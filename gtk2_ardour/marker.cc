@@ -576,7 +576,7 @@ Marker::setup_name_display ()
                                 _scene_change_rect = new ArdourCanvas::Rectangle (group);
                                 _scene_change_text = new ArdourCanvas::Text (group);
                                 /* move name label over */
-                                _label_offset += r.x1;
+                                _label_offset = name_padding + r.x1;
                         }
                         
                         _scene_change_rect->set_fill (false);
@@ -595,6 +595,7 @@ Marker::setup_name_display ()
                         scene_change_width = r.x1;
                         
                 } else {
+                        _label_offset = name_padding;
                         if (_scene_change_text) {
                                 delete _scene_change_text;
                                 delete _scene_change_rect;
