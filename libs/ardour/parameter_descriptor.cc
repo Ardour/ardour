@@ -50,6 +50,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		break;
 	case PanAzimuthAutomation:
 		normal = 0.5f; // there really is no _normal but this works for stereo, sort of
+		upper  = 1.0f;
 		break;
 	case PanWidthAutomation:
 		lower  = -1.0;
@@ -57,7 +58,8 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		normal = 0.0f;
 		break;
 	case RecEnableAutomation:
-		/* default 0.0 - 1.0 is fine */
+		lower  = 0.0;
+		upper  = 1.0;
 		toggled = true;
 		break;
 	case PluginAutomation:

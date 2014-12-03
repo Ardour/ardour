@@ -27,7 +27,7 @@ struct ParameterDescriptor
 	ParameterDescriptor()
 		: normal(0.0)
 		, lower(0.0)
-		, upper(0.0)
+		, upper(1.0)
 		, toggled(false)
 	{}
 
