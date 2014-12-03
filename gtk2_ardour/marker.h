@@ -78,6 +78,7 @@ class Marker : public sigc::trackable
 
     virtual void canvas_height_set (double);
     void set_has_scene_change (bool);
+    bool can_have_scene_change () const { return _location && _location->scene_change (); }
 	bool has_scene_change () const { return _have_scene_change; }
 
 

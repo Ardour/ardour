@@ -155,7 +155,8 @@
                          style="generic_control"
                          text="01:23:45:56"/>
                   <HBox>
-                    <VBox>
+                    <VBox width="20"
+                          height="20">
                       <Iconbutton id="program_change_button"
                                   width="20"
                                   height="20"

@@ -42,7 +42,8 @@ void MarkerInspectorDialog::set_marker (Marker* marker)
 	_inspector_panel.set_visible (marker);
 	_marker = marker;
 	if (_marker) {
-		_program_change_button.set_active (_marker->has_scene_change ());
+        _program_change_button.set_visible (_marker->can_have_scene_change ());
+        _program_change_button.set_active (_marker->has_scene_change ());
 		_location_name.set_text (_marker->name ());
 	}
 }
