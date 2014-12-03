@@ -56,7 +56,7 @@ check_nodes (XMLNode const * p, XMLNode const * q, list<string> const & ignore_p
 	while (i != pp.end ()) {
 		CPPUNIT_ASSERT_EQUAL ((*i)->name(), (*j)->name());
 		if (find (ignore_properties.begin(), ignore_properties.end(), (*i)->name ()) == ignore_properties.end ()) {
-			CPPUNIT_ASSERT_EQUAL ((*i)->value(), (*j)->value());
+			CPPUNIT_ASSERT_EQUAL_MESSAGE ((*i)->name(), (*i)->value(), (*j)->value());
 		}
 		++i;
 		++j;
