@@ -365,7 +365,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
                 _location->StartChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
                 _location->EndChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
                 _location->Changed.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
-                _location->SceneChangeChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
+                _location->SceneChangeChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::scene_change_changed, this), gui_context());
 
                 /* connect to scene change active signal if there is a scene change */
                 connect_to_scene_change_signals ();
@@ -395,13 +395,16 @@ Marker::connect_to_scene_change_signals ()
         if (_location) {
                 boost::shared_ptr<SceneChange> sc = _location->scene_change();
                 if (sc) {
+                        _have_scene_change = true;
                         sc->ActiveChanged.connect (scene_change_active_connection, invalidator(*this), boost::bind (&Marker::scene_change_active_changed, this), gui_context());
                 } else {
+                        _have_scene_change = false;
                         scene_change_active_connection.disconnect ();
                 }
         } else {
                 /* Not likely to happen but handle it anyway */
                 scene_change_active_connection.disconnect ();
+                _have_scene_change = false;
         }
 }
 
