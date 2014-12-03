@@ -213,6 +213,8 @@ class DummyAudioBackend : public AudioBackend {
 	         DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 		~DummyAudioBackend ();
 
+		bool is_running () const { return _running; }
+
 		/* AUDIOBACKEND API */
 
 		std::string name () const;
