@@ -92,7 +92,9 @@ write_ref (XMLNode* node, string ref_file)
 {
 	XMLTree ref;
 	ref.set_root (node);
-	return ref.write (ref_file);
+	bool rv = ref.write (ref_file);
+	ref.set_root (0);
+	return rv;
 }
 
 class TestReceiver : public Receiver 
