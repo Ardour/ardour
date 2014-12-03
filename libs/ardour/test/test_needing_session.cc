@@ -22,9 +22,9 @@ TestNeedingSession::setUp ()
 void
 TestNeedingSession::tearDown ()
 {
-	AudioEngine::instance()->remove_session ();
 	delete _session;
+	AudioEngine::instance()->remove_session ();
 	AudioEngine::instance()->stop ();
-	
 	AudioEngine::destroy ();
+	_session = 0;
 }

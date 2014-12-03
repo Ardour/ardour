@@ -50,8 +50,8 @@ void
 SessionTest::tearDown ()
 {
 	// this is needed or there is a crash in MIDI::Manager::destroy
+	AudioEngine::instance()->remove_session ();
 	AudioEngine::instance()->stop ();
-
 	AudioEngine::destroy ();
 }
 
@@ -64,6 +64,7 @@ SessionTest::new_session ()
 	CPPUNIT_ASSERT (!Glib::file_test (new_session_dir, Glib::FILE_TEST_EXISTS));
 
 	Session* new_session = 0;
+	AudioEngine::create ();
 
 	new_session = new Session (*AudioEngine::instance (), new_session_dir, session_name);
 
@@ -95,6 +96,7 @@ SessionTest::new_session_from_template ()
 
 	Session* new_session = 0;
 	BusProfile* bus_profile = 0;
+	AudioEngine::create ();
 
 	// create a new session based on session template
 	new_session = new Session (*AudioEngine::instance (), new_session_dir, session_name,
