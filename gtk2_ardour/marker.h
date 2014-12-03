@@ -150,7 +150,7 @@ class Marker : public sigc::trackable
         virtual void scene_change_active_changed ();
         virtual void scene_change_changed ();
         PBD::ScopedConnection scene_change_active_connection;
-
+        
         virtual void _set_position (framepos_t, framepos_t);
 
         void pick_basic_color (ArdourCanvas::Color);
@@ -167,6 +167,7 @@ private:
 	Marker & operator= (Marker const &);
 
         PBD::ScopedConnectionList location_connections;
+        void connect_to_scene_change_signals ();
 };
 
 /** A Marker that displays a range (start+end) rather than a single location
