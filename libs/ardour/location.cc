@@ -761,6 +761,7 @@ Location::set_scene_change (boost::shared_ptr<SceneChange>  sc)
 {
         if (_scene_change != sc) {
                 _scene_change = sc;
+                _session.set_dirty ();
                 
                 scene_changed (); /* EMIT SIGNAL */
                 SceneChangeChanged (); /* EMIT SIGNAL */
