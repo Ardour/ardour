@@ -1,6 +1,8 @@
 #!/bin/sh
 
-TOP=`dirname "$0"`/..
+cd "`dirname \"$0\"`"
+
+TOP=..
 . $TOP/build/gtk2_ardour/ardev_common_waf.sh
 
 LIBS_DIR=$TOP/build/libs
