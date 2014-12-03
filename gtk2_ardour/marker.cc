@@ -365,6 +365,10 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
                 _location->StartChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
                 _location->EndChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
                 _location->Changed.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
+                _location->SceneChangeChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
+
+                /* connect to scene change active signal if there is a scene change */
+                scene_change_changed ();
         }
 }
 
@@ -383,6 +387,28 @@ void Marker::reparent(ArdourCanvas::Container & parent)
 {
 	group->reparent (&parent);
 	_parent = &parent;
+}
+
+void
+Marker::scene_change_changed ()
+{
+        if (_location) {
+                boost::shared_ptr<SceneChange> sc = _location->scene_change();
+                if (sc) {
+                        sc->ActiveChanged.connect (scene_change_active_connection, invalidator(*this), boost::bind (&Marker::scene_change_active_changed, this), gui_context());
+                } else {
+                        scene_change_active_connection.disconnect ();
+                }
+        } else {
+                /* Not likely to happen but handle it anyway */
+                scene_change_active_connection.disconnect ();
+        }
+}                        
+
+void
+Marker::scene_change_active_changed ()
+{
+        setup_name_display ();
 }
 
 void
@@ -560,7 +586,7 @@ Marker::setup_name_display ()
                         _name_item->set_color (ArdourCanvas::contrasting_text_color (_color));
                 }
 
-                if (_have_scene_change) {
+                if (_have_scene_change && _location->scene_change()->active()) {
                         
                         /* coordinates of rect that will surround "MIDI" */
                         

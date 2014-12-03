@@ -147,6 +147,9 @@ class Marker : public sigc::trackable
         virtual void flags_changed ();
         virtual void bounds_changed ();
         virtual void name_changed ();
+        virtual void scene_change_active_changed ();
+        virtual void scene_change_changed ();
+        PBD::ScopedConnection scene_change_active_connection;
 
         virtual void _set_position (framepos_t, framepos_t);
 
