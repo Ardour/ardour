@@ -2215,8 +2215,9 @@ ARDOUR_UI::on_lock_button_pressed () {
 
 void
 ARDOUR_UI::lock_session () {
-    
+    editor->get_waves_button ("lock_session_button").set_active (true);
     session_lock_dialog->run ();
+    editor->get_waves_button ("lock_session_button").set_active (false);
 }
 
 bool
