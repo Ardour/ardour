@@ -15,8 +15,13 @@ MTDMTest::basicTest ()
 
 	memset (in, 0, 256 * sizeof (float));
 	MTDM* mtdm = new MTDM (44100);
-	mtdm->process (256, in, out);
-	memcpy (in, out, 256 * sizeof (float));
+
+	// initialization, need at least 3 cycles
+	// to allow resolution below error limit.
+	for (int i = 0; i < 4; ++i) {
+		mtdm->process (256, in, out);
+		memcpy (in, out, 256 * sizeof (float));
+	}
 	
 	for (int i = 0; i < 64; ++i) {
 		mtdm->process (256, in, out);
