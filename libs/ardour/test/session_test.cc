@@ -22,10 +22,12 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static TextReceiver text_receiver ("test");
+static const char* localedir = LOCALEDIR;
 
 void
 SessionTest::setUp ()
 {
+	ARDOUR::init (false, true, localedir);
 	SessionEvent::create_per_thread_pool ("session_test", 512);
 
 	text_receiver.listen_to (error);
