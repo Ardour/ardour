@@ -101,6 +101,9 @@ AudioEngine::~AudioEngine ()
 	stop_metering_thread ();
 	stop_hw_event_processing();
 	drop_backend ();
+	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
+		i->second->deinstantiate();
+	}
 }
 
 AudioEngine*
