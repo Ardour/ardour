@@ -448,6 +448,47 @@ ARDOUR_UI::update_frame_rate_button ()
 }
 
 void
+ARDOUR_UI::update_recent_session_menuitems ()
+{
+    std::vector<std::string> recent_session_names;
+    recent_session_full_paths.clear();
+    get_recent_session_names_and_paths(recent_session_names,recent_session_full_paths);
+ 
+    
+    int i;
+    
+    for(i=0;i<recent_session_names.size();++i){
+       Glib::RefPtr<Action> act;
+       
+        std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
+        act=ActionManager::get_action_from_name(X_(label.c_str()));
+        
+        // set label for existing recent session menuitem
+        act->set_label(X_(recent_session_names[i].c_str()));
+        
+        /*
+        act->set_visible(true);
+        std::cout<<"i= "<<i<<" visible="<<act->get_visible()<<std::endl;
+        */
+    }
+    
+    //hide empty recent_session_menuitems
+    for(;i<MAX_RECENT_SESSION_COUNTS;++i){
+        Glib::RefPtr<Action> act;
+        std::string label=recent_session_menuitem_id+string_compose ("%1", i);
+        act=ActionManager::get_action_from_name(X_(label.c_str()));
+        
+        act->set_label(X_(""));
+        recent_session_full_paths.push_back("");
+        
+        //act->set_visible(false);
+        
+        
+    }
+
+}
+
+void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = ActionGroup::create (X_("Main"));
@@ -456,7 +497,8 @@ ARDOUR_UI::install_actions ()
 
 	/* menus + submenus that need action items */
 
-	ActionManager::register_action (main_menu_actions, X_("Session"), _("File"));
+	act=ActionManager::register_action (main_menu_actions, X_("Session"), _("File"));
+    ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (main_actions, X_("Cleanup"), _("CleanUp"));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (main_menu_actions, X_("Sync"), _("Sync"));
@@ -481,7 +523,14 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::get_session_parameters), false, true, "")));
 
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
-	ActionManager::register_action (main_actions, X_("Recent"), _("Recent Sessions"),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
+	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
+    /* register act for recent_session_menuitems */
+    for(int i=0;i<MAX_RECENT_SESSION_COUNTS;++i){
+        std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
+         ActionManager::register_action (main_actions, X_(label.c_str()), _(""),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session_from_menuitem), i));
+    }
+    
+    
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -553,8 +602,7 @@ ARDOUR_UI::install_actions ()
     act = ActionManager::register_action (main_actions, X_("ShowUnused"), _("Show Unused"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::open_dead_folder));
     //ActionManager::session_sensitive_actions.push_back (act);
     
-	ActionManager::write_sensitive_actions.push_back (act);
-
+    ActionManager::register_action (main_actions, X_("recent-sessions"), _("Recent Sessions"));
 	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);

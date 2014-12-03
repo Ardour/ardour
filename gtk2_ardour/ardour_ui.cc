@@ -1416,6 +1416,92 @@ ARDOUR_UI::open_recent_session ()
 	}
 }
 
+void
+ARDOUR_UI::get_recent_session_names_and_paths(std::vector<std::string>& session_names,std::vector<std::string>& session_paths)
+{
+    ARDOUR::RecentSessions rs;
+    ARDOUR::read_recent_sessions (rs);
+    
+    /* after reading we should check that    */
+    /* recent_session is still existing      */
+    
+    int i=0;
+    for (ARDOUR::RecentSessions::iterator it = rs.begin();
+         (i < MAX_RECENT_SESSION_COUNTS) && (it != rs.end());
+         ++it)
+    {
+        std::vector<std::string> state_file_paths;
+        
+        // now get available states for this session
+        
+        get_state_files_in_directory ((*it).second, state_file_paths);
+        
+        // vector<const gchar*> item;
+        string dirname = (*it).second;
+        
+        /* remove any trailing / */
+        if (dirname[dirname.length()-1] == '/') {
+            dirname = dirname.substr (0, dirname.length()-1);
+        }
+        
+        /* check whether session still exists */
+        if (!Glib::file_test(dirname.c_str(), Glib::FILE_TEST_EXISTS)) {
+            /* session doesn't exist */
+            continue;
+        }
+        
+        /* now get available states for this session */
+        
+        vector<string> states;
+        states = Session::possible_states (dirname);
+        
+        if (states.empty()) {
+            /* no state file? */
+            continue;
+        }
+        
+        std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
+        
+        if (state_file_names.empty()) {
+            continue;
+        }
+        
+        session_paths.push_back(Glib::build_filename((*it).second,state_file_names.front() + statefile_suffix) );
+        session_names.push_back(state_file_names.front());
+        //std::cout<<"state_file_names.front()= "<<state_file_names.front()<<std::endl;
+        
+        ++i;
+    }
+    
+        
+}
+
+
+void
+ARDOUR_UI::open_recent_session_from_menuitem(unsigned int num_of_recent_session)
+{
+    std::string cur_recent_session_path=recent_session_full_paths[num_of_recent_session];
+    //std::cout<<"ARDOUR_UI::open_recent_session_from_menuitem: "<<cur_recent_session_path<<std::endl;
+    if (cur_recent_session_path== "")
+        return;
+    
+    //check that cur_recent_session_path is still existing
+    if ( !Glib::file_test (cur_recent_session_path, Glib::FileTest (G_FILE_TEST_EXISTS)) )
+    {
+        WavesMessageDialog session_deleted ("",string_compose (_("There is no existing session at \"%1\""), cur_recent_session_path.c_str() ),WavesMessageDialog::BUTTON_OK);
+        session_deleted.run ();
+        return ;
+    }
+    
+    string path, name;
+    bool isnew;
+    if (ARDOUR::find_session (cur_recent_session_path, path, name, isnew) == 0) {
+        _session_is_new = isnew;
+        load_session (path, name);
+    }
+}
+
+
 bool
 ARDOUR_UI::check_audioengine ()
 {

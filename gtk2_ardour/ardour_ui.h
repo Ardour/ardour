@@ -260,6 +260,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void update_bit_depth_button ();
     void update_sample_rate_dropdown ();
     void update_frame_rate_button ();
+    void update_recent_session_menuitems();
 
     PBD::ScopedConnectionList update_connections_to_toolbar_buttons;
     
@@ -571,6 +572,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		    return ARDOUR::cmp_nocase(a.first, b.first) == -1;
 	    }
 	};
+    
+    /* opening recent sessions from menuitems */
+    void open_recent_session_from_menuitem (unsigned int);
 
 	/* menu bar and associated stuff */
 
@@ -821,6 +825,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     Timecode::TimecodeFormat _timecode_format;
     
     PBD::ScopedConnection connection_with_session_config;
+
+    //get names and paths of recent sessions
+    void get_recent_session_names_and_paths(std::vector<std::string>& session_names,std::vector<std::string>& session_paths);
+    
+    //recent session menuitem id
+    const std::string recent_session_menuitem_id="recent-session-";
+  
+    //full path to recent sessions
+    std::vector<std::string> recent_session_full_paths;
+    
 };
 
 #endif /* __ardour_gui_h__ */

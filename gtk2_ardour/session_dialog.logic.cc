@@ -271,6 +271,7 @@ SessionDialog::redisplay_recent_sessions ()
 		++session_snapshot_count;
 	}
 
+    //ARDOUR_UI::instance()->update_recent_session_menuitems();
 	return session_snapshot_count;
 }
 
