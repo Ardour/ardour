@@ -40,12 +40,17 @@ class SceneChange : public PBD::Stateful
         void set_color (uint32_t);
         bool color_out_of_bounds() const { return _color == out_of_bound_color; }
         static const uint32_t out_of_bound_color;
+
+        bool active () const { return _active; }
+        void set_active (bool);
         
         PBD::Signal0<void> ColorChanged;
+        PBD::Signal0<void> ActiveChanged;
 
     protected:
         /* derived classes are responsible for serializing & deserializing this value */
         uint32_t _color;
+        bool     _active;
 
 };
 
