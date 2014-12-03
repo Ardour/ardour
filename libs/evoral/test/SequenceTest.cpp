@@ -107,7 +107,6 @@ SequenceTest::controlInterpolationTest ()
 
 	double min = 0.0;
 	double max = 127.0;
-	double normal = 0.0;
 
 	// Make a ramp like /\ from min to max and back to min
 	c->set_double(min, 0, true);

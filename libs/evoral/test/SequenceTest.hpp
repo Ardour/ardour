@@ -39,6 +39,10 @@ public:
 		};
 	}
 
+	ParameterDescriptor descriptor(const Parameter& param) const {
+		return ParameterDescriptor();
+	}
+
 	std::string to_symbol(const Parameter& /*param*/) const { return "control"; }
 };
 
@@ -48,11 +52,9 @@ public:
 	MySequence(DummyTypeMap&map) : Sequence<Time>(map) {}
 
 	boost::shared_ptr<Control> control_factory(const Parameter& param) {
-
-		return boost::shared_ptr<Control>(
-			new Control(param, boost::shared_ptr<ControlList> (
-				new ControlList(param)
-		)));
+		const Evoral::ParameterDescriptor desc;
+		boost::shared_ptr<ControlList>    list(new ControlList(param, desc));
+		return boost::shared_ptr<Control>(new Control(param, desc, list));
 	}
 };
 
