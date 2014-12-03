@@ -1723,7 +1723,7 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
 				} else {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
-				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
+				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld", hrs, mins, secs);
                 	} else {
 				buf[0] = '\0';
 	                        mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -1743,7 +1743,7 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
                                 } else {
                                         mark.style = ArdourCanvas::Ruler::Mark::Minor;
                                 }
-				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
+                                snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld", hrs, mins, secs);
                         } else {
 				buf[0] = '\0';
                                 mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -1759,7 +1759,7 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
                         sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (hrs % minsec_mark_modulo == 0) {
                                 mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld.%03ld", hrs, mins, secs, millisecs);
+                                snprintf (buf, sizeof(buf), "%02ld:%02ld", hrs, mins);
                         } else {
 				buf[0] = '\0';
                                 mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -1775,7 +1775,7 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
                         sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (hrs % minsec_mark_modulo == 0) {
                                 mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                snprintf (buf, sizeof(buf), "%02ld:00:00:00", hrs, mins, secs, millisecs);
+                                snprintf (buf, sizeof(buf), "%02ld:00", hrs, mins);
                                 mark.label = buf;
                                 mark.position = pos/1000.0;
                                 marks.push_back (mark);
