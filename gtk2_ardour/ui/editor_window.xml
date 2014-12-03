@@ -365,7 +365,7 @@
             <icon source="transport_bar_border.png"/>
             <Adjustment id="temporal_zoom_adjustment"
                         minvalue="0"
-                        maxvalue="25"
+                        maxvalue="23"
                         initialvalue="4"
                         step="1"
                         pageincrement="1"/>
