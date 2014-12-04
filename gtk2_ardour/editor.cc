@@ -322,15 +322,15 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, current_mixer_strip (0)
 	, _master_bus_ui (0)
-        , _set_session_in_progress(false)
-        , _midi_input_dropdown (get_waves_dropdown ("midi_input_dropdown"))
-        , _midi_output_dropdown (get_waves_dropdown ("midi_output_dropdown"))
-        , midi_marker_input_activity_image (get_image ("midi_input_activity_indicator"))
-        , midi_marker_output_activity_image (get_image ("midi_output_activity_indicator"))
-        , midi_marker_input_enabled_image (get_image ("midi_input_enabled_indicator"))
-        , midi_marker_input_disabled_image (get_image ("midi_input_disabled_indicator"))
-        , midi_marker_output_enabled_image (get_image ("midi_output_enabled_indicator"))
-        , midi_marker_output_disabled_image (get_image ("midi_output_disabled_indicator"))
+    , _set_session_in_progress(false)
+    , _midi_input_dropdown (get_waves_dropdown ("midi_input_dropdown"))
+    , _midi_output_dropdown (get_waves_dropdown ("midi_output_dropdown"))
+    , midi_marker_input_activity_image (get_image ("midi_input_activity_indicator"))
+    , midi_marker_output_activity_image (get_image ("midi_output_activity_indicator"))
+    , midi_marker_input_enabled_image (get_image ("midi_input_enabled_indicator"))
+    , midi_marker_input_disabled_image (get_image ("midi_input_disabled_indicator"))
+    , midi_marker_output_enabled_image (get_image ("midi_output_enabled_indicator"))
+    , midi_marker_output_disabled_image (get_image ("midi_output_disabled_indicator"))
 {
         constructed = false;
 
@@ -353,7 +353,7 @@ Editor::Editor ()
 	clicked_routeview = 0;
 	clicked_control_point = 0;
 	last_update_frame = 0;
-        pre_press_cursor = 0;
+    pre_press_cursor = 0;
 	_drags = new DragManager (this);
 	lock_dialog = 0;
 	ruler_dialog = 0;
@@ -390,6 +390,7 @@ Editor::Editor ()
 	current_interthread_info = 0;
 	_show_measures = true;
 	_maximised = false;
+    _enable_group_edit = false;
 	show_gain_after_trim = false;
 
 	have_pending_keyboard_selection = false;
@@ -3895,6 +3896,29 @@ Editor::set_stationary_playhead (bool yn)
 		instant_save ();
 	}
 }
+
+void Editor::toggle_enable_group_edit ()
+{
+    RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-enable-group-edit"));
+    if (act) {
+        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+        set_enable_group_edit (tact->get_active());
+    }
+}
+
+void Editor::set_enable_group_edit (bool yn)
+{
+    if (_enable_group_edit != yn) {
+        _enable_group_edit = yn;
+        
+        if (_session) {
+            _session->config.set_enable_group_edit(yn);
+        }
+        
+        instant_save ();
+    }
+}
+
 
 PlaylistSelector&
 Editor::playlist_selector () const

@@ -198,7 +198,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(*this, &Editor::select_all_tracks));
 	reg_sens (editor_actions, "deselect-all", _("Select All/Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
 	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
-    toggle_reg_sens (editor_actions, "toggle-enable-group-edit", _("Enable Group Edit"), sigc::mem_fun (*this, &Editor::vertical_zoom_step_in));
+    toggle_reg_sens (editor_actions, "toggle-enable-group-edit", _("Enable Group Edit"), sigc::mem_fun (*this, &Editor::toggle_enable_group_edit));
 
 	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
 	reg_sens (editor_actions, "alternate-select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
@@ -1758,7 +1758,24 @@ Editor::parameter_changed (std::string p)
 				tact->set_active (s);
 			}
 		}
-	}
+    } else if (p == "enable-group-edit") {
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-enable-group-edit"));
+        
+        if (_session) {
+            
+            bool s = _session->config.get_enable_group_edit ();
+            _enable_group_edit = s;
+            
+            if (act) {
+
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                if (tact->get_active () != s) {
+                    tact->set_active (s);
+                }
+            }
+
+        }
+    }
 }
 
 void

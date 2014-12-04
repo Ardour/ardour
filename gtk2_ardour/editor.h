@@ -213,6 +213,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void separate_regions_using_location (ARDOUR::Location&);
 	void transition_to_rolling (bool forward);
 
+    void toggle_enable_group_edit ();
+    void set_enable_group_edit (bool enabled);
 	/* NOTE: these functions assume that the "pixel" coordinate is
 	   in canvas coordinates. These coordinates already take into
 	   account any scrolling offsets.
@@ -1506,7 +1508,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _stationary_playhead;
 	/// true if we are in fullscreen mode
 	bool _maximised;
-
+    /// true if we have group edit enabled
+    bool _enable_group_edit;
+    
 	TempoLines* tempo_lines;
 
 	ArdourCanvas::Container* global_rect_group;
