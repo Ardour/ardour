@@ -197,7 +197,7 @@ CONFIG_VARIABLE (long, font_scale, "font-scale", 81920)
 #ifdef __APPLE__
 CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir()+"/Music")
 #else
-CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir()+"\Documents\\")
+CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", Glib::get_home_dir()+"\\Documents")
 #endif
 CONFIG_VARIABLE (bool, show_waveforms, "show-waveforms", true)
 CONFIG_VARIABLE (bool, show_waveforms_while_recording, "show-waveforms-while-recording", true)
