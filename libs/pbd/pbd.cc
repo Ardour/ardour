@@ -81,8 +81,9 @@ PBD::init ()
 	
 	if (WSAStartup(MAKEWORD(1,1),&wsaData) != 0) {
 		fatal << "Windows socket initialization failed with error: " << WSAGetLastError() << endmsg;
+		abort();
 		/*NOTREACHED*/
-		return;
+		return false;
 	}
 #endif
 
