@@ -2,7 +2,8 @@
 <State>
   <FadeIn>
     <AutomationList automation-id="fadein" id="167" default="1" min-yval="0" max-yval="2" interpolation-style="Linear" state="Off" style="Absolute">
-      <events>1 2
+      <events>0 1
+1 2
 3 4
 </events>
     </AutomationList>
