@@ -30,12 +30,12 @@
 #include "pbd/ringbuffer.h"
 
 #include "evoral/Event.hpp"
-#include "evoral/EventRingBuffer.hpp"
 
 #include "midi++/types.h"
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
+#include "ardour/event_ring_buffer.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/midi_port.h"
 
@@ -83,7 +83,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	bool                    have_timer;
 	boost::function<framecnt_t (void)> timer;
 	RingBuffer< Evoral::Event<double> > output_fifo;
-        Evoral::EventRingBuffer<MIDI::timestamp_t> input_fifo;
+        EventRingBuffer<MIDI::timestamp_t> input_fifo;
         Glib::Threads::Mutex output_fifo_lock;
 	CrossThreadChannel _xthread;
 
