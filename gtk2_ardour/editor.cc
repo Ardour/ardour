@@ -3338,6 +3338,8 @@ Editor::commit_reversible_command ()
 		if (_begin_reversible_command_selection) {
 			_session->add_command (new MementoCommand<Selection>(*(selection), _begin_reversible_command_selection, &selection->get_state ()));
 			_begin_reversible_command_selection = 0;
+		} else {
+			cerr << "Please call Editor::begin_reversible_command () before Editor::commit_reversible_command ()." << endl;
 		}
 
 		_session->commit_reversible_command ();
