@@ -24,6 +24,9 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <map>
+
+#include <string>
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gtkmm/box.h>
@@ -35,6 +38,7 @@
 
 #include "pbd/statefuldestructible.h"
 
+#include "canvas/fwd.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "editing.h"
