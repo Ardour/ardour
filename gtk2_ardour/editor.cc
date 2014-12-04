@@ -1527,10 +1527,6 @@ Editor::set_session (Session *t)
     _master_bus_ui->master_bus_set_visible ( set_master_bus_visible );
     
     _set_session_in_progress = false;
-    
-    /* it is neccessary to update recent session menuitems */
-    /* because new session could be created               */
-    ARDOUR_UI::instance()->update_recent_session_menuitems();
 }
 
 void

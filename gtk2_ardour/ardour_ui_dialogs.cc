@@ -357,6 +357,10 @@ ARDOUR_UI::goto_editor_window ()
 	/* mixer should now be on top */
 	WM::Manager::instance().set_transient_for (editor);
 	_mixer_on_top = false;
+
+    /* it is neccessary to update recent session menuitems */
+    /* because new session could be created                */
+    ARDOUR_UI::instance()->update_recent_session_menuitems();
 }
 
 void

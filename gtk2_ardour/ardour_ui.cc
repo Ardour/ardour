@@ -1472,8 +1472,6 @@ ARDOUR_UI::get_recent_session_names_and_paths(std::vector<std::string>& session_
         
         ++i;
     }
-    
-        
 }
 
 
@@ -1481,7 +1479,6 @@ void
 ARDOUR_UI::open_recent_session_from_menuitem(unsigned int num_of_recent_session)
 {
     std::string cur_recent_session_path=recent_session_full_paths[num_of_recent_session];
-    //std::cout<<"ARDOUR_UI::open_recent_session_from_menuitem: "<<cur_recent_session_path<<std::endl;
     if (cur_recent_session_path== "")
         return;
     
@@ -1500,7 +1497,6 @@ ARDOUR_UI::open_recent_session_from_menuitem(unsigned int num_of_recent_session)
         load_session (path, name);
     }
 }
-
 
 bool
 ARDOUR_UI::check_audioengine ()

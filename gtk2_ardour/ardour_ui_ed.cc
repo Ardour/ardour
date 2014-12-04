@@ -451,41 +451,20 @@ void
 ARDOUR_UI::update_recent_session_menuitems ()
 {
     std::vector<std::string> recent_session_names;
-    recent_session_full_paths.clear();
-    get_recent_session_names_and_paths(recent_session_names,recent_session_full_paths);
- 
+    recent_session_full_paths.clear ();
+    get_recent_session_names_and_paths (recent_session_names,recent_session_full_paths);
     
-    int i;
-    
-    for(i=0;i<recent_session_names.size();++i){
-       Glib::RefPtr<Action> act;
-       
-        std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
-        act=ActionManager::get_action_from_name(X_(label.c_str()));
-        
-        // set label for existing recent session menuitem
-        act->set_label(X_(recent_session_names[i].c_str()));
-        
-        /*
-        act->set_visible(true);
-        std::cout<<"i= "<<i<<" visible="<<act->get_visible()<<std::endl;
-        */
-    }
-    
-    //hide empty recent_session_menuitems
-    for(;i<MAX_RECENT_SESSION_COUNTS;++i){
-        Glib::RefPtr<Action> act;
-        std::string label=recent_session_menuitem_id+string_compose ("%1", i);
-        act=ActionManager::get_action_from_name(X_(label.c_str()));
-        
-        act->set_label(X_(""));
-        recent_session_full_paths.push_back("");
-        
-        //act->set_visible(false);
-        
-        
-    }
+	for (int i=0; i < MAX_RECENT_SESSION_COUNTS; ++i){
+		Glib::RefPtr<Action> act;
 
+		std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
+		act = ActionManager::get_action_from_name (label.c_str());
+
+		// set label for existing recent session menuitem and hiding
+		// the items there are no recent sessions for them.
+		act->set_label (i < recent_session_names.size () ? recent_session_names[i].c_str () : "");
+		act->set_visible (i < recent_session_names.size ());
+	}
 }
 
 void
