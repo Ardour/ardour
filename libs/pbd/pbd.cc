@@ -34,6 +34,10 @@
 #include "pbd/id.h"
 #include "pbd/enumwriter.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <winsock2.h>
+#endif
+
 #include "i18n.h"
 
 extern void setup_libpbd_enums ();
@@ -68,6 +72,17 @@ PBD::init ()
 	// Essential!!  Make sure that any files used by Ardour
 	//              will be created or opened in BINARY mode!
 	_fmode = O_BINARY;
+
+	WSADATA	wsaData;
+
+	/* Initialize windows socket DLL for PBD::CrossThreadChannel
+	 */
+	
+	if (WSAStartup(MAKEWORD(1,1),&wsaData) != 0) {
+		fatal << "Windows socket initialization failed with error: " << WSAGetLastError() << endmsg;
+		/*NOTREACHED*/
+		return;
+	}
 #endif
 
 	if (!Glib::thread_supported()) {
@@ -89,5 +104,9 @@ PBD::init ()
 void
 PBD::cleanup ()
 {
+#ifdef PLATFORM_WINDOWS
+	WSACleanup();
+#endif	
+
 	EnumWriter::destroy ();
 }

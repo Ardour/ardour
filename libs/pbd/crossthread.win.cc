@@ -25,13 +25,6 @@ CrossThreadChannel::CrossThreadChannel (bool non_blocking)
 	, receive_socket()
 	, recv_address()
 {
-	WSADATA	wsaData;
-
-	if(WSAStartup(MAKEWORD(1,1),&wsaData) != 0) {
-		std::cerr << "CrossThreadChannel::CrossThreadChannel() Winsock initialization failed with error: " << WSAGetLastError() << std::endl;
-		return;
-	}
-
 	struct sockaddr_in send_address;
 
 	// Create Send Socket
@@ -104,7 +97,6 @@ CrossThreadChannel::~CrossThreadChannel ()
 
 	closesocket(send_socket);
 	closesocket(receive_socket);
-	WSACleanup();
 }
 
 void
