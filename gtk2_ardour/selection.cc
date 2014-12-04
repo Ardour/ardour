@@ -140,7 +140,8 @@ void
 Selection::clear_time ()
 {
 	time.clear();
-
+    time.tracks_in_range.clear();
+    
 	TimeChanged ();
 }
 

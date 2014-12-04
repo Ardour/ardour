@@ -4240,24 +4240,24 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			if (_add) {
 
 				/* adding to the selection */
-				_editor->set_selected_track_as_side_effect (Selection::Add);
-				_editor->clicked_selection = _editor->selection->add (start, end);
+				// GZ: Waves TracksLive gives no possibility (by PRD) to add multiple time ranges
+                // but there used to be such possibility.
+                // kept the flag "_add" in case if we need it again
 				_add = false;
 				
-			} else {
-
-				/* new selection */
-
-				if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
-					_editor->set_selected_track_as_side_effect (Selection::Set);
-				}
-
-				_editor->clicked_selection = _editor->selection->set (start, end);
 			}
+
+            /* new selection range selection */
+            _editor->selection->time.tracks_in_range.clear();
+            if (_editor->clicked_axisview ) {
+                _editor->selection->time.tracks_in_range.push_back (_editor->clicked_axisview );
+            }
+
+            _editor->clicked_selection = _editor->selection->set (start, end);
 		}
 		
 		/* select all tracks within the rectangle that we've marked out so far */
-		TrackViewList new_selection;
+        TrackViewList& tracks_in_range = _editor->selection->time.tracks_in_range;
 		TrackViewList& all_tracks (_editor->track_views);
 
 		ArdourCanvas::Coord const top = grab_y();
@@ -4267,37 +4267,35 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 			//first, find the tracks that are covered in the y range selection
 			for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
-				if ((*i)->covered_by_y_range (top, bottom)) {
-					new_selection.push_back (*i);
+				if ((*i)->covered_by_y_range (top, bottom) && !tracks_in_range.contains(*i) ) {
+                    
+                    tracks_in_range.push_back (*i);
 				}
 			}
-
+            
+// GZ: Waves TrackLive does not support custom groups now,
+// but we may need this in future versions
+#if 0
 			//now find any tracks that are GROUPED with the tracks we selected
-			TrackViewList grouped_add = new_selection;
-			for (TrackViewList::const_iterator i = new_selection.begin(); i != new_selection.end(); ++i) {
+            TrackViewList grouped_tracks_to_add;
+			for (TrackViewList::const_iterator i = tracks_in_range.begin(); i != tracks_in_range.end(); ++i) {
 				RouteTimeAxisView *n = dynamic_cast<RouteTimeAxisView *>(*i);
-				if ( n && n->route()->route_group() && n->route()->route_group()->is_active() && n->route()->route_group()->enabled_property (ARDOUR::Properties::select.property_id) ) {
-					for (TrackViewList::const_iterator j = all_tracks.begin(); j != all_tracks.end(); ++j) {
-						RouteTimeAxisView *check = dynamic_cast<RouteTimeAxisView *>(*j);
-						if ( check && (n != check) && (check->route()->route_group() == n->route()->route_group()) )
-							grouped_add.push_back (*j);
+				if ( n && n->route()->route_group() && n->route()->route_group()->is_active() ) {
+                    
+                    boost::shared_ptr<RouteList> grouped_routes;
+                    grouped_routes =  n->route()->route_group()->route_list();
+                    RouteList::iterator j = grouped_routes->begin();
+					for (; j != grouped_routes->end(); ++j) {
+                        
+                        RouteTimeAxisView *check = _editor->axis_view_from_route(*j);
+						if ( check && (n != check) )
+							grouped_tracks_to_add.push_back(check);
 					}
 				}
 			}
-
-			//now compare our list with the current selection, and add or remove as necessary
-			//( NOTE: most mouse moves don't change the selection so we can't just SET it for every mouse move; it gets clunky )
-			TrackViewList tracks_to_add;
-			TrackViewList tracks_to_remove;
-			for (TrackViewList::const_iterator i = grouped_add.begin(); i != grouped_add.end(); ++i)
-				if ( !_editor->selection->tracks.contains ( *i ) )
-					tracks_to_add.push_back ( *i );
-			for (TrackViewList::const_iterator i = _editor->selection->tracks.begin(); i != _editor->selection->tracks.end(); ++i)
-				if ( !grouped_add.contains ( *i ) )
-					tracks_to_remove.push_back ( *i );
-			_editor->selection->add(tracks_to_add);
-			_editor->selection->remove(tracks_to_remove);
-
+            
+            tracks_in_range.add(grouped_tracks_to_add);
+#endif
 		}
 	}
 	break;
@@ -4411,10 +4409,6 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 					_editor->selection->clear_time();
 				}
 			}
-		}
-
-		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
-			_editor->selection->set (_editor->clicked_axisview);
 		}
 			
 		if (s && s->get_play_range () && s->transport_rolling()) {

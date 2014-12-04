@@ -778,8 +778,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                             separate-drag the selection. Well actually, Igor@Waves
                             decided this, so here it is.
                          */
-                        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-                        start_selection_grab (item, rtv, event, copy);
+                        start_selection_grab (item, event, copy);
                         return true;
                     }
                 }
@@ -900,8 +899,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                      separate-drag the selection. Well actually, Igor@Waves
                      decided this, so here it is.
                      */
-                    RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tvp.first);
-                    start_selection_grab (item, rtv, event, copy);
+                    start_selection_grab (item, event, copy);
                     return true;
                 }
             }
@@ -2458,13 +2456,13 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
  *  the section of the clicked region that lies within the time range.
  */
 void
-Editor::start_selection_grab (ArdourCanvas::Item* item, RouteTimeAxisView* rtv, GdkEvent* event, bool copy/*=false*/)
+Editor::start_selection_grab (ArdourCanvas::Item* item, GdkEvent* event, bool copy/*=false*/)
 {
 	/* lets try to create new Region for the selection */
 	begin_reversible_command (_("new region for selection drag"));
     
     RegionSelection new_regions;
-    cut_copy_region_from_selection (new_regions, rtv, true, copy);
+    cut_copy_region_from_selection (new_regions, copy);
     
     commit_reversible_command ();
     

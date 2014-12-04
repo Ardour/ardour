@@ -1454,12 +1454,13 @@ RouteTimeAxisView::fade_range (TimeSelection& selection)
 	vector<Command*> cmds;
 	playlist->rdiff (cmds);
 	_session->add_commands (cmds);
+    
 	_session->add_command (new StatefulDiffCommand (playlist));
 
 }
 
 void
-RouteTimeAxisView::cut_copy_range (Selection& selection, bool copy, Selection& new_items)
+RouteTimeAxisView::cut_copy_region_from_range (Selection& selection, bool copy, Selection& new_items)
 {
     new_items.clear();
     
@@ -1498,10 +1499,17 @@ RouteTimeAxisView::cut_copy_range (Selection& selection, bool copy, Selection& n
             new_items.set (what_we_got);
             if (Config->get_edit_mode() == Ripple)
                 playlist->ripple(time.start(), -time.length(), NULL);
+            
+            vector<Command*> cmds;
+            playlist->rdiff (cmds);
+            _session->add_commands (cmds);
+            
+            _session->add_command (new StatefulDiffCommand (playlist));
         }
         
     }
 }
+
 
 void
 RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
@@ -1526,8 +1534,8 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 
-        playlist->clear_changes ();
-        playlist->clear_owned_changes ();
+    playlist->clear_changes ();
+    playlist->clear_owned_changes ();
 
 	switch (op) {
 	case Delete:
@@ -1536,11 +1544,11 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 				playlist->ripple(time.start(), -time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
-                        vector<Command*> cmds;
-                        playlist->rdiff (cmds);
-                        _session->add_commands (cmds);
-			
-                        _session->add_command (new StatefulDiffCommand (playlist));
+            vector<Command*> cmds;
+            playlist->rdiff (cmds);
+            _session->add_commands (cmds);
+
+            _session->add_command (new StatefulDiffCommand (playlist));
 		}
 		break;
 		
@@ -1551,11 +1559,11 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 				playlist->ripple(time.start(), -time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
-                        vector<Command*> cmds;
-                        playlist->rdiff (cmds);
-                        _session->add_commands (cmds);
+            vector<Command*> cmds;
+            playlist->rdiff (cmds);
+            _session->add_commands (cmds);
 
-                        _session->add_command (new StatefulDiffCommand (playlist));
+            _session->add_command (new StatefulDiffCommand (playlist));
 		}
 		break;
 	case Copy:
@@ -1570,10 +1578,12 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 				playlist->ripple(time.start(), -time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
-                        vector<Command*> cmds;
-                        playlist->rdiff (cmds);
+            vector<Command*> cmds;
+            playlist->rdiff (cmds);
 			_session->add_commands (cmds);
-                        _session->add_command (new StatefulDiffCommand (playlist));
+            
+            _session->add_command (new StatefulDiffCommand (playlist));
+            
 			what_we_got->release ();
 		}
 		break;

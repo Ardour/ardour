@@ -1006,13 +1006,6 @@ Editor::track_selection_changed ()
 		}
 
 		if (yn) {
-			(*i)->reshow_selection (selection->time);
-		} else {
-			(*i)->hide_selection ();
-		}
-
-
-		if (yn) {
 			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
 			if (rtav) {
 				routes->push_back (rtav->route());
@@ -1060,9 +1053,13 @@ Editor::time_selection_changed ()
 		(*i)->hide_selection ();
 	}
 
-	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		(*i)->show_selection (selection->time);
-	}
+    {   // Now show time range selection on all affected tracks
+        TrackViewList& track_to_process = selection->time.tracks_in_range;
+        TrackViewList::iterator i = track_to_process.begin();
+        for (; i != track_to_process.end(); ++i) {
+            (*i)->show_selection (selection->time);
+        }
+    }
 
 	if (selection->time.empty()) {
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);

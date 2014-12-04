@@ -709,9 +709,9 @@ TimeAxisView::popup_display_menu (guint32 when)
 void
 TimeAxisView::set_selected (bool yn)
 {
-        if (can_edit_name() && name_entry.get_visible()) {
-                end_name_edit (RESPONSE_CANCEL);
-        }
+    if (can_edit_name() && name_entry.get_visible()) {
+            end_name_edit (RESPONSE_CANCEL);
+    }
 
 	if (yn == _selected) {
 		return;
@@ -721,9 +721,9 @@ TimeAxisView::set_selected (bool yn)
 
 	if (_selected) {
 		controls_event_box.set_state (Gtk::STATE_ACTIVE);
+        
 	} else {
 		controls_event_box.set_state (Gtk::STATE_NORMAL);
-		hide_selection ();
 
 		/* children will be set for the yn=true case. but when deselecting
 		   the editor only has a list of top-level trackviews, so we
@@ -775,6 +775,10 @@ TimeAxisView::hide_timestretch ()
 void
 TimeAxisView::show_selection (TimeSelection& ts)
 {
+    if (!ts.tracks_in_range.contains(this) ) {
+        return;
+    }
+    
 	double x1;
 	double x2;
 	double y2;

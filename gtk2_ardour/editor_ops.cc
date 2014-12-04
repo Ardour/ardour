@@ -2714,24 +2714,19 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 }
 
 void
-Editor::cut_copy_region_from_selection (RegionSelection& new_regions, RouteTimeAxisView* rtv, bool follow_track_selection/*=false*/, bool copy /*=false*/)
+Editor::cut_copy_region_from_selection (RegionSelection& new_regions, bool copy /*=false*/)
 {
     new_regions.clear();
     
-	if (selection->time.empty() || selection->tracks.empty() ) {
+	if (selection->time.empty() || selection->time.tracks_in_range.empty() ) {
 		return;
 	}
     
-    TrackViewList ts;
-    if (follow_track_selection) {
-        ts = selection->tracks.filter_to_unique_playlists ();
-        sort_track_selection (ts);
-    } else {
-        if (rtv) {
-            ts.push_back(rtv);
-        }
-    }
+    // get track views associated with time selection
+    TrackViewList ts = selection->time.tracks_in_range.filter_to_unique_playlists ();
+    sort_track_selection (ts);
     
+    // latest_regionviews contains latest processed regions
     latest_regionviews.clear();
     for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
         
@@ -2741,11 +2736,15 @@ Editor::cut_copy_region_from_selection (RegionSelection& new_regions, RouteTimeA
             continue;
         }
         
+        // form selection object to get new cut/copied regions
         Selection new_items(this);
-        route_view->cut_copy_range(*selection, copy, new_items);
+        route_view->cut_copy_region_from_range(*selection, copy, new_items);
         
+        // connect this collect_new_region_view method to RegionViewAdded signal
+        // to collect newly pasted regions in latest_regionviews container
         sigc::connection c = route_view->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
+        // paste cut/copied regions back
         AudioRange range = selection->time[clicked_selection];
         route_view->paste(range.start, 1, new_items, 0);
         
@@ -4373,7 +4372,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 void
 Editor::cut_copy_ranges (CutCopyOp op)
 {
-	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	TrackViewList ts = selection->time.tracks_in_range.filter_to_unique_playlists ();
 
 	/* Sort the track selection now, so that it if is used, the playlists
 	   selected by the calls below to cut_copy_clear are in the order that
