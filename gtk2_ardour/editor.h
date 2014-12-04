@@ -215,6 +215,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
     void toggle_enable_group_edit ();
     void set_enable_group_edit (bool enabled);
+    bool is_group_edit_enabled () {return _enable_group_edit;}
 	/* NOTE: these functions assume that the "pixel" coordinate is
 	   in canvas coordinates. These coordinates already take into
 	   account any scrolling offsets.

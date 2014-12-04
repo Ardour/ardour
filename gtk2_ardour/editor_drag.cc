@@ -4235,6 +4235,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		   or create a new selection
 		*/
 
+        TrackViewList& all_tracks (_editor->track_views);
 		if (first_move) {
 
 			if (_add) {
@@ -4248,55 +4249,62 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			}
 
             /* new selection range selection */
-            _editor->selection->time.tracks_in_range.clear();
-            if (_editor->clicked_axisview ) {
-                _editor->selection->time.tracks_in_range.push_back (_editor->clicked_axisview );
-            }
-
             _editor->clicked_selection = _editor->selection->set (start, end);
+            
+            if (_editor->clicked_axisview ) {
+                
+                if (_editor->is_group_edit_enabled() ) {
+                    // apply to all tracks
+                    _editor->selection->time.tracks_in_range.add(all_tracks);
+                } else {
+                    _editor->selection->time.tracks_in_range.push_back (_editor->clicked_axisview );
+                }
+            }
 		}
 		
-		/* select all tracks within the rectangle that we've marked out so far */
-        TrackViewList& tracks_in_range = _editor->selection->time.tracks_in_range;
-		TrackViewList& all_tracks (_editor->track_views);
+        if (!_editor->is_group_edit_enabled() ) {
+        
+            /* select all tracks within the rectangle that we've marked out so far */
+            TrackViewList& tracks_in_range = _editor->selection->time.tracks_in_range;
 
-		ArdourCanvas::Coord const top = grab_y();
-		ArdourCanvas::Coord const bottom = current_pointer_y();
+            ArdourCanvas::Coord const top = grab_y();
+            ArdourCanvas::Coord const bottom = current_pointer_y();
 
-		if (top >= 0 && bottom >= 0) {
+            if (top >= 0 && bottom >= 0) {
 
-			//first, find the tracks that are covered in the y range selection
-			for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
-				if ((*i)->covered_by_y_range (top, bottom) && !tracks_in_range.contains(*i) ) {
-                    
-                    tracks_in_range.push_back (*i);
-				}
-			}
-            
+                //first, find the tracks that are covered in the y range selection
+                for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
+                    if ((*i)->covered_by_y_range (top, bottom) && !tracks_in_range.contains(*i) ) {
+                        
+                        tracks_in_range.push_back (*i);
+                    }
+                }
+                
 // GZ: Waves TrackLive does not support custom groups now,
 // but we may need this in future versions
 #if 0
-			//now find any tracks that are GROUPED with the tracks we selected
-            TrackViewList grouped_tracks_to_add;
-			for (TrackViewList::const_iterator i = tracks_in_range.begin(); i != tracks_in_range.end(); ++i) {
-				RouteTimeAxisView *n = dynamic_cast<RouteTimeAxisView *>(*i);
-				if ( n && n->route()->route_group() && n->route()->route_group()->is_active() ) {
-                    
-                    boost::shared_ptr<RouteList> grouped_routes;
-                    grouped_routes =  n->route()->route_group()->route_list();
-                    RouteList::iterator j = grouped_routes->begin();
-					for (; j != grouped_routes->end(); ++j) {
+                //now find any tracks that are GROUPED with the tracks we selected
+                TrackViewList grouped_tracks_to_add;
+                for (TrackViewList::const_iterator i = tracks_in_range.begin(); i != tracks_in_range.end(); ++i) {
+                    RouteTimeAxisView *n = dynamic_cast<RouteTimeAxisView *>(*i);
+                    if ( n && n->route()->route_group() && n->route()->route_group()->is_active() ) {
                         
-                        RouteTimeAxisView *check = _editor->axis_view_from_route(*j);
-						if ( check && (n != check) )
-							grouped_tracks_to_add.push_back(check);
-					}
-				}
-			}
-            
-            tracks_in_range.add(grouped_tracks_to_add);
+                        boost::shared_ptr<RouteList> grouped_routes;
+                        grouped_routes =  n->route()->route_group()->route_list();
+                        RouteList::iterator j = grouped_routes->begin();
+                        for (; j != grouped_routes->end(); ++j) {
+                            
+                            RouteTimeAxisView *check = _editor->axis_view_from_route(*j);
+                            if ( check && (n != check) )
+                                grouped_tracks_to_add.push_back(check);
+                        }
+                    }
+                }
+                
+                tracks_in_range.add(grouped_tracks_to_add);
 #endif
-		}
+            }
+        }
 	}
 	break;
 
