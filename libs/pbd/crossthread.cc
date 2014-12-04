@@ -17,11 +17,17 @@
 
 */
 
+
 #include <cstdlib>
 #include <cerrno>
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
+
+#ifdef PLATFORM_WINDOWS
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
 
 #include "pbd/error.h"
 #include "pbd/crossthread.h"
@@ -30,91 +36,29 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 
-CrossThreadChannel::CrossThreadChannel (bool non_blocking)
+#ifndef PLATFORM_WINDOWS
+#include "crossthread.posix.cc"
+#else
+#include "crossthread.win.cc"
+#endif
+
+gboolean 
+cross_thread_channel_call_receive_slot (GIOChannel*, GIOCondition condition, void *data)
 {
-	_ios = 0;
-	fds[0] = -1;
-	fds[1] = -1;
-
-	if (pipe (fds)) {
-		error << "cannot create x-thread pipe for read (%2)" << ::strerror (errno) << endmsg;
-		return;
-	}
-
-	if (non_blocking) {
-		if (fcntl (fds[0], F_SETFL, O_NONBLOCK)) {
-			error << "cannot set non-blocking mode for x-thread pipe (read) (" << ::strerror (errno) << ')' << endmsg;
-			return;
-		}
-		
-		if (fcntl (fds[1], F_SETFL, O_NONBLOCK)) {
-			error << "cannot set non-blocking mode for x-thread pipe (write) (%2)" << ::strerror (errno) << ')' << endmsg;
-			return;
-		}
-	}
-}
-
-CrossThreadChannel::~CrossThreadChannel ()
-{
-	/* glibmm hack */
-	drop_ios ();
-
-	if (fds[0] >= 0) {
-		close (fds[0]);
-		fds[0] = -1;
-	} 
-
-	if (fds[1] >= 0) {
-		close (fds[1]);
-		fds[1] = -1;
-	} 
+        CrossThreadChannel* ctc = static_cast<CrossThreadChannel*>(data);
+        return ctc->receive_slot (Glib::IOCondition (condition));
 }
 
 void
-CrossThreadChannel::wakeup ()
+CrossThreadChannel::set_receive_handler (sigc::slot<bool,Glib::IOCondition> s)
 {
-	char c = 0;
-	(void) ::write (fds[1], &c, 1);
-}
-
-RefPtr<IOSource>
-CrossThreadChannel::ios () 
-{
-	if (!_ios) {
-		_ios = new RefPtr<IOSource> (IOSource::create (fds[0], IOCondition(IO_IN|IO_PRI|IO_ERR|IO_HUP|IO_NVAL)));
-	}
-	return *_ios;
+        receive_slot = s;
 }
 
 void
-CrossThreadChannel::drop_ios ()
+CrossThreadChannel::attach (Glib::RefPtr<Glib::MainContext> context)
 {
-	delete _ios;
-	_ios = 0;
-}
-
-void
-CrossThreadChannel::drain ()
-{
-	drain (fds[0]);
-}
-
-void
-CrossThreadChannel::drain (int fd)
-{
-	/* drain selectable fd */
-	char buf[64];
-	while (::read (fd, buf, sizeof (buf)) > 0) {};
-}
-
-int
-CrossThreadChannel::deliver (char msg)
-{
-        return ::write (fds[1], &msg, 1);
-}
-
-int 
-CrossThreadChannel::receive (char& msg)
-{
-        return ::read (fds[0], &msg, 1);
+        receive_source = g_io_create_watch (receive_channel, GIOCondition(G_IO_IN|G_IO_PRI|G_IO_ERR|G_IO_HUP|G_IO_NVAL));
+        g_source_set_callback (receive_source, (GSourceFunc) cross_thread_channel_call_receive_slot, this, NULL);
+        g_source_attach (receive_source, context->gobj());
 }
