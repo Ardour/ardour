@@ -665,8 +665,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void sort_track_selection (TrackViewList&);
 
-	XMLNode* _pre_command_selection;
-	bool _pre_command_selection_saved;
+	XMLNode* _begin_reversible_command_selection;
 
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;

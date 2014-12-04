@@ -305,8 +305,7 @@ Editor::Editor ()
 	
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
-	_pre_command_selection = new XMLNode (X_(""));
-	_pre_command_selection_saved = false;
+	_begin_reversible_command_selection = 0;
 
 	clicked_regionview = 0;
 	clicked_axisview = 0;
@@ -3318,8 +3317,7 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (_session) {
-		_pre_command_selection = &selection->get_state ();
-		_pre_command_selection_saved = true;
+		_begin_reversible_command_selection = &selection->get_state ();
 		_session->begin_reversible_command (name);
 	}
 }
@@ -3328,8 +3326,7 @@ void
 Editor::begin_reversible_command (GQuark q)
 {
 	if (_session) {
-		_pre_command_selection = &selection->get_state ();
-		_pre_command_selection_saved = true;
+		_begin_reversible_command_selection = &selection->get_state ();
 		_session->begin_reversible_command (q);
 	}
 }
@@ -3338,11 +3335,9 @@ void
 Editor::commit_reversible_command ()
 {
 	if (_session) {
-		if (_pre_command_selection_saved) {
-			_session->add_command (new MementoCommand<Selection>(*(selection), _pre_command_selection, &selection->get_state ()));
-			_pre_command_selection_saved = false;
-		} else {
-			cerr << "Programming error. Editor::commit_reversible_command () called without Editor::begin_reversible_command." << endl;
+		if (_begin_reversible_command_selection) {
+			_session->add_command (new MementoCommand<Selection>(*(selection), _begin_reversible_command_selection, &selection->get_state ()));
+			_begin_reversible_command_selection = 0;
 		}
 
 		_session->commit_reversible_command ();
