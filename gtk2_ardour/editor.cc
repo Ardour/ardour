@@ -56,6 +56,7 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/grouped_buttons.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/tearoff.h"
@@ -71,6 +72,7 @@
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/session_playlists.h"
+#include "ardour/tempo.h"
 #include "ardour/utils.h"
 
 #include "canvas/debug.h"
@@ -110,6 +112,7 @@
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
 #include "playlist_selector.h"
+#include "public_editor.h"
 #include "region_layering_order_editor.h"
 #include "rgb_macros.h"
 #include "rhythm_ferret.h"

@@ -21,9 +21,12 @@
 #define __ardour_editor_h__
 
 #include <list>
+#include <map>
 #include <set>
 #include <stack>
+#include <string>
 #include <sys/time.h>
+#include <cmath>
 
 #include <boost/optional.hpp>
 
@@ -41,14 +44,17 @@
 
 #include "ardour/import_status.h"
 #include "ardour/tempo.h"
+#include "ardour/location.h"
 #include "ardour/types.h"
 
+#include "canvas/fwd.h"
 #include "canvas/ruler.h"
 
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_dropdown.h"
 #include "public_editor.h"
+#include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
 #include "region_selection.h"
