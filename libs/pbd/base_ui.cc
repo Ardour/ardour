@@ -51,15 +51,10 @@ BaseUI::BaseUI (const string& str)
 	: m_context(MainContext::get_default())
 	, run_loop_thread (0)
 	, _name (str)
-#ifndef PLATFORM_WINDOWS
 	, request_channel (true)
-#endif
 {
 	base_ui_instance = this;
-
-#ifndef PLATFORM_WINDOWS
-	request_channel.ios()->connect (sigc::mem_fun (*this, &BaseUI::request_handler));
-#endif
+	request_channel.set_receive_handler (sigc::mem_fun (*this, &BaseUI::request_handler));
 
 	/* derived class must set _ok */
 }
@@ -124,24 +119,6 @@ BaseUI::quit ()
 	}
 }
 
-#ifdef PLATFORM_WINDOWS
-gboolean
-BaseUI::_request_handler (gpointer data)
-{
-	BaseUI* ui = static_cast<BaseUI*>(data);
-	return ui->request_handler ();
-}
-
-bool
-BaseUI::request_handler ()
-{
-	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::request_handler\n");
-	handle_ui_requests ();
-	// keep calling indefinitely at the timeout interval
-	return true;
-}
-
-#else
 bool
 BaseUI::request_handler (Glib::IOCondition ioc)
 {
@@ -166,17 +143,12 @@ BaseUI::request_handler (Glib::IOCondition ioc)
 
 	return true;
 }
-#endif
 
 void
 BaseUI::signal_new_request ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::signal_new_request\n");
-#ifdef PLATFORM_WINDOWS
-	// handled in timeout, how to signal...?
-#else
 	request_channel.wakeup ();
-#endif
 }
 
 /**
@@ -186,13 +158,5 @@ void
 BaseUI::attach_request_source ()
 {
 	DEBUG_TRACE (DEBUG::EventLoop, "BaseUI::attach_request_source\n");
-#ifdef PLATFORM_WINDOWS
-	GSource* request_source = g_timeout_source_new(200);
-	g_source_set_callback (request_source, &BaseUI::_request_handler, this, NULL);
-	g_source_attach (request_source, m_context->gobj());
-#else
-	request_channel.ios()->attach (m_context);
-	/* glibmm hack - drop the refptr to the IOSource now before it can hurt */
-	request_channel.drop_ios ();
-#endif
+	request_channel.attach (m_context);
 }

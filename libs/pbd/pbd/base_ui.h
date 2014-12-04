@@ -93,14 +93,9 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 
 	virtual void thread_init () {};
 
-#ifdef PLATFORM_WINDOWS
-	static gboolean _request_handler (gpointer);
-	bool request_handler ();
-#else
 	/** Called when there input ready on the request_channel
 	 */
 	bool request_handler (Glib::IOCondition);
-#endif
 
 	void signal_new_request ();
 	void attach_request_source ();
@@ -115,10 +110,8 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 	std::string _name; 
 	BaseUI* base_ui_instance;
 
-#ifndef PLATFORM_WINDOWS
 	CrossThreadChannel request_channel;
-#endif
-	
+
 	static uint64_t rt_bit;
 
 	int setup_request_pipe ();
