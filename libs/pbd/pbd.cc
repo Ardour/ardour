@@ -31,6 +31,7 @@
 
 #include "pbd/pbd.h"
 #include "pbd/debug.h"
+#include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/enumwriter.h"
 
