@@ -37,6 +37,7 @@ libpbd_sources = [
     'convert.cc',
     'controllable.cc',
     'controllable_descriptor.cc',
+    'crossthread.cc',
     'cpus.cc',
     'debug.cc',
     'enumwriter.cc',
@@ -130,9 +131,6 @@ def build(bld):
 
     if bld.is_defined('DEBUG_RT_ALLOC'):
         obj.source += 'debug_rt_alloc.c'
-
-    if bld.env['build_target'] != 'mingw':
-        obj.source += [ 'crossthread.cc' ]
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
