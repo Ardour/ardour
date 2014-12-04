@@ -33,6 +33,7 @@
 #include "location_ui.h"
 #include "prompter.h"
 #include "utils.h"
+#include "public_editor.h"
 
 #include "i18n.h"
 
@@ -853,12 +854,12 @@ LocationUI::do_location_remove (ARDOUR::Location *loc)
 		return FALSE;
 	}
 
-	_session->begin_reversible_command (_("remove marker"));
+	PublicEditor::instance().begin_reversible_command (_("remove marker"));
 	XMLNode &before = _session->locations()->get_state();
 	_session->locations()->remove (loc);
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	_session->commit_reversible_command ();
+	PublicEditor::instance().commit_reversible_command ();
 
 	return FALSE;
 }
@@ -1017,12 +1018,12 @@ LocationUI::add_new_location()
 		if (Config->get_name_new_markers()) {
 			newest_location = location;
 		}
-		_session->begin_reversible_command (_("add marker"));
+		PublicEditor::instance().begin_reversible_command (_("add marker"));
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (location, true);
 		XMLNode &after = _session->locations()->get_state();
 		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-		_session->commit_reversible_command ();
+		PublicEditor::instance().commit_reversible_command ();
 	}
 
 }
@@ -1036,12 +1037,12 @@ LocationUI::add_new_range()
 		framepos_t where = _session->audible_frame();
 		_session->locations()->next_available_name(rangename,"unnamed");
 		Location *location = new Location (*_session, where, where, rangename, Location::IsRangeMarker);
-		_session->begin_reversible_command (_("add range marker"));
+		PublicEditor::instance().begin_reversible_command (_("add range marker"));
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (location, true);
 		XMLNode &after = _session->locations()->get_state();
 		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-		_session->commit_reversible_command ();
+		PublicEditor::instance().commit_reversible_command ();
 	}
 }
 

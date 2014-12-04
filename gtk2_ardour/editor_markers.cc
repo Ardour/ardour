@@ -654,12 +654,12 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 			return;
 		}
 		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);
-		_session->begin_reversible_command (_("add marker"));
+		begin_reversible_command (_("add marker"));
+
 		XMLNode &before = _session->locations()->get_state();
 		_session->locations()->add (location, true);
 		XMLNode &after = _session->locations()->get_state();
 		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-		_session->commit_reversible_command ();
 
 		/* find the marker we just added */
 
@@ -668,6 +668,8 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 			/* make it the selected marker */
 			selection->set (lam->start);
 		}
+
+		commit_reversible_command ();
 	}
 }
 
@@ -721,12 +723,12 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 gint
 Editor::really_remove_marker (Location* loc)
 {
-	_session->begin_reversible_command (_("remove marker"));
+	begin_reversible_command (_("remove marker"));
 	XMLNode &before = _session->locations()->get_state();
 	_session->locations()->remove (loc);
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	_session->commit_reversible_command ();
+	commit_reversible_command ();
 	return FALSE;
 }
 

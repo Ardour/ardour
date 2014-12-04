@@ -21,12 +21,9 @@
 #define __ardour_editor_h__
 
 #include <list>
-#include <map>
 #include <set>
 #include <stack>
-#include <string>
 #include <sys/time.h>
-#include <cmath>
 
 #include <boost/optional.hpp>
 
@@ -44,17 +41,14 @@
 
 #include "ardour/import_status.h"
 #include "ardour/tempo.h"
-#include "ardour/location.h"
 #include "ardour/types.h"
 
-#include "canvas/fwd.h"
 #include "canvas/ruler.h"
 
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_dropdown.h"
 #include "public_editor.h"
-#include "editing.h"
 #include "enums.h"
 #include "editor_items.h"
 #include "region_selection.h"
@@ -405,6 +399,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
         void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
 
+	void get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const;
+
 	void center_screen (framepos_t);
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
@@ -662,6 +658,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ControlPoint*      clicked_control_point;
 
 	void sort_track_selection (TrackViewList&);
+
+	XMLNode* _pre_command_selection;
+	bool _pre_command_selection_saved;
 
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;
