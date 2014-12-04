@@ -352,7 +352,7 @@ RhythmFerret::do_split_action ()
 
 	editor.EditorFreeze(); /* Emit signal */
 
-	_session->begin_reversible_command (_("split regions (rhythm ferret)"));
+	editor.begin_reversible_command (_("split regions (rhythm ferret)"));
 
 	/* Merge the transient positions for regions in consideration */
 	AnalysisFeatureList merged_features;
@@ -381,7 +381,7 @@ RhythmFerret::do_split_action ()
 		i = tmp;
 	}
 
-	_session->commit_reversible_command ();
+	editor.commit_reversible_command ();
 
 	editor.EditorThaw(); /* Emit signal */
 }

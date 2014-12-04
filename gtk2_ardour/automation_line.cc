@@ -280,7 +280,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 
 	double const x = trackview.editor().sample_to_pixel_unrounded (_time_converter->to((*cp.model())->when) - _offset);
 
-	trackview.editor().session()->begin_reversible_command (_("automation event move"));
+	trackview.editor().begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
@@ -301,7 +301,7 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), 0, &alist->get_state()));
 
-	trackview.editor().session()->commit_reversible_command ();
+	trackview.editor().commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
 
@@ -453,7 +453,7 @@ AutomationLine::string_to_fraction (string const & s) const
 void
 AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
-	trackview.editor().session()->begin_reversible_command (_("automation event move"));
+	trackview.editor().begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
@@ -479,7 +479,7 @@ AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 void
 AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
-	trackview.editor().session()->begin_reversible_command (_("automation range move"));
+	trackview.editor().begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0));
 
@@ -499,7 +499,7 @@ AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 void
 AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
 {
-	trackview.editor().session()->begin_reversible_command (_("automation range move"));
+	trackview.editor().begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), state, 0));
 
@@ -854,7 +854,7 @@ AutomationLine::is_first_point (ControlPoint& cp)
 void
 AutomationLine::remove_point (ControlPoint& cp)
 {
-	trackview.editor().session()->begin_reversible_command (_("remove control point"));
+	trackview.editor().begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
 	alist->erase (cp.model());
@@ -862,7 +862,7 @@ AutomationLine::remove_point (ControlPoint& cp)
 	trackview.editor().session()->add_command(
 		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
 
-	trackview.editor().session()->commit_reversible_command ();
+	trackview.editor().commit_reversible_command ();
 	trackview.editor().session()->set_dirty ();
 }
 

@@ -3363,7 +3363,7 @@ MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const 
 	}
 	counts.increase_n_notes();
 
-	trackview.session()->begin_reversible_command (Operations::paste);
+	trackview.editor().begin_reversible_command (Operations::paste);
 
 	// Paste notes
 	paste_internal(pos, paste_count, times, **m);
@@ -3375,7 +3375,7 @@ MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const 
 		a->second->paste(pos, paste_count, times, selection, counts);
 	}
 
-	trackview.session()->commit_reversible_command ();
+	trackview.editor().commit_reversible_command ();
 
 	return true;
 }

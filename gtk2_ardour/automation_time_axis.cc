@@ -429,7 +429,7 @@ AutomationTimeAxisView::clear_clicked ()
 {
 	assert (_line || _view);
 
-	_session->begin_reversible_command (_("clear automation"));
+	_editor.begin_reversible_command (_("clear automation"));
 
 	if (_line) {
 		_line->clear ();
@@ -437,7 +437,7 @@ AutomationTimeAxisView::clear_clicked ()
 		_view->clear ();
 	}
 
-	_session->commit_reversible_command ();
+	_editor.commit_reversible_command ();
 	_session->set_dirty ();
 }
 
@@ -622,13 +622,14 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 
 	_editor.snap_to_with_modifier (when, event);
 
-	_session->begin_reversible_command (_("add automation event"));
+	_editor.begin_reversible_command (_("add automation event"));
 	XMLNode& before = list->get_state();
 
 	list->add (when, y, with_guard_points);
 
 	XMLNode& after = list->get_state();
-	_session->commit_reversible_command (new MementoCommand<ARDOUR::AutomationList> (*list, &before, &after));
+	_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list, &before, &after));
+	_editor.commit_reversible_command ();
 	_session->set_dirty ();
 }
 

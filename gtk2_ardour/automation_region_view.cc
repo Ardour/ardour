@@ -175,15 +175,15 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	double when_d = when;
 	_line->view_to_model_coord (when_d, y);
 
-	view->session()->begin_reversible_command (_("add automation event"));
+	view->editor().begin_reversible_command (_("add automation event"));
 	XMLNode& before = _line->the_list()->get_state();
 
 	_line->the_list()->add (when_d, y, with_guard_points, false);
 
 	XMLNode& after = _line->the_list()->get_state();
 
-	view->session()->commit_reversible_command (
-		new MementoCommand<ARDOUR::AutomationList> (_line->memento_command_binder(), &before, &after));
+	view->session()->add_command (new MementoCommand<ARDOUR::AutomationList> (_line->memento_command_binder(), &before, &after));
+	view->editor().commit_reversible_command ();
 
 	view->session()->set_dirty ();
 }

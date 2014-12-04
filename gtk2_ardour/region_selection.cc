@@ -73,6 +73,7 @@ void
 RegionSelection::clear_all()
 {
 	clear();
+	pending.clear ();
 	_bylayer.clear();
 }
 

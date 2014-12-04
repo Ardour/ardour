@@ -24,9 +24,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <map>
-
-#include <string>
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gtkmm/box.h>
@@ -38,7 +35,6 @@
 
 #include "pbd/statefuldestructible.h"
 
-#include "canvas/fwd.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "editing.h"
@@ -403,6 +399,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void stop_canvas_autoscroll () = 0;
         virtual bool autoscroll_active() const = 0;
 
+	virtual void begin_reversible_command (std::string cmd_name) = 0;
+	virtual void begin_reversible_command (GQuark) = 0;
+	virtual void commit_reversible_command () = 0;
+
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
 
@@ -420,6 +420,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
+	virtual void get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

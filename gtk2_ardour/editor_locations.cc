@@ -28,7 +28,7 @@ using namespace Gtk;
 EditorLocations::EditorLocations (Editor* e)
 	: EditorComponent (e)
 {
-	_locations = new LocationUI;
+	_locations = new LocationUI ();
 	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	_scroller.add (*_locations);
 }
