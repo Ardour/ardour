@@ -90,7 +90,9 @@
       <menuitem action='toggle-session-lock-dialog'/>
       <separator/>
       <menuitem action='toggle-key-editor'/>
-    </menu>         
+      <separator/>
+      <menuitem action='toggle-enable-group-edit'/>
+    </menu>
 
     <menu action='TrackMenu'>
       <menuitem action='AddTrackBus'/>	
