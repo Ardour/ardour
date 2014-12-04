@@ -37,10 +37,6 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-namespace Evoral {
-	template class EventRingBuffer<MIDI::timestamp_t>;
-}
-
 pthread_t AsyncMIDIPort::_process_thread;
 
 #define port_engine AudioEngine::instance()->port_engine()
