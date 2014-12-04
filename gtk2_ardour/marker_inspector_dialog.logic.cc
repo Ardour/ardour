@@ -71,7 +71,7 @@ MarkerInspectorDialog::_program_change_button_clicked (WavesButton *button)
 				msc->set_active (_program_change_button.active_state () == Gtkmm2ext::ExplicitActive);
 			}
 		} else if (_program_change_button.active_state () == Gtkmm2ext::ExplicitActive ) {
-			_marker->location()->set_scene_change(boost::shared_ptr<ARDOUR::MIDISceneChange> (new ARDOUR::MIDISceneChange (0, -1, 1)));
+			_marker->location()->set_scene_change(boost::shared_ptr<ARDOUR::MIDISceneChange> (new ARDOUR::MIDISceneChange (1, -1, 1)));
 		}
 	}
 }
