@@ -29,7 +29,7 @@
 #include "pbd/libpbd_visibility.h"
 
 #ifdef PLATFORM_WINDOWS
-#include <Windows.h>
+#include <windows.h>
 #endif // PLATFORM_WINDOWS
 
 
