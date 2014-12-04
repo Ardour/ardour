@@ -30,13 +30,13 @@
 #include "pbd/ringbuffer.h"
 
 #include "evoral/Event.hpp"
+#include "evoral/EventRingBuffer.hpp"
 
 #include "midi++/types.h"
 #include "midi++/parser.h"
 #include "midi++/port.h"
 
 #include "ardour/libardour_visibility.h"
-#include "ardour/event_ring_buffer.h"
 #include "ardour/midi_port.h"
 
 namespace ARDOUR {
@@ -62,20 +62,15 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 	/* clears async request communication channel */
 	void clear () {
-#ifndef PLATFORM_WINDOWS
-		return xthread.drain ();
-#endif
+		_xthread.drain ();
 	}
+
+        CrossThreadChannel& xthread() {
+                return _xthread;
+        }
+
 	/* Not selectable; use ios() */
 	int selectable() const { return -1; }
-
-	Glib::RefPtr<Glib::IOSource> ios() {
-#ifndef PLATFORM_WINDOWS
-		return xthread.ios();
-#else
-		return Glib::RefPtr<Glib::IOSource>(0);
-#endif
-	}
 	void set_timer (boost::function<framecnt_t (void)>&);
 
 	static void set_process_thread (pthread_t);
@@ -88,11 +83,9 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	bool                    have_timer;
 	boost::function<framecnt_t (void)> timer;
 	RingBuffer< Evoral::Event<double> > output_fifo;
-        EventRingBuffer<MIDI::timestamp_t> input_fifo;
+        Evoral::EventRingBuffer<MIDI::timestamp_t> input_fifo;
         Glib::Threads::Mutex output_fifo_lock;
-#ifndef PLATFORM_WINDOWS
-	CrossThreadChannel xthread;
-#endif
+	CrossThreadChannel _xthread;
 
 	int create_port ();
 
@@ -106,7 +99,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 	void make_connections ();
 	void init (std::string const &, Flags);
 
-        void flush_output_fifo (pframes_t);
+    void flush_output_fifo (pframes_t);
 
 	static pthread_t _process_thread;
 };

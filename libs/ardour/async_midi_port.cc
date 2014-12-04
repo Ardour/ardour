@@ -37,6 +37,10 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
+namespace Evoral {
+	template class EventRingBuffer<MIDI::timestamp_t>;
+}
+
 pthread_t AsyncMIDIPort::_process_thread;
 
 #define port_engine AudioEngine::instance()->port_engine()
@@ -49,9 +53,7 @@ AsyncMIDIPort::AsyncMIDIPort (string const & name, PortFlags flags)
 	, have_timer (false)
 	, output_fifo (512)
 	, input_fifo (1024)
-#ifndef PLATFORM_WINDOWS
-	, xthread (true)
-#endif
+	, _xthread (true)
 {
 }
 
@@ -132,11 +134,9 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 			input_fifo.write (when, (Evoral::EventType) 0, (*b).size(), (*b).buffer());
 		}
 
-#ifndef PLATFORM_WINDOWS
 		if (!mb.empty()) {
-			xthread.wakeup ();
+			_xthread.wakeup ();
 		}
-#endif
 	}
 }
 
