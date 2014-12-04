@@ -49,6 +49,7 @@
 #include "ardour/meter.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/dB.h"
 
 #include "i18n.h"
 
@@ -82,11 +83,14 @@ reset_cursor_to_default_state (Gtk::StateType, Gtk::Entry* widget)
 }
 
 GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int fader_girth)
-	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0.0, 1.0, 0.01, 0.1)
+	: gain_adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()),  // value
+	                   0.0,  // lower
+	                   1.0,  // upper
+	                   dB_coeff_step(Config->get_max_gain()) / 10.0,  // step increment
+	                   dB_coeff_step(Config->get_max_gain()))  // page increment
 	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
 	, _data_type (DataType::AUDIO)
-
 {
 	using namespace Menu_Helpers;
 
@@ -260,8 +264,8 @@ GainMeterBase::setup_gain_adjustment ()
 		_data_type = DataType::AUDIO;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (1.0);
-		gain_adjustment.set_step_increment (0.01);
-		gain_adjustment.set_page_increment (0.1);
+		gain_adjustment.set_step_increment (dB_coeff_step(Config->get_max_gain()) / 10.0);
+		gain_adjustment.set_page_increment (dB_coeff_step(Config->get_max_gain()));
 		gain_slider->set_default_value (gain_to_slider_position (1));
 	} else {
 		_data_type = DataType::MIDI;

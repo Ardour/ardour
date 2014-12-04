@@ -34,6 +34,11 @@ static inline float accurate_coefficient_to_dB (float coeff) {
 	return 20.0f * log10f (coeff);
 }
 
+static inline double dB_coeff_step(double max_coeff) {
+	const double max_db = lrint(accurate_coefficient_to_dB(max_coeff));
+	return 0.1 * (max_coeff / max_db);
+}
+
 extern double zero_db_as_fraction;
 
 #endif /* __ardour_dB_h__ */

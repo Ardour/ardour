@@ -18,8 +18,11 @@
 */
 
 #include "ardour/amp.h"
+#include "ardour/dB.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/types.h"
+#include "ardour/utils.h"
 
 namespace ARDOUR {
 
@@ -27,6 +30,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	: Evoral::ParameterDescriptor()
 	, key((uint32_t)-1)
 	, datatype(Variant::NOTHING)
+	, type((AutomationType)parameter.type())
 	, unit(NONE)
 	, step(0)
 	, smallstep(0)
@@ -39,13 +43,9 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	, max_unbound(0)
 	, enumeration(false)
 {
-	if (parameter.type() == GainAutomation) {
-		unit = DB;
-	}
-
 	switch((AutomationType)parameter.type()) {
 	case GainAutomation:
-		upper  = Amp::max_gain_coefficient;
+		upper  = Config->get_max_gain();
 		normal = 1.0f;
 		break;
 	case PanAzimuthAutomation:
@@ -116,22 +116,33 @@ ParameterDescriptor::update_steps()
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
-	} else if (integer_step) {
+	} else if (type == GainAutomation) {
+		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
+		   like "slider position", so we convert from "slider position" to gain
+		   to have the correct unit here. */
+		largestep = slider_position_to_gain(dB_coeff_step(upper));
+		step      = slider_position_to_gain(largestep / 10.0);
+		smallstep = step;
+	} else {
 		const float delta = upper - lower;
 
-		smallstep = delta / 10000.0f;
-		step      = delta / 1000.0f;
-		largestep = delta / 40.0f;
+		/* 30 happens to be the total number of steps for a fader with default
+		   max gain of 2.0 (6 dB), so we use 30 here too for consistency. */
+		step      = smallstep = (delta / 300.0f);
+		largestep = (delta / 30.0f);
 
-		smallstep = std::max(1.0, rint(smallstep));
-		step      = std::max(1.0, rint(step));
-		largestep = std::max(1.0, rint(largestep));
+		if (logarithmic) {
+			/* Compensate for internal_to_interface's pow so we get roughly the
+			   desired number of steps. */
+			smallstep = pow(smallstep, 1.5f);
+			step      = pow(step, 1.5f);
+			largestep = pow(largestep, 1.5f);
+		} else if (integer_step) {
+			smallstep = std::max(1.0, rint(smallstep));
+			step      = std::max(1.0, rint(step));
+			largestep = std::max(1.0, rint(largestep));
+		}
 	}
-	/* else: leave all others as default '0'
-	 * in that case the UI (eg. AutomationController::create)
-	 * uses internal_to_interface() to map the value
-	 * to an appropriate interface range
-	 */
 }
 
 } // namespace ARDOUR

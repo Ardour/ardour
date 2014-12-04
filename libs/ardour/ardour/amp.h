@@ -106,8 +106,6 @@ public:
 
 	std::string value_as_string (boost::shared_ptr<AutomationControl>) const;
 
-        static const float max_gain_coefficient;
-
 private:
 	bool   _denormal_protection;
 	bool   _apply_gain;

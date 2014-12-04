@@ -27,6 +27,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/buffer_set.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
 #include "i18n.h"
@@ -34,9 +35,6 @@
 using namespace ARDOUR;
 using namespace PBD;
 using std::min;
-
-/* gain range of -inf to +6dB, default 0dB */
-const float Amp::max_gain_coefficient = 1.99526231f;
 
 Amp::Amp (Session& s)
 	: Processor(s, "Amp")
@@ -403,7 +401,7 @@ Amp::set_state (const XMLNode& node, int version)
 void
 Amp::GainControl::set_value (double val)
 {
-	AutomationControl::set_value (min (val, (double) max_gain_coefficient));
+	AutomationControl::set_value (min (val, (double) Config->get_max_gain()));
 	_amp->session().set_dirty ();
 }
 

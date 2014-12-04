@@ -54,6 +54,7 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	boost::shared_ptr<ScalePoints> scale_points;
 	uint32_t                       key;  ///< for properties
 	Variant::Type                  datatype;  ///< for properties
+	AutomationType                 type;
 	Unit                           unit;
 	float                          step;
 	float                          smallstep;
