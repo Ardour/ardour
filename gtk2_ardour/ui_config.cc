@@ -70,7 +70,10 @@ UIConfiguration::UIConfiguration ()
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
-	_dirty (false)
+	_dirty (false),
+	aliases_modified (false),
+	derived_modified (false)
+	
 {
 	_instance = this;
 
@@ -224,11 +227,11 @@ UIConfiguration::load_state ()
 
 	std::string rcfile;
 
-	if ( find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile)) {
+	if (find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile)) {
 		XMLTree tree;
 		found = true;
 
-		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
+		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endmsg;
 
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
@@ -300,6 +303,21 @@ UIConfiguration::get_state ()
 	root->add_child_nocopy (get_variables ("UI"));
 	root->add_child_nocopy (get_variables ("Canvas"));
 
+	if (derived_modified) {
+
+	}
+
+	if (aliases_modified) {
+		XMLNode* parent = new XMLNode (X_("ColorAliases"));
+		for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
+			XMLNode* node = new XMLNode (X_("ColorAlias"));
+			node->add_property (X_("name"), i->first);
+			node->add_property (X_("alias"), i->second);
+			parent->add_child_nocopy (*node);
+		}
+		root->add_child_nocopy (*parent);
+	}
+	
 	if (_extra_xml) {
 		root->add_child_copy (*_extra_xml);
 	}
@@ -350,9 +368,37 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 		}
 	}
 
+	XMLNode* aliases = find_named_node (root, X_("ColorAliases"));
+
+	if (aliases) {
+		load_color_aliases (*aliases);
+	}
+	
 	return 0;
 }
 
+void
+UIConfiguration::load_color_aliases (XMLNode const & node)
+{
+	XMLNodeList const nlist = node.children();
+	XMLNodeConstIterator niter;
+	XMLProperty const *name;
+	XMLProperty const *alias;
+	
+	color_aliases.clear ();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() != X_("ColorAlias")) {
+			continue;
+		}
+		name = (*niter)->property (X_("name"));
+		alias = (*niter)->property (X_("alias"));
+
+		if (name && alias) {
+			color_aliases.insert (make_pair (name->value(), alias->value()));
+		}
+	}
+}
 
 void
 UIConfiguration::set_variables (const XMLNode& node)
@@ -493,11 +539,15 @@ void
 UIConfiguration::reset_relative (const string& name, const RelativeHSV& rhsv)
 {
 	RelativeColors::iterator i = relative_colors.find (name);
+
 	if (i == relative_colors.end()) {
 		return;
 	}
 
 	i->second = rhsv;
+	derived_modified = true;
+
+	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -509,6 +559,8 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 	}
 
 	i->second = alias;
+	aliases_modified = true;
+
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 }
 	

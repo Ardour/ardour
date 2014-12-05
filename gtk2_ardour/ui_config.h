@@ -180,9 +180,14 @@ class UIConfiguration : public PBD::Stateful
 
 	XMLNode& state ();
 	bool _dirty;
+	bool aliases_modified;
+	bool derived_modified;
+	
 	static UIConfiguration* _instance;
 
 	void color_theme_changed ();
+
+	void load_color_aliases (XMLNode const &);
 };
 
 #endif /* __ardour_ui_configuration_h__ */
