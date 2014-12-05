@@ -59,8 +59,8 @@ AutomationListPropertyTest::basicTest ()
 	/* No change since we just cleared them */
 	CPPUNIT_ASSERT_EQUAL (false, property.changed());
 	
-	property->add (1, 2);
-	property->add (3, 4);
+	property->add (1, 2, false, false);
+	property->add (3, 4, false, false);
 
 	/* Now it has changed */
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
@@ -81,8 +81,8 @@ AutomationListPropertyTest::basicTest ()
 	/* Do some more */
 	property.clear_changes ();
 	CPPUNIT_ASSERT_EQUAL (false, property.changed());
-	property->add (5, 6);
-	property->add (7, 8);
+	property->add (5, 6, false, false);
+	property->add (7, 8, false, false);
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
 	foo = new XMLNode ("test");
 	property.get_changes_as_xml (foo);
@@ -133,13 +133,13 @@ AutomationListPropertyTest::undoTest ()
 	boost::shared_ptr<Fred> sheila (new Fred);
 
 	/* Add some data */
-	sheila->_jim->add (1, 2);
-	sheila->_jim->add (3, 4);
+	sheila->_jim->add (1, 2, false, false);
+	sheila->_jim->add (3, 4, false, false);
 
 	/* Do a `command' */
 	sheila->clear_changes ();
-	sheila->_jim->add (5, 6);
-	sheila->_jim->add (7, 8);
+	sheila->_jim->add (5, 6, false, false);
+	sheila->_jim->add (7, 8, false, false);
 	StatefulDiffCommand sdc (sheila);
 
 	std::string test_data_filename = "automation_list_property_test3.ref";
