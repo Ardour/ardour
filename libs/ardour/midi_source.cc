@@ -34,6 +34,7 @@
 #include "pbd/pthread_utils.h"
 #include "pbd/basename.h"
 
+#include "evoral/Control.hpp"
 #include "evoral/EventSink.hpp"
 
 #include "ardour/debug.h"
@@ -303,6 +304,14 @@ MidiSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::Musica
 {
 	if (_model) {
 		_model->end_write (option, end);
+
+		/* Make captured controls discrete to play back user input exactly. */
+		for (MidiModel::Controls::iterator i = _model->controls().begin(); i != _model->controls().end(); ++i) {
+			if (i->second->list()) {
+				i->second->list()->set_interpolation(Evoral::ControlList::Discrete);
+				_interpolation_style.insert(std::make_pair(i->second->parameter(), Evoral::ControlList::Discrete));
+			}
+		}
 	}
 
 	_writing = false;
