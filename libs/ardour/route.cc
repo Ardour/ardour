@@ -433,7 +433,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	assert (!AudioEngine::instance()->process_lock().trylock());
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-	assert(lm.locked());
+	if (!lm.locked()) {
+		bufs.silence (nframes, 0);
+		return;
+	}
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
