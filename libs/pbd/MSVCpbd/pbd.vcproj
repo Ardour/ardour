@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib libxml2D.lib libsndfile-1D.lib intlD.lib"
+				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib libxml2D.lib libsndfile-1D.lib intlD.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix).lib $(DllPrefix)glibmm32$(GlibmmDllSuffix).lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib libxml2.lib libsndfile-1.lib intl.lib"
+				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix).lib $(DllPrefix)glibmm32$(GlibmmDllSuffix).lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib libxml2.lib libsndfile-1.lib intl.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				SubSystem="2"
@@ -225,7 +225,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib libxml2RDC.lib libsndfile-1.lib intlRDC.lib"
+				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib libxml2RDC.lib libsndfile-1.lib intlRDC.lib ws2_32.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"
@@ -300,6 +300,10 @@
 			</File>
 			<File
 				RelativePath="..\cpus.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\crossthread.cc"
 				>
 			</File>
 			<File
