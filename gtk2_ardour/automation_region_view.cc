@@ -120,8 +120,7 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 	} else if (ev->type == GDK_BUTTON_RELEASE) {
 		if (e.drags()->end_grab (ev)) {
 			return true;
-		} else if (e.current_mouse_mode() != Editing::MouseObject &&
-		           e.current_mouse_mode() == Editing::MouseDraw) {
+		} else if (e.current_mouse_mode() != Editing::MouseDraw) {
 			return false;
 		}
 
