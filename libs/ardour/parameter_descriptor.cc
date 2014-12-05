@@ -132,11 +132,17 @@ ParameterDescriptor::update_steps()
 		largestep = (delta / 30.0f);
 
 		if (logarithmic) {
-			/* Compensate for internal_to_interface's pow so we get roughly the
-			   desired number of steps. */
-			smallstep = pow(smallstep, 1.5f);
-			step      = pow(step, 1.5f);
-			largestep = pow(largestep, 1.5f);
+			/* Steps are linear, but we map them with pow like values (in
+			   internal_to_interface).  Thus, they are applied exponentially,
+			   which means too few steps.  So, divide to get roughly the
+			   desired number of steps (30).  This is not mathematically
+			   precise but seems to be about right for the controls I tried.
+			   If you're reading this, you've probably found a case where that
+			   isn't true, and somebody needs to sit down with a piece of paper
+			   and actually do the math. */
+			smallstep = smallstep / logf(30.0f);
+			step      = step      / logf(30.0f);
+			largestep = largestep / logf(30.0f);
 		} else if (integer_step) {
 			smallstep = std::max(1.0, rint(smallstep));
 			step      = std::max(1.0, rint(step));
