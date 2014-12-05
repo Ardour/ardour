@@ -333,38 +333,38 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return false;
 	}
 
+	if (!trackview.editor().internal_editing()) {
+		// not in internal edit mode, so just act like a normal region
+		return RegionView::canvas_group_event (ev);
+	}
+
+	const MouseMode m = trackview.editor().current_mouse_mode();
 	bool r;
 
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
+		_last_event_x = ev->crossing.x;
+		_last_event_y = ev->crossing.y;
+		enter_notify(&ev->crossing);
+		// set entered_regionview (among other things)
+		return RegionView::canvas_group_event (ev);
+
 	case GDK_LEAVE_NOTIFY:
 		_last_event_x = ev->crossing.x;
 		_last_event_y = ev->crossing.y;
-		break;
-	case GDK_MOTION_NOTIFY:
-		_last_event_x = ev->motion.x;
-		_last_event_y = ev->motion.y;
-		break;
-	default:
-		break;
-	}
+		leave_notify(&ev->crossing);
+		// reset entered_regionview (among other things)
+		return RegionView::canvas_group_event (ev);
 
-	if (ev->type == GDK_2BUTTON_PRESS) {
+	case GDK_2BUTTON_PRESS:
 		// cannot use double-click to exit internal mode if single-click is being used
-		MouseMode m = trackview.editor().current_mouse_mode();
-
-		if ((m != MouseObject || !Keyboard::modifier_state_contains (ev->button.state, Keyboard::insert_note_modifier())) && (m != MouseDraw)) {
+		if ((m != MouseDraw) &&
+		    (m != MouseObject ||
+		     !Keyboard::modifier_state_contains (ev->button.state, Keyboard::insert_note_modifier()))) {
 			return trackview.editor().toggle_internal_editing_from_double_click (ev);
 		}
-	}
+		break;
 
-	if ((!trackview.editor().internal_editing() && trackview.editor().current_mouse_mode() != MouseGain) ||
-	    (trackview.editor().current_mouse_mode() == MouseTimeFX)) {
-		// handle non-internal-edit/non-draw modes elsewhere
-		return RegionView::canvas_group_event (ev);
-	}
-
-	switch (ev->type) {
 	case GDK_SCROLL:
 		if (scroll (&ev->scroll)) {
 			return true;
@@ -386,24 +386,16 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		_note_player = 0;
 		return r;
 
-	case GDK_ENTER_NOTIFY:
-		// set entered_regionview (among other things)
-		trackview.editor().canvas_region_view_event (ev, group, this);
-		return enter_notify (&ev->crossing);
-
-	case GDK_LEAVE_NOTIFY:
-		// reset entered_regionview (among other things)
-		trackview.editor().canvas_region_view_event (ev, group, this);
-		return leave_notify (&ev->crossing);
-
 	case GDK_MOTION_NOTIFY:
+		_last_event_x = ev->motion.x;
+		_last_event_y = ev->motion.y;
 		return motion (&ev->motion);
 
 	default:
 		break;
 	}
 
-	return trackview.editor().canvas_region_view_event (ev, group, this);
+	return RegionView::canvas_group_event (ev);
 }
 
 bool
@@ -417,20 +409,6 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 		create_ghost_note (ev->x, ev->y);
 	}
 
-	if (!trackview.editor().internal_editing()) {
-		Keyboard::magic_widget_drop_focus();
-	} else {
-		Keyboard::magic_widget_grab_focus();
-		group->grab_focus();
-	}
-
-	// if current operation is non-operational in a midi region, change the cursor to so indicate
-	if (trackview.editor().current_mouse_mode() == MouseGain) {
-		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
-		pre_enter_cursor = editor->get_canvas_cursor();
-		editor->set_canvas_cursor(editor->cursors()->timebar);
-	}
-
 	return false;
 }
 
@@ -441,16 +419,6 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 
 	trackview.editor().verbose_cursor()->hide ();
 	remove_ghost_note ();
-
-	if (trackview.editor().internal_editing()) {
-		Keyboard::magic_widget_drop_focus();
-	}
-
-	if (pre_enter_cursor) {
-		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
-		editor->set_canvas_cursor(pre_enter_cursor);
-		pre_enter_cursor = 0;
-	}
 
 	return false;
 }
