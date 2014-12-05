@@ -376,6 +376,7 @@ HSV::delta (const HSV& other) const
 		d.s = s - other.s;
 		d.v = v - other.v;
 	}
+	d.a = a - other.a;
 	/* do not clamp - we are returning a delta */
 	return d;
 }
