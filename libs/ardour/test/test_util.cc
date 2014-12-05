@@ -40,23 +40,23 @@ using namespace PBD;
 static void
 check_nodes (XMLNode const * p, XMLNode const * q, list<string> const & ignore_properties)
 {
-	CPPUNIT_ASSERT_EQUAL (p->is_content(), q->is_content());
+	CPPUNIT_ASSERT_EQUAL (q->is_content(), p->is_content());
 	if (!p->is_content()) {
-		CPPUNIT_ASSERT_EQUAL (p->name(), q->name());
+		CPPUNIT_ASSERT_EQUAL (q->name(), p->name());
 	} else {
-		CPPUNIT_ASSERT_EQUAL (p->content(), q->content());
+		CPPUNIT_ASSERT_EQUAL (q->content(), p->content());
 	}
 
 	XMLPropertyList const & pp = p->properties ();
 	XMLPropertyList const & qp = q->properties ();
-	CPPUNIT_ASSERT_EQUAL (pp.size(), qp.size());
+	CPPUNIT_ASSERT_EQUAL (qp.size(), pp.size());
 
 	XMLPropertyList::const_iterator i = pp.begin ();
 	XMLPropertyList::const_iterator j = qp.begin ();
 	while (i != pp.end ()) {
-		CPPUNIT_ASSERT_EQUAL ((*i)->name(), (*j)->name());
+		CPPUNIT_ASSERT_EQUAL ((*j)->name(), (*i)->name());
 		if (find (ignore_properties.begin(), ignore_properties.end(), (*i)->name ()) == ignore_properties.end ()) {
-			CPPUNIT_ASSERT_EQUAL_MESSAGE ((*i)->name(), (*i)->value(), (*j)->value());
+			CPPUNIT_ASSERT_EQUAL_MESSAGE ((*j)->name(), (*i)->value(), (*i)->value());
 		}
 		++i;
 		++j;
@@ -65,7 +65,7 @@ check_nodes (XMLNode const * p, XMLNode const * q, list<string> const & ignore_p
 	XMLNodeList const & pc = p->children ();
 	XMLNodeList const & qc = q->children ();
 
-	CPPUNIT_ASSERT_EQUAL (pc.size(), qc.size());
+	CPPUNIT_ASSERT_EQUAL (qc.size(), pc.size());
 	XMLNodeList::const_iterator k = pc.begin ();
 	XMLNodeList::const_iterator l = qc.begin ();
 	
