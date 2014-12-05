@@ -156,3 +156,23 @@ MIDISceneChange::operator==(const MIDISceneChange& other) const
 		_bank == other._bank &&
 		_channel == other._channel;
 }
+
+void
+MIDISceneChange::set_channel (int channel)
+{
+        _channel = channel;
+}
+
+void
+MIDISceneChange::set_program (int program)
+{
+        _program = program;
+}
+
+void
+MIDISceneChange::set_bank (int bank)
+{
+        _bank = bank;
+}
+      
+
