@@ -24,6 +24,9 @@
 #include <ostream>
 #include <iostream>
 
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
 #include "ardour/configuration_variable.h"
@@ -40,7 +43,7 @@
 template<class T>
 class ColorVariable : public ARDOUR::ConfigVariableBase
 {
-  public:
+    public:
 	ColorVariable (std::string str) : ARDOUR::ConfigVariableBase (str) {}
 	ColorVariable (std::string str, T val) : ARDOUR::ConfigVariableBase (str), value (val) {}
 
@@ -79,7 +82,19 @@ class ColorVariable : public ARDOUR::ConfigVariableBase
 
 class UIConfiguration : public PBD::Stateful
 {
-  public:
+    public:
+	struct RelativeHSV {
+		RelativeHSV (const std::string& b, const ArdourCanvas::HSV& mod) 
+			: base_color (b)
+			, modifier (mod)
+			, quantized_hue (-1.0) {}
+		std::string base_color;
+		ArdourCanvas::HSV modifier;
+		double quantized_hue;
+
+		ArdourCanvas::HSV get() const;
+        };
+
 	UIConfiguration();
 	~UIConfiguration();
 
@@ -98,8 +113,19 @@ class UIConfiguration : public PBD::Stateful
 	XMLNode& get_state (void);
 	XMLNode& get_variables (std::string);
 	void set_variables (const XMLNode&);
-	void pack_canvasvars ();
-	void reset_derived_colors ();
+
+	typedef std::map<std::string,RelativeHSV> RelativeColors;
+	typedef std::map<std::string,std::string> ColorAliases;
+
+	RelativeColors relative_colors;
+	ColorAliases color_aliases;
+
+	void set_alias (std::string const & name, std::string const & alias);
+	
+	void reset_relative (const std::string& name, const RelativeHSV& new_value);
+	
+	RelativeHSV color_as_relative_hsv (ArdourCanvas::Color c);
+	ArdourCanvas::Color quantized (ArdourCanvas::Color) const;
 
 	ArdourCanvas::Color base_color_by_name (const std::string&) const;
 	ArdourCanvas::Color color (const std::string&) const;
@@ -139,26 +165,6 @@ class UIConfiguration : public PBD::Stateful
 #undef COLOR_ALIAS
 
   private:
-
-	struct RelativeHSV {
-		RelativeHSV (const std::string& b, const ArdourCanvas::HSV& mod) 
-			: base_color (b)
-			, modifier (mod)
-			, quantized_hue (-1.0) {}
-		std::string base_color;
-		ArdourCanvas::HSV modifier;
-		double quantized_hue;
-
-		ArdourCanvas::HSV get() const;
-        };
-
-	/* these are loaded from serialized state (e.g. XML) */
-	std::map<std::string,RelativeHSV> relative_colors;
-	/* these are computed during color_compute()*/
-	std::map<std::string,ArdourCanvas::HSV> actual_colors;
-	/* these map from the name/key of relative colors to the color/value of actual colors */
-	std::map<std::string,std::string> color_aliases;
-
 	/* declare variables */
 
 #undef  UI_CONFIG_VARIABLE
@@ -183,11 +189,7 @@ class UIConfiguration : public PBD::Stateful
 	bool _dirty;
 	static UIConfiguration* _instance;
 
-	void color_compute ();
-	void print_relative_def (std::string camelcase, std::string name, ArdourCanvas::Color c);
 	void color_theme_changed ();
-	void regenerate_relative_definitions ();
-	ArdourCanvas::Color quantized (ArdourCanvas::Color);
 };
 
 #endif /* __ardour_ui_configuration_h__ */

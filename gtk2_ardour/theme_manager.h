@@ -28,8 +28,17 @@
 #include <gtkmm/button.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/rc.h>
+
+#include "canvas/canvas.h"
+
 #include "ardour_window.h"
+
 #include "ui_config.h"
+
+namespace ArdourCanvas {
+	class Container;
+	class ScrollGroup;
+}
 
 class ThemeManager : public ArdourWindow
 {
@@ -53,6 +62,8 @@ class ThemeManager : public ArdourWindow
 	void on_icon_set_changed ();
 
   private:
+	Gtk::Notebook notebook;
+
 	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
 	    ColorDisplayModelColumns() {
 		    add (name);
@@ -89,7 +100,53 @@ class ThemeManager : public ArdourWindow
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;
 
+	ColorDisplayModelColumns base_color_columns;
+	Gtk::ScrolledWindow base_color_scroller;
+	ArdourCanvas::GtkCanvasViewport base_color_viewport;
+	ArdourCanvas::Container* base_color_group;
+	std::string base_color_edit_name;
+
+	sigc::connection color_dialog_connection;
+	void foobar_response (int);
+	
+	ArdourCanvas::Container* initialize_canvas (ArdourCanvas::Canvas& canvas);
+	void build_base_color_canvas (ArdourCanvas::Container&, bool (ThemeManager::*event_handler)(GdkEvent*,std::string), double width, double height);
+	void base_color_viewport_allocated (Gtk::Allocation&);
+	void base_color_dialog_done (int);
+	bool base_color_event (GdkEvent*, std::string);
+	void edit_named_color (std::string);
+	
 	bool button_press_event (GdkEventButton*);
+
+
+	struct ColorAliasModelColumns : public Gtk::TreeModel::ColumnRecord {
+		ColorAliasModelColumns() {
+			add (name);
+			add (alias);
+			add (color);
+		}
+		
+		Gtk::TreeModelColumn<std::string>  name;
+		Gtk::TreeModelColumn<std::string>  alias;
+		Gtk::TreeModelColumn<Gdk::Color>   color;
+	};
+
+	ColorAliasModelColumns       alias_columns;
+	Gtk::TreeView                alias_display;
+	Glib::RefPtr<Gtk::TreeStore> alias_list;
+	Gtk::ScrolledWindow          alias_scroller;
+
+	bool alias_button_press_event (GdkEventButton*);
+
+	Gtk::Window* palette_window;
+	std::string palette_edit_name;
+	
+	void choose_color_from_palette (std::string const &target_name);
+	bool palette_chosen (GdkEvent*, std::string);
+	void palette_canvas_allocated (Gtk::Allocation& alloc, ArdourCanvas::Container* group, bool (ThemeManager::*event_handler)(GdkEvent*,std::string));
+	bool palette_done (GdkEventAny*);
+
+	void setup_aliases ();
 };
 
 #endif /* __ardour_gtk_color_manager_h__ */
