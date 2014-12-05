@@ -75,6 +75,8 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace Glib;
 
+ //recent session menuitem id
+static const std::string recent_session_menuitem_id="recent-session-";
 int
 ARDOUR_UI::create_editor ()
 {

@@ -830,8 +830,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     //get names and paths of recent sessions
     void get_recent_session_names_and_paths(std::vector<std::string>& session_names,std::vector<std::string>& session_paths);
     
-    //recent session menuitem id
-    const std::string recent_session_menuitem_id="recent-session-";
+   
   
     //full path to recent sessions
     std::vector<std::string> recent_session_full_paths;
