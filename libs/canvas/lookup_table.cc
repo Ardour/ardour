@@ -41,11 +41,22 @@ DumbLookupTable::DumbLookupTable (Item const & item)
 }
 
 vector<Item *>
-DumbLookupTable::get (Rect const &)
+DumbLookupTable::get (Rect const &area)
 {
 	list<Item *> const & items = _item.items ();
 	vector<Item *> vitems;
+#if 1
+	for (list<Item *>::const_iterator i = items.begin(); i != items.end(); ++i) {
+		boost::optional<Rect> item_bbox = (*i)->bounding_box ();
+		if (!item_bbox) continue;
+		Rect item = (*i)->item_to_window (item_bbox.get());
+		if (item.intersection (area)) {
+			vitems.push_back (*i);
+		}
+	}
+#else
 	copy (items.begin(), items.end(), back_inserter (vitems));
+#endif
 	return vitems;
 }
 
