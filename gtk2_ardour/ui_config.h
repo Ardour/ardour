@@ -140,15 +140,10 @@ class UIConfiguration : public PBD::Stateful
 	bool set_##var (Type val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "ui_config_vars.h"
 #undef  UI_CONFIG_VARIABLE
-#undef CANVAS_STRING_VARIABLE
-#define CANVAS_STRING_VARIABLE(var,name) \
-	std::string get_##var () const { return var.get(); }			\
-	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #define CANVAS_FONT_VARIABLE(var,name) \
 	Pango::FontDescription get_##var () const { return ARDOUR_UI_UTILS::sanitized_font (var.get()); } \
 	bool set_##var (const std::string& val) { bool ret = var.set (val); if (ret) { ParameterChanged (name); } return ret;  }
 #include "canvas_vars.h"
-#undef CANVAS_STRING_VARIABLE
 #undef CANVAS_FONT_VARIABLE
 
 #undef CANVAS_BASE_COLOR
@@ -172,10 +167,8 @@ class UIConfiguration : public PBD::Stateful
 #include "ui_config_vars.h"
 #undef UI_CONFIG_VARIABLE
 
-#define CANVAS_STRING_VARIABLE(var,name) ARDOUR::ConfigVariable<std::string> var;
 #define CANVAS_FONT_VARIABLE(var,name) ARDOUR::ConfigVariable<std::string> var;
 #include "canvas_vars.h"
-#undef CANVAS_STRING_VARIABLE
 #undef CANVAS_FONT_VARIABLE
 
 	/* declare base color variables (these are modifiable by the user) */

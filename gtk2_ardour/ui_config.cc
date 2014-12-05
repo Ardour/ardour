@@ -320,18 +320,14 @@ UIConfiguration::get_variables (std::string which_node)
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_STRING_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
-#undef  CANVAS_BASE_COLOR
 #define UI_CONFIG_VARIABLE(Type,var,Name,value) if (node->name() == "UI") { var.add_to_node (*node); }
 #define CANVAS_STRING_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
 #define CANVAS_FONT_VARIABLE(var,Name) if (node->name() == "Canvas") { var.add_to_node (*node); }
-#define CANVAS_BASE_COLOR(var,Name,val) if (node->name() == "Canvas") { var.add_to_node (*node); }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
-#include "base_colors.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_STRING_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
-#undef  CANVAS_BASE_COLOR
 
 	return *node;
 }
