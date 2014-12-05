@@ -53,7 +53,6 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 	, _orien (orientation)
 	, _pattern (0)
 	, _hovering (false)
-	, _last_drawn (-1)
 	, _dragging (false)
 	, _centered_text (true)
 	, _current_parent (0)
@@ -331,8 +330,6 @@ PixFader::render (cairo_t *cr, cairo_rectangle_t* area)
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
 		cairo_fill (cr);
 	}
-
-	_last_drawn = ds;
 }
 
 void
@@ -424,7 +421,6 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 
 			if (ev_pos == _grab_start) {
 				/* no motion - just a click */
-				const double slider_pos =  display_span();
 				ev_pos = rint(ev_pos);
 
 				if (ev->state & Keyboard::TertiaryModifier) {
@@ -562,9 +558,7 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 void
 PixFader::adjustment_changed ()
 {
-	if (display_span() != _last_drawn) {
-		queue_draw ();
-	}
+	queue_draw ();
 }
 
 /** @return pixel offset of the current value from the right or bottom of the fader */

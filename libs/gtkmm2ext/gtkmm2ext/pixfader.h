@@ -90,7 +90,6 @@ class LIBGTKMM2EXT_API PixFader : public CairoWidget
 	GdkWindow* _grab_window;
 	double _grab_loc;
 	double _grab_start;
-	int _last_drawn;
 	bool _dragging;
 	float _default_value;
 	int _unity_loc;
