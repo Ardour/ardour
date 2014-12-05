@@ -3315,6 +3315,7 @@ Editor::begin_reversible_command (string name)
 {
 	if (_session) {
 		_begin_reversible_command_selection = &selection->get_state ();
+		before = &get_state ();
 		_session->begin_reversible_command (name);
 	}
 }
@@ -3324,6 +3325,7 @@ Editor::begin_reversible_command (GQuark q)
 {
 	if (_session) {
 		_begin_reversible_command_selection = &selection->get_state ();
+		before = &get_state ();
 		_session->begin_reversible_command (q);
 	}
 }
@@ -3334,6 +3336,7 @@ Editor::commit_reversible_command ()
 	if (_session) {
 		if (_begin_reversible_command_selection) {
 			_session->add_command (new MementoCommand<Selection>(*(selection), _begin_reversible_command_selection, &selection->get_state ()));
+			_session->add_command (new MementoCommand<Editor>(*(this), before, &get_state ()));
 			_begin_reversible_command_selection = 0;
 		} else {
 			cerr << "Please call Editor::begin_reversible_command () before Editor::commit_reversible_command ()." << endl;

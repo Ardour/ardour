@@ -997,10 +997,6 @@ Editor::time_selection_changed ()
 		return;
 	}
 
-	if ( (mouse_mode == MouseObject && !get_smart_mode() ) &&  !selection->time.empty()) {
-		set_mouse_mode (Editing::MouseRange);
-	}
-
 	/* XXX this is superficially inefficient. Hide the selection in all
 	 * tracks, then show it in all selected tracks.
 	 *
@@ -1305,10 +1301,6 @@ Editor::sensitize_the_right_region_actions ()
 void
 Editor::region_selection_changed ()
 {
-	if ( (mouse_mode == MouseRange && !get_smart_mode() ) &&  !selection->regions.empty()) {
-		set_mouse_mode (Editing::MouseObject);
-	}
-
 	_regions->block_change_connection (true);
 	editor_regions_selection_changed_connection.block(true);
 
