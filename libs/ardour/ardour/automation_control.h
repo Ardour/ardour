@@ -40,7 +40,10 @@ class Automatable;
 
 /** A PBD::Controllable with associated automation data (AutomationList)
  */
-class LIBARDOUR_API AutomationControl : public PBD::Controllable, public Evoral::Control, public boost::enable_shared_from_this<AutomationControl>
+class LIBARDOUR_API AutomationControl
+	: public PBD::Controllable
+	, public Evoral::Control
+	, public boost::enable_shared_from_this<AutomationControl>
 {
 public:
 	AutomationControl(ARDOUR::Session&,
@@ -58,25 +61,25 @@ public:
 	void set_list (boost::shared_ptr<Evoral::ControlList>);
 
 	inline bool automation_playback() const {
-		return alist()->automation_playback();
+		return alist() ? alist()->automation_playback() : false;
 	}
 
 	inline bool automation_write() const {
-		return alist()->automation_write();
+		return alist() ? alist()->automation_write() : false;
 	}
 
 	inline AutoState automation_state() const {
-		return alist()->automation_state();
+		return alist() ? alist()->automation_state() : Off;
 	}
 
 	inline AutoStyle automation_style() const {
-		return alist()->automation_style();
+		return alist() ? alist()->automation_style() : Absolute;
 	}
 
-        void set_automation_state(AutoState as);
-        void set_automation_style(AutoStyle as);
-        void start_touch (double when);
-        void stop_touch (bool mark, double when);
+	void set_automation_state(AutoState as);
+	void set_automation_style(AutoStyle as);
+	void start_touch(double when);
+	void stop_touch(bool mark, double when);
 
 	void set_value (double);
 	double get_value () const;

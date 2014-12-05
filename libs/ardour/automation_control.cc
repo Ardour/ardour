@@ -106,6 +106,7 @@ AutomationControl::set_automation_state (AutoState as)
 void
 AutomationControl::set_automation_style (AutoStyle as)
 {
+	if (!_list) return;
 	alist()->set_automation_style (as);
 }
 
