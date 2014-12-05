@@ -84,10 +84,12 @@ AutomationListPropertyTest::basicTest ()
 	property->add (5, 6, false, false);
 	property->add (7, 8, false, false);
 	CPPUNIT_ASSERT_EQUAL (true, property.changed());
+	delete foo;
 	foo = new XMLNode ("test");
 	property.get_changes_as_xml (foo);
 	write_automation_list_xml (foo, test_data_filename);
 	check_xml (foo, test_data_file2, ignore_properties);
+	delete foo;
 }
 
 /** Here's a StatefulDestructible class that has a AutomationListProperty */
