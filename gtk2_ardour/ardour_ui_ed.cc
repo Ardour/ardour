@@ -456,6 +456,21 @@ ARDOUR_UI::update_recent_session_menuitems ()
     recent_session_full_paths.clear ();
     get_recent_session_names_and_paths (recent_session_names,recent_session_full_paths);
     
+    // gtk changes label of menu item automatically
+    // '_' to '' on mac
+    // '_' to underscore on win
+    // so that to save '_' in the session name
+    // we should transform '_' to '__'
+    // it's not obvious behaviour of gtk
+    for (int i=0; i < recent_session_names.size(); ++i){
+        std::string& session_name = recent_session_names[i];
+        for (int j=0; j < session_name.size(); ++j)
+            if ( session_name[j] == '_' ){
+                session_name.insert (j,"_");  // we should doubled
+                ++j;                         // and skip next symbol because it's '_'
+            }
+    }
+    
 	for (int i=0; i < MAX_RECENT_SESSION_COUNTS; ++i){
 		Glib::RefPtr<Action> act;
 
@@ -465,7 +480,7 @@ ARDOUR_UI::update_recent_session_menuitems ()
 		// set label for existing recent session menuitem and hiding
 		// the items there are no recent sessions for them.
 		act->set_label (i < recent_session_names.size () ? recent_session_names[i].c_str () : "");
-		act->set_visible (i < recent_session_names.size ());
+		act->set_sensitive (i < recent_session_names.size ());
 	}
 }
 

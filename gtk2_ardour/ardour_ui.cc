@@ -1478,9 +1478,9 @@ ARDOUR_UI::get_recent_session_names_and_paths(std::vector<std::string>& session_
 void
 ARDOUR_UI::open_recent_session_from_menuitem(unsigned int num_of_recent_session)
 {
+    if (num_of_recent_session >= recent_session_full_paths.size())
+        return ;
     std::string cur_recent_session_path=recent_session_full_paths[num_of_recent_session];
-    if (cur_recent_session_path== "")
-        return;
     
     //check that cur_recent_session_path is still existing
     if ( !Glib::file_test (cur_recent_session_path, Glib::FileTest (G_FILE_TEST_EXISTS)) )
