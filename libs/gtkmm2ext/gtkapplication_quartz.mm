@@ -306,7 +306,7 @@ keyval_keypad_nonkeypad_equivalent (guint keyval)
 		break;
 	}
 
-	return GDK_VoidSymbol;
+	return GDK_KEY_VoidSymbol;
 }
 
 static const gchar* 
@@ -830,7 +830,7 @@ cocoa_menu_item_update_accelerator (NSMenuItem *cocoa_item,
 			guint actual_key = key->accel_key; 
 			
 			if (keyval_is_keypad (actual_key)) {
-				if ((actual_key = keyval_keypad_nonkeypad_equivalent (actual_key)) == GDK_VoidSymbol) {
+				if ((actual_key = keyval_keypad_nonkeypad_equivalent (actual_key)) == GDK_KEY_VoidSymbol) {
 					/* GDK_KP_Separator */
 					[cocoa_item setKeyEquivalent:@""];
 					return;

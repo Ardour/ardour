@@ -258,11 +258,11 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			)
 		);
 
-	if (event->keyval == GDK_Shift_R) {
-		keyval = GDK_Shift_L;
+	if (event->keyval == GDK_KEY_Shift_R) {
+		keyval = GDK_KEY_Shift_L;
 
-	} else if (event->keyval == GDK_Control_R) {
-		keyval = GDK_Control_L;
+	} else if (event->keyval == GDK_KEY_Control_R) {
+		keyval = GDK_KEY_Control_L;
 
 	} else {
 		keyval = event->keyval;
@@ -342,7 +342,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			*/
 
 			switch (event->keyval) {
-			case GDK_w:
+			case GDK_KEY_w:
 				close_current_dialog ();
 				ret = true;
 				break;

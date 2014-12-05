@@ -373,7 +373,7 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 	guint keyval;
 	keyval = gdk_keyval_from_name (actual.c_str());
 
-	if (keyval == GDK_VoidSymbol || keyval == 0) {
+	if (keyval == GDK_KEY_VoidSymbol || keyval == 0) {
 		return false;
 	}
 

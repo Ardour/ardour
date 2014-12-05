@@ -25,7 +25,7 @@ class LIBGTKMM2EXT_API KeyboardKey
 {
   public:
 	KeyboardKey () {
-		_val = GDK_VoidSymbol;
+		_val = GDK_KEY_VoidSymbol;
 	}
 
 	KeyboardKey (uint32_t state, uint32_t keycode);
