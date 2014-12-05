@@ -595,7 +595,6 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Ite
 void
 Editor::build_marker_menu (Location* loc)
 {
-    std::cout<<"Editor::build_marker_menu"<<std::endl;
 	using namespace Menu_Helpers;
 
 	marker_menu = new Menu;
