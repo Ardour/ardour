@@ -358,6 +358,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     
     bool session_auto_save_is_allowed() const;
     void update_marker_inspector (MarkerSelection*);
+    void show_marker_inspector();
 
   protected:
 	friend class PublicEditor;

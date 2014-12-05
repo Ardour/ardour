@@ -997,3 +997,9 @@ ARDOUR_UI::update_marker_inspector (MarkerSelection* markers)
 		marker_inspector_dialog->set_marker (0);
 	}
 }
+
+void
+ARDOUR_UI::show_marker_inspector ()
+{
+    marker_inspector_dialog->show();
+}

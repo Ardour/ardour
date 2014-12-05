@@ -595,40 +595,29 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Ite
 void
 Editor::build_marker_menu (Location* loc)
 {
+    std::cout<<"Editor::build_marker_menu"<<std::endl;
 	using namespace Menu_Helpers;
 
 	marker_menu = new Menu;
 	MenuList& items = marker_menu->items();
 	marker_menu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Locate to Here"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from Here"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Move Mark to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
-
+	items.push_back (MenuElem (_("Move Playhead to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
+	items.push_back (MenuElem (_("Move Marker to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
+    items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 	items.push_back (SeparatorElem());
 
-	items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
-
-	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
-	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
-
+	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 	items.push_back (CheckMenuElem (_("Lock")));
 	Gtk::CheckMenuItem* lock_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 	if (loc->locked ()) {
 		lock_item->set_active ();
 	}
 	lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
-
-	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
-	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
-	if (loc->position_lock_style() == MusicTime) {
-		glue_item->set_active ();
-	}
-	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
-
+    items.push_back (MenuElem (_("Delete"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 	items.push_back (SeparatorElem());
-
-	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
+    
+    items.push_back (MenuElem (_("Show Marker Inspector"), sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::show_marker_inspector)));
 }
 
 void
