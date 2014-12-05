@@ -46,14 +46,14 @@ class MarkerInspectorDialog : public Gtk::Window, public ARDOUR::SessionHandlePt
   private:
 	Gtk::Container& _empty_panel;
 	Gtk::Container& _inspector_panel;
-	WavesButton&   _color_palette_button;
-	Gtk::Container& _color_buttons_home;
 
-	WavesButton&   _info_panel_button;
-	Gtk::Container& _info_panel_home;
-	
 	Gtk::Label& _location_name;
-	WavesButton&   _program_change_button;
+	WavesButton&   _program_change_on_button;
+	WavesButton&   _program_change_off_button;
+	Gtk::Container& _program_change_info_panel;
+	WavesDropdown& _bank_dropdown;
+	WavesDropdown& _program_dropdown;
+	WavesDropdown& _channel_dropdown;
 
 #include "marker_inspector_dialog.logic.h"
 };

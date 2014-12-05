@@ -43,8 +43,9 @@ class WavesDropdown : public WavesIconButton
     Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie = 0);
     Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie = 0);
     Gtk::CheckMenuItem& add_check_menu_item (const std::string& item, void* cookie = 0);
+	void set_maxmenuheight (int maxmenuheight) { _maxmenuheight = ((maxmenuheight < 0) ? -1 : maxmenuheight); }
+	int get_maxmenuheight () const { return _maxmenuheight; }
 
-    
     sigc::signal2<void, WavesDropdown*, int> selected_item_changed;
 
   private:
@@ -54,6 +55,7 @@ class WavesDropdown : public WavesIconButton
     void _on_menu_item (int item_number, void* cookie);
     void _on_popup_menu_position (int& x, int& y, bool& push_in);
     bool _on_mouse_pressed (GdkEventButton*);
+	int _maxmenuheight;
 };
 
 #endif /* __gtk2_ardour_waves_dropdown_h__ */

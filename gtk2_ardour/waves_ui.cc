@@ -714,6 +714,15 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		event_box->set_visible_window (visible_window);
 	}
 
+	WavesDropdown* dropdown = dynamic_cast<WavesDropdown*> (&widget);
+
+	if (dropdown) {
+		int maxmenuheight = xml_property (definition, "maxmenuheight", styles, -1);
+		dropdown->set_maxmenuheight (maxmenuheight);
+		bool menutogglesize = xml_property (definition, "maxmenuheight", styles, false);
+		dropdown->get_menu ().set_reserve_toggle_size (menutogglesize);
+	}
+
 	Gtkmm2ext::Fader* fader = dynamic_cast<Gtkmm2ext::Fader*> (&widget);
 	if (fader) {
 		property = xml_property (definition, "touchcursor", styles, "");

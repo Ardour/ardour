@@ -24,6 +24,7 @@ char* WavesDropdown::menu_item_data_key = "waves_dropdown_item_cookie";
 WavesDropdown::WavesDropdown (const std::string& title)
   : WavesIconButton (title)
   , _current_item_number (-1)
+  , _maxmenuheight (-1)
 {
 	signal_button_press_event().connect (sigc::mem_fun(*this, &WavesDropdown::_on_mouse_pressed));
 	_menu.signal_hide ().connect (sigc::bind (sigc::mem_fun (*this, &CairoWidget::set_active), false));
@@ -222,7 +223,10 @@ WavesDropdown::_on_mouse_pressed (GdkEventButton*)
 	_hovering = _pushed = false;
 	if (!_menu.items ().empty ()) {
 		_menu.popup (sigc::mem_fun(this, &WavesDropdown::_on_popup_menu_position), 1, gtk_get_current_event_time());
-		set_active (true);
+		Gtk::Allocation a = _menu.get_allocation ();
+		if ((_maxmenuheight > -1) && _maxmenuheight < a.get_height ()) {
+			_menu.set_size_request (-1, _maxmenuheight);
+		}
 	} else {
 		set_active (false);
 	}

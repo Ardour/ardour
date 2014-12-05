@@ -29,12 +29,13 @@ MarkerInspectorDialog::MarkerInspectorDialog ()
 	: WavesUI ("marker_inspector_dialog.xml", *this)
 	, _empty_panel (get_container ("empty_panel"))
 	, _inspector_panel (get_container ("inspector_panel"))
-	, _color_palette_button (get_waves_button ("color_palette_button"))
-	, _color_buttons_home (get_container ("color_buttons_home"))
-	, _info_panel_button (get_waves_button ("info_panel_button"))
-	, _info_panel_home (get_container ("info_panel_home"))
 	, _location_name (get_label ("location_name"))
-	, _program_change_button (get_waves_button ("program_change_button"))
+	, _program_change_on_button (get_waves_button ("program_change_on_button"))
+	, _program_change_off_button (get_waves_button ("program_change_off_button"))
+	, _program_change_info_panel (get_container ("program_change_info_panel"))
+	, _bank_dropdown (get_waves_dropdown ("bank_dropdown"))
+	, _program_dropdown (get_waves_dropdown ("program_dropdown"))
+	, _channel_dropdown (get_waves_dropdown ("channel_dropdown"))
 	, _marker (0)
 {
 	_init ();
@@ -48,5 +49,5 @@ void
 MarkerInspectorDialog::on_realize ()
 {
 	Gtk::Window::on_realize();
-	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_TITLE));
+	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_TITLE|Gdk::DECOR_MENU));
 }

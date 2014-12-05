@@ -27,9 +27,12 @@ private:
 	Marker* _marker;
 
 	void _init();
-	void _color_palette_button_clicked (WavesButton *button);
-	void _info_panel_button_clicked (WavesButton *button);
-	void _program_change_button_clicked (WavesButton *button);
-
+	void _display_scene_change_info ();
+	void _enable_program_change (bool);
+	void _program_change_on_button_clicked (WavesButton *button);
+	void _program_change_off_button_clicked (WavesButton *button);
+	void on_bank_dropdown_item_changed (WavesDropdown*, int);
+	void on_program_dropdown_item_changed (WavesDropdown*, int);
+	void on_channel_dropdown_item_changed (WavesDropdown*, int);
 //};
 
