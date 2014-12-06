@@ -44,7 +44,7 @@ uint16_t
 SMF::num_tracks() const
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
-	return _smf->number_of_tracks;
+	return _smf ? _smf->number_of_tracks : 0;
 }
 
 uint16_t
@@ -167,7 +167,9 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 
 	for (int i = 0; i < track; ++i) {
 		_smf_track = smf_track_new();
-		assert(_smf_track);
+		if (!_smf_track) {
+			return -2;
+		}
 		smf_add_track(_smf, _smf_track);
 	}
 
