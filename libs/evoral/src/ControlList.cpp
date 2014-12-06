@@ -1599,7 +1599,16 @@ ControlList::paste (const ControlList& alist, double pos, float /*times*/)
 		where = upper_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 		for (const_iterator i = alist.begin();i != alist.end(); ++i) {
-			_events.insert (where, new ControlEvent( (*i)->when+pos,( *i)->value));
+			double value = (*i)->value;
+			if (alist.parameter() != parameter()) {
+				const ParameterDescriptor& src_desc = alist.descriptor();
+
+				value -= src_desc.lower;  // translate to 0-relative
+				value /= (src_desc.upper - src_desc.lower);  // normalize range
+				value *= (_desc.upper - _desc.lower);  // scale to our range
+				value += _desc.lower;  // translate to our offset
+			}
+			_events.insert (where, new ControlEvent((*i)->when + pos, value));
 			end = (*i)->when + pos;
 		}
 

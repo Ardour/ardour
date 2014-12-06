@@ -57,6 +57,10 @@ public:
 		return (_type == id._type && _channel == id._channel && _id == id._id );
 	}
 
+	inline bool operator!=(const Parameter& id) const {
+		return !operator==(id);
+	}
+
 	/** Strict weak ordering
 	 * See: http://www.sgi.com/tech/stl/StrictWeakOrdering.html
 	 * Sort Parameters first according to type then to channel and lastly to ID.
