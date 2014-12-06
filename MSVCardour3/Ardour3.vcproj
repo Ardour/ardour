@@ -1370,6 +1370,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\color_aliases.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\colors.h"
 				>
 			</File>
