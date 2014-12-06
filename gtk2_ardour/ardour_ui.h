@@ -90,6 +90,7 @@
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
+#include "theme_manager.h"
 
 
 class VideoTimeLine;
@@ -106,7 +107,6 @@ class SessionDialog;
 class SessionOptionEditor;
 class ShuttleControl;
 class Splash;
-class ThemeManager;
 class TimeInfoBox;
 class MidiTracer;
 class NSM_Client;
