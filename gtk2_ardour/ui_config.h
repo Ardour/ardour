@@ -109,6 +109,10 @@ class UIConfiguration : public PBD::Stateful
 	int save_state ();
 	int load_defaults ();
 
+	void color_theme_changed ();
+
+	static void load_rc_file (std::string const &, bool themechange);
+	
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state (void);
 	XMLNode& get_variables (std::string);
@@ -185,9 +189,11 @@ class UIConfiguration : public PBD::Stateful
 	
 	static UIConfiguration* _instance;
 
-	void color_theme_changed ();
-
 	void load_color_aliases (XMLNode const &);
+	void reset_gtk_theme ();
+	
+	XMLNode _saved_state_node;
+	int     _saved_state_version;
 };
 
 #endif /* __ardour_ui_configuration_h__ */

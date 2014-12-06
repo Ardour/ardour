@@ -17,11 +17,14 @@
 
 */
 
+#include <iostream>
+#include <sstream>
 #include <unistd.h>
 #include <cstdlib>
 #include <cstdio> /* for snprintf, grrr */
 
 #include <glibmm/miscutils.h>
+#include <glib/gstdio.h>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
@@ -30,6 +33,7 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/gtk_ui.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -72,7 +76,9 @@ UIConfiguration::UIConfiguration ()
 
 	_dirty (false),
 	aliases_modified (false),
-	derived_modified (false)
+	derived_modified (false),
+	_saved_state_node (""),
+	_saved_state_version (-1)
 	
 {
 	_instance = this;
@@ -105,6 +111,55 @@ UIConfiguration::~UIConfiguration ()
 {
 }
 
+void
+UIConfiguration::color_theme_changed ()
+{
+	_dirty = true;
+
+	reset_gtk_theme ();
+
+	/* reload the RC file, which will trigger gtk_rc_reset_styles().
+	   It would be nice if simply resetting the color scheme
+	   or even just calling gtk_rc_reset_styles() would do this
+	   for us, but it appears that we actually have to reload
+	   the RC file for it all to work.
+	*/
+	
+	bool env_defined = false;
+	string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
+
+	if (!env_defined) {
+		rcfile = ARDOUR_UI::config()->get_ui_rc_file();
+	}
+
+	load_rc_file (rcfile, true);
+}
+
+void
+UIConfiguration::reset_gtk_theme ()
+{
+	stringstream ss;
+
+	ss << "gtk_color_scheme = \"" << hex;
+	
+	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
+		
+		if (g->first.find ("gtk_") == 0) {
+			ColorAliases::const_iterator a = color_aliases.find (g->first);
+			const string gtk_name = g->first.substr (4);
+			ss << gtk_name << ":#" << std::setw (6) << setfill ('0') << (color (g->second) >> 8) << ';';
+		}
+	}
+
+	ss << '"' << dec << endl;
+
+	/* reset GTK color scheme */
+
+	cerr << "Reset gtk color scheme\n";
+	
+	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
+}
+	
 UIConfiguration::RelativeHSV
 UIConfiguration::color_as_relative_hsv (Color c)
 {
@@ -166,24 +221,6 @@ UIConfiguration::color_as_relative_hsv (Color c)
 }
 
 void
-UIConfiguration::color_theme_changed ()
-{
-	return;
-	
-	map<std::string,RelativeHSV>::iterator current_color;
-
-	/* we need to reset the quantized hues before we start, because
-	 * otherwise when we call RelativeHSV::get() in color_compute()
-	 * we don't get an answer based on the new base colors, but instead
-	 * based on any existing hue quantization.
-	 */
-
-	for (current_color = relative_colors.begin(); current_color != relative_colors.end(); ++current_color) {
-		current_color->second.quantized_hue = -1;
-	}
-}
-
-void
 UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 {
 #undef  UI_CONFIG_VARIABLE
@@ -202,7 +239,7 @@ UIConfiguration::load_defaults ()
 		XMLTree tree;
 		found = 1;
 
-		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endl;
+		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endmsg;
 
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
@@ -213,9 +250,14 @@ UIConfiguration::load_defaults ()
 			error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
-
+		
 		_dirty = false;
 	}
+
+
+	cerr << "\n\n\nUIC defaults reloaded, now emitting ColorsChanged\n";
+	
+	ARDOUR_UI_UTILS::ColorsChanged ();
 
 	return found;
 }
@@ -242,6 +284,8 @@ UIConfiguration::load_state ()
 			error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
+
+		/* make a copy */
 	}
 
 	if (find_file (ardour_config_search_path(), ui_config_file_name, rcfile)) {
@@ -267,6 +311,10 @@ UIConfiguration::load_state ()
 		error << _("could not find any ui configuration file, canvas will look broken.") << endmsg;
 	}
 
+	cerr << "\n\n\nUIC loaded state, now emitting ColorsChanged\n";
+	
+	ARDOUR_UI_UTILS::ColorsChanged ();
+
 	return 0;
 }
 
@@ -275,6 +323,10 @@ UIConfiguration::save_state()
 {
 	XMLTree tree;
 
+	if (!dirty()) {
+		return 0;
+	}
+	
 	std::string rcfile(user_config_directory());
 	rcfile = Glib::build_filename (rcfile, ui_config_file_name);
 
@@ -368,12 +420,19 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 		}
 	}
 
+	XMLNode* relative = find_named_node (root, X_("RelativeColors"));
+	
+	if (relative) {
+		// load_relative_colors (*relative);
+	}
+
+	
 	XMLNode* aliases = find_named_node (root, X_("ColorAliases"));
 
 	if (aliases) {
 		load_color_aliases (*aliases);
 	}
-	
+
 	return 0;
 }
 
@@ -400,6 +459,32 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 	}
 }
 
+
+#if 0
+void
+UIConfiguration::load_relative_colors (XMLNode const & node)
+{
+	XMLNodeList const nlist = node.children();
+	XMLNodeConstIterator niter;
+	XMLProperty const *name;
+	XMLProperty const *alias;
+	
+	color_aliases.clear ();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() != X_("RelativeColor")) {
+			continue;
+		}
+		name = (*niter)->property (X_("name"));
+		alias = (*niter)->property (X_("alias"));
+
+		if (name && alias) {
+			color_aliases.insert (make_pair (name->value(), alias->value()));
+		}
+	}
+
+}
+#endif
 void
 UIConfiguration::set_variables (const XMLNode& node)
 {
@@ -436,7 +521,7 @@ UIConfiguration::set_dirty ()
 bool
 UIConfiguration::dirty () const
 {
-	return _dirty;
+	return _dirty || aliases_modified || derived_modified;
 }
 
 ArdourCanvas::Color
@@ -558,9 +643,27 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 		return;
 	}
 
+	cerr << "Reset alias for " << name << " to " << alias << endl;
+	
 	i->second = alias;
 	aliases_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 }
-	
+
+void
+UIConfiguration::load_rc_file (const string& filename, bool themechange)
+{
+	std::string rc_file_path;
+
+	if (!find_file (ardour_config_search_path(), filename, rc_file_path)) {
+		warning << string_compose (_("Unable to find UI style file %1 in search path %2. %3 will look strange"),
+                                           filename, ardour_config_search_path().to_string(), PROGRAM_NAME)
+				<< endmsg;
+		return;
+	}
+
+	info << "Loading ui configuration file " << rc_file_path << endmsg;
+
+	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
+}

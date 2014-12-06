@@ -225,6 +225,9 @@ ThemeManager::ThemeManager()
 	set_size_request (-1, 400);
 	setup_theme ();
 	setup_aliases ();
+
+	/* Trigger setting up the GTK color scheme and loading the RC file */
+	ARDOUR_UI::config()->color_theme_changed ();
 }
 
 ThemeManager::~ThemeManager()
@@ -327,23 +330,6 @@ ThemeManager::foobar_response (int result)
 }
 
 void
-load_rc_file (const string& filename, bool themechange)
-{
-	std::string rc_file_path;
-
-	if (!find_file (ardour_config_search_path(), filename, rc_file_path)) {
-		warning << string_compose (_("Unable to find UI style file %1 in search path %2. %3 will look strange"),
-                                           filename, ardour_config_search_path().to_string(), PROGRAM_NAME)
-				<< endmsg;
-		return;
-	}
-
-	info << "Loading ui configuration file " << rc_file_path << endmsg;
-
-	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
-}
-
-void
 ThemeManager::on_flat_buttons_toggled ()
 {
 	ARDOUR_UI::config()->set_flat_buttons (flat_buttons.get_active());
@@ -413,10 +399,11 @@ ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
 
-        ARDOUR_UI::config()->set_ui_rc_file("ui_dark.rc");
-	ARDOUR_UI::config()->set_dirty ();
-
-	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
+	UIConfiguration* uic (ARDOUR_UI::config());
+	
+        uic->set_ui_rc_file("ui_dark.rc");
+	uic->set_dirty ();
+	uic->load_rc_file (uic->get_ui_rc_file(), true);
 }
 
 void
@@ -424,8 +411,11 @@ ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
 
-        ARDOUR_UI::config()->set_ui_rc_file("ui_light.rc");
-	load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), true);
+	UIConfiguration* uic (ARDOUR_UI::config());
+	
+        uic->set_ui_rc_file("ui_light.rc");
+	uic->set_dirty ();
+	uic->load_rc_file (uic->get_ui_rc_file(), true);
 }
 
 void
@@ -492,28 +482,13 @@ ThemeManager::setup_theme ()
 		row[columns.gdkcolor] = col;
 	}
 
-	ColorsChanged.emit();
-
-	bool env_defined = false;
-	string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
-
-	if(!env_defined) {
-		rcfile = ARDOUR_UI::config()->get_ui_rc_file();
-	}
-
-	if (rcfile == "ui_dark.rc") {
-		dark_button.set_active();
-	} else if (rcfile == "ui_light.rc") {
-		light_button.set_active();
-	}
+	UIConfiguration* uic (ARDOUR_UI::config());
 	
-	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
-	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
-	waveform_gradient_depth.set_value (ARDOUR_UI::config()->get_waveform_gradient_depth());
-	timeline_item_gradient_depth.set_value (ARDOUR_UI::config()->get_timeline_item_gradient_depth());
-	all_dialogs.set_active (ARDOUR_UI::config()->get_all_floating_windows_are_dialogs());
-	
-	load_rc_file(rcfile, false);
+	flat_buttons.set_active (uic->get_flat_buttons());
+	blink_rec_button.set_active (uic->get_blink_rec_arm());
+	waveform_gradient_depth.set_value (uic->get_waveform_gradient_depth());
+	timeline_item_gradient_depth.set_value (uic->get_timeline_item_gradient_depth());
+	all_dialogs.set_active (uic->get_all_floating_windows_are_dialogs());
 }
 
 void
@@ -521,9 +496,7 @@ ThemeManager::reset_canvas_colors()
 {
 	ARDOUR_UI::config()->load_defaults();
 	setup_theme ();
-	/* mark dirty ... */
 	ARDOUR_UI::config()->set_dirty ();
-	/* but save it immediately */
 	ARDOUR_UI::config()->save_state ();
 }
 

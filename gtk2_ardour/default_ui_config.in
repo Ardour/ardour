@@ -129,6 +129,46 @@
     <ColorAlias name="ghost track wave clip" alias="color 29"/>
     <ColorAlias name="ghost track wave fill" alias="color 29"/>
     <ColorAlias name="ghost track zero line" alias="color 30"/>
+    <ColorAlias name="gtk_arm" alias="color 9"/>
+    <ColorAlias name="gtk_audio_bus" alias="color 61"/>
+    <ColorAlias name="gtk_audio_track" alias="color 70"/>
+    <ColorAlias name="gtk_automation_track_header" alias="color 42"/>
+    <ColorAlias name="gtk_background" alias="color 12"/>
+    <ColorAlias name="gtk_bases" alias="color 27"/>
+    <ColorAlias name="gtk_bg_selected" alias="color 99"/>
+    <ColorAlias name="gtk_bg_tooltip" alias="color 52"/>
+    <ColorAlias name="gtk_bright_color" alias="color 74"/>
+    <ColorAlias name="gtk_bright_indicator" alias="color 9"/>
+    <ColorAlias name="gtk_contrasting_indicator" alias="color 91"/>
+    <ColorAlias name="gtk_control_base" alias="color 61"/>
+    <ColorAlias name="gtk_control_text" alias="color 26"/>
+    <ColorAlias name="gtk_control_text2" alias="color 83"/>
+    <ColorAlias name="gtk_darkest" alias="color 29"/>
+    <ColorAlias name="gtk_fg_selected" alias="color 18"/>
+    <ColorAlias name="gtk_fg_tooltip" alias="color 29"/>
+    <ColorAlias name="gtk_foreground" alias="color 50"/>
+    <ColorAlias name="gtk_light_text_on_dark" alias="color 31"/>
+    <ColorAlias name="gtk_lightest" alias="color 13"/>
+    <ColorAlias name="gtk_midi_channel_selector" alias="color 44"/>
+    <ColorAlias name="gtk_midi_track" alias="color 58"/>
+    <ColorAlias name="gtk_monitor" alias="color 8"/>
+    <ColorAlias name="gtk_mono" alias="color 95"/>
+    <ColorAlias name="gtk_mute" alias="color 52"/>
+    <ColorAlias name="gtk_not_so_bright_indicator" alias="color 32"/>
+    <ColorAlias name="gtk_processor_fader" alias="color 94"/>
+    <ColorAlias name="gtk_processor_fader_frame" alias="color 104"/>
+    <ColorAlias name="gtk_processor_frame_selected" alias="color 32"/>
+    <ColorAlias name="gtk_processor_postfader" alias="color 79"/>
+    <ColorAlias name="gtk_processor_postfader_frame" alias="color 103"/>
+    <ColorAlias name="gtk_processor_prefader" alias="color 69"/>
+    <ColorAlias name="gtk_processor_prefader_frame" alias="color 69"/>
+    <ColorAlias name="gtk_send_bg" alias="color 70"/>
+    <ColorAlias name="gtk_send_fg" alias="color 24"/>
+    <ColorAlias name="gtk_solo" alias="color 91"/>
+    <ColorAlias name="gtk_somewhat_bright_indicator" alias="color 89"/>
+    <ColorAlias name="gtk_texts" alias="color 50"/>
+    <ColorAlias name="gtk_track_header_inactive" alias="color 84"/>
+    <ColorAlias name="gtk_track_header_selected" alias="color 93"/>
     <ColorAlias name="image track" alias="color 31"/>
     <ColorAlias name="inactive crossfade" alias="color 32"/>
     <ColorAlias name="inactive fade handle" alias="color 33"/>
