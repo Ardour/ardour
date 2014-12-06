@@ -613,6 +613,8 @@ SMFSource::load_model (bool lock, bool force_reload)
 		_model->clear();
 	}
 
+	invalidate();
+
 	if (writable() && !_open) {
 		return;
 	}
@@ -712,6 +714,7 @@ SMFSource::destroy_model ()
 {
 	//cerr << _name << " destroying model " << _model.get() << endl;
 	_model.reset();
+	invalidate();
 }
 
 void
@@ -753,6 +756,7 @@ SMFSource::ensure_disk_file ()
 		_model.reset ();
 		mm->sync_to_source ();
 		_model = mm;
+		invalidate();
 	} else {
 		/* No model; if it's not already open, it's an empty source, so create
 		   and open it for writing.

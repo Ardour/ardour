@@ -397,6 +397,7 @@ void
 MidiSource::drop_model ()
 {
 	_model.reset();
+	invalidate();
 	ModelChanged (); /* EMIT SIGNAL */
 }
 
@@ -404,6 +405,7 @@ void
 MidiSource::set_model (boost::shared_ptr<MidiModel> m)
 {
 	_model = m;
+	invalidate();
 	ModelChanged (); /* EMIT SIGNAL */
 }
 
