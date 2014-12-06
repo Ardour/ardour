@@ -212,7 +212,11 @@ void
 SMF::seek_to_start() const
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
-	_smf_track->next_event_number = 1;
+	if (_smf_track) {
+		_smf_track->next_event_number = 1;
+	} else {
+		cerr << "WARNING: SMF seek_to_start() with no track" << endl;
+	}
 }
 
 /** Read an event from the current position in file.
