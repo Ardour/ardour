@@ -1242,21 +1242,27 @@ ControlList::multipoint_eval (double x) const
 void
 ControlList::build_search_cache_if_necessary (double start) const
 {
-	/* Only do the range lookup if x is in a different range than last time
-	 * this was called (or if the search cache has been marked "dirty" (left<0) */
 	if (_events.empty()) {
+		/* Empty, nothing to cache, move to end. */
 		_search_cache.first = _events.end();
 		_search_cache.left = 0;
+		return;
 	} else if ((_search_cache.left < 0) || (_search_cache.left > start)) {
+		/* Marked dirty (left < 0), or we're too far forward, re-search. */
 
 		const ControlEvent start_point (start, 0);
-
-		//cerr << "REBUILD: (" << _search_cache.left << ".." << _search_cache.right << ") := ("
-		//	<< start << ".." << end << ")" << endl;
 
 		_search_cache.first = lower_bound (_events.begin(), _events.end(), &start_point, time_comparator);
 		_search_cache.left = start;
 	}
+
+	/* We now have a search cache that is not too far right, but it may be too
+	   far left and need to be advanced. */
+
+	while (_search_cache.first != end() && (*_search_cache.first)->when < start) {
+		++_search_cache.first;
+	}
+	_search_cache.left = start;
 }
 
 /** Get the earliest event after \a start using the current interpolation style.
@@ -1365,8 +1371,8 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 		const ControlEvent* first = NULL;
 		const ControlEvent* next = NULL;
 
-		/* Step is after first */
 		if (_search_cache.first == _events.begin() || (*_search_cache.first)->when <= start) {
+			/* Step is after first */
 			first = *_search_cache.first;
 			++_search_cache.first;
 			if (_search_cache.first == _events.end()) {
@@ -1374,8 +1380,8 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			}
 			next = *_search_cache.first;
 
-			/* Step is before first */
 		} else {
+			/* Step is before first */
 			const_iterator prev = _search_cache.first;
 			--prev;
 			first = *prev;
@@ -1455,8 +1461,8 @@ ControlList::rt_safe_earliest_event_linear_unlocked (double start, double& x, do
 			return true;
 		}
 
-		/* No points in the future, so no steps (towards them) in the future */
 	} else {
+		/* No points in the future, so no steps (towards them) in the future */
 		return false;
 	}
 }
