@@ -4041,6 +4041,8 @@ Editor::remove_clicked_region ()
 		return;
 	}
 
+	begin_reversible_command (_("remove region"));
+
 	boost::shared_ptr<Playlist> playlist = clicked_routeview->playlist();
 
 	playlist->clear_changes ();
