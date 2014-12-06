@@ -586,7 +586,7 @@ ThemeManager::build_base_color_canvas (ArdourCanvas::Container& group, bool (The
 	
 	for (uint32_t y = 0; y < height - box_size && color_num < color_limit; y += box_size) {
 		for (uint32_t x = 0; x < width - box_size && color_num < color_limit; x += box_size) {
-			Rectangle* r = new Rectangle (&group, ArdourCanvas::Rect (x, y, x + box_size, y + box_size));
+			ArdourCanvas::Rectangle* r = new Rectangle (&group, ArdourCanvas::Rect (x, y, x + box_size, y + box_size));
 
 			string name = nc[color_num++].name;
 
