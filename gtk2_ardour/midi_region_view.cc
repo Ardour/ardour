@@ -66,6 +66,7 @@
 #include "midi_velocity_dialog.h"
 #include "mouse_cursors.h"
 #include "note_player.h"
+#include "paste_context.h"
 #include "public_editor.h"
 #include "route_time_axis.h"
 #include "rgb_macros.h"
@@ -3322,22 +3323,22 @@ MidiRegionView::selection_as_cut_buffer () const
 
 /** This method handles undo */
 bool
-MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const ::Selection& selection, ItemCounts& counts)
+MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContext& ctx)
 {
 	trackview.session()->begin_reversible_command (Operations::paste);
 
 	// Paste notes, if available
-	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(counts.n_notes());
+	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(ctx.counts.n_notes());
 	if (m != selection.midi_notes.end()) {
-		counts.increase_n_notes();
-		paste_internal(pos, paste_count, times, **m);
+		ctx.counts.increase_n_notes();
+		paste_internal(pos, ctx.count, ctx.times, **m);
 	}
 
 	// Paste control points to automation children, if available
 	typedef RouteTimeAxisView::AutomationTracks ATracks;
 	const ATracks& atracks = midi_view()->automation_tracks();
 	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
-		a->second->paste(pos, paste_count, times, selection, counts);
+		a->second->paste(pos, selection, ctx);
 	}
 
 	trackview.session()->commit_reversible_command ();

@@ -43,6 +43,7 @@
 #include "gui_thread.h"
 #include "route_time_axis.h"
 #include "automation_line.h"
+#include "paste_context.h"
 #include "public_editor.h"
 #include "selection.h"
 #include "rgb_macros.h"
@@ -633,14 +634,19 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 }
 
 bool
-AutomationTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts)
+AutomationTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx)
 {
 	if (_line) {
-		return paste_one (pos, paste_count, times, selection, counts);
+		return paste_one (pos, ctx.count, ctx.times, selection, ctx.counts, ctx.greedy);
 	} else if (_view) {
-		AutomationSelection::const_iterator l = selection.lines.get_nth(_parameter, counts.n_lines(_parameter));
-		if (l != selection.lines.end() && _view->paste (pos, paste_count, times, *l)) {
-			counts.increase_n_lines(_parameter);
+		AutomationSelection::const_iterator l = selection.lines.get_nth(_parameter, ctx.counts.n_lines(_parameter));
+		if (l == selection.lines.end()) {
+			if (ctx.greedy && selection.lines.size() == 1) {
+				l = selection.lines.begin();
+			}
+		}
+		if (l != selection.lines.end() && _view->paste (pos, ctx.count, ctx.times, *l)) {
+			ctx.counts.increase_n_lines(_parameter);
 			return true;
 		}
 	}
@@ -649,7 +655,7 @@ AutomationTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times
 }
 
 bool
-AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts)
+AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts, bool greedy)
 {
 	boost::shared_ptr<AutomationList> alist(_line->the_list());
 
@@ -661,7 +667,11 @@ AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float t
 	/* Get appropriate list from selection. */
 	AutomationSelection::const_iterator p = selection.lines.get_nth(_parameter, counts.n_lines(_parameter));
 	if (p == selection.lines.end()) {
-		return false;
+		if (greedy && selection.lines.size() == 1) {
+			p = selection.lines.begin();
+		} else {
+			return false;
+		}
 	}
 	counts.increase_n_lines(_parameter);
 

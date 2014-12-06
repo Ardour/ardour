@@ -100,7 +100,7 @@ public:
 
 	/* Editing operations */
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (ARDOUR::framepos_t, unsigned paste_count, float times, const Selection&, ItemCounts&);
+	bool paste (ARDOUR::framepos_t, const Selection&, PasteContext& ctx);
 	RegionView* combine_regions ();
 	void uncombine_regions ();
 	void uncombine_region (RegionView*);

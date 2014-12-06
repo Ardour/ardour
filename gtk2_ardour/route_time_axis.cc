@@ -67,6 +67,7 @@
 #include "gui_thread.h"
 #include "item_counts.h"
 #include "keyboard.h"
+#include "paste_context.h"
 #include "playlist_selector.h"
 #include "point_selection.h"
 #include "prompter.h"
@@ -1572,7 +1573,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 bool
-RouteTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts)
+RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx)
 {
 	if (!is_track()) {
 		return false;
@@ -1580,12 +1581,12 @@ RouteTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, con
 
 	boost::shared_ptr<Playlist>       pl   = playlist ();
 	const ARDOUR::DataType            type = pl->data_type();
-	PlaylistSelection::const_iterator p    = selection.playlists.get_nth(type, counts.n_playlists(type));
+	PlaylistSelection::const_iterator p    = selection.playlists.get_nth(type, ctx.counts.n_playlists(type));
 
 	if (p == selection.playlists.end()) {
 		return false;
 	}
-	counts.increase_n_playlists(type);
+	ctx.counts.increase_n_playlists(type);
 
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
 
@@ -1597,15 +1598,15 @@ RouteTimeAxisView::paste (framepos_t pos, unsigned paste_count, float times, con
 	/* add multi-paste offset if applicable */
 	std::pair<framepos_t, framepos_t> extent   = (*p)->get_extent();
 	const framecnt_t                  duration = extent.second - extent.first;
-	pos += _editor.get_paste_offset(pos, paste_count, duration);
+	pos += _editor.get_paste_offset(pos, ctx.count, duration);
 
 	pl->clear_changes ();
 	if (Config->get_edit_mode() == Ripple) {
 		std::pair<framepos_t, framepos_t> extent = (*p)->get_extent_with_endspace();
 		framecnt_t amount = extent.second - extent.first;
-		pl->ripple(pos, amount * times, boost::shared_ptr<Region>());
+		pl->ripple(pos, amount * ctx.times, boost::shared_ptr<Region>());
 	}
-	pl->paste (*p, pos, times);
+	pl->paste (*p, pos, ctx.times);
 
 	vector<Command*> cmds;
 	pl->rdiff (cmds);

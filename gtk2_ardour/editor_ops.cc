@@ -83,6 +83,7 @@
 #include "mixer_strip.h"
 #include "mouse_cursors.h"
 #include "normalize_dialog.h"
+#include "paste_context.h"
 #include "patch_change_dialog.h"
 #include "quantize_dialog.h"
 #include "region_gain_line.h"
@@ -4446,11 +4447,24 @@ Editor::paste_internal (framepos_t position, float times)
 		RegionSelection rs;
 		get_regions_at (rs, position, ts);
 
-		ItemCounts counts;
+		if (ts.size() == 1 && cut_buffer->lines.size() == 1) {
+			AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(ts.front());
+			if (atv) {
+				/* Only one line, and one automation track selected.  Do a
+				   "greedy" paste from one automation type to another. */
+				PasteContext ctx(paste_count, times, ItemCounts(), true);
+				begin_reversible_command (Operations::paste);
+				atv->paste (position, *cut_buffer, ctx);
+				commit_reversible_command ();
+				return;
+			}
+		}
+
+		PasteContext ctx(paste_count, times, ItemCounts(), false);
 		for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
 			if (mrv) {
-				mrv->paste (position, paste_count, times, *cut_buffer, counts);
+				mrv->paste (position, *cut_buffer, ctx);
 			}
 		}
 
@@ -4460,9 +4474,9 @@ Editor::paste_internal (framepos_t position, float times)
 
 		begin_reversible_command (Operations::paste);
 
-		ItemCounts counts;
+		PasteContext ctx(paste_count, times, ItemCounts(), false);
 		for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
-			(*i)->paste (position, paste_count, times, *cut_buffer, counts);
+			(*i)->paste (position, *cut_buffer, ctx);
 		}
 
 		commit_reversible_command ();
