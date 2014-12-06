@@ -311,7 +311,7 @@ TearOff::set_state (const XMLNode& node)
                 sscanf (prop->value().c_str(), "%d", &own_window_ypos);
         }
 
-        if (own_window.is_realized()) {
+        if (own_window.get_realized()) {
                 own_window.set_default_size (own_window_width, own_window_height);
                 own_window.move (own_window_xpos, own_window_ypos);
         }
