@@ -62,6 +62,12 @@ Flag::setup (Distance height, Duple position)
 }
 
 void
+Flag::set_font_description (Pango::FontDescription font_description)
+{
+	_text->set_font_description (font_description);
+}
+
+void
 Flag::set_text (string const & text)
 {
 	_text->set (text);

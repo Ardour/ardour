@@ -17,6 +17,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <pangomm/fontdescription.h>
+
 #include "canvas/visibility.h"
 #include "canvas/types.h"
 #include "canvas/container.h"
@@ -35,6 +37,8 @@ public:
 
 	void set_text (std::string const &);
 	void set_height (Distance);
+
+	void set_font_description (Pango::FontDescription);
 
         bool covers (Duple const &) const;
 	

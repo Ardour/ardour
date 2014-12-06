@@ -66,6 +66,7 @@ PatchChange::PatchChange(
 	CANVAS_DEBUG_NAME (_flag, text);
 
 	_flag->Event.connect (sigc::mem_fun (*this, &PatchChange::event_handler));
+	_flag->set_font_description (ARDOUR_UI::config()->get_SmallFont());
 	_flag->set_text(text);
 }
 
