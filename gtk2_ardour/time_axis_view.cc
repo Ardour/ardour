@@ -219,6 +219,8 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 TimeAxisView::~TimeAxisView()
 {
+	CatchDeletion (this);
+
 	in_destructor = true;
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
