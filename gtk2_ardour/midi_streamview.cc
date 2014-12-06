@@ -176,11 +176,21 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 	}
 
 	region_view->enable_display (true);
+	region_view->set_height (child_height());
 
 	boost::shared_ptr<MidiSource> source(region_view->midi_region()->midi_source(0));
+	if (!source) {
+		error << _("attempt to display MIDI region with no source") << endmsg;
+		return;
+	}
 
 	if (load_model) {
 		source->load_model();
+	}
+
+	if (!source->model()) {
+		error << _("attempt to display MIDI region with no model") << endmsg;
+		return;
 	}
 
 	_range_dirty = update_data_note_range(
@@ -188,7 +198,6 @@ MidiStreamView::display_region(MidiRegionView* region_view, bool load_model)
 		source->model()->highest_note());
 
 	// Display region contents
-	region_view->set_height (child_height());
 	region_view->display_model(source->model());
 }
 
