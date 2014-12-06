@@ -342,7 +342,7 @@ AutomationStreamView::paste (framepos_t                                pos,
 
 	/* If *prev doesn't cover pos, it's no good */
 	if (r->position() > pos || ((r->position() + r->length()) < pos)) {
-		return boost::shared_ptr<AutomationLine> ();
+		return false;
 	}
 
 	AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*prev);
