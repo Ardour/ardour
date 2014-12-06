@@ -124,7 +124,7 @@ class TimeAxisView : public virtual AxisView
 
 	uint32_t current_height() const { return height; }
 
-	void idle_resize (uint32_t);
+	void idle_resize (int32_t);
 
 	virtual guint32 show_at (double y, int& nth, Gtk::VBox *parent);
 	virtual void hide ();

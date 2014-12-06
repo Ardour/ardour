@@ -406,9 +406,9 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 }
 
 void
-TimeAxisView::idle_resize (uint32_t h)
+TimeAxisView::idle_resize (int32_t h)
 {
-	set_height (h);
+	set_height (std::max(0, h));
 }
 
 
