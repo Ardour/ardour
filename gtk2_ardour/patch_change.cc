@@ -158,9 +158,14 @@ PatchChange::event_handler (GdkEvent* ev)
 	/* XXX: icky dcast */
 	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
 
+	if (!e->internal_editing()) {
+		// not in internal edit mode, so no patch change editing
+		return false;
+	}
+
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		if (e->current_mouse_mode() == Editing::MouseObject && e->internal_editing()) {
+		if (e->current_mouse_mode() == Editing::MouseObject) {
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
 
