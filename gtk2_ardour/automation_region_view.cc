@@ -208,9 +208,10 @@ AutomationRegionView::paste (framepos_t                                      pos
 
 	/* add multi-paste offset if applicable */
 	pos += view->editor().get_paste_offset(
-		pos, paste_count, _line->time_converter().to(slist->length()));
+		pos, paste_count, _source_relative_time_converter.to(slist->length()));
 
-	const double model_pos = _line->time_converter().from(pos - _line->time_converter().origin_b());
+	const double model_pos = _source_relative_time_converter.from(
+		pos - _source_relative_time_converter.origin_b());
 
 	XMLNode& before = my_list->get_state();
 	my_list->paste(*slist, model_pos, times);
