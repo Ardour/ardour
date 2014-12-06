@@ -67,6 +67,8 @@ FileSource::FileSource (Session& session, DataType type, const string& path, con
 FileSource::FileSource (Session& session, const XMLNode& node, bool /*must_exist*/)
 	: Source (session, node)
 	, _file_is_new (false)
+	, _channel (0)
+	, _open (false)
 {
 	/* this setting of _path is temporary - we expect derived classes
 	   to call ::init() which will actually locate the file
