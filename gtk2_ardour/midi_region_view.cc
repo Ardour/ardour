@@ -3324,19 +3324,16 @@ MidiRegionView::selection_as_cut_buffer () const
 bool
 MidiRegionView::paste (framepos_t pos, unsigned paste_count, float times, const ::Selection& selection, ItemCounts& counts)
 {
-	// Get our set of notes from the selection
-	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(counts.n_notes());
-	if (m == selection.midi_notes.end()) {
-		return false;
-	}
-	counts.increase_n_notes();
-
 	trackview.session()->begin_reversible_command (Operations::paste);
 
-	// Paste notes
-	paste_internal(pos, paste_count, times, **m);
+	// Paste notes, if available
+	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(counts.n_notes());
+	if (m != selection.midi_notes.end()) {
+		counts.increase_n_notes();
+		paste_internal(pos, paste_count, times, **m);
+	}
 
-	// Paste control points to automation children
+	// Paste control points to automation children, if available
 	typedef RouteTimeAxisView::AutomationTracks ATracks;
 	const ATracks& atracks = midi_view()->automation_tracks();
 	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
