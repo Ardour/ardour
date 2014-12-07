@@ -666,8 +666,8 @@ ArdourButton::set_colors ()
 	fill_active_color = ARDOUR_UI::config()->color (string_compose ("%1: fill active", name));
 	fill_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: fill", name));
 
-	text_active_color = ARDOUR_UI::config()->color (string_compose ("%1: text active", name));
-	text_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: text", name));
+	text_active_color = ArdourCanvas::contrasting_text_color (fill_active_color);
+	text_inactive_color = ArdourCanvas::contrasting_text_color (fill_inactive_color);
 
 	led_active_color = ARDOUR_UI::config()->color (string_compose ("%1: led active", name));
 	led_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: led", name));

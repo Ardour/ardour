@@ -201,7 +201,9 @@ luminance (uint32_t c)
 uint32_t
 ArdourCanvas::contrasting_text_color (uint32_t c)
 {
-        static const uint32_t white = ArdourCanvas::rgba_to_color (1.0, 1.0, 1.0, 1.0);
+	/* use a slightly off-white... XXX should really look this up */
+
+        static const uint32_t white = ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1.0);
         static const uint32_t black = ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0);
 
 	return (luminance (c) < 0.50) ? white : black;
