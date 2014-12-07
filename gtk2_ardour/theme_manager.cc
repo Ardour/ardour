@@ -231,7 +231,8 @@ ThemeManager::ThemeManager()
 	setup_aliases ();
 
 	/* Trigger setting up the GTK color scheme and loading the RC file */
-	ARDOUR_UI::config()->color_theme_changed ();
+	cerr << "Load RC file\n";
+	UIConfiguration::load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), false);
 }
 
 ThemeManager::~ThemeManager()

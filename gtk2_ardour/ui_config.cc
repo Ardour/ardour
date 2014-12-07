@@ -104,13 +104,13 @@ UIConfiguration::UIConfiguration ()
 
 	load_state();
 
-	ARDOUR_UI_UTILS::ColorsChanged.connect (boost::bind (&UIConfiguration::color_theme_changed, this));
+	ARDOUR_UI_UTILS::ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
 
-	/* force loading of the GTK rc file */
-
-	parameter_changed ("ui-rc-file");
+	/* force GTK theme setting, so that RC file will work */
+	
+	reset_gtk_theme ();
 }
 
 UIConfiguration::~UIConfiguration ()
@@ -118,7 +118,7 @@ UIConfiguration::~UIConfiguration ()
 }
 
 void
-UIConfiguration::color_theme_changed ()
+UIConfiguration::colors_changed ()
 {
 	_dirty = true;
 
@@ -133,9 +133,7 @@ UIConfiguration::color_theme_changed ()
 	   GTK RC file, which causes a reset of all styles and a redraw
 	*/
 
-	parameter_changed ("ui-rc-file");
-
-	save_state ();
+	parameter_changed ("ui-rc_file");
 }
 
 void
@@ -144,15 +142,10 @@ UIConfiguration::parameter_changed (string param)
 	_dirty = true;
 	
 	if (param == "ui-rc-file") {
-		bool env_defined = false;
-		string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
-		
-		if (!env_defined) {
-			rcfile = get_ui_rc_file();
-		}
-
-		load_rc_file (rcfile, true);
+		load_rc_file (get_ui_rc_file(), true);
 	}
+
+	save_state ();
 }
 
 void
@@ -336,6 +329,8 @@ UIConfiguration::save_state()
 {
 	XMLTree tree;
 
+	PBD::stacktrace (cerr, 20);
+	
 	if (!dirty()) {
 		return 0;
 	}
@@ -646,6 +641,8 @@ UIConfiguration::reset_relative (const string& name, const RelativeHSV& rhsv)
 	derived_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+
+	save_state ();
 }
 
 void
@@ -660,6 +657,8 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 	aliases_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+
+	save_state ();
 }
 
 void

@@ -109,8 +109,6 @@ class UIConfiguration : public PBD::Stateful
 	int save_state ();
 	int load_defaults ();
 
-	void color_theme_changed ();
-
 	static void load_rc_file (std::string const &, bool themechange);
 	
 	int set_state (const XMLNode&, int version);
@@ -155,7 +153,7 @@ class UIConfiguration : public PBD::Stateful
 #undef CANVAS_BASE_COLOR
 #define CANVAS_BASE_COLOR(var,name,val) \
 	ArdourCanvas::Color get_##var() const { return var.get(); } \
-	bool set_##var (ArdourCanvas::Color v) { bool ret = var.set (v); if (ret) { ParameterChanged (#var); } return ret;  } \
+	bool set_##var (ArdourCanvas::Color v) { bool ret = var.set (v); if (ret) { ParameterChanged (name); } return ret;  } \
 	bool set_##var(const ArdourCanvas::HSV& v) const { return set_##var (v.color()); }
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
@@ -193,6 +191,7 @@ class UIConfiguration : public PBD::Stateful
 
 	void load_color_aliases (XMLNode const &);
 	void reset_gtk_theme ();
+	void colors_changed ();
 	
 	XMLNode _saved_state_node;
 	int     _saved_state_version;
