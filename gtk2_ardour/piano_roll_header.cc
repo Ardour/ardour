@@ -513,17 +513,15 @@ bool
 PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 {
 	int note = _view.y_to_note(ev->y);
+	bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 
-	if (ev->button == 2 && ev->type == GDK_BUTTON_PRESS) {
-		if (Keyboard::no_modifiers_active (ev->state)) {
-			SetNoteSelection (note); // EMIT SIGNAL
-			return true;
-		}
-		return false;
-	}
-	
-	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS && note >= 0 && note < 128) {
-		
+	if (ev->button == 2 && Keyboard::no_modifiers_active (ev->state)) {
+		SetNoteSelection (note); // EMIT SIGNAL
+		return true;
+	} else if (tertiary && (ev->button == 1 || ev->button == 2)) {
+		ExtendNoteSelection (note); // EMIT SIGNAL
+		return true;
+	} else if (ev->button == 1 && note >= 0 && note < 128) {
 		add_modal_grab();
 		_dragging = true;
 		
