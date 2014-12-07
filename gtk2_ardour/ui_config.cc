@@ -464,8 +464,6 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 	}
 }
 
-
-#if 0
 void
 UIConfiguration::load_relative_colors (XMLNode const & node)
 {
