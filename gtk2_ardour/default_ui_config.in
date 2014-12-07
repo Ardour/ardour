@@ -28,6 +28,17 @@
     <Option name="colorDlight" value="0x00b3ffff"/>
     <Option name="colorDA" value="0x8000ffff"/>
 
+    <Option name="meterColor0" value="90FE3BFF"/>
+    <Option name="meterColor1" value="90FE3BFF"/>
+    <Option name="meterColor2" value="90FE3BFF"/>
+    <Option name="meterColor3" value="90FE3BFF"/>
+    <Option name="meterColor4" value="FFEA38ff"/>
+    <Option name="meterColor5" value="FFEA38ff"/>
+    <Option name="meterColor6" value="FFEA38ff"/>
+    <Option name="meterColor7" value="FFEA38ff"/>
+    <Option name="meterColor8" value="FF0000ff"/>
+    <Option name="meterColor9" value="FF0000ff"/>
+    
     <Option name="small font" value="@FONT_SMALL@"/>
     <Option name="smaller font" value="@FONT_SMALLER@"/>
     <Option name="normal font" value="@FONT_NORMAL@"/>
