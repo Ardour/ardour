@@ -60,28 +60,25 @@ bool
 VisibilityTracker::fully_visible () const
 {
 	if (_use_window_manager_visibility) {
-		return _window.is_mapped() && (_visibility == GDK_VISIBILITY_UNOBSCURED);
-	} else {
-		return _window.is_mapped();
+		return _window.get_mapped() && (_visibility == GDK_VISIBILITY_UNOBSCURED);
 	}
+	return _window.get_mapped();
 }
 
 bool
 VisibilityTracker::not_visible () const
 {
 	if (_use_window_manager_visibility) {
-		return !_window.is_mapped() || (_visibility == GDK_VISIBILITY_FULLY_OBSCURED);
-	} else {
-		return !_window.is_mapped();
+		return !_window.get_mapped() || (_visibility == GDK_VISIBILITY_FULLY_OBSCURED);
 	}
+	return !_window.get_mapped();
 }
 
 bool
 VisibilityTracker::partially_visible () const
 {
 	if (_use_window_manager_visibility) {
-		return _window.is_mapped() && ((_visibility == GDK_VISIBILITY_PARTIAL) || (_visibility == GDK_VISIBILITY_UNOBSCURED));
-	} else {
-		return _window.is_mapped();
+		return _window.get_mapped() && ((_visibility == GDK_VISIBILITY_PARTIAL) || (_visibility == GDK_VISIBILITY_UNOBSCURED));
 	}
+	return _window.get_mapped();
 }

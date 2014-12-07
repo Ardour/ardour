@@ -153,13 +153,13 @@ WindowProxy::toggle()
 		/* we'd like to just call this and nothing else */
 		_window->present ();
 	} else {
-		if (_window->is_mapped()) {
+		if (_window->get_mapped()) {
 			save_pos_and_size();
 		}
 
 		vistracker->cycle_visibility ();
 
-		if (_window->is_mapped()) {
+		if (_window->get_mapped()) {
 			if (_width != -1 && _height != -1) {
 				_window->set_default_size (_width, _height);
 			}
