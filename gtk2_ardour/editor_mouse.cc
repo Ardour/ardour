@@ -1561,6 +1561,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		switch (eff) {
 		case MouseObject:
+		case MouseDraw:
 			switch (item_type) {
 			case AutomationTrackItem:
 				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_axisview);
