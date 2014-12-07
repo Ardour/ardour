@@ -105,6 +105,12 @@ UIConfiguration::UIConfiguration ()
 	load_state();
 
 	ARDOUR_UI_UTILS::ColorsChanged.connect (boost::bind (&UIConfiguration::color_theme_changed, this));
+
+	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
+
+	/* force loading of the GTK rc file */
+
+	parameter_changed ("ui-rc-file");
 }
 
 UIConfiguration::~UIConfiguration ()
@@ -118,21 +124,33 @@ UIConfiguration::color_theme_changed ()
 
 	reset_gtk_theme ();
 
-	/* reload the RC file, which will trigger gtk_rc_reset_styles().
-	   It would be nice if simply resetting the color scheme
-	   or even just calling gtk_rc_reset_styles() would do this
-	   for us, but it appears that we actually have to reload
-	   the RC file for it all to work.
+	/* In theory, one of these ought to work:
+
+	   gtk_rc_reparse_all_for_settings (gtk_settings_get_default(), true);
+	   gtk_rc_reset_styles (gtk_settings_get_default());
+
+	   but in practice, neither of them do. So just reload the current
+	   GTK RC file, which causes a reset of all styles and a redraw
 	*/
+
+	parameter_changed ("ui-rc-file");
+}
+
+void
+UIConfiguration::parameter_changed (string param)
+{
+	_dirty = true;
 	
-	bool env_defined = false;
-	string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
+	if (param == "ui-rc-file") {
+		bool env_defined = false;
+		string rcfile = Glib::getenv("ARDOUR3_UI_RC", env_defined);
+		
+		if (!env_defined) {
+			rcfile = get_ui_rc_file();
+		}
 
-	if (!env_defined) {
-		rcfile = ARDOUR_UI::config()->get_ui_rc_file();
+		load_rc_file (rcfile, true);
 	}
-
-	load_rc_file (rcfile, true);
 }
 
 void
@@ -155,8 +173,6 @@ UIConfiguration::reset_gtk_theme ()
 
 	/* reset GTK color scheme */
 
-	cerr << "Reset gtk color scheme\n";
-	
 	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
 }
 	

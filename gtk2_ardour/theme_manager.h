@@ -29,6 +29,7 @@
 #include <gtkmm/scale.h>
 #include <gtkmm/rc.h>
 
+#include "canvas/types.h"
 #include "canvas/canvas.h"
 
 #include "ardour_window.h"
@@ -40,6 +41,8 @@ namespace ArdourCanvas {
 	class ScrollGroup;
 }
 
+class ArdourDialog;
+
 class ThemeManager : public ArdourWindow
 {
   public:
@@ -47,7 +50,7 @@ class ThemeManager : public ArdourWindow
 	~ThemeManager();
 
 	int save (std::string path);
-	void setup_theme ();
+	void setup_basic_color_display ();
 	void reset_canvas_colors();
 
 	void on_dark_theme_button_toggled ();
@@ -63,25 +66,30 @@ class ThemeManager : public ArdourWindow
 
   private:
 	Gtk::Notebook notebook;
-
-	struct ColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    ColorDisplayModelColumns() {
-		    add (name);
-		    add (gdkcolor);
-		    add (pVar);
-		    add (rgba);
-	    }
-
-	    Gtk::TreeModelColumn<std::string>  name;
-	    Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
-	    Gtk::TreeModelColumn<ColorVariable<uint32_t> *> pVar;
-	    Gtk::TreeModelColumn<uint32_t>     rgba;
+	
+	struct BasicColorDisplayModelColumns : public Gtk::TreeModel::ColumnRecord {
+		BasicColorDisplayModelColumns() {
+			add (name);
+			add (gdkcolor);
+			add (pVar);
+			add (rgba);
+		}
+		
+		Gtk::TreeModelColumn<std::string>  name;
+		Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
+		Gtk::TreeModelColumn<ColorVariable<ArdourCanvas::Color> *> pVar;
+		Gtk::TreeModelColumn<ArdourCanvas::Color>     rgba;
 	};
+	
+	BasicColorDisplayModelColumns basic_color_columns;
+	Gtk::TreeView basic_color_display;
+	Glib::RefPtr<Gtk::TreeStore> basic_color_list;
 
-	ColorDisplayModelColumns columns;
-	Gtk::TreeView color_display;
-	Glib::RefPtr<Gtk::TreeStore> color_list;
+	bool basic_color_button_press_event (GdkEventButton*);
+
 	Gtk::ColorSelectionDialog color_dialog;
+	sigc::connection color_dialog_connection;
+	
 	Gtk::ScrolledWindow scroller;
 	Gtk::HBox theme_selection_hbox;
 	Gtk::RadioButton dark_button;
@@ -100,25 +108,46 @@ class ThemeManager : public ArdourWindow
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;
 
-	ColorDisplayModelColumns base_color_columns;
-	Gtk::ScrolledWindow base_color_scroller;
-	ArdourCanvas::GtkCanvasViewport base_color_viewport;
-	ArdourCanvas::Container* base_color_group;
-	std::string base_color_edit_name;
+	/* handles response from color dialog when it used to 
+	   edit a basic color
+	*/
+	void basic_color_response (int, ColorVariable<ArdourCanvas::Color>*);
 
-	sigc::connection color_dialog_connection;
-	void foobar_response (int);
+	/* handls response from color dialog when it is used to
+	   edit a derived color.
+	*/
+	void palette_color_response (int, std::string);
+
+	Gtk::ScrolledWindow palette_scroller;
+	ArdourCanvas::GtkCanvasViewport palette_viewport;
+	ArdourCanvas::Container* palette_group;
 	
-	ArdourCanvas::Container* initialize_canvas (ArdourCanvas::Canvas& canvas);
-	void build_base_color_canvas (ArdourCanvas::Container&, bool (ThemeManager::*event_handler)(GdkEvent*,std::string), double width, double height);
-	void base_color_viewport_allocated (Gtk::Allocation&);
-	void base_color_dialog_done (int);
-	bool base_color_event (GdkEvent*, std::string);
-	void edit_named_color (std::string);
+	/* these methods create and manage a canvas for use in either the
+	   palette tab or in a separate dialog. Different behaviour is
+	   accomplished by changing the event handler passed into the 
+	   allocation handler. We do it there because we have to rebuild
+	   the canvas on allocation events, and during the rebuild, connect
+	   each rectangle to the event handler.
+
+	   the alternative is one event handler for the canvas and a map
+	   of where each color rectangle is. nothing wrong with this
+	   but the per-rect event setup is simpler and avoids building
+	   and looking up the map information.
+	*/
+	ArdourCanvas::Container* initialize_palette_canvas (ArdourCanvas::Canvas& canvas);
+	void build_palette_canvas (ArdourCanvas::Canvas&, ArdourCanvas::Container&, sigc::slot<bool,GdkEvent*,std::string> event_handler);
+	void palette_canvas_allocated (Gtk::Allocation& alloc, ArdourCanvas::Container* group, ArdourCanvas::Canvas* canvas, sigc::slot<bool,GdkEvent*,std::string> event_handler);
+	void palette_size_request (Gtk::Requisition*);
+
+	/* handles events from a palette canvas inside the palette (derived
+	   colors) tab
+	*/
+	bool palette_event (GdkEvent*, std::string name);
+	/* allows user to edit a named color (e.g. "color 3") after clicking
+	   on it inside the palette tab.
+	*/
+	void edit_palette_color (std::string);
 	
-	bool button_press_event (GdkEventButton*);
-
-
 	struct ColorAliasModelColumns : public Gtk::TreeModel::ColumnRecord {
 		ColorAliasModelColumns() {
 			add (name);
@@ -138,15 +167,16 @@ class ThemeManager : public ArdourWindow
 
 	bool alias_button_press_event (GdkEventButton*);
 
-	Gtk::Window* palette_window;
-	std::string palette_edit_name;
+	ArdourDialog* palette_window;
+	sigc::connection palette_response_connection;
 	
 	void choose_color_from_palette (std::string const &target_name);
-	bool palette_chosen (GdkEvent*, std::string);
-	void palette_canvas_allocated (Gtk::Allocation& alloc, ArdourCanvas::Container* group, bool (ThemeManager::*event_handler)(GdkEvent*,std::string));
-	bool palette_done (GdkEventAny*);
+	
+	bool alias_palette_event (GdkEvent*, std::string, std::string);
+	void alias_palette_response (int, std::string, std::string);
 
 	void setup_aliases ();
+	void setup_palette ();
 };
 
 #endif /* __ardour_gtk_color_manager_h__ */

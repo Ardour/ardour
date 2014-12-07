@@ -42,6 +42,7 @@
 #include "canvas/wave_view.h"
 
 #include "ardour_button.h"
+#include "ardour_dialog.h"
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
@@ -76,42 +77,42 @@ ThemeManager::ThemeManager()
 	, timeline_item_gradient_depth_label (_("Timeline item gradient depth"))
 	, all_dialogs (_("All floating windows are dialogs"))
 	, icon_set_label (_("Icon Set"))
-	, base_color_viewport (*base_color_scroller.get_hadjustment(), *base_color_scroller.get_vadjustment())
-	, base_color_group (0)
+	, palette_viewport (*palette_scroller.get_hadjustment(), *palette_scroller.get_vadjustment())
+	, palette_group (0)
 	, palette_window (0)
 {
 	set_title (_("Theme Manager"));
 
 	/* Basic color list */
 	
-	color_list = TreeStore::create (columns);
-	color_display.set_model (color_list);
-	color_display.append_column (_("Object"), columns.name);
+	basic_color_list = TreeStore::create (basic_color_columns);
+	basic_color_display.set_model (basic_color_list);
+	basic_color_display.append_column (_("Object"), basic_color_columns.name);
 	
 	Gtkmm2ext::CellRendererColorSelector* color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
 	TreeViewColumn* color_column = manage (new TreeViewColumn (_("Color"), *color_renderer));
-	color_column->add_attribute (color_renderer->property_color(), columns.gdkcolor);
+	color_column->add_attribute (color_renderer->property_color(), basic_color_columns.gdkcolor);
 
-	color_display.append_column (*color_column);
+	basic_color_display.append_column (*color_column);
 	
-	color_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
-	color_display.get_column (0)->set_expand (true);
-	color_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
-	color_display.get_column (1)->set_expand (false);
-	color_display.set_reorderable (false);
-	color_display.get_selection()->set_mode (SELECTION_NONE);
-	color_display.set_headers_visible (true);
+	basic_color_display.get_column (0)->set_data (X_("colnum"), GUINT_TO_POINTER(0));
+	basic_color_display.get_column (0)->set_expand (true);
+	basic_color_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
+	basic_color_display.get_column (1)->set_expand (false);
+	basic_color_display.set_reorderable (false);
+	basic_color_display.get_selection()->set_mode (SELECTION_NONE);
+	basic_color_display.set_headers_visible (true);
 
-	color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::button_press_event), false);
+	basic_color_display.signal_button_press_event().connect (sigc::mem_fun (*this, &ThemeManager::basic_color_button_press_event), false);
 
-	scroller.add (color_display);
+	scroller.add (basic_color_display);
 	scroller.set_policy (POLICY_NEVER, POLICY_AUTOMATIC);
 
 	/* Now the alias list */
 	
 	alias_list = TreeStore::create (alias_columns);
 	alias_display.set_model (alias_list);
-	alias_display.append_column (_("Object"), columns.name);
+	alias_display.append_column (_("Object"), basic_color_columns.name);
 
 	color_renderer = manage (new Gtkmm2ext::CellRendererColorSelector);
 	color_column = manage (new TreeViewColumn (_("Color"), *color_renderer));
@@ -179,12 +180,14 @@ ThemeManager::ThemeManager()
 	hbox->pack_start (timeline_item_gradient_depth_label, false, false);
 	vbox->pack_start (*hbox, PACK_SHRINK);
 
-	base_color_viewport.signal_size_allocate().connect (sigc::mem_fun (*this, &ThemeManager::base_color_viewport_allocated));
-	base_color_scroller.add (base_color_viewport);
+	palette_group = initialize_palette_canvas (*palette_viewport.canvas());
+	palette_viewport.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), palette_group, palette_viewport.canvas(),
+								     sigc::mem_fun (*this, &ThemeManager::palette_event)));
+	palette_scroller.add (palette_viewport);
 	
-	notebook.append_page (scroller, _("Palette"));
-	notebook.append_page (base_color_scroller, _("Base Colors"));
 	notebook.append_page (alias_scroller, _("Items"));
+	notebook.append_page (palette_scroller, _("Palette"));
+	notebook.append_page (scroller, _("Colors"));
 	
 	vbox->pack_start (notebook);
 
@@ -223,7 +226,8 @@ ThemeManager::ThemeManager()
 							    PROGRAM_NAME));
 
 	set_size_request (-1, 400);
-	setup_theme ();
+	setup_basic_color_display ();
+	/* no need to call setup_palette() here, it will be done when its size is allocated */
 	setup_aliases ();
 
 	/* Trigger setting up the GTK color scheme and loading the RC file */
@@ -241,7 +245,7 @@ ThemeManager::save (string /*path*/)
 }
 
 bool
-ThemeManager::button_press_event (GdkEventButton* ev)
+ThemeManager::basic_color_button_press_event (GdkEventButton* ev)
 {
 	TreeIter iter;
 	TreeModel::Path path;
@@ -249,7 +253,7 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 	int cellx;
 	int celly;
 
-	if (!color_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+	if (!basic_color_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
 		return false;
 	}
 
@@ -259,27 +263,28 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 		return false;
 
 	case 1: /* color */
-		if ((iter = color_list->get_iter (path))) {
+		if ((iter = basic_color_list->get_iter (path))) {
 
-			ColorVariable<uint32_t>* var = (*iter)[columns.pVar];
+			ColorVariable<ArdourCanvas::Color>* var = (*iter)[basic_color_columns.pVar];
 			if (!var) {
 				/* parent row, do nothing */
 				return false;
 			}
-			
-			int r,g, b, a;
-			uint32_t rgba = (*iter)[columns.rgba];
-			Gdk::Color color;
 
-			UINT_TO_RGBA (rgba, &r, &g, &b, &a);
-			color.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
+			Gdk::Color color;
+			double r, g, b, a;
+
+			ArdourCanvas::color_to_rgba (var->get(), r, g, b, a);
+			color.set_rgb_p (r, g, b);
 			color_dialog.get_colorsel()->set_previous_color (color);
 			color_dialog.get_colorsel()->set_current_color (color);
-			color_dialog.get_colorsel()->set_previous_alpha ((guint16) (a * 256));
-			color_dialog.get_colorsel()->set_current_alpha ((guint16) (a * 256));
+			color_dialog.get_colorsel()->set_previous_alpha ((guint16) (a * 65535.0));
+			color_dialog.get_colorsel()->set_current_alpha ((guint16) (a * 65535.0));
 
+			ColorVariable<ArdourCanvas::Color>* ccvar = (*iter)[basic_color_columns.pVar];
+			
 			color_dialog_connection.disconnect ();
-			color_dialog_connection = color_dialog.signal_response().connect (sigc::mem_fun (*this, &ThemeManager::foobar_response));
+			color_dialog_connection = color_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::basic_color_response), ccvar));
 			color_dialog.present ();
 		}
 	}
@@ -288,36 +293,28 @@ ThemeManager::button_press_event (GdkEventButton* ev)
 }
 
 void
-ThemeManager::foobar_response (int result)
+ThemeManager::basic_color_response (int result, ColorVariable<ArdourCanvas::Color>* color_variable)
 {
-	// ColorVariable<uint32_t> *ccvar;
-	int r,g, b, a;
-	uint32_t rgba;
 	Gdk::Color color;
-
+	double a;
+	
 	color_dialog_connection.disconnect ();
 	
 	switch (result) {
 	case RESPONSE_CANCEL:
 		break;
 	case RESPONSE_ACCEPT:
+	case RESPONSE_OK:
 		color = color_dialog.get_colorsel()->get_current_color();
-		a = color_dialog.get_colorsel()->get_current_alpha();
-		r = (int) floor (color.get_red_p() * 255.0);
-		g = (int) floor (color.get_green_p() * 255.0);
-		b = (int) floor (color.get_blue_p() * 255.0);
-		
-		rgba = RGBA_TO_UINT(r,g,b,a>>8);
-		// (*iter)[columns.rgba] = rgba;
-		// (*iter)[columns.gdkcolor] = color;
-		
-		// ccvar = (*iter)[columns.pVar];
-		// ccvar->set(rgba);
-		/* mark dirty ... */
-		ARDOUR_UI::config()->set_dirty ();
-		/* but save it immediately */
-		ARDOUR_UI::config()->save_state ();
-		
+		a = color_dialog.get_colorsel()->get_current_alpha() / 65535.0;
+
+		color_variable->set (ArdourCanvas::rgba_to_color (color.get_red_p(),
+								  color.get_green_p(),
+								  color.get_blue_p(),
+								  a));
+		setup_basic_color_display ();
+		setup_palette ();
+		setup_aliases ();	
 		ColorsChanged(); //EMIT SIGNAL
 		break;
 		
@@ -402,8 +399,6 @@ ThemeManager::on_dark_theme_button_toggled()
 	UIConfiguration* uic (ARDOUR_UI::config());
 	
         uic->set_ui_rc_file("ui_dark.rc");
-	uic->set_dirty ();
-	uic->load_rc_file (uic->get_ui_rc_file(), true);
 }
 
 void
@@ -414,23 +409,21 @@ ThemeManager::on_light_theme_button_toggled()
 	UIConfiguration* uic (ARDOUR_UI::config());
 	
         uic->set_ui_rc_file("ui_light.rc");
-	uic->set_dirty ();
-	uic->load_rc_file (uic->get_ui_rc_file(), true);
 }
 
 void
-ThemeManager::setup_theme ()
+ThemeManager::setup_basic_color_display ()
 {
 	int r, g, b, a;
 
-	color_list->clear();
+	basic_color_list->clear();
 
 	for (std::map<std::string,ColorVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->configurable_colors.begin(); i != ARDOUR_UI::config()->configurable_colors.end(); i++) {
 
 
 		ColorVariable<uint32_t>* var = i->second;
 
-		TreeModel::Children rows = color_list->children();
+		TreeModel::Children rows = basic_color_list->children();
 		TreeModel::Row row;
 		string::size_type colon;
 
@@ -444,7 +437,7 @@ ThemeManager::setup_theme ()
 			TreeModel::iterator ri;
 
 			for (ri = rows.begin(); ri != rows.end(); ++ri) {
-				string s = (*ri)[columns.name];
+				string s = (*ri)[basic_color_columns.name];
 				if (s == parent) {
 					break;
 				}
@@ -452,34 +445,33 @@ ThemeManager::setup_theme ()
 
 			if (ri == rows.end()) {
 				/* not found, add the parent as new top level row */
-				row = *(color_list->append());
-				row[columns.name] = parent;
-				row[columns.pVar] = 0;
+				row = *(basic_color_list->append());
+				row[basic_color_columns.name] = parent;
+				row[basic_color_columns.pVar] = 0;
 				
 				/* now add the child as a child of this one */
 
-				row = *(color_list->insert (row->children().end()));
-				row[columns.name] = var->name().substr (colon+1);
+				row = *(basic_color_list->insert (row->children().end()));
+				row[basic_color_columns.name] = var->name().substr (colon+1);
 			} else {
-				row = *(color_list->insert ((*ri)->children().end()));
-				row[columns.name] = var->name().substr (colon+1);
+				row = *(basic_color_list->insert ((*ri)->children().end()));
+				row[basic_color_columns.name] = var->name().substr (colon+1);
 			}
 
 		} else {
 			/* add as a child */
-			row = *(color_list->append());
-			row[columns.name] = var->name();
+			row = *(basic_color_list->append());
+			row[basic_color_columns.name] = var->name();
 		}
 
 		Gdk::Color col;
 		uint32_t rgba = var->get();
 		UINT_TO_RGBA (rgba, &r, &g, &b, &a);
-		//cerr << (*i)->name() << " == " << hex << rgba << ": " << hex << r << " " << hex << g << " " << hex << b << endl;
 		col.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
 
-		row[columns.pVar] = var;
-		row[columns.rgba] = rgba;
-		row[columns.gdkcolor] = col;
+		row[basic_color_columns.pVar] = var;
+		row[basic_color_columns.rgba] = rgba;
+		row[basic_color_columns.gdkcolor] = col;
 	}
 
 	UIConfiguration* uic (ARDOUR_UI::config());
@@ -495,7 +487,7 @@ void
 ThemeManager::reset_canvas_colors()
 {
 	ARDOUR_UI::config()->load_defaults();
-	setup_theme ();
+	setup_basic_color_display ();
 	ARDOUR_UI::config()->set_dirty ();
 	ARDOUR_UI::config()->save_state ();
 }
@@ -521,20 +513,31 @@ struct SortByHue {
 };
 
 ArdourCanvas::Container*
-ThemeManager::initialize_canvas (ArdourCanvas::Canvas& canvas)
+ThemeManager::initialize_palette_canvas (ArdourCanvas::Canvas& canvas)
 {
 	using namespace ArdourCanvas;
 
 	/* hide background */
 	canvas.set_background_color (rgba_to_color (0.0, 0.0, 1.0, 0.0));
 
-	ScrollGroup* base_color_scroll_group = new ScrollGroup (canvas.root(), ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
-	canvas.add_scroller (*base_color_scroll_group);
-	return new ArdourCanvas::Container (base_color_scroll_group);
+	/* bi-directional scroll group */
+	
+	ScrollGroup* scroll_group = new ScrollGroup (canvas.root(), ScrollGroup::ScrollSensitivity (ScrollGroup::ScrollsVertically|ScrollGroup::ScrollsHorizontally));
+	canvas.add_scroller (*scroll_group);
+
+	/* new container to hold everything */
+
+	return new ArdourCanvas::Container (scroll_group);
 }
 
 void
-ThemeManager::build_base_color_canvas (ArdourCanvas::Container& group, bool (ThemeManager::*event_handler)(GdkEvent*,std::string), double width, double height)
+ThemeManager::palette_canvas_allocated (Gtk::Allocation& alloc, ArdourCanvas::Container* group, ArdourCanvas::Canvas* canvas, sigc::slot<bool,GdkEvent*,std::string> event_handler)
+{
+	build_palette_canvas (*canvas, *group, event_handler);
+}
+
+void
+ThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCanvas::Container& group, sigc::slot<bool,GdkEvent*,std::string> event_handler)
 {
 	using namespace ArdourCanvas;
 
@@ -550,6 +553,8 @@ ThemeManager::build_base_color_canvas (ArdourCanvas::Container& group, bool (The
 	
 	const uint32_t color_limit = nc.size();
 	const double box_size = 20.0;
+	const double width = canvas.width();
+	const double height = canvas.height();
 
 	uint32_t color_num = 0;
 
@@ -570,41 +575,50 @@ ThemeManager::build_base_color_canvas (ArdourCanvas::Container& group, bool (The
 				r->set_fill_color (color);
 				r->set_outline_color (rgba_to_color (0.0, 0.0, 0.0, 1.0));
 				r->set_tooltip (name);
-				r->Event.connect (sigc::bind (sigc::mem_fun (*this, event_handler), name));
+				r->Event.connect (sigc::bind (event_handler, name));
 			}
 		}
 	}
 }
-	
-void
-ThemeManager::base_color_viewport_allocated (Gtk::Allocation&)
-{
-	if (!base_color_group) {
-		base_color_group = initialize_canvas (*base_color_viewport.canvas());
-	}
 
-	build_base_color_canvas (*base_color_group, &ThemeManager::base_color_event,
-				 base_color_viewport.canvas()->width(),
-				 base_color_viewport.canvas()->height());
-				 
+void
+ThemeManager::palette_size_request (Gtk::Requisition* req)
+{
+	uint32_t ncolors = ARDOUR_UI::instance()->config()->relative_colors.size();
+	const int box_size = 20;
+
+	double c = sqrt (ncolors);
+	req->width = (int) floor (c * box_size);
+	req->height = (int) floor (c * box_size);
+
+	/* add overflow row if necessary */
+	
+	if (fmod (ncolors, c) != 0.0) {
+		req->height += box_size;
+	}
+}
+
+void
+ThemeManager::setup_palette ()
+{
+	build_palette_canvas (*palette_viewport.canvas(), *palette_group, sigc::mem_fun (*this, &ThemeManager::palette_event));
 }
 
 bool
-ThemeManager::base_color_event (GdkEvent*ev, string name)
+ThemeManager::palette_event (GdkEvent* ev, string name)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
-		edit_named_color (name);
-		break;
+		edit_palette_color (name);
+		return true;
 	default:
 		break;
 	}
-
 	return true;
 }
 
 void
-ThemeManager::edit_named_color (std::string name)
+ThemeManager::edit_palette_color (std::string name)
 {
 	using namespace ArdourCanvas;
 	double r,g, b, a;
@@ -620,25 +634,18 @@ ThemeManager::edit_named_color (std::string name)
 	color_dialog.get_colorsel()->set_previous_alpha ((guint16) (a * 65535));
 	color_dialog.get_colorsel()->set_current_alpha ((guint16) (a * 65535));
 
-	base_color_edit_name = name;
-	
 	color_dialog_connection.disconnect ();
-	color_dialog_connection = color_dialog.signal_response().connect (sigc::mem_fun (*this, &ThemeManager::base_color_dialog_done));
+	color_dialog_connection = color_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_color_response), name));
 	color_dialog.present();
 }
 
 void
-ThemeManager::base_color_dialog_done (int result)
+ThemeManager::palette_color_response (int result, std::string name)
 {
 	using namespace ArdourCanvas;
 
-	cerr << "Done, using [" << base_color_edit_name << "] res = " << result << endl;
+	color_dialog_connection.disconnect ();
 	
-	if (base_color_edit_name.empty()) {
-		color_dialog.hide ();
-		return;
-	}
-
 	UIConfiguration* uic (ARDOUR_UI::instance()->config());
 	UIConfiguration::RelativeHSV rhsv ("", HSV());
 	Gdk::Color gdkcolor;
@@ -647,7 +654,6 @@ ThemeManager::base_color_dialog_done (int result)
 	switch (result) {
 	case RESPONSE_ACCEPT:
 	case RESPONSE_OK:
-		cerr << "Accepting\n";
 		gdkcolor = color_dialog.get_colorsel()->get_current_color();
 		a = color_dialog.get_colorsel()->get_current_alpha() / 65535.0;
 		r = gdkcolor.get_red_p();
@@ -655,14 +661,11 @@ ThemeManager::base_color_dialog_done (int result)
 		b = gdkcolor.get_blue_p();
 
 		rhsv = uic->color_as_relative_hsv (rgba_to_color (r, g, b, a));
-		uic->reset_relative (base_color_edit_name, rhsv);
+		uic->reset_relative (name, rhsv);
 
 		/* rebuild */
 		
-		build_base_color_canvas (*base_color_group, &ThemeManager::base_color_event,
-					 base_color_viewport.canvas()->width(),
-					 base_color_viewport.canvas()->height());
-		
+		setup_palette ();
 		ColorsChanged(); //EMIT SIGNAL
 		break;
 		
@@ -671,62 +674,71 @@ ThemeManager::base_color_dialog_done (int result)
 	}
 
 	color_dialog.hide ();
-	base_color_edit_name = "";
-}
-
-void
-ThemeManager::palette_canvas_allocated (Gtk::Allocation& alloc, ArdourCanvas::Container* group, bool (ThemeManager::*event_handler)(GdkEvent*,std::string))
-{
-	build_base_color_canvas (*group, event_handler, alloc.get_width(), alloc.get_height());
 }
 
 bool
-ThemeManager::palette_chosen (GdkEvent* ev, string name)
+ThemeManager::alias_palette_event (GdkEvent* ev, string new_alias, string target_name)
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
+		ARDOUR_UI::instance()->config()->set_alias (target_name, new_alias);
+		return true;
 		break;
 	default:
-		return false;
+		break;
+	}
+	return false;
+}
+
+void
+ThemeManager::alias_palette_response (int response, std::string target_name, std::string old_alias)
+{
+	palette_response_connection.disconnect ();
+
+	switch (response) {
+	case GTK_RESPONSE_OK:
+	case GTK_RESPONSE_ACCEPT:
+		/* rebuild alias list with new color: inefficient but simple */
+		
+		setup_aliases ();
+		break;
+	default:
+		/* revert choice */
+		ARDOUR_UI::instance()->config()->set_alias (target_name, old_alias);
 		break;
 	}
 
-	UIConfiguration* uic (ARDOUR_UI::instance()->config());
-	uic->set_alias (palette_edit_name, name);
-
-	(void) palette_done ((GdkEventAny*) 0);
-
-	/* rebuild alias list with new color: inefficient but simple */
-	
-	setup_aliases ();
-	
-	return true;
-}
-
-bool
-ThemeManager::palette_done (GdkEventAny*)
-{
-	palette_edit_name = "";
 	palette_window->hide ();
-	return true;
 }
 
 void
 ThemeManager::choose_color_from_palette (string const & name)
 {
-	if (!palette_window) {
-		palette_window = new Gtk::Window (WINDOW_TOPLEVEL);
-		ArdourCanvas::GtkCanvas* canvas = new ArdourCanvas::GtkCanvas ();
-		ArdourCanvas::Container* group = initialize_canvas (*canvas);
-		
-		canvas->signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), group, &ThemeManager::palette_chosen));
-		palette_window->signal_delete_event().connect (sigc::mem_fun (*this, &ThemeManager::palette_done));
-		
-		palette_window->add (*canvas);
-		canvas->show ();
+	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration::ColorAliases::iterator i = uic->color_aliases.find (name);
+
+	if (i == uic->color_aliases.end()) {
+		return;
 	}
 
-	palette_edit_name = name;
+	if (!palette_window) {
+		palette_window = new ArdourDialog (_("Color Palette"));
+		palette_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
+		palette_window->add_button (Stock::OK, RESPONSE_OK);
+
+		ArdourCanvas::GtkCanvas* canvas = new ArdourCanvas::GtkCanvas ();
+		ArdourCanvas::Container* group = initialize_palette_canvas (*canvas);
+		
+		canvas->signal_size_request().connect (sigc::mem_fun (*this, &ThemeManager::palette_size_request));
+		canvas->signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), group, canvas,
+								    sigc::bind (sigc::mem_fun (*this, &ThemeManager::alias_palette_event), name)));
+
+		palette_window->get_vbox()->pack_start (*canvas);
+		palette_window->show_all ();
+	}
+
+	palette_response_connection.disconnect ();
+	palette_response_connection = palette_window->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::alias_palette_response), name, i->second));
 
 	palette_window->set_position (WIN_POS_MOUSE);
 	palette_window->present ();
@@ -784,7 +796,8 @@ ThemeManager::alias_button_press_event (GdkEventButton* ev)
 
 	case 1: /* color */
 		if ((iter = alias_list->get_iter (path))) {
-			choose_color_from_palette ((*iter)[alias_columns.name]);
+			string target_color_name = (*iter)[alias_columns.name];
+			choose_color_from_palette (target_color_name);
 		}
 		break;
 	}

@@ -138,6 +138,8 @@ class UIConfiguration : public PBD::Stateful
         sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);
 
+	void parameter_changed (std::string);
+	
 #undef UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) \
 	Type get_##var () const { return var.get(); } \
