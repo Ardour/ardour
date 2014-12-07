@@ -150,7 +150,6 @@ using namespace Gtk;
 using namespace std;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
-UIConfiguration *ARDOUR_UI::ui_config = 0;
 
 sigc::signal<void,bool> ARDOUR_UI::Blink;
 sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
@@ -162,7 +161,7 @@ sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
-	
+	, ui_config (new UIConfiguration)
 	, gui_object_state (new GUIObjectState)
 
 	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, true))
@@ -395,12 +394,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
 	attach_to_engine ();
-}
-
-void
-ARDOUR_UI::create_configuration ()
-{
-	ui_config = new UIConfiguration();
 }
 
 GlobalPortMatrixWindow*

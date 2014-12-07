@@ -129,7 +129,13 @@ namespace Gtkmm2ext {
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
-  public:
+    private:
+	/* This must be the first data element because constructor ordering
+	   relies on it.
+	*/
+	UIConfiguration*     ui_config;
+
+    public:
         ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
 	~ARDOUR_UI();
 
@@ -168,9 +174,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
-	static UIConfiguration *config () { return ui_config; }
-	static void create_configuration(); 
-
+	static UIConfiguration *config () { return theArdourUI->ui_config; }
+	
 	PublicEditor&	  the_editor(){return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
 
@@ -218,7 +223,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void create_xrun_marker (framepos_t);
 
 	GUIObjectState* gui_object_state;
-
+	
 	MainClock* primary_clock;
 	MainClock* secondary_clock;
 	void focus_on_clock ();
@@ -324,7 +329,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
   private:
 	Gtk::Tooltips       _tooltips;
-	NSM_Client          *nsm;
+	NSM_Client*          nsm;
 	bool                _was_dirty;
         bool                _mixer_on_top;
         bool first_time_engine_run;
@@ -648,8 +653,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         AddVideoDialog*         create_add_video_dialog ();
         BigClockWindow*         create_big_clock_window(); 
         GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
-
-	static UIConfiguration *ui_config;
 
 	ARDOUR::SystemExec *video_server_process;
 
