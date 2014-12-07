@@ -160,7 +160,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::APPLY, RESPONSE_ACCEPT);
-	set_response_sensitive (RESPONSE_ACCEPT, false);
+	set_response_sensitive (RESPONSE_ACCEPT, true);
 	set_default_response (RESPONSE_ACCEPT);
 
 	bpm_spinner.show ();
@@ -181,10 +181,18 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	tap_tempo_button.signal_clicked().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo));
 }
 
+bool
+TempoDialog::is_user_input_valid() const
+{
+	return (when_beat_entry.get_text() != "")
+		&& (when_bar_entry.get_text() != "")
+		&& (when_bar_entry.get_text() != "0");
+}
+
 void
 TempoDialog::bpm_changed ()
 {
-	set_response_sensitive (RESPONSE_ACCEPT, true);
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
 bool
@@ -198,18 +206,14 @@ TempoDialog::bpm_button_release (GdkEventButton*)
 {
 	/* the value has been modified, accept should work now */
 
-	set_response_sensitive (RESPONSE_ACCEPT, true);
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 	return false;
 }
 
 bool
 TempoDialog::entry_key_release (GdkEventKey*)
 {
-	if (when_beat_entry.get_text() != "" && when_bar_entry.get_text() != "") {
-	        set_response_sensitive (RESPONSE_ACCEPT, true);
-	} else {
-	        set_response_sensitive (RESPONSE_ACCEPT, false);
-	}
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 	return false;
 }
 
@@ -251,7 +255,7 @@ TempoDialog::get_note_type ()
 void
 TempoDialog::pulse_change ()
 {
-        set_response_sensitive (RESPONSE_ACCEPT, true);
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
 void
@@ -374,7 +378,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::APPLY, RESPONSE_ACCEPT);
-	set_response_sensitive (RESPONSE_ACCEPT, false);
+	set_response_sensitive (RESPONSE_ACCEPT, true);
 	set_default_response (RESPONSE_ACCEPT);
 
 	get_vbox()->show_all ();
@@ -387,6 +391,14 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 	when_bar_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_press), false);
 	when_bar_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &MeterDialog::entry_key_release));
 	note_type.signal_changed().connect (sigc::mem_fun (*this, &MeterDialog::note_type_change));
+}
+
+bool
+MeterDialog::is_user_input_valid() const
+{
+	return (when_bar_entry.get_text() != "")
+		&& (when_bar_entry.get_text() != "0")
+		&& (bpb_entry.get_text() != "");
 }
 
 bool
@@ -440,18 +452,14 @@ MeterDialog::entry_key_press (GdkEventKey* ev)
 bool
 MeterDialog::entry_key_release (GdkEventKey*)
 {
-        if (when_bar_entry.get_text() != "" && bpb_entry.get_text() != "") {
-	        set_response_sensitive (RESPONSE_ACCEPT, true);
-	} else {
-	        set_response_sensitive (RESPONSE_ACCEPT, false);
-	}
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 	return false;
 }
 
 void
 MeterDialog::note_type_change ()
 {
-        set_response_sensitive (RESPONSE_ACCEPT, true);
+        set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
 double

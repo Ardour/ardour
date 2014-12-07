@@ -47,6 +47,7 @@ public:
 
 private:
 	void init (const Timecode::BBT_Time& start, double, double, bool);
+	bool is_user_input_valid() const;
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
 	bool bpm_button_release (GdkEventButton* );
@@ -84,6 +85,7 @@ public:
 
 private:
 	void init (const Timecode::BBT_Time&, double, double, bool);
+	bool is_user_input_valid() const;
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );
 	void note_type_change ();
