@@ -485,8 +485,13 @@ private:
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
+	void enter_internal ();
+	void leave_internal ();
+
 	double _last_event_x;
 	double _last_event_y;
+	bool   _grabbed_keyboard;
+	bool   _entered;
 
 	framepos_t snap_frame_to_grid_underneath (framepos_t p, framecnt_t &) const;
 	

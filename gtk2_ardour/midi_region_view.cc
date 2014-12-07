@@ -119,6 +119,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
+	, _grabbed_keyboard (false)
+	, _entered (false)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
 	, pre_note_enter_cursor (0)
@@ -162,6 +164,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
+	, _grabbed_keyboard (false)
+	, _entered (false)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
 	, pre_note_enter_cursor (0)
@@ -211,6 +215,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
+	, _grabbed_keyboard (false)
+	, _entered (false)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
 	, pre_note_enter_cursor (0)
@@ -242,6 +248,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
+	, _grabbed_keyboard (false)
+	, _entered (false)
 	, pre_enter_cursor (0)
 	, pre_press_cursor (0)
 	, pre_note_enter_cursor (0)
@@ -406,10 +414,9 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 		_mouse_mode_connection, invalidator (*this), boost::bind (&MidiRegionView::mouse_mode_changed, this), gui_context ()
 		);
 
-	if (trackview.editor().current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
-		create_ghost_note (ev->x, ev->y);
-	}
+	enter_internal();
 
+	_entered = true;
 	return false;
 }
 
@@ -418,27 +425,48 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 {
 	_mouse_mode_connection.disconnect ();
 
-	trackview.editor().verbose_cursor()->hide ();
-	remove_ghost_note ();
+	leave_internal();
 
+	_entered = false;
 	return false;
 }
 
 void
 MidiRegionView::mouse_mode_changed ()
 {
-	if (trackview.editor().current_mouse_mode() == MouseDraw && trackview.editor().internal_editing()) {
-		create_ghost_note (_last_event_x, _last_event_y);
+	if (trackview.editor().internal_editing()) {
+		// Switched in to internal editing mode while entered
+		enter_internal();
 	} else {
-		remove_ghost_note ();
-		trackview.editor().verbose_cursor()->hide ();
+		// Switched out of internal editing mode while entered
+		leave_internal();
+	}
+}
+
+void
+MidiRegionView::enter_internal()
+{
+	if (trackview.editor().current_mouse_mode() == MouseDraw && _mouse_state != AddDragging) {
+		// Show ghost note under pencil
+		create_ghost_note(_last_event_x, _last_event_y);
 	}
 
-	if (!trackview.editor().internal_editing()) {
-		Keyboard::magic_widget_drop_focus();
-	} else {
+	if (!_selection.empty()) {
+		// Grab keyboard for moving selected notes with arrow keys
 		Keyboard::magic_widget_grab_focus();
-		group->grab_focus();
+		_grabbed_keyboard = true;
+	}
+}
+
+void
+MidiRegionView::leave_internal()
+{
+	trackview.editor().verbose_cursor()->hide ();
+	remove_ghost_note ();
+
+	if (_grabbed_keyboard) {
+		Keyboard::magic_widget_drop_focus();
+		_grabbed_keyboard = false;
 	}
 }
 
@@ -2052,6 +2080,12 @@ MidiRegionView::clear_selection_except (NoteBase* ev, bool signal)
 		}
 	}
 
+	if (!ev && _entered) {
+		// Clearing selection entirely, ungrab keyboard
+		Keyboard::magic_widget_drop_focus();
+		_grabbed_keyboard = false;
+	}
+
 	/* this does not change the status of this regionview w.r.t the editor
 	   selection.
 	*/
@@ -2064,6 +2098,8 @@ MidiRegionView::clear_selection_except (NoteBase* ev, bool signal)
 void
 MidiRegionView::unique_select(NoteBase* ev)
 {
+	const bool selection_was_empty = _selection.empty();
+
 	clear_selection_except (ev);
 
 	/* don't bother with checking to see if we should remove this
@@ -2074,6 +2110,11 @@ MidiRegionView::unique_select(NoteBase* ev)
 
 	if (!ev->selected()) {
 		add_to_selection (ev);
+		if (selection_was_empty && _entered) {
+			// Grab keyboard for moving notes with arrow keys
+			Keyboard::magic_widget_grab_focus();
+			_grabbed_keyboard = true;
+		}
 	}
 }
 
@@ -2345,6 +2386,11 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 
 	if (i != _selection.end()) {
 		_selection.erase (i);
+		if (_selection.empty() && _grabbed_keyboard) {
+			// Ungrab keyboard
+			Keyboard::magic_widget_drop_focus();
+			_grabbed_keyboard = false;
+		}
 	}
 
 	ev->set_selected (false);
@@ -2359,18 +2405,19 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 void
 MidiRegionView::add_to_selection (NoteBase* ev)
 {
-	bool add_mrv_selection = false;
-
-	if (_selection.empty()) {
-		add_mrv_selection = true;
-	}
+	const bool selection_was_empty = _selection.empty();
 
 	if (_selection.insert (ev).second) {
 		ev->set_selected (true);
 		start_playing_midi_note ((ev)->note());
+		if (selection_was_empty && _entered) {
+			// Grab keyboard for moving notes with arrow keys
+			Keyboard::magic_widget_grab_focus();
+			_grabbed_keyboard = true;
+		}
 	}
 
-	if (add_mrv_selection) {
+	if (selection_was_empty) {
 		PublicEditor& editor (trackview.editor());
 		editor.get_selection().add (this);
 	}
@@ -3600,6 +3647,8 @@ MidiRegionView::drop_down_keys ()
 void
 MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, double y)
 {
+	/* XXX: This is dead code.  What was it for? */
+
 	double note = midi_stream_view()->y_to_note(y);
 	Events e;
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
