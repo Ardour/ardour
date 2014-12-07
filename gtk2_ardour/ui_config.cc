@@ -329,8 +329,6 @@ UIConfiguration::save_state()
 {
 	XMLTree tree;
 
-	PBD::stacktrace (cerr, 20);
-	
 	if (!dirty()) {
 		return 0;
 	}
@@ -338,7 +336,6 @@ UIConfiguration::save_state()
 	std::string rcfile(user_config_directory());
 	rcfile = Glib::build_filename (rcfile, ui_config_file_name);
 
-	// this test seems bogus?
 	if (rcfile.length()) {
 		tree.set_root (&get_state());
 		if (!tree.write (rcfile.c_str())){
