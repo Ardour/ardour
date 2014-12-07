@@ -212,16 +212,6 @@
     <ColorAlias name="meter background: top" alias="color 34"/>
     <ColorAlias name="meter bar" alias="color 25"/>
     <ColorAlias name="meter color BBC" alias="color 8"/>
-    <ColorAlias name="meter fill: 0" alias="color 47"/>
-    <ColorAlias name="meter fill: 1" alias="color 48"/>
-    <ColorAlias name="meter fill: 2" alias="color 17"/>
-    <ColorAlias name="meter fill: 3" alias="color 17"/>
-    <ColorAlias name="meter fill: 4" alias="color 32"/>
-    <ColorAlias name="meter fill: 5" alias="color 32"/>
-    <ColorAlias name="meter fill: 6" alias="color 8"/>
-    <ColorAlias name="meter fill: 7" alias="color 8"/>
-    <ColorAlias name="meter fill: 8" alias="color 9"/>
-    <ColorAlias name="meter fill: 9" alias="color 9"/>
     <ColorAlias name="meter marker" alias="color 19"/>
     <ColorAlias name="meterbridge label: fill" alias="color 34"/>
     <ColorAlias name="meterbridge label: fill active" alias="color 46"/>
