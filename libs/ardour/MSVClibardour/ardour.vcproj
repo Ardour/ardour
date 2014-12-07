@@ -612,6 +612,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\legatize.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\location.cc"
 				>
 			</File>
@@ -1683,6 +1687,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\latent.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\legatize.h"
 				>
 			</File>
 			<File
