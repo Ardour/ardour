@@ -786,14 +786,16 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		}
 		return true;
 
-	} else if (ev->keyval == GDK_Left && unmodified) {
+	} else if (ev->keyval == GDK_Left) {
 
-		nudge_notes (false);
+		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+		nudge_notes (false, fine);
 		return true;
 
-	} else if (ev->keyval == GDK_Right && unmodified) {
+	} else if (ev->keyval == GDK_Right) {
 
-		nudge_notes (true);
+		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+		nudge_notes (true, fine);
 		return true;
 
 	} else if (ev->keyval == GDK_c && unmodified) {
@@ -3093,7 +3095,7 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTim
 }
 
 void
-MidiRegionView::nudge_notes (bool forward)
+MidiRegionView::nudge_notes (bool forward, bool fine)
 {
 	if (_selection.empty()) {
 		return;
@@ -3104,15 +3106,21 @@ MidiRegionView::nudge_notes (bool forward)
 	   into a vector and sort before using the first one.
 	*/
 
-	framepos_t ref_point = source_beats_to_absolute_frames ((*(_selection.begin()))->note()->time());
-	framepos_t unused;
-	framecnt_t distance;
+	const framepos_t    ref_point = source_beats_to_absolute_frames ((*(_selection.begin()))->note()->time());
+	Evoral::MusicalTime delta;
 
-	if (trackview.editor().snap_mode() == Editing::SnapOff) {
+	if (!fine) {
+
+		/* non-fine, move by 1 bar regardless of snap */
+		delta = Evoral::MusicalTime(trackview.session()->tempo_map().meter_at(ref_point).divisions_per_bar());
+
+	} else if (trackview.editor().snap_mode() == Editing::SnapOff) {
 
 		/* grid is off - use nudge distance */
 
-		distance = trackview.editor().get_nudge_distance (ref_point, unused);
+		framepos_t       unused;
+		const framecnt_t distance = trackview.editor().get_nudge_distance (ref_point, unused);
+		delta = region_frames_to_region_beats (fabs ((double)distance));
 
 	} else {
 
@@ -3132,14 +3140,13 @@ MidiRegionView::nudge_notes (bool forward)
 		}
 
 		trackview.editor().snap_to (next_pos, (forward ? RoundUpAlways : RoundDownAlways), false);
-		distance = ref_point - next_pos;
+		const framecnt_t distance = ref_point - next_pos;
+		delta = region_frames_to_region_beats (fabs ((double)distance));
 	}
 
-	if (distance == 0) {
+	if (!delta) {
 		return;
 	}
-
-	Evoral::MusicalTime delta = region_frames_to_region_beats (fabs ((double)distance));
 
 	if (!forward) {
 		delta = -delta;

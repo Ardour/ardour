@@ -288,7 +288,7 @@ public:
 	void change_note_lengths (bool, bool, Evoral::MusicalTime beats, bool start, bool end);
         void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void transpose (bool up, bool fine, bool allow_smush);
-	void nudge_notes (bool forward);
+	void nudge_notes (bool forward, bool fine);
 	void channel_edit ();
 	void velocity_edit ();
 
