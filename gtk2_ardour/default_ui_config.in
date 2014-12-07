@@ -133,7 +133,7 @@
     <ColorAlias name="gtk_audio_bus" alias="color 61"/>
     <ColorAlias name="gtk_audio_track" alias="color 70"/>
     <ColorAlias name="gtk_automation_track_header" alias="color 42"/>
-    <ColorAlias name="gtk_background" alias="color 12"/>
+    <ColorAlias name="gtk_background" alias="color 34"/>
     <ColorAlias name="gtk_bases" alias="color 27"/>
     <ColorAlias name="gtk_bg_selected" alias="color 99"/>
     <ColorAlias name="gtk_bg_tooltip" alias="color 52"/>
