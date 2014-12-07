@@ -19,7 +19,6 @@
 #ifndef EVORAL_EVENT_HPP
 #define EVORAL_EVENT_HPP
 
-#include <assert.h>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>

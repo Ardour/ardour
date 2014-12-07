@@ -20,8 +20,6 @@
 #ifndef EVORAL_SMF_HPP
 #define EVORAL_SMF_HPP
 
-#include <cassert>
-
 #include <glibmm/threads.h>
 
 #include "evoral/visibility.h"
