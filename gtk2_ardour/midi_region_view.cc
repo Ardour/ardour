@@ -636,7 +636,9 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				return true;
 			} else if (m == MouseObject) {
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
-				clear_selection ();
+				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+					clear_selection ();
+				}
 				_mouse_state = SelectRectDragging;
 				return true;
 			} else if (m == MouseRange) {
