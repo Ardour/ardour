@@ -693,8 +693,6 @@ ThemeManager::alias_palette_event (GdkEvent* ev, string new_alias, string target
 void
 ThemeManager::alias_palette_response (int response, std::string target_name, std::string old_alias)
 {
-	palette_response_connection.disconnect ();
-
 	switch (response) {
 	case GTK_RESPONSE_OK:
 	case GTK_RESPONSE_ACCEPT:
@@ -721,23 +719,22 @@ ThemeManager::choose_color_from_palette (string const & name)
 		return;
 	}
 
-	if (!palette_window) {
-		palette_window = new ArdourDialog (_("Color Palette"));
-		palette_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
-		palette_window->add_button (Stock::OK, RESPONSE_OK);
+	delete palette_window;
 
-		ArdourCanvas::GtkCanvas* canvas = new ArdourCanvas::GtkCanvas ();
-		ArdourCanvas::Container* group = initialize_palette_canvas (*canvas);
-		
-		canvas->signal_size_request().connect (sigc::mem_fun (*this, &ThemeManager::palette_size_request));
-		canvas->signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), group, canvas,
-								    sigc::bind (sigc::mem_fun (*this, &ThemeManager::alias_palette_event), name)));
+	palette_window = new ArdourDialog (_("Color Palette"));
+	palette_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	palette_window->add_button (Stock::OK, RESPONSE_OK);
+	
+	ArdourCanvas::GtkCanvas* canvas = new ArdourCanvas::GtkCanvas ();
+	ArdourCanvas::Container* group = initialize_palette_canvas (*canvas);
+	
+	canvas->signal_size_request().connect (sigc::mem_fun (*this, &ThemeManager::palette_size_request));
+	canvas->signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), group, canvas,
+							    sigc::bind (sigc::mem_fun (*this, &ThemeManager::alias_palette_event), name)));
+	
+	palette_window->get_vbox()->pack_start (*canvas);
+	palette_window->show_all ();
 
-		palette_window->get_vbox()->pack_start (*canvas);
-		palette_window->show_all ();
-	}
-
-	palette_response_connection.disconnect ();
 	palette_response_connection = palette_window->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::alias_palette_response), name, i->second));
 
 	palette_window->set_position (WIN_POS_MOUSE);
