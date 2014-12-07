@@ -134,6 +134,8 @@ UIConfiguration::color_theme_changed ()
 	*/
 
 	parameter_changed ("ui-rc-file");
+
+	save_state ();
 }
 
 void
@@ -270,9 +272,6 @@ UIConfiguration::load_defaults ()
 		_dirty = false;
 	}
 
-
-	cerr << "\n\n\nUIC defaults reloaded, now emitting ColorsChanged\n";
-	
 	ARDOUR_UI_UTILS::ColorsChanged ();
 
 	return found;
@@ -327,8 +326,6 @@ UIConfiguration::load_state ()
 		error << _("could not find any ui configuration file, canvas will look broken.") << endmsg;
 	}
 
-	cerr << "\n\n\nUIC loaded state, now emitting ColorsChanged\n";
-	
 	ARDOUR_UI_UTILS::ColorsChanged ();
 
 	return 0;
@@ -659,8 +656,6 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 		return;
 	}
 
-	cerr << "Reset alias for " << name << " to " << alias << endl;
-	
 	i->second = alias;
 	aliases_modified = true;
 
