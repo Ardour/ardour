@@ -1822,6 +1822,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\paste_context.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\patch_change.h"
 				>
 			</File>
