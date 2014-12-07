@@ -105,6 +105,7 @@ libardour_sources = [
         'io_processor.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
+        'legatize.cc',
         'location.cc',
         'location_importer.cc',
         'ltc_slave.cc',

@@ -252,6 +252,8 @@
         <menuitem action='transpose-region'/>
         <menuitem action='insert-patch-change'/>
         <menuitem action='quantize-region'/>
+        <menuitem action='legatize-region'/>
+        <menuitem action='remove-overlap'/>
         <menuitem action='fork-region'/>
         <menuitem action='show-region-list-editor'/>
       </menu>
@@ -632,6 +634,8 @@
       <menuitem action='transpose-region'/>
       <menuitem action='insert-patch-change-context'/>
       <menuitem action='quantize-region'/>
+      <menuitem action='legatize-region'/>
+      <menuitem action='remove-overlap'/>
       <menuitem action='fork-region'/>
       <menuitem action='show-region-list-editor'/>
     </menu>

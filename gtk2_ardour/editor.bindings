@@ -33,6 +33,8 @@
   <Binding action="Region/cut-region-gain" key="ampersand"/>
   <Binding action="Common/Quit" key="Primary-q"/>
   <Binding action="Region/quantize-region" key="q"/>
+  <Binding action="Region/legatize-region" key="Primary-apostrophe"/>
+  <Binding action="Region/remove-overlap" key="Secondary-apostrophe"/>
   <Binding action="MouseMode/toggle-internal-edit" key="e"/>
   <Binding action="Editor/select-all-before-edit-cursor" key="Primary-e"/>
   <Binding action="Region/export-region" key="Primary-Level4-e"/>

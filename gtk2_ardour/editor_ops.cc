@@ -50,6 +50,7 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/profile.h"
 #include "ardour/quantize.h"
+#include "ardour/legatize.h"
 #include "ardour/region_factory.h"
 #include "ardour/reverse.h"
 #include "ardour/session.h"
@@ -4985,6 +4986,36 @@ Editor::quantize_region ()
 
 		apply_midi_note_edit_op (quant);
 	}
+}
+
+void
+Editor::legatize_region (bool shrink_only)
+{
+	int selected_midi_region_cnt = 0;
+
+	if (!_session) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (rs.empty()) {
+		return;
+	}
+
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
+		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
+		if (mrv) {
+			selected_midi_region_cnt++;
+		}
+	}
+
+	if (selected_midi_region_cnt == 0) {
+		return;
+	}
+
+	Legatize legatize(shrink_only);
+	apply_midi_note_edit_op (legatize);
 }
 
 void

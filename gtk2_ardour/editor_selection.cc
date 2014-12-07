@@ -1181,6 +1181,8 @@ Editor::sensitize_the_right_region_actions ()
 		editor_menu_actions->get_action("RegionMenuMIDI")->set_sensitive (false);
 		_region_actions->get_action("show-region-list-editor")->set_sensitive (false);
 		_region_actions->get_action("quantize-region")->set_sensitive (false);
+		_region_actions->get_action("legatize-region")->set_sensitive (false);
+		_region_actions->get_action("remove-overlap")->set_sensitive (false);
 		_region_actions->get_action("fork-region")->set_sensitive (false);
 		_region_actions->get_action("insert-patch-change-context")->set_sensitive (false);
 		_region_actions->get_action("insert-patch-change")->set_sensitive (false);

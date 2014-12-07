@@ -1190,6 +1190,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void reset_region_scale_amplitude ();
 	void adjust_region_gain (bool up);
 	void quantize_region ();
+	void legatize_region (bool shrink_only);
 	void insert_patch_change (bool from_context);
 	void fork_region ();
 
