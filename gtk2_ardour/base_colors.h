@@ -61,14 +61,14 @@ CANVAS_BASE_COLOR(colorLightest,"colorLightest", 0xffffffff) /* white */
 
 /* Meter colors */
 
-CANVAS_BASE_COLOR(MeterColor0, "meterColor0", 0x008800FF)
-CANVAS_BASE_COLOR(MeterColor1, "meterColor1", 0x00AA00FF)
-CANVAS_BASE_COLOR(MeterColor2, "meterColor2", 0x00FF00FF)
-CANVAS_BASE_COLOR(MeterColor3, "meterColor3", 0x00FF00FF)
-CANVAS_BASE_COLOR(MeterColor4, "meterColor4", 0xFFF000ff)
-CANVAS_BASE_COLOR(MeterColor5, "meterColor5", 0xFFF000ff)
-CANVAS_BASE_COLOR(MeterColor6, "meterColor6", 0xFF8800ff)
-CANVAS_BASE_COLOR(MeterColor7, "meterColor7", 0xFF8800ff)
+CANVAS_BASE_COLOR(MeterColor0, "meterColor0", 0x90FE3BFF)
+CANVAS_BASE_COLOR(MeterColor1, "meterColor1", 0x90FE3BFF)
+CANVAS_BASE_COLOR(MeterColor2, "meterColor2", 0x90FE3BFF)
+CANVAS_BASE_COLOR(MeterColor3, "meterColor3", 0x90FE3BFF)
+CANVAS_BASE_COLOR(MeterColor4, "meterColor4", 0xFFEA38ff)
+CANVAS_BASE_COLOR(MeterColor5, "meterColor5", 0xFFEA38ff)
+CANVAS_BASE_COLOR(MeterColor6, "meterColor6", 0xFFEA38ff)
+CANVAS_BASE_COLOR(MeterColor7, "meterColor7", 0xFFEA38ff)
 CANVAS_BASE_COLOR(MeterColor8, "meterColor8", 0xFF0000ff)
 CANVAS_BASE_COLOR(MeterColor9, "meterColor9", 0xFF0000ff)
     
