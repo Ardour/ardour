@@ -103,12 +103,13 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 		return false;
 	}
 
-	if (!trackview.editor().internal_editing()) {
+	PublicEditor& e = trackview.editor ();
+
+	if (!trackview.editor().internal_editing() &&
+	    e.current_mouse_mode() != Editing::MouseDraw) {
 		// not in internal edit mode, so just act like a normal region
 		return RegionView::canvas_group_event (ev);
 	}
-
-	PublicEditor& e = trackview.editor ();
 
 	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseObject) {
 
@@ -122,7 +123,7 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 		e.drags()->motion_handler(ev, false);
 		return true;
 
-	} else if (ev->type == GDK_BUTTON_RELEASE) {
+	} else if (ev->type == GDK_BUTTON_RELEASE && e.current_mouse_mode() == Editing::MouseDraw) {
 		if (e.drags()->end_grab (ev)) {
 			return true;
 		} else if (e.current_mouse_mode() != Editing::MouseDraw &&
