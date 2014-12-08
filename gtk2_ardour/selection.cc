@@ -465,7 +465,6 @@ void
 Selection::add (vector<RegionView*>& v)
 {
 	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 
 	/* XXX This method or the add (const RegionSelection&) needs to go
 	 */
@@ -487,7 +486,6 @@ void
 Selection::add (const RegionSelection& rs)
 {
 	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 
 	/* XXX This method or the add (const vector<RegionView*>&) needs to go
 	 */
@@ -509,7 +507,6 @@ void
 Selection::add (RegionView* r)
 {
 	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		bool changed = regions.add (r);
@@ -820,7 +817,6 @@ void
 Selection::set (const RegionSelection& rs)
 {
 	clear_time();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
 	regions = rs;
 	RegionsChanged(); /* EMIT SIGNAL */
@@ -836,21 +832,28 @@ Selection::set (MidiRegionView* mrv)
 }
 
 void
-Selection::set (RegionView* r, bool /*also_clear_tracks*/)
+Selection::set (RegionView* r, bool also_clear_tracks/*=false*/)
 {
 	clear_time();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 	clear_objects ();
+    
+    if (also_clear_tracks) {
+        clear_tracks();
+    }
+    
 	add (r);
 }
 
 void
-Selection::set (vector<RegionView*>& v)
+Selection::set (vector<RegionView*>& v, bool also_clear_tracks/*=false*/)
 {
 	clear_time();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
 
+    if (also_clear_tracks) {
+        clear_tracks();
+    }
+    
 	add (v);
 }
 

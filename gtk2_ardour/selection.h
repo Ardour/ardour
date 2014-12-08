@@ -123,9 +123,9 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void set (TimeAxisView*);
 	void set (const TrackViewList&);
 	void set (const MidiNoteSelection&);
-	void set (RegionView*, bool also_clear_tracks = true);
+	void set (RegionView*, bool also_clear_tracks = false);
 	void set (MidiRegionView*);
-	void set (std::vector<RegionView*>&);
+	void set (std::vector<RegionView*>&, bool also_clear_tracks = false);
 	long set (framepos_t, framepos_t);
 	void set_preserving_all_ranges (framepos_t, framepos_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
