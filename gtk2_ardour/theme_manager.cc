@@ -588,7 +588,7 @@ ThemeManager::palette_size_request (Gtk::Requisition* req)
 	uint32_t ncolors = ARDOUR_UI::instance()->config()->relative_colors.size();
 	const int box_size = 20;
 
-	double c = sqrt (ncolors);
+	double c = sqrt ((double)ncolors);
 	req->width = (int) floor (c * box_size);
 	req->height = (int) floor (c * box_size);
 
