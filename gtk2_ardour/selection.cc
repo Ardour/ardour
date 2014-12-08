@@ -137,10 +137,12 @@ Selection::clear_tracks ()
 }
 
 void
-Selection::clear_time ()
+Selection::clear_time (bool clear_applied_tracks/*=true*/)
 {
 	time.clear();
-    time.tracks_in_range.clear();
+    if (clear_applied_tracks) {
+        time.tracks_in_range.clear();
+    }
     
 	TimeChanged ();
 }
@@ -864,7 +866,7 @@ long
 Selection::set (framepos_t start, framepos_t end)
 {
 	clear_objects();  //enforce region/object exclusivity
-	clear_time();
+	clear_time(false); //do not clear tracks time selection is applied to
 
 	if ((start == 0 && end == 0) || end < start) {
 		return 0;

@@ -199,7 +199,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
  * The Track selection isn't affected when ranges or objects are added.
  */
 
-	void clear_time();  //clears any time selection  ( i.e. Range )
+	void clear_time(bool clear_applied_tracks = true);  //clears any time selection  ( i.e. Range )
 	void clear_tracks ();  //clears the track header selections
 	void clear_objects();  //clears the items listed below
 
