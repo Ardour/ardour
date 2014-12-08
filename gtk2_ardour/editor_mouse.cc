@@ -325,16 +325,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 		return;
 	}
 
-	switch (m) {
-	case MouseDraw:
-		act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
-		tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		tact->set_active (true);
-		break;
-	default:
-		break;
-	}
-	
 	if (_session && mouse_mode == MouseAudition) {
 		/* stop transport and reset default speed to avoid oddness with
 		   auditioning */
