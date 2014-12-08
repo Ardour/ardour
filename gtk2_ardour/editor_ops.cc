@@ -84,6 +84,7 @@
 #include "mixer_strip.h"
 #include "mouse_cursors.h"
 #include "normalize_dialog.h"
+#include "note.h"
 #include "paste_context.h"
 #include "patch_change_dialog.h"
 #include "quantize_dialog.h"
@@ -3912,7 +3913,7 @@ struct AutomationRecord {
  *  @param op Operation (Cut, Copy or Clear)
  */
 void
-Editor::cut_copy_points (CutCopyOp op)
+Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::MusicalTime earliest, bool midi)
 {
 	if (selection->points.empty ()) {
 		return;
@@ -3941,31 +3942,45 @@ Editor::cut_copy_points (CutCopyOp op)
 		/* This operation will involve putting things in the cut buffer, so create an empty
 		   ControlList for each of our source lists to put the cut buffer data in.
 		*/
-		framepos_t start = std::numeric_limits<framepos_t>::max();
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
 			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor());
-
-			/* Calculate earliest start position of any point in selection. */
-			start = std::min(start, i->second.line->session_position(i->first->begin()));
 		}
 
 		/* Add all selected points to the relevant copy ControlLists */
+		framepos_t start = std::numeric_limits<framepos_t>::max();
 		for (PointSelection::iterator i = selection->points.begin(); i != selection->points.end(); ++i) {
 			boost::shared_ptr<AutomationList> al = (*i)->line().the_list();
-			AutomationList::const_iterator j = (*i)->model ();
+			AutomationList::const_iterator    j  = (*i)->model();
+
 			lists[al].copy->fast_simple_add ((*j)->when, (*j)->value);
+			if (midi) {
+				/* Update earliest MIDI start time in beats */
+				earliest = std::min(earliest,  Evoral::MusicalTime((*j)->when));
+			} else {
+				/* Update earliest session start time in frames */
+				start = std::min(start, (*i)->line().session_position(j));
+			}
 		}
 
 		/* Snap start time backwards, so copy/paste is snap aligned. */
-		snap_to(start, RoundDownMaybe);
+		if (midi) {
+			if (earliest == Evoral::MusicalTime::max()) {
+				earliest = Evoral::MusicalTime();  // Weird... don't offset
+			}
+			earliest.round_down_to_beat();
+		} else {
+			if (start == std::numeric_limits<double>::max()) {
+				start = 0;  // Weird... don't offset
+			}
+			snap_to(start, RoundDownMaybe);
+		}
 
+		const double line_offset = midi ? earliest.to_double() : start;
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
 			/* Correct this copy list so that it is relative to the earliest
 			   start time, so relative ordering between points is preserved
-			   when copying from several lists. */
-			const AutomationLine* line        = i->second.line;
-			const double          line_offset = line->time_converter().from(start);
-
+			   when copying from several lists and the paste starts at the
+			   earliest copied piece of data. */
 			for (AutomationList::iterator j = i->second.copy->begin(); j != i->second.copy->end(); ++j) {
 				(*j)->when -= line_offset;
 			}
@@ -4003,9 +4018,13 @@ Editor::cut_copy_points (CutCopyOp op)
 void
 Editor::cut_copy_midi (CutCopyOp op)
 {
+	Evoral::MusicalTime earliest = Evoral::MusicalTime::max();
 	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 		if (mrv) {
+			if (!mrv->selection().empty()) {
+				earliest = std::min(earliest, (*mrv->selection().begin())->note()->time());
+			}
 			mrv->cut_copy_clear (op);
 
 			/* XXX: not ideal, as there may be more than one track involved in the selection */
@@ -4014,7 +4033,7 @@ Editor::cut_copy_midi (CutCopyOp op)
 	}
 
 	if (!selection->points.empty()) {
-		cut_copy_points (op);
+		cut_copy_points (op, earliest, true);
 		if (op == Cut || op == Delete) {
 			selection->clear_points ();
 		}

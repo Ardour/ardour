@@ -1127,7 +1127,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
-	void cut_copy_points (Editing::CutCopyOp);
+	void cut_copy_points (Editing::CutCopyOp, Evoral::MusicalTime earliest=Evoral::MusicalTime(), bool midi=false);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 	void cut_copy_midi (Editing::CutCopyOp);
