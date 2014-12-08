@@ -167,7 +167,6 @@ if test x$SAE != x ; then
     #
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
-    env="$env<key>ARDOUR3_UI_RC</key><string>ardour3_ui_dark_sae.rc</string>"
 elif test x$MIXBUS != x ; then
     appname="Ardour3/Mixbus"
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
@@ -176,7 +175,6 @@ elif test x$MIXBUS != x ; then
     #
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>us-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui.conf</string>"
-    env="$env<key>ARDOUR3_UI_RC</key><string>ardour3_ui_dark.rc</string>"
 else
     appname="Ardour3"
 fi
@@ -462,13 +460,8 @@ else
     echo cp ../../instant.xml $Resources/instant.xml
 fi
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
-cp $BUILD_ROOT/gtk2_ardour/dark_fonts.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/dark_styles.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/light_fonts.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/light_styles.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ui_dark.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/ui_light.rc $Resources
-cp $BUILD_ROOT/gtk2_ardour/widgets.rc $Resources
+cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Resources
+
 
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
