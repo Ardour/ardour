@@ -391,47 +391,12 @@ Editor::update_time_selection_display ()
 void
 Editor::step_mouse_mode (bool next)
 {
-	switch (current_mouse_mode()) {
-	case MouseObject:
-		if (next) {
-			set_mouse_mode (MouseRange);
-		} else {
-			set_mouse_mode (MouseTimeFX);
-		}
-		break;
-
-	case MouseRange:
-		if (next) set_mouse_mode (MouseDraw);
-		else set_mouse_mode (MouseCut);
-		break;
-
-	case MouseCut:
-		if (next) set_mouse_mode (MouseRange);
-		else set_mouse_mode (MouseDraw);
-		break;
-
-	case MouseDraw:
-		if (next) set_mouse_mode (MouseCut);
-		else set_mouse_mode (MouseRange);
-		break;
-
-	case MouseGain:
-		if (next) set_mouse_mode (MouseTimeFX);
-		else set_mouse_mode (MouseDraw);
-		break;
-
-	case MouseTimeFX:
-		if (next) {
-			set_mouse_mode (MouseAudition);
-		} else {
-			set_mouse_mode (MouseGain);
-		}
-		break;
-
-	case MouseAudition:
-		if (next) set_mouse_mode (MouseObject);
-		else set_mouse_mode (MouseTimeFX);
-		break;
+	const int n_mouse_modes = (int)MouseDraw + 1;
+	int       current       = (int)current_mouse_mode();
+	if (next) {
+		set_mouse_mode((MouseMode)((current + 1) % n_mouse_modes));
+	} else {
+		set_mouse_mode((MouseMode)((current + n_mouse_modes - 1) % n_mouse_modes));
 	}
 }
 
