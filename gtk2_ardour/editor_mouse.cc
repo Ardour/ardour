@@ -255,10 +255,6 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
 		break;
 
-	case MouseGain:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-gain"));
-		break;
-
 	case MouseTimeFX:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
 		break;
@@ -305,10 +301,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	case MouseDraw:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
-		break;
-
-	case MouseGain:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-gain"));
 		break;
 
 	case MouseTimeFX:
@@ -463,7 +455,6 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	if (((mouse_mode != MouseObject) &&
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
-	     (mouse_mode != MouseGain) &&
 	     (mouse_mode != MouseDraw)) ||
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
 	    (internal_editing() && mouse_mode != MouseTimeFX)) {
@@ -750,36 +741,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case MouseDraw:
-		switch (item_type) {
-		case NoteItem:
-			/* Existing note: allow trimming/motion */
-			if (internal_editing()) {
-				/* trim notes if we're in internal edit mode and near the ends of the note */
-				NoteBase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
-				assert (cn);
-				if (cn->big_enough_to_trim() && cn->mouse_near_ends()) {
-					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
-				} else {
-					_drags->set (new NoteDrag (this, item), event);
-				}
-				return true;
-			} 
-			break;
-		case StreamItem:
-			if (internal_editing()) {
-				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
-					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
-				}
-				return true;
-			}
-			break;
-
-		default:
-			break;
-		}
-		break;
-
 	case MouseCut:
 		switch (item_type) {
 		case RegionItem:
@@ -985,7 +946,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case MouseGain:
+	case MouseDraw:
 		switch (item_type) {
 		case GainLineItem:
 			_drags->set (new LineDrag (this, item), event);
@@ -1019,7 +980,31 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case AutomationLineItem:
 			_drags->set (new LineDrag (this, item), event);
 			break;
-			
+
+		case NoteItem:
+			/* Existing note: allow trimming/motion */
+			if (internal_editing()) {
+				/* trim notes if we're in internal edit mode and near the ends of the note */
+				NoteBase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
+				assert (cn);
+				if (cn->big_enough_to_trim() && cn->mouse_near_ends()) {
+					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+				} else {
+					_drags->set (new NoteDrag (this, item), event);
+				}
+				return true;
+			}
+			break;
+
+		case StreamItem:
+			if (internal_editing()) {
+				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
+				}
+				return true;
+			}
+			break;
+
 		default:
 			break;
 		}
@@ -1525,23 +1510,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 
 		switch (eff) {
-		case MouseObject:
 		case MouseDraw:
-			switch (item_type) {
-			case AutomationTrackItem:
-				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_axisview);
-				if (atv) {
-					bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
-					atv->add_automation_event (event, where, event->button.y, with_guard_points);
-				}
-				return true;
-				break;
-			default:
-				break;
-			}
-			break;
-
-		case MouseGain:
 			switch (item_type) {
 			case RegionItem:
 			{
@@ -1560,8 +1529,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case AutomationTrackItem: {
 				bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
-				dynamic_cast<AutomationTimeAxisView*>(clicked_axisview)->
-					add_automation_event (event, where, event->button.y, with_guard_points);
+				atv = dynamic_cast<AutomationTimeAxisView*>(clicked_axisview);
+				if (atv) {
+					atv->add_automation_event (event, where, event->button.y, with_guard_points);
+				}
 				return true;
 				break;
 			}
@@ -1663,7 +1634,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	switch (item_type) {
 	case ControlPointItem:
-		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
+		if (mouse_mode == MouseDraw || mouse_mode == MouseObject) {
 			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
 			cp->show ();
 
@@ -1675,7 +1646,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case GainLineItem:
-		if (mouse_mode == MouseGain) {
+		if (mouse_mode == MouseDraw) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
 				line->set_outline_color (ARDOUR_UI::config()->get_EnteredGainLine());
@@ -1684,7 +1655,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case AutomationLineItem:
-		if (mouse_mode == MouseGain || mouse_mode == MouseObject) {
+		if (mouse_mode == MouseDraw || mouse_mode == MouseObject) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
 				line->set_outline_color (ARDOUR_UI::config()->get_EnteredAutomationLine());
@@ -2451,11 +2422,6 @@ Editor::set_internal_edit (bool yn)
 
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			(*i)->leave_internal_edit_mode ();
-		}
-
-		if (mouse_mode == MouseDraw && pre_internal_mouse_mode != MouseDraw) {
-			/* we were drawing .. flip back to something sensible */
-			set_mouse_mode (pre_internal_mouse_mode);
 		}
 
 		set_snap_to (pre_internal_snap_type);

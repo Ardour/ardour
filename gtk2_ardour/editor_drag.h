@@ -154,7 +154,7 @@ public:
 	 *  @return true if this drag should happen in this mouse mode.
 	 */
 	virtual bool active (Editing::MouseMode m) {
-		return (m != Editing::MouseGain);
+		return true;
 	}
 
 	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
@@ -523,6 +523,14 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
+	bool active (Editing::MouseMode mode) {
+		return mode == Editing::MouseDraw;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
 private:
 	double y_to_region (double) const;
 	framecnt_t grid_frames (framepos_t) const;
@@ -689,10 +697,6 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	bool active (Editing::MouseMode) {
-		return true;
-	}
-
 	bool allow_vertical_autoscroll () const {
 		return false;
 	}
@@ -820,10 +824,6 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	bool active (Editing::MouseMode) {
-		return true;
-	}
-
 private:
 
 	AutomationLine* _line;
@@ -842,10 +842,6 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
-
-	bool active (Editing::MouseMode) {
-		return true;
-	}
 
 private:
 
@@ -1052,10 +1048,6 @@ public:
 
 	bool x_movement_matters () const {
 		return false;
-	}
-
-	bool active (Editing::MouseMode) {
-		return true;
 	}
 
 private:

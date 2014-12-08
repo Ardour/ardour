@@ -2852,7 +2852,6 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_move_button);
 	mouse_mode_size_group->add_widget (mouse_cut_button);
 	mouse_mode_size_group->add_widget (mouse_select_button);
-	mouse_mode_size_group->add_widget (mouse_gain_button);
 	mouse_mode_size_group->add_widget (mouse_timefx_button);
 	mouse_mode_size_group->add_widget (mouse_audition_button);
 	mouse_mode_size_group->add_widget (mouse_draw_button);
@@ -2892,7 +2891,6 @@ Editor::setup_toolbar ()
 	}
 	
 	if (!ARDOUR::Profile->get_trx()) {
-		mouse_mode_hbox->pack_start (mouse_gain_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
@@ -3184,8 +3182,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Object Mode (select/move Objects)"));
 	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split Regions)"));
 	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select/move Ranges)"));
-	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit MIDI Notes"));
-	ARDOUR_UI::instance()->set_tip (mouse_gain_button, _("Draw Region Gain"));
+	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit Gain/Notes/Automation"));
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
 	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Note Level Editing"));

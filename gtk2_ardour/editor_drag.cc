@@ -3644,8 +3644,8 @@ ControlPointDrag::aborted (bool)
 bool
 ControlPointDrag::active (Editing::MouseMode m)
 {
-	if (m == Editing::MouseGain) {
-		/* always active in mouse gain */
+	if (m == Editing::MouseDraw) {
+		/* always active in mouse draw */
 		return true;
 	}
 

@@ -1630,7 +1630,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourButton mouse_select_button;
 	ArdourButton mouse_draw_button;
 	ArdourButton mouse_move_button;
-	ArdourButton mouse_gain_button;
 	ArdourButton mouse_timefx_button;
 	ArdourButton mouse_audition_button;
 	ArdourButton mouse_cut_button;

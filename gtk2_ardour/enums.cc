@@ -175,7 +175,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (SamplesRulerItem);
 	REGISTER (item_type);
 
-	REGISTER_ENUM(MouseGain);
 	REGISTER_ENUM(MouseObject);
 	REGISTER_ENUM(MouseRange);
 	REGISTER_ENUM(MouseDraw);

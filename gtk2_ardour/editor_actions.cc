@@ -465,11 +465,6 @@ Editor::register_actions ()
 	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
 	mouse_draw_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
-	mouse_gain_button.set_related_action (act);
-	mouse_gain_button.set_image (::get_icon("tool_gain"));
-	mouse_gain_button.set_name ("mouse mode button");
-
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
 	mouse_audition_button.set_related_action (act);
 	mouse_audition_button.set_image (::get_icon("tool_audition"));

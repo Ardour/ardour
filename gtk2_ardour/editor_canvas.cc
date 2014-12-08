@@ -1113,10 +1113,6 @@ Editor::which_mode_cursor () const
 		mode_cursor = _cursors->midi_pencil;
 		break;
 
-	case MouseGain:
-		mode_cursor = _cursors->cross_hair;
-		break;
-
 	case MouseTimeFX:
 		mode_cursor = _cursors->time_fx; // just use playhead
 		break;
@@ -1300,12 +1296,12 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 			break;
 		}
 
-	} else if (mouse_mode == MouseGain) {
+	} else if (mouse_mode == MouseDraw) {
 		
 		/* ControlPointItem is not really specific to region gain mode
 		   but it is the same cursor so don't worry about this for now.
 		   The result is that we'll see the fader cursor if we enter
-		   non-region-gain-line control points while in MouseGain
+		   non-region-gain-line control points while in MouseDraw
 		   mode, even though we can't edit them in this mode.
 		*/
 
