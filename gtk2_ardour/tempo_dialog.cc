@@ -130,14 +130,14 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 		row = 1;
 	}
 
+	char buf[64];
+
+	snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
+	when_bar_entry.set_text (buf);
+	snprintf (buf, sizeof (buf), "%" PRIu32, when.beats);
+	when_beat_entry.set_text (buf);
+
 	if (movable) {
-		char buf[64];
-
-		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
-		when_bar_entry.set_text (buf);
-		snprintf (buf, sizeof (buf), "%" PRIu32, when.beats);
-		when_beat_entry.set_text (buf);
-
 		when_bar_entry.set_width_chars(4);
 		when_beat_entry.set_width_chars (4);
 
