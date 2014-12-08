@@ -164,6 +164,106 @@ Editor::extend_selection_to_track (TimeAxisView& view)
 	return false;
 }
 
+bool
+Editor::extend_time_selection_to_track (TimeAxisView& view)
+{
+    if (selection->time.empty() || selection->time.tracks_in_range.contains (&view) ) {
+        /* already selected, do nothing */
+        return false;
+    }
+    
+    if (selection->time.tracks_in_range.empty() ) {
+        selection->time.tracks_in_range.push_back (&view);
+        return true;
+    }
+    
+    /* something is already selected, so figure out which range of things to add */
+    TrackViewList to_be_added;
+    TrackViewList sorted = track_views;
+    TrackViewByPositionSorter cmp;
+    bool passed_clicked = false;
+    bool forwards = true;
+    
+    sorted.sort (cmp);
+    
+    if (!selection->time.tracks_in_range.contains (&view)) {
+        to_be_added.push_back (&view);
+    }
+    
+    /* figure out if we should go forward or backwards */
+    
+    for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
+        
+        if ((*i) == &view) {
+            passed_clicked = true;
+        }
+        
+        if (selection->time.tracks_in_range.contains (*i) ) {
+            if (passed_clicked) {
+                forwards = true;
+            } else {
+                forwards = false;
+            }
+            break;
+        }
+    }
+    
+    passed_clicked = false;
+    
+    if (forwards) {
+        
+        for (TrackViewList::iterator i = sorted.begin(); i != sorted.end(); ++i) {
+            
+            if ((*i) == &view) {
+                passed_clicked = true;
+                continue;
+            }
+            
+            if (passed_clicked) {
+                if ((*i)->hidden()) {
+                    continue;
+                }
+                if (selection->time.tracks_in_range.contains (*i) ) {
+                    break;
+                } else if (!(*i)->hidden()) {
+                    to_be_added.push_back (*i);
+                }
+            }
+        }
+        
+    } else {
+        
+        for (TrackViewList::reverse_iterator r = sorted.rbegin(); r != sorted.rend(); ++r) {
+            
+            if ((*r) == &view) {
+                passed_clicked = true;
+                continue;
+            }
+            
+            if (passed_clicked) {
+                
+                if ((*r)->hidden()) {
+                    continue;
+                }
+                
+                if (selection->time.tracks_in_range.contains (*r)) {
+                    break;
+                } else if (!(*r)->hidden()) {
+                    to_be_added.push_back (*r);
+                }
+            }
+        }
+    }
+    
+    if (!to_be_added.empty()) {
+        selection->time.tracks_in_range.add (to_be_added);
+        return true;
+    }
+    
+    return false;
+}
+
+
 void
 Editor::select_all_tracks ()
 {

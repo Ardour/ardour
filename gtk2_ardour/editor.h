@@ -255,6 +255,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void track_mixer_selection ();
 
 	bool extend_selection_to_track (TimeAxisView&);
+    bool extend_time_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
 	framepos_t get_preroll ();

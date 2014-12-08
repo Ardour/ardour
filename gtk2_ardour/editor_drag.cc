@@ -4402,9 +4402,13 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if (_operation == SelectionExtend) {
 			if (_time_selection_at_start) {
+                Selection& selection = _editor->get_selection();
 				framepos_t pos = adjusted_current_frame (event, false);
 				framepos_t start = min (pos, start_at_start);
 				framepos_t end = max (pos, end_at_start);
+                
+                //also extend on tracks
+                _editor->extend_time_selection_to_track (*_editor->clicked_axisview);
 				_editor->selection->set (start, end);
 			}
 		} else {
