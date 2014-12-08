@@ -2,7 +2,7 @@
 <Ardour>
   <UI>
     <Option name="icon-set" value="default"/>
-    <Option name="ui-rc-file" value="ui_dark.rc"/>
+    <Option name="ui-rc-file" value="clearlooks.rc"/>
     <Option name="flat-buttons" value="0"/>
     <Option name="blink-rec-arm" value="0"/>
     <Option name="waveform-gradient-depth" value="0"/>

@@ -286,9 +286,11 @@ UIConfiguration::load_defaults ()
 		}
 		
 		_dirty = false;
-	}
 
-	ARDOUR_UI_UTILS::ColorsChanged ();
+		ARDOUR_UI_UTILS::ColorsChanged ();
+	} else {
+		warning << string_compose (_("Could not find default UI configuration file %1"), default_ui_config_file_name) << endmsg;
+	}
 
 	return found;
 }

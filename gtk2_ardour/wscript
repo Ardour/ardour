@@ -527,9 +527,7 @@ def build(bld):
 
     # Font configuration
 
-    dark_rc_subst_dict = {}
-    light_rc_subst_dict = {}
-    ui_conf_dict = {}
+    font_subst_dict = {}
     font_sizes      = {}
     base_font       = ""
 
@@ -587,93 +585,32 @@ def build(bld):
             else:
                 key = "_".join (['FONT',sizename])
                 fontstyle = " ".join ([basefont,points])
-
-            dark_rc_subst_dict[key] = fontstyle
-            light_rc_subst_dict[key] = fontstyle
-            ui_conf_dict[key] = points
+                
+            font_subst_dict[key] = fontstyle
             
     # @FONT_SIZE_XXXX@
     for sizename,points in iter(font_sizes.items()):
             key = "_".join (['FONT_SIZE',sizename])
-            dark_rc_subst_dict[key] = points
-            light_rc_subst_dict[key] = points
-            ui_conf_dict[key] = points
+            font_subst_dict[key] = points
 
     # various font names, eg @BOLD_MONOSPACE@
     for font_sym,text in iter(font_names.items()):
         key = font_sym
-        dark_rc_subst_dict[key] = text
-        light_rc_subst_dict[key] = text
-        ui_conf_dict[key] = text
+        font_subst_dict[key] = text
 
-    # RC files
-    dark_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
-        'gtk2_ardour/ui_dark.rc.in', 'ARDOUR_DARK')
-    dark_rc_subst_dict['COLPREFIX'] = 'ARDOUR_DARK'
-    light_rc_subst_dict['COLOR_SCHEME'] = build_color_scheme(
-        'gtk2_ardour/ui_light.rc.in', 'ARDOUR_LIGHT')
-    light_rc_subst_dict['COLPREFIX'] = 'ARDOUR_LIGHT'
+    # RC file
 
     obj              = bld(features = 'subst')
-    obj.source       = [ 'ui_dark.rc.in' ]
-    obj.target       = 'ui_dark.rc.pre'
-    obj.install_path = None
-    set_subst_dict(obj, dark_rc_subst_dict)
-
-    obj              = bld(features = 'subst')
-    obj.source       = [ 'ui_light.rc.in' ]
-    obj.target       = 'ui_light.rc.pre'
-    obj.install_path = None
-    set_subst_dict(obj, light_rc_subst_dict)
-
-    obj              = bld(features = 'subst')
-    obj.source       = [ 'styles.rc.in' ]
-    obj.target       = 'dark_styles.rc'
-    obj.install_path = None
-    set_subst_dict(obj, dark_rc_subst_dict)
-
-    obj              = bld(features = 'subst')
-    obj.source       = [ 'styles.rc.in' ]
-    obj.target       = 'light_styles.rc'
-    obj.install_path = None
-    set_subst_dict(obj, light_rc_subst_dict)
-
-    obj              = bld(features = 'subst')
-    obj.source       = [ 'fonts.rc.in' ]
-    obj.target       = 'dark_fonts.rc'
-    obj.install_path = None
-    set_subst_dict(obj, dark_rc_subst_dict)
-
-    obj              = bld(features = 'subst')
-    obj.source       = [ 'fonts.rc.in' ]
-    obj.target       = 'light_fonts.rc'
-    obj.install_path = None
-    set_subst_dict(obj, light_rc_subst_dict)
-
-    obj              = bld(rule = autowaf.copyfile) 
-    obj.source       = [ 'widget_list.rc' ]
-    obj.target       = 'widgets.rc'
-    obj.install_path = None
-
-    obj = bld (rule = include_processor)
-    obj.source = [ 'ui_dark.rc.pre' ]
-    # find and add all ##include dependencies as sources
-    obj.source += _doPyp (bld.path.find_resource ('ui_dark.rc.in').srcpath(), True)
-    obj.target = 'ui_dark.rc'
+    obj.source       = [ 'clearlooks.rc.in' ]
+    obj.target       = 'clearlooks.rc'
     obj.install_path = bld.env['CONFDIR']
-
-    obj = bld (rule = include_processor)
-    obj.source = [ 'ui_light.rc.pre' ]
-    # find and add all ##include dependencies as sources
-    obj.source += _doPyp (bld.path.find_resource ('ui_light.rc.in').srcpath(), True)
-    obj.target = 'ui_light.rc'
-    obj.install_path = bld.env['CONFDIR']
+    set_subst_dict(obj, font_subst_dict)
 
     obj              = bld(features = 'subst')
     obj.source       = [ 'default_ui_config.in' ]
     obj.target       = 'default_ui_config'
-    obj.install_path = None
-    set_subst_dict(obj, ui_conf_dict)
+    obj.install_path = bld.env['CONFDIR']
+    set_subst_dict(obj, font_subst_dict)
 
     # Menus
     menus_argv = []
