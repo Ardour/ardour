@@ -5211,7 +5211,7 @@ NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView
 	, _region_view (rv)
 	, _drag_rect (0)
 {
-	
+	_note[0] = _note[1] = 0;
 }
 
 NoteCreateDrag::~NoteCreateDrag ()
@@ -5249,6 +5249,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	_note[0] = adjusted_frame (pf, event) - _region_view->region()->position ();
+	_note[1] = _note[0];
 
 	MidiStreamView* sv = _region_view->midi_stream_view ();
 	double const x = _editor->sample_to_pixel (_note[0]);
