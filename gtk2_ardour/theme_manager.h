@@ -71,12 +71,10 @@ class ThemeManager : public ArdourWindow
 		BasicColorDisplayModelColumns() {
 			add (name);
 			add (gdkcolor);
-			add (color_variable);
 		}
 		
 		Gtk::TreeModelColumn<std::string>  name;
 		Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
-		Gtk::TreeModelColumn<ColorVariable<ArdourCanvas::Color> *> color_variable;
 	};
 	
 	BasicColorDisplayModelColumns basic_color_columns;
@@ -109,7 +107,7 @@ class ThemeManager : public ArdourWindow
 	/* handles response from color dialog when it used to 
 	   edit a basic color
 	*/
-	void basic_color_response (int, ColorVariable<ArdourCanvas::Color>*);
+	void basic_color_response (int, std::string);
 
 	/* handls response from color dialog when it is used to
 	   edit a derived color.
@@ -175,6 +173,8 @@ class ThemeManager : public ArdourWindow
 
 	void setup_aliases ();
 	void setup_palette ();
+
+	void colors_changed ();
 };
 
 #endif /* __ardour_gtk_color_manager_h__ */

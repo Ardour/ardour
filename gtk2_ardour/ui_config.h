@@ -35,51 +35,6 @@
 
 #include "utils.h"
 
-/* This is very similar to ARDOUR::ConfigVariable but expects numeric values to
- * be in hexadecimal. This is because it is intended for use with color
- * specifications which are easier to scan for issues in "rrggbbaa" format than
- * as decimals.
- */
-template<class T>
-class ColorVariable : public ARDOUR::ConfigVariableBase
-{
-    public:
-	ColorVariable (std::string str) : ARDOUR::ConfigVariableBase (str) {}
-	ColorVariable (std::string str, T val) : ARDOUR::ConfigVariableBase (str), value (val) {}
-
-	bool set (T val) {
-		if (val == value) {
-			return false;
-		}
-		value = val;
-		return true;
-	}
-
-	T get() const {
-		return value;
-	}
-
-	std::string get_as_string () const {
-		std::stringstream ss;
-		ss << std::hex;
-		ss.fill('0');
-		ss.width(8);
-		ss << value;
-		return ss.str ();
-	}
-
-	void set_from_string (std::string const & s) {
-		std::stringstream ss;
-		ss << std::hex;
-		ss << s;
-		ss >> value;
-	}
-
-  protected:
-	T get_for_save() { return value; }
-	T value;
-};
-
 class UIConfiguration : public PBD::Stateful
 {
     public:
@@ -93,21 +48,18 @@ class UIConfiguration : public PBD::Stateful
 		double quantized_hue;
 
 		ArdourCanvas::HSV get() const;
-};
+	};
 
 	UIConfiguration();
 	~UIConfiguration();
 
 	static UIConfiguration* instance() { return _instance; }
 
-	bool dirty () const;
-	void set_dirty ();
-
 	int load_state ();
 	int save_state ();
 	int load_defaults ();
 
-	static void load_rc_file (std::string const &, bool themechange);
+	void load_rc_file (bool themechange);
 	
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state (void);
@@ -116,15 +68,15 @@ class UIConfiguration : public PBD::Stateful
 
 	typedef std::map<std::string,RelativeHSV> RelativeColors;
 	typedef std::map<std::string,std::string> ColorAliases;
-	typedef std::map<std::string,ColorVariable<ArdourCanvas::Color> *> BaseColors;
+	typedef std::map<std::string,ArdourCanvas::Color> BaseColors;
 
 	BaseColors     base_colors;
 	RelativeColors relative_colors;
 	ColorAliases   color_aliases;
 
 	void set_alias (std::string const & name, std::string const & alias);
-	
-	void reset_relative (const std::string& name, const RelativeHSV& new_value);
+	void set_relative (const std::string& name, const RelativeHSV& new_value);
+	void set_base (const std::string& name, ArdourCanvas::Color);
 	
 	RelativeHSV color_as_relative_hsv (ArdourCanvas::Color c);
 	std::string color_as_alias (ArdourCanvas::Color c);
@@ -153,9 +105,7 @@ class UIConfiguration : public PBD::Stateful
 
 #undef CANVAS_BASE_COLOR
 #define CANVAS_BASE_COLOR(var,name,val) \
-	ArdourCanvas::Color get_##var() const { return var.get(); } \
-	bool set_##var (ArdourCanvas::Color v) { bool ret = var.set (v); if (ret) { ParameterChanged (name); } return ret;  } \
-	bool set_##var(const ArdourCanvas::HSV& v) const { return set_##var (v.color()); }
+	ArdourCanvas::Color get_##var() const { return base_color_by_name (name); }
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
@@ -176,27 +126,21 @@ class UIConfiguration : public PBD::Stateful
 #include "canvas_vars.h"
 #undef CANVAS_FONT_VARIABLE
 
-	/* declare base color variables (these are modifiable by the user) */
-
-#undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,val) ColorVariable<ArdourCanvas::Color> var;
-#include "base_colors.h"
-#undef CANVAS_BASE_COLOR
-
 	XMLNode& state ();
 	bool _dirty;
+	bool base_modified;
 	bool aliases_modified;
 	bool derived_modified;
 	
 	static UIConfiguration* _instance;
 
+	int store_color_theme (std::string const &);
+	void load_base_colors (XMLNode const &);
 	void load_color_aliases (XMLNode const &);
 	void load_relative_colors (XMLNode const &);
 	void reset_gtk_theme ();
 	void colors_changed ();
-	
-	XMLNode _saved_state_node;
-	int     _saved_state_version;
+	int load_color_theme ();
 };
 
 std::ostream& operator<< (std::ostream& o, const UIConfiguration::RelativeHSV& rhsv);

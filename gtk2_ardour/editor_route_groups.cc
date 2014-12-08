@@ -272,7 +272,6 @@ EditorRouteGroups::button_press_event (GdkEventButton* ev)
 		case RESPONSE_ACCEPT:
 			c = color_dialog.get_colorsel()->get_current_color();
 			GroupTabs::set_group_color (group, gdk_color_to_rgba (c));
-			ARDOUR_UI::config()->set_dirty ();
 			break;
 			
 		default:

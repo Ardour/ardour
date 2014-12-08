@@ -64,22 +64,10 @@ UIConfiguration::UIConfiguration ()
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
 
-	/* initialize all the base colors using default
-	   colors for now. these will be reset when/if
-	   we load the UI config file.
-	*/
-
-#undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,val) var (name,quantized (val)),
-#include "base_colors.h"
-#undef CANVAS_BASE_COLOR
-
 	_dirty (false),
+	base_modified (false),
 	aliases_modified (false),
-	derived_modified (false),
-	_saved_state_node (""),
-	_saved_state_version (-1)
-	
+	derived_modified (false)
 {
 	_instance = this;
 
@@ -88,7 +76,7 @@ UIConfiguration::UIConfiguration ()
 	*/
 	  
 #undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,color) base_colors.insert (make_pair (name,&var));
+#define CANVAS_BASE_COLOR(var,name,color) base_colors.insert (make_pair (name,color));
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
@@ -110,7 +98,7 @@ UIConfiguration::UIConfiguration ()
 
 	/* force GTK theme setting, so that loading an RC file will work */
 	
-	reset_gtk_theme ();
+	load_color_theme ();
 }
 
 UIConfiguration::~UIConfiguration ()
@@ -120,8 +108,6 @@ UIConfiguration::~UIConfiguration ()
 void
 UIConfiguration::colors_changed ()
 {
-	_dirty = true;
-
 	reset_gtk_theme ();
 
 	/* In theory, one of these ought to work:
@@ -142,7 +128,12 @@ UIConfiguration::parameter_changed (string param)
 	_dirty = true;
 	
 	if (param == "ui-rc-file") {
-		load_rc_file (get_ui_rc_file(), true);
+		load_rc_file (true);
+	} else if (param == "color-file") {
+		load_color_theme ();
+	} else if (param == "base-color") { /* one of many */
+		base_modified = true;
+		ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 	}
 
 	save_state ();
@@ -179,16 +170,16 @@ UIConfiguration::color_as_relative_hsv (Color c)
 	double shortest_distance = DBL_MAX;
 	string closest_name;
 
-	map<string,ColorVariable<Color>*>::iterator f;
+	BaseColors::iterator f;
 	std::map<std::string,HSV> palette;
 
 	for (f = base_colors.begin(); f != base_colors.end(); ++f) {
 		/* Do not include any specialized base colors in the palette
-		   we use to do comparisons
+		   we use to do comparisons (e.g. meter colors)
 		*/
 
 		if (f->first.find ("color") == 0) {
-			palette.insert (make_pair (f->first, HSV (f->second->get())));
+			palette.insert (make_pair (f->first, HSV (f->second)));
 		}
 	}
 
@@ -287,12 +278,81 @@ UIConfiguration::load_defaults ()
 		
 		_dirty = false;
 
-		ARDOUR_UI_UTILS::ColorsChanged ();
 	} else {
 		warning << string_compose (_("Could not find default UI configuration file %1"), default_ui_config_file_name) << endmsg;
 	}
 
 	return found;
+}
+
+int
+UIConfiguration::load_color_theme ()
+{
+	std::string cfile;
+	string basename = color_file.get();
+
+	basename += ".colors";
+	
+	if (find_file (ardour_config_search_path(), basename, cfile)) {
+		XMLTree tree;
+
+		info << string_compose (_("Loading color file %1"), cfile) << endmsg;
+
+		if (!tree.read (cfile.c_str())) {
+			error << string_compose(_("cannot read color file \"%1\""), cfile) << endmsg;
+			return -1;
+		}
+
+		if (set_state (*tree.root(), Stateful::loading_state_version)) {
+			error << string_compose(_("color file \"%1\" not loaded successfully."), cfile) << endmsg;
+			return -1;
+		}
+
+		ARDOUR_UI_UTILS::ColorsChanged ();
+	} else {
+		warning << string_compose (_("Color file %1 not found"), basename) << endmsg;
+	}
+
+	return 0;
+}
+
+int
+UIConfiguration::store_color_theme (string const& path)
+{
+	XMLNode* root;
+	LocaleGuard lg (X_("POSIX"));
+
+	root = new XMLNode("Ardour");
+
+	XMLNode* parent = new XMLNode (X_("RelativeColors"));
+	for (RelativeColors::const_iterator i = relative_colors.begin(); i != relative_colors.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("RelativeColor"));
+		node->add_property (X_("name"), i->first);
+		node->add_property (X_("base"), i->second.base_color);
+		node->add_property (X_("modifier"), i->second.modifier.to_string());
+		parent->add_child_nocopy (*node);
+	}
+	root->add_child_nocopy (*parent);
+	
+	
+	parent = new XMLNode (X_("ColorAliases"));
+	for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("ColorAlias"));
+		node->add_property (X_("name"), i->first);
+		node->add_property (X_("alias"), i->second);
+		parent->add_child_nocopy (*node);
+	}
+	root->add_child_nocopy (*parent);
+	
+	XMLTree tree;
+
+	tree.set_root (root);
+	if (!tree.write (path.c_str())){
+		error << string_compose (_("Color file %1 not saved"), path) << endmsg;
+		return -1;
+	}
+
+	return 0;
 }
 
 int
@@ -317,8 +377,6 @@ UIConfiguration::load_state ()
 			error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
 			return -1;
 		}
-
-		/* make a copy */
 	}
 
 	if (find_file (ardour_config_search_path(), ui_config_file_name, rcfile)) {
@@ -344,32 +402,42 @@ UIConfiguration::load_state ()
 		error << _("could not find any ui configuration file, canvas will look broken.") << endmsg;
 	}
 
-	ARDOUR_UI_UTILS::ColorsChanged ();
-
 	return 0;
 }
 
 int
 UIConfiguration::save_state()
 {
-	XMLTree tree;
 
-	if (!dirty()) {
-		return 0;
-	}
-	
-	std::string rcfile(user_config_directory());
-	rcfile = Glib::build_filename (rcfile, ui_config_file_name);
+	if (_dirty) {
+		std::string rcfile = Glib::build_filename (user_config_directory(), ui_config_file_name);
+		
+		XMLTree tree;
 
-	if (rcfile.length()) {
 		tree.set_root (&get_state());
+
 		if (!tree.write (rcfile.c_str())){
 			error << string_compose (_("Config file %1 not saved"), rcfile) << endmsg;
 			return -1;
 		}
+
+		_dirty = false;
 	}
 
-	_dirty = false;
+	if (base_modified || aliases_modified || derived_modified) {
+		std::string colorfile = Glib::build_filename (user_config_directory(), (color_file.get() + ".colors"));
+
+		cerr << "Save colors to " << colorfile << endl;
+		if (store_color_theme (colorfile)) {
+			error << string_compose (_("Color file %1 not saved"), color_file.get()) << endmsg;
+			return -1;
+		}
+
+		base_modified = false;
+		aliases_modified = false;
+		derived_modified = false;
+	}
+	
 
 	return 0;
 }
@@ -385,26 +453,6 @@ UIConfiguration::get_state ()
 	root->add_child_nocopy (get_variables ("UI"));
 	root->add_child_nocopy (get_variables ("Canvas"));
 
-	XMLNode* parent = new XMLNode (X_("RelativeColors"));
-	for (RelativeColors::const_iterator i = relative_colors.begin(); i != relative_colors.end(); ++i) {
-		XMLNode* node = new XMLNode (X_("RelativeColor"));
-		node->add_property (X_("name"), i->first);
-		node->add_property (X_("base"), i->second.base_color);
-		node->add_property (X_("modifier"), i->second.modifier.to_string());
-		parent->add_child_nocopy (*node);
-	}
-	root->add_child_nocopy (*parent);
-
-	
-	parent = new XMLNode (X_("ColorAliases"));
-	for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
-		XMLNode* node = new XMLNode (X_("ColorAlias"));
-		node->add_property (X_("name"), i->first);
-		node->add_property (X_("alias"), i->second);
-		parent->add_child_nocopy (*node);
-	}
-	root->add_child_nocopy (*parent);
-	
 	if (_extra_xml) {
 		root->add_child_copy (*_extra_xml);
 	}
@@ -435,6 +483,8 @@ UIConfiguration::get_variables (std::string which_node)
 int
 UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 {
+	/* this can load a generic UI configuration file or a colors file */
+
 	if (root.name() != "Ardour") {
 		return -1;
 	}
@@ -455,6 +505,13 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 		}
 	}
 
+	XMLNode* base = find_named_node (root, X_("BaseColors"));
+
+	if (base) {
+		load_base_colors (*base);
+	}
+
+	
 	XMLNode* relative = find_named_node (root, X_("RelativeColors"));
 	
 	if (relative) {
@@ -469,6 +526,12 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 	}
 
 	return 0;
+}
+
+void
+UIConfiguration::load_base_colors (XMLNode const &)
+{
+
 }
 
 void
@@ -531,35 +594,15 @@ UIConfiguration::set_variables (const XMLNode& node)
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
 #undef  CANVAS_FONT_VARIABLE
-
-	/* Reset base colors */
-
-#undef  CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,val) var.set_from_node (node); /* we don't care about ParameterChanged here */
-#include "base_colors.h"
-#undef CANVAS_BASE_COLOR	
-
-}
-
-void
-UIConfiguration::set_dirty ()
-{
-	_dirty = true;
-}
-
-bool
-UIConfiguration::dirty () const
-{
-	return _dirty || aliases_modified || derived_modified;
 }
 
 ArdourCanvas::Color
 UIConfiguration::base_color_by_name (const std::string& name) const
 {
-	map<std::string,ColorVariable<Color>* >::const_iterator i = base_colors.find (name);
+	BaseColors::const_iterator i = base_colors.find (name);
 
 	if (i != base_colors.end()) {
-		return i->second->get();
+		return i->second;
 	}
 
 	cerr << string_compose (_("Base Color %1 not found"), name) << endl;
@@ -620,7 +663,20 @@ UIConfiguration::quantized (Color c) const
 }
 
 void
-UIConfiguration::reset_relative (const string& name, const RelativeHSV& rhsv)
+UIConfiguration::set_base (string const& name, ArdourCanvas::Color color)
+{
+	BaseColors::iterator i = base_colors.find (name);
+	if (i == base_colors.end()) {
+		return;
+	}
+	i->second = color;
+	base_modified = true;
+
+	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+}
+
+void
+UIConfiguration::set_relative (const string& name, const RelativeHSV& rhsv)
 {
 	RelativeColors::iterator i = relative_colors.find (name);
 
@@ -632,8 +688,6 @@ UIConfiguration::reset_relative (const string& name, const RelativeHSV& rhsv)
 	derived_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
-
-	save_state ();
 }
 
 void
@@ -648,18 +702,17 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 	aliases_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
-
-	save_state ();
 }
 
 void
-UIConfiguration::load_rc_file (const string& filename, bool themechange)
+UIConfiguration::load_rc_file (bool themechange)
 {
+	string basename = ui_rc_file.get();
 	std::string rc_file_path;
 
-	if (!find_file (ardour_config_search_path(), filename, rc_file_path)) {
+	if (!find_file (ardour_config_search_path(), basename, rc_file_path)) {
 		warning << string_compose (_("Unable to find UI style file %1 in search path %2. %3 will look strange"),
-                                           filename, ardour_config_search_path().to_string(), PROGRAM_NAME)
+                                           basename, ardour_config_search_path().to_string(), PROGRAM_NAME)
 				<< endmsg;
 		return;
 	}

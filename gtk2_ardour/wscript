@@ -650,6 +650,7 @@ def build(bld):
         obj.install_path = bld.env['CONFDIR']
 
     # not modified at present
+    bld.install_files(bld.env['CONFDIR'], 'dark.colors')
     bld.install_files(bld.env['CONFDIR'], 'step_editing.bindings')
     bld.install_files(bld.env['CONFDIR'], 'mixer.bindings')
 

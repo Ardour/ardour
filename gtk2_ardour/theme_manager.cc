@@ -59,7 +59,6 @@ using namespace ARDOUR_UI_UTILS;
 
 namespace ARDOUR_UI_UTILS {
 	sigc::signal<void> ColorsChanged;
-	sigc::signal<void,uint32_t> ColorChanged;
 }
 
 ThemeManager::ThemeManager()
@@ -230,13 +229,23 @@ ThemeManager::ThemeManager()
 	/* no need to call setup_palette() here, it will be done when its size is allocated */
 	setup_aliases ();
 
-	/* Trigger setting up the GTK color scheme and loading the RC file */
-	cerr << "Load RC file\n";
-	UIConfiguration::load_rc_file (ARDOUR_UI::config()->get_ui_rc_file(), false);
+	/* Trigger setting up the color scheme and loading the GTK RC file */
+
+	ARDOUR_UI::config()->load_rc_file (false);
+
+	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ThemeManager::colors_changed));
 }
 
 ThemeManager::~ThemeManager()
 {
+}
+
+void
+ThemeManager::colors_changed ()
+{
+	setup_basic_color_display ();
+	setup_palette ();
+	setup_aliases ();	
 }
 
 int
@@ -266,16 +275,11 @@ ThemeManager::basic_color_button_press_event (GdkEventButton* ev)
 	case 1: /* color */
 		if ((iter = basic_color_list->get_iter (path))) {
 
-			ColorVariable<ArdourCanvas::Color>* var = (*iter)[basic_color_columns.color_variable];
-			if (!var) {
-				/* parent row, do nothing */
-				return false;
-			}
-
+			string color_name = (*iter)[basic_color_columns.name];
 			Gdk::Color color;
 			double r, g, b, a;
 
-			ArdourCanvas::color_to_rgba (var->get(), r, g, b, a);
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->base_color_by_name (color_name), r, g, b, a);
 			color.set_rgb_p (r, g, b);
 			color_dialog.get_colorsel()->set_previous_color (color);
 			color_dialog.get_colorsel()->set_current_color (color);
@@ -283,7 +287,7 @@ ThemeManager::basic_color_button_press_event (GdkEventButton* ev)
 			color_dialog.get_colorsel()->set_current_alpha ((guint16) (a * 65535.0));
 
 			color_dialog_connection.disconnect ();
-			color_dialog_connection = color_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::basic_color_response), var));
+			color_dialog_connection = color_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::basic_color_response), color_name));
 			color_dialog.present ();
 		}
 	}
@@ -292,7 +296,7 @@ ThemeManager::basic_color_button_press_event (GdkEventButton* ev)
 }
 
 void
-ThemeManager::basic_color_response (int result, ColorVariable<ArdourCanvas::Color>* color_variable)
+ThemeManager::basic_color_response (int result, string name)
 {
 	Gdk::Color color;
 	double a;
@@ -307,14 +311,10 @@ ThemeManager::basic_color_response (int result, ColorVariable<ArdourCanvas::Colo
 		color = color_dialog.get_colorsel()->get_current_color();
 		a = color_dialog.get_colorsel()->get_current_alpha() / 65535.0;
 
-		color_variable->set (ArdourCanvas::rgba_to_color (color.get_red_p(),
-								  color.get_green_p(),
-								  color.get_blue_p(),
-								  a));
-		setup_basic_color_display ();
-		setup_palette ();
-		setup_aliases ();	
-		ColorsChanged(); //EMIT SIGNAL
+		ARDOUR_UI::config()->set_base (name, ArdourCanvas::rgba_to_color (color.get_red_p(),
+										  color.get_green_p(),
+										  color.get_blue_p(),
+										  a));
 		break;
 		
 	default:
@@ -329,7 +329,6 @@ void
 ThemeManager::on_flat_buttons_toggled ()
 {
 	ARDOUR_UI::config()->set_flat_buttons (flat_buttons.get_active());
-	ARDOUR_UI::config()->set_dirty ();
 	ArdourButton::set_flat_buttons (flat_buttons.get_active());
 	/* force a redraw */
 	gtk_rc_reset_styles (gtk_settings_get_default());
@@ -339,7 +338,6 @@ void
 ThemeManager::on_blink_rec_arm_toggled ()
 {
 	ARDOUR_UI::config()->set_blink_rec_arm (blink_rec_button.get_active());
-	ARDOUR_UI::config()->set_dirty ();
 	ARDOUR::Config->ParameterChanged("blink-rec-arm");
 }
 
@@ -347,21 +345,18 @@ void
 ThemeManager::on_region_color_toggled ()
 {
 	ARDOUR_UI::config()->set_color_regions_using_track_color (region_color_button.get_active());
-	ARDOUR_UI::config()->set_dirty ();
 }
 
 void
 ThemeManager::on_show_clip_toggled ()
 {
 	ARDOUR_UI::config()->set_show_waveform_clipping (show_clipping_button.get_active());
-	ARDOUR_UI::config()->set_dirty ();
 }
 
 void
 ThemeManager::on_all_dialogs_toggled ()
 {
 	ARDOUR_UI::config()->set_all_floating_windows_are_dialogs (all_dialogs.get_active());
-	ARDOUR_UI::config()->set_dirty ();
 }
 
 void
@@ -370,7 +365,6 @@ ThemeManager::on_waveform_gradient_depth_change ()
 	double v = waveform_gradient_depth.get_value();
 
 	ARDOUR_UI::config()->set_waveform_gradient_depth (v);
-	ARDOUR_UI::config()->set_dirty ();
 	ArdourCanvas::WaveView::set_global_gradient_depth (v);
 }
 
@@ -380,7 +374,6 @@ ThemeManager::on_timeline_item_gradient_depth_change ()
 	double v = timeline_item_gradient_depth.get_value();
 
 	ARDOUR_UI::config()->set_timeline_item_gradient_depth (v);
-	ARDOUR_UI::config()->set_dirty ();
 }
 
 void
@@ -397,7 +390,7 @@ ThemeManager::on_dark_theme_button_toggled()
 
 	UIConfiguration* uic (ARDOUR_UI::config());
 	
-        uic->set_ui_rc_file("ui_dark.rc");
+        uic->set_color_file("dark");
 }
 
 void
@@ -407,7 +400,7 @@ ThemeManager::on_light_theme_button_toggled()
 
 	UIConfiguration* uic (ARDOUR_UI::config());
 	
-        uic->set_ui_rc_file("ui_light.rc");
+        uic->set_color_file("light");
 }
 
 void
@@ -419,10 +412,9 @@ ThemeManager::setup_basic_color_display ()
 		TreeModel::Row row;
 
 		row = *(basic_color_list->append());
-		row[basic_color_columns.name] = i->second->name();
-		row[basic_color_columns.color_variable] = i->second;
+		row[basic_color_columns.name] = i->first;
 
-		ArdourCanvas::Color c = i->second->get();
+		ArdourCanvas::Color c = i->second;
 
 		/* Gdk colors don't support alpha */
 
@@ -448,7 +440,6 @@ ThemeManager::reset_canvas_colors()
 {
 	ARDOUR_UI::config()->load_defaults();
 	setup_basic_color_display ();
-	ARDOUR_UI::config()->set_dirty ();
 	ARDOUR_UI::config()->save_state ();
 }
 
@@ -621,12 +612,7 @@ ThemeManager::palette_color_response (int result, std::string name)
 		b = gdkcolor.get_blue_p();
 
 		rhsv = uic->color_as_relative_hsv (rgba_to_color (r, g, b, a));
-		uic->reset_relative (name, rhsv);
-
-		/* rebuild */
-		
-		setup_palette ();
-		ColorsChanged(); //EMIT SIGNAL
+		uic->set_relative (name, rhsv);
 		break;
 		
 	default:

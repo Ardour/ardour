@@ -615,9 +615,7 @@ ARDOUR_UI::save_ardour_state ()
 
 	Config->save_state();
 
-	if (ui_config->dirty()) {
-		ui_config->save_state ();
-	}
+	ui_config->save_state ();
 
 	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
 	XMLNode& mnode (mixer->get_state());

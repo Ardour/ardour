@@ -572,9 +572,7 @@ ARDOUR_UI::post_engine ()
 
 ARDOUR_UI::~ARDOUR_UI ()
 {
-	if (ui_config->dirty()) {
-		ui_config->save_state();
-	}
+	ui_config->save_state();
 
 	stop_video_server();
 

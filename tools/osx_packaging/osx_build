@@ -443,30 +443,19 @@ echo "Copying other stuff to $APPDIR  ..."
 #cp $BUILD_ROOT/gtk2_ardour/ergonomic-us.bindings  $Resources
 
 cp $BUILD_ROOT/gtk2_ardour/mnemonic-us.bindings  $Resources
-cp ../../gtk2_ardour/mixer.bindings $Resources
-cp ../../gtk2_ardour/step_editing.bindings $Resources
 cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
-
-if test x$SAE != x ; then
-    cp $BUILD_ROOT/gtk2_ardour/SAE-de-keypad.bindings  $Resources
-    cp $BUILD_ROOT/gtk2_ardour/SAE-de-nokeypad.bindings  $Resources
-    cp $BUILD_ROOT/gtk2_ardour/SAE-us-keypad.bindings  $Resources
-    cp $BUILD_ROOT/gtk2_ardour/SAE-us-nokeypad.bindings  $Resources
-    cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
-    echo cp $BUILD_ROOT/instant.xml.sae $Resources/instant.xml
-else
-    cp ../../system_config $Resources/system_config
-    cp ../../instant.xml $Resources/instant.xml
-    echo cp ../../instant.xml $Resources/instant.xml
-fi
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
 cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Resources
 
+# Copied directly from source tree
 
+cp ../../system_config $Resources/system_config
+cp ../../instant.xml $Resources/instant.xml
+cp ../../gtk2_ardour/step_editing.bindings $Resources
+cp ../../gtk2_ardour/mixer.bindings $Resources
 cp -r ../../gtk2_ardour/icons $Resources
 cp -r ../../gtk2_ardour/pixmaps $Resources
-
-# shared stuff
+cp ../../gtk2_ardour/dark.colors $Resources
 cp -R ../../gtk2_ardour/splash.png $Shared
 cp -R ../../gtk2_ardour/small-splash.png $Shared
 cp -R ../../gtk2_ardour/ArdourMono.ttf $Shared
