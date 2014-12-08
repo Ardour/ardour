@@ -305,7 +305,8 @@ Editor::Editor ()
 	
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
-	_begin_reversible_command_selection = 0;
+	_selection_memento = new SelectionMemento ();
+	before = 0;
 
 	clicked_regionview = 0;
 	clicked_axisview = 0;
@@ -1393,7 +1394,7 @@ Editor::set_session (Session *t)
 
 	/* register for undo history */
 	_session->register_with_memento_command_factory(id(), this);
-	_session->register_with_memento_command_factory(selection->id(), selection);
+	_session->register_with_memento_command_factory(_selection_memento->id(), _selection_memento);
 
 	ActionManager::ui_manager->signal_pre_activate().connect (sigc::mem_fun (*this, &Editor::action_pre_activated));
 
@@ -3317,8 +3318,7 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (_session) {
-		_begin_reversible_command_selection = &selection->get_state ();
-		before = &get_state ();
+		before = &_selection_memento->get_state ();
 		_session->begin_reversible_command (name);
 	}
 }
@@ -3327,8 +3327,7 @@ void
 Editor::begin_reversible_command (GQuark q)
 {
 	if (_session) {
-		_begin_reversible_command_selection = &selection->get_state ();
-		before = &get_state ();
+		before = &_selection_memento->get_state ();
 		_session->begin_reversible_command (q);
 	}
 }
@@ -3337,10 +3336,9 @@ void
 Editor::commit_reversible_command ()
 {
 	if (_session) {
-		if (_begin_reversible_command_selection) {
-			_session->add_command (new MementoCommand<Selection>(*(selection), _begin_reversible_command_selection, &selection->get_state ()));
-			_session->add_command (new MementoCommand<Editor>(*(this), before, &get_state ()));
-			_begin_reversible_command_selection = 0;
+		if (before) {
+			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before, &_selection_memento->get_state ()));
+			before = 0;
 		} else {
 			cerr << "Please call Editor::begin_reversible_command () before Editor::commit_reversible_command ()." << endl;
 		}
@@ -4230,6 +4228,12 @@ Editor::on_key_release_event (GdkEventKey* ev)
 {
 	return Gtk::Window::on_key_release_event (ev);
 	// return key_press_focus_accelerator_handler (*this, ev);
+}
+
+double
+Editor::get_y_origin () const
+{
+	return vertical_adjustment.get_value ();
 }
 
 /** Queue up a change to the viewport x origin.
