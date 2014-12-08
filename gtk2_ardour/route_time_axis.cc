@@ -1243,7 +1243,27 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 
 			return;
 		}
-
+        
+        if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier))) {
+            
+            /* special case: show/hide range selection for selected track */
+            if (_editor.get_selection().selected (this)) {
+                Selection& selection = _editor.get_selection();
+                
+                if (!selection.time.empty() ) {
+                    TimeAxisView* tv = (TimeAxisView*)this;
+                    if (selection.time.tracks_in_range.contains(tv) ) {
+                        selection.time.tracks_in_range.remove(tv);
+                        hide_selection();
+                    } else {
+                        selection.time.tracks_in_range.push_back(tv);
+                        show_selection (selection.time);
+                    }
+                }
+                
+                return;
+            }
+        }
 
 		switch (ArdourKeyboard::selection_type (ev->state)) {
 		case Selection::Toggle:
