@@ -44,12 +44,14 @@ struct LIBCANVAS_API HSV
 	HSV ();
 	HSV (double h, double s, double v, double a = 1.0);
 	HSV (Color);
-
+	HSV (const std::string&);
+	
 	double h;
 	double s;
 	double v;
 	double a;
 
+	std::string to_string() const;
 	bool is_gray() const;
 	
 	Color color() const { return hsva_to_color (h,s, v, a); }

@@ -71,14 +71,12 @@ class ThemeManager : public ArdourWindow
 		BasicColorDisplayModelColumns() {
 			add (name);
 			add (gdkcolor);
-			add (pVar);
-			add (rgba);
+			add (color_variable);
 		}
 		
 		Gtk::TreeModelColumn<std::string>  name;
 		Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
-		Gtk::TreeModelColumn<ColorVariable<ArdourCanvas::Color> *> pVar;
-		Gtk::TreeModelColumn<ArdourCanvas::Color>     rgba;
+		Gtk::TreeModelColumn<ColorVariable<ArdourCanvas::Color> *> color_variable;
 	};
 	
 	BasicColorDisplayModelColumns basic_color_columns;

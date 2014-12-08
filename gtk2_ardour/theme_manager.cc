@@ -266,7 +266,7 @@ ThemeManager::basic_color_button_press_event (GdkEventButton* ev)
 	case 1: /* color */
 		if ((iter = basic_color_list->get_iter (path))) {
 
-			ColorVariable<ArdourCanvas::Color>* var = (*iter)[basic_color_columns.pVar];
+			ColorVariable<ArdourCanvas::Color>* var = (*iter)[basic_color_columns.color_variable];
 			if (!var) {
 				/* parent row, do nothing */
 				return false;
@@ -282,10 +282,8 @@ ThemeManager::basic_color_button_press_event (GdkEventButton* ev)
 			color_dialog.get_colorsel()->set_previous_alpha ((guint16) (a * 65535.0));
 			color_dialog.get_colorsel()->set_current_alpha ((guint16) (a * 65535.0));
 
-			ColorVariable<ArdourCanvas::Color>* ccvar = (*iter)[basic_color_columns.pVar];
-			
 			color_dialog_connection.disconnect ();
-			color_dialog_connection = color_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::basic_color_response), ccvar));
+			color_dialog_connection = color_dialog.signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::basic_color_response), var));
 			color_dialog.present ();
 		}
 	}
@@ -415,64 +413,25 @@ ThemeManager::on_light_theme_button_toggled()
 void
 ThemeManager::setup_basic_color_display ()
 {
-	int r, g, b, a;
-
 	basic_color_list->clear();
 
-	for (std::map<std::string,ColorVariable<uint32_t> *>::iterator i = ARDOUR_UI::config()->configurable_colors.begin(); i != ARDOUR_UI::config()->configurable_colors.end(); i++) {
-
-
-		ColorVariable<uint32_t>* var = i->second;
-
-		TreeModel::Children rows = basic_color_list->children();
+	for (UIConfiguration::BaseColors::const_iterator i = ARDOUR_UI::config()->base_colors.begin(); i != ARDOUR_UI::config()->base_colors.end(); i++) {
 		TreeModel::Row row;
-		string::size_type colon;
 
-		if ((colon = var->name().find (':')) != string::npos) {
+		row = *(basic_color_list->append());
+		row[basic_color_columns.name] = i->second->name();
+		row[basic_color_columns.color_variable] = i->second;
 
-			/* this is supposed to be a child node, so find the
-			 * parent 
-			 */
+		ArdourCanvas::Color c = i->second->get();
 
-			string parent = var->name().substr (0, colon);
-			TreeModel::iterator ri;
+		/* Gdk colors don't support alpha */
 
-			for (ri = rows.begin(); ri != rows.end(); ++ri) {
-				string s = (*ri)[basic_color_columns.name];
-				if (s == parent) {
-					break;
-				}
-			}
+		double r, g, b, a;
+		ArdourCanvas::color_to_rgba (c, r, g, b, a);
+		Gdk::Color gcolor;
+		gcolor.set_rgb_p (r, g, b);
 
-			if (ri == rows.end()) {
-				/* not found, add the parent as new top level row */
-				row = *(basic_color_list->append());
-				row[basic_color_columns.name] = parent;
-				row[basic_color_columns.pVar] = 0;
-				
-				/* now add the child as a child of this one */
-
-				row = *(basic_color_list->insert (row->children().end()));
-				row[basic_color_columns.name] = var->name().substr (colon+1);
-			} else {
-				row = *(basic_color_list->insert ((*ri)->children().end()));
-				row[basic_color_columns.name] = var->name().substr (colon+1);
-			}
-
-		} else {
-			/* add as a child */
-			row = *(basic_color_list->append());
-			row[basic_color_columns.name] = var->name();
-		}
-
-		Gdk::Color col;
-		uint32_t rgba = var->get();
-		UINT_TO_RGBA (rgba, &r, &g, &b, &a);
-		col.set_rgb_p (r / 255.0, g / 255.0, b / 255.0);
-
-		row[basic_color_columns.pVar] = var;
-		row[basic_color_columns.rgba] = rgba;
-		row[basic_color_columns.gdkcolor] = col;
+		row[basic_color_columns.gdkcolor] = gcolor;
 	}
 
 	UIConfiguration* uic (ARDOUR_UI::config());
@@ -753,22 +712,56 @@ ThemeManager::setup_aliases ()
 	alias_list->clear ();
 
 	for (UIConfiguration::ColorAliases::iterator i = aliases.begin(); i != aliases.end(); ++i) {
+		TreeModel::Children rows = alias_list->children();
 		TreeModel::Row row;
+		string::size_type colon;
 
-		row = *(alias_list->append());
-		row[alias_columns.name] = i->first;
+		if ((colon = i->first.find (':')) != string::npos) {
+
+			/* this is supposed to be a child node, so find the
+			 * parent 
+			 */
+
+			string parent = i->first.substr (0, colon);
+			TreeModel::iterator ri;
+
+			for (ri = rows.begin(); ri != rows.end(); ++ri) {
+				string s = (*ri)[alias_columns.name];
+				if (s == parent) {
+					break;
+				}
+			}
+
+			if (ri == rows.end()) {
+				/* not found, add the parent as new top level row */
+				row = *(alias_list->append());
+				row[alias_columns.name] = parent;
+				row[alias_columns.alias] = "";
+				
+				/* now add the child as a child of this one */
+
+				row = *(alias_list->insert (row->children().end()));
+				row[alias_columns.name] = i->first.substr (colon+1);
+			} else {
+				row = *(alias_list->insert ((*ri)->children().end()));
+				row[alias_columns.name] = i->first.substr (colon+1);
+			}
+
+		} else {
+			/* add as a child */
+			row = *(alias_list->append());
+			row[alias_columns.name] = i->first;
+		}
+
 		row[alias_columns.alias] = i->second;
 
-		Color c = uic->color (i->second);
-
-		/* Gdk colors don't support alpha */
-
+		Gdk::Color col;
 		double r, g, b, a;
+		Color c (uic->color (i->second));
 		color_to_rgba (c, r, g, b, a);
-		Gdk::Color gcolor;
-		gcolor.set_rgb_p (r, g, b);
+		col.set_rgb_p (r, g, b);
 
-		row[alias_columns.color] = gcolor;
+		row[alias_columns.color] = col;
 	}
 }
 

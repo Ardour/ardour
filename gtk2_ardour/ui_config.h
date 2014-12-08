@@ -100,8 +100,6 @@ class UIConfiguration : public PBD::Stateful
 
 	static UIConfiguration* instance() { return _instance; }
 
-	std::map<std::string,ColorVariable<ArdourCanvas::Color> *> configurable_colors;
-
 	bool dirty () const;
 	void set_dirty ();
 
@@ -118,9 +116,11 @@ class UIConfiguration : public PBD::Stateful
 
 	typedef std::map<std::string,RelativeHSV> RelativeColors;
 	typedef std::map<std::string,std::string> ColorAliases;
+	typedef std::map<std::string,ColorVariable<ArdourCanvas::Color> *> BaseColors;
 
+	BaseColors     base_colors;
 	RelativeColors relative_colors;
-	ColorAliases color_aliases;
+	ColorAliases   color_aliases;
 
 	void set_alias (std::string const & name, std::string const & alias);
 	
@@ -191,6 +191,7 @@ class UIConfiguration : public PBD::Stateful
 	static UIConfiguration* _instance;
 
 	void load_color_aliases (XMLNode const &);
+	void load_relative_colors (XMLNode const &);
 	void reset_gtk_theme ();
 	void colors_changed ();
 	

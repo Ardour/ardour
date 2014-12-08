@@ -88,7 +88,7 @@ UIConfiguration::UIConfiguration ()
 	*/
 	  
 #undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,color) configurable_colors.insert (make_pair (name,&var));
+#define CANVAS_BASE_COLOR(var,name,color) base_colors.insert (make_pair (name,&var));
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR
 
@@ -133,7 +133,7 @@ UIConfiguration::colors_changed ()
 	   GTK RC file, which causes a reset of all styles and a redraw
 	*/
 
-	parameter_changed ("ui-rc_file");
+	parameter_changed ("ui-rc-file");
 }
 
 void
@@ -182,7 +182,7 @@ UIConfiguration::color_as_relative_hsv (Color c)
 	map<string,ColorVariable<Color>*>::iterator f;
 	std::map<std::string,HSV> palette;
 
-	for (f = configurable_colors.begin(); f != configurable_colors.end(); ++f) {
+	for (f = base_colors.begin(); f != base_colors.end(); ++f) {
 		/* Do not include any specialized base colors in the palette
 		   we use to do comparisons
 		*/
@@ -385,20 +385,25 @@ UIConfiguration::get_state ()
 	root->add_child_nocopy (get_variables ("UI"));
 	root->add_child_nocopy (get_variables ("Canvas"));
 
-	if (derived_modified) {
-
+	XMLNode* parent = new XMLNode (X_("RelativeColors"));
+	for (RelativeColors::const_iterator i = relative_colors.begin(); i != relative_colors.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("RelativeColor"));
+		node->add_property (X_("name"), i->first);
+		node->add_property (X_("base"), i->second.base_color);
+		node->add_property (X_("modifier"), i->second.modifier.to_string());
+		parent->add_child_nocopy (*node);
 	}
+	root->add_child_nocopy (*parent);
 
-	if (aliases_modified) {
-		XMLNode* parent = new XMLNode (X_("ColorAliases"));
-		for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
-			XMLNode* node = new XMLNode (X_("ColorAlias"));
-			node->add_property (X_("name"), i->first);
-			node->add_property (X_("alias"), i->second);
-			parent->add_child_nocopy (*node);
-		}
-		root->add_child_nocopy (*parent);
+	
+	parent = new XMLNode (X_("ColorAliases"));
+	for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("ColorAlias"));
+		node->add_property (X_("name"), i->first);
+		node->add_property (X_("alias"), i->second);
+		parent->add_child_nocopy (*node);
 	}
+	root->add_child_nocopy (*parent);
 	
 	if (_extra_xml) {
 		root->add_child_copy (*_extra_xml);
@@ -453,7 +458,7 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 	XMLNode* relative = find_named_node (root, X_("RelativeColors"));
 	
 	if (relative) {
-		// load_relative_colors (*relative);
+		load_relative_colors (*relative);
 	}
 
 	
@@ -489,44 +494,39 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 	}
 }
 
-
-#if 0
 void
 UIConfiguration::load_relative_colors (XMLNode const & node)
 {
 	XMLNodeList const nlist = node.children();
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
-	XMLProperty const *alias;
+	XMLProperty const *base;
+	XMLProperty const *modifier;
 	
-	color_aliases.clear ();
+	relative_colors.clear ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() != X_("RelativeColor")) {
 			continue;
 		}
 		name = (*niter)->property (X_("name"));
-		alias = (*niter)->property (X_("alias"));
+		base = (*niter)->property (X_("base"));
+		modifier = (*niter)->property (X_("modifier"));
 
-		if (name && alias) {
-			color_aliases.insert (make_pair (name->value(), alias->value()));
+		if (name && base && modifier) {
+			RelativeHSV rhsv (base->value(), HSV (modifier->value()));
+			relative_colors.insert (make_pair (name->value(), rhsv));
 		}
 	}
 
 }
-#endif
+
 void
 UIConfiguration::set_variables (const XMLNode& node)
 {
 #undef  UI_CONFIG_VARIABLE
-#define UI_CONFIG_VARIABLE(Type,var,name,val) \
-         if (var.set_from_node (node)) { \
-		 ParameterChanged (name); \
-		 }
-#define CANVAS_FONT_VARIABLE(var,name)	\
-         if (var.set_from_node (node)) { \
-		 ParameterChanged (name); \
-		 }
+#define UI_CONFIG_VARIABLE(Type,var,name,val) if (var.set_from_node (node)) { ParameterChanged (name); }
+#define CANVAS_FONT_VARIABLE(var,name)        if (var.set_from_node (node)) { ParameterChanged (name); }
 #include "ui_config_vars.h"
 #include "canvas_vars.h"
 #undef  UI_CONFIG_VARIABLE
@@ -535,8 +535,7 @@ UIConfiguration::set_variables (const XMLNode& node)
 	/* Reset base colors */
 
 #undef  CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,val) \
-	var.set_from_node (node);
+#define CANVAS_BASE_COLOR(var,name,val) var.set_from_node (node); /* we don't care about ParameterChanged here */
 #include "base_colors.h"
 #undef CANVAS_BASE_COLOR	
 
@@ -557,9 +556,9 @@ UIConfiguration::dirty () const
 ArdourCanvas::Color
 UIConfiguration::base_color_by_name (const std::string& name) const
 {
-	map<std::string,ColorVariable<Color>* >::const_iterator i = configurable_colors.find (name);
+	map<std::string,ColorVariable<Color>* >::const_iterator i = base_colors.find (name);
 
-	if (i != configurable_colors.end()) {
+	if (i != base_colors.end()) {
 		return i->second->get();
 	}
 

@@ -28,16 +28,16 @@
     <Option name="colorDlight" value="0x00b3ffff"/>
     <Option name="colorDA" value="0x8000ffff"/>
 
-    <Option name="meterColor0" value="008800FF"/>
-    <Option name="meterColor1" value="00AA00FF"/>
-    <Option name="meterColor2" value="00FF00FF"/>
-    <Option name="meterColor3" value="00FF00FF"/>
-    <Option name="meterColor4" value="FFF000ff"/>
-    <Option name="meterColor5" value="FFF000ff"/>
-    <Option name="meterColor6" value="FF8800ff"/>
-    <Option name="meterColor7" value="FF8800ff"/>
-    <Option name="meterColor8" value="FF0000ff"/>
-    <Option name="meterColor9" value="FF0000ff"/>
+    <Option name="meterColor0" value="0x008800FF"/>
+    <Option name="meterColor1" value="0x00AA00FF"/>
+    <Option name="meterColor2" value="0x00FF00FF"/>
+    <Option name="meterColor3" value="0x00FF00FF"/>
+    <Option name="meterColor4" value="0xFFF000ff"/>
+    <Option name="meterColor5" value="0xFFF000ff"/>
+    <Option name="meterColor6" value="0xFF8800ff"/>
+    <Option name="meterColor7" value="0xFF8800ff"/>
+    <Option name="meterColor8" value="0xFF0000ff"/>
+    <Option name="meterColor9" value="0xFF0000ff"/>
     
     <Option name="small font" value="@FONT_SMALL@"/>
     <Option name="smaller font" value="@FONT_SMALLER@"/>
@@ -396,6 +396,9 @@
     <ColorAlias name="recorded waveform fill" alias="color 13"/>
     <ColorAlias name="recorded waveform outline" alias="color 43"/>
     <ColorAlias name="recording rect" alias="color 86"/>
+    <ColorAlias name="region list automatic" alias="color 53"/>
+    <ColorAlias name="region list missing source" alias="color 9"/>
+    <ColorAlias name="region list whole file" alias="color 1"/>
     <ColorAlias name="region area covered by another region" alias="color 87"/>
     <ColorAlias name="region base" alias="color 11"/>
     <ColorAlias name="route button: fill" alias="color 25"/>

@@ -17,6 +17,7 @@
 */
 
 #include <algorithm>
+#include <sstream>
 #include <cmath>
 #include <stdint.h>
 #include <cfloat>
@@ -234,6 +235,26 @@ HSV::HSV (double hh, double ss, double vv, double aa)
 HSV::HSV (Color c)
 {
 	color_to_hsva (c, h, s, v, a);
+}
+
+HSV::HSV (const std::string& str)
+{
+	stringstream ss (str);
+	ss >> h;
+	ss >> s;
+	ss >> v;
+	ss >> a;
+}
+
+string
+HSV::to_string () const
+{
+	stringstream ss;
+	ss << h << ' ';
+	ss << s << ' ';
+	ss << v << ' ';
+	ss << a;
+	return ss.str();
 }
 
 bool
