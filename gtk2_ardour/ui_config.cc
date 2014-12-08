@@ -108,7 +108,7 @@ UIConfiguration::UIConfiguration ()
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
 
-	/* force GTK theme setting, so that RC file will work */
+	/* force GTK theme setting, so that loading an RC file will work */
 	
 	reset_gtk_theme ();
 }
@@ -183,7 +183,13 @@ UIConfiguration::color_as_relative_hsv (Color c)
 	std::map<std::string,HSV> palette;
 
 	for (f = configurable_colors.begin(); f != configurable_colors.end(); ++f) {
-		palette.insert (make_pair (f->first, HSV (f->second->get())));
+		/* Do not include any specialized base colors in the palette
+		   we use to do comparisons
+		*/
+
+		if (f->first.find ("color") == 0) {
+			palette.insert (make_pair (f->first, HSV (f->second->get())));
+		}
 	}
 
 	for (map<string,HSV>::iterator f = palette.begin(); f != palette.end(); ++f) {
@@ -231,6 +237,23 @@ UIConfiguration::color_as_relative_hsv (Color c)
 	return RelativeHSV (closest_name, delta);
 }
 
+string
+UIConfiguration::color_as_alias (Color c)
+{
+	string closest;
+	double shortest_distance = DBL_MAX;
+	HSV target (c);
+	
+	for (RelativeColors::const_iterator a = relative_colors.begin(); a != relative_colors.end(); ++a) {
+		HSV hsv (a->second.get());
+		double d = hsv.distance (target);
+		if (d < shortest_distance) {
+			shortest_distance = d;
+			closest = a->first;
+		}
+	}
+	return closest;
+}		
 void
 UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 {
@@ -538,36 +561,6 @@ UIConfiguration::base_color_by_name (const std::string& name) const
 		return i->second->get();
 	}
 
-#if 0 // yet unsed experimental style postfix
-	/* Idea: use identical colors but different font/sizes
-	 * for variants of the same 'widget'.
-	 *
-	 * example:
-	 *  set_name("mute button");  // in route_ui.cc
-	 *  set_name("mute button small"); // in mixer_strip.cc
-	 *
-	 * ardour3_widget_list.rc:
-	 *  widget "*mute button" style:highest "small_button"
-	 *  widget "*mute button small" style:highest "very_small_text"
-	 *
-	 * both use color-schema of defined in
-	 *   BUTTON_VARS(MuteButton, "mute button")
-	 *
-	 * (in this particular example the widgets should be packed
-	 * vertically shinking the mixer strip ones are currently not)
-	 */
-	const size_t name_len = name.size();
-	const size_t name_sep = name.find(':');
-	for (i = configurable_colors.begin(); i != configurable_colors.end(), name_sep != string::npos; ++i) {
-		const size_t cmp_len = i->first.size();
-		const size_t cmp_sep = i->first.find(':');
-		if (cmp_len >= name_len || cmp_sep == string::npos) continue;
-		if (name.substr(name_sep) != i->first.substr(cmp_sep)) continue;
-		if (name.substr(0, cmp_sep) != i->first.substr(0, cmp_sep)) continue;
-		return i->second->get();
-	}
-#endif
-
 	cerr << string_compose (_("Base Color %1 not found"), name) << endl;
 	return RGBA_TO_UINT (g_random_int()%256,g_random_int()%256,g_random_int()%256,0xff);
 }
@@ -673,4 +666,9 @@ UIConfiguration::load_rc_file (const string& filename, bool themechange)
 	info << "Loading ui configuration file " << rc_file_path << endmsg;
 
 	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
+}
+
+std::ostream& operator<< (std::ostream& o, const UIConfiguration::RelativeHSV& rhsv)
+{
+	return o << rhsv.base_color << " + HSV(" << rhsv.modifier << ")";
 }

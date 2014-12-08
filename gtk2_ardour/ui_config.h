@@ -93,7 +93,7 @@ class UIConfiguration : public PBD::Stateful
 		double quantized_hue;
 
 		ArdourCanvas::HSV get() const;
-        };
+};
 
 	UIConfiguration();
 	~UIConfiguration();
@@ -127,6 +127,7 @@ class UIConfiguration : public PBD::Stateful
 	void reset_relative (const std::string& name, const RelativeHSV& new_value);
 	
 	RelativeHSV color_as_relative_hsv (ArdourCanvas::Color c);
+	std::string color_as_alias (ArdourCanvas::Color c);
 	ArdourCanvas::Color quantized (ArdourCanvas::Color) const;
 
 	ArdourCanvas::Color base_color_by_name (const std::string&) const;
@@ -196,6 +197,8 @@ class UIConfiguration : public PBD::Stateful
 	XMLNode _saved_state_node;
 	int     _saved_state_version;
 };
+
+std::ostream& operator<< (std::ostream& o, const UIConfiguration::RelativeHSV& rhsv);
 
 #endif /* __ardour_ui_configuration_h__ */
 

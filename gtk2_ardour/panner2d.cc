@@ -33,6 +33,9 @@
 #include "ardour/pannable.h"
 #include "ardour/speakers.h"
 
+#include "canvas/colors.h"
+
+#include "ardour_ui.h"
 #include "panner2d.h"
 #include "keyboard.h"
 #include "gui_thread.h"
@@ -424,10 +427,9 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
 
-	float r, g, b;
-	r = g = b = 0.1;
+	double r, g, b, a;
 	if (_send_mode) {
-		rgba_p_from_style("SendStripBase", &r, &g, &b, "fg");
+		ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("send strip base"), r, g, b, a);
 	}
 	if (!panner_shell->bypassed()) {
 		cairo_set_source_rgba (cr, r, g, b, 1.0);

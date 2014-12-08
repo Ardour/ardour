@@ -62,10 +62,6 @@ ArdourCanvas::Points* get_canvas_points (std::string who, uint32_t npoints);
 Pango::FontDescription sanitized_font (std::string const&);
 Pango::FontDescription get_font_for_style (std::string widgetname);
 
-uint32_t rgba_from_style (std::string, uint32_t, uint32_t, uint32_t, uint32_t, std::string = "fg", int = Gtk::STATE_NORMAL, bool = true);
-
-bool rgba_p_from_style (std::string, float*, float*, float*, std::string = "fg", int = Gtk::STATE_NORMAL);
-
 void decorate (Gtk::Window& w, Gdk::WMDecoration d);
 
 void set_color_from_rgb (Gdk::Color&, uint32_t);

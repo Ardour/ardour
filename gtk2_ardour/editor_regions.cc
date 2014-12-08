@@ -341,14 +341,15 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		row = *(_model->append());
 
 		if (missing_source) {
-			c.set_rgb(65535,0,0);     // FIXME: error color from style
+			// c.set_rgb(65535,0,0);     // FIXME: error color from style
+			set_color_from_rgba (c, ARDOUR_UI::config()->color ("region list missing source"));
 
 		} else if (region->automatic()){
-			c.set_rgb(0,65535,0);     // FIXME: error color from style
+			// c.set_rgb(0,65535,0);     // FIXME: error color from style
+			set_color_from_rgba (c, ARDOUR_UI::config()->color ("region list automatic"));
 
 		} else {
-			set_color_from_rgba (c, rgba_from_style ("RegionListWholeFile", 0xff, 0, 0, 0, "fg", Gtk::STATE_NORMAL, false ));
-
+			set_color_from_rgba (c, ARDOUR_UI::config()->color ("region list whole file"));
 		}
 
 		row[_columns.color_] = c;

@@ -226,15 +226,11 @@ static void mtr_red_stripe(cairo_t* cr, float l, float w, int h, float top, floa
 	cairo_fill (cr);
 }
 
-static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
-	float r,g,b;
+static void set_bg_color (Gtk::Widget& w, cairo_t* cr, MeterType type) {
+	double r,g,b,a;
 	switch(type) {
 		case MeterVU:
-			if (rgba_p_from_style("meterstripVU", &r, &g, &b, "bg")) {
-				cairo_set_source_rgb (cr, r, g, b);
-			} else {
-				cairo_set_source_rgb (cr, 1.0, 1.0, 0.85);
-			}
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip vu bg"), r, g, b, a);
 			break;
 		case MeterIEC1DIN:
 		case MeterIEC1NOR:
@@ -243,39 +239,32 @@ static void set_bg_color(Gtk::Widget& w, cairo_t* cr, MeterType type) {
 		case MeterK12:
 		case MeterK14:
 		case MeterK20:
-			if (rgba_p_from_style("meterstripPPM", &r, &g, &b, "bg")) {
-				cairo_set_source_rgb (cr, r, g, b);
-			} else {
-				cairo_set_source_rgb (cr, 0.1, 0.1, 0.1);
-			}
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip ppm bg"), r, g, b, a);
 			break;
 		default:
 			{
 			Gdk::Color c = w.get_style()->get_bg (Gtk::STATE_ACTIVE);
-			cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
+			r = c.get_red_p();
+			g = c.get_green_p();
+			b = c.get_blue_p();
 			}
 			break;
 	}
+	cairo_set_source_rgb (cr, r, g, b);
 }
 
 static void set_fg_color(Gtk::Widget&, MeterType type, Gdk::Color * c) {
-	float r,g,b;
+	double r,g,b,a;
 	switch(type) {
 		case MeterVU:
-			if (rgba_p_from_style("meterstripVU", &r, &g, &b)) {
-				c->set_rgb_p(r, g, b);
-			} else {
-				c->set_rgb_p(0.0, 0.0, 0.0);
-			}
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip vu fg"), r, g, b, a);
+
 			break;
 		default:
-			if (rgba_p_from_style("meterstripPPM", &r, &g, &b)) {
-				c->set_rgb_p(r, g, b);
-			} else {
-				c->set_rgb_p(1.0, 1.0, 1.0);
-			}
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip vu fg"), r, g, b, a);
 			break;
 	}
+	c->set_rgb_p (r, g, b);
 }
 
 static cairo_pattern_t*

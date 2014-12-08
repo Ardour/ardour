@@ -132,8 +132,6 @@
     <ColorAlias name="generic button: fill active" alias="color 9"/>
     <ColorAlias name="generic button: led" alias="color 15"/>
     <ColorAlias name="generic button: led active" alias="color 18"/>
-    <ColorAlias name="generic button: text" alias="color 26"/>
-    <ColorAlias name="generic button: text active" alias="color 27"/>
     <ColorAlias name="ghost track base" alias="color 28"/>
     <ColorAlias name="ghost track midi outline" alias="color 4"/>
     <ColorAlias name="ghost track wave" alias="color 29"/>
@@ -173,7 +171,7 @@
     <ColorAlias name="gtk_processor_postfader_frame" alias="color 103"/>
     <ColorAlias name="gtk_processor_prefader" alias="color 69"/>
     <ColorAlias name="gtk_processor_prefader_frame" alias="color 69"/>
-    <ColorAlias name="gtk_send_bg" alias="color 70"/>
+    <ColorAlias name="gtk_send_bg" alias="color 38"/>
     <ColorAlias name="gtk_send_fg" alias="color 24"/>
     <ColorAlias name="gtk_solo" alias="color 91"/>
     <ColorAlias name="gtk_somewhat_bright_indicator" alias="color 89"/>
@@ -188,8 +186,6 @@
     <ColorAlias name="invert button: fill active" alias="color 35"/>
     <ColorAlias name="invert button: led" alias="color 36"/>
     <ColorAlias name="invert button: led active" alias="color 37"/>
-    <ColorAlias name="invert button: text" alias="color 26"/>
-    <ColorAlias name="invert button: text active" alias="color 33"/>
     <ColorAlias name="location cd marker" alias="color 38"/>
     <ColorAlias name="location loop" alias="color 39"/>
     <ColorAlias name="location marker" alias="color 32"/>
@@ -199,8 +195,6 @@
     <ColorAlias name="lock button: fill active" alias="color 42"/>
     <ColorAlias name="lock button: led" alias="color 4"/>
     <ColorAlias name="lock button: led active" alias="color 4"/>
-    <ColorAlias name="lock button: text" alias="color 43"/>
-    <ColorAlias name="lock button: text active" alias="color 26"/>
     <ColorAlias name="marker bar" alias="color 11"/>
     <ColorAlias name="marker bar separator" alias="color 2"/>
     <ColorAlias name="marker drag line" alias="color 44"/>
@@ -217,15 +211,17 @@
     <ColorAlias name="meterbridge label: fill active" alias="color 46"/>
     <ColorAlias name="meterbridge label: led" alias="color 9"/>
     <ColorAlias name="meterbridge label: led active" alias="color 9"/>
-    <ColorAlias name="meterbridge label: text" alias="color 26"/>
-    <ColorAlias name="meterbridge label: text active" alias="color 9"/>
     <ColorAlias name="meterbridge peakindicator: fill" alias="color 34"/>
     <ColorAlias name="meterbridge peakindicator: fill active" alias="color 9"/>
     <ColorAlias name="meterbridge peakindicator: led" alias="color 9"/>
     <ColorAlias name="meterbridge peakindicator: led active" alias="color 9"/>
-    <ColorAlias name="meterbridge peakindicator: text" alias="color 9"/>
-    <ColorAlias name="meterbridge peakindicator: text active" alias="color 9"/>
     <ColorAlias name="meterbridge peaklabel" alias="color 9"/>
+    <ColorAlias name="meterstrip dpm fg" alias="color 9"/>
+    <ColorAlias name="meterstrip ppm fg" alias="color 13"/>
+    <ColorAlias name="meterstrip vu fg" alias="color 4"/>
+    <ColorAlias name="meterstrip dpm bg" alias="color 9"/>
+    <ColorAlias name="meterstrip ppm bg" alias="color 27"/>
+    <ColorAlias name="meterstrip vu bg" alias="color 32"/>
     <ColorAlias name="midi bus base" alias="color 4"/>
     <ColorAlias name="midi device: fill" alias="color 25"/>
     <ColorAlias name="midi device: fill active" alias="color 42"/>
@@ -238,8 +234,6 @@
     <ColorAlias name="midi input button: fill active" alias="color 48"/>
     <ColorAlias name="midi input button: led" alias="color 4"/>
     <ColorAlias name="midi input button: led active" alias="color 4"/>
-    <ColorAlias name="midi input button: text" alias="color 4"/>
-    <ColorAlias name="midi input button: text active" alias="color 4"/>
     <ColorAlias name="midi meter fill: 0" alias="color 52"/>
     <ColorAlias name="midi meter fill: 1" alias="color 53"/>
     <ColorAlias name="midi meter fill: 2" alias="color 53"/>
@@ -269,20 +263,14 @@
     <ColorAlias name="mixer strip button: fill active" alias="color 8"/>
     <ColorAlias name="mixer strip button: led" alias="color 66"/>
     <ColorAlias name="mixer strip button: led active" alias="color 8"/>
-    <ColorAlias name="mixer strip button: text" alias="color 26"/>
-    <ColorAlias name="mixer strip button: text active" alias="color 4"/>
     <ColorAlias name="mixer strip name button: fill" alias="color 25"/>
     <ColorAlias name="mixer strip name button: fill active" alias="color 67"/>
     <ColorAlias name="mixer strip name button: led" alias="color 66"/>
     <ColorAlias name="mixer strip name button: led active" alias="color 8"/>
-    <ColorAlias name="mixer strip name button: text" alias="color 26"/>
-    <ColorAlias name="mixer strip name button: text active" alias="color 26"/>
     <ColorAlias name="monitor button: fill" alias="color 25"/>
     <ColorAlias name="monitor button: fill active" alias="color 68"/>
     <ColorAlias name="monitor button: led" alias="color 69"/>
     <ColorAlias name="monitor button: led active" alias="color 9"/>
-    <ColorAlias name="monitor button: text" alias="color 26"/>
-    <ColorAlias name="monitor button: text active" alias="color 27"/>
     <ColorAlias name="monitor knob" alias="color 60"/>
     <ColorAlias name="monitor knob: arc end" alias="color 70"/>
     <ColorAlias name="monitor knob: arc start" alias="color 16"/>
@@ -344,22 +332,16 @@
     <ColorAlias name="mouse mode button: fill active" alias="color 12"/>
     <ColorAlias name="mouse mode button: led" alias="color 66"/>
     <ColorAlias name="mouse mode button: led active" alias="color 8"/>
-    <ColorAlias name="mouse mode button: text" alias="color 26"/>
-    <ColorAlias name="mouse mode button: text active" alias="color 4"/>
     <ColorAlias name="mute button: fill" alias="color 25"/>
     <ColorAlias name="mute button: fill active" alias="color 75"/>
     <ColorAlias name="mute button: led" alias="color 4"/>
     <ColorAlias name="mute button: led active" alias="color 4"/>
-    <ColorAlias name="mute button: text" alias="color 26"/>
-    <ColorAlias name="mute button: text active" alias="color 27"/>
     <ColorAlias name="name highlight fill" alias="color 18"/>
     <ColorAlias name="name highlight outline" alias="color 23"/>
     <ColorAlias name="nudge button: fill" alias="color 20"/>
     <ColorAlias name="nudge button: fill active" alias="color 42"/>
     <ColorAlias name="nudge button: led" alias="color 66"/>
     <ColorAlias name="nudge button: led active" alias="color 8"/>
-    <ColorAlias name="nudge button: text" alias="color 26"/>
-    <ColorAlias name="nudge button: text active" alias="color 26"/>
     <ColorAlias name="nudge clock: background" alias="color 7"/>
     <ColorAlias name="nudge clock: cursor" alias="color 8"/>
     <ColorAlias name="nudge clock: edited text" alias="color 8"/>
@@ -372,15 +354,11 @@
     <ColorAlias name="plugin bypass button: fill active" alias="color 42"/>
     <ColorAlias name="plugin bypass button: led" alias="color 69"/>
     <ColorAlias name="plugin bypass button: led active" alias="color 9"/>
-    <ColorAlias name="plugin bypass button: text" alias="color 26"/>
-    <ColorAlias name="plugin bypass button: text active" alias="color 26"/>
     <ColorAlias name="processor automation line" alias="color 77"/>
     <ColorAlias name="processor control button: fill" alias="color 29"/>
     <ColorAlias name="processor control button: fill active" alias="color 46"/>
     <ColorAlias name="processor control button: led" alias="color 67"/>
     <ColorAlias name="processor control button: led active" alias="color 16"/>
-    <ColorAlias name="processor control button: text" alias="color 13"/>
-    <ColorAlias name="processor control button: text active" alias="color 13"/>
     <ColorAlias name="processor fader: fill" alias="color 16"/>
     <ColorAlias name="processor fader: fill active" alias="color 78"/>
     <ColorAlias name="processor fader: led" alias="color 44"/>
@@ -403,8 +381,6 @@
     <ColorAlias name="punch button: fill active" alias="color 9"/>
     <ColorAlias name="punch button: led" alias="color 4"/>
     <ColorAlias name="punch button: led active" alias="color 4"/>
-    <ColorAlias name="punch button: text" alias="color 81"/>
-    <ColorAlias name="punch button: text active" alias="color 82"/>
     <ColorAlias name="punch clock: background" alias="color 4"/>
     <ColorAlias name="punch clock: cursor" alias="color 9"/>
     <ColorAlias name="punch clock: edited text" alias="color 9"/>
@@ -417,8 +393,6 @@
     <ColorAlias name="record enable button: fill active" alias="color 83"/>
     <ColorAlias name="record enable button: led" alias="color 84"/>
     <ColorAlias name="record enable button: led active" alias="color 85"/>
-    <ColorAlias name="record enable button: text" alias="color 81"/>
-    <ColorAlias name="record enable button: text active" alias="color 4"/>
     <ColorAlias name="recorded waveform fill" alias="color 13"/>
     <ColorAlias name="recorded waveform outline" alias="color 43"/>
     <ColorAlias name="recording rect" alias="color 86"/>
@@ -428,8 +402,6 @@
     <ColorAlias name="route button: fill active" alias="color 67"/>
     <ColorAlias name="route button: led" alias="color 66"/>
     <ColorAlias name="route button: led active" alias="color 8"/>
-    <ColorAlias name="route button: text" alias="color 26"/>
-    <ColorAlias name="route button: text active" alias="color 27"/>
     <ColorAlias name="rubber band rect" alias="color 88"/>
     <ColorAlias name="rude audition: fill" alias="color 20"/>
     <ColorAlias name="rude audition: fill active" alias="color 86"/>
@@ -475,12 +447,11 @@
     <ColorAlias name="selection clock: edited text" alias="color 9"/>
     <ColorAlias name="selection clock: text" alias="color 12"/>
     <ColorAlias name="selection rect" alias="color 95"/>
+    <ColorAlias name="send bg" alias="color 38"/>
     <ColorAlias name="send alert button: fill" alias="color 71"/>
-    <ColorAlias name="send alert button: fill active" alias="color 96"/>
+    <ColorAlias name="send alert button: fill active" alias="color 38"/>
     <ColorAlias name="send alert button: led" alias="color 4"/>
     <ColorAlias name="send alert button: led active" alias="color 4"/>
-    <ColorAlias name="send alert button: text" alias="color 97"/>
-    <ColorAlias name="send alert button: text active" alias="color 4"/>
     <ColorAlias name="shuttle" alias="color 12"/>
     <ColorAlias name="silence" alias="color 98"/>
     <ColorAlias name="silence text" alias="color 99"/>
@@ -488,8 +459,6 @@
     <ColorAlias name="solo button: fill active" alias="color 12"/>
     <ColorAlias name="solo button: led" alias="color 4"/>
     <ColorAlias name="solo button: led active" alias="color 4"/>
-    <ColorAlias name="solo button: text" alias="color 26"/>
-    <ColorAlias name="solo button: text active" alias="color 27"/>
     <ColorAlias name="solo isolate: fill" alias="color 25"/>
     <ColorAlias name="solo isolate: fill active" alias="color 42"/>
     <ColorAlias name="solo isolate: led" alias="color 69"/>
@@ -530,14 +499,10 @@
     <ColorAlias name="transport active option button: fill active" alias="color 48"/>
     <ColorAlias name="transport active option button: led" alias="color 66"/>
     <ColorAlias name="transport active option button: led active" alias="color 8"/>
-    <ColorAlias name="transport active option button: text" alias="color 26"/>
-    <ColorAlias name="transport active option button: text active" alias="color 4"/>
     <ColorAlias name="transport button: fill" alias="color 25"/>
     <ColorAlias name="transport button: fill active" alias="color 48"/>
     <ColorAlias name="transport button: led" alias="color 4"/>
     <ColorAlias name="transport button: led active" alias="color 4"/>
-    <ColorAlias name="transport button: text" alias="color 4"/>
-    <ColorAlias name="transport button: text active" alias="color 4"/>
     <ColorAlias name="transport clock: background" alias="color 7"/>
     <ColorAlias name="transport clock: cursor" alias="color 8"/>
     <ColorAlias name="transport clock: edited text" alias="color 8"/>
@@ -553,15 +518,11 @@
     <ColorAlias name="transport option button: fill active" alias="color 42"/>
     <ColorAlias name="transport option button: led" alias="color 66"/>
     <ColorAlias name="transport option button: led active" alias="color 8"/>
-    <ColorAlias name="transport option button: text" alias="color 26"/>
-    <ColorAlias name="transport option button: text active" alias="color 26"/>
     <ColorAlias name="transport punch rect" alias="color 80"/>
     <ColorAlias name="transport recenable button: fill" alias="color 20"/>
     <ColorAlias name="transport recenable button: fill active" alias="color 83"/>
     <ColorAlias name="transport recenable button: led" alias="color 4"/>
     <ColorAlias name="transport recenable button: led active" alias="color 4"/>
-    <ColorAlias name="transport recenable button: text" alias="color 4"/>
-    <ColorAlias name="transport recenable button: text active" alias="color 4"/>
     <ColorAlias name="trim handle" alias="color 18"/>
     <ColorAlias name="trim handle locked" alias="color 86"/>
     <ColorAlias name="verbose canvas cursor" alias="color 32"/>
@@ -574,13 +535,5 @@
     <ColorAlias name="zoom button: fill active" alias="color 48"/>
     <ColorAlias name="zoom button: led" alias="color 66"/>
     <ColorAlias name="zoom button: led active" alias="color 8"/>
-    <ColorAlias name="zoom button: text" alias="color 26"/>
-    <ColorAlias name="zoom button: text active" alias="color 4"/>
-    <ColorAlias name="zoom menu: fill" alias="color 105"/>
-    <ColorAlias name="zoom menu: fill active" alias="color 42"/>
-    <ColorAlias name="zoom menu: led" alias="color 66"/>
-    <ColorAlias name="zoom menu: led active" alias="color 8"/>
-    <ColorAlias name="zoom menu: text" alias="color 26"/>
-    <ColorAlias name="zoom menu: text active" alias="color 26"/>
   </ColorAliases>    
 </Ardour>
