@@ -596,13 +596,13 @@ ARDOUR_UI::save_ardour_state ()
 		tearoff_node->add_child_nocopy (*t);
 	}
 
-	if (mixer && mixer->monitor_section()) {
+	if (mixer->monitor_section()) {
 		XMLNode* t = new XMLNode (X_("monitor-section"));
 		mixer->monitor_section()->tearoff().add_state (*t);
 		tearoff_node->add_child_nocopy (*t);
 	}
 
-	if (editor && editor->mouse_mode_tearoff()) {
+	if (editor->mouse_mode_tearoff()) {
 		XMLNode* t = new XMLNode (X_("mouse-mode"));
 		editor->mouse_mode_tearoff ()->add_state (*t);
 		tearoff_node->add_child_nocopy (*t);
