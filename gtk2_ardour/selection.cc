@@ -1200,7 +1200,7 @@ MarkerSelection::range (framepos_t& s, framepos_t& e)
 }
 
 XMLNode&
-Selection::get_state ()
+Selection::get_state () const
 {
 	/* XXX: not complete; just sufficient to get track selection state
 	   so that re-opening plugin windows for editor mixer strips works
@@ -1230,9 +1230,9 @@ Selection::get_state ()
 
 	for (TimeSelection::const_iterator i = time.begin(); i != time.end(); ++i) {
 		XMLNode* t = node->add_child (X_("AudioRange"));
-		snprintf(buf, sizeof(buf), "%d", (*i).start);
+		snprintf(buf, sizeof(buf), "%ld", (*i).start);
 		t->add_property (X_("start"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", (*i).end);
+		snprintf(buf, sizeof(buf), "%ld", (*i).end);
 		t->add_property (X_("end"), string(buf));
 	}
 	

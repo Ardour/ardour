@@ -63,7 +63,7 @@ namespace Evoral {
 
 /** The Selection class holds lists of selected items (tracks, regions, etc. etc.). */
 
-class Selection : public sigc::trackable, public PBD::ScopedConnectionList, public PBD::StatefulDestructible
+class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 {
   public:
 	enum SelectionType {
@@ -216,7 +216,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList, publ
 	void foreach_midi_regionview (void (MidiRegionView::*method)(void));
 	template<class A> void foreach_region (void (ARDOUR::Region::*method)(A), A arg);
 
-	XMLNode& get_state ();
+	XMLNode& get_state () const;
 	int set_state (XMLNode const &, int);
 
   private:

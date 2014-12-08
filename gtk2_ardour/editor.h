@@ -58,6 +58,7 @@
 #include "enums.h"
 #include "editor_items.h"
 #include "region_selection.h"
+#include "selection_memento.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -149,7 +150,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	double visible_canvas_height () const {
 		return _visible_canvas_height;
 	}
-	double trackviews_height() const;
+	double trackviews_height () const;
 
 	void cycle_snap_mode ();
 	void next_snap_choice ();
@@ -372,6 +373,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_tearoff_visibility();
 	void reattach_all_tearoffs ();
 
+	double get_y_origin () const;
 	void reset_x_origin (framepos_t);
 	void reset_x_origin_to_follow_playhead ();
 	void reset_y_origin (double);
@@ -664,8 +666,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ControlPoint*      clicked_control_point;
 
 	void sort_track_selection (TrackViewList&);
-
-	XMLNode* _begin_reversible_command_selection;
 
 	void get_equivalent_regions (RegionView* rv, std::vector<RegionView*> &, PBD::PropertyID) const;
 	RegionSelection get_equivalent_regions (RegionSelection &, PBD::PropertyID) const;
@@ -1714,6 +1714,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Selection* selection;
 	Selection* cut_buffer;
+	SelectionMemento* _selection_memento;
 
 	void time_selection_changed ();
         void update_time_selection_display ();
