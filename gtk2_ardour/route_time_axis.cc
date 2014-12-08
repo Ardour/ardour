@@ -1253,11 +1253,12 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
                 if (!selection.time.empty() ) {
                     TimeAxisView* tv = (TimeAxisView*)this;
                     if (selection.time.tracks_in_range.contains(tv) ) {
-                        selection.time.tracks_in_range.remove(tv);
-                        hide_selection();
-                    } else {
-                        selection.time.tracks_in_range.push_back(tv);
-                        show_selection (selection.time);
+                        
+                        if (tv->is_time_selection_visible() ) {
+                            hide_selection();
+                        } else {
+                            show_selection (selection.time);
+                        }
                     }
                 }
                 

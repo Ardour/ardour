@@ -136,7 +136,7 @@ class TimeAxisView : public virtual AxisView
 	bool hidden () const { return _hidden; }
 
 	void set_selected (bool);
-
+    
 	/**
 	 * potential handler for entered events
 	 */
@@ -165,6 +165,8 @@ class TimeAxisView : public virtual AxisView
 	virtual void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	virtual void hide_timestretch ();
 
+    bool is_time_selection_visible ();
+    
 	/* editing operations */
 
 	virtual void cut_copy_clear (Selection&, Editing::CutCopyOp) {}

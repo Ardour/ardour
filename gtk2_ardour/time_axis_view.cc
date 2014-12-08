@@ -97,7 +97,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	, _resize_drag_start (-1)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
-    , _try_to_change_height(false)
+    , _try_to_change_height (false)
 	, _ebox_release_can_act (true)
 	, controls_event_box (ui.root ())//ui.get_container ("controls_event_box"))
 	, time_axis_box (ui.root ())
@@ -863,6 +863,12 @@ TimeAxisView::hide_selection ()
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->hide_selection ();
 	}
+}
+
+bool
+TimeAxisView::is_time_selection_visible ()
+{
+    return selection_group->visible ();
 }
 
 void
