@@ -304,6 +304,36 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 }
 
 void
+StreamView::add_playable_regions_to_selection ()
+{
+    foreach_regionview (sigc::mem_fun(*this, &StreamView::add_region_to_selection_if_playable));
+    
+}
+
+void
+StreamView::add_region_to_selection_if_playable (RegionView* region_view)
+{
+    Session* session = _trackview.editor().session();
+    
+    if (session) {
+        Selection& selection = _trackview.editor().get_selection();
+        Location* loop_location = session->locations()->auto_loop_location();
+        
+        // if we have a loop range and play loop is enabled
+        if (loop_location && session->get_play_loop () ) {
+            
+            if (region_view->region()->coverage(loop_location->start(), loop_location->end()) ) {
+                selection.add_region(region_view);
+            }
+            
+        } else { // there is no loop range
+            selection.add_region(region_view);
+        }
+    }
+
+}
+
+void
 StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 {
 	boost::shared_ptr<Track> tr (wtr.lock());

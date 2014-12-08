@@ -122,13 +122,22 @@ public:
 
 	virtual void playlist_layered (boost::weak_ptr<ARDOUR::Track>);
 	
+    // selects all playable regions
+    // all regions are playable except a loop range case
+    // in this case only regions which are covered by loop range will be selected
+    void add_playable_regions_to_selection ();
+    // check if region is playable and add it to the current selection
+    // all regions are playable except a loop range case
+    // in this case only regions which are covered by loop range will be selected
+    void add_region_to_selection_if_playable (RegionView*);
+    
 	sigc::signal<void, RegionView*> RegionViewAdded;
 	sigc::signal<void> RegionViewRemoved;
 	/** Emitted when the height of regions has changed */
 	sigc::signal<void> ContentsHeightChanged;
 
 protected:
-       StreamView (RouteTimeAxisView&, ArdourCanvas::Container* canvas_group = 0);
+    StreamView (RouteTimeAxisView&, ArdourCanvas::Container* canvas_group = 0);
 
 	void         transport_changed();
 	void         transport_looped();

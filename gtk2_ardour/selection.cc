@@ -257,7 +257,7 @@ Selection::toggle (TimeAxisView* track)
         
         StreamView* view = track->view();
         if (view) {
-            view->foreach_regionview (sigc::mem_fun(*this, &Selection::add_region));
+            view->add_playable_regions_to_selection ();
         }
         
 	} else {
@@ -416,7 +416,7 @@ Selection::add (const TrackViewList& track_list)
             
             StreamView* view = (*x)->view();
             if (view) {
-                view->foreach_regionview (sigc::mem_fun(*this, &Selection::add_region));
+                view->add_playable_regions_to_selection();
             }
 		}
 		if (!_no_tracks_changed) {
@@ -430,11 +430,6 @@ Selection::add (TimeAxisView* track)
 {
 	TrackViewList tr;
 	track->set_selected (true);
-    
-    StreamView* view = track->view();
-    if (view) {
-        view->foreach_regionview (sigc::mem_fun(*this, &Selection::add_region));
-    }
     
 	tr.push_back (track);
 	add (tr);
