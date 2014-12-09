@@ -55,12 +55,12 @@ class UIConfiguration : public PBD::Stateful
 
 	static UIConfiguration* instance() { return _instance; }
 
+	void load_rc_file (bool themechange, bool allow_own = true);
+
 	int load_state ();
 	int save_state ();
 	int load_defaults ();
 
-	void load_rc_file (bool themechange);
-	
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state (void);
 	XMLNode& get_variables (std::string);
@@ -134,13 +134,15 @@ class UIConfiguration : public PBD::Stateful
 	
 	static UIConfiguration* _instance;
 
-	int store_color_theme (std::string const &);
+	int store_color_theme ();
 	void load_base_colors (XMLNode const &);
 	void load_color_aliases (XMLNode const &);
 	void load_relative_colors (XMLNode const &);
 	void reset_gtk_theme ();
 	void colors_changed ();
-	int load_color_theme ();
+	int load_color_theme (bool allow_own=true);
+
+	uint32_t block_save;
 };
 
 std::ostream& operator<< (std::ostream& o, const UIConfiguration::RelativeHSV& rhsv);

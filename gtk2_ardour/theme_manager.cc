@@ -639,6 +639,8 @@ ThemeManager::alias_palette_event (GdkEvent* ev, string new_alias, string target
 void
 ThemeManager::alias_palette_response (int response, std::string target_name, std::string old_alias)
 {
+	cerr << "palette response: " << response << endl;
+	
 	switch (response) {
 	case GTK_RESPONSE_OK:
 	case GTK_RESPONSE_ACCEPT:
@@ -646,9 +648,14 @@ ThemeManager::alias_palette_response (int response, std::string target_name, std
 		
 		setup_aliases ();
 		break;
-	default:
+
+	case GTK_RESPONSE_REJECT:
 		/* revert choice */
 		ARDOUR_UI::instance()->config()->set_alias (target_name, old_alias);
+		break;
+
+	default:
+		/* do nothing */
 		break;
 	}
 
@@ -668,7 +675,7 @@ ThemeManager::choose_color_from_palette (string const & name)
 	delete palette_window;
 
 	palette_window = new ArdourDialog (_("Color Palette"));
-	palette_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	palette_window->add_button (Stock::CANCEL, RESPONSE_REJECT); /* using CANCEL causes confusion if dialog is closed via CloseAllDialogs */
 	palette_window->add_button (Stock::OK, RESPONSE_OK);
 	
 	ArdourCanvas::GtkCanvas* canvas = new ArdourCanvas::GtkCanvas ();

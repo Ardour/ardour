@@ -67,7 +67,8 @@ UIConfiguration::UIConfiguration ()
 	_dirty (false),
 	base_modified (false),
 	aliases_modified (false),
-	derived_modified (false)
+	derived_modified (false),
+	block_save (0)
 {
 	_instance = this;
 
@@ -257,45 +258,68 @@ UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 int
 UIConfiguration::load_defaults ()
 {
-	int found = 0;
         std::string rcfile;
-
+	int ret = -1;
+	
 	if (find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile) ) {
 		XMLTree tree;
-		found = 1;
 
 		info << string_compose (_("Loading default ui configuration file %1"), rcfile) << endmsg;
 
 		if (!tree.read (rcfile.c_str())) {
 			error << string_compose(_("cannot read default ui configuration file \"%1\""), rcfile) << endmsg;
-			return -1;
+		} else {
+			if (set_state (*tree.root(), Stateful::loading_state_version)) {
+				error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
+			} else {
+				_dirty = false;
+				ret = 0;
+			}
 		}
-
-		if (set_state (*tree.root(), Stateful::loading_state_version)) {
-			error << string_compose(_("default ui configuration file \"%1\" not loaded successfully."), rcfile) << endmsg;
-			return -1;
-		}
-		
-		_dirty = false;
 
 	} else {
 		warning << string_compose (_("Could not find default UI configuration file %1"), default_ui_config_file_name) << endmsg;
 	}
 
-	return found;
+	if (ret == 0) {
+		/* reload color theme */
+		load_color_theme (false);
+		ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+	}
+
+	return 0;
 }
 
 int
-UIConfiguration::load_color_theme ()
+UIConfiguration::load_color_theme (bool allow_own)
 {
 	std::string cfile;
-	string basename = color_file.get();
+	string basename;
+	bool found = false;
 
-	basename += ".colors";
+	if (allow_own) {
+		basename = "my-";
+		basename += color_file.get();
+		basename += ".colors";
+
+		if (find_file (ardour_config_search_path(), basename, cfile)) {
+			found = true;
+		}
+	}
+
+	if (!found) {
+		basename = color_file.get();
+		basename += ".colors";
 	
-	if (find_file (ardour_config_search_path(), basename, cfile)) {
-		XMLTree tree;
+		if (find_file (ardour_config_search_path(), basename, cfile)) {
+			found = true;
+		}
+	}
 
+	if (found) {
+
+		XMLTree tree;
+		
 		info << string_compose (_("Loading color file %1"), cfile) << endmsg;
 
 		if (!tree.read (cfile.c_str())) {
@@ -317,7 +341,7 @@ UIConfiguration::load_color_theme ()
 }
 
 int
-UIConfiguration::store_color_theme (string const& path)
+UIConfiguration::store_color_theme ()
 {
 	XMLNode* root;
 	LocaleGuard lg (X_("POSIX"));
@@ -345,10 +369,12 @@ UIConfiguration::store_color_theme (string const& path)
 	root->add_child_nocopy (*parent);
 	
 	XMLTree tree;
-
+	std::string colorfile = Glib::build_filename (user_config_directory(), (string ("my-") + color_file.get() + ".colors"));
+	
 	tree.set_root (root);
-	if (!tree.write (path.c_str())){
-		error << string_compose (_("Color file %1 not saved"), path) << endmsg;
+
+	if (!tree.write (colorfile.c_str())){
+		error << string_compose (_("Color file %1 not saved"), colorfile) << endmsg;
 		return -1;
 	}
 
@@ -425,10 +451,8 @@ UIConfiguration::save_state()
 	}
 
 	if (base_modified || aliases_modified || derived_modified) {
-		std::string colorfile = Glib::build_filename (user_config_directory(), (color_file.get() + ".colors"));
 
-		cerr << "Save colors to " << colorfile << endl;
-		if (store_color_theme (colorfile)) {
+		if (store_color_theme ()) {
 			error << string_compose (_("Color file %1 not saved"), color_file.get()) << endmsg;
 			return -1;
 		}
@@ -705,7 +729,7 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 }
 
 void
-UIConfiguration::load_rc_file (bool themechange)
+UIConfiguration::load_rc_file (bool themechange, bool allow_own)
 {
 	string basename = ui_rc_file.get();
 	std::string rc_file_path;
@@ -726,3 +750,4 @@ std::ostream& operator<< (std::ostream& o, const UIConfiguration::RelativeHSV& r
 {
 	return o << rhsv.base_color << " + HSV(" << rhsv.modifier << ")";
 }
+
