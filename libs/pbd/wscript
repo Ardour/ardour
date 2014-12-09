@@ -173,6 +173,6 @@ def build(bld):
         testobj.defines      = [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
         if sys.platform != 'darwin' and bld.env['build_target'] != 'mingw':
             testobj.linkflags    = ['-lrt']
-
+            
 def shutdown():
     autowaf.shutdown()

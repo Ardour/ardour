@@ -918,6 +918,7 @@ def build(bld):
     # shared objects loaded at runtime go here (two aliases)
     bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
     bld.env['LIBDIR'] = bld.env['DLLDIR']
+    bld.env['LOCALEDIR'] = os.path.join(bld.env['DATADIR'], 'locale')
 
     autowaf.set_recursive()
 
