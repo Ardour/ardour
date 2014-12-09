@@ -42,12 +42,12 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	HBox* hbox;
 	Label* label;
 
-	format_selector.append_text (".tar.xz");
+	format_selector.append (".tar.xz");
 	format_selector.set_active_text (".tar.xz");
 
-	encode_selector.append_text (_("None"));
-	encode_selector.append_text (_("FLAC 16bit"));
-	encode_selector.append_text (_("FLAC 24bit"));
+	encode_selector.append (_("None"));
+	encode_selector.append (_("FLAC 16bit"));
+	encode_selector.append (_("FLAC 24bit"));
 	encode_selector.set_active_text ("FLAC 16bit"); // TODO remember
 
 	hbox = manage (new HBox);

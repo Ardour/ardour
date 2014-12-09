@@ -320,11 +320,11 @@ public:
 	 */
 	void add (T e, std::string const & o) {
 		_options.push_back (e);
-		_combo->append_text (o);
+		_combo->append (o);
 	}
 
 	void clear () {
-		_combo->clear_items();
+		_combo->remove_all ();
 		_options.clear ();
 	}
 
@@ -464,14 +464,14 @@ public:
 	 *  @param strings a vector of allowed strings
 	 */
         void set_popdown_strings (const std::vector<std::string>& strings) {
-		_combo->clear_items ();
+		_combo->remove_all ();
 		for (std::vector<std::string>::const_iterator i = strings.begin(); i != strings.end(); ++i) {
-			_combo->append_text (*i);
+			_combo->append (*i);
 		}
 	}
 
 	void clear () {
-		_combo->clear_items();
+		_combo->remove_all ();
 	}
 
 	void changed () {

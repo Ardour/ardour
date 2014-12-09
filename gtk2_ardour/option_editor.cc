@@ -299,9 +299,9 @@ BoolComboOption::BoolComboOption (
 	_combo = manage (new ComboBoxText);
 
 	/* option 0 is the false option */
-	_combo->append_text (f);
+	_combo->append (f);
 	/* and option 1 is the true */
-	_combo->append_text (t);
+	_combo->append (t);
 
 	_combo->signal_changed().connect (sigc::mem_fun (*this, &BoolComboOption::changed));
 }

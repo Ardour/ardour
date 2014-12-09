@@ -74,22 +74,22 @@ AddRouteDialog::AddRouteDialog ()
 
 	refill_track_modes ();
 
-	track_bus_combo.append_text (_("Audio Tracks"));
-	track_bus_combo.append_text (_("MIDI Tracks"));
-	track_bus_combo.append_text (_("Audio+MIDI Tracks"));
-	track_bus_combo.append_text (_("Audio Busses"));
-	track_bus_combo.append_text (_("MIDI Busses"));
-	track_bus_combo.append_text (_("VCA Masters"));
+	track_bus_combo.append (_("Audio Tracks"));
+	track_bus_combo.append (_("MIDI Tracks"));
+	track_bus_combo.append (_("Audio+MIDI Tracks"));
+	track_bus_combo.append (_("Audio Busses"));
+	track_bus_combo.append (_("MIDI Busses"));
+	track_bus_combo.append (_("VCA Masters"));
 	track_bus_combo.set_active (0);
 
-	insert_at_combo.append_text (_("First"));
-	insert_at_combo.append_text (_("Before Selection"));
-	insert_at_combo.append_text (_("After Selection"));
-	insert_at_combo.append_text (_("Last"));
+	insert_at_combo.append (_("First"));
+	insert_at_combo.append (_("Before Selection"));
+	insert_at_combo.append (_("After Selection"));
+	insert_at_combo.append (_("Last"));
 	insert_at_combo.set_active (3);
 
-	strict_io_combo.append_text (_("Flexible-I/O"));
-	strict_io_combo.append_text (_("Strict-I/O"));
+	strict_io_combo.append (_("Flexible-I/O"));
+	strict_io_combo.append (_("Strict-I/O"));
 	strict_io_combo.set_active (Config->get_strict_io () ? 1 : 0);
 
 	VBox* vbox = manage (new VBox);
@@ -543,7 +543,7 @@ AddRouteDialog::refill_channel_setups ()
 void
 AddRouteDialog::add_route_group (RouteGroup* g)
 {
-	route_group_combo.insert_text (3, g->name ());
+	route_group_combo.insert (3, g->name ());
 }
 
 RouteGroup*
@@ -565,11 +565,11 @@ void
 AddRouteDialog::refill_route_groups ()
 {
 	route_group_combo.clear ();
-	route_group_combo.append_text (_("New Group..."));
+	route_group_combo.append (_("New Group..."));
 
-	route_group_combo.append_text ("separator");
+	route_group_combo.append ("separator");
 
-	route_group_combo.append_text (_("No Group"));
+	route_group_combo.append (_("No Group"));
 
 	if (_session) {
 		_session->foreach_route_group (sigc::mem_fun (*this, &AddRouteDialog::add_route_group));
