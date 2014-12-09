@@ -317,6 +317,7 @@
 		   <menuitem action='set-mouse-mode-object'/>
 		   <menuitem action='set-mouse-mode-zoom'/>
 		   <menuitem action='set-mouse-mode-timefx'/>
+		   <menuitem action='set-mouse-mode-content'/>
 		   <separator/>
 		   <menuitem action='cycle-edit-point'/>
 		   <menuitem action='cycle-edit-point-with-marker'/>

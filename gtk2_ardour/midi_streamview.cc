@@ -145,12 +145,6 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 
 	region_views.push_front (region_view);
 
-	if (_trackview.editor().internal_editing()) {
-		region_view->hide_rect ();
-	} else {
-		region_view->show_rect ();
-	}
-
 	/* display events and find note range */
 	display_region (region_view, wait_for_data);
 
@@ -675,16 +669,4 @@ MidiStreamView::resume_updates ()
 	apply_note_range_to_regions ();
 
 	_canvas_group->redraw ();
-}
-
-void
-MidiStreamView::leave_internal_edit_mode ()
-{
-	StreamView::leave_internal_edit_mode ();
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end(); ++i) {
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
-		if (mrv) {
-			mrv->clear_selection ();
-		}
-	}
 }

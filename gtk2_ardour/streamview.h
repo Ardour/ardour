@@ -76,9 +76,6 @@ public:
 	virtual int set_samples_per_pixel (double);
 	gdouble     get_samples_per_pixel () const { return _samples_per_pixel; }
 
-        virtual void enter_internal_edit_mode ();
-        virtual void leave_internal_edit_mode ();
-
  	void set_layer_display (LayerDisplay);
 	LayerDisplay layer_display () const { return _layer_display; }
 

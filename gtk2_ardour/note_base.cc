@@ -258,7 +258,8 @@ NoteBase::set_mouse_fractions (GdkEvent* ev)
 bool
 NoteBase::event_handler (GdkEvent* ev)
 {
-	if (!_region.get_time_axis_view().editor().internal_editing()) {
+	PublicEditor& editor = _region.get_time_axis_view().editor();
+	if (!editor.internal_editing()) {
 		return false;
 	}
 
@@ -280,7 +281,7 @@ NoteBase::event_handler (GdkEvent* ev)
 	case GDK_BUTTON_PRESS:
 		set_mouse_fractions (ev);
 		if (ev->button.button == 3 && Keyboard::no_modifiers_active (ev->button.state) && _selected) {
-			_region.get_time_axis_view().editor().edit_notes (_region);
+			editor.edit_notes (_region);
 			return true;
 		}
 		break;
@@ -296,7 +297,7 @@ NoteBase::event_handler (GdkEvent* ev)
 		break;
 	}
 
-	return _region.get_time_axis_view().editor().canvas_note_event (ev, _item);
+	return editor.canvas_note_event (ev, _item);
 }
 
 bool

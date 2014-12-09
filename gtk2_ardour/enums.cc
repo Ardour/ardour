@@ -181,6 +181,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseTimeFX);
 	REGISTER_ENUM(MouseAudition);
 	REGISTER_ENUM(MouseCut);
+	REGISTER_ENUM(MouseContent);
 	REGISTER (mouse_mode);
 
 }

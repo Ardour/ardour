@@ -347,7 +347,6 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
-	const MouseMode m = trackview.editor().current_mouse_mode();
 	bool r;
 
 	switch (ev->type) {
@@ -364,15 +363,6 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		leave_notify(&ev->crossing);
 		// reset entered_regionview (among other things)
 		return RegionView::canvas_group_event (ev);
-
-	case GDK_2BUTTON_PRESS:
-		// cannot use double-click to exit internal mode if single-click is being used
-		if ((m != MouseDraw) &&
-		    (m != MouseObject ||
-		     !Keyboard::modifier_state_contains (ev->button.state, Keyboard::insert_note_modifier()))) {
-			return trackview.editor().toggle_internal_editing_from_double_click (ev);
-		}
-		break;
 
 	case GDK_SCROLL:
 		if (scroll (&ev->scroll)) {
@@ -480,7 +470,7 @@ MidiRegionView::button_press (GdkEventButton* ev)
 	Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
 	MouseMode m = editor->current_mouse_mode();
 
-	if (m == MouseObject && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
+	if (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 		pre_press_cursor = editor->get_canvas_cursor ();
 		editor->set_canvas_cursor (editor->cursors()->midi_pencil);
 	}
@@ -529,7 +519,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 			clear_selection ();
 			break;
 
-		case MouseObject:
+		case MouseContent:
 		case MouseTimeFX:
 			{
 				clear_selection();
@@ -594,18 +584,18 @@ MidiRegionView::motion (GdkEventMotion* ev)
 {
 	PublicEditor& editor = trackview.editor ();
 
-	if (!_ghost_note && editor.current_mouse_mode() == MouseObject &&
+	if (!_ghost_note && editor.current_mouse_mode() == MouseContent &&
 	    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
 	    _mouse_state != AddDragging) {
 
 		create_ghost_note (ev->x, ev->y);
 
-	} else if (_ghost_note && editor.current_mouse_mode() == MouseObject &&
+	} else if (_ghost_note && editor.current_mouse_mode() == MouseContent &&
 	           Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
 
 		update_ghost_note (ev->x, ev->y);
 
-	} else if (_ghost_note && editor.current_mouse_mode() == MouseObject) {
+	} else if (_ghost_note && editor.current_mouse_mode() == MouseContent) {
 
 		remove_ghost_note ();
 		editor.verbose_cursor()->hide ();
@@ -628,13 +618,13 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			
 			MouseMode m = editor.current_mouse_mode();
 			
-			if (m == MouseDraw || (m == MouseObject && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
+			if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 				editor.drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (&editor), group, this), (GdkEvent *) ev);
 				_mouse_state = AddDragging;
 				remove_ghost_note ();
 				editor.verbose_cursor()->hide ();
 				return true;
-			} else if (m == MouseObject) {
+			} else if (m == MouseContent) {
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 					clear_selection ();
@@ -3255,7 +3245,7 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 {
 	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
 	Editing::MouseMode mm = editor->current_mouse_mode();
-	bool trimmable = (mm == MouseObject || mm == MouseTimeFX || mm == MouseDraw);
+	bool trimmable = (mm == MouseContent || mm == MouseTimeFX || mm == MouseDraw);
 
 	if (can_set_cursor) {
 		if (trimmable && x_fraction > 0.0 && x_fraction < 0.2) {

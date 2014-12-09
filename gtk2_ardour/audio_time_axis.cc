@@ -314,19 +314,3 @@ AudioTimeAxisView::build_automation_action_menu (bool for_selection)
 {
 	RouteTimeAxisView::build_automation_action_menu (for_selection);
 }
-
-void
-AudioTimeAxisView::enter_internal_edit_mode ()
-{
-        if (audio_view()) {
-                audio_view()->enter_internal_edit_mode ();
-        }
-}
-
-void
-AudioTimeAxisView::leave_internal_edit_mode ()
-{
-        if (audio_view()) {
-                audio_view()->leave_internal_edit_mode ();
-        }
-}

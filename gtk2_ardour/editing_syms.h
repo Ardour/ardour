@@ -72,6 +72,7 @@ MOUSEMODE(MouseCut)
 MOUSEMODE(MouseTimeFX)
 MOUSEMODE(MouseAudition)
 MOUSEMODE(MouseDraw)
+MOUSEMODE(MouseContent)
 
 /* Changing this order will break the menu */
 ZOOMFOCUS(ZoomFocusLeft)

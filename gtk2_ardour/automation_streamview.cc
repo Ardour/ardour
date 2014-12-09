@@ -277,9 +277,6 @@ AutomationStreamView::clear ()
 void
 AutomationStreamView::get_selectables (framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
 {
-	if (!_trackview.editor().internal_editing()) {
-		return;  // TODO: selection of automation regions
-	}
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
 		assert (arv);

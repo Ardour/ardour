@@ -35,7 +35,7 @@
   <Binding action="Region/quantize-region" key="q"/>
   <Binding action="Region/legatize-region" key="Primary-apostrophe"/>
   <Binding action="Region/remove-overlap" key="Secondary-apostrophe"/>
-  <Binding action="MouseMode/toggle-internal-edit" key="e"/>
+  <Binding action="MouseMode/set-mouse-mode-content" key="e"/>
   <Binding action="Editor/select-all-before-edit-cursor" key="Primary-e"/>
   <Binding action="Region/export-region" key="Primary-Level4-e"/>
   <Binding action="Main/ExportSession" key="Level4-e"/>

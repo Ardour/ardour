@@ -243,51 +243,40 @@ TimeInfoBox::selection_changed ()
 
 	switch (Editor::instance().current_mouse_mode()) {
 
+	case Editing::MouseContent:
+		/* displaying MIDI note selection is tricky */
+		selection_start->set_off (true);
+		selection_end->set_off (true);
+		selection_length->set_off (true);
+		break;
+
 	case Editing::MouseObject:
-		if (Editor::instance().internal_editing()) {
-			/* displaying MIDI note selection is tricky */
-			
-			selection_start->set_off (true);
-			selection_end->set_off (true);
-			selection_length->set_off (true);
+		if (selection.regions.empty()) {
+			if (selection.points.empty()) {
+				Glib::RefPtr<Action> act = ActionManager::get_action ("MouseMode", "set-mouse-mode-object-range");
+				Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 
-		} else {
-			if (selection.regions.empty()) {
-				if (selection.points.empty()) {
-					Glib::RefPtr<Action> act = ActionManager::get_action ("MouseMode", "set-mouse-mode-object-range");
-					Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
-					if (tact && tact->get_active() && !selection.time.empty()) {
-						/* show selected range */
-						selection_start->set_off (false);
-						selection_end->set_off (false);
-						selection_length->set_off (false);
-						selection_start->set (selection.time.start());
-						selection_end->set (selection.time.end_frame());
-						selection_length->set (selection.time.length());
-					} else {
-						selection_start->set_off (true);
-						selection_end->set_off (true);
-						selection_length->set_off (true);
-					}
-				} else {
-					s = max_framepos;
-					e = 0;
-					for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
-						framepos_t const p = (*i)->line().session_position ((*i)->model ());
-						s = min (s, p);
-						e = max (e, p);
-					}
+				if (tact && tact->get_active() && !selection.time.empty()) {
+					/* show selected range */
 					selection_start->set_off (false);
 					selection_end->set_off (false);
 					selection_length->set_off (false);
-					selection_start->set (s);
-					selection_end->set (e);
-					selection_length->set (e - s + 1);
+					selection_start->set (selection.time.start());
+					selection_end->set (selection.time.end_frame());
+					selection_length->set (selection.time.length());
+				} else {
+					selection_start->set_off (true);
+					selection_end->set_off (true);
+					selection_length->set_off (true);
 				}
 			} else {
-				s = selection.regions.start();
-				e = selection.regions.end_frame();
+				s = max_framepos;
+				e = 0;
+				for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
+					framepos_t const p = (*i)->line().session_position ((*i)->model ());
+					s = min (s, p);
+					e = max (e, p);
+				}
 				selection_start->set_off (false);
 				selection_end->set_off (false);
 				selection_length->set_off (false);
@@ -295,6 +284,15 @@ TimeInfoBox::selection_changed ()
 				selection_end->set (e);
 				selection_length->set (e - s + 1);
 			}
+		} else {
+			s = selection.regions.start();
+			e = selection.regions.end_frame();
+			selection_start->set_off (false);
+			selection_end->set_off (false);
+			selection_length->set_off (false);
+			selection_start->set (s);
+			selection_end->set (e);
+			selection_length->set (e - s + 1);
 		}
 		break;
 

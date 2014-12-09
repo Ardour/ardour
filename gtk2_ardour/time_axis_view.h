@@ -106,9 +106,6 @@ class TimeAxisView : public virtual AxisView
 	/** @return maximum allowable value of order */
 	static int max_order () { return _max_order; }
 
-	virtual void enter_internal_edit_mode () {}
-	virtual void leave_internal_edit_mode () {}
-
 	ArdourCanvas::Container* canvas_display () { return _canvas_display; }
 	ArdourCanvas::Container* ghost_group () { return _ghost_group; }
 

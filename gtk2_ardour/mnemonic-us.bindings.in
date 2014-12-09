@@ -137,7 +137,6 @@ This mode provides many different operations on both regions and control points,
 
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
-@mmode|MouseMode/toggle-internal-edit|e|toggle MIDI note editing
 @select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
 @rop|Region/export-region|<@PRIMARY@><@LEVEL4@>e|export selected region(s)
 @sess|Main/ExportSession|<@LEVEL4@>e|export session
@@ -160,6 +159,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Editor/addExistingAudioFiles|<@PRIMARY@>i|import audio files
 @sess|Editor/toggle-midi-input-active|<@SECONDARY@>i|toggle sel. track MIDI input
 @mmode|MouseMode/set-mouse-mode-object|o|object mode
+@mmode|MouseMode/set-mouse-mode-content|e|content mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Window/toggle-session-options-editor|<@WINDOW@>o|toggle preferences dialog

@@ -398,7 +398,6 @@ Editor::Editor ()
 
 	zoom_focus = ZoomFocusLeft;
 	_edit_point = EditAtMouse;
-	_internal_editing = false;
 	current_canvas_cursor = 0;
 	_visible_track_count = -1;
 
@@ -668,11 +667,6 @@ Editor::Editor ()
 	_snap_mode = SnapOff;
 	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
-        pre_internal_mouse_mode = MouseObject;
-        pre_internal_snap_type = _snap_type;
-        pre_internal_snap_mode = _snap_mode;
-        internal_snap_type = _snap_type;
-        internal_snap_mode = _snap_mode;
 	set_edit_point_preference (EditAtMouse, true);
 
 	_playlist_selector = new PlaylistSelector();
@@ -875,7 +869,7 @@ Editor::set_entered_regionview (RegionView* rv)
 	entered_regionview = rv;
 
 	if (entered_regionview  != 0) {
-		entered_regionview->entered (internal_editing ());
+		entered_regionview->entered ();
 	}
 
 	if (!_all_region_actions_sensitized && _last_region_menu_was_main) {
@@ -2084,12 +2078,6 @@ Editor::set_snap_mode (SnapMode mode)
 {
 	string str = snap_mode_strings[(int)mode];
 
-	if (_internal_editing) {
-		internal_snap_mode = mode;
-	} else {
-		pre_internal_snap_mode = mode;
-	}
-
 	_snap_mode = mode;
 
 	if (str != snap_mode_selector.get_text ()) {
@@ -2241,23 +2229,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 		snap_mode_selection_done((SnapMode) string_2_enum (prop->value(), _snap_mode));
 	}
 
-	if ((prop = node.property ("internal-snap-to"))) {
-		internal_snap_type = (SnapType) string_2_enum (prop->value(), internal_snap_type);
-	}
-
-	if ((prop = node.property ("internal-snap-mode"))) {
-		internal_snap_mode = (SnapMode) string_2_enum (prop->value(), internal_snap_mode);
-	}
-
-	if ((prop = node.property ("pre-internal-snap-to"))) {
-		pre_internal_snap_type = (SnapType) string_2_enum (prop->value(), pre_internal_snap_type);
-	}
-
-
-	if ((prop = node.property ("pre-internal-snap-mode"))) {
-		pre_internal_snap_mode = (SnapMode) string_2_enum (prop->value(), pre_internal_snap_mode);
-	}
-
 	if ((prop = node.property ("mouse-mode"))) {
 		MouseMode m = str2mousemode(prop->value());
 		set_mouse_mode (m, true);
@@ -2277,16 +2248,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("y-origin")) != 0) {
 		reset_y_origin (atof (prop->value ()));
-	}
-
-	if ((prop = node.property ("internal-edit"))) {
-		bool yn = string_is_affirmative (prop->value());
-		RefPtr<Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
 	}
 
 	if ((prop = node.property ("join-object-range"))) {
@@ -2459,10 +2420,6 @@ Editor::get_state ()
 	node->add_property ("zoom", buf);
 	node->add_property ("snap-to", enum_2_string (_snap_type));
 	node->add_property ("snap-mode", enum_2_string (_snap_mode));
-	node->add_property ("internal-snap-to", enum_2_string (internal_snap_type));
-	node->add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
-	node->add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
-	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
 	node->add_property ("edit-point", enum_2_string (_edit_point));
 	snprintf (buf, sizeof(buf), "%d", _visible_track_count);
 	node->add_property ("visible-track-count", buf);
@@ -2480,7 +2437,6 @@ Editor::get_state ()
 	node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
 	node->add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
 	node->add_property ("mouse-mode", enum2str(mouse_mode));
-	node->add_property ("internal-edit", _internal_editing ? "yes" : "no");
 	node->add_property ("join-object-range", smart_mode_action->get_active () ? "yes" : "no");
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
@@ -2855,7 +2811,7 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_timefx_button);
 	mouse_mode_size_group->add_widget (mouse_audition_button);
 	mouse_mode_size_group->add_widget (mouse_draw_button);
-	mouse_mode_size_group->add_widget (internal_edit_button);
+	mouse_mode_size_group->add_widget (mouse_content_button);
 
 	mouse_mode_size_group->add_widget (zoom_in_button);
 	mouse_mode_size_group->add_widget (zoom_out_button);
@@ -2894,7 +2850,7 @@ Editor::setup_toolbar ()
 		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-		mouse_mode_hbox->pack_start (internal_edit_button, false, false, 0);
+		mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 	}
 
 	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
@@ -3185,7 +3141,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit Gain/Notes/Automation"));
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
-	ARDOUR_UI::instance()->set_tip (internal_edit_button, _("Note Level Editing"));
+	ARDOUR_UI::instance()->set_tip (mouse_content_button, _("Select/move contents (notes and automation)"));
 	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
 	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
@@ -5050,12 +5006,6 @@ Editor::add_routes (RouteList& routes)
 		track_views.push_back (rtv);
 
 		rtv->effective_gain_display ();
-
-                if (internal_editing()) {
-                        rtv->enter_internal_edit_mode ();
-                } else {
-                        rtv->leave_internal_edit_mode ();
-                }
 
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));

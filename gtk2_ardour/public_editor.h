@@ -173,25 +173,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	 */
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
 
-	/** Switch into a mode in which editing is primarily focused on "within" regions,
-	    rather than regions as black-box objects. For Ardour3, this is aimed at
-	    editing MIDI regions but may expand in the future to other types of regions.
-	*/
-
-	virtual void set_internal_edit (bool yn) = 0;
-
-	/** Driven by a double-click, switch in or out of a mode in which
-	    editing is primarily focused on "within" regions, rather than
-	    regions as black-box objects. For Ardour3, this is aimed at editing
-	    MIDI regions but may expand in the future to other types of
-	    regions.
-	*/
-
-	virtual bool toggle_internal_editing_from_double_click (GdkEvent*) = 0;
-
-	/** @return Whether editing is currently in "internal" mode or not
+	/** @return Whether the current mouse mode is an "internal" editing mode.
 	 */
-
 	virtual bool internal_editing() const = 0;
 
 	/** Possibly start the audition of a region.  If @param r is 0, or not an AudioRegion

@@ -568,7 +568,7 @@ AudioRegionView::reset_fade_in_shape_width (boost::shared_ptr<AudioRegion> ar, f
 
 	if (fade_in_handle->visible()) {
 		//see comment for drag_start
-		entered(false);
+		entered();
 	}
 
 	if (pwidth < 5) {
@@ -653,7 +653,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	if (fade_out_handle->visible()) {
 		//see comment for drag_start
-		entered(false);
+		entered();
 	}
 	/* don't show shape if its too small */
 
@@ -1051,9 +1051,9 @@ AudioRegionView::update_envelope_visibility ()
 	}
 
 	if (Config->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
-		gain_line->add_visibility (AutomationLine::Line);
+		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
 	} else {
-		gain_line->hide ();
+		gain_line->set_visibility (AutomationLine::VisibleAspects(0));
 	}
 }
 
@@ -1298,17 +1298,14 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 }
 
 void
-AudioRegionView::entered (bool internal_editing)
+AudioRegionView::entered ()
 {
 	trackview.editor().set_current_trimmable (_region);
 	trackview.editor().set_current_movable (_region);
-	
-	if (gain_line) {
-		/* these may or may not be visible depending on mouse mode */
-		gain_line->add_visibility (AutomationLine::ControlPoints);
-	}
 
-	if (!internal_editing &&  ( trackview.editor().current_mouse_mode() == Editing::MouseObject ) ) {
+	update_envelope_visibility();
+
+	if ((trackview.editor().current_mouse_mode() == Editing::MouseObject)) {
 		if (start_xfade_rect) {
 			start_xfade_rect->set_outline (true);
 		}
@@ -1614,7 +1611,7 @@ AudioRegionView::drag_end ()
 		// if fade_in_trim_handle or fade_out_trim_handle should
 		// be visible. -- If the fade_in_handle is visible
 		// we have focus and are not in internal edit mode.
-		entered(false);
+		entered();
 	}
 }
 

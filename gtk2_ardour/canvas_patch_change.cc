@@ -143,21 +143,13 @@ CanvasPatchChange::on_patch_menu_selected(const PatchPrimaryKey& key)
 	_region.change_patch_change (*this, key);
 }
 
-static bool
-in_edit_mode(Editor* editor)
-{
-	return (editor->internal_editing() &&
-	        (editor->current_mouse_mode() == Editing::MouseObject ||
-	         editor->current_mouse_mode() == Editing::MouseDraw));
-}
-
 bool
 CanvasPatchChange::on_event (GdkEvent* ev)
 {
 	/* XXX: icky dcast */
 	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
 	
-	if (!in_edit_mode(e)) {
+	if (!e.internal_editing()) {
 		return false;
 	}
 

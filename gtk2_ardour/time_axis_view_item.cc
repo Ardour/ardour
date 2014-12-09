@@ -858,13 +858,10 @@ TimeAxisViewItem::frame_handle_crossing (GdkEvent* ev, ArdourCanvas::Rectangle* 
 		item->set_fill (false);
 		break;
 	case GDK_ENTER_NOTIFY:
-		if (trackview.editor().effective_mouse_mode() == Editing::MouseObject &&
-		    !trackview.editor().internal_editing()) {
-			/* never set this to be visible in internal
-			   edit mode. Note, however, that we do need to
-			   undo visibility (LEAVE_NOTIFY case above) no
-			   matter what the mode is.
-			*/
+		if (trackview.editor().effective_mouse_mode() == Editing::MouseObject) {
+			/* Never set this to be visible in other modes.  Note, however,
+			   that we do need to undo visibility (LEAVE_NOTIFY case above) no
+			   matter what the mode is. */
 			item->set_fill (true);
 		}
 		break;

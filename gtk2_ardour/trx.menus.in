@@ -5,8 +5,8 @@
   <accelerator action='set-mouse-mode-draw'/>
   <accelerator action='set-mouse-mode-zoom'/>
   <accelerator action='set-mouse-mode-timefx'/>
+  <accelerator action='set-mouse-mode-content'/>
   <accelerator action='set-mouse-mode-object-range'/>
-  <accelerator action='toggle-internal-edit'/>
   <accelerator action='focus-on-clock'/>
   <accelerator action='track-solo-toggle'/>
   <accelerator action='track-mute-toggle'/>

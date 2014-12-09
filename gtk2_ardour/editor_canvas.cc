@@ -1023,41 +1023,16 @@ Editor::which_grabber_cursor () const
 {
 	Gdk::Cursor* c = _cursors->grabber;
 
-	if (_internal_editing) {
-		switch (mouse_mode) {
-		case MouseDraw:
-			c = _cursors->midi_pencil;
-			break;
-
-		case MouseObject:
-			c = _cursors->grabber_note;
-			break;
-
-		case MouseTimeFX:
-			c = _cursors->midi_resize;
-			break;
-			
-		case MouseRange:
-			c = _cursors->grabber_note;
-			break;
-
-		default:
-			break;
+	switch (_edit_point) {
+	case EditAtMouse:
+		c = _cursors->grabber_edit_point;
+		break;
+	default:
+		boost::shared_ptr<Movable> m = _movable.lock();
+		if (m && m->locked()) {
+			c = _cursors->speaker;
 		}
-
-	} else {
-
-		switch (_edit_point) {
-		case EditAtMouse:
-			c = _cursors->grabber_edit_point;
-			break;
-		default:
-			boost::shared_ptr<Movable> m = _movable.lock();
-			if (m && m->locked()) {
-				c = _cursors->speaker;
-			}
-			break;
-		}
+		break;
 	}
 
 	return c;
@@ -1096,9 +1071,6 @@ Editor::which_mode_cursor () const
 	switch (mouse_mode) {
 	case MouseRange:
 		mode_cursor = _cursors->selector;
-		if (_internal_editing) {
-			mode_cursor = which_grabber_cursor();
-		}
 		break;
 
 	case MouseCut:
@@ -1106,6 +1078,7 @@ Editor::which_mode_cursor () const
 		break;
 			
 	case MouseObject:
+	case MouseContent:
 		/* don't use mode cursor, pick a grabber cursor based on the item */
 		break;
 
@@ -1123,7 +1096,7 @@ Editor::which_mode_cursor () const
 	}
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
-	if (!_internal_editing && get_smart_mode() ) {
+	if (get_smart_mode()) {
 
 		double x, y;
 		get_pointer_position (x, y);
@@ -1161,18 +1134,14 @@ Editor::which_track_cursor () const
 {
 	Gdk::Cursor* cursor = 0;
 
-	assert (mouse_mode == MouseObject || get_smart_mode());
-
-	if (!_internal_editing) {
-		switch (_join_object_range_state) {
-		case JOIN_OBJECT_RANGE_NONE:
-		case JOIN_OBJECT_RANGE_OBJECT:
-			cursor = which_grabber_cursor ();
-			break;
-		case JOIN_OBJECT_RANGE_RANGE:
-			cursor = _cursors->selector;
-			break;
-		}
+	switch (_join_object_range_state) {
+	case JOIN_OBJECT_RANGE_NONE:
+	case JOIN_OBJECT_RANGE_OBJECT:
+		cursor = which_grabber_cursor ();
+		break;
+	case JOIN_OBJECT_RANGE_RANGE:
+		cursor = _cursors->selector;
+		break;
 	}
 
 	return cursor;
