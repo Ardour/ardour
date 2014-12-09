@@ -1113,8 +1113,10 @@ void TracksControlPanel::save_general_preferences ()
 	Config->set_history_depth (_limit_undo_history_spinbutton.get_value ());
 	Config->set_saved_history_depth (_save_undo_history_spinbutton.get_value ());
 	Config->set_save_history (_save_undo_history_spinbutton.get_value () > 0);
-	Config->set_audio_capture_buffer_seconds (PBD::atoi (_recording_seconds_dropdown.get_text ()));
-	Config->set_audio_playback_buffer_seconds (PBD::atoi (_playback_seconds_dropdown.get_text()));
+    int capture_seconds = PBD::atoi (_recording_seconds_dropdown.get_text ());
+    int playback_seconds = PBD::atoi (_playback_seconds_dropdown.get_text ());
+	Config->set_audio_capture_buffer_seconds (capture_seconds);
+	Config->set_audio_playback_buffer_seconds (playback_seconds);
 }
 
 
