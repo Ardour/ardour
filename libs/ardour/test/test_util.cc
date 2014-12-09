@@ -134,7 +134,6 @@ protected:
 };
 
 TestReceiver test_receiver;
-static const char* localedir = LOCALEDIR;
 
 /** @param dir Session directory.
  *  @param state Session state file, without .ardour suffix.
@@ -142,7 +141,6 @@ static const char* localedir = LOCALEDIR;
 Session *
 load_session (string dir, string state)
 {
-	ARDOUR::init (false, true, localedir);
 	SessionEvent::create_per_thread_pool ("test", 512);
 
 	test_receiver.listen_to (error);
