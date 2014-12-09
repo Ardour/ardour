@@ -106,13 +106,12 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 	PublicEditor& e = trackview.editor ();
 
-	if (!trackview.editor().internal_editing() &&
-	    e.current_mouse_mode() != Editing::MouseDraw) {
+	if (!trackview.editor().internal_editing()) {
 		// not in internal edit mode, so just act like a normal region
 		return RegionView::canvas_group_event (ev);
 	}
 
-	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseObject) {
+	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseContent) {
 
 		/* XXX: icky dcast to Editor */
 		e.drags()->set (new EditorRubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
@@ -128,7 +127,7 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 		if (e.drags()->end_grab (ev)) {
 			return true;
 		} else if (e.current_mouse_mode() != Editing::MouseDraw &&
-		           e.current_mouse_mode() != Editing::MouseObject) {
+		           e.current_mouse_mode() != Editing::MouseContent) {
 			return RegionView::canvas_group_event (ev);
 		}
 
@@ -285,7 +284,7 @@ AutomationRegionView::region_resized (const PBD::PropertyChange& what_changed)
 
 
 void
-AutomationRegionView::entered (bool)
+AutomationRegionView::entered ()
 {
 	if (_line) {
 		_line->track_entered();

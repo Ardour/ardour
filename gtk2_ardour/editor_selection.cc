@@ -1384,7 +1384,7 @@ Editor::select_all_objects (Selection::Operation op)
 
 	TrackViewList ts  = track_views;
 
-	if (_internal_editing) {
+	if (internal_editing()) {
 
 		bool midi_selected = false;
 
@@ -1452,7 +1452,7 @@ Editor::invert_selection ()
 {
 	list<Selectable *> touched;
 
-	if (_internal_editing) {
+	if (internal_editing()) {
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 			if (mrv) {
@@ -1695,7 +1695,7 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 		}
 	}
 
-	if (_internal_editing) {
+	if (internal_editing()) {
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 			if (mrv) {
@@ -1748,7 +1748,7 @@ Editor::select_all_selectables_using_edit (bool after)
 		}
 	}
 
-	if (_internal_editing) {
+	if (internal_editing()) {
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 			mrv->select_range (start, end);
@@ -1791,7 +1791,7 @@ Editor::select_all_selectables_between (bool /*within*/)
 		return;
 	}
 
-	if (_internal_editing) {
+	if (internal_editing()) {
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 			mrv->select_range (start, end);

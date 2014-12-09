@@ -89,7 +89,7 @@ class RegionView : public TimeAxisViewItem
 	void remove_ghost_in (TimeAxisView&);
 	void remove_ghost (GhostRegion*);
 
-	virtual void entered (bool) {}
+	virtual void entered () {}
 	virtual void exited () {}
 
 	virtual void enable_display(bool yn) { _enable_display = yn; }

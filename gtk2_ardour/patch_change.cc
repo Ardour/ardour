@@ -157,9 +157,8 @@ PatchChange::event_handler (GdkEvent* ev)
 {
 	/* XXX: icky dcast */
 	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view().editor());
-
+	
 	if (!e->internal_editing()) {
-		// not in internal edit mode, so no patch change editing
 		return false;
 	}
 

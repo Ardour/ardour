@@ -405,22 +405,6 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 }
 
 void
-MidiTimeAxisView::enter_internal_edit_mode ()
-{
-	if (midi_view()) {
-		midi_view()->enter_internal_edit_mode ();
-	}
-}
-
-void
-MidiTimeAxisView::leave_internal_edit_mode ()
-{
-	if (midi_view()) {
-		midi_view()->leave_internal_edit_mode ();
-	}
-}
-
-void
 MidiTimeAxisView::check_step_edit ()
 {
 	ensure_step_editor ();
@@ -1322,10 +1306,6 @@ MidiTimeAxisView::route_active_changed ()
 void
 MidiTimeAxisView::set_note_selection (uint8_t note)
 {
-	if (!_editor.internal_editing()) {
-		return;
-	}
-
 	uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {
@@ -1342,10 +1322,6 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 void
 MidiTimeAxisView::add_note_selection (uint8_t note)
 {
-	if (!_editor.internal_editing()) {
-		return;
-	}
-
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {
@@ -1362,10 +1338,6 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 void
 MidiTimeAxisView::extend_note_selection (uint8_t note)
 {
-	if (!_editor.internal_editing()) {
-		return;
-	}
-
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {
@@ -1382,10 +1354,6 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 void
 MidiTimeAxisView::toggle_note_selection (uint8_t note)
 {
-	if (!_editor.internal_editing()) {
-		return;
-	}
-
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
 	if (_view->num_selected_regionviews() == 0) {

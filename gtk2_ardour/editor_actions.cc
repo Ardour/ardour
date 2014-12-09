@@ -476,6 +476,11 @@ Editor::register_actions ()
 	mouse_timefx_button.set_image (::get_icon("tool_stretch"));
 	mouse_timefx_button.set_name ("mouse mode button");
 
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Content Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));	
+	mouse_content_button.set_related_action (act);
+	mouse_content_button.set_image (::get_icon("tool_content"));
+	mouse_content_button.set_name ("mouse mode button");
+
 	if(!Profile->get_mixbus()) {
 		act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
 		mouse_cut_button.set_related_action (act);
@@ -484,11 +489,6 @@ Editor::register_actions ()
 	}
 	
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
-
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "toggle-internal-edit", _("Edit MIDI"), sigc::mem_fun(*this, &Editor::toggle_internal_editing));
-	internal_edit_button.set_related_action (act);
-	internal_edit_button.set_image (::get_icon("tool_note"));
-	internal_edit_button.set_name ("mouse mode button");
 
 	RadioAction::Group edit_point_group;
 	ActionManager::register_radio_action (editor_actions, edit_point_group, X_("edit-at-playhead"), _("Playhead"), (sigc::bind (sigc::mem_fun(*this, &Editor::edit_point_chosen), Editing::EditAtPlayhead)));
@@ -1755,16 +1755,6 @@ Editor::reset_canvas_action_sensitivity (bool onoff)
 	for (vector<Glib::RefPtr<Action> >::iterator x = ActionManager::mouse_edit_point_requires_canvas_actions.begin();
 	     x != ActionManager::mouse_edit_point_requires_canvas_actions.end(); ++x) {
 		(*x)->set_sensitive (onoff);
-	}
-}
-
-void
-Editor::toggle_internal_editing ()
-{
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("MouseMode"), X_("toggle-internal-edit"));
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		set_internal_edit (tact->get_active());
 	}
 }
 

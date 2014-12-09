@@ -259,6 +259,10 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
 		break;
 
+	case MouseContent:
+		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
+		break;
+
 	case MouseAudition:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-audition"));
 		break;
@@ -307,6 +311,10 @@ Editor::mouse_mode_toggled (MouseMode m)
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
 		break;
 
+	case MouseContent:
+		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
+		break;
+
 	case MouseAudition:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-audition"));
 		break;
@@ -350,6 +358,12 @@ Editor::mouse_mode_toggled (MouseMode m)
 	MouseModeChanged (); /* EMIT SIGNAL */
 }
 
+bool
+Editor::internal_editing() const
+{
+	return mouse_mode == Editing::MouseContent || mouse_mode == Editing::MouseDraw;
+}
+
 void
 Editor::update_time_selection_display ()
 {
@@ -366,29 +380,13 @@ Editor::update_time_selection_display ()
 void
 Editor::step_mouse_mode (bool next)
 {
-	const int n_mouse_modes = (int)MouseDraw + 1;
+	const int n_mouse_modes = (int)MouseContent + 1;
 	int       current       = (int)current_mouse_mode();
 	if (next) {
 		set_mouse_mode((MouseMode)((current + 1) % n_mouse_modes));
 	} else {
 		set_mouse_mode((MouseMode)((current + n_mouse_modes - 1) % n_mouse_modes));
 	}
-}
-
-bool
-Editor::toggle_internal_editing_from_double_click (GdkEvent* event)
-{
-	if (_drags->active()) {
-		_drags->end_grab (event);
-	} 
-
-	ActionManager::do_action ("MouseMode", "toggle-internal-edit");
-
-	/* prevent reversion of edit cursor on button release */
-	
-	pre_press_cursor = 0;
-
-	return true;
 }
 
 void
@@ -439,9 +437,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
 	     (mouse_mode != MouseDraw)) ||
-	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3) ||
-	    (internal_editing() && mouse_mode != MouseTimeFX)) {
-
+	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
 		return;
 	}
 
@@ -533,6 +529,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	   not on the main track canvas or because we want
 	   them to be modeless.
 	*/
+
+	NoteBase* note = NULL;
 
 	switch (item_type) {
 	case PlayheadCursorItem:
@@ -655,11 +653,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 	}
 
-	/* there is no Range mode when in internal edit mode */
-	if (eff == MouseRange && internal_editing()) {
-		eff = MouseObject;
-	}
-
 	switch (eff) {
 	case MouseRange:
 		switch (item_type) {
@@ -686,19 +679,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case StreamItem:
-			if (internal_editing()) {
-				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
-					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
-					return true;
-				} 
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
 			} else {
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
-					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
-				} else {
-					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
-				}
-				return true;
+				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
 			}
+			return true;
 			break;
 
 		case RegionViewNameHighlight:
@@ -709,12 +695,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		default:
-			if (!internal_editing()) {
-				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
-					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
-				} else {
-					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
-				}
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
+				_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
+			} else {
+				_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
 			}
 		}
 		return true;
@@ -740,26 +724,42 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 		break;
 
-	case MouseObject:
+	case MouseContent:
 		switch (item_type) {
 		case NoteItem:
 			/* Existing note: allow trimming/motion */
-			if (internal_editing()) {
-				NoteBase* cn = reinterpret_cast<NoteBase*> (item->get_data ("notebase"));
-				assert (cn);
-				if (cn->big_enough_to_trim() && cn->mouse_near_ends()) {
+			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
+				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
 					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
 				} else {
 					_drags->set (new NoteDrag (this, item), event);
 				}
+			}
+			return true;
+
+		case ControlPointItem:
+			_drags->set (new ControlPointDrag (this, item), event);
+			return true;
+			break;
+
+		case StreamItem:
+			if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+				_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
 				return true;
 			}
+			break;
+
+		case AutomationTrackItem:
+			/* rubberband drag to select automation points */
+			_drags->set (new EditorRubberbandSelectDrag (this, item), event);
 			break;
 
 		default:
 			break;
 		}
+		break;
 
+	case MouseObject:
 		if (Keyboard::modifier_state_contains (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) &&
 		    event->type == GDK_BUTTON_PRESS) {
 
@@ -809,10 +809,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					break;
 				}
 
-				if (internal_editing ()) {
-					break;
-				}
-
 				/* click on a normal region view */
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 					add_region_copy_drag (item, event, clicked_regionview);
@@ -822,10 +818,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					add_region_drag (item, event, clicked_regionview);
 				}
 
-
-//				if (!internal_editing() && (_join_object_range_state == JOIN_OBJECT_RANGE_RANGE && !selection->regions.empty())) {
-//					_drags->add (new SelectionDrag (this, clicked_axisview->get_selection_rect (clicked_selection)->rect, SelectionDrag::SelectionMove));
-//				}
 
 				_drags->start_grab (event);
 				return true;
@@ -869,15 +861,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case StreamItem:
-				if (internal_editing()) {
-					if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
-						_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
-					}
-					return true;
-				} else {
-					_drags->set (new EditorRubberbandSelectDrag (this, item), event);
-				}
-				break;
+				_drags->set (new EditorRubberbandSelectDrag (this, item), event);
+				return true;
 
 			case AutomationTrackItem:
 			{
@@ -961,28 +946,23 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case NoteItem:
-			/* Existing note: allow trimming/motion */
-			if (internal_editing()) {
-				/* trim notes if we're in internal edit mode and near the ends of the note */
-				NoteBase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
-				assert (cn);
-				if (cn->big_enough_to_trim() && cn->mouse_near_ends()) {
+			if ((note = reinterpret_cast<NoteBase*>(item->get_data ("notebase")))) {
+				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
+					/* Note is big and pointer is near the end, trim */
 					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
 				} else {
+					/* Drag note */
 					_drags->set (new NoteDrag (this, item), event);
 				}
 				return true;
 			}
-			break;
+			return true;
 
 		case StreamItem:
-			if (internal_editing()) {
-				if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
-					_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
-				}
-				return true;
+			if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
+				_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
 			}
-			break;
+			return true;
 
 		default:
 			break;
@@ -991,12 +971,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MouseTimeFX:
-		if (internal_editing() && item_type == NoteItem ) {
-			/* drag notes if we're in internal edit mode */
-			NoteBase* cn = reinterpret_cast<NoteBase*>(item->get_data ("notebase"));
-			assert (cn);
-			if (cn->big_enough_to_trim()) {
-				_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+		if (item_type == NoteItem) {
+			/* resize-drag notes */
+			if ((note = reinterpret_cast<NoteBase*>(item->get_data ("notebase")))) {
+				if (note->big_enough_to_trim()) {
+					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+				}
 			}
 			return true;
 		} else if (clicked_regionview) {
@@ -1031,11 +1011,6 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseObject:
 		switch (item_type) {
 		case RegionItem:
-			if (internal_editing ()) {
-				/* no region drags in internal edit mode */
-				return false;
-			}
-
 			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::CopyModifier)) {
 				add_region_copy_drag (item, event, clicked_regionview);
 			} else {
@@ -1061,9 +1036,7 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case LeftFrameHandle:
 		case RightFrameHandle:
-			if (!internal_editing ()) {
-				_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
-			}
+			_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer()), event);
 			return true;
 			break;
 
@@ -1112,48 +1085,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	if (_session && _session->actively_recording()) {
 		return true;
-	}
-
-	if (internal_editing()) {
-		bool leave_internal_edit_mode = false;
-
-		switch (item_type) {
-		case NoteItem:
-			break;
-
-		case RegionItem:
-			if (!dynamic_cast<MidiRegionView*> (clicked_regionview) && !dynamic_cast<AutomationRegionView*> (clicked_regionview)) {
-				leave_internal_edit_mode = true;
-			}
-			break;
-
-		case PlayheadCursorItem:
-		case MarkerItem:
-		case TempoMarkerItem:
-		case MeterMarkerItem:
-		case MarkerBarItem:
-		case TempoBarItem:
-		case MeterBarItem:
-		case RangeMarkerBarItem:
-		case CdMarkerBarItem:
-		case TransportMarkerBarItem:
-		case StreamItem:
-		case TimecodeRulerItem:
-		case SamplesRulerItem:
-		case MinsecRulerItem:
-		case BBTRulerItem:
-			/* button press on these items never does anything to
-			   change the editing mode.
-			*/
-			break;
-
-		default:
-			break;
-		}
-		
-		if (leave_internal_edit_mode) {
-			ActionManager::do_action ("MouseMode", "toggle-internal-edit");
-		}
 	}
 
 	button_selection (item, event, item_type);
@@ -1663,7 +1594,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case FadeInHandleItem:
 	case FadeInTrimHandleItem:
-		if (mouse_mode == MouseObject && !internal_editing()) {
+		if (mouse_mode == MouseObject) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {
 				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
@@ -1674,7 +1605,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case FadeOutHandleItem:
 	case FadeOutTrimHandleItem:
-		if (mouse_mode == MouseObject && !internal_editing()) {
+		if (mouse_mode == MouseObject) {
 			ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 			if (rect) {
 				RegionView* rv = static_cast<RegionView*>(item->get_data ("regionview"));
@@ -2374,44 +2305,6 @@ Editor::escape ()
 	reset_focus ();
 }
 
-void
-Editor::set_internal_edit (bool yn)
-{
-	if (_internal_editing == yn) {
-		return;
-	}
-
-	_internal_editing = yn;
-
-	if (yn) {
-		pre_internal_mouse_mode = mouse_mode;
-		pre_internal_snap_type = _snap_type;
-		pre_internal_snap_mode = _snap_mode;
-
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			(*i)->enter_internal_edit_mode ();
-		}
-
-		set_snap_to (internal_snap_type);
-		set_snap_mode (internal_snap_mode);
-
-	} else {
-
-		internal_snap_mode = _snap_mode;
-		internal_snap_type = _snap_type;
-
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			(*i)->leave_internal_edit_mode ();
-		}
-
-		set_snap_to (pre_internal_snap_type);
-		set_snap_mode (pre_internal_snap_mode);
-	}
-
-	reset_canvas_cursor ();
-	MouseModeChanged ();
-}
-
 /** Update _join_object_range_state which indicate whether we are over the top
  *  or bottom half of a route view, used by the `join object/range' tool
  *  mode. Coordinates in canvas space.
@@ -2419,7 +2312,7 @@ Editor::set_internal_edit (bool yn)
 void
 Editor::update_join_object_range_location (double y)
 {
-	if (_internal_editing || !get_smart_mode()) {
+	if (!get_smart_mode()) {
 		_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
 		return;
 	}

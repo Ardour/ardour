@@ -109,7 +109,7 @@ class AudioRegionView : public RegionView
 
 	void show_region_editor ();
 
-	virtual void entered (bool);
+	virtual void entered ();
 	virtual void exited ();
 
 	void thaw_after_trim ();

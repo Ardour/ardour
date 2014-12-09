@@ -178,9 +178,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Editing::MidiEditMode current_midi_edit_mode () const;
 	void remove_midi_note (ArdourCanvas::Item *, GdkEvent *);
 
-	bool internal_editing() const { return _internal_editing ; }
-	void set_internal_edit (bool yn);
-	bool toggle_internal_editing_from_double_click (GdkEvent*);
+	bool internal_editing() const;
 
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
@@ -546,12 +544,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_samples_per_pixel (framecnt_t);
 
 	Editing::MouseMode mouse_mode;
-	Editing::MouseMode pre_internal_mouse_mode;
-	Editing::SnapType  pre_internal_snap_type;
-	Editing::SnapMode  pre_internal_snap_mode;
-	Editing::SnapType  internal_snap_type;
-	Editing::SnapMode  internal_snap_mode;
-	bool _internal_editing;
 	Editing::MouseMode effective_mouse_mode () const;
 
 	enum JoinObjectRangeState {
@@ -1641,6 +1633,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourButton mouse_draw_button;
 	ArdourButton mouse_move_button;
 	ArdourButton mouse_timefx_button;
+	ArdourButton mouse_content_button;
 	ArdourButton mouse_audition_button;
 	ArdourButton mouse_cut_button;
 
@@ -1650,9 +1643,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	void			 mouse_mode_object_range_toggled ();
 	bool                     ignore_mouse_mode_toggle;
-
-	ArdourButton internal_edit_button;
-	void         toggle_internal_editing ();
 
 	bool                     mouse_select_button_release (GdkEventButton*);
 

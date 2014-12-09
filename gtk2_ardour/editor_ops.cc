@@ -3853,20 +3853,15 @@ Editor::cut_copy (CutCopyOp op)
 		return;
 	}
 
-	if (internal_editing()) {
-
-		switch (effective_mouse_mode()) {
-		case MouseObject:
-		case MouseRange:
-			begin_reversible_command (opname + ' ' + X_("MIDI"));
-			cut_copy_midi (op);
-			commit_reversible_command ();
-			break;
-		default:
-			break;
-		}
-
+	switch (mouse_mode) {
+	case MouseDraw:
+	case MouseContent:
+		begin_reversible_command (opname + ' ' + X_("MIDI"));
+		cut_copy_midi (op);
+		commit_reversible_command ();
 		return;
+	default:
+		break;
 	}
 
 	bool did_edit = false;
