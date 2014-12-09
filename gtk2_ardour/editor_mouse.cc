@@ -221,6 +221,28 @@ Editor::mouse_mode_object_range_toggled()
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
+static Glib::RefPtr<Action>
+get_mouse_mode_action(MouseMode m)
+{
+	switch (m) {
+	case MouseRange:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
+	case MouseObject:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object"));
+	case MouseCut:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-cut"));
+	case MouseDraw:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
+	case MouseTimeFX:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
+	case MouseContent:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
+	case MouseAudition:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-audition"));
+	}
+	return Glib::RefPtr<Action>();
+}
+
 void
 Editor::set_mouse_mode (MouseMode m, bool force)
 {
@@ -236,42 +258,8 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		if ( m == MouseCut) m = MouseObject;
 	}
 
-	Glib::RefPtr<Action> act;
-
-	switch (m) {
-	case MouseRange:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
-		break;
-
-	case MouseCut:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-cut"));
-		break;
-
-	case MouseObject:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object"));
-		break;
-
-	case MouseDraw:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
-		break;
-
-	case MouseTimeFX:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
-		break;
-
-	case MouseContent:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
-		break;
-
-	case MouseAudition:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-audition"));
-		break;
-	}
-
-	assert (act);
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact);
+	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
 	/* go there and back to ensure that the toggled handler is called to set up mouse_mode */
 	tact->set_active (false);
@@ -283,47 +271,12 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 void
 Editor::mouse_mode_toggled (MouseMode m)
 {
-	Glib::RefPtr<Action> act;
-	Glib::RefPtr<ToggleAction> tact;
-
 	if (ARDOUR::Profile->get_mixbus()) {
 		if ( m == MouseCut)  m = MouseObject;
 	}
 
-	switch (m) {
-	case MouseRange:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
-		break;
-
-	case MouseObject:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object"));
-		break;
-
-	case MouseCut:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-cut"));
-		break;
-
-	case MouseDraw:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
-		break;
-
-	case MouseTimeFX:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
-		break;
-
-	case MouseContent:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
-		break;
-
-	case MouseAudition:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-audition"));
-		break;
-	}
-
-	assert (act);
-
-	tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-	assert (tact);
+	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
 	if (!tact->get_active()) {
 		/* this was just the notification that the old mode has been
@@ -339,6 +292,15 @@ Editor::mouse_mode_toggled (MouseMode m)
 		_session->request_transport_speed (0.0, true);
 	}
 
+	if (mouse_mode == m) {
+		/* switch "in to" the same mode, act like a toggle and switch back to previous mode */
+		Glib::RefPtr<Action>       pact  = get_mouse_mode_action(previous_mouse_mode);
+		Glib::RefPtr<ToggleAction> ptact = Glib::RefPtr<ToggleAction>::cast_dynamic(pact);
+		ptact->set_active(true);
+		return;
+	}
+
+	previous_mouse_mode = mouse_mode;
 	mouse_mode = m;
 
 	instant_save ();
