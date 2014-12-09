@@ -118,6 +118,19 @@
     void on_device_error ();
 
 	// Merged ARDOUR's preferences
+	void display_waveform_shape ();
+	void display_meter_hold ();
+	void display_meter_falloff ();
+	void display_audio_capture_buffer_seconds ();
+	void display_audio_playback_buffer_seconds ();
+	void display_mmc_control ();
+	void display_send_mmc ();
+	void display_mmc_send_device_id ();
+	void display_mmc_receive_device_id ();
+	void display_only_copy_imported_files ();
+	void display_history_depth ();
+	void display_saved_history_depth ();
+	void display_denormal_protection ();
 	void display_general_preferences ();
 	void save_general_preferences ();
 

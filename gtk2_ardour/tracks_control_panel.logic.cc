@@ -930,8 +930,7 @@ TracksControlPanel::cleanup_midi_device_list()
     }
 }
 
-
-void TracksControlPanel::display_general_preferences ()
+void TracksControlPanel::display_waveform_shape ()
 {
 	ARDOUR::WaveformShape shape = Config->get_waveform_shape ();
 	switch (shape) {
@@ -942,10 +941,14 @@ void TracksControlPanel::display_general_preferences ()
 		_waveform_shape_dropdown.set_current_item (1);
 		break;
 	default:
-		dbg_msg ("TracksControlPanel::display_general_preferences ():\nUnexpected WaveFormShape !");
+		dbg_msg ("TracksControlPanel::display_waveform_shape ():\nUnexpected WaveFormShape !");
 		break;
 	}
+}
 
+void
+TracksControlPanel::display_meter_hold ()
+{
 	float peak_hold_time = Config->get_meter_hold ();
 	int selected_item = 0;
 	if (peak_hold_time <= (MeterHoldOff + 0.1)) {
@@ -958,9 +961,13 @@ void TracksControlPanel::display_general_preferences ()
 		selected_item = 3;
 	} 
 	_peak_hold_time_dropdown.set_current_item (selected_item);
+}
 
+void
+TracksControlPanel::display_meter_falloff ()
+{
 	float meter_falloff = Config->get_meter_falloff ();
-	selected_item = 0;
+	int selected_item = 0;
 
 	if (meter_falloff <= (METER_FALLOFF_OFF + 0.1)) {
 		selected_item = 0;
@@ -982,48 +989,113 @@ void TracksControlPanel::display_general_preferences ()
 		selected_item = 8;
 	} 
 	_dpm_fall_off_dropdown.set_current_item (selected_item);
+}
 
-
+void
+TracksControlPanel::display_audio_capture_buffer_seconds ()
+{
 	long period = Config->get_audio_capture_buffer_seconds ();
-	selected_item = 0;
+	int selected_item = 0;
 
-    if ((period <= 5.1)) {
+	if (period <= 5) {
 		selected_item = 0;
-	} else if ((period <= 10.1)) {
+	} else if (period <= 10) {
 		selected_item = 1;
-	} else if ((period <= 15.1)) {
+	} else if (period <= 15) {
 		selected_item = 2;
-	} else if ((period <= 30.1)) {
-		selected_item = 3;
-    }
-	_recording_seconds_dropdown.set_current_item (selected_item);
-	
-	period = Config->get_audio_playback_buffer_seconds ();
-	selected_item = 0;
-
-    if ((period <= 5.1)) {
-		selected_item = 0;
-	} else if ((period <= 10.1)) {
-		selected_item = 1;
-	} else if ((period <= 15.1)) {
-		selected_item = 2;
-	} else if ((period <= 20.1)) {
+	} else {
 		selected_item = 3;
 	}
-	_playback_seconds_dropdown.set_current_item (selected_item);
+	_recording_seconds_dropdown.set_current_item (selected_item);
+}	
 
+void
+TracksControlPanel::display_audio_playback_buffer_seconds ()
+{
+	long period = Config->get_audio_playback_buffer_seconds ();
+	int selected_item = 0;
+
+	if (period <= 5) {
+		selected_item = 0;
+	} else if (period <= 10) {
+		selected_item = 1;
+	} else if (period <= 15) {
+		selected_item = 2;
+	} else {
+		selected_item = 3;
+	}
+
+	_playback_seconds_dropdown.set_current_item (selected_item);
+}
+
+void
+TracksControlPanel::display_mmc_control ()
+{
 	_obey_mmc_commands_button.set_active_state (Config->get_mmc_control () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+}
+
+void
+TracksControlPanel::display_send_mmc ()
+{
 	_send_mmc_commands_button.set_active_state (Config->get_send_mmc () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	_inbound_mmc_device_spinbutton.set_value (Config->get_mmc_receive_device_id ());
+}
+
+void
+TracksControlPanel::display_mmc_send_device_id ()
+{
 	_outbound_mmc_device_spinbutton.set_value (Config->get_mmc_send_device_id ());
+}
+
+void
+TracksControlPanel::display_mmc_receive_device_id ()
+{
+	_inbound_mmc_device_spinbutton.set_value (Config->get_mmc_receive_device_id ());
+}
+
+void
+TracksControlPanel::display_history_depth ()
+{
 	_limit_undo_history_spinbutton.set_value (Config->get_history_depth ());
+}
+
+void
+TracksControlPanel::display_saved_history_depth ()
+{
 	_save_undo_history_spinbutton.set_value (Config->get_saved_history_depth ());
+}
+void
+TracksControlPanel::display_only_copy_imported_files ()
+{
 	_copy_imported_files_button.set_active_state (Config->get_only_copy_imported_files () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+}
+
+void
+TracksControlPanel::display_denormal_protection ()
+{
 	_dc_bias_against_denormals_button.set_active_state (Config->get_denormal_protection () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
 
-void TracksControlPanel::save_general_preferences ()
+void
+TracksControlPanel::display_general_preferences ()
+{
+	display_waveform_shape ();
+	display_meter_hold ();
+	display_meter_falloff ();
+	display_audio_capture_buffer_seconds ();
+	display_audio_playback_buffer_seconds ();
+	display_mmc_control ();
+	display_send_mmc ();
+	display_mmc_send_device_id ();
+	display_mmc_receive_device_id ();
+	display_only_copy_imported_files ();
+	display_history_depth ();
+	display_saved_history_depth ();
+	display_denormal_protection ();
+}
+
+void
+TracksControlPanel::save_general_preferences ()
 {
 	int selected_item = _waveform_shape_dropdown.get_current_item ();
 	switch (selected_item) {
@@ -1101,12 +1173,9 @@ void TracksControlPanel::save_general_preferences ()
 	Config->set_history_depth (_limit_undo_history_spinbutton.get_value ());
 	Config->set_saved_history_depth (_save_undo_history_spinbutton.get_value ());
 	Config->set_save_history (_save_undo_history_spinbutton.get_value () > 0);
-    int capture_seconds = PBD::atoi (_recording_seconds_dropdown.get_text ());
-    int playback_seconds = PBD::atoi (_playback_seconds_dropdown.get_text ());
-	Config->set_audio_capture_buffer_seconds (capture_seconds);
-	Config->set_audio_playback_buffer_seconds (playback_seconds);
+	Config->set_audio_capture_buffer_seconds (PBD::atoi (_recording_seconds_dropdown.get_text ()));
+	Config->set_audio_playback_buffer_seconds (PBD::atoi (_playback_seconds_dropdown.get_text()));
 }
-
 
 void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, int)
 {
@@ -1128,7 +1197,7 @@ void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, int)
 
 void
 TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
-{	
+{
 	if (_ignore_changes) {
 		return;
 	}
@@ -1345,7 +1414,6 @@ TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
     msg.run();
 }
 
-
 void
 TracksControlPanel::on_mtc_input_chosen (WavesDropdown* dropdown, int el_number)
 {
@@ -1359,7 +1427,6 @@ TracksControlPanel::on_mtc_input_chosen (WavesDropdown* dropdown, int el_number)
 
 }
 
-
 void
 TracksControlPanel::engine_running ()
 {
@@ -1368,12 +1435,10 @@ TracksControlPanel::engine_running ()
     show_buffer_duration ();
 }
 
-
 void
 TracksControlPanel::engine_stopped ()
 {
 }
-
 
 void
 TracksControlPanel::on_a_settings_tab_button_clicked (WavesButton* clicked_button)
@@ -1394,7 +1459,6 @@ TracksControlPanel::on_a_settings_tab_button_clicked (WavesButton* clicked_butto
 	_general_settings_tab.set_visible (visible);
 	_general_settings_tab_button.set_active(visible);
 }
-
 
 void
 TracksControlPanel::on_device_error ()
@@ -1521,7 +1585,6 @@ TracksControlPanel::on_ok (WavesButton*)
     update_configs();
 }
 
-
 void
 TracksControlPanel::on_cancel (WavesButton*)
 {
@@ -1557,7 +1620,6 @@ TracksControlPanel::on_cancel (WavesButton*)
 	display_general_preferences ();
 }
 
-
 void 
 TracksControlPanel::on_apply (WavesButton*)
 {
@@ -1567,13 +1629,11 @@ TracksControlPanel::on_apply (WavesButton*)
     update_configs(); 
 }
 
-
 void TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
 {
     const char * id_name = (char*)capture_control->get_data(DeviceConnectionControl::id_name);
     EngineStateController::instance()->set_physical_audio_input_state(id_name, active);
 }
-
 
 void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
 {
@@ -1581,13 +1641,11 @@ void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* pla
     EngineStateController::instance()->set_physical_audio_output_state(id_name, active);
 }
 
-
 void TracksControlPanel::on_midi_capture_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
     const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::capture_id_name);
     EngineStateController::instance()->set_physical_midi_input_state(id_name, active);
 }
-
 
 void TracksControlPanel::on_midi_playback_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
@@ -1604,13 +1662,11 @@ void TracksControlPanel::on_port_registration_update()
     populate_mtc_in_dropdown();
 }
 
-
 void
 TracksControlPanel::on_buffer_size_update ()
 {
     populate_buffer_size_dropdown();
 }
-
 
 void
 TracksControlPanel::on_device_list_update (bool current_device_disconnected)
@@ -1630,7 +1686,6 @@ TracksControlPanel::on_device_list_update (bool current_device_disconnected)
         return;
     }
 }
-
                                       
 void
 TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
@@ -1641,30 +1696,34 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
         on_audio_input_configuration_changed ();
     } else if (parameter_name == "default-session-parent-dir") {
         _default_open_path.set_text(Config->get_default_session_parent_dir());
-    } else if ((parameter_name == "meter-hold") ||
-			   (parameter_name == "meter-falloff") ||
-			   (parameter_name == "waveform-shape") ||
-			   (parameter_name == "mmc-control") ||
-			   (parameter_name == "send-mmc") ||
-			   (parameter_name == "midi-feedback") ||
-			   (parameter_name == "mmc-receive-device-id") ||
-			   (parameter_name == "mmc-send-device-id") ||
-			   (parameter_name == "playback-buffer-seconds") ||
-			   (parameter_name == "capture-buffer-seconds") ||
-			   (parameter_name == "only-copy-imported-files") ||
-			   (parameter_name == "denormal-protection") ||
-			   (parameter_name == "history-depth") ||
-			   (parameter_name == "save-history") ||
-			   (parameter_name == "save-history-depth")){
-		// This is not that correct.
-		// We should update UI when the panel is being shown.
-		// We should not react immediately.
-		// The use case is: load the values, edit them and then
-		// save or cancel.
-		display_general_preferences ();
-    }
+    } else if (parameter_name == "waveform-shape") {
+		display_waveform_shape ();
+	} else if (parameter_name == "meter-hold") {
+		display_meter_hold ();
+	} else if (parameter_name == "meter-falloff") {
+		display_meter_falloff ();
+	} else if (parameter_name == "capture-buffer-seconds") {
+		display_audio_capture_buffer_seconds ();
+	} else if (parameter_name == "playback-buffer-seconds") {
+		display_audio_playback_buffer_seconds ();
+	} else if (parameter_name == "mmc-control") {
+		display_mmc_control ();
+	} else if (parameter_name == "send-mmc") {
+		display_send_mmc ();
+	} else if (parameter_name == "mmc-receive-device-id") {
+		display_mmc_receive_device_id ();
+	} else if (parameter_name == "mmc-send-device-id") {
+		display_mmc_send_device_id ();
+	} else if (parameter_name == "only-copy-imported-files") {
+		display_only_copy_imported_files ();
+	} else if (parameter_name == "denormal-protection") {
+		display_denormal_protection ();
+	} else if (parameter_name == "history-depth") {
+		display_history_depth ();
+	} else if (parameter_name == "save-history-depth") {
+		display_saved_history_depth ();
+	}
 }
-
 
 void
 TracksControlPanel::on_audio_input_configuration_changed ()
@@ -1706,7 +1765,6 @@ TracksControlPanel::on_audio_input_configuration_changed ()
     }
 }
 
-
 void
 TracksControlPanel::on_audio_output_configuration_changed()
 {
@@ -1739,7 +1797,6 @@ TracksControlPanel::on_audio_output_configuration_changed()
 
 }
 
-
 void
 TracksControlPanel::on_midi_input_configuration_changed ()
 {
@@ -1765,7 +1822,6 @@ TracksControlPanel::on_midi_input_configuration_changed ()
     populate_mtc_in_dropdown();
 }
 
-
 void
 TracksControlPanel::on_midi_output_configuration_changed ()
 {
@@ -1789,13 +1845,11 @@ TracksControlPanel::on_midi_output_configuration_changed ()
     }
 }
 
-
 void
 TracksControlPanel::on_mtc_input_changed (const std::string&)
 {
     // add actions here
 }
-
 
 std::string
 TracksControlPanel::bufsize_as_string (uint32_t sz)
@@ -1807,7 +1861,6 @@ TracksControlPanel::bufsize_as_string (uint32_t sz)
 	snprintf (buf, sizeof (buf), _("%u samples"), sz);
 	return buf;
 }
-
 
 framecnt_t
 TracksControlPanel::get_sample_rate () const
