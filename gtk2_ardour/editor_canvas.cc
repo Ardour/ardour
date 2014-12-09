@@ -1434,9 +1434,10 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case VideoBarItem:
 	case DropZoneItem:
     case SelectionItem:
-		cursor = which_grabber_cursor();
+        if (mouse_mode == MouseRange || mouse_mode == MouseObject) {
+            cursor = which_grabber_cursor();
+        }
 		break;
-
 	default:
 		break;
 	}
