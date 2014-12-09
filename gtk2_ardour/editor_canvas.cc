@@ -1342,12 +1342,6 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		case AutomationLineItem:
 			cursor = _cursors->cross_hair;
 			break;
-		case StartSelectionTrimItem:
-			cursor = _cursors->left_side_trim;
-			break;
-		case EndSelectionTrimItem:
-			cursor = _cursors->right_side_trim;
-			break;
 		case FadeInItem:
 			cursor = _cursors->fade_in;
 			break;
@@ -1389,6 +1383,9 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		case CrossfadeViewItem:
 			cursor = _cursors->cross_hair;
 			break;
+        case SelectionItem:
+            cursor = which_grabber_cursor();
+            break;
 		default:
 			break;
 		}
@@ -1410,7 +1407,17 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		default:
 			break;
 		}
-	}
+        
+    } else if (mouse_mode == MouseRange) {
+        
+        switch (type) {
+        case SelectionItem:
+            cursor = which_grabber_cursor();
+            break;
+        default:
+            break;
+        }
+    }
 
 	switch (type) {
 		/* These items use the timebar cursor at all times */
@@ -1435,12 +1442,6 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case DropZoneItem:
         cursor = which_grabber_cursor();
         break;
-    /* Use grabber cursor only if we are in Pointer Or Range tool mode */
-    case SelectionItem:
-        if (mouse_mode == MouseRange || mouse_mode == MouseObject) {
-            cursor = which_grabber_cursor();
-        }
-		break;
 	default:
 		break;
 	}
