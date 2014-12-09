@@ -5291,6 +5291,7 @@ EditorRubberbandSelectDrag::deselect_things ()
 		_editor->selection->clear_tracks();
 	}
 	_editor->selection->clear_regions();
+    _editor->selection->clear_time ();
 	_editor->selection->clear_points ();
 	_editor->selection->clear_lines ();
 }
