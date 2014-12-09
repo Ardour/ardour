@@ -1113,6 +1113,8 @@ void TracksControlPanel::save_general_preferences ()
 	Config->set_history_depth (_limit_undo_history_spinbutton.get_value ());
 	Config->set_saved_history_depth (_save_undo_history_spinbutton.get_value ());
 	Config->set_save_history (_save_undo_history_spinbutton.get_value () > 0);
+	Config->set_audio_capture_buffer_seconds (PBD::atoi (_recording_seconds_dropdown.get_text ()));
+	Config->set_audio_playback_buffer_seconds (PBD::atoi (_playback_seconds_dropdown.get_text()));
 }
 
 
@@ -1829,7 +1831,7 @@ pframes_t
 TracksControlPanel::get_buffer_size() const
 {
     std::string bs_text = _buffer_size_dropdown.get_text ();
-    pframes_t samples = atoi (bs_text); /* will ignore trailing text */
+    pframes_t samples = PBD::atoi (bs_text); /* will ignore trailing text */
 	return samples;
 }
 
