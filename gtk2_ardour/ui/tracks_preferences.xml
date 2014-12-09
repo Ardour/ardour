@@ -918,27 +918,18 @@
                        width="117"/>
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
-                <DropdownItem title="0"
-                              horzalignment="start"
-                              data="0"/>
                 <DropdownItem title="5"
                               horzalignment="start"
-                              data="1"/>
+                              data="0"/>
                 <DropdownItem title="10"
                               horzalignment="start"
-                              data="2"/>
+                              data="1"/>
                 <DropdownItem title="15"
                               horzalignment="start"
+                              data="2"/>
+                <DropdownItem title="20"
+                              horzalignment="start"
                               data="3"/>
-                <DropdownItem title="30"
-                              horzalignment="start"
-                              data="4"/>
-                <DropdownItem title="45"
-                              horzalignment="start"
-                              data="5"/>
-                <DropdownItem title="60"
-                              horzalignment="start"
-                              data="6"/>
               </DropdownMenu>
             </Dropdown>
           </HBox>
@@ -955,27 +946,18 @@
                        width="117"/>
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
-                <DropdownItem title="0"
-                              horzalignment="start"
-                              data="0"/>
                 <DropdownItem title="5"
                               horzalignment="start"
-                              data="1"/>
+                              data="0"/>
                 <DropdownItem title="10"
                               horzalignment="start"
-                              data="2"/>
+                              data="1"/>
                 <DropdownItem title="15"
                               horzalignment="start"
+                              data="2"/>
+                <DropdownItem title="20"
+                              horzalignment="start"
                               data="3"/>
-                <DropdownItem title="30"
-                              horzalignment="start"
-                              data="4"/>
-                <DropdownItem title="45"
-                              horzalignment="start"
-                              data="5"/>
-                <DropdownItem title="60"
-                              horzalignment="start"
-                              data="6"/>
               </DropdownMenu>
             </Dropdown>
           </HBox>

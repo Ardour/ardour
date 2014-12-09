@@ -987,40 +987,28 @@ void TracksControlPanel::display_general_preferences ()
 	long period = Config->get_audio_capture_buffer_seconds ();
 	selected_item = 0;
 
-	if (period <= 0.1) {
+    if ((period <= 5.1)) {
 		selected_item = 0;
-	} else if ((period <= 5.1)) {
-		selected_item = 1;
 	} else if ((period <= 10.1)) {
-		selected_item = 2;
+		selected_item = 1;
 	} else if ((period <= 15.1)) {
-		selected_item = 3;
+		selected_item = 2;
 	} else if ((period <= 30.1)) {
-		selected_item = 4;
-	} else if ((period <= 45.1)) {
-		selected_item = 5;
-	} else if ((period <= 60.1)) {
-		selected_item = 6;
-	}
+		selected_item = 3;
+    }
 	_recording_seconds_dropdown.set_current_item (selected_item);
 	
 	period = Config->get_audio_playback_buffer_seconds ();
 	selected_item = 0;
 
-	if (period <= 0.1) {
+    if ((period <= 5.1)) {
 		selected_item = 0;
-	} else if ((period <= 5.1)) {
-		selected_item = 1;
 	} else if ((period <= 10.1)) {
-		selected_item = 2;
+		selected_item = 1;
 	} else if ((period <= 15.1)) {
+		selected_item = 2;
+	} else if ((period <= 20.1)) {
 		selected_item = 3;
-	} else if ((period <= 30.1)) {
-		selected_item = 4;
-	} else if ((period <= 45.1)) {
-		selected_item = 5;
-	} else if ((period <= 60.1)) {
-		selected_item = 6;
 	}
 	_playback_seconds_dropdown.set_current_item (selected_item);
 
@@ -1140,7 +1128,7 @@ void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, int)
 
 void
 TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
-{
+{	
 	if (_ignore_changes) {
 		return;
 	}
