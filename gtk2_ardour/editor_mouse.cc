@@ -745,11 +745,15 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case MouseRange:
 		switch (item_type) {
 		case StartSelectionTrimItem:
-			_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionStartTrim), event);
+            if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Keyboard::TertiaryModifier) ) {
+                _drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionStartTrim), event);
+            }
 			break;
 
 		case EndSelectionTrimItem:
-			_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionEndTrim), event);
+            if (Keyboard::modifier_state_equals (event->button.state, Keyboard::Keyboard::TertiaryModifier) ) {
+                _drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionEndTrim), event);
+            }
 			break;
 
 		case SelectionItem:

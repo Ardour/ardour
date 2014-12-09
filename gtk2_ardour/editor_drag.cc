@@ -4145,14 +4145,14 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, true);
 		}
-		Drag::start_grab (event, _editor->cursors()->left_side_trim);
+		Drag::start_grab (event, cursor);
 		break;
 
 	case SelectionEndTrim:
 		if (_editor->clicked_axisview) {
 			_editor->clicked_axisview->order_selection_trims (_item, false);
 		}
-		Drag::start_grab (event, _editor->cursors()->right_side_trim);
+		Drag::start_grab (event, cursor);
 		break;
 
 	case SelectionMove:
