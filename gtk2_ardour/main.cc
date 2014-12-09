@@ -53,6 +53,7 @@
 #include "opts.h"
 #include "enums.h"
 #include "bundle_env.h"
+#include "waves_message_dialog.h"
 
 #include "i18n.h"
 
@@ -76,13 +77,7 @@ static const char* localedir = LOCALEDIR;
 void
 gui_jack_error ()
 {
-	MessageDialog win (string_compose (_("%1 could not connect to the audio backend."), PROGRAM_NAME),
-	                   false,
-	                   Gtk::MESSAGE_INFO,
-	                   Gtk::BUTTONS_NONE);
-
-	win.add_button ("QUIT", RESPONSE_CLOSE);
-	win.set_default_response (RESPONSE_CLOSE);
+    WavesMessageDialog win ("waves_connect_to_backend_error_dialog.xml", "", string_compose (_("%1 could not connect to the audio backend."), PROGRAM_NAME) );
 
 	win.show_all ();
 	win.set_position (Gtk::WIN_POS_CENTER);
@@ -101,15 +96,16 @@ tell_about_backend_death (void* /* ignored */)
 {
 	if (AudioEngine::instance()->processed_frames() == 0) {
 		/* died during startup */
-		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
-		msg.set_position (Gtk::WIN_POS_CENTER);
-		msg.set_secondary_text (string_compose (_(
+		string message1 = string_compose (_("The audio backend (%1) has failed, or terminated\n"), AudioEngine::instance()->current_backend_name());
+        string message2 = (string_compose (_(
 "%2 exited unexpectedly, and without notifying %1.\n\
 \n\
 This could be due to misconfiguration or to an error inside %2.\n\
 \n\
 Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
 
+        WavesMessageDialog msg ("", message1+message2);
+        msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
 		_exit (0);
 
@@ -117,9 +113,10 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 
 		/* engine has already run, so this is a mid-session backend death */
 			
-		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
-		msg.set_secondary_text (string_compose (_("%2 exited unexpectedly, and without notifying %1."),
+		string message1 = (string_compose (_("The audio backend (%1) has failed, or terminated\n"), AudioEngine::instance()->current_backend_name()));
+		string message2 = (string_compose (_("%2 exited unexpectedly, and without notifying %1."),
 							 PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
+        WavesMessageDialog msg ("", message1+message2);
 		msg.present ();
 	}
 	return false; /* do not call again */

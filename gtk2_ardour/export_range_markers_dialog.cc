@@ -140,7 +140,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
   	if (filepath.empty()) {
   		// warning dialog
  		string txt = _("Please enter a valid target directory.");
-		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		WavesMessageDialog msg ("", txt);
 		msg.run();
  		return false;
  	}
@@ -148,7 +148,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
 	if ( (stat (filepath.c_str(), &statbuf) != 0) ||
 		(!S_ISDIR (statbuf.st_mode)) ) {
 		string txt = _("Please select an existing target directory. Files are not allowed!");
-		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		WavesMessageDialog msg ("", txt);
 		msg.run();
 		return false;
 	}
@@ -157,7 +157,7 @@ ExportRangeMarkersDialog::is_filepath_valid(string &filepath)
  	string dirpath = Glib::path_get_dirname (filepath);
 	if (!exists_and_writable (dirpath)) {
  		string txt = _("Cannot write file in: ") + dirpath;
-		MessageDialog msg (*this, txt, false, MESSAGE_ERROR, BUTTONS_OK, true);
+		WavesMessageDialog msg ("", txt);
 		msg.run();
  		return false;
   	}

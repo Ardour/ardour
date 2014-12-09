@@ -51,6 +51,7 @@
 #include "public_editor.h"
 #include "selection.h"
 #include "time_axis_view.h"
+#include "waves_message_dialog.h"
 
 #include "i18n.h"
 
@@ -142,21 +143,10 @@ Editor::export_region ()
 
 		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
 
-			MessageDialog checker (_("File Exists!"),
-					       true,
-					       Gtk::MESSAGE_WARNING,
-					       Gtk::BUTTONS_NONE);
-			
-			checker.set_title (_("File Exists!"));
-
-			checker.add_button ("CANCEL", RESPONSE_CANCEL);
-			checker.add_button (_("Overwrite Existing File"), RESPONSE_ACCEPT);
-			checker.set_default_response (RESPONSE_CANCEL);
-			
-			checker.set_wmclass (X_("midi_export_file_exists"), PROGRAM_NAME);
-			checker.set_position (Gtk::WIN_POS_MOUSE);
-
-			ret = checker.run ();
+			WavesMessageDialog msg ("waves_file_exists_dialog.xml", "", _("File Exists!"), WavesMessageDialog::BUTTON_CANCEL | WavesMessageDialog::BUTTON_ACCEPT);
+            msg.set_position (Gtk::WIN_POS_MOUSE);
+            
+            ret = msg.run ();
 
 			switch (ret) {
 			case Gtk::RESPONSE_ACCEPT:

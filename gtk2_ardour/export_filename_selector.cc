@@ -21,6 +21,7 @@
 #include <gtkmm/messagedialog.h>
 
 #include "export_filename_selector.h"
+#include "waves_message_dialog.h"
 
 #include "i18n.h"
 
@@ -247,7 +248,7 @@ ExportFilenameSelector::check_folder ()
 	}
 
 	if (!Glib::file_test (path_entry.get_text(), Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-		Gtk::MessageDialog msg (string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
+		WavesMessageDialog msg ("", string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
 The filename will be chosen from the information just above the folder selector."), path_entry.get_text()));
 		msg.run ();
 		path_entry.set_text (Glib::path_get_dirname (path_entry.get_text()));
@@ -333,7 +334,7 @@ ExportFilenameSelector::open_browse_dialog ()
 			std::string filename = dialog.get_filename();
 			
 			if (!Glib::file_test (filename, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-				Gtk::MessageDialog msg (string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
+				WavesMessageDialog msg ("", string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
 The filename will be chosen from the information just above the folder selector."), filename));
 				msg.run ();
 				continue;

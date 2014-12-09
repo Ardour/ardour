@@ -6108,23 +6108,11 @@ Editor::split_region_at_points (boost::shared_ptr<Region> r, AnalysisFeatureList
 	}
 
 
-	if (positions.size() > 20 && can_ferret) {
-		std::string msgstr = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time."), r->name(), positions.size() + 1);
-		MessageDialog msg (msgstr,
-				   false,
-				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_OK_CANCEL);
-
-		if (can_ferret) {
-			msg.add_button (_("Call for the Ferret!"), RESPONSE_APPLY);
-			msg.set_secondary_text (_("Press OK to continue with this split operation\nor ask the Ferret dialog to tune the analysis"));
-		} else {
-			msg.set_secondary_text (_("Press OK to continue with this split operation"));
-		}
-
-		msg.set_title (_("Excessive split?"));
+	if (positions.size() > 20 && can_ferret)
+    {
+        string message = string_compose (_("You are about to split\n%1\ninto %2 pieces.\nThis could take a long time.\nPress OK to continue with this split operation\nor ask the Ferret dialog to tune the analysis"), r->name(), positions.size() + 1);
+        WavesMessageDialog msg ("waves_excessive_split_dialog.xml", "", message, WavesMessageDialog::BUTTON_CANCEL | WavesMessageDialog::BUTTON_OK | WavesMessageDialog::BUTTON_ACCEPT );
 		msg.present ();
-
 		int response = msg.run();
 		msg.hide ();
 
@@ -6919,7 +6907,8 @@ Editor::fit_tracks (TrackViewList & tracks)
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
-		MessageDialog msg (*this, _("There are too many tracks to fit in the current window"));
+		WavesMessageDialog msg ("", _("There are too many tracks to fit in the current window"));
+        msg.run ();
 		/* too small to be displayed */
 		return;
 	}

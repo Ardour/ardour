@@ -70,6 +70,7 @@
 #include "gui_thread.h"
 #include "route_group_menu.h"
 #include "meter_patterns.h"
+#include "waves_message_dialog.h"
 
 #include "i18n.h"
 #include "dbg_msg.h"
@@ -711,7 +712,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 {
 	using namespace Menu_Helpers;
 	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to audio engine - no I/O changes are possible"));
+		WavesMessageDialog msg ("", _("Not connected to audio engine - no I/O changes are possible"));
 		msg.run ();
 		return true;
 	}
@@ -839,7 +840,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 	citems.clear();
 
 	if (!_session->engine().connected()) {
-		MessageDialog msg (_("Not connected to audio engine - no I/O changes are possible"));
+		WavesMessageDialog msg ("", _("Not connected to audio engine - no I/O changes are possible"));
 		msg.run ();
 		return true;
 	}

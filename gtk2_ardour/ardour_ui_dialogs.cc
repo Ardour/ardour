@@ -380,7 +380,7 @@ ARDOUR_UI::goto_mixer_window ()
 	}
 	
 	if (g_getenv ("ARDOUR_LOVES_STUPID_TINY_SCREENS") == 0 && screen && screen->get_height() < 700) {
-		Gtk::MessageDialog msg (_("This screen is not tall enough to display the mixer window"));
+		WavesMessageDialog msg ("",_("This screen is not tall enough to display the mixer window"));
 		msg.run ();
 		return;
 	}

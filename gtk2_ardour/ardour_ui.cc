@@ -483,10 +483,9 @@ was not fast enough. Try to restart\n\
 the audio backend and save the session."), PROGRAM_NAME);
 	}
 
-	MessageDialog msg (*editor, msgstr);
+    WavesMessageDialog msg ("", msgstr);
 	pop_back_splash (msg);
-	msg.set_keep_above (true);
-	msg.run ();
+    msg.run ();
 	
 	if (free_reason) {
 		free (const_cast<char*> (reason));
@@ -986,11 +985,11 @@ ARDOUR_UI::finish()
 				/* use the default name */
 				if (save_state_canfail ("")) {
 					/* failed - don't quit */
-					MessageDialog msg (*editor,
+					WavesMessageDialog msg ("",
 							   string_compose (_("\
 %1 was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
-\"Just quit\" option."), PROGRAM_NAME));
+\"Don't save\" option."), PROGRAM_NAME));
 					pop_back_splash(msg);
 					msg.run ();
 					return;
@@ -1502,7 +1501,7 @@ bool
 ARDOUR_UI::check_audioengine ()
 {
 	if (!AudioEngine::instance()->connected()) {
-		MessageDialog msg (string_compose (
+		WavesMessageDialog msg ("", string_compose (
 					   _("%1 is not connected to any audio backend.\n"
 					     "You cannot open or close sessions in this condition"),
 					   PROGRAM_NAME));
@@ -1560,7 +1559,7 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 	}
 
 	catch (...) {
-		MessageDialog msg (*editor,
+		WavesMessageDialog msg ("",
 				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
@@ -1621,7 +1620,7 @@ ARDOUR_UI::session_add_audio_route (
 	}
 
 	catch (...) {
-		MessageDialog msg (*editor,
+		WavesMessageDialog msg ("",
 				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
@@ -1768,7 +1767,7 @@ ARDOUR_UI::transport_record (bool roll)
 		switch (_session->record_status()) {
 		case Session::Disabled:
 			if (_session->ntracks() == 0) {
-				MessageDialog msg (*editor, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
+				WavesMessageDialog msg ("", _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
 				msg.run ();
 				return;
 			}
@@ -2281,7 +2280,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 		if (do_save) {
 			char illegal = Session::session_name_is_legal(snapname);
 			if (illegal) {
-				MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
+				WavesMessageDialog msg ("", string_compose (_("To ensure compatibility with various systems\n"
 				                     "snapshot names may not contain a '%1' character"), illegal));
 				msg.run ();
 				goto again;
@@ -2346,7 +2345,7 @@ ARDOUR_UI::rename_session ()
 			char illegal = Session::session_name_is_legal (name);
 
 			if (illegal) {
-				MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
+				WavesMessageDialog msg ("", string_compose (_("To ensure compatibility with various systems\n"
 								     "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				goto again;
@@ -2354,7 +2353,7 @@ ARDOUR_UI::rename_session ()
 
 			switch (_session->rename (name)) {
 			case -1: {
-				MessageDialog msg (_("That name is already in use by another directory/folder. Please try again."));
+				WavesMessageDialog msg ("", _("That name is already in use by another directory/folder. Please try again."));
 				msg.set_position (WIN_POS_MOUSE);
 				msg.run ();
 				goto again;
@@ -2363,7 +2362,7 @@ ARDOUR_UI::rename_session ()
 			case 0:
 				break;
 			default: {
-				MessageDialog msg (_("Renaming this session failed.\nThings could be seriously messed up at this point"));
+				WavesMessageDialog msg ("", _("Renaming this session failed.\nThings could be seriously messed up at this point"));
 				msg.set_position (WIN_POS_MOUSE);
 				msg.run ();
 				break;
@@ -2520,16 +2519,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 {
 	std::string str = string_compose (_("This session\n%1\nalready exists. Do you want to open it?"), session_path);
 
-	MessageDialog msg (str,
-			   false,
-			   Gtk::MESSAGE_WARNING,
-			   Gtk::BUTTONS_YES_NO,
-			   true);
-
-
-	msg.set_name (X_("OpenExistingDialog"));
-	msg.set_title (_("Open Existing Session"));
-	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
+	WavesMessageDialog msg ("",str, WavesMessageDialog::BUTTON_YES | WavesMessageDialog::BUTTON_NO);
 	msg.set_position (Gtk::WIN_POS_MOUSE);
 	pop_back_splash (msg);
 
@@ -2902,7 +2892,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (!likely_new) {
 				pop_back_splash (session_dialog);
-				MessageDialog msg (string_compose (_("There is no existing session at \"%1\""), session_path));
+				WavesMessageDialog msg ("", string_compose (_("There is no existing session at \"%1\""), session_path));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
@@ -2912,7 +2902,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (illegal) {
 				pop_back_splash (session_dialog);
-				MessageDialog msg (session_dialog, string_compose(_("To ensure compatibility with various systems\n"
+				WavesMessageDialog msg ("", string_compose(_("To ensure compatibility with various systems\n"
 										    "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
@@ -3004,23 +2994,14 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	catch (AudioEngine::PortRegistrationFailure& err) {
 
-		MessageDialog msg (err.what(),
-				   true,
-				   Gtk::MESSAGE_INFO,
-				   Gtk::BUTTONS_CLOSE);
-
-		msg.set_title (_("Port Registration Error"));
-		msg.set_secondary_text (_("Click the Close button to try again."));
+		WavesMessageDialog msg ("Port Registration Error", string( err.what() ) + "\nClick the Close button to try again.", WavesMessageDialog::BUTTON_CLOSE );
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash (msg);
 		msg.present ();
-
 		int response = msg.run ();
-
 		msg.hide ();
-
 		switch (response) {
-		case RESPONSE_CANCEL:
+		case RESPONSE_CLOSE:
 			exit (1);
 		default:
 			break;
@@ -3115,7 +3096,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 
 	catch (...) {
 
-		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		WavesMessageDialog msg ("", string_compose(_("Could not create session in \"%1\""), path));
 		pop_back_splash (msg);
 		msg.run ();
 		return -1;
@@ -3213,17 +3194,12 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 	removed = rep.paths.size();
 
 	if (removed == 0) {
-		MessageDialog msgd (*editor,
-				    _("No files were ready for clean-up"),
-				    true,
-				    Gtk::MESSAGE_INFO,
-				    Gtk::BUTTONS_OK);
-		msgd.set_title (_("Clean-up"));
-		msgd.set_secondary_text (_("If this seems suprising, \n\
+		WavesMessageDialog msgd ("", _("No files were ready for clean-up\n"
+"If this seems suprising, \n\
 check for any existing snapshots.\n\
 These may still include regions that\n\
 require some unused files to continue to exist."));
-
+		
 		msgd.run ();
 		return;
 	}
@@ -3354,28 +3330,13 @@ ARDOUR_UI::cleanup ()
 		/* shouldn't happen: menu item is insensitive */
 		return;
 	}
-
-
-	MessageDialog checker (_("Are you sure you want to clean-up?"),
-				true,
-				Gtk::MESSAGE_QUESTION,
-				Gtk::BUTTONS_NONE);
-
-	checker.set_title (_("Clean-up"));
-
-	checker.set_secondary_text(_("Clean-up is a destructive operation.\n\
+	   
+    WavesMessageDialog msg("waves_clean_up_dialog.xml","", _("Are you sure want to clean-up?\n Clean-up is a destructive operation.\n\
 ALL undo/redo information will be lost if you clean-up.\n\
-Clean-up will move all unused files to a \"dead\" location."));
+Clean-up will move all unused files to a \"dead\" location."),
+                         WavesMessageDialog::BUTTON_CANCEL | WavesMessageDialog::BUTTON_ACCEPT);
 
-	checker.add_button ("CANCEL", RESPONSE_CANCEL);
-	checker.add_button (_("Clean-up"), RESPONSE_ACCEPT);
-	checker.set_default_response (RESPONSE_CANCEL);
-
-	checker.set_name (_("CleanupDialog"));
-	checker.set_wmclass (X_("ardour_cleanup"), PROGRAM_NAME);
-	checker.set_position (Gtk::WIN_POS_MOUSE);
-
-	switch (checker.run()) {
+	switch (msg.run()) {
 	case RESPONSE_ACCEPT:
 		break;
 	default:
@@ -3400,7 +3361,7 @@ Clean-up will move all unused files to a \"dead\" location."));
 
 	editor->finish_cleanup ();
 
-	checker.hide();
+    msg.hide ();
 	display_cleanup_results (rep, _("Cleaned Files"), false);
 }
 
@@ -3898,8 +3859,7 @@ ARDOUR_UI::create_xrun_marker (framepos_t where)
 void
 ARDOUR_UI::halt_on_xrun_message ()
 {
-	MessageDialog msg (*editor,
-			   _("Recording was stopped because your system could not keep up."));
+	WavesMessageDialog msg ("", _("Recording was stopped because your system could not keep up."));
 	msg.run ();
 }
 
@@ -3928,7 +3888,7 @@ ARDOUR_UI::disk_overrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (*editor, string_compose (_("\
+		WavesMessageDialog* msg = new WavesMessageDialog ("", string_compose (_("\
 The disk system on your computer\n\
 was not able to keep up with %1.\n\
 \n\
@@ -4056,8 +4016,8 @@ ARDOUR_UI::disk_underrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (
-			*editor, string_compose (_("The disk system on your computer\n\
+		WavesMessageDialog* msg = new WavesMessageDialog (
+			"", string_compose (_("The disk system on your computer\n\
 was not able to keep up with %1.\n\
 \n\
 Specifically, it failed to read data from disk\n\
@@ -4068,7 +4028,7 @@ quickly enough to keep up with playback.\n"), PROGRAM_NAME));
 }
 
 void
-ARDOUR_UI::disk_speed_dialog_gone (int /*ignored_response*/, MessageDialog* msg)
+ARDOUR_UI::disk_speed_dialog_gone (int /*ignored_response*/, WavesMessageDialog* msg)
 {
 	have_disk_speed_dialog_displayed = false;
 	delete msg;
@@ -4149,7 +4109,7 @@ ARDOUR_UI::disconnect_from_engine ()
 	halt_connection.disconnect ();
 	
 	if (AudioEngine::instance()->stop ()) {
-		MessageDialog msg (*editor, _("Could not disconnect from Audio/MIDI engine"));
+		WavesMessageDialog msg ("", _("Could not disconnect from Audio/MIDI engine"));
 		msg.run ();
 		return -1;
 	} else {
@@ -4163,13 +4123,9 @@ int
 ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
-		if (editor) {
-			MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
-			msg.run ();
-		} else {
-			MessageDialog msg (_("Could not reconnect to the Audio/MIDI engine"));
-			msg.run ();
-		}
+		WavesMessageDialog msg ("", _("Could not reconnect to the Audio/MIDI engine"));
+		msg.run ();
+
 		return -1;
 	}
 	

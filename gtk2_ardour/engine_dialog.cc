@@ -105,7 +105,7 @@ EngineControl::EngineControl ()
 	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
 
 	if (backends.empty()) {
-		MessageDialog msg (string_compose (_("No audio/MIDI backends detected. %1 cannot run\n\n(This is a build/packaging/system error. It should never happen.)"), PROGRAM_NAME));
+		WavesMessageDialog msg ("", string_compose (_("No audio/MIDI backends detected. %1 cannot run\n\n(This is a build/packaging/system error. It should never happen.)"), PROGRAM_NAME));
 		msg.run ();
 		throw failed_constructor ();
 	}

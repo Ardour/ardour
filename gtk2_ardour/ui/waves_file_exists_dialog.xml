@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Tracks Live" resizeable="False">
+  <style name="generic_control"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#BFBFBF"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  
+  <style name="generic_button"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#6D6E72"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         visible="false"
+         noshowall="true"
+         width="80"
+         height="22"/>
+
+  <EventBox bgnormal="#EDECE8">
+    <VBox borderwidth="10"
+          spacing="10"
+          width = "400">
+      <Label id="message_label"
+             style="generic_control"
+             fgnormal="#6D6E72"
+             horzalignment="center"
+             justify="center"
+             height="40"/>
+      <HBox spacing="10">
+        <Button id="ok_button"
+                style="generic_button"
+                box.pack="end"
+                text="ok"/>
+        <Button id="close_button"
+                style="generic_button"
+                box.pack="end"
+                text="Close"/>
+        <Button id="accept_button"
+                style="generic_button"
+                box.pack="end"
+                text="Overwrite Existing File"
+                width="160"/>
+        <Button id="yes_button"
+                style="generic_button"
+                box.pack="end"
+                text="Yes"/>
+        <Button id="no_button"
+                style="generic_button"
+                box.pack="end"
+                text="No"/>
+        <Button id="cancel_button"
+                style="generic_button"
+                box.pack="end"
+                text="Cancel"/>
+      </HBox>
+    </VBox>
+  </EventBox>
+
+</Dialog>

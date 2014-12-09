@@ -75,6 +75,7 @@
 #include "session_lock_dialog.h"
 #include "tracks_control_panel.h"
 #include "marker_inspector_dialog.h"
+#include "waves_message_dialog.h"
 #include "ui_config.h"
 #include "enums.h"
 #include "visibility_group.h"
@@ -729,7 +730,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ARDOUR::microseconds_t last_shuttle_request;
 
 	bool have_disk_speed_dialog_displayed;
-	void disk_speed_dialog_gone (int ignored_response, Gtk::MessageDialog*);
+	void disk_speed_dialog_gone (int ignored_response, WavesMessageDialog*);
 	void disk_overrun_handler ();
 	void disk_underrun_handler ();
 	void gui_idle_handler ();

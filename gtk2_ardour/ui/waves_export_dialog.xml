@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Add Track" resizeable="False">
+<style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6a6a6a"
+         fgactive="#BFBFBF"
+         bgactive="#303030"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_dropdown"
+         normalicon="added_track_format_dropdown_active"
+         activeicon="added_track_format_dropdown_active"
+         _prelighticon="added_track_format_dropdown_prelight"
+         inactiveicon="added_track_format_dropdown_inactive"
+         width="110"
+         height="21"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6a6a6a"
+         fgactive="#BFBFBF"
+         bgactive="#303030"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+         
+  <EventBox bgnormal="#CDCCC8">
+  <HBox>
+      <Button id="first_tab_button"
+              text="\n First Tab \n"
+              style="generic_control"
+              fgnormal="#EDECE8"
+              bgnormal="#ADACA8"
+              fgactive="#000000"
+              bgactive="#dcdcdc"
+              borderwidth="0 1 1 1"
+              width="110"
+              height="32"/>
+      <EventBox bgnormal="#373737"
+                width="0"
+                height="25"/>
+      <Button id="second_tab_button"
+              width="110"
+              height="32"
+              text="\n Second Tab \n"
+              style="generic_control"
+              fgnormal="#EDECE8"
+              bgnormal="#ADACA8"
+              fgactive="#000000"
+              bgactive="#dcdcdc"
+              borderwidth="0 1 1 1"/>
+  </HBox>
+  </EventBox>
+  
+  <Layout id="first_layout"
+          width="637"
+          height="278"
+          bgnormal="#EDECE8">
+    <VBox x="0"
+          y="14"
+          width="637">
+          <Label id="top_label"
+                 style="generic_control"
+                 vertalignment="center"
+                 height="19"
+                 winfont ="Arial Bold 19"
+                 macfont ="Helvetica Bold 19"/>
+          <VBox height="14"
+                width="637"/>
+          <Label id="bottom_label"
+                 style="generic_control"
+                 vertalignment="center"
+                 height="10"
+                 winfont ="Arial Bold 10"
+                 macfont ="Helvetica Bold 10"/>
+    </VBox>
+    
+    <Label text="Lossless Export:"
+           style="generic_control"
+           x="21"
+           y="76"
+           winfont ="Arial Bold 14"
+           macfont ="Helvetica Bold 14"/>
+           
+    <Label text="Format"
+           style="generic_control"
+           x="21"
+           y="104"
+           winfont ="Arial Bold 10"
+           macfont ="Helvetica Bold 10"/>
+    <Label text="Depth"
+           style="generic_control"
+           x="154"
+           y="104"
+           winfont ="Arial Bold 10"
+           macfont ="Helvetica Bold 10"/>
+    <Label text="Sample Rate"
+           style="generic_control"
+           x="287"
+           y="104"
+           winfont ="Arial Bold 10"
+           macfont ="Helvetica Bold 10"/>
+    <Label text="Dither"
+           style="generic_control"
+           x="420"
+           y="104"
+           winfont ="Arial Bold 10"
+           macfont ="Helvetica Bold 10"/>
+    <Label text="Normalize"
+           style="generic_control"
+           x="546"
+           y="104"
+           winfont ="Arial Bold 10"
+           macfont ="Helvetica Bold 10"/>
+      
+    <Dropdown id="format_dropdown"
+              style="generic_dropdown"
+              x="19"
+              y="118">
+      <HBox>
+        <VBox width="10"/>
+        <Label style="generic_control"
+               fgnormal="#EDECE8"
+               horzalignment="start"
+               width="93"/>
+      </HBox>
+    </Dropdown>
+    
+    <Dropdown id="depth_dropdown"
+        style="generic_dropdown"
+        x="152"
+        y="118">
+        <HBox>
+            <VBox width="10"/>
+            <Label style="generic_control"
+            fgnormal="#EDECE8"
+            horzalignment="start"
+            width="93"/>
+        </HBox>
+        <DropdownMenu bgnormal="#454545">
+        </DropdownMenu>
+    </Dropdown>
+    
+    <Dropdown id="sample_rate_dropdown"
+        style="generic_dropdown"
+        x="285"
+        y="118">
+        <HBox>
+            <VBox width="10"/>
+            <Label style="generic_control"
+            fgnormal="#EDECE8"
+            horzalignment="start"
+            width="93"/>
+        </HBox>
+        <DropdownMenu bgnormal="#454545">
+        </DropdownMenu>
+    </Dropdown>
+    
+    <Dropdown id="dither_dropdown"
+        style="generic_dropdown"
+        x="418"
+        y="118">
+        <HBox>
+            <VBox width="10"/>
+            <Label style="generic_control"
+            fgnormal="#EDECE8"
+            horzalignment="start"
+            width="93"/>
+        </HBox>
+        <DropdownMenu bgnormal="#454545">
+        </DropdownMenu>
+    </Dropdown>
+    
+    <Iconbutton id="normalze_button"
+                width="20"
+                height="20"
+                x="561"
+                y="118"
+                normalicon="waves_check_box"
+                activeicon="waves_check_box_active"
+                toggleable="true"/>
+    
+    <Label text="Lossy Export:"
+            style="generic_control"
+            x="21"
+            y="168"
+            winfont ="Arial Bold 14"
+            macfont ="Helvetica Bold 14"/>
+    <Label text="Format"
+            style="generic_control"
+            x="21"
+            y="197"
+            winfont ="Arial Bold 10"
+            macfont ="Helvetica Bold 10"/>
+    <Label text="Bit Rate"
+            style="generic_control"
+            x="154"
+            y="197"
+            winfont ="Arial Bold 10"
+            macfont ="Helvetica Bold 10"/>
+            
+    <Dropdown id="lossy_format_dropdown"
+              style="generic_dropdown"
+              x="19"
+              y="211">
+              <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_control"
+                  fgnormal="#EDECE8"
+                  horzalignment="start"
+                  width="93"/>
+              </HBox>
+              <DropdownMenu bgnormal="#454545">
+              </DropdownMenu>
+          </Dropdown>
+            
+    <Dropdown id="lossy_bit_rate"
+              style="generic_dropdown"
+              x="152"
+              y="211">
+              <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_control"
+                  fgnormal="#EDECE8"
+                  horzalignment="start"
+                  width="93"/>
+              </HBox>
+              <DropdownMenu bgnormal="#454545">
+              </DropdownMenu>
+     </Dropdown>
+
+    <Button style="generic_button"
+            id="cancel_button"
+            text="Cancel"
+            winfont ="Arial Bold 10"
+            macfont ="Helvetica Bold 10"
+            fgnormal="#6D6E72"
+    	    bgnormal="#CACAC5"
+    		fgactive="#EDECE8"
+    		bgactive="#6D6E72"
+    		borderwidth="0 0 0 0"
+            bordercolor="#6D6E72"
+            x="358"
+            y="233"
+            width="110"
+            height="22"/>
+
+    <Button style="generic_button"
+            id="export_button"
+            winfont ="Arial Bold 10"
+            macfont ="Helvetica Bold 10"
+            text="Export"
+            fgnormal="#6D6E72"
+    	    bgnormal="#CACAC5"
+    		fgactive="#EDECE8"
+    		bgactive="#6D6E72"
+    		borderwidth="0 0 0 0"
+            bordercolor="#6D6E72"
+            x="481"
+            y="233"
+            width="110"
+            height="22"/>
+  </Layout>
+  
+  <Layout id="second_layout"
+          width="637"
+          height="278"
+          bgnormal="#EDECE8">
+          
+          <Label text="Channels"
+                 style="generic_control"
+                 x="21"
+                 y="104"
+                 winfont ="Arial Bold 10"
+                 macfont ="Helvetica Bold 10"/>
+          
+          <Dropdown id="channels_dropdown"
+              style="generic_dropdown"
+              x="19"
+              y="118">
+              <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_control"
+                         fgnormal="#EDECE8"
+                         horzalignment="start"
+                         width="93"/>
+              </HBox>
+              <DropdownMenu bgnormal="#454545">
+              </DropdownMenu>
+          </Dropdown>          
+  </Layout>
+</Dialog>

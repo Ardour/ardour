@@ -45,6 +45,7 @@
 #include "automation_time_axis.h"
 #include "route_time_axis.h"
 #include "group_tabs.h"
+#include "waves_message_dialog.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -654,7 +655,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	}
 
 	if (!_session->engine().connected()) {
-	        MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
+	        WavesMessageDialog msg ("", _("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
 		return true;
 	}
@@ -1533,14 +1534,9 @@ RouteUI::verify_new_route_name (const std::string& name)
 		return true;
 	}
 	
-	MessageDialog colon_msg (
-		_("The use of colons (':') is discouraged in track and bus names.\nDo you want to use this new name?"),
-		false, MESSAGE_QUESTION, BUTTONS_NONE
-		);
+	WavesMessageDialog colon_msg ("waves_route_rename_dialog.xml", "", _("The use of colons (':') is discouraged in track and bus names.\nDo you want to use this new name?"),
+                                  WavesMessageDialog::BUTTON_ACCEPT | WavesMessageDialog::BUTTON_CANCEL);
 	
-	colon_msg.add_button (_("Use the new name"), Gtk::RESPONSE_ACCEPT);
-	colon_msg.add_button (_("Re-edit the name"), Gtk::RESPONSE_CANCEL);
-
 	return (colon_msg.run () == Gtk::RESPONSE_ACCEPT);
 }
 

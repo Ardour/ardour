@@ -271,19 +271,24 @@
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
 		95176F7A1A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95176F791A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc */; };
 		95176F7E1A08E76F00E32046 /* file_sample_rate_mismatch_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95176F7D1A08E76F00E32046 /* file_sample_rate_mismatch_dialog.xml */; };
-		95176F861A092A2900E32046 /* ok_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95176F841A092A2900E32046 /* ok_dialog.xml */; };
 		95176F871A092A2900E32046 /* yes_no_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95176F851A092A2900E32046 /* yes_no_dialog.xml */; };
-		95176F8F1A092A5B00E32046 /* ok_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95176F8D1A092A5B00E32046 /* ok_dialog.cc */; };
 		95176F901A092A5B00E32046 /* yes_no_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95176F8E1A092A5B00E32046 /* yes_no_dialog.cc */; };
 		952E0B3C1A0A1D7000F375D0 /* buildlog.txt in Resources */ = {isa = PBXBuildFile; fileRef = 952E0B3B1A0A1D7000F375D0 /* buildlog.txt */; };
 		954DCFBD1A0239DA00B7160E /* about_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 954DCFBC1A0239DA00B7160E /* about_dialog.cc */; };
 		954DCFC11A023AAB00B7160E /* about_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFBF1A023AAB00B7160E /* about_dialog.xml */; };
 		954DCFC21A023AAB00B7160E /* license_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFC01A023AAB00B7160E /* license_dialog.xml */; };
-		954DCFDC1A07A07600B7160E /* read_only_session_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 954DCFDB1A07A07600B7160E /* read_only_session_dialog.cc */; };
 		954DCFDE1A07A14E00B7160E /* read_only_session_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */; };
-		954DCFE11A07C70400B7160E /* sample_rate_mismatch_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 954DCFE01A07C70400B7160E /* sample_rate_mismatch_dialog.cc */; };
-		954DCFE51A07D1C800B7160E /* sample_rate_mismatch_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFE41A07D1C800B7160E /* sample_rate_mismatch_dialog.xml */; };
+		957EF44B1A30BFB300F1500E /* waves_message_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 957EF44A1A30BFB300F1500E /* waves_message_dialog.cc */; };
 		95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95A134DD1A0239080008E3D6 /* license_dialog.cc */; };
+		95F9DFD71A35A8BD0007E953 /* waves_message_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD61A35A8BD0007E953 /* waves_message_dialog.xml */; };
+		95F9DFE01A35F3310007E953 /* waves_clean_up_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */; };
+		95F9DFE11A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */; };
+		95F9DFE21A35F3310007E953 /* waves_excessive_split_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDA1A35F3310007E953 /* waves_excessive_split_dialog.xml */; };
+		95F9DFE31A35F3310007E953 /* waves_export_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDB1A35F3310007E953 /* waves_export_dialog.xml */; };
+		95F9DFE41A35F3310007E953 /* waves_file_exists_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDC1A35F3310007E953 /* waves_file_exists_dialog.xml */; };
+		95F9DFE51A35F3310007E953 /* waves_how_to_import_dialog_1.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDD1A35F3310007E953 /* waves_how_to_import_dialog_1.xml */; };
+		95F9DFE61A35F3310007E953 /* waves_how_to_import_dialog_2.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDE1A35F3310007E953 /* waves_how_to_import_dialog_2.xml */; };
+		95F9DFE71A35F3310007E953 /* waves_route_rename_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDF1A35F3310007E953 /* waves_route_rename_dialog.xml */; };
 		CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1A9079199A37AE00ECA62B /* add_tracks_dialog.cc */; };
 		CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */; };
 		CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */ = {isa = PBXBuildFile; fileRef = CE1C6DCD19879F04006BDB03 /* compact_meter_strip.cc */; };
@@ -446,8 +451,6 @@
 		432790F2194EFFB9003C9FEA /* gprofhelper.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = gprofhelper.c; path = ../gprofhelper.c; sourceTree = SOURCE_ROOT; };
 		432790F3194EFFB9003C9FEA /* group_tabs.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = group_tabs.cc; path = ../group_tabs.cc; sourceTree = SOURCE_ROOT; };
 		432790F5194EFFB9003C9FEA /* gtk_pianokeyboard.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = gtk_pianokeyboard.c; path = ../gtk_pianokeyboard.c; sourceTree = SOURCE_ROOT; };
-		432790F7194EFFB9003C9FEA /* gtk-custom-hruler.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "gtk-custom-hruler.c"; path = "../gtk-custom-hruler.c"; sourceTree = SOURCE_ROOT; };
-		432790F9194EFFB9003C9FEA /* gtk-custom-ruler.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; name = "gtk-custom-ruler.c"; path = "../gtk-custom-ruler.c"; sourceTree = SOURCE_ROOT; };
 		432790FB194EFFB9003C9FEA /* gui_object.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = gui_object.cc; path = ../gui_object.cc; sourceTree = SOURCE_ROOT; };
 		432790FE194EFFB9003C9FEA /* hit.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = hit.cc; path = ../hit.cc; sourceTree = SOURCE_ROOT; };
 		43279101194EFFB9003C9FEA /* insert_time_dialog.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = insert_time_dialog.cc; path = ../insert_time_dialog.cc; sourceTree = SOURCE_ROOT; };
@@ -502,7 +505,6 @@
 		43279164194EFFB9003C9FEA /* note.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = note.cc; path = ../note.cc; sourceTree = SOURCE_ROOT; };
 		43279166194EFFB9003C9FEA /* nsm.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = nsm.cc; path = ../nsm.cc; sourceTree = SOURCE_ROOT; };
 		43279168194EFFB9003C9FEA /* nsmclient.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = nsmclient.cc; path = ../nsmclient.cc; sourceTree = SOURCE_ROOT; };
-		4327916B194EFFB9003C9FEA /* open_file_dialog.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = open_file_dialog.cc; path = ../open_file_dialog.cc; sourceTree = SOURCE_ROOT; };
 		4327916D194EFFB9003C9FEA /* open_file_dialog.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = open_file_dialog.mm; path = ../open_file_dialog.mm; sourceTree = SOURCE_ROOT; };
 		4327916E194EFFB9003C9FEA /* option_editor.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = option_editor.cc; path = ../option_editor.cc; sourceTree = SOURCE_ROOT; };
 		43279170194EFFB9003C9FEA /* opts.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = opts.cc; path = ../opts.cc; sourceTree = SOURCE_ROOT; };
@@ -560,7 +562,6 @@
 		432791E2194EFFBA003C9FEA /* shuttle_control.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = shuttle_control.cc; path = ../shuttle_control.cc; sourceTree = SOURCE_ROOT; };
 		432791E4194EFFBA003C9FEA /* speaker_dialog.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = speaker_dialog.cc; path = ../speaker_dialog.cc; sourceTree = SOURCE_ROOT; };
 		432791E6194EFFBA003C9FEA /* splash.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = splash.cc; path = ../splash.cc; sourceTree = SOURCE_ROOT; };
-		432791E8194EFFBA003C9FEA /* startup.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = startup.cc; path = ../startup.cc; sourceTree = SOURCE_ROOT; };
 		432791EA194EFFBA003C9FEA /* step_editor.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = step_editor.cc; path = ../step_editor.cc; sourceTree = SOURCE_ROOT; };
 		432791EC194EFFBA003C9FEA /* step_entry.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = step_entry.cc; path = ../step_entry.cc; sourceTree = SOURCE_ROOT; };
 		432791EE194EFFBA003C9FEA /* stereo_panner_editor.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = stereo_panner_editor.cc; path = ../stereo_panner_editor.cc; sourceTree = SOURCE_ROOT; };
@@ -951,8 +952,6 @@
 		43B3513D194F04E00038C140 /* global_signals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = global_signals.h; path = ../global_signals.h; sourceTree = SOURCE_ROOT; };
 		43B3513E194F04E00038C140 /* group_tabs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = group_tabs.h; path = ../group_tabs.h; sourceTree = SOURCE_ROOT; };
 		43B3513F194F04E00038C140 /* gtk_pianokeyboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gtk_pianokeyboard.h; path = ../gtk_pianokeyboard.h; sourceTree = SOURCE_ROOT; };
-		43B35140194F04E00038C140 /* gtk-custom-hruler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtk-custom-hruler.h"; path = "../gtk-custom-hruler.h"; sourceTree = SOURCE_ROOT; };
-		43B35141194F04E00038C140 /* gtk-custom-ruler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "gtk-custom-ruler.h"; path = "../gtk-custom-ruler.h"; sourceTree = SOURCE_ROOT; };
 		43B35142194F04E00038C140 /* gui_object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gui_object.h; path = ../gui_object.h; sourceTree = SOURCE_ROOT; };
 		43B35143194F04E00038C140 /* gui_thread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gui_thread.h; path = ../gui_thread.h; sourceTree = SOURCE_ROOT; };
 		43B35144194F04E00038C140 /* hit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hit.h; path = ../hit.h; sourceTree = SOURCE_ROOT; };
@@ -1129,25 +1128,28 @@
 		95176F781A08E6D800E32046 /* file_sample_rate_mismatch_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file_sample_rate_mismatch_dialog.h; path = ../file_sample_rate_mismatch_dialog.h; sourceTree = "<group>"; };
 		95176F791A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_sample_rate_mismatch_dialog.cc; path = ../file_sample_rate_mismatch_dialog.cc; sourceTree = "<group>"; };
 		95176F7D1A08E76F00E32046 /* file_sample_rate_mismatch_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = file_sample_rate_mismatch_dialog.xml; sourceTree = "<group>"; };
-		95176F841A092A2900E32046 /* ok_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = ok_dialog.xml; sourceTree = "<group>"; };
 		95176F851A092A2900E32046 /* yes_no_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = yes_no_dialog.xml; sourceTree = "<group>"; };
-		95176F8B1A092A4700E32046 /* ok_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ok_dialog.h; path = ../ok_dialog.h; sourceTree = "<group>"; };
 		95176F8C1A092A4700E32046 /* yes_no_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = yes_no_dialog.h; path = ../yes_no_dialog.h; sourceTree = "<group>"; };
-		95176F8D1A092A5B00E32046 /* ok_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ok_dialog.cc; path = ../ok_dialog.cc; sourceTree = "<group>"; };
 		95176F8E1A092A5B00E32046 /* yes_no_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = yes_no_dialog.cc; path = ../yes_no_dialog.cc; sourceTree = "<group>"; };
 		952E0B3B1A0A1D7000F375D0 /* buildlog.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = buildlog.txt; path = ../../../buildlog.txt; sourceTree = "<group>"; };
 		954DCFBC1A0239DA00B7160E /* about_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = about_dialog.cc; path = ../about_dialog.cc; sourceTree = "<group>"; };
 		954DCFBE1A0239EC00B7160E /* about_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = about_dialog.h; path = ../about_dialog.h; sourceTree = "<group>"; };
 		954DCFBF1A023AAB00B7160E /* about_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = about_dialog.xml; sourceTree = "<group>"; };
 		954DCFC01A023AAB00B7160E /* license_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = license_dialog.xml; sourceTree = "<group>"; };
-		954DCFD71A07A06300B7160E /* read_only_session_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = read_only_session_dialog.h; path = ../read_only_session_dialog.h; sourceTree = "<group>"; };
-		954DCFDB1A07A07600B7160E /* read_only_session_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = read_only_session_dialog.cc; path = ../read_only_session_dialog.cc; sourceTree = "<group>"; };
 		954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = read_only_session_dialog.xml; sourceTree = "<group>"; };
-		954DCFDF1A07C6F200B7160E /* sample_rate_mismatch_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = sample_rate_mismatch_dialog.h; path = ../sample_rate_mismatch_dialog.h; sourceTree = "<group>"; };
-		954DCFE01A07C70400B7160E /* sample_rate_mismatch_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = sample_rate_mismatch_dialog.cc; path = ../sample_rate_mismatch_dialog.cc; sourceTree = "<group>"; };
-		954DCFE41A07D1C800B7160E /* sample_rate_mismatch_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = sample_rate_mismatch_dialog.xml; sourceTree = "<group>"; };
+		957EF44A1A30BFB300F1500E /* waves_message_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_message_dialog.cc; path = ../waves_message_dialog.cc; sourceTree = "<group>"; };
+		957EF44F1A30BFBF00F1500E /* waves_message_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_message_dialog.h; path = ../waves_message_dialog.h; sourceTree = "<group>"; };
 		95A134DD1A0239080008E3D6 /* license_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = license_dialog.cc; path = ../license_dialog.cc; sourceTree = "<group>"; };
 		95A134DF1A02391F0008E3D6 /* license_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = license_dialog.h; path = ../license_dialog.h; sourceTree = "<group>"; };
+		95F9DFD61A35A8BD0007E953 /* waves_message_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_message_dialog.xml; sourceTree = "<group>"; };
+		95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_clean_up_dialog.xml; sourceTree = "<group>"; };
+		95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_connect_to_backend_error_dialog.xml; sourceTree = "<group>"; };
+		95F9DFDA1A35F3310007E953 /* waves_excessive_split_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_excessive_split_dialog.xml; sourceTree = "<group>"; };
+		95F9DFDB1A35F3310007E953 /* waves_export_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_dialog.xml; sourceTree = "<group>"; };
+		95F9DFDC1A35F3310007E953 /* waves_file_exists_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_file_exists_dialog.xml; sourceTree = "<group>"; };
+		95F9DFDD1A35F3310007E953 /* waves_how_to_import_dialog_1.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_how_to_import_dialog_1.xml; sourceTree = "<group>"; };
+		95F9DFDE1A35F3310007E953 /* waves_how_to_import_dialog_2.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_how_to_import_dialog_2.xml; sourceTree = "<group>"; };
+		95F9DFDF1A35F3310007E953 /* waves_route_rename_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_route_rename_dialog.xml; sourceTree = "<group>"; };
 		CE1A9079199A37AE00ECA62B /* add_tracks_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = add_tracks_dialog.cc; path = ../add_tracks_dialog.cc; sourceTree = "<group>"; };
 		CE1A907E199A37BF00ECA62B /* add_tracks_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = add_tracks_dialog.h; path = ../add_tracks_dialog.h; sourceTree = "<group>"; };
 		CE1C6DCC19879F04006BDB03 /* compact_meter_bridge.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = compact_meter_bridge.cc; path = ../compact_meter_bridge.cc; sourceTree = "<group>"; };
@@ -1235,11 +1237,9 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
-				95176F8D1A092A5B00E32046 /* ok_dialog.cc */,
+				957EF44A1A30BFB300F1500E /* waves_message_dialog.cc */,
 				95176F8E1A092A5B00E32046 /* yes_no_dialog.cc */,
 				95176F791A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc */,
-				954DCFE01A07C70400B7160E /* sample_rate_mismatch_dialog.cc */,
-				954DCFDB1A07A07600B7160E /* read_only_session_dialog.cc */,
 				954DCFBC1A0239DA00B7160E /* about_dialog.cc */,
 				95A134DD1A0239080008E3D6 /* license_dialog.cc */,
 				CE294C6B19CAD54500D12768 /* marker_io_dialog.cc */,
@@ -1360,8 +1360,6 @@
 				432790F2194EFFB9003C9FEA /* gprofhelper.c */,
 				432790F3194EFFB9003C9FEA /* group_tabs.cc */,
 				432790F5194EFFB9003C9FEA /* gtk_pianokeyboard.c */,
-				432790F7194EFFB9003C9FEA /* gtk-custom-hruler.c */,
-				432790F9194EFFB9003C9FEA /* gtk-custom-ruler.c */,
 				432790FB194EFFB9003C9FEA /* gui_object.cc */,
 				432790FE194EFFB9003C9FEA /* hit.cc */,
 				43279101194EFFB9003C9FEA /* insert_time_dialog.cc */,
@@ -1416,7 +1414,6 @@
 				43279164194EFFB9003C9FEA /* note.cc */,
 				43279166194EFFB9003C9FEA /* nsm.cc */,
 				43279168194EFFB9003C9FEA /* nsmclient.cc */,
-				4327916B194EFFB9003C9FEA /* open_file_dialog.cc */,
 				4327916D194EFFB9003C9FEA /* open_file_dialog.mm */,
 				4327916E194EFFB9003C9FEA /* option_editor.cc */,
 				43279170194EFFB9003C9FEA /* opts.cc */,
@@ -1474,7 +1471,6 @@
 				432791E2194EFFBA003C9FEA /* shuttle_control.cc */,
 				432791E4194EFFBA003C9FEA /* speaker_dialog.cc */,
 				432791E6194EFFBA003C9FEA /* splash.cc */,
-				432791E8194EFFBA003C9FEA /* startup.cc */,
 				432791EA194EFFBA003C9FEA /* step_editor.cc */,
 				432791EC194EFFBA003C9FEA /* step_entry.cc */,
 				432791EE194EFFBA003C9FEA /* stereo_panner_editor.cc */,
@@ -1843,10 +1839,17 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
-				95176F841A092A2900E32046 /* ok_dialog.xml */,
+				95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */,
+				95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */,
+				95F9DFDA1A35F3310007E953 /* waves_excessive_split_dialog.xml */,
+				95F9DFDB1A35F3310007E953 /* waves_export_dialog.xml */,
+				95F9DFDC1A35F3310007E953 /* waves_file_exists_dialog.xml */,
+				95F9DFDD1A35F3310007E953 /* waves_how_to_import_dialog_1.xml */,
+				95F9DFDE1A35F3310007E953 /* waves_how_to_import_dialog_2.xml */,
+				95F9DFDF1A35F3310007E953 /* waves_route_rename_dialog.xml */,
+				95F9DFD61A35A8BD0007E953 /* waves_message_dialog.xml */,
 				95176F851A092A2900E32046 /* yes_no_dialog.xml */,
 				95176F7D1A08E76F00E32046 /* file_sample_rate_mismatch_dialog.xml */,
-				954DCFE41A07D1C800B7160E /* sample_rate_mismatch_dialog.xml */,
 				954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */,
 				954DCFBF1A023AAB00B7160E /* about_dialog.xml */,
 				954DCFC01A023AAB00B7160E /* license_dialog.xml */,
@@ -1892,11 +1895,9 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
-				95176F8B1A092A4700E32046 /* ok_dialog.h */,
+				957EF44F1A30BFBF00F1500E /* waves_message_dialog.h */,
 				95176F8C1A092A4700E32046 /* yes_no_dialog.h */,
 				95176F781A08E6D800E32046 /* file_sample_rate_mismatch_dialog.h */,
-				954DCFDF1A07C6F200B7160E /* sample_rate_mismatch_dialog.h */,
-				954DCFD71A07A06300B7160E /* read_only_session_dialog.h */,
 				954DCFBE1A0239EC00B7160E /* about_dialog.h */,
 				95A134DF1A02391F0008E3D6 /* license_dialog.h */,
 				CE294C7E19CAD58500D12768 /* ardour_dropdown.h */,
@@ -1993,8 +1994,6 @@
 				43B3513D194F04E00038C140 /* global_signals.h */,
 				43B3513E194F04E00038C140 /* group_tabs.h */,
 				43B3513F194F04E00038C140 /* gtk_pianokeyboard.h */,
-				43B35140194F04E00038C140 /* gtk-custom-hruler.h */,
-				43B35141194F04E00038C140 /* gtk-custom-ruler.h */,
 				43B35142194F04E00038C140 /* gui_object.h */,
 				43B35143194F04E00038C140 /* gui_thread.h */,
 				43B35144194F04E00038C140 /* hit.h */,
@@ -2310,9 +2309,9 @@
 				43279334194F003A003C9FEA /* application-x-ardour_22px.png in Resources */,
 				43279335194F003A003C9FEA /* application-x-ardour_32px.png in Resources */,
 				43279336194F003A003C9FEA /* application-x-ardour_48px.png in Resources */,
-				954DCFE51A07D1C800B7160E /* sample_rate_mismatch_dialog.xml in Resources */,
 				43279337194F003A003C9FEA /* ardour-app-icon_osx.png in Resources */,
 				43279338194F003A003C9FEA /* ardour-app-icon_osx_mask.png in Resources */,
+				95F9DFE71A35F3310007E953 /* waves_route_rename_dialog.xml in Resources */,
 				43279339194F003A003C9FEA /* ardour_icon_16px.png in Resources */,
 				4327933A194F003A003C9FEA /* ardour_icon_22px.png in Resources */,
 				4327933B194F003A003C9FEA /* ardour_icon_256px.png in Resources */,
@@ -2334,6 +2333,7 @@
 				4327934B194F003A003C9FEA /* fadein-fast-cut.png in Resources */,
 				4327934C194F003A003C9FEA /* fadein-linear.png in Resources */,
 				4327934D194F003A003C9FEA /* fadein-long-cut.png in Resources */,
+				95F9DFE11A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml in Resources */,
 				4327934E194F003A003C9FEA /* fadein-S1.png in Resources */,
 				4327934F194F003A003C9FEA /* fadein-S2.png in Resources */,
 				43279350194F003A003C9FEA /* fadein-short-cut.png in Resources */,
@@ -2418,7 +2418,6 @@
 				4327939E194F003A003C9FEA /* record-normal-enabled.png in Resources */,
 				4327939F194F003A003C9FEA /* record-normal-in-progress.png in Resources */,
 				432793A0194F003A003C9FEA /* record-step.png in Resources */,
-				95176F861A092A2900E32046 /* ok_dialog.xml in Resources */,
 				432793A1194F003A003C9FEA /* record_disabled_grey.png in Resources */,
 				432793A2194F003A003C9FEA /* record_normal_red.png in Resources */,
 				432793A3194F003A003C9FEA /* record_tape_red.png in Resources */,
@@ -2429,6 +2428,7 @@
 				432793A8194F003A003C9FEA /* resize_right_cursor.png in Resources */,
 				432793A9194F003A003C9FEA /* resize_top_cursor.png in Resources */,
 				432793AA194F003A003C9FEA /* resize_top_left_cursor.png in Resources */,
+				95F9DFE31A35F3310007E953 /* waves_export_dialog.xml in Resources */,
 				432793AB194F003A003C9FEA /* resize_top_right_cursor.png in Resources */,
 				432793AC194F003A003C9FEA /* sae.png in Resources */,
 				432793AD194F003A003C9FEA /* sessionlock.png in Resources */,
@@ -2511,12 +2511,14 @@
 				432793F6194F003A003C9FEA /* vertical_zoom_fader_face.png in Resources */,
 				432793F7194F003A003C9FEA /* wholenote.png in Resources */,
 				432793F8194F003A003C9FEA /* zoom_fader_handle.png in Resources */,
+				95F9DFE61A35F3310007E953 /* waves_how_to_import_dialog_2.xml in Resources */,
 				432793F9194F003A003C9FEA /* zoom_fader_handle_active.png in Resources */,
 				432793FA194F003A003C9FEA /* zoom_full.png in Resources */,
 				432793FB194F003A003C9FEA /* zoom_in.png in Resources */,
 				432793FC194F003A003C9FEA /* zoom_in_cursor.png in Resources */,
 				432793FD194F003A003C9FEA /* zoom_out.png in Resources */,
 				432793FE194F003A003C9FEA /* zoom_out_cursor.png in Resources */,
+				95F9DFE41A35F3310007E953 /* waves_file_exists_dialog.xml in Resources */,
 				43279431194F0062003C9FEA /* forwardblarrow.xpm in Resources */,
 				43279432194F0062003C9FEA /* h_meter_strip.xpm in Resources */,
 				43279433194F0062003C9FEA /* hiin.xpm in Resources */,
@@ -2542,8 +2544,11 @@
 				43279447194F0062003C9FEA /* toggle-button-00.xpm in Resources */,
 				43279448194F0062003C9FEA /* toggle-button-01.xpm in Resources */,
 				43279449194F0062003C9FEA /* tool_audition.xpm in Resources */,
+				95F9DFE51A35F3310007E953 /* waves_how_to_import_dialog_1.xml in Resources */,
+				95F9DFE21A35F3310007E953 /* waves_excessive_split_dialog.xml in Resources */,
 				4327944A194F0062003C9FEA /* tool_gain.xpm in Resources */,
 				4327944B194F0062003C9FEA /* tool_object.xpm in Resources */,
+				95F9DFE01A35F3310007E953 /* waves_clean_up_dialog.xml in Resources */,
 				4327944C194F0062003C9FEA /* tool_range.xpm in Resources */,
 				4327944D194F0062003C9FEA /* tool_stretch.xpm in Resources */,
 				4327944E194F0062003C9FEA /* tool_zoom.xpm in Resources */,
@@ -2572,6 +2577,7 @@
 				CEB9D792197516BE00B21780 /* automation_time_axis.xml in Resources */,
 				CEB9D793197516BE00B21780 /* editor_mixer.xml in Resources */,
 				952E0B3C1A0A1D7000F375D0 /* buildlog.txt in Resources */,
+				95F9DFD71A35A8BD0007E953 /* waves_message_dialog.xml in Resources */,
 				CEB9D794197516BE00B21780 /* inspector_gain_meter.xml in Resources */,
 				CEB9D795197516BE00B21780 /* master_ui_gain_meter.xml in Resources */,
 				CEB9D796197516BE00B21780 /* master_ui.xml in Resources */,
@@ -2598,7 +2604,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				43279254194EFFF1003C9FEA /* main.m in Sources */,
-				95176F8F1A092A5B00E32046 /* ok_dialog.cc in Sources */,
 				4327925B194EFFF1003C9FEA /* AppDelegate.m in Sources */,
 				CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */,
 				CEAFC771195445560016ACF0 /* time.cc in Sources */,
@@ -2606,13 +2611,13 @@
 				CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */,
 				CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */,
 				CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */,
-				954DCFDC1A07A07600B7160E /* read_only_session_dialog.cc in Sources */,
 				95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */,
 				CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */,
 				954DCFBD1A0239DA00B7160E /* about_dialog.cc in Sources */,
 				CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */,
 				95176F7A1A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc in Sources */,
 				CE294C7519CAD54500D12768 /* marker_io_dialog.cc in Sources */,
+				957EF44B1A30BFB300F1500E /* waves_message_dialog.cc in Sources */,
 				CE294C7619CAD54500D12768 /* mixer_bridge_view.cc in Sources */,
 				CE294C7719CAD54500D12768 /* open_file_dialog_nix.cc in Sources */,
 				CE294C7819CAD54500D12768 /* open_file_dialog_windows.cc in Sources */,
@@ -2621,7 +2626,6 @@
 				CE294C7B19CAD54500D12768 /* waves_dropdown.cc in Sources */,
 				CE294C7C19CAD54500D12768 /* waves_grid.cc in Sources */,
 				CE294C7D19CAD54500D12768 /* waves_zoom_control.cc in Sources */,
-				954DCFE11A07C70400B7160E /* sample_rate_mismatch_dialog.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

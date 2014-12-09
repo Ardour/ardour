@@ -74,7 +74,7 @@ void
 Editor::add_external_audio_action (ImportMode mode_hint)
 {
 	if (_session == 0) {
-		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
+		WavesMessageDialog msg ("", _("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
@@ -96,7 +96,7 @@ Editor::external_audio_dialog ()
 	uint32_t midi_track_cnt;
 
 	if (_session == 0) {
-		MessageDialog msg (_("You can't import or embed an audiofile until you have a session loaded."));
+		WavesMessageDialog msg ("", _("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
 		return;
 	}
@@ -166,40 +166,37 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 		already_exists = true;
 	}
 
-	int function = 1;
-
-	if (already_exists) {
+	if (already_exists)
+    {
 		string message;
+        std::string layout_name;
+        
 		if (all_or_nothing) {
 			// updating is still disabled
 			//message = string_compose(_("The session already contains a source file named %1. Do you want to update that file (and thus all regions using the file) or import this file as a new file?"),wave_name);
-			message = string_compose (_("The session already contains a source file named %1.  Do you want to import %1 as a new file, or skip it?"), wave_name);
+			layout_name = "waves_how_to_import_dialog_1.xml";
+            message = string_compose (_("The session already contains a source file named %1.  Do you want to import %1 as a new file, or skip it?"), wave_name);
 		} else {
+            layout_name = "waves_how_to_import_dialog_2.xml";
 			message = string_compose (_("The session already contains a source file named %1.  Do you want to import %2 as a new source, or skip it?"), wave_name, wave_name);
 
 		}
-		MessageDialog dialog(message, false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_NONE, true);
+        
+        WavesMessageDialog msg (layout_name, "", message, WavesMessageDialog::BUTTON_OK | WavesMessageDialog::BUTTON_CANCEL );
+        msg.set_position (Gtk::WIN_POS_CENTER);
+        
+        switch ( msg.run() ) {
+            case Gtk::RESPONSE_OK:
+                return 1;
+                break;
+            case Gtk::RESPONSE_CANCEL:
+                return 2;
+                break;
+        }
 
-		if (all_or_nothing) {
-			// disabled
-			//dialog.add_button("Update", 0);
-			dialog.add_button("Import", 1);
-			dialog.add_button("Skip",   2);
-		} else {
-			dialog.add_button("Import", 1);
-			dialog.add_button("Cancel", 2);
-		}
-
-		//dialog.add_button("Skip all", 4); // All or rest?
-
-		dialog.show();
-
-		function = dialog.run ();
-
-		dialog.hide();
 	}
 
-	return function;
+	return 1;
 }
 
 boost::shared_ptr<AudioTrack>

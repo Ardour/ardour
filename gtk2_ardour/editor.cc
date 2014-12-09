@@ -4877,14 +4877,10 @@ Editor::show_rhythm_ferret ()
 void
 Editor::first_idle ()
 {
-	MessageDialog* dialog = 0;
+    WavesMessageDialog* dialog = 0;
 	
 	if (track_views.size() > 1) {
-		dialog = new MessageDialog (
-			*this,
-			string_compose (_("Please wait while %1 loads visual data."), PROGRAM_NAME),
-			true
-			);
+		dialog = new WavesMessageDialog ("", string_compose (_("Please wait while %1 loads visual data."), PROGRAM_NAME) );
 		dialog->present ();
 		ARDOUR_UI::instance()->flush_pending ();
 	}

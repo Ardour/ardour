@@ -1325,7 +1325,8 @@ TracksControlPanel::on_buffer_size_dropdown_item_clicked (WavesDropdown*, int)
         _buffer_size_dropdown.set_text(buffer_size_str);
     }
     
-	MessageDialog( _("Buffer size set to the value which is not supported"), PROGRAM_NAME).run();
+	WavesMessageDialog msg("", _("Buffer size set to the value which is not supported"));
+    msg.run();
 }
 
 void
@@ -1350,7 +1351,8 @@ TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
 		_sample_rate_dropdown.set_text(sample_rate_str);
 	}
 	
-    MessageDialog( _("Sample rate set to the value which is not supported"), PROGRAM_NAME).run();
+    WavesMessageDialog msg("", _("Sample rate set to the value which is not supported"));
+    msg.run();
 }
 
 

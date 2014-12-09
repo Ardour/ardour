@@ -41,6 +41,7 @@
 #include "ardour_ui.h"
 #include "plugin_selector.h"
 #include "gui_thread.h"
+#include "waves_message_dialog.h"
 
 #include "i18n.h"
 
@@ -493,7 +494,7 @@ PluginSelector::run ()
 				if (p) {
 					plugins.push_back (p);
                                 } else {
-                                        MessageDialog msg (string_compose (_("The plugin \"%1\" could not be loaded\n\nSee the Log window for more details (maybe)"), pp->name));
+                                        WavesMessageDialog msg ("", string_compose (_("The plugin \"%1\" could not be loaded\n\nSee the Log window for more details (maybe)"), pp->name));
                                         msg.run ();
                                 }
 			}

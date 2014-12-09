@@ -27,6 +27,7 @@
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
 
+#include "waves_message_dialog.h"
 #include "export_dialog.h"
 #include "gui_thread.h"
 #include "nag.h"
@@ -180,7 +181,7 @@ ExportDialog::notify_errors (bool force)
 {
 	if (force || status->errors()) {
 		std::string txt = _("Export has been aborted due to an error!\nSee the Log for details.");
-		Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+		WavesMessageDialog msg ("", txt);
 		msg.run();
 	}
 }
