@@ -3897,8 +3897,8 @@ ARDOUR_UI::create_xrun_marker (framepos_t where)
 void
 ARDOUR_UI::halt_on_xrun_message ()
 {
-	MessageDialog msg (*editor,
-			   _("Recording was stopped because your system could not keep up."));
+        cerr << "HALT on xrun\n";
+	MessageDialog msg (*editor, _("Recording was stopped because your system could not keep up."));
 	msg.run ();
 }
 

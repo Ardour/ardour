@@ -513,6 +513,8 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 				framecnt_t total = chaninfo->capture_vector.len[0] + chaninfo->capture_vector.len[1];
 
 				if (rec_nframes > total) {
+                                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
+                                                                                    pthread_self(), name(), rec_nframes, total));
 					DiskOverrun ();
 					return -1;
 				}
@@ -619,6 +621,8 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 				if (necessary_samples > total) {
 					cerr << _name << " Need " << necessary_samples << " total = " << total << endl;
 					cerr << "underrun for " << _name << endl;
+                                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, rec_nframes = %3 total space = %4\n",
+                                                                                    pthread_self(), name(), rec_nframes, total));
 					DiskUnderrun ();
 					return -1;
 
@@ -1394,7 +1398,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
 		}
-
+                
 		(*chan)->capture_buf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
 
@@ -1406,6 +1410,8 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 			*/
 
 			to_write = min ((framecnt_t)(disk_io_chunk_frames - to_write), (framecnt_t) vector.len[1]);
+
+                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 additional write of %2\n", name(), to_write));
 
 			if ((*chan)->write_source->write (vector.buf[1], to_write) != to_write) {
 				error << string_compose(_("AudioDiskstream %1: cannot write to disk"), id()) << endmsg;
