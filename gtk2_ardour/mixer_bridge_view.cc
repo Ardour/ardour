@@ -342,6 +342,10 @@ MixerBridgeView::toggle_midi_input_active (bool flip_others)
 bool
 MixerBridgeView::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 {
+    if (!_session) {
+        return false;
+    }
+    
 	if (ev->button == 1) {
 		if (_selection.selected (strip)) {
 			/* primary-click: toggle selection state of strip */
@@ -353,17 +357,27 @@ MixerBridgeView::strip_button_release_event (GdkEventButton *ev, MixerStrip *str
 				_selection.add (strip);
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
 
-				if (!_selection.selected(strip)) {
+				if (!_selection.selected((RouteUI*)strip)) {
 				
 					/* extend selection */
-					
 					vector<MixerStrip*> tmp;
-					bool accumulate = false;
-					
 					tmp.push_back (strip);
+                    
+                    // get ORDERED list of routes from the session
+                    // to acoomplish this - sort the list of routes as they are displayed
+                    // the same sorter is used to pack strips for mixer and meter
+                    SignalOrderRouteSorter sorter;
+                    boost::shared_ptr<RouteList> routes = _session->get_routes();
+                    RouteList sorted_routes(*routes);
+                    sorted_routes.sort(sorter);
 
-					for (std::map<boost::shared_ptr<ARDOUR::Route>, MixerStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
-						if ((*i).second == strip) {
+                    bool accumulate = false;
+                    bool passed_target = false;
+					for (RouteList::iterator i = sorted_routes.begin(); i != sorted_routes.end(); ++i) {
+                        
+                        MixerStrip* mixer_strip = strip_by_route(*i);
+                        
+						if (mixer_strip == strip) {
 							/* hit clicked strip, start accumulating till we hit the first 
 							   selected strip
 							*/
@@ -372,20 +386,24 @@ MixerBridgeView::strip_button_release_event (GdkEventButton *ev, MixerStrip *str
 								break;
 							} else {
 								accumulate = true;
+                                passed_target = true;
 							}
-						} else if (_selection.selected ((*i).second)) {
+                            
+						} else if (_selection.selected ((RouteUI*)mixer_strip) ) {
 							/* hit selected strip. if currently accumulating others,
 							   we're done. if not accumulating others, start doing so.
 							*/
 							if (accumulate) {
-								/* done */
-								break;
+                                
+                                if (passed_target)
+                                    break;
+                                
 							} else {
 								accumulate = true;
 							}
 						} else {
 							if (accumulate) {
-								tmp.push_back ((*i).second);
+								tmp.push_back (mixer_strip);
 							}
 						}
 					}
