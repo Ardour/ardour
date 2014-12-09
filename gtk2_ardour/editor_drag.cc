@@ -5190,10 +5190,10 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 	
 	Selection::Operation op = ArdourKeyboard::selection_type (button_state);
 
-	//_editor->begin_reversible_command (_("rubberband selection"));
+	_editor->begin_reversible_command (_("rubberband selection"));
 
 	_editor->select_all_within (x1, x2 - 1, y1, y2, _editor->track_views, op, false);
-	//_editor->commit_reversible_command ();
+	_editor->commit_reversible_command ();
 }
 
 void
