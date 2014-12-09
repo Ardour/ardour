@@ -668,6 +668,7 @@ Editor::Editor ()
 	set_snap_to (_snap_type);
 	_snap_mode = SnapOff;
 	set_snap_mode (_snap_mode);
+	previous_mouse_mode = MouseObject;
 	set_mouse_mode (MouseObject, true);
 	set_edit_point_preference (EditAtMouse, true);
 

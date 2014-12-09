@@ -544,6 +544,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_samples_per_pixel (framecnt_t);
 
 	Editing::MouseMode mouse_mode;
+	Editing::MouseMode previous_mouse_mode;
 	Editing::MouseMode effective_mouse_mode () const;
 
 	enum JoinObjectRangeState {
