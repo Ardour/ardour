@@ -639,13 +639,10 @@ ThemeManager::alias_palette_event (GdkEvent* ev, string new_alias, string target
 void
 ThemeManager::alias_palette_response (int response, std::string target_name, std::string old_alias)
 {
-	cerr << "palette response: " << response << endl;
-	
 	switch (response) {
 	case GTK_RESPONSE_OK:
 	case GTK_RESPONSE_ACCEPT:
 		/* rebuild alias list with new color: inefficient but simple */
-		
 		setup_aliases ();
 		break;
 
