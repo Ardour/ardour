@@ -69,6 +69,7 @@ namespace PBD {
 		LIBARDOUR_API extern uint64_t Ports;
 		LIBARDOUR_API extern uint64_t AudioEngine;
 		LIBARDOUR_API extern uint64_t Soundcloud;
+		LIBARDOUR_API extern uint64_t Butler;
 	}
 }
 
