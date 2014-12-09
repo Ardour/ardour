@@ -1422,7 +1422,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		cursor = _cursors->timebar;
 		break;
 
-		/* These items use the grabber cursor at all times */
+    /* These items use the grabber cursor at all times */
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 	case MeterBarItem:
@@ -1433,6 +1433,9 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case CdMarkerBarItem:
 	case VideoBarItem:
 	case DropZoneItem:
+        cursor = which_grabber_cursor();
+        break;
+    /* Use grabber cursor only if we are in Pointer Or Range tool mode */
     case SelectionItem:
         if (mouse_mode == MouseRange || mouse_mode == MouseObject) {
             cursor = which_grabber_cursor();
