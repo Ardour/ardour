@@ -359,18 +359,14 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 	table->attach (*note_label, 0, 1, 1, 2, FILL|EXPAND, FILL|EXPAND);
 	table->attach (note_type, 1, 2, 1, 2, FILL|EXPAND, SHRINK);
 
+	snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
+	when_bar_entry.set_text (buf);
+
 	if (movable) {
-		char buf[64];
-
-		snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
-		when_bar_entry.set_text (buf);
-
 		Label* when_label = manage (new Label(_("Meter begins at bar:"), ALIGN_LEFT, ALIGN_CENTER));
 
 		table->attach (*when_label, 0, 1, 2, 3, FILL | EXPAND, FILL | EXPAND);
 		table->attach (when_bar_entry, 1, 2, 2, 3, FILL | EXPAND, FILL | EXPAND);
-	} else {
-		when_bar_entry.set_text ("0");
 	}
 
 	get_vbox()->set_border_width (12);
