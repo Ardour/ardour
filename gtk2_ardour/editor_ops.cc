@@ -245,7 +245,7 @@ Editor::split_regions_at (framepos_t where, RegionSelection& regions)
         // select only those regions which are on the right side of the cut
         RegionSelection::iterator iter = latest_regionviews.begin();
         for (; iter != latest_regionviews.end(); ++iter) {
-            if (where <= (*iter)->region()->start() ) {
+            if (where <= (*iter)->region()->position() ) {
                 regions_to_select.push_back(*iter);
             }
         }
