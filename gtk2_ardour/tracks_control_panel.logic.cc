@@ -1026,7 +1026,6 @@ void TracksControlPanel::display_general_preferences ()
 
 	_obey_mmc_commands_button.set_active_state (Config->get_mmc_control () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	_send_mmc_commands_button.set_active_state (Config->get_send_mmc () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
-	_send_mmc_feedback_button.set_active_state (Config->get_midi_feedback () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	_inbound_mmc_device_spinbutton.set_value (Config->get_mmc_receive_device_id ());
 	_outbound_mmc_device_spinbutton.set_value (Config->get_mmc_send_device_id ());
 	_limit_undo_history_spinbutton.set_value (Config->get_history_depth ());
@@ -1106,7 +1105,6 @@ void TracksControlPanel::save_general_preferences ()
 
 	Config->set_mmc_control (_obey_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
 	Config->set_send_mmc (_send_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
-	Config->set_midi_feedback (_send_mmc_feedback_button.active_state () == Gtkmm2ext::ExplicitActive);
 	Config->set_only_copy_imported_files (_copy_imported_files_button.active_state () ==  Gtkmm2ext::ExplicitActive);
 	Config->set_denormal_protection (_dc_bias_against_denormals_button.active_state () == Gtkmm2ext::ExplicitActive);
 

@@ -885,17 +885,6 @@
           </HBox>
           <HBox>
             <Label style="parameter_label"
-                   text="Send MIDI control feedback"/>
-            <VBox style="parameter_spacing"/>
-            <Iconbutton id="send_mmc_feedback_button"
-                        width="20"
-                        height="20"
-                        normalicon="waves_check_box"
-                        activeicon="waves_check_box_active"
-                        toggleable="true"/>
-          </HBox>
-          <HBox>
-            <Label style="parameter_label"
                    text="Inbound MMC device ID"/>
             <VBox style="parameter_spacing"/>
             <SpinButton id="inbound_mmc_device_spinbutton"
