@@ -4266,7 +4266,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
         
             /* select all tracks within the rectangle that we've marked out so far */
             TrackViewList& tracks_in_range = _editor->selection->time.tracks_in_range;
-
+            TrackViewList new_covered_tracks;
+            
             ArdourCanvas::Coord const top = grab_y();
             ArdourCanvas::Coord const bottom = current_pointer_y();
 
@@ -4274,9 +4275,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
                 //first, find the tracks that are covered in the y range selection
                 for (TrackViewList::const_iterator i = all_tracks.begin(); i != all_tracks.end(); ++i) {
-                    if ((*i)->covered_by_y_range (top, bottom) && !tracks_in_range.contains(*i) ) {
+                    if ((*i)->covered_by_y_range (top, bottom) ) {
                         
-                        tracks_in_range.push_back (*i);
+                        new_covered_tracks.push_back (*i);
                     }
                 }
                 
@@ -4284,8 +4285,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 // but we may need this in future versions
 #if 0
                 //now find any tracks that are GROUPED with the tracks we selected
-                TrackViewList grouped_tracks_to_add;
-                for (TrackViewList::const_iterator i = tracks_in_range.begin(); i != tracks_in_range.end(); ++i) {
+                TrackViewList grouped_tracks_to_add = new_covered_tracks;
+                for (TrackViewList::const_iterator i = tracks_to_add.begin(); i != tracks_to_add.end(); ++i) {
                     RouteTimeAxisView *n = dynamic_cast<RouteTimeAxisView *>(*i);
                     if ( n && n->route()->route_group() && n->route()->route_group()->is_active() ) {
                         
@@ -4300,9 +4301,19 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
                         }
                     }
                 }
-                
-                tracks_in_range.add(grouped_tracks_to_add);
+                new_covered_tracks = grouped_tracks_to_add;
 #endif
+                // clean up those tracks which are not covered by drag anymore
+                for (TrackViewList::const_iterator i = tracks_in_range.begin(); i != tracks_in_range.end(); ++i)
+                    if ( !new_covered_tracks.contains ( *i ) )
+                        tracks_in_range.remove( *i );
+                
+                // now add new covered tracks
+                TrackViewList tracks_to_add;
+                for (TrackViewList::const_iterator i = new_covered_tracks.begin(); i != new_covered_tracks.end(); ++i)
+                    if ( !tracks_in_range.contains ( *i ) )
+                        tracks_to_add.push_back ( *i );
+                tracks_in_range.add(tracks_to_add);
             }
         }
 	}
@@ -4402,7 +4413,6 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if (_operation == SelectionExtend) {
 			if (_time_selection_at_start) {
-                Selection& selection = _editor->get_selection();
 				framepos_t pos = adjusted_current_frame (event, false);
 				framepos_t start = min (pos, start_at_start);
 				framepos_t end = max (pos, end_at_start);
