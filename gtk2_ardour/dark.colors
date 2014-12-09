@@ -267,10 +267,10 @@
     <ColorAlias name="meterbridge peakindicator: led" alias="color 9"/>
     <ColorAlias name="meterbridge peakindicator: led active" alias="color 9"/>
     <ColorAlias name="meterbridge peaklabel" alias="color 9"/>
-    <ColorAlias name="meterstrip dpm fg" alias="color 9"/>
-    <ColorAlias name="meterstrip ppm fg" alias="color 13"/>
+    <ColorAlias name="meterstrip dpm fg" alias="color 31"/>
+    <ColorAlias name="meterstrip ppm fg" alias="color 31"/>
     <ColorAlias name="meterstrip vu fg" alias="color 4"/>
-    <ColorAlias name="meterstrip dpm bg" alias="color 9"/>
+    <ColorAlias name="meterstrip dpm bg" alias="color 27"/>
     <ColorAlias name="meterstrip ppm bg" alias="color 27"/>
     <ColorAlias name="meterstrip vu bg" alias="color 32"/>
     <ColorAlias name="midi bus base" alias="color 4"/>
