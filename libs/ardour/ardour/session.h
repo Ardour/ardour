@@ -384,6 +384,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void set_auto_punch_location (Location *);
 	void set_auto_loop_location (Location *);
+	void set_session_extents (framepos_t start, framepos_t end);
 	int location_name(std::string& result, std::string base = std::string(""));
 
 	pframes_t get_block_size()        const { return current_block_size; }

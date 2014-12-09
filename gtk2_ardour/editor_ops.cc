@@ -5902,6 +5902,34 @@ Editor::set_punch_from_selection ()
 }
 
 void
+Editor::set_session_extents_from_selection ()
+{
+	if (_session == 0 || selection->time.empty()) {
+		return;
+	}
+
+	begin_reversible_command (_("set session start/stop from selection"));
+
+	framepos_t start = selection->time[clicked_selection].start;
+	framepos_t end = selection->time[clicked_selection].end;
+
+	Location* loc;
+	if ((loc = _session->locations()->session_range_location()) == 0) {
+		_session->set_session_extents ( start, end );  // this will create a new session range;  no need for UNDO
+	} else {
+		XMLNode &before = loc->get_state();
+
+		_session->set_session_extents ( start, end );
+
+		XMLNode &after = loc->get_state();
+
+		_session->add_command (new MementoCommand<Location>(*loc, &before, &after));
+
+		commit_reversible_command ();
+	}
+}
+
+void
 Editor::set_punch_from_edit_range ()
 {
 	if (_session == 0) {
