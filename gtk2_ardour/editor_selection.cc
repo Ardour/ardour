@@ -845,20 +845,10 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 		/* 2. find all the tracks we should select in */
 
 		set<RouteTimeAxisView*> relevant_tracks;
-
-		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*i);
-			if (r) {
-				relevant_tracks.insert (r);
-			}
-		}
-
 		set<RouteTimeAxisView*> already_in_selection;
 
-		if (relevant_tracks.empty()) {
-
-			/* no tracks selected .. thus .. if the
-			   regionview we're in isn't selected
+		{
+			/* if the regionview we're in isn't selected
 			   (i.e. we're about to extend to it), then
 			   find all tracks between the this one and
 			   any selected ones.
