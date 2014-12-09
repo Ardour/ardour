@@ -840,6 +840,12 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (_copy && first_move) {
 
+		if (_x_constrained) {
+			_editor->begin_reversible_command (Operations::fixed_time_region_copy);
+		} else {
+			_editor->begin_reversible_command (Operations::region_copy);
+		}
+
 		/* duplicate the regionview(s) and region(s) */
 
 		list<DraggingView> new_regionviews;
@@ -1018,12 +1024,6 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 
 		_editor->commit_reversible_command ();
 		return;
-	}
-
-	if (_x_constrained) {
-		_editor->begin_reversible_command (Operations::fixed_time_region_copy);
-	} else {
-		_editor->begin_reversible_command (Operations::region_copy);
 	}
 
 	/* insert the regions into their new playlists */
