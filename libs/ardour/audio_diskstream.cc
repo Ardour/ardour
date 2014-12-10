@@ -514,7 +514,7 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 
 				if (rec_nframes > total) {
                                         DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
-                                                                                    pthread_self(), name(), rec_nframes, total));
+                                                                                    DEBUG_THREAD_SELF, name(), rec_nframes, total));
 					DiskOverrun ();
 					return -1;
 				}
@@ -622,7 +622,7 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 					cerr << _name << " Need " << necessary_samples << " total = " << total << endl;
 					cerr << "underrun for " << _name << endl;
                                         DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, rec_nframes = %3 total space = %4\n",
-                                                                                    pthread_self(), name(), rec_nframes, total));
+                                                                                    DEBUG_THREAD_SELF, name(), rec_nframes, total));
 					DiskUnderrun ();
 					return -1;
 
