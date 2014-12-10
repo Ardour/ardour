@@ -552,7 +552,7 @@ bool vstfx_midi_input (VSTState* vstfx)
 	if (vst_version >= 2) {
 		/* should we send it VST events (i.e. MIDI) */
 
-		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)) {
+		if ((plugin->flags & effFlagsIsSynth) || (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "receiveVstEvents", 0.0f) > 0)) {
 			return true;
 		}
 	}
@@ -570,8 +570,8 @@ bool vstfx_midi_output (VSTState* vstfx)
 	if (vst_version >= 2) {
 		/* should we send it VST events (i.e. MIDI) */
 
-		if (   (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstEvents"), 0.0f) > 0)
-		       || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstMidiEvent"), 0.0f) > 0)
+		if (   (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "sendVstEvents", 0.0f) > 0)
+				|| (plugin->dispatcher (plugin, effCanDo, 0, 0,(void*) "sendVstMidiEvent", 0.0f) > 0)
 			 ) {
 			return true;
 		}
