@@ -27,6 +27,7 @@
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
+#include "ardour/debug.h"
 #include "ardour/butler.h"
 #include "ardour/io.h"
 #include "ardour/midi_diskstream.h"
@@ -171,6 +172,8 @@ Butler::wait_for_requests ()
 			break;
 		}
 
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler awake at @ %2", pthread_self(), g_get_monotonic_time()));
+
 		if (pfd[0].revents & ~POLLIN) {
 			error << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endmsg;
 			break;
@@ -210,7 +213,7 @@ Butler::dequeue_request (Request::Type& r)
 	return false;
 }
 
-	void *
+void *
 Butler::thread_work ()
 {
 	uint32_t err = 0;
@@ -219,28 +222,33 @@ Butler::thread_work ()
 	RouteList::iterator i;
 
 	while (true) {
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler main loop, disk work outstanding ? %2 @ %3\n", pthread_self(), disk_work_outstanding, g_get_monotonic_time()));
+
 		if(!disk_work_outstanding) {
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler waits for requests @ %2\n", pthread_self(), g_get_monotonic_time()));
 			if (wait_for_requests ()) {
 				Request::Type req;
 
 				/* empty the pipe of all current requests */
 #ifdef PLATFORM_WINDOWS
 				dequeue_request (req);
-				{
 #else
-				while(dequeue_request(req)) {
+				while (dequeue_request(req)) {
 #endif
 					switch (req) {
 
 					case Request::Run:
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to run @ %2\n", pthread_self(), g_get_monotonic_time()));
 						should_run = true;
 						break;
 
 					case Request::Pause:
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to pause @ %2\n", pthread_self(), g_get_monotonic_time()));
 						should_run = false;
 						break;
 
 					case Request::Quit:
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to quit @ %2\n", pthread_self(), g_get_monotonic_time()));
 						return 0;
 						abort(); /*NOTREACHED*/
 						break;
@@ -248,22 +256,28 @@ Butler::thread_work ()
 					default:
 						break;
 					}
+#ifndef PLATFORM_WINDOWS
 				}
+#endif
 			}
 		}
 
-
-restart:
+		
+	  restart:
+		DEBUG_TRACE (DEBUG::Butler, "at restart for disk work\n");
 		disk_work_outstanding = false;
 
 		if (transport_work_requested()) {
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("do transport work @ %1\n", g_get_monotonic_time()));
 			_session.butler_transport_work ();
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1\n", g_get_monotonic_time()));
 		}
 
 		frameoffset_t audition_seek;
 		if (should_run && _session.is_auditioning()
 				&& (audition_seek = _session.the_auditioner()->seek_frame()) >= 0) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner());
+			DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
 			tr->seek(audition_seek);
 			_session.the_auditioner()->seek_response(audition_seek);
 		}
@@ -289,14 +303,17 @@ restart:
 
 			if (io && !io->active()) {
 				/* don't read inactive tracks */
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("butler skips inactive track %1\n", tr->name()));
 				continue;
 			}
-
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("butler refills %1\n", tr->name()));
 			switch (tr->do_refill ()) {
 			case 0:
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
 				break;
 				
 			case 1:
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name()));
 				disk_work_outstanding = true;
 				break;
 
@@ -313,6 +330,7 @@ restart:
 		}
 
 		if (!err && transport_work_requested()) {
+			DEBUG_TRACE (DEBUG::Butler, "transport work requested during refill, back to restart\n");
 			goto restart;
 		}
 
@@ -328,11 +346,14 @@ restart:
 			/* note that we still try to flush diskstreams attached to inactive routes
 			 */
 
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("butler flushes track %1\n", tr->name()));
 			switch (tr->do_flush (ButlerContext)) {
 			case 0:
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush complete for %1\n", tr->name()));
 				break;
 				
 			case 1:
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush not finished for %1\n", tr->name()));
 				disk_work_outstanding = true;
 				break;
 
@@ -349,15 +370,18 @@ restart:
 			/* stop the transport and try to catch as much possible
 			   captured state as we can.
 			*/
+			DEBUG_TRACE (DEBUG::Butler, "error occurred during recording - stop transport\n");
 			_session.request_stop ();
 		}
 
 		if (i != rl->begin() && i != rl->end()) {
 			/* we didn't get to all the streams */
+			DEBUG_TRACE (DEBUG::Butler, "not all tracks processed, will need to go back for more\n");
 			disk_work_outstanding = true;
 		}
 
 		if (!err && transport_work_requested()) {
+			DEBUG_TRACE (DEBUG::Butler, "transport work requested during flush, back to restart\n");
 			goto restart;
 		}
 
@@ -380,6 +404,7 @@ restart:
 			paused.signal();
 		}
 
+		DEBUG_TRACE (DEBUG::Butler, "butler emptying pool trash\n");
 		empty_pool_trash ();
 	}
 
@@ -408,6 +433,7 @@ Butler::queue_request (Request::Type r)
 void
 Butler::summon ()
 {
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: summon butler to run @ %2", pthread_self(), g_get_monotonic_time()));
 	queue_request (Request::Run);
 }
 
@@ -415,6 +441,7 @@ void
 Butler::stop ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: asking butler to stop @ %2", pthread_self(), g_get_monotonic_time()));
 	queue_request (Request::Pause);
 	paused.wait(request_lock);
 }
@@ -423,6 +450,7 @@ void
 Butler::wait_until_finished ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: waiting for butler to finish @ %2", pthread_self(), g_get_monotonic_time()));
 	queue_request (Request::Pause);
 	paused.wait(request_lock);
 }

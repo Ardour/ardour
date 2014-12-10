@@ -369,7 +369,7 @@ def build(bld):
         'PACKAGE="' + I18N_PACKAGE + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-        'LOCALEDIR="' + os.path.join(os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+        'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         'EVORAL_MIDI_XML=1',
         ]
 
@@ -416,8 +416,7 @@ def build(bld):
         mo_files = bld.path.ant_glob('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename(mo.srcpath()).replace('.mo', '')
-            bld.install_as(os.path.join(bld.env['PREFIX'], 'share', 'locale',
-                                        lang, 'LC_MESSAGES', I18N_PACKAGE + '.mo'),
+            bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + '.mo'),
                            mo)
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
@@ -439,8 +438,7 @@ def build(bld):
             'PACKAGE="libardour3test"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-            'LOCALEDIR="' + os.path.join(
-                os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+            'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
             ]
         testcommon.name         = 'testcommon'
 
@@ -519,8 +517,7 @@ def build(bld):
             'PACKAGE="libardour3profile"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-            'LOCALEDIR="' + os.path.join(
-                os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+            'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
             ]
         if bld.env['FPU_OPTIMIZATION']:
             session_load_tester.source += [ 'sse_functions_xmm.cc' ]
@@ -552,8 +549,7 @@ def build(bld):
                 'PACKAGE="libardour3profile"',
                 'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
                 'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-                'LOCALEDIR="' + os.path.join(
-                    os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+                'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
                 ]
             if bld.env['FPU_OPTIMIZATION']:
                 profilingobj.source += [ 'sse_functions_xmm.cc' ]
@@ -584,8 +580,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
         'PACKAGE="libardour3test"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-        'LOCALEDIR="' + os.path.join(
-            os.path.normpath(bld.env['DATADIR']), 'locale') + '"',
+        'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
         ]
 
 def shutdown():
