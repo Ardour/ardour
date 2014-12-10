@@ -200,8 +200,6 @@ main (int argc, char* argv[])
 		ds << setprecision (1) << data_minutes;
 		
 		cout << "BW @ " << written << " frames (" << ds.str() << " minutes) = " << (bandwidth/1048576.0) <<  " MB/sec " << bandwidth / data_rate << " x faster than necessary " << endl;
-
-		usleep(1e6 * 1024 / samplerate);
 	}
 
 	return 0;
