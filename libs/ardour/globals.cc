@@ -214,34 +214,16 @@ lotsa_files_please ()
 
 	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
 
+#ifdef __APPLE__
+                /* See the COMPATIBILITY note on the Apple setrlimit() man page */
+		rl.rlim_cur = min ((rlim_t) OPEN_MAX, rl.rlim_max);
+#else
 		rl.rlim_cur = rl.rlim_max;
+#endif
 
 		if (setrlimit (RLIMIT_NOFILE, &rl) != 0) {
 			if (rl.rlim_cur == RLIM_INFINITY) {
-#if __APPLE__
-				/* For some reason, Apple doesn't do this the
-				 * same way as Linux, and asking for
-				 * RLIM_INFINITY even though that is
-				 * rl.rlim_cur doesn't work.
-				 * 
-				 * So try some actual large numbers in the hope
-				 * that one of them will work.
-				 */
-
-				rl.rlim_cur = 10000;
-				if (setrlimit (RLIMIT_NOFILE, &rl) != 0) {
-					rl.rlim_cur = 4096;
-					if (setrlimit (RLIMIT_NOFILE, &rl) != 0) {
-						rl.rlim_cur = 1000;
-						if (setrlimit (RLIMIT_NOFILE, &rl) != 0) {
-							error << _("Could not set system open files limit to a reasonable value. Be careful!") << endmsg;
-						}
-					}
-				}
-				info << string_compose ("Configured system open file limit to %1", rl.rlim_cur) << endmsg;
-#else
 				error << _("Could not set system open files limit to \"unlimited\"") << endmsg;
-#endif				
 			} else {
 				error << string_compose (_("Could not set system open files limit to %1"), rl.rlim_cur) << endmsg;
 			}
