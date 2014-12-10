@@ -4413,6 +4413,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			} else {
 				if (!_editor->clicked_selection) {
 					_editor->selection->clear_time();
+                    _editor->selection->clear_objects();
 				}
 			}
 		}
