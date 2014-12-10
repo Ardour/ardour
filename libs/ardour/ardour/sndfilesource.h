@@ -24,7 +24,6 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/broadcast_info.h"
-#include "pbd/sndfile_manager.h"
 
 namespace ARDOUR {
 
@@ -75,8 +74,6 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 
 	static int get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error_msg);
 
-	void release_descriptor ();
-
   protected:
 	void set_path (const std::string& p);
 	void set_header_timeline_position ();
@@ -86,7 +83,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	framecnt_t write_float (Sample* data, framepos_t pos, framecnt_t cnt);
 
   private:
-	PBD::SndFileDescriptor* _descriptor;
+	SNDFILE* _sndfile;
 	SF_INFO _info;
 	BroadcastInfo *_broadcast_info;
 
@@ -113,7 +110,6 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	framecnt_t nondestructive_write_unlocked (Sample *dst, framecnt_t cnt);
 	void handle_header_position_change ();
 	PBD::ScopedConnection header_position_connection;
-	PBD::ScopedConnection file_manager_connection;
 };
 
 } // namespace ARDOUR

@@ -32,7 +32,6 @@
 #include "ardour/source.h"
 #include "ardour/ardour.h"
 #include "ardour/readable.h"
-#include "pbd/file_manager.h"
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
 
@@ -160,7 +159,6 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	 */
         mutable Glib::Threads::Mutex _peaks_ready_lock;
 
-	PBD::FdFileDescriptor* _peakfile_descriptor;
 	int        _peakfile_fd;
 	framecnt_t peak_leftover_cnt;
 	framecnt_t peak_leftover_size;
