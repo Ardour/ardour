@@ -61,7 +61,7 @@ namespace PBD {
 #define DEBUG_STR(a) /* empty */
 #define DEBUG_STR_APPEND(a,b) /* empty */
 #define DEBUG_ENABLED(b) (0)
-#ifdef PTW32_VERSION
+#ifdef PLATFORM_WINDOWS
 #define DEBUG_THREAD_SELF pthread_self().p
 #else
 #define DEBUG_THREAD_SELF pthread_self()
