@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <getopt.h>
+#include <fcntl.h>
 
 #include <glibmm/miscutils.h>
 
@@ -53,13 +54,14 @@ main (int argc, char* argv[])
 {
 	vector<SNDFILE*> sndfiles;
 	uint32_t sample_size;
-	char optstring[] = "f:r:F:n:c:b:s";
+	char optstring[] = "f:r:F:n:c:b:sD";
 	int channels, samplerate;
 	char const *suffix = ".wav";
 	char const *header_format = "wav";
 	char const *data_format = "float";
 	uint32_t block_size = 64 * 1024;
 	uint32_t nfiles = 100;
+        bool direct = false;
 	const struct option longopts[] = {
 		{ "header-format", 1, 0, 'f' },
 		{ "data-format", 1, 0, 'F' },
@@ -68,6 +70,7 @@ main (int argc, char* argv[])
 		{ "blocksize", 1, 0, 'b' },
 		{ "channels", 1, 0, 'c' },
 		{ "sync", 0, 0, 's' },
+		{ "direct", 0, 0, 'D' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -105,7 +108,9 @@ main (int argc, char* argv[])
 		case 's':
 			with_sync = true;
 			break;
-
+                case 'D':
+                        direct = true;
+                        break;
 		default:
 			usage ();
 			return 0;
@@ -167,8 +172,34 @@ main (int argc, char* argv[])
 		ss << suffix;
 		
 		path = Glib::build_filename (tmpdirname, ss.str());
-		
-		if ((sf = sf_open (path.c_str(), SFM_RDWR, &format_info)) == 0) {
+
+                int flags = O_RDWR|O_CREAT|O_TRUNC;
+                
+#ifndef __APPLE__
+                if (direct) {
+                        flags |= O_DIRECT;
+                }
+#endif
+
+                int fd = open (path.c_str(), flags, 0644);
+
+                if (fd < 0) {
+			cerr << "Could not open file #" << n << " @ " << path << endl;
+			return 1;
+                }
+
+#ifdef __APPLE__
+                if (direct) {
+                        /* Apple man pages say only that it returns "a value other than -1 on success",
+                           which probably means zero, but you just can't be too careful with
+                           those guys.
+                        */
+                        if (fcntl (fd, F_NOCACHE, 1) == -1) {
+                                cerr << "Cannot set F_NOCACHE on file # " << n << endl;
+                        }
+                }
+#endif
+		if ((sf = sf_open_fd (fd, SFM_RDWR, &format_info, true)) == 0) {
 			cerr << "Could not open file #" << n << " @ " << path << endl;
 			return 1;
 		}
@@ -176,7 +207,7 @@ main (int argc, char* argv[])
 		sndfiles.push_back (sf);
 	}
 
-	cout << nfiles << " files are in " << tmpdirname << endl;
+	cout << nfiles << " files are in " << tmpdirname << " all used " << (direct ? "without" : "with") << " OS buffer cache" << endl;
 	cout << "Format is " << suffix << ' ' << channels << " channel" << (channels > 1 ? "s" : "") << " written in chunks of " << block_size << " frames, synced ? " << (with_sync ? "yes" : "no") << endl;
 		
 	data = new float[block_size*channels];
