@@ -137,7 +137,7 @@ Butler::terminate_thread ()
 {
 	if (have_thread) {
 		void* status;
-                DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: ask butler to quit @ %2\n", pthread_self(), g_get_monotonic_time()));
+                DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: ask butler to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 		queue_request (Request::Quit);
 		pthread_join (thread, &status);
 	}
@@ -173,7 +173,7 @@ Butler::wait_for_requests ()
 			break;
 		}
 
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler awake at @ %2\n", pthread_self(), g_get_monotonic_time()));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler awake at @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 
 		if (pfd[0].revents & ~POLLIN) {
 			error << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endmsg;
@@ -223,10 +223,10 @@ Butler::thread_work ()
 	RouteList::iterator i;
 
 	while (true) {
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler main loop, disk work outstanding ? %2 @ %3\n", pthread_self(), disk_work_outstanding, g_get_monotonic_time()));
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler main loop, disk work outstanding ? %2 @ %3\n", DEBUG_THREAD_SELF, disk_work_outstanding, g_get_monotonic_time()));
 
 		if(!disk_work_outstanding) {
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler waits for requests @ %2\n", pthread_self(), g_get_monotonic_time()));
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler waits for requests @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 			if (wait_for_requests ()) {
 				Request::Type req;
 
@@ -239,17 +239,17 @@ Butler::thread_work ()
 					switch (req) {
 
 					case Request::Run:
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to run @ %2\n", pthread_self(), g_get_monotonic_time()));
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 						should_run = true;
 						break;
 
 					case Request::Pause:
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to pause @ %2\n", pthread_self(), g_get_monotonic_time()));
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to pause @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 						should_run = false;
 						break;
 
 					case Request::Quit:
-						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to quit @ %2\n", pthread_self(), g_get_monotonic_time()));
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to quit @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 						return 0;
 						abort(); /*NOTREACHED*/
 						break;
@@ -404,7 +404,7 @@ Butler::thread_work ()
 				goto restart;
 			}
 
-                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler signals pause @ %2\n", pthread_self(), g_get_monotonic_time()));
+                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler signals pause @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 			paused.signal();
 		}
 
@@ -437,7 +437,7 @@ Butler::queue_request (Request::Type r)
 void
 Butler::summon ()
 {
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: summon butler to run @ %2\n", pthread_self(), g_get_monotonic_time()));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: summon butler to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 	queue_request (Request::Run);
 }
 
@@ -445,7 +445,7 @@ void
 Butler::stop ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: asking butler to stop @ %2\n", pthread_self(), g_get_monotonic_time()));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: asking butler to stop @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 	queue_request (Request::Pause);
 	paused.wait(request_lock);
 }
@@ -454,7 +454,7 @@ void
 Butler::wait_until_finished ()
 {
 	Glib::Threads::Mutex::Lock lm (request_lock);
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: waiting for butler to finish @ %2\n", pthread_self(), g_get_monotonic_time()));
+	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: waiting for butler to finish @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
 	queue_request (Request::Pause);
 	paused.wait(request_lock);
 }
