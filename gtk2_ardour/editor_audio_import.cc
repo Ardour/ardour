@@ -511,6 +511,7 @@ Editor::import_sndfiles (vector<string> paths, ImportDisposition disposition, Im
 		pos = import_status.pos;
 	}
 
+	import_status.sources.clear();
 	set_canvas_cursor (current_canvas_cursor);
 	return result;
 }
