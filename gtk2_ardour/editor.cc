@@ -1990,28 +1990,24 @@ Editor::add_track_context_items (Menu_Helpers::MenuList& edit_items)
     // Tools menu
     Glib::RefPtr<Gtk::Action> act = ActionManager::get_action_from_name ("set-mouse-mode-range");
     assert (act);
-    Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
     Image* icon;
-    icon = manage (new Gtk::Image (tact->get_active() ? get_icon_path (X_ ("tool_marker_active")) : get_icon_path (X_ ("tool_marker"))));
+    icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_marker_idle"))));
     edit_items.push_back (ImageMenuElem ( ("Range Select Tool \t 1"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-object");
     assert (act);
-    tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-    icon = manage (new Gtk::Image (tact->get_active () ? get_icon_path (X_ ("tool_arrow_active")) : get_icon_path (X_ ("tool_arrow"))));
-    edit_items.push_back (ImageMenuElem ( ("Pointer Tool \t\t 2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_arrow_idle"))));
+    edit_items.push_back (ImageMenuElem ( ("Pointer Tool      \t 2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-cut");
     assert (act);
-    tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-    icon = manage (new Gtk::Image (tact->get_active () ? get_icon_path (X_ ("tool_cut_active")) : get_icon_path (X_ ("tool_cut"))));
-    edit_items.push_back (ImageMenuElem ( ("Split Tool \t\t 3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_cut_idle"))));
+    edit_items.push_back (ImageMenuElem ( ("Split Tool        \t 3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-zoom");
     assert (act);
-    tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-    icon = manage (new Gtk::Image (tact->get_active () ? get_icon_path (X_ ("tool_zoom_active")) : get_icon_path (X_ ("tool_zoom"))));
-    edit_items.push_back (ImageMenuElem ( ("Zoom Tool \t\t 4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_zoom_idle"))));
+    edit_items.push_back (ImageMenuElem ( ("Zoom Tool         \t 4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
 }
 
 void
