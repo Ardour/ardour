@@ -837,16 +837,6 @@ TimeAxisView::show_selection (TimeSelection& ts)
 }
 
 void
-TimeAxisView::reshow_selection (TimeSelection& ts)
-{
-	show_selection (ts);
-
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->show_selection (ts);
-	}
-}
-
-void
 TimeAxisView::hide_selection ()
 {
 	if (selection_group->visible ()) {

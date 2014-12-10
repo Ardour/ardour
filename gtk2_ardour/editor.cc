@@ -4347,8 +4347,8 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 	bool const showing_time_selection = selection->time.length() > 0;
 
 	if (showing_time_selection && selection->time.start () != selection->time.end_frame ()) {
-		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-			(*i)->reshow_selection (selection->time);
+		for (TrackViewList::iterator i = selection->time.tracks_in_range.begin(); i != selection->time.tracks_in_range.end(); ++i) {
+			(*i)->show_selection (selection->time);
 		}
 	}
 

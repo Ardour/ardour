@@ -161,7 +161,6 @@ class TimeAxisView : public virtual AxisView
 	virtual void set_samples_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
-	virtual void reshow_selection (TimeSelection&);
 	virtual void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	virtual void hide_timestretch ();
 
