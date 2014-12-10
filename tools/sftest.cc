@@ -5,6 +5,8 @@
 #include <iomanip>
 #include <sstream>
 #include <cstdlib>
+#include <cerrno>
+
 #include <unistd.h>
 #include <sndfile.h>
 #include <stdint.h>
@@ -174,17 +176,10 @@ main (int argc, char* argv[])
 		path = Glib::build_filename (tmpdirname, ss.str());
 
                 int flags = O_RDWR|O_CREAT|O_TRUNC;
-                
-#ifndef __APPLE__
-                if (direct) {
-                        flags |= O_DIRECT;
-                }
-#endif
-
                 int fd = open (path.c_str(), flags, 0644);
 
                 if (fd < 0) {
-			cerr << "Could not open file #" << n << " @ " << path << endl;
+			cerr << "Could not open file #" << n << " @ " << path << " (" << strerror (errno) << ")" << endl;
 			return 1;
                 }
 
@@ -200,7 +195,7 @@ main (int argc, char* argv[])
                 }
 #endif
 		if ((sf = sf_open_fd (fd, SFM_RDWR, &format_info, true)) == 0) {
-			cerr << "Could not open file #" << n << " @ " << path << endl;
+			cerr << "Could not open SNDFILE #" << n << " @ " << path << " (" << sf_strerror (0) << ")" << endl;
 			return 1;
 		}
 
