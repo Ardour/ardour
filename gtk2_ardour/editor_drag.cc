@@ -4235,7 +4235,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		   or create a new selection
 		*/
 
-        TrackViewList& all_tracks (_editor->track_views);
 		if (first_move) {
 
 			if (_add) {
@@ -4250,19 +4249,13 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
             /* new selection range selection */
             _editor->clicked_selection = _editor->selection->set (start, end);
-            
-            if (_editor->clicked_axisview ) {
-                
-                if (_editor->is_group_edit_enabled() ) {
-                    // apply to all tracks
-                    _editor->selection->time.tracks_in_range.add(all_tracks);
-                } else {
-                    _editor->selection->time.tracks_in_range.push_back (_editor->clicked_axisview );
-                }
-            }
 		}
 		
-        if (!_editor->is_group_edit_enabled() ) {
+		TrackViewList& all_tracks (_editor->track_views);
+        if (_editor->is_group_edit_enabled() ) {
+			/* all tracks are in scope */
+			_editor->selection->time.tracks_in_range.add(all_tracks);
+		} else {
         
             /* select all tracks within the rectangle that we've marked out so far */
             TrackViewList& tracks_in_range = _editor->selection->time.tracks_in_range;
@@ -4303,17 +4296,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
                 }
                 new_covered_tracks = grouped_tracks_to_add;
 #endif
-                // clean up those tracks which are not covered by drag anymore
-                for (TrackViewList::const_iterator i = tracks_in_range.begin(); i != tracks_in_range.end(); ++i)
-                    if ( !new_covered_tracks.contains ( *i ) )
-                        tracks_in_range.remove( *i );
-                
-                // now add new covered tracks
-                TrackViewList tracks_to_add;
-                for (TrackViewList::const_iterator i = new_covered_tracks.begin(); i != new_covered_tracks.end(); ++i)
-                    if ( !tracks_in_range.contains ( *i ) )
-                        tracks_to_add.push_back ( *i );
-                tracks_in_range.add(tracks_to_add);
+				tracks_in_range.clear();
+				tracks_in_range.add(new_covered_tracks);
             }
         }
 	}
