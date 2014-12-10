@@ -684,11 +684,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu* build_track_bus_context_menu ();
 	Gtk::Menu* build_track_region_context_menu ();
 	Gtk::Menu* build_track_selection_context_menu ();
-	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
-	void add_region_context_items (Gtk::Menu_Helpers::MenuList&, boost::shared_ptr<ARDOUR::Track>);
 	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
-	Gtk::MenuItem* _popup_region_menu_item;
+    void add_region_context_items (Gtk::Menu_Helpers::MenuList&);
+    void add_track_context_items (Gtk::Menu_Helpers::MenuList&);
+    void activate_track_context_menu_action (Glib::RefPtr<Gtk::Action>& );
+    
+    Gtk::MenuItem* _popup_region_menu_item;
 
 	void popup_control_point_context_menu (ArdourCanvas::Item *, GdkEvent *);
 	Gtk::Menu _control_point_context_menu;

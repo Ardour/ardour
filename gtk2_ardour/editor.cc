@@ -1738,31 +1738,6 @@ Editor::popup_track_context_menu (int button, int32_t time, ItemType item_type, 
 		return;
 	}
 
-	if (item_type != SelectionItem && clicked_routeview && clicked_routeview->audio_track()) {
-
-		/* Bounce to disk */
-
-		using namespace Menu_Helpers;
-		MenuList& edit_items  = menu->items();
-
-		edit_items.push_back (SeparatorElem());
-
-		switch (clicked_routeview->audio_track()->freeze_state()) {
-		case AudioTrack::NoFreeze:
-			edit_items.push_back (MenuElem (_("Freeze"), sigc::mem_fun(*this, &Editor::freeze_route)));
-			break;
-
-		case AudioTrack::Frozen:
-			edit_items.push_back (MenuElem (_("Unfreeze"), sigc::mem_fun(*this, &Editor::unfreeze_route)));
-			break;
-
-		case AudioTrack::UnFrozen:
-			edit_items.push_back (MenuElem (_("Freeze"), sigc::mem_fun(*this, &Editor::freeze_route)));
-			break;
-		}
-
-	}
-
 	if (item_type == StreamItem && clicked_routeview) {
 		clicked_routeview->build_underlay_menu(menu);
 	}
@@ -1785,7 +1760,7 @@ Editor::build_track_context_menu ()
  	MenuList& edit_items = track_context_menu.items();
 	edit_items.clear();
 
-	add_dstream_context_items (edit_items);
+    add_track_context_items (edit_items);
 	return &track_context_menu;
 }
 
@@ -1808,25 +1783,7 @@ Editor::build_track_region_context_menu ()
 	MenuList& edit_items  = track_region_context_menu.items();
 	edit_items.clear();
 
-	/* we've just cleared the track region context menu, so the menu that these
-	   two items were on will have disappeared; stop them dangling.
-	*/
-	region_edit_menu_split_item = 0;
-	region_edit_menu_split_multichannel_item = 0;
-
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
-
-	if (rtv) {
-		boost::shared_ptr<Track> tr;
-		boost::shared_ptr<Playlist> pl;
-
-		if ((tr = rtv->track())) {
-			add_region_context_items (edit_items, tr);
-		}
-	}
-
-	add_dstream_context_items (edit_items);
-
+    add_region_context_items (edit_items);
 	return &track_region_context_menu;
 }
 
@@ -1880,45 +1837,6 @@ Editor::build_track_selection_context_menu ()
 	return &track_selection_context_menu;
 }
 
-void
-Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::shared_ptr<Track> track)
-{
-	using namespace Menu_Helpers;
-
-	/* OK, stick the region submenu at the top of the list, and then add
-	   the standard items.
-	*/
-
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	string::size_type pos = 0;
-	string menu_item_name = (rs.size() == 1) ? rs.front()->region()->name() : _("Selected Regions");
-
-	/* we have to hack up the region name because "_" has a special
-	   meaning for menu titles.
-	*/
-
-	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
-		menu_item_name.replace (pos, 1, "__");
-		pos += 2;
-	}
-
-	if (_popup_region_menu_item == 0) {
-		_popup_region_menu_item = new MenuItem (menu_item_name);
-		_popup_region_menu_item->set_submenu (*dynamic_cast<Menu*> (ActionManager::get_widget (X_("/PopupRegionMenu"))));
-		_popup_region_menu_item->show ();
-	} else {
-		_popup_region_menu_item->set_label (menu_item_name);
-	}
-
-	const framepos_t position = get_preferred_edit_position (false, true);
-
-	edit_items.push_back (*_popup_region_menu_item);
-	if (track->playlist()->count_regions_at (position) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
-		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region-context-menu")->create_menu_item ()));
-	}
-	edit_items.push_back (SeparatorElem());
-}
 
 /** Add context menu items relevant to selection ranges.
  * @param edit_items List to add the items to.
@@ -1997,86 +1915,109 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	}
 }
 
+void
+Editor::add_region_context_items (Gtk::Menu_Helpers::MenuList& edit_items)
+{
+    using namespace Menu_Helpers;
+    
+    // Region
+    
+    Menu *region_menu = manage (new Menu);
+    MenuList& region_items = region_menu->items();
+    //region_menu->set_name ("ArdourContextMenu");
+    region_items.push_back (*manage (ActionManager::get_action_from_name ("rename-region")->create_menu_item ()));
+    region_items.push_back (*manage (ActionManager::get_action_from_name ("set-loop-from-region")->create_menu_item ()));
+    region_items.back().set_label ("Set as loop range");
+    
+    // Region -> Position
+    Menu *position_menu = manage (new Menu);
+    MenuList& position_items = position_menu->items();
+    //position_menu->set_name ("ArdourContextMenu");
+    position_items.push_back (*manage (ActionManager::get_action_from_name ("toggle-region-lock")->create_menu_item ()));
+    position_items.push_back (*manage (ActionManager::get_action_from_name ("naturalize-region")->create_menu_item ()));
+    region_items.push_back (MenuElem (_("Position"), *position_menu));
+    
+    region_items.push_back (*manage (ActionManager::get_action_from_name ("export-region")->create_menu_item ()));
+    region_items.back().set_label ("Export region...");
+    region_items.push_back (*manage (ActionManager::get_action_from_name ("analyze-region")->create_menu_item ()));
+    edit_items.push_back (MenuElem (_("Region"), *region_menu));
+    
+    edit_items.push_back (SeparatorElem());
+    
+    // Cut, copy, paste, delete
+    
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("editor-cut")->create_menu_item ()));
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("editor-copy")->create_menu_item ()));
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("editor-paste")->create_menu_item ()));
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("editor-delete")->create_menu_item ()));  // or 'remove-region'
+    
+    edit_items.push_back (SeparatorElem());
+    
+    // Align Selected Regions
+    
+    Menu *align_menu = manage (new Menu);
+    MenuList& align_items = align_menu->items();
+    align_items.push_back (MenuElem (_("Session Start"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions), ARDOUR::SyncPoint)));
+    //align_items.back().set_label ("Session Start");
+    align_items.push_back (MenuElem (_("Relative"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::SyncPoint)));
+    edit_items.push_back (MenuElem (_("Align Selected Region"), *align_menu));
+    
+    edit_items.push_back (SeparatorElem());
+    
+    edit_items.push_back (MenuElem (_("Import Audio File"), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("toggle-region-mute")->create_menu_item ()));
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("reverse-region")->create_menu_item ()));
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("strip-region-silence")->create_menu_item ()));
+    edit_items.back().set_label ("Strip Silence");
+    edit_items.push_back (*manage (ActionManager::get_action_from_name ("pitch-shift-region")->create_menu_item ()));
+    edit_items.back().set_label ("Pitch Shift");
+    
+    // Gain
+    
+    Menu *gain_menu = manage (new Menu);
+    MenuList& gain_items = gain_menu->items();
+    gain_items.push_back (*manage (ActionManager::get_action_from_name ("boost-region-gain")->create_menu_item ()));
+    gain_items.push_back (*manage (ActionManager::get_action_from_name ("cut-region-gain")->create_menu_item ()));
+    edit_items.push_back (MenuElem (_("Gain"), *gain_menu));
+}
+
 
 void
-Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
+Editor::add_track_context_items (Menu_Helpers::MenuList& edit_items)
 {
-	using namespace Menu_Helpers;
+    using namespace Menu_Helpers;
+    
+    // Tools menu
+    Glib::RefPtr<Gtk::Action> act = ActionManager::get_action_from_name ("set-mouse-mode-range");
+    assert (act);
+    Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+    Image* icon;
+    icon = manage (new Gtk::Image (tact->get_active() ? get_icon_path (X_ ("tool_marker_active")) : get_icon_path (X_ ("tool_marker"))));
+    edit_items.push_back (ImageMenuElem ( ("Range Select Tool \t 1"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    
+    act = ActionManager::get_action_from_name ("set-mouse-mode-object");
+    assert (act);
+    tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+    icon = manage (new Gtk::Image (tact->get_active () ? get_icon_path (X_ ("tool_arrow_active")) : get_icon_path (X_ ("tool_arrow"))));
+    edit_items.push_back (ImageMenuElem ( ("Pointer Tool \t\t 2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    
+    act = ActionManager::get_action_from_name ("set-mouse-mode-cut");
+    assert (act);
+    tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+    icon = manage (new Gtk::Image (tact->get_active () ? get_icon_path (X_ ("tool_cut_active")) : get_icon_path (X_ ("tool_cut"))));
+    edit_items.push_back (ImageMenuElem ( ("Split Tool \t\t 3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    
+    act = ActionManager::get_action_from_name ("set-mouse-mode-zoom");
+    assert (act);
+    tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+    icon = manage (new Gtk::Image (tact->get_active () ? get_icon_path (X_ ("tool_zoom_active")) : get_icon_path (X_ ("tool_zoom"))));
+    edit_items.push_back (ImageMenuElem ( ("Zoom Tool \t\t 4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+}
 
-	/* Playback */
-
-	Menu *play_menu = manage (new Menu);
-	MenuList& play_items = play_menu->items();
-	play_menu->set_name ("ArdourContextMenu");
-
-	play_items.push_back (MenuElem (_("Play From Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point)));
-	play_items.push_back (MenuElem (_("Play From Start"), sigc::mem_fun(*this, &Editor::play_from_start)));
-	play_items.push_back (MenuElem (_("Play Region"), sigc::mem_fun(*this, &Editor::play_selected_region)));
-	play_items.push_back (SeparatorElem());
-	play_items.push_back (MenuElem (_("Loop Region"), sigc::bind (sigc::mem_fun (*this, &Editor::set_loop_from_region), true)));
-
-	edit_items.push_back (MenuElem (_("Play"), *play_menu));
-
-	/* Selection */
-
-	Menu *select_menu = manage (new Menu);
-	MenuList& select_items = select_menu->items();
-	select_menu->set_name ("ArdourContextMenu");
-
-	select_items.push_back (MenuElem (_("Select All in Track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
-	select_items.push_back (MenuElem (_("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set)));
-	select_items.push_back (MenuElem (_("Invert Selection in Track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
-	select_items.push_back (MenuElem (_("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
-	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Set Range to Loop Range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop)));
-	select_items.push_back (MenuElem (_("Set Range to Punch Range"), sigc::mem_fun(*this, &Editor::set_selection_from_punch)));
-	select_items.push_back (SeparatorElem());
-	select_items.push_back (MenuElem (_("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
-	select_items.push_back (MenuElem (_("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));
-	select_items.push_back (MenuElem (_("Select All After Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, true)));
-	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
-	select_items.push_back (MenuElem (_("Select All Between Playhead and Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), false)));
-	select_items.push_back (MenuElem (_("Select All Within Playhead and Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_between), true)));
-	select_items.push_back (MenuElem (_("Select Range Between Playhead and Edit Point"), sigc::mem_fun(*this, &Editor::select_range_between)));
-
-	edit_items.push_back (MenuElem (_("Select"), *select_menu));
-
-	/* Cut-n-Paste */
-
-	Menu *cutnpaste_menu = manage (new Menu);
-	MenuList& cutnpaste_items = cutnpaste_menu->items();
-	cutnpaste_menu->set_name ("ArdourContextMenu");
-
-	cutnpaste_items.push_back (MenuElem (_("Cut"), sigc::mem_fun(*this, &Editor::cut)));
-	cutnpaste_items.push_back (MenuElem (_("Copy"), sigc::mem_fun(*this, &Editor::copy)));
-	cutnpaste_items.push_back (MenuElem (_("Paste"), sigc::bind (sigc::mem_fun(*this, &Editor::paste), 1.0f, true)));
-
-	cutnpaste_items.push_back (SeparatorElem());
-
-	cutnpaste_items.push_back (MenuElem (_("Align"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions), ARDOUR::SyncPoint)));
-	cutnpaste_items.push_back (MenuElem (_("Align Relative"), sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::SyncPoint)));
-
-	edit_items.push_back (MenuElem (_("Edit"), *cutnpaste_menu));
-
-	/* Adding new material */
-
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Insert Selected Region"), sigc::bind (sigc::mem_fun(*this, &Editor::insert_region_list_selection), 1.0f)));
-	edit_items.push_back (MenuElem (_("Insert Existing Media"), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
-
-	/* Nudge track */
-
-	Menu *nudge_menu = manage (new Menu());
-	MenuList& nudge_items = nudge_menu->items();
-	nudge_menu->set_name ("ArdourContextMenu");
-
-	edit_items.push_back (SeparatorElem());
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
-
-	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
+void
+Editor::activate_track_context_menu_action (Glib::RefPtr<Gtk::Action>& act)
+{
+    act->activate ();
 }
 
 void

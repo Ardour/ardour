@@ -121,7 +121,7 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
 
 @ranges|Editor/set-loop-from-edit-range|bracketright|set loop range from edit range
-@ranges|Region/set-loop-from-region|<@SECONDARY@>bracketright|set loop range from region(s)
+@ranges|Region/set-loop-from-region|<@PRIMARY@>L|set loop range from region(s)
 
 @ranges|Editor/set-punch-from-edit-range|bracketleft|set punch range from edit range
 @ranges|Region/set-punch-from-region|<@SECONDARY@>bracketleft|set punch range from region(s)
@@ -141,19 +141,19 @@ This mode provides many different operations on both regions and control points,
 
 @mmode|MouseMode/toggle-internal-edit|e|toggle MIDI note editing
 @select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
-@rop|Region/export-region|<@PRIMARY@><@LEVEL4@>e|export selected region(s)
+
 @sess|Main/ExportSession|<@LEVEL4@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|i|toggle editor window mixer
 @vis|Common/toggle-mixer|m|toggle mixer
 @vis|Common/toggle-meterbridge|b|toggle meterBridge
 @wvis|Common/goto-editor|<@WINDOW@>e|toggle editor window
-@mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
-@rop|Region/reverse-region|<@SECONDARY@>r|reverse
+;;@rop|Region/reverse-region|<@SECONDARY@>r|reverse
 @trans|Transport/Record|<@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
 @rop|Region/pitch-shift-region|<@SECONDARY@>t|transpose
+@rop|Region/strip-region-silence|<@SECONDARY@>l|transpose
 @eep|Editor/select-all-tracks|<@PRIMARY@>t|select all tracks
 @mmode|MouseMode/set-mouse-mode-object-range|y|link object/range tools
 @edit|Editor/alternate-redo|<@PRIMARY@>y|redo
@@ -163,7 +163,6 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/invert-selection|<@TERTIARY@>i|invert selection
 @sess|Editor/addExistingAudioFiles|<@PRIMARY@>i|import audio files
 @sess|Editor/toggle-midi-input-active|<@SECONDARY@>i|toggle sel. track MIDI input
-@mmode|MouseMode/set-mouse-mode-object|o|object mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
 @sess|Window/toggle-tracks-control-panel|<@PRIMARY@>comma|open preferences dialog
@@ -206,12 +205,10 @@ This mode provides many different operations on both regions and control points,
 @eep|Region/trim-back|k|trim back
 @wvis|Window/toggle-key-editor|<@WINDOW@>k|toggle key bindings editor
 @trans|Transport/Loop|l|loop play (the loop range)
-@select|Editor/select-all-in-loop-range|<@PRIMARY@>l|select all in loop range
 @wvis|Window/toggle-locations|<@WINDOW@>l| toggle locations dialog
 
 ;; BOTTOM ROW
 
-@mmode|MouseMode/set-mouse-mode-zoom|z|zoom mode
 @edit|Editor/undo|<@PRIMARY@>z|undo
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)
@@ -219,7 +216,6 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 ;@-group|Editor/crop|c|some text
-@mmode|MouseMode/set-mouse-mode-cut|c|cut mode
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
 @wvis|Window/toggle-theme-manager|<@WINDOW@>c|toggle color manager
 @rop|Region/set-region-sync-position|v|set region sync point
@@ -267,6 +263,7 @@ This mode provides many different operations on both regions and control points,
 @movp|Transport/GotoStart|Home|to start marker
 @movp|Transport/GotoEnd|End|to end marker
 @edit|Editor/editor-delete|Delete|delete
+@edit|Editor/remove-region|Delete|delete selected region
 @edit|Editor/alternate-editor-delete|BackSpace|backspace (delete)
 
 @select|Editor/escape|Escape|break drag or deselect all
@@ -338,12 +335,11 @@ This mode provides many different operations on both regions and control points,
 
 
 ;; numbers
-
-@eep|Editor/cycle-zoom-focus|1|cycle to next zoom focus
-@eep|Editor/cycle-snap-mode|2|cycle to next grid snap mode
-@eep|Editor/prev-snap-choice|3|use next grid unit
+@mmode|MouseMode/set-mouse-mode-range|1|range mode
+@mmode|MouseMode/set-mouse-mode-object|2|link object/range tools
+@mmode|MouseMode/set-mouse-mode-cut|3|cut mode
+@mmode|MouseMode/set-mouse-mode-zoom|4|zoom mode
 @eep|Editor/prev-snap-choice-music-only|<@PRIMARY@>3|use previous grid unit
-@eep|Editor/next-snap-choice|4|use next grid unit
 @eep|Editor/next-snap-choice-music-only|<@PRIMARY@>4|use next musical grid unit
 @trans|Transport/ToggleAutoPlay|5|toggle auto play
 @trans|Transport/ToggleAutoReturn|6|toggle auto return

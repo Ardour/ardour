@@ -1818,7 +1818,7 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "remove-region", _("Remove"), sigc::mem_fun (*this, &Editor::remove_selected_regions));
 
 	/* Offer dialogue box to rename the first selected region */
-	reg_sens (_region_actions, "rename-region", _("Rename..."), sigc::mem_fun (*this, &Editor::rename_region));
+	reg_sens (_region_actions, "rename-region", _("Rename"), sigc::mem_fun (*this, &Editor::rename_region));
 
 	/* Raise all selected regions by 1 layer */
 	reg_sens (_region_actions, "raise-region", _("Raise"), sigc::mem_fun (*this, &Editor::raise_region));
