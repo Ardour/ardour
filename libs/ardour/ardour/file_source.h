@@ -110,8 +110,6 @@ protected:
 	uint16_t    _channel;
 	bool        _within_session;
 	std::string _origin;
-	bool        _open;
-
 };
 
 } // namespace ARDOUR

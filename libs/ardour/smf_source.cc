@@ -59,6 +59,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 	, MidiSource(s, path, flags)
 	, FileSource(s, DataType::MIDI, path, string(), flags)
 	, Evoral::SMF()
+	, _open (false)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
@@ -94,6 +95,7 @@ SMFSource::SMFSource (Session& s, const string& path)
 	, MidiSource(s, path, Source::Flag (0))
 	, FileSource(s, DataType::MIDI, path, string(), Source::Flag (0))
 	, Evoral::SMF()
+	, _open (false)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
@@ -125,6 +127,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 	: Source(s, node)
 	, MidiSource(s, node)
 	, FileSource(s, node, must_exist)
+	, _open (false)
 	, _last_ev_time_beats(0.0)
 	, _last_ev_time_frames(0)
 	, _smf_last_read_end (0)
@@ -174,7 +177,7 @@ SMFSource::SMFSource (Session& s, const XMLNode& node, bool must_exist)
 		return;
 	}
 
-	if (open(_path)) {
+	if (open (_path)) {
 		throw failed_constructor ();
 	}
 

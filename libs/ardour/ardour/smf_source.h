@@ -77,8 +77,16 @@ public:
 	void set_path (const std::string& newpath);
 
   private:
-	int open_for_write ();
+	bool _open;
+	Evoral::MusicalTime _last_ev_time_beats;
+	framepos_t          _last_ev_time_frames;
+	/** end time (start + duration) of last call to read_unlocked */
+	mutable framepos_t _smf_last_read_end;
+	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */
+	mutable framepos_t _smf_last_read_time;
 
+	int open_for_write ();
+	
 	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
 	                          framepos_t                     position,
 	                          framepos_t                     start,
@@ -89,12 +97,6 @@ public:
 	                           framepos_t                  position,
 	                           framecnt_t                  cnt);
 
-	Evoral::MusicalTime _last_ev_time_beats;
-	framepos_t          _last_ev_time_frames;
-	/** end time (start + duration) of last call to read_unlocked */
-	mutable framepos_t _smf_last_read_end;
-	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */
-	mutable framepos_t _smf_last_read_time;
 };
 
 }; /* namespace ARDOUR */

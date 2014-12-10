@@ -25,7 +25,6 @@
 #include "evoral/Event.hpp"
 #include "evoral/SMF.hpp"
 #include "evoral/midi_util.h"
-#include "pbd/file_manager.h"
 
 #ifdef COMPILER_MSVC
 extern double round(double x);
@@ -78,8 +77,7 @@ SMF::seek_to_track(int track)
 bool
 SMF::test(const std::string& path)
 {
-	PBD::StdioFileDescriptor d (path, "r");
-	FILE* f = d.allocate ();
+	FILE* f = fopen (path.c_str(), "r");
 	if (f == 0) {
 		return false;
 	}
@@ -110,8 +108,7 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 
 	_file_path = path;
 
-	PBD::StdioFileDescriptor d (_file_path, "r");
-	FILE* f = d.allocate ();
+	FILE* f = fopen (_file_path.c_str(), "r");
 	if (f == 0) {
 		return -1;
 	}
@@ -182,8 +179,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 	{
 		/* put a stub file on disk */
 
-		PBD::StdioFileDescriptor d (_file_path, "w+");
-		FILE* f = d.allocate ();
+		FILE* f = fopen (_file_path.c_str(), "w+");
 		if (f == 0) {
 			return -1;
 		}
@@ -396,8 +392,7 @@ void
 SMF::end_write() THROW_FILE_ERROR
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
-	PBD::StdioFileDescriptor d (_file_path, "w+");
-	FILE* f = d.allocate ();
+	FILE* f = fopen (_file_path.c_str(), "w+");
 	if (f == 0) {
 		throw FileError (_file_path);
 	}
