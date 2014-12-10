@@ -248,12 +248,6 @@ Session::get_track_statistics ()
 	g_atomic_int_set (&_playback_load, (uint32_t) floor (pworst * 100.0f));
 	g_atomic_int_set (&_capture_load, (uint32_t) floor (cworst * 100.0f));
 
-        if (cworst < 0.4 || pworst < 0.4) {
-                GTimeVal now;
-                g_get_current_time (&now);
-                std::cerr << g_time_val_to_iso8601 (&now) <<  " *** WARNING *** CAPTURE BUFFERS (WORST): " << cworst  << "PLAYBACK BUFFERS (WORST): " << pworst << endl;
-        }
-
 	if (actively_recording()) {
 		set_dirty();
 	}
