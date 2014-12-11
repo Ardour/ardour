@@ -708,7 +708,9 @@
       <Label style="generic_control"
              text="Pre Record Buffer"
              x="24"
-             y="235"/>
+             y="235"
+             visible="false"
+             noshowall="true"/>
       <Dropdown style="generic_dropdown"
                 id="pre_record_buffer_dropdown"
                 x="215"
@@ -717,7 +719,9 @@
                 height="20"
                 normalicon="preference_session_settings_dropdown"
                 activeicon="preference_session_settings_dropdown_active"
-                _prelighticon="preference_session_settings_dropdown_prelight">
+                _prelighticon="preference_session_settings_dropdown_prelight"
+                visible="false"
+                noshowall="true">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_control"
