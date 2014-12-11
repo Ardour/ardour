@@ -347,79 +347,93 @@ MixerBridgeView::strip_button_release_event (GdkEventButton *ev, MixerStrip *str
     }
     
 	if (ev->button == 1) {
-		if (_selection.selected (strip)) {
-			/* primary-click: toggle selection state of strip */
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				_selection.remove (strip);
-			} 
-		} else {
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				_selection.add (strip);
-			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
-
-				if (!_selection.selected((RouteUI*)strip)) {
-				
-					/* extend selection */
-					vector<MixerStrip*> tmp;
-					tmp.push_back (strip);
+        
+        // primary modifier usecase
+        if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) ) {
+            if (_selection.selected (strip) ){
+                _selection.remove (strip);
+            } else {
+                _selection.add (strip);
+            }
+            
+            return true;
+        }
+    
+        // cesondary modifier usecase (multi-selection)
+        if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier) )  {
+            if (!_selection.selected((RouteUI*)strip)) {
+                
+                /* extend selection */
+                vector<MixerStrip*> tmp;
+                tmp.push_back (strip);
+                
+                // get ORDERED list of routes from the session
+                // to acoomplish this - sort the list of routes as they are displayed
+                // the same sorter is used to pack strips for mixer and meter
+                SignalOrderRouteSorter sorter;
+                boost::shared_ptr<RouteList> routes = _session->get_routes();
+                RouteList sorted_routes(*routes);
+                sorted_routes.sort(sorter);
+                
+                bool accumulate = false;
+                bool passed_target = false;
+                for (RouteList::iterator i = sorted_routes.begin(); i != sorted_routes.end(); ++i) {
                     
-                    // get ORDERED list of routes from the session
-                    // to acoomplish this - sort the list of routes as they are displayed
-                    // the same sorter is used to pack strips for mixer and meter
-                    SignalOrderRouteSorter sorter;
-                    boost::shared_ptr<RouteList> routes = _session->get_routes();
-                    RouteList sorted_routes(*routes);
-                    sorted_routes.sort(sorter);
-
-                    bool accumulate = false;
-                    bool passed_target = false;
-					for (RouteList::iterator i = sorted_routes.begin(); i != sorted_routes.end(); ++i) {
+                    MixerStrip* mixer_strip = strip_by_route(*i);
+                    
+                    if (!mixer_strip) {
+                        // we do not create MixerStrip for master bus
+                        // it appears to be the last
+                        // in the right case we won't hit the end
+                        // because multi selection always happens between selected and slicked
+                        continue;
+                    }
+                    
+                    if (mixer_strip == strip) {
+                        /* hit clicked strip, start accumulating till we hit the first
+                         selected strip
+                         */
+                        if (accumulate) {
+                            /* done */
+                            break;
+                        } else {
+                            accumulate = true;
+                            passed_target = true;
+                        }
                         
-                        MixerStrip* mixer_strip = strip_by_route(*i);
-                        
-						if (mixer_strip == strip) {
-							/* hit clicked strip, start accumulating till we hit the first 
-							   selected strip
-							*/
-							if (accumulate) {
-								/* done */
-								break;
-							} else {
-								accumulate = true;
-                                passed_target = true;
-							}
+                    } else if (_selection.selected ((RouteUI*)mixer_strip) ) {
+                        /* hit selected strip. if currently accumulating others,
+                         we're done. if not accumulating others, start doing so.
+                         */
+                        if (accumulate) {
                             
-						} else if (_selection.selected ((RouteUI*)mixer_strip) ) {
-							/* hit selected strip. if currently accumulating others,
-							   we're done. if not accumulating others, start doing so.
-							*/
-							if (accumulate) {
-                                
-                                if (passed_target)
-                                    break;
-                                
-							} else {
-								accumulate = true;
-							}
-						} else {
-							if (accumulate) {
-								tmp.push_back (mixer_strip);
-							}
-						}
-					}
-
-					for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-						_selection.add (*i);
-					}
-				}
-
-			} else {
-				_selection.set (strip);
-			}
-		}
+                            if (passed_target)
+                                break;
+                            
+                        } else {
+                            accumulate = true;
+                        }
+                    } else {
+                        if (accumulate) {
+                            tmp.push_back (mixer_strip);
+                        }
+                    }
+                }
+                
+                for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
+                    _selection.add (*i);
+                }
+            }
+            
+            return true;
+        }
+        
+        // other cases
+        _selection.set (strip);
+        return true;
 	}
 
-	return true;
+	return false;
 }
 
 
