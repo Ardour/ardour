@@ -87,7 +87,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	static std::map<std::string, const XMLTree*> __xml_tree_cache;
 	std::list<Gtk::Object*> _orphan_objects;
 	const XMLTree* _xml_tree;
-	const std::string _scrip_file_name;
+	const std::string _script_file_name;
 	Gtk::Container& _root_container;
 
 	Gtk::Object* get_object (const char *id);
