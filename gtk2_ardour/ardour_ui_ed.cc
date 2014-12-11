@@ -611,15 +611,13 @@ ARDOUR_UI::install_actions ()
 	/* windows visibility actions */
 
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
-	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalMixer"), _("Maximise Mixer Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_space));
 	act = ActionManager::register_toggle_action (common_actions, X_("KeepTearoffs"), _("Show Toolbars"), mem_fun (*this, &ARDOUR_UI::toggle_keep_tearoffs));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	ActionManager::register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 
-	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
-	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
-	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meter Bridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
+	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_bridge_view));
+	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Meter Bridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -925,7 +923,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 void
 ARDOUR_UI::save_ardour_state ()
 {
-	if (!keyboard || !mixer || !editor /*|| !meterbridge*/) {
+	if (!keyboard || !editor) {
 		return;
 	}
 
@@ -947,12 +945,6 @@ ARDOUR_UI::save_ardour_state ()
 
 	XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
 
-	if (mixer && mixer->monitor_section()) {
-		XMLNode* t = new XMLNode (X_("monitor-section"));
-		mixer->monitor_section()->tearoff().add_state (*t);
-		tearoff_node->add_child_nocopy (*t);
-	}
-
 	if (editor && editor->mouse_mode_tearoff()) {
 		XMLNode* t = new XMLNode (X_("mouse-mode"));
 		editor->mouse_mode_tearoff ()->add_state (*t);
@@ -970,19 +962,14 @@ ARDOUR_UI::save_ardour_state ()
 	}
 
 	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
-	XMLNode& mnode (mixer->get_state());
-	//XMLNode& bnode (meterbridge->get_state());
 
 	if (_session) {
 		_session->add_instant_xml (enode);
-		_session->add_instant_xml (mnode);
-		//_session->add_instant_xml (bnode);
 		if (location_ui) {
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
 	} else {
 		Config->add_instant_xml (enode);
-		Config->add_instant_xml (mnode);
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}

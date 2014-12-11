@@ -184,7 +184,7 @@ MixerBridgeView::add_strips (RouteList& routes)
 			continue;
 		}
 
-		MixerStrip* strip = new MixerStrip (*ARDOUR_UI::instance()->the_mixer(), _session, route, _mixer_strip_script_name, _max_name_size);
+		MixerStrip* strip = new MixerStrip (_session, route, _mixer_strip_script_name, _max_name_size);
 		strip->signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &MixerBridgeView::strip_button_release_event), strip));
 		_strips [route] = strip;
 		strip->show();

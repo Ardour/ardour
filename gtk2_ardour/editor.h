@@ -2127,9 +2127,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	MouseCursors* _cursors;
 
-	void follow_mixer_selection ();
-	bool _following_mixer_selection;
-
 	void follow_mixer_bridge_view_selection ();
 	bool _following_mixer_bridge_view_selection;
 

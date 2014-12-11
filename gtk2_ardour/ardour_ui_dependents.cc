@@ -66,7 +66,6 @@ ARDOUR_UI::we_have_dependents ()
 	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
 
 	editor->track_mixer_selection ();
-	mixer->track_editor_selection ();
 }
 
 void
@@ -75,8 +74,6 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	BootMessage (_("Setup Editor"));
 	editor->set_session (s);
 	BootMessage (_("Setup Mixer"));
-	mixer->set_session (s);
-//	meterbridge->set_session (s);
 
 	/* its safe to do this now */
 

@@ -314,7 +314,6 @@ Editor::Editor ()
 	, _last_cut_copy_source_track (0)
 
 	, _region_selection_change_updates_region_list (true)
-	, _following_mixer_selection (false)
 	, _following_mixer_bridge_view_selection (false)
 	, _mixer_bridge_view ("mixer_bridge_view.xml", "mixer_strip.xml")
 	, _meter_bridge_view ("meter_bridge_view.xml", "meter_strip.xml")

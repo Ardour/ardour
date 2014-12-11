@@ -276,8 +276,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	if (hide_stuff) {
 		editor->hide ();
-		mixer->hide ();
-//		meterbridge->hide ();
 		theme_manager->hide ();
 		audio_port_matrix->hide();
 		midi_port_matrix->hide();
@@ -364,36 +362,7 @@ ARDOUR_UI::goto_editor_window ()
 }
 
 void
-ARDOUR_UI::goto_mixer_window ()
-{
-	Glib::RefPtr<Gdk::Window> win;
-	Glib::RefPtr<Gdk::Screen> screen;
-	
-	if (editor) {
-		win = editor->get_window ();
-	}
-
-	if (win) {
-		screen = win->get_screen();
-	} else {
-		screen = Gdk::Screen::get_default();
-	}
-	
-	if (g_getenv ("ARDOUR_LOVES_STUPID_TINY_SCREENS") == 0 && screen && screen->get_height() < 700) {
-		WavesMessageDialog msg ("",_("This screen is not tall enough to display the mixer window"));
-		msg.run ();
-		return;
-	}
-
-	mixer->show_window ();
-	mixer->present ();
-	/* mixer should now be on top */
-	WM::Manager::instance().set_transient_for (mixer);
-	_mixer_on_top = true;
-}
-
-void
-ARDOUR_UI::toggle_mixer_window ()
+ARDOUR_UI::toggle_mixer_bridge_view ()
 {
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
 	if (!act) {
@@ -442,85 +411,6 @@ ARDOUR_UI::toggle_meterbridge ()
 		editor->get_container ("edit_pane").show ();
 		editor->get_container ("compact_meter_bridge_home").show ();
 	}
-}
-
-void
-ARDOUR_UI::toggle_editor_mixer ()
-{
-	bool obscuring = false;
-	/* currently, if windows are on different
-	   screens then we do nothing; but in the
-	   future we may want to bring the window 
-	   to the front or something, so I'm leaving this 
-	   variable for future use
-	*/
-        bool same_screen = true; 
-	
-        if (editor && mixer) {
-
-		/* remeber: Screen != Monitor (Screen is a separately rendered
-		 * continuous geometry that make include 1 or more monitors.
-		 */
-		
-                if (editor->get_screen() != mixer->get_screen() && (mixer->get_screen() != 0) && (editor->get_screen() != 0)) {
-                        // different screens, so don't do anything
-                        same_screen = false;
-                } else {
-                        // they are on the same screen, see if they are obscuring each other
-
-                        gint ex, ey, ew, eh;
-                        gint mx, my, mw, mh;
-
-                        editor->get_position (ex, ey);
-                        editor->get_size (ew, eh);
-
-                        mixer->get_position (mx, my);
-                        mixer->get_size (mw, mh);
-
-                        GdkRectangle e;
-                        GdkRectangle m;
-                        GdkRectangle r;
-
-                        e.x = ex;
-                        e.y = ey;
-                        e.width = ew;
-                        e.height = eh;
-
-                        m.x = mx;
-                        m.y = my;
-                        m.width = mw;
-                        m.height = mh;
-
-        		if (gdk_rectangle_intersect (&e, &m, &r)) {
-                                obscuring = true;
-                        }
-                }
-        }
-
-        if (mixer && !mixer->not_visible() && mixer->property_has_toplevel_focus()) {
-                if (obscuring && same_screen) {
-                        goto_editor_window();
-                }
-        } else if (editor && !editor->not_visible() && editor->property_has_toplevel_focus()) {
-                if (obscuring && same_screen) {
-                        goto_mixer_window();
-                }
-        } else if (mixer && mixer->not_visible()) {
-                if (obscuring && same_screen) {
-                        goto_mixer_window ();
-                }
-        } else if (editor && editor->not_visible()) {
-                if (obscuring && same_screen) {
-                        goto_editor_window ();
-                }
-        } else if (obscuring && same_screen) {
-                //it's unclear what to do here, so just do the opposite of what we did last time  (old behavior)
-                if (_mixer_on_top) {
-			goto_editor_window ();
-		} else {
-			goto_mixer_window ();
-		}
-        }
 }
 
 void
@@ -595,16 +485,7 @@ ARDOUR_UI::main_window_state_event_handler (GdkEventWindowState* ev, bool window
 			}
 		}
 
-	} else {
-
-		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
-		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
-			if (big_clock_window) {
-				big_clock_window->set_transient_for (*mixer);
-			}
-		}
 	}
-
 	return false;
 }
 
@@ -623,17 +504,3 @@ ARDOUR_UI::editor_meter_peak_button_release (GdkEventButton* ev)
 	return true;
 }
 
-void
-ARDOUR_UI::toggle_mixer_space()
-{
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMaximalMixer");
-
-	if (act) {
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		if (tact->get_active()) {
-			mixer->maximise_mixer_space ();
-		} else {
-			mixer->restore_mixer_space ();
-		}
-	}
-}

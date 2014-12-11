@@ -108,6 +108,8 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	bool is_midi_track() const;
 	bool has_audio_outputs () const;
 
+    static const char* XMLColor[15];
+
 	boost::shared_ptr<ARDOUR::Route> route() const { return _route; }
 	ARDOUR::RouteGroup* route_group() const;
 

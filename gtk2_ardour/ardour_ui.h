@@ -106,7 +106,6 @@ class AudioClock;
 class ButtonJoiner;
 class ConnectionEditor;
 class MainClock;
-class Mixer_UI;
 class PublicEditor;
 class RCOptionEditor;
 class RouteParams_UI;
@@ -180,11 +179,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	static UIConfiguration *config () { return ui_config; }
 
 	PublicEditor&	  the_editor(){return *editor;}
-	Mixer_UI* the_mixer() { return mixer; }
 
 	void new_midi_tracer_window ();
 	void toggle_editing_space();
-	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 
 	Gtk::Tooltips& tooltips() { return _tooltips; }
@@ -393,10 +390,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void minimize_window();
     void maximize_window();
 	void goto_editor_window ();
-	void goto_mixer_window ();
-	void toggle_mixer_window ();
+	void toggle_mixer_bridge_view ();
 	void toggle_meterbridge ();
-    void toggle_editor_mixer ();
 
 	int  setup_windows ();
 	void setup_transport ();
@@ -651,44 +646,39 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void rename_session ();
 	void setup_order_hint ();
 
-	Mixer_UI   *mixer;
-	int         create_mixer ();
-
 	PublicEditor     *editor;
 	int         create_editor ();
 
-	//Meterbridge  *meterbridge;
-	int         create_meterbridge ();
-        /* Dialogs that can be created via new<T> */
+    /* Dialogs that can be created via new<T> */
 
-        WM::Proxy<SpeakerDialog> speaker_config_window;
-        WM::Proxy<ThemeManager> theme_manager;
-        WM::Proxy<KeyEditor> key_editor;
-        WM::Proxy<RCOptionEditor> rc_option_editor;
-        boost::shared_ptr<AddTracksDialog> _add_tracks_dialog;
-        WM::Proxy<About> about;
-        WM::Proxy<LocationUIWindow> location_ui;
-        WM::Proxy<RouteParams_UI> route_params;
-        WM::Proxy<TracksControlPanel> tracks_control_panel;
-        WM::Proxy<SessionLockDialog> session_lock_dialog;
-        WM::Proxy<MarkerInspectorDialog> marker_inspector_dialog;
+    WM::Proxy<SpeakerDialog> speaker_config_window;
+    WM::Proxy<ThemeManager> theme_manager;
+    WM::Proxy<KeyEditor> key_editor;
+    WM::Proxy<RCOptionEditor> rc_option_editor;
+    boost::shared_ptr<AddTracksDialog> _add_tracks_dialog;
+    WM::Proxy<About> about;
+    WM::Proxy<LocationUIWindow> location_ui;
+    WM::Proxy<RouteParams_UI> route_params;
+    WM::Proxy<TracksControlPanel> tracks_control_panel;
+    WM::Proxy<SessionLockDialog> session_lock_dialog;
+    WM::Proxy<MarkerInspectorDialog> marker_inspector_dialog;
     
-        /* Windows/Dialogs that require a creator method */
+    /* Windows/Dialogs that require a creator method */
 
-        WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
-        WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
-        WM::ProxyWithConstructor<BundleManager> bundle_manager;
-        WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
-        WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
-        WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
+    WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
+    WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
+    WM::ProxyWithConstructor<BundleManager> bundle_manager;
+    WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
+    WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
+    WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 
-        /* creator methods */
+    /* creator methods */
 
-        SessionOptionEditor*    create_session_option_editor ();
-        BundleManager*          create_bundle_manager ();
-        AddVideoDialog*         create_add_video_dialog ();
-        BigClockWindow*         create_big_clock_window(); 
-        GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
+    SessionOptionEditor*    create_session_option_editor ();
+    BundleManager*          create_bundle_manager ();
+    AddVideoDialog*         create_add_video_dialog ();
+    BigClockWindow*         create_big_clock_window(); 
+    GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 
 	static UIConfiguration *ui_config;
 

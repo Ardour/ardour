@@ -65,6 +65,10 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 
+const char* RouteUI::XMLColor[15] = { "#9a2f16", "#9a4618", "#9a5f1a", "#f48e16", "#f4ad16",
+									  "#4b7c0d", "#1c9a4a", "#1c9b7f", "#1d9b9b", "#197f9a",
+									  "#4937a3", "#6f2ba1", "#7e1a99", "#9a177e", "#242424"};
+
 Gtk::TargetEntry RouteUI::header_target("HEADER", Gtk::TARGET_SAME_APP | Gtk::TARGET_OTHER_WIDGET,ROUTE_HEADER);
 
 uint32_t RouteUI::_max_invert_buttons = 3;

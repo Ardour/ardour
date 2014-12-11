@@ -69,7 +69,6 @@ namespace Gtk {
 	class Style;
 }
 
-class Mixer_UI;
 class IOSelectorWindow;
 class MotionController;
 class RouteGroupMenu;
@@ -78,8 +77,8 @@ class ArdourWindow;
 class MixerStrip : public RouteUI
 {
   public:
-	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, const std::string& layout_script_file, size_t max_name_size = 0);
-	MixerStrip (Mixer_UI&, ARDOUR::Session*, const std::string& layout_script_file, size_t max_name_size = 0);
+	MixerStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, const std::string& layout_script_file, size_t max_name_size = 0);
+	MixerStrip (ARDOUR::Session*, const std::string& layout_script_file, size_t max_name_size = 0);
 	~MixerStrip ();
 
 	GainMeter&      gain_meter()      { return gpm; }
@@ -126,12 +125,10 @@ class MixerStrip : public RouteUI
 	void toggle_processors ();
 	void ab_plugins ();
 
-    static const char* XMLColor[15];
-    
     void route_rec_enable_changed();
+	void route_color_changed ();
     
   protected:
-	friend class Mixer_UI;
 	void set_packed (bool yn);
 	bool packed () { return _packed; }
 
@@ -139,9 +136,10 @@ class MixerStrip : public RouteUI
 	void set_stuff_from_route ();
     
     PublicEditor& _editor;
+
+    PBD::ScopedConnectionList _input_output_channels_update;
     
   private:
-	Mixer_UI& _mixer;
 
 	void init ();
 
@@ -152,7 +150,7 @@ class MixerStrip : public RouteUI
     size_t _max_name_size;
 
 	Gtk::EventBox&       panners_home;
-	ProcessorBox processor_box;
+	//ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
 
@@ -186,22 +184,9 @@ class MixerStrip : public RouteUI
  	bool name_entry_focus_out (GdkEventFocus *ev);
     void name_entry_changed ();
     
-	WavesButton&   color_palette_button;
-	Gtk::Container& color_palette_home;
-	Gtk::Container& color_buttons_home;
-
-	WavesButton&   info_panel_button;
-	Gtk::Container& info_panel_home;
-	Gtk::Label& input_info_label;
-	Gtk::Label& output_info_label;
-    
-    void update_inspector_info_panel ();
-    PBD::ScopedConnectionList _input_output_channels_update;
-
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
 	WavesButton&   _comment_button;
-	WavesButton* color_button[15];
 
 	void comment_editor_done_editing ();
 	void setup_comment_editor ();
@@ -265,7 +250,6 @@ class MixerStrip : public RouteUI
 
 	Gtk::Style *passthru_style;
 
-	void route_color_changed ();
 	void show_passthru_color ();
 
 	void property_changed (const PBD::PropertyChange&);
@@ -319,9 +303,6 @@ class MixerStrip : public RouteUI
 	PBD::ScopedConnection _level_meter_connection;
 
 	std::string meter_point_string (ARDOUR::MeterPoint);
-	void color_button_clicked (WavesButton *button);
-	void color_palette_button_clicked (WavesButton *button);
-	void info_panel_button_clicked (WavesButton *button);
     
     bool deletion_in_progress;
 };

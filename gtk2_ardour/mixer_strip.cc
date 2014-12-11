@@ -75,10 +75,6 @@
 #include "i18n.h"
 #include "dbg_msg.h"
 
-#ifdef _WIN32
-#define random() rand()
-#endif
-
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
@@ -89,17 +85,13 @@ using namespace ArdourMeter;
 
 int MixerStrip::scrollbar_height = 0;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
-const char* MixerStrip::XMLColor[15] = { "#9a2f16", "#9a4618", "#9a5f1a", "#f48e16", "#f4ad16",
-										 "#4b7c0d", "#1c9a4a", "#1c9b7f", "#1d9b9b", "#197f9a",
-										 "#4937a3", "#6f2ba1", "#7e1a99", "#9a177e", "#242424"};
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_script_file, size_t max_name_size)
+MixerStrip::MixerStrip (Session* sess, const std::string& layout_script_file, size_t max_name_size)
 	: AxisView(sess)
 	, RouteUI (sess, layout_script_file)
     , _max_name_size (max_name_size)
-	, _mixer(mx)
 	, _mixer_owned (xml_property(*xml_tree()->root(), "selfdestruct", true))
-	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))
+//	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))
 	, gpm (sess, xml_property(*xml_tree()->root(), "gainmeterscript", "default_gain_meter.xml"))
 	, panners (sess)
 	, _visibility (X_("mixer-strip-visibility"))
@@ -113,15 +105,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, const std::string& layout_s
     , name_button (get_waves_button ("name_button"))
     , _name_entry (get_entry("name_entry"))
     , _name_entry_eventbox (get_event_box("name_entry_eventbox"))
-	, color_palette_button (get_waves_button ("color_palette_button"))
-	, color_palette_home (get_container ("color_palette_home"))
-	, color_buttons_home (get_container ("color_buttons_home"))
 	, group_button (get_waves_button ("group_button"))
 	, panners_home (get_event_box ("panners_home"))
-    , info_panel_button (get_waves_button ("info_panel_button"))
-	, info_panel_home (get_container ("info_panel_home"))
-	, input_info_label (get_label ("input_info_label"))
-	, output_info_label (get_label ("output_info_label"))
 {
 	init ();
 
@@ -176,13 +161,12 @@ namespace {
     }
 }
     
-MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt, const std::string& layout_script_file, size_t max_name_size)
+MixerStrip::MixerStrip (Session* sess, boost::shared_ptr<Route> rt, const std::string& layout_script_file, size_t max_name_size)
 	: AxisView(sess)
 	, RouteUI (sess, layout_script_file)
     , _max_name_size(max_name_size)
-	, _mixer(mx)
 	, _mixer_owned (xml_property(*xml_tree()->root(), "selfdestruct", true))
-	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))
+//	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, xml_property(*xml_tree()->root(), "selfdestruct", true))
 	, gpm (sess, xml_property(*xml_tree()->root(), "gainmeterscript", "default_gain_meter.xml"))
 	, panners (sess)
 	, _visibility (X_("mixer-strip-visibility"))
@@ -196,15 +180,8 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
     , name_button (get_waves_button ("name_button"))
     , _name_entry (get_entry ("name_entry"))
     , _name_entry_eventbox (get_event_box("name_entry_eventbox"))
-	, color_palette_button (get_waves_button ("color_palette_button"))
-	, color_palette_home (get_container ("color_palette_home"))
-	, color_buttons_home (get_container ("color_buttons_home"))
 	, group_button (get_waves_button ("group_button"))
 	, panners_home (get_event_box ("panners_home"))
-    , info_panel_button (get_waves_button ("info_panel_button"))
-	, info_panel_home (get_container ("info_panel_home"))
-	, input_info_label (get_label ("input_info_label"))
-	, output_info_label (get_label ("output_info_label"))
 {
 	init ();
 	set_route (rt);
@@ -214,29 +191,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 void
 MixerStrip::init ()
 {
-	color_button[0] = &get_waves_button ("color_button_1");
-	color_button[1] = &get_waves_button ("color_button_2");
-	color_button[2] = &get_waves_button ("color_button_3");
-	color_button[3] = &get_waves_button ("color_button_4");
-	color_button[4] = &get_waves_button ("color_button_5");
-	color_button[5] = &get_waves_button ("color_button_6");
-	color_button[6] = &get_waves_button ("color_button_7");
-	color_button[7] = &get_waves_button ("color_button_8");
-	color_button[8] = &get_waves_button ("color_button_9");
-	color_button[9] = &get_waves_button ("color_button_10");
-	color_button[10] = &get_waves_button ("color_button_11");
-	color_button[11] = &get_waves_button ("color_button_12");
-	color_button[12] = &get_waves_button ("color_button_13");
-	color_button[13] = &get_waves_button ("color_button_14");
-	color_button[14] = &get_waves_button ("color_button_15");
-
-	color_palette_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::color_palette_button_clicked));
-	info_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::info_panel_button_clicked));
-
-	for (size_t i=0; i<(sizeof(color_button)/sizeof(color_button[0])); i++) {
-		color_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &MixerStrip::color_button_clicked));
-	}
-
 	input_selector = 0;
 	output_selector = 0;
 	group_menu = 0;
@@ -265,8 +219,6 @@ MixerStrip::init ()
 	_session->engine().Running.connect (*this, invalidator (*this), boost::bind (&MixerStrip::engine_running, this), gui_context());
     _session->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&MixerStrip::on_record_state_changed, this), gui_context());
 
-    _session->session_routes_reconnected.connect(_input_output_channels_update, invalidator (*this), boost::bind (&MixerStrip::update_inspector_info_panel, this), gui_context());
-    
 	/* ditto for this button and busses */
 
 	name_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::name_button_button_press), false);
@@ -537,7 +489,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	/* ProcessorBox needs access to _route so that it can read
 	   GUI object state.
 	*/
-	processor_box.set_route (rt);
+//	processor_box.set_route (rt);
 
 	/* map the current state */
 
@@ -560,20 +512,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	
 	if (route()->is_master()) {
 		master_mute_button.show ();
-		//get_container ("track_buttons_home").hide ();
-        color_buttons_home.set_visible (false);
-        color_palette_button.set_visible (false);
-        color_palette_button.set_active (false);
-		//mute_button.hide ();
-		//solo_button.hide ();
-		//rec_enable_button.hide ();
 	} else {
 		master_mute_button.hide ();
-        color_palette_button.set_visible (true);
-        color_palette_home.set_visible (true);
-		//mute_button.show ();
-		//solo_button.show ();
-		//rec_enable_button.show ();
 	}
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
@@ -662,7 +602,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	add_events (Gdk::BUTTON_RELEASE_MASK);
 
-	processor_box.show ();
+//	processor_box.show ();
 
 	if (!route()->is_master() && !route()->is_monitor()) {
 		/* we don't allow master or control routes to be hidden */
@@ -1450,16 +1390,9 @@ void
 MixerStrip::route_color_changed ()
 {
 	Gdk::Color new_color = color();
-	for (size_t i=0; i<(sizeof(color_button)/sizeof(color_button[0])); i++) {
-		color_button[i]->set_active (new_color == Gdk::Color (XMLColor[i]));
-	}
-	
 	name_button.modify_bg (Gtk::STATE_NORMAL, new_color);
 	name_button.modify_bg (Gtk::STATE_ACTIVE, new_color);
 	name_button.modify_bg (Gtk::STATE_PRELIGHT, new_color);
-	color_palette_home.modify_bg (STATE_NORMAL, new_color);
-	color_palette_home.modify_bg (STATE_ACTIVE, new_color);
-	color_palette_home.queue_draw ();
 	reset_strip_style ();
 }
 
@@ -1562,11 +1495,11 @@ MixerStrip::map_frozen ()
 	if (at) {
 		switch (at->freeze_state()) {
 		case AudioTrack::Frozen:
-			processor_box.set_sensitive (false);
+//			processor_box.set_sensitive (false);
 			hide_redirect_editors ();
 			break;
 		default:
-			processor_box.set_sensitive (true);
+//			processor_box.set_sensitive (true);
 			// XXX need some way, maybe, to retoggle redirect editors
 			break;
 		}
@@ -1587,11 +1520,11 @@ MixerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 		return;
 	}
 
-	Gtk::Window* w = processor_box.get_processor_ui (processor);
+	//Gtk::Window* w = processor_box.get_processor_ui (processor);
 
-	if (w) {
-		w->hide ();
-	}
+	//if (w) {
+	//	w->hide ();
+	//}
 }
 
 void
@@ -1848,13 +1781,14 @@ MixerStrip::set_button_names ()
 PluginSelector*
 MixerStrip::plugin_selector()
 {
-	return _mixer.plugin_selector();
+	//return _mixer.plugin_selector();
+	return 0;
 }
 
 void
 MixerStrip::hide_things ()
 {
-	processor_box.hide_things ();
+//	processor_box.hide_things ();
 }
 
 bool
@@ -1905,7 +1839,6 @@ MixerStrip::parameter_changed (string p)
 		   our VisibilityGroup to reflect these changes in our widgets.
 		*/
 		_visibility.set_state (Config->get_mixer_strip_visibility ());
-        update_inspector_info_panel();
 	}
 }
 
@@ -1945,49 +1878,49 @@ MixerStrip::route_active_changed ()
 void
 MixerStrip::copy_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsCopy);
+//	processor_box.processor_operation (ProcessorBox::ProcessorsCopy);
 }
 
 void
 MixerStrip::cut_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsCut);
+//	processor_box.processor_operation (ProcessorBox::ProcessorsCut);
 }
 
 void
 MixerStrip::paste_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsPaste);
+//	processor_box.processor_operation (ProcessorBox::ProcessorsPaste);
 }
 
 void
 MixerStrip::select_all_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsSelectAll);
+//	processor_box.processor_operation (ProcessorBox::ProcessorsSelectAll);
 }
 
 void
 MixerStrip::deselect_all_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsSelectNone);
+//	processor_box.processor_operation (ProcessorBox::ProcessorsSelectNone);
 }
 
 bool
 MixerStrip::delete_processors ()
 {
-	return processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
+//	return processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
 }
 
 void
 MixerStrip::toggle_processors ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsToggleActive);
+//	processor_box.processor_operation (ProcessorBox::ProcessorsToggleActive);
 }
 
 void
 MixerStrip::ab_plugins ()
 {
-	processor_box.processor_operation (ProcessorBox::ProcessorsAB);
+//	processor_box.processor_operation (ProcessorBox::ProcessorsAB);
 }
 
 void
@@ -2024,124 +1957,4 @@ MixerStrip::set_meter_type (MeterType t)
 {
 	if (_suspend_menu_callbacks) return;
 	gpm.set_type (t);
-}
-
-void
-MixerStrip::color_palette_button_clicked (WavesButton *button)
-{
-	color_buttons_home.set_visible (!color_buttons_home.is_visible ());
-	color_palette_button.set_active (color_buttons_home.is_visible ());
-}
-
-void
-MixerStrip::color_button_clicked (WavesButton *button)
-{
-
-	button->set_active (true);
-	for (size_t i=0; i<(sizeof(color_button)/sizeof(color_button[0])); i++) {
-		if (button != color_button[i]) {
-			color_button[i]->set_active (false);
-		} else {
-			TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
-            track_selection.foreach_route_ui (boost::bind (&RouteUI::set_color, _1, Gdk::Color (XMLColor[i])));
-		}
-	}
-}
-
-void
-MixerStrip::update_inspector_info_panel ()
-{
-    if( !_route )
-        return;
-    
-    // Input label
-    string input_text;
-    
-    AutoConnectOption auto_connection_options;
-    auto_connection_options = Config->get_output_auto_connect();
-    
-	PortSet& in_ports (_route->input()->ports() );
-    
-    string track_name = _route->name();
-    
-    for (PortSet::iterator i = in_ports.begin(); i != in_ports.end(); ++i)
-    {        
-        vector<string> connections_string;
-        i->get_connections(connections_string);
-
-        for(unsigned int j = 0; j < connections_string.size(); ++j)
-        {
-            // delete "/audio_out 1"
-            remove_pattern_from_string(connections_string[j], "/audio_out 1", connections_string[j]);
-           
-            // Do not show the same inputs. For example Input for Master Bus can be "Track 1/audio_out 1", "Track 1/audio_out 2". We leave only one "Track 1".
-            int pos = connections_string[j].find("/audio_out 2");
-            if( pos != string::npos )
-                continue;
-            
-            remove_pattern_from_string(connections_string[j], "system:capture:", connections_string[j]);
-            remove_pattern_from_string(connections_string[j], "ardour:", connections_string[j]);
-                        
-            input_text += "\n" + connections_string[j];
-        }
-    }
-    
-    input_text = "In" + input_text;
-    input_info_label.set_text (input_text);
-    input_info_label.set_tooltip_text (input_text);
-    
-    // Output label
-    string output_text = "";
-    PortSet& out_ports (_route->output()->ports() );
-    
-    if( track_name != "master")
-    {
-        // if multi out mode
-        if( auto_connection_options == AutoConnectPhysical )
-        {
-            for (PortSet::iterator i = out_ports.begin(); i != out_ports.end(); ++i)
-            {
-                vector<string> connections_string;
-                i->get_connections(connections_string);
-                
-                for(unsigned int j = 0; j < connections_string.size(); ++j)
-                {
-                    if( connections_string[j].find("system:playback:") != string::npos )
-                        connections_string[j].erase(0, 16);
-                    
-                    output_text += "\n" + connections_string[j];
-                }
-            }
-        } else { // stereo out mode
-            output_text = "\nMaster Bus";
-        }
-        
-    } else {
-        
-        for (PortSet::iterator i = out_ports.begin(); i != out_ports.end(); ++i)
-        {
-            vector<string> connections_string;
-            i->get_connections(connections_string);
-            
-            for(unsigned int j = 0; j < connections_string.size(); ++j)
-            {
-                if( connections_string[j].find("system:playback:") != string::npos )
-                    connections_string[j].erase(0, 16);
-                
-                output_text += "\n" + connections_string[j];
-            }
-        }
-
-    }
-    
-    output_text = "Out" + output_text;
-    output_info_label.set_text(output_text);
-    output_info_label.set_tooltip_text(output_text);
-}
-
-void
-MixerStrip::info_panel_button_clicked (WavesButton *button)
-{
-	info_panel_home.set_visible (!info_panel_home.is_visible ());
-	info_panel_button.set_active (info_panel_home.is_visible ());
 }

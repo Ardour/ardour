@@ -93,34 +93,6 @@
   <Button id="midi_input_enable_button" ui.orphan="true"/>
   <Button id="group_button" text="Grp" ui.orphan="true"/>
   <HBox id="invert_button_box" ui.orphan="true"/>
-  <button id="color_palette_button" ui.orphan="true"/>
-  <button id="color_button_1" ui.orphan="true"/>
-  <button id="color_button_2" ui.orphan="true"/>
-  <button id="color_button_3" ui.orphan="true"/>
-  <button id="color_button_4" ui.orphan="true"/>
-  <button id="color_button_5" ui.orphan="true"/>
-  <button id="color_button_6" ui.orphan="true"/>
-  <button id="color_button_7" ui.orphan="true"/>
-  <button id="color_button_8" ui.orphan="true"/>
-  <button id="color_button_9" ui.orphan="true"/>
-  <button id="color_button_10" ui.orphan="true"/>
-  <button id="color_button_11" ui.orphan="true"/>
-  <button id="color_button_12" ui.orphan="true"/>
-  <button id="color_button_13" ui.orphan="true"/>
-  <button id="color_button_14" ui.orphan="true"/>
-  <button id="color_button_15" ui.orphan="true"/>
   <button id="master_mute_button" ui.orphan="true"/>
   <VBox id="track_buttons_home" ui.orphan="true"/>
-  <EventBox id="color_palette_home" ui.orphan="true"/>
-  <VBox id="color_buttons_home" ui.orphan="true"/>
-  <Button id="info_panel_button" ui.orphan="true"/>
-  <Label id="input_info_label"
-         winfont="Arial 8"
-         macfont="Helvetica 8"
-         ui.orphan="true"/>
-  <Label id="output_info_label" 
-         winfont="Arial 8"
-         macfont="Helvetica 8"
-         ui.orphan="true"/>
-  <VBox id="info_panel_home" ui.orphan="true"/>
 </RouteUI>

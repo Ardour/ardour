@@ -212,18 +212,17 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, _feedback_exists (false)
-        , _dsp_load_adjustment (0)
-        , _hd_load_adjustment (0)
-        , _dsp_load_label (0)
-        , _hd_load_label (0)
-        , _hd_remained_time_label (0)
+    , _dsp_load_adjustment (0)
+    , _hd_load_adjustment (0)
+    , _dsp_load_label (0)
+    , _hd_load_label (0)
+    , _hd_remained_time_label (0)
 	, editor (0)
-	, mixer (0)
-        , _tracks_button (0)
-        , _bit_depth_button (0)
-        , _frame_rate_button (0)
-        , _sample_rate_dropdown (0)
-        , splash (0)
+    , _tracks_button (0)
+    , _bit_depth_button (0)
+    , _frame_rate_button (0)
+    , _sample_rate_dropdown (0)
+    , splash (0)
 {
 	show_splash ();
 	Gtkmm2ext::init(localedir);
@@ -3409,28 +3408,16 @@ ARDOUR_UI::setup_order_hint ()
 	  we want the new routes to have their order keys set starting from 
 	  the highest order key in the selection + 1 (if available).
 	*/
-    if (_add_tracks_dialog->get_transient_for () == mixer->get_toplevel()) {
-        for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
-			if ((*s)->route()->order_key() > order_hint) {
-				order_hint = (*s)->route()->order_key();
-			}
-		}
 
-		if (!mixer->selection().routes.empty()) {
-			order_hint++;
+	for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
+		RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
+		if (tav && tav->route() && tav->route()->order_key() > order_hint) {
+			order_hint = tav->route()->order_key();
 		}
+	}
 
-	} else {
-		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
-			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
-			if (tav && tav->route() && tav->route()->order_key() > order_hint) {
-				order_hint = tav->route()->order_key();
-			}
-		}
-
-		if (!editor->get_selection().tracks.empty()) {
-			order_hint++;
-		}
+	if (!editor->get_selection().tracks.empty()) {
+		order_hint++;
 	}
 
 	_session->set_order_hint (order_hint);
