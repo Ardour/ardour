@@ -204,4 +204,14 @@ MouseCursors::set_cursor_set (const std::string& name)
 	midi_resize = new Cursor (SIZING);
 	midi_erase = new Cursor (DRAPED_BOX);
 	up_down = new Cursor (SB_V_DOUBLE_ARROW);
+
+
+	{
+		char pix[4] = { 0, 0, 0, 0 };
+		RefPtr<Bitmap> bits = Bitmap::create (pix, 2, 2);
+		Color c;
+		_invalid = new Cursor (bits, bits, c, c, 0, 0);
+	}
+
+
 }
