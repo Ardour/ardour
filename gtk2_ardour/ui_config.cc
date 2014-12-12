@@ -634,10 +634,14 @@ UIConfiguration::base_color_by_name (const std::string& name) const
 }
 
 ArdourCanvas::Color
-UIConfiguration::color (const std::string& name) const
+UIConfiguration::color (const std::string& name, bool* failed) const
 {
 	map<string,string>::const_iterator e = color_aliases.find (name);
 
+	if (failed) {
+		*failed = false;
+	}
+	
 	if (e != color_aliases.end ()) {
 		map<string,RelativeHSV>::const_iterator rc = relative_colors.find (e->second);
 		if (rc != relative_colors.end()) {
@@ -652,6 +656,10 @@ UIConfiguration::color (const std::string& name) const
 	}
 	
 	cerr << string_compose (_("Color %1 not found"), name) << endl;
+
+	if (failed) {
+		*failed = true;
+	}
 	
 	return rgba_to_color ((g_random_int()%256)/255.0,
 			      (g_random_int()%256)/255.0,

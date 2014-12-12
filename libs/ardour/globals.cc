@@ -214,7 +214,12 @@ lotsa_files_please ()
 
 	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
 
+#ifdef __APPLE__
+                /* See the COMPATIBILITY note on the Apple setrlimit() man page */
+		rl.rlim_cur = min ((rlim_t) OPEN_MAX, rl.rlim_max);
+#else
 		rl.rlim_cur = rl.rlim_max;
+#endif
 
 		if (setrlimit (RLIMIT_NOFILE, &rl) != 0) {
 			if (rl.rlim_cur == RLIM_INFINITY) {

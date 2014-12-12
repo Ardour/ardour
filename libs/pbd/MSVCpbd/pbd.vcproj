@@ -335,10 +335,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\file_manager.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\file_utils.cc"
 				>
 			</File>
@@ -420,10 +416,6 @@
 			</File>
 			<File
 				RelativePath="..\signals.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\sndfile_manager.cc"
 				>
 			</File>
 			<File

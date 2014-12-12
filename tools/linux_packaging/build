@@ -547,8 +547,8 @@ cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Etc
 cp ../../system_config $Etc/system_config
 cp ../../gtk2_ardour/dark.colors $Etc
 cp ../../instant.xml $Shared/instant.xml
-cp ../../gtk2_ardour/step_editing.bindings $Shared
-cp ../../gtk2_ardour/mixer.bindings $Shared
+cp ../../gtk2_ardour/step_editing.bindings $Etc
+cp ../../gtk2_ardour/mixer.bindings $Etc
 cp -r ../../gtk2_ardour/icons $Shared
 cp -r ../../gtk2_ardour/pixmaps $Shared
 cp -r ../../gtk2_ardour/splash.png $Shared

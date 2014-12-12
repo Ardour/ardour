@@ -299,6 +299,7 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "set-loop-from-edit-range", _("Set Loop from Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_edit_range), false));
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Edit Range"), sigc::mem_fun(*this, &Editor::set_punch_from_edit_range));
+	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Edit Range"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
 
 	/* this is a duplicated action so that the main menu can use a different label */
 	reg_sens (editor_actions, "main-menu-play-selected-regions", _("Play Selected Regions"), sigc::mem_fun (*this, &Editor::play_selected_region));

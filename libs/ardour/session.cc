@@ -1247,6 +1247,25 @@ Session::set_auto_punch_location (Location* location)
 }
 
 void
+Session::set_session_extents (framepos_t start, framepos_t end)
+{
+	Location* existing;
+	if ((existing = _locations->session_range_location()) == 0) {
+		//if there is no existing session, we need to make a new session location  (should never happen)
+		existing = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
+	}
+	
+	if (end <= start) {
+		error << _("Session: you can't use that location for session start/end)") << endmsg;
+		return;
+	}
+
+	existing->set( start, end );
+	
+	set_dirty();
+}
+
+void
 Session::set_auto_loop_location (Location* location)
 {
 	Location* existing;

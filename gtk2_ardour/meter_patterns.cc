@@ -236,10 +236,12 @@ static void set_bg_color (Gtk::Widget& w, cairo_t* cr, MeterType type) {
 		case MeterIEC1NOR:
 		case MeterIEC2BBC:
 		case MeterIEC2EBU:
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip ppm bg"), r, g, b, a);
+			break;
 		case MeterK12:
 		case MeterK14:
 		case MeterK20:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip ppm bg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip dpm bg"), r, g, b, a);
 			break;
 		default:
 			{
@@ -258,10 +260,15 @@ static void set_fg_color(Gtk::Widget&, MeterType type, Gdk::Color * c) {
 	switch(type) {
 		case MeterVU:
 			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip vu fg"), r, g, b, a);
-
+			break;
+		case MeterIEC1DIN:
+		case MeterIEC1NOR:
+		case MeterIEC2BBC:
+		case MeterIEC2EBU:
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip ppm fg"), r, g, b, a);
 			break;
 		default:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip vu fg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip dpm fg"), r, g, b, a);
 			break;
 	}
 	c->set_rgb_p (r, g, b);

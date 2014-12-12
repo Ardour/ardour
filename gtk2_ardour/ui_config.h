@@ -83,7 +83,7 @@ class UIConfiguration : public PBD::Stateful
 	ArdourCanvas::Color quantized (ArdourCanvas::Color) const;
 
 	ArdourCanvas::Color base_color_by_name (const std::string&) const;
-	ArdourCanvas::Color color (const std::string&) const;
+	ArdourCanvas::Color color (const std::string&, bool* failed = 0) const;
 	ArdourCanvas::HSV  color_hsv (const std::string&) const;
 
         sigc::signal<void,std::string> ParameterChanged;

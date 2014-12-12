@@ -50,7 +50,6 @@
 #endif
 
 #include "pbd/compose.h"
-#include "pbd/file_manager.h"
 #include "pbd/file_utils.h"
 #include "pbd/debug.h"
 #include "pbd/error.h"
@@ -282,11 +281,9 @@ copy_file(const std::string & from_path, const std::string & to_path)
 {
 	if (!Glib::file_test (from_path, Glib::FILE_TEST_EXISTS)) return false;
 
-	FdFileDescriptor from_file(from_path, false, 0444);
-	FdFileDescriptor to_file(to_path, true, 0666);
+	int fd_from (::open (from_path.c_str(), O_RDONLY));
+	int fd_to (::open (to_path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 
-	int fd_from = from_file.allocate ();
-	int fd_to = to_file.allocate ();
 	char buf[4096]; // BUFSIZ  ??
 	ssize_t nread;
 

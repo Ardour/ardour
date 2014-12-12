@@ -1840,6 +1840,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Set Loop from Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), false)));
 	edit_items.push_back (MenuElem (_("Set Punch from Range"), sigc::mem_fun(*this, &Editor::set_punch_from_selection)));
+	edit_items.push_back (MenuElem (_("Set Session Start/End from Range"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Add Range Markers"), sigc::mem_fun (*this, &Editor::add_location_from_selection)));
