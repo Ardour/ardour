@@ -1146,7 +1146,6 @@ TracksControlPanel::save_general_preferences ()
 	}
     
     uint32_t grey = _color_adjustment.get_value();
-//    uint32_t color_uint32 = (value<<24)+(value<<16)+(value<<8)+255;
     uint32_t color_uint32 = RGBA_TO_UINT(grey, grey, grey, 255);
     
     // Do not change order.
