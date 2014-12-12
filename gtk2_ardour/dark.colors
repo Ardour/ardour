@@ -35,11 +35,11 @@
     <RelativeColor name="color 104" base="colorLightGray" modifier="0 0 0 1"/>
     <RelativeColor name="color 105" base="colorB" modifier="0 -0.79085 -0.4 -0.686275"/>
     <RelativeColor name="color 11" base="colorDdark" modifier="0 -0.907975 -0.360784 -0.2"/>
-    <RelativeColor name="color 12" base="colorClight" modifier="0 -0.175824 -0.286275 0"/>
+    <RelativeColor name="color 12" base="colorC" modifier="-0 -0.140351 -0.329412 0"/>
     <RelativeColor name="color 13" base="colorLightest" modifier="0 0 0 1"/>
     <RelativeColor name="color 14" base="colorD" modifier="0 -0.416667 -0.2 0"/>
     <RelativeColor name="color 15" base="colorDdark" modifier="0 -0.547945 -0.713725 0"/>
-    <RelativeColor name="color 16" base="colorDlight" modifier="0 0 -0.180392 1"/>
+    <RelativeColor name="color 16" base="colorDlight" modifier="18 -0.5 -0.270588 0"/>
     <RelativeColor name="color 17" base="colorC" modifier="0 0 0 1"/>
     <RelativeColor name="color 18" base="colorDdark" modifier="0 0 0 1"/>
     <RelativeColor name="color 19" base="colorA" modifier="0 -0.447964 -0.133333 0"/>
@@ -49,7 +49,7 @@
     <RelativeColor name="color 22" base="colorLightest" modifier="0 0 -0.101961 1"/>
     <RelativeColor name="color 23" base="colorDA" modifier="0 0 0 1"/>
     <RelativeColor name="color 24" base="colorC" modifier="0 -0.845745 -0.262745 -0.227451"/>
-    <RelativeColor name="color 25" base="colorDdark" modifier="0 -0.932692 -0.592157 0"/>
+    <RelativeColor name="color 25" base="colorDA" modifier="-0 -0.972973 -0.709804 0"/>
     <RelativeColor name="color 26" base="colorDdark" modifier="0 -0.921296 -0.152941 0"/>
     <RelativeColor name="color 27" base="colorDarkGray" modifier="0 0 0.00784314 1"/>
     <RelativeColor name="color 28" base="colorDA" modifier="0 -0.5 -0.513725 -0.223529"/>
@@ -85,7 +85,7 @@
     <RelativeColor name="color 55" base="colorAB" modifier="0 -0.0766129 -0.027451 0"/>
     <RelativeColor name="color 56" base="colorC" modifier="0 -0.713568 -0.219608 0"/>
     <RelativeColor name="color 57" base="colorClight" modifier="0 -0.5 -0.341176 0"/>
-    <RelativeColor name="color 58" base="colorClight" modifier="0 -0.5 -0.670588 0"/>
+    <RelativeColor name="color 58" base="colorClight" modifier="-0 -0.708861 -0.690196 0"/>
     <RelativeColor name="color 59" base="colorDdark" modifier="0 -0.698039 0 0"/>
     <RelativeColor name="color 6" base="colorC" modifier="0 -0.361702 -0.262745 0"/>
     <RelativeColor name="color 60" base="colorDdark" modifier="342 -0.888889 -0.647059 -0.372549"/>
@@ -99,7 +99,7 @@
     <RelativeColor name="color 68" base="colorABlight" modifier="0 -0.0253807 -0.227451 0"/>
     <RelativeColor name="color 69" base="colorA" modifier="0 0 -0.6 1"/>
     <RelativeColor name="color 7" base="colorMidGray" modifier="0 0 0.0235294 1"/>
-    <RelativeColor name="color 70" base="colorDlight" modifier="0 -0.190909 -0.568627 0"/>
+    <RelativeColor name="color 70" base="colorDlight" modifier="18 -0.609091 -0.568627 0"/>
     <RelativeColor name="color 71" base="colorAB" modifier="0 -0.926316 -0.627451 0"/>
     <RelativeColor name="color 72" base="colorABlight" modifier="0 -0.0218341 -0.101961 0"/>
     <RelativeColor name="color 73" base="colorDdark" modifier="0 -0.260417 -0.247059 0"/>
@@ -128,9 +128,9 @@
     <RelativeColor name="color 94" base="colorLightGray" modifier="0 0 -0.109804 1"/>
     <RelativeColor name="color 95" base="colorClight" modifier="0 -0.864754 -0.0431373 -0.533333"/>
     <RelativeColor name="color 96" base="colorClight" modifier="0 -0.157205 -0.101961 0"/>
-   <RelativeColor name="color 97" base="colorLightest" modifier="0 0 -0.2 1"/>
+    <RelativeColor name="color 97" base="colorLightest" modifier="0 0 -0.2 1"/>
     <RelativeColor name="color 98" base="colorD" modifier="0 -0.619608 0 -0.521569"/>
-    <RelativeColor name="color 99" base="colorDdark" modifier="18 -0.0555556 -0.576471 0"/>
+    <RelativeColor name="color 99" base="colorDlight" modifier="0 -0.659864 -0.423529 0"/>
   </RelativeColors>
   <ColorAliases>  
     <ColorAlias name="active crossfade" alias="color 1"/>
