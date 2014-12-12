@@ -150,7 +150,7 @@ NoteBase::set_selected(bool selected)
 	set_fill_color (base_color());
         
 	if (_selected) {
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->get_MidiNoteSelected()));
+		set_outline_color(ArdourCanvas::rgba_to_color(1,0,0,1));
 	} else {
 		set_outline_color(calculate_outline(base_color()));
 	}
