@@ -158,6 +158,7 @@ TracksControlPanel::init ()
     populate_output_channels ();
     populate_midi_ports ();
     populate_default_session_path ();
+    display_waveform_color_fader ();
     
     // Init session Settings
     populate_bit_depth_dropdown();
@@ -547,6 +548,37 @@ TracksControlPanel::populate_pre_record_buffer_dropdown()
     std::string str_time = ss.str() + " Min";
     
     _pre_record_buffer_dropdown.set_text( str_time );
+}
+
+#define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
+#define UINT_TO_RGBA(u,r,g,b,a) { UINT_TO_RGB(((u)>>8),r,g,b); (*(a)) = (u)&0xff; }
+
+void
+TracksControlPanel::display_waveform_color_fader ()
+{
+    // get waveform color from preferences
+    uint32_t color_uint32 = ARDOUR_UI::config()->get_canvasvar_WaveFormFill(); // rgba
+    
+    uint32_t r,g,b, a;
+    UINT_TO_RGBA(color_uint32, &r, &g, &b, &a);
+    uint32_t grey = round (0.21*r + 0.72*g + 0.07*b);
+    
+    Gdk::Color color; // 8 bytes
+    color.set_grey_p ( (double)grey/255 );
+    
+    _color_box.modify_bg (Gtk::STATE_NORMAL, color );
+    _color_adjustment.set_value (grey);
+    
+    _color_adjustment.signal_value_changed().connect (mem_fun (*this, &TracksControlPanel::color_adjustment_changed));
+}
+
+void
+TracksControlPanel::color_adjustment_changed ()
+{
+    int grey = _color_adjustment.get_value(); // 0..255
+    Gdk::Color color; // 8 bytes
+    color.set_grey_p ( (double)grey/255 );
+    _color_box.modify_bg (Gtk::STATE_NORMAL, color );
 }
 
 void
@@ -1094,6 +1126,9 @@ TracksControlPanel::display_general_preferences ()
 	display_denormal_protection ();
 }
 
+#define RGB_TO_UINT(r,g,b) ((((guint)(r))<<16)|(((guint)(g))<<8)|((guint)(b)))
+#define RGB_TO_RGBA(x,a) (((x) << 8) | ((((guint)a) & 0xff)))
+#define RGBA_TO_UINT(r,g,b,a) RGB_TO_RGBA(RGB_TO_UINT(r,g,b), a)
 void
 TracksControlPanel::save_general_preferences ()
 {
@@ -1109,6 +1144,16 @@ TracksControlPanel::save_general_preferences ()
 		dbg_msg ("TracksControlPanel::general_preferences ():\nUnexpected WaveFormShape !");
 		break;
 	}
+    
+    uint32_t grey = _color_adjustment.get_value();
+//    uint32_t color_uint32 = (value<<24)+(value<<16)+(value<<8)+255;
+    uint32_t color_uint32 = RGBA_TO_UINT(grey, grey, grey, 255);
+    
+    // Do not change order.
+    ARDOUR_UI::config()->set_canvasvar_RecWaveFormFill (color_uint32);
+    ARDOUR_UI::config()->set_canvasvar_SelectedWaveFormFill (color_uint32);
+    ARDOUR_UI::config()->set_canvasvar_ZeroLine (color_uint32);
+    ARDOUR_UI::config()->set_canvasvar_WaveFormFill (color_uint32); // Must be the last! because it triggers waveform update in ARDOUR_UI
 
 	selected_item = _peak_hold_time_dropdown.get_current_item ();
 	switch (selected_item) {
@@ -1722,7 +1767,9 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
 		display_history_depth ();
 	} else if (parameter_name == "save-history-depth") {
 		display_saved_history_depth ();
-	}
+	} else if (parameter_name == "waveform fill") {
+        display_waveform_color_fader ();
+    }
 }
 
 void

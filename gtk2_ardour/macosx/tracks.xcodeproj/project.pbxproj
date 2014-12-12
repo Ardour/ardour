@@ -284,7 +284,6 @@
 		95F9DFE01A35F3310007E953 /* waves_clean_up_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */; };
 		95F9DFE11A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */; };
 		95F9DFE21A35F3310007E953 /* waves_excessive_split_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDA1A35F3310007E953 /* waves_excessive_split_dialog.xml */; };
-		95F9DFE31A35F3310007E953 /* waves_export_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDB1A35F3310007E953 /* waves_export_dialog.xml */; };
 		95F9DFE41A35F3310007E953 /* waves_file_exists_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDC1A35F3310007E953 /* waves_file_exists_dialog.xml */; };
 		95F9DFE51A35F3310007E953 /* waves_how_to_import_dialog_1.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDD1A35F3310007E953 /* waves_how_to_import_dialog_1.xml */; };
 		95F9DFE61A35F3310007E953 /* waves_how_to_import_dialog_2.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFDE1A35F3310007E953 /* waves_how_to_import_dialog_2.xml */; };
@@ -1145,7 +1144,6 @@
 		95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_clean_up_dialog.xml; sourceTree = "<group>"; };
 		95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_connect_to_backend_error_dialog.xml; sourceTree = "<group>"; };
 		95F9DFDA1A35F3310007E953 /* waves_excessive_split_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_excessive_split_dialog.xml; sourceTree = "<group>"; };
-		95F9DFDB1A35F3310007E953 /* waves_export_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_dialog.xml; sourceTree = "<group>"; };
 		95F9DFDC1A35F3310007E953 /* waves_file_exists_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_file_exists_dialog.xml; sourceTree = "<group>"; };
 		95F9DFDD1A35F3310007E953 /* waves_how_to_import_dialog_1.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_how_to_import_dialog_1.xml; sourceTree = "<group>"; };
 		95F9DFDE1A35F3310007E953 /* waves_how_to_import_dialog_2.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_how_to_import_dialog_2.xml; sourceTree = "<group>"; };
@@ -1842,7 +1840,6 @@
 				95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */,
 				95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */,
 				95F9DFDA1A35F3310007E953 /* waves_excessive_split_dialog.xml */,
-				95F9DFDB1A35F3310007E953 /* waves_export_dialog.xml */,
 				95F9DFDC1A35F3310007E953 /* waves_file_exists_dialog.xml */,
 				95F9DFDD1A35F3310007E953 /* waves_how_to_import_dialog_1.xml */,
 				95F9DFDE1A35F3310007E953 /* waves_how_to_import_dialog_2.xml */,
@@ -2428,7 +2425,6 @@
 				432793A8194F003A003C9FEA /* resize_right_cursor.png in Resources */,
 				432793A9194F003A003C9FEA /* resize_top_cursor.png in Resources */,
 				432793AA194F003A003C9FEA /* resize_top_left_cursor.png in Resources */,
-				95F9DFE31A35F3310007E953 /* waves_export_dialog.xml in Resources */,
 				432793AB194F003A003C9FEA /* resize_top_right_cursor.png in Resources */,
 				432793AC194F003A003C9FEA /* sae.png in Resources */,
 				432793AD194F003A003C9FEA /* sessionlock.png in Resources */,

@@ -1299,3 +1299,8 @@ TrackViewList::filter_to_unique_playlists ()
 	}
 	return ts;
 }
+
+void
+TimeAxisView::update_waveform_color () {
+    
+}

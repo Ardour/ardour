@@ -162,6 +162,7 @@ public:
     PBD::Signal3<void, const PBD::ID&, const PBD::ID&, bool> relative_tracks_reorder_request;
     
     void route_rec_enable_changed();
+    void update_waveform_color ();
     
 protected:
 	friend class StreamView;

@@ -545,6 +545,12 @@ RegionView::set_colors ()
 }
 
 void
+RegionView::update_color ()
+{
+    TimeAxisViewItem::update_color ();
+}
+
+void
 RegionView::set_frame_color ()
 {
 	TimeAxisViewItem::set_frame_color ();

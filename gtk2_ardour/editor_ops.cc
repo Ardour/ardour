@@ -1905,6 +1905,14 @@ Editor::update_temporal_zoom_slider ()
 	_temporal_zoom_adjustment.set_value(value);
 }
 
+void
+Editor::update_waveform_color ()
+{
+    for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+        (*i)->update_waveform_color ();
+	}
+}
+
 bool
 Editor::choose_new_marker_name(string &name) {
 

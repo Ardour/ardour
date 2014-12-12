@@ -312,6 +312,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void set_video_timeline_height (const int h) = 0;
 	virtual void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true) = 0;
 	virtual void export_video (bool range = false) = 0;
+    virtual void update_waveform_color () = 0;
 
 	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
 

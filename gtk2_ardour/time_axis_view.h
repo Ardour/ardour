@@ -205,6 +205,8 @@ class TimeAxisView : public virtual AxisView
 	SelectionRect* get_selection_rect(uint32_t id);
 	
 	static uint32_t preset_height (Height);
+    
+    virtual void update_waveform_color ();
 
   protected:
 	/* The Standard LHS Controls */

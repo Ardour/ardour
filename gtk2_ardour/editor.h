@@ -1227,6 +1227,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_by_slider ();
 	void wave_form_zoom ();
 	void update_temporal_zoom_slider ();
+    void update_waveform_color ();
 
 	void insert_region_list_selection (float times);
 

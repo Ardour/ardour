@@ -432,7 +432,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
 	} else if (p == "show-waveform-clipping") {
 		ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
-	}
+	} else if ( p == "waveform fill" ) {        
+        the_editor ().update_waveform_color();
+    }
 }
 
 void

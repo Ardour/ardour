@@ -532,6 +532,14 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 	}
 }
 
+void
+StreamView::update_waveform_color ()
+{
+    for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		(*i)->update_color ();
+	}
+}
+
 
 /** Get selectable things within a given range.
  *  @param start Start time in session frames.

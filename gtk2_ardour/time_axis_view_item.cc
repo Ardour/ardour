@@ -674,6 +674,12 @@ TimeAxisViewItem::set_colors()
 }
 
 void
+TimeAxisViewItem::update_color()
+{
+    set_colors ();
+}
+
+void
 TimeAxisViewItem::set_name_text_color ()
 {
 	if (!name_text) {

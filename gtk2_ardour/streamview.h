@@ -100,6 +100,7 @@ public:
 	void         foreach_selected_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
+    void update_waveform_color ();
 	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable* >&);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 

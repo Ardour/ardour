@@ -1432,7 +1432,7 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 		}
 	}
 
-        for (vector<ArdourCanvas::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
+    for (vector<ArdourCanvas::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
 		(*w)->set_fill_color (fill);
 		(*w)->set_outline_color (outline);
 		(*w)->set_clip_color (clip);

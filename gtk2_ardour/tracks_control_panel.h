@@ -71,6 +71,8 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     WavesButton& _browse_button;
     WavesButton& _name_tracks_after_driver;
     WavesButton& _reset_tracks_name_to_default;
+    Gtk::Adjustment& _color_adjustment;
+    Gtk::Container& _color_box;
 	WavesButton& _obey_mmc_commands_button;
 	WavesButton& _send_mmc_commands_button;
 	WavesButton& _dc_bias_against_denormals_button;

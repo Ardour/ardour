@@ -2817,3 +2817,11 @@ RouteTimeAxisView::on_record_state_changed ()
     if ( (_session->record_status()==Session::Recording) && (_route->record_enabled()) )
         end_name_edit (RESPONSE_CANCEL);
 }
+
+void
+RouteTimeAxisView::update_waveform_color ()
+{
+    if (_view) {
+		_view->update_waveform_color ();
+	}
+}

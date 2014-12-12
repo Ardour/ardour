@@ -96,6 +96,8 @@
     void populate_output_channels();
     void populate_midi_ports();
     void populate_default_session_path();
+    void display_waveform_color_fader();
+    void color_adjustment_changed();
 
     // Session Settings
     void populate_file_type_dropdown();

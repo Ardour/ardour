@@ -188,6 +188,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	virtual void set_colors();
 	virtual void set_frame_color();
+    virtual void update_color();
 	virtual void set_frame_gradient ();
 	void set_trim_handle_colors();
 
