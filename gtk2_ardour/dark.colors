@@ -59,7 +59,7 @@
     <RelativeColor name="color 31" base="colorB" modifier="0 -0.977376 -0.133333 0"/>
     <RelativeColor name="color 32" base="colorB" modifier="0 -0.257384 -0.0705882 -0.533333"/>
     <RelativeColor name="color 33" base="colorLightGray" modifier="0 0 0.235294 1"/>
-    <RelativeColor name="color 34" base="colorMidGray" modifier="0 0 0.129412 1"/>
+    <RelativeColor name="color 34" base="colorMidGray" modifier="0 0 0.105882 0"/>
     <RelativeColor name="color 35" base="colorDdark" modifier="0 -0.317308 -0.184314 0"/>
     <RelativeColor name="color 36" base="colorABlight" modifier="0 -0.253521 -0.721569 0"/>
     <RelativeColor name="color 37" base="colorC" modifier="342 -0.384236 -0.203922 0"/>
@@ -130,7 +130,7 @@
     <RelativeColor name="color 96" base="colorClight" modifier="0 -0.157205 -0.101961 0"/>
     <RelativeColor name="color 97" base="colorLightest" modifier="0 0 -0.2 1"/>
     <RelativeColor name="color 98" base="colorD" modifier="0 -0.619608 0 -0.521569"/>
-    <RelativeColor name="color 99" base="colorDlight" modifier="0 -0.659864 -0.423529 0"/>
+    <RelativeColor name="color 99" base="colorDlight" modifier="0 -0.481865 -0.243137 0"/>
   </RelativeColors>
   <ColorAliases>  
     <ColorAlias name="active crossfade" alias="color 1"/>
@@ -145,14 +145,14 @@
     <ColorAlias name="big clock active: cursor" alias="color 8"/>
     <ColorAlias name="big clock active: edited text" alias="color 8"/>
     <ColorAlias name="big clock active: text" alias="color 9"/>
-    <ColorAlias name="big clock: background" alias="color 4"/>
+    <ColorAlias name="big clock: background" alias="color 67"/>
     <ColorAlias name="big clock: cursor" alias="color 8"/>
     <ColorAlias name="big clock: edited text" alias="color 8"/>
     <ColorAlias name="big clock: text" alias="color 10"/>
     <ColorAlias name="border color" alias="color 4"/>
     <ColorAlias name="cd marker bar" alias="color 11"/>
     <ColorAlias name="clipped waveform" alias="color 9"/>
-    <ColorAlias name="clock: background" alias="color 4"/>
+    <ColorAlias name="clock: background" alias="color 67"/>
     <ColorAlias name="clock: cursor" alias="color 8"/>
     <ColorAlias name="clock: edited text" alias="color 8"/>
     <ColorAlias name="clock: text" alias="color 12"/>
@@ -203,8 +203,8 @@
     <ColorAlias name="gtk_control_base" alias="color 61"/>
     <ColorAlias name="gtk_control_text" alias="color 26"/>
     <ColorAlias name="gtk_control_text2" alias="color 83"/>
-    <ColorAlias name="gtk_darkest" alias="color 29"/>
-    <ColorAlias name="gtk_fg_selected" alias="color 18"/>
+    <ColorAlias name="gtk_darkest" alias="color 67"/>
+    <ColorAlias name="gtk_fg_selected" alias="color 67"/>
     <ColorAlias name="gtk_fg_tooltip" alias="color 29"/>
     <ColorAlias name="gtk_foreground" alias="color 50"/>
     <ColorAlias name="gtk_light_text_on_dark" alias="color 31"/>
@@ -253,7 +253,7 @@
     <ColorAlias name="measure line beat" alias="color 45"/>
     <ColorAlias name="meter background: bottom" alias="color 46"/>
     <ColorAlias name="meter background: top" alias="color 34"/>
-    <ColorAlias name="meter bar" alias="color 25"/>
+    <ColorAlias name="meter bar" alias="color 29"/>
     <ColorAlias name="meter color BBC" alias="color 8"/>
     <ColorAlias name="meter marker" alias="color 19"/>
     <ColorAlias name="meterbridge label: fill" alias="color 34"/>
@@ -367,7 +367,7 @@
     <ColorAlias name="monitor solo override: led active" alias="color 8"/>
     <ColorAlias name="monitor solo override: text" alias="color 26"/>
     <ColorAlias name="monitor solo override: text active" alias="color 26"/>
-    <ColorAlias name="mono panner bg" alias="color 61"/>
+    <ColorAlias name="mono panner bg" alias="color 67"/>
     <ColorAlias name="mono panner fill" alias="color 74"/>
     <ColorAlias name="mono panner outline" alias="color 70"/>
     <ColorAlias name="mono panner position fill" alias="color 11"/>
@@ -385,7 +385,7 @@
     <ColorAlias name="nudge button: fill active" alias="color 42"/>
     <ColorAlias name="nudge button: led" alias="color 66"/>
     <ColorAlias name="nudge button: led active" alias="color 8"/>
-    <ColorAlias name="nudge clock: background" alias="color 7"/>
+    <ColorAlias name="nudge clock: background" alias="color 67"/>
     <ColorAlias name="nudge clock: cursor" alias="color 8"/>
     <ColorAlias name="nudge clock: edited text" alias="color 8"/>
     <ColorAlias name="nudge clock: text" alias="color 12"/>
@@ -424,7 +424,7 @@
     <ColorAlias name="punch button: fill active" alias="color 9"/>
     <ColorAlias name="punch button: led" alias="color 4"/>
     <ColorAlias name="punch button: led active" alias="color 4"/>
-    <ColorAlias name="punch clock: background" alias="color 4"/>
+    <ColorAlias name="punch clock: background" alias="color 67"/>
     <ColorAlias name="punch clock: cursor" alias="color 9"/>
     <ColorAlias name="punch clock: edited text" alias="color 9"/>
     <ColorAlias name="punch clock: text" alias="color 12"/>
@@ -465,13 +465,13 @@
     <ColorAlias name="rude solo: led active" alias="color 4"/>
     <ColorAlias name="rude solo: text" alias="color 21"/>
     <ColorAlias name="rude solo: text active" alias="color 22"/>
-    <ColorAlias name="ruler base" alias="color 90"/>
+    <ColorAlias name="ruler base" alias="color 67"/>
     <ColorAlias name="ruler text" alias="color 22"/>
-    <ColorAlias name="secondary clock: background" alias="color 7"/>
+    <ColorAlias name="secondary clock: background" alias="color 67"/>
     <ColorAlias name="secondary clock: cursor" alias="color 8"/>
     <ColorAlias name="secondary clock: edited text" alias="color 8"/>
     <ColorAlias name="secondary clock: text" alias="color 91"/>
-    <ColorAlias name="secondary delta clock: background" alias="color 4"/>
+    <ColorAlias name="secondary delta clock: background" alias="color 67"/>
     <ColorAlias name="secondary delta clock: cursor" alias="color 9"/>
     <ColorAlias name="secondary delta clock: edited text" alias="color 9"/>
     <ColorAlias name="secondary delta clock: text" alias="color 92"/>
@@ -486,7 +486,7 @@
     <ColorAlias name="selected waveform fill" alias="color 8"/>
     <ColorAlias name="selected waveform outline" alias="color 67"/>
     <ColorAlias name="selection" alias="color 94"/>
-    <ColorAlias name="selection clock: background" alias="color 4"/>
+    <ColorAlias name="selection clock: background" alias="color 67"/>
     <ColorAlias name="selection clock: cursor" alias="color 9"/>
     <ColorAlias name="selection clock: edited text" alias="color 9"/>
     <ColorAlias name="selection clock: text" alias="color 12"/>
@@ -514,20 +514,20 @@
     <ColorAlias name="solo safe: led active" alias="color 9"/>
     <ColorAlias name="solo safe: text" alias="color 26"/>
     <ColorAlias name="solo safe: text active" alias="color 26"/>
-    <ColorAlias name="stereo panner bg" alias="color 61"/>
+    <ColorAlias name="stereo panner bg" alias="color 67"/>
     <ColorAlias name="stereo panner fill" alias="color 74"/>
     <ColorAlias name="stereo panner inverted bg" alias="color 61"/>
     <ColorAlias name="stereo panner inverted fill" alias="color 100"/>
     <ColorAlias name="stereo panner inverted outline" alias="color 83"/>
     <ColorAlias name="stereo panner inverted text" alias="color 4"/>
-    <ColorAlias name="stereo panner mono bg" alias="color 61"/>
+    <ColorAlias name="stereo panner mono bg" alias="color 67"/>
     <ColorAlias name="stereo panner mono fill" alias="color 54"/>
     <ColorAlias name="stereo panner mono outline" alias="color 101"/>
     <ColorAlias name="stereo panner mono text" alias="color 4"/>
     <ColorAlias name="stereo panner outline" alias="color 70"/>
     <ColorAlias name="stereo panner rule" alias="color 70"/>
     <ColorAlias name="stereo panner text" alias="color 4"/>
-    <ColorAlias name="tempo bar" alias="color 102"/>
+    <ColorAlias name="tempo bar" alias="color 29"/>
     <ColorAlias name="tempo marker" alias="color 19"/>
     <ColorAlias name="time axis frame" alias="color 4"/>
     <ColorAlias name="time stretch fill" alias="color 26"/>
@@ -544,11 +544,11 @@
     <ColorAlias name="transport button: fill active" alias="color 48"/>
     <ColorAlias name="transport button: led" alias="color 4"/>
     <ColorAlias name="transport button: led active" alias="color 4"/>
-    <ColorAlias name="transport clock: background" alias="color 7"/>
+    <ColorAlias name="transport clock: background" alias="color 67"/>
     <ColorAlias name="transport clock: cursor" alias="color 8"/>
     <ColorAlias name="transport clock: edited text" alias="color 8"/>
     <ColorAlias name="transport clock: text" alias="color 91"/>
-    <ColorAlias name="transport delta clock: background" alias="color 4"/>
+    <ColorAlias name="transport delta clock: background" alias="color 67"/>
     <ColorAlias name="transport delta clock: cursor" alias="color 9"/>
     <ColorAlias name="transport delta clock: edited text" alias="color 9"/>
     <ColorAlias name="transport delta clock: text" alias="color 92"/>
