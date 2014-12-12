@@ -782,14 +782,7 @@ TimeAxisViewItem::set_frame_color()
 	set_frame_gradient ();
 
 	if (!_recregion) {
-		uint32_t f = ARDOUR_UI::config()->color ("time axis frame");
-
-		if (!rect_visible) {
-			/* make the frame outline be visible but rather transparent */
-			f = UINT_RGBA_CHANGE_A (f, 64);
-		}
-
-		frame->set_outline_color (f);
+		frame->set_outline_color (ARDOUR_UI::config()->color ("time axis frame"));
 	}
 }
 

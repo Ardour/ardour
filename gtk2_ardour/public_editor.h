@@ -235,6 +235,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void copy_playlists (TimeAxisView*) = 0;
 	virtual void clear_playlists (TimeAxisView*) = 0;
 	virtual void select_all_tracks () = 0;
+	virtual void deselect_all () = 0;
 	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;

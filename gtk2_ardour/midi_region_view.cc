@@ -135,6 +135,9 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+
+	PublicEditor& editor (trackview.editor());
+	editor.get_selection().ClearMidiNoteSelection.connect (_clear_midi_selection_connection, invalidator (*this), boost::bind (&MidiRegionView::clear_midi_selection, this), gui_context ());
 }
 
 MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
@@ -181,6 +184,9 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+
+	PublicEditor& editor (trackview.editor());
+	editor.get_selection().ClearMidiNoteSelection.connect (_clear_midi_selection_connection, invalidator (*this), boost::bind (&MidiRegionView::clear_midi_selection, this), gui_context ());
 }
 
 void
@@ -315,6 +321,9 @@ MidiRegionView::init (bool wfd)
 	connect_to_diskstream ();
 
 	SelectionCleared.connect (_selection_cleared_connection, invalidator (*this), boost::bind (&MidiRegionView::selection_cleared, this, _1), gui_context ());
+
+	PublicEditor& editor (trackview.editor());
+	editor.get_selection().ClearMidiNoteSelection.connect (_clear_midi_selection_connection, invalidator (*this), boost::bind (&MidiRegionView::clear_midi_selection, this), gui_context ());
 }
 
 InstrumentInfo&
