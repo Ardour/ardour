@@ -655,7 +655,12 @@ UIConfiguration::color (const std::string& name, bool* failed) const
 		}
 	}
 	
-	cerr << string_compose (_("Color %1 not found"), name) << endl;
+	if (!failed) {
+		/* only show this message if the caller wasn't interested in
+		   the fail status.
+		*/
+		cerr << string_compose (_("Color %1 not found"), name) << endl;
+	}
 
 	if (failed) {
 		*failed = true;
