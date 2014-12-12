@@ -19,7 +19,6 @@
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
       <menuitem action='Close'/>
-      <menuitem action='Recent'/>
       <menu name='recent-sessions' action='recent-sessions'>
         <menuitem action='recent-session-0'/>
         <menuitem action='recent-session-1'/>
