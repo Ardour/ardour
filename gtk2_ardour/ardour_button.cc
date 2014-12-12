@@ -34,6 +34,7 @@
 #include "ardour/rc_configuration.h" // for widget prelight preference
 
 #include "canvas/utils.h"
+#include "canvas/colors.h"
 
 #include "ardour_button.h"
 #include "ardour_ui.h"
@@ -680,10 +681,15 @@ ArdourButton::set_colors ()
 	if (failed) {
 		led_active_color = ARDOUR_UI::config()->color ("generic button: led active");
 	}
-	led_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: led", name), &failed);
-	if (failed) {
-		led_inactive_color = ARDOUR_UI::config()->color ("generic button: led");
-	}
+
+	/* The inactive color for the LED is just a fairly dark version of the
+	 * active color.
+	 */
+	
+	ArdourCanvas::HSV inactive (led_active_color);
+	inactive.v = 0.35;
+
+	led_inactive_color = inactive.color ();
 }
 
 /**
