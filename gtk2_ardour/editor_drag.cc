@@ -3960,8 +3960,6 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 	} else {
 
 		/* just a click */
-
-		bool do_deselect = true;
 		MidiTimeAxisView* mtv;
 
 		if ((mtv = dynamic_cast<MidiTimeAxisView*>(_editor->clicked_axisview)) != 0) {
@@ -3969,20 +3967,8 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 			if (_editor->selection->empty()) {
 				/* nothing selected */
 				add_midi_region (mtv);
-				do_deselect = false;
 			}
-		} 
-
-		/* do not deselect if Primary or Tertiary (toggle-select or
-		 * extend-select are pressed.
-		 */
-
-		if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier) && 
-		    !Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier) && 
-		    do_deselect) {
-			deselect_things ();
 		}
-
 	}
 
 	_editor->rubberband_rect->hide();
@@ -4395,28 +4381,11 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* just a click, no pointer movement.
 		 */
 
-		if (_operation == SelectionExtend) {
-			if (_time_selection_at_start) {
-				framepos_t pos = adjusted_current_frame (event, false);
-				framepos_t start = min (pos, start_at_start);
-				framepos_t end = max (pos, end_at_start);
-                
-                //also extend on tracks
-                _editor->extend_time_selection_to_track (*_editor->clicked_axisview);
-				_editor->selection->set (start, end);
-			}
-		} else {
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
-				if (_editor->clicked_selection) {
-					_editor->selection->remove (_editor->clicked_selection);
-				}
-			} else {
-				if (!_editor->clicked_selection) {
-					_editor->selection->clear_time();
-                    _editor->selection->clear_objects();
-				}
-			}
-		}
+        if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
+            if (_editor->clicked_selection) {
+                _editor->selection->remove (_editor->clicked_selection);
+            }
+        }
 			
 		if (s && s->get_play_range () && s->transport_rolling()) {
 			s->request_stop (false, false);

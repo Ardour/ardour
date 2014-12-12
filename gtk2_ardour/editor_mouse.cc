@@ -672,10 +672,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                 return true;
                 break;
 
-        case SkipBarItem:
-                _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateSkipMarker), event);
-                return true;
-                break;
+    case SkipBarItem:
+            _drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateSkipMarker), event);
+            return true;
+            break;
 
 	case ClockRulerItem: {
                 ArdourCanvas::Duple i;
@@ -796,8 +796,25 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				} 
 			} else {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
-					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
+                    
+                    // range extend must happen on mouse down
+                    if (!selection->time.empty() ) {
+                        
+                        framepos_t pos = canvas_event_sample (event);
+                        framepos_t start = min (pos, selection->time.start() );
+                        framepos_t end = max (pos, selection->time.end_frame() );
+                        
+                        //also extend on tracks
+                        extend_time_selection_to_track (*clicked_axisview);
+                        selection->set (start, end);
+                    }
 				} else {
+                    
+                    if (!clicked_selection) {
+                        selection->clear_time();
+                        selection->clear_objects();
+                    }
+                    
 					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
 				}
 				return true;
@@ -814,8 +831,25 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		default:
 			if (!internal_editing()) {
 				if (Keyboard::modifier_state_equals (event->button.state, Keyboard::RangeSelectModifier)) {
-					_drags->set (new SelectionDrag (this, item, SelectionDrag::SelectionExtend), event);
+                    
+                    // range extend must happen on mouse down
+                    if (!selection->time.empty() ) {
+                        
+                        framepos_t pos = canvas_event_sample (event);
+                        framepos_t start = min (pos, selection->time.start() );
+                        framepos_t end = max (pos, selection->time.end_frame() );
+                        
+                        //also extend on tracks
+                        extend_time_selection_to_track (*clicked_axisview);
+                        selection->set (start, end);
+                    }
 				} else {
+                    
+                    if (!clicked_selection) {
+                        selection->clear_time();
+                        selection->clear_objects();
+                    }
+                    
 					_drags->set (new SelectionDrag (this, item, SelectionDrag::CreateSelection), event);
 				}
 			}
@@ -1027,6 +1061,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					}
 					return true;
 				} else {
+                    
+                    if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier) &&
+                        !Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier) ) {
+                    
+                        selection->clear_regions();
+                        selection->clear_time ();
+                        selection->clear_points ();
+                        selection->clear_lines ();
+                    }
+                        
 					_drags->set (new EditorRubberbandSelectDrag (this, item), event);
 				}
 				break;
