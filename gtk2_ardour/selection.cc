@@ -42,6 +42,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+PBD::Signal0<void> Selection::ClearMidiNoteSelection;
+
 struct AudioRangeComparator {
     bool operator()(AudioRange a, AudioRange b) {
 	    return a.start < b.start;
@@ -173,6 +175,9 @@ Selection::clear_midi_notes ()
 		midi_notes.clear ();
 		MidiNotesChanged ();
 	}
+	
+	//the MIDI note selections are actually stored in a per-MRV selection object.  so this tells them to clear their selections:
+	ClearMidiNoteSelection();  //signal
 }
 
 void
