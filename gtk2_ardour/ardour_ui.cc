@@ -209,8 +209,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
-	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
-	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
+//	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
+//	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, _feedback_exists (false)
     , _dsp_load_adjustment (0)
     , _hd_load_adjustment (0)
@@ -370,8 +370,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		bundle_manager.set_state (*ui_xml);
 		location_ui.set_state (*ui_xml);
 		big_clock_window.set_state (*ui_xml);
-		audio_port_matrix.set_state (*ui_xml);
-		midi_port_matrix.set_state (*ui_xml);
+//		audio_port_matrix.set_state (*ui_xml);
+//		midi_port_matrix.set_state (*ui_xml);
 	}
 
 	WM::Manager::instance().register_window (&theme_manager);
@@ -388,8 +388,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
-	WM::Manager::instance().register_window (&audio_port_matrix);
-	WM::Manager::instance().register_window (&midi_port_matrix);
+//	WM::Manager::instance().register_window (&audio_port_matrix);
+//	WM::Manager::instance().register_window (&midi_port_matrix);
     
     session_lock_dialog->set_deletable (false);
 	session_lock_dialog->set_modal (true); 

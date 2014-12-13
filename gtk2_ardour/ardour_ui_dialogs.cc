@@ -277,8 +277,8 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	if (hide_stuff) {
 		editor->hide ();
 		theme_manager->hide ();
-		audio_port_matrix->hide();
-		midi_port_matrix->hide();
+//		audio_port_matrix->hide();
+//		midi_port_matrix->hide();
 		route_params->hide();
 	}
 

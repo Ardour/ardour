@@ -669,8 +669,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
     WM::ProxyWithConstructor<BundleManager> bundle_manager;
     WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
-    WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
-    WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
+//    WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
+//    WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 
     /* creator methods */
 
