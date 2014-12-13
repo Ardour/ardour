@@ -46,7 +46,8 @@ private:
 	static MidiPatchManager* _manager;
 
 public:
-	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> > MidiNameDocuments;
+	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> >    MidiNameDocuments;
+	typedef std::map<std::string, MIDINameDocument::MasterDeviceNamesList> DeviceNamesByMaker;
 
 	virtual ~MidiPatchManager() { _manager = 0; }
 
@@ -133,6 +134,8 @@ public:
 
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }
 
+	const DeviceNamesByMaker& devices_by_manufacturer() const { return _devices_by_manufacturer; }
+
 private:
 	void session_going_away();
 	void refresh();
@@ -140,6 +143,7 @@ private:
 
 	MidiNameDocuments                       _documents;
 	MIDINameDocument::MasterDeviceNamesList _master_devices_by_model;
+	DeviceNamesByMaker                      _devices_by_manufacturer;
 	MasterDeviceNames::Models               _all_models;
 };
 

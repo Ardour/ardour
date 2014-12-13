@@ -26,7 +26,7 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 
-#include "ardour/midi_patch_manager.h"
+#include "midi++/midnam_patch.h"
 
 #include "canvas/debug.h"
 

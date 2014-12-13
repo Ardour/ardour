@@ -3,7 +3,7 @@
 <MIDINameDocument>
   <Author>CherryPicker</Author>
   <MasterDeviceNames>
-    <Manufacturer>Korg inc.</Manufacturer>
+    <Manufacturer>Korg</Manufacturer>
     <Model>RADIAS</Model>
     <CustomDeviceMode Name="CPMode 1">
       <ChannelNameSetAssignments>

@@ -266,14 +266,28 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	MIDI::Name::MidiPatchManager& patch_manager = MIDI::Name::MidiPatchManager::instance();
+	typedef MIDI::Name::MidiPatchManager PatchManager;
 
-	MIDI::Name::MasterDeviceNames::Models::const_iterator m = patch_manager.all_models().begin();
-	for (; m != patch_manager.all_models().end(); ++m) {
-		_midnam_model_selector.AddMenuElem(
-			Gtk::Menu_Helpers::MenuElem(m->c_str(),
-			                            sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed),
-			                                       m->c_str())));
+	PatchManager& patch_manager = PatchManager::instance();
+
+	for (PatchManager::DeviceNamesByMaker::const_iterator m = patch_manager.devices_by_manufacturer().begin();
+	     m != patch_manager.devices_by_manufacturer().end(); ++m) {
+		Menu*                   menu  = Gtk::manage(new Menu);
+		Menu_Helpers::MenuList& items = menu->items();
+
+		// Build manufacturer submenu
+		for (MIDI::Name::MIDINameDocument::MasterDeviceNamesList::const_iterator n = m->second.begin();
+		     n != m->second.end(); ++n) {
+			Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(
+				n->first.c_str(),
+				sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed),
+				           n->first.c_str()));
+
+			items.push_back(elem);
+		}
+
+		// Add manufacturer submenu to selector
+		_midnam_model_selector.AddMenuElem(Menu_Helpers::MenuElem(m->first, *menu));
 	}
 
 	if (gui_property (X_("midnam-model-name")).empty()) {

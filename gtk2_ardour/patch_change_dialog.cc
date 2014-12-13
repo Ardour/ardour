@@ -27,7 +27,6 @@
 
 #include "midi++/midnam_patch.h"
 
-#include "ardour/midi_patch_manager.h"
 #include "ardour/beats_frames_converter.h"
 #include "ardour/instrument_info.h"
 
