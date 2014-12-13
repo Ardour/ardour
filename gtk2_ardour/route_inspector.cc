@@ -93,9 +93,9 @@ RouteInspector::~RouteInspector ()
 void
 RouteInspector::update_inspector_info_panel ()
 {
-    if(!route ())
+    if (!route ()) {
         return;
-    
+	}
     // Input label
     std::string input_text;
     
@@ -185,17 +185,19 @@ void
 RouteInspector::set_route (boost::shared_ptr<Route> rt)
 {
 	MixerStrip::set_route (rt);
-
-	if (route()->is_master()) {
-		master_mute_button.show ();
-        color_buttons_home.set_visible (false);
-        color_palette_button.set_visible (false);
-        color_palette_button.set_active (false);
-	} else {
-		master_mute_button.hide ();
-        color_palette_button.set_visible (true);
-        color_palette_home.set_visible (true);
+	if (route ()) {
+		if (route()->is_master()) {
+			master_mute_button.show ();
+			color_buttons_home.set_visible (false);
+			color_palette_button.set_visible (false);
+			color_palette_button.set_active (false);
+		} else {
+			master_mute_button.hide ();
+			color_palette_button.set_visible (true);
+			color_palette_home.set_visible (true);
+		}
 	}
+	update_inspector_info_panel ();
 }
 
 void

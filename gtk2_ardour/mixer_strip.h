@@ -137,8 +137,6 @@ class MixerStrip : public RouteUI
     
     PublicEditor& _editor;
 
-    PBD::ScopedConnectionList _input_output_channels_update;
-    
   private:
 
 	void init ();

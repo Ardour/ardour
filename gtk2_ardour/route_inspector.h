@@ -47,6 +47,8 @@ class RouteInspector : public MixerStrip
     void update_info_panel ();
 	WavesButton* color_button[15];
 
+    PBD::ScopedConnectionList _input_output_channels_update;
+    
 	void route_color_changed ();
 	void color_button_clicked (WavesButton *button);
 	void color_palette_button_clicked (WavesButton *button);
