@@ -69,6 +69,11 @@ ArdourDropdown::on_button_press_event (GdkEventButton*)
 	return true;
 }
 
+void
+ArdourDropdown::clear_items ()
+{
+	_menu.items ().clear ();
+}
 
 void
 ArdourDropdown::AddMenuElem (Menu_Helpers::MenuElem e)

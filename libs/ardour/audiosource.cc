@@ -103,8 +103,10 @@ AudioSource::~AudioSource ()
 		cerr << "AudioSource destroyed with leftover peak data pending" << endl;
 	}
 
-	close (_peakfile_fd);
-	_peakfile_fd = -1;
+	if ((-1) != _peakfile_fd) {
+		close (_peakfile_fd);
+		_peakfile_fd = -1;
+	}
 
 	delete [] peak_leftovers;
 }
