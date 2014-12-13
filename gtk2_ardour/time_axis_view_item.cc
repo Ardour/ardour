@@ -184,7 +184,6 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	last_item_width = 0;
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
-        rect_visible = true;
 	vestigial_frame = 0;
 
 	if (duration == 0) {
@@ -285,30 +284,6 @@ bool
 TimeAxisViewItem::canvas_group_event (GdkEvent* /*ev*/)
 {
 	return false;
-}
-
-void
-TimeAxisViewItem::hide_rect ()
-{
-        rect_visible = false;
-        set_frame_color ();
-
-        if (name_highlight) {
-                name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
-                name_highlight->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 64));
-        }
-}
-
-void
-TimeAxisViewItem::show_rect ()
-{
-        rect_visible = true;
-        set_frame_color ();
-
-        if (name_highlight) {
-                name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
-                name_highlight->set_fill_color (fill_color);
-        }
 }
 
 /**
@@ -719,13 +694,6 @@ TimeAxisViewItem::set_name_text_color ()
 uint32_t
 TimeAxisViewItem::fill_opacity () const
 {
-	if (!rect_visible) {
-		/* if the frame/rect is marked as "invisible", then the
-		   fill should be translucent.parent.
-		*/
-		return 64;
-	}
-
 	if (_dragging) {
 		return 130;
 	}
