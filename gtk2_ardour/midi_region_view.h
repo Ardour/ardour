@@ -100,6 +100,8 @@ public:
 	void set_frame_color();
 	void color_handler ();
 
+	uint32_t fill_opacity() const;
+
 	void show_step_edit_cursor (Evoral::MusicalTime pos);
 	void move_step_edit_cursor (Evoral::MusicalTime pos);
 	void hide_step_edit_cursor ();

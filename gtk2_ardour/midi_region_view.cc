@@ -307,6 +307,10 @@ MidiRegionView::init (bool wfd)
 	                                       boost::bind (&MidiRegionView::snap_changed, this),
 	                                       gui_context());
 
+	trackview.editor().MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
+	                                            boost::bind (&MidiRegionView::mouse_mode_changed, this),
+	                                            gui_context ());
+
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
 	connect_to_diskstream ();
 
@@ -400,10 +404,6 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 bool
 MidiRegionView::enter_notify (GdkEventCrossing* ev)
 {
-	trackview.editor().MouseModeChanged.connect (
-		_mouse_mode_connection, invalidator (*this), boost::bind (&MidiRegionView::mouse_mode_changed, this), gui_context ()
-		);
-
 	enter_internal();
 
 	_entered = true;
@@ -424,12 +424,17 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 void
 MidiRegionView::mouse_mode_changed ()
 {
-	if (trackview.editor().internal_editing()) {
-		// Switched in to internal editing mode while entered
-		enter_internal();
-	} else {
-		// Switched out of internal editing mode while entered
-		leave_internal();
+	// Adjust frame colour (become more transparent for internal tools)
+	set_frame_color();
+
+	if (_entered) {
+		if (trackview.editor().internal_editing()) {
+			// Switched in to internal editing mode while entered
+			enter_internal();
+		} else {
+			// Switched out of internal editing mode while entered
+			leave_internal();
+		}
 	}
 }
 
@@ -3258,6 +3263,19 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 	}
 }
 
+uint32_t
+MidiRegionView::fill_opacity() const
+{
+	uint32_t a = RegionView::fill_opacity();
+	if (trackview.editor().current_mouse_mode() == MouseDraw ||
+	    trackview.editor().current_mouse_mode() == MouseContent) {
+		/* Make rect more transparent when in an internal mode.  This should
+		   probably be configurable somehow. */
+		a /= 2;
+	}
+	return a;
+}
+
 void
 MidiRegionView::set_frame_color()
 {
@@ -3272,14 +3290,12 @@ MidiRegionView::set_frame_color()
 	if (_selected) {
 		f = ARDOUR_UI::config()->get_SelectedFrameBase();
 	} else if (high_enough_for_name) {
-		f= ARDOUR_UI::config()->get_MidiFrameBase();
+		f = ARDOUR_UI::config()->get_MidiFrameBase();
 	} else {
 		f = fill_color;
 	}
 
-	if (!rect_visible) {
-		f = UINT_RGBA_CHANGE_A (f, 80);
-	}
+	f = UINT_RGBA_CHANGE_A (f, fill_opacity());
 
 	frame->set_fill_color (f);
 }
