@@ -23,19 +23,19 @@
           <VBox id="level_meter_home"
                 width="18"
                 height="187"/>
-           <icon source="mixer_strip_meter_marks.png"/>
+           <icon source="mixer_strip_meter_marks"/>
         </HBox>
       </VBox>
       <VBox>
         <!--<HBox height="6"/>-->
         <Fader id="gain_slider"
                adjustment="gain_adjustment"
-               facesource="slider_controller_fader.png"
-               activefacesource="slider_controller_active_fader.png"
-               underlaysource="slider_controller_fader_underlay.png"
-               handlesource="slider_controller_fader_handle.png"
-               activehandlesource="slider_controller_fader_handle.png"
-               touchcursor="fader_touch_cursor.png"
+               facesource="slider_controller_fader"
+               activefacesource="slider_controller_active_fader"
+               underlaysource="slider_controller_fader_underlay"
+               handlesource="slider_controller_fader_handle"
+               activehandlesource="slider_controller_fader_handle"
+               touchcursor="fader_touch_cursor"
                minposx="10"
                minposy="199"
                maxposx="10"

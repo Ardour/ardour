@@ -96,10 +96,10 @@
   <button id="master_mute_button" ui.orphan="true"/>
   <VBox id="track_buttons_home" ui.orphan="true"/>
   <Icon id="rec_enable_indicator_on"
-        source="rec_enable_indicator_on.png"
+        source="rec_enable_indicator_on"
         ui.orphan="true"/>
   
   <Icon id="rec_enable_indicator_off"
-        source="rec_enable_indicator_off.png"
+        source="rec_enable_indicator_off"
         ui.orphan="true"/>
 </RouteUI>

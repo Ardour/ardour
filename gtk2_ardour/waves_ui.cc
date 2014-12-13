@@ -26,17 +26,54 @@
 #include "pbd/convert.h"
 #include "dbg_msg.h"
 
+#define WAVES_TIME_MEASUREMENT 0
+
+#if (WAVES_TIME_MEASUREMENT)
+#include <sys/time.h>
+
+static inline unsigned long get_ctime()
+{
+    timeval time;
+    gettimeofday(&time, NULL);
+    long millis = (time.tv_sec * 1000) + (time.tv_usec / 1000);
+    return millis;
+}
+static unsigned long accutime = 0;
+
+#endif // WAVES_TIME_MEASUREMENT
+
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 std::map<std::string, const XMLTree*> WavesUI::__xml_tree_cache;
+std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > __icon_cache;
+
+static Glib::RefPtr<Gdk::Pixbuf> get_cached_icon (const char* image_file_name)
+{
+	if (*image_file_name) {
+		std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> >::iterator it = __icon_cache.find(image_file_name);
+		if (it != __icon_cache.end()) {
+			return (*it).second;
+		} else {
+			Glib::RefPtr<Gdk::Pixbuf> newimage = get_icon (image_file_name);
+			__icon_cache[image_file_name] = newimage;
+			return newimage;
+		}
+	}
+	return Glib::RefPtr<Gdk::Pixbuf>();
+}
 
 WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 	: _xml_tree (NULL)
 	, _script_file_name (layout_script_file)
 	, _root_container (root)
 {
+#if (WAVES_TIME_MEASUREMENT)
+    std::cout << "WavesUI::WavesUI (\"" << layout_script_file  << "\") . . ." << std::endl;
+    unsigned long st=get_ctime();
+#endif // WAVES_TIME_MEASUREMENT
+
 	// To avoid a need of reading the same file many times:
 	std::map<std::string, const XMLTree*>::const_iterator it = __xml_tree_cache.find(layout_script_file);
 	if (it != __xml_tree_cache.end()) {
@@ -56,6 +93,12 @@ WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 	}
 
 	create_ui(_xml_tree, root);
+
+#if (WAVES_TIME_MEASUREMENT)
+    unsigned long wt = get_ctime()-st;;
+    accutime += wt;
+    std::cout << ". . . done in " << wt << " msec; accu = " << accutime << std::endl;
+#endif // WAVES_TIME_MEASUREMENT
 }
 
 WavesUI::~WavesUI ()
@@ -86,19 +129,7 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 	} else if (widget_type == "DROPDOWNITEM") {
 	} else if (widget_type == "DROPDOWNMENU") {
 	} else if (widget_type == "ICON") {
-		std::string image_path;
-		Searchpath spath(ARDOUR::ardour_data_search_path ());
-
-		spath.add_subdirectory_to_paths ("icons");
-    
-		if (find_file (spath, 
-									  xml_property (definition, "source", styles, ""),
-									  image_path)) {
-			Gtk::Image& icon = *manage (new Gtk::Image(image_path));
-			child = &icon;
-		} else {
-			dbg_msg(xml_property (definition, "source", styles, "") + " NOT FOUND");
-		}
+		child = manage (new Gtk::Image (get_cached_icon (xml_property (definition, "source", styles, "").c_str ())));
 	} else if (widget_type == "COMBOBOXTEXT") {
 		child = manage (new Gtk::ComboBoxText);
 	} else if (widget_type == "CHECKBUTTON") {
@@ -188,11 +219,11 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 		bool read_only = xml_property (definition, "readonly", styles, false);
 
 		child = manage (new Gtkmm2ext::Fader(adjustment, 
-											 face_image,
-											 active_face_image,
-											 underlay_image,
-											 handle_image,
-											 active_handle_image,
+											 get_cached_icon(face_image.c_str ()),
+											 get_cached_icon(active_face_image.c_str ()),
+											 get_cached_icon(underlay_image.c_str ()),
+											 get_cached_icon(handle_image.c_str ()),
+											 get_cached_icon(active_handle_image.c_str ()),
 											 minposx,
 											 minposy,
 											 maxposx,
@@ -566,9 +597,9 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	std::string property = xml_property (definition, "cssname", styles, "");
 	if (!property.empty ()) {
 		widget.set_name (property);
-	}/* else {
+	} else {
 		widget.unset_name ();
-	}*/
+	}
 
 	int height = xml_property (definition, "height", styles, -1);
 	int width = xml_property (definition, "width", styles, -1);
@@ -728,7 +759,7 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	if (fader) {
 		property = xml_property (definition, "touchcursor", styles, "");
 		if (!property.empty ()) {
-			fader->set_touch_cursor (property);
+			fader->set_touch_cursor (get_cached_icon (property.c_str ()));
 		}
 	}
 
@@ -846,23 +877,23 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 	if (iconbutton) {
 		property = xml_property (definition, "normalicon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_normal_image (get_icon (property.c_str ()));
+			iconbutton->set_normal_image (get_cached_icon (property.c_str ()));
 		}
 		property = xml_property (definition, "activeicon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_active_image (get_icon (property.c_str ()));
+			iconbutton->set_active_image (get_cached_icon (property.c_str ()));
 		}
 		property = xml_property (definition, "prelighticon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_prelight_image (get_icon (property.c_str ()));
+			iconbutton->set_prelight_image (get_cached_icon (property.c_str ()));
 		}
 		property = xml_property (definition, "inactiveicon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_inactive_image (get_icon (property.c_str ()));
+			iconbutton->set_inactive_image (get_cached_icon (property.c_str ()));
 		}
 		property = xml_property (definition, "implicitactiveicon", styles, "");
 		if (!property.empty ()) {
-			iconbutton->set_implicit_active_image (get_icon (property.c_str ()));
+			iconbutton->set_implicit_active_image (get_cached_icon (property.c_str ()));
 		}
 	}
 

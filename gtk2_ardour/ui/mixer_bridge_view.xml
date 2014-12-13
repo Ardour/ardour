@@ -5,7 +5,7 @@
     <VBox width="70">
       <EventBox bgnormal="#000000"
                 height="1"/>
-      <Icon source="mixer_plate.png"/>
+      <Icon source="mixer_plate"/>
       <EventBox bgnormal="#000000"
                 height="1"
                 box.pack="end"/>

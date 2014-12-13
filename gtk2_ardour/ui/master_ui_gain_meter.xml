@@ -9,9 +9,9 @@
     </HBox>    
     <Fader id="gain_slider"
            adjustment="gain_adjustment"
-           facesource="slider_controller_fader.png"
-           handlesource="slider_controller_fader_handle.png"
-           activehandlesource="slider_controller_fader_handle.png"
+           facesource="slider_controller_fader"
+           handlesource="slider_controller_fader_handle"
+           activehandlesource="slider_controller_fader_handle"
            minposx="10"
            minposy="187"
            maxposx="10"

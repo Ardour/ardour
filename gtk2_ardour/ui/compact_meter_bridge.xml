@@ -5,7 +5,7 @@
     <HBox>
       <VBox width="11"/>
       <VBox>
-        <icon source="meter_bridge_level_scale.png" box.padding="8"/>
+        <icon source="meter_bridge_level_scale" box.padding="8"/>
       </VBox>
       <VBox width="9"/>
       <ScrolledWindow hscroll="always"

@@ -12,12 +12,12 @@
             <VBox>
               <HBox>
                 <Icon id="rec_enable_indicator_on"
-                            source="rec_enable_indicator_on.png"
+                            source="rec_enable_indicator_on"
                             visible="false"
                             noshowall="true"/>
                 
                 <Icon id="rec_enable_indicator_off"
-                            source="rec_enable_indicator_off.png"
+                            source="rec_enable_indicator_off"
                             visible="false"
                             noshowall="true"/>
                 

@@ -66,7 +66,7 @@
                         normalicon="tracks"
                         activeicon="tracks_active"/>
             <Layout width="407" height="51">
-              <icon source="top_bar_background.png"/>
+              <icon source="top_bar_background"/>
               <HBox id="time_info_box_home"
                     x="60"
                     y="4"/>
@@ -139,28 +139,28 @@
                       box.fill="true"
                       box.expand="true">
               <HBox>
-                <icon source="infobar_left.png"/>
+                <icon source="infobar_left"/>
                 <Layout width="80">
-                    <icon source="infobar_center.png"
+                    <icon source="infobar_center"
                           box.fill="true"
                           box.expand="false"/>
                     <icon id="mtc_idle_icon"
-                          source="mtc_idle.png"
+                          source="mtc_idle"
                           x="3"
                           y="4"
                           visible="false"
                           noshowall="true"/>
                     <icon id="mtc_sync_icon"
-                          source="mtc_sync.png"
+                          source="mtc_sync"
                           x="3"
                           y="4"
                           visible="false"
                           noshowall="true"/>
                 </Layout>
-                <icon source="infobar_center.png"
+                <icon source="infobar_center"
                       box.fill="true"
                       box.expand="true"/>
-                <icon source="infobar_right.png"
+                <icon source="infobar_right"
                       box.pack="end"/>
               </HBox>
             </EventBox>
@@ -168,7 +168,7 @@
                     width="115"
                     height="51"
                     box.pack="end">
-              <icon source="metrics_display.png"
+              <icon source="metrics_display"
                     x="1"/>
               <Adjustment id="dsp_load_adjustment"
                           minvalue="1"
@@ -176,8 +176,8 @@
                           initialvalue="50"
                           readonly="fals"/>
               <Fader adjustment="dsp_load_adjustment"
-                     facesource="dsp_load_fader_face.png"
-                     handlesource="dsp_load_fader_handle.png"
+                     facesource="dsp_load_fader_face"
+                     handlesource="dsp_load_fader_handle"
                      minposx="0"
                      minposy="3"
                      maxposx="56"
@@ -201,8 +201,8 @@
                           initialvalue="50"
                           readonly="fals"/>
               <Fader adjustment="hd_load_adjustment"
-                     facesource="hd_load_fader_face.png"
-                     handlesource="dsp_load_fader_handle.png"
+                     facesource="hd_load_fader_face"
+                     handlesource="dsp_load_fader_handle"
                      minposx="0"
                      minposy="3"
                      maxposx="56"
@@ -249,7 +249,7 @@
           <Layout bgnormal="#FF0000"
                   width="649"
                   height="28">
-            <icon source="transport_bar_border.png"/>
+            <icon source="transport_bar_border"/>
             <HBox borderwidth="1"
                   spacing="1">
               <iconbutton id="inspector_on_button"
@@ -275,7 +275,7 @@
                         width="54"
                         height="26">
                 <!-- Some may ask why it's enveloped in the EventBox? The answer would be: GTK alighns the horizontal size of ICON -->
-                <Icon source="transport_bar_bg.png"/>
+                <Icon source="transport_bar_bg"/>
               </EventBox>
               <iconbutton id="transport_start_button"
                           tooltip="Rewind"
@@ -322,7 +322,7 @@
               <EventBox width="60"
                         height="26">
                 <!-- Some may ask why it's enveloped in the EventBox? The answer would be: GTK alighns the horizontal size of ICON -->
-                <Icon source="transport_bar_bg.png"/>
+                <Icon source="transport_bar_bg"/>
               </EventBox>
               <iconbutton id="tool_marker_button"
                           tooltip="Range Select Tool"
@@ -354,15 +354,15 @@
                   height="28"
                   box.fill="true"
                   box.expand="true">
-            <icon source="transport_bar_border.png"/>
-            <icon source="transport_bar_bg.png"
+            <icon source="transport_bar_border"/>
+            <icon source="transport_bar_bg"
                   y="1"/>
           </Layout>
           <Layout bgnormal="#FF0000"
                   width="249"
                   height="28"
                   box.pack="end">
-            <icon source="transport_bar_border.png"/>
+            <icon source="transport_bar_border"/>
             <Adjustment id="temporal_zoom_adjustment"
                         minvalue="0"
                         maxvalue="23"
@@ -380,9 +380,9 @@
               <EventBox tooltip="Vertical Zoom">
                   <Fader id="vertical_zoom_fader"
                        adjustment="vertical_zoom_adjustment"
-                       facesource="vertical_zoom_fader_face.png"
-                       handlesource="zoom_fader_handle.png"
-                       activehandlesource="zoom_fader_handle_active.png"
+                       facesource="vertical_zoom_fader_face"
+                       handlesource="zoom_fader_handle"
+                       activehandlesource="zoom_fader_handle_active"
                        x="1"
                        y="1"
                        minposx="20"
@@ -392,9 +392,9 @@
               </EventBox>
               <EventBox tooltip="Horizontal Zoom">
                   <Fader adjustment="temporal_zoom_adjustment"
-                         facesource="horizontal_zoom_fader_face.png"
-                         handlesource="zoom_fader_handle.png"
-                         activehandlesource="zoom_fader_handle_active.png"
+                         facesource="horizontal_zoom_fader_face"
+                         handlesource="zoom_fader_handle"
+                         activehandlesource="zoom_fader_handle_active"
                          x="76"
                          y="1"
                          minposx="66"
@@ -453,7 +453,7 @@
                             bgnormal="#424242"/>
                   <EventBox bgnormal="#6C6C6C">
                     <HBox id="marker_lane_hbox" noshowall="true">
-                      <Icon source="marker_label.png"/>
+                      <Icon source="marker_label"/>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
                       <Dropdown id="midi_input_dropdown"
@@ -468,14 +468,14 @@
                           availability/activity of the MIDI inputs
                           -->
                           <Icon id="midi_input_enabled_indicator"
-                                source="midi_input_enabled_indicator.png"
+                                source="midi_input_enabled_indicator"
                                 noshowall="true"/>
                           <Icon id="midi_input_disabled_indicator"
-                                source="midi_input_disabled_indicator.png"
+                                source="midi_input_disabled_indicator"
                                 visible="false"
                                 noshowall="true"/>
                           <Icon id="midi_input_activity_indicator"
-                                source="midi_input_activity_indicator.png"
+                                source="midi_input_activity_indicator"
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
@@ -495,14 +495,14 @@
                           availability/activity of the MIDI outputs
                           -->
                           <Icon id="midi_output_enabled_indicator"
-                                source="midi_output_enabled_indicator.png"
+                                source="midi_output_enabled_indicator"
                                 noshowall="true"/>
                           <Icon id="midi_output_disabled_indicator"
-                                source="midi_output_disabled_indicator.png"
+                                source="midi_output_disabled_indicator"
                                 visible="false"
                                 noshowall="true"/>
                           <Icon id="midi_output_activity_indicator"
-                                source="midi_output_activity_indicator.png"
+                                source="midi_output_activity_indicator"
                                 visible="false"
                                 noshowall="true"/>
                         </HBox>
@@ -525,7 +525,7 @@
                   <EventBox id="skip_button_home"
                             bgnormal="#6C6C6C">
                     <HBox>
-                      <icon source="skip_lane_label.png"/>
+                      <icon source="skip_lane_label"/>
                       <EventBox width="1"
                                 bgnormal="#424242"/>
                       <iconbutton id="skip_button"

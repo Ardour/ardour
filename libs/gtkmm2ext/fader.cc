@@ -122,17 +122,22 @@ static void get_closest_point_on_line(double xa, double ya, double xb, double yb
 }
 
 Fader::Fader (Gtk::Adjustment& adj,
-			  const std::string& face_image_file, 
-			  const std::string& active_face_image_file,
-			  const std::string& underlay_image_file,
-			  const std::string& handle_image_file,
-			  const std::string& active_handle_image_file,
+			  const Glib::RefPtr<Gdk::Pixbuf>& face_pixbuf,
+			  const Glib::RefPtr<Gdk::Pixbuf>& active_face_pixbuf,
+			  const Glib::RefPtr<Gdk::Pixbuf>& underlay_pixbuf,
+			  const Glib::RefPtr<Gdk::Pixbuf>& handle_pixbuf,
+			  const Glib::RefPtr<Gdk::Pixbuf>& active_handle_pixbuf,
 			  int min_pos_x, 
 			  int min_pos_y,
 			  int max_pos_x,
 			  int max_pos_y,
 			  bool read_only)
 	: adjustment (adj)
+	, _face_pixbuf (face_pixbuf)
+	, _active_face_pixbuf (active_face_pixbuf)
+	, _underlay_pixbuf (underlay_pixbuf)
+	, _handle_pixbuf (handle_pixbuf)
+	, _active_handle_pixbuf (active_handle_pixbuf)
 	, _min_pos_x (min_pos_x)
 	, _min_pos_y (min_pos_y)
 	, _max_pos_x (max_pos_x)
@@ -143,45 +148,6 @@ Fader::Fader (Gtk::Adjustment& adj,
 	, _grab_window (0)
 	, _touch_cursor (0)
 {
-	PBD::Searchpath spath(ARDOUR::ardour_data_search_path());
-
-	spath.add_subdirectory_to_paths ("icons");
-
-	std::string data_file_path;
-
-	if (PBD::find_file (spath, face_image_file, data_file_path)) {
-		_face_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
-	} else {
-		throw failed_constructor(); 
-	}
-	
-	if (active_face_image_file.length ()) {
-		if (PBD::find_file (spath, active_face_image_file, data_file_path)) {
-			_active_face_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
-		} else {
-			throw failed_constructor(); 
-		}
-	}
-
-	if (underlay_image_file.length ()) {
-		if (PBD::find_file (spath, underlay_image_file, data_file_path)) {
-			_underlay_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
-		} else {
-			throw failed_constructor(); 
-		}
-	}
-
-	if (PBD::find_file (spath, handle_image_file, data_file_path)) {
-		_handle_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
-	} else {
-		throw failed_constructor(); 
-	}
-	if (PBD::find_file (spath, active_handle_image_file, data_file_path)) {
-		_active_handle_pixbuf  = Gdk::Pixbuf::create_from_file (data_file_path);
-	} else {
-		throw failed_constructor(); 
-	}
-
 	update_unity_position ();
 
 	if (!_read_only) {
@@ -198,6 +164,12 @@ Fader::~Fader ()
 	if (_touch_cursor) {
 		delete _touch_cursor;
 	}
+}
+
+void
+Fader::set_touch_cursor (const Glib::RefPtr<Gdk::Pixbuf>& touch_cursor)
+{
+	_touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(), touch_cursor, 12, 12);
 }
 
 void
@@ -301,10 +273,6 @@ Fader::on_button_press_event (GdkEventButton* ev)
 					 NULL,
 					 NULL,
 					 ev->time);
-
-	if (ev->button == 2) {
-		set_adjustment_from_event (ev);
-	}
 
 	queue_draw();
 	
@@ -445,44 +413,11 @@ Fader::on_leave_notify_event (GdkEventCrossing*)
 }
 
 void
-Fader::set_adjustment_from_event (GdkEventButton* ev)
-{
-/*	double span = 
-	double fract = (_orien == VERT) ? (1.0 - (ev->y / span)) : (ev->x / span);
-
-	fract = min (1.0, fract);
-	fract = max (0.0, fract);
-
-	adjustment.set_value (fract * (adjustment.get_upper () - adjustment.get_lower ()));
-	*/
-}
-
-void
 Fader::set_default_value (float d)
 {
 	_default_value = d;
 	update_unity_position ();
 }
-
-void
-Fader::set_touch_cursor (const std::string& icon_name)
-{
-	PBD::Searchpath spath(ARDOUR::ardour_data_search_path());
-
-	spath.add_subdirectory_to_paths ("icons");
-
-	std::string icon_file_path;
-
-	if (PBD::find_file (spath, icon_name, icon_file_path)) {
-		_touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(), 
-                                                 Gdk::Pixbuf::create_from_file (icon_file_path),
-                                                 12,
-                                                 12);
-	} else {
-		throw failed_constructor(); 
-	}
-}
-
 
 void
 Fader::update_unity_position ()

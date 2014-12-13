@@ -15,7 +15,7 @@ fgnormal="#E6E6E6"
          bordercolor="#7E7E7E"
          borderwidth="1 1 0 0" />
     <Layout width="240" height="215">
-      <icon source="systemlock.png"/>
+      <icon source="systemlock"/>
     <Button style="generic_button"
         id="ok_button"
         text="Unlock System"        

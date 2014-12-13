@@ -88,6 +88,6 @@
               _prelighticon="master_global_rec_prelight"
               ui.orphan="true"/>
   <icon id="master_bus_multi_out_mode_icon"
-        source="master_bus_multi_out_mode.png"
+        source="master_bus_multi_out_mode"
         ui.orphan="true"/>
 </RouteUI>

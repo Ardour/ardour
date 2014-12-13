@@ -38,11 +38,11 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 {
   public:
         Fader (Gtk::Adjustment& adjustment, 
-			   const std::string& face_image_file,
-			   const std::string& active_face_image_file,
-			   const std::string& underlay_image_file,
-			   const std::string& handle_image_file,
-			   const std::string& active_handle_image_file,
+			   const Glib::RefPtr<Gdk::Pixbuf>& face_pixbuf,
+			   const Glib::RefPtr<Gdk::Pixbuf>& active_face_pixbuf,
+			   const Glib::RefPtr<Gdk::Pixbuf>& underlay_pixbuf,
+			   const Glib::RefPtr<Gdk::Pixbuf>& handle_pixbuf,
+			   const Glib::RefPtr<Gdk::Pixbuf>& active_handle_pixbuf,
 			   int min_pos_x, 
 			   int min_pos_y,
 			   int max_pos_x,
@@ -53,7 +53,7 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 
 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
 	void set_default_value (float);
-	void set_touch_cursor (const std::string& icon_name);
+	void set_touch_cursor (const Glib::RefPtr<Gdk::Pixbuf>& touch_cursor);
 
   protected:
 	void get_handle_position (double& x, double& y);
@@ -75,11 +75,11 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 
   private:
 
-    Glib::RefPtr<Gdk::Pixbuf> _handle_pixbuf;
-    Glib::RefPtr<Gdk::Pixbuf> _active_handle_pixbuf;
-	Glib::RefPtr<Gdk::Pixbuf> _underlay_pixbuf;
-    Glib::RefPtr<Gdk::Pixbuf> _face_pixbuf;
-	Glib::RefPtr<Gdk::Pixbuf> _active_face_pixbuf;
+    const Glib::RefPtr<Gdk::Pixbuf> _face_pixbuf;
+	const Glib::RefPtr<Gdk::Pixbuf> _active_face_pixbuf;
+	const Glib::RefPtr<Gdk::Pixbuf> _underlay_pixbuf;
+    const Glib::RefPtr<Gdk::Pixbuf> _handle_pixbuf;
+    const Glib::RefPtr<Gdk::Pixbuf> _active_handle_pixbuf;
 	int _min_pos_x;
 	int _min_pos_y;
 	int _max_pos_x;
@@ -102,7 +102,6 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	bool _read_only;
 
 	void adjustment_changed ();
-	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
 };
 
