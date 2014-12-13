@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Paul Davis
+    Copyright (C) 2014 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,31 +17,18 @@
 
 */
 
-#include "editor_locations.h"
-#include "location_ui.h"
+#ifndef __ardour_gtk_selection_memento_h__
+#define __ardour_gtk_selection_memento_h__
 
-#include "i18n.h"
+#include "pbd/statefuldestructible.h"
 
-using namespace ARDOUR;
-using namespace Gtk;
-
-EditorLocations::EditorLocations (Editor* e)
-	: EditorComponent (e)
+class SelectionMemento : public PBD::StatefulDestructible
 {
-	_locations = new LocationUI ();
-	_scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
-	_scroller.add (*_locations);
-}
+public:
+	SelectionMemento ();
+	~SelectionMemento ();
 
-void
-EditorLocations::set_session (ARDOUR::Session* s)
-{
-	SessionHandlePtr::set_session (s);
-	_locations->set_session (s);
-}
-
-Widget&
-EditorLocations::widget()
-{
-	return _scroller;
-}
+	XMLNode& get_state ();
+	int set_state (const XMLNode&, int version);
+};
+#endif /* __ardour_gtk_selection_memento_h__ */

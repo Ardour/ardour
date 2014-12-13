@@ -305,6 +305,8 @@ Editor::Editor ()
 	
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
+	_selection_memento = new SelectionMemento ();
+	before = 0;
 
 	clicked_regionview = 0;
 	clicked_axisview = 0;
@@ -1392,6 +1394,7 @@ Editor::set_session (Session *t)
 
 	/* register for undo history */
 	_session->register_with_memento_command_factory(id(), this);
+	_session->register_with_memento_command_factory(_selection_memento->id(), _selection_memento);
 
 	ActionManager::ui_manager->signal_pre_activate().connect (sigc::mem_fun (*this, &Editor::action_pre_activated));
 
@@ -3313,6 +3316,7 @@ void
 Editor::begin_reversible_command (string name)
 {
 	if (_session) {
+		before = &_selection_memento->get_state ();
 		_session->begin_reversible_command (name);
 	}
 }
@@ -3321,6 +3325,7 @@ void
 Editor::begin_reversible_command (GQuark q)
 {
 	if (_session) {
+		before = &_selection_memento->get_state ();
 		_session->begin_reversible_command (q);
 	}
 }
@@ -3329,6 +3334,13 @@ void
 Editor::commit_reversible_command ()
 {
 	if (_session) {
+		if (before) {
+			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before, &_selection_memento->get_state ()));
+			before = 0;
+		} else {
+			cerr << "Please call Editor::begin_reversible_command () before Editor::commit_reversible_command ()." << endl;
+		}
+
 		_session->commit_reversible_command ();
 	}
 }
@@ -4178,7 +4190,7 @@ Editor::copy_playlists (TimeAxisView* v)
 void
 Editor::clear_playlists (TimeAxisView* v)
 {
-	begin_reversible_command (_("clear playlists"));
+	begin_reversible_command (_("clear playlists"));	
 	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists->get (playlists);
 	mapover_tracks (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), v, ARDOUR::Properties::select.property_id);
@@ -4214,6 +4226,12 @@ Editor::on_key_release_event (GdkEventKey* ev)
 {
 	return Gtk::Window::on_key_release_event (ev);
 	// return key_press_focus_accelerator_handler (*this, ev);
+}
+
+double
+Editor::get_y_origin () const
+{
+	return vertical_adjustment.get_value ();
 }
 
 /** Queue up a change to the viewport x origin.
@@ -4625,8 +4643,7 @@ Editor::set_punch_range (framepos_t start, framepos_t end, string cmd)
 		_session->set_auto_punch_location (loc);
 		XMLNode &after = _session->locations()->get_state();
 		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	}
-	else {
+	} else {
 		XMLNode &before = tpl->get_state();
 		tpl->set_hidden (false, this);
 		tpl->set (start, end);
@@ -4804,6 +4821,35 @@ Editor::get_regions_from_selection_and_entered ()
 }
 
 void
+Editor::get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const
+{
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		RouteTimeAxisView* tatv;
+		
+		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+			boost::shared_ptr<Playlist> pl;
+			std::vector<boost::shared_ptr<Region> > results;
+			boost::shared_ptr<Track> tr;
+			
+			if ((tr = tatv->track()) == 0) {
+				/* bus */
+				continue;
+			}
+			
+			if ((pl = (tr->playlist())) != 0) {
+				boost::shared_ptr<Region> r = pl->region_by_id (id);
+				if (r) {
+					RegionView* marv = tatv->view()->find_view (r);
+					if (marv) {
+						regions.push_back (marv);
+					}
+				}
+			}
+		}
+	}
+}
+
+void
 Editor::get_regions_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions, bool src_comparison)
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -4962,8 +5008,15 @@ Editor::located ()
 }
 
 void
-Editor::region_view_added (RegionView *)
+Editor::region_view_added (RegionView * rv)
 {
+	for (list<PBD::ID>::iterator pr = selection->regions.pending.begin (); pr != selection->regions.pending.end (); ++pr) {
+		if (rv->region ()->id () == (*pr)) {
+			selection->add (rv);
+			selection->regions.pending.erase (pr);
+			break;
+		}
+	}
 	_summary->set_background_dirty ();
 }
 

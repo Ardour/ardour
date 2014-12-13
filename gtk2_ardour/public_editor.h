@@ -245,6 +245,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
 	virtual framecnt_t get_current_zoom () const = 0;
+	virtual void reset_zoom (framecnt_t) = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void new_playlists (TimeAxisView*) = 0;
@@ -288,6 +289,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (framepos_t frame) = 0;
+	virtual double get_y_origin () const = 0;
+	virtual void reset_y_origin (double pos) = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
@@ -403,6 +406,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void stop_canvas_autoscroll () = 0;
         virtual bool autoscroll_active() const = 0;
 
+	virtual void begin_reversible_command (std::string cmd_name) = 0;
+	virtual void begin_reversible_command (GQuark) = 0;
+	virtual void commit_reversible_command () = 0;
+
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
 
@@ -420,6 +427,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
+	virtual void get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 
