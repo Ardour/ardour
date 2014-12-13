@@ -34,6 +34,7 @@
 #include "ardour/region.h"
 
 #include "ardour_dialog.h"
+#include "ardour_dropdown.h"
 #include "route_ui.h"
 #include "enums.h"
 #include "route_time_axis.h"
@@ -107,8 +108,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
-	void model_changed();
-	void custom_device_mode_changed();
+	void model_changed(const std::string& model);
+	void custom_device_mode_changed(const std::string& mode);
 
 	void append_extra_display_menu_items ();
 	void build_automation_action_menu (bool);
@@ -138,8 +139,8 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	Gtk::HBox                    _channel_status_box;
 	Gtk::VBox                    _midi_controls_box;
 	MidiChannelSelectorWindow*   _channel_selector;
-	Gtk::ComboBoxText            _midnam_model_selector;
-	Gtk::ComboBoxText            _midnam_custom_device_mode_selector;
+	ArdourDropdown               _midnam_model_selector;
+	ArdourDropdown               _midnam_custom_device_mode_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
 	Gtk::Menu*                    default_channel_menu;
