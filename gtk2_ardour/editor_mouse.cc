@@ -329,13 +329,37 @@ Editor::internal_editing() const
 void
 Editor::update_time_selection_display ()
 {
-	switch (mouse_mode) {
-	case MouseRange:
-		selection->clear_objects ();
-		break;
-	default:
-		selection->clear_time ();
-		break;
+	if (smart_mode_action->get_active()) {
+		/* not sure what to do here */
+		if (mouse_mode == MouseObject) {
+		} else {
+		}
+	} else {
+		switch (mouse_mode) {
+		case MouseRange:
+			selection->clear_objects ();
+			selection->ClearMidiNoteSelection();  //signal
+			break;
+		case MouseObject:
+			selection->clear_objects ();
+			selection->clear_time ();
+			selection->clear_tracks ();
+			selection->ClearMidiNoteSelection();  //signal
+			break;
+		case MouseContent:
+		case MouseDraw:
+			//if we go into internal editing, clear everything in the outside world
+			selection->clear_objects ();
+			selection->clear_time ();
+			selection->clear_tracks ();
+			break;
+		default:
+			//clear everything
+			selection->clear_objects ();
+			selection->clear_time ();
+			selection->clear_tracks ();
+			break;
+		}
 	}
 }
 

@@ -356,6 +356,11 @@ private:
 	PBD::ScopedConnection _selection_cleared_connection;
 	void selection_cleared (MidiRegionView *);
 
+	/** this handles the case when the "external" world wants us to clear our internal selections
+	 */
+	PBD::ScopedConnection _clear_midi_selection_connection;
+	void clear_midi_selection () { clear_selection(); }
+
 	friend class EditNoteDialog;
 
 	/** Play the NoteOn event of the given note immediately
