@@ -780,7 +780,7 @@ CrossfadeEditor::apply_preset (Preset *preset)
 void
 CrossfadeEditor::apply ()
 {
-	_session->begin_reversible_command (_("Edit crossfade"));
+	the_editor().begin_reversible_command (_("Edit crossfade"));
 
 	XMLNode& before = xfade->get_state ();
 
@@ -793,7 +793,7 @@ CrossfadeEditor::apply ()
 			)
 		);
 
-	_session->commit_reversible_command ();
+	the_editor().commit_reversible_command ();
 }
 
 void

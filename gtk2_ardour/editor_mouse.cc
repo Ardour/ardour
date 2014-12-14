@@ -2344,8 +2344,6 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	clicked_routeview->playlist()->add_region (region, selection->time[clicked_selection].start);
 	_session->add_command(new StatefulDiffCommand (playlist));
 
-	commit_reversible_command ();
-
 	c.disconnect ();
 
 	if (latest_regionviews.empty()) {
@@ -2356,7 +2354,10 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	/* we need to deselect all other regionviews, and select this one
 	   i'm ignoring undo stuff, because the region creation will take care of it
 	*/
+
 	selection->set (latest_regionviews);
+
+	commit_reversible_command ();
 
 	_drags->set (new RegionMoveDrag (this, latest_regionviews.front()->get_canvas_group(), latest_regionviews.front(), latest_regionviews, false, false), event);
 }

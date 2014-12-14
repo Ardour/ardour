@@ -1206,6 +1206,7 @@ Selection::get_state () const
 	   so that re-opening plugin windows for editor mixer strips works
 	*/
 
+	char buf[32];
 	XMLNode* node = new XMLNode (X_("Selection"));
 
 	for (TrackSelection::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
@@ -1221,9 +1222,23 @@ Selection::get_state () const
 		}
 	}
 
+	for (RegionSelection::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		XMLNode* r = node->add_child (X_("Region"));
+		r->add_property (X_("id"), atoi ((*i)->region ()->id ().to_s ().c_str()));
+		
+	}
+
+	for (TimeSelection::const_iterator i = time.begin(); i != time.end(); ++i) {
+		XMLNode* t = node->add_child (X_("AudioRange"));
+		snprintf(buf, sizeof(buf), "%ld", (*i).start);
+		t->add_property (X_("start"), string(buf));
+		snprintf(buf, sizeof(buf), "%ld", (*i).end);
+		t->add_property (X_("end"), string(buf));
+	}
+	
 	for (MarkerSelection::const_iterator i = markers.begin(); i != markers.end(); ++i) {
 		XMLNode* t = node->add_child (X_("Marker"));
-
+		
 		bool is_start;
 		Location* loc = editor->find_location_from_marker (*i, is_start);
 
@@ -1241,6 +1256,11 @@ Selection::set_state (XMLNode const & node, int)
 		return -1;
 	}
 
+	clear_regions ();
+	clear_time ();
+	clear_tracks ();
+	clear_markers ();
+
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("RouteView")) {
@@ -1252,6 +1272,36 @@ Selection::set_state (XMLNode const & node, int)
 			if (rtv) {
 				add (rtv);
 			}
+
+		} else if ((*i)->name() == X_("Region")) {
+			XMLProperty* prop_id = (*i)->property (X_("id"));
+			assert (prop_id);
+			PBD::ID id (prop_id->value ());
+			
+			RegionSelection rs;
+			editor->get_regionviews_by_id (id, rs);
+			
+			if (!rs.empty ()) {
+				add (rs);
+			} else {
+				/*
+				  regionviews are being constructed - stash the region IDs 
+				  so we can identify them in Editor::region_view_added ()
+				*/
+				regions.pending.push_back (id);
+			}
+			
+		} else if  ((*i)->name() == X_("AudioRange")) {
+			XMLProperty* prop_start = (*i)->property (X_("start"));
+			XMLProperty* prop_end = (*i)->property (X_("end"));
+
+			assert (prop_start);
+			assert (prop_end);
+
+			framepos_t s (atol (prop_start->value ().c_str()));
+			framepos_t e (atol (prop_end->value ().c_str()));
+
+			set_preserving_all_ranges (s, e);
 
 		} else if ((*i)->name() == X_("AutomationView")) {
 

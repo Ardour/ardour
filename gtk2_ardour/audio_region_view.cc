@@ -1237,7 +1237,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 	   can represent automation data with it.
 	*/
 
-	trackview.session()->begin_reversible_command (_("add gain control point"));
+	trackview.editor().begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope()->get_state();
 
 	if (!audio_region()->envelope_active()) {
@@ -1251,7 +1251,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 	XMLNode &after = audio_region()->envelope()->get_state();
 	trackview.session()->add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
-	trackview.session()->commit_reversible_command ();
+	trackview.editor().commit_reversible_command ();
 }
 
 void

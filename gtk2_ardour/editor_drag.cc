@@ -840,6 +840,12 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (_copy && first_move) {
 
+		if (_x_constrained) {
+			_editor->begin_reversible_command (Operations::fixed_time_region_copy);
+		} else {
+			_editor->begin_reversible_command (Operations::region_copy);
+		}
+
 		/* duplicate the regionview(s) and region(s) */
 
 		list<DraggingView> new_regionviews;
@@ -889,6 +895,14 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			_views = new_regionviews;
 
 			swap_grab (new_regionviews.front().view->get_canvas_group (), 0, event ? event->motion.time : 0);
+		}
+
+	} else if (!_copy && first_move) {
+
+		if (_x_constrained) {
+			_editor->begin_reversible_command (_("fixed time region drag"));
+		} else {
+			_editor->begin_reversible_command (Operations::region_drag);
 		}
 	}
 
@@ -1020,12 +1034,6 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		return;
 	}
 
-	if (_x_constrained) {
-		_editor->begin_reversible_command (Operations::fixed_time_region_copy);
-	} else {
-		_editor->begin_reversible_command (Operations::region_copy);
-	}
-
 	/* insert the regions into their new playlists */
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
 
@@ -1100,12 +1108,6 @@ RegionMoveDrag::finished_no_copy (
 		/* all changes were made during motion event handlers */
 		_editor->commit_reversible_command ();
 		return;
-	}
-
-	if (_x_constrained) {
-		_editor->begin_reversible_command (_("fixed time region drag"));
-	} else {
-		_editor->begin_reversible_command (Operations::region_drag);
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
@@ -3632,7 +3634,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_point->line().end_drag (_pushing, _final_index);
-	_editor->session()->commit_reversible_command ();
+	_editor->commit_reversible_command ();
 }
 
 void
@@ -3746,7 +3748,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 		}
 	}
 
-	_editor->session()->commit_reversible_command ();
+	_editor->commit_reversible_command ();
 }
 
 void
@@ -5043,7 +5045,7 @@ AutomationRangeDrag::finished (GdkEvent* event, bool)
 		i->line->end_drag (false, 0);
 	}
 
-	_editor->session()->commit_reversible_command ();
+	_editor->commit_reversible_command ();
 }
 
 void
@@ -5189,9 +5191,11 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 	}
 	
 	Selection::Operation op = ArdourKeyboard::selection_type (button_state);
-	
+
 	_editor->begin_reversible_command (_("rubberband selection"));
+
 	_editor->select_all_within (x1, x2 - 1, y1, y2, _editor->track_views, op, false);
+
 	_editor->commit_reversible_command ();
 }
 
