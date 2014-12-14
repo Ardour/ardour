@@ -878,9 +878,9 @@
                           pageincrement="1"/>
               <Fader id="color_fader"
                      adjustment="color_adjustment"
-                     facesource="horizontal_zoom_fader_face.png"
-                     handlesource="zoom_fader_handle.png"
-                     activehandlesource="zoom_fader_handle_active.png"
+                     facesource="horizontal_zoom_fader_face"
+                     handlesource="zoom_fader_handle"
+                     activehandlesource="zoom_fader_handle_active"
                      x="1"
                      y="1"
                      minposx="20"
