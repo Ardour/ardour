@@ -112,6 +112,8 @@ MouseCursors::drop_all ()
 	delete move; move = 0;
 	delete expand_left_right; expand_left_right = 0;
 	delete expand_up_down; expand_up_down = 0;
+
+        /* no need to drop _invalid */
 }
 
 Gdk::Cursor*
@@ -145,20 +147,35 @@ MouseCursors::set_cursor_set (const std::string& name)
 	   sets should come with a hotspot info file.
 	*/
 
+        /* using a null GdkCursor* in a call to gdk_window_set_cursor()
+           causes the GdkWindow to use the cursor of the parent window.
+
+           Since we never set the cursor for the top level window(s),
+           this will be default cursor on a given platform. 
+           
+           Obviously, if this was used with deeply nested windows
+           some of which have non-default cursors and some don't,
+           this might fail, but in reality we use it only in cases
+           of single nesting or non-non-default cursors.
+        */
+
+#define DEFAULT_PLATFORM_CURSOR (Gdk::Cursor*) 0
+
 	zoom_in = make_cursor ("zoom_in_cursor", 10, 5);
 	zoom_out = make_cursor ("zoom_out_cursor", 5, 5);
 	scissors = make_cursor ("scissors", 5, 0);
-	grabber = make_cursor ("grabber", 5, 0);
+        all_direction_move = new Cursor (FLEUR);
+	grabber = DEFAULT_PLATFORM_CURSOR;
+	grabber_edit_point = DEFAULT_PLATFORM_CURSOR;
 	grabber_note = make_cursor ("grabber_note", 5, 10);
-	grabber_edit_point = make_cursor ("grabber_edit_point", 5, 4);
 	left_side_trim = make_cursor ("trim_left_cursor", 5, 11);
 	anchored_left_side_trim = make_cursor ("anchored_trim_left_cursor", 5, 11);
 	right_side_trim = make_cursor ("trim_right_cursor", 23, 11);
 	anchored_right_side_trim = make_cursor ("anchored_trim_right_cursor", 23, 11);
 	left_side_trim_right_only = make_cursor ("trim_left_cursor_right_only", 5, 11);
 	right_side_trim_left_only = make_cursor ("trim_right_cursor_left_only", 23, 11);
-	fade_in = make_cursor ("fade_in_cursor", 0, 0);
-	fade_out = make_cursor ("fade_out_cursor", 29, 0);
+	fade_in = new Cursor(LEFT_PTR);
+	fade_out = new Cursor(LEFT_PTR);
 	resize_left = make_cursor ("resize_left_cursor", 3, 10);
 	resize_top_left = make_cursor ("resize_top_left_cursor", 3, 3);
 	resize_top = make_cursor ("resize_top_cursor", 10, 3);
@@ -170,7 +187,7 @@ MouseCursors::set_cursor_set (const std::string& name)
 	move = make_cursor ("move_cursor", 11, 11);
 	expand_left_right = make_cursor ("expand_left_right_cursor", 11, 4);
 	expand_up_down = make_cursor ("expand_up_down_cursor", 4, 11);
-	selector = make_cursor ("i_beam_cursor", 4, 11);
+        selector = new Cursor (XTERM); /* odd but this is actually an I-Beam */
 
 	Gdk::Color fbg ("#ffffff");
 	Gdk::Color ffg ("#000000");
@@ -198,20 +215,10 @@ MouseCursors::set_cursor_set (const std::string& name)
 	trimmer =  new Cursor (SB_H_DOUBLE_ARROW);
 	time_fx = new Cursor (SIZING);
 	wait = new Cursor (WATCH);
-	timebar = new Cursor(LEFT_PTR);
+	timebar = DEFAULT_PLATFORM_CURSOR;
 	midi_pencil = new Cursor (PENCIL);
 	midi_select = new Cursor (CENTER_PTR);
 	midi_resize = new Cursor (SIZING);
 	midi_erase = new Cursor (DRAPED_BOX);
 	up_down = new Cursor (SB_V_DOUBLE_ARROW);
-
-
-	{
-		char pix[4] = { 0, 0, 0, 0 };
-		RefPtr<Bitmap> bits = Bitmap::create (pix, 2, 2);
-		Color c;
-		_invalid = new Cursor (bits, bits, c, c, 0, 0);
-	}
-
-
 }

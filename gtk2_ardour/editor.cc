@@ -352,7 +352,7 @@ Editor::Editor ()
 	clicked_routeview = 0;
 	clicked_control_point = 0;
 	last_update_frame = 0;
-    pre_press_cursor = 0;
+        pre_press_cursor = _cursors->invalid_cursor ();
 	_drags = new DragManager (this);
 	lock_dialog = 0;
 	ruler_dialog = 0;

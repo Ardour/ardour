@@ -434,7 +434,7 @@ Editor::reset_controls_layout_height (int32_t h)
 bool
 Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 {
-	if (current_canvas_cursor) {
+	if (!MouseCursors::is_invalid (current_canvas_cursor)) {
 		set_canvas_cursor (current_canvas_cursor);
 	}
 	return false;
@@ -1082,15 +1082,19 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 
 	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
 
-	if (win && cursor) {
-	        win->set_cursor (*cursor);
-	}
+	if (win && !MouseCursors::is_invalid (cursor)) {
+                if (cursor) {
+                        win->set_cursor (*cursor);
+                } else {
+                        win->set_cursor ();
+                }
+        }
 }
 
 void
 Editor::push_canvas_cursor (Gdk::Cursor* cursor)
 {
-	if (cursor) {
+	if (!MouseCursors::is_invalid (cursor)) {
 		_cursor_stack.push (cursor);
 		set_canvas_cursor (cursor, false);
 	}
@@ -1179,7 +1183,7 @@ Editor::which_trim_cursor (bool left) const
 Gdk::Cursor*
 Editor::which_mode_cursor () const
 {
-	Gdk::Cursor* mode_cursor = 0;
+	Gdk::Cursor* mode_cursor = _cursors->invalid_cursor();
 
 	switch (mouse_mode) {
 	case MouseRange:
@@ -1259,7 +1263,7 @@ Editor::which_mode_cursor () const
 Gdk::Cursor*
 Editor::which_track_cursor () const
 {
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = _cursors->invalid_cursor();
 
 	assert (mouse_mode == MouseObject || get_smart_mode());
 
@@ -1287,11 +1291,11 @@ Editor::reset_canvas_cursor ()
 
 	Gdk::Cursor* cursor = which_mode_cursor ();
 
-	if (!cursor) {
+	if (MouseCursors::is_invalid (cursor)) {
 		cursor = which_grabber_cursor ();
 	}
 		
-	if (cursor) {
+	if (!MouseCursors::is_invalid (cursor)) {
 		set_canvas_cursor (cursor);
 		return true;
 	}
@@ -1302,7 +1306,7 @@ Editor::reset_canvas_cursor ()
 void
 Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType type)
 {
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = _cursors->invalid_cursor ();
 
 	if (_drags->active()) {
 		return;
@@ -1383,13 +1387,13 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		case CrossfadeViewItem:
 			cursor = _cursors->cross_hair;
 			break;
-        case SelectionItem:
-            cursor = which_grabber_cursor();
-            break;
+                case SelectionItem:
+                        cursor = which_grabber_cursor();
+                        break;
 		default:
 			break;
 		}
-
+                
 	} else if (mouse_mode == MouseGain) {
 		
 		/* ControlPointItem is not really specific to region gain mode
@@ -1408,16 +1412,16 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 			break;
 		}
         
-    } else if (mouse_mode == MouseRange) {
+        } else if (mouse_mode == MouseRange) {
         
-        switch (type) {
-        case SelectionItem:
-            cursor = which_grabber_cursor();
-            break;
-        default:
-            break;
+                switch (type) {
+                case SelectionItem:
+                        cursor = _cursors->all_direction_move;
+                        break;
+                default:
+                        break;
+                }
         }
-    }
 
 	switch (type) {
 		/* These items use the timebar cursor at all times */
@@ -1429,7 +1433,7 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 		cursor = _cursors->timebar;
 		break;
 
-    /* These items use the grabber cursor at all times */
+                /* These items use the grabber cursor at all times */
 	case MeterMarkerItem:
 	case TempoMarkerItem:
 	case MeterBarItem:
@@ -1440,13 +1444,13 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	case CdMarkerBarItem:
 	case VideoBarItem:
 	case DropZoneItem:
-        cursor = which_grabber_cursor();
-        break;
+                cursor = which_grabber_cursor();
+                break;
 	default:
 		break;
 	}
 
-	if (cursor) {
+	if (!MouseCursors::is_invalid (cursor)) {
 		set_canvas_cursor (cursor, false);
 	}
 }

@@ -110,8 +110,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container *parent, RouteTimeAxisVi
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, pre_enter_cursor (0)
-	, pre_press_cursor (0)
+	, pre_enter_cursor (MouseCursors::invalid_cursor())
+	, pre_press_cursor (MouseCursors::invalid_cursor())
 	, _note_player (0)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -147,8 +147,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container *parent, RouteTimeAxisVi
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, pre_enter_cursor (0)
-	, pre_press_cursor (0)
+	, pre_enter_cursor (MouseCursors::invalid_cursor())
+	, pre_press_cursor (MouseCursors::invalid_cursor())
 	, _note_player (0)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -193,8 +193,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, pre_enter_cursor (0)
-	, pre_press_cursor (0)
+	, pre_enter_cursor (MouseCursors::invalid_cursor())
+	, pre_press_cursor (MouseCursors::invalid_cursor())
 	, _note_player (0)
 {
 	init (false);
@@ -221,8 +221,8 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _no_sound_notes (false)
 	, _last_event_x (0)
 	, _last_event_y (0)
-	, pre_enter_cursor (0)
-	, pre_press_cursor (0)
+	, pre_enter_cursor (MouseCursors::invalid_cursor())
+	, pre_press_cursor (MouseCursors::invalid_cursor())
 	, _note_player (0)
 {
 	init (true);
@@ -411,9 +411,9 @@ MidiRegionView::leave_notify (GdkEventCrossing*)
 	trackview.editor().verbose_cursor()->hide ();
 	remove_ghost_note ();
 
-	if (pre_enter_cursor) {
+	if (!MouseCursors::is_invalid (pre_enter_cursor)) {
 		Editor* editor = dynamic_cast<Editor *> (&trackview.editor());
-		editor->set_canvas_cursor(pre_enter_cursor);
+		editor->set_canvas_cursor (pre_enter_cursor);
 	}
 
 	return false;
@@ -482,9 +482,9 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 	PublicEditor& editor = trackview.editor ();
 
-	if (pre_press_cursor) {
+	if (!MouseCursors::is_invalid (pre_press_cursor)) {
 		dynamic_cast<Editor*>(&editor)->set_canvas_cursor (pre_press_cursor, false);
-		pre_press_cursor = 0;
+		pre_press_cursor = MouseCursors::invalid_cursor();
 	}
 
 	switch (_mouse_state) {
@@ -3130,9 +3130,9 @@ MidiRegionView::note_left (NoteBase*)
 
 	editor->verbose_cursor()->hide ();
 
-	if (pre_enter_cursor) {
+	if (!MouseCursors::is_invalid (pre_enter_cursor)) {
 		editor->set_canvas_cursor (pre_enter_cursor);
-		pre_enter_cursor = 0;
+		pre_enter_cursor = MouseCursors::invalid_cursor();
 	}
 }
 

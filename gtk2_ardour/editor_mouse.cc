@@ -1441,9 +1441,9 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	framepos_t where = canvas_event_sample (event);
 	AutomationTimeAxisView* atv = 0;
 
-        if (pre_press_cursor) {
+        if (!MouseCursors::is_invalid (pre_press_cursor)) {
                 set_canvas_cursor (pre_press_cursor);
-                pre_press_cursor = 0;
+                pre_press_cursor = _cursors->invalid_cursor();
         }
 
 	/* no action if we're recording */
