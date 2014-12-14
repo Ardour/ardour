@@ -402,13 +402,7 @@
     <ColorAlias name="rude solo: fill" alias="color 20"/>
     <ColorAlias name="rude solo: fill active" alias="color 86"/>
     <ColorAlias name="rude solo: led active" alias="color 4"/>
-<<<<<<< Updated upstream
-    <ColorAlias name="rude solo: text" alias="color 21"/>
-    <ColorAlias name="rude solo: text active" alias="color 22"/>
     <ColorAlias name="ruler base" alias="color 67"/>
-=======
-    <ColorAlias name="ruler base" alias="color 90"/>
->>>>>>> Stashed changes
     <ColorAlias name="ruler text" alias="color 22"/>
     <ColorAlias name="secondary clock: background" alias="color 67"/>
     <ColorAlias name="secondary clock: cursor" alias="color 8"/>
@@ -449,13 +443,7 @@
     <ColorAlias name="solo safe: fill" alias="color 25"/>
     <ColorAlias name="solo safe: fill active" alias="color 42"/>
     <ColorAlias name="solo safe: led active" alias="color 9"/>
-<<<<<<< Updated upstream
-    <ColorAlias name="solo safe: text" alias="color 26"/>
-    <ColorAlias name="solo safe: text active" alias="color 26"/>
     <ColorAlias name="stereo panner bg" alias="color 67"/>
-=======
-    <ColorAlias name="stereo panner bg" alias="color 61"/>
->>>>>>> Stashed changes
     <ColorAlias name="stereo panner fill" alias="color 74"/>
     <ColorAlias name="stereo panner inverted bg" alias="color 61"/>
     <ColorAlias name="stereo panner inverted fill" alias="color 100"/>
