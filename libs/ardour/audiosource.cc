@@ -322,7 +322,7 @@ AudioSource::read_peaks (PeakData *peaks, framecnt_t npeaks, framepos_t start, f
 
 struct ScopedFileDescriptor {
 	ScopedFileDescriptor (int fd) : _fd (fd) {}
-	~ScopedFileDescriptor() { close (_fd); }
+	~ScopedFileDescriptor() { if ((-1) != _fd) close (_fd); }
 	operator int() { return _fd; }
 	int _fd;
 };
