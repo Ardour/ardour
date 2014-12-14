@@ -915,8 +915,8 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 
 	if (timestretch_rect == 0) {
 		timestretch_rect = new ArdourCanvas::Rectangle (canvas_display ());
-		timestretch_rect->set_fill_color (ARDOUR_UI::config()->get_TimeStretchFill());
-		timestretch_rect->set_outline_color (ARDOUR_UI::config()->get_TimeStretchOutline());
+		timestretch_rect->set_fill_color (ARDOUR_UI::config()->color ("TimeStretchFill"));
+		timestretch_rect->set_outline_color (ARDOUR_UI::config()->color ("TimeStretchOutline"));
 	}
 
 	timestretch_rect->show ();
@@ -1813,11 +1813,11 @@ RouteTimeAxisView::color_handler ()
 {
 	//case cTimeStretchOutline:
 	if (timestretch_rect) {
-		timestretch_rect->set_outline_color (ARDOUR_UI::config()->get_TimeStretchOutline());
+		timestretch_rect->set_outline_color (ARDOUR_UI::config()->color ("TimeStretchOutline"));
 	}
 	//case cTimeStretchFill:
 	if (timestretch_rect) {
-		timestretch_rect->set_fill_color (ARDOUR_UI::config()->get_TimeStretchFill());
+		timestretch_rect->set_fill_color (ARDOUR_UI::config()->color ("TimeStretchFill"));
 	}
 
 	reset_meter();

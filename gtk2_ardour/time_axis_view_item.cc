@@ -201,9 +201,9 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
 
 		if (_recregion) {
-			frame->set_outline_color (ARDOUR_UI::config()->get_RecordingRect());
+			frame->set_outline_color (ARDOUR_UI::config()->color ("RecordingRect"));
 		} else {
-			frame->set_outline_color (ARDOUR_UI::config()->get_TimeAxisFrame());
+			frame->set_outline_color (ARDOUR_UI::config()->color ("TimeAxisFrame"));
 		}
 	}
 	
@@ -537,7 +537,7 @@ TimeAxisViewItem::set_selected(bool yn)
 		if (!selection_frame) {
 			selection_frame = new ArdourCanvas::TimeRectangle (group);
 			selection_frame->set_fill (false);
-			selection_frame->set_outline_color (ARDOUR_UI::config()->get_SelectedTimeAxisFrame());
+			selection_frame->set_outline_color (ARDOUR_UI::config()->color ("SelectedTimeAxisFrame"));
 			selection_frame->set_ignore_events (true);
 		}
 		selection_frame->set (frame->get().shrink (1.0));
@@ -729,7 +729,7 @@ TimeAxisViewItem::fill_opacity () const
 		return 130;
 	}
 
-	uint32_t col = ARDOUR_UI::config()->get_FrameBase();
+	uint32_t col = ARDOUR_UI::config()->color ("FrameBase");
 	return UINT_RGBA_A (col);
 }
 
@@ -743,7 +743,7 @@ TimeAxisViewItem::get_fill_color () const
 
 	if (_selected) {
 
-                f = ARDOUR_UI::config()->get_SelectedFrameBase();
+                f = ARDOUR_UI::config()->color ("SelectedFrameBase");
 
 		if (o == 0) {
 			/* some condition of this item has set fill opacity to
@@ -756,10 +756,10 @@ TimeAxisViewItem::get_fill_color () const
 	} else {
 
 		if (_recregion) {
-			f = ARDOUR_UI::config()->get_RecordingRect();
+			f = ARDOUR_UI::config()->color ("RecordingRect");
 		} else {
 			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->get_FrameBase();
+				f = ARDOUR_UI::config()->color ("FrameBase");
 			} else {
 				f = fill_color;
 			}
@@ -783,7 +783,7 @@ TimeAxisViewItem::set_frame_color()
 	set_frame_gradient ();
 
 	if (!_recregion) {
-		uint32_t f = ARDOUR_UI::config()->get_TimeAxisFrame();
+		uint32_t f = ARDOUR_UI::config()->color ("TimeAxisFrame");
 
 		if (!rect_visible) {
 			/* make the frame outline be visible but rather transparent */
@@ -910,8 +910,8 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			if (!vestigial_frame) {
 				vestigial_frame = new ArdourCanvas::TimeRectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
 				CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
-				vestigial_frame->set_outline_color (ARDOUR_UI::config()->get_VestigialFrame());
-				vestigial_frame->set_fill_color (ARDOUR_UI::config()->get_VestigialFrame());
+				vestigial_frame->set_outline_color (ARDOUR_UI::config()->color ("VestigialFrame"));
+				vestigial_frame->set_fill_color (ARDOUR_UI::config()->color ("VestigialFrame"));
 				vestigial_frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 			}
 

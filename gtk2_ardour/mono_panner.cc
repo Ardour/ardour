@@ -487,12 +487,12 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-        colors.fill = ARDOUR_UI::config()->get_MonoPannerFill();
-        colors.outline = ARDOUR_UI::config()->get_MonoPannerOutline();
-        colors.text = ARDOUR_UI::config()->get_MonoPannerText();
-        colors.background = ARDOUR_UI::config()->get_MonoPannerBackground();
-        colors.pos_outline = ARDOUR_UI::config()->get_MonoPannerPositionOutline();
-        colors.pos_fill = ARDOUR_UI::config()->get_MonoPannerPositionFill();
+        colors.fill = ARDOUR_UI::config()->color ("MonoPannerFill");
+        colors.outline = ARDOUR_UI::config()->color ("MonoPannerOutline");
+        colors.text = ARDOUR_UI::config()->color ("MonoPannerText");
+        colors.background = ARDOUR_UI::config()->color ("MonoPannerBackground");
+        colors.pos_outline = ARDOUR_UI::config()->color ("MonoPannerPositionOutline");
+        colors.pos_fill = ARDOUR_UI::config()->color ("MonoPannerPositionFill");
 }
 
 void

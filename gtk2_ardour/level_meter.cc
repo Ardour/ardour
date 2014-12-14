@@ -273,36 +273,36 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		uint32_t b[4];
 		float stp[4];
 		int styleflags = Config->get_meter_style_led() ? 3 : 1;
-		b[0] = ARDOUR_UI::config()->get_MeterBackgroundBot();
-		b[1] = ARDOUR_UI::config()->get_MeterBackgroundTop();
+		b[0] = ARDOUR_UI::config()->color ("MeterBackgroundBot");
+		b[1] = ARDOUR_UI::config()->color ("MeterBackgroundTop");
 		b[2] = 0x991122ff; // red highlight gradient Bot
 		b[3] = 0x551111ff; // red highlight gradient Top
 		if (n < nmidi) {
-			c[0] = ARDOUR_UI::config()->get_MidiMeterColor0();
-			c[1] = ARDOUR_UI::config()->get_MidiMeterColor1();
-			c[2] = ARDOUR_UI::config()->get_MidiMeterColor2();
-			c[3] = ARDOUR_UI::config()->get_MidiMeterColor3();
-			c[4] = ARDOUR_UI::config()->get_MidiMeterColor4();
-			c[5] = ARDOUR_UI::config()->get_MidiMeterColor5();
-			c[6] = ARDOUR_UI::config()->get_MidiMeterColor6();
-			c[7] = ARDOUR_UI::config()->get_MidiMeterColor7();
-			c[8] = ARDOUR_UI::config()->get_MidiMeterColor8();
-			c[9] = ARDOUR_UI::config()->get_MidiMeterColor9();
+			c[0] = ARDOUR_UI::config()->color ("MidiMeterColor0");
+			c[1] = ARDOUR_UI::config()->color ("MidiMeterColor1");
+			c[2] = ARDOUR_UI::config()->color ("MidiMeterColor2");
+			c[3] = ARDOUR_UI::config()->color ("MidiMeterColor3");
+			c[4] = ARDOUR_UI::config()->color ("MidiMeterColor4");
+			c[5] = ARDOUR_UI::config()->color ("MidiMeterColor5");
+			c[6] = ARDOUR_UI::config()->color ("MidiMeterColor6");
+			c[7] = ARDOUR_UI::config()->color ("MidiMeterColor7");
+			c[8] = ARDOUR_UI::config()->color ("MidiMeterColor8");
+			c[9] = ARDOUR_UI::config()->color ("MidiMeterColor9");
 			stp[0] = 115.0 *  32.0 / 128.0;
 			stp[1] = 115.0 *  64.0 / 128.0;
 			stp[2] = 115.0 * 100.0 / 128.0;
 			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			c[0] = ARDOUR_UI::config()->get_MeterColor0();
-			c[1] = ARDOUR_UI::config()->get_MeterColor1();
-			c[2] = ARDOUR_UI::config()->get_MeterColor2();
-			c[3] = ARDOUR_UI::config()->get_MeterColor3();
-			c[4] = ARDOUR_UI::config()->get_MeterColor4();
-			c[5] = ARDOUR_UI::config()->get_MeterColor5();
-			c[6] = ARDOUR_UI::config()->get_MeterColor6();
-			c[7] = ARDOUR_UI::config()->get_MeterColor7();
-			c[8] = ARDOUR_UI::config()->get_MeterColor8();
-			c[9] = ARDOUR_UI::config()->get_MeterColor9();
+			c[0] = ARDOUR_UI::config()->color ("MeterColor0");
+			c[1] = ARDOUR_UI::config()->color ("MeterColor1");
+			c[2] = ARDOUR_UI::config()->color ("MeterColor2");
+			c[3] = ARDOUR_UI::config()->color ("MeterColor3");
+			c[4] = ARDOUR_UI::config()->color ("MeterColor4");
+			c[5] = ARDOUR_UI::config()->color ("MeterColor5");
+			c[6] = ARDOUR_UI::config()->color ("MeterColor6");
+			c[7] = ARDOUR_UI::config()->color ("MeterColor7");
+			c[8] = ARDOUR_UI::config()->color ("MeterColor8");
+			c[9] = ARDOUR_UI::config()->color ("MeterColor9");
 
 			switch (meter_type) {
 				case MeterK20:

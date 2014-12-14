@@ -579,6 +579,8 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 			color_aliases.insert (make_pair (name->value(), alias->value()));
 		}
 	}
+
+	cerr << "Color alias table contains " << color_aliases.size() << endl;
 }
 
 void

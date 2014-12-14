@@ -53,7 +53,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 void
 VerboseCursor::color_handler ()
 {
-	_canvas_item->set_color (ARDOUR_UI::config()->get_VerboseCanvasCursor());
+	_canvas_item->set_color (ARDOUR_UI::config()->color ("VerboseCanvasCursor"));
 }
 
 ArdourCanvas::Item *

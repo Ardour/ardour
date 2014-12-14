@@ -160,21 +160,21 @@ AudioRegionView::init (bool wfd)
 		fade_out_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out handle for %1", region()->name()));
 		fade_out_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
-		fade_out_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle")());
+		fade_out_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
 		fade_out_handle->set_data ("regionview", this);
 		fade_out_handle->hide ();
 
 		fade_in_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in trim handle for %1", region()->name()));
 		fade_in_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
-		fade_in_trim_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle")());
+		fade_in_trim_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
 		fade_in_trim_handle->set_data ("regionview", this);
 		fade_in_trim_handle->hide ();
 
 		fade_out_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out trim handle for %1", region()->name()));
 		fade_out_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
-		fade_out_trim_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle")());
+		fade_out_trim_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
 		fade_out_trim_handle->set_data ("regionview", this);
 		fade_out_trim_handle->hide ();
 	}
@@ -315,7 +315,7 @@ AudioRegionView::fade_in_active_changed ()
 		if (audio_region()->fade_in_active()) {
 			start_xfade_rect->set_fill (false);
 		} else {
-			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->color ("inactive crossfade");
+			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->color ("inactive crossfade"));
 			start_xfade_rect->set_fill (true);
 		}
 	}
@@ -328,7 +328,7 @@ AudioRegionView::fade_out_active_changed ()
 		if (audio_region()->fade_out_active()) {
 			end_xfade_rect->set_fill (false);
 		} else {	
-			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->color ("inactive crossfade");
+			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->color ("inactive crossfade"));
 			end_xfade_rect->set_fill (true);
 		}
 	}
@@ -1405,24 +1405,24 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 	if (_selected) {
 		if (_region->muted()) {
 			/* hide outline with zero alpha */
-			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_SelectedWaveForm(), 0);
-			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_SelectedWaveFormFill(), MUTED_ALPHA);
+			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("SelectedWaveForm"), 0);
+			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("SelectedWaveFormFill"), MUTED_ALPHA);
 		} else {
-			outline = ARDOUR_UI::config()->get_SelectedWaveForm();
-			fill = ARDOUR_UI::config()->get_SelectedWaveFormFill();
+			outline = ARDOUR_UI::config()->color ("SelectedWaveForm");
+			fill = ARDOUR_UI::config()->color ("SelectedWaveFormFill");
 		}
 	} else {
 		if (_recregion) {
-			outline = ARDOUR_UI::config()->get_RecWaveForm();
-			fill = ARDOUR_UI::config()->get_RecWaveFormFill();
+			outline = ARDOUR_UI::config()->color ("RecWaveForm");
+			fill = ARDOUR_UI::config()->color ("RecWaveFormFill");
 		} else {
 			if (_region->muted()) {
 				/* hide outline with zero alpha */
-				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_WaveForm(), 0);	
-				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_WaveFormFill(), MUTED_ALPHA);
+				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("WaveForm"), 0);	
+				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("WaveFormFill"), MUTED_ALPHA);
 			} else {
-				outline = ARDOUR_UI::config()->get_WaveForm();
-				fill = ARDOUR_UI::config()->get_WaveFormFill();
+				outline = ARDOUR_UI::config()->color ("WaveForm");
+				fill = ARDOUR_UI::config()->color ("WaveFormFill");
 			}
 		}
 	}
