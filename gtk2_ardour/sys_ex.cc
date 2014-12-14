@@ -35,8 +35,8 @@ SysEx::SysEx (
 	_flag = new ArdourCanvas::Flag (
 		parent,
 		height, 
-		ARDOUR_UI::config()->color ("MidiSysExOutline"),
-		ARDOUR_UI::config()->color ("MidiSysExFill"),
+		ARDOUR_UI::config()->color ("midi sysex outline"),
+		ARDOUR_UI::config()->color ("midi sysex fill"),
 		ArdourCanvas::Duple (x, y)
 		);
 	

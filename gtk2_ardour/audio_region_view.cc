@@ -1399,30 +1399,30 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 {
 	ArdourCanvas::Color fill;
 	ArdourCanvas::Color outline;
-	ArdourCanvas::Color clip = ARDOUR_UI::config()->color ("waveform clip");
+	ArdourCanvas::Color clip = ARDOUR_UI::config()->color ("clipped waveform");
 	ArdourCanvas::Color zero = ARDOUR_UI::config()->color ("zero line");
 
 	if (_selected) {
 		if (_region->muted()) {
 			/* hide outline with zero alpha */
-			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("SelectedWaveForm"), 0);
-			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("SelectedWaveFormFill"), MUTED_ALPHA);
+			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("selected waveform outline"), 0);
+			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("selected waveform fill"), MUTED_ALPHA);
 		} else {
-			outline = ARDOUR_UI::config()->color ("SelectedWaveForm");
-			fill = ARDOUR_UI::config()->color ("SelectedWaveFormFill");
+			outline = ARDOUR_UI::config()->color ("selected waveform outline");
+			fill = ARDOUR_UI::config()->color ("selected waveform fill");
 		}
 	} else {
 		if (_recregion) {
-			outline = ARDOUR_UI::config()->color ("RecWaveForm");
-			fill = ARDOUR_UI::config()->color ("RecWaveFormFill");
+			outline = ARDOUR_UI::config()->color ("recording waveform outline");
+			fill = ARDOUR_UI::config()->color ("recording waveform fill");
 		} else {
 			if (_region->muted()) {
 				/* hide outline with zero alpha */
-				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("WaveForm"), 0);	
-				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("WaveFormFill"), MUTED_ALPHA);
+				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("waveform outline"), 0);	
+				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("waveform fill"), MUTED_ALPHA);
 			} else {
-				outline = ARDOUR_UI::config()->color ("WaveForm");
-				fill = ARDOUR_UI::config()->color ("WaveFormFill");
+				outline = ARDOUR_UI::config()->color ("waveform outline");
+				fill = ARDOUR_UI::config()->color ("waveform fill");
 			}
 		}
 	}

@@ -2621,7 +2621,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 
 			// calculate the colors: get the color settings
 			uint32_t fill_color = UINT_RGBA_CHANGE_A(
-				ARDOUR_UI::config()->color ("MidiNoteSelected"),
+				ARDOUR_UI::config()->color ("midi note selected"),
 				128);
 
 			// make the resize preview notes more transparent and bright
@@ -2634,7 +2634,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 				0.85));
 
 			resize_rect->set_outline_color (NoteBase::calculate_outline (
-								ARDOUR_UI::config()->color ("MidiNoteSelected")));
+								ARDOUR_UI::config()->color ("midi note selected")));
 
 			resize_data->resize_rect = resize_rect;
 			_resize_data.push_back(resize_data);
@@ -3281,9 +3281,9 @@ MidiRegionView::set_frame_color()
 	}
 
 	if (_selected) {
-		f = ARDOUR_UI::config()->color ("SelectedFrameBase");
+		f = ARDOUR_UI::config()->color ("selected frame base");
 	} else if (high_enough_for_name) {
-		f= ARDOUR_UI::config()->color ("MidiFrameBase");
+		f= ARDOUR_UI::config()->color ("midi frame base");
 	} else {
 		f = fill_color;
 	}

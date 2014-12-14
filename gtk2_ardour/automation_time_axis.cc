@@ -124,7 +124,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	CANVAS_DEBUG_NAME (_base_rect, string_compose ("base rect for %1", _name));
 	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
 	_base_rect->set_outline (false);
-	_base_rect->set_fill_color (ARDOUR_UI::config()->color ("AutomationTrackFill"));
+	_base_rect->set_fill_color (ARDOUR_UI::config()->color ("automation track fill"));
 	_base_rect->set_data ("trackview", this);
 	_base_rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event), _base_rect, this));
 	if (!a) {
@@ -257,7 +257,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				)
 			);
 
-		line->set_line_color (ARDOUR_UI::config()->color ("ProcessorAutomationLine"));
+		line->set_line_color (ARDOUR_UI::config()->color ("processor automation line"));
 		line->queue_reset ();
 		add_line (line);
 	}

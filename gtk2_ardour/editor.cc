@@ -390,11 +390,11 @@ Editor::Editor ()
 
 	sfbrowser = 0;
 
-	location_marker_color = ARDOUR_UI::config()->color ("LocationMarker");
-	location_range_color = ARDOUR_UI::config()->color ("LocationRange");
-	location_cd_marker_color = ARDOUR_UI::config()->color ("LocationCDMarker");
-	location_loop_color = ARDOUR_UI::config()->color ("LocationLoop");
-	location_punch_color = ARDOUR_UI::config()->color ("LocationPunch");
+	location_marker_color = ARDOUR_UI::config()->color ("location marker");
+	location_range_color = ARDOUR_UI::config()->color ("location range");
+	location_cd_marker_color = ARDOUR_UI::config()->color ("location cd marker");
+	location_loop_color = ARDOUR_UI::config()->color ("location loop");
+	location_punch_color = ARDOUR_UI::config()->color ("location punch");
 
 	zoom_focus = ZoomFocusLeft;
 	_edit_point = EditAtMouse;

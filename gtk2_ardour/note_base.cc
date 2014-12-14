@@ -96,7 +96,7 @@ NoteBase::show_velocity()
 	if (!_text) {
 		_text = new Text (_item->parent ());
 		_text->set_ignore_events (true);
-		_text->set_color (ARDOUR_UI::config()->color ("MidiNoteVelocityText"));
+		_text->set_color (ARDOUR_UI::config()->color ("midi note velocity text"));
 		_text->set_alignment (Pango::ALIGN_CENTER);
 	}
 
@@ -121,8 +121,8 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
 	if ( (selection & (1 << _note->channel())) == 0 ) {
-		set_fill_color(ARDOUR_UI::config()->color ("MidiNoteInactiveChannel"));
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("MidiNoteInactiveChannel")));
+		set_fill_color(ARDOUR_UI::config()->color ("midi note inactive channel"));
+		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("midi note inactive channel")));
 	} else {
 		// set the color according to the notes selection state
 		set_selected(_selected);
@@ -150,7 +150,7 @@ NoteBase::set_selected(bool selected)
 	set_fill_color (base_color());
         
 	if (_selected) {
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("MidiNoteSelected")));
+		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("midi note selected")));
 	} else {
 		set_outline_color(calculate_outline(base_color()));
 	}
@@ -174,13 +174,13 @@ NoteBase::base_color()
 	{
 		uint32_t color = _region.midi_stream_view()->get_region_color();
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (color, opacity), 
-		                         ARDOUR_UI::config()->color ("MidiNoteSelected"), 
+		                         ARDOUR_UI::config()->color ("midi note selected"), 
 					 0.5);
 	}
 
 	case ChannelColors:
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()], opacity), 
-		                         ARDOUR_UI::config()->color ("MidiNoteSelected()"), 0.5);
+		                         ARDOUR_UI::config()->color ("midi note selected"), 0.5);
 
 	default:
 		return meter_style_fill_color(_note->velocity(), selected());

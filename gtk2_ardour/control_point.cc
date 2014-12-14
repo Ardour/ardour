@@ -45,8 +45,8 @@ ControlPoint::ControlPoint (AutomationLine& al)
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
 	_item->set_fill (true);
-	_item->set_fill_color (ARDOUR_UI::config()->color ("ControlPointFill"));
-	_item->set_outline_color (ARDOUR_UI::config()->color ("ControlPointOutline"));
+	_item->set_fill_color (ARDOUR_UI::config()->color ("control point fill"));
+	_item->set_outline_color (ARDOUR_UI::config()->color ("control point outline"));
 	_item->set_data ("control_point", this);
 	_item->Event.connect (sigc::mem_fun (this, &ControlPoint::event_handler));
 
@@ -70,7 +70,7 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
 	_item->set_fill (true);
-	_item->set_outline_color (ARDOUR_UI::config()->color ("ControlPointOutline"));
+	_item->set_outline_color (ARDOUR_UI::config()->color ("control point outline"));
 
 	/* NOTE: no event handling in copied ControlPoints */
 
@@ -122,13 +122,13 @@ ControlPoint::set_color ()
 	uint32_t color = 0;
 
 	if (_selected) {
-		color = ARDOUR_UI::config()->color ("ControlPointSelected");
+		color = ARDOUR_UI::config()->color ("control point selected");
 	} else {
-		color = ARDOUR_UI::config()->color ("ControlPointOutline");
+		color = ARDOUR_UI::config()->color ("control point outline");
 	}
 
 	_item->set_outline_color (color);
-	_item->set_fill_color (ARDOUR_UI::config()->color ("ControlPointFill"));
+	_item->set_fill_color (ARDOUR_UI::config()->color ("control point fill"));
 }
 
 void
