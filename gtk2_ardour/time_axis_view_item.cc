@@ -743,7 +743,7 @@ TimeAxisViewItem::get_fill_color () const
 
 	if (_selected) {
 
-                f = ARDOUR_UI::config()->color ("selected frame base");
+                f = ARDOUR_UI::config()->color ("selected region base");
 
 		if (o == 0) {
 			/* some condition of this item has set fill opacity to
