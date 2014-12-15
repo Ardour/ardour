@@ -510,11 +510,12 @@ UIConfiguration::load_modifiers (XMLNode const & node)
 	XMLProperty const *mod;
 	
 	modifiers.clear ();
-
+	
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 		if ((*niter)->name() != X_("Modifier")) {
 			continue;
 		}
+
 		name = (*niter)->property (X_("name"));
 		mod = (*niter)->property (X_("modifier"));
 
@@ -545,6 +546,12 @@ UIConfiguration::modifier (string const & name) const
 		return m->second;
 	}
 	return SVAModifier ();
+}
+
+ArdourCanvas::Color
+UIConfiguration::color_mod (std::string const & colorname, std::string const & modifiername) const
+{
+	return HSV (color (colorname)).mod (modifier (modifiername)).color ();
 }
 
 ArdourCanvas::Color
