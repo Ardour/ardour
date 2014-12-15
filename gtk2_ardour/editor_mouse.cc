@@ -1965,6 +1965,13 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case AutomationTrackItem:
 		break;
 
+    case LeftFrameHandle:
+        reset_canvas_cursor ();
+        break;
+    case RightFrameHandle:
+        reset_canvas_cursor ();
+        break;
+            
 	case FeatureLineItem:
 	{
 		ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);

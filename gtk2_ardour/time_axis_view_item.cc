@@ -73,8 +73,8 @@ using namespace Gtkmm2ext;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_X_OFFSET = 10.0;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_OFFSET = 5.0;
 const double TimeAxisViewItem::GRAB_HANDLE_TOP = 2.0;
-const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 10.0;
-const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 1.0;
+const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 5.0;
+const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 2.0;
 
 const double TimeAxisViewItem::REGION_TOP_OFFSET = 2.0;
 const double TimeAxisViewItem::REGION_BOTTOM_OFFSET = 3.0;
@@ -318,13 +318,13 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		double top   = TimeAxisViewItem::GRAB_HANDLE_TOP;
 		double width = TimeAxisViewItem::GRAB_HANDLE_WIDTH;
 
-		frame_handle_start = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height() - REGION_BOTTOM_OFFSET));
+		frame_handle_start = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 0.5*trackview.current_height(), width, trackview.current_height() - REGION_BOTTOM_OFFSET));
 		CANVAS_DEBUG_NAME (frame_handle_start, "TAVI frame handle start");
 		frame_handle_start->set_outline (false);
 		frame_handle_start->set_fill (false);
 		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (*this, &TimeAxisViewItem::frame_handle_crossing), frame_handle_start));
 
-		frame_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, top, width, trackview.current_height() - REGION_BOTTOM_OFFSET));
+		frame_handle_end = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 0.5*trackview.current_height(), width, trackview.current_height() - REGION_BOTTOM_OFFSET));
 
 		CANVAS_DEBUG_NAME (frame_handle_end, "TAVI frame handle end");
 		frame_handle_end->set_outline (false);
@@ -722,7 +722,10 @@ TimeAxisViewItem::set_height (double height)
 	if (frame) {
 		frame->set_y1 (height - REGION_BOTTOM_OFFSET);
 		if (frame_handle_start) {
+            // trim is available just in the bottom half of region
+            frame_handle_start->set_y0 (0.5*height-REGION_BOTTOM_OFFSET);
 			frame_handle_start->set_y1 (height - REGION_BOTTOM_OFFSET);
+            frame_handle_end->set_y0 (0.5*height-REGION_BOTTOM_OFFSET);
 			frame_handle_end->set_y1 (height - REGION_BOTTOM_OFFSET);
 		}
 	}

@@ -1445,8 +1445,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_wave_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_frame_handle_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
-	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
-	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*);
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);

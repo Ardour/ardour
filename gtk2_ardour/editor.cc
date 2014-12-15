@@ -1615,19 +1615,8 @@ void
 Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
-	AudioRegionView* arv = static_cast<AudioRegionView*> (item->get_data ("regionview"));
-	assert(arv);
-
-	MenuList& items (xfade_in_context_menu.items());
-	items.clear ();
-
-	if (arv->audio_region()->fade_in_active()) {
-		items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), false)));
-	} else {
-		items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_in_active), true)));
-	}
-
-	items.push_back (SeparatorElem());
+    MenuList& items (xfade_in_context_menu.items());
+    items.clear ();
 	fill_xfade_menu (items, true);
 
 	xfade_in_context_menu.popup (button, time);
@@ -1638,19 +1627,8 @@ void
 Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
-	AudioRegionView* arv = static_cast<AudioRegionView*> (item->get_data ("regionview"));
-	assert(arv);
-
-	MenuList& items (xfade_out_context_menu.items());
-	items.clear ();
-
-	if (arv->audio_region()->fade_out_active()) {
-		items.push_back (MenuElem (_("Deactivate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), false)));
-	} else {
-		items.push_back (MenuElem (_("Activate"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_out_active), true)));
-	}
-
-	items.push_back (SeparatorElem());
+    MenuList& items (xfade_out_context_menu.items());
+    items.clear ();
 	fill_xfade_menu (items, false);
 
 	xfade_out_context_menu.popup (button, time);
@@ -1996,17 +1974,17 @@ Editor::add_track_context_items (Menu_Helpers::MenuList& edit_items)
     act = ActionManager::get_action_from_name ("set-mouse-mode-object");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_arrow_idle"))));
-    edit_items.push_back (ImageMenuElem ( ("Pointer Tool      \t 2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    edit_items.push_back (ImageMenuElem ( ("Pointer Tool \t\t 2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-cut");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_cut_idle"))));
-    edit_items.push_back (ImageMenuElem ( ("Split Tool        \t 3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    edit_items.push_back (ImageMenuElem ( ("Split Tool \t\t 3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-zoom");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_zoom_idle"))));
-    edit_items.push_back (ImageMenuElem ( ("Zoom Tool         \t 4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    edit_items.push_back (ImageMenuElem ( ("Zoom Tool \t\t 4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
 }
 
 void

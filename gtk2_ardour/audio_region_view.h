@@ -158,8 +158,6 @@ class AudioRegionView : public RegionView
 	ArdourCanvas::Polygon*          sync_mark; ///< polgyon for sync position
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
 	ArdourCanvas::Rectangle*        fade_out_handle; ///< fade out handle, or 0
-	ArdourCanvas::Rectangle*        fade_in_trim_handle; ///< fade in trim handle, or 0
-	ArdourCanvas::Rectangle*        fade_out_trim_handle; ///< fade out trim handle, or 0
 
 	ArdourCanvas::XFadeCurve* start_xfade_curve;
 	ArdourCanvas::Rectangle*  start_xfade_rect;
