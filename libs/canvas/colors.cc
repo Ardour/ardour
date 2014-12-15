@@ -548,12 +548,24 @@ SVAModifier::from_string (string const & str)
 	switch (op) {
 	case '*':
 		type = Multiply;
+		/* no-op values for multiply */
+		s = 1.0;
+		v = 1.0;
+		a = 1.0;
 		break;
 	case '+':
 		type = Add;
+		/* no-op values for add */
+		s = 0.0;
+		v = 0.0;
+		a = 1.0;
 		break;
 	case '=':
 		type = Assign;
+		/* this will avoid assignment in operator() (see below) */
+		s = -1.0;
+		v = -1.0;
+		a = -1.0;
 		break;
 	default:
 		throw failed_constructor ();
@@ -564,11 +576,11 @@ SVAModifier::from_string (string const & str)
 	while (ss) {
 		ss >> mod;
 		if ((pos = mod.find ("alpha:")) != string::npos) {
-			a = PBD::atoi (mod.substr (pos+6));
+			a = PBD::atof (mod.substr (pos+6));
 		} else if ((pos = mod.find ("saturate:")) != string::npos) {
-			s = PBD::atoi (mod.substr (pos+9));
+			s = PBD::atof (mod.substr (pos+9));
 		} else if ((pos = mod.find ("darkness:")) != string::npos) {
-			v = PBD::atoi (mod.substr (pos+9));
+			v = PBD::atof (mod.substr (pos+9));
 		} else {
 			throw failed_constructor ();
 		}
@@ -625,9 +637,15 @@ SVAModifier::operator () (HSV& hsv)  const
 		r.a *= a;
 		break;
 	case Assign:
-		r.s = s;
-		r.v = v;
-		r.a = a;
+		if (s > -1.0) {
+			r.s = s;
+		}
+		if (v > -1.0) {
+			r.v = v;
+		}
+		if (a > -1.0) {
+			r.a = a;
+		}
 		break;
 	}
 
