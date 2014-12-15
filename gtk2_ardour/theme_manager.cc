@@ -158,7 +158,7 @@ ThemeManager::ThemeManager()
 	
 	notebook.append_page (alias_scroller, _("Items"));
 	notebook.append_page (palette_scroller, _("Palette"));
-	notebook.append_page (modifier_scroller, _("Modifiers"));
+	notebook.append_page (modifier_scroller, _("Transparency"));
 	
 	pack_start (notebook);
 
@@ -227,8 +227,10 @@ ThemeManager::setup_modifiers ()
 		mod_scale->signal_value_changed().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::modifier_edited), mod_scale, m->first));
 
 		mod_label = manage (new Label (m->first));
+		mod_label->set_alignment (1.0, 0.5);
+		mod_label->set_size_request (150, -1); /* 150 pixels should be enough for anyone */
 		
-		mod_hbox->pack_start (*mod_label, false, true, 6);
+		mod_hbox->pack_start (*mod_label, false, true, 12);
 		mod_hbox->pack_start (*mod_scale, true, true);
 
 		modifier_vbox.pack_start (*mod_hbox, false, false);
