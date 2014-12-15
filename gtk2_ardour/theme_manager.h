@@ -32,8 +32,6 @@
 #include "canvas/types.h"
 #include "canvas/canvas.h"
 
-#include "ardour_window.h"
-
 #include "ui_config.h"
 
 namespace ArdourCanvas {
@@ -43,7 +41,7 @@ namespace ArdourCanvas {
 
 class ArdourDialog;
 
-class ThemeManager : public ArdourWindow
+class ThemeManager : public Gtk::VBox
 {
   public:
 	ThemeManager();

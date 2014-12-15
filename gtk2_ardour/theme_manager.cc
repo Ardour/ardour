@@ -62,8 +62,7 @@ namespace ARDOUR_UI_UTILS {
 }
 
 ThemeManager::ThemeManager()
-	: ArdourWindow (_("Theme Manager"))
-	, dark_button (_("Dark Theme"))
+        : dark_button (_("Dark Theme"))
 	, light_button (_("Light Theme"))
 	, reset_button (_("Restore Defaults"))
 	, flat_buttons (_("Draw \"flat\" buttons"))
@@ -80,8 +79,6 @@ ThemeManager::ThemeManager()
 	, palette_group (0)
 	, palette_window (0)
 {
-	set_title (_("Theme Manager"));
-
 	/* Now the alias list */
 	
 	alias_list = TreeStore::create (alias_columns);
@@ -113,17 +110,16 @@ ThemeManager::ThemeManager()
 	theme_selection_hbox.pack_start (dark_button);
 	theme_selection_hbox.pack_start (light_button);
 
-	Gtk::VBox* vbox = Gtk::manage (new Gtk::VBox ());
-	vbox->set_homogeneous (false);
-	vbox->pack_start (theme_selection_hbox, PACK_SHRINK);
-	vbox->pack_start (reset_button, PACK_SHRINK);
+	set_homogeneous (false);
+	pack_start (theme_selection_hbox, PACK_SHRINK);
+	pack_start (reset_button, PACK_SHRINK);
 #ifndef __APPLE__
-	vbox->pack_start (all_dialogs, PACK_SHRINK);
+	pack_start (all_dialogs, PACK_SHRINK);
 #endif
-	vbox->pack_start (flat_buttons, PACK_SHRINK);
-	vbox->pack_start (blink_rec_button, PACK_SHRINK);
-	vbox->pack_start (region_color_button, PACK_SHRINK);
-	vbox->pack_start (show_clipping_button, PACK_SHRINK);
+	pack_start (flat_buttons, PACK_SHRINK);
+	pack_start (blink_rec_button, PACK_SHRINK);
+	pack_start (region_color_button, PACK_SHRINK);
+	pack_start (show_clipping_button, PACK_SHRINK);
 
 	Gtk::HBox* hbox;
 
@@ -137,7 +133,7 @@ ThemeManager::ThemeManager()
 		hbox->set_spacing (6);
 		hbox->pack_start (icon_set_label, false, false);
 		hbox->pack_start (icon_set_dropdown, true, true);
-		vbox->pack_start (*hbox, PACK_SHRINK);
+		pack_start (*hbox, PACK_SHRINK);
 	}
 
 	
@@ -145,13 +141,13 @@ ThemeManager::ThemeManager()
 	hbox->set_spacing (6);
 	hbox->pack_start (waveform_gradient_depth, true, true);
 	hbox->pack_start (waveform_gradient_depth_label, false, false);
-	vbox->pack_start (*hbox, PACK_SHRINK);
+	pack_start (*hbox, PACK_SHRINK);
 
 	hbox = Gtk::manage (new Gtk::HBox());
 	hbox->set_spacing (6);
 	hbox->pack_start (timeline_item_gradient_depth, true, true);
 	hbox->pack_start (timeline_item_gradient_depth_label, false, false);
-	vbox->pack_start (*hbox, PACK_SHRINK);
+	pack_start (*hbox, PACK_SHRINK);
 
 	palette_group = initialize_palette_canvas (*palette_viewport.canvas());
 	palette_viewport.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), palette_group, palette_viewport.canvas(),
@@ -164,11 +160,9 @@ ThemeManager::ThemeManager()
 	notebook.append_page (palette_scroller, _("Palette"));
 	notebook.append_page (modifier_scroller, _("Modifiers"));
 	
-	vbox->pack_start (notebook);
+	pack_start (notebook);
 
-	vbox->show_all ();
-
-	add (*vbox);
+	show_all ();
 
 	waveform_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
 	timeline_item_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
@@ -205,10 +199,6 @@ ThemeManager::ThemeManager()
 	setup_aliases ();
 	setup_modifiers ();
 	
-	/* Trigger setting up the color scheme and loading the GTK RC file */
-
-	ARDOUR_UI::config()->load_rc_file (false);
-
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ThemeManager::colors_changed));
 }
 

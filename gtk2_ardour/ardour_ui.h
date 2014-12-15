@@ -90,8 +90,6 @@
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
-#include "theme_manager.h"
-
 
 class VideoTimeLine;
 class ArdourKeyboard;
@@ -628,7 +626,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         /* Dialogs that can be created via new<T> */
 
         WM::Proxy<SpeakerDialog> speaker_config_window;
-        WM::Proxy<ThemeManager> theme_manager;
         WM::Proxy<KeyEditor> key_editor;
         WM::Proxy<RCOptionEditor> rc_option_editor;
         WM::Proxy<AddRouteDialog> add_route_dialog;

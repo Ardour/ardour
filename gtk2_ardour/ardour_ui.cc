@@ -202,7 +202,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, editor_meter_peak_display()
 
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
-	, theme_manager (X_("theme-manager"), _("Theme Manager"))
 	, key_editor (X_("key-editor"), _("Key Bindings"))
 	, rc_option_editor (X_("rc-options-editor"), _("Preferences"))
 	, add_route_dialog (X_("add-routes"), _("Add Tracks/Busses"))
@@ -349,7 +348,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	const XMLNode* ui_xml = Config->extra_xml (X_("UI"));
 
 	if (ui_xml) {
-		theme_manager.set_state (*ui_xml);
 		key_editor.set_state (*ui_xml);
 		rc_option_editor.set_state (*ui_xml);
 		session_option_editor.set_state (*ui_xml);
@@ -365,7 +363,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		midi_port_matrix.set_state (*ui_xml);
 	}
 
-	WM::Manager::instance().register_window (&theme_manager);
 	WM::Manager::instance().register_window (&key_editor);
 	WM::Manager::instance().register_window (&rc_option_editor);
 	WM::Manager::instance().register_window (&session_option_editor);
@@ -381,12 +378,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
 
-	/* We need to instantiate the theme manager because it loads our
-	   theme files. This should really change so that its window
-	   and its functionality are separate 
-	*/
-	
-	(void) theme_manager.get (true);
+	/* Trigger setting up the color scheme and loading the GTK RC file */
+
+	ARDOUR_UI::config()->load_rc_file (false);
 	
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();

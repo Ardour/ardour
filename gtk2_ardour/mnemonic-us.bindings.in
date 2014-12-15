@@ -216,7 +216,6 @@ This mode provides many different operations on both regions and control points,
 ;@-group|Editor/crop|c|some text
 @mmode|MouseMode/set-mouse-mode-cut|c|cut mode
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
-@wvis|Window/toggle-theme-manager|<@WINDOW@>c|toggle color manager
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text

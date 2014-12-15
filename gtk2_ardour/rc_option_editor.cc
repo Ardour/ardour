@@ -54,6 +54,7 @@
 #include "midi_port_dialog.h"
 #include "sfdb_ui.h"
 #include "keyboard.h"
+#include "theme_manager.h"
 #include "i18n.h"
 
 using namespace std;
@@ -2336,6 +2337,10 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_style_led)
 		     ));
 
+	/* and now the theme manager */
+
+	ThemeManager* tm = manage (new ThemeManager);
+	add_page (_("Theme"), *tm);
 }
 
 void
