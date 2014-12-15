@@ -333,7 +333,7 @@ MidiStreamView::draw_note_lines()
 		case 6:
 		case 8:
 		case 10:
-			color = ARDOUR_UI::config()->color ("piano roll black");
+			color = ARDOUR_UI::config()->color_mod ("piano roll black", "piano roll black");
 			break;
 		default:
 			color = ARDOUR_UI::config()->color_mod ("piano roll white", "piano roll white");
