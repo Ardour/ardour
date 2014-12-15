@@ -2,16 +2,16 @@
 
 <Ardour>
   <Colors>
-    <Color name="meter color0" value="0x0x008800FF"/>
-    <Color name="meter color1" value="0x0x00AA00FF"/>
-    <Color name="meter color2" value="0x0x00FF00FF"/>
-    <Color name="meter color3" value="0x0x00FF00FF"/>
-    <Color name="meter color4" value="0x0xFFF000ff"/>
-    <Color name="meter color5" value="0x0xFFF000ff"/>
-    <Color name="meter color6" value="0x0xFF8800ff"/>
-    <Color name="meter color7" value="0x0xFF8800ff"/>
-    <Color name="meter color8" value="0x0xFF0000ff"/>
-    <Color name="meter color9" value="0x0xFF0000ff"/>
+    <Color name="meter color0" value="0x008800FF"/>
+    <Color name="meter color1" value="0x00AA00FF"/>
+    <Color name="meter color2" value="0x00FF00FF"/>
+    <Color name="meter color3" value="0x00FF00FF"/>
+    <Color name="meter color4" value="0xFFF000ff"/>
+    <Color name="meter color5" value="0xFFF000ff"/>
+    <Color name="meter color6" value="0xFF8800ff"/>
+    <Color name="meter color7" value="0xFF8800ff"/>
+    <Color name="meter color8" value="0xFF0000ff"/>
+    <Color name="meter color9" value="0xFF0000ff"/>
     <Color name="color 1" value="0x20b2b22e"/>
     <Color name="color 10" value="0xf0f0f0ff"/>
     <Color name="color 100" value="0xe49c9cc9"/>
