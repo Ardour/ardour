@@ -445,16 +445,12 @@ AudioRegionView::set_height (gdouble height)
 	for (uint32_t n = 0; n < wcnt; ++n) {
 		gdouble ht;
 
-		if (height < NAME_HIGHLIGHT_THRESH) {
-			ht = ((height - 2 * wcnt) / (double) wcnt);
-		} else {
-			ht = (((height - 2 * wcnt) ) / (double) wcnt);
-		}
+        ht = (height / (double) wcnt);
 
-		gdouble yoff = n * (ht + 1);
+		gdouble yoff = n * ht;
 
 		waves[n]->set_height (ht - (TimeAxisViewItem::REGION_BOTTOM_OFFSET + TimeAxisViewItem::REGION_TOP_OFFSET) );
-		waves[n]->set_y_position (yoff + TimeAxisViewItem::REGION_BOTTOM_OFFSET);
+		waves[n]->set_y_position (yoff + TimeAxisViewItem::REGION_BOTTOM_OFFSET + 1);
 	}
 
 	if (gain_line) {
@@ -1080,10 +1076,10 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 	WaveView *wave = new WaveView (group, audio_region ());
 	CANVAS_DEBUG_NAME (wave, string_compose ("wave view for chn %1 of %2", which, get_item_name()));
-	
+
 	wave->set_channel (which);
-	wave->set_y_position (yoff);
-	wave->set_height (ht);
+	wave->set_y_position (yoff + TimeAxisViewItem::REGION_BOTTOM_OFFSET + 1);
+	wave->set_height (ht - (TimeAxisViewItem::REGION_BOTTOM_OFFSET + TimeAxisViewItem::REGION_TOP_OFFSET) );
 	wave->set_samples_per_pixel (samples_per_pixel);
 	wave->set_show_zero_line (true);
 	wave->set_clip_level (Config->get_waveform_clip_level ());
