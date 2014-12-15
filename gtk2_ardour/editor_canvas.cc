@@ -896,7 +896,7 @@ Editor::color_handler()
 	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("cd marker bar", "marker_bar"));
 	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("range marker bar"));
+	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("range marker bar", "range marker bar"));
 	range_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
 	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("transport marker bar"));

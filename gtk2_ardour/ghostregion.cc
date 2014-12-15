@@ -87,7 +87,7 @@ void
 GhostRegion::set_colors ()
 {
 	if (is_automation_ghost()) {
-		base_rect->set_fill_color (ARDOUR_UI::config()->color ("ghost track base"));
+		base_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("ghost track base", "ghost track base"));
 	}
 }
 
