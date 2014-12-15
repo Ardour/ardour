@@ -262,7 +262,16 @@ UIConfiguration::store_color_theme ()
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
-	
+
+	parent = new XMLNode (X_("Modifiers"));
+	for (Modifiers::const_iterator i = modifiers.begin(); i != modifiers.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("Modifier"));
+		node->add_property (X_("name"), i->first);
+		node->add_property (X_("modifier"), i->second.to_string());
+		parent->add_child_nocopy (*node);
+	}
+	root->add_child_nocopy (*parent);
+
 	XMLTree tree;
 	std::string colorfile = Glib::build_filename (user_config_directory(), (string ("my-") + color_file.get() + ".colors"));
 	
@@ -435,6 +444,12 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 		load_color_aliases (*aliases);
 	}
 
+	XMLNode* modifiers = find_named_node (root, X_("Modifiers"));
+
+	if (modifiers) {
+		load_modifiers (*modifiers);
+	}
+
 	return 0;
 }
 
@@ -482,6 +497,30 @@ UIConfiguration::load_colors (XMLNode const & node)
 			ArdourCanvas::Color c;
 			c = strtol (color->value().c_str(), 0, 16);
 			colors.insert (make_pair (name->value(), c));
+		}
+	}
+}
+
+void
+UIConfiguration::load_modifiers (XMLNode const & node)
+{
+	XMLNodeList const nlist = node.children();
+	XMLNodeConstIterator niter;
+	XMLProperty const *name;
+	XMLProperty const *mod;
+	
+	modifiers.clear ();
+
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() != X_("Modifier")) {
+			continue;
+		}
+		name = (*niter)->property (X_("name"));
+		mod = (*niter)->property (X_("modifier"));
+
+		if (name && mod) {
+			SVAModifier svam (mod->value());
+			modifiers.insert (make_pair (name->value(), svam));
 		}
 	}
 }

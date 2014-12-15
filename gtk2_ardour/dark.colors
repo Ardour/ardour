@@ -482,4 +482,6 @@
     <ColorAlias name="zoom button: fill active" alias="color 48"/>
     <ColorAlias name="zoom button: led active" alias="color 8"/>
   </ColorAliases>    
+  <Modifiers>
+    <Modifer name="region note edit" modifier="= alpha:0"/>
 </Ardour>

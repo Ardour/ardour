@@ -56,9 +56,11 @@ class UIConfiguration : public PBD::Stateful
 
 	typedef std::map<std::string,ArdourCanvas::Color> Colors;
 	typedef std::map<std::string,std::string> ColorAliases;
+	typedef std::map<std::string,ArdourCanvas::SVAModifier> Modifiers;
 
 	Colors         colors;
 	ColorAliases   color_aliases;
+	Modifiers      modifiers;
 
 	void set_alias (std::string const & name, std::string const & alias);
 	void set_color (const std::string& name, ArdourCanvas::Color);
@@ -68,7 +70,8 @@ class UIConfiguration : public PBD::Stateful
 
 	ArdourCanvas::Color color (const std::string&, bool* failed = 0) const;
 	ArdourCanvas::HSV  color_hsv (const std::string&) const;
-
+	ArdourCanvas::SVAModifier modifier (const std::string&);
+		
         sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);
 
@@ -108,6 +111,7 @@ class UIConfiguration : public PBD::Stateful
 	int store_color_theme ();
 	void load_color_aliases (XMLNode const &);
 	void load_colors (XMLNode const &);
+	void load_modifiers (XMLNode const &);
 	void reset_gtk_theme ();
 	void colors_changed ();
 	int load_color_theme (bool allow_own=true);
