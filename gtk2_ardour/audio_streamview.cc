@@ -121,7 +121,10 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	region_view->init (wait_for_waves);
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_view->set_height (child_height ());
-
+    
+    region_view->set_io_channels_config_for_label (region->get_related_audio_file_channel_count() );
+    region_view->set_sample_rate_for_label(region->audio_source()->sample_rate() );
+    
 	/* if its the special single-sample length that we use for rec-regions, make it
 	   insensitive to events
 	*/

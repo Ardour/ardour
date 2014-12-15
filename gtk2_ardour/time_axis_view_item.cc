@@ -61,10 +61,12 @@ using namespace Gtkmm2ext;
 
 #ifdef _WIN32
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 11");
+    Pango::FontDescription TimeAxisViewItem::FILE_INFO_FONT("Arial 10");
 	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 0.0;
 #else
 	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 1.0;
     Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 11");
+    Pango::FontDescription TimeAxisViewItem::FILE_INFO_FONT("Helvetica 10");
 #endif
 
 
@@ -184,6 +186,8 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	visibility = vis;
 	_sensitive = true;
 	name_text_width = 0;
+    ioconfig_label_width = 0;
+    sr_label_width = 0;
 	last_item_width = 0;
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
@@ -230,7 +234,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		frame = 0;
 	}
 
-	{ // always show name highlight
+	{ // configure name highlight rect
         name_highlight_color = ArdourCanvas::rgba_to_color (0, 0, 0, 0.5);
         name_highlight = new ArdourCanvas::Rectangle (group, 
                                         ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
@@ -243,19 +247,72 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
         name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
 	}
         
-        {
+    { // configure name text
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
                 
-                name_text->set_position (ArdourCanvas::Duple (NAME_HIGHLIGHT_X_OFFSET + NAME_HIGHLIGHT_X_INDENT, NAME_HIGHLIGHT_Y_OFFSET + NAME_HIGHLIGHT_Y_INDENT) );
-                name_text->set("");
-                name_text->set_font_description (NAME_FONT);
-                
-                if (name_text->text().empty()) {
-                        name_highlight->hide();
-                }
-        }
+        name_text->set_position (ArdourCanvas::Duple (NAME_HIGHLIGHT_X_OFFSET + NAME_HIGHLIGHT_X_INDENT, NAME_HIGHLIGHT_Y_OFFSET + NAME_HIGHLIGHT_Y_INDENT) );
+        name_text->set_font_description (NAME_FONT);
+        name_text->set("");
+        name_highlight->hide();
+    }
+    
+    { // configure io config highlight
+        uint32_t opacity = 255*0.9;
+        ioconfig_highlight_color = RGBA_TO_UINT (17,128,128,opacity);
+        // alighn with name highlight
+        double x0 = name_highlight->x1 ();
+        double y0 = name_highlight->y0 ();
+        double x1 = x0 + 2*NAME_HIGHLIGHT_X_INDENT;
+        double y1 = name_highlight->y1 ();
+        ioconfig_highlight = new ArdourCanvas::Rectangle (group,
+                                                      ArdourCanvas::Rect (x0, y0, x1, y1) );
+        CANVAS_DEBUG_NAME (ioconfig_highlight, string_compose ("io config highlight for %1", get_item_name()));
+        ioconfig_highlight->set_data ("timeaxisviewitem", this);
+        ioconfig_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0) );
+        ioconfig_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
+    }
+    
+    { // configure io config label text
+        ioconfig_text = new ArdourCanvas::Text (group);
+        CANVAS_DEBUG_NAME (ioconfig_text, string_compose ("ioconfig text for %1", get_item_name()));
+        
+        ioconfig_text->set_position (ArdourCanvas::Duple (ioconfig_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, ioconfig_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        ioconfig_text->set_font_description (FILE_INFO_FONT);
+        ioconfig_text->set_color (RGBA_TO_UINT (255,255,255,255));
 
+        ioconfig_text->set("");
+        ioconfig_text->hide();
+    }
+    
+    { // configure SR highlight
+        uint32_t opacity = 255*0.9;
+        sr_highlight_color = RGBA_TO_UINT (127,1,64,opacity);
+        // alighn with io config highlight
+        double x0 = ioconfig_highlight->x1 ();
+        double y0 = ioconfig_highlight->y0 ();
+        double x1 = x0 + 2*NAME_HIGHLIGHT_X_INDENT;
+        double y1 = ioconfig_highlight->y1 ();
+        sample_rate_highlight = new ArdourCanvas::Rectangle (group,
+                                                      ArdourCanvas::Rect (x0, y0, x1, y1) );
+        CANVAS_DEBUG_NAME (sample_rate_highlight, string_compose ("sr highlight for %1",get_item_name()));
+        sample_rate_highlight->set_data ("timeaxisviewitem", this);
+        sample_rate_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0) );
+        sample_rate_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
+    }
+
+    { // configure SR label text
+        sample_rate_text = new ArdourCanvas::Text (group);
+        CANVAS_DEBUG_NAME (sample_rate_text, string_compose ("sr text for %1", get_item_name()));
+        
+        sample_rate_text->set_position (ArdourCanvas::Duple (sample_rate_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, sample_rate_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        sample_rate_text->set_font_description (FILE_INFO_FONT);
+        sample_rate_text->set_color(RGBA_TO_UINT (255,255,255,255) );
+        
+        sample_rate_text->set("");
+        sample_rate_text->hide();
+    }
+    
 	/* create our grab handles used for trimming/duration etc */
 	if (!_recregion && !_automation) {
 		double top   = TimeAxisViewItem::GRAB_HANDLE_TOP;
@@ -304,8 +361,18 @@ TimeAxisViewItem::hide_rect ()
         set_frame_color ();
 
         if (name_highlight) {
-                name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
-                name_highlight->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 64));
+            name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
+            name_highlight->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 64));
+        }
+    
+        if (ioconfig_highlight) {
+            ioconfig_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
+            ioconfig_highlight->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 64));
+        }
+    
+        if (sample_rate_highlight) {
+            sample_rate_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
+            sample_rate_highlight->set_fill_color (UINT_RGBA_CHANGE_A (fill_color, 64));
         }
 }
 
@@ -316,8 +383,18 @@ TimeAxisViewItem::show_rect ()
         set_frame_color ();
 
         if (name_highlight) {
-                name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
-                name_highlight->set_fill_color (name_highlight_color);
+            name_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
+            name_highlight->set_fill_color (name_highlight_color);
+        }
+    
+        if (ioconfig_highlight) {
+            ioconfig_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
+            ioconfig_highlight->set_fill_color (ioconfig_highlight_color);
+        }
+        
+        if (sample_rate_highlight) {
+            sample_rate_highlight->set_outline_what (ArdourCanvas::Rectangle::What (0));
+            sample_rate_highlight->set_fill_color (sr_highlight_color);
         }
 }
 
@@ -565,9 +642,70 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 	}
 
 	name_text->set (new_name);
+    
+    name_text->show ();
     name_text_width = name_text->text_width();
     manage_name_highlight();
 }
+
+void
+TimeAxisViewItem::set_io_channels_config_for_label (uint32_t chan_count)
+{
+    std::string label;
+    
+    switch (chan_count ) {
+        case 1:
+            label = "M";
+            break;
+        case 2:
+            label = "ST";
+            break;
+        default:
+            std::ostringstream ss;
+            ss << chan_count;
+            label = ss.str();
+            break;
+    }
+    
+    set_ioconfig_text (label);
+}
+
+void
+TimeAxisViewItem::set_sample_rate_for_label (framecnt_t sr)
+{
+    std::ostringstream ss;
+    ss << (float)sr/1000.0;
+    std::string sample_rate_str(ss.str());
+    set_sr_text(sample_rate_str);
+}
+
+
+void
+TimeAxisViewItem::set_ioconfig_text(const string& new_io_text)
+{
+    if (!ioconfig_text) {
+        return;
+    }
+    
+    ioconfig_text->set (new_io_text);
+    ioconfig_text->show(); // show to calculate the width
+    ioconfig_label_width = ioconfig_text->text_width();
+    manage_ioconfig_highlight();
+}
+
+void
+TimeAxisViewItem::set_sr_text(const string& new_sr_text)
+{
+    if (!sample_rate_text) {
+        return;
+    }
+    
+    sample_rate_text->set (new_sr_text);
+    sample_rate_text->show(); // show to calculate the width
+    sr_label_width = sample_rate_text->text_width();
+    manage_sr_highlight();
+}
+
 
 /**
  * Set the height of this item.
@@ -597,6 +735,9 @@ TimeAxisViewItem::set_height (double height)
 void
 TimeAxisViewItem::manage_name_highlight ()
 {
+    manage_sr_highlight ();
+    manage_ioconfig_highlight ();
+    
     if (!name_highlight) {
 		return;
 	}
@@ -631,6 +772,87 @@ TimeAxisViewItem::manage_name_highlight ()
     
     manage_name_text ();
 }
+
+void
+TimeAxisViewItem::manage_ioconfig_highlight ()
+{
+    manage_sr_highlight();
+    
+    if (!ioconfig_highlight) {
+        return;
+    }
+    
+    if (ioconfig_highlight->x0 () >= _width) {
+        ioconfig_highlight->hide();
+        manage_ioconfig_text ();
+        return;
+    }
+    
+    if (_height < NAME_HIGHLIGHT_THRESH) {
+        ioconfig_highlight->hide();
+        manage_ioconfig_text ();
+        return;
+    }
+    
+    if (ioconfig_text->text().empty() ) {
+        ioconfig_highlight->hide();
+        return;
+    }
+    
+    double ioconfig_x1 = ioconfig_label_width + NAME_HIGHLIGHT_X_INDENT + name_highlight->x1 ();
+    if (_width < ioconfig_x1) {
+        ioconfig_x1 = _width;
+    }
+    
+    ioconfig_highlight->set (ArdourCanvas::Rect (name_highlight->x1 (),
+                                                 name_highlight->y0 (),
+                                                 ioconfig_x1,
+                                                 name_highlight->y1 () ) );
+    ioconfig_highlight->show();
+    ioconfig_highlight->raise_to_top();
+    
+    manage_ioconfig_text ();
+}
+
+void
+TimeAxisViewItem::manage_sr_highlight ()
+{
+    if (!ioconfig_highlight) {
+        return;
+    }
+    
+    if (sample_rate_highlight->x0 () > _width) {
+        sample_rate_highlight->hide();
+        manage_sr_text ();
+        return;
+    }
+    
+    if (_height < NAME_HIGHLIGHT_THRESH) {
+        sample_rate_highlight->hide();
+        manage_sr_text ();
+        return;
+    }
+    
+    if (sample_rate_text->text().empty() ) {
+        sample_rate_highlight->hide();
+        return;
+    }
+    
+    double sr_x1 = sr_label_width + NAME_HIGHLIGHT_X_INDENT + ioconfig_highlight->x1 ();
+    if (_width < sr_x1) {
+        sr_x1 = _width;
+    }
+
+    sample_rate_highlight->set (ArdourCanvas::Rect (ioconfig_highlight->x1 (),
+                                                 ioconfig_highlight->y0 (),
+                                                 sr_x1,
+                                                 ioconfig_highlight->y1 () ) );
+    sample_rate_highlight->show();
+    sample_rate_highlight->raise_to_top();
+    
+    manage_sr_text ();
+}
+
 
 void
 TimeAxisViewItem::set_color (uint32_t base_color)
@@ -668,6 +890,14 @@ TimeAxisViewItem::set_colors()
 	if (name_highlight) {
 		name_highlight->set_fill_color (name_highlight_color);
 	}
+    
+    if (ioconfig_highlight) {
+        ioconfig_highlight->set_fill_color (ioconfig_highlight_color);
+    }
+    
+    if (sample_rate_highlight) {
+        sample_rate_highlight->set_fill_color (sr_highlight_color);
+    }
 
 	set_name_text_color ();
 	set_trim_handle_colors();
@@ -961,6 +1191,70 @@ TimeAxisViewItem::manage_name_text ()
 		name_text->show ();
         name_text->raise_to_top ();
 	}
+}
+
+void
+TimeAxisViewItem::manage_ioconfig_text ()
+{
+    if (!ioconfig_text) {
+        return;
+    }
+    
+    if (!ioconfig_highlight->visible() ) {
+        ioconfig_text->hide ();
+        return;
+    }
+    
+    if (ioconfig_text->text().empty()) {
+        ioconfig_text->hide ();
+    }
+    
+    int visible_ioconfig_width = ioconfig_label_width;
+    
+    if (visible_ioconfig_width > _width - ioconfig_highlight->x0() - NAME_HIGHLIGHT_X_INDENT) {
+        visible_ioconfig_width = _width - ioconfig_highlight->x0() - NAME_HIGHLIGHT_X_INDENT;
+    }
+    
+    if (visible_ioconfig_width < 1) {
+        ioconfig_text->hide ();
+    } else {
+        ioconfig_text->set_position (ArdourCanvas::Duple (ioconfig_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, ioconfig_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        ioconfig_text->clamp_width (visible_ioconfig_width);
+        ioconfig_text->show ();
+        ioconfig_text->raise_to_top ();
+    }
+}
+
+void
+TimeAxisViewItem::manage_sr_text ()
+{
+    if (!sample_rate_text) {
+        return;
+    }
+    
+    if (!sample_rate_highlight->visible() ) {
+        sample_rate_text->hide ();
+        return;
+    }
+    
+    if (sample_rate_text->text().empty()) {
+        sample_rate_text->hide ();
+    }
+    
+    int visible_sr_width = sr_label_width;
+    
+    if (visible_sr_width > _width - sample_rate_highlight->x0() - NAME_HIGHLIGHT_X_INDENT) {
+        visible_sr_width = _width - sample_rate_highlight->x0() - NAME_HIGHLIGHT_X_INDENT;
+    }
+    
+    if (visible_sr_width < 1) {
+        sample_rate_text->hide ();
+    } else {
+        sample_rate_text->set_position (ArdourCanvas::Duple (sample_rate_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, sample_rate_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        sample_rate_text->clamp_width (visible_sr_width);
+        sample_rate_text->show ();
+        sample_rate_text->raise_to_top ();
+    }
 }
 
 /**

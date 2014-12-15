@@ -67,6 +67,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	bool set_destructive (bool yn);
 
 	bool one_of_several_channels () const;
+    uint32_t channel_count () const { return _info.channels; }
 
 	bool clamped_at_unity () const;
 

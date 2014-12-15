@@ -70,7 +70,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool sensitive () const { return _sensitive; }
 	TimeAxisView& get_time_axis_view () const;
 	void set_name_text(const std::string&);
-	virtual void set_height(double h);
+    void set_io_channels_config_for_label (uint32_t);
+    void set_sample_rate_for_label (framecnt_t);
+    virtual void set_height(double h);
 	virtual double height() const { return _height; }
 	void set_y (double);
 	void set_color (uint32_t);
@@ -104,6 +106,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	// Default sizes, font and spacing
 	static const double NAME_WIDTH_CORRECTION;
 	static Pango::FontDescription NAME_FONT;
+    static Pango::FontDescription FILE_INFO_FONT;
 	static void set_constant_heights ();
     static const double NAME_HIGHLIGHT_Y_INDENT;
     static const double NAME_HIGHLIGHT_X_OFFSET;
@@ -241,7 +244,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual uint32_t fill_opacity() const;
 
 	uint32_t fill_color;
-        uint32_t name_highlight_color;
+    uint32_t name_highlight_color;
+    uint32_t sr_highlight_color;
+    uint32_t ioconfig_highlight_color;
 	uint32_t frame_color_r;
 	uint32_t frame_color_g;
 	uint32_t frame_color_b;
@@ -258,6 +263,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	uint32_t last_item_width;
 	int name_text_width;
+    int ioconfig_label_width;
+    int sr_label_width;
 	bool wide_enough_for_name;
 	bool high_enough_for_name;
         bool rect_visible;
@@ -266,7 +273,11 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	ArdourCanvas::Rectangle* vestigial_frame;
 	ArdourCanvas::Rectangle* frame;
 	ArdourCanvas::Text*      name_text;
+    ArdourCanvas::Text*      ioconfig_text;
+    ArdourCanvas::Text*      sample_rate_text;
 	ArdourCanvas::Rectangle* name_highlight;
+    ArdourCanvas::Rectangle* ioconfig_highlight;
+    ArdourCanvas::Rectangle* sample_rate_highlight;
 
 	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */
 	ArdourCanvas::Rectangle* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
@@ -281,12 +292,20 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool _dragging;
 
 private:
-        double _width;
+    double _width;
 
+    void set_ioconfig_text(const std::string&);
+    void set_sr_text(const std::string&s);
+    
 	void parameter_changed (std::string);
-        void manage_name_highlight ();
-        void manage_name_text ();
+    void manage_name_highlight ();
+    void manage_name_text ();
 
+    void manage_ioconfig_highlight ();
+    void manage_ioconfig_text();
+    
+    void manage_sr_highlight ();
+    void manage_sr_text ();
 }; /* class TimeAxisViewItem */
 
 #endif /* __gtk_ardour_time_axis_view_item_h__ */
