@@ -738,9 +738,6 @@ TimeAxisViewItem::set_height (double height)
 void
 TimeAxisViewItem::manage_name_highlight ()
 {
-    manage_sr_highlight ();
-    manage_ioconfig_highlight ();
-    
     if (!name_highlight) {
 		return;
 	}
@@ -774,13 +771,15 @@ TimeAxisViewItem::manage_name_highlight ()
 	}
     
     manage_name_text ();
+    
+    manage_ioconfig_highlight ();
+    manage_sr_highlight ();
+
 }
 
 void
 TimeAxisViewItem::manage_ioconfig_highlight ()
 {
-    manage_sr_highlight();
-    
     if (!ioconfig_highlight) {
         return;
     }
@@ -802,10 +801,14 @@ TimeAxisViewItem::manage_ioconfig_highlight ()
         return;
     }
     
-    double ioconfig_x1 = ioconfig_label_width + 2*NAME_HIGHLIGHT_X_INDENT + name_highlight->x1 ();
+    
 #ifdef __APPLE__
-	ioconfig_x1 = ioconfig_x1 - NAME_HIGHLIGHT_X_INDENT; // there is a bug in pango with text width definition on MAC
-#endif // __APPLE__
+    // there is a bug in pango with text width definition on MAC
+    // that's why ioconfig_label_width is bigger then is in fact
+    double ioconfig_x1 = ioconfig_label_width + NAME_HIGHLIGHT_X_INDENT/2 + name_highlight->x1 ();
+#else
+    double ioconfig_x1 = ioconfig_label_width + 2*NAME_HIGHLIGHT_X_INDENT + name_highlight->x1 ();
+#endif
 
     if (_width < ioconfig_x1) {
         ioconfig_x1 = _width;
@@ -845,10 +848,13 @@ TimeAxisViewItem::manage_sr_highlight ()
         return;
     }
     
-    double sr_x1 = sr_label_width + 2*NAME_HIGHLIGHT_X_INDENT + ioconfig_highlight->x1 ();
 #ifdef __APPLE__
-	sr_x1 = sr_x1 - NAME_HIGHLIGHT_X_INDENT; // there is a bug in pango with text width definition on MAC
-#endif // __APPLE__
+    // there is a bug in pango with text width definition on MAC
+    // that's why ioconfig_label_width is bigger then is in fact
+    double sr_x1 = sr_label_width + NAME_HIGHLIGHT_X_INDENT/2 + ioconfig_highlight->x1 ();
+#else
+    double sr_x1 = sr_label_width + 2*NAME_HIGHLIGHT_X_INDENT + ioconfig_highlight->x1 ();
+#endif
 
     if (_width < sr_x1) {
         sr_x1 = _width;
@@ -1126,7 +1132,6 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 	_width = pixel_width;
 
 	manage_name_highlight ();
-	manage_name_text ();
 
 	if (pixel_width < 2.0) {
 
