@@ -23,7 +23,7 @@
 
 #include <sys/time.h>
 
-#include <glib.h>
+#include <glibmm/convert.h>
 
 #include "midi++/port.h"
 
@@ -758,7 +758,7 @@ Strip::display (uint32_t line_number, const std::string& line)
 	retval << (_index * 7 + (line_number * 0x38));
 	
 	// ascii data to display. @param line is UTF-8
-	string ascii = g_str_to_ascii (line.c_str(), 0);
+	string ascii = Glib::convert_with_fallback (line, "UTF-8", "ISO-8859-1", "_");
 	string::size_type len = ascii.length();
 	if (len > 6) {
 		ascii = ascii.substr (0, 6);
