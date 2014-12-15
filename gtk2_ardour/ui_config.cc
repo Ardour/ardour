@@ -506,6 +506,7 @@ UIConfiguration::load_colors (XMLNode const & node)
 void
 UIConfiguration::load_modifiers (XMLNode const & node)
 {
+	PBD::LocaleGuard lg ("POSIX");
 	XMLNodeList const nlist = node.children();
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
