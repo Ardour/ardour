@@ -21,7 +21,6 @@
 #define __waves_message_dialog_h__
 
 #include "waves_dialog.h"
-#include "ardour_button.h"
 
 class WavesMessageDialog : public WavesDialog
 {
