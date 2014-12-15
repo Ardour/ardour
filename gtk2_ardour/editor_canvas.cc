@@ -921,7 +921,7 @@ Editor::color_handler()
 	transport_punchout_line->set_outline_color (ARDOUR_UI::config()->color ("punch line"));
 
 	rubberband_rect->set_outline_color (ARDOUR_UI::config()->color ("rubber band rect"));
-	rubberband_rect->set_fill_color ((guint32) ARDOUR_UI::config()->color ("rubber band rect"));
+	rubberband_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("rubber band rect", "selection rect"));
 
 	location_marker_color = ARDOUR_UI::config()->color ("location marker");
 	location_range_color = ARDOUR_UI::config()->color ("location range");
