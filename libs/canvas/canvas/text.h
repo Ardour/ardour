@@ -51,6 +51,7 @@ public:
         void dump (std::ostream&) const;
 
 	std::string text() const { return _text; }
+	double text_width() const;
 
 private:
 	std::string             _text;

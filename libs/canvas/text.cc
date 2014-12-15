@@ -244,3 +244,14 @@ Text::dump (ostream& o) const
 
 	o << endl;
 }
+
+
+double
+Text::text_width() const
+{
+    if (_need_redraw) {
+        redraw ();
+    }
+    
+    return _width;
+}
