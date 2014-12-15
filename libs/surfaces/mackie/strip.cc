@@ -23,6 +23,8 @@
 
 #include <sys/time.h>
 
+#include <glib.h>
+
 #include "midi++/port.h"
 
 #include "pbd/compose.h"
@@ -351,7 +353,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 		} else {
 			line1 = PBD::short_version (fullname, 6);
 		}
-
+		
 		_surface->write (display (0, line1));
 	}
 }
@@ -755,10 +757,16 @@ Strip::display (uint32_t line_number, const std::string& line)
 	// offset (0 to 0x37 first line, 0x38 to 0x6f for second line)
 	retval << (_index * 7 + (line_number * 0x38));
 	
-	// ascii data to display
-	retval << line;
+	// ascii data to display. @param line is UTF-8
+	string ascii = g_str_to_ascii (line.c_str(), 0);
+	string::size_type len = ascii.length();
+	if (len > 6) {
+		ascii = ascii.substr (0, 6);
+		len = 6;
+	}
+	retval << ascii;
 	// pad with " " out to 6 chars
-	for (int i = line.length(); i < 6; ++i) {
+	for (int i = len; i < 6; ++i) {
 		retval << ' ';
 	}
 	
