@@ -783,7 +783,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	bool me = false;
 
 	/* the color that will be used to show parts of regions that will not be heard */
-	uint32_t const non_playing_color = ARDOUR_UI::config()->color ("covered region");
+	uint32_t const non_playing_color = ARDOUR_UI::config()->color_mod ("covered region", "region base");
 
 	while (t < end) {
 
