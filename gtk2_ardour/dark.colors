@@ -77,7 +77,7 @@
     <Color name="color 61" value="0x20242aff"/>
     <Color name="color 63" value="0x5566ffff"/>
     <Color name="color 64" value="0xa7acd4ff"/>
-    <Color name="color 65" value="0xb8cca35f"/>
+    <Color name="color 65" value="0xb8cca3ff"/>
     <Color name="color 66" value="0x4f2f00ff"/>
     <Color name="color 67" value="0x121212ff"/>
     <Color name="color 68" value="0xc57805ff"/>
@@ -493,7 +493,7 @@
     <Modifier name="midi frame base" modifier="= alpha:0.4"/>
     <Modifier name="midi patch change fill" modifier="= alpha:0.6274"/>
     <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
-    <Modifier name="modifier 65" modifier="= alpha:0.3725"/>
+    <Modifier name="midi track base" modifier="= alpha:0.3725"/>
     <Modifier name="modifier 74" modifier="= alpha:0.7882"/>
     <Modifier name="modifier 76" modifier="= alpha:0.4196"/>
     <Modifier name="modifier 95" modifier="= alpha:0.4666"/>

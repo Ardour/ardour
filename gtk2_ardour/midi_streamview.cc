@@ -588,7 +588,7 @@ MidiStreamView::color_handler ()
 	draw_note_lines ();
 
 	if (_trackview.is_midi_track()) {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("midi track base"));
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("midi track base", "midi track base"));
 	} else {
 		canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("midi bus base"));
 	}
