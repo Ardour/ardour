@@ -96,7 +96,7 @@ NoteBase::show_velocity()
 	if (!_text) {
 		_text = new Text (_item->parent ());
 		_text->set_ignore_events (true);
-		_text->set_color (ARDOUR_UI::config()->color ("midi note velocity text"));
+		_text->set_color (ARDOUR_UI::config()->color_mod ("midi note velocity text", "midi note velocity text"));
 		_text->set_alignment (Pango::ALIGN_CENTER);
 	}
 

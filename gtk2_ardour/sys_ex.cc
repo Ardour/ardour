@@ -36,7 +36,7 @@ SysEx::SysEx (
 		parent,
 		height, 
 		ARDOUR_UI::config()->color ("midi sysex outline"),
-		ARDOUR_UI::config()->color ("midi sysex fill"),
+		ARDOUR_UI::config()->color_mod ("midi sysex fill", "midi sysex fill"),
 		ArdourCanvas::Duple (x, y)
 		);
 	

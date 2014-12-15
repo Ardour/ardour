@@ -397,9 +397,6 @@
     <ColorAlias name="secondary delta clock: cursor" alias="color 9"/>
     <ColorAlias name="secondary delta clock: edited text" alias="color 9"/>
     <ColorAlias name="secondary delta clock: text" alias="color 92"/>
-    <ColorAlias name="selected crossfade editor line" alias="color 14"/>
-    <ColorAlias name="selected crossfade editor wave" alias="color 32"/>
-    <ColorAlias name="selected crossfade editor wave fill" alias="color 4"/>
     <ColorAlias name="selected midi note color max" alias="color 62"/>
     <ColorAlias name="selected midi note color mid" alias="color 93"/>
     <ColorAlias name="selected midi note color min" alias="color 61"/>
@@ -492,7 +489,11 @@
     <Modifier name="ghost track base" modifier="= alpha:0.7764"/>
     <Modifier name="audio bus base" modifier="= alpha:0.4078"/>
     <Modifier name="range marker bar" modifier="= alpha:0.4078"/>
-    <Modifier name="modifier 32" modifier="= alpha:0.4666"/>
+    <Modifier name="inactive crossfade" modifier="= alpha:0.4666"/>
+    <Modifier name="midi note velocity text" modifier="= alpha:0.4666"/>
+    <Modifier name="midi sysex fill" modifier="= alpha:0.4666"/>
+    <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
+
     <Modifier name="modifier 45" modifier="= alpha:0.4627"/>
     <Modifier name="modifier 5" modifier="= alpha:0.4078"/>
     <Modifier name="modifier 51" modifier="= alpha:0.4"/>

@@ -315,7 +315,7 @@ AudioRegionView::fade_in_active_changed ()
 		if (audio_region()->fade_in_active()) {
 			start_xfade_rect->set_fill (false);
 		} else {
-			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->color ("inactive crossfade"));
+			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("inactive crossfade", "inactive crossfade"));
 			start_xfade_rect->set_fill (true);
 		}
 	}
@@ -328,7 +328,7 @@ AudioRegionView::fade_out_active_changed ()
 		if (audio_region()->fade_out_active()) {
 			end_xfade_rect->set_fill (false);
 		} else {	
-			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->color ("inactive crossfade"));
+			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("inactive crossfade", "inactive crossfade"));
 			end_xfade_rect->set_fill (true);
 		}
 	}
