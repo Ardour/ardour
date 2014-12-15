@@ -43,17 +43,20 @@ struct LIBCANVAS_API HSV;
 
 class LIBCANVAS_API SVAModifier
 {
-  private:
+  public:
 	enum Type {
 		Add,
 		Multiply,
 		Assign
 	};
 
-  public:
 	SVAModifier (std::string const &);
-	SVAModifier (Type t, double ss, double vv, double aa) : type (t), s (ss) , v (vv) , a (aa) {}
-	SVAModifier () : type (Add), s (0), v (0), a (0) {} /* no-op modifier */
+	SVAModifier (Type t, double ss, double vv, double aa) : type (t), _s (ss) , _v (vv) , _a (aa) {}
+	SVAModifier () : type (Add), _s (0), _v (0), _a (0) {} /* no-op modifier */
+
+	double s() const { return _s; }
+	double v() const { return _v; }
+	double a() const { return _a; }
 	
 	HSV operator () (HSV& hsv) const;
 	std::string to_string () const;
@@ -61,9 +64,9 @@ class LIBCANVAS_API SVAModifier
 	
   private:
 	Type type;
-	double s;
-	double v;
-	double a;
+	double _s;
+	double _v;
+	double _a;
 };
 
 struct LIBCANVAS_API HSV

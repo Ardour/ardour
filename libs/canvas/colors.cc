@@ -529,9 +529,9 @@ HSV::mod (SVAModifier const & svam)
 
 SVAModifier::SVAModifier (string const &str)
 	: type (Add)
-	, s (0)
-	, v (0)
-	, a (0)
+	, _s (0)
+	, _v (0)
+	, _a (0)
 {
 	from_string (str);
 }
@@ -549,23 +549,23 @@ SVAModifier::from_string (string const & str)
 	case '*':
 		type = Multiply;
 		/* no-op values for multiply */
-		s = 1.0;
-		v = 1.0;
-		a = 1.0;
+		_s = 1.0;
+		_v = 1.0;
+		_a = 1.0;
 		break;
 	case '+':
 		type = Add;
 		/* no-op values for add */
-		s = 0.0;
-		v = 0.0;
-		a = 0.0;
+		_s = 0.0;
+		_v = 0.0;
+		_a = 0.0;
 		break;
 	case '=':
 		type = Assign;
 		/* this will avoid assignment in operator() (see below) */
-		s = -1.0;
-		v = -1.0;
-		a = -1.0;
+		_s = -1.0;
+		_v = -1.0;
+		_a = -1.0;
 		break;
 	default:
 		throw failed_constructor ();
@@ -576,11 +576,11 @@ SVAModifier::from_string (string const & str)
 	while (ss) {
 		ss >> mod;
 		if ((pos = mod.find ("alpha:")) != string::npos) {
-			a = PBD::atof (mod.substr (pos+6));
+			_a = PBD::atof (mod.substr (pos+6));
 		} else if ((pos = mod.find ("saturate:")) != string::npos) {
-			s = PBD::atof (mod.substr (pos+9));
+			_s = PBD::atof (mod.substr (pos+9));
 		} else if ((pos = mod.find ("darkness:")) != string::npos) {
-			v = PBD::atof (mod.substr (pos+9));
+			_v = PBD::atof (mod.substr (pos+9));
 		} else {
 			throw failed_constructor ();
 		}
@@ -605,16 +605,16 @@ SVAModifier::to_string () const
 		break;
 	}
 
-	if (s > -1.0) {
-		ss << " saturate:" << s;
+	if (_s >= 0.0) {
+		ss << " saturate:" << _s;
 	}
 
-	if (v > -1.0) {
-		ss << " darker:" << v;
+	if (_v >= 0.0) {
+		ss << " darker:" << _v;
 	}
 
-	if (a > -1.0) {
-		ss << " alpha:" << a;
+	if (_a >= 0.0) {
+		ss << " alpha:" << _a;
 	}
 
 	return ss.str();
@@ -627,24 +627,24 @@ SVAModifier::operator () (HSV& hsv)  const
 	
 	switch (type) {
 	case Add:
-		r.s += s;
-		r.v += v;
-		r.a += a;
+		r.s += _s;
+		r.v += _v;
+		r.a += _a;
 		break;
 	case Multiply:
-		r.s *= s;
-		r.v *= v;
-		r.a *= a;
+		r.s *= _s;
+		r.v *= _v;
+		r.a *= _a;
 		break;
 	case Assign:
-		if (s > -1.0) {
-			r.s = s;
+		if (_s >= 0.0) {
+			r.s = _s;
 		}
-		if (v > -1.0) {
-			r.v = v;
+		if (_v >= 0.) {
+			r.v = _v;
 		}
-		if (a > -1.0) {
-			r.a = a;
+		if (_a >= 0.0) {
+			r.a = _a;
 		}
 		break;
 	}
