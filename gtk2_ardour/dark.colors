@@ -61,7 +61,7 @@
     <Color name="color 47" value="0x00880eff"/>
     <Color name="color 48" value="0x00aa11ff"/>
     <Color name="color 49" value="0x00660aff"/>
-    <Color name="color 5" value="0x9dadc468"/>
+    <Color name="color 5" value="0x9dadc4ff"/>
     <Color name="color 50" value="0xeeeeecff"/>
     <Color name="color 51" value="0x383d3766"/>
     <Color name="color 52" value="0xe8faa1ff"/>
@@ -493,10 +493,10 @@
     <Modifier name="midi note velocity text" modifier="= alpha:0.4666"/>
     <Modifier name="midi sysex fill" modifier="= alpha:0.4666"/>
     <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
-
     <Modifier name="measure line beat" modifier="= alpha:0.4627"/>
     <Modifier name="piano roll white" modifier="= alpha:0.4627"/>
-    <Modifier name="modifier 5" modifier="= alpha:0.4078"/>
+    <Modifier name="audio track base" modifier="= alpha:0.4078"/>
+    <Modifier name="automation track fill" modifier="= alpha:0.4078"/>
     <Modifier name="modifier 51" modifier="= alpha:0.4"/>
     <Modifier name="modifier 60" modifier="= alpha:0.6274"/>
     <Modifier name="modifier 61" modifier="= alpha:0.7529"/>

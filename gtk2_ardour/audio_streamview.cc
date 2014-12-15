@@ -516,7 +516,7 @@ AudioStreamView::color_handler ()
 {
 	//case cAudioTrackBase:
 	if (_trackview.is_track()) {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("audio track base"));
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("audio track base", "audio track base"));
 	}
 
 	//case cAudioBusBase:
