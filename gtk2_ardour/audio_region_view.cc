@@ -988,7 +988,7 @@ AudioRegionView::set_colors ()
 	if (gain_line) {
 		gain_line->set_line_color (audio_region()->envelope_active() ? 
 					   ARDOUR_UI::config()->color ("gain line") : 
-					   ARDOUR_UI::config()->color ("gain line inactive"));
+					   ARDOUR_UI::config()->color_mod ("gain line inactive", "gain line inactive"));
 	}
 
 	set_waveform_colors ();
@@ -1368,7 +1368,7 @@ AudioRegionView::envelope_active_changed ()
 	if (gain_line) {
 		gain_line->set_line_color (audio_region()->envelope_active() ? 
 					   ARDOUR_UI::config()->color ("gain line") : 
-					   ARDOUR_UI::config()->color ("gain line inactive"));
+					   ARDOUR_UI::config()->color_mod ("gain line inactive", "gain line inactive"));
 		update_envelope_visibility ();
 	}
 }

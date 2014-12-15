@@ -33,7 +33,7 @@
     <Color name="color 21" value="0x969696ff"/>
     <Color name="color 22" value="0xe5e5e5ff"/>
     <Color name="color 23" value="0x8000ffff"/>
-    <Color name="color 24" value="0x9fbca2c5"/>
+    <Color name="color 24" value="0x9fbca2ff"/>
     <Color name="color 25" value="0x4a4a4aff"/>
     <Color name="color 26" value="0xc7c9d8ff"/>
     <Color name="color 27" value="0x191919ff"/>
@@ -488,7 +488,7 @@
     <Modifier name="marker bar" modifier="= alpha:0.8"/>
     <Modifier name="mono panner position fill" modifier="= alpha:0.8"/>
     <Modifier name="region base" modifier="= alpha:0.8"/>
-    <Modifier name="modifier 24" modifier="= alpha:0.7725"/>
+    <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>
     <Modifier name="modifier 28" modifier="= alpha:0.7764"/>
     <Modifier name="modifier 3" modifier="= alpha:0.4078"/>
     <Modifier name="modifier 32" modifier="= alpha:0.4666"/>
