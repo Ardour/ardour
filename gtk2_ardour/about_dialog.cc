@@ -91,6 +91,13 @@ About::about_button_pressed (WavesButton*)
     license_dialog.run ();
 }
 
+void 
+About::on_realize ()
+{
+	WavesDialog::on_realize();
+	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_ALL));
+}
+
 About::~About ()
 {
 }

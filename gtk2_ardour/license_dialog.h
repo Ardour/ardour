@@ -27,6 +27,7 @@ class LicenseDialog : public WavesDialog
 public:
     LicenseDialog();
     ~LicenseDialog();
+	void on_realize ();
 
 protected:
     void on_esc_pressed ();

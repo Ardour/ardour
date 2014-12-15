@@ -28,6 +28,7 @@ class About : public WavesDialog
 public:
     About();
     ~About();
+	void on_realize ();
     
 protected:
     void on_esc_pressed ();

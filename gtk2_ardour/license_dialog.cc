@@ -44,6 +44,13 @@ LicenseDialog::on_esc_pressed ()
     hide();
 }
 
+void 
+LicenseDialog::on_realize ()
+{
+	WavesDialog::on_realize();
+	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_ALL));
+}
+
 LicenseDialog::~LicenseDialog ()
 {
 }
