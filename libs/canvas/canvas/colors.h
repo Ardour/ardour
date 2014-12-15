@@ -52,7 +52,8 @@ class LIBCANVAS_API SVAModifier
 
   public:
 	SVAModifier (std::string const &);
-	SVAModifier (double ss, double vv, double aa) : s (ss) , v (vv) , a (aa) {}
+	SVAModifier (Type t, double ss, double vv, double aa) : type (t), s (ss) , v (vv) , a (aa) {}
+	SVAModifier () : type (Add), s (0), v (0), a (0) {} /* no-op modifier */
 	
 	HSV operator () (HSV& hsv) const;
 	std::string to_string () const;

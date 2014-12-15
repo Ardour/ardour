@@ -529,9 +529,9 @@ HSV::mod (SVAModifier const & svam)
 
 SVAModifier::SVAModifier (string const &str)
 	: type (Add)
-	, s (-1.0)
-	, v (-1.0)
-	, a (-1.0)
+	, s (0)
+	, v (0)
+	, a (0)
 {
 	from_string (str);
 }
