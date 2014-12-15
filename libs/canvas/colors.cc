@@ -22,6 +22,10 @@
 #include <stdint.h>
 #include <cfloat>
 
+#include "pbd/convert.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/locale_guard.h"
+
 #include "canvas/colors.h"
 #include "canvas/colorspace.h"
 
@@ -516,3 +520,117 @@ HSV::print (std::ostream& o) const
 
 
 std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSV& hsv) { hsv.print (o); return o; }
+
+HSV
+HSV::mod (SVAModifier const & svam)
+{
+	return svam (*this);
+}
+
+SVAModifier::SVAModifier (string const &str)
+	: type (Add)
+	, s (-1.0)
+	, v (-1.0)
+	, a (-1.0)
+{
+	from_string (str);
+}
+
+void
+SVAModifier::from_string (string const & str)
+{
+	char op;
+	stringstream ss (str);
+	string mod;
+
+	ss >> op;
+
+	switch (op) {
+	case '*':
+		type = Multiply;
+		break;
+	case '+':
+		type = Add;
+		break;
+	case '=':
+		type = Assign;
+		break;
+	default:
+		throw failed_constructor ();
+	}
+
+	string::size_type pos;
+
+	while (ss) {
+		ss >> mod;
+		if ((pos = mod.find ("alpha:")) != string::npos) {
+			a = PBD::atoi (mod.substr (pos+6));
+		} else if ((pos = mod.find ("saturate:")) != string::npos) {
+			s = PBD::atoi (mod.substr (pos+9));
+		} else if ((pos = mod.find ("darkness:")) != string::npos) {
+			v = PBD::atoi (mod.substr (pos+9));
+		} else {
+			throw failed_constructor ();
+		}
+	}
+}
+
+string
+SVAModifier::to_string () const
+{
+	PBD::LocaleGuard lg ("POSIX");
+	stringstream ss;
+
+	switch (type) {
+	case Add:
+		ss << '+';
+		break;
+	case Multiply:
+		ss << '*';
+		break;
+	case Assign:
+		ss << '=';
+		break;
+	}
+
+	if (s > -1.0) {
+		ss << " saturate:" << s;
+	}
+
+	if (v > -1.0) {
+		ss << " darker:" << v;
+	}
+
+	if (a > -1.0) {
+		ss << " alpha:" << a;
+	}
+
+	return ss.str();
+}
+
+HSV
+SVAModifier::operator () (HSV& hsv)  const
+{
+	HSV r (hsv);
+	
+	switch (type) {
+	case Add:
+		r.s += s;
+		r.v += v;
+		r.a += a;
+		break;
+	case Multiply:
+		r.s *= s;
+		r.v *= v;
+		r.a *= a;
+		break;
+	case Assign:
+		r.s = s;
+		r.v = v;
+		r.a = a;
+		break;
+	}
+
+	return r;
+}
+
