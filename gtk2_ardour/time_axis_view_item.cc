@@ -801,7 +801,7 @@ TimeAxisViewItem::manage_ioconfig_highlight ()
     
     double ioconfig_x1 = ioconfig_label_width + 2*NAME_HIGHLIGHT_X_INDENT + name_highlight->x1 ();
 #ifdef __APPLE__
-	ioconfig_x1 =- NAME_HIGHLIGHT_X_INDENT; // there is a bug in pango with text width definition on MAC
+	ioconfig_x1 = ioconfig_x1 - NAME_HIGHLIGHT_X_INDENT; // there is a bug in pango with text width definition on MAC
 #endif // __APPLE__
 
     if (_width < ioconfig_x1) {
@@ -844,7 +844,7 @@ TimeAxisViewItem::manage_sr_highlight ()
     
     double sr_x1 = sr_label_width + 2*NAME_HIGHLIGHT_X_INDENT + ioconfig_highlight->x1 ();
 #ifdef __APPLE__
-	sr_x1 =- NAME_HIGHLIGHT_X_INDENT; // there is a bug in pango with text width definition on MAC
+	sr_x1 = sr_x1 - NAME_HIGHLIGHT_X_INDENT; // there is a bug in pango with text width definition on MAC
 #endif // __APPLE__
 
     if (_width < sr_x1) {
