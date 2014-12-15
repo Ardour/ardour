@@ -646,8 +646,10 @@ ThemeManager::setup_aliases ()
 			/* add as a child */
 			row = *(alias_list->append());
 			row[alias_columns.name] = i->first;
+			row[alias_columns.key] = i->first;
 		}
 
+		row[alias_columns.key] = i->first;
 		row[alias_columns.alias] = i->second;
 
 		Gdk::Color col;
@@ -674,7 +676,7 @@ ThemeManager::alias_button_press_event (GdkEventButton* ev)
 	}
 
 	guint32 colnum = GPOINTER_TO_UINT (column->get_data (X_("colnum")));
-	
+
 	switch (colnum) {
 	case 0:
 		/* allow normal processing to occur */
@@ -682,8 +684,10 @@ ThemeManager::alias_button_press_event (GdkEventButton* ev)
 
 	case 1: /* color */
 		if ((iter = alias_list->get_iter (path))) {
-			string target_color_name = (*iter)[alias_columns.name];
-			choose_color_from_palette (target_color_name);
+			string target_color_alias = (*iter)[alias_columns.key];
+			if (!target_color_alias.empty()) {
+				choose_color_from_palette (target_color_alias);
+			}
 		}
 		break;
 	}

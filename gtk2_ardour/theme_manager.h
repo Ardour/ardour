@@ -134,11 +134,13 @@ class ThemeManager : public Gtk::VBox
 			add (name);
 			add (alias);
 			add (color);
+			add (key);
 		}
 		
 		Gtk::TreeModelColumn<std::string>  name;
 		Gtk::TreeModelColumn<std::string>  alias;
 		Gtk::TreeModelColumn<Gdk::Color>   color;
+		Gtk::TreeModelColumn<std::string>  key;
 	};
 
 	ColorAliasModelColumns       alias_columns;
