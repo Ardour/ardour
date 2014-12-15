@@ -15,7 +15,7 @@
     <Color name="meter color9" value="0xFF0000ff"/>
     <Color name="color 1" value="0x20b2b2ff"/>
     <Color name="color 10" value="0xf0f0f0ff"/>
-    <Color name="color 100" value="0xe49c9cc9"/>
+    <Color name="color 100" value="0xe49c9cff"/>
     <Color name="color 101" value="0xa06000ff"/>
     <Color name="color 102" value="0x70727fcc"/>
     <Color name="color 103" value="0x1e7727f9"/>
@@ -485,7 +485,7 @@
   </ColorAliases>    
   <Modifiers>
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
-    <Modifier name="modifier 100" modifier="= alpha:0.7882"/>
+    <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
     <Modifier name="modifier 102" modifier="= alpha:0.8"/>
     <Modifier name="modifier 103" modifier="= alpha:0.9764"/>
     <Modifier name="modifier 105" modifier="= alpha:3137"/>
