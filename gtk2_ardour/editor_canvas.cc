@@ -911,7 +911,7 @@ Editor::color_handler()
 	transport_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("transport drag rect"));
 	transport_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("transport drag rect"));
 
-	transport_loop_range_rect->set_fill_color (ARDOUR_UI::config()->color ("transport loop rect"));
+	transport_loop_range_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("transport loop rect", "loop rectangle"));
 	transport_loop_range_rect->set_outline_color (ARDOUR_UI::config()->color ("transport loop rect"));
 
 	transport_punch_range_rect->set_fill_color (ARDOUR_UI::config()->color ("transport punch rect"));
