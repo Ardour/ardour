@@ -76,8 +76,8 @@ void WavesMessageDialog::init(const std::string& title,
     _no_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesMessageDialog::_on_button_clicked));
     
     _message_label.set_text (message);
-    set_title (title);
-    _ok_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesMessageDialog::_on_button_clicked));
+
+	set_title (title);
 	show_all ();
 }
 
