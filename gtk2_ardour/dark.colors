@@ -63,7 +63,7 @@
     <Color name="color 49" value="0x00660aff"/>
     <Color name="color 5" value="0x9dadc4ff"/>
     <Color name="color 50" value="0xeeeeecff"/>
-    <Color name="color 51" value="0x383d3766"/>
+    <Color name="color 51" value="0x383d37ff"/>
     <Color name="color 52" value="0xe8faa1ff"/>
     <Color name="color 53" value="0xf2c37dff"/>
     <Color name="color 54" value="0xf48352ff"/>
@@ -73,7 +73,7 @@
     <Color name="color 58" value="0x474f3fff"/>
     <Color name="color 59" value="0xb2baffff"/>
     <Color name="color 6" value="0x44bc50ff"/>
-    <Color name="color 60" value="0x50545aa0"/>
+    <Color name="color 60" value="0x50545aff"/>
     <Color name="color 61" value="0x20242ac0"/>
     <Color name="color 62" value="0x8894ff88"/>
     <Color name="color 63" value="0x5566ffff"/>
@@ -274,8 +274,6 @@
     <ColorAlias name="midi note selected" alias="color 59"/>
     <ColorAlias name="midi note velocity text" alias="color 32"/>
     <ColorAlias name="midi patch change fill" alias="color 60"/>
-    <ColorAlias name="midi patch change inactive channel fill" alias="color 60"/>
-    <ColorAlias name="midi patch change inactive channel outline" alias="color 61"/>
     <ColorAlias name="midi patch change outline" alias="color 26"/>
     <ColorAlias name="midi select rect fill" alias="color 62"/>
     <ColorAlias name="midi select rect outline" alias="color 63"/>
@@ -497,8 +495,8 @@
     <Modifier name="piano roll white" modifier="= alpha:0.4627"/>
     <Modifier name="audio track base" modifier="= alpha:0.4078"/>
     <Modifier name="automation track fill" modifier="= alpha:0.4078"/>
-    <Modifier name="modifier 51" modifier="= alpha:0.4"/>
-    <Modifier name="modifier 60" modifier="= alpha:0.6274"/>
+    <Modifier name="midi frame base" modifier="= alpha:0.4"/>
+    <Modifier name="midi patch change fill" modifier="= alpha:0.6274"/>
     <Modifier name="modifier 61" modifier="= alpha:0.7529"/>
     <Modifier name="modifier 62" modifier="= alpha:0.5333"/>
     <Modifier name="modifier 65" modifier="= alpha:0.3725"/>

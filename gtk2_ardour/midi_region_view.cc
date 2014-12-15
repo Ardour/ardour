@@ -3283,7 +3283,7 @@ MidiRegionView::set_frame_color()
 	if (_selected) {
 		f = ARDOUR_UI::config()->color ("selected region base");
 	} else if (high_enough_for_name) {
-		f= ARDOUR_UI::config()->color ("midi frame base");
+		f= ARDOUR_UI::config()->color_mod ("midi frame base", "midi frame base");
 	} else {
 		f = fill_color;
 	}

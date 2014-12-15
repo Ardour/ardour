@@ -59,7 +59,7 @@ PatchChange::PatchChange(
 		parent,
 		height,
 		ARDOUR_UI::config()->color ("midi patch change outline"),
-		ARDOUR_UI::config()->color ("midi patch change fill"),
+		ARDOUR_UI::config()->color_mod ("midi patch change fill", "midi patch change fill"),
 		ArdourCanvas::Duple (x, y)
 		);
 	
