@@ -558,7 +558,7 @@ SVAModifier::from_string (string const & str)
 		/* no-op values for add */
 		s = 0.0;
 		v = 0.0;
-		a = 1.0;
+		a = 0.0;
 		break;
 	case '=':
 		type = Assign;
