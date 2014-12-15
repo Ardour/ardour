@@ -56,7 +56,7 @@
     <Color name="color 42" value="0x404145ff"/>
     <Color name="color 43" value="0x000424ff"/>
     <Color name="color 44" value="0x004f08ff"/>
-    <Color name="color 45" value="0xa29e9e76"/>
+    <Color name="color 45" value="0xa29e9eff"/>
     <Color name="color 46" value="0x333333ff"/>
     <Color name="color 47" value="0x00880eff"/>
     <Color name="color 48" value="0x00aa11ff"/>
@@ -494,7 +494,8 @@
     <Modifier name="midi sysex fill" modifier="= alpha:0.4666"/>
     <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
 
-    <Modifier name="modifier 45" modifier="= alpha:0.4627"/>
+    <Modifier name="measure line beat" modifier="= alpha:0.4627"/>
+    <Modifier name="piano roll white" modifier="= alpha:0.4627"/>
     <Modifier name="modifier 5" modifier="= alpha:0.4078"/>
     <Modifier name="modifier 51" modifier="= alpha:0.4"/>
     <Modifier name="modifier 60" modifier="= alpha:0.6274"/>
