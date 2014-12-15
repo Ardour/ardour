@@ -25,6 +25,7 @@
 #include <set>
 
 #include <boost/scoped_array.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include <glibmm/threads.h>
 
@@ -48,7 +49,9 @@
 #include "ardour/progress.h"
 
 #include "ardour/sndfilesource.h"
+#ifdef HAVE_COREAUDIO
 #include "ardour/coreaudiosource.h"
+#endif // HAVE_COREAUDIO
 
 #include "i18n.h"
 #include <locale.h>
@@ -1566,7 +1569,7 @@ AudioRegion::get_related_audio_file_channel_count () const
     uint32_t chan_count = 0;
     for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
         
-        boost::shared_ptr<SndFileSource> sndf = dynamic_pointer_cast<SndFileSource>(*i);
+        boost::shared_ptr<SndFileSource> sndf = boost::dynamic_pointer_cast<SndFileSource>(*i);
         if (sndf ) {
             
             if (sndf->channel_count() > chan_count) {
@@ -1575,7 +1578,7 @@ AudioRegion::get_related_audio_file_channel_count () const
         }
 #ifdef HAVE_COREAUDIO
         else {
-            boost::shared_ptr<CoreAudioSource> cauf = dynamic_pointer_cast<CoreAudioSource>(*i);
+            boost::shared_ptr<CoreAudioSource> cauf = boost::dynamic_pointer_cast<CoreAudioSource>(*i);
             if (cauf) {
                 if (cauf->channel_count() > chan_count) {
                     chan_count = cauf->channel_count();
