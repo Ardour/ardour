@@ -64,6 +64,7 @@ class UIConfiguration : public PBD::Stateful
 
 	void set_alias (std::string const & name, std::string const & alias);
 	void set_color (const std::string& name, ArdourCanvas::Color);
+	void set_modifier (std::string const &, ArdourCanvas::SVAModifier svam);
 	
 	std::string color_as_alias (ArdourCanvas::Color c);
 	ArdourCanvas::Color quantized (ArdourCanvas::Color) const;
@@ -106,6 +107,7 @@ class UIConfiguration : public PBD::Stateful
 	bool _dirty;
 	bool aliases_modified;
 	bool colors_modified;
+	bool modifiers_modified;
 	
 	static UIConfiguration* _instance;
 

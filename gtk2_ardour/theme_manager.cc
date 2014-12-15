@@ -157,9 +157,12 @@ ThemeManager::ThemeManager()
 	palette_viewport.signal_size_allocate().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::palette_canvas_allocated), palette_group, palette_viewport.canvas(),
 								     sigc::mem_fun (*this, &ThemeManager::palette_event)));
 	palette_scroller.add (palette_viewport);
+
+	modifier_scroller.add (modifier_vbox);
 	
 	notebook.append_page (alias_scroller, _("Items"));
 	notebook.append_page (palette_scroller, _("Palette"));
+	notebook.append_page (modifier_scroller, _("Modifiers"));
 	
 	vbox->pack_start (notebook);
 
@@ -200,7 +203,8 @@ ThemeManager::ThemeManager()
 	set_size_request (-1, 400);
 	/* no need to call setup_palette() here, it will be done when its size is allocated */
 	setup_aliases ();
-
+	setup_modifiers ();
+	
 	/* Trigger setting up the color scheme and loading the GTK RC file */
 
 	ARDOUR_UI::config()->load_rc_file (false);
@@ -213,10 +217,53 @@ ThemeManager::~ThemeManager()
 }
 
 void
+ThemeManager::setup_modifiers ()
+{
+	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration::Modifiers& modifiers (uic->modifiers);
+	Gtk::HBox* mod_hbox;
+	Gtk::Label* mod_label;
+	Gtk::HScale* mod_scale;
+	
+	Gtkmm2ext::container_clear (modifier_vbox);
+
+	for (UIConfiguration::Modifiers::const_iterator m = modifiers.begin(); m != modifiers.end(); ++m) {
+		mod_hbox = manage (new HBox);
+
+		mod_scale = manage (new HScale (0.0, 1.0, 0.01));
+		mod_scale->set_draw_value (false);
+		mod_scale->set_value (m->second.a());
+		mod_scale->set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+		mod_scale->signal_value_changed().connect (sigc::bind (sigc::mem_fun (*this, &ThemeManager::modifier_edited), mod_scale, m->first));
+
+		mod_label = manage (new Label (m->first));
+		
+		mod_hbox->pack_start (*mod_label, false, true, 6);
+		mod_hbox->pack_start (*mod_scale, true, true);
+
+		modifier_vbox.pack_start (*mod_hbox, false, false);
+	}
+
+	modifier_vbox.show_all ();
+
+}
+
+void
+ThemeManager::modifier_edited (Gtk::Range* range, string name)
+{
+	using namespace ArdourCanvas;
+	
+	double alpha = range->get_value();
+	SVAModifier svam (SVAModifier::Assign, -1.0, -1.0, alpha);
+	ARDOUR_UI::config()->set_modifier (name, svam);
+}
+
+void
 ThemeManager::colors_changed ()
 {
 	setup_palette ();
 	setup_aliases ();	
+	setup_modifiers ();	
 }
 
 int

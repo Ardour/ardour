@@ -68,6 +68,7 @@ UIConfiguration::UIConfiguration ()
 	_dirty (false),
 	aliases_modified (false),
 	colors_modified (false),
+	modifiers_modified (false),
 	block_save (0)
 {
 	_instance = this;
@@ -354,7 +355,7 @@ UIConfiguration::save_state()
 		_dirty = false;
 	}
 
-	if (aliases_modified || colors_modified) {
+	if (aliases_modified || colors_modified || modifiers_modified) {
 
 		if (store_color_theme ()) {
 			error << string_compose (_("Color file %1 not saved"), color_file.get()) << endmsg;
@@ -363,6 +364,7 @@ UIConfiguration::save_state()
 
 		aliases_modified = false;
 		colors_modified = false;
+		modifiers_modified = false;
 	}
 	
 
@@ -624,6 +626,21 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 
 	i->second = alias;
 	aliases_modified = true;
+
+	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+}
+
+void
+UIConfiguration::set_modifier (string const & name, SVAModifier svam)
+{
+	Modifiers::iterator m = modifiers.find (name);
+
+	if (m == modifiers.end()) {
+		return;
+	}
+
+	m->second = svam;
+	modifiers_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 }

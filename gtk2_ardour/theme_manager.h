@@ -161,6 +161,12 @@ class ThemeManager : public ArdourWindow
 	void setup_aliases ();
 	void setup_palette ();
 
+	Gtk::ScrolledWindow modifier_scroller;
+	Gtk::VBox modifier_vbox;
+	
+	void setup_modifiers ();
+	void modifier_edited (Gtk::Range*, std::string);
+	
 	void colors_changed ();
 };
 
