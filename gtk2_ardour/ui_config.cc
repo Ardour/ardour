@@ -537,6 +537,16 @@ UIConfiguration::set_variables (const XMLNode& node)
 #undef  CANVAS_FONT_VARIABLE
 }
 
+ArdourCanvas::SVAModifier
+UIConfiguration::modifier (string const & name) const
+{
+	Modifiers::const_iterator m = modifiers.find (name);
+	if (m != modifiers.end()) {
+		return m->second;
+	}
+	return SVAModifier ();
+}
+
 ArdourCanvas::Color
 UIConfiguration::color (const std::string& name, bool* failed) const
 {
