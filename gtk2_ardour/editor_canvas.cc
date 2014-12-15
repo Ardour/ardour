@@ -890,10 +890,10 @@ Editor::color_handler()
 	tempo_bar->set_fill_color (ARDOUR_UI::config()->color ("tempo bar"));
 	tempo_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	marker_bar->set_fill_color (ARDOUR_UI::config()->color ("marker bar"));
+	marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("marker bar", "marker_bar"));
 	marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("cd marker bar"));
+	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("cd marker bar", "marker_bar"));
 	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
 	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("range marker bar"));

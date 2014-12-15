@@ -492,7 +492,7 @@ MonoPanner::set_colors ()
         colors.text = ARDOUR_UI::config()->color ("mono panner text");
         colors.background = ARDOUR_UI::config()->color ("mono panner bg");
         colors.pos_outline = ARDOUR_UI::config()->color ("mono panner position outline");
-        colors.pos_fill = ARDOUR_UI::config()->color ("mono panner position fill");
+        colors.pos_fill = ARDOUR_UI::config()->color_mod ("mono panner position fill", "mono panner position fill");
 }
 
 void

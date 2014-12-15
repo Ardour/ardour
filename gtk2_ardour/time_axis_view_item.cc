@@ -729,7 +729,7 @@ TimeAxisViewItem::fill_opacity () const
 		return 130;
 	}
 
-	uint32_t col = ARDOUR_UI::config()->color ("region base");
+	uint32_t col = ARDOUR_UI::config()->color_mod ("region base", "region base");
 	return UINT_RGBA_A (col);
 }
 
@@ -759,7 +759,7 @@ TimeAxisViewItem::get_fill_color () const
 			f = ARDOUR_UI::config()->color ("recording rect");
 		} else {
 			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->color ("region base");
+				f = ARDOUR_UI::config()->color_mod ("region base", "region base");
 			} else {
 				f = fill_color;
 			}
