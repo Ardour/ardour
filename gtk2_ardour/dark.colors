@@ -74,7 +74,7 @@
     <Color name="color 59" value="0xb2baffff"/>
     <Color name="color 6" value="0x44bc50ff"/>
     <Color name="color 60" value="0x50545aff"/>
-    <Color name="color 61" value="0x20242ac0"/>
+    <Color name="color 61" value="0x20242aff"/>
     <Color name="color 62" value="0x8894ff88"/>
     <Color name="color 63" value="0x5566ffff"/>
     <Color name="color 64" value="0xa7acd4ff"/>
@@ -395,9 +395,6 @@
     <ColorAlias name="secondary delta clock: cursor" alias="color 9"/>
     <ColorAlias name="secondary delta clock: edited text" alias="color 9"/>
     <ColorAlias name="secondary delta clock: text" alias="color 92"/>
-    <ColorAlias name="selected midi note color max" alias="color 62"/>
-    <ColorAlias name="selected midi note color mid" alias="color 93"/>
-    <ColorAlias name="selected midi note color min" alias="color 61"/>
     <ColorAlias name="selected region base" alias="color 25"/>
     <ColorAlias name="selected time axis frame" alias="color 86"/>
     <ColorAlias name="selected waveform fill" alias="color 8"/>
@@ -497,7 +494,7 @@
     <Modifier name="automation track fill" modifier="= alpha:0.4078"/>
     <Modifier name="midi frame base" modifier="= alpha:0.4"/>
     <Modifier name="midi patch change fill" modifier="= alpha:0.6274"/>
-    <Modifier name="modifier 61" modifier="= alpha:0.7529"/>
+    <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
     <Modifier name="modifier 62" modifier="= alpha:0.5333"/>
     <Modifier name="modifier 65" modifier="= alpha:0.3725"/>
     <Modifier name="modifier 74" modifier="= alpha:0.7882"/>

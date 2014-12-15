@@ -686,7 +686,7 @@ StereoPanner::set_colors ()
 	colors[Inverted].fill = ARDOUR_UI::config()->color_mod ("stereo panner inverted fill", "stereo panner inverted");
 	colors[Inverted].outline = ARDOUR_UI::config()->color ("stereo panner inverted outline");
 	colors[Inverted].text = ARDOUR_UI::config()->color ("stereo panner inverted text");
-	colors[Inverted].background = ARDOUR_UI::config()->color ("stereo panner inverted bg");
+	colors[Inverted].background = ARDOUR_UI::config()->color_mod ("stereo panner inverted bg", "stereo panner inverted bg");
 	colors[Inverted].rule = ARDOUR_UI::config()->color ("stereo panner rule");
 }
 
