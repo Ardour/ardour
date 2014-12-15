@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <!-- The Dark Theme for Ardour -->
 
 <Ardour>
@@ -12,7 +13,7 @@
     <Color name="meter color7" value="0xFF8800ff"/>
     <Color name="meter color8" value="0xFF0000ff"/>
     <Color name="meter color9" value="0xFF0000ff"/>
-    <Color name="color 1" value="0x20b2b22e"/>
+    <Color name="color 1" value="0x20b2b2ff"/>
     <Color name="color 10" value="0xf0f0f0ff"/>
     <Color name="color 100" value="0xe49c9cc9"/>
     <Color name="color 101" value="0xa06000ff"/>
@@ -483,6 +484,26 @@
     <ColorAlias name="zoom button: led active" alias="color 8"/>
   </ColorAliases>    
   <Modifiers>
-    <Modifer name="region note edit" modifier="= alpha:0"/>
+    <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
+    <Modifier name="modifier 100" modifier="= alpha:0.7882"/>
+    <Modifier name="modifier 102" modifier="= alpha:0.8"/>
+    <Modifier name="modifier 103" modifier="= alpha:0.9764"/>
+    <Modifier name="modifier 105" modifier="= alpha:3137"/>
+    <Modifier name="modifier 11" modifier="= alpha:0.8"/>
+    <Modifier name="modifier 24" modifier="= alpha:0.7725"/>
+    <Modifier name="modifier 28" modifier="= alpha:0.7764"/>
+    <Modifier name="modifier 3" modifier="= alpha:0.4078"/>
+    <Modifier name="modifier 32" modifier="= alpha:0.4666"/>
+    <Modifier name="modifier 45" modifier="= alpha:0.4627"/>
+    <Modifier name="modifier 5" modifier="= alpha:0.4078"/>
+    <Modifier name="modifier 51" modifier="= alpha:0.4"/>
+    <Modifier name="modifier 60" modifier="= alpha:0.6274"/>
+    <Modifier name="modifier 61" modifier="= alpha:0.7529"/>
+    <Modifier name="modifier 62" modifier="= alpha:0.5333"/>
+    <Modifier name="modifier 65" modifier="= alpha:0.3725"/>
+    <Modifier name="modifier 74" modifier="= alpha:0.7882"/>
+    <Modifier name="modifier 76" modifier="= alpha:0.4196"/>
+    <Modifier name="modifier 95" modifier="= alpha:0.4666"/>
+    <Modifier name="modifier 98" modifier="= alpha:0.4784"/>
   </Modifiers>
 </Ardour>

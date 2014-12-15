@@ -737,7 +737,7 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	if (!start_xfade_curve) {
 		start_xfade_curve = new ArdourCanvas::XFadeCurve (group, ArdourCanvas::XFadeCurve::Start);
 		CANVAS_DEBUG_NAME (start_xfade_curve, string_compose ("xfade start out line for %1", region()->name()));
-		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->color ("active crossfade"));
+		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
 		start_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 		start_xfade_curve->set_ignore_events (true);
 	}
@@ -826,7 +826,7 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	if (!end_xfade_curve) {
 		end_xfade_curve = new ArdourCanvas::XFadeCurve (group, ArdourCanvas::XFadeCurve::End);
 		CANVAS_DEBUG_NAME (end_xfade_curve, string_compose ("xfade end out line for %1", region()->name()));
-		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->color ("active crossfade"));
+		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
 		end_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 		end_xfade_curve->set_ignore_events (true);
 	}
@@ -994,11 +994,11 @@ AudioRegionView::set_colors ()
 	set_waveform_colors ();
 
 	if (start_xfade_curve) {
-		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->color ("active crossfade"));
+		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
 		start_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 	}
 	if (end_xfade_curve) {
-		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->color ("active crossfade"));
+		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
 		end_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 	}
 
