@@ -484,4 +484,5 @@
   </ColorAliases>    
   <Modifiers>
     <Modifer name="region note edit" modifier="= alpha:0"/>
+  </Modifiers>
 </Ardour>
