@@ -487,7 +487,7 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-        colors.fill = ARDOUR_UI::config()->color ("mono panner fill");
+        colors.fill = ARDOUR_UI::config()->color_mod ("mono panner fill", "panner fill");
         colors.outline = ARDOUR_UI::config()->color ("mono panner outline");
         colors.text = ARDOUR_UI::config()->color ("mono panner text");
         colors.background = ARDOUR_UI::config()->color ("mono panner bg");

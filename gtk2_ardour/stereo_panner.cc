@@ -670,7 +670,7 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 void
 StereoPanner::set_colors ()
 {
-	colors[Normal].fill = ARDOUR_UI::config()->color ("stereo panner fill");
+	colors[Normal].fill = ARDOUR_UI::config()->color_mod ("stereo panner fill", "panner fill");
 	// colors[Normal].outline = ARDOUR_UI::config()->color ("stereo panner outline");
 	colors[Normal].outline = ArdourCanvas::HSV (colors[Normal].fill).outline().color ();
 	colors[Normal].text = ARDOUR_UI::config()->color ("stereo panner text");
