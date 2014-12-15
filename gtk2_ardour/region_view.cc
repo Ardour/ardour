@@ -235,7 +235,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
                 return;
         }
 
-        uint32_t const color = ARDOUR_UI::config()->color ("silence");
+        uint32_t const color = ARDOUR_UI::config()->color_mod ("silence", "silence");
 
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
