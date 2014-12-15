@@ -106,25 +106,25 @@ class NoteBase : public sigc::trackable
                 if (selected) {
                         if (vel < 64) {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->color ("selected midi note color min"),
-					ARDOUR_UI::config()->color ("selected midi note color mid"),
+					ARDOUR_UI::config()->color_mod ("selected midi note min", "selected midi note"),
+					ARDOUR_UI::config()->color_mod ("selected midi note mid", "selected midi note"),
 					(vel / (double)63.0));
                         } else {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->color ("selected midi note color mid"),
-					ARDOUR_UI::config()->color ("selected midi note color max"),
+					ARDOUR_UI::config()->color_mod ("selected midi note mid", "selected midi note"),
+					ARDOUR_UI::config()->color_mod ("selected midi note max", "selected midi note"),
 					((vel-64) / (double)63.0));
                         }
                 } else {
                         if (vel < 64) {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->color ("midi note color min"),
-					ARDOUR_UI::config()->color ("midi note color mid"),
+					ARDOUR_UI::config()->color_mod ("midi note min", "midi note"),
+					ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
 					(vel / (double)63.0));
                         } else {
                                 return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->color ("midi note color mid"),
-					ARDOUR_UI::config()->color ("midi note color max"),
+					ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
+					ARDOUR_UI::config()->color_mod ("midi note max", " midi note"),
 					((vel-64) / (double)63.0));
                         }
                 }
