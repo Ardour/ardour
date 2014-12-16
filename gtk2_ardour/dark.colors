@@ -135,7 +135,7 @@
     <ColorAlias name="big clock: edited text" alias="color 8"/>
     <ColorAlias name="big clock: text" alias="color 10"/>
     <ColorAlias name="border color" alias="color 4"/>
-    <ColorAlias name="cd marker bar" alias="color 11"/>
+    <ColorAlias name="cd marker bar" alias="color 87"/>
     <ColorAlias name="clipped waveform" alias="color 9"/>
     <ColorAlias name="clock: background" alias="color 67"/>
     <ColorAlias name="clock: cursor" alias="color 8"/>
@@ -223,8 +223,8 @@
     <ColorAlias name="location range" alias="color 41"/>
     <ColorAlias name="lock button: fill active" alias="color 42"/>
     <ColorAlias name="lock button: led active" alias="color 4"/>
-    <ColorAlias name="marker bar" alias="color 11"/>
-    <ColorAlias name="marker bar separator" alias="color 2"/>
+    <ColorAlias name="marker bar" alias="color 2"/>
+    <ColorAlias name="marker bar separator" alias="color 27"/>
     <ColorAlias name="marker drag line" alias="color 44"/>
     <ColorAlias name="marker label" alias="color 4"/>
     <ColorAlias name="marker track" alias="color 31"/>
@@ -232,7 +232,7 @@
     <ColorAlias name="measure line beat" alias="color 45"/>
     <ColorAlias name="meter background bottom" alias="color 46"/>
     <ColorAlias name="meter background top" alias="color 34"/>
-    <ColorAlias name="meter bar" alias="color 29"/>
+    <ColorAlias name="meter bar" alias="color 7"/>
     <ColorAlias name="meter color BBC" alias="color 8"/>
     <ColorAlias name="meter marker" alias="color 19"/>
     <ColorAlias name="meterbridge label: fill" alias="color 34"/>
@@ -361,7 +361,7 @@
     <ColorAlias name="punch line" alias="color 83"/>
     <ColorAlias name="range drag bar rect" alias="color 21"/>
     <ColorAlias name="range drag rect" alias="color 56"/>
-    <ColorAlias name="range marker bar" alias="color 3"/>
+    <ColorAlias name="range marker bar" alias="color 34"/>
     <ColorAlias name="record enable button: fill active" alias="color 83"/>
     <ColorAlias name="record enable button: led active" alias="color 85"/>
     <ColorAlias name="recording waveform fill" alias="color 13"/>
@@ -435,7 +435,7 @@
     <ColorAlias name="stereo panner outline" alias="color 70"/>
     <ColorAlias name="stereo panner rule" alias="color 70"/>
     <ColorAlias name="stereo panner text" alias="color 4"/>
-    <ColorAlias name="tempo bar" alias="color 29"/>
+    <ColorAlias name="tempo bar" alias="color 46"/>
     <ColorAlias name="tempo marker" alias="color 19"/>
     <ColorAlias name="time axis frame" alias="color 4"/>
     <ColorAlias name="time stretch fill" alias="color 26"/>
@@ -457,7 +457,7 @@
     <ColorAlias name="transport delta clock: text" alias="color 92"/>
     <ColorAlias name="transport drag rect" alias="color 21"/>
     <ColorAlias name="transport loop rect" alias="color 103"/>
-    <ColorAlias name="transport marker bar" alias="color 11"/>
+    <ColorAlias name="transport marker bar" alias="color 25"/>
     <ColorAlias name="transport option button: fill active" alias="color 42"/>
     <ColorAlias name="transport option button: led active" alias="color 8"/>
     <ColorAlias name="transport punch rect" alias="color 80"/>
@@ -479,13 +479,11 @@
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
     <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
     <Modifier name="loop rectangle" modifier="= alpha:0.9764"/>
-    <Modifier name="marker bar" modifier="= alpha:0.8"/>
     <Modifier name="mono panner position fill" modifier="= alpha:0.8"/>
     <Modifier name="region base" modifier="= alpha:0.8"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>
     <Modifier name="ghost track base" modifier="= alpha:0.7764"/>
     <Modifier name="audio bus base" modifier="= alpha:0.4078"/>
-    <Modifier name="range marker bar" modifier="= alpha:0.4078"/>
     <Modifier name="inactive crossfade" modifier="= alpha:0.4666"/>
     <Modifier name="midi note velocity text" modifier="= alpha:0.4666"/>
     <Modifier name="midi sysex fill" modifier="= alpha:0.4666"/>
