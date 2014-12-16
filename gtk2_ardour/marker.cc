@@ -347,7 +347,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
 
 	if (handle_events) {
-                /* events will be handled by both the group, make sure it can be used to lookup this object.
+                /* events will be handled by the group, make sure it can be used to lookup this object.
                  */
                 group->set_data ("marker", this);
 		group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
