@@ -76,7 +76,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	void set_color (uint32_t);
 	void set_name_text_color ();
 
-        uint32_t get_fill_color () const;
+	uint32_t get_fill_color () const;
 
 	ArdourCanvas::Item* get_canvas_frame();
 	ArdourCanvas::Item* get_canvas_group();
@@ -241,6 +241,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	double _height;
 	Visibility visibility;
+	std::string _fill_color_name;
 	bool _recregion;
 	bool _automation; ///< true if this is an automation region view
 	bool _dragging;

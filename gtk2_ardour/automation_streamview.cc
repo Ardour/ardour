@@ -31,19 +31,21 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 
-#include "automation_streamview.h"
-#include "region_view.h"
-#include "automation_region_view.h"
-#include "automation_time_axis.h"
-#include "region_selection.h"
-#include "selection.h"
-#include "public_editor.h"
 #include "ardour_ui.h"
-#include "rgb_macros.h"
+#include "automation_region_view.h"
+#include "automation_streamview.h"
+#include "automation_time_axis.h"
+#include "global_signals.h"
 #include "gui_thread.h"
+#include "public_editor.h"
+#include "region_selection.h"
+#include "region_view.h"
+#include "rgb_macros.h"
+#include "selection.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 
@@ -56,7 +58,9 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group auto %1", tv.name()));
 	CANVAS_DEBUG_NAME (canvas_rect, string_compose ("SV canvas rectangle auto %1", tv.name()));
 
-	canvas_rect->set_fill (false);
+	color_handler ();
+
+	ColorsChanged.connect(sigc::mem_fun(*this, &AutomationStreamView::color_handler));
 }
 
 AutomationStreamView::~AutomationStreamView ()
@@ -191,13 +195,11 @@ AutomationStreamView::setup_rec_box ()
 void
 AutomationStreamView::color_handler ()
 {
-	/*if (_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_MidiTrackBase();
+	if (_trackview.is_midi_track()) {
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("midi track base", "midi track base"));
+	} else {
+		canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("midi bus base"));
 	}
-
-	if (!_trackview.is_midi_track()) {
-		canvas_rect->property_fill_color_rgba() = ARDOUR_UI::config()->get_MidiBusBase();;
-	}*/
 }
 
 AutoState

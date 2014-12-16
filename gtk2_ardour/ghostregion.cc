@@ -230,12 +230,10 @@ MidiGhostRegion::set_height ()
 void
 MidiGhostRegion::set_colors()
 {
-	guint fill = source_track_color(200);
-
 	GhostRegion::set_colors();
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		(*it)->rect->set_fill_color (fill);
+		(*it)->rect->set_fill_color (ARDOUR_UI::config()->color_mod((*it)->event->base_color(), "ghost track midi fill"));
 		(*it)->rect->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
 	}
 }
@@ -272,7 +270,7 @@ MidiGhostRegion::add_note (NoteBase* n)
 	GhostEvent* event = new GhostEvent (n, group);
 	events.push_back (event);
 
-	event->rect->set_fill_color (source_track_color(200));
+	event->rect->set_fill_color (ARDOUR_UI::config()->color_mod(n->base_color(), "ghost track midi fill"));
 	event->rect->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
 
 	MidiStreamView* mv = midi_view();

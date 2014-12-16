@@ -558,6 +558,12 @@ UIConfiguration::color_mod (std::string const & colorname, std::string const & m
 }
 
 ArdourCanvas::Color
+UIConfiguration::color_mod (const ArdourCanvas::Color& color, std::string const & modifiername) const
+{
+	return HSV (color).mod (modifier (modifiername)).color ();
+}
+
+ArdourCanvas::Color
 UIConfiguration::color (const std::string& name, bool* failed) const
 {
 	ColorAliases::const_iterator e = color_aliases.find (name);

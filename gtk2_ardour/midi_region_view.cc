@@ -274,6 +274,7 @@ MidiRegionView::init (bool wfd)
 
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
+	_fill_color_name = "midi frame base";
 
 	RegionView::init (false);
 
@@ -3282,8 +3283,8 @@ MidiRegionView::set_frame_color()
 
 	if (_selected) {
 		f = ARDOUR_UI::config()->color ("selected region base");
-	} else if (high_enough_for_name) {
-		f= ARDOUR_UI::config()->color_mod ("midi frame base", "midi frame base");
+	} else if (high_enough_for_name || !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+		f = ARDOUR_UI::config()->color_mod ("midi frame base", "midi frame base");
 	} else {
 		f = fill_color;
 	}

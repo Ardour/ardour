@@ -110,6 +110,10 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		_controller = AutomationController::create (_automatable, _control->parameter(), _control->desc(), _control);
 	}
 
+	const std::string fill_color_name = (dynamic_cast<MidiTimeAxisView*>(&parent)
+	                                     ? "midi automation track fill"
+	                                     : "audio automation track fill");
+
 	automation_menu = 0;
 	auto_off_item = 0;
 	auto_touch_item = 0;
@@ -124,7 +128,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	CANVAS_DEBUG_NAME (_base_rect, string_compose ("base rect for %1", _name));
 	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
 	_base_rect->set_outline (false);
-	_base_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("automation track fill", "automation track fill"));
+	_base_rect->set_fill_color (ARDOUR_UI::config()->color_mod (fill_color_name, "automation track fill"));
 	_base_rect->set_data ("trackview", this);
 	_base_rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event), _base_rect, this));
 	if (!a) {

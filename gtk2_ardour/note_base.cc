@@ -122,7 +122,8 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 	// make note change its color if its channel is not marked active
 	if ( (selection & (1 << _note->channel())) == 0 ) {
 		set_fill_color(ARDOUR_UI::config()->color ("midi note inactive channel"));
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("midi note inactive channel")));
+		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("midi note inactive channel"),
+		                                    _selected));
 	} else {
 		// set the color according to the notes selection state
 		set_selected(_selected);
@@ -149,12 +150,7 @@ NoteBase::set_selected(bool selected)
 	_selected = selected;
 	set_fill_color (base_color());
         
-	if (_selected) {
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("midi note selected")));
-	} else {
-		set_outline_color(calculate_outline(base_color()));
-	}
-
+	set_outline_color(calculate_outline(base_color(), _selected));
 }
 
 #define SCALE_USHORT_TO_UINT8_T(x) ((x) / 257)

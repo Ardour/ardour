@@ -169,6 +169,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
 	fill_color = base_color;
+	_fill_color_name = "region base";
 	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
@@ -729,21 +730,19 @@ TimeAxisViewItem::fill_opacity () const
 		return 130;
 	}
 
-	uint32_t col = ARDOUR_UI::config()->color_mod ("region base", "region base");
+	uint32_t col = ARDOUR_UI::config()->color_mod (_fill_color_name, _fill_color_name);
 	return UINT_RGBA_A (col);
 }
 
 uint32_t
 TimeAxisViewItem::get_fill_color () const
 {
-        uint32_t f;
-	uint32_t o;
-
-	o = fill_opacity ();
+	uint32_t f;
+	uint32_t o = fill_opacity ();
 
 	if (_selected) {
 
-                f = ARDOUR_UI::config()->color ("selected region base");
+		f = ARDOUR_UI::config()->color ("selected region base");
 
 		if (o == 0) {
 			/* some condition of this item has set fill opacity to
@@ -759,7 +758,7 @@ TimeAxisViewItem::get_fill_color () const
 			f = ARDOUR_UI::config()->color ("recording rect");
 		} else {
 			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->color_mod ("region base", "region base");
+				f = ARDOUR_UI::config()->color_mod (_fill_color_name, _fill_color_name);
 			} else {
 				f = fill_color;
 			}
