@@ -626,7 +626,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MarkerItem:
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-			hide_marker (item, event);
+                        if (!Profile->get_trx()) {
+                                hide_marker (item, event);
+                        }
 		} else {
 			_drags->set (new MarkerDrag (this, item), event);
 		}
