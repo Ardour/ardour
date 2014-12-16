@@ -264,12 +264,12 @@ MIDISceneChanger::recording() const
 }
 
 void
-  MIDISceneChanger::bank_change_input (MIDI::Parser& /*parser*/, unsigned short, int)
+MIDISceneChanger::bank_change_input (MIDI::Parser& /*parser*/, unsigned short, int)
 {
 	if (recording()) {
-                have_seen_bank_changes = true;
-        }
-        MIDIInputActivity (); /* EMIT SIGNAL */
+        have_seen_bank_changes = true;
+    }
+    MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void
@@ -294,8 +294,11 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	Locations* locations (_session.locations ());
 	Location* loc;
 	bool new_mark = false;
-	framecnt_t slop = (framecnt_t) floor ((Config->get_inter_scene_gap_msecs() / 1000.0) * _session.frame_rate());
-
+    
+    double frames_per_sec = _session.timecode_frames_per_second();
+    float maker_slop_sec = Config->get_inter_scene_gap_frames()/frames_per_sec;
+	framecnt_t slop = (framecnt_t) floor (maker_slop_sec * _session.frame_rate() );
+    
 	/* check for marker at current location */
 
 	loc = locations->mark_at (time, slop);
@@ -312,17 +315,16 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		
 		loc = new Location (_session, time, time, new_name, Location::IsMark);
 		new_mark = true;
-	}
 
         int bank = -1;
         if (have_seen_bank_changes) {
             bank = input_port->channel (channel)->bank();
         }
 
-	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
+        MIDISceneChange* msc = new MIDISceneChange (channel, bank, program & 0x7f);
 
         /* check for identical scene change so we can re-use color, if any */
-
+        
         Locations::LocationList copy (locations->list());
 
         for (Locations::LocationList::const_iterator l = copy.begin(); l != copy.end(); ++l) {
@@ -334,17 +336,15 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
                 }
         }
 
-	loc->set_scene_change (boost::shared_ptr<MIDISceneChange> (msc));
-	
-	/* this will generate a "changed" signal to be emitted by locations,
-	   and we will call ::gather() to update our list of MIDI events.
-	*/
-
-	if (new_mark) {
+        loc->set_scene_change (boost::shared_ptr<MIDISceneChange> (msc));
+        
+        /* this will generate a "changed" signal to be emitted by locations,
+           and we will call ::gather() to update our list of MIDI events.
+        */
 		locations->add (loc);
 	}
 
-        MIDIInputActivity (); /* EMIT SIGNAL */
+    MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void
