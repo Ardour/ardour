@@ -561,6 +561,12 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
         set_session_range_location (0, 5 * 60 * _engine.sample_rate());
 
+        /* Initial loop location, from absolute zero, length 10 seconds  */
+        
+        Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop);
+        _locations->add (loc, true);
+        set_auto_loop_location (loc);
+        
 	_state_of_the_state = Clean;
 
         /* set up Master Out and Control Out if necessary */

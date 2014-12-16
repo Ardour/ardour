@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2001 Paul Davis
+  Copyright (C) 2001 Paul Davis
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -92,13 +92,13 @@ RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
         : Marker (l, editor, parent, height, rgba, text, Range, start, true)
         , _end_frame (end)
         , _end_line (0)
-		, _start_handler (0)
-		, _end_handler (0)
+        , _start_handler (0)
+        , _end_handler (0)
 {
         assert (start < end);
 
         /* Marker::Marker calls these but will not have used our versions since it is a constructor.
-        */
+         */
 
         set_position (start, end);
         setup_line ();
@@ -206,29 +206,29 @@ RangeMarker::_set_position (framepos_t start, framepos_t end)
 void
 RangeMarker::setup_line ()
 {
-    Marker::setup_line ();
+        Marker::setup_line ();
 
-    if (!_end_line) {
+        if (!_end_line) {
 		_end_line = new ArdourCanvas::Line (editor.get_hscroll_group());
                 _end_line->set_ignore_events (true);
 		_end_line->set_y1 (ArdourCanvas::COORD_MAX);
-    }
+        }
 
-    /* line at the end (the start line is handled by Marker */
+        /* line at the end (the start line is handled by Marker */
         
-    /* lines in a different canvas (scroll)group so we have to convert the position
-        into a different coordinate system.
-    */
+        /* lines in a different canvas (scroll)group so we have to convert the position
+           into a different coordinate system.
+        */
         
-    ArdourCanvas::Duple h = _name_background->item_to_canvas (ArdourCanvas::Duple (0.0, _height));
-    ArdourCanvas::Duple g = group->canvas_origin();
+        ArdourCanvas::Duple h = _name_background->item_to_canvas (ArdourCanvas::Duple (0.0, _height));
+        ArdourCanvas::Duple g = group->canvas_origin();
 
-    /* merge and adjust them */
+        /* merge and adjust them */
 
-    g.x += _name_background->x1();
-    g.y = h.y;
+        g.x += _name_background->x1();
+        g.y = h.y;
 
-    ArdourCanvas::Duple d = _end_line->canvas_to_item (g);
+        ArdourCanvas::Duple d = _end_line->canvas_to_item (g);
        
 	_end_line->set_y0 (d.y - 2.0); /* bottom of marker, in the right coordinate system */
 	_end_line->set_x0 (d.x - 1.0);
@@ -270,16 +270,16 @@ RangeMarker::bounds_changed ()
 void
 RangeMarker::canvas_height_set (double h) 
 {
-    if (_end_line) {
-        /* h is already in the right coordinate system since it is an absolute height */
-        _end_line->set_y1 (h);
-    }
+        if (_end_line) {
+                /* h is already in the right coordinate system since it is an absolute height */
+                _end_line->set_y1 (h);
+        }
 }
 
 void
 RangeMarker::setup_name_display ()
 {
-    /* No need to adjust name background size here, since it is always the same */
+        /* No need to adjust name background size here, since it is always the same */
 
 	if (_name.empty()) {
                 if (_name_item) {
@@ -312,6 +312,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	, _start_line (0)
         , _scene_change_rect (0)
         , _scene_change_text (0)
+        , _marker_lock_text (0)
         , frame_position (start_pos)
 	, _type (type)
 	, _shown (false)
@@ -346,7 +347,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
 
 	if (handle_events) {
-                /* events will be handled by both the group, make sure it can be used to lookup this object.
+                /* events will be handled by the group, make sure it can be used to lookup this object.
                  */
                 group->set_data ("marker", this);
 		group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
@@ -358,6 +359,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
         use_color ();
 
         if (_location) {
+        
                 /* Listen to region properties that we care about */
 
                 _location->FlagsChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::flags_changed, this), gui_context());
@@ -366,7 +368,8 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
                 _location->EndChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
                 _location->Changed.connect (location_connections, invalidator(*this), boost::bind (&Marker::bounds_changed, this), gui_context());
                 _location->SceneChangeChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::scene_change_changed, this), gui_context());
-
+                _location->LockChanged.connect (location_connections, invalidator(*this), boost::bind (&Marker::setup_name_display, this), gui_context());
+        
                 /* connect to scene change active signal if there is a scene change */
                 connect_to_scene_change_signals ();
         }
@@ -571,7 +574,9 @@ void
 Marker::setup_name_display ()
 {
 	double limit = _left_label_limit;
-        
+    
+        _label_offset = name_padding;
+    
 	if (_name.empty()) {
 
                 if (_name_item) {
@@ -585,53 +590,85 @@ Marker::setup_name_display ()
                 return;
 
 	} else {
-
-                int name_width;
                 int scene_change_width = 0;
-
+                int lock_change_width = 0;
+        
+                // Pango has a bug in text width calculation on MAC
+#ifdef __APPLE__
+                int font_width_compensation = 4;
+#else
+                int font_width_compensation = 0;
+#endif // __APPLE__
+        
                 if (!_name_item) {
                         _name_item = new ArdourCanvas::Text (group);
                         CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", _name));
                         _name_item->set_font_description (name_font);
                         _name_item->set_color (ArdourCanvas::contrasting_text_color (_color));
                 }
-
-                if (_have_scene_change && _location->scene_change()->active()) {
-                        
+        
+                if (!_marker_lock_text) {
+                        _marker_lock_text = new ArdourCanvas::Text (group);
+                        CANVAS_DEBUG_NAME (_marker_lock_text, string_compose ("Marker::_marker_lock_text for %1", _name));
+                        _marker_lock_text->set_font_description (name_font);
+                        _marker_lock_text->set_color (ArdourCanvas::contrasting_text_color (_color));
+                        _marker_lock_text->set (X_("Locked"));
+                }
+        
+                int marker_lock_text_width = 0;
+                if (_location && _location->locked() ) {
+                        int lock_height;
+                        int lock_width;
+                    
+                        _marker_lock_text->set_position (ArdourCanvas::Duple (2.0, (_height / 2.0) - (name_height / 2.0) - 1.0));
+                        _marker_lock_text->show();
+                    
+                        pixel_size (X_("Locked"), name_font, lock_width, lock_height);
+                        marker_lock_text_width = _marker_lock_text->position().x + lock_width + font_width_compensation;
+                    
+                        _label_offset = name_padding + marker_lock_text_width;
+                } else {
+                        _marker_lock_text->hide();
+                }
+        
+                if (_have_scene_change && _location && _location->scene_change()->active()) {
+                    
                         /* coordinates of rect that will surround "MIDI" */
                         
                         ArdourCanvas::Rect r;
                         int midi_height;
+                        int midi_width;
+                    
+                        pixel_size (X_("MIDI"), name_font, midi_width, midi_height);
                         
-                        pixel_size (X_("MIDI"), name_font, name_width, midi_height);
-                        
-                        r.x0 = 2.0;
-                        r.x1 = r.x1 + name_width + 7.0;
-                        
+                        r.x0 = marker_lock_text_width + 2.0;
+                        r.x1 = r.x0 + midi_width + font_width_compensation + 3.0; // 3 pixels after signlar
+                    
                         if (_scene_change_text == 0) {
                                 _scene_change_rect = new ArdourCanvas::Rectangle (group);
                                 _scene_change_text = new ArdourCanvas::Text (group);
-                                /* move name label over */
-                                _label_offset = name_padding + r.x1;
+                        
+                                _scene_change_rect->set_fill (false);
+                                _scene_change_text->set_font_description (name_font);
+                                _scene_change_text->set (X_("MIDI"));
                         }
-                        
-                        _scene_change_rect->set_fill (false);
-                        
-                        _scene_change_text->set_font_description (name_font);
-                        _scene_change_text->set (X_("MIDI"));
-                        
+                    
+                        /* move name label over */
+                        _label_offset = name_padding + r.x1;
+                    
+                        /**/
+                    
                         /* 4 pixels left margin, place it in the vertical middle, plus or minus
                          */
-                        _scene_change_text->set_position (ArdourCanvas::Duple (4.0, (_height / 2.0) - (name_height / 2.0) - 1.0));
-                        
+                        _scene_change_text->set_position (ArdourCanvas::Duple (r.x0 + 2.0, (_height / 2.0) - (name_height / 2.0) - 1.0));
+                    
                         r.y0 = _scene_change_text->position().y - 2.0;
                         r.y1 = r.y0 + name_height + 4.0;
-                        
+                    
                         _scene_change_rect->set (r);
-                        scene_change_width = r.x1;
+                        scene_change_width = r.x1 - r.x0;
                         
                 } else {
-                        _label_offset = name_padding;
                         if (_scene_change_text) {
                                 delete _scene_change_text;
                                 delete _scene_change_rect;
@@ -639,17 +676,20 @@ Marker::setup_name_display ()
                                 _scene_change_rect = 0;
                         }
                 }
+        
+                double name_text_width = pixel_width (_name, name_font) + font_width_compensation;
                 
-                double name_text_width = pixel_width (_name, name_font);
-                
-                name_width = min ((name_text_width + (2.0 * name_padding)), limit);
-		_name_item->show ();
+                int name_width = min ((name_text_width + (2.0 * name_padding)), limit);
+                _name_item->show ();
                 _name_item->set_position (ArdourCanvas::Duple (_label_offset, (_height / 2.0) - (name_height / 2.0)));
-		_name_item->clamp_width (name_width);
-		_name_item->set (_name);
-                
+                _name_item->clamp_width (name_width);
+        
+                if (_name_item->text() != _name) {
+                        _name_item->set (_name);
+                }
+        
                 _name_background->set_x0 (_name_item->position().x - _label_offset);
-                _name_background->set_x1 (_name_background->x0() + name_width + scene_change_width);
+                _name_background->set_x1 (_name_background->x0() + name_width + scene_change_width + marker_lock_text_width);
         }
 }
 
@@ -689,7 +729,7 @@ Marker::hide ()
 void
 Marker::use_color ()
 {
-       if (mark) {
+        if (mark) {
                 mark->set_fill_color (_color);
                 mark->set_outline_color (_color);
         }
@@ -724,6 +764,9 @@ Marker::use_color ()
         }
         if (_scene_change_text) {
                 _scene_change_text->set_color (contrast);
+        }
+        if (_marker_lock_text) {
+                _marker_lock_text->set_color (contrast);
         }
 }
 
@@ -763,7 +806,7 @@ Marker::set_has_scene_change (bool yn)
         _have_scene_change = yn;
         setup_name_display ();
 }
-                
+
 /***********************************************************************/
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const string& text,

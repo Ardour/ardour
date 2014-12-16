@@ -129,6 +129,7 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Rectangle* _name_background;
 	ArdourCanvas::Rectangle* _scene_change_rect;
 	ArdourCanvas::Text* _scene_change_text;
+    ArdourCanvas::Text* _marker_lock_text;
 
 	std::string  _name;
 	double        unit_position;
