@@ -2603,8 +2603,7 @@ namespace
 {
     void run_message_dialog(std::string message)
     {
-        MessageDialog msg (message.c_str(), false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
-        msg.set_keep_above(true);
+        WavesMessageDialog msg ("", message.c_str());
         msg.set_position (Gtk::WIN_POS_MOUSE);
         msg.run();
     }
