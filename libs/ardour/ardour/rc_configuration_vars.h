@@ -201,6 +201,7 @@ CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", false)
 CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor", 20.0)
 CONFIG_VARIABLE (std::string, freesound_download_dir, "freesound-download-dir", Glib::get_home_dir() + "/Freesound/snd")
+CONFIG_VARIABLE (framecnt_t, range_location_minimum, "range-location-minimum", 128) /* samples */
 
 /* plugin related */
 

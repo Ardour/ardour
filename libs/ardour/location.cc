@@ -220,7 +220,12 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 		return 0;
-	}
+	} else {
+                /* range locations must exceed a minimum duration */
+                if (_end - s < Config->get_range_location_minimum()) {
+                        return -1;
+                }
+        }
 
 	if (s != _start) {
 
@@ -283,6 +288,11 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 		return 0;
+        } else {
+                /* range locations must exceed a minimum duration */
+                if (e - _start < Config->get_range_location_minimum()) {
+                        return -1;
+                }
 	}
 
 	if (e != _end) {
@@ -340,6 +350,11 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 	} else {
+
+                /* range locations must exceed a minimum duration */
+                if (e - s < Config->get_range_location_minimum()) {
+                        return -1;
+                }
                 
                 if (s != _start) {
 
