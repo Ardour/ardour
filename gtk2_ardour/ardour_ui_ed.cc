@@ -1003,7 +1003,21 @@ ARDOUR_UI::update_marker_inspector (MarkerSelection* markers)
 }
 
 void
+ARDOUR_UI::update_track_color_dialog (boost::shared_ptr<ARDOUR::Route> route)
+{
+	track_color_dialog->set_route (route);
+}
+
+void
 ARDOUR_UI::show_marker_inspector ()
 {
+	marker_inspector_dialog->set_position (Gtk::WIN_POS_MOUSE);
     marker_inspector_dialog->show();
+}
+
+void
+ARDOUR_UI::show_track_color_dialog ()
+{
+	track_color_dialog->set_position (Gtk::WIN_POS_MOUSE);
+    track_color_dialog->show();
 }

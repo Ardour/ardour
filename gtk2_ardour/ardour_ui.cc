@@ -205,6 +205,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     , _add_tracks_dialog(new AddTracksDialog())	
 	, session_lock_dialog (X_("session-lock-dialog"), _("System Lock"))
 	, marker_inspector_dialog (X_("marker-inspector-dialog"), _("Marker Inspector"))
+	, track_color_dialog (X_("track_color-dialog"), _("Marker Inspector"))
     , session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -385,6 +386,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&tracks_control_panel);
 	WM::Manager::instance().register_window (&session_lock_dialog);
 	WM::Manager::instance().register_window (&marker_inspector_dialog);
+	WM::Manager::instance().register_window (&track_color_dialog);
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);

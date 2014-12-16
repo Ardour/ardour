@@ -263,6 +263,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 
 	if (route) {
 		current_mixer_strip->set_route (route);
+		ARDOUR_UI::instance()->update_track_color_dialog (route);
 	}
 }
 

@@ -76,6 +76,7 @@
 #include "tracks_control_panel.h"
 #include "marker_inspector_dialog.h"
 #include "waves_message_dialog.h"
+#include "waves_track_color_dialog.h"
 #include "ui_config.h"
 #include "enums.h"
 #include "visibility_group.h"
@@ -100,6 +101,7 @@
 #include "time.h"
 
 struct MarkerSelection;
+class TrackSelection;
 class VideoTimeLine;
 class ArdourKeyboard;
 class AudioClock;
@@ -341,10 +343,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void reset_route_peak_display (ARDOUR::Route*);
 	void reset_group_peak_display (ARDOUR::RouteGroup*);
 
-        const std::string& announce_string() const { return _announce_string; }
+    const std::string& announce_string() const { return _announce_string; }
 
-        int disconnect_from_engine ();
-        int reconnect_to_engine ();
+    int disconnect_from_engine ();
+    int reconnect_to_engine ();
 
     void set_sample_format(ARDOUR::SampleFormat sf) {_sample_format = sf;}
     void set_header_format(ARDOUR::HeaderFormat hf) {_header_format = hf;}
@@ -356,7 +358,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     
     bool session_auto_save_is_allowed() const;
     void update_marker_inspector (MarkerSelection*);
+    void update_track_color_dialog (boost::shared_ptr<ARDOUR::Route> route);
     void show_marker_inspector();
+    void show_track_color_dialog();
 
   protected:
 	friend class PublicEditor;
@@ -662,6 +666,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     WM::Proxy<TracksControlPanel> tracks_control_panel;
     WM::Proxy<SessionLockDialog> session_lock_dialog;
     WM::Proxy<MarkerInspectorDialog> marker_inspector_dialog;
+    WM::Proxy<WavesTrackColorDialog> track_color_dialog;
     
     /* Windows/Dialogs that require a creator method */
 
