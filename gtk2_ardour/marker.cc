@@ -594,7 +594,11 @@ Marker::setup_name_display ()
                 int lock_change_width = 0;
         
                 // Pango has a bug in text width calculation on MAC
+#ifdef __APPLE__
                 int font_width_compensation = 4;
+#else
+				int font_width_compensation = 0;
+#endif // __APPLE__
         
                 if (!_name_item) {
                     _name_item = new ArdourCanvas::Text (group);
