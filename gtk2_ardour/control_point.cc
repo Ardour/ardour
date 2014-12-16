@@ -119,16 +119,13 @@ ControlPoint::reset (double x, double y, AutomationList::iterator mi, uint32_t v
 void
 ControlPoint::set_color ()
 {
-	uint32_t color = 0;
-
 	if (_selected) {
-		color = ARDOUR_UI::config()->color ("control point selected");
+		_item->set_outline_color(ARDOUR_UI::config()->color ("control point selected outline"));;
+		_item->set_fill_color(ARDOUR_UI::config()->color ("control point selected fill"));
 	} else {
-		color = ARDOUR_UI::config()->color ("control point outline");
+		_item->set_outline_color(ARDOUR_UI::config()->color ("control point outline"));
+		_item->set_fill_color(ARDOUR_UI::config()->color ("control point fill"));
 	}
-
-	_item->set_outline_color (color);
-	_item->set_fill_color (ARDOUR_UI::config()->color ("control point fill"));
 }
 
 void

@@ -144,6 +144,10 @@
     <ColorAlias name="control point fill" alias="color 13"/>
     <ColorAlias name="control point outline" alias="color 9"/>
     <ColorAlias name="control point selected" alias="color 14"/>
+    <ColorAlias name="control point fill" alias="color 17"/>
+    <ColorAlias name="control point outline" alias="meter color3"/>
+    <ColorAlias name="control point selected fill" alias="color 72"/>
+    <ColorAlias name="control point selected outline" alias="color 9"/>
     <ColorAlias name="crossfade editor base" alias="color 15"/>
     <ColorAlias name="crossfade editor line" alias="color 4"/>
     <ColorAlias name="crossfade editor line shading" alias="color 16"/>
