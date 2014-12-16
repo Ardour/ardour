@@ -69,7 +69,7 @@ Editor::initialize_canvas ()
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
 
-        _track_canvas->set_background_color (ARDOUR_UI::config()->get_ArrangeBase());
+        _track_canvas->set_background_color (ARDOUR_UI::config()->color ("arrange base"));
 
 	/* scroll group for items that should not automatically scroll
 	 *  (e.g verbose cursor). It shares the canvas coordinate space.
@@ -871,8 +871,8 @@ Editor::set_horizontal_position (double p)
 void
 Editor::color_handler()
 {
-	ArdourCanvas::Color base = ARDOUR_UI::config()->get_RulerBase();
-	ArdourCanvas::Color text = ARDOUR_UI::config()->get_RulerText();
+	ArdourCanvas::Color base = ARDOUR_UI::config()->color ("ruler base");
+	ArdourCanvas::Color text = ARDOUR_UI::config()->color ("ruler text");
 	timecode_ruler->set_fill_color (base);
 	timecode_ruler->set_outline_color (text);
 	minsec_ruler->set_fill_color (base);
@@ -882,52 +882,52 @@ Editor::color_handler()
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
 	
-	playhead_cursor->set_color (ARDOUR_UI::config()->get_PlayHead());
+	playhead_cursor->set_color (ARDOUR_UI::config()->color ("play head"));
 
-	meter_bar->set_fill_color (ARDOUR_UI::config()->get_MeterBar());
-	meter_bar->set_outline_color (ARDOUR_UI::config()->get_MarkerBarSeparator());
+	meter_bar->set_fill_color (ARDOUR_UI::config()->color ("meter bar"));
+	meter_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	tempo_bar->set_fill_color (ARDOUR_UI::config()->get_TempoBar());
-	tempo_bar->set_outline_color (ARDOUR_UI::config()->get_MarkerBarSeparator());
+	tempo_bar->set_fill_color (ARDOUR_UI::config()->color ("tempo bar"));
+	tempo_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	marker_bar->set_fill_color (ARDOUR_UI::config()->get_MarkerBar());
-	marker_bar->set_outline_color (ARDOUR_UI::config()->get_MarkerBarSeparator());
+	marker_bar->set_fill_color (ARDOUR_UI::config()->color ("marker bar"));
+	marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->get_CDMarkerBar());
-	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->get_MarkerBarSeparator());
+	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("cd marker bar"));
+	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	range_marker_bar->set_fill_color (ARDOUR_UI::config()->get_RangeMarkerBar());
-	range_marker_bar->set_outline_color (ARDOUR_UI::config()->get_MarkerBarSeparator());
+	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("range marker bar"));
+	range_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->get_TransportMarkerBar());
-	transport_marker_bar->set_outline_color (ARDOUR_UI::config()->get_MarkerBarSeparator());
+	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("transport marker bar"));
+	transport_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	cd_marker_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_RangeDragBarRect());
-	cd_marker_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_RangeDragBarRect());
+	cd_marker_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag bar rect"));
+	cd_marker_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("range drag bar rect"));
 
-	range_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_RangeDragBarRect());
-	range_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_RangeDragBarRect());
+	range_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag bar rect"));
+	range_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("range drag bar rect"));
 
-	transport_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->get_TransportDragRect());
-	transport_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->get_TransportDragRect());
+	transport_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("transport drag rect"));
+	transport_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("transport drag rect"));
 
-	transport_loop_range_rect->set_fill_color (ARDOUR_UI::config()->get_TransportLoopRect());
-	transport_loop_range_rect->set_outline_color (ARDOUR_UI::config()->get_TransportLoopRect());
+	transport_loop_range_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("transport loop rect", "loop rectangle"));
+	transport_loop_range_rect->set_outline_color (ARDOUR_UI::config()->color ("transport loop rect"));
 
-	transport_punch_range_rect->set_fill_color (ARDOUR_UI::config()->get_TransportPunchRect());
-	transport_punch_range_rect->set_outline_color (ARDOUR_UI::config()->get_TransportPunchRect());
+	transport_punch_range_rect->set_fill_color (ARDOUR_UI::config()->color ("transport punch rect"));
+	transport_punch_range_rect->set_outline_color (ARDOUR_UI::config()->color ("transport punch rect"));
 
-	transport_punchin_line->set_outline_color (ARDOUR_UI::config()->get_PunchLine());
-	transport_punchout_line->set_outline_color (ARDOUR_UI::config()->get_PunchLine());
+	transport_punchin_line->set_outline_color (ARDOUR_UI::config()->color ("punch line"));
+	transport_punchout_line->set_outline_color (ARDOUR_UI::config()->color ("punch line"));
 
-	rubberband_rect->set_outline_color (ARDOUR_UI::config()->get_RubberBandRect());
-	rubberband_rect->set_fill_color ((guint32) ARDOUR_UI::config()->get_RubberBandRect());
+	rubberband_rect->set_outline_color (ARDOUR_UI::config()->color ("rubber band rect"));
+	rubberband_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("rubber band rect", "selection rect"));
 
-	location_marker_color = ARDOUR_UI::config()->get_LocationMarker();
-	location_range_color = ARDOUR_UI::config()->get_LocationRange();
-	location_cd_marker_color = ARDOUR_UI::config()->get_LocationCDMarker();
-	location_loop_color = ARDOUR_UI::config()->get_LocationLoop();
-	location_punch_color = ARDOUR_UI::config()->get_LocationPunch();
+	location_marker_color = ARDOUR_UI::config()->color ("location marker");
+	location_range_color = ARDOUR_UI::config()->color ("location range");
+	location_cd_marker_color = ARDOUR_UI::config()->color ("location cd marker");
+	location_loop_color = ARDOUR_UI::config()->color ("location loop");
+	location_punch_color = ARDOUR_UI::config()->color ("location punch");
 
 	refresh_location_display ();
 

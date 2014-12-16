@@ -763,8 +763,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				0xcccc00ff, 0xcccc00ff,
 				0xffaa00ff, 0xffaa00ff,
 				0xff0000ff,
-				ARDOUR_UI::config()->get_MeterBackgroundBot(),
-				ARDOUR_UI::config()->get_MeterBackgroundTop()
+				ARDOUR_UI::config()->color ("meter background bottom"),
+				ARDOUR_UI::config()->color ("meter background top")
 				);
 
 		info->min_unbound = desc.min_unbound;

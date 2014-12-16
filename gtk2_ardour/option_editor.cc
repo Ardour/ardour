@@ -445,6 +445,21 @@ OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
 	o->set_state_from_config ();
 }
 
+/** Add a new page 
+ *  @param pn Page name (will be created if it doesn't already exist)
+ *  @param w widget that fills the page
+ */
+void
+OptionEditor::add_page (std::string const & pn, Gtk::Widget& w)
+{
+	if (_pages.find (pn) == _pages.end()) {
+		_pages[pn] = new OptionEditorPage (_notebook, pn);
+	}
+
+	OptionEditorPage* p = _pages[pn];
+	p->box.pack_start (w, true, true);
+}
+
 void
 OptionEditor::set_current_page (string const & p)
 {

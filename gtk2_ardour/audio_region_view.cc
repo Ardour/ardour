@@ -153,28 +153,28 @@ AudioRegionView::init (bool wfd)
 		fade_in_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in handle for %1", region()->name()));
 		fade_in_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
-		fade_in_handle->set_fill_color (ARDOUR_UI::config()->get_InactiveFadeHandle());
+		fade_in_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
 		fade_in_handle->set_data ("regionview", this);
 		fade_in_handle->hide ();
 
 		fade_out_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out handle for %1", region()->name()));
 		fade_out_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
-		fade_out_handle->set_fill_color (ARDOUR_UI::config()->get_InactiveFadeHandle());
+		fade_out_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
 		fade_out_handle->set_data ("regionview", this);
 		fade_out_handle->hide ();
 
 		fade_in_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in trim handle for %1", region()->name()));
 		fade_in_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
-		fade_in_trim_handle->set_fill_color (ARDOUR_UI::config()->get_InactiveFadeHandle());
+		fade_in_trim_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
 		fade_in_trim_handle->set_data ("regionview", this);
 		fade_in_trim_handle->hide ();
 
 		fade_out_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out trim handle for %1", region()->name()));
 		fade_out_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
-		fade_out_trim_handle->set_fill_color (ARDOUR_UI::config()->get_InactiveFadeHandle());
+		fade_out_trim_handle->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
 		fade_out_trim_handle->set_data ("regionview", this);
 		fade_out_trim_handle->hide ();
 	}
@@ -315,7 +315,7 @@ AudioRegionView::fade_in_active_changed ()
 		if (audio_region()->fade_in_active()) {
 			start_xfade_rect->set_fill (false);
 		} else {
-			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_InactiveCrossfade());
+			start_xfade_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("inactive crossfade", "inactive crossfade"));
 			start_xfade_rect->set_fill (true);
 		}
 	}
@@ -328,7 +328,7 @@ AudioRegionView::fade_out_active_changed ()
 		if (audio_region()->fade_out_active()) {
 			end_xfade_rect->set_fill (false);
 		} else {	
-			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->get_InactiveCrossfade());
+			end_xfade_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("inactive crossfade", "inactive crossfade"));
 			end_xfade_rect->set_fill (true);
 		}
 	}
@@ -737,14 +737,14 @@ AudioRegionView::redraw_start_xfade_to (boost::shared_ptr<AudioRegion> ar, frame
 	if (!start_xfade_curve) {
 		start_xfade_curve = new ArdourCanvas::XFadeCurve (group, ArdourCanvas::XFadeCurve::Start);
 		CANVAS_DEBUG_NAME (start_xfade_curve, string_compose ("xfade start out line for %1", region()->name()));
-		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->get_ActiveCrossfade());
-		start_xfade_curve->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
+		start_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 		start_xfade_curve->set_ignore_events (true);
 	}
 	if (!start_xfade_rect) {
 		start_xfade_rect = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (start_xfade_rect, string_compose ("xfade start rect for %1", region()->name()));
-		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 		start_xfade_rect->set_fill (false);
 		start_xfade_rect->set_outline (false);
 		start_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_start_xfade_event), start_xfade_rect, this));
@@ -826,15 +826,15 @@ AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecn
 	if (!end_xfade_curve) {
 		end_xfade_curve = new ArdourCanvas::XFadeCurve (group, ArdourCanvas::XFadeCurve::End);
 		CANVAS_DEBUG_NAME (end_xfade_curve, string_compose ("xfade end out line for %1", region()->name()));
-		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->get_ActiveCrossfade());
-		end_xfade_curve->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
+		end_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 		end_xfade_curve->set_ignore_events (true);
 	}
 
 	if (!end_xfade_rect) {
 		end_xfade_rect = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (end_xfade_rect, string_compose ("xfade end rect for %1", region()->name()));
-		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 		end_xfade_rect->set_fill (false);
 		end_xfade_rect->set_outline (false);
 		end_xfade_rect->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_end_xfade_event), end_xfade_rect, this));
@@ -987,26 +987,26 @@ AudioRegionView::set_colors ()
 
 	if (gain_line) {
 		gain_line->set_line_color (audio_region()->envelope_active() ? 
-					   ARDOUR_UI::config()->get_GainLine() : 
-					   ARDOUR_UI::config()->get_GainLineInactive());
+					   ARDOUR_UI::config()->color ("gain line") : 
+					   ARDOUR_UI::config()->color_mod ("gain line inactive", "gain line inactive"));
 	}
 
 	set_waveform_colors ();
 
 	if (start_xfade_curve) {
-		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->get_ActiveCrossfade());
-		start_xfade_curve->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		start_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
+		start_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 	}
 	if (end_xfade_curve) {
-		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->get_ActiveCrossfade());
-		end_xfade_curve->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		end_xfade_curve->set_fill_color (ARDOUR_UI::config()->color_mod ("active crossfade", "crossfade alpha"));
+		end_xfade_curve->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 	}
 
 	if (start_xfade_rect) {
-		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		start_xfade_rect->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 	}
 	if (end_xfade_rect) {
-		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->get_CrossfadeLine());
+		end_xfade_rect->set_outline_color (ARDOUR_UI::config()->color ("crossfade line"));
 	}
 }
 
@@ -1364,8 +1364,8 @@ AudioRegionView::envelope_active_changed ()
 {
 	if (gain_line) {
 		gain_line->set_line_color (audio_region()->envelope_active() ? 
-					   ARDOUR_UI::config()->get_GainLine() : 
-					   ARDOUR_UI::config()->get_GainLineInactive());
+					   ARDOUR_UI::config()->color ("gain line") : 
+					   ARDOUR_UI::config()->color_mod ("gain line inactive", "gain line inactive"));
 		update_envelope_visibility ();
 	}
 }
@@ -1396,30 +1396,30 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 {
 	ArdourCanvas::Color fill;
 	ArdourCanvas::Color outline;
-	ArdourCanvas::Color clip = ARDOUR_UI::config()->get_WaveFormClip();
-	ArdourCanvas::Color zero = ARDOUR_UI::config()->get_ZeroLine();
+	ArdourCanvas::Color clip = ARDOUR_UI::config()->color ("clipped waveform");
+	ArdourCanvas::Color zero = ARDOUR_UI::config()->color ("zero line");
 
 	if (_selected) {
 		if (_region->muted()) {
 			/* hide outline with zero alpha */
-			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_SelectedWaveForm(), 0);
-			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_SelectedWaveFormFill(), MUTED_ALPHA);
+			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("selected waveform outline"), 0);
+			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("selected waveform fill"), MUTED_ALPHA);
 		} else {
-			outline = ARDOUR_UI::config()->get_SelectedWaveForm();
-			fill = ARDOUR_UI::config()->get_SelectedWaveFormFill();
+			outline = ARDOUR_UI::config()->color ("selected waveform outline");
+			fill = ARDOUR_UI::config()->color ("selected waveform fill");
 		}
 	} else {
 		if (_recregion) {
-			outline = ARDOUR_UI::config()->get_RecWaveForm();
-			fill = ARDOUR_UI::config()->get_RecWaveFormFill();
+			outline = ARDOUR_UI::config()->color ("recording waveform outline");
+			fill = ARDOUR_UI::config()->color ("recording waveform fill");
 		} else {
 			if (_region->muted()) {
 				/* hide outline with zero alpha */
-				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_WaveForm(), 0);	
-				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_WaveFormFill(), MUTED_ALPHA);
+				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("waveform outline"), 0);	
+				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->color ("waveform fill"), MUTED_ALPHA);
 			} else {
-				outline = ARDOUR_UI::config()->get_WaveForm();
-				fill = ARDOUR_UI::config()->get_WaveFormFill();
+				outline = ARDOUR_UI::config()->color ("waveform outline");
+				fill = ARDOUR_UI::config()->color ("waveform fill");
 			}
 		}
 	}

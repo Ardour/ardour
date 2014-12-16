@@ -103,36 +103,26 @@ class NoteBase : public sigc::trackable
 	MidiRegionView& region_view() const { return _region; }
 
 	inline static uint32_t meter_style_fill_color(uint8_t vel, bool selected) {
-                if (selected) {
-                        if (vel < 64) {
-                                return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_SelectedMidiNoteColorBase(),
-					ARDOUR_UI::config()->get_SelectedMidiNoteColorMid(),
-					(vel / (double)63.0));
-                        } else {
-                                return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_SelectedMidiNoteColorMid(),
-					ARDOUR_UI::config()->get_SelectedMidiNoteColorTop(),
-					((vel-64) / (double)63.0));
-                        }
-                } else {
-                        if (vel < 64) {
-                                return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_MidiNoteColorBase(),
-					ARDOUR_UI::config()->get_MidiNoteColorMid(),
-					(vel / (double)63.0));
-                        } else {
-                                return UINT_INTERPOLATE(
-					ARDOUR_UI::config()->get_MidiNoteColorMid(),
-					ARDOUR_UI::config()->get_MidiNoteColorTop(),
-					((vel-64) / (double)63.0));
-                        }
-                }
+		if (vel < 64) {
+			return UINT_INTERPOLATE(
+				ARDOUR_UI::config()->color_mod ("midi note min", "midi note"),
+				ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
+				(vel / (double)63.0));
+		} else {
+			return UINT_INTERPOLATE(
+				ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
+				ARDOUR_UI::config()->color_mod ("midi note max", " midi note"),
+				((vel-64) / (double)63.0));
+		}
 	}
 
 	/// calculate outline colors from fill colors of notes
-	inline static uint32_t calculate_outline(uint32_t color) {
-		return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
+	inline static uint32_t calculate_outline(uint32_t color, bool selected=false) {
+		if (selected) {
+			return ARDOUR_UI::config()->color ("midi note selected outline");
+		} else {
+			return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
+		}
 	}
 
 	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms

@@ -26,6 +26,7 @@
 #include <glibmm/miscutils.h>
 #include <glib/gstdio.h>
 
+#include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
@@ -65,31 +66,12 @@ UIConfiguration::UIConfiguration ()
 #undef  CANVAS_FONT_VARIABLE
 
 	_dirty (false),
-	base_modified (false),
 	aliases_modified (false),
-	derived_modified (false),
+	colors_modified (false),
+	modifiers_modified (false),
 	block_save (0)
 {
 	_instance = this;
-
-	/* pack all base colors into the configurable color map so that
-	   derived colors can use them.
-	*/
-	  
-#undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,color) base_colors.insert (make_pair (name,color));
-#include "base_colors.h"
-#undef CANVAS_BASE_COLOR
-
-#undef CANVAS_COLOR
-#define CANVAS_COLOR(var,name,base,modifier) relative_colors.insert (make_pair (name, RelativeHSV (base,modifier)));
-#include "colors.h"
-#undef CANVAS_COLOR
-	
-#undef COLOR_ALIAS
-#define COLOR_ALIAS(var,name,alias) color_aliases.insert (make_pair (name,alias));
-#include "color_aliases.h"
-#undef CANVAS_COLOR
 
 	load_state();
 
@@ -132,9 +114,6 @@ UIConfiguration::parameter_changed (string param)
 		load_rc_file (true);
 	} else if (param == "color-file") {
 		load_color_theme ();
-	} else if (param == "base-color") { /* one of many */
-		base_modified = true;
-		ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 	}
 
 	save_state ();
@@ -163,89 +142,6 @@ UIConfiguration::reset_gtk_theme ()
 	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
 }
 	
-UIConfiguration::RelativeHSV
-UIConfiguration::color_as_relative_hsv (Color c)
-{
-	HSV variable (c);
-	HSV closest;
-	double shortest_distance = DBL_MAX;
-	string closest_name;
-
-	BaseColors::iterator f;
-	std::map<std::string,HSV> palette;
-
-	for (f = base_colors.begin(); f != base_colors.end(); ++f) {
-		/* Do not include any specialized base colors in the palette
-		   we use to do comparisons (e.g. meter colors)
-		*/
-
-		if (f->first.find ("color") == 0) {
-			palette.insert (make_pair (f->first, HSV (f->second)));
-		}
-	}
-
-	for (map<string,HSV>::iterator f = palette.begin(); f != palette.end(); ++f) {
-		
-		double d;
-		HSV fixed (f->second);
-		
-		if (fixed.is_gray() || variable.is_gray()) {
-			/* at least one is achromatic; HSV::distance() will do
-			 * the right thing
-			 */
-			d = fixed.distance (variable);
-		} else {
-			/* chromatic: compare ONLY hue because our task is
-			   to pick the HUE closest and then compute
-			   a modifier. We want to keep the number of 
-			   hues low, and by computing perceptual distance 
-			   we end up finding colors that are to each
-			   other without necessarily be close in hue.
-			*/
-			d = fabs (variable.h - fixed.h);
-		}
-
-		if (d < shortest_distance) {
-			closest = fixed;
-			closest_name = f->first;
-			shortest_distance = d;
-		}
-	}
-	
-	/* we now know the closest color of the fixed colors to 
-	   this variable color. Compute the HSV diff and
-	   use it to redefine the variable color in terms of the
-	   fixed one.
-	*/
-	
-	HSV delta = variable.delta (closest);
-
-	/* quantize hue delta so we don't end up with many subtle hues caused
-	 * by original color choices
-	 */
-
-	delta.h = hue_width * (round (delta.h/hue_width));
-
-	return RelativeHSV (closest_name, delta);
-}
-
-string
-UIConfiguration::color_as_alias (Color c)
-{
-	string closest;
-	double shortest_distance = DBL_MAX;
-	HSV target (c);
-	
-	for (RelativeColors::const_iterator a = relative_colors.begin(); a != relative_colors.end(); ++a) {
-		HSV hsv (a->second.get());
-		double d = hsv.distance (target);
-		if (d < shortest_distance) {
-			shortest_distance = d;
-			closest = a->first;
-		}
-	}
-	return closest;
-}		
 void
 UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 {
@@ -348,16 +244,16 @@ UIConfiguration::store_color_theme ()
 
 	root = new XMLNode("Ardour");
 
-	XMLNode* parent = new XMLNode (X_("RelativeColors"));
-	for (RelativeColors::const_iterator i = relative_colors.begin(); i != relative_colors.end(); ++i) {
-		XMLNode* node = new XMLNode (X_("RelativeColor"));
+	XMLNode* parent = new XMLNode (X_("Colors"));
+	for (Colors::const_iterator i = colors.begin(); i != colors.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("Color"));
 		node->add_property (X_("name"), i->first);
-		node->add_property (X_("base"), i->second.base_color);
-		node->add_property (X_("modifier"), i->second.modifier.to_string());
+		stringstream ss;
+		ss << "0x" << setw (8) << setfill ('0') << hex << i->second;
+		node->add_property (X_("value"), ss.str());
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
-	
 	
 	parent = new XMLNode (X_("ColorAliases"));
 	for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
@@ -367,7 +263,16 @@ UIConfiguration::store_color_theme ()
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
-	
+
+	parent = new XMLNode (X_("Modifiers"));
+	for (Modifiers::const_iterator i = modifiers.begin(); i != modifiers.end(); ++i) {
+		XMLNode* node = new XMLNode (X_("Modifier"));
+		node->add_property (X_("name"), i->first);
+		node->add_property (X_("modifier"), i->second.to_string());
+		parent->add_child_nocopy (*node);
+	}
+	root->add_child_nocopy (*parent);
+
 	XMLTree tree;
 	std::string colorfile = Glib::build_filename (user_config_directory(), (string ("my-") + color_file.get() + ".colors"));
 	
@@ -450,16 +355,16 @@ UIConfiguration::save_state()
 		_dirty = false;
 	}
 
-	if (base_modified || aliases_modified || derived_modified) {
+	if (aliases_modified || colors_modified || modifiers_modified) {
 
 		if (store_color_theme ()) {
 			error << string_compose (_("Color file %1 not saved"), color_file.get()) << endmsg;
 			return -1;
 		}
 
-		base_modified = false;
 		aliases_modified = false;
-		derived_modified = false;
+		colors_modified = false;
+		modifiers_modified = false;
 	}
 	
 
@@ -529,33 +434,25 @@ UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 		}
 	}
 
-	XMLNode* base = find_named_node (root, X_("BaseColors"));
+	XMLNode* colors = find_named_node (root, X_("Colors"));
 
-	if (base) {
-		load_base_colors (*base);
+	if (colors) {
+		load_colors (*colors);
 	}
 
-	
-	XMLNode* relative = find_named_node (root, X_("RelativeColors"));
-	
-	if (relative) {
-		load_relative_colors (*relative);
-	}
-
-	
 	XMLNode* aliases = find_named_node (root, X_("ColorAliases"));
 
 	if (aliases) {
 		load_color_aliases (*aliases);
 	}
 
+	XMLNode* modifiers = find_named_node (root, X_("Modifiers"));
+
+	if (modifiers) {
+		load_modifiers (*modifiers);
+	}
+
 	return 0;
-}
-
-void
-UIConfiguration::load_base_colors (XMLNode const &)
-{
-
 }
 
 void
@@ -582,30 +479,54 @@ UIConfiguration::load_color_aliases (XMLNode const & node)
 }
 
 void
-UIConfiguration::load_relative_colors (XMLNode const & node)
+UIConfiguration::load_colors (XMLNode const & node)
 {
 	XMLNodeList const nlist = node.children();
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
-	XMLProperty const *base;
-	XMLProperty const *modifier;
+	XMLProperty const *color;
 	
-	relative_colors.clear ();
+	colors.clear ();
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() != X_("RelativeColor")) {
+		if ((*niter)->name() != X_("Color")) {
 			continue;
 		}
 		name = (*niter)->property (X_("name"));
-		base = (*niter)->property (X_("base"));
-		modifier = (*niter)->property (X_("modifier"));
+		color = (*niter)->property (X_("value"));
 
-		if (name && base && modifier) {
-			RelativeHSV rhsv (base->value(), HSV (modifier->value()));
-			relative_colors.insert (make_pair (name->value(), rhsv));
+		if (name && color) {
+			ArdourCanvas::Color c;
+			c = strtol (color->value().c_str(), 0, 16);
+			colors.insert (make_pair (name->value(), c));
 		}
 	}
+}
 
+void
+UIConfiguration::load_modifiers (XMLNode const & node)
+{
+	PBD::LocaleGuard lg ("POSIX");
+	XMLNodeList const nlist = node.children();
+	XMLNodeConstIterator niter;
+	XMLProperty const *name;
+	XMLProperty const *mod;
+	
+	modifiers.clear ();
+	
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() != X_("Modifier")) {
+			continue;
+		}
+
+		name = (*niter)->property (X_("name"));
+		mod = (*niter)->property (X_("modifier"));
+
+		if (name && mod) {
+			SVAModifier svam (mod->value());
+			modifiers.insert (make_pair (name->value(), svam));
+		}
+	}
 }
 
 void
@@ -620,38 +541,47 @@ UIConfiguration::set_variables (const XMLNode& node)
 #undef  CANVAS_FONT_VARIABLE
 }
 
-ArdourCanvas::Color
-UIConfiguration::base_color_by_name (const std::string& name) const
+ArdourCanvas::SVAModifier
+UIConfiguration::modifier (string const & name) const
 {
-	BaseColors::const_iterator i = base_colors.find (name);
-
-	if (i != base_colors.end()) {
-		return i->second;
+	Modifiers::const_iterator m = modifiers.find (name);
+	if (m != modifiers.end()) {
+		return m->second;
 	}
+	return SVAModifier ();
+}
 
-	cerr << string_compose (_("Base Color %1 not found"), name) << endl;
-	return RGBA_TO_UINT (g_random_int()%256,g_random_int()%256,g_random_int()%256,0xff);
+ArdourCanvas::Color
+UIConfiguration::color_mod (std::string const & colorname, std::string const & modifiername) const
+{
+	return HSV (color (colorname)).mod (modifier (modifiername)).color ();
+}
+
+ArdourCanvas::Color
+UIConfiguration::color_mod (const ArdourCanvas::Color& color, std::string const & modifiername) const
+{
+	return HSV (color).mod (modifier (modifiername)).color ();
 }
 
 ArdourCanvas::Color
 UIConfiguration::color (const std::string& name, bool* failed) const
 {
-	map<string,string>::const_iterator e = color_aliases.find (name);
+	ColorAliases::const_iterator e = color_aliases.find (name);
 
 	if (failed) {
 		*failed = false;
 	}
 	
 	if (e != color_aliases.end ()) {
-		map<string,RelativeHSV>::const_iterator rc = relative_colors.find (e->second);
-		if (rc != relative_colors.end()) {
-			return rc->second.get();
+		Colors::const_iterator rc = colors.find (e->second);
+		if (rc != colors.end()) {
+			return rc->second;
 		}
 	} else {
 		/* not an alias, try directly */
-		map<string,RelativeHSV>::const_iterator rc = relative_colors.find (name);
-		if (rc != relative_colors.end()) {
-			return rc->second.get();
+		Colors::const_iterator rc = colors.find (name);
+		if (rc != colors.end()) {
+			return rc->second;
 		}
 	}
 	
@@ -672,25 +602,6 @@ UIConfiguration::color (const std::string& name, bool* failed) const
 			      0xff);
 }
 
-ArdourCanvas::HSV
-UIConfiguration::RelativeHSV::get() const
-{
-	HSV base (UIConfiguration::instance()->base_color_by_name (base_color));
-	
-	/* this operation is a little wierd. because of the way we originally
-	 * computed the alpha specification for the modifiers used here
-	 * we need to reset base's alpha to zero before adding the modifier.
-	 */
-
-	HSV self (base + modifier);
-	
-	if (quantized_hue >= 0.0) {
-		self.h = quantized_hue;
-	}
-	
-	return self;
-}
-
 Color
 UIConfiguration::quantized (Color c) const
 {
@@ -700,29 +611,14 @@ UIConfiguration::quantized (Color c) const
 }
 
 void
-UIConfiguration::set_base (string const& name, ArdourCanvas::Color color)
+UIConfiguration::set_color (string const& name, ArdourCanvas::Color color)
 {
-	BaseColors::iterator i = base_colors.find (name);
-	if (i == base_colors.end()) {
+	Colors::iterator i = colors.find (name);
+	if (i == colors.end()) {
 		return;
 	}
 	i->second = color;
-	base_modified = true;
-
-	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
-}
-
-void
-UIConfiguration::set_relative (const string& name, const RelativeHSV& rhsv)
-{
-	RelativeColors::iterator i = relative_colors.find (name);
-
-	if (i == relative_colors.end()) {
-		return;
-	}
-
-	i->second = rhsv;
-	derived_modified = true;
+	colors_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 }
@@ -737,6 +633,21 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 
 	i->second = alias;
 	aliases_modified = true;
+
+	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+}
+
+void
+UIConfiguration::set_modifier (string const & name, SVAModifier svam)
+{
+	Modifiers::iterator m = modifiers.find (name);
+
+	if (m == modifiers.end()) {
+		return;
+	}
+
+	m->second = svam;
+	modifiers_modified = true;
 
 	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 }
@@ -759,8 +670,4 @@ UIConfiguration::load_rc_file (bool themechange, bool allow_own)
 	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
 }
 
-std::ostream& operator<< (std::ostream& o, const UIConfiguration::RelativeHSV& rhsv)
-{
-	return o << rhsv.base_color << " + HSV(" << rhsv.modifier << ")";
-}
 

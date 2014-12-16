@@ -22,6 +22,10 @@
 #include <stdint.h>
 #include <cfloat>
 
+#include "pbd/convert.h"
+#include "pbd/failed_constructor.h"
+#include "pbd/locale_guard.h"
+
 #include "canvas/colors.h"
 #include "canvas/colorspace.h"
 
@@ -516,3 +520,135 @@ HSV::print (std::ostream& o) const
 
 
 std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSV& hsv) { hsv.print (o); return o; }
+
+HSV
+HSV::mod (SVAModifier const & svam)
+{
+	return svam (*this);
+}
+
+SVAModifier::SVAModifier (string const &str)
+	: type (Add)
+	, _s (0)
+	, _v (0)
+	, _a (0)
+{
+	from_string (str);
+}
+
+void
+SVAModifier::from_string (string const & str)
+{
+	char op;
+	stringstream ss (str);
+	string mod;
+
+	ss >> op;
+
+	switch (op) {
+	case '*':
+		type = Multiply;
+		/* no-op values for multiply */
+		_s = 1.0;
+		_v = 1.0;
+		_a = 1.0;
+		break;
+	case '+':
+		type = Add;
+		/* no-op values for add */
+		_s = 0.0;
+		_v = 0.0;
+		_a = 0.0;
+		break;
+	case '=':
+		type = Assign;
+		/* this will avoid assignment in operator() (see below) */
+		_s = -1.0;
+		_v = -1.0;
+		_a = -1.0;
+		break;
+	default:
+		throw failed_constructor ();
+	}
+
+	string::size_type pos;
+
+	while (ss) {
+		ss >> mod;
+		if ((pos = mod.find ("alpha:")) != string::npos) {
+			_a = PBD::atof (mod.substr (pos+6));
+		} else if ((pos = mod.find ("saturate:")) != string::npos) {
+			_s = PBD::atof (mod.substr (pos+9));
+		} else if ((pos = mod.find ("darkness:")) != string::npos) {
+			_v = PBD::atof (mod.substr (pos+9));
+		} else {
+			throw failed_constructor ();
+		}
+	}
+}
+
+string
+SVAModifier::to_string () const
+{
+	PBD::LocaleGuard lg ("POSIX");
+	stringstream ss;
+
+	switch (type) {
+	case Add:
+		ss << '+';
+		break;
+	case Multiply:
+		ss << '*';
+		break;
+	case Assign:
+		ss << '=';
+		break;
+	}
+
+	if (_s >= 0.0) {
+		ss << " saturate:" << _s;
+	}
+
+	if (_v >= 0.0) {
+		ss << " darker:" << _v;
+	}
+
+	if (_a >= 0.0) {
+		ss << " alpha:" << _a;
+	}
+
+	return ss.str();
+}
+
+HSV
+SVAModifier::operator () (HSV& hsv)  const
+{
+	HSV r (hsv);
+	
+	switch (type) {
+	case Add:
+		r.s += _s;
+		r.v += _v;
+		r.a += _a;
+		break;
+	case Multiply:
+		r.s *= _s;
+		r.v *= _v;
+		r.a *= _a;
+		break;
+	case Assign:
+		if (_s >= 0.0) {
+			r.s = _s;
+		}
+		if (_v >= 0.) {
+			r.v = _v;
+		}
+		if (_a >= 0.0) {
+			r.a = _a;
+		}
+		break;
+	}
+
+	return r;
+}
+

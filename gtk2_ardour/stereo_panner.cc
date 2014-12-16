@@ -670,24 +670,24 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 void
 StereoPanner::set_colors ()
 {
-	colors[Normal].fill = ARDOUR_UI::config()->get_StereoPannerFill();
-	// colors[Normal].outline = ARDOUR_UI::config()->get_StereoPannerOutline();
+	colors[Normal].fill = ARDOUR_UI::config()->color_mod ("stereo panner fill", "panner fill");
+	// colors[Normal].outline = ARDOUR_UI::config()->color ("stereo panner outline");
 	colors[Normal].outline = ArdourCanvas::HSV (colors[Normal].fill).outline().color ();
-	colors[Normal].text = ARDOUR_UI::config()->get_StereoPannerText();
-	colors[Normal].background = ARDOUR_UI::config()->get_StereoPannerBackground();
-	colors[Normal].rule = ARDOUR_UI::config()->get_StereoPannerRule();
+	colors[Normal].text = ARDOUR_UI::config()->color ("stereo panner text");
+	colors[Normal].background = ARDOUR_UI::config()->color ("stereo panner bg");
+	colors[Normal].rule = ARDOUR_UI::config()->color ("stereo panner rule");
 
-	colors[Mono].fill = ARDOUR_UI::config()->get_StereoPannerMonoFill();
-	colors[Mono].outline = ARDOUR_UI::config()->get_StereoPannerMonoOutline();
-	colors[Mono].text = ARDOUR_UI::config()->get_StereoPannerMonoText();
-	colors[Mono].background = ARDOUR_UI::config()->get_StereoPannerMonoBackground();
-	colors[Mono].rule = ARDOUR_UI::config()->get_StereoPannerRule();
+	colors[Mono].fill = ARDOUR_UI::config()->color ("stereo panner mono fill");
+	colors[Mono].outline = ARDOUR_UI::config()->color ("stereo panner mono outline");
+	colors[Mono].text = ARDOUR_UI::config()->color ("stereo panner mono text");
+	colors[Mono].background = ARDOUR_UI::config()->color ("stereo panner mono bg");
+	colors[Mono].rule = ARDOUR_UI::config()->color ("stereo panner rule");
 
-	colors[Inverted].fill = ARDOUR_UI::config()->get_StereoPannerInvertedFill();
-	colors[Inverted].outline = ARDOUR_UI::config()->get_StereoPannerInvertedOutline();
-	colors[Inverted].text = ARDOUR_UI::config()->get_StereoPannerInvertedText();
-	colors[Inverted].background = ARDOUR_UI::config()->get_StereoPannerInvertedBackground();
-	colors[Inverted].rule = ARDOUR_UI::config()->get_StereoPannerRule();
+	colors[Inverted].fill = ARDOUR_UI::config()->color_mod ("stereo panner inverted fill", "stereo panner inverted");
+	colors[Inverted].outline = ARDOUR_UI::config()->color ("stereo panner inverted outline");
+	colors[Inverted].text = ARDOUR_UI::config()->color ("stereo panner inverted text");
+	colors[Inverted].background = ARDOUR_UI::config()->color_mod ("stereo panner inverted bg", "stereo panner inverted bg");
+	colors[Inverted].rule = ARDOUR_UI::config()->color ("stereo panner rule");
 }
 
 void

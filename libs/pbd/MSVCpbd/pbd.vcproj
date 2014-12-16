@@ -745,6 +745,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\scoped_file_descriptor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\search_path.h"
 				>
 			</File>

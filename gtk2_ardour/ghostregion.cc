@@ -87,7 +87,7 @@ void
 GhostRegion::set_colors ()
 {
 	if (is_automation_ghost()) {
-		base_rect->set_fill_color (ARDOUR_UI::config()->get_GhostTrackBase());
+		base_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("ghost track base", "ghost track base"));
 	}
 }
 
@@ -141,17 +141,17 @@ AudioGhostRegion::set_colors ()
 	guint fill_color;
 
 	if (is_automation_ghost()) {
-		fill_color = ARDOUR_UI::config()->get_GhostTrackWaveFill();
+		fill_color = ARDOUR_UI::config()->color ("ghost track wave fill");
 	}
 	else {
 		fill_color = source_track_color(200);
 	}
 
 	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->set_outline_color (ARDOUR_UI::config()->get_GhostTrackWave());
+		waves[n]->set_outline_color (ARDOUR_UI::config()->color ("ghost track wave"));
 		waves[n]->set_fill_color (fill_color);
-		waves[n]->set_clip_color (ARDOUR_UI::config()->get_GhostTrackWaveClip());
-		waves[n]->set_zero_color (ARDOUR_UI::config()->get_GhostTrackZeroLine());
+		waves[n]->set_clip_color (ARDOUR_UI::config()->color ("ghost track wave clip"));
+		waves[n]->set_zero_color (ARDOUR_UI::config()->color ("ghost track zero line"));
 	}
 }
 
@@ -230,13 +230,11 @@ MidiGhostRegion::set_height ()
 void
 MidiGhostRegion::set_colors()
 {
-	guint fill = source_track_color(200);
-
 	GhostRegion::set_colors();
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		(*it)->rect->set_fill_color (fill);
-		(*it)->rect->set_outline_color (ARDOUR_UI::config()->get_GhostTrackMidiOutline());
+		(*it)->rect->set_fill_color (ARDOUR_UI::config()->color_mod((*it)->event->base_color(), "ghost track midi fill"));
+		(*it)->rect->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
 	}
 }
 
@@ -272,8 +270,8 @@ MidiGhostRegion::add_note (NoteBase* n)
 	GhostEvent* event = new GhostEvent (n, group);
 	events.push_back (event);
 
-	event->rect->set_fill_color (source_track_color(200));
-	event->rect->set_outline_color (ARDOUR_UI::config()->get_GhostTrackMidiOutline());
+	event->rect->set_fill_color (ARDOUR_UI::config()->color_mod(n->base_color(), "ghost track midi fill"));
+	event->rect->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
 
 	MidiStreamView* mv = midi_view();
 

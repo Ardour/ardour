@@ -39,6 +39,36 @@ extern LIBCANVAS_API Color rgba_to_color (double r, double g, double b, double a
 
 uint32_t LIBCANVAS_API contrasting_text_color (uint32_t c);
 
+struct LIBCANVAS_API HSV;
+
+class LIBCANVAS_API SVAModifier
+{
+  public:
+	enum Type {
+		Add,
+		Multiply,
+		Assign
+	};
+
+	SVAModifier (std::string const &);
+	SVAModifier (Type t, double ss, double vv, double aa) : type (t), _s (ss) , _v (vv) , _a (aa) {}
+	SVAModifier () : type (Add), _s (0), _v (0), _a (0) {} /* no-op modifier */
+
+	double s() const { return _s; }
+	double v() const { return _v; }
+	double a() const { return _a; }
+	
+	HSV operator () (HSV& hsv) const;
+	std::string to_string () const;
+	void from_string (std::string const &);
+	
+  private:
+	Type type;
+	double _s;
+	double _v;
+	double _a;
+};
+
 struct LIBCANVAS_API HSV
 {
 	HSV ();
@@ -57,6 +87,8 @@ struct LIBCANVAS_API HSV
 	Color color() const { return hsva_to_color (h,s, v, a); }
 	operator Color() const { return color(); }
 
+	HSV mod (SVAModifier const & svam);
+	
 	HSV operator+ (const HSV&) const;
 	HSV operator- (const HSV&) const;
 
@@ -87,6 +119,7 @@ struct LIBCANVAS_API HSV
   protected:
 	void clamp ();
 };
+
 
 }
 

@@ -280,6 +280,7 @@ MidiRegionView::init (bool wfd)
 
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
+	_fill_color_name = "midi frame base";
 
 	RegionView::init (false);
 
@@ -2625,7 +2626,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 
 			// calculate the colors: get the color settings
 			uint32_t fill_color = UINT_RGBA_CHANGE_A(
-				ARDOUR_UI::config()->get_MidiNoteSelected(),
+				ARDOUR_UI::config()->color ("midi note selected"),
 				128);
 
 			// make the resize preview notes more transparent and bright
@@ -2638,7 +2639,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 				0.85));
 
 			resize_rect->set_outline_color (NoteBase::calculate_outline (
-								ARDOUR_UI::config()->get_MidiNoteSelected()));
+								ARDOUR_UI::config()->color ("midi note selected")));
 
 			resize_data->resize_rect = resize_rect;
 			_resize_data.push_back(resize_data);
@@ -3298,9 +3299,9 @@ MidiRegionView::set_frame_color()
 	}
 
 	if (_selected) {
-		f = ARDOUR_UI::config()->get_SelectedFrameBase();
-	} else if (high_enough_for_name) {
-		f = ARDOUR_UI::config()->get_MidiFrameBase();
+		f = ARDOUR_UI::config()->color ("selected region base");
+	} else if (high_enough_for_name || !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+		f = ARDOUR_UI::config()->color_mod ("midi frame base", "midi frame base");
 	} else {
 		f = fill_color;
 	}

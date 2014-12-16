@@ -38,18 +38,6 @@
 class UIConfiguration : public PBD::Stateful
 {
     public:
-	struct RelativeHSV {
-		RelativeHSV (const std::string& b, const ArdourCanvas::HSV& mod) 
-			: base_color (b)
-			, modifier (mod)
-			, quantized_hue (-1.0) {}
-		std::string base_color;
-		ArdourCanvas::HSV modifier;
-		double quantized_hue;
-
-		ArdourCanvas::HSV get() const;
-	};
-
 	UIConfiguration();
 	~UIConfiguration();
 
@@ -66,26 +54,27 @@ class UIConfiguration : public PBD::Stateful
 	XMLNode& get_variables (std::string);
 	void set_variables (const XMLNode&);
 
-	typedef std::map<std::string,RelativeHSV> RelativeColors;
+	typedef std::map<std::string,ArdourCanvas::Color> Colors;
 	typedef std::map<std::string,std::string> ColorAliases;
-	typedef std::map<std::string,ArdourCanvas::Color> BaseColors;
+	typedef std::map<std::string,ArdourCanvas::SVAModifier> Modifiers;
 
-	BaseColors     base_colors;
-	RelativeColors relative_colors;
+	Colors         colors;
 	ColorAliases   color_aliases;
+	Modifiers      modifiers;
 
 	void set_alias (std::string const & name, std::string const & alias);
-	void set_relative (const std::string& name, const RelativeHSV& new_value);
-	void set_base (const std::string& name, ArdourCanvas::Color);
+	void set_color (const std::string& name, ArdourCanvas::Color);
+	void set_modifier (std::string const &, ArdourCanvas::SVAModifier svam);
 	
-	RelativeHSV color_as_relative_hsv (ArdourCanvas::Color c);
 	std::string color_as_alias (ArdourCanvas::Color c);
 	ArdourCanvas::Color quantized (ArdourCanvas::Color) const;
 
-	ArdourCanvas::Color base_color_by_name (const std::string&) const;
 	ArdourCanvas::Color color (const std::string&, bool* failed = 0) const;
+	ArdourCanvas::Color color_mod (std::string const & color, std::string const & modifier) const;
+	ArdourCanvas::Color color_mod (const ArdourCanvas::Color& color, std::string const & modifier) const;
 	ArdourCanvas::HSV  color_hsv (const std::string&) const;
-
+	ArdourCanvas::SVAModifier modifier (const std::string&) const;
+		
         sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);
 
@@ -103,17 +92,6 @@ class UIConfiguration : public PBD::Stateful
 #include "canvas_vars.h"
 #undef CANVAS_FONT_VARIABLE
 
-#undef CANVAS_BASE_COLOR
-#define CANVAS_BASE_COLOR(var,name,val) \
-	ArdourCanvas::Color get_##var() const { return base_color_by_name (name); }
-#include "base_colors.h"
-#undef CANVAS_BASE_COLOR
-
-#undef COLOR_ALIAS
-#define COLOR_ALIAS(var,name,alias) ArdourCanvas::Color get_##var() const { return color (name); }
-#include "color_aliases.h"
-#undef COLOR_ALIAS
-
   private:
 	/* declare variables */
 
@@ -128,24 +106,22 @@ class UIConfiguration : public PBD::Stateful
 
 	XMLNode& state ();
 	bool _dirty;
-	bool base_modified;
 	bool aliases_modified;
-	bool derived_modified;
+	bool colors_modified;
+	bool modifiers_modified;
 	
 	static UIConfiguration* _instance;
 
 	int store_color_theme ();
-	void load_base_colors (XMLNode const &);
 	void load_color_aliases (XMLNode const &);
-	void load_relative_colors (XMLNode const &);
+	void load_colors (XMLNode const &);
+	void load_modifiers (XMLNode const &);
 	void reset_gtk_theme ();
 	void colors_changed ();
 	int load_color_theme (bool allow_own=true);
 
 	uint32_t block_save;
 };
-
-std::ostream& operator<< (std::ostream& o, const UIConfiguration::RelativeHSV& rhsv);
 
 #endif /* __ardour_ui_configuration_h__ */
 

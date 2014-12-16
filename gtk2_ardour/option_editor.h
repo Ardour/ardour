@@ -651,7 +651,8 @@ public:
 	~OptionEditor ();
 
 	void add_option (std::string const &, OptionEditorComponent *);
-
+	void add_page (std::string const &, Gtk::Widget& page_widget);
+	
 	void set_current_page (std::string const &);
 
 protected:

@@ -43,6 +43,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
 
 #include "ardour/audiosource.h"
@@ -319,13 +320,6 @@ AudioSource::read_peaks (PeakData *peaks, framecnt_t npeaks, framepos_t start, f
 /** @param peaks Buffer to write peak data.
  *  @param npeaks Number of peaks to write.
  */
-
-struct ScopedFileDescriptor {
-	ScopedFileDescriptor (int fd) : _fd (fd) {}
-	~ScopedFileDescriptor() { close (_fd); }
-	operator int() { return _fd; }
-	int _fd;
-};
 
 int
 AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t start, framecnt_t cnt,

@@ -1338,10 +1338,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\base_colors.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\big_clock_window.h"
 				>
 			</File>
@@ -1371,10 +1367,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\color_aliases.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\colors.h"
 				>
 			</File>
 			<File

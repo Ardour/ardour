@@ -1025,7 +1025,7 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect->rect = new ArdourCanvas::TimeRectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
 		rect->rect->set_outline (false);
-		rect->rect->set_fill_color (ARDOUR_UI::config()->get_SelectionRect());
+		rect->rect->set_fill_color (ARDOUR_UI::config()->color_mod ("selection rect", "selection rect"));
 
 		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->start_trim, "selection rect start trim");
@@ -1190,26 +1190,26 @@ TimeAxisView::color_handler ()
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
 
-		(*i)->rect->set_fill_color (ARDOUR_UI::config()->get_SelectionRect());
-		(*i)->rect->set_outline_color (ARDOUR_UI::config()->get_Selection());
+		(*i)->rect->set_fill_color (ARDOUR_UI::config()->color_mod ("selection rect", "selection rect"));
+		(*i)->rect->set_outline_color (ARDOUR_UI::config()->color ("selection"));
 
-		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->get_Selection());
-		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->get_Selection());
+		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
 		
-		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->get_Selection());
-		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->get_Selection());
+		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
 	}
 	
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 		
-		(*i)->rect->set_fill_color (ARDOUR_UI::config()->get_SelectionRect());
-		(*i)->rect->set_outline_color (ARDOUR_UI::config()->get_Selection());
+		(*i)->rect->set_fill_color (ARDOUR_UI::config()->color_mod ("selection rect", "selection rect"));
+		(*i)->rect->set_outline_color (ARDOUR_UI::config()->color ("selection"));
 		
-		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->get_Selection());
-		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->get_Selection());
+		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
 		
-		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->get_Selection());
-		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->get_Selection());
+		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
 	}
 }
 

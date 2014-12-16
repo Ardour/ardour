@@ -32,8 +32,6 @@
 #include "canvas/types.h"
 #include "canvas/canvas.h"
 
-#include "ardour_window.h"
-
 #include "ui_config.h"
 
 namespace ArdourCanvas {
@@ -43,14 +41,13 @@ namespace ArdourCanvas {
 
 class ArdourDialog;
 
-class ThemeManager : public ArdourWindow
+class ThemeManager : public Gtk::VBox
 {
   public:
 	ThemeManager();
 	~ThemeManager();
 
 	int save (std::string path);
-	void setup_basic_color_display ();
 	void reset_canvas_colors();
 
 	void on_dark_theme_button_toggled ();
@@ -77,16 +74,9 @@ class ThemeManager : public ArdourWindow
 		Gtk::TreeModelColumn<Gdk::Color>   gdkcolor;
 	};
 	
-	BasicColorDisplayModelColumns basic_color_columns;
-	Gtk::TreeView basic_color_display;
-	Glib::RefPtr<Gtk::TreeStore> basic_color_list;
-
-	bool basic_color_button_press_event (GdkEventButton*);
-
 	Gtk::ColorSelectionDialog color_dialog;
 	sigc::connection color_dialog_connection;
 	
-	Gtk::ScrolledWindow scroller;
 	Gtk::HBox theme_selection_hbox;
 	Gtk::RadioButton dark_button;
 	Gtk::RadioButton light_button;
@@ -103,11 +93,6 @@ class ThemeManager : public ArdourWindow
 	Gtk::CheckButton gradient_waveforms;
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;
-
-	/* handles response from color dialog when it used to 
-	   edit a basic color
-	*/
-	void basic_color_response (int, std::string);
 
 	/* handls response from color dialog when it is used to
 	   edit a derived color.
@@ -149,11 +134,13 @@ class ThemeManager : public ArdourWindow
 			add (name);
 			add (alias);
 			add (color);
+			add (key);
 		}
 		
 		Gtk::TreeModelColumn<std::string>  name;
 		Gtk::TreeModelColumn<std::string>  alias;
 		Gtk::TreeModelColumn<Gdk::Color>   color;
+		Gtk::TreeModelColumn<std::string>  key;
 	};
 
 	ColorAliasModelColumns       alias_columns;
@@ -174,6 +161,12 @@ class ThemeManager : public ArdourWindow
 	void setup_aliases ();
 	void setup_palette ();
 
+	Gtk::ScrolledWindow modifier_scroller;
+	Gtk::VBox modifier_vbox;
+	
+	void setup_modifiers ();
+	void modifier_edited (Gtk::Range*, std::string);
+	
 	void colors_changed ();
 };
 

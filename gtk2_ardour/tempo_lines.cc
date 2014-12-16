@@ -83,12 +83,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	for (i = begin; i != end; ++i) {
 
 		if ((*i).is_bar()) {
-			color = ARDOUR_UI::config()->get_MeasureLineBar();
+			color = ARDOUR_UI::config()->color ("measure line bar");
 		} else {
 			if (beat_density > 0.3) {
 				continue; /* only draw beat lines if the gaps between beats are large. */
 			}
-			color = ARDOUR_UI::config()->get_MeasureLineBeat();
+			color = ARDOUR_UI::config()->color_mod ("measure line beat", "measure line beat");
 		}
 
 		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
