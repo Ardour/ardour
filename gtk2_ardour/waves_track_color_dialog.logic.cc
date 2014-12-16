@@ -27,13 +27,17 @@
 void
 WavesTrackColorDialog::set_route (boost::shared_ptr<ARDOUR::Route> route)
 {
-	_route_connections.drop_connections ();
-	_route = route;
-	if (_route) {
-		_route->gui_changed.connect (_route_connections, 
-									 invalidator (*this), 
-									 boost::bind (&WavesTrackColorDialog::_on_route_gui_changed, this, _1), gui_context ());
-		_route_color_changed();
+    if ((_route != route) && !_deletion_in_progress) {
+		_route_connections.drop_connections ();
+		_route = route;
+		_color_buttons_home.set_visible(_route);
+		_empty_panel.set_visible(!_route);
+		if (_route) {
+			_route->gui_changed.connect (_route_connections, 
+										 invalidator (*this), 
+										 boost::bind (&WavesTrackColorDialog::_on_route_gui_changed, this, _1), gui_context ());
+			_route_color_changed();
+		}
 	}
 }
 
@@ -42,7 +46,6 @@ WavesTrackColorDialog::_init ()
 {
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
 	set_resizable(false);
-
 	for (size_t i=0; i<(sizeof(color_button)/sizeof(color_button[0])); i++) {
 		color_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &WavesTrackColorDialog::_on_color_button_clicked));
 	}

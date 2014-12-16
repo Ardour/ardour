@@ -29,11 +29,14 @@ class WavesTrackColorDialog : public Gtk::Window, public ARDOUR::SessionHandlePt
 {
 public:
 	WavesTrackColorDialog();
+	virtual ~WavesTrackColorDialog();
 
 private:
 	void _init();
 
 	WavesButton* color_button[15];
+	Gtk::Container& _empty_panel;
+	Gtk::Container& _color_buttons_home;
 	#include "waves_track_color_dialog.logic.h"
 };
 

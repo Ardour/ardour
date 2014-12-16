@@ -21,6 +21,9 @@
 
 WavesTrackColorDialog::WavesTrackColorDialog ()
 	: WavesUI ("waves_track_color_dialog.xml", *this)
+	, _empty_panel (get_container("empty_panel"))
+	, _color_buttons_home (get_container("color_buttons_home"))
+	, _deletion_in_progress (false)
 {
 	color_button[0] = &get_waves_button ("color_button_1");
 	color_button[1] = &get_waves_button ("color_button_2");
@@ -39,4 +42,10 @@ WavesTrackColorDialog::WavesTrackColorDialog ()
 	color_button[14] = &get_waves_button ("color_button_15");
 
 	_init ();
+}
+
+WavesTrackColorDialog::~WavesTrackColorDialog ()
+{
+	_route_connections.drop_connections ();
+	_deletion_in_progress = true;
 }

@@ -27,6 +27,8 @@ private:
 
     PBD::ScopedConnectionList _route_connections;
 	boost::shared_ptr<ARDOUR::Route> _route;
+    bool _deletion_in_progress;
+
 	void _route_color_changed ();
 	void _on_color_button_clicked (WavesButton *button);
 	void _on_route_gui_changed (std::string what_changed);

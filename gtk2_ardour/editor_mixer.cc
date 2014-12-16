@@ -257,13 +257,15 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		}
 	}
 
-	if (current_mixer_strip->route() == route) {
-		return;
+	if (route && (current_mixer_strip->route() != route)) {
+		current_mixer_strip->set_route (route);
 	}
 
-	if (route) {
-		current_mixer_strip->set_route (route);
+	std::cout << "ARDOUR_UI::instance()->update_track_color_dialog (" << ((route && !route->is_master ()) ? "SOMEROUTE" : "noroute") << ")" << std::endl;
+	if (route && !route->is_master ()) {
 		ARDOUR_UI::instance()->update_track_color_dialog (route);
+	} else {
+		ARDOUR_UI::instance()->update_track_color_dialog (boost::shared_ptr<ARDOUR::Route>());
 	}
 }
 
