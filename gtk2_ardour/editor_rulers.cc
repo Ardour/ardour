@@ -1775,7 +1775,7 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
                         sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (hrs % minsec_mark_modulo == 0) {
                                 mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                snprintf (buf, sizeof(buf), "%02ld:00", hrs, mins);
+                                snprintf (buf, sizeof(buf), "%02ld:00", hrs);
                                 mark.label = buf;
                                 mark.position = pos/1000.0;
                                 marks.push_back (mark);
