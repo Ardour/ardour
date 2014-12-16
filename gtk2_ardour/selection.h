@@ -221,7 +221,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	XMLNode& get_state () const;
 	int set_state (XMLNode const &, int);
 
-	static PBD::Signal0<void> ClearMidiNoteSelection;
+	PBD::Signal0<void> ClearMidiNoteSelection;
 
   private:
 	PublicEditor const * editor;

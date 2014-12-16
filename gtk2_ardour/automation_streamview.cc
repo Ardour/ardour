@@ -319,13 +319,6 @@ AutomationStreamView::get_lines () const
 	return lines;
 }
 
-struct RegionPositionSorter {
-	bool operator() (RegionView* a, RegionView* b) {
-		return a->region()->position() < b->region()->position();
-	}
-};
-
-
 bool
 AutomationStreamView::paste (framepos_t                                pos,
                              unsigned                                  paste_count,
@@ -338,7 +331,7 @@ AutomationStreamView::paste (framepos_t                                pos,
 		return false;
 	}
 
-	region_views.sort (RegionPositionSorter ());
+	region_views.sort (RegionView::PositionOrder());
 
 	list<RegionView*>::const_iterator prev = region_views.begin ();
 

@@ -42,8 +42,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal0<void> Selection::ClearMidiNoteSelection;
-
 struct AudioRangeComparator {
     bool operator()(AudioRange a, AudioRange b) {
 	    return a.start < b.start;
