@@ -56,6 +56,13 @@ AddTracksDialog::AddTracksDialog ()
 }
 
 void
+AddTracksDialog::on_show ()
+{
+    WavesDialog::on_show ();
+    _tracks_counter_entry.set_position (-1); // set cursor at the last position
+}
+
+void
 AddTracksDialog::populate_tracks_format_dropdown ()
 {
     _tracks_format_dropdown.set_text(TrackFormat::FormatMono);
@@ -88,6 +95,7 @@ AddTracksDialog::on_decrement_button (WavesButton*)
     {
         set_track_count(1);
     }
+    _tracks_counter_entry.set_position (-1); // set cursor at the last position
 }
 
 void
@@ -105,6 +113,7 @@ AddTracksDialog::on_increment_button (WavesButton*)
     }
     
     input_channels ();
+    _tracks_counter_entry.set_position (-1); // set cursor at the last position
 }
 
 int

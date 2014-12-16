@@ -36,6 +36,7 @@ public:
     void setup();
     int count();
     ARDOUR::ChanCount input_channels ();
+    void on_show ();
     
 protected:
     void on_enter_pressed ();
