@@ -216,9 +216,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
         Editor* editor = dynamic_cast<Editor*>( &(ARDOUR_UI::instance()->the_editor()) );
         
 		if ( _route->is_master() )
-            color = (Gdk::Color)(MixerStrip::XMLColor[master_color]);
+            color = (Gdk::Color)(XMLColor[master_color]);
 		else
-		    color = (Gdk::Color)(MixerStrip::XMLColor[default_palette_color]);
+		    color = (Gdk::Color)(XMLColor[default_palette_color]);
 
         set_color (color);
 	}
