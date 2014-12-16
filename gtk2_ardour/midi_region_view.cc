@@ -3397,8 +3397,6 @@ MidiRegionView::selection_as_cut_buffer () const
 bool
 MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContext& ctx)
 {
-	trackview.session()->begin_reversible_command (Operations::paste);
-
 	// Paste notes, if available
 	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(ctx.counts.n_notes());
 	if (m != selection.midi_notes.end()) {
@@ -3412,8 +3410,6 @@ MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContex
 	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
 		a->second->paste(pos, selection, ctx);
 	}
-
-	trackview.session()->commit_reversible_command ();
 
 	return true;
 }

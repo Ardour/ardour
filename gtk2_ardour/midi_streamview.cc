@@ -670,3 +670,41 @@ MidiStreamView::resume_updates ()
 
 	_canvas_group->redraw ();
 }
+
+struct RegionPositionSorter {
+	bool operator() (RegionView* a, RegionView* b) {
+		return a->region()->position() < b->region()->position();
+	}
+};
+
+bool
+MidiStreamView::paste (ARDOUR::framepos_t pos, const Selection& selection, PasteContext& ctx)
+{
+	/* Paste into the first region which starts on or before pos.  Only called when
+	   using an internal editing tool. */
+
+	if (region_views.empty()) {
+		return false;
+	}
+
+	region_views.sort (RegionView::PositionOrder());
+
+	list<RegionView*>::const_iterator prev = region_views.begin ();
+
+	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		if ((*i)->region()->position() > pos) {
+			break;
+		}
+		prev = i;
+	}
+
+	boost::shared_ptr<Region> r = (*prev)->region ();
+
+	/* If *prev doesn't cover pos, it's no good */
+	if (r->position() > pos || ((r->position() + r->length()) < pos)) {
+		return false;
+	}
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*prev);
+	return mrv ? mrv->paste(pos, selection, ctx) : false;
+}

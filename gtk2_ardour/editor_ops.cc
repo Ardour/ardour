@@ -4457,46 +4457,27 @@ Editor::paste_internal (framepos_t position, float times)
 		   R1.A1, R1.A2, R2, R2.A1, ... */
 	}
 
+	begin_reversible_command (Operations::paste);
+
 	if (ts.size() == 1 && cut_buffer->lines.size() == 1 &&
 	    dynamic_cast<AutomationTimeAxisView*>(ts.front())) {
 	    /* Only one line copied, and one automation track selected.  Do a
 	       "greedy" paste from one automation type to another. */
 
-	    begin_reversible_command (Operations::paste);
-
 	    PasteContext ctx(paste_count, times, ItemCounts(), true);
 	    ts.front()->paste (position, *cut_buffer, ctx);
 
-	    commit_reversible_command ();
-
-	} else if (internal_editing ()) {
-
-		/* undo/redo is handled by individual tracks/regions */
-
-		RegionSelection rs;
-		get_regions_at (rs, position, ts);
-
-		PasteContext ctx(paste_count, times, ItemCounts(), false);
-		for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-			MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
-			if (mrv) {
-				mrv->paste (position, *cut_buffer, ctx);
-			}
-		}
-
 	} else {
 
-		/* we do redo (do you do voodoo?) */
-
-		begin_reversible_command (Operations::paste);
+		/* Paste into tracks */
 
 		PasteContext ctx(paste_count, times, ItemCounts(), false);
 		for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 			(*i)->paste (position, *cut_buffer, ctx);
 		}
-
-		commit_reversible_command ();
 	}
+
+	commit_reversible_command ();
 }
 
 void
