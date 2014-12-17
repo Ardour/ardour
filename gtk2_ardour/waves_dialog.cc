@@ -120,7 +120,12 @@ WavesDialog::on_key_press_event (GdkEventKey* ev)
     switch (ev->keyval)
     {
         case GDK_Return:
+            hide ();
             response (WavesDialog::RESPONSE_DEFAULT);
+            return true;
+        case GDK_Escape:
+            hide ();
+            response (Gtk::RESPONSE_CANCEL);
             return true;
     }
     
