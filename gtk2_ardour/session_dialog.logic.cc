@@ -286,7 +286,7 @@ void
 SessionDialog::on_quit (WavesButton*)
 {
 	hide();
-	response (Gtk::RESPONSE_CANCEL);
+	response (Gtk::RESPONSE_REJECT);
 }
 
 void
@@ -360,3 +360,18 @@ SessionDialog::on_system_configuration (WavesButton* clicked_button)
 	redisplay_system_configuration ();
 	set_keep_above(true);
 }
+
+bool
+SessionDialog::on_key_press_event (GdkEventKey* ev)
+{
+    switch (ev->keyval)
+    {
+        case GDK_Return:
+            return true;
+        case GDK_Escape:
+            return true;
+    }
+    
+	return WavesDialog::on_key_press_event (ev);
+}
+

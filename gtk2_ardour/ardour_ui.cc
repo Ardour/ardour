@@ -2777,15 +2777,23 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		if (should_be_new || session_name.empty()) {
 			/* need the dialog to get info from user */
-			switch (session_dialog.run()) {
-			case RESPONSE_ACCEPT:
-				break;
-			default:
-				if (quit_on_cancel) {
-					exit (1);
-				} else {
-					return ret;
-				}
+            int response = session_dialog.run();
+			switch (response) {
+                case Gtk::RESPONSE_ACCEPT: // existed session was choosen or new session was created
+                    break;
+                case Gtk::RESPONSE_CANCEL: // cancel was pressed
+                case WavesDialog::RESPONSE_DEFAULT: // enter was pressed
+                    continue; // do not act on Esc or Enter button pressed
+                case Gtk::RESPONSE_REJECT: // quit button pressed
+                    UI::quit ();
+                    return ret;
+                default: // this happens on Close Button pressed (at the top left corner only on Mac)
+                    if (quit_on_cancel) {
+                        exit (1);
+                    } else {
+                        UI::quit ();
+                        return ret;
+                    }
 			}
 
 			session_dialog.hide ();

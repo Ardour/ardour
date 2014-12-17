@@ -81,6 +81,8 @@
 	void on_system_configuration (WavesButton*);
 	bool on_delete_event (GdkEventAny*);
 
+	bool on_key_press_event (GdkEventKey*);
+
     void on_system_configuration_change();
 	void redisplay_system_configuration();
 	int redisplay_recent_sessions ();
