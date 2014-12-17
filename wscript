@@ -259,7 +259,7 @@ int main() { return 0; }''',
             compiler_name = 'clang-darwin'
         else:
             compiler_name = 'clang'
-    elif conf.env['CC'][0].find ('msvc') != -1:
+    elif conf.env['MSVC_COMPILER']:
             compiler_name = 'msvc'
     else:
         if platform == 'darwin':
