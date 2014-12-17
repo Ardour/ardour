@@ -267,8 +267,6 @@ int main() { return 0; }''',
         else:
             compiler_name = 'gcc'
 
-    print "Compiler name is ", compiler_name, "\n"
-
     flags_dict = compiler_flags_dictionaries[compiler_name]
             
     autowaf.set_basic_compiler_flags (conf,flags_dict)
