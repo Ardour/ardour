@@ -177,22 +177,21 @@ MidiSource::update_length (framecnt_t)
 }
 
 void
-MidiSource::invalidate ()
+MidiSource::invalidate (const Lock& lock)
 {
 	_model_iter_valid = false;
 	_model_iter.invalidate();
 }
 
 framecnt_t
-MidiSource::midi_read (Evoral::EventSink<framepos_t>&     dst,
+MidiSource::midi_read (const Lock&                        lm,
+                       Evoral::EventSink<framepos_t>&     dst,
                        framepos_t                         source_start,
                        framepos_t                         start,
                        framecnt_t                         cnt,
                        MidiStateTracker*                  tracker,
                        const std::set<Evoral::Parameter>& filtered) const
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
-
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
 
 	DEBUG_TRACE (DEBUG::MidiSourceIO,
@@ -233,22 +232,21 @@ MidiSource::midi_read (Evoral::EventSink<framepos_t>&     dst,
 		}
 		return cnt;
 	} else {
-		return read_unlocked (dst, source_start, start, cnt, tracker);
+		return read_unlocked (lm, dst, source_start, start, cnt, tracker);
 	}
 }
 
 framecnt_t
-MidiSource::midi_write (MidiRingBuffer<framepos_t>& source,
+MidiSource::midi_write (const Lock&                 lm,
+                        MidiRingBuffer<framepos_t>& source,
                         framepos_t                  source_start,
                         framecnt_t                  cnt)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
-
-	const framecnt_t ret = write_unlocked (source, source_start, cnt);
+	const framecnt_t ret = write_unlocked (lm, source, source_start, cnt);
 
 	if (cnt == max_framecnt) {
 		_last_read_end = 0;
-		invalidate();
+		invalidate(lm);
 	} else {
 		_capture_length += cnt;
 	}
@@ -257,7 +255,7 @@ MidiSource::midi_write (MidiRingBuffer<framepos_t>& source,
 }
 
 void
-MidiSource::mark_streaming_midi_write_started (NoteMode mode)
+MidiSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
 {
 	if (_model) {
 		_model->set_note_mode (mode);
@@ -292,14 +290,15 @@ MidiSource::mark_write_starting_now (framecnt_t position,
 }
 
 void
-MidiSource::mark_streaming_write_started ()
+MidiSource::mark_streaming_write_started (const Lock& lock)
 {
 	NoteMode note_mode = _model ? _model->note_mode() : Sustained;
-	mark_streaming_midi_write_started (note_mode);
+	mark_streaming_midi_write_started (lock, note_mode);
 }
 
 void
-MidiSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption option,
+MidiSource::mark_midi_streaming_write_completed (const Lock&                                            lock,
+                                                 Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption option,
                                                  Evoral::MusicalTime                                    end)
 {
 	if (_model) {
@@ -318,37 +317,39 @@ MidiSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::Musica
 }
 
 void
-MidiSource::mark_streaming_write_completed ()
+MidiSource::mark_streaming_write_completed (const Lock& lock)
 {
-	mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
 }
 
 int
-MidiSource::write_to (boost::shared_ptr<MidiSource> newsrc, Evoral::MusicalTime begin, Evoral::MusicalTime end)
+MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::MusicalTime begin, Evoral::MusicalTime end)
 {
+	Lock newsrc_lock (newsrc->mutex ());
+
 	newsrc->set_timeline_position (_timeline_position);
 	newsrc->copy_interpolation_from (this);
 	newsrc->copy_automation_state_from (this);
 
 	if (_model) {
 		if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
-			_model->write_to (newsrc);
+			_model->write_to (newsrc, newsrc_lock);
 		} else {
-			_model->write_section_to (newsrc, begin, end);
+			_model->write_section_to (newsrc, newsrc_lock, begin, end);
 		}
 	} else {
 		error << string_compose (_("programming error: %1"), X_("no model for MidiSource during ::clone()"));
 		return -1;
 	}
 
-	newsrc->flush_midi();
+	newsrc->flush_midi(newsrc_lock);
 
 	/* force a reload of the model if the range is partial */
 
 	if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
-		newsrc->load_model (true, true);
+		newsrc->load_model (newsrc_lock, true);
 	} else {
-		newsrc->set_model (_model);
+		newsrc->set_model (newsrc_lock, _model);
 	}
 
 	/* this file is not removable (but since it is MIDI, it is mutable) */
@@ -361,6 +362,8 @@ MidiSource::write_to (boost::shared_ptr<MidiSource> newsrc, Evoral::MusicalTime 
 void
 MidiSource::session_saved()
 {
+	Lock lm (_lock);
+
 	/* this writes a copy of the data to disk.
 	   XXX do we need to do this every time?
 	*/
@@ -375,18 +378,18 @@ MidiSource::session_saved()
 		_model.reset ();
 
 		/* Flush model contents to disk. */
-		mm->sync_to_source ();
+		mm->sync_to_source (lm);
 
 		/* Reacquire model. */
 		_model = mm;
 
 	} else {
-		flush_midi();
+		flush_midi(lm);
 	}
 }
 
 void
-MidiSource::set_note_mode(NoteMode mode)
+MidiSource::set_note_mode(const Lock& lock, NoteMode mode)
 {
 	if (_model) {
 		_model->set_note_mode(mode);
@@ -394,18 +397,18 @@ MidiSource::set_note_mode(NoteMode mode)
 }
 
 void
-MidiSource::drop_model ()
+MidiSource::drop_model (const Lock& lock)
 {
 	_model.reset();
-	invalidate();
+	invalidate(lock);
 	ModelChanged (); /* EMIT SIGNAL */
 }
 
 void
-MidiSource::set_model (boost::shared_ptr<MidiModel> m)
+MidiSource::set_model (const Lock& lock, boost::shared_ptr<MidiModel> m)
 {
 	_model = m;
-	invalidate();
+	invalidate(lock);
 	ModelChanged (); /* EMIT SIGNAL */
 }
 

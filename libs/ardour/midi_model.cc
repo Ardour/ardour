@@ -1426,25 +1426,23 @@ MidiModel::PatchChangeDiffCommand::get_state ()
  * `Discrete' mode).
  */
 bool
-MidiModel::write_to (boost::shared_ptr<MidiSource> source)
+MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
+                     const Glib::Threads::Mutex::Lock& source_lock)
 {
 	ReadLock lock(read_lock());
 
 	const bool old_percussive = percussive();
 	set_percussive(false);
 
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	source->drop_model();
-	source->mark_streaming_midi_write_started (note_mode());
+	source->drop_model(source_lock);
+	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		source->append_event_unlocked_beats(*i);
+		source->append_event_beats(source_lock, *i);
 	}
 
 	set_percussive(old_percussive);
-	source->mark_streaming_write_completed();
+	source->mark_streaming_write_completed(source_lock);
 
 	set_edited(false);
 
@@ -1457,7 +1455,7 @@ MidiModel::write_to (boost::shared_ptr<MidiSource> source)
     of the model.
 */
 bool
-MidiModel::sync_to_source ()
+MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 {
 	ReadLock lock(read_lock());
 
@@ -1465,16 +1463,19 @@ MidiModel::sync_to_source ()
 	set_percussive(false);
 
 	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
+	if (!ms) {
+		error << "MIDI model has no source to sync to" << endmsg;
+		return false;
+	}
 
-	ms->mark_streaming_midi_write_started (note_mode());
+	ms->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		ms->append_event_unlocked_beats(*i);
+		ms->append_event_beats(source_lock, *i);
 	}
 
 	set_percussive (old_percussive);
-	ms->mark_streaming_write_completed ();
+	ms->mark_streaming_write_completed (source_lock);
 
 	set_edited (false);
 
@@ -1489,7 +1490,10 @@ MidiModel::sync_to_source ()
  * destroying the original note durations.
  */
 bool
-MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin_time, Evoral::MusicalTime end_time)
+MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
+                             const Glib::Threads::Mutex::Lock& source_lock,
+                             Evoral::MusicalTime               begin_time,
+                             Evoral::MusicalTime               end_time)
 {
 	ReadLock lock(read_lock());
 	MidiStateTracker mst;
@@ -1497,11 +1501,8 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 	const bool old_percussive = percussive();
 	set_percussive(false);
 
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	source->drop_model();
-	source->mark_streaming_midi_write_started (note_mode());
+	source->drop_model(source_lock);
+	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
 		const Evoral::Event<Evoral::MusicalTime>& ev (*i);
@@ -1526,22 +1527,22 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource> source, Evoral::Music
 					continue;
 				}
 
-				source->append_event_unlocked_beats (*i);
+				source->append_event_beats (source_lock, *i);
 				mst.remove (mev->note(), mev->channel());
 
 			} else if (mev->is_note_on()) {
 				mst.add (mev->note(), mev->channel());
-				source->append_event_unlocked_beats(*i);
+				source->append_event_beats(source_lock, *i);
 			} else {
-				source->append_event_unlocked_beats(*i);
+				source->append_event_beats(source_lock, *i);
 			}
 		}
 	}
 
-	mst.resolve_notes (*source, end_time);
+	mst.resolve_notes (*source, source_lock, end_time);
 
 	set_percussive(old_percussive);
-	source->mark_streaming_write_completed();
+	source->mark_streaming_write_completed(source_lock);
 
 	set_edited(false);
 
@@ -1630,7 +1631,7 @@ MidiModel::edit_lock()
 	assert (ms);
 
 	Glib::Threads::Mutex::Lock* source_lock = new Glib::Threads::Mutex::Lock (ms->mutex());
-	ms->invalidate(); // Release cached iterator's read lock on model
+	ms->invalidate(*source_lock); // Release cached iterator's read lock on model
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
 }
 
@@ -1855,7 +1856,8 @@ MidiModel::set_midi_source (boost::shared_ptr<MidiSource> s)
 	boost::shared_ptr<MidiSource> old = _midi_source.lock ();
 
 	if (old) {
-		old->invalidate ();
+		Source::Lock lm(old->mutex());
+		old->invalidate (lm);
 	}
 
 	_midi_source_connections.drop_connections ();

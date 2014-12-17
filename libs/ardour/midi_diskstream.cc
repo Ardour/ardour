@@ -851,7 +851,8 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	}
 
 	if (record_enabled() && ((total > disk_io_chunk_frames) || force_flush)) {
-		if (_write_source->midi_write (*_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
+		Source::Lock lm(_write_source->mutex());
+		if (_write_source->midi_write (lm, *_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 			return -1;
 		} 
@@ -919,6 +920,8 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 
 			/* phew, we have data */
 
+			Source::Lock source_lock(_write_source->mutex());
+
 			/* figure out the name for this take */
 
 			srcs.push_back (_write_source);
@@ -936,7 +939,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			   where all the data is already on disk.
 			*/
 
-			_write_source->mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, total_capture_beats);
+			_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, total_capture_beats);
 
 			/* we will want to be able to keep (over)writing the source
 			   but we don't want it to be removable. this also differs
@@ -1280,7 +1283,8 @@ MidiDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 	}
 
 	if (_write_source && mark_write_complete) {
-		_write_source->mark_streaming_write_completed ();
+		Source::Lock lm(_write_source->mutex());
+		_write_source->mark_streaming_write_completed (lm);
 	}
 	use_new_write_source (0);
 }

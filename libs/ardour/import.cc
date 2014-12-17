@@ -354,7 +354,9 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 			boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource> (*s);
 
-			smfs->drop_model ();
+			Glib::Threads::Mutex::Lock source_lock(smfs->mutex());
+
+			smfs->drop_model (source_lock);
 			source->seek_to_track (i);
 
 			uint64_t t       = 0;
@@ -384,11 +386,12 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				}
 
 				if (first) {
-					smfs->mark_streaming_write_started ();
+					smfs->mark_streaming_write_started (source_lock);
 					first = false;
 				}
 
-				smfs->append_event_unlocked_beats(
+				smfs->append_event_beats(
+					source_lock,
 					Evoral::Event<Evoral::MusicalTime>(
 						0,
 						Evoral::MusicalTime::ticks_at_rate(t, source->ppqn()),
@@ -408,7 +411,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				const Evoral::MusicalTime length_beats = Evoral::MusicalTime::ticks_at_rate(t, source->ppqn());
 				BeatsFramesConverter      converter(smfs->session().tempo_map(), pos);
 				smfs->update_length(pos + converter.to(length_beats.round_up_to_beat()));
-				smfs->mark_streaming_write_completed ();
+				smfs->mark_streaming_write_completed (source_lock);
 
 				if (status.cancel) {
 					break;

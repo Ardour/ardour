@@ -270,7 +270,8 @@ MidiRegionView::init (bool wfd)
 					   gui_context());
 	
 	if (wfd) {
-		midi_region()->midi_source(0)->load_model();
+		Glib::Threads::Mutex::Lock lm(midi_region()->midi_source(0)->mutex());
+		midi_region()->midi_source(0)->load_model(lm);
 	}
 
 	_model = midi_region()->midi_source(0)->model();

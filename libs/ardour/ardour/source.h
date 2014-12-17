@@ -51,6 +51,8 @@ class LIBARDOUR_API Source : public SessionObject
 		Empty = 0x100, /* used for MIDI only */
 	};
 
+	typedef Glib::Threads::Mutex::Lock Lock;
+
 	Source (Session&, DataType type, const std::string& name, Flag flags=Flag(0));
 	Source (Session&, const XMLNode&);
 
@@ -69,8 +71,8 @@ class LIBARDOUR_API Source : public SessionObject
 
 	void mark_for_remove();
 
-	virtual void mark_streaming_write_started () {}
-	virtual void mark_streaming_write_completed () = 0;
+	virtual void mark_streaming_write_started (const Lock& lock) {}
+	virtual void mark_streaming_write_completed (const Lock& lock) = 0;
 
 	virtual void session_saved() {}
 

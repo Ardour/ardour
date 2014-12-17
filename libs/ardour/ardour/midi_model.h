@@ -238,10 +238,15 @@ public:
 	void apply_command (Session& session, Command* cmd);
 	void apply_command_as_subcommand (Session& session, Command* cmd);
 
-	bool sync_to_source ();
-	bool write_to(boost::shared_ptr<MidiSource> source);
-	bool write_section_to (boost::shared_ptr<MidiSource> source, Evoral::MusicalTime begin = Evoral::MinMusicalTime,
-	Evoral::MusicalTime end = Evoral::MaxMusicalTime);
+	bool sync_to_source (const Glib::Threads::Mutex::Lock& source_lock);
+
+	bool write_to(boost::shared_ptr<MidiSource>     source,
+	              const Glib::Threads::Mutex::Lock& source_lock);
+
+	bool write_section_to(boost::shared_ptr<MidiSource>     source,
+	                      const Glib::Threads::Mutex::Lock& source_lock,
+	                      Evoral::MusicalTime               begin = Evoral::MinMusicalTime,
+	                      Evoral::MusicalTime               end   = Evoral::MaxMusicalTime);
 
 	// MidiModel doesn't use the normal AutomationList serialisation code
 	// since controller data is stored in the .mid

@@ -302,13 +302,13 @@ AudioFileSource::set_state (const XMLNode& node, int version)
 }
 
 void
-AudioFileSource::mark_streaming_write_completed ()
+AudioFileSource::mark_streaming_write_completed (const Lock& lock)
 {
 	if (!writable()) {
 		return;
 	}
 
-	AudioSource::mark_streaming_write_completed ();
+	AudioSource::mark_streaming_write_completed (lock);
 }
 
 int

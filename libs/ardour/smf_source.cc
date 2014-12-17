@@ -203,7 +203,8 @@ SMFSource::open_for_write ()
 
 /** All stamps in audio frames */
 framecnt_t
-SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination,
+SMFSource::read_unlocked (const Lock&                    lock,
+                          Evoral::EventSink<framepos_t>& destination,
                           framepos_t const               source_start,
                           framepos_t                     start,
                           framecnt_t                     duration,
@@ -303,12 +304,13 @@ SMFSource::read_unlocked (Evoral::EventSink<framepos_t>& destination,
 }
 
 framecnt_t
-SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source,
+SMFSource::write_unlocked (const Lock&                 lock,
+                           MidiRingBuffer<framepos_t>& source,
                            framepos_t                  position,
                            framecnt_t                  cnt)
 {
 	if (!_writing) {
-		mark_streaming_write_started ();
+		mark_streaming_write_started (lock);
 	}
 
 	framepos_t        time;
@@ -372,7 +374,7 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source,
 			continue;
 		}
 
-		append_event_unlocked_frames(ev, position);
+		append_event_frames(lock, ev, position);
 	}
 
 	Evoral::SMF::flush ();
@@ -383,13 +385,14 @@ SMFSource::write_unlocked (MidiRingBuffer<framepos_t>& source,
 
 /** Append an event with a timestamp in beats */
 void
-SMFSource::append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev)
+SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&         lock,
+                               const Evoral::Event<Evoral::MusicalTime>& ev)
 {
 	if (!_writing || ev.size() == 0)  {
 		return;
 	}
 
-	/*printf("SMFSource: %s - append_event_unlocked_beats ID = %d time = %lf, size = %u, data = ",
+	/*printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
                name().c_str(), ev.id(), ev.time(), ev.size());
 	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
 
@@ -435,13 +438,15 @@ SMFSource::append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>
 
 /** Append an event with a timestamp in frames (framepos_t) */
 void
-SMFSource::append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, framepos_t position)
+SMFSource::append_event_frames (const Glib::Threads::Mutex::Lock& lock,
+                                const Evoral::Event<framepos_t>&  ev,
+                                framepos_t                        position)
 {
 	if (!_writing || ev.size() == 0)  {
 		return;
 	}
 
-	// printf("SMFSource: %s - append_event_unlocked_frames ID = %d time = %u, size = %u, data = ",
+	// printf("SMFSource: %s - append_event_frames ID = %d time = %u, size = %u, data = ",
 	// name().c_str(), ev.id(), ev.time(), ev.size());
 	// for (size_t i=0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
 
@@ -508,33 +513,30 @@ SMFSource::set_state (const XMLNode& node, int version)
 }
 
 void
-SMFSource::mark_streaming_midi_write_started (NoteMode mode)
+SMFSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
 {
-	/* CALLER MUST HOLD LOCK */
-
 	if (!_open && open_for_write()) {
 		error << string_compose (_("cannot open MIDI file %1 for write"), _path) << endmsg;
 		/* XXX should probably throw or return something */
 		return;
 	}
 
-	MidiSource::mark_streaming_midi_write_started (mode);
+	MidiSource::mark_streaming_midi_write_started (lock, mode);
 	Evoral::SMF::begin_write ();
 	_last_ev_time_beats  = Evoral::MusicalTime();
 	_last_ev_time_frames = 0;
 }
 
 void
-SMFSource::mark_streaming_write_completed ()
+SMFSource::mark_streaming_write_completed (const Lock& lock)
 {
-	mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
 }
 
 void
-SMFSource::mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_notes_option, Evoral::MusicalTime when)
+SMFSource::mark_midi_streaming_write_completed (const Lock& lm, Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_notes_option, Evoral::MusicalTime when)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
-	MidiSource::mark_midi_streaming_write_completed (stuck_notes_option, when);
+	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, when);
 
 	if (!writable()) {
 		warning << string_compose ("attempt to write to unwritable SMF file %1", _path) << endmsg;
@@ -596,15 +598,11 @@ static bool compare_eventlist (
 }
 
 void
-SMFSource::load_model (bool lock, bool force_reload)
+SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload)
 {
 	if (_writing) {
 		return;
 	}
-
-	boost::shared_ptr<Glib::Threads::Mutex::Lock> lm;
-	if (lock)
-		lm = boost::shared_ptr<Glib::Threads::Mutex::Lock>(new Glib::Threads::Mutex::Lock(_lock));
 
 	if (_model && !force_reload) {
 		return;
@@ -616,7 +614,7 @@ SMFSource::load_model (bool lock, bool force_reload)
 		_model->clear();
 	}
 
-	invalidate();
+	invalidate(lock);
 
 	if (writable() && !_open) {
 		return;
@@ -707,33 +705,33 @@ SMFSource::load_model (bool lock, bool force_reload)
 
 	_model->end_write (Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, _length_beats);
 	_model->set_edited (false);
-	invalidate();
+	invalidate(lock);
 
 	free(buf);
 }
 
 void
-SMFSource::destroy_model ()
+SMFSource::destroy_model (const Glib::Threads::Mutex::Lock& lock)
 {
 	//cerr << _name << " destroying model " << _model.get() << endl;
 	_model.reset();
-	invalidate();
+	invalidate(lock);
 }
 
 void
-SMFSource::flush_midi ()
+SMFSource::flush_midi (const Lock& lock)
 {
 	if (!writable() || _length_beats == 0.0) {
 		return;
 	}
 
-	ensure_disk_file ();
+	ensure_disk_file (lock);
 
 	Evoral::SMF::end_write ();
 	/* data in the file means its no longer removable */
 	mark_nonremovable ();
 
-	invalidate();
+	invalidate(lock);
 }
 
 void
@@ -745,7 +743,7 @@ SMFSource::set_path (const string& p)
 
 /** Ensure that this source has some file on disk, even if it's just a SMF header */
 void
-SMFSource::ensure_disk_file ()
+SMFSource::ensure_disk_file (const Lock& lock)
 {
 	if (!writable()) {
 		return;
@@ -757,9 +755,9 @@ SMFSource::ensure_disk_file ()
 		*/
 		boost::shared_ptr<MidiModel> mm = _model;
 		_model.reset ();
-		mm->sync_to_source ();
+		mm->sync_to_source (lock);
 		_model = mm;
-		invalidate();
+		invalidate(lock);
 	} else {
 		/* No model; if it's not already open, it's an empty source, so create
 		   and open it for writing.

@@ -205,7 +205,7 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 		}
 	} else if (type == DataType::MIDI) {
 		boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
-		src->load_model (true, true);
+		src->load_model (Glib::Threads::Mutex::Lock(src->mutex()), true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
@@ -273,7 +273,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 	} else if (type == DataType::MIDI) {
 
 		boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
-		src->load_model (true, true);
+		src->load_model (Glib::Threads::Mutex::Lock(src->mutex()), true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
@@ -324,7 +324,7 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 		boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
 		assert (src->writable ());
 
-		src->load_model (true, true);
+		src->load_model (Glib::Threads::Mutex::Lock(src->mutex()), true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 		// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif

@@ -57,7 +57,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * \param end time of latest event that can be written.
 	 * \return zero on success, non-zero if the write failed for any reason.
 	 */
-	int write_to (boost::shared_ptr<MidiSource> newsrc,
+	int write_to (const Lock&                   lock,
+	              boost::shared_ptr<MidiSource> newsrc,
 	              Evoral::MusicalTime           begin = Evoral::MinMusicalTime,
 	              Evoral::MusicalTime           end   = Evoral::MaxMusicalTime);
 
@@ -70,7 +71,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
 	 * \param filtered Parameters whose MIDI messages will not be returned.
 	 */
-	virtual framecnt_t midi_read (Evoral::EventSink<framepos_t>&     dst,
+	virtual framecnt_t midi_read (const Lock&                        lock,
+	                              Evoral::EventSink<framepos_t>&     dst,
 	                              framepos_t                         source_start,
 	                              framepos_t                         start,
 	                              framecnt_t                         cnt,
@@ -82,22 +84,33 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 *  @param source_start This source's start position in session frames.
 	 *  @param cnt The length of time to write.
 	 */
-	virtual framecnt_t midi_write (MidiRingBuffer<framepos_t>& src,
+	virtual framecnt_t midi_write (const Lock&                 lock,
+	                               MidiRingBuffer<framepos_t>& src,
 	                               framepos_t                  source_start,
 	                               framecnt_t                  cnt);
 
-	virtual void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
+	/** Append a single event with a timestamp in beats.
+	 *
+	 * Caller must ensure that the event is later than the last written event.
+	 */
+	virtual void append_event_beats(const Lock&                               lock,
+	                                const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
 
-	virtual void append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev,
-	                                          framepos_t                       source_start) = 0;
+	/** Append a single event with a timestamp in frames.
+	 *
+	 * Caller must ensure that the event is later than the last written event.
+	 */
+	virtual void append_event_frames(const Lock&                      lock,
+	                                 const Evoral::Event<framepos_t>& ev,
+	                                 framepos_t                       source_start) = 0;
 
 	virtual bool       empty () const;
 	virtual framecnt_t length (framepos_t pos) const;
 	virtual void       update_length (framecnt_t);
 
-	virtual void mark_streaming_midi_write_started (NoteMode mode);
-	virtual void mark_streaming_write_started ();
-	virtual void mark_streaming_write_completed ();
+	virtual void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
+	virtual void mark_streaming_write_started (const Lock& lock);
+	virtual void mark_streaming_write_completed (const Lock& lock);
 
 	/** Mark write starting with the given time parameters.
 	 *
@@ -119,6 +132,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * etc.
 	 */
 	virtual void mark_midi_streaming_write_completed (
+		const Lock&                                            lock,
 		Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_option,
 		Evoral::MusicalTime                                    when = Evoral::MusicalTime());
 
@@ -137,19 +151,17 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	void     set_length_beats(TimeType l) { _length_beats = l; }
 	TimeType length_beats() const         { return _length_beats; }
 
-	virtual void load_model(bool lock=true, bool force_reload=false) = 0;
-	virtual void destroy_model() = 0;
+	virtual void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false) = 0;
+	virtual void destroy_model(const Glib::Threads::Mutex::Lock& lock) = 0;
 
-	/** This must be called with the source lock held whenever the
-	 *  source/model contents have been changed (reset iterators/cache/etc).
-	 */
-	void invalidate();
+	/** Reset cached information (like iterators) when things have changed. */
+	void invalidate(const Glib::Threads::Mutex::Lock& lock);
 
-	void set_note_mode(NoteMode mode);
+	void set_note_mode(const Glib::Threads::Mutex::Lock& lock, NoteMode mode);
 
 	boost::shared_ptr<MidiModel> model() { return _model; }
-	void set_model (boost::shared_ptr<MidiModel>);
-	void drop_model();
+	void set_model(const Glib::Threads::Mutex::Lock& lock, boost::shared_ptr<MidiModel>);
+	void drop_model(const Glib::Threads::Mutex::Lock& lock);
 
 	Evoral::ControlList::InterpolationStyle interpolation_of (Evoral::Parameter) const;
 	void set_interpolation_of (Evoral::Parameter, Evoral::ControlList::InterpolationStyle);
@@ -169,9 +181,10 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	PBD::Signal2<void, Evoral::Parameter, AutoState> AutomationStateChanged;
 
   protected:
-	virtual void flush_midi() = 0;
+	virtual void flush_midi(const Lock& lock) = 0;
 
-	virtual framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
+	virtual framecnt_t read_unlocked (const Lock&                    lock,
+	                                  Evoral::EventSink<framepos_t>& dst,
 	                                  framepos_t                     position,
 	                                  framepos_t                     start,
 	                                  framecnt_t                     cnt,
@@ -182,7 +195,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 *  @param position This source's start position in session frames.
 	 *  @param cnt The duration of this block to write for.
 	 */
-	virtual framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& source,
+	virtual framecnt_t write_unlocked (const Lock&                 lock,
+	                                   MidiRingBuffer<framepos_t>& source,
 	                                   framepos_t                  position,
 	                                   framecnt_t                  cnt) = 0;
 

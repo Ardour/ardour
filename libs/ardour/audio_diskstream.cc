@@ -1771,13 +1771,15 @@ AudioDiskstream::prep_record_enable ()
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			(*chan)->source.request_input_monitoring (!(_session.config.get_auto_input() && rolling));
 			capturing_sources.push_back ((*chan)->write_source);
-			(*chan)->write_source->mark_streaming_write_started ();
+			(*chan)->write_source->mark_streaming_write_started (
+				Source::Lock((*chan)->write_source->mutex()));
 		}
 
 	} else {
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			capturing_sources.push_back ((*chan)->write_source);
-			(*chan)->write_source->mark_streaming_write_started ();
+			(*chan)->write_source->mark_streaming_write_started (
+				Source::Lock((*chan)->write_source->mutex()));
 		}
 	}
 
@@ -1963,7 +1965,8 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 			if ((*chan)->write_source) {
 
 				if (mark_write_complete) {
-					(*chan)->write_source->mark_streaming_write_completed ();
+					(*chan)->write_source->mark_streaming_write_completed (
+						Source::Lock((*chan)->write_source->mutex()));
 					(*chan)->write_source->done_with_peakfile_writes ();
 				}
 

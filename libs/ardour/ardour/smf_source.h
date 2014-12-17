@@ -47,26 +47,24 @@ public:
 
 	virtual ~SMFSource ();
 
-        bool safe_file_extension (const std::string& path) const {
+	bool safe_file_extension (const std::string& path) const {
 		return safe_midi_file_extension(path);
 	}
 
-	void append_event_unlocked_beats (const Evoral::Event<Evoral::MusicalTime>& ev);
-	void append_event_unlocked_frames (const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void append_event_beats (const Lock& lock, const Evoral::Event<Evoral::MusicalTime>& ev);
+	void append_event_frames (const Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
 
-	void mark_streaming_midi_write_started (NoteMode mode);
-	void mark_streaming_write_completed ();
-	void mark_midi_streaming_write_completed (Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption,
+	void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
+	void mark_streaming_write_completed (const Lock& lock);
+	void mark_midi_streaming_write_completed (const Lock& lock,
+	                                          Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption,
 	                                          Evoral::MusicalTime when = Evoral::MusicalTime());
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void load_model (bool lock=true, bool force_reload=false);
-	void destroy_model ();
-
-	void flush_midi ();
-	void ensure_disk_file ();
+	void load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
+	void destroy_model (const Glib::Threads::Mutex::Lock& lock);
 
 	static bool safe_midi_file_extension (const std::string& path);
 	static bool valid_midi_file (const std::string& path);
@@ -75,6 +73,7 @@ public:
 
   protected:
 	void set_path (const std::string& newpath);
+	void flush_midi (const Lock& lock);
 
   private:
 	bool _open;
@@ -87,13 +86,17 @@ public:
 
 	int open_for_write ();
 	
-	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
+	void ensure_disk_file (const Lock& lock);
+
+	framecnt_t read_unlocked (const Lock&                    lock,
+	                          Evoral::EventSink<framepos_t>& dst,
 	                          framepos_t                     position,
 	                          framepos_t                     start,
 	                          framecnt_t                     cnt,
 	                          MidiStateTracker*              tracker) const;
 
-	framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& src,
+	framecnt_t write_unlocked (const Lock&                 lock,
+	                           MidiRingBuffer<framepos_t>& src,
 	                           framepos_t                  position,
 	                           framecnt_t                  cnt);
 

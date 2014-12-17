@@ -45,10 +45,10 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& ev);
-	void append_event_unlocked_frames(const Evoral::Event<framepos_t>& ev, framepos_t source_start);
-	void load_model(bool lock=true, bool force_reload=false);
-	void destroy_model();
+	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Evoral::MusicalTime>& ev);
+	void append_event_frames(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
+	void destroy_model(const Glib::Threads::Mutex::Lock& lock);
 
 protected:
 	friend class SourceFactory;
@@ -58,15 +58,17 @@ protected:
 	MidiPlaylistSource (Session&, const XMLNode&);
 
 
-	void flush_midi();
+	void flush_midi(const Lock& lock);
 
-	framecnt_t read_unlocked (Evoral::EventSink<framepos_t>& dst,
+	framecnt_t read_unlocked (const Lock&                    lock,
+	                          Evoral::EventSink<framepos_t>& dst,
 	                          framepos_t                     position,
 	                          framepos_t                     start,
 	                          framecnt_t                     cnt,
 	                          MidiStateTracker*              tracker) const;
 
-	framecnt_t write_unlocked (MidiRingBuffer<framepos_t>& dst,
+	framecnt_t write_unlocked (const Lock&                 lock,
+	                           MidiRingBuffer<framepos_t>& dst,
 	                           framepos_t                  position,
 	                           framecnt_t                  cnt);
 

@@ -122,7 +122,8 @@ MidiPlaylistSource::length (framepos_t)  const
 }
 
 framecnt_t
-MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
+MidiPlaylistSource::read_unlocked (const Lock& lock,
+				   Evoral::EventSink<framepos_t>& dst,
 				   framepos_t /*position*/,
 				   framepos_t start, framecnt_t cnt,
 				   MidiStateTracker*) const
@@ -137,7 +138,8 @@ MidiPlaylistSource::read_unlocked (Evoral::EventSink<framepos_t>& dst,
 }
 
 framecnt_t
-MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>&,
+MidiPlaylistSource::write_unlocked (const Lock&,
+                                    MidiRingBuffer<framepos_t>&,
                                     framepos_t,
                                     framecnt_t)
 {
@@ -147,33 +149,33 @@ MidiPlaylistSource::write_unlocked (MidiRingBuffer<framepos_t>&,
 }
 
 void
-MidiPlaylistSource::append_event_unlocked_beats(const Evoral::Event<Evoral::MusicalTime>& /*ev*/)
+MidiPlaylistSource::append_event_beats(const Glib::Threads::Mutex::Lock& /*lock*/, const Evoral::Event<Evoral::MusicalTime>& /*ev*/)
 {
-	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_unlocked_beats() called - should be impossible") << endmsg;
+	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_beats() called - should be impossible") << endmsg;
 	abort(); /*NOTREACHED*/
 }
 
 void
-MidiPlaylistSource::append_event_unlocked_frames(const Evoral::Event<framepos_t>& /* ev */, framepos_t /*source_start*/)
+MidiPlaylistSource::append_event_frames(const Glib::Threads::Mutex::Lock& /*lock*/, const Evoral::Event<framepos_t>& /* ev */, framepos_t /*source_start*/)
 {
-	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_unlocked_frames() called - should be impossible") << endmsg;
+	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_frames() called - should be impossible") << endmsg;
 	abort(); /*NOTREACHED*/
 }
 
 void
-MidiPlaylistSource::load_model (bool, bool)
+MidiPlaylistSource::load_model (const Glib::Threads::Mutex::Lock&, bool)
 {
 	/* nothing to do */
 }
 
 void
-MidiPlaylistSource::destroy_model ()
+MidiPlaylistSource::destroy_model (const Glib::Threads::Mutex::Lock&)
 {
 	/* nothing to do */
 }
 
 void
-MidiPlaylistSource::flush_midi ()
+MidiPlaylistSource::flush_midi (const Lock& lock)
 {
 }
 

@@ -150,8 +150,11 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	Evoral::MusicalTime const bbegin = bfc.from (_start);
 	Evoral::MusicalTime const bend = bfc.from (_start + _length);
 
-	if (midi_source(0)->write_to (newsrc, bbegin, bend)) {
-		return boost::shared_ptr<MidiRegion> ();
+	{
+		Source::Lock lm(newsrc->mutex());
+		if (midi_source(0)->write_to (lm, newsrc, bbegin, bend)) {
+			return boost::shared_ptr<MidiRegion> ();
+		}
 	}
 
 	PropertyList plist;
@@ -272,7 +275,10 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 	}
 
 	boost::shared_ptr<MidiSource> src = midi_source(chan_n);
-	src->set_note_mode(mode);
+
+	Glib::Threads::Mutex::Lock lm(src->mutex());
+
+	src->set_note_mode(lm, mode);
 
 	/*
 	  cerr << "MR " << name () << " read @ " << position << " * " << to_read
@@ -285,6 +291,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 	/* This call reads events from a source and writes them to `dst' timed in session frames */
 
 	if (src->midi_read (
+		    lm, // source lock
 			dst, // destination buffer
 			_position - _start, // start position of the source in session frames
 			_start + internal_offset, // where to start reading in the source
@@ -429,7 +436,7 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	   the iterator.
 	*/
 	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex());
-	midi_source(0)->invalidate ();
+	midi_source(0)->invalidate (lm);
 }
 
 /** This is called when a trim drag has resulted in a -ve _start time for this region.

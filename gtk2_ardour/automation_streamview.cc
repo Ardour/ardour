@@ -76,7 +76,8 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	if (wait_for_data) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
 		if (mr) {
-			mr->midi_source()->load_model();
+			Source::Lock lock(mr->midi_source()->mutex());
+			mr->midi_source()->load_model(lock);
 		}
 	}
 
