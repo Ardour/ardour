@@ -4492,10 +4492,24 @@ Editor::paste_internal (framepos_t position, float times)
 
 		begin_reversible_command (Operations::paste);
 
+        RegionSelection new_regions;
+        
 		for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
+            
+            RouteTimeAxisView* route_view = dynamic_cast<RouteTimeAxisView*> (*i);
+            
+            // connect this collect_new_region_view method to RegionViewAdded signal
+            // to collect newly pasted regions in latest_regionviews container
+            sigc::connection c = route_view->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
+            
 			(*i)->paste (position, times, *cut_buffer, nth);
+            
+            c.disconnect ();
+            new_regions.add(latest_regionviews);
 		}
 
+        selection->set (new_regions);
+        
 		commit_reversible_command ();
 	}
 }
