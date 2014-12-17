@@ -1559,7 +1559,8 @@ MidiRegionView::extend_active_notes()
 
 	for (unsigned i=0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1 (trackview.editor().sample_to_pixel(_region->length()));
+			_active_notes[i]->set_x1(
+				trackview.editor().sample_to_pixel(_region->position() + _region->length()));
 		}
 	}
 }
@@ -3781,8 +3782,6 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 
 	boost::shared_ptr<MidiBuffer> buf = mtv->midi_track()->get_gui_feed_buffer ();
 
-	BeatsFramesConverter converter (trackview.session()->tempo_map(), mtv->midi_track()->get_capture_start_frame (0));
-
 	framepos_t back = max_framepos;
 
 	for (MidiBuffer::iterator i = buf->begin(); i != buf->end(); ++i) {
@@ -3796,12 +3795,8 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 			}
 		}
 
-		/* ev.time() is in session frames, so (ev.time() - converter.origin_b()) is
-		   frames from the start of the source, and so time_beats is in terms of the
-		   source.
-		*/
-
-		Evoral::MusicalTime const time_beats = converter.from (ev.time () - converter.origin_b ());
+		/* convert from session frames to source beats */
+		Evoral::MusicalTime const time_beats = _source_relative_time_converter.from(ev.time());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
 			boost::shared_ptr<NoteType> note (

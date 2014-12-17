@@ -134,6 +134,7 @@ protected:
 	void         transport_looped();
 	void         rec_enable_changed();
 	void         sess_rec_enable_changed();
+	void         create_rec_box(framepos_t frame_pos, double width);
 	virtual void setup_rec_box () = 0;
 	virtual void update_rec_box ();
 

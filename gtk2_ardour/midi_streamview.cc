@@ -497,12 +497,12 @@ MidiStreamView::setup_rec_box ()
 				if (region) {
 					region->set_start (_trackview.track()->current_capture_start()
 					                   - _trackview.track()->get_capture_start_frame (0));
-					region->set_position (_trackview.track()->current_capture_start());
+					region->set_position (_trackview.session()->transport_frame());
+
 					RegionView* rv = add_region_view_internal (region, false, true);
 					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
 					mrv->begin_write ();
 
-				
 					/* rec region will be destroyed in setup_rec_box */
 					rec_regions.push_back (make_pair (region, rv));
 
@@ -515,32 +515,7 @@ MidiStreamView::setup_rec_box ()
 
 			/* start a new rec box */
 
-			boost::shared_ptr<MidiTrack> mt = _trackview.midi_track(); /* we know what it is already */
-			framepos_t const frame_pos = mt->current_capture_start ();
-			gdouble const xstart = _trackview.editor().sample_to_pixel (frame_pos);
-			gdouble const xend = xstart;
-			uint32_t fill_color;
-
-			fill_color = ARDOUR_UI::config()->color ("recording rect");
-
-			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::Rectangle (_canvas_group);
-			rec_rect->set (ArdourCanvas::Rect (xstart, 1, xend, _trackview.current_height() - 1));
-			rec_rect->set_outline_color (ARDOUR_UI::config()->color ("recording rect"));
-			rec_rect->set_fill_color (fill_color);
-			rec_rect->lower_to_bottom();
-
-			RecBoxInfo recbox;
-			recbox.rectangle = rec_rect;
-			recbox.start = _trackview.session()->transport_frame();
-			recbox.length = 0;
-
-			rec_rects.push_back (recbox);
-
-			screen_update_connection.disconnect();
-			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
-				sigc::mem_fun (*this, &MidiStreamView::update_rec_box));
-			rec_updating = true;
-			rec_active = true;
+			create_rec_box(_trackview.midi_track()->current_capture_start(), 0);
 
 		} else if (rec_active &&
 		           (_trackview.session()->record_status() != Session::Recording ||
@@ -559,7 +534,6 @@ MidiStreamView::setup_rec_box ()
 			/* disconnect rapid update */
 			screen_update_connection.disconnect();
 			rec_data_ready_connections.drop_connections ();
-
 			rec_updating = false;
 			rec_active = false;
 

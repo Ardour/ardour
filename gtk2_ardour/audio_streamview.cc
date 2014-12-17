@@ -237,62 +237,11 @@ AudioStreamView::setup_rec_box ()
 
 			/* start a new rec box */
 
-			boost::shared_ptr<AudioTrack> at;
-
-			at = _trackview.audio_track(); /* we know what it is already */
+			boost::shared_ptr<AudioTrack> at = _trackview.audio_track();
 			framepos_t const frame_pos = at->current_capture_start ();
-			gdouble xstart = _trackview.editor().sample_to_pixel (frame_pos);
-			gdouble xend = xstart; /* keeps gcc optimized happy, really set in switch() below */
-			uint32_t fill_color;
+			double     const width     = ((at->mode() == Destructive) ? 2 : 0);
 
-			switch (_trackview.audio_track()->mode()) {
-			case Normal:
-			case NonLayered:
-				xend = xstart;
-				fill_color = ARDOUR_UI::config()->color ("recording rect");
-				break;
-
-			case Destructive:
-				xend = xstart + 2;
-				fill_color = ARDOUR_UI::config()->color ("recording rect");
-				/* make the recording rect translucent to allow
-				   the user to see the peak data coming in, etc.
-				*/
-				fill_color = UINT_RGBA_CHANGE_A (fill_color, 120);
-				break;
-			default:
-				fatal << string_compose (_("programming error: %1: %2"),
-						"AudioStreamView: impossible track mode",
-						(int) _trackview.audio_track()->mode()) << endmsg;
-				abort(); /*NOTREACHED*/
-			}
-
-			ArdourCanvas::Rectangle * rec_rect = new ArdourCanvas::TimeRectangle (_canvas_group);
-			rec_rect->set_x0 (xstart);
-			rec_rect->set_y0 (0);
-			rec_rect->set_x1 (xend);
-			rec_rect->set_y1 (child_height ());
-			rec_rect->set_outline_what (ArdourCanvas::Rectangle::What (0));
-			rec_rect->set_outline_color (ARDOUR_UI::config()->color ("time axis frame"));
-			rec_rect->set_fill_color (fill_color);
-
-			RecBoxInfo recbox;
-			recbox.rectangle = rec_rect;
-			
-			if (rec_rects.empty()) {
-				recbox.start = _trackview.session()->record_location ();
-			} else {
-				recbox.start = _trackview.session()->transport_frame ();
-			}
-			recbox.length = 0;
-
-			rec_rects.push_back (recbox);
-
-			screen_update_connection.disconnect();
-			screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
-					sigc::mem_fun (*this, &AudioStreamView::update_rec_box));
-			rec_updating = true;
-			rec_active = true;
+			create_rec_box(frame_pos, width);
 
 		} else if (rec_active &&
 			   (_trackview.session()->record_status() != Session::Recording ||

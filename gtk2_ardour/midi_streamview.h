@@ -105,9 +105,11 @@ class MidiStreamView : public StreamView
 	void suspend_updates ();
 	void resume_updates ();
 
-  private:
+  protected:
 	void setup_rec_box ();
 	void update_rec_box ();
+
+  private:
 
 	RegionView* add_region_view_internal (
 		boost::shared_ptr<ARDOUR::Region>,

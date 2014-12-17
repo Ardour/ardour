@@ -405,6 +405,43 @@ StreamView::transport_looped()
 }
 
 void
+StreamView::create_rec_box(framepos_t frame_pos, double width)
+{
+	const double   xstart     = _trackview.editor().sample_to_pixel(frame_pos);
+	const double   xend       = xstart + width;
+	const uint32_t fill_color = ARDOUR_UI::config()->color_mod("recording rect", "recording_rect");
+
+	ArdourCanvas::Rectangle* rec_rect = new ArdourCanvas::TimeRectangle(_canvas_group);
+	rec_rect->set_x0(xstart);
+	rec_rect->set_y0(0);
+	rec_rect->set_x1(xend);
+	rec_rect->set_y1(child_height ());
+	rec_rect->set_outline_what(ArdourCanvas::Rectangle::What(0));
+	rec_rect->set_outline_color(ARDOUR_UI::config()->color("recording rect"));
+	rec_rect->set_fill_color(fill_color);
+	rec_rect->lower_to_bottom();
+
+	RecBoxInfo recbox;
+	recbox.rectangle = rec_rect;
+	recbox.length    = 0;
+
+	if (rec_rects.empty()) {
+		recbox.start = _trackview.session()->record_location ();
+	} else {
+		recbox.start = _trackview.session()->transport_frame ();
+	}
+
+	rec_rects.push_back (recbox);
+
+	screen_update_connection.disconnect();
+	screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
+		sigc::mem_fun(*this, &StreamView::update_rec_box));
+
+	rec_updating = true;
+	rec_active = true;
+}
+
+void
 StreamView::update_rec_box ()
 {
 	if (rec_active && rec_rects.size() > 0) {
