@@ -39,6 +39,8 @@ static inline unsigned long get_ctime()
     return millis;
 }
 static unsigned long accutime = 0;
+static unsigned long noftimes = 0;
+std::map<std::string, unsigned long> __dbg_file_counter;
 
 #endif // WAVES_TIME_MEASUREMENT
 
@@ -70,8 +72,18 @@ WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 	, _root_container (root)
 {
 #if (WAVES_TIME_MEASUREMENT)
-    std::cout << "WavesUI::WavesUI (\"" << layout_script_file  << "\") . . ." << std::endl;
+	char outputline[64];
+	sprintf (outputline, "%06d: ", ++noftimes);
     unsigned long st=get_ctime();
+	unsigned long filerefcnt = 0;
+	std::map<std::string, unsigned long>::iterator uit = __dbg_file_counter.find(layout_script_file);
+	if (uit != __dbg_file_counter.end()) {
+		filerefcnt = (*uit).second;
+	}
+	
+	__dbg_file_counter[layout_script_file] = ++filerefcnt;
+    std::cout << outputline << "WavesUI::WavesUI (\"" << layout_script_file  << "\" [" << filerefcnt << "]) . . ." << std::endl;
+
 #endif // WAVES_TIME_MEASUREMENT
 
 	// To avoid a need of reading the same file many times:
@@ -97,7 +109,7 @@ WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 #if (WAVES_TIME_MEASUREMENT)
     unsigned long wt = get_ctime()-st;;
     accutime += wt;
-    std::cout << ". . . done in " << wt << " msec; accu = " << accutime << std::endl;
+    std::cout << "        . . . done in " << wt << " msec; accu = " << accutime << std::endl;
 #endif // WAVES_TIME_MEASUREMENT
 }
 
