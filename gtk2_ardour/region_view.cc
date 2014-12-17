@@ -510,18 +510,6 @@ RegionView::set_duration (framecnt_t frames, void *src)
 	return true;
 }
 
-uint32_t
-RegionView::fill_opacity () const
-{
-	if (!_region->opaque()) {
-		return 60;
-	}
-	
-	uint32_t normal_tavi_opacity = TimeAxisViewItem::fill_opacity ();
-
-	return normal_tavi_opacity;
-}
-
 void
 RegionView::set_colors ()
 {
@@ -534,10 +522,14 @@ RegionView::set_colors ()
 	}
 }
 
-void
-RegionView::set_frame_color ()
+uint32_t
+RegionView::get_fill_color () const
 {
-	TimeAxisViewItem::set_frame_color ();
+	uint32_t f = TimeAxisViewItem::get_fill_color();
+	if (_region->opaque()) {
+		f = UINT_RGBA_CHANGE_A (f, 255);
+	}
+	return f;
 }
 
 void

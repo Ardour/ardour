@@ -106,10 +106,8 @@ public:
 
 	inline ARDOUR::ColorMode color_mode() const { return midi_view()->color_mode(); }
 
-	void set_frame_color();
+	uint32_t get_fill_color() const;
 	void color_handler ();
-
-	uint32_t fill_opacity() const;
 
 	void show_step_edit_cursor (Evoral::MusicalTime pos);
 	void move_step_edit_cursor (Evoral::MusicalTime pos);

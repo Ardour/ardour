@@ -692,48 +692,29 @@ TimeAxisViewItem::set_name_text_color ()
 }
 
 uint32_t
-TimeAxisViewItem::fill_opacity () const
-{
-	if (_dragging) {
-		return 130;
-	}
-
-	uint32_t col = ARDOUR_UI::config()->color_mod (_fill_color_name, _fill_color_name);
-	return UINT_RGBA_A (col);
-}
-
-uint32_t
 TimeAxisViewItem::get_fill_color () const
 {
 	uint32_t f;
-	uint32_t o = fill_opacity ();
 
+	const std::string mod_name = (_dragging ? "dragging region" : _fill_color_name);
 	if (_selected) {
 
-		f = ARDOUR_UI::config()->color ("selected region base");
+		f = ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
 
-		if (o == 0) {
-			/* some condition of this item has set fill opacity to
-			 * zero, but it has been selected, so use a mid-way
-			 * alpha value to make it reasonably visible.
-			 */
-			o = 130;
-		}
-		
 	} else {
 
 		if (_recregion) {
 			f = ARDOUR_UI::config()->color ("recording rect");
 		} else {
 			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->color_mod (_fill_color_name, _fill_color_name);
+				f = ARDOUR_UI::config()->color_mod (_fill_color_name, mod_name);
 			} else {
-				f = fill_color;
+				f = ARDOUR_UI::config()->color_mod (fill_color, mod_name);
 			}
 		}
 	}
 
-	return UINT_RGBA_CHANGE_A (f, o);
+	return f;
 }
 
 /**
