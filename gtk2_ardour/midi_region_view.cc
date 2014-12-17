@@ -424,8 +424,6 @@ MidiRegionView::enter_notify (GdkEventCrossing* ev)
 bool
 MidiRegionView::leave_notify (GdkEventCrossing*)
 {
-	_mouse_mode_connection.disconnect ();
-
 	leave_internal();
 
 	_entered = false;
@@ -3275,40 +3273,17 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 }
 
 uint32_t
-MidiRegionView::fill_opacity() const
+MidiRegionView::get_fill_color() const
 {
-	uint32_t a = RegionView::fill_opacity();
-	if (trackview.editor().current_mouse_mode() == MouseDraw ||
-	    trackview.editor().current_mouse_mode() == MouseContent) {
-		/* Make rect more transparent when in an internal mode.  This should
-		   probably be configurable somehow. */
-		a /= 2;
-	}
-	return a;
-}
-
-void
-MidiRegionView::set_frame_color()
-{
-	uint32_t f;
-
-	TimeAxisViewItem::set_frame_color ();
-
-	if (!frame) {
-		return;
-	}
-
+	const std::string mod_name = (_dragging ? "dragging region" :
+	                              trackview.editor().internal_editing() ? "editable region" :
+	                              "midi frame base");
 	if (_selected) {
-		f = ARDOUR_UI::config()->color ("selected region base");
+		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
 	} else if (high_enough_for_name || !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-		f = ARDOUR_UI::config()->color_mod ("midi frame base", "midi frame base");
-	} else {
-		f = fill_color;
+		return ARDOUR_UI::config()->color_mod ("midi frame base", mod_name);
 	}
-
-	f = UINT_RGBA_CHANGE_A (f, fill_opacity());
-
-	frame->set_fill_color (f);
+	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
 }
 
 void

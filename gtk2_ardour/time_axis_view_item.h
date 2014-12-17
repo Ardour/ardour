@@ -76,7 +76,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	void set_color (uint32_t);
 	void set_name_text_color ();
 
-	uint32_t get_fill_color () const;
+	virtual uint32_t get_fill_color () const;
 
 	ArdourCanvas::Item* get_canvas_frame();
 	ArdourCanvas::Item* get_canvas_group();
@@ -214,8 +214,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool show_vestigial;
 
 	uint32_t fill_color;
-
-	virtual uint32_t fill_opacity() const;
 
 	uint32_t last_item_width;
 	int name_text_width;

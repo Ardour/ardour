@@ -1,18 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- The Dark Theme for Ardour -->
-
 <Ardour>
   <Colors>
-    <Color name="meter color0" value="0x008800FF"/>
-    <Color name="meter color1" value="0x00AA00FF"/>
-    <Color name="meter color2" value="0x00FF00FF"/>
-    <Color name="meter color3" value="0x00FF00FF"/>
-    <Color name="meter color4" value="0xFFF000ff"/>
-    <Color name="meter color5" value="0xFFF000ff"/>
-    <Color name="meter color6" value="0xFF8800ff"/>
-    <Color name="meter color7" value="0xFF8800ff"/>
-    <Color name="meter color8" value="0xFF0000ff"/>
-    <Color name="meter color9" value="0xFF0000ff"/>
     <Color name="color 1" value="0x20b2b2ff"/>
     <Color name="color 10" value="0xf0f0f0ff"/>
     <Color name="color 100" value="0xe49c9cff"/>
@@ -116,6 +104,16 @@
     <Color name="color 97" value="0xccccccff"/>
     <Color name="color 98" value="0x9effffff"/>
     <Color name="color 99" value="0x5da3c1ff"/>
+    <Color name="meter color0" value="0x008800ff"/>
+    <Color name="meter color1" value="0x00aa00ff"/>
+    <Color name="meter color2" value="0x00ff00ff"/>
+    <Color name="meter color3" value="0x00ff00ff"/>
+    <Color name="meter color4" value="0xfff000ff"/>
+    <Color name="meter color5" value="0xfff000ff"/>
+    <Color name="meter color6" value="0xff8800ff"/>
+    <Color name="meter color7" value="0xff8800ff"/>
+    <Color name="meter color8" value="0xff0000ff"/>
+    <Color name="meter color9" value="0xff0000ff"/>
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="color 1"/>
@@ -481,6 +479,8 @@
     <Modifier name="audio track base" modifier="= alpha:0.4078"/>
     <Modifier name="automation track fill" modifier="= alpha:0.326156"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
+    <Modifier name="dragging region" modifier="= alpha:0.9"/>
+    <Modifier name="editable region" modifier="= alpha:0.1"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>
     <Modifier name="ghost track base" modifier="= alpha:0.640782"/>
     <Modifier name="ghost track midi fill" modifier="= alpha:0.228968"/>
@@ -497,7 +497,7 @@
     <Modifier name="panner fill" modifier="= alpha:0.7882"/>
     <Modifier name="piano roll black" modifier="= alpha:0.331098"/>
     <Modifier name="piano roll white" modifier="= alpha:0.4627"/>
-    <Modifier name="region base" modifier="= alpha:0.99"/>
+    <Modifier name="region base" modifier="= alpha:0.75"/>
     <Modifier name="selected midi note" modifier="= alpha:0.7529"/>
     <Modifier name="selection rect" modifier="= alpha:0.4666"/>
     <Modifier name="silence" modifier="= alpha:0.4784"/>

@@ -85,6 +85,8 @@ class RegionView : public TimeAxisViewItem
 
 	virtual void region_changed (const PBD::PropertyChange&);
 
+	uint32_t get_fill_color () const;
+
 	virtual GhostRegion* add_ghost (TimeAxisView&) = 0;
 	void remove_ghost_in (TimeAxisView&);
 	void remove_ghost (GhostRegion*);
@@ -149,10 +151,7 @@ class RegionView : public TimeAxisViewItem
 	void        lock_toggle ();
 
 	virtual void set_colors ();
-	virtual void set_frame_color ();
 	virtual void reset_width_dependent_items (double pixel_width);
-
-	uint32_t fill_opacity () const;
 
 	virtual void color_handler () {}
 

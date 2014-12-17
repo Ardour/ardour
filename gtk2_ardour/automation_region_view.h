@@ -70,6 +70,8 @@ public:
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(TimeAxisView&) { return 0; }
 
+	uint32_t get_fill_color() const;
+
 	void set_height (double);
 	void reset_width_dependent_items(double pixel_width);
 
@@ -79,6 +81,7 @@ protected:
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event(GdkEvent* ev);
 	void add_automation_event (GdkEvent* event, framepos_t when, double y, bool with_guard_points);
+	void mouse_mode_changed ();
 	void entered();
 	void exited();
 
@@ -87,6 +90,7 @@ private:
 	ARDOUR::DoubleBeatsFramesConverter _source_relative_time_converter;
 	Evoral::Parameter                  _parameter;
 	boost::shared_ptr<AutomationLine>  _line;
+	PBD::ScopedConnection              _mouse_mode_connection;
 };
 
 #endif /* __gtk_ardour_automation_region_view_h__ */

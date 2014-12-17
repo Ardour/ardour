@@ -29,6 +29,7 @@
 
 #include "gtkmm2ext/keyboard.h"
 
+#include "ardour_ui.h"
 #include "automation_region_view.h"
 #include "editing.h"
 #include "editor.h"
@@ -57,6 +58,10 @@ AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*            
 	}
 
 	group->raise_to_top();
+
+	trackview.editor().MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
+	                                            boost::bind (&AutomationRegionView::mouse_mode_changed, this),
+	                                            gui_context ());
 }
 
 AutomationRegionView::~AutomationRegionView ()
@@ -95,6 +100,27 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
 	_line->set_maximum_time (_region->length());
 	_line->set_offset (_region->start ());
+}
+
+uint32_t
+AutomationRegionView::get_fill_color() const
+{
+	const std::string mod_name = (_dragging ? "dragging region" :
+	                              trackview.editor().internal_editing() ? "editable region" :
+	                              "midi frame base");
+	if (_selected) {
+		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
+	} else if (high_enough_for_name || !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+		return ARDOUR_UI::config()->color_mod ("midi frame base", mod_name);
+	}
+	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
+}
+
+void
+AutomationRegionView::mouse_mode_changed ()
+{
+	// Adjust frame colour (become more transparent for internal tools)
+	set_frame_color();
 }
 
 bool
