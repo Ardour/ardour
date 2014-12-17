@@ -38,10 +38,6 @@ public:
     ARDOUR::ChanCount input_channels ();
     void on_show ();
     
-protected:
-    void on_enter_pressed ();
-    void on_esc_pressed ();
-    
 private:
 	WavesButton& _decrement_button;
     WavesButton& _increment_button;

@@ -79,7 +79,7 @@ void
 AddTracksDialog::on_ok_button (WavesButton*)
 {
     hide();
-	response (Gtk::RESPONSE_YES);
+	response (WavesDialog::RESPONSE_DEFAULT);
 }
 
 void
@@ -156,18 +156,4 @@ AddTracksDialog::setup ()
 {
     set_track_count(1);
     _tracks_format_dropdown.set_text(TrackFormat::FormatMono);
-}
-
-void
-AddTracksDialog::on_enter_pressed ()
-{
-    hide();
-    response (Gtk::RESPONSE_YES);
-}
-
-void
-AddTracksDialog::on_esc_pressed ()
-{
-    hide();
-    response (Gtk::RESPONSE_CANCEL);
 }

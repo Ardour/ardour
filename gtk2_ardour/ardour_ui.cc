@@ -3451,7 +3451,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
     int r = _add_tracks_dialog->run();
     
 	switch (r) {
-		case Gtk::RESPONSE_YES:
+		case WavesDialog::RESPONSE_DEFAULT:
 			break;
 		default:
 			return;
