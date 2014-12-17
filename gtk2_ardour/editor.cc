@@ -1484,8 +1484,10 @@ void
 Editor::popup_xfade_in_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
-	AudioRegionView* arv = static_cast<AudioRegionView*> (item->get_data ("regionview"));
-	assert(arv);
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*> ((RegionView*)item->get_data ("regionview"));
+	if (!arv) {
+		return;
+	}
 
 	MenuList& items (xfade_in_context_menu.items());
 	items.clear ();
@@ -1507,8 +1509,10 @@ void
 Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::Item* item, ItemType /*item_type*/)
 {
 	using namespace Menu_Helpers;
-	AudioRegionView* arv = static_cast<AudioRegionView*> (item->get_data ("regionview"));
-	assert(arv);
+	AudioRegionView* arv = dynamic_cast<AudioRegionView*> ((RegionView*)item->get_data ("regionview"));
+	if (!arv) {
+		return;
+	}
 
 	MenuList& items (xfade_out_context_menu.items());
 	items.clear ();
