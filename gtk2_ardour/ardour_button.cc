@@ -511,10 +511,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_restore (cr);
 	}
 
-	// a transparent gray layer to indicate insensitivity
+	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
-		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.6);
+		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
+		uint32_t ins_color = ARDOUR_UI::config()->color ("gtk_background");
+		ArdourCanvas::set_source_rgb_a (cr, ins_color, 0.6);
 		cairo_fill (cr);
 	}
 
