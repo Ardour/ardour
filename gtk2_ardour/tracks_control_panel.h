@@ -64,7 +64,6 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesButton& _stereo_out_button;
 	WavesButton& _ok_button;
 	WavesButton& _cancel_button;
-	WavesButton& _apply_button;
 	WavesButton& _control_panel_button;
 	WavesButton& _no_button;
 	WavesButton& _yes_button;
