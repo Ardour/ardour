@@ -293,15 +293,27 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 
 	if (mouse_mode == m) {
-		/* switch "in to" the same mode, act like a toggle and switch back to previous mode */
+		/* switch to the same mode, act like a toggle and switch back to previous mode */
 		Glib::RefPtr<Action>       pact  = get_mouse_mode_action(previous_mouse_mode);
 		Glib::RefPtr<ToggleAction> ptact = Glib::RefPtr<ToggleAction>::cast_dynamic(pact);
 		ptact->set_active(true);
 		return;
 	}
 
+	const bool was_internal = internal_editing();
+
 	previous_mouse_mode = mouse_mode;
 	mouse_mode = m;
+
+	if (!was_internal && internal_editing()) {
+		/* switched to internal, switch to internal snap settings */
+		set_snap_to(internal_snap_type);
+		set_snap_mode(internal_snap_mode);
+	} else if (was_internal && !internal_editing()) {
+		/* switched out of internal, switch to non-internal snap settings */
+		set_snap_to(pre_internal_snap_type);
+		set_snap_mode(pre_internal_snap_mode);
+	}
 
 	instant_save ();
 

@@ -541,6 +541,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Editing::MouseMode mouse_mode;
 	Editing::MouseMode previous_mouse_mode;
+	Editing::MouseMode pre_internal_mouse_mode;
+	Editing::SnapType  pre_internal_snap_type;
+	Editing::SnapMode  pre_internal_snap_mode;
+	Editing::SnapType  internal_snap_type;
+	Editing::SnapMode  internal_snap_mode;
 	Editing::MouseMode effective_mouse_mode () const;
 
 	enum JoinObjectRangeState {
