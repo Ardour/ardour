@@ -91,7 +91,8 @@ CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundarie
 CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)
 CONFIG_VARIABLE (bool, autoscroll_editor, "autoscroll-editor", true)
 CONFIG_VARIABLE (FadeShape, default_fade_shape, "default-fade-shape", FadeLinear)
-CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "selection-after-split", None)
+CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "region-selection-after-split",
+		g_getenv("MIXBUS") ? ExistingNewlyCreatedBoth : None) // we can't use Profile->get_mixbus() here: Profile hasn't been created
 
 /* monitoring, mute, solo etc */
 
