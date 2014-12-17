@@ -549,8 +549,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case TempoMarkerItem:
 	{
-		TempoMarker* m = reinterpret_cast<TempoMarker*> (item->get_data ("marker"));
-		assert (m);
 		_drags->set (
 			new TempoMarkerDrag (
 				this,
@@ -564,8 +562,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 	case MeterMarkerItem:
 	{
-		MeterMarker* m = reinterpret_cast<MeterMarker*> (item->get_data ("marker"));
-		assert (m);
 		_drags->set (
 			new MeterMarkerDrag (
 				this,
