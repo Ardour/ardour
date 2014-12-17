@@ -183,13 +183,32 @@ def ensure_visible_symbols(bld, visible):
             bld.cxxflags += [ '-fvisibility=hidden' ]
             bld.cflags += [ '-fvisibility=hidden' ]
 
+def set_basic_compiler_flags (conf,flag_dict):
+    if Options.options.debug:
+        conf.env.append_value('CFLAGS',flag_dict['debuggable'])
+        conf.env.append_value('CXXFLAGS',flag_dict['debuggable'])
+        conf.env.append_value('LINKFLAGS',flag_dict['linker-debuggable'])
+    else:
+        conf.env.append_value('CFLAGS',flag_dict['nondebuggable'])
+        conf.env.append_value('CXXFLAGS',flag_dict['nondebuggable'])
+
+    if Options.options.ultra_strict:
+        Options.options.strict = True
+        conf.env.append_value('CFLAGS', flag_dict['ultra-strict'])
+                              
+    if Options.options.strict:
+        conf.env.append_value('CFLAGS', flag_dict['c-strict'])
+        conf.env.append_value('CXXFLAGS', flag_dict['cxx-strict'])
+        conf.env.append_value('CFLAGS', flag_dict['strict'])
+        conf.env.append_value('CXXFLAGS', flag_dict['strict'])
+
+    conf.env.append_value('CFLAGS', flag_dict['show-column'])
+    conf.env.append_value('CXXFLAGS', flag_dict['show-column'])
+            
 def configure(conf):
     global g_step
     if g_step > 1:
         return
-    def append_cxx_flags(flags):
-        conf.env.append_value('CFLAGS', flags)
-        conf.env.append_value('CXXFLAGS', flags)
     print('')
     display_header('Global Configuration')
 
@@ -227,58 +246,6 @@ def configure(conf):
         if not dot:
             conf.fatal("Graphviz (dot) is required to build with --docs")
 
-    if Options.options.debug:
-        if conf.env['MSVC_COMPILER']:
-            conf.env['CFLAGS']    = ['/Od', '/Zi', '/MTd']
-            conf.env['CXXFLAGS']  = ['/Od', '/Zi', '/MTd']
-            conf.env['LINKFLAGS'] = ['/DEBUG']
-        else:
-            conf.env['CFLAGS']   = ['-O0', '-g']
-            conf.env['CXXFLAGS'] = ['-O0',  '-g']
-    else:
-        if conf.env['MSVC_COMPILER']:
-            conf.env['CFLAGS']    = ['/MD']
-            conf.env['CXXFLAGS']  = ['/MD']
-        append_cxx_flags(['-DNDEBUG'])
-
-    if Options.options.ultra_strict:
-        Options.options.strict = True
-        conf.env.append_value('CFLAGS', ['-Wredundant-decls',
-                                         '-Wstrict-prototypes',
-                                         '-Wmissing-prototypes'])
-
-    if Options.options.strict:
-        conf.env.append_value('CFLAGS', ['-std=c99', '-pedantic', '-Wshadow'])
-        conf.env.append_value('CXXFLAGS', ['-ansi',
-                                           '-Wnon-virtual-dtor',
-                                           '-Woverloaded-virtual'])
-        append_cxx_flags(['-Wall',
-                          '-Wcast-align',
-                          '-Wextra',
-                          '-Wwrite-strings'])
-        if sys.platform != "darwin":
-            # this is really only to be avoid on OLD apple gcc, but not sure how to version check
-            append_cxx_flags(['-fstrict-overflow'])
-
-        if not conf.check_cc(fragment = '''
-#ifndef __clang__
-#error
-#endif
-int main() { return 0; }''',
-                         features  = 'c',
-                         mandatory = False,
-                         execute   = False,
-                         msg       = 'Checking for clang'):
-            if sys.platform != "darwin":
-                # this is really only to be avoid on OLD apple gcc, but not sure how to version check
-                append_cxx_flags(['-Wunsafe-loop-optimizations'])
-                # this is invalid (still) on Lion apple gcc
-                append_cxx_flags(['-Wlogical-op'])
-            
-
-    if not conf.env['MSVC_COMPILER']:
-        append_cxx_flags(['-fshow-column'])
-
     conf.env.prepend_value('CFLAGS', '-I' + os.path.abspath('.'))
     conf.env.prepend_value('CXXFLAGS', '-I' + os.path.abspath('.'))
 
@@ -288,13 +255,6 @@ int main() { return 0; }''',
     print('')
 
     g_step = 2
-
-def set_c99_mode(conf):
-    if conf.env.MSVC_COMPILER:
-        # MSVC has no hope or desire to compile C99, just compile as C++
-        conf.env.append_unique('CFLAGS', ['-TP'])
-    else:
-        conf.env.append_unique('CFLAGS', ['-std=c99'])
 
 def set_local_lib(conf, name, has_objects):
     var_name = 'HAVE_' + nameify(name.upper())
