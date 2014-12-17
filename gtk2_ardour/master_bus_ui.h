@@ -73,7 +73,7 @@ private:
 	void on_global_rec_button (WavesButton*);
     void on_output_connection_mode_changed ();
     bool on_level_meter_button_press (GdkEventButton*);
-    bool on_master_event_box_button_release (GdkEventButton*);
+    bool on_master_event_box_button_press (GdkEventButton*);
     
     PBD::ScopedConnection _route_meter_connection;
     

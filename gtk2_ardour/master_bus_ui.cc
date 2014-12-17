@@ -132,7 +132,7 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 	_master_mute_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button));
 	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
 	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
-    _master_event_box.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_event_box_button_release));
+    _master_event_box.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_event_box_button_press));
     
     _editor.get_selection().TracksChanged.connect (sigc::mem_fun(*this, &MasterBusUI::update_master_bus_selection));
     
@@ -247,31 +247,64 @@ MasterBusUI::update_master_bus_selection ()
 }
 
 bool
-MasterBusUI::on_master_event_box_button_release (GdkEventButton *ev)
+MasterBusUI::on_master_event_box_button_press (GdkEventButton *ev)
 {
     if (ev->button == 1) {
         
+        if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
+            
+            TimeAxisView* tv = _editor.axis_view_from_route (_route );
+            if (tv) {
+                /* special case: select/deselect all tracks along with master bus*/
+                if (_editor.get_selection().selected (tv)) {
+                    _editor.get_selection().clear_tracks ();
+                } else {
+                    _editor.select_all_tracks ();
+                }
+            }
+            return true;
+        }
+        
         switch (ArdourKeyboard::selection_type (ev->state)) {
             case Selection::Toggle:
-                if (_selected) {
-                    TimeAxisView* tv = _editor.axis_view_from_route (_route );
-                    if (tv) {
-                        _editor.set_selected_track(*tv, Selection::Toggle);
-                    }
-                    _selected = false;
-                    break;
-                } /*else - just fall down*/
+            {
+                TimeAxisView* tv = _editor.axis_view_from_route (_route );
+                if (tv) {
+                    _editor.get_selection().toggle (tv);
+                }
+                _selected = false;
+            }
+            break;
                 
             case Selection::Set:
-                if (!_selected) {
+            {
+                TimeAxisView* tv = _editor.axis_view_from_route (_route );
+                if (tv) {
+                    _editor.set_selected_track(*tv);
+                }
+                _selected = true;
+            }
+            break;
+                
+            case Selection::Extend:
+            {
+                TimeAxisView* tv = _editor.axis_view_from_route (_route );
+                if (tv) {
+                     _editor.extend_selection_to_track (*tv);
+                }
+                _selected = true;
+            }
+            break;
+                
+            case Selection::Add:
+            {
                     TimeAxisView* tv = _editor.axis_view_from_route (_route );
                     if (tv) {
-                        _editor.set_selected_track(*tv);
+                        _editor.get_selection().add (tv);
                     }
                     _selected = true;
-                break;
-        
             }
+            break;
         }
     }
     
