@@ -3580,6 +3580,8 @@ MidiRegionView::selection_as_notelist (Notes& selected, bool allow_all_if_none_s
 void
 MidiRegionView::update_ghost_note (double x, double y)
 {
+	x = std::max(0.0, x);
+
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 
 	_last_ghost_x = x;
@@ -3623,12 +3625,8 @@ MidiRegionView::create_ghost_note (double x, double y)
 	_ghost_note = new Note (*this, _note_group, g);
 	_ghost_note->set_ignore_events (true);
 	_ghost_note->set_outline_color (0x000000aa);
-	if (x < 0) { x = 0; }
 	update_ghost_note (x, y);
 	_ghost_note->show ();
-
-	_last_ghost_x = x;
-	_last_ghost_y = y;
 
 	show_verbose_cursor (_ghost_note->note ());
 }
