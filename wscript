@@ -255,7 +255,7 @@ int main() { return 0; }''',
                          msg       = 'Checking for clang')
 
     if is_clang:
-        if platform == darwin:
+        if platform == 'darwin':
             compiler_name = 'clang-darwin'
         else:
             compiler_name = 'clang'
