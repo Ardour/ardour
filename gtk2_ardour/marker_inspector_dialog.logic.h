@@ -25,10 +25,14 @@ protected:
 
 private:
 	Marker* _marker;
+	PBD::ScopedConnectionList _marker_connections;
 
 	void _init();
+	void _display_marker_data ();
 	void _display_scene_change_info ();
 	void _enable_program_change (bool);
+	void _on_location_changed (ARDOUR::Location*);
+	void _lock_button_clicked (WavesButton *button);
 	void _program_change_on_button_clicked (WavesButton *button);
 	void _program_change_off_button_clicked (WavesButton *button);
 	void on_bank_dropdown_item_changed (WavesDropdown*, int);

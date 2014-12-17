@@ -160,6 +160,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool session_loaded;
 	int build_session (const std::string& path, const std::string& snapshot, ARDOUR::BusProfile&);
 	bool session_is_new() const { return _session_is_new; }
+	std::string format_session_time (framepos_t frame);
 
 	ARDOUR::Session* the_session() { return _session; }
 
@@ -210,7 +211,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	static sigc::signal<void, framepos_t, bool, framepos_t> Clock;
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
-        static sigc::signal<void> CloseAllDialogs;
+    static sigc::signal<void> CloseAllDialogs;
 
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
@@ -310,14 +311,14 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 		session_add_midi_route (true, route_group, how_many, name_template, instrument);
 	}
 
-        void session_add_mixed_track (const ARDOUR::ChanCount& input, const ARDOUR::ChanCount& output, ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
-				      ARDOUR::PluginInfoPtr instrument);
+    void session_add_mixed_track (const ARDOUR::ChanCount& input, const ARDOUR::ChanCount& output, ARDOUR::RouteGroup* route_group, uint32_t how_many, std::string const & name_template,
+				    ARDOUR::PluginInfoPtr instrument);
 
-	/*void session_add_midi_bus () {
+	/*  void session_add_midi_bus () {
 		session_add_midi_route (false);
 	}*/
 
-        void attach_to_engine ();
+    void attach_to_engine ();
 	void post_engine ();
 
     void update_output_operation_mode_buttons();
@@ -735,7 +736,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void plugin_scan_dialog (std::string type, std::string plugin, bool);
 	void plugin_scan_timeout (int);
 
-        void session_format_mismatch (std::string, std::string);
+    void session_format_mismatch (std::string, std::string);
 
 	void session_dialog (std::string);
 	int pending_state_dialog ();
@@ -825,8 +826,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
     //get names and paths of recent sessions
     void get_recent_session_names_and_paths(std::vector<std::string>& session_names,std::vector<std::string>& session_paths);
-    
-   
   
     //full path to recent sessions
     std::vector<std::string> recent_session_full_paths;

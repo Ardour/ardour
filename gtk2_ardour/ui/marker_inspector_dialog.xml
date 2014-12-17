@@ -24,16 +24,29 @@
             <EventBox bgnormal="#404040">
               <VBox borderwidth="8">
                 <HBox height="9"/>
-                <Label id="location_name"
+                <Label id="location_name_label"
                        style="generic_control"
                        text="MARKER 1"/>
                 <HBox height="7"/>
-                <Label id="location_time"
+                <Label id="location_time_label"
                        style="generic_control"
                        text="01:23:45:56"/>
+                <HBox height="6"/>
+                <HBox>
+                  <Iconbutton id="lock_button"
+                              width="20"
+                              height="20"
+                              normalicon="waves_check_box"
+                              activeicon="waves_check_box_active"
+                              toggleable="true"/>
+                  <Label style="generic_control"
+                         text="Locked"
+                         height="20"
+                         vertalignment="center"/>
+                </HBox>
                 <HBox height="11"/>
                 <Label style="generic_control"
-                     text="PROGRAM CHANGE"/>
+                       text="PROGRAM CHANGE"/>
                 <HBox height="4"/>
                 <HBox>
                   <Button id="program_change_on_button"

@@ -3034,8 +3034,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 			d.run ();
 		}
 	}
-
-    
     
 	if (!new_session->writable()) {
         
@@ -4512,4 +4510,42 @@ ARDOUR_UI::open_media_folder ()
     /* XXX what to do here ? */
 
 #endif
+}
+
+std::string
+ARDOUR_UI::format_session_time (framepos_t frame)
+{
+	char buf[128];
+	Timecode::Time timecode;
+	Timecode::BBT_Time bbt;
+
+	if (the_session() == 0) {
+		return string();
+	}
+
+	/* Take clock mode from the primary clock */
+
+	AudioClock::Mode m = primary_clock->mode();
+
+	switch (m) {
+	case AudioClock::BBT:
+		the_session()->bbt_time (frame, bbt);
+		snprintf (buf, sizeof (buf), "%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32, bbt.bars, bbt.beats, bbt.ticks);
+		break;
+
+	case AudioClock::Timecode:
+		the_session()->timecode_time (frame, timecode);
+		snprintf (buf, sizeof (buf), "%s", Timecode::timecode_format_time (timecode).c_str());
+		break;
+
+	case AudioClock::MinSec:
+		AudioClock::print_minsec (frame, buf, sizeof (buf), the_session()->frame_rate());
+		break;
+
+	default:
+		snprintf (buf, sizeof(buf), "%" PRIi64, frame);
+		break;
+	}
+
+    return buf;
 }

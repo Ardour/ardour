@@ -35,6 +35,10 @@
 class WavesButton;
 class Marker;
 
+namespace ARDOUR {
+	class Location;
+}
+
 class MarkerInspectorDialog : public Gtk::Window, public ARDOUR::SessionHandlePtr, public WavesUI {
   public:
 	MarkerInspectorDialog ();
@@ -47,7 +51,9 @@ class MarkerInspectorDialog : public Gtk::Window, public ARDOUR::SessionHandlePt
 	Gtk::Container& _empty_panel;
 	Gtk::Container& _inspector_panel;
 
-	Gtk::Label& _location_name;
+	Gtk::Label& _location_name_label;
+	Gtk::Label& _location_time_label;
+	WavesButton&  _lock_button;
 	WavesButton&   _program_change_on_button;
 	WavesButton&   _program_change_off_button;
 	Gtk::Container& _program_change_info_panel;
