@@ -55,7 +55,6 @@
     void save_pre_record_buffer();
 	void on_ok(WavesButton*);
 	void on_cancel(WavesButton*);
-	void on_apply(WavesButton*);
     void update_configs();
     void update_session_config();
 	void on_capture_active_changed (DeviceConnectionControl* capture_control, bool active);
@@ -118,6 +117,10 @@
     void on_midi_output_configuration_changed ();
     void on_mtc_input_changed (const std::string&);
     void on_device_error ();
+
+	bool on_key_press_event (GdkEventKey*);
+    void accept ();
+    void reject ();
 
 	// Merged ARDOUR's preferences
 	void display_waveform_shape ();

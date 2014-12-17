@@ -90,7 +90,6 @@ TracksControlPanel::init ()
 {
 	_ok_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_ok));
 	_cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_cancel));
-	_apply_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_apply));
 
 	_audio_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
 	_midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
@@ -1622,7 +1621,13 @@ TracksControlPanel::update_configs()
 void
 TracksControlPanel::on_ok (WavesButton*)
 {
-	hide();
+	accept ();
+    hide();
+}
+
+void
+TracksControlPanel::accept ()
+{
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_OK);
     
@@ -1630,9 +1635,8 @@ TracksControlPanel::on_ok (WavesButton*)
 }
 
 void
-TracksControlPanel::on_cancel (WavesButton*)
+TracksControlPanel::reject ()
 {
-	hide();
 	response(Gtk::RESPONSE_CANCEL);
     
     // restore previous value in combo-boxes
@@ -1664,13 +1668,29 @@ TracksControlPanel::on_cancel (WavesButton*)
 	display_general_preferences ();
 }
 
-void 
-TracksControlPanel::on_apply (WavesButton*)
+void
+TracksControlPanel::on_cancel (WavesButton*)
 {
-	EngineStateController::instance()->push_current_state_to_backend(true);
-	//response(Gtk::RESPONSE_APPLY);
+    reject ();
+    hide();
+}
+
+bool
+TracksControlPanel::on_key_press_event (GdkEventKey* ev)
+{
+    switch (ev->keyval)
+    {
+        case GDK_Return:
+            accept ();
+            hide ();
+            return true;
+        case GDK_Escape:
+            reject ();
+            hide ();
+            return true;
+    }
     
-    update_configs(); 
+	return WavesDialog::on_key_press_event (ev);
 }
 
 void TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
