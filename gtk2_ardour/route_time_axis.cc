@@ -1293,9 +1293,11 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 			break;
 
 		case Selection::Set:
-			if (_editor.get_selection().selected (this)) {
-				_editor.get_selection().set (this);
-			}
+            if (! Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
+                if (_editor.get_selection().selected (this)) {
+                    _editor.get_selection().set (this);
+                }
+            }
 			break;
 
 		case Selection::Extend:
