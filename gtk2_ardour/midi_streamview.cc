@@ -100,7 +100,7 @@ MidiStreamView::~MidiStreamView ()
 }
 
 RegionView*
-MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, bool)
+MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, bool recording)
 {
 	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
 
@@ -108,8 +108,16 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 		return 0;
 	}
 
-	RegionView* region_view = new MidiRegionView (_canvas_group, _trackview, region,
-	                                              _samples_per_pixel, region_color);
+	RegionView* region_view = NULL;
+	if (recording) {
+		region_view = new MidiRegionView (
+			_canvas_group, _trackview, region,
+			_samples_per_pixel, region_color, recording,
+			TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame));
+	} else {
+		region_view = new MidiRegionView (_canvas_group, _trackview, region,
+		                                  _samples_per_pixel, region_color);
+	}
 
 	region_view->init (false);
 
@@ -488,7 +496,7 @@ MidiStreamView::setup_rec_box ()
 					region->set_start (_trackview.track()->current_capture_start()
 					                   - _trackview.track()->get_capture_start_frame (0));
 					region->set_position (_trackview.track()->current_capture_start());
-					RegionView* rv = add_region_view_internal (region, false);
+					RegionView* rv = add_region_view_internal (region, false, true);
 					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
 					mrv->begin_write ();
 

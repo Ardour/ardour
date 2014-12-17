@@ -68,11 +68,20 @@ public:
 	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
 	typedef Evoral::Sequence<Evoral::MusicalTime>::Notes Notes;
 
-	MidiRegionView (ArdourCanvas::Container *,
-	                RouteTimeAxisView&,
-	                boost::shared_ptr<ARDOUR::MidiRegion>,
-	                double initial_samples_per_pixel,
-	                uint32_t base_color);
+	MidiRegionView (ArdourCanvas::Container*              parent,
+	                RouteTimeAxisView&                    tv,
+	                boost::shared_ptr<ARDOUR::MidiRegion> r,
+	                double                                samples_per_pixel,
+	                uint32_t                              basic_color);
+
+	MidiRegionView (ArdourCanvas::Container*              parent,
+	                RouteTimeAxisView&                    tv,
+	                boost::shared_ptr<ARDOUR::MidiRegion> r,
+	                double                                samples_per_pixel,
+	                uint32_t                              basic_color,
+	                bool                                  recording,
+	                Visibility                            visibility);
+
 
 	MidiRegionView (const MidiRegionView& other);
 	MidiRegionView (const MidiRegionView& other, boost::shared_ptr<ARDOUR::MidiRegion>);
@@ -322,16 +331,6 @@ public:
         ARDOUR::InstrumentInfo& instrument_info() const;
 	
 protected:
-	/** Allows derived types to specify their visibility requirements
-	 * to the TimeAxisViewItem parent class.
-	 */
-	MidiRegionView (ArdourCanvas::Container *,
-	                RouteTimeAxisView&,
-	                boost::shared_ptr<ARDOUR::MidiRegion>,
-	                double samples_per_pixel,
-	                uint32_t basic_color,
-	                TimeAxisViewItem::Visibility);
-
 	void region_resized (const PBD::PropertyChange&);
 
 	void set_flags (XMLNode *);

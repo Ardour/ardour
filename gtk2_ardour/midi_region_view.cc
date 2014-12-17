@@ -142,8 +142,9 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
                                 boost::shared_ptr<MidiRegion> r,
                                 double                        spu,
                                 uint32_t                      basic_color,
+                                bool                          recording,
                                 TimeAxisViewItem::Visibility  visibility)
-	: RegionView (parent, tv, r, spu, basic_color, false, visibility)
+	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
 	, _current_range_min(0)
 	, _current_range_max(0)
 	, _region_relative_time_converter(r->session().tempo_map(), r->position())
@@ -340,7 +341,7 @@ MidiRegionView::connect_to_diskstream ()
 bool
 MidiRegionView::canvas_group_event(GdkEvent* ev)
 {
-	if (in_destructor) {
+	if (in_destructor || _recregion) {
 		return false;
 	}
 
