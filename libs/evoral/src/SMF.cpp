@@ -17,6 +17,7 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -211,7 +212,7 @@ SMF::seek_to_start() const
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 	if (_smf_track) {
-		_smf_track->next_event_number = 1;
+		_smf_track->next_event_number = std::min(_smf_track->number_of_events, 1);
 	} else {
 		cerr << "WARNING: SMF seek_to_start() with no track" << endl;
 	}
