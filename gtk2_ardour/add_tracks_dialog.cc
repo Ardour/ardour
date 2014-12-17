@@ -121,7 +121,9 @@ AddTracksDialog::count ()
 {
     string str_track_count = _tracks_counter_entry.get_text();
     char * pEnd;
-    return strtol( str_track_count.c_str(), &pEnd, 10 );
+    int number = strtol( str_track_count.c_str(), &pEnd, 10 );
+    number = number >= 0 ? number : 0;
+    return number;
 }
 
 void
