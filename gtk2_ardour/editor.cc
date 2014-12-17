@@ -670,6 +670,11 @@ Editor::Editor ()
 	set_snap_mode (_snap_mode);
 	previous_mouse_mode = MouseObject;
 	set_mouse_mode (MouseObject, true);
+        pre_internal_mouse_mode = MouseObject;
+        pre_internal_snap_type = _snap_type;
+        pre_internal_snap_mode = _snap_mode;
+        internal_snap_type = _snap_type;
+        internal_snap_mode = _snap_mode;
 	set_edit_point_preference (EditAtMouse, true);
 
 	_playlist_selector = new PlaylistSelector();
@@ -2087,6 +2092,12 @@ Editor::set_snap_mode (SnapMode mode)
 {
 	string str = snap_mode_strings[(int)mode];
 
+	if (internal_editing()) {
+		internal_snap_mode = mode;
+	} else {
+		pre_internal_snap_mode = mode;
+	}
+
 	_snap_mode = mode;
 
 	if (str != snap_mode_selector.get_text ()) {
@@ -2236,6 +2247,22 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("snap-mode"))) {
 		snap_mode_selection_done((SnapMode) string_2_enum (prop->value(), _snap_mode));
+	}
+
+	if ((prop = node.property ("internal-snap-to"))) {
+		internal_snap_type = (SnapType) string_2_enum (prop->value(), internal_snap_type);
+	}
+
+	if ((prop = node.property ("internal-snap-mode"))) {
+		internal_snap_mode = (SnapMode) string_2_enum (prop->value(), internal_snap_mode);
+	}
+
+	if ((prop = node.property ("pre-internal-snap-to"))) {
+		pre_internal_snap_type = (SnapType) string_2_enum (prop->value(), pre_internal_snap_type);
+	}
+
+	if ((prop = node.property ("pre-internal-snap-mode"))) {
+		pre_internal_snap_mode = (SnapMode) string_2_enum (prop->value(), pre_internal_snap_mode);
 	}
 
 	if ((prop = node.property ("mouse-mode"))) {
@@ -2429,6 +2456,10 @@ Editor::get_state ()
 	node->add_property ("zoom", buf);
 	node->add_property ("snap-to", enum_2_string (_snap_type));
 	node->add_property ("snap-mode", enum_2_string (_snap_mode));
+	node->add_property ("internal-snap-to", enum_2_string (internal_snap_type));
+	node->add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
+	node->add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
+	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
 	node->add_property ("edit-point", enum_2_string (_edit_point));
 	snprintf (buf, sizeof(buf), "%d", _visible_track_count);
 	node->add_property ("visible-track-count", buf);
