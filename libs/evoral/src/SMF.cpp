@@ -212,7 +212,7 @@ SMF::seek_to_start() const
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
 	if (_smf_track) {
-		_smf_track->next_event_number = std::min(_smf_track->number_of_events, 1);
+		_smf_track->next_event_number = std::min(_smf_track->number_of_events, (size_t)1);
 	} else {
 		cerr << "WARNING: SMF seek_to_start() with no track" << endl;
 	}
