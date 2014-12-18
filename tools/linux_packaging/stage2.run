@@ -14,6 +14,8 @@ PGM_NAME="Ardour"
 PGM_VENDOR="Ardour"
 PGM_EXEC_FILE="ardour3"
 
+THE_SHELL="/bin/sh"
+
 if test -z "$INSTALL_DEST_BASE"; then
 	INSTALL_DEST_BASE="/opt"
 	CALL_MKDIR=1
@@ -135,7 +137,7 @@ if [ "$(id -u)" != "0" ]; then
 		echo "Please enter root password below"
 		echo ""
 
-		if ! su -c "./.stage2.run";
+		if ! su -s $THE_SHELL -c "./.stage2.run";
 		then
 			echo ""
 			echo "!!! ERROR !!!"
@@ -144,7 +146,7 @@ if [ "$(id -u)" != "0" ]; then
 			echo "running as root AND an attempt to use su failed."
 			echo ""
 			echo "Please correct this by installing and configuring sudo or running"
-			echo "the installer as root (su -c)."
+			echo "the installer as root (su -s $THE_SHELL -c)."
 			echo ""
 			read -p "Press ENTER to exit installer:" BLAH
 			exit 1
@@ -161,7 +163,7 @@ if [ "$(id -u)" != "0" ]; then
 		echo "Please enter root password below"
 		echo ""
 
-		if ! su -c "./.stage2.run";
+		if ! su -s $THE_SHELL -c "./.stage2.run";
 		then
 			echo ""
 			echo "!!! ERROR !!!"
@@ -170,7 +172,7 @@ if [ "$(id -u)" != "0" ]; then
 			echo "running as root AND an attempt to use both sudo and su failed."
 			echo ""
 			echo "Please correct this by installing and configuring sudo or running"
-			echo "the installer as root (su -c)."
+			echo "the installer as root (su -s $THE_SHELL -c)."
 			echo ""
 			read -p "Press ENTER to exit installer:" BLAH
 			exit 1
@@ -183,7 +185,7 @@ if [ "$(id -u)" != "0" ]; then
 	# su. Using sh -c in the normal case gets around that, but is a bit of a hack.
 	NORM_USER="sh -c"
 else
-	NORM_USER="su -l $USER_NAME -c" 
+	NORM_USER="su -l $USER_NAME -s $THE_SHELL -c" 
 fi
 
 ###############################
