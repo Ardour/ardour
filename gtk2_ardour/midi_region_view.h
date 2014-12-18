@@ -153,8 +153,11 @@ public:
 
 	void delete_sysex (SysEx*);
 
-	/** Change a patch to the next or previous bank/program. */
-	void step_patch (PatchChange& patch, int dbank, int dprog);
+	/** Change a patch to the next or previous bank/program.
+	 * @param bank If true, step bank, otherwise, step program.
+	 * @param delta Amount to adjust number.
+	 */
+	void step_patch (PatchChange& patch, bool bank, int delta);
 
 	/** Displays all patch change events in the region as flags on the canvas.
 	 */

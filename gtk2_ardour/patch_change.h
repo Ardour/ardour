@@ -33,45 +33,40 @@ namespace MIDI {
 class PatchChange
 {
 public:
-	PatchChange(
-		MidiRegionView&                   region,
-		ArdourCanvas::Container*          parent,
-		const std::string&                text,
-		double                            height,
-		double                            x,
-		double                            y,
-		ARDOUR::InstrumentInfo&           info,
-		ARDOUR::MidiModel::PatchChangePtr patch
-		);
+	PatchChange(MidiRegionView&                   region,
+	            ArdourCanvas::Container*          parent,
+	            const std::string&                text,
+	            double                            height,
+	            double                            x,
+	            double                            y,
+	            ARDOUR::InstrumentInfo&           info,
+	            ARDOUR::MidiModel::PatchChangePtr patch);
 
 	~PatchChange();
-
-	ARDOUR::MidiModel::PatchChangePtr patch () const { return _patch; }
 
 	void initialize_popup_menus();
 
 	void on_patch_menu_selected(const MIDI::Name::PatchPrimaryKey& key);
 
-	ArdourCanvas::Item* canvas_item () const {
-		return _flag;
-	}
 
 	void move (ArdourCanvas::Duple);
 	void set_height (ArdourCanvas::Distance);
 	void hide ();
 	void show ();
 
-        ArdourCanvas::Item& item() const { return *_flag; }
+	ARDOUR::MidiModel::PatchChangePtr patch()       const { return _patch; }
+	ArdourCanvas::Item*               canvas_item() const { return _flag; }
+	ArdourCanvas::Item&               item()        const { return *_flag; }
 
 private:
 	bool event_handler (GdkEvent *);
 
-	MidiRegionView& _region;
-        ARDOUR::InstrumentInfo& _info;
+	MidiRegionView&                   _region;
+	ARDOUR::InstrumentInfo&           _info;
 	ARDOUR::MidiModel::PatchChangePtr _patch;
-	Gtk::Menu     _popup;
-	bool          _popup_initialized;
-	ArdourCanvas::Flag* _flag;
+	Gtk::Menu                         _popup;
+	bool                              _popup_initialized;
+	ArdourCanvas::Flag*               _flag;
 };
 
 #endif /* __PATCH_CHANGE_H__ */

@@ -31,25 +31,25 @@
 #include "canvas/debug.h"
 
 #include "ardour_ui.h"
-#include "midi_region_view.h"
-#include "patch_change.h"
 #include "editor.h"
 #include "editor_drag.h"
+#include "midi_region_view.h"
+#include "patch_change.h"
 
 using namespace MIDI::Name;
 using namespace std;
+using Gtkmm2ext::Keyboard;
 
 /** @param x x position in pixels.
  */
-PatchChange::PatchChange(
-		MidiRegionView& region,
-		ArdourCanvas::Container* parent,
-		const string&   text,
-		double          height,
-		double          x,
-		double          y,
-		ARDOUR::InstrumentInfo& info,
-		ARDOUR::MidiModel::PatchChangePtr patch)
+PatchChange::PatchChange(MidiRegionView&                   region,
+                         ArdourCanvas::Container*          parent,
+                         const string&                     text,
+                         double                            height,
+                         double                            x,
+                         double                            y,
+                         ARDOUR::InstrumentInfo&           info,
+                         ARDOUR::MidiModel::PatchChangePtr patch)
 	: _region (region)
 	, _info (info)
 	, _patch (patch)
@@ -60,8 +60,7 @@ PatchChange::PatchChange(
 		height,
 		ARDOUR_UI::config()->color ("midi patch change outline"),
 		ARDOUR_UI::config()->color_mod ("midi patch change fill", "midi patch change fill"),
-		ArdourCanvas::Duple (x, y)
-		);
+		ArdourCanvas::Duple (x, y));
 	
 	CANVAS_DEBUG_NAME (_flag, text);
 
@@ -199,13 +198,15 @@ PatchChange::event_handler (GdkEvent* ev)
 		case GDK_Up:
 		case GDK_KP_Up:
 		case GDK_uparrow:
-			_region.step_patch (*this, 0, -1);
-			break;
+			_region.step_patch(
+				*this, Keyboard::modifier_state_contains(ev->key.state, Keyboard::TertiaryModifier), 1);
+			return true;
 		case GDK_Down:
 		case GDK_KP_Down:
 		case GDK_downarrow:
-			_region.step_patch (*this, 0, 1);
-			break;
+			_region.step_patch(
+				*this, Keyboard::modifier_state_contains(ev->key.state, Keyboard::TertiaryModifier), -1);
+			return true;
 		default:
 			break;
 		}
@@ -213,10 +214,12 @@ PatchChange::event_handler (GdkEvent* ev)
 
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			_region.step_patch (*this, 0, -1);
+			_region.step_patch(
+				*this, Keyboard::modifier_state_contains(ev->scroll.state, Keyboard::TertiaryModifier), 1);
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			_region.step_patch (*this, 0, 1);
+			_region.step_patch(
+				*this, Keyboard::modifier_state_contains(ev->scroll.state, Keyboard::TertiaryModifier), -1);
 			return true;
 		}
 		break;

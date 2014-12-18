@@ -1984,11 +1984,14 @@ MidiRegionView::delete_patch_change (PatchChange* pc)
 }
 
 void
-MidiRegionView::step_patch (PatchChange& patch, int dbank, int dprog)
+MidiRegionView::step_patch (PatchChange& patch, bool bank, int delta)
 {
 	MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key(patch.patch());
-	key.set_bank(key.bank() + dbank);
-	key.set_program(key.program() + dprog);
+	if (bank) {
+		key.set_bank(key.bank() + delta);
+	} else {
+		key.set_program(key.program() + delta);
+	}
 	change_patch_change(patch, key);
 }
 
