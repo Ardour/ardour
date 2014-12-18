@@ -658,6 +658,11 @@ def configure(conf):
         conf.env['MSVC_TARGETS'] = ['x64']
         conf.load('msvc')
 
+    if Options.options.debug:
+        # Nuke user CFLAGS/CXXFLAGS if debug is set (they likely contain -O3, NDEBUG, etc)
+        conf.env['CFLAGS'] = []
+        conf.env['CXXFLAGS'] = []
+
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
     conf.env['MINOR'] = MINOR
