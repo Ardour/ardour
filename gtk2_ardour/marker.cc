@@ -625,7 +625,7 @@ Marker::setup_name_display ()
                         int lock_height;
                         int lock_width;
                     
-                        _marker_lock_text->set_position (ArdourCanvas::Duple (2.0, (_height / 2.0) - (name_height / 2.0) + MARKER_TEXT_Y_AMENDMENT));
+                        _marker_lock_text->set_position (ArdourCanvas::Duple (2.0, (_height - name_height) / 2.0 + MARKER_TEXT_Y_AMENDMENT));
                         _marker_lock_text->show();
                     
                         pixel_size (X_("Locked"), name_font, lock_width, lock_height);
@@ -665,11 +665,10 @@ Marker::setup_name_display ()
                     
                         /* 4 pixels left margin, place it in the vertical middle, plus or minus
                          */
-						r.y0 = (_height - name_height) / 2.0;
-                        _scene_change_text->set_position (ArdourCanvas::Duple (r.x0 + 2.0, r.y0 + MARKER_TEXT_Y_AMENDMENT));
+                        _scene_change_text->set_position (ArdourCanvas::Duple (r.x0 + 2.0, (_height - name_height) / 2.0 + MARKER_TEXT_Y_AMENDMENT));
                     
-                        r.y0 -= 2.0;
-                        r.y1 = r.y0 + name_height + 4.0;
+                        r.y0 = 2.0;
+                        r.y1 = _height - 2;
                     
                         _scene_change_rect->set (r);
                         scene_change_width = r.x1 - r.x0;
@@ -687,7 +686,7 @@ Marker::setup_name_display ()
                 
                 int name_width = min ((name_text_width + (2.0 * name_padding)), limit);
                 _name_item->show ();
-                _name_item->set_position (ArdourCanvas::Duple (_label_offset, (_height / 2.0) - (name_height / 2.0) + MARKER_TEXT_Y_AMENDMENT));
+                _name_item->set_position (ArdourCanvas::Duple (_label_offset, (_height - name_height) / 2.0 + MARKER_TEXT_Y_AMENDMENT));
                 _name_item->clamp_width (name_width);
         
                 if (_name_item->text() != _name) {
