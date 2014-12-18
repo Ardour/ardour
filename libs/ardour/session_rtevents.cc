@@ -143,6 +143,12 @@ Session::rt_set_listen (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_o
 void
 Session::set_mute (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
 {
+	/* Set superficial value of mute controls for automation. */
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Route::MuteControllable> mc = (*i)->mute_control();
+		mc->set_superficial_value(yn);
+	}
+
 	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_mute));
 }
 

@@ -3409,7 +3409,7 @@ Route::SoloControllable::SoloControllable (std::string name, boost::shared_ptr<R
 void
 Route::SoloControllable::set_value (double val)
 {
-	bool bval = ((val >= 0.5f) ? true: false);
+	const bool bval = ((val >= 0.5) ? true : false);
 
 	boost::shared_ptr<RouteList> rl (new RouteList);
 
@@ -3456,37 +3456,51 @@ Route::MuteControllable::MuteControllable (std::string name, boost::shared_ptr<R
 }
 
 void
+Route::MuteControllable::set_superficial_value(bool muted)
+{
+	/* Note we can not use AutomationControl::set_value here since it will emit
+	   Changed(), but the value will not be correct to the observer. */
+
+	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
+
+	Control::set_double (muted, _session.transport_frame(), to_list);
+}
+
+void
 Route::MuteControllable::set_value (double val)
 {
-	bool bval = ((val >= 0.5f) ? true: false);
-
-	// boost::shared_ptr<RouteList> rl (new RouteList);
+	const bool bval = ((val >= 0.5) ? true : false);
 
 	boost::shared_ptr<Route> r = _route.lock ();
 	if (!r) {
 		return;
 	}
 
-	/* I don't know why this apparently "should" be done via the RT event
-	   system, but doing so causes a ton of annoying errors... */
-	// rl->push_back (r);
-	// _session.set_mute (rl, bval);
+	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
+		// Playing back automation, set route mute directly
+		r->set_mute (bval, this);
+	} else {
+		// Set from user, queue mute event
+		boost::shared_ptr<RouteList> rl (new RouteList);
+		rl->push_back (r);
+		_session.set_mute (rl, bval, Session::rt_cleanup);
+	}
 
-	/* ... but this seems to work. */
-	r->set_mute (bval, this);
-
-	AutomationControl::set_value(bval);
+	// Set superficial/automation value to drive controller (and possibly record)
+	set_superficial_value(bval);
 }
 
 double
 Route::MuteControllable::get_value () const
 {
-	boost::shared_ptr<Route> r = _route.lock ();
-	if (!r) {
-		return 0;
+	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
+		// Playing back automation, get the value from the list
+		return AutomationControl::get_value();
 	}
 
-	return r->muted() ? 1.0f : 0.0f;
+	// Not playing back automation, get the actual route mute value
+	boost::shared_ptr<Route> r = _route.lock ();
+	return (r && r->muted()) ? 1.0 : 0.0;
 }
 
 void

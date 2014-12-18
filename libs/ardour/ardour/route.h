@@ -394,15 +394,18 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 		void set_value (double);
 		double get_value () const;
 
+		/* Pretend to change value, but do not affect actual route mute. */
+		void set_superficial_value(bool muted);
+
 	private:
 		boost::weak_ptr<Route> _route;
 	};
 
-	boost::shared_ptr<AutomationControl> solo_control() const {
+	boost::shared_ptr<SoloControllable> solo_control() const {
 		return _solo_control;
 	}
 
-	boost::shared_ptr<AutomationControl> mute_control() const {
+	boost::shared_ptr<MuteControllable> mute_control() const {
 		return _mute_control;
 	}
 
