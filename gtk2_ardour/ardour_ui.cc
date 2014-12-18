@@ -2965,7 +2965,7 @@ ARDOUR_UI::close_session()
 	ARDOUR_COMMAND_LINE::session_name = "";
 
 	if (get_session_parameters (true, false)) {
-		exit (1);
+		UI::quit ();
 	}
 }
 
