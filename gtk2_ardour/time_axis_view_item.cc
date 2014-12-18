@@ -60,12 +60,12 @@ using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
 #ifdef _WIN32
-    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 11");
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Arial 10");
     Pango::FontDescription TimeAxisViewItem::FILE_INFO_FONT("Arial 10");
 	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 0.0;
 #else
 	const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_INDENT = 1.0;
-    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 11");
+    Pango::FontDescription TimeAxisViewItem::NAME_FONT("Helvetica 10");
     Pango::FontDescription TimeAxisViewItem::FILE_INFO_FONT("Helvetica 10");
 #endif
 
@@ -235,7 +235,8 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	}
 
 	{ // configure name highlight rect
-        name_highlight_color = ArdourCanvas::rgba_to_color (0, 0, 0, 0.5);
+        uint32_t opacity = 255*0.85; //70% opacity
+        name_highlight_color = RGBA_TO_UINT (0, 0, 0, opacity);
         name_highlight = new ArdourCanvas::Rectangle (group, 
                                         ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
                                                             NAME_HIGHLIGHT_Y_OFFSET,
@@ -258,7 +259,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
     }
     
     { // configure io config highlight
-        uint32_t opacity = 255*0.9;
+        uint32_t opacity = 255*0.95;
         ioconfig_highlight_color = RGBA_TO_UINT (17,128,128,opacity);
         // alighn with name highlight
         double x0 = name_highlight->x1 ();
@@ -286,7 +287,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
     }
     
     { // configure SR highlight
-        uint32_t opacity = 255*0.9;
+        uint32_t opacity = 255*0.95;
         sr_highlight_color = RGBA_TO_UINT (127,1,64,opacity);
         // alighn with io config highlight
         double x0 = ioconfig_highlight->x1 ();
