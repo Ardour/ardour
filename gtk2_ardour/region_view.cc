@@ -18,7 +18,6 @@
 */
 
 #include <cmath>
-#include <cassert>
 #include <algorithm>
 
 #include <gtkmm.h>

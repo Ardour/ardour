@@ -21,6 +21,7 @@
 #define MIDNAM_PATCH_H_
 
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <list>
@@ -43,41 +44,41 @@ namespace Name
 struct LIBMIDIPP_API PatchPrimaryKey
 {
 public:
-	int bank_number;
-	int program_number;
-
-	PatchPrimaryKey (uint8_t a_program_number = 0, uint16_t a_bank_number = 0) {
-		bank_number = std::min (a_bank_number, (uint16_t) 16384);
-		program_number = std::min (a_program_number, (uint8_t) 127);
-	}
-	
-	bool is_sane() const { 	
-		return ((bank_number >= 0) && (bank_number <= 16384) && 
-			(program_number >=0 ) && (program_number <= 127));
-	}
+	PatchPrimaryKey (int program_num = 0, int bank_num = 0)
+		: _bank(std::max(0, std::min(bank_num, 16383)))
+		, _program(std::max(0, std::min(program_num, 127)))
+	{}
 	
 	inline PatchPrimaryKey& operator=(const PatchPrimaryKey& id) {
-		bank_number = id.bank_number;
-		program_number = id.program_number;
+		_bank    = id._bank;
+		_program = id._program;
 		return *this;
 	}
 	
 	inline bool operator==(const PatchPrimaryKey& id) const {
-		return (bank_number == id.bank_number && program_number == id.program_number);
+		return (_bank    == id._bank &&
+		        _program == id._program);
 	}
 	
-	/**
-	 * obey strict weak ordering or crash in STL containers
-	 */
+	/** Strict weak ordering. */
 	inline bool operator<(const PatchPrimaryKey& id) const {
-		if (bank_number < id.bank_number) {
+		if (_bank < id._bank) {
 			return true;
-		} else if (bank_number == id.bank_number && program_number < id.program_number) {
+		} else if (_bank == id._bank && _program < id._program) {
 			return true;
 		}
-		
 		return false;
 	}
+
+	void set_bank(int bank)       { _bank    = std::max(0, std::min(bank, 16383)); }
+	void set_program(int program) { _program = std::max(0, std::min(program, 127)); }
+
+	inline uint16_t bank()    const { return _bank; }
+	inline uint8_t  program() const { return _program; }
+
+private:
+	uint16_t _bank;
+	uint8_t  _program;
 };
 
 class PatchBank;
@@ -94,11 +95,11 @@ public:
 	
 	const std::string& note_list_name() const  { return _note_list_name; }
 
-	uint8_t program_number() const     { return _id.program_number; }
-	void set_program_number(uint8_t n) { _id.program_number = n; }
+	uint8_t program_number() const     { return _id.program(); }
+	void set_program_number(uint8_t n) { _id.set_program(n); }
 
-	uint16_t bank_number() const      { return _id.bank_number; }
-	void set_bank_number (uint16_t n) { _id.bank_number = n; }
+	uint16_t bank_number() const      { return _id.bank(); }
+	void set_bank_number (uint16_t n) { _id.set_bank(n); }
 
 	const PatchPrimaryKey&   patch_primary_key()   const { return _id; }
 
@@ -161,12 +162,10 @@ public:
 	}
 	
 	boost::shared_ptr<Patch> find_patch(const PatchPrimaryKey& key) {
-		assert(key.is_sane());
 		return _patch_map[key];
 	}
 	
 	boost::shared_ptr<Patch> previous_patch(const PatchPrimaryKey& key) {
-		assert(key.is_sane());
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
@@ -182,7 +181,6 @@ public:
 	}
 	
 	boost::shared_ptr<Patch> next_patch(const PatchPrimaryKey& key) {
-		assert(key.is_sane());
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {

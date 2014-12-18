@@ -331,7 +331,6 @@ ControlList::fast_simple_add (double when, double value)
 	Glib::Threads::Mutex::Lock lm (_lock);
 	/* to be used only for loading pre-sorted data from saved state */
 	_events.insert (_events.end(), new ControlEvent (when, value));
-	assert(_events.back());
 
 	mark_dirty ();
 }
@@ -1017,9 +1016,10 @@ ControlList::truncate_start (double overall_length)
 		double first_legal_value;
 		double first_legal_coordinate;
 
-		assert(!_events.empty());
-
-		if (overall_length == _events.back()->when) {
+		if (_events.empty()) {
+			/* nothing to truncate */
+			return;
+		} else if (overall_length == _events.back()->when) {
 			/* no change in overall length */
 			return;
 		}

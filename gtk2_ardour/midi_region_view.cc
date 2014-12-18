@@ -1881,15 +1881,11 @@ MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MID
 	}
 
 	if (i != _model->patch_changes().end() && patch_applies(*i, time, channel)) {
-		key.bank_number    = (*i)->bank();
-		key.program_number = (*i)->program ();
+		key.set_bank((*i)->bank());
+		key.set_program((*i)->program ());
 	} else {
-		key.bank_number = key.program_number = 0;
-	}
-
-	if (!key.is_sane()) {
-		error << string_compose(_("insane MIDI patch key %1:%2"),
-		                        key.bank_number, key.program_number) << endmsg;
+		key.set_bank(0);
+		key.set_program(0);
 	}
 }
 
@@ -1898,11 +1894,11 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 {
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("alter patch change"));
 
-	if (pc.patch()->program() != new_patch.program_number) {
-		c->change_program (pc.patch (), new_patch.program_number);
+	if (pc.patch()->program() != new_patch.program()) {
+		c->change_program (pc.patch (), new_patch.program());
 	}
 
-	int const new_bank = new_patch.bank_number;
+	int const new_bank = new_patch.bank();
 	if (pc.patch()->bank() != new_bank) {
 		c->change_bank (pc.patch (), new_bank);
 	}
@@ -1988,47 +1984,12 @@ MidiRegionView::delete_patch_change (PatchChange* pc)
 }
 
 void
-MidiRegionView::previous_patch (PatchChange& patch)
+MidiRegionView::step_patch (PatchChange& patch, int dbank, int dprog)
 {
-	if (patch.patch()->program() < 127) {
-		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
-		key.program_number++;
-		change_patch_change (patch, key);
-	}
-}
-
-void
-MidiRegionView::next_patch (PatchChange& patch)
-{
-	if (patch.patch()->program() > 0) {
-		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
-		key.program_number--;
-		change_patch_change (patch, key);
-	}
-}
-
-void
-MidiRegionView::next_bank (PatchChange& patch)
-{
-	if (patch.patch()->program() < 127) {
-		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
-		if (key.bank_number > 0) {
-			key.bank_number--;
-			change_patch_change (patch, key);
-		}
-	}
-}
-
-void
-MidiRegionView::previous_bank (PatchChange& patch)
-{
-	if (patch.patch()->program() > 0) {
-		MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key (patch.patch());
-		if (key.bank_number < 127) {
-			key.bank_number++;
-			change_patch_change (patch, key);
-		}
-	}
+	MIDI::Name::PatchPrimaryKey key = patch_change_to_patch_key(patch.patch());
+	key.set_bank(key.bank() + dbank);
+	key.set_program(key.program() + dprog);
+	change_patch_change(patch, key);
 }
 
 void
@@ -3893,8 +3854,8 @@ MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
 			get_patch_key_at(n->time(), n->channel(), patch_key);
 			name = device_names->note_name(mtv->gui_property(X_("midnam-custom-device-mode")),
 			                               n->channel(),
-			                               patch_key.bank_number,
-			                               patch_key.program_number,
+			                               patch_key.bank(),
+			                               patch_key.program(),
 			                               n->note());
 		}
 	}

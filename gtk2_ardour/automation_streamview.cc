@@ -16,7 +16,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <cassert>
 #include <cmath>
 #include <list>
 #include <utility>
@@ -42,6 +41,8 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -71,7 +72,9 @@ AutomationStreamView::~AutomationStreamView ()
 RegionView*
 AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region, bool wait_for_data, bool /*recording*/)
 {
-	assert (region);
+	if (!region) {
+		return 0;
+	}
 
 	if (wait_for_data) {
 		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
@@ -88,7 +91,10 @@ AutomationStreamView::add_region_view_internal (boost::shared_ptr<Region> region
 	boost::shared_ptr<AutomationList> list;
 	if (control) {
 		list = boost::dynamic_pointer_cast<AutomationList>(control->list());
-		assert(!control->list() || list);
+		if (control->list() && !list) {
+			error << _("unable to display automation region for control without list") << endmsg;
+			return 0;
+		}
 	}
 
 	AutomationRegionView *region_view;
@@ -285,8 +291,9 @@ AutomationStreamView::get_selectables (framepos_t start, framepos_t end, double 
 	}
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
-		assert (arv);
-		arv->line()->get_selectables (start, end, botfrac, topfrac, results);
+		if (arv) {
+			arv->line()->get_selectables (start, end, botfrac, topfrac, results);
+		}
 	}
 }
 
@@ -307,8 +314,9 @@ AutomationStreamView::get_lines () const
 
 	for (list<RegionView*>::const_iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
-		assert (arv);
-		lines.push_back (arv->line());
+		if (arv) {
+			lines.push_back (arv->line());
+		}
 	}
 
 	return lines;

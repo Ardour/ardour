@@ -199,12 +199,12 @@ PatchChange::event_handler (GdkEvent* ev)
 		case GDK_Up:
 		case GDK_KP_Up:
 		case GDK_uparrow:
-			_region.previous_patch (*this);
+			_region.step_patch (*this, 0, -1);
 			break;
 		case GDK_Down:
 		case GDK_KP_Down:
 		case GDK_downarrow:
-			_region.next_patch (*this);
+			_region.step_patch (*this, 0, 1);
 			break;
 		default:
 			break;
@@ -213,10 +213,10 @@ PatchChange::event_handler (GdkEvent* ev)
 
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
-			_region.previous_patch (*this);
+			_region.step_patch (*this, 0, -1);
 			return true;
 		} else if (ev->scroll.direction == GDK_SCROLL_DOWN) {
-			_region.next_patch (*this);
+			_region.step_patch (*this, 0, 1);
 			return true;
 		}
 		break;

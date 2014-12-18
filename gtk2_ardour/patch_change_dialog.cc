@@ -285,7 +285,7 @@ PatchChangeDialog::set_active_patch_combo ()
 		boost::replace_all (n, "_", " ");
 
 		MIDI::Name::PatchPrimaryKey const & key = (*j)->patch_primary_key ();
-		if (key.program_number == _program.get_value() - 1) {
+		if (key.program() == _program.get_value() - 1) {
 			_ignore_signals = true;
 			_patch_combo.set_active_text (n);
 			_ignore_signals = false;

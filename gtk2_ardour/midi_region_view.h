@@ -153,16 +153,8 @@ public:
 
 	void delete_sysex (SysEx*);
 
-	/** Alter a given patch to be its predecessor in the MIDNAM file.
-	 */
-	void previous_patch (PatchChange &);
-
-	/** Alters a given patch to be its successor in the MIDNAM file.
-	 */
-	void next_patch (PatchChange &);
-
-	void previous_bank (PatchChange &);
-	void next_bank (PatchChange &);
+	/** Change a patch to the next or previous bank/program. */
+	void step_patch (PatchChange& patch, int dbank, int dprog);
 
 	/** Displays all patch change events in the region as flags on the canvas.
 	 */

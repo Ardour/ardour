@@ -29,7 +29,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include <glib.h>
-#include <cassert>
 
 #include "pbd/semutils.h"
 

@@ -58,7 +58,8 @@ static int
 initialize_primary_key_from_commands (
 	const XMLTree& tree, PatchPrimaryKey& id, const XMLNode* node)
 {
-	id.bank_number = 0;
+	uint16_t bank    = 0;
+	uint8_t  program = 0;
 
 	const XMLNodeList events = node->children();
 	for (XMLNodeList::const_iterator i = events.begin(); i != events.end(); ++i) {
@@ -69,18 +70,19 @@ initialize_primary_key_from_commands (
 			const string& value   = node->property("Value")->value();
 
 			if (control == "0") {
-				id.bank_number |= string_to_int(tree, value) << 7;
+				bank |= string_to_int(tree, value) << 7;
 			} else if (control == "32") {
-				id.bank_number |= string_to_int(tree, value);
+				bank |= string_to_int(tree, value);
 			}
 
 		} else if (node->name() == "ProgramChange") {
 			const string& number = node->property("Number")->value();
 			assert(number != "");
-			id.program_number = string_to_int(tree, number);
+			program = string_to_int(tree, number);
 		}
 	}
 
+	id = PatchPrimaryKey(program, bank);
 	return 0;
 }
 
@@ -91,7 +93,7 @@ Patch::get_state (void)
 
 	/* XXX this is totally wrong */
 
-	node->add_property("Number", string_compose ("%1", _id.program_number));
+	node->add_property("Number", string_compose ("%1", _id.program()));
 	node->add_property("Name",   _name);
 
 	/*
@@ -120,7 +122,7 @@ Patch::set_state (const XMLTree& tree, const XMLNode& node)
 
 	const XMLProperty* program_change = node.property("ProgramChange");
 	if (program_change) {
-		_id.program_number = string_to_int(tree, program_change->value());
+		_id = PatchPrimaryKey(string_to_int(tree, program_change->value()), _id.bank());
 	}
 
 	const XMLProperty* name = node.property("Name");
@@ -426,7 +428,7 @@ PatchBank::set_state (const XMLTree& tree, const XMLNode& node)
 		if (initialize_primary_key_from_commands (tree, id, commands)) {
 			return -1;
 		}
-		_number = id.bank_number;
+		_number = id.bank();
 	}
 
 	XMLNode* patch_name_list = node.child("PatchNameList");
