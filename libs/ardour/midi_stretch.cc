@@ -76,7 +76,10 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 		return -1;
 
 	boost::shared_ptr<MidiSource> src = region->midi_source(0);
-	src->load_model(Glib::Threads::Mutex::Lock(src->mutex()));
+	{
+		Source::Lock lock(src->mutex());
+		src->load_model(lock);
+	}
 
 	boost::shared_ptr<MidiModel> old_model = src->model();
 
