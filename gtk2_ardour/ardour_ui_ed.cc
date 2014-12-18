@@ -209,6 +209,12 @@ if (Profile->get_mixbus())
 	/** TRANSLATORS: This is `Manual' in the sense of an instruction book that tells a user how to use Ardour */
 	ActionManager::register_action (common_actions, X_("Manual"), S_("Help|Manual"),  mem_fun(*this, &ARDOUR_UI::launch_manual));
 	ActionManager::register_action (common_actions, X_("Reference"), _("Reference"),  mem_fun(*this, &ARDOUR_UI::launch_reference));
+	ActionManager::register_action (common_actions, X_("Tracker"), _("Report A Bug"), mem_fun(*this, &ARDOUR_UI::launch_tracker));
+	ActionManager::register_action (common_actions, X_("Cheat_Sheet"), _("Cheat Sheet"), mem_fun(*this, &ARDOUR_UI::launch_cheat_sheet));
+	ActionManager::register_action (common_actions, X_("Website"), _("Ardour Website"), mem_fun(*this, &ARDOUR_UI::launch_website));
+	ActionManager::register_action (common_actions, X_("Website_Dev"), _("Ardour Development"), mem_fun(*this, &ARDOUR_UI::launch_website_dev));
+	ActionManager::register_action (common_actions, X_("Forums"), _("User Forums"), mem_fun(*this, &ARDOUR_UI::launch_forums));
+	ActionManager::register_action (common_actions, X_("Howto_Report"), _("How to report a bug"), mem_fun(*this, &ARDOUR_UI::launch_howto_report));
 
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false));
 	ActionManager::session_sensitive_actions.push_back (act);
