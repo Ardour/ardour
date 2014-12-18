@@ -4386,7 +4386,7 @@ Session::freeze_all (InterThreadInfo& itt)
 }
 
 boost::shared_ptr<Region>
-Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
+Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 			  bool /*overwrite*/, vector<boost::shared_ptr<Source> >& srcs,
 			  InterThreadInfo& itt, 
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint,
@@ -4394,7 +4394,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 {
 	boost::shared_ptr<Region> result;
 	boost::shared_ptr<Playlist> playlist;
-	boost::shared_ptr<AudioFileSource> fsource;
+	boost::shared_ptr<Source> source;
 	ChanCount diskstream_channels (track.n_channels());
 	framepos_t position;
 	framecnt_t this_chunk;
@@ -4416,8 +4416,8 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 	diskstream_channels = track.bounce_get_output_streams (diskstream_channels, endpoint,
 			include_endpoint, for_export, for_freeze);
 
-	if (diskstream_channels.n_audio() < 1) {
-		error << _("Cannot write a range with no audio.") << endmsg;
+	if (diskstream_channels.n(track.data_type()) < 1) {
+		error << _("Cannot write a range with no data.") << endmsg;
 		return result;
 	}
 
@@ -4443,26 +4443,27 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 	legal_playlist_name = legalize_for_path (playlist->name());
 
-	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n_audio(); ++chan_n) {
+	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(track.data_type()); ++chan_n) {
 
 		string base_name = string_compose ("%1-%2-bounce", playlist->name(), chan_n);
-		string path = new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true);
+		string path = ((track.data_type() == DataType::AUDIO)
+		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false, true)
+		               : new_midi_source_path (legal_playlist_name));
 		
 		if (path.empty()) {
 			goto out;
 		}
 
 		try {
-			fsource = boost::dynamic_pointer_cast<AudioFileSource> (
-				SourceFactory::createWritable (DataType::AUDIO, *this, path, false, frame_rate()));
+			source = SourceFactory::createWritable (track.data_type(), *this, path, false, frame_rate());
 		}
 
 		catch (failed_constructor& err) {
-			error << string_compose (_("cannot create new audio file \"%1\" for %2"), path, track.name()) << endmsg;
+			error << string_compose (_("cannot create new file \"%1\" for %2"), path, track.name()) << endmsg;
 			goto out;
 		}
 
-		srcs.push_back (fsource);
+		srcs.push_back (source);
 	}
 
 	/* tell redirects that care that we are about to use a much larger
@@ -4512,10 +4513,19 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 		uint32_t n = 0;
 		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src, ++n) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+			boost::shared_ptr<MidiSource> ms;
 
 			if (afs) {
 				if (afs->write (buffers.get_audio(n).data(latency_skip), current_chunk) != current_chunk) {
 					goto out;
+				}
+			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
+				Source::Lock lock(ms->mutex());
+				ms->mark_streaming_write_started(lock);
+
+				const MidiBuffer& buf = buffers.get_midi(0);
+				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
+					ms->append_event_frames(lock, *i, ms->timeline_position());
 				}
 			}
 		}
@@ -4553,10 +4563,14 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
 
 		for (vector<boost::shared_ptr<Source> >::iterator src=srcs.begin(); src != srcs.end(); ++src) {
 			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
+			boost::shared_ptr<MidiSource> ms;
 
 			if (afs) {
 				afs->update_header (position, *xnow, now);
 				afs->flush_header ();
+			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
+				Source::Lock lock(ms->mutex());
+				ms->mark_streaming_write_completed(lock);
 			}
 		}
 
@@ -4575,12 +4589,7 @@ Session::write_one_track (AudioTrack& track, framepos_t start, framepos_t end,
   out:
 	if (!result) {
 		for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
-			boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
-
-			if (afs) {
-				afs->mark_for_remove ();
-			}
-
+			(*src)->mark_for_remove ();
 			(*src)->drop_references ();
 		}
 

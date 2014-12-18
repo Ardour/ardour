@@ -250,6 +250,13 @@ MidiBuffer::insert_event(const Evoral::MIDIEvent<TimeType>& ev)
 	return true;
 }
 
+uint32_t
+MidiBuffer::write(TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf)
+{
+	insert_event(Evoral::MIDIEvent<TimeType>(type, time, size, const_cast<uint8_t*>(buf)));
+	return size;
+}
+
 /** Reserve space for a new event in the buffer.
  *
  * This call is for copying MIDI directly into the buffer, the data location

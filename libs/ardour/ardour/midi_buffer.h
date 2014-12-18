@@ -21,7 +21,10 @@
 #define __ardour_midi_buffer_h__
 
 #include "evoral/midi_util.h"
+#include "evoral/EventSink.hpp"
+
 #include "midi++/event.h"
+
 #include "ardour/buffer.h"
 #include "ardour/parameter_types.h"
 
@@ -29,7 +32,7 @@ namespace ARDOUR {
 
 
 /** Buffer containing 8-bit unsigned char (MIDI) data. */
-class LIBARDOUR_API MidiBuffer : public Buffer
+class LIBARDOUR_API MidiBuffer : public Buffer, public Evoral::EventSink<framepos_t>
 {
 public:
 	typedef framepos_t TimeType;
@@ -54,6 +57,9 @@ public:
 
 	bool insert_event(const Evoral::MIDIEvent<TimeType>& event);
 	bool merge_in_place(const MidiBuffer &other);
+
+	/** EventSink interface for non-RT use (export, bounce). */
+	uint32_t write(TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf);
 
 	template<typename BufferType, typename EventType>
 		class iterator_base

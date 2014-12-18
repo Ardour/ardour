@@ -632,7 +632,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* flattening stuff */
 
-	boost::shared_ptr<Region> write_one_track (AudioTrack&, framepos_t start, framepos_t end,
+	boost::shared_ptr<Region> write_one_track (Track&, framepos_t start, framepos_t end,
 						   bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
 						   boost::shared_ptr<Processor> endpoint,
 							 bool include_endpoint, bool for_export, bool for_freeze);

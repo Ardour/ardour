@@ -560,26 +560,52 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 }
 
 int
-MidiTrack::export_stuff (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framecnt_t /*nframes*/, 
-			 boost::shared_ptr<Processor> /*endpoint*/, bool /*include_endpoint*/, bool /*for_export*/, bool /*for_freeze*/)
+MidiTrack::export_stuff (BufferSet&                   buffers,
+                         framepos_t                   start,
+                         framecnt_t                   nframes,
+                         boost::shared_ptr<Processor> endpoint,
+                         bool                         include_endpoint,
+                         bool                         for_export,
+                         bool                         for_freeze)
 {
-	return -1;
+	if (buffers.count().n_midi() == 0) {
+		return -1;
+	}
+
+	boost::shared_ptr<MidiDiskstream> diskstream = midi_diskstream();
+
+	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
+
+	boost::shared_ptr<MidiPlaylist> mpl = boost::dynamic_pointer_cast<MidiPlaylist>(diskstream->playlist());
+	if (!mpl) {
+		return -2;
+	}
+
+	buffers.get_midi(0).clear();
+	if (mpl->read(buffers.get_midi(0), start, nframes, 0) != nframes) {
+		return -1;
+	}
+
+	//bounce_process (buffers, start, nframes, endpoint, include_endpoint, for_export, for_freeze);
+
+	return 0;
 }
 
 boost::shared_ptr<Region>
-MidiTrack::bounce (InterThreadInfo& /*itt*/)
+MidiTrack::bounce (InterThreadInfo& itt)
 {
-	std::cerr << "MIDI bounce currently unsupported" << std::endl;
-	return boost::shared_ptr<Region> ();
+	return bounce_range (_session.current_start_frame(), _session.current_end_frame(), itt, main_outs(), false);
 }
 
-
 boost::shared_ptr<Region>
-MidiTrack::bounce_range (framepos_t /*start*/, framepos_t /*end*/, InterThreadInfo& /*itt*/,
-			 boost::shared_ptr<Processor> /*endpoint*/, bool /*include_endpoint*/)
+MidiTrack::bounce_range (framepos_t                   start,
+                         framepos_t                   end,
+                         InterThreadInfo&             itt,
+                         boost::shared_ptr<Processor> endpoint,
+                         bool                         include_endpoint)
 {
-	std::cerr << "MIDI bounce range currently unsupported" << std::endl;
-	return boost::shared_ptr<Region> ();
+	vector<boost::shared_ptr<Source> > srcs;
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false);
 }
 
 void
