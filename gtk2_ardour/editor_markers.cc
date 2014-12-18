@@ -99,7 +99,7 @@ Editor::add_new_location_internal (Location* location)
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
 			lam->start = new Marker (location, *this, *cd_marker_group, marker_height, 0, location->name(), Marker::Mark, location->start());
 			group = cd_marker_group;
-		} else {
+		} else {            
 			lam->start = new Marker (location, *this, *marker_group, marker_height, 0, location->name(), Marker::Mark, location->start());
 			group = marker_group;
 		}
@@ -382,37 +382,51 @@ Editor::LocationMarkers::set_selected (bool s)
 void
 Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 {
-	string markername, markerprefix;
-	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
+    if (!_session) {
+        return;
+    }
+    
+    // check if we have markers closer then 1 frame to desired position
+    // add new marker if we don't and do nothing if marker exists
+    Locations* locations (_session->locations ());
+    Location* loc;
+    
+    double frames_per_sec = _session->timecode_frames_per_second();
+    float maker_slop_sec = Config->get_inter_scene_gap_frames()/frames_per_sec;
+    framecnt_t slop = (framecnt_t) floor (maker_slop_sec * _session->frame_rate() );
+    
+    loc = locations->mark_at (where, slop);
+    
+    if (!loc) {
+        string markername, markerprefix;
+        int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
 
-	if (is_xrun) {
-		markerprefix = "xrun";
-		flags = Location::IsMark;
-	} else {
-		markerprefix = _(Marker::default_new_marker_prefix);
-	}
-
-	if (_session) {
-		_session->locations()->next_available_name(markername, markerprefix);
-		if (!is_xrun && !choose_new_marker_name(markername)) {
-			return;
-		}
-		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);
-		_session->begin_reversible_command (_("add marker"));
-		XMLNode &before = _session->locations()->get_state();
-		_session->locations()->add (location, true);
-		XMLNode &after = _session->locations()->get_state();
-		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-		_session->commit_reversible_command ();
-
-		/* find the marker we just added */
-
-		LocationMarkers *lam = find_location_markers (location);
-		if (lam) {
-			/* make it the selected marker */
-			selection->set (lam->start);
-		}
-	}
+        if (is_xrun) {
+            markerprefix = "xrun";
+            flags = Location::IsMark;
+        } else {
+            markerprefix = _(Marker::default_new_marker_prefix);
+        }
+    
+        _session->locations()->next_available_name(markername, markerprefix);
+        if (!is_xrun && !choose_new_marker_name(markername)) {
+            return;
+        }
+        Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);
+        _session->begin_reversible_command (_("add marker"));
+        XMLNode &before = _session->locations()->get_state();
+        _session->locations()->add (location, true);
+        XMLNode &after = _session->locations()->get_state();
+        _session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+        _session->commit_reversible_command ();
+        
+        /* find the marker we just added */
+        LocationMarkers *lam = find_location_markers (location);
+        if (lam) {
+            /* make it the selected marker */
+            selection->set (lam->start);
+        }
+    }
 }
 
 void

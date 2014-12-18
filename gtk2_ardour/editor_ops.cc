@@ -1979,21 +1979,39 @@ Editor::add_location_from_selection ()
 void
 Editor::add_location_mark (framepos_t where)
 {
-	string markername;
+    if (!_session) {
+        return;
+    }
+    
+    // check if we have markers closer then 1 frame to desired position
+    // add new marker if we don't and do nothing if marker exists
+    Locations* locations (_session->locations ());
+    Location* loc;
+    
+    double frames_per_sec = _session->timecode_frames_per_second();
+    float maker_slop_sec = Config->get_inter_scene_gap_frames()/frames_per_sec;
+    framecnt_t slop = (framecnt_t) floor (maker_slop_sec * _session->frame_rate() );
+    
+    loc = locations->mark_at (where, slop);
+    
+    if (!loc) {
+        // add new marker if we don't have any
+        string markername;
+        select_new_marker = true;
 
-	select_new_marker = true;
-
-	_session->locations()->next_available_name(markername,_(Marker::default_new_marker_prefix));
-	if (!choose_new_marker_name(markername)) {
-		return;
-	}
-	Location *location = new Location (*_session, where, where, markername, Location::IsMark);
-	_session->begin_reversible_command (_("add marker"));
-	XMLNode &before = _session->locations()->get_state();
-	_session->locations()->add (location, true);
-	XMLNode &after = _session->locations()->get_state();
-	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	_session->commit_reversible_command ();
+        _session->locations()->next_available_name(markername,_(Marker::default_new_marker_prefix));
+        if (!choose_new_marker_name(markername)) {
+            return;
+        }
+    
+        Location *location = new Location (*_session, where, where, markername, Location::IsMark);
+        _session->begin_reversible_command (_("add marker"));
+        XMLNode &before = _session->locations()->get_state();
+        _session->locations()->add (location, true);
+        XMLNode &after = _session->locations()->get_state();
+        _session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+        _session->commit_reversible_command ();
+    }
 }
 
 void
