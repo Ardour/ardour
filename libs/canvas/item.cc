@@ -104,6 +104,21 @@ Item::~Item ()
 	delete _lut;
 }
 
+bool
+Item::visible() const
+{
+	Item const * i = this;
+
+	while (i) {
+		if (!i->self_visible()) {
+			return false;
+		}
+		i = i->parent();
+	}
+
+	return true;
+}
+
 Duple
 Item::canvas_origin () const
 {
@@ -254,10 +269,17 @@ Item::set_position (Duple p)
 	
 	_position = p;
 
-	_canvas->item_moved (this, pre_change_parent_bounding_box);
+	/* only update canvas and parent if visible. Otherwise, this
+	   will be done when ::show() is called.
+	*/
+	
+	if (visible()) {
+		_canvas->item_moved (this, pre_change_parent_bounding_box);
+		
 
-	if (_parent) {
-		_parent->child_changed ();
+		if (_parent) {
+			_parent->child_changed ();
+		}
 	}
 }
 
@@ -303,15 +325,28 @@ Item::hide ()
 	if (_visible) {
 		_visible = false;
 
-		/* recompute parent bounding box, which may alter now that this
-		 * child is hidden.
-		 */
+		/* children are all hidden because we are hidden, no need
+		   to propagate change because our bounding box necessarily
+		   includes them all already. thus our being hidden results
+		   in (a) a redraw of the entire bounding box (b) no children
+		   will be drawn.
 
-		if (_parent) {
-			_parent->child_changed ();
+		   BUT ... current item in canvas might be one of our children,
+		   which is now hidden. So propagate away.
+		*/
+
+		for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+
+			if ((*i)->self_visible()) {
+				/* item was visible but is now hidden because
+				   we (its parent) are hidden
+				*/
+				(*i)->propagate_show_hide ();
+			}
 		}
 
-		_canvas->item_shown_or_hidden (this);
+		
+		propagate_show_hide ();
 	}
 }
 
@@ -319,16 +354,32 @@ void
 Item::show ()
 {
 	if (!_visible) {
+
 		_visible = true;
 
-		/* bounding box may have changed while we were hidden */
-
-		if (_parent) {
-			_parent->child_changed ();
+		for (list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
+			if ((*i)->self_visible()) {
+				/* item used to be hidden by us (its parent),
+				   but is now visible
+				*/
+				(*i)->propagate_show_hide ();
+			}
 		}
 
-		_canvas->item_shown_or_hidden (this);
+		propagate_show_hide ();
 	}
+}
+
+void
+Item::propagate_show_hide ()
+{
+	/* bounding box may have changed while we were hidden */
+	
+	if (_parent) {
+		_parent->child_changed ();
+	}
+	
+	_canvas->item_shown_or_hidden (this);
 }
 
 Duple
@@ -555,7 +606,7 @@ Item::width () const
 void
 Item::redraw () const
 {
-	if (_visible && _bounding_box && _canvas) {
+	if (visible() && _bounding_box && _canvas) {
 		_canvas->request_redraw (item_to_window (_bounding_box.get()));
 	}
 }	
@@ -569,7 +620,7 @@ Item::begin_change ()
 void
 Item::end_change ()
 {
-	if (_visible) {
+	if (visible()) {
 		_canvas->item_changed (this, _pre_change_bounding_box);
 		
 		if (_parent) {
@@ -586,7 +637,7 @@ Item::begin_visual_change ()
 void
 Item::end_visual_change ()
 {
-	if (_visible) {
+	if (visible()) {
 		_canvas->item_visual_property_changed (this);
 	}
 }
@@ -1014,7 +1065,7 @@ Item::dump (ostream& o) const
 {
 	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
 
-	o << _canvas->indent() << whatami() << ' ' << this << " Visible ? " << _visible;
+	o << _canvas->indent() << whatami() << ' ' << this << " self-Visible ? " << self_visible() << " visible ? " << visible();
 	o << " @ " << position();
 	
 #ifdef CANVAS_DEBUG
@@ -1038,7 +1089,8 @@ Item::dump (ostream& o) const
 		o << _canvas->indent();
 		o << " @ " << position();
 		o << " Items: " << _items.size();
-		o << " Visible ? " << _visible;
+		o << " Self-Visible ? " << self_visible();
+		o << " Visible ? " << visible();
 		
 		boost::optional<Rect> bb = bounding_box();
 		

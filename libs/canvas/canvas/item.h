@@ -167,10 +167,12 @@ public:
 	/** @return true if this item is visible (ie it will be rendered),
 	 *  otherwise false
 	 */
-	bool visible () const {
+	bool self_visible () const {
 		return _visible;
 	}
 
+	bool visible () const;
+	
 	/** @return Our canvas, or 0 if we are not attached to one */
 	Canvas* canvas () const {
 		return _canvas;
@@ -301,6 +303,7 @@ private:
 	bool _ignore_events;
 
 	void find_scroll_parent ();
+	void propagate_show_hide ();
 };
 
 extern LIBCANVAS_API std::ostream& operator<< (std::ostream&, const ArdourCanvas::Item&);
