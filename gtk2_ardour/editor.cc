@@ -1986,17 +1986,22 @@ Editor::add_track_context_items (Menu_Helpers::MenuList& edit_items)
     act = ActionManager::get_action_from_name ("set-mouse-mode-object");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_arrow_idle"))));
-    edit_items.push_back (ImageMenuElem ( ("Pointer Tool \t\t 2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
-    
+	#if defined (PLATFORM_WINDOWS)
+		std::string str="\t\t\t";
+	#else
+		std::string str="\t\t";
+	#endif
+	edit_items.push_back (ImageMenuElem ( ("Pointer Tool "+str+"2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+  
     act = ActionManager::get_action_from_name ("set-mouse-mode-cut");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_cut_idle"))));
-    edit_items.push_back (ImageMenuElem ( ("Split Tool \t\t 3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+	edit_items.push_back (ImageMenuElem ( ("Split Tool "+str+"3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-zoom");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_zoom_idle"))));
-    edit_items.push_back (ImageMenuElem ( ("Zoom Tool \t\t 4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+	edit_items.push_back (ImageMenuElem ( ("Zoom Tool"+str+"4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
 }
 
 void
