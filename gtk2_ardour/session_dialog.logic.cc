@@ -366,8 +366,16 @@ SessionDialog::on_key_press_event (GdkEventKey* ev)
 {
     switch (ev->keyval)
     {
-        case GDK_Return:
-            return true;
+        case GDK_Return: // button Enter was pressed
+        case GDK_KP_Enter:
+            if ( _open_selected_button.get_sensitive () ) // if recent session was choosen
+            {
+                response (Gtk::RESPONSE_ACCEPT); // load choosen recent session
+                return true;
+            } else
+            {
+                return true;
+            }
         case GDK_Escape:
             return true;
     }
