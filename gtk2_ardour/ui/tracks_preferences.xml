@@ -138,6 +138,20 @@
               y="18"
               width="71"
               height="24"/>
+      <Button id="apply_button"
+              style="generic_button"
+              text="Apply"
+              fgnormal="#303030"
+              bgnormal="#CACAC5"
+              fgactive="#909090"
+              bgactive="#424242"
+              borderwidth="1 1 1 1"
+              bordercolor="#454545"
+              x="419"
+              y="18"
+              width="71"
+              height="24"
+              ui.orphan="true"/>
     </Layout>
     <Layout id="midi_settings_tab"
             bgnormal="#303030"
