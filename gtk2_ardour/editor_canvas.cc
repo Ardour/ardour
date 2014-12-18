@@ -476,7 +476,13 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
 		if (SMFSource::safe_midi_file_extension (*i)) {
-			midi_paths.push_back (*i);
+            
+            // Waves TracksLive does not support midi
+            if (Profile->get_trx()) {
+                continue;
+            }
+            
+            midi_paths.push_back (*i);
 		} else {
 			audio_paths.push_back (*i);
 		}
@@ -490,7 +496,10 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 		frame = 0;
 
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame);
+        // Waves TracksLive does not support midi
+        if (!Profile->get_trx()) {
+            do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame);
+        }
 		
 		if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
@@ -505,8 +514,11 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 		if (tv->track()) {
 			/* select the track, then embed/import */
 			selection->set (tv);
-
-			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
+            
+            // Waves TracksLive does not support midi
+            if (!Profile->get_trx()) {
+                do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
+            }
 
 			if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
