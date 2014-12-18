@@ -840,9 +840,9 @@ WavesAudioBackend::_freewheel_thread ()
             return;
         }
 
-        _freewheel_thread_active = false;
+        _freewheel_thread_active = true;
         if ((pthread_create (&thread_id, &attributes, __start_process_thread, thread_data))) {
-            _freewheel_thread_active = true;
+            _freewheel_thread_active = false;
             std::cerr << "WavesAudioBackend::freewheel_thread (): pthread_create () failed!" << std::endl;
             return;
         }
