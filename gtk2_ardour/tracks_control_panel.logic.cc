@@ -166,6 +166,7 @@ TracksControlPanel::init ()
     populate_auto_save_timer_dropdown();
     populate_pre_record_buffer_dropdown();
     
+    show_buffer_duration ();
 	_audio_settings_tab_button.set_active(true);
 
 	display_general_preferences ();
