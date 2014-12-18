@@ -470,10 +470,10 @@ int main() { return 0; }''',
             break
 
     if prepend_opt_flags:
-        optimization_flags[:0] = [ flags_dict['full-optimization'] ]
+        optimization_flags[:0] = flags_dict['full-optimization']
 
     if opt.debug_symbols:
-        optimization_flags += [ flags_dict['debuggable'] ]
+        optimization_flags += flags_dict['debuggable']
 
     if opt.stl_debug:
         cxx_flags.append("-D_GLIBCXX_DEBUG")
