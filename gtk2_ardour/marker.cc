@@ -62,6 +62,12 @@ const char * Marker::default_new_marker_prefix = N_("Marker ");
 static const double name_padding = 10.0;
 static const double handler_size = 5.0;
 
+#if defined (PLATFORM_WINDOWS)
+#define MARKER_TEXT_Y_AMENDMENT (-2)
+#else
+#define MARKER_TEXT_Y_AMENDMENT (-1)
+#endif
+
 RulerMarker::RulerMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanvas::Container& parent, double height, guint32 rgba, const std::string& text,
                           framepos_t start, framepos_t end)
         : RangeMarker (l, editor, parent, height, rgba, text, start, end)
@@ -591,7 +597,6 @@ Marker::setup_name_display ()
 
 	} else {
                 int scene_change_width = 0;
-                int lock_change_width = 0;
         
                 // Pango has a bug in text width calculation on MAC
 #ifdef __APPLE__
@@ -620,7 +625,7 @@ Marker::setup_name_display ()
                         int lock_height;
                         int lock_width;
                     
-                        _marker_lock_text->set_position (ArdourCanvas::Duple (2.0, (_height / 2.0) - (name_height / 2.0) - 1.0));
+                        _marker_lock_text->set_position (ArdourCanvas::Duple (2.0, (_height / 2.0) - (name_height / 2.0) + MARKER_TEXT_Y_AMENDMENT));
                         _marker_lock_text->show();
                     
                         pixel_size (X_("Locked"), name_font, lock_width, lock_height);
@@ -660,9 +665,10 @@ Marker::setup_name_display ()
                     
                         /* 4 pixels left margin, place it in the vertical middle, plus or minus
                          */
-                        _scene_change_text->set_position (ArdourCanvas::Duple (r.x0 + 2.0, (_height / 2.0) - (name_height / 2.0) - 1.0));
+						r.y0 = (_height - name_height) / 2.0;
+                        _scene_change_text->set_position (ArdourCanvas::Duple (r.x0 + 2.0, r.y0 + MARKER_TEXT_Y_AMENDMENT));
                     
-                        r.y0 = _scene_change_text->position().y - 2.0;
+                        r.y0 -= 2.0;
                         r.y1 = r.y0 + name_height + 4.0;
                     
                         _scene_change_rect->set (r);
@@ -681,7 +687,7 @@ Marker::setup_name_display ()
                 
                 int name_width = min ((name_text_width + (2.0 * name_padding)), limit);
                 _name_item->show ();
-                _name_item->set_position (ArdourCanvas::Duple (_label_offset, (_height / 2.0) - (name_height / 2.0)));
+                _name_item->set_position (ArdourCanvas::Duple (_label_offset, (_height / 2.0) - (name_height / 2.0) + MARKER_TEXT_Y_AMENDMENT));
                 _name_item->clamp_width (name_width);
         
                 if (_name_item->text() != _name) {
