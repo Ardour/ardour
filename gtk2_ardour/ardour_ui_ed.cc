@@ -995,7 +995,7 @@ ARDOUR_UI::update_marker_inspector (MarkerSelection* markers)
 		return;
 	}
 	
-	if(markers && !markers->empty()) {
+	if(markers && !markers->empty() && markers->back ()->location () && markers->back ()->location ()->is_mark ()) {
 		marker_inspector_dialog->set_marker (markers->back ());
 	} else {
 		marker_inspector_dialog->set_marker (0);
@@ -1012,12 +1012,14 @@ void
 ARDOUR_UI::show_marker_inspector ()
 {
 	marker_inspector_dialog->set_position (Gtk::WIN_POS_MOUSE);
-    marker_inspector_dialog->show();
+	track_color_dialog->hide ();
+    marker_inspector_dialog->show ();
 }
 
 void
 ARDOUR_UI::show_track_color_dialog ()
 {
 	track_color_dialog->set_position (Gtk::WIN_POS_MOUSE);
+	marker_inspector_dialog->hide ();
     track_color_dialog->show();
 }
