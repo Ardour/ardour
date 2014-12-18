@@ -1375,20 +1375,32 @@ Editor::set_session (Session *t)
 		return;
 	}
 
+    ProgressDialog::instance()->set_progress (0.4);
 	_playlist_selector->set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
+    ProgressDialog::instance()->set_progress (0.45);
 	_group_tabs->set_session (_session);
 	_route_groups->set_session (_session);
+    ProgressDialog::instance()->set_progress (0.5);
 	_regions->set_session (_session);
+    ProgressDialog::instance()->set_progress (0.55);
 	_snapshots->set_session (_session);
+    ProgressDialog::instance()->set_progress (0.6);
 	_routes->set_session (_session);
+    ProgressDialog::instance()->set_progress (0.65);
 	_locations->set_session (_session);
+    ProgressDialog::instance()->set_progress (0.7);
 	_compact_meter_bridge.set_session (_session);
+    ProgressDialog::instance()->set_progress (0.75);
     _mixer_bridge_view.set_max_name_size(mixer_bridge_strip_max_name_size);
+    ProgressDialog::instance()->set_progress (0.8);
     _mixer_bridge_view.set_session (_session);
+    ProgressDialog::instance()->set_progress (0.85);
     _meter_bridge_view.set_max_name_size(meter_bridge_strip_max_name_size);
+    ProgressDialog::instance()->set_progress (0.9);
 	_meter_bridge_view.set_session (_session);
+    ProgressDialog::instance()->set_progress (0.95);
     
 	if (rhythm_ferret) {
 		rhythm_ferret->set_session (_session);

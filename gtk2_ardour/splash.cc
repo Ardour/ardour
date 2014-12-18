@@ -225,8 +225,6 @@ Splash::message (const string& msg)
 	str += Glib::Markup::escape_text (msg);
 	str += "</b>";
 
-        show ();
-
 	layout->set_markup (str);
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
 	

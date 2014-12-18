@@ -2971,6 +2971,14 @@ ARDOUR_UI::close_session()
 int
 ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, std::string mix_template)
 {
+    ProgressDialog::instance()->set_top_label ("Loading session: "+path);
+    ProgressDialog::instance()->update_info (0.0, NULL, NULL, "Loading audio...");
+    ProgressDialog::instance()->show ();
+    /* Make sure the progress dialog is drawn */
+    while (Glib::MainContext::get_default()->iteration (false)) {
+        /* do nothing */
+    }
+    
 	Session *new_session;
 	int unload_status;
 	int retval = -1;
@@ -2988,10 +2996,10 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	session_loaded = false;
 
-	loading_message (string_compose (_("Please wait while %1 loads your session"), PROGRAM_NAME));
-
+    ProgressDialog::instance()->set_progress (0.1);
 	try {
 		new_session = new Session (*AudioEngine::instance(), path, snap_name, 0, mix_template);
+        ProgressDialog::instance()->update_info (0.4, NULL, NULL, "Loading elements...");
 	}
 
 	/* this one is special */
@@ -3072,6 +3080,8 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	retval = 0;
 
   out:
+   ProgressDialog::instance()->set_progress (1);
+   ProgressDialog::instance()->hide ();
 	return retval;
 }
 

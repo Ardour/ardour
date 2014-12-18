@@ -269,6 +269,8 @@
 		43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */ = {isa = PBXBuildFile; fileRef = 43279430194F0062003C9FEA /* tracks_preferences.xml */; };
 		4327947F194F009E003C9FEA /* tracks.menus.in in Resources */ = {isa = PBXBuildFile; fileRef = 43279475194F009E003C9FEA /* tracks.menus.in */; };
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
+		5BC67E591A408FCE00F29ABA /* progress_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 5BC67E581A408FCE00F29ABA /* progress_dialog.xml */; };
+		5BC67E5F1A4090BD00F29ABA /* progress_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5BC67E5E1A4090BD00F29ABA /* progress_dialog.cc */; };
 		95176F7A1A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95176F791A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc */; };
 		95176F7E1A08E76F00E32046 /* file_sample_rate_mismatch_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95176F7D1A08E76F00E32046 /* file_sample_rate_mismatch_dialog.xml */; };
 		95176F871A092A2900E32046 /* yes_no_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95176F851A092A2900E32046 /* yes_no_dialog.xml */; };
@@ -1124,6 +1126,9 @@
 		43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = waves_audiobackend.xcodeproj; path = ../../libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj; sourceTree = "<group>"; };
 		43B351F4194F130C0038C140 /* libardour.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libardour.xcodeproj; path = ../../libs/ardour/macosx/libardour.xcodeproj; sourceTree = "<group>"; };
 		43B351FA194F131D0038C140 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../libs/pbd/macosx/pbd.xcodeproj; sourceTree = "<group>"; };
+		5BC67E581A408FCE00F29ABA /* progress_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = progress_dialog.xml; sourceTree = "<group>"; };
+		5BC67E5D1A4090AA00F29ABA /* progress_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = progress_dialog.h; path = ../progress_dialog.h; sourceTree = "<group>"; };
+		5BC67E5E1A4090BD00F29ABA /* progress_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = progress_dialog.cc; path = ../progress_dialog.cc; sourceTree = "<group>"; };
 		95176F781A08E6D800E32046 /* file_sample_rate_mismatch_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = file_sample_rate_mismatch_dialog.h; path = ../file_sample_rate_mismatch_dialog.h; sourceTree = "<group>"; };
 		95176F791A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = file_sample_rate_mismatch_dialog.cc; path = ../file_sample_rate_mismatch_dialog.cc; sourceTree = "<group>"; };
 		95176F7D1A08E76F00E32046 /* file_sample_rate_mismatch_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = file_sample_rate_mismatch_dialog.xml; sourceTree = "<group>"; };
@@ -1235,6 +1240,7 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				5BC67E5E1A4090BD00F29ABA /* progress_dialog.cc */,
 				957EF44A1A30BFB300F1500E /* waves_message_dialog.cc */,
 				95176F8E1A092A5B00E32046 /* yes_no_dialog.cc */,
 				95176F791A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc */,
@@ -1837,6 +1843,7 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				5BC67E581A408FCE00F29ABA /* progress_dialog.xml */,
 				95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */,
 				95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */,
 				95F9DFDA1A35F3310007E953 /* waves_excessive_split_dialog.xml */,
@@ -1892,6 +1899,7 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				5BC67E5D1A4090AA00F29ABA /* progress_dialog.h */,
 				957EF44F1A30BFBF00F1500E /* waves_message_dialog.h */,
 				95176F8C1A092A4700E32046 /* yes_no_dialog.h */,
 				95176F781A08E6D800E32046 /* file_sample_rate_mismatch_dialog.h */,
@@ -2575,6 +2583,7 @@
 				952E0B3C1A0A1D7000F375D0 /* buildlog.txt in Resources */,
 				95F9DFD71A35A8BD0007E953 /* waves_message_dialog.xml in Resources */,
 				CEB9D794197516BE00B21780 /* inspector_gain_meter.xml in Resources */,
+				5BC67E591A408FCE00F29ABA /* progress_dialog.xml in Resources */,
 				CEB9D795197516BE00B21780 /* master_ui_gain_meter.xml in Resources */,
 				CEB9D796197516BE00B21780 /* master_ui.xml in Resources */,
 				CEB9D797197516BE00B21780 /* meter_strip.xml in Resources */,
@@ -2617,6 +2626,7 @@
 				CE294C7619CAD54500D12768 /* mixer_bridge_view.cc in Sources */,
 				CE294C7719CAD54500D12768 /* open_file_dialog_nix.cc in Sources */,
 				CE294C7819CAD54500D12768 /* open_file_dialog_windows.cc in Sources */,
+				5BC67E5F1A4090BD00F29ABA /* progress_dialog.cc in Sources */,
 				CE294C7919CAD54500D12768 /* ruler_dialog.cc in Sources */,
 				CE294C7A19CAD54500D12768 /* soundcloud_export_selector.cc in Sources */,
 				CE294C7B19CAD54500D12768 /* waves_dropdown.cc in Sources */,

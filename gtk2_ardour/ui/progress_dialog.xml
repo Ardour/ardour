@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title=""
+        resizeable="False"
+        winfont ="Arial Bold 12"
+        macfont ="Helvetica Bold 12"
+        fgnormal="#6D6E72"
+        borderwidth="5 5 5 5"
+        bordercolor="#000000">
+  
+  <style name="generic_control"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#6D6E72"        
+         />
+
+  <EventBox bgnormal="#EDECE8">
+      <VBox width="320">
+          <Label id="top_label"
+                 style="generic_control"
+                 vertalignment="center"
+                 text="---"
+                 height="28"/>
+          <VBox height="4"/>
+          <HBox width="320">
+                <VBox width="13"/>
+                <Layout width="294"
+                        height="18">
+                    <ProgressBar id="progress_bar"
+                                 winfont ="Arial 11"
+                                 macfont ="Helvetica 11"
+                                 fgnormal="#ffffff"
+                                 fgactive="#ffffff"
+                                 fghovered="#ffffff"
+                                 text="from xml"
+                                 
+                                 bgnormal="#6B6B6B"
+                                 bgselected="#20B2AA"
+                                 width="294"
+                                 height="18"
+                                 x="0"
+                                 y="0"
+                                 visible="true"/>
+                    <VBox x="0"
+                          y="0"
+                          width="294"
+                          height="18">
+                    </VBox>
+                </Layout>
+          </HBox>
+          <VBox height="9"/>
+          <Label id="bottom_label"
+                 style="generic_control"
+                 winfont ="Arial 10"
+                 macfont ="Helvetica 10"
+                 vertalignment="center"
+                 text="info-2"
+                 height="10"/>
+          <VBox height="11"/>
+          <HBox width="320">
+             <VBox width="120"/>
+            
+         </HBox>
+         <VBox height="7"/>
+      </VBox>
+  </EventBox>
+
+  
+</Dialog>

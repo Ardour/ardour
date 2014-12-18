@@ -89,6 +89,7 @@
 #include "global_port_matrix.h"
 #include "keyeditor.h"
 #include "location_ui.h"
+#include "progress_dialog.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
 #include "session_option_editor.h"
