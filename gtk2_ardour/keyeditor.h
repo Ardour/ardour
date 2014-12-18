@@ -67,8 +67,7 @@ class KeyEditor : public ArdourWindow
 
 	void unbind ();
 
-	bool can_bind;
-	guint last_state;
+	guint last_keyval;
 
 	void action_selected ();
 	void populate ();
