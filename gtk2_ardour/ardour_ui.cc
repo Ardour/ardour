@@ -2788,12 +2788,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
                     UI::quit ();
                     return ret;
                 default: // this happens on Close Button pressed (at the top left corner only on Mac)
-                    if (quit_on_cancel) {
-                        exit (1);
-                    } else {
-                        UI::quit ();
-                        return ret;
-                    }
+                    UI::quit ();
+                    return ret;
 			}
 
 			session_dialog.hide ();
