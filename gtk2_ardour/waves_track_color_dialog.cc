@@ -44,6 +44,13 @@ WavesTrackColorDialog::WavesTrackColorDialog ()
 	_init ();
 }
 
+void
+WavesTrackColorDialog::on_realize ()
+{
+	Gtk::Window::on_realize();
+	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_TITLE|Gdk::DECOR_MENU));
+}
+
 WavesTrackColorDialog::~WavesTrackColorDialog ()
 {
 	_route_connections.drop_connections ();

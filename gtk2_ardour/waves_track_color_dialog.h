@@ -31,6 +31,9 @@ public:
 	WavesTrackColorDialog();
 	virtual ~WavesTrackColorDialog();
 
+protected:
+	void on_realize ();
+
 private:
 	void _init();
 
