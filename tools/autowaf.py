@@ -171,7 +171,7 @@ def ensure_visible_symbols(bld, visible):
             print ('*** WARNING: MSVC does not allow symbols to be visible/exported by default while building ' + bld.name)
         else:
             pass
-    else:        
+    else:
         if not hasattr (bld,'cxxflags'):
             bld.cxxflags = []
         if not hasattr (bld,'cflags'):
@@ -183,19 +183,19 @@ def ensure_visible_symbols(bld, visible):
             bld.cxxflags += [ '-fvisibility=hidden' ]
             bld.cflags += [ '-fvisibility=hidden' ]
 
-def set_basic_compiler_flags (conf,flag_dict):
+def set_basic_compiler_flags(conf, flag_dict):
     if Options.options.debug:
-        conf.env.append_value('CFLAGS',flag_dict['debuggable'])
-        conf.env.append_value('CXXFLAGS',flag_dict['debuggable'])
-        conf.env.append_value('LINKFLAGS',flag_dict['linker-debuggable'])
+        conf.env.append_value('CFLAGS', flag_dict['debuggable'])
+        conf.env.append_value('CXXFLAGS', flag_dict['debuggable'])
+        conf.env.append_value('LINKFLAGS', flag_dict['linker-debuggable'])
     else:
-        conf.env.append_value('CFLAGS',flag_dict['nondebuggable'])
-        conf.env.append_value('CXXFLAGS',flag_dict['nondebuggable'])
+        conf.env.append_value('CFLAGS', flag_dict['nondebuggable'])
+        conf.env.append_value('CXXFLAGS', flag_dict['nondebuggable'])
 
     if Options.options.ultra_strict:
         Options.options.strict = True
         conf.env.append_value('CFLAGS', flag_dict['ultra-strict'])
-                              
+
     if Options.options.strict:
         conf.env.append_value('CFLAGS', flag_dict['c-strict'])
         conf.env.append_value('CXXFLAGS', flag_dict['cxx-strict'])
@@ -204,7 +204,7 @@ def set_basic_compiler_flags (conf,flag_dict):
 
     conf.env.append_value('CFLAGS', flag_dict['show-column'])
     conf.env.append_value('CXXFLAGS', flag_dict['show-column'])
-            
+
 def configure(conf):
     global g_step
     if g_step > 1:
@@ -620,18 +620,18 @@ def post_test(ctx, appname, dirs=['src'], remove=['*boost*', 'c++*']):
             # Generate coverage data
             subprocess.call(('lcov -c %s -b %s' % (diropts, base)).split(),
                             stdout=coverage_lcov, stderr=coverage_log)
-    
+
             # Strip unwanted stuff
             subprocess.call(
                 ['lcov', '--remove', 'coverage.lcov'] + remove,
                 stdout=coverage_stripped_lcov, stderr=coverage_log)
-    
+
             # Generate HTML coverage output
             if not os.path.isdir('coverage'):
                 os.makedirs('coverage')
             subprocess.call('genhtml -o coverage coverage-stripped.lcov'.split(),
                             stdout=coverage_log, stderr=coverage_log)
-    
+
         except:
             Logs.warn('Failed to run lcov, no coverage report will be generated')
     finally:
@@ -677,4 +677,3 @@ def run_tests(ctx, appname, tests, desired_status=0, dirs=['src'], name='*'):
         Logs.pprint('GREEN', '** Pass: All %s.%s tests passed' % (appname, name))
     else:
         Logs.pprint('RED', '** FAIL: %d %s.%s tests failed' % (failures, appname, name))
-
