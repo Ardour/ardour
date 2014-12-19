@@ -63,7 +63,15 @@ public:
 
 	std::set<Evoral::Parameter> contained_automation();
 
-	void clear_note_trackers ();
+	/** Clear all note trackers. */
+	void reset_note_trackers ();
+
+	/** Resolve all pending notes and clear all note trackers.
+	 *
+	 * @param dst Sink to write note offs to.
+	 * @param time Time stamp of all written note offs.
+	 */
+	void resolve_note_trackers (Evoral::EventSink<framepos_t>& dst, framepos_t time);
 
 protected:
 

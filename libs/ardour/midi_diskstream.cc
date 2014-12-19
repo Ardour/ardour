@@ -606,11 +606,19 @@ MidiDiskstream::set_pending_overwrite (bool yn)
 int
 MidiDiskstream::overwrite_existing_buffers ()
 {
-	/* This is safe as long as the butler thread is suspended, which it should be */
+	/* Clear the playback buffer contents.  This is safe as long as the butler
+	   thread is suspended, which it should be. */
 	_playback_buf->reset ();
+	_playback_buf->reset_tracker ();
 
 	g_atomic_int_set (&_frames_read_from_ringbuffer, 0);
 	g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
+
+	/* Resolve all currently active notes in the playlist.  This is more
+	   aggressive than it needs to be: ideally we would only resolve what is
+	   absolutely necessary, but this seems difficult and/or impossible without
+	   having the old data or knowing what change caused the overwrite. */
+	midi_playlist()->resolve_note_trackers (*_playback_buf, overwrite_frame);
 
 	read (overwrite_frame, disk_io_chunk_frames, false);
 	file_frame = overwrite_frame; // it was adjusted by ::read()
@@ -1398,7 +1406,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			   beyond the loop end.
 			*/
 
-			_playback_buf->loop_resolve (dst, 0);
+			_playback_buf->resolve_tracker (dst, 0);
 		}
 
 		if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
@@ -1489,7 +1497,7 @@ MidiDiskstream::reset_tracker ()
 	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
 
 	if (mp) {
-		mp->clear_note_trackers ();
+		mp->reset_note_trackers ();
 	}
 }
 

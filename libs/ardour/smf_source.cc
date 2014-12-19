@@ -282,13 +282,8 @@ SMFSource::read_unlocked (const Lock&                    lock,
 
 		if (ev_frame_time < start + duration) {
 			destination.write (ev_frame_time, ev_type, ev_size, ev_buffer);
-
 			if (tracker) {
-				if (ev_buffer[0] & MIDI_CMD_NOTE_ON) {
-					tracker->add (ev_buffer[1], ev_buffer[0] & 0xf);
-				} else if (ev_buffer[0] & MIDI_CMD_NOTE_OFF) {
-					tracker->remove (ev_buffer[1], ev_buffer[0] & 0xf);
-				}
+				tracker->track(ev_buffer);
 			}
 		} else {
 			break;

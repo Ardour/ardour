@@ -241,7 +241,7 @@ MidiRingBuffer<T>::reset_tracker ()
 
 template<typename T>
 void
-MidiRingBuffer<T>::loop_resolve (MidiBuffer& dst, framepos_t t)
+MidiRingBuffer<T>::resolve_tracker (MidiBuffer& dst, framepos_t t)
 {
 	_tracker.resolve_notes (dst, t);
 }

@@ -414,6 +414,12 @@ MidiRegion::model_changed ()
 void
 MidiRegion::model_contents_changed ()
 {
+	{
+		/* Invalidate source iterator to force reading new contents even if the
+		   calls to read progress linearly. */
+		Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex());
+		midi_source(0)->invalidate (lm);
+	}
 	send_change (PropertyChange (Properties::midi_data));
 }
 

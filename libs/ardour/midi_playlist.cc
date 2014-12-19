@@ -288,14 +288,27 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 }
 
 void
-MidiPlaylist::clear_note_trackers ()
+MidiPlaylist::reset_note_trackers ()
 {
 	Playlist::RegionWriteLock rl (this, false);
 
 	for (NoteTrackers::iterator n = _note_trackers.begin(); n != _note_trackers.end(); ++n) {
 		delete n->second;
 	}
-	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 clears all note trackers\n", name()));
+	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 reset all note trackers\n", name()));
+	_note_trackers.clear ();
+}
+
+void
+MidiPlaylist::resolve_note_trackers (Evoral::EventSink<framepos_t>& dst, framepos_t time)
+{
+	Playlist::RegionWriteLock rl (this, false);
+
+	for (NoteTrackers::iterator n = _note_trackers.begin(); n != _note_trackers.end(); ++n) {
+		n->second->resolve_notes(dst, time);
+		delete n->second;
+	}
+	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 resolve all note trackers\n", name()));
 	_note_trackers.clear ();
 }
 

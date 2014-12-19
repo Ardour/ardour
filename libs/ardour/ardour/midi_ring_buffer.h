@@ -54,7 +54,7 @@ public:
 	void flush (framepos_t start, framepos_t end);
 
 	void reset_tracker ();
-	void loop_resolve (MidiBuffer& dst, framepos_t);
+	void resolve_tracker (MidiBuffer& dst, framepos_t);
 
 private:
 	MidiStateTracker _tracker;
