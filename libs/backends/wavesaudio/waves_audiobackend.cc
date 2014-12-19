@@ -1223,7 +1223,6 @@ WavesAudioBackend::__instantiate (const std::string& arg1, const std::string& ar
 	LARGE_INTEGER Frequency;
 	QueryPerformanceFrequency(&Frequency);
 	__performance_counter_frequency = Frequency.QuadPart;
-	std::cout << "__performance_counter_frequency:" << __performance_counter_frequency << std::endl;
 
 #endif
     return 0;
