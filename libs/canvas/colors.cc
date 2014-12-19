@@ -35,6 +35,12 @@ using namespace ArdourCanvas;
 using std::max;
 using std::min;
 
+ArdourCanvas::Color
+change_alpha (Color c, double a)
+{
+	return ((c & ~0xff) | (lrintf (a*255.0) & 0xff));
+}
+
 void
 ArdourCanvas::color_to_hsv (Color color, double& h, double& s, double& v)
 {

@@ -31,6 +31,8 @@ namespace ArdourCanvas
 struct LIBCANVAS_API HSV;
 struct LIBCANVAS_API HSVA;
 
+extern LIBCANVAS_API Color change_alpha (Color, double alpha);
+
 extern LIBCANVAS_API Color hsva_to_color (double h, double s, double v, double a = 1.0);
 extern LIBCANVAS_API void  color_to_hsva (Color color, double& h, double& s, double& v, double& a);
 extern LIBCANVAS_API void  color_to_hsv (Color color, double& h, double& s, double& v);
