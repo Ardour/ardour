@@ -525,11 +525,16 @@ RegionView::set_colors ()
 uint32_t
 RegionView::get_fill_color () const
 {
-	uint32_t f = TimeAxisViewItem::get_fill_color();
+	ArdourCanvas::Color f = TimeAxisViewItem::get_fill_color();
+	char const *modname;
+	
 	if (_region->opaque()) {
-		f = UINT_RGBA_CHANGE_A (f, 255);
+		modname = "opaque region base";
+	} else {
+		modname = "transparent region base";
 	}
-	return f;
+
+	return HSV(f).mod (ARDOUR_UI::config()->modifier (modname)).color ();
 }
 
 void
