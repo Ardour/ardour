@@ -80,7 +80,7 @@ AutomationRegionView::init (bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	_fill_color_name = "midi frame base";
+	fill_color_name = "midi frame base";
 	set_colors ();
 
 	_enable_display = true;

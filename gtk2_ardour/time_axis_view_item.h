@@ -235,7 +235,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 	double _height;
 	Visibility visibility;
-	std::string _fill_color_name;
+	std::string fill_color_name;
 	bool _recregion;
 	bool _automation; ///< true if this is an automation region view
 	bool _dragging;

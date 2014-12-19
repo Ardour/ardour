@@ -169,7 +169,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
 	fill_color = base_color;
-	_fill_color_name = "region base";
+	fill_color_name = "time axis view item base";
 	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
@@ -691,30 +691,30 @@ TimeAxisViewItem::set_name_text_color ()
 	name_text->set_color (ArdourCanvas::contrasting_text_color (f));
 }
 
-uint32_t
+ArdourCanvas::Color
 TimeAxisViewItem::get_fill_color () const
 {
-	uint32_t f;
+	ArdourCanvas::Color c;
+	const std::string mod_name = (_dragging ? "dragging region" : fill_color_name);
 
-	const std::string mod_name = (_dragging ? "dragging region" : _fill_color_name);
 	if (_selected) {
 
-		f = ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
+		c = ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
 
 	} else {
 
 		if (_recregion) {
-			f = ARDOUR_UI::config()->color ("recording rect");
+			c = ARDOUR_UI::config()->color ("recording rect");
 		} else {
 			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				f = ARDOUR_UI::config()->color_mod (_fill_color_name, mod_name);
+				c = ARDOUR_UI::config()->color_mod (fill_color_name, mod_name);
 			} else {
-				f = ARDOUR_UI::config()->color_mod (fill_color, mod_name);
+				c = ARDOUR_UI::config()->color_mod (fill_color, mod_name);
 			}
 		}
 	}
 
-	return f;
+	return c;
 }
 
 /**

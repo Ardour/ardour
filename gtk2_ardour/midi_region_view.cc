@@ -282,7 +282,7 @@ MidiRegionView::init (bool wfd)
 
 	_model = midi_region()->midi_source(0)->model();
 	_enable_display = false;
-	_fill_color_name = "midi frame base";
+	fill_color_name = "midi frame base";
 
 	RegionView::init (false);
 
