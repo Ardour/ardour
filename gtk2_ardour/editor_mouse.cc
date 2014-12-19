@@ -292,17 +292,8 @@ Editor::mouse_mode_toggled (MouseMode m)
 		_session->request_transport_speed (0.0, true);
 	}
 
-	if (mouse_mode == m) {
-		/* switch to the same mode, act like a toggle and switch back to previous mode */
-		Glib::RefPtr<Action>       pact  = get_mouse_mode_action(previous_mouse_mode);
-		Glib::RefPtr<ToggleAction> ptact = Glib::RefPtr<ToggleAction>::cast_dynamic(pact);
-		ptact->set_active(true);
-		return;
-	}
-
 	const bool was_internal = internal_editing();
 
-	previous_mouse_mode = mouse_mode;
 	mouse_mode = m;
 
 	if (!was_internal && internal_editing()) {
