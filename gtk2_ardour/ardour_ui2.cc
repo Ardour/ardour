@@ -362,28 +362,28 @@ ARDOUR_UI::setup_transport ()
 	tbox->set_spacing (2);
 
 	if (!Profile->get_trx()) {
-		tbox1->pack_start (midi_panic_button, false, false, 5);
-		tbox1->pack_start (click_button, false, false, 5);
+		tbox1->pack_start (midi_panic_button, true, true, 5);
+		tbox1->pack_start (click_button, true, true, 5);
 	}
 
-	tbox1->pack_start (goto_start_button, false, false);
-	tbox1->pack_start (goto_end_button, false, false);
-	tbox1->pack_start (auto_loop_button, false, false);
+	tbox1->pack_start (goto_start_button, true, true);
+	tbox1->pack_start (goto_end_button, true, true);
+	tbox1->pack_start (auto_loop_button, true, true);
 
 	if (!Profile->get_trx()) {
-		tbox2->pack_start (play_selection_button, false, false);
+		tbox2->pack_start (play_selection_button, true, true);
 	}
-	tbox2->pack_start (roll_button, false, false);
-	tbox2->pack_start (stop_button, false, false);
-	tbox2->pack_start (rec_button, false, false, 5);
+	tbox2->pack_start (roll_button, true, true);
+	tbox2->pack_start (stop_button, true, true);
+	tbox2->pack_start (rec_button, true, true, 5);
 
-	vbox1->pack_start (*tbox1, false, false);
-	vbox2->pack_start (*tbox2, false, false);
+	vbox1->pack_start (*tbox1, true, true);
+	vbox2->pack_start (*tbox2, true, true);
 
 	a1->add (*vbox1);
-	a1->set (0.5, 1.0, 0.0, 0.0);
+	a1->set (0.5, 0.5, 0.0, 1.0);
 	a2->add (*vbox2);
-	a2->set (0.5, 1.0, 0.0, 0.0);
+	a2->set (0.5, 0.5, 0.0, 1.0);
 
 	tbox->pack_start (*a1, false, false);
 	tbox->pack_start (*a2, false, false);
