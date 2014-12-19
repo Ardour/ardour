@@ -75,7 +75,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::IODeviceDisconnected:
-            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceListChanged" << std::endl;
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::IODeviceDisconnected" << std::endl;
             engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::AudioCallback:
