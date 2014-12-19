@@ -228,16 +228,16 @@ TimeAxisView::~TimeAxisView()
 	}
 
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
-		delete (*i)->rect;
-		delete (*i)->start_trim;
-		delete (*i)->end_trim;
+		delete (*i)->rect; (*i)->rect=0;
+		delete (*i)->start_trim; (*i)->start_trim = 0;
+		delete (*i)->end_trim; (*i)->end_trim = 0;
 
 	}
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
-		delete (*i)->rect;
-		delete (*i)->start_trim;
-		delete (*i)->end_trim;
+		delete (*i)->rect; (*i)->rect = 0;
+		delete (*i)->start_trim; (*i)->start_trim = 0;
+		delete (*i)->end_trim; (*i)->end_trim = 0;
 	}
 
 	delete selection_group;
