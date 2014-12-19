@@ -1028,6 +1028,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\selection_memento.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\send_ui.cc"
 				>
 			</File>
@@ -2007,6 +2011,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\selection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\selection_memento.h"
 				>
 			</File>
 			<File
