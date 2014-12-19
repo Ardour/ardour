@@ -158,7 +158,7 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/invert-selection|<@TERTIARY@>i|invert selection
 @sess|Editor/addExistingAudioFiles|<@PRIMARY@>i|import audio files
 @sess|Editor/toggle-midi-input-active|<@SECONDARY@>i|toggle sel. track MIDI input
-@mmode|MouseMode/set-mouse-mode-object|o|object mode
+@mmode|MouseMode/set-mouse-mode-object|g|object mode
 @mmode|MouseMode/set-mouse-mode-content|e|content mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
