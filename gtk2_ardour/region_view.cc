@@ -514,11 +514,17 @@ void
 RegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
+	set_sync_mark_color ();
+}
 
+void
+RegionView::set_sync_mark_color ()
+{
 	if (sync_mark) {
-		/* XXX: make these colours themable */
-		sync_mark->set_fill_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0));
-		sync_line->set_outline_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0));
+		ArdourCanvas::Color c = ARDOUR_UI::config()->color ("sync mark");
+		sync_mark->set_fill_color (c);
+		sync_mark->set_outline_color (c);
+		sync_line->set_outline_color (c);
 	}
 }
 
@@ -619,11 +625,10 @@ RegionView::region_sync_changed ()
 
 		sync_mark = new ArdourCanvas::Polygon (group);
 		CANVAS_DEBUG_NAME (sync_mark, string_compose ("sync mark for %1", get_item_name()));
-		sync_mark->set_fill_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0));    // FIXME make a themeable colour
-
 		sync_line = new ArdourCanvas::Line (group);
 		CANVAS_DEBUG_NAME (sync_line, string_compose ("sync mark for %1", get_item_name()));
-		sync_line->set_outline_color (ArdourCanvas::rgba_to_color (0, 1.0, 0, 1.0)); // FIXME make a themeable colour
+
+		set_sync_mark_color ();
 	}
 
 	/* this has to handle both a genuine change of position, a change of samples_per_pixel

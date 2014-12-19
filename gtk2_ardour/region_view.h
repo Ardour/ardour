@@ -151,6 +151,7 @@ class RegionView : public TimeAxisViewItem
 	void        lock_toggle ();
 
 	virtual void set_colors ();
+	virtual void set_sync_mark_color ();
 	virtual void reset_width_dependent_items (double pixel_width);
 
 	virtual void color_handler () {}
