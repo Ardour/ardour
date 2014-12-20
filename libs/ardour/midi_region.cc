@@ -151,7 +151,16 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	Evoral::MusicalTime const bend = bfc.from (_start + _length);
 
 	{
-		Source::Lock lm(newsrc->mutex());
+		Source::Lock lm (midi_source(0)->mutex());
+		/* ::write_to() will take the lock on newsrc.
+
+		   XXX taking the lock on our own source here seems
+		   partly sane and partly odd. We don't write the
+		   data to the newsrc from our source, but from
+		   the in memory copy. This whole thing (memory vs. disk, SMF
+		   versus MidiModel) is so f'ed up that its no wonder
+		   stuff is wierd sometimes.
+		 */
 		if (midi_source(0)->write_to (lm, newsrc, bbegin, bend)) {
 			return boost::shared_ptr<MidiRegion> ();
 		}
