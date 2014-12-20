@@ -31,6 +31,8 @@ namespace ARDOUR {
 	class Session;
 }
 
+bool test_init ();
+
 PBD::Searchpath test_search_path ();
 
 std::string new_test_output_dir (std::string prefix = "");
@@ -39,6 +41,8 @@ int get_test_sample_rate ();
 
 extern void check_xml (XMLNode *, std::string, std::list<std::string> const &);
 extern bool write_ref (XMLNode *, std::string);
+extern void create_and_start_dummy_backend ();
+extern void stop_and_destroy_backend ();
 extern ARDOUR::Session* load_session (std::string, std::string);
 
 #endif

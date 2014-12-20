@@ -135,11 +135,8 @@ protected:
 
 TestReceiver test_receiver;
 
-/** @param dir Session directory.
- *  @param state Session state file, without .ardour suffix.
- */
-Session *
-load_session (string dir, string state)
+bool
+test_init ()
 {
 	SessionEvent::create_per_thread_pool ("test", 512);
 
@@ -152,17 +149,39 @@ load_session (string dir, string state)
 	   required bits in gtk2_ardour.
 	*/
 	Config->set_use_lxvst (false);
+	return true;
+}
 
+void
+create_and_start_dummy_backend ()
+{
 	AudioEngine* engine = AudioEngine::create ();
 
+	CPPUNIT_ASSERT (AudioEngine::instance ());
+	CPPUNIT_ASSERT (engine);
 	CPPUNIT_ASSERT (engine->set_backend ("Dummy", "", ""));
 
 	init_post_engine ();
 
 	CPPUNIT_ASSERT (engine->start () == 0);
+}
 
-	Session* session = new Session (*engine, dir, state);
-	engine->set_session (session);
+void
+stop_and_destroy_backend ()
+{
+	AudioEngine::instance()->remove_session ();
+	AudioEngine::instance()->stop ();
+	AudioEngine::destroy ();
+}
+
+/** @param dir Session directory.
+ *  @param state Session state file, without .ardour suffix.
+ */
+Session *
+load_session (string dir, string state)
+{
+	Session* session = new Session (*AudioEngine::instance(), dir, state);
+	AudioEngine::instance ()->set_session (session);
 	return session;
 }
 

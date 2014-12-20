@@ -3,6 +3,7 @@
 
 #include <cppunit/CompilerOutputter.h>
 #include <cppunit/extensions/TestFactoryRegistry.h>
+#include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/TestResult.h>
 #include <cppunit/TestResultCollector.h>
 #include <cppunit/TestRunner.h>
@@ -10,6 +11,7 @@
 
 #include "pbd/debug.h"
 #include "ardour/ardour.h"
+#include "test_util.h"
 
 static const char* localedir = LOCALEDIR;
 
@@ -47,7 +49,9 @@ main(int argc, char* argv[])
 		}
 	}
 
-	ARDOUR::init (false, true, localedir);
+	CPPUNIT_ASSERT (ARDOUR::init (false, true, localedir));
+
+	CPPUNIT_ASSERT (test_init ());
 	
 	CppUnit::TestResult testresult;
 	

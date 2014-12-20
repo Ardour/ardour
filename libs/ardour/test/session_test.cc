@@ -21,38 +21,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-static TextReceiver text_receiver ("test");
-
-void
-SessionTest::setUp ()
-{
-	SessionEvent::create_per_thread_pool ("session_test", 512);
-
-	text_receiver.listen_to (error);
-	text_receiver.listen_to (info);
-	text_receiver.listen_to (fatal);
-	text_receiver.listen_to (warning);
-
-	AudioEngine* engine = AudioEngine::create ();
-
-	CPPUNIT_ASSERT (engine);
-
-	CPPUNIT_ASSERT (engine->set_backend ("Dummy", "", ""));
-
-	init_post_engine ();
-
-	CPPUNIT_ASSERT (engine->start () == 0);
-}
-
-void
-SessionTest::tearDown ()
-{
-	// this is needed or there is a crash in MIDI::Manager::destroy
-	AudioEngine::instance()->remove_session ();
-	AudioEngine::instance()->stop ();
-	AudioEngine::destroy ();
-}
-
 void
 SessionTest::new_session ()
 {
@@ -61,20 +29,16 @@ SessionTest::new_session ()
 
 	CPPUNIT_ASSERT (!Glib::file_test (new_session_dir, Glib::FILE_TEST_EXISTS));
 
-	Session* new_session = 0;
-	AudioEngine::create ();
+	create_and_start_dummy_backend ();
 
-	new_session = new Session (*AudioEngine::instance (), new_session_dir, session_name);
+	ARDOUR::Session* new_session = load_session (new_session_dir, "test_session");
 
 	CPPUNIT_ASSERT (new_session);
-
-	// shouldn't need to do this as it is done in Session constructor
-	// via Session::when_engine_running
-	//AudioEngine::instance->set_session (new_session);
 
 	new_session->save_state ("");
 
 	delete new_session;
+	stop_and_destroy_backend ();
 }
 
 void
@@ -94,7 +58,8 @@ SessionTest::new_session_from_template ()
 
 	Session* new_session = 0;
 	BusProfile* bus_profile = 0;
-	AudioEngine::create ();
+
+	create_and_start_dummy_backend ();
 
 	// create a new session based on session template
 	new_session = new Session (*AudioEngine::instance (), new_session_dir, session_name,
@@ -105,6 +70,10 @@ SessionTest::new_session_from_template ()
 	new_session->save_state ("");
 
 	delete new_session;
+	stop_and_destroy_backend ();
+
+	// keep the same audio backend
+	create_and_start_dummy_backend ();
 
 	Session* template_session = 0;
 
@@ -114,4 +83,5 @@ SessionTest::new_session_from_template ()
 	CPPUNIT_ASSERT (template_session);
 
 	delete template_session;
+	stop_and_destroy_backend ();
 }
