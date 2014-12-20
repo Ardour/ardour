@@ -432,6 +432,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\cursor_context.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\curvetest.cc"
 				>
 			</File>
@@ -1395,6 +1399,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\crossfade_xpms.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\cursor_context.h"
 				>
 			</File>
 			<File
