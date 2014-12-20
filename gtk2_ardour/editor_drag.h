@@ -27,6 +27,7 @@
 
 #include "ardour/types.h"
 
+#include "cursor_context.h"
 #include "editor_items.h"
 
 namespace ARDOUR {
@@ -240,6 +241,7 @@ private:
 	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
 	ARDOUR::framepos_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
 	ARDOUR::framepos_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
+	CursorContext::Handle _cursor_ctx; ///< cursor change context
 };
 
 class RegionDrag;

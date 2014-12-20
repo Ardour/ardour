@@ -27,6 +27,8 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/smf_source.h"
 
+#include "pbd/error.h"
+
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/pixbuf.h"
@@ -367,8 +369,10 @@ Editor::reset_controls_layout_height (int32_t h)
 bool
 Editor::track_canvas_map_handler (GdkEventAny* /*ev*/)
 {
-	if (current_canvas_cursor) {
-		set_canvas_cursor (current_canvas_cursor);
+	if (!_cursor_stack.empty()) {
+		set_canvas_cursor (get_canvas_cursor());
+	} else {
+		PBD::error << "cursor stack is empty" << endmsg;
 	}
 	return false;
 }
@@ -985,13 +989,16 @@ Editor::get_track_canvas() const
 	return _track_canvas_viewport;
 }
 
-void
-Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
+Gdk::Cursor*
+Editor::get_canvas_cursor () const
 {
-	if (save) {
-		current_canvas_cursor = cursor;
-	}
+	/* The top of the cursor stack is always the currently visible cursor. */
+	return _cursor_stack.back();
+}
 
+void
+Editor::set_canvas_cursor (Gdk::Cursor* cursor)
+{
 	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
 
 	if (win && cursor) {
@@ -999,22 +1006,32 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 	}
 }
 
-void
+size_t
 Editor::push_canvas_cursor (Gdk::Cursor* cursor)
 {
 	if (cursor) {
-		_cursor_stack.push (cursor);
-		set_canvas_cursor (cursor, false);
+		_cursor_stack.push_back (cursor);
+		set_canvas_cursor (cursor);
 	}
+	return _cursor_stack.size() - 1;
 }
 
 void
 Editor::pop_canvas_cursor ()
 {
-	if (!_cursor_stack.empty()) {
-		Gdk::Cursor* cursor = _cursor_stack.top ();
-		_cursor_stack.pop ();
-		set_canvas_cursor (cursor, false);
+	while (true) {
+		if (_cursor_stack.size() <= 1) {
+			PBD::error << "attempt to pop default cursor" << endmsg;
+			return;
+		}
+
+		_cursor_stack.pop_back();
+		if (_cursor_stack.back()) {
+			/* Popped to an existing cursor, we're done.  Otherwise, the
+			   context that created this cursor has been destroyed, so we need
+			   to skip to the next down the stack. */
+			return;
+		}
 	}
 }
 
@@ -1147,29 +1164,8 @@ Editor::which_track_cursor () const
 	return cursor;
 }
 
-bool
-Editor::reset_canvas_cursor ()
-{
-	if (!is_drawable()) {
-		return false;
-	}
-
-	Gdk::Cursor* cursor = which_mode_cursor ();
-
-	if (!cursor) {
-		cursor = which_grabber_cursor ();
-	}
-		
-	if (cursor) {
-		set_canvas_cursor (cursor);
-		return true;
-	}
-
-	return false;
-}
-
 void
-Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType type)
+Editor::choose_canvas_cursor_on_entry (ItemType type)
 {
 	Gdk::Cursor* cursor = 0;
 
@@ -1179,7 +1175,8 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 
 	cursor = which_mode_cursor ();
 
-	if (mouse_mode == MouseObject || get_smart_mode ()) {
+	if ((mouse_mode == MouseObject || get_smart_mode ()) ||
+	    mouse_mode == MouseContent) {
 
 		/* find correct cursor to use in object/smart mode */
 
@@ -1237,9 +1234,6 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 			break;
 		case FadeOutTrimHandleItem:
 			cursor = _cursors->fade_out;
-			break;
-		case NoteItem:
-			cursor = which_grabber_cursor();
 			break;
 		case FeatureLineItem:
 			cursor = _cursors->cross_hair;
@@ -1313,7 +1307,8 @@ Editor::choose_canvas_cursor_on_entry (GdkEventCrossing* /*event*/, ItemType typ
 	}
 
 	if (cursor) {
-		set_canvas_cursor (cursor, true);
+		CursorContext::set(&_enter_cursor_ctx, *this, cursor);
+		_entered_item_type = type;
 	}
 }
 

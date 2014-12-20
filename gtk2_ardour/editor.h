@@ -20,13 +20,14 @@
 #ifndef __ardour_editor_h__
 #define __ardour_editor_h__
 
+#include <sys/time.h>
+
+#include <cmath>
 #include <list>
 #include <map>
 #include <set>
-#include <stack>
 #include <string>
-#include <sys/time.h>
-#include <cmath>
+#include <vector>
 
 #include <boost/optional.hpp>
 
@@ -97,6 +98,7 @@ class AutomationTimeAxisView;
 class BundleManager;
 class ButtonJoiner;
 class ControlPoint;
+class CursorContext;
 class DragManager;
 class EditNoteDialog;
 class EditorCursor;
@@ -439,11 +441,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
         void maybe_autoscroll (bool, bool, bool);
         bool autoscroll_active() const;
 
-	Gdk::Cursor* get_canvas_cursor () const { return current_canvas_cursor; }
-	void set_canvas_cursor (Gdk::Cursor*, bool save=false);
-	
-	void push_canvas_cursor (Gdk::Cursor*);
-	void pop_canvas_cursor ();
+	Gdk::Cursor* get_canvas_cursor () const;
 
 	void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>);
 	void set_current_movable (boost::shared_ptr<ARDOUR::Movable>);
@@ -726,14 +724,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::VBox           global_vpacker;
 	Gtk::VBox           vpacker;
 
-	std::stack<Gdk::Cursor*> _cursor_stack;
-	Gdk::Cursor*          current_canvas_cursor;
+	/* Cursor stuff.  Do not use directly, use via CursorContext. */
+	friend class CursorContext;
+	std::vector<Gdk::Cursor*> _cursor_stack;
+	void set_canvas_cursor (Gdk::Cursor*);
+	size_t push_canvas_cursor (Gdk::Cursor*);
+	void pop_canvas_cursor ();
+
 	Gdk::Cursor* which_grabber_cursor () const;
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
-	bool reset_canvas_cursor ();
-	void choose_canvas_cursor_on_entry (GdkEventCrossing*, ItemType);
+	void choose_canvas_cursor_on_entry (ItemType);
 
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
@@ -1095,7 +1097,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framepos_t cut_buffer_start;
 	framecnt_t cut_buffer_length;
 
-	Gdk::Cursor* pre_press_cursor;
+	boost::shared_ptr<CursorContext> _press_cursor_ctx;  ///< Button press cursor context
+	boost::shared_ptr<CursorContext> _enter_cursor_ctx;  ///< Entered item cursor context
+
 	boost::weak_ptr<ARDOUR::Trimmable> _trimmable;
 	boost::weak_ptr<ARDOUR::Movable> _movable;
 
@@ -1977,6 +1981,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	    to point to the RegionView.  Otherwise it is 0.
 	*/
 	RegionView*   entered_regionview;
+
+	ItemType _entered_item_type;
 
 	bool clear_entered_track;
 	bool left_track_canvas (GdkEventCrossing*);

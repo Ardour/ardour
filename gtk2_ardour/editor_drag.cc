@@ -274,7 +274,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 	} else {
 		/* CAIROCANVAS need a variant here that passes *cursor */
 		_item->grab ();
-		_editor->push_canvas_cursor (cursor);
+		_cursor_ctx = CursorContext::create(*_editor, cursor);
 	}
 
 	if (_editor->session() && _editor->session()->transport_rolling()) {
@@ -311,7 +311,7 @@ Drag::end_grab (GdkEvent* event)
 	finished (event, _move_threshold_passed);
 
 	_editor->verbose_cursor()->hide ();
-	_editor->pop_canvas_cursor ();
+	_cursor_ctx.reset();
 
 	return _move_threshold_passed;
 }

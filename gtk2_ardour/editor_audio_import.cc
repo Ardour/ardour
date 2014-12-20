@@ -46,6 +46,7 @@
 #include "pbd/memento_command.h"
 
 #include "ardour_ui.h"
+#include "cursor_context.h"
 #include "editor.h"
 #include "sfdb_ui.h"
 #include "editing.h"
@@ -475,7 +476,7 @@ Editor::import_sndfiles (vector<string> paths, ImportDisposition disposition, Im
 	import_status.track = track;
 	import_status.replace = replace;
 
-	set_canvas_cursor (_cursors->wait);
+	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
 	gdk_flush ();
 
 	/* start import thread for this spec. this will ultimately call Session::import_files()
@@ -512,7 +513,6 @@ Editor::import_sndfiles (vector<string> paths, ImportDisposition disposition, Im
 	}
 
 	import_status.sources.clear();
-	set_canvas_cursor (current_canvas_cursor);
 	return result;
 }
 
@@ -526,9 +526,8 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	SourceList sources;
 	string linked_path;
 	SoundFileInfo finfo;
-	int ret = 0;
 
-        push_canvas_cursor (_cursors->wait);
+	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
         gdk_flush ();
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
@@ -540,7 +539,7 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 
 		if (!AudioFileSource::get_soundfile_info (path, finfo, error_msg)) {
 			error << string_compose(_("Editor: cannot open file \"%1\", (%2)"), path, error_msg ) << endmsg;
-			goto out;
+			return -3;
 		}
 
 		if (check_sample_rate  && (finfo.samplerate != (int) _session->frame_rate())) {
@@ -562,19 +561,16 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 
 				switch (resx) {
 				case 0: /* stop a multi-file import */
-					ret = -2;
-					goto out;
+					return -2;
 				case 1: /* don't embed this one */
-					ret = -1;
-					goto out;
+					return -1;
 				case 2: /* do it, and the rest without asking */
 					check_sample_rate = false;
 					break;
 				case 3: /* do it */
 					break;
 				default:
-					ret = -2;
-					goto out;
+					return -2;
 				}
 			} else {
 				choices.push_back (_("Cancel"));
@@ -590,13 +586,11 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 
 				switch (resx) {
 				case 0: /* don't import */
-					ret = -1;
-					goto out;
+					return -1;
 				case 1: /* do it */
 					break;
 				default:
-					ret = -2;
-					goto out;
+					return -2;
 				}
 			}
 		}
@@ -627,23 +621,18 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 
 			catch (failed_constructor& err) {
 				error << string_compose(_("could not open %1"), path) << endmsg;
-				goto out;
+				return -3;
 			}
 
 			gtk_main_iteration();
 		}
 	}
 
-	if (sources.empty()) {
-		goto out;
+	if (!sources.empty()) {
+		return add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true);
 	}
 
-
-	ret = add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true);
-
-  out:
-	pop_canvas_cursor ();
-	return ret;
+	return 0;
 }
 
 int

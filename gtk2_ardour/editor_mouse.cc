@@ -705,7 +705,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RegionViewName:
 		case StreamItem:
 		case AutomationTrackItem:
-			_drags->set (new RegionCutDrag (this, item, canvas_event_sample (event)), event, current_canvas_cursor);
+			_drags->set (new RegionCutDrag (this, item, canvas_event_sample (event)), event, get_canvas_cursor());
 			return true;
 			break;
 		default:
@@ -719,7 +719,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			/* Existing note: allow trimming/motion */
 			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
 				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
-					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+					_drags->set (new NoteResizeDrag (this, item), event, get_canvas_cursor());
 				} else {
 					_drags->set (new NoteDrag (this, item), event);
 				}
@@ -938,7 +938,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			if ((note = reinterpret_cast<NoteBase*>(item->get_data ("notebase")))) {
 				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
 					/* Note is big and pointer is near the end, trim */
-					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+					_drags->set (new NoteResizeDrag (this, item), event, get_canvas_cursor());
 				} else {
 					/* Drag note */
 					_drags->set (new NoteDrag (this, item), event);
@@ -964,7 +964,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			/* resize-drag notes */
 			if ((note = reinterpret_cast<NoteBase*>(item->get_data ("notebase")))) {
 				if (note->big_enough_to_trim()) {
-					_drags->set (new NoteResizeDrag (this, item), event, current_canvas_cursor);
+					_drags->set (new NoteResizeDrag (this, item), event, get_canvas_cursor());
 				}
 			}
 			return true;
@@ -976,12 +976,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MouseAudition:
-		_drags->set (new ScrubDrag (this, item), event);
+		_drags->set (new ScrubDrag (this, item), event, _cursors->transparent);
 		scrub_reversals = 0;
 		scrub_reverse_distance = 0;
 		last_scrub_x = event->button.x;
 		scrubbing_direction = 0;
-		push_canvas_cursor (_cursors->transparent);
 		return true;
 		break;
 
@@ -1068,8 +1067,6 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		return false;
 	}
 
-        pre_press_cursor = current_canvas_cursor;
-
 	_track_canvas->grab_focus();
 
 	if (_session && _session->actively_recording()) {
@@ -1141,10 +1138,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	framepos_t where = canvas_event_sample (event);
 	AutomationTimeAxisView* atv = 0;
 
-        if (pre_press_cursor) {
-                set_canvas_cursor (pre_press_cursor);
-                pre_press_cursor = 0;
-        }
+	_press_cursor_ctx.reset();
 
 	/* no action if we're recording */
 
@@ -1441,7 +1435,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseAudition:
-			pop_canvas_cursor ();
 			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
 				switch (item_type) {
@@ -1529,7 +1522,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	 * (e.g. the actual entered regionview)
 	 */
 
-	choose_canvas_cursor_on_entry (&event->crossing, item_type);
+	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
 	case ControlPointItem:
@@ -1649,7 +1642,8 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	bool is_start;
 	bool ret = true;
 
-	reset_canvas_cursor ();
+	_enter_cursor_ctx.reset();
+	_entered_item_type = NoItem;
 
 	switch (item_type) {
 	case ControlPointItem:
@@ -2321,8 +2315,8 @@ Editor::update_join_object_range_location (double y)
 			
 		_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 		
-		if (_join_object_range_state != old) {
-			set_canvas_cursor (which_track_cursor ());
+		if (_join_object_range_state != old && _enter_cursor_ctx) {
+			_enter_cursor_ctx->change(which_track_cursor());
 		}
 
 	} else if (entered_track) {
@@ -2354,8 +2348,8 @@ Editor::update_join_object_range_location (double y)
 			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
 		}
 
-		if (_join_object_range_state != old) {
-			set_canvas_cursor (which_track_cursor ());
+		if (_join_object_range_state != old && _enter_cursor_ctx) {
+			_enter_cursor_ctx->change(which_track_cursor());
 		}
 	}
 }

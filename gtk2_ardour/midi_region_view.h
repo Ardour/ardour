@@ -61,6 +61,7 @@ class EditNoteDialog;
 class NotePlayer;
 class PatchChange;
 class ItemCounts;
+class CursorContext;
 
 class MidiRegionView : public RegionView
 {
@@ -496,9 +497,8 @@ private:
 	
 	PBD::ScopedConnection _mouse_mode_connection;
 
-	Gdk::Cursor* pre_enter_cursor;
-	Gdk::Cursor* pre_press_cursor;
-	Gdk::Cursor* pre_note_enter_cursor;
+	boost::shared_ptr<CursorContext> _note_cursor_ctx;
+	boost::shared_ptr<CursorContext> _press_cursor_ctx;
 
 	NotePlayer* _note_player;
 

@@ -313,7 +313,6 @@ Editor::Editor ()
 	clicked_routeview = 0;
 	clicked_control_point = 0;
 	last_update_frame = 0;
-        pre_press_cursor = 0;
 	last_paste_pos = 0;
 	paste_count = 0;
 	_drags = new DragManager (this);
@@ -374,6 +373,7 @@ Editor::Editor ()
 	current_stepping_trackview = 0;
 	entered_track = 0;
 	entered_regionview = 0;
+	_entered_item_type = NoItem;
 	entered_marker = 0;
 	clear_entered_track = false;
 	current_timefx = 0;
@@ -400,7 +400,6 @@ Editor::Editor ()
 
 	zoom_focus = ZoomFocusLeft;
 	_edit_point = EditAtMouse;
-	current_canvas_cursor = 0;
 	_visible_track_count = -1;
 
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
@@ -519,6 +518,9 @@ Editor::Editor ()
 	_cursors = new MouseCursors;
 	_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
 	cerr << "Set cursor set to " << ARDOUR_UI::config()->get_icon_set() << endl;
+
+	/* Push default cursor to ever-present bottom of cursor stack. */
+	push_canvas_cursor(_cursors->grabber);
 
 	ArdourCanvas::GtkCanvas* time_pad = manage (new ArdourCanvas::GtkCanvas ());
 
@@ -2120,7 +2122,9 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		edit_point_selector.set_text (str);
 	}
 
-	reset_canvas_cursor ();
+	if (_entered_item_type != NoItem) {
+		choose_canvas_cursor_on_entry (_entered_item_type);
+	}
 
 	if (!force && !changed) {
 		return;
@@ -5744,9 +5748,10 @@ Editor::ui_parameter_changed (string parameter)
 {
 	if (parameter == "icon-set") {
 		while (!_cursor_stack.empty()) {
-			_cursor_stack.pop();
+			_cursor_stack.pop_back();
 		}
 		_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
+		_cursor_stack.push_back(_cursors->grabber);
 	} else if (parameter == "draggable-playhead") {
 		if (_verbose_cursor) {
 			playhead_cursor->set_sensitive (ARDOUR_UI::config()->get_draggable_playhead());

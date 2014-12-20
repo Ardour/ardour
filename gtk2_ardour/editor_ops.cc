@@ -3689,14 +3689,13 @@ Editor::freeze_route ()
 
 	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this);
 
-	set_canvas_cursor (_cursors->wait);
+	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
 
 	while (!itt.done && !itt.cancel) {
 		gtk_main_iteration ();
 	}
 
 	current_interthread_info = 0;
-	set_canvas_cursor (current_canvas_cursor);
 }
 
 void
@@ -4734,7 +4733,7 @@ Editor::normalize_region ()
 		return;
 	}
 
-	set_canvas_cursor (_cursors->wait);
+	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
 	gdk_flush ();
 
 	/* XXX: should really only count audio regions here */
@@ -4753,7 +4752,6 @@ Editor::normalize_region ()
 
 			if (a == -1) {
 				/* the user cancelled the operation */
-				set_canvas_cursor (current_canvas_cursor);
 				return;
 			}
 
@@ -4784,7 +4782,6 @@ Editor::normalize_region ()
 	}
 
 	commit_reversible_command ();
-	set_canvas_cursor (current_canvas_cursor);
 }
 
 
@@ -4955,7 +4952,7 @@ Editor::fork_region ()
 
 	begin_reversible_command (_("Fork Region(s)"));
 
-	set_canvas_cursor (_cursors->wait);
+	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
@@ -4982,8 +4979,6 @@ Editor::fork_region ()
 	}
 
 	commit_reversible_command ();
-
-	set_canvas_cursor (current_canvas_cursor);
 }
 
 void
@@ -5102,7 +5097,7 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 
 	begin_reversible_command (command);
 
-	set_canvas_cursor (_cursors->wait);
+	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
 	gdk_flush ();
 
 	int n = 0;
@@ -5155,7 +5150,7 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 				
 				_session->add_command(new StatefulDiffCommand (playlist));
 			} else {
-				goto out;
+				return;
 			}
 
 			if (progress) {
@@ -5168,9 +5163,6 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 	}
 
 	commit_reversible_command ();
-
-  out:
-	set_canvas_cursor (current_canvas_cursor);
 }
 
 void
