@@ -122,14 +122,9 @@ void
 Editor::initialize_rulers ()
 {
 	ruler_grabbed_widget = 0;
-	/* Not really sure why we can't get this right in a cross-platform way,
-	   but it seems hard.
-	*/
-#ifdef __APPLE__	
+
 	Pango::FontDescription font (ARDOUR_UI::config()->get_SmallerFont());
-#else
-	Pango::FontDescription font (ARDOUR_UI::config()->get_SmallFont());
-#endif
+
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);
 	_minsec_metric = new MinsecMetric (this);
@@ -809,7 +804,7 @@ Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 	} else {
 
                 const framecnt_t hours_in_range = range / (60 * 60 * fr);
-                const int text_width_rough_guess = 70; /* pixels, very very approximate guess at how wide the tick mark text is */
+                const int text_width_rough_guess = 120; /* pixels, very very approximate guess at how wide the tick mark text is */
 
                 /* Normally we do not need to know anything about the width of the canvas
                    to set the ruler scale, because the caller has already determined
@@ -851,21 +846,14 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 
 	switch (timecode_ruler_scale) {
 	case timecode_show_bits:
-
 		// Find timecode time of this sample (pos) with subframe accuracy
 		_session->sample_to_timecode(pos, timecode, true /* use_offset */, true /* use_subframes */ );
-
 		for (n = 0; n < timecode_nmarks; n++) {
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, true /* use_subframes */ );
 			if ((timecode.subframes % timecode_mark_modulo) == 0) {
 				if (timecode.subframes == 0) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
-                    if (timecode.hours) {
-                        snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
-                    } else {
-                        snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
-                    }
-                    
+					snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 				} else {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					snprintf (buf, sizeof(buf), ".%02u", timecode.subframes);
@@ -873,23 +861,46 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				
 			}
 			mark.label = buf;
 			mark.position = pos;
-
 			marks.push_back (mark);
-
 			// Increment subframes by one
 			Timecode::increment_subframes( timecode, _session->config.get_subframes_per_frame() );
 		}
-	  break;
+		break;
+
+	case timecode_show_frames:
+		// Find timecode time of this sample (pos)
+		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
+		// Go to next whole frame down
+		Timecode::frames_floor( timecode );
+		for (n = 0; n < timecode_nmarks; n++) {
+			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
+			if ((timecode.frames % timecode_mark_modulo) == 0) {
+				if (timecode.frames == 0) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				}
+				mark.position = pos;
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+			} else {
+				snprintf (buf, sizeof(buf)," ");
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+				mark.position = pos;
+			}
+			mark.label = buf;
+			marks.push_back (mark);
+			Timecode::increment( timecode, _session->config.get_subframes_per_frame() );
+		}
+		break;
+
 	case timecode_show_seconds:
 		// Find timecode time of this sample (pos)
 		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole second down
 		Timecode::seconds_floor( timecode );
-
 		for (n = 0; n < timecode_nmarks; n++) {
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.seconds % timecode_mark_modulo) == 0) {
@@ -900,29 +911,23 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					mark.position = pos;
 				}
-                if (timecode.hours) {
-                    snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
-                } else {
-                    snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
-                }
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
 				mark.position = pos;
-
 			}
 			mark.label = buf;
 			marks.push_back (mark);
-
 			Timecode::increment_seconds( timecode, _session->config.get_subframes_per_frame() );
 		}
-	  break;
+		break;
+
 	case timecode_show_minutes:
-		// Find timecode time of this sample (pos)
+		//Find timecode time of this sample (pos)
 		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole minute down
 		Timecode::minutes_floor( timecode );
-
 		for (n = 0; n < timecode_nmarks; n++) {
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.minutes % timecode_mark_modulo) == 0) {
@@ -931,51 +936,37 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 				} else {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
-                if (timecode.hours) {
-                    snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
-                } else {
-                    snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
-                }
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
-
 			}
 			mark.label = buf;
 			mark.position = pos;
 			marks.push_back (mark);
 			Timecode::increment_minutes( timecode, _session->config.get_subframes_per_frame() );
 		}
-
-	  break;
+		break;
 	case timecode_show_hours:
 		// Find timecode time of this sample (pos)
 		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
 		// Go to next whole hour down
 		Timecode::hours_floor( timecode );
-
 		for (n = 0; n < timecode_nmarks; n++) {
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.hours % timecode_mark_modulo) == 0) {
 				mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                if (timecode.hours) {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
-                                } else {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
-                                }
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
 			} else {
 				snprintf (buf, sizeof(buf)," ");
 				mark.style = ArdourCanvas::Ruler::Mark::Micro;
-                                
 			}
 			mark.label = buf;
 			mark.position = pos;
 			marks.push_back (mark);
-                        /* Move to next hour */
-                        Timecode::increment_hours( timecode, _session->config.get_subframes_per_frame() );
+			Timecode::increment_hours( timecode, _session->config.get_subframes_per_frame() );
 		}
-	  break;
-
+		break;
 	case timecode_show_many_hours:
 		// Find timecode time of this sample (pos)
 		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
@@ -986,11 +977,7 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
 			if ((timecode.hours % timecode_mark_modulo) == 0) {
 				mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                if (timecode.hours) {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
-                                } else {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
-                                }
+				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
                                 mark.label = buf;
                                 mark.position = pos;
                                 marks.push_back (mark);
@@ -1001,44 +988,9 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
                         */
                         timecode.hours += timecode_mark_modulo;
 		}
-	  break;
-
-	case timecode_show_frames:
-		// Find timecode time of this sample (pos)
-		_session->sample_to_timecode(pos, timecode, true /* use_offset */, false /* use_subframes */ );
-		// Go to next whole frame down
-		Timecode::frames_floor( timecode );
-
-		for (n = 0; n < timecode_nmarks; n++) {
-			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
-			if ((timecode.frames % timecode_mark_modulo) == 0)  {
-				if (timecode.frames == 0) {
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-				} else {
-					mark.style = ArdourCanvas::Ruler::Mark::Minor;
-				}
-				mark.position = pos;
-                                if (timecode.hours) {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
-                                } else {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
-                                }
-			} else {
-				snprintf (buf, sizeof(buf)," ");
-				mark.style = ArdourCanvas::Ruler::Mark::Micro;
-				mark.position = pos;
-
-			}
-			mark.label = buf;
-			marks.push_back (mark);
-			Timecode::increment( timecode, _session->config.get_subframes_per_frame() );
-		}
-
-	  break;
+		break;
 	}
 }
-
-
 
 void
 Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
