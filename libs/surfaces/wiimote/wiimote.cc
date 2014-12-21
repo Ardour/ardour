@@ -208,11 +208,10 @@ WiimoteControlProtocol::connect_idle ()
 {
 	DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::connect_idle init\n");
 
-	bool retry = true;
+	bool retry = false;
 
 	if (connect_wiimote ()) {
 		stop_wiimote_discovery ();
-		retry = false;
 	}
 
 	DEBUG_TRACE (DEBUG::WiimoteControl, "WiimoteControlProtocol::connect_idle done\n");
@@ -228,30 +227,29 @@ WiimoteControlProtocol::connect_wiimote ()
 		return true;
 	}
 
-	bool success = true;
+	bool success = false;
 
 	// if we don't have a Wiimote yet, try to discover it; if that
 	// fails, wait for a short period of time and try again
-	if (!wiimote) {
+	for (int i = 0; i < 5; ++i) {
 		cerr << "Wiimote: Not discovered yet, press 1+2 to connect" << endl;
 
 		bdaddr_t bdaddr = {{ 0, 0, 0, 0, 0, 0 }};
 		wiimote = cwiid_open (&bdaddr, 0);
 		callback_thread_registered = false;
-		if (!wiimote) {
-			success = false;
-		} else {
+		if (wiimote) {
 			// a Wiimote was discovered
 			cerr << "Wiimote: Connected successfully" << endl;
 
 			// attach the WiimoteControlProtocol object to the Wiimote handle
 			if (cwiid_set_data (wiimote, this)) {
 				cerr << "Wiimote: Failed to attach control protocol" << endl;
-				success = false;
+			} else {
+				success = true;
+				// clear the last button state to start processing events cleanly
+				button_state = 0;
+				break;
 			}
-
-			// clear the last button state to start processing events cleanly
-			button_state = 0;
 		}
 	}
 
