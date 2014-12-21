@@ -563,15 +563,15 @@ def build(bld):
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
-                'SMALLER' : '8',
-                'SMALL' : '9',
-                'NORMAL' : '10',
-                'BIG' : '14',
-                'BIGGER' : '17',
-                'LARGE' : '18',
-                'LARGER' : '24',
-                'HUGER' : '34',
-                'MASSIVE' : '60',
+                'SMALLER' : '6',
+                'SMALL' : '7',
+                'NORMAL' : '8',
+                'BIG' : '11',
+                'BIGGER' : '13.5',
+                'LARGE' : '14.5',
+                'LARGER' : '19',
+                'HUGER' : '27',
+                'MASSIVE' : '48',
         }
         font_names = {
                 'MONOSPACE' : 'ArdourMono',
