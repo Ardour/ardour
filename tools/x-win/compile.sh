@@ -31,7 +31,7 @@ if test -z "${ARDOURCFG}"; then
 fi
 
 if [ "$(id -u)" = "0" ]; then
-	apt-get -y install build-essential \
+	apt-get -qq -y install build-essential \
 		${DEBIANPKGS} \
 		git autoconf automake libtool pkg-config yasm python
 
