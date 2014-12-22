@@ -319,6 +319,9 @@ Editor::register_actions ()
 	redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
 	redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
 
+	selection_undo_action = reg_sens (editor_actions, "undo-last-selection-op", _("Undo Last Selection Op"), sigc::mem_fun(*this, &Editor::undo_reversible_selection_op));
+	selection_redo_action = reg_sens (editor_actions, "redo-last-selection-op", _("Redo Last Selection Op"), sigc::mem_fun(*this, &Editor::redo_reversible_selection_op));
+
 	reg_sens (editor_actions, "export-audio", _("Export Audio"), sigc::mem_fun(*this, &Editor::export_audio));
 	reg_sens (editor_actions, "export-range", _("Export Range"), sigc::mem_fun(*this, &Editor::export_range));
 
