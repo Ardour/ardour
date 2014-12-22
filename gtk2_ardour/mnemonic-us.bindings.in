@@ -206,11 +206,10 @@ This mode provides many different operations on both regions and control points,
 
 ;; BOTTOM ROW
 
-@mmode|Editor/zoom-to-range|z|zoom to selection
+@mmode|Editor/zoom-to-selection|z|zoom to selection
+@vis|Editor/zoom-to-selection-both-axes|<@PRIMARY@><@SECONDARY@>z|zoom to selection, x and y
 @edit|Editor/undo|<@PRIMARY@>z|undo
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
-@vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)
-@vis|Editor/zoom-to-region-both-axes|<@SECONDARY@>z|zoom (x+y) to selected region
 @vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 ;@-group|Editor/crop|c|some text

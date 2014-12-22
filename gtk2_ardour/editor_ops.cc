@@ -1760,16 +1760,19 @@ Editor::temporal_zoom_region (bool both_axes)
 	redo_visual_stack.push_back (current_visual_state (both_axes));
 }
 
-void
-Editor::zoom_to_region (bool both_axes)
-{
-	temporal_zoom_region (both_axes);
-}
 
 void
 Editor::temporal_zoom_selection (bool both_axes)
 {
 	if (!selection) return;
+
+	//ToDo:  if notes are selected, zoom to that
+
+	//ToDo:  if control points are selected, zoom to that
+
+	//if region(s) are selected, zoom to that
+	if ( !selection->regions.empty() )
+		temporal_zoom_region (both_axes);
 
 	//if a range is selected, zoom to that
 	if (!selection->time.empty()) {
@@ -1784,10 +1787,7 @@ Editor::temporal_zoom_selection (bool both_axes)
 		if (both_axes)
 			fit_selected_tracks();
 
-	} else {
-		temporal_zoom_region (both_axes);
 	}
-
 
 }
 
