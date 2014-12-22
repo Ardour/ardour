@@ -4379,6 +4379,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	Session* s = _editor->session();
 
+	_editor->begin_reversible_selection_op (_("Change Time Selection"));
 	if (movement_occurred) {
 		motion (event, false);
 		/* XXX this is not object-oriented programming at all. ick */
@@ -4435,6 +4436,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->stop_canvas_autoscroll ();
 	_editor->clicked_selection = 0;
+	_editor->commit_reversible_selection_op ();
 }
 
 void
@@ -5192,11 +5194,11 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 	
 	Selection::Operation op = ArdourKeyboard::selection_type (button_state);
 
-	_editor->begin_reversible_command (_("rubberband selection"));
+	_editor->begin_reversible_selection_op (_("rubberband selection"));
 
 	_editor->select_all_within (x1, x2 - 1, y1, y2, _editor->track_views, op, false);
 
-	_editor->commit_reversible_command ();
+	_editor->commit_reversible_selection_op ();
 }
 
 void

@@ -122,6 +122,8 @@ Editor::undo (uint32_t n)
 	
 	if (_session) {
 		_session->undo (n);
+		redo_action->set_sensitive(true);
+		begin_selection_op_history ();
 	}
 }
 
@@ -134,6 +136,11 @@ Editor::redo (uint32_t n)
 	
 	if (_session) {
 		_session->redo (n);
+		cerr << "redo depth is : " << _session->redo_depth() << endl;
+		if (_session->redo_depth() == 0) {
+			redo_action->set_sensitive(false);
+		}
+		begin_selection_op_history ();
 	}
 }
 

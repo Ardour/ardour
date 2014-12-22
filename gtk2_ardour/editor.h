@@ -440,6 +440,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
 	              bool              for_mark  = false);
 
+	void begin_selection_op_history ();
+	void begin_reversible_selection_op (std::string cmd_name);
+	void commit_reversible_selection_op ();
+	void undo_reversible_selection_op ();
+	void redo_reversible_selection_op ();
 	void begin_reversible_command (std::string cmd_name);
 	void begin_reversible_command (GQuark);
 	void commit_reversible_command ();
@@ -1941,6 +1946,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void write_selection ();
 
+	uint32_t selection_op_cmd_depth;
+	uint32_t selection_op_history_it;
+
+	std::list<XMLNode *> selection_op_history; /* used in *_reversible_selection_op */
 	std::list<XMLNode *> before; /* used in *_reversible_command */
 
 	void update_title ();
@@ -2066,6 +2075,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Glib::RefPtr<Gtk::Action>              undo_action;
 	Glib::RefPtr<Gtk::Action>              redo_action;
+	Glib::RefPtr<Gtk::Action>              selection_undo_action;
+	Glib::RefPtr<Gtk::Action>              selection_redo_action;
 
 	void history_changed ();
 

@@ -1465,7 +1465,11 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 
                 /* do any (de)selection operations that should occur on button release */
+
+		begin_reversible_selection_op (_("Button Select"));
                 button_selection (item, event, item_type);
+		commit_reversible_selection_op ();
+
 		return true;
 		break;
 

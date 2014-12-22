@@ -284,6 +284,8 @@ Editor::Editor ()
 	, _tools_tearoff (0)
 
 	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
+	, selection_op_cmd_depth (0)
+	, selection_op_history_it (0)
 
 	  /* nudge */
 
@@ -309,6 +311,7 @@ Editor::Editor ()
 	selection = new Selection (this);
 	cut_buffer = new Selection (this);
 	_selection_memento = new SelectionMemento ();
+	selection_op_history.clear();
 	before.clear();
 
 	clicked_regionview = 0;
@@ -3312,6 +3315,95 @@ Editor::map_transport_state ()
 /* UNDO/REDO */
 
 void
+Editor::begin_selection_op_history ()
+{
+	selection_op_cmd_depth = 0;
+	selection_op_history_it = 0;
+	selection_op_history.clear();
+	selection_undo_action->set_sensitive (false);
+	selection_redo_action->set_sensitive (false);
+	selection_op_history.push_front (&_selection_memento->get_state ());
+}
+
+void
+Editor::begin_reversible_selection_op (string name)
+{
+	if (_session) {
+		//cerr << name << endl;
+		/* begin/commit pairs can be nested */
+		selection_op_cmd_depth++;
+	}
+}
+
+void
+Editor::commit_reversible_selection_op ()
+{
+	if (_session) {
+		if (selection_op_cmd_depth == 1) {
+
+			if (selection_op_history_it > 0 && selection_op_history_it < selection_op_history.size()) {
+				list<XMLNode *>::iterator it = selection_op_history.begin();
+				advance (it, selection_op_history_it);
+				selection_op_history.erase (selection_op_history.begin(), it);
+			}
+			selection_op_history.push_front (&_selection_memento->get_state ());
+			selection_op_history_it = 0;
+		}
+
+		if (selection_op_cmd_depth > 0) {
+			selection_op_cmd_depth--;
+		}
+
+		selection_undo_action->set_sensitive (true);
+		selection_redo_action->set_sensitive (false);
+	}
+}
+
+void
+Editor::undo_reversible_selection_op ()
+{
+	if (_session) {
+		selection_op_history_it++;
+		uint32_t n = 0;
+		for (std::list<XMLNode *>::iterator i = selection_op_history.begin(); i != selection_op_history.end(); ++i) {
+			if (n == selection_op_history_it) {
+				_selection_memento->set_state (*(*i), Stateful::current_state_version);
+				selection_redo_action->set_sensitive (true);
+			}
+			++n;
+
+		}
+		/* is there an earlier entry? */
+		if ((selection_op_history_it + 1) >= selection_op_history.size()) {
+			selection_undo_action->set_sensitive (false);
+		}
+	}
+}
+
+void
+Editor::redo_reversible_selection_op ()
+{
+	if (_session) {
+		if (selection_op_history_it > 0) {
+			selection_op_history_it--;
+		}
+		uint32_t n = 0;
+		for (std::list<XMLNode *>::iterator i = selection_op_history.begin(); i != selection_op_history.end(); ++i) {
+			if (n == selection_op_history_it) {
+				_selection_memento->set_state (*(*i), Stateful::current_state_version);
+				selection_undo_action->set_sensitive (true);
+			}
+			++n;
+
+		}
+
+		if (selection_op_history_it == 0) {
+			selection_redo_action->set_sensitive (false);
+		}
+	}
+}
+
+void
 Editor::begin_reversible_command (string name)
 {
 	if (_session) {
@@ -3335,9 +3427,12 @@ Editor::commit_reversible_command ()
 	if (_session) {
 		if (before.size() == 1) {
 			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
+			begin_selection_op_history ();
 		}
 
-		if (!before.empty()) {
+		if (before.empty()) {
+			cerr << "Please call begin_reversible_command() before commit_reversible_command()." << endl;
+		} else {
 			before.pop_back();
 		}
 
@@ -4922,6 +5017,9 @@ Editor::first_idle ()
 	_routes->redisplay ();
 
 	delete dialog;
+
+	begin_selection_op_history ();
+
 	_have_idled = true;
 }
 
