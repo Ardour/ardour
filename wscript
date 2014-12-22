@@ -62,7 +62,7 @@ compiler_flags_dictionaries= {
         'sse' : '/arch:SSE',
         'silence-unused-arguments' : '',
         'sse' : '',
-        'fpmath-see' : '',
+        'fpmath-sse' : '',
         'xmmintrinsics' : '',
         'pipe' : '',
         'full-optimization' : '/O2',
