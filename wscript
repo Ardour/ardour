@@ -841,6 +841,7 @@ def configure(conf):
         # needed for at least libsmf
         conf.check_cc(function_name='htonl', header_name='winsock2.h', lib='ws2_32')
         conf.env.append_value('LIB', 'ws2_32')
+        conf.env.append_value('LIB', 'winmm')
         # needed for mingw64 packages, not harmful on normal mingw build
         conf.env.append_value('LIB', 'intl')
         conf.check_cc(function_name='regcomp', header_name='regex.h',
