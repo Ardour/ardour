@@ -139,7 +139,8 @@ TracksControlPanel::init ()
     _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
 
     _control_panel_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_control_panel_button));
-    
+    _color_adjustment.signal_value_changed().connect (mem_fun (*this, &TracksControlPanel::color_adjustment_changed));
+
     _yes_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_yes_button));
     _no_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_no_button));
     _yes_button.set_visible(false);
@@ -568,8 +569,6 @@ TracksControlPanel::display_waveform_color_fader ()
     
     _color_box.modify_bg (Gtk::STATE_NORMAL, color );
     _color_adjustment.set_value (grey);
-    
-    _color_adjustment.signal_value_changed().connect (mem_fun (*this, &TracksControlPanel::color_adjustment_changed));
 }
 
 void
@@ -1112,6 +1111,7 @@ void
 TracksControlPanel::display_general_preferences ()
 {
 	display_waveform_shape ();
+    display_waveform_color_fader ();
 	display_meter_hold ();
 	display_meter_falloff ();
 	display_audio_capture_buffer_seconds ();
