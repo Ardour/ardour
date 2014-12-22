@@ -278,13 +278,13 @@ ARDOUR_UI::on_tracks_button (WavesButton*)
 void
 ARDOUR_UI::on_bit_depth_button (WavesButton*)
 {
-    tracks_control_panel->show ();
+    tracks_control_panel->show_and_open_tab (TracksControlPanel::SessionSettingsTab);
 }
 
 void
 ARDOUR_UI::on_frame_rate_button (WavesButton*)
 {
-    tracks_control_panel->show ();
+    tracks_control_panel->show_and_open_tab (TracksControlPanel::SessionSettingsTab);
 }
 
 void
