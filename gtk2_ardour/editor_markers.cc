@@ -1436,6 +1436,13 @@ Editor::populate_midi_inout_dropdowns  ()
 	populate_midi_inout_dropdown (true);
 }
 
+namespace  {
+    void midi_dropdown_element_data_cleaner (void* data)
+    {
+        free(data);
+    }
+}
+
 void
 Editor::populate_midi_inout_dropdown  (bool playback)
 {
@@ -1471,9 +1478,8 @@ Editor::populate_midi_inout_dropdown  (bool playback)
 
 		if (state_iter->active) {
             
-            Gtk::CheckMenuItem& new_item = dropdown->add_check_menu_item (device_name, strdup (state_iter->name.c_str()));
+            Gtk::CheckMenuItem& new_item = dropdown->add_check_menu_item (device_name, strdup (state_iter->name.c_str()), midi_dropdown_element_data_cleaner);
             new_item.set_active(state_iter->scene_connected);
-            
             
             if (!have_first) {
 				dropdown->set_text (device_name);

@@ -121,7 +121,7 @@ WavesDropdown::set_current_item (int current_item_number)
 }
 
 Gtk::MenuItem&
-WavesDropdown::add_menu_item (const std::string& item, void* cookie)
+WavesDropdown::add_menu_item (const std::string& item, void* cookie, DestroyNotify cookie_cleaner)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
@@ -134,13 +134,17 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie)
 		child->set_style (get_style());
 	}
 
-	menuitem.set_data (menu_item_data_key, cookie);
+    if (cookie_cleaner) {
+        menuitem.set_data (menu_item_data_key, cookie, cookie_cleaner);
+    } else {
+        menuitem.set_data (menu_item_data_key, cookie);
+    }
 
     return menuitem;
 }
 
 Gtk::RadioMenuItem&
-WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie)
+WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie, DestroyNotify cookie_cleaner)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
@@ -160,13 +164,17 @@ WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie)
 		child->set_style (get_style());
 	}
 
-	menuitem.set_data (menu_item_data_key, cookie);
+    if (cookie_cleaner) {
+        menuitem.set_data (menu_item_data_key, cookie, cookie_cleaner);
+    } else {
+        menuitem.set_data (menu_item_data_key, cookie);
+    }
 
     return menuitem;
 }
 
 Gtk::CheckMenuItem&
-WavesDropdown::add_check_menu_item (const std::string& item, void* cookie)
+WavesDropdown::add_check_menu_item (const std::string& item, void* cookie,  DestroyNotify cookie_cleaner)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
@@ -179,7 +187,11 @@ WavesDropdown::add_check_menu_item (const std::string& item, void* cookie)
 		child->set_style (get_style());
 	}
 
-	menuitem.set_data (menu_item_data_key, cookie);
+    if (cookie_cleaner) {
+        menuitem.set_data (menu_item_data_key, cookie, cookie_cleaner);
+    } else {
+        menuitem.set_data (menu_item_data_key, cookie);
+    }
 
     return menuitem;
 }
