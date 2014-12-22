@@ -1149,6 +1149,11 @@ TracksControlPanel::save_general_preferences ()
     uint32_t color_uint32 = RGBA_TO_UINT(grey, grey, grey, 255);
     
     // Do not change order.
+    // Save outline color
+    ARDOUR_UI::config()->set_canvasvar_SelectedWaveForm (color_uint32);
+    ARDOUR_UI::config()->set_canvasvar_RecWaveForm (color_uint32);
+    ARDOUR_UI::config()->set_canvasvar_WaveForm (color_uint32);
+    // Save fill color
     ARDOUR_UI::config()->set_canvasvar_RecWaveFormFill (color_uint32);
     ARDOUR_UI::config()->set_canvasvar_SelectedWaveFormFill (color_uint32);
     ARDOUR_UI::config()->set_canvasvar_ZeroLine (color_uint32);
