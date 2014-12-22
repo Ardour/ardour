@@ -5018,6 +5018,10 @@ Editor::first_idle ()
 
 	delete dialog;
 
+	if (_session->undo_depth() == 0) {
+		undo_action->set_sensitive(false);
+	}
+	redo_action->set_sensitive(false);
 	begin_selection_op_history ();
 
 	_have_idled = true;

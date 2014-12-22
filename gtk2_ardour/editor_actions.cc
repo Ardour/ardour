@@ -314,8 +314,8 @@ Editor::register_actions ()
 	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
 
 	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
-	redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
-	redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+	alternate_redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+	alternate_alternate_redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
 
 	selection_undo_action = reg_sens (editor_actions, "undo-last-selection-op", _("Undo Last Selection Op"), sigc::mem_fun(*this, &Editor::undo_reversible_selection_op));
 	selection_redo_action = reg_sens (editor_actions, "redo-last-selection-op", _("Redo Last Selection Op"), sigc::mem_fun(*this, &Editor::redo_reversible_selection_op));

@@ -2075,6 +2075,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	Glib::RefPtr<Gtk::Action>              undo_action;
 	Glib::RefPtr<Gtk::Action>              redo_action;
+	Glib::RefPtr<Gtk::Action>              alternate_redo_action;
+	Glib::RefPtr<Gtk::Action>              alternate_alternate_redo_action;
 	Glib::RefPtr<Gtk::Action>              selection_undo_action;
 	Glib::RefPtr<Gtk::Action>              selection_redo_action;
 
