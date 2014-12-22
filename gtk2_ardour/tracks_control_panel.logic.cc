@@ -1510,6 +1510,28 @@ TracksControlPanel::on_a_settings_tab_button_clicked (WavesButton* clicked_butto
 }
 
 void
+TracksControlPanel::show_and_open_tab (int tab_id)
+{
+    show ();
+    
+    bool visible = (tab_id == MIDISystemSettingsTab);
+	_midi_settings_tab.set_visible (visible);
+	_midi_settings_tab_button.set_active(visible);
+    
+	visible = (tab_id == SessionSettingsTab);
+	_session_settings_tab.set_visible (visible);;
+	_session_settings_tab_button.set_active(visible);
+    
+	visible = (tab_id == AudioSystemSettingsTab);
+	_audio_settings_tab.set_visible (visible);
+	_audio_settings_tab_button.set_active(visible);
+    
+	visible = (tab_id == PreferencesTab);
+	_general_settings_tab.set_visible (visible);
+	_general_settings_tab_button.set_active(visible);
+}
+
+void
 TracksControlPanel::on_device_error ()
 {
     WavesMessageDialog message_dialog ("", _("Device cannot operate properly. Switched to None device."));

@@ -20,6 +20,13 @@
 // class TracksControlPanel : public WavesDialog {
   public:
     void refresh_session_settings_info ();
+    enum {
+        AudioSystemSettingsTab,
+        MIDISystemSettingsTab,
+        SessionSettingsTab,
+        PreferencesTab
+    };
+    void show_and_open_tab (int);
 
   private:
 
