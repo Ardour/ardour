@@ -804,7 +804,8 @@ def configure(conf):
 
     # executing a test program is n/a when cross-compiling
     if Options.options.dist_target != 'mingw':
-        conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
+        if Options.options.dist_target != 'msvc':
+            conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
         conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
                   execute = "1",
                   mandatory = True,
