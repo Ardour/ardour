@@ -70,8 +70,10 @@ user_config_directory ()
 			exit (1);
 		}
 
+#ifndef PLATFORM_WINDOWS
 		p = home_dir;
 		p = Glib::build_filename (p, ".config");
+#endif
 	}
 #endif
 
