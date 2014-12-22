@@ -3427,6 +3427,7 @@ Editor::commit_reversible_command ()
 	if (_session) {
 		if (before.size() == 1) {
 			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
+			undo_action->set_sensitive(true);
 			begin_selection_op_history ();
 		}
 
