@@ -35,6 +35,7 @@
 #include "editor.h"
 #include "keyboard.h"
 #include "public_editor.h"
+#include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
@@ -1201,7 +1202,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 			 * TODO: check if file is audio/midi, allow drops on same track-type only,
 			 * currently: if audio is dropped on a midi-track, it is only added to the region-list
 			 */
-			if (Profile->get_sae() || Config->get_only_copy_imported_files()) {
+			if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files()) {
 				context->drag_status(Gdk::ACTION_COPY, time);
 			} else {
 				if ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY) {

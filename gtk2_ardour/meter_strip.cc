@@ -407,7 +407,7 @@ MeterStrip::fast_update ()
 	float mpeak = level_meter->update_meters();
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
-		if (mpeak >= Config->get_meter_peak()) {
+		if (mpeak >= ARDOUR_UI::config()->get_meter_peak()) {
 			peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 		}
 	}

@@ -239,7 +239,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	cairo_stroke (cr);
 
 	//highlight if grabbed or if mouse is hovering over me
-	if ( _grabbed || (_hovering && ARDOUR::Config->get_widget_prelight() ) ) {
+	if ( _grabbed || (_hovering && ARDOUR_UI::config()->get_widget_prelight() ) ) {
 		cairo_set_source_rgba (cr, 1,1,1, 0.12 );
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);

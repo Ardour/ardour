@@ -30,7 +30,7 @@
  *  are expressed using subclasses of Option.  More complex UI elements are represented
  *  using individual classes subclassed from OptionEditorBox.
  */
-
+	
 /** Editor for options which are obtained from and written back to one of the .rc files. */
 class RCOptionEditor : public OptionEditor
 {
@@ -43,6 +43,7 @@ private:
 	void parameter_changed (std::string const &);
 	void ltc_generator_volume_changed ();
 	ARDOUR::RCConfiguration* _rc_config;
+	UIConfiguration* _ui_config;
 	BoolOption* _solo_control_is_listen_control;
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;
 	VisibilityGroup _mixer_strip_visibility;

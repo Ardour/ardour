@@ -401,7 +401,7 @@ ThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCanvas::
 
 	/* we want the colors sorted by hue, with their name */
 
-	UIConfiguration::Colors& colors (ARDOUR_UI::instance()->config()->colors);
+	UIConfiguration::Colors& colors (ARDOUR_UI::config()->colors);
 	vector<NamedColor> nc;
 	for (UIConfiguration::Colors::const_iterator x = colors.begin(); x != colors.end(); ++x) {
 		nc.push_back (NamedColor (x->first, HSV (x->second)));
@@ -442,7 +442,7 @@ ThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCanvas::
 void
 ThemeManager::palette_size_request (Gtk::Requisition* req)
 {
-	uint32_t ncolors = ARDOUR_UI::instance()->config()->colors.size();
+	uint32_t ncolors = ARDOUR_UI::config()->colors.size();
 	const int box_size = 20;
 
 	double c = sqrt ((double)ncolors);
@@ -480,7 +480,7 @@ ThemeManager::edit_palette_color (std::string name)
 {
 	using namespace ArdourCanvas;
 	double r,g, b, a;
-	UIConfiguration* uic (ARDOUR_UI::instance()->config());
+	UIConfiguration* uic (ARDOUR_UI::config());
 	ArdourCanvas::Color c = uic->color (name);
 	Gdk::Color gdkcolor;
 
@@ -504,7 +504,7 @@ ThemeManager::palette_color_response (int result, std::string name)
 
 	color_dialog_connection.disconnect ();
 	
-	UIConfiguration* uic (ARDOUR_UI::instance()->config());
+	UIConfiguration* uic (ARDOUR_UI::config());
 	Gdk::Color gdkcolor;
 	double r,g, b, a;
 
@@ -532,7 +532,7 @@ ThemeManager::alias_palette_event (GdkEvent* ev, string new_alias, string target
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
-		ARDOUR_UI::instance()->config()->set_alias (target_name, new_alias);
+		ARDOUR_UI::config()->set_alias (target_name, new_alias);
 		return true;
 		break;
 	default:
@@ -553,7 +553,7 @@ ThemeManager::alias_palette_response (int response, std::string target_name, std
 
 	case GTK_RESPONSE_REJECT:
 		/* revert choice */
-		ARDOUR_UI::instance()->config()->set_alias (target_name, old_alias);
+		ARDOUR_UI::config()->set_alias (target_name, old_alias);
 		break;
 
 	default:
@@ -601,7 +601,7 @@ ThemeManager::setup_aliases ()
 {
 	using namespace ArdourCanvas;
 	
-	UIConfiguration* uic (ARDOUR_UI::instance()->config());
+	UIConfiguration* uic (ARDOUR_UI::config());
 	UIConfiguration::ColorAliases& aliases (uic->color_aliases);
 
 	alias_list->clear ();

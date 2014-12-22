@@ -4106,7 +4106,7 @@ Editor::session_state_saved (string)
 void
 Editor::update_tearoff_visibility()
 {
-	bool visible = Config->get_keep_tearoffs();
+	bool visible = ARDOUR_UI::config()->get_keep_tearoffs();
 	_mouse_mode_tearoff->set_visible (visible);
 	_tools_tearoff->set_visible (visible);
 	if (_zoom_tearoff) {

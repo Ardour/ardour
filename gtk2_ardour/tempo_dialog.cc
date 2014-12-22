@@ -23,8 +23,7 @@
 
 #include "gtkmm2ext/utils.h"
 
-#include "ardour/rc_configuration.h"
-
+#include "ardour_ui.h"
 #include "tempo_dialog.h"
 
 #include "i18n.h"
@@ -108,7 +107,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	
 	Table* table;
 
-	if (Config->get_allow_non_quarter_pulse()) {
+	if (ARDOUR_UI::config()->get_allow_non_quarter_pulse()) {
 		table = manage (new Table (5, 5));
 	} else {
 		table = manage (new Table (5, 4));
@@ -122,7 +121,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	table->attach (*bpm_label, 0, 1, 0, 1);
 	table->attach (bpm_spinner, 1, 5, 0, 1);
 
-	if (Config->get_allow_non_quarter_pulse()) {
+	if (ARDOUR_UI::config()->get_allow_non_quarter_pulse()) {
 		table->attach (pulse_selector_label, 0, 1, 1, 2);
 		table->attach (pulse_selector, 1, 5, 1, 2);
 		row = 2;

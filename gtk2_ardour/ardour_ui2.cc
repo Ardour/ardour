@@ -687,7 +687,7 @@ ARDOUR_UI::toggle_follow_edits ()
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	Config->set_follow_edits (tact->get_active ());
+	ui_config->set_follow_edits (tact->get_active ());
 }
 
 	

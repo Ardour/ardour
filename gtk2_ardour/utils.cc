@@ -760,7 +760,7 @@ ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (guint keyval)
 void
 ARDOUR_UI_UTILS::set_pango_fontsize ()
 {
-	long val = ARDOUR::Config->get_font_scale();
+	long val = ARDOUR_UI::config()->get_font_scale();
 
 	/* FT2 rendering - used by GnomeCanvas, sigh */
 
@@ -776,7 +776,7 @@ ARDOUR_UI_UTILS::set_pango_fontsize ()
 void
 ARDOUR_UI_UTILS::reset_dpi ()
 {
-	long val = ARDOUR::Config->get_font_scale();
+	long val = ARDOUR_UI::config()->get_font_scale();
 	set_pango_fontsize ();
 	/* Xft rendering */
 

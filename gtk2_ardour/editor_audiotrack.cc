@@ -70,7 +70,7 @@ void
 Editor::toggle_meter_updating()
 {
 	DisplaySuspender ds;
-	if (Config->get_show_track_meters()) {
+	if (ARDOUR_UI::config()->get_show_track_meters()) {
 		start_updating_meters ();
 	} else {
 		stop_updating_meters ();

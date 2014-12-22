@@ -186,7 +186,7 @@ AudioStreamView::setup_rec_box ()
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.track()->record_enabled()) {
-			if (_trackview.audio_track()->mode() == Normal && Config->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
+			if (_trackview.audio_track()->mode() == Normal && ARDOUR_UI::config()->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
 
@@ -314,7 +314,7 @@ AudioStreamView::rec_peak_range_ready (framepos_t start, framecnt_t cnt, boost::
 void
 AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 {
-	if (!Config->get_show_waveforms_while_recording ()) {
+	if (!ARDOUR_UI::config()->get_show_waveforms_while_recording ()) {
 		return;
 	}
 

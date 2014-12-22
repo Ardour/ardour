@@ -95,7 +95,7 @@ TimeAxisViewItem::set_constant_heights ()
 	        Y_OFFSET is measured from the top of the time axis view item.
 	*/
 
-	if (Config->get_show_name_highlight()) {
+	if (ARDOUR_UI::config()->get_show_name_highlight()) {
 		NAME_Y_OFFSET = height + 1;
 		NAME_HIGHLIGHT_SIZE = height + 2;
 	} else {
@@ -207,7 +207,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		}
 	}
 	
-	if (Config->get_show_name_highlight() && (visibility & ShowNameHighlight)) {
+	if (ARDOUR_UI::config()->get_show_name_highlight() && (visibility & ShowNameHighlight)) {
 
 		double width;
 		double start = 1.0;
@@ -235,7 +235,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
-		if (Config->get_show_name_highlight()) {
+		if (ARDOUR_UI::config()->get_show_name_highlight()) {
 			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
 		} else {
 			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
@@ -564,7 +564,7 @@ TimeAxisViewItem::set_height (double height)
 	manage_name_highlight ();
 
 	if (visibility & ShowNameText) {
-		if (Config->get_show_name_highlight()) {
+		if (ARDOUR_UI::config()->get_show_name_highlight()) {
 			name_text->set_y_position (height - NAME_Y_OFFSET); 
 		} else {
 			name_text->set_y_position (NAME_Y_OFFSET); 
@@ -676,7 +676,7 @@ TimeAxisViewItem::set_name_text_color ()
 
 	uint32_t f;
 	
-	if (Config->get_show_name_highlight()) {
+	if (ARDOUR_UI::config()->get_show_name_highlight()) {
 		/* name text will always be on top of name highlight, which
 		   will always use our fill color.
 		*/
@@ -706,7 +706,7 @@ TimeAxisViewItem::get_fill_color () const
 		if (_recregion) {
 			c = ARDOUR_UI::config()->color ("recording rect");
 		} else {
-			if ((!Config->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+			if ((!ARDOUR_UI::config()->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 				c = ARDOUR_UI::config()->color_mod (fill_color_name, mod_name);
 			} else {
 				c = ARDOUR_UI::config()->color_mod (fill_color, mod_name);

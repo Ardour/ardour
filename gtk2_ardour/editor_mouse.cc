@@ -1085,7 +1085,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	}
 
 	//not rolling, range mode click + join_play_range :  locate the PH here
-	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && Config->get_follow_edits() ) {
+	if ( !_drags->active () && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && ARDOUR_UI::config()->get_follow_edits() ) {
 		framepos_t where = canvas_event_sample (event);
 		snap_to(where);
 		_session->request_locate (where, false);
@@ -2331,7 +2331,7 @@ Editor::update_join_object_range_location (double y)
 			entered_route_view->canvas_display()->canvas_to_item (cx, cy);
 
 			double track_height = entered_route_view->view()->child_height();
-			if (Config->get_show_name_highlight()) {
+			if (ARDOUR_UI::config()->get_show_name_highlight()) {
 				track_height -= TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 			}
 			double const c = cy / track_height;

@@ -55,6 +55,7 @@
 #include "sfdb_ui.h"
 #include "keyboard.h"
 #include "theme_manager.h"
+#include "ui_config.h"
 #include "i18n.h"
 
 using namespace std;
@@ -530,12 +531,12 @@ private:
 class FontScalingOptions : public OptionEditorBox
 {
 public:
-	FontScalingOptions (RCConfiguration* c) :
-		_rc_config (c),
+	FontScalingOptions (UIConfiguration* uic) :
+		_ui_config (uic),
 		_dpi_adjustment (50, 50, 250, 1, 10),
 		_dpi_slider (_dpi_adjustment)
 	{
-		_dpi_adjustment.set_value (floor ((double)(_rc_config->get_font_scale () / 1024)));
+		_dpi_adjustment.set_value (floor ((double)(uic->get_font_scale () / 1024)));
 
 		Label* l = manage (new Label (_("Font scaling:")));
 		l->set_name ("OptionsLabel");
@@ -554,7 +555,7 @@ public:
 	void parameter_changed (string const & p)
 	{
 		if (p == "font-scale") {
-			_dpi_adjustment.set_value (floor ((double)(_rc_config->get_font_scale() / 1024)));
+			_dpi_adjustment.set_value (floor ((double)(_ui_config->get_font_scale() / 1024)));
 		}
 	}
 
@@ -567,12 +568,12 @@ private:
 
 	void dpi_changed ()
 	{
-		_rc_config->set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024));
+		_ui_config->set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024));
 		/* XXX: should be triggered from the parameter changed signal */
 		reset_dpi ();
 	}
 
-	RCConfiguration* _rc_config;
+	UIConfiguration* _ui_config;
 	Adjustment _dpi_adjustment;
 	HScale _dpi_slider;
 };
@@ -580,12 +581,12 @@ private:
 class ClipLevelOptions : public OptionEditorBox
 {
 public:
-	ClipLevelOptions (RCConfiguration* c) 
-		: _rc_config (c)
+	ClipLevelOptions (UIConfiguration* c) 
+		: _ui_config (c)
 		, _clip_level_adjustment (-.5, -50.0, 0.0, 0.1, 1.0) /* units of dB */
 		, _clip_level_slider (_clip_level_adjustment)
 	{
-		_clip_level_adjustment.set_value (_rc_config->get_waveform_clip_level ());
+		_clip_level_adjustment.set_value (_ui_config->get_waveform_clip_level ());
 
 		Label* l = manage (new Label (_("Waveform Clip Level (dBFS):")));
 		l->set_name ("OptionsLabel");
@@ -604,7 +605,7 @@ public:
 	void parameter_changed (string const & p)
 	{
 		if (p == "waveform-clip-level") {
-			_clip_level_adjustment.set_value (_rc_config->get_waveform_clip_level());
+			_clip_level_adjustment.set_value (_ui_config->get_waveform_clip_level());
 		}
 	}
 
@@ -617,12 +618,12 @@ private:
 
 	void clip_level_changed ()
 	{
-		_rc_config->set_waveform_clip_level (_clip_level_adjustment.get_value());
+		_ui_config->set_waveform_clip_level (_clip_level_adjustment.get_value());
 		/* XXX: should be triggered from the parameter changed signal */
 		ArdourCanvas::WaveView::set_clip_level (_clip_level_adjustment.get_value());
 	}
 
-	RCConfiguration* _rc_config;
+	UIConfiguration* _ui_config;
 	Adjustment _clip_level_adjustment;
 	HScale _clip_level_slider;
 };
@@ -992,8 +993,9 @@ private:
 class PluginOptions : public OptionEditorBox
 {
 public:
-	PluginOptions (RCConfiguration* c)
+	PluginOptions (RCConfiguration* c, UIConfiguration* uic)
 		: _rc_config (c)
+		, _ui_config (uic)
 		, _display_plugin_scan_progress (_("Always Display Plugin Scan Progress"))
 		, _discover_vst_on_start (_("Scan for [new] VST Plugins on Application Start"))
 		, _discover_au_on_start (_("Scan for AudioUnit Plugins on Application Start"))
@@ -1084,7 +1086,7 @@ public:
 
 	void parameter_changed (string const & p) {
 		if (p == "show-plugin-scan-window") {
-			bool const x = _rc_config->get_show_plugin_scan_window();
+			bool const x = _ui_config->get_show_plugin_scan_window();
 			_display_plugin_scan_progress.set_active (x);
 		}
 		else if (p == "discover-vst-on-start") {
@@ -1110,6 +1112,7 @@ public:
 
 private:
 	RCConfiguration* _rc_config;
+	UIConfiguration* _ui_config;
 	CheckButton _display_plugin_scan_progress;
 	CheckButton _discover_vst_on_start;
 	CheckButton _discover_au_on_start;
@@ -1118,7 +1121,7 @@ private:
 
 	void display_plugin_scan_progress_toggled () {
 		bool const x = _display_plugin_scan_progress.get_active();
-		_rc_config->set_show_plugin_scan_window(x);
+		_ui_config->set_show_plugin_scan_window(x);
 	}
 
 	void discover_vst_on_start_toggled () {
@@ -1149,7 +1152,7 @@ private:
 				_("Set Windows VST Search Path"),
 				_rc_config->get_plugin_path_vst(),
 				PluginManager::instance().get_default_windows_vst_path()
-				);
+			);
 		ResponseType r = (ResponseType) pd->run ();
 		pd->hide();
 		if (r == RESPONSE_ACCEPT) {
@@ -1244,6 +1247,7 @@ private:
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditor (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
         , _rc_config (Config)
+	, _ui_config (ARDOUR_UI::config())
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
 	/* MISC */
@@ -1300,8 +1304,8 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "only-copy-imported-files",
 		     _("Always copy imported files"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_only_copy_imported_files),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_only_copy_imported_files)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_only_copy_imported_files),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_only_copy_imported_files)
 		     ));
 
 	add_option (_("Misc"), new DirectoryOption (
@@ -1574,16 +1578,16 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "show-track-meters",
 		     _("Show meters on tracks in the editor"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_track_meters),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_track_meters)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_track_meters),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_track_meters)
 		     ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-editor-meter",
 		     _("Display master-meter in the toolbar"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_editor_meter),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_editor_meter)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_editor_meter),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_editor_meter)
 		     ));
 
 	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
@@ -1620,16 +1624,16 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
 		     _("Make rubberband selection rectangle snap to the grid"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_rubberbanding_snaps_to_grid),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_rubberbanding_snaps_to_grid)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_rubberbanding_snaps_to_grid),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_rubberbanding_snaps_to_grid)
 		     ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-waveforms",
 		     _("Show waveforms in regions"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_waveforms),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_waveforms),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_waveforms)
 		     ));
 
 	add_option (_("Editor"),
@@ -1638,15 +1642,15 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Show gain envelopes in audio regions"),
 		     _("in all modes"),
 		     _("only in region gain mode"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_region_gain),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_region_gain)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_region_gain),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_region_gain)
 		     ));
 
 	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
 		"waveform-scale",
 		_("Waveform scale"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_waveform_scale),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_waveform_scale)
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_waveform_scale),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_waveform_scale)
 		);
 
 	wfs->add (Linear, _("linear"));
@@ -1657,8 +1661,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
 		"waveform-shape",
 		_("Waveform shape"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_waveform_shape),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_waveform_shape)
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_waveform_shape),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_waveform_shape)
 		);
 
 	wfsh->add (Traditional, _("traditional"));
@@ -1666,45 +1670,45 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), wfsh);
 
-	add_option (_("Editor"), new ClipLevelOptions (_rc_config));
+	add_option (_("Editor"), new ClipLevelOptions (_ui_config));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "show-waveforms-while-recording",
 		     _("Show waveforms for audio while it is being recorded"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_waveforms_while_recording),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_waveforms_while_recording)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_waveforms_while_recording),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_waveforms_while_recording)
 		     ));
 
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "show-zoom-tools",
 			    _("Show zoom toolbar"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_zoom_tools),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_zoom_tools)
+			    sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_zoom_tools),
+			    sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_zoom_tools)
 			    ));
 
 	add_option (_("Editor"),
 		    new BoolOption (
 			    "update-editor-during-summary-drag",
 			    _("Update editor window during drags of the summary"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_update_editor_during_summary_drag),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_update_editor_during_summary_drag)
+			    sigc::mem_fun (*_ui_config, &UIConfiguration::get_update_editor_during_summary_drag),
+			    sigc::mem_fun (*_ui_config, &UIConfiguration::set_update_editor_during_summary_drag)
 			    ));
 
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "link-editor-and-mixer-selection",
 		     _("Synchronise editor and mixer selection"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_editor_and_mixer_selection),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_editor_and_mixer_selection)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_link_editor_and_mixer_selection),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_link_editor_and_mixer_selection)
 		     ));
 
 	bo = new BoolOption (
 		     "name-new-markers",
 		     _("Name new markers"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_name_new_markers),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_name_new_markers)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_name_new_markers),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_name_new_markers)
 		);
 	
 	add_option (_("Editor"), bo);
@@ -1715,8 +1719,8 @@ RCOptionEditor::RCOptionEditor ()
 	    new BoolOption (
 		    "autoscroll-editor",
 		    _("Auto-scroll editor window when dragging near its edges"),
-		    sigc::mem_fun (*_rc_config, &RCConfiguration::get_autoscroll_editor),
-		    sigc::mem_fun (*_rc_config, &RCConfiguration::set_autoscroll_editor)
+		    sigc::mem_fun (*_ui_config, &UIConfiguration::get_autoscroll_editor),
+		    sigc::mem_fun (*_ui_config, &UIConfiguration::set_autoscroll_editor)
 		    ));
 
 	ComboOption<RegionSelectionAfterSplit> *rsas = new ComboOption<RegionSelectionAfterSplit> (
@@ -2093,16 +2097,16 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "never-display-periodic-midi",
 		     _("Never display periodic MIDI messages (MTC, MIDI Clock)"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_never_display_periodic_midi),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_never_display_periodic_midi)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_never_display_periodic_midi),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_never_display_periodic_midi)
 		     ));
 
 	add_option (_("MIDI"),
 	     new BoolOption (
 		     "sound-midi-notes",
 		     _("Sound MIDI notes as they are selected"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_sound_midi_notes),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_sound_midi_notes)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_sound_midi_notes),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_sound_midi_notes)
 		     ));
 
 	add_option (_("MIDI"), new OptionEditorHeading (_("Midi Audition")));
@@ -2168,7 +2172,7 @@ RCOptionEditor::RCOptionEditor ()
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined AUDIOUNIT_SUPPORT)
 	/* Plugin options (currrently VST only) */
-	add_option (_("Plugins"), new PluginOptions (_rc_config));
+	add_option (_("Plugins"), new PluginOptions (_rc_config, _ui_config));
 #endif
 
 	/* INTERFACE */
@@ -2177,37 +2181,37 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "widget-prelight",
 		     _("Graphically indicate mouse pointer hovering over various widgets"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_widget_prelight),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_widget_prelight)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_widget_prelight),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_widget_prelight)
 		     ));
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "use-tooltips",
 		     _("Show tooltips if mouse hovers over a control"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_tooltips),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_tooltips)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_use_tooltips),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_use_tooltips)
 		     ));
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "show-name-highlight",
 		     _("Use name highlight bars in region displays"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_name_highlight),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_name_highlight)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_name_highlight),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_name_highlight)
 		     ));
 
 #ifndef GTKOSX
 	/* font scaling does nothing with GDK/Quartz */
-	add_option (S_("Preferences|GUI"), new FontScalingOptions (_rc_config));
+	add_option (S_("Preferences|GUI"), new FontScalingOptions (_ui_config));
 #endif
 
 	add_option (S_("GUI"),
 		    new BoolOption (
 			    "super-rapid-clock-update",
 			    _("update transport clock display at FPS instead of every 100ms"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_super_rapid_clock_update),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_super_rapid_clock_update)
+			    sigc::mem_fun (*_ui_config, &UIConfiguration::get_super_rapid_clock_update),
+			    sigc::mem_fun (*_ui_config, &UIConfiguration::set_super_rapid_clock_update)
 			    ));
 
 	/* Lock GUI timeout */
@@ -2240,8 +2244,8 @@ RCOptionEditor::RCOptionEditor ()
 		new VisibilityOption (
 			_("Mixer Strip"),
 			&_mixer_strip_visibility,
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_mixer_strip_visibility),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_mixer_strip_visibility)
+			sigc::mem_fun (*_ui_config, &UIConfiguration::get_mixer_strip_visibility),
+			sigc::mem_fun (*_ui_config, &UIConfiguration::set_mixer_strip_visibility)
 			)
 		);
 
@@ -2249,8 +2253,8 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "default-narrow_ms",
 		     _("Use narrow strips in the mixer by default"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_default_narrow_ms),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_default_narrow_ms)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_default_narrow_ms),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_default_narrow_ms)
 		     ));
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Metering")));
@@ -2258,8 +2262,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<float>* mht = new ComboOption<float> (
 		"meter-hold",
 		_("Peak hold time"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_hold),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_hold)
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_meter_hold),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_meter_hold)
 		);
 
 	mht->add (MeterHoldOff, _("off"));
@@ -2291,8 +2295,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<MeterLineUp>* mlu = new ComboOption<MeterLineUp> (
 		"meter-line-up-level",
 		_("Meter line-up level; 0dBu"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_level),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_level)
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_meter_line_up_level),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_meter_line_up_level)
 		);
 
 	mlu->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
@@ -2307,8 +2311,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<MeterLineUp>* mld = new ComboOption<MeterLineUp> (
 		"meter-line-up-din",
 		_("IEC1/DIN Meter line-up level; 0dBu"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_line_up_din),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_line_up_din)
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_meter_line_up_din),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_meter_line_up_din)
 		);
 
 	mld->add (MeteringLineUp24, _("-24dBFS (SMPTE US: 4dBu = -20dBFS)"));
@@ -2323,8 +2327,8 @@ RCOptionEditor::RCOptionEditor ()
 	ComboOption<VUMeterStandard>* mvu = new ComboOption<VUMeterStandard> (
 		"meter-vu-standard",
 		_("VU Meter standard"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_vu_standard),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_vu_standard)
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_meter_vu_standard),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_meter_vu_standard)
 		);
 
 	mvu->add (MeteringVUfrench,   _("0VU = -2dBu (France)"));
@@ -2338,8 +2342,8 @@ RCOptionEditor::RCOptionEditor ()
 	HSliderOption *mpks = new HSliderOption("meter-peak",
 			_("Peak threshold [dBFS]"),
 			mpk,
-			sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_peak),
-			sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_peak)
+			sigc::mem_fun (*_ui_config, &UIConfiguration::get_meter_peak),
+			sigc::mem_fun (*_ui_config, &UIConfiguration::set_meter_peak)
 			);
 
 	Gtkmm2ext::UI::instance()->set_tip
@@ -2352,8 +2356,8 @@ RCOptionEditor::RCOptionEditor ()
 	     new BoolOption (
 		     "meter-style-led",
 		     _("LED meter style"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_style_led),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_style_led)
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_meter_style_led),
+		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_meter_style_led)
 		     ));
 
 	/* and now the theme manager */

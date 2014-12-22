@@ -153,25 +153,18 @@ AudioClock::on_realize ()
 	first_width = req.width;
 	first_height = req.height;
 
-	set_font ();
+	// XXX FIX ME: define font based on ... ???
+	// set_font ();
 	set_colors ();
 }
 
 void
-AudioClock::set_font ()
+AudioClock::set_font (Pango::FontDescription font)
 {
 	Glib::RefPtr<Gtk::Style> style = get_style ();
-	Pango::FontDescription font;
 	Pango::AttrFontDesc* font_attr;
 
-	if (!is_realized()) {
-		font = get_font_for_style (get_name());
-	} else {
-		font = style->get_font();
-	}
-
 	font_size = font.get_size();
-
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 
 	normal_attributes.change (*font_attr);
@@ -2198,7 +2191,8 @@ AudioClock::on_style_changed (const Glib::RefPtr<Gtk::Style>& old_style)
 	Gtk::Requisition req;
 	set_clock_dimensions (req);
 
-	set_font ();
+	/* XXXX fix me ... we shouldn't be using GTK styles anyway */
+	// set_font ();
 	set_colors ();
 }
 

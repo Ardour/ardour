@@ -164,8 +164,6 @@ Session::Session (AudioEngine &eng,
 	, _worst_input_latency (0)
  	, _worst_track_latency (0)
 	, _have_captured (false)
-	, _meter_hold (0)
-	, _meter_falloff (0)
 	, _non_soloed_outs_muted (false)
 	, _listen_cnt (0)
 	, _solo_isolated_cnt (0)

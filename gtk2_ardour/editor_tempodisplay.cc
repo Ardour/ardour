@@ -88,7 +88,7 @@ Editor::draw_metric_marks (const Metrics& metrics)
 			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->color ("meter marker"), buf,
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			if (Config->get_allow_non_quarter_pulse()) {
+			if (ARDOUR_UI::config()->get_allow_non_quarter_pulse()) {
 				snprintf (buf, sizeof (buf), "%.2f/%.0f", ts->beats_per_minute(), ts->note_type());
 			} else {
 				snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());

@@ -48,7 +48,7 @@ using namespace PBD;
 void
 ARDOUR_UI::toggle_keep_tearoffs ()
 {
-	ActionManager::toggle_config_state ("Common", "KeepTearoffs", &RCConfiguration::set_keep_tearoffs, &RCConfiguration::get_keep_tearoffs);
+	ActionManager::toggle_config_state ("Common", "KeepTearoffs", &UIConfiguration::set_keep_tearoffs, &UIConfiguration::get_keep_tearoffs);
 
 	ARDOUR_UI::update_tearoff_visibility();
 }
@@ -328,7 +328,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "follow-edits") {
 
-		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &RCConfiguration::get_follow_edits);
+		ActionManager::map_some_state ("Transport", "ToggleFollowEdits", &UIConfiguration::get_follow_edits);
 
 	} else if (p == "send-mtc") {
 
@@ -339,7 +339,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ActionManager::map_some_state ("options", "SendMMC", &RCConfiguration::get_send_mmc);
 
 	} else if (p == "keep-tearoffs") {
-		ActionManager::map_some_state ("Common", "KeepTearoffs", &RCConfiguration::get_keep_tearoffs);
+		ActionManager::map_some_state ("Common", "KeepTearoffs", &UIConfiguration::get_keep_tearoffs);
 	} else if (p == "mmc-control") {
 		ActionManager::map_some_state ("options", "UseMMC", &RCConfiguration::get_mmc_control);
 	} else if (p == "midi-feedback") {
@@ -370,9 +370,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 		set_fps_timeout_connection ();
 
 	} else if (p == "show-track-meters") {
-		editor->toggle_meter_updating();
+		if (editor) editor->toggle_meter_updating();
 	} else if (p == "primary-clock-delta-edit-cursor") {
-		if (Config->get_primary_clock_delta_edit_cursor()) {
+		if (ARDOUR_UI::config()->get_primary_clock_delta_edit_cursor()) {
 			primary_clock->set_is_duration (true);
 			primary_clock->set_editable (false);
 			primary_clock->set_widget_name ("transport delta");
@@ -382,7 +382,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			primary_clock->set_widget_name ("transport");
 		}
 	} else if (p == "secondary-clock-delta-edit-cursor") {
-		if (Config->get_secondary_clock_delta_edit_cursor()) {
+		if (ARDOUR_UI::config()->get_secondary_clock_delta_edit_cursor()) {
 			secondary_clock->set_is_duration (true);
 			secondary_clock->set_editable (false);
 			secondary_clock->set_widget_name ("secondary delta");
@@ -399,7 +399,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "waveform-gradient-depth") {
 		ArdourCanvas::WaveView::set_global_gradient_depth (config()->get_waveform_gradient_depth());
 	} else if (p == "show-editor-meter") {
-		bool show = Config->get_show_editor_meter();
+		bool show = ARDOUR_UI::config()->get_show_editor_meter();
 
 		if (editor_meter) {
 			if (meter_box.get_parent()) {
@@ -415,9 +415,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 			} 
 		}
 	} else if (p == "waveform-scale") {
-		ArdourCanvas::WaveView::set_global_logscaled (Config->get_waveform_scale() == Logarithmic);
+		ArdourCanvas::WaveView::set_global_logscaled (ARDOUR_UI::config()->get_waveform_scale() == Logarithmic);
 	} else if (p == "waveform-shape") {
-		ArdourCanvas::WaveView::set_global_shape (Config->get_waveform_shape() == Rectified
+		ArdourCanvas::WaveView::set_global_shape (ARDOUR_UI::config()->get_waveform_shape() == Rectified
 				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
 	} else if (p == "show-waveform-clipping") {
 		ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());

@@ -36,6 +36,7 @@
 
 #include "gtkmm2ext/actions.h"
 
+#include "ardour_ui.h"
 #include "actions.h"
 #include "i18n.h"
 
@@ -122,6 +123,31 @@ ActionManager::toggle_config_state (const char* group, const char* action, bool 
 	}
 }
 
+/** Examine the state of a Configuration setting and a toggle action, and toggle the Configuration
+ * setting if its state doesn't match the toggle action.
+ * @param group Action group.
+ * @param action Action name.
+ * @param Method to set the state of the Configuration setting.
+ * @param Method to get the state of the Configuration setting.
+ */
+void
+ActionManager::toggle_config_state (const char* group, const char* action, bool (UIConfiguration::*set)(bool), bool (UIConfiguration::*get)(void) const)
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact) {
+			bool x = (ARDOUR_UI::config()->*get)();
+
+			if (x != tact->get_active()) {
+				(ARDOUR_UI::config()->*set) (!x);
+			}
+		}
+	}
+}
+
 void
 ActionManager::toggle_config_state_foo (const char* group, const char* action, sigc::slot<bool, bool> set, sigc::slot<bool> get)
 {
@@ -156,6 +182,29 @@ ActionManager::map_some_state (const char* group, const char* action, bool (RCCo
 		if (tact) {
 
 			bool x = (Config->*get)();
+
+			if (tact->get_active() != x) {
+				tact->set_active (x);
+			}
+		}
+	}
+}
+
+/** Set the state of a ToggleAction using a particular Configuration get() method
+ * @param group Action group.
+ * @param action Action name.
+ * @param get Method to obtain the state that the ToggleAction should have.
+ */
+void
+ActionManager::map_some_state (const char* group, const char* action, bool (UIConfiguration::*get)() const)
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action (group, action);
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+		if (tact) {
+
+			bool x = (ARDOUR_UI::config()->*get)();
 
 			if (tact->get_active() != x) {
 				tact->set_active (x);

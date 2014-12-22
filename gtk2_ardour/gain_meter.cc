@@ -898,7 +898,7 @@ GainMeterBase::update_meters()
 			peak_display.set_text (buf);
 		}
 	}
-	if (mpeak >= Config->get_meter_peak()) {
+	if (mpeak >= ARDOUR_UI::config()->get_meter_peak()) {
 		peak_display.set_name ("MixerStripPeakDisplayPeak");
 	}
 }

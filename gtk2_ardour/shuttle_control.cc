@@ -615,7 +615,7 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_set_source (cr, shine_pattern);
 	cairo_fill (cr);
 */
-	if (ARDOUR::Config->get_widget_prelight()) {
+	if (ARDOUR_UI::config()->get_widget_prelight()) {
 		if (_hovering) {
 			rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius);
 			cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
@@ -712,7 +712,7 @@ ShuttleControl::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = true;
 
-	if (ARDOUR::Config->get_widget_prelight()) {
+	if (ARDOUR_UI::config()->get_widget_prelight()) {
 		queue_draw ();
 	}
 
@@ -724,7 +724,7 @@ ShuttleControl::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = false;
 
-	if (ARDOUR::Config->get_widget_prelight()) {
+	if (ARDOUR_UI::config()->get_widget_prelight()) {
 		queue_draw ();
 	}
 

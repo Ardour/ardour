@@ -443,7 +443,7 @@ MidiStreamView::setup_rec_box ()
 		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.track()->record_enabled()) {
 
-			if (Config->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
+			if (ARDOUR_UI::config()->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
 

@@ -491,7 +491,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-50, 1.0));
 					points.insert (std::pair<float,float>(-40, 1.0));
 					points.insert (std::pair<float,float>(-30, 1.0));
-					if (Config->get_meter_line_up_level() == MeteringLineUp24) {
+					if (ARDOUR_UI::config()->get_meter_line_up_level() == MeteringLineUp24) {
 						points.insert (std::pair<float,float>(-24, 1.0));
 					} else {
 						points.insert (std::pair<float,float>(-25, 1.0));
@@ -611,7 +611,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	Pango::FontDescription font;
 
 	font = Pango::FontDescription (ARDOUR_UI::config()->get_SmallMonospaceFont());
-	double fixfontsize = 81920.0 / (double) ARDOUR::Config->get_font_scale();
+	double fixfontsize = 81920.0 / (double) ARDOUR_UI::config()->get_font_scale();
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
 	font.set_size (9.0 * PANGO_SCALE * fixfontsize);
@@ -721,7 +721,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(-30.0f, "-30"));
 					points.insert (std::pair<float,string>(-20.0f, "-20"));
 					if (types.size() == 1) {
-						if (Config->get_meter_line_up_level() == MeteringLineUp24) {
+						if (ARDOUR_UI::config()->get_meter_line_up_level() == MeteringLineUp24) {
 							points.insert (std::pair<float,string>(-24.0f, "-24"));
 						} else {
 							points.insert (std::pair<float,string>(-25.0f, "-25"));

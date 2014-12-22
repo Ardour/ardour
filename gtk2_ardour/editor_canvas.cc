@@ -429,7 +429,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame);
 		
-		if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
+		if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
 			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
@@ -445,7 +445,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
 
-			if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
+			if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
@@ -501,7 +501,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 {
-	if (!Config->get_autoscroll_editor () || autoscroll_active ()) {
+	if (!ARDOUR_UI::config()->get_autoscroll_editor () || autoscroll_active ()) {
 		return;
 	}
 

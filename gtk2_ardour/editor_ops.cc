@@ -1905,7 +1905,7 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 bool
 Editor::choose_new_marker_name(string &name) {
 
-	if (!Config->get_name_new_markers()) {
+	if (!ARDOUR_UI::config()->get_name_new_markers()) {
 		/* don't prompt user for a new name */
 		return true;
 	}
@@ -2348,7 +2348,7 @@ Editor::get_preroll ()
 void
 Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 {
-	if ( _session->transport_rolling() || !Config->get_follow_edits() || _ignore_follow_edits )
+	if ( _session->transport_rolling() || !ARDOUR_UI::config()->get_follow_edits() || _ignore_follow_edits )
 		return;
 
 	location -= get_preroll();
@@ -5739,8 +5739,9 @@ Editor::set_playhead_cursor ()
 		}
 	}
 
-	if ( Config->get_follow_edits() )
+	if (ARDOUR_UI::config()->get_follow_edits()) {
 		cancel_time_selection();
+	}
 }
 
 void

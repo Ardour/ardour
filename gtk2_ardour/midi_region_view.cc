@@ -1237,7 +1237,7 @@ MidiRegionView::display_sysexes()
 	bool have_periodic_system_messages = false;
 	bool display_periodic_messages = true;
 
-	if (!Config->get_never_display_periodic_midi()) {
+	if (!ARDOUR_UI::config()->get_never_display_periodic_midi()) {
 
 		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::MusicalTime> > mev = 
@@ -1557,7 +1557,7 @@ MidiRegionView::extend_active_notes()
 void
 MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 {
-	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
+	if (_no_sound_notes || !ARDOUR_UI::config()->get_sound_midi_notes()) {
 		return;
 	}
 
@@ -1577,7 +1577,7 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 void
 MidiRegionView::start_playing_midi_note(boost::shared_ptr<NoteType> note)
 {
-	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
+	if (_no_sound_notes || !ARDOUR_UI::config()->get_sound_midi_notes()) {
 		return;
 	}
 
@@ -1596,7 +1596,7 @@ MidiRegionView::start_playing_midi_note(boost::shared_ptr<NoteType> note)
 void
 MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
 {
-	if (_no_sound_notes || !Config->get_sound_midi_notes()) {
+	if (_no_sound_notes || !ARDOUR_UI::config()->get_sound_midi_notes()) {
 		return;
 	}
 
@@ -2404,7 +2404,7 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 		(*i)->move_event(dx, dy);
 	}
 
-	if (dy && !_selection.empty() && !_no_sound_notes && Config->get_sound_midi_notes()) {
+	if (dy && !_selection.empty() && !_no_sound_notes && ARDOUR_UI::config()->get_sound_midi_notes()) {
 
 		if (to_play.size() > 1) {
 

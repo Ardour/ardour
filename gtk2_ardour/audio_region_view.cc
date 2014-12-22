@@ -671,7 +671,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 
 	effective_height = _height - 1.0;
 
-	if (Config->get_show_name_highlight() && effective_height >= NAME_HIGHLIGHT_THRESH) {
+	if (ARDOUR_UI::config()->get_show_name_highlight() && effective_height >= NAME_HIGHLIGHT_THRESH) {
 		effective_height -= NAME_HIGHLIGHT_SIZE;
 	}
 
@@ -959,7 +959,7 @@ AudioRegionView::set_samples_per_pixel (gdouble fpp)
 {
 	RegionView::set_samples_per_pixel (fpp);
 
-	if (Config->get_show_waveforms ()) {
+	if (ARDOUR_UI::config()->get_show_waveforms ()) {
 		for (uint32_t n = 0; n < waves.size(); ++n) {
 			waves[n]->set_samples_per_pixel (fpp);
 		}
@@ -1013,7 +1013,7 @@ AudioRegionView::set_colors ()
 void
 AudioRegionView::setup_waveform_visibility ()
 {
-	if (Config->get_show_waveforms ()) {
+	if (ARDOUR_UI::config()->get_show_waveforms ()) {
 		for (uint32_t n = 0; n < waves.size(); ++n) {
 			/* make sure the zoom level is correct, since we don't update
 			   this when waveforms are hidden.
@@ -1050,7 +1050,7 @@ AudioRegionView::update_envelope_visibility ()
 		return;
 	}
 
-	if (Config->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
+	if (ARDOUR_UI::config()->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
 	} else {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(0));
@@ -1139,11 +1139,11 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_height (ht);
 	wave->set_samples_per_pixel (samples_per_pixel);
 	wave->set_show_zero_line (true);
-	wave->set_clip_level (Config->get_waveform_clip_level ());
+	wave->set_clip_level (ARDOUR_UI::config()->get_waveform_clip_level ());
 
 	wave->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_wave_view_event), wave, this));
 	
-	switch (Config->get_waveform_shape()) {
+	switch (ARDOUR_UI::config()->get_waveform_shape()) {
 	case Rectified:
 		wave->set_shape (WaveView::Rectified);
 		break;
@@ -1151,13 +1151,13 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		wave->set_shape (WaveView::Normal);
 	}
 		
-	wave->set_logscaled (Config->get_waveform_scale() == Logarithmic);
+	wave->set_logscaled (ARDOUR_UI::config()->get_waveform_scale() == Logarithmic);
 
 	vector<ArdourCanvas::WaveView*> v;
 	v.push_back (wave);
 	set_some_waveform_colors (v);
 
-	if (!Config->get_show_waveforms ()) {
+	if (!ARDOUR_UI::config()->get_show_waveforms ()) {
 		wave->hide();
 	}
 

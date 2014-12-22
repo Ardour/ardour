@@ -107,12 +107,12 @@ static float meter_lineup_cfg(MeterLineUp lul, float offset) {
 }
 
 static float meter_lineup(float offset) {
-	return meter_lineup_cfg(Config->get_meter_line_up_level(), offset);
+	return meter_lineup_cfg (ARDOUR_UI::config()->get_meter_line_up_level(), offset);
 }
 
 static float vu_standard() {
 	// note - default meter config is +2dB (france)
-	switch (Config->get_meter_vu_standard()) {
+	switch (ARDOUR_UI::config()->get_meter_vu_standard()) {
 		default:
 		case MeteringVUfrench:   // 0VU = -2dBu
 			return 0;
@@ -142,7 +142,7 @@ LevelMeterBase::update_meters ()
 			const float mpeak = _meter->meter_level(n, MeterMaxPeak);
 			if (mpeak > (*i).max_peak) {
 				(*i).max_peak = mpeak;
-				(*i).meter->set_highlight(mpeak >= Config->get_meter_peak());
+				(*i).meter->set_highlight(mpeak >= ARDOUR_UI::config()->get_meter_peak());
 			}
 			if (mpeak > max_peak) {
 				max_peak = mpeak;
@@ -157,7 +157,7 @@ LevelMeterBase::update_meters ()
 				} else if (meter_type == MeterIEC1NOR) {
 					(*i).meter->set (meter_deflect_nordic (peak + meter_lineup(0)));
 				} else if (meter_type == MeterIEC1DIN) {
-					(*i).meter->set (meter_deflect_din (peak + meter_lineup_cfg(Config->get_meter_line_up_din(), 3.0)));
+					(*i).meter->set (meter_deflect_din (peak + meter_lineup_cfg(ARDOUR_UI::config()->get_meter_line_up_din(), 3.0)));
 				} else if (meter_type == MeterIEC2BBC || meter_type == MeterIEC2EBU) {
 					(*i).meter->set (meter_deflect_ppm (peak + meter_lineup(0)));
 				} else if (meter_type == MeterVU) {
@@ -187,7 +187,7 @@ LevelMeterBase::parameter_changed (string p)
 		uint32_t n;
 
 		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-			(*i).meter->set_hold_count ((uint32_t) floor(Config->get_meter_hold()));
+			(*i).meter->set_hold_count ((uint32_t) floor(ARDOUR_UI::config()->get_meter_hold()));
 		}
 	}
 	else if (p == "meter-line-up-level") {
@@ -272,7 +272,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		uint32_t c[10];
 		uint32_t b[4];
 		float stp[4];
-		int styleflags = Config->get_meter_style_led() ? 3 : 1;
+		int styleflags = ARDOUR_UI::config()->get_meter_style_led() ? 3 : 1;
 		b[0] = ARDOUR_UI::config()->color ("meter background bottom");
 		b[1] = ARDOUR_UI::config()->color ("meter background top");
 		b[2] = 0x991122ff; // red highlight gradient Bot
@@ -380,7 +380,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 77.5;  // 115 * log_meter(-10)
 					stp[2] = 92.5;  // 115 * log_meter(-3)
 					stp[3] = 100.0; // 115 * log_meter(0)
-				switch (Config->get_meter_line_up_level()) {
+					switch (ARDOUR_UI::config()->get_meter_line_up_level()) {
 					case MeteringLineUp24:
 						stp[0] = 42.0;
 						break;
@@ -401,7 +401,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
 			meters[n].packed = false;
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, len,
+			meters[n].meter = new FastMeter ((uint32_t) floor (ARDOUR_UI::config()->get_meter_hold()), width, _meter_orientation, len,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
 					b[0], b[1], b[2], b[3],

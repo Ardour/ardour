@@ -221,7 +221,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	ARDOUR::framecnt_t parse_as_bbt_distance (const std::string&);
 	ARDOUR::framecnt_t parse_as_frames_distance (const std::string&);
 	
-	void set_font ();
+	void set_font (Pango::FontDescription);
 	void set_colors ();
 	void show_edit_status (int length);
 	int  merge_input_and_edit_string ();

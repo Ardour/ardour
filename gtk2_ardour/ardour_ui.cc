@@ -561,6 +561,8 @@ ARDOUR_UI::post_engine ()
 		Config->ParameterChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::parameter_changed, this, _1), gui_context());
 		boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 		Config->map_parameters (pc);
+
+		ui_config->map_parameters (pc);
 	}
 }
 
@@ -1146,10 +1148,10 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
-	if (editor_meter && Config->get_show_editor_meter()) {
+	if (editor_meter && ARDOUR_UI::config()->get_show_editor_meter()) {
 		float mpeak = editor_meter->update_meters();
 		if (mpeak > editor_meter_max_peak) {
-			if (mpeak >= Config->get_meter_peak()) {
+			if (mpeak >= ARDOUR_UI::config()->get_meter_peak()) {
 				editor_meter_peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 			}
 		}
@@ -2067,7 +2069,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if ( Config->get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
+			if (ARDOUR_UI::config()->get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
 				_session->request_play_range (&editor->get_selection().time, true);
 				_session->set_requested_return_frame( editor->get_selection().time.front().start );  //force an auto-return here
 			}
@@ -2244,7 +2246,7 @@ ARDOUR_UI::map_transport_state ()
 			auto_loop_button.set_active (false);
 		}
 
-		if (Config->get_follow_edits()) {
+		if (ARDOUR_UI::config()->get_follow_edits()) {
 			/* light up both roll and play-selection if they are joined */
 			roll_button.set_active (true);
 			play_selection_button.set_active (true);
@@ -2277,7 +2279,7 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	if (Config->get_super_rapid_clock_update()) {
+	if (ui_config->get_super_rapid_clock_update()) {
 		clock_signal_connection = FPSUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
 	} else {
 		clock_signal_connection = RapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
@@ -4014,7 +4016,7 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 	}
 
 	const bool cancelled = PluginManager::instance().cancelled();
-	if (type != X_("closeme") && !Config->get_show_plugin_scan_window()) {
+	if (type != X_("closeme") && !ui_config->get_show_plugin_scan_window()) {
 		if (cancelled && scan_dlg->is_mapped()) {
 			scan_dlg->hide();
 			gui_idle_handler();
@@ -4245,13 +4247,13 @@ ARDOUR_UI::use_config ()
 void
 ARDOUR_UI::update_transport_clocks (framepos_t pos)
 {
-	if (Config->get_primary_clock_delta_edit_cursor()) {
+	if (ui_config->get_primary_clock_delta_edit_cursor()) {
 		primary_clock->set (pos, false, editor->get_preferred_edit_position());
 	} else {
 		primary_clock->set (pos);
 	}
 
-	if (Config->get_secondary_clock_delta_edit_cursor()) {
+	if (ui_config->get_secondary_clock_delta_edit_cursor()) {
 		secondary_clock->set (pos, false, editor->get_preferred_edit_position());
 	} else {
 		secondary_clock->set (pos);

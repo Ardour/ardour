@@ -1237,7 +1237,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 		framepos_t pos = 0;
 		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
-		if (Profile->get_sae() || Config->get_only_copy_imported_files() || copy) {
+		if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files() || copy) {
 			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, SrcBest, pos);
 		} else {
 			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);

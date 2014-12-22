@@ -3855,10 +3855,10 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	double y1;
 	double y2;
 
-	framepos_t const pf = adjusted_current_frame (event, Config->get_rubberbanding_snaps_to_grid ());
+	framepos_t const pf = adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ());
 
 	framepos_t grab = grab_frame ();
-	if (Config->get_rubberbanding_snaps_to_grid ()) {
+	if (ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ()) {
 		_editor->snap_to_with_modifier (grab, event);
 	}
 
@@ -4391,7 +4391,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			if ( s->get_play_range() && s->transport_rolling() ) {
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
-				if (Config->get_follow_edits() && !s->transport_rolling()) {
+				if (ARDOUR_UI::config()->get_follow_edits() && !s->transport_rolling()) {
 					if (_operation == SelectionEndTrim)
 						_editor->maybe_locate_with_edit_preroll( _editor->get_selection().time.end_frame());
 					else

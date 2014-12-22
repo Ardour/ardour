@@ -13,6 +13,9 @@
     <Option name="show-waveform-clipping" value="1"/>
     <Option name="lock-gui-after-seconds" value="0"/>
     <Option name="draggable-playhead" value="1"/>
+    <Option name="no-new-session-dialog" value="1"/>
+    <Option name="show-track-meters" value="1"/>
+    <Option name="default-narrow_ms" value="0"/>
   </UI>
   <Canvas>
     <Option name="small font" value="@FONT_SMALL@"/>

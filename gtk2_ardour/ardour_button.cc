@@ -520,7 +520,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	}
 
 	// if requested, show hovering
-	if (ARDOUR::Config->get_widget_prelight()
+	if (ARDOUR_UI::config()->get_widget_prelight()
 			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
 			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
@@ -587,7 +587,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		const float newdia = rint (ARDOUR::Config->get_font_scale () / 1024. / 7.5); // 11px with 80% font-scaling
+		const float newdia = rint (ARDOUR_UI::config()->get_font_scale () / 1024. / 7.5); // 11px with 80% font-scaling
 		if (_diameter != newdia) {
 			_pattern_height = 0;
 			_diameter = newdia;
@@ -1044,7 +1044,7 @@ ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = (_elements & Inactive) ? false : true;
 
-	if (ARDOUR::Config->get_widget_prelight()) {
+	if (ARDOUR_UI::config()->get_widget_prelight()) {
 		CairoWidget::set_dirty ();
 	}
 
@@ -1056,7 +1056,7 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = false;
 
-	if (ARDOUR::Config->get_widget_prelight()) {
+	if (ARDOUR_UI::config()->get_widget_prelight()) {
 		CairoWidget::set_dirty ();
 	}
 

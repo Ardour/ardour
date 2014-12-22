@@ -2524,7 +2524,7 @@ RouteTimeAxisView::show_meter ()
 void
 RouteTimeAxisView::reset_meter ()
 {
-	if (Config->get_show_track_meters()) {
+	if (ARDOUR_UI::config()->get_show_track_meters()) {
 		int meter_width = 3;
 		if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 6;

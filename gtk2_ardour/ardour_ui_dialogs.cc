@@ -234,7 +234,7 @@ ARDOUR_UI::set_session (Session *s)
 		editor_meter_max_peak = -INFINITY;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
 
-		if (Config->get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
+		if (ARDOUR_UI::config()->get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
 			transport_tearoff_hbox.pack_start (meter_box, false, false);
 			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();

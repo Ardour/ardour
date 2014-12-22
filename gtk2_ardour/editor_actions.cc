@@ -1616,10 +1616,10 @@ Editor::toggle_sound_midi_notes ()
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
 	
 	if (act) {
-		bool s = Config->get_sound_midi_notes();
+		bool s = ARDOUR_UI::config()->get_sound_midi_notes();
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 		if (tact->get_active () != s) {
-			Config->set_sound_midi_notes (tact->get_active());
+			ARDOUR_UI::config()->set_sound_midi_notes (tact->get_active());
 		}
 	}
 }
@@ -1699,13 +1699,13 @@ Editor::parameter_changed (std::string p)
 		update_just_timecode ();
 	} else if (p == "show-zoom-tools") {
 		if (_zoom_tearoff) {
-			_zoom_tearoff->set_visible (Config->get_show_zoom_tools(), true);
+			_zoom_tearoff->set_visible (ARDOUR_UI::config()->get_show_zoom_tools(), true);
 		}
 	} else if (p == "sound-midi-notes") {
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("sound-midi-notes"));
 
 		if (act) {
-			bool s = Config->get_sound_midi_notes();
+			bool s = ARDOUR_UI::config()->get_sound_midi_notes();
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 			if (tact->get_active () != s) {
 				tact->set_active (s);
@@ -1721,7 +1721,7 @@ Editor::parameter_changed (std::string p)
 
 		/* this doesn't really belong here but it has to go somewhere */
 
-		if (Config->get_use_tooltips()) {
+		if (ARDOUR_UI::config()->get_use_tooltips()) {
 			Gtkmm2ext::enable_tooltips ();
 		} else {
 			Gtkmm2ext::disable_tooltips ();

@@ -91,7 +91,7 @@ Mixer_UI::Mixer_UI ()
 	, in_group_row_change (false)
 	, track_menu (0)
 	, _monitor_section (0)
-	, _strip_width (Config->get_default_narrow_ms() ? Narrow : Wide)
+	, _strip_width (ARDOUR_UI::config()->get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
         , _in_group_rebuild_or_clear (false)
         , _route_deletion_in_progress (false)
@@ -368,7 +368,7 @@ Mixer_UI::add_strips (RouteList& routes)
 			strip = new MixerStrip (*this, _session, route);
 			strips.push_back (strip);
 
-			Config->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
+			ARDOUR_UI::config()->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 			
 			if (strip->width_owner() != strip) {
 				strip->set_width_enum (_strip_width, this);
@@ -618,7 +618,7 @@ Mixer_UI::sync_treeview_from_order_keys ()
 void
 Mixer_UI::follow_editor_selection ()
 {
-	if (!Config->get_link_editor_and_mixer_selection() || _following_editor_selection) {
+	if (!ARDOUR_UI::config()->get_link_editor_and_mixer_selection() || _following_editor_selection) {
 		return;
 	}
 
@@ -1798,7 +1798,7 @@ Mixer_UI::parameter_changed (string const & p)
 			_group_tabs->hide ();
 		}
 	} else if (p == "default-narrow_ms") {
-		bool const s = Config->get_default_narrow_ms ();
+		bool const s = ARDOUR_UI::config()->get_default_narrow_ms ();
 		for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->set_width_enum (s ? Narrow : Wide, this);
 		}

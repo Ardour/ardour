@@ -474,7 +474,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 bool
 EditorSummary::suspending_editor_updates () const
 {
-	return (!Config->get_update_editor_during_summary_drag () && (_zoom_dragging || _move_dragging));
+	return (!ARDOUR_UI::config()->get_update_editor_during_summary_drag () && (_zoom_dragging || _move_dragging));
 }
 
 /** Fill in x and y with the editor's current viewable area in summary coordinates */

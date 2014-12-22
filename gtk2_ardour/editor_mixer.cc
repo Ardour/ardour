@@ -283,7 +283,7 @@ Editor::track_mixer_selection ()
 void
 Editor::follow_mixer_selection ()
 {
-	if (!ARDOUR::Config->get_link_editor_and_mixer_selection() || _following_mixer_selection) {
+	if (!ARDOUR_UI::config()->get_link_editor_and_mixer_selection() || _following_mixer_selection) {
 		return;
 	}
 

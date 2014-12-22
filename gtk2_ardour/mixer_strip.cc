@@ -2069,7 +2069,7 @@ MixerStrip::parameter_changed (string p)
 		/* The user has made changes to the mixer strip visibility, so get
 		   our VisibilityGroup to reflect these changes in our widgets.
 		*/
-		_visibility.set_state (Config->get_mixer_strip_visibility ());
+		_visibility.set_state (ARDOUR_UI::config()->get_mixer_strip_visibility ());
 	}
 	else if (p == "track-name-number") {
 		name_changed ();

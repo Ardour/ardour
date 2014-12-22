@@ -1015,7 +1015,7 @@ LocationUI::add_new_location()
 		framepos_t where = _session->audible_frame();
 		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
-		if (Config->get_name_new_markers()) {
+		if (ARDOUR_UI::config()->get_name_new_markers()) {
 			newest_location = location;
 		}
 		PublicEditor::instance().begin_reversible_command (_("add marker"));
