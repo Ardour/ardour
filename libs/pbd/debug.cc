@@ -50,6 +50,7 @@ uint64_t PBD::DEBUG::Pool = PBD::new_debug_bit ("pool");
 uint64_t PBD::DEBUG::EventLoop = PBD::new_debug_bit ("eventloop");
 uint64_t PBD::DEBUG::AbstractUI = PBD::new_debug_bit ("abstractui");
 uint64_t PBD::DEBUG::FileUtils = PBD::new_debug_bit ("fileutils");
+uint64_t PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
 
 uint64_t PBD::debug_bits = 0x0;
 

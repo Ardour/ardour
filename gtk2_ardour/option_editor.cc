@@ -22,7 +22,8 @@
 #include <gtkmm/alignment.h>
 #include "gtkmm2ext/utils.h"
 
-#include "ardour/configuration.h"
+#include "pbd/configuration.h"
+
 #include "ardour/rc_configuration.h"
 #include "ardour/utils.h"
 #include "ardour/dB.h"
@@ -377,7 +378,7 @@ OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
  *  @param o Configuration to edit.
  *  @param t Title for the dialog.
  */
-OptionEditor::OptionEditor (Configuration* c, std::string const & t)
+OptionEditor::OptionEditor (PBD::Configuration* c, std::string const & t)
 	: ArdourWindow (t), _config (c)
 {
 	using namespace Notebook_Helpers;

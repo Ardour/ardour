@@ -20,11 +20,11 @@
 #ifndef __ardour_session_configuration_h__
 #define __ardour_session_configuration_h__
 
-#include "ardour/configuration.h"
+#include "pbd/configuration.h"
 
 namespace ARDOUR {
 
-class LIBARDOUR_API SessionConfiguration : public Configuration
+class LIBARDOUR_API SessionConfiguration : public PBD::Configuration
 {
 public:
 	SessionConfiguration ();
@@ -58,8 +58,8 @@ public:
 
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-#define CONFIG_VARIABLE(Type,var,name,value) ConfigVariable<Type> var;
-#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) ConfigVariableWithMutation<Type> var;
+#define CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
+#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) PBD::ConfigVariableWithMutation<Type> var;
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL

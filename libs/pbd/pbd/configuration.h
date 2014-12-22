@@ -17,23 +17,23 @@
 
 */
 
-#ifndef __ardour_configuration_h__
-#define __ardour_configuration_h__
+#ifndef __libpbd_configuration_h__
+#define __libpbd_configuration_h__
 
 #include <boost/function.hpp>
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
-#include "ardour/configuration_variable.h"
+#include "pbd/configuration_variable.h"
 
 class XMLNode;
 
-namespace ARDOUR {
+namespace PBD {
 
-class LIBARDOUR_API Configuration : public PBD::Stateful
+class LIBPBD_API Configuration : public PBD::Stateful
 {
   public:
-	Configuration();
-	virtual ~Configuration();
+	Configuration() {}
+	virtual ~Configuration() {}
 
 	virtual void map_parameters (boost::function<void (std::string)>&) = 0;
 	virtual int set_state (XMLNode const &, int) = 0;
@@ -44,6 +44,6 @@ class LIBARDOUR_API Configuration : public PBD::Stateful
 	PBD::Signal1<void,std::string> ParameterChanged;
 };
 
-} // namespace ARDOUR
+} // namespace PBD
 
-#endif /* __ardour_configuration_h__ */
+#endif /* __libpbd_configuration_h__ */

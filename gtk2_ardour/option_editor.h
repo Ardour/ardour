@@ -46,7 +46,7 @@
  *  options dialog.
  */
 
-namespace ARDOUR {
+namespace PBD {
 	class Configuration;
 }
 
@@ -647,7 +647,7 @@ public:
 class OptionEditor : public ArdourWindow
 {
 public:
-	OptionEditor (ARDOUR::Configuration *, std::string const &);
+	OptionEditor (PBD::Configuration *, std::string const &);
 	~OptionEditor ();
 
 	void add_option (std::string const &, OptionEditorComponent *);
@@ -658,8 +658,8 @@ public:
 protected:
 
 	virtual void parameter_changed (std::string const &);
-
-	ARDOUR::Configuration* _config;
+	
+	PBD::Configuration* _config;
 
 private:
 

@@ -34,6 +34,7 @@ libpbd_sources = [
     'boost_debug.cc',
     'cartesian.cc',
     'command.cc',
+    'configuration_variable.cc',
     'convert.cc',
     'controllable.cc',
     'controllable_descriptor.cc',

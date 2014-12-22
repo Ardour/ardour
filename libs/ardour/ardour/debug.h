@@ -33,7 +33,6 @@ namespace PBD {
 		LIBARDOUR_API extern uint64_t MidiPlaylistIO;
 		LIBARDOUR_API extern uint64_t MidiDiskstreamIO;
 		LIBARDOUR_API extern uint64_t SnapBBT;
-		LIBARDOUR_API extern uint64_t Configuration;
 		LIBARDOUR_API extern uint64_t Latency;
 		LIBARDOUR_API extern uint64_t LatencyCompensation;
 		LIBARDOUR_API extern uint64_t Peaks;

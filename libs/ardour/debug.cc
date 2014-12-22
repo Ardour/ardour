@@ -29,7 +29,6 @@ uint64_t PBD::DEBUG::MidiSourceIO = PBD::new_debug_bit ("midisourceio");
 uint64_t PBD::DEBUG::MidiPlaylistIO = PBD::new_debug_bit ("midiplaylistio");
 uint64_t PBD::DEBUG::MidiDiskstreamIO = PBD::new_debug_bit ("mididiskstreamio");
 uint64_t PBD::DEBUG::SnapBBT = PBD::new_debug_bit ("snapbbt");
-uint64_t PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
 uint64_t PBD::DEBUG::Latency = PBD::new_debug_bit ("latency");
 uint64_t PBD::DEBUG::LatencyCompensation = PBD::new_debug_bit ("latencycompensation");
 uint64_t PBD::DEBUG::Peaks = PBD::new_debug_bit ("peaks");

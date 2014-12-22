@@ -21,12 +21,15 @@
 #include <glib/gstdio.h> /* for g_stat() */
 #include <glibmm/miscutils.h> /* for build_filename() */
 
+#include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/locale_guard.h"
 #include "pbd/pathexpand.h"
 
 #include "ardour/types.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session_configuration.h"
+#include "ardour/utils.h"
 #include "i18n.h"
 
 using namespace ARDOUR;

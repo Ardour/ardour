@@ -56,7 +56,6 @@ libardour_sources = [
         'capturing_processor.cc',
         'chan_count.cc',
         'chan_mapping.cc',
-        'configuration.cc',
         'config_text.cc',
         'control_protocol_manager.cc',
         'cycle_timer.cc',

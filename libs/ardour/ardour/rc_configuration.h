@@ -23,16 +23,17 @@
 #include <map>
 #include <string>
 
+#include "pbd/configuration.h"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
-#include "ardour/configuration.h"
 
 class XMLNode;
 
 namespace ARDOUR {
 
-class LIBARDOUR_API RCConfiguration : public Configuration
+class LIBARDOUR_API RCConfiguration : public PBD::Configuration
 {
   public:
 	RCConfiguration();
@@ -74,8 +75,8 @@ class LIBARDOUR_API RCConfiguration : public Configuration
 
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
-#define CONFIG_VARIABLE(Type,var,name,value) ConfigVariable<Type> var;
-#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) ConfigVariableWithMutation<Type> var;
+#define CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
+#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) PBD::ConfigVariableWithMutation<Type> var;
 #include "ardour/rc_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL

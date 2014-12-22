@@ -17,21 +17,20 @@
 
 */
 
-#ifndef __ardour_configuration_variable_h__
-#define __ardour_configuration_variable_h__
+#ifndef __libpbd_configuration_variable_h__
+#define __libpbd_configuration_variable_h__
 
 #include <iostream>
 #include <sstream>
+#include <string>
 
 #include "pbd/xml++.h"
 #include "pbd/convert.h"
-#include "ardour/libardour_visibility.h"
-#include "ardour/types.h"
-#include "ardour/utils.h"
+#include "pbd/libpbd_visibility.h"
 
-namespace ARDOUR {
+namespace PBD {
 
-class LIBARDOUR_API ConfigVariableBase {
+class LIBPBD_API ConfigVariableBase {
   public:
 
 	ConfigVariableBase (std::string str) : _name (str) {}
@@ -52,7 +51,7 @@ class LIBARDOUR_API ConfigVariableBase {
 };
 
 template<class T>
-class /*LIBARDOUR_API*/ ConfigVariable : public ConfigVariableBase
+class /*LIBPBD_API*/ ConfigVariable : public ConfigVariableBase
 {
   public:
 
@@ -92,7 +91,7 @@ class /*LIBARDOUR_API*/ ConfigVariable : public ConfigVariableBase
 
 /** Specialisation of ConfigVariable for std::string to cope with whitespace properly */
 template<>
-class /*LIBARDOUR_API*/ ConfigVariable<std::string> : public ConfigVariableBase
+class /*LIBPBD_API*/ ConfigVariable<std::string> : public ConfigVariableBase
 {
   public:
 
@@ -127,7 +126,7 @@ class /*LIBARDOUR_API*/ ConfigVariable<std::string> : public ConfigVariableBase
 };
 
 template<>
-class /*LIBARDOUR_API*/ ConfigVariable<bool> : public ConfigVariableBase
+class /*LIBPBD_API*/ ConfigVariable<bool> : public ConfigVariableBase
 {
   public:
 
@@ -164,7 +163,7 @@ class /*LIBARDOUR_API*/ ConfigVariable<bool> : public ConfigVariableBase
 };
 
 template<class T>
-class /*LIBARDOUR_API*/ ConfigVariableWithMutation : public ConfigVariable<T>
+class /*LIBPBD_API*/ ConfigVariableWithMutation : public ConfigVariable<T>
 {
   public:
 	ConfigVariableWithMutation (std::string name, T val, T (*m)(T))
@@ -193,7 +192,7 @@ class /*LIBARDOUR_API*/ ConfigVariableWithMutation : public ConfigVariable<T>
 };
 
 template<>
-class /*LIBARDOUR_API*/ ConfigVariableWithMutation<std::string> : public ConfigVariable<std::string>
+class /*LIBPBD_API*/ ConfigVariableWithMutation<std::string> : public ConfigVariable<std::string>
 {
   public:
 	ConfigVariableWithMutation (std::string name, std::string val, std::string (*m)(std::string))
@@ -219,4 +218,4 @@ class /*LIBARDOUR_API*/ ConfigVariableWithMutation<std::string> : public ConfigV
 
 }
 
-#endif /* __ardour_configuration_variable_h__ */
+#endif /* __libpbd_configuration_variable_h__ */

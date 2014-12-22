@@ -29,7 +29,7 @@
 
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
-#include "ardour/configuration_variable.h"
+#include "pbd/configuration_variable.h"
 
 #include "canvas/colors.h"
 
@@ -96,11 +96,11 @@ class UIConfiguration : public PBD::Stateful
 	/* declare variables */
 
 #undef  UI_CONFIG_VARIABLE
-#define UI_CONFIG_VARIABLE(Type,var,name,value) ARDOUR::ConfigVariable<Type> var;
+#define UI_CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
 #include "ui_config_vars.h"
 #undef UI_CONFIG_VARIABLE
 
-#define CANVAS_FONT_VARIABLE(var,name) ARDOUR::ConfigVariable<std::string> var;
+#define CANVAS_FONT_VARIABLE(var,name) PBD::ConfigVariable<std::string> var;
 #include "canvas_vars.h"
 #undef CANVAS_FONT_VARIABLE
 
