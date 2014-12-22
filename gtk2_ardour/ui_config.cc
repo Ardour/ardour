@@ -497,7 +497,7 @@ UIConfiguration::load_colors (XMLNode const & node)
 
 		if (name && color) {
 			ArdourCanvas::Color c;
-			c = strtol (color->value().c_str(), 0, 16);
+			c = strtoul (color->value().c_str(), 0, 16);
 			colors.insert (make_pair (name->value(), c));
 		}
 	}
