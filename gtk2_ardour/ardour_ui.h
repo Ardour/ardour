@@ -332,6 +332,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_session_options_window ();
 
   private:
+	PublicEditor*        editor;
+	Mixer_UI*            mixer;
 	Gtk::Tooltips       _tooltips;
 	NSM_Client*          nsm;
 	bool                _was_dirty;
@@ -621,10 +623,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void rename_session ();
 	void setup_order_hint ();
 
-	Mixer_UI   *mixer;
 	int         create_mixer ();
-
-	PublicEditor     *editor;
 	int         create_editor ();
 
 	Meterbridge  *meterbridge;
