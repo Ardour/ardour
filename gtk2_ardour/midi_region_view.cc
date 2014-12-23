@@ -415,8 +415,6 @@ bool
 MidiRegionView::leave_notify (GdkEventCrossing*)
 {
 	leave_internal();
-	_note_cursor_ctx.reset();
-	_press_cursor_ctx.reset();
 
 	_entered = false;
 	return false;
@@ -3143,7 +3141,6 @@ MidiRegionView::note_entered(NoteBase* ev)
 	if (_mouse_state == SelectTouchDragging) {
 		note_selected (ev, true);
 	} else if (editor->current_mouse_mode() == MouseContent) {
-		CursorContext::set(&_note_cursor_ctx, *editor, editor->cursors()->grabber_note);
 		show_verbose_cursor (ev->note ());
 	} else if (editor->current_mouse_mode() == MouseDraw) {
 		show_verbose_cursor (ev->note ());
@@ -3160,8 +3157,6 @@ MidiRegionView::note_left (NoteBase*)
 	}
 
 	editor->verbose_cursor()->hide ();
-
-	_note_cursor_ctx.reset();
 }
 
 void
@@ -3212,13 +3207,14 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 	Editing::MouseMode mm = editor->current_mouse_mode();
 	bool trimmable = (mm == MouseContent || mm == MouseTimeFX || mm == MouseDraw);
 
-	if (can_set_cursor) {
+	Editor::EnterContext* ctx = editor->get_enter_context(NoteItem);
+	if (can_set_cursor && ctx) {
 		if (trimmable && x_fraction > 0.0 && x_fraction < 0.2) {
-			CursorContext::set(&_note_cursor_ctx, *editor, editor->cursors()->left_side_trim);
+			ctx->cursor_ctx->change(editor->cursors()->left_side_trim);
 		} else if (trimmable && x_fraction >= 0.8 && x_fraction < 1.0) {
-			CursorContext::set(&_note_cursor_ctx, *editor, editor->cursors()->right_side_trim);
+			ctx->cursor_ctx->change(editor->cursors()->right_side_trim);
 		} else {
-			CursorContext::set(&_note_cursor_ctx, *editor, editor->cursors()->grabber_note);
+			ctx->cursor_ctx->change(editor->cursors()->grabber_note);
 		}
 	}
 }

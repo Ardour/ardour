@@ -782,6 +782,17 @@ Editor::stop_canvas_autoscroll ()
 	autoscroll_connection.disconnect ();
 }
 
+Editor::EnterContext*
+Editor::get_enter_context(ItemType type)
+{
+	for (ssize_t i = _enter_stack.size() - 1; i >= 0; --i) {
+		if (_enter_stack[i].item_type == type) {
+			return &_enter_stack[i];
+		}
+	}
+	return NULL;
+}
+
 bool
 Editor::left_track_canvas (GdkEventCrossing */*ev*/)
 {
@@ -1165,16 +1176,10 @@ Editor::which_track_cursor () const
 	return cursor;
 }
 
-void
-Editor::choose_canvas_cursor_on_entry (ItemType type)
+Gdk::Cursor*
+Editor::which_canvas_cursor(ItemType type) const
 {
-	Gdk::Cursor* cursor = 0;
-
-	if (_drags->active()) {
-		return;
-	}
-
-	cursor = which_mode_cursor ();
+	Gdk::Cursor* cursor = which_mode_cursor ();
 
 	if ((mouse_mode == MouseObject || get_smart_mode ()) ||
 	    mouse_mode == MouseContent) {
@@ -1256,6 +1261,8 @@ Editor::choose_canvas_cursor_on_entry (ItemType type)
 		case CrossfadeViewItem:
 			cursor = _cursors->cross_hair;
 			break;
+		case NoteItem:
+			cursor = _cursors->grabber_note;
 		default:
 			break;
 		}
@@ -1274,6 +1281,8 @@ Editor::choose_canvas_cursor_on_entry (ItemType type)
 		case ControlPointItem:
 			cursor = _cursors->fader;
 			break;
+		case NoteItem:
+			cursor = _cursors->grabber_note;
 		default:
 			break;
 		}
@@ -1307,9 +1316,30 @@ Editor::choose_canvas_cursor_on_entry (ItemType type)
 		break;
 	}
 
+	return cursor;
+}
+
+void
+Editor::choose_canvas_cursor_on_entry (ItemType type)
+{
+	if (_drags->active()) {
+		return;
+	}
+
+	Gdk::Cursor* cursor = which_canvas_cursor(type);
+
 	if (cursor) {
-		CursorContext::set(&_enter_cursor_ctx, *this, cursor);
-		_entered_item_type = type;
+		// Push a new enter context
+		const EnterContext ctx = { type, CursorContext::create(*this, cursor) };
+		_enter_stack.push_back(ctx);
+	}
+}
+
+void
+Editor::update_all_enter_cursors ()
+{
+	for (std::vector<EnterContext>::iterator i = _enter_stack.begin(); i != _enter_stack.end(); ++i) {
+		i->cursor_ctx->change(which_canvas_cursor(i->item_type));
 	}
 }
 

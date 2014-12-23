@@ -373,7 +373,6 @@ Editor::Editor ()
 	current_stepping_trackview = 0;
 	entered_track = 0;
 	entered_regionview = 0;
-	_entered_item_type = NoItem;
 	entered_marker = 0;
 	clear_entered_track = false;
 	current_timefx = 0;
@@ -2122,9 +2121,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 		edit_point_selector.set_text (str);
 	}
 
-	if (_entered_item_type != NoItem) {
-		choose_canvas_cursor_on_entry (_entered_item_type);
-	}
+	update_all_enter_cursors();
 
 	if (!force && !changed) {
 		return;

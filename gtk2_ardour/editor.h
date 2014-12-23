@@ -459,6 +459,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void get_pointer_position (double &, double &) const;
 
+	/** Context for mouse entry (stored in a stack). */
+	struct EnterContext {
+		ItemType                         item_type;
+		boost::shared_ptr<CursorContext> cursor_ctx;
+	};
+
+	/** Get the topmost enter context for the given item type.
+	 *
+	 * This is used to change the cursor associated with a given enter context,
+	 * which may not be on the top of the stack.
+	 */
+	EnterContext* get_enter_context(ItemType type);
+
 	TimeAxisView* stepping_axis_view () {
 		return _stepping_axis_view;
 	}
@@ -735,7 +748,13 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
+	Gdk::Cursor* which_canvas_cursor (ItemType type) const;
+
+	/** Push the appropriate enter/cursor context on item entry. */
 	void choose_canvas_cursor_on_entry (ItemType);
+
+	/** Update all enter cursors based on current settings. */
+	void update_all_enter_cursors ();
 
 	ArdourCanvas::GtkCanvas* _track_canvas;
 	ArdourCanvas::GtkCanvasViewport* _track_canvas_viewport;
@@ -1098,7 +1117,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	framecnt_t cut_buffer_length;
 
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;  ///< Button press cursor context
-	boost::shared_ptr<CursorContext> _enter_cursor_ctx;  ///< Entered item cursor context
 
 	boost::weak_ptr<ARDOUR::Trimmable> _trimmable;
 	boost::weak_ptr<ARDOUR::Movable> _movable;
@@ -1981,7 +1999,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	*/
 	RegionView*   entered_regionview;
 
-	ItemType _entered_item_type;
+	std::vector<EnterContext> _enter_stack;
 
 	bool clear_entered_track;
 	bool left_track_canvas (GdkEventCrossing*);

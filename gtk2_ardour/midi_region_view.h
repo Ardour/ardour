@@ -497,7 +497,6 @@ private:
 	
 	PBD::ScopedConnection _mouse_mode_connection;
 
-	boost::shared_ptr<CursorContext> _note_cursor_ctx;
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;
 
 	NotePlayer* _note_player;

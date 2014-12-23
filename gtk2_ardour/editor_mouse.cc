@@ -320,6 +320,8 @@ Editor::mouse_mode_toggled (MouseMode m)
 	
 	update_time_selection_display ();
 
+	update_all_enter_cursors ();
+
 	MouseModeChanged (); /* EMIT SIGNAL */
 }
 
@@ -1642,8 +1644,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	bool is_start;
 	bool ret = true;
 
-	_enter_cursor_ctx.reset();
-	_entered_item_type = NoItem;
+	_enter_stack.pop_back();
 
 	switch (item_type) {
 	case ControlPointItem:
@@ -2314,9 +2315,10 @@ Editor::update_join_object_range_location (double y)
 		double const c = item_space.y / entered_regionview->height();
 			
 		_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
-		
-		if (_join_object_range_state != old && _enter_cursor_ctx) {
-			_enter_cursor_ctx->change(which_track_cursor());
+
+		Editor::EnterContext* ctx = get_enter_context(RegionItem);
+		if (_join_object_range_state != old && ctx) {
+			ctx->cursor_ctx->change(which_track_cursor());
 		}
 
 	} else if (entered_track) {
@@ -2348,8 +2350,9 @@ Editor::update_join_object_range_location (double y)
 			_join_object_range_state = JOIN_OBJECT_RANGE_OBJECT;
 		}
 
-		if (_join_object_range_state != old && _enter_cursor_ctx) {
-			_enter_cursor_ctx->change(which_track_cursor());
+		Editor::EnterContext* ctx = get_enter_context(StreamItem);
+		if (_join_object_range_state != old && ctx) {
+			ctx->cursor_ctx->change(which_track_cursor());
 		}
 	}
 }
