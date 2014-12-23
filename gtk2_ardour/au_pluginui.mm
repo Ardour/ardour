@@ -657,7 +657,10 @@ AUPluginUI::parent_cocoa_window ()
 
 	/* move the au_view down so that it doesn't overlap the top_box contents */
 
-	NSPoint origin = { 0, static_cast<CGFloat> (a.height) };
+	const int spacing = 6;  // main vbox spacing
+	const int pad     = 4;  // box pad
+
+	NSPoint origin = { spacing + pad, static_cast<CGFloat> (a.height) + (2 * spacing) + pad };
 
 	[au_view setFrameOrigin:origin];
         [view addSubview:au_view positioned:NSWindowBelow relativeTo:NULL];
