@@ -29,18 +29,13 @@
 #include "ardour/template_utils.h"
 #include "ardour/session.h"
 
-#ifdef PLATFORM_WINDOWS
-#include <windows.h>
-#include <shlobj.h> // CSIDL_*
-#include "pbd/windows_special_dirs.h"
-#endif
-
 #ifdef interface
 #undef interface
 #endif
 
 #include "video_server_dialog.h"
 #include "utils_videotl.h"
+#include "video_tool_paths.h"
 #include "i18n.h"
 
 #ifdef PLATFORM_WINDOWS
@@ -93,40 +88,10 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	listenaddr_combo.append_text("0.0.0.0");
 	listenaddr_combo.set_active(0);
 
-#ifdef PLATFORM_WINDOWS
-	HKEY key;
-	DWORD size = PATH_MAX;
-	char tmp[PATH_MAX+1];
-	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
-#endif
-
-	std::string icsd_file_path;
-	if (find_file (PBD::Searchpath(Glib::getenv("PATH")), X_("harvid"), icsd_file_path)) {
-		path_entry.set_text(icsd_file_path);
-	}
-#ifdef PLATFORM_WINDOWS
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
-	{
-		path_entry.set_text(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", NULL));
-	}
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ | KEY_WOW64_32KEY, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
-	{
-		path_entry.set_text(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", NULL));
-	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "harvid.exe", NULL), Glib::FILE_TEST_EXISTS))
-	{
-		path_entry.set_text(g_build_filename(program_files, "harvid", "harvid.exe", NULL));
-	}
-#endif
-	/* generic fallbacks to try */
-	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {
-		path_entry.set_text(X_("C:\\Program Files\\harvid\\harvid.exe"));
-	}
-	else {
+	std::string harvid_exe;
+	if (ArdourVideoToolPaths::harvid_exe(harvid_exe)) {
+		path_entry.set_text(harvid_exe);
+	} else {
 		PBD::warning <<
 			string_compose(
 					_("The external video server 'harvid' can not be found.\n"
@@ -138,7 +103,6 @@ VideoServerDialog::VideoServerDialog (Session* s)
 					 ), PROGRAM_NAME)
 			<< endmsg;
 	}
-
 
 	if (docroot_entry.get_text().empty()) {
 	  std::string docroot =  Glib::path_get_dirname(_session->session_directory().root_path());
