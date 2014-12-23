@@ -23,11 +23,11 @@
 #include <map>
 #include <string>
 
-#include "ardour/types.h"
-#include "pbd/configuration.h"
-
 #include "ardour/libardour_visibility.h"
+#include "ardour/types.h"
 #include "ardour/utils.h"
+
+#include "pbd/configuration.h"
 
 class XMLNode;
 

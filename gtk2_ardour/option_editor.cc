@@ -22,13 +22,13 @@
 #include <gtkmm/alignment.h>
 #include "gtkmm2ext/utils.h"
 
-#include "ardour/types.h"
-#include "pbd/configuration.h"
-
-#include "ardour/rc_configuration.h"
-#include "ardour/utils.h"
 #include "ardour/dB.h"
+#include "ardour/rc_configuration.h"
 #include "ardour/session.h"
+#include "ardour/types.h"
+#include "ardour/utils.h"
+
+#include "pbd/configuration.h"
 
 #include "public_editor.h"
 #include "option_editor.h"
