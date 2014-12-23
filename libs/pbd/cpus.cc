@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #elif defined(PLATFORM_WINDOWS)
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 #include "pbd/cpus.h"
