@@ -67,21 +67,22 @@
 
 #include "video_timeline.h"
 
-#include "about.h"
+#include "add_route_dialog.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "editing.h"
-#include "engine_dialog.h"
-#include "export_video_dialog.h"
 #include "enums.h"
 #include "visibility_group.h"
 #include "window_manager.h"
 
-#include "add_route_dialog.h"
+#ifdef COMPILER_MSVC
+#include "about.h"
 #include "add_video_dialog.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
+#include "engine_dialog.h"
+#include "export_video_dialog.h"
 #include "global_port_matrix.h"
 #include "keyeditor.h"
 #include "location_ui.h"
@@ -89,6 +90,22 @@
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
+#else
+class About;
+class AddRouteDialog;
+class AddVideoDialog;
+class BigClockWindow;
+class BundleManager;
+class EngineControl;
+class ExportVideoDialog;
+class KeyEditor;
+class LocationUIWindow;
+class RCOptionEditor;
+class RouteParams_UI;
+class SessionOptionEditor;
+class SpeakerDialog;
+class GlobalPortMatrixWindow;
+#endif
 
 class VideoTimeLine;
 class ArdourKeyboard;
@@ -98,8 +115,6 @@ class ConnectionEditor;
 class MainClock;
 class Mixer_UI;
 class PublicEditor;
-class RCOptionEditor;
-class RouteParams_UI;
 class SaveAsDialog;
 class SessionDialog;
 class SessionOptionEditor;
