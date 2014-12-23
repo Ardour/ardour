@@ -49,19 +49,20 @@ user_config_directory ()
 	if (!p.empty()) return p;
 
 #ifdef __APPLE__
+
 	p = Glib::build_filename (Glib::get_home_dir(), "Library/Preferences");
+
 #else
+
 	const char* c = 0;
-
-	/* adopt freedesktop standards, and put .ardour3 into $XDG_CONFIG_HOME or ~/.config
-	 */
-
+	/* adopt freedesktop standards, and put .ardour3 into $XDG_CONFIG_HOME or ~/.config */
 	if ((c = getenv ("XDG_CONFIG_HOME")) != 0) {
 		p = c;
 	} else {
+
 #ifdef PLATFORM_WINDOWS
 		// Not technically the home dir (since it needs to be a writable folder)
-		const string home_dir = Glib::build_filename (Glib::get_user_config_dir(), user_config_dir_name);
+		const string home_dir = Glib::get_user_config_dir();
 #else
 		const string home_dir = Glib::get_home_dir();
 #endif
@@ -69,17 +70,16 @@ user_config_directory ()
 			error << "Unable to determine home directory" << endmsg;
 			exit (1);
 		}
+		p = home_dir;
 
 #ifndef PLATFORM_WINDOWS
-		p = home_dir;
 		p = Glib::build_filename (p, ".config");
 #endif
-	}
-#endif
 
-#ifndef PLATFORM_WINDOWS
+	}
+#endif // end not __APPLE__
+
 	p = Glib::build_filename (p, user_config_dir_name);
-#endif
 
 	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
 		if (g_mkdir_with_parents (p.c_str(), 0755)) {
