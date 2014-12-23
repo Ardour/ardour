@@ -3574,6 +3574,7 @@ Editor::set_visible_track_count (int32_t n)
 
 	int h;
 	string str;
+	DisplaySuspender ds;
 	
 	if (_visible_track_count > 0) {
 		h = trackviews_height() / _visible_track_count;
