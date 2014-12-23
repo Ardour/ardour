@@ -5837,6 +5837,7 @@ Editor::global_rec_clicked (WavesButton*)
     boost::shared_ptr<RouteList> rl = _session->get_tracks ();
     
     bool all_tracks_are_record_armed = check_all_tracks_are_record_armed();
+    DisplaySuspender ds;
     _session->set_record_enabled (rl, !all_tracks_are_record_armed);
     _global_rec_button.set_active(!all_tracks_are_record_armed);
 }
