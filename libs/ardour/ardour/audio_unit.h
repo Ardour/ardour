@@ -53,9 +53,8 @@ struct LIBARDOUR_API AUParameterDescriptor : public ParameterDescriptor {
 	AudioUnitParameterID id;
 	AudioUnitScope scope;
 	AudioUnitElement element;
-	float default_value;
 	bool automatable;
-	AudioUnitParameterUnit unit;
+	AudioUnitParameterUnit au_unit;
 };
 
 class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin

@@ -606,7 +606,7 @@ AUPlugin::discover_parameters ()
 
 			d.lower = info.minValue;
 			d.upper = info.maxValue;
-			d.default_value = info.defaultValue;
+			d.normal = info.defaultValue;
 
 			d.integer_step = (info.unit == kAudioUnitParameterUnit_Indexed);
 			d.toggled = (info.unit == kAudioUnitParameterUnit_Boolean) ||
@@ -617,7 +617,18 @@ AUPlugin::discover_parameters ()
 				(info.flags & kAudioUnitParameterFlag_IsWritable);
 
 			d.logarithmic = (info.flags & kAudioUnitParameterFlag_DisplayLogarithmic);
-			d.unit = info.unit;
+			d.au_unit = info.unit;
+			switch (info.unit) {
+			case kAudioUnitParameterUnit_Decibels:
+				d.unit = ParameterDescriptor::DB;
+				break;
+			case kAudioUnitParameterUnit_MIDINoteNumber:
+				d.unit = ParameterDescriptor::MIDI_NOTE;
+				break;
+			case kAudioUnitParameterUnit_Hertz:
+				d.unit = ParameterDescriptor::HZ;
+				break;
+			}
 
 			d.min_unbound = 0; // lower is bound
 			d.max_unbound = 0; // upper is bound
@@ -759,7 +770,7 @@ float
 AUPlugin::default_value (uint32_t port)
 {
 	if (port < descriptors.size()) {
-		return descriptors[port].default_value;
+		return descriptors[port].normal;
 	}
 
 	return 0;
