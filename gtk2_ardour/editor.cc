@@ -680,8 +680,6 @@ Editor::Editor ()
         assert (act);
 	skip_button.set_related_action (act);
 
-        ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
-
 	global_solo_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_solo_clicked));
 	_global_rec_button.signal_clicked.connect (sigc::mem_fun(*this,&Editor::global_rec_clicked));   
 
@@ -1480,6 +1478,8 @@ Editor::set_session (Session *t)
     _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::start_session_auto_save_event_timing, this), gui_context());
     _session->locations()->session_range_location()->StartChanged.connect(_session_connections, invalidator (*this), boost::bind (&Editor::update_horizontal_adjustment_limits, this), gui_context() );
     _session->locations()->session_range_location()->EndChanged.connect(_session_connections, invalidator (*this), boost::bind (&Editor::update_horizontal_adjustment_limits, this), gui_context() );
+    
+    ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
     
     update_horizontal_adjustment_limits();
     
