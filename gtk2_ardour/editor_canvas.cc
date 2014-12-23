@@ -1030,6 +1030,7 @@ Editor::pop_canvas_cursor ()
 			/* Popped to an existing cursor, we're done.  Otherwise, the
 			   context that created this cursor has been destroyed, so we need
 			   to skip to the next down the stack. */
+			set_canvas_cursor (_cursor_stack.back());
 			return;
 		}
 	}
