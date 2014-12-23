@@ -307,7 +307,6 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	    bool exclusive;
 	};
 
-	SoloMuteRelease* _solo_release;
 	SoloMuteRelease* _mute_release;
 
 	void setup_invert_buttons ();

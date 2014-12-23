@@ -126,7 +126,6 @@ RouteUI::init ()
 	main_mute_check = 0;
     solo_safe_check = 0;
     solo_isolated_check = 0;
-	_solo_release = 0;
 	_mute_release = 0;
 	denormal_menu_item = 0;
     step_edit_item = 0;
@@ -494,126 +493,38 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 	multiple_solo_change = false;
 
-        /* Goal here is to use Ctrl as the modifier on all platforms.
-           This is questionable design, but here's how we do it.
-        */
+    /* Goal here is to use Ctrl as the modifier on all platforms.
+       This is questionable design, but here's how we do it.
+    */
 	int control_modifier;
 #ifdef __APPLE__
-        control_modifier = Keyboard::SecondaryModifier; /* Control */
+    control_modifier = Keyboard::SecondaryModifier; /* Control */
 #else
-        /* Anything except OS X */
-        control_modifier = Keyboard::PrimaryModifier;  /* Control */
+    /* Anything except OS X */
+    control_modifier = Keyboard::PrimaryModifier;  /* Control */
 #endif
 
-        if (Keyboard::is_context_menu_event (ev)) {
-                if (solo_menu == 0) {
-                        build_solo_menu ();
-                }
-                solo_menu->popup (1, ev->time);
-        } else {
-                if (Keyboard::is_button2_event (ev)) {
-                        // Primary-button2 click is the midi binding click
-                        // button2-click is "momentary"
-                        if (solo_button.on_button_press_event (ev)) {
-                                return true;
-                        }
-                        _solo_release = new SoloMuteRelease (_route->self_soloed());
-		}
+    if (Keyboard::is_context_menu_event (ev))
+    {
+        if (solo_menu == 0) {
+            build_solo_menu ();
+        }
+        solo_menu->popup (1, ev->time);
+    } else
+    {
+		if ( ev->button == 1 )
+        {
+            if (Keyboard::modifier_state_equals (ev->state, control_modifier)) {
 
-		if (ev->button == 1 || Keyboard::is_button2_event (ev)) {
-
-			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-
-				/* Primary-Tertiary-click applies change to all routes */
-
-				if (_solo_release) {
-					_solo_release->routes = _session->get_routes ();
-				}
-
-				DisplaySuspender ds;
-				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (_session->get_routes(), !_route->listening_via_monitor(),  Session::rt_cleanup, true);
-				} else {
-					_session->set_solo (_session->get_routes(), !_route->self_soloed(),  Session::rt_cleanup, true);
-				}
-
-			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
-
-				// Primary-Secondary-click: exclusively solo this track
-
-				if (_solo_release) {
-					_solo_release->exclusive = true;
-
-					boost::shared_ptr<RouteList> routes = _session->get_routes();
-
-					for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-						if ((*i)->soloed ()) {
-							_solo_release->routes_on->push_back (*i);
-						} else {
-							_solo_release->routes_off->push_back (*i);
-						}
-					}
-				}
-
-				if (Config->get_solo_control_is_listen_control()) {
-					/* ??? we need a just_one_listen() method */
-				} else {
-					DisplaySuspender ds;
-					_session->set_just_one_solo (_route, true);
-				}
-
-                        } else if (Keyboard::modifier_state_equals (ev->state, control_modifier)) {
-
-                                // control-click (SecondaryModifier): toggle solo isolated status
+                // control-click: toggle solo isolated status
 
 				_route->set_solo_isolated (!_route->solo_isolated(), this);
-				delete _solo_release;
-				_solo_release = 0;
-
-			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-				/* Primary-button1: solo mix group.
-				   NOTE: Primary-button2 is MIDI learn.
-				*/
-
-				/* Primary-button1 applies change to the mix group even if it is not active
-				   NOTE: Primary-button2 is MIDI learn.
-				*/
-
-				boost::shared_ptr<RouteList> rl;
-
-				if (ev->button == 1) { 
-
-					if (_route->route_group()) {
-							
-						rl = _route->route_group()->route_list();
-							
-						if (_solo_release) {
-							_solo_release->routes = rl;
-						}
-					} else {
-						rl.reset (new RouteList);
-						rl->push_back (_route);
-					}
-
-					DisplaySuspender ds;
-					if (Config->get_solo_control_is_listen_control()) {
-						_session->set_listen (rl, !_route->listening_via_monitor(),  Session::rt_cleanup, true);
-					} else {
-						_session->set_solo (rl, !_route->self_soloed(),  Session::rt_cleanup, true);
-					}
-				}
-
-			} else {
-
+			} else
+            {
 				/* click: solo this route */
 
 				boost::shared_ptr<RouteList> rl (new RouteList);
 				rl->push_back (route());
-
-				if (_solo_release) {
-					_solo_release->routes = rl;
-				}
 
 				DisplaySuspender ds;
 				if (Config->get_solo_control_is_listen_control()) {
@@ -631,23 +542,6 @@ RouteUI::solo_press(GdkEventButton* ev)
 bool
 RouteUI::solo_release (GdkEventButton*)
 {
-	if (_solo_release) {
-
-		if (_solo_release->exclusive) {
-
-		} else {
-			DisplaySuspender ds;
-			if (Config->get_solo_control_is_listen_control()) {
-				_session->set_listen (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-			} else {
-				_session->set_solo (_solo_release->routes, _solo_release->active, Session::rt_cleanup, true);
-			}
-		}
-                
-		delete _solo_release;
-		_solo_release = 0;
-	}
-
 	return true;
 }
 
