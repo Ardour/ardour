@@ -35,6 +35,7 @@
 #include "ardour/monitor_processor.h"
 #include "ardour/port.h"
 #include "ardour/route.h"
+#include "ardour/user_bundle.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
