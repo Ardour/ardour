@@ -32,14 +32,40 @@
 
 using namespace PBD;
 
+#ifdef PLATFORM_WINDOWS
+
+static bool
+windows_install_dir (const char *regkey, std::string &rv) {
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ, &key))
+	    && (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+		 )
+	{
+		rv = Glib::locale_to_utf8(tmp);
+		return true;
+	}
+
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
+	    && (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			)
+	{
+		rv = Glib::locale_to_utf8(tmp);
+		return true;
+	}
+
+	return false;
+}
+#endif
+
 bool
 ArdourVideoToolPaths::harvid_exe (std::string &harvid_exe)
 {
 
 #ifdef PLATFORM_WINDOWS
-	HKEY key;
-	DWORD size = PATH_MAX;
-	char tmp[PATH_MAX+1];
+	std::string reg;
 	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
 #endif
 
@@ -50,28 +76,20 @@ ArdourVideoToolPaths::harvid_exe (std::string &harvid_exe)
 		harvid_exe = icsd_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
+	else if ( windows_install_dir("Software\\RSS\\harvid", reg))
 	{
-		harvid_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", NULL);
-	}
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ | KEY_WOW64_32KEY, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
-	{
-		harvid_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "harvid.exe", NULL);
+		harvid_exe = g_build_filename(reg.c_str(), "harvid.exe", NULL);
 	}
 	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "harvid.exe", NULL), Glib::FILE_TEST_EXISTS))
 	{
 		harvid_exe = g_build_filename(program_files, "harvid", "harvid.exe", NULL);
 	}
-#endif
-	/* generic fallbacks to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {
 		harvid_exe = X_("C:\\Program Files\\harvid\\harvid.exe");
 	}
-	else {
+#endif
+	else
+	{
 		return false;
 	}
 	return true;
@@ -82,9 +100,7 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 {
 	std::string xjadeo_file_path;
 #ifdef PLATFORM_WINDOWS
-	HKEY key;
-	DWORD size = PATH_MAX;
-	char tmp[PATH_MAX+1];
+	std::string reg;
 	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
 #endif
 	if (getenv("XJREMOTE")) {
@@ -103,23 +119,14 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 	}
 #endif
 #ifdef PLATFORM_WINDOWS
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
+	else if ( windows_install_dir("Software\\RSS\\xjadeo", reg))
 	{
-		xjadeo_exe = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", NULL));
-	}
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\xjadeo", 0, KEY_READ | KEY_WOW64_32KEY, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
-	{
-		xjadeo_exe = std::string(g_build_filename(Glib::locale_to_utf8(tmp).c_str(), "xjadeo.exe", NULL));
+		xjadeo_exe = std::string(g_build_filename(reg.c_str(), "xjadeo.exe", NULL));
 	}
 	else if (program_files && Glib::file_test(g_build_filename(program_files, "xjadeo", "xjadeo.exe", NULL), Glib::FILE_TEST_EXISTS))
 	{
 		xjadeo_exe = std::string(g_build_filename(program_files, "xjadeo", "xjadeo.exe", NULL));
 	}
-	/* generic fallback to try */
 	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjadeo.exe"), Glib::FILE_TEST_EXISTS)) {
 		xjadeo_exe = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
 	}
@@ -135,9 +142,7 @@ bool
 ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffprobe_exe)
 {
 #ifdef PLATFORM_WINDOWS
-	HKEY key;
-	DWORD size = PATH_MAX;
-	char tmp[PATH_MAX+1];
+	std::string reg;
 	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
 #endif
 
@@ -149,32 +154,17 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 		ffmpeg_exe = ff_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
+	else if ( windows_install_dir("Software\\RSS\\harvid", reg))
 	{
-		ffmpeg_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffmpeg.exe"), NULL);
-		ffprobe_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffprobe.exe"), NULL);
+		ffmpeg_exe = g_build_filename(reg.c_str(), X_("ffmpeg.exe"), NULL);
+		ffprobe_exe = g_build_filename(reg.c_str(), X_("ffprobe.exe"), NULL);
 	}
-	else if ( (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\RSS\\harvid", 0, KEY_READ | KEY_WOW64_32KEY, &key))
-			&&  (ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			)
-	{
-		ffmpeg_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffmpeg.exe"), NULL);
-		ffprobe_exe = g_build_filename(Glib::locale_to_utf8(tmp).c_str(), X_("ffprobe.exe"), NULL);
-	}
+
 	if (Glib::file_test(ffmpeg_exe, Glib::FILE_TEST_EXISTS)) {
 		;
 	}
 	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL);
-	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffmpeg.exe", NULL), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL);
-	}
-	/* generic fallbacks to try */
-	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = X_("C:\\Program Files\\harvid\\ffmpeg.exe");
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
@@ -191,14 +181,7 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 		;
 	}
 	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffprobe.exe", NULL), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", NULL);
-	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "ffmpeg", "ffprobe.exe", NULL), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", NULL);
-	}
-	/* generic fallbacks to try */
-	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
-		ffprobe_exe = X_("C:\\Program Files\\harvid\\ffprobe.exe");
+		ffprobe_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", NULL);
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");
