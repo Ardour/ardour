@@ -1232,6 +1232,20 @@ Selection::get_state () const
 		
 	}
 
+	for (PointSelection::const_iterator i = points.begin(); i != points.end(); ++i) {
+		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&(*i)->line().trackview);
+		if (atv) {
+			XMLNode* r = node->add_child (X_("ControlPoint"));
+			r->add_property (X_("type"), "track");
+			r->add_property (X_("route-id"), atoi (atv->parent_route()->id ().to_s ().c_str()));
+			r->add_property (X_("automation-list-id"), atoi ((*i)->line().the_list()->id ().to_s ().c_str()));
+			r->add_property (X_("parameter"), EventTypeMap::instance().to_symbol ((*i)->line().the_list()->parameter ()));
+
+			snprintf(buf, sizeof(buf), "%d", (*i)->view_index());
+			r->add_property (X_("view-index"), string(buf));
+		}
+	}
+
 	for (TimeSelection::const_iterator i = time.begin(); i != time.end(); ++i) {
 		XMLNode* t = node->add_child (X_("AudioRange"));
 		snprintf(buf, sizeof(buf), "%" PRId64, (*i).start);
@@ -1261,6 +1275,7 @@ Selection::set_state (XMLNode const & node, int)
 	}
 
 	clear_regions ();
+	clear_points ();
 	clear_time ();
 	clear_tracks ();
 	clear_markers ();
@@ -1295,6 +1310,39 @@ Selection::set_state (XMLNode const & node, int)
 				regions.pending.push_back (id);
 			}
 			
+		} else if  ((*i)->name() == X_("ControlPoint")) {
+			XMLProperty* prop_type = (*i)->property (X_("type"));
+			XMLProperty* prop_route_id = (*i)->property (X_("route-id"));
+			XMLProperty* prop_alist_id = (*i)->property (X_("automation-list-id"));
+			XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
+			XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
+
+			assert (prop_type);
+			assert (prop_route_id);
+			assert (prop_alist_id);
+			assert (prop_parameter);
+			assert (prop_view_index);
+
+			if (prop_type->value () == "track") {
+				PBD::ID id (prop_route_id->value ());
+				RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
+
+				if (rtv) {
+					boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().from_symbol (prop_parameter->value ()));
+					if (atv) {
+						list<boost::shared_ptr<AutomationLine> > lines = atv->lines();
+						for (list<boost::shared_ptr<AutomationLine> > ::iterator i = lines.begin(); i != lines.end(); ++i) {
+							if ((*i)->the_list()->id() == prop_alist_id->value()) {
+								ControlPoint* cp = (*i)->nth(atol(prop_view_index->value().c_str()));
+								if (cp) {
+									add (cp);
+								}
+							}
+						}
+					}
+				}
+			} 
+
 		} else if  ((*i)->name() == X_("AudioRange")) {
 			XMLProperty* prop_start = (*i)->property (X_("start"));
 			XMLProperty* prop_end = (*i)->property (X_("end"));

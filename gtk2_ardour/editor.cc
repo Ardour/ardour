@@ -3360,7 +3360,7 @@ Editor::commit_reversible_selection_op ()
 }
 
 void
-Editor::undo_reversible_selection_op ()
+Editor::undo_selection_op ()
 {
 	if (_session) {
 		selection_op_history_it++;
@@ -3381,7 +3381,7 @@ Editor::undo_reversible_selection_op ()
 }
 
 void
-Editor::redo_reversible_selection_op ()
+Editor::redo_selection_op ()
 {
 	if (_session) {
 		if (selection_op_history_it > 0) {
