@@ -594,6 +594,8 @@ def options(opt):
                     help='Compile with support for linuxVST plugins')
     opt.add_option('--no-lxvst', action='store_false', dest='lxvst',
                     help='Compile without support for linuxVST plugins')
+    opt.add_option('--no-lrdf', action='store_true', dest='no_lrdf',
+                    help='Compile without support for LRDF LADSPA data even if present')
     opt.add_option('--nls', action='store_true', default=True, dest='nls',
                     help='Enable i18n (native language support) (default)')
     opt.add_option('--no-nls', action='store_false', dest='nls')

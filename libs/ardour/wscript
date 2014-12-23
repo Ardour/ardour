@@ -254,8 +254,9 @@ def configure(conf):
                       atleast_version='0.4.0', mandatory=False)
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     if Options.options.dist_target != 'mingw':
-        autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
-                          atleast_version='0.4.0')
+        if not Options.options.no_lrdf:
+            autowaf.check_pkg(conf, 'lrdf', uselib_store='LRDF',
+                              atleast_version='0.4.0')
         autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
                           atleast_version='0.3.2')
     autowaf.check_pkg(conf, 'samplerate', uselib_store='SAMPLERATE',
