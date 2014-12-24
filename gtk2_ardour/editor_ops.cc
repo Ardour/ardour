@@ -6588,6 +6588,7 @@ Editor::set_track_height (Height h)
 void
 Editor::vertical_zoom_by_slider()
 {
+    DisplaySuspender ds;
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		(*i)->set_height (_vertical_zoom_adjustment.get_value()*22);
 	}
