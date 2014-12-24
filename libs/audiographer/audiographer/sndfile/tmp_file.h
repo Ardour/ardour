@@ -35,7 +35,10 @@ class TmpFile : public SndfileWriter<T>, public SndfileReader<T>
 	~TmpFile()
 	{
 		if (!filename.empty()) {
-			std::remove(filename.c_str());
+			SndfileHandle::close();
+			if (std::remove(filename.c_str() ) != 0) {
+				std::cout << "TmpFile::~TmpFile () : Error removing temp file: " << strerror(errno) << std::endl;
+			}
 		}
 	}
 

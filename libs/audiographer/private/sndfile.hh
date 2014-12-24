@@ -94,6 +94,8 @@ class SndfileHandle
 
 		bool operator == (const SndfileHandle &rhs) const { return (p == rhs.p) ; }
 
+		int close (void);
+
 		sf_count_t	frames (void) const		{ return p ? p->sfinfo.frames : 0 ; }
 		int			format (void) const		{ return p ? p->sfinfo.format : 0 ; }
 		int			channels (void) const	{ return p ? p->sfinfo.channels : 0 ; }
@@ -249,6 +251,20 @@ SndfileHandle::operator = (const SndfileHandle &rhs)
 
 	return *this ;
 } /* SndfileHandle assignment operator */
+
+int
+SndfileHandle::close (void)
+{ 
+	if ( (p->sf != NULL) && (sf_close (p->sf) == 0 ) )
+	{
+		p->sf = NULL;
+		return 0;
+	} 
+	else
+	{ 
+		return -1 ; 
+	} 
+}
 
 inline int
 SndfileHandle::error (void) const
