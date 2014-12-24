@@ -774,6 +774,8 @@ Route::set_solo (bool yn, void *src)
 		set_mute_master_solo ();
 		solo_changed (true, src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
+        
+        set_mute (false, src);
 	}
 }
 
