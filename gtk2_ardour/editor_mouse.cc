@@ -296,14 +296,15 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	mouse_mode = m;
 
+	/* Switch snap type/mode if we're moving to/from an internal tool.  Note
+	   this must toggle the actions and not call set_snap_*() directly,
+	   otherwise things get out of sync and the combo box stops working. */
 	if (!was_internal && internal_editing()) {
-		/* switched to internal, switch to internal snap settings */
-		set_snap_to(internal_snap_type);
-		set_snap_mode(internal_snap_mode);
+		snap_type_action(internal_snap_type)->set_active(true);
+		snap_mode_action(internal_snap_mode)->set_active(true);
 	} else if (was_internal && !internal_editing()) {
-		/* switched out of internal, switch to non-internal snap settings */
-		set_snap_to(pre_internal_snap_type);
-		set_snap_mode(pre_internal_snap_mode);
+		snap_type_action(pre_internal_snap_type)->set_active(true);
+		snap_mode_action(pre_internal_snap_mode)->set_active(true);
 	}
 
 	instant_save ();
