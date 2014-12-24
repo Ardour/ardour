@@ -778,7 +778,8 @@ def options(opt):
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
         help='directory where the header files of qm-dsp can be found')
-
+    opt.add_option('--gtk-disable-deprecated', action='store_true', default=False, dest='gtk_disable_deprecated',
+                    help='Enable GTK/MM_DISABLE_DEPRECATED')
     for i in children:
         opt.recurse(i)
 
@@ -1005,6 +1006,9 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
     if have_rf64_riff_support:
             conf.env.append_value('CXXFLAGS', "-DHAVE_RF64_RIFF")
             conf.env.append_value('CFLAGS', "-DHAVE_RF64_RIFF")
+    
+    if Options.options.gtk_disable_deprecated:
+        conf.env.append_value('CXXFLAGS', '-DGTKMM_DISABLE_DEPRECATED')
 
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = True
