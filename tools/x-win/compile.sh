@@ -24,9 +24,10 @@ fi
 : ${PREFIX=${ROOT}/win-stack-$WARCH}
 
 if test -z "${ARDOURCFG}"; then
-	ARDOURCFG="--with-dummy --windows-vst"
 	if test -f ${PREFIX}/include/pa_asio.h; then
-		ARDOURCFG="$ARDOURCFG --with-wavesbackend"
+		ARDOURCFG="--windows-vst --with-backends=jack,dummy,wavesaudio"
+	else
+		ARDOURCFG="--windows-vst --with-backends=jack,dummy"
 	fi
 fi
 
