@@ -39,6 +39,7 @@
 #include "ardour/template_utils.h"
 
 #include "ardour_dialog.h"
+#include "instrument_selector.h"
 
 class Editor;
 
@@ -78,7 +79,7 @@ class AddRouteDialog : public ArdourDialog
 	Gtk::Label instrument_label;
 	Gtk::ComboBoxText mode_combo;
 	Gtk::ComboBoxText route_group_combo;
-	Gtk::ComboBox     instrument_combo;
+	InstrumentSelector instrument_combo;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 
@@ -108,21 +109,6 @@ class AddRouteDialog : public ArdourDialog
 
 	static std::vector<std::string> channel_combo_strings;
 	static std::vector<std::string> bus_mode_strings;
-
-	struct InstrumentListColumns : public Gtk::TreeModel::ColumnRecord {
-		InstrumentListColumns () {
-			add (name);
-			add (info_ptr);
-		}
-		Gtk::TreeModelColumn<std::string>  name;
-		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> info_ptr;
-	};
-
-	Glib::RefPtr<Gtk::ListStore> instrument_list;
-	InstrumentListColumns instrument_list_columns;
-
-	void build_instrument_list ();
-	uint32_t reasonable_synth_id;
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

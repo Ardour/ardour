@@ -57,7 +57,6 @@ AddRouteDialog::AddRouteDialog ()
 	, configuration_label (_("Configuration:"))
 	, mode_label (_("Track mode:"))
 	, instrument_label (_("Instrument:"))
-	, reasonable_synth_id(0)
 {
 	set_name ("AddRouteDialog");
 	set_modal (true);
@@ -80,12 +79,6 @@ AddRouteDialog::AddRouteDialog ()
 	track_bus_combo.append_text (_("Audio+MIDI Tracks"));
 	track_bus_combo.append_text (_("Busses"));
 	track_bus_combo.set_active (0);
-
-	build_instrument_list ();
-	instrument_combo.set_model (instrument_list);
-	instrument_combo.pack_start (instrument_list_columns.name);
-	instrument_combo.set_active (reasonable_synth_id);
-	instrument_combo.set_button_sensitivity (Gtk::SENSITIVITY_AUTO);
 
 	VBox* vbox = manage (new VBox);
 	Gtk::Label* l;
@@ -561,61 +554,8 @@ AddRouteDialog::route_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gtk
 	return route_group_combo.get_active_text () == "separator";
 }
 
-void
-AddRouteDialog::build_instrument_list ()
-{
-	PluginInfoList all_plugs;
-	PluginManager& manager (PluginManager::instance());
-	TreeModel::Row row;
-
-	all_plugs.insert (all_plugs.end(), manager.ladspa_plugin_info().begin(), manager.ladspa_plugin_info().end());
-#ifdef WINDOWS_VST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.windows_vst_plugin_info().begin(), manager.windows_vst_plugin_info().end());
-#endif
-#ifdef LXVST_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.lxvst_plugin_info().begin(), manager.lxvst_plugin_info().end());
-#endif
-#ifdef AUDIOUNIT_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.au_plugin_info().begin(), manager.au_plugin_info().end());
-#endif
-#ifdef LV2_SUPPORT
-	all_plugs.insert (all_plugs.end(), manager.lv2_plugin_info().begin(), manager.lv2_plugin_info().end());
-#endif
-
-
-	instrument_list = ListStore::create (instrument_list_columns);
-
-	row = *(instrument_list->append());
-	row[instrument_list_columns.info_ptr] = PluginInfoPtr ();
-	row[instrument_list_columns.name] = _("-none-");
-
-	uint32_t n = 1;
-	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
-
-		if (manager.get_status (*i) == PluginManager::Hidden) continue;
-
-		if ((*i)->is_instrument()) {
-			row = *(instrument_list->append());
-			row[instrument_list_columns.name] = (*i)->name;
-			row[instrument_list_columns.info_ptr] = *i;
-			if ((*i)->unique_id == "https://community.ardour.org/node/7596") {
-				reasonable_synth_id = n;
-			}
-			n++;
-		}
-	}
-}
-
 PluginInfoPtr
 AddRouteDialog::requested_instrument ()
 {
-	TreeModel::iterator iter = instrument_combo.get_active ();
-	TreeModel::Row row;
-	
-	if (iter) {
-		row = (*iter);
-		return row[instrument_list_columns.info_ptr];
-	}
-
-	return PluginInfoPtr();
+	return instrument_combo.selected_instrument();
 }

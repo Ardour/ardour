@@ -660,6 +660,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\instrument_selector.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\interthread_progress_window.cc"
 				>
 			</File>

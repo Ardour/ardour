@@ -109,6 +109,7 @@ gtk2_ardour_sources = [
         'gtk_pianokeyboard.c',
         'gui_object.cc',
         'insert_time_dialog.cc',
+        'instrument_selector.cc',
         'interthread_progress_window.cc',
         'io_selector.cc',
         'hit.cc',
