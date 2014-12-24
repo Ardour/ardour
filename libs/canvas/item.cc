@@ -594,7 +594,7 @@ Item::height () const
 Coord
 Item::width () const 
 {
-	boost::optional<ArdourCanvas::Rect> bb = bounding_box().get();
+	boost::optional<ArdourCanvas::Rect> bb = bounding_box();
 
 	if (bb) {
 		return bb->width ();
