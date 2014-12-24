@@ -124,6 +124,26 @@ echo " === complete"
 du -sh $DESTDIR
 
 ################################################################################
+### get video tools
+if test -z "$NOVIDEOTOOLS"; then
+	echo " === Including video-tools"
+	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
+	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/harvid_win-${HARVID_VERSION}.tar.xz \
+		"${SRCDIR}/harvid_win-${HARVID_VERSION}.tar.xz"
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/xjadeo_win-${XJADEO_VERSION}.tar.xz \
+		"${SRCDIR}/xjadeo_win-${XJADEO_VERSION}.tar.xz"
+
+	mkdir $DESTDIR/video
+	tar -xf "${SRCDIR}/harvid_win-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	tar -xf "${SRCDIR}/xjadeo_win-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
+fi
+
+################################################################################
 ### include static gdb - re-zipped binaries from
 ### http://sourceforge.net/projects/mingw/files/MinGW/Extension/gdb/gdb-7.6.1-1/gdb-7.6.1-1-mingw32-bin.tar.lzma
 ### http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.1/threads-win32/sjlj/x86_64-4.9.1-release-win32-sjlj-rt_v3-rev1.7z
@@ -140,8 +160,10 @@ cd bin
 START ..\\gdb\\bin\\gdb.exe ardour.exe
 EOF
 	OUTFILE="${TMPDIR}/ardour-${ARDOURVERSION}-dbg-${WARCH}-Setup.exe"
+	VERSIONINFO="Debug Version."
 else
 	OUTFILE="${TMPDIR}/ardour-${ARDOURVERSION}-${WARCH}-Setup.exe"
+	VERSIONINFO="Optimized Version."
 fi
 
 ################################################################################
@@ -208,6 +230,21 @@ Section "Ardour3 (required)" SecArdour
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\Ardour3.lnk" "\$INSTDIR\\bin\\ardour.exe" "" "\$INSTDIR\\bin\\ardour.exe" 0
 SectionEnd
+EOF
+
+if test -z "$NOVIDEOTOOLS"; then
+
+	cat >> $NSISFILE << EOF
+Section "Videotimeline Tools" SecVideo
+  WriteRegStr HKLM SOFTWARE\\Ardour\\video "Install_Dir" "\$INSTDIR\\video"
+  SetOutPath \$INSTDIR
+  File /r video
+SectionEnd
+EOF
+
+fi
+
+cat >> $NSISFILE << EOF
 Section "Start Menu Shortcuts" SecMenu
   SetShellVarContext all
   CreateDirectory "\$SMPROGRAMS\\ardour3"
@@ -223,10 +260,28 @@ fi
 cat >> $NSISFILE << EOF
   CreateShortCut "\$SMPROGRAMS\\ardour3\\Uninstall.lnk" "\$INSTDIR\\uninstall.exe" "" "\$INSTDIR\\uninstall.exe" 0
 SectionEnd
-LangString DESC_SecArdour \${LANG_ENGLISH} "Ardour ${ARDOURVERSION}\$\\r\$\\nDebug Version.\$\\r\$\\n${ARDOURDATE}"
+LangString DESC_SecArdour \${LANG_ENGLISH} "Ardour ${ARDOURVERSION}\$\\r\$\\n${VERSIONINFO}\$\\r\$\\n${ARDOURDATE}"
+EOF
+
+if test -z "$NOVIDEOTOOLS"; then
+	cat >> $NSISFILE << EOF
+LangString DESC_SecVideo \${LANG_ENGLISH} "Video Tools\$\\r\$\\nxjadeo-${XJADEO_VERSION}\$\\r\$\\nharvid-${HARVID_VERSION}"
+EOF
+fi
+
+cat >> $NSISFILE << EOF
 LangString DESC_SecMenu \${LANG_ENGLISH} "Create Start-Menu Shortcuts (recommended)."
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 !insertmacro MUI_DESCRIPTION_TEXT \${SecArdour} \$(DESC_SecArdour)
+EOF
+
+if test -z "$NOVIDEOTOOLS"; then
+	cat >> $NSISFILE << EOF
+!insertmacro MUI_DESCRIPTION_TEXT \${SecVideo} \$(DESC_SecVideo)
+EOF
+fi
+
+cat >> $NSISFILE << EOF
 !insertmacro MUI_DESCRIPTION_TEXT \${SecMenu} \$(DESC_SecMenu)
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 Section "Uninstall"
@@ -237,6 +292,7 @@ Section "Uninstall"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"
   RMDir /r "\$INSTDIR\\gdb"
+  RMDir /r "\$INSTDIR\\video"
   Delete "\$INSTDIR\\ardbg.bat"
   Delete "\$INSTDIR\\uninstall.exe"
   Delete "\$INSTDIR\\Ardour3.lnk"
