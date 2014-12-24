@@ -114,6 +114,7 @@ cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
 
 cp COPYING $DESTDIR/share/
 cp gtk2_ardour/icons/ardour.ico $DESTDIR/share/
+cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
 
 # replace default cursor with square version (sans hotspot file)
 cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/ardour3/icons/
@@ -130,17 +131,21 @@ if test -z "$NOVIDEOTOOLS"; then
 	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
 	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 
-	rsync -Pa \
+	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/harvid_win-${HARVID_VERSION}.tar.xz \
 		"${SRCDIR}/harvid_win-${HARVID_VERSION}.tar.xz"
 
-	rsync -Pa \
+	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/xjadeo_win-${XJADEO_VERSION}.tar.xz \
 		"${SRCDIR}/xjadeo_win-${XJADEO_VERSION}.tar.xz"
 
 	mkdir $DESTDIR/video
 	tar -xf "${SRCDIR}/harvid_win-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
 	tar -xf "${SRCDIR}/xjadeo_win-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
+
+	echo " === unzipped"
+	du -sh $DESTDIR/video
+	du -sh $DESTDIR
 fi
 
 ################################################################################
@@ -253,7 +258,14 @@ EOF
 
 if test -f "$DESTDIR/ardbg.bat"; then
 	cat >> $NSISFILE << EOF
-  CreateShortCut "\$SMPROGRAMS\\ardour3\\Ardour3 GDB.lnk" "\$INSTDIR\\ardbg.bat" "" "\$INSTDIR\\ardbg.bat" 0
+  CreateShortCut "\$SMPROGRAMS\\ardour3\\Ardour3 GDB.lnk" "\$INSTDIR\\ardbg.bat" "" "\$INSTDIR\\share\\ardour_bug.ico" 0
+EOF
+fi
+
+if test -z "$NOVIDEOTOOLS"; then
+	cat >> $NSISFILE << EOF
+	IfFileExists "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0 +2
+  CreateShortCut "\$SMPROGRAMS\\ardour3\\Video Monitor.lnk" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" "" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0
 EOF
 fi
 
