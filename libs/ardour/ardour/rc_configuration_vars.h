@@ -205,6 +205,10 @@ CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donat
 /* video timeline configuration */
 CONFIG_VARIABLE (bool, video_advanced_setup, "video-advanced-setup", false)
 CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://localhost:1554")
+#ifndef PLATFORM_WINDOWS
 CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "/")
+#else
+CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "C:\\")
+#endif
 CONFIG_VARIABLE (bool, show_video_export_info, "show-video-export-info", true)
 CONFIG_VARIABLE (bool, show_video_server_dialog, "show-video-server-dialog", false)

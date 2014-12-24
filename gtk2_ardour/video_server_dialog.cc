@@ -151,7 +151,11 @@ VideoServerDialog::VideoServerDialog (Session* s)
 	if (Config->get_video_advanced_setup()){
 		vbox->pack_start (*docroot_hbox, false, false);
 	} else {
+#ifndef PLATFORM_WINDOWS
 		docroot_entry.set_text(X_("/"));
+#else
+		docroot_entry.set_text(X_("C:\\"));
+#endif
 		listenport_spinner.set_sensitive(false);
 	}
 	vbox->pack_start (*options_box, false, true);

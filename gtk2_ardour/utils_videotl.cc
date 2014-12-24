@@ -105,7 +105,11 @@ VideoUtils::video_get_docroot (ARDOUR::RCConfiguration* config)
 	if (config->get_video_advanced_setup()) {
 		return config->get_video_server_docroot();
 	}
+#ifndef PLATFORM_WINDOWS
 	return X_("/");
+#else
+	return X_("C:\\");
+#endif
 }
 
 std::string

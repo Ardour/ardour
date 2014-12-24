@@ -3653,7 +3653,13 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 
 		std::string icsd_exec = video_server_dialog->get_exec_path();
 		std::string icsd_docroot = video_server_dialog->get_docroot();
-		if (icsd_docroot.empty()) {icsd_docroot = X_("/");}
+		if (icsd_docroot.empty()) {
+#ifndef PLATFORM_WINDOWS
+			icsd_docroot = X_("/");
+#else
+			icsd_docroot = X_("C:\\");
+#endif
+		}
 
 		GStatBuf sb;
 		if (g_lstat (icsd_docroot.c_str(), &sb) != 0 || !S_ISDIR(sb.st_mode)) {
@@ -3687,7 +3693,7 @@ ARDOUR_UI::start_video_server (Gtk::Window* float_window, bool popup_msg)
 		argp[8] = 0;
 		stop_video_server();
 
-		if (icsd_docroot == X_("/")) {
+		if (icsd_docroot == X_("/") || icsd_docroot == X_("C:\\")) {
 			Config->set_video_advanced_setup(false);
 		} else {
 			std::ostringstream osstream;
