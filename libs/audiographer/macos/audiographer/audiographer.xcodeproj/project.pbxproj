@@ -1,0 +1,166 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		435E66801A4AB63D00472D50 /* broadcast_info.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = broadcast_info.h; path = ../../audiographer/broadcast_info.h; sourceTree = "<group>"; };
+		435E66811A4AB63D00472D50 /* debug_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = debug_utils.h; path = ../../audiographer/debug_utils.h; sourceTree = "<group>"; };
+		435E66821A4AB63D00472D50 /* debuggable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = debuggable.h; path = ../../audiographer/debuggable.h; sourceTree = "<group>"; };
+		435E66831A4AB63D00472D50 /* exception.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = exception.h; path = ../../audiographer/exception.h; sourceTree = "<group>"; };
+		435E66841A4AB63D00472D50 /* flag_debuggable.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = flag_debuggable.h; path = ../../audiographer/flag_debuggable.h; sourceTree = "<group>"; };
+		435E66851A4AB63D00472D50 /* flag_field.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = flag_field.h; path = ../../audiographer/flag_field.h; sourceTree = "<group>"; };
+		435E66861A4AB63D00472D50 /* process_context.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = process_context.h; path = ../../audiographer/process_context.h; sourceTree = "<group>"; };
+		435E66871A4AB63D00472D50 /* routines.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = routines.h; path = ../../audiographer/routines.h; sourceTree = "<group>"; };
+		435E66881A4AB63D00472D50 /* sink.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sink.h; path = ../../audiographer/sink.h; sourceTree = "<group>"; };
+		435E66891A4AB63D00472D50 /* source.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = source.h; path = ../../audiographer/source.h; sourceTree = "<group>"; };
+		435E668A1A4AB63D00472D50 /* throwing.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = throwing.h; path = ../../audiographer/throwing.h; sourceTree = "<group>"; };
+		435E668B1A4AB63D00472D50 /* type_utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = type_utils.h; path = ../../audiographer/type_utils.h; sourceTree = "<group>"; };
+		435E668C1A4AB63D00472D50 /* types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = types.h; path = ../../audiographer/types.h; sourceTree = "<group>"; };
+		435E668D1A4AB63D00472D50 /* visibility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = visibility.h; path = ../../audiographer/visibility.h; sourceTree = "<group>"; };
+		435E668E1A4AB64B00472D50 /* chunker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = chunker.h; path = ../../audiographer/general/chunker.h; sourceTree = "<group>"; };
+		435E668F1A4AB64B00472D50 /* deinterleaver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = deinterleaver.h; path = ../../audiographer/general/deinterleaver.h; sourceTree = "<group>"; };
+		435E66901A4AB64B00472D50 /* interleaver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = interleaver.h; path = ../../audiographer/general/interleaver.h; sourceTree = "<group>"; };
+		435E66911A4AB64B00472D50 /* normalizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = normalizer.h; path = ../../audiographer/general/normalizer.h; sourceTree = "<group>"; };
+		435E66921A4AB64B00472D50 /* peak_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = peak_reader.h; path = ../../audiographer/general/peak_reader.h; sourceTree = "<group>"; };
+		435E66931A4AB64B00472D50 /* sample_format_converter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sample_format_converter.h; path = ../../audiographer/general/sample_format_converter.h; sourceTree = "<group>"; };
+		435E66941A4AB64B00472D50 /* silence_trimmer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = silence_trimmer.h; path = ../../audiographer/general/silence_trimmer.h; sourceTree = "<group>"; };
+		435E66951A4AB64B00472D50 /* sr_converter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sr_converter.h; path = ../../audiographer/general/sr_converter.h; sourceTree = "<group>"; };
+		435E66961A4AB64B00472D50 /* threader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = threader.h; path = ../../audiographer/general/threader.h; sourceTree = "<group>"; };
+		435E66981A4AB66B00472D50 /* sndfile_base.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sndfile_base.h; path = ../../audiographer/sndfile/sndfile_base.h; sourceTree = "<group>"; };
+		435E66991A4AB66B00472D50 /* sndfile_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sndfile_reader.h; path = ../../audiographer/sndfile/sndfile_reader.h; sourceTree = "<group>"; };
+		435E669A1A4AB66B00472D50 /* sndfile_writer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sndfile_writer.h; path = ../../audiographer/sndfile/sndfile_writer.h; sourceTree = "<group>"; };
+		435E669B1A4AB66B00472D50 /* sndfile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = sndfile.h; path = ../../audiographer/sndfile/sndfile.h; sourceTree = "<group>"; };
+		435E669C1A4AB66B00472D50 /* tmp_file.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tmp_file.h; path = ../../audiographer/sndfile/tmp_file.h; sourceTree = "<group>"; };
+		435E669D1A4AB67A00472D50 /* identity_vertex.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = identity_vertex.h; path = ../../audiographer/utils/identity_vertex.h; sourceTree = "<group>"; };
+		435E669E1A4AB67A00472D50 /* listed_source.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = listed_source.h; path = ../../audiographer/utils/listed_source.h; sourceTree = "<group>"; };
+		435E669F1A4AB69E00472D50 /* debug_utils.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = debug_utils.cc; path = ../../src/debug_utils.cc; sourceTree = "<group>"; };
+		435E66A01A4AB69E00472D50 /* routines.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = routines.cc; path = ../../src/routines.cc; sourceTree = "<group>"; };
+		435E66A11A4AB6A800472D50 /* broadcast_info.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = broadcast_info.cc; path = ../../src/general/broadcast_info.cc; sourceTree = "<group>"; };
+		435E66A21A4AB6A800472D50 /* normalizer.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = normalizer.cc; path = ../../src/general/normalizer.cc; sourceTree = "<group>"; };
+		435E66A31A4AB6A800472D50 /* sample_format_converter.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sample_format_converter.cc; path = ../../src/general/sample_format_converter.cc; sourceTree = "<group>"; };
+		435E66A41A4AB6A800472D50 /* sr_converter.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = sr_converter.cc; path = ../../src/general/sr_converter.cc; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		435E66711A4AB60C00472D50 = {
+			isa = PBXGroup;
+			children = (
+				435E667F1A4AB61C00472D50 /* headers */,
+				435E667E1A4AB61400472D50 /* src */,
+			);
+			sourceTree = "<group>";
+		};
+		435E667E1A4AB61400472D50 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				435E66A11A4AB6A800472D50 /* broadcast_info.cc */,
+				435E66A21A4AB6A800472D50 /* normalizer.cc */,
+				435E66A31A4AB6A800472D50 /* sample_format_converter.cc */,
+				435E66A41A4AB6A800472D50 /* sr_converter.cc */,
+				435E669F1A4AB69E00472D50 /* debug_utils.cc */,
+				435E66A01A4AB69E00472D50 /* routines.cc */,
+			);
+			name = src;
+			sourceTree = "<group>";
+		};
+		435E667F1A4AB61C00472D50 /* headers */ = {
+			isa = PBXGroup;
+			children = (
+				435E66971A4AB65700472D50 /* SND */,
+				435E668E1A4AB64B00472D50 /* chunker.h */,
+				435E668F1A4AB64B00472D50 /* deinterleaver.h */,
+				435E66901A4AB64B00472D50 /* interleaver.h */,
+				435E669D1A4AB67A00472D50 /* identity_vertex.h */,
+				435E669E1A4AB67A00472D50 /* listed_source.h */,
+				435E66911A4AB64B00472D50 /* normalizer.h */,
+				435E66921A4AB64B00472D50 /* peak_reader.h */,
+				435E66931A4AB64B00472D50 /* sample_format_converter.h */,
+				435E66941A4AB64B00472D50 /* silence_trimmer.h */,
+				435E66951A4AB64B00472D50 /* sr_converter.h */,
+				435E66961A4AB64B00472D50 /* threader.h */,
+				435E66801A4AB63D00472D50 /* broadcast_info.h */,
+				435E66811A4AB63D00472D50 /* debug_utils.h */,
+				435E66821A4AB63D00472D50 /* debuggable.h */,
+				435E66831A4AB63D00472D50 /* exception.h */,
+				435E66841A4AB63D00472D50 /* flag_debuggable.h */,
+				435E66851A4AB63D00472D50 /* flag_field.h */,
+				435E66861A4AB63D00472D50 /* process_context.h */,
+				435E66871A4AB63D00472D50 /* routines.h */,
+				435E66881A4AB63D00472D50 /* sink.h */,
+				435E66891A4AB63D00472D50 /* source.h */,
+				435E668A1A4AB63D00472D50 /* throwing.h */,
+				435E668B1A4AB63D00472D50 /* type_utils.h */,
+				435E668C1A4AB63D00472D50 /* types.h */,
+				435E668D1A4AB63D00472D50 /* visibility.h */,
+			);
+			name = headers;
+			sourceTree = "<group>";
+		};
+		435E66971A4AB65700472D50 /* SND */ = {
+			isa = PBXGroup;
+			children = (
+				435E66981A4AB66B00472D50 /* sndfile_base.h */,
+				435E66991A4AB66B00472D50 /* sndfile_reader.h */,
+				435E669A1A4AB66B00472D50 /* sndfile_writer.h */,
+				435E669B1A4AB66B00472D50 /* sndfile.h */,
+				435E669C1A4AB66B00472D50 /* tmp_file.h */,
+			);
+			name = SND;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		435E66721A4AB60C00472D50 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+			};
+			buildConfigurationList = 435E66751A4AB60C00472D50 /* Build configuration list for PBXProject "audiographer" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 435E66711A4AB60C00472D50;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		435E66761A4AB60C00472D50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		435E66771A4AB60C00472D50 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		435E66751A4AB60C00472D50 /* Build configuration list for PBXProject "audiographer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				435E66761A4AB60C00472D50 /* Debug */,
+				435E66771A4AB60C00472D50 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 435E66721A4AB60C00472D50 /* Project object */;
+}

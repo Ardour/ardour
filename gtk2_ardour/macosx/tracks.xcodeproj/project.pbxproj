@@ -873,6 +873,7 @@
 		4327942F194F0062003C9FEA /* session_lock_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = session_lock_dialog.xml; path = ../ui/session_lock_dialog.xml; sourceTree = SOURCE_ROOT; };
 		43279430194F0062003C9FEA /* tracks_preferences.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = tracks_preferences.xml; path = ../ui/tracks_preferences.xml; sourceTree = SOURCE_ROOT; };
 		43279475194F009E003C9FEA /* tracks.menus.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = tracks.menus.in; path = ../tracks.menus.in; sourceTree = SOURCE_ROOT; };
+		435E66781A4AB60C00472D50 /* audiographer.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = audiographer.xcodeproj; path = ../../libs/audiographer/macos/audiographer/audiographer.xcodeproj; sourceTree = "<group>"; };
 		4397595019CADAFC00740098 /* canvas.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = canvas.xcodeproj; path = ../../libs/canvas/macosx/canvas/canvas.xcodeproj; sourceTree = "<group>"; };
 		4397599619CB06AC00740098 /* gtkmm2ext.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = gtkmm2ext.xcodeproj; path = ../../libs/gtkmm2ext/macosx/gtkmm2ext/gtkmm2ext.xcodeproj; sourceTree = "<group>"; };
 		43B350F1194F04E00038C140 /* actions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = actions.h; path = ../actions.h; sourceTree = SOURCE_ROOT; };
@@ -1219,6 +1220,7 @@
 		43279039194EFF24003C9FEA = {
 			isa = PBXGroup;
 			children = (
+				435E66781A4AB60C00472D50 /* audiographer.xcodeproj */,
 				952E0B3B1A0A1D7000F375D0 /* buildlog.txt */,
 				4397599619CB06AC00740098 /* gtkmm2ext.xcodeproj */,
 				4397595019CADAFC00740098 /* canvas.xcodeproj */,
@@ -2171,6 +2173,13 @@
 			name = headers;
 			sourceTree = "<group>";
 		};
+		435E66791A4AB60C00472D50 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		4397595119CADAFC00740098 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -2248,6 +2257,10 @@
 			productRefGroup = 43279245194EFFF1003C9FEA /* Products */;
 			projectDirPath = "";
 			projectReferences = (
+				{
+					ProductGroup = 435E66791A4AB60C00472D50 /* Products */;
+					ProjectRef = 435E66781A4AB60C00472D50 /* audiographer.xcodeproj */;
+				},
 				{
 					ProductGroup = 4397595119CADAFC00740098 /* Products */;
 					ProjectRef = 4397595019CADAFC00740098 /* canvas.xcodeproj */;
