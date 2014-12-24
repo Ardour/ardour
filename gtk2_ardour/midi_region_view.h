@@ -499,7 +499,7 @@ private:
 
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;
 
-	NotePlayer* _note_player;
+	boost::shared_ptr<NotePlayer> _note_player;
 
         ARDOUR::ChannelMode get_channel_mode() const;
         uint16_t get_selected_channels () const;

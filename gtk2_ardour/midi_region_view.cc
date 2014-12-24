@@ -122,7 +122,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_player (0)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
@@ -168,7 +167,6 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_player (0)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
@@ -219,7 +217,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_player (0)
 {
 	init (false);
 }
@@ -249,7 +246,6 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
-	, _note_player (0)
 {
 	init (true);
 }
@@ -386,8 +382,7 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 
 	case GDK_BUTTON_RELEASE:
 		r = button_release (&ev->button);
-		delete _note_player;
-		_note_player = 0;
+		_note_player.reset();
 		return r;
 
 	case GDK_MOTION_NOTIFY:
@@ -1575,20 +1570,8 @@ MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 void
 MidiRegionView::start_playing_midi_note(boost::shared_ptr<NoteType> note)
 {
-	if (_no_sound_notes || !ARDOUR_UI::config()->get_sound_midi_notes()) {
-		return;
-	}
-
-	RouteUI* route_ui = dynamic_cast<RouteUI*> (&trackview);
-
-	if (!route_ui || !route_ui->midi_track()) {
-		return;
-	}
-
-	delete _note_player;
-	_note_player = new NotePlayer (route_ui->midi_track ());
-	_note_player->add (note);
-	_note_player->on ();
+	const std::vector< boost::shared_ptr<NoteType> > notes(1, note);
+	start_playing_midi_chord(notes);
 }
 
 void
@@ -1604,8 +1587,7 @@ MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > n
 		return;
 	}
 
-	delete _note_player;
-	_note_player = new NotePlayer (route_ui->midi_track());
+	_note_player = boost::shared_ptr<NotePlayer>(new NotePlayer(route_ui->midi_track()));
 
 	for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
 		_note_player->add (*n);
@@ -3887,8 +3869,7 @@ MidiRegionView::selection_cleared (MidiRegionView* rv)
 void
 MidiRegionView::note_button_release ()
 {
-	delete _note_player;
-	_note_player = 0;
+	_note_player.reset();
 }
 
 ChannelMode
