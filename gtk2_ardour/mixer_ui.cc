@@ -57,6 +57,7 @@
 #include "actions.h"
 #include "gui_thread.h"
 #include "mixer_group_tabs.h"
+#include "timers.h"
 
 #include "i18n.h"
 
@@ -884,7 +885,7 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 gint
 Mixer_UI::start_updating ()
 {
-    fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &Mixer_UI::fast_update_strips));
+    fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &Mixer_UI::fast_update_strips));
     return 0;
 }
 

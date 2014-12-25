@@ -41,6 +41,7 @@
 #include "selection.h"
 #include "public_editor.h"
 #include "ardour_ui.h"
+#include "timers.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "utils.h"
@@ -434,8 +435,7 @@ StreamView::create_rec_box(framepos_t frame_pos, double width)
 	rec_rects.push_back (recbox);
 
 	screen_update_connection.disconnect();
-	screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
-		sigc::mem_fun(*this, &StreamView::update_rec_box));
+	screen_update_connection = Timers::rapid_connect (sigc::mem_fun(*this, &StreamView::update_rec_box));
 
 	rec_updating = true;
 	rec_active = true;

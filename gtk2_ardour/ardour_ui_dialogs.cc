@@ -55,6 +55,7 @@
 #include "sfdb_ui.h"
 #include "theme_manager.h"
 #include "time_info_box.h"
+#include "timers.h"
 
 #include <gtkmm2ext/keyboard.h>
 
@@ -145,11 +146,7 @@ ARDOUR_UI::set_session (Session *s)
 
 	setup_session_options ();
 
-	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
-	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::solo_blink));
-	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::sync_blink));
-	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::audition_blink));
-	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::feedback_blink));
+	blink_connection = Timers::blink_connect (sigc::mem_fun(*this, &ARDOUR_UI::blink_handler));
 
 	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
 	_session->StepEditStatusChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::step_edit_status_change, this, _1), gui_context());
@@ -178,15 +175,12 @@ ARDOUR_UI::set_session (Session *s)
 	Glib::signal_idle().connect (sigc::mem_fun (*this, &ARDOUR_UI::first_idle));
 
 	start_clocking ();
-	start_blinking ();
 
 	map_transport_state ();
 
-	second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second), 1000);
-	point_one_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds), 100);
-#ifndef PLATFORM_WINDOWS
-	point_zero_something_second_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds), 40);
-#endif
+	second_connection = Timers::second_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second));
+	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds));
+	point_zero_something_second_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_zero_something_seconds));
 	set_fps_timeout_connection();
 
 	update_format ();
@@ -287,9 +281,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	second_connection.disconnect ();
 	point_one_second_connection.disconnect ();
-#ifndef PLATFORM_WINDOWS
 	point_zero_something_second_connection.disconnect();
-#endif
 	fps_connection.disconnect();
 
 	if (editor_meter) {
@@ -309,12 +301,11 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		ARDOUR_UI::instance()->video_timeline->close_session();
 	}
 
-	stop_blinking ();
 	stop_clocking ();
 
 	/* drop everything attached to the blink signal */
 
-	Blink.clear ();
+	blink_connection.disconnect ();
 
 	delete _session;
 	_session = 0;

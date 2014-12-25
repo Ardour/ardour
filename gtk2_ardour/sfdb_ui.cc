@@ -68,6 +68,7 @@
 #include "gain_meter.h"
 #include "main_clock.h"
 #include "public_editor.h"
+#include "timers.h"
 
 #include "sfdb_freesound_mootcher.h"
 
@@ -856,7 +857,7 @@ SoundFileBrowser::remove_gain_meter ()
 void
 SoundFileBrowser::start_metering ()
 {
-	metering_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &SoundFileBrowser::meter));
+	metering_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &SoundFileBrowser::meter));
 }
 
 void

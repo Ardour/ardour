@@ -20,7 +20,7 @@
 #include "ardour/lxvst_plugin.h"
 #include "ardour/linux_vst_support.h"
 #include "lxvst_plugin_ui.h"
-#include "ardour_ui.h"
+#include "timers.h"
 #include <gdk/gdkx.h>
 
 #define LXVST_H_FIDDLE 40
@@ -49,7 +49,7 @@ bool
 LXVSTPluginUI::start_updating (GdkEventAny*)
 {
 	_screen_update_connection.disconnect();
-	_screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (mem_fun(*this, &LXVSTPluginUI::resize_callback));
+	_screen_update_connection = Timers::rapid_connect (mem_fun(*this, &LXVSTPluginUI::resize_callback));
 	return false;
 }
 

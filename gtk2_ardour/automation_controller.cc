@@ -34,6 +34,7 @@
 #include "automation_controller.h"
 #include "gui_thread.h"
 #include "note_select_dialog.h"
+#include "timers.h"
 
 #include "i18n.h"
 
@@ -104,7 +105,7 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 	_adjustment->signal_value_changed().connect(
 		sigc::mem_fun(*this, &AutomationController::value_adjusted));
 
-	_screen_update_connection = ARDOUR_UI::RapidScreenUpdate.connect (
+	_screen_update_connection = Timers::rapid_connect (
 			sigc::mem_fun (*this, &AutomationController::display_effective_value));
 
 	ac->Changed.connect (_changed_connection, invalidator (*this), boost::bind (&AutomationController::value_changed, this), gui_context());

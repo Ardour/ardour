@@ -193,16 +193,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::HBox& editor_transport_box() { return _editor_transport_box; }
 
 	static PublicEditor* _instance;
-	static sigc::signal<void,bool> Blink;
-
-	/** point_zero_one_seconds -- 10Hz ^= 100ms */
-	static sigc::signal<void>      RapidScreenUpdate;
-
-	/** point_zero_something_seconds -- currently 25Hz ^= 40ms */
-	static sigc::signal<void>      SuperRapidScreenUpdate;
-
-	/** every_fps -- see set_fps_timeout_connection() 25Hz < x < 120Hz */
-	static sigc::signal<void>      FPSUpdate;
 
 	/** Emitted frequently with the audible frame, false, and the edit point as
 	 *  parameters respectively.
@@ -370,13 +360,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void use_config ();
 
-	static gint _blink  (void *);
-	void blink ();
-	gint blink_timeout_tag;
-	bool blink_on;
-	void start_blinking ();
-	void stop_blinking ();
-
 	void about_signal_response(int response);
 
 	Gtk::VBox     top_packer;
@@ -479,6 +462,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton     editor_meter_peak_display;
 	bool             editor_meter_peak_button_release (GdkEventButton*);
 
+	void blink_handler (bool);
+	sigc::connection blink_connection;
+
 	void solo_blink (bool);
 	void sync_blink (bool);
 	void audition_blink (bool);
@@ -562,10 +548,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::Label    format_label;
 	void update_format ();
 	
-	gint every_second ();
-	gint every_point_one_seconds ();
-	gint every_point_zero_something_seconds ();
-	gint every_fps ();
+	void every_second ();
+	void every_point_one_seconds ();
+	void every_point_zero_something_seconds ();
 
 	sigc::connection second_connection;
 	sigc::connection point_one_second_connection;

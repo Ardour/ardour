@@ -135,6 +135,7 @@ typedef uint64_t microseconds_t;
 #include "startup.h"
 #include "theme_manager.h"
 #include "time_axis_view_item.h"
+#include "timers.h"
 #include "utils.h"
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
@@ -151,10 +152,6 @@ using namespace std;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
-sigc::signal<void,bool> ARDOUR_UI::Blink;
-sigc::signal<void>      ARDOUR_UI::RapidScreenUpdate;
-sigc::signal<void>      ARDOUR_UI::SuperRapidScreenUpdate;
-sigc::signal<void>      ARDOUR_UI::FPSUpdate;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
@@ -179,7 +176,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, first_time_engine_run (true)
-	, blink_timeout_tag (-1)
 
 	  /* transport */
 
@@ -531,8 +527,6 @@ ARDOUR_UI::post_engine ()
 		AudioEngine::instance()->stop ();
 		exit (0);
 	}
-
-	blink_timeout_tag = -1;
 
 	/* this being a GUI and all, we want peakfiles */
 
@@ -1009,9 +1003,7 @@ If you still wish to quit, please use the\n\n\
 
 		second_connection.disconnect ();
 		point_one_second_connection.disconnect ();
-#ifndef PLATFORM_WINDOWS
 		point_zero_something_second_connection.disconnect();
-#endif
 		fps_connection.disconnect();
 	}
 
@@ -1112,7 +1104,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 }
 
 
-gint
+void
 ARDOUR_UI::every_second ()
 {
 	update_cpu_load ();
@@ -1132,23 +1124,19 @@ ARDOUR_UI::every_second ()
 			_was_dirty = false;
 		}
 	}
-	return TRUE;
 }
 
-gint
+void
 ARDOUR_UI::every_point_one_seconds ()
 {
 	shuttle_box->update_speed_display ();
-	RapidScreenUpdate(); /* EMIT_SIGNAL */
-	return TRUE;
 }
 
-gint
+void
 ARDOUR_UI::every_point_zero_something_seconds ()
 {
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
-	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
 	if (editor_meter && ARDOUR_UI::config()->get_show_editor_meter()) {
 		float mpeak = editor_meter->update_meters();
 		if (mpeak > editor_meter_max_peak) {
@@ -1157,17 +1145,6 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 			}
 		}
 	}
-	return TRUE;
-}
-
-gint
-ARDOUR_UI::every_fps ()
-{
-	FPSUpdate(); /* EMIT_SIGNAL */
-#ifdef PLATFORM_WINDOWS
-	every_point_zero_something_seconds();
-#endif
-	return TRUE;
 }
 
 void
@@ -1199,7 +1176,7 @@ ARDOUR_UI::set_fps_timeout_connection ()
 #endif
 	}
 	fps_connection.disconnect();
-	fps_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &ARDOUR_UI::every_fps), interval);
+	Timers::set_fps_interval (interval);
 }
 
 void
@@ -2270,9 +2247,21 @@ ARDOUR_UI::map_transport_state ()
 }
 
 void
+ARDOUR_UI::blink_handler (bool blink_on)
+{
+	transport_rec_enable_blink (blink_on);
+	solo_blink (blink_on);
+	sync_blink (blink_on);
+	audition_blink (blink_on);
+	feedback_blink (blink_on);
+}
+
+void
 ARDOUR_UI::update_clocks ()
 {
-	if (editor && !editor->dragging_playhead()) {
+	if (!_session) return;
+
+	if (!editor && !editor->dragging_playhead()) {
 		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
 	}
 }
@@ -2281,9 +2270,9 @@ void
 ARDOUR_UI::start_clocking ()
 {
 	if (ui_config->get_super_rapid_clock_update()) {
-		clock_signal_connection = FPSUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+		clock_signal_connection = Timers::fps_connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
 	} else {
-		clock_signal_connection = RapidScreenUpdate.connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
+		clock_signal_connection = Timers::rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
 	}
 }
 
@@ -2292,42 +2281,6 @@ ARDOUR_UI::stop_clocking ()
 {
 	clock_signal_connection.disconnect ();
 }
-
-gint
-ARDOUR_UI::_blink (void *arg)
-{
-	((ARDOUR_UI *) arg)->blink ();
-	return TRUE;
-}
-
-void
-ARDOUR_UI::blink ()
-{
-	Blink (blink_on = !blink_on); /* EMIT_SIGNAL */
-}
-
-void
-ARDOUR_UI::start_blinking ()
-{
-	/* Start the blink signal. Everybody with a blinking widget
-	   uses Blink to drive the widget's state.
-	*/
-
-	if (blink_timeout_tag < 0) {
-		blink_on = false;
-		blink_timeout_tag = g_timeout_add (240, _blink, this);
-	}
-}
-
-void
-ARDOUR_UI::stop_blinking ()
-{
-	if (blink_timeout_tag >= 0) {
-		g_source_remove (blink_timeout_tag);
-		blink_timeout_tag = -1;
-	}
-}
-
 
 /** Ask the user for the name of a new snapshot and then take it.
  */

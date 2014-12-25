@@ -25,8 +25,8 @@
 
 #include "return_ui.h"
 #include "io_selector.h"
-#include "ardour_ui.h"
 #include "gui_thread.h"
+#include "timers.h"
 
 #include "i18n.h"
 
@@ -62,8 +62,8 @@ ReturnUI::ReturnUI (Gtk::Window* parent, boost::shared_ptr<Return> r, Session* s
 	_gpm.setup_meters ();
 	_gpm.set_fader_name (X_("ReturnUIFader"));
 
-	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (sigc::mem_fun (*this, &ReturnUI::update));
-	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun (*this, &ReturnUI::fast_update));
+	// screen_update_connection = Timers::rapid_connect (sigc::mem_fun (*this, &ReturnUI::update));
+	fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun (*this, &ReturnUI::fast_update));
 }
 
 ReturnUI::~ReturnUI ()

@@ -46,6 +46,7 @@
 #include "return_ui.h"
 #include "route_params_ui.h"
 #include "send_ui.h"
+#include "timers.h"
 
 #include "i18n.h"
 
@@ -642,7 +643,7 @@ RouteParams_UI::update_title ()
 void
 RouteParams_UI::start_updating ()
 {
-	update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect
+	update_connection = Timers::rapid_connect
 		(sigc::mem_fun(*this, &RouteParams_UI::update_views));
 }
 

@@ -46,6 +46,7 @@
 #include "automation_time_axis.h"
 #include "route_time_axis.h"
 #include "group_tabs.h"
+#include "timers.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -147,7 +148,7 @@ RouteUI::init ()
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	if (ARDOUR_UI::config()->get_blink_rec_arm()) {
-		rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
+		rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
 	}
 
 	show_sends_button = manage (new ArdourButton);
@@ -1924,7 +1925,7 @@ RouteUI::parameter_changed (string const & p)
 	} else if (p == "blink-rec-arm") {
 		if (ARDOUR_UI::config()->get_blink_rec_arm()) {
 			rec_blink_connection.disconnect ();
-			rec_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
+			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
 		} else {
 			rec_blink_connection.disconnect ();
 			RouteUI::blink_rec_display(false);
@@ -2220,7 +2221,7 @@ RouteUI::bus_send_display_changed (boost::shared_ptr<Route> send_to)
 {
 	if (_route == send_to) {
 		show_sends_button->set_active (true);
-		send_blink_connection = ARDOUR_UI::instance()->Blink.connect (sigc::mem_fun (*this, &RouteUI::send_blink));
+		send_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &RouteUI::send_blink));
 	} else {
 		show_sends_button->set_active (false);
 		send_blink_connection.disconnect ();

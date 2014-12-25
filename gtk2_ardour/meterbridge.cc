@@ -54,6 +54,7 @@
 #include "gui_thread.h"
 #include "global_signals.h"
 #include "meter_patterns.h"
+#include "timers.h"
 
 #include "i18n.h"
 
@@ -555,7 +556,7 @@ Meterbridge::get_state (void)
 gint
 Meterbridge::start_updating ()
 {
-	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (sigc::mem_fun(*this, &Meterbridge::fast_update_strips));
+	fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &Meterbridge::fast_update_strips));
 	return 0;
 }
 

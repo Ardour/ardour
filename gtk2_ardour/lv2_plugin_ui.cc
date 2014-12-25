@@ -21,8 +21,8 @@
 #include "ardour/session.h"
 #include "pbd/error.h"
 
-#include "ardour_ui.h"
 #include "lv2_plugin_ui.h"
+#include "timers.h"
 
 #include "lv2/lv2plug.in/ns/extensions/ui/ui.h"
 
@@ -145,7 +145,7 @@ LV2PluginUI::start_updating(GdkEventAny*)
 {
 	if (!_output_ports.empty()) {
 		_screen_update_connection.disconnect();
-		_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
+		_screen_update_connection = Timers::super_rapid_connect
 		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
 	}
 	return false;
@@ -344,7 +344,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	if (_lv2->has_message_output()) {
-		_message_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
+		_message_update_connection = Timers::super_rapid_connect (
 			sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
 	}
 }
@@ -444,10 +444,10 @@ LV2PluginUI::on_window_show(const std::string& title)
 			_screen_update_connection.disconnect();
 			_message_update_connection.disconnect();
 			LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
-			_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
+			_screen_update_connection = Timers::super_rapid_connect
 		        (sigc::mem_fun(*this, &LV2PluginUI::output_update));
 			if (_lv2->has_message_output()) {
-				_message_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
+				_message_update_connection = Timers::super_rapid_connect (
 					sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
 			}
 			return false;
@@ -460,10 +460,10 @@ LV2PluginUI::on_window_show(const std::string& title)
 		_screen_update_connection.disconnect();
 		_message_update_connection.disconnect();
 		LV2_EXTERNAL_UI_SHOW(_external_ui_ptr);
-		_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
+		_screen_update_connection = Timers::super_rapid_connect
 			(sigc::mem_fun(*this, &LV2PluginUI::output_update));
 		if (_lv2->has_message_output()) {
-			_message_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect(
+			_message_update_connection = Timers::super_rapid_connect (
 				sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
 		}
 		return false;

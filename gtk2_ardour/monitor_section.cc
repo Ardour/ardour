@@ -37,6 +37,7 @@
 #include "gui_thread.h"
 #include "monitor_section.h"
 #include "public_editor.h"
+#include "timers.h"
 #include "volume_controller.h"
 #include "utils.h"
 
@@ -104,7 +105,7 @@ MonitorSection::MonitorSection (Session* s)
 	rude_audition_button.set_name ("rude audition");
 	rude_audition_button.show ();
 
-	ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MonitorSection::do_blink));
+        Timers::blink_connect (sigc::mem_fun (*this, &MonitorSection::do_blink));
 
 	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
 	UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));

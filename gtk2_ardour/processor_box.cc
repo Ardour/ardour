@@ -76,6 +76,7 @@
 #include "return_ui.h"
 #include "route_processor_selection.h"
 #include "send_ui.h"
+#include "timers.h"
 
 #include "i18n.h"
 
@@ -550,7 +551,7 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 	}
 
-	ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &Control::control_changed));
+	Timers::rapid_connect (sigc::mem_fun (*this, &Control::control_changed));
 	
 	control_changed ();
 	set_tooltip ();

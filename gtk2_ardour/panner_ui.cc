@@ -32,6 +32,7 @@
 #include "panner2d.h"
 #include "gui_thread.h"
 #include "stereo_panner.h"
+#include "timers.h"
 #include "mono_panner.h"
 
 #include "i18n.h"
@@ -576,7 +577,7 @@ PannerUI::pan_automation_state_changed ()
 	pan_watching.disconnect();
 
 	if (x) {
-		pan_watching = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &PannerUI::effective_pan_display));
+		pan_watching = Timers::rapid_connect (sigc::mem_fun (*this, &PannerUI::effective_pan_display));
 	}
 }
 

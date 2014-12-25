@@ -26,7 +26,7 @@
 
 #include "send_ui.h"
 #include "io_selector.h"
-#include "ardour_ui.h"
+#include "timers.h"
 #include "gui_thread.h"
 
 #include "i18n.h"
@@ -80,9 +80,9 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 	_gpm.setup_meters ();
 	_gpm.set_fader_name (X_("SendUIFader"));
 
-	// screen_update_connection = ARDOUR_UI::instance()->RapidScreenUpdate.connect (
+	// screen_update_connection = Timers::rapid_connect (
 	//		sigc::mem_fun (*this, &SendUI::update));
-	fast_screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect (
+	fast_screen_update_connection = Timers::super_rapid_connect (
 			sigc::mem_fun (*this, &SendUI::fast_update));
 }
 

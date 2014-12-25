@@ -48,6 +48,7 @@
 #include "plugin_ui.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
+#include "timers.h"
 
 #include "i18n.h"
 
@@ -939,8 +940,7 @@ GenericPluginUI::start_updating (GdkEventAny*)
 {
 	if (output_controls.size() > 0 ) {
 		screen_update_connection.disconnect();
-		screen_update_connection = ARDOUR_UI::instance()->SuperRapidScreenUpdate.connect
-			(sigc::mem_fun(*this, &GenericPluginUI::output_update));
+		screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &GenericPluginUI::output_update));
 	}
 	return false;
 }

@@ -43,6 +43,7 @@
 #include "public_editor.h"
 #include "utils.h"
 #include "meter_patterns.h"
+#include "timers.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -873,7 +874,7 @@ GainMeterBase::gain_automation_state_changed ()
 	gain_watching.disconnect();
 
 	if (x) {
-		gain_watching = ARDOUR_UI::RapidScreenUpdate.connect (sigc::mem_fun (*this, &GainMeterBase::effective_gain_display));
+		gain_watching = Timers::rapid_connect (sigc::mem_fun (*this, &GainMeterBase::effective_gain_display));
 	}
 }
 
