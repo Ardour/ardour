@@ -107,10 +107,12 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "marker.h"
+#include "midi_region_view.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
+#include "note_base.h"
 #include "playlist_selector.h"
 #include "public_editor.h"
 #include "region_layering_order_editor.h"
@@ -5733,6 +5735,40 @@ Editor::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* ev
 	}
 
 	_control_point_context_menu.popup (event->button.button, event->button.time);
+}
+
+void
+Editor::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	using namespace Menu_Helpers;
+
+	NoteBase* note = reinterpret_cast<NoteBase*>(item->get_data("notebase"));
+	if (!note) {
+		return;
+	}
+
+	/* We need to get the selection here and pass it to the operations, since
+	   popping up the menu will cause a region leave event which clears
+	   entered_regionview. */
+
+	MidiRegionView&       mrv = note->region_view();
+	const RegionSelection rs  = get_regions_from_selection_and_entered ();
+
+	MenuList& items = _note_context_menu.items();
+	items.clear();
+
+	items.push_back(MenuElem(_("Delete"),
+	                         sigc::mem_fun(mrv, &MidiRegionView::delete_selection)));
+	items.push_back(MenuElem(_("Edit..."),
+	                         sigc::bind(sigc::mem_fun(*this, &Editor::edit_notes), &mrv)));
+	items.push_back(MenuElem(_("Legatize"),
+	                         sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, false)));
+	items.push_back(MenuElem(_("Quantize..."),
+	                         sigc::bind(sigc::mem_fun(*this, &Editor::quantize_regions), rs)));
+	items.push_back(MenuElem(_("Remove Overlap"),
+	                         sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, true)));
+
+	_note_context_menu.popup (event->button.button, event->button.time);
 }
 
 void

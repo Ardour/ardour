@@ -740,6 +740,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void popup_control_point_context_menu (ArdourCanvas::Item *, GdkEvent *);
 	Gtk::Menu _control_point_context_menu;
 
+	void popup_note_context_menu (ArdourCanvas::Item *, GdkEvent *);
+	Gtk::Menu _note_context_menu;
+
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
@@ -1227,7 +1230,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void reset_region_scale_amplitude ();
 	void adjust_region_gain (bool up);
 	void quantize_region ();
+	void quantize_regions (const RegionSelection& rs);
 	void legatize_region (bool shrink_only);
+	void legatize_regions (const RegionSelection& rs, bool shrink_only);
 	void insert_patch_change (bool from_context);
 	void fork_region ();
 
@@ -1608,7 +1613,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_tempo_marker (TempoMarker&);
 	void edit_meter_marker (MeterMarker&);
 	void edit_control_point (ArdourCanvas::Item*);
-        void edit_notes (TimeAxisViewItem&);
+	void edit_notes (MidiRegionView*);
 
 	void marker_menu_edit ();
 	void marker_menu_remove ();
@@ -2016,7 +2021,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void apply_filter (ARDOUR::Filter&, std::string cmd, ProgressReporter* progress = 0);
 
 	Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
-	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op);
+	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 
 	/* handling cleanup */
 

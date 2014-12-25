@@ -4909,26 +4909,22 @@ Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv
 }
 
 void
-Editor::apply_midi_note_edit_op (MidiOperator& op)
+Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 {
-	Command* cmd;
-
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
 	if (rs.empty()) {
 		return;
 	}
 
 	begin_reversible_command (op.name ());
 
-	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
-		RegionSelection::iterator tmp = r;
+	for (RegionSelection::const_iterator r = rs.begin(); r != rs.end(); ) {
+		RegionSelection::const_iterator tmp = r;
 		++tmp;
 
 		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
 
 		if (mrv) {
-			cmd = apply_midi_note_edit_op_to_region (op, *mrv);
+			Command* cmd = apply_midi_note_edit_op_to_region (op, *mrv);
 			if (cmd) {
 				(*cmd)();
 				_session->add_command (cmd);
@@ -4984,26 +4980,15 @@ Editor::fork_region ()
 void
 Editor::quantize_region ()
 {
-	int selected_midi_region_cnt = 0;
-
-	if (!_session) {
-		return;
+	if (_session) {
+		quantize_regions(get_regions_from_selection_and_entered ());
 	}
+}
 
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (rs.empty()) {
-		return;
-	}
-
-	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
-		if (mrv) {
-			selected_midi_region_cnt++;
-		}
-	}
-
-	if (selected_midi_region_cnt == 0) {
+void
+Editor::quantize_regions (const RegionSelection& rs)
+{
+	if (rs.n_midi_regions() == 0) {
 		return;
 	}
 
@@ -5018,38 +5003,27 @@ Editor::quantize_region ()
 				qd->start_grid_size(), qd->end_grid_size(),
 				qd->strength(), qd->swing(), qd->threshold());
 
-		apply_midi_note_edit_op (quant);
+		apply_midi_note_edit_op (quant, rs);
 	}
 }
 
 void
 Editor::legatize_region (bool shrink_only)
 {
-	int selected_midi_region_cnt = 0;
-
-	if (!_session) {
-		return;
+	if (_session) {
+		legatize_regions(get_regions_from_selection_and_entered (), shrink_only);
 	}
+}
 
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (rs.empty()) {
-		return;
-	}
-
-	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
-		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
-		if (mrv) {
-			selected_midi_region_cnt++;
-		}
-	}
-
-	if (selected_midi_region_cnt == 0) {
+void
+Editor::legatize_regions (const RegionSelection& rs, bool shrink_only)
+{
+	if (rs.n_midi_regions() == 0) {
 		return;
 	}
 
 	Legatize legatize(shrink_only);
-	apply_midi_note_edit_op (legatize);
+	apply_midi_note_edit_op (legatize, rs);
 }
 
 void

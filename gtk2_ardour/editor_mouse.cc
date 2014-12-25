@@ -1305,6 +1305,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				popup_control_point_context_menu (item, event);
 				break;
 
+			case NoteItem:
+				if (internal_editing()) {
+					popup_note_context_menu (item, event);
+				}
+				break;
+
 			default:
 				break;
 			}
@@ -1883,21 +1889,15 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_notes (TimeAxisViewItem& tavi)
+Editor::edit_notes (MidiRegionView* mrv)
 {
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(&tavi);
-
-	if (!mrv) {
-		return;
-	}
-
 	MidiRegionView::Selection const & s = mrv->selection();
 
 	if (s.empty ()) {
 		return;
 	}
 
-	EditNoteDialog* d = new EditNoteDialog (&(*s.begin())->region_view(), s);
+	EditNoteDialog* d = new EditNoteDialog (mrv, s);
 	d->show_all ();
 	ensure_float (*d);
 

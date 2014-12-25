@@ -21,6 +21,7 @@
 #include "ardour/region.h"
 
 #include "gui_thread.h"
+#include "midi_region_view.h"
 #include "region_view.h"
 #include "region_selection.h"
 #include "time_axis_view.h"
@@ -286,4 +287,19 @@ RegionSelection::playlists () const
 	}
 
 	return pl;
+}
+
+size_t
+RegionSelection::n_midi_regions () const
+{
+	size_t count = 0;
+
+	for (const_iterator r = begin(); r != end(); ++r) {
+		MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*r);
+		if (mrv) {
+			++count;
+		}
+	}
+
+	return count;
 }
