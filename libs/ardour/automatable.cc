@@ -408,8 +408,6 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		if (mt) {
 			control = new MidiTrack::MidiControl(mt, param);
 			make_list = false;  // No list, this is region "automation"
-		} else {
-			warning << "MidiCCAutomation for non-MidiTrack" << endl;
 		}
 	} else if (param.type() == PluginAutomation) {
 		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
