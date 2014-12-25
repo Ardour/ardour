@@ -121,7 +121,7 @@ dump_view_tree (NSView* view, int depth)
 	} 
 }
 
-- (void)auViewResized:(NSNotification *)notification;
+- (void)auViewResized:(NSNotification *)notification
 {
         (void) notification; // stop complaints about unusued argument
 	plugin_ui->cocoa_view_resized();
@@ -430,7 +430,6 @@ AUPluginUI::create_cocoa_view ()
 void
 AUPluginUI::cocoa_view_resized ()
 {
-        GtkRequisition topsize = top_box.size_request ();
         NSWindow* window = get_nswindow ();
         NSRect windowFrame= [window frame];
         NSRect new_frame = [au_view frame];
