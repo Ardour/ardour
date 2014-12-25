@@ -2105,7 +2105,7 @@ AudioClock::build_ops_menu ()
 	if (!Profile->get_sae()) {
 		ops_items.push_back (MenuElem (_("Timecode"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Timecode)));
 	}
-	ops_items.push_back (MenuElem (_("Minutes:Seconds"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec)));
+	ops_items.push_back (MenuElem (_("Time"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), MinSec)));
 	ops_items.push_back (MenuElem (_("Samples"), sigc::bind (sigc::mem_fun(*this, &AudioClock::set_mode), Frames)));
 
 	if (editable && !_off && !is_duration && !_follows_playhead) {
