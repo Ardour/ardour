@@ -1746,6 +1746,18 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	hbox->pack_start (*vbox, false, false);
 	options.pack_start (*hbox, false, false);
 
+	l = manage (new Label);
+	l->set_markup (_("<b>Instrument</b>"));
+
+	vbox = manage (new VBox);
+	vbox->set_border_width (12);
+	vbox->set_spacing (6);
+	vbox->pack_start (*l, false, false);
+	vbox->pack_start (instrument_combo, false, false);
+	hbox = manage (new HBox);
+	hbox->pack_start (*vbox, false, false);
+	options.pack_start (*hbox, false, false);
+
 	str.clear ();
 	str.push_back (_("Best"));
 	str.push_back (_("Good"));
@@ -1949,6 +1961,7 @@ SoundFileOmega::do_something (int action)
 	ImportPosition pos = get_position ();
 	ImportMode mode = get_mode ();
 	ImportDisposition chns = get_channel_disposition ();
+	PluginInfoPtr instrument = instrument_combo.selected_instrument();
 	framepos_t where;
 	
 	switch (pos) {
@@ -1969,9 +1982,9 @@ SoundFileOmega::do_something (int action)
 	SrcQuality quality = get_src_quality();
 	
 	if (copy_files_btn.get_active()) {
-		PublicEditor::instance().do_import (paths, chns, mode, quality, where);
+		PublicEditor::instance().do_import (paths, chns, mode, quality, where, instrument);
 	} else {
-		PublicEditor::instance().do_embed (paths, chns, mode, where);
+		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
 	}
 	
 	if (action == RESPONSE_OK) {

@@ -50,6 +50,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "audio_clock.h"
+#include "instrument_selector.h"
 
 namespace ARDOUR {
 	class Session;
@@ -284,6 +285,7 @@ class SoundFileOmega : public SoundFileBrowser
 	Gtk::ComboBoxText where_combo;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::ComboBoxText src_combo;
+	InstrumentSelector instrument_combo;
 
 	Gtk::CheckButton copy_files_btn;
 

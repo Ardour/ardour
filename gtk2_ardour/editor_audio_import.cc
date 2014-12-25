@@ -263,7 +263,12 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMode mode, SrcQuality quality, framepos_t& pos)
+Editor::do_import (vector<string>        paths,
+                   ImportDisposition     disposition,
+                   ImportMode            mode,
+                   SrcQuality            quality,
+                   framepos_t&           pos,
+                   ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
 	vector<string> to_import;
@@ -298,7 +303,7 @@ Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMo
 			ok = false;
 		} else {
 			ipw.show ();
-			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false) == 0);
+			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument) == 0);
 		}
 
 	} else {
@@ -343,7 +348,7 @@ Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMo
 					track = get_nth_selected_audio_track (nth++);
 				}
 
-				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace) == 0);
+				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument) == 0);
 				break;
 
 			case Editing::ImportDistinctChannels:
@@ -351,7 +356,7 @@ Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMo
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace) == 0);
+				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument) == 0);
 				break;
 
 			case Editing::ImportSerializeFiles:
@@ -359,7 +364,7 @@ Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMo
 				to_import.clear ();
 				to_import.push_back (*a);
 
-				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace) == 0);
+				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument) == 0);
 				break;
 
 			case Editing::ImportMergeFiles:
@@ -377,7 +382,7 @@ Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMo
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, framepos_t& pos)
+Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, framepos_t& pos, ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
@@ -403,7 +408,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 				track = get_nth_selected_audio_track (nth++);
 			}
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, -1, track) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, -1, track, instrument) < -1) {
 				goto out;
 			}
 		}
@@ -420,14 +425,14 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, -1, -1, track) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, -1, -1, track, instrument) < -1) {
 				goto out;
 			}
 		}
 		break;
 
 	case Editing::ImportMergeFiles:
-		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, pos, 1, 1, track) < -1) {
+		if (embed_sndfiles (paths, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, instrument) < -1) {
 			goto out;
 		}
 		break;
@@ -443,7 +448,7 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 			to_embed.clear ();
 			to_embed.push_back (*a);
 
-			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, 1, track) < -1) {
+			if (embed_sndfiles (to_embed, multi, check_sample_rate, import_as, mode, pos, 1, 1, track, instrument) < -1) {
 				goto out;
 			}
 		}
@@ -459,8 +464,16 @@ Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode 
 }
 
 int
-Editor::import_sndfiles (vector<string> paths, ImportDisposition disposition, ImportMode mode, SrcQuality quality, framepos_t& pos,
-			 int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool replace)
+Editor::import_sndfiles (vector<string>            paths,
+                         ImportDisposition         disposition,
+                         ImportMode                mode,
+                         SrcQuality                quality,
+                         framepos_t&               pos,
+                         int                       target_regions,
+                         int                       target_tracks,
+                         boost::shared_ptr<Track>& track,
+                         bool                      replace,
+                         ARDOUR::PluginInfoPtr     instrument)
 {
 	import_status.paths = paths;
 	import_status.done = false;
@@ -504,7 +517,7 @@ Editor::import_sndfiles (vector<string> paths, ImportDisposition disposition, Im
 			import_status.mode,
 			import_status.target_regions,
 			import_status.target_tracks,
-			track, false
+			track, false, instrument
 			);
 
 		/* update position from results */
@@ -517,10 +530,16 @@ Editor::import_sndfiles (vector<string> paths, ImportDisposition disposition, Im
 }
 
 int
-Editor::embed_sndfiles (vector<string> paths, bool multifile,
-			bool& check_sample_rate, ImportDisposition disposition, ImportMode mode, 
-			framepos_t& pos, int target_regions, int target_tracks,
-			boost::shared_ptr<Track>& track)
+Editor::embed_sndfiles (vector<string>            paths,
+                        bool                      multifile,
+                        bool&                     check_sample_rate,
+                        ImportDisposition         disposition,
+                        ImportMode                mode,
+                        framepos_t&               pos,
+                        int                       target_regions,
+                        int                       target_tracks,
+                        boost::shared_ptr<Track>& track,
+                        ARDOUR::PluginInfoPtr     instrument)
 {
 	boost::shared_ptr<AudioFileSource> source;
 	SourceList sources;
@@ -629,15 +648,23 @@ Editor::embed_sndfiles (vector<string> paths, bool multifile,
 	}
 
 	if (!sources.empty()) {
-		return add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true);
+		return add_sources (paths, sources, pos, disposition, mode, target_regions, target_tracks, track, true, instrument);
 	}
 
 	return 0;
 }
 
 int
-Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos, ImportDisposition disposition, ImportMode mode,
-		     int target_regions, int target_tracks, boost::shared_ptr<Track>& track, bool /*add_channel_suffix*/)
+Editor::add_sources (vector<string>            paths,
+                     SourceList&               sources,
+                     framepos_t&               pos,
+                     ImportDisposition         disposition,
+                     ImportMode                mode,
+                     int                       target_regions,
+                     int                       target_tracks,
+                     boost::shared_ptr<Track>& track,
+                     bool                      /*add_channel_suffix*/,
+                     ARDOUR::PluginInfoPtr     instrument)
 {
 	vector<boost::shared_ptr<Region> > regions;
 	string region_name;
@@ -832,7 +859,7 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
                         }
                 }
 		
-		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n]);
+		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], instrument);
 
 		rlen = (*r)->length();
 
@@ -858,8 +885,14 @@ Editor::add_sources (vector<string> paths, SourceList& sources, framepos_t& pos,
 }
 
 int
-Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t in_chans, uint32_t out_chans, framepos_t& pos,
-				     ImportMode mode, boost::shared_ptr<Track>& existing_track, const string& new_track_name)
+Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
+                                     uint32_t                  in_chans,
+                                     uint32_t                  out_chans,
+                                     framepos_t&               pos,
+                                     ImportMode                mode,
+                                     boost::shared_ptr<Track>& existing_track,
+                                     const string&             new_track_name,
+                                     ARDOUR::PluginInfoPtr     instrument)
 {
 	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
@@ -907,10 +940,11 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region, uint32_t 
 
 				existing_track = at.front();
 			} else if (mr) {
-				list<boost::shared_ptr<MidiTrack> > mt (_session->new_midi_track (ChanCount (DataType::MIDI, 1),
-												  ChanCount (DataType::MIDI, 1),
-												  boost::shared_ptr<PluginInfo>(), 
-												  Normal, 0, 1));
+				list<boost::shared_ptr<MidiTrack> > mt (
+					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
+					                          ChanCount (DataType::MIDI, 1),
+					                          instrument,
+					                          Normal, 0, 1));
 
 				if (mt.empty()) {
 					return -1;

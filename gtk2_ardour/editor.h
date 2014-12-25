@@ -402,8 +402,18 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region>);
 
-	void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality, framepos_t&);
-	void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  framepos_t&);
+	void do_import (std::vector<std::string>              paths,
+	                Editing::ImportDisposition            disposition,
+	                Editing::ImportMode                   mode,
+	                ARDOUR::SrcQuality                    quality,
+	                framepos_t&                           pos,
+	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
+
+	void do_embed (std::vector<std::string>              paths,
+	               Editing::ImportDisposition            disposition,
+	               Editing::ImportMode                   mode,
+	               framepos_t&                           pos,
+	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
         void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
 
@@ -1290,19 +1300,47 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos, bool copy);
 	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos, bool copy);
 
-        int  import_sndfiles (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,  
-			      ARDOUR::SrcQuality, framepos_t& pos,
-			      int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool);
-	int  embed_sndfiles (std::vector<std::string> paths, bool multiple_files, bool& check_sample_rate, 
-			     Editing::ImportDisposition disposition, Editing::ImportMode mode,
-			     framepos_t& pos, int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&);
+	int import_sndfiles (std::vector<std::string>              paths,
+	                     Editing::ImportDisposition            disposition,
+	                     Editing::ImportMode                   mode,
+	                     ARDOUR::SrcQuality                    quality,
+	                     framepos_t&                           pos,
+	                     int                                   target_regions,
+	                     int                                   target_tracks,
+	                     boost::shared_ptr<ARDOUR::Track>&     track,
+	                     bool                                  replace,
+	                     boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
-	int add_sources (std::vector<std::string> paths, ARDOUR::SourceList& sources, framepos_t& pos, 
-			 Editing::ImportDisposition, Editing::ImportMode,
-			 int target_regions, int target_tracks, boost::shared_ptr<ARDOUR::Track>&, bool add_channel_suffix);
+	int embed_sndfiles (std::vector<std::string>              paths,
+	                    bool                                  multiple_files,
+	                    bool&                                 check_sample_rate,
+	                    Editing::ImportDisposition            disposition,
+	                    Editing::ImportMode                   mode,
+	                    framepos_t&                           pos,
+	                    int                                   target_regions,
+	                    int                                   target_tracks,
+	                    boost::shared_ptr<ARDOUR::Track>&     track,
+	                    boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
-	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region> region, uint32_t, uint32_t,  framepos_t& pos, Editing::ImportMode mode,
-					 boost::shared_ptr<ARDOUR::Track>& existing_track, const std::string& new_track_name);
+	int add_sources (std::vector<std::string>              paths,
+	                 ARDOUR::SourceList&                   sources,
+	                 framepos_t&                           pos,
+	                 Editing::ImportDisposition            disposition,
+	                 Editing::ImportMode                   mode,
+	                 int                                   target_regions,
+	                 int                                   target_tracks,
+	                 boost::shared_ptr<ARDOUR::Track>&     track,
+	                 bool                                  add_channel_suffix,
+	                 boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
+
+	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region>     region,
+	                                 uint32_t                              in_chans,
+	                                 uint32_t                              out_chans,
+	                                 framepos_t&                           pos,
+	                                 Editing::ImportMode                   mode,
+	                                 boost::shared_ptr<ARDOUR::Track>&     existing_track,
+	                                 const std::string&                    new_track_name,
+	                                 boost::shared_ptr<ARDOUR::PluginInfo> instrument);
 
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
