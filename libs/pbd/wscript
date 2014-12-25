@@ -75,6 +75,7 @@ libpbd_sources = [
     'strsplit.cc',
     'system_exec.cc',
     'textreceiver.cc',
+    'timer.cc',
     'timing.cc',
     'transmitter.cc',
     'undo.cc',
