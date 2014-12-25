@@ -165,6 +165,7 @@ TimeInfoBox::sync_selection_mode (AudioClock* src)
 		selection_end.set_mode (src->mode());
 		selection_length.set_mode (src->mode());
 		syncing_selection = false;
+        mode_changed (); // EMIT SIGNAL
 	}
 }
 

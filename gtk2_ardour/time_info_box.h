@@ -47,6 +47,8 @@ class TimeInfoBox : public Gtk::VBox, public WavesUI, public ARDOUR::SessionHand
 
     void set_session (ARDOUR::Session*);
     void set_mode (AudioClock::Mode);
+    AudioClock::Mode mode() const { return selection_start.mode(); }
+    sigc::signal<void> mode_changed;
 
   private:
     AudioClock selection_start;

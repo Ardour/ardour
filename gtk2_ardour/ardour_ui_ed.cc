@@ -223,6 +223,47 @@ ARDOUR_UI::hide_mtc_indicator ()
 }
 
 void
+ARDOUR_UI::on_time_info_box_mode_changed ()
+{
+    sync_displays_format ( time_info_box->mode() );
+}
+
+void
+ARDOUR_UI::on_primary_clock_mode_changed ()
+{
+    sync_displays_format ( primary_clock->mode() );
+}
+
+void
+ARDOUR_UI::sync_displays_format (AudioClock::Mode mode)
+{
+    if (_ignore_changes) {
+		return;
+	}
+    
+    PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+    
+    if( time_info_box )
+        time_info_box->set_mode (mode);
+    if ( big_clock )
+        primary_clock->set_mode (mode);
+    
+    switch (mode) {
+        case AudioClock::Timecode:
+            _display_format_dropdown->set_text ("Timecode");
+            break;
+        case AudioClock::MinSec:
+            _display_format_dropdown->set_text ("Time");
+            break;
+        case AudioClock::Frames:
+            _display_format_dropdown->set_text ("Samples");
+            break;
+        default:
+            break;
+    }
+}
+
+void
 ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
     void* data = dropdown->get_item_associated_data(el_number);
@@ -239,10 +280,7 @@ ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* dropdown, int
     else if ( format == "Samples" )
         mode = AudioClock::Frames;
     
-    if( time_info_box )
-        time_info_box->set_mode (mode);
-    if ( big_clock )
-        primary_clock->set_mode (mode);
+    sync_displays_format (mode);
 }
 
 void

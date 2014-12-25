@@ -823,6 +823,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     ARDOUR::HeaderFormat _header_format;
     Timecode::TimecodeFormat _timecode_format;
     
+    void sync_displays_format (AudioClock::Mode mode);
+    void on_time_info_box_mode_changed ();
+    void on_primary_clock_mode_changed ();
+    
     PBD::ScopedConnection connection_with_session_config;
 
     //get names and paths of recent sessions

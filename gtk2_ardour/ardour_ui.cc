@@ -171,6 +171,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
 	  /* big clock */
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
+    , _ignore_changes (0)
 	, video_timeline(0)
 	  /* start of private members */
 	, nsm (0)

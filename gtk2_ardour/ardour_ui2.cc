@@ -252,6 +252,7 @@ ARDOUR_UI::setup_transport ()
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (secondary_clock, &AudioClock::set));
 
 	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
+    primary_clock->mode_changed.connect (mem_fun(*this, &ARDOUR_UI::on_primary_clock_mode_changed));
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
@@ -339,6 +340,8 @@ ARDOUR_UI::setup_transport ()
 	transport_vbox->pack_start (*tbox, true, true, 0);
 
 	time_info_box = manage (new TimeInfoBox);
+    time_info_box->mode_changed.connect (mem_fun(*this, &ARDOUR_UI::on_time_info_box_mode_changed));
+    
 	editor->get_box ("time_info_box_home").pack_start (*time_info_box, false, false);
 
 
