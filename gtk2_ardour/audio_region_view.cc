@@ -32,6 +32,7 @@
 #include "ardour/audiosource.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/engine_state_controller.h"
 
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
@@ -216,6 +217,13 @@ AudioRegionView::init (bool wfd)
 	}
 
 	/* XXX sync mark drag? */
+    
+    update_ioconfig_label ();
+    update_sample_rate_label ();
+    
+    EngineStateController::instance()->EngineRunning.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::update_sample_rate_label, this), gui_context() );
+    
+    EngineStateController::instance()->SampleRateChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::update_sample_rate_label, this), gui_context() );
 }
 
 AudioRegionView::~AudioRegionView ()
@@ -334,6 +342,59 @@ AudioRegionView::region_renamed ()
 
 	set_item_name (str, this);
 	set_name_text (str);
+}
+
+void
+AudioRegionView::update_sample_rate_label ()
+{
+    boost::shared_ptr<AudioRegion> aregion = audio_region();
+    
+    if (!aregion) {
+        set_sr_text("");
+        return;
+    }
+    
+    framecnt_t region_sr = aregion->audio_source()->sample_rate();
+    framecnt_t system_sr = EngineStateController::instance()->get_current_sample_rate();
+    
+    if (region_sr != system_sr) {
+        std::ostringstream ss;
+        ss << (float)region_sr/1000.0;
+        std::string sample_rate_str(ss.str() );
+        set_sr_text(sample_rate_str);
+    } else {
+        set_sr_text("");
+    }
+}
+
+void
+AudioRegionView::update_ioconfig_label ()
+{
+    boost::shared_ptr<AudioRegion> aregion = audio_region();
+    
+    if (!aregion) {
+        set_sr_text("");
+        return;
+    }
+    
+    uint32_t chan_count = aregion->get_related_audio_file_channel_count();
+    std::string label;
+    
+    switch (chan_count ) {
+        case 1:
+            label = "M";
+            break;
+        case 2:
+            label = "ST";
+            break;
+        default:
+            std::ostringstream ss;
+            ss << chan_count;
+            label = ss.str();
+            break;
+    }
+    
+    set_ioconfig_text (label);
 }
 
 void

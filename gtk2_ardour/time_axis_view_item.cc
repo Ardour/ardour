@@ -650,38 +650,6 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 }
 
 void
-TimeAxisViewItem::set_io_channels_config_for_label (uint32_t chan_count)
-{
-    std::string label;
-    
-    switch (chan_count ) {
-        case 1:
-            label = "M";
-            break;
-        case 2:
-            label = "ST";
-            break;
-        default:
-            std::ostringstream ss;
-            ss << chan_count;
-            label = ss.str();
-            break;
-    }
-    
-    set_ioconfig_text (label);
-}
-
-void
-TimeAxisViewItem::set_sample_rate_for_label (framecnt_t sr)
-{
-    std::ostringstream ss;
-    ss << (float)sr/1000.0;
-    std::string sample_rate_str(ss.str());
-    set_sr_text(sample_rate_str);
-}
-
-
-void
 TimeAxisViewItem::set_ioconfig_text(const string& new_io_text)
 {
     if (!ioconfig_text) {

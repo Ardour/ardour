@@ -70,8 +70,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool sensitive () const { return _sensitive; }
 	TimeAxisView& get_time_axis_view () const;
 	void set_name_text(const std::string&);
-    void set_io_channels_config_for_label (uint32_t);
-    void set_sample_rate_for_label (framecnt_t);
     virtual void set_height(double h);
 	virtual double height() const { return _height; }
 	void set_y (double);
@@ -195,6 +193,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual void set_frame_gradient ();
 	void set_trim_handle_colors();
 
+    void set_ioconfig_text(const std::string&);
+    void set_sr_text(const std::string&s);
+    
 	virtual void reset_width_dependent_items (double);
 
 	static gint idle_remove_this_item(TimeAxisViewItem*, void*);
@@ -293,9 +294,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 
 private:
     double _width;
-
-    void set_ioconfig_text(const std::string&);
-    void set_sr_text(const std::string&s);
     
 	void parameter_changed (std::string);
     void manage_name_highlight ();

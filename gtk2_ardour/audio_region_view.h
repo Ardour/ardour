@@ -184,6 +184,9 @@ class AudioRegionView : public RegionView
 	void region_scale_amplitude_changed ();
 	void region_renamed ();
 
+    void update_sample_rate_label ();
+    void update_ioconfig_label ();
+    
 	void create_one_wave (uint32_t, bool);
 	void peaks_ready_handler (uint32_t);
 
