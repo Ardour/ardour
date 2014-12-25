@@ -364,7 +364,7 @@
         <Label style="generic_control" text="Operation Mode" fgnormal="#c1c1c1"
                winfont ="Arial 12"
                macfont ="Helvetica 12"
-               x="55" y="10"/>
+               x="55" y="6"/>
         <Button id="multi_out_button"
                     text="Multi Out"
                     style="generic_control"
