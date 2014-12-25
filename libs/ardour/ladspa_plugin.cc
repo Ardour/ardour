@@ -792,11 +792,11 @@ LadspaPlugin::load_preset (PresetRecord r)
 	return true;
 }
 
+#ifdef HAVE_LRDF
 /* XXX: should be in liblrdf */
 static void
 lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 {
-#ifdef HAVE_LRDF
 	lrdf_statement p;
 	lrdf_statement *q;
 	lrdf_statement *i;
@@ -830,8 +830,8 @@ lrdf_remove_preset (const char* /*source*/, const char *setting_uri)
 	p.predicate = NULL;
 	p.object = NULL;
 	lrdf_remove_matches (&p);
-#endif
 }
+#endif
 
 void
 LadspaPlugin::do_remove_preset (string name)

@@ -370,6 +370,7 @@ PluginManager::ladspa_refresh ()
 	}
 }
 
+#ifdef HAVE_LRDF
 static bool rdf_filter (const string &str, void* /*arg*/)
 {
 	return str[0] != '.' &&
@@ -378,6 +379,7 @@ static bool rdf_filter (const string &str, void* /*arg*/)
 		    (str.find(".n3")   == (str.length() - 3)) ||
 		    (str.find(".ttl")  == (str.length() - 4)));
 }
+#endif
 
 void
 PluginManager::add_ladspa_presets()
