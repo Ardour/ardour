@@ -29,8 +29,8 @@ namespace PBD {
                 extern uint64_t Drags;
                 extern uint64_t CutNPaste;
                 extern uint64_t Accelerators;
+                extern uint64_t GUITiming;
 	}
 }
 
 #endif /* __gtk2_ardour_debug_h__ */
-
