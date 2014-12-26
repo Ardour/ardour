@@ -1709,6 +1709,7 @@ TracksControlPanel::on_key_press_event (GdkEventKey* ev)
     switch (ev->keyval)
     {
         case GDK_Return:
+        case GDK_KP_Enter:
             accept ();
             hide ();
             return true;
