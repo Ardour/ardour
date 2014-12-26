@@ -21,6 +21,7 @@
 #define __ardour_gtk_key_editor_h__
 
 #include <string>
+#include <map>
 
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/treeview.h>
@@ -74,6 +75,9 @@ class KeyEditor : public ArdourWindow
 	void populate ();
 
 	void reset ();
+
+        std::map<std::string,std::string> action_blacklist;
+        void load_blacklist ();
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */

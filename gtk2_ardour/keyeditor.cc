@@ -31,6 +31,7 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "pbd/file_utils.h"
 #include "pbd/strsplit.h"
 
 #include "ardour/filesystem_paths.h"
@@ -112,6 +113,26 @@ KeyEditor::KeyEditor ()
 	vpacker.show ();
 
 	unbind_button.set_sensitive (false);
+
+        load_blacklist ();
+}
+
+void
+KeyEditor::load_blacklist ()
+{
+        string blacklist;
+        
+        if (!find_file (ARDOUR::ardour_data_search_path(), X_("keybindings.blacklist"), blacklist)) {
+                return;
+        }
+
+        ifstream in (blacklist.c_str());
+
+        while (in) {
+                string str;
+                in >> str;
+                action_blacklist.insert (make_pair (str, str));
+        }
 }
 
 void
@@ -248,8 +269,16 @@ KeyEditor::populate ()
 		TreeModel::Row row;
 		vector<string> parts;
 
-		parts.clear ();
+                /* Rip off "<Actions>" before comparing with blacklist */
 
+                string without_action = (*p).substr (9);
+                
+                if (action_blacklist.find (without_action) != action_blacklist.end()) {
+                        continue;
+                }
+
+		parts.clear ();
+                
 		split (*p, parts, '/');
 
 		if (parts.empty()) {
