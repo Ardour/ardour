@@ -2166,6 +2166,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
     void port_connection_handler (boost::weak_ptr<ARDOUR::Port> wa, std::string, boost::weak_ptr<ARDOUR::Port> wb, std::string, bool connected);
     
     PBD::ScopedConnectionList port_state_connection_list;
+    
+    void update_progress_dialog_of_changing_tracks (bool);
 
         /* members and methods associated with MIDI + markers */
 

@@ -66,6 +66,7 @@
 
 #include "ardour/ardour.h"
 #include "ardour/audio_backend.h"
+#include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/automation_watch.h"
@@ -2972,13 +2973,9 @@ ARDOUR_UI::close_session()
 int
 ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, std::string mix_template)
 {
-    ProgressDialog::instance()->set_top_label ("Loading session: "+path);
+    ProgressDialog::instance()->set_top_label ("Loading session: "+snap_name);
     ProgressDialog::instance()->update_info (0.0, NULL, NULL, "Loading audio...");
     ProgressDialog::instance()->show ();
-    /* Make sure the progress dialog is drawn */
-    while (Glib::MainContext::get_default()->iteration (false)) {
-        /* do nothing */
-    }
     
 	Session *new_session;
 	int unload_status;
@@ -3473,7 +3470,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	setup_order_hint();
 
 	ChanCount input_chan = _add_tracks_dialog->input_channels ();
-	DisplaySuspender ds;
+	//DisplaySuspender ds;
 	ChanCount output_chan;
 
     // NP: output_channels amount will be validated and changed accordingly to Master BUS config in Session::reconnect_existing_routes
@@ -3484,15 +3481,41 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	} else */ {
 		output_chan = input_chan;
 	}
+    
+    ProgressDialog::instance()->set_top_label ("Adding tracks...");
+    ProgressDialog::instance()->set_num_of_steps (_add_tracks_dialog->count () * 2);
+    ProgressDialog::instance()->show ();
 
-	session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->count(), "");
+    session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->count(), "");
+    ProgressDialog::instance()->hide ();
 }
 
 void
 ARDOUR_UI::delete_selected_tracks()
 {
+    DisplaySuspender ds;
+    
     TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
-    track_selection.foreach_route_ui (boost::bind (&RouteUI::remove_this_route, _1, false));
+    boost::shared_ptr<RouteList> routes_to_remove(new RouteList);
+    for (list<TimeAxisView*>::iterator i = track_selection.begin(); i != track_selection.end(); ++i) {
+        RouteUI* t = dynamic_cast<RouteUI*> (*i);
+        if (t) {
+            if ( t->route()->is_master() || t->route()->is_monitor() )
+                continue;
+            
+            AudioTrack* audio_track = dynamic_cast<AudioTrack*>( t->route().get() );
+            if ( audio_track && audio_track->is_master_track() )
+                continue;
+            
+            routes_to_remove->push_back(t->route() );
+        }
+    }
+    ProgressDialog::instance()->set_top_label ("Removing tracks...");
+    ProgressDialog::instance()->set_num_of_steps (routes_to_remove->size ());
+    ProgressDialog::instance()->show ();
+
+    ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
+    ProgressDialog::instance()->hide ();
 }
 
 void

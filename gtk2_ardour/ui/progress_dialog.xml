@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title=""
-        resizeable="False"
         winfont ="Arial Bold 12"
         macfont ="Helvetica Bold 12"
         fgnormal="#6D6E72"
@@ -14,12 +13,13 @@
          />
 
   <EventBox bgnormal="#EDECE8">
-      <VBox width="320">
+      <VBox width="320" borderwidth="5">
           <Label id="top_label"
                  style="generic_control"
                  vertalignment="center"
                  text="---"
-                 height="28"/>
+                 height="28"
+                 ellipsize="end"/>
           <VBox height="4"/>
           <HBox width="320">
                 <VBox width="13"/>

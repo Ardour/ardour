@@ -1407,7 +1407,8 @@ RouteUI::remove_this_route (bool apply_to_selection)
         routes_to_remove->push_back(this->route() );
 	}
     
-    Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_routes), ARDOUR_UI::instance()->the_session(), routes_to_remove) );
+    ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
+    ProgressDialog::instance()->hide ();
 }
 
 gint
@@ -1417,12 +1418,6 @@ RouteUI::idle_remove_this_route (RouteUI *rui)
 	return false;
 }
 
-gint
-RouteUI::idle_remove_routes (Session* sess, boost::shared_ptr<RouteList>& rlist)
-{
-    sess->remove_routes (rlist);
-    return false;
-}
 
 /** @return true if this name should be used for the route, otherwise false */
 bool

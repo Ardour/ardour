@@ -33,6 +33,9 @@ ProgressDialog::ProgressDialog (const std::string& title,
 , _top_label ( get_label ("top_label") )
 , _bottom_label ( get_label ("bottom_label") )
 , _progress_bar (get_progressbar ("progress_bar"))
+, num_of_steps (0)
+, cur_step (0)
+, hide_automatically(false)
 {
     init (title, top_message, progress_message, bottom_message);
 }
@@ -53,8 +56,6 @@ ProgressDialog::init (const std::string& title,
     set_modal (true);
     set_resizable (false);
     set_position (Gtk::WIN_POS_CENTER_ALWAYS);
-    set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
-    
 
     set_title (title);
     set_top_label (top_message);
@@ -90,6 +91,45 @@ ProgressDialog::update_info (double new_progress, const char* top_message, const
         set_progress_label (progress_message);
     if (bottom_message)
         set_bottom_label (bottom_message);
+}
+
+void
+ProgressDialog::set_num_of_steps (unsigned int n, bool hide_automatically)
+{
+    num_of_steps = n;
+    cur_step = 0;
+    this->hide_automatically = hide_automatically;
+    _progress_bar.set_fraction (0.0);
+    set_bottom_label("0 %");
+}
+void
+ProgressDialog::add_progress_step ()
+{
+    unsigned int this_thread_cur_step;
+    { //thread unsafe, so
+        std::lock_guard <std::mutex> lock (_m);
+        if (cur_step == num_of_steps)
+            return;
+        
+        ++cur_step;
+        this_thread_cur_step = cur_step;
+    }
+    set_bottom_label (string_compose ("%1 %", int ( ( float (cur_step) / (num_of_steps)) * 100)));
+    set_progress (float (this_thread_cur_step) / (num_of_steps));
+
+    if (hide_automatically && this_thread_cur_step == num_of_steps){
+        hide ();
+    }
+}
+
+void
+ProgressDialog::show ()
+{
+    WavesDialog::show ();
+    /* Make sure the progress dialog is drawn */
+    while (Glib::MainContext::get_default()->iteration (false)) {
+    /* do nothing */
+    }
 }
 
 void

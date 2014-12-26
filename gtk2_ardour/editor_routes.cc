@@ -564,6 +564,7 @@ EditorRoutes::redisplay ()
 		*/
 		_editor->vertical_adjustment.set_value (_editor->_full_canvas_height - _editor->_visible_canvas_height);
 	}
+    ProgressDialog::instance()->add_progress_step ();
 }
 
 void

@@ -56,6 +56,7 @@
 
 #include "canvas/debug.h"
 
+#include "actions.h"
 #include "ardour_ui.h"
 #include "ardour_button.h"
 #include "debug.h"
@@ -436,10 +437,12 @@ RouteTimeAxisView::build_display_menu ()
                 items.push_back (SeparatorElem());
                 
                 if (!Profile->get_sae()) {
-                        items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
+                    items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
+                    items.back().set_label ("Remove");
                 } else {
                         items.push_front (SeparatorElem());
-                        items.push_front (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
+                    items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
+                    items.back().set_label ("Delete");
                 }
         }
 
@@ -727,11 +730,12 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, true)));
 	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
+        items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
+        items.back().set_label ("Remove");
 	} else {
 		items.push_front (SeparatorElem());
-		items.push_front (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
-	}
+        items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
+        items.back().set_label ("Delete");	}
 }
 
 void

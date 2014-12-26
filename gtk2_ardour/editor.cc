@@ -1487,6 +1487,9 @@ Editor::set_session (Session *t)
     // if new tracks is added, they must effect on Global Record button and Master Mute button
     _session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::connect_routes_and_update_global_rec_button, this, _1), gui_context());
     
+    // one route was removed/added
+    _session->RouteAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_progress_dialog_of_changing_tracks, this, _1), gui_context());
+    
     // connect existing tracks to Global Record button
     connect_routes_and_update_global_rec_button( *(_session->get_tracks().get()) );
     
@@ -5034,6 +5037,7 @@ Editor::add_routes (RouteList& routes)
         
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
+        ProgressDialog::instance()->add_progress_step ();
 	}
 
 	if (new_views.size() > 0) {
@@ -5943,4 +5947,11 @@ Editor::port_connection_handler (boost::weak_ptr<Port> wa, std::string, boost::w
     }
     
     // add actions here
+}
+
+
+void // true - track was added, false - track was removed
+Editor::update_progress_dialog_of_changing_tracks (bool operation)
+{
+    ProgressDialog::instance()->add_progress_step ();
 }

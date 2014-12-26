@@ -217,7 +217,6 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 
 	void remove_this_route (bool apply_to_selection = false);
 	static gint idle_remove_this_route (RouteUI *);
-    static gint idle_remove_routes (ARDOUR::Session*, boost::shared_ptr<ARDOUR::RouteList> &);
 
 	void route_rename();
 
