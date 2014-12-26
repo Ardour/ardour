@@ -4510,8 +4510,7 @@ Editor::paste_internal (framepos_t position, float times)
 
 		begin_reversible_command (Operations::paste);
 
-        RegionSelection new_regions;
-        
+        latest_regionviews.clear();
 		for (nth = 0, i = ts.begin(); i != ts.end(); ++i, ++nth) {
             
             RouteTimeAxisView* route_view = dynamic_cast<RouteTimeAxisView*> (*i);
@@ -4523,10 +4522,9 @@ Editor::paste_internal (framepos_t position, float times)
 			(*i)->paste (position, times, *cut_buffer, nth);
             
             c.disconnect ();
-            new_regions.add(latest_regionviews);
 		}
 
-        selection->set (new_regions);
+        selection->set (latest_regionviews);
         
 		commit_reversible_command ();
 	}
