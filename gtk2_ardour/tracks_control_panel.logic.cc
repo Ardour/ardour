@@ -1414,53 +1414,13 @@ TracksControlPanel::on_frame_rate_item_clicked (WavesDropdown*, int)
 void 
 TracksControlPanel::on_buffer_size_dropdown_item_clicked (WavesDropdown*, int)
 {
-	if (_ignore_changes) {
-		return;
-	}
-
-    pframes_t new_buffer_size = get_buffer_size();
-    if (EngineStateController::instance()->set_new_buffer_size_in_controller(new_buffer_size) )
-    {
-        show_buffer_duration();
-        return;
-    }
-    
-    {
-		// set _ignore_changes flag to ignore changes in combo-box callbacks
-		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-        // restore previous buffer size value in combo box
-        std::string buffer_size_str = bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() );
-        _buffer_size_dropdown.set_text(buffer_size_str);
-    }
-    
-	WavesMessageDialog msg("", _("Buffer size set to the value which is not supported"));
-    msg.run();
+    show_buffer_duration();
 }
 
 void
 TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
 {
-	if (_ignore_changes) {
-		return;
-	}
-
-    framecnt_t new_sample_rate = get_sample_rate ();
-    if (EngineStateController::instance()->set_new_sample_rate_in_controller(new_sample_rate) )
-    {
-        show_buffer_duration();
-        return;
-    }
-    
-	{
-		// set _ignore_changes flag to ignore changes in combo-box callbacks
-		PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-		// restore previous buffer size value in combo box
-		std::string sample_rate_str = ARDOUR_UI_UTILS::rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
-		_sample_rate_dropdown.set_text(sample_rate_str);
-	}
-	
-    WavesMessageDialog msg("", _("Sample rate set to the value which is not supported"));
-    msg.run();
+    show_buffer_duration();
 }
 
 void
@@ -1650,16 +1610,41 @@ void
 TracksControlPanel::on_ok (WavesButton*)
 {
 	accept ();
-    hide();
 }
 
 void
 TracksControlPanel::accept ()
 {
+    framecnt_t new_sample_rate = get_sample_rate ();
+    if ( ! EngineStateController::instance()->set_new_sample_rate_in_controller(new_sample_rate) )
+    {
+        // restore current sample rate value in combo box
+        std::string sample_rate_str = ARDOUR_UI_UTILS::rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
+        WavesMessageDialog msg("", _("Sample rate set to the value which is not supported"));
+        msg.run();
+        _sample_rate_dropdown.set_text(sample_rate_str);
+        show_buffer_duration();
+        return;
+    }
+    
+    pframes_t new_buffer_size = get_buffer_size();
+    if ( ! EngineStateController::instance()->set_new_buffer_size_in_controller(new_buffer_size) )
+    {
+        // restore current buffer size value in combo box
+        std::string buffer_size_str = bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() );
+        WavesMessageDialog msg("", _("Buffer size set to the value which is not supported"));
+        msg.run();
+        _buffer_size_dropdown.set_text(buffer_size_str);
+        show_buffer_duration();
+        return;
+    }
+
+    
 	EngineStateController::instance()->push_current_state_to_backend(true);
 	response(Gtk::RESPONSE_OK);
     
     update_configs();
+    hide();
 }
 
 void
@@ -1692,15 +1677,22 @@ TracksControlPanel::reject ()
     str = ss.str() + " Min";
     _pre_record_buffer_dropdown.set_text(str);
     
+    std::string buffer_size_str = bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() );
+    _buffer_size_dropdown.set_text(buffer_size_str);
+    std::string sample_rate_str = ARDOUR_UI_UTILS::rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
+    _sample_rate_dropdown.set_text(sample_rate_str);
+    show_buffer_duration ();
+    
     _default_open_path.set_text(Config->get_default_session_parent_dir());
 	display_general_preferences ();
+
+    hide ();
 }
 
 void
 TracksControlPanel::on_cancel (WavesButton*)
 {
     reject ();
-    hide();
 }
 
 bool
@@ -1711,11 +1703,9 @@ TracksControlPanel::on_key_press_event (GdkEventKey* ev)
         case GDK_Return:
         case GDK_KP_Enter:
             accept ();
-            hide ();
             return true;
         case GDK_Escape:
             reject ();
-            hide ();
             return true;
     }
     
