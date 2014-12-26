@@ -395,36 +395,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 	multiple_mute_change = false;
 
-        if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-
-            /* toggle mute on everything (but
-             * exclude the master and monitor)
-             *
-             * because we are going to erase
-             * elements of the list we need to work
-             * on a copy.
-             */
-            
-            boost::shared_ptr<RouteList> copy (new RouteList);
-
-            *copy = *_session->get_routes ();
-
-            for (RouteList::iterator i = copy->begin(); i != copy->end(); ) {
-                if ((*i)->is_master() || (*i)->is_monitor()) {
-                    i = copy->erase (i);
-                } else {
-                    ++i;
-                }
-            }
-
-            if (_mute_release) {
-                _mute_release->routes = copy;
-            }
-
-            DisplaySuspender ds;
-            _session->set_mute (copy, !_route->muted());
-
-        } else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+        if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 
                 /* Primary-button1 applies change to the mix group even if it is not active
@@ -575,11 +546,6 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			// do nothing on midi sigc::bind event
 			return rec_enable_button.on_button_press_event (ev);
 
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-
-			DisplaySuspender ds;
-			_session->set_record_enabled (_session->get_routes(), !rec_enable_button.active_state());
-
 		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			/* Primary-button1 applies change to the route group (even if it is not active)
@@ -699,10 +665,7 @@ RouteUI::monitor_press (GdkEventButton* ev, MonitorChoice monitor_choice)
 		mc = monitor_choice;
 	}
 
-	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {	
-		rl = _session->get_routes ();
-
-	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+    if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 		if (_route->route_group() && _route->route_group()->is_monitoring()) {
 			rl = _route->route_group()->route_list();
 		} else {
