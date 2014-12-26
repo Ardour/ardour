@@ -151,6 +151,10 @@
     <menu name='Edit' action='Edit'>
       <menuitem action='undo'/>
       <menuitem action='redo'/>
+      <separator/>
+      <menuitem action='undo-last-selection-op'/>
+      <menuitem action='redo-last-selection-op'/>
+      <separator/>  
       <menuitem action='editor-cut'/>
       <menuitem action='editor-copy'/>
       <menuitem action='editor-paste'/>
