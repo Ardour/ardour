@@ -157,8 +157,8 @@ RouteUI::init ()
 	
 //	monitor_input_button.set_distinct_led_click (false);
 
-	monitor_input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press));
-	monitor_input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release));
+	monitor_input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_press), false);
+	monitor_input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &RouteUI::monitor_input_release), false);
 
 	BusSendDisplayChanged.connect_same_thread (*this, boost::bind(&RouteUI::bus_send_display_changed, this, _1));
     
@@ -646,31 +646,32 @@ RouteUI::update_monitoring_display ()
 }
 
 bool
-RouteUI::monitor_input_press(GdkEventButton*)
+RouteUI::monitor_input_press(GdkEventButton* ev)
+{
+    return monitor_press (ev, MonitorInput);
+;
+}
+
+bool
+RouteUI::monitor_input_release(GdkEventButton*)
 {
 	return true;
 }
 
 bool
-RouteUI::monitor_input_release(GdkEventButton* ev)
+RouteUI::monitor_disk_press (GdkEventButton* ev)
 {
-	return monitor_release (ev, MonitorInput);
+	return monitor_press (ev, MonitorDisk);
 }
 
 bool
-RouteUI::monitor_disk_press (GdkEventButton*)
+RouteUI::monitor_disk_release (GdkEventButton*)
 {
 	return true;
 }
 
 bool
-RouteUI::monitor_disk_release (GdkEventButton* ev)
-{
-	return monitor_release (ev, MonitorDisk);
-}
-
-bool
-RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
+RouteUI::monitor_press (GdkEventButton* ev, MonitorChoice monitor_choice)
 {	
 	if (ev->button != 1) {
 		return false;

@@ -163,7 +163,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	bool show_sends_press(GdkEventButton*);
 	bool show_sends_release(GdkEventButton*);
 
-	bool monitor_release(GdkEventButton*, ARDOUR::MonitorChoice);
+	bool monitor_press(GdkEventButton*, ARDOUR::MonitorChoice);
 	bool monitor_input_press(GdkEventButton*);
 	bool monitor_input_release(GdkEventButton*);
 	bool monitor_disk_press(GdkEventButton*);
