@@ -284,6 +284,7 @@ Editor::Editor ()
 	, _vertical_zoom_adjustment (get_adjustment ("vertical_zoom_adjustment"))
     , _vertical_zoom_fader (get_fader ("vertical_zoom_fader"))
 	, vertical_adjustment (get_adjustment ("vertical_adjustment"))
+    , _waves_zoom_adjustment (get_adjustment ("waves_zoom_adjustment"))
 	, _waves_zoom_control (get_adjustment ("waves_zoom_adjustment"))
     , horizontal_adjustment (get_adjustment ("horizontal_adjustment"))
     , unused_adjustment (get_adjustment ("unused_adjustment"))
@@ -2948,6 +2949,8 @@ Editor::setup_toolbar ()
 
 	_temporal_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::temporal_zoom_by_slider));
 	_vertical_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::vertical_zoom_by_slider));
+    _waves_zoom_adjustment.signal_value_changed().connect (mem_fun (*this, &Editor::waveform_zoom_changed));
+    
 	ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_temporal_zoom_slider));
         
         _vertical_zoom_fader.signal_button_press_event().connect (sigc::mem_fun(*this, &Editor::vertical_fader_pressed), false);

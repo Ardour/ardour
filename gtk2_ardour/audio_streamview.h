@@ -49,10 +49,10 @@ class Selection;
 
 class AudioStreamView : public StreamView
 {
-  public:
+  public:    
 	AudioStreamView (AudioTimeAxisView&);
 
-	int     set_amplitude_above_axis (gdouble app);
+	void set_amplitude_above_axis (gdouble app);
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }
 
 	void show_all_fades ();

@@ -57,29 +57,36 @@ using namespace Editing;
 
 AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	: StreamView (tv)
+    , _amplitude_above_axis(1.0)
 {
 	color_handler ();
-	_amplitude_above_axis = 1.0;
+    
+    Session* session = tv.editor().session();
+    
+    if (session) {
+        _amplitude_above_axis = session->config.get_wave_amlitude_zoom () * session->config.get_wave_zoom_factor ();
+    }
 }
 
-int
+void
 AudioStreamView::set_amplitude_above_axis (gdouble app)
 {
 	RegionViewList::iterator i;
 
-	if (app < 1.0) {
-		return -1;
-	}
-
-	_amplitude_above_axis = app;
-
-	for (i = region_views.begin(); i != region_views.end(); ++i) {
-		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv)
-			arv->set_amplitude_above_axis (app);
-	}
-
-	return 0;
+    if ( abs(_amplitude_above_axis - app) > 0.01 ) {
+        
+        if (app < 1.0) {
+            _amplitude_above_axis = 1;
+        } else {
+            _amplitude_above_axis = app;
+        }
+        
+        for (i = region_views.begin(); i != region_views.end(); ++i) {
+            AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+            if (arv)
+                arv->set_amplitude_above_axis (_amplitude_above_axis);
+        }
+    }
 }
 
 RegionView*
@@ -121,6 +128,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 	region_view->init (wait_for_waves);
 	region_view->set_amplitude_above_axis(_amplitude_above_axis);
 	region_view->set_height (child_height ());
+    region_view->set_amplitude_above_axis(_amplitude_above_axis);
 
 	if (region->length() == 1) {
 		region_view->set_sensitive (false);

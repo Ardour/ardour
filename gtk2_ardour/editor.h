@@ -1637,7 +1637,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
     void record_state_changed ();
     void global_rec_clicked (WavesButton*);
 
-	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
+	Gtkmm2ext::TearOff* _mouse_mode_tearoff;
 	WavesButton& _tool_marker_button;
 	ArdourButton mouse_draw_button;
 	WavesButton& _tool_arrow_button;
@@ -1646,6 +1646,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	WavesButton& _tool_cut_button;
 	Gtk::Adjustment& _temporal_zoom_adjustment;
 	Gtk::Adjustment& _vertical_zoom_adjustment;
+    Gtk::Adjustment& _waves_zoom_adjustment;
     Gtkmm2ext::Fader& _vertical_zoom_fader;
 
 	ArdourButton mouse_timefx_button;
@@ -2062,6 +2063,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_track_height (Height);
 	void vertical_zoom_by_slider();
 
+    void waveform_zoom_changed();
+    
 	void remove_tracks ();
 	void toggle_tracks_active ();
 

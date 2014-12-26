@@ -772,7 +772,13 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 			     sample_start, sample_end - sample_start,
 			     _channel, 
 			     _samples_per_pixel);
-
+    
+    // apply waveform amplitude zoom multiplier
+    for (int i = 0; i < n_peaks; ++i) {
+        peaks[i].max *= _amplitude_above_axis;
+        peaks[i].min *= _amplitude_above_axis;
+    }
+    
 	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, _height);
 
 	draw_image (image, peaks.get(), n_peaks);
@@ -963,7 +969,7 @@ WaveView::set_shape (Shape s)
 void
 WaveView::set_amplitude_above_axis (double a)
 {
-	if (_amplitude_above_axis != a) {
+	if ( abs(_amplitude_above_axis - a) > 0.01 ) {
 		begin_visual_change ();
 		invalidate_image_cache ();
 		_amplitude_above_axis = a;

@@ -54,8 +54,8 @@
                 initial_value="0"
                 minvalue="0"
                 maxvalue="10"
-                step="0.2"
-                pagesize="2.0"/>
+                step="0.1"
+                pagesize="1.0"/>
     <HBox id="menu_bar_home"/>
     <EventBox bgnormal="#000000">
       <VBox borderwidth="2" spacing ="1">

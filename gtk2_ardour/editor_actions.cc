@@ -41,6 +41,7 @@
 #include "time_axis_view.h"
 #include "utils.h"
 #include "i18n.h"
+#include "audio_streamview.h"
 #include "audio_time_axis.h"
 #include "editor_group_tabs.h"
 #include "editor_routes.h"
@@ -1771,6 +1772,16 @@ Editor::parameter_changed (std::string p)
                 }
             }
 
+        }
+    } else if (p == "wave-amplitude-zoom") {
+        
+        if (_session) {
+            double amlitude_zoom = _session->config.get_wave_amlitude_zoom ();
+            double adjust = _waves_zoom_adjustment.get_value();
+            if ( abs(amlitude_zoom - adjust ) > 0.01 ) {
+                _waves_zoom_adjustment.set_value(amlitude_zoom);
+            }
+            
         }
     }
 }

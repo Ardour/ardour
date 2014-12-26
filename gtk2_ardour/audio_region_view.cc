@@ -983,9 +983,13 @@ AudioRegionView::set_samples_per_pixel (gdouble fpp)
 void
 AudioRegionView::set_amplitude_above_axis (gdouble a)
 {
-	for (uint32_t n=0; n < waves.size(); ++n) {
-		waves[n]->set_amplitude_above_axis (a);
-	}
+    if (abs(_amplitude_above_axis - a) > 0.01) {
+        
+        _amplitude_above_axis = a;
+        for (uint32_t n=0; n < waves.size(); ++n) {
+            waves[n]->set_amplitude_above_axis (a);
+        }
+    }
 }
 
 void

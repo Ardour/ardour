@@ -6595,6 +6595,28 @@ Editor::vertical_zoom_by_slider()
 }
 
 void
+Editor::waveform_zoom_changed()
+{
+    double new_adjustment_value = _waves_zoom_adjustment.get_value();
+    double amlitude_multiplier = new_adjustment_value * _session->config.get_wave_zoom_factor ();
+    
+    for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+        
+        AudioStreamView* audio_view = dynamic_cast<AudioStreamView*>((*i)->view() );
+        if (audio_view) {
+            
+            if ( abs(amlitude_multiplier - audio_view->get_amplitude_above_axis() ) > 0.01 ) {
+                audio_view->set_amplitude_above_axis(amlitude_multiplier);
+            }
+        }
+    }
+    
+    if ( abs(new_adjustment_value - _session->config.get_wave_amlitude_zoom () ) > 0.01 ) {
+        _session->config.set_wave_amlitude_zoom (new_adjustment_value);
+    }
+}
+
+void
 Editor::toggle_tracks_active ()
 {
 	TrackSelection& ts (selection->tracks);
