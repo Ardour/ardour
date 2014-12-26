@@ -1208,6 +1208,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\video_tool_paths.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\visibility_group.cc"
 				>
 			</File>
@@ -1595,6 +1599,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\insert_time_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\instrument_selector.h"
 				>
 			</File>
 			<File
@@ -2207,6 +2215,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\video_timeline.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\video_tool_paths.h"
 				>
 			</File>
 			<File
