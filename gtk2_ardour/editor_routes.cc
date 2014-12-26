@@ -576,7 +576,6 @@ EditorRoutes::redisplay ()
 	// model deprecated g_atomic_int_exchange_and_add(, 1)
 	g_atomic_int_inc(&_redisplay_active);
 	if (!g_atomic_int_compare_and_exchange (&_redisplay_active, 1, 1)) {
-		printf ("SKIP redisplay\n");
 		return;
 	}
 
@@ -778,15 +777,13 @@ EditorRoutes::route_removed (TimeAxisView *tv)
 
 	TreeModel::Children rows = _model->children();
 	TreeModel::Children::iterator ri;
-	bool found = false;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[_columns.tv] == tv) {
-            boost::shared_ptr<Route> route = (*ri)[_columns.route];
-            PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
-            PBD::Unwinder<boost::shared_ptr<Route> > uw_route (_route_is_being_deleted, route );
+                        boost::shared_ptr<Route> route = (*ri)[_columns.route];
+                        PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
+                        PBD::Unwinder<boost::shared_ptr<Route> > uw_route (_route_is_being_deleted, route );
 			_model->erase (ri);
-			found = true;
 			break;
 		}
 	}
@@ -1699,26 +1696,26 @@ EditorRoutes::idle_update_mute_rec_solo_etc()
 		(*i)[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (route) ? 1 : 0;
 		(*i)[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (route) ? 1 : 0;
 		(*i)[_columns.active] = route->active ();
-		{
-			if (boost::dynamic_pointer_cast<Track> (route)) {
-				boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
-
-				if (route->record_enabled()) {
-					if (_session->record_status() == Session::Recording) {
-						(*i)[_columns.rec_state] = 1;
-					} else {
-						(*i)[_columns.rec_state] = 2;
-					}
-                                } else if (mt && mt->step_editing()) {
-                                        (*i)[_columns.rec_state] = 3;
+                if (boost::dynamic_pointer_cast<Track> (route)) {
+                        boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
+                        
+                        if (route->record_enabled()) {
+                                if (_session->record_status() == Session::Recording) {
+                                        (*i)[_columns.rec_state] = 1;
                                 } else {
-                                        (*i)[_columns.rec_state] = 0;
+                                        (*i)[_columns.rec_state] = 2;
                                 }
-                                
-                                (*i)[_columns.name_editable] = !route->record_enabled ();
+                        } else if (mt && mt->step_editing()) {
+                                (*i)[_columns.rec_state] = 3;
+                        } else {
+                                (*i)[_columns.rec_state] = 0;
                         }
+                        
+                        (*i)[_columns.name_editable] = !route->record_enabled ();
                 }
-	}
+        }
+
+	return false; // do not call again (until needed)
 }
 
 void
