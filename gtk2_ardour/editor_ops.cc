@@ -2690,8 +2690,14 @@ Editor::create_region_from_selection (vector<boost::shared_ptr<Region> >& new_re
 		return;
 	}
 
-	framepos_t start = selection->time[clicked_selection].start;
-	framepos_t end = selection->time[clicked_selection].end;
+	framepos_t start, end;
+	if (clicked_selection) {
+		start = selection->time[clicked_selection].start;
+		end = selection->time[clicked_selection].end;
+	} else {
+		start = selection->time.start();
+		end = selection->time.end_frame();
+	}
 
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
 	sort_track_selection (ts);
@@ -4591,7 +4597,13 @@ Editor::duplicate_selection (float times)
 			continue;
 		}
 		playlist->clear_changes ();
-		playlist->duplicate (*ri, selection->time[clicked_selection].end, times);
+		framepos_t end;
+		if (clicked_selection) {
+			end = selection->time[clicked_selection].end;
+		} else {
+			end = selection->time.end_frame();
+		}
+		playlist->duplicate (*ri, end, times);
 		_session->add_command (new StatefulDiffCommand (playlist));
 
 		++ri;
