@@ -618,14 +618,11 @@ namespace ARDOUR {
 /* these cover types declared above in this header. See enums.cc
    for the definitions.
 */
-
 std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
@@ -636,8 +633,6 @@ std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
 std::istream& operator>>(std::istream& o, Timecode::TimecodeFormat& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RegionSelectionAfterSplit& sf);
@@ -647,8 +642,6 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
@@ -659,11 +652,24 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);
 std::ostream& operator<<(std::ostream& o, const Timecode::TimecodeFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::DenormalModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RegionSelectionAfterSplit& sf);
+
+
+/* because these operators work on types which can be used when making
+   a UI_CONFIG_VARIABLE (in gtk2_ardour) we need them to be exported.
+*/
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
+
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
+
 
 static inline ARDOUR::framepos_t
 session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
