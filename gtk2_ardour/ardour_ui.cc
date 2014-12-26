@@ -3495,7 +3495,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 void
 ARDOUR_UI::delete_selected_tracks()
 {
-    //DisplaySuspender ds;
+    DisplaySuspender ds;
     
     TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
     boost::shared_ptr<RouteList> routes_to_remove(new RouteList);
