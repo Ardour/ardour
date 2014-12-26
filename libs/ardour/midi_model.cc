@@ -164,84 +164,37 @@ MidiModel::NoteDiffCommand::side_effect_remove (const NotePtr note)
 	side_effect_removals.insert (note);
 }
 
-void
-MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
-                                    uint8_t new_value)
+Variant
+MidiModel::NoteDiffCommand::get_value (const NotePtr note, Property prop)
 {
-	assert (note);
-
-	NoteChange change;
-
 	switch (prop) {
 	case NoteNumber:
-		if (new_value == note->note()) {
-			return;
-		}
-		change.old_value = note->note();
-		break;
+		return Variant(note->note());
 	case Velocity:
-		if (new_value == note->velocity()) {
-			return;
-		}
-		change.old_value = note->velocity();
-		break;
+		return Variant(note->velocity());
 	case Channel:
-		if (new_value == note->channel()) {
-			return;
-		}
-		change.old_value = note->channel();
-		break;
-
-
+		return Variant(note->channel());
 	case StartTime:
-		fatal << "MidiModel::DiffCommand::change() with integer argument called for start time" << endmsg;
-		abort(); /*NOTREACHED*/
-		break;
+		return Variant(note->time());
 	case Length:
-		fatal << "MidiModel::DiffCommand::change() with integer argument called for length" << endmsg;
-		abort(); /*NOTREACHED*/
-		break;
+		return Variant(note->length());
 	}
-
-	change.note = note;
-	change.property = prop;
-	change.new_value = new_value;
-
-	_changes.push_back (change);
 }
 
 void
-MidiModel::NoteDiffCommand::change (const NotePtr note, Property prop,
-                                    TimeType new_time)
+MidiModel::NoteDiffCommand::change (const NotePtr  note,
+                                    Property       prop,
+                                    const Variant& new_value)
 {
 	assert (note);
 
-	NoteChange change;
+	const NoteChange change = {
+		prop, note, 0, get_value(note, prop), new_value
+	};
 
-	switch (prop) {
-	case NoteNumber:
-	case Channel:
-	case Velocity:
-		fatal << "MidiModel::NoteDiffCommand::change() with time argument called for note, channel or velocity" << endmsg;
-		break;
-
-	case StartTime:
-		if (note->time() == new_time) {
-			return;
-		}
-		change.old_time = note->time();
-		break;
-	case Length:
-		if (note->length() == new_time) {
-			return;
-		}
-		change.old_time = note->length();
-		break;
+	if (change.old_value == new_value) {
+		return;
 	}
-
-	change.note = note;
-	change.property = prop;
-	change.new_time = new_time;
 
 	_changes.push_back (change);
 }
@@ -304,7 +257,7 @@ MidiModel::NoteDiffCommand::operator() ()
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
-				i->note->set_note (i->new_value);
+				i->note->set_note (i->new_value.get_int());
 				break;
 
 			case StartTime:
@@ -312,7 +265,7 @@ MidiModel::NoteDiffCommand::operator() ()
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
-				i->note->set_time (i->new_time);
+				i->note->set_time (i->new_value.get_beats());
 				break;
 
 			case Channel:
@@ -320,18 +273,18 @@ MidiModel::NoteDiffCommand::operator() ()
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
-				i->note->set_channel (i->new_value);
+				i->note->set_channel (i->new_value.get_int());
 				break;
 
 				/* no remove-then-add required for these properties, since we do not index them
 				 */
 
 			case Velocity:
-				i->note->set_velocity (i->new_value);
+				i->note->set_velocity (i->new_value.get_int());
 				break;
 
 			case Length:
-				i->note->set_length (i->new_time);
+				i->note->set_length (i->new_value.get_beats());
 				break;
 
 			}
@@ -411,7 +364,7 @@ MidiModel::NoteDiffCommand::undo ()
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
-				i->note->set_note (i->old_value);
+				i->note->set_note (i->old_value.get_int());
 				break;
 
 			case StartTime:
@@ -423,7 +376,7 @@ MidiModel::NoteDiffCommand::undo ()
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
-				i->note->set_time (i->old_time);
+				i->note->set_time (i->old_value.get_beats());
 				break;
 
 			case Channel:
@@ -435,18 +388,18 @@ MidiModel::NoteDiffCommand::undo ()
 					_model->remove_note_unlocked (i->note);
 					temporary_removals.insert (i->note);
 				}
-				i->note->set_channel (i->old_value);
+				i->note->set_channel (i->old_value.get_int());
 				break;
 
 				/* no remove-then-add required for these properties, since we do not index them
 				 */
 
 			case Velocity:
-				i->note->set_velocity (i->old_value);
+				i->note->set_velocity (i->old_value.get_int());
 				break;
 
 			case Length:
-				i->note->set_length (i->old_time);
+				i->note->set_length (i->old_value.get_beats());
 				break;
 			}
 		}
@@ -593,9 +546,9 @@ MidiModel::NoteDiffCommand::marshal_change (const NoteChange& change)
 	{
 		ostringstream old_value_str (ios::ate);
 		if (change.property == StartTime || change.property == Length) {
-			old_value_str << change.old_time;
+			old_value_str << change.old_value.get_beats();
 		} else {
-			old_value_str << (unsigned int) change.old_value;
+			old_value_str << change.old_value.get_int();
 		}
 		xml_change->add_property ("old", old_value_str.str());
 	}
@@ -603,9 +556,9 @@ MidiModel::NoteDiffCommand::marshal_change (const NoteChange& change)
 	{
 		ostringstream new_value_str (ios::ate);
 		if (change.property == StartTime || change.property == Length) {
-			new_value_str << change.new_time;
+			new_value_str << change.new_value.get_beats();
 		} else {
-			new_value_str << (unsigned int) change.new_value;
+			new_value_str << change.new_value.get_int();
 		}
 		xml_change->add_property ("new", new_value_str.str());
 	}
@@ -640,7 +593,9 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	if ((prop = xml_change->property ("old")) != 0) {
 		istringstream old_str (prop->value());
 		if (change.property == StartTime || change.property == Length) {
-			old_str >> change.old_time;
+			Evoral::MusicalTime old_time;
+			old_str >> old_time;
+			change.old_value = old_time;
 		} else {
 			int integer_value_so_that_istream_does_the_right_thing;
 			old_str >> integer_value_so_that_istream_does_the_right_thing;
@@ -654,7 +609,9 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	if ((prop = xml_change->property ("new")) != 0) {
 		istringstream new_str (prop->value());
 		if (change.property == StartTime || change.property == Length) {
-			new_str >> change.new_time;
+			Evoral::MusicalTime new_time;
+			new_str >> new_time;
+			change.new_value = Variant(new_time);
 		} else {
 			int integer_value_so_that_istream_does_the_right_thing;
 			new_str >> integer_value_so_that_istream_does_the_right_thing;

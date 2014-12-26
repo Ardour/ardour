@@ -21,17 +21,22 @@
 #ifndef __ardour_midi_model_h__
 #define __ardour_midi_model_h__
 
-#include <queue>
 #include <deque>
+#include <queue>
 #include <utility>
+
 #include <boost/utility.hpp>
 #include <glibmm/threads.h>
+
 #include "pbd/command.h"
-#include "ardour/libardour_visibility.h"
-#include "ardour/types.h"
+
 #include "ardour/automatable_sequence.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
+#include "ardour/types.h"
+#include "ardour/variant.h"
+
 #include "evoral/Note.hpp"
 #include "evoral/Sequence.hpp"
 
@@ -101,8 +106,15 @@ public:
 		void remove (const NotePtr note);
 		void side_effect_remove (const NotePtr note);
 
-		void change (const NotePtr note, Property prop, uint8_t new_value);
-		void change (const NotePtr note, Property prop, TimeType new_time);
+		void change (const NotePtr note, Property prop, uint8_t new_value) {
+			change(note, prop, Variant(new_value));
+		}
+
+		void change (const NotePtr note, Property prop, TimeType new_time) {
+			change(note, prop, Variant(new_time));
+		}
+
+		void change (const NotePtr note, Property prop, const Variant& new_value);
 
 		bool adds_or_removes() const {
 			return !_added_notes.empty() || !_removed_notes.empty();
@@ -110,15 +122,15 @@ public:
 
 		NoteDiffCommand& operator+= (const NoteDiffCommand& other);
 
+		static Variant get_value (const NotePtr note, Property prop);
+
 	private:
 		struct NoteChange {
 			NoteDiffCommand::Property property;
 			NotePtr note;
 			uint32_t note_id;
-			uint8_t  old_value;  // or...
-			TimeType old_time;   // this
-			uint8_t  new_value;  // or...
-			TimeType new_time;   // this
+			Variant old_value;
+			Variant new_value;
 		};
 
 		typedef std::list<NoteChange> ChangeList;

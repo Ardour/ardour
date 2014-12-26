@@ -27,6 +27,7 @@
 #include <stdexcept>
 
 #include "ardour/libardour_visibility.h"
+#include "evoral/types.hpp"
 #include "pbd/compose.h"
 
 namespace ARDOUR {
@@ -37,6 +38,7 @@ class LIBARDOUR_API Variant
 public:
 	enum Type {
 		NOTHING, ///< Nothing (void)
+		BEATS,   ///< Beats+ticks
 		BOOL,    ///< Boolean
 		DOUBLE,  ///< C double (64-bit IEEE-754)
 		FLOAT,   ///< C float (32-bit IEEE-754)
@@ -53,6 +55,11 @@ public:
 	explicit Variant(float   value) : _type(FLOAT)   { _float  = value; }
 	explicit Variant(int32_t value) : _type(INT)     { _int    = value; }
 	explicit Variant(int64_t value) : _type(LONG)    { _long   = value; }
+
+	explicit Variant(const Evoral::MusicalTime& beats)
+		: _type(BEATS)
+		, _beats(beats)
+	{}
 
 	/** Make a variant of a specific string type (string types only) */
 	Variant(Type type, const std::string& value)
@@ -109,9 +116,56 @@ public:
 	int    get_int()    const { ensure_type(INT);    return _int;    }
 	long   get_long()   const { ensure_type(LONG);   return _long;   }
 
+	bool   operator==(bool v)   const { return _type == BOOL   && _bool == v; }
+	double operator==(double v) const { return _type == DOUBLE && _double == v; }
+	float  operator==(float v)  const { return _type == FLOAT  && _float == v; }
+	int    operator==(int v)    const { return _type == INT    && _int == v; }
+	long   operator==(long v)   const { return _type == LONG   && _long == v; }
+
+	Variant& operator=(bool v)   { _type = BOOL;   _bool = v;   return *this; }
+	Variant& operator=(double v) { _type = DOUBLE; _double = v; return *this; }
+	Variant& operator=(float v)  { _type = FLOAT;  _float = v;  return *this; }
+	Variant& operator=(int v)    { _type = INT;    _int = v;    return *this; }
+	Variant& operator=(long v)   { _type = LONG;   _long = v;   return *this; }
+
 	const std::string& get_path()   const { ensure_type(PATH);   return _string; }
 	const std::string& get_string() const { ensure_type(STRING); return _string; }
 	const std::string& get_uri()    const { ensure_type(URI);    return _string; }
+
+	bool operator==(const Variant& v) const {
+		if (_type != v._type) {
+			return false;
+		}
+
+		switch (_type) {
+		case NOTHING: return true;
+		case BEATS:   return _beats  == v._beats;
+		case BOOL:    return _bool   == v._bool;
+		case DOUBLE:  return _double == v._double;
+		case FLOAT:   return _float  == v._float;
+		case INT:     return _int    == v._int;
+		case LONG:    return _long   == v._long;
+		case PATH:
+		case STRING:
+		case URI:     return _string == v._string;
+		}
+
+		return false;
+	}
+
+	bool operator==(const Evoral::MusicalTime& v) const {
+		return _type == BEATS && _beats == v;
+	}
+
+	Variant& operator=(Evoral::MusicalTime v) {
+		_type  = BEATS;
+		_beats = v;
+		return *this;
+	}
+
+	const Evoral::MusicalTime& get_beats() const {
+		ensure_type(BEATS); return _beats;
+	}
 
 	Type type() const { return _type; }
 
@@ -141,8 +195,9 @@ private:
 		}
 	}
 
-	Type        _type;    ///< Type tag
-	std::string _string;  ///< For all string types (PATH, STRING, URI)
+	Type                _type;    ///< Type tag
+	std::string         _string;  ///< PATH, STRING, URI
+	Evoral::MusicalTime _beats;   ///< BEATS
 
 	// Union of all primitive numeric types
 	union {
