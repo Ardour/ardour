@@ -54,7 +54,7 @@ private:
                const std::string& progress_message,
                const std::string& bottom_message);
 
-    mutable std::mutex _m;
+    mutable Glib::Threads::Mutex _m;
     Gtk::Label& _top_label;
     Gtk::Label& _bottom_label;
     Gtk::ProgressBar& _progress_bar;

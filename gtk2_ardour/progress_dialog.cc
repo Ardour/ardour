@@ -107,14 +107,14 @@ ProgressDialog::add_progress_step ()
 {
     unsigned int this_thread_cur_step;
     { //thread unsafe, so
-        std::lock_guard <std::mutex> lock (_m);
+        Glib::Threads::Mutex::Lock lm  (_m);
         if (cur_step == num_of_steps)
             return;
         
         ++cur_step;
         this_thread_cur_step = cur_step;
     }
-    set_bottom_label (string_compose ("%1 %", int ( ( float (cur_step) / (num_of_steps)) * 100)));
+    set_bottom_label (string_compose ("%1 %", int ( ( float (this_thread_cur_step) / (num_of_steps)) * 100)));
     set_progress (float (this_thread_cur_step) / (num_of_steps));
 
     if (hide_automatically && this_thread_cur_step == num_of_steps){

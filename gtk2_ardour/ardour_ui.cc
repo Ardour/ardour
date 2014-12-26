@@ -3481,19 +3481,21 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	} else */ {
 		output_chan = input_chan;
 	}
-    
+
+//doesn't work on windows, so it will be fixed
+/* 
     ProgressDialog::instance()->set_top_label ("Adding tracks...");
     ProgressDialog::instance()->set_num_of_steps (_add_tracks_dialog->count () * 2);
     ProgressDialog::instance()->show ();
-
+*/
     session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->count(), "");
-    ProgressDialog::instance()->hide ();
+//    ProgressDialog::instance()->hide ();
 }
 
 void
 ARDOUR_UI::delete_selected_tracks()
 {
-    DisplaySuspender ds;
+    //DisplaySuspender ds;
     
     TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
     boost::shared_ptr<RouteList> routes_to_remove(new RouteList);
@@ -3510,12 +3512,15 @@ ARDOUR_UI::delete_selected_tracks()
             routes_to_remove->push_back(t->route() );
         }
     }
+
+//doesn't work on windows, so it will be fixed
+ /*   
     ProgressDialog::instance()->set_top_label ("Removing tracks...");
     ProgressDialog::instance()->set_num_of_steps (routes_to_remove->size ());
     ProgressDialog::instance()->show ();
-
+*/
     ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
-    ProgressDialog::instance()->hide ();
+//    ProgressDialog::instance()->hide ();
 }
 
 void
