@@ -420,10 +420,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\configuration.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\control_protocol_manager.cc"
 				>
 			</File>
@@ -1467,14 +1463,6 @@
 			</File>
 			<File
 				RelativePath="..\ardour\comparable_shared_ptr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\configuration.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\configuration_variable.h"
 				>
 			</File>
 			<File
