@@ -287,6 +287,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\configuration_variable.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\controllable.cc"
 				>
 			</File>
@@ -646,6 +650,14 @@
 			</File>
 			<File
 				RelativePath="..\pbd\compose.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\configuration.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\configuration_variable.h"
 				>
 			</File>
 			<File
