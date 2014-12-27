@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 20014 Paul Davis
+    Copyright (C) 2014 Paul Davis
     Author: David Robillard
 
     This program is free software; you can redistribute it and/or modify
