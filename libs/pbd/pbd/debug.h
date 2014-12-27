@@ -25,6 +25,7 @@
 #include <sstream>
 
 #include "pbd/libpbd_visibility.h"
+#include "pbd/timing.h"
 
 namespace PBD {
 
@@ -57,6 +58,11 @@ namespace PBD {
 #define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
 #define DEBUG_ENABLED(bits) ((bits) & PBD::debug_bits)
 #define DEBUG_THREAD_SELF 0
+
+#define DEBUG_TIMING_START(bits,td) if ((bits) & PBD::debug_bits) { td.start_timing (); }
+#define DEBUG_TIMING_ADD_ELAPSED(bits,td) if ((bits) & PBD::debug_bits) { td.add_elapsed (); }
+#define DEBUG_TIMING_RESET(bits,td) if ((bits) & PBD::debug_bits) { td.reset (); }
+
 #else
 #define DEBUG_TRACE(bits,fmt,...) /*empty*/
 #define DEBUG_STR(a) /* empty */
@@ -67,6 +73,11 @@ namespace PBD {
 #else
 #define DEBUG_THREAD_SELF pthread_self()
 #endif
+
+#define DEBUG_TIMING_START(bits,td) /*empty*/
+#define DEBUG_TIMING_ADD_ELAPSED(bits,td) /*empty*/
+#define DEBUG_TIMING_RESET(bits,td) /*empty*/
+
 #endif
 #endif /* __libpbd_debug_h__ */
 
