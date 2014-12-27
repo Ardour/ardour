@@ -1651,7 +1651,9 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	bool is_start;
 	bool ret = true;
 
-	_enter_stack.pop_back();
+	if (!_enter_stack.empty()) {
+		_enter_stack.pop_back();
+	}
 
 	switch (item_type) {
 	case ControlPointItem:
