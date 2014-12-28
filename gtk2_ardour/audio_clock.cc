@@ -54,7 +54,7 @@ using Gtkmm2ext::Keyboard;
 
 sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
-const double AudioClock::info_font_scale_factor = 0.50;
+const double AudioClock::info_font_scale_factor = 0.60;
 const double AudioClock::separator_height = 0.0;
 const double AudioClock::x_leading_padding = 6.0;
 
