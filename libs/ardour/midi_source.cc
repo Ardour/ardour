@@ -200,11 +200,10 @@ MidiSource::midi_read (const Lock&                        lm,
 
 	if (_model) {
 		// Find appropriate model iterator
-		Evoral::Sequence<Evoral::MusicalTime>::const_iterator& i = _model_iter;
+		Evoral::Sequence<Evoral::MusicalTime>::const_iterator i = _model_iter;
 		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
 			// Cached iterator is invalid, search for the first event past start
-			i                 = _model->begin(converter.from(start), false, filtered);
-			_model_iter_valid = true;
+			i = _model->begin(converter.from(start), false, filtered);
 		}
 
 		_last_read_end = start + cnt;
@@ -230,6 +229,8 @@ MidiSource::midi_read (const Lock&                        lm,
 				break;
 			}
 		}
+		_model_iter       = i;
+		_model_iter_valid = true;
 		return cnt;
 	} else {
 		return read_unlocked (lm, dst, source_start, start, cnt, tracker);
