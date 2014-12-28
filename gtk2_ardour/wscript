@@ -393,6 +393,7 @@ def build(bld):
         obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
+        obj.linkflags += bld.env['LDFLAGS']
         obj.defines = ['_POSIX_SOURCE', 'USE_WS_PREFIX']
         obj.install_path = bld.env['DLLDIR']
         # end of the wine executable

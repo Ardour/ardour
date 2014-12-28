@@ -62,6 +62,7 @@ def build(bld):
             'vstwin.c',
             )
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
+        obj.linkflags += bld.env['LDFLAGS']
         obj.target = 'ardour-vst-scanner.exe.so'
         obj.uselib = ['GIOMM', 'DL']
         obj.use = [ 'libpbd' ]
