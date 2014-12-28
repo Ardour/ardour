@@ -74,10 +74,16 @@ const double trim_handle_size = 6.0; /* pixels */
 uint32_t TimeAxisView::button_height = 0;
 uint32_t TimeAxisView::extra_height = 0;
 int const TimeAxisView::_max_order = 512;
-unsigned int TimeAxisView::name_width_px = 100; // TODO adjust with font-scaling on style-change
+unsigned int TimeAxisView::name_width_px = 100;
 PBD::Signal1<void,TimeAxisView*> TimeAxisView::CatchDeletion;
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::controls_meters_size_group = Glib::RefPtr<Gtk::SizeGroup>();
 Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::midi_scroomer_size_group = Glib::RefPtr<Gtk::SizeGroup>();
+
+void
+TimeAxisView::setup_sizes()
+{
+	name_width_px = ceil (100. * ARDOUR_UI::config()->get_font_scale() / 102400.);
+}
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
 	: AxisView (sess)

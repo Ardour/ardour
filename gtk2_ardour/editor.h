@@ -940,7 +940,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Ruler* samples_ruler;
 	ArdourCanvas::Ruler* minsec_ruler;
 
-	static const double timebar_height;
+	static double timebar_height;
 	guint32 visible_timebars;
 	Gtk::Menu          *editor_ruler_menu;
 

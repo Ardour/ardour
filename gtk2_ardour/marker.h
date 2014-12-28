@@ -63,6 +63,8 @@ class Marker : public sigc::trackable
 
 	static PBD::Signal1<void,Marker*> CatchDeletion;
 
+	static void setup_sizes (const double timebar_height);
+
 	ArdourCanvas::Item& the_item() const;
 
 	void set_selected (bool);

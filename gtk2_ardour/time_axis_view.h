@@ -100,6 +100,8 @@ class TimeAxisView : public virtual AxisView
 
 	static PBD::Signal1<void,TimeAxisView*> CatchDeletion;
 
+	static void setup_sizes ();
+
 	/** @return index of this TimeAxisView within its parent */
 	int order () const { return _order; }
 

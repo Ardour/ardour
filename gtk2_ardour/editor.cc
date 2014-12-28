@@ -140,7 +140,7 @@ using PBD::internationalize;
 using PBD::atoi;
 using Gtkmm2ext::Keyboard;
 
-const double Editor::timebar_height = 15.0;
+double Editor::timebar_height = 15.0;
 
 static const gchar *_snap_type_strings[] = {
 	N_("CD Frames"),
@@ -404,6 +404,10 @@ Editor::Editor ()
 	_visible_track_count = -1;
 
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
+
+	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::config()->get_font_scale() / 102400.));
+	TimeAxisView::setup_sizes ();
+	Marker::setup_sizes (timebar_height);
 
 	_scroll_callbacks = 0;
 

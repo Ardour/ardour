@@ -52,7 +52,12 @@ using namespace Gtkmm2ext;
 
 PBD::Signal1<void,Marker*> Marker::CatchDeletion;
 
-static const double marker_height = 13.0;
+static double marker_height = 13.0;
+
+void Marker::setup_sizes(const double timebar_height)
+{
+	marker_height = floor (timebar_height) - 2;
+}
 
 Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
 		Type type, framepos_t frame, bool handle_events)
