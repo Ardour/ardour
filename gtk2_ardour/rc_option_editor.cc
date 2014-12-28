@@ -549,6 +549,8 @@ public:
 
 		_box->pack_start (*h, false, false);
 
+		set_note (_("Major font-scale changes require an application restart to re-layout."));
+
 		_dpi_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &FontScalingOptions::dpi_changed));
 	}
 
