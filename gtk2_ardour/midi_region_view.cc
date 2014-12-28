@@ -445,6 +445,14 @@ MidiRegionView::enter_internal()
 		Keyboard::magic_widget_grab_focus();
 		_grabbed_keyboard = true;
 	}
+
+	// Lower frame handles below notes so they don't steal events
+	if (frame_handle_start) {
+		frame_handle_start->lower_to_bottom();
+	}
+	if (frame_handle_end) {
+		frame_handle_end->lower_to_bottom();
+	}
 }
 
 void
@@ -456,6 +464,14 @@ MidiRegionView::leave_internal()
 	if (_grabbed_keyboard) {
 		Keyboard::magic_widget_drop_focus();
 		_grabbed_keyboard = false;
+	}
+
+	// Raise frame handles above notes so they catch events
+	if (frame_handle_start) {
+		frame_handle_start->raise_to_top();
+	}
+	if (frame_handle_end) {
+		frame_handle_end->raise_to_top();
 	}
 }
 
