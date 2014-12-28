@@ -47,7 +47,7 @@ def build(bld):
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         # wine exec wrapper script
-        obj = bld(features = 'subst', rule= 'chmod 0755 ${TGT}')
+        obj = bld(features = 'subst')
         obj.source = 'scanner.wine'
         obj.target = 'ardour-vst-scanner'
         obj.chmod  = Utils.O755

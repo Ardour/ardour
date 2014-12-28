@@ -91,7 +91,7 @@ def build(bld):
         for i in dict:
             setattr(obj, i, dict[i])
 
-    obj              = bld(features = 'subst', rule= 'chmod 0755 ${TGT}')
+    obj              = bld(features = 'subst')
     obj.source       = 'hardev_common.sh.in'
     obj.target       = 'hardev_common_waf.sh'
     obj.chmod        = Utils.O755
