@@ -1655,7 +1655,11 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 		/* outline all edges */
 		ev->set_outline_all ();
 	}
-	
+
+	// Update color in case velocity has changed
+	ev->set_fill_color(ev->base_color());
+	ev->set_outline_color(ev->calculate_outline(ev->base_color(), ev->selected()));
+
 	if (update_ghost_regions) {
 		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 			MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
