@@ -543,6 +543,8 @@ public:
 
 		 const Glib::ustring dflt = _("Default");
 		 const Glib::ustring empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
+
+		_dpi_slider.set_name("FontScaleSlider");
 		_dpi_slider.set_update_policy (UPDATE_DISCONTINUOUS);
 		_dpi_slider.set_draw_value(false);
 		_dpi_slider.add_mark(50,  Gtk::POS_TOP, empty);

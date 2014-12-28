@@ -501,6 +501,14 @@ style "option_entry"  = "default"
 
 }
 
+style "font_scale_slider" = "default"
+{
+  # scale-marks are based on style->dark/light,
+	# which cannot be specified directly in the gtkrc.
+	# this is a quick hack to increase visibility of the marks
+  bg[NORMAL] = shade(1.4, @background)
+}
+
 style "very_small_bright_when_active" = "very_small_text"
 {
 	fg[NORMAL] = @foreground
@@ -1031,6 +1039,7 @@ widget "*AddRouteDialogSpinner" style:highest "ardour_adjusters"
 widget "*OptionsNotebook" style:highest "preferences"
 widget "*OptionsLabel" style:highest "preferences"
 widget "*OptionsEntry" style:highest "option_entry"
+widget "*FontScaleSlider" style:highest "font_scale_slider"
 widget "*InspectorNotebook" style:highest "preferences"
 widget "*EditorRulerLabel*" style:highest "ruler_label"
 widget "*MixerAutomationModeButton*" style:highest "very_small_button"
