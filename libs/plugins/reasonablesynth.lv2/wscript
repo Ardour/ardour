@@ -3,7 +3,7 @@ import os
 import re
 import shutil
 import waflib.extras.autowaf as autowaf
-from waflib import Options
+import waflib.Options as Options, waflib.Utils as Utils
 
 # Mandatory variables
 top = '.'
@@ -31,6 +31,7 @@ def build(bld):
                 source       = i + '.in',
                 target       = '../../LV2/%s/%s' % (bundle, i),
                 install_path = '${LV2DIR}/%s' % bundle,
+                chmod        = Utils.O644,
                 LIB_EXT      = module_ext)
 
         # Build plugin library
