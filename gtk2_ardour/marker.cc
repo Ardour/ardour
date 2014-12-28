@@ -75,73 +75,78 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	, _label_offset (0)
 
 {
+
+	const double MH = marker_height - 1;
 	/* Shapes we use:
-
-	  Mark:
-
-	   (0,0) -> (6,0)
-	     ^        |
-	     |	      V
-           (0,5)    (6,5)
-	       \    /
-               (3,marker_height)
-
-
-	   TempoMark:
-	   MeterMark:
-
-               (3,0)
-              /      \
-	   (0,5) -> (6,5)
-	     ^        |
-	     |	      V
-           (0,10)<-(6,10)
-
-
-           Start:
-
-	   0,0\
-       	    |  \
-            |   \ 6,6
-	    |	/
-            |  /
-           0,12
-
-	   End:
-
-	       /12,0
-	      /     |
-             /      |
-	   6,6      |
-             \      |
-              \     |
-               \    |
-	       12,12
-
-             PunchIn:
-
-	     0,0 ------> marker_height,0
-	      |       /
-	      |      /
-	      |     /
-	      |    /
-	      |   /
-	      |  /
-	     0,marker_height
-
-	     PunchOut
-
-	   0,0 -->-marker_height,0
-	    \       |
-	     \      |
-	      \     |
-	       \    |
-	        \   |
-	         \  |
-	         marker_height,marker_height
-
-
-	*/
+	 *
+	 * Mark:
+	 *
+	 *  (0,0)   ->  (6,0)
+	 *    ^           |
+	 *    |           V
+	 * (0,MH*.4)  (6,MH*.4)
+	 *     \         /
+	 *        (3,MH)
+	 *
+	 *
+	 * TempoMark:
+	 * MeterMark:
+	 *
+	 *        (3,0)
+	 *     /         \
+	 * (0,MH*.6)  (6,MH.*.6)
+	 *    ^           |
+	 *    |           V
+	 * (0,MH)   <-  (6,MH)
+	 *
+	 *
+	 * SessionStart:
+	 * RangeStart:
+	 *
+	 *       0,0\
+	 *        |  \
+	 *        |   \ 6,MH/2
+	 *        |   /
+	 *        |  /
+	 *       0,MH
+	 *
+	 *
+	 * SessionEnd:
+	 * RangeEnd:
+	 *
+	 *         /12,0
+	 *        /   |
+	 * 6,MH/2/    |
+	 *       \    |
+	 *        \   |
+	 *         \12,MH
+	 *
+	 *
+	 * PunchIn:
+	 *
+	 *   0,0 ------> marker_height,0
+	 *    |       /
+	 *    |      /
+	 *    |     /
+	 *    |    /
+	 *    |   /
+	 *    |  /
+	 *   0,marker_height
+	 *
+	 *
+	 *   PunchOut
+	 *
+	 *   0,0 ------> marker_height,0
+	 *    \        |
+	 *     \       |
+	 *      \      |
+	 *       \     |
+	 *        \    |
+	 *         \   |
+	 *          \  |
+	 *   marker_height,marker_height
+	 *
+	 */
 
 	switch (type) {
 	case Mark:
@@ -149,24 +154,23 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, 5.0));
-		points->push_back (ArdourCanvas::Duple (3.0, marker_height));
-		points->push_back (ArdourCanvas::Duple (0.0, 5.0));
+		points->push_back (ArdourCanvas::Duple (6.0, MH * .4));
+		points->push_back (ArdourCanvas::Duple (3.0, MH));
+		points->push_back (ArdourCanvas::Duple (0.0, MH * .4));
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 3;
-		_label_offset = 8.0;
+		_label_offset = 10.0;
 		break;
 
 	case Tempo:
 	case Meter:
-
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (3.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, 5.0));
-		points->push_back (ArdourCanvas::Duple (6.0, 10.0));
-		points->push_back (ArdourCanvas::Duple (0.0, 10.0));
-		points->push_back (ArdourCanvas::Duple (0.0, 5.0));
+		points->push_back (ArdourCanvas::Duple (6.0, MH * .6));
+		points->push_back (ArdourCanvas::Duple (6.0, MH));
+		points->push_back (ArdourCanvas::Duple (0.0, MH));
+		points->push_back (ArdourCanvas::Duple (0.0, MH * .6));
 		points->push_back (ArdourCanvas::Duple (3.0, 0.0));
 
 		_shift = 3;
@@ -175,27 +179,26 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 
 	case SessionStart:
 	case RangeStart:
-
-	        points = new ArdourCanvas::Points ();
+		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
-		points->push_back (ArdourCanvas::Duple (0.0, marker_height));
+		points->push_back (ArdourCanvas::Duple (6.5, MH * .5));
+		points->push_back (ArdourCanvas::Duple (0.0, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 0;
-		_label_offset = marker_height;
+		_label_offset = 8.0;
 		break;
 
 	case SessionEnd:
 	case RangeEnd:
 		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
-		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
-		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
-		points->push_back (ArdourCanvas::Duple (6.5, 6.5));
+		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (6.0, MH));
+		points->push_back (ArdourCanvas::Duple (0.0, MH * .5));
+		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
 
-		_shift = marker_height;
-		_label_offset = 6.0;
+		_shift = 6.0;
+		_label_offset = 0.0;
 		break;
 
 	case LoopStart:
@@ -206,7 +209,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = 0;
-		_label_offset = 12.0;
+		_label_offset = marker_height;
 		break;
 
 	case LoopEnd:
@@ -220,7 +223,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		_label_offset = 0.0;
 		break;
 
-	case  PunchIn:
+	case PunchIn:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
@@ -231,11 +234,11 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		_label_offset = marker_height;
 		break;
 
-	case  PunchOut:
+	case PunchOut:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (12.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (12.0, 12.0));
+		points->push_back (ArdourCanvas::Duple (marker_height, 0.0));
+		points->push_back (ArdourCanvas::Duple (marker_height, marker_height));
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
 		_shift = marker_height;
@@ -281,7 +284,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", annotation));
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height / 2.0) - (name_height / 2.0) - 2.0));
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height - name_height - 1) * .5 ));
 
 	set_name (annotation.c_str());
 
@@ -418,9 +421,9 @@ Marker::setup_name_display ()
 			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
 		} else {
 			/* right edge remains at zero (group-relative). Add
-			 * arbitrary 4 pixels of extra padding at the end
+			 * arbitrary 2 pixels of extra padding at the end
 			 */
-			_name_background->set_x1 (_name_item->position().x + name_width + 4.0);
+			_name_background->set_x1 (_name_item->position().x + name_width + 2.0);
 		}
 	}
 
