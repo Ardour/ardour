@@ -533,15 +533,31 @@ class FontScalingOptions : public OptionEditorBox
 public:
 	FontScalingOptions (UIConfiguration* uic) :
 		_ui_config (uic),
-		_dpi_adjustment (50, 50, 250, 1, 10),
+		_dpi_adjustment (100, 50, 250, 1, 5),
 		_dpi_slider (_dpi_adjustment)
 	{
-		_dpi_adjustment.set_value (floor ((double)(uic->get_font_scale () / 1024)));
+		_dpi_adjustment.set_value (_ui_config->get_font_scale() / 1024.);
 
 		Label* l = manage (new Label (_("Font scaling:")));
 		l->set_name ("OptionsLabel");
 
+		 const Glib::ustring dflt = _("Default");
+		 const Glib::ustring empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
 		_dpi_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+		_dpi_slider.set_draw_value(false);
+		_dpi_slider.add_mark(50,  Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(60,  Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(70,  Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(80,  Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(90,  Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(100, Gtk::POS_TOP, dflt);
+		_dpi_slider.add_mark(125, Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(150, Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(175, Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(200, Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(225, Gtk::POS_TOP, empty);
+		_dpi_slider.add_mark(250, Gtk::POS_TOP, empty);
+
 		HBox* h = manage (new HBox);
 		h->set_spacing (4);
 		h->pack_start (*l, false, false);
@@ -557,7 +573,7 @@ public:
 	void parameter_changed (string const & p)
 	{
 		if (p == "font-scale") {
-			_dpi_adjustment.set_value (floor ((double)(_ui_config->get_font_scale() / 1024)));
+			_dpi_adjustment.set_value (_ui_config->get_font_scale() / 1024.);
 		}
 	}
 
@@ -570,7 +586,7 @@ private:
 
 	void dpi_changed ()
 	{
-		_ui_config->set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024));
+		_ui_config->set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024.));
 		/* XXX: should be triggered from the parameter changed signal */
 		reset_dpi ();
 	}
