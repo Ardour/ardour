@@ -124,6 +124,8 @@ public:
 
 		static Variant get_value (const NotePtr note, Property prop);
 
+		static Variant::Type value_type (Property prop);
+
 	private:
 		struct NoteChange {
 			NoteDiffCommand::Property property;

@@ -5771,6 +5771,8 @@ Editor::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
 	                         sigc::bind(sigc::mem_fun(*this, &Editor::quantize_regions), rs)));
 	items.push_back(MenuElem(_("Remove Overlap"),
 	                         sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, true)));
+	items.push_back(MenuElem(_("Transform..."),
+	                         sigc::bind(sigc::mem_fun(*this, &Editor::transform_regions), rs)));
 
 	_note_context_menu.popup (event->button.button, event->button.time);
 }

@@ -1233,6 +1233,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void quantize_regions (const RegionSelection& rs);
 	void legatize_region (bool shrink_only);
 	void legatize_regions (const RegionSelection& rs, bool shrink_only);
+	void transform_region ();
+	void transform_regions (const RegionSelection& rs);
 	void insert_patch_change (bool from_context);
 	void fork_region ();
 

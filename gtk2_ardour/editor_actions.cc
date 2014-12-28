@@ -1938,6 +1938,7 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "quantize-region", _("Quantize..."), sigc::mem_fun (*this, &Editor::quantize_region));
 	reg_sens (_region_actions, "legatize-region", _("Legatize"), sigc::bind(sigc::mem_fun (*this, &Editor::legatize_region), false));
+	reg_sens (_region_actions, "transform-region", _("Transform..."), sigc::mem_fun (*this, &Editor::transform_region));
 	reg_sens (_region_actions, "remove-overlap", _("Remove Overlap"), sigc::bind(sigc::mem_fun (*this, &Editor::legatize_region), true));
 	reg_sens (_region_actions, "insert-patch-change", _("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &Editor::insert_patch_change), false));
 	reg_sens (_region_actions, "insert-patch-change-context", _("Insert Patch Change..."), sigc::bind (sigc::mem_fun (*this, &Editor::insert_patch_change), true));

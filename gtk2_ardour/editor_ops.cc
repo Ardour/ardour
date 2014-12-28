@@ -97,6 +97,7 @@
 #include "strip_silence_dialog.h"
 #include "time_axis_view.h"
 #include "transpose_dialog.h"
+#include "transform_dialog.h"
 
 #include "i18n.h"
 
@@ -5036,6 +5037,33 @@ Editor::legatize_regions (const RegionSelection& rs, bool shrink_only)
 
 	Legatize legatize(shrink_only);
 	apply_midi_note_edit_op (legatize, rs);
+}
+
+void
+Editor::transform_region ()
+{
+	if (_session) {
+		transform_regions(get_regions_from_selection_and_entered ());
+	}
+}
+
+void
+Editor::transform_regions (const RegionSelection& rs)
+{
+	if (rs.n_midi_regions() == 0) {
+		return;
+	}
+
+	TransformDialog* td = new TransformDialog();
+
+	td->present();
+	const int r = td->run();
+	td->hide();
+
+	if (r == Gtk::RESPONSE_OK) {
+		Transform transform(td->get());
+		apply_midi_note_edit_op(transform, rs);
+	}
 }
 
 void

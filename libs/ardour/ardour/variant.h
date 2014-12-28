@@ -49,7 +49,8 @@ public:
 		URI      ///< URI string
 	};
 
-	explicit Variant()              : _type(NOTHING) { _long   = 0;     }
+	Variant() : _type(NOTHING) { _long = 0; }
+
 	explicit Variant(bool    value) : _type(BOOL)    { _bool   = value; }
 	explicit Variant(double  value) : _type(DOUBLE)  { _double = value; }
 	explicit Variant(float   value) : _type(FLOAT)   { _float  = value; }
@@ -92,6 +93,9 @@ public:
 			_long = (int64_t)lrint(std::max((double)INT64_MIN,
 			                                std::min(value, (double)INT64_MAX)));
 			break;
+		case BEATS:
+			_beats = Evoral::MusicalTime(value);
+			break;
 		default:
 			_type = NOTHING;
 			_long = 0;
@@ -106,6 +110,7 @@ public:
 		case FLOAT:  return _float;
 		case INT:    return _int;
 		case LONG:   return _long;
+		case BEATS:  return _beats.to_double();
 		default:     return 0.0;
 		}
 	}
@@ -157,6 +162,8 @@ public:
 		return _type == BEATS && _beats == v;
 	}
 
+	bool operator!() const { return _type == NOTHING; }
+
 	Variant& operator=(Evoral::MusicalTime v) {
 		_type  = BEATS;
 		_beats = v;
@@ -171,7 +178,7 @@ public:
 
 	static bool type_is_numeric(Type type) {
 		switch (type) {
-		case BOOL: case DOUBLE: case FLOAT: case INT: case LONG:
+		case BOOL: case DOUBLE: case FLOAT: case INT: case LONG: case BEATS:
 			return true;
 		default:
 			return false;

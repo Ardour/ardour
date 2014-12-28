@@ -181,6 +181,20 @@ MidiModel::NoteDiffCommand::get_value (const NotePtr note, Property prop)
 	}
 }
 
+Variant::Type
+MidiModel::NoteDiffCommand::value_type(Property prop)
+{
+	switch (prop) {
+	case NoteNumber:
+	case Velocity:
+	case Channel:
+		return Variant::INT;
+	case StartTime:
+	case Length:
+		return Variant::BEATS;
+	}
+}
+
 void
 MidiModel::NoteDiffCommand::change (const NotePtr  note,
                                     Property       prop,
