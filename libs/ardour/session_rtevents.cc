@@ -220,6 +220,8 @@ Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool g
 		}
 	}
 
+        update_route_record_state ();
+
 	set_dirty ();
 }
 

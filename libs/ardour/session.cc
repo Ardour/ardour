@@ -3035,7 +3035,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
             
 			tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, boost::weak_ptr<Track> (tr)));
 			track_playlist_changed (boost::weak_ptr<Track> (tr));
-			tr->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_route_record_state, this));
+			// tr->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_route_record_state, this));
 
 			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (tr);
 			if (mt) {
@@ -5400,12 +5400,8 @@ Session::update_route_record_state ()
 
 	g_atomic_int_set (&_have_rec_enabled_track, i != rl->end () ? 1 : 0);
 
-	if (g_atomic_int_get (&_have_rec_enabled_track) != old) {
-		RecordStateChanged (); /* EMIT SIGNAL */
-	}
+        i = rl->begin();
 
-    
-    i = rl->begin();
 	while (i != rl->end ()) {
         
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
@@ -5416,7 +5412,7 @@ Session::update_route_record_state ()
 		++i;
 	}
     
-    g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
+        g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
 }
 
 void
