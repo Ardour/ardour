@@ -1372,7 +1372,6 @@ RouteUI::remove_this_route (bool apply_to_selection)
 	}
     
     ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
-    ProgressDialog::instance()->hide ();
 }
 
 gint

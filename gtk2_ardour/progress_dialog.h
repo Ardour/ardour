@@ -40,7 +40,8 @@ public:
     // it's expected that set_num_of_steps () was called previously
     void add_progress_step ();
     void update_info (double new_progress, const char* top_message, const char* progress_message, const char* bottom_message);
-    void show ();
+    void show_pd ();
+	void hide_pd ();
 
 private:
     ProgressDialog (const std::string& title="",
@@ -54,7 +55,6 @@ private:
                const std::string& progress_message,
                const std::string& bottom_message);
 
-    mutable Glib::Threads::Mutex _m;
     Gtk::Label& _top_label;
     Gtk::Label& _bottom_label;
     Gtk::ProgressBar& _progress_bar;

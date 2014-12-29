@@ -105,31 +105,37 @@ ProgressDialog::set_num_of_steps (unsigned int n, bool hide_automatically)
 void
 ProgressDialog::add_progress_step ()
 {
-    unsigned int this_thread_cur_step;
-    { //thread unsafe, so
-        Glib::Threads::Mutex::Lock lm  (_m);
-        if (cur_step == num_of_steps)
-            return;
+   if (cur_step == num_of_steps)
+	return;
         
-        ++cur_step;
-        this_thread_cur_step = cur_step;
-    }
-    set_bottom_label (string_compose ("%1 %", int ( ( float (this_thread_cur_step) / (num_of_steps)) * 100)));
-    set_progress (float (this_thread_cur_step) / (num_of_steps));
+    ++cur_step;
+    
+    set_bottom_label (string_compose ("%1 %", int ( ( float (cur_step) / (num_of_steps)) * 100)));
+    set_progress (float (cur_step) / (num_of_steps));
 
-    if (hide_automatically && this_thread_cur_step == num_of_steps){
-        hide ();
+    if (hide_automatically && cur_step == num_of_steps){
+        hide_pd ();
     }
 }
 
 void
-ProgressDialog::show ()
+ProgressDialog::show_pd ()
 {
     WavesDialog::show ();
     /* Make sure the progress dialog is drawn */
     while (Glib::MainContext::get_default()->iteration (false)) {
     /* do nothing */
     }
+}
+
+void
+ProgressDialog::hide_pd ()
+{
+	 /* Make sure the progress dialog is drawn */
+    while (Glib::MainContext::get_default()->iteration (false)) {
+    /* do nothing */
+	}
+    WavesDialog::hide ();    
 }
 
 void

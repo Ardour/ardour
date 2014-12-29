@@ -2975,7 +2975,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 {
     ProgressDialog::instance()->set_top_label ("Loading session: "+snap_name);
     ProgressDialog::instance()->update_info (0.0, NULL, NULL, "Loading audio...");
-    ProgressDialog::instance()->show ();
+    ProgressDialog::instance()->show_pd ();
     
 	Session *new_session;
 	int unload_status;
@@ -3079,7 +3079,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
   out:
    ProgressDialog::instance()->set_progress (1);
-   ProgressDialog::instance()->hide ();
+   ProgressDialog::instance()->hide_pd ();
 	return retval;
 }
 
@@ -3482,14 +3482,14 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		output_chan = input_chan;
 	}
 
-//doesn't work on windows, so it will be fixed
-/* 
+ 
     ProgressDialog::instance()->set_top_label ("Adding tracks...");
     ProgressDialog::instance()->set_num_of_steps (_add_tracks_dialog->count () * 2);
-    ProgressDialog::instance()->show ();
-*/
+    ProgressDialog::instance()->show_pd ();
+	
     session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->count(), "");
-//    ProgressDialog::instance()->hide ();
+
+	ProgressDialog::instance()->hide_pd ();
 }
 
 void
@@ -3513,14 +3513,14 @@ ARDOUR_UI::delete_selected_tracks()
         }
     }
 
-//doesn't work on windows, so it will be fixed
- /*   
+  
     ProgressDialog::instance()->set_top_label ("Removing tracks...");
     ProgressDialog::instance()->set_num_of_steps (routes_to_remove->size ());
-    ProgressDialog::instance()->show ();
-*/
+    ProgressDialog::instance()->show_pd ();
+	
     ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
-//    ProgressDialog::instance()->hide ();
+
+    ProgressDialog::instance()->hide_pd ();
 }
 
 void
