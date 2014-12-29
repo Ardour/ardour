@@ -151,16 +151,9 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 	Evoral::MusicalTime const bend = bfc.from (_start + _length);
 
 	{
+		/* Lock our source since we'll be reading from it.  write_to() will
+		   take a lock on newsrc. */
 		Source::Lock lm (midi_source(0)->mutex());
-		/* ::write_to() will take the lock on newsrc.
-
-		   XXX taking the lock on our own source here seems
-		   partly sane and partly odd. We don't write the
-		   data to the newsrc from our source, but from
-		   the in memory copy. This whole thing (memory vs. disk, SMF
-		   versus MidiModel) is so f'ed up that its no wonder
-		   stuff is wierd sometimes.
-		 */
 		if (midi_source(0)->write_to (lm, newsrc, bbegin, bend)) {
 			return boost::shared_ptr<MidiRegion> ();
 		}
@@ -425,9 +418,12 @@ MidiRegion::model_contents_changed ()
 {
 	{
 		/* Invalidate source iterator to force reading new contents even if the
-		   calls to read progress linearly. */
-		Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex());
-		midi_source(0)->invalidate (lm);
+		   calls to read() progress linearly.  Try-lock only to avoid deadlock
+		   when called while writing with the source already locked. */
+		Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
+		if (lm.locked()) {
+			midi_source(0)->invalidate (lm);
+		}
 	}
 	send_change (PropertyChange (Properties::midi_data));
 }
