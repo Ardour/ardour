@@ -417,7 +417,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 					break;
 				}
 			} else {
-				warning << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, source->file_path()) << endmsg;
+				info << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, source->file_path()) << endmsg;
 			}
 
 			++s; // next source
