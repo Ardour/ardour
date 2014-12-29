@@ -446,8 +446,10 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	   for a given set of filtered_parameters, so now that we've changed that list we must invalidate
 	   the iterator.
 	*/
-	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex());
-	midi_source(0)->invalidate (lm);
+	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
+	if (lm.locked()) {
+		midi_source(0)->invalidate (lm);
+	}
 }
 
 /** This is called when a trim drag has resulted in a -ve _start time for this region.
