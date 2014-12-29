@@ -357,11 +357,11 @@ Sequence<Time>::const_iterator::operator++()
 	}
 
 	// Use the next earliest controller iff it's earlier than the note event
-	if (_control_iter != _control_iters.end() && _control_iter->x != DBL_MAX) {
-		if (_type == NIL || _control_iter->x < earliest_t.to_double()) {
-			_type = CONTROL;
-			earliest_t = Time(_control_iter->x);
-		}
+	if (_control_iter != _control_iters.end() &&
+	    _control_iter->list && _control_iter->x != DBL_MAX &&
+	    (_control_iter->x < earliest_t.to_double() || _type == NIL)) {
+		_type = CONTROL;
+		earliest_t = Time(_control_iter->x);
 	}
 
 	// Use the next earliest SysEx iff it's earlier than the controller
