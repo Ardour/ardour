@@ -416,6 +416,9 @@ Editor::register_actions ()
 	}
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
+//  Tracks Live doesn't use it
+//	reg_sens (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
+
 	act = reg_sens (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
@@ -463,6 +466,8 @@ Editor::register_actions ()
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
 	_tool_marker_button.set_related_action (act);
 
+//  Tracks Live doesn't use it
+//	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
 	mouse_draw_button.set_related_action (act);
 	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
 	mouse_draw_button.add_elements (ArdourButton::Inset );
