@@ -917,10 +917,8 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::MusicalTime leng
 		return;
 	}
 
-	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	MidiStreamView* const view = mtv->midi_view();
-
-	const double note = view->y_to_note(y);
+	MidiTimeAxisView* const mtv  = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MidiStreamView* const   view = mtv->midi_view();
 
 	// Start of note in frames relative to region start
 	if (snap_t) {
@@ -928,11 +926,15 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::MusicalTime leng
 		t = snap_frame_to_grid_underneath (t, grid_frames);
 	}
 
-	const boost::shared_ptr<NoteType> new_note (
-		new NoteType (mtv->get_channel_for_add (),
-		              region_frames_to_region_beats(t + _region->start()), 
-		              length,
-		              (uint8_t)note, 0x40));
+	const MidiModel::TimeType beat_time = region_frames_to_region_beats(
+		t + _region->start());
+
+	const double  note     = view->y_to_note(y);
+	const uint8_t chan     = mtv->get_channel_for_add();
+	const uint8_t velocity = get_velocity_for_add(beat_time);
+
+	const boost::shared_ptr<NoteType> new_note(
+		new NoteType (chan, beat_time, length, (uint8_t)note, velocity));
 
 	if (_model->contains (new_note)) {
 		return;
@@ -3529,20 +3531,17 @@ MidiRegionView::update_ghost_note (double x, double y)
 	framecnt_t grid_frames;
 	framepos_t const f = snap_frame_to_grid_underneath (unsnapped_frame, grid_frames);
 
-	/* use region_frames... because we are converting a delta within the region
-	*/
-	 
+	/* calculate time in beats relative to start of source */
 	const Evoral::MusicalTime length = get_grid_beats(unsnapped_frame);
+	const Evoral::MusicalTime time   = std::max(
+		Evoral::MusicalTime(),
+		absolute_frames_to_source_beats (f + _region->position ()));
 
-	/* note that this sets the time of the ghost note in beats relative to
-	   the start of the source; that is how all note times are stored.
-	*/
-	_ghost_note->note()->set_time (
-		std::max(Evoral::MusicalTime(),
-		         absolute_frames_to_source_beats (f + _region->position ())));
+	_ghost_note->note()->set_time (time);
 	_ghost_note->note()->set_length (length);
 	_ghost_note->note()->set_note (midi_stream_view()->y_to_note (y));
 	_ghost_note->note()->set_channel (mtv->get_channel_for_add ());
+	_ghost_note->note()->set_velocity (get_velocity_for_add (time));
 
 	/* the ghost note does not appear in ghost regions, so pass false in here */
 	update_note (_ghost_note, false);
@@ -3847,6 +3846,33 @@ MidiRegionView::show_verbose_cursor (string const & text, double xoffset, double
 	trackview.editor().verbose_cursor()->set (text);
 	trackview.editor().verbose_cursor()->show ();
 	trackview.editor().verbose_cursor()->set_offset (ArdourCanvas::Duple (xoffset, yoffset));
+}
+
+uint8_t
+MidiRegionView::get_velocity_for_add (MidiModel::TimeType time) const
+{
+	if (_model->notes().empty()) {
+		return 0x40;  // No notes, use default
+	}
+
+	MidiModel::Notes::const_iterator m = _model->note_lower_bound(time);
+	if (m == _model->notes().begin()) {
+		// Before the start, use the velocity of the first note
+		return (*m)->velocity();
+	} else if (m == _model->notes().end()) {
+		// Past the end, use the velocity of the last note
+		--m;
+		return (*m)->velocity();
+	}
+
+	// Interpolate velocity of surrounding notes
+	MidiModel::Notes::const_iterator n = m;
+	--n;
+
+	const double frac = ((time - (*n)->time()).to_double() /
+	                     ((*m)->time() - (*n)->time()).to_double());
+
+	return (*n)->velocity() + (frac * ((*m)->velocity() - (*n)->velocity()));
 }
 
 /** @param p A session framepos.
