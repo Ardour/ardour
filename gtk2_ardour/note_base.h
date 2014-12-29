@@ -41,7 +41,7 @@ namespace ArdourCanvas {
 	class Text;
 }
 
-/** This manages all the event handling for any MIDI event on the canvas.
+/** Base class for canvas notes (sustained note rectangles and hit diamonds).
  *
  * This is not actually a canvas item itself to avoid the dreaded diamond
  * inheritance pattern, since various types of canvas items (Note (rect), Hit
@@ -51,7 +51,6 @@ namespace ArdourCanvas {
  * Note: Because of this, derived classes need to manually bounce events to
  * on_event, it won't happen automatically.
  */
-
 class NoteBase : public sigc::trackable
 {
   public:
@@ -90,6 +89,8 @@ class NoteBase : public sigc::trackable
 
 	virtual void set_outline_color(uint32_t c) = 0;
 	virtual void set_fill_color(uint32_t c) = 0;
+
+	virtual void set_ignore_events(bool ignore) = 0;
 
 	virtual ArdourCanvas::Coord x0 () const = 0;
 	virtual ArdourCanvas::Coord y0 () const = 0;

@@ -125,3 +125,9 @@ Hit::y1 () const
 	/* bottom vertex */
 	return _polygon->position().y + _polygon->get()[3].y;
 }
+
+void
+Hit::set_ignore_events (bool ignore)
+{
+	_polygon->set_ignore_events (ignore);
+}

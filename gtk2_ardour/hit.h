@@ -54,6 +54,8 @@ public:
 	void set_outline_color (uint32_t);
 	void set_fill_color (uint32_t);
 
+	void set_ignore_events (bool);
+
 	void move_event (double, double);
 
         /* no trimming of percussive hits */

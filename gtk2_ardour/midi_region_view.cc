@@ -1144,15 +1144,7 @@ MidiRegionView::redisplay_model()
 			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 
 				cne->validate ();
-
-				Note* cn;
-				Hit* ch;
-
-				if ((cn = dynamic_cast<Note*>(cne)) != 0) {
-					update_note (cn);
-				} else if ((ch = dynamic_cast<Hit*>(cne)) != 0) {
-					update_hit (ch);
-				}
+				update_note (cne);
 
 				if (visible) {
 					cne->show ();
@@ -1627,12 +1619,24 @@ MidiRegionView::note_in_region_range (const boost::shared_ptr<NoteType> note, bo
 	return !outside;
 }
 
+void
+MidiRegionView::update_note (NoteBase* note, bool update_ghost_regions)
+{
+	Note* sus = NULL;
+	Hit*  hit = NULL;
+	if ((sus = dynamic_cast<Note*>(note))) {
+		update_sustained(sus, update_ghost_regions);
+	} else if ((hit = dynamic_cast<Hit*>(note))) {
+		update_hit(hit, update_ghost_regions);
+	}
+}
+
 /** Update a canvas note's size from its model note.
  *  @param ev Canvas note to update.
  *  @param update_ghost_regions true to update the note in any ghost regions that we have, otherwise false.
  */
 void
-MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
+MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 	const double x = trackview.editor().sample_to_pixel (source_beats_to_region_frames (note->time()));
@@ -1689,7 +1693,7 @@ MidiRegionView::update_note (Note* ev, bool update_ghost_regions)
 }
 
 void
-MidiRegionView::update_hit (Hit* ev)
+MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 {
 	boost::shared_ptr<NoteType> note = ev->note();
 
@@ -1700,6 +1704,19 @@ MidiRegionView::update_hit (Hit* ev)
 
 	ev->set_position (ArdourCanvas::Duple (x, y));
 	ev->set_height (diamond_size);
+
+	// Update color in case velocity has changed
+	ev->set_fill_color(ev->base_color());
+	ev->set_outline_color(ev->calculate_outline(ev->base_color(), ev->selected()));
+
+	if (update_ghost_regions) {
+		for (std::vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
+			MidiGhostRegion* gr = dynamic_cast<MidiGhostRegion*> (*i);
+			if (gr) {
+				gr->update_note (ev);
+			}
+		}
+	}
 }
 
 /** Add a MIDI note to the view (with length).
@@ -3555,7 +3572,11 @@ MidiRegionView::create_ghost_note (double x, double y)
 	remove_ghost_note ();
 
 	boost::shared_ptr<NoteType> g (new NoteType);
-	_ghost_note = new Note (*this, _note_group, g);
+	if (midi_view()->note_mode() == Sustained) {
+		_ghost_note = new Note (*this, _note_group, g);
+	} else {
+		_ghost_note = new Hit (*this, _note_group, 10, g);
+	}
 	_ghost_note->set_ignore_events (true);
 	_ghost_note->set_outline_color (0x000000aa);
 	update_ghost_note (x, y);

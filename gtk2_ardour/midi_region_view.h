@@ -410,7 +410,7 @@ private:
 	Note**                               _active_notes;
 	ArdourCanvas::Container*             _note_group;
 	ARDOUR::MidiModel::NoteDiffCommand*  _note_diff_command;
-	Note*                                _ghost_note;
+	NoteBase*                            _ghost_note;
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
 	ArdourCanvas::Rectangle*             _step_edit_cursor;
@@ -450,8 +450,10 @@ private:
 	NoteBase* find_canvas_note (boost::shared_ptr<NoteType>);
 	Events::iterator _optimization_iterator;
 
-	void update_note (Note *, bool update_ghost_regions = true);
-        void update_hit (Hit *);
+	void update_note (NoteBase*, bool update_ghost_regions = true);
+	void update_sustained (Note *, bool update_ghost_regions = true);
+	void update_hit (Hit *, bool update_ghost_regions = true);
+
 	void create_ghost_note (double, double);
 	void update_ghost_note (double, double);
 
