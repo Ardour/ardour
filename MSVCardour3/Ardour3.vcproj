@@ -1168,6 +1168,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\transform_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\transpose_dialog.cc"
 				>
 			</File>
@@ -2171,6 +2175,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\transcode_video_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\transform_dialog.h"
 				>
 			</File>
 			<File
