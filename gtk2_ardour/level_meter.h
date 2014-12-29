@@ -110,7 +110,10 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr
 	float                  max_peak;
 	ARDOUR::MeterType      meter_type;
 	ARDOUR::MeterType      visible_meter_type;
-
+        ARDOUR::ChanCount      input_configuration;
+        ARDOUR::ChanCount      output_configuration;
+        bool                   io_configuration_changed;
+        
 	PBD::ScopedConnection _configuration_connection;
 	PBD::ScopedConnection _meter_type_connection;
 	PBD::ScopedConnection _parameter_connection;
@@ -123,8 +126,6 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr
 	void configuration_changed (ARDOUR::ChanCount in, ARDOUR::ChanCount out);
 	void meter_type_changed (ARDOUR::MeterType);
 
-	void on_theme_changed ();
-	bool style_changed;
 	bool color_changed;
 	void color_handler ();
 };

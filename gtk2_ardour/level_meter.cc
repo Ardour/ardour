@@ -50,19 +50,15 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, regular_meter_width (6)
 	, meter_length (0)
 	, thin_meter_width(2)
+        , max_peak (minus_infinity())
+        , meter_type (MeterPeak)
+        , io_configuration_changed (false)
+        , color_changed (false)
 {
 	set_session (s);
-	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
-	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeterBase::on_theme_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
-	max_peak = minus_infinity();
-	meter_type = MeterPeak;
-}
 
-void
-LevelMeterBase::on_theme_changed()
-{
-	style_changed = true;
+	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
+	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
 }
 
 LevelMeterBase::~LevelMeterBase ()
@@ -70,6 +66,7 @@ LevelMeterBase::~LevelMeterBase ()
 	_configuration_connection.disconnect();
 	_meter_type_connection.disconnect();
 	_parameter_connection.disconnect();
+
 	for (vector<MeterInfo>::iterator i = meters.begin(); i != meters.end(); i++) {
 		delete (*i).meter;
 	}
@@ -80,7 +77,9 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 {
 	_configuration_connection.disconnect();
 	_meter_type_connection.disconnect();
-
+        input_configuration.reset ();
+        output_configuration.reset ();
+                
 	_meter = meter;
 	color_changed = true;
 
@@ -209,10 +208,21 @@ LevelMeterBase::parameter_changed (string p)
 }
 
 void
-LevelMeterBase::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
+LevelMeterBase::configuration_changed (ChanCount in, ChanCount out)
 {
-	color_changed = true;
-	_setup_meters ();
+        if (in != input_configuration) {
+                cerr << this << " INPUT CONFIGURATION CHANGED from " << input_configuration << " => " << in << endl;
+                input_configuration = in;
+                io_configuration_changed = true;
+        }
+        if (out != output_configuration) {
+                cerr << this << " OUTPUT CONFIGURATION CHANGED from " << output_configuration << " => " << out << endl;
+                output_configuration = out;
+                io_configuration_changed = true;
+        }
+        if (io_configuration_changed) {
+                _setup_meters ();
+        }
 }
 
 void
@@ -238,8 +248,6 @@ LevelMeterBase::hide_all_meters ()
 void
 LevelMeterBase::_setup_meters ()
 {
-	hide_all_meters ();
-
  	if (!_meter) {
  		return; /* do it later or never */
  	}
@@ -263,19 +271,22 @@ LevelMeterBase::_setup_meters ()
 		meters.push_back (MeterInfo());
 	}
 
-	//cerr << "LevelMeterBase::_setup_meters() called color_changed = " << color_changed << " colors: " << endl;//DEBUG
-
 	for (int32_t n = nmeters-1; nmeters && n >= 0 ; --n) {
 		uint32_t c[10];
 		uint32_t b[4];
 		float stp[4];
 		int styleflags = Config->get_meter_style_led() ? 3 : 1;
+
 		b[0] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundBot();
 		b[1] = ARDOUR_UI::config()->get_canvasvar_MeterBackgroundTop();
 		b[2] = ARDOUR_UI::config()->get_canvasvar_MeterHighlightBackgroundBot(); // red highlight gradient Bot
 		b[3] = ARDOUR_UI::config()->get_canvasvar_MeterHighlightBackgroundTop(); // red highlight gradient Top
+
 		if (n < nmidi) {
-			c[0] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor0();
+
+                        /* MIDI meter colors */
+
+                        c[0] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor0();
 			c[1] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor1();
 			c[2] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor2();
 			c[3] = ARDOUR_UI::config()->get_canvasvar_MidiMeterColor3();
@@ -290,7 +301,11 @@ LevelMeterBase::_setup_meters ()
 			stp[2] = 115.0 * 100.0 / 128.0;
 			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			c[0] = ARDOUR_UI::config()->get_canvasvar_MeterColor0();
+
+                        /* Audio meter colors */
+
+
+                        c[0] = ARDOUR_UI::config()->get_canvasvar_MeterColor0();
 			c[1] = ARDOUR_UI::config()->get_canvasvar_MeterColor1();
 			c[2] = ARDOUR_UI::config()->get_canvasvar_MeterColor2();
 			c[3] = ARDOUR_UI::config()->get_canvasvar_MeterColor3();
@@ -395,10 +410,22 @@ LevelMeterBase::_setup_meters ()
 				}
 			}
 		}
-		if (meters[n].width != width || meters[n].length != meter_length || color_changed || meter_type != visible_meter_type) {
+
+		if (meters[n].width != width || meters[n].length != meter_length || io_configuration_changed || color_changed || meter_type != visible_meter_type) {
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
-			meters[n].packed = false;
+
+                        /* Need a new meter because some property (width, length, IO configuration, color, meter type) has been 
+                           changed. Unpack the old one and delete it
+                        */
+
+                        if (meters[n].meter && meters[n].meter->get_parent()) {
+                                meters[n].meter->get_parent()->remove (*meters[n].meter);
+                                meters[n].packed = false;
+                        }
 			delete meters[n].meter;
+
+                        /* Create a new one */
+                        
 			meters[n].meter = new FastMeter ((uint32_t) floor (Config->get_meter_hold()), width, _meter_orientation, meter_length,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
@@ -413,14 +440,14 @@ LevelMeterBase::_setup_meters ()
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press));
 			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release));
-		}
-
-		//pack_end (*meters[n].meter, false, false);
-		mtr_pack (*meters[n].meter);
-		meters[n].meter->show_all ();
-		meters[n].packed = true;
+                        
+                        mtr_pack (*meters[n].meter);
+                        meters[n].meter->show_all ();
+                        meters[n].packed = true;
+                }
 	}
-	//show();
+
+        io_configuration_changed = false;
 	color_changed = false;
 	visible_meter_type = meter_type;
 }
@@ -469,6 +496,7 @@ void LevelMeterBase::hide_meters ()
 void
 LevelMeterBase::color_handler ()
 {
+        cerr << this << " colors changes color\n";
 	color_changed = true;
 	_setup_meters ();
 }
@@ -488,6 +516,9 @@ LevelMeterHBox::setup_meters (int width /* =3 */, int thin /* = 2 */)
 	Gtk::Requisition sz;
 	size_request (sz);
 	meter_length = sz.height;
+        if (meter_length > 2) {
+                meter_length -= 2;
+        }
 	regular_meter_width = width;
 	thin_meter_width = thin;
 	_setup_meters ();
@@ -517,7 +548,7 @@ LevelMeterVBox::setup_meters (int width /* =3 */, int thin /* = 2 */)
 {
 	Gtk::Requisition sz;
 	size_request (sz);
-	meter_length = sz.width;
+	meter_length = sz.width - 2;
 	regular_meter_width = width;
 	thin_meter_width = thin;
 	_setup_meters ();
