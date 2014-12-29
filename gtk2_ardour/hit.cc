@@ -102,26 +102,26 @@ Coord
 Hit::x0 () const
 {
 	/* left vertex */
-	return _polygon->get()[0].x;
+	return _polygon->position().x + _polygon->get()[0].x;
 }
 
 Coord
 Hit::x1 () const
 {
 	/* right vertex */
-	return _polygon->get()[2].x;
+	return _polygon->position().x + _polygon->get()[2].x;
 }
 
 Coord
 Hit::y0 () const
 {
 	/* top vertex */
-	return _polygon->get()[1].y;
+	return _polygon->position().y + _polygon->get()[1].y;
 }
 
 Coord
 Hit::y1 () const
 {
 	/* bottom vertex */
-	return _polygon->get()[3].y;
+	return _polygon->position().y + _polygon->get()[3].y;
 }
