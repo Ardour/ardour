@@ -35,17 +35,20 @@ public:
 	Hit (MidiRegionView&                   region,
 	     ArdourCanvas::Item*               parent,
 	     double                            size,
-	     const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>(),
-	     bool with_events = true);
-       ~Hit();
+	     const boost::shared_ptr<NoteType> note        = boost::shared_ptr<NoteType>(),
+	     bool                              with_events = true);
 
-        void show ();
+	~Hit();
+
+	void show ();
 	void hide ();
 
 	ArdourCanvas::Coord x0 () const;
 	ArdourCanvas::Coord y0 () const;
 	ArdourCanvas::Coord x1 () const;
 	ArdourCanvas::Coord y1 () const;
+
+	ArdourCanvas::Duple position ();
 
 	void set_position (ArdourCanvas::Duple);
 
@@ -58,8 +61,10 @@ public:
 
 	void move_event (double, double);
 
-        /* no trimming of percussive hits */
-        bool big_enough_to_trim() const { return false; }
+	/* no trimming of percussive hits */
+	bool big_enough_to_trim() const { return false; }
+
+	static ArdourCanvas::Points points(ArdourCanvas::Distance height);
 
 private:
 	ArdourCanvas::Polygon* _polygon;

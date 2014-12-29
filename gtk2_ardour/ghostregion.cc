@@ -19,6 +19,7 @@
 
 #include "evoral/Note.hpp"
 #include "canvas/container.h"
+#include "canvas/polygon.h"
 #include "canvas/rectangle.h"
 #include "canvas/wave_view.h"
 #include "canvas/debug.h"
@@ -30,6 +31,7 @@
 #include "midi_time_axis.h"
 #include "rgb_macros.h"
 #include "note.h"
+#include "hit.h"
 
 using namespace std;
 using namespace Editing;
@@ -193,14 +195,24 @@ MidiGhostRegion::~MidiGhostRegion()
 MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
 	: event (e)
 {
-	rect = new ArdourCanvas::Rectangle (g, ArdourCanvas::Rect (e->x0(), e->y0(), e->x1(), e->y1()));
-	CANVAS_DEBUG_NAME (rect, "ghost note rect");
+	Hit* hit = NULL;
+	if (dynamic_cast<Note*>(e)) {
+		item = new ArdourCanvas::Rectangle(
+			g, ArdourCanvas::Rect(e->x0(), e->y0(), e->x1(), e->y1()));
+	} else if ((hit = dynamic_cast<Hit*>(e))) {
+		ArdourCanvas::Polygon* poly = new ArdourCanvas::Polygon(g);
+		poly->set(Hit::points(e->y1() - e->y0()));
+		poly->set_position(hit->position());
+		item = poly;
+	}
+
+	CANVAS_DEBUG_NAME (item, "ghost note item");
 }
 
 MidiGhostRegion::GhostEvent::~GhostEvent ()
 {
 	/* event is not ours to delete */
-	delete rect;
+	delete item;
 }
 
 void
@@ -233,9 +245,28 @@ MidiGhostRegion::set_colors()
 	GhostRegion::set_colors();
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
-		(*it)->rect->set_fill_color (ARDOUR_UI::config()->color_mod((*it)->event->base_color(), "ghost track midi fill"));
-		(*it)->rect->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
+		(*it)->item->set_fill_color (ARDOUR_UI::config()->color_mod((*it)->event->base_color(), "ghost track midi fill"));
+		(*it)->item->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
 	}
+}
+
+static double
+note_height(TimeAxisView& trackview, MidiStreamView* mv)
+{
+	const double tv_height  = trackview.current_height();
+	const double note_range = mv->contents_note_range();
+
+	return std::max(1.0, floor(tv_height / note_range - 1.0));
+}
+
+static double
+note_y(TimeAxisView& trackview, MidiStreamView* mv, uint8_t note_num)
+{
+	const double tv_height  = trackview.current_height();
+	const double note_range = mv->contents_note_range();
+	const double s          = tv_height / note_range;
+
+	return tv_height - (note_num + 1 - mv->lowest_note()) * s;
 }
 
 void
@@ -247,19 +278,27 @@ MidiGhostRegion::update_range ()
 		return;
 	}
 
-	double const h = std::max(1., floor (trackview.current_height() / double (mv->contents_note_range ())) -1);
-	double const s = trackview.current_height() / double (mv->contents_note_range ());
+	double const h = note_height(trackview, mv);
 
 	for (EventList::iterator it = events.begin(); it != events.end(); ++it) {
 		uint8_t const note_num = (*it)->event->note()->note();
 
 		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
-			(*it)->rect->hide();
+			(*it)->item->hide();
 		} else {
-			(*it)->rect->show();
-			double const y = trackview.current_height() - (note_num + 1 - mv->lowest_note()) * s;
-			(*it)->rect->set_y0 (y);
-			(*it)->rect->set_y1 (y + h);
+			(*it)->item->show();
+			double const y = note_y(trackview, mv, note_num);
+			ArdourCanvas::Rectangle* rect = NULL;
+			ArdourCanvas::Polygon*   poly = NULL;
+			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>((*it)->item))) {
+				rect->set_y0 (y);
+				rect->set_y1 (y + h);
+			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>((*it)->item))) {
+				Duple position = poly->position();
+				position.y = y;
+				poly->set_position(position);
+				poly->set(Hit::points(h));
+			}
 		}
 	}
 }
@@ -270,20 +309,30 @@ MidiGhostRegion::add_note (NoteBase* n)
 	GhostEvent* event = new GhostEvent (n, group);
 	events.push_back (event);
 
-	event->rect->set_fill_color (ARDOUR_UI::config()->color_mod(n->base_color(), "ghost track midi fill"));
-	event->rect->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
+	event->item->set_fill_color (ARDOUR_UI::config()->color_mod(n->base_color(), "ghost track midi fill"));
+	event->item->set_outline_color (ARDOUR_UI::config()->color ("ghost track midi outline"));
 
 	MidiStreamView* mv = midi_view();
 
 	if (mv) {
-		const uint8_t note_num = n->note()->note();
+		uint8_t const note_num = n->note()->note();
+		double const  h        = note_height(trackview, mv);
+		double const  y        = note_y(trackview, mv, note_num);
 
 		if (note_num < mv->lowest_note() || note_num > mv->highest_note()) {
-			event->rect->hide();
+			event->item->hide();
 		} else {
-			const double y = mv->note_to_y(note_num);
-			event->rect->set_y0 (y);
-			event->rect->set_y1 (y + std::max(1., floor(mv->note_height()) -1));
+			ArdourCanvas::Rectangle* rect = NULL;
+			ArdourCanvas::Polygon*   poly = NULL;
+			if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(event->item))) {
+				rect->set_y0 (y);
+				rect->set_y1 (y + h);
+			} else if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(event->item))) {
+				Duple position = poly->position();
+				position.y = y;
+				poly->set_position(position);
+				poly->set(Hit::points(h));
+			}
 		}
 	}
 }
@@ -310,10 +359,25 @@ MidiGhostRegion::update_note (NoteBase* parent)
 		return;
 	}
 
-	double const x1 = parent->x0 ();
-	double const x2 = parent->x1 ();
-	ev->rect->set_x0 (x1);
-	ev->rect->set_x1 (x2);
+	Note*                    note = NULL;
+	ArdourCanvas::Rectangle* rect = NULL;
+	Hit*                     hit  = NULL;
+	ArdourCanvas::Polygon*   poly = NULL;
+	if ((note = dynamic_cast<Note*>(parent))) {
+		if ((rect = dynamic_cast<ArdourCanvas::Rectangle*>(ev->item))) {
+			double const x1 = parent->x0 ();
+			double const x2 = parent->x1 ();
+			rect->set_x0 (x1);
+			rect->set_x1 (x2);
+		}
+	} else if ((hit = dynamic_cast<Hit*>(parent))) {
+		if ((poly = dynamic_cast<ArdourCanvas::Polygon*>(ev->item))) {
+			ArdourCanvas::Duple ppos = hit->position();
+			ArdourCanvas::Duple gpos = poly->position();
+			gpos.x = ppos.x;
+			poly->set_position(gpos);
+		}
+	}
 }
 
 void

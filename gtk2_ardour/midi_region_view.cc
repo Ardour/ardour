@@ -1456,8 +1456,6 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 GhostRegion*
 MidiRegionView::add_ghost (TimeAxisView& tv)
 {
-	Note* note;
-
 	double unit_position = _region->position () / samples_per_pixel;
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);
 	MidiGhostRegion* ghost;
@@ -1472,9 +1470,7 @@ MidiRegionView::add_ghost (TimeAxisView& tv)
 	}
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		if ((note = dynamic_cast<Note*>(*i)) != 0) {
-			ghost->add_note(note);
-		}
+		ghost->add_note(*i);
 	}
 
 	ghost->set_height ();
@@ -1738,14 +1734,6 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 
 		event = ev_rect;
 
-		MidiGhostRegion* gr;
-
-		for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
-			if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
-				gr->add_note(ev_rect);
-			}
-		}
-
 	} else if (midi_view()->note_mode() == Percussive) {
 
 		const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
@@ -1761,6 +1749,14 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 	}
 
 	if (event) {
+		MidiGhostRegion* gr;
+
+		for (std::vector<GhostRegion*>::iterator g = ghosts.begin(); g != ghosts.end(); ++g) {
+			if ((gr = dynamic_cast<MidiGhostRegion*>(*g)) != 0) {
+				gr->add_note(event);
+			}
+		}
+
 		if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
 			note_selected(event, true);
 		}

@@ -77,7 +77,7 @@ public:
 	    virtual ~GhostEvent ();
 	    
 	    NoteBase* event;
-	    ArdourCanvas::Rectangle* rect;
+	    ArdourCanvas::Item* item;
 	};
 
 	MidiGhostRegion(TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos);

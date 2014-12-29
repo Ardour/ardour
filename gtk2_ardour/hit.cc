@@ -76,8 +76,8 @@ Hit::hide ()
 	_polygon->hide ();
 }
 
-void
-Hit::set_height (Distance height)
+Points
+Hit::points(Distance height)
 {
 	/* draw a diamond */
 
@@ -89,7 +89,19 @@ Hit::set_height (Distance height)
 	p.push_back (Duple (+half_height, 0)); // right, middle
 	p.push_back (Duple (0, +half_height)); // bottom
 
-	_polygon->set (p);
+	return p;
+}
+
+void
+Hit::set_height (Distance height)
+{
+	_polygon->set (points(height));
+}
+
+Duple
+Hit::position ()
+{
+	return _polygon->position ();
 }
 
 void
