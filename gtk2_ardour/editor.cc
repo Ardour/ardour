@@ -316,6 +316,7 @@ Editor::Editor ()
 
 	, _region_selection_change_updates_region_list (true)
 	, _following_mixer_bridge_view_selection (false)
+    , _following_meter_bridge_selection (false)
 	, _mixer_bridge_view ("mixer_bridge_view.xml", "mixer_strip.xml")
 	, _meter_bridge_view ("meter_bridge_view.xml", "meter_strip.xml")
 	, _control_point_toggled_on_press (false)
