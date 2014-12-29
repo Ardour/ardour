@@ -40,6 +40,7 @@ class DummyAudioBackend;
 namespace DummyMidiData {
 	typedef struct _MIDISequence {
 		float   beat_time;
+		uint8_t size;
 		uint8_t event[3];
 	} MIDISequence;
 };

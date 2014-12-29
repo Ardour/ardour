@@ -1783,7 +1783,9 @@ void DummyMidiPort::midi_generate (const pframes_t n_samples)
 			break;
 		}
 		_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (
-						ev_beat_time, _midi_seq_dat[_midi_seq_pos].event, 3
+						ev_beat_time,
+						_midi_seq_dat[_midi_seq_pos].event,
+						_midi_seq_dat[_midi_seq_pos].size
 						)));
 		++_midi_seq_pos;
 
