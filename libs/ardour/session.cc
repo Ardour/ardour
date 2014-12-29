@@ -2325,18 +2325,25 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
         uint32_t input_n = 0;
         uint32_t output_n = 0;
         RouteList::iterator rIter = existing_routes.begin();
+		const AutoConnectOption current_input_auto_connection (Config->get_input_auto_connect());
+		const AutoConnectOption current_output_auto_connection (Config->get_output_auto_connect());
         for (; rIter != existing_routes.end(); ++rIter) {
-            
             if (*rIter == _master_out || *rIter == _monitor_out ) {
                 continue;
             }
+
+			if (current_output_auto_connection == AutoConnectPhysical) {
+	            (*rIter)->amp()->deactivate();
+			} else if (current_output_auto_connection == AutoConnectMaster) {
+				(*rIter)->amp()->activate();
+			}
             
             if (reconnectIputs) {
                 (*rIter)->input()->disconnect (this); //GZ: check this; could be heavy
                 
                 for (uint32_t route_input_n = 0; route_input_n < (*rIter)->n_inputs().get(DataType::AUDIO); ++route_input_n) {
                     
-                    if (Config->get_input_auto_connect() & AutoConnectPhysical) {
+                    if (current_input_auto_connection & AutoConnectPhysical) {
                         
                         if ( input_n == physinputs.size() ) {
                             break;
@@ -2358,7 +2365,7 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
             if (reconnectOutputs) {
                 
                 //normalize route ouptuts: reduce the amount outputs to be equal to the amount of inputs
-                if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+                if (current_output_auto_connection & AutoConnectPhysical) {
                 
                     //GZ: check this; could be heavy
                     (*rIter)->output()->disconnect (this);
@@ -2367,7 +2374,7 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                     //GZ: check this; could be heavy
                     (*rIter)->output()->ensure_io(ChanCount(DataType::AUDIO, route_inputs_count), false, this );
                
-                } else if (Config->get_output_auto_connect() & AutoConnectMaster){
+                } else if (current_output_auto_connection & AutoConnectMaster){
                     
                     if (!reconnect_master) {
                         continue;
@@ -2386,7 +2393,7 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                 }
                 
                 for (uint32_t route_output_n = 0; route_output_n < (*rIter)->n_outputs().get(DataType::AUDIO); ++route_output_n) {
-                    if ((Config->get_output_auto_connect() & AutoConnectPhysical) ) {
+                    if (current_output_auto_connection & AutoConnectPhysical) {
                         
                         if ( output_n == physoutputs.size() ) {
                             break;
@@ -2402,7 +2409,7 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
                         (*rIter)->output()->connect ((*rIter)->output()->ports().port(DataType::AUDIO, route_output_n), port, this);
                         ++output_n;
                         
-                    } else if (Config->get_output_auto_connect() & AutoConnectMaster) {
+                    } else if (current_output_auto_connection & AutoConnectMaster) {
                   
                         if ( route_output_n == _master_out->n_inputs().get(DataType::AUDIO) ) {
                             break;
