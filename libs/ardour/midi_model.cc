@@ -179,6 +179,8 @@ MidiModel::NoteDiffCommand::get_value (const NotePtr note, Property prop)
 	case Length:
 		return Variant(note->length());
 	}
+
+	return Variant ();
 }
 
 Variant::Type
@@ -193,6 +195,8 @@ MidiModel::NoteDiffCommand::value_type(Property prop)
 	case Length:
 		return Variant::BEATS;
 	}
+
+	return Variant::NOTHING;
 }
 
 void

@@ -62,6 +62,8 @@ Transform::Value::eval(const Context& ctx) const
 	case RANDOM:
 		return Variant(g_random_double());
 	}
+
+	return Variant ();
 }
 
 void
