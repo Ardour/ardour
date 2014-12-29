@@ -1754,20 +1754,7 @@ struct MidiEventSorter {
 void DummyMidiPort::setup_generator (int seq_id, const float sr)
 {
 	DummyPort::setup_random_number_generator();
-	switch (seq_id) {
-		case 1:
-			_midi_seq_dat = DummyMidiData::s1;
-			break;
-		case 2:
-			_midi_seq_dat = DummyMidiData::s2;
-			break;
-		case 3:
-			_midi_seq_dat = DummyMidiData::s3;
-			break;
-		default:
-			_midi_seq_dat = DummyMidiData::s0;
-			break;
-	}
+	_midi_seq_dat = DummyMidiData::sequences[seq_id % NUM_MIDI_EVENT_GENERATORS];
 	_midi_seq_spb = sr * .5f; // 120 BPM, beat_time 1.0 per beat.
 	_midi_seq_pos = 0;
 	_midi_seq_time = 0;

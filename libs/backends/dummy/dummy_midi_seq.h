@@ -23,9 +23,7 @@
 
 namespace ARDOUR { namespace DummyMidiData {
 
-#define NUM_MIDI_EVENT_GENERATORS 4
-
-const MIDISequence s0[] = { // some arbitrary short sequence
+static const MIDISequence s0[] = { // some arbitrary short sequence
 	{ 0.00, {0x90,  64, 0x7f} },
 	{ 0.50, {0x80,  64, 0x00} },
 	{ 1.00, {0x90,  66, 0x7f} },
@@ -37,7 +35,7 @@ const MIDISequence s0[] = { // some arbitrary short sequence
 	{ 4.00, {0xff, 255, 0xff} }, // sentinel
 };
 
-const MIDISequence s1[] = {  // Cmaj7 - iterate all channels
+static const MIDISequence s1[] = {  // Cmaj7 - iterate all channels
 	{ 0.00, {0x90,  60, 0x7f} },
 	{ 0.25, {0x90,  64, 0x7f} },
 	{ 0.50, {0x90,  67, 0x7f} },
@@ -201,7 +199,7 @@ const MIDISequence s1[] = {  // Cmaj7 - iterate all channels
 	{32.00, {0xff, 255, 0xff} }, // sentinel
 };
 
-const MIDISequence s2[] = { // channel 1, sweep all notes
+static const MIDISequence s2[] = { // channel 1, sweep all notes
 	{ 0.00, {0x90,   0, 0x7f} },
 	{ 0.25, {0x80,   0, 0x00} },
 	{ 0.25, {0x90,   1, 0x7f} },
@@ -461,7 +459,7 @@ const MIDISequence s2[] = { // channel 1, sweep all notes
 	{32.00, {0xff, 255, 0xff} }, // sentinel
 };
 
-const MIDISequence s3[] = { // velocity sweep
+static const MIDISequence s3[] = { // velocity sweep
 	{ 0.000, {0x90, 60, 0x00} },
 	{ 0.125, {0x80, 60, 0x00} },
 	{ 0.125, {0x90, 61, 0x01} },
@@ -721,6 +719,12 @@ const MIDISequence s3[] = { // velocity sweep
 	{16.000, {0xff, 255, 0xff} }, // sentinel
 };
 
+static const MIDISequence *sequences[] = {
+	s0, s1, s2, s3
+};
+
 }} // namespace
+
+#define NUM_MIDI_EVENT_GENERATORS (sizeof (ARDOUR::DummyMidiData::sequences) / sizeof(ARDOUR::DummyMidiData::MIDISequence*))
 
 #endif
