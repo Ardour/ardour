@@ -239,8 +239,6 @@ LevelMeterBase::hide_all_meters ()
 void
 LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 {
-	hide_all_meters ();
-
  	if (!_meter) {
  		return; /* do it later or never */
  	}
@@ -400,8 +398,13 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		}
 		if (meters[n].width != width || meters[n].length != len || color_changed || meter_type != visible_meter_type) {
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
-			meters[n].packed = false;
-			delete meters[n].meter;
+
+			if (meters[n].meter && meters[n].meter->get_parent()) {
+				mtr_remove (*meters[n].meter);
+				meters[n].packed = false;
+				delete meters[n].meter;
+			}
+
 			meters[n].meter = new FastMeter ((uint32_t) floor (ARDOUR_UI::config()->get_meter_hold()), width, _meter_orientation, len,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
@@ -415,14 +418,13 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			meters[n].meter->add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 			meters[n].meter->signal_button_press_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_press), false);
 			meters[n].meter->signal_button_release_event().connect (sigc::mem_fun (*this, &LevelMeterBase::meter_button_release), false);
-		}
 
-		//pack_end (*meters[n].meter, false, false);
-		mtr_pack (*meters[n].meter);
-		meters[n].meter->show_all ();
-		meters[n].packed = true;
+			mtr_pack (*meters[n].meter);
+			meters[n].meter->show_all ();
+			meters[n].packed = true;
+		}
 	}
-	//show();
+
 	color_changed = false;
 	visible_meter_type = meter_type;
 }
