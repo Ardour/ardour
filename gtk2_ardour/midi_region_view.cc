@@ -1113,8 +1113,12 @@ MidiRegionView::get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::No
 void
 MidiRegionView::redisplay_model()
 {
-	// Don't redisplay the model if we're currently recording and displaying that
 	if (_active_notes) {
+		/* Recording, so just update canvas events to reflect changes
+		   in zoom or whatever without touching model. */
+		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+			update_note(*i);
+		}
 		return;
 	}
 
