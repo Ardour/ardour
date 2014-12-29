@@ -1236,6 +1236,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\transform.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\transient_detector.cc"
 				>
 			</File>
@@ -2183,6 +2187,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\track.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\transform.h"
 				>
 			</File>
 			<File
