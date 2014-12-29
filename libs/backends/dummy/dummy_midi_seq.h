@@ -719,8 +719,22 @@ static const MIDISequence s3[] = { // velocity sweep
 	{16.000, 3, {0xff, 255, 0xff} }, // sentinel
 };
 
+static const MIDISequence s4[] = { // channel1, sustain pedal test
+	{ 0.00, 3, {0x90,   64, 0x7f} },
+	{ 0.50, 3, {0x80,   64, 0x00} },
+	{ 1.00, 3, {0xB0, 0x40, 0x7f} }, // CC64, Sustain on
+	{ 1.25, 3, {0x90,   64, 0x7f} },
+	{ 1.75, 3, {0x80,   64, 0x00} },
+	{ 2.25, 3, {0x90,   66, 0x7f} },
+	{ 3.00, 3, {0xB0, 0x40, 0x00} }, // CC64, Sustain off
+	{ 3.25, 3, {0x80,   66, 0x00} },
+	{ 3.25, 3, {0x90,   64, 0x7f} },
+	{ 3.75, 3, {0x80,   64, 0x00} },
+	{ 4.00, 3, {0xff,  255, 0xff} }, // sentinel
+};
+
 static const MIDISequence *sequences[] = {
-	s0, s1, s2, s3
+	s0, s1, s2, s3, s4
 };
 
 }} // namespace
