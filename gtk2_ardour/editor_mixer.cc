@@ -213,17 +213,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	if (!_session) {
 		return;
 	}
-
-	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
-
-	if (act) {
-		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
-		if (!tact || !tact->get_active()) {
-			/* not showing mixer strip presently */
-			return;
-		}
-	}
-
+    
 	if (current_mixer_strip == 0) {
 		create_editor_mixer ();
 	}
@@ -257,10 +247,18 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		}
 	}
 
-	if (route && (current_mixer_strip->route() != route)) {
-		current_mixer_strip->set_route (route);
+    Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
+    
+	if (act) {
+		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
+        
+		if ( tact && tact->get_active() ) { // if inspector is visible
+			if (route && (current_mixer_strip->route() != route)) {
+                current_mixer_strip->set_route (route);
+            }
+		}
 	}
-
+    
 	if (route && !route->is_master ()) {
 		ARDOUR_UI::instance()->update_track_color_dialog (route);
 	} else {
