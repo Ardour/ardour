@@ -635,8 +635,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                                 Location* l = m->location();
                                 if (l && l->is_auto_loop()) {
                                         if (Config->get_loop_is_mode() && !_session->get_play_loop() ) {
-                                                /* play loop is disabled, use drag to create new Loop range */
+                                                /* play loop is disabled, use drag to create new Loop range or toggle loop playback */
                                                 _drags->set (new RangeMarkerBarDrag (this, clock_ruler, RangeMarkerBarDrag::CreateLoopMarker), event);
+                                                return true;
+                                        } else {
+                                                _drags->set (new MarkerDrag (this, item), event);
                                                 return true;
                                         }
                                 }
