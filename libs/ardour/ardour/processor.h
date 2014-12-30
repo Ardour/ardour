@@ -118,8 +118,8 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	ProcessorWindowProxy * window_proxy () const { return _window_proxy; }
 	void set_window_proxy (ProcessorWindowProxy* wp);
 
-        void set_owner (SessionObject*);
-        SessionObject* owner() const;
+	void set_owner (SessionObject*);
+	SessionObject* owner() const;
 
 protected:
 	virtual int set_state_2X (const XMLNode&, int version);
@@ -134,7 +134,7 @@ protected:
 	bool      _pre_fader; ///< true if this processor is currently placed before the Amp, otherwise false
 	void*     _ui_pointer;
 	ProcessorWindowProxy *_window_proxy;
-        SessionObject* _owner;
+	SessionObject* _owner;
 };
 
 } // namespace ARDOUR

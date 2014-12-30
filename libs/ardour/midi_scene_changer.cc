@@ -43,12 +43,12 @@ MIDISceneChanger::MIDISceneChanger (Session& s)
 	, last_delivered_bank (-1)
 	  
 {
-        /* catch any add/remove/clear etc. for all Locations */
+	/* catch any add/remove/clear etc. for all Locations */
 	_session.locations()->changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
 	_session.locations()->added.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
 	_session.locations()->removed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
 
-        /* catch class-based signal that notifies of us changes in the scene change state of any Location */
+	/* catch class-based signal that notifies of us changes in the scene change state of any Location */
 	Location::scene_changed.connect_same_thread (*this, boost::bind (&MIDISceneChanger::locations_changed, this));
 }
 
@@ -83,9 +83,9 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 
 			if (msc) {
 
-                                if (msc->bank() >= 0) {
-                                        have_seen_bank_changes = true;
-                                }
+				if (msc->bank() >= 0) {
+					have_seen_bank_changes = true;
+				}
 			
 				scenes.insert (std::make_pair ((*l)->start(), msc));
 			}
@@ -99,7 +99,7 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_p
 	uint8_t buf[4];
 	size_t cnt;
 
-        MIDIOutputActivity (); /* EMIT SIGNAL */
+	MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		mbuf.push_back (when, cnt, buf);
@@ -130,7 +130,7 @@ MIDISceneChanger::non_rt_deliver (boost::shared_ptr<MIDISceneChange> msc)
 	   possible" (practically speaking, in the next process callback).
 	*/
         
-        MIDIOutputActivity (); /* EMIT SIGNAL */
+	MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		aport->write (buf, cnt, 0);
@@ -260,9 +260,9 @@ void
   MIDISceneChanger::bank_change_input (MIDI::Parser& /*parser*/, unsigned short, int)
 {
 	if (recording()) {
-                have_seen_bank_changes = true;
-        }
-        MIDIInputActivity (); /* EMIT SIGNAL */
+		have_seen_bank_changes = true;
+	}
+	MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void
@@ -273,7 +273,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	last_program_message_time = time;
 
 	if (!recording()) {
-                MIDIInputActivity (); /* EMIT SIGNAL */
+		MIDIInputActivity (); /* EMIT SIGNAL */
 		jump_to (input_port->channel (channel)->bank(), program);
 		return;
 	}
@@ -301,28 +301,28 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		new_mark = true;
 	}
 
-        unsigned short bank;
+	unsigned short bank;
 
-        if (have_seen_bank_changes) {
-                bank = input_port->channel (channel)->bank();
-        } else {
-                bank = -1;
-        }
+	if (have_seen_bank_changes) {
+		bank = input_port->channel (channel)->bank();
+	} else {
+		bank = -1;
+	}
 
 	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
 
-        /* check for identical scene change so we can re-use color, if any */
+	/* check for identical scene change so we can re-use color, if any */
 
-        Locations::LocationList copy (locations->list());
+	Locations::LocationList copy (locations->list());
 
-        for (Locations::LocationList::const_iterator l = copy.begin(); l != copy.end(); ++l) {
-                boost::shared_ptr<MIDISceneChange> sc = boost::dynamic_pointer_cast<MIDISceneChange>((*l)->scene_change());
+	for (Locations::LocationList::const_iterator l = copy.begin(); l != copy.end(); ++l) {
+		boost::shared_ptr<MIDISceneChange> sc = boost::dynamic_pointer_cast<MIDISceneChange>((*l)->scene_change());
 
-                if (sc && (*sc.get()) == *msc) {
-                        msc->set_color (sc->color ());
-                        break;
-                }
-        }
+		if (sc && (*sc.get()) == *msc) {
+			msc->set_color (sc->color ());
+			break;
+		}
+	}
 
 	loc->set_scene_change (boost::shared_ptr<MIDISceneChange> (msc));
 	
@@ -334,7 +334,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		locations->add (loc);
 	}
 
-        MIDIInputActivity (); /* EMIT SIGNAL */
+	MIDIInputActivity (); /* EMIT SIGNAL */
 }
 
 void

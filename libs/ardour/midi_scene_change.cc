@@ -141,10 +141,10 @@ MIDISceneChange::set_state (const XMLNode& node, int /* version-ignored */)
 	_channel = atoi (prop->value());
 
 	if ((prop = node.property (X_("color"))) != 0) {
-                _color = atoi (prop->value());
-        } else {
-                _color = out_of_bound_color;
-        }
+		_color = atoi (prop->value());
+	} else {
+		_color = out_of_bound_color;
+	}
 
 	return 0;
 }
@@ -152,7 +152,7 @@ MIDISceneChange::set_state (const XMLNode& node, int /* version-ignored */)
 bool
 MIDISceneChange::operator==(const MIDISceneChange& other) const
 {
-        return _program == other._program &&
-                _bank == other._bank &&
-                _channel == other._channel;
+	return _program == other._program &&
+		_bank == other._bank &&
+		_channel == other._channel;
 }

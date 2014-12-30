@@ -180,7 +180,7 @@ MidiModel::NoteDiffCommand::get_value (const NotePtr note, Property prop)
 		return Variant(note->length());
 	}
 
-	return Variant ();
+	return Variant();
 }
 
 Variant::Type

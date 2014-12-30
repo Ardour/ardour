@@ -66,7 +66,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	float capture_buffer_load() const;
 
 	void get_playback (MidiBuffer& dst, framecnt_t);
-        void flush_playback (framepos_t, framepos_t);
+	void flush_playback (framepos_t, framepos_t);
 
 	void set_record_enabled (bool yn);
 	
@@ -127,9 +127,11 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	friend class Auditioner;
 	int seek (framepos_t which_sample, bool complete_refill = false);
 
-        int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
-        frameoffset_t calculate_playback_distance (pframes_t nframes);
-	bool commit  (framecnt_t nframes);
+	int process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
+
+	frameoffset_t calculate_playback_distance (pframes_t nframes);
+	bool commit (framecnt_t nframes);
+
 	static framecnt_t midi_readahead;
 
   private:

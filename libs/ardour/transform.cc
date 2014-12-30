@@ -63,7 +63,7 @@ Transform::Value::eval(const Context& ctx) const
 		return Variant(g_random_double());
 	}
 
-	return Variant ();
+	return Variant();
 }
 
 void

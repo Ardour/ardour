@@ -166,25 +166,25 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	std::vector<PresetRecord> get_presets ();
 
-        /** @return true if this plugin will respond to MIDI program
+	/** @return true if this plugin will respond to MIDI program
 	 * change messages by changing presets.
 	 *
 	 * This is hard to return a correct value for because most plugin APIs
 	 * do not specify plugin behaviour. However, if you want to force
-         * the display of plugin built-in preset names rather than MIDI program
-         * numbers, return true. If you want a generic description, return
+	 * the display of plugin built-in preset names rather than MIDI program
+	 * numbers, return true. If you want a generic description, return
 	 * false.
-	*/
-        virtual bool presets_are_MIDI_programs() const { return false; }
+	 */
+	virtual bool presets_are_MIDI_programs() const { return false; }
 
-        /** @return true if this plugin is General MIDI compliant, false
+	/** @return true if this plugin is General MIDI compliant, false
 	 * otherwise.
 	 *
 	 * It is important to note that it is is almost impossible for a host
 	 * (e.g. Ardour) to determine this for just about any plugin API
 	 * known as of June 2012
 	 */
-        virtual bool current_preset_uses_general_midi() const { return false; }
+	virtual bool current_preset_uses_general_midi() const { return false; }
 
 	/** @return Last preset to be requested; the settings may have
 	 * been changed since; find out with parameter_changed_since_last_preset.
@@ -266,8 +266,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	/** Emitted when a property is changed in the plugin. */
 	PBD::Signal2<void, uint32_t, Variant> PropertyChanged;
 
-        PBD::Signal1<void,uint32_t> StartTouch;
-        PBD::Signal1<void,uint32_t> EndTouch;
+	PBD::Signal1<void,uint32_t> StartTouch;
+	PBD::Signal1<void,uint32_t> EndTouch;
 
 protected:
 

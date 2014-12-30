@@ -46,7 +46,7 @@ class LIBARDOUR_API MidiPort : public Port {
 	void transport_stopped ();
 	void realtime_locate ();
 	void reset ();
-        void require_resolve ();
+	void require_resolve ();
 
 	bool input_active() const { return _input_active; }
 	void set_input_active (bool yn);
@@ -55,20 +55,20 @@ class LIBARDOUR_API MidiPort : public Port {
 
 	MidiBuffer& get_midi_buffer (pframes_t nframes);
 
-        void set_always_parse (bool yn);
-        MIDI::Parser& self_parser() { return _self_parser; }
+	void set_always_parse (bool yn);
+	MIDI::Parser& self_parser() { return _self_parser; }
 
   protected:
-        friend class PortManager;
+	friend class PortManager;
 
-        MidiPort (const std::string& name, PortFlags);
+	MidiPort (const std::string& name, PortFlags);
 
   private:
 	MidiBuffer* _buffer;
 	bool        _has_been_mixed_down;
 	bool        _resolve_required;
 	bool        _input_active;
-        bool        _always_parse;
+	bool        _always_parse;
 
     /* Naming this is tricky. AsyncMIDIPort inherits (for now, aug 2013) from
      * both MIDI::Port, which has _parser, and this (ARDOUR::MidiPort). We
@@ -81,7 +81,7 @@ class LIBARDOUR_API MidiPort : public Port {
      * into this object, somehow.
      */
 
-        MIDI::Parser _self_parser;
+	MIDI::Parser _self_parser;
 
 	void resolve_notes (void* buffer, framepos_t when);
 };

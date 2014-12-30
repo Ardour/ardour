@@ -53,7 +53,7 @@ class MIDISceneChange : public SceneChange
 	XMLNode& get_state();
 	int set_state (const XMLNode&, int version);
 
-        bool operator==(const MIDISceneChange& other) const;
+	bool operator==(const MIDISceneChange& other) const;
 
   private:
 	int _bank;

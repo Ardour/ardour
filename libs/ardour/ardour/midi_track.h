@@ -115,30 +115,30 @@ public:
 	 *     If mode is ForceChannel, mask is simply a channel number which all events will
 	 *     be forced to while reading.
 	 */
-        void set_capture_channel_mode (ChannelMode mode, uint16_t mask);
-        void set_playback_channel_mode (ChannelMode mode, uint16_t mask);
-        void set_playback_channel_mask (uint16_t mask);
-        void set_capture_channel_mask (uint16_t mask);
+	void set_capture_channel_mode (ChannelMode mode, uint16_t mask);
+	void set_playback_channel_mode (ChannelMode mode, uint16_t mask);
+	void set_playback_channel_mask (uint16_t mask);
+	void set_capture_channel_mask (uint16_t mask);
 
 	ChannelMode get_playback_channel_mode() const {
 		return static_cast<ChannelMode>((g_atomic_int_get(&_playback_channel_mask) & 0xffff0000) >> 16);
 	}
-        uint16_t get_playback_channel_mask() const {
+	uint16_t get_playback_channel_mask() const {
 		return g_atomic_int_get(&_playback_channel_mask) & 0x0000ffff;
 	}
 	ChannelMode get_capture_channel_mode() const {
 		return static_cast<ChannelMode>((g_atomic_int_get(&_capture_channel_mask) & 0xffff0000) >> 16);
 	}
-        uint16_t get_capture_channel_mask() const {
+	uint16_t get_capture_channel_mask() const {
 		return g_atomic_int_get(&_capture_channel_mask) & 0x0000ffff;
 	}
 
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 
-        PBD::Signal0<void> PlaybackChannelMaskChanged;
-        PBD::Signal0<void> PlaybackChannelModeChanged;
-        PBD::Signal0<void> CaptureChannelMaskChanged;
-        PBD::Signal0<void> CaptureChannelModeChanged;
+	PBD::Signal0<void> PlaybackChannelMaskChanged;
+	PBD::Signal0<void> PlaybackChannelModeChanged;
+	PBD::Signal0<void> CaptureChannelMaskChanged;
+	PBD::Signal0<void> CaptureChannelModeChanged;
     
 	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
@@ -161,8 +161,8 @@ private:
 	NoteMode                   _note_mode;
 	bool                       _step_editing;
 	bool                       _input_active;
-        uint32_t                   _playback_channel_mask; // 16 bits mode, 16 bits mask
-        uint32_t                   _capture_channel_mask; // 16 bits mode, 16 bits mask
+	uint32_t                   _playback_channel_mask; // 16 bits mode, 16 bits mask
+	uint32_t                   _capture_channel_mask; // 16 bits mode, 16 bits mask
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
 	
@@ -183,7 +183,7 @@ private:
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);
 
-        void filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask); 
+	void filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask); 
 
 /* if mode is ForceChannel, force mask to the lowest set channel or 1 if no
  * channels are set.
@@ -194,7 +194,7 @@ private:
 		mask = force_mask (mode, mask);
 		g_atomic_int_set(&_playback_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
 	}
-        void _set_playback_channel_mask (uint16_t mask) {
+	void _set_playback_channel_mask (uint16_t mask) {
 		mask = force_mask (get_playback_channel_mode(), mask);
 		g_atomic_int_set(&_playback_channel_mask, (uint32_t(get_playback_channel_mode()) << 16) | uint32_t(mask));
 	}
@@ -202,7 +202,7 @@ private:
 		mask = force_mask (mode, mask);
 		g_atomic_int_set(&_capture_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
 	}
-        void _set_capture_channel_mask (uint16_t mask) {
+	void _set_capture_channel_mask (uint16_t mask) {
 		mask = force_mask (get_capture_channel_mode(), mask);
 		g_atomic_int_set(&_capture_channel_mask, (uint32_t(get_capture_channel_mode()) << 16) | uint32_t(mask));
 	}

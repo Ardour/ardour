@@ -207,8 +207,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin (boost::shared_ptr<Plugin>);
 
-        void start_touch (uint32_t param_id);
-        void end_touch (uint32_t param_id);
+	void start_touch (uint32_t param_id);
+	void end_touch (uint32_t param_id);
 };
 
 } // namespace ARDOUR

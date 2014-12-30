@@ -123,8 +123,8 @@ MidiControlUI::reset_ports ()
 	}
 	
 	for (vector<AsyncMIDIPort*>::const_iterator pi = ports.begin(); pi != ports.end(); ++pi) {
-                (*pi)->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *pi));
-                (*pi)->xthread().attach (_main_loop->get_context());
+		(*pi)->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MidiControlUI::midi_input_handler), *pi));
+		(*pi)->xthread().attach (_main_loop->get_context());
 	}
 }
 
