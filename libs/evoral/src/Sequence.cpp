@@ -114,10 +114,10 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	assert (_patch_change_iter == seq.patch_changes().end() || (*_patch_change_iter)->time() >= t);
 
 	// Find first control event after t
-	ControlIterator earliest_control(boost::shared_ptr<ControlList>(), DBL_MAX, 0.0);
 	_control_iters.reserve(seq._controls.size());
 	bool   found                  = false;
 	size_t earliest_control_index = 0;
+	double earliest_control_x     = DBL_MAX;
 	for (Controls::const_iterator i = seq._controls.begin(); i != seq._controls.end(); ++i) {
 
 		if (filtered.find (i->first) != filtered.end()) {
@@ -155,82 +155,41 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 		_control_iters.push_back(new_iter);
 
 		// Found a new earliest_control
-		if (x < earliest_control.x) {
-			earliest_control = new_iter;
+		if (x < earliest_control_x) {
+			earliest_control_x     = x;
 			earliest_control_index = _control_iters.size() - 1;
-			found = true;
+			found                  = true;
 		}
 	}
 
 	if (found) {
 		_control_iter = _control_iters.begin() + earliest_control_index;
 		assert(_control_iter != _control_iters.end());
+		assert(_control_iter->list);
 	} else {
 		_control_iter = _control_iters.end();
 	}
 
-	// Now find the earliest event overall and point to it
-	Time earliest_t = t;
+	// Choose the earliest event overall to point to
+	choose_next(t);
 
-	if (_note_iter != seq.notes().end()) {
-		_type = NOTE_ON;
-		earliest_t = (*_note_iter)->time();
-	}
+	// Allocate a new event for storing the current event in MIDI format
+	_event = boost::shared_ptr< Event<Time> >(
+		new Event<Time>(0, Time(), 4, NULL, true));
 
-	if (_sysex_iter != seq.sysexes().end()
-	    && ((*_sysex_iter)->time() < earliest_t || _type == NIL)) {
-		_type = SYSEX;
-		earliest_t = (*_sysex_iter)->time();
-	}
+	// Set event from chosen sub-iterator
+	set_event();
 
-	if (_patch_change_iter != seq.patch_changes().end() && ((*_patch_change_iter)->time() < earliest_t || _type == NIL)) {
-		_type = PATCH_CHANGE;
-		earliest_t = (*_patch_change_iter)->time ();
-	}
-
-	if (_control_iter != _control_iters.end()
-	    && earliest_control.list && earliest_control.x >= t.to_double()
-	    && (earliest_control.x < earliest_t.to_double() || _type == NIL)) {
-		_type = CONTROL;
-		earliest_t = Time(earliest_control.x);
-	}
-
-	switch (_type) {
-	case NOTE_ON:
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at note on event @ %1\n", earliest_t));
-		_event = boost::shared_ptr<Event<Time> > (new Event<Time> ((*_note_iter)->on_event(), true));
-		_active_notes.push(*_note_iter);
-		break;
-	case SYSEX:
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at sysex event @ %1\n", earliest_t));
-		_event = boost::shared_ptr< Event<Time> >(
-			new Event<Time>(*(*_sysex_iter), true));
-		break;
-	case CONTROL:
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at control event @ %1\n", earliest_t));
-		seq.control_to_midi_event(_event, earliest_control);
-		break;
-	case PATCH_CHANGE:
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at patch change event @ %1\n", earliest_t));
-		_event = boost::shared_ptr<Event<Time> > (new Event<Time> ((*_patch_change_iter)->message (_active_patch_change_message), true));
-		break;
-	default:
-		break;
-	}
-
-	if (_type == NIL || !_event || _event->size() == 0) {
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Starting at end @ %1\n", t));
-		_type   = NIL;
-		_is_end = true;
+	if (_is_end) {
+		DEBUG_TRACE(DEBUG::Sequence,
+		            string_compose("Starting at end @ %1\n", t));
 	} else {
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("New iterator = 0x%1 : 0x%2 @ %3\n",
-		                                              (int)_event->event_type(),
-		                                              (int)((MIDIEvent<Time>*)_event.get())->type(),
-		                                              _event->time()));
-
-		assert(midi_event_is_valid(_event->buffer(), _event->size()));
+		DEBUG_TRACE(DEBUG::Sequence,
+		            string_compose("Starting at type 0x%1 : 0x%2 @ %3\n",
+		                           (int)_event->event_type(),
+		                           (int)((MIDIEvent<Time>*)_event.get())->type(),
+		                           _event->time()));
 	}
-
 }
 
 template<typename Time>
@@ -253,8 +212,98 @@ Sequence<Time>::const_iterator::invalidate()
 		_patch_change_iter = _seq->patch_changes().end();
 		_active_patch_change_message = 0;
 	}
+	_control_iters.clear();
 	_control_iter = _control_iters.end();
 	_lock.reset();
+}
+
+template<typename Time>
+Time
+Sequence<Time>::const_iterator::choose_next(Time earliest_t)
+{
+	_type = NIL;
+
+	// Next earliest note on
+	if (_note_iter != _seq->notes().end()) {
+		_type      = NOTE_ON;
+		earliest_t = (*_note_iter)->time();
+	}
+
+	// Use the next note off iff it's earlier or the same time as the note on
+	if ((!_active_notes.empty())) {
+		if (_type == NIL || _active_notes.top()->end_time() <= earliest_t) {
+			_type      = NOTE_OFF;
+			earliest_t = _active_notes.top()->end_time();
+		}
+	}
+
+	// Use the next earliest controller iff it's earlier than the note event
+	if (_control_iter != _control_iters.end() &&
+	    _control_iter->list && _control_iter->x != DBL_MAX) {
+		if (_type == NIL || _control_iter->x < earliest_t.to_double()) {
+			_type      = CONTROL;
+			earliest_t = Time(_control_iter->x);
+		}
+	}
+
+	// Use the next earliest SysEx iff it's earlier than the controller
+	if (_sysex_iter != _seq->sysexes().end()) {
+		if (_type == NIL || (*_sysex_iter)->time() < earliest_t) {
+			_type      = SYSEX;
+			earliest_t = (*_sysex_iter)->time();
+		}
+	}
+
+	// Use the next earliest patch change iff it's earlier than the SysEx
+	if (_patch_change_iter != _seq->patch_changes().end()) {
+		if (_type == NIL || (*_patch_change_iter)->time() < earliest_t) {
+			_type      = PATCH_CHANGE;
+			earliest_t = (*_patch_change_iter)->time();
+		}
+	}
+	return earliest_t;
+}
+
+template<typename Time>
+void
+Sequence<Time>::const_iterator::set_event()
+{
+	switch (_type) {
+	case NOTE_ON:
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = note on\n");
+		*_event = (*_note_iter)->on_event();
+		_active_notes.push(*_note_iter);
+		break;
+	case NOTE_OFF:
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
+		assert(!_active_notes.empty());
+		*_event = _active_notes.top()->off_event();
+		_active_notes.pop();
+		break;
+	case SYSEX:
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
+		*_event = *(*_sysex_iter);
+		break;
+	case CONTROL:
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = control\n");
+		_seq->control_to_midi_event(_event, *_control_iter);
+		break;
+	case PATCH_CHANGE:
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = program change\n");
+		*_event = (*_patch_change_iter)->message (_active_patch_change_message);
+		break;
+	default:
+		_is_end = true;
+		break;
+	}
+
+	if (_type == NIL || !_event || _event->size() == 0) {
+		DEBUG_TRACE(DEBUG::Sequence, "iterator = end\n");
+		_type   = NIL;
+		_is_end = true;
+	} else {
+		assert(midi_event_is_valid(_event->buffer(), _event->size()));
+	}
 }
 
 template<typename Time>
@@ -332,83 +381,11 @@ Sequence<Time>::const_iterator::operator++()
 		assert(false);
 	}
 
-	// Now find the earliest event overall and point to it
-	_type = NIL;
-	Time earliest_t = std::numeric_limits<Time>::max();
+	// Choose the earliest event overall to point to
+	choose_next(std::numeric_limits<Time>::max());
 
-	// Next earliest note on
-	if (_note_iter != _seq->notes().end()) {
-		_type = NOTE_ON;
-		earliest_t = (*_note_iter)->time();
-	}
-
-	// Use the next note off iff it's earlier or the same time as the note on
-#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	// issue 0005121 When in Percussive mode, all note offs go missing, which jams all MIDI instruments that they stop playing
-	// remove this code since it drowns MIDI instruments by stealing all voices and crashes LinuxSampler
-	if (!_seq->percussive() && (!_active_notes.empty())) {
-#else
-	if ((!_active_notes.empty())) {
-#endif
-		if (_type == NIL || _active_notes.top()->end_time() <= earliest_t) {
-			_type = NOTE_OFF;
-			earliest_t = _active_notes.top()->end_time();
-		}
-	}
-
-	// Use the next earliest controller iff it's earlier than the note event
-	if (_control_iter != _control_iters.end() &&
-	    _control_iter->list && _control_iter->x != DBL_MAX &&
-	    (_control_iter->x < earliest_t.to_double() || _type == NIL)) {
-		_type = CONTROL;
-		earliest_t = Time(_control_iter->x);
-	}
-
-	// Use the next earliest SysEx iff it's earlier than the controller
-	if (_sysex_iter != _seq->sysexes().end()) {
-		if (_type == NIL || (*_sysex_iter)->time() < earliest_t) {
-			_type = SYSEX;
-			earliest_t = (*_sysex_iter)->time();
-		}
-	}
-
-	// Use the next earliest patch change iff it's earlier than the SysEx
-	if (_patch_change_iter != _seq->patch_changes().end()) {
-		if (_type == NIL || (*_patch_change_iter)->time() < earliest_t) {
-			_type = PATCH_CHANGE;
-			earliest_t = (*_patch_change_iter)->time();
-		}
-	}
-
-	// Set event to reflect new position
-	switch (_type) {
-	case NOTE_ON:
-		// DEBUG_TRACE(DEBUG::Sequence, "iterator = note on\n");
-		*_event = (*_note_iter)->on_event();
-		_active_notes.push(*_note_iter);
-		break;
-	case NOTE_OFF:
-		// DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
-		assert(!_active_notes.empty());
-		*_event = _active_notes.top()->off_event();
-		_active_notes.pop();
-		break;
-	case CONTROL:
-		//DEBUG_TRACE(DEBUG::Sequence, "iterator = control\n");
-		_seq->control_to_midi_event(_event, *_control_iter);
-		break;
-	case SYSEX:
-		//DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
-		*_event = *(*_sysex_iter);
-		break;
-	case PATCH_CHANGE:
-		//DEBUG_TRACE(DEBUG::Sequence, "iterator = patch change\n");
-		*_event = (*_patch_change_iter)->message (_active_patch_change_message);
-		break;
-	default:
-		//DEBUG_TRACE(DEBUG::Sequence, "iterator = end\n");
-		_is_end = true;
-	}
+	// Set event from chosen sub-iterator
+	set_event();
 
 	assert(_is_end || (_event->size() > 0 && _event->buffer() && _event->buffer()[0] != '\0'));
 

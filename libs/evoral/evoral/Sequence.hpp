@@ -217,7 +217,7 @@ private:
 public:
 
 	/** Read iterator */
-	class LIBEVORAL_API /* Added by JE - */ const_iterator {
+	class LIBEVORAL_API const_iterator {
 	public:
 		const_iterator();
 		const_iterator(const Sequence<Time>& seq, Time t, bool, std::set<Evoral::Parameter> const &);
@@ -241,6 +241,9 @@ public:
 
 	private:
 		friend class Sequence<Time>;
+
+		Time choose_next(Time earliest_t);
+		void set_event();
 
 		typedef std::vector<ControlIterator> ControlIterators;
 		enum MIDIMessageType { NIL, NOTE_ON, NOTE_OFF, CONTROL, SYSEX, PATCH_CHANGE };

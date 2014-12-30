@@ -313,6 +313,7 @@ MidiSource::mark_midi_streaming_write_completed (const Lock&                    
 		}
 	}
 
+	invalidate(lock);
 	_writing = false;
 }
 
