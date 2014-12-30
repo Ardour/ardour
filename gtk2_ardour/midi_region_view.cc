@@ -721,7 +721,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		clear_selection();
 		_mouse_state = None;
 
-	} else if (unmodified && (ev->keyval == GDK_comma || ev->keyval == GDK_period)) {
+	} else if (ev->keyval == GDK_comma || ev->keyval == GDK_period) {
 
 		bool start = (ev->keyval == GDK_comma);
 		bool end = (ev->keyval == GDK_period);
