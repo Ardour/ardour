@@ -21,16 +21,16 @@
       </PatchBank>
     </ChannelNameSet>
     <NoteNameList Name="Notes">
-      <Note Number="37" Name="Kick"/>
-      <Note Number="39" Name="Snare"/>
-      <Note Number="40" Name="Clap"/>
-      <Note Number="43" Name="Closed Hi-hat"/>
-      <Note Number="44" Name="Low Tom"/>
-      <Note Number="47" Name="Open Hi-hat"/>
-      <Note Number="50" Name="Crash Cymbal"/>
-      <Note Number="51" Name="High Tom"/>
-      <Note Number="68" Name="Agogô"/>
-      <Note Number="76" Name="Claves"/>
+      <Note Number="36" Name="Kick"/>
+      <Note Number="38" Name="Snare"/>
+      <Note Number="39" Name="Clap"/>
+      <Note Number="42" Name="Closed Hi-hat"/>
+      <Note Number="43" Name="Low Tom"/>
+      <Note Number="46" Name="Open Hi-hat"/>
+      <Note Number="49" Name="Crash Cymbal"/>
+      <Note Number="50" Name="High Tom"/>
+      <Note Number="67" Name="Agogô"/>
+      <Note Number="75" Name="Claves"/>
     </NoteNameList>
     <ControlNameList Name="Controls">
       <Control Type="7bit" Number="40" Name="Kick Level"/>

@@ -151,7 +151,7 @@ XMLNode&
 Note::get_state (void)
 {
 	XMLNode* node = new XMLNode("Note");
-	node->add_property("Number", _number + 1);
+	node->add_property("Number", _number);
 	node->add_property("Name",   _name);
 
 	return *node;
@@ -163,14 +163,14 @@ Note::set_state (const XMLTree& tree, const XMLNode& node)
 	assert(node.name() == "Note");
 
 	const int num = string_to_int(tree, node.property("Number")->value());
-	if (num < 1 || num > 128) {
+	if (num > 127) {
 		PBD::warning << string_compose("%1: Note number %2 (%3) out of range",
 		                               tree.filename(), num, _name)
 		             << endmsg;
 		return -1;
 	}
 
-	_number = num - 1;
+	_number = num;
 	_name   = node.property("Name")->value();
 
 	return 0;
