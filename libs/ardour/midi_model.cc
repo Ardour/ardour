@@ -582,8 +582,16 @@ MidiModel::NoteDiffCommand::marshal_change (const NoteChange& change)
 	}
 
 	ostringstream id_str;
-	id_str << change.note->id();
-	xml_change->add_property ("id", id_str.str());
+	if (change.note) {
+		id_str << change.note->id();
+		xml_change->add_property ("id", id_str.str());
+	} else if (change.note_id) {
+		warning << _("Change has no note, using note ID") << endmsg;
+		id_str << change.note_id;
+		xml_change->add_property ("id", id_str.str());
+	} else {
+		error << _("Change has no note or note ID") << endmsg;
+	}
 
 	return *xml_change;
 }
@@ -593,6 +601,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 {
 	XMLProperty* prop;
 	NoteChange change;
+	change.note_id = 0;
 
 	if ((prop = xml_change->property("property")) != 0) {
 		change.property = (Property) string_2_enum (prop->value(), change.property);
