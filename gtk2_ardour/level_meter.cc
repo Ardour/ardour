@@ -49,20 +49,15 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, regular_meter_width (6)
 	, meter_length (0)
 	, thin_meter_width(2)
+        , max_peak (minus_infinity())
+        , meter_type (MeterPeak)
+        , color_changed (false)
 {
 	set_session (s);
+
 	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
 	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun(*this, &LevelMeterBase::parameter_changed));
-	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &LevelMeterBase::on_theme_changed));
 	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
-	max_peak = minus_infinity();
-	meter_type = MeterPeak;
-}
-
-void
-LevelMeterBase::on_theme_changed()
-{
-	style_changed = true;
 }
 
 LevelMeterBase::~LevelMeterBase ()

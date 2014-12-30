@@ -121,8 +121,6 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	void configuration_changed (ARDOUR::ChanCount in, ARDOUR::ChanCount out);
 	void meter_type_changed (ARDOUR::MeterType);
 
-	void on_theme_changed ();
-	bool style_changed;
 	bool color_changed;
 	void color_handler ();
 };
