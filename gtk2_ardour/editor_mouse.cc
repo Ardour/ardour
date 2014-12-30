@@ -2316,7 +2316,7 @@ Editor::update_join_object_range_location (double y)
 
 		ArdourCanvas::Duple const item_space = entered_regionview->get_canvas_group()->canvas_to_item (ArdourCanvas::Duple (0, y));
 		double const c = item_space.y / entered_regionview->height();
-			
+
 		_join_object_range_state = c <= 0.5 ? JOIN_OBJECT_RANGE_RANGE : JOIN_OBJECT_RANGE_OBJECT;
 
 		Editor::EnterContext* ctx = get_enter_context(RegionItem);
