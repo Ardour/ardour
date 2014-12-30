@@ -162,7 +162,7 @@ if ! grep " using ./waf configure" build/config.log | grep -q -- "--optimize"; t
 	cp -r ${SRCDIR}/gdb_$WARCH $DESTDIR/gdb
 	cat > $DESTDIR/ardbg.bat << EOF
 cd bin
-START ..\\gdb\\bin\\gdb.exe ardour.exe
+START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\ardour-debug.log" ardour.exe
 EOF
 	OUTFILE="${TMPDIR}/ardour-${ARDOURVERSION}-dbg-${WARCH}-Setup.exe"
 	VERSIONINFO="Debug Version."
