@@ -196,9 +196,11 @@ class DummyMidiPort : public DummyPort {
 		const DummyMidiBuffer const_buffer () const { return _buffer; }
 
 		void setup_generator (int, float const);
+		void set_loopback (const DummyMidiBuffer src);
 
 	private:
 		DummyMidiBuffer _buffer;
+		DummyMidiBuffer _loopback;
 
 		// midi event generator ('fake' physical inputs)
 		void midi_generate (const pframes_t n_samples);
@@ -362,6 +364,12 @@ class DummyAudioBackend : public AudioBackend {
 		static size_t max_buffer_size() {return _max_buffer_size;}
 
 	private:
+		enum MidiPortMode {
+			MidiNoEvents,
+			MidiGenerator,
+			MidiLoopback,
+		};
+
 		std::string _instance_name;
 		static std::vector<std::string> _midi_options;
 		static std::vector<AudioBackend::DeviceStatus> _device_status;
@@ -381,7 +389,7 @@ class DummyAudioBackend : public AudioBackend {
 
 		uint32_t _n_midi_inputs;
 		uint32_t _n_midi_outputs;
-		bool     _enable_midi_generators;
+		MidiPortMode _midi_mode;
 
 		uint32_t _systemic_input_latency;
 		uint32_t _systemic_output_latency;

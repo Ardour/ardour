@@ -67,7 +67,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _n_outputs (0)
 	, _n_midi_inputs (0)
 	, _n_midi_outputs (0)
-	, _enable_midi_generators (false)
+	, _midi_mode (MidiNoEvents)
 	, _systemic_input_latency (0)
 	, _systemic_output_latency (0)
 	, _processed_samples (0)
@@ -321,6 +321,7 @@ DummyAudioBackend::enumerate_midi_options () const
 		_midi_options.push_back (_("2 in, 2 out, Silence"));
 		_midi_options.push_back (_("8 in, 8 out, Silence"));
 		_midi_options.push_back (_("Midi Event Generators"));
+		_midi_options.push_back (_("8 in, 8 out, Loopback"));
 	}
 	return _midi_options;
 }
@@ -328,7 +329,7 @@ DummyAudioBackend::enumerate_midi_options () const
 int
 DummyAudioBackend::set_midi_option (const std::string& opt)
 {
-	_enable_midi_generators = false;
+	_midi_mode = MidiNoEvents;
 	if (opt == _("1 in, 1 out, Silence")) {
 		_n_midi_inputs = _n_midi_outputs = 1;
 	}
@@ -340,7 +341,11 @@ DummyAudioBackend::set_midi_option (const std::string& opt)
 	}
 	else if (opt == _("Midi Event Generators")) {
 		_n_midi_inputs = _n_midi_outputs = NUM_MIDI_EVENT_GENERATORS;
-		_enable_midi_generators = true;
+		_midi_mode = MidiGenerator;
+	}
+	else if (opt == _("8 in, 8 out, Loopback")) {
+		_n_midi_inputs = _n_midi_outputs = 8;
+		_midi_mode = MidiLoopback;
 	}
 	else {
 		_n_midi_inputs = _n_midi_outputs = 0;
@@ -783,7 +788,7 @@ DummyAudioBackend::register_system_ports()
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		_system_midi_in.push_back (static_cast<DummyMidiPort*>(p));
-		if (_enable_midi_generators) {
+		if (_midi_mode == MidiGenerator) {
 			static_cast<DummyMidiPort*>(p)->setup_generator (i % NUM_MIDI_EVENT_GENERATORS, _samplerate);
 		}
 	}
@@ -1163,7 +1168,16 @@ DummyAudioBackend::main_process_thread ()
 				DummyAudioPort* op = _system_outputs[(opn % opc)];
 				(*it)->fill_wavetable ((const float*)op->get_buffer (_samples_per_period), _samples_per_period);
 			}
+		}
 
+		if (_midi_mode == MidiLoopback) {
+			int opn = 0;
+			int opc = _system_midi_out.size();
+			for (std::vector<DummyMidiPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++opn) {
+				DummyMidiPort* op = _system_midi_out[(opn % opc)];
+				op->get_buffer(0); // mix-down
+				(*it)->set_loopback (op->const_buffer());
+			}
 		}
 
 		if (!_freewheeling) {
@@ -1741,15 +1755,27 @@ DummyMidiPort::DummyMidiPort (DummyAudioBackend &b, const std::string& name, Por
 	, _midi_seq_pos (0)
 {
 	_buffer.clear ();
+	_loopback.clear ();
 }
 
-DummyMidiPort::~DummyMidiPort () { }
+DummyMidiPort::~DummyMidiPort () {
+	_buffer.clear ();
+	_loopback.clear ();
+}
 
 struct MidiEventSorter {
 	bool operator() (const boost::shared_ptr<DummyMidiEvent>& a, const boost::shared_ptr<DummyMidiEvent>& b) {
 		return *a < *b;
 	}
 };
+
+void DummyMidiPort::set_loopback (const DummyMidiBuffer src)
+{
+	_loopback.clear ();
+	for (DummyMidiBuffer::const_iterator it = src.begin (); it != src.end (); ++it) {
+		_loopback.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
+	}
+}
 
 void DummyMidiPort::setup_generator (int seq_id, const float sr)
 {
@@ -1771,6 +1797,9 @@ void DummyMidiPort::midi_generate (const pframes_t n_samples)
 	_gen_cycle = true;
 
 	if (_midi_seq_spb == 0 || !_midi_seq_dat) {
+		for (DummyMidiBuffer::const_iterator it = _loopback.begin (); it != _loopback.end (); ++it) {
+			_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
+		}
 		return;
 	}
 
