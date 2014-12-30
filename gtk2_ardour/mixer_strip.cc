@@ -413,7 +413,7 @@ MixerStrip::on_record_state_changed ()
     if ( !_session )
         return;
     
-    if ( (_session->record_status()==Session::Recording) && (_route->record_enabled()) )
+    if ( (_session->record_status()==Session::Recording) && (_route) && (_route->record_enabled()) )
         end_name_edit (RESPONSE_CANCEL);
 }
 
