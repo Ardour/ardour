@@ -1366,15 +1366,26 @@ Editor::select_all_in_track (Selection::Operation op)
 	}
 }
 
-void
+bool
 Editor::select_all_internal_edit (Selection::Operation)
 {
+	bool selected = false;
+
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 		if (mrv) {
 			mrv->select_all_notes ();
+			selected = true;
 		}
 	}
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(entered_regionview);
+	if (mrv) {
+		mrv->select_all_notes ();
+		selected = true;
+	}
+
+	return selected;
 }
 
 void
@@ -1384,27 +1395,8 @@ Editor::select_all_objects (Selection::Operation op)
 
 	TrackViewList ts  = track_views;
 
-	if (internal_editing()) {
-
-		bool midi_selected = false;
-
-		for (TrackViewList::iterator iter = ts.begin(); iter != ts.end(); ++iter) {
-			if ((*iter)->hidden()) {
-				continue;
-			}
-			
-			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*iter);
-
-			if (rtav && rtav->is_midi_track()) {
-				midi_selected = true;
-				break;
-			}
-		}
-
-		if (midi_selected) {
-			select_all_internal_edit (op);
-			return;
-		}
+	if (internal_editing() && select_all_internal_edit(op)) {
+		return;  // Selected notes
 	}
 
 	for (TrackViewList::iterator iter = ts.begin(); iter != ts.end(); ++iter) {
