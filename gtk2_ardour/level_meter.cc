@@ -49,9 +49,9 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, regular_meter_width (6)
 	, meter_length (0)
 	, thin_meter_width(2)
-        , max_peak (minus_infinity())
-        , meter_type (MeterPeak)
-        , color_changed (false)
+	, max_peak (minus_infinity())
+	, meter_type (MeterPeak)
+	, color_changed (false)
 {
 	set_session (s);
 
