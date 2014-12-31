@@ -113,6 +113,7 @@ struct /*LIBEVORAL_API*/ Range {
 	Range (T f, T t) : from (f), to (t) {}
 	T from; ///< start of the range
 	T to;   ///< end of the range
+	bool empty() const { return from == to; }
 };
 
 template<typename T>	
@@ -191,7 +192,7 @@ RangeList<T> subtract (Range<T> range, RangeList<T> sub)
 	RangeList<T> result;
 	result.add (range);
 
-	if (sub.empty ()) {
+	if (sub.empty () || range.empty()) {
 		return result;
 	}
 
