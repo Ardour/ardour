@@ -516,8 +516,8 @@ GtkCanvas::deliver_enter_leave (Duple const & point, int state)
 	leave_event.type = GDK_LEAVE_NOTIFY;
 
 	Item* i;
-	GdkNotifyType enter_detail;
-	GdkNotifyType leave_detail;
+	GdkNotifyType enter_detail = GDK_NOTIFY_UNKNOWN;
+	GdkNotifyType leave_detail = GDK_NOTIFY_UNKNOWN;
 	vector<Item*> items_to_leave_virtual;
 	vector<Item*> items_to_enter_virtual;
 
