@@ -1234,9 +1234,9 @@ Selection::get_state () const
 
 	for (TimeSelection::const_iterator i = time.begin(); i != time.end(); ++i) {
 		XMLNode* t = node->add_child (X_("AudioRange"));
-		snprintf(buf, sizeof(buf), "%ld", (*i).start);
+		snprintf(buf, sizeof(buf), "%" PRId64, (*i).start);
 		t->add_property (X_("start"), string(buf));
-		snprintf(buf, sizeof(buf), "%ld", (*i).end);
+		snprintf(buf, sizeof(buf), "%" PRId64, (*i).end);
 		t->add_property (X_("end"), string(buf));
 	}
 	
