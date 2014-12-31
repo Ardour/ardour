@@ -286,7 +286,11 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 		memcpy(*buf, event->midi_buffer, size_t(event_size));
 		*size = event_size;
 
-		assert(midi_event_is_valid(*buf, *size));
+		if (!midi_event_is_valid(*buf, *size)) {
+			cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
+			*size = 0;
+			return -1;
+		}
 
 		/* printf("SMF::read_event @ %u: ", *delta_t);
 		   for (size_t i = 0; i < *size; ++i) {

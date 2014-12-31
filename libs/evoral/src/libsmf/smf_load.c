@@ -83,7 +83,6 @@ next_chunk(smf_t *smf)
 
 	if (smf->next_chunk_offset > smf->file_buffer_length) {
 		g_critical("SMF error: malformed chunk; truncated file?");
-		return (NULL);
 	}
 
 	return (chunk);
@@ -396,7 +395,10 @@ extract_sysex_event(const unsigned char *buf, const size_t buffer_length, smf_ev
 
 	status = *buf;
 
-	assert(is_sysex_byte(status));
+	if (!(is_sysex_byte(status))) {
+		g_critical("Corrupt sysex status byte in extract_sysex_event().");
+		return (-6);
+	}
 
 	c++;
 
@@ -439,7 +441,10 @@ extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_
 
 	status = *buf;
 
-	assert(is_escape_byte(status));
+	if (!(is_escape_byte(status))) {
+		g_critical("Corrupt escape status byte in extract_escaped_event().");
+		return (-6);
+	}
 
 	c++;
 
@@ -787,6 +792,7 @@ static int
 parse_mtrk_chunk(smf_track_t *track)
 {
 	smf_event_t *event;
+	int ret = 0;
 
 	if (parse_mtrk_header(track))
 		return (-1);
@@ -795,10 +801,10 @@ parse_mtrk_chunk(smf_track_t *track)
 		event = parse_next_event(track);
 
 		/* Couldn't parse an event? */
-		if (event == NULL)
-			return (-1);
-
-		assert(smf_event_is_valid(event));
+		if (event == NULL || !smf_event_is_valid(event)) {
+			ret = -1;
+			break;
+		}
 
 		if (event_is_end_of_track(event))
 			break;
@@ -808,7 +814,7 @@ parse_mtrk_chunk(smf_track_t *track)
 	track->file_buffer_length = 0;
 	track->next_event_offset = -1;
 
-	return (0);
+	return (ret);
 }
 
 /**
@@ -870,6 +876,7 @@ smf_t *
 smf_load_from_memory(const void *buffer, const size_t buffer_length)
 {
 	int i;
+	int ret;
 
 	smf_t *smf = smf_new();
 
@@ -887,16 +894,16 @@ smf_load_from_memory(const void *buffer, const size_t buffer_length)
 
 		smf_add_track(smf, track);
 
-		/* Skip unparseable chunks. */
-		if (parse_mtrk_chunk(track)) {
-			g_warning("SMF warning: Cannot load track.");
-			smf_track_delete(track);
-			continue;
-		}
+		ret = parse_mtrk_chunk(track);
 
 		track->file_buffer = NULL;
 		track->file_buffer_length = 0;
 		track->next_event_offset = -1;
+
+		if (ret) {
+			g_warning("SMF warning: Error parsing track, continuing with data loaded so far.");
+			break;
+		}
 	}
 
 	if (smf->expected_number_of_tracks != smf->number_of_tracks) {

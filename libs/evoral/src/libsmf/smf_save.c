@@ -547,58 +547,68 @@ smf_validate(smf_t *smf)
 
 #ifndef NDEBUG
 
-static void
-assert_smf_event_is_identical(const smf_event_t *a, const smf_event_t *b)
+#define CHECK(cond) if (!(cond)) { return -1; }
+
+static int
+check_smf_event_is_identical(const smf_event_t *a, const smf_event_t *b)
 {
-	assert(a->event_number == b->event_number);
-	assert(a->delta_time_pulses == b->delta_time_pulses);
-	assert(abs((long)(a->time_pulses - b->time_pulses)) <= 2);
-	assert(fabs(a->time_seconds - b->time_seconds) <= 0.01);
-	assert(a->track_number == b->track_number);
-	assert(a->midi_buffer_length == b->midi_buffer_length);
-	assert(memcmp(a->midi_buffer, b->midi_buffer, a->midi_buffer_length) == 0);
+	CHECK(a->event_number == b->event_number);
+	CHECK(a->delta_time_pulses == b->delta_time_pulses);
+	CHECK(abs((long)(a->time_pulses - b->time_pulses)) <= 2);
+	CHECK(fabs(a->time_seconds - b->time_seconds) <= 0.01);
+	CHECK(a->track_number == b->track_number);
+	CHECK(a->midi_buffer_length == b->midi_buffer_length);
+	CHECK(memcmp(a->midi_buffer, b->midi_buffer, a->midi_buffer_length) == 0);
+	return 0;
 }
 
-static void
-assert_smf_track_is_identical(const smf_track_t *a, const smf_track_t *b)
+static int
+check_smf_track_is_identical(const smf_track_t *a, const smf_track_t *b)
 {
 	size_t i;
 
-	assert(a->track_number == b->track_number);
-	assert(a->number_of_events == b->number_of_events);
+	CHECK(a->track_number == b->track_number);
+	CHECK(a->number_of_events == b->number_of_events);
 
 	for (i = 1; i <= a->number_of_events; i++)
-		assert_smf_event_is_identical(smf_track_get_event_by_number(a, i), smf_track_get_event_by_number(b, i));
+		check_smf_event_is_identical(smf_track_get_event_by_number(a, i), smf_track_get_event_by_number(b, i));
+
+	return 0;
 }
 
-static void
-assert_smf_is_identical(const smf_t *a, const smf_t *b)
+static int
+check_smf_is_identical(const smf_t *a, const smf_t *b)
 {
 	int i;
 
-	assert(a->format == b->format);
-	assert(a->ppqn == b->ppqn);
-	assert(a->frames_per_second == b->frames_per_second);
-	assert(a->resolution == b->resolution);
-	assert(a->number_of_tracks == b->number_of_tracks);
+	CHECK(a->format == b->format);
+	CHECK(a->ppqn == b->ppqn);
+	CHECK(a->frames_per_second == b->frames_per_second);
+	CHECK(a->resolution == b->resolution);
+	CHECK(a->number_of_tracks == b->number_of_tracks);
 
 	for (i = 1; i <= a->number_of_tracks; i++)
-		assert_smf_track_is_identical(smf_get_track_by_number(a, i), smf_get_track_by_number(b, i));
+		check_smf_track_is_identical(smf_get_track_by_number(a, i), smf_get_track_by_number(b, i));
 
 	/* We do not need to compare tempos explicitly, as tempo is always computed from track contents. */
+	return 0;
 }
 
-static void
-assert_smf_saved_correctly(const smf_t *smf, FILE* file)
+static int
+check_smf_saved_correctly(const smf_t *smf, FILE* file)
 {
 	smf_t *saved;
+	int ret;
 
 	saved = smf_load (file);
-	assert(saved != NULL);
-
-	assert_smf_is_identical(smf, saved);
+	if (!saved) {
+		ret = -1;
+	} else {
+		ret = check_smf_is_identical(smf, saved);
+	}
 
 	smf_delete(saved);
+	return (ret);
 }
 
 #endif /* !NDEBUG */
@@ -645,7 +655,9 @@ smf_save(smf_t *smf, FILE* file)
 		return (error);
 
 #ifndef NDEBUG
-	assert_smf_saved_correctly(smf, file);
+	if (check_smf_saved_correctly(smf, file)) {
+		g_warning("SMF warning: Did not save correctly, possible data loss.");
+	}
 #endif
 
 	return (0);

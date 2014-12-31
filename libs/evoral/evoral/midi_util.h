@@ -95,7 +95,9 @@ midi_event_size(const uint8_t* buffer)
 		int end;
 		
 		for (end = 1; buffer[end] != MIDI_CMD_COMMON_SYSEX_END; end++) {
-			assert((buffer[end] & 0x80) == 0);
+			if ((buffer[end] & 0x80) != 0) {
+				return -1;
+			}
 		}
 		assert(buffer[end] == MIDI_CMD_COMMON_SYSEX_END);
 		return end + 1;
@@ -117,6 +119,11 @@ midi_event_is_valid(const uint8_t* buffer, size_t len)
 	const int size = midi_event_size(buffer);
 	if (size < 0 || (size_t)size != len) {
 		return false;
+	}
+	for (size_t i = 1; i < len; ++i) {
+		if ((buffer[i] & 0x80) != 0) {
+			return false;  // Non-status byte has MSb set
+		}
 	}
 	return true;
 }
