@@ -81,17 +81,6 @@ BigClockWindow::on_size_allocate (Gtk::Allocation& alloc)
 	if (original_width) {
 		clock.set_scale ((double) alloc.get_width() / original_width,
 				 (double)  alloc.get_height() / original_height);
-
-
-
-		std::cerr << "Rescale to "
-			  << (double) alloc.get_width() / original_width
-			  << " x " 
-			  << (double)  alloc.get_height() / original_height
-			  << " using " << alloc.get_width() << " vs. " << original_width
-			  << " and " << alloc.get_height() << " vs. " << original_height
-			  << std::endl;
-
 	}
 }
 
