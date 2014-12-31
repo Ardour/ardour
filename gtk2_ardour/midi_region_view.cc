@@ -1670,9 +1670,9 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	if (!note->length()) {
 		if (_active_notes && note->note() < 128) {
 			Note* const old_rect = _active_notes[note->note()];
-			if (old_rect && old_rect != ev) {
-				/* There is an active note on this key, but it's not this note,
-				   so we have a stuck note.  Finish the old rectangle here. */
+			if (old_rect) {
+				/* There is an active note on this key, so we have a stuck
+				   note.  Finish the old rectangle here. */
 				old_rect->set_x1 (x);
 				old_rect->set_outline_all ();
 			}
