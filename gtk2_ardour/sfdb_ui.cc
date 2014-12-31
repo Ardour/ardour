@@ -283,10 +283,15 @@ SoundFileBox::setup_labels (const string& filename)
 
 	if (SMFSource::valid_midi_file (path)) {
 
-		boost::shared_ptr<SMFSource> ms =
-			boost::dynamic_pointer_cast<SMFSource> (
-					SourceFactory::createExternal (DataType::MIDI, *_session,
-											 path, 0, Source::Flag (0), false));
+		boost::shared_ptr<SMFSource> ms;
+		try {
+			ms = boost::dynamic_pointer_cast<SMFSource> (
+				SourceFactory::createExternal (DataType::MIDI, *_session,
+				                               path, 0, Source::Flag (0), false));
+		} catch (const std::exception& e) {
+			error << string_compose(_("Could not read file: %1 (%2)."),
+			                        path, e.what()) << endmsg;
+		}
 
 		preview_label.set_markup (_("<b>Midi File Information</b>"));
 
