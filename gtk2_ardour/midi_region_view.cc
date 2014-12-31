@@ -118,6 +118,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
+	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
@@ -149,7 +150,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _region_relative_time_converter(r->session().tempo_map(), r->position())
 	, _source_relative_time_converter(r->session().tempo_map(), r->position() - r->start())
 	, _active_notes(0)
-	, _note_group (new ArdourCanvas::Container (parent))
+	, _note_group (new ArdourCanvas::Container (group))
 	, _note_diff_command (0)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
@@ -163,6 +164,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
+	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
@@ -213,6 +215,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
+	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
@@ -242,6 +245,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _optimization_iterator (_events.end())
 	, _list_editor (0)
 	, _no_sound_notes (false)
+	, _last_display_zoom (0)
 	, _last_event_x (0)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
@@ -1114,10 +1118,18 @@ void
 MidiRegionView::redisplay_model()
 {
 	if (_active_notes) {
-		/* Recording, so just update canvas events to reflect changes
-		   in zoom or whatever without touching model. */
-		for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-			update_note(*i);
+		// Currently recording
+		const framecnt_t zoom = trackview.editor().get_current_zoom();
+		if (zoom != _last_display_zoom) {
+			/* Update resolved canvas notes to reflect changes in zoom without
+			   touching model.  Leave active notes (with length 0) alone since
+			   they are being extended. */
+			for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
+				if ((*i)->note()->length() > 0) {
+					update_note(*i);
+				}
+			}
+			_last_display_zoom = zoom;
 		}
 		return;
 	}
@@ -1524,17 +1536,17 @@ MidiRegionView::resolve_note(uint8_t note, Evoral::MusicalTime end_time)
 	}
 
 	if (_active_notes && _active_notes[note]) {
+		/* Set note length so update_note() works.  Note this is a local note
+		   for recording, not from a model, so we can safely mess with it. */
+		_active_notes[note]->note()->set_length(
+			end_time - _active_notes[note]->note()->time());
 
-		/* XXX is end_time really region-centric? I think so, because
-		   this is a new region that we're recording, so source zero is
-		   the same as region zero
-		*/
+		/* End time is relative to the region being recorded. */
 		const framepos_t end_time_frames = region_beats_to_region_frames(end_time);
 
 		_active_notes[note]->set_x1 (trackview.editor().sample_to_pixel(end_time_frames));
 		_active_notes[note]->set_outline_all ();
 		_active_notes[note] = 0;
-
 	}
 }
 
@@ -1548,14 +1560,13 @@ MidiRegionView::extend_active_notes()
 		return;
 	}
 
-	for (unsigned i=0; i < 128; ++i) {
+	for (unsigned i = 0; i < 128; ++i) {
 		if (_active_notes[i]) {
 			_active_notes[i]->set_x1(
-				trackview.editor().sample_to_pixel(_region->position() + _region->length()));
+				trackview.editor().sample_to_pixel(_region->length()));
 		}
 	}
 }
-
 
 void
 MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
@@ -1658,11 +1669,10 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	if (!note->length()) {
 		if (_active_notes && note->note() < 128) {
-			// If this note is already active there's a stuck note,
-			// finish the old note rectangle
-			if (_active_notes[note->note()]) {
-				Note* const old_rect = _active_notes[note->note()];
-				boost::shared_ptr<NoteType> old_note = old_rect->note();
+			Note* const old_rect = _active_notes[note->note()];
+			if (old_rect && old_rect != ev) {
+				/* There is an active note on this key, but it's not this note,
+				   so we have a stuck note.  Finish the old rectangle here. */
 				old_rect->set_x1 (x);
 				old_rect->set_outline_all ();
 			}
@@ -1734,7 +1744,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 
 		Note* ev_rect = new Note (*this, _note_group, note);
 
-		update_note (ev_rect);
+		update_sustained (ev_rect);
 
 		event = ev_rect;
 
@@ -3748,7 +3758,8 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		}
 
 		/* convert from session frames to source beats */
-		Evoral::MusicalTime const time_beats = _source_relative_time_converter.from(ev.time());
+		Evoral::MusicalTime const time_beats = _source_relative_time_converter.from(
+			ev.time() - src->timeline_position() + _region->start());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
 			boost::shared_ptr<NoteType> note (

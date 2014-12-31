@@ -492,6 +492,8 @@ private:
 	void enter_internal ();
 	void leave_internal ();
 
+	framecnt_t _last_display_zoom;
+
 	double _last_event_x;
 	double _last_event_y;
 	bool   _grabbed_keyboard;
