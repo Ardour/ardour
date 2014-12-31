@@ -26,23 +26,18 @@ class AudioClock;
 
 class BigClockWindow : public ArdourWindow
 {
-  public:
-    BigClockWindow (AudioClock&);
-
-  private:
-    AudioClock& clock;
-    bool resize_in_progress;
-    int original_height;
-    int original_width;
-    int original_font_size;
-
-    void on_size_allocate (Gtk::Allocation&);
-    void on_realize ();
-    void on_unmap ();
-    bool on_key_press_event (GdkEventKey*);
-
-    bool text_resizer (int, int);
-    void reset_aspect_ratio ();
+    public:
+	BigClockWindow (AudioClock&);
+	
+    private:
+	AudioClock& clock;
+	int original_height;
+	int original_width;
+	
+	void on_size_allocate (Gtk::Allocation&);
+	void on_realize ();
+	void on_unmap ();
+	bool on_key_press_event (GdkEventKey*);
 };
 
 #endif // __ardour_window_h__
