@@ -1467,10 +1467,10 @@ AlsaAudioBackend::main_process_thread ()
 				i = 0;
 				for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 					assert (_rmidi_out.size() > i);
-					const AlsaMidiBuffer src = static_cast<const AlsaMidiPort*>(*it)->const_buffer();
+					const AlsaMidiBuffer * src = static_cast<const AlsaMidiPort*>(*it)->const_buffer();
 					AlsaMidiOut *rm = _rmidi_out.at(i);
 					rm->sync_time (clock1);
-					for (AlsaMidiBuffer::const_iterator mit = src.begin (); mit != src.end (); ++mit) {
+					for (AlsaMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
 						rm->send_event ((*mit)->timestamp(), (*mit)->data(), (*mit)->size());
 					}
 				}
@@ -1826,8 +1826,8 @@ void* AlsaMidiPort::get_buffer (pframes_t /* nframes */)
 		for (std::vector<AlsaPort*>::const_iterator i = get_connections ().begin ();
 				i != get_connections ().end ();
 				++i) {
-			const AlsaMidiBuffer src = static_cast<const AlsaMidiPort*>(*i)->const_buffer ();
-			for (AlsaMidiBuffer::const_iterator it = src.begin (); it != src.end (); ++it) {
+			const AlsaMidiBuffer * src = static_cast<const AlsaMidiPort*>(*i)->const_buffer ();
+			for (AlsaMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				(_buffer[_bufperiod]).push_back (boost::shared_ptr<AlsaMidiEvent>(new AlsaMidiEvent (**it)));
 			}
 		}

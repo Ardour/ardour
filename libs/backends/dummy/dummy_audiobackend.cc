@@ -1769,10 +1769,10 @@ struct MidiEventSorter {
 	}
 };
 
-void DummyMidiPort::set_loopback (const DummyMidiBuffer src)
+void DummyMidiPort::set_loopback (DummyMidiBuffer const * const src)
 {
 	_loopback.clear ();
-	for (DummyMidiBuffer::const_iterator it = src.begin (); it != src.end (); ++it) {
+	for (DummyMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 		_loopback.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
 	}
 }
@@ -1838,8 +1838,8 @@ void* DummyMidiPort::get_buffer (pframes_t n_samples)
 			if (source->is_physical() && source->is_terminal()) {
 				source->get_buffer(n_samples); // generate signal.
 			}
-			const DummyMidiBuffer src = static_cast<const DummyMidiPort*>(*i)->const_buffer ();
-			for (DummyMidiBuffer::const_iterator it = src.begin (); it != src.end (); ++it) {
+			const DummyMidiBuffer *src = source->const_buffer ();
+			for (DummyMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
 				_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
 			}
 		}

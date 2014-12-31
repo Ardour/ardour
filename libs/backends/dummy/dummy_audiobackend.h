@@ -193,10 +193,10 @@ class DummyMidiPort : public DummyPort {
 		DataType type () const { return DataType::MIDI; };
 
 		void* get_buffer (pframes_t nframes);
-		const DummyMidiBuffer const_buffer () const { return _buffer; }
+		const DummyMidiBuffer * const_buffer () const { return &_buffer; }
 
 		void setup_generator (int, float const);
-		void set_loopback (const DummyMidiBuffer src);
+		void set_loopback (DummyMidiBuffer const * const src);
 
 	private:
 		DummyMidiBuffer _buffer;
