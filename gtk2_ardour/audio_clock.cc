@@ -95,6 +95,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, last_sdelta (0)
 	, dragging (false)
 	, drag_field (Field (0))
+	, xscale (1.0)
+	, yscale (1.0)
 {
 	set_flags (CAN_FOCUS);
 
@@ -278,6 +280,15 @@ AudioClock::set_colors ()
 }
 
 void
+AudioClock::set_scale (double x, double y)
+{
+	xscale = x;
+	yscale = y;
+
+	queue_draw ();
+}
+
+void
 AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 {
 	/* main layout: rounded rect, plus the text */
@@ -296,9 +307,21 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 		cairo_fill (cr);
 	}
 
-	cairo_move_to (cr, (get_width() - layout_width) / 2.0, (upper_height - layout_height) / 2.0);
+	double lw = layout_width * xscale;
+	double lh = layout_height * yscale;
 
+	cairo_move_to (cr, (get_width() - lw) / 2.0, (upper_height - lh) / 2.0);
+
+	if (xscale != 1.0 || yscale != 1.0) {
+		cairo_save (cr);
+		cairo_scale (cr, xscale, yscale);
+	}
+	
 	pango_cairo_show_layout (cr, _layout->gobj());
+
+	if (xscale != 1.0 || yscale != 1.0) {
+		cairo_restore (cr);
+	}
 
 	if (_left_layout) {
 

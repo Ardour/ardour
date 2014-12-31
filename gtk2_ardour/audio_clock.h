@@ -77,6 +77,14 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_session (ARDOUR::Session *s);
         void set_negative_allowed (bool yn); 
 
+	/** Alter cairo scaling during rendering. 
+	 *
+	 * Used by clocks that resize themselves
+	 * to fit any given space. Can lead
+	 * to font distortion.
+	 */
+	void set_scale (double x, double y);
+	
 	static void print_minsec (framepos_t, char* buf, size_t bufsize, float frame_rate);
 
 	sigc::signal<void> ValueChanged;
@@ -232,6 +240,9 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	double bg_r, bg_g, bg_b, bg_a;
 	double cursor_r, cursor_g, cursor_b, cursor_a;
+
+	double xscale;
+	double yscale;
 };
 
 #endif /* __audio_clock_h__ */
