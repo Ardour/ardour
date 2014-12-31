@@ -1224,6 +1224,10 @@ forge_variant(LV2_Atom_Forge* forge, const Variant& value)
 	switch (value.type()) {
 	case Variant::NOTHING:
 		break;
+	case Variant::BEATS:
+		// No atom type for this, just forge a double
+		lv2_atom_forge_double(forge, value.get_beats().to_double());
+		break;
 	case Variant::BOOL:
 		lv2_atom_forge_bool(forge, value.get_bool());
 		break;
