@@ -120,9 +120,14 @@ midi_event_is_valid(const uint8_t* buffer, size_t len)
 	if (size < 0 || (size_t)size != len) {
 		return false;
 	}
-	for (size_t i = 1; i < len; ++i) {
-		if ((buffer[i] & 0x80) != 0) {
-			return false;  // Non-status byte has MSb set
+	if (status < 0xf0) {
+		/* Channel messages: all start with status byte followed by
+		 * non status bytes.
+		 */
+		for (size_t i = 1; i < len; ++i) {
+			if ((buffer[i] & 0x80) != 0) {
+				return false;  // Non-status byte has MSb set
+			}
 		}
 	}
 	return true;
