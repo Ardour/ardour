@@ -1152,6 +1152,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\timers.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\track_selection.cc"
 				>
 			</File>
@@ -2159,6 +2163,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\time_selection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\timers.h"
 				>
 			</File>
 			<File
