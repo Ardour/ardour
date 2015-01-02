@@ -22,6 +22,11 @@
 #include <sstream>
 #include <limits>
 
+#ifdef COMPILER_MSVC
+#undef min
+#undef max
+#endif
+
 namespace PBD {
 
 bool

@@ -451,6 +451,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\timer.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\timing.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\transmitter.cc"
 				>
 			</File>
@@ -798,6 +806,14 @@
 			</File>
 			<File
 				RelativePath="..\pbd\textreceiver.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\timer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\timing.h"
 				>
 			</File>
 			<File
