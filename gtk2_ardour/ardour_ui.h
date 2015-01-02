@@ -133,14 +133,8 @@ namespace Gtk {
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
-    private:
-	/* This must be the first data element because constructor ordering
-	   relies on it.
-	*/
-	UIConfiguration*     ui_config;
-
     public:
-	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfiguration*);
+	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
 	~ARDOUR_UI();
 
 	bool run_startup (bool should_be_new, std::string load_template);
@@ -185,7 +179,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
-	static UIConfiguration *config () { return theArdourUI->ui_config; }
 	
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }

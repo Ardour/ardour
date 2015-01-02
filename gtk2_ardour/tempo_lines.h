@@ -32,8 +32,8 @@ public:
 	void draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
 	           const ARDOUR::TempoMap::BBTPointList::const_iterator& end,
 	           unsigned                                              divisions,
-	           framecnt_t                                            leftmost_frame,
-	           framecnt_t                                            frame_rate);
+	           ARDOUR::framecnt_t                                    leftmost_frame,
+	           ARDOUR::framecnt_t                                    frame_rate);
 
 	void show();
 	void hide();
@@ -41,8 +41,8 @@ public:
 private:
 	void draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
 	                 unsigned                                              divisions,
-	                 framecnt_t                                            leftmost_frame,
-	                 framecnt_t                                            frame_rate);
+	                 ARDOUR::framecnt_t                                    leftmost_frame,
+	                 ARDOUR::framecnt_t                                    frame_rate);
 
 	ArdourCanvas::LineSet lines;
 };

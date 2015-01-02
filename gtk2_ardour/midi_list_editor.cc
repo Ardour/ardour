@@ -35,9 +35,9 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
 
-#include "ardour_ui.h"
 #include "midi_list_editor.h"
 #include "note_player.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -798,7 +798,7 @@ MidiListEditor::redisplay_model ()
 void
 MidiListEditor::selection_changed ()
 {
-	if (!ARDOUR_UI::config()->get_sound_midi_notes()) {
+	if (!UIConfiguration::instance().get_sound_midi_notes()) {
 		return;
 	}
 

@@ -96,7 +96,7 @@ NoteBase::show_velocity()
 	if (!_text) {
 		_text = new Text (_item->parent ());
 		_text->set_ignore_events (true);
-		_text->set_color (ARDOUR_UI::config()->color_mod ("midi note velocity text", "midi note velocity text"));
+		_text->set_color (UIConfiguration::instance().color_mod ("midi note velocity text", "midi note velocity text"));
 		_text->set_alignment (Pango::ALIGN_CENTER);
 	}
 
@@ -121,8 +121,8 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
 	if ( (selection & (1 << _note->channel())) == 0 ) {
-		set_fill_color(ARDOUR_UI::config()->color ("midi note inactive channel"));
-		set_outline_color(calculate_outline(ARDOUR_UI::config()->color ("midi note inactive channel"),
+		set_fill_color(UIConfiguration::instance().color ("midi note inactive channel"));
+		set_outline_color(calculate_outline(UIConfiguration::instance().color ("midi note inactive channel"),
 		                                    _selected));
 	} else {
 		// set the color according to the notes selection state
@@ -170,13 +170,13 @@ NoteBase::base_color()
 	{
 		uint32_t color = _region.midi_stream_view()->get_region_color();
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (color, opacity), 
-		                         ARDOUR_UI::config()->color ("midi note selected"), 
+		                         UIConfiguration::instance().color ("midi note selected"), 
 					 0.5);
 	}
 
 	case ChannelColors:
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()], opacity), 
-		                         ARDOUR_UI::config()->color ("midi note selected"), 0.5);
+		                         UIConfiguration::instance().color ("midi note selected"), 0.5);
 
 	default:
 		return meter_style_fill_color(_note->velocity(), selected());

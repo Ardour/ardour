@@ -42,6 +42,7 @@
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "main_clock.h"
+#include "meterbridge.h"
 #include "meter_patterns.h"
 #include "midi_tracer.h"
 #include "mixer_ui.h"
@@ -223,13 +224,13 @@ ARDOUR_UI::set_session (Session *s)
 
 		editor_meter_peak_display.set_name ("meterbridge peakindicator");
 		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
-		editor_meter_peak_display.set_size_request (std::max(9.f, rintf(8.f * ARDOUR_UI::config()->get_ui_scale())), -1);
+		editor_meter_peak_display.set_size_request (std::max(9.f, rintf(8.f * UIConfiguration::instance().get_ui_scale())), -1);
 		editor_meter_peak_display.set_corner_radius (3.0);
 
 		editor_meter_max_peak = -INFINITY;
 		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
 
-		if (ARDOUR_UI::config()->get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
+		if (UIConfiguration::instance().get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
 			transport_tearoff_hbox.pack_start (meter_box, false, false);
 			transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
 			meter_box.show();
@@ -336,7 +337,7 @@ ARDOUR_UI::goto_editor_window ()
 	editor->show_window ();
 	editor->present ();
 	/* mixer should now be on top */
-	if (ARDOUR_UI::config()->get_transients_follow_front()) {
+	if (UIConfiguration::instance().get_transients_follow_front()) {
 		WM::Manager::instance().set_transient_for (editor);
 	}
 	_mixer_on_top = false;
@@ -367,7 +368,7 @@ ARDOUR_UI::goto_mixer_window ()
 	mixer->show_window ();
 	mixer->present ();
 	/* mixer should now be on top */
-	if (ARDOUR_UI::config()->get_transients_follow_front()) {
+	if (UIConfiguration::instance().get_transients_follow_front()) {
 		WM::Manager::instance().set_transient_for (mixer);
 	}
 	_mixer_on_top = true;

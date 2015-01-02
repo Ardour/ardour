@@ -43,7 +43,6 @@ private:
 	void parameter_changed (std::string const &);
 	void ltc_generator_volume_changed ();
 	ARDOUR::RCConfiguration* _rc_config;
-	UIConfiguration* _ui_config;
 	BoolOption* _solo_control_is_listen_control;
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;
 	VisibilityGroup _mixer_strip_visibility;

@@ -42,6 +42,7 @@
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "selection.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 

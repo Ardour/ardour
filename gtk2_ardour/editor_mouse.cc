@@ -1139,7 +1139,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 	}
 
 	//not rolling, range mode click + join_play_range :  locate the PH here
-	if ( !_drags->active () && _session && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && ARDOUR_UI::config()->get_follow_edits() ) {
+	if ( !_drags->active () && _session && !_session->transport_rolling() && ( effective_mouse_mode() == MouseRange ) && UIConfiguration::instance().get_follow_edits() ) {
 		framepos_t where = canvas_event_sample (event);
 		snap_to(where);
 		_session->request_locate (where, false);
@@ -1606,7 +1606,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseDraw) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
-				line->set_outline_color (ARDOUR_UI::config()->color ("entered gain line"));
+				line->set_outline_color (UIConfiguration::instance().color ("entered gain line"));
 			}
 		}
 		break;
@@ -1615,7 +1615,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		if (mouse_mode == MouseDraw || mouse_mode == MouseObject) {
 			ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
 			if (line) {
-				line->set_outline_color (ARDOUR_UI::config()->color ("entered automation line"));
+				line->set_outline_color (UIConfiguration::instance().color ("entered automation line"));
 			}
 		}
 		break;
@@ -1633,7 +1633,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 			break;
 		}
 		entered_marker = marker;
-		marker->set_color_rgba (ARDOUR_UI::config()->color ("entered marker"));
+		marker->set_color_rgba (UIConfiguration::instance().color ("entered marker"));
 		// fall through
 	case MeterMarkerItem:
 	case TempoMarkerItem:
@@ -1755,7 +1755,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	{
 		ArdourCanvas::Rectangle *rect = dynamic_cast<ArdourCanvas::Rectangle *> (item);
 		if (rect) {
-			rect->set_fill_color (ARDOUR_UI::config()->color ("inactive fade handle"));
+			rect->set_fill_color (UIConfiguration::instance().color ("inactive fade handle"));
 		}
 	}
 	break;
@@ -1766,7 +1766,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	case FeatureLineItem:
 	{
 		ArdourCanvas::Line *line = dynamic_cast<ArdourCanvas::Line *> (item);
-		line->set_outline_color (ARDOUR_UI::config()->color ("zero line"));
+		line->set_outline_color (UIConfiguration::instance().color ("zero line"));
 	}
 	break;
 
@@ -2396,7 +2396,7 @@ Editor::update_join_object_range_location (double y)
 			entered_route_view->canvas_display()->canvas_to_item (cx, cy);
 
 			double track_height = entered_route_view->view()->child_height();
-			if (ARDOUR_UI::config()->get_show_name_highlight()) {
+			if (UIConfiguration::instance().get_show_name_highlight()) {
 				track_height -= TimeAxisViewItem::NAME_HIGHLIGHT_SIZE;
 			}
 			double const c = cy / track_height;

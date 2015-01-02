@@ -39,10 +39,10 @@
 #include "region_selection.h"
 #include "selection.h"
 #include "public_editor.h"
-#include "ardour_ui.h"
 #include "timers.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -85,7 +85,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 		_trackview.session()->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::sess_rec_enable_changed, this), gui_context());
 	}
 
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
 }
 
 StreamView::~StreamView ()
@@ -409,7 +409,7 @@ StreamView::create_rec_box(framepos_t frame_pos, double width)
 {
 	const double   xstart     = _trackview.editor().sample_to_pixel(frame_pos);
 	const double   xend       = xstart + width;
-	const uint32_t fill_color = ARDOUR_UI::config()->color_mod("recording rect", "recording_rect");
+	const uint32_t fill_color = UIConfiguration::instance().color_mod("recording rect", "recording_rect");
 
 	ArdourCanvas::Rectangle* rec_rect = new ArdourCanvas::Rectangle(_canvas_group);
 	rec_rect->set_x0(xstart);
@@ -417,7 +417,7 @@ StreamView::create_rec_box(framepos_t frame_pos, double width)
 	rec_rect->set_x1(xend);
 	rec_rect->set_y1(child_height ());
 	rec_rect->set_outline_what(ArdourCanvas::Rectangle::What(0));
-	rec_rect->set_outline_color(ARDOUR_UI::config()->color("recording rect"));
+	rec_rect->set_outline_color(UIConfiguration::instance().color("recording rect"));
 	rec_rect->set_fill_color(fill_color);
 	rec_rect->lower_to_bottom();
 

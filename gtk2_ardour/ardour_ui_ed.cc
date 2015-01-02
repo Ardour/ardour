@@ -49,6 +49,7 @@
 #include "engine_dialog.h"
 #include "editor.h"
 #include "actions.h"
+#include "meterbridge.h"
 #include "mixer_ui.h"
 #include "startup.h"
 #include "window_manager.h"
@@ -644,7 +645,7 @@ ARDOUR_UI::save_ardour_state ()
 
 	Config->save_state();
 
-	ui_config->save_state ();
+	UIConfiguration::instance().save_state ();
 
 	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
 	XMLNode& mnode (mixer->get_state());

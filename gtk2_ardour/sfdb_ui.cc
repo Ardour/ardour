@@ -68,6 +68,7 @@
 #include "main_clock.h"
 #include "public_editor.h"
 #include "timers.h"
+#include "ui_config.h"
 
 #include "sfdb_freesound_mootcher.h"
 
@@ -1315,7 +1316,7 @@ SoundFileOmega::reset_options ()
 		   to do embedding (or if we are importing a MIDI file).
 		*/
 
-		if (ARDOUR_UI::config()->get_only_copy_imported_files()) {
+		if (UIConfiguration::instance().get_only_copy_imported_files()) {
 			copy_files_btn.set_sensitive (false);
 		} else {
 			copy_files_btn.set_sensitive (false);
@@ -1489,7 +1490,7 @@ SoundFileOmega::reset_options ()
 	 * or any file if we are under nsm control */
 	bool const must_copy = _session->get_nsm_state() || have_a_midi_file || notebook.get_current_page() == 2;
 	
-	if (ARDOUR_UI::config()->get_only_copy_imported_files()) {
+	if (UIConfiguration::instance().get_only_copy_imported_files()) {
 
 		if (selection_can_be_embedded_with_links && !must_copy) {
 			copy_files_btn.set_sensitive (true);

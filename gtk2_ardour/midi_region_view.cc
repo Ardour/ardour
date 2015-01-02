@@ -76,11 +76,11 @@
 #include "streamview.h"
 #include "patch_change_dialog.h"
 #include "verbose_cursor.h"
-#include "ardour_ui.h"
 #include "note.h"
 #include "hit.h"
 #include "patch_change.h"
 #include "sys_ex.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -1298,7 +1298,7 @@ MidiRegionView::display_sysexes()
 	bool have_periodic_system_messages = false;
 	bool display_periodic_messages = true;
 
-	if (!ARDOUR_UI::config()->get_never_display_periodic_midi()) {
+	if (!UIConfiguration::instance().get_never_display_periodic_midi()) {
 
 		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev = 
@@ -1629,7 +1629,7 @@ MidiRegionView::extend_active_notes()
 void
 MidiRegionView::play_midi_note(boost::shared_ptr<NoteType> note)
 {
-	if (_no_sound_notes || !ARDOUR_UI::config()->get_sound_midi_notes()) {
+	if (_no_sound_notes || !UIConfiguration::instance().get_sound_midi_notes()) {
 		return;
 	}
 
@@ -1656,7 +1656,7 @@ MidiRegionView::start_playing_midi_note(boost::shared_ptr<NoteType> note)
 void
 MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > notes)
 {
-	if (_no_sound_notes || !ARDOUR_UI::config()->get_sound_midi_notes()) {
+	if (_no_sound_notes || !UIConfiguration::instance().get_sound_midi_notes()) {
 		return;
 	}
 
@@ -2537,7 +2537,7 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 		(*i)->move_event(dx, dy);
 	}
 
-	if (dy && !_selection.empty() && !_no_sound_notes && ARDOUR_UI::config()->get_sound_midi_notes()) {
+	if (dy && !_selection.empty() && !_no_sound_notes && UIConfiguration::instance().get_sound_midi_notes()) {
 
 		if (to_play.size() > 1) {
 
@@ -2719,7 +2719,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 
 			// calculate the colors: get the color settings
 			uint32_t fill_color = UINT_RGBA_CHANGE_A(
-				ARDOUR_UI::config()->color ("midi note selected"),
+				UIConfiguration::instance().color ("midi note selected"),
 				128);
 
 			// make the resize preview notes more transparent and bright
@@ -2732,7 +2732,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 				0.85));
 
 			resize_rect->set_outline_color (NoteBase::calculate_outline (
-								ARDOUR_UI::config()->color ("midi note selected")));
+								UIConfiguration::instance().color ("midi note selected")));
 
 			resize_data->resize_rect = resize_rect;
 			_resize_data.push_back(resize_data);
@@ -3406,12 +3406,12 @@ MidiRegionView::get_fill_color() const
 	                              trackview.editor().internal_editing() ? "editable region" :
 	                              "midi frame base");
 	if (_selected) {
-		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
-	} else if ((!ARDOUR_UI::config()->get_show_name_highlight() || high_enough_for_name) &&
-	           !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-		return ARDOUR_UI::config()->color_mod ("midi frame base", mod_name);
+		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
+	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
+	           !UIConfiguration::instance().get_color_regions_using_track_color()) {
+		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
 	}
-	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
+	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
 
 void

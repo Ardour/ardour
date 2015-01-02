@@ -36,16 +36,10 @@
 
 #include "ardour/profile.h"
 
-#include "ardour_ui.h"
-/*
- * ardour_ui.h was moved up in the include list
- * due to a conflicting definition of 'Rect' between
- * Apple's MacTypes.h file and GTK
- */
-
 #include "public_editor.h"
 #include "time_axis_view_item.h"
 #include "time_axis_view.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "rgb_macros.h"
 
@@ -72,7 +66,7 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 void
 TimeAxisViewItem::set_constant_heights ()
 {
-        NAME_FONT = Pango::FontDescription (ARDOUR_UI::config()->get_SmallFont());
+        NAME_FONT = Pango::FontDescription (UIConfiguration::instance().get_SmallFont());
 
         Gtk::Window win;
         Gtk::Label foo;
@@ -95,7 +89,7 @@ TimeAxisViewItem::set_constant_heights ()
 	        Y_OFFSET is measured from the top of the time axis view item.
 	*/
 
-	if (ARDOUR_UI::config()->get_show_name_highlight()) {
+	if (UIConfiguration::instance().get_show_name_highlight()) {
 		NAME_Y_OFFSET = height + 1;
 		NAME_HIGHLIGHT_SIZE = height + 2;
 	} else {
@@ -201,13 +195,13 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
 
 		if (_recregion) {
-			frame->set_outline_color (ARDOUR_UI::config()->color ("recording rect"));
+			frame->set_outline_color (UIConfiguration::instance().color ("recording rect"));
 		} else {
-			frame->set_outline_color (ARDOUR_UI::config()->color ("time axis frame"));
+			frame->set_outline_color (UIConfiguration::instance().color ("time axis frame"));
 		}
 	}
 	
-	if (ARDOUR_UI::config()->get_show_name_highlight() && (visibility & ShowNameHighlight)) {
+	if (UIConfiguration::instance().get_show_name_highlight() && (visibility & ShowNameHighlight)) {
 
 		/* rectangle size will be set in ::manage_name_highlight() */
 		name_highlight = new ArdourCanvas::Rectangle (group);
@@ -223,7 +217,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	if (visibility & ShowNameText) {
 		name_text = new ArdourCanvas::Text (group);
 		CANVAS_DEBUG_NAME (name_text, string_compose ("name text for %1", get_item_name()));
-		if (ARDOUR_UI::config()->get_show_name_highlight()) {
+		if (UIConfiguration::instance().get_show_name_highlight()) {
 			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, trackview.current_height() - NAME_Y_OFFSET));
 		} else {
 			name_text->set_position (ArdourCanvas::Duple (NAME_X_OFFSET, NAME_Y_OFFSET));
@@ -260,7 +254,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	set_position (start, this);
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&TimeAxisViewItem::parameter_changed, this, _1), gui_context ());
-	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &TimeAxisViewItem::parameter_changed));
 }
 
 TimeAxisViewItem::~TimeAxisViewItem()
@@ -503,7 +497,7 @@ TimeAxisViewItem::set_selected(bool yn)
 		if (!selection_frame) {
 			selection_frame = new ArdourCanvas::Rectangle (group);
 			selection_frame->set_fill (false);
-			selection_frame->set_outline_color (ARDOUR_UI::config()->color ("selected time axis frame"));
+			selection_frame->set_outline_color (UIConfiguration::instance().color ("selected time axis frame"));
 			selection_frame->set_ignore_events (true);
 		}
 		selection_frame->set (frame->get().shrink (1.0));
@@ -555,7 +549,7 @@ TimeAxisViewItem::set_height (double height)
 	manage_name_highlight ();
 
 	if (visibility & ShowNameText) {
-		if (ARDOUR_UI::config()->get_show_name_highlight()) {
+		if (UIConfiguration::instance().get_show_name_highlight()) {
 			name_text->set_y_position (height - NAME_Y_OFFSET); 
 		} else {
 			name_text->set_y_position (NAME_Y_OFFSET); 
@@ -668,7 +662,7 @@ TimeAxisViewItem::set_name_text_color ()
 
 	uint32_t f;
 	
-	if (ARDOUR_UI::config()->get_show_name_highlight()) {
+	if (UIConfiguration::instance().get_show_name_highlight()) {
 		/* name text will always be on top of name highlight, which
 		   will always use our fill color.
 		*/
@@ -689,14 +683,14 @@ TimeAxisViewItem::get_fill_color () const
 	const std::string mod_name = (_dragging ? "dragging region" : fill_color_name);
 
 	if (_selected) {
-		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
+		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
 	} else if (_recregion) {
-		return ARDOUR_UI::config()->color ("recording rect");
-	} else if ((!ARDOUR_UI::config()->get_show_name_highlight() || high_enough_for_name) &&
-	           !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-		return ARDOUR_UI::config()->color_mod (fill_color_name, mod_name);
+		return UIConfiguration::instance().color ("recording rect");
+	} else if ((!UIConfiguration::instance().get_show_name_highlight() || high_enough_for_name) &&
+	           !UIConfiguration::instance().get_color_regions_using_track_color()) {
+		return UIConfiguration::instance().color_mod (fill_color_name, mod_name);
 	}
-	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
+	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
 
 /**
@@ -713,14 +707,14 @@ TimeAxisViewItem::set_frame_color()
 	set_frame_gradient ();
 
 	if (!_recregion) {
-		frame->set_outline_color (ARDOUR_UI::config()->color ("time axis frame"));
+		frame->set_outline_color (UIConfiguration::instance().color ("time axis frame"));
 	}
 }
 
 void
 TimeAxisViewItem::set_frame_gradient ()
 {
-	if (ARDOUR_UI::config()->get_timeline_item_gradient_depth() == 0.0) {
+	if (UIConfiguration::instance().get_timeline_item_gradient_depth() == 0.0) {
 		frame->set_gradient (ArdourCanvas::Fill::StopList (), 0);
 		return;
 	}
@@ -739,7 +733,7 @@ TimeAxisViewItem::set_frame_gradient ()
 	
 	ArdourCanvas::color_to_hsv (f, h, s, v);
 
-	v = min (1.0, v * (1.0 - ARDOUR_UI::config()->get_timeline_item_gradient_depth()));
+	v = min (1.0, v * (1.0 - UIConfiguration::instance().get_timeline_item_gradient_depth()));
 	
 	ArdourCanvas::Color darker = ArdourCanvas::hsva_to_color (h, s, v, a);
 	stops.push_back (std::make_pair (1.0, darker));
@@ -762,11 +756,11 @@ TimeAxisViewItem::set_trim_handle_colors()
 #else
 	if (frame_handle_start) {
 		if (position_locked) {
-			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_TrimHandleLocked());
-			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_TrimHandleLocked());
+			frame_handle_start->set_fill_color (UIConfiguration::instance().get_TrimHandleLocked());
+			frame_handle_end->set_fill_color (UIConfiguration::instance().get_TrimHandleLocked());
 		} else {
-			frame_handle_start->set_fill_color (ARDOUR_UI::config()->get_TrimHandle());
-			frame_handle_end->set_fill_color (ARDOUR_UI::config()->get_TrimHandle());
+			frame_handle_start->set_fill_color (UIConfiguration::instance().get_TrimHandle());
+			frame_handle_end->set_fill_color (UIConfiguration::instance().get_TrimHandle());
 		}
 	}
 #endif
@@ -834,8 +828,8 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 			if (!vestigial_frame) {
 				vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
 				CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
-				vestigial_frame->set_outline_color (ARDOUR_UI::config()->color ("vestigial frame"));
-				vestigial_frame->set_fill_color (ARDOUR_UI::config()->color ("vestigial frame"));
+				vestigial_frame->set_outline_color (UIConfiguration::instance().color ("vestigial frame"));
+				vestigial_frame->set_fill_color (UIConfiguration::instance().color ("vestigial frame"));
 				vestigial_frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 			}
 

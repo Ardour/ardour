@@ -372,7 +372,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "show-track-meters") {
 		if (editor) editor->toggle_meter_updating();
 	} else if (p == "primary-clock-delta-edit-cursor") {
-		if (ARDOUR_UI::config()->get_primary_clock_delta_edit_cursor()) {
+		if (UIConfiguration::instance().get_primary_clock_delta_edit_cursor()) {
 			primary_clock->set_is_duration (true);
 			primary_clock->set_editable (false);
 			primary_clock->set_widget_name ("transport delta");
@@ -382,7 +382,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			primary_clock->set_widget_name ("transport");
 		}
 	} else if (p == "secondary-clock-delta-edit-cursor") {
-		if (ARDOUR_UI::config()->get_secondary_clock_delta_edit_cursor()) {
+		if (UIConfiguration::instance().get_secondary_clock_delta_edit_cursor()) {
 			secondary_clock->set_is_duration (true);
 			secondary_clock->set_editable (false);
 			secondary_clock->set_widget_name ("secondary delta");
@@ -397,9 +397,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 			start_clocking ();
 		}
 	} else if (p == "waveform-gradient-depth") {
-		ArdourCanvas::WaveView::set_global_gradient_depth (config()->get_waveform_gradient_depth());
+		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "show-editor-meter") {
-		bool show = ARDOUR_UI::config()->get_show_editor_meter();
+		bool show = UIConfiguration::instance().get_show_editor_meter();
 
 		if (editor_meter) {
 			if (meter_box.get_parent()) {
@@ -415,17 +415,17 @@ ARDOUR_UI::parameter_changed (std::string p)
 			} 
 		}
 	} else if (p == "waveform-scale") {
-		ArdourCanvas::WaveView::set_global_logscaled (ARDOUR_UI::config()->get_waveform_scale() == Logarithmic);
+		ArdourCanvas::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {
-		CairoWidget::set_widget_prelight( config()->get_widget_prelight() );
+		CairoWidget::set_widget_prelight (UIConfiguration::instance().get_widget_prelight());
 	} else if (p == "waveform-shape") {
-		ArdourCanvas::WaveView::set_global_shape (ARDOUR_UI::config()->get_waveform_shape() == Rectified
+		ArdourCanvas::WaveView::set_global_shape (UIConfiguration::instance().get_waveform_shape() == Rectified
 				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
 	} else if (p == "show-waveform-clipping") {
-		ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
+		ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
 	} else if (p == "waveform-cache-size") {
 		/* GUI option has units of megabytes; image cache uses units of bytes */
-		ArdourCanvas::WaveView::set_image_cache_size (ARDOUR_UI::config()->get_waveform_cache_size() * 1048576);
+		ArdourCanvas::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
 	}
 }
 

@@ -28,6 +28,11 @@
 
 #include <sigc++/signal.h>
 
+namespace ARDOUR {
+	class Route;
+	class RouteGroup;
+}
+
 namespace ArdourMeter {
 
 extern sigc::signal<void> ResetAllPeakDisplays;

@@ -61,7 +61,6 @@
 #include "canvas/canvas.h"
 
 #include "actions.h"
-#include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
@@ -98,6 +97,7 @@
 #include "time_axis_view.h"
 #include "transpose_dialog.h"
 #include "transform_dialog.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -2045,7 +2045,7 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 bool
 Editor::choose_new_marker_name(string &name) {
 
-	if (!ARDOUR_UI::config()->get_name_new_markers()) {
+	if (!UIConfiguration::instance().get_name_new_markers()) {
 		/* don't prompt user for a new name */
 		return true;
 	}
@@ -2537,7 +2537,7 @@ Editor::get_preroll ()
 void
 Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 {
-	if ( _session->transport_rolling() || !ARDOUR_UI::config()->get_follow_edits() || _ignore_follow_edits )
+	if ( _session->transport_rolling() || !UIConfiguration::instance().get_follow_edits() || _ignore_follow_edits )
 		return;
 
 	location -= get_preroll();
@@ -6115,7 +6115,7 @@ Editor::set_playhead_cursor ()
 		}
 	}
 
-	if (ARDOUR_UI::config()->get_follow_edits()) {
+	if (UIConfiguration::instance().get_follow_edits()) {
 		cancel_time_selection();
 	}
 }
@@ -7889,7 +7889,7 @@ Editor::unlock ()
 	
 	delete _main_menu_disabler;
 
-	if (ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+	if (UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		start_lock_event_timing ();
 	}
 }

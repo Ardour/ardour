@@ -30,11 +30,11 @@
 
 #include "canvas/debug.h"
 
-#include "ardour_ui.h"
 #include "editor.h"
 #include "editor_drag.h"
 #include "midi_region_view.h"
 #include "patch_change.h"
+#include "ui_config.h"
 
 using namespace MIDI::Name;
 using namespace std;
@@ -58,15 +58,15 @@ PatchChange::PatchChange(MidiRegionView&                   region,
 	_flag = new ArdourCanvas::Flag (
 		parent,
 		height,
-		ARDOUR_UI::config()->color ("midi patch change outline"),
-		ARDOUR_UI::config()->color_mod ("midi patch change fill", "midi patch change fill"),
+		UIConfiguration::instance().color ("midi patch change outline"),
+		UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill"),
 		ArdourCanvas::Duple (x, y),
 		true);
 	
 	CANVAS_DEBUG_NAME (_flag, text);
 
 	_flag->Event.connect (sigc::mem_fun (*this, &PatchChange::event_handler));
-	_flag->set_font_description (ARDOUR_UI::config()->get_SmallFont());
+	_flag->set_font_description (UIConfiguration::instance().get_SmallFont());
 	_flag->set_text(text);
 }
 

@@ -38,6 +38,7 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/data_type.h"
 #include "ardour/chan_mapping.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 
 #include "plugin_eq_gui.h"

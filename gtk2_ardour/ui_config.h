@@ -37,11 +37,12 @@
 
 class UIConfiguration : public PBD::Stateful
 {
-    public:
+private:
 	UIConfiguration();
 	~UIConfiguration();
 
-	static UIConfiguration* instance() { return _instance; }
+    public:
+	static UIConfiguration& instance();
 
 	void load_rc_file (bool themechange, bool allow_own = true);
 
@@ -76,14 +77,14 @@ class UIConfiguration : public PBD::Stateful
 	ArdourCanvas::HSV  color_hsv (const std::string&) const;
 	ArdourCanvas::SVAModifier modifier (const std::string&) const;
 
-	static sigc::signal<void>  ColorsChanged;
+	sigc::signal<void>  ColorsChanged;
 
 	void reset_dpi ();
 	void set_pango_fontsize ();
 
 	float get_ui_scale ();
 		
-	static sigc::signal<void>  DPIReset;
+	sigc::signal<void>  DPIReset;
 
 	sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);
@@ -130,8 +131,6 @@ class UIConfiguration : public PBD::Stateful
 	bool colors_modified;
 	bool modifiers_modified;
 	
-	static UIConfiguration* _instance;
-
 	int store_color_theme ();
 	void load_color_aliases (XMLNode const &);
 	void load_colors (XMLNode const &);

@@ -29,7 +29,6 @@
 
 #include "gtkmm2ext/keyboard.h"
 
-#include "ardour_ui.h"
 #include "automation_region_view.h"
 #include "editing.h"
 #include "editor.h"
@@ -37,6 +36,7 @@
 #include "gui_thread.h"
 #include "midi_automation_line.h"
 #include "public_editor.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -109,11 +109,11 @@ AutomationRegionView::get_fill_color() const
 	                              trackview.editor().internal_editing() ? "editable region" :
 	                              "midi frame base");
 	if (_selected) {
-		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
-	} else if (high_enough_for_name || !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-		return ARDOUR_UI::config()->color_mod ("midi frame base", mod_name);
+		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
+	} else if (high_enough_for_name || !UIConfiguration::instance().get_color_regions_using_track_color()) {
+		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
 	}
-	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
+	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
 
 void
