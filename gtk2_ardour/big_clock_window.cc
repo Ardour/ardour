@@ -47,6 +47,7 @@ BigClockWindow::BigClockWindow (AudioClock& c)
 	clock.show_all ();
 
 	clock.size_request (default_size);
+
 	clock.signal_size_allocate().connect (sigc::mem_fun (*this, &BigClockWindow::clock_size_reallocated));
 }
 
@@ -71,6 +72,19 @@ BigClockWindow::on_realize ()
 	/* (try to) ensure that resizing is possible.
 	 */
 	get_window()->set_decorations (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH);
+
+	/* try to force a fixed aspect ratio so that we don't distort the font
+	 */
+
+	float aspect = default_size.width/(float)default_size.height;
+	Gdk::Geometry geom;
+
+	geom.min_aspect = aspect;
+	geom.max_aspect = aspect;
+	geom.min_width = -1; /* use requisition */
+	geom.min_height = -1; /* use requisition */
+
+	get_window()->set_geometry_hints (geom, Gdk::WindowHints (Gdk::HINT_ASPECT|Gdk::HINT_MIN_SIZE));
 }
 
 void
