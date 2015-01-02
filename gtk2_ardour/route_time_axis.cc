@@ -76,6 +76,7 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "streamview.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "route_group_menu.h"
 
@@ -307,7 +308,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} 
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_pixel));
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	PropertyList* plist = new PropertyList();
 
@@ -921,8 +922,8 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 
 	if (timestretch_rect == 0) {
 		timestretch_rect = new ArdourCanvas::Rectangle (canvas_display ());
-		timestretch_rect->set_fill_color (ArdourCanvas::HSV (ARDOUR_UI::config()->color ("time stretch fill")).mod (ARDOUR_UI::config()->modifier ("time stretch fill")).color());
-		timestretch_rect->set_outline_color (ARDOUR_UI::config()->color ("time stretch outline"));
+		timestretch_rect->set_fill_color (ArdourCanvas::HSV (UIConfiguration::instance().color ("time stretch fill")).mod (UIConfiguration::instance().modifier ("time stretch fill")).color());
+		timestretch_rect->set_outline_color (UIConfiguration::instance().color ("time stretch outline"));
 	}
 
 	timestretch_rect->show ();
@@ -1833,11 +1834,11 @@ RouteTimeAxisView::color_handler ()
 {
 	//case cTimeStretchOutline:
 	if (timestretch_rect) {
-		timestretch_rect->set_outline_color (ARDOUR_UI::config()->color ("time stretch outline"));
+		timestretch_rect->set_outline_color (UIConfiguration::instance().color ("time stretch outline"));
 	}
 	//case cTimeStretchFill:
 	if (timestretch_rect) {
-		timestretch_rect->set_fill_color (ARDOUR_UI::config()->color ("time stretch fill"));
+		timestretch_rect->set_fill_color (UIConfiguration::instance().color ("time stretch fill"));
 	}
 
 	reset_meter();
@@ -2560,7 +2561,7 @@ RouteTimeAxisView::show_meter ()
 void
 RouteTimeAxisView::reset_meter ()
 {
-	if (ARDOUR_UI::config()->get_show_track_meters()) {
+	if (UIConfiguration::instance().get_show_track_meters()) {
 		int meter_width = 3;
 		if (_route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 6;
@@ -2582,7 +2583,7 @@ RouteTimeAxisView::meter_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &RouteTimeAxisView::meter_changed)
 	reset_meter();
-	if (_route && !no_redraw && ARDOUR_UI::config()->get_show_track_meters()) {
+	if (_route && !no_redraw && UIConfiguration::instance().get_show_track_meters()) {
 		request_redraw ();
 	}
 	// reset peak when meter point changes

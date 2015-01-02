@@ -219,10 +219,9 @@ libxml_structured_error_func (void* /* parsing_context*/,
 }
 
 
-ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfiguration* uic)
+ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
-	, ui_config (uic->post_gui_init ())
 	, session_loaded (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
@@ -286,6 +285,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 {
 	Gtkmm2ext::init (localedir);
 
+	UIConfiguration::instance().post_gui_init ();
+
 	if (ARDOUR::handle_old_configuration_files (boost::bind (ask_about_configuration_copy, _1, _2, _3))) {
 		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
 		msg.run ();
@@ -302,9 +303,9 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	xmlSetGenericErrorFunc (this, libxml_generic_error_func);
 	xmlSetStructuredErrorFunc (this, libxml_structured_error_func);
 	
-	ui_config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
-	ui_config->map_parameters (pc);
+	UIConfiguration::instance().map_parameters (pc);
 
 	roll_button.set_controllable (roll_controllable);
 	stop_button.set_controllable (stop_controllable);
@@ -389,7 +390,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	/* we don't like certain modifiers */
 	Bindings::set_ignored_state (GDK_LOCK_MASK|GDK_MOD2_MASK|GDK_MOD3_MASK);
 
-	ARDOUR_UI::config()->reset_dpi ();
+	UIConfiguration::instance().reset_dpi ();
 
 	TimeAxisViewItem::set_constant_heights ();
 
@@ -436,12 +437,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 
 	/* Trigger setting up the color scheme and loading the GTK RC file */
 
-	ARDOUR_UI::config()->load_rc_file (false);
+	UIConfiguration::instance().load_rc_file (false);
 	
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
 
-	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
 	attach_to_engine ();
 }
@@ -621,13 +622,13 @@ ARDOUR_UI::post_engine ()
 		boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 		Config->map_parameters (pc);
 
-		ui_config->map_parameters (pc);
+		UIConfiguration::instance().map_parameters (pc);
 	}
 }
 
 ARDOUR_UI::~ARDOUR_UI ()
 {
-	ui_config->save_state();
+	UIConfiguration::instance().save_state();
 
 	stop_video_server();
 
@@ -1265,10 +1266,10 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 {
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
-	if (editor_meter && ARDOUR_UI::config()->get_show_editor_meter()) {
+	if (editor_meter && UIConfiguration::instance().get_show_editor_meter()) {
 		float mpeak = editor_meter->update_meters();
 		if (mpeak > editor_meter_max_peak) {
-			if (mpeak >= ARDOUR_UI::config()->get_meter_peak()) {
+			if (mpeak >= UIConfiguration::instance().get_meter_peak()) {
 				editor_meter_peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 			}
 		}
@@ -2185,7 +2186,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 		if (rolling) {
 			_session->request_stop (with_abort, true);
 		} else {
-			if (ARDOUR_UI::config()->get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
+			if (UIConfiguration::instance().get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
 				_session->request_play_range (&editor->get_selection().time, true);
 				_session->set_requested_return_frame( editor->get_selection().time.front().start );  //force an auto-return here
 			}
@@ -2362,7 +2363,7 @@ ARDOUR_UI::map_transport_state ()
 			auto_loop_button.set_active (false);
 		}
 
-		if (ARDOUR_UI::config()->get_follow_edits()) {
+		if (UIConfiguration::instance().get_follow_edits()) {
 			/* light up both roll and play-selection if they are joined */
 			roll_button.set_active (true);
 			play_selection_button.set_active (true);
@@ -2408,7 +2409,7 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	if (ui_config->get_super_rapid_clock_update()) {
+	if (UIConfiguration::instance().get_super_rapid_clock_update()) {
 		clock_signal_connection = Timers::fps_connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
 	} else {
 		clock_signal_connection = Timers::rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
@@ -4281,7 +4282,7 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 	}
 
 	const bool cancelled = PluginManager::instance().cancelled();
-	if (type != X_("closeme") && (!ui_config->get_show_plugin_scan_window()) && !_initial_verbose_plugin_scan) {
+	if (type != X_("closeme") && (!UIConfiguration::instance().get_show_plugin_scan_window()) && !_initial_verbose_plugin_scan) {
 		if (cancelled && scan_dlg->is_mapped()) {
 			scan_dlg->hide();
 			gui_idle_handler();
@@ -4513,13 +4514,13 @@ ARDOUR_UI::use_config ()
 void
 ARDOUR_UI::update_transport_clocks (framepos_t pos)
 {
-	if (ui_config->get_primary_clock_delta_edit_cursor()) {
+	if (UIConfiguration::instance().get_primary_clock_delta_edit_cursor()) {
 		primary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
 	} else {
 		primary_clock->set (pos);
 	}
 
-	if (ui_config->get_secondary_clock_delta_edit_cursor()) {
+	if (UIConfiguration::instance().get_secondary_clock_delta_edit_cursor()) {
 		secondary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
 	} else {
 		secondary_clock->set (pos);
@@ -4878,7 +4879,7 @@ ARDOUR_UI::transport_numpad_event (int num)
 void
 ARDOUR_UI::set_flat_buttons ()
 {
-	CairoWidget::set_flat_buttons( config()->get_flat_buttons() );
+	CairoWidget::set_flat_buttons( UIConfiguration::instance().get_flat_buttons() );
 }
 
 void

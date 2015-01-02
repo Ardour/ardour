@@ -45,7 +45,7 @@ GroupTabs::GroupTabs ()
 	, _dragging_new_tab (0)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &GroupTabs::queue_draw));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &GroupTabs::queue_draw));
 }
 
 GroupTabs::~GroupTabs ()

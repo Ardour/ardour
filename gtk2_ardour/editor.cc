@@ -124,6 +124,7 @@
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "timers.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "verbose_cursor.h"
 
@@ -402,11 +403,11 @@ Editor::Editor ()
 
 	sfbrowser = 0;
 
-	location_marker_color = ARDOUR_UI::config()->color ("location marker");
-	location_range_color = ARDOUR_UI::config()->color ("location range");
-	location_cd_marker_color = ARDOUR_UI::config()->color ("location cd marker");
-	location_loop_color = ARDOUR_UI::config()->color ("location loop");
-	location_punch_color = ARDOUR_UI::config()->color ("location punch");
+	location_marker_color = UIConfiguration::instance().color ("location marker");
+	location_range_color = UIConfiguration::instance().color ("location range");
+	location_cd_marker_color = UIConfiguration::instance().color ("location cd marker");
+	location_loop_color = UIConfiguration::instance().color ("location loop");
+	location_punch_color = UIConfiguration::instance().color ("location punch");
 
 	zoom_focus = ZoomFocusPlayhead;
 	_edit_point = EditAtMouse;
@@ -414,7 +415,7 @@ Editor::Editor ()
 
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
-	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::config()->get_ui_scale()));
+	timebar_height = std::max(12., ceil (15. * UIConfiguration::instance().get_ui_scale()));
 	TimeAxisView::setup_sizes ();
 	ArdourMarker::setup_sizes (timebar_height);
 
@@ -530,8 +531,8 @@ Editor::Editor ()
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	_cursors = new MouseCursors;
-	_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
-	cerr << "Set cursor set to " << ARDOUR_UI::config()->get_icon_set() << endl;
+	_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
+	cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << endl;
 
 	/* Push default cursor to ever-present bottom of cursor stack. */
 	push_canvas_cursor(_cursors->grabber);
@@ -771,7 +772,7 @@ Editor::Editor ()
 	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
-	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
 
 	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
@@ -798,7 +799,7 @@ Editor::Editor ()
 
 	/* grab current parameter state */
 	boost::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
-	ARDOUR_UI::config()->map_parameters (pc);
+	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
 
@@ -1150,7 +1151,7 @@ Editor::on_realize ()
 	Window::on_realize ();
 	Realized ();
 
-	if (ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+	if (UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		start_lock_event_timing ();
 	}
 
@@ -1210,7 +1211,7 @@ Editor::lock_timeout_callback ()
 
 	timersub (&now, &last_event_time, &delta);
 
-	if (delta.tv_sec > (time_t) ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+	if (delta.tv_sec > (time_t) UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		lock ();
 		/* don't call again. Returning false will effectively
 		   disconnect us from the timer callback.
@@ -4241,7 +4242,7 @@ Editor::session_state_saved (string)
 void
 Editor::update_tearoff_visibility()
 {
-	bool visible = ARDOUR_UI::config()->get_keep_tearoffs();
+	bool visible = UIConfiguration::instance().get_keep_tearoffs();
 	_mouse_mode_tearoff->set_visible (visible);
 	_tools_tearoff->set_visible (visible);
 	if (_zoom_tearoff) {
@@ -5976,11 +5977,11 @@ Editor::ui_parameter_changed (string parameter)
 		while (!_cursor_stack.empty()) {
 			_cursor_stack.pop_back();
 		}
-		_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
+		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
 		_cursor_stack.push_back(_cursors->grabber);
 	} else if (parameter == "draggable-playhead") {
 		if (_verbose_cursor) {
-			playhead_cursor->set_sensitive (ARDOUR_UI::config()->get_draggable_playhead());
+			playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
 		}
 	}
 }

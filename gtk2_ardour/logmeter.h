@@ -20,6 +20,8 @@
 #ifndef __ardour_gtk_log_meter_h__
 #define __ardour_gtk_log_meter_h__
 
+#include "ardour/dB.h"
+
 #if 1
 static inline float
 _log_meter (float power, double lower_db, double upper_db, double non_linearity)

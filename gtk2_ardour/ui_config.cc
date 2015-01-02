@@ -62,13 +62,15 @@ using namespace ArdourCanvas;
 
 static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
-UIConfiguration* UIConfiguration::_instance = 0;
 
 static const double hue_width = 18.0;
 
-sigc::signal<void>  UIConfiguration::ColorsChanged;
-
-sigc::signal<void>  UIConfiguration::DPIReset;
+UIConfiguration&
+UIConfiguration::instance ()
+{
+	static UIConfiguration s_instance;
+	return s_instance;
+}
 
 UIConfiguration::UIConfiguration ()
 	:
@@ -86,8 +88,6 @@ UIConfiguration::UIConfiguration ()
 	modifiers_modified (false),
 	block_save (0)
 {
-	_instance = this;
-
 	load_state();
 
 	ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));

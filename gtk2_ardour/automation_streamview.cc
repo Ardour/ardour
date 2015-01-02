@@ -30,7 +30,6 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 
-#include "ardour_ui.h"
 #include "automation_region_view.h"
 #include "automation_streamview.h"
 #include "automation_time_axis.h"
@@ -40,6 +39,7 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -60,7 +60,7 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 
 	color_handler ();
 
-	UIConfiguration::ColorsChanged.connect(sigc::mem_fun(*this, &AutomationStreamView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect(sigc::mem_fun(*this, &AutomationStreamView::color_handler));
 }
 
 AutomationStreamView::~AutomationStreamView ()
@@ -202,9 +202,9 @@ void
 AutomationStreamView::color_handler ()
 {
 	if (_trackview.is_midi_track()) {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("midi track base", "midi track base"));
+		canvas_rect->set_fill_color (UIConfiguration::instance().color_mod ("midi track base", "midi track base"));
 	} else {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("midi bus base"));
+		canvas_rect->set_fill_color (UIConfiguration::instance().color ("midi bus base"));
 	}
 }
 

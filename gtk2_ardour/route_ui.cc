@@ -47,6 +47,7 @@
 #include "route_time_axis.h"
 #include "group_tabs.h"
 #include "timers.h"
+#include "ui_config.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -151,7 +152,7 @@ RouteUI::init ()
 	rec_enable_button->set_icon (ArdourIcon::RecButton);
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
-	if (ARDOUR_UI::config()->get_blink_rec_arm()) {
+	if (UIConfiguration::instance().get_blink_rec_arm()) {
 		rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
 	}
 
@@ -313,7 +314,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	update_mute_display ();
 	update_solo_display ();
 
-	if (!ARDOUR_UI::config()->get_blink_rec_arm()) {
+	if (!UIConfiguration::instance().get_blink_rec_arm()) {
 		blink_rec_display(true); // set initial rec-en button state
 	}
 
@@ -1264,7 +1265,7 @@ RouteUI::blink_rec_display (bool blinkOn)
 
                 case Session::Disabled:
                 case Session::Enabled:
-                        if ( ARDOUR_UI::config()->get_blink_rec_arm() )
+                        if ( UIConfiguration::instance().get_blink_rec_arm() )
 							rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
 						else
 							rec_enable_button->set_active_state ( ImplicitActive );
@@ -1865,7 +1866,7 @@ RouteUI::parameter_changed (string const & p)
 	} else if (p == "auto-input") {
 		update_monitoring_display ();
 	} else if (p == "blink-rec-arm") {
-		if (ARDOUR_UI::config()->get_blink_rec_arm()) {
+		if (UIConfiguration::instance().get_blink_rec_arm()) {
 			rec_blink_connection.disconnect ();
 			rec_blink_connection = Timers::blink_connect (sigc::mem_fun (*this, &RouteUI::blink_rec_display));
 		} else {

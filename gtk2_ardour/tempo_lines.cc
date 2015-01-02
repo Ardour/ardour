@@ -22,10 +22,10 @@
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 
-#include "ardour_ui.h"
+#include "tempo_lines.h"
 #include "public_editor.h"
 #include "rgb_macros.h"
-#include "tempo_lines.h"
+#include "ui_config.h"
 
 using namespace std;
 
@@ -60,7 +60,7 @@ TempoLines::draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
                         framecnt_t                                            frame_rate)
 {
 	const double   fpb  = b->tempo->frames_per_beat(frame_rate);
-	const uint32_t base = ARDOUR_UI::config()->color_mod("measure line beat", "measure line beat");
+	const uint32_t base = UIConfiguration::instance().color_mod("measure line beat", "measure line beat");
 
 	for (unsigned l = 1; l < divisions; ++l) {
 		/* find the coarsest division level this tick falls on */
@@ -127,12 +127,12 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	for (i = begin; i != end; ++i) {
 
 		if ((*i).is_bar()) {
-			color = ARDOUR_UI::config()->color ("measure line bar");
+			color = UIConfiguration::instance().color ("measure line bar");
 		} else {
 			if (beat_density > 0.3) {
 				continue; /* only draw beat lines if the gaps between beats are large. */
 			}
-			color = ARDOUR_UI::config()->color_mod ("measure line beat", "measure line beat");
+			color = UIConfiguration::instance().color_mod ("measure line beat", "measure line beat");
 		}
 
 		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);

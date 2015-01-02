@@ -64,6 +64,7 @@
 #include "mouse_cursors.h"
 #include "note_base.h"
 #include "patch_change.h"
+#include "ui_config.h"
 #include "verbose_cursor.h"
 
 using namespace std;
@@ -3080,7 +3081,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
-			ARDOUR_UI::config()->color ("meter marker"),
+			UIConfiguration::instance().color ("meter marker"),
 			name,
 			*new MeterSection (_marker->meter())
 		);
@@ -3211,7 +3212,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker = new TempoMarker (
 			*_editor,
 			*_editor->tempo_group,
-			ARDOUR_UI::config()->color ("tempo marker"),
+			UIConfiguration::instance().color ("tempo marker"),
 			name,
 			*new TempoSection (_marker->tempo())
 			);
@@ -4385,7 +4386,7 @@ void
 RubberbandSelectDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
-	show_verbose_cursor_time (adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid()));
+	show_verbose_cursor_time (adjusted_current_frame (event, UIConfiguration::instance().get_rubberbanding_snaps_to_grid()));
 }
 
 void
@@ -4396,10 +4397,10 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	double y1;
 	double y2;
 
-	framepos_t const pf = adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid());
+	framepos_t const pf = adjusted_current_frame (event, UIConfiguration::instance().get_rubberbanding_snaps_to_grid());
 
 	framepos_t grab = grab_frame ();
-	if (ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ()) {
+	if (UIConfiguration::instance().get_rubberbanding_snaps_to_grid ()) {
 		_editor->snap_to_with_modifier (grab, event);
 	} else {
 		grab = raw_grab_frame ();
@@ -4476,7 +4477,7 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 	framepos_t grab = grab_frame ();
 	framepos_t lpf = last_pointer_frame ();
 
-	if (!ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ()) {
+	if (!UIConfiguration::instance().get_rubberbanding_snaps_to_grid ()) {
 		grab = raw_grab_frame ();
 		lpf = _editor->pixel_to_sample_from_event (last_pointer_x());
 	}
@@ -4943,7 +4944,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			if (s->get_play_range() && s->transport_rolling()) {
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
-				if (ARDOUR_UI::config()->get_follow_edits() && !s->transport_rolling()) {
+				if (UIConfiguration::instance().get_follow_edits() && !s->transport_rolling()) {
 					if (_operation == SelectionEndTrim)
 						_editor->maybe_locate_with_edit_preroll( _editor->get_selection().time.end_frame());
 					else
@@ -5014,8 +5015,8 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 								      physical_screen_height (_editor->get_window())));
 	_drag_rect->hide ();
 
-	_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag rect"));
-	_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("range drag rect"));
+	_drag_rect->set_fill_color (UIConfiguration::instance().color ("range drag rect"));
+	_drag_rect->set_outline_color (UIConfiguration::instance().color ("range drag rect"));
 }
 
 RangeMarkerBarDrag::~RangeMarkerBarDrag()

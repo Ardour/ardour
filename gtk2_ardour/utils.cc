@@ -46,7 +46,6 @@
 #include "canvas/item.h"
 #include "canvas/utils.h"
 
-#include "ardour_ui.h"
 #include "debug.h"
 #include "public_editor.h"
 #include "keyboard.h"
@@ -54,6 +53,7 @@
 #include "i18n.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "ui_config.h"
 
 using namespace std;
 using namespace Gtk;

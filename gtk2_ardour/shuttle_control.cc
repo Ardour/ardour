@@ -122,7 +122,7 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 
 	//background
 	pattern = cairo_pattern_create_linear (0, 0, 0, alloc.get_height());
-	uint32_t col = ARDOUR_UI::config()->color ("shuttle");
+	uint32_t col = UIConfiguration::instance().color ("shuttle");
 	int r,b,g,a;
 	UINT_TO_RGBA(col, &r, &g, &b, &a);
 	cairo_pattern_add_color_stop_rgb (pattern, 0.0, r/400.0, g/400.0, b/400.0);
@@ -640,7 +640,7 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	cairo_move_to (cr, get_width() - (fabs(extents.x_advance) + 5), text_ypos);
 	cairo_show_text (cr, buf);
 
-	if (ARDOUR_UI::config()->get_widget_prelight()) {
+	if (UIConfiguration::instance().get_widget_prelight()) {
 		if (_hovering) {
 			rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, 4.0);
 			cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
@@ -729,7 +729,7 @@ ShuttleControl::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = true;
 
-	if (ARDOUR_UI::config()->get_widget_prelight()) {
+	if (UIConfiguration::instance().get_widget_prelight()) {
 		queue_draw ();
 	}
 
@@ -741,7 +741,7 @@ ShuttleControl::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = false;
 
-	if (ARDOUR_UI::config()->get_widget_prelight()) {
+	if (UIConfiguration::instance().get_widget_prelight()) {
 		queue_draw ();
 	}
 

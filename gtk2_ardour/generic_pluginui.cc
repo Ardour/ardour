@@ -49,6 +49,7 @@
 #include "gui_thread.h"
 #include "automation_controller.h"
 #include "timers.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -763,8 +764,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				0xcccc00ff, 0xcccc00ff,
 				0xffaa00ff, 0xffaa00ff,
 				0xff0000ff,
-				ARDOUR_UI::config()->color ("meter background bottom"),
-				ARDOUR_UI::config()->color ("meter background top")
+				UIConfiguration::instance().color ("meter background bottom"),
+				UIConfiguration::instance().color ("meter background top")
 				);
 
 		info->min_unbound = desc.min_unbound;

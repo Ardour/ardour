@@ -38,6 +38,7 @@
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "ardour_window.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "meterbridge.h"
@@ -58,7 +59,7 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
 PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::config()->get_ui_scale()))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * UIConfiguration::instance().get_ui_scale()))
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
@@ -111,8 +112,8 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
-	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 }
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
@@ -299,8 +300,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::name_label_button_release), false);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
-	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 
@@ -414,7 +415,7 @@ MeterStrip::fast_update ()
 	float mpeak = level_meter->update_meters();
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
-		if (mpeak >= ARDOUR_UI::config()->get_meter_peak()) {
+		if (mpeak >= UIConfiguration::instance().get_meter_peak()) {
 			peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 		}
 	}
@@ -544,8 +545,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
 
-	nh *= ARDOUR_UI::config()->get_ui_scale();
-	tnh *= ARDOUR_UI::config()->get_ui_scale();
+	nh *= UIConfiguration::instance().get_ui_scale();
+	tnh *= UIConfiguration::instance().get_ui_scale();
 
 	int prev_height, ignored;
 	bool need_relayout = false;
@@ -810,7 +811,7 @@ MeterStrip::name_changed () {
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		// NB numbers are rotated 90deg. on the meterbridge -> use height
-		number_label.set_size_request(PX_SCALE(18, 18), tnh * ARDOUR_UI::config()->get_ui_scale());
+		number_label.set_size_request(PX_SCALE(18, 18), tnh * UIConfiguration::instance().get_ui_scale());
 	} else {
 		number_label.hide();
 	}

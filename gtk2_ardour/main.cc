@@ -367,15 +367,13 @@ int main (int argc, char *argv[])
 	}
 #endif
 
-	UIConfiguration* ui_config = new UIConfiguration;
-
-	if (ui_config->pre_gui_init ()) {
+	if (UIConfiguration::instance().pre_gui_init ()) {
 		error << _("Could not complete pre-GUI initialization") << endmsg;
 		exit (1);
 	}
 	
 	try {
-		ui = new ARDOUR_UI (&argc, &argv, localedir.c_str(), ui_config);
+		ui = new ARDOUR_UI (&argc, &argv, localedir.c_str());
 	} catch (failed_constructor& err) {
 		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
 		exit (1);

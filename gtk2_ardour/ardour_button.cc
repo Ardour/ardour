@@ -31,13 +31,12 @@
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gui_thread.h"
 
-#include "ardour/rc_configuration.h" // for widget prelight preference
-
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
 #include "ardour_button.h"
 #include "ardour_ui.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -95,7 +94,7 @@ ArdourButton::ArdourButton (Element e)
 	, _update_colors (true)
 	, _pattern_height (0)
 {
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e)
@@ -134,8 +133,8 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _pattern_height (0)
 {
 	set_text (str);
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
-	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
 }
 
 ArdourButton::~ArdourButton()
@@ -208,7 +207,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	uint32_t text_color;
 	uint32_t led_color;
 
-	const float corner_radius = std::max(2.f, _corner_radius * ARDOUR_UI::config()->get_ui_scale());
+	const float corner_radius = std::max(2.f, _corner_radius * UIConfiguration::instance().get_ui_scale());
 
 	if (_update_colors) {
 		set_colors ();
@@ -440,12 +439,12 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		//black ring
 		cairo_set_source_rgb (cr, 0, 0, 0);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * ARDOUR_UI::config()->get_ui_scale(), 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * UIConfiguration::instance().get_ui_scale(), 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		//led color
 		ArdourCanvas::set_source_rgba (cr, led_color);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * ARDOUR_UI::config()->get_ui_scale(), 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * UIConfiguration::instance().get_ui_scale(), 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		cairo_restore (cr);
@@ -454,13 +453,13 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
 		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius);
-		uint32_t ins_color = ARDOUR_UI::config()->color ("gtk_background");
+		uint32_t ins_color = UIConfiguration::instance().color ("gtk_background");
 		ArdourCanvas::set_source_rgb_a (cr, ins_color, 0.6);
 		cairo_fill (cr);
 	}
 
 	// if requested, show hovering
-	if (ARDOUR_UI::config()->get_widget_prelight()
+	if (UIConfiguration::instance().get_widget_prelight()
 			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
 			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
@@ -527,7 +526,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		const float newdia = rintf (11.f * ARDOUR_UI::config()->get_ui_scale());
+		const float newdia = rintf (11.f * UIConfiguration::instance().get_ui_scale());
 		if (_diameter != newdia) {
 			_pattern_height = 0;
 			_diameter = newdia;
@@ -606,21 +605,21 @@ ArdourButton::set_colors ()
 	std::string name = get_name();
 	bool failed = false;
 
-	fill_active_color = ARDOUR_UI::config()->color (string_compose ("%1: fill active", name), &failed);
+	fill_active_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
 	if (failed) {
-		fill_active_color = ARDOUR_UI::config()->color ("generic button: fill active");
+		fill_active_color = UIConfiguration::instance().color ("generic button: fill active");
 	}
-	fill_inactive_color = ARDOUR_UI::config()->color (string_compose ("%1: fill", name), &failed);
+	fill_inactive_color = UIConfiguration::instance().color (string_compose ("%1: fill", name), &failed);
 	if (failed) {
-		fill_inactive_color = ARDOUR_UI::config()->color ("generic button: fill");
+		fill_inactive_color = UIConfiguration::instance().color ("generic button: fill");
 	}
 
 	text_active_color = ArdourCanvas::contrasting_text_color (fill_active_color);
 	text_inactive_color = ArdourCanvas::contrasting_text_color (fill_inactive_color);
 
-	led_active_color = ARDOUR_UI::config()->color (string_compose ("%1: led active", name), &failed);
+	led_active_color = UIConfiguration::instance().color (string_compose ("%1: led active", name), &failed);
 	if (failed) {
-		led_active_color = ARDOUR_UI::config()->color ("generic button: led active");
+		led_active_color = UIConfiguration::instance().color ("generic button: led active");
 	}
 
 	/* The inactive color for the LED is just a fairly dark version of the
@@ -984,7 +983,7 @@ ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = (_elements & Inactive) ? false : true;
 
-	if (ARDOUR_UI::config()->get_widget_prelight()) {
+	if (UIConfiguration::instance().get_widget_prelight()) {
 		CairoWidget::set_dirty ();
 	}
 
@@ -996,7 +995,7 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = false;
 
-	if (ARDOUR_UI::config()->get_widget_prelight()) {
+	if (UIConfiguration::instance().get_widget_prelight()) {
 		CairoWidget::set_dirty ();
 	}
 
