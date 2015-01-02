@@ -17,9 +17,10 @@
 
 */
 
-#include "ardour_ui.h"
 #include "main_clock.h"
 #include "public_editor.h"
+
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -50,13 +51,13 @@ MainClock::build_ops_menu ()
 	ops_items.push_back (CheckMenuElem (_("Display delta to edit cursor"), sigc::mem_fun (*this, &MainClock::display_delta_to_edit_cursor)));
 	Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem *> (&ops_items.back());
 	if (_primary) {
-		if (ARDOUR_UI::config()->get_primary_clock_delta_edit_cursor ()) {
-			ARDOUR_UI::config()->set_primary_clock_delta_edit_cursor (false);
+		if (UIConfiguration::instance().get_primary_clock_delta_edit_cursor ()) {
+			UIConfiguration::instance().set_primary_clock_delta_edit_cursor (false);
 			c->set_active (true);
 		}
 	} else {
-		if (ARDOUR_UI::config()->get_secondary_clock_delta_edit_cursor ()) {
-			ARDOUR_UI::config()->set_secondary_clock_delta_edit_cursor (false);
+		if (UIConfiguration::instance().get_secondary_clock_delta_edit_cursor ()) {
+			UIConfiguration::instance().set_secondary_clock_delta_edit_cursor (false);
 			c->set_active (true);
 		}
 	}
@@ -83,9 +84,9 @@ void
 MainClock::display_delta_to_edit_cursor ()
 {
 	if (_primary) {
-		ARDOUR_UI::config()->set_primary_clock_delta_edit_cursor (!ARDOUR_UI::config()->get_primary_clock_delta_edit_cursor ());
+		UIConfiguration::instance().set_primary_clock_delta_edit_cursor (!UIConfiguration::instance().get_primary_clock_delta_edit_cursor ());
 	} else {
-		ARDOUR_UI::config()->set_secondary_clock_delta_edit_cursor (!ARDOUR_UI::config()->get_secondary_clock_delta_edit_cursor ());
+		UIConfiguration::instance().set_secondary_clock_delta_edit_cursor (!UIConfiguration::instance().get_secondary_clock_delta_edit_cursor ());
 	}
 }
 

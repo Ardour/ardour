@@ -173,8 +173,8 @@ Meterbridge::Meterbridge ()
 	viewport->set_border_width(0);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &Meterbridge::on_theme_changed));
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
-	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
 }
 
 Meterbridge::~Meterbridge ()

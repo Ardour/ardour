@@ -36,7 +36,6 @@
 
 #include "gtkmm2ext/actions.h"
 
-#include "ardour_ui.h"
 #include "actions.h"
 #include "i18n.h"
 
@@ -138,10 +137,10 @@ ActionManager::toggle_config_state (const char* group, const char* action, bool 
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
 		if (tact) {
-			bool x = (ARDOUR_UI::config()->*get)();
+			bool x = (UIConfiguration::instance().*get)();
 
 			if (x != tact->get_active()) {
-				(ARDOUR_UI::config()->*set) (!x);
+				(UIConfiguration::instance().*set) (!x);
 			}
 		}
 	}
@@ -203,7 +202,7 @@ ActionManager::map_some_state (const char* group, const char* action, bool (UICo
 
 		if (tact) {
 
-			bool x = (ARDOUR_UI::config()->*get)();
+			bool x = (UIConfiguration::instance().*get)();
 
 			if (tact->get_active() != x) {
 				tact->set_active (x);

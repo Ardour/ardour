@@ -66,6 +66,7 @@
 #include "gui_thread.h"
 #include "route_group_menu.h"
 #include "meter_patterns.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -257,7 +258,7 @@ MixerStrip::init ()
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	// TODO implement ArdourKnob::on_size_request properly
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::config()->get_ui_scale()))
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 	trim_control.set_size_request (PX_SCALE(19), PX_SCALE(19));
 #undef PX_SCALE
 	trim_control.set_tooltip_prefix (_("Trim: "));
@@ -384,7 +385,7 @@ MixerStrip::init ()
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 
 	parameter_changed (X_("mixer-element-visibility"));
-	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
@@ -703,7 +704,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	set_button_names ();
 
-	const float scale = std::max(1.f, ARDOUR_UI::config()->get_ui_scale());
+	const float scale = std::max(1.f, UIConfiguration::instance().get_ui_scale());
 
 	switch (w) {
 	case Wide:
@@ -2186,7 +2187,7 @@ MixerStrip::parameter_changed (string p)
 		/* The user has made changes to the mixer strip visibility, so get
 		   our VisibilityGroup to reflect these changes in our widgets.
 		*/
-		_visibility.set_state (ARDOUR_UI::config()->get_mixer_strip_visibility ());
+		_visibility.set_state (UIConfiguration::instance().get_mixer_strip_visibility ());
 	}
 	else if (p == "track-name-number") {
 		name_changed ();

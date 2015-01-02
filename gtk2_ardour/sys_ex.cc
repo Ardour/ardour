@@ -19,8 +19,8 @@
 
 #include <iostream>
 #include "canvas/flag.h"
-#include "ardour_ui.h"
 #include "sys_ex.h"
+#include "ui_config.h"
 
 using namespace std;
 
@@ -35,8 +35,8 @@ SysEx::SysEx (
 	_flag = new ArdourCanvas::Flag (
 		parent,
 		height, 
-		ARDOUR_UI::config()->color ("midi sysex outline"),
-		ARDOUR_UI::config()->color_mod ("midi sysex fill", "midi sysex fill"),
+		UIConfiguration::instance().color ("midi sysex outline"),
+		UIConfiguration::instance().color_mod ("midi sysex fill", "midi sysex fill"),
 		ArdourCanvas::Duple (x, y)
 		);
 	

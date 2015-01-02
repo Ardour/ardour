@@ -50,6 +50,7 @@
 #include "control_point.h"
 #include "utils.h"
 #include "item_counts.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -141,7 +142,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	CANVAS_DEBUG_NAME (_base_rect, string_compose ("base rect for %1", _name));
 	_base_rect->set_x1 (ArdourCanvas::COORD_MAX);
 	_base_rect->set_outline (false);
-	_base_rect->set_fill_color (ARDOUR_UI::config()->color_mod (fill_color_name, "automation track fill"));
+	_base_rect->set_fill_color (UIConfiguration::instance().color_mod (fill_color_name, "automation track fill"));
 	_base_rect->set_data ("trackview", this);
 	_base_rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event), _base_rect, this));
 	if (!a) {
@@ -267,7 +268,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 				)
 			);
 
-		line->set_line_color (ARDOUR_UI::config()->color ("processor automation line"));
+		line->set_line_color (UIConfiguration::instance().color ("processor automation line"));
 		line->queue_reset ();
 		add_line (line);
 	}
@@ -275,7 +276,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	/* make sure labels etc. are correct */
 
 	automation_state_changed ();
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
 
 	_route->DropReferences.connect (
 		_route_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()

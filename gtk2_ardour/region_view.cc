@@ -35,7 +35,6 @@
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
-#include "ardour_ui.h"
 #include "streamview.h"
 #include "region_view.h"
 #include "automation_region_view.h"
@@ -190,7 +189,7 @@ RegionView::init (bool wfd)
 
 	set_colors ();
 
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }
@@ -233,7 +232,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
                 return;
         }
 
-        uint32_t const color = ARDOUR_UI::config()->color_mod ("silence", "silence");
+        uint32_t const color = UIConfiguration::instance().color_mod ("silence", "silence");
 
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
@@ -274,7 +273,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
         _silence_text = new ArdourCanvas::Text (group);
 	_silence_text->set_ignore_events (true);
         _silence_text->set_font_description (get_font_for_style (N_("SilenceText")));
-        _silence_text->set_color (ARDOUR_UI::config()->color ("silence text"));
+        _silence_text->set_color (UIConfiguration::instance().color ("silence text"));
 
         /* both positions are relative to the region start offset in source */
 
@@ -520,7 +519,7 @@ void
 RegionView::set_sync_mark_color ()
 {
 	if (sync_mark) {
-		ArdourCanvas::Color c = ARDOUR_UI::config()->color ("sync mark");
+		ArdourCanvas::Color c = UIConfiguration::instance().color ("sync mark");
 		sync_mark->set_fill_color (c);
 		sync_mark->set_outline_color (c);
 		sync_line->set_outline_color (c);
@@ -539,7 +538,7 @@ RegionView::get_fill_color () const
 		modname = "transparent region base";
 	}
 
-	return HSV(f).mod (ARDOUR_UI::config()->modifier (modname)).color ();
+	return HSV(f).mod (UIConfiguration::instance().modifier (modname)).color ();
 }
 
 void
@@ -783,7 +782,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 	bool me = false;
 
 	/* the color that will be used to show parts of regions that will not be heard */
-	uint32_t const non_playing_color = ARDOUR_UI::config()->color_mod ("covered region", "covered region base");
+	uint32_t const non_playing_color = UIConfiguration::instance().color_mod ("covered region", "covered region base");
 
 	while (t < end) {
 

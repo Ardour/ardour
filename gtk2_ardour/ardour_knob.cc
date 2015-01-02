@@ -24,6 +24,7 @@
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
+#include "pbd/controllable.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -35,8 +36,8 @@
 #include "ardour/rc_configuration.h" // for widget prelight preference
 
 #include "ardour_knob.h"
-#include "ardour_ui.h"
 #include "timers.h"
+#include "ui_config.h"
 
 #include "canvas/colors.h"
 #include "canvas/utils.h"
@@ -65,7 +66,7 @@ ArdourKnob::ArdourKnob (Element e, Flags flags)
 	, _flags (flags)
 	, _tooltip (this)
 {
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
 
 	// watch automation :(
 	Timers::rapid_connect (sigc::mem_fun (*this, &ArdourKnob::controllable_changed));
@@ -106,7 +107,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	cairo_translate (cr, xc, yc);  //after this, everything is based on the center of the knob
 
 	//get the knob color from the theme
-	ArdourCanvas::Color knob_color = ARDOUR_UI::config()->color (string_compose ("%1", get_name()));
+	ArdourCanvas::Color knob_color = UIConfiguration::instance().color (string_compose ("%1", get_name()));
 
 	float center_radius = 0.48*scale;
 	float border_width = 0.8;
@@ -131,10 +132,10 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 
 		//look up the arc colors from the config
 		double red_start, green_start, blue_start, unused;
-		ArdourCanvas::Color arc_start_color = ARDOUR_UI::config()->color ( string_compose ("%1: arc start", get_name()));
+		ArdourCanvas::Color arc_start_color = UIConfiguration::instance().color ( string_compose ("%1: arc start", get_name()));
 		ArdourCanvas::color_to_rgba( arc_start_color, red_start, green_start, blue_start, unused );
 		double red_end, green_end, blue_end;
-		ArdourCanvas::Color arc_end_color = ARDOUR_UI::config()->color ( string_compose ("%1: arc end", get_name()) );
+		ArdourCanvas::Color arc_end_color = UIConfiguration::instance().color ( string_compose ("%1: arc end", get_name()) );
 		ArdourCanvas::color_to_rgba( arc_end_color, red_end, green_end, blue_end, unused );
 
 		//vary the arc color over the travel of the knob
@@ -263,7 +264,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	cairo_stroke (cr);
 
 	//highlight if grabbed or if mouse is hovering over me
-	if (_tooltip.dragging() || (_hovering && ARDOUR_UI::config()->get_widget_prelight() ) ) {
+	if (_tooltip.dragging() || (_hovering && UIConfiguration::instance().get_widget_prelight() ) ) {
 		cairo_set_source_rgba (cr, 1,1,1, 0.12 );
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
@@ -330,7 +331,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 
 
 	//scale the adjustment based on keyboard modifiers & GUI size
-	const float ui_scale = max (1.f, ARDOUR_UI::config()->get_ui_scale());
+	const float ui_scale = max (1.f, UIConfiguration::instance().get_ui_scale());
 	float scale = 0.0025 / ui_scale;
 
 	if (ev->state & Keyboard::GainFineScaleModifier) {

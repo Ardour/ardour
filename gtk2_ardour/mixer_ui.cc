@@ -58,6 +58,7 @@
 #include "gui_thread.h"
 #include "mixer_group_tabs.h"
 #include "timers.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -93,7 +94,7 @@ Mixer_UI::Mixer_UI ()
 	, track_menu (0)
 	, _monitor_section (0)
 	, _plugin_selector (0)
-	, _strip_width (ARDOUR_UI::config()->get_default_narrow_ms() ? Narrow : Wide)
+	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
         , _in_group_rebuild_or_clear (false)
         , _route_deletion_in_progress (false)
@@ -371,7 +372,7 @@ Mixer_UI::add_strips (RouteList& routes)
 			strip = new MixerStrip (*this, _session, route);
 			strips.push_back (strip);
 
-			ARDOUR_UI::config()->get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
+			UIConfiguration::instance().get_default_narrow_ms() ? _strip_width = Narrow : _strip_width = Wide;
 			
 			if (strip->width_owner() != strip) {
 				strip->set_width_enum (_strip_width, this);
@@ -1841,7 +1842,7 @@ Mixer_UI::parameter_changed (string const & p)
 			_group_tabs->hide ();
 		}
 	} else if (p == "default-narrow_ms") {
-		bool const s = ARDOUR_UI::config()->get_default_narrow_ms ();
+		bool const s = UIConfiguration::instance().get_default_narrow_ms ();
 		for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->set_width_enum (s ? Narrow : Wide, this);
 		}

@@ -51,6 +51,7 @@
 #include "keyboard.h"
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
+#include "ui_config.h"
 #include "verbose_cursor.h"
 
 #include "i18n.h"
@@ -70,7 +71,7 @@ Editor::initialize_canvas ()
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
 
-	_track_canvas->set_background_color (ARDOUR_UI::config()->color ("arrange base"));
+	_track_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
 
 	/* scroll group for items that should not automatically scroll
 	 *  (e.g verbose cursor). It shares the canvas coordinate space.
@@ -272,7 +273,7 @@ Editor::initialize_canvas ()
 
 	initialize_rulers ();
 
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
 	color_handler();
 
 }
@@ -427,7 +428,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
 		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame, is.selected_instrument());
 		
-		if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files() || copy) {
+		if (Profile->get_sae() || UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
 		} else {
 			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
@@ -443,7 +444,7 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack, SrcBest, frame);
 
-			if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files() || copy) {
+			if (Profile->get_sae() || UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack, SrcBest, frame);
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
@@ -499,7 +500,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 {
-	if (!ARDOUR_UI::config()->get_autoscroll_editor () || autoscroll_active ()) {
+	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
 		return;
 	}
 
@@ -884,8 +885,8 @@ Editor::set_horizontal_position (double p)
 void
 Editor::color_handler()
 {
-	ArdourCanvas::Color base = ARDOUR_UI::config()->color ("ruler base");
-	ArdourCanvas::Color text = ARDOUR_UI::config()->color ("ruler text");
+	ArdourCanvas::Color base = UIConfiguration::instance().color ("ruler base");
+	ArdourCanvas::Color text = UIConfiguration::instance().color ("ruler text");
 	timecode_ruler->set_fill_color (base);
 	timecode_ruler->set_outline_color (text);
 	minsec_ruler->set_fill_color (base);
@@ -895,57 +896,57 @@ Editor::color_handler()
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
 	
-	playhead_cursor->set_color (ARDOUR_UI::config()->color ("play head"));
+	playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 
-	meter_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("meter bar", "marker bar"));
-	meter_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
+	meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
+	meter_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	tempo_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("tempo bar", "marker bar"));
-	tempo_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
+	tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
+	tempo_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("marker bar", "marker bar"));
-	marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
+	marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("marker bar", "marker bar"));
+	marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("cd marker bar", "marker bar"));
-	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
+	cd_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("cd marker bar", "marker bar"));
+	cd_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("range marker bar", "marker bar"));
-	range_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
+	range_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
+	range_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("transport marker bar", "marker bar"));
-	transport_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
+	transport_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("transport marker bar", "marker bar"));
+	transport_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	cd_marker_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag bar rect"));
-	cd_marker_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("range drag bar rect"));
+	cd_marker_bar_drag_rect->set_fill_color (UIConfiguration::instance().color ("range drag bar rect"));
+	cd_marker_bar_drag_rect->set_outline_color (UIConfiguration::instance().color ("range drag bar rect"));
 
-	range_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag bar rect"));
-	range_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("range drag bar rect"));
+	range_bar_drag_rect->set_fill_color (UIConfiguration::instance().color ("range drag bar rect"));
+	range_bar_drag_rect->set_outline_color (UIConfiguration::instance().color ("range drag bar rect"));
 
-	transport_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("transport drag rect"));
-	transport_bar_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("transport drag rect"));
+	transport_bar_drag_rect->set_fill_color (UIConfiguration::instance().color ("transport drag rect"));
+	transport_bar_drag_rect->set_outline_color (UIConfiguration::instance().color ("transport drag rect"));
 
-	transport_loop_range_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("transport loop rect", "loop rectangle"));
-	transport_loop_range_rect->set_outline_color (ARDOUR_UI::config()->color ("transport loop rect"));
+	transport_loop_range_rect->set_fill_color (UIConfiguration::instance().color_mod ("transport loop rect", "loop rectangle"));
+	transport_loop_range_rect->set_outline_color (UIConfiguration::instance().color ("transport loop rect"));
 
-	transport_punch_range_rect->set_fill_color (ARDOUR_UI::config()->color ("transport punch rect"));
-	transport_punch_range_rect->set_outline_color (ARDOUR_UI::config()->color ("transport punch rect"));
+	transport_punch_range_rect->set_fill_color (UIConfiguration::instance().color ("transport punch rect"));
+	transport_punch_range_rect->set_outline_color (UIConfiguration::instance().color ("transport punch rect"));
 
-	transport_punchin_line->set_outline_color (ARDOUR_UI::config()->color ("punch line"));
-	transport_punchout_line->set_outline_color (ARDOUR_UI::config()->color ("punch line"));
+	transport_punchin_line->set_outline_color (UIConfiguration::instance().color ("punch line"));
+	transport_punchout_line->set_outline_color (UIConfiguration::instance().color ("punch line"));
 
-	rubberband_rect->set_outline_color (ARDOUR_UI::config()->color ("rubber band rect"));
-	rubberband_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("rubber band rect", "selection rect"));
+	rubberband_rect->set_outline_color (UIConfiguration::instance().color ("rubber band rect"));
+	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
 
-	location_marker_color = ARDOUR_UI::config()->color ("location marker");
-	location_range_color = ARDOUR_UI::config()->color ("location range");
-	location_cd_marker_color = ARDOUR_UI::config()->color ("location cd marker");
-	location_loop_color = ARDOUR_UI::config()->color ("location loop");
-	location_punch_color = ARDOUR_UI::config()->color ("location punch");
+	location_marker_color = UIConfiguration::instance().color ("location marker");
+	location_range_color = UIConfiguration::instance().color ("location range");
+	location_cd_marker_color = UIConfiguration::instance().color ("location cd marker");
+	location_loop_color = UIConfiguration::instance().color ("location loop");
+	location_punch_color = UIConfiguration::instance().color ("location punch");
 
 	refresh_location_display ();
 
 	/* redraw the whole thing */
-	_track_canvas->set_background_color (ARDOUR_UI::config()->color ("arrange base"));
+	_track_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
 	_track_canvas->queue_draw ();
         
 /*

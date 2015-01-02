@@ -37,11 +37,11 @@
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 
-#include "ardour_ui.h"
 #include "audio_clock.h"
 #include "utils.h"
 #include "keyboard.h"
 #include "gui_thread.h"
+#include "ui_config.h"
 #include "i18n.h"
 
 using namespace ARDOUR;
@@ -120,8 +120,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 		clocks.push_back (this);
 	}
 
-	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
-	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
 }
 
 AudioClock::~AudioClock ()
@@ -220,15 +220,15 @@ AudioClock::set_colors ()
 	uint32_t cursor_color;
 
 	if (active_state()) {
-		bg_color = ARDOUR_UI::config()->color (string_compose ("%1 active: background", get_name()));
-		text_color = ARDOUR_UI::config()->color (string_compose ("%1 active: text", get_name()));
-		editing_color = ARDOUR_UI::config()->color (string_compose ("%1 active: edited text", get_name()));
-		cursor_color = ARDOUR_UI::config()->color (string_compose ("%1 active: cursor", get_name()));
+		bg_color = UIConfiguration::instance().color (string_compose ("%1 active: background", get_name()));
+		text_color = UIConfiguration::instance().color (string_compose ("%1 active: text", get_name()));
+		editing_color = UIConfiguration::instance().color (string_compose ("%1 active: edited text", get_name()));
+		cursor_color = UIConfiguration::instance().color (string_compose ("%1 active: cursor", get_name()));
 	} else {
-		bg_color = ARDOUR_UI::config()->color (string_compose ("%1: background", get_name()));
-		text_color = ARDOUR_UI::config()->color (string_compose ("%1: text", get_name()));
-		editing_color = ARDOUR_UI::config()->color (string_compose ("%1: edited text", get_name()));
-		cursor_color = ARDOUR_UI::config()->color (string_compose ("%1: cursor", get_name()));
+		bg_color = UIConfiguration::instance().color (string_compose ("%1: background", get_name()));
+		text_color = UIConfiguration::instance().color (string_compose ("%1: text", get_name()));
+		editing_color = UIConfiguration::instance().color (string_compose ("%1: edited text", get_name()));
+		cursor_color = UIConfiguration::instance().color (string_compose ("%1: cursor", get_name()));
 	}
 
 	/* store for bg and cursor in render() */

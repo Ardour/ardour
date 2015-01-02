@@ -34,6 +34,7 @@
 #include "prompter.h"
 #include "utils.h"
 #include "public_editor.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -1017,7 +1018,7 @@ LocationUI::add_new_location()
 		framepos_t where = _session->audible_frame();
 		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
-		if (ARDOUR_UI::config()->get_name_new_markers()) {
+		if (UIConfiguration::instance().get_name_new_markers()) {
 			newest_location = location;
 		}
 		PublicEditor::instance().begin_reversible_command (_("add marker"));
