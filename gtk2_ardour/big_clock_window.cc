@@ -36,8 +36,6 @@ using namespace ARDOUR_UI_UTILS;
 BigClockWindow::BigClockWindow (AudioClock& c) 
 	: ArdourWindow (_("Big Clock"))
 	, clock (c)
-	, original_height (0)
-	, original_width (0)
 {
 	ARDOUR_UI::Clock.connect (sigc::mem_fun (clock, &AudioClock::set));
 
@@ -47,6 +45,9 @@ BigClockWindow::BigClockWindow (AudioClock& c)
 	set_border_width (0);
 	add (clock);
 	clock.show_all ();
+
+	clock.size_request (default_size);
+	clock.signal_size_allocate().connect (sigc::mem_fun (*this, &BigClockWindow::clock_size_reallocated));
 }
 
 void
@@ -67,21 +68,16 @@ void
 BigClockWindow::on_realize ()
 {
 	ArdourWindow::on_realize ();
+	/* (try to) ensure that resizing is possible.
+	 */
 	get_window()->set_decorations (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH);
-
-	int x, y, d;
-	get_window()->get_geometry (x, y, original_width, original_height, d);
 }
 
 void
-BigClockWindow::on_size_allocate (Gtk::Allocation& alloc)
+BigClockWindow::clock_size_reallocated (Gtk::Allocation& alloc)
 {
-	ArdourWindow::on_size_allocate (alloc);
-
-	if (original_width) {
-		clock.set_scale ((double) alloc.get_width() / original_width,
-				 (double)  alloc.get_height() / original_height);
-	}
+	clock.set_scale ((double) alloc.get_width() / default_size.width,
+			 (double)  alloc.get_height() / default_size.height);
 }
 
 
