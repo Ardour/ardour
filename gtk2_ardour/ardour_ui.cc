@@ -115,6 +115,7 @@ typedef uint64_t microseconds_t;
 #include "export_video_dialog.h"
 #include "export_video_infobox.h"
 #include "gain_meter.h"
+#include "global_signals.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
 #include "gui_thread.h"
