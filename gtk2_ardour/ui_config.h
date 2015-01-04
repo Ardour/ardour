@@ -75,6 +75,9 @@ class UIConfiguration : public PBD::Stateful
 	ArdourCanvas::Color color_mod (const ArdourCanvas::Color& color, std::string const & modifier) const;
 	ArdourCanvas::HSV  color_hsv (const std::string&) const;
 	ArdourCanvas::SVAModifier modifier (const std::string&) const;
+
+	void reset_dpi ();
+	void set_pango_fontsize ();
 		
         sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);
