@@ -34,7 +34,6 @@
 #include "automation_region_view.h"
 #include "automation_streamview.h"
 #include "automation_time_axis.h"
-#include "global_signals.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "region_selection.h"
@@ -61,7 +60,7 @@ AutomationStreamView::AutomationStreamView (AutomationTimeAxisView& tv)
 
 	color_handler ();
 
-	ColorsChanged.connect(sigc::mem_fun(*this, &AutomationStreamView::color_handler));
+	UIConfiguration::ColorsChanged.connect(sigc::mem_fun(*this, &AutomationStreamView::color_handler));
 }
 
 AutomationStreamView::~AutomationStreamView ()

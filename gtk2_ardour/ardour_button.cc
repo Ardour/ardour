@@ -38,7 +38,6 @@
 
 #include "ardour_button.h"
 #include "ardour_ui.h"
-#include "global_signals.h"
 
 #include "i18n.h"
 
@@ -96,7 +95,7 @@ ArdourButton::ArdourButton (Element e)
 	, _update_colors (true)
 	, _pattern_height (0)
 {
-	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 }
 
 ArdourButton::ArdourButton (const std::string& str, Element e)
@@ -135,8 +134,8 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _pattern_height (0)
 {
 	set_text (str);
-	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
-	ARDOUR_UI_UTILS::DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
 }
 
 ArdourButton::~ArdourButton()

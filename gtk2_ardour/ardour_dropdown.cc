@@ -35,7 +35,6 @@
 
 #include "ardour_dropdown.h"
 #include "ardour_ui.h"
-#include "global_signals.h"
 
 #include "i18n.h"
 

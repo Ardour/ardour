@@ -39,7 +39,6 @@
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "editor.h"
-#include "global_signals.h"
 #include "editing.h"
 #include "rgb_macros.h"
 #include "utils.h"
@@ -273,7 +272,7 @@ Editor::initialize_canvas ()
 
 	initialize_rulers ();
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &Editor::color_handler));
 	color_handler();
 
 }

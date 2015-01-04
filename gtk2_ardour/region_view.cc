@@ -36,7 +36,6 @@
 #include "canvas/colors.h"
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "streamview.h"
 #include "region_view.h"
 #include "automation_region_view.h"
@@ -191,7 +190,7 @@ RegionView::init (bool wfd)
 
 	set_colors ();
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &RegionView::color_handler));
 
 	/* XXX sync mark drag? */
 }

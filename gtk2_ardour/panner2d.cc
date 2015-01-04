@@ -36,7 +36,6 @@
 #include "canvas/colors.h"
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "panner2d.h"
 #include "keyboard.h"
 #include "gui_thread.h"
@@ -91,7 +90,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 		have_colors = true;
 	}
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &Panner2d::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &Panner2d::color_handler));
 
 	panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
