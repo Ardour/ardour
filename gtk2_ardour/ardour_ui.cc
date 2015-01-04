@@ -113,7 +113,6 @@ typedef uint64_t microseconds_t;
 #include "export_video_dialog.h"
 #include "export_video_infobox.h"
 #include "gain_meter.h"
-#include "global_signals.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
 #include "gui_thread.h"
@@ -444,7 +443,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	_process_thread = new ProcessThread ();
 	_process_thread->init ();
 
-	DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
+	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &ARDOUR_UI::resize_text_widgets));
 
 	attach_to_engine ();
 }

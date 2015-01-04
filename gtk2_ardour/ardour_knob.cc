@@ -36,7 +36,6 @@
 
 #include "ardour_knob.h"
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "timers.h"
 
 #include "canvas/colors.h"
@@ -66,7 +65,7 @@ ArdourKnob::ArdourKnob (Element e, Flags flags)
 	, _flags (flags)
 	, _tooltip (this)
 {
-	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
 
 	// watch automation :(
 	Timers::rapid_connect (sigc::mem_fun (*this, &ArdourKnob::controllable_changed));

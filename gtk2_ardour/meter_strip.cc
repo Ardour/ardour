@@ -35,7 +35,6 @@
 #include <gtkmm2ext/rgb_macros.h>
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "ardour_window.h"
@@ -112,8 +111,8 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
-	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 }
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
@@ -300,8 +299,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::name_label_button_release), false);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
-	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 

@@ -43,7 +43,6 @@
 
 #include "ardour_ui.h"
 #include "ardour_dialog.h"
-#include "global_signals.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "time_axis_view.h"
@@ -220,7 +219,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	time_axis_hbox.show();
 	top_hbox.pack_start (scroomer_placeholder, false, false); // OR pack_end to move after meters ?
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 }

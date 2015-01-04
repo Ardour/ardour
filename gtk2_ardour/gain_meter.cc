@@ -36,7 +36,6 @@
 
 #include "ardour_ui.h"
 #include "gain_meter.h"
-#include "global_signals.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -171,8 +170,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	RedrawMetrics.connect (sigc::mem_fun(*this, &GainMeterBase::redraw_metrics));
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
-	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
-	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
+	UIConfiguration::ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
+	UIConfiguration::DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
 }
 
 GainMeterBase::~GainMeterBase ()

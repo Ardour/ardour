@@ -35,7 +35,6 @@
 #include "ardour/smf_source.h"
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "gui_thread.h"
 #include "midi_region_view.h"
 #include "midi_streamview.h"
@@ -86,7 +85,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	color_handler ();
 
-	ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
+	UIConfiguration::ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
 
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);

@@ -48,7 +48,6 @@
 #include "theme_manager.h"
 #include "rgb_macros.h"
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -58,10 +57,6 @@ using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
-
-namespace ARDOUR_UI_UTILS {
-	sigc::signal<void> ColorsChanged;
-}
 
 ThemeManager::ThemeManager()
         : dark_button (_("Dark Theme"))
@@ -206,7 +201,7 @@ ThemeManager::ThemeManager()
 	setup_aliases ();
 	setup_modifiers ();
 	
-	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ThemeManager::colors_changed));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &ThemeManager::colors_changed));
 }
 
 ThemeManager::~ThemeManager()

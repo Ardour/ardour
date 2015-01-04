@@ -34,7 +34,6 @@
 #include "canvas/debug.h"
 
 #include "streamview.h"
-#include "global_signals.h"
 #include "region_view.h"
 #include "route_time_axis.h"
 #include "region_selection.h"
@@ -86,7 +85,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 		_trackview.session()->RecordStateChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::sess_rec_enable_changed, this), gui_context());
 	}
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &StreamView::color_handler));
 }
 
 StreamView::~StreamView ()

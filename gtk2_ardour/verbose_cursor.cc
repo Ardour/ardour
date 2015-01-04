@@ -30,7 +30,6 @@
 #include "audio_clock.h"
 #include "editor.h"
 #include "editor_drag.h"
-#include "global_signals.h"
 #include "main_clock.h"
 #include "verbose_cursor.h"
 
@@ -47,7 +46,7 @@ VerboseCursor::VerboseCursor (Editor* editor)
 	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_LargerBoldFont()));
 	color_handler ();
 
-	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
 }
 
 void

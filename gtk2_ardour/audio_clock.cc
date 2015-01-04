@@ -39,7 +39,6 @@
 
 #include "ardour_ui.h"
 #include "audio_clock.h"
-#include "global_signals.h"
 #include "utils.h"
 #include "keyboard.h"
 #include "gui_thread.h"
@@ -121,8 +120,8 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 		clocks.push_back (this);
 	}
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
-	DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &AudioClock::set_colors));
+	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &AudioClock::dpi_reset));
 }
 
 AudioClock::~AudioClock ()
