@@ -846,7 +846,7 @@ Session::load_state (string snapshot_name)
 	} else {
 		if (prop->value().find ('.') != string::npos) {
 			/* old school version format */
-			if (prop->value()[0] == '2') {
+			if (prop->value()[0] < '3') {
 				Stateful::loading_state_version = 2000;
 			} else {
 				Stateful::loading_state_version = 3000;
