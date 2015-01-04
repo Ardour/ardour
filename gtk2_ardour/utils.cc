@@ -40,7 +40,7 @@
 #include "pbd/file_utils.h"
 
 #include <gtkmm2ext/utils.h>
-#include "ardour/rc_configuration.h"
+
 #include "ardour/filesystem_paths.h"
 
 #include "canvas/item.h"
