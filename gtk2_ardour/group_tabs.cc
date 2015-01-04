@@ -29,6 +29,7 @@
 #include "i18n.h"
 #include "ardour_ui.h"
 #include "rgb_macros.h"
+#include "ui_config.h"
 #include "utils.h"
 
 using namespace std;

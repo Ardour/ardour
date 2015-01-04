@@ -34,6 +34,7 @@
 #include "stereo_panner.h"
 #include "timers.h"
 #include "mono_panner.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
