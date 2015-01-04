@@ -48,6 +48,7 @@
 #include <gtkmm2ext/utils.h>
 
 #include "ardour_ui.h"
+#include "ui_config.h"
 #include "opts.h"
 #include "enums.h"
 #include "bundle_env.h"

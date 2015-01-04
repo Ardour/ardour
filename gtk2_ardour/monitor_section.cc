@@ -42,6 +42,7 @@
 #include "public_editor.h"
 #include "timers.h"
 #include "volume_controller.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "i18n.h"
