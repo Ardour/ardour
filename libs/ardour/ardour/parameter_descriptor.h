@@ -20,6 +20,7 @@
 #ifndef __ardour_parameter_descriptor_h__
 #define __ardour_parameter_descriptor_h__
 
+#include "ardour/types.h"
 #include "ardour/variant.h"
 
 #include "evoral/Parameter.hpp"
