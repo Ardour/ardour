@@ -49,8 +49,6 @@ namespace ArdourCanvas {
 
 namespace ARDOUR_UI_UTILS {
 
-extern sigc::signal<void>  DPIReset;
-
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList &, Gtk::Menu_Helpers::MenuElem, bool);
 
