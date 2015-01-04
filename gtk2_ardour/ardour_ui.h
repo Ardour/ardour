@@ -74,7 +74,6 @@
 #include "editing.h"
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
-#include "meterbridge.h"
 #include "enums.h"
 #include "visibility_group.h"
 #include "window_manager.h"
@@ -107,6 +106,7 @@ class SessionOptionEditor;
 class ShuttleControl;
 class Splash;
 class TimeInfoBox;
+class Meterbridge;
 class MidiTracer;
 class NSM_Client;
 class LevelMeterHBox;
