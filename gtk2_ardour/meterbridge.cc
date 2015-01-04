@@ -52,7 +52,6 @@
 #include "route_sorter.h"
 #include "actions.h"
 #include "gui_thread.h"
-#include "global_signals.h"
 #include "meter_patterns.h"
 #include "timers.h"
 
@@ -174,8 +173,8 @@ Meterbridge::Meterbridge ()
 	viewport->set_border_width(0);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &Meterbridge::on_theme_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
-	DPIReset.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
+	UIConfiguration::DPIReset.connect (sigc::mem_fun (*this, &Meterbridge::on_theme_changed));
 }
 
 Meterbridge::~Meterbridge ()

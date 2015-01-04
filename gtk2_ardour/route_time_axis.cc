@@ -61,7 +61,6 @@
 #include "ardour_button.h"
 #include "audio_streamview.h"
 #include "debug.h"
-#include "global_signals.h"
 #include "route_time_axis.h"
 #include "automation_time_axis.h"
 #include "enums.h"
@@ -308,7 +307,7 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} 
 
 	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_pixel));
-	ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	PropertyList* plist = new PropertyList();
 

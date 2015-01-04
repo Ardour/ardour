@@ -39,7 +39,6 @@
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
-#include "global_signals.h"
 #include "gui_thread.h"
 #include "route_time_axis.h"
 #include "automation_line.h"
@@ -276,7 +275,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	/* make sure labels etc. are correct */
 
 	automation_state_changed ();
-	ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
 
 	_route->DropReferences.connect (
 		_route_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()

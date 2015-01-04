@@ -40,7 +40,6 @@
 #include "canvas/colors.h"
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "stereo_panner.h"
 #include "stereo_panner_editor.h"
 #include "rgb_macros.h"
@@ -97,7 +96,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<PannerShell> p)
 	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::bypass_handler, this), gui_context());
 	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::pannable_handler, this), gui_context());
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
 
 	set_tooltip ();
 }

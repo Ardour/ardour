@@ -39,7 +39,6 @@
 #include "ardour/panner_shell.h"
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "mono_panner.h"
 #include "mono_panner_editor.h"
 #include "rgb_macros.h"
@@ -87,7 +86,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 
 	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
 	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
-	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 
 	set_tooltip ();
 }

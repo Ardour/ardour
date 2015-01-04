@@ -48,7 +48,6 @@
 #include "ardour/filesystem_paths.h"
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "ui_config.h"
 
 #include "i18n.h"
@@ -63,6 +62,10 @@ static const char* default_ui_config_file_name = "default_ui_config";
 UIConfiguration* UIConfiguration::_instance = 0;
 
 static const double hue_width = 18.0;
+
+sigc::signal<void>  UIConfiguration::ColorsChanged;
+
+sigc::signal<void>  UIConfiguration::DPIReset;
 
 UIConfiguration::UIConfiguration ()
 	:
@@ -84,7 +87,7 @@ UIConfiguration::UIConfiguration ()
 
 	load_state();
 
-	ARDOUR_UI_UTILS::ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
+	ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
 }
@@ -155,7 +158,7 @@ UIConfiguration::reset_dpi ()
 
 	gtk_settings_set_long_property (gtk_settings_get_default(),
 					"gtk-xft-dpi", val, "ardour");
-	ARDOUR_UI_UTILS::DPIReset(); //Emit Signal
+	DPIReset(); //Emit Signal
 }
 
 void
@@ -236,7 +239,7 @@ UIConfiguration::load_defaults ()
 	if (ret == 0) {
 		/* reload color theme */
 		load_color_theme (false);
-		ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+		ColorsChanged (); /* EMIT SIGNAL */
 	}
 
 	return ret;
@@ -284,7 +287,7 @@ UIConfiguration::load_color_theme (bool allow_own)
 			return -1;
 		}
 
-		ARDOUR_UI_UTILS::ColorsChanged ();
+		ColorsChanged ();
 	} else {
 		warning << string_compose (_("Color file %1 not found"), basename) << endmsg;
 	}
@@ -676,7 +679,7 @@ UIConfiguration::set_color (string const& name, ArdourCanvas::Color color)
 	i->second = color;
 	colors_modified = true;
 
-	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+	ColorsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -690,7 +693,7 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 	i->second = alias;
 	aliases_modified = true;
 
-	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+	ColorsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -705,7 +708,7 @@ UIConfiguration::set_modifier (string const & name, SVAModifier svam)
 	m->second = svam;
 	modifiers_modified = true;
 
-	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+	ColorsChanged (); /* EMIT SIGNAL */
 }
 
 void

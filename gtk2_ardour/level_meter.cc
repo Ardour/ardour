@@ -25,7 +25,6 @@
 #include "pbd/fastlog.h"
 
 #include "ardour_ui.h"
-#include "global_signals.h"
 #include "level_meter.h"
 #include "utils.h"
 #include "logmeter.h"
@@ -59,7 +58,7 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 
 	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
 	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun(*this, &LevelMeterBase::parameter_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
+	UIConfiguration::ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
 }
 
 LevelMeterBase::~LevelMeterBase ()
