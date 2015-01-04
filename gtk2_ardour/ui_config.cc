@@ -35,10 +35,13 @@
 #include <glibmm/miscutils.h>
 #include <glib/gstdio.h>
 
+#include <gtkmm/settings.h>
+
 #include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
+#include "pbd/locale_guard.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -46,8 +49,8 @@
 #include "gtkmm2ext/gtk_ui.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/utils.h"
 
-#include "ardour_ui.h"
 #include "ui_config.h"
 
 #include "i18n.h"
