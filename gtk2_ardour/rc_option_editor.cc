@@ -1011,7 +1011,7 @@ private:
 	{
 		_ui_config->set_font_scale ((long) floor (_dpi_adjustment.get_value() * 1024.));
 		/* XXX: should be triggered from the parameter changed signal */
-		reset_dpi ();
+		_ui_config->reset_dpi ();
 	}
 
 	UIConfiguration* _ui_config;

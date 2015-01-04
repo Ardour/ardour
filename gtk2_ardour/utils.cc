@@ -21,9 +21,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
-#include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
-
 #include <cstdlib>
 #include <clocale>
 #include <cstring>
@@ -797,34 +794,6 @@ ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (guint keyval)
 	}
 
 	return false;
-}
-
-void
-ARDOUR_UI_UTILS::set_pango_fontsize ()
-{
-	long val = ARDOUR_UI::config()->get_font_scale();
-
-	/* FT2 rendering - used by GnomeCanvas, sigh */
-
-#ifndef PLATFORM_WINDOWS
-	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_new(), val/1024, val/1024);
-#endif
-
-	/* Cairo rendering, in case there is any */
-
-	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
-}
-
-void
-ARDOUR_UI_UTILS::reset_dpi ()
-{
-	long val = ARDOUR_UI::config()->get_font_scale();
-	set_pango_fontsize ();
-	/* Xft rendering */
-
-	gtk_settings_set_long_property (gtk_settings_get_default(),
-					"gtk-xft-dpi", val, "ardour");
-	DPIReset();//Emit Signal
 }
 
 void
