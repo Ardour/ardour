@@ -393,7 +393,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	/* we don't like certain modifiers */
 	Bindings::set_ignored_state (GDK_LOCK_MASK|GDK_MOD2_MASK|GDK_MOD3_MASK);
 
-	reset_dpi();
+	ARDOUR_UI::config()->reset_dpi ();
 
 	TimeAxisViewItem::set_constant_heights ();
 

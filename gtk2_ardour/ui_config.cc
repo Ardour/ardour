@@ -29,6 +29,9 @@
 
 #include <cairo/cairo.h>
 
+#include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
+#include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
+
 #include <glibmm/miscutils.h>
 #include <glib/gstdio.h>
 
@@ -142,7 +145,35 @@ UIConfiguration::reset_gtk_theme ()
 
 	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
 }
-	
+
+void
+UIConfiguration::reset_dpi ()
+{
+	long val = get_font_scale();
+	set_pango_fontsize ();
+	/* Xft rendering */
+
+	gtk_settings_set_long_property (gtk_settings_get_default(),
+					"gtk-xft-dpi", val, "ardour");
+	ARDOUR_UI_UTILS::DPIReset(); //Emit Signal
+}
+
+void
+UIConfiguration::set_pango_fontsize ()
+{
+	long val = get_font_scale();
+
+	/* FT2 rendering - used by GnomeCanvas, sigh */
+
+#ifndef PLATFORM_WINDOWS
+	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_new(), val/1024, val/1024);
+#endif
+
+	/* Cairo rendering, in case there is any */
+
+	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
+}
+
 void
 UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 {
