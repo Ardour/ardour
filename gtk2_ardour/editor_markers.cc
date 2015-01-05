@@ -636,6 +636,7 @@ Editor::build_marker_menu (Location* loc)
 void
 Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 {
+    std::cout<<"build_range_marker_menu"<<std::endl;
 	using namespace Menu_Helpers;
 
 	bool const loop_or_punch_or_session = loop_or_punch | session;
@@ -649,39 +650,8 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	MenuList& items = markerMenu->items();
 	markerMenu->set_name ("ArdourContextMenu");
 
-	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
-	items.push_back (MenuElem (_("Locate to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
-	items.push_back (MenuElem (_("Play from Marker"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
-
-	items.push_back (MenuElem (_("Set Marker from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
-	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Set Range from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection), false)));
-	}
-
-	items.push_back (MenuElem (_("Zoom to Range"), sigc::mem_fun (*this, &Editor::marker_menu_zoom_to_range)));
-
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_range)));
-	items.push_back (SeparatorElem());
-
-	if (!loop_or_punch_or_session) {
-		items.push_back (MenuElem (_("Hide Range"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
-		items.push_back (MenuElem (_("Rename Range..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
-	}
-
 	if (!session) {
-		items.push_back (MenuElem (_("Remove Range"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
-	}
-
-	if (!loop_or_punch_or_session || !session) {
-		items.push_back (SeparatorElem());
-	}
-	
-	items.push_back (MenuElem (_("Separate Regions in Range"), sigc::mem_fun(*this, &Editor::marker_menu_separate_regions_using_location)));
-	items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::marker_menu_select_all_selectables_using_range)));
-	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Select Range"), sigc::mem_fun(*this, &Editor::marker_menu_select_using_range)));
+		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 	}
 }
 
