@@ -41,7 +41,6 @@
 
 #include "ardour/profile.h"
 
-#include "ardour_ui.h"
 #include "ardour_dialog.h"
 #include "gui_thread.h"
 #include "public_editor.h"
@@ -55,6 +54,7 @@
 #include "streamview.h"
 #include "editor_drag.h"
 #include "editor.h"
+#include "tooltips.h"
 #include "ui_config.h"
 
 #include "i18n.h"
@@ -147,7 +147,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
 	name_label.set_width_chars (12);
-	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
+	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
 	Gtk::Entry* an_entry = new Gtkmm2ext::FocusEntry;
 	an_entry->set_name ("EditorTrackNameDisplay");

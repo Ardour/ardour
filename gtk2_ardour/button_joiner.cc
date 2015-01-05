@@ -27,11 +27,12 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "ardour_ui.h"
 #include "button_joiner.h"
+#include "tooltips.h"
 #include "ui_config.h"
 
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& lw, Gtk::Widget& rw, bool central_joiner)
 	: left (lw)
@@ -219,7 +220,7 @@ void
 ButtonJoiner::action_tooltip_changed ()
 {
 	std::string str = _action->property_tooltip().get_value();
-	ARDOUR_UI::instance()->set_tip (*this, str);
+	set_tooltip (*this, str);
 }
 
 void

@@ -48,7 +48,6 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/template_utils.h"
 
-#include "ardour_ui.h"
 #include "startup.h"
 #include "opts.h"
 #include "engine_dialog.h"

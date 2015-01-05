@@ -32,15 +32,16 @@
 #include "gtkmm2ext/rgb_macros.h"
 
 #include "actions.h"
-#include "ardour_ui.h"
 #include "rgb_macros.h"
 #include "shuttle_control.h"
+#include "tooltips.h"
 
 #include "i18n.h"
 
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+using namespace ARDOUR_UI_UTILS;
 using std::min;
 using std::max;
 
@@ -53,7 +54,7 @@ ShuttleControl::ShuttleControl ()
 	: _controllable (new ShuttleControllable (*this))
 	, binding_proxy (_controllable)
 {
-	ARDOUR_UI::instance()->set_tip (*this, _("Shuttle speed control (Context-click for options)"));
+	set_tooltip (*this, _("Shuttle speed control (Context-click for options)"));
 
 	pattern = 0;
 	shine_pattern = 0;

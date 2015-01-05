@@ -27,11 +27,11 @@
 
 #include "ardour/filesystem_paths.h"
 
-#include "ardour_ui.h"
 #include "midi_channel_selector.h"
 #include "midi_time_axis.h"
 #include "step_editor.h"
 #include "step_entry.h"
+#include "tooltips.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -188,13 +188,13 @@ StepEntry::StepEntry (StepEditor& seditor)
 	note_length_box.pack_start (length_32_button, false, false);
 	note_length_box.pack_start (length_64_button, false, false);
 
-	ARDOUR_UI::instance()->set_tip (&length_1_button, _("Set note length to a whole note"), "");
-	ARDOUR_UI::instance()->set_tip (&length_2_button, _("Set note length to a half note"), "");
-	ARDOUR_UI::instance()->set_tip (&length_4_button, _("Set note length to a quarter note"), "");
-	ARDOUR_UI::instance()->set_tip (&length_8_button, _("Set note length to a eighth note"), "");
-	ARDOUR_UI::instance()->set_tip (&length_16_button, _("Set note length to a sixteenth note"), "");
-	ARDOUR_UI::instance()->set_tip (&length_32_button, _("Set note length to a thirty-second note"), "");
-	ARDOUR_UI::instance()->set_tip (&length_64_button, _("Set note length to a sixty-fourth note"), "");
+	set_tooltip (&length_1_button, _("Set note length to a whole note"), "");
+	set_tooltip (&length_2_button, _("Set note length to a half note"), "");
+	set_tooltip (&length_4_button, _("Set note length to a quarter note"), "");
+	set_tooltip (&length_8_button, _("Set note length to a eighth note"), "");
+	set_tooltip (&length_16_button, _("Set note length to a sixteenth note"), "");
+	set_tooltip (&length_32_button, _("Set note length to a thirty-second note"), "");
+	set_tooltip (&length_64_button, _("Set note length to a sixty-fourth note"), "");
 
 	RadioButtonGroup velocity_group = velocity_ppp_button.get_group();
 	velocity_pp_button.set_group (velocity_group);
@@ -273,14 +273,14 @@ StepEntry::StepEntry (StepEditor& seditor)
 	velocity_ff_button.property_draw_indicator() = false;
 	velocity_fff_button.property_draw_indicator() = false;
 
-	ARDOUR_UI::instance()->set_tip (&velocity_ppp_button, _("Set volume (velocity) to pianississimo"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_pp_button, _("Set volume (velocity) to pianissimo"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_p_button, _("Set volume (velocity) to piano"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_mp_button, _("Set volume (velocity) to mezzo-piano"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_mf_button, _("Set volume (velocity) to mezzo-forte"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_f_button, _("Set volume (velocity) to forte"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_ff_button, _("Set volume (velocity) to fortissimo"), "");
-	ARDOUR_UI::instance()->set_tip (&velocity_fff_button, _("Set volume (velocity) to fortississimo"), "");
+	set_tooltip (&velocity_ppp_button, _("Set volume (velocity) to pianississimo"), "");
+	set_tooltip (&velocity_pp_button, _("Set volume (velocity) to pianissimo"), "");
+	set_tooltip (&velocity_p_button, _("Set volume (velocity) to piano"), "");
+	set_tooltip (&velocity_mp_button, _("Set volume (velocity) to mezzo-piano"), "");
+	set_tooltip (&velocity_mf_button, _("Set volume (velocity) to mezzo-forte"), "");
+	set_tooltip (&velocity_f_button, _("Set volume (velocity) to forte"), "");
+	set_tooltip (&velocity_ff_button, _("Set volume (velocity) to fortissimo"), "");
+	set_tooltip (&velocity_fff_button, _("Set volume (velocity) to fortississimo"), "");
 
 	note_velocity_box.pack_start (velocity_ppp_button, false, false);
 	note_velocity_box.pack_start (velocity_pp_button, false, false);
@@ -328,20 +328,20 @@ StepEntry::StepEntry (StepEditor& seditor)
 	resync_box.pack_start (bar_resync_button, true, false);
 	resync_box.pack_start (resync_button, true, false);
 
-	ARDOUR_UI::instance()->set_tip (&chord_button, _("Stack inserted notes to form a chord"), "");
-	ARDOUR_UI::instance()->set_tip (&sustain_button, _("Extend selected notes by note length"), "");
-	ARDOUR_UI::instance()->set_tip (&dot0_button, _("Use undotted note lengths"), "");
-	ARDOUR_UI::instance()->set_tip (&dot1_button, _("Use dotted (* 1.5) note lengths"), "");
-	ARDOUR_UI::instance()->set_tip (&dot2_button, _("Use double-dotted (* 1.75) note lengths"), "");
-	ARDOUR_UI::instance()->set_tip (&dot3_button, _("Use triple-dotted (* 1.875) note lengths"), "");
-	ARDOUR_UI::instance()->set_tip (&rest_button, _("Insert a note-length's rest"), "");
-	ARDOUR_UI::instance()->set_tip (&grid_rest_button, _("Insert a grid-unit's rest"), "");
-	ARDOUR_UI::instance()->set_tip (&beat_resync_button, _("Insert a rest until the next beat"), "");
-	ARDOUR_UI::instance()->set_tip (&bar_resync_button, _("Insert a rest until the next bar"), "");
-	ARDOUR_UI::instance()->set_tip (&bank_button, _("Insert a bank change message"), "");
-	ARDOUR_UI::instance()->set_tip (&program_button, _("Insert a program change message"), "");
-	ARDOUR_UI::instance()->set_tip (&back_button, _("Move Insert Position Back by Note Length"), "");
-	ARDOUR_UI::instance()->set_tip (&resync_button, _("Move Insert Position to Edit Point"), "");
+	set_tooltip (&chord_button, _("Stack inserted notes to form a chord"), "");
+	set_tooltip (&sustain_button, _("Extend selected notes by note length"), "");
+	set_tooltip (&dot0_button, _("Use undotted note lengths"), "");
+	set_tooltip (&dot1_button, _("Use dotted (* 1.5) note lengths"), "");
+	set_tooltip (&dot2_button, _("Use double-dotted (* 1.75) note lengths"), "");
+	set_tooltip (&dot3_button, _("Use triple-dotted (* 1.875) note lengths"), "");
+	set_tooltip (&rest_button, _("Insert a note-length's rest"), "");
+	set_tooltip (&grid_rest_button, _("Insert a grid-unit's rest"), "");
+	set_tooltip (&beat_resync_button, _("Insert a rest until the next beat"), "");
+	set_tooltip (&bar_resync_button, _("Insert a rest until the next bar"), "");
+	set_tooltip (&bank_button, _("Insert a bank change message"), "");
+	set_tooltip (&program_button, _("Insert a program change message"), "");
+	set_tooltip (&back_button, _("Move Insert Position Back by Note Length"), "");
+	set_tooltip (&resync_button, _("Move Insert Position to Edit Point"), "");
 
         act = myactions.find_action ("StepEditing/back");
         gtk_activatable_set_use_action_appearance (GTK_ACTIVATABLE (back_button.gobj()), false);
