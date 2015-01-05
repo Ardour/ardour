@@ -139,19 +139,19 @@ MonitorSection::MonitorSection (Session* s)
 	solo_model_box.show ();
 
 	act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
-	ARDOUR_UI::instance()->tooltips().set_tip (solo_in_place_button, _("Solo controls affect solo-in-place"));
+	ARDOUR_UI::instance()->set_tip (solo_in_place_button, _("Solo controls affect solo-in-place"));
 	if (act) {
 		solo_in_place_button.set_related_action (act);
 	}
 
 	act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
-	ARDOUR_UI::instance()->tooltips().set_tip (afl_button, _("Solo controls toggle after-fader-listen"));
+	ARDOUR_UI::instance()->set_tip (afl_button, _("Solo controls toggle after-fader-listen"));
 	if (act) {
 		afl_button.set_related_action (act);
 	}
 
 	act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
-	ARDOUR_UI::instance()->tooltips().set_tip (pfl_button, _("Solo controls toggle pre-fader-listen"));
+	ARDOUR_UI::instance()->set_tip (pfl_button, _("Solo controls toggle pre-fader-listen"));
 	if (act) {
 		pfl_button.set_related_action (act);
 	}
@@ -161,7 +161,7 @@ MonitorSection::MonitorSection (Session* s)
 	solo_boost_control = new ArdourKnob ();
 	solo_boost_control->set_name("monitor knob");
 	solo_boost_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
-	ARDOUR_UI::instance()->tooltips().set_tip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
+	ARDOUR_UI::instance()->set_tip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
 
 	solo_boost_display = new ArdourDisplay ();
 	solo_boost_display->set_name("monitor section cut");
@@ -190,7 +190,7 @@ MonitorSection::MonitorSection (Session* s)
 	solo_cut_control = new ArdourKnob ();
 	solo_cut_control->set_name ("monitor knob");
 	solo_cut_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
-	ARDOUR_UI::instance()->tooltips().set_tip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
+	ARDOUR_UI::instance()->set_tip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
 
 	solo_cut_display = new ArdourDisplay ();
 	solo_cut_display->set_name("monitor section cut");
@@ -216,7 +216,7 @@ MonitorSection::MonitorSection (Session* s)
 	dim_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	dim_control->set_name ("monitor knob");
 	dim_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
-	ARDOUR_UI::instance()->tooltips().set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
+	ARDOUR_UI::instance()->set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
 
 	dim_display = new ArdourDisplay ();
 	dim_display->set_name("monitor section cut");

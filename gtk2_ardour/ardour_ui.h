@@ -202,8 +202,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
 
-	Gtk::Tooltips& tooltips() { return _tooltips; }
-
 	static PublicEditor* _instance;
 
 	/** Emitted frequently with the audible frame, false, and the edit point as
@@ -338,7 +336,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
   private:
 	PublicEditor*        editor;
 	Mixer_UI*            mixer;
-	Gtk::Tooltips       _tooltips;
 	NSM_Client*          nsm;
 	bool                _was_dirty;
         bool                _mixer_on_top;

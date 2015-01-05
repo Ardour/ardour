@@ -360,7 +360,7 @@ SessionDialog::setup_initial_choice_box ()
 		Gtk::Button *updates_button = manage (new Gtk::Button (_("Check the website for more...")));
 
 		updates_button->signal_clicked().connect (mem_fun(*this, &SessionDialog::updates_button_clicked) );
-		ARDOUR_UI::instance()->tooltips().set_tip (*updates_button, _("Click to open the program website in your web browser"));
+		ARDOUR_UI::instance()->set_tip (*updates_button, _("Click to open the program website in your web browser"));
 
 		info_box->pack_start (*updates_button, false, false);
 

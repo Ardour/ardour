@@ -558,8 +558,6 @@ ARDOUR_UI::post_engine ()
 	AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 	AudioEngine::instance()->BecameSilent.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::audioengine_became_silent, this), gui_context());
 
-	_tooltips.enable();
-
 	if (setup_windows ()) {
 		throw failed_constructor ();
 	}
