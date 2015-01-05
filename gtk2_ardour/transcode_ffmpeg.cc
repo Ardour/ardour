@@ -273,7 +273,7 @@ TranscodeFfmpeg::default_meta_data ()
 {
 	TranscodeFfmpeg::FFSettings ffm;
 	ffm.clear();
-	ffm["comment"] = "Created with ardour";
+	ffm["comment"] = "Created with " PROGRAM_NAME;
 	return ffm;
 }
 
