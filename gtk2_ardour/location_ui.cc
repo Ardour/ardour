@@ -320,15 +320,15 @@ LocationEditRow::set_location (Location *loc)
 		ARDOUR_UI::instance()->set_tip (end_clock, _("End time - middle click to locate here"));
 		ARDOUR_UI::instance()->set_tip (length_clock, _("Length"));
 
-		ARDOUR_UI::instance()->tooltips().set_tip (start_to_playhead_button, _("Set range start from playhead location"));
-		ARDOUR_UI::instance()->tooltips().set_tip (end_to_playhead_button, _("Set range end from playhead location"));
+		ARDOUR_UI::instance()->set_tip (start_to_playhead_button, _("Set range start from playhead location"));
+		ARDOUR_UI::instance()->set_tip (end_to_playhead_button, _("Set range end from playhead location"));
 		
 	} else {
 
 		ARDOUR_UI::instance()->set_tip (remove_button, _("Remove this marker"));
 		ARDOUR_UI::instance()->set_tip (start_clock, _("Position - middle click to locate here"));
 
-		ARDOUR_UI::instance()->tooltips().set_tip (start_to_playhead_button, _("Set marker time from playhead location"));
+		ARDOUR_UI::instance()->set_tip (start_to_playhead_button, _("Set marker time from playhead location"));
 
 		end_clock.hide();
 		length_clock.hide();
