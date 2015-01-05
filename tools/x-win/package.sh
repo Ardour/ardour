@@ -221,7 +221,10 @@ EOF
 fi
 
 cat >> $NSISFILE << EOF
+!addincludedir "${this_script_dir}\\nsis"
 !include MUI2.nsh
+!include FileAssociation.nsh
+
 Name "${PROGRAM_NAME}${PROGRAM_VERSION}"
 OutFile "${OUTFILE}"
 RequestExecutionLevel admin
@@ -282,6 +285,7 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
+  \${registerExtension} "\$INSTDIR\\bin\\${PRODUCT_EXE}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
 
@@ -363,6 +367,7 @@ Section "Uninstall"
   RMDir "\$INSTDIR"
   Delete "\$SMPROGRAMS\\${PRODUCT_ID}\\*.*"
   RMDir "\$SMPROGRAMS\\${PRODUCT_ID}"
+  \${unregisterExtension} ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
 
