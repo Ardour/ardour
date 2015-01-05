@@ -22,6 +22,7 @@
 #include <gtkmm/drawingarea.h>
 
 #include "gtkmm2ext/binding_proxy.h"
+#include "gtkmm2ext/cairo_widget.h"
 
 #include "pbd/controllable.h"
 #include "ardour/session_handle.h"
