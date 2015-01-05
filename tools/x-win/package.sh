@@ -27,6 +27,9 @@ PROGRAM_NAME=Ardour
 PRODUCT_NAME=ardour
 PROGRAM_VERSION=3
 
+LOWERCASE_DIRNAME=ardour3 # see wscript 'lwrcase_dirname' used for lib/ardour3 and share/ardour3
+STATEFILE_SUFFIX=ardour # see filename_extensions.cc
+
 if test -n "$MIXBUS"; then
 	PROGRAM_NAME=Mixbus
 	PRODUCT_NAME=mixbus
@@ -83,7 +86,7 @@ fi
 
 echo " === bundle to $DESTDIR"
 
-ALIBDIR=$DESTDIR/lib/ardour3
+ALIBDIR=$DESTDIR/lib/${LOWERCASE_DIRNAME}
 
 rm -rf $DESTDIR
 mkdir -p $DESTDIR/bin
@@ -137,15 +140,15 @@ if test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
 	cp /usr/${XPREFIX}/lib/libwinpthread-1.dll $DESTDIR/bin/
 fi
 
-cp -r $PREFIX/share/ardour3 $DESTDIR/share/
-cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
+cp -r $PREFIX/share/${LOWERCASE_DIRNAME} $DESTDIR/share/
+cp -r $PREFIX/etc/${LOWERCASE_DIRNAME}/* $DESTDIR/share/${LOWERCASE_DIRNAME}/
 
 cp COPYING $DESTDIR/share/
 cp gtk2_ardour/icons/${PRODUCT_ICON} $DESTDIR/share/
 cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
 
 # replace default cursor with square version (sans hotspot file)
-cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/ardour3/icons/
+cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 
 # clean build-dir after depoyment
 ./waf uninstall
@@ -285,7 +288,7 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
-  \${registerExtension} "\$INSTDIR\\bin\\${PRODUCT_EXE}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
+  \${registerExtension} "\$INSTDIR\\bin\\${STATEFILE_SUFFIX}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
 
@@ -367,7 +370,7 @@ Section "Uninstall"
   RMDir "\$INSTDIR"
   Delete "\$SMPROGRAMS\\${PRODUCT_ID}\\*.*"
   RMDir "\$SMPROGRAMS\\${PRODUCT_ID}"
-  \${unregisterExtension} ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
+  \${unregisterExtension} ".${STATEFILE_SUFFIX}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
 
