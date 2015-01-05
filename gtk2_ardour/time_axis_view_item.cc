@@ -990,9 +990,15 @@ TimeAxisViewItem::set_frame_color()
             f = UINT_RGBA_CHANGE_A (f, 64);
     }
     
-    uint32_t opacity = 255*0.7; //70% opacity
-    uint32_t outline_color_rgba = RGBA_TO_UINT (0, 0, 0, opacity);
-
+    uint32_t outline_color_rgba; //border color
+    if (_selected){
+        uint32_t opacity = 255; //100% opacity
+        outline_color_rgba = RGBA_TO_UINT (255, 255, 255, opacity);
+    }
+    else{
+        uint32_t opacity = 255 * 0.7; //70% opacity
+        outline_color_rgba = RGBA_TO_UINT (0, 0, 0, opacity);
+    }
     frame->set_outline_color (outline_color_rgba );
 }
 
