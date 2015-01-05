@@ -78,17 +78,18 @@ SMF::seek_to_track(int track)
 bool
 SMF::test(const std::string& path)
 {
-	FILE* f = fopen (path.c_str(), "r");
+	FILE* f = fopen(path.c_str(), "r");
 	if (f == 0) {
 		return false;
 	}
 
-	smf_t* test_smf;
-	if ((test_smf = smf_load (f)) == NULL) {
-		return false;
-	}
-	smf_delete (test_smf);
-	return true;
+	smf_t* test_smf = smf_load(f);
+	fclose(f);
+
+	const bool success = (test_smf != NULL);
+	smf_delete(test_smf);
+
+	return success;
 }
 
 /** Attempt to open the SMF file for reading and/or writing.
@@ -109,16 +110,14 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 
 	_file_path = path;
 
-	FILE* f = fopen (_file_path.c_str(), "r");
+	FILE* f = fopen(_file_path.c_str(), "r");
 	if (f == 0) {
 		return -1;
-	}
-
-	if ((_smf = smf_load (f)) == 0) {
+	} else if ((_smf = smf_load(f)) == 0) {
+		fclose(f);
 		return -1;
-	}
-
-	if ((_smf_track = smf_get_track_by_number(_smf, track)) == 0) {
+	} else if ((_smf_track = smf_get_track_by_number(_smf, track)) == 0) {
+		fclose(f);
 		return -2;
 	}
 
@@ -131,6 +130,7 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 		_empty = false;
 	}
 
+	fclose(f);
 	return 0;
 }
 
@@ -186,8 +186,10 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 		}
 
 		if (smf_save (_smf, f)) {
+			fclose (f);
 			return -1;
 		}
+		fclose (f);
 	}
 
 	_empty = true;
@@ -403,8 +405,11 @@ SMF::end_write() THROW_FILE_ERROR
 	}
 
 	if (smf_save(_smf, f) != 0) {
+		fclose(f);
 		throw FileError (_file_path);
 	}
+
+	fclose(f);
 }
 
 double
