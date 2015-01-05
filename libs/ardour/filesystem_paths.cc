@@ -114,9 +114,10 @@ user_cache_directory ()
 	if ((c = getenv ("XDG_CACHE_HOME")) != 0) {
 		p = c;
 	} else {
+
 #ifdef PLATFORM_WINDOWS
 		// Not technically the home dir (since it needs to be a writable folder)
-		const string home_dir = Glib::build_filename (Glib::get_user_data_dir(), user_config_dir_name);
+		const string home_dir = Glib::get_user_data_dir();
 #else
 		const string home_dir = Glib::get_home_dir();
 #endif
@@ -124,14 +125,25 @@ user_cache_directory ()
 			error << "Unable to determine home directory" << endmsg;
 			exit (1);
 		}
-
 		p = home_dir;
-		p = Glib::build_filename (p, ".cache");
-	}
-#endif
 
 #ifndef PLATFORM_WINDOWS
+		p = Glib::build_filename (p, ".cache");
+#endif
+
+	}
+#endif // end not __APPLE__
+
 	p = Glib::build_filename (p, user_config_dir_name);
+
+#ifdef PLATFORM_WINDOWS
+	 /* On Windows Glib::get_user_data_dir is the folder to use for local
+		* (as opposed to roaming) application data.
+		* See documentation for CSIDL_LOCAL_APPDATA.
+		* Glib::get_user_data_dir() == GLib::get_user_config_dir()
+		* so we add an extra subdir *below* the config dir.
+		*/
+	p = Glib::build_filename (p, "cache");
 #endif
 
 	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
