@@ -47,7 +47,6 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
-#include "ardour_ui.h"
 #include "actions.h"
 #include "editor.h"
 #include "time_axis_view.h"
