@@ -12,11 +12,25 @@ test -f gtk2_ardour/wscript || exit 1
 : ${TMPDIR=/var/tmp}
 : ${SRCDIR=/var/tmp/winsrc}  # source-code tgz cache
 
-# TODO: add variant switches here or grep from build/config.log
+# TODO: grep from build/config.log instead
+while [ $# -gt 0 ] ; do
+	echo "arg = $1"
+	case $1 in
+		--mixbus)
+			MIXBUS=1
+			shift ;;
+	esac
+done
+
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
 PROGRAM_NAME=Ardour
 PRODUCT_NAME=ardour
 PROGRAM_VERSION=3
+
+if test -n "$MIXBUS"; then
+	PROGRAM_NAME=Mixbus
+	PRODUCT_NAME=mixbus
+fi
 
 # derived variables
 PRODUCT_ID=${PRODUCT_NAME}${PROGRAM_VERSION}
@@ -217,8 +231,20 @@ InstallDirRegKey HKLM "Software\\${PROGRAM_NAME}\\${PRODUCT_ID}\\$WARCH" "Instal
 
 EOF
 
-# TODO: add project speficic finish/welcome page
-cat >> $NSISFILE << EOF
+if test -n "$MIXBUS"; then
+
+# TODO: proper welcome/finish text.
+	cat >> $NSISFILE << EOF
+!define MUI_FINISHPAGE_TITLE "Welcome to Mixbus"
+!define MUI_FINISHPAGE_TEXT "Thank you for choosing Harrison Mixbus."
+!define MUI_FINISHPAGE_LINK "Harrison Consoles Website"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://harrisonconsoles.com"
+!define MUI_FINISHPAGE_NOREBOOTSUPPORT
+EOF
+
+else
+
+	cat >> $NSISFILE << EOF
 !define MUI_FINISHPAGE_TITLE "Welcome to Ardour"
 !define MUI_FINISHPAGE_TEXT "This windows versions or Ardour is provided as-is.\$\\r\$\\nThe ardour community currently has no expertise in supporting windows users, and there are no developers focusing on windows specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
 !define MUI_FINISHPAGE_LINK "Ardour Manual"
@@ -227,6 +253,8 @@ cat >> $NSISFILE << EOF
 #!define MUI_FINISHPAGE_RUN "\$INSTDIR\\bin\\${PRODUCT_EXE}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 EOF
+
+fi
 
 cat >> $NSISFILE << EOF
 !define MUI_ABORTWARNING
