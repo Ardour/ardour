@@ -1,15 +1,29 @@
 #!/bin/bash
 
-# we assuem this script is <ardour-src>/tools/x-win/package
+# we assume this script is <ardour-src>/tools/x-win/package.sh
 pushd "`/usr/bin/dirname \"$0\"`" > /dev/null; this_script_dir="`pwd`"; popd > /dev/null
 cd $this_script_dir/../..
 test -f gtk2_ardour/wscript || exit 1
 
+# Defaults (overridden by environment)
 : ${XARCH=i686} # or x86_64
 : ${ROOT=/home/ardour}
 : ${MAKEFLAGS=-j4}
 : ${TMPDIR=/var/tmp}
 : ${SRCDIR=/var/tmp/winsrc}  # source-code tgz cache
+
+# TODO: add variant switches here or grep from build/config.log
+# see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
+PROGRAM_NAME=Ardour
+PRODUCT_NAME=ardour
+PROGRAM_VERSION=3
+
+# derived variables
+PRODUCT_ID=${PRODUCT_NAME}${PROGRAM_VERSION}
+PRODUCT_EXE=${PRODUCT_NAME}.exe
+PRODUCT_ICON=${PRODUCT_NAME}.ico
+
+###############################################################################
 
 if test "$XARCH" = "x86_64" -o "$XARCH" = "amd64"; then
 	echo "Target: 64bit Windows (x86_64)"
@@ -75,7 +89,7 @@ cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
 cp build/libs/fst/ardour-vst-scanner.exe $DESTDIR/bin/ || true
-cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/ardour.exe
+cp `ls -t build/gtk2_ardour/ardour-*.exe | head -n1` $DESTDIR/bin/${PRODUCT_EXE}
 
 mkdir -p $DESTDIR/lib/gtk-2.0/engines
 cp build/libs/clearlooks-newer/clearlooks.dll $DESTDIR/lib/gtk-2.0/engines/libclearlooks.la
@@ -113,7 +127,7 @@ cp -r $PREFIX/share/ardour3 $DESTDIR/share/
 cp -r $PREFIX/etc/ardour3/* $DESTDIR/share/ardour3/
 
 cp COPYING $DESTDIR/share/
-cp gtk2_ardour/icons/ardour.ico $DESTDIR/share/
+cp gtk2_ardour/icons/${PRODUCT_ICON} $DESTDIR/share/
 cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
 
 # replace default cursor with square version (sans hotspot file)
@@ -158,16 +172,16 @@ if ! grep " using ./waf configure" build/config.log | grep -q -- "--optimize"; t
 	tar xf gdb-static-win3264.tar.xz
 	cd - > /dev/null
 
-	echo " === Creating ardbg.bat"
+	echo " === Creating debug.bat"
 	cp -r ${SRCDIR}/gdb_$WARCH $DESTDIR/gdb
-	cat > $DESTDIR/ardbg.bat << EOF
+	cat > $DESTDIR/debug.bat << EOF
 cd bin
-START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\ardour-debug.log" ardour.exe
+START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\${PRODUCT_NAME}-debug.log" ${PRODUCT_EXE}
 EOF
-	OUTFILE="${TMPDIR}/ardour-${ARDOURVERSION}-dbg-${WARCH}-Setup.exe"
+	OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}-dbg-${WARCH}-Setup.exe"
 	VERSIONINFO="Debug Version."
 else
-	OUTFILE="${TMPDIR}/ardour-${ARDOURVERSION}-${WARCH}-Setup.exe"
+	OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}-${WARCH}-Setup.exe"
 	VERSIONINFO="Optimized Version."
 fi
 
@@ -194,21 +208,27 @@ fi
 
 cat >> $NSISFILE << EOF
 !include MUI2.nsh
-Name "Ardour3"
+Name "${PROGRAM_NAME}${PROGRAM_VERSION}"
 OutFile "${OUTFILE}"
 RequestExecutionLevel admin
-InstallDir "\$${PGF}\\ardour3"
-InstallDirRegKey HKLM "Software\\Ardour\\ardour3\\$WARCH" "Install_Dir"
+InstallDir "\$${PGF}\\${PRODUCT_ID}"
+InstallDirRegKey HKLM "Software\\${PROGRAM_NAME}\\${PRODUCT_ID}\\$WARCH" "Install_Dir"
+!define MUI_ICON "share\\${PRODUCT_ICON}"
 
-!define MUI_ICON "share\\ardour.ico"
+EOF
+
+# TODO: add project speficic finish/welcome page
+cat >> $NSISFILE << EOF
 !define MUI_FINISHPAGE_TITLE "Welcome to Ardour"
 !define MUI_FINISHPAGE_TEXT "This windows versions or Ardour is provided as-is.\$\\r\$\\nThe ardour community currently has no expertise in supporting windows users, and there are no developers focusing on windows specific issues either.\$\\r\$\\nIf you like Ardour, please consider helping out."
 !define MUI_FINISHPAGE_LINK "Ardour Manual"
 !define MUI_FINISHPAGE_LINK_LOCATION "http://manual.ardour.org"
 #this would run as admin - see http://forums.winamp.com/showthread.php?t=353366
-#!define MUI_FINISHPAGE_RUN "\$INSTDIR\\bin\\ardour.exe"
+#!define MUI_FINISHPAGE_RUN "\$INSTDIR\\bin\\${PRODUCT_EXE}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
+EOF
 
+cat >> $NSISFILE << EOF
 !define MUI_ABORTWARNING
 !insertmacro MUI_PAGE_LICENSE "share\\COPYING"
 !insertmacro MUI_PAGE_COMPONENTS
@@ -219,21 +239,21 @@ InstallDirRegKey HKLM "Software\\Ardour\\ardour3\\$WARCH" "Install_Dir"
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
 
-Section "Ardour3 (required)" SecArdour
+Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   SectionIn RO
   SetOutPath \$INSTDIR
   File /r bin
   File /r lib
   File /r share
-  File /nonfatal ardbg.bat
+  File /nonfatal debug.bat
   File /nonfatal /r gdb
-  WriteRegStr HKLM SOFTWARE\\Ardour\\ardour3\\$WARCH "Install_Dir" "\$INSTDIR"
-  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "DisplayName" "Ardour3"
-  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "NoModify" 1
-  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour3" "NoRepair" 1
+  WriteRegStr HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\$WARCH" "Install_Dir" "\$INSTDIR"
+  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "DisplayName" "${PROGRAM_NAME}${PROGRAM_VERSION}"
+  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "NoModify" 1
+  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
-  CreateShortCut "\$INSTDIR\\Ardour3.lnk" "\$INSTDIR\\bin\\ardour.exe" "" "\$INSTDIR\\bin\\ardour.exe" 0
+  CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
 SectionEnd
 EOF
 
@@ -241,7 +261,7 @@ if test -z "$NOVIDEOTOOLS"; then
 
 	cat >> $NSISFILE << EOF
 Section "Videotimeline Tools" SecVideo
-  WriteRegStr HKLM SOFTWARE\\Ardour\\video "Install_Dir" "\$INSTDIR\\video"
+  WriteRegStr "HKLM Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\video" "Install_Dir" "\$INSTDIR\\video"
   SetOutPath \$INSTDIR
   File /r video
 SectionEnd
@@ -252,27 +272,27 @@ fi
 cat >> $NSISFILE << EOF
 Section "Start Menu Shortcuts" SecMenu
   SetShellVarContext all
-  CreateDirectory "\$SMPROGRAMS\\ardour3"
-  CreateShortCut "\$SMPROGRAMS\\ardour3\\Ardour3.lnk" "\$INSTDIR\\bin\\ardour.exe" "" "\$INSTDIR\\bin\\ardour.exe" 0
+  CreateDirectory "\$SMPROGRAMS\\${PRODUCT_ID}"
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
 EOF
 
-if test -f "$DESTDIR/ardbg.bat"; then
+if test -f "$DESTDIR/debug.bat"; then
 	cat >> $NSISFILE << EOF
-  CreateShortCut "\$SMPROGRAMS\\ardour3\\Ardour3 GDB.lnk" "\$INSTDIR\\ardbg.bat" "" "\$INSTDIR\\share\\ardour_bug.ico" 0
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\${PROGRAM_NAME}${PROGRAM_VERSION} GDB.lnk" "\$INSTDIR\\debug.bat" "" "\$INSTDIR\\share\\ardour_bug.ico" 0
 EOF
 fi
 
 if test -z "$NOVIDEOTOOLS"; then
 	cat >> $NSISFILE << EOF
-	IfFileExists "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0 +2
-  CreateShortCut "\$SMPROGRAMS\\ardour3\\Video Monitor.lnk" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" "" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0
+  IfFileExists "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0 +2
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\Video Monitor.lnk" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" "" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0
 EOF
 fi
 
 cat >> $NSISFILE << EOF
-  CreateShortCut "\$SMPROGRAMS\\ardour3\\Uninstall.lnk" "\$INSTDIR\\uninstall.exe" "" "\$INSTDIR\\uninstall.exe" 0
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\Uninstall.lnk" "\$INSTDIR\\uninstall.exe" "" "\$INSTDIR\\uninstall.exe" 0
 SectionEnd
-LangString DESC_SecArdour \${LANG_ENGLISH} "Ardour ${ARDOURVERSION}\$\\r\$\\n${VERSIONINFO}\$\\r\$\\n${ARDOURDATE}"
+LangString DESC_SecMainProg \${LANG_ENGLISH} "${PROGRAM_NAME} ${ARDOURVERSION}\$\\r\$\\n${VERSIONINFO}\$\\r\$\\n${ARDOURDATE}"
 EOF
 
 if test -z "$NOVIDEOTOOLS"; then
@@ -284,7 +304,7 @@ fi
 cat >> $NSISFILE << EOF
 LangString DESC_SecMenu \${LANG_ENGLISH} "Create Start-Menu Shortcuts (recommended)."
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-!insertmacro MUI_DESCRIPTION_TEXT \${SecArdour} \$(DESC_SecArdour)
+!insertmacro MUI_DESCRIPTION_TEXT \${SecMainProg} \$(DESC_SecMainProg)
 EOF
 
 if test -z "$NOVIDEOTOOLS"; then
@@ -298,19 +318,23 @@ cat >> $NSISFILE << EOF
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 Section "Uninstall"
   SetShellVarContext all
-  DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\ardour"
-  DeleteRegKey HKLM SOFTWARE\\Ardour\\ardour3
+  DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}"
+  DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}"
+# XXX XXX XXX
+# TODO: remove the following line before release. But for now, clean up old version agnnstic registry
+  DeleteRegKey HKLM "Software\\${PROGRAM_NAME}"
+# XXX XXX XXX
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"
   RMDir /r "\$INSTDIR\\gdb"
   RMDir /r "\$INSTDIR\\video"
-  Delete "\$INSTDIR\\ardbg.bat"
+  Delete "\$INSTDIR\\debug.bat"
   Delete "\$INSTDIR\\uninstall.exe"
-  Delete "\$INSTDIR\\Ardour3.lnk"
+  Delete "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk"
   RMDir "\$INSTDIR"
-  Delete "\$SMPROGRAMS\\ardour3\\*.*"
-  RMDir "\$SMPROGRAMS\\ardour3"
+  Delete "\$SMPROGRAMS\\${PRODUCT_ID}\\*.*"
+  RMDir "\$SMPROGRAMS\\${PRODUCT_ID}"
 SectionEnd
 EOF
 

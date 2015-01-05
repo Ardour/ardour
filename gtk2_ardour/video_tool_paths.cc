@@ -76,7 +76,7 @@ ArdourVideoToolPaths::harvid_exe (std::string &harvid_exe)
 		harvid_exe = icsd_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
-	else if ( windows_install_dir("Software\\Ardour\\video", reg))
+	else if ( windows_install_dir("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", reg))
 	{
 		harvid_exe = g_build_filename(reg.c_str(), "harvid", "harvid.exe", NULL);
 	}
@@ -123,7 +123,7 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 	}
 #endif
 #ifdef PLATFORM_WINDOWS
-	else if ( windows_install_dir("Software\\Ardour\\video", reg))
+	else if ( windows_install_dir("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", reg))
 	{
 		xjadeo_exe = std::string(g_build_filename(reg.c_str(), "xjadeo", "xjadeo.exe", NULL));
 	}
@@ -162,7 +162,7 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 		ffmpeg_exe = ff_file_path;
 	}
 #ifdef PLATFORM_WINDOWS
-	else if ( windows_install_dir("Software\\Ardour\\video", reg))
+	else if ( windows_install_dir("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", reg))
 	{
 		ffmpeg_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffmpeg.exe"), NULL);
 		ffprobe_exe = g_build_filename(reg.c_str(), X_("harvid"), X_("ffprobe.exe"), NULL);

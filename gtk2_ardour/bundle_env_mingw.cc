@@ -58,9 +58,9 @@ get_install_path ()
 		char tmp[PATH_MAX+1];
 		if (
 #ifdef __MINGW64__
-				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\Ardour\\ardour3\\w64", 0, KEY_READ, &key))
+				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\w64", 0, KEY_READ, &key))
 #else
-				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\Ardour\\ardour3\\w32", 0, KEY_READ, &key))
+				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\w32", 0, KEY_READ, &key))
 #endif
 				&&(ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
 			 )
