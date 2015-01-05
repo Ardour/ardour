@@ -2311,7 +2311,7 @@ remove_end(string state)
 		statename = statename.substr (start+1);
 	}
 
-	if ((end = statename.rfind(".ardour")) == string::npos) {
+	if ((end = statename.rfind(statefile_suffix)) == string::npos) {
 		end = statename.length();
 	}
 
@@ -2493,11 +2493,16 @@ accept_all_midi_files (const string& path, void* /*arg*/)
 static bool
 accept_all_state_files (const string& path, void* /*arg*/)
 {
-        if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
-                return false;
-        }
+	if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+		return false;
+	}
 
-	return (path.length() > 7 && path.find (".ardour") == (path.length() - 7));
+	std::string const statefile_ext (statefile_suffix);
+	if (path.length() >= statefile_ext.length()) {
+		return (0 == path.compare (path.length() - statefile_ext.length(), statefile_ext.length(), statefile_ext));
+	} else {
+		return false;
+	}
 }
 
 int
