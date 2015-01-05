@@ -48,6 +48,7 @@
 #include "editor_regions.h"
 #include "editor_drag.h"
 #include "main_clock.h"
+#include "tooltips.h"
 #include "ui_config.h"
 
 #include "i18n.h"
@@ -127,7 +128,7 @@ EditorRegions::EditorRegions (Editor* e)
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);
 		l = manage (new Label (ci[i].label));
-		ARDOUR_UI::instance()->set_tip (*l, ci[i].tooltip);
+		set_tooltip (*l, ci[i].tooltip);
 		col->set_widget (*l);
 		l->show ();
 

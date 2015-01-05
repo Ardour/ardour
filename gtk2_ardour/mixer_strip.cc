@@ -53,7 +53,6 @@
 #include "ardour/types.h"
 #include "ardour/user_bundle.h"
 
-#include "ardour_ui.h"
 #include "ardour_window.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
@@ -66,6 +65,7 @@
 #include "gui_thread.h"
 #include "route_group_menu.h"
 #include "meter_patterns.h"
+#include "tooltips.h"
 #include "ui_config.h"
 
 #include "i18n.h"
@@ -156,10 +156,10 @@ MixerStrip::init ()
 	}
 	
 	width_button.set_icon (ArdourIcon::StripWidth);
-	ARDOUR_UI::instance()->set_tip (width_button, t);
+	set_tooltip (width_button, t);
 
 	hide_button.set_icon (ArdourIcon::CloseCross);
-	ARDOUR_UI::instance()->set_tip (&hide_button, _("Hide this mixer strip"));
+	set_tooltip (&hide_button, _("Hide this mixer strip"));
 
 	input_button_box.set_spacing(2);
 	
@@ -170,7 +170,7 @@ MixerStrip::init ()
 	output_button.set_text (_("Output"));
 	output_button.set_name ("mixer strip button");
 
-	ARDOUR_UI::instance()->set_tip (&meter_point_button, _("Click to select metering point"), "");
+	set_tooltip (&meter_point_button, _("Click to select metering point"));
 	meter_point_button.set_name ("mixer strip button");
 
 	bottom_button_table.attach (meter_point_button, 2, 3, 0, 1);
@@ -251,7 +251,7 @@ MixerStrip::init ()
 	name_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	name_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::name_button_resized));
 
-	ARDOUR_UI::instance()->set_tip (&group_button, _("Mix group"), "");
+	set_tooltip (&group_button, _("Mix group"));
 	group_button.set_name ("mixer strip button");
 
 	_comment_button.set_name (X_("mixer strip button"));
@@ -544,7 +544,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 			midi_input_enable_button->set_icon (ArdourIcon::DinMidi);
 			midi_input_enable_button->signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
 			midi_input_enable_button->signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
-			ARDOUR_UI::instance()->set_tip (midi_input_enable_button, _("Enable/Disable MIDI input"));
+			set_tooltip (midi_input_enable_button, _("Enable/Disable MIDI input"));
 		} else {
 			input_button_box.remove (*midi_input_enable_button);
 		}
@@ -1335,9 +1335,9 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	strcpy(tooltip_cstr, tooltip.str().c_str());
 
 	if (for_input) {
-		ARDOUR_UI::instance()->set_tip (&input_button, tooltip_cstr, "");
+		set_tooltip (&input_button, tooltip_cstr);
   	} else {
-		ARDOUR_UI::instance()->set_tip (&output_button, tooltip_cstr, "");
+		set_tooltip (&output_button, tooltip_cstr);
 	}
 
 	if (each_io_has_one_connection) {
@@ -1472,7 +1472,7 @@ MixerStrip::setup_comment_button ()
 		break;
 	}
 
-	ARDOUR_UI::instance()->set_tip (
+	set_tooltip (
 		_comment_button, _route->comment().empty() ? _("Click to Add/Edit Comments") : _route->comment()
 		);
 
@@ -1698,7 +1698,7 @@ MixerStrip::name_changed ()
 			break;
 	}
 
-	ARDOUR_UI::instance()->set_tip (name_button, _route->name());
+	set_tooltip (name_button, _route->name());
 
 	if (_session->config.get_track_name_number()) {
 		const int64_t track_number = _route->track_number ();

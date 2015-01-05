@@ -34,10 +34,10 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/rgb_macros.h>
 
-#include "ardour_ui.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "ardour_window.h"
+#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -158,7 +158,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	// peak display
 	peak_display.set_name ("meterbridge peakindicator");
 	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
-	ARDOUR_UI::instance()->set_tip (peak_display, _("Reset Peak"));
+	set_tooltip (peak_display, _("Reset Peak"));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_size_request(PX_SCALE(12, 12), PX_SCALE(8, 8));
@@ -183,8 +183,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_layout_ellipsize_width(48 * PANGO_SCALE);
 	name_label.set_size_request(PX_SCALE(18, 18), PX_SCALE(50, 50));
 	name_label.set_alignment(-1.0, .5);
-	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
-	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
+	set_tooltip (name_label, _route->name());
+	set_tooltip (*level_meter, _route->name());
 
 	number_label.set_corner_radius(2);
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
@@ -396,9 +396,9 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	}
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed);
 	name_changed();
-	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
+	set_tooltip (name_label, _route->name());
 	if (level_meter) {
-		ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
+		set_tooltip (*level_meter, _route->name());
 	}
 }
 

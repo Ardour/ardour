@@ -20,8 +20,6 @@
 
 #include "export_timespan_selector.h"
 
-#include "ardour_ui.h"
-
 #include "ardour/location.h"
 #include "ardour/types.h"
 #include "ardour/session.h"
