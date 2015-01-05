@@ -124,6 +124,7 @@
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "timers.h"
+#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 #include "verbose_cursor.h"
@@ -3232,30 +3233,30 @@ Editor::build_snap_type_menu ()
 void
 Editor::setup_tooltips ()
 {
-	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Grab mode)"));
-	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Grab Mode (select/move objects)"));
-	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split regions)"));
-	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select time ranges)"));
-	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
-	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
-	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Audition Mode (listen to regions)"));
-	ARDOUR_UI::instance()->set_tip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
-	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
-	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
-	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
-	ARDOUR_UI::instance()->set_tip (zoom_in_button, _("Zoom In"));
-	ARDOUR_UI::instance()->set_tip (zoom_out_button, _("Zoom Out"));
-	ARDOUR_UI::instance()->set_tip (zoom_preset_selector, _("Zoom to Time Scale"));
-	ARDOUR_UI::instance()->set_tip (zoom_out_full_button, _("Zoom to Session"));
-	ARDOUR_UI::instance()->set_tip (zoom_focus_selector, _("Zoom focus"));
-	ARDOUR_UI::instance()->set_tip (tav_expand_button, _("Expand Tracks"));
-	ARDOUR_UI::instance()->set_tip (tav_shrink_button, _("Shrink Tracks"));
-	ARDOUR_UI::instance()->set_tip (visible_tracks_selector, _("Number of visible tracks"));
-	ARDOUR_UI::instance()->set_tip (snap_type_selector, _("Snap/Grid Units"));
-	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
-	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
-	ARDOUR_UI::instance()->set_tip (edit_mode_selector, _("Edit Mode"));
-	ARDOUR_UI::instance()->set_tip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));
+	set_tooltip (smart_mode_button, _("Smart Mode (add Range functions to Grab mode)"));
+	set_tooltip (mouse_move_button, _("Grab Mode (select/move objects)"));
+	set_tooltip (mouse_cut_button, _("Cut Mode (split regions)"));
+	set_tooltip (mouse_select_button, _("Range Mode (select time ranges)"));
+	set_tooltip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
+	set_tooltip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
+	set_tooltip (mouse_audition_button, _("Audition Mode (listen to regions)"));
+	set_tooltip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
+	set_tooltip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
+	set_tooltip (nudge_forward_button, _("Nudge Region/Selection Later"));
+	set_tooltip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
+	set_tooltip (zoom_in_button, _("Zoom In"));
+	set_tooltip (zoom_out_button, _("Zoom Out"));
+	set_tooltip (zoom_preset_selector, _("Zoom to Time Scale"));
+	set_tooltip (zoom_out_full_button, _("Zoom to Session"));
+	set_tooltip (zoom_focus_selector, _("Zoom focus"));
+	set_tooltip (tav_expand_button, _("Expand Tracks"));
+	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
+	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
+	set_tooltip (snap_type_selector, _("Snap/Grid Units"));
+	set_tooltip (snap_mode_selector, _("Snap/Grid Mode"));
+	set_tooltip (edit_point_selector, _("Edit point"));
+	set_tooltip (edit_mode_selector, _("Edit Mode"));
+	set_tooltip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));
 }
 
 int

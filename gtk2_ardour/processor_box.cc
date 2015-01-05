@@ -74,6 +74,7 @@
 #include "route_processor_selection.h"
 #include "send_ui.h"
 #include "timers.h"
+#include "tooltips.h"
 
 #include "i18n.h"
 
@@ -322,10 +323,10 @@ ProcessorEntry::setup_tooltip ()
 				postfix = string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
 			}
 			if (pi->plugin()->has_editor()) {
-				ARDOUR_UI::instance()->set_tip (_button,
+				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI.%2"), name (Wide), postfix));
 			} else {
-				ARDOUR_UI::instance()->set_tip (_button,
+				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
 			}
 			return;
@@ -336,7 +337,7 @@ ProcessorEntry::setup_tooltip ()
 			return;
 		}
 	}
-	ARDOUR_UI::instance()->set_tip (_button, string_compose ("<b>%1</b>", name (Wide)));
+	ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
 
 string
@@ -603,7 +604,7 @@ ProcessorEntry::Control::set_tooltip ()
 
 	string sm = Glib::Markup::escape_text (tmp);
 	_slider_persistant_tooltip.set_tip (sm);
-	ARDOUR_UI::instance()->set_tip (_button, sm);
+	ARDOUR_UI_UTILS::set_tooltip (_button, sm);
 }
 
 void
@@ -1048,7 +1049,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 			);
 	}
 
-	ARDOUR_UI::instance()->set_tip (processor_display, _("Right-click to add/remove/edit\nplugins,inserts,sends and more"));
+	ARDOUR_UI_UTILS::set_tooltip (processor_display, _("Right-click to add/remove/edit\nplugins,inserts,sends and more"));
 }
 
 ProcessorBox::~ProcessorBox ()

@@ -76,6 +76,7 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "streamview.h"
+#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 #include "route_group_menu.h"
@@ -180,10 +181,10 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 
                 if (is_midi_track()) {
-                        ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
+                        set_tooltip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
 			gm.set_fader_name ("MidiTrackFader");
                 } else {
-                        ARDOUR_UI::instance()->set_tip(*rec_enable_button, _("Record"));
+                        set_tooltip(*rec_enable_button, _("Record"));
 			gm.set_fader_name ("AudioTrackFader");
                 }
 
@@ -251,9 +252,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 	}
 	
-	ARDOUR_UI::instance()->set_tip(*solo_button,_("Solo"));
-	ARDOUR_UI::instance()->set_tip(*mute_button,_("Mute"));
-	ARDOUR_UI::instance()->set_tip(route_group_button, _("Route Group"));
+	set_tooltip(*solo_button,_("Solo"));
+	set_tooltip(*mute_button,_("Mute"));
+	set_tooltip(route_group_button, _("Route Group"));
 
 	mute_button->set_tweaks(ArdourButton::TrackHeader);
 	solo_button->set_tweaks(ArdourButton::TrackHeader);
@@ -263,9 +264,9 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	route_group_button.set_tweaks(ArdourButton::TrackHeader);
 
 	if (is_midi_track()) {
-		ARDOUR_UI::instance()->set_tip(automation_button, _("MIDI Controllers and Automation"));
+		set_tooltip(automation_button, _("MIDI Controllers and Automation"));
 	} else {
-		ARDOUR_UI::instance()->set_tip(automation_button, _("Automation"));
+		set_tooltip(automation_button, _("Automation"));
 	}
 
 	update_track_number_visibility();
@@ -1786,7 +1787,7 @@ RouteTimeAxisView::update_playlist_tip ()
 			take_name = take_name.substr (idx + group_string.length());
 
 			/* set the playlist button tooltip to the take name */
-			ARDOUR_UI::instance()->set_tip (
+			set_tooltip (
 				playlist_button,
 				string_compose(_("Take: %1.%2"),
 					Glib::Markup::escape_text(rg->name()),
@@ -1798,7 +1799,7 @@ RouteTimeAxisView::update_playlist_tip ()
 	}
 
 	/* set the playlist button tooltip to the playlist name */
-	ARDOUR_UI::instance()->set_tip (playlist_button, _("Playlist") + std::string(": ") + Glib::Markup::escape_text(track()->playlist()->name()));
+	set_tooltip (playlist_button, _("Playlist") + std::string(": ") + Glib::Markup::escape_text(track()->playlist()->name()));
 }
 
 
@@ -2727,16 +2728,16 @@ RouteTimeAxisView::set_button_names ()
 		switch (Config->get_listen_position()) {
 			case AfterFaderListen:
 				solo_button->set_text (S_("AfterFader|A"));
-				ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
+				set_tooltip (*solo_button, _("After-fade listen (AFL)"));
 				break;
 			case PreFaderListen:
 				solo_button->set_text (S_("PreFader|P"));
-				ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
+				set_tooltip (*solo_button, _("Pre-fade listen (PFL)"));
 			break;
 		}
 	} else {
 		solo_button->set_text (S_("Solo|S"));
-		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
+		set_tooltip (*solo_button, _("Solo"));
 	}
 	mute_button->set_text (S_("Mute|M"));
 }

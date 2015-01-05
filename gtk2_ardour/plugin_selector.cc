@@ -38,9 +38,9 @@
 #include "ardour/plugin.h"
 #include "ardour/utils.h"
 
-#include "ardour_ui.h"
 #include "plugin_selector.h"
 #include "gui_thread.h"
+#include "tooltips.h"
 
 #include "i18n.h"
 
@@ -48,6 +48,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace std;
+using namespace ARDOUR_UI_UTILS;
 
 static const char* _filter_mode_strings[] = {
 	N_("Name contains"),
@@ -126,11 +127,11 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	ascroller.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC);
 	ascroller.add(added_list);
 	btn_add = manage(new Gtk::Button(Stock::ADD));
-	ARDOUR_UI::instance()->set_tip(*btn_add, _("Add a plugin to the effect list"));
+	set_tooltip(*btn_add, _("Add a plugin to the effect list"));
 	btn_add->set_sensitive (false);
 	btn_remove = manage(new Gtk::Button(Stock::REMOVE));
 	btn_remove->set_sensitive (false);
-	ARDOUR_UI::instance()->set_tip(*btn_remove, _("Remove a plugin from the effect list"));
+	set_tooltip(*btn_remove, _("Remove a plugin from the effect list"));
 
 	btn_add->set_name("PluginSelectorButton");
 	btn_remove->set_name("PluginSelectorButton");

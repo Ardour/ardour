@@ -36,7 +36,6 @@
 
 #include "canvas/debug.h"
 
-#include "ardour_ui.h"
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
 #include "gui_thread.h"
@@ -45,6 +44,7 @@
 #include "paste_context.h"
 #include "public_editor.h"
 #include "selection.h"
+#include "tooltips.h"
 #include "rgb_macros.h"
 #include "point_selection.h"
 #include "control_point.h"
@@ -101,7 +101,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		tipname += ": ";
 	}
 	tipname += nom;
-	ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
+	set_tooltip(controls_ebox, tipname);
 
 	//plugin name and param name appear on 2 separate lines in the track header
 	tipname = nomparent;
@@ -160,8 +160,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	controls_table.set_no_show_all();
 
-	ARDOUR_UI::instance()->set_tip(auto_button, _("automation state"));
-	ARDOUR_UI::instance()->set_tip(hide_button, _("hide track"));
+	set_tooltip(auto_button, _("automation state"));
+	set_tooltip(hide_button, _("hide track"));
 
 	const string str = gui_property ("height");
 	if (!str.empty()) {
@@ -171,7 +171,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	}
 
 	//name label isn't editable on an automation track; remove the tooltip
-	ARDOUR_UI::instance()->set_tip (name_label, X_(""));
+	set_tooltip (name_label, X_(""));
 
 	/* repack the name label */
 

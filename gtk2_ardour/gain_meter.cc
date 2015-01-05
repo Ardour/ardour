@@ -34,7 +34,6 @@
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
 
-#include "ardour_ui.h"
 #include "gain_meter.h"
 #include "logmeter.h"
 #include "gui_thread.h"
@@ -43,6 +42,7 @@
 #include "utils.h"
 #include "meter_patterns.h"
 #include "timers.h"
+#include "tooltips.h"
 #include "ui_config.h"
 
 #include "ardour/session.h"
@@ -146,8 +146,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
-	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
+	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
+	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
@@ -959,8 +959,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
-	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
+	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
+	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);

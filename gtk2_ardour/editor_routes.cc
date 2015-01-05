@@ -47,6 +47,7 @@
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
 #include "route_sorter.h"
+#include "tooltips.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -219,7 +220,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);
 		l = manage (new Label (ci[i].label));
-		ARDOUR_UI::instance()->set_tip (*l, ci[i].tooltip);
+		set_tooltip (*l, ci[i].tooltip);
 		col->set_widget (*l);
 		l->show ();
 	}
