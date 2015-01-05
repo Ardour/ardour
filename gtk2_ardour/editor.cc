@@ -1986,27 +1986,22 @@ Editor::add_track_context_items (Menu_Helpers::MenuList& edit_items)
     assert (act);
     Image* icon;
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_marker_idle"))));
-    edit_items.push_back (ImageMenuElem ( ("Range Select Tool \t 1"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    edit_items.push_back (ImageMenuElem ("Range Select Tool", *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-object");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_arrow_idle"))));
-	#if defined (PLATFORM_WINDOWS)
-		std::string str="\t\t\t";
-	#else
-		std::string str="\t\t";
-	#endif
-	edit_items.push_back (ImageMenuElem ( ("Pointer Tool "+str+"2"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    edit_items.push_back (ImageMenuElem ("Pointer Tool", *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
   
     act = ActionManager::get_action_from_name ("set-mouse-mode-cut");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_cut_idle"))));
-	edit_items.push_back (ImageMenuElem ( ("Split Tool "+str+"3"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+	edit_items.push_back (ImageMenuElem ("Split Tool", *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
     
     act = ActionManager::get_action_from_name ("set-mouse-mode-zoom");
     assert (act);
     icon = manage (new Gtk::Image (get_icon_path (X_ ("tool_zoom_idle"))));
-	edit_items.push_back (ImageMenuElem ( ("Zoom Tool"+str+"4"), *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
+    edit_items.push_back (ImageMenuElem ("Zoom Tool", *icon, sigc::bind (sigc::mem_fun (*this, &Editor::activate_track_context_menu_action), act)));
 }
 
 void
