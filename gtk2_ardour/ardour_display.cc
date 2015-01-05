@@ -24,6 +24,7 @@
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
+#include "pbd/controllable.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -35,7 +36,6 @@
 #include "ardour/rc_configuration.h" // for widget prelight preference
 
 #include "ardour_display.h"
-#include "ardour_ui.h"
 
 #include "i18n.h"
 

@@ -20,7 +20,6 @@
 #include <sigc++/bind.h>
 #include "ardour/tempo.h"
 
-#include "ardour_ui.h"
 #include "video_image_frame.h"
 #include "public_editor.h"
 #include "canvas/container.h"

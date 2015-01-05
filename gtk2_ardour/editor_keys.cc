@@ -27,7 +27,6 @@
 
 #include "ardour/session.h"
 
-#include "ardour_ui.h"
 #include "editor.h"
 #include "region_view.h"
 #include "selection.h"

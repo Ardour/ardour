@@ -42,7 +42,6 @@
 #include "ardour/panner_shell.h"
 
 #include "ardour_button.h"
-#include "ardour_ui.h"
 #include "audio_time_axis.h"
 #include "automation_line.h"
 #include "enums.h"

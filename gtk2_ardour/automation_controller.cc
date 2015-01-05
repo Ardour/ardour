@@ -30,7 +30,6 @@
 #include "ardour/tempo.h"
 
 #include "ardour_button.h"
-#include "ardour_ui.h"
 #include "automation_controller.h"
 #include "gui_thread.h"
 #include "note_select_dialog.h"
