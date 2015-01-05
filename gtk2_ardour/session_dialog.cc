@@ -355,7 +355,7 @@ SessionDialog::setup_initial_choice_box ()
 	existing_session_chooser.set_current_folder(poor_mans_glob (Config->get_default_session_parent_dir()));
 	
 	FileFilter session_filter;
-	session_filter.add_pattern ("*.ardour");
+	session_filter.add_pattern (string_compose(X_("*.%1"), ARDOUR::statefile_suffix));
 	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 	existing_session_chooser.add_filter (session_filter);
 	existing_session_chooser.set_filter (session_filter);

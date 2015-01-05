@@ -25,6 +25,7 @@
 #include "ardour/audio_region_importer.h"
 #include "ardour/audio_playlist_importer.h"
 #include "ardour/audio_track_importer.h"
+#include "ardour/filename_extensions.h"
 #include "ardour/location_importer.h"
 #include "ardour/tempo_map_importer.h"
 
@@ -164,11 +165,11 @@ SessionImportDialog::browse ()
 	dialog.set_transient_for(*this);
 	dialog.set_filename (file_entry.get_text());
 
-        FileFilter session_filter;
-        session_filter.add_pattern ("*.ardour");
-        session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
-        dialog.add_filter (session_filter);
-        dialog.set_filter (session_filter);
+	FileFilter session_filter;
+	session_filter.add_pattern (string_compose(X_("*.%1"), ARDOUR::statefile_suffix));
+	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
+	dialog.add_filter (session_filter);
+	dialog.set_filter (session_filter);
 
 	dialog.add_button(Stock::CANCEL, RESPONSE_CANCEL);
 	dialog.add_button(Stock::OK, RESPONSE_OK);
