@@ -1049,6 +1049,7 @@ def build(bld):
     bld.env['DLLDIR'] = os.path.join(bld.env['LIBDIR'], lwrcase_dirname)
     bld.env['LIBDIR'] = bld.env['DLLDIR']
     bld.env['LOCALEDIR'] = os.path.join(bld.env['DATADIR'], 'locale')
+    bld.env['lwrcase_dirname'] = lwrcase_dirname;
 
     autowaf.set_recursive()
 

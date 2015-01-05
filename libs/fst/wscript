@@ -83,5 +83,6 @@ def build(bld):
         'USE_WS_PREFIX',
         'VST_SCANNER_APP',
         'PACKAGE="' + I18N_PACKAGE + '"',
+        'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
         ]
     obj.install_path = os.path.join(bld.env['LIBDIR'])

@@ -167,7 +167,7 @@ ardour_dll_directory ()
 #ifdef PLATFORM_WINDOWS
 	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
 	dll_dir_path = Glib::build_filename (dll_dir_path, "lib");
-	return Glib::build_filename (dll_dir_path, "ardour3");
+	return Glib::build_filename (dll_dir_path, LIBARDOUR);
 #else
 	std::string s = Glib::getenv("ARDOUR_DLL_PATH");
 	if (s.empty()) {
@@ -184,7 +184,7 @@ windows_search_path ()
 {
 	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
 	dll_dir_path = Glib::build_filename (dll_dir_path, "share");
-	return Glib::build_filename (dll_dir_path, "ardour3");
+	return Glib::build_filename (dll_dir_path, LIBARDOUR);
 }
 #endif
 
