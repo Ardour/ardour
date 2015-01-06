@@ -2427,30 +2427,13 @@ state_file_filter (const string &str, void* /*arg*/)
 		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
 }
 
-static string
-remove_end(string state)
-{
-	string statename(state);
-
-	string::size_type start,end;
-	if ((start = statename.find_last_of (G_DIR_SEPARATOR)) != string::npos) {
-		statename = statename.substr (start+1);
-	}
-
-	if ((end = statename.rfind(statefile_suffix)) == string::npos) {
-		end = statename.length();
-	}
-
-	return string(statename.substr (0, end));
-}
-
 vector<string>
 Session::possible_states (string path)
 {
 	vector<string> states;
 	find_files_matching_filter (states, path, state_file_filter, 0, false, false);
 
-	transform(states.begin(), states.end(), states.begin(), remove_end);
+	transform(states.begin(), states.end(), states.begin(), basename_nosuffix);
 
 	sort (states.begin(), states.end());
 
