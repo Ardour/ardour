@@ -636,7 +636,6 @@ Editor::build_marker_menu (Location* loc)
 void
 Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 {
-    std::cout<<"build_range_marker_menu"<<std::endl;
 	using namespace Menu_Helpers;
 
 	bool const loop_or_punch_or_session = loop_or_punch | session;

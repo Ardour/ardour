@@ -79,7 +79,7 @@
     		  bgnormal="#303030"
     		  fgactive="#000000"
     		  bgactive="#dcdcdc"
-    		  borderwidth="0 0 1 1"
+    		  borderwidth="0 1 1 1"
               x="0"
               y="271"
               width="393"
