@@ -362,16 +362,6 @@ get_absolute_path (const std::string & p)
 }
 
 std::string
-get_suffix (const std::string & p)
-{
-	string::size_type period = p.find_last_of ('.');
-	if (period == string::npos || period == p.length() - 1) {
-		return string();
-	}
-	return p.substr (period+1);
-}
-
-std::string
 get_extension (const std::string& p)
 {
 	if (p == "." || p == "..") return string();

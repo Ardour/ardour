@@ -196,13 +196,6 @@ LIBPBD_API bool touch_file (const std::string& path);
 LIBPBD_API std::string get_absolute_path (const std::string &);
 
 /**
- * Take a path/filename and return the suffix (characters beyond the last '.'
- * @return A string containing the suffix, which will be empty
- * if there are no '.' characters in the path/filename.
- */
-LIBPBD_API std::string get_suffix (const std::string &);
-
-/**
  * Take a path/filename and return the extension, a substring
  * starting at the rightmost dot and ending at the path's end,
  * otherwise and empty string
