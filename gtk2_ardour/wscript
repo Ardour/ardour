@@ -458,8 +458,7 @@ def build(bld):
     obj.includes += ['../libs']
 
     if bld.env['build_target'] == 'mingw':
-        if bld.env['DEBUG'] == False:
-            obj.linkflags = ['-mwindows']
+        obj.linkflags = ['-mwindows']
 
     if bld.is_defined('HAVE_SUIL'):
         obj.source += [ 'lv2_plugin_ui.cc' ]

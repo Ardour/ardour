@@ -148,7 +148,7 @@ sigpipe_handler (int /*signal*/)
 #endif
 
 
-#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS && defined NDEBUG)
+#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
 static bool IsAConsolePort (HANDLE handle)
 {
 	DWORD mode;
@@ -192,7 +192,7 @@ int main (int argc, char *argv[])
 	gtk_set_locale ();
 #endif
 
-#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS && defined NDEBUG)
+#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
 	/* re-attach to the console so we can see 'printf()' output etc.
 	 * for MSVC see  gtk2_ardour/msvc/winmain.cc
 	 */
@@ -310,7 +310,7 @@ int main (int argc, char *argv[])
 	ARDOUR::cleanup ();
 	pthread_cancel_all ();
 
-#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS && defined NDEBUG)
+#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
 	if (pStdOut) {
 		fclose (pStdOut);
 	}
