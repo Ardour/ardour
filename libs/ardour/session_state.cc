@@ -2669,12 +2669,10 @@ accept_all_state_files (const string& path, void* /*arg*/)
 		return false;
 	}
 
-	std::string const statefile_ext (statefile_suffix);
-	if (path.length() >= statefile_ext.length()) {
-		return (0 == path.compare (path.length() - statefile_ext.length(), statefile_ext.length(), statefile_ext));
-	} else {
-		return false;
+	if (PBD::get_extension(path) == statefile_suffix) {
+		return true;
 	}
+	return false;
 }
 
 int
