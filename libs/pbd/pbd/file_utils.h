@@ -214,6 +214,12 @@ LIBPBD_API std::string get_suffix (const std::string &);
 LIBPBD_API std::string get_extension (const std::string &);
 
 /**
+ * Take a filename and return the filename without the
+ * extension.
+ */
+LIBPBD_API std::string remove_extension (const std::string &);
+
+/**
  * Find out if `needle' is a file or directory within the
  * directory `haystack'.
  * @return true if it is.

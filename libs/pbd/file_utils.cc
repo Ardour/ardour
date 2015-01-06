@@ -379,6 +379,14 @@ get_extension (const std::string& p)
 	return pos == string::npos ? string() : string(p.c_str() + pos);
 }
 
+std::string
+remove_extension (const std::string& p)
+{
+	if (p == "." || p == "..") return p;
+	string::size_type pos (p.rfind ('.'));
+	return pos == string::npos ? p : string(p.c_str(), p.c_str() + pos);
+}
+
 bool
 equivalent_paths (const std::string& a, const std::string& b)
 {
