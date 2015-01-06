@@ -371,6 +371,14 @@ get_suffix (const std::string & p)
 	return p.substr (period+1);
 }
 
+std::string
+get_extension (const std::string& p)
+{
+	if (p == "." || p == "..") return string();
+	string::size_type pos (p.rfind ('.'));
+	return pos == string::npos ? string() : string(p.c_str() + pos);
+}
+
 bool
 equivalent_paths (const std::string& a, const std::string& b)
 {

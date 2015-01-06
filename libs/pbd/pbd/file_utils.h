@@ -203,6 +203,17 @@ LIBPBD_API std::string get_absolute_path (const std::string &);
 LIBPBD_API std::string get_suffix (const std::string &);
 
 /**
+ * Take a path/filename and return the extension, a substring
+ * starting at the rightmost dot and ending at the path's end,
+ * otherwise and empty string
+ *
+ * The dot is included in the return value so that it is
+ * possible to distinguish between no extension and an empty
+ * extension
+ */
+LIBPBD_API std::string get_extension (const std::string &);
+
+/**
  * Find out if `needle' is a file or directory within the
  * directory `haystack'.
  * @return true if it is.
