@@ -2640,9 +2640,9 @@ accept_all_midi_files (const string& path, void* /*arg*/)
                 return false;
         }
 
-	return ((path.length() > 4 && path.find (mid_suffix) != (path.length() - 4)) ||
-                (path.length() > 4 && path.find (smf_suffix) != (path.length() - 4)) ||
-                (path.length() > 5 && path.find (midi_suffix) != (path.length() - 5)));
+	return ((get_extension (path) == mid_suffix) ||
+                (get_extension (path) == smf_suffix) ||
+                (get_extension (path) == midi_suffix));
 }
 
 static bool
