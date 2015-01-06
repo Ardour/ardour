@@ -213,7 +213,7 @@ CairoEditableText::CairoEditableText (boost::shared_ptr<CairoFontDescription> fo
 
 	add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK |
 	            Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK | Gdk::SCROLL_MASK);
-	set_flags (Gtk::CAN_FOCUS);
+	set_can_focus ();
 
 	set_can_default (true);
 }
