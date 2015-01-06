@@ -166,7 +166,7 @@ SessionImportDialog::browse ()
 	dialog.set_filename (file_entry.get_text());
 
 	FileFilter session_filter;
-	session_filter.add_pattern (string_compose(X_("*.%1"), ARDOUR::statefile_suffix));
+	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
 	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 	dialog.add_filter (session_filter);
 	dialog.set_filter (session_filter);

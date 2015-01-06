@@ -726,7 +726,7 @@ SessionMetadataImporter::run ()
 	session_selector.set_default_response(Gtk::RESPONSE_ACCEPT);
 
 	Gtk::FileFilter session_filter;
-	session_filter.add_pattern (string_compose(X_("*.%1"), ARDOUR::statefile_suffix));
+	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
 	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 	session_selector.add_filter (session_filter);
 	session_selector.set_filter (session_filter);
@@ -755,7 +755,7 @@ SessionMetadataImporter::run ()
 
 	/* We have a session: load the data and run dialog */
 
-	string filename = Glib::build_filename (path, name + "." + ARDOUR::statefile_suffix);
+	string filename = Glib::build_filename (path, name + ARDOUR::statefile_suffix);
 	XMLTree session_tree;
 	if (!session_tree.read (filename)) {
 		warn_user (_("This session file could not be read!"));

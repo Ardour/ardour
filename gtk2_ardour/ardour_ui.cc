@@ -1651,7 +1651,7 @@ ARDOUR_UI::open_session ()
 		}
 
 		FileFilter session_filter;
-		session_filter.add_pattern (string_compose(X_("*.%1"), ARDOUR::statefile_suffix));
+		session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
 		session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
 		open_session_selector->add_filter (session_filter);
 		open_session_selector->set_filter (session_filter);
