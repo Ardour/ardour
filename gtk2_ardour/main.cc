@@ -58,6 +58,7 @@
 
 #ifdef PLATFORM_WINDOWS
 #include <fcntl.h> // Needed for '_fmode'
+#include <shellapi.h> // console
 #endif
 
 #ifdef WAF_BUILD
@@ -146,6 +147,16 @@ sigpipe_handler (int /*signal*/)
 }
 #endif
 
+
+#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS && defined NDEBUG)
+static bool IsAConsolePort (HANDLE handle)
+{
+	DWORD mode;
+	return (GetConsoleMode(handle, &mode) != 0);
+}
+#endif
+
+
 #if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
 /*
  *  Release build with MSVC uses ardour_main()
@@ -179,6 +190,20 @@ int main (int argc, char *argv[])
 
 #ifdef ENABLE_NLS
 	gtk_set_locale ();
+#endif
+
+#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS && defined NDEBUG)
+	/* re-attach to the console so we can see 'printf()' output etc.
+	 * for MSVC see  gtk2_ardour/msvc/winmain.cc
+	 */
+	FILE  *pStdOut = 0, *pStdErr = 0;
+	BOOL  bConsole = AttachConsole(ATTACH_PARENT_PROCESS);
+	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+
+	if ((bConsole) && (IsAConsolePort(hStdOut))) {
+		pStdOut = freopen( "CONOUT$", "w", stdout );
+		pStdErr = freopen( "CONOUT$", "w", stderr );
+	}
 #endif
 
 #if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
@@ -284,6 +309,33 @@ int main (int argc, char *argv[])
 
 	ARDOUR::cleanup ();
 	pthread_cancel_all ();
+
+#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS && defined NDEBUG)
+	if (pStdOut) {
+		fclose (pStdOut);
+	}
+	if (pStdErr) {
+		fclose (pStdErr);
+	}
+
+	if (bConsole) {
+		// Detach and free the console from our application
+		INPUT_RECORD input_record;
+
+		input_record.EventType = KEY_EVENT;
+		input_record.Event.KeyEvent.bKeyDown = TRUE;
+		input_record.Event.KeyEvent.dwControlKeyState = 0;
+		input_record.Event.KeyEvent.uChar.UnicodeChar = VK_RETURN;
+		input_record.Event.KeyEvent.wRepeatCount      = 1;
+		input_record.Event.KeyEvent.wVirtualKeyCode   = VK_RETURN;
+		input_record.Event.KeyEvent.wVirtualScanCode  = MapVirtualKey( VK_RETURN, 0 );
+
+		DWORD written = 0;
+		WriteConsoleInput( GetStdHandle( STD_INPUT_HANDLE ), &input_record, 1, &written );
+
+		FreeConsole();
+	}
+#endif
 
 	return 0;
 }
