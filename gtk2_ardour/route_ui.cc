@@ -433,7 +433,6 @@ RouteUI::mute_press (GdkEventButton* ev)
                 _mute_release->routes = rl;
             }
 
-            DisplaySuspender ds;
             _session->set_mute (rl, !_route->muted());
         }
         
@@ -677,7 +676,6 @@ RouteUI::monitor_press (GdkEventButton* ev, MonitorChoice monitor_choice)
 		rl->push_back (route());
 	}
 
-	DisplaySuspender ds;
 	_session->set_monitoring (rl, mc, Session::rt_cleanup, true);		
 
 	return true;
