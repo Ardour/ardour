@@ -177,7 +177,7 @@ EditorSummary::render_background_image ()
 		StreamView* s = (*i)->view ();
 
 		if (s) {
-			cairo_set_line_width (cr, _track_height * 0.6);
+			cairo_set_line_width (cr, _track_height * 0.8);
 
 			s->foreach_regionview (sigc::bind (
 						       sigc::mem_fun (*this, &EditorSummary::render_region),
@@ -242,10 +242,10 @@ EditorSummary::render (cairo_t* cr, cairo_rectangle_t*)
 	int32_t width = _view_rectangle_x.second - _view_rectangle_x.first;
 	int32_t height = _view_rectangle_y.second - _view_rectangle_y.first;
 	cairo_rectangle (cr, _view_rectangle_x.first, _view_rectangle_y.first, width, height); 
-	cairo_set_source_rgba (cr, 1, 1, 1, 0.25);
+	cairo_set_source_rgba (cr, 1, 1, 1, 0.1);
 	cairo_fill_preserve (cr);
 	cairo_set_line_width (cr, 1);
-	cairo_set_source_rgba (cr, 1, 1, 1, 0.5);
+	cairo_set_source_rgba (cr, 1, 1, 1, 0.4);
 	cairo_stroke (cr);
 
 	/* Playhead */
