@@ -4001,84 +4001,50 @@ Editor::get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t durat
 	return offset;
 }
 
+unsigned
+Editor::get_grid_beat_divisions(framepos_t position)
+{
+	switch (_snap_type) {
+	case SnapToBeatDiv128: return 128;
+	case SnapToBeatDiv64:  return 64;
+	case SnapToBeatDiv32:  return 32;
+	case SnapToBeatDiv28:  return 28;
+	case SnapToBeatDiv24:  return 24;
+	case SnapToBeatDiv20:  return 20;
+	case SnapToBeatDiv16:  return 16;
+	case SnapToBeatDiv14:  return 14;
+	case SnapToBeatDiv12:  return 12;
+	case SnapToBeatDiv10:  return 10;
+	case SnapToBeatDiv8:   return 8;
+	case SnapToBeatDiv7:   return 7;
+	case SnapToBeatDiv6:   return 6;
+	case SnapToBeatDiv5:   return 5;
+	case SnapToBeatDiv4:   return 4;
+	case SnapToBeatDiv3:   return 3;
+	case SnapToBeatDiv2:   return 2;
+	default:               return 0;
+	}
+	return 0;
+}
+
 Evoral::Beats
 Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 {
 	success = true;
 
+	const unsigned divisions = get_grid_beat_divisions(position);
+	if (divisions) {
+		return Evoral::Beats(1.0 / (double)get_grid_beat_divisions(position));
+	}
+
 	switch (_snap_type) {
 	case SnapToBeat:
 		return Evoral::Beats(1.0);
-		break;
-
-	case SnapToBeatDiv128:
-		return Evoral::Beats(1.0/128.0);
-		break;
-	case SnapToBeatDiv64:
-		return Evoral::Beats(1.0/64.0);
-		break;
-	case SnapToBeatDiv32:
-		return Evoral::Beats(1.0/32.0);
-		break;
-	case SnapToBeatDiv28:
-		return Evoral::Beats(1.0/28.0);
-		break;
-	case SnapToBeatDiv24:
-		return Evoral::Beats(1.0/24.0);
-		break;
-	case SnapToBeatDiv20:
-		return Evoral::Beats(1.0/20.0);
-		break;
-	case SnapToBeatDiv16:
-		return Evoral::Beats(1.0/16.0);
-		break;
-	case SnapToBeatDiv14:
-		return Evoral::Beats(1.0/14.0);
-		break;
-	case SnapToBeatDiv12:
-		return Evoral::Beats(1.0/12.0);
-		break;
-	case SnapToBeatDiv10:
-		return Evoral::Beats(1.0/10.0);
-		break;
-	case SnapToBeatDiv8:
-		return Evoral::Beats(1.0/8.0);
-		break;
-	case SnapToBeatDiv7:
-		return Evoral::Beats(1.0/7.0);
-		break;
-	case SnapToBeatDiv6:
-		return Evoral::Beats(1.0/6.0);
-		break;
-	case SnapToBeatDiv5:
-		return Evoral::Beats(1.0/5.0);
-		break;
-	case SnapToBeatDiv4:
-		return Evoral::Beats(1.0/4.0);
-		break;
-	case SnapToBeatDiv3:
-		return Evoral::Beats(1.0/3.0);
-		break;
-	case SnapToBeatDiv2:
-		return Evoral::Beats(1.0/2.0);
-		break;
-
 	case SnapToBar:
 		if (_session) {
 			return Evoral::Beats(_session->tempo_map().meter_at (position).divisions_per_bar());
 		}
 		break;
-
-	case SnapToCDFrame:
-	case SnapToTimecodeFrame:
-	case SnapToTimecodeSeconds:
-	case SnapToTimecodeMinutes:
-	case SnapToSeconds:
-	case SnapToMinutes:
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
 	default:
 		success = false;
 		break;

@@ -316,6 +316,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next);
 	framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration);
+	unsigned get_grid_beat_divisions(framepos_t position);
 	Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position);
 
 	void nudge_forward (bool next, bool force_playhead);
