@@ -267,7 +267,7 @@ if (Profile->get_mixbus())
 	act = ActionManager::register_action (transport_actions, X_("Loop"), _("Play Loop Range"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("PlaySelection"), _("Play Selected Range"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_selection));
+	act = ActionManager::register_action (transport_actions, X_("PlaySelection"), _("Play Selection"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("PlayPreroll"), _("Play Selection w/Preroll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_preroll));

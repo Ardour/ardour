@@ -1712,29 +1712,9 @@ Editor::temporal_zoom_region (bool both_axes)
 	framepos_t end = 0;
 	set<TimeAxisView*> tracks;
 
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (rs.empty()) {
+	if ( !get_selection_extents(start, end) )
 		return;
-	}
-
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-
-		if ((*i)->region()->position() < start) {
-			start = (*i)->region()->position();
-		}
-
-		if ((*i)->region()->last_frame() + 1 > end) {
-			end = (*i)->region()->last_frame() + 1;
-		}
-
-		tracks.insert (&((*i)->get_time_axis_view()));
-	}
-
-	if ((start == 0 && end == 0) || end < start) {
-		return;
-	}
-
+	
 	calc_extra_zoom_edges (start, end);
 
 	/* if we're zooming on both axes we need to save track heights etc.
@@ -1772,6 +1752,46 @@ Editor::temporal_zoom_region (bool both_axes)
 }
 
 
+bool
+Editor::get_selection_extents ( framepos_t &start, framepos_t &end )
+{
+	start = max_framepos;
+	end = 0;
+	bool ret = true;
+	
+	//ToDo:  if notes are selected, set extents to that selection
+
+	//ToDo:  if control points are selected, set extents to that selection
+
+	if ( !selection->regions.empty() ) {
+		RegionSelection rs = get_regions_from_selection_and_entered ();
+
+		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+
+			if ((*i)->region()->position() < start) {
+				start = (*i)->region()->position();
+			}
+
+			if ((*i)->region()->last_frame() + 1 > end) {
+				end = (*i)->region()->last_frame() + 1;
+			}
+		}
+
+	} else if (!selection->time.empty()) {
+		start = selection->time.start();
+		end = selection->time.end_frame();
+	} else 
+		ret = false;  //no selection found
+
+	//range check
+	if ((start == 0 && end == 0) || end < start) {
+		ret = false;
+	}
+	
+	return ret;	
+}
+
+
 void
 Editor::temporal_zoom_selection (bool both_axes)
 {
@@ -1788,16 +1808,14 @@ Editor::temporal_zoom_selection (bool both_axes)
 	//if a range is selected, zoom to that
 	if (!selection->time.empty()) {
 
-		framepos_t start = selection->time.start();
-		framepos_t end = selection->time.end_frame();
-
-		calc_extra_zoom_edges(start, end);
-
-		temporal_zoom_by_frame (start, end);
-
+		framepos_t start,  end;
+		if (get_selection_extents (start, end)) {
+			calc_extra_zoom_edges(start, end);
+			temporal_zoom_by_frame (start, end);
+		}
+		
 		if (both_axes)
 			fit_selected_tracks();
-
 	}
 
 }
@@ -2342,11 +2360,15 @@ Editor::play_from_edit_point_and_return ()
 void
 Editor::play_selection ()
 {
-	if (selection->time.empty()) {
+ 	framepos_t start, end;
+	if (!get_selection_extents ( start, end))
 		return;
-	}
 
-	_session->request_play_range (&selection->time, true);
+	AudioRange ar (start, end, 0);
+	list<AudioRange> lar;
+	lar.push_back (ar);
+
+	_session->request_play_range (&lar, true);
 }
 
 framepos_t
@@ -2379,16 +2401,17 @@ Editor::maybe_locate_with_edit_preroll ( framepos_t location )
 void
 Editor::play_with_preroll ()
 {
-	if (selection->time.empty()) {
-		return;
-	} else {
+	{
 		framepos_t preroll = get_preroll();
 		
-		framepos_t start = 0;
-		if (selection->time[clicked_selection].start > preroll)
-			start = selection->time[clicked_selection].start - preroll;
+		framepos_t start, end;
+		if (!get_selection_extents ( start, end))
+			return;
+
+		if (start > preroll)
+			start = start - preroll;
 		
-		framepos_t end = selection->time[clicked_selection].end + preroll;
+		end = end + preroll;  //"post-roll"
 		
 		AudioRange ar (start, end, 0);
 		list<AudioRange> lar;
@@ -5859,12 +5882,13 @@ Editor::select_prev_route()
 void
 Editor::set_loop_from_selection (bool play)
 {
-	if (_session == 0 || selection->time.empty()) {
+	if (_session == 0) {
 		return;
 	}
 
-	framepos_t start = selection->time[clicked_selection].start;
-	framepos_t end = selection->time[clicked_selection].end;
+	framepos_t start, end;
+	if (!get_selection_extents ( start, end))
+		return;
 
 	set_loop_range (start, end,  _("set loop range from selection"));
 
@@ -5875,47 +5899,11 @@ Editor::set_loop_from_selection (bool play)
 }
 
 void
-Editor::set_loop_from_edit_range (bool play)
-{
-	if (_session == 0) {
-		return;
-	}
-
-	framepos_t start;
-	framepos_t end;
-
-	if (!get_edit_op_range (start, end)) {
-		return;
-	}
-
-	set_loop_range (start, end,  _("set loop range from edit range"));
-
-	if (play) {
-		_session->request_locate (start, true);
-		_session->request_play_loop (true);
-	}
-}
-
-void
 Editor::set_loop_from_region (bool play)
 {
-	framepos_t start = max_framepos;
-	framepos_t end = 0;
-
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (rs.empty()) {
+	framepos_t start, end;
+	if (!get_selection_extents ( start, end))
 		return;
-	}
-
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		if ((*i)->region()->position() < start) {
-			start = (*i)->region()->position();
-		}
-		if ((*i)->region()->last_frame() + 1 > end) {
-			end = (*i)->region()->last_frame() + 1;
-		}
-	}
 
 	set_loop_range (start, end, _("set loop range from region"));
 
@@ -5928,12 +5916,13 @@ Editor::set_loop_from_region (bool play)
 void
 Editor::set_punch_from_selection ()
 {
-	if (_session == 0 || selection->time.empty()) {
+	if (_session == 0) {
 		return;
 	}
 
-	framepos_t start = selection->time[clicked_selection].start;
-	framepos_t end = selection->time[clicked_selection].end;
+	framepos_t start, end;
+	if (!get_selection_extents ( start, end))
+		return;
 
 	set_punch_range (start, end,  _("set punch range from selection"));
 }
@@ -5941,14 +5930,15 @@ Editor::set_punch_from_selection ()
 void
 Editor::set_session_extents_from_selection ()
 {
-	if (_session == 0 || selection->time.empty()) {
+	if (_session == 0) {
 		return;
 	}
+	
+	framepos_t start, end;
+	if (!get_selection_extents ( start, end))
+		return;
 
 	begin_reversible_command (_("set session start/stop from selection"));
-
-	framepos_t start = selection->time[clicked_selection].start;
-	framepos_t end = selection->time[clicked_selection].end;
 
 	Location* loc;
 	if ((loc = _session->locations()->session_range_location()) == 0) {
@@ -5967,42 +5957,11 @@ Editor::set_session_extents_from_selection ()
 }
 
 void
-Editor::set_punch_from_edit_range ()
-{
-	if (_session == 0) {
-		return;
-	}
-
-	framepos_t start;
-	framepos_t end;
-
-	if (!get_edit_op_range (start, end)) {
-		return;
-	}
-
-	set_punch_range (start, end,  _("set punch range from edit range"));
-}
-
-void
 Editor::set_punch_from_region ()
 {
-	framepos_t start = max_framepos;
-	framepos_t end = 0;
-
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (rs.empty()) {
+	framepos_t start, end;
+	if (!get_selection_extents ( start, end))
 		return;
-	}
-
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		if ((*i)->region()->position() < start) {
-			start = (*i)->region()->position();
-		}
-		if ((*i)->region()->last_frame() + 1 > end) {
-			end = (*i)->region()->last_frame() + 1;
-		}
-	}
 
 	set_punch_range (start, end, _("set punch range from region"));
 }

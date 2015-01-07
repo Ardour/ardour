@@ -51,8 +51,6 @@
     <menu name='Transport' action='Transport'>
       <menuitem action='ToggleRoll'/>
       <menu action="PlayMenu">
-        <menuitem action='main-menu-play-selected-regions'/>
-        <menuitem action='play-edit-range'/>
         <menuitem action='PlaySelection'/>
         <menuitem action='PlayPreroll'/>
         <menuitem action='play-from-edit-point-and-return'/>
@@ -65,14 +63,8 @@
 #if 0
       <menuitem action='toggle-skip-playback'/>
 #endif
-      <menu action="SetLoopMenu">
-        <menuitem action='set-loop-from-edit-range'/>
-        <menuitem action='set-loop-from-region'/>
-      </menu>
-      <menu action="SetPunchMenu">
-        <menuitem action='set-punch-from-edit-range'/>
-        <menuitem action='set-punch-from-region'/>
-      </menu>
+      <menuitem action='set-loop-from-edit-range'/>
+      <menuitem action='set-punch-from-edit-range'/>
 
       <separator/>
       <menuitem action='Forward'/>

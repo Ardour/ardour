@@ -98,7 +98,7 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>grave|next EP w/marker
 
 @trans|Transport/ToggleRoll|space|toggle roll
-@epp|Editor/play-edit-range|<@SECONDARY@>space|play edit range
+@epp|Editor/PlaySelection|<@SECONDARY@>space|play edit range
 @epp|Editor/play-from-edit-point-and-return|<@LEVEL4@>space|play from EP \& return
 @trans|Transport/ToggleRollMaybe|<@PRIMARY@><@SECONDARY@>space|stop (keep loop/range play)
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
@@ -119,10 +119,8 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
 
 @ranges|Editor/set-loop-from-edit-range|bracketright|set loop range from edit range
-@ranges|Region/set-loop-from-region|<@SECONDARY@>bracketright|set loop range from region(s)
 
 @ranges|Editor/set-punch-from-edit-range|bracketleft|set punch range from edit range
-@ranges|Region/set-punch-from-region|<@SECONDARY@>bracketleft|set punch range from region(s)
 
 @rop|Region/boost-region-gain|asciicircum|increase region gain
 @rop|Region/cut-region-gain|ampersand|reduce region gain

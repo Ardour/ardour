@@ -242,6 +242,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
+	bool get_selection_extents ( framepos_t &start, framepos_t &end );  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 	void track_mixer_selection ();
 
@@ -1425,9 +1426,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void set_session_extents_from_selection ();
 
-	void set_loop_from_edit_range (bool play);
 	void set_loop_from_region (bool play);
-	void set_punch_from_edit_range ();
 
 	void set_loop_range (framepos_t start, framepos_t end, std::string cmd);
 	void set_punch_range (framepos_t start, framepos_t end, std::string cmd);
