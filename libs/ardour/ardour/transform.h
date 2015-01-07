@@ -106,7 +106,8 @@ public:
 			ADD,   ///< Add top two values
 			SUB,   ///< Subtract top from second-top
 			MULT,  ///< Multiply top two values
-			DIV    ///< Divide second-top by top
+			DIV,   ///< Divide second-top by top
+			MOD    ///< Modulus (division remainder)
 		};
 
 		Operation(Operator o, const Value& a=Value()) : op(o), arg(a) {}

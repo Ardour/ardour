@@ -106,6 +106,12 @@ Transform::Operation::eval(Context& ctx) const
 		}
 		value /= rhs.to_double();
 		break;
+	case MOD:
+		if (rhs.to_double() == 0.0) {
+			return;  // Program will fail safely
+		}
+		value = fmod(value, rhs.to_double());
+		break;
 	default: break;
 	}
 

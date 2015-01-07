@@ -69,7 +69,7 @@ TransformDialog::Model::Model()
 	}
 
 	static const char* operator_labels[] = {
-		/* no PUSH */ "+", "-", "*", "/", NULL
+		/* no PUSH */ "+", "-", "*", "/", "mod", NULL
 	};
 	for (int o = 0; operator_labels[o]; ++o) {
 		Gtk::TreeModel::Row row = *(operator_list->append());
