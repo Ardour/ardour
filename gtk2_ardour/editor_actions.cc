@@ -700,7 +700,7 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));
 
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measure Lines"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
 
 	/* if there is a logo in the editor canvas, its always visible at startup */
 
