@@ -336,6 +336,7 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 	_automation_tracks.clear ();
 
 	delete route_group_menu;
+	CatchDeletion (this);
 }
 
 void
