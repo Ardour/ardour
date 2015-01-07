@@ -51,14 +51,14 @@ public:
 		return safe_midi_file_extension(path);
 	}
 
-	void append_event_beats (const Lock& lock, const Evoral::Event<Evoral::MusicalTime>& ev);
+	void append_event_beats (const Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
 	void append_event_frames (const Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
 
 	void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
 	void mark_streaming_write_completed (const Lock& lock);
 	void mark_midi_streaming_write_completed (const Lock& lock,
-	                                          Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption,
-	                                          Evoral::MusicalTime when = Evoral::MusicalTime());
+	                                          Evoral::Sequence<Evoral::Beats>::StuckNoteOption,
+	                                          Evoral::Beats when = Evoral::Beats());
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -77,7 +77,7 @@ public:
 
   private:
 	bool _open;
-	Evoral::MusicalTime _last_ev_time_beats;
+	Evoral::Beats       _last_ev_time_beats;
 	framepos_t          _last_ev_time_frames;
 	/** end time (start + duration) of last call to read_unlocked */
 	mutable framepos_t _smf_last_read_end;

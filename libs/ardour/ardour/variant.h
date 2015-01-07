@@ -57,7 +57,7 @@ public:
 	explicit Variant(int32_t value) : _type(INT)     { _int    = value; }
 	explicit Variant(int64_t value) : _type(LONG)    { _long   = value; }
 
-	explicit Variant(const Evoral::MusicalTime& beats)
+	explicit Variant(const Evoral::Beats& beats)
 		: _type(BEATS)
 		, _beats(beats)
 	{}
@@ -94,7 +94,7 @@ public:
 			                                std::min(value, (double)INT64_MAX)));
 			break;
 		case BEATS:
-			_beats = Evoral::MusicalTime(value);
+			_beats = Evoral::Beats(value);
 			break;
 		default:
 			_type = NOTHING;
@@ -158,19 +158,19 @@ public:
 		return false;
 	}
 
-	bool operator==(const Evoral::MusicalTime& v) const {
+	bool operator==(const Evoral::Beats& v) const {
 		return _type == BEATS && _beats == v;
 	}
 
 	bool operator!() const { return _type == NOTHING; }
 
-	Variant& operator=(Evoral::MusicalTime v) {
+	Variant& operator=(Evoral::Beats v) {
 		_type  = BEATS;
 		_beats = v;
 		return *this;
 	}
 
-	const Evoral::MusicalTime& get_beats() const {
+	const Evoral::Beats& get_beats() const {
 		ensure_type(BEATS); return _beats;
 	}
 
@@ -202,9 +202,9 @@ private:
 		}
 	}
 
-	Type                _type;    ///< Type tag
-	std::string         _string;  ///< PATH, STRING, URI
-	Evoral::MusicalTime _beats;   ///< BEATS
+	Type          _type;    ///< Type tag
+	std::string   _string;  ///< PATH, STRING, URI
+	Evoral::Beats _beats;   ///< BEATS
 
 	// Union of all primitive numeric types
 	union {

@@ -276,9 +276,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	*/
 
 	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
-	framepos_t framepos_plus_beats (framepos_t, Evoral::MusicalTime) const;
-	framepos_t framepos_minus_beats (framepos_t, Evoral::MusicalTime) const;
-	Evoral::MusicalTime framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
+	framepos_t framepos_plus_beats (framepos_t, Evoral::Beats) const;
+	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
+	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }

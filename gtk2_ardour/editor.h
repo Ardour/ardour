@@ -315,7 +315,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next);
 	framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration);
-	Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position);
+	Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position);
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
@@ -1172,7 +1172,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
-	void cut_copy_points (Editing::CutCopyOp, Evoral::MusicalTime earliest=Evoral::MusicalTime(), bool midi=false);
+	void cut_copy_points (Editing::CutCopyOp, Evoral::Beats earliest=Evoral::Beats(), bool midi=false);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 	void cut_copy_midi (Editing::CutCopyOp);

@@ -66,8 +66,8 @@ class CursorContext;
 class MidiRegionView : public RegionView
 {
 public:
-	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
-	typedef Evoral::Sequence<Evoral::MusicalTime>::Notes Notes;
+	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::Sequence<Evoral::Beats>::Notes Notes;
 
 	MidiRegionView (ArdourCanvas::Container*              parent,
 	                RouteTimeAxisView&                    tv,
@@ -100,8 +100,8 @@ public:
 	{ return midi_view()->midi_view(); }
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
-	                    Evoral::MusicalTime pos, Evoral::MusicalTime len);
-	void step_sustain (Evoral::MusicalTime beats);
+	                    Evoral::Beats pos, Evoral::Beats len);
+	void step_sustain (Evoral::Beats beats);
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
@@ -110,17 +110,17 @@ public:
 	uint32_t get_fill_color() const;
 	void color_handler ();
 
-	void show_step_edit_cursor (Evoral::MusicalTime pos);
-	void move_step_edit_cursor (Evoral::MusicalTime pos);
+	void show_step_edit_cursor (Evoral::Beats pos);
+	void move_step_edit_cursor (Evoral::Beats pos);
 	void hide_step_edit_cursor ();
-	void set_step_edit_cursor_width (Evoral::MusicalTime beats);
+	void set_step_edit_cursor_width (Evoral::Beats beats);
 
 	void redisplay_model();
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
 	void add_note(const boost::shared_ptr<NoteType> note, bool visible);
-	void resolve_note(uint8_t note_num, Evoral::MusicalTime end_time);
+	void resolve_note(uint8_t note_num, Evoral::Beats end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
 	bool paste (framepos_t pos, const ::Selection& selection, PasteContext& ctx);
@@ -134,7 +134,7 @@ public:
 	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
-	void get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;
+	void get_patch_key_at (Evoral::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;
 
 	/** Convert a given PatchChange into a PatchPrimaryKey
 	 */
@@ -145,10 +145,10 @@ public:
 	 * @param new_patch new patch
 	 */
 	void change_patch_change (PatchChange& old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
-	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Evoral::MusicalTime> const &);
+	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Evoral::Beats> const &);
 
-	void add_patch_change (framecnt_t, Evoral::PatchChange<Evoral::MusicalTime> const &);
-	void move_patch_change (PatchChange &, Evoral::MusicalTime);
+	void add_patch_change (framecnt_t, Evoral::PatchChange<Evoral::Beats> const &);
+	void move_patch_change (PatchChange &, Evoral::Beats);
 	void delete_patch_change (PatchChange *);
 	void edit_patch_change (PatchChange *);
 
@@ -176,7 +176,7 @@ public:
 
 	void start_note_diff_command (std::string name = "midi edit");
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
-	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Evoral::MusicalTime val);
+	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Evoral::Beats val);
 	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
 	void note_diff_remove_note (NoteBase* ev);
 
@@ -263,22 +263,22 @@ public:
 	framepos_t snap_pixel_to_sample(double x);
 
 	/** Convert a timestamp in beats into frames (both relative to region position) */
-	framepos_t region_beats_to_region_frames(Evoral::MusicalTime beats) const;
+	framepos_t region_beats_to_region_frames(Evoral::Beats beats) const;
 	/** Convert a timestamp in beats into absolute frames */
-	framepos_t region_beats_to_absolute_frames(Evoral::MusicalTime beats) const {
+	framepos_t region_beats_to_absolute_frames(Evoral::Beats beats) const {
 		return _region->position() + region_beats_to_region_frames (beats);
 	}
 	/** Convert a timestamp in frames to beats (both relative to region position) */
-	Evoral::MusicalTime region_frames_to_region_beats(framepos_t) const;
+	Evoral::Beats region_frames_to_region_beats(framepos_t) const;
 
 	/** Convert a timestamp in beats measured from source start into absolute frames */
-	framepos_t source_beats_to_absolute_frames(Evoral::MusicalTime beats) const;
+	framepos_t source_beats_to_absolute_frames(Evoral::Beats beats) const;
 	/** Convert a timestamp in beats measured from source start into region-relative frames */
-	framepos_t source_beats_to_region_frames(Evoral::MusicalTime beats) const {
+	framepos_t source_beats_to_region_frames(Evoral::Beats beats) const {
 		return source_beats_to_absolute_frames (beats) - _region->position();
 	}
 	/** Convert a timestamp in absolute frames to beats measured from source start*/
-	Evoral::MusicalTime absolute_frames_to_source_beats(framepos_t) const;
+	Evoral::Beats absolute_frames_to_source_beats(framepos_t) const;
 
 	ARDOUR::BeatsFramesConverter const & region_relative_time_converter () const {
 		return _region_relative_time_converter;
@@ -290,7 +290,7 @@ public:
 
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);
-	void change_note_lengths (bool, bool, Evoral::MusicalTime beats, bool start, bool end);
+	void change_note_lengths (bool, bool, Evoral::Beats beats, bool start, bool end);
         void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
@@ -320,7 +320,7 @@ public:
 	 * \param length duration of the note in beats
 	 * \param snap_t true to snap t to the grid, otherwise false.
 	 */
-	void create_note_at (framepos_t t, double y, Evoral::MusicalTime length, bool snap_t);
+	void create_note_at (framepos_t t, double y, Evoral::Beats length, bool snap_t);
 
 	void clear_selection (bool signal = true) { clear_selection_except (0, signal); }
 
@@ -414,8 +414,8 @@ private:
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
 	ArdourCanvas::Rectangle*             _step_edit_cursor;
-	Evoral::MusicalTime                  _step_edit_cursor_width;
-	Evoral::MusicalTime                  _step_edit_cursor_position;
+	Evoral::Beats                        _step_edit_cursor_width;
+	Evoral::Beats                        _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
 
 	/** A group used to temporarily reparent _note_group to during start trims, so
@@ -477,7 +477,7 @@ private:
 
 	void drop_down_keys ();
 	void maybe_select_by_position (GdkEventButton* ev, double x, double y);
-	void get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask = 0);
+	void get_events (Events& e, Evoral::Sequence<Evoral::Beats>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
 	void display_patch_changes_on_channel (uint8_t, bool);
 
@@ -485,7 +485,7 @@ private:
 	void data_recorded (boost::weak_ptr<ARDOUR::MidiSource>);
 
 	/** Get grid type as beats, or default to 1 if not snapped to beats. */
-	Evoral::MusicalTime get_grid_beats(framepos_t pos) const;
+	Evoral::Beats get_grid_beats(framepos_t pos) const;
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();

@@ -121,7 +121,7 @@ Transform::Operation::eval(Context& ctx) const
 
 Command*
 Transform::operator()(boost::shared_ptr<MidiModel> model,
-                      Evoral::MusicalTime          position,
+                      Evoral::Beats                position,
                       std::vector<Notes>&          seqs)
 {
 	typedef MidiModel::NoteDiffCommand Command;

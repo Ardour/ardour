@@ -45,22 +45,22 @@ class StepEditor : public PBD::ScopedConnectionList, public sigc::trackable
         virtual ~StepEditor ();
 
 	void check_step_edit ();
-	void step_edit_rest (Evoral::MusicalTime beats);
+	void step_edit_rest (Evoral::Beats beats);
         void step_edit_beat_sync ();
         void step_edit_bar_sync ();
         int  step_add_bank_change (uint8_t channel, uint8_t bank);
         int  step_add_program_change (uint8_t channel, uint8_t program);
         int  step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity,
-                            Evoral::MusicalTime beat_duration);
-        void step_edit_sustain (Evoral::MusicalTime beats);
+                            Evoral::Beats beat_duration);
+        void step_edit_sustain (Evoral::Beats beats);
         bool step_edit_within_triplet () const;
         void step_edit_toggle_triplet ();
         bool step_edit_within_chord () const;
         void step_edit_toggle_chord ();
         void reset_step_edit_beat_pos ();
         void resync_step_edit_to_edit_point ();
-        void move_step_edit_beat_pos (Evoral::MusicalTime beats);
-        void set_step_edit_cursor_width (Evoral::MusicalTime beats);
+        void move_step_edit_beat_pos (Evoral::Beats beats);
+        void set_step_edit_cursor_width (Evoral::Beats beats);
 
         std::string name() const;
 
@@ -69,19 +69,19 @@ class StepEditor : public PBD::ScopedConnectionList, public sigc::trackable
 
   private:
         ARDOUR::framepos_t                    step_edit_insert_position;
-	Evoral::MusicalTime                   step_edit_beat_pos;
+	Evoral::Beats                   step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::MidiRegion> step_edit_region;
 	MidiRegionView*                       step_edit_region_view;
         uint8_t                              _step_edit_triplet_countdown;
         bool                                 _step_edit_within_chord;
-        Evoral::MusicalTime                  _step_edit_chord_duration;
+        Evoral::Beats                  _step_edit_chord_duration;
         PBD::ScopedConnection                 step_edit_region_connection;
         PublicEditor&                        _editor;
         boost::shared_ptr<ARDOUR::MidiTrack> _track;
         StepEntry*                            step_editor;
         MidiTimeAxisView&                    _mtv;
         int8_t                                last_added_pitch;
-        Evoral::MusicalTime                   last_added_end;
+        Evoral::Beats                   last_added_end;
 
         void region_removed (boost::weak_ptr<ARDOUR::Region>);
         void playlist_changed ();

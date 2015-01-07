@@ -364,6 +364,6 @@ SMF<Time>::write_var_len(uint32_t value)
 	return ret;
 }
 
-template class SMF<Evoral::MusicalTime>;
+template class SMF<Evoral::Beats>;
 
 } // namespace Evoral

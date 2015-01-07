@@ -57,7 +57,7 @@ class SMFTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END();
 
 public:
-	typedef Evoral::MusicalTime Time;
+	typedef Evoral::Beats Time;
 
 	void setUp() {
 		type_map = new DummyTypeMap();

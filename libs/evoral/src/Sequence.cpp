@@ -1404,6 +1404,6 @@ Sequence<Time>::dump (ostream& str) const
 	str << "--- dump\n";
 }
 
-template class Sequence<Evoral::MusicalTime>;
+template class Sequence<Evoral::Beats>;
 
 } // namespace Evoral

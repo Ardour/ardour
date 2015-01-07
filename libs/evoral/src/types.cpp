@@ -22,8 +22,8 @@
 
 namespace Evoral {
 
-const double      MusicalTime::PPQN = 1920.0;
-const MusicalTime MaxMusicalTime    = Evoral::MusicalTime(DBL_MAX);
-const MusicalTime MinMusicalTime    = Evoral::MusicalTime(DBL_MIN);
+const double Beats::PPQN = 1920.0;
+const Beats  MaxBeats    = Evoral::Beats(DBL_MAX);
+const Beats  MinBeats    = Evoral::Beats(DBL_MIN);
 
 }

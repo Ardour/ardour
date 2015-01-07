@@ -526,10 +526,10 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
 void
 StepEntry::rest_event_handler ()
 {
-	se->step_edit_rest (Evoral::MusicalTime());
+	se->step_edit_rest (Evoral::Beats());
 }
 
-Evoral::MusicalTime
+Evoral::Beats
 StepEntry::note_length ()
 {
         double base_time = 4.0 / (double) length_divisor_adjustment.get_value();
@@ -549,7 +549,7 @@ StepEntry::note_length ()
                 base_time *= 1 + ((dots - 1.0)/dots);
         }
 
-        return Evoral::MusicalTime(base_time);
+        return Evoral::Beats(base_time);
 }
 
 uint8_t
@@ -795,7 +795,7 @@ StepEntry::insert_rest ()
 void
 StepEntry::insert_grid_rest ()
 {
-	se->step_edit_rest (Evoral::MusicalTime());
+	se->step_edit_rest (Evoral::Beats());
 }
 
 void

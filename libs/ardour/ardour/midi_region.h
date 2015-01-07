@@ -37,8 +37,8 @@ namespace ARDOUR {
 		   MidiModel used by the MidiRegion
 		*/
 		LIBARDOUR_API extern PBD::PropertyDescriptor<void*> midi_data;
-		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::MusicalTime> start_beats;
-		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::MusicalTime> length_beats;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> start_beats;
+		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> length_beats;
 	}
 }
 
@@ -114,8 +114,8 @@ class LIBARDOUR_API MidiRegion : public Region
 
   private:
 	friend class RegionFactory;
-	PBD::Property<Evoral::MusicalTime> _start_beats;
-	PBD::Property<Evoral::MusicalTime> _length_beats;
+	PBD::Property<Evoral::Beats> _start_beats;
+	PBD::Property<Evoral::Beats> _length_beats;
 
 	MidiRegion (const SourceList&);
 	MidiRegion (boost::shared_ptr<const MidiRegion>);

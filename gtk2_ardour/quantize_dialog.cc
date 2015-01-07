@@ -131,7 +131,7 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 	if (txt == "main grid") {
 		bool success;
 
-		Evoral::MusicalTime b = editor.get_grid_type_as_beats (success, 0);
+		Evoral::Beats b = editor.get_grid_type_as_beats (success, 0);
 		if (!success) {
 			return 1.0;
 		}

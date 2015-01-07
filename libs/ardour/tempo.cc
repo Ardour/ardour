@@ -1841,7 +1841,7 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
  *  pos can be -ve, if required.
  */
 framepos_t
-TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
+TempoMap::framepos_plus_beats (framepos_t pos, Evoral::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	Metrics::const_iterator next_tempo;
@@ -1891,11 +1891,11 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		framecnt_t distance_frames = (next_tempo == metrics.end() ? max_framepos : ((*next_tempo)->frame() - pos));
 
 		/* Distance to the end in beats */
-		Evoral::MusicalTime distance_beats = Evoral::MusicalTime::ticks_at_rate(
+		Evoral::Beats distance_beats = Evoral::Beats::ticks_at_rate(
 			distance_frames, tempo->frames_per_beat (_frame_rate));
 
 		/* Amount to subtract this time */
-		Evoral::MusicalTime const delta = min (distance_beats, beats);
+		Evoral::Beats const delta = min (distance_beats, beats);
 
 		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tdistance to %1 = %2 (%3 beats)\n",
 							       (next_tempo == metrics.end() ? max_framepos : (*next_tempo)->frame()),
@@ -1933,7 +1933,7 @@ TempoMap::framepos_plus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 
 /** Subtract some (fractional) beats from a frame position, and return the result in frames */
 framepos_t
-TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
+TempoMap::framepos_minus_beats (framepos_t pos, Evoral::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	Metrics::const_reverse_iterator prev_tempo;
@@ -2000,11 +2000,11 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 		framecnt_t distance_frames = (pos - tempo->frame());
 
 		/* Distance to the start in beats */
-		Evoral::MusicalTime distance_beats = Evoral::MusicalTime::ticks_at_rate(
+		Evoral::Beats distance_beats = Evoral::Beats::ticks_at_rate(
 			distance_frames, tempo->frames_per_beat (_frame_rate));
 
 		/* Amount to subtract this time */
-		Evoral::MusicalTime const sub = min (distance_beats, beats);
+		Evoral::Beats const sub = min (distance_beats, beats);
 
 		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("\tdistance to %1 = %2 (%3 beats)\n",
 							       tempo->frame(), distance_frames, distance_beats));
@@ -2037,7 +2037,7 @@ TempoMap::framepos_minus_beats (framepos_t pos, Evoral::MusicalTime beats) const
 			}
 		} else {
 			pos -= llrint (beats.to_double() * tempo->frames_per_beat (_frame_rate));
-			beats = Evoral::MusicalTime();
+			beats = Evoral::Beats();
 		}
 	}
 
@@ -2183,7 +2183,7 @@ TempoMap::framepos_plus_bbt (framepos_t pos, BBT_Time op) const
 /** Count the number of beats that are equivalent to distance when going forward,
     starting at pos.
 */
-Evoral::MusicalTime
+Evoral::Beats
 TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
@@ -2218,7 +2218,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 	             string_compose ("frame %1 walk by %2 frames, start with tempo = %3 @ %4\n",
 	                             pos, distance, *((const Tempo*)tempo), tempo->frame()));
 	
-	Evoral::MusicalTime beats = Evoral::MusicalTime();
+	Evoral::Beats beats = Evoral::Beats();
 
 	while (distance) {
 
@@ -2246,7 +2246,7 @@ TempoMap::framewalk_to_beats (framepos_t pos, framecnt_t distance) const
 		pos += sub;
 		distance -= sub;
 		assert (tempo);
-		beats += Evoral::MusicalTime::ticks_at_rate(sub, tempo->frames_per_beat (_frame_rate));
+		beats += Evoral::Beats::ticks_at_rate(sub, tempo->frames_per_beat (_frame_rate));
 
 		DEBUG_TRACE (DEBUG::TempoMath, string_compose ("now at %1, beats = %2 distance left %3\n",
 							       pos, beats, distance));

@@ -940,14 +940,14 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			/* set length in beats to entire capture length */
 
 			BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
-			const Evoral::MusicalTime total_capture_beats = converter.from (total_capture);
+			const Evoral::Beats total_capture_beats = converter.from (total_capture);
 			_write_source->set_length_beats (total_capture_beats);
 
 			/* flush to disk: this step differs from the audio path,
 			   where all the data is already on disk.
 			*/
 
-			_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, total_capture_beats);
+			_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Evoral::Beats>::ResolveStuckNotes, total_capture_beats);
 
 			/* we will want to be able to keep (over)writing the source
 			   but we don't want it to be removable. this also differs

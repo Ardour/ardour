@@ -54,8 +54,8 @@ Quantize::~Quantize ()
 
 Command*
 Quantize::operator () (boost::shared_ptr<MidiModel> model,
-                       Evoral::MusicalTime position,
-                       std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>& seqs)
+                       Evoral::Beats position,
+                       std::vector<Evoral::Sequence<Evoral::Beats>::Notes>& seqs)
 {
 	/* TODO: Rewrite this to be precise with fixed point? */
 
@@ -69,7 +69,7 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 	bool even;
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
-	for (std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
+	for (std::vector<Evoral::Sequence<Evoral::Beats>::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
 
 		even = false;
 
@@ -119,10 +119,10 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 				delta = new_end - (*i)->end_time().to_double();
 
 				if (fabs (delta) >= _threshold) {
-					Evoral::MusicalTime new_dur(new_end - new_start);
+					Evoral::Beats new_dur(new_end - new_start);
 
 					if (!new_dur) {
-						new_dur = Evoral::MusicalTime(_end_grid);
+						new_dur = Evoral::Beats(_end_grid);
 					}
 
 					cmd->change ((*i), MidiModel::NoteDiffCommand::Length, new_dur);

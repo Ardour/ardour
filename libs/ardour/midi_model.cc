@@ -620,7 +620,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	if ((prop = xml_change->property ("old")) != 0) {
 		istringstream old_str (prop->value());
 		if (change.property == StartTime || change.property == Length) {
-			Evoral::MusicalTime old_time;
+			Evoral::Beats old_time;
 			old_str >> old_time;
 			change.old_value = old_time;
 		} else {
@@ -636,7 +636,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	if ((prop = xml_change->property ("new")) != 0) {
 		istringstream new_str (prop->value());
 		if (change.property == StartTime || change.property == Length) {
-			Evoral::MusicalTime new_time;
+			Evoral::Beats new_time;
 			new_str >> new_time;
 			change.new_value = Variant(new_time);
 		} else {
@@ -1237,7 +1237,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 {
 	XMLProperty* prop;
 	Evoral::event_id_t id = 0;
-	Evoral::MusicalTime time = Evoral::MusicalTime();
+	Evoral::Beats time = Evoral::Beats();
 	int channel = 0;
 	int program = 0;
 	int bank = 0;
@@ -1476,8 +1476,8 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 bool
 MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
                              const Glib::Threads::Mutex::Lock& source_lock,
-                             Evoral::MusicalTime               begin_time,
-                             Evoral::MusicalTime               end_time)
+                             Evoral::Beats                     begin_time,
+                             Evoral::Beats                     end_time)
 {
 	ReadLock lock(read_lock());
 	MidiStateTracker mst;
@@ -1489,12 +1489,12 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		const Evoral::Event<Evoral::MusicalTime>& ev (*i);
+		const Evoral::Event<Evoral::Beats>& ev (*i);
 
 		if (ev.time() >= begin_time && ev.time() < end_time) {
 
-			const Evoral::MIDIEvent<Evoral::MusicalTime>* mev =
-				static_cast<const Evoral::MIDIEvent<Evoral::MusicalTime>* > (&ev);
+			const Evoral::MIDIEvent<Evoral::Beats>* mev =
+				static_cast<const Evoral::MIDIEvent<Evoral::Beats>* > (&ev);
 
 			if (!mev) {
 				continue;
@@ -2026,7 +2026,7 @@ MidiModel::transpose (TimeType from, TimeType to, int semitones)
 void
 MidiModel::control_list_marked_dirty ()
 {
-	AutomatableSequence<Evoral::MusicalTime>::control_list_marked_dirty ();
+	AutomatableSequence<Evoral::Beats>::control_list_marked_dirty ();
 	
 	ContentsChanged (); /* EMIT SIGNAL */
 }

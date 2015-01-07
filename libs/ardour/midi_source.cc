@@ -200,7 +200,7 @@ MidiSource::midi_read (const Lock&                        lm,
 
 	if (_model) {
 		// Find appropriate model iterator
-		Evoral::Sequence<Evoral::MusicalTime>::const_iterator& i = _model_iter;
+		Evoral::Sequence<Evoral::Beats>::const_iterator& i = _model_iter;
 		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
 			// Cached iterator is invalid, search for the first event past start
 			i                 = _model->begin(converter.from(start), false, filtered);
@@ -297,9 +297,9 @@ MidiSource::mark_streaming_write_started (const Lock& lock)
 }
 
 void
-MidiSource::mark_midi_streaming_write_completed (const Lock&                                            lock,
-                                                 Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption option,
-                                                 Evoral::MusicalTime                                    end)
+MidiSource::mark_midi_streaming_write_completed (const Lock&                                      lock,
+                                                 Evoral::Sequence<Evoral::Beats>::StuckNoteOption option,
+                                                 Evoral::Beats                                    end)
 {
 	if (_model) {
 		_model->end_write (option, end);
@@ -320,11 +320,11 @@ MidiSource::mark_midi_streaming_write_completed (const Lock&                    
 void
 MidiSource::mark_streaming_write_completed (const Lock& lock)
 {
-	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Evoral::Beats>::DeleteStuckNotes);
 }
 
 int
-MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::MusicalTime begin, Evoral::MusicalTime end)
+MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::Beats begin, Evoral::Beats end)
 {
 	Lock newsrc_lock (newsrc->mutex ());
 
@@ -333,7 +333,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 	newsrc->copy_automation_state_from (this);
 
 	if (_model) {
-		if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
+		if (begin == Evoral::MinBeats && end == Evoral::MaxBeats) {
 			_model->write_to (newsrc, newsrc_lock);
 		} else {
 			_model->write_section_to (newsrc, newsrc_lock, begin, end);
@@ -347,7 +347,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 
 	/* force a reload of the model if the range is partial */
 
-	if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
+	if (begin != Evoral::MinBeats || end != Evoral::MaxBeats) {
 		newsrc->load_model (newsrc_lock, true);
 	} else {
 		newsrc->set_model (newsrc_lock, _model);

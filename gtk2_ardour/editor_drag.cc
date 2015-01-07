@@ -5229,9 +5229,9 @@ framecnt_t
 NoteCreateDrag::grid_frames (framepos_t t) const
 {
 	bool success;
-	Evoral::MusicalTime grid_beats = _editor->get_grid_type_as_beats (success, t);
+	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, t);
 	if (!success) {
-		grid_beats = Evoral::MusicalTime(1);
+		grid_beats = Evoral::Beats(1);
 	}
 
 	return _region_view->region_beats_to_region_frames (grid_beats);
@@ -5288,13 +5288,13 @@ NoteCreateDrag::finished (GdkEvent*, bool had_movement)
 	framecnt_t length = (framecnt_t) fabs ((double)(_note[0] - _note[1]));
 
 	framecnt_t const g = grid_frames (start);
-	Evoral::MusicalTime const one_tick = Evoral::MusicalTime::ticks(1);
+	Evoral::Beats const one_tick = Evoral::Beats::ticks(1);
 	
 	if (_editor->snap_mode() == SnapNormal && length < g) {
 		length = g;
 	}
 
-	Evoral::MusicalTime length_beats = max (
+	Evoral::Beats length_beats = max (
 		one_tick, _region_view->region_frames_to_region_beats (length) - one_tick);
 
 	_region_view->create_note_at (start, _drag_rect->y0(), length_beats, false);

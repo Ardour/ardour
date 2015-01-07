@@ -52,9 +52,9 @@ class MidiSource;
  * Because of this MIDI controllers and automatable controllers/widgets/etc
  * are easily interchangeable.
  */
-class LIBARDOUR_API MidiModel : public AutomatableSequence<Evoral::MusicalTime> {
+class LIBARDOUR_API MidiModel : public AutomatableSequence<Evoral::Beats> {
 public:
-	typedef Evoral::MusicalTime TimeType;
+	typedef Evoral::Beats TimeType;
 
 	MidiModel (boost::shared_ptr<MidiSource>);
 
@@ -259,8 +259,8 @@ public:
 
 	bool write_section_to(boost::shared_ptr<MidiSource>     source,
 	                      const Glib::Threads::Mutex::Lock& source_lock,
-	                      Evoral::MusicalTime               begin = Evoral::MinMusicalTime,
-	                      Evoral::MusicalTime               end   = Evoral::MaxMusicalTime);
+	                      Evoral::Beats                     begin = Evoral::MinBeats,
+	                      Evoral::Beats                     end   = Evoral::MaxBeats);
 
 	// MidiModel doesn't use the normal AutomationList serialisation code
 	// since controller data is stored in the .mid

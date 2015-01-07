@@ -53,9 +53,9 @@ using namespace PBD;
 
 namespace ARDOUR {
 	namespace Properties {
-		PBD::PropertyDescriptor<void*>                midi_data;
-		PBD::PropertyDescriptor<Evoral::MusicalTime>  start_beats;
-		PBD::PropertyDescriptor<Evoral::MusicalTime>  length_beats;
+		PBD::PropertyDescriptor<void*>         midi_data;
+		PBD::PropertyDescriptor<Evoral::Beats> start_beats;
+		PBD::PropertyDescriptor<Evoral::Beats> length_beats;
 	}
 }
 
@@ -80,7 +80,7 @@ MidiRegion::register_properties ()
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
-	, _start_beats (Properties::start_beats, Evoral::MusicalTime())
+	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, midi_source(0)->length_beats())
 {
 	register_properties ();
@@ -94,7 +94,7 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 	, _start_beats (Properties::start_beats, other->_start_beats)
-	, _length_beats (Properties::length_beats, Evoral::MusicalTime())
+	, _length_beats (Properties::length_beats, Evoral::Beats())
 {
 	update_length_beats ();
 	register_properties ();
@@ -107,11 +107,11 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 /** Create a new MidiRegion that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset)
 	: Region (other, offset)
-	, _start_beats (Properties::start_beats, Evoral::MusicalTime())
-	, _length_beats (Properties::length_beats, Evoral::MusicalTime())
+	, _start_beats (Properties::start_beats, Evoral::Beats())
+	, _length_beats (Properties::length_beats, Evoral::Beats())
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
-	Evoral::MusicalTime const offset_beats = bfc.from (offset);
+	Evoral::Beats const offset_beats = bfc.from (offset);
 
 	_start_beats  = other->_start_beats.val() + offset_beats;
 	_length_beats = other->_length_beats.val() - offset_beats;
@@ -147,8 +147,8 @@ boost::shared_ptr<MidiRegion>
 MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
-	Evoral::MusicalTime const bbegin = bfc.from (_start);
-	Evoral::MusicalTime const bend = bfc.from (_start + _length);
+	Evoral::Beats const bbegin = bfc.from (_start);
+	Evoral::Beats const bend = bfc.from (_start + _length);
 
 	{
 		/* Lock our source since we'll be reading from it.  write_to() will
@@ -223,7 +223,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	/* zero length regions don't exist - so if _length_beats is zero, this object
 	   is under construction.
 	*/
-	if (_length_beats.val() == Evoral::MusicalTime()) {
+	if (_length_beats.val() == Evoral::Beats()) {
 		/* leave _length_beats alone, and change _length to reflect the state of things
 		   at the new position (tempo map may dictate a different number of frames
 		*/
@@ -462,7 +462,7 @@ MidiRegion::fix_negative_start ()
 
 	model()->insert_silence_at_start (c.from (-_start));
 	_start = 0;
-	_start_beats = Evoral::MusicalTime();
+	_start_beats = Evoral::Beats();
 }
 
 /** Transpose the notes in this region by a given number of semitones */

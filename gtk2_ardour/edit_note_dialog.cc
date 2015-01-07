@@ -116,8 +116,8 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	int test_channel = (*_events.begin())->note()->channel ();
 	int test_pitch = (*_events.begin())->note()->note ();
 	int test_velocity = (*_events.begin())->note()->velocity ();
-	Evoral::MusicalTime test_time = (*_events.begin())->note()->time ();
-	Evoral::MusicalTime test_length = (*_events.begin())->note()->length ();
+	Evoral::Beats test_time = (*_events.begin())->note()->time ();
+	Evoral::Beats test_length = (*_events.begin())->note()->length ();
 	
 	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->note()->channel() != test_channel) {
@@ -193,7 +193,7 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	Evoral::MusicalTime const t = _region_view->source_relative_time_converter().from (_time_clock.current_time ());
+	Evoral::Beats const t = _region_view->source_relative_time_converter().from (_time_clock.current_time ());
 
 	if (!_time_all.get_sensitive() || _time_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -204,7 +204,7 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	Evoral::MusicalTime const d = _region_view->region_relative_time_converter().from (_length_clock.current_duration ());
+	Evoral::Beats const d = _region_view->region_relative_time_converter().from (_length_clock.current_duration ());
 
 	if (!_length_all.get_sensitive() || _length_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {

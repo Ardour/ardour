@@ -155,7 +155,7 @@ Event<Timestamp>::set_original_time (Timestamp t)
 	
 #endif // EVORAL_EVENT_ALLOC
 
-template class Event<Evoral::MusicalTime>;
+template class Event<Evoral::Beats>;
 template class Event<double>;
 template class Event<int64_t>;
 
