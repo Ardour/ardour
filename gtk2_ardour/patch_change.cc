@@ -164,7 +164,7 @@ PatchChange::event_handler (GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		if (e->current_mouse_mode() == Editing::MouseObject) {
+		if (e->current_mouse_mode() == Editing::MouseContent) {
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
 
