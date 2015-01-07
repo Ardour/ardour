@@ -536,13 +536,40 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		// NB numbers are rotated 90deg. on the meterbridge
 		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
+
+	int prev_height, ignored;
+	bool need_relayout = false;
+
+	namebx.get_size_request(ignored, prev_height);
 	namebx.set_size_request(18, nh + tnh);
-	namenumberbx.set_size_request(18, nh + tnh);
-	if (_route) {
-		name_label.set_size_request(18, nh + (_route->is_master() ? tnh : -1));
-		name_label.set_layout_ellisize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
+
+	if (prev_height != nh + tnh) {
+		need_relayout = true;
 	}
+
+	namenumberbx.get_size_request(ignored, prev_height);
+	namenumberbx.set_size_request(18, nh + tnh);
+
+	if (prev_height != nh + tnh) {
+		need_relayout = true;
+	}
+
+	if (_route) {
+		int nlh = nh + (_route->is_master() ? tnh : -1);
+		name_label.get_size_request(ignored, prev_height);
+		name_label.set_size_request(18, nlh);
+		name_label.set_layout_ellisize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
+		if (prev_height != nlh) {
+			need_relayout = true;
+		}
+	}
+
 	VBox::on_size_allocate(a);
+
+	if (need_relayout) {
+		queue_resize();
+		MetricChanged(); // force re-layout, parent on_scroll(), queue_resize()
+	}
 }
 
 gint

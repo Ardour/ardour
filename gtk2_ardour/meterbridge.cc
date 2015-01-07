@@ -104,9 +104,12 @@ Meterbridge::Meterbridge ()
 	Gdk::Geometry geom;
 	geom.max_width = 1<<16;
 	geom.max_height = max_height;
+	geom.min_width = 40;
+	geom.min_height = -1;
 	geom.height_inc = 16;
 	geom.width_inc = 1;
-	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
+	assert(max_height % 16 == 0);
+	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MIN_SIZE | Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
 
 	set_keep_above (true);
 	set_border_width (0);
@@ -325,33 +328,18 @@ Meterbridge::on_size_request (Gtk::Requisition* r)
 	Gtk::Requisition mr = meterarea.size_request();
 
 	geom.max_width = mr.width + metrics_left.get_width() + metrics_right.get_width();
+	geom.max_width = std::max(50, geom.max_width);
 	geom.max_height = max_height;
-
-#ifndef GTKOSX
-	/* on OSX this leads to a constant live-loop: show/hide scrollbar
-	 * on Linux, the window is resized IFF the scrollbar was not visible
-	 */
-	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
-	Glib::RefPtr<Gdk::Screen> screen = get_screen ();
-	Gdk::Rectangle monitor_rect;
-	screen->get_monitor_geometry (0, monitor_rect);
-	const int scr_w = monitor_rect.get_width() - 44;
-
-	if (cur_max_width < geom.max_width
-			&& cur_max_width < scr_w
-			&& !(scroller.get_hscrollbar_visible() && hsc)) {
-		int h = r->height;
-		*r = Gtk::Requisition();
-		r->width = geom.max_width;
-		r->height = h;
-	}
-#endif
 
 	if (cur_max_width != geom.max_width) {
 		cur_max_width = geom.max_width;
+		/* height resizes are 'heavy' since the metric areas and meter-patterns
+		 * are re-generated. limit to 16px steps. */
 		geom.height_inc = 16;
 		geom.width_inc = 1;
-		set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
+		geom.min_width = 40;
+		geom.min_height = -1;
+		set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MIN_SIZE | Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
 	}
 }
 
@@ -360,6 +348,7 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 {
 	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
 
+	/* switch left/right edge patterns depending on horizontal scroll-position */
 	if (scroller.get_hscrollbar_visible() && hsc) {
 		if (!scroll_connection.connected()) {
 			scroll_connection = scroller.get_hscrollbar()->get_adjustment()->signal_value_changed().connect(sigc::mem_fun (*this, &Meterbridge::on_scroll));
