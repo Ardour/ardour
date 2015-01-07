@@ -22,9 +22,10 @@
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 
-#include "tempo_lines.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
+#include "rgb_macros.h"
+#include "tempo_lines.h"
 
 using namespace std;
 
@@ -52,9 +53,63 @@ TempoLines::hide ()
 	lines.hide ();
 }
 
+static uint8_t
+tick_alpha(uint8_t base_alpha, unsigned divisions)
+{
+	if (divisions == 32) {
+		return std::max(0, base_alpha / 5);
+	} else if (divisions == 16) {
+		return std::max(0, base_alpha / 4);
+	} else if (divisions == 8) {
+		return std::max(0, base_alpha / 3);
+	} else if (divisions == 4) {
+		return std::max(0, base_alpha / 2);
+	}
+	return 0;
+}
+
 void
-TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
-		  const ARDOUR::TempoMap::BBTPointList::const_iterator& end)
+TempoLines::draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
+                        double                                                beat_density,
+                        framecnt_t                                            leftmost_frame,
+                        framecnt_t                                            frame_rate)
+{
+	const double   fpb       = b->tempo->frames_per_beat(frame_rate);
+	const uint32_t base      = ARDOUR_UI::config()->color_mod("measure line beat", "measure line beat");
+	unsigned       divisions = 4;
+	if (beat_density < 0.01) {
+		divisions = 32;
+	} else if (beat_density < 0.025) {
+		divisions = 16;
+	} else if (beat_density < 0.05) {
+		divisions = 8;
+	} else if (beat_density < 0.1) {
+		divisions = 4;
+	}
+
+	for (unsigned l = 1; l < divisions; ++l) {
+		/* find the coarsest division level this tick falls on */
+		unsigned level = divisions;
+		for (unsigned d = divisions; d >= 4; d /= 2) {
+			if (l % (divisions / d) == 0) {
+				level = d;
+			}
+		}
+
+		/* draw line with alpha corresponding to coarsest level */
+		const uint32_t   c = UINT_RGBA_CHANGE_A(base, tick_alpha(UINT_RGBA_A(base), level));
+		const framepos_t f = b->frame + (l * (fpb / (double)divisions));
+		if (f > leftmost_frame) {
+			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
+		}
+	}
+}
+
+void
+TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+                  const ARDOUR::TempoMap::BBTPointList::const_iterator& end,
+                  framecnt_t                                            leftmost_frame,
+                  framecnt_t                                            frame_rate)
 {
 	ARDOUR::TempoMap::BBTPointList::const_iterator i;
 	double  beat_density;
@@ -80,6 +135,13 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	lines.clear ();
 
+	if (beat_density < 0.1 && begin != end && begin->frame > 0) {
+		/* draw subdivisions of the beat before the first visible beat line */
+		ARDOUR::TempoMap::BBTPointList::const_iterator prev = begin;
+		--prev;
+		draw_ticks(prev, beat_density, leftmost_frame, frame_rate);
+	}
+
 	for (i = begin; i != end; ++i) {
 
 		if ((*i).is_bar()) {
@@ -94,6 +156,11 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
 
 		lines.add (xpos, 1.0, color);
+
+		if (beat_density < 0.1) {
+			/* draw subdivisions of this beat */
+			draw_ticks(i, beat_density, leftmost_frame, frame_rate);
+		}
 	}
 }
 
