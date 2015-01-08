@@ -563,7 +563,6 @@ EditorRoutes::redisplay_real ()
 		 */
 		_editor->vertical_adjustment.set_value (_editor->_full_canvas_height - _editor->_visible_canvas_height);
 	}
-    ProgressDialog::instance()->add_progress_step ();
 }
 
 void
@@ -989,6 +988,7 @@ EditorRoutes::sync_order_keys_from_treeview ()
 		}
 
 		++order;
+        ProgressDialog::instance()->add_progress_step (); //process of tracks addition
 	}
 	
 	if (changed) {

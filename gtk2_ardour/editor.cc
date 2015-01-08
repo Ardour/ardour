@@ -5013,7 +5013,7 @@ Editor::add_routes (RouteList& routes)
         
 		rtv->view()->RegionViewAdded.connect (sigc::mem_fun (*this, &Editor::region_view_added));
 		rtv->view()->RegionViewRemoved.connect (sigc::mem_fun (*this, &Editor::region_view_removed));
-        ProgressDialog::instance()->add_progress_step ();
+        ProgressDialog::instance()->add_progress_step (); //process of tracks addition
 	}
 
 	if (new_views.size() > 0) {
@@ -5929,5 +5929,5 @@ Editor::port_connection_handler (boost::weak_ptr<Port> wa, std::string, boost::w
 void // true - track was added, false - track was removed
 Editor::update_progress_dialog_of_changing_tracks (bool operation)
 {
-    ProgressDialog::instance()->add_progress_step ();
+    ProgressDialog::instance()->add_progress_step (); // process of tracks addition/removal 
 }

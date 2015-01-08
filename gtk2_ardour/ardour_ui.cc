@@ -3484,7 +3484,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
  
     ProgressDialog::instance()->set_top_label ("Adding tracks...");
-    ProgressDialog::instance()->set_num_of_steps (_add_tracks_dialog->count () * 2);
+    ProgressDialog::instance()->set_num_of_steps (_add_tracks_dialog->count () * 4);
     ProgressDialog::instance()->show_pd ();
 	
     session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->count(), "");
