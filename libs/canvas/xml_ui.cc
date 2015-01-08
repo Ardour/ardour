@@ -49,7 +49,15 @@ xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styl
 	if (property.empty()) {
 		return default_value;
 	}
-	return atof(property.c_str());
+
+	// get float value from string
+	double value;
+	std::istringstream ss (property);
+	// set classic locale with "." float delimeter as default
+	ss.imbue(std::locale("C"));
+	ss >> value;
+
+	return value;
 }
 
 double
