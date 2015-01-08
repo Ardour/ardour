@@ -4638,7 +4638,13 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 
 	switch (ep) {
 	case EditAtPlayhead:
-		where = _session->audible_frame();
+		if (_dragging_playhead) {
+			if (!mouse_frame (where, ignored)) {
+				/* XXX not right but what can we do ? */
+				return 0;
+			}
+		} else
+			where = _session->audible_frame();
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
 		break;
 

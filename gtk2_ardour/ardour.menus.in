@@ -184,7 +184,6 @@
       <menuitem action='split-region'/>
       <menu action="SeparateMenu">
         <menuitem action='separate-under-region'/>
-        <menuitem action='editor-separate'/>
         <menuitem action='separate-from-loop'/>
         <menuitem action='separate-from-punch'/>
         <separator/>

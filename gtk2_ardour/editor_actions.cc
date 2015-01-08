@@ -1989,7 +1989,7 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
 	reg_sens (_region_actions, "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
-	reg_sens (_region_actions, "split-region", _("Split"), sigc::mem_fun (*this, &Editor::split_region));
+	reg_sens (_region_actions, "split-region", _("Split/Separate"), sigc::mem_fun (*this, &Editor::split_region));
 	reg_sens (_region_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
 	reg_sens (_region_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
 

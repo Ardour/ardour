@@ -5794,20 +5794,25 @@ Editor::set_playhead_cursor ()
 void
 Editor::split_region ()
 {
+	//if a range is selected, separate it
 	if ( !selection->time.empty()) {
 		separate_regions_between (selection->time);
 		return;
 	}
 
-	RegionSelection rs = get_regions_from_selection_and_edit_point ();
+	//if no range was selected, try to find some regions to split
+	if (current_mouse_mode() == MouseObject) {  //don't try this for Internal Edit, Stretch, Draw, etc.
+	
+		RegionSelection rs = get_regions_from_selection_and_edit_point ();
 
-	framepos_t where = get_preferred_edit_position ();
+		framepos_t where = get_preferred_edit_position ();
 
-	if (rs.empty()) {
-		return;
+		if (rs.empty()) {
+			return;
+		}
+
+		split_regions_at (where, rs);
 	}
-
-	split_regions_at (where, rs);
 }
 
 struct EditorOrderRouteSorter {
