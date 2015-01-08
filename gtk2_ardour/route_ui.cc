@@ -676,15 +676,15 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		return false;
 	}
 
-        if (is_midi_track()) {
+	if (is_midi_track()) {
 
-                /* rec-enable button exits from step editing */
+		/* rec-enable button exits from step editing */
 
-                if (midi_track()->step_editing()) {
+		if (midi_track()->step_editing()) {
 			midi_track()->set_step_editing (false);
 			return false;
-                }
-        }
+		}
+	}
 
 	if (is_track() && rec_enable_button) {
 
@@ -856,79 +856,79 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 void
 RouteUI::build_record_menu ()
 {
-        if (record_menu) {
-                return;
-        }
+	if (record_menu) {
+		return;
+	}
 
-        /* no rec-button context menu for non-MIDI tracks
-         */
+	/* no rec-button context menu for non-MIDI tracks
+	 */
 
-        if (is_midi_track()) {
-                record_menu = new Menu;
-                record_menu->set_name ("ArdourContextMenu");
+	if (is_midi_track()) {
+		record_menu = new Menu;
+		record_menu->set_name ("ArdourContextMenu");
 
-                using namespace Menu_Helpers;
-                MenuList& items = record_menu->items();
+		using namespace Menu_Helpers;
+		MenuList& items = record_menu->items();
 
-                items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
-                step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+		items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
+		step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
-                if (_route->record_enabled()) {
-                        step_edit_item->set_sensitive (false);
-                }
+		if (_route->record_enabled()) {
+			step_edit_item->set_sensitive (false);
+		}
 
-                step_edit_item->set_active (midi_track()->step_editing());
-        }
+		step_edit_item->set_active (midi_track()->step_editing());
+	}
 }
 
 void
 RouteUI::toggle_step_edit ()
 {
-        if (!is_midi_track() || _route->record_enabled()) {
-                return;
-        }
+	if (!is_midi_track() || _route->record_enabled()) {
+		return;
+	}
 
-        midi_track()->set_step_editing (step_edit_item->get_active());
+	midi_track()->set_step_editing (step_edit_item->get_active());
 }
 
 void
 RouteUI::step_edit_changed (bool yn)
 {
-        if (yn) {
-                if (rec_enable_button) {
-                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
-                }
+	if (yn) {
+		if (rec_enable_button) {
+			rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		}
 
-                start_step_editing ();
+		start_step_editing ();
 
-                if (step_edit_item) {
-                        step_edit_item->set_active (true);
-                }
+		if (step_edit_item) {
+			step_edit_item->set_active (true);
+		}
 
-        } else {
+	} else {
 
-                if (rec_enable_button) {
-                        rec_enable_button->unset_active_state ();
-                }
+		if (rec_enable_button) {
+			rec_enable_button->unset_active_state ();
+		}
 
-                stop_step_editing ();
+		stop_step_editing ();
 
-                if (step_edit_item) {
-                        step_edit_item->set_active (false);
-                }
-        }
+		if (step_edit_item) {
+			step_edit_item->set_active (false);
+		}
+	}
 }
 
 bool
 RouteUI::rec_enable_release (GdkEventButton* ev)
 {
-        if (Keyboard::is_context_menu_event (ev)) {
-                build_record_menu ();
-                if (record_menu) {
-                        record_menu->popup (1, ev->time);
-                }
-                return false;
-        }
+	if (Keyboard::is_context_menu_event (ev)) {
+		build_record_menu ();
+		if (record_menu) {
+			record_menu->popup (1, ev->time);
+		}
+		return false;
+	}
 
 	return false;
 }
