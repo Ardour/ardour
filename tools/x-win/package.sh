@@ -70,7 +70,7 @@ set -e
 
 ARDOURVERSION=$(git describe | sed 's/-g.*$//')
 ARDOURDATE=$(date -R)
-BINVERSION=$(git describe | sed 's/-g.*$//' | sed 's/-/./')
+BINVERSION=$(git describe | sed 's/-g.*$//;s/\-rc\([^-]*\)-/-rc\1./;s/-/./;s/-.*$//')
 if ! test -f build/gtk2_ardour/ardour-${BINVERSION}.exe; then
 	echo "*** Please compile ardour ${ARDOURVERSION} first."
 	exit 1

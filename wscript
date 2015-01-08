@@ -147,16 +147,16 @@ else:
     rev = fetch_tarball_revision ()
 
 #
-# rev is now of the form MAJOR.MINOR-rev-commit
-# or, if right at the same rev as a release, MAJOR.MINOR
+# rev is now of the form MAJOR.MINOR[-rcX]-rev-commit
+# or, if right at the same rev as a release, MAJOR.MINOR[-rcX]
 #
 
-parts = rev.split ('.')
+parts = rev.split ('.', 1)
 MAJOR = parts[0]
-other = parts[1].split ('-')
+other = parts[1].split('-', 1)
 MINOR = other[0]
 if len(other) > 1:
-    MICRO = other[1]
+    MICRO = other[1].rsplit('-',1)[0].replace('-','.')
 else:
     MICRO = '0'
 
