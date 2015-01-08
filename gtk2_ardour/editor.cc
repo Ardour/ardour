@@ -3195,7 +3195,7 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Grab Mode (select/move objects)"));
 	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split regions)"));
 	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select time ranges)"));
-	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation"));
+	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
 	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
 	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Audition Mode (listen to regions)"));
 	ARDOUR_UI::instance()->set_tip (mouse_content_button, _("Internal Edit Mode (edit notes and gain curves inside regions)"));
