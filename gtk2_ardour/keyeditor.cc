@@ -310,4 +310,7 @@ void
 KeyEditor::reset ()
 {
 	Keyboard::the_keyboard().reset_bindings ();
+	populate ();
+	view.get_selection()->unselect_all ();
+	populate ();
 }
