@@ -2221,7 +2221,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "show-name-highlight",
-		     _("Use name highlight bars in region displays"),
+		     _("Use name highlight bars in region displays (requires a restart)"),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_name_highlight),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_name_highlight)
 		     ));
