@@ -4611,7 +4611,7 @@ Editor::sort_track_selection (TrackViewList& sel)
 }
 
 framepos_t
-Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_menu)
+Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_menu, bool from_outside_canvas)
 {
 	bool ignored;
 	framepos_t where = 0;
@@ -4620,8 +4620,10 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 	if(Profile->get_mixbus())
 		if (ep == EditAtSelectedMarker)
 			ep=EditAtPlayhead;
-		
-	if (from_context_menu && (ep == EditAtMouse)) {
+
+	if (from_outside_canvas && (ep == EditAtMouse)) {
+		ep = EditAtPlayhead;
+	} else if (from_context_menu && (ep == EditAtMouse)) {
 		return  canvas_event_sample (&context_click_event, 0, 0);
 	}
 

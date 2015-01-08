@@ -280,7 +280,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void restore_editing_space () = 0;
 	virtual void update_tearoff_visibility () = 0;
 	virtual void reattach_all_tearoffs () = 0;
-	virtual framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool from_context_menu = false) = 0;
+	virtual framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (framepos_t, RegionSelection&) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
