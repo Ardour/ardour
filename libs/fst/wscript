@@ -18,7 +18,7 @@ scanner_app_src = [
     ]
 
 # needed for code used from libardour
-I18N_PACKAGE = 'ardour3'
+I18N_PACKAGE = 'ardour'
 
 def options(opt):
     autowaf.set_options(opt)
@@ -82,7 +82,7 @@ def build(bld):
         '_POSIX_SOURCE',
         'USE_WS_PREFIX',
         'VST_SCANNER_APP',
-        'PACKAGE="' + I18N_PACKAGE + '"',
+        'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
         'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
         ]
     obj.install_path = os.path.join(bld.env['LIBDIR'])

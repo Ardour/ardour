@@ -9,6 +9,24 @@ import sys
 import platform as PLATFORM
 from waflib.Tools import winres
 
+from waflib.Build import BuildContext
+class i18n(BuildContext):
+        cmd = 'i18n'
+        fun = 'i18n'
+
+class i18n_pot(BuildContext):
+        cmd = 'i18n_pot'
+        fun = 'i18n_pot'
+
+class i18n_po(BuildContext):
+        cmd = 'i18n_po'
+        fun = 'i18n_po'
+
+class i18n_mo(BuildContext):
+        cmd = 'i18n_mo'
+        fun = 'i18n_mo'
+
+
 compiler_flags_dictionaries= {
     'gcc' : {
         # Flags required when building a debug build
@@ -1036,7 +1054,7 @@ def build(bld):
     bld.path.find_dir ('libs/pbd/pbd')
 
     # set up target directories
-    lwrcase_dirname = 'ardour3'
+    lwrcase_dirname = 'ardour' + bld.env['MAJOR']
 
     if bld.is_defined ('TRX_BUILD'):
         lwrcase_dirname = 'trx'
@@ -1069,6 +1087,7 @@ def build(bld):
         bld.add_post_fun(test)
 
 def i18n(bld):
+    print(bld.env)
     bld.recurse (i18n_children)
 
 def i18n_pot(bld):

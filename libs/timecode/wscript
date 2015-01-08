@@ -21,7 +21,8 @@ def build(bld):
                target   = 'timecode',
                includes = ['.'],
                export_includes = ['.'],
-               defines  = [ 'LIBTIMECODE_DLL_EXPORTS' ]
+               defines  = [ 'LIBTIMECODE_DLL_EXPORTS' ],
+               install_path = bld.env['LIBDIR']
                )
 
 def shutdown():
