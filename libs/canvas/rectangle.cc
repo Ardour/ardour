@@ -147,7 +147,7 @@ Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {
 		Rect r = _rect.fix ();
-		_bounding_box = r;
+		_bounding_box = r.expand (_outline_width + 0.5);
 	}
 
 	_bounding_box_dirty = false;
