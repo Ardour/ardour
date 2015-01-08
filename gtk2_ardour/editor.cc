@@ -1911,7 +1911,6 @@ Editor::add_region_context_items (Gtk::Menu_Helpers::MenuList& edit_items)
     
     region_items.push_back (*manage (ActionManager::get_action_from_name ("export-region")->create_menu_item ()));
     region_items.back().set_label ("Export region...");
-    region_items.push_back (*manage (ActionManager::get_action_from_name ("analyze-region")->create_menu_item ()));
     edit_items.push_back (MenuElem (_("Region"), *region_menu));
     
     edit_items.push_back (SeparatorElem());
