@@ -487,7 +487,7 @@
     <Modifier name="ghost track midi fill" modifier="= alpha:0.228968"/>
     <Modifier name="inactive crossfade" modifier="= alpha:0.4666"/>
     <Modifier name="loop rectangle" modifier="= alpha:0.9764"/>
-    <Modifier name="measure line beat" modifier="= alpha:0.4627"/>
+    <Modifier name="measure line beat" modifier="= alpha:0.8"/>
     <Modifier name="midi frame base" modifier="= alpha:0.4"/>
     <Modifier name="midi note" modifier="= alpha:0.686905"/>
     <Modifier name="midi note velocity text" modifier="= alpha:0.4666"/>
