@@ -215,7 +215,6 @@ libardour_sources = [
         'unknown_processor.cc',
         'user_bundle.cc',
         'utils.cc',
-        'version.cc',
         'vumeterdsp.cc',
         'worker.cc'
 ]
@@ -241,11 +240,6 @@ def configure(conf):
     conf.load('compiler_cxx')
     conf.load('gas')
     # we don't use hard-coded micro versions with ardour, so hard code it to zero
-    autowaf.build_version_files(
-        path_prefix + 'ardour/version.h',
-        path_prefix + 'version.cc',
-        'libardour' + str(conf.env['MAJOR']), conf.env['MAJOR'], conf.env['MINOR'], 0,
-        'LIBARDOUR_API', 'ardour/libardour_visibility.h')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
                       atleast_version='0.3.2')

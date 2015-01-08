@@ -37,7 +37,6 @@
 #endif
 
 #include "ardour/revision.h"
-#include "ardour/version.h"
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/session_utils.h"
@@ -48,7 +47,6 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
-#include "version.h"
 #include "ardour_ui.h"
 #include "opts.h"
 #include "enums.h"

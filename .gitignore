@@ -60,33 +60,15 @@ tags
 /gtk2_ardour/ardev_common.sh
 /gtk2_ardour/*.bindings
 /gtk2_ardour/*.rc
-/gtk2_ardour/version.cc
-/gtk2_ardour/version.h
 
 # /libs/ardour/
-/libs/ardour/version.cc
-/libs/ardour/ardour/version.h
 /libs/ardour/revision.cc
 /libs/ardour/config_text.cc
-
-# /libs/canvas
-/libs/canvas/version.cc
-/libs/canvas/canvas/version.h
 
 # /libs/gtkmm2ext/
 /libs/gtkmm2ext/*.pot
 /libs/gtkmm2ext/*.mo
 /libs/gtkmm2ext/*.po
-/libs/gtkmm2ext/version.cc
-/libs/gtkmm2ext/gtkmm2ext/version.h
-
-# /libs/midi++2/
-/libs/midi++2/version.cc
-/libs/midi++2/midi++/version.h
-
-# /libs/pbd/
-/libs/pbd/version.cc
-/libs/pbd/pbd/version.h
 
 /libs/taglib/taglib/flacproperties.h
 /libs/taglib/taglib/apefooter.h

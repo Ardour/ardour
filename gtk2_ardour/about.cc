@@ -27,10 +27,7 @@
 #include "pbd/file_utils.h"
 
 #include "ardour/revision.h"
-#include "ardour/version.h"
 #include "ardour/filesystem_paths.h"
-
-#include "version.h"
 
 #include "about.h"
 #include "configinfo.h"
