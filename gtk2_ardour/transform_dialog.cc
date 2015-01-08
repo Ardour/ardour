@@ -179,6 +179,9 @@ set_spinner_for(Gtk::SpinButton&                     spinner,
 		spinner.set_digits(0);
 		break;
 	}
+	spinner.set_value(
+		std::min(spinner.get_adjustment()->get_upper(),
+		         std::max(spinner.get_adjustment()->get_lower(), spinner.get_value())));
 }
 
 void
