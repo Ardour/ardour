@@ -29,8 +29,8 @@
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
-      <menuitem action='bring-into-session'/>
       <menu name='Cleanup' action='Cleanup'>
+		<menuitem action='bring-into-session'/>
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
