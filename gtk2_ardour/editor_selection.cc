@@ -1741,10 +1741,10 @@ Editor::select_all_selectables_using_edit (bool after)
 	list<Selectable *> touched;
 
 	if (after) {
-		start = get_preferred_edit_position();
+		start = get_preferred_edit_position(false, true);
 		end = _session->current_end_frame();
 	} else {
-		if ((end = get_preferred_edit_position()) > 1) {
+		if ((end = get_preferred_edit_position(false, true)) > 1) {
 			start = 0;
 			end -= 1;
 		} else {
