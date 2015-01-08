@@ -272,7 +272,7 @@
     <ColorAlias name="midi note max" alias="color 52"/>
     <ColorAlias name="midi note mid" alias="color 57"/>
     <ColorAlias name="midi note min" alias="color 58"/>
-    <ColorAlias name="midi note selected" alias="color 59"/>
+    <ColorAlias name="midi note selected" alias="color 40"/>
     <ColorAlias name="midi note selected outline" alias="color 9"/>
     <ColorAlias name="midi note velocity text" alias="color 32"/>
     <ColorAlias name="midi patch change fill" alias="color 60"/>
