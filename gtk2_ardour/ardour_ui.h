@@ -790,6 +790,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
     int ambiguous_file (std::string file, std::vector<std::string> hits);
 
+    bool transport_button_press (GdkEventButton*, Glib::RefPtr<Gtk::Action>&);
+   
 	bool click_button_clicked (GdkEventButton *);
 
 	Gtk::Adjustment* _dsp_load_adjustment;

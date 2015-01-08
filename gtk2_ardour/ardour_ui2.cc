@@ -219,15 +219,16 @@ ARDOUR_UI::setup_transport ()
 	
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);
-	editor->get_waves_button ("transport_stop_button").set_related_action (act);
+    editor->get_waves_button ("transport_stop_button").signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::transport_button_press), act), false);
 
 	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
 	roll_button.set_related_action (act);
-	editor->get_waves_button ("transport_play_button").set_related_action (act);
+    editor->get_waves_button ("transport_play_button").signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::transport_button_press), act), false);
+
 
 	act = ActionManager::get_action (X_("Transport"), X_("Record"));
 	rec_button.set_related_action (act);
-	editor->get_waves_button ("transport_record_button").set_related_action (act);
+    editor->get_waves_button ("transport_record_button").signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::transport_button_press), act), false);
 
 	act = ActionManager::get_action (X_("Transport"), X_("GotoStart"));
 	goto_start_button.set_related_action (act);
@@ -239,8 +240,9 @@ ARDOUR_UI::setup_transport ()
 
 	act = ActionManager::get_action (X_("Transport"), X_("Loop"));
 	auto_loop_button.set_related_action (act);
-	editor->get_waves_button ("transport_loop_button").set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
+    editor->get_waves_button ("transport_loop_button").signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::transport_button_press), act), false);
+    
+    act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
 	play_selection_button.set_related_action (act);
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
 	midi_panic_button.set_related_action (act);
@@ -559,4 +561,10 @@ ARDOUR_UI::toggle_follow_edits ()
 	Config->set_follow_edits (tact->get_active ());
 }
 
-	
+bool
+ARDOUR_UI::transport_button_press (GdkEventButton*, Glib::RefPtr<Gtk::Action>& act)
+{
+    assert (act);
+    act->activate ();
+    return true;
+}
