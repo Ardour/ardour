@@ -65,6 +65,10 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
     
     if (session) {
         _amplitude_above_axis = session->config.get_wave_amlitude_zoom () * session->config.get_wave_zoom_factor ();
+        
+        if (_amplitude_above_axis < 1.0) {
+            _amplitude_above_axis = 1.0;
+        }
     }
 }
 
@@ -76,7 +80,7 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
     if ( abs(_amplitude_above_axis - app) > 0.01 ) {
         
         if (app < 1.0) {
-            _amplitude_above_axis = 1;
+            _amplitude_above_axis = 1.0;
         } else {
             _amplitude_above_axis = app;
         }
