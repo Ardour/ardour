@@ -31,6 +31,7 @@ public:
 
 	void draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin, 
 	           const ARDOUR::TempoMap::BBTPointList::const_iterator& end,
+	           unsigned                                              divisions,
 	           framecnt_t                                            leftmost_frame,
 	           framecnt_t                                            frame_rate);
 
@@ -39,7 +40,7 @@ public:
 
 private:
 	void draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
-	                 double                                                beat_density,
+	                 unsigned                                              divisions,
 	                 framecnt_t                                            leftmost_frame,
 	                 framecnt_t                                            frame_rate);
 

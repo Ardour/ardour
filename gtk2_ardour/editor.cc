@@ -2094,6 +2094,8 @@ Editor::set_snap_to (SnapType st)
 		break;
 	}
 
+	redisplay_tempo (false);
+
 	SnapChanged (); /* EMIT SIGNAL */
 }
 

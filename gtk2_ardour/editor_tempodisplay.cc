@@ -178,8 +178,9 @@ Editor::draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 	if (tempo_lines == 0) {
 		tempo_lines = new TempoLines (time_line_group, ArdourCanvas::LineSet::Vertical);
 	}
-	
-	tempo_lines->draw (begin, end, leftmost_frame, _session->frame_rate());
+
+	const unsigned divisions = get_grid_beat_divisions(leftmost_frame);
+	tempo_lines->draw (begin, end, divisions, leftmost_frame, _session->frame_rate());
 }
 
 void
