@@ -2541,7 +2541,10 @@ ARDOUR_UI::edit_metadata ()
 	SessionMetadataEditor dialog;
 	dialog.set_session (_session);
 	editor->ensure_float (dialog);
+	Keyboard::magic_widget_grab_focus ();
+	dialog.grab_focus ();
 	dialog.run ();
+	Keyboard::magic_widget_drop_focus ();
 }
 
 void
