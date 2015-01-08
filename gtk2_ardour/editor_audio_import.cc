@@ -175,10 +175,10 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 			// updating is still disabled
 			//message = string_compose(_("The session already contains a source file named %1. Do you want to update that file (and thus all regions using the file) or import this file as a new file?"),wave_name);
 			layout_name = "waves_how_to_import_dialog_1.xml";
-            message = string_compose (_("The session already contains a source file named %1.  Do you want to import %1 as a new file, or skip it?"), wave_name);
+            message = string_compose (_("The session already contains a source file named %1.  \nDo you want to import %1 as a new file, or skip it?"), wave_name);
 		} else {
             layout_name = "waves_how_to_import_dialog_2.xml";
-			message = string_compose (_("The session already contains a source file named %1.  Do you want to import %2 as a new source, or skip it?"), wave_name, wave_name);
+			message = string_compose (_("The session already contains a source file named %1.  \nDo you want to import %2 as a new source, or skip it?"), wave_name, wave_name);
 
 		}
         
