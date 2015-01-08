@@ -2208,6 +2208,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_widget_prelight)
 		     ));
 
+#ifdef TOOLTIPS_GOT_FIXED
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "use-tooltips",
@@ -2215,6 +2216,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_use_tooltips),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_use_tooltips)
 		     ));
+#endif
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
