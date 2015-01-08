@@ -572,7 +572,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_samples_per_pixel (framecnt_t);
 
 	Editing::MouseMode mouse_mode;
-	Editing::MouseMode pre_internal_mouse_mode;
 	Editing::SnapType  pre_internal_snap_type;
 	Editing::SnapMode  pre_internal_snap_mode;
 	Editing::SnapType  internal_snap_type;

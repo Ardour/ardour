@@ -680,7 +680,6 @@ Editor::Editor ()
 	_snap_mode = SnapOff;
 	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
-        pre_internal_mouse_mode = MouseObject;
         pre_internal_snap_type = _snap_type;
         pre_internal_snap_mode = _snap_mode;
         internal_snap_type = _snap_type;
@@ -2037,6 +2036,12 @@ void
 Editor::set_snap_to (SnapType st)
 {
 	unsigned int snap_ind = (unsigned int)st;
+
+	if (internal_editing()) {
+		internal_snap_type = st;
+	} else {
+		pre_internal_snap_type = st;
+	}
 
 	_snap_type = st;
 
