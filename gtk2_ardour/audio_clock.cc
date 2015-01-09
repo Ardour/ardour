@@ -287,25 +287,36 @@ AudioClock::set_colors ()
 void
 AudioClock::render (cairo_t* cr, cairo_rectangle_t* expose_area)
 {
+	int origx(0), origy(0);
+	
+	if (!get_visible_window ()) {
+		for (Gtk::Widget *parent = get_parent (); parent; parent = parent->get_parent ()) {
+			if (parent->get_has_window()) {
+				translate_coordinates (*parent, 0, 0, origx, origy);
+				break;
+			}
+		}
+	}
+
 	/* main layout: rounded rect, plus the text */
 
 	if (_need_bg) {
 		cairo_set_source_rgba (cr, bg_r, bg_g, bg_b, bg_a);
 		if (corner_radius) {
 			if (_left_layout) {
-				Gtkmm2ext::rounded_top_half_rectangle (cr, expose_area->x, expose_area->y, get_width(), upper_height, corner_radius);
+				Gtkmm2ext::rounded_top_half_rectangle (cr, origx, origy, get_width(), upper_height, corner_radius);
 			} else {
-				Gtkmm2ext::rounded_rectangle (cr, expose_area->x, expose_area->y, get_width(), upper_height, corner_radius);
+				Gtkmm2ext::rounded_rectangle (cr, origx, origy, get_width(), upper_height, corner_radius);
 			}
 		} else {
-			cairo_rectangle (cr, expose_area->x, expose_area->y, get_width(), upper_height);
+			cairo_rectangle (cr, origx, origy, get_width(), upper_height);
 		}
 		cairo_fill (cr);
 	}
 
 	cairo_move_to (cr, 
-				   (get_width() - layout_width) / 2.0 + expose_area->x,
-				   (upper_height - layout_height) / 2.0 + expose_area->y);
+				   (get_width() - layout_width) / 2.0 + origx,
+				   (upper_height - layout_height) / 2.0 + origy);
 
 	pango_cairo_show_layout (cr, _layout->gobj());
 
@@ -324,15 +335,15 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t* expose_area)
 			if (_need_bg) {
 				if (corner_radius) {
 					Gtkmm2ext::rounded_bottom_half_rectangle (cr,
-															  expose_area->x, 
-															  expose_area->y + upper_height + separator_height,
+															  origx, 
+															  origy + upper_height + separator_height,
 															  left_rect_width + (separator_height == 0 ? corner_radius : 0),
 															  h,
 															  corner_radius);
 				} else {
 					cairo_rectangle (cr, 
-									 expose_area->x,
-									 expose_area->y + upper_height + separator_height,
+									 origx,
+									 origy + upper_height + separator_height,
 									 left_rect_width,
 									 h);
 				}
@@ -340,22 +351,22 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t* expose_area)
 			}
 
 			cairo_move_to (cr,
-						   expose_area->x + x_leading_padding,
-						   expose_area->y + upper_height + separator_height + ((h - info_height)/2.0));
+						   origx + x_leading_padding,
+						   origy + upper_height + separator_height + ((h - info_height)/2.0));
 			pango_cairo_show_layout (cr, _left_layout->gobj());
 
 			if (_need_bg) {
 				if (corner_radius) {
 					Gtkmm2ext::rounded_bottom_half_rectangle (cr,
-															  expose_area->x + left_rect_width + separator_height,
-															  expose_area->y + upper_height + separator_height,
+															  origx + left_rect_width + separator_height,
+															  origy + upper_height + separator_height,
 															  get_width() - separator_height - left_rect_width,
 															  h,
 															  corner_radius);
 				} else {
 					cairo_rectangle (cr,
-									 expose_area->x + left_rect_width + separator_height,
-									 expose_area->y + upper_height + separator_height,
+									 origx + left_rect_width + separator_height,
+									 origy + upper_height + separator_height,
 									 get_width() - separator_height - left_rect_width,
 									 h);
 				}
@@ -379,12 +390,12 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t* expose_area)
 					x = x_leading_padding + left_rect_width + separator_height;
 				}
 				cairo_move_to (cr,
-							   expose_area->x + x,
-							   expose_area->y + upper_height + separator_height + ((h - info_height)/2.0));
+							   origx + x,
+							   origy + upper_height + separator_height + ((h - info_height)/2.0));
 			} else {
 				cairo_move_to (cr,
-							   expose_area->x + x_leading_padding + left_rect_width + separator_height,
-							   expose_area->y + upper_height + separator_height + ((h - info_height)/2.0));
+							   origx + x_leading_padding + left_rect_width + separator_height,
+							   origy + upper_height + separator_height + ((h - info_height)/2.0));
 			}
 			pango_cairo_show_layout (cr, _right_layout->gobj());
 
@@ -394,15 +405,15 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t* expose_area)
 			if (_need_bg) {
 				if (corner_radius) {
 					Gtkmm2ext::rounded_bottom_half_rectangle (cr,
-															  expose_area->x,
-															  expose_area->y + upper_height + separator_height,
+															  origx,
+															  origy + upper_height + separator_height,
 															  get_width(),
 															  h,
 															  corner_radius);
 				} else {
 					cairo_rectangle (cr,
-									 expose_area->x,
-									 expose_area->y + upper_height + separator_height,
+									 origx,
+									 origy + upper_height + separator_height,
 									 get_width(),
 									 h);
 				}
@@ -430,8 +441,8 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t* expose_area)
 
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				cairo_rectangle (cr,
-								 expose_area->x + min (get_width() - 2.0, (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
-								 expose_area->y + (upper_height - layout_height)/2.0,
+								 origx + min (get_width() - 2.0, (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
+								 origy + (upper_height - layout_height)/2.0,
 								 2.0,
 								 cursor.get_height()/PANGO_SCALE);
 				cairo_fill (cr);
@@ -442,8 +453,8 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t* expose_area)
 			if (input_string.empty()) {
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				cairo_rectangle (cr,
-								 expose_area->x + (get_width()/2.0),
-								 expose_area->y + (upper_height - layout_height)/2.0,
+								 origx + (get_width()/2.0),
+								 origy + (upper_height - layout_height)/2.0,
 								 2.0,
 								 upper_height);
 				cairo_fill (cr);
