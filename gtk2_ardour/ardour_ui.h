@@ -398,6 +398,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void goto_editor_window ();
 	void toggle_mixer_bridge_view ();
 	void toggle_meterbridge ();
+    void show_meterbridge_view ();
 
 	int  setup_windows ();
 	void setup_transport ();

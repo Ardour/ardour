@@ -351,6 +351,8 @@ ARDOUR_UI::goto_editor_window ()
 	}
 
 	editor->show_window ();
+    show_meterbridge_view ();
+    
 	editor->present ();
 	/* mixer should now be on top */
 	WM::Manager::instance().set_transient_for (editor);
@@ -388,18 +390,24 @@ ARDOUR_UI::toggle_mixer_bridge_view ()
 void
 ARDOUR_UI::toggle_meterbridge ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));
+    show_meterbridge_view ();
+}
+
+void
+ARDOUR_UI::show_meterbridge_view ()
+{
+    Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));
 	if (!act) {
 		return;
 	}
-
+    
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
+    
 	Glib::RefPtr<Action> mixer_act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
 	if (!mixer_act) {
 		return;
 	}
-
+    
 	Glib::RefPtr<ToggleAction> mixer_tact = Glib::RefPtr<ToggleAction>::cast_dynamic (mixer_act);
 	if (tact->get_active()) {
 		mixer_tact->set_active(false);
