@@ -60,7 +60,7 @@ class AutomationStreamView : public StreamView
 
 	void clear ();
 
-	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*> &);
+	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*> &, bool within = false);
 	void set_selected_points (PointSelection &);
 
 	std::list<boost::shared_ptr<AutomationLine> > get_lines () const;

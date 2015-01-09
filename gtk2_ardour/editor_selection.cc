@@ -1791,7 +1791,7 @@ Editor::select_all_selectables_using_edit (bool after)
 }
 
 void
-Editor::select_all_selectables_between (bool /*within*/)
+Editor::select_all_selectables_between (bool within)
 {
 	framepos_t start;
 	framepos_t end;
@@ -1821,7 +1821,7 @@ Editor::select_all_selectables_between (bool /*within*/)
 		if ((*iter)->hidden()) {
 			continue;
 		}
-		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
+		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched, within);
 	}
 
 	begin_reversible_selection_op(_("Select all Selectables Between"));

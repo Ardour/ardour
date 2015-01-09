@@ -548,7 +548,7 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
  *  @param result Filled in with selectable things.
  */
 void
-StreamView::get_selectables (framepos_t start, framepos_t end, double top, double bottom, list<Selectable*>& results)
+StreamView::get_selectables (framepos_t start, framepos_t end, double top, double bottom, list<Selectable*>& results, bool within)
 {
 	if (_trackview.editor().internal_editing()) {
 		return;  // Don't select regions with an internal tool
@@ -584,10 +584,17 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 			layer_t const l = (*i)->region()->layer ();
 			layer_ok = (min_layer <= l && l <= max_layer);
 		}
-
-		if ((*i)->region()->coverage (start, end) != Evoral::OverlapNone && layer_ok) {
-			results.push_back (*i);
+		
+		if (within) {
+			if ((*i)->region()->coverage (start, end) == Evoral::OverlapExternal && layer_ok) {
+				results.push_back (*i);
+			}
+		} else {
+			if ((*i)->region()->coverage (start, end) != Evoral::OverlapNone && layer_ok) {
+				results.push_back (*i);
+			}
 		}
+		
 	}
 }
 

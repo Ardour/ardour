@@ -1342,7 +1342,7 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
  * @param results List to add things to.
  */
 void
-RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results)
+RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
 	double speed = 1.0;
 
@@ -1354,14 +1354,14 @@ RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top
 	framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
 
 	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
-		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
 	}
 
 	/* pick up visible automation tracks */
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
-			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
 		}
 	}
 }

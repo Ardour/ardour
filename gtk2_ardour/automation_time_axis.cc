@@ -693,7 +693,7 @@ AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float t
 }
 
 void
-AutomationTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results)
+AutomationTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool /*within*/)
 {
 	if (!_line && !_view) {
 		return;
