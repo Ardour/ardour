@@ -104,7 +104,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	beat_density = (beats * 10.0f) / lines.canvas()->width();
 
-	if (beat_density > 4.0f) {
+	if (beat_density > 2.0f) {
 		/* if the lines are too close together, they become useless */
 		lines.clear ();
 		return;
