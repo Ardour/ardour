@@ -547,26 +547,28 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
-		if (press) {
-			if (eff_mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
-			} else {
-				/* don't change the selection unless the
-				   clicked track is not currently selected. if
-				   so, "collapse" the selection to just this
-				   track
-				*/
-				if (!selection->selected (clicked_axisview)) {
-					set_selected_track_as_side_effect (Selection::Set);
-				}
-			}
-		} else {
-			if (eff_mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
-			}
-		}
-		break;
-
+        if (event->button.button == 1) {
+            if (press) {
+                if (eff_mouse_mode != MouseRange) {
+                    set_selected_regionview_from_click (press, op);
+                } else {
+                    /* don't change the selection unless the
+                     clicked track is not currently selected. if
+                     so, "collapse" the selection to just this
+                     track
+                     */
+                    if (!selection->selected (clicked_axisview)) {
+                        set_selected_track_as_side_effect (Selection::Set);
+                    }
+                }
+            } else {
+                if (eff_mouse_mode != MouseRange) {
+                    set_selected_regionview_from_click (press, op);
+                }
+            }
+        }
+        break;
+            
  	case RegionViewNameHighlight:
  	case RegionViewName:
 	case LeftFrameHandle:
@@ -579,30 +581,30 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case FadeOutItem:
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
-		if (get_smart_mode() || eff_mouse_mode != MouseRange) {
-			set_selected_regionview_from_click (press, op);
-		} else if (event->type == GDK_BUTTON_PRESS) {
-			set_selected_track_as_side_effect (op);
-		}
-		break;
+            if (get_smart_mode() || eff_mouse_mode != MouseRange) {
+                set_selected_regionview_from_click (press, op);
+            } else if (event->type == GDK_BUTTON_PRESS) {
+                set_selected_track_as_side_effect (op);
+            }
+        break;
 
 	case ControlPointItem:
-		set_selected_track_as_side_effect (op);
-		if (eff_mouse_mode != MouseRange) {
-			set_selected_control_point_from_click (press, op);
-		}
-		break;
+            set_selected_track_as_side_effect (op);
+            if (eff_mouse_mode != MouseRange) {
+                set_selected_control_point_from_click (press, op);
+            }
+        break;
 
 	case StreamItem:
-		/* for context click, select track */
-		if (event->button.button == 3) {
-			selection->clear_tracks ();
-			set_selected_track_as_side_effect (op);
-		}
-		break;
+            /* for context click, select track */
+            if (event->button.button == 3) {
+                selection->clear_tracks ();
+                set_selected_track_as_side_effect (op);
+            }
+        break;
 
 	case AutomationTrackItem:
-		set_selected_track_as_side_effect (op);
+            set_selected_track_as_side_effect (op);
 		break;
 
 	default:
@@ -1575,6 +1577,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case RegionItem:
+                // make selection and fall down
+                set_selected_regionview_from_click (false/*button release handler*/, Selection::Set);
 			case RegionViewNameHighlight:
 			case RegionViewName:
 				popup_track_context_menu (1, event->button.time, item_type, false);
