@@ -381,6 +381,8 @@ LTC_Slave::process_ltc(framepos_t const /*now*/)
 			timecode_negative_offset, timecode_offset
 			);
 
+		ltc_frame += ltc_slave_latency.max + session.worst_playback_latency();
+
 		framepos_t cur_timestamp = frame.off_end + 1;
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC F: %1 LF: %2  N: %3 L: %4\n", ltc_frame, last_ltc_frame, cur_timestamp, last_timestamp));
 		if (frame.off_end + 1 <= last_timestamp || last_timestamp == 0) {
@@ -463,7 +465,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 			reset();
 		}
 
-		parse_ltc(nframes, in, now - ltc_slave_latency.max );
+		parse_ltc(nframes, in, now);
 		process_ltc(now);
 	}
 
