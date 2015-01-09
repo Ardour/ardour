@@ -286,8 +286,9 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 	if (dir > 0 || pos > 0) {
 		pos += dir;
 	}
-
-	framepos_t const target = get_region_boundary (pos, dir, true, false);
+    TrackViewList track_views = selection->time.tracks_in_range.filter_to_unique_playlists();
+    
+	framepos_t const target = find_next_region_boundary (pos, dir, track_views);
 	if (target < 0) {
 		return;
 	}
@@ -3105,12 +3106,7 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 	boost::shared_ptr<Playlist> playlist;
 	TrackViewList ts;
 
-	if (selection->tracks.empty()) {
-		ts = track_views.filter_to_unique_playlists();
-	} else {
-		ts = selection->tracks.filter_to_unique_playlists ();
-	}
-
+    ts = selection->time.tracks_in_range.filter_to_unique_playlists ();
 	sort_track_selection (ts);
 
 	for (TrackSelection::iterator i = ts.begin(); i != ts.end(); ++i) {
@@ -3763,7 +3759,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		return;
 	}
 
-	TrackSelection views = selection->tracks;
+	TrackViewList views = selection->time.tracks_in_range.filter_to_unique_playlists();
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
