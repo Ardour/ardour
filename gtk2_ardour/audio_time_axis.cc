@@ -31,10 +31,10 @@
 #include "pbd/stl_delete.h"
 #include "pbd/memento_command.h"
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/bindable_button.h>
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/selector.h"
+#include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/utils.h"
 
 #include "ardour/event_type_map.h"
 #include "ardour/pannable.h"
