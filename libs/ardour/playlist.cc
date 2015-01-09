@@ -210,6 +210,19 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 
 		region = *i;
 
+        /* coverage will return OverlapStart if the start/end coincides
+         with the end/start point. we do not add such a region to the new playlist,
+         so catch this special case.
+         */
+        
+        if (region->first_frame() >= end) {
+            continue;
+        }
+        
+        if (region->last_frame() <= start) {
+            continue;
+        }
+        
 		overlap = region->coverage (start, end);
 
 		switch (overlap) {
@@ -914,7 +927,7 @@ Playlist::flush_notifications (bool from_undo)
 
 			 current = *i;
 
-			 if (current->first_frame() >= start && current->last_frame() < end) {
+			 if (current->first_frame() >= start && current->last_frame() <= end) {
 
 				 if (cutting) {
 					 remove_region_internal (current);
@@ -923,14 +936,18 @@ Playlist::flush_notifications (bool from_undo)
 				 continue;
 			 }
 
-			 /* coverage will return OverlapStart if the start coincides
-			    with the end point. we do not partition such a region,
+			 /* coverage will return OverlapStart if the start/end coincides
+			    with the end/start point. we do not partition such a region,
 			    so catch this special case.
 			 */
 
 			 if (current->first_frame() >= end) {
 				 continue;
 			 }
+             
+             if (current->last_frame() <= start) {
+                 continue;
+             }
 
 			 if ((overlap = current->coverage (start, end)) == Evoral::OverlapNone) {
 				 continue;
