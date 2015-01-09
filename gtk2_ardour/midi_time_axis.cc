@@ -144,7 +144,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	*/
 	RouteTimeAxisView::set_route (rt);
 
-	_view->apply_color (_color, StreamView::RegionColor);
+	_view->apply_color (gdk_color_to_rgba (color()), StreamView::RegionColor);
 
 	subplugin_menu.set_name ("ArdourContextMenu");
 
