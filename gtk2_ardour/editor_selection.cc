@@ -1541,6 +1541,12 @@ Editor::set_selection_from_region ()
 	}
 
 	selection->set (selection->regions.start(), selection->regions.end_frame());
+	
+	//we must now select tracks, because otherwise set_selection_from_region would appear to do nothing
+	//perhaps too drastic; perhaps the user really only wants the region's track selected
+	//but I can't think of any use-case for that (why wouldn't you just select the region?)
+	select_all_tracks();	
+	
 	if (!Profile->get_sae()) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
