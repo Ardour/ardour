@@ -205,12 +205,8 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
 	_tooltip.target_stop_drag ();
 	accumulated_delta = 0;
 	detented = false;
-
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier)) {
-		_panner->reset ();
-	} else {
-		StopGesture ();
-	}
+    
+	StopGesture ();
 
 	return true;
 }
