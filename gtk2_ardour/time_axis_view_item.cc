@@ -694,27 +694,17 @@ TimeAxisViewItem::set_name_text_color ()
 ArdourCanvas::Color
 TimeAxisViewItem::get_fill_color () const
 {
-	ArdourCanvas::Color c;
 	const std::string mod_name = (_dragging ? "dragging region" : fill_color_name);
 
 	if (_selected) {
-
-		c = ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
-
-	} else {
-
-		if (_recregion) {
-			c = ARDOUR_UI::config()->color ("recording rect");
-		} else {
-			if ((!ARDOUR_UI::config()->get_show_name_highlight() || high_enough_for_name) && !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
-				c = ARDOUR_UI::config()->color_mod (fill_color_name, mod_name);
-			} else {
-				c = ARDOUR_UI::config()->color_mod (fill_color, mod_name);
-			}
-		}
+		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
+	} else if (_recregion) {
+		return ARDOUR_UI::config()->color ("recording rect");
+	} else if ((!ARDOUR_UI::config()->get_show_name_highlight() || high_enough_for_name) &&
+	           !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+		return ARDOUR_UI::config()->color_mod (fill_color_name, mod_name);
 	}
-
-	return c;
+	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
 }
 
 /**

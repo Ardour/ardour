@@ -3257,7 +3257,8 @@ MidiRegionView::get_fill_color() const
 	                              "midi frame base");
 	if (_selected) {
 		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
-	} else if (high_enough_for_name || !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+	} else if ((!ARDOUR_UI::config()->get_show_name_highlight() || high_enough_for_name) &&
+	           !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 		return ARDOUR_UI::config()->color_mod ("midi frame base", mod_name);
 	}
 	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
