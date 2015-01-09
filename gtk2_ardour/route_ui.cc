@@ -127,6 +127,8 @@ RouteUI::init ()
     solo_safe_check = 0;
     solo_isolated_check = 0;
 	_mute_release = 0;
+    _momentary_solo = false;
+    _was_muted_before_momentary_soloed = false;
 	denormal_menu_item = 0;
     step_edit_item = 0;
 	multiple_mute_change = false;
@@ -467,12 +469,16 @@ RouteUI::solo_press(GdkEventButton* ev)
        This is questionable design, but here's how we do it.
     */
 	int control_modifier;
+    int alt_modifier;
 #ifdef __APPLE__
     control_modifier = Keyboard::SecondaryModifier; /* Control */
+    alt_modifier = Keyboard::Level4Modifier; /* Alt */
 #else
     /* Anything except OS X */
     control_modifier = Keyboard::PrimaryModifier;  /* Control */
+    alt_modifier = Keyboard::SecondaryModifier; /* Alt */
 #endif
+    int momentary_mask = alt_modifier | Keyboard::TertiaryModifier; /* Alt+Shift */
 
     if (Keyboard::is_context_menu_event (ev))
     {
@@ -484,13 +490,40 @@ RouteUI::solo_press(GdkEventButton* ev)
     {
 		if ( ev->button == 1 )
         {
-            if (Keyboard::modifier_state_equals (ev->state, control_modifier)) {
-
+            if (Keyboard::modifier_state_equals (ev->state, control_modifier))
+            {
                 // control-click: toggle solo isolated status
 
 				_route->set_solo_isolated (!_route->solo_isolated(), this);
 			} else
+            if (Keyboard::modifier_state_equals (ev->state, alt_modifier))
             {
+                // alt-click: toogle Solo X-Or
+                
+                DisplaySuspender ds;
+				if (Config->get_solo_control_is_listen_control()) {
+					_session->set_listen (_session->get_routes(), false,  Session::rt_cleanup, true);
+				} else {
+					_session->set_solo (_session->get_routes(), false,  Session::rt_cleanup, true);
+				}
+                
+                boost::shared_ptr<RouteList> rl (new RouteList);
+				rl->push_back (route());
+                
+				if (Config->get_solo_control_is_listen_control()) {
+					_session->set_listen (rl, true);
+				} else {
+					_session->set_solo (rl, true);
+				}
+            } else
+            {
+                if (Keyboard::modifier_state_equals (ev->state, momentary_mask))
+                {
+                    // alt+shift-click: toogle momentary solo
+                    _momentary_solo = true;
+                    _was_muted_before_momentary_soloed = _route->muted ();
+                }
+                
 				/* click: solo this route */
 
 				boost::shared_ptr<RouteList> rl (new RouteList);
@@ -503,7 +536,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 					_session->set_solo (rl, !_route->self_soloed());
 				}
 			}
-		}
+		} // if ( ev->button == 1 )
 	}
 
 	return true;
@@ -512,6 +545,29 @@ RouteUI::solo_press(GdkEventButton* ev)
 bool
 RouteUI::solo_release (GdkEventButton*)
 {
+    if ( _momentary_solo )
+    {
+        boost::shared_ptr<RouteList> rl (new RouteList);
+        rl->push_back (route());
+        
+        if (Config->get_solo_control_is_listen_control()) {
+            _session->set_listen (rl, false);
+        } else {
+            _session->set_solo (rl, false);
+        }
+        
+        _momentary_solo = false;
+        
+        if ( _was_muted_before_momentary_soloed )
+        {
+            boost::shared_ptr<RouteList> rl (new RouteList);
+            rl->push_back (_route);
+            
+            _session->set_mute (rl, true);
+            _was_muted_before_momentary_soloed = false;
+        }
+    }
+
 	return true;
 }
 
