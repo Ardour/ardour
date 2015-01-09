@@ -208,7 +208,7 @@
     <ColorAlias name="gtk_solo" alias="color 91"/>
     <ColorAlias name="gtk_somewhat_bright_indicator" alias="color 89"/>
     <ColorAlias name="gtk_texts" alias="color 50"/>
-    <ColorAlias name="gtk_track_header_inactive" alias="color 84"/>
+    <ColorAlias name="gtk_track_header_inactive" alias="color 34"/>
     <ColorAlias name="gtk_track_header_selected" alias="color 40"/>
     <ColorAlias name="image track" alias="color 31"/>
     <ColorAlias name="inactive crossfade" alias="color 32"/>
