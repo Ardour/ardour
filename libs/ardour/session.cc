@@ -4523,7 +4523,9 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-					ms->append_event_frames(lock, *i, ms->timeline_position());
+					Evoral::Event<framepos_t> ev = *i;
+					ev.set_time(ev.time() - position);
+					ms->append_event_frames(lock, ev, ms->timeline_position());
 				}
 			}
 		}
