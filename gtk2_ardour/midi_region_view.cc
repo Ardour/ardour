@@ -2693,6 +2693,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				}
 			}
 
+			len = std::max(Evoral::Beats(1 / 512.0), len);
+
 			char buf[16];
 			snprintf (buf, sizeof (buf), "%.3g beats", len.to_double());
 			show_verbose_cursor (buf, 0, 0);
@@ -2761,12 +2763,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!at_front) {
-			const Evoral::Beats len = x_beats - canvas_note->note()->time();
-
-			if (!!len) {
-				/* XXX convert to beats */
-				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
-			}
+			const Evoral::Beats len = std::max(Evoral::Beats(1 / 512.0),
+			                                   x_beats - canvas_note->note()->time());
+			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 		}
 
 		delete resize_rect;
