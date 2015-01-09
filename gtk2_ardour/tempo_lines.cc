@@ -72,7 +72,7 @@ TempoLines::draw_ticks (const ARDOUR::TempoMap::BBTPointList::const_iterator& b,
 		}
 
 		/* draw line with alpha corresponding to coarsest level */
-		const uint8_t    a = max(0, (int)rint(UINT_RGBA_A(base) / (0.75 * log2(level))));
+		const uint8_t    a = max(8, (int)rint(UINT_RGBA_A(base) / (0.8 * log2(level))));
 		const uint32_t   c = UINT_RGBA_CHANGE_A(base, a);
 		const framepos_t f = b->frame + (l * (fpb / (double)divisions));
 		if (f > leftmost_frame) {
