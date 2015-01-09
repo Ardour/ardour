@@ -1,25 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <TimeInfoBox>
-  <HBox id="selection_start_home"
-          x="52"
-          y="5"/>
-  <HBox height="6"/>
-  <HBox id="selection_end_home"
-          x="52"
-          y="21"/>
+  <HBox id="selection_start_home"/>
   <HBox height="5"/>
-  <HBox id="selection_length_home"
-          x="52"
-          y="37"/>
+  <HBox id="selection_end_home"/>
+  <HBox height="4"/>
+  <HBox id="selection_length_home"/>
   <HBox id="punch_start_home"
-        width="66"
-        height="10"
-        x="118"
-        y="0" ui.orphan="true"/>
+        ui.orphan="true"/>
   <HBox id="punch_end_home"
-        width="66"
-        height="10"
-        x="118"
-        y="10" ui.orphan="true"/>
+        ui.orphan="true"/>
 </TimeInfoBox>
