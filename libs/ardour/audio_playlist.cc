@@ -85,19 +85,6 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, fram
 		framecnt_t fade_in = 64;
 		framecnt_t fade_out = 64;
 
-        /* coverage will return OverlapStart if the start/end coincides
-         with the end/start point. we do not add such a region to the new playlist,
-         so catch this special case.
-         */
-        
-        if (region->first_frame() >= end) {
-            continue;
-        }
-        
-        if (region->last_frame() <= start) {
-            continue;
-        }
-        
 		switch (region->coverage (start, end)) {
 		case Evoral::OverlapNone:
 			continue;
