@@ -55,9 +55,17 @@ WavesZoomControl::render (cairo_t* cr, cairo_rectangle_t*)
 		break;
 
 	case StateSliding:
-		pixbuf = _state_sliding_pixbuf;
+	{
+		double current_zoom = _adjustment.get_value ();
+		if (current_zoom < _begin_motion_zoom) {
+			pixbuf = _state_decreasing_zoom_pixbuf;
+		} else if (current_zoom > _begin_motion_zoom) {
+			pixbuf = _state_increasing_zoom_pixbuf;
+		} else {
+			pixbuf = _state_sliding_pixbuf;
+		}
 		break;
-
+	}
 	case StateButtonUpActive:
 		pixbuf = _state_increasing_zoom_pixbuf;
 		break;
@@ -173,70 +181,19 @@ WavesZoomControl::on_motion_notify_event (GdkEventMotion* ev)
 	case StateButtonDownActive:
 		break;
 	case StateSliding:
-		_adjustment.set_value (std::max (std::min (_begin_motion_zoom + _adjustment.get_step_increment () * (_begin_motion_y - ev->y),
-												   _adjustment.get_upper ()),
-										 _adjustment.get_lower ()));
+	{
+		double zoom_factor = std::max (std::min (_begin_motion_zoom + _adjustment.get_step_increment () * (_begin_motion_y - ev->y),
+												 _adjustment.get_upper ()),
+									   _adjustment.get_lower ());
+		_adjustment.set_value (zoom_factor);
+		queue_draw ();
 		break;
+	}
 	default:
-		dbg_msg("WavesZoomControl::on_enter_notify_event () : Unexpected state of WavesZoomControl!");
+		dbg_msg("WavesZoomControl::on_motion_notify_event () : Unexpected state of WavesZoomControl!");
 		break;
 	}
 	return true;
-}
-
-bool
-WavesZoomControl::on_enter_notify_event (GdkEventCrossing* ev)
-{
-	switch (_state) {
-	case StateIdle:
-		break;
-
-	case StateSliding:
-		break;
-
-	case StateButtonUpLeft:
-		_state = StateButtonUpActive;
-		queue_draw ();
-		break;
-
-	case StateButtonDownLeft:
-		_state = StateButtonDownActive;
-		queue_draw ();
-		break;
-
-	default:
-		dbg_msg("WavesZoomControl::on_enter_notify_event () : Unexpected state of WavesZoomControl!");
-		break;
-	}
-
-	return CairoWidget::on_enter_notify_event (ev);
-}
-
-bool
-WavesZoomControl::on_leave_notify_event (GdkEventCrossing* ev)
-{
-	switch (_state) {
-	case StateIdle:
-		break;
-
-	case StateSliding:
-		break;
-
-	case StateButtonUpActive:
-		_state = StateButtonUpLeft;
-		queue_draw ();
-		break;
-
-	case StateButtonDownActive:
-		_state = StateButtonDownLeft;
-		queue_draw ();
-		break;
-
-	default:
-		dbg_msg("WavesZoomControl::on_leave_notify_event () : Unexpected state of WavesZoomControl!");
-		break;
-	}
-	return CairoWidget::on_leave_notify_event (ev);
 }
 
 WavesZoomControl::ControlArea
