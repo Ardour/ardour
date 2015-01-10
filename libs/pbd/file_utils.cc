@@ -377,6 +377,13 @@ remove_extension (const std::string& p)
 	return pos == string::npos ? p : string(p.c_str(), p.c_str() + pos);
 }
 
+std::string
+filename_no_extension (const std::string& p)
+{
+	std::string base = Glib::path_get_basename (p);
+	return remove_extension (base);
+}
+
 bool
 equivalent_paths (const std::string& a, const std::string& b)
 {
