@@ -138,7 +138,7 @@ style "default" = "medium_text"
   GtkMenu             :: vertical-offset                  = 0                 # [               0 ]          When the menu is a submenu, position it this number of pixels offset vertically.
   GtkMenu             :: vertical-padding                 = 0                 # [               0 ] ( >= 0 ) Extra space at the top and bottom of the menu.
 
-  GtkMenuItem         :: arrow-scaling                    = 0.1               # [             0.8 ] ( 0.2  ) Amount of space used up by arrow, relative to the menu item's font size.
+  GtkMenuItem         :: arrow-scaling                    = 0.7               # [             0.8 ] ( 0.2  ) Amount of space used up by arrow, relative to the menu item's font size.
   GtkMenuItem         :: arrow-spacing                    = 10                # [              10 ] ( >= 0 ) Space between label and arrow.
   GtkMenuItem         :: horizontal-padding               = 3                 # [               3 ] ( >= 0 ) Padding to left and right of the menu item.
   GtkMenuItem         :: selected-shadow-type             = GTK_SHADOW_NONE   # [ GTK_SHADOW_NONE ]          Shadow type when item is selected.
