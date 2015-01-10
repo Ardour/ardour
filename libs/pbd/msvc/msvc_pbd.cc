@@ -262,6 +262,25 @@ trunc(double x)
 	return (floor(x));
 }
 
+//***************************************************************
+//
+//	log2()
+//
+// Emulates C99 log2() using log().
+//
+//	Returns:
+//
+//    On Success: The binary (base-2) logarithm of 'x'
+//                (e.g. log2(1024) == 10).
+//    On Failure: None, except that calling log(x) should generate
+//                an appropriate error for us (such as ERANGE etc).
+//
+LIBPBD_API double PBD_APICALLTYPE
+log2(double x)
+{
+	return (log(x) / log((double)2.0));
+}
+
 namespace PBD {
 
 //***************************************************************

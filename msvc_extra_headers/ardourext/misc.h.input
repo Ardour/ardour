@@ -254,6 +254,10 @@ inline int64_t abs(int64_t val) throw()
 #define rint(value)  round(value)
 #if !defined(LIBPBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
 extern  double round(double x);
+
+// log2().... MSVC doesn't offer the C99 function 'log2()'
+// so let's emulate it.
+extern  double log2(double x);
 #endif
 
 #endif /* __ardour_msvc_extensions_h__ */
