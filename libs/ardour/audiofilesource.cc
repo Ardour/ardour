@@ -31,7 +31,6 @@
 #include <errno.h>
 
 #include "pbd/convert.h"
-#include "pbd/basename.h"
 #include "pbd/file_utils.h"
 #include "pbd/mountpoint.h"
 #include "pbd/stl_delete.h"
@@ -230,7 +229,7 @@ AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 string
 AudioFileSource::broken_peak_path (string audio_path)
 {
-	return _session.peak_path (basename_nosuffix (audio_path));
+	return _session.peak_path (filename_no_extension (audio_path));
 }
 
 string

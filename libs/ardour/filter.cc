@@ -20,7 +20,7 @@
 #include <time.h>
 #include <cerrno>
 
-#include "pbd/basename.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/analyser.h"
 #include "ardour/audiofilesource.h"
@@ -46,7 +46,7 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 
 	for (uint32_t i = 0; i < region->n_channels(); ++i) {
 
-		string name = PBD::basename_nosuffix (names[i]);
+		string name = PBD::filename_no_extension (names[i]);
 
 		/* remove any existing version of suffix by assuming it starts
 		   with some kind of "special" character.

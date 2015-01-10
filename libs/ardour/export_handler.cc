@@ -25,6 +25,7 @@
 #include <glibmm/convert.h>
 
 #include "pbd/convert.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/audiofile_tagger.h"
 #include "ardour/debug.h"
@@ -37,7 +38,6 @@
 #include "ardour/soundcloud_upload.h"
 #include "ardour/system_exec.h"
 #include "pbd/openuri.h"
-#include "pbd/basename.h"
 #include "ardour/session_metadata.h"
 
 #include "i18n.h"
@@ -326,7 +326,7 @@ ExportHandler::finish_timespan ()
 			std::map<char, std::string> subs {
 				{ 'f', filename },
 				{ 'd', Glib::path_get_dirname(filename)  + G_DIR_SEPARATOR },
-				{ 'b', PBD::basename_nosuffix(filename) },
+				{ 'b', PBD::filename_no_extension(filename) },
 				...
 			};
 #endif
@@ -335,7 +335,7 @@ ExportHandler::finish_timespan ()
 			std::map<char, std::string> subs;
 			subs.insert (std::pair<char, std::string> ('f', filename));
 			subs.insert (std::pair<char, std::string> ('d', Glib::path_get_dirname (filename) + G_DIR_SEPARATOR));
-			subs.insert (std::pair<char, std::string> ('b', PBD::basename_nosuffix (filename)));
+			subs.insert (std::pair<char, std::string> ('b', PBD::filename_no_extension (filename)));
 			subs.insert (std::pair<char, std::string> ('s', session.path ()));
 			subs.insert (std::pair<char, std::string> ('n', session.name ()));
 
@@ -361,7 +361,7 @@ ExportHandler::finish_timespan ()
 						filename, soundcloud_username, soundcloud_password, token) );
 			std::string path = soundcloud_uploader->Upload (
 					filename,
-					PBD::basename_nosuffix(filename), // title
+					PBD::filename_no_extension(filename), // title
 					token,
 					soundcloud_make_public,
 					soundcloud_downloadable,

@@ -19,8 +19,8 @@
 
 #include <inttypes.h>
 
-#include "pbd/basename.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
@@ -65,7 +65,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 			   and store the ancestral name of sources so multiple clones
 			   generates reasonable names that don't have too many suffixes. */
 			const std::string ancestor_name = mr->sources().front()->ancestor_name();
-			const std::string base          = PBD::basename_nosuffix(ancestor_name);
+			const std::string base          = PBD::filename_no_extension(ancestor_name);
 
 			boost::shared_ptr<MidiSource> source = mr->session().create_midi_source_for_session(base);
 			source->set_ancestor_name(mr->sources().front()->name());

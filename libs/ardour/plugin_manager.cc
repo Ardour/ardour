@@ -35,14 +35,12 @@
 #ifdef WINDOWS_VST_SUPPORT
 #include "ardour/vst_info_file.h"
 #include "fst.h"
-#include "pbd/basename.h"
 #include <cstring>
 #endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
 #include "ardour/vst_info_file.h"
 #include "ardour/linux_vst_support.h"
-#include "pbd/basename.h"
 #include <cstring>
 #endif //LXVST_SUPPORT
 
@@ -820,7 +818,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		/* what a joke freeware VST is */
 
 		if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
-			info->name = PBD::basename_nosuffix (path);
+			info->name = PBD::filename_no_extension (path);
 		} else {
 			info->name = finfo->name;
 		}
@@ -940,7 +938,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		PluginInfoPtr info(new LXVSTPluginInfo);
 
 		if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
-			info->name = PBD::basename_nosuffix (path);
+			info->name = PBD::filename_no_extension (path);
 		} else {
 			info->name = finfo->name;
 		}

@@ -40,8 +40,8 @@
 #include <boost/scoped_array.hpp>
 #include <boost/shared_array.hpp>
 
-#include "pbd/basename.h"
 #include "pbd/convert.h"
+#include "pbd/file_utils.h"
 
 #include "evoral/SMF.hpp"
 
@@ -121,7 +121,7 @@ vector<string>
 Session::get_paths_for_new_sources (bool /*allow_replacing*/, const string& import_file_path, uint32_t channels)
 {
 	vector<string> new_paths;
-	const string basename = basename_nosuffix (import_file_path);
+	const string basename = filename_no_extension (import_file_path);
 
 	for (uint32_t n = 0; n < channels; ++n) {
 

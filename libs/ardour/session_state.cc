@@ -64,7 +64,6 @@
 #include "evoral/SMF.hpp"
 
 #include "pbd/boost_debug.h"
-#include "pbd/basename.h"
 #include "pbd/controllable_descriptor.h"
 #include "pbd/debug.h"
 #include "pbd/enumwriter.h"
@@ -2433,7 +2432,7 @@ Session::possible_states (string path)
 	vector<string> states;
 	find_files_matching_filter (states, path, state_file_filter, 0, false, false);
 
-	transform(states.begin(), states.end(), states.begin(), basename_nosuffix);
+	transform(states.begin(), states.end(), states.begin(), filename_no_extension);
 
 	sort (states.begin(), states.end());
 
@@ -3028,7 +3027,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		/* see if there an easy to find peakfile for this file, and remove it.
 		 */
 
-                string base = basename_nosuffix (*x);
+                string base = filename_no_extension (*x);
                 base += "%A"; /* this is what we add for the channel suffix of all native files,
                                  or for the first channel of embedded files. it will miss
                                  some peakfiles for other channels

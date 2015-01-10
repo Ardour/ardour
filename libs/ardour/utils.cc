@@ -47,9 +47,9 @@
 
 #include "pbd/cpus.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
-#include "pbd/basename.h"
 #include "pbd/strsplit.h"
 #include "pbd/replace_all.h"
 
@@ -299,7 +299,7 @@ ARDOUR::cmp_nocase_utf8 (const string& s1, const string& s2)
 string
 ARDOUR::region_name_from_path (string path, bool strip_channels, bool add_channel_suffix, uint32_t total, uint32_t this_one)
 {
-	path = PBD::basename_nosuffix (path);
+	path = PBD::filename_no_extension (path);
 
 	if (strip_channels) {
 
@@ -660,7 +660,7 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
 bool
 ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string& path)
 {
-        string bws = basename_nosuffix (path);
+        string bws = filename_no_extension (path);
 	struct dirent* dentry;
 	struct stat statbuf;
 	DIR* dead;
@@ -690,7 +690,7 @@ ARDOUR::matching_unsuffixed_filename_exists_in (const string& dir, const string&
                         continue;
                 }
 
-                string bws2 = basename_nosuffix (dentry->d_name);
+                string bws2 = filename_no_extension (dentry->d_name);
 
                 if (bws2 == bws) {
                         ret = true;

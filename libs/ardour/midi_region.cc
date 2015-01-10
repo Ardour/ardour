@@ -31,7 +31,7 @@
 #include "evoral/types.hpp"
 
 #include "pbd/xml++.h"
-#include "pbd/basename.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/midi_model.h"
@@ -158,7 +158,7 @@ MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 
 	PropertyList plist;
 
-	plist.add (Properties::name, PBD::basename_nosuffix (newsrc->name()));
+	plist.add (Properties::name, PBD::filename_no_extension (newsrc->name()));
 	plist.add (Properties::whole_file, true);
 	plist.add (Properties::start, _start);
 	plist.add (Properties::start_beats, _start_beats);
