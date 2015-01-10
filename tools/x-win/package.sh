@@ -384,4 +384,4 @@ echo " === Building Windows Installer (lzma compression takes ages)"
 fi
 time makensis -V2 $NSISFILE
 rm -rf $DESTDIR
-ls -lh "$OUTFILE"
+ls -lgGh "$OUTFILE"
