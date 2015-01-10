@@ -23,7 +23,6 @@
 #include <string>
 #include <sstream>
 
-#include "pbd/basename.h"
 #include "pbd/enumwriter.h"
 
 #include "ardour/audioregion.h"

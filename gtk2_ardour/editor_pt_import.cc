@@ -25,7 +25,6 @@
 #include <algorithm>
 
 #include "pbd/pthread_utils.h"
-#include "pbd/basename.h"
 #include "pbd/shortpath.h"
 #include "pbd/stateful_diff_command.h"
 
