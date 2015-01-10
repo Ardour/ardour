@@ -202,8 +202,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 				}
 			} else if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ((*i)->route_group() == group)
+					if ((*i)->route_group() == group) {
 						selection->remove(*i);
+					}
 				}
 			} else {
 				selection->remove (clicked_axisview);
@@ -215,8 +216,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 				}
 			} else if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ( (*i)->route_group() == group)
+					if ((*i)->route_group() == group) {
 						selection->add(*i);
+					}
 				}
 			} else {
 				selection->add (clicked_axisview);
@@ -234,8 +236,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 			}
 		} else if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group)
+				if ((*i)->route_group() == group) {
 					selection->add(*i);
+				}
 			}
 		} else {
 			selection->add (clicked_axisview);
@@ -253,8 +256,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 			}
 		} else if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group)
+				if ((*i)->route_group() == group) {
 					selection->add(*i);
+				}
 			}
 		} else {
 			selection->set (clicked_axisview);
@@ -1953,7 +1957,7 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 void
 Editor::deselect_all ()
 {
-	begin_reversible_selection_op(_("Clear Selection"));
+	begin_reversible_selection_op(_("Deselect All"));
 	selection->clear ();
 	commit_reversible_selection_op ();
 }

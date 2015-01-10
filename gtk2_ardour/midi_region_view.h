@@ -203,6 +203,7 @@ public:
 	void move_selection(double dx, double dy, double cumulative_dy);
 	void note_dropped (NoteBase* ev, ARDOUR::frameoffset_t, int8_t d_note);
 
+	void select_notes (std::list<boost::shared_ptr<NoteType> >);
 	void select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend);
 	void toggle_matching_notes (uint8_t notenum, uint16_t channel_mask);
 
@@ -438,6 +439,9 @@ private:
 	 * when they appear after the command is applied. */
 	std::set< boost::shared_ptr<NoteType> > _marked_for_selection;
 
+	/** Notes that should be selected when the model is redisplayed. */
+	std::set< boost::shared_ptr<NoteType> > _pending_note_selection;
+
 	/** New notes (created in the current command) which should have visible velocity
 	 * when they appear after the command is applied. */
 	std::set< boost::shared_ptr<NoteType> > _marked_for_velocity;
@@ -448,6 +452,7 @@ private:
 	PBD::ScopedConnection content_connection;
 
 	NoteBase* find_canvas_note (boost::shared_ptr<NoteType>);
+	NoteBase* find_canvas_note (NoteType);
 	Events::iterator _optimization_iterator;
 
 	void update_note (NoteBase*, bool update_ghost_regions = true);
@@ -498,6 +503,8 @@ private:
 	double _last_event_y;
 	bool   _grabbed_keyboard;
 	bool   _entered;
+
+	bool _mouse_changed_selection;
 
 	framepos_t snap_frame_to_grid_underneath (framepos_t p, framecnt_t &) const;
 	

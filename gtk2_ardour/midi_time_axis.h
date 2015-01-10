@@ -30,6 +30,8 @@
 #include <gtkmm2ext/selector.h>
 #include <list>
 
+#include "evoral/Note.hpp"
+
 #include "ardour/types.h"
 #include "ardour/region.h"
 
@@ -65,7 +67,7 @@ class MidiChannelSelectorWindow;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
-	public:
+public:
 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~MidiTimeAxisView ();
 
@@ -100,11 +102,13 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	uint8_t get_channel_for_add () const;
 
-	protected:
+	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&);
+
+protected:
 	void start_step_editing ();
 	void stop_step_editing ();
 
-	private:
+private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
 	void model_changed(const std::string& model);
@@ -165,6 +169,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask);
 	void extend_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 	void toggle_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
+	void get_per_region_note_selection_region_view (RegionView*, std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&);
 
 	void ensure_step_editor ();
 

@@ -4718,6 +4718,9 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 			} else {
 				_region->unique_select (_primary);
 			}
+
+			_editor->begin_reversible_selection_op(_("Select Note Press"));
+			_editor->commit_reversible_selection_op();
 		}
 	}
 }
@@ -4799,14 +4802,17 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 {
 	if (!moved) {
 		/* no motion - select note */
-		
+
 		if (_editor->current_mouse_mode() == Editing::MouseObject ||
 		    _editor->current_mouse_mode() == Editing::MouseDraw) {
-			
+
+			bool changed = false;
+
 			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 				if (add) {
 					_region->note_deselected (_primary);
+					changed = true;
 				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
@@ -4814,11 +4820,18 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 
 				if (!extend && !add && _region->selection_size() > 1) {
 					_region->unique_select (_primary);
+					changed = true;
 				} else if (extend) {
 					_region->note_selected (_primary, true, true);
+					changed = true;
 				} else {
 					/* it was added during button press */
 				}
+			}
+
+			if (changed) {
+				_editor->begin_reversible_selection_op(_("Select Note Release"));
+				_editor->commit_reversible_selection_op();
 			}
 		}
 	} else {
@@ -5204,12 +5217,15 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 void
 EditorRubberbandSelectDrag::deselect_things ()
 {
-	if (!getenv("ARDOUR_SAE")) {
-		_editor->selection->clear_tracks();
-	}
+	_editor->begin_reversible_selection_op (_("Clear Selection (rubberband)"));
+
+	_editor->selection->clear_tracks();
 	_editor->selection->clear_regions();
 	_editor->selection->clear_points ();
 	_editor->selection->clear_lines ();
+	_editor->selection->clear_midi_notes ();
+
+	_editor->commit_reversible_selection_op();
 }
 
 NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)

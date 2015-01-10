@@ -1308,6 +1308,8 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 {
 	uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op(_("Set Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
@@ -1317,6 +1319,8 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
 }
 
 void
@@ -1324,6 +1328,8 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op(_("Add Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
@@ -1333,6 +1339,8 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
 }
 
 void
@@ -1340,6 +1348,8 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op(_("Extend Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::extend_note_selection_region_view),
@@ -1349,6 +1359,8 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::extend_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
 }
 
 void
@@ -1356,6 +1368,8 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op(_("Toggle Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection_region_view),
@@ -1365,6 +1379,15 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
+}
+
+void
+MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >& selection)
+{
+	_view->foreach_regionview (
+		sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::get_per_region_note_selection_region_view), sigc::ref(selection)));
 }
 
 void
@@ -1389,6 +1412,24 @@ void
 MidiTimeAxisView::toggle_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask)
 {
 	dynamic_cast<MidiRegionView*>(rv)->toggle_matching_notes (note, chn_mask);
+}
+
+void
+MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection)
+{
+	Evoral::Sequence<Evoral::Beats>::Notes selected;
+	dynamic_cast<MidiRegionView*>(rv)->selection_as_notelist (selected, false);
+
+	std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > notes;
+
+	Evoral::Sequence<Evoral::Beats>::Notes::iterator sel_it;
+	for (sel_it = selected.begin(); sel_it != selected.end(); ++sel_it) {
+		notes.insert (*sel_it);
+	}
+
+	if (!notes.empty()) {
+		selection.push_back (make_pair ((rv)->region()->id(), notes));
+	}
 }
 
 void

@@ -448,11 +448,15 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
+	if (press) {
+		_mouse_changed_selection = false;
+	}
+
 	switch (item_type) {
 	case RegionItem:
 		if (press) {
 			if (eff_mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
+				_mouse_changed_selection = set_selected_regionview_from_click (press, op);
 			} else {
 				/* don't change the selection unless the
 				   clicked track is not currently selected. if
@@ -465,7 +469,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 			}
 		} else {
 			if (eff_mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
+				_mouse_changed_selection = set_selected_regionview_from_click (press, op);
 			}
 		}
 		break;
@@ -483,7 +487,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
 		if (get_smart_mode() || eff_mouse_mode != MouseRange) {
-			set_selected_regionview_from_click (press, op);
+			_mouse_changed_selection = set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
 		}
@@ -492,7 +496,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case ControlPointItem:
 		set_selected_track_as_side_effect (op);
 		if (eff_mouse_mode != MouseRange) {
-			set_selected_control_point_from_click (press, op);
+			_mouse_changed_selection = set_selected_control_point_from_click (press, op);
 		}
 		break;
 
@@ -501,6 +505,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		if (event->button.button == 3) {
 			selection->clear_tracks ();
 			set_selected_track_as_side_effect (op);
+			_mouse_changed_selection = true;
 		}
 		break;
 
@@ -510,6 +515,12 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	default:
 		break;
+	}
+
+	if ((!press) && _mouse_changed_selection) {
+		begin_reversible_selection_op (_("Button Selection"));
+		commit_reversible_selection_op ();
+		_mouse_changed_selection = false;
 	}
 }
 
@@ -744,6 +755,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case AutomationTrackItem:
 			/* rubberband drag to select automation points */
 			_drags->set (new EditorRubberbandSelectDrag (this, item), event);
+			return true;
 			break;
 
 		default:
@@ -1465,10 +1477,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 
                 /* do any (de)selection operations that should occur on button release */
-
-		begin_reversible_selection_op (_("Button Select"));
-                button_selection (item, event, item_type);
-		commit_reversible_selection_op ();
+		button_selection (item, event, item_type);
 
 		return true;
 		break;

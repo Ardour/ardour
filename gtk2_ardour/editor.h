@@ -421,7 +421,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
         void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
 
-	void get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const;
+	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
+	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const;
 
 	void center_screen (framepos_t);
 
@@ -706,6 +707,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
+	bool _mouse_changed_selection;
 
 	void catch_vanishing_regionview (RegionView *);
 

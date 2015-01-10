@@ -156,7 +156,7 @@ void
 AutomationLine::update_visibility ()
 {
 	if (_visible & Line) {
-		/* Only show the line there are some points, otherwise we may show an out-of-date line
+		/* Only show the line when there are some points, otherwise we may show an out-of-date line
 		   when automation points have been removed (the line will still follow the shape of the
 		   old points).
 		*/

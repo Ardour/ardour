@@ -123,6 +123,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
@@ -169,6 +170,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
@@ -220,6 +222,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	init (false);
 }
@@ -250,6 +253,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	init (true);
 }
@@ -502,6 +506,7 @@ MidiRegionView::button_press (GdkEventButton* ev)
 	}
 
 	_pressed_button = ev->button;
+	_mouse_changed_selection = false;
 
 	return true;
 }
@@ -532,12 +537,14 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseRange:
 			/* no motion occured - simple click */
 			clear_selection ();
+			_mouse_changed_selection = true;
 			break;
 
 		case MouseContent:
 		case MouseTimeFX:
 			{
 				clear_selection();
+				_mouse_changed_selection = true;
 
 				if (Keyboard::is_insert_note_event(ev)) {
 
@@ -589,6 +596,11 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 	default:
 		break;
+	}
+
+	if(_mouse_changed_selection) {
+		trackview.editor().begin_reversible_selection_op (_("Mouse Selection Change"));
+		trackview.editor().commit_reversible_selection_op ();
 	}
 
 	return false;
@@ -643,6 +655,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 					clear_selection ();
+					_mouse_changed_selection = true;
 				}
 				_mouse_state = SelectRectDragging;
 				return true;
@@ -747,22 +760,32 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 	} else if (ev->keyval == GDK_Tab) {
 
+		trackview.editor().begin_reversible_selection_op (_("Select Adjacent Note"));
+
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		} else {
 			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		}
+
+		trackview.editor().commit_reversible_selection_op();
+
 		return true;
 
 	} else if (ev->keyval == GDK_ISO_Left_Tab) {
 
 		/* Shift-TAB generates ISO Left Tab, for some reason */
 
+		trackview.editor().begin_reversible_selection_op (_("Select Adjacent Note"));
+
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		} else {
 			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		}
+
+		trackview.editor().commit_reversible_selection_op();
+
 		return true;
 
 
@@ -946,9 +969,11 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bo
 
 	view->update_note_range(new_note->note());
 
+	trackview.editor().begin_reversible_command(_("add note"));
 	MidiModel::NoteDiffCommand* cmd = _model->new_note_diff_command(_("add note"));
 	cmd->add (new_note);
 	_model->apply_command(*trackview.session(), cmd);
+	trackview.editor().commit_reversible_command();
 
 	play_midi_note (new_note);
 }
@@ -982,8 +1007,8 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 
 	content_connection.disconnect ();
 	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
-
-	clear_events ();
+	/* Don't signal as nobody else needs to know until selection has been altered.*/
+	clear_events (false);
 
 	if (_enable_display) {
 		redisplay_model();
@@ -994,6 +1019,7 @@ void
 MidiRegionView::start_note_diff_command (string name)
 {
 	if (!_note_diff_command) {
+		trackview.editor().begin_reversible_command (name);
 		_note_diff_command = _model->new_note_diff_command (name);
 	}
 }
@@ -1044,6 +1070,7 @@ void
 MidiRegionView::apply_diff (bool as_subcommand)
 {
 	bool add_or_remove;
+	bool commit = false;
 
 	if (!_note_diff_command) {
 		return;
@@ -1060,6 +1087,7 @@ MidiRegionView::apply_diff (bool as_subcommand)
 		_model->apply_command_as_subcommand (*trackview.session(), _note_diff_command);
 	} else {
 		_model->apply_command (*trackview.session(), _note_diff_command);
+		commit = true;
 	}
 
 	_note_diff_command = 0;
@@ -1070,6 +1098,9 @@ MidiRegionView::apply_diff (bool as_subcommand)
 	}
 
 	_marked_for_velocity.clear();
+	if (commit) {
+		trackview.editor().commit_reversible_command ();
+	}
 }
 
 void
@@ -1093,6 +1124,27 @@ MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 
 	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
 		if ((*_optimization_iterator)->note() == note) {
+			return *_optimization_iterator;
+		}
+	}
+
+	return 0;
+}
+
+/** This version finds any canvas note matching the supplied note.*/
+NoteBase*
+MidiRegionView::find_canvas_note (NoteType note)
+{
+	if (_optimization_iterator != _events.end()) {
+		++_optimization_iterator;
+	}
+
+	if (_optimization_iterator != _events.end() && (*(*_optimization_iterator)->note()) == note) {
+		return *_optimization_iterator;
+	}
+
+	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
+		if (*((*_optimization_iterator)->note()) == note) {
 			return *_optimization_iterator;
 		}
 	}
@@ -1173,6 +1225,13 @@ MidiRegionView::redisplay_model()
 				add_note (note, visible);
 			}
 
+			set<boost::shared_ptr<NoteType> >::iterator it;
+			for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
+				if (*(*it) == *note) {
+					add_to_selection (cne);
+				}
+			}
+
 		} else {
 			
 			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
@@ -1181,7 +1240,6 @@ MidiRegionView::redisplay_model()
 			}
 		}
 	}
-
 
 	/* remove note items that are no longer valid */
 
@@ -1213,6 +1271,7 @@ MidiRegionView::redisplay_model()
 
 	_marked_for_selection.clear ();
 	_marked_for_velocity.clear ();
+	_pending_note_selection.clear ();
 
 	/* we may have caused _events to contain things out of order (e.g. if a note
 	   moved earlier or later). we don't generally need them in time order, but
@@ -1909,7 +1968,9 @@ MidiRegionView::get_patch_key_at (Evoral::Beats time, uint8_t channel, MIDI::Nam
 void
 MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPrimaryKey& new_patch)
 {
-	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("alter patch change"));
+	string name = _("alter patch change");
+	trackview.editor().begin_reversible_command (name);
+	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
 	if (pc.patch()->program() != new_patch.program()) {
 		c->change_program (pc.patch (), new_patch.program());
@@ -1921,6 +1982,7 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 	}
 
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -1929,7 +1991,9 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 void
 MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evoral::PatchChange<Evoral::Beats> & new_change)
 {
-	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("alter patch change"));
+	string name = _("alter patch change");
+	trackview.editor().begin_reversible_command (name);
+	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
 	if (old_change->time() != new_change.time()) {
 		c->change_time (old_change, new_change.time());
@@ -1948,6 +2012,7 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 	}
 
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -1962,8 +2027,10 @@ void
 MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Beats> const & patch)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	string name = _("add patch change");
 
-	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("add patch change"));
+	trackview.editor().begin_reversible_command (name);
+	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 	c->add (MidiModel::PatchChangePtr (
 		        new Evoral::PatchChange<Evoral::Beats> (
 			        absolute_frames_to_source_beats (_region->position() + t),
@@ -1973,6 +2040,7 @@ MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Beat
 		);
 
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -1981,9 +2049,11 @@ MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Beat
 void
 MidiRegionView::move_patch_change (PatchChange& pc, Evoral::Beats t)
 {
+	trackview.editor().begin_reversible_command (_("move patch change"));
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("move patch change"));
 	c->change_time (pc.patch (), t);
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -1992,9 +2062,11 @@ MidiRegionView::move_patch_change (PatchChange& pc, Evoral::Beats t)
 void
 MidiRegionView::delete_patch_change (PatchChange* pc)
 {
+	trackview.editor().begin_reversible_command (_("delete patch change"));
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("delete patch change"));
 	c->remove (pc->patch ());
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -2139,6 +2211,24 @@ MidiRegionView::invert_selection ()
 			remove_from_selection(*i);
 		} else {
 			add_to_selection (*i);
+		}
+	}
+}
+
+/** Used for selection undo/redo.
+    The requested notes most likely won't exist in the view until the next model redisplay.
+*/
+void
+MidiRegionView::select_notes (list<boost::shared_ptr<NoteType> > notes)
+{
+	NoteBase* cne;
+	list<boost::shared_ptr<NoteType> >::iterator n;
+
+	for (n = notes.begin(); n != notes.end(); ++n) {
+		if ((cne = find_canvas_note(*(*n))) != 0) {
+			add_to_selection (cne);
+		} else {
+			_pending_note_selection.insert(*n);
 		}
 	}
 }

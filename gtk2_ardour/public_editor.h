@@ -34,6 +34,7 @@
 #include <gtkmm/actiongroup.h>
 #include <sigc++/signal.h>
 
+#include "evoral/Note.hpp"
 #include "evoral/types.hpp"
 
 #include "pbd/statefuldestructible.h"
@@ -391,6 +392,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void stop_canvas_autoscroll () = 0;
         virtual bool autoscroll_active() const = 0;
 
+	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
+	virtual void commit_reversible_selection_op () = 0;
 	virtual void begin_reversible_command (std::string cmd_name) = 0;
 	virtual void begin_reversible_command (GQuark) = 0;
 	virtual void commit_reversible_command () = 0;
@@ -412,7 +415,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
-	virtual void get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const = 0;
+	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
+	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

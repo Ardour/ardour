@@ -109,6 +109,7 @@ Selection::clear ()
 	clear_midi_notes ();
 	clear_midi_regions ();
 	clear_markers ();
+	pending_midi_note_selection.clear();
 }
 
 void
@@ -506,9 +507,9 @@ Selection::add (RegionView* r)
 
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		bool changed = regions.add (r);
-        if (changed) {
-            RegionsChanged ();
-        }
+		if (changed) {
+			RegionsChanged ();
+		}
 	}
 }
 
@@ -1229,12 +1230,45 @@ Selection::get_state () const
 	for (RegionSelection::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		XMLNode* r = node->add_child (X_("Region"));
 		r->add_property (X_("id"), atoi ((*i)->region ()->id ().to_s ().c_str()));
-		
+	}
+
+	/* midi region views have thir own internal selection. */
+	XMLNode* n;
+	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > rid_notes;
+	editor->get_per_region_note_selection (rid_notes);
+	if (!rid_notes.empty()) {
+		n = node->add_child (X_("MIDINote"));
+	}
+	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rn_it;
+	for (rn_it = rid_notes.begin(); rn_it != rid_notes.end(); ++rn_it) {
+		n->add_property (X_("region_id"), atoi((*rn_it).first.to_s().c_str()));
+			
+		for (std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
+			XMLNode* nc = n->add_child(X_("note"));
+			snprintf(buf, sizeof(buf), "%d", (*i)->channel());
+			nc->add_property(X_("channel"), string(buf));
+
+			snprintf(buf, sizeof(buf), "%f", (*i)->time().to_double());
+			nc->add_property(X_("time"), string(buf));
+
+			snprintf(buf, sizeof(buf), "%d", (*i)->note());
+			nc->add_property(X_("note"), string(buf));
+
+			snprintf(buf, sizeof(buf), "%f", (*i)->length().to_double());
+			nc->add_property(X_("length"), string(buf));
+
+			snprintf(buf, sizeof(buf), "%d", (*i)->velocity());
+			nc->add_property(X_("velocity"), string(buf));
+
+			snprintf(buf, sizeof(buf), "%d", (*i)->off_velocity());
+			nc->add_property(X_("off-velocity"), string(buf));
+		}
 	}
 
 	for (PointSelection::const_iterator i = points.begin(); i != points.end(); ++i) {
 		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (&(*i)->line().trackview);
 		if (atv) {
+
 			XMLNode* r = node->add_child (X_("ControlPoint"));
 			r->add_property (X_("type"), "track");
 			r->add_property (X_("route-id"), atoi (atv->parent_route()->id ().to_s ().c_str()));
@@ -1243,6 +1277,7 @@ Selection::get_state () const
 
 			snprintf(buf, sizeof(buf), "%d", (*i)->view_index());
 			r->add_property (X_("view-index"), string(buf));
+
 		}
 	}
 
@@ -1304,44 +1339,106 @@ Selection::set_state (XMLNode const & node, int)
 				add (rs);
 			} else {
 				/*
-				  regionviews are being constructed - stash the region IDs 
+				  regionviews haven't been constructed - stash the region IDs 
 				  so we can identify them in Editor::region_view_added ()
 				*/
 				regions.pending.push_back (id);
 			}
 			
+		} else if ((*i)->name() == X_("MIDINote")) {
+			XMLProperty* prop_region_id = (*i)->property (X_("region-id"));
+
+			assert (prop_region_id);
+
+			PBD::ID const id (prop_region_id->value ());
+			RegionSelection rs;
+
+			editor->get_regionviews_by_id (id, rs); // there could be more than one
+
+			std::list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > notes;
+			XMLNodeList children = (*i)->children ();
+
+			for (XMLNodeList::const_iterator ci = children.begin(); ci != children.end(); ++ci) {
+				XMLProperty* prop_channel = (*ci)->property (X_("channel"));
+				XMLProperty* prop_time = (*ci)->property (X_("time"));
+				XMLProperty* prop_note = (*ci)->property (X_("note"));
+				XMLProperty* prop_length = (*ci)->property (X_("length"));
+				XMLProperty* prop_velocity = (*ci)->property (X_("velocity"));
+				XMLProperty* prop_off_velocity = (*ci)->property (X_("off-velocity"));
+				
+				assert (prop_channel);
+				assert (prop_time);
+				assert (prop_note);
+				assert (prop_length);
+				assert (prop_velocity);
+				assert (prop_off_velocity);
+				
+				uint8_t channel = atoi(prop_channel->value());
+				Evoral::Beats time (atof(prop_time->value()));
+				Evoral::Beats length (atof(prop_length->value()));
+				uint8_t note = atoi(prop_note->value());
+				uint8_t velocity = atoi(prop_velocity->value());
+				uint8_t off_velocity = atoi(prop_off_velocity->value());
+				boost::shared_ptr<Evoral::Note<Evoral::Beats> > the_note 
+					(new Evoral::Note<Evoral::Beats>  (channel, time, length, note, velocity));
+				the_note->set_off_velocity (off_velocity);
+				
+				notes.push_back (the_note);
+			}
+			
+			for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
+				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*rsi);
+				if (mrv) {
+					mrv->select_notes(notes);
+				}
+			}
+
+			if (rs.empty()) {
+				/* regionviews containing these notes don't yet exist on the canvas.*/
+				pending_midi_note_selection.push_back (make_pair (id, notes));
+			}
+
 		} else if  ((*i)->name() == X_("ControlPoint")) {
 			XMLProperty* prop_type = (*i)->property (X_("type"));
-			XMLProperty* prop_route_id = (*i)->property (X_("route-id"));
-			XMLProperty* prop_alist_id = (*i)->property (X_("automation-list-id"));
-			XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
-			XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
-
-			assert (prop_type);
-			assert (prop_route_id);
-			assert (prop_alist_id);
-			assert (prop_parameter);
-			assert (prop_view_index);
+	
+			assert(prop_type);
 
 			if (prop_type->value () == "track") {
-				PBD::ID id (prop_route_id->value ());
-				RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
+
+				XMLProperty* prop_route_id = (*i)->property (X_("route-id"));
+				XMLProperty* prop_alist_id = (*i)->property (X_("automation-list-id"));
+				XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
+				XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
+
+				assert (prop_type);
+				assert (prop_route_id);
+				assert (prop_alist_id);
+				assert (prop_parameter);
+				assert (prop_view_index);
+
+				PBD::ID route_id (prop_route_id->value ());
+				RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (route_id);
+				vector <ControlPoint *> cps;
 
 				if (rtv) {
 					boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().from_symbol (prop_parameter->value ()));
 					if (atv) {
 						list<boost::shared_ptr<AutomationLine> > lines = atv->lines();
-						for (list<boost::shared_ptr<AutomationLine> > ::iterator i = lines.begin(); i != lines.end(); ++i) {
-							if ((*i)->the_list()->id() == prop_alist_id->value()) {
-								ControlPoint* cp = (*i)->nth(atol(prop_view_index->value().c_str()));
+						for (list<boost::shared_ptr<AutomationLine> > ::iterator li = lines.begin(); li != lines.end(); ++li) {
+							if ((*li)->the_list()->id() == prop_alist_id->value()) {
+								ControlPoint* cp = (*li)->nth(atol(prop_view_index->value().c_str()));
 								if (cp) {
-									add (cp);
+									cps.push_back (cp);
+									cp->show();
 								}
 							}
 						}
 					}
 				}
-			} 
+				if (!cps.empty()) {
+					add (cps);
+				}
+			}
 
 		} else if  ((*i)->name() == X_("AudioRange")) {
 			XMLProperty* prop_start = (*i)->property (X_("start"));

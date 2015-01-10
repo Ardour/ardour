@@ -81,7 +81,6 @@
 #include "control_protocol/control_protocol.h"
 
 #include "actions.h"
-#include "actions.h"
 #include "analysis_window.h"
 #include "audio_clock.h"
 #include "audio_region_view.h"
@@ -251,6 +250,7 @@ pane_size_watcher (Paned* pane)
 Editor::Editor ()
 	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 
+	, _mouse_changed_selection (false)
 	  /* time display buttons */
 	, minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))
@@ -3336,7 +3336,7 @@ void
 Editor::begin_reversible_selection_op (string name)
 {
 	if (_session) {
-		//cerr << name << endl;
+		cerr << name << endl;
 		/* begin/commit pairs can be nested */
 		selection_op_cmd_depth++;
 	}
@@ -3349,20 +3349,22 @@ Editor::commit_reversible_selection_op ()
 		if (selection_op_cmd_depth == 1) {
 
 			if (selection_op_history_it > 0 && selection_op_history_it < selection_op_history.size()) {
+				/* the user has undone some selection ops and then made a new one */
 				list<XMLNode *>::iterator it = selection_op_history.begin();
 				advance (it, selection_op_history_it);
 				selection_op_history.erase (selection_op_history.begin(), it);
 			}
+
 			selection_op_history.push_front (&_selection_memento->get_state ());
 			selection_op_history_it = 0;
+
+			selection_undo_action->set_sensitive (true);
+			selection_redo_action->set_sensitive (false);
 		}
 
 		if (selection_op_cmd_depth > 0) {
 			selection_op_cmd_depth--;
 		}
-
-		selection_undo_action->set_sensitive (true);
-		selection_redo_action->set_sensitive (false);
 	}
 }
 
@@ -3378,7 +3380,6 @@ Editor::undo_selection_op ()
 				selection_redo_action->set_sensitive (true);
 			}
 			++n;
-
 		}
 		/* is there an earlier entry? */
 		if ((selection_op_history_it + 1) >= selection_op_history.size()) {
@@ -3401,7 +3402,6 @@ Editor::redo_selection_op ()
 				selection_undo_action->set_sensitive (true);
 			}
 			++n;
-
 		}
 
 		if (selection_op_history_it == 0) {
@@ -4899,17 +4899,17 @@ Editor::get_regions_from_selection_and_entered ()
 }
 
 void
-Editor::get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const
+Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const
 {
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		RouteTimeAxisView* tatv;
+		RouteTimeAxisView* rtav;
 		
-		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+		if ((rtav = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 			boost::shared_ptr<Playlist> pl;
 			std::vector<boost::shared_ptr<Region> > results;
 			boost::shared_ptr<Track> tr;
 			
-			if ((tr = tatv->track()) == 0) {
+			if ((tr = rtav->track()) == 0) {
 				/* bus */
 				continue;
 			}
@@ -4917,14 +4917,29 @@ Editor::get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) co
 			if ((pl = (tr->playlist())) != 0) {
 				boost::shared_ptr<Region> r = pl->region_by_id (id);
 				if (r) {
-					RegionView* marv = tatv->view()->find_view (r);
-					if (marv) {
-						regions.push_back (marv);
+					RegionView* rv = rtav->view()->find_view (r);
+					if (rv) {
+						regions.push_back (rv);
 					}
 				}
 			}
 		}
 	}
+}
+
+void
+Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection) const
+{
+
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		MidiTimeAxisView* mtav;
+		
+		if ((mtav = dynamic_cast<MidiTimeAxisView*> (*i)) != 0) {
+
+			mtav->get_per_region_note_selection (selection);
+		}
+	}
+	
 }
 
 void
@@ -5102,6 +5117,19 @@ Editor::region_view_added (RegionView * rv)
 			break;
 		}
 	}
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+	if (mrv) {
+		list<pair<PBD::ID const, list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rnote;
+		for (rnote = selection->pending_midi_note_selection.begin(); rnote != selection->pending_midi_note_selection.end(); ++rnote) {
+			if (rv->region()->id () == (*rnote).first) {
+				mrv->select_notes ((*rnote).second);
+				selection->pending_midi_note_selection.erase(rnote);
+				break;
+			}
+		}
+	}
+
 	_summary->set_background_dirty ();
 }
 
