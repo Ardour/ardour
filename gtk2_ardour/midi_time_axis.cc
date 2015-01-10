@@ -440,7 +440,11 @@ MidiTimeAxisView::model_changed(const std::string& model)
 		_midnam_custom_device_mode_selector.hide();
 	}
 
-	_route->instrument_info().set_external_instrument (model, device_modes.front());
+	if (device_modes.size() > 0) {
+		_route->instrument_info().set_external_instrument (model, device_modes.front());
+	} else {
+		_route->instrument_info().set_external_instrument (model, "");
+	}
 
 	// Rebuild controller menu
 	_controller_menu_map.clear ();
