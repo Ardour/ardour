@@ -36,7 +36,6 @@
 
 #include <boost/algorithm/string/erase.hpp>
 
-#include "pbd/basename.h"
 #include "pbd/boost_debug.h"
 #include "pbd/convert.h"
 #include "pbd/convert.h"

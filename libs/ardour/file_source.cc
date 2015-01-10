@@ -27,7 +27,6 @@
 #include <errno.h>
 
 #include "pbd/convert.h"
-#include "pbd/basename.h"
 #include "pbd/stl_delete.h"
 #include "pbd/strsplit.h"
 #include "pbd/shortpath.h"

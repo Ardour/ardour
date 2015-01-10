@@ -33,7 +33,6 @@
 #include <glibmm/threads.h>
 
 #include "pbd/error.h"
-#include "pbd/basename.h"
 #include "pbd/memento_command.h"
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"

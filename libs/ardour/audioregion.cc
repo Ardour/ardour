@@ -29,7 +29,6 @@
 
 #include <glibmm/threads.h>
 
-#include "pbd/basename.h"
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
 #include "pbd/enumwriter.h"

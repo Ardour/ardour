@@ -32,7 +32,6 @@
 
 #include "pbd/xml++.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/basename.h"
 
 #include "evoral/Control.hpp"
 #include "evoral/EventSink.hpp"
