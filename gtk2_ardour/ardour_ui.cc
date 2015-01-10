@@ -47,7 +47,6 @@
 #include <gtkmm/accelmap.h>
 
 #include "pbd/error.h"
-#include "pbd/basename.h"
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/enumwriter.h"
@@ -2890,10 +2889,10 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 
 	if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
 		/* /path/to/foo => /path/to/foo, foo */
-		load_session (path, basename_nosuffix (path));
+		load_session (path, filename_no_extension (path));
 	} else {
 		/* /path/to/foo/foo.ardour => /path/to/foo, foo */
-		load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+		load_session (Glib::path_get_dirname (path), filename_no_extension (path));
 	}
 }
 
@@ -2935,7 +2934,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		template_name = load_template;
 	}
 
-	session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
+	session_name = filename_no_extension (ARDOUR_COMMAND_LINE::session_name);
 	session_path = ARDOUR_COMMAND_LINE::session_name;
 	
 	if (!session_path.empty()) {

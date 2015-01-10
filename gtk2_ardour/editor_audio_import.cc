@@ -26,8 +26,8 @@
 
 #include <sndfile.h>
 
+#include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
-#include "pbd/basename.h"
 #include "pbd/shortpath.h"
 #include "pbd/stateful_diff_command.h"
 
@@ -741,7 +741,7 @@ Editor::add_sources (vector<string>            paths,
 				string path;
 
 				if (fs) {
-					region_name = basename_nosuffix (fs->path());
+					region_name = filename_no_extension (fs->path());
 				} else {
 					region_name = (*x)->name();
 				}
@@ -766,10 +766,10 @@ Editor::add_sources (vector<string>            paths,
 				}
 
 				if (SMFSource::safe_midi_file_extension (paths.front())) {
-					string track_name = string_compose ("%1-t%2", PBD::basename_nosuffix (fs->path()), (n + 1));
+					string track_name = string_compose ("%1-t%2", PBD::filename_no_extension (fs->path()), (n + 1));
 					track_names.push_back (track_name);
 				} else {
-					track_names.push_back (PBD::basename_nosuffix (paths[n]));
+					track_names.push_back (PBD::filename_no_extension (paths[n]));
 				}
 			}
 

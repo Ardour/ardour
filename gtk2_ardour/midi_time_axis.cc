@@ -27,9 +27,9 @@
 
 #include "pbd/error.h"
 #include "pbd/ffs.h"
+#include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
-#include "pbd/basename.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
@@ -1526,7 +1526,7 @@ MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 
 	plist.add (ARDOUR::Properties::start, 0);
 	plist.add (ARDOUR::Properties::length, length);
-	plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
+	plist.add (ARDOUR::Properties::name, PBD::filename_no_extension(src->name()));
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 
