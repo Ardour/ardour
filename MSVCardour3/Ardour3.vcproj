@@ -98,7 +98,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;pixmaps\*.xpm&quot; &quot;$(Debug32TestSuiteFolder)\..\share\ardour3\pixmaps&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Debug32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Debug32TestSuiteFolder)\..\share\ardour3&quot;&#x0D;&#x0A;"
+				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;pixmaps\*.xpm&quot; &quot;$(Debug32TestSuiteFolder)\..\share\mixbus3\pixmaps&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Debug32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Debug32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Debug32TestSuiteFolder)\..\share\mixbus3&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -182,7 +182,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;pixmaps\*.xpm&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\pixmaps&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(PackagerFolderLocal)\..\share\ardour3&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(Release32TestSuiteFolder)\$(ProjectName).exe&quot; &quot;$(Release32TargetFolder)\$(ProjectName).exe&quot;&#x0D;&#x0A;cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;pixmaps\*.xpm&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\pixmaps&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(PackagerFolderLocal)\..\share\mixbus3&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -267,7 +267,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;pixmaps\*.xpm&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\pixmaps&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\ardour3&quot;&#x0D;&#x0A;"
+				CommandLine="cd ..\gtk2_ardour&#x0D;&#x0A;copy /Y &quot;pixmaps\*.xpm&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\pixmaps&quot;&#x0D;&#x0A;copy /Y &quot;icons\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\*.png&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;icons\cursor_square\hotspots&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3\icons&quot;&#x0D;&#x0A;copy /Y &quot;default_ui_config&quot; &quot;$(Release32TestSuiteFolder)\..\share\mixbus3&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
