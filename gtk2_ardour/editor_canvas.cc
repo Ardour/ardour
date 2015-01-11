@@ -123,7 +123,7 @@ Editor::initialize_canvas ()
 	transport_punch_range_rect->hide();
 
 	/*a group to hold time (measure) lines */
-	time_line_group = new ArdourCanvas::Container (h_scroll_group);
+	time_line_group = new ArdourCanvas::Container (hv_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
 	_trackview_group = new ArdourCanvas::Container (hv_scroll_group);
@@ -231,7 +231,6 @@ Editor::initialize_canvas ()
 		logo_item->lower_to_bottom ();
 	}
 
-	hv_scroll_group->raise_to_top ();
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
@@ -900,22 +899,22 @@ Editor::color_handler()
 	
 	playhead_cursor->set_color (ARDOUR_UI::config()->color ("play head"));
 
-	meter_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("meter bar", "marker bar"));
+	meter_bar->set_fill_color (ARDOUR_UI::config()->color ("meter bar"));
 	meter_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	tempo_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("tempo bar", "marker bar"));
+	tempo_bar->set_fill_color (ARDOUR_UI::config()->color ("tempo bar"));
 	tempo_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("marker bar", "marker bar"));
+	marker_bar->set_fill_color (ARDOUR_UI::config()->color ("marker bar"));
 	marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("cd marker bar", "marker bar"));
+	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("cd marker bar"));
 	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("range marker bar", "marker bar"));
+	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("range marker bar"));
 	range_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("transport marker bar", "marker bar"));
+	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("transport marker bar"));
 	transport_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
 	cd_marker_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag bar rect"));
