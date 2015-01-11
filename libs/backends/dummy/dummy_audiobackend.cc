@@ -322,6 +322,7 @@ DummyAudioBackend::enumerate_midi_options () const
 		_midi_options.push_back (_("8 in, 8 out, Silence"));
 		_midi_options.push_back (_("Midi Event Generators"));
 		_midi_options.push_back (_("8 in, 8 out, Loopback"));
+		_midi_options.push_back (_("MIDI to Audio, Loopback"));
 	}
 	return _midi_options;
 }
@@ -346,6 +347,10 @@ DummyAudioBackend::set_midi_option (const std::string& opt)
 	else if (opt == _("8 in, 8 out, Loopback")) {
 		_n_midi_inputs = _n_midi_outputs = 8;
 		_midi_mode = MidiLoopback;
+	}
+	else if (opt == _("MIDI to Audio, Loopback")) {
+		_n_midi_inputs = _n_midi_outputs = UINT32_MAX;
+		_midi_mode = MidiToAudio;
 	}
 	else {
 		_n_midi_inputs = _n_midi_outputs = 0;
@@ -748,10 +753,14 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::Silence;
 	}
 
+	if (_midi_mode == MidiToAudio) {
+		gt = DummyAudioPort::Loopback;
+	}
+
 	const int a_ins = _n_inputs > 0 ? _n_inputs : 8;
 	const int a_out = _n_outputs > 0 ? _n_outputs : 8;
-	const int m_ins = _n_midi_inputs;
-	const int m_out = _n_midi_outputs;
+	const int m_ins = _n_midi_inputs == UINT_MAX ? 0 : _n_midi_inputs;
+	const int m_out = _n_midi_outputs == UINT_MAX ? a_ins : _n_midi_outputs;
 
 	/* with 'Loopback' there is exactly once cycle latency, divide it between In + Out; */
 	const size_t l_in = _samples_per_period * .25;
@@ -1161,7 +1170,7 @@ DummyAudioBackend::main_process_thread ()
 		}
 		_processed_samples += _samples_per_period;
 
-		if (_device == _("Loopback")) {
+		if (_device == _("Loopback") && _midi_mode != MidiToAudio) {
 			int opn = 0;
 			int opc = _system_outputs.size();
 			for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
@@ -1177,6 +1186,15 @@ DummyAudioBackend::main_process_thread ()
 				DummyMidiPort* op = _system_midi_out[(opn % opc)];
 				op->get_buffer(0); // mix-down
 				(*it)->set_loopback (op->const_buffer());
+			}
+		}
+		else if (_midi_mode == MidiToAudio) {
+			int opn = 0;
+			int opc = _system_midi_out.size();
+			for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
+				DummyMidiPort* op = _system_midi_out[(opn % opc)];
+				op->get_buffer(0); // mix-down
+				(*it)->midi_to_wavetable (op->const_buffer(), _samples_per_period);
 			}
 		}
 
@@ -1585,6 +1603,34 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 	}
 }
 
+void DummyAudioPort::midi_to_wavetable (DummyMidiBuffer const * const src, size_t n_samples)
+{
+	memset(_wavetable, 0, n_samples * sizeof(float));
+	/* generate an audio spike for every midi message
+	 * to verify layency-compensation alignment
+	 * (here: midi-out playback-latency + audio-in capture-latency)
+	 */
+	for (DummyMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
+		const pframes_t t = (*it)->timestamp();
+		assert(t < n_samples);
+		// somewhat arbitrary mapping for quick visual feedback
+		float v = -.5f;
+		if ((*it)->size() == 3) {
+			const unsigned char *d = (*it)->const_data();
+			if ((d[0] & 0xf0) == 0x90) { // note on
+				v = .25f + d[2] / 512.f;
+			}
+			else if ((d[0] & 0xf0) == 0x80) { // note off
+				v = .3f - d[2] / 640.f;
+			}
+			else if ((d[0] & 0xf0) == 0xb0) { // CC
+				v = -.1f - d[2] / 256.f;
+			}
+		}
+		_wavetable[t] += v;
+	}
+}
+
 float DummyAudioPort::grandf ()
 {
 	// Gaussian White Noise
@@ -1859,7 +1905,7 @@ DummyMidiEvent::DummyMidiEvent (const pframes_t timestamp, const uint8_t* data, 
 {
 	if (size > 0) {
 		_data = (uint8_t*) malloc (size);
-	 memcpy (_data, data, size);
+		memcpy (_data, data, size);
 	}
 }
 

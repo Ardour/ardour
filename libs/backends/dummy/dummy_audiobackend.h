@@ -160,6 +160,7 @@ class DummyAudioPort : public DummyPort {
 		};
 		void setup_generator (GeneratorType const, float const);
 		void fill_wavetable (const float* d, size_t n_samples) { assert(_wavetable != 0);  memcpy(_wavetable, d, n_samples * sizeof(float)); }
+		void midi_to_wavetable (DummyMidiBuffer const * const src, size_t n_samples);
 
 	private:
 		Sample _buffer[8192];
@@ -368,6 +369,7 @@ class DummyAudioBackend : public AudioBackend {
 			MidiNoEvents,
 			MidiGenerator,
 			MidiLoopback,
+			MidiToAudio,
 		};
 
 		std::string _instance_name;
