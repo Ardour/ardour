@@ -828,7 +828,7 @@
               </DropdownMenu>
             </Dropdown>
           </HBox>
-          <HBox >
+          <HBox>
             <Label style="parameter_label"
                    text="Waveform Shape"
                    horzalignment="end"/>
@@ -850,34 +850,32 @@
                               data="1"/>
               </DropdownMenu>
             </Dropdown>
-          </HBox>          
+          </HBox>
           <HBox>
-              <Label style="parameter_label"
-                     text="Waveform Color"
-                     horzalignment="end"/>
-              <VBox style="parameter_spacing"/>
-              <Adjustment id="color_adjustment"
-                          minvalue="0"
-                          maxvalue="255"
-                          initialvalue="255"
-                          step="1"
-                          pageincrement="1"/>
-              <Fader id="color_fader"
-                     adjustment="color_adjustment"
-                     facesource="horizontal_zoom_fader_face"
-                     handlesource="zoom_fader_handle"
-                     activehandlesource="zoom_fader_handle_active"
-                     x="1"
-                     y="1"
-                     minposx="20"
-                     minposy="13"
-                     maxposx="66"
-                     maxposy="13"/>
-              <VBox width="10"/>
-              <EventBox id="color_box"
-                        width="20"
-                        height="10"
-                        bgnormal="#ffffff"/>
+            <Label style="parameter_label"
+                   text="Waveform Color"
+                   horzalignment="end"/>
+            <VBox style="parameter_spacing"/>
+            <Adjustment id="color_adjustment"
+                        minvalue="0"
+                        maxvalue="255"
+                        initialvalue="255"
+                        step="1"
+                        pageincrement="1"/>
+            <Fader id="color_fader"
+                   adjustment="color_adjustment"
+                   facesource="waveform_zoom_fader_face"
+                   handlesource="zoom_fader_handle"
+                   activehandlesource="zoom_fader_handle_active"
+                   minposx="6"
+                   minposy="9"
+                   maxposx="66"
+                   maxposy="9"/>
+            <VBox width="10"/>
+            <EventBox id="color_box"
+                      width="20"
+                      height="20"
+                      bgnormal="#ffffff"/>
           </HBox>
           <HBox>
             <Label style="parameter_label"
