@@ -2282,6 +2282,12 @@ ARDOUR_UI::stop_clocking ()
 	clock_signal_connection.disconnect ();
 }
 
+void
+ARDOUR_UI::save_session_as ()
+{
+	
+}
+
 /** Ask the user for the name of a new snapshot and then take it.
  */
 

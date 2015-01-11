@@ -9,7 +9,8 @@
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
       <menuitem action='Rename'/>
-      <menuitem action='Snapshot'/>
+      <menuitem action='SnapshotStay'/>
+      <menuitem action='SnapshotSwitch'/>
       <menuitem action='SaveTemplate'/>
       <menu name='Metadata' action='Metadata'>
         <menuitem action='EditMetadata'/>
