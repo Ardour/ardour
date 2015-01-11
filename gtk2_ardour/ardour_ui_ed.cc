@@ -584,7 +584,6 @@ ARDOUR_UI::install_actions ()
 			hide_return (sigc::bind (sigc::mem_fun(*editor, &PublicEditor::export_video), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-
 #ifdef __APPLE__
 	act = ActionManager::register_action (main_actions, X_("MainWindow"), _("Main Window"),  sigc::mem_fun(*this, &ARDOUR_UI::goto_editor_window));
     //ActionManager::session_sensitive_actions.push_back (act);
@@ -598,11 +597,15 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("ToggleMultiOutMode"), "Multi Out", sigc::mem_fun(*this, &ARDOUR_UI::toggle_multi_out_mode));
 	ActionManager::register_action (main_actions, X_("ToggleStereoOutMode"), "Stereo Out", sigc::mem_fun(*this, &ARDOUR_UI::toggle_stereo_out_mode));
 
-	act = ActionManager::register_action (main_actions, X_("Snapshot"), _("Snapshot..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
+	act = ActionManager::register_action (main_actions, X_("SnapshotStay"), _("Snapshot (& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("SaveAs"), _("Save As.."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
+	act = ActionManager::register_action (main_actions, X_("SnapshotSwitch"), _("Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 

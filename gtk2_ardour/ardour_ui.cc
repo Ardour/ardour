@@ -2242,6 +2242,11 @@ ARDOUR_UI::session_auto_save_is_allowed() const
         return false;
 }
 
+void
+ARDOUR_UI::save_session_as ()
+{
+}
+
 /** Ask the user for the name of a new snapshot and then take it.
  */
 
