@@ -54,6 +54,7 @@
 
 #include <glibmm.h>
 #include <glibmm/threads.h>
+#include <glibmm/fileutils.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -3598,7 +3599,7 @@ Session::solo_cut_control() const
 }
 
 int
-Session::rename (const std::string& new_name)
+Session::rename (const std::string& new_name, bool after_copy)
 {
 	string legal_name = legalize_for_path (new_name);
 	string newpath;
@@ -3742,11 +3743,12 @@ Session::rename (const std::string& new_name)
 		}
 	}
 
-	/* remove old name from recent sessions */
+	if (!after_copy) {
+		/* remove old name from recent sessions */
+		remove_recent_sessions (_path);
+		_path = newpath;
+	}
 
-	remove_recent_sessions (_path);
-
-	_path = newpath;
 	_current_snapshot_name = new_name;
 	_name = new_name;
 
@@ -3921,4 +3923,137 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 	save_state ("", false, false);
 
 	return ret;
+}
+
+static
+bool accept_all_files (string const &, void *)
+{
+	return true;
+}
+
+int
+Session::save_as (SaveAs& saveas)
+{
+	vector<string> files;
+	string current_folder = Glib::path_get_dirname (_path);
+	string new_folder = legalize_for_path (saveas.new_name);
+	string to_dir = Glib::build_filename (saveas.new_parent_folder, saveas.new_name);
+	int64_t total_bytes = 0;
+	int64_t copied = 0;
+	int64_t cnt = 0;
+	int64_t all = 0;
+
+	/* get total size */
+
+	for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+		
+		/* need to clear this because
+		 * find_files_matching_filter() is cumulative
+		 */
+		
+		files.clear ();
+		
+		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+		
+		all += files.size();
+		
+		for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
+			GStatBuf gsb;
+			
+			if ((*i).find (X_("interchange")) == string::npos || saveas.copy_media) {
+				g_stat ((*i).c_str(), &gsb);
+				total_bytes += gsb.st_size;
+			}
+		}
+	}
+
+	try {
+		for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+			
+			/* need to clear this because
+			 * find_files_matching_filter() is cumulative
+			 */
+
+			files.clear ();
+			
+			find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+			
+			const size_t prefix_len = (*sd).path.size();
+			
+			for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
+				std::string from = *i;
+				std::string to = Glib::build_filename (to_dir, (*i).substr(prefix_len));
+
+				g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755);
+				
+				if ((*i).find (X_("interchange")) == string::npos || saveas.copy_media) {
+					
+					GStatBuf gsb;
+					g_stat ((*i).c_str(), &gsb);
+					
+					if (!copy_file (from, to)) {
+						throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+					}
+					
+					copied += gsb.st_size;
+					double fraction = (double) copied / total_bytes;
+					
+					/* tell someone "X percent, file M of
+					 * N"; M is one-based
+					 */
+
+					cnt++;
+					
+					if (!saveas.Progress (fraction, cnt, all)) {
+						throw Glib::FileError (Glib::FileError::FAILED, "copy cancelled");
+					}
+				}
+			}
+			
+			/* now modify our _path setting so that we refer to the copy we've just
+			 * created. The filename of the session file hasn't
+			 * been changed yet.
+			 */
+			
+			_path = new_folder;
+			
+			/* _path now refers to the copy we just created, but that copy
+			 * contains references to the wrong name and so forth.
+			 * Use rename() to actually change the name 
+			 */
+			
+			if (rename (saveas.new_name, true)) {
+				throw Glib::FileError (Glib::FileError::NAME_TOO_LONG, "rename failed");
+			}
+			
+			if (saveas.copy_media && saveas.copy_external) {
+				if (consolidate_all_media()) {
+					throw Glib::FileError (Glib::FileError::NO_SPACE_LEFT, "consolidate failed");
+				}
+			}
+		}
+
+	} catch (...) {
+		
+		/* recursively remove all the directories */
+		
+		/* XXX HOW TO DO THIS */
+		
+		/* return error */
+		
+		return -1;
+	}
+	
+	return 0;
+}
+
+
+/** Check all sources used by the current snapshot
+ *  and make a copy of any external media within
+ *  the session.
+ */
+int
+Session::consolidate_all_media ()
+{
+	return 0;
 }
