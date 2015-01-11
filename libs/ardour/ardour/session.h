@@ -409,7 +409,21 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	framecnt_t worst_input_latency ()  const { return _worst_input_latency; }
 	framecnt_t worst_track_latency ()  const { return _worst_track_latency; }
 	framecnt_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
+	
+	int consolidate_all_media ();
 
+	struct SaveAs {
+		std::string new_parent_folder;
+		std::string new_name;
+		bool        switch_to;
+		bool        copy_media;
+		bool        copy_external;
+		
+		/* emitted as we make progress */
+		PBD::Signal3<bool,float,int64_t,int64_t> Progress;
+	};
+
+	int save_as (SaveAs&);
 	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name);
@@ -418,7 +432,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void remove_state (std::string snapshot_name);
 	void rename_state (std::string old_name, std::string new_name);
 	void remove_pending_capture_state ();
-	int rename (const std::string&);
+	int rename (const std::string&, bool after_copy = false);
 	bool get_nsm_state () const { return _under_nsm_control; }
 	void set_nsm_state (bool state) { _under_nsm_control = state; }
 	bool save_default_options ();
