@@ -231,6 +231,7 @@ Editor::initialize_canvas ()
 		logo_item->lower_to_bottom ();
 	}
 
+	hv_scroll_group->raise_to_top ();
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
