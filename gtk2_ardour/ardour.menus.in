@@ -364,7 +364,7 @@
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
       <menu action='TrackHeightMenu'>
-        <menuitem action='fit-tracks'/>
+        <menuitem action='fit-selection'/>
         <menuitem action='track-height-largest'/>
         <menuitem action='track-height-larger'/>
         <menuitem action='track-height-large'/>
@@ -405,7 +405,7 @@
         <menuitem action='temporal-zoom-out'/>
         <menuitem action='zoom-to-session'/>
         <menuitem action='zoom-to-selection'/>
-        <menuitem action='zoom-to-selection-both-axes'/>
+        <menuitem action='fit-selection'/>
         <menuitem action='toggle-zoom'/>
         <menuitem action='expand-tracks'/>
         <menuitem action='shrink-tracks'/>

@@ -2129,7 +2129,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	RhythmFerret* rhythm_ferret;
 
 	void fit_tracks (TrackViewList &);
-	void fit_selected_tracks ();
+	void fit_selection ();
 	void set_track_height (Height);
 
 	void remove_tracks ();

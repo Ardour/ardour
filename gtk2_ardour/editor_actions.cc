@@ -262,7 +262,6 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 	reg_sens (editor_actions, "zoom-to-selection", _("Zoom to Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), false));
-	reg_sens (editor_actions, "zoom-to-selection-both-axes", _("Zoom to Selection (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), true));
 	reg_sens (editor_actions, "toggle-zoom", _("Toggle Zoom State"), sigc::mem_fun(*this, &Editor::swap_visual_state));
 
 	reg_sens (editor_actions, "expand-tracks", _("Expand Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), false));
@@ -409,8 +408,7 @@ Editor::register_actions ()
 	}
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	act = reg_sens (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = reg_sens (editor_actions, "fit-selection", _("Fit Selection (Vertical)"), sigc::mem_fun(*this, &Editor::fit_selection));
 
 	act = reg_sens (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));

@@ -1815,7 +1815,7 @@ Editor::temporal_zoom_selection (bool both_axes)
 		}
 		
 		if (both_axes)
-			fit_selected_tracks();
+			fit_selection();
 	}
 
 }
@@ -6918,7 +6918,7 @@ Editor::insert_time (
 }
 
 void
-Editor::fit_selected_tracks ()
+Editor::fit_selection ()
 {
         if (!selection->tracks.empty()) {
                 fit_tracks (selection->tracks);
