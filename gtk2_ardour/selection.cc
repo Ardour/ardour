@@ -43,9 +43,9 @@ using namespace ARDOUR;
 using namespace PBD;
 
 struct AudioRangeComparator {
-    bool operator()(AudioRange a, AudioRange b) {
-	    return a.start < b.start;
-    }
+	bool operator()(AudioRange a, AudioRange b) {
+		return a.start < b.start;
+	}
 };
 
 Selection::Selection (const PublicEditor* e)
@@ -229,7 +229,7 @@ Selection::toggle (boost::shared_ptr<Playlist> pl)
 {
 	clear_time();  //enforce object/range exclusivity
 	clear_tracks();  //enforce object/track exclusivity
-	
+
 	PlaylistSelection::iterator i;
 
 	if ((i = find (playlists.begin(), playlists.end(), pl)) == playlists.end()) {
@@ -301,7 +301,7 @@ Selection::toggle (RegionView* r)
 {
 	clear_time();  //enforce object/range exclusivity
 	clear_tracks();  //enforce object/track exclusivity
-	
+
 	RegionSelection::iterator i;
 
 	if ((i = find (regions.begin(), regions.end(), r)) == regions.end()) {
@@ -372,7 +372,7 @@ Selection::add (boost::shared_ptr<Playlist> pl)
 {
 	clear_time();  //enforce object/range exclusivity
 	clear_tracks();  //enforce object/track exclusivity
-	
+
 	if (find (playlists.begin(), playlists.end(), pl) == playlists.end()) {
 		pl->use ();
 		playlists.push_back(pl);
@@ -385,7 +385,7 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 {
 	clear_time();  //enforce object/range exclusivity
 	clear_tracks();  //enforce object/track exclusivity
-	
+
 	bool changed = false;
 
 	for (list<boost::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
@@ -563,7 +563,7 @@ void
 Selection::replace (uint32_t sid, framepos_t start, framepos_t end)
 {
 	clear_objects();  //enforce object/range exclusivity
-	
+
 	for (list<AudioRange>::iterator i = time.begin(); i != time.end(); ++i) {
 		if ((*i).id == sid) {
 			time.erase (i);
@@ -906,7 +906,7 @@ Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 	clear_objects();
-	
+
 	add (ac);
 }
 
@@ -992,7 +992,7 @@ Selection::toggle (list<Selectable*> const & selectables)
 {
 	clear_time();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
-	
+
 	RegionView* rv;
 	ControlPoint* cp;
 	vector<RegionView*> rvs;
@@ -1179,7 +1179,7 @@ Selection::add (const list<Marker*>& m)
 	markers.insert (markers.end(), m.begin(), m.end());
 	markers.sort ();
 	markers.unique ();
-	
+
 	MarkersChanged ();
 }
 
@@ -1242,7 +1242,7 @@ Selection::get_state () const
 	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rn_it;
 	for (rn_it = rid_notes.begin(); rn_it != rid_notes.end(); ++rn_it) {
 		n->add_property (X_("region_id"), atoi((*rn_it).first.to_s().c_str()));
-			
+
 		for (std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
 			XMLNode* nc = n->add_child(X_("note"));
 			snprintf(buf, sizeof(buf), "%d", (*i)->channel());
@@ -1288,10 +1288,10 @@ Selection::get_state () const
 		snprintf(buf, sizeof(buf), "%" PRId64, (*i).end);
 		t->add_property (X_("end"), string(buf));
 	}
-	
+
 	for (MarkerSelection::const_iterator i = markers.begin(); i != markers.end(); ++i) {
 		XMLNode* t = node->add_child (X_("Marker"));
-		
+
 		bool is_start;
 		Location* loc = editor->find_location_from_marker (*i, is_start);
 
@@ -1331,20 +1331,20 @@ Selection::set_state (XMLNode const & node, int)
 			XMLProperty* prop_id = (*i)->property (X_("id"));
 			assert (prop_id);
 			PBD::ID id (prop_id->value ());
-			
+
 			RegionSelection rs;
 			editor->get_regionviews_by_id (id, rs);
-			
+
 			if (!rs.empty ()) {
 				add (rs);
 			} else {
 				/*
-				  regionviews haven't been constructed - stash the region IDs 
+				  regionviews haven't been constructed - stash the region IDs
 				  so we can identify them in Editor::region_view_added ()
 				*/
 				regions.pending.push_back (id);
 			}
-			
+
 		} else if ((*i)->name() == X_("MIDINote")) {
 			XMLProperty* prop_region_id = (*i)->property (X_("region-id"));
 
@@ -1365,27 +1365,27 @@ Selection::set_state (XMLNode const & node, int)
 				XMLProperty* prop_length = (*ci)->property (X_("length"));
 				XMLProperty* prop_velocity = (*ci)->property (X_("velocity"));
 				XMLProperty* prop_off_velocity = (*ci)->property (X_("off-velocity"));
-				
+
 				assert (prop_channel);
 				assert (prop_time);
 				assert (prop_note);
 				assert (prop_length);
 				assert (prop_velocity);
 				assert (prop_off_velocity);
-				
+
 				uint8_t channel = atoi(prop_channel->value());
 				Evoral::Beats time (atof(prop_time->value()));
 				Evoral::Beats length (atof(prop_length->value()));
 				uint8_t note = atoi(prop_note->value());
 				uint8_t velocity = atoi(prop_velocity->value());
 				uint8_t off_velocity = atoi(prop_off_velocity->value());
-				boost::shared_ptr<Evoral::Note<Evoral::Beats> > the_note 
+				boost::shared_ptr<Evoral::Note<Evoral::Beats> > the_note
 					(new Evoral::Note<Evoral::Beats>  (channel, time, length, note, velocity));
 				the_note->set_off_velocity (off_velocity);
-				
+
 				notes.push_back (the_note);
 			}
-			
+
 			for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
 				MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*rsi);
 				if (mrv) {
@@ -1400,7 +1400,7 @@ Selection::set_state (XMLNode const & node, int)
 
 		} else if  ((*i)->name() == X_("ControlPoint")) {
 			XMLProperty* prop_type = (*i)->property (X_("type"));
-	
+
 			assert(prop_type);
 
 			if (prop_type->value () == "track") {
@@ -1488,9 +1488,9 @@ Selection::set_state (XMLNode const & node, int)
 			if (m) {
 				add (m);
 			}
-			
+
 		}
-		
+
 	}
 
 	return 0;

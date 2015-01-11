@@ -3336,7 +3336,7 @@ void
 Editor::begin_reversible_selection_op (string name)
 {
 	if (_session) {
-		cerr << name << endl;
+		//cerr << name << endl;
 		/* begin/commit pairs can be nested */
 		selection_op_cmd_depth++;
 	}
@@ -4933,7 +4933,7 @@ Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<
 
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		MidiTimeAxisView* mtav;
-		
+
 		if ((mtav = dynamic_cast<MidiTimeAxisView*> (*i)) != 0) {
 
 			mtav->get_per_region_note_selection (selection);
