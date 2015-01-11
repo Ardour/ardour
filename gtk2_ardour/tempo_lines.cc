@@ -117,7 +117,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 	lines.clear ();
 
-	if (beat_density < 0.1 && begin != end && begin->frame > 0) {
+	if (beat_density <= 0.12 && begin != end && begin->frame > 0) {
 		/* draw subdivisions of the beat before the first visible beat line */
 		ARDOUR::TempoMap::BBTPointList::const_iterator prev = begin;
 		--prev;
@@ -139,7 +139,7 @@ TempoLines::draw (const ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 
 		lines.add (xpos, 1.0, color);
 
-		if (beat_density < 0.1) {
+		if (beat_density <= 0.12) {
 			/* draw subdivisions of this beat */
 			draw_ticks(i, divisions, leftmost_frame, frame_rate);
 		}
