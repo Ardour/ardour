@@ -2285,7 +2285,18 @@ ARDOUR_UI::stop_clocking ()
 void
 ARDOUR_UI::save_session_as ()
 {
-	
+	if (!_session) {
+		return;
+	}
+
+	Session::SaveAs sa;
+	sa.new_parent_folder = "/tmp";
+	sa.new_name = "foobar";
+	sa.switch_to = true;
+	sa.copy_media = true;
+	sa.copy_external = false;
+
+	_session->save_as (sa);
 }
 
 /** Ask the user for the name of a new snapshot and then take it.

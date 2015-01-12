@@ -140,12 +140,6 @@ Session::pre_engine_init (string fullpath)
 
 	_path = canonical_path(fullpath);
 
-	/* we require _path to end with a dir separator */
-
-	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
-		_path += G_DIR_SEPARATOR;
-	}
-
 	/* is it new ? */
 
 	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
@@ -731,8 +725,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	std::string tmp_path(_session_dir->root_path());
 	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
 
-	// cerr << "actually writing state to " << xml_path << endl;
-
+	cerr << "actually writing state to " << tmp_path << endl;
+	
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
 		if (g_remove (tmp_path.c_str()) != 0) {
@@ -743,6 +737,8 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
+		cerr << "renaming state to " << xml_path << endl;
+		
 		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
 					tmp_path, xml_path, g_strerror(errno)) << endmsg;
@@ -3602,7 +3598,7 @@ int
 Session::rename (const std::string& new_name, bool after_copy)
 {
 	string legal_name = legalize_for_path (new_name);
-	string newpath;
+	string new_path;
 	string oldstr;
 	string newstr;
 	bool first = true;
@@ -3623,91 +3619,117 @@ Session::rename (const std::string& new_name, bool after_copy)
 	 * already exist ...
 	 */
 
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-		vector<string> v;
+	if (!after_copy) {
+		for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+			
+			if (first) {
+				/* primary session directory */
+				newstr = _path;
+				first = false;
+			} else {
+				oldstr = (*i).path;
+				
+				/* this is a stupid hack because Glib::path_get_dirname() is
+				 * lexical-only, and so passing it /a/b/c/ gives a different
+				 * result than passing it /a/b/c ...
+				 */
+				
+				if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
+					oldstr = oldstr.substr (0, oldstr.length() - 1);
+				}
 
-		oldstr = (*i).path;
-
-		/* this is a stupid hack because Glib::path_get_dirname() is
-		 * lexical-only, and so passing it /a/b/c/ gives a different
-		 * result than passing it /a/b/c ...
-		 */
-
-		if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
-			oldstr = oldstr.substr (0, oldstr.length() - 1);
-		}
-
-		string base = Glib::path_get_dirname (oldstr);
-		string p = Glib::path_get_basename (oldstr);
-
-		newstr = Glib::build_filename (base, legal_name);
-		
-		if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
-			return -1;
+				string base = Glib::path_get_dirname (oldstr);
+				string p = Glib::path_get_basename (oldstr);
+				
+				newstr = Glib::build_filename (base, legal_name);
+			}
+			
+			if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
+				return -1;
+			}
 		}
 	}
 
 	/* Session dirs */
+
+	first = false;
 	
-	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		vector<string> v;
 
 		oldstr = (*i).path;
-
+		
 		/* this is a stupid hack because Glib::path_get_dirname() is
 		 * lexical-only, and so passing it /a/b/c/ gives a different
 		 * result than passing it /a/b/c ...
 		 */
-
+		
 		if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
 			oldstr = oldstr.substr (0, oldstr.length() - 1);
 		}
 
-		string base = Glib::path_get_dirname (oldstr);
-		string p = Glib::path_get_basename (oldstr);
-
-		newstr = Glib::build_filename (base, legal_name);
-
-		cerr << "Rename " << oldstr << " => " << newstr << endl;		
-
-		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
-			return 1;
+		if (first) {
+			newstr = _path;
+		} else {
+			string base = Glib::path_get_dirname (oldstr);
+			newstr = Glib::build_filename (base, legal_name);
 		}
 
+		if (!after_copy) {
+			cerr << "Rename " << oldstr << " => " << newstr << endl;		
+			if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+				error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
+				return 1;
+			}
+		}
+
+		/* Reset path in "session dirs" */
+		
+		(*i).path = newstr;
+
+		/* reset primary SessionDirectory object */
+		
 		if (first) {
 			(*_session_dir) = newstr;
-			newpath = newstr;
-			first = 1;
+			new_path = newstr;
+			first = false;
 		}
 
-		/* directory below interchange */
+		/* now rename directory below session_dir/interchange */
 
-		v.push_back (newstr);
+		string old_interchange_dir;
+		string new_interchange_dir;
+
+		/* use newstr here because we renamed the path that used to be oldstr to newstr above */		
+
+		v.push_back (newstr); 
 		v.push_back (interchange_dir_name);
-		v.push_back (p);
+		v.push_back (Glib::path_get_basename (oldstr));
 
-		oldstr = Glib::build_filename (v);
+		old_interchange_dir = Glib::build_filename (v);
 
 		v.clear ();
 		v.push_back (newstr);
 		v.push_back (interchange_dir_name);
 		v.push_back (legal_name);
-
-		newstr = Glib::build_filename (v);
 		
-		cerr << "Rename " << oldstr << " => " << newstr << endl;
+		new_interchange_dir = Glib::build_filename (v);
 		
-		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
+		cerr << "Rename " << old_interchange_dir << " => " << new_interchange_dir << endl;
+		
+		if (::g_rename (old_interchange_dir.c_str(), new_interchange_dir.c_str()) != 0) {
+			error << string_compose (_("renaming %s as %2 failed (%3)"),
+						 old_interchange_dir, new_interchange_dir,
+						 g_strerror (errno))
+			      << endmsg;
 			return 1;
 		}
 	}
 
 	/* state file */
 	
-	oldstr = Glib::build_filename (newpath, _current_snapshot_name) + statefile_suffix;
-	newstr= Glib::build_filename (newpath, legal_name) + statefile_suffix;
+	oldstr = Glib::build_filename (new_path, _current_snapshot_name) + statefile_suffix;
+	newstr= Glib::build_filename (new_path, legal_name) + statefile_suffix;
 	
 	cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
@@ -3717,12 +3739,11 @@ Session::rename (const std::string& new_name, bool after_copy)
 	}
 
 	/* history file */
-
 	
-	oldstr = Glib::build_filename (newpath, _current_snapshot_name) + history_suffix;
+	oldstr = Glib::build_filename (new_path, _current_snapshot_name) + history_suffix;
 
 	if (Glib::file_test (oldstr, Glib::FILE_TEST_EXISTS))  {
-		newstr = Glib::build_filename (newpath, legal_name) + history_suffix;
+		newstr = Glib::build_filename (new_path, legal_name) + history_suffix;
 		
 		cerr << "Rename " << oldstr << " => " << newstr << endl;		
 		
@@ -3732,37 +3753,20 @@ Session::rename (const std::string& new_name, bool after_copy)
 		}
 	}
 
-	/* update file source paths */
-	
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
-		if (fs) {
-			string p = fs->path ();
-			boost::replace_all (p, old_sources_root, _session_dir->sources_root());
-			fs->set_path (p);
-		}
-	}
-
 	if (!after_copy) {
 		/* remove old name from recent sessions */
 		remove_recent_sessions (_path);
-		_path = newpath;
+		_path = new_path;
 	}
 
 	_current_snapshot_name = new_name;
 	_name = new_name;
-
-	/* re-add directory separator - reverse hack to oldstr above */
-	if (_path[_path.length()-1] != G_DIR_SEPARATOR) {
-		_path += G_DIR_SEPARATOR;
-	}
 
 	set_dirty ();
 
 	/* save state again to get everything just right */
 
 	save_state (_current_snapshot_name);
-
 
 	/* add to recent sessions */
 
@@ -3937,7 +3941,7 @@ Session::save_as (SaveAs& saveas)
 	vector<string> files;
 	string current_folder = Glib::path_get_dirname (_path);
 	string new_folder = legalize_for_path (saveas.new_name);
-	string to_dir = Glib::build_filename (saveas.new_parent_folder, saveas.new_name);
+	string to_dir = Glib::build_filename (saveas.new_parent_folder, new_folder);
 	int64_t total_bytes = 0;
 	int64_t copied = 0;
 	int64_t cnt = 0;
@@ -3956,6 +3960,8 @@ Session::save_as (SaveAs& saveas)
 		find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
 		
 		all += files.size();
+
+		cerr << (*sd).path << " Contained " << files.size() << " total now " << all << endl;
 		
 		for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
 			GStatBuf gsb;
@@ -3965,84 +3971,201 @@ Session::save_as (SaveAs& saveas)
 				total_bytes += gsb.st_size;
 			}
 		}
+		cerr << "\ttotal size now " << total_bytes << endl;
 	}
 
+	/* Create the new session directory */
+	
+	string old_path = _path;
+	string old_name = _name;
+	string old_snapshot = _current_snapshot_name;
+	string old_sd = _session_dir->root_path();
+	
+	(*_session_dir) = to_dir;
+
+	if (!_session_dir->create()) {
+		return -1;
+	}
+
+	cerr << "Created new session dir " << _session_dir->root_path() << endl;
+		
 	try {
-		for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
-			
-			/* need to clear this because
-			 * find_files_matching_filter() is cumulative
+		if (saveas.copy_media) {		
+
+			/* copy all media files. Find each location in
+			 * session_dirs, and copy files from there to
+			 * target.
 			 */
-
-			files.clear ();
 			
-			find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
-			
-			const size_t prefix_len = (*sd).path.size();
-			
-			for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-				std::string from = *i;
-				std::string to = Glib::build_filename (to_dir, (*i).substr(prefix_len));
-
-				g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755);
+			for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
 				
-				if ((*i).find (X_("interchange")) == string::npos || saveas.copy_media) {
-					
-					GStatBuf gsb;
-					g_stat ((*i).c_str(), &gsb);
-					
-					if (!copy_file (from, to)) {
-						throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
-					}
-					
-					copied += gsb.st_size;
-					double fraction = (double) copied / total_bytes;
-					
-					/* tell someone "X percent, file M of
-					 * N"; M is one-based
-					 */
+				/* need to clear this because
+				 * find_files_matching_filter() is cumulative
+				 */
+				
+				files.clear ();
+				
+				find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+				
+				const size_t prefix_len = (*sd).path.size();
 
-					cnt++;
-					
-					if (!saveas.Progress (fraction, cnt, all)) {
-						throw Glib::FileError (Glib::FileError::FAILED, "copy cancelled");
+				/* copy all media files (everything below
+				 * interchange/)
+				 */
+				
+				for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
+					std::string from = *i;
+
+
+					if ((*i).find (X_("interchange")) != string::npos) {
+
+						/* media file */
+						
+						GStatBuf gsb;
+						g_stat ((*i).c_str(), &gsb);
+						
+						/* strip the session dir prefix from
+						 * each full path, then prepend new
+						 * to_dir to give complete path.
+						 */
+						
+						std::string to = Glib::build_filename (to_dir, (*i).substr (prefix_len));
+						
+						cerr << "Copy " << from << " to " << to << endl;
+						
+						if (!copy_file (from, to)) {
+							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+						}
+						
+						copied += gsb.st_size;
+						double fraction = (double) copied / total_bytes;
+						
+						/* tell someone "X percent, file M of
+						 * N"; M is one-based
+						 */
+						
+						cnt++;
+						
+						cerr << "PROGRESS " << fraction << "%, " << cnt << " of " << all << endl;
+						
+#if 0
+						if (!saveas.Progress (fraction, cnt, all)) {
+							throw Glib::FileError (Glib::FileError::FAILED, "copy cancelled");
+						}
+#endif
 					}
-				}
-			}
-			
-			/* now modify our _path setting so that we refer to the copy we've just
-			 * created. The filename of the session file hasn't
-			 * been changed yet.
-			 */
-			
-			_path = new_folder;
-			
-			/* _path now refers to the copy we just created, but that copy
-			 * contains references to the wrong name and so forth.
-			 * Use rename() to actually change the name 
-			 */
-			
-			if (rename (saveas.new_name, true)) {
-				throw Glib::FileError (Glib::FileError::NAME_TOO_LONG, "rename failed");
-			}
-			
-			if (saveas.copy_media && saveas.copy_external) {
-				if (consolidate_all_media()) {
-					throw Glib::FileError (Glib::FileError::NO_SPACE_LEFT, "consolidate failed");
 				}
 			}
 		}
 
+		_path = to_dir;
+		_current_snapshot_name = saveas.new_name;
+		_name = saveas.new_name;
+		
+		cerr << "New path = " << _path << endl;
+		
+		if (!saveas.copy_media && saveas.switch_to) {
+
+			/* need to make all internal file sources point to old session */
+			
+			for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+				boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+
+				if (fs && fs->within_session()) {
+
+					cerr << "fs " << fs->name() << " is inside session " << fs->path() << endl;
+					
+					/* give it an absolute path referencing
+					 * the original session. Should be
+					 * easy, but in general, we don't
+					 * actually know where it lives - it
+					 * could be in any session dir. So we
+					 * have to look for it.
+					 *
+					 * Note that the session_dirs list 
+					 */
+
+					for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+						SessionDirectory sdir ((*sd).path);
+						string file_dir;
+						switch (fs->type()) {
+						case DataType::AUDIO:
+							file_dir = sdir.sound_path();
+							break;
+						case DataType::MIDI:
+							file_dir = sdir.midi_path();
+							break;
+						default:
+							continue;
+						}
+						string possible_path = Glib::build_filename (file_dir, fs->path());
+						if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
+							/* Found it */
+							cerr << "Reset path for " << fs->name() << " @ " << fs->path() << " to " << possible_path << endl;
+							fs->set_path (possible_path);
+							break;
+						}
+					}
+						
+				}
+			}
+		}
+		
+		bool was_dirty = dirty ();
+
+		cerr << "Saving state\n";
+		
+		save_state ("", false, false);
+		save_default_options ();
+		
+		if (saveas.copy_media && saveas.copy_external) {
+			if (consolidate_all_media()) {
+				throw Glib::FileError (Glib::FileError::NO_SPACE_LEFT, "consolidate failed");
+			}
+		}
+
+		if (!saveas.switch_to) {
+
+			/* switch back to the way things were */
+
+			_path = old_path;
+			_name = old_name;
+			_current_snapshot_name = old_snapshot;
+
+			(*_session_dir) = old_sd;
+
+			if (was_dirty) {
+				set_dirty ();
+			}
+
+		} else {
+
+			/* prune session dirs
+			 */
+
+			space_and_path sp;
+			sp.path = _path;
+			session_dirs.clear ();
+			session_dirs.push_back (sp);
+			refresh_disk_space ();
+
+			cerr << "pruned session dirs, sd = " << _session_dir->root_path()
+			     << " path = " << _path << endl;
+		}
+
 	} catch (...) {
+
+		cerr << "copying/saveas failed\n";
 		
 		/* recursively remove all the directories */
 		
-		/* XXX HOW TO DO THIS */
+		remove_directory (to_dir);
 		
 		/* return error */
 		
 		return -1;
 	}
+	cerr << "saveas completed successfully\n";
 	
 	return 0;
 }

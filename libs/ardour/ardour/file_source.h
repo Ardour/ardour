@@ -46,8 +46,8 @@ class LIBARDOUR_API FileSource : virtual public Source {
 public:
 	virtual ~FileSource ();
 
-	virtual const std::string& path() const { return _path; }
-
+	const std::string& path() const { return _path; }
+	
 	virtual bool safe_file_extension (const std::string& path) const = 0;
 
 	int  move_to_trash (const std::string& trash_dir_name);
