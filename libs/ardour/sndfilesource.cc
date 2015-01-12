@@ -470,7 +470,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 	update_length (_length + cnt);
 
 	if (_build_peakfiles) {
-		compute_and_write_peaks (data, frame_pos, cnt, false, true);
+		compute_and_write_peaks (data, frame_pos, cnt, true, true);
 	}
 
 	return cnt;
@@ -557,7 +557,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 	update_length (file_pos + cnt);
 
 	if (_build_peakfiles) {
-		compute_and_write_peaks (data, file_pos, cnt, false, true);
+		compute_and_write_peaks (data, file_pos, cnt, true, true);
 	}
 
 	file_pos += cnt;
