@@ -81,15 +81,15 @@ Editor::initialize_canvas ()
 	ArdourCanvas::ScrollGroup* hsg; 
 	ArdourCanvas::ScrollGroup* hg;
 
+	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
+	_track_canvas->add_scroller (*hg);
+
 	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
 							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
 	_track_canvas->add_scroller (*hsg);
-
-	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
-	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
-	_track_canvas->add_scroller (*hg);
 
 	_verbose_cursor = new VerboseCursor (this);
 
@@ -225,8 +225,6 @@ Editor::initialize_canvas ()
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
 	}
-
-	hv_scroll_group->raise_to_top ();
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
