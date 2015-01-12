@@ -588,11 +588,11 @@
                       table.rightattach="1"
                       table.topattach="1"
                       table.bottomattach="2"
-                      width="233"
                       table.yfill="true"
                       table.yexpand="true"
                       bgnormal="#3E3E3E">
-                <VBox id="edit_controls_vbox"/>
+                <VBox id="edit_controls_vbox"
+                      width="233"/>
               </Layout>
               <VScrollbar adjustment="vertical_adjustment"
                           table.leftattach="2"
