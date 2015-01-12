@@ -251,7 +251,7 @@ Canvas::window_to_canvas (Duple const & d) const
 		in_window.y = 0;
 	}
 
-	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
+	for (std::list<Item*>::const_reverse_iterator i = root_children.rbegin(); i != root_children.rend(); ++i) {
 		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_window (in_window)) {
 			break;
 		}
