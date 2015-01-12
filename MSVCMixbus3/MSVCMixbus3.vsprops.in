@@ -128,4 +128,8 @@
 		Name="TargetSxSFolder"
 		Value="@TargetSxSFolder@"
 	/>
+	<UserMacro
+		Name="LibardourFolder"
+		Value="mixbus3"
+	/>
 </VisualStudioPropertySheet>

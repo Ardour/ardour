@@ -128,4 +128,8 @@
 		Name="TargetSxSFolder"
 		Value="@TargetSxSFolder@"
 	/>
+	<UserMacro
+		Name="LibardourFolder"
+		Value="ardour3"
+	/>
 </VisualStudioPropertySheet>
