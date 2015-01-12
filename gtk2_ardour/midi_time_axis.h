@@ -19,6 +19,8 @@
 #ifndef __ardour_midi_time_axis_h__
 #define __ardour_midi_time_axis_h__
 
+#include <list>
+
 #include <gtkmm/table.h>
 #include <gtkmm/button.h>
 #include <gtkmm/box.h>
@@ -27,10 +29,7 @@
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/checkmenuitem.h>
 
-#include <gtkmm2ext/selector.h>
-#include <list>
-
-#include "evoral/Note.hpp"
+#include "gtkmm2ext/selector.h"
 
 #include "ardour/types.h"
 #include "ardour/region.h"
@@ -55,6 +54,10 @@ namespace ARDOUR {
 	class Processor;
 	class Location;
 	class MidiPlaylist;
+}
+
+namespace Evoral {
+	template<typename Time> class Note;
 }
 
 class PublicEditor;
