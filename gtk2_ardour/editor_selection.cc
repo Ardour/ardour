@@ -1081,7 +1081,6 @@ Editor::track_selection_changed ()
         }
     }
 
-    bool master_track_selected = false;
 	RouteNotificationListPtr routes (new RouteNotificationList);
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -1099,26 +1098,13 @@ Editor::track_selection_changed ()
 			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*i);
 			if (rtav) {
 				routes->push_back (rtav->route());
-                
-                boost::shared_ptr<AudioTrack> atr = boost::dynamic_pointer_cast<AudioTrack> (rtav->route());
-                if (atr && atr->is_master_track() ) {
-                    master_track_selected = true;
-                }
 			}
 		}
 	}
 
     // check if we should enable track selectin sensitive actions
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, track_selected() );
-    
-    // check if we should disable actions forbiden when only master track is selected
-    if( master_track_selected &&
-        track_selected() &&
-        selection->tracks.size() < 2 ) {
-        
-        ActionManager::set_sensitive (ActionManager::actions_forbiden_for_master_track, false);
-    }
-    
+
 	/* notify control protocols */
 	ControlProtocol::TrackSelectionChanged (routes);
 }

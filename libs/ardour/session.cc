@@ -426,11 +426,6 @@ Session::Session (AudioEngine &eng,
         }
     }
     
-    // Waves Tracks: always create master track at the end
-    if ( ARDOUR::Profile->get_trx () ) {
-        create_master_track();
-    }
-    
     _is_new = false;
     
 	SessionLoaded();
@@ -612,7 +607,6 @@ Session::destroy ()
 
 	_master_out.reset ();
 	_monitor_out.reset ();
-    _master_track.reset ();
 
 	{
 		RCUWriter<RouteList> writer (routes);
@@ -2653,88 +2647,6 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	return ret;
 }
 
-/** Caller must not hold process lock
- *  @param name_template string to use for the start of the name, or "" to use "Audio".
- */
-bool
-Session::create_master_track ()
-{
-    if (!_master_out) {
-        return false;
-    }
-    
-    if (_master_track) {
-        return true;
-    }
-    
-    // master track I/O is stereo
-    uint32_t input_channels = _master_out->n_inputs().get(DataType::AUDIO);
-    uint32_t output_channels = input_channels;
-    
-    std::string track_name = "Master Track";
-	string port;
-	RouteList new_routes;
-    boost::shared_ptr<AudioTrack> track;
-        
-    try {
-        track.reset (new AudioTrack (*this, track_name, Route::MasterTrack, Normal) );
-        
-        if (track->init ()) {
-            return false;
-        }
-        
-        track->use_new_diskstream();
-        track->set_mute (true, this);
-        
-        {
-            Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-            
-            if (track->input()->ensure_io (ChanCount(DataType::AUDIO, input_channels), false, this)) {
-                error << string_compose (
-                                         _("cannot configure %1 in/%2 out configuration for new audio track"),
-                                         input_channels, output_channels)
-                << endmsg;
-                return false;
-            }
-            
-            if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
-                error << string_compose (
-                                         _("cannot configure %1 in/%2 out configuration for new audio track"),
-                                         input_channels, output_channels)
-                << endmsg;
-                return false;
-            }
-        }
-        
-        track->non_realtime_input_change();
-        
-        track->DiskstreamChanged.connect_same_thread (*this, boost::bind (&Session::resort_routes, this));
-        if (Config->get_remote_model() == UserOrdered) {
-            track->set_remote_control_id (next_control_id());
-        }
-        
-        new_routes.push_back (track);
-    }
-    
-    catch (failed_constructor &err) {
-        error << _("Session: could not create Master Track.") << endmsg;
-        return false;
-    }
-    
-    catch (AudioEngine::PortRegistrationFailure& pfe) {
-        
-        error << pfe.what() << endmsg;
-        return false;
-    }
-
-	if (!new_routes.empty()) {
-		add_routes (new_routes, false, false, true);
-	}
-    
-	return true;
-}
-
-
 /** Caller must not hold process lock.
  *  @param name_template string to use for the start of the name, or "" to use "Bus".
  */
@@ -3025,14 +2937,6 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (r);
 		if (tr) {
             
-            boost::shared_ptr<AudioTrack> atr = boost::dynamic_pointer_cast<AudioTrack> (r);
-            if (atr) {
-                
-                if (atr->is_master_track()) {
-                    _master_track = r;
-                }
-            }
-            
 			tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, boost::weak_ptr<Track> (tr)));
 			track_playlist_changed (boost::weak_ptr<Track> (tr));
 			// tr->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Session::update_route_record_state, this));
@@ -3183,8 +3087,8 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
         
         for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
             
-            if (*iter == _master_out || *iter == _master_track) {
-                return;
+            if (*iter == _master_out) {
+                continue;
             }
             
             (*iter)->set_solo (false, this);
@@ -3202,10 +3106,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
             
             if (*iter == _monitor_out) {
                 _monitor_out.reset ();
-            }
-            
-            if (*iter == _master_track) {
-                _master_track.reset ();
             }
 
             update_route_solo_state ();
@@ -3307,7 +3207,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 void
 Session::remove_route (boost::shared_ptr<Route> route)
 {
-	if (route == _master_out || route == _master_track) {
+	if (route == _master_out) {
 		return;
 	}
 
@@ -3331,10 +3231,6 @@ Session::remove_route (boost::shared_ptr<Route> route)
 		if (route == _monitor_out) {
 			_monitor_out.reset ();
 		}
-        
-        if (route == _master_track) {
-            _master_track.reset ();
-        }
 
 		/* writer goes out of scope, forces route list update */
 	}

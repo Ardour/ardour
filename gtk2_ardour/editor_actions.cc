@@ -281,7 +281,6 @@ Editor::register_actions ()
 
     act = reg_sens (editor_actions, "DeleteSelectedTracks", _("Delete Selected"), sigc::mem_fun(ARDOUR_UI::instance(), &ARDOUR_UI::delete_selected_tracks));
     ActionManager::track_selection_sensitive_actions.push_back (act);
-    ActionManager::actions_forbiden_for_master_track.push_back (act);
 	act = reg_sens (editor_actions, "move-selected-tracks-up", _("Move Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "move-selected-tracks-down", _("Move Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));

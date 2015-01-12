@@ -1407,10 +1407,6 @@ RouteUI::remove_this_route (bool apply_to_selection)
                 if ( t->route()->is_master() || t->route()->is_monitor() )
                     continue;
                 
-                AudioTrack* audio_track = dynamic_cast<AudioTrack*>( t->route().get() );
-                if( audio_track && audio_track->is_master_track() )
-                    continue;
-                
                 routes_to_remove->push_back(t->route() );
             }
         }
@@ -1418,10 +1414,6 @@ RouteUI::remove_this_route (bool apply_to_selection)
 		if ( route()->is_master() || route()->is_monitor() )
 			return;
         
-        AudioTrack* audio_track = dynamic_cast<AudioTrack*>( route().get() );
-        if( audio_track && audio_track->is_master_track() )
-            return;
-		
         routes_to_remove->push_back(this->route() );
 	}
     
@@ -1565,17 +1557,6 @@ bool
 RouteUI::is_audio_track () const
 {
 	return boost::dynamic_pointer_cast<AudioTrack>(_route) != 0;
-}
-
-bool
-RouteUI::is_master_track () const
-{
-    boost::shared_ptr<AudioTrack> at;
-	if (at = boost::dynamic_pointer_cast<AudioTrack>(_route) ) {
-        return at->is_master_track();
-    }
-    
-    return false;
 }
 
 boost::shared_ptr<AudioTrack>

@@ -130,18 +130,9 @@ CompactMeterStrip::update_tooltip ()
 {
     string record_status = _route->record_enabled() ? "Record Enabled" : "Record Disabled";
     
-    boost::shared_ptr<AudioTrack> t;
-    t = boost::dynamic_pointer_cast<AudioTrack>( _route );
-    
-    if( t != NULL && t->is_master_track () )
-    {
-        this->set_tooltip_text (_route->name () + "\n" + record_status);
-    } else
-    {
-        stringstream ss;
-        ss<<_serial_number - 1;
-        this->set_tooltip_text ("Track " + ss.str() + "\n" + _route->name () + "\n" + record_status);
-    }
+    stringstream ss;
+    ss<<_serial_number - 1;
+    this->set_tooltip_text ("Track " + ss.str() + "\n" + _route->name () + "\n" + record_status);
 }
 
 void

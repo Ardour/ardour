@@ -429,27 +429,22 @@ RouteTimeAxisView::build_display_menu ()
 	}
 	build_size_menu ();
 	items.push_back (MenuElem (_("Height"), *_size_menu));
+    
+    items.push_back (SeparatorElem());
+    
+    if (!Profile->get_sae()) {
+        items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
+        items.back().set_label ("Remove");
+    } else {
+            items.push_front (SeparatorElem());
+        items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
+        items.back().set_label ("Delete");
+    }
 
-        boost::shared_ptr<AudioTrack> atr = audio_track ();
-
-        if (!(atr && atr->is_master_track())) {
-                
-                items.push_back (SeparatorElem());
-                
-                if (!Profile->get_sae()) {
-                    items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
-                    items.back().set_label ("Remove");
-                } else {
-                        items.push_front (SeparatorElem());
-                    items.push_back (*manage (ActionManager::get_action_from_name ("DeleteSelectedTracks")->create_menu_item ()));
-                    items.back().set_label ("Delete");
-                }
-        }
-
-        if (Profile->get_trx()) {
-                /* no more stuff in the menu for Tracks but retain code for easier merging with Ardour */
-                return;
-        }
+    if (Profile->get_trx()) {
+            /* no more stuff in the menu for Tracks but retain code for easier merging with Ardour */
+            return;
+    }
 
 	items.push_back (SeparatorElem());
 
@@ -2387,12 +2382,7 @@ RouteTimeAxisView::can_edit_name () const
 {
     if( _route->is_master () )
         return false;
-    
-    boost::shared_ptr<AudioTrack> audio_track = boost::dynamic_pointer_cast<AudioTrack>( _route );
-    
-    if( audio_track && audio_track->is_master_track() )
-        return false;
-    
+
     if (_session == 0) {
         return false;
     }

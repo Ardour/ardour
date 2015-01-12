@@ -104,7 +104,6 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
     
 	bool is_track() const;
 	bool is_audio_track() const;
-    bool is_master_track() const;
 	bool is_midi_track() const;
 	bool has_audio_outputs () const;
 

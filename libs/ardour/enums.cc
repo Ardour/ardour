@@ -444,7 +444,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Route, Auditioner);
 	REGISTER_CLASS_ENUM (Route, MasterOut);
 	REGISTER_CLASS_ENUM (Route, MonitorOut);
-    REGISTER_CLASS_ENUM (Route, MasterTrack);
 	REGISTER_BITS (_Route_Flag);
 
 	REGISTER_CLASS_ENUM (Source, Writable);

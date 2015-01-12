@@ -50,7 +50,6 @@ vector<RefPtr<Gtk::Action> > ActionManager::write_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::actions_forbiden_for_master_track;
 vector<RefPtr<Gtk::Action> > ActionManager::point_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::time_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::line_selection_sensitive_actions;

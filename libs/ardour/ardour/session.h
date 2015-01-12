@@ -498,8 +498,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		uint32_t how_many = 1,
 		std::string name_template = ""
 		);
-    
-    bool create_master_track ();
 
 	RouteList new_audio_route (
 		int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template = ""
@@ -688,7 +686,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
-    boost::shared_ptr<Route> master_track() const { return _master_track; }
 
 	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p, bool);
 	void globally_set_send_gains_from_track (boost::shared_ptr<Route> dest);
@@ -1595,7 +1592,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Route> _master_out;
 	boost::shared_ptr<Route> _monitor_out;
-    boost::shared_ptr<Route> _master_track;
 
 	void auto_connect_master_bus ();
 

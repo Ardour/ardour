@@ -3505,10 +3505,6 @@ ARDOUR_UI::delete_selected_tracks()
             if ( t->route()->is_master() || t->route()->is_monitor() )
                 continue;
             
-            AudioTrack* audio_track = dynamic_cast<AudioTrack*>( t->route().get() );
-            if ( audio_track && audio_track->is_master_track() )
-                continue;
-            
             routes_to_remove->push_back(t->route() );
         }
     }

@@ -6658,11 +6658,6 @@ Editor::remove_tracks ()
 			continue;
 		}
         
-        AudioTrack* atr = dynamic_cast<AudioTrack*> (rtv->route().get() );
-        if (atr && atr->is_master_track() ) {
-            continue;
-        }
-        
 		if (rtv->is_track()) {
 			ntracks++;
 		} else {

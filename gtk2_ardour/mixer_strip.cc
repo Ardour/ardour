@@ -385,10 +385,6 @@ MixerStrip::begin_name_edit ()
     if ( (_session->record_status()==Session::Recording) && (_route->record_enabled()) )
         return;
     
-    boost::shared_ptr<AudioTrack> audio_track = boost::dynamic_pointer_cast<AudioTrack>(_route);
-    if( audio_track && audio_track->is_master_track() )
-        return;
-    
     _name_entry.set_text ( _route->name() );
     name_button.hide();
     _name_entry_eventbox.show ();
