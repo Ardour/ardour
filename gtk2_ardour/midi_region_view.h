@@ -119,7 +119,7 @@ public:
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void add_note(const boost::shared_ptr<NoteType> note, bool visible);
+	NoteBase* add_note(const boost::shared_ptr<NoteType> note, bool visible);
 	void resolve_note(uint8_t note_num, Evoral::Beats end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);

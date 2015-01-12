@@ -1222,7 +1222,7 @@ MidiRegionView::redisplay_model()
 
 			} else {
 
-				add_note (note, visible);
+				cne = add_note (note, visible);
 			}
 
 			set<boost::shared_ptr<NoteType> >::iterator it;
@@ -1794,7 +1794,7 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
  * notes, and resolve_note should be called when the corresponding note off
  * event arrives, to properly display the note.
  */
-void
+NoteBase*
 MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 {
 	NoteBase* event = 0;
@@ -1852,6 +1852,7 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 	MidiStreamView* const view = mtv->midi_view();
 
 	view->update_note_range (note->note());
+	return event;
 }
 
 void
