@@ -62,8 +62,6 @@ SelectionMemento::set_state (const XMLNode& node, int /*version*/) {
 	if ((prop = node.property ("mouse-mode"))) {
 		Editing::MouseMode m = Editing::str2mousemode(prop->value());
 		editor.set_mouse_mode (m, true);
-	} else {
-		editor.set_mouse_mode (Editing::MouseObject, true);
 	}
 
 	if ((prop = node.property ("zoom"))) {
