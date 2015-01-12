@@ -758,7 +758,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		delete_selection();
 		return true;
 
-	} else if (ev->keyval == GDK_Tab) {
+	} else if (ev->keyval == GDK_Tab || ev->keyval == GDK_ISO_Left_Tab) {
 
 		trackview.editor().begin_reversible_selection_op (_("Select Adjacent Note"));
 
@@ -771,24 +771,6 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		trackview.editor().commit_reversible_selection_op();
 
 		return true;
-
-	} else if (ev->keyval == GDK_ISO_Left_Tab) {
-
-		/* Shift-TAB generates ISO Left Tab, for some reason */
-
-		trackview.editor().begin_reversible_selection_op (_("Select Adjacent Note"));
-
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
-		} else {
-			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
-		}
-
-		trackview.editor().commit_reversible_selection_op();
-
-		return true;
-
-
 
 	} else if (ev->keyval == GDK_Up) {
 
