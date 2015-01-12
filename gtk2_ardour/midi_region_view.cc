@@ -598,7 +598,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		break;
 	}
 
-	if(_mouse_changed_selection) {
+	if (_mouse_changed_selection) {
 		trackview.editor().begin_reversible_selection_op (_("Mouse Selection Change"));
 		trackview.editor().commit_reversible_selection_op ();
 	}
@@ -989,7 +989,7 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 
 	content_connection.disconnect ();
 	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
-	/* Don't signal as nobody else needs to know until selection has been altered.*/
+	/* Don't signal as nobody else needs to know until selection has been altered. */
 	clear_events (false);
 
 	if (_enable_display) {
@@ -1113,7 +1113,7 @@ MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 	return 0;
 }
 
-/** This version finds any canvas note matching the supplied note.*/
+/** This version finds any canvas note matching the supplied note. */
 NoteBase*
 MidiRegionView::find_canvas_note (NoteType note)
 {
