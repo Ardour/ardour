@@ -500,14 +500,14 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		_stepping_axis_view = v;
 	}
 
- 	ArdourCanvas::Container* get_trackview_group () const { return _trackview_group; }
-        ArdourCanvas::Container* get_noscroll_group () const { return no_scroll_group; }
-        ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
-        ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
+	ArdourCanvas::Container* get_trackview_group () const { return _trackview_group; }
+	ArdourCanvas::Container* get_noscroll_group () const { return no_scroll_group; }
+	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
+	ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
 
-        ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
+	ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
-        void override_visible_track_count ();
+	void override_visible_track_count ();
 
 	/* Ruler metrics methods */
 
@@ -814,12 +814,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
 	*/
-        ArdourCanvas::ScrollGroup* hv_scroll_group;
-
+	ArdourCanvas::ScrollGroup* hv_scroll_group;
 
 	/* The group containing all other groups that are scrolled horizontally ONLY
 	*/
-        ArdourCanvas::ScrollGroup* h_scroll_group;
+	ArdourCanvas::ScrollGroup* h_scroll_group;
 
 	/* The group containing all trackviews. */
 	ArdourCanvas::Container* no_scroll_group;
