@@ -80,17 +80,12 @@ Editor::initialize_canvas ()
 
 	ArdourCanvas::ScrollGroup* hsg; 
 	ArdourCanvas::ScrollGroup* hg;
-	ArdourCanvas::ScrollGroup* vg;
 
 	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
 							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
 	_track_canvas->add_scroller (*hsg);
-
-	v_scroll_group = vg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
-	CANVAS_DEBUG_NAME (v_scroll_group, "canvas v scroll");
-	_track_canvas->add_scroller (*vg);
 
 	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
 	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
