@@ -787,7 +787,7 @@
           </HBox>
           <HBox >
             <Label style="parameter_label"
-                   text="DPM Fall-off"/>
+                   text="Meter Ballistics"/>
             <VBox style="parameter_spacing"/>
             <Dropdown id="dpm_fall_off_dropdown"
                       style="preferences_tab_dropdown">
@@ -979,14 +979,18 @@
           </HBox>
           <HBox>
             <Label style="parameter_label"
-                   text="Use DC Bias To Protect Against Denormals"/>
+                   text="Use DC Bias To Protect Against Denormals"
+                   visible="false"
+                   noshowall="true"/>
             <VBox style="parameter_spacing"/>
             <Iconbutton id="dc_bias_against_denormals_button"
                         width="20"
                         height="20"
                         normalicon="waves_check_box"
                         activeicon="waves_check_box_active"
-                        toggleable="true"/>
+                        toggleable="true"
+                        visible="false"
+                        noshowall="true"/>
           </HBox>
           <HBox>
             <Label style="parameter_label"
