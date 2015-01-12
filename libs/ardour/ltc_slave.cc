@@ -479,7 +479,8 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		pos = session.transport_frame();
 		return true;
 	} else if (ltc_speed != 0) {
-		if (delayedlocked > 0) delayedlocked--;
+		if (delayedlocked > 1) delayedlocked--;
+		else if (current_delta == 0) delayedlocked = 0;
 	}
 
 	if (abs(now - last_timestamp) > FLYWHEEL_TIMEOUT) {
