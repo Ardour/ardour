@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # script for pulling together a MacOSX app bundle.
 
 GTKSTACK_ROOT=$HOME/gtk/inst
@@ -230,6 +232,8 @@ else
     cp  Ardour3.icns $Resources/appIcon.icns
 fi
 cp  typeArdour.icns $Resources/
+
+set +e # things below are not error-free (optional files etc) :(
 
 # copy locale files
 if test x$WITH_NLS != x ; then
@@ -607,8 +611,6 @@ else
 fi
 VOLNAME=$APPNAME-$release_version
 
-# TODO use mktemp
-export TMPDIR=`pwd`
 MNTPATH=`mktemp -d -t ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
@@ -622,6 +624,8 @@ rm -rf "$MNTPATH"
 mkdir -p "$MNTPATH"
 
 TMPDMG="${TMPDMG}.dmg"
+
+trap "rm -rf $MNTPATH $TMPDMG ${TMPDMG}.dmg $ICNSTMP" EXIT
 
 hdiutil create -megabytes $DMGMEGABYTES "$TMPDMG"
 DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
@@ -673,6 +677,7 @@ EOF
 chmod -Rf go-w "${MNTPATH}"
 sync
 
+set -e
 echo "compressing Image ..."
 
 # Umount the image
@@ -680,9 +685,6 @@ umount "${DiskDevice}"
 hdiutil eject "${DiskDevice}"
 # Create a read-only version, use zlib compression
 hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
-# Delete the temporary files
-rm "$TMPDMG"
-rm -rf "$MNTPATH"
 
 echo "setting file icon ..."
 
