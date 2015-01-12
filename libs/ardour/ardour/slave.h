@@ -388,6 +388,7 @@ public:
 	int            ltc_detect_fps_cnt;
 	int            ltc_detect_fps_max;
 	bool           printed_timecode_warning;
+	bool           sync_lock_broken;
 	Timecode::TimecodeFormat ltc_timecode;
 	Timecode::TimecodeFormat a3e_timecode;
 

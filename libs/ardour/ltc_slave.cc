@@ -52,6 +52,7 @@ LTC_Slave::LTC_Slave (Session& s)
 	delayedlocked = 10;
 	monotonic_cnt = 0;
 	fps_detected=false;
+	sync_lock_broken = false;
 
 	ltc_timecode = session.config.get_timecode_format();
 	a3e_timecode = session.config.get_timecode_format();
@@ -124,6 +125,7 @@ LTC_Slave::resync_xrun()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC resync_xrun()\n");
 	engine_dll_initstate = 0;
+	sync_lock_broken = false;
 }
 
 void
@@ -131,6 +133,7 @@ LTC_Slave::resync_latency()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC resync_latency()\n");
 	engine_dll_initstate = 0;
+	sync_lock_broken = false;
 
 	if (!session.deletion_in_progress() && session.ltc_output_io()) { /* check if Port exits */
 		boost::shared_ptr<Port> ltcport = session.ltc_input_port();
@@ -147,6 +150,7 @@ LTC_Slave::reset()
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
+	sync_lock_broken = false;
 }
 
 void
@@ -438,7 +442,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	if (last_timestamp == 0) {
 		engine_dll_initstate = 0;
-		delayedlocked++;
+		if (delayedlocked < 10) ++delayedlocked;
 	}
 	else if (engine_dll_initstate != transport_direction && ltc_speed != 0) {
 		engine_dll_initstate = transport_direction;
@@ -475,7 +479,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		pos = session.transport_frame();
 		return true;
 	} else if (ltc_speed != 0) {
-		delayedlocked = 0;
+		if (delayedlocked > 0) delayedlocked--;
 	}
 
 	if (abs(now - last_timestamp) > FLYWHEEL_TIMEOUT) {
@@ -551,6 +555,11 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	        speed = 1.0;
 	}
 
+	if (speed != 0 && delayedlocked == 0 && fabsf(speed) != 1.0) {
+		sync_lock_broken = true;
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed not locked %1 %2\n", speed, ltc_speed));
+	}
+
 	return true;
 }
 
@@ -592,7 +601,8 @@ LTC_Slave::approximate_current_delta() const
 	} else if ((monotonic_cnt - last_timestamp) > 2 * frames_per_ltc_frame) {
 		snprintf(delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
-		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"green\" face=\"monospace\" >%s%s%lld</span>sm",
+		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span>sm",
+				sync_lock_broken ? "red" : "green",
 				LEADINGZERO(llabs(current_delta)), PLUSMINUS(-current_delta), llabs(current_delta));
 	}
 	return std::string(delta);
