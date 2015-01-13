@@ -276,7 +276,7 @@ Fader::on_button_press_event (GdkEventButton* ev)
 
 	queue_draw();
 	
-	return false;
+	return true;
 }
 
 bool
