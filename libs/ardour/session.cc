@@ -110,8 +110,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-const char * Session::default_trx_track_name_pattern = "Track "; // add track number to the pattern
-const char * Session::default_ardour_track_name_pattern = "Audio "; // add track number to the pattern
+const char * Session::default_trx_track_name_pattern = "Track"; // add track number to the pattern
+const char * Session::default_ardour_track_name_pattern = "Audio "; // add track number to the pattern (SHOULD NOT IT BE "ARDOUR"!!!!)
 
 // seconds should be added afte the region exceeds end marker
 const uint32_t session_end_shift = 15;
