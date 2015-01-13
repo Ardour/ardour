@@ -1117,17 +1117,11 @@ MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 NoteBase*
 MidiRegionView::find_canvas_note (NoteType note)
 {
-	if (_optimization_iterator != _events.end()) {
-		++_optimization_iterator;
-	}
+	Events::iterator it;
 
-	if (_optimization_iterator != _events.end() && (*(*_optimization_iterator)->note()) == note) {
-		return *_optimization_iterator;
-	}
-
-	for (_optimization_iterator = _events.begin(); _optimization_iterator != _events.end(); ++_optimization_iterator) {
-		if (*((*_optimization_iterator)->note()) == note) {
-			return *_optimization_iterator;
+	for (it = _events.begin(); it != _events.end(); ++it) {
+		if (*((*it)->note()) == note) {
+			return *it;
 		}
 	}
 
