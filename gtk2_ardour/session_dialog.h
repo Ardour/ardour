@@ -69,7 +69,10 @@ class SessionDialog : public WavesDialog {
 	WavesButton& _open_saved_session_button;
 	WavesButton& _system_configuration_button;
 	WavesButton* _recent_session_button[MAX_RECENT_SESSION_COUNTS];
-	Gtk::Label& _session_details_label;
+	Gtk::Label& _session_details_label_1;
+   	Gtk::Label& _session_details_label_2;
+   	Gtk::Label& _session_details_label_3;
+ 	Gtk::Label& _session_details_label_4;
 	WM::Proxy<TracksControlPanel>& _system_configuration_dialog;
   
 #include "session_dialog.logic.h"

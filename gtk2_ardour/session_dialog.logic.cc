@@ -190,12 +190,11 @@ SessionDialog::redisplay_system_configuration ()
     std::stringstream ss;
     ss << n_ch_in << " In, " << n_ch_out << " Out";
     channel_config_info = ss.str();
-    
-    _session_details_label.set_text(string_compose (_("%1\n%2\n%3\n%4"),
-                                                    eng_controller->get_current_device_name(),
-                                                    channel_config_info,
-                                                    operation_mode,
-													eng_controller->get_current_sample_rate()));
+
+    _session_details_label_1.set_text(string_compose (_("%1"),eng_controller->get_current_device_name()));
+    _session_details_label_2.set_text(string_compose (_("%1"),channel_config_info));
+    _session_details_label_3.set_text(string_compose (_("%1"),operation_mode));
+    _session_details_label_4.set_text(string_compose (_("%1"),eng_controller->get_current_sample_rate()));
 }
 
 int
