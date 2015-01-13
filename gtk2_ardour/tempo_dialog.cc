@@ -165,6 +165,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	bpm_spinner.show ();
 	tap_tempo_button.show ();
 	get_vbox()->pack_end (tap_tempo_button);
+	bpm_spinner.grab_focus ();
 
 	set_name ("MetricDialog");
 
