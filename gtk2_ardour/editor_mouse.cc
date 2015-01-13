@@ -335,13 +335,7 @@ Editor::internal_editing() const
 void
 Editor::update_time_selection_display ()
 {
-	if (smart_mode_action->get_active()) {
-		/* not sure what to do here */
-		if (mouse_mode == MouseObject) {
-		} else {
-		}
-	} else {
-		switch (mouse_mode) {
+	switch (mouse_mode) {
 		case MouseRange:
 			selection->clear_objects ();
 			selection->ClearMidiNoteSelection();  //signal
@@ -365,7 +359,6 @@ Editor::update_time_selection_display ()
 			selection->clear_time ();
 			selection->clear_tracks ();
 			break;
-		}
 	}
 }
 
