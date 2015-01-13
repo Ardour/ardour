@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include "pbd/compose.h"
 #include "ardour/meter.h"
 #include "ardour/track.h"
 #include "ardour/audio_track.h"
@@ -131,8 +132,7 @@ CompactMeterStrip::update_tooltip ()
     string record_status = _route->record_enabled() ? "Record Enabled" : "Record Disabled";
     
     stringstream ss;
-    ss<<_serial_number - 1;
-    this->set_tooltip_text ("Track " + ss.str() + "\n" + _route->name () + "\n" + record_status);
+    this->set_tooltip_text (string_compose ("Track %1\n%2\n%3", _serial_number, _route->name (), record_status));
 }
 
 void
