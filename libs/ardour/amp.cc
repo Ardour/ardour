@@ -36,7 +36,7 @@ using namespace PBD;
 using std::min;
 
 /* gain range of -inf to +6dB, default 0dB */
-const float Amp::max_gain_coefficient = 1.99526231f;
+const float Amp::max_gain_coefficient = 1.99526231f; //+6dB
 const float Amp::min_gain_coefficient = FLT_MIN;;
 const float Amp::min_gain_coefficient_gap = 0.0000003f;
 

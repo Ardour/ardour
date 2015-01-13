@@ -134,8 +134,8 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	void setup_gain_adjustment ();
     
-    void adjust_gain_relatively(ARDOUR::gain_t val, ARDOUR::RouteList& routes, void* src);
-    ARDOUR::gain_t get_relative_gain_factor (ARDOUR::gain_t val, ARDOUR::RouteList& routes);
+    void adjust_gain_relatively(ARDOUR::gain_t val, const ARDOUR::RouteList& routes, void* src);
+    ARDOUR::gain_t get_relative_gain_factor (ARDOUR::gain_t val, const ARDOUR::RouteList& routes);
     
 	std::string astate_string (ARDOUR::AutoState);
 	std::string short_astate_string (ARDOUR::AutoState);

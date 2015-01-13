@@ -554,7 +554,7 @@ GainMeter::gain_adjusted ()
 }
 
 gain_t
-GainMeter::get_relative_gain_factor (gain_t val, RouteList& routes)
+GainMeter::get_relative_gain_factor (gain_t val, const RouteList& routes)
 {
     gain_t usable_gain = _amp->gain();
     
@@ -582,7 +582,7 @@ GainMeter::get_relative_gain_factor (gain_t val, RouteList& routes)
             return 0.0f;
         }
         
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+        for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
             gain_t g = (*i)->amp()->gain();
             
             // we are close anough to count this route's on max
@@ -601,7 +601,7 @@ GainMeter::get_relative_gain_factor (gain_t val, RouteList& routes)
         
     } else { // get min factor for selected tracks
         
-        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+        for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
             gain_t g = (*i)->amp()->gain();
             
             // we are close anough to count this on min
@@ -622,11 +622,11 @@ GainMeter::get_relative_gain_factor (gain_t val, RouteList& routes)
 }
 
 void
-GainMeter::adjust_gain_relatively(gain_t val, RouteList& routes, void* src)
+GainMeter::adjust_gain_relatively(gain_t val, const RouteList& routes, void* src)
 {
     gain_t factor = get_relative_gain_factor(val, routes);
     
-    for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+    for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
         (*i)->inc_gain(factor, src);
     }
 }
