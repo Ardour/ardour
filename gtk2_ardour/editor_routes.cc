@@ -1325,6 +1325,8 @@ EditorRoutes::button_press (GdkEventButton* ev)
 void
 EditorRoutes::selection_changed ()
 {
+	_editor->begin_reversible_selection_op (X_("Select Track from Route List"));
+
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
 		TreeIter iter;
@@ -1349,6 +1351,8 @@ EditorRoutes::selection_changed ()
 	} else {
 		_editor->get_selection().clear_tracks ();
 	}
+
+	_editor->commit_reversible_selection_op ();
 }
 
 bool

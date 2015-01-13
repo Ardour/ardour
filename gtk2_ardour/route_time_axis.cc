@@ -1294,14 +1294,21 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
 
 		/* special case: select/deselect all tracks */
+
+		_editor.begin_reversible_selection_op (X_("Selection Click"));
+
 		if (_editor.get_selection().selected (this)) {
 			_editor.get_selection().clear_tracks ();
 		} else {
 			_editor.select_all_tracks ();
 		}
 
+		_editor.commit_reversible_selection_op ();
+
 		return;
 	}
+
+	_editor.begin_reversible_selection_op (X_("Selection Click"));
 
 	switch (ArdourKeyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
@@ -1320,6 +1327,8 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		_editor.get_selection().add (this);
 		break;
 	}
+
+	_editor.commit_reversible_selection_op ();
 }
 
 void
