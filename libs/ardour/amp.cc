@@ -37,6 +37,8 @@ using std::min;
 
 /* gain range of -inf to +6dB, default 0dB */
 const float Amp::max_gain_coefficient = 1.99526231f;
+const float Amp::min_gain_coefficient = FLT_MIN;;
+const float Amp::min_gain_coefficient_gap = 0.0000003f;
 
 Amp::Amp (Session& s)
 	: Processor(s, "Amp")
@@ -364,7 +366,7 @@ Amp::inc_gain (gain_t factor, void *src)
 {
 	float desired_gain = _gain_control->user_double();
 
-	if (desired_gain == 0.0f) {
+	if (desired_gain == 0.0f && factor > min_gain_coefficient_gap) {
 		set_gain (0.000001f + (0.000001f * factor), src);
 	} else {
 		set_gain (desired_gain + (desired_gain * factor), src);

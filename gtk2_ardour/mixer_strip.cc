@@ -545,13 +545,14 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (is_track ()) {
 		rec_enable_button.set_sensitive (_session->writable());
 		rec_enable_button.show();
+        gpm.set_affected_by_selection(true);
 	} else {
 
 		/* non-master bus */
 
 		if (!_route->is_master()) {
 			show_sends_button.show();
-		}
+        }
 	}
 
 	_route->meter_change.connect (route_connections, invalidator (*this), bind (&MixerStrip::meter_changed, this), gui_context());
@@ -1721,7 +1722,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 
 	gain_meter().set_controls (_route, send->meter(), send->amp());
 	gain_meter().setup_meters ();
-
+    
 	uint32_t const in = _current_delivery->pans_required();
 	uint32_t const out = _current_delivery->pan_outs();
 

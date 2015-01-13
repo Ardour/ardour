@@ -75,6 +75,8 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
 				   boost::shared_ptr<ARDOUR::Amp> amp);
 
+    void set_affected_by_selection (bool yn) {affected_by_selection = yn; }
+
 	void update_gain_sensitive ();
 	void update_meters ();
 
@@ -114,7 +116,8 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 
 	bool ignore_toggle;
 	bool next_release_selects;
-
+    bool affected_by_selection;
+    
 	Gtkmm2ext::Fader&      gain_slider;
 	Gtk::Adjustment&       gain_adjustment;
     Gtk::Entry&            gain_display_entry;
@@ -130,7 +133,10 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
 	Gtk::Menu gain_astyle_menu;
 
 	void setup_gain_adjustment ();
-
+    
+    void adjust_gain_relatively(ARDOUR::gain_t val, ARDOUR::RouteList& routes, void* src);
+    ARDOUR::gain_t get_relative_gain_factor (ARDOUR::gain_t val, ARDOUR::RouteList& routes);
+    
 	std::string astate_string (ARDOUR::AutoState);
 	std::string short_astate_string (ARDOUR::AutoState);
 	std::string _astate_string (ARDOUR::AutoState, bool);

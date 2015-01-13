@@ -44,6 +44,7 @@
 #include "public_editor.h"
 #include "utils.h"
 #include "meter_patterns.h"
+#include "selection.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -90,7 +91,8 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	ignore_toggle = false;
 	meter_menu = 0;
 	next_release_selects = false;
-
+    affected_by_selection = false;
+    
 	level_meter_home.pack_start(level_meter);
 	level_meter.ButtonPress.connect_same_thread (_level_meter_connection, boost::bind (&GainMeter::level_meter_button_press, this, _1));
 
@@ -430,7 +432,32 @@ GainMeter::gain_activated ()
 	/* clamp to displayable values */
 	if (_data_type == DataType::AUDIO) {
 		f = min (f, 6.0f);
-		_amp->set_gain (dB_to_coefficient(f), this);
+        
+        if (_route && _route->amp() == _amp) {
+            
+            Selection& selection = ARDOUR_UI::instance()->the_editor().get_selection();
+            TimeAxisView* tv = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id() );
+            
+            // if route is a part of selection and affected_by_selection is set
+            if (affected_by_selection && selection.selected(tv) && selection.tracks.size() > 1 ) {
+                
+                RouteList routes;
+                TrackViewList track_list = selection.tracks;
+                TrackViewList::const_iterator iter = track_list.begin ();
+                for (; iter != track_list.end(); ++iter) {
+                    RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
+                    
+                    if (rtv) {
+                        rtv->route()->set_gain (dB_to_coefficient(f), this);;
+                    }
+                }
+                
+            } else {
+                _route->set_gain (dB_to_coefficient(f), this);
+            }
+        } else {
+            _amp->set_gain (dB_to_coefficient(f), this);
+        }
 	} else {
 		f = min (fabs (f), 2.0f);
 		_amp->set_gain (f, this);
@@ -494,13 +521,114 @@ GainMeter::gain_adjusted ()
 	
 	if (!ignore_toggle) {
 		if (_route && _route->amp() == _amp) {
-			_route->set_gain (value, this);
+            
+            Selection& selection = ARDOUR_UI::instance()->the_editor().get_selection();
+            TimeAxisView* tv = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id() );
+            
+            // if route is a part of selection and affected_by_selection is set
+            if (affected_by_selection && selection.selected(tv) && selection.tracks.size() > 1 ) {
+
+                RouteList routes;
+                TrackViewList track_list = selection.tracks;
+                TrackViewList::const_iterator iter = track_list.begin ();
+                for (; iter != track_list.end(); ++iter) {
+                    RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
+                    
+                    if (rtv) {
+                        routes.push_back(rtv->route() );
+                    }
+                }
+                
+                adjust_gain_relatively(value, routes, this);
+                
+            } else {
+                _route->set_gain (value, this);
+            }
+            
 		} else {
 			_amp->set_gain (value, this);
 		}
 	}
 
 	show_gain ();
+}
+
+gain_t
+GainMeter::get_relative_gain_factor (gain_t val, RouteList& routes)
+{
+    gain_t usable_gain = _amp->gain();
+    
+    // avoid "devide by 0" situation
+    if (usable_gain < 0.000001) {
+        usable_gain = 0.000001;
+    }
+    
+    gain_t delta = val;
+    if (delta < 0.0f) {
+        delta = 0.0f;
+    }
+    
+    delta -= usable_gain;
+    
+    if (delta == 0.0f)
+        return 0.0f;
+    
+    gain_t factor = delta / usable_gain;
+    
+    if (factor > 0.0f) { // get max factor for selected tracks
+        
+        // we are already on top
+        if (abs(usable_gain - Amp::max_gain_coefficient) < Amp::min_gain_coefficient_gap) {
+            return 0.0f;
+        }
+        
+        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+            gain_t g = (*i)->amp()->gain();
+            
+            // we are close anough to count this route's on max
+            if (abs(g - Amp::max_gain_coefficient) < Amp::min_gain_coefficient_gap ) {
+                continue;
+            }
+            
+            // if the current factor woulnd't raise this route above maximum
+            if ((g + g * factor) < Amp::max_gain_coefficient) {
+                continue;
+            }
+            
+            // factor is calculated so that it would raise current route to max
+            factor = Amp::max_gain_coefficient / g - 1.0f;
+        }
+        
+    } else { // get min factor for selected tracks
+        
+        for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+            gain_t g = (*i)->amp()->gain();
+            
+            // we are close anough to count this on min
+            if (g <= Amp::min_gain_coefficient) {
+                continue;
+            }
+            
+            if ((g + g * factor) > Amp::min_gain_coefficient) {
+                continue;
+            }
+            
+            // factor is calculated so that it would lower current route to min
+            factor = Amp::min_gain_coefficient / g - 1.0f;
+        }
+    }
+    
+    return factor;
+}
+
+void
+GainMeter::adjust_gain_relatively(gain_t val, RouteList& routes, void* src)
+{
+    gain_t factor = get_relative_gain_factor(val, routes);
+    
+    for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+        (*i)->inc_gain(factor, src);
+    }
 }
 
 void
@@ -683,7 +811,30 @@ GainMeter::gain_slider_button_press (GdkEventButton* ev)
 	switch (ev->type) {
         case GDK_BUTTON_PRESS:
             if (Keyboard::modifier_state_contains (ev->state, GDK_MOD1_MASK)) {
-                _amp->set_gain (dB_to_coefficient(0.0), this);
+                if (_route && _route->amp() == _amp) {
+                    Selection& selection = ARDOUR_UI::instance()->the_editor().get_selection();
+                    TimeAxisView* tv = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id() );
+                    
+                    // if route is a part of selection and affected_by_selection is set
+                    if (affected_by_selection && selection.selected(tv) && selection.tracks.size() > 1 ) {
+                        
+                        RouteList routes;
+                        TrackViewList track_list = selection.tracks;
+                        TrackViewList::const_iterator iter = track_list.begin ();
+                        for (; iter != track_list.end(); ++iter) {
+                            RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
+                            
+                            if (rtv) {
+                                rtv->route()->set_gain (dB_to_coefficient(0.0), this);;
+                            }
+                        }
+                        
+                    } else {
+                        _route->set_gain (dB_to_coefficient(0.0), this);
+                    }
+                } else {
+                    _amp->set_gain (dB_to_coefficient(0.0), this);
+                }
                 return true;
             }
             _amp->gain_control()->start_touch (_amp->session().transport_frame());
