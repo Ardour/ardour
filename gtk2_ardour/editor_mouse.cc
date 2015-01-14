@@ -214,10 +214,6 @@ Editor::mouse_mode_object_range_toggled()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	if (tact->get_active()) {
-		m = MouseObject;  //Smart mode turned to ON, force editing to Object mode
-	}
-
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
@@ -341,7 +337,6 @@ Editor::update_time_selection_display ()
 		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
 		break;
 	case MouseObject:
-		selection->clear_objects ();
 		selection->clear_time ();
 		selection->clear_tracks ();
 		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
