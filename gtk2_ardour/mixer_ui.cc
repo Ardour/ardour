@@ -1290,6 +1290,14 @@ Mixer_UI::route_groups_changed ()
 
 	group_model->clear ();
 
+#if 0
+	/* this is currently not used,
+	 * Mixer_UI::group_display_button_press() has a case for it,
+	 * and a commented edit_route_group() but that's n/a since 2011.
+	 *
+	 * This code is left as reminder that
+	 * row[group_columns.group] = 0 has special meaning.
+	 */
 	{
 		TreeModel::Row row;
 		row = *(group_model->append());
@@ -1297,6 +1305,7 @@ Mixer_UI::route_groups_changed ()
 		row[group_columns.text] = (_("-all-"));
 		row[group_columns.group] = 0;
 	}
+#endif
 
 	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
 
