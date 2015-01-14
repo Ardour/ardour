@@ -3450,7 +3450,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
                                 return;
                         } else if (loc->is_auto_loop()) {
                                 /* toggle loop playback, leave rolling if already rolling */
-                                _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), true);
+                                _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), false);
                                 return;
                         }
                 }
@@ -4615,10 +4615,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
                 /* toggle loop playback, leave rolling if already rolling */
-                _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), true);
-                /* locate to start of loop */
-                _editor->session()->request_locate (_editor->temp_location->start(), _editor->session()->transport_rolling());
-                
+                _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), false);
 	}
 
 	_editor->stop_canvas_autoscroll ();
