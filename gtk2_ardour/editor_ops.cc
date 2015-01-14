@@ -1503,15 +1503,8 @@ Editor::temporal_zoom_step (bool coarser)
 {
 	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
 
-	framecnt_t nspp = samples_per_pixel;
-
-	if (coarser) {
-		nspp *= 2;
-	} else {
-		nspp /= 2;
-	}
-
-	temporal_zoom (nspp);
+    int zoom_step = coarser ? 1 : -1;
+    _temporal_zoom_adjustment.set_value(_temporal_zoom_adjustment.get_value() + zoom_step);
 }
 
 void
