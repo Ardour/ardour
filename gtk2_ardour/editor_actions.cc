@@ -467,10 +467,10 @@ Editor::register_actions ()
 
 //  Tracks Live doesn't use it
 //	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
-	mouse_draw_button.set_related_action (act);
-	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
-	mouse_draw_button.add_elements (ArdourButton::Inset );
-	mouse_draw_button.set_name ("mouse mode button");
+//	mouse_draw_button.set_related_action (act);
+//	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
+//	mouse_draw_button.add_elements (ArdourButton::Inset );
+//	mouse_draw_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-gain", _("Gain Tool"), sigc::bind (mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGain));	
 	mouse_gain_button.set_related_action (act);

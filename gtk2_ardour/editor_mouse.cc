@@ -246,10 +246,11 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	case MouseObject:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object"));
 		break;
-
 	case MouseDraw:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
-		break;
+//  Tracks Live doesn't use it
+//		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
+//		break;
+        return;
 
 	case MouseGain:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-gain"));
