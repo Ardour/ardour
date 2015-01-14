@@ -1947,7 +1947,8 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "close-region-gaps", _("Close Gaps"), sigc::mem_fun (*this, &Editor::close_region_gaps));
 
 	/* Open the Rhythm Ferret dialogue for the selected regions */
-	reg_sens (_region_actions, "show-rhythm-ferret", _("Rhythm Ferret..."), sigc::mem_fun (*this, &Editor::show_rhythm_ferret));
+	// TracksLive doesn't use it
+//    reg_sens (_region_actions, "show-rhythm-ferret", _("Rhythm Ferret..."), sigc::mem_fun (*this, &Editor::show_rhythm_ferret));
 
 	/* Export the first selected region */
 	reg_sens (_region_actions, "export-region", _("Export..."), sigc::mem_fun (*this, &Editor::export_region));
