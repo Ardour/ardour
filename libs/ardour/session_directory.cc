@@ -176,6 +176,7 @@ SessionDirectory::sub_directories () const
 
 	tmp_paths.push_back (sound_path ());
 	tmp_paths.push_back (midi_path ());
+	tmp_paths.push_back (video_path ());
 	tmp_paths.push_back (peak_path ());
 	tmp_paths.push_back (dead_path ());
 	tmp_paths.push_back (export_path ());

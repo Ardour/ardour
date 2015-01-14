@@ -410,17 +410,29 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	framecnt_t worst_track_latency ()  const { return _worst_track_latency; }
 	framecnt_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
 	
-	int consolidate_all_media ();
-
 	struct SaveAs {
-		std::string new_parent_folder;
-		std::string new_name;
-		bool        switch_to;
-		bool        copy_media;
-		bool        copy_external;
+		std::string new_parent_folder;  /* parent folder where new session folder will be created */
+		std::string new_name;           /* name of newly saved session */
+		bool        switch_to;     /* true if we should be working on newly saved session after save-as; false otherwise */
+		bool        copy_media;    /* true if media files (audio, media, etc) should be copied into newly saved session; false otherwise */
+		bool        copy_external; /* true if external media should be consolidated into the newly saved session; false otherwise */
 		
-		/* emitted as we make progress */
+		/* emitted as we make progress. 3 arguments passed to signal
+		 * handler:
+		 *
+		 *  1: percentage complete measured as a fraction (0-1.0) of
+		 *     total data copying done.
+		 *  2: number of files copied so far
+		 *  3: total number of files to copy
+		 *
+		 * Handler should return true for save-as to continue, or false
+		 * to stop (and remove all evidence of partial save-as).
+		 */
 		PBD::Signal3<bool,float,int64_t,int64_t> Progress;
+
+		/* if save_as() returns non-zero, this string will indicate the reason why.
+		 */
+		std::string failure_message;
 	};
 
 	int save_as (SaveAs&);
@@ -1723,6 +1735,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void setup_click_state (const XMLNode*);
 	void setup_bundles ();
 	
+	void save_as_bring_callback (uint32_t, uint32_t, std::string);
+
 	static int get_session_info_from_path (XMLTree& state_tree, const std::string& xmlpath);
 };
 

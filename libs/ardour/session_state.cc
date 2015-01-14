@@ -4001,6 +4001,13 @@ bool accept_all_files (string const &, void *)
 	return true;
 }
 
+void
+Session::save_as_bring_callback (uint32_t,uint32_t,string)
+{
+	/* It would be good if this did something useful vis-a-vis save-as, but the arguments doesn't provide the correct information right now to do this.
+	*/
+}
+
 int
 Session::save_as (SaveAs& saveas)
 {
@@ -4012,6 +4019,14 @@ Session::save_as (SaveAs& saveas)
 	int64_t copied = 0;
 	int64_t cnt = 0;
 	int64_t all = 0;
+	int32_t internal_file_cnt = 0;
+
+	vector<string> do_not_copy_extensions;
+	do_not_copy_extensions.push_back (statefile_suffix);
+	do_not_copy_extensions.push_back (pending_suffix);
+	do_not_copy_extensions.push_back (backup_suffix);
+	do_not_copy_extensions.push_back (temp_suffix);
+	do_not_copy_extensions.push_back (history_suffix);
 
 	/* get total size */
 
@@ -4027,99 +4042,141 @@ Session::save_as (SaveAs& saveas)
 		
 		all += files.size();
 
-		cerr << (*sd).path << " Contained " << files.size() << " total now " << all << endl;
-		
 		for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
 			GStatBuf gsb;
-			
-			if ((*i).find (X_("interchange")) == string::npos || saveas.copy_media) {
-				g_stat ((*i).c_str(), &gsb);
-				total_bytes += gsb.st_size;
-			}
+			g_stat ((*i).c_str(), &gsb);
+			total_bytes += gsb.st_size;
 		}
-		cerr << "\ttotal size now " << total_bytes << endl;
 	}
 
-	/* Create the new session directory */
+	/* save old values so we can switch back if we are not switching to the new session */
 	
 	string old_path = _path;
 	string old_name = _name;
 	string old_snapshot = _current_snapshot_name;
 	string old_sd = _session_dir->root_path();
+	vector<string> old_search_path[DataType::num_types];
+	string old_config_search_path[DataType::num_types];
+
+	old_search_path[DataType::AUDIO] = source_search_path (DataType::AUDIO);
+	old_search_path[DataType::MIDI] = source_search_path (DataType::MIDI);
+	old_config_search_path[DataType::AUDIO]  = config.get_audio_search_path ();	
+	old_config_search_path[DataType::MIDI]  = config.get_midi_search_path ();	
+
+	/* switch session directory */
 	
 	(*_session_dir) = to_dir;
 
+	/* create new tree */
+	
 	if (!_session_dir->create()) {
 		return -1;
 	}
 
-	cerr << "Created new session dir " << _session_dir->root_path() << endl;
-		
 	try {
-		if (saveas.copy_media) {		
-
-			/* copy all media files. Find each location in
-			 * session_dirs, and copy files from there to
-			 * target.
+		/* copy all media files. Find each location in
+		 * session_dirs, and copy files from there to
+		 * target.
+		 */
+		
+		for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
+			
+			/* need to clear this because
+			 * find_files_matching_filter() is cumulative
 			 */
 			
-			for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
-				
-				/* need to clear this because
-				 * find_files_matching_filter() is cumulative
-				 */
-				
-				files.clear ();
-				
-				find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
-				
-				const size_t prefix_len = (*sd).path.size();
+			files.clear ();
+			
+			const size_t prefix_len = (*sd).path.size();
+			
+			/* Work just on the files within this session dir */
+			
+			find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
+			
+			/* copy all the files. Handling is different for media files
+			   than others because of the *silly* subtree we have below the interchange
+			   folder. That really was a bad idea, but I'm not fixing it as part of
+			   implementing ::save_as().
+			*/
+			
+			for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
 
-				/* copy all media files (everything below
-				 * interchange/)
-				 */
+				std::string from = *i;
 				
-				for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
-					std::string from = *i;
+				if ((*i).find (interchange_dir_name) != string::npos) {
+					
+					/* media file */
 
-
-					if ((*i).find (X_("interchange")) != string::npos) {
-
-						/* media file */
+					if (saveas.copy_media) {
 						
-						GStatBuf gsb;
-						g_stat ((*i).c_str(), &gsb);
-						
-						/* strip the session dir prefix from
-						 * each full path, then prepend new
-						 * to_dir to give complete path.
+						/* typedir is the "midifiles" or "audiofiles" etc. part of the path.
 						 */
+						string typedir = Glib::path_get_basename (Glib::path_get_dirname (*i));
+						vector<string> v;
+						v.push_back (to_dir);
+						v.push_back (interchange_dir_name);
+						v.push_back (new_folder);
+						v.push_back (typedir);
+						v.push_back (Glib::path_get_basename (*i));
 						
-						std::string to = Glib::build_filename (to_dir, (*i).substr (prefix_len));
-						
-						cerr << "Copy " << from << " to " << to << endl;
+						std::string to = Glib::build_filename (v);
 						
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
 						}
-						
-						copied += gsb.st_size;
-						double fraction = (double) copied / total_bytes;
-						
-						/* tell someone "X percent, file M of
-						 * N"; M is one-based
-						 */
-						
-						cnt++;
-						
-						cerr << "PROGRESS " << fraction << "%, " << cnt << " of " << all << endl;
-						
-#if 0
-						if (!saveas.Progress (fraction, cnt, all)) {
-							throw Glib::FileError (Glib::FileError::FAILED, "copy cancelled");
-						}
-#endif
 					}
+					
+					/* we found media files inside the session folder */
+					
+					internal_file_cnt++;
+					
+				} else {
+					
+					/* normal non-media file. Don't copy state, history, etc.
+					 */
+					
+					bool do_copy = true;
+					
+					for (vector<string>::iterator v = do_not_copy_extensions.begin(); v != do_not_copy_extensions.end(); ++v) {
+						if (((*i).length() > (*v).length()) && ((*i).find (*v) == (*i).length() - (*v).length())) {
+							/* end of filename matches extension, do not copy file */
+							do_copy = false;
+							break;
+						} 
+					}
+					
+					if (do_copy) {
+						string to = Glib::build_filename (to_dir, (*i).substr (prefix_len));
+						
+						if (!copy_file (from, to)) {
+							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+						}
+					}
+				}
+				
+				/* measure file size even if we're not going to copy so that our Progress
+				   signals are correct, since we included these do-not-copy files
+				   in the computation of the total size and file count.
+				*/
+				
+				GStatBuf gsb;
+				g_stat ((*i).c_str(), &gsb);
+				copied += gsb.st_size;
+				cnt++;
+				
+				double fraction = (double) copied / total_bytes;
+				
+				/* tell someone "X percent, file M of N"; M is one-based */
+				
+				boost::optional<bool> res = saveas.Progress (fraction, cnt, all);
+				bool keep_going = true;
+
+				if (res) {
+					keep_going = *res;
+				}
+
+				if (!keep_going) {
+					throw Glib::FileError (Glib::FileError::FAILED, "copy cancelled");
 				}
 			}
 		}
@@ -4127,65 +4184,31 @@ Session::save_as (SaveAs& saveas)
 		_path = to_dir;
 		_current_snapshot_name = saveas.new_name;
 		_name = saveas.new_name;
-		
-		cerr << "New path = " << _path << endl;
-		
-		if (!saveas.copy_media && saveas.switch_to) {
 
-			/* need to make all internal file sources point to old session */
-			
-			for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-				boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+		if (!saveas.copy_media) {
 
-				if (fs && fs->within_session()) {
+			/* reset search paths of the new session (which we're pretending to be right now) to
+			   include the original session search path, so we can still find all audio.
+			*/
 
-					cerr << "fs " << fs->name() << " is inside session " << fs->path() << endl;
-					
-					/* give it an absolute path referencing
-					 * the original session. Should be
-					 * easy, but in general, we don't
-					 * actually know where it lives - it
-					 * could be in any session dir. So we
-					 * have to look for it.
-					 *
-					 * Note that the session_dirs list 
-					 */
+			if (internal_file_cnt) {
+				for (vector<string>::iterator s = old_search_path[DataType::AUDIO].begin(); s != old_search_path[DataType::AUDIO].end(); ++s) {
+					ensure_search_path_includes (*s, DataType::AUDIO);
+				}
 
-					for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
-						SessionDirectory sdir ((*sd).path);
-						string file_dir;
-						switch (fs->type()) {
-						case DataType::AUDIO:
-							file_dir = sdir.sound_path();
-							break;
-						case DataType::MIDI:
-							file_dir = sdir.midi_path();
-							break;
-						default:
-							continue;
-						}
-						string possible_path = Glib::build_filename (file_dir, fs->path());
-						if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
-							/* Found it */
-							cerr << "Reset path for " << fs->name() << " @ " << fs->path() << " to " << possible_path << endl;
-							fs->set_path (possible_path);
-							break;
-						}
-					}
-						
+				for (vector<string>::iterator s = old_search_path[DataType::MIDI].begin(); s != old_search_path[DataType::MIDI].end(); ++s) {
+					ensure_search_path_includes (*s, DataType::MIDI);
 				}
 			}
 		}
 		
 		bool was_dirty = dirty ();
 
-		cerr << "Saving state\n";
-		
 		save_state ("", false, false);
 		save_default_options ();
 		
 		if (saveas.copy_media && saveas.copy_external) {
-			if (consolidate_all_media()) {
+			if (bring_all_sources_into_session (boost::bind (&Session::save_as_bring_callback, this, _1, _2, _3))) {
 				throw Glib::FileError (Glib::FileError::NO_SPACE_LEFT, "consolidate failed");
 			}
 		}
@@ -4204,9 +4227,15 @@ Session::save_as (SaveAs& saveas)
 				set_dirty ();
 			}
 
+			if (internal_file_cnt) {
+				/* reset these to their original values */
+				config.set_audio_search_path (old_config_search_path[DataType::AUDIO]);
+				config.set_midi_search_path (old_config_search_path[DataType::MIDI]);
+			}
+			
 		} else {
 
-			/* prune session dirs
+			/* prune session dirs, and update disk space statistics
 			 */
 
 			space_and_path sp;
@@ -4214,14 +4243,23 @@ Session::save_as (SaveAs& saveas)
 			session_dirs.clear ();
 			session_dirs.push_back (sp);
 			refresh_disk_space ();
-
-			cerr << "pruned session dirs, sd = " << _session_dir->root_path()
-			     << " path = " << _path << endl;
 		}
+
+	} catch (Glib::FileError& e) {
+
+		saveas.failure_message = e.what();
+		
+		/* recursively remove all the directories */
+		
+		remove_directory (to_dir);
+		
+		/* return error */
+		
+		return -1;
 
 	} catch (...) {
 
-		cerr << "copying/saveas failed\n";
+		saveas.failure_message = _("unknown reason");
 		
 		/* recursively remove all the directories */
 		
@@ -4231,18 +4269,6 @@ Session::save_as (SaveAs& saveas)
 		
 		return -1;
 	}
-	cerr << "saveas completed successfully\n";
 	
-	return 0;
-}
-
-
-/** Check all sources used by the current snapshot
- *  and make a copy of any external media within
- *  the session.
- */
-int
-Session::consolidate_all_media ()
-{
 	return 0;
 }
