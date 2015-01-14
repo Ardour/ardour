@@ -487,11 +487,12 @@ Editor::register_actions ()
 	mouse_audition_button.add_elements (ArdourButton::Inset );
 	mouse_audition_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
-	mouse_timefx_button.set_related_action (act);
-	mouse_timefx_button.set_image (::get_icon("tool_stretch"));
-	mouse_timefx_button.add_elements (ArdourButton::Inset );
-	mouse_timefx_button.set_name ("mouse mode button");
+//  Tracks Live doesn't use it
+//	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
+//	mouse_timefx_button.set_related_action (act);
+//	mouse_timefx_button.set_image (::get_icon("tool_stretch"));
+//	mouse_timefx_button.add_elements (ArdourButton::Inset );
+//	mouse_timefx_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
 	_tool_cut_button.set_related_action (act);

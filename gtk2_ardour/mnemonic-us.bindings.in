@@ -151,7 +151,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/redo|<@PRIMARY@>r|redo
 ;;@rop|Region/reverse-region|<@SECONDARY@>r|reverse
 @trans|Transport/Record|<@TERTIARY@>r|engage record
-@mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
+;; Tracks Live doesn't use it @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
 @rop|Region/pitch-shift-region|<@SECONDARY@>t|transpose
 @rop|Region/strip-region-silence|<@SECONDARY@>l|transpose
 @eep|Editor/select-all-tracks|<@PRIMARY@>t|select all tracks

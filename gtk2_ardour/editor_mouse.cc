@@ -261,8 +261,10 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		break;
 
 	case MouseTimeFX:
-		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
-		break;
+//  Tracks Live doesn't use it
+//		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
+//		break;
+        return;
 
 	case MouseAudition:
 		act = ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-audition"));
