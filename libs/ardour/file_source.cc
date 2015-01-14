@@ -337,7 +337,6 @@ FileSource::find (Session& s, DataType type, const string& path, bool must_exist
         }
 
         found_path = keeppath;
-
         ret = true;
 
   out:
