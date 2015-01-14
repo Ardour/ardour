@@ -136,6 +136,14 @@ namespace ARDOUR {
 	class ProcessThread;
 }
 
+namespace Gtkmm2ext {
+	class TearOff;
+}
+
+namespace Gtk {
+	class ProgressBar;
+}
+
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
   public:
@@ -650,6 +658,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	guint32  last_key_press_time;
 
 	void snapshot_session (bool switch_to_it);
+	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
 	void rename_session ();
 	void setup_order_hint ();

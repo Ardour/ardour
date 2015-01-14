@@ -2242,6 +2242,25 @@ ARDOUR_UI::session_auto_save_is_allowed() const
         return false;
 }
 
+bool
+ARDOUR_UI::save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar)
+{
+	char buf[256];
+
+	snprintf (buf, sizeof (buf), _("Copied %" PRId64 " of %" PRId64), cnt, total);
+
+	label->set_text (buf);
+	bar->set_fraction (fraction);
+
+	/* process events, redraws, etc. */
+	
+	while (gtk_events_pending()) {
+		gtk_main_iteration ();
+	}
+
+	return true; /* continue with save-as */
+}
+
 void
 ARDOUR_UI::save_session_as ()
 {
@@ -2249,6 +2268,15 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 
+	ArdourDialog save_as_dialog (_("Save As"), true);
+	Gtk::Label label;
+	Gtk::ProgressBar progress_bar;
+
+	save_as_dialog.get_vbox()->pack_start (label);
+	save_as_dialog.get_vbox()->pack_start (progress_bar);
+	label.show ();
+	progress_bar.show ();
+	
 	Session::SaveAs sa;
 	sa.new_parent_folder = "/tmp";
 	sa.new_name = "foobar";
@@ -2256,7 +2284,24 @@ ARDOUR_UI::save_session_as ()
 	sa.copy_media = true;
 	sa.copy_external = false;
 
-	_session->save_as (sa);
+	/* this signal will be emitted from within this, the calling thread,
+	 * after every file is copied. It provides information on percentage
+	 * complete (in terms of total data to copy), the number of files
+	 * copied so far, and the total number to copy.
+	 */
+
+	ScopedConnection c;
+
+	sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3, &label, &progress_bar));
+
+	save_as_dialog.show_all ();
+	save_as_dialog.present ();
+	
+	if (_session->save_as (sa)) {
+		/* ERROR MESSAGE */
+		MessageDialog msg (string_compose (_("Save As failed: %1"), sa.failure_message));
+		msg.run ();
+	}
 }
 
 /** Ask the user for the name of a new snapshot and then take it.
