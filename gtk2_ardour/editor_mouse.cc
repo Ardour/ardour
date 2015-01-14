@@ -346,12 +346,41 @@ Editor::update_time_selection_display ()
 		 would destroy the range selection rectangle, which we need to stick
 		 around for AutomationRangeDrag. */
 		selection->clear_regions ();
+		selection->clear_playlists ();
 		break;
-	default:
+	case MouseContent:
 		/* This handles internal edit.
 		   Clear everything except points and notes. 
 		*/
 		selection->clear_regions();
+		selection->clear_lines();
+		selection->clear_playlists ();
+
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
+
+	case MouseTimeFX:
+		/* We probably want to keep region selection */
+		selection->clear_points ();
+		selection->clear_lines();
+		selection->clear_playlists ();
+
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
+
+	case MouseAudition:
+		/*Don't lose lines or points if no action in this mode */
+		selection->clear_regions ();
+		selection->clear_playlists ();
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
+
+	default:
+		/*Clear everything */
+		selection->clear_objects();
 		selection->clear_time ();
 		selection->clear_tracks ();
 		break;
