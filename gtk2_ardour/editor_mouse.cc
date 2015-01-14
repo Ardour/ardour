@@ -750,6 +750,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 			break;
 
+		case RegionItem:
+			if (dynamic_cast<AutomationRegionView*>(clicked_regionview)) {
+				/* rubberband drag to select automation points */
+				_drags->set (new EditorRubberbandSelectDrag (this, item), event);
+				return true;
+			}
+			break;
+
 		default:
 			break;
 		}

@@ -132,30 +132,10 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 	PublicEditor& e = trackview.editor ();
 
-	if (!trackview.editor().internal_editing()) {
-		// not in internal edit mode, so just act like a normal region
-		return RegionView::canvas_group_event (ev);
-	}
-
-	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseContent) {
-
-		/* XXX: icky dcast to Editor */
-		e.drags()->set (new EditorRubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
-		e.drags()->start_grab (ev);
-		return true;
-
-	} else if (ev->type == GDK_MOTION_NOTIFY && e.drags()->active()) {
-		/* we probably shouldn't have to handle this here, but... */
-		e.drags()->motion_handler(ev, false);
-		return true;
-
-	} else if (ev->type == GDK_BUTTON_RELEASE && e.current_mouse_mode() == Editing::MouseDraw) {
-		if (e.drags()->end_grab (ev)) {
-			return true;
-		} else if (e.current_mouse_mode() != Editing::MouseDraw &&
-		           e.current_mouse_mode() != Editing::MouseContent) {
-			return RegionView::canvas_group_event (ev);
-		}
+	if (trackview.editor().internal_editing() &&
+	    ev->type == GDK_BUTTON_RELEASE &&
+	    e.current_mouse_mode() == Editing::MouseDraw &&
+	    !e.drags()->active()) {
 
 		double x = ev->button.x;
 		double y = ev->button.y;
