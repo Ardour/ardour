@@ -164,8 +164,16 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
 		return false;
 	}
 
+    int alt_modifier;
+#ifdef __APPLE__
+    alt_modifier = Keyboard::Level4Modifier; /* Alt */
+#else
+    /* Anything except OS X */
+    alt_modifier = Keyboard::SecondaryModifier; /* Alt */
+#endif
+    
 	if (ev->type == GDK_BUTTON_PRESS) {
-        if (Keyboard::modifier_state_contains (ev->state, Keyboard::Level4Modifier)) {
+        if (Keyboard::modifier_state_contains (ev->state, alt_modifier)) {
             position_control->set_value (0.5);
             _dragging = false;
             _tooltip.target_stop_drag ();
