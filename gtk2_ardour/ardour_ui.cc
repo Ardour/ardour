@@ -2278,7 +2278,18 @@ ARDOUR_UI::save_session_as ()
 	progress_bar.show ();
 	
 	Session::SaveAs sa;
-	sa.new_parent_folder = "/tmp";
+
+        /* THIS IS A HARD-CODED SETTING OF THE OPTIONS FOR SAVE-AS.
+
+           IN REALITY SOME DIALOG NEEDS TO COLLECT THIS INFORMATION
+           FROM THE USER. 
+
+           BASED ON DISCUSSIONS WITH IGOR, TRACKS SHOULD NOT PRESENT
+           THE "copy_external" option, BUT SHOULD ALWAYS SET IT TO
+           TRUE.
+        */
+
+        sa.new_parent_folder = "/tmp";
 	sa.new_name = "foobar";
 	sa.switch_to = true;
 	sa.copy_media = true;
