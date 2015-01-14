@@ -1041,7 +1041,7 @@ class AutomationRangeDrag : public Drag
 {
 public:
 	AutomationRangeDrag (Editor *, AutomationTimeAxisView *, std::list<ARDOUR::AudioRange> const &);
-	AutomationRangeDrag (Editor *, AudioRegionView *, std::list<ARDOUR::AudioRange> const &);
+	AutomationRangeDrag (Editor *, RegionView *, std::list<ARDOUR::AudioRange> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1054,7 +1054,8 @@ public:
 
 private:
 	void setup (std::list<boost::shared_ptr<AutomationLine> > const &);
-        double y_fraction (boost::shared_ptr<AutomationLine>, double global_y_position) const;
+	double y_fraction (boost::shared_ptr<AutomationLine>, double global_y_position) const;
+	double value (boost::shared_ptr<ARDOUR::AutomationList> list, double x) const;
 
 	std::list<ARDOUR::AudioRange> _ranges;
 
@@ -1068,8 +1069,9 @@ private:
 	};
 
 	std::list<Line> _lines;
-        double y_origin;
-	bool _nothing_to_drag;
+	double          _y_origin;
+	bool            _nothing_to_drag;
+	bool            _integral;
 };
 
 /** Drag of one edge of an xfade

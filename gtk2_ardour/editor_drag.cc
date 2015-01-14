@@ -47,6 +47,7 @@
 #include "i18n.h"
 #include "keyboard.h"
 #include "audio_region_view.h"
+#include "automation_region_view.h"
 #include "midi_region_view.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -4849,24 +4850,36 @@ NoteDrag::aborted (bool)
 AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, list<AudioRange> const & r)
 	: Drag (editor, atv->base_item ())
 	, _ranges (r)
+	, _y_origin (atv->y_position())
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
-	y_origin = atv->y_position();
 	setup (atv->lines ());
 }
 
-/** Make an AutomationRangeDrag for region gain lines */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AudioRegionView* rv, list<AudioRange> const & r)
+/** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<AudioRange> const & r)
 	: Drag (editor, rv->get_canvas_group ())
 	, _ranges (r)
+	, _y_origin (rv->get_time_axis_view().y_position())
 	, _nothing_to_drag (false)
+	, _integral (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 
 	list<boost::shared_ptr<AutomationLine> > lines;
-	lines.push_back (rv->get_gain_line ());
-	y_origin = rv->get_time_axis_view().y_position();
+
+	AudioRegionView*      audio_view;
+	AutomationRegionView* automation_view;
+	if ((audio_view = dynamic_cast<AudioRegionView*>(rv))) {
+		lines.push_back (audio_view->get_gain_line ());
+	} else if ((automation_view = dynamic_cast<AutomationRegionView*>(rv))) {
+		lines.push_back (automation_view->line ());
+		_integral = true;
+	} else {
+		error << _("Automation range drag created for invalid region type") << endmsg;
+	}
+
 	setup (lines);
 }
 
@@ -4911,7 +4924,14 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 double
 AutomationRangeDrag::y_fraction (boost::shared_ptr<AutomationLine> line, double global_y) const
 {
-	return 1.0 - ((global_y - y_origin) / line->height());
+	return 1.0 - ((global_y - _y_origin) / line->height());
+}
+
+double
+AutomationRangeDrag::value (boost::shared_ptr<AutomationList> list, double x) const
+{
+	const double v = list->eval(x);
+	return _integral ? rint(v) : v;
 }
 
 void
@@ -4962,8 +4982,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, the_list->eval (p));
-				the_list->editor_add (q, the_list->eval (q));
+				the_list->editor_add (p, value (the_list, p));
+				the_list->editor_add (q, value (the_list, q));
 			}
 
 			/* same thing for the end */
@@ -4988,8 +5008,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, the_list->eval (p));
-				the_list->editor_add (q, the_list->eval (q));
+				the_list->editor_add (p, value (the_list, p));
+				the_list->editor_add (q, value (the_list, q));
 			}
 		}
 

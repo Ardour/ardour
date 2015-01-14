@@ -336,29 +336,28 @@ void
 Editor::update_time_selection_display ()
 {
 	switch (mouse_mode) {
-		case MouseRange:
-			selection->clear_objects ();
-			selection->ClearMidiNoteSelection();  //signal
-			break;
-		case MouseObject:
-			selection->clear_objects ();
-			selection->clear_time ();
-			selection->clear_tracks ();
-			selection->ClearMidiNoteSelection();  //signal
-			break;
-		case MouseContent:
-		case MouseDraw:
-			//if we go into internal editing, clear everything in the outside world
-			selection->clear_objects ();
-			selection->clear_time ();
-			selection->clear_tracks ();
-			break;
-		default:
-			//clear everything
-			selection->clear_objects ();
-			selection->clear_time ();
-			selection->clear_tracks ();
-			break;
+	case MouseRange:
+		selection->clear_objects ();
+		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
+		break;
+	case MouseObject:
+		selection->clear_objects ();
+		selection->clear_time ();
+		selection->clear_tracks ();
+		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
+		break;
+	case MouseDraw:
+		/* Clear top level objects, but not time or tracks, since that
+		 woulddestroy the range selection rectangle, which we need to stick
+		 around for AutomationRangeDrag. */
+		selection->clear_objects ();
+		break;
+	default:
+		/* Clear everything. */
+		selection->clear_objects ();
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
 	}
 }
 
@@ -920,12 +919,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case SelectionItem:
 		{
-			AudioRegionView* arv = dynamic_cast<AudioRegionView *> (clicked_regionview);
-			if (arv) {
-				_drags->set (new AutomationRangeDrag (this, arv, selection->time), event, _cursors->up_down);
+			if (dynamic_cast<AudioRegionView*>(clicked_regionview) ||
+			    dynamic_cast<AutomationRegionView*>(clicked_regionview)) {
+				_drags->set (new AutomationRangeDrag (this, clicked_regionview, selection->time),
+				             event, _cursors->up_down);
 			} else {
 				double const y = event->button.y;
-				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
+				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y, false);
 				if (tvp.first) {
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 					if ( atv) {
