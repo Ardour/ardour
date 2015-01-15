@@ -5471,6 +5471,7 @@ Editor::session_going_away ()
 	   and thus cause a leak.
 	*/
 
+    ARDOUR_UI::instance()->update_track_color_dialog (boost::shared_ptr<ARDOUR::Route>());
 	if (current_mixer_strip) {
 		if (current_mixer_strip->get_parent() != 0) {
 			current_mixer_strip->get_parent()->remove (*current_mixer_strip);
