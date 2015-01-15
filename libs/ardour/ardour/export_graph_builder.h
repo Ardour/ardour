@@ -68,17 +68,20 @@ class LIBARDOUR_API ExportGraphBuilder
 	unsigned get_normalize_cycle_count() const;
 
 	void reset ();
+    void cleanup (bool remove_out_files = false);
 	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);
 	void add_config (FileSpec const & config);
 
   private:
 
 	void add_split_config (FileSpec const & config);
-
+    
 	class Encoder {
 	  public:
 		template <typename T> boost::shared_ptr<AudioGrapher::Sink<T> > init (FileSpec const & new_config);
 		void add_child (FileSpec const & new_config);
+        void remove_children ();
+        void destroy_writer (bool delete_out_file);
 		bool operator== (FileSpec const & other_config) const;
 
 		static int get_real_format (FileSpec const & config);
@@ -95,6 +98,8 @@ class LIBARDOUR_API ExportGraphBuilder
 		std::list<ExportFilenamePtr> filenames;
 		PBD::ScopedConnection  copy_files_connection;
 
+        std::string writer_filename;
+        
 		// Only one of these should be available at a time
 		FloatWriterPtr float_writer;
 		IntWriterPtr   int_writer;
@@ -108,6 +113,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		SFC (ExportGraphBuilder &, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
+        void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
 	  private:
@@ -130,6 +136,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
+        void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
 		unsigned get_normalize_cycle_count() const;
@@ -167,6 +174,8 @@ class LIBARDOUR_API ExportGraphBuilder
 		SRC (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
+        void remove_children (bool remove_out_files);
+        
 		bool operator== (FileSpec const & other_config) const;
 
 	  private:
@@ -189,6 +198,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
+        void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
 	  private:
@@ -206,6 +216,7 @@ class LIBARDOUR_API ExportGraphBuilder
 	  public:
 		ChannelConfig (ExportGraphBuilder & parent, FileSpec const & new_config, ChannelMap & channel_map);
 		void add_child (FileSpec const & new_config);
+        void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
 	  private:
