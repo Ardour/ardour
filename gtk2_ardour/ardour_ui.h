@@ -234,6 +234,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void xrun_handler (framepos_t);
 	void create_xrun_marker (framepos_t);
 
+    ProgressDialog _progress_dialog;
+    
 	GUIObjectState* gui_object_state;
 
 	MainClock* primary_clock;

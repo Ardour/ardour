@@ -23,7 +23,6 @@
 #include "i18n.h"
 
 using namespace Gtk;
-//ProgressDialog *ProgressDialog::theProgressDialog = 0;
 
 ProgressDialog::ProgressDialog (const std::string& title,
                                       const std::string& top_message,
@@ -33,18 +32,12 @@ ProgressDialog::ProgressDialog (const std::string& title,
 , _top_label ( get_label ("top_label") )
 , _bottom_label ( get_label ("bottom_label") )
 , _progress_bar (get_progressbar ("progress_bar"))
+, _cancel_button ((get_waves_button ("cancel_button")))
 , num_of_steps (0)
 , cur_step (0)
 , hide_automatically(false)
 {
     init (title, top_message, progress_message, bottom_message);
-}
-
-ProgressDialog*
-ProgressDialog::instance ()
-{
-    static ProgressDialog theProgressDialog;
-    return &theProgressDialog;
 }
 
 void
@@ -61,6 +54,14 @@ ProgressDialog::init (const std::string& title,
     set_top_label (top_message);
     set_progress_label (progress_message);
     set_bottom_label (bottom_message);
+    
+    _cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &ProgressDialog::cancel_clicked));
+}
+
+void
+ProgressDialog::cancel_clicked (WavesButton*)
+{
+    CancelClicked ();
 }
 
 void
@@ -91,6 +92,12 @@ ProgressDialog::update_info (double new_progress, const char* top_message, const
         set_progress_label (progress_message);
     if (bottom_message)
         set_bottom_label (bottom_message);
+}
+
+void
+ProgressDialog::set_progress (double new_progress)
+{
+    update_progress_gui (new_progress);
 }
 
 void
@@ -136,6 +143,24 @@ ProgressDialog::hide_pd ()
     /* do nothing */
 	}
     WavesDialog::hide ();    
+}
+
+void
+ProgressDialog::show_cancel_button ()
+{
+    _cancel_button.show ();
+}
+
+void
+ProgressDialog::hide_cancel_button ()
+{
+    _cancel_button.hide ();
+}
+
+void
+ProgressDialog::set_cancel_button_sensitive (bool sensitive)
+{
+    _cancel_button.set_sensitive (sensitive);
 }
 
 void

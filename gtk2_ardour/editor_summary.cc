@@ -21,6 +21,7 @@
 
 #include "canvas/debug.h"
 
+#include "ardour_ui.h"
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -33,7 +34,6 @@
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
 #include "route_time_axis.h"
-#include "progress_dialog.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -1034,7 +1034,7 @@ EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 		if (tr) {
 			tr->PlaylistChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context ());
 		}
-        ProgressDialog::instance()->add_progress_step (); //process of tracks addition 
+        ARDOUR_UI::instance()->_progress_dialog.add_progress_step (); //process of tracks addition 
 	}
 
 	_background_dirty = true;

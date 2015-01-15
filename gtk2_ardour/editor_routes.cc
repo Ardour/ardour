@@ -989,7 +989,7 @@ EditorRoutes::sync_order_keys_from_treeview ()
 		}
 
 		++order;
-        ProgressDialog::instance()->add_progress_step (); //process of tracks addition
+        ARDOUR_UI::instance()->_progress_dialog.add_progress_step (); //process of tracks addition
 	}
 	
 	if (changed) {

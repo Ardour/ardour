@@ -11,6 +11,18 @@
          macfont ="Helvetica Bold 12"
          fgnormal="#6D6E72"        
          />
+  
+  <style name="generic_button"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#6D6E72"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         visible="false"
+         noshowall="true"
+         width="110"
+         height="22"/>
 
   <EventBox bgnormal="#EDECE8">
       <VBox width="320" borderwidth="5">
@@ -56,6 +68,14 @@
                  text="info-2"
                  height="10"/>
           <VBox height="11"/>
+          <HBox width="320">
+              <VBox width="105"/>
+              <Button id="cancel_button"
+                      style="generic_button"
+                      text="Cancel"
+                      visible="false"
+                      noshowall="true"/>
+          </HBox>
           <HBox width="320">
              <VBox width="120"/>
             

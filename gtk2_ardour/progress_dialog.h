@@ -20,6 +20,7 @@
 #define __progress_dialog_h__
 
 #include "waves_dialog.h"
+#include "waves_button.h"
 #include "progress_reporter.h"
 
 namespace Gtk {
@@ -30,7 +31,11 @@ namespace Gtk {
 class ProgressDialog : public WavesDialog, public ProgressReporter
 {
 public:
-    static ProgressDialog *instance ();
+    ProgressDialog (const std::string& title="",
+                    const std::string& top_message="",
+                    const std::string& progress_message="",
+                    const std::string& bottom_message="");
+    ~ProgressDialog () {}
     void set_top_label (std::string message);
     void set_progress_label (std::string message);
     void set_bottom_label (std::string message);
@@ -40,15 +45,15 @@ public:
     // it's expected that set_num_of_steps () was called previously
     void add_progress_step ();
     void update_info (double new_progress, const char* top_message, const char* progress_message, const char* bottom_message);
+    void set_progress (double new_progress);
     void show_pd ();
 	void hide_pd ();
-
+    void show_cancel_button ();
+    void hide_cancel_button ();
+    void set_cancel_button_sensitive (bool sensitive);
+    PBD::Signal0<void> CancelClicked;
+    
 private:
-    ProgressDialog (const std::string& title="",
-                    const std::string& top_message="",
-                    const std::string& progress_message="",
-                    const std::string& bottom_message="");
-    ~ProgressDialog () {}
     void update_progress_gui (float);
     void init (const std::string& title,
                const std::string& top_message,
@@ -58,6 +63,9 @@ private:
     Gtk::Label& _top_label;
     Gtk::Label& _bottom_label;
     Gtk::ProgressBar& _progress_bar;
+    WavesButton& _cancel_button;
+    
+    void cancel_clicked (WavesButton*);
     unsigned int num_of_steps;
     unsigned int cur_step;
     bool hide_automatically;
