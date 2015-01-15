@@ -668,12 +668,13 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		}
 	}
 
-	if(!from_scratch) {
-		_editor->selection->tracks.clear();
-	} 
-
 	DisplaySuspender ds;
+    _editor->selection->block_tracks_changed (true);
 
+    if(!from_scratch) {
+        _editor->selection->tracks.clear();
+    }
+    
 	_display.set_model (Glib::RefPtr<ListStore>());
 
 	for (list<RouteTimeAxisView*>::iterator x = routes.begin(); x != routes.end(); ++x) {
@@ -704,10 +705,6 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
 		row[_columns.name_editable] = true;
 
-		if (!from_scratch) {
-			_editor->selection->add(*x);
-		}
-
 		boost::weak_ptr<Route> wr ((*x)->route());
 
 		(*x)->route()->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());
@@ -735,6 +732,10 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
         (*x)->relative_tracks_reorder_request.connect(*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::move_selected_tracks_relatively, this, _1, _2, _3), gui_context());
 	}
 
+    /* restore selection notifications and update the selection */
+    _editor->selection->block_tracks_changed (false);
+    _editor->selection->TracksChanged();
+    
 	update_rec_display ();
 	update_mute_display ();
 	update_solo_display (true);

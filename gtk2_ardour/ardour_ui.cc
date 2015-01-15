@@ -3570,7 +3570,13 @@ ARDOUR_UI::delete_selected_tracks()
 {
     DisplaySuspender ds;
     
-    TrackSelection& track_selection =  ARDOUR_UI::instance()->the_editor().get_selection().tracks;
+    if (!editor) {
+        return;
+    }
+    
+    TrackSelection& track_selection =  editor->get_selection().tracks;
+    editor->get_selection().block_tracks_changed (true);
+    
     boost::shared_ptr<RouteList> routes_to_remove(new RouteList);
     for (list<TimeAxisView*>::iterator i = track_selection.begin(); i != track_selection.end(); ++i) {
         RouteUI* t = dynamic_cast<RouteUI*> (*i);
@@ -3589,6 +3595,10 @@ ARDOUR_UI::delete_selected_tracks()
 	
     ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
 
+    /* restore selection notifications and update the selection */
+    editor->get_selection().block_tracks_changed (false);
+    editor->get_selection().TracksChanged();
+    
     ProgressDialog::instance()->hide_pd ();
 }
 
