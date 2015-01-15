@@ -679,7 +679,7 @@ EngineStateController::set_new_backend_as_current(const std::string& backend_nam
         return true;
     }
     
-    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->set_backend (backend_name, "ardour", "");
+    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->set_backend (backend_name, PROGRAM_NAME, "");
 	if (backend)
 	{
         if (_current_state != NULL) {
