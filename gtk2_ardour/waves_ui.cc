@@ -101,7 +101,9 @@ WavesUI::WavesUI (const std::string& layout_script_file, Gtk::Container& root)
 		}
 
 		_xml_tree = new XMLTree (layout_file, false);
-		__xml_tree_cache[layout_script_file] = _xml_tree;
+		if (xml_property (*_xml_tree->root (), "CACHEIT", XMLNodeMap (), true)) {
+			__xml_tree_cache[layout_script_file] = _xml_tree;
+		}
 	}
 
 	create_ui(_xml_tree, root);
@@ -571,7 +573,7 @@ WavesUI::create_ui (const XMLTree& layout, Gtk::Container& root)
 {
 	XMLNodeMap styles;
 	get_styles(layout, styles);
-	const XMLNodeList& definition = layout.root()->children();
+	const XMLNodeList& definition = layout.root ()->children();
 	WavesUI::create_ui (definition, styles, root);
 }
 
