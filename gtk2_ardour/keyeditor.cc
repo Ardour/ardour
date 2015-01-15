@@ -203,11 +203,14 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 			goto out;
 		}
 
+		GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & ev->state);
+
 		Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
+		Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator (mod);
 
 		bool result = AccelMap::change_entry (path,
 						      last_keyval,
-						      ModifierType (Keyboard::RelevantModifierKeyMask & ev->state),
+						      Gdk::ModifierType(mod),
 						      true);
 
 		if (result) {
