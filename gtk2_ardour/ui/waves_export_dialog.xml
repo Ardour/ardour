@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Tracks Live" resizeable="False" CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#6F6F6F"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  
+  <style name="generic_button"
+         style="generic_control"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         width="80"
+         height="22"/>
+
+  <EventBox bgnormal="#EDECE8">
+    <VBox borderwidth="10"
+          spacing="10">
+      <Label style="generic_control"
+             text="Export content of selected tracks as new file"/>
+      <HBox spacing="21">
+        <VBox>
+          <Label style="generic_control"
+                 text="Format"/>
+        </VBox>
+        <VBox>
+          <Label style="generic_control"
+                 text="Depth"/>
+        </VBox>
+        <VBox>
+          <Label style="generic_control"
+                 text="Sample Rate"/>
+        </VBox>
+        <VBox>
+          <Label style="generic_control"
+                 text="Dither"/>
+        </VBox>
+        <VBox>
+          <Label style="generic_control"
+                 text="Normalize"/>
+        </VBox>
+      </HBox>
+      <HBox spacing="10">
+        <Button id="cancel_button"
+                style="generic_button"
+                box.pack="end"
+                text="Cancel"/>
+        <Button id="export_button"
+                style="generic_button"
+                box.pack="end"
+                text="Export"/>
+      </HBox>
+    </VBox>
+  </EventBox>
+
+</Dialog>
