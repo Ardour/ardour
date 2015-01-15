@@ -4070,6 +4070,7 @@ Session::save_as (SaveAs& saveas)
 	/* create new tree */
 	
 	if (!_session_dir->create()) {
+		saveas.failure_message = string_compose (_("Cannot create new session folder %1"), to_dir);
 		return -1;
 	}
 
