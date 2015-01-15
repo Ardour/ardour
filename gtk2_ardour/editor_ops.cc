@@ -3731,7 +3731,7 @@ Editor::freeze_route ()
 	InterThreadInfo itt;
 	current_interthread_info = &itt;
 
-	InterthreadProgressWindow ipw (current_interthread_info, _("Freeze"), _("Cancel Freeze"));
+	InterthreadProgressWindow ipw (current_interthread_info);
 
 	pthread_create_and_store (X_("freezer"), &itt.thread, _freeze_thread, this);
 

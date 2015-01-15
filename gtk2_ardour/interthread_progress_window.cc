@@ -22,85 +22,80 @@
 #include "ardour/import_status.h"
 #include "interthread_progress_window.h"
 #include "i18n.h"
+#include "progress_dialog.h"
+#include "gtkmm2ext/gui_thread.h"
 
 using namespace std;
 using namespace Gtk;
 
 /** @param i Status information.
- *  @param t Window title.
- *  @param c Label to use for Cancel button.
+
  */
-InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i, string const & t, string const & c)
-	: ArdourDialog (t, true)
-	, _interthread_info (i)
+
+InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i)
+	: _interthread_info (i)
 {
-	_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
+    _timeout_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &InterthreadProgressWindow::update), 100);
+    _progress_dialog.CancelClicked.connect (_cancel_connection, MISSING_INVALIDATOR, boost::bind (&InterthreadProgressWindow::cancel_clicked, this), gui_context());
+}
 
-	set_border_width (12);
-	get_vbox()->set_spacing (6);
-
-	get_vbox()->pack_start (_bar, false, false);
-
-	Button* b = add_button ("CANCEL", RESPONSE_CANCEL);
-	b->signal_clicked().connect (sigc::mem_fun (*this, &InterthreadProgressWindow::cancel_clicked));
-
-	_cancel_label.set_text (c);
-	_cancel_button.add (_cancel_label);
-
-	set_default_size (200, 100);
-	show_all ();
-        hide ();
-
-	Glib::signal_timeout().connect (sigc::mem_fun (*this, &InterthreadProgressWindow::update), 100);
+InterthreadProgressWindow::~InterthreadProgressWindow ()
+{
+    _timeout_connection.disconnect ();
+    _cancel_connection.disconnect ();
+    _progress_dialog.hide_cancel_button ();
+    _progress_dialog.hide_pd ();
 }
 
 void
 InterthreadProgressWindow::cancel_clicked ()
 {
-	_interthread_info->cancel = true;
+    _interthread_info->cancel = true;
+}
+
+void
+InterthreadProgressWindow::show ()
+{
+    _progress_dialog.show_pd ();
+    _progress_dialog.show_cancel_button ();
 }
 
 bool
 InterthreadProgressWindow::update ()
 {
-	_bar.set_fraction (_interthread_info->progress);
-	return !(_interthread_info->done || _interthread_info->cancel);
+    _progress_dialog.set_progress (_interthread_info->progress);
+ 	return !(_interthread_info->done || _interthread_info->cancel);
 }
 
-/** @param i Status information.
- *  @param t Window title.
- *  @param c Label to use for Cancel button.
- */
-ImportProgressWindow::ImportProgressWindow (ARDOUR::ImportStatus* s, string const & t, string const & c)
-	: InterthreadProgressWindow (s, t, c)
-	, _import_status (s)
+/** @param s Status information.
+  */
+
+ImportProgressWindow::ImportProgressWindow (ARDOUR::ImportStatus* s)
+: InterthreadProgressWindow (s)
+, _import_status (s)
 {
-	_label.set_alignment (0, 0.5);
-	_label.set_use_markup (true);
-
-	get_vbox()->pack_start (_label, false, false);
-
-	_label.show ();
 }
 
 bool
 ImportProgressWindow::update ()
 {
-	_cancel_button.set_sensitive (!_import_status->freeze);
-	_label.set_markup ("<i>" + _import_status->doing_what + "</i>");
+    _progress_dialog.set_cancel_button_sensitive (!_import_status->freeze);
 
-	/* use overall progress for the bar, rather than that for individual files */
-	_bar.set_fraction ((_import_status->current - 1 + _import_status->progress) / _import_status->total);
+ 	/* use overall progress for the bar, rather than that for individual files */
+    double fraction = (_import_status->current - 1 + _import_status->progress) / _import_status->total;
+    
+ 	/* some of the code which sets up _import_status->current may briefly increment it too far
+     at the end of an import, so check for that to avoid a visual glitch */
 
-	/* some of the code which sets up _import_status->current may briefly increment it too far
-	   at the end of an import, so check for that to avoid a visual glitch
-	*/
-	uint32_t c = _import_status->current;
+    uint32_t c = _import_status->current;
 	if (c > _import_status->total) {
 		c = _import_status->total;
 	}
-
-	_bar.set_text (string_compose (_("Importing file: %1 of %2"), c, _import_status->total));
-
-	return !(_import_status->all_done || _import_status->cancel);
+     
+     _progress_dialog.update_info ( fraction,
+                                    _("Importing files"),
+                                    (string_compose (_("Importing file: %1 of %2"), c, _import_status->total)).c_str(),
+                                    (_import_status->doing_what).c_str() );
+     
+     return !(_import_status->all_done || _import_status->cancel);
 }

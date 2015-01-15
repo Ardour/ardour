@@ -89,8 +89,7 @@ Editor::embed_audio_from_video (std::string path, framepos_t n, bool lock_positi
 	import_status.total = paths.size ();
 	import_status.all_done = false;
 
-	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
-	ipw.show ();
+	ImportProgressWindow ipw (&import_status);
 
 	boost::shared_ptr<ARDOUR::Track> track;
 	bool ok = (import_sndfiles (paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, ARDOUR::SrcBest, n, 1, 1, track, false) == 0);

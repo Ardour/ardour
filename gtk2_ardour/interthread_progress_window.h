@@ -22,7 +22,10 @@
 
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
+#include "pbd/signals.h"
 #include "ardour_dialog.h"
+#include "waves_button.h"
+#include "progress_dialog.h"
 
 namespace ARDOUR {
 	class InterThreadInfo;
@@ -34,35 +37,35 @@ namespace ARDOUR {
  *  automagically updated using a Glib timer, and a cancel button.
  */
 
-class InterthreadProgressWindow : public ArdourDialog
+class InterthreadProgressWindow
 {
 public:
-	InterthreadProgressWindow (ARDOUR::InterThreadInfo *, std::string const &, std::string const &);
+	InterthreadProgressWindow (ARDOUR::InterThreadInfo *);
+    virtual ~InterthreadProgressWindow ();
+    void show ();
 
 protected:
 
 	virtual bool update ();
-
-	Gtk::Button _cancel_button;
-	Gtk::Label _cancel_label;
-	Gtk::ProgressBar _bar;
+    ProgressDialog _progress_dialog;
 
 private:
 	void cancel_clicked ();
-
+    
 	ARDOUR::InterThreadInfo* _interthread_info;
+    PBD::ScopedConnection _cancel_connection;
+    sigc::connection _timeout_connection;
 };
 
 /** Progress dialogue for importing sound files */
 class ImportProgressWindow : public InterthreadProgressWindow
 {
 public:
-	ImportProgressWindow (ARDOUR::ImportStatus *, std::string const &, std::string const &);
+	ImportProgressWindow (ARDOUR::ImportStatus *);
 
 private:
 	bool update ();
 
-	Gtk::Label _label;
 	ARDOUR::ImportStatus* _import_status;
 };
 

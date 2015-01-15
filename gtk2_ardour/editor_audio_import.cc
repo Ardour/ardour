@@ -272,7 +272,7 @@ Editor::do_import (vector<string> paths, ImportDisposition disposition, ImportMo
 	import_status.total = paths.size ();
 	import_status.all_done = false;
 
-	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
+	ImportProgressWindow ipw (&import_status);
 
 	bool ok = true;
 
