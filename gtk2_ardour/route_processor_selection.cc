@@ -135,7 +135,9 @@ RouteProcessorSelection::remove (RouteUI* r)
 void
 RouteProcessorSelection::set (RouteUI* r)
 {
+    _no_route_change_signal = true;
 	clear_routes ();
+    _no_route_change_signal = false;
 	add (r);
 }
 

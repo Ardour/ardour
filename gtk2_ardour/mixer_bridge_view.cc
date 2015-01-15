@@ -420,9 +420,12 @@ MixerBridgeView::strip_button_release_event (GdkEventButton *ev, MixerStrip *str
                     }
                 }
                 
+                _selection.block_routes_changed (true);
                 for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
                     _selection.add (*i);
                 }
+                _selection.block_routes_changed (false);
+                _selection.RoutesChanged ();
             }
             
             return true;
