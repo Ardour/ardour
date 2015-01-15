@@ -118,7 +118,7 @@ ExportHandler::ExportHandler (Session & session)
 
 ExportHandler::~ExportHandler ()
 {
-	// TODO remove files that were written but not finished
+    graph_builder->cleanup (export_status->aborted () );
 }
 
 /** Add an export to the `to-do' list */
