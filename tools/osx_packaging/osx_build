@@ -558,10 +558,6 @@ elif [ x$MIXBUS != x ] ; then
 
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
-    cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-		DMGWINBOTTOM=580
-		YPOS=$[ $DMGWINBOTTOM - 300 ]
-		MIXBUSPOS="set position of item \"MixBus_Install_QuickStart.pdf\" of container window to {90, ${YPOS}}"
 else 
 
     echo "Creating $APPNAME packaging directory"
