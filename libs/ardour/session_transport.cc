@@ -500,7 +500,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 	jump_to = -1;
 
 	AutoReturnTarget autoreturn = Config->get_auto_return_target_list ();
-	
+
 	if (!autoreturn) {
 		return false;
 	}
