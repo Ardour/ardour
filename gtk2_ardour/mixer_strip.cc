@@ -1241,6 +1241,10 @@ MixerStrip::io_changed_proxy ()
 void
 MixerStrip::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::weak_ptr<Port> wb)
 {
+    if (!_route) {
+        return;
+    }
+    
 	boost::shared_ptr<Port> a = wa.lock ();
 	boost::shared_ptr<Port> b = wb.lock ();
 
