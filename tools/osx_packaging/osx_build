@@ -540,7 +540,7 @@ rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
 
 DMGWINBOTTOM=440
-DMGBACKGROUND=dmgbg.png
+DMGBACKGROUND=dmgbg
 
 if [ x$SAE != x ] ; then
 	
@@ -558,6 +558,7 @@ elif [ x$MIXBUS != x ] ; then
 
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
+    DMGBACKGROUND=dmgbgMB
 else 
 
     echo "Creating $APPNAME packaging directory"
@@ -592,7 +593,7 @@ if test x$WITH_HARVID != x ; then
 	YPOS=$[ $DMGWINBOTTOM - 300 ]
 	XJADEOPOS="set position of item \"Jadeo.app\" of container window to {310, ${YPOS}}"
 
-	DMGBACKGROUND=dmgbgxj.png
+	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
 
 echo "Building DMG ..."
@@ -630,7 +631,7 @@ mount -t hfs "${DiskDevice}" "${MNTPATH}"
 
 cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
 mkdir "${MNTPATH}/.background"
-cp -vi ${DMGBACKGROUND} "${MNTPATH}/.background/dmgbg.png"
+cp -vi ${DMGBACKGROUND}.png "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
