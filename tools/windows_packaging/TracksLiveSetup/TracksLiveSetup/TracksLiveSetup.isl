@@ -271,6 +271,7 @@
 		<row><td>NewBinary24</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\TracksLiveSetup\icons\Installer Banner.bmp</td></row>
 		<row><td>NewBinary25</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\TracksLiveSetup\icons\Installer Banner.bmp</td></row>
 		<row><td>NewBinary26</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\TracksLiveSetup\icons\Installer Splash.bmp</td></row>
+		<row><td>NewBinary27</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\TracksLiveSetup\scripts\preferences_cleanup.vbs</td></row>
 		<row><td>NewBinary3</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\Up.ibd</td></row>
 		<row><td>NewBinary4</td><td/><td>&lt;ISProductFolder&gt;\Redist\Language Independent\OS Independent\WarningIcon.ibd</td></row>
 		<row><td>NewBinary5</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\TracksLiveSetup\icons\Installer Splash.bmp</td></row>
@@ -2030,6 +2031,7 @@
 		<row><td>SetARPINSTALLLOCATION</td><td>51</td><td>ARPINSTALLLOCATION</td><td>[INSTALLDIR]</td><td/><td/></row>
 		<row><td>SetAllUsersProfileNT</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%SystemRoot]\Profiles\All Users</td><td/><td/></row>
 		<row><td>ShowMsiLog</td><td>226</td><td>SystemFolder</td><td>[SystemFolder]notepad.exe "[MsiLogFileLocation]"</td><td/><td>Shows Property-driven MSI Log</td></row>
+		<row><td>remove_preferences</td><td>1094</td><td>NewBinary27</td><td/><td/><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%ALLUSERSPROFILE]</td><td/><td/></row>
 		<row><td>setUserProfileNT</td><td>51</td><td>USERPROFILE</td><td>[%USERPROFILE]</td><td/><td/></row>
 	</table>
@@ -6367,7 +6369,7 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>COMPANY_NAME</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>2023958064</td></row>
+		<row><td>COMPANY_NAME</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-2136801231</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1033</td><td>Always Install</td><td>0</td><td/><td>1621317870</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1033</td><td>The color settings of your system are not adequate for running [ProductName].</td><td>0</td><td/><td>1621317870</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_OS</td><td>1033</td><td>The operating system is not adequate for running [ProductName].</td><td>0</td><td/><td>1621317870</td></row>
@@ -7490,11 +7492,11 @@
 		<row><td>ID_STRING14</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1889785454</td></row>
 		<row><td>ID_STRING15</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023999979</td></row>
 		<row><td>ID_STRING16</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023970352</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.WavesAudio.com</td><td>0</td><td/><td>2023958064</td></row>
-		<row><td>ID_STRING3</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>2023958064</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://www.waves.com/support</td><td>0</td><td/><td>-2136765775</td></row>
+		<row><td>ID_STRING3</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-2136801231</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>TracksLive</td><td>0</td><td/><td>1621309294</td></row>
 		<row><td>ID_STRING5</td><td>1033</td><td>LAUNCH~1.EXE|Launch gdb.exe</td><td>0</td><td/><td>1621352975</td></row>
-		<row><td>ID_STRING6</td><td>1033</td><td>http://www.WavesAudio.com/support</td><td>0</td><td/><td>2023958064</td></row>
+		<row><td>ID_STRING6</td><td>1033</td><td>http://www.waves.com/support/support</td><td>0</td><td/><td>-2136765775</td></row>
 		<row><td>ID_STRING7</td><td>1033</td><td>US: +1-865-909-9200, Worldwide: +972-3-608-4000</td><td>0</td><td/><td>1621317071</td></row>
 		<row><td>ID_STRING8</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621302927</td></row>
 		<row><td>ID_STRING9</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621351824</td></row>
@@ -7736,6 +7738,7 @@
 		<row><td>WriteEnvironmentStrings</td><td/><td>5200</td><td>WriteEnvironmentStrings</td><td/></row>
 		<row><td>WriteIniValues</td><td/><td>5100</td><td>WriteIniValues</td><td/></row>
 		<row><td>WriteRegistryValues</td><td/><td>5000</td><td>WriteRegistryValues</td><td/></row>
+		<row><td>remove_preferences</td><td>REMOVE="ALL"</td><td>6405</td><td/><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>VersionNT &gt;= 500</td><td>980</td><td/><td/></row>
 		<row><td>setUserProfileNT</td><td>VersionNT</td><td>960</td><td/><td/></row>
 	</table>
