@@ -25,7 +25,7 @@
          height="22"/>
 
   <EventBox bgnormal="#EDECE8">
-      <VBox width="320" borderwidth="5">
+      <VBox width="320">
           <Label id="top_label"
                  style="generic_control"
                  vertalignment="center"
