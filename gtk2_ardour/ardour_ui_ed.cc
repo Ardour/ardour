@@ -221,7 +221,7 @@ if (Profile->get_mixbus())
 	ActionManager::register_action (common_actions, X_("Forums"), _("User Forums"), mem_fun(*this, &ARDOUR_UI::launch_forums));
 	ActionManager::register_action (common_actions, X_("Howto_Report"), _("How to report a bug"), mem_fun(*this, &ARDOUR_UI::launch_howto_report));
 
-	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false));
+	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 

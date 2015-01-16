@@ -494,6 +494,62 @@ Session::non_realtime_locate ()
 	clear_clicks ();
 }
 
+bool
+Session::select_playhead_priority_target (framepos_t& jump_to)
+{
+	jump_to = -1;
+
+	AutoReturnTarget autoreturn = Config->get_auto_return_target_list ();
+	
+	if (!autoreturn) {
+		return false;
+	}
+
+	/* Note that the order of checking each AutoReturnTarget flag defines
+	   the priority each flag.
+	*/
+	
+	if (autoreturn & LastLocate) {
+		jump_to = _last_roll_location;
+	}
+	
+	if (jump_to < 0 && (autoreturn & RangeSelectionStart)) {
+		if (!_range_selection.empty()) {
+			jump_to = _range_selection.from;
+		}
+	}
+	
+	if (jump_to < 0 && (autoreturn & Loop)) {
+		/* don't try to handle loop play when synced to JACK */
+		
+		if (!synced_to_engine()) {
+			Location *location = _locations->auto_loop_location();
+			
+			if (location) {
+				jump_to = location->start();
+			} 
+		}
+	}
+	
+	if (jump_to < 0 && (autoreturn & RegionSelectionStart)) {
+		if (!_object_selection.empty()) {
+			jump_to = _object_selection.from;
+		}
+	} 
+
+	return jump_to >= 0;
+}
+
+void
+Session::follow_playhead_priority ()
+{
+	framepos_t target;
+
+	if (select_playhead_priority_target (target)) {
+		request_locate (target);
+	}
+}
+
 void
 Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 {
@@ -576,8 +632,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		update_latency_compensation ();
 	}
 
-	bool const auto_return_enabled =
-		(!config.get_external_sync() && (config.get_auto_return() || abort));
+	bool const auto_return_enabled = (!config.get_external_sync() && (Config->get_auto_return_target_list() || abort));
 
 	if (auto_return_enabled ||
 	    (ptw & PostTransportLocate) ||
@@ -603,40 +658,13 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				do_locate = true;
 
 			} else {
-				if (config.get_auto_return()) {
+				framepos_t jump_to;
 
-					if (play_loop) {
+				if (select_playhead_priority_target (jump_to)) {
 
-						/* don't try to handle loop play when synced to JACK */
+					_transport_frame = jump_to;
+					do_locate = true;
 
-						if (!synced_to_engine()) {
-
-							Location *location = _locations->auto_loop_location();
-
-							if (location != 0) {
-								_transport_frame = location->start();
-							} else {
-								_transport_frame = _last_roll_location;
-							}
-							do_locate = true;
-						}
-
-					} else if (_play_range) {
-
-						/* return to start of range */
-
-						if (!current_audio_range.empty()) {
-							_transport_frame = current_audio_range.front().start;
-							do_locate = true;
-						}
-
-					} else {
-
-						/* regular auto-return */
-
-						_transport_frame = _last_roll_location;
-						do_locate = true;
-					}
 				} else if (abort) {
 
 					_transport_frame = _last_roll_location;
@@ -1218,7 +1246,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 			}
 			_engine.transport_stop ();
 		} else {
-			bool const auto_return_enabled = (!config.get_external_sync() && (config.get_auto_return() || abort));
+			bool const auto_return_enabled = (!config.get_external_sync() && (Config->get_auto_return_target_list() || abort));
 
 			if (!auto_return_enabled) {
 				_requested_return_frame = destination_frame;
