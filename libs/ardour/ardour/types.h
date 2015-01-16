@@ -612,6 +612,13 @@ namespace ARDOUR {
 	    uint32_t max; //< samples
 	};
 
+        enum AutoReturnTarget {
+		LastLocate = 0x1,
+		RangeSelectionStart = 0x2,
+		Loop = 0x4,
+		RegionSelectionStart = 0x8,
+	};
+
 } // namespace ARDOUR
 
 
@@ -636,6 +643,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RegionSelectionAfterSplit& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::AutoReturnTarget& sf);
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
@@ -655,6 +663,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::DenormalModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RegionSelectionAfterSplit& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoReturnTarget& sf);
 
 
 /* because these operators work on types which can be used when making

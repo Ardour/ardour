@@ -32,6 +32,7 @@
     <Option name="periodic-safety-backup-interval" value="120"/>
     <Option name="timecode-format" value="timecode_30"/>
     <Option name="seamless-loop" value="1"/>
+    <Option name="auto-return-target-list" value="RangeSelectionStart,Loop,RegionSelectionStart"/>
   </Config>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>

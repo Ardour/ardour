@@ -774,6 +774,14 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void maybe_update_session_range (framepos_t, framepos_t);
 
+	/* temporary hacks to allow selection to be pushed from GUI into backend.
+	   Whenever we move the selection object into libardour, these will go away.
+	 */
+	void set_range_selection (framepos_t start, framepos_t end);
+	void set_object_selection (framepos_t start, framepos_t end);
+	void clear_range_selection ();
+	void clear_object_selection ();
+	
 	/* buffers for gain and pan */
 
 	gain_t* gain_automation_buffer () const;
@@ -1339,13 +1347,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void post_transport ();
 	void engine_halted ();
 	void xrun_recovery ();
+	bool select_playhead_priority_target (framepos_t&);
+	void follow_playhead_priority ();
+	
+	/* These are synchronous and so can only be called from within the process
+	 * cycle
+	 */
 
-    /* These are synchronous and so can only be called from within the process
-     * cycle
-     */
-
-    int  send_full_time_code (framepos_t, pframes_t nframes);
-    void send_song_position_pointer (framepos_t);
+	int  send_full_time_code (framepos_t, pframes_t nframes);
+	void send_song_position_pointer (framepos_t);
 
 	TempoMap    *_tempo_map;
 	void          tempo_map_changed (const PBD::PropertyChange&);
@@ -1558,6 +1568,12 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_play_range (std::list<AudioRange>&, bool leave_rolling);
 	void unset_play_range ();
 
+	/* temporary hacks to allow selection to be pushed from GUI into backend
+	   Whenever we move the selection object into libardour, these will go away.
+	*/
+	Evoral::Range<framepos_t> _range_selection;
+	Evoral::Range<framepos_t> _object_selection;
+	
 	/* main outs */
 	uint32_t main_outs;
 

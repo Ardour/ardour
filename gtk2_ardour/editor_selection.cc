@@ -652,9 +652,12 @@ Editor::set_selected_regionview_from_click (bool press, Selection::Operation op)
 				if (press)
 					goto out;
 				else {
-					get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.property_id);
-					selection->set(all_equivalent_regions);
-					commit = true;
+					if (selection->regions.size() > 1) {
+						/* collapse region selection down to just this one region (and its equivalents) */
+						get_equivalent_regions(clicked_regionview, all_equivalent_regions, ARDOUR::Properties::select.property_id);
+						selection->set(all_equivalent_regions);
+						commit = true;
+					}
 				}
 			}
 			break;
@@ -1027,6 +1030,16 @@ Editor::time_selection_changed ()
 	} else {
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
+
+	/* propagate into backend */
+
+	if (_session) {
+		if (selection->time.length() != 0) {
+			_session->set_range_selection (selection->time.start(), selection->time.end_frame());
+		} else {
+			_session->clear_range_selection ();
+		}
+	}
 }
 
 /** Set all region actions to have a given sensitivity */
@@ -1337,6 +1350,17 @@ Editor::region_selection_changed ()
 	if (_session && !_session->transport_rolling() && !selection->regions.empty()) {
 		maybe_locate_with_edit_preroll (selection->regions.start());
 	}
+
+	/* propagate into backend */
+
+	if (_session) {
+		if (!selection->regions.empty()) {
+			_session->set_object_selection (selection->regions.start(), selection->regions.end_frame());
+		} else {
+			_session->clear_object_selection ();
+		}
+	}
+
 }
 
 void
