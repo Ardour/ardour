@@ -63,6 +63,122 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
+class AutoReturnTargetOptions : public OptionEditorBox
+{
+    public:
+	AutoReturnTargetOptions (RCConfiguration* c, Gtk::Window* p)
+		: _rc_config (c)
+		, range_selection_button (_("Play Range Selection"))
+		, last_roll_button (_("Play from Last Roll"))
+		, loop_button (_("Play Loop"))
+		, region_selection_button (_("Play Region Selection"))
+		, toggle_button (_("Enable/Disable all options"))
+	{
+		_box->pack_start (range_selection_button, false, false);
+		range_selection_button.signal_toggled().connect (sigc::mem_fun (*this, &AutoReturnTargetOptions::range_selection_toggled));
+
+		_box->pack_start (loop_button, false, false);
+		loop_button.signal_toggled().connect (sigc::mem_fun (*this, &AutoReturnTargetOptions::loop_toggled));
+
+		_box->pack_start (region_selection_button, false, false);
+		region_selection_button.signal_toggled().connect (sigc::mem_fun (*this, &AutoReturnTargetOptions::region_selection_toggled));
+
+		_box->pack_start (last_roll_button, false, false);
+		last_roll_button.signal_toggled().connect (sigc::mem_fun (*this, &AutoReturnTargetOptions::last_roll_toggled));
+
+		HBox* hbox = manage (new HBox);
+		/* keep the toggle button small */
+		hbox->pack_start (toggle_button, false, false);
+		_box->pack_start (*hbox, false, false);
+
+		toggle_button.signal_clicked().connect (sigc::mem_fun (*this, &AutoReturnTargetOptions::toggle));
+
+		Gtkmm2ext::UI::instance()->set_tip (range_selection_button,
+						    _("If enabled, playhead will always start from the beginning of the current range selection.\n\nIf disabled or no range selection, see the next choice in this list"));
+		Gtkmm2ext::UI::instance()->set_tip (loop_button,
+						    _("If enabled, playhead will always start from the beginning of the loop range.\n\nIf disabled or no loop range, see the next choice in this list"));
+		Gtkmm2ext::UI::instance()->set_tip (region_selection_button,
+						    _("If enabled, playhead will always start from the beginning of the first selected region.\n\nIf disabled or no region selection, see the next choice in this list"));
+		Gtkmm2ext::UI::instance()->set_tip (last_roll_button,
+						    _("If enabled, playhead will always start from the last position where it was started.\n\nIf disabled it will start from wherever it is currently located"));
+
+		Gtkmm2ext::UI::instance()->set_tip (toggle_button,
+						    _("Change status of all buttons above to all enabled or all disabled"));
+	}
+			
+	void parameter_changed (string const & p)
+	{
+		if (p == "auto-return-target-list") {
+			AutoReturnTarget art = _rc_config->get_auto_return_target_list();
+			cerr << "ARTO, reset buttons with " << enum_2_string (art) << endl;
+			range_selection_button.set_active (art & RangeSelectionStart);
+			loop_button.set_active (art & Loop);
+			region_selection_button.set_active (art & RegionSelectionStart);
+			last_roll_button.set_active (art & LastLocate);
+		}
+	}
+				 
+	void set_state_from_config ()
+	{
+		parameter_changed ("auto-return-target-list");
+	}
+
+    private:
+
+	void range_selection_toggled () {
+		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
+		if (range_selection_button.get_active ()) {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RangeSelectionStart));
+		} else {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RangeSelectionStart));
+		}
+	}
+	void last_roll_toggled () {
+		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
+		if (range_selection_button.get_active ()) {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RangeSelectionStart));
+		} else {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RangeSelectionStart));
+		}
+	}
+	void region_selection_toggled () {
+		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
+		if (range_selection_button.get_active ()) {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RangeSelectionStart));
+		} else {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RangeSelectionStart));
+		}
+	}
+	void loop_toggled () {
+		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
+		if (range_selection_button.get_active ()) {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RangeSelectionStart));
+		} else {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RangeSelectionStart));
+		}
+	}
+
+	void toggle () {
+		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
+		if (art) {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (0));
+		} else {
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (RangeSelectionStart|
+										   RegionSelectionStart|
+										   Loop|
+										   LastLocate));
+		}
+	}
+	
+	RCConfiguration* _rc_config;
+
+	Gtk::CheckButton range_selection_button;
+	Gtk::CheckButton last_roll_button;
+	Gtk::CheckButton loop_button;
+	Gtk::CheckButton region_selection_button;
+	Gtk::Button      toggle_button;
+};
+
 class ClickOptions : public OptionEditorBox
 {
 public:
@@ -1333,6 +1449,10 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	/* TRANSPORT */
+
+	add_option (_("Transport"), new OptionEditorHeading (S_("Playhead Behaviour")));
+	add_option (_("Transport"), new AutoReturnTargetOptions (_rc_config, this));
+	add_option (_("Transport"), new OptionEditorHeading (S_("Transport Options")));
 
 	BoolOption* tsf;
 
