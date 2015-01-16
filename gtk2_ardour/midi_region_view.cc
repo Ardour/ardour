@@ -951,11 +951,12 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bo
 
 	view->update_note_range(new_note->note());
 
-	trackview.editor().begin_reversible_command(_("add note"));
-	MidiModel::NoteDiffCommand* cmd = _model->new_note_diff_command(_("add note"));
-	cmd->add (new_note);
-	_model->apply_command(*trackview.session(), cmd);
-	trackview.editor().commit_reversible_command();
+	start_note_diff_command(_("add note"));
+
+	clear_selection ();
+	note_diff_add_note (new_note, true, false);
+
+	apply_diff();
 
 	play_midi_note (new_note);
 }
@@ -1852,10 +1853,12 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	view->update_note_range(new_note->note());
 
 	_marked_for_selection.clear ();
-	clear_selection ();
 
 	start_note_diff_command (_("step add"));
+
+	clear_selection ();
 	note_diff_add_note (new_note, true, false);
+
 	apply_diff();
 
 	// last_step_edit_note = new_note;
@@ -2779,7 +2782,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 void
 MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative)
 {
-	start_note_diff_command (_("resize notes"));
+	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		Note*  canvas_note = (*i)->note;
@@ -2840,7 +2843,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 	}
 
 	_resize_data.clear();
-	apply_diff();
+	apply_diff(true);
 }
 
 void

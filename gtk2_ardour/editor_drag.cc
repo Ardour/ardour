@@ -1963,6 +1963,8 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	*/
 	region->note_selected (cnote, cnote->selected ());
 
+	_editor->begin_reversible_command (_("resize notes"));
+
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
 		MidiRegionSelection::iterator next;
 		next = r;
@@ -2001,6 +2003,8 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
 		}
 	}
+
+	_editor->commit_reversible_command ();
 }
 
 void

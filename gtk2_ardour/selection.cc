@@ -1310,6 +1310,7 @@ Selection::set_state (XMLNode const & node, int)
 	}
 
 	clear_regions ();
+	clear_midi_notes ();
 	clear_points ();
 	clear_time ();
 	clear_tracks ();
