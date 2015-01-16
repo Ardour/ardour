@@ -1657,8 +1657,12 @@ MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > n
 bool
 MidiRegionView::note_in_region_range (const boost::shared_ptr<NoteType> note, bool& visible) const
 {
+	/* This is imprecise due to all the conversion conversion involved, so only
+	   hide notes if they seem to start more than one tick before the start. */
+	const framecnt_t tick_frames       = Evoral::Beats::tick().to_ticks(trackview.session()->frame_rate());
 	const framepos_t note_start_frames = source_beats_to_region_frames (note->time());
-	bool outside = (note_start_frames  < 0) || (note_start_frames > _region->last_frame());
+	const bool       outside           = ((note_start_frames <= -tick_frames) ||
+	                                      (note_start_frames > _region->last_frame()));
 
 	visible = (note->note() >= midi_stream_view()->lowest_note()) &&
 		(note->note() <= midi_stream_view()->highest_note());
