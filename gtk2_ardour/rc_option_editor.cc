@@ -112,7 +112,6 @@ class AutoReturnTargetOptions : public OptionEditorBox
 	{
 		if (p == "auto-return-target-list") {
 			AutoReturnTarget art = _rc_config->get_auto_return_target_list();
-			cerr << "ARTO, reset buttons with " << enum_2_string (art) << endl;
 			range_selection_button.set_active (art & RangeSelectionStart);
 			loop_button.set_active (art & Loop);
 			region_selection_button.set_active (art & RegionSelectionStart);
