@@ -126,6 +126,7 @@
     <Option name="video-server-docroot" value="/"/>
     <Option name="show-video-export-info" value="1"/>
     <Option name="show-video-server-dialog" value="0"/>
+    <Option name="auto-return-target-list" value="RangeSelectionStart,Loop,RegionSelectionStart"/>
   </Config>
   <Metadata/>
   <ControlProtocols/>

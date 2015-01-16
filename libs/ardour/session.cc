@@ -271,6 +271,8 @@ Session::Session (AudioEngine &eng,
 	, click_emphasis_length (0)
 	, _clicks_cleared (0)
 	, _play_range (false)
+	, _range_selection (-1,-1)
+	, _object_selection (-1,-1)
 	, main_outs (0)
 	, first_file_data_format_reset (true)
 	, first_file_header_format_reset (true)
@@ -6108,4 +6110,33 @@ Session::reconnect_ltc_output ()
 		}
 #endif
 	}
+}
+
+void
+Session::set_range_selection (framepos_t start, framepos_t end)
+{
+	cerr << "set range selection " << start << " .. " << end << endl;
+	_range_selection = Evoral::Range<framepos_t> (start, end);
+	follow_playhead_priority ();
+}
+
+void
+Session::set_object_selection (framepos_t start, framepos_t end)
+{
+	_object_selection = Evoral::Range<framepos_t> (start, end);
+	follow_playhead_priority ();
+}
+
+void
+Session::clear_range_selection ()
+{
+	_range_selection = Evoral::Range<framepos_t> (-1,-1);
+	follow_playhead_priority ();
+}
+
+void
+Session::clear_object_selection ()
+{
+	_object_selection = Evoral::Range<framepos_t> (-1,-1);
+	follow_playhead_priority ();
 }
