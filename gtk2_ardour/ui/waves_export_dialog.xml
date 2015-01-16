@@ -183,11 +183,18 @@
                 style="generic_button"
                 box.pack="end"
                 text="Cancel"/>
+        <Button id="stop_export_button"
+                style="generic_button"
+                box.pack="end"
+                text="Stop Export"/>
         <Button id="export_button"
                 style="generic_button"
                 box.pack="end"
                 text="Export"/>
       </HBox>
+      <ProgressBar id="export_progress_bar"
+                   height="21"
+                   bgnormal="#6B6B6B"/>
     </VBox>
   </EventBox>
 
