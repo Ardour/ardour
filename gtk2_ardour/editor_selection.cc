@@ -1046,7 +1046,14 @@ void
 Editor::track_selection_changed ()
 {
     if (!selection->tracks.empty() ) {
-        set_selected_mixer_strip (*(selection->tracks.front()));
+        
+        TrackViewList::iterator iter = track_views.begin();
+        for (; iter != track_views.end(); ++iter) {
+            if (selection->selected(*iter) ) {
+                TimeAxisView* tv = *iter;
+                set_selected_mixer_strip (*tv);
+            }
+        }
         
     } else {
 

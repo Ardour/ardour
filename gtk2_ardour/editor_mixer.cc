@@ -165,7 +165,9 @@ Editor::show_editor_mixer (bool yn)
 		}
 
 		if (r) {
-			current_mixer_strip->set_route (r);
+            if (!current_mixer_strip->route() ) {
+                current_mixer_strip->set_route (r);
+            }
 			//current_mixer_strip->set_width_enum (editor_mixer_strip_width, (void*) this);
 		}
 
@@ -218,8 +220,16 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		create_editor_mixer ();
 	}
 
+    if (current_mixer_strip->route() && !selection->tracks.empty() ) {
+        TimeAxisView* cur_view = get_route_view_by_route_id(current_mixer_strip->route()->id() );
+        
+        if (selection->selected(cur_view) ) {
+            // nothing to do, we already show the track which is selected
+            return;
+        }
+    }
 
-	// if this is an automation track, then we shold the mixer strip should
+	// if this is an automation track, then the mixer strip should
 	// show the parent
 
 	boost::shared_ptr<ARDOUR::Route> route;
@@ -252,11 +262,9 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	if (act) {
 		Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic(act);
         
-		if ( tact && tact->get_active() ) { // if inspector is visible
-			if (route && (current_mixer_strip->route() != route)) {
-                current_mixer_strip->set_route (route);
-            }
-		}
+        if (route && (current_mixer_strip->route() != route)) {
+            current_mixer_strip->set_route (route);
+        }
 	}
     
 	if (route && !route->is_master ()) {
