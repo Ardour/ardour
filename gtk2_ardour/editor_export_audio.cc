@@ -45,6 +45,7 @@
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
 #include "editor.h"
+#include "waves_export_dialog.h"
 #include "export_dialog.h"
 #include "midi_export_dialog.h"
 #include "midi_region_view.h"
@@ -63,6 +64,10 @@ using namespace Gtk;
 void
 Editor::export_audio ()
 {
+	{
+	WavesExportDialog export_dialog (_("Export"), _session, ExportProfileManager::RegularExport);
+	export_dialog.run();
+	}
 	ExportDialog dialog (*this, _("Export"), ExportProfileManager::RegularExport);
 	dialog.set_session (_session);
 	dialog.run();

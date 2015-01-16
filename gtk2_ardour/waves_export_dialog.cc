@@ -18,11 +18,16 @@
 */
 
 #include "waves_export_dialog.h"
-WavesExportDialog::WavesExportDialog (const std::string &title, ARDOUR::ExportProfileManager::ExportType type)
+
+WavesExportDialog::WavesExportDialog (const std::string &title, ARDOUR::Session* session, ARDOUR::ExportProfileManager::ExportType type)
 	: WavesDialog ("waves_export_dialog.xml", true, false )
 	, _export_button (get_waves_button ("export_button"))
 	, _cancel_button (get_waves_button ("cancel_button"))
+	, _stop_export_button (get_waves_button ("stop_export_button"))
+	, _export_progress_bar (get_progressbar ("export_progress_bar"))
+	, _export_type (type)
+	, _previous_progress (0)
 {
 	set_title (title);
-	init ();
+	init (session);
 }

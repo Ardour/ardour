@@ -21,23 +21,19 @@
 #define __waves_export_dialog_h__
 
 #include "ardour/export_profile_manager.h"
-#include "public_editor.h"
-#include "export_timespan_selector.h"
-#include "export_channel_selector.h"
-#include "export_file_notebook.h"
-#include "export_preset_selector.h"
-#include "soundcloud_export_selector.h"
 
 #include "waves_dialog.h"
 
 class WavesExportDialog : public WavesDialog
 {
 public:
-	WavesExportDialog(const std::string &title, ARDOUR::ExportProfileManager::ExportType type);
+	WavesExportDialog(const std::string &title, ARDOUR::Session* session, ARDOUR::ExportProfileManager::ExportType type);
 
 protected:
 	WavesButton& _export_button;
 	WavesButton& _cancel_button;
+	WavesButton& _stop_export_button;
+	Gtk::ProgressBar &_export_progress_bar;
    
 private:
 	#include "waves_export_dialog.logic.h"

@@ -19,8 +19,29 @@
 
 //class WavesExportDialog : public WavesDialog
 //{
-private:
-	void init ();
-void _on_export_button_clicked (WavesButton*);
-void _on_cancel_button_clicked (WavesButton*);
+protected:
+
+	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
+	HandlerPtr _export_handler;
+
+	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
+	ManagerPtr _profile_manager;
+
+	typedef boost::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
+	StatusPtr _export_status;
+
+	ARDOUR::ExportProfileManager::ExportType _export_type;
+	sigc::connection _progress_connection;
+	std::stringstream _export_error;
+	float _previous_progress; // Needed for gtk bug workaround.
+
+
+	void init (ARDOUR::Session* session);
+	void _show_progress ();
+	void _notify_errors (bool force = false);
+	void _on_export_button_clicked (WavesButton*);
+	void _on_cancel_button_clicked (WavesButton*);
+	gint _on_progress_timeout ();
+
+
 //};
