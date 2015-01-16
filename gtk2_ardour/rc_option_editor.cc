@@ -138,25 +138,25 @@ class AutoReturnTargetOptions : public OptionEditorBox
 	void last_roll_toggled () {
 		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
 		if (range_selection_button.get_active ()) {
-			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RangeSelectionStart));
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | LastLocate));
 		} else {
-			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RangeSelectionStart));
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~LastLocate));
 		}
 	}
 	void region_selection_toggled () {
 		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
 		if (range_selection_button.get_active ()) {
-			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RangeSelectionStart));
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RegionSelectionStart));
 		} else {
-			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RangeSelectionStart));
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RegionSelectionStart));
 		}
 	}
 	void loop_toggled () {
 		AutoReturnTarget art = _rc_config->get_auto_return_target_list ();
 		if (range_selection_button.get_active ()) {
-			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | RangeSelectionStart));
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art | Loop));
 		} else {
-			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~RangeSelectionStart));
+			_rc_config->set_auto_return_target_list (AutoReturnTarget (art & ~Loop));
 		}
 	}
 
