@@ -3577,6 +3577,8 @@ Session::config_changed (std::string p, bool ours)
 		reconnect_ltc_output ();
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();
+	} else if (p == "auto-return-target-list") {
+		follow_playhead_priority ();
 	}
 
 	set_dirty ();
