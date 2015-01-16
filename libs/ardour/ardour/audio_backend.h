@@ -186,7 +186,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * if there is any chance that a buffer size of 1024 is not in the list
      * returned by available_buffer_sizes()
      */
-    virtual uint32_t default_buffer_size () const {
+    virtual uint32_t default_buffer_size (const std::string& device) const {
 	    return 1024;
     }
 
