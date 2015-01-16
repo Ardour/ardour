@@ -127,7 +127,8 @@ setup_enum_writer ()
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
 	Evoral::OverlapType _OverlapType;
-
+	AutoReturnTarget _AutoReturnTarget;
+		
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -634,6 +635,13 @@ setup_enum_writer ()
 	REGISTER_ENUM (Evoral::OverlapEnd);
 	REGISTER_ENUM (Evoral::OverlapExternal);
 	REGISTER(_OverlapType);
+
+	REGISTER_ENUM (LastLocate);
+	REGISTER_ENUM (RangeSelectionStart);
+	REGISTER_ENUM (Loop);
+	REGISTER_ENUM (RegionSelectionStart);
+	REGISTER_BITS (_AutoReturnTarget);
+
 }
 
 } /* namespace ARDOUR */
@@ -947,6 +955,34 @@ std::istream& operator>>(std::istream& o, FadeShape& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const FadeShape& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, RegionSelectionAfterSplit& var)
+{
+	std::string s;
+	o >> s;
+	var = (RegionSelectionAfterSplit) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const RegionSelectionAfterSplit& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, AutoReturnTarget& var)
+{
+	std::string s;
+	o >> s;
+	var = (AutoReturnTarget) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const AutoReturnTarget& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

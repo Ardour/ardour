@@ -1149,6 +1149,16 @@ Editor::time_selection_changed ()
 	} else {
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
+
+	/* propagate into backend */
+
+	if (_session) {
+		if (selection->time.length() != 0) {
+			_session->set_range_selection (selection->time.start(), selection->time.end_frame());
+		} else {
+			_session->clear_range_selection ();
+		}
+	}
 }
 
 /** Set all region actions to have a given sensitivity */
@@ -1457,6 +1467,17 @@ Editor::region_selection_changed ()
 	if (_session && !_session->transport_rolling() && !selection->regions.empty()) {
 		maybe_locate_with_edit_preroll (selection->regions.start());
 	}
+
+	/* propagate into backend */
+
+	if (_session) {
+		if (!selection->regions.empty()) {
+			_session->set_object_selection (selection->regions.start(), selection->regions.end_frame());
+		} else {
+			_session->clear_object_selection ();
+		}
+	}
+
 }
 
 void

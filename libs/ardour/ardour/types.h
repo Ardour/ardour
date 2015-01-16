@@ -598,6 +598,13 @@ namespace ARDOUR {
 	    uint32_t max; //< samples
 	};
 
+        enum AutoReturnTarget {
+		LastLocate = 0x1,
+		RangeSelectionStart = 0x2,
+		Loop = 0x4,
+		RegionSelectionStart = 0x8,
+	};
+
 } // namespace ARDOUR
 
 
@@ -627,6 +634,8 @@ std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::RegionSelectionAfterSplit& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::AutoReturnTarget& sf);
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
@@ -650,6 +659,22 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::RegionSelectionAfterSplit& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoReturnTarget& sf);
+
+/* because these operators work on types which can be used when making
+   a UI_CONFIG_VARIABLE (in gtk2_ardour) we need them to be exported.
+*/
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
+LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
+
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
+
 
 static inline ARDOUR::framepos_t
 session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
