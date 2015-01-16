@@ -48,6 +48,11 @@ WavesExportDialog::init (ARDOUR::Session* session)
 	} else {
 		_profile_manager->set_selection_range ();
 	}
+
+	/* Load states */
+    
+	_profile_manager->load_profile ();
+
 }
 
 void

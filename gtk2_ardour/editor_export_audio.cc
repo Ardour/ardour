@@ -64,7 +64,7 @@ using namespace Gtk;
 void
 Editor::export_audio ()
 {
-	{
+	if (1) {
 	WavesExportDialog export_dialog (_("Export"), _session, ExportProfileManager::RegularExport);
 	export_dialog.run();
 	}
