@@ -20,6 +20,7 @@
 #include <string>
 #include <stdio.h>
 #include "ardour/location.h"
+#include "public_editor.h"
 #include "ardour/midi_scene_change.h"
 
 #include "main_clock.h"
@@ -99,15 +100,26 @@ MarkerInspectorDialog::_enable_program_change (bool yn)
 		boost::shared_ptr<ARDOUR::SceneChange> sc = _marker->location ()->scene_change ();
 		if (sc) {
 			boost::shared_ptr<ARDOUR::MIDISceneChange> msc = boost::dynamic_pointer_cast<ARDOUR::MIDISceneChange> (sc);
-			if (msc) {
+			if (msc && (msc->active () != yn)) {
 				msc->set_active (yn);
+                _set_session_dirty ();
 			}
 		} else if (yn) {
 			_marker->location()->set_scene_change(boost::shared_ptr<ARDOUR::MIDISceneChange> (new ARDOUR::MIDISceneChange (1, -1, 1)));
 			_display_scene_change_info ();
+            _set_session_dirty ();
 		}
 	}
 }
+
+void
+MarkerInspectorDialog::_set_session_dirty ()
+{
+    if (ARDOUR_UI::instance ()->the_editor ().session ()) {
+        ARDOUR_UI::instance ()->the_editor ().session ()->set_dirty ();
+    }
+}
+
 
 void
 MarkerInspectorDialog::_lock_button_clicked (WavesButton *button)
@@ -118,6 +130,7 @@ MarkerInspectorDialog::_lock_button_clicked (WavesButton *button)
 		} else {
 			_marker->location()->lock ();
 		}
+        _set_session_dirty ();
 	}
 }
 
@@ -138,8 +151,10 @@ MarkerInspectorDialog::on_bank_dropdown_item_changed (WavesDropdown*, int select
 {
 	if (_marker && _marker->location()) {
 		boost::shared_ptr<ARDOUR::MIDISceneChange> msc = boost::dynamic_pointer_cast<ARDOUR::MIDISceneChange> (_marker->location ()->scene_change ());
-		if (msc) {
-			msc->set_bank (selected_item - 1);
+        int bank = selected_item - 1;
+		if (msc && (msc->bank () != bank)) {
+			msc->set_bank (bank);
+            _set_session_dirty ();
 		}
 	}
 }
@@ -149,8 +164,9 @@ MarkerInspectorDialog::on_program_dropdown_item_changed (WavesDropdown*, int sel
 {
 	if (_marker && _marker->location()) {
 		boost::shared_ptr<ARDOUR::MIDISceneChange> msc = boost::dynamic_pointer_cast<ARDOUR::MIDISceneChange> (_marker->location ()->scene_change ());
-		if (msc) {
+		if (msc && (msc->program () != selected_item)) {
 			msc->set_program (selected_item);
+            _set_session_dirty ();
 		}
 	}
 }
@@ -160,8 +176,10 @@ MarkerInspectorDialog::on_channel_dropdown_item_changed (WavesDropdown*, int sel
 {
 	if (_marker && _marker->location()) {
 		boost::shared_ptr<ARDOUR::MIDISceneChange> msc = boost::dynamic_pointer_cast<ARDOUR::MIDISceneChange> (_marker->location ()->scene_change ());
-		if (msc) {
-			msc->set_channel (selected_item + 1);
+        int channel = selected_item + 1;
+		if (msc && (msc->channel () != channel)) {
+			msc->set_channel (channel);
+            _set_session_dirty ();
 		}
 	}
 }

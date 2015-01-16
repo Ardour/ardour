@@ -31,6 +31,7 @@ private:
 	void _display_marker_data ();
 	void _display_scene_change_info ();
 	void _enable_program_change (bool);
+    void _set_session_dirty ();
 	void _on_location_changed (ARDOUR::Location*);
 	void _lock_button_clicked (WavesButton *button);
 	void _program_change_on_button_clicked (WavesButton *button);
