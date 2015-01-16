@@ -52,7 +52,10 @@ ScrollGroup::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 		return;
 	}
 
-	Rect self (_position.x, _position.y, _position.x + r.get().width(), _position.y + r.get().height());
+	Rect self (_position.x + r.get().x0,
+	           _position.y + r.get().y0,
+	           _position.x + r.get().x1,
+	           _position.y + r.get().y1);
 
 	self.x1 = min (_position.x + _canvas->width(), self.x1);
 	self.y1 = min (_position.y + _canvas->height(), self.y1);
