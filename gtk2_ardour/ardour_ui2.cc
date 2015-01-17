@@ -111,7 +111,6 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (goto_end_button, _("Go to end of session"));
 	set_tip (auto_loop_button, _("Play loop range"));
 	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
-	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (follow_edits_button, _("Playhead follows Range Selections and Edits"));
 	set_tip (auto_input_button, _("Be sensible about input monitoring"));
 	set_tip (click_button, _("Enable/Disable audio click"));
@@ -185,7 +184,28 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
 
-	auto_return_button.set_text(_("Auto Return"));
+	transport_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
+						 static_cast<Widget*>(&transport_frame)));
+	transport_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
+						 static_cast<Widget*> (&transport_frame), 1));
+	transport_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
+						 static_cast<Widget*>(&transport_frame)));
+	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
+						  static_cast<Widget*> (&transport_frame), 1));
+
+	/* build auto-return dropdown */
+
+	auto_return_dropdown.set_text (_("Auto Return"));
+
+	auto_return_last_locate = manage (new CheckMenuItem (_("Play from last roll")));
+	auto_return_last_locate->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_auto_return_state), LastLocate));
+	auto_return_last_locate->show ();
+	auto_return_dropdown.AddMenuElem (Gtk::Menu_Helpers::CheckMenuElem (*auto_return_last_locate));
+
+	auto_return_region_selection = manage (new CheckMenuItem (_("Play from region selection")));
+	auto_return_region_selection->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_auto_return_state), RegionSelectionStart));
+	auto_return_region_selection->show ();
+	auto_return_dropdown.AddMenuElem (Gtk::Menu_Helpers::CheckMenuElem (*auto_return_region_selection));
 
 	follow_edits_button.set_text(_("Follow Edits"));
 
@@ -194,7 +214,6 @@ ARDOUR_UI::setup_transport ()
 	click_button.set_related_action (act);
 	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
 
-	auto_return_button.set_name ("transport option button");
 	follow_edits_button.set_name ("transport option button");
 	auto_input_button.set_name ("transport option button");
 
@@ -258,8 +277,6 @@ ARDOUR_UI::setup_transport ()
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
-	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
-	auto_return_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
 	follow_edits_button.set_related_action (act);
 	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
@@ -352,7 +369,7 @@ ARDOUR_UI::setup_transport ()
 	VBox* auto_box = manage (new VBox);
 	auto_box->set_homogeneous (true);
 	auto_box->set_spacing (2);
-
+        
 	/* desensitize */
 
 	set_transport_sensitivity (false);
