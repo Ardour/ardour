@@ -131,12 +131,6 @@ ARDOUR_UI::toggle_auto_play ()
 }
 
 void
-ARDOUR_UI::toggle_auto_return ()
-{
-	ActionManager::toggle_config_state_foo ("Transport", "ToggleAutoReturn", sigc::mem_fun (_session->config, &SessionConfiguration::set_auto_return), sigc::mem_fun (_session->config, &SessionConfiguration::get_auto_return));
-}
-
-void
 ARDOUR_UI::toggle_click ()
 {
 	ActionManager::toggle_config_state ("Transport", "ToggleClick", &RCConfiguration::set_clicking, &RCConfiguration::get_clicking);
