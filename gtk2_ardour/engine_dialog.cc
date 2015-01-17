@@ -1036,15 +1036,25 @@ EngineControl::show_buffer_duration ()
 	uint32_t samples = atoi (bs_text); /* will ignore trailing text */
 	uint32_t rate = get_rate();
 
-	/* Translators: "msecs" is ALWAYS plural here, so we do not
-	   need singular form as well.
-	 */
 	/* Developers: note the hard-coding of a double buffered model
 	   in the (2 * samples) computation of latency. we always start
 	   the audiobackend in this configuration.
 	 */
+	/* note to jack1 developers: ardour also always starts the engine
+	 * in async mode (no jack2 --sync option) which adds an extra cycle
+	 * of latency with jack2 (and *3 would be correct)
+	 * The value can also be wrong if jackd is started externally..
+	 *
+	 * At the time of writing the ALSA backend always uses double-buffering *2,
+	 * The Dummy backend *1, and who knows what ASIO really does :)
+	 *
+	 * So just display the period size, that's also what
+	 * ARDOUR_UI::update_sample_rate() does for the status bar.
+	 * (the statusbar calls AudioEngine::instance()->usecs_per_cycle()
+	 * but still, that's the buffer period, not [round-trip] latency)
+	 */
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("(%.1f msecs)"), (2 * samples) / (rate/1000.0));
+	snprintf (buf, sizeof (buf), _("(%.1f ms)"), (samples / (rate/1000.0f)));
 	buffer_size_duration_label.set_text (buf);
 }
 
