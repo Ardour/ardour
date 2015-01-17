@@ -184,16 +184,9 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
 
-	transport_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						 static_cast<Widget*> (&transport_frame), 1));
-	transport_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						  static_cast<Widget*> (&transport_frame), 1));
-
-	/* build auto-return dropdown */
+	/* XXX WAVES DEMO CODE 
+           build auto-return dropdown 
+        */
 
 	auto_return_dropdown.set_text (_("Auto Return"));
 

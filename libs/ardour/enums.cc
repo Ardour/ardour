@@ -960,20 +960,6 @@ std::ostream& operator<<(std::ostream& o, const FadeShape& var)
 	return o << s;
 }
 
-std::istream& operator>>(std::istream& o, RegionSelectionAfterSplit& var)
-{
-	std::string s;
-	o >> s;
-	var = (RegionSelectionAfterSplit) string_2_enum (s, var);
-	return o;
-}
-
-std::ostream& operator<<(std::ostream& o, const RegionSelectionAfterSplit& var)
-{
-	std::string s = enum_2_string (var);
-	return o << s;
-}
-
 std::istream& operator>>(std::istream& o, AutoReturnTarget& var)
 {
 	std::string s;

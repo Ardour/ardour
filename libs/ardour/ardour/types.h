@@ -634,7 +634,6 @@ std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::RegionSelectionAfterSplit& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoReturnTarget& sf);
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
@@ -659,7 +658,6 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::RegionSelectionAfterSplit& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoReturnTarget& sf);
 
 /* because these operators work on types which can be used when making
