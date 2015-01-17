@@ -180,7 +180,7 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	}
 
 	if (_send_mode) {
-		b = ARDOUR_UI::config()->color ("send strip base");
+		b = ARDOUR_UI::config()->color ("send bg");
 		// b = rgba_from_style("SendStripBase",
 		// UINT_RGBA_R(b), UINT_RGBA_G(b), UINT_RGBA_B(b), 255,
 		// "fg");
