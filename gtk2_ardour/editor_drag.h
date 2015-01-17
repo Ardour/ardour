@@ -27,11 +27,20 @@
 
 #include "ardour/types.h"
 
+#include "canvas/types.h"
+
 #include "cursor_context.h"
 #include "editor_items.h"
+#include "editing.h"
 
 namespace ARDOUR {
 	class Location;
+}
+
+namespace ArdourCanvas {
+	class Item;
+	class Line;
+	class Rectangle;
 }
 
 namespace PBD {
@@ -45,6 +54,18 @@ class TimeAxisView;
 class MidiTimeAxisView;
 class Drag;
 class NoteBase;
+class RegionView;
+class TimeAxisView;
+class RouteTimeAxisView;
+class RegionSelection;
+class MidiRegionView;
+class MeterMarker;
+class Marker;
+class TempoMarker;
+class ControlPoint;
+class AudioRegionView;
+class AutomationLine;
+class AutomationTimeAxisView;
 
 /** Class to manage current drags */
 class DragManager
@@ -433,13 +454,13 @@ protected:
 private:
 	TimeAxisView *prev_tav;		// where regions were most recently dragged from
 	TimeAxisView *orig_tav;		// where drag started
-	framecnt_t prev_amount;
-	framepos_t prev_position;
-	framecnt_t selection_length;
+	ARDOUR::framecnt_t prev_amount;
+	ARDOUR::framepos_t prev_position;
+	ARDOUR::framecnt_t selection_length;
 	bool allow_moves_across_tracks; // only if all selected regions are on one track
 	ARDOUR::RegionList *exclude;
-	void add_all_after_to_views (TimeAxisView *tav, framepos_t where, const RegionSelection &exclude, bool drag_in_progress);
-	void remove_unselected_from_views (framecnt_t amount, bool move_regions);
+	void add_all_after_to_views (TimeAxisView *tav, ARDOUR::framepos_t where, const RegionSelection &exclude, bool drag_in_progress);
+	void remove_unselected_from_views (ARDOUR::framecnt_t amount, bool move_regions);
 
 };
 
@@ -535,7 +556,7 @@ public:
 
 private:
 	double y_to_region (double) const;
-	framecnt_t grid_frames (framepos_t) const;
+	ARDOUR::framecnt_t grid_frames (framepos_t) const;
 	
 	MidiRegionView* _region_view;
 	ArdourCanvas::Rectangle* _drag_rect;
