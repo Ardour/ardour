@@ -427,8 +427,14 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "show-waveform-clipping") {
 		ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
 	} else if ( p == "waveform fill" ) {        
-        the_editor ().update_waveform_color();
-    }
+                the_editor ().update_waveform_color();
+	} else if (p == "auto-return-target-list") {
+		AutoReturnTarget art = Config->get_auto_return_target_list ();
+		auto_return_loop->set_active ((bool) (art & Loop));
+		auto_return_range_selection->set_active ((bool) (art & RangeSelectionStart));
+		auto_return_region_selection->set_active ((bool) (art & RegionSelectionStart));
+		auto_return_last_locate->set_active ((bool) (art & LastLocate));
+	}
 }
 
 void
