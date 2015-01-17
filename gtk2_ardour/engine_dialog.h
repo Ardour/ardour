@@ -246,7 +246,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void engine_running ();
     void engine_stopped ();
     PBD::ScopedConnection running_connection;
-    PBD::ScopedConnection stopped_connection;
+    PBD::ScopedConnectionList stopped_connection;
 
     void connect_disconnect_click ();
     void calibrate_audio_latency ();

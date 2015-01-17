@@ -298,6 +298,10 @@ EngineControl::EngineControl ()
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 
 	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
+
+	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
+	connect_disconnect_button.set_no_show_all();
+
 }
 
 void
@@ -511,8 +515,6 @@ EngineControl::build_no_control_notebook ()
 		basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 		row++;
 	}
-
-	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
 
 	basic_packer.attach (connect_disconnect_button, 0, 2, row, row+1, FILL, AttachOptions (0));
 	row++;
@@ -758,6 +760,8 @@ EngineControl::backend_changed ()
 			midi_option_combo.set_sensitive (false);
 		}
 	}
+
+	connect_disconnect_button.hide();
 
 	midi_option_changed();
 
@@ -2109,6 +2113,7 @@ EngineControl::engine_running ()
 	sample_rate_combo.set_sensitive (true);
 
 	connect_disconnect_button.set_label (string_compose (_("Disconnect from %1"), backend->name()));
+	connect_disconnect_button.show();
 
 	started_at_least_once = true;
 }
@@ -2121,6 +2126,7 @@ EngineControl::engine_stopped ()
 
 	buffer_size_combo.set_sensitive (false);
 	connect_disconnect_button.set_label (string_compose (_("Connect to %1"), backend->name()));
+	connect_disconnect_button.show();
 
 	sample_rate_combo.set_sensitive (true);
 	buffer_size_combo.set_sensitive (true);
