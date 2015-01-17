@@ -63,6 +63,23 @@ Arrow::setup ()
 	CANVAS_DEBUG_NAME (_line, "arrow line");
 }
 
+void
+Arrow::compute_bounding_box () const
+{
+	/* Compute our bounding box manually rather than using the default
+	   container algorithm, since having the bounding box with origin other
+	   than zero causes strange problems for mysterious reasons. */
+
+	const double outline_pad = 0.5 + (_line->outline_width() / 2.0);
+	const double head_width  = std::max(_heads[0].width, _heads[1].width);
+
+	_bounding_box = Rect(0,
+	                     0,
+	                     _line->x1() + (head_width / 2.0) + outline_pad,
+	                     _line->y1());
+
+	_bounding_box_dirty = false;
+}
 
 /** Set whether to show an arrow head at one end or other
  *  of the line.

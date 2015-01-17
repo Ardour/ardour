@@ -51,6 +51,8 @@ public:
 	Arrow (Canvas*);
 	Arrow (Item*);
 
+	void compute_bounding_box () const;
+
 	void set_show_head (int, bool);
 	void set_head_outward (int, bool);
 	void set_head_height (int, Distance);
