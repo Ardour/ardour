@@ -27,17 +27,15 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-ScrollGroup::ScrollGroup (Canvas* c, ScrollSensitivity s, bool clip)
+ScrollGroup::ScrollGroup (Canvas* c, ScrollSensitivity s)
 	: Container (c)
 	, _scroll_sensitivity (s)	
-	, _clip(clip)
 {
 }
 
-ScrollGroup::ScrollGroup (Item* parent, ScrollSensitivity s, bool clip)
+ScrollGroup::ScrollGroup (Item* parent, ScrollSensitivity s)
 	: Container (parent)
 	, _scroll_sensitivity (s)	
-	, _clip(clip)
 {
 }
 
@@ -52,14 +50,6 @@ ScrollGroup::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 
 	if (!r) {
 		return;
-	}
-
-	if (!_clip) {
-		/* kludge: clip disabled, because for some reason the cursor scroll
-		   group requires scroll offsets here to clip correctly yet everything
-		   else does not.  I can't figure this out, so since not clipping a
-		   single arrow isn't the end of the world, just don't clip. */
-		Container::render (area, context);
 	}
 
 	Rect self (_position.x + r.get().x0,
