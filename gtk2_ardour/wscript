@@ -368,10 +368,7 @@ def build(bld):
         # If we require VST support we build a stub main() and the FST library
         # here using winegcc, and link it to the GTK front-end library
         obj = bld (features = 'cxx c cxxprogram wine')
-        obj.source = (
-            '../libs/fst/vstwin.c',
-            '../vst/winmain.c',
-            )
+        obj.source = ( '../vst/winmain.c')
         #
         # XXX do we really need to explicitly link to all of these for the wine executable?
         #
@@ -383,7 +380,8 @@ def build(bld):
                              'libmidipp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
-                             'libcanvas'
+                             'libcanvas',
+                             'vstwin'
                              ]
         obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
