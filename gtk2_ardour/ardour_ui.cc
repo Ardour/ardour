@@ -205,7 +205,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
-	, auto_return_button (ArdourButton::led_default_elements)
 	, follow_edits_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
 	, auditioning_alert_button (_("Audition"))
@@ -4788,16 +4787,16 @@ ARDOUR_UI::transport_numpad_event (int num)
 		_pending_locate_num = _pending_locate_num*10 + num;
 	} else {
 		switch (num) {		
-			case 0:  toggle_roll(false, false); 		break;
-			case 1:  transport_rewind(1); 				break;
-			case 2:  transport_forward(1); 				break;
-			case 3:  transport_record(true); 			break;
-			case 4:  toggle_session_auto_loop();		break;
-			case 5:  transport_record(false); toggle_session_auto_loop(); 	break;
-			case 6:  toggle_punch(); 					break;
-			case 7:  toggle_click(); 				break;
-			case 8:  toggle_auto_return();			break;
-			case 9:  toggle_follow_edits();		break;
+		case 0:  toggle_roll(false, false);  break;
+		case 1:  transport_rewind(1);        break;
+		case 2:  transport_forward(1);       break;
+		case 3:  transport_record(true);     break;
+		case 4:  toggle_session_auto_loop(); break;
+		case 5:  transport_record(false); toggle_session_auto_loop(); 	break;
+		case 6:  toggle_punch(); 					break;
+		case 7:  toggle_click();             break;
+		case 8:  toggle_all_auto_return ();  break;
+		case 9:  toggle_follow_edits();	     break;
 		}
 	}
 }
@@ -4870,3 +4869,29 @@ ARDOUR_UI::hide_application ()
 {
     Application::instance ()-> hide ();
 }
+
+void
+ARDOUR_UI::toggle_auto_return_state (AutoReturnTarget t)
+{
+	AutoReturnTarget art = Config->get_auto_return_target_list ();
+	if (art & t) {
+		Config->set_auto_return_target_list (AutoReturnTarget (art & ~t));
+	} else {
+		Config->set_auto_return_target_list (AutoReturnTarget (art | t));
+	}
+}
+
+void
+ARDOUR_UI::toggle_all_auto_return ()
+{
+	AutoReturnTarget art = Config->get_auto_return_target_list ();
+	if (art) {
+		Config->set_auto_return_target_list (AutoReturnTarget (0));
+	} else {
+		Config->set_auto_return_target_list (AutoReturnTarget (LastLocate|
+								       RangeSelectionStart|
+								       RegionSelectionStart|
+								       Loop));
+	}
+}
+

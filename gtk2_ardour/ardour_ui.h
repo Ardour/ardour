@@ -70,6 +70,7 @@
 #include "about.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
+#include "ardour_dropdown.h"
 #include "ardour_window.h"
 #include "editing.h"
 #include "engine_dialog.h"
@@ -322,7 +323,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_punch_out ();
 	void show_loop_punch_ruler_and_disallow_hide ();
 	void reenable_hide_loop_punch_ruler_if_appropriate ();
-	void toggle_auto_return ();
 	void toggle_click ();
         void toggle_audio_midi_setup ();
 	void toggle_session_auto_loop ();
@@ -453,7 +453,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	ShuttleControl* shuttle_box;
 
-	ArdourButton auto_return_button;
+	ArdourDropdown auto_return_dropdown;
+	Gtk::CheckMenuItem *auto_return_last_locate;
+	Gtk::CheckMenuItem *auto_return_range_selection;
+	Gtk::CheckMenuItem *auto_return_region_selection;
+	Gtk::CheckMenuItem *auto_return_loop;
+	Gtk::MenuItem *auto_return_toggle;
+
+	void toggle_auto_return_state (ARDOUR::AutoReturnTarget);
+	void toggle_all_auto_return ();
+	
 	ArdourButton follow_edits_button;
 	ArdourButton auto_input_button;
 	ArdourButton click_button;
