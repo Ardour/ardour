@@ -487,7 +487,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 			}
 		} else {
 			if (eff_mouse_mode != MouseRange) {
-				_mouse_changed_selection = set_selected_regionview_from_click (press, op);
+				_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
 			}
 		}
 		break;
@@ -505,7 +505,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
 		if (get_smart_mode() || eff_mouse_mode != MouseRange) {
-			_mouse_changed_selection = set_selected_regionview_from_click (press, op);
+			_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
 		}
@@ -514,7 +514,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case ControlPointItem:
 		set_selected_track_as_side_effect (op);
 		if (eff_mouse_mode != MouseRange) {
-			_mouse_changed_selection = set_selected_control_point_from_click (press, op);
+			_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
 		}
 		break;
 
@@ -523,7 +523,10 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		if (event->button.button == 3) {
 			selection->clear_tracks ();
 			set_selected_track_as_side_effect (op);
-			_mouse_changed_selection = true;
+
+			/* We won't get a release.*/
+			begin_reversible_selection_op (_("Button 3 Menu Select"));
+			commit_reversible_selection_op ();
 		}
 		break;
 
