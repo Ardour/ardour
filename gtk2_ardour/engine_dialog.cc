@@ -967,7 +967,11 @@ EngineControl::device_changed ()
 			buffer_size_combo.set_sensitive (true);
 			set_popdown_strings (buffer_size_combo, s);
 
-			buffer_size_combo.set_active_text (bufsize_as_string (backend->default_buffer_size(device_name)));
+			uint32_t period = backend->buffer_size();
+			if (0 == period) {
+				period = backend->default_buffer_size(device_name);
+			}
+			buffer_size_combo.set_active_text (bufsize_as_string (period));
 			show_buffer_duration ();
 		} else {
 			buffer_size_combo.set_sensitive (false);
