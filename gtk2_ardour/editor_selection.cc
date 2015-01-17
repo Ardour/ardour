@@ -30,6 +30,7 @@
 
 #include "control_protocol/control_protocol.h"
 
+#include "editor_drag.h"
 #include "editor.h"
 #include "actions.h"
 #include "audio_time_axis.h"
@@ -1031,9 +1032,12 @@ Editor::time_selection_changed ()
 		ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, true);
 	}
 
-	/* propagate into backend */
+	/* propagate into backend, but only when there is no drag or we are at
+	 * the end of a drag, otherwise this is too expensive (could case a
+	 * locate per mouse motion event.
+	 */
 
-	if (_session) {
+	if (_session && !_drags->active()) {
 		if (selection->time.length() != 0) {
 			_session->set_range_selection (selection->time.start(), selection->time.end_frame());
 		} else {
