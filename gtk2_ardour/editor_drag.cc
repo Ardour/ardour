@@ -4364,7 +4364,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		/* XXX what if its a music time selection? */
 		if (s) {
-			if ( s->get_play_range() && s->transport_rolling() ) {
+			if (s->get_play_range() && s->transport_rolling()) {
 				s->request_play_range (&_editor->selection->time, true);
 			} else {
 				if (Config->get_follow_edits() && !s->transport_rolling()) {
@@ -4374,8 +4374,14 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 						s->request_locate (_editor->get_selection().time.start());
 				}
 			}
-		}
 
+			if (_editor->get_selection().time.length() != 0) {
+				s->set_range_selection (_editor->get_selection().time.start(), _editor->get_selection().time.end_frame());
+			} else {
+				s->clear_range_selection ();
+			}
+		}
+		
 	} else {
 		/* just a click, no pointer movement.
 		 */
