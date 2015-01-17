@@ -46,6 +46,8 @@ class LIBCANVAS_API ScrollGroup : public Container
 
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
+	ScrollSensitivity sensitivity() const { return _scroll_sensitivity; }
+
   private:
 	ScrollSensitivity _scroll_sensitivity;
 	Duple             _scroll_offset;

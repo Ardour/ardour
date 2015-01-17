@@ -236,7 +236,7 @@ Canvas::window_to_canvas (Duple const & d) const
 	 */
 
 	std::list<Item*> const& root_children (_root.items());
-	ScrollGroup* sg = 0;
+	ScrollGroup* best_group = 0;
 
 	/* if the coordinates are negative, clamp to zero and find the item
 	 * that covers that "edge" position.
@@ -252,13 +252,20 @@ Canvas::window_to_canvas (Duple const & d) const
 	}
 
 	for (std::list<Item*>::const_reverse_iterator i = root_children.rbegin(); i != root_children.rend(); ++i) {
-		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_window (in_window)) {
-			break;
+		ScrollGroup* sg = dynamic_cast<ScrollGroup*>(*i);
+		/* If scroll groups overlap, choose the one with the highest sensitivity,
+		   that is, choose an HV scroll group over an H or V only group. */
+		if (sg && (!best_group || sg->sensitivity() > best_group->sensitivity())) {
+			best_group = sg;
+			if (sg->sensitivity() == (ScrollGroup::ScrollsVertically | ScrollGroup::ScrollsHorizontally)) {
+				/* Can't do any better than this. */
+				break;
+			}
 		}
 	}
 
-	if (sg) {
-		return d.translate (sg->scroll_offset());
+	if (best_group) {
+		return d.translate (best_group->scroll_offset());
 	}
 
 	return d;

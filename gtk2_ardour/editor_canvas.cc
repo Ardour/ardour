@@ -80,6 +80,7 @@ Editor::initialize_canvas ()
 
 	ArdourCanvas::ScrollGroup* hsg; 
 	ArdourCanvas::ScrollGroup* hg;
+	ArdourCanvas::ScrollGroup* cg;
 
 	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
 	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
@@ -90,6 +91,10 @@ Editor::initialize_canvas ()
 													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
 	_track_canvas->add_scroller (*hsg);
+
+	cursor_scroll_group = cg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	CANVAS_DEBUG_NAME (cursor_scroll_group, "canvas cursor scroll");
+	_track_canvas->add_scroller (*cg);
 
 	_verbose_cursor = new VerboseCursor (this);
 
