@@ -955,7 +955,7 @@ EngineControl::device_changed ()
 			buffer_size_combo.set_sensitive (true);
 			set_popdown_strings (buffer_size_combo, s);
 
-			buffer_size_combo.set_active_text (bufsize_as_string (backend->default_buffer_size()));
+			buffer_size_combo.set_active_text (bufsize_as_string (backend->default_buffer_size(device_name)));
 			show_buffer_duration ();
 		} else {
 			buffer_size_combo.set_sensitive (false);
