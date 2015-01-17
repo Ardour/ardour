@@ -135,7 +135,7 @@ ArdourDropdown::clear_items ()
 }
 
 void
-ArdourDropdown::AddMenuElem (Menu_Helpers::MenuElem e)
+ArdourDropdown::AddMenuElem (Menu_Helpers::Element e)
 {
 	using namespace Menu_Helpers;
 
