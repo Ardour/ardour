@@ -852,6 +852,13 @@ EngineControl::list_devices ()
 		} else {
 			ok_button->set_sensitive (true);
 			apply_button->set_sensitive (true);
+			if (backend->can_change_sample_rate_when_running() && sample_rate_combo.get_children().size() > 0) {
+				sample_rate_combo.set_sensitive (true);
+			}
+			if (backend->can_change_buffer_size_when_running() && buffer_size_combo.get_children().size() > 0) {
+				buffer_size_combo.set_sensitive (true);
+			}
+
 		}
 	}
 }
