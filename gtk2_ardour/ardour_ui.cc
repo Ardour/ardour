@@ -4580,10 +4580,31 @@ void
 ARDOUR_UI::toggle_auto_return_state (AutoReturnTarget t)
 {
 	AutoReturnTarget art = Config->get_auto_return_target_list ();
-	if (art & t) {
-		Config->set_auto_return_target_list (AutoReturnTarget (art & ~t));
-	} else {
+	CheckMenuItem* check_menu_item = 0;
+	
+	switch (t) {
+	case LastLocate:
+		check_menu_item = auto_return_last_locate;
+		break;
+	case Loop:
+		check_menu_item = auto_return_loop;
+		break;
+	case RangeSelectionStart:
+		check_menu_item = auto_return_range_selection;
+		break;
+	case RegionSelectionStart:
+		check_menu_item = auto_return_region_selection;
+		break;
+	}
+	
+	if (!check_menu_item) {
+		return;
+	}
+
+	if (check_menu_item->get_active()) {
 		Config->set_auto_return_target_list (AutoReturnTarget (art | t));
+	} else {
+		Config->set_auto_return_target_list (AutoReturnTarget (art & ~t));
 	}
 }
 
