@@ -129,8 +129,13 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 		switch ((*i)->coverage (start, end)) {
 		case Evoral::OverlapStart:
 		case Evoral::OverlapInternal:
-		case Evoral::OverlapExternal:
 			regs.push_back (*i);
+			break;
+
+		case Evoral::OverlapExternal:
+			/* this region is entirely contained in the read range */
+			regs.push_back (*i);
+			ended.push_back (*i);
 			break;
 
 		case Evoral::OverlapEnd:
