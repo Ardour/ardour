@@ -34,6 +34,7 @@
 
 #ifdef PLATFORM_WINDOWS
 	#include <windows.h>
+	#include <shellapi.h>
 #endif
 
 bool
