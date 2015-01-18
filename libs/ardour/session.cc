@@ -4485,8 +4485,13 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 
 	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
-		if (afs)
+		boost::shared_ptr<MidiSource> ms;
+		if (afs) {
 			afs->prepare_for_peakfile_writes ();
+		} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
+			Source::Lock lock(ms->mutex());
+			ms->mark_streaming_write_started(lock);
+		}
 	}
 
 	while (to_do && !itt.cancel) {
@@ -4519,7 +4524,6 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 				}
 			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
 				Source::Lock lock(ms->mutex());
-				ms->mark_streaming_write_started(lock);
 
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
