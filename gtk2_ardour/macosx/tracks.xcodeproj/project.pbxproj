@@ -269,6 +269,7 @@
 		43279460194F0062003C9FEA /* tracks_preferences.xml in Resources */ = {isa = PBXBuildFile; fileRef = 43279430194F0062003C9FEA /* tracks_preferences.xml */; };
 		4327947F194F009E003C9FEA /* tracks.menus.in in Resources */ = {isa = PBXBuildFile; fileRef = 43279475194F009E003C9FEA /* tracks.menus.in */; };
 		43B351ED194F04E00038C140 /* step_editing.bindings in Resources */ = {isa = PBXBuildFile; fileRef = 43B351C0194F04E00038C140 /* step_editing.bindings */; };
+		5BC24BAA1A64328D006A2400 /* trackslive.menus.in in Resources */ = {isa = PBXBuildFile; fileRef = 5BC24BA91A64328D006A2400 /* trackslive.menus.in */; };
 		5BC67E591A408FCE00F29ABA /* progress_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 5BC67E581A408FCE00F29ABA /* progress_dialog.xml */; };
 		5BC67E5F1A4090BD00F29ABA /* progress_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 5BC67E5E1A4090BD00F29ABA /* progress_dialog.cc */; };
 		95176F7A1A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95176F791A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc */; };
@@ -1129,6 +1130,7 @@
 		43B351EE194F12FB0038C140 /* waves_audiobackend.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = waves_audiobackend.xcodeproj; path = ../../libs/backends/wavesaudio/macosx/waves_audiobackend.xcodeproj; sourceTree = "<group>"; };
 		43B351F4194F130C0038C140 /* libardour.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = libardour.xcodeproj; path = ../../libs/ardour/macosx/libardour.xcodeproj; sourceTree = "<group>"; };
 		43B351FA194F131D0038C140 /* pbd.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = pbd.xcodeproj; path = ../../libs/pbd/macosx/pbd.xcodeproj; sourceTree = "<group>"; };
+		5BC24BA91A64328D006A2400 /* trackslive.menus.in */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = trackslive.menus.in; path = ../trackslive.menus.in; sourceTree = "<group>"; };
 		5BC67E581A408FCE00F29ABA /* progress_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = progress_dialog.xml; sourceTree = "<group>"; };
 		5BC67E5D1A4090AA00F29ABA /* progress_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = progress_dialog.h; path = ../progress_dialog.h; sourceTree = "<group>"; };
 		5BC67E5E1A4090BD00F29ABA /* progress_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = progress_dialog.cc; path = ../progress_dialog.cc; sourceTree = "<group>"; };
@@ -1226,6 +1228,7 @@
 		43279039194EFF24003C9FEA = {
 			isa = PBXGroup;
 			children = (
+				5BC24BA91A64328D006A2400 /* trackslive.menus.in */,
 				435E66781A4AB60C00472D50 /* audiographer.xcodeproj */,
 				952E0B3B1A0A1D7000F375D0 /* buildlog.txt */,
 				4397599619CB06AC00740098 /* gtkmm2ext.xcodeproj */,
@@ -2488,6 +2491,7 @@
 				432793C6194F003A003C9FEA /* tool_cut_active.png in Resources */,
 				432793C7194F003A003C9FEA /* tool_cut_prelight.png in Resources */,
 				432793C8194F003A003C9FEA /* tool_gain.png in Resources */,
+				5BC24BAA1A64328D006A2400 /* trackslive.menus.in in Resources */,
 				432793C9194F003A003C9FEA /* tool_marker.png in Resources */,
 				432793CA194F003A003C9FEA /* tool_marker_active.png in Resources */,
 				432793CB194F003A003C9FEA /* tool_marker_prelight.png in Resources */,

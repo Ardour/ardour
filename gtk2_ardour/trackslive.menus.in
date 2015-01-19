@@ -127,6 +127,8 @@
         <menuitem action='vertical-zoom-out'/>
         <menuitem action='temporal-zoom-in'/>
         <menuitem action='temporal-zoom-out'/>
+        <menuitem action='waveform-zoom-in'/>
+        <menuitem action='waveform-zoom-out'/>
       </menu>
       <menuitem action='toggle-follow-playhead'/>
 
