@@ -214,10 +214,6 @@ Editor::mouse_mode_object_range_toggled()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	if (tact->get_active()) {
-		m = MouseObject;  //Smart mode turned to ON, force editing to Object mode
-	}
-
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
