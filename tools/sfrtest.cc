@@ -21,8 +21,6 @@ using namespace std;
 
 SF_INFO format_info;
 float* data = 0;
-bool with_sync = false;
-
 int
 read_one (SNDFILE* sf, uint32_t nframes)
 {
@@ -47,15 +45,14 @@ int
 main (int argc, char* argv[])
 {
 	vector<SNDFILE*> sndfiles;
-	uint32_t sample_size;
-	char optstring[] = "n:b:s";
+	uint32_t sample_size = sizeof (float);
+	char optstring[] = "n:b:sD";
 	uint32_t block_size = 64 * 1024;
 	uint32_t nfiles = 100;
         bool direct = false;
 	const struct option longopts[] = {
 		{ "nfiles", 1, 0, 'n' },
 		{ "blocksize", 1, 0, 'b' },
-		{ "sync", 0, 0, 's' },
 		{ "direct", 0, 0, 'D' },
 		{ 0, 0, 0, 0 }
 	};
@@ -77,9 +74,6 @@ main (int argc, char* argv[])
 		case 'b':
 			block_size = atoi (optarg);
 			break;
-		case 's':
-			with_sync = true;
-			break;
                 case 'D':
                         direct = true;
                         break;
@@ -95,7 +89,7 @@ main (int argc, char* argv[])
 		usage ();
 		return 1;
 	}
-	
+
 	for (uint32_t n = 1; n <= nfiles; ++n) {
 		SNDFILE* sf;
 		char path[PATH_MAX+1];
@@ -136,7 +130,7 @@ main (int argc, char* argv[])
 		sndfiles.push_back (sf);
 	}
 
-	cout << "Discovered " << nfiles+1 << " files using " << name_template << endl;
+	cout << "Discovered " << sndfiles.size() << " files using " << name_template << endl;
 		
 	data = new float[block_size];
 	uint64_t read = 0;
@@ -152,13 +146,9 @@ main (int argc, char* argv[])
 		}
 		read += block_size;
 		gint64 elapsed = g_get_monotonic_time() - before;
-		double bandwidth = (sndfiles.size() * block_size * sample_size) / (elapsed/1000000.0);
-		double data_minutes = read / (double) (60.0 * 48000.0);
-		const double data_rate = sndfiles.size() * sample_size * samplerate;
-		stringstream ds;
-		ds << setprecision (1) << data_minutes;
+                double bandwidth = ((sndfiles.size() * block_size * sample_size)/1048576.0) / (elapsed/1000000.0);
 		
-		cout << "BW @ " << read << " frames (" << ds.str() << " minutes) = " << (bandwidth/1048576.0) <<  " MB/sec " << bandwidth / data_rate << " x faster than necessary " << endl;
+                printf ("BW @ %Lu %.3f seconds bandwidth %.4f MB/sec\n", read, elapsed/1000000.0, bandwidth);
 	}
 
 	return 0;
