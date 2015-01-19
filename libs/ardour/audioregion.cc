@@ -768,7 +768,7 @@ AudioRegion::get_basic_state ()
 {
 	XMLNode& node (Region::state ());
 	char buf[64];
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
 	node.add_property ("channels", buf);
@@ -781,7 +781,7 @@ AudioRegion::state ()
 {
 	XMLNode& node (get_basic_state());
 	XMLNode *child;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	child = node.add_child ("Envelope");
 
@@ -838,7 +838,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());
 
 	suspend_property_changes ();

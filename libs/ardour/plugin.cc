@@ -389,7 +389,7 @@ XMLNode &
 Plugin::get_state ()
 {
 	XMLNode* root = new XMLNode (state_node_name ());
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	root->add_property (X_("last-preset-uri"), _last_preset.uri);
 	root->add_property (X_("last-preset-label"), _last_preset.label);

@@ -596,7 +596,7 @@ SVAModifier::from_string (string const & str)
 string
 SVAModifier::to_string () const
 {
-	PBD::LocaleGuard lg ("POSIX");
+	PBD::LocaleGuard lg ("C");
 	stringstream ss;
 
 	switch (type) {
