@@ -286,7 +286,9 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 	if (dir > 0 || pos > 0) {
 		pos += dir;
 	}
+    
     TrackViewList track_views = selection->time.tracks_in_range.filter_to_unique_playlists();
+    sort_track_selection (track_views);
     
 	framepos_t const target = find_next_region_boundary (pos, dir, track_views);
 	if (target < 0) {
@@ -2854,7 +2856,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	boost::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
 
-	TrackViewList tmptracks = get_tracks_for_range_action ();
+	TrackViewList tmptracks = selection->time.tracks_in_range.filter_to_unique_playlists ();
 	sort_track_selection (tmptracks);
 
 	for (TrackSelection::iterator i = tmptracks.begin(); i != tmptracks.end(); ++i) {
@@ -2921,8 +2923,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	}
 
 	if (in_command)	{
-//		selection->set (new_selection);
-
+		selection->set (new_selection);
 		commit_reversible_command ();
 	}
 }
@@ -3753,7 +3754,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 	}
 
 	TrackViewList views = selection->time.tracks_in_range.filter_to_unique_playlists();
-
+    sort_track_selection (views);
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
 		if (enable_processing) {
