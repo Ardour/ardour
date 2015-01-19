@@ -223,7 +223,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
     if (current_mixer_strip->route() && !selection->tracks.empty() ) {
         TimeAxisView* cur_view = get_route_view_by_route_id(current_mixer_strip->route()->id() );
         
-        if (selection->selected(cur_view) ) {
+        if (cur_view && selection->selected(cur_view) ) {
             // nothing to do, we already show the track which is selected
             return;
         }
