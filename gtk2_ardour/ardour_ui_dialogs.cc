@@ -151,6 +151,8 @@ ARDOUR_UI::set_session (Session *s)
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::audition_blink));
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::feedback_blink));
 
+    _session->SaveSession.connect_same_thread (_session_connections, boost::bind (&ARDOUR_UI::save_session_gui_state, this));
+    
 	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
 	_session->StepEditStatusChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());

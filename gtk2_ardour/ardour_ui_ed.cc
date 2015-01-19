@@ -962,7 +962,7 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 }
 
 void
-ARDOUR_UI::save_ardour_state ()
+ARDOUR_UI::save_application_state ()
 {
 	if (!keyboard || !editor) {
 		return;
@@ -1003,13 +1003,8 @@ ARDOUR_UI::save_ardour_state ()
 	}
 
 	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
-
-	if (_session) {
-		_session->add_instant_xml (enode);
-		if (location_ui) {
-			_session->add_instant_xml (location_ui->ui().get_state ());
-		}
-	} else {
+    
+    if (!_session) {
 		Config->add_instant_xml (enode);
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());

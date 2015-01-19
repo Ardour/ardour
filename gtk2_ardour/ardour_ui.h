@@ -185,8 +185,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void close_session();
     void lock_session ();
     
-	int  save_state_canfail (std::string state_name = "", bool switch_to_it = false);
-	void save_state (const std::string & state_name = "", bool switch_to_it = false);
+    int save_session_state (const std::string & name = "", bool pending = false, bool switch_to_it = false);
+    void save_session_gui_state ();
+	int save_state (const std::string & state_name = "", bool switch_to_it = false);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
 	static UIConfiguration *config () { return ui_config; }
@@ -228,7 +229,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	XMLNode* keyboard_settings () const;
 	XMLNode* tearoff_settings (const char*) const;
 
-	void save_ardour_state ();
+	void save_application_state ();
 	gboolean configure_handler (GdkEventConfigure* conf);
 
 	void halt_on_xrun_message ();

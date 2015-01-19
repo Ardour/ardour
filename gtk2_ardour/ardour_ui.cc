@@ -616,7 +616,7 @@ ARDOUR_UI::configure_timeout ()
 		return true;
 	} else {
 		have_configure_timeout = false;
-		save_ardour_state ();
+		save_application_state ();
 		return false;
 	}
 }
@@ -985,7 +985,7 @@ ARDOUR_UI::finish()
 				break;
 			case 1:
 				/* use the default name */
-				if (save_state_canfail ("")) {
+				if (save_state ("")) {
 					/* failed - don't quit */
 					WavesMessageDialog msg ("",
 							   string_compose (_("\
@@ -1016,7 +1016,7 @@ If you still wish to quit, please use the\n\n\
 	   windows to be destroyed before their visible state can be
 	   saved.
 	*/
-	save_ardour_state ();
+	save_application_state ();
 
 	close_all_dialogs ();
 
@@ -2453,38 +2453,59 @@ ARDOUR_UI::rename_session ()
 	}
 }
 
-void
-ARDOUR_UI::save_state (const string & name, bool switch_to_it)
+int
+ARDOUR_UI::save_session_state (const string & name, bool pending, bool switch_to_it)
 {
-	XMLNode* node = new XMLNode (X_("UI"));
-
-	WM::Manager::instance().add_state (*node);
-
-	node->add_child_nocopy (gui_object_state->get_state());
-
-	_session->add_extra_xml (*node);
-
-	save_state_canfail (name, switch_to_it);
+    if (_session) {
+        
+        std::string sess_name = name;
+        if (sess_name.length() == 0) {
+            sess_name = _session->snap_name();
+        }
+        
+        int ret = 0;
+        if ((ret = _session->save_state (name, false, switch_to_it)) != 0) {
+            return ret;
+        }
+    }
+    
+    return 0;
 }
+
+/* called as a handler for Session::SaveSession signal */
+void
+ARDOUR_UI::save_session_gui_state ()
+{
+    if (_session) {
+        
+        /* save extra XML with session GUI config */
+        XMLNode* node = new XMLNode (X_("UI"));
+        
+        WM::Manager::instance().add_state (*node);
+        
+        node->add_child_nocopy (gui_object_state->get_state());
+        
+        _session->add_extra_xml (*node);
+        
+        /* save session instant XML */
+        XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
+        _session->add_instant_xml (enode);
+        if (location_ui) {
+            _session->add_instant_xml (location_ui->ui().get_state ());
+        }
+        delete &enode;
+    }
+}
+
 
 int
-ARDOUR_UI::save_state_canfail (string name, bool switch_to_it)
+ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
-	if (_session) {
-		int ret;
-
-		if (name.length() == 0) {
-			name = _session->snap_name();
-		}
-
-		if ((ret = _session->save_state (name, false, switch_to_it)) != 0) {
-			return ret;
-		}
-	}
-
-	save_ardour_state (); /* XXX cannot fail? yeah, right ... */
-	return 0;
+    int ret = save_session_state (name, switch_to_it);
+	save_application_state ();
+    return ret;
 }
+
 
 void
 ARDOUR_UI::primary_clock_value_changed ()
