@@ -4668,22 +4668,10 @@ Editor::get_regions_from_selection_and_edit_point ()
 {
 	RegionSelection regions;
 
-	if (_edit_point == EditAtMouse && entered_regionview && selection->tracks.empty() && selection->regions.empty() ) {
+	if (_edit_point == EditAtMouse && entered_regionview && selection->regions.empty() ) {
 		regions.add (entered_regionview);
 	} else {
 		regions = selection->regions;
-	}
-
-	if ( regions.empty() ) {
-		TrackViewList tracks = selection->tracks;
-
-		if (!tracks.empty()) {
-			/* no region selected or entered, but some selected tracks:
-			 * act on all regions on the selected tracks at the edit point
-			 */ 
-			framepos_t const where = get_preferred_edit_position ();
-			get_regions_at(regions, where, tracks);
-		}
 	}
 
 	return regions;
