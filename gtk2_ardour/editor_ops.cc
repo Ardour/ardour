@@ -1637,6 +1637,7 @@ Editor::temporal_zoom (framecnt_t fpp)
 	// leftmost_after_zoom = min (leftmost_after_zoom, _session->current_end_frame());
 
 	reposition_and_zoom (leftmost_after_zoom, nfpp);
+    set_session_dirty ();
 }
 
 void
@@ -2899,7 +2900,7 @@ Editor::separate_regions_between (const TimeSelection& ts)
 							rtv->view()->foreach_regionview (sigc::bind (
 										sigc::ptr_fun (add_if_covered),
 										&(*t), &new_selection));
-
+                            
 							if (!in_command) {
 								begin_reversible_command (_("separate"));
 								in_command = true;

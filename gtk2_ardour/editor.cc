@@ -4346,7 +4346,7 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 	refresh_location_display();
 	_summary->set_overlays_dirty ();
 
-	instant_save ();
+	set_session_dirty ();
 }
 
 void
