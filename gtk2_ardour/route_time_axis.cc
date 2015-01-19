@@ -877,6 +877,10 @@ RouteTimeAxisView::set_height (uint32_t h)
 		automation_button.hide ();
 	}
 
+    if (height_changed) {
+        ARDOUR_UI::instance()->set_session_dirty();
+    }
+    
 	if (height_changed && !no_redraw) {
 		/* only emit the signal if the height really changed */
 		request_redraw ();
