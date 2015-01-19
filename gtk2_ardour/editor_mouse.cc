@@ -1632,44 +1632,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 	}
 
-	/* delete events get handled here */
-
 	Editing::MouseMode const eff = effective_mouse_mode ();
-
-	if (!_drags->active () && Keyboard::is_delete_event (&event->button)) {
-
-		switch (item_type) {
-		case TempoMarkerItem:
-			remove_tempo_marker (item);
-			break;
-
-		case MeterMarkerItem:
-			remove_meter_marker (item);
-			break;
-
-		case MarkerItem:
-			remove_marker (*item, event);
-			break;
-
-		case RegionItem:
-			if (eff == MouseObject) {
-				remove_clicked_region ();
-			}
-			break;
-
-		case ControlPointItem:
-			remove_control_point (item);
-			break;
-
-		case NoteItem:
-			remove_midi_note (item, event);
-			break;
-
-		default:
-			break;
-		}
-		return true;
-	}
 
 	switch (event->button.button) {
 	case 1:
