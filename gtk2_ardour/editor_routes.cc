@@ -1592,10 +1592,7 @@ EditorRoutes::move_selected_tracks_relatively (const PBD::ID& source_track_id, c
     if (source_track_id == target_track_id) {
         return;
     }
-    
-    RouteTimeAxisView* source_rtv = _editor->get_route_view_by_route_id(source_track_id);
-    Selection& selection = _editor->get_selection();
-    
+
     RouteList routes;
     RouteList routes_to_move;
 	TreeModel::Children rows = _model->children();
@@ -1607,7 +1604,7 @@ EditorRoutes::move_selected_tracks_relatively (const PBD::ID& source_track_id, c
         RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
         
         // selected tracks: add to the move list but if it's not a target
-        if (selection.selected(tv) &&
+        if (_editor->get_selection().selected(tv) &&
             route->id() != target_track_id ) {
             routes_to_move.push_back(route);
             continue;

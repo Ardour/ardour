@@ -439,7 +439,7 @@ GainMeter::gain_activated ()
             TimeAxisView* tv = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id() );
             
             // if route is a part of selection and affected_by_selection is set
-            if (affected_by_selection && selection.selected(tv) && selection.tracks.size() > 1 ) {
+            if (affected_by_selection && tv && selection.selected(tv) && selection.tracks.size() > 1 ) {
                 
                 RouteList routes;
                 TrackViewList track_list = selection.tracks;
@@ -526,7 +526,7 @@ GainMeter::gain_adjusted ()
             TimeAxisView* tv = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id() );
             
             // if route is a part of selection and affected_by_selection is set
-            if (affected_by_selection && selection.selected(tv) && selection.tracks.size() > 1 ) {
+            if (affected_by_selection && tv && selection.selected(tv) && selection.tracks.size() > 1 ) {
 
                 RouteList routes;
                 TrackViewList track_list = selection.tracks;
@@ -816,7 +816,7 @@ GainMeter::gain_slider_button_press (GdkEventButton* ev)
                     TimeAxisView* tv = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id() );
                     
                     // if route is a part of selection and affected_by_selection is set
-                    if (affected_by_selection && selection.selected(tv) && selection.tracks.size() > 1 ) {
+                    if (affected_by_selection && tv && selection.selected(tv) && selection.tracks.size() > 1 ) {
                         
                         RouteList routes;
                         TrackViewList track_list = selection.tracks;
