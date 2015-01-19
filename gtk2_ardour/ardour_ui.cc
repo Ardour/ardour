@@ -2508,6 +2508,14 @@ ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 
 
 void
+ARDOUR_UI::set_session_dirty ()
+{
+    if (_session) {
+        _session->set_dirty ();
+    }
+}
+
+void
 ARDOUR_UI::primary_clock_value_changed ()
 {
 	if (_session) {

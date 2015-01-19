@@ -387,6 +387,8 @@ ARDOUR_UI::toggle_mixer_bridge_view ()
 	} else {
 		editor->get_container ("mixer_bridge_view_home").hide ();
 	}
+    
+    set_session_dirty ();
 }
 
 void
@@ -421,6 +423,8 @@ ARDOUR_UI::show_meterbridge_view ()
 		editor->get_container ("edit_pane").show ();
 		editor->get_container ("compact_meter_bridge_home").show ();
 	}
+    
+    set_session_dirty ();
 }
 
 void

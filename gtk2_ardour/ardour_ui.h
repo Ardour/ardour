@@ -188,6 +188,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     int save_session_state (const std::string & name = "", bool pending = false, bool switch_to_it = false);
     void save_session_gui_state ();
 	int save_state (const std::string & state_name = "", bool switch_to_it = false);
+    void set_session_dirty ();
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
 	static UIConfiguration *config () { return ui_config; }

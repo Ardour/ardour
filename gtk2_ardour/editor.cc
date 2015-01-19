@@ -4041,6 +4041,14 @@ Editor::session_state_saved (string)
 }
 
 void
+Editor::set_session_dirty ()
+{
+    if (_session) {
+        _session->set_dirty ();
+    }
+}
+
+void
 Editor::update_tearoff_visibility()
 {
 	bool visible = Config->get_keep_tearoffs();

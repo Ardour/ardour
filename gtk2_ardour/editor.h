@@ -2016,7 +2016,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool on_key_release_event (GdkEventKey*);
 
 	void session_state_saved (std::string);
-
+    void set_session_dirty ();
+    
 	Glib::RefPtr<Gtk::Action>              undo_action;
 	Glib::RefPtr<Gtk::Action>              redo_action;
 

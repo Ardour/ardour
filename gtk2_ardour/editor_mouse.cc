@@ -350,7 +350,7 @@ Editor::mouse_mode_toggled (MouseMode m)
 
 	mouse_mode = m;
 
-	instant_save ();
+	set_session_dirty ();
 
 	/* this should generate a new enter event which will
 	   trigger the appropiate cursor.

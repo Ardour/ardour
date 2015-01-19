@@ -118,6 +118,7 @@ Editor::show_editor_mixer (bool yn)
 
 			if (track_views.empty()) {
 				show_editor_mixer_when_tracks_arrive = true;
+                set_session_dirty ();
 				return;
 			}
             
@@ -178,6 +179,8 @@ Editor::show_editor_mixer (bool yn)
 			}
 		}
 	}
+    
+    set_session_dirty ();
 
 #ifdef GTKOSX
 	/* XXX gtk problem here */
