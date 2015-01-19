@@ -190,22 +190,22 @@ ARDOUR_UI::setup_transport ()
 
 	auto_return_dropdown.set_text (_("Auto Return"));
 
-	auto_return_last_locate = manage (new CheckMenuItem (_("Play from last roll")));
+	auto_return_last_locate = manage (new Gtk::CheckMenuItem (_("Play from last roll")));
 	auto_return_last_locate->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_auto_return_state), LastLocate));
 	auto_return_last_locate->show ();
 	auto_return_dropdown.AddMenuElem (Gtk::Menu_Helpers::CheckMenuElem (*auto_return_last_locate));
 
-	auto_return_region_selection = manage (new CheckMenuItem (_("Play from region selection")));
+	auto_return_region_selection = manage (new Gtk::CheckMenuItem (_("Play from region selection")));
 	auto_return_region_selection->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_auto_return_state), RegionSelectionStart));
 	auto_return_region_selection->show ();
 	auto_return_dropdown.AddMenuElem (Gtk::Menu_Helpers::CheckMenuElem (*auto_return_region_selection));
 
-	auto_return_range_selection = manage (new CheckMenuItem (_("Play from range selection")));
+	auto_return_range_selection = manage (new Gtk::CheckMenuItem (_("Play from range selection")));
 	auto_return_range_selection->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_auto_return_state), RangeSelectionStart));
 	auto_return_range_selection->show ();
 	auto_return_dropdown.AddMenuElem (Gtk::Menu_Helpers::CheckMenuElem (*auto_return_range_selection));
 
-	auto_return_loop = manage (new CheckMenuItem (_("Play from loop")));
+	auto_return_loop = manage (new Gtk::CheckMenuItem (_("Play from loop")));
 	auto_return_loop->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_auto_return_state), Loop));
 	auto_return_loop->show ();
 	auto_return_dropdown.AddMenuElem (Gtk::Menu_Helpers::CheckMenuElem (*auto_return_loop));

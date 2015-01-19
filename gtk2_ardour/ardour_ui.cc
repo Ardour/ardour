@@ -4696,7 +4696,7 @@ void
 ARDOUR_UI::toggle_auto_return_state (AutoReturnTarget t)
 {
 	AutoReturnTarget art = Config->get_auto_return_target_list ();
-	CheckMenuItem* check_menu_item = 0;
+	Gtk::CheckMenuItem* check_menu_item = 0;
 	
 	switch (t) {
 	case LastLocate:
