@@ -3849,7 +3849,7 @@ void
 RubberbandSelectDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
-	show_verbose_cursor_time (adjusted_current_frame (event));
+	show_verbose_cursor_time (adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid()));
 }
 
 void
@@ -3860,11 +3860,13 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	double y1;
 	double y2;
 
-	framepos_t const pf = adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ());
+	framepos_t const pf = adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid());
 
 	framepos_t grab = grab_frame ();
 	if (ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ()) {
 		_editor->snap_to_with_modifier (grab, event);
+	} else {
+		grab = raw_grab_frame ();
 	}
 
 	/* base start and end on initial click position */
@@ -3935,13 +3937,20 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 {
 	framepos_t x1;
 	framepos_t x2;
+	framepos_t grab = grab_frame ();
+	framepos_t lpf = last_pointer_frame ();
+
+	if (!ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ()) {
+		grab = raw_grab_frame ();
+		lpf = _editor->pixel_to_sample_from_event (last_pointer_x());
+	}
 	
-	if (grab_frame() < last_pointer_frame()) {
-		x1 = grab_frame ();
-		x2 = last_pointer_frame ();
+	if (grab < lpf) {
+		x1 = grab;
+		x2 = lpf;
 	} else {
-		x2 = grab_frame ();
-		x1 = last_pointer_frame ();
+		x2 = grab;
+		x1 = lpf;
 	}
 
 	double y1;
