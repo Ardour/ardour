@@ -8,6 +8,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <fcntl.h>
+#include <stdbool.h>
 
 #include <glib.h>
 
@@ -32,7 +33,9 @@ main (int argc, char* argv[])
         int* files;
 	char optstring[] = "b:D";
 	uint32_t block_size = 64 * 1024 * 4;
+#ifdef __APPLE__
         bool direct = false;
+#endif
 	const struct option longopts[] = {
 		{ "blocksize", 1, 0, 'b' },
 		{ "direct", 0, 0, 'D' },
@@ -56,7 +59,9 @@ main (int argc, char* argv[])
 			block_size = atoi (optarg);
 			break;
                 case 'D':
+#ifdef __APPLE__
                         direct = true;
+#endif
                         break;
 		default:
 			usage ();
@@ -121,7 +126,7 @@ main (int argc, char* argv[])
 	}
 
 	data = (char*) malloc (sizeof (char) * block_size);
-	uint64_t read = 0;
+	uint64_t _read = 0;
 	
 	while (true) {
 		gint64 before;
@@ -129,17 +134,17 @@ main (int argc, char* argv[])
 
 		for (n = 0; n < nfiles; ++n) {
 
-                        if (::read (files[n], (char*) data, block_size) != block_size) {
+                        if (read (files[n], (char*) data, block_size) != block_size) {
                                 fprintf (stderr, "read failed on file %d (%s)\n", n, strerror (errno));
                                 return -1;
                         }
 		}
 
-		read += block_size;
+		_read += block_size;
 		gint64 elapsed = g_get_monotonic_time() - before;
                 double bandwidth = ((nfiles * block_size)/1048576.0) / (elapsed/1000000.0);
 		
-                printf ("BW @ %Lu %.3f seconds bandwidth %.4f MB/sec\n", read, elapsed/1000000.0, bandwidth);
+                printf ("BW @ %Lu %.3f seconds bandwidth %.4f MB/sec\n", _read, elapsed/1000000.0, bandwidth);
 	}
 
 	return 0;
