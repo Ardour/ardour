@@ -1,4 +1,4 @@
-/* g++ -o readtest readtest.cc `pkg-config --cflags --libs sndfile` `pkg-config --cflags --libs glibmm-2.4` */
+/* gcc -o readtest readtest.cc `pkg-config --cflags --libs glib-2.0` */
 
 #include <stdlib.h>
 #include <errno.h>
@@ -120,7 +120,7 @@ main (int argc, char* argv[])
                 files[n] = fd;
 	}
 
-	data = new char[block_size];
+	data = (char*) malloc (sizeof (char) * block_size);
 	uint64_t read = 0;
 	
 	while (true) {
