@@ -752,8 +752,7 @@ RouteUI::monitor_press (GdkEventButton* ev, MonitorChoice monitor_choice)
 	}
 
 	MonitorChoice mc;
-	boost::shared_ptr<RouteList> rl;
-	
+		
 	/* XXX for now, monitoring choices are orthogonal. cue monitoring 
 	   will follow in 3.X but requires mixing the input and playback (disk)
 	   signal together, which requires yet more buffers.
@@ -767,19 +766,25 @@ RouteUI::monitor_press (GdkEventButton* ev, MonitorChoice monitor_choice)
 		mc = monitor_choice;
 	}
 
+#if 0
     if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 		if (_route->route_group() && _route->route_group()->is_monitoring()) {
 			rl = _route->route_group()->route_list();
 		} else {
 			rl.reset (new RouteList);
-			rl->push_back (route());
+			rl->push_back (_route);
 		}
-	} else {
-		rl.reset (new RouteList);
-		rl->push_back (route());
 	}
+#endif
+    
+    boost::shared_ptr<RouteList> rl(new RouteList);
 
-	_session->set_monitoring (rl, mc, Session::rt_cleanup, true);		
+    if ( is_selected () ) {
+        rl = get_selected_route_list ();
+    } else {
+        rl->push_back (_route);
+    }
+    _session->set_monitoring (rl, mc, Session::rt_cleanup, true);
 
 	return true;
 }
