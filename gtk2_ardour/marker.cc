@@ -482,6 +482,8 @@ Marker::set_selected (bool yn)
                         reset_color ();
                 }
         }
+    
+    ARDOUR_UI::instance()->set_session_dirty ();
 }
 
 void

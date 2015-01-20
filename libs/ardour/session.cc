@@ -1398,6 +1398,18 @@ Session::set_auto_loop_location (Location* location)
 }
 
 void
+Session::update_loop (Location* loc)
+{
+    set_dirty ();
+}
+
+void
+Session::update_marks (Location* loc)
+{
+    set_dirty ();
+}
+
+void
 Session::update_skips (Location* loc, bool consolidate)
 {
         Locations::LocationList skips;
@@ -1417,6 +1429,8 @@ Session::update_skips (Location* loc, bool consolidate)
         }
 
         sync_locations_to_skips (skips);
+    
+    set_dirty ();
 }
 
 Locations::LocationList
@@ -1486,31 +1500,47 @@ Session::sync_locations_to_skips (const Locations::LocationList& locations)
 void
 Session::location_added (Location *location)
 {
-        if (location->is_auto_punch()) {
-                set_auto_punch_location (location);
-        }
+    if (location->is_auto_punch()) {
+            set_auto_punch_location (location);
+    }
 
-        if (location->is_auto_loop()) {
-                set_auto_loop_location (location);
-        }
+    if (location->is_auto_loop()) {
+        location->StartChanged.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
+        location->EndChanged.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
+        location->Changed.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
+        location->FlagsChanged.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
         
-        if (location->is_session_range()) {
-                /* no need for any signal handling or event setting with the session range,
-                   because we keep a direct reference to it and use its start/end directly.
-                */
-                _session_range_location = location;
-        }
+        set_auto_loop_location (location);
+    }
+    
+    if (location->is_session_range()) {
+            /* no need for any signal handling or event setting with the session range,
+               because we keep a direct reference to it and use its start/end directly.
+            */
+            _session_range_location = location;
+    }
 
-        if (location->is_skip()) {
-                /* listen for per-location signals that require us to update skip-locate events */
+    if (location->is_mark()) {
+        /* listen for per-location signals that require us to update skip-locate events */
+        
+        location->StartChanged.connect_same_thread (mark_update_connections, boost::bind (&Session::update_marks, this, location));
+        location->Changed.connect_same_thread (mark_update_connections, boost::bind (&Session::update_marks, this, location));
+        location->FlagsChanged.connect_same_thread (mark_update_connections, boost::bind (&Session::update_marks, this, location));
+        location->LockChanged.connect_same_thread (mark_update_connections, boost::bind (&Session::update_marks, this, location));
+        location->NameChanged.connect_same_thread (mark_update_connections, boost::bind (&Session::update_marks, this, location));
+    }
 
-                location->StartChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->EndChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->Changed.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->FlagsChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, false));
+    
+    if (location->is_skip()) {
+        /* listen for per-location signals that require us to update skip-locate events */
 
-                update_skips (location, true);
-        }
+        location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+        location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+        location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+        location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, false));
+
+        update_skips (location, true);
+    }
 
 	set_dirty ();
 }

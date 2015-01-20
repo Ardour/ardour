@@ -115,9 +115,7 @@ MarkerInspectorDialog::_enable_program_change (bool yn)
 void
 MarkerInspectorDialog::_set_session_dirty ()
 {
-    if (ARDOUR_UI::instance ()->the_editor ().session ()) {
-        ARDOUR_UI::instance ()->the_editor ().session ()->set_dirty ();
-    }
+    ARDOUR_UI::instance()->set_session_dirty ();
 }
 
 
@@ -130,7 +128,6 @@ MarkerInspectorDialog::_lock_button_clicked (WavesButton *button)
 		} else {
 			_marker->location()->lock ();
 		}
-        _set_session_dirty ();
 	}
 }
 

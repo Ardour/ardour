@@ -1236,9 +1236,14 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
         void             _locations_changed (const Locations::LocationList&);
 
         void              update_skips (Location*, bool consolidate);
+    void update_marks (Location* loc);
+    void update_loop (Location* loc);
         Locations::LocationList consolidate_skips (Location*);
 	void              sync_locations_to_skips (const Locations::LocationList&);
-        PBD::ScopedConnectionList skip_connections;
+    
+    PBD::ScopedConnectionList loop_update_connections;
+    PBD::ScopedConnectionList mark_update_connections;
+    PBD::ScopedConnectionList skip_update_connections;
 
 	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);

@@ -877,6 +877,8 @@ Session::set_play_loop (bool yn, double speed)
 	}
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
+    
+    set_dirty ();
 	TransportStateChange ();
 }
 void
