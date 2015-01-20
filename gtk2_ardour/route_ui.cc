@@ -389,68 +389,89 @@ RouteUI::polarity_changed ()
 }
 
 bool
+RouteUI::is_selected ()
+{
+    TimeAxisView* tv = ARDOUR_UI::instance()->the_editor().get_route_view_by_route_id (_route->id() );
+    return tv->is_selected ();
+}
+
+boost::shared_ptr<ARDOUR::RouteList>
+RouteUI::get_selected_route_list ()
+{
+    boost::shared_ptr<ARDOUR::RouteList> selected_route_list(new RouteList);
+    
+    TrackSelection& tracks_selection = ARDOUR_UI::instance()->the_editor().get_selection().tracks;
+    
+    for(std::list<TimeAxisView*>::iterator it = tracks_selection.begin(); it != tracks_selection.end(); it++) {
+        
+        RouteUI* t = dynamic_cast<RouteUI*> (*it);
+        if (t) {
+            selected_route_list->push_back (t->route());
+        }
+    }
+    
+    return selected_route_list;
+}
+
+bool
 RouteUI::mute_press (GdkEventButton* ev)
 {    
 	if (ev->button != 1) {
 		return true;
 	}
 
-	multiple_mute_change = false;
-
-        if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-
-
-                /* Primary-button1 applies change to the mix group even if it is not active
-                   NOTE: Primary-button2 is MIDI learn.
-                */
-                
-                boost::shared_ptr<RouteList> rl;
-                
-                if (ev->button == 1) { 
-                        
-                        if (_route->route_group()) {
-                                
-                                rl = _route->route_group()->route_list();
-                                
-                                if (_mute_release) {
-                                        _mute_release->routes = rl;
-                                }
-                        } else {
-                                rl.reset (new RouteList);
-                                rl->push_back (_route);
-                        }
-                        
-                        DisplaySuspender ds;
-                        _session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
-                }
-
-        } else {
-
-            /* plain click applies change to this route */
-
-            boost::shared_ptr<RouteList> rl (new RouteList);
-            rl->push_back (_route);
+#if 0
+//    Groups will be able to use in the future, but Tracks Live doesn't support it now
+    if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+        
+        
+        /* Primary-button1 applies change to the mix group even if it is not active
+         NOTE: Primary-button2 is MIDI learn.
+         */
+        
+        boost::shared_ptr<RouteList> rl;
+        
+        if (ev->button == 1) {
             
-            if (_mute_release) {
-                _mute_release->routes = rl;
+            if (_route->route_group()) {
+                
+                rl = _route->route_group()->route_list();
+                
+                if (_mute_release) {
+                    _mute_release->routes = rl;
+                }
+            } else {
+                rl.reset (new RouteList);
+                rl->push_back (_route);
             }
-
-            _session->set_mute (rl, !_route->muted());
+            
+            DisplaySuspender ds;
+            _session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
         }
         
+    } else {
+#endif
+    
+    if ( is_selected () ) {
+        // change mute state of the all selected tracks
+        
+        DisplaySuspender ds;
+        boost::shared_ptr<ARDOUR::RouteList> selected_route_list = get_selected_route_list ();
+        _session->set_mute (selected_route_list, !_route->muted());
+    } else {
+        // change mute state of the single cliced track
+        
+        boost::shared_ptr<RouteList> rl (new RouteList);
+        rl->push_back (_route);
+        _session->set_mute (rl, !_route->muted());
+    }
+    
 	return true;
 }
         
 bool
 RouteUI::mute_release (GdkEventButton*)
 {
-	if (_mute_release){
-		DisplaySuspender ds;
-		_session->set_mute (_mute_release->routes, _mute_release->active, Session::rt_cleanup, true);
-		delete _mute_release;
-		_mute_release = 0;
-	}
-
 	return true;
 }
 

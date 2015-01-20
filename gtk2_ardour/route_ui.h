@@ -306,6 +306,9 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	};
 
 	SoloMuteRelease* _mute_release;
+    bool is_selected ();
+    boost::shared_ptr<ARDOUR::RouteList> get_selected_route_list ();
+    
     bool _momentary_solo;
     bool _was_muted_before_momentary_soloed;
 

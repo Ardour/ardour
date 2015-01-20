@@ -136,6 +136,7 @@ class TimeAxisView : public virtual AxisView
 	bool hidden () const { return _hidden; }
 
 	void set_selected (bool);
+    bool is_selected () {return _selected;}
     
 	/**
 	 * potential handler for entered events
