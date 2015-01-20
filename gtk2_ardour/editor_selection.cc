@@ -1112,6 +1112,9 @@ Editor::track_selection_changed ()
     // check if we should enable track selectin sensitive actions
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, track_selected() );
 
+    /* make session dirty */
+    set_session_dirty ();
+    
 	/* notify control protocols */
 	ControlProtocol::TrackSelectionChanged (routes);
 }
