@@ -445,7 +445,6 @@ RouteUI::mute_press (GdkEventButton* ev)
                 rl->push_back (_route);
             }
             
-            DisplaySuspender ds;
             _session->set_mute (rl, !_route->muted(), Session::rt_cleanup, true);
         }
         
@@ -455,7 +454,6 @@ RouteUI::mute_press (GdkEventButton* ev)
     if ( is_selected () ) {
         // change mute state of the all selected tracks
         
-        DisplaySuspender ds;
         boost::shared_ptr<ARDOUR::RouteList> selected_route_list = get_selected_route_list ();
         _session->set_mute (selected_route_list, !_route->muted());
     } else {
