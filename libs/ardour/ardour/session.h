@@ -1260,6 +1260,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
         int  immediately_post_engine ();
 	void remove_empty_sounds ();
 
+    void session_loaded ();
+    
 	void setup_midi_control ();
 	int  midi_read (MIDI::Port *);
 

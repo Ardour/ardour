@@ -344,21 +344,29 @@ Session::post_engine_init ()
 	ltc_tx_initialize();
 	/* initial program change will be delivered later; see ::config_changed() */
 
-	_state_of_the_state = Clean;
+	
 
 	Port::set_connecting_blocked (false);
 
-	DirtyChanged (); /* EMIT SIGNAL */
-
-	if (_is_new) {
-		save_state ("");
-	} else if (state_was_pending) {
-		save_state ("");
-		remove_pending_capture_state ();
-		state_was_pending = false;
-	}
-
 	return 0;
+}
+
+void
+Session::session_loaded ()
+{
+    SessionLoaded();
+    
+    _state_of_the_state = Clean;
+    
+    DirtyChanged (); /* EMIT SIGNAL */
+    
+    if (_is_new) {
+        save_state ("");
+    } else if (state_was_pending) {
+        save_state ("");
+        remove_pending_capture_state ();
+        state_was_pending = false;
+    }
 }
 
 string
@@ -2995,6 +3003,10 @@ Session::set_dirty ()
 	if (_state_of_the_state & Loading) {
 		return;
 	}
+    
+    if (_state_of_the_state & Deletion) {
+        return;
+    }
 
 	bool was_dirty = dirty();
 

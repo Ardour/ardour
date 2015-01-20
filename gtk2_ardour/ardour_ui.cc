@@ -3042,6 +3042,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			*/
 
 			ARDOUR_COMMAND_LINE::session_name = "";
+            
+            return ret;
 		}
 	}
 
@@ -3165,10 +3167,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	goto_editor_window ();
 
-	if (_session) {
-		_session->set_clean ();
-	}
-
 #ifdef WINDOWS_VST_SUPPORT
 	fst_stop_threading();
 #endif
@@ -3176,6 +3174,11 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 #ifdef WINDOWS_VST_SUPPORT
 	fst_start_threading();
 #endif
+    
+    if (_session) {
+        _session->set_clean ();
+    }
+    
 	retval = 0;
 
   out:

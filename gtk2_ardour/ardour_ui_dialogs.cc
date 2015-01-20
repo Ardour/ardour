@@ -395,6 +395,7 @@ void
 ARDOUR_UI::toggle_meterbridge ()
 {
     show_meterbridge_view ();
+    set_session_dirty ();
 }
 
 void
@@ -423,8 +424,6 @@ ARDOUR_UI::show_meterbridge_view ()
 		editor->get_container ("edit_pane").show ();
 		editor->get_container ("compact_meter_bridge_home").show ();
 	}
-    
-    set_session_dirty ();
 }
 
 void
