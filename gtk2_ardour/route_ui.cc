@@ -598,21 +598,25 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	}
 
 	if (!_session->engine().connected()) {
-	        WavesMessageDialog msg ("", _("Not connected to AudioEngine - cannot engage record"));
+        WavesMessageDialog msg ("", _("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
 		return true;
 	}
 
-        if (is_midi_track()) {
+//    Tracks Live doesn't use it
+#if 0
+    if (is_midi_track())
+    {
+        /* rec-enable button exits from step editing */
 
-                /* rec-enable button exits from step editing */
-
-                if (midi_track()->step_editing()) {
-			midi_track()->set_step_editing (false);
-			return true;
-                }
+        if (midi_track()->step_editing())
+        {
+            midi_track()->set_step_editing (false);
+            return true;
         }
-
+    }
+#endif
+    
 	if (is_track()) {
 
 		if (Keyboard::is_button2_event (ev)) {
@@ -620,7 +624,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			// do nothing on midi sigc::bind event
 			return rec_enable_button.on_button_press_event (ev);
 
-		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
+		}
+#if 0
+//    Groups will be able to use in the future, but Tracks Live doesn't support it now
+            else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 
 			/* Primary-button1 applies change to the route group (even if it is not active)
 			   NOTE: Primary-button2 is MIDI learn.
@@ -639,23 +646,44 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 					rl->push_back (_route);
 				}
 
-				DisplaySuspender ds;
 				_session->set_record_enabled (rl, !rec_enable_button.active_state(), Session::rt_cleanup, true);
 			}
-
-		} else if (Keyboard::is_context_menu_event (ev)) {
+#endif
+		else if (Keyboard::is_context_menu_event (ev)) {
 
 			/* do this on release */
 
 		} else {
-
-			boost::shared_ptr<RouteList> rl (new RouteList);
-			rl->push_back (route());
-			DisplaySuspender ds;
-			_session->set_record_enabled (rl, !rec_enable_button.active_state());
+            boost::shared_ptr<RouteList> rl (new RouteList);
+            
+            if ( is_selected () ) {
+                rl = get_selected_route_list ();
+            } else {
+                rl->push_back (_route);
+            }
+            /* Record enable uses EditorRoutes::redisplay N time. Where N is the number of changed tracks. 
+             DisplaySuspender is used in order to improve GUI performance */
+            DisplaySuspender ds;
+            _session->set_record_enabled (rl, !rec_enable_button.active_state(), Session::rt_cleanup, true);
 		}
 	}
 
+	return true;
+}
+
+bool
+RouteUI::rec_enable_release (GdkEventButton* ev)
+{
+#if 0
+    if (Keyboard::is_context_menu_event (ev)) {
+        build_record_menu ();
+        if (record_menu) {
+            record_menu->popup (1, ev->time);
+        }
+        return true;
+    }
+#endif
+    
 	return true;
 }
 
@@ -810,20 +838,6 @@ RouteUI::step_edit_changed (bool yn)
             step_edit_item->set_active (false);
         }
     }
-}
-
-bool
-RouteUI::rec_enable_release (GdkEventButton* ev)
-{
-        if (Keyboard::is_context_menu_event (ev)) {
-                build_record_menu ();
-                if (record_menu) {
-                        record_menu->popup (1, ev->time);
-                }
-                return true;
-        }
-
-	return true;
 }
 
 void
