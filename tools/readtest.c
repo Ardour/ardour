@@ -1,4 +1,4 @@
-/* gcc -o readtest readtest.cc `pkg-config --cflags --libs glib-2.0` */
+/* gcc -o readtest readtest.c `pkg-config --cflags --libs glib-2.0` */
 
 #include <stdlib.h>
 #include <errno.h>
@@ -23,21 +23,23 @@ read_one (int fd, ssize_t sz)
 void
 usage ()
 {
-	fprintf (stderr, "readtest [ -b BLOCKSIZE ] [ -s ] [ -D ] filename-template\n");
+	fprintf (stderr, "readtest [ -b BLOCKSIZE ] [-l FILELIMIT] [ -D ] filename-template\n");
 }
 
 int
 main (int argc, char* argv[])
 {
 	int* files;
-	char optstring[] = "b:D";
+	char optstring[] = "b:Dl:";
 	uint32_t block_size = 64 * 1024 * 4;
+	int max_files = -1;
 #ifdef __APPLE__
 	bool direct = false;
 #endif
 	const struct option longopts[] = {
 		{ "blocksize", 1, 0, 'b' },
 		{ "direct", 0, 0, 'D' },
+		{ "limit", 1, 0, 'l' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -56,6 +58,9 @@ main (int argc, char* argv[])
 		switch (c) {
 			case 'b':
 				block_size = atoi (optarg);
+				break;
+			case 'l':
+				max_files = atoi (optarg);
 				break;
 			case 'D':
 #ifdef __APPLE__
@@ -85,6 +90,10 @@ main (int argc, char* argv[])
 		}
 
 		++n;
+
+		if (max_files > 0 &&  n >= max_files) {
+			break;
+		}
 	}
 
 	if (n == 0) {
@@ -126,7 +135,7 @@ main (int argc, char* argv[])
 
 	data = (char*) malloc (sizeof (char) * block_size);
 	uint64_t _read = 0;
-	double min_throughput = -1;
+	double max_elapsed = 0;
 	double total_time = 0;
 
 	while (true) {
@@ -145,19 +154,21 @@ main (int argc, char* argv[])
 		gint64 elapsed = g_get_monotonic_time() - before;
 		double bandwidth = ((nfiles * block_size)/1048576.0) / (elapsed/1000000.0);
 
-		printf ("BW @ %Lu %.3f seconds bandwidth %.4f MB/sec\n", _read, elapsed/1000000.0, bandwidth);
+		printf ("BW @ %lu %.3f seconds bandwidth %.4f MB/sec\n", (long unsigned int)_read, elapsed/1000000.0, bandwidth);
 
 		total_time += elapsed;
-		if (min_throughput > bandwidth || min_throughput < 0) {
-			min_throughput = bandwidth;
+
+		if (elapsed > max_elapsed) {
+			max_elapsed = elapsed;
 		}
 
 	}
 
 out:
-	if (min_throughput > 0 && total_time > 0) {
+	if (max_elapsed > 0 && total_time > 0) {
 		double bandwidth = ((nfiles * _read)/1048576.0) / (total_time/1000000.0);
-		printf ("Min: %.4f MB/sec  Avg: %.4f MB/sec\n", min_throughput, bandwidth);
+		double min_throughput = ((nfiles * block_size)/1048576.0) / (max_elapsed/1000000.0);
+		printf ("Min: %.4f MB/sec Avg: %.4f MB/sec  || Max: %.3f sec \n", min_throughput, bandwidth, max_elapsed/1000000.0);
 	}
 
 	return 0;
