@@ -20,7 +20,7 @@
 	doap:name "Reasonable Synth";
 	lv2:optionalFeature lv2:hardRTCapable ;
 	lv2:requiredFeature urid:map ;
-	rdfs:comment """A simple synthesizer with no controls at all but a reasonable sound instead.""" ;
+	rdfs:comment """A simple synthesizer with no controls at all but a reasonable sound instead. Note that this synth does not respond to any Control or Program Messages. Its main purpose is to act as sensible default on new installations until other plugins are installed.""" ;
 	lv2:port
 	[
 		a atom:AtomPort ,
