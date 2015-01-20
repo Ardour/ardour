@@ -126,6 +126,8 @@ main (int argc, char* argv[])
 
 	data = (char*) malloc (sizeof (char) * block_size);
 	uint64_t _read = 0;
+	double min_throughput = -1;
+	double total_time = 0;
 
 	while (true) {
 		gint64 before;
@@ -135,7 +137,7 @@ main (int argc, char* argv[])
 
 			if (read (files[n], (char*) data, block_size) != block_size) {
 				fprintf (stderr, "read failed on file %d (%s)\n", n, strerror (errno));
-				return -1;
+				goto out;
 			}
 		}
 
@@ -144,6 +146,18 @@ main (int argc, char* argv[])
 		double bandwidth = ((nfiles * block_size)/1048576.0) / (elapsed/1000000.0);
 
 		printf ("BW @ %Lu %.3f seconds bandwidth %.4f MB/sec\n", _read, elapsed/1000000.0, bandwidth);
+
+		total_time += elapsed;
+		if (min_throughput > bandwidth || min_throughput < 0) {
+			min_throughput = bandwidth;
+		}
+
+	}
+
+out:
+	if (min_throughput > 0 && total_time > 0) {
+		double bandwidth = ((nfiles * _read)/1048576.0) / (total_time/1000000.0);
+		printf ("Min: %.4f MB/sec  Avg: %.4f MB/sec\n", min_throughput, bandwidth);
 	}
 
 	return 0;
