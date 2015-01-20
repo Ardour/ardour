@@ -1,4 +1,4 @@
-/* gcc -o readtest readtest.c `pkg-config --cflags --libs glib-2.0` */
+/* gcc -o readtest readtest.c `pkg-config --cflags --libs glib-2.0` -lm */
 
 #include <stdlib.h>
 #include <errno.h>
@@ -8,7 +8,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <fcntl.h>
-#include <stdbool.h>
+#include <math.h>
 
 #include <glib.h>
 
@@ -30,11 +30,11 @@ int
 main (int argc, char* argv[])
 {
 	int* files;
-	char optstring[] = "b:Dl:";
+	char optstring[] = "b:Dl:q";
 	uint32_t block_size = 64 * 1024 * 4;
 	int max_files = -1;
 #ifdef __APPLE__
-	bool direct = false;
+	int direct = 0;
 #endif
 	const struct option longopts[] = {
 		{ "blocksize", 1, 0, 'b' },
@@ -49,30 +49,34 @@ main (int argc, char* argv[])
 	int flags = O_RDONLY;
 	int n = 0;
 	int nfiles = 0;
-
+	int quiet = 0;
+	
 	while (1) {
 		if ((c = getopt_long (argc, argv, optstring, longopts, &option_index)) == -1) {
 			break;
 		}
 
 		switch (c) {
-			case 'b':
-				block_size = atoi (optarg);
-				break;
-			case 'l':
-				max_files = atoi (optarg);
-				break;
-			case 'D':
+		case 'b':
+			block_size = atoi (optarg);
+			break;
+		case 'l':
+			max_files = atoi (optarg);
+			break;
+		case 'D':
 #ifdef __APPLE__
-				direct = true;
+			direct = 1;
 #endif
-				break;
-			default:
-				usage ();
-				return 0;
+			break;
+		case 'q':
+			quiet = 1;
+			break;
+		default:
+			usage ();
+			return 0;
 		}
 	}
-
+	
 	if (optind < argc) {
 		name_template = argv[optind];
 	} else {
@@ -101,8 +105,10 @@ main (int argc, char* argv[])
 		return 1;
 	}
 
-	printf ("Discovered %d files using %s\n", n, name_template);
-
+	if (!quiet) {
+		printf ("Discovered %d files using %s\n", n, name_template);
+	}
+	
 	nfiles = n;
 	files = (int *) malloc (sizeof (int) * nfiles);
 
@@ -138,7 +144,7 @@ main (int argc, char* argv[])
 	double max_elapsed = 0;
 	double total_time = 0;
 
-	while (true) {
+	while (1) {
 		gint64 before;
 		before = g_get_monotonic_time();
 
@@ -154,8 +160,10 @@ main (int argc, char* argv[])
 		gint64 elapsed = g_get_monotonic_time() - before;
 		double bandwidth = ((nfiles * block_size)/1048576.0) / (elapsed/1000000.0);
 
-		printf ("BW @ %lu %.3f seconds bandwidth %.4f MB/sec\n", (long unsigned int)_read, elapsed/1000000.0, bandwidth);
-
+		if (!quiet) {
+			printf ("BW @ %lu %.3f seconds bandwidth %.4f MB/sec\n", (long unsigned int)_read, elapsed/1000000.0, bandwidth);
+		}
+		
 		total_time += elapsed;
 
 		if (elapsed > max_elapsed) {
@@ -169,6 +177,7 @@ out:
 		double bandwidth = ((nfiles * _read)/1048576.0) / (total_time/1000000.0);
 		double min_throughput = ((nfiles * block_size)/1048576.0) / (max_elapsed/1000000.0);
 		printf ("Min: %.4f MB/sec Avg: %.4f MB/sec  || Max: %.3f sec \n", min_throughput, bandwidth, max_elapsed/1000000.0);
+		printf ("Max Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * bandwidth / (4 * 48000.)));
 	}
 
 	return 0;
