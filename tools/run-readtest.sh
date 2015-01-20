@@ -8,6 +8,11 @@ interleave=
 blocksize=262144
 needfiles=1
 
+if uname -a | grep --silent arwin ; then
+    ddmega=m
+else
+    ddmega=M
+fi
 
 while [ $# -gt 1 ] ; do
     case $1 in
@@ -42,7 +47,7 @@ if [ x$needfiles != x ] ; then
 	#
 	
 	for i in `seq 1 $numfiles` ; do
-	    dd of=$dir/testfile_$i if=/dev/zero bs=1M count=$filesize
+	    dd of=$dir/testfile_$i if=/dev/zero bs=1$ddmega count=$filesize
 	    echo $i
 	done
     else
@@ -64,7 +69,7 @@ if [ x$needfiles != x ] ; then
     fi
 fi
 
-if uname -a | grep -s arwin ; then
+if uname -a | grep --silent arwin ; then
     # clears cache on OS X
     sudo purge
 elif [ -f /proc/sys/vm/drop_cache ] ; then
