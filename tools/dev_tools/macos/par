@@ -1,2 +1,4 @@
-cd $AD/tracks/tools/osx_packaging
-./osx_build --trackslive
+cd $AD/tracks/tools/osx_packaging && \
+./osx_build --trackslive && \
+cd $AD/tracks/tools/osx_packaging/TracksLiveInstall && \
+./osx_install_build

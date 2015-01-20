@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# Paths to build and installer
+OSX_PACKAGING_ROOT=$HOME/WS/GIT/tracks_daw/tracks/tools/osx_packaging
+OSX_INSTALLER_ROOT=$OSX_PACKAGING_ROOT/TracksLiveInstall
+# folder for temporal files
+TEMP=$OSX_INSTALLER_ROOT/temp
+
+echo "Start..."
+
+if uname -a | grep arwin >/dev/null 2>&1 ; then
+EXTENDED_RE=-E
+else
+EXTENDED_RE=-r
+fi
+
+GIT_REV_REGEXP='([0-9][0-9]*)\.([0-9][0-9]*)\.([0-9][0-9]*)-?([0-9][0-9]*)?-?([a-z0-9]*)'
+
+major_version=`cut -d'"' -f2 < ../../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\1/"`
+minor_version=`cut -d'"' -f2 < ../../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\2/"`
+micro_version=`cut -d'"' -f2 < ../../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\3/"`
+r=`cut -d'"' -f2 < ../../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\4/"`
+if [ "x$r" != "x" ] ; then
+revcount=$r
+fi
+
+# define build's version
+release_version=${major_version}.${minor_version}.${micro_version}${revcount:+.$revcount}
+echo "Version is $release_version"
+
+# it's defined in Igor's template (Tracks Live Install Template.dmg) and
+# can't be changed without appropriate changes in template
+template_dmg_name="Tracks Live Install Template"
+template_mount_name="Tracks Live Install"
+template_binary_name="TracksLive"
+
+# set installer't title parameters
+installer_dmg_name="Tracks Live Install-${revcount}"
+installer_mount_name=$template_mount_name
+installer_binary_name="Tracks Live"
+
+# name of dmg (build) that used for installer
+build_dmg_name="TracksLive-$release_version"
+
+# clear previous installer
+rm -rf "$OSX_INSTALLER_ROOT/${installer_dmg_name}.dmg"
+
+#create temp
+mkdir $TEMP
+
+# convert template from 'compressed' to 'read/write'
+hdiutil convert "$OSX_INSTALLER_ROOT/installer_template/${template_dmg_name}.dmg" -format UDRW -o "$TEMP/${installer_dmg_name}.dmg"
+
+# open template mount
+hdiutil attach "$TEMP/${installer_dmg_name}.dmg"
+# open build mount
+hdiutil attach "$OSX_PACKAGING_ROOT/$build_dmg_name.dmg"
+
+# remove old binary from template
+rm -rf "/Volumes/$template_mount_name/$template_binary_name.app"
+
+# copy new binary from build to template
+cp -r "/Volumes/$build_dmg_name/TracksLive.app" "/Volumes/$installer_mount_name/$installer_binary_name.app"
+#copy manual to template
+cp "/$OSX_INSTALLER_ROOT/Tracks_Live.pdf" "/Volumes/$installer_mount_name/Tracks Live Manual.pdf"
+
+echo '
+    tell application "Finder"
+        tell disk "'${installer_mount_name}'"
+        open
+            set position of item "'${installer_binary_name}'" of container window to {135, 108}
+            set position of item "Applications" of container window to {365, 108}
+            set position of item "Tracks Live Manual.pdf" of container window to {80, 220}
+            # set position of hidden files
+            set position of item ".background" of container window to {440, 220}
+            set position of item ".VolumeIcon" of container window to {440, 220}
+            set position of item ".Trashes" of container window to {440, 220}
+            set position of item ".TemporaryItems" of container window to {440, 220}
+            set position of item ".apdisk" of container window to {440, 220}
+            set position of item ".DS_Store" of container window to {440, 220}
+            set position of item ".fseventsd" of container window to {440, 220}
+            close
+        end tell
+    end tell
+' | osascript
+
+#close mounts
+hdiutil detach "/Volumes/$build_dmg_name"
+hdiutil detach "/Volumes/$installer_mount_name"
+
+# convert from 'read/write' to 'compressed'
+hdiutil convert "$TEMP/${installer_dmg_name}.dmg" -format UDCo -o "$OSX_INSTALLER_ROOT/${installer_dmg_name}.dmg"
+
+# remove temporal folder
+rm -rf $TEMP
+
+echo "Done"
