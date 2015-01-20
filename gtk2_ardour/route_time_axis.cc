@@ -893,6 +893,7 @@ RouteTimeAxisView::route_color_changed ()
 	display_route_color();
 	if (_view) {
 		_view->apply_color (color(), StreamView::RegionColor);
+        ARDOUR_UI::instance()->set_session_dirty ();
 	}
 }
 
