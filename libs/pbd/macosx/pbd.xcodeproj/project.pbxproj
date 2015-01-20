@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		43D8CBC91A6E6B0E00ABE168 /* signals.cc in Sources */ = {isa = PBXBuildFile; fileRef = 43D8CBC71A6E6B0E00ABE168 /* signals.cc */; };
+		43D8CBCA1A6E6B0E00ABE168 /* signals.h in Headers */ = {isa = PBXBuildFile; fileRef = 43D8CBC81A6E6B0E00ABE168 /* signals.h */; };
 		6941206F0B8A34AB00AF661E /* base_ui.cc in Sources */ = {isa = PBXBuildFile; fileRef = 694120270B8A34AB00AF661E /* base_ui.cc */; };
 		694120700B8A34AB00AF661E /* basename.cc in Sources */ = {isa = PBXBuildFile; fileRef = 694120280B8A34AB00AF661E /* basename.cc */; };
 		694120710B8A34AB00AF661E /* command.cc in Sources */ = {isa = PBXBuildFile; fileRef = 694120290B8A34AB00AF661E /* command.cc */; };
@@ -95,6 +97,8 @@
 /* Begin PBXFileReference section */
 		089C1667FE841158C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		32BAE0B70371A74B00C91783 /* pbd_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = pbd_Prefix.pch; sourceTree = "<group>"; };
+		43D8CBC71A6E6B0E00ABE168 /* signals.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = signals.cc; path = ../signals.cc; sourceTree = "<group>"; };
+		43D8CBC81A6E6B0E00ABE168 /* signals.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = signals.h; sourceTree = "<group>"; };
 		694120270B8A34AB00AF661E /* base_ui.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = base_ui.cc; path = ../base_ui.cc; sourceTree = SOURCE_ROOT; };
 		694120280B8A34AB00AF661E /* basename.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = basename.cc; path = ../basename.cc; sourceTree = SOURCE_ROOT; };
 		694120290B8A34AB00AF661E /* command.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = command.cc; path = ../command.cc; sourceTree = SOURCE_ROOT; };
@@ -245,6 +249,7 @@
 		08FB77ACFE841707C02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				43D8CBC71A6E6B0E00ABE168 /* signals.cc */,
 				69C63C140B9369CB00BC0BCA /* strreplace.cc */,
 				694120270B8A34AB00AF661E /* base_ui.cc */,
 				694120280B8A34AB00AF661E /* basename.cc */,
@@ -281,6 +286,7 @@
 		694120360B8A34AB00AF661E /* pbd */ = {
 			isa = PBXGroup;
 			children = (
+				43D8CBC81A6E6B0E00ABE168 /* signals.h */,
 				69C63C180B9369DE00BC0BCA /* replace_all.h */,
 				694120380B8A34AB00AF661E /* abstract_ui.cc */,
 				694120390B8A34AB00AF661E /* abstract_ui.h */,
@@ -386,6 +392,7 @@
 				694120A70B8A34AB00AF661E /* transmitter.h in Headers */,
 				694120A80B8A34AB00AF661E /* undo.h in Headers */,
 				694120A90B8A34AB00AF661E /* whitespace.h in Headers */,
+				43D8CBCA1A6E6B0E00ABE168 /* signals.h in Headers */,
 				694120AA0B8A34AB00AF661E /* xml++.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -418,8 +425,15 @@
 /* Begin PBXProject section */
 		0867D690FE84028FC02AAC07 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+			};
 			buildConfigurationList = 4FADC24608B4156D00ABE55E /* Build configuration list for PBXProject "pbd" */;
+			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
 			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
 			mainGroup = 0867D691FE84028FC02AAC07 /* pbd */;
 			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
 			projectDirPath = "";
@@ -456,6 +470,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				43D8CBC91A6E6B0E00ABE168 /* signals.cc in Sources */,
 				69C63C2B0B936A6E00BC0BCA /* version.cc in Sources */,
 				6941206F0B8A34AB00AF661E /* base_ui.cc in Sources */,
 				69C63C150B9369CB00BC0BCA /* strreplace.cc in Sources */,
