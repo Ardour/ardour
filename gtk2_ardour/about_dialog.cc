@@ -73,7 +73,7 @@ About::init_credits ()
     ss << timeinfo->tm_year + 1900;
     string str_year = ss.str();
     
-    string text="Version : " + revision + "\nCopyright 2001-" + str_year + " Paul Devis\nWaves Audio Ltd. 2013-" + str_year;
+    string text="Version : " + revision + "\nCopyright 2001-" + str_year + " Paul Davis\nWaves Audio Ltd. 2013-" + str_year;
     _credits.set_text (text);
 }
 
