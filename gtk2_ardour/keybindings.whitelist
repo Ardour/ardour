@@ -31,6 +31,8 @@
 /Transport/Record 
 /Editor/temporal-zoom-in
 /Editor/temporal-zoom-out
+/Editor/waveform-zoom-in
+/Editor/waveform-zoom-out
 /Mouse/set-mouse-mode-range
 /Mouse/set-mouse-mode-object
 /Mouse/set-mouse-mode-cut
