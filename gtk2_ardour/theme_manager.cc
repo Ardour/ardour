@@ -170,12 +170,7 @@ ThemeManager::ThemeManager()
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
 	
-	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
-	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
-	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
-	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
-	waveform_gradient_depth.set_value(ARDOUR_UI::config()->get_waveform_gradient_depth());
-	timeline_item_gradient_depth.set_value(ARDOUR_UI::config()->get_timeline_item_gradient_depth());
+	set_ui_to_state();
 
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
@@ -347,10 +342,36 @@ ThemeManager::on_light_theme_button_toggled()
 }
 
 void
+ThemeManager::set_ui_to_state()
+{
+	/* there is no way these values can change individually
+	 * by themselves (w/o user-interaction)
+	 * hence a common combined update function suffices
+	 */
+
+	if (ARDOUR_UI::config()->get_color_file() == "light") {
+		light_button.set_active(true);
+	} else {
+		dark_button.set_active(true);
+	}
+
+	/* there is no need to block signal handlers, here,
+	 * all elements check if the value has changed and ignore NOOPs 
+	 */
+	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
+	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
+	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
+	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
+	waveform_gradient_depth.set_value(ARDOUR_UI::config()->get_waveform_gradient_depth());
+	timeline_item_gradient_depth.set_value(ARDOUR_UI::config()->get_timeline_item_gradient_depth());
+}
+
+void
 ThemeManager::reset_canvas_colors()
 {
 	ARDOUR_UI::config()->load_defaults();
 	ARDOUR_UI::config()->save_state ();
+	set_ui_to_state();
 }
 
 ArdourCanvas::Container*

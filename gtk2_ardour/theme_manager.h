@@ -168,6 +168,7 @@ class ThemeManager : public Gtk::VBox
 	void modifier_edited (Gtk::Range*, std::string);
 	
 	void colors_changed ();
+	void set_ui_to_state ();
 };
 
 #endif /* __ardour_gtk_color_manager_h__ */
