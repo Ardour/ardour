@@ -1642,6 +1642,8 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 		 save = true;
 	 }
 
+     mark_session_dirty ();
+     
 	 return save;
  }
 
