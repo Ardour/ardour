@@ -129,8 +129,6 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 
 	bool ignore_toggle;
 	bool wait_for_release;
-	bool multiple_mute_change;
-	bool multiple_solo_change;
 	WavesButton& master_mute_button;
 	WavesButton& mute_button;
 	WavesButton& solo_button;
@@ -265,7 +263,7 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	static PBD::Signal1<void, boost::shared_ptr<ARDOUR::Route> > BusSendDisplayChanged;
 
 	bool dnd_in_progress() {return _dnd_operation_in_progress; }
-
+    
   protected:
 	PBD::ScopedConnectionList route_connections;
 	bool self_destruct;
@@ -305,12 +303,9 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	    bool exclusive;
 	};
 
-	SoloMuteRelease* _mute_release;
+    SoloMuteRelease* _momentary_solo;
     bool is_selected ();
     boost::shared_ptr<ARDOUR::RouteList> get_selected_route_list ();
-    
-    bool _momentary_solo;
-    bool _was_muted_before_momentary_soloed;
 
 	void setup_invert_buttons ();
 	void set_invert_button_state ();

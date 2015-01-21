@@ -62,12 +62,15 @@ Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeve
 void
 Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_override */)
 {
+    solo_update_disabled = true;
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
 			(*i)->set_solo (yn, this);
 		}
 	}
-
+    solo_update_disabled = false;
+    
+    routes_solo_changed (rl);
 	set_dirty();
 }
 
@@ -173,6 +176,24 @@ Session::rt_set_solo_isolated (boost::shared_ptr<RouteList> rl, bool yn, bool /*
 		}
 	}
 
+	set_dirty();
+}
+
+void
+Session::set_solo_isolated_force (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+{
+	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_solo_isolated_force));
+}
+
+void
+Session::rt_set_solo_isolated_force (boost::shared_ptr<RouteList> rl, bool yn, bool /*group_override*/)
+{
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_auditioner()) {
+			(*i)->set_solo_isolated_force (yn, this);
+		}
+	}
+    
 	set_dirty();
 }
 

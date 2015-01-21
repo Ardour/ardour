@@ -3397,6 +3397,7 @@ Session::route_listen_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 
 	update_route_solo_state ();
 }
+
 void
 Session::route_solo_isolated_changed (void* /*src*/, boost::weak_ptr<Route> wpr)
 {
@@ -3556,6 +3557,120 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
 	SoloChanged (); /* EMIT SIGNAL */
 	set_dirty();
+}
+
+void
+Session::routes_solo_changed (boost::shared_ptr<RouteList> solo_change_routes)
+{
+    if (solo_update_disabled) {
+        // We know already
+        DEBUG_TRACE (DEBUG::Solo, "solo update disabled - changed ignored\n");
+        return;
+    }
+    
+    if (solo_change_routes->empty() ) {
+        return;
+    }
+    
+    boost::shared_ptr<RouteList> non_solo_change_routes (new RouteList);
+    boost::shared_ptr<RouteList> r = routes.reader ();
+    int32_t delta;
+    
+    std::set_difference (r->begin(), r->end(),
+                         solo_change_routes->begin(), solo_change_routes->end(),
+                         std::back_inserter(*non_solo_change_routes) );
+    
+    DEBUG_TRACE (DEBUG::Solo, string_compose ("propagate solo change, delta = %1\n", delta));
+    
+    solo_update_disabled = true;
+    RouteList uninvolved;
+    
+    for (RouteList::iterator route = solo_change_routes->begin(); route != solo_change_routes->begin(); ++route) {
+    
+        if ((*route)->self_soloed() ) {
+            delta = 1;
+        } else {
+            delta = -1;
+        }
+        
+        DEBUG_TRACE (DEBUG::Solo, string_compose ("%1\n", (*route)->name()));
+        
+        for (RouteList::iterator i = non_solo_change_routes->begin(); i != non_solo_change_routes->end(); ++i) {
+            bool via_sends_only;
+            bool in_signal_flow;
+            
+            if ((*i) == *route || (*i)->solo_isolated() || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner() ) {
+                continue;
+            }
+            
+            in_signal_flow = false;
+            
+            DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed from %1\n", (*i)->name()));
+            
+            if ((*i)->feeds (*route, &via_sends_only)) {
+                DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", (*i)->name()));
+                if (!via_sends_only) {
+                    if (!(*route)->soloed_by_others_upstream()) {
+                        (*i)->mod_solo_by_others_downstream (delta);
+                    }
+                } else {
+                    DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a send-only feed from %1\n", (*i)->name()));
+                }
+                in_signal_flow = true;
+            } else {
+                DEBUG_TRACE (DEBUG::Solo, string_compose ("\tno feed from %1\n", (*i)->name()));
+            }
+            
+            DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed to %1\n", (*i)->name()));
+            
+            if ((*route)->feeds (*i, &via_sends_only)) {
+                /* propagate solo upstream only if routing other than
+                 sends is involved, but do consider the other route
+                 (*i) to be part of the signal flow even if only
+                 sends are involved.
+                 */
+                DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 feeds %2 via sends only %3 sboD %4 sboU %5\n",
+                                                          (*route)->name(),
+                                                          (*i)->name(),
+                                                          via_sends_only,
+                                                          (*route)->soloed_by_others_downstream(),
+                                                          (*route)->soloed_by_others_upstream()));
+                if (!via_sends_only) {
+                    if (!(*route)->soloed_by_others_downstream()) {
+                        DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
+                        (*i)->mod_solo_by_others_upstream (delta);
+                    } else {
+                        DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others downstream\n");
+                    }
+                } else {
+                    DEBUG_TRACE (DEBUG::Solo, string_compose ("\tfeed to %1 ignored, sends-only\n", (*i)->name()));
+                }
+                in_signal_flow = true;
+            } else {
+                DEBUG_TRACE (DEBUG::Solo, "\tno feed to\n");
+            }
+            
+            if (!in_signal_flow) {
+                uninvolved.push_back (*i);
+            }
+        }
+    }
+    solo_update_disabled = false;
+    DEBUG_TRACE (DEBUG::Solo, "propagation complete\n");
+    
+    update_route_solo_state ();
+    
+    /* now notify that the mute state of the routes not involved in the signal
+     pathway of the just-solo-changed route may have altered.
+     */
+    
+    for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
+        DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1\n", (*i)->name() ));
+        (*i)->mute_changed (this);
+    }
+    
+    SoloChanged (); /* EMIT SIGNAL */
+    set_dirty();
 }
 
 void

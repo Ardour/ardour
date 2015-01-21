@@ -161,6 +161,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool self_soloed () const { return _self_solo; }
 
 	void set_solo_isolated (bool yn, void *src);
+    void set_solo_isolated_force (bool yn, void *src);
 	bool solo_isolated() const;
 
 	void set_solo_safe (bool yn, void *src);
@@ -521,6 +522,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	uint32_t       _soloed_by_others_upstream;
 	uint32_t       _soloed_by_others_downstream;
 	uint32_t       _solo_isolated;
+    bool           _forced_solo_isolated;
 
 	bool           _denormal_protection;
 

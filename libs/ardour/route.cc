@@ -921,6 +921,12 @@ Route::set_solo_isolated (bool yn, void *src)
 		_solo_isolated++;
 	} else {
 		if (_solo_isolated > 0) {
+            
+            // do not drop to 0 if we are forced to be in solo isolated mode
+            if (_forced_solo_isolated && _solo_isolated == 1) {
+                return;
+            }
+            
 			_solo_isolated--;
 			if (_solo_isolated == 0) {
 				_mute_master->set_solo_ignore (false);
@@ -932,6 +938,43 @@ Route::set_solo_isolated (bool yn, void *src)
 	if (changed) {
 		solo_isolated_changed (src);
 	}
+}
+
+void
+Route::set_solo_isolated_force (bool yn, void *src)
+{
+	if (is_master() || is_monitor() || is_auditioner()) {
+		return;
+	}
+    
+    bool changed = false;
+    
+	if (yn)
+    {
+        _forced_solo_isolated = true;
+        
+        if (_solo_isolated == 0) {
+            _solo_isolated++;
+            _mute_master->set_solo_ignore (true);
+            changed = true;
+        } else {
+            return;
+        }
+	} else {
+        _forced_solo_isolated = false;
+        
+        if (_solo_isolated > 0) {
+            _solo_isolated--;
+            if (_solo_isolated == 0) {
+                _mute_master->set_solo_ignore (false);
+                changed = true;
+            }
+        }
+	}
+    
+    if (changed) {
+        solo_isolated_changed (src);
+    }
 }
 
 bool

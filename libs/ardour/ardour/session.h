@@ -697,6 +697,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_listen (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
+    void set_solo_isolated_force (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
         void set_exclusive_input_active (boost::shared_ptr<RouteList> rt, bool onoff, bool flip_others=false);
 
@@ -1464,6 +1465,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void route_listen_changed (void *src, boost::weak_ptr<Route>);
 	void route_mute_changed (void *src);
 	void route_solo_changed (bool self_solo_change, void *src, boost::weak_ptr<Route>);
+    void routes_solo_changed (boost::shared_ptr<RouteList> solo_change_routes);
 	void route_solo_isolated_changed (void *src, boost::weak_ptr<Route>);
 	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
     
@@ -1702,6 +1704,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void rt_set_mute (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_listen (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_solo_isolated (boost::shared_ptr<RouteList>, bool yn, bool group_override);
+    void rt_set_solo_isolated_force (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_record_enabled (boost::shared_ptr<RouteList>, bool yn, bool group_override);
 	void rt_set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, bool group_override);
 

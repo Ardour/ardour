@@ -126,15 +126,12 @@ RouteUI::init ()
 	main_mute_check = 0;
     solo_safe_check = 0;
     solo_isolated_check = 0;
-	_mute_release = 0;
     _momentary_solo = false;
-    _was_muted_before_momentary_soloed = false;
 	denormal_menu_item = 0;
     step_edit_item = 0;
-	multiple_mute_change = false;
-	multiple_solo_change = false;
 	_i_am_the_modifier = 0;
-
+    _momentary_solo = 0;
+    
 	setup_invert_buttons ();
 
 	_session->SoloChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
@@ -482,8 +479,6 @@ RouteUI::solo_press(GdkEventButton* ev)
 		return true;
 	}
 
-	multiple_solo_change = false;
-
     /* Goal here is to use Ctrl as the modifier on all platforms.
        This is questionable design, but here's how we do it.
     */
@@ -499,61 +494,102 @@ RouteUI::solo_press(GdkEventButton* ev)
 #endif
     int momentary_mask = alt_modifier | Keyboard::TertiaryModifier; /* Alt+Shift */
 
-    if (Keyboard::is_context_menu_event (ev))
-    {
+    if (Keyboard::is_context_menu_event (ev)) {
         if (solo_menu == 0) {
             build_solo_menu ();
         }
         solo_menu->popup (1, ev->time);
-    } else
-    {
+    } else {
 		if ( ev->button == 1 )
         {
-            if (Keyboard::modifier_state_equals (ev->state, control_modifier))
-            {
+            if (Keyboard::modifier_state_equals (ev->state, control_modifier)) {
+                
                 // control-click: toggle solo isolated status
-
-				_route->set_solo_isolated (!_route->solo_isolated(), this);
+                if ( is_selected () ) {
+                    boost::shared_ptr<ARDOUR::RouteList> selected_route_list = get_selected_route_list ();
+                    _session->set_solo_isolated_force (selected_route_list, !_route->solo_isolated(), Session::rt_cleanup, true);
+                } else {
+                    _route->set_solo_isolated_force (!_route->solo_isolated(), _session);
+                }
 			} else
-            if (Keyboard::modifier_state_equals (ev->state, alt_modifier))
-            {
+            if (Keyboard::modifier_state_equals (ev->state, alt_modifier)) {
+                
                 // alt-click: toogle Solo X-Or
                 
-                DisplaySuspender ds;
-				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (_session->get_routes(), false,  Session::rt_cleanup, true);
-				} else {
+                // Tracks Live doesn't use monitor bus so far
+				//if (Config->get_solo_control_is_listen_control()) {
+				//	_session->set_listen (_session->get_routes(), false,  Session::rt_cleanup, true);
+				//} else {
 					_session->set_solo (_session->get_routes(), false,  Session::rt_cleanup, true);
-				}
+				//}
                 
                 boost::shared_ptr<RouteList> rl (new RouteList);
-				rl->push_back (route());
                 
-				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (rl, true);
-				} else {
+                if ( is_selected () ) {
+                    rl = get_selected_route_list ();
+                } else {
+                    rl->push_back (_route);
+                }
+                
+                // Tracks Live doesn't use monitor bus so far
+				//if (Config->get_solo_control_is_listen_control()) {
+				//	_session->set_listen (rl, true);
+				//} else {
 					_session->set_solo (rl, true);
-				}
-            } else
-            {
-                if (Keyboard::modifier_state_equals (ev->state, momentary_mask))
-                {
+				//}
+            } else {
+                if (Keyboard::modifier_state_equals (ev->state, momentary_mask)) {
+                    
                     // alt+shift-click: toogle momentary solo
-                    _momentary_solo = true;
-                    _was_muted_before_momentary_soloed = _route->muted ();
+                    
+                    _momentary_solo = new SoloMuteRelease(true);
+                    // is used for muting tracks back after momentary solo release
+                    _momentary_solo->routes_on = boost::shared_ptr<ARDOUR::RouteList>(new ARDOUR::RouteList);
+                    // is used for unsoloing tracks after momentary solo release
+                    _momentary_solo->routes_off = boost::shared_ptr<ARDOUR::RouteList>(new ARDOUR::RouteList);
+                    
+                    if ( is_selected () ) {
+                    
+                        // is used for unsoloing tracks after momentary solo release
+                        _momentary_solo->routes_off = get_selected_route_list ();
+                        
+                        for (RouteList::iterator it = _momentary_solo->routes_off->begin(); it != _momentary_solo->routes_off->end(); ++it) {
+                            if ( (*it)->muted() )
+                                _momentary_solo->routes_on->push_back ( *it );
+                        }
+                    } else {
+                        // is used for unsoloing tracks after momentary solo release
+                        _momentary_solo->routes_off->push_back (_route);
+                        if (_route->muted ())
+                            _momentary_solo->routes_on->push_back (_route);
+                    }
                 }
                 
 				/* click: solo this route */
 
-				boost::shared_ptr<RouteList> rl (new RouteList);
-				rl->push_back (route());
+                if ( is_selected () ) {
+                    
+                    boost::shared_ptr<ARDOUR::RouteList> selected_route_list = get_selected_route_list ();
+//                    DisplaySuspender ds;
 
-				DisplaySuspender ds;
-				if (Config->get_solo_control_is_listen_control()) {
-					_session->set_listen (rl, !_route->listening_via_monitor());
-				} else {
-					_session->set_solo (rl, !_route->self_soloed());
-				}
+                    // Tracks Live doesn't use monitor bus so far
+                    //if (Config->get_solo_control_is_listen_control()) {
+                    //    _session->set_listen (selected_route_list, !_route->listening_via_monitor(), Session::rt_cleanup, true);
+                    //} else {
+
+                        _session->set_solo (selected_route_list, !_route->self_soloed(), Session::rt_cleanup, true);
+                    //}
+                } else {
+                    boost::shared_ptr<RouteList> rl (new RouteList);
+                    rl->push_back (_route);
+                    
+                    // Tracks Live doesn't use monitor bus so far
+                    //if (Config->get_solo_control_is_listen_control()) {
+                    //    _session->set_listen (rl, !_route->listening_via_monitor(), Session::rt_cleanup, true);
+                    //} else {
+                        _session->set_solo (rl, !_route->self_soloed(), Session::rt_cleanup, true);
+                    //}
+                }
 			}
 		} // if ( ev->button == 1 )
 	}
@@ -566,25 +602,20 @@ RouteUI::solo_release (GdkEventButton*)
 {
     if ( _momentary_solo )
     {
-        boost::shared_ptr<RouteList> rl (new RouteList);
-        rl->push_back (route());
+        // Tracks Live doesn't use monitor bus so far
+        //if (Config->get_solo_control_is_listen_control()) {
+        //    _session->set_listen (rl, false);
+        //} else {
         
-        if (Config->get_solo_control_is_listen_control()) {
-            _session->set_listen (rl, false);
-        } else {
-            _session->set_solo (rl, false);
-        }
+        // unsolo tracks after momentary solo release
+        _session->set_solo (_momentary_solo->routes_off, false);
+        //}
         
-        _momentary_solo = false;
+        // mute tracks back after momentary solo release
+        _session->set_mute (_momentary_solo->routes_on, true);
         
-        if ( _was_muted_before_momentary_soloed )
-        {
-            boost::shared_ptr<RouteList> rl (new RouteList);
-            rl->push_back (_route);
-            
-            _session->set_mute (rl, true);
-            _was_muted_before_momentary_soloed = false;
-        }
+        delete _momentary_solo;
+        _momentary_solo = 0;
     }
 
 	return true;
