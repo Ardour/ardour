@@ -114,24 +114,32 @@ KeyEditor::KeyEditor ()
 
 	unbind_button.set_sensitive (false);
 
-        load_blacklist ();
+        load_blackwhitelists ();
 }
 
 void
-KeyEditor::load_blacklist ()
+KeyEditor::load_blackwhitelists ()
 {
-        string blacklist;
+        string list;
         
-        if (!find_file (ARDOUR::ardour_data_search_path(), X_("keybindings.blacklist"), blacklist)) {
-                return;
+        if (find_file (ARDOUR::ardour_data_search_path(), X_("keybindings.blacklist"), list)) {
+                ifstream in (list.c_str());
+                
+                while (in) {
+                        string str;
+                        in >> str;
+                        action_blacklist.insert (make_pair (str, str));
+                }
         }
 
-        ifstream in (blacklist.c_str());
-
-        while (in) {
-                string str;
-                in >> str;
-                action_blacklist.insert (make_pair (str, str));
+        if (find_file (ARDOUR::ardour_data_search_path(), X_("keybindings.whitelist"), list)) {
+                ifstream in (list.c_str());
+                
+                while (in) {
+                        string str;
+                        in >> str;
+                        action_whitelist.insert (make_pair (str, str));
+                }
         }
 }
 
@@ -274,9 +282,15 @@ KeyEditor::populate ()
                 string without_action = (*p).substr (9);
                 
                 if (action_blacklist.find (without_action) != action_blacklist.end()) {
+                        /* this action is in the blacklist */
                         continue;
                 }
 
+                if (!action_whitelist.empty() && action_whitelist.find (without_action) == action_whitelist.end()) {
+                        /* there is a whitelist, and this action isn't in it */
+                        continue;
+                }
+                
 		parts.clear ();
                 
 		split (*p, parts, '/');

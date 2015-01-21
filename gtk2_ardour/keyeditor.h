@@ -77,7 +77,8 @@ class KeyEditor : public ArdourWindow
 	void reset ();
 
         std::map<std::string,std::string> action_blacklist;
-        void load_blacklist ();
+        std::map<std::string,std::string> action_whitelist;
+        void load_blackwhitelists ();
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */
