@@ -1031,6 +1031,6 @@ WaveView::set_global_show_waveform_clipping (bool yn)
 {
 	if (_global_show_waveform_clipping != yn) {
 		_global_show_waveform_clipping = yn;
-		VisualPropertiesChanged (); /* EMIT SIGNAL */
+		ClipLevelChanged ();
 	}
 }

@@ -290,6 +290,8 @@ void
 ThemeManager::on_show_clip_toggled ()
 {
 	ARDOUR_UI::config()->set_show_waveform_clipping (show_clipping_button.get_active());
+	// "show-waveform-clipping" was a session config key
+	ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
 }
 
 void
