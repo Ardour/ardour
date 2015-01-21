@@ -174,6 +174,8 @@ ThemeManager::ThemeManager()
 	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
 	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
 	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
+	waveform_gradient_depth.set_value(ARDOUR_UI::config()->get_waveform_gradient_depth());
+	timeline_item_gradient_depth.set_value(ARDOUR_UI::config()->get_timeline_item_gradient_depth());
 
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
