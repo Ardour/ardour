@@ -839,6 +839,9 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		if (!xml_property (definition, "hasframe", styles, true)) {
 			entry->set_has_frame (false);
 		}
+		if (xml_property (definition, "activatesdefault", styles, false)) {
+			entry->set_activates_default (true);
+		}
     }
     
 	Gtk::Label* label = dynamic_cast<Gtk::Label*> (&widget);
