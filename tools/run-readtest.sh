@@ -61,7 +61,7 @@ if [ x$needfiles != x ] ; then
 	limit=`expr $filesize * 1048576`
 	while [ $size -lt $limit ] ; do
 	    for i in `seq 1 $numfiles` ; do
-		dd if=/dev/zero bs=$write_blocksize count=1 >> $dir/testfile_$i >/dev/null 2>&1
+		dd if=/dev/zero bs=$write_blocksize count=1 >> $dir/testfile_$i 2>/dev/null
 	    done
 	    size=`expr $size + $write_blocksize`
 	done
@@ -75,7 +75,7 @@ for bs in $@ ; do
         sudo purge
     elif [ -f /proc/sys/vm/drop_cache ] ; then
         # Linux cache clearing
-        echo 3 | sudo tee /proc/sys/vm/drop/cache >/dev/null
+        echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
     else       
         # need an alternative for other operating systems
         :
