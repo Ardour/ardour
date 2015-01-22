@@ -308,10 +308,9 @@
                   y="12"
                   width="90"
                   height="20"
-                  normalicon="preference_rate_buffer_dropdown"
-                  activeicon="preference_rate_buffer_dropdown_active"
-                  _prelighticon="preference_rate_buffer_dropdown_prelight"
-                  inactiveicon="preference_rate_buffer_dropdown_inactive">
+                  normalicon="dropdown_90x20"
+                  activeicon="dropdown_90x20_active"
+                  inactiveicon="dropdown_90x20_inactive">
           <HBox>
             <VBox width="10"/>
             <Label style="generic_control"
@@ -332,10 +331,10 @@
                   y="40"
                   width="90"
                   height="20"
-                  normalicon="preference_rate_buffer_dropdown"
-                  activeicon="preference_rate_buffer_dropdown_active"
-                  _prelighticon="preference_rate_buffer_dropdown_prelight"
-                  inactiveicon="preference_rate_buffer_dropdown_inactive">
+                  normalicon="dropdown_90x20"
+                  activeicon="dropdown_90x20_active"
+                  _prelighticon="dropdown_90x20_prelight"
+                  inactiveicon="dropdown_90x20_inactive">
           <HBox>
             <VBox width="10"/>
             <Label style="generic_control"
