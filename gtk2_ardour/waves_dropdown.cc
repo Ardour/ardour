@@ -131,8 +131,8 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie, DestroyNoti
 	
 	Widget* child = (provide_style ? menuitem.get_child () : 0);
 	if (child) {
-		ensure_style();
-		child->set_style (get_style());
+		_menu.ensure_style();
+		child->set_style (_menu.get_style());
 	}
 	
     if (cookie_cleaner) {
@@ -159,10 +159,11 @@ WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie, Destr
     }
     
 	Gtk::RadioMenuItem& menuitem = *dynamic_cast <Gtk::RadioMenuItem*> (&_menu.items ().back ());
+
 	Widget* child = (provide_style ? menuitem.get_child () : 0);
 	if (child) {
-		ensure_style();
-		child->set_style (get_style());
+		_menu.ensure_style();
+		child->set_style (_menu.get_style());
 	}
 
     if (cookie_cleaner) {
@@ -182,10 +183,11 @@ WavesDropdown::add_check_menu_item (const std::string& item, void* cookie,  Dest
 	items.push_back (Gtk::Menu_Helpers::CheckMenuElem (item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), items.size (), cookie)));
     
 	Gtk::CheckMenuItem& menuitem = *dynamic_cast <Gtk::CheckMenuItem*> (&_menu.items ().back ());
+
 	Widget* child = (provide_style ? menuitem.get_child () : 0);
 	if (child) {
-		ensure_style();
-		child->set_style (get_style());
+		_menu.ensure_style();
+		child->set_style (_menu.get_style());
 	}
 
     if (cookie_cleaner) {
