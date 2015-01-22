@@ -67,7 +67,8 @@ CONFIG_VARIABLE (RemoteModel, remote_model, "remote-model", MixerOrdered)
 
 /* disk operations */
 
-CONFIG_VARIABLE (uint32_t, minimum_disk_io_bytes,  "minimum-disk-io-bytes", 1024 * 256)
+CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes,  "minimum-disk-read-bytes", ARDOUR::Diskstream::default_disk_read_chunk_frames() * sizeof (ARDOUR::Sample))
+CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes,  "minimum-disk-write-bytes", ARDOUR::Diskstream::default_disk_write_chunk_frames() * sizeof (ARDOUR::Sample))
 CONFIG_VARIABLE (float, midi_readahead,  "midi-readahead", 1.0)
 CONFIG_VARIABLE (float, audio_capture_buffer_seconds, "capture-buffer-seconds", 5.0)
 CONFIG_VARIABLE (float, audio_playback_buffer_seconds, "playback-buffer-seconds", 5.0)

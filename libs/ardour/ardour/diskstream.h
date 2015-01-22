@@ -138,8 +138,12 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	ChanCount n_channels() { return _n_channels; }
 
-	static framecnt_t disk_io_frames() { return disk_io_chunk_frames; }
-	static void set_disk_io_chunk_frames (framecnt_t n) { disk_io_chunk_frames = n; }
+	static framecnt_t disk_read_frames() { return disk_read_chunk_frames; }
+	static framecnt_t disk_write_frames() { return disk_write_chunk_frames; }
+	static void set_disk_read_chunk_frames (framecnt_t n) { disk_read_chunk_frames = n; }
+	static void set_disk_write_chunk_frames (framecnt_t n) { disk_write_chunk_frames = n; }
+	static framecnt_t default_disk_read_chunk_frames ();
+	static framecnt_t default_disk_write_chunk_frames ();
 
 	/* Stateful */
 	virtual XMLNode& get_state(void);
@@ -268,7 +272,9 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 		framecnt_t& rec_nframes, framecnt_t& rec_offset
 		);
 
-	static framecnt_t disk_io_chunk_frames;
+	static framecnt_t disk_read_chunk_frames;
+	static framecnt_t disk_write_chunk_frames;
+
 	std::vector<CaptureInfo*> capture_info;
 	mutable Glib::Threads::Mutex capture_info_lock;
 

@@ -620,7 +620,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 	   having the old data or knowing what change caused the overwrite. */
 	midi_playlist()->resolve_note_trackers (*_playback_buf, overwrite_frame);
 
-	read (overwrite_frame, disk_io_chunk_frames, false);
+	read (overwrite_frame, disk_read_chunk_frames, false);
 	file_frame = overwrite_frame; // it was adjusted by ::read()
 	overwrite_queued = false;
 	_pending_overwrite = false;
@@ -810,12 +810,12 @@ MidiDiskstream::do_refill ()
 
 /** Flush pending data to disk.
  *
- * Important note: this function will write *AT MOST* disk_io_chunk_frames
+ * Important note: this function will write *AT MOST* disk_write_chunk_frames
  * of data to disk. it will never write more than that.  If it writes that
  * much and there is more than that waiting to be written, it will return 1,
  * otherwise 0 on success or -1 on failure.
  *
- * If there is less than disk_io_chunk_frames to be written, no data will be
+ * If there is less than disk_write_chunk_frames to be written, no data will be
  * written at all unless @a force_flush is true.
  */
 int
@@ -832,7 +832,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	if (total == 0 || 
 	    _capture_buf->read_space() == 0 || 
-	    (!force_flush && (total < disk_io_chunk_frames) && was_recording)) {
+	    (!force_flush && (total < disk_write_chunk_frames) && was_recording)) {
 		goto out;
 	}
 
@@ -847,7 +847,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	   let the caller know too.
 	   */
 
-	if (total >= 2 * disk_io_chunk_frames || ((force_flush || !was_recording) && total > disk_io_chunk_frames)) {
+	if (total >= 2 * disk_write_chunk_frames || ((force_flush || !was_recording) && total > disk_write_chunk_frames)) {
 		ret = 1;
 	}
 
@@ -855,10 +855,10 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		/* push out everything we have, right now */
 		to_write = max_framecnt;
 	} else {
-		to_write = disk_io_chunk_frames;
+		to_write = disk_write_chunk_frames;
 	}
 
-	if (record_enabled() && ((total > disk_io_chunk_frames) || force_flush)) {
+	if (record_enabled() && ((total > disk_write_chunk_frames) || force_flush)) {
 		Source::Lock lm(_write_source->mutex());
 		if (_write_source->midi_write (lm, *_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;

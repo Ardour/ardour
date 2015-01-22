@@ -30,8 +30,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-/* see disk_io_chunk_frames */
-const uint32_t SrcFileSource::blocksize = 65536U;
+const uint32_t SrcFileSource::blocksize = 65536U; /* somewhat arbitrary */
 
 SrcFileSource::SrcFileSource (Session& s, boost::shared_ptr<AudioFileSource> src, SrcQuality srcq)
 	: Source(s, DataType::AUDIO, src->name(), Flag (src->flags() & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
