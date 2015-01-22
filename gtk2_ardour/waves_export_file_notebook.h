@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2008 Paul Davis
-    Copyright (C) 2014 Waves Audio Ltd.
+    Copyright (C) 2015 Waves Audio Ltd.
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 #include "ardour/session_handle.h"
 
 #include "export_format_selector.h"
-#include "export_filename_selector.h"
+#include "waves_export_filename_selector.h"
 #include "soundcloud_export_selector.h"
 
 class WavesExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
@@ -109,7 +109,7 @@ class WavesExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHand
 
 		Gtk::Label              filename_label;
 		Gtk::Alignment          filename_align;
-		ExportFilenameSelector  filename_selector;
+		WavesExportFilenameSelector  filename_selector;
 
 		Gtk::CheckButton	soundcloud_upload_button;
 		Gtk::HBox               tab_widget;

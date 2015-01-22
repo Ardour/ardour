@@ -1,6 +1,6 @@
 /*
     Copyright (C) 2008 Paul Davis
-    Copyright (C) 2014 Waves Audio Ltd.
+    Copyright (C) 2015 Waves Audio Ltd.
     Author: Sakari Bergen
 
     This program is free software; you can redistribute it and/or modify
