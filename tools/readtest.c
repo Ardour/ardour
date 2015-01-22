@@ -177,6 +177,7 @@ out:
 		double min_throughput = ((nfiles * block_size)/1048576.0) / (max_elapsed/1000000.0);
 		printf ("Min: %.4f MB/sec Avg: %.4f MB/sec  || Max: %.3f sec \n", min_throughput, bandwidth, max_elapsed/1000000.0);
 		printf ("Max Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * bandwidth / (4 * 48000.)));
+		printf ("Sus Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * min_throughput / (4 * 48000.)));
 	}
 
 	return 0;
