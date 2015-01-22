@@ -43,6 +43,7 @@ installer_binary_name="Tracks Live"
 build_dmg_name="TracksLive-$release_version"
 
 # clear previous installer
+hdiutil detach "/Volumes/$installer_mount_name"
 rm -rf "$OSX_INSTALLER_ROOT/${installer_dmg_name}.dmg"
 
 #create temp
@@ -62,7 +63,7 @@ rm -rf "/Volumes/$template_mount_name/$template_binary_name.app"
 # copy new binary from build to template
 cp -r "/Volumes/$build_dmg_name/TracksLive.app" "/Volumes/$installer_mount_name/$installer_binary_name.app"
 #copy manual to template
-cp "/$OSX_INSTALLER_ROOT/Tracks_Live.pdf" "/Volumes/$installer_mount_name/Tracks Live Manual.pdf"
+cp "${AD}/tracks/tools/Tracks Live Manual/Tracks Live Manual.pdf" "/Volumes/$installer_mount_name/"
 
 echo '
     tell application "Finder"
