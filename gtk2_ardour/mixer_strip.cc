@@ -1730,7 +1730,7 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	uint32_t const in = _current_delivery->pans_required();
 	uint32_t const out = _current_delivery->pan_outs();
 
-	panner_ui().set_panner (_current_delivery->panner_shell(), _current_delivery->panner());
+    panner_ui().set_panner (boost::shared_ptr<Route>(), _current_delivery->panner_shell(), _current_delivery->panner());
 	panner_ui().set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 	panner_ui().setup_pan ();
 	panner_ui().show_all ();
@@ -1756,7 +1756,7 @@ MixerStrip::revert_to_default_display ()
 	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp());
 	gain_meter().setup_meters ();
 
-	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
+	panner_ui().set_panner (_route, _route->main_outs()->panner_shell(), _route->main_outs()->panner());
 	update_panner_choices();
 	panner_ui().setup_pan ();
 

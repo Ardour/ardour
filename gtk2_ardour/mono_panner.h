@@ -28,6 +28,8 @@
 
 #include "panner_interface.h"
 
+#include "ardour/route.h"
+
 namespace ARDOUR {
 	class PannerShell;
 }
@@ -39,7 +41,12 @@ namespace PBD {
 class MonoPanner : public PannerInterface
 {
   public:
+    
+    static double DEFAULT_VALUE;
+    
 	MonoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
+    MonoPanner (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PannerShell>);
+    
 	~MonoPanner ();
 
     boost::shared_ptr<PBD::Controllable> get_controllable() const { return position_control; }
@@ -54,9 +61,15 @@ class MonoPanner : public PannerInterface
 	bool on_motion_notify_event (GdkEventMotion*);
     bool on_scroll_event (GdkEventScroll*);
     bool on_key_press_event (GdkEventKey*);
+    
+    void adjust_pan_value_by (double);
 
   private:
+    void init ();
+    boost::shared_ptr<ARDOUR::RouteList> get_selected_routes ();
+    
 	PannerEditor* editor ();
+    boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 	
     boost::shared_ptr<PBD::Controllable> position_control;

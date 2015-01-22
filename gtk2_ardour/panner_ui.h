@@ -64,7 +64,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	PannerUI (ARDOUR::Session*);
 	~PannerUI ();
 
-	virtual void set_panner (boost::shared_ptr<ARDOUR::PannerShell>, boost::shared_ptr<ARDOUR::Panner>);
+	virtual void set_panner (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PannerShell>, boost::shared_ptr<ARDOUR::Panner>);
 
 	void panshell_changed ();
 
@@ -110,7 +110,8 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
         StereoPanner*  _stereo_panner;
 	MonoPanner*    _mono_panner;
-
+    boost::shared_ptr<ARDOUR::Route> _route;
+    
         bool _ignore_width_change;
         bool _ignore_position_change;
         void width_adjusted ();

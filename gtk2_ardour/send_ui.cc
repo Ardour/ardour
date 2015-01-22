@@ -42,7 +42,7 @@ SendUI::SendUI (Gtk::Window* parent, boost::shared_ptr<Send> s, Session* session
 {
 	assert (_send);
 
- 	_panners.set_panner (s->panner_shell(), s->panner());
+ 	_panners.set_panner (boost::shared_ptr<Route>(), s->panner_shell(), s->panner());
  	_gpm.set_controls (boost::shared_ptr<Route>(), s->meter(), s->amp());
 
 	_hbox.pack_start (_gpm, true, true);
@@ -104,7 +104,7 @@ SendUI::outs_changed (IOChange change, void* /*ignored*/)
 		uint32_t const in = _send->pans_required();
 		uint32_t const out = _send->pan_outs();
 		if (_panners._panner == 0) {
-			_panners.set_panner (_send->panner_shell(), _send->panner());
+			_panners.set_panner (boost::shared_ptr<Route>(), _send->panner_shell(), _send->panner());
 		}
 		_panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 		_panners.setup_pan ();

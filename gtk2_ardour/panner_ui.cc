@@ -90,7 +90,7 @@ PannerUI::PannerUI (Session* s)
 }
 
 void
-PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panner> p)
+PannerUI::set_panner (boost::shared_ptr<ARDOUR::Route> route, boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panner> p)
 {
     /* note that the panshell might not change here (i.e. ps == _panshell)
     */
@@ -115,6 +115,9 @@ PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panne
     delete _mono_panner;
     _mono_panner = 0;
 
+    _route.reset();
+    _route = route;
+    
 	if (!_panner) {
 		return;
 	}
@@ -204,7 +207,7 @@ PannerUI::~PannerUI ()
 void
 PannerUI::panshell_changed ()
 {
-	set_panner (_panshell, _panshell->panner());
+	set_panner (_route, _panshell, _panshell->panner());
 	setup_pan ();
 }
 
@@ -275,8 +278,8 @@ PannerUI::setup_pan ()
 		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 		boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
-		_mono_panner = new MonoPanner (_panshell);
-
+		_mono_panner = new MonoPanner (_route, _panshell);
+        
 		_mono_panner->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
 					boost::weak_ptr<AutomationControl> (ac)));
 		_mono_panner->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),

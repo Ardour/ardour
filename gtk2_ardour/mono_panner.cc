@@ -38,6 +38,8 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 
+#include "public_editor.h"
+#include "selection.h"
 #include "ardour_ui.h"
 #include "global_signals.h"
 #include "mono_panner.h"
@@ -53,6 +55,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
 Gdk::Cursor* MonoPanner::__touch_cursor;
+double MonoPanner::DEFAULT_VALUE = 0.5;
 
 MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())
@@ -65,31 +68,51 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	, position_binder (position_control)
 	, _dragging (false)
 {
+    init ();
+}
 
-	if (_knob_image[0] == 0) {
-		for (size_t i=0; i < (sizeof(_knob_image)/sizeof(_knob_image[0])); i++) {
-			_knob_image[i] = load_pixbuf (_knob_image_files[i]);
-		}
-	}
-
-	if (__touch_cursor == 0) {
-		__touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(), 
-										 ::get_icon ("panner_touch_cursor"),
-										 12,
-										 12);
-	}
-
-	position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
-
-	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
-	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
-
-	set_tooltip ();
+MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::Route> route, boost::shared_ptr<ARDOUR::PannerShell> p)
+: PannerInterface (p->panner())
+, _route (route)
+, _panner_shell (p)
+, position_control (_panner->pannable()->pan_azimuth_control)
+, drag_start_y (0)
+, last_drag_y (0)
+, accumulated_delta (0)
+, detented (false)
+, position_binder (position_control)
+, _dragging (false)
+{
+    init ();
 }
 
 MonoPanner::~MonoPanner ()
 {
 	
+}
+
+void
+MonoPanner::init ()
+{
+    if (_knob_image[0] == 0) {
+        for (size_t i=0; i < (sizeof(_knob_image)/sizeof(_knob_image[0])); i++) {
+            _knob_image[i] = load_pixbuf (_knob_image_files[i]);
+        }
+    }
+    
+    if (__touch_cursor == 0) {
+        __touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(),
+                                          ::get_icon ("panner_touch_cursor"),
+                                          12,
+                                          12);
+    }
+    
+    position_control->Changed.connect (panvalue_connections, invalidator(*this), boost::bind (&MonoPanner::value_change, this), gui_context());
+    
+    _panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
+    _panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
+    
+    set_tooltip ();
 }
 
 void
@@ -174,7 +197,36 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
     
 	if (ev->type == GDK_BUTTON_PRESS) {
         if (Keyboard::modifier_state_contains (ev->state, alt_modifier)) {
-            position_control->set_value (0.5);
+            
+            // reset panner to default value
+            if (_route && _route->main_outs()->panner() == _panner) {
+                
+                // determine if we deal with selection
+                PublicEditor& editor = ARDOUR_UI::instance()->the_editor();
+                Selection& selection = editor.get_selection();
+                TimeAxisView* tv = editor.get_route_view_by_route_id (_route->id() );
+                
+                if (tv && selection.selected(tv) && selection.tracks.size() > 1 ) {
+                    boost::shared_ptr<ARDOUR::RouteList> routes = get_selected_routes ();
+                    
+                    ARDOUR::RouteList::const_iterator iter = routes->begin();
+                    for (; iter != routes->end(); ++iter) {
+                        
+                        boost::shared_ptr<ARDOUR::AutomationControl> control;
+                        control = (*iter)->panner()->pannable()->pan_azimuth_control;
+                        control->set_value (DEFAULT_VALUE);
+                    }
+                } else {
+                    
+                    boost::shared_ptr<ARDOUR::AutomationControl> control;
+                    control = _route->panner()->pannable()->pan_azimuth_control;
+                    control->set_value (DEFAULT_VALUE);
+                }
+
+            } else {
+                position_control->set_value (DEFAULT_VALUE);
+            }
+            
             _dragging = false;
             _tooltip.target_stop_drag ();
         } else {
@@ -265,31 +317,109 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	int w = get_width();
 	double delta = (last_drag_y - ev->y) / (double) w;
 
-	/* create a detent close to the center */
-
-	if (!detented && ARDOUR::Panner::equivalent (position_control->get_value(), 0.5)) {
-		detented = true;
-		/* snap to center */
-		position_control->set_value (0.5);
-	}
-
-	if (detented) {
-		accumulated_delta += delta;
-
-		/* have we pulled far enough to escape ? */
-
-		if (fabs (accumulated_delta) >= 0.025) {
-			position_control->set_value (position_control->get_value() + accumulated_delta);
-			detented = false;
-			accumulated_delta = false;
-		}
-	} else {
-		double pv = position_control->get_value(); // 0..1.0 ; 0 = left
-		position_control->set_value (pv + delta);
-	}
+    adjust_pan_value_by (delta);
 
 	last_drag_y = ev->y;
 	return true;
+}
+
+boost::shared_ptr<ARDOUR::RouteList>
+MonoPanner::get_selected_routes ()
+{
+    Selection& selection = ARDOUR_UI::instance()->the_editor().get_selection();
+    
+    boost::shared_ptr<ARDOUR::RouteList> routes (new ARDOUR::RouteList);
+    
+    TrackViewList track_list = selection.tracks;
+    TrackViewList::const_iterator iter = track_list.begin ();
+    for (; iter != track_list.end(); ++iter) {
+        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
+        
+        if (rtv) {
+            routes->push_back(rtv->route() );
+        }
+    }
+    
+    return routes;
+
+}
+
+void
+MonoPanner::adjust_pan_value_by (double delta)
+{
+    // first, calculate correct increment delta value
+    double update_by_delta = 0;
+    
+    /* create a detent close to the center */
+    if (!detented && ARDOUR::Panner::equivalent (position_control->get_value(), DEFAULT_VALUE)) {
+        detented = true;
+    }
+    
+    if (detented) {
+        accumulated_delta += delta;
+        
+        /* have we pulled far enough to escape ? */
+        
+        if (fabs (accumulated_delta) >= 0.025) {
+            update_by_delta = accumulated_delta;
+            detented = false;
+            accumulated_delta = 0;
+        }
+    } else {
+        update_by_delta = delta;
+    }
+    
+    // we've reached the bottom or the top, so don't move in this direction any more
+    double original_val = position_control->get_value();
+    if ( (update_by_delta > 0 && original_val >= 1 ) ||
+        (update_by_delta < 0 && original_val <= 0 ) ) {
+        return;
+    }
+    
+    // make sure that calculated delta won't exceed the value we need to reach the top
+    // or make us to go lower then the the bottom
+    double result_value = original_val + update_by_delta;
+    if (result_value < 0 ) {
+        update_by_delta = update_by_delta - result_value;
+    } else if (result_value > 1) {
+        update_by_delta = update_by_delta - (result_value - 1);
+    }
+    
+    // apply change to the associated route if we have it
+    if (_route && _route->main_outs()->panner() == _panner) {
+        
+        // determine if we deal with selection
+        PublicEditor& editor = ARDOUR_UI::instance()->the_editor();
+        Selection& selection = editor.get_selection();
+        TimeAxisView* tv = editor.get_route_view_by_route_id (_route->id() );
+        
+        if (tv && selection.selected(tv) && selection.tracks.size() > 1 ) {
+            boost::shared_ptr<ARDOUR::RouteList> routes = get_selected_routes ();
+            
+            // apply the change
+            ARDOUR::RouteList::const_iterator iter = routes->begin();
+            for (; iter != routes->end(); ++iter) {
+                
+                boost::shared_ptr<ARDOUR::AutomationControl> control;
+                control = (*iter)->panner()->pannable()->pan_azimuth_control;
+                
+                double pv = control->get_value(); // 0..1.0 ; 0 = left
+                control->set_value (pv + update_by_delta);
+            }
+            
+        } else {
+            
+            boost::shared_ptr<ARDOUR::AutomationControl> control;
+            control = _route->panner()->pannable()->pan_azimuth_control;
+            
+            double pv = control->get_value(); // 0..1.0 ; 0 = left
+            control->set_value (pv + update_by_delta);
+        }
+        
+    } else { // apply change to the panner directly
+        double pv = position_control->get_value(); // 0..1.0 ; 0 = left
+        position_control->set_value (pv + update_by_delta);
+    }
 }
 
 bool
