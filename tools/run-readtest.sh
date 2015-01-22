@@ -73,7 +73,7 @@ for bs in $@ ; do
     if uname -a | grep --silent arwin ; then
         # clears cache on OS X
         sudo purge
-    elif [ -f /proc/sys/vm/drop_cache ] ; then
+    elif [ -f /proc/sys/vm/drop_caches ] ; then
         # Linux cache clearing
         echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
     else       
