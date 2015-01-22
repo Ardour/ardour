@@ -117,6 +117,7 @@ private:
 	static void __prop_style_watcher(WavesButton *);
 	void _prop_style_watcher();
 	Gtk::Label* _find_label (Gtk::Container *child);
+	Gtk::Entry* _find_entry (Gtk::Container *child);
 
 	BindingProxy                binding_proxy;
 

@@ -40,9 +40,9 @@ class WavesDropdown : public WavesIconButton
     Gtk::MenuItem* get_item (int);
     Gtk::MenuItem* get_item (const std::string&);
     
-    Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie = 0,  DestroyNotify cookie_cleaner = 0);
-    Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie = 0,  DestroyNotify cookie_cleaner = 0);
-    Gtk::CheckMenuItem& add_check_menu_item (const std::string& item, void* cookie = 0,  DestroyNotify cookie_cleaner = 0);
+    Gtk::MenuItem& add_menu_item (const std::string& item, void* cookie = 0,  DestroyNotify cookie_cleaner = 0, bool provide_style = true);
+    Gtk::RadioMenuItem& add_radio_menu_item (const std::string& item, void* cookie = 0,  DestroyNotify cookie_cleaner = 0, bool provide_style = true);
+    Gtk::CheckMenuItem& add_check_menu_item (const std::string& item, void* cookie = 0,  DestroyNotify cookie_cleaner = 0, bool provide_style = true);
 	void set_maxmenuheight (int maxmenuheight) { _maxmenuheight = ((maxmenuheight < 0) ? -1 : maxmenuheight); }
 	int get_maxmenuheight () const { return _maxmenuheight; }
 

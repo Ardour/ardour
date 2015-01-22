@@ -270,6 +270,8 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 											 step,
 											 page_increment,
 											 page_size));
+	} else if (widget_type == "TREEVIEW") {
+		child = manage (new Gtk::TreeView ());
 	} else if (widget_type != "STYLE") {
 		dbg_msg (std::string("Illegal object type (" + 
 							  definition.name() +
@@ -523,25 +525,25 @@ WavesUI::add_dropdown_items (WavesDropdown &dropdown, const XMLNodeList& definit
 				std::transform (node_name.begin (), node_name.end (), node_name.begin (), ::toupper);
 
 				if (node_name == "DROPDOWNITEM") {
-					Gtk::MenuItem& menuitem = dropdown.add_menu_item (title, (void*)itemdata);
-					if (menuitem.get_child ()) {
-						set_attributes (*menuitem.get_child (), **ii, styles);
+					Gtk::MenuItem& menuitem = dropdown.add_menu_item (title, (void*)itemdata, 0, 0);
+					if (Gtk::Widget* child = menuitem.get_child ()) {
+						set_attributes (*child, **ii, styles);
 					}
 					if (!widget_id.empty ()) {
 						(*this)[widget_id] = &menuitem;
 					}
 				} else if (node_name == "DROPDOWNCHECKITEM") {
-					Gtk::CheckMenuItem& menuitem = dropdown.add_check_menu_item (title, (void*)itemdata);
-					if (menuitem.get_child ()) {
-						set_attributes (*menuitem.get_child (), **ii, styles);
+					Gtk::CheckMenuItem& menuitem = dropdown.add_check_menu_item (title, (void*)itemdata, 0, 0);
+					if (Gtk::Widget* child = menuitem.get_child ()) {
+						set_attributes (*child, **ii, styles);
 					}
 					if (!widget_id.empty ()) {
 						(*this)[widget_id] = &menuitem;
 					}
 				} else if (node_name == "DROPDOWNRADIOITEM") {
-					Gtk::RadioMenuItem& menuitem = dropdown.add_radio_menu_item (title, (void*)itemdata);
-					if (menuitem.get_child ()) {
-						set_attributes (*menuitem.get_child (), **ii, styles);
+					Gtk::RadioMenuItem& menuitem = dropdown.add_radio_menu_item (title, (void*)itemdata, 0, 0);
+					if (Gtk::Widget* child = menuitem.get_child ()) {
+						set_attributes (*child, **ii, styles);
 					}
 					if (!widget_id.empty ()) {
 						(*this)[widget_id] = &menuitem;
@@ -621,6 +623,7 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
     if (((width != -1) || (height != -1)) && (dynamic_cast<Gtk::Menu*> (&widget) == 0)) {
         widget.set_size_request (width, height);
     }
+
 	property = xml_property (definition, "textcolornormal", styles, "");
 	if (!property.empty ()) {
 		widget.unset_text(Gtk::STATE_NORMAL);
@@ -687,6 +690,36 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		widget.modify_bg(Gtk::STATE_PRELIGHT, Gdk::Color(property));
 	}
 
+	property = xml_property (definition, "basenormal", styles, "");
+	if (!property.empty ()) {
+		widget.unset_base(Gtk::STATE_NORMAL);
+		widget.modify_base(Gtk::STATE_NORMAL, Gdk::Color(property));
+	}
+
+	property = xml_property (definition, "basedisabled", styles, property);
+	if (!property.empty ()) {
+		widget.unset_base(Gtk::STATE_INSENSITIVE);
+		widget.modify_base(Gtk::STATE_INSENSITIVE, Gdk::Color(property));
+	}
+
+	property = xml_property (definition, "baseactive", styles, "");
+	if (!property.empty ()) {
+		widget.unset_base(Gtk::STATE_ACTIVE);
+		widget.modify_base(Gtk::STATE_ACTIVE, Gdk::Color(property));
+	}
+    
+    property = xml_property (definition, "baseselected", styles, "");
+    if (!property.empty ()) {
+        widget.unset_base(Gtk::STATE_SELECTED);
+        widget.modify_base(Gtk::STATE_SELECTED, Gdk::Color(property));
+    }
+
+	property = xml_property (definition, "basehover", styles, "");
+	if (!property.empty ()) {
+		widget.unset_base(Gtk::STATE_PRELIGHT);
+		widget.modify_base(Gtk::STATE_PRELIGHT, Gdk::Color(property));
+	}
+
 	property = xml_property (definition, "fgnormal", styles, "");
 	if (!property.empty ()) {
 		widget.modify_fg(Gtk::STATE_NORMAL, Gdk::Color(property));
@@ -719,10 +752,14 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 			} else if (property == "impliciactive") {
 				state = Gtkmm2ext::ImplicitActive;
 			} else {
-				dbg_msg ("Invalid state for CairoWidget !");
+				cairo_widget = 0;
 			}
-			cairo_widget->set_active_state (state);
-		} else {
+			if (cairo_widget) {
+				cairo_widget->set_active_state (state);
+			}
+		} 
+
+		if (!cairo_widget) {
 			Gtk::StateType state = Gtk::STATE_NORMAL; 
 			if (property == "normal") {
 				state = Gtk::STATE_NORMAL;
@@ -798,6 +835,10 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 			dbg_msg ("Invalid horizontal alignment for Gtk::Entry !");
 		}
         entry->set_alignment (xalign);
+		
+		if (!xml_property (definition, "hasframe", styles, true)) {
+			entry->set_has_frame (false);
+		}
     }
     
 	Gtk::Label* label = dynamic_cast<Gtk::Label*> (&widget);
@@ -860,6 +901,10 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 			dbg_msg ("Invalid ellipsize mode for Gtk::Label !");
 		}
 		label->set_ellipsize (ellipsize_mode);
+
+		if (xml_property (definition, "usemarkup", styles, false)) {
+			label->set_use_markup (true);
+		}
 	}
 
 	Gtk::SpinButton* spin_button = dynamic_cast<Gtk::SpinButton*> (&widget);
@@ -945,6 +990,13 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		}
 		scrolled_window->set_policy(hscrollbar_policy, vscrollbar_policy);
 	}
+
+	Gtk::TreeView* tree_view = dynamic_cast<Gtk::TreeView*> (&widget);
+	if (tree_view) {
+		if (xml_property (definition, "hscroll", styles, false)) {
+			tree_view->set_headers_visible (true);
+		}
+	}
 }
 
 Gtk::Object* 
@@ -952,10 +1004,22 @@ WavesUI::get_object(const char *id)
 {
 	Gtk::Object* object = NULL;
 	WavesUI::iterator it = find(id);
-	if(it != end())
+	if(it != end()) {
 		object = it->second;
+	}
 
 	return object;
+}
+
+Gtk::Widget&
+WavesUI::get_widget (const char* id)
+{
+	Gtk::Widget* child = dynamic_cast<Gtk::Widget*> (get_object(id));
+	if (child == NULL ) {
+		dbg_msg (std::string("Widget ") + id + " not found in " + _script_file_name + "!");
+		abort ();
+	}
+	return *child;
 }
 
 Gtk::Adjustment&
@@ -1294,3 +1358,27 @@ WavesUI::get_progressbar (const char* id)
 	}
 	return *child;
 }
+
+Gtk::ScrolledWindow&
+WavesUI::get_scrolled_window (const char* id)
+{
+    Gtk::ScrolledWindow* child = dynamic_cast<Gtk::ScrolledWindow*> (get_object(id));
+    if (child == NULL ) {
+		dbg_msg (std::string("Gtk::ScrolledWindow ") + id + " not found in " + _script_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+Gtk::TreeView&
+WavesUI::get_tree_view (const char* id)
+{
+    Gtk::TreeView* child = dynamic_cast<Gtk::TreeView*> (get_object(id));
+    if (child == NULL ) {
+		dbg_msg (std::string("Gtk::TreeView ") + id + " not found in " + _script_file_name + "!");
+		abort ();
+	}
+	return *child;
+}
+
+

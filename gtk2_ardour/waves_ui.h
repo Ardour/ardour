@@ -47,6 +47,7 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	WavesUI (const std::string& layout_script_file, Gtk::Container& root);
 	virtual ~WavesUI (); 
 
+	Gtk::Widget& get_widget (const char* id);
 	Gtk::Adjustment& get_adjustment (const char* id);
 	Gtk::Container& get_container (const char* id);
 	Gtk::EventBox& get_event_box (const char* id);
@@ -79,6 +80,8 @@ class WavesUI : public std::map<std::string, Gtk::Object*> {
 	const XMLTree* xml_tree () { return _xml_tree; }
 	Gtk::Container& root () { return _root_container; }
     Gtk::ProgressBar& get_progressbar (const char* id);
+	Gtk::TreeView& get_tree_view (const char* id);
+	Gtk::ScrolledWindow& get_scrolled_window (const char* id);
 
   protected:
 	void set_attributes (Gtk::Widget& widget, const XMLNode& definition, const XMLNodeMap& styles);

@@ -121,19 +121,20 @@ WavesDropdown::set_current_item (int current_item_number)
 }
 
 Gtk::MenuItem&
-WavesDropdown::add_menu_item (const std::string& item, void* cookie, DestroyNotify cookie_cleaner)
+WavesDropdown::add_menu_item (const std::string& item, void* cookie, DestroyNotify cookie_cleaner, bool provide_style)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
 	items.push_back (Gtk::Menu_Helpers::MenuElem (item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), items.size (), cookie)));
     
 	Gtk::MenuItem& menuitem = _menu.items ().back ();
-	ensure_style();
-	Widget* child = menuitem.get_child ();
+	
+	Widget* child = (provide_style ? menuitem.get_child () : 0);
 	if (child) {
+		ensure_style();
 		child->set_style (get_style());
 	}
-
+	
     if (cookie_cleaner) {
         menuitem.set_data (menu_item_data_key, cookie, cookie_cleaner);
     } else {
@@ -144,7 +145,7 @@ WavesDropdown::add_menu_item (const std::string& item, void* cookie, DestroyNoti
 }
 
 Gtk::RadioMenuItem&
-WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie, DestroyNotify cookie_cleaner)
+WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie, DestroyNotify cookie_cleaner, bool provide_style)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
@@ -158,9 +159,9 @@ WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie, Destr
     }
     
 	Gtk::RadioMenuItem& menuitem = *dynamic_cast <Gtk::RadioMenuItem*> (&_menu.items ().back ());
-	ensure_style();
-	Widget* child = menuitem.get_child ();
+	Widget* child = (provide_style ? menuitem.get_child () : 0);
 	if (child) {
+		ensure_style();
 		child->set_style (get_style());
 	}
 
@@ -174,16 +175,16 @@ WavesDropdown::add_radio_menu_item (const std::string& item, void* cookie, Destr
 }
 
 Gtk::CheckMenuItem&
-WavesDropdown::add_check_menu_item (const std::string& item, void* cookie,  DestroyNotify cookie_cleaner)
+WavesDropdown::add_check_menu_item (const std::string& item, void* cookie,  DestroyNotify cookie_cleaner, bool provide_style)
 {
 	Gtk::Menu_Helpers::MenuList& items = _menu.items ();
 	
 	items.push_back (Gtk::Menu_Helpers::CheckMenuElem (item, sigc::bind (sigc::mem_fun(*this, &WavesDropdown::_on_menu_item), items.size (), cookie)));
     
 	Gtk::CheckMenuItem& menuitem = *dynamic_cast <Gtk::CheckMenuItem*> (&_menu.items ().back ());
-	ensure_style();
-	Widget* child = menuitem.get_child ();
+	Widget* child = (provide_style ? menuitem.get_child () : 0);
 	if (child) {
+		ensure_style();
 		child->set_style (get_style());
 	}
 
