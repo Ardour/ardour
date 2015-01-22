@@ -370,15 +370,6 @@ EngineControl::build_notebook ()
 
 	basic_vbox.pack_start (basic_hbox, false, false);
 
-	if (_have_control) {
-		Gtk::HBox* hpacker = manage (new HBox);
-		hpacker->set_border_width (12);
-		hpacker->pack_start (control_app_button, false, false);
-		hpacker->show ();
-		control_app_button.show();
-		basic_vbox.pack_start (*hpacker);
-	}
-
 	{
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 		basic_vbox.show_all ();
