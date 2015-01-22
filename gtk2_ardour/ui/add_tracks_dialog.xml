@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Add Track" resizeable="False">
-<style name="generic_control"
+  <style name="generic_control"
          winfont ="Arial Bold 10"
          macfont ="Helvetica Bold 10"
          fgnormal="#6D6E72"
