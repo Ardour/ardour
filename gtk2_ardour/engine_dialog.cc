@@ -43,6 +43,7 @@
 #include "ardour/mididm.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/types.h"
+#include "ardour/profile.h"
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -421,6 +422,10 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	buffer_size_duration_label.set_alignment (0.0); /* left-align */
 	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, SHRINK, (AttachOptions) 0);
+
+	/* button spans 2 rows */
+
+	basic_packer.attach (control_app_button, 3, 4, row-1, row+1, xopt, xopt);
 	row++;
 
 	input_channels.set_name ("InputChannels");
@@ -429,22 +434,26 @@ EngineControl::build_full_control_notebook ()
 	input_channels.set_wrap (false);
 	output_channels.set_editable (true);
 
-	label = manage (left_aligned_label (_("Input Channels:")));
-	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
-	++row;
-
+	if (!ARDOUR::Profile->get_mixbus()) {
+		label = manage (left_aligned_label (_("Input Channels:")));
+		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+		basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+		++row;
+	}
+	
 	output_channels.set_name ("OutputChannels");
 	output_channels.set_flags (Gtk::CAN_FOCUS);
 	output_channels.set_digits (0);
 	output_channels.set_wrap (false);
 	output_channels.set_editable (true);
 
-	label = manage (left_aligned_label (_("Output Channels:")));
-	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
-	++row;
-
+	if (!ARDOUR::Profile->get_mixbus()) {
+		label = manage (left_aligned_label (_("Output Channels:")));
+		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+		basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+		++row;
+	}
+	
 	input_latency.set_name ("InputLatency");
 	input_latency.set_flags (Gtk::CAN_FOCUS);
 	input_latency.set_digits (0);
@@ -775,6 +784,11 @@ EngineControl::backend_changed ()
 bool
 EngineControl::print_channel_count (Gtk::SpinButton* sb)
 {
+	if (ARDOUR::Profile->get_mixbus()) {
+		cout << "Mixbus crash trap. sb->get_value(): " << sb->get_value();
+		return true;
+	}
+	
 	uint32_t cnt = (uint32_t) sb->get_value();
 	if (cnt == 0) {
 		sb->set_text (_("all available channels"));
@@ -1755,12 +1769,22 @@ EngineControl::get_midi_option () const
 uint32_t
 EngineControl::get_input_channels() const
 {
+	if (ARDOUR::Profile->get_mixbus()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		if (!backend) return 0;
+		return backend->input_channels();
+	}
 	return (uint32_t) input_channels_adjustment.get_value();
 }
 
 uint32_t
 EngineControl::get_output_channels() const
 {
+	if (ARDOUR::Profile->get_mixbus()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		if (!backend) return 0;
+		return backend->input_channels();
+	}
 	return (uint32_t) output_channels_adjustment.get_value();
 }
 
