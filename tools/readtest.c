@@ -151,7 +151,6 @@ main (int argc, char* argv[])
 		for (n = 0; n < nfiles; ++n) {
 
 			if (read (files[n], (char*) data, block_size) != block_size) {
-				fprintf (stderr, "read failed on file %d (%s)\n", n, strerror (errno));
 				goto out;
 			}
 		}
