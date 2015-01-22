@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Dialog title="Tracks Live" resizeable="False" CACHEIT="false">
+<Dialog title="Tracks Live" CACHEIT="false">
   <style name="generic_control"
          winfont ="Arial Bold 12"
          macfont ="Helvetica Bold 12"
@@ -9,7 +9,7 @@
          bgactive="#454545"
          fghover="#CCCCCC"
          bghover="#898989"/>
-  
+
   <style name="generic_button"
          style="generic_control"
          winfont ="Arial Bold 12"
@@ -20,164 +20,56 @@
          width="80"
          height="22"/>
 
-  <style name="generic_dropdown"
-         style="generic_button"
-         fgnormal="#EDECE8"
-         normalicon="added_track_format_dropdown_active"
-         activeicon="added_track_format_dropdown_active"
-         _prelighticon="added_track_format_dropdown_prelight"
-         inactiveicon="added_track_format_dropdown_inactive"
-         width="110"
-         height="21"/>
-
-  <style name="generic_dropdown_label"
-         style="generic_button"
-         fgnormal="#EDECE8"
-         horzalignment="center"
-         width="88"/>
-  
-  <EventBox bgnormal="#EDECE8">
-    <VBox borderwidth="10"
-          spacing="10">
-      <Label style="generic_control"
-             text="Export content of selected tracks as new file"/>
-      <Label style="generic_control"
-             text="Lossless Export:"
-             horzalignment="start"
-             vertalignment="bottom"
-             winfont ="Arial Bold 14"
-             macfont ="Helvetica Bold 14"/>
-      <HBox spacing="21">
-        <VBox>
+  <EventBox bgnormal="#EDECE8"
+            box.pack="end">
+    <VBox>
+      <VBox>
+        <HBox spacing="1">
+          <Button id="file_format_selector_button"
+                  style="generic_button"
+                  text="File Format"/>
+          <Button id="timespan_selector_button"
+                  style="generic_button"
+                  text="Time Span"/>
+          <Button id="channel_selector_button"
+                  style="generic_button"
+                  text="Channels"/>
+        </HBox>
+        <EventBox id="selectors_home"
+                  bgnormal="#EDECE8"
+                  width="652"
+                  height="232">
+          <VBox id="file_format_selector">
+            <HBox id="preset_selector_home" ui.orphan="true"/>
+            <HBox id="file_notebook_home"/>
+          </VBox>
+          <VBox id="timespan_selector_home"/>
+          <VBox id="channel_selector_home"/>
+        </EventBox>
+      </VBox>
+      <HBox id="warning_widget">
+        <Label id="warn_label"
+               style="generic_control"
+               usemarkup="true"
+               box.fill="true"
+               box.expand="true"
+               fgnormal="#E2974B"/>
+        <HBox id="list_files_widget">
+          <Button id="list_files_button"
+                  style="generic_button"
+                  box.pack="end"
+                  text="List Files"/>
           <Label style="generic_control"
-                 text="Format"
-                 horzalignment="start"/>
-          <Dropdown id="lossless_format_dropdown"
-                    style="generic_dropdown">
-            <HBox>
-              <Label style="generic_dropdown_label"/>
-            </HBox>
-            <DropdownMenu bgnormal="#454545">
-              <DropdownItem title="None"/>
-              <DropdownItem title="Wave"/>
-              <DropdownItem title="AIFF"/>
-              <DropdownItem title="AAC"/>
-              <DropdownItem title="CAF"/>
-              <DropdownItem title="FLAC"/>
-            </DropdownMenu>
-          </Dropdown>
-        </VBox>
-        <VBox>
-          <Label style="generic_control"
-                 text="Depth"
-                 horzalignment="start"/>
-          <Dropdown id="lossless_depth_dropdown"
-                    style="generic_dropdown">
-            <HBox>
-              <Label style="generic_dropdown_label"/>
-            </HBox>
-            <DropdownMenu bgnormal="#454545">
-              <DropdownItem title="None"/>
-              <DropdownItem title="16 bit"/>
-              <DropdownItem title="24 bit"/>
-            </DropdownMenu>
-          </Dropdown>
-        </VBox>
-        <VBox>
-          <Label style="generic_control"
-                 text="Sample Rate"
-                 horzalignment="start"/>
-          <Dropdown id="lossless_sample_rate_dropdown"
-                    style="generic_dropdown">
-            <HBox>
-              <Label style="generic_dropdown_label"/>
-            </HBox>
-            <DropdownMenu bgnormal="#454545">
-              <DropdownItem title="None"/>
-              <DropdownItem title="44.1 kHz"/>
-              <DropdownItem title="48 kHz"/>
-              <DropdownItem title="88.2 kHz"/>
-              <DropdownItem title="96 kHz"/>
-              <DropdownItem title="176.4 kHz"/>
-              <DropdownItem title="192 kHz"/>
-            </DropdownMenu>
-          </Dropdown>
-        </VBox>
-        <VBox>
-          <Label style="generic_control"
-                 text="Dither"
-                 horzalignment="start"/>
-          <Dropdown id="lossless_dither_dropdown"
-                    style="generic_dropdown">
-            <HBox>
-              <Label style="generic_dropdown_label"/>
-            </HBox>
-            <DropdownMenu bgnormal="#454545">
-              <DropdownItem title="None"/>
-              <DropdownItem title="Type1"/>
-              <DropdownItem title="Type2"/>
-              <DropdownItem title="Type3+Shaping"/>
-            </DropdownMenu>
-          </Dropdown>
-        </VBox>
-        <VBox>
-          <Label style="generic_control"
-                 text="Normalize"
-                 horzalignment="start"/>
-          <Iconbutton id="lossless_normalize_button"
-                      width="20"
-                      height="20"
-                      normalicon="waves_darker_check_box"
-                      activeicon="waves_darker_check_box_active"
-                      toggleable="true"/>
-        </VBox>
+                 text="Some already existing files will be overwritten."
+                 box.pack="end"
+                 fgnormal="#E2974B"/>
+        </HBox>
       </HBox>
-      <Label style="generic_control"
-             text="Lossy Export:"
-             height="40"
-             horzalignment="start"
-             vertalignment="bottom"
-             winfont ="Arial Bold 14"
-             macfont ="Helvetica Bold 14"/>
-      <HBox spacing="21">
-        <VBox>
-          <Label style="generic_control"
-                 text="Format"
-                 horzalignment="start"/>
-          <Dropdown id="lossy_format_dropdown"
-                    style="generic_dropdown">
-            <HBox>
-              <Label style="generic_dropdown_label"/>
-            </HBox>
-            <DropdownMenu bgnormal="#454545">
-              <DropdownItem title="None"/>
-              <DropdownItem title="MP3"/>
-              <DropdownItem title="AAC"/>
-              <DropdownItem title="OGG Forbis"/>
-            </DropdownMenu>
-          </Dropdown>
-        </VBox>
-        <VBox>
-          <Label style="generic_control"
-                 text="Bit Rate"
-                 horzalignment="start"/>
-          <Dropdown id="lossy_bit_rate_dropdown"
-                    style="generic_dropdown">
-            <HBox>
-              <Label style="generic_dropdown_label"/>
-            </HBox>
-            <DropdownMenu bgnormal="#454545">
-              <DropdownItem title="None"/>
-              <DropdownItem title="96 kbps"/>
-              <DropdownItem title="128 kbps"/>
-              <DropdownItem title="160 kbps"/>
-              <DropdownItem title="192 kbps"/>
-              <DropdownItem title="256 kbps"/>
-              <DropdownItem title="320 kbps"/>
-            </DropdownMenu>
-          </Dropdown>
-        </VBox>
-      </HBox>
+      <VBox id="export_progress_widget">
+        <ProgressBar id="export_progress_bar"
+                     height="21"
+                     bgnormal="#6B6B6B"/>
+      </VBox>
       <HBox spacing="10">
         <Button id="cancel_button"
                 style="generic_button"
@@ -186,16 +78,14 @@
         <Button id="stop_export_button"
                 style="generic_button"
                 box.pack="end"
+                visible="false"
+                noshowall="true"
                 text="Stop Export"/>
         <Button id="export_button"
                 style="generic_button"
                 box.pack="end"
                 text="Export"/>
       </HBox>
-      <ProgressBar id="export_progress_bar"
-                   height="21"
-                   bgnormal="#6B6B6B"/>
     </VBox>
   </EventBox>
-
 </Dialog>

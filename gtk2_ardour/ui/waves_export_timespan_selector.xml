@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<VBox CACHEIT="false">
+  <style name="generic_control"
+         winfont="Arial Bold 10"
+         macfont="Helvetica Bold 10"
+         fgnormal="#C1C1C1"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"
+         fgdisabled ="#959595"/>
+  <style name="generic_button"
+         style="generic_control"
+         width="80"
+         height="20"/>
+  <style name="generic_dropdown"
+         style="generic_control"
+         bgdisabled="#373737"/>
+  <style name="generic_dropdown_menu"
+         bgnormal="#6C6C6C"/>
+  <HBox>
+    <Label style="generic_control"
+           text="Show Times as:"/>
+    <Dropdown id="time_format_dropdown"
+              style="generic_control"
+              width="126"
+              height="20"
+              normalicon="preference_device_dropdown"
+              activeicon="preference_device_dropdown_active"
+              inactiveicon="preference_device_dropdown_inactive">
+      <HBox>
+        <VBox width="10"/>
+        <Label style="generic_control"
+               horzalignment="start"
+               width="117"
+               height="20"/>
+      </HBox>
+      <DropdownMenu style="generic_dropdown_menu">
+        <Dropdownitem style="generic_control"
+                      title="Timecode"
+                      data="0"
+                      horzalignment="start"/>
+        <Dropdownitem style="generic_control"
+                      title="Minutes:Seconds"
+                      data="1"
+                      horzalignment="start"/>
+        <Dropdownitem style="generic_control"
+                      title="Bars:Beats"
+                      data="2"
+                      horzalignment="start"/>
+      </DropdownMenu>
+    </Dropdown>
+    <Button id="select_all_button"
+            style="generic_button"
+            text="Select All"/>
+    <Button id="deselect_all_button"
+            style="generic_button"
+            text="Deslect All"/>
+  </HBox>
+  <ScrolledWindow id="range_scroller"
+                  height="232">
+    <TreeView id="range_view"/>
+  </ScrolledWindow>
+</VBox>

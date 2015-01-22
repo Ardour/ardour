@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<HBox CACHEIT="false">
+  <style name="generic_control"
+        winfont ="Arial Bold 12"
+        macfont ="Helvetica Bold 12"
+        fgnormal="#6F6F6F"
+        bgnormal="#6C6C6C"
+        fgactive="#BFBFBF"
+        bgactive="#454545"
+        fghover="#CCCCCC"
+        bghover="#898989"/>
+
+  <style name="generic_button"
+         style="generic_control"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         fgdisabled="#8D8D8D"
+         width="65"
+         height="22"/>
+  <Label style="generic_control"
+         text="Preset"/>
+  <Button id="new_button"
+          style="generic_button"
+          box.pack="end"
+          state="disabled"
+          text="New"/>
+  <Button id="remove_button"
+          style="generic_button"
+          state="disabled"
+          box.pack="end"
+          text="Remove"/>
+  <Button id="save_button"
+          style="generic_button"
+          state="disabled"
+          box.pack="end"
+          text="Save"/>
+</HBox>
