@@ -111,7 +111,8 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
     , _master_bus_multi_out_mode_icon (get_image("master_bus_multi_out_mode_icon"))
     , _master_event_box (WavesUI::root () )
     , _selected(false)
-    , _ignore_mute_upadte(false)
+    , _ignore_mute_update(false)
+    , _ignore_selection_click(false)
     , _editor(ed)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
@@ -130,6 +131,8 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 
 	_peak_display_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_peak_display_button));
 	_master_mute_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button));
+    _master_mute_button.signal_enter_notify_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button_enter));
+    _master_mute_button.signal_leave_notify_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button_leave));
 	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
 	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
     _master_event_box.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_event_box_button_press));
@@ -249,6 +252,10 @@ MasterBusUI::update_master_bus_selection ()
 bool
 MasterBusUI::on_master_event_box_button_press (GdkEventButton *ev)
 {
+    if (_ignore_selection_click) {
+        return true;
+    }
+    
     if (ev->button == 1) {
         
         if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
@@ -480,16 +487,16 @@ bool MasterBusUI::check_all_tracks_are_muted()
 void MasterBusUI::on_master_mute_button (WavesButton*)
 {
     Session* session = ARDOUR_UI::instance()->the_session();
-   
+    
     if( !session )
         return;
     
-    PBD::Unwinder<bool> uw (_ignore_mute_upadte, true);
+    PBD::Unwinder<bool> uw (_ignore_mute_update, true);
     
     if (Config->get_output_auto_connect() & AutoConnectPhysical) // Multi out
     {
         boost::shared_ptr<RouteList> tracks = session->get_tracks();
-        bool all_tracks_are_muted = this->check_all_tracks_are_muted();        
+        bool all_tracks_are_muted = this->check_all_tracks_are_muted();
         session->set_mute(tracks, !all_tracks_are_muted);
         _master_mute_button.set_active( !all_tracks_are_muted );
     } else if (Config->get_output_auto_connect() & AutoConnectMaster) // Stereo out
@@ -500,21 +507,35 @@ void MasterBusUI::on_master_mute_button (WavesButton*)
     }
 }
 
+bool
+MasterBusUI::on_master_mute_button_enter (GdkEventCrossing*)
+{
+    _ignore_selection_click = true;
+    return true;
+}
+
+bool
+MasterBusUI::on_master_mute_button_leave (GdkEventCrossing*)
+{
+    _ignore_selection_click = false;
+    return true;
+}
+
 void MasterBusUI::route_mute_state_changed (void* )
-{   
+{
     Session* session = ARDOUR_UI::instance()->the_session();
     
     if( !session )
         return;
     
-    if( _ignore_mute_upadte )
+    if( _ignore_mute_update )
         return;
-    
+
     if (Config->get_output_auto_connect() & AutoConnectPhysical) // Multi out
     {
         _master_mute_button.set_active( check_all_tracks_are_muted() );
     } else if (Config->get_output_auto_connect() & AutoConnectMaster) // Stereo out
-    {
+{
         boost::shared_ptr<Route> master = session->master_out();
         _master_mute_button.set_active(master->muted());
     }
