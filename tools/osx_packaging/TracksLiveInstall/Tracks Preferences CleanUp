@@ -1,0 +1,14 @@
+# deletes Tracks Live Preferences
+# except recent and config
+function delete_file {
+if [ -f "$1" ] ; then
+    rm -r "$1"
+fi
+}
+path_to_preferences="$HOME/Library/Preferences/Tracks Live"
+
+delete_file "${path_to_preferences}/instant.xml"
+delete_file "${path_to_preferences}/sfdb"
+delete_file "${path_to_preferences}/ui_config"
+delete_file "${path_to_preferences}/pango.rc"
+delete_file "${path_to_preferences}/Tracks Live_announcements_osx_1.0.0"

@@ -64,6 +64,8 @@ rm -rf "/Volumes/$template_mount_name/$template_binary_name.app"
 cp -r "/Volumes/$build_dmg_name/TracksLive.app" "/Volumes/$installer_mount_name/$installer_binary_name.app"
 #copy manual to template
 cp "${AD}/tracks/tools/Tracks Live Manual/Tracks Live Manual.pdf" "/Volumes/$installer_mount_name/"
+#copy script for 'preferences cleanup' to template
+cp "${OSX_INSTALLER_ROOT}/Tracks Preferences CleanUp" "/Volumes/$installer_mount_name/"
 
 echo '
     tell application "Finder"
@@ -72,14 +74,15 @@ echo '
             set position of item "'${installer_binary_name}'" of container window to {135, 108}
             set position of item "Applications" of container window to {365, 108}
             set position of item "Tracks Live Manual.pdf" of container window to {80, 220}
+            set position of item "Tracks Preferences CleanUp" of container window to {420, 220}
             # set position of hidden files
-            set position of item ".background" of container window to {440, 220}
-            set position of item ".VolumeIcon" of container window to {440, 220}
-            set position of item ".Trashes" of container window to {440, 220}
-            set position of item ".TemporaryItems" of container window to {440, 220}
-            set position of item ".apdisk" of container window to {440, 220}
-            set position of item ".DS_Store" of container window to {440, 220}
-            set position of item ".fseventsd" of container window to {440, 220}
+            set position of item ".background" of container window to {250, 0}
+            set position of item ".VolumeIcon" of container window to {250, 0}
+            set position of item ".Trashes" of container window to {250, 0}
+            set position of item ".TemporaryItems" of container window to {250, 0}
+            set position of item ".apdisk" of container window to {250, 0}
+            set position of item ".DS_Store" of container window to {250, 0}
+            set position of item ".fseventsd" of container window to {250, 0}
             close
         end tell
     end tell
