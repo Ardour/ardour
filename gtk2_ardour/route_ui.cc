@@ -516,12 +516,11 @@ RouteUI::solo_press(GdkEventButton* ev)
                 
                 // alt-click: toogle Solo X-Or
                 
-                // Tracks Live doesn't use monitor bus so far
-				//if (Config->get_solo_control_is_listen_control()) {
-				//	_session->set_listen (_session->get_routes(), false,  Session::rt_cleanup, true);
-				//} else {
+				if (Config->get_solo_control_is_listen_control()) {
+					_session->set_listen (_session->get_routes(), false,  Session::rt_cleanup, true);
+				} else {
 					_session->set_solo (_session->get_routes(), false,  Session::rt_cleanup, true);
-				//}
+				}
                 
                 boost::shared_ptr<RouteList> rl (new RouteList);
                 
@@ -531,12 +530,11 @@ RouteUI::solo_press(GdkEventButton* ev)
                     rl->push_back (_route);
                 }
                 
-                // Tracks Live doesn't use monitor bus so far
-				//if (Config->get_solo_control_is_listen_control()) {
-				//	_session->set_listen (rl, true);
-				//} else {
+				if (Config->get_solo_control_is_listen_control()) {
+					_session->set_listen (rl, true);
+				} else {
 					_session->set_solo (rl, true);
-				//}
+				}
             } else {
                 if (Keyboard::modifier_state_equals (ev->state, momentary_mask)) {
                     
@@ -570,25 +568,22 @@ RouteUI::solo_press(GdkEventButton* ev)
                 if ( is_selected () ) {
                     
                     boost::shared_ptr<ARDOUR::RouteList> selected_route_list = get_selected_route_list ();
-//                    DisplaySuspender ds;
 
-                    // Tracks Live doesn't use monitor bus so far
-                    //if (Config->get_solo_control_is_listen_control()) {
-                    //    _session->set_listen (selected_route_list, !_route->listening_via_monitor(), Session::rt_cleanup, true);
-                    //} else {
+                    if (Config->get_solo_control_is_listen_control()) {
+                        _session->set_listen (selected_route_list, !_route->listening_via_monitor(), Session::rt_cleanup, true);
+                    } else {
 
                         _session->set_solo (selected_route_list, !_route->self_soloed(), Session::rt_cleanup, true);
-                    //}
+                    }
                 } else {
                     boost::shared_ptr<RouteList> rl (new RouteList);
                     rl->push_back (_route);
                     
-                    // Tracks Live doesn't use monitor bus so far
-                    //if (Config->get_solo_control_is_listen_control()) {
-                    //    _session->set_listen (rl, !_route->listening_via_monitor(), Session::rt_cleanup, true);
-                    //} else {
+                    if (Config->get_solo_control_is_listen_control()) {
+                        _session->set_listen (rl, !_route->listening_via_monitor(), Session::rt_cleanup, true);
+                    } else {
                         _session->set_solo (rl, !_route->self_soloed(), Session::rt_cleanup, true);
-                    //}
+                    }
                 }
 			}
 		} // if ( ev->button == 1 )
@@ -602,14 +597,8 @@ RouteUI::solo_release (GdkEventButton*)
 {
     if ( _momentary_solo )
     {
-        // Tracks Live doesn't use monitor bus so far
-        //if (Config->get_solo_control_is_listen_control()) {
-        //    _session->set_listen (rl, false);
-        //} else {
-        
         // unsolo tracks after momentary solo release
         _session->set_solo (_momentary_solo->routes_off, false);
-        //}
         
         // mute tracks back after momentary solo release
         _session->set_mute (_momentary_solo->routes_on, true);
