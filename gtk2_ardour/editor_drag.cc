@@ -390,7 +390,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				motion (event, first_move && !_starting_point_passed);
 				
                 _starting_point_passed = first_move;
-				
+                
 				_last_pointer_x = _drags->current_pointer_x ();
 				_last_pointer_y = current_pointer_y ();
 				_last_pointer_frame = adjusted_current_frame (event);
@@ -2500,7 +2500,7 @@ TrimDrag::aborted (bool movement_occurred)
 	finished (0, true);
 
 	if (movement_occurred) {
-		_editor->undo ();
+		_editor->session()->undo (1);
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {

@@ -2016,6 +2016,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
+    void on_record_state_changed ();
+    
 	void session_state_saved (std::string);
     void set_session_dirty ();
     
