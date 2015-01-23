@@ -62,3 +62,8 @@ SessionLockDialog::on_ok (WavesButton*)
 }
 
 
+bool
+SessionLockDialog::on_key_press_event (GdkEventKey*)
+{
+    return true;    
+}

@@ -49,6 +49,7 @@ class SessionLockDialog : public WavesDialog {
 
     SessionLockDialog ();
 	~SessionLockDialog ();
+    bool on_key_press_event (GdkEventKey*);
 
   private:
 	WavesButton& _ok_button;
