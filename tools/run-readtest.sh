@@ -19,7 +19,7 @@ while [ $# -gt 1 ] ; do
 	-d) dir=$2; shift; shift ;;
 	-f) filesize=$2; shift; shift ;;
 	-n) numfiles=$2; shift; shift ;;
-	-N) nocache="-s"; shift; shift ;;
+	-N) nocache="-s"; shift;;
         *) break ;;
     esac
 done
