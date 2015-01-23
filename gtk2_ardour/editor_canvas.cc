@@ -1012,7 +1012,7 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor)
 {
 	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
 
-	if (win && cursor) {
+	if (win && !_cursors->is_invalid (cursor)) {
 	        win->set_cursor (*cursor);
 	}
 }
@@ -1020,7 +1020,7 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor)
 size_t
 Editor::push_canvas_cursor (Gdk::Cursor* cursor)
 {
-	if (cursor) {
+	if (!_cursors->is_invalid (cursor)) {
 		_cursor_stack.push_back (cursor);
 		set_canvas_cursor (cursor);
 	}
@@ -1095,7 +1095,7 @@ Editor::which_trim_cursor (bool left) const
 Gdk::Cursor*
 Editor::which_mode_cursor () const
 {
-	Gdk::Cursor* mode_cursor = 0;
+	Gdk::Cursor* mode_cursor = _cursors->invalid_cursor ();
 
 	switch (mouse_mode) {
 	case MouseRange:
@@ -1161,7 +1161,7 @@ Editor::which_mode_cursor () const
 Gdk::Cursor*
 Editor::which_track_cursor () const
 {
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = _cursors->invalid_cursor();
 
 	switch (_join_object_range_state) {
 	case JOIN_OBJECT_RANGE_NONE:
@@ -1332,7 +1332,7 @@ Editor::choose_canvas_cursor_on_entry (ItemType type)
 
 	Gdk::Cursor* cursor = which_canvas_cursor(type);
 
-	if (cursor) {
+	if (!_cursors->is_invalid (cursor)) {
 		// Push a new enter context
 		const EnterContext ctx = { type, CursorContext::create(*this, cursor) };
 		_enter_stack.push_back(ctx);

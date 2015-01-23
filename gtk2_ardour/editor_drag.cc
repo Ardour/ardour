@@ -234,11 +234,13 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 	_item->ungrab ();
 	_item = new_item;
 
-	if (cursor == 0) {
-		_item->grab ();
+	if (!_cursor_ctx) {
+		_cursor_ctx = CursorContext::create (*_editor, cursor);
 	} else {
-		_item->grab ();
+		_cursor_ctx->change (cursor);
 	}
+
+	_item->grab ();
 }
 
 void
@@ -271,12 +273,11 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 
 	_last_pointer_y = _grab_y;
 
-	if (cursor == 0) {
-		_item->grab ();
-	} else {
+	_item->grab ();
+
+	if (!_editor->cursors()->is_invalid (cursor)) {
 		/* CAIROCANVAS need a variant here that passes *cursor */
-		_item->grab ();
-		_cursor_ctx = CursorContext::create(*_editor, cursor);
+		_cursor_ctx = CursorContext::create (*_editor, cursor);
 	}
 
 	if (_editor->session() && _editor->session()->transport_rolling()) {
@@ -4151,7 +4152,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		return;
 	}
 
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = _editor->cursors()->invalid_cursor();
 
 	switch (_operation) {
 	case CreateSelection:
@@ -4489,7 +4490,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		return;
 	}
 
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = _editor->cursors()->invalid_cursor();
 
 	if (!_editor->temp_location) {
 		_editor->temp_location = new Location (*_editor->session());
