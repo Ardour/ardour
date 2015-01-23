@@ -6588,6 +6588,15 @@ Editor::waveform_zoom_changed()
 }
 
 void
+Editor::waveform_zoom_step(bool coarser)
+{
+    ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_step, coarser)
+    
+    int zoom_step = coarser ? 1 : -1;
+    _waves_zoom_adjustment.set_value(_waves_zoom_adjustment.get_value() + zoom_step);
+}
+
+void
 Editor::toggle_tracks_active ()
 {
 	TrackSelection& ts (selection->tracks);

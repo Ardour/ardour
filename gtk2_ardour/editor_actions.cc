@@ -266,8 +266,8 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "temporal-zoom-out", _("Zoom Out Horizontal"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
 	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In Horizontal"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
-    reg_sens (editor_actions, "waveform-zoom-in", _("Waveform Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), true));
-    reg_sens (editor_actions, "waveform-zoom-out", _("Waveform Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
+    reg_sens (editor_actions, "waveform-zoom-in", _("Waveform Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::waveform_zoom_step), true));
+    reg_sens (editor_actions, "waveform-zoom-out", _("Waveform Zoom Out"), sigc::bind (sigc::mem_fun(*this, &Editor::waveform_zoom_step), false));
     
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 	reg_sens (editor_actions, "zoom-to-region", _("Zoom to Region"), sigc::bind (sigc::mem_fun(*this, &Editor::zoom_to_region), false));
