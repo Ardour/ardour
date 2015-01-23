@@ -125,8 +125,10 @@ void
 RangeMarker::parameter_changed (const std::string& s)
 {
         if (s == "skip-playback") {
-                /* reset our color to reflect global skip-playback setting */
-                pick_basic_color (0);
+                if (_location->is_skip()) {
+                        /* reset our color to reflect global skip-playback setting */
+                        pick_basic_color (0);
+                }
         }
 }
 
