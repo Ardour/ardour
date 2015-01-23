@@ -1448,6 +1448,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*);
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
 	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);
+	bool canvas_range_marker_handle_event (GdkEvent* event,ArdourCanvas::Item*, bool leftside);
 	bool canvas_zoom_rect_event (GdkEvent* event,ArdourCanvas::Item*);
 	bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*);
 	bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*);

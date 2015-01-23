@@ -3149,14 +3149,21 @@ FadeOutDrag::aborted (bool)
 
 sigc::connection MarkerDrag::timeout_connection;
 
-MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
+MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i, Type t)
 	: Drag (e, i)
-        , type (Move)
+        , type (t)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
 
 	_marker = reinterpret_cast<Marker*> (_item->get_data ("marker"));
-	assert (_marker);
+        assert (_marker);
+
+	Location *location = _marker->location();
+
+        if (location && location->is_mark()) {
+                /* Enforce this */
+                type = Move;
+        }
 }
 
 MarkerDrag::~MarkerDrag ()
@@ -3184,30 +3191,11 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
         boost::optional<ArdourCanvas::Rect> ro = _marker->the_item().bounding_box();
         assert (ro);
         ArdourCanvas::Rect r (*ro);
-        
-        r = _marker->the_item().item_to_canvas (r);
-        
-        if (r.width() > 50.0) {
-                if (abs (grab_x() - r.x0) < 20.0) {
-                        type = TrimLeft;
-                } else if (abs (grab_x() - r.x1) < 20.0) {
-                        type = TrimRight;
-                } else {
-                        type = Move;
-                }
-        } else {
-                type = Move;
-        }
 
-	Location *location = _marker->location();
 	_editor->_dragging_edit_point = true;
 
+        Location *location = _marker->location();
         if (location) {
-
-                if (location->is_mark()) {
-                        type = Move;
-                }
-
                 show_drag_text (location);
         }
 

@@ -47,6 +47,7 @@
 #include "midi_time_axis.h"
 #include "editor_regions.h"
 #include "verbose_cursor.h"
+#include "mouse_cursors.h"
 
 #include "i18n.h"
 
@@ -890,6 +891,30 @@ bool
 Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Marker* /*marker*/)
 {
 	return typed_event (item, event, MarkerItem);
+}
+
+bool
+Editor::canvas_range_marker_handle_event (GdkEvent *event, ArdourCanvas::Item* item, bool left_side)
+{
+        switch (event->type) {
+        case GDK_ENTER_NOTIFY:
+                if (left_side) {
+                        push_canvas_cursor (cursors()->left_side_trim);
+                } else {
+                        push_canvas_cursor (cursors()->right_side_trim);
+                }
+                break;
+
+        case GDK_LEAVE_NOTIFY:
+                pop_canvas_cursor ();
+                break;
+
+        default:
+                return typed_event (item, event, (left_side ? LeftDragHandle : RightDragHandle));
+                break;
+        }
+
+        return false;
 }
 
 bool

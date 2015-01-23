@@ -63,7 +63,9 @@ enum ItemType {
 	SamplesRulerItem,
 	DropZoneItem,
         ClockRulerItem,
-
+        LeftDragHandle,
+        RightDragHandle,
+        
 	/* don't remove this */
 
 	NoItem

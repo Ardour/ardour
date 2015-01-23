@@ -103,6 +103,16 @@ RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
 {
         assert (start < end);
 
+        left_drag_handle = new ArdourCanvas::Rectangle (group);
+        left_drag_handle->set_outline (false);
+        left_drag_handle->set_fill (false);
+        left_drag_handle->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_range_marker_handle_event), group, true));
+
+        right_drag_handle = new ArdourCanvas::Rectangle (group);
+        right_drag_handle->set_outline (false);
+        right_drag_handle->set_fill (false);
+        right_drag_handle->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_range_marker_handle_event), group, false));
+        
         /* Marker::Marker calls these but will not have used our versions since it is a constructor.
          */
 
@@ -111,6 +121,7 @@ RangeMarker::RangeMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
         use_color ();
         setup_name_display ();
 
+        
         /* our appearance depends on some backend parameters, so pick up changes as necessary */
 
         Config->ParameterChanged.connect (parameter_connection, invalidator (*this), boost::bind (&RangeMarker::parameter_changed, this, _1), gui_context());
@@ -206,6 +217,29 @@ RangeMarker::_set_position (framepos_t start, framepos_t end)
                 if (_name_item) {
                         _name_item->clamp_width (pixel_width - _label_offset);
                 }
+
+                double handle_width = min (pixel_width/2.0, 10.0);
+                
+                if (left_drag_handle) {
+                        ArdourCanvas::Rect r;
+                        r.x0 = 0;
+                        r.x1 = handle_width;
+                        r.y0 = 0;
+                        r.y1 = _height;
+
+                        left_drag_handle->set (r);
+                }
+
+                if (right_drag_handle) {
+                        ArdourCanvas::Rect r;
+                        r.x0 = pixel_width - handle_width;
+                        r.x1 = pixel_width;
+                        r.y0 = 0;
+                        r.y1 = _height;
+
+                        right_drag_handle->set (r);
+                }
+
         }
 
         Marker::_set_position (start, end);
@@ -252,8 +286,8 @@ RangeMarker::setup_line ()
 		_start_handler->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::NOTHING));
 	}
 
-	_start_handler->set_x0 (0);
-	_start_handler->set_y0 (0);
+	_start_handler->set_x0 (0);	
+_start_handler->set_y0 (0);
 	_start_handler->set_x1 (handler_size);
 	_start_handler->set_y1 (handler_size);
 
@@ -321,6 +355,8 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
         , _scene_change_rect (0)
         , _scene_change_text (0)
         , _marker_lock_text (0)
+        , left_drag_handle (0)
+        , right_drag_handle (0)
         , frame_position (start_pos)
 	, _type (type)
 	, _shown (false)
@@ -330,6 +366,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	, _right_label_limit (DBL_MAX)
 	, _label_offset (0)
         , _have_scene_change (l ? l->scene_change() : false)
+          
 {
 	unit_position = editor.sample_to_pixel (frame_position);
 
@@ -814,6 +851,17 @@ Marker::set_has_scene_change (bool yn)
 {
         _have_scene_change = yn;
         setup_name_display ();
+}
+
+void
+Marker::set_trim_active (bool yn)
+{
+        if (left_drag_handle) {
+                left_drag_handle->set_ignore_events (!yn);
+        }
+        if (right_drag_handle) {
+                right_drag_handle->set_ignore_events (!yn);
+        }
 }
 
 /***********************************************************************/

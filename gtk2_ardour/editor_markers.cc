@@ -1156,6 +1156,7 @@ Editor::update_loop_range_view ()
 
                 if (lam) {
                         lam->start->set_color (ARDOUR_UI::instance()->config()->get_canvasvar_LoopRangeMarkerActive());
+                        lam->start->set_trim_active (true);
                 }
 
 	} else {
@@ -1163,6 +1164,7 @@ Editor::update_loop_range_view ()
 
                 if (lam) {
                         lam->start->set_color (ARDOUR_UI::instance()->config()->get_canvasvar_LoopRangeMarkerInactive());
+                        lam->start->set_trim_active (false);
                 }
 	}
 }

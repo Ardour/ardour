@@ -635,14 +635,22 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                                                 _drags->set (new RangeMarkerBarDrag (this, clock_ruler, RangeMarkerBarDrag::CreateLoopMarker), event);
                                                 return true;
                                         } else {
-                                                _drags->set (new MarkerDrag (this, item), event);
+                                                _drags->set (new MarkerDrag (this, item, MarkerDrag::Move), event);
                                                 return true;
                                         }
                                 }
                         }
-                        _drags->set (new MarkerDrag (this, item), event);
+                        _drags->set (new MarkerDrag (this, item, MarkerDrag::Move), event);
 		}
 		return true;
+
+        case LeftDragHandle:
+                _drags->set (new MarkerDrag (this, item, MarkerDrag::TrimLeft), event);
+                break;
+
+        case RightDragHandle:
+                _drags->set (new MarkerDrag (this, item, MarkerDrag::TrimRight), event);
+                break;
 
 	case TempoMarkerItem:
 	{
@@ -1837,7 +1845,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case MarkerItem:
-	case MeterMarkerItem:
+        case MeterMarkerItem:
 	case TempoMarkerItem:
 		break;
 

@@ -750,7 +750,13 @@ public:
 class MarkerDrag : public Drag
 {
 public:
-        MarkerDrag (Editor *, ArdourCanvas::Item *);
+        enum Type {
+                TrimLeft,
+                TrimRight,
+                Move
+        };
+
+        MarkerDrag (Editor *, ArdourCanvas::Item *, Type);
 	~MarkerDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -767,15 +773,9 @@ public:
 	}
 
 private:
-        enum Type {
-                TrimLeft,
-                TrimRight,
-                Move
-        };
-
 	Marker* _marker; ///< marker being dragged
         Type  type;
-
+        
         struct CopiedLocationMarkerInfo {
 	    ARDOUR::Location* location;
 	    std::vector<Marker*> markers;

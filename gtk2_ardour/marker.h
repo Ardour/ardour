@@ -111,6 +111,8 @@ class Marker : public sigc::trackable
 
 	bool label_on_left () const;
 
+        void set_trim_active (bool);
+        
         static double marker_height() { return _marker_height; }
 
         static const char * default_new_marker_prefix;
@@ -130,6 +132,8 @@ class Marker : public sigc::trackable
 	ArdourCanvas::Rectangle* _scene_change_rect;
 	ArdourCanvas::Text* _scene_change_text;
     ArdourCanvas::Text* _marker_lock_text;
+        ArdourCanvas::Rectangle* left_drag_handle;
+        ArdourCanvas::Rectangle* right_drag_handle;
 
 	std::string  _name;
 	double        unit_position;
