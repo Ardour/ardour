@@ -233,7 +233,7 @@ protected:
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
-    bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
+	bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
         bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true

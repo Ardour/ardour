@@ -387,12 +387,12 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 			if (!_editor->autoscroll_active() || from_autoscroll) {
                 
-                bool first_move = (_move_threshold_passed != old_move_threshold_passed) ||
-                                   from_autoscroll;
+				bool first_move = (_move_threshold_passed != old_move_threshold_passed) ||
+					from_autoscroll;
                 
 				motion (event, first_move && !_starting_point_passed);
 				
-                _starting_point_passed = first_move;
+				_starting_point_passed = first_move;
 				
 				_last_pointer_x = _drags->current_pointer_x ();
 				_last_pointer_y = current_pointer_y ();
