@@ -272,6 +272,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	/** @return true if the playhead is currently being dragged, otherwise false */
 	virtual bool dragging_playhead () const = 0;
+    virtual framepos_t get_playhead_position () const = 0;
 	virtual void ensure_float (Gtk::Window&) = 0;
 	virtual void show_window () = 0;
 	virtual framepos_t leftmost_sample() const = 0;

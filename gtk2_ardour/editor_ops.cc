@@ -4019,7 +4019,7 @@ Editor::cut_copy_points (CutCopyOp op)
 	}
 
 	/* XXX: not ideal, as there may be more than one track involved in the point selection */
-	_last_cut_copy_source_track = &selection->points.front()->line().trackview;
+	_last_cut_copy_source_tracks.push_back(&selection->points.front()->line().trackview);
 
 	/* Keep a record of the AutomationLists that we end up using in this operation */
 	typedef std::map<boost::shared_ptr<AutomationList>, AutomationRecord> Lists;
@@ -4365,11 +4365,11 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			cut_buffer->set (foo);
 		}
 		
-		if (pmap.empty()) {
-			_last_cut_copy_source_track = 0;
-		} else {
-			_last_cut_copy_source_track = pmap.front().tv;
-		}
+        _last_cut_copy_source_tracks.clear ();
+    
+        for (vector<PlaylistMapping>::iterator i = pmap.begin(); i != pmap.end(); ++i) {
+            _last_cut_copy_source_tracks.push_back(i->tv);
+        }
 	}
 
 	for (FreezeList::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
@@ -4416,7 +4416,7 @@ Editor::paste (float times, bool from_context)
 {
         DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
 
-	paste_internal (get_preferred_edit_position (false, from_context), times);
+	paste_internal (get_playhead_position (), times);
 }
 
 void
@@ -4453,26 +4453,9 @@ Editor::paste_internal (framepos_t position, float times)
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("preferred edit position is %1\n", position));
 	}
 
-	TrackViewList ts;
-	TrackViewList::iterator i;
-	size_t nth;
-
-	/* get everything in the correct order */
-
-	if (_edit_point == Editing::EditAtMouse && entered_track) {
-		/* With the mouse edit point, paste onto the track under the mouse */
-		ts.push_back (entered_track);
-	} else if (!selection->tracks.empty()) {
-		/* Otherwise, if there are some selected tracks, paste to them */
-		ts = selection->tracks.filter_to_unique_playlists ();
-		sort_track_selection (ts);
-	} else if (_last_cut_copy_source_track) {
-		/* Otherwise paste to the track that the cut/copy came from;
-		   see discussion in mantis #3333.
-		*/
-		ts.push_back (_last_cut_copy_source_track);
-	}
-
+	TrackViewList ts = _last_cut_copy_source_tracks.filter_to_unique_playlists();
+    TrackViewList::iterator i;
+    size_t nth;
 	if (internal_editing ()) {
 
 		/* undo/redo is handled by individual tracks/regions */

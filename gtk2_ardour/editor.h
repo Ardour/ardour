@@ -342,6 +342,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool follow_playhead() const { return _follow_playhead; }
 	bool dragging_playhead () const { return _dragging_playhead; }
 
+    framepos_t get_playhead_position () const
+    {
+        if (_session) {
+            return _session->audible_frame();
+        } else {
+            return 0;
+        }
+    }
+    
 	void toggle_zero_line_visibility ();
 	void set_summary ();
 	void set_group_tabs ();
@@ -2115,7 +2124,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/** Track that was the source for the last cut/copy operation.  Used as a place
 	    to paste things iff there is no selected track.
 	*/
-	TimeAxisView* _last_cut_copy_source_track;
+	TrackViewList _last_cut_copy_source_tracks;
 
 	/** true if a change in Selection->regions should change the selection in the region list.
 	    See EditorRegions::selection_changed.
