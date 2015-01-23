@@ -594,10 +594,6 @@ RegionView::make_name () const
 		str = _region->name();
 	}
 
-	if (_region->muted()) {
-		str = string ("!") + str;
-	}
-
 	return str;
 }
 

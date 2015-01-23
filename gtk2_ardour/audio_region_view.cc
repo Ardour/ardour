@@ -332,14 +332,6 @@ AudioRegionView::region_renamed ()
 {
 	std::string str = RegionView::make_name ();
 
-	if (audio_region()->speed_mismatch (trackview.session()->frame_rate())) {
-		str = string ("*") + str;
-	}
-
-	if (_region->muted()) {
-		str = string ("!") + str;
-	}
-
 	set_item_name (str, this);
 	set_name_text (str);
 }
