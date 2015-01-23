@@ -216,6 +216,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _pointer_frame_offset (0)
 	, _trackview_only (trackview_only)
 	, _move_threshold_passed (false)
+    , _starting_point_passed (false)
 	, _was_double_click (false)
 	, _raw_grab_frame (0)
 	, _grab_frame (0)
@@ -366,7 +367,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 	bool const old_move_threshold_passed = _move_threshold_passed;
 
-	if (!from_autoscroll && !_move_threshold_passed) {
+	if (!_move_threshold_passed) {
 
 		bool const xp = (::llabs (_drags->current_pointer_frame () - _raw_grab_frame) >= threshold.first);
 		bool const yp = (::fabs ((current_pointer_y () - _grab_y)) >= threshold.second);
@@ -382,7 +383,13 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			}
 
 			if (!_editor->autoscroll_active() || from_autoscroll) {
-				motion (event, _move_threshold_passed != old_move_threshold_passed);
+                
+                bool first_move = (_move_threshold_passed != old_move_threshold_passed) ||
+                                   from_autoscroll;
+                
+				motion (event, first_move && !_starting_point_passed);
+				
+                _starting_point_passed = first_move;
 				
 				_last_pointer_x = _drags->current_pointer_x ();
 				_last_pointer_y = current_pointer_y ();
