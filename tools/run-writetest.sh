@@ -21,6 +21,6 @@ rm -r $dir/sftest
 
 for bs in $@ ; do
     echo "Blocksize $bs"
-    ./sftest $sync $nocache -b $bs -q -d $dir -S $filesize
+    ./sftest $sync $nocache -b $bs -q -d $dir -n $numfiles -S $filesize
     rm -r $dir/sftest
 done
