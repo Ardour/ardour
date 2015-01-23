@@ -112,7 +112,6 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
     , _master_event_box (WavesUI::root () )
     , _selected(false)
     , _ignore_mute_update(false)
-    , _ignore_selection_click(false)
     , _editor(ed)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
@@ -130,9 +129,7 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 	ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &MasterBusUI::reset_group_peak_display));
 
 	_peak_display_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_peak_display_button));
-	_master_mute_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button));
-    _master_mute_button.signal_enter_notify_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button_enter));
-    _master_mute_button.signal_leave_notify_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button_leave));
+	_master_mute_button.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button_press));
 	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
 	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
     _master_event_box.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_event_box_button_press));
@@ -252,10 +249,6 @@ MasterBusUI::update_master_bus_selection ()
 bool
 MasterBusUI::on_master_event_box_button_press (GdkEventButton *ev)
 {
-    if (_ignore_selection_click) {
-        return true;
-    }
-    
     if (ev->button == 1) {
         
         if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
@@ -484,12 +477,13 @@ bool MasterBusUI::check_all_tracks_are_muted()
     return all_tracks_are_muted;
 }
 
-void MasterBusUI::on_master_mute_button (WavesButton*)
+bool
+MasterBusUI::on_master_mute_button_press (GdkEventButton*)
 {
     Session* session = ARDOUR_UI::instance()->the_session();
     
     if( !session )
-        return;
+        return true;
     
     PBD::Unwinder<bool> uw (_ignore_mute_update, true);
     
@@ -505,19 +499,7 @@ void MasterBusUI::on_master_mute_button (WavesButton*)
         master->set_mute(!master->muted(), session);
         _master_mute_button.set_active(master->muted());
     }
-}
-
-bool
-MasterBusUI::on_master_mute_button_enter (GdkEventCrossing*)
-{
-    _ignore_selection_click = true;
-    return true;
-}
-
-bool
-MasterBusUI::on_master_mute_button_leave (GdkEventCrossing*)
-{
-    _ignore_selection_click = false;
+    
     return true;
 }
 

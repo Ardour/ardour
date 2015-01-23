@@ -68,9 +68,7 @@ private:
 	void reset_route_peak_display (ARDOUR::Route* route);
 	void reset_group_peak_display (ARDOUR::RouteGroup* group);
 	void on_peak_display_button (WavesButton*);
-	void on_master_mute_button (WavesButton*);
-    bool on_master_mute_button_enter (GdkEventCrossing*);
-    bool on_master_mute_button_leave (GdkEventCrossing*);
+	bool on_master_mute_button_press (GdkEventButton*);
     void on_clear_solo_button (WavesButton*);
 	void on_global_rec_button (WavesButton*);
     void on_output_connection_mode_changed ();
@@ -118,7 +116,6 @@ private:
     
     bool _selected;
     bool _ignore_mute_update;
-    bool _ignore_selection_click;
 };
 
 #endif /* __tracks_master_bus_ui_h__ */
