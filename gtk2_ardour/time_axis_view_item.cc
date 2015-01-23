@@ -175,6 +175,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	group->Event.connect (sigc::mem_fun (*this, &TimeAxisViewItem::canvas_group_event));
 
 	fill_color = base_color;
+    _route_time_axis_view_color = base_color;
 	samples_per_pixel = fpp;
 	frame_position = start;
 	item_duration = duration;
@@ -839,6 +840,12 @@ TimeAxisViewItem::manage_sr_highlight ()
     manage_sr_text ();
 }
 
+void
+TimeAxisViewItem::restore_color_after_mute ()
+{
+    fill_color = _route_time_axis_view_color;
+    set_colors ();    
+}
 
 void
 TimeAxisViewItem::set_color (uint32_t base_color)

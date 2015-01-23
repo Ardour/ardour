@@ -74,6 +74,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual double height() const { return _height; }
 	void set_y (double);
 	void set_color (uint32_t);
+    void set_route_time_axis_view_color (uint32_t color) { _route_time_axis_view_color = color;}
 	void set_name_text_color ();
 
         uint32_t get_fill_color () const;
@@ -192,6 +193,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
     virtual void update_color();
 	virtual void set_frame_gradient ();
 	void set_trim_handle_colors();
+    void restore_color_after_mute ();
 
     void set_ioconfig_text(const std::string&);
     void set_sr_text(const std::string&s);
@@ -245,6 +247,7 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	virtual uint32_t fill_opacity() const;
 
 	uint32_t fill_color;
+    uint32_t _route_time_axis_view_color;
     uint32_t name_highlight_color;
     uint32_t sr_highlight_color;
     uint32_t ioconfig_highlight_color;

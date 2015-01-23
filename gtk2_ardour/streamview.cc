@@ -392,7 +392,10 @@ StreamView::apply_color (uint32_t color, ColorTarget target)
 	case RegionColor:
 		region_color = color;
 		for (i = region_views.begin(); i != region_views.end(); ++i) {
-			(*i)->set_color (region_color);
+            if ( !(*i)->region()->muted() )
+                (*i)->set_color (region_color);
+            else
+                (*i)->set_route_time_axis_view_color (region_color);
 		}
 		break;
 

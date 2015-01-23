@@ -64,7 +64,7 @@
 
 #include "i18n.h"
 
-#define MUTED_ALPHA 255 //VK: 48
+#define MUTED_ALPHA 0 // NP: do not show waveform if region is muted
 
 using namespace std;
 using namespace ARDOUR;
@@ -1393,8 +1393,9 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 	if (_selected) {
 		if (_region->muted()) {
 			/* hide outline with zero alpha */
-			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), 0);
-			fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill(), MUTED_ALPHA);
+			outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
+            zero    = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
+			fill    = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm(), MUTED_ALPHA);
 		} else {
 			outline = ARDOUR_UI::config()->get_canvasvar_SelectedWaveForm();
 			fill = ARDOUR_UI::config()->get_canvasvar_SelectedWaveFormFill();
@@ -1413,7 +1414,8 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 		} else {
 			if (_region->muted()) {
 				/* hide outline with zero alpha */
-				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), 0);	
+				outline = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveForm(), 0);
+                zero = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_ZeroLine(), MUTED_ALPHA);
 				fill = UINT_RGBA_CHANGE_A(ARDOUR_UI::config()->get_canvasvar_WaveFormFill(), MUTED_ALPHA);
 			} else {
 				outline = ARDOUR_UI::config()->get_canvasvar_WaveForm();

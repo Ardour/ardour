@@ -438,7 +438,13 @@ RegionView::reset_width_dependent_items (double pixel_width)
 void
 RegionView::region_muted ()
 {
-	set_frame_color ();
+    if ( _region->muted() ) {
+        TimeAxisViewItem::set_color ( ARDOUR_UI::config()->get_canvasvar_MutedRegionFill () );
+    } else {
+        TimeAxisViewItem::restore_color_after_mute ();
+        set_frame_color ();
+    }
+
 	region_renamed ();
 }
 
