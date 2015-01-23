@@ -236,7 +236,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	}
 
 	{ // configure name highlight rect
-        uint32_t opacity = 255*0.85; //70% opacity
+        uint32_t opacity = 255*0.85; //85% opacity
         name_highlight_color = RGBA_TO_UINT (0, 0, 0, opacity);
         name_highlight = new ArdourCanvas::Rectangle (group, 
                                         ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
@@ -260,8 +260,8 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
     }
     
     { // configure io config highlight
-        uint32_t opacity = 255*0.95;
-        ioconfig_highlight_color = RGBA_TO_UINT (17,128,128,opacity);
+        uint32_t opacity = 255*0.85; //85% opacity
+        ioconfig_highlight_color = RGBA_TO_UINT (0, 0, 0, opacity);
         // alighn with name highlight
         double x0 = name_highlight->x1 ();
         double y0 = name_highlight->y0 ();
@@ -279,7 +279,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
         ioconfig_text = new ArdourCanvas::Text (group);
         CANVAS_DEBUG_NAME (ioconfig_text, string_compose ("ioconfig text for %1", get_item_name()));
         
-        ioconfig_text->set_position (ArdourCanvas::Duple (ioconfig_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, ioconfig_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        ioconfig_text->set_position (ArdourCanvas::Duple (ioconfig_highlight->x0 () /*+ NAME_HIGHLIGHT_X_INDENT*/, ioconfig_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
         ioconfig_text->set_font_description (FILE_INFO_FONT);
         ioconfig_text->set_color (RGBA_TO_UINT (255,255,255,255));
 
@@ -288,8 +288,8 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
     }
     
     { // configure SR highlight
-        uint32_t opacity = 255*0.95;
-        sr_highlight_color = RGBA_TO_UINT (127,1,64,opacity);
+        uint32_t opacity = 255*0.85; //85% opacity
+        sr_highlight_color = RGBA_TO_UINT (0, 0, 0, opacity);
         // alighn with io config highlight
         double x0 = ioconfig_highlight->x1 ();
         double y0 = ioconfig_highlight->y0 ();
@@ -307,7 +307,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
         sample_rate_text = new ArdourCanvas::Text (group);
         CANVAS_DEBUG_NAME (sample_rate_text, string_compose ("sr text for %1", get_item_name()));
         
-        sample_rate_text->set_position (ArdourCanvas::Duple (sample_rate_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, sample_rate_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        sample_rate_text->set_position (ArdourCanvas::Duple (sample_rate_highlight->x0 () /*+ NAME_HIGHLIGHT_X_INDENT*/, sample_rate_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
         sample_rate_text->set_font_description (FILE_INFO_FONT);
         sample_rate_text->set_color(RGBA_TO_UINT (255,255,255,255) );
         
@@ -775,9 +775,9 @@ TimeAxisViewItem::manage_ioconfig_highlight ()
 #ifdef __APPLE__
     // there is a bug in pango with text width definition on MAC
     // that's why ioconfig_label_width is bigger then is in fact
-    double ioconfig_x1 = ioconfig_label_width + NAME_HIGHLIGHT_X_INDENT/2 + name_highlight->x1 ();
+    double ioconfig_x1 = ioconfig_label_width + /*NAME_HIGHLIGHT_X_INDENT/2 */+ name_highlight->x1 ();
 #else
-    double ioconfig_x1 = ioconfig_label_width + 2*NAME_HIGHLIGHT_X_INDENT + name_highlight->x1 ();
+    double ioconfig_x1 = ioconfig_label_width + /*2*NAME_HIGHLIGHT_X_INDENT */+ name_highlight->x1 ();
 #endif
 
     if (_width < ioconfig_x1) {
@@ -1209,14 +1209,14 @@ TimeAxisViewItem::manage_ioconfig_text ()
     
     int visible_ioconfig_width = ioconfig_label_width;
     
-    if (visible_ioconfig_width > _width - ioconfig_highlight->x0() - NAME_HIGHLIGHT_X_INDENT) {
-        visible_ioconfig_width = _width - ioconfig_highlight->x0() - NAME_HIGHLIGHT_X_INDENT;
+    if (visible_ioconfig_width > _width - ioconfig_highlight->x0() /*- NAME_HIGHLIGHT_X_INDENT*/) {
+        visible_ioconfig_width = _width - ioconfig_highlight->x0() /*- NAME_HIGHLIGHT_X_INDENT*/;
     }
     
     if (visible_ioconfig_width < 1) {
         ioconfig_text->hide ();
     } else {
-        ioconfig_text->set_position (ArdourCanvas::Duple (ioconfig_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, ioconfig_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        ioconfig_text->set_position (ArdourCanvas::Duple (ioconfig_highlight->x0 () /*+ NAME_HIGHLIGHT_X_INDENT*/, ioconfig_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
         ioconfig_text->clamp_width (visible_ioconfig_width);
         ioconfig_text->show ();
         ioconfig_text->raise_to_top ();
@@ -1241,14 +1241,14 @@ TimeAxisViewItem::manage_sr_text ()
     
     int visible_sr_width = sr_label_width;
     
-    if (visible_sr_width > _width - sample_rate_highlight->x0() - NAME_HIGHLIGHT_X_INDENT) {
-        visible_sr_width = _width - sample_rate_highlight->x0() - NAME_HIGHLIGHT_X_INDENT;
+    if (visible_sr_width > _width - sample_rate_highlight->x0() /*- NAME_HIGHLIGHT_X_INDENT*/) {
+        visible_sr_width = _width - sample_rate_highlight->x0() /*- NAME_HIGHLIGHT_X_INDENT*/;
     }
     
     if (visible_sr_width < 1) {
         sample_rate_text->hide ();
     } else {
-        sample_rate_text->set_position (ArdourCanvas::Duple (sample_rate_highlight->x0 () + NAME_HIGHLIGHT_X_INDENT, sample_rate_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
+        sample_rate_text->set_position (ArdourCanvas::Duple (sample_rate_highlight->x0 () /*+ NAME_HIGHLIGHT_X_INDENT*/, sample_rate_highlight->y0 () + NAME_HIGHLIGHT_Y_INDENT) );
         sample_rate_text->clamp_width (visible_sr_width);
         sample_rate_text->show ();
         sample_rate_text->raise_to_top ();
