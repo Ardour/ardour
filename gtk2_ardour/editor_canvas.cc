@@ -1106,8 +1106,8 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor, bool save)
 void
 Editor::push_canvas_cursor (Gdk::Cursor* cursor)
 {
-	if (!MouseCursors::is_invalid (cursor)) {
-		_cursor_stack.push (cursor);
+	if (!MouseCursors::is_invalid (current_canvas_cursor)) {
+		_cursor_stack.push (current_canvas_cursor);
 		set_canvas_cursor (cursor, false);
 	}
 }
@@ -1116,9 +1116,9 @@ void
 Editor::pop_canvas_cursor ()
 {
 	if (!_cursor_stack.empty()) {
-		Gdk::Cursor* cursor = _cursor_stack.top ();
-		_cursor_stack.pop ();
-		set_canvas_cursor (cursor, false);
+                Gdk::Cursor* cursor = _cursor_stack.top ();
+                _cursor_stack.pop ();
+                set_canvas_cursor (cursor, false);
 	}
 }
 
