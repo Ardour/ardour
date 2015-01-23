@@ -58,6 +58,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void set_number (int);
 	void focus_name();
         void set_clock_group (ClockGroup&);
+        void unset_clock_group () { _clock_group = 0; }
 
 	sigc::signal<void,ARDOUR::Location*> remove_requested;
 	sigc::signal<void> redraw_ranges;

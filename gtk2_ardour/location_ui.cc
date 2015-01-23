@@ -839,7 +839,9 @@ LocationUI::LocationUI ()
 
 LocationUI::~LocationUI()
 {
-        delete _clock_group;
+	loop_edit_row.unset_clock_group ();
+	punch_edit_row.unset_clock_group ();
+	delete _clock_group;
 }
 
 gint
