@@ -75,16 +75,17 @@ RulerMarker::RulerMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
         /* make sure we call our own color stuff, since we look different */
 
         use_color ();
+
+        /* unset the effects of RangeMarker::use_color () called during constructor */
+
+        _name_background->set_pattern (Cairo::RefPtr<Cairo::SurfacePattern> ());
+
 }
 
 void
 RulerMarker::use_color ()
 {
         Marker::use_color ();
-
-        /* unset the effects of RangeMarker::use_color () called during constructor */
-
-        _name_background->set_pattern (Cairo::RefPtr<Cairo::SurfacePattern> ());
 
         if (_end_line) {
                 _end_line->set_outline_color (_color);
