@@ -2211,10 +2211,20 @@ ARDOUR_UI::on_lock_button_pressed () {
 }
 
 void
-ARDOUR_UI::lock_session () {
+ARDOUR_UI::on_lock_session ()
+{
     editor->get_waves_button ("lock_session_button").set_active (true);
-    session_lock_dialog->run ();
+}
+
+void
+ARDOUR_UI::on_unlock_session ()
+{
     editor->get_waves_button ("lock_session_button").set_active (false);
+}
+
+void
+ARDOUR_UI::lock_session () {
+    session_lock_dialog->run ();
 }
 
 bool

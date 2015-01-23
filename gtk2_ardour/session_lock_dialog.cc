@@ -31,6 +31,7 @@
 #include "session_lock_dialog.h"
 #include "i18n.h"
 #include "dbg_msg.h"
+#include "ardour_ui.h"
 
 using namespace std;
 using namespace Gtk;
@@ -61,6 +62,19 @@ SessionLockDialog::on_ok (WavesButton*)
 	response (Gtk::RESPONSE_OK);
 }
 
+void
+SessionLockDialog::on_show ()
+{
+    WavesDialog::on_show ();
+    ARDOUR_UI::instance()->on_lock_session ();
+}
+
+void
+SessionLockDialog::on_hide ()
+{
+    ARDOUR_UI::instance()->on_unlock_session ();
+    WavesDialog::on_hide ();
+}
 
 bool
 SessionLockDialog::on_key_press_event (GdkEventKey*)

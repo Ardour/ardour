@@ -369,6 +369,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     
     bool screen_lock_is_allowed() const;
     void on_lock_button_pressed ();
+    void on_lock_session ();
+    void on_unlock_session ();
     PBD::Signal0<void> lock_button_was_pressed;
     
     bool session_auto_save_is_allowed() const;
