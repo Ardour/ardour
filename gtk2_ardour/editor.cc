@@ -4684,6 +4684,28 @@ Editor::get_regions_from_selection_and_edit_point ()
 	return regions;
 }
 
+RegionSelection
+Editor::get_regions_from_selection_and_playhead ()
+{
+    RegionSelection regions;
+    TrackViewList involved_tracks;
+    
+    RegionSelection& selected_regions = selection->regions;
+    
+    if (!selected_regions.empty() ) {
+        
+        RegionSelection::iterator iter = selected_regions.begin ();
+        for (; iter != selected_regions.end (); ++iter) {
+            involved_tracks.push_back ( &(*iter)->get_time_axis_view() );
+        }
+    }
+    
+    framepos_t where = get_playhead_position ();
+    get_regions_at(regions, where, involved_tracks /*if empty apply to all*/);
+    
+    return regions;
+}
+
 /** Get regions using the following method:
  *
  *  Make a region list using:

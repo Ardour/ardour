@@ -5709,9 +5709,8 @@ Editor::split_region ()
 		return;
 	}
 
-	RegionSelection rs = get_regions_from_selection_and_edit_point ();
-
-	framepos_t where = get_preferred_edit_position ();
+	RegionSelection rs = get_regions_from_selection_and_playhead ();
+	framepos_t where = get_playhead_position ();
 
 	if (rs.empty()) {
 		return;
