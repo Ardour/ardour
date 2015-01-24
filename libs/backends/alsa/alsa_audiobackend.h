@@ -301,6 +301,7 @@ class AlsaAudioBackend : public AudioBackend {
 
 		bool  _run; /* keep going or stop, ardour thread */
 		bool  _active; /* is running, process thread */
+		bool  _freewheel;
 		bool  _freewheeling;
 		bool  _measure_latency;
 

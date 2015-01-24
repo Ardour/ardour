@@ -47,6 +47,7 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _pcmi (0)
 	, _run (false)
 	, _active (false)
+	, _freewheel (false)
 	, _freewheeling (false)
 	, _measure_latency (false)
 	, _audio_device("")
@@ -657,11 +658,7 @@ AlsaAudioBackend::stop ()
 int
 AlsaAudioBackend::freewheel (bool onoff)
 {
-	if (onoff == _freewheeling) {
-		return 0;
-	}
 	_freewheeling = onoff;
-	engine.freewheel_callback (onoff);
 	return 0;
 }
 
@@ -1410,7 +1407,13 @@ AlsaAudioBackend::main_process_thread ()
 	while (_run) {
 		long nr;
 		bool xrun = false;
-		if (!_freewheeling) {
+
+		if (_freewheeling != _freewheel) {
+			_freewheel = _freewheeling;
+			engine.freewheel_callback (_freewheel);
+		}
+
+		if (!_freewheel) {
 			nr = _pcmi->pcm_wait ();
 
 			if (_pcmi->state () > 0) {
@@ -1421,7 +1424,8 @@ AlsaAudioBackend::main_process_thread ()
 				PBD::error << _("AlsaAudioBackend: I/O error. Audio Process Terminated.") << endmsg;
 				break;
 			}
-			while (nr >= (long)_samples_per_period) {
+
+			while (nr >= (long)_samples_per_period && _freewheeling == _freewheel) {
 				uint32_t i = 0;
 				clock1 = g_get_monotonic_time();
 				no_proc_errors = 0;
