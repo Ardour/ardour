@@ -228,12 +228,6 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 Duple
 Canvas::window_to_canvas (Duple const & d) const
 {
-	/* Find the scroll group that covers d (a window coordinate). Scroll groups are only allowed
-	 * as children of the root group, so we just scan its first level
-	 * children and see what we can find.
-	 */
-
-	std::list<Item*> const& root_children (_root.items());
 	ScrollGroup* sg = 0;
 
 	/* if the coordinates are negative, clamp to zero and find the item
@@ -249,10 +243,11 @@ Canvas::window_to_canvas (Duple const & d) const
 		in_window.y = 0;
 	}
 
-	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
-		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_window (in_window)) {
+	for (list<ScrollGroup*>::const_iterator s = scrollers.begin(); s != scrollers.end(); ++s) {
+		if ((*s)->covers_window (in_window)) {
+                        sg = *s;
 			break;
-		}
+		} 
 	}
 
 	if (sg) {
@@ -279,7 +274,6 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 			break;
 		}
 	}
-	
 
 	if (sg) {
 		wd = d.translate (-sg->scroll_offset());
