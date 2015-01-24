@@ -58,6 +58,7 @@ static int64_t _x_get_monotonic_usec() {
 DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
 	, _running (false)
+	, _freewheel (false)
 	, _freewheeling (false)
 	, _device ("")
 	, _samplerate (48000)
@@ -446,11 +447,7 @@ DummyAudioBackend::stop ()
 int
 DummyAudioBackend::freewheel (bool onoff)
 {
-	if (onoff == _freewheeling) {
-		return 0;
-	}
 	_freewheeling = onoff;
-	engine.freewheel_callback (onoff);
 	return 0;
 }
 
@@ -1157,6 +1154,11 @@ DummyAudioBackend::main_process_thread ()
 	clock1 = _x_get_monotonic_usec();
 	while (_running) {
 
+		if (_freewheeling != _freewheel) {
+			_freewheel = _freewheeling;
+			engine.freewheel_callback (_freewheel);
+		}
+
 		// re-set input buffers, generate on demand.
 		for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 			(*it)->next_period();
@@ -1198,7 +1200,7 @@ DummyAudioBackend::main_process_thread ()
 			}
 		}
 
-		if (!_freewheeling) {
+		if (!_freewheel) {
 			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 			clock2 = _x_get_monotonic_usec();
 #ifdef PLATFORM_WINDOWS
