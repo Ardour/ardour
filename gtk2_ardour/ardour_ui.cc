@@ -225,7 +225,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     , _frame_rate_button (0)
     , _sample_rate_dropdown (0)
     , splash (0)
-	, session_name_from_command_line ("")
 {
 	show_splash ();
 	Gtkmm2ext::init(localedir);
@@ -414,12 +413,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     
     // start the engine pushing state from the state controller
     EngineStateController::instance()->push_current_state_to_backend(true);
-	
-	// get path to session from command line parameter
-
-	if ( (*argcp > 1) && (strlen (argvp[0][1]) != 0)) {
-		session_name_from_command_line = argvp[0][1];
-	}
 }
 
 GlobalPortMatrixWindow*
@@ -2895,13 +2888,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			session_dialog.clear_given ();
 		}
 		
-		if (session_name_from_command_line.size ()) { 
+		if (ARDOUR_COMMAND_LINE::session_name.size ()) { 
 			// session to open is already chosen by user
-			// as a result of doubled click or drag-n-drop 
+			// from command line 
 			// we shouldn't run SessionDialog
 			// just open chosen session
-			session_dialog.set_selected_session_full_path (session_name_from_command_line);
-			session_name_from_command_line = "";
+			session_dialog.set_selected_session_full_path (ARDOUR_COMMAND_LINE::session_name);
 		}
 		else { 
 			// session wasn't preliminary chosen
