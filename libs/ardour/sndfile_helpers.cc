@@ -140,6 +140,19 @@ sndfile_data_width (int format)
 	}
 }
 
+int
+sndfile_data_width (ARDOUR::SampleFormat format)
+{
+	switch (format) {
+	case ARDOUR::FormatInt16:
+		return sndfile_data_width (SF_FORMAT_PCM_16);
+	case ARDOUR::FormatInt24:
+		return sndfile_data_width (SF_FORMAT_PCM_24);
+	default:
+		return sndfile_data_width (SF_FORMAT_FLOAT);
+	}
+}
+
 string
 sndfile_major_format(int format)
 {
