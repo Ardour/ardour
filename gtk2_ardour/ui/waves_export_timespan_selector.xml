@@ -27,9 +27,9 @@
               style="generic_control"
               width="126"
               height="20"
-              normalicon="preference_device_dropdown"
-              activeicon="preference_device_dropdown_active"
-              inactiveicon="preference_device_dropdown_inactive">
+              normalicon="dropdown_126x20"
+              activeicon="dropdown_126x20_active"
+              inactiveicon="dropdown_126x20_inactive">
       <HBox>
         <VBox width="10"/>
         <Label style="generic_control"

@@ -259,10 +259,10 @@
                   y="12"
                   width="126"
                   height="20"
-                  normalicon="preference_device_dropdown"
-                  activeicon="preference_device_dropdown_active"
-                  _prelighticon="preference_device_dropdown_prelight"
-                  inactiveicon="preference_device_dropdown_inactive">
+                  normalicon="dropdown_126x20"
+                  activeicon="dropdown_126x20_active"
+                  _prelighticon="dropdown_126x20_prelight"
+                  inactiveicon="dropdown_126x20_inactive">
           <HBox>
             <VBox width="10"/>
             <Label style="generic_control"
@@ -284,10 +284,10 @@
                   y="40"
                   width="126"
                   height="20"
-                  normalicon="preference_device_dropdown"
-                  activeicon="preference_device_dropdown_active"
-                  _prelighticon="preference_device_dropdown_prelight"
-                  inactiveicon="preference_device_dropdown_inactive">
+                  normalicon="dropdown_126x20"
+                  activeicon="dropdown_126x20_active"
+                  _prelighticon="dropdown_126x20_prelight"
+                  inactiveicon="dropdown_126x20_inactive">
           <HBox>
             <VBox width="10"/>
             <Label style="generic_control"
