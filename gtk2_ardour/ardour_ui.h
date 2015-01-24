@@ -862,6 +862,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
   
     //full path to recent sessions
     std::vector<std::string> recent_session_full_paths;
+
+	std::string session_name_from_command_line;
     
 };
 

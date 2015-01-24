@@ -225,6 +225,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     , _frame_rate_button (0)
     , _sample_rate_dropdown (0)
     , splash (0)
+	, session_name_from_command_line ("")
 {
 	show_splash ();
 	Gtkmm2ext::init(localedir);
@@ -413,6 +414,12 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     
     // start the engine pushing state from the state controller
     EngineStateController::instance()->push_current_state_to_backend(true);
+	
+	// get path to session from command line parameter
+
+	if ( (*argcp > 1) && (strlen (argvp[0][1]) != 0)) {
+		session_name_from_command_line = argvp[0][1];
+	}
 }
 
 GlobalPortMatrixWindow*
@@ -2888,24 +2895,36 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			session_dialog.clear_given ();
 		}
 		
-		if (should_be_new || session_name.empty()) {
-			/* need the dialog to get info from user */
-            int response = session_dialog.run();
-			switch (response) {
-                case Gtk::RESPONSE_ACCEPT: // existed session was choosen or new session was created
-                    break;
-                case Gtk::RESPONSE_CANCEL: // cancel was pressed
-                case WavesDialog::RESPONSE_DEFAULT: // enter was pressed
-                    continue; // do not act on Esc or Enter button pressed
-                case Gtk::RESPONSE_REJECT: // quit button pressed
-                    UI::quit ();
-                    return ret;
-                default: // this happens on Close Button pressed (at the top left corner only on Mac)
-                    UI::quit ();
-                    return ret;
-			}
+		if (session_name_from_command_line.size ()) { 
+			// session to open is already chosen by user
+			// as a result of doubled click or drag-n-drop 
+			// we shouldn't run SessionDialog
+			// just open chosen session
+			session_dialog.set_selected_session_full_path (session_name_from_command_line);
+			session_name_from_command_line = "";
+		}
+		else { 
+			// session wasn't preliminary chosen
+			// so we must show SessionDialog
+			if (should_be_new || session_name.empty()) {
+				/* need the dialog to get info from user */
+				int response = session_dialog.run();
+				switch (response) {
+					case Gtk::RESPONSE_ACCEPT: // existed session was choosen or new session was created
+						break;
+					case Gtk::RESPONSE_CANCEL: // cancel was pressed
+					case WavesDialog::RESPONSE_DEFAULT: // enter was pressed
+						continue; // do not act on Esc or Enter button pressed
+					case Gtk::RESPONSE_REJECT: // quit button pressed
+						UI::quit ();
+						return ret;
+					default: // this happens on Close Button pressed (at the top left corner only on Mac)
+						UI::quit ();
+						return ret;
+				}
 
-			session_dialog.hide ();
+				session_dialog.hide ();
+			}
 		}
 
 		/* if we run the startup dialog again, offer more than just "new session" */

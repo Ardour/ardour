@@ -43,6 +43,7 @@
 
 	bool connect_outs_to_master() const { return true; }
 	bool connect_outs_to_physical() const { return false; }
+	void set_selected_session_full_path (std::string path) { _selected_session_full_name = path; }
 
   private:
 // data types:
