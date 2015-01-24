@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VBox CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_button"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#6D6E72"
+         textcolornormal="#6D6E72"
+         bgnormal="#CACAC5"
+         basenormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         borderwidth="0 0 0 0"
+         bordercolor="#6D6E72"
+         height="20"/>
+  <style name="generic_dropdown"
+         style="generic_control"
+         bgnormal="#6C6C6C"
+         fgnormal="#C1C1C1"/>
+  <style name="generic_dropdown_menu"
+         style="generic_dropdown"/>
+  <Dropdown id="format_dropdown"
+            style="generic_dropdown"
+            width="418"
+            height="20"
+            normalicon="dropdown_418x20"
+            activeicon="dropdown_418x20_active" ui.norphan="true">
+    <HBox>
+      <VBox width="10"/>
+      <Label style="generic_dropdown"
+             horzalignment="start"/>
+    </HBox>
+    <DropdownMenu style="generic_dropdown_menu"/>
+  </Dropdown>
+
+  <HBox spacing="2" 
+        box.pack="end">
+    <Button id="edit_button"
+            style="generic_button"
+            text="Edit"
+            width="60"/>
+    <Button id="remove_button"
+            style="generic_button"
+            text="Remove"
+            width="60"/>
+    <Button id="new_button"
+            style="generic_button"
+            text="New"
+            width="60"/>
+  </HBox>
+</VBox>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VBox CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_button"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#EDECE8"
+         fgactive="#6D6E72"
+         textcolornormal="#6D6E72"
+         bgnormal="#6D6E72"
+         bgactive="#CACAC5"
+         borderwidth="0 0 0 0"
+         bordercolor="#6D6E72"/>
+  <style name="generic_dropdown"
+         style="generic_control"
+         bgnormal="#6C6C6C"
+         fgnormal="#C1C1C1"/>
+  <style name="generic_dropdown_menu"
+         style="generic_dropdown"/>
+  <EventBox bgnormal="#00ff00" height="1"/>
+  <EventBox bgnormal="#6C6C6C">
+    <HBox>
+      <Iconbutton id="lossless_check_button"
+                  width="20"
+                  height="20"
+                  normalicon="waves_check_box"
+                  activeicon="waves_check_box_active"
+                  toggleable="true"/>
+      <Button id="lossless_button"
+              style="generic_button"
+              text="Lossless"
+              height="30"
+              width="100"/>
+      <Iconbutton id="lossy_check_button"
+                  width="20"
+                  height="20"
+                  normalicon="waves_check_box"
+                  activeicon="waves_check_box_active"
+                  toggleable="true"/>
+      <Button id="lossy_button"
+              style="generic_button"
+              text="Lossy"
+              height="30"
+              width="100"/>
+    </HBox>
+  </EventBox>
+  <EventBox id="file_page_home"
+            bgnormal="#CBDBF5"/>
+  <EventBox bgnormal="#ffff00" height="1" box.pack="end"/>
+</VBox>

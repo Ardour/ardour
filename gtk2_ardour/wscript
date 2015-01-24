@@ -35,6 +35,7 @@ gtk2_ardour_sources = [
 		'waves_export_preset_selector.cc',
 		'waves_export_timespan_selector.cc',
 		'waves_export_filename_selector.cc',
+		'waves_export_format_selector.cc',
 		'marker_inspector_dialog.cc',
 		'marker_inspector_dialog.logic.cc',
 		'route_inspector.cc',

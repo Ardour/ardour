@@ -61,9 +61,11 @@ style "default" = "medium_text"
 
   GtkTreeView::vertical-padding = 0
   GtkTreeView::horizontal-padding = 0
-  GtkTreeView::even-row-color = shade(0.25,@@COLPREFIX@_base)
-  GtkTreeView::odd-row-color = lighter(lighter(@@COLPREFIX@_base))
-  
+  GtkTreeView::even-row-color = { 0.42, 0.42, 0.42 }
+  GtkTreeView::odd-row-color = { 0.42, 0.42, 0.42 }
+  #GtkTreeView::even-row-color = shade(0.25,@bases)
+  #GtkTreeView::odd-row-color = lighter(lighter(@bases))
+    
   GtkWidget           :: focus-line-pattern               = "\000\000"        #                              Dash pattern used to draw the focus indicator.
   GtkWidget           :: focus-line-width                 = 1                 # [               1 ] ( >= 0 ) Width, in pixels, of the focus indicator line.
   GtkWidget           :: focus-padding                    = 1                 # [               1 ] ( >= 0 ) Width, in pixels, between focus indicator and the widget box.

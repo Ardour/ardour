@@ -37,8 +37,8 @@
         </HBox>
         <EventBox id="selectors_home"
                   bgnormal="#EDECE8"
-                  width="652"
-                  height="232">
+                  width="642"
+                  height="273">
           <VBox id="file_format_selector">
             <HBox id="preset_selector_home" ui.orphan="true"/>
             <HBox id="file_notebook_home"/>

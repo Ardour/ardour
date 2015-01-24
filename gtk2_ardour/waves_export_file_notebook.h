@@ -28,11 +28,12 @@
 #include "ardour/export_profile_manager.h"
 #include "ardour/session_handle.h"
 
-#include "export_format_selector.h"
+#include "waves_export_format_selector.h"
 #include "waves_export_filename_selector.h"
 #include "soundcloud_export_selector.h"
+#include "waves_ui.h"
 
-class WavesExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
+class WavesExportFileNotebook : public Gtk::VBox, public WavesUI, public ARDOUR::SessionHandlePtr
 {
   public:
 
@@ -55,23 +56,32 @@ class WavesExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHand
 
 	ManagerPtr        profile_manager;
 
-	void add_new_file_page ();
-	void add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr format_state, ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);
+	FilePage* add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr format_state,
+							 ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);
 	void remove_file_page (FilePage * page);
 	void update_remove_file_page_sensitivity ();
 	void update_soundcloud_upload ();
+	void show_lossless_page ();
+	void show_lossy_page ();
+
+	void on_lossless_button (WavesButton*);
+	void on_lossy_button (WavesButton*);
 
 	sigc::connection page_change_connection;
-	void handle_page_change (GtkNotebookPage*, uint32_t page);
 
-	Gtk::HBox    new_file_hbox;
-	Gtk::Button  new_file_button;
-	Gtk::VBox    new_file_dummy;
-
-	uint32_t     last_visible_page;
 	uint32_t     page_counter;
 
-	class FilePage : public Gtk::VBox {
+	WavesButton& _lossless_button;
+	WavesButton& _lossless_check_button;
+	FilePage* _lossless_format_file_page;
+
+	WavesButton& _lossy_button;
+	WavesButton& _lossy_check_button;
+	FilePage* _lossy_format_file_page;
+
+	Gtk::Container& _file_page_home;
+
+	class FilePage : public Gtk::VBox, public WavesUI {
 	  public:
 		FilePage (ARDOUR::Session * s, ManagerPtr profile_manager, WavesExportFileNotebook * parent, uint32_t number,
 		          ARDOUR::ExportProfileManager::FormatStatePtr format_state,
@@ -79,8 +89,6 @@ class WavesExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHand
 
 		virtual ~FilePage ();
 
-		Gtk::Widget & get_tab_widget () { return tab_widget; }
-		void set_remove_sensitive (bool value);
 		std::string get_format_name () const;
 		bool get_soundcloud_upload () const;
 
@@ -101,21 +109,21 @@ class WavesExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHand
 		ManagerPtr                                     profile_manager;
 
 		/* GUI components */
-
-		Gtk::Label              format_label;
-		Gtk::Alignment          format_align;
-		ExportFormatSelector    format_selector;
+		Gtk::Container& _format_selector_home;
+		Gtk::Container& _filename_selector_home;
+		//Gtk::Label              format_label;
+		//Gtk::Alignment          format_align;
+		WavesExportFormatSelector    _format_selector;
 		PBD::ScopedConnection   format_connection;
 
-		Gtk::Label              filename_label;
-		Gtk::Alignment          filename_align;
-		WavesExportFilenameSelector  filename_selector;
+		//Gtk::Alignment          filename_align;
+		WavesExportFilenameSelector  _filename_selector;
 
-		Gtk::CheckButton	soundcloud_upload_button;
-		Gtk::HBox               tab_widget;
-		Gtk::Label              tab_label;
-		Gtk::Alignment          tab_close_alignment;
-		Gtk::Button             tab_close_button;
+		//Gtk::CheckButton	soundcloud_upload_button;
+		//Gtk::HBox               tab_widget;
+		//Gtk::Label              tab_label;
+		//Gtk::Alignment          tab_close_alignment;
+		//Gtk::Button             tab_close_button;
 		uint32_t                tab_number;
 	};
 };

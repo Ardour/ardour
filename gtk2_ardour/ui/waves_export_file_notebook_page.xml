@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VBox CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_button"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         textcolornormal="#6D6E72"
+         bgnormal="#CACAC5"
+         basenormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         borderwidth="0 0 0 0"
+         bordercolor="#6D6E72"/>
+  <style name="generic_dropdown"
+         style="generic_button"
+         fgnormal="#EDECE8"
+         normalicon="dropdown_90x20"
+         activeicon="dropdown_90x20_active"
+         inactiveicon="dropdown_90x20_inactive"
+         width="90"
+         height="20"
+         horzalignment="start"/>
+  <style name="generic_dropdown_menu"
+         style="generic_dropdown"/>
+  <EventBox bgnormal="#ff0000" height="3"/>
+  <Label style="generic_control"
+         winfont ="Arial Bold 11"
+         macfont ="Helvetica Bold 11"
+         text="Format"
+         horzalignment="start"/>
+  <HBox>
+    <VBox width="18"/>
+    <VBox>
+    <HBox id="format_selector_home"/>
+        <VBox spacing="10">
+          <HBox spacing="10">
+            <VBox>
+              <Label style="generic_control"
+                     text="Format"
+                     horzalignment="start"/>
+              <Dropdown id="lossless_format_dropdown"
+                        style="generic_dropdown">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_dropdown"/>
+                </HBox>
+                <DropdownMenu bgnormal="#454545">
+                  <DropdownItem style="generic_dropdown" title="None"/>
+                  <DropdownItem style="generic_dropdown" title="Wave"/>
+                  <DropdownItem style="generic_dropdown" title="AIFF"/>
+                  <DropdownItem style="generic_dropdown" title="AAC"/>
+                  <DropdownItem style="generic_dropdown" title="CAF"/>
+                  <DropdownItem style="generic_dropdown" title="FLAC"/>
+                </DropdownMenu>
+              </Dropdown>
+            </VBox>
+            <VBox>
+              <Label style="generic_control"
+                     text="Depth"
+                     horzalignment="start"/>
+              <Dropdown id="lossless_depth_dropdown"
+                        style="generic_dropdown">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_dropdown"/>
+                </HBox>
+                <DropdownMenu bgnormal="#454545">
+                  <DropdownItem style="generic_dropdown" title="None"/>
+                  <DropdownItem style="generic_dropdown" title="16 bit"/>
+                  <DropdownItem style="generic_dropdown" title="24 bit"/>
+                </DropdownMenu>
+              </Dropdown>
+            </VBox>
+            <VBox>
+              <Label style="generic_control"
+                     text="Sample Rate"
+                     horzalignment="start"/>
+              <Dropdown id="lossless_sample_rate_dropdown"
+                        style="generic_dropdown">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_dropdown"/>
+                </HBox>
+                <DropdownMenu bgnormal="#454545">
+                  <DropdownItem style="generic_dropdown" title="None"/>
+                  <DropdownItem style="generic_dropdown" title="44.1 kHz"/>
+                  <DropdownItem style="generic_dropdown" title="48 kHz"/>
+                  <DropdownItem style="generic_dropdown" title="88.2 kHz"/>
+                  <DropdownItem style="generic_dropdown" title="96 kHz"/>
+                  <DropdownItem style="generic_dropdown" title="176.4 kHz"/>
+                  <DropdownItem style="generic_dropdown" title="192 kHz"/>
+                </DropdownMenu>
+              </Dropdown>
+            </VBox>
+            <VBox>
+              <Label style="generic_control"
+                     text="Dither"
+                     horzalignment="start"/>
+              <Dropdown id="lossless_dither_dropdown"
+                        style="generic_dropdown"
+                        width="126"
+                        normalicon="dropdown_126x20"
+                        activeicon="dropdown_126x20_active"
+                        inactiveicon="dropdown_126x20_inactive">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_dropdown"/>
+                </HBox>
+                <DropdownMenu style="generic_dropdown"
+                              bgnormal="#454545">
+                  <DropdownItem style="generic_dropdown" title="None"/>
+                  <DropdownItem style="generic_dropdown" title="Type1"/>
+                  <DropdownItem style="generic_dropdown" title="Type2"/>
+                  <DropdownItem style="generic_dropdown" title="Type3+Shaping"/>
+                </DropdownMenu>
+              </Dropdown>
+            </VBox>
+            <VBox>
+              <Label style="generic_control"
+                     text="Normalize"
+                     horzalignment="start"/>
+              <Iconbutton id="lossless_normalize_button"
+                          width="20"
+                          height="20"
+                          normalicon="waves_darker_check_box"
+                          activeicon="waves_darker_check_box_active"
+                          toggleable="true"/>
+            </VBox>
+          </HBox>
+          <HBox spacing="10">
+            <VBox>
+              <Label style="generic_control"
+                     text="Format"
+                     horzalignment="start"/>
+              <Dropdown id="lossy_format_dropdown"
+                        style="generic_dropdown">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_dropdown"/>
+                </HBox>
+                <DropdownMenu bgnormal="#454545">
+                  <DropdownItem style="generic_dropdown" title="None"/>
+                  <DropdownItem style="generic_dropdown" title="MP3"/>
+                  <DropdownItem style="generic_dropdown" title="AAC"/>
+                  <DropdownItem style="generic_dropdown" title="OGG Forbis"/>
+                </DropdownMenu>
+              </Dropdown>
+            </VBox>
+            <VBox>
+              <Label style="generic_control"
+                     text="Bit Rate"
+                     horzalignment="start"/>
+              <Dropdown id="lossy_bit_rate_dropdown"
+                        style="generic_dropdown">
+                <HBox>
+                  <VBox width="10"/>
+                  <Label style="generic_dropdown"/>
+                </HBox>
+                <DropdownMenu bgnormal="#454545">
+                  <DropdownItem style="generic_dropdown" title="None"/>
+                  <DropdownItem style="generic_dropdown" title="96 kbps"/>
+                  <DropdownItem style="generic_dropdown" title="128 kbps"/>
+                  <DropdownItem style="generic_dropdown" title="160 kbps"/>
+                  <DropdownItem style="generic_dropdown" title="192 kbps"/>
+                  <DropdownItem style="generic_dropdown" title="256 kbps"/>
+                  <DropdownItem style="generic_dropdown" title="320 kbps"/>
+                </DropdownMenu>
+              </Dropdown>
+            </VBox>
+          </HBox>
+        </VBox>
+    </VBox>
+  </HBox>
+  <Label style="generic_control"
+         winfont ="Arial Bold 11"
+         macfont ="Helvetica Bold 11"
+         text="Location"
+         horzalignment="start"/>
+  <HBox>
+    <VBox width="18"/>
+    <VBox id="filename_selector_home"/>
+  </HBox>
+  <EventBox bgnormal="#ffff00" height="3" box.pack="end"/>
+</VBox>

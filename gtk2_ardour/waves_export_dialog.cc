@@ -26,6 +26,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/export_status.h"
 #include "ardour/export_handler.h"
+#include "ardour/export_format_specification.h"
 
 #include "waves_message_dialog.h"
 #include "waves_export_dialog.h"
@@ -101,6 +102,28 @@ WavesExportDialog::set_session (ARDOUR::Session* s)
 	/* Load states */
 
 	profile_manager->load_profile ();
+    /* Tracks does not need anything but Lossless and Lossy */
+	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
+	ExportProfileManager::FormatStateList::const_iterator format_it = formats.begin();
+
+	ExportProfileManager::FilenameStateList const & filenames = profile_manager->get_filenames ();
+	ExportProfileManager::FilenameStateList::const_iterator filename_it = filenames.begin ();
+
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	for (format_it = formats.begin(), filename_it = filenames.begin();
+	     format_it != formats.end() && filename_it != filenames.end();
+	     ++format_it, ++filename_it) {
+		std::cout << "Format:" << (*format_it)->format->name() << std::endl;
+
+	}
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+
 	sync_with_manager ();
 
 	/* Warnings */
@@ -177,6 +200,23 @@ WavesExportDialog::close_dialog (WavesButton*)
 		status->abort();
 	}
 
+	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
+	ExportProfileManager::FormatStateList::const_iterator format_it = formats.begin();
+
+	ExportProfileManager::FilenameStateList const & filenames = profile_manager->get_filenames ();
+	ExportProfileManager::FilenameStateList::const_iterator filename_it = filenames.begin ();
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
+	for (format_it = formats.begin(), filename_it = filenames.begin();
+	     format_it != formats.end() && filename_it != filenames.end();
+	     ++format_it, ++filename_it) {
+		std::cout << "Format:" << (*format_it)->format->name() << std::endl;
+
+	}
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
 	response (Gtk::RESPONSE_CANCEL);
 }
 
@@ -196,9 +236,6 @@ WavesExportDialog::show_selector (Gtk::Widget& widget)
 	if (!widget.get_parent ()) {
 		_selectors_home.add (widget);
 		widget.show_all ();
-		std::cout << "WavesExportDialog::show_selector (Gtk::Widget& widget) -- ADDED" << std::endl;
-	} else {
-		std::cout << "WavesExportDialog::show_selector (Gtk::Widget& widget) -- DID NOT ADD" << std::endl;
 	}
 }
 
@@ -207,9 +244,6 @@ WavesExportDialog::hide_selector (Gtk::Widget& widget)
 {
 	if (widget.get_parent () == &_selectors_home) {
 		_selectors_home.remove (widget);
-		std::cout << "WavesExportDialog::hide_selector (Gtk::Widget& widget) -- REMOVED" << std::endl;
-	} else {
-		std::cout << "WavesExportDialog::hide_selector (Gtk::Widget& widget) -- DID NOT REMOVE" << std::endl;
 	}
 }
 

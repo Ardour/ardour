@@ -30,6 +30,7 @@
 #include "waves_message_dialog.h"
 #include "export_dialog.h"
 #include "gui_thread.h"
+#include "ardour/export_format_specification.h"
 
 #include "i18n.h"
 
@@ -87,6 +88,25 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	/* Load states */
 
 	profile_manager->load_profile ();
+	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
+	ExportProfileManager::FormatStateList::const_iterator format_it = formats.begin();
+
+	ExportProfileManager::FilenameStateList const & filenames = profile_manager->get_filenames ();
+	ExportProfileManager::FilenameStateList::const_iterator filename_it = filenames.begin ();
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	for (format_it = formats.begin(), filename_it = filenames.begin();
+	     format_it != formats.end() && filename_it != filenames.end();
+	     ++format_it, ++filename_it) {
+		std::cout << "Format:" << (*format_it)->format->name() << std::endl;
+
+	}
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
+	std::cout << "****************************************************" << std::endl;
 	sync_with_manager ();
 
 	/* Warnings */
@@ -191,6 +211,23 @@ ExportDialog::close_dialog ()
 	if (status->running) {
 		status->abort();
 	}
+	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
+	ExportProfileManager::FormatStateList::const_iterator format_it = formats.begin();
+
+	ExportProfileManager::FilenameStateList const & filenames = profile_manager->get_filenames ();
+	ExportProfileManager::FilenameStateList::const_iterator filename_it = filenames.begin ();
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
+	for (format_it = formats.begin(), filename_it = filenames.begin();
+	     format_it != formats.end() && filename_it != filenames.end();
+	     ++format_it, ++filename_it) {
+		std::cout << "Format:" << (*format_it)->format->name() << std::endl;
+
+	}
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
+	std::cout << "----------------------------------------------------" << std::endl;
 
 	hide_all ();
 	set_modal (false);
