@@ -51,6 +51,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/profile.h"
 #include "ardour/smf_source.h"
 #include "ardour/region_factory.h"
 #include "ardour/source_factory.h"
@@ -632,7 +633,9 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	found_search_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 	found_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::found_search_clicked));
 	
-	notebook.append_page (*vbox, _("Search Tags"));
+        if (!Profile->get_trx()) {
+                notebook.append_page (*vbox, _("Search Tags"));
+        }
 
 	//add freesound search
 
@@ -708,7 +711,9 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_entry.signal_activate().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_search_clicked));
 	freesound_more_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_more_clicked));
 	freesound_similar_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_similar_clicked));
-	notebook.append_page (*vbox, _("Search Freesound"));
+        if (!Profile->get_trx()) {
+                notebook.append_page (*vbox, _("Search Freesound"));
+        }
 
 	notebook.set_size_request (500, -1);
 	notebook.signal_switch_page().connect (sigc::hide_return (sigc::hide (sigc::hide (sigc::mem_fun (*this, &SoundFileBrowser::reset_options)))));
