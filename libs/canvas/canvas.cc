@@ -230,13 +230,8 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 Duple
 Canvas::window_to_canvas (Duple const & d) const
 {
-	/* Find the scroll group that covers d (a window coordinate). Scroll groups are only allowed
-	 * as children of the root group, so we just scan its first level
-	 * children and see what we can find.
-	 */
-
-	std::list<Item*> const& root_children (_root.items());
 	ScrollGroup* best_group = 0;
+	ScrollGroup* sg = 0;
 
 	/* if the coordinates are negative, clamp to zero and find the item
 	 * that covers that "edge" position.
@@ -251,15 +246,27 @@ Canvas::window_to_canvas (Duple const & d) const
 		in_window.y = 0;
 	}
 
-	for (std::list<Item*>::const_reverse_iterator i = root_children.rbegin(); i != root_children.rend(); ++i) {
-		ScrollGroup* sg = dynamic_cast<ScrollGroup*>(*i);
-		/* If scroll groups overlap, choose the one with the highest sensitivity,
-		   that is, choose an HV scroll group over an H or V only group. */
-		if (sg && (!best_group || sg->sensitivity() > best_group->sensitivity())) {
-			best_group = sg;
-			if (sg->sensitivity() == (ScrollGroup::ScrollsVertically | ScrollGroup::ScrollsHorizontally)) {
-				/* Can't do any better than this. */
-				break;
+	for (list<ScrollGroup*>::const_iterator s = scrollers.begin(); s != scrollers.end(); ++s) {
+
+		if ((*s)->covers_window (in_window)) {
+			sg = *s;
+
+			/* XXX January 22nd 2015: leaving this in place for now
+			 * but I think it fixes a bug that really should be
+			 * fixed in a different way (and will be) by my next
+			 * commit. But it may still be relevant. 
+			 */
+
+			/* If scroll groups overlap, choose the one with the highest sensitivity,
+			   that is, choose an HV scroll group over an H or V
+			   only group. 
+			*/
+			if (!best_group || sg->sensitivity() > best_group->sensitivity()) {
+				best_group = sg;
+				if (sg->sensitivity() == (ScrollGroup::ScrollsVertically | ScrollGroup::ScrollsHorizontally)) {
+					/* Can't do any better than this. */
+					break;
+				}
 			}
 		}
 	}
@@ -288,7 +295,6 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 			break;
 		}
 	}
-	
 
 	if (sg) {
 		wd = d.translate (-sg->scroll_offset());
