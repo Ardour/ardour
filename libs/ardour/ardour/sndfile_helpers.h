@@ -23,6 +23,8 @@
 #include <string>
 #include <stdint.h>
 
+#include "ardour/types.h"
+
 // Use this define when initializing arrarys for use in sndfile_*_format()
 #define SNDFILE_STR_LENGTH 32
 
@@ -47,6 +49,7 @@ int sndfile_header_format_by_index (int);
 int sndfile_endian_format_by_index (int);
 
 int sndfile_data_width (int format);
+int sndfile_data_width (ARDOUR::SampleFormat);
 
 // It'd be nice if libsndfile did this for us
 std::string sndfile_major_format (int);
