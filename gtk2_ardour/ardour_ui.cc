@@ -777,7 +777,7 @@ ARDOUR_UI::starting ()
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
 	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
 
-	if (ARDOUR_COMMAND_LINE::check_announcements) {
+	if (!Profile->get_trx() && ARDOUR_COMMAND_LINE::check_announcements) {
 		check_announcements ();
 	}
 
