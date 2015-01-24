@@ -1013,7 +1013,14 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor)
 	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
 
 	if (win && !_cursors->is_invalid (cursor)) {
-	        win->set_cursor (*cursor);
+		/* glibmm 2.4 doesn't allow null cursor pointer because it uses
+		   a Gdk::Cursor& as the argument to Gdk::Window::set_cursor().
+		   But a null pointer just means "use parent window cursor",
+		   and so should be allowed. Gtkmm 3.x has fixed this API.
+
+		   For now, drop down and use C API
+		*/
+		gdk_window_set_cursor (win->gobj(), cursor ? cursor->gobj() : 0);
 	}
 }
 
@@ -1095,7 +1102,7 @@ Editor::which_trim_cursor (bool left) const
 Gdk::Cursor*
 Editor::which_mode_cursor () const
 {
-	Gdk::Cursor* mode_cursor = _cursors->invalid_cursor ();
+	Gdk::Cursor* mode_cursor = MouseCursors::invalid_cursor ();
 
 	switch (mouse_mode) {
 	case MouseRange:
@@ -1161,7 +1168,7 @@ Editor::which_mode_cursor () const
 Gdk::Cursor*
 Editor::which_track_cursor () const
 {
-	Gdk::Cursor* cursor = _cursors->invalid_cursor();
+	Gdk::Cursor* cursor = MouseCursors::invalid_cursor();
 
 	switch (_join_object_range_state) {
 	case JOIN_OBJECT_RANGE_NONE:

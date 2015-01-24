@@ -29,6 +29,7 @@
 
 #include "cursor_context.h"
 #include "editor_items.h"
+#include "mouse_cursors.h"
 
 namespace ARDOUR {
 	class Location;
@@ -58,8 +59,8 @@ public:
 
 	void abort ();
 	void add (Drag *);
-	void set (Drag *, GdkEvent *, Gdk::Cursor* c = 0);
-	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void set (Drag *, GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
+	void start_grab (GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 

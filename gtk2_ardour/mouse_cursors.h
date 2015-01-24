@@ -80,15 +80,16 @@ public:
 	   "use the parent window's cursor"
 	*/
 	
-	bool is_invalid (Gdk::Cursor* c) const { return c == _invalid; }
-	Gdk::Cursor* invalid_cursor() const { return _invalid; }
+	static bool is_invalid (Gdk::Cursor* c) { if (!_invalid) { create_invalid(); } return c == _invalid; }
+	static Gdk::Cursor* invalid_cursor() { if (!_invalid) { create_invalid(); } return _invalid; }
 
     private:
 	std::string _cursor_set;
 	void drop_all ();
 
 	Gdk::Cursor* make_cursor (const char* name, int hotspot_x = 0, int hotspot_y = 0);
-	Gdk::Cursor* _invalid;
+	static Gdk::Cursor* _invalid;
+	static void create_invalid ();
 };
 
 #endif /* __gtk2_ardour_mouse_cursors__ */

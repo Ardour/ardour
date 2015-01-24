@@ -4152,7 +4152,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		return;
 	}
 
-	Gdk::Cursor* cursor = _editor->cursors()->invalid_cursor();
+	Gdk::Cursor* cursor = MouseCursors::invalid_cursor();
 
 	switch (_operation) {
 	case CreateSelection:
@@ -4490,7 +4490,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		return;
 	}
 
-	Gdk::Cursor* cursor = _editor->cursors()->invalid_cursor();
+	Gdk::Cursor* cursor = MouseCursors::invalid_cursor();
 
 	if (!_editor->temp_location) {
 		_editor->temp_location = new Location (*_editor->session());
