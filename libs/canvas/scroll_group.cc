@@ -81,13 +81,18 @@ ScrollGroup::scroll_to (Duple const& d)
 bool
 ScrollGroup::covers_canvas (Duple const& d) const
 {
-	boost::optional<Rect> r = bounding_box ();
+        boost::optional<Rect> r = bounding_box ();
 
 	if (!r) {
 		return false;
 	}
 
-	return r->contains (d);
+        /* Bounding box is in item coordinates, but we need
+           to consider the position of the bounding box
+           within the canvas.
+        */
+        
+	return r->translate (position()).contains (d);
 }
 
 bool
@@ -99,7 +104,10 @@ ScrollGroup::covers_window (Duple const& d) const
 		return false;
 	}
 
-	Rect w = r->translate (-_scroll_offset);
-
-	return w.contains (d);
+        /* Bounding box is in item coordinates, but we need
+           to consider the position of the bounding box
+           within the canvas. 
+        */
+        
+	return r->translate (position()).contains (d);
 }
