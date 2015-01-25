@@ -1672,7 +1672,7 @@ AUPlugin::parameter_is_output (uint32_t) const
 void
 AUPlugin::add_state (XMLNode* root) const
 {
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	CFDataRef xmlData;
 	CFPropertyListRef propertyList;
 
@@ -1711,7 +1711,7 @@ AUPlugin::set_state(const XMLNode& node, int version)
 {
 	int ret = -1;
 	CFPropertyListRef propertyList;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to AUPlugin::set_state") << endmsg;

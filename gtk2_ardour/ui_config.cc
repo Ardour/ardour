@@ -180,7 +180,7 @@ XMLNode&
 UIConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	root = new XMLNode("Ardour");
 
@@ -198,7 +198,7 @@ XMLNode&
 UIConfiguration::get_variables (std::string which_node)
 {
 	XMLNode* node;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	node = new XMLNode(which_node);
 

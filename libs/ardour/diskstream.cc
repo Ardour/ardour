@@ -458,7 +458,7 @@ Diskstream::get_state ()
 {
 	XMLNode* node = new XMLNode ("Diskstream");
         char buf[64];
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	node->add_property ("flags", enum_2_string (_flags));
 	node->add_property ("playlist", _playlist->name());

@@ -1825,7 +1825,7 @@ AudioDiskstream::get_state ()
 {
 	XMLNode& node (Diskstream::get_state());
 	char buf[64] = "";
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	snprintf (buf, sizeof(buf), "%u", (unsigned int) c->size());
@@ -1867,7 +1867,7 @@ AudioDiskstream::set_state (const XMLNode& node, int version)
 	XMLNodeIterator niter;
 	uint32_t nchans = 1;
 	XMLNode* capture_pending_node = 0;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	/* prevent write sources from being created */
 
