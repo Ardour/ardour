@@ -68,6 +68,7 @@ static const char* results_markup = X_("<span weight=\"bold\" size=\"larger\">%1
 
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
+	, engine_status ("")
 	, basic_packer (9, 4)
 	, input_latency_adjustment (0, 0, 99999, 1)
 	, input_latency (input_latency_adjustment)
@@ -248,6 +249,9 @@ EngineControl::EngineControl ()
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (notebook);
 
+	get_action_area()->pack_start (engine_status);
+	engine_status.show();
+
 	/* need a special function to print "all available channels" when the
 	 * channel counts hit zero.
 	 */
@@ -263,9 +267,9 @@ EngineControl::EngineControl ()
 	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
 	manage_control_app_sensitivity ();
 
-	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
 	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
@@ -2146,6 +2150,7 @@ EngineControl::engine_running ()
 	connect_disconnect_button.show();
 
 	started_at_least_once = true;
+	engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Active")));
 }
 
 void
@@ -2160,6 +2165,7 @@ EngineControl::engine_stopped ()
 
 	sample_rate_combo.set_sensitive (true);
 	buffer_size_combo.set_sensitive (true);
+	engine_status.set_markup(string_compose ("<span foreground=\"red\">%1</span>", _("Inactive")));
 }
 
 void

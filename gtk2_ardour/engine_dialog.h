@@ -53,6 +53,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   private:
     Gtk::Notebook notebook;
 
+    Gtk::Label engine_status;
+
     /* core fields used by all backends */
 
     Gtk::Table basic_packer;
