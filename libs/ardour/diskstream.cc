@@ -777,12 +777,20 @@ Diskstream::default_disk_read_chunk_frames()
 #elif defined __APPLE__
 	return (4 * 1048576) / sizeof (Sample);
 #else
-	return 65536;
+	/* Linux, etc. */
+	return (2 * 1048576) / sizeof (Sample);
 #endif
 }	
 
 framecnt_t
 Diskstream::default_disk_write_chunk_frames ()
 {
+#ifdef PLATFORM_WINDOWS
+	return (2 * 1048576);
+#elif defined __APPLE__
+	return (4 * 1048576);
+#else
+	/* Linux, etc. */
 	return 65536;
+#endif
 }
