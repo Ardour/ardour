@@ -739,7 +739,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		}
 	}
 
-	SaveSession (); /* EMIT SIGNAL */
+	SessionSaveUnderway (); /* EMIT SIGNAL */
 
 	tree.set_root (&get_state());
 

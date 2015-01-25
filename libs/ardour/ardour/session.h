@@ -451,7 +451,21 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
-	PBD::Signal0<void> SaveSession;
+
+	/* emitted when session needs to be saved due to some internal
+	 * event or condition (i.e. not in response to a user request).
+	 *
+	 * Only one object should
+	 * connect to this signal and take responsibility.
+	 *
+	 * Argument is the snapshot name to use when saving.
+	 */
+	PBD::Signal1<void,std::string> SaveSessionRequested; 
+
+	/* emitted during a session save to allow other entities to add state, via
+	 * extra XML, to the session state 
+	 */
+	PBD::Signal0<void> SessionSaveUnderway;
 
 	std::vector<std::string> possible_states() const;
 	static std::vector<std::string> possible_states (std::string path);
