@@ -346,6 +346,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 
+	void save_session_at_its_request (std::string);
 	/* periodic safety backup, to be precise */
 	gint autosave_session();
 	void update_autosave();

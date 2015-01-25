@@ -677,6 +677,13 @@ ARDOUR_UI::get_transport_controllable_state ()
 	return *node;
 }
 
+void
+ARDOUR_UI::save_session_at_its_request (std::string snapshot_name)
+{
+	if (_session) {
+		_session->save_state (snapshot_name);
+	}
+}
 
 gint
 ARDOUR_UI::autosave_session ()
