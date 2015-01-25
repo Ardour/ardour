@@ -102,27 +102,19 @@ WavesExportDialog::set_session (ARDOUR::Session* s)
 	/* Load states */
 
 	profile_manager->load_profile ();
-    /* Tracks does not need anything but Lossless and Lossy */
+
+	// TRACKS SPECIFIC CONFIGURATION
 	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
-	ExportProfileManager::FormatStateList::const_iterator format_it = formats.begin();
-
 	ExportProfileManager::FilenameStateList const & filenames = profile_manager->get_filenames ();
-	ExportProfileManager::FilenameStateList::const_iterator filename_it = filenames.begin ();
-
-	std::cout << "****************************************************" << std::endl;
-	std::cout << "****************************************************" << std::endl;
-	std::cout << "****************************************************" << std::endl;
-	std::cout << "****************************************************" << std::endl;
-	for (format_it = formats.begin(), filename_it = filenames.begin();
-	     format_it != formats.end() && filename_it != filenames.end();
-	     ++format_it, ++filename_it) {
-		std::cout << "Format:" << (*format_it)->format->name() << std::endl;
-
+	while (formats.size () > 2) {
+		profile_manager->remove_format_state (formats.back ());
+		profile_manager->remove_filename_state (filenames.back ());
 	}
-	std::cout << "****************************************************" << std::endl;
-	std::cout << "****************************************************" << std::endl;
-	std::cout << "****************************************************" << std::endl;
-	std::cout << "****************************************************" << std::endl;
+
+	if (formats.size () == 1) {
+		profile_manager->duplicate_format_state (formats.front ()),
+		profile_manager->duplicate_filename_state (filenames.front ());
+	}
 
 	sync_with_manager ();
 
@@ -200,23 +192,6 @@ WavesExportDialog::close_dialog (WavesButton*)
 		status->abort();
 	}
 
-	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
-	ExportProfileManager::FormatStateList::const_iterator format_it = formats.begin();
-
-	ExportProfileManager::FilenameStateList const & filenames = profile_manager->get_filenames ();
-	ExportProfileManager::FilenameStateList::const_iterator filename_it = filenames.begin ();
-	std::cout << "----------------------------------------------------" << std::endl;
-	std::cout << "----------------------------------------------------" << std::endl;
-	std::cout << "----------------------------------------------------" << std::endl;
-	for (format_it = formats.begin(), filename_it = filenames.begin();
-	     format_it != formats.end() && filename_it != filenames.end();
-	     ++format_it, ++filename_it) {
-		std::cout << "Format:" << (*format_it)->format->name() << std::endl;
-
-	}
-	std::cout << "----------------------------------------------------" << std::endl;
-	std::cout << "----------------------------------------------------" << std::endl;
-	std::cout << "----------------------------------------------------" << std::endl;
 	response (Gtk::RESPONSE_CANCEL);
 }
 

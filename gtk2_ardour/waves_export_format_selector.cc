@@ -27,7 +27,7 @@
 #include "i18n.h"
 
 WavesExportFormatSelector::WavesExportFormatSelector ()
-  : Gtk::HBox ()
+  : Gtk::VBox ()
   , WavesUI ("waves_export_format_selector.xml", *this)
   , _edit_button (get_waves_button ("edit_button"))
   , _remove_button (get_waves_button ("remove_button"))
@@ -186,14 +186,12 @@ WavesExportFormatSelector::open_edit_dialog (bool new_dialog)
 void
 WavesExportFormatSelector::update_format_dropdown (WavesDropdown*, int item)
 {
-	std::cout << "WavesExportFormatSelector::update_format_dropdown ()" << std::endl;
 	Gtk::TreeModel::Children::iterator it;
 	bool done = false;
 	for (it = format_list->children().begin(); it != format_list->children().end(); ++it) {
 		FormatPtr format = it->get_value (format_cols.format);
 		if ((void*)format.get () == _format_dropdown.get_item_associated_data(item)) {
 			state->format = format;
-			std::cout << "    Changed format to " << format->name () << std::endl;
 			done = true;
 			break;
 		}
