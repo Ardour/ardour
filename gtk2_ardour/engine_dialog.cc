@@ -1967,14 +1967,14 @@ EngineControl::check_audio_latency_measurement ()
 		solid = false;
 	}
 
+	lm_results.set_markup (string_compose (results_markup, buf));
+
 	if (solid) {
 		have_lm_results = true;
 		end_latency_detection ();
 		lm_use_button.set_sensitive (true);
 		return false;
 	}
-
-	lm_results.set_markup (string_compose (results_markup, buf));
 
 	return true;
 }
@@ -2027,6 +2027,7 @@ EngineControl::check_midi_latency_measurement ()
 		have_lm_results = true;
 		end_latency_detection ();
 		lm_use_button.set_sensitive (true);
+		lm_results.set_markup (string_compose (results_markup, buf));
 		return false;
 	} else if (mididm->processed () > 400) {
 		have_lm_results = false;
