@@ -576,6 +576,9 @@ WavesUI::create_ui (const XMLTree& layout, Gtk::Container& root)
 	XMLNodeMap styles;
 	get_styles(layout, styles);
 	const XMLNodeList& definition = layout.root ()->children();
+    if (xml_property (*layout.root (), "UI.NEEDINIT", styles, false)) {
+		set_attributes(root, *layout.root (), styles);
+	}
 	WavesUI::create_ui (definition, styles, root);
 }
 
