@@ -403,7 +403,19 @@
 		<row><td>ISX_DEFAULTCOMPONENT145</td><td>{15CC8D18-96CC-4CCC-A9FB-D1B1E7B1A7A5}</td><td>EXPORT</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT146</td><td>{126B595E-D5C6-439E-A79C-C3516F988C1C}</td><td>EXPORT</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT147</td><td>{D6256274-BA3A-47FE-8607-61C1C8D15DAA}</td><td>EXPORT</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT148</td><td>{CF7604FB-D37F-42DC-A326-9815FF6AF202}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT149</td><td>{2ADBF39E-772D-41D7-A486-D10D6CF38D52}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT15</td><td>{DAA78A3B-027A-479B-AB63-CAE65D447245}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT150</td><td>{C043C466-DAEA-4DC1-B992-C0111A23F0B6}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT151</td><td>{00889E3A-62AE-4B85-B0C1-B8C650715F82}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT152</td><td>{5AA4BC40-FA04-47FC-8671-82019B080CCF}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT153</td><td>{CE0C249D-FC6C-4685-BBE9-8333477F09F4}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT154</td><td>{60F95AB2-75E5-41BE-944C-3A6D433932AE}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT155</td><td>{04FDF9B0-127C-496B-B126-FF099C97896D}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT156</td><td>{083CD7B8-44B4-42A1-8619-87D7A1DA6F1B}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT157</td><td>{98EF2054-C111-482F-A555-110BFE5F7612}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT158</td><td>{733B29E1-6682-47AA-908E-7B2BFF8084D7}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT159</td><td>{E9D6CBC4-5D96-4241-AA9D-FF79E3015B01}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT16</td><td>{382FBA8A-CDB2-4A85-B1E2-4C09A47A5F0F}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT160</td><td>{1ABD8ED1-F237-4353-AFE8-A2AC97B9BA37}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT161</td><td>{EEBDFC67-ADD1-43AB-BF8F-21407CE64D09}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -681,11 +693,11 @@
 		<row><td>ISX_DEFAULTCOMPONENT406</td><td>{66CBAF75-1457-4486-B48D-1648A3C3AFD6}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT407</td><td>{F5C7FF23-74B7-411E-8B90-9096C5DF763A}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT408</td><td>{ABD1EF76-8651-4775-93AD-F00BF787E212}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>ISX_DEFAULTCOMPONENT409</td><td>{D3EC6BF6-1363-456B-ABCF-FF15F04B8D2B}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT409</td><td>{E74DB69A-F74B-4080-A55C-4193163553D5}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT41</td><td>{B7771ECF-925E-42C5-BBDF-56C984282433}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>ISX_DEFAULTCOMPONENT410</td><td>{62C8C25A-0055-4FB3-A1E4-23B95E44E1D9}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>ISX_DEFAULTCOMPONENT411</td><td>{7913C0E8-29A2-4DDE-BC2E-0B35837D7CA6}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
-		<row><td>ISX_DEFAULTCOMPONENT412</td><td>{B82B696D-11CE-4579-A13A-DE3B1FDC20D6}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT410</td><td>{2D951B8F-A424-4C33-A6A0-C74B72EE17A0}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT411</td><td>{6FCB2FCC-F906-4525-9C69-B34B4E2CB99A}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT412</td><td>{A9263A93-7408-48CC-A8FA-F159F9EF5329}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT413</td><td>{6726B80A-526E-4C82-9526-BAD25470734E}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT414</td><td>{214B2606-991B-403B-82CB-FA220E08DE4F}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT415</td><td>{49E929E2-DDA6-42A4-BB89-D052E4160650}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -1160,6 +1172,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT838</td><td>{D38AD25D-AE59-4465-9097-02AC0BC791F1}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT839</td><td>{A8B3776D-A7AA-4A99-8DE3-B8A6585A207B}</td><td>ICONS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td>{171F4C1F-B859-4228-9205-5C38FF3CF5B5}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT840</td><td>{CC33D596-367D-4ADB-9C7D-5C56DE3FF541}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td>{2CC2416F-B08C-4C57-B1B5-B4F007D9A97D}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT86</td><td>{34A92246-9928-4403-AAEF-A7DEABF9E4B1}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT87</td><td>{849A9C83-04A5-4BD8-9262-87A0DD3D2697}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -2944,7 +2957,19 @@
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT145</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT146</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT147</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT148</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT149</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT15</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT150</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT151</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT152</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT153</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT154</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT155</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT156</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT157</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT158</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT159</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT16</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT160</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT161</td></row>
@@ -3701,6 +3726,7 @@
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT838</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT839</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT84</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT840</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT85</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT86</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT87</td></row>
@@ -4052,6 +4078,11 @@
 		<row><td>device_capture_control.xml</td><td>ISX_DEFAULTCOMPONENT22</td><td>DEVICE~1.XML|device_capture_control.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\device_capture_control.xml</td><td>1</td><td/></row>
 		<row><td>device_playback_control.xml</td><td>ISX_DEFAULTCOMPONENT23</td><td>DEVICE~1.XML|device_playback_control.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\device_playback_control.xml</td><td>1</td><td/></row>
 		<row><td>display_metrics_mockup.png</td><td>ISX_DEFAULTCOMPONENT160</td><td>DISPLA~1.PNG|display_metrics_mockup.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\display_metrics_mockup.png</td><td>1</td><td/></row>
+		<row><td>dropdown_126x20_inactive.png</td><td>ISX_DEFAULTCOMPONENT153</td><td>DROPDO~1.PNG|dropdown_126x20_inactive.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_126x20_inactive.png</td><td>1</td><td/></row>
+		<row><td>dropdown_126x20_prelight.png</td><td>ISX_DEFAULTCOMPONENT154</td><td>DROPDO~1.PNG|dropdown_126x20_prelight.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_126x20_prelight.png</td><td>1</td><td/></row>
+		<row><td>dropdown_418x20.png</td><td>ISX_DEFAULTCOMPONENT150</td><td>DROPDO~1.PNG|dropdown_418x20.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_418x20.png</td><td>1</td><td/></row>
+		<row><td>dropdown_418x20_active.png</td><td>ISX_DEFAULTCOMPONENT151</td><td>DROPDO~1.PNG|dropdown_418x20_active.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_418x20_active.png</td><td>1</td><td/></row>
+		<row><td>dropdown_418x20_prelight.png</td><td>ISX_DEFAULTCOMPONENT152</td><td>DROPDO~1.PNG|dropdown_418x20_prelight.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_418x20_prelight.png</td><td>1</td><td/></row>
 		<row><td>dropdown_90x20.png</td><td>ISX_DEFAULTCOMPONENT161</td><td>DROPDO~1.PNG|dropdown_90x20.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_90x20.png</td><td>1</td><td/></row>
 		<row><td>dropdown_90x20_active.png</td><td>ISX_DEFAULTCOMPONENT162</td><td>DROPDO~1.PNG|dropdown_90x20_active.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_90x20_active.png</td><td>1</td><td/></row>
 		<row><td>dropdown_90x20_inactive.png</td><td>ISX_DEFAULTCOMPONENT163</td><td>DROPDO~1.PNG|dropdown_90x20_inactive.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\dropdown_90x20_inactive.png</td><td>1</td><td/></row>
@@ -4504,10 +4535,6 @@
 		<row><td>pianissimo.png</td><td>ISX_DEFAULTCOMPONENT373</td><td>PIANIS~1.PNG|pianissimo.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\pianissimo.png</td><td>1</td><td/></row>
 		<row><td>pianississimo.png</td><td>ISX_DEFAULTCOMPONENT374</td><td>PIANIS~1.PNG|pianississimo.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\pianississimo.png</td><td>1</td><td/></row>
 		<row><td>piano.png</td><td>ISX_DEFAULTCOMPONENT375</td><td>piano.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\piano.png</td><td>1</td><td/></row>
-		<row><td>preference_device_dropdown.p</td><td>ISX_DEFAULTCOMPONENT409</td><td>PREFER~1.PNG|preference_device_dropdown.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\preference_device_dropdown.png</td><td>1</td><td/></row>
-		<row><td>preference_device_dropdown_a</td><td>ISX_DEFAULTCOMPONENT410</td><td>PREFER~1.PNG|preference_device_dropdown_active.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\preference_device_dropdown_active.png</td><td>1</td><td/></row>
-		<row><td>preference_device_dropdown_i</td><td>ISX_DEFAULTCOMPONENT411</td><td>PREFER~1.PNG|preference_device_dropdown_inactive.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\preference_device_dropdown_inactive.png</td><td>1</td><td/></row>
-		<row><td>preference_device_dropdown_p</td><td>ISX_DEFAULTCOMPONENT412</td><td>PREFER~1.PNG|preference_device_dropdown_prelight.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\preference_device_dropdown_prelight.png</td><td>1</td><td/></row>
 		<row><td>preference_general_preferenc</td><td>ISX_DEFAULTCOMPONENT413</td><td>PREFER~1.PNG|preference_general_preferences_dropdown.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\preference_general_preferences_dropdown.png</td><td>1</td><td/></row>
 		<row><td>preference_general_preferenc1</td><td>ISX_DEFAULTCOMPONENT414</td><td>PREFER~1.PNG|preference_general_preferences_dropdown_active.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\preference_general_preferences_dropdown_active.png</td><td>1</td><td/></row>
 		<row><td>preference_mtc_dropdown.png</td><td>ISX_DEFAULTCOMPONENT415</td><td>PREFER~1.PNG|preference_mtc_dropdown.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\preference_mtc_dropdown.png</td><td>1</td><td/></row>
@@ -4757,13 +4784,25 @@
 		<row><td>waves_connect_to_backend_err</td><td>ISX_DEFAULTCOMPONENT49</td><td>WAVES_~1.XML|waves_connect_to_backend_error_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_connect_to_backend_error_dialog.xml</td><td>1</td><td/></row>
 		<row><td>waves_darker_check_box.png</td><td>ISX_DEFAULTCOMPONENT675</td><td>WAVES_~1.PNG|waves_darker_check_box.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\waves_darker_check_box.png</td><td>1</td><td/></row>
 		<row><td>waves_darker_check_box_activ</td><td>ISX_DEFAULTCOMPONENT827</td><td>WAVES_~1.PNG|waves_darker_check_box_active.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\waves_darker_check_box_active.png</td><td>1</td><td/></row>
+		<row><td>waves_darker_radio_button.pn</td><td>ISX_DEFAULTCOMPONENT149</td><td>WAVES_~1.PNG|waves_darker_radio_button.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\waves_darker_radio_button.png</td><td>1</td><td/></row>
+		<row><td>waves_darker_radio_button_ac</td><td>ISX_DEFAULTCOMPONENT148</td><td>WAVES_~1.PNG|waves_darker_radio_button_active.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\waves_darker_radio_button_active.png</td><td>1</td><td/></row>
 		<row><td>waves_excessive_split_dialog</td><td>ISX_DEFAULTCOMPONENT50</td><td>WAVES_~1.XML|waves_excessive_split_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_excessive_split_dialog.xml</td><td>1</td><td/></row>
+		<row><td>waves_export_dialog.xml</td><td>ISX_DEFAULTCOMPONENT155</td><td>WAVES_~1.XML|waves_export_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_export_dialog.xml</td><td>1</td><td/></row>
+		<row><td>waves_export_file_notebook.x</td><td>ISX_DEFAULTCOMPONENT156</td><td>WAVES_~1.XML|waves_export_file_notebook.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_export_file_notebook.xml</td><td>1</td><td/></row>
+		<row><td>waves_export_file_notebook_p</td><td>ISX_DEFAULTCOMPONENT157</td><td>WAVES_~1.XML|waves_export_file_notebook_page.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_export_file_notebook_page.xml</td><td>1</td><td/></row>
+		<row><td>waves_export_filename_select</td><td>ISX_DEFAULTCOMPONENT158</td><td>WAVES_~1.XML|waves_export_filename_selector.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_export_filename_selector.xml</td><td>1</td><td/></row>
+		<row><td>waves_export_format_selector</td><td>ISX_DEFAULTCOMPONENT159</td><td>WAVES_~1.XML|waves_export_format_selector.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_export_format_selector.xml</td><td>1</td><td/></row>
+		<row><td>waves_export_preset_selector</td><td>ISX_DEFAULTCOMPONENT409</td><td>WAVES_~1.XML|waves_export_preset_selector.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_export_preset_selector.xml</td><td>1</td><td/></row>
+		<row><td>waves_export_timespan_select</td><td>ISX_DEFAULTCOMPONENT410</td><td>WAVES_~1.XML|waves_export_timespan_selector.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_export_timespan_selector.xml</td><td>1</td><td/></row>
 		<row><td>waves_file_exists_dialog.xml</td><td>ISX_DEFAULTCOMPONENT51</td><td>WAVES_~1.XML|waves_file_exists_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_file_exists_dialog.xml</td><td>1</td><td/></row>
 		<row><td>waves_how_to_import_dialog_1</td><td>ISX_DEFAULTCOMPONENT52</td><td>WAVES_~1.XML|waves_how_to_import_dialog_1.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_how_to_import_dialog_1.xml</td><td>1</td><td/></row>
 		<row><td>waves_how_to_import_dialog_2</td><td>ISX_DEFAULTCOMPONENT53</td><td>WAVES_~1.XML|waves_how_to_import_dialog_2.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_how_to_import_dialog_2.xml</td><td>1</td><td/></row>
 		<row><td>waves_message_dialog.xml</td><td>ISX_DEFAULTCOMPONENT54</td><td>WAVES_~1.XML|waves_message_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_message_dialog.xml</td><td>1</td><td/></row>
+		<row><td>waves_port_export_channel_se</td><td>ISX_DEFAULTCOMPONENT411</td><td>WAVES_~1.XML|waves_port_export_channel_selector.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_port_export_channel_selector.xml</td><td>1</td><td/></row>
+		<row><td>waves_region_export_channel_</td><td>ISX_DEFAULTCOMPONENT412</td><td>WAVES_~1.XML|waves_region_export_channel_selector.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_region_export_channel_selector.xml</td><td>1</td><td/></row>
 		<row><td>waves_route_rename_dialog.xm</td><td>ISX_DEFAULTCOMPONENT55</td><td>WAVES_~1.XML|waves_route_rename_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_route_rename_dialog.xml</td><td>1</td><td/></row>
 		<row><td>waves_track_color_dialog.xml</td><td>ISX_DEFAULTCOMPONENT56</td><td>WAVES_~1.XML|waves_track_color_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_track_color_dialog.xml</td><td>1</td><td/></row>
+		<row><td>waves_track_export_channel_s</td><td>ISX_DEFAULTCOMPONENT840</td><td>WAVES_~1.XML|waves_track_export_channel_selector.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_track_export_channel_selector.xml</td><td>1</td><td/></row>
 		<row><td>wholenote.png</td><td>ISX_DEFAULTCOMPONENT832</td><td>WHOLEN~1.PNG|wholenote.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\wholenote.png</td><td>1</td><td/></row>
 		<row><td>wscript</td><td>ISX_DEFAULTCOMPONENT147</td><td>wscript</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\export\wscript</td><td>1</td><td/></row>
 		<row><td>yes_no_dialog.xml</td><td>ISX_DEFAULTCOMPONENT57</td><td>YES_NO~1.XML|yes_no_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\yes_no_dialog.xml</td><td>1</td><td/></row>
@@ -4978,7 +5017,19 @@
 		<row><td>ISX_DEFAULTCOMPONENT145</td><td/><td/><td>_46DE7BBF_4F49_450F_A4D6_6CF40E4E82E1_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT146</td><td/><td/><td>_8D5BAD23_D8BC_4D18_85C7_FA63BC96B3B6_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT147</td><td/><td/><td>_F4B4EF7D_7C8C_43FE_AAB4_E4E8B5B71F6D_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT148</td><td/><td/><td>_1BE3D50C_FA52_4D21_872A_6BCAEE900AB4_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT149</td><td/><td/><td>_3101B3D4_E27F_4AD5_9257_9E2D9FA64917_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT15</td><td/><td/><td>_F42FCEFF_2F3B_4311_8A5E_D1CF7F7660E8_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT150</td><td/><td/><td>_DBE2BB81_D6F5_4DF5_9A97_367A01CE9FD7_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT151</td><td/><td/><td>_6FAA6FBA_AFD2_4955_ADE3_587D8EA0C24E_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT152</td><td/><td/><td>_0CF5D6BD_017C_4B2F_A11C_1388DE12BD31_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT153</td><td/><td/><td>_38CE2F51_9EE7_471F_A17F_FFFFBAA52DD4_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT154</td><td/><td/><td>_0BB6DD37_2EB5_4150_A1FA_D31BE6F8DA43_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT155</td><td/><td/><td>_B4075208_0CE6_41C7_8D1B_AE664E197A7A_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT156</td><td/><td/><td>_5C36F1A9_4033_4E5C_8207_A214DA9F96FE_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT157</td><td/><td/><td>_CAF56C95_B8F0_4B77_8F00_321E2B24154F_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT158</td><td/><td/><td>_BEF1CC26_0984_42C9_BD46_8A91E8854859_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT159</td><td/><td/><td>_61E149F0_97FF_4857_B742_05AC6E7A525B_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT16</td><td/><td/><td>_98A0B4FB_41F2_46B2_971A_8EEA19078AD7_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT160</td><td/><td/><td>_887884CA_41F8_4239_A1BE_A182AD66BBAB_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT161</td><td/><td/><td>_253BAADE_8EE2_4839_9565_3AE46FAC5F0B_FILTER</td><td/><td/><td/><td/></row>
@@ -5256,11 +5307,11 @@
 		<row><td>ISX_DEFAULTCOMPONENT406</td><td/><td/><td>_D12EC621_5E35_49B9_B1D6_796BDC29AC5B_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT407</td><td/><td/><td>_AC84627E_397C_4787_B299_8C939F1F1D12_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT408</td><td/><td/><td>_37A41247_70ED_4529_9244_2AC65671DC65_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>ISX_DEFAULTCOMPONENT409</td><td/><td/><td>_419CF63E_1A14_404E_8EBD_5B3502E461BB_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT409</td><td/><td/><td>_67A4B7F1_A577_420B_A7E0_F802A20587B8_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT41</td><td/><td/><td>_C60C2C39_5065_476E_8F2C_0521A6B29C65_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>ISX_DEFAULTCOMPONENT410</td><td/><td/><td>_0786556D_B235_45F7_888B_556E2E40550C_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>ISX_DEFAULTCOMPONENT411</td><td/><td/><td>_5D16E48C_4DED_4B9F_A9A0_8E276A857C02_FILTER</td><td/><td/><td/><td/></row>
-		<row><td>ISX_DEFAULTCOMPONENT412</td><td/><td/><td>_8011BC7E_DAA7_407D_95BB_4F40093E8EDE_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT410</td><td/><td/><td>_EB47E41C_C0FB_4850_BA40_A0083DDDD143_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT411</td><td/><td/><td>_4026DD80_C6D9_405E_8DCD_B40EE5B3D228_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT412</td><td/><td/><td>_3102F0ED_0526_417A_B06F_0900FE7AB8F2_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT413</td><td/><td/><td>_7D0B89C8_3C4A_4521_B7E8_46F22A4DCC5B_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT414</td><td/><td/><td>_1B1ABEF5_A34C_4F5B_A569_30A7A4AB458E_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT415</td><td/><td/><td>_0DE2328E_BEDE_4771_AFCA_603831F755AB_FILTER</td><td/><td/><td/><td/></row>
@@ -5735,6 +5786,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT838</td><td/><td/><td>_5E8A0069_BC91_469C_91B7_6E9A9250F519_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT839</td><td/><td/><td>_12B48310_701D_47E1_83F6_4BE38C3B3994_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td/><td/><td>_7EDC8F54_7F12_4722_A553_D3218A57F9E9_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT840</td><td/><td/><td>_C7754987_A3DB_4FFF_8C5B_49E5262FF829_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td/><td/><td>_9DE256D6_C9BB_44B1_B3AF_6EE743985360_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT86</td><td/><td/><td>_881319D8_8A0C_4EE3_A6FB_5078845D784A_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT87</td><td/><td/><td>_605CEA43_D434_45AB_ACFA_FEF649ED5620_FILTER</td><td/><td/><td/><td/></row>
@@ -6495,7 +6547,7 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>COMPANY_NAME</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-1331494225</td></row>
+		<row><td>COMPANY_NAME</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-794594687</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1033</td><td>Always Install</td><td>0</td><td/><td>1621317870</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1033</td><td>The color settings of your system are not adequate for running [ProductName].</td><td>0</td><td/><td>1621317870</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_OS</td><td>1033</td><td>The operating system is not adequate for running [ProductName].</td><td>0</td><td/><td>1621317870</td></row>
@@ -7618,11 +7670,11 @@
 		<row><td>ID_STRING14</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1889785454</td></row>
 		<row><td>ID_STRING15</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023999979</td></row>
 		<row><td>ID_STRING16</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023970352</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.waves.com</td><td>0</td><td/><td>-1197216623</td></row>
-		<row><td>ID_STRING3</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-1331494225</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://www.WavesAudio.com</td><td>0</td><td/><td>-794594687</td></row>
+		<row><td>ID_STRING3</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-794594687</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>TracksLive</td><td>0</td><td/><td>1621309294</td></row>
 		<row><td>ID_STRING5</td><td>1033</td><td>LAUNCH~1.EXE|Launch gdb.exe</td><td>0</td><td/><td>1621352975</td></row>
-		<row><td>ID_STRING6</td><td>1033</td><td>http://www.waves.com/support</td><td>0</td><td/><td>-1197271887</td></row>
+		<row><td>ID_STRING6</td><td>1033</td><td>http://www.WavesAudio.com/support</td><td>0</td><td/><td>-794594687</td></row>
 		<row><td>ID_STRING7</td><td>1033</td><td>US: +1-865-909-9200, Worldwide: +972-3-608-4000</td><td>0</td><td/><td>1621317071</td></row>
 		<row><td>ID_STRING8</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621302927</td></row>
 		<row><td>ID_STRING9</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621351824</td></row>
