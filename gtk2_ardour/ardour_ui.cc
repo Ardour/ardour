@@ -2643,17 +2643,14 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 void
 ARDOUR_UI::idle_load (const std::string& path)
 {
-	if (_session) {
-		if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
-			/* /path/to/foo => /path/to/foo, foo */
-			load_session (path, basename_nosuffix (path));
-		} else {
-			/* /path/to/foo/foo.ardour => /path/to/foo, foo */
-			load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
-		}
+	ARDOUR_COMMAND_LINE::session_name = path;
 
+	if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+		/* /path/to/foo => /path/to/foo, foo */
+		load_session (path, basename_nosuffix (path));
 	} else {
-		ARDOUR_COMMAND_LINE::session_name = path;
+		/* /path/to/foo/foo.ardour => /path/to/foo, foo */
+		load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
 	}
 }
 
