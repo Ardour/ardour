@@ -11,8 +11,8 @@
          fghover="#CCCCCC"
          bghover="#898989"/>
   <style name="generic_button"
-         winfont ="Arial Bold 12"
-         macfont ="Helvetica Bold 12"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
          fgnormal="#6D6E72"
          textcolornormal="#6D6E72"
          bgnormal="#CACAC5"

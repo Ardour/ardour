@@ -37,7 +37,7 @@ namespace ARDOUR {
 }
 
 ///
-class WavesExportFormatSelector : public Gtk::HBox, public WavesUI, public ARDOUR::SessionHandlePtr
+class WavesExportFormatSelector : public Gtk::VBox, public WavesUI, public ARDOUR::SessionHandlePtr
 {
 
   private:

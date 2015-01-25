@@ -47,6 +47,17 @@ WavesExportFileNotebook::WavesExportFileNotebook ()
 	_lossy_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFileNotebook::on_lossy_button));
 }
 
+WavesExportFileNotebook::~WavesExportFileNotebook ()
+{
+	if (_lossless_format_file_page) {
+		delete _lossless_format_file_page;
+	}
+	if (_lossy_format_file_page) {
+		delete _lossy_format_file_page;
+	}
+}
+
+
 void
 WavesExportFileNotebook::set_session_and_manager (ARDOUR::Session* s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager)
 {
@@ -279,7 +290,6 @@ WavesExportFileNotebook::FilePage::get_soundcloud_upload () const
 void
 WavesExportFileNotebook::FilePage::save_format_to_manager (FormatPtr format)
 {
-	std::cout << "WavesExportFileNotebook::FilePage::save_format_to_manager (FormatPtr format)" << std::endl;
 	profile_manager->save_format_to_disk (format);
 }
 

@@ -38,6 +38,7 @@ class WavesExportFileNotebook : public Gtk::VBox, public WavesUI, public ARDOUR:
   public:
 
 	WavesExportFileNotebook ();
+	~WavesExportFileNotebook ();
 
 	void set_session_and_manager (ARDOUR::Session * s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
 	void sync_with_manager ();
