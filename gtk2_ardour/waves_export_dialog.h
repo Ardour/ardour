@@ -29,7 +29,7 @@
 
 #include "public_editor.h"
 #include "waves_export_timespan_selector.h"
-#include "export_channel_selector.h"
+#include "waves_export_channel_selector.h"
 #include "waves_export_file_notebook.h"
 #include "waves_export_preset_selector.h"
 #include "waves_dialog.h"
@@ -41,8 +41,6 @@ namespace ARDOUR {
 	class ExportStatus;
 	class ExportHandler;
 }
-
-class ExportChannelSelector;
 
 class WavesExportDialog : public WavesDialog, public PBD::ScopedConnectionList 
 {
@@ -79,7 +77,7 @@ class WavesExportDialog : public WavesDialog, public PBD::ScopedConnectionList
 
 	boost::scoped_ptr<WavesExportPresetSelector>   preset_selector;
 	boost::scoped_ptr<WavesExportTimespanSelector> timespan_selector;
-	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
+	boost::scoped_ptr<WavesExportChannelSelector>  channel_selector;
 	boost::scoped_ptr<WavesExportFileNotebook>     file_notebook;
 
 	boost::shared_ptr<SoundcloudExportSelector> soundcloud_selector;

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HBox CACHEIT="false"
+      UI.NEEDINIT="true"
+      spacing="5"
+      borderwidth="10">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_button"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         textcolornormal="#6D6E72"
+         bgnormal="#CACAC5"
+         basenormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         borderwidth="0 0 0 0"
+         bordercolor="#6D6E72"/>
+  <style name="generic_dropdown"
+         style="generic_button"
+         fgnormal="#EDECE8"
+         normalicon="dropdown_90x20"
+         activeicon="dropdown_90x20_active"
+         inactiveicon="dropdown_90x20_inactive"
+         width="90"
+         height="20"
+         horzalignment="start"/>
+  <style name="generic_dropdown_menu"
+         style="generic_dropdown"/>
+  <VBox spacing="5">
+    <Hbox spacing="8">
+      <HBox>
+        <IconButton id="region_contents_button"
+                    width="20"
+                    height="20"
+                    normalicon="waves_darker_radio_button"
+                    activeicon="waves_darker_radio_button_active"
+                    toggleable="true"
+                    state="active"/>
+        <Label style="generic_control"
+         text="Export region contents"/>
+      </HBox>
+      <HBox>
+        <IconButton id="track_output_button"
+                    width="20"
+                    height="20"
+                    normalicon="waves_darker_radio_button"
+                    activeicon="waves_darker_radio_button_active"
+                    toggleable="true"/>
+        <Label style="generic_control"
+         text="Export track output"/>
+      </HBox>
+    </Hbox>
+    <ScrolledWindow id="track_scroller"
+                    height="130"
+                    width="622"/>
+  </VBox>
+</HBox>

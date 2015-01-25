@@ -170,7 +170,7 @@ WavesExportDialog::init_components ()
 {
 	preset_selector.reset (new WavesExportPresetSelector ());
 	timespan_selector.reset (new WavesExportTimespanSelectorMultiple (_session, profile_manager));
-	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	channel_selector.reset (new WavesPortExportChannelSelector (_session, profile_manager));
 	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new WavesExportFileNotebook ());
 }
@@ -446,7 +446,7 @@ WavesExportRangeDialog::init_components ()
 {
 	preset_selector.reset (new WavesExportPresetSelector ());
 	timespan_selector.reset (new WavesExportTimespanSelectorSingle (_session, profile_manager, range_id));
-	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	channel_selector.reset (new WavesPortExportChannelSelector (_session, profile_manager));
 	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new WavesExportFileNotebook ());
 }
@@ -460,7 +460,7 @@ WavesExportSelectionDialog::init_components ()
 {
 	preset_selector.reset (new WavesExportPresetSelector ());
 	timespan_selector.reset (new WavesExportTimespanSelectorSingle (_session, profile_manager, X_("selection")));
-	channel_selector.reset (new PortExportChannelSelector (_session, profile_manager));
+	channel_selector.reset (new WavesPortExportChannelSelector (_session, profile_manager));
 	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new WavesExportFileNotebook ());
 }
@@ -485,7 +485,7 @@ WavesExportRegionDialog::init_components ()
 
 	preset_selector.reset (new WavesExportPresetSelector ());
 	timespan_selector.reset (new WavesExportTimespanSelectorSingle (_session, profile_manager, loc_id));
-	channel_selector.reset (new RegionExportChannelSelector (_session, profile_manager, region, track));
+	channel_selector.reset (new WavesRegionExportChannelSelector (_session, profile_manager, region, track));
 	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new WavesExportFileNotebook ());
 }
@@ -501,7 +501,7 @@ WavesStemExportDialog::init_components ()
 {
 	preset_selector.reset (new WavesExportPresetSelector ());
 	timespan_selector.reset (new WavesExportTimespanSelectorMultiple (_session, profile_manager));
-	channel_selector.reset (new TrackExportChannelSelector (_session, profile_manager));
+	channel_selector.reset (new WavesTrackExportChannelSelector (_session, profile_manager));
 	soundcloud_selector.reset (new SoundcloudExportSelector ());
 	file_notebook.reset (new WavesExportFileNotebook ());
 }

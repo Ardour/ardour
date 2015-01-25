@@ -29,6 +29,7 @@ path_prefix = 'gtk2_ardour/'
 gtk2_ardour_sources = [
         'mixer_bridge_view.cc',
         'waves_export_dialog.cc',
+        'waves_export_channel_selector.cc',
         'waves_track_color_dialog.cc',
         'waves_track_color_dialog.logic.cc',
 		'waves_export_file_notebook.cc',

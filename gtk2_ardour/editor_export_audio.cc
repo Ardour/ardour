@@ -72,7 +72,7 @@ Editor::export_audio ()
 void
 Editor::stem_export ()
 {
-	StemExportDialog dialog (*this);
+	WavesStemExportDialog dialog (*this);
 	dialog.set_session (_session);
 	dialog.run();
 }
@@ -99,7 +99,7 @@ Editor::export_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-		ExportRangeDialog dialog (*this, l->id().to_s());
+		WavesExportRangeDialog dialog (*this, l->id().to_s());
 		dialog.set_session (_session);
 		dialog.run();
 	}
@@ -122,7 +122,7 @@ Editor::export_region ()
 		RouteTimeAxisView & rtv (dynamic_cast<RouteTimeAxisView &> (selection->regions.front()->get_time_axis_view()));
 		AudioTrack & track (dynamic_cast<AudioTrack &> (*rtv.route()));
 		
-		ExportRegionDialog dialog (*this, *(audio_region.get()), track);
+		WavesExportRegionDialog dialog (*this, *(audio_region.get()), track);
 		dialog.set_session (_session);
 		dialog.run ();
 		
