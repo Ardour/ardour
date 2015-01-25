@@ -738,7 +738,7 @@ void
 AudioEngine::drop_backend ()
 {
 	if (_backend) {
-		_backend->stop ();
+		stop(false);
 		_backend->drop_device ();
 		_backend.reset ();
 		_running = false;
