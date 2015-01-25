@@ -704,9 +704,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		 * save state only if there's no slave or if it's not yet locked.
 		 */
 		if (!_slave || !_slave->locked()) {
-			DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: pending save\n"));
-			/* capture start has been changed, so save pending state */
-			save_state ("", true);
+			DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: requests save\n"));
+			SaveSessionRequested (_current_snapshot_name);
 			saved = true;
 		}
 	}
@@ -718,7 +717,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	/* save the current state of things if appropriate */
 
 	if (did_record && !saved) {
-		save_state (_current_snapshot_name);
+		SaveSessionRequested (_current_snapshot_name);
 	}
 
 	if (ptw & PostTransportStop) {
