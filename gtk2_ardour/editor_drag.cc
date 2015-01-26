@@ -1377,7 +1377,7 @@ RegionMoveDrag::aborted (bool movement_occurred)
 {
 	if (_copy) {
 
-		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
 			list<DraggingView>::const_iterator next = i;
 			++next;
 			delete i->view;
