@@ -61,6 +61,8 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 	bool transport_work_requested() const;
 	void drop_references ();
 
+        void map_parameters ();
+
 	framecnt_t audio_diskstream_capture_buffer_size() const { return audio_dstream_capture_buffer_size; }
 	framecnt_t audio_diskstream_playback_buffer_size() const { return audio_dstream_playback_buffer_size; }
 	uint32_t midi_diskstream_buffer_size()  const { return midi_dstream_buffer_size; }

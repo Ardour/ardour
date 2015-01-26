@@ -271,6 +271,7 @@ Session::post_engine_init ()
 		
 		Config->map_parameters (ff);
 		config.map_parameters (ft);
+                _butler->map_parameters ();
 
 		/* Reset all panners */
 		
