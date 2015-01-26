@@ -471,6 +471,11 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 
 	Location* loc = find_location_from_marker (marker, is_start);
 
+    // loop range cannot be removed in TracksLive
+    if (loc->is_auto_loop() ) {
+        return;
+    }
+    
 	if (_session && loc) {
 	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 	}
@@ -554,8 +559,8 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	bool is_start;
 	Location * loc = find_location_from_marker (marker, is_start);
-
-	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
+    
+	if (loc == transport_punch_location() || loc->is_session_range ()) {
 
 		if (transport_marker_menu == 0) {
 			build_range_marker_menu (loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
