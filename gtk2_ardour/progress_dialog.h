@@ -45,7 +45,6 @@ public:
     // it's expected that set_num_of_steps () was called previously
     void add_progress_step ();
     void update_info (double new_progress, const char* top_message, const char* progress_message, const char* bottom_message);
-    void set_progress (double new_progress);
     void show_pd ();
 	void hide_pd ();
     void show_cancel_button ();

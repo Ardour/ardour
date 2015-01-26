@@ -95,12 +95,6 @@ ProgressDialog::update_info (double new_progress, const char* top_message, const
 }
 
 void
-ProgressDialog::set_progress (double new_progress)
-{
-    update_progress_gui (new_progress);
-}
-
-void
 ProgressDialog::set_num_of_steps (unsigned int n, bool hide_automatically)
 {
     num_of_steps = n;
@@ -142,7 +136,8 @@ ProgressDialog::hide_pd ()
     while (Glib::MainContext::get_default()->iteration (false)) {
     /* do nothing */
 	}
-    WavesDialog::hide ();    
+    set_progress (0);
+    WavesDialog::hide ();
 }
 
 void
