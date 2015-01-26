@@ -2976,10 +2976,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			char illegal = Session::session_name_is_legal (session_name);
 			
 			if (illegal) {
-				MessageDialog msg (session_dialog,
-						   string_compose (_("To ensure compatibility with various systems\n"
-								     "session names may not contain a '%1' character"),
-								   illegal));
+				WavesMessageDialog msg ("", string_compose (_("To ensure compatibility with various systems\n"
+								                              "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
