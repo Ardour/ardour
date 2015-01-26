@@ -72,6 +72,7 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 	ofn.nMaxFile = _MAX_PATH;
 	ofn.lpstrTitle = title.c_str();
 	ofn.Flags = OFN_PATHMUSTEXIST;
+	ofn.lpstrFilter = " \0*.ardour\0";
 
 	// Check on valid path
 	WIN32_FIND_DATA FindFileData;
