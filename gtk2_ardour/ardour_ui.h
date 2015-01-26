@@ -154,7 +154,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void show_about ();
 	void hide_about ();
 
-	void idle_load (const std::string& path);
+	void load_from_application_api (const std::string& path);
 	void finish();
 
 	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());

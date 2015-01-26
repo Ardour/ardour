@@ -762,7 +762,7 @@ ARDOUR_UI::starting ()
 	bool brand_new_user = ArdourStartup::required ();
 
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
-	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_load));
+	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::load_from_application_api));
 
 	if (ARDOUR_COMMAND_LINE::check_announcements) {
 		check_announcements ();
@@ -2641,7 +2641,7 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 }
 
 void
-ARDOUR_UI::idle_load (const std::string& path)
+ARDOUR_UI::load_from_application_api (const std::string& path)
 {
 	ARDOUR_COMMAND_LINE::session_name = path;
 
