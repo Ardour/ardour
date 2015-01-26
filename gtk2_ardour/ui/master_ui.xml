@@ -14,7 +14,7 @@
           <EventBox width="1"
                     bgnormal="#494949"
                     bgactive="#494949"/>
-          <EventBox width="29"
+          <EventBox width="28"
                     bgnormal="#424242"
                     bgactive="#F48E16"/>
           <EventBox width="6"
