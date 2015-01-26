@@ -4151,7 +4151,11 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		show_verbose_cursor_time (adjusted_current_frame (event));
 	}
 
-	_original_pointer_time_axis = _editor->trackview_by_y_position (current_pointer_y ()).first->order ();
+    TimeAxisView* view = _editor->trackview_by_y_position (current_pointer_y ()).first;
+    
+    if (view) {
+        _original_pointer_time_axis = view->order ();
+    }
 }
 
 void
