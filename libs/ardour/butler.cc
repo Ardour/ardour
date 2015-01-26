@@ -54,18 +54,21 @@ Butler::Butler(Session& s)
 	g_atomic_int_set(&should_do_transport_work, 0);
 	SessionEvent::pool->set_trash (&pool_trash);
 
-	/* catch future changes to parameters */
-	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
-
-	/* use any current ones that we care about */
-	boost::function<void (std::string)> ff (boost::bind (&Butler::config_changed, this, _1));
-	Config->map_parameters (ff);
-	
+        /* catch future changes to parameters */
+        Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
 }
 
 Butler::~Butler()
 {
 	terminate_thread ();
+}
+
+void
+Butler::map_parameters ()
+{
+        /* use any current ones that we care about */
+        boost::function<void (std::string)> ff (boost::bind (&Butler::config_changed, this, _1));
+        Config->map_parameters (ff);
 }
 
 void
