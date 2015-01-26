@@ -799,7 +799,7 @@ AudioDiskstream::commit (framecnt_t playback_distance)
 			need_butler = ((framecnt_t) c->front()->capture_buf->read_space() >= disk_write_chunk_frames);
 		}
 	}
-
+        
 	return need_butler;
 }
 

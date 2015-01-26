@@ -128,7 +128,8 @@ setup_enum_writer ()
 	MTC_Status _MIDI_MTC_Status;
 	Evoral::OverlapType _OverlapType;
 	AutoReturnTarget _AutoReturnTarget;
-		
+        BufferingPreset _BufferingPreset;
+        
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -642,6 +643,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (RegionSelectionStart);
 	REGISTER_BITS (_AutoReturnTarget);
 
+        REGISTER_ENUM (Small);
+        REGISTER_ENUM (Medium);
+        REGISTER_ENUM (Large);
+        REGISTER_ENUM (Custom);
+        REGISTER(_BufferingPreset);
 }
 
 } /* namespace ARDOUR */
@@ -969,6 +975,20 @@ std::istream& operator>>(std::istream& o, AutoReturnTarget& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const AutoReturnTarget& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, ARDOUR::BufferingPreset& var)
+{
+	std::string s;
+	o >> s;
+	var = (ARDOUR::BufferingPreset) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::BufferingPreset& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;
