@@ -151,5 +151,6 @@ WavesDialog::on_delete_event (GdkEventAny*)
 void
 WavesDialog::on_response(int response_id)
 {
+    Dialog::on_response (response_id);
     hide ();
 }
