@@ -176,21 +176,25 @@ Editor::canvas_scroll_event (GdkEventScroll *event, bool from_canvas)
 }
 
 bool
-Editor::track_canvas_button_press_event (GdkEventButton */*event*/)
+Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
-	begin_reversible_selection_op (_("Clear Selection Click (track canvas)"));
-	selection->clear ();
-	commit_reversible_selection_op();
 	_track_canvas->grab_focus();
+	if (!Keyboard::is_context_menu_event (event)) {
+		begin_reversible_selection_op (_("Clear Selection Click (track canvas)"));
+		selection->clear ();
+		commit_reversible_selection_op();
+        }
 	return false;
 }
 
 bool
 Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
-	if (_drags->active ()) {
-		_drags->end_grab ((GdkEvent*) event);
-	}
+	if (!Keyboard::is_context_menu_event (event)) {
+                if (_drags->active ()) {
+                        _drags->end_grab ((GdkEvent*) event);
+                }
+        }
 	return false;
 }
 
