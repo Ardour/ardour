@@ -1388,6 +1388,17 @@ Session::set_auto_loop_location (Location* location)
 
 	location->set_auto_loop (true, this);
 
+    if (play_loop && Config->get_seamless_loop()) {
+        // set all tracks to use internal looping
+        boost::shared_ptr<RouteList> rl = routes.reader ();
+        for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+            boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+            if (tr && !tr->hidden()) {
+                tr->set_loop (location);
+            }
+        }
+    }
+    
 	/* take care of our stuff first */
 
 	auto_loop_changed (location);
@@ -1549,7 +1560,16 @@ void
 Session::location_removed (Location *location)
 {
         if (location->is_auto_loop()) {
-                set_auto_loop_location (0);
+            set_auto_loop_location (0);
+            
+            // set all tracks to NOT use internal looping
+            boost::shared_ptr<RouteList> rl = routes.reader ();
+            for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+                boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+                if (tr && !tr->hidden()) {
+                    tr->set_loop (0);
+                }
+            }
         }
         
         if (location->is_auto_punch()) {
