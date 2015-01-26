@@ -1028,7 +1028,6 @@ If you still wish to quit, please use the\n\n\
 	close_all_dialogs ();
 
 	if (_session) {
-		// _session->set_deletion_in_progress ();
 		_session->set_clean ();
 		_session->remove_pending_capture_state ();
 		delete _session;
