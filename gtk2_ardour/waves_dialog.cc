@@ -147,3 +147,9 @@ WavesDialog::on_delete_event (GdkEventAny*)
 	hide ();
 	return false;
 }
+
+void
+WavesDialog::on_response(int response_id)
+{
+    hide ();
+}

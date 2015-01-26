@@ -51,6 +51,7 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr, public 
 	bool on_key_press_event (GdkEventKey*);
 	void on_show ();
 	bool on_delete_event (GdkEventAny*);
+    
 
 	enum {
 		// We need one smaller then smallest Gtk::RESPONSE_*
@@ -58,6 +59,7 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr, public 
 	};
 
   protected:
+    void on_response(int response_id);
 
   private:
 
