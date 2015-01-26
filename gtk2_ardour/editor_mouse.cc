@@ -1472,20 +1472,24 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 	}
 
-	/* see if we're finishing a drag */
+        bool were_dragging = false;
 
-	bool were_dragging = false;
-	if (_drags->active ()) {
-		bool const r = _drags->end_grab (event);
-		if (r) {
-			/* grab dragged, so do nothing else */
-			return true;
-		}
+	if (!Keyboard::is_context_menu_event (&event->button)) {
 
-		were_dragging = true;
-	}
+                /* see if we're finishing a drag */
+                
+                if (_drags->active ()) {
+                        bool const r = _drags->end_grab (event);
+                        if (r) {
+                                /* grab dragged, so do nothing else */
+                                return true;
+                        }
+                        
+                        were_dragging = true;
+                }
 
-	update_region_layering_order_editor ();
+                update_region_layering_order_editor ();
+        }
 
 	/* edit events get handled here */
 

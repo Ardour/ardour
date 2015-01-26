@@ -176,19 +176,23 @@ Editor::canvas_scroll_event (GdkEventScroll *event, bool from_canvas)
 }
 
 bool
-Editor::track_canvas_button_press_event (GdkEventButton */*event*/)
+Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
-	selection->clear ();
-	_track_canvas->grab_focus();
+	if (!Keyboard::is_context_menu_event (event)) {
+                selection->clear ();
+        }
+        _track_canvas->grab_focus();
 	return false;
 }
 
 bool
 Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
-	if (_drags->active ()) {
-		_drags->end_grab ((GdkEvent*) event);
-	}
+	if (!Keyboard::is_context_menu_event (event)) {
+                if (_drags->active ()) {
+                        _drags->end_grab ((GdkEvent*) event);
+                }
+        }
 	return false;
 }
 
