@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExportPreset id="12968c13-2184-4c5d-9f60-dbe7331a0f1d" name="Tracks Live">
+  <ExportFormat id="cfd909af-e1e1-4156-aa08-59260ed1c240"/>
+  <ExportFilename>
+    <Folder relative="true" path="\export"/>
+    <Field name="label" enabled="false"/>
+    <Field name="session" enabled="false"/>
+    <Field name="revision" enabled="false"/>
+    <Field name="time" enabled="false" value="T_None"/>
+    <Field name="date" enabled="false" value="D_None"/>
+  </ExportFilename>
+</ExportPreset>
