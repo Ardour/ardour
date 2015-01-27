@@ -352,9 +352,15 @@ for backend in jack wavesaudio ; do
 done
 
 # Export Formats/Presets
-for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
-    cp "$f" $ExportFormats ; 
-done
+if test x$APPNAME == x"TracksLive" ; then
+    for f in "$BUILD_ROOT/../export/Tracks Live.preset" "$BUILD_ROOT/../export/Tracks Live.format" ; do 
+        cp "$f" $ExportFormats ; 
+    done
+else
+    for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do 
+        cp "$f" $ExportFormats ; 
+    done
+fi
 
 # Session and Route templates
 #for f in $BUILD_ROOT/../templates/* ; do 
