@@ -1885,7 +1885,8 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "cut-region-gain", _("Cut Gain"), sigc::bind (sigc::mem_fun(*this, &Editor::adjust_region_gain), false));
 
 	/* Open the pitch shift dialogue for any selected audio regions */
-	reg_sens (_region_actions, "pitch-shift-region", _("Pitch Shift..."), sigc::mem_fun (*this, &Editor::pitch_shift_region));
+//  Tracks Live doesn't use it
+//	reg_sens (_region_actions, "pitch-shift-region", _("Pitch Shift..."), sigc::mem_fun (*this, &Editor::pitch_shift_region));
 
 	/* Open the transpose dialogue for any selected MIDI regions */
 	reg_sens (_region_actions, "transpose-region", _("Transpose..."), sigc::mem_fun (*this, &Editor::transpose_region));
