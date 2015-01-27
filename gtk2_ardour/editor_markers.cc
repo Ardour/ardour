@@ -1216,10 +1216,6 @@ Editor::marker_selection_changed ()
 		return;
 	}
 
-	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		i->second->set_selected (false);
-	}
-
 	for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
 		(*x)->set_selected (true);
 	}
