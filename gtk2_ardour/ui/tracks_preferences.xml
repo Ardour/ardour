@@ -922,9 +922,9 @@
           </HBox>
           <HBox>
             <Label style="parameter_label"
-                   text="Playback (Seconds of Buffering)"/>
+                   text="Drive Buffering"/>
             <VBox style="parameter_spacing"/>
-            <Dropdown id="playback_seconds_dropdown"
+            <Dropdown id="hard_disk_buffering_dropdown"
                       style="preferences_tab_dropdown">
               <HBox>
                 <VBox width="10"/>
@@ -933,46 +933,15 @@
                        width="117"/>
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
-                <DropdownItem title="5"
+                <DropdownItem title="Small"
                               horzalignment="start"
-                              data="0"/>
-                <DropdownItem title="10"
+                              data="Small"/>
+                <DropdownItem title="Medium"
                               horzalignment="start"
-                              data="1"/>
-                <DropdownItem title="15"
+                              data="Medium"/>
+                <DropdownItem title="Large"
                               horzalignment="start"
-                              data="2"/>
-                <DropdownItem title="20"
-                              horzalignment="start"
-                              data="3"/>
-              </DropdownMenu>
-            </Dropdown>
-          </HBox>
-          <HBox>
-            <Label style="parameter_label"
-                   text="Recording (Seconds of Buffering)"/>
-            <VBox style="parameter_spacing"/>
-            <Dropdown id="recording_seconds_dropdown"
-                      style="preferences_tab_dropdown">
-              <HBox>
-                <VBox width="10"/>
-                <Label style="generic_control"
-                       horzalignment="start"
-                       width="117"/>
-              </HBox>
-              <DropdownMenu style="generic_dropdown_menu">
-                <DropdownItem title="5"
-                              horzalignment="start"
-                              data="0"/>
-                <DropdownItem title="10"
-                              horzalignment="start"
-                              data="1"/>
-                <DropdownItem title="15"
-                              horzalignment="start"
-                              data="2"/>
-                <DropdownItem title="20"
-                              horzalignment="start"
-                              data="3"/>
+                              data="Large"/>
               </DropdownMenu>
             </Dropdown>
           </HBox>

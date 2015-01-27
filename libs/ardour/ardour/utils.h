@@ -75,6 +75,9 @@ LIBARDOUR_API ARDOUR::SyncSource string_to_sync_source (std::string str);
 
 LIBARDOUR_API const char* edit_mode_to_string (ARDOUR::EditMode);
 LIBARDOUR_API ARDOUR::EditMode string_to_edit_mode (std::string);
+    
+LIBARDOUR_API ARDOUR::BufferingPreset string_to_hdd_buffering_preset (const std::string& str);
+LIBARDOUR_API const char* hdd_buffering_preset_to_string (BufferingPreset preset);
 
 #undef  OLD_GAIN_MATH
 #define OLD_GAIN_MATH

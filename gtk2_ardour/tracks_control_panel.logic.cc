@@ -1023,41 +1023,25 @@ TracksControlPanel::display_meter_falloff ()
 }
 
 void
-TracksControlPanel::display_audio_capture_buffer_seconds ()
+TracksControlPanel::display_hdd_buffering ()
 {
-	long period = Config->get_audio_capture_buffer_seconds ();
+	BufferingPreset preset = Config->get_buffering_preset ();
 	int selected_item = 0;
 
-	if (period <= 5) {
-		selected_item = 0;
-	} else if (period <= 10) {
-		selected_item = 1;
-	} else if (period <= 15) {
-		selected_item = 2;
-	} else {
-		selected_item = 3;
-	}
-	_recording_seconds_dropdown.set_current_item (selected_item);
+    switch (preset) {
+        case Small:
+            selected_item = 0;
+            break;
+        case Medium:
+            selected_item = 1;
+            break;
+        case Large:
+            selected_item = 2;
+            break;
+    }
+    
+    _hard_disk_buffering_dropdown.set_current_item (selected_item);
 }	
-
-void
-TracksControlPanel::display_audio_playback_buffer_seconds ()
-{
-	long period = Config->get_audio_playback_buffer_seconds ();
-	int selected_item = 0;
-
-	if (period <= 5) {
-		selected_item = 0;
-	} else if (period <= 10) {
-		selected_item = 1;
-	} else if (period <= 15) {
-		selected_item = 2;
-	} else {
-		selected_item = 3;
-	}
-
-	_playback_seconds_dropdown.set_current_item (selected_item);
-}
 
 void
 TracksControlPanel::display_mmc_control ()
@@ -1114,8 +1098,7 @@ TracksControlPanel::display_general_preferences ()
     display_waveform_color_fader ();
 	display_meter_hold ();
 	display_meter_falloff ();
-	display_audio_capture_buffer_seconds ();
-	display_audio_playback_buffer_seconds ();
+	display_hdd_buffering ();
 	display_mmc_control ();
 	display_send_mmc ();
 	display_mmc_send_device_id ();
@@ -1222,8 +1205,7 @@ TracksControlPanel::save_general_preferences ()
 	Config->set_history_depth (_limit_undo_history_spinbutton.get_value ());
 	Config->set_saved_history_depth (_save_undo_history_spinbutton.get_value ());
 	Config->set_save_history (_save_undo_history_spinbutton.get_value () > 0);
-	Config->set_audio_capture_buffer_seconds (PBD::atoi (_recording_seconds_dropdown.get_text ()));
-	Config->set_audio_playback_buffer_seconds (PBD::atoi (_playback_seconds_dropdown.get_text()));
+	Config->set_buffering_preset (string_to_hdd_buffering_preset (_hard_disk_buffering_dropdown.get_text ()));
 }
 
 void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, int)
@@ -1786,9 +1768,7 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
 	} else if (parameter_name == "meter-falloff") {
 		display_meter_falloff ();
 	} else if (parameter_name == "capture-buffer-seconds") {
-		display_audio_capture_buffer_seconds ();
-	} else if (parameter_name == "playback-buffer-seconds") {
-		display_audio_playback_buffer_seconds ();
+		display_hdd_buffering ();
 	} else if (parameter_name == "mmc-control") {
 		display_mmc_control ();
 	} else if (parameter_name == "send-mmc") {

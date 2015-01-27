@@ -133,8 +133,7 @@
 	void display_waveform_shape ();
 	void display_meter_hold ();
 	void display_meter_falloff ();
-	void display_audio_capture_buffer_seconds ();
-	void display_audio_playback_buffer_seconds ();
+	void display_hdd_buffering ();
 	void display_mmc_control ();
 	void display_send_mmc ();
 	void display_mmc_send_device_id ();

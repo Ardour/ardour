@@ -94,8 +94,7 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesDropdown& _waveform_shape_dropdown;
 	WavesDropdown& _peak_hold_time_dropdown;
 	WavesDropdown& _dpm_fall_off_dropdown;
-	WavesDropdown& _recording_seconds_dropdown;
-	WavesDropdown& _playback_seconds_dropdown;
+	WavesDropdown& _hard_disk_buffering_dropdown;
 
     Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
