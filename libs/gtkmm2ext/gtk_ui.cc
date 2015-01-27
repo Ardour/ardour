@@ -664,7 +664,9 @@ UI::handle_fatal (const char *message)
 
 	theMain->run ();
 
-	_exit (1);
+    //GZ: Temporary change to catch a bug
+    //_exit (1);
+	abort ();
 }
 
 void
