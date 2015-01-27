@@ -116,7 +116,13 @@ WavesExportDialog::set_session (ARDOUR::Session* s)
 			profile_manager->duplicate_filename_state (filenames.front ());
 		}
 	}
-
+    if (formats.size()) {
+        ExportProfileManager::FormatStatePtr state = formats.front ();
+        if (!state->format ) {
+            state->format = state->list->front ();
+        }
+    }
+    
 	sync_with_manager ();
 
 	/* Warnings */

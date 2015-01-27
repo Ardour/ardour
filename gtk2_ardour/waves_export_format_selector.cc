@@ -40,10 +40,6 @@ WavesExportFormatSelector::WavesExportFormatSelector ()
 	_sample_rate_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_sample_rate_dropdown));
 	_dithering_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_dithering_dropdown));
 	_normalize_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_normalize_button));
-
-	/* Sorted contents for dropdown */
-	format_list = Gtk::ListStore::create (format_cols);
-    format_list->set_sort_column (format_cols.label, Gtk::SORT_ASCENDING);
 }
 
 WavesExportFormatSelector::~WavesExportFormatSelector ()

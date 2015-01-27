@@ -67,7 +67,9 @@ WavesExportFileNotebook::sync_with_manager ()
 	ExportProfileManager::FilenameStateList::const_iterator filename_it = filenames.begin ();
 
 	if (_format_file_page) {
+        _format_file_page_home.remove (*_format_file_page);
 		remove_file_page (_format_file_page);
+        _format_file_page = 0;
 	}
 
 	// Lossless formats page:

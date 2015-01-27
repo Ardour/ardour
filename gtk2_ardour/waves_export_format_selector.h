@@ -91,17 +91,6 @@ class WavesExportFormatSelector : public Gtk::VBox, public WavesUI, public ARDOU
 
 	/*** GUI componenets ***/
 
-	struct FormatCols : public Gtk::TreeModelColumnRecord
-	{
-	  public:
-		Gtk::TreeModelColumn<FormatPtr>    format;
-		Gtk::TreeModelColumn<std::string>  label;
-
-		FormatCols () { add (format); add (label); }
-	};
-	FormatCols                   format_cols;
-	Glib::RefPtr<Gtk::ListStore> format_list;
-
 	WavesDropdown& _format_dropdown;
 	WavesDropdown& _depth_dropdown;
 	WavesDropdown& _sample_rate_dropdown;
