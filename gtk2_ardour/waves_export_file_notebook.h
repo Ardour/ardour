@@ -60,31 +60,15 @@ class WavesExportFileNotebook : public Gtk::VBox, public WavesUI, public ARDOUR:
 	FilePage* add_file_page (ARDOUR::ExportProfileManager::FormatStatePtr format_state,
 							 ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);
 	void remove_file_page (FilePage * page);
-	void update_remove_file_page_sensitivity ();
 	void update_soundcloud_upload ();
-	void show_lossless_page ();
-	void show_lossy_page ();
 
-	void on_lossless_button (WavesButton*);
-	void on_lossy_button (WavesButton*);
+	FilePage* _format_file_page;
 
-	sigc::connection page_change_connection;
-
-	uint32_t     page_counter;
-
-	WavesButton& _lossless_button;
-	WavesButton& _lossless_check_button;
-	FilePage* _lossless_format_file_page;
-
-	WavesButton& _lossy_button;
-	WavesButton& _lossy_check_button;
-	FilePage* _lossy_format_file_page;
-
-	Gtk::Container& _file_page_home;
+	Gtk::Container& _format_file_page_home;
 
 	class FilePage : public Gtk::VBox, public WavesUI {
 	  public:
-		FilePage (ARDOUR::Session * s, ManagerPtr profile_manager, WavesExportFileNotebook * parent, uint32_t number,
+		FilePage (ARDOUR::Session * s, ManagerPtr profile_manager, WavesExportFileNotebook * parent,
 		          ARDOUR::ExportProfileManager::FormatStatePtr format_state,
 		          ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);
 
@@ -102,7 +86,6 @@ class WavesExportFileNotebook : public Gtk::VBox, public WavesUI, public ARDOUR:
 
 	  private:
 		void save_format_to_manager (FormatPtr format);
-		void update_tab_label ();
 		void critical_selection_changed ();
 
 		ARDOUR::ExportProfileManager::FormatStatePtr   format_state;
@@ -112,20 +95,10 @@ class WavesExportFileNotebook : public Gtk::VBox, public WavesUI, public ARDOUR:
 		/* GUI components */
 		Gtk::Container& _format_selector_home;
 		Gtk::Container& _filename_selector_home;
-		//Gtk::Label              format_label;
-		//Gtk::Alignment          format_align;
 		WavesExportFormatSelector    _format_selector;
 		PBD::ScopedConnection   format_connection;
 
-		//Gtk::Alignment          filename_align;
 		WavesExportFilenameSelector  _filename_selector;
-
-		//Gtk::CheckButton	soundcloud_upload_button;
-		//Gtk::HBox               tab_widget;
-		//Gtk::Label              tab_label;
-		//Gtk::Alignment          tab_close_alignment;
-		//Gtk::Button             tab_close_button;
-		uint32_t                tab_number;
 	};
 };
 

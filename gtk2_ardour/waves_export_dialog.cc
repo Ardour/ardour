@@ -106,14 +106,15 @@ WavesExportDialog::set_session (ARDOUR::Session* s)
 	// TRACKS SPECIFIC CONFIGURATION
 	ExportProfileManager::FormatStateList const & formats = profile_manager->get_formats ();
 	ExportProfileManager::FilenameStateList const & filenames = profile_manager->get_filenames ();
-	while (formats.size () > 2) {
+	while (formats.size () > 1) { // so far Tracks Live offers one format per time
 		profile_manager->remove_format_state (formats.back ());
 		profile_manager->remove_filename_state (filenames.back ());
 	}
-
-	if (formats.size () == 1) {
-		profile_manager->duplicate_format_state (formats.front ()),
-		profile_manager->duplicate_filename_state (filenames.front ());
+	if (0) { // so far Tracks Live offers one format per time
+		if (formats.size () == 1) {
+			profile_manager->duplicate_format_state (formats.front ()),
+			profile_manager->duplicate_filename_state (filenames.front ());
+		}
 	}
 
 	sync_with_manager ();

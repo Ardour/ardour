@@ -51,28 +51,43 @@ class WavesExportFormatSelector : public Gtk::VBox, public WavesUI, public ARDOU
 	~WavesExportFormatSelector ();
 
 	void set_state (ARDOUR::ExportProfileManager::FormatStatePtr state_, ARDOUR::Session * session_);
-	void update_format_list ();
 
 	sigc::signal<void, FormatPtr> FormatEdited;
-	sigc::signal<void, FormatPtr> FormatRemoved;
-	sigc::signal<FormatPtr, FormatPtr> NewFormat;
 
 	/* Compatibility with other elements */
 
 	sigc::signal<void> CriticalSelectionChanged;
 
   private:
+	  enum ExportFormatId{
+          NoFormat = 0,  
+		  Wave = 1,
+          AIFF = 2,
+          CAF = 3,
+          FLAC = 4
+	  };
 
-	void select_format (FormatPtr f);
-	void add_new_format (WavesButton*);
-	void remove_format (bool called_from_button = false);
-	int open_edit_dialog (bool new_dialog = false);
-	void update_format_dropdown (WavesDropdown*, int);
-	void update_format_description ();
-	void on_edit_button (WavesButton*);
-	void on_remove_button (WavesButton*);
+	  enum ExportDitheringId{
+          NoDithering = 0,  
+		  Triangular = 1,
+          Rectangular = 2,
+          Shaped = 3,
+	  };
 
-	ARDOUR::ExportProfileManager::FormatStatePtr state;
+	void update_selector ();
+	void update_selector_format ();
+	void update_selector_depth ();
+	void update_selector_sample_rate ();
+	void update_selector_dithering ();
+	void update_selector_normalize ();
+
+	void on_format_dropdown (WavesDropdown*, int);
+	void on_depth_dropdown (WavesDropdown*, int);
+	void on_sample_rate_dropdown (WavesDropdown*, int);
+	void on_dithering_dropdown (WavesDropdown*, int);
+	void on_normalize_button (WavesButton*);
+
+	ARDOUR::ExportProfileManager::FormatStatePtr _state;
 
 	/*** GUI componenets ***/
 
@@ -88,9 +103,10 @@ class WavesExportFormatSelector : public Gtk::VBox, public WavesUI, public ARDOU
 	Glib::RefPtr<Gtk::ListStore> format_list;
 
 	WavesDropdown& _format_dropdown;
-	WavesButton& _edit_button;
-	WavesButton& _remove_button;
-	WavesButton& _new_button;
+	WavesDropdown& _depth_dropdown;
+	WavesDropdown& _sample_rate_dropdown;
+	WavesDropdown& _dithering_dropdown;
+	WavesButton& _normalize_button;
 };
 
 #endif // __waves_export_format_selector_h__

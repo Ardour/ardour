@@ -26,32 +26,6 @@
   <style name="generic_dropdown_menu"
          style="generic_dropdown"/>
   <EventBox bgnormal="#00ff00" height="1"/>
-  <EventBox bgnormal="#6C6C6C">
-    <HBox>
-      <Iconbutton id="lossless_check_button"
-                  width="20"
-                  height="20"
-                  normalicon="waves_check_box"
-                  activeicon="waves_check_box_active"
-                  toggleable="true"/>
-      <Button id="lossless_button"
-              style="generic_button"
-              text="Lossless"
-              height="30"
-              width="100"/>
-      <Iconbutton id="lossy_check_button"
-                  width="20"
-                  height="20"
-                  normalicon="waves_check_box"
-                  activeicon="waves_check_box_active"
-                  toggleable="true"/>
-      <Button id="lossy_button"
-              style="generic_button"
-              text="Lossy"
-              height="30"
-              width="100"/>
-    </HBox>
-  </EventBox>
   <EventBox id="file_page_home"
             bgnormal="#CBDBF5"/>
   <EventBox bgnormal="#ffff00" height="1" box.pack="end"/>

@@ -29,20 +29,21 @@
 WavesExportFormatSelector::WavesExportFormatSelector ()
   : Gtk::VBox ()
   , WavesUI ("waves_export_format_selector.xml", *this)
-  , _edit_button (get_waves_button ("edit_button"))
-  , _remove_button (get_waves_button ("remove_button"))
-  , _new_button (get_waves_button ("new_button"))
   , _format_dropdown (get_waves_dropdown ("format_dropdown"))
+  , _depth_dropdown (get_waves_dropdown ("depth_dropdown"))
+  , _sample_rate_dropdown (get_waves_dropdown ("sample_rate_dropdown"))
+  , _dithering_dropdown (get_waves_dropdown ("dithering_dropdown"))
+  , _normalize_button (get_waves_button ("normalize_button"))
 {
-	_edit_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_edit_button));
-	_remove_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_remove_button));
-	_new_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::add_new_format));
+	_depth_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_depth_dropdown));
+	_format_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_format_dropdown));
+	_sample_rate_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_sample_rate_dropdown));
+	_dithering_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_dithering_dropdown));
+	_normalize_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::on_normalize_button));
 
 	/* Sorted contents for dropdown */
 	format_list = Gtk::ListStore::create (format_cols);
     format_list->set_sort_column (format_cols.label, Gtk::SORT_ASCENDING);
-
-	_format_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &WavesExportFormatSelector::update_format_dropdown));
 }
 
 WavesExportFormatSelector::~WavesExportFormatSelector ()
@@ -54,163 +55,257 @@ void
 WavesExportFormatSelector::set_state (ARDOUR::ExportProfileManager::FormatStatePtr const state_, ARDOUR::Session * session_)
 {
 	SessionHandlePtr::set_session (session_);
-
-	state = state_;
-
-	update_format_list ();
+	_state = state_;
+	update_selector ();
 }
 
 void
-WavesExportFormatSelector::update_format_list ()
+WavesExportFormatSelector::update_selector ()
 {
-	FormatPtr format_to_select = state->format;
-	format_list->clear();
-
-	if (state->list->empty()) {
-		_edit_button.set_sensitive (false);
-		_remove_button.set_sensitive (false);
-		return;
-	} else {
-		_edit_button.set_sensitive (true);
-		_remove_button.set_sensitive (true);
+	set_visible (_state && _state->format);
+	if (_state && _state->format) {
+		update_selector_format ();
+		update_selector_depth ();
+		update_selector_sample_rate ();
+		update_selector_dithering ();
+		update_selector_normalize ();
 	}
-
-	Gtk::ListStore::iterator tree_it;
-
-	for (FormatList::const_iterator it = state->list->begin(); it != state->list->end(); ++it) {
-		tree_it = format_list->append();
-		tree_it->set_value (format_cols.format, *it);
-		tree_it->set_value (format_cols.label, (*it)->description());
-	}
-
-	{
-		_format_dropdown.clear_items ();
-		Gtk::TreeModel::Children::iterator it;
-		for (it = format_list->children().begin(); it != format_list->children().end(); ++it) {
-			_format_dropdown.add_menu_item (it->get_value (format_cols.label), (void*)it->get_value (format_cols.format).get ());
-		}
-	}
-
-	if ((_format_dropdown.get_current_item () < 0) && 
-		(_format_dropdown.get_menu ().items ().size () > 0)) {
-		_format_dropdown.set_current_item (0);
-	}
-
-	select_format (format_to_select);
 }
 
 void
-WavesExportFormatSelector::select_format (FormatPtr f)
+WavesExportFormatSelector::update_selector_format ()
 {
-	int size = _format_dropdown.get_menu ().items ().size ();
-	for (int i = 0; i < size; i++) {
-		if (_format_dropdown.get_item_associated_data (i) == (void*)f.get()) {
-			_format_dropdown.set_current_item (i);
+	ExportFormatId export_format_id = NoFormat;
+	if (_state && _state->format) {
+		switch (_state->format->format_id ()) {
+		case ARDOUR::ExportFormatBase::F_AIFF:
+			export_format_id = AIFF;
+			break;
+		case ARDOUR::ExportFormatBase::F_CAF:
+			export_format_id = CAF;
+			break;
+		case ARDOUR::ExportFormatBase::F_WAV:
+		default:
+			export_format_id = Wave;
 			break;
 		}
-	}
-
-	CriticalSelectionChanged();
-}
-
-void
-WavesExportFormatSelector::on_edit_button (WavesButton*)
-{
-	open_edit_dialog (false);
-}
-
-void
-WavesExportFormatSelector::on_remove_button (WavesButton*)
-{
-	remove_format (true);
-}
-
-void
-WavesExportFormatSelector::add_new_format (WavesButton*)
-{
-	FormatPtr new_format = state->format = NewFormat (state->format);
-
-	if (open_edit_dialog (true) != Gtk::RESPONSE_APPLY) {
-		remove_format(false);
-		if (state->list->empty()) {
-			state->format.reset ();
-		}
-	}
-}
-
-void
-WavesExportFormatSelector::remove_format (bool called_from_button)
-{
-	if (called_from_button) {
-		Gtk::MessageDialog dialog (_("Do you really want to remove the format?"),
-				false,
-				Gtk::MESSAGE_QUESTION,
-				Gtk::BUTTONS_YES_NO);
-
-		if (Gtk::RESPONSE_YES != dialog.run ()) {
-			/* User has selected "no" or closed the dialog, better
-			 * abort
-			 */
-			return;
-		}
-	}
-
-	int current_item = _format_dropdown.get_current_item();
-	if (current_item >= 0) {
-		void* item_data = _format_dropdown.get_item_associated_data (current_item);
-
-		Gtk::TreeModel::Children::iterator it;
-		for (it = format_list->children().begin(); it != format_list->children().end(); ++it) {
-			FormatPtr remove = it->get_value (format_cols.format);
-			if (item_data == (void*)remove.get ()) {
-				FormatRemoved (remove);
+		int size = _format_dropdown.get_menu ().items ().size ();
+		for (int i = 0; i < size; i++) {
+			if (_format_dropdown.get_item_associated_data (i) == (void*)export_format_id) {
+				_format_dropdown.set_current_item (i);
+				break;
 			}
 		}
 	}
 }
 
-int
-WavesExportFormatSelector::open_edit_dialog (bool new_dialog)
+void
+WavesExportFormatSelector::update_selector_depth ()
 {
-	ExportFormatDialog dialog (state->format, new_dialog);
-	dialog.set_session (_session);
-	Gtk::ResponseType response = (Gtk::ResponseType) dialog.run();
-	if (response == Gtk::RESPONSE_APPLY) {
-		update_format_description ();
-		FormatEdited (state->format);
-		CriticalSelectionChanged();
+	int depth = 16;
+	if (_state && _state->format) {
+		switch (_state->format->sample_format ()) {
+		case ARDOUR::ExportFormatBase::SF_24:
+			depth = 24;
+			break;
+		case ARDOUR::ExportFormatBase::SF_16:
+		default:
+			depth = 16;
+			break;
+		}
+		int size = _depth_dropdown.get_menu ().items ().size ();
+		for (int i = 0; i < size; i++) {
+			if (_depth_dropdown.get_item_associated_data (i) == (void*)depth) {
+				_depth_dropdown.set_current_item (i);
+				break;
+			}
+		}
 	}
-	return response;
 }
 
 void
-WavesExportFormatSelector::update_format_dropdown (WavesDropdown*, int item)
+WavesExportFormatSelector::update_selector_sample_rate ()
 {
-	Gtk::TreeModel::Children::iterator it;
-	bool done = false;
-	for (it = format_list->children().begin(); it != format_list->children().end(); ++it) {
-		FormatPtr format = it->get_value (format_cols.format);
-		if ((void*)format.get () == _format_dropdown.get_item_associated_data(item)) {
-			state->format = format;
-			done = true;
+	int sample_rate = 44100;
+	if (_state && _state->format) {
+		switch (_state->format->sample_rate ()) {
+		case ARDOUR::ExportFormatBase::SR_Session:
+			sample_rate = 1;
+			break;
+		case ARDOUR::ExportFormatBase::SR_48:
+			sample_rate = 48000;
+			break;
+		case ARDOUR::ExportFormatBase::SR_88_2:
+			sample_rate = 88200;
+			break;
+		case ARDOUR::ExportFormatBase::SR_96:
+			sample_rate = 96000;
+			break;
+		case ARDOUR::ExportFormatBase::SR_192:
+			sample_rate = 192000;
+			break;
+		case ARDOUR::ExportFormatBase::SR_44_1:
+		default:
+			sample_rate = 44100;
 			break;
 		}
-	}
-
-	if (!done) {
-		if (!format_list->children().empty()) {
-			_format_dropdown.set_current_item (0);
-		} else {
-			_edit_button.set_sensitive (false);
-			_remove_button.set_sensitive (false);
+		int size = _sample_rate_dropdown.get_menu ().items ().size ();
+		for (int i = 0; i < size; i++) {
+			if (_sample_rate_dropdown.get_item_associated_data (i) == (void*)sample_rate) {
+				_sample_rate_dropdown.set_current_item (i);
+				break;
+			}
 		}
+	}
+}
+
+void
+WavesExportFormatSelector::update_selector_dithering ()
+{
+	ExportDitheringId export_dithering_id = NoDithering;
+	if (_state && _state->format) {
+		switch (_state->format->dither_type ()) {
+		case ARDOUR::ExportFormatBase::D_Shaped:
+			export_dithering_id = Shaped;
+			break;
+		case ARDOUR::ExportFormatBase::D_Tri:
+			export_dithering_id = Triangular;
+			break;
+		case ARDOUR::ExportFormatBase::D_Rect:
+			export_dithering_id = Rectangular;
+			break;
+		case ARDOUR::ExportFormatBase::D_None:
+		default:
+			export_dithering_id = NoDithering;
+			break;
+		}
+		int size = _dithering_dropdown.get_menu ().items ().size ();
+		for (int i = 0; i < size; i++) {
+			if (_dithering_dropdown.get_item_associated_data (i) == (void*)export_dithering_id) {
+				_dithering_dropdown.set_current_item (i);
+				break;
+			}
+		}
+	}
+}
+
+void
+WavesExportFormatSelector::update_selector_normalize ()
+{
+	if (_state && _state->format) {
+		_normalize_button.set_active_state (_state->format->normalize () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 	}
 	CriticalSelectionChanged();
 }
 
-void
-WavesExportFormatSelector::update_format_description ()
+void 
+WavesExportFormatSelector::on_format_dropdown (WavesDropdown*, int item)
 {
-	std::cout << "WavesExportFormatSelector::update_format_description () : " << state->format->description() << std::endl;
-//	format_combo.get_active()->set_value(format_cols.label, state->format->description());
+	if (_state && _state->format) {
+		ExportFormatId export_format_id = ExportFormatId((char*)_format_dropdown.get_item_associated_data(item) - (char*)0);
+		switch (export_format_id) {
+		case AIFF:
+			_state->format->set_format_id (ARDOUR::ExportFormatBase::F_AIFF);
+			_state->format->set_extension ("aiff");
+			break;
+		case CAF:
+			_state->format->set_format_id (ARDOUR::ExportFormatBase::F_CAF);
+			_state->format->set_extension ("caf");
+			break;
+		case Wave:
+		default:
+			_state->format->set_format_id (ARDOUR::ExportFormatBase::F_WAV);
+			_state->format->set_extension ("wav");
+			break;
+		}
+		FormatEdited (_state->format);
+		CriticalSelectionChanged();
+	}
 }
+
+void 
+WavesExportFormatSelector::on_depth_dropdown (WavesDropdown*, int item)
+{
+	if (_state && _state->format) {
+		int depth = int((char*)_depth_dropdown.get_item_associated_data(item) - (char*)0);
+
+		switch (depth) {
+		case 24:
+			_state->format->set_sample_format (ARDOUR::ExportFormatBase::SF_24);
+			break;
+		case 16:
+		default:
+			_state->format->set_sample_format (ARDOUR::ExportFormatBase::SF_16);
+			break;
+		}
+		FormatEdited (_state->format);
+		CriticalSelectionChanged();
+	}
+}
+
+void 
+WavesExportFormatSelector::on_sample_rate_dropdown (WavesDropdown*, int item)
+{
+	if (_state && _state->format) {
+		int sample_rate = int((char*)_sample_rate_dropdown.get_item_associated_data(item) - (char*)0);
+
+		switch (sample_rate) {
+		case 44100:
+			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_44_1);
+			break;
+		case 48000:
+			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_48);
+			break;
+		case 88200:
+			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_88_2);
+			break;
+		case 96000:
+			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_96);
+			break;
+		case 192000:
+			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_192);
+			break;
+		case 1: // from session
+		default:
+			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_Session);
+			break;
+		}
+		FormatEdited (_state->format);
+		CriticalSelectionChanged();
+	}
+}
+
+void 
+WavesExportFormatSelector::on_dithering_dropdown (WavesDropdown*, int item)
+{
+	if (_state && _state->format) {
+		ExportDitheringId export_format_id = ExportDitheringId((char*)_dithering_dropdown.get_item_associated_data(item) - (char*)0);
+		switch (export_format_id) {
+		case Shaped:
+			_state->format->set_dither_type (ARDOUR::ExportFormatBase::D_Shaped);
+			break;
+		case Triangular:
+			_state->format->set_dither_type (ARDOUR::ExportFormatBase::D_Tri);
+			break;
+		case Rectangular:
+			_state->format->set_dither_type (ARDOUR::ExportFormatBase::D_Rect);
+			break;
+		case NoDithering:
+		default:
+			_state->format->set_dither_type (ARDOUR::ExportFormatBase::D_None);
+			break;
+		}
+		FormatEdited (_state->format);
+		CriticalSelectionChanged();
+	}
+}
+
+void WavesExportFormatSelector::on_normalize_button (WavesButton*)
+{
+	if (_state && _state->format) {
+		_state->format->set_normalize (_normalize_button.active_state() == Gtkmm2ext::ExplicitActive);
+		FormatEdited (_state->format);
+		CriticalSelectionChanged();
+	}
+}
+
