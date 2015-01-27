@@ -1195,7 +1195,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 	if (!AudioEngine::instance()->connected()) {
 
-		snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">none</span>"));
+		snprintf (buf, sizeof (buf), "%s", _("Audio: <span foreground=\"red\">none</span>"));
 
 	} else {
 
@@ -1203,7 +1203,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 		if (rate == 0) {
 			/* no sample rate available */
-			snprintf (buf, sizeof (buf), _("Audio: <span foreground=\"red\">none</span>"));
+			snprintf (buf, sizeof (buf), "%s", _("Audio: <span foreground=\"red\">none</span>"));
 		} else {
 
 			if (fmod (rate, 1000.0) != 0.0) {
