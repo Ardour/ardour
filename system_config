@@ -2,7 +2,7 @@
 <Ardour>
   <MIDI-port tag="@MIDITAG@" device="ardour" type="@MIDITYPE@" mode="duplex"/>
   <Config>
-    <Option name="buffering-preset" value="Small"/>
+    <Option name="buffering-preset" value="Medium"/>
     <Option name="mute-affects-pre-fader" value="1"/>
     <Option name="mute-affects-post-fader" value="1"/>
     <Option name="mute-affects-control-outs" value="1"/>
