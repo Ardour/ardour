@@ -812,14 +812,14 @@ Diskstream::default_disk_read_chunk_frames()
 	return 65536;
 #endif*/
 //GZ to Paul Davis FIX-ME restored old value which used to work with current ring buffer capacity
-    return 262144;
+    return 65536;
 }	
 
 framecnt_t
 Diskstream::default_disk_write_chunk_frames ()
 {
 //GZ to Paul Davis FIX-ME restored old value which used to work with current ring buffer capacity
-	return 262144;
+	return 65536;
 }
 
 void
