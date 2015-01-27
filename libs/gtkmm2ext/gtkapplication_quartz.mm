@@ -1427,9 +1427,6 @@ namespace Gtk {
 @interface GtkApplicationDelegate : NSObject
 -(BOOL) application:(NSApplication*) app openFile:(NSString*) file;
 - (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) app;
-- (void)applicationWillFinishLaunching:(NSNotification *)aNotification;
-- (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
-- (void) startApp;
 @end
 
 @implementation GtkApplicationDelegate
