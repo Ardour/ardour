@@ -1040,7 +1040,8 @@ IO::make_connections_2X (const XMLNode& node, int /*version*/, bool in)
 					if (p != string::npos) {
 						ports[x].replace (p, 4, "/audio_out");
 					}
-					nth(i)->connect (ports[x]);
+					if (NULL != nth(i).get())
+						nth(i)->connect (ports[x]);
 				}
 			}
 
@@ -1082,7 +1083,8 @@ IO::make_connections_2X (const XMLNode& node, int /*version*/, bool in)
 					if (p != string::npos) {
 						ports[x].replace (p, 3, "/audio_in");
 					}
-					nth(i)->connect (ports[x]);
+					if (NULL != nth(i).get())
+						nth(i)->connect (ports[x]);
 				}
 			}
 
@@ -1606,8 +1608,10 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
-			if (nth(i)->connected_to (other->nth(j)->name())) {
-				return true;
+			if ((NULL != nth(i).get()) && (NULL != other->nth(j).get())) {
+				if (nth(i)->connected_to (other->nth(j)->name())) {
+					return true;
+				}
 			}
 		}
 	}

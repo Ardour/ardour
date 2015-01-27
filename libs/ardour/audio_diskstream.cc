@@ -225,7 +225,7 @@ AudioDiskstream::get_input_sources ()
 
 		connections.clear ();
 
-		if (_io->nth (n)->get_connections (connections) == 0) {
+		if ((_io->nth (n).get()) && (_io->nth (n)->get_connections (connections) == 0)) {
 			if (!(*chan)->source.name.empty()) {
 				// _source->disable_metering ();
 			}
