@@ -700,9 +700,10 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (transport_actions, X_("ToggleRollMaybe"), _("Start/Continue/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop and Forget Capture"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::transport_sensitive_actions.push_back (act);
+	//Tracks Live doesn't use it
+//    act = ActionManager::register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop and Forget Capture"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
+//	ActionManager::session_sensitive_actions.push_back (act);
+//	ActionManager::transport_sensitive_actions.push_back (act);
 
 	/* these two behave as follows:
 
