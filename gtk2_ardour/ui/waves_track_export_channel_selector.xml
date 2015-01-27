@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <HBox CACHEIT="false"
       UI.NEEDINIT="true"
-      spacing="5"
-      borderwidth="10">
+      spacing="5">
   <style name="generic_control"
          winfont ="Arial Bold 10"
          macfont ="Helvetica Bold 10"
@@ -35,11 +34,11 @@
   <style name="generic_dropdown_menu"
          style="generic_dropdown"/>
   <VBox spacing="5">
-    <Hbox spacing="8">
-      <HBox>
+    <Hbox spacing="5">
+      <HBox spacing="10">
         <IconButton id="region_contents_button"
-                    width="20"
-                    height="20"
+                    width="14"
+                    height="14"
                     normalicon="waves_darker_radio_button"
                     activeicon="waves_darker_radio_button_active"
                     toggleable="true"
@@ -47,10 +46,10 @@
         <Label style="generic_control"
          text="Export region contents"/>
       </HBox>
-      <HBox>
+      <HBox spacing="5">
         <IconButton id="track_output_button"
-                    width="20"
-                    height="20"
+                    width="14"
+                    height="14"
                     normalicon="waves_darker_radio_button"
                     activeicon="waves_darker_radio_button_active"
                     toggleable="true"/>
@@ -59,7 +58,7 @@
       </HBox>
     </Hbox>
     <ScrolledWindow id="track_scroller"
-                    height="130"
-                    width="622"/>
+                    height="175"
+                    width="642"/>
   </VBox>
 </HBox>

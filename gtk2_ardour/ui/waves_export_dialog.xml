@@ -1,44 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Tracks Live" CACHEIT="false">
   <style name="generic_control"
-         winfont ="Arial Bold 12"
-         macfont ="Helvetica Bold 12"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
          fgnormal="#6F6F6F"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
-         bgactive="#454545"
-         fghover="#CCCCCC"
-         bghover="#898989"/>
-
+         bgactive="#454545"/>
   <style name="generic_button"
          style="generic_control"
-         winfont ="Arial Bold 12"
-         macfont ="Helvetica Bold 12"
          bgnormal="#CACAC5"
          fgactive="#EDECE8"
          bgactive="#6D6E72"
+         width="80"
+         height="22"/>
+  <style name="tab_button"
+         style="generic_button"
+         bgnormal="#CACAC5"
+         fgactive="#6F6F6F"
+         bgactive="#EDECE8"
          width="80"
          height="22"/>
 
   <EventBox bgnormal="#EDECE8"
             box.pack="end">
     <VBox>
-      <VBox>
+      <EventBox bgnormal="#CACAC5">
         <HBox spacing="1">
           <Button id="file_format_selector_button"
-                  style="generic_button"
+                  style="tab_button"
                   text="File Format"/>
           <Button id="timespan_selector_button"
-                  style="generic_button"
+                  style="tab_button"
                   text="Time Span"/>
           <Button id="channel_selector_button"
-                  style="generic_button"
+                  style="tab_button"
                   text="Channels"/>
         </HBox>
+      </EventBox>
+      <VBox borderwidth="10">
         <EventBox id="selectors_home"
                   bgnormal="#EDECE8"
                   width="642"
-                  height="273">
+                  height="210">
           <VBox id="file_format_selector">
             <HBox id="preset_selector_home" ui.orphan="true"/>
             <HBox id="file_notebook_home"/>
@@ -46,46 +50,50 @@
           <VBox id="timespan_selector_home"/>
           <VBox id="channel_selector_home"/>
         </EventBox>
-      </VBox>
-      <HBox id="warning_widget">
-        <Label id="warn_label"
-               style="generic_control"
-               usemarkup="true"
-               box.fill="true"
-               box.expand="true"
-               fgnormal="#E2974B"/>
-        <HBox id="list_files_widget">
-          <Button id="list_files_button"
-                  style="generic_button"
-                  box.pack="end"
-                  text="List Files"/>
-          <Label style="generic_control"
-                 text="Some already existing files will be overwritten."
-                 box.pack="end"
+        <VBox spacing="10">
+          <VBox height="22">
+            <HBox id="warning_widget">
+              <Label id="warn_label"
+                 style="generic_control"
+                 usemarkup="true"
+                 box.fill="true"
+                 box.expand="true"
                  fgnormal="#E2974B"/>
-        </HBox>
-      </HBox>
-      <VBox id="export_progress_widget">
-        <ProgressBar id="export_progress_bar"
-                     height="21"
-                     bgnormal="#6B6B6B"/>
+              <HBox id="list_files_widget" spacing="10">
+                <Button id="list_files_button"
+                        style="generic_button"
+                        box.pack="end"
+                        text="List Files"/>
+                <Label style="generic_control"
+                       text="Some already existing files will be overwritten."
+                       box.pack="end"
+                       fgnormal="#E2974B"/>
+              </HBox>
+            </HBox>
+            <VBox id="export_progress_widget">
+              <ProgressBar id="export_progress_bar"
+                           height="22"
+                           bgnormal="#6B6B6B"/>
+            </VBox>
+          </VBox>
+          <HBox spacing="10" >
+            <Button id="export_button"
+                    style="generic_button"
+                    box.pack="end"
+                    text="Export"/>
+            <Button id="cancel_button"
+                    style="generic_button"
+                    box.pack="end"
+                    text="Cancel"/>
+            <Button id="stop_export_button"
+                    style="generic_button"
+                    box.pack="end"
+                    visible="false"
+                    noshowall="true"
+                    text="Stop Export"/>
+          </HBox>
+        </VBox>
       </VBox>
-      <HBox spacing="10">
-        <Button id="cancel_button"
-                style="generic_button"
-                box.pack="end"
-                text="Cancel"/>
-        <Button id="stop_export_button"
-                style="generic_button"
-                box.pack="end"
-                visible="false"
-                noshowall="true"
-                text="Stop Export"/>
-        <Button id="export_button"
-                style="generic_button"
-                box.pack="end"
-                text="Export"/>
-      </HBox>
     </VBox>
   </EventBox>
 </Dialog>

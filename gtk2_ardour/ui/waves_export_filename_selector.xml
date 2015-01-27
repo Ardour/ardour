@@ -24,7 +24,9 @@
   <style name="generic_dropdown"
          style="generic_control"
          bgnormal="#6C6C6C"
-         fgnormal="#C1C1C1"/>
+         basenormal="#6C6C6C"
+         fgnormal="#C1C1C1"
+         textcolornormal="#C1C1C1"/>
   <style name="generic_dropdown_menu"
          style="generic_dropdown"/>
   <VBox>
@@ -32,7 +34,7 @@
       <Label style="generic_control"
              text="Folder:"/>
       <Entry id="path_entry"
-             style="generic_button"
+             style="generic_dropdown"
              activatesdefault="true"
              hasframe="false"
              horzalignment="start"
@@ -55,7 +57,7 @@
       <Label style="generic_control"
              text="Label:"/>
       <Entry id="label_entry"
-             style="generic_button"
+             style="generic_dropdown"
              hasframe="false"
              activatesdefault="true"
              horzalignment="start"
@@ -112,7 +114,7 @@
       </HBox>
       <HBox>
         <Entry id="revision_entry"
-               style="generic_button"
+               style="generic_dropdown"
                hasframe="false"
                horzalignment="start"
                width="32"

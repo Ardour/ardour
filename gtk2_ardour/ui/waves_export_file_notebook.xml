@@ -10,23 +10,17 @@
          fghover="#CCCCCC"
          bghover="#898989"/>
   <style name="generic_button"
-         winfont ="Arial Bold 12"
-         macfont ="Helvetica Bold 12"
-         fgnormal="#EDECE8"
-         fgactive="#6D6E72"
-         textcolornormal="#6D6E72"
-         bgnormal="#6D6E72"
-         bgactive="#CACAC5"
-         borderwidth="0 0 0 0"
-         bordercolor="#6D6E72"/>
+         style="generic_control"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         width="80"
+         height="22"/>
   <style name="generic_dropdown"
          style="generic_control"
          bgnormal="#6C6C6C"
          fgnormal="#C1C1C1"/>
   <style name="generic_dropdown_menu"
          style="generic_dropdown"/>
-  <EventBox bgnormal="#00ff00" height="1"/>
-  <EventBox id="file_page_home"
-            bgnormal="#CBDBF5"/>
-  <EventBox bgnormal="#ffff00" height="1" box.pack="end"/>
+  <VBox id="file_page_home"/>
 </VBox>

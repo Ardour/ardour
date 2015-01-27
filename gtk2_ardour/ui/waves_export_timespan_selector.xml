@@ -1,30 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<VBox CACHEIT="false">
+<VBox CACHEIT="false" UI.NEEDINIT="true" spacing="10">
   <style name="generic_control"
-         winfont="Arial Bold 10"
-         macfont="Helvetica Bold 10"
-         fgnormal="#C1C1C1"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6F6F6F"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
-         bgactive="#454545"
-         fghover="#CCCCCC"
-         bghover="#898989"
-         fgdisabled ="#959595"/>
+         bgactive="#454545"/>
   <style name="generic_button"
          style="generic_control"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
          width="80"
-         height="20"/>
+         height="22"/>
   <style name="generic_dropdown"
-         style="generic_control"
-         bgdisabled="#373737"/>
+         style="generic_button"
+         fgnormal="#EDECE8"
+         bgnormal="#6C6C6C"
+         horzalignment="start"/>
   <style name="generic_dropdown_menu"
-         bgnormal="#6C6C6C"/>
-  <HBox>
+         style="generic_dropdown"
+         height="-1"
+         width="-1"/>
+  <HBox spacing="5">
     <Label style="generic_control"
            text="Show Times as:"/>
     <Dropdown id="time_format_dropdown"
-              style="generic_control"
+              style="generic_dropdown"
               width="126"
               height="20"
               normalicon="dropdown_126x20"
@@ -32,35 +36,28 @@
               inactiveicon="dropdown_126x20_inactive">
       <HBox>
         <VBox width="10"/>
-        <Label style="generic_control"
+        <Label style="generic_dropdown"
                horzalignment="start"
                width="117"
                height="20"/>
       </HBox>
       <DropdownMenu style="generic_dropdown_menu">
-        <Dropdownitem style="generic_control"
-                      title="Timecode"
-                      data="0"
-                      horzalignment="start"/>
-        <Dropdownitem style="generic_control"
-                      title="Minutes:Seconds"
-                      data="1"
-                      horzalignment="start"/>
-        <Dropdownitem style="generic_control"
-                      title="Bars:Beats"
-                      data="2"
-                      horzalignment="start"/>
+        <Dropdownitem style="generic_dropdown_menu" title="Timecode" data="0"/>
+        <Dropdownitem style="generic_dropdown_menu" title="Minutes:Seconds" data="1"/>
+        <Dropdownitem style="generic_dropdown_menu" title="Bars:Beats" data="2"/>
       </DropdownMenu>
     </Dropdown>
     <Button id="select_all_button"
             style="generic_button"
-            text="Select All"/>
+            text="Select All"
+            height="20"/>
     <Button id="deselect_all_button"
             style="generic_button"
-            text="Deslect All"/>
+            text="Deslect All"
+            height="20"/>
   </HBox>
   <ScrolledWindow id="range_scroller"
-                  height="232">
+                  height="170">
     <TreeView id="range_view"/>
   </ScrolledWindow>
 </VBox>

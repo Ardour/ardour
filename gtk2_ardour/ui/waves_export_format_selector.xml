@@ -3,28 +3,22 @@
   <style name="generic_control"
          winfont ="Arial Bold 10"
          macfont ="Helvetica Bold 10"
-         fgnormal="#6D6E72"
+         fgnormal="#6F6F6F"
          bgnormal="#6C6C6C"
          fgactive="#BFBFBF"
-         bgactive="#454545"
-         fghover="#CCCCCC"
-         bghover="#898989"/>
+         bgactive="#454545"/>
   <style name="generic_button"
-         winfont ="Arial Bold 10"
-         macfont ="Helvetica Bold 10"
-         fgnormal="#6D6E72"
-         textcolornormal="#6D6E72"
+         style="generic_control"
          bgnormal="#CACAC5"
-         basenormal="#CACAC5"
          fgactive="#EDECE8"
          bgactive="#6D6E72"
-         borderwidth="0 0 0 0"
-         bordercolor="#6D6E72"
-         height="20"/>
+         width="80"
+         height="22"/>
   <style name="generic_dropdown"
          style="generic_button"
-         fgnormal="#EDECE8"
-         bgnormal="#454545"
+         fgnormal="#C1C1C1"
+         textcolornormal="#C1C1C1"
+         bgnormal="#6C6C6C"
          normalicon="dropdown_90x20"
          activeicon="dropdown_90x20_active"
          inactiveicon="dropdown_90x20_inactive"
@@ -44,7 +38,7 @@
                 style="generic_dropdown">
         <HBox>
           <VBox width="10"/>
-          <Label style="generic_dropdown"/>
+          <Label style="generic_dropdown_menu"/>
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
           <DropdownItem style="generic_dropdown_menu" title="Wave" data="1"/>
@@ -61,9 +55,9 @@
                 style="generic_dropdown">
         <HBox>
           <VBox width="10"/>
-          <Label style="generic_dropdown"/>
+          <Label style="generic_dropdown_menu"/>
         </HBox>
-        <DropdownMenu bgnormal="#454545">
+        <DropdownMenu style="generic_dropdown_menu">
           <DropdownItem style="generic_dropdown_menu" title="16 bit" data="16"/>
           <DropdownItem style="generic_dropdown_menu" title="24 bit" data="24"/>
         </DropdownMenu>
@@ -77,9 +71,9 @@
                 style="generic_dropdown">
         <HBox>
           <VBox width="10"/>
-          <Label style="generic_dropdown"/>
+          <Label style="generic_dropdown_menu"/>
         </HBox>
-        <DropdownMenu bgnormal="#454545">
+        <DropdownMenu style="generic_dropdown_menu">
           <DropdownItem style="generic_dropdown_menu" title="Session" data="1"/>
           <DropdownItem style="generic_dropdown_menu" title="44.1 kHz" data="44100"/>
           <DropdownItem style="generic_dropdown_menu" title="48 kHz" data="48000"/>
@@ -101,10 +95,9 @@
                 inactiveicon="dropdown_126x20_inactive">
         <HBox>
           <VBox width="10"/>
-          <Label style="generic_dropdown"/>
+          <Label style="generic_dropdown_menu"/>
         </HBox>
-        <DropdownMenu style="generic_dropdown"
-                      bgnormal="#454545">
+        <DropdownMenu style="generic_dropdown_menu">
           <DropdownItem style="generic_dropdown_menu" title="None" data="0"/>
           <DropdownItem style="generic_dropdown_menu" title="Triangular" data="1"/>
           <DropdownItem style="generic_dropdown_menu" title="Rectangular" data="2"/>

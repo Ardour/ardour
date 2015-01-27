@@ -31,24 +31,25 @@
          horzalignment="start"/>
   <style name="generic_dropdown_menu"
          style="generic_dropdown"/>
-  <EventBox bgnormal="#ff0000" height="3"/>
-  <Label style="generic_control"
-         winfont ="Arial Bold 11"
-         macfont ="Helvetica Bold 11"
-         text="Format"
+  <VBox spacing="5">
+    <Label style="generic_control"
+         text="Format options"
+         vertalignment="bottom"
          horzalignment="start"/>
   <HBox>
     <VBox width="18"/>
     <HBox id="format_selector_home"/>
   </HBox>
+  </VBox>
+  <VBox spacing="5">
   <Label style="generic_control"
-         winfont ="Arial Bold 11"
-         macfont ="Helvetica Bold 11"
-         text="Location"
+         text="Location options"
+         height="25"
+         vertalignment="bottom"
          horzalignment="start"/>
   <HBox>
     <VBox width="18"/>
     <VBox id="filename_selector_home"/>
   </HBox>
-  <EventBox bgnormal="#ffff00" height="3" box.pack="end"/>
+  </VBox>    
 </VBox>
