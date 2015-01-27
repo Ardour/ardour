@@ -1424,11 +1424,16 @@ namespace Gtk {
 
 @end
 
-@interface GtkApplicationDelegate : NSObject {}
+@interface GtkApplicationDelegate : NSObject
+-(BOOL) application:(NSApplication*) app openFile:(NSString*) file;
+- (NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication *) app;
+- (void)applicationWillFinishLaunching:(NSNotification *)aNotification;
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification;
+- (void) startApp;
 @end
 
 @implementation GtkApplicationDelegate
--(BOOL) application:(NSApplication*) app :(NSString*) file
+-(BOOL) application:(NSApplication*) app openFile:(NSString*) file
 {
 	UNUSED_PARAMETER(app);
 	Glib::ustring utf8_path ([file UTF8String]);
