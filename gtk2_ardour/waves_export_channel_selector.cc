@@ -458,7 +458,7 @@ WavesRegionExportChannelSelector::WavesRegionExportChannelSelector (ARDOUR::Sess
   , _fades_button (get_waves_button ("fades_button"))
   , _processed_button (get_waves_button ("processed_button"))
 {
-	get_label ("raw_label").set_text (string_compose ("%", region_chans));
+	get_label ("raw_label").set_text (string_compose ("%1", region_chans));
 	_raw_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesRegionExportChannelSelector::on_raw_fades_processed_button));
 
 	get_label ("fades_label").set_text (string_compose ("%1", region_chans));
@@ -549,19 +549,13 @@ WavesTrackExportChannelSelector::WavesTrackExportChannelSelector (ARDOUR::Sessio
 	_track_view.set_model (track_list);
 	_track_view.set_headers_visible (true);
 
-	_track_view.append_column_editable (_("Track"), track_cols.selected);
+	_track_view.append_column_editable (_(""), track_cols.selected);
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(_track_view.get_column_cell_renderer (0));
 	toggle->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &WavesTrackExportChannelSelector::update_config)));
 
-	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
-	text_renderer->property_editable() = false;
-
-	Gtk::TreeView::Column* column = _track_view.get_column (0);
-	column->pack_start (*text_renderer);
-	column->add_attribute (text_renderer->property_text(), track_cols.label);
+	_track_view.append_column (_("Track"), track_cols.label);
 
 	fill_list();
-
 	show_all_children ();
 }
 
