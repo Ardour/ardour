@@ -61,7 +61,7 @@ void WavesMessageDialog::init(const std::string& title,
     _ok_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesMessageDialog::_on_button_clicked));
 
 	_close_button.set_visible  (buttons&BUTTON_CLOSE);
-    _ok_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesMessageDialog::_on_button_clicked));
+    _close_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesMessageDialog::_on_button_clicked));
 
 	_accept_button.set_visible  (buttons&BUTTON_ACCEPT);
     _accept_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesMessageDialog::_on_button_clicked));
