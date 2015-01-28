@@ -1420,8 +1420,16 @@ AlsaAudioBackend::main_process_thread ()
 				++no_proc_errors;
 				xrun = true;
 			}
-			if (_pcmi->state () < 0 || no_proc_errors > bailout) {
+			if (_pcmi->state () < 0) {
 				PBD::error << _("AlsaAudioBackend: I/O error. Audio Process Terminated.") << endmsg;
+				break;
+			}
+			if (no_proc_errors > bailout) {
+				PBD::error
+					<< string_compose (
+							_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive x-runs."),
+							no_proc_errors)
+					<< endmsg;
 				break;
 			}
 
@@ -1501,7 +1509,7 @@ AlsaAudioBackend::main_process_thread ()
 			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {
 				engine.Xrun ();
 #if 0
-				fprintf(stderr, "ALSA x-run read: %.1f ms, write: %.1f ms\n",
+				fprintf(stderr, "ALSA x-run read: %.2f ms, write: %.2f ms\n",
 						_pcmi->capt_xrun() * 1000.0, _pcmi->play_xrun() * 1000.0);
 #endif
 			}
