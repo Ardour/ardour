@@ -37,13 +37,13 @@ if ($platform eq "darwin") {
     $gtk_modifier_map{'SECONDARY'} = 'Control';
     $gtk_modifier_map{'TERTIARY'} = 'Shift';
     $gtk_modifier_map{'LEVEL4'} = 'Mod1';
-    $gtk_modifier_map{'WINDOW'} = 'Control';
+    $gtk_modifier_map{'WINDOW'} = 'Alt';
 
     $cs_modifier_map{'PRIMARY'} = 'Cmd';
     $cs_modifier_map{'SECONDARY'} = 'Control';
     $cs_modifier_map{'TERTIARY'} = 'Shift';
     $cs_modifier_map{'LEVEL4'} = 'Mod1';
-    $cs_modifier_map{'WINDOW'} = 'Control';
+    $cs_modifier_map{'WINDOW'} = 'Alt';
 
     $mouse_modifier_map{'PRIMARY'} = 'Cmd';
     $mouse_modifier_map{'SECONDARY'} = 'Ctrl';
@@ -57,21 +57,21 @@ if ($platform eq "darwin") {
     $gtk_modifier_map{'SECONDARY'} = 'Alt';
     $gtk_modifier_map{'TERTIARY'} = 'Shift';
     $gtk_modifier_map{'LEVEL4'} = 'Meta';
-    $gtk_modifier_map{'WINDOW'} = 'Meta';
+    $gtk_modifier_map{'WINDOW'} = 'Alt';
     $gtk_modifier_map{$winkey} => 'Meta';
 
     $cs_modifier_map{'PRIMARY'} = 'Control';
     $cs_modifier_map{'SECONDARY'} = 'Alt';
     $cs_modifier_map{'TERTIARY'} = 'Shift';
     $cs_modifier_map{'LEVEL4'} = 'Meta';
-    $cs_modifier_map{'WINDOW'} = 'Meta';
+    $cs_modifier_map{'WINDOW'} = 'Alt';
     $cs_modifier_map{$winkey} => 'Meta';
 
     $mouse_modifier_map{'PRIMARY'} = 'Ctl';
     $mouse_modifier_map{'SECONDARY'} = 'Alt';
     $mouse_modifier_map{'TERTIARY'} = 'Shift';
     $mouse_modifier_map{'LEVEL4'} = 'Meta';
-    $mouse_modifier_map{'WINDOW'} = 'Meta';
+    $mouse_modifier_map{'WINDOW'} = 'Alt';
     $mouse_modifier_map{$winkey} => 'Meta';
 }
 
