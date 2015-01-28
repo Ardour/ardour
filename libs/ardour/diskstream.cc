@@ -803,22 +803,12 @@ Diskstream::set_own_replication_path (const std::string& path)
 framecnt_t
 Diskstream::default_disk_read_chunk_frames()
 {
-/*
-#ifdef PLATFORM_WINDOWS
-	return (2 * 1048576) / sizeof (Sample);
-#elif defined __APPLE__
-	return (4 * 1048576) / sizeof (Sample);
-#else
 	return 65536;
-#endif*/
-//GZ to Paul Davis FIX-ME restored old value which used to work with current ring buffer capacity
-    return 65536;
 }	
 
 framecnt_t
 Diskstream::default_disk_write_chunk_frames ()
 {
-//GZ to Paul Davis FIX-ME restored old value which used to work with current ring buffer capacity
 	return 65536;
 }
 

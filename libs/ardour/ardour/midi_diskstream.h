@@ -122,11 +122,13 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
   protected:
 	friend class MidiTrack;
 	friend class Auditioner;
-	int seek (framepos_t which_sample, bool complete_refill = false);
 
-        int  process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
-        frameoffset_t calculate_playback_distance (pframes_t nframes);
-	bool commit  (framecnt_t nframes);
+	int seek (framepos_t which_sample, bool complete_refill = false);
+	int _do_refill_with_alloc (bool one_chunk_only);
+	int process (BufferSet&, framepos_t transport_frame, pframes_t nframes, framecnt_t &, bool need_diskstream);
+	frameoffset_t calculate_playback_distance (pframes_t nframes);
+	bool commit (framecnt_t nframes);
+
 	static framecnt_t midi_readahead;
 
   private:
@@ -134,8 +136,6 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	/* The two central butler operations */
 	int do_flush (RunContext context, bool force = false);
 	int do_refill ();
-
-	int do_refill_with_alloc();
 
 	int read (framepos_t& start, framecnt_t cnt, bool reversed);
 
