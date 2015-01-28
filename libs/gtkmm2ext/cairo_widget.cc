@@ -25,6 +25,7 @@
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
 
 bool CairoWidget::_flat_buttons = false;
+bool CairoWidget::_widget_prelight = true;
 
 static void noop() { }
 sigc::slot<void> CairoWidget::focus_handler (sigc::ptr_fun (noop));
@@ -254,6 +255,12 @@ void
 CairoWidget::set_flat_buttons (bool yn)
 {
 	_flat_buttons = yn;
+}
+
+void
+CairoWidget::set_widget_prelight (bool yn)
+{
+	_widget_prelight = yn;
 }
 
 void

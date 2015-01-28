@@ -416,6 +416,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "waveform-scale") {
 		ArdourCanvas::WaveView::set_global_logscaled (ARDOUR_UI::config()->get_waveform_scale() == Logarithmic);
+	} else if (p == "widget-prelight") {
+		CairoWidget::set_widget_prelight( config()->get_widget_prelight() );
 	} else if (p == "waveform-shape") {
 		ArdourCanvas::WaveView::set_global_shape (ARDOUR_UI::config()->get_waveform_shape() == Rectified
 				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
