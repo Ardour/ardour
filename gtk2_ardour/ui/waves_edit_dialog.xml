@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Dialog title="Tracks Live" resizeable="False">
+<Dialog CACHEIT="false" title="Tracks Live">
     <style name="generic_control"
            winfont ="Arial Bold 12"
            macfont ="Helvetica Bold 12"
@@ -37,12 +37,18 @@
                  fgnormal="#6D6E72"
                  text="New name"
                  box.pack="start"/>
-         <Entry  style="generic_control"
-                 id="name_entry"
+         <Entry  id="name_entry"
+                 hasframe="false"
+                 bgnormal="#6C6C6C"
+                 basenormal="#6C6C6C"
+                 fgnormal="#C1C1C1"
+                 textcolornormal="#C1C1C1"
                  text="???"
-                 width="170"
-                 height="23"
-                 box.pack="start"/>
+                 height="22"
+                 box.pack="start"
+                 box.fill="true"
+                 box.expand="true"
+                 horzalignment="start"/>
       </HBox>
       
       <HBox spacing="10">
