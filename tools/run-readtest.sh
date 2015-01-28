@@ -5,24 +5,29 @@ filesize=100 # megabytes
 numfiles=128
 nocache=
 interleave=
-blocksize=262144
 needfiles=1
+write_blocksize=262144
 
+if uname -a | grep --silent arwin ; then
+    ddmega=m
+else
+    ddmega=M
+fi
 
 while [ $# -gt 1 ] ; do
     case $1 in
 	-d) dir=$2; shift; shift ;;
 	-f) filesize=$2; shift; shift ;;
 	-n) numfiles=$2; shift; shift ;;
-	-N) nocache="-s"; shift; shift ;;
-	-b) blocksize=$2; shift; shift ;;
+	-N) nocache="-s"; shift;;
+        *) break ;;
     esac
 done
 
 if [ -d $dir -a -f $dir/testfile_1 ] ; then
     # dir exists and has a testfile within it - reuse to avoid
     # recreating files
-    echo "Re-using files in $dir"
+    echo "# Re-using files in $dir"
     needfiles=
 else
     dir=$dir/readtest_$$
@@ -35,6 +40,7 @@ else
 fi
 
 if [ x$needfiles != x ] ; then
+    echo "# Building files for test..."
     if [ x$interleave = x ] ; then
 	
 	#
@@ -42,13 +48,12 @@ if [ x$needfiles != x ] ; then
 	#
 	
 	for i in `seq 1 $numfiles` ; do
-	    dd of=$dir/testfile_$i if=/dev/zero bs=1M count=$filesize
-	    echo $i
+	    dd of=$dir/testfile_$i if=/dev/zero bs=1$ddmega count=$filesize >/dev/null 2>&1
 	done
     else
 	
 	#
-	# Create files interleaved, adding $blocksize to each
+	# Create files interleaved, adding $write_blocksize to each
 	# file in turn.
 	#
 	
@@ -56,25 +61,26 @@ if [ x$needfiles != x ] ; then
 	limit=`expr $filesize * 1048576`
 	while [ $size -lt $limit ] ; do
 	    for i in `seq 1 $numfiles` ; do
-		dd if=/dev/zero bs=$blocksize count=1 >> $dir/testfile_$i
+		dd if=/dev/zero bs=$write_blocksize count=1 >> $dir/testfile_$i 2>/dev/null
 	    done
-	    size=`expr $size + $blocksize`
-	    echo "Files now @ $size bytes"
+	    size=`expr $size + $write_blocksize`
 	done
     fi
 fi
 
-if uname -a | grep -s arwin ; then
-    # clears cache on OS X
-    sudo purge
-elif [ -f /proc/sys/vm/drop_cache ] ; then
-     # Linux cache clearing
-    echo 3 | sudo tee /proc/sys/vm/drop/cache >/dev/null
-else       
-    # need an alternative for other operating systems
-    :
-fi
+for bs in $@ ; do
 
-echo "Ready to run ..."
-
-./readtest $nocache -b $blocksize -q $dir/testfile_%d
+    if uname -a | grep --silent arwin ; then
+        # clears cache on OS X
+        sudo purge
+    elif [ -f /proc/sys/vm/drop_caches ] ; then
+        # Linux cache clearing
+        echo 3 | sudo tee /proc/sys/vm/drop_caches >/dev/null
+    else       
+        # need an alternative for other operating systems
+        :
+    fi
+    
+    echo "# Blocksize $bs"
+    ./readtest $nocache -b $bs -q $dir/testfile_%d
+done
