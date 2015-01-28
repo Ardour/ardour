@@ -25,6 +25,9 @@
          winfont ="Arial 10"
          macfont ="Helvetica 10"/>
   <style name="generic_dropdown_menu"
+         style="generic_dropdown"
+         winfont ="Arial Bold 9"
+         macfont ="Helvetica 10"
          bgnormal="#454545"/>
 
   <style name="topbar_dropdown_menu"
