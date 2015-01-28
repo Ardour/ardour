@@ -167,8 +167,15 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	void move_processor_automation (boost::weak_ptr<Processor>,
 			std::list<Evoral::RangeMove<framepos_t> > const &);
 
-	/** For non-butler contexts (allocates temporary working buffers) */
-	virtual int do_refill_with_alloc() = 0;
+	/** For non-butler contexts (allocates temporary working buffers)
+	 *
+	 * This accessible method has a default argument; derived classes
+	 * must inherit the virtual method that we call which does NOT
+	 * have a default argument, to avoid complications with inheritance
+	 */
+	int do_refill_with_alloc(bool partial_fill = true) {
+		return _do_refill_with_alloc (partial_fill);
+	}
 	virtual void set_block_size (pframes_t) = 0;
 
 	bool pending_overwrite () const {
@@ -200,6 +207,11 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	virtual int  can_internal_playback_seek (framecnt_t distance) = 0;
 	virtual void reset_write_sources (bool, bool force = false) = 0;
 	virtual void non_realtime_input_change () = 0;
+	/* accessible method has default argument, so use standard C++ "trick"
+	   to avoid complications with inheritance, by adding this virtual
+	   method which does NOT have a default argument.
+	*/
+	virtual int _do_refill_with_alloc (bool partial_fill) = 0;
 
   protected:
 	friend class Auditioner;

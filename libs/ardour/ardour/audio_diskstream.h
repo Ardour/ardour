@@ -207,9 +207,8 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 
 	/* The two central butler operations */
 	int do_flush (RunContext context, bool force = false);
-	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer); }
+	int do_refill () { return _do_refill(_mixdown_buffer, _gain_buffer, 0); }
 
-	int do_refill_with_alloc ();
 
 	int read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 	          framepos_t& start, framecnt_t cnt,
@@ -256,9 +255,12 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 
 	SerializedRCUManager<ChannelList> channels;
 
+  protected:
+	int _do_refill_with_alloc (bool one_chunk_only);
+
  /* really */
   private:
-	int _do_refill (Sample *mixdown_buffer, float *gain_buffer);
+	int _do_refill (Sample *mixdown_buffer, float *gain_buffer, framecnt_t fill_level);
 
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
