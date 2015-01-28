@@ -924,9 +924,15 @@ AudioDiskstream::seek (framepos_t frame, bool complete_refill)
 	file_frame = frame;
 
 	if (complete_refill) {
-		while ((ret = do_refill_with_alloc ()) > 0) ;
+		/* call _do_refill() to refill the entire buffer, using
+		   the largest reads possible.
+		*/
+		while ((ret = do_refill_with_alloc (false)) > 0) ;
 	} else {
-		ret = do_refill_with_alloc ();
+		/* call _do_refill() to refill just one chunk, and then
+		   return.
+		*/
+		ret = do_refill_with_alloc (true);
 	}
 
 	return ret;
@@ -1068,12 +1074,13 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 }
 
 int
-AudioDiskstream::do_refill_with_alloc ()
+AudioDiskstream::_do_refill_with_alloc (bool partial_fill)
 {
-	Sample* mix_buf  = new Sample[disk_read_chunk_frames];
-	float*  gain_buf = new float[disk_read_chunk_frames];
+	Sample* mix_buf  = new Sample[1048576];
+	float*  gain_buf = new float[1048576];
 
-	int ret = _do_refill(mix_buf, gain_buf);
+	int ret = _do_refill (mix_buf, gain_buf, (partial_fill ? 
+						  (_session.butler()->audio_diskstream_playback_buffer_size() / 4.0) : 0));
 
 	delete [] mix_buf;
 	delete [] gain_buf;
@@ -1083,9 +1090,15 @@ AudioDiskstream::do_refill_with_alloc ()
 
 /** Get some more data from disk and put it in our channels' playback_bufs,
  *  if there is suitable space in them.
+ *
+ * If fill_level is non-zero, then we will refill the buffer so that there is
+ * still at least fill_level samples of space left to be filled. This is used
+ * after locates so that we do not need to wait to fill the entire buffer.
+ *
  */
+
 int
-AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
+AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_level)
 {
 	int32_t ret = 0;
 	framecnt_t to_read;
@@ -1117,13 +1130,12 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		return 0;
 	}
 
-	/* if there are 2+ chunks of disk i/o possible for
-	   this track, let the caller know so that it can arrange
-	   for us to be called again, ASAP.
-	*/
-
-	if (total_space >= (_slaved ? 3 : 2) * disk_read_chunk_frames) {
-		ret = 1;
+	if (fill_level && (fill_level < total_space)) {
+		cerr << name() << " adjust total space of " << total_space << " to leave " << fill_level << " to still refill\n";
+		if (fill_level < 0) {
+			PBD::stacktrace (cerr, 20);
+		}
+		total_space -= fill_level;
 	}
 
 	/* if we're running close to normal speed and there isn't enough
@@ -1149,10 +1161,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	if (_slaved && total_space < (framecnt_t) (c->front()->playback_buf->bufsize() / 2)) {
 		return 0;
 	}
-
-	/* never do more than disk_read_chunk_frames worth of disk input per call (limit doesn't apply for memset) */
-
-	total_space = min (disk_read_chunk_frames, total_space);
 
 	if (reversed) {
 
@@ -1220,6 +1228,34 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 	framepos_t file_frame_tmp = 0;
 
+	/* this needs to be 32 bit for the power-of-two hack below to work.
+	   Clever, but poses ugly casting problems since the value is
+	   semantically a framecnt_t.
+	 */
+
+	uint32_t chunk_size_for_read = (uint32_t) max ((framecnt_t) 65536, min ((framecnt_t) 1048576, total_space)); 
+
+	/* if not already a power of 2, go to next lower power of 2 */
+
+	if ((chunk_size_for_read & (chunk_size_for_read - 1)) != 0) {
+
+		/* move to the next largest power of two. Hack from stanford bithacks page. */
+		
+		chunk_size_for_read--;
+		chunk_size_for_read |= chunk_size_for_read >> 1;
+		chunk_size_for_read |= chunk_size_for_read >> 2;
+		chunk_size_for_read |= chunk_size_for_read >> 4;
+		chunk_size_for_read |= chunk_size_for_read >> 8;
+		chunk_size_for_read |= chunk_size_for_read >> 16;
+		chunk_size_for_read++;
+		
+		/* go back to previous power */
+		
+		chunk_size_for_read >>= 1;
+	}
+
+	cerr << name() << " will read " << chunk_size_for_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << endl;
+	
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
 		ChannelInfo* chan (*i);
@@ -1229,7 +1265,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		chan->playback_buf->get_write_vector (&vector);
 
-		if ((framecnt_t) vector.len[0] > disk_read_chunk_frames) {
+		if ((framecnt_t) vector.len[0] > chunk_size_for_read) {
 
 			/* we're not going to fill the first chunk, so certainly do not bother with the
 			   other part. it won't be connected with the part we do fill, as in:
@@ -1261,7 +1297,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		len2 = vector.len[1];
 
 		to_read = min (ts, len1);
-		to_read = min (to_read, disk_read_chunk_frames);
+		to_read = min (to_read, (framecnt_t) chunk_size_for_read);
 
 		assert (to_read >= 0);
 
@@ -1280,8 +1316,9 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		if (to_read) {
 
-			/* we read all of vector.len[0], but it wasn't an entire disk_read_chunk_frames of data,
-			   so read some or all of vector.len[1] as well.
+			/* we read all of vector.len[0], but it wasn't the
+			   entire chunk_size_for_read of data, so read some or
+			   all of vector.len[1] as well.
 			*/
 
 			if (read (buf2, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan_n, reversed)) {
@@ -1301,8 +1338,9 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	file_frame = file_frame_tmp;
 	assert (file_frame >= 0);
 
+	ret = ((total_space - chunk_size_for_read) > disk_read_chunk_frames);
+	
   out:
-
 	return ret;
 }
 
