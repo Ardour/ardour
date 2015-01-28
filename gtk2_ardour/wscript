@@ -257,6 +257,20 @@ gtk2_ardour_sources = [
         'video_tool_paths.cc'
 ]
 
+def enoify (major, minor):
+    if major == 3:
+        return "\\n\\\"E-No\\\""
+    elif major == 4:
+        if minor == 0:
+            return "\\n\\\"No Pussyfooting\\\""
+        elif minor == 1:
+            return "\\n\\\"Here Come the Warm Jets\\\""
+        elif minor == 2:
+            return "\\n\\\"Taking Tiger Mountain\\\""
+        elif minor == 3:
+            return "\\n\\\"Lady June's Linguistic Leprosy\\\""
+    return "\\\"\\\""
+
 def options(opt):
     autowaf.set_options(opt)
 
@@ -285,7 +299,8 @@ def configure(conf):
 
     bak = conf.env['define_key']
     conf.define('VERSIONSTRING', str (conf.env['VERSION']))
-    conf.env['define_key'] = ['VERSIONSTRING']
+    conf.define('CODENAME', enoify(int(conf.env['MAJOR']), int(conf.env['MINOR'])))
+    conf.env['define_key'] = ['VERSIONSTRING', 'CODENAME' ]
     conf.write_config_header('gtk2ardour-version.h')
     conf.env['define_key'] = bak;
 
