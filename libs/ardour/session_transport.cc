@@ -319,7 +319,7 @@ Session::butler_transport_work ()
 	finished = true;
 	ptw = post_transport_work();
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1\n", enum_2_string (ptw)));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1 at %2\n", enum_2_string (ptw), g_get_monotonic_time()));
 
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -410,7 +410,7 @@ Session::butler_transport_work ()
 
 	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 
-	DEBUG_TRACE (DEBUG::Transport, X_("Butler transport work all done\n"));
+	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done at %1\n"), g_get_monotonic_time()));
 	DEBUG_TRACE (DEBUG::Transport, X_(string_compose ("Frame %1\n", _transport_frame)));
 }
 

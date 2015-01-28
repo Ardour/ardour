@@ -784,7 +784,7 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 }
 
 int
-MidiDiskstream::do_refill_with_alloc ()
+MidiDiskstream::_do_refill_with_alloc (bool /* partial_fill */)
 {
 	return do_refill();
 }
