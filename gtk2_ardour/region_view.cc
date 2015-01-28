@@ -579,9 +579,8 @@ RegionView::make_name () const
 	// XXX nice to have some good icons for this
 
 	if (_region->locked()) {
-		str += '>';
 		str += _region->name();
-		str += '<';
+		str = "Locked   " + str;
 	} else if (_region->position_locked()) {
 		str += '{';
 		str += _region->name();
