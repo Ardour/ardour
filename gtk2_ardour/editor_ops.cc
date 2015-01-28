@@ -89,6 +89,7 @@
 #include "strip_silence_dialog.h"
 #include "time_axis_view.h"
 #include "transpose_dialog.h"
+#include "waves_edit_dialog.h"
 
 #include "i18n.h"
 #include "dbg_msg.h"
@@ -2545,42 +2546,17 @@ Editor::rename_region ()
 	if (rs.empty()) {
 		return;
 	}
+    
+    WavesEditDialog waves_edit_dialog ("", "Rename region");
+    waves_edit_dialog.set_entry_text (rs.front()->region()->name());
 
-	ArdourDialog d (*this, _("Rename Region"), true, false);
-	Entry entry;
-	Label label (_("New name:"));
-	HBox hbox;
+    int const ret = waves_edit_dialog.run ();
 
-	hbox.set_spacing (6);
-	hbox.pack_start (label, false, false);
-	hbox.pack_start (entry, true, true);
-
-	d.get_vbox()->set_border_width (12);
-	d.get_vbox()->pack_start (hbox, false, false);
-
-	d.add_button("CANCEL", Gtk::RESPONSE_CANCEL);
-	d.add_button("OK", Gtk::RESPONSE_OK);
-
-	d.set_size_request (300, -1);
-
-	entry.set_text (rs.front()->region()->name());
-	entry.select_region (0, -1);
-
-	entry.signal_activate().connect (sigc::bind (sigc::mem_fun (d, &Dialog::response), RESPONSE_OK));
-
-	d.show_all ();
-
-	entry.grab_focus();
-
-	int const ret = d.run();
-
-	d.hide ();
-
-	if (ret != RESPONSE_OK) {
+	if (ret != WavesDialog::RESPONSE_DEFAULT) {
 		return;
 	}
 
-	std::string str = entry.get_text();
+	std::string str = waves_edit_dialog.get_entry_text();
 	strip_whitespace_edges (str);
 	if (!str.empty()) {
 		rs.front()->region()->set_name (str);
