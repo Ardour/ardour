@@ -566,6 +566,13 @@ fi
 # install bundled LV2s to <app>/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
 
+# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
+if test -d $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
+	cp -R $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 $APPLIB/LV2/
+elif test -d $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
+	cp -R $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 $APPLIB/LV2/
+fi
+
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir

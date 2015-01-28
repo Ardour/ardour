@@ -122,6 +122,11 @@ cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 cp -r build/libs/LV2 $ALIBDIR/
 cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvampplugins.dll
 
+# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
+if test -d $PREFIX/lib/lv2/lv2core.lv2 ; then
+	cp -R $PREFIX/lib/lv2/lv2core.lv2 $ALIBDIR/LV2/
+fi
+
 mv $ALIBDIR/surfaces/ardourcp-*.dll $DESTDIR/bin/
 
 # TODO use -static-libgcc -static-libstdc++ -- but for .exe files only
