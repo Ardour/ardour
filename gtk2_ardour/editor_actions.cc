@@ -1970,7 +1970,8 @@ Editor::register_region_actions ()
 	reg_sens (_region_actions, "set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
 	reg_sens (_region_actions, "alternate-set-fade-out-length", _("Set Fade Out Length"), sigc::bind (sigc::mem_fun (*this, &Editor::set_fade_length), false));
 
-	reg_sens (_region_actions, "set-tempo-from-region", _("Set Tempo from Region = Bar"), sigc::mem_fun (*this, &Editor::set_tempo_from_region));
+//    Tracks Live doesn't use it
+//	reg_sens (_region_actions, "set-tempo-from-region", _("Set Tempo from Region = Bar"), sigc::mem_fun (*this, &Editor::set_tempo_from_region));
 
 	reg_sens (
 		_region_actions,

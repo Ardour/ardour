@@ -227,11 +227,9 @@
       <menuitem action='split-multichannel-region'/>
       <menuitem action='toggle-opaque-region'/>
       <menuitem action='toggle-region-mute'/>
-      <menuitem action='pitch-shift-region'/>
       <menuitem action='reverse-region'/>    
       <menuitem action='close-region-gaps'/>
       <menuitem action='place-transient' />
-      <menuitem action='show-rhythm-ferret'/>
       <menuitem action='strip-region-silence'/>
     </menu>
     <menu action='RegionMenuMIDI'>
