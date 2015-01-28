@@ -1018,7 +1018,7 @@ Playlist::flush_notifications (bool from_undo)
 
 				 current->suspend_property_changes ();
 				 thawlist.push_back (current);
-				 current->cut_end (pos2 - 1);
+				 current->cut_end (pos2);
 
 			 } else if (overlap == Evoral::OverlapEnd) {
 
@@ -1058,7 +1058,7 @@ Playlist::flush_notifications (bool from_undo)
 
 				 current->suspend_property_changes ();
 				 thawlist.push_back (current);
-				 current->cut_end (pos2 - 1);
+				 current->cut_end (pos2);
 
 			 } else if (overlap == Evoral::OverlapStart) {
 
