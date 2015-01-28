@@ -504,39 +504,6 @@ ARDOUR::sync_source_to_string (SyncSource src, bool sh)
 	return _("JACK");
 }
 
-BufferingPreset
-ARDOUR::string_to_hdd_buffering_preset (const string& str)
-{
-    if (str == _("Small")) {
-        return Small;
-    } else if (str == _("Medium")) {
-        return Medium;
-    } else if (str == _("Large")) {
-        return Large;
-    }
-    
-    fatal << string_compose (_("programming error: unknown buffering preset \"%1\""), str) << endmsg;
-    /*NOTREACHED*/
-    return Small;
-}
-
-const char*
-ARDOUR::hdd_buffering_preset_to_string (BufferingPreset preset)
-{
-    switch (preset) {
-        case Small:
-            return _("Small");
-            
-        case Medium:
-            return _("Medium");
-            
-        case Large:
-            return _("Large");
-    }
-    /* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
-    return _("Small");
-}
-
 float
 ARDOUR::meter_falloff_to_float (MeterFalloff falloff)
 {

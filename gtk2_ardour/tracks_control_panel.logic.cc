@@ -1205,7 +1205,10 @@ TracksControlPanel::save_general_preferences ()
 	Config->set_history_depth (_limit_undo_history_spinbutton.get_value ());
 	Config->set_saved_history_depth (_save_undo_history_spinbutton.get_value ());
 	Config->set_save_history (_save_undo_history_spinbutton.get_value () > 0);
-	Config->set_buffering_preset (string_to_hdd_buffering_preset (_hard_disk_buffering_dropdown.get_text ()));
+    
+    BufferingPreset preset;
+    preset = (BufferingPreset)string_2_enum (_hard_disk_buffering_dropdown.get_text (), preset);
+	Config->set_buffering_preset (preset);
 }
 
 void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, int)
@@ -1767,7 +1770,7 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
 		display_meter_hold ();
 	} else if (parameter_name == "meter-falloff") {
 		display_meter_falloff ();
-	} else if (parameter_name == "capture-buffer-seconds") {
+	} else if (parameter_name == "buffering-preset") {
 		display_hdd_buffering ();
 	} else if (parameter_name == "mmc-control") {
 		display_mmc_control ();
