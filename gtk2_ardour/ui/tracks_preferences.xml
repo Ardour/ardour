@@ -31,7 +31,11 @@
          normalicon="preference_general_preferences_dropdown"
          activeicon="preference_general_preferences_dropdown_active"/>
   <style name="generic_dropdown_menu"
+         style="preferences_tab_dropdown"
          bgnormal="#424242"/>
+  <style name="generic_dropdown_item"
+         style="generic_dropdown_menu"
+         horzalignment="start"/>
 
   <Layout bgnormal="#424242"
           x="0"
@@ -562,13 +566,13 @@
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="Caf"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="Wave"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="Aiff"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="Wave64"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control" text="Bit Depth" x="24" y="70"/>
@@ -589,11 +593,11 @@
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="16 bit"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="24 bit"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="32 bit floating point"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control" text="Session Frame Rate" x="24" y="100"/>
@@ -614,15 +618,15 @@
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="24 fps"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="25 fps"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="30 fps"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="23.976 fps"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="29.97 fps"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
@@ -646,17 +650,17 @@
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="0 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="1 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="3 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="5 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="10 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="15 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control" text="Auto Save Timer" x="24" y="205"/>
@@ -677,17 +681,17 @@
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="0 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="1 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="3 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="5 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="10 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="15 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
@@ -715,9 +719,9 @@
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
           <Dropdownitem title="0 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
           <Dropdownitem title="1 Min"
-                        horzalignment="start"/>
+                        style="generic_dropdown_item"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
@@ -742,8 +746,6 @@
              text=""
              x = "105"
              y = "315"/>
-      <dropdownitem title="Mono"/>
-      <dropdownitem title="Stereo"/>
     </Layout>
     <EventBox id="general_settings_tab"
               bgnormal="#303030"
@@ -770,16 +772,16 @@
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
                 <DropdownItem title="Off"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="0"/>
                 <DropdownItem title="Short"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="1"/>
                 <DropdownItem title="Medium"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="2"/>
                 <DropdownItem title="Long"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="3"/>
               </DropdownMenu>
             </Dropdown>
@@ -798,31 +800,31 @@
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
                 <DropdownItem title="Off"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="0"/>
                 <DropdownItem title="Slowest [6.6dB/sec]"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="1"/>
                 <DropdownItem title="Slow [8.6dB/sec] (BBC PPM, EBU PPM)"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="2"/>
                 <DropdownItem title="Slowish [12.0dB/sec] (DIN)"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="3"/>
                 <DropdownItem title="Moderate [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="4"/>
                 <DropdownItem title="Medium [20dB/sec]"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="5"/>
                 <DropdownItem title="Fast [32dB/sec]"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="6"/>
                 <DropdownItem title="Faster [46dB/sec]"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="7"/>
                 <DropdownItem title="Fastest [70dB/sec]"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="8"/>
               </DropdownMenu>
             </Dropdown>
@@ -842,10 +844,10 @@
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
                 <DropdownItem title="Traditional"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="0"/>
                 <DropdownItem title="Rectified"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="1"/>
               </DropdownMenu>
             </Dropdown>
@@ -934,13 +936,13 @@
               </HBox>
               <DropdownMenu style="generic_dropdown_menu">
                 <DropdownItem title="Small"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="Small"/>
                 <DropdownItem title="Medium"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="Medium"/>
                 <DropdownItem title="Large"
-                              horzalignment="start"
+                              style="generic_dropdown_item"
                               data="Large"/>
               </DropdownMenu>
             </Dropdown>
