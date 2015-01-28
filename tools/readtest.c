@@ -106,7 +106,7 @@ main (int argc, char* argv[])
 	}
 
 	if (!quiet) {
-		printf ("Discovered %d files using %s\n", n, name_template);
+		printf ("# Discovered %d files using %s\n", n, name_template);
 	}
 	
 	nfiles = n;
@@ -160,7 +160,7 @@ main (int argc, char* argv[])
 		double bandwidth = ((nfiles * block_size)/1048576.0) / (elapsed/1000000.0);
 
 		if (!quiet) {
-			printf ("BW @ %lu %.3f seconds bandwidth %.4f MB/sec\n", (long unsigned int)_read, elapsed/1000000.0, bandwidth);
+			printf ("# BW @ %lu %.3f seconds bandwidth %.4f MB/sec\n", (long unsigned int)_read, elapsed/1000000.0, bandwidth);
 		}
 		
 		total_time += elapsed;
@@ -175,9 +175,10 @@ out:
 	if (max_elapsed > 0 && total_time > 0) {
 		double bandwidth = ((nfiles * _read)/1048576.0) / (total_time/1000000.0);
 		double min_throughput = ((nfiles * block_size)/1048576.0) / (max_elapsed/1000000.0);
-		printf ("Min: %.4f MB/sec Avg: %.4f MB/sec  || Max: %.3f sec \n", min_throughput, bandwidth, max_elapsed/1000000.0);
-		printf ("Max Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * bandwidth / (4 * 48000.)));
-		printf ("Sus Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * min_throughput / (4 * 48000.)));
+		printf ("# Min: %.4f MB/sec Avg: %.4f MB/sec  || Max: %.3f sec \n", min_throughput, bandwidth, max_elapsed/1000000.0);
+		printf ("# Max Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * bandwidth / (4 * 48000.)));
+		printf ("# Sus Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * min_throughput / (4 * 48000.)));
+		printf ("%d %.4f %.4f %.4f\n", block_size, min_throughput, bandwidth, max_elapsed/1000000.0);
 	}
 
 	return 0;

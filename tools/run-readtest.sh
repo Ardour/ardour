@@ -27,7 +27,7 @@ done
 if [ -d $dir -a -f $dir/testfile_1 ] ; then
     # dir exists and has a testfile within it - reuse to avoid
     # recreating files
-    echo "Re-using files in $dir"
+    echo "# Re-using files in $dir"
     needfiles=
 else
     dir=$dir/readtest_$$
@@ -40,7 +40,7 @@ else
 fi
 
 if [ x$needfiles != x ] ; then
-    echo "Building files for test..."
+    echo "# Building files for test..."
     if [ x$interleave = x ] ; then
 	
 	#
@@ -81,6 +81,6 @@ for bs in $@ ; do
         :
     fi
     
-    echo "Blocksize $bs"
+    echo "# Blocksize $bs"
     ./readtest $nocache -b $bs -q $dir/testfile_%d
 done
