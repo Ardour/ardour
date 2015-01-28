@@ -81,6 +81,7 @@
       <menuitem action='editor-cut'/>
       <menuitem action='editor-delete'/>
       <menuitem action='split-region'/>
+      <menuitem action='split-on-playhead'/>
       <menu action="SelectMenu">	   
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>

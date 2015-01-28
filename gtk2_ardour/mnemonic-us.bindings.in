@@ -185,6 +185,7 @@ This mode provides many different operations on both regions and control points,
 @aep|Region/align-regions-start|<@PRIMARY@><@LEVEL4@>a|align start(s)
 @aep|Region/align-regions-start-relative|<@LEVEL4@>a|align start(s) relative
 @rop|Region/split-region|s|split
+@rop|Region/split-on-playhead|<@LEVEL4@>downarrow|split on playhead
 @sess|Common/Save|<@PRIMARY@>s|save session
 @sess|Main/Snapshot|<@PRIMARY@><@TERTIARY@>s|snapshot session
 @trans|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status

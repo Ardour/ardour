@@ -5680,19 +5680,24 @@ Editor::set_playhead_cursor ()
 void
 Editor::split_region ()
 {
-	if ( !selection->time.empty()) {
-		separate_regions_between (selection->time);
+	if (selection->time.empty()) {
 		return;
 	}
+    
+    separate_regions_between (selection->time);
+}
 
-	RegionSelection rs = get_regions_from_selection_and_playhead ();
-	framepos_t where = get_playhead_position ();
-
-	if (rs.empty()) {
-		return;
-	}
-
-	split_regions_at (where, rs);
+void
+Editor::split_region_on_playhead ()
+{
+    RegionSelection regions_to_split = selection->regions;
+    framepos_t where = get_playhead_position ();
+    
+    if (regions_to_split.empty()) {
+        return;
+    }
+    
+    split_regions_at (where, regions_to_split);
 }
 
 struct EditorOrderRouteSorter {

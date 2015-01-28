@@ -1201,6 +1201,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void reset_focus ();
 
 	void split_region ();
+    void split_region_on_playhead ();
 
 	void delete_ ();
 	void cut ();
