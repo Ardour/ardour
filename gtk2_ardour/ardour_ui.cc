@@ -2705,13 +2705,31 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 void
 ARDOUR_UI::load_from_application_api (const std::string& path)
 {
-    ARDOUR_COMMAND_LINE::session_name = path;
-    
-    if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) {
+    if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) { // session folder was chosen
+        string full_name_to_session_file = string_compose ("%1/%2.ardour", path, basename_nosuffix (path));
+        //check that session file is really existing in folder
+        if ( !Glib::file_test (full_name_to_session_file, Glib::FileTest (G_FILE_TEST_EXISTS)) )
+        {
+            WavesMessageDialog session_deleted ("",string_compose (_("There is no existing session at \"%1\""), full_name_to_session_file),WavesMessageDialog::BUTTON_OK);
+            session_deleted.run ();
+            return ;
+        }
         load_session (path, basename_nosuffix (path));
-    } else {
-        load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
     }
+    else {  // session file was chosen
+        string temp_path, temp_name;
+        bool isnew;
+        //check that user choose right file format
+        if (ARDOUR::find_session (path, temp_path, temp_name, isnew) == 0) {
+            load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+        }
+        else {
+            WavesMessageDialog session_wrong_format ("",string_compose (_("\"%1\" has wrong file format"), path),WavesMessageDialog::BUTTON_OK);
+            session_wrong_format.run ();
+            return ;
+        }
+    }
+    ARDOUR_COMMAND_LINE::session_name = path;
 }
 
 namespace
