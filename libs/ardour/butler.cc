@@ -104,15 +104,13 @@ Butler::config_changed (std::string p)
 int
 Butler::start_thread()
 {
+    // set up capture and playback buffering
     Diskstream::set_buffering_parameters (Config->get_buffering_preset());
     
 	/* size is in Samples, not bytes */
     const float rate = (float)_session.frame_rate();
 	audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
 	audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
-    
-    _session.adjust_capture_buffering ();
-    _session.adjust_playback_buffering ();
     
 	/* size is in bytes
 	 * XXX: Jack needs to tell us the MIDI buffer size
@@ -131,6 +129,11 @@ Butler::start_thread()
 
 	//pthread_detach (thread);
 	have_thread = true;
+    
+    // we are ready to request buffer adjustments
+    _session.adjust_capture_buffering ();
+    _session.adjust_playback_buffering ();
+    
 	return 0;
 }
 
