@@ -1206,8 +1206,11 @@ TracksControlPanel::save_general_preferences ()
 	Config->set_saved_history_depth (_save_undo_history_spinbutton.get_value ());
 	Config->set_save_history (_save_undo_history_spinbutton.get_value () > 0);
     
+    int cur_item_num = _hard_disk_buffering_dropdown.get_current_item ();
+
     BufferingPreset preset;
-    preset = (BufferingPreset)string_2_enum (_hard_disk_buffering_dropdown.get_text (), preset);
+    preset = BufferingPreset((char*)_hard_disk_buffering_dropdown.get_item_associated_data (cur_item_num) - (char*)0);
+
 	Config->set_buffering_preset (preset);
 }
 

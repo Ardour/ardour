@@ -937,13 +937,13 @@
               <DropdownMenu style="generic_dropdown_menu">
                 <DropdownItem title="Small"
                               style="generic_dropdown_item"
-                              data="Small"/>
+                              data="0"/>
                 <DropdownItem title="Medium"
                               style="generic_dropdown_item"
-                              data="Medium"/>
+                              data="1"/>
                 <DropdownItem title="Large"
                               style="generic_dropdown_item"
-                              data="Large"/>
+                              data="2"/>
               </DropdownMenu>
             </Dropdown>
           </HBox>
