@@ -1035,12 +1035,29 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 
 		switch (event->scroll.direction) {
 		case GDK_SCROLL_UP:
-			temporal_zoom_step (false);
+
+			if (Profile->get_mixbus()) {
+				//for mouse-wheel zoom, force zoom-focus to mouse
+				Editing::ZoomFocus temp_focus = zoom_focus;
+				zoom_focus = Editing::ZoomFocusMouse;
+				temporal_zoom_step (false);
+				zoom_focus = temp_focus;
+			} else {
+				temporal_zoom_step (false);
+			}
 			handled = true;
 			break;
 			
 		case GDK_SCROLL_DOWN:
-			temporal_zoom_step (true);
+			if (Profile->get_mixbus()) {
+				//for mouse-wheel zoom, force zoom-focus to mouse
+				Editing::ZoomFocus temp_focus = zoom_focus;
+				zoom_focus = Editing::ZoomFocusMouse;
+				temporal_zoom_step (true);
+				zoom_focus = temp_focus;
+			} else {
+				temporal_zoom_step (true);
+			}
 			handled = true;
 			break;
 			
