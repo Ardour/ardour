@@ -41,11 +41,11 @@ WavesDropdown::clear_items ()
 }
 
 void*
-WavesDropdown::get_item_associated_data(int item_number)
+WavesDropdown::get_item_data_pv(size_t item_number)
 {
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
     if (item_number >= items.size()) {
-        return NULL;
+        return 0;
     }
     
     Gtk::Menu_Helpers::MenuList::iterator i = items.begin();

@@ -1209,7 +1209,7 @@ TracksControlPanel::save_general_preferences ()
     int cur_item_num = _hard_disk_buffering_dropdown.get_current_item ();
 
     BufferingPreset preset;
-    preset = BufferingPreset((char*)_hard_disk_buffering_dropdown.get_item_associated_data (cur_item_num) - (char*)0);
+    preset = BufferingPreset(_hard_disk_buffering_dropdown.get_item_data_u (cur_item_num));
 
 	Config->set_buffering_preset (preset);
 }
@@ -1414,7 +1414,7 @@ TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
 void
 TracksControlPanel::on_mtc_input_chosen (WavesDropdown* dropdown, int el_number)
 {
-    char* full_name_of_chosen_port = (char*)dropdown->get_item_associated_data(el_number);
+    char* full_name_of_chosen_port = (char*)dropdown->get_item_data_pv(el_number);
     
     if (full_name_of_chosen_port) {
         EngineStateController::instance()->set_mtc_input((char*) full_name_of_chosen_port);

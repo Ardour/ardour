@@ -126,7 +126,7 @@ WavesExportTimespanSelector::set_time_format_from_state ()
 	
 	unsigned int size = _time_format_dropdown.get_menu ().items ().size();
 	for (unsigned int i = 0; i < size; i++) {
-		if (_time_format_dropdown.get_item_associated_data (i) == (void*)itemdata) {
+		if (_time_format_dropdown.get_item_data_u (i) == itemdata) {
 			_time_format_dropdown.set_current_item (i);
 			break;
 		}

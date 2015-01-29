@@ -266,7 +266,7 @@ ARDOUR_UI::sync_displays_format (AudioClock::Mode mode)
 void
 ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
-    void* data = dropdown->get_item_associated_data(el_number);
+    void* data = dropdown->get_item_data_pv(el_number);
     assert(data);
     
     string format = *(string*)data;
@@ -286,7 +286,7 @@ ARDOUR_UI::on_display_format_dropdown_item_clicked (WavesDropdown* dropdown, int
 void
 ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
-    void* data = dropdown->get_item_associated_data(el_number);
+    void* data = dropdown->get_item_data_pv(el_number);
     assert(data);
     
     string timecode_source = *(string*)data;
@@ -408,7 +408,7 @@ ARDOUR_UI::sample_rate_changed()
 void
 ARDOUR_UI::on_sample_rate_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
-    void* data = dropdown->get_item_associated_data(el_number);
+    void* data = dropdown->get_item_data_pv(el_number);
     assert(data);
     
     framecnt_t sample_rate = *(float*)data;

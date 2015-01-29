@@ -87,7 +87,7 @@ WavesExportFormatSelector::update_selector_format ()
 		}
 		int size = _format_dropdown.get_menu ().items ().size ();
 		for (int i = 0; i < size; i++) {
-			if (_format_dropdown.get_item_associated_data (i) == (void*)export_format_id) {
+			if (_format_dropdown.get_item_data_u (i) == export_format_id) {
 				_format_dropdown.set_current_item (i);
 				break;
 			}
@@ -111,7 +111,7 @@ WavesExportFormatSelector::update_selector_depth ()
 		}
 		int size = _depth_dropdown.get_menu ().items ().size ();
 		for (int i = 0; i < size; i++) {
-			if (_depth_dropdown.get_item_associated_data (i) == (void*)depth) {
+			if (_depth_dropdown.get_item_data_u (i) == depth) {
 				_depth_dropdown.set_current_item (i);
 				break;
 			}
@@ -147,7 +147,7 @@ WavesExportFormatSelector::update_selector_sample_rate ()
 		}
 		int size = _sample_rate_dropdown.get_menu ().items ().size ();
 		for (int i = 0; i < size; i++) {
-			if (_sample_rate_dropdown.get_item_associated_data (i) == (void*)sample_rate) {
+			if (_sample_rate_dropdown.get_item_data_u (i) == sample_rate) {
 				_sample_rate_dropdown.set_current_item (i);
 				break;
 			}
@@ -177,7 +177,7 @@ WavesExportFormatSelector::update_selector_dithering ()
 		}
 		int size = _dithering_dropdown.get_menu ().items ().size ();
 		for (int i = 0; i < size; i++) {
-			if (_dithering_dropdown.get_item_associated_data (i) == (void*)export_dithering_id) {
+			if (_dithering_dropdown.get_item_data_u (i) == export_dithering_id) {
 				_dithering_dropdown.set_current_item (i);
 				break;
 			}

@@ -86,7 +86,7 @@ WavesExportFilenameSelector::load_state ()
 
 	int size = _date_format_dropdown.get_menu ().items ().size ();
 	for (int i = 0; i < size; i++) {
-		if (_date_format_dropdown.get_item_associated_data (i) == (void*)filename->get_date_format()) {
+		if (_date_format_dropdown.get_item_data_u (i) == filename->get_date_format()) {
 			_date_format_dropdown.set_current_item (i);
             break;
 		}
@@ -94,7 +94,7 @@ WavesExportFilenameSelector::load_state ()
 
 	size = _time_format_dropdown.get_menu ().items ().size ();
 	for (int i = 0; i < size; i++) {
-		if (_time_format_dropdown.get_item_associated_data (i) == (void*)filename->get_time_format()) {
+		if (_time_format_dropdown.get_item_data_u (i) == filename->get_time_format()) {
 			_time_format_dropdown.set_current_item (i);
             break;
 		}

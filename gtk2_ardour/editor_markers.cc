@@ -1372,7 +1372,7 @@ Editor::reset_marker_midi_images (bool input)
 void
 Editor::midi_input_chosen (WavesDropdown* dropdown, int el_number)
 {
-    char* full_name_of_chosen_port = (char*)dropdown->get_item_associated_data(el_number);
+    char* full_name_of_chosen_port = (char*)dropdown->get_item_data_pv(el_number);
     
     if (full_name_of_chosen_port) {
         Gtk::MenuItem* item = dropdown->get_item(el_number);
@@ -1388,7 +1388,7 @@ Editor::midi_input_chosen (WavesDropdown* dropdown, int el_number)
 void
 Editor::midi_output_chosen (WavesDropdown* dropdown, int el_number)
 {
-    char* full_name_of_chosen_port = (char*)dropdown->get_item_associated_data(el_number);
+    char* full_name_of_chosen_port = (char*)dropdown->get_item_data_pv(el_number);
     
     if (full_name_of_chosen_port) {
         Gtk::MenuItem* item = dropdown->get_item(el_number);
