@@ -125,6 +125,10 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/boost-region-gain|asciicircum|increase region gain
 @rop|Region/cut-region-gain|ampersand|reduce region gain
 
+;; Alt+number row:  region operations
+@rop|Region/naturalize-region|<@SECONDARY@>1|move to original position
+
+
 ;; letters
 ;; TOP ROW
 
@@ -140,7 +144,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/ExportSession|<@LEVEL4@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|<@TERTIARY@>e|toggle editor window mixer
-@wvis|Common/goto-editor|<@WINDOW@>e|toggle editor window
+@wvis|Common/goto-editor|<@SECONDARY@>e|toggle editor window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
 @rop|Region/reverse-region|<@SECONDARY@>r|reverse
@@ -160,15 +164,14 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-content|e|content mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
-@wvis|Window/toggle-session-options-editor|<@WINDOW@>o|toggle preferences dialog
-@rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
+@wvis|Window/toggle-session-options-editor|<@SECONDARY@>o|toggle preferences dialog
+@rop|Region/naturalize-region|<@PRIMARY@><@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
-@wvis|Window/toggle-rc-options-editor|<@PRIMARY@><@TERTIARY@>p|toggle preferences dialog
-@wvis|Window/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
-@wvis|Window/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
+@wvis|Window/toggle-rc-options-editor|<@SECONDARY@>p|toggle preferences dialog
+@wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>p|toggle global audio patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
-@select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
+@select|Editor/select-all-after-playhead|<@PRIMARY@><@TERTIARY@>p|all after playhead
 
 ;; MIDDLE ROW
 
@@ -188,18 +191,18 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
 @vis|Editor/fit-selection|f|fit selection vertically
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
+@wvis|Region/show-rhythm-ferret|<@SECONDARY@>f|show rhythm ferret window 
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
-@wvis|Common/ToggleMaximalMixer|F12|maximise mixer space
-@wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
+@wvis|Common/ToggleMaximalMixer|<@PRIMARY@><@TERTIARY@>f|maximise mixer space
 @mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Region/play-selected-regions|h|play selected region(s)
 @eep|Region/trim-front|j|trim front
 @eep|Region/trim-back|k|trim back
-@wvis|Window/toggle-key-editor|<@WINDOW@>k|toggle key bindings editor
+@wvis|Window/toggle-key-editor|<@SECONDARY@>k|toggle key bindings editor
 @trans|Transport/Loop|l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|<@PRIMARY@>l|select all in loop range
-@wvis|Window/toggle-locations|<@WINDOW@>l| toggle locations dialog
+@wvis|Window/toggle-locations|<@SECONDARY@>l| toggle locations dialog
 
 ;; BOTTOM ROW
 
@@ -208,20 +211,21 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/undo|<@PRIMARY@>z|undo
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
-@edit|Editor/editor-cut|<@PRIMARY@>x|cut
-;@-group|Editor/crop|c|some text
 @mmode|MouseMode/set-mouse-mode-cut|c|cut mode
+@edit|Editor/editor-cut|<@PRIMARY@>x|cut
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
+@-group|Editor/crop|<@SECONDARY@>c|some text
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
-@wvis|Window/toggle-big-clock|<@WINDOW@>b|toggle big clock
+@wvis|Window/toggle-big-clock|<@SECONDARY@>b|toggle big clock
 @rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
-@wvis|Common/toggle-editor-mixer|<@WINDOW@>m|rotate editor \& mixer window
+@wvis|Common/toggle-editor-mixer|<@SECONDARY@>m|rotate editor \& mixer window
+@wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 
 ;; arrow keys, navigation etc.
 
