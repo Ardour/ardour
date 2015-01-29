@@ -122,18 +122,21 @@ This mode provides many different operations on both regions and control points,
 
 @ranges|Editor/set-punch-from-edit-range|bracketleft|set punch range from edit range
 
-@rop|Region/boost-region-gain|asciicircum|increase region gain
-@rop|Region/cut-region-gain|ampersand|reduce region gain
 
 ;; Alt+number row:  region operations
-@rop|Region/naturalize-region|<@SECONDARY@>1|move to original position
-
+@rop|Region/toggle-region-mute|<@SECONDARY@>1|mute/unmute
+@rop|Region/naturalize-region|<@SECONDARY@>2|move to original position
+@rop|Region/normalize-region|<@SECONDARY@>3|normalize
+@rop|Region/reverse-region|<@SECONDARY@>4|reverse
+@rop|Region/quantize-region|<@SECONDARY@>5|quantize MIDI notes \linebreak[4] in selected region(s)
+@rop|Region/boost-region-gain|<@SECONDARY@>6|increase region gain
+@rop|Region/cut-region-gain|<@SECONDARY@>7|reduce region gain
+@rop|Region/pitch-shift-region|<@SECONDARY@>8|transpose
 
 ;; letters
 ;; TOP ROW
 
 @sess|Common/Quit|<@PRIMARY@>q|quit
-@rop|Region/quantize-region|<@SECONDARY@>q|quantize MIDI notes \linebreak[4] in selected region(s)
 @movp|Editor/jump-forward-to-mark|w|to next mark
 @movp|Editor/jump-backward-to-mark|q|to previous mark
 
@@ -147,10 +150,8 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/goto-editor|<@SECONDARY@>e|toggle editor window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
-@rop|Region/reverse-region|<@SECONDARY@>r|reverse
 @trans|Transport/Record|<@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
-@rop|Region/pitch-shift-region|<@SECONDARY@>t|transpose
 @eep|Editor/select-all-tracks|<@PRIMARY@>t|select all tracks
 @mmode|MouseMode/set-mouse-mode-object-range|y|link object/range tools
 @edit|Editor/alternate-redo|<@PRIMARY@>y|redo
@@ -165,7 +166,6 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Window/toggle-session-options-editor|<@SECONDARY@>o|toggle preferences dialog
-@rop|Region/naturalize-region|<@PRIMARY@><@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
 @wvis|Window/toggle-rc-options-editor|<@SECONDARY@>p|toggle preferences dialog
@@ -220,10 +220,8 @@ This mode provides many different operations on both regions and control points,
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
 @wvis|Window/toggle-big-clock|<@SECONDARY@>b|toggle big clock
-@rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
-@rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
 @wvis|Common/toggle-editor-mixer|<@SECONDARY@>m|rotate editor \& mixer window
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 
