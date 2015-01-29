@@ -25,11 +25,13 @@
 
 #include <glibmm/miscutils.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include "open_file_dialog_proxy.h"
 
 using namespace std;
 
-string
+std::string
 ARDOUR::save_file_dialog (std::string initial_path, std::string title)
 {
 	TCHAR szFilePathName[_MAX_PATH] = "";
@@ -62,7 +64,7 @@ ARDOUR::save_file_dialog (std::string initial_path, std::string title)
 	return string();
 }
 
-string
+std::string
 ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 {
 	TCHAR szFilePathName[_MAX_PATH] = "";
@@ -94,7 +96,74 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 	return string ();
 }
 
-string 
+std::vector<std::string>
+ARDOUR::open_file_dialog (std::vector<std::string> extentions, std::string initial_path, std::string title)
+{
+	TCHAR szFilePathName[_MAX_PATH] = "";
+	OPENFILENAME ofn = {0};
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lpstrFile = szFilePathName;  // This will hold the file name
+	ofn.nMaxFile = _MAX_PATH;
+	ofn.lpstrTitle = title.c_str();
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
+
+	// Create filter for required file types
+	std::string filter;
+	for (int i = 0; i < extentions.size(); ++i) {
+		filter += "*."+extentions[i]+";";
+	}
+
+	char c_filter[2+filter.size()+2];
+	c_filter[0] = ' ';
+	c_filter[1] = '\0';
+	strcpy (c_filter+2, filter.c_str ());
+	c_filter[filter.size()+3] = '\0';
+	
+	ofn.lpstrFilter = c_filter;
+		
+	// Check on valid path
+	WIN32_FIND_DATA FindFileData;
+	HANDLE handle = FindFirstFile(initial_path.c_str(), &FindFileData) ;
+        int found = (handle != INVALID_HANDLE_VALUE);
+        
+	// if path is valid
+	if (found) {
+		ofn.lpstrInitialDir = initial_path.c_str();
+        } else {
+		initial_path = Glib::get_home_dir();
+		ofn.lpstrInitialDir = initial_path.c_str();
+	}
+
+	std::vector<std::string> file_pathes;
+        
+	if (GetOpenFileName(&ofn)) {
+
+		std::string directory_path = ofn.lpstrFile;
+		std::string path;
+		char* ptr = ofn.lpstrFile;
+
+		bool many_files = (ofn.lpstrFile [strlen (ofn.lpstrFile) + 1] != 0);
+
+		if (ofn.lpstrFile [strlen (ofn.lpstrFile) + 1] != 0) { // Many files
+			for (char *current_name = ofn.lpstrFile + strlen (ofn.lpstrFile) + 1;
+				 *current_name;
+				 current_name += strlen (current_name) + 1) {
+					 file_pathes.push_back (ofn.lpstrFile);
+					 std::string& current_file_path = file_pathes.back (); 
+					 current_file_path += "\\";
+					 current_file_path += current_name;
+			}
+		} else {
+			file_pathes.push_back (ofn.lpstrFile); // single file selected
+		}
+
+		return file_pathes;
+	}
+
+	return file_pathes;
+}
+
+std::string 
 ARDOUR::choose_folder_dialog (std::string /* initial_path */, std::string title)
 {
 	BROWSEINFO bi;

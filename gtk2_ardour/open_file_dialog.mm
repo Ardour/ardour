@@ -21,17 +21,18 @@
 #import <Cocoa/Cocoa.h>
 
 #include <string>
+#include <vector>
 
 #include <iostream>
 
 using namespace std;
 
 /* ====== "trampoline" functions to invoke Objective-C method ====== */
-string 
-ARDOUR::open_file_dialog (std::string initial_path, string title)
+std::string
+ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 {
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
-        
+    
         //NP: we should find some gentle way to do this
         NSString *nsDefaultPath = [NSString stringWithUTF8String:initial_path.c_str()];
         // Call the Objective-C method using Objective-C syntax
@@ -41,8 +42,38 @@ ARDOUR::open_file_dialog (std::string initial_path, string title)
         return stdPath;
 }
 
-string 
-ARDOUR::save_file_dialog (std::string initial_path, string title)
+std::vector<std::string>
+ARDOUR::open_file_dialog (std::vector<std::string> extantions, std::string initial_path, std::string title)
+{
+    NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
+    //NP: we should find some gentle way to do this
+    NSString *nsDefaultPath = [NSString stringWithUTF8String:initial_path.c_str()];
+    
+    id fileTypesArray = [NSMutableArray new];
+    
+    for (auto str : extantions) {
+		id nsstr = [NSString stringWithUTF8String:str.c_str()];
+		[fileTypesArray addObject:nsstr];
+	}
+    
+    NSArray *nsPathes = [FileDialog class_open_file_dialog:nsTitle withArg2:nsDefaultPath withArg3:fileTypesArray];
+    
+    std::vector<std::string> stdPathes;
+    
+    int count = [nsPathes count];
+    for (int i=0; i<count; i++) {
+        NSURL *saveURL = [nsPathes objectAtIndex:i];
+        NSString *filePath = [saveURL path];
+        string stdPath = [filePath UTF8String];
+        stdPathes.push_back (stdPath);
+    }
+    
+    // Returns pathes to selected files
+    return stdPathes;
+}
+
+std::string
+ARDOUR::save_file_dialog (std::string initial_path, std::string title)
 {
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
@@ -55,8 +86,8 @@ ARDOUR::save_file_dialog (std::string initial_path, string title)
         return stdPath;
 }
     
-string
-ARDOUR::choose_folder_dialog(std::string initial_path, string title)
+std::string
+ARDOUR::choose_folder_dialog(std::string initial_path, std::string title)
 {
         NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
         
@@ -111,6 +142,39 @@ ARDOUR::choose_folder_dialog(std::string initial_path, string title)
     }
     
     return @"";
+}
+
+/* On choose many files */
++ (NSArray*) class_open_file_dialog:(NSString *)title withArg2:(NSString *)initial_path withArg3:(NSArray*) fileTypesArray
+{
+    // Create a File Open Dialog class.
+    NSOpenPanel* openDlg = [NSOpenPanel openPanel];
+    
+    [openDlg setCanChooseFiles:YES];
+    [openDlg setAllowedFileTypes:fileTypesArray];
+    [openDlg setAllowsMultipleSelection:TRUE];
+    [openDlg setTitle:title];
+    
+    NSFileManager *fm = [[NSFileManager alloc] init];
+    BOOL isDir;
+    BOOL exists = [fm fileExistsAtPath:initial_path isDirectory:&isDir];
+    
+    if(!exists)
+        initial_path = NSHomeDirectory();
+    
+    [openDlg setDirectoryURL : [NSURL fileURLWithPath:initial_path]];
+    
+    // Display the dialog box.  If the OK pressed,
+    // process the files.
+    if ( [openDlg runModal] == NSOKButton )
+    {
+        // Gets first selected file
+        NSArray *files = [openDlg URLs];
+        
+        return files;
+    }
+    
+    return nil;
 }
 
 /* On create new session */
