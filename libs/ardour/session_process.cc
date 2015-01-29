@@ -159,7 +159,10 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
-		_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler);
+		if (_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler) < 0) {
+			stop_transport ();
+			return -1;
+		}
 	} else {
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
