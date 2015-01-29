@@ -2287,8 +2287,6 @@ LV2World::LV2World()
 	: world(lilv_world_new())
 	, _bundle_checked(false)
 {
-	lilv_world_load_all(world);
-
 	atom_AtomPort      = lilv_new_uri(world, LV2_ATOM__AtomPort);
 	atom_Chunk         = lilv_new_uri(world, LV2_ATOM__Chunk);
 	atom_Sequence      = lilv_new_uri(world, LV2_ATOM__Sequence);
@@ -2392,6 +2390,7 @@ LV2World::load_bundled_plugins(bool verbose)
 			lilv_node_free(node);
 		}
 
+		lilv_world_load_all(world);
 		_bundle_checked = true;
 	}
 }
