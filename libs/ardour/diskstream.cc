@@ -772,13 +772,7 @@ Diskstream::disengage_record_enable ()
 framecnt_t
 Diskstream::default_disk_read_chunk_frames()
 {
-#ifdef PLATFORM_WINDOWS
-	return (2 * 1048576) / sizeof (Sample);
-#elif defined __APPLE__
-	return (4 * 1048576) / sizeof (Sample);
-#else
 	return 65536;
-#endif
 }	
 
 framecnt_t
