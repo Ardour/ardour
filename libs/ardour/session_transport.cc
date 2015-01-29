@@ -481,7 +481,15 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 	if (jump_to < 0 && (autoreturn & RangeSelectionStart)) {
 		if (!_range_selection.empty()) {
 			jump_to = _range_selection.from;
-		}
+		} else {
+                        if (transport_rolling()) {
+                                /* Range selection no longer exists, but we're playing, 
+                                   so do nothing. Next stop will put us where
+                                   we need to be.
+                                */
+                                return false;
+                        }
+                }
 	}
 	
 	if (jump_to < 0 && (autoreturn & Loop)) {
