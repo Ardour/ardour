@@ -198,7 +198,7 @@ void
 WavesExportFormatSelector::on_format_dropdown (WavesDropdown*, int item)
 {
 	if (_state && _state->format) {
-		ExportFormatId export_format_id = ExportFormatId((char*)_format_dropdown.get_item_associated_data(item) - (char*)0);
+		ExportFormatId export_format_id = ExportFormatId(_format_dropdown.get_item_data_u(item));
 		switch (export_format_id) {
 		case AIFF:
 			_state->format->set_format_id (ARDOUR::ExportFormatBase::F_AIFF);
@@ -223,7 +223,7 @@ void
 WavesExportFormatSelector::on_depth_dropdown (WavesDropdown*, int item)
 {
 	if (_state && _state->format) {
-		int depth = int((char*)_depth_dropdown.get_item_associated_data(item) - (char*)0);
+		unsigned int depth = _depth_dropdown.get_item_data_u(item);
 
 		switch (depth) {
 		case 24:
@@ -243,7 +243,7 @@ void
 WavesExportFormatSelector::on_sample_rate_dropdown (WavesDropdown*, int item)
 {
 	if (_state && _state->format) {
-		int sample_rate = int((char*)_sample_rate_dropdown.get_item_associated_data(item) - (char*)0);
+		unsigned int sample_rate = _sample_rate_dropdown.get_item_data_u(item);
 
 		switch (sample_rate) {
 		case 44100:
@@ -275,7 +275,7 @@ void
 WavesExportFormatSelector::on_dithering_dropdown (WavesDropdown*, int item)
 {
 	if (_state && _state->format) {
-		ExportDitheringId export_format_id = ExportDitheringId((char*)_dithering_dropdown.get_item_associated_data(item) - (char*)0);
+		ExportDitheringId export_format_id = ExportDitheringId(_dithering_dropdown.get_item_data_u(item));
 		switch (export_format_id) {
 		case Shaped:
 			_state->format->set_dither_type (ARDOUR::ExportFormatBase::D_Shaped);

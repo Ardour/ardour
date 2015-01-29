@@ -209,7 +209,7 @@ WavesExportFilenameSelector::change_date_format (WavesDropdown*, int item)
 		return;
 	}
 
-	filename->set_date_format ((DateFormat)((char*)_date_format_dropdown.get_item_associated_data(item) - (char*)0));
+	filename->set_date_format ((DateFormat)_date_format_dropdown.get_item_data_u(item));
 	CriticalSelectionChanged();
 }
 
@@ -220,7 +220,7 @@ WavesExportFilenameSelector::change_time_format (WavesDropdown*, int item)
 		return;
 	}
 
-	filename->set_time_format ((TimeFormat)((char*)_time_format_dropdown.get_item_associated_data(item) - (char*)0));
+	filename->set_time_format ((TimeFormat)_time_format_dropdown.get_item_data_u(item));
 	CriticalSelectionChanged();
 }
 

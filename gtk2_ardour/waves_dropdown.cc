@@ -44,7 +44,7 @@ void*
 WavesDropdown::get_item_associated_data(int item_number)
 {
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
-    if (item_number >= items.size() ) {
+    if (item_number >= items.size()) {
         return NULL;
     }
     
@@ -58,7 +58,7 @@ Gtk::MenuItem*
 WavesDropdown::get_item (int item_number)
 {
     Gtk::Menu_Helpers::MenuList& items = _menu.items ();
-    if (item_number >= items.size() ) {
+    if (item_number >= items.size()) {
         return NULL;
     }
     

@@ -36,7 +36,9 @@ class WavesDropdown : public WavesIconButton
 	int get_current_item () { return _current_item_number; }
 	void set_current_item (int current_item_number);
     
-    void* get_item_associated_data (int);
+    void* get_item_associated_data (size_t);
+	int get_item_data_i (size_t item) { return (char*)get_item_associated_data(item) - (char*)0; }
+	unsigned int get_item_data_u (size_t item) { return (char*)get_item_associated_data(item) - (char*)0; }
     Gtk::MenuItem* get_item (int);
     Gtk::MenuItem* get_item (const std::string&);
     
@@ -46,7 +48,7 @@ class WavesDropdown : public WavesIconButton
 	void set_maxmenuheight (int maxmenuheight) { _maxmenuheight = ((maxmenuheight < 0) ? -1 : maxmenuheight); }
 	int get_maxmenuheight () const { return _maxmenuheight; }
 
-    sigc::signal2<void, WavesDropdown*, int> selected_item_changed;
+    sigc::signal2<void, WavesDropdown*, size_t> selected_item_changed;
 
   private:
     static char* menu_item_data_key;
