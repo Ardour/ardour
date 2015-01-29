@@ -627,17 +627,31 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
                         }
 		} else {
                         Marker* m = reinterpret_cast<Marker*> (item->get_data ("marker"));
+
+
                         if (m) {
                                 Location* l = m->location();
                                 if (l && l->is_auto_loop()) {
-                                        if (Config->get_loop_is_mode() && !_session->get_play_loop() ) {
-                                                /* play loop is disabled, use drag to create new Loop range or toggle loop playback */
-                                                _drags->set (new RangeMarkerBarDrag (this, clock_ruler, RangeMarkerBarDrag::CreateLoopMarker), event);
-                                                return true;
-                                        } else {
-                                                _drags->set (new MarkerDrag (this, item, MarkerDrag::Move), event);
-                                                return true;
-                                        }
+
+	                                ArdourCanvas::Duple i;
+	                                gdk_event_get_coords (event, &i.x, &i.y);
+	                                i = clock_ruler->canvas_to_item (i);
+	                                if (i.y >= ruler_divide_height) {
+		                                /* lower half: drag/set playhead */
+		                                _drags->set (new CursorDrag (this, *playhead_cursor, false), event);
+		                                return true;
+	                                } else {
+		                                /* upper half - control loop playback */
+
+		                                if (Config->get_loop_is_mode() && !_session->get_play_loop() ) {
+			                                /* play loop is disabled, use drag to create new Loop range or toggle loop playback */
+			                                _drags->set (new RangeMarkerBarDrag (this, clock_ruler, RangeMarkerBarDrag::CreateLoopMarker), event);
+			                                return true;
+		                                } else {
+			                                _drags->set (new MarkerDrag (this, item, MarkerDrag::Move), event);
+			                                return true;
+		                                }
+	                                }
                                 }
                         }
                         _drags->set (new MarkerDrag (this, item, MarkerDrag::Move), event);
