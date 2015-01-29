@@ -1364,7 +1364,8 @@ Editor::sensitize_the_right_region_actions ()
 		_region_actions->get_action("analyze-region")->set_sensitive (false);
 		_region_actions->get_action("reset-region-gain-envelopes")->set_sensitive (false);
 		_region_actions->get_action("toggle-region-gain-envelope-active")->set_sensitive (false);
-		_region_actions->get_action("pitch-shift-region")->set_sensitive (false);
+//        Tracks Live doesn't use it
+//		_region_actions->get_action("pitch-shift-region")->set_sensitive (false);
 
 	}
 
