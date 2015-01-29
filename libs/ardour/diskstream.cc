@@ -851,14 +851,14 @@ Diskstream::get_buffering_presets (BufferingPreset bp,
 		break;
 
 	case Medium:
-		read_chunk_size = 262144;  /* samples */
+		read_chunk_size = 65536;  /* samples */
 		write_chunk_size = 131072; /* samples */
-		read_buffer_size = 10;  /* seconds */
+		read_buffer_size = 13;  /* seconds */
 		write_buffer_size = 10; /* seconds */
 		break;
 
 	case Large:
-		read_chunk_size = 524288; /* samples */
+		read_chunk_size = 65536; /* samples */
 		write_chunk_size = 131072; /* samples */
 		read_buffer_size = 20; /* seconds */
 		write_buffer_size = 20; /* seconds */

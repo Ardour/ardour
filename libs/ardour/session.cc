@@ -431,7 +431,7 @@ Session::Session (AudioEngine &eng,
     _is_new = false;
     
     session_loaded ();
-	BootMessage (_("Session loading complete"));
+    BootMessage (_("Session loading complete"));
 
 }
 
