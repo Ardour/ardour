@@ -50,6 +50,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+#include "ardour/sndfile_helpers.h"
 #include "ardour/source_factory.h"
 #include "ardour/track.h"
 #include "ardour/types.h"
@@ -1079,8 +1080,7 @@ AudioDiskstream::_do_refill_with_alloc (bool partial_fill)
 	Sample* mix_buf  = new Sample[1048576];
 	float*  gain_buf = new float[1048576];
 
-	int ret = _do_refill (mix_buf, gain_buf, (partial_fill ? 
-						  (_session.butler()->audio_diskstream_playback_buffer_size() / 4.0) : 0));
+	int ret = _do_refill (mix_buf, gain_buf, (partial_fill ? disk_read_chunk_frames : 0));
 
 	delete [] mix_buf;
 	delete [] gain_buf;
@@ -1111,6 +1111,14 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	framecnt_t ts;
 
+	/* do not read from disk while session is marked as Loading, to avoid
+	   useless redundant I/O.
+	*/
+	
+	if (_session.state_of_the_state() & Session::Loading) {
+		return 0;
+	}
+	
 	if (c->empty()) {
 		return 0;
 	}
@@ -1130,12 +1138,17 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 		return 0;
 	}
 
-	if (fill_level && (fill_level < total_space)) {
-		cerr << name() << " adjust total space of " << total_space << " to leave " << fill_level << " to still refill\n";
-		if (fill_level < 0) {
-			PBD::stacktrace (cerr, 20);
+	if (fill_level) {
+		if (fill_level < total_space) {
+			cerr << name() << " adjust total space of " << total_space << " to leave " << fill_level << " to still refill\n";
+			if (fill_level < 0) {
+				PBD::stacktrace (cerr, 20);
+			}
+			total_space -= fill_level;
+		} else {
+			/* we can't do anything with it */
+			fill_level = 0;
 		}
-		total_space -= fill_level;
 	}
 
 	/* if we're running close to normal speed and there isn't enough
@@ -1228,33 +1241,29 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 	framepos_t file_frame_tmp = 0;
 
-	/* this needs to be 32 bit for the power-of-two hack below to work.
-	   Clever, but poses ugly casting problems since the value is
-	   semantically a framecnt_t.
+	/* total_space is in samples. We want to optimize read sizes in various sizes using bytes */
+
+	const size_t bits_per_sample = sndfile_data_width (_session.config.get_native_file_data_format());
+	size_t total_bytes = total_space * bits_per_sample / 8;
+
+	/* chunk size range is 256kB to 4MB. Bigger is faster in terms of MB/sec, but bigger chunk size always takes longer
 	 */
+	size_t byte_size_for_read = max ((size_t) (256 * 1024), min ((size_t) (4 * 1048576), total_bytes));
 
-	uint32_t chunk_size_for_read = (uint32_t) max ((framecnt_t) 65536, min ((framecnt_t) 1048576, total_space)); 
+	/* find nearest (lower) multiple of 16384 */
 
-	/* if not already a power of 2, go to next lower power of 2 */
+	byte_size_for_read = (byte_size_for_read / 16384) * 16384;
 
-	if ((chunk_size_for_read & (chunk_size_for_read - 1)) != 0) {
+	/* now back to samples */
 
-		/* move to the next largest power of two. Hack from stanford bithacks page. */
-		
-		chunk_size_for_read--;
-		chunk_size_for_read |= chunk_size_for_read >> 1;
-		chunk_size_for_read |= chunk_size_for_read >> 2;
-		chunk_size_for_read |= chunk_size_for_read >> 4;
-		chunk_size_for_read |= chunk_size_for_read >> 8;
-		chunk_size_for_read |= chunk_size_for_read >> 16;
-		chunk_size_for_read++;
-		
-		/* go back to previous power */
-		
-		chunk_size_for_read >>= 1;
-	}
+	framecnt_t samples_to_read = byte_size_for_read / (bits_per_sample / 8);
+	
+	//cerr << name() << " will read " << byte_size_for_read << " out of total bytes " << total_bytes << " in buffer of "
+	// << c->front()->playback_buf->bufsize() * bits_per_sample / 8 << " bps = " << bits_per_sample << endl;
+	cerr << name () << " read samples = " << samples_to_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << " samples\n";
 
-	cerr << name() << " will read " << chunk_size_for_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << endl;
+	uint64_t before = g_get_monotonic_time ();
+	uint64_t elapsed;
 	
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
@@ -1265,7 +1274,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 		chan->playback_buf->get_write_vector (&vector);
 
-		if ((framecnt_t) vector.len[0] > chunk_size_for_read) {
+		if ((framecnt_t) vector.len[0] > samples_to_read) {
 
 			/* we're not going to fill the first chunk, so certainly do not bother with the
 			   other part. it won't be connected with the part we do fill, as in:
@@ -1297,7 +1306,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 		len2 = vector.len[1];
 
 		to_read = min (ts, len1);
-		to_read = min (to_read, (framecnt_t) chunk_size_for_read);
+		to_read = min (to_read, (framecnt_t) samples_to_read);
 
 		assert (to_read >= 0);
 
@@ -1317,7 +1326,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 		if (to_read) {
 
 			/* we read all of vector.len[0], but it wasn't the
-			   entire chunk_size_for_read of data, so read some or
+			   entire samples_to_read of data, so read some or
 			   all of vector.len[1] as well.
 			*/
 
@@ -1335,10 +1344,15 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 	}
 
+	elapsed = g_get_monotonic_time () - before;
+	cerr << "\tbandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
+		
 	file_frame = file_frame_tmp;
 	assert (file_frame >= 0);
 
-	ret = ((total_space - chunk_size_for_read) > disk_read_chunk_frames);
+	ret = ((total_space - samples_to_read) > disk_read_chunk_frames);
+	
+	c->front()->playback_buf->get_write_vector (&vector);
 	
   out:
 	return ret;
