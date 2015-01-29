@@ -348,6 +348,64 @@ ARDOUR_UI_UTILS::emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 	return forward_key_press(&ev);
 }
 
+static string
+show_gdk_event_state (int state)
+{
+	string s;
+	if (state & GDK_SHIFT_MASK) {
+		s += "+SHIFT";
+	}
+	if (state & GDK_LOCK_MASK) {
+		s += "+LOCK";
+	}
+	if (state & GDK_CONTROL_MASK) {
+		s += "+CONTROL";
+	}
+	if (state & GDK_MOD1_MASK) {
+		s += "+MOD1";
+	}
+	if (state & GDK_MOD2_MASK) {
+		s += "+MOD2";
+	}
+	if (state & GDK_MOD3_MASK) {
+		s += "+MOD3";
+	}
+	if (state & GDK_MOD4_MASK) {
+		s += "+MOD4";
+	}
+	if (state & GDK_MOD5_MASK) {
+		s += "+MOD5";
+	}
+	if (state & GDK_BUTTON1_MASK) {
+		s += "+BUTTON1";
+	}
+	if (state & GDK_BUTTON2_MASK) {
+		s += "+BUTTON2";
+	}
+	if (state & GDK_BUTTON3_MASK) {
+		s += "+BUTTON3";
+	}
+	if (state & GDK_BUTTON4_MASK) {
+		s += "+BUTTON4";
+	}
+	if (state & GDK_BUTTON5_MASK) {
+		s += "+BUTTON5";
+	}
+	if (state & GDK_SUPER_MASK) {
+		s += "+SUPER";
+	}
+	if (state & GDK_HYPER_MASK) {
+		s += "+HYPER";
+	}
+	if (state & GDK_META_MASK) {
+		s += "+META";
+	}
+	if (state & GDK_RELEASE_MASK) {
+		s += "+RELEASE";
+	}
+
+	return s;
+}
 bool
 ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
@@ -380,7 +438,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
         DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 allow_activation ? %6\n",
                                                           win,
                                                           ev->keyval,
-                                                          ev->state,
+							  show_gdk_event_state (ev->state),
                                                           special_handling_of_unmodified_accelerators,
                                                           Keyboard::some_magic_widget_has_focus(),
                                                           allow_activating,
@@ -452,6 +510,8 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 			mod = GdkModifierType (mod & gtk_accelerator_get_default_mod_mask());
 			Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator(mod);
 
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tmodified modifier was %1\n", show_gdk_event_state (mod)));
+			
 			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, mod)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
 				return true;
@@ -469,7 +529,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 
 		if (allow_activating) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
-			if (gtk_window_activate_key (win, ev)) {
+			if (gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, GdkModifierType (ev->state & mask))) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
 			}
@@ -489,7 +549,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 	if (!gtk_window_propagate_key_event (win, ev)) {
                 DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
 		if (allow_activating) {
-			return gtk_window_activate_key (win, ev);
+			return gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, GdkModifierType (ev->state & mask));
 		} else {
 			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
 		}
