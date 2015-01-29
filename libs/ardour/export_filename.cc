@@ -55,10 +55,10 @@ ExportFilename::ExportFilename (Session & session) :
   include_timespan (true), // Include timespan name always
   include_time (false),
   include_date (false),
-  date_format (D_None),
-  time_format (T_None),
   session (session),
-  revision (1)
+  revision (1),
+  date_format (D_None),
+  time_format (T_None)
 {
 	time_t rawtime;
 	std::time (&rawtime);
