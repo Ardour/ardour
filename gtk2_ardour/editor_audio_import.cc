@@ -49,6 +49,7 @@
 #include "ardour_ui.h"
 #include "editor.h"
 #include "sfdb_ui.h"
+#include "waves_import_dialog.h"
 #include "editing.h"
 #include "audio_time_axis.h"
 #include "midi_time_axis.h"
@@ -73,6 +74,9 @@ using std::string;
 void
 Editor::add_external_audio_action (ImportMode mode_hint)
 {
+	std::cout << "**********************************************" << std::endl;
+	std::cout << "Editor::add_external_audio_action" << std::endl;
+	std::cout << "**********************************************" << std::endl;
 	if (_session == 0) {
 		WavesMessageDialog msg ("", _("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
@@ -91,6 +95,8 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 void
 Editor::external_audio_dialog ()
 {
+	WavesImportDialog import_dialog;
+	import_dialog.run ();
 	vector<string> paths;
 	uint32_t audio_track_cnt;
 	uint32_t midi_track_cnt;
