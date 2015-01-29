@@ -123,19 +123,19 @@ sndfile_data_width (int format)
 	int tval = format & 0xf;
 
 	switch (tval) {
-	  case SF_FORMAT_PCM_S8:
-	  case SF_FORMAT_PCM_U8:
+	case SF_FORMAT_PCM_S8:
+	case SF_FORMAT_PCM_U8:
 		return 8;
-	  case SF_FORMAT_PCM_16:
+	case SF_FORMAT_PCM_16:
 		return 16;
-	  case SF_FORMAT_PCM_24:
+	case SF_FORMAT_PCM_24:
 		return 24;
-	  case SF_FORMAT_PCM_32:
+	case SF_FORMAT_PCM_32:
 		return 32;
-	  case SF_FORMAT_FLOAT:
-		return 1; // heh, heh
-	  default:
-	    // we don't handle anything else within ardour
+	case SF_FORMAT_FLOAT:
+		return 32;
+	default:
+		// we don't handle anything else within ardour
 		return 0;
 	}
 }
