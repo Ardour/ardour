@@ -1235,12 +1235,18 @@ Editor::start_session_auto_save_event_timing ()
 void
 Editor::on_record_state_changed ()
 {
-    if (_session->actively_recording() ) {
+    if (_session->actively_recording() && _drags->active() ) {
         _drags->abort ();
     }
     
     start_lock_event_timing ();
     start_session_auto_save_event_timing ();
+    
+    if (_session->actively_recording() && _session->have_rec_enabled_track () ) {
+        set_track_header_dnd_active (false);
+    } else {
+        set_track_header_dnd_active (true);
+    }
 }
 
 bool
@@ -1486,6 +1492,7 @@ Editor::set_session (Session *t)
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
     _session->RecordStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::on_record_state_changed, this), gui_context());
+    _session->RecordArmStateChanged.connect (_session_connections, invalidator (*this), boost::bind (&Editor::on_record_state_changed, this), gui_context());
     _session->locations()->session_range_location()->StartChanged.connect(_session_connections, invalidator (*this), boost::bind (&Editor::update_horizontal_adjustment_limits, this), gui_context() );
     _session->locations()->session_range_location()->EndChanged.connect(_session_connections, invalidator (*this), boost::bind (&Editor::update_horizontal_adjustment_limits, this), gui_context() );
     

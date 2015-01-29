@@ -523,6 +523,17 @@ ARDOUR_UI::update_recent_session_menuitems ()
 }
 
 void
+ARDOUR_UI::set_topbar_buttons_sensitive (bool yn)
+{
+    _bit_depth_button->set_sensitive (yn);
+    _frame_rate_button->set_sensitive (yn);
+    
+    _sample_rate_dropdown->set_sensitive (yn);
+    _display_format_dropdown->set_sensitive (yn);
+    _timecode_source_dropdown->set_sensitive (yn);
+}
+
+void
 ARDOUR_UI::install_actions ()
 {
 	Glib::RefPtr<ActionGroup> main_actions = ActionGroup::create (X_("Main"));
@@ -567,9 +578,11 @@ ARDOUR_UI::install_actions ()
     
 	act = ActionManager::register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
-
+    ActionManager::record_restricted_actions.push_back (act);
+    
 	act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track"),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
+    ActionManager::record_restricted_actions.push_back (act);
 	//ActionManager::session_sensitive_actions.push_back (act);
 	//ActionManager::write_sensitive_actions.push_back (act);
 
@@ -635,6 +648,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Delete Unused Sources"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
+    ActionManager::record_restricted_actions.push_back (act);
 	//ActionManager::session_sensitive_actions.push_back (act);
     act = ActionManager::register_action (main_actions, X_("ShowUnused"), _("Show Unused"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::open_dead_folder));
     //ActionManager::session_sensitive_actions.push_back (act);
@@ -647,8 +661,9 @@ ARDOUR_UI::install_actions ()
 	/* these actions are intended to be shared across all windows */
 
 	common_actions = ActionGroup::create (X_("Common"));
-	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
-
+	act = ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
+    ActionManager::record_restricted_actions.push_back (act);
+    
 	/* windows visibility actions */
 
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));

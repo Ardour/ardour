@@ -283,10 +283,13 @@ Editor::register_actions ()
     reg_sens (editor_actions, "vertical-zoom-out", _("Zoom Out Vertical "), sigc::mem_fun (*this, &Editor::vertical_zoom_step_out ));
 
     act = reg_sens (editor_actions, "DeleteSelectedTracks", _("Delete Selected"), sigc::mem_fun(ARDOUR_UI::instance(), &ARDOUR_UI::delete_selected_tracks));
+    ActionManager::record_restricted_actions.push_back (act);
     ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "move-selected-tracks-up", _("Move Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
+    ActionManager::record_restricted_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "move-selected-tracks-down", _("Move Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));
+    ActionManager::record_restricted_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up));
@@ -327,10 +330,14 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false));
 
 	undo_action = reg_sens (editor_actions, "undo", _("Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
+    ActionManager::record_restricted_actions.push_back (undo_action);
 
 	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+    ActionManager::record_restricted_actions.push_back (redo_action);
 	redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+    ActionManager::record_restricted_actions.push_back (redo_action);
 	redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+    ActionManager::record_restricted_actions.push_back (redo_action);
 
 	reg_sens (editor_actions, "export-audio", _("Export Audio"), sigc::mem_fun(*this, &Editor::export_audio));
 	reg_sens (editor_actions, "export-range", _("Export Range"), sigc::mem_fun(*this, &Editor::export_range));

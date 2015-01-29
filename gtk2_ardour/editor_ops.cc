@@ -6602,6 +6602,24 @@ Editor::toggle_tracks_active ()
 }
 
 void
+Editor::set_track_header_dnd_active (bool yn)
+{
+    TrackViewList::iterator iter = track_views.begin ();
+    
+    for (; iter != track_views.end(); ++iter) {
+        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
+        
+        if (rtv) {
+            if (yn) {
+                rtv->enable_header_dnd ();
+            } else {
+                rtv->disable_header_dnd ();
+            }
+        }
+    }
+}
+
+void
 Editor::remove_tracks ()
 {
 	TrackSelection& ts (selection->tracks);

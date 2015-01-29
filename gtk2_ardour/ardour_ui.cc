@@ -1962,6 +1962,15 @@ void ARDOUR_UI::toggle_multi_out_mode ()
         // the mode is already enabled, nothing to do here
         return;
     }
+
+    if (!_session) {
+        return;
+    }
+    
+    if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
+        return;
+    }
+
     
     Config->set_output_auto_connect(AutoConnectPhysical);
 	editor->get_waves_button ("mode_multi_out_button").set_active(true);
@@ -1972,6 +1981,14 @@ void ARDOUR_UI::toggle_stereo_out_mode ()
 {
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
         // the mode is already enabled, nothing to do here
+        return;
+    }
+    
+    if (!_session) {
+        return;
+    }
+    
+    if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
         return;
     }
     
@@ -4364,15 +4381,31 @@ ARDOUR_UI::record_state_changed ()
 {
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed);
 
-	if (!_session || !big_clock_window) {
+	if (!_session ) {
 		/* why bother - the clock isn't visible */
 		return;
 	}
 
 	if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
-		big_clock->set_active (true);
+
+        tracks_control_panel.action()->set_sensitive(false);
+        set_topbar_buttons_sensitive (false);
+		ActionManager::set_sensitive (ActionManager::record_restricted_actions, false);
+        
+        if (big_clock_window) {
+            big_clock->set_active (true);
+        }
+        
 	} else {
-		big_clock->set_active (false);
+        
+        tracks_control_panel.action()->set_sensitive(true);
+        set_topbar_buttons_sensitive (true);
+        ActionManager::set_sensitive (ActionManager::record_restricted_actions, true);
+        
+        if (big_clock_window) {
+            big_clock->set_active (false);
+        }
+
 	}
 }
 

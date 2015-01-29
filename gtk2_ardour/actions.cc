@@ -47,6 +47,7 @@ using namespace ARDOUR;
 
 vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::write_sensitive_actions;
+vector<RefPtr<Gtk::Action> > ActionManager::record_restricted_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::plugin_selection_sensitive_actions;
 vector<RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;

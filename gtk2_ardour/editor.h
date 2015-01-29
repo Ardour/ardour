@@ -2083,7 +2083,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
     
 	void remove_tracks ();
 	void toggle_tracks_active ();
-
+    void set_track_header_dnd_active (bool yn);
+    
 	bool _have_idled;
 	int resize_idle_id;
 	static gboolean _idle_resize (gpointer);

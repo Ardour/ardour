@@ -5483,6 +5483,12 @@ Session::update_route_record_state ()
 	}
     
         g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
+    
+    bool record_arm_state_changed = (old != g_atomic_int_get (&_have_rec_enabled_track) );
+    
+    if (record_status() == Recording && record_arm_state_changed ) {
+        RecordArmStateChanged ();
+    }
 }
 
 void

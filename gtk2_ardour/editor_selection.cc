@@ -1112,6 +1112,11 @@ Editor::track_selection_changed ()
 
     // check if we should enable track selectin sensitive actions
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, track_selected() );
+    
+    // but disable those actions which are restricted if we are actively recording
+    if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
+        ActionManager::set_sensitive (ActionManager::record_restricted_actions, false );
+    }
 
     /* make session dirty */
     set_session_dirty ();

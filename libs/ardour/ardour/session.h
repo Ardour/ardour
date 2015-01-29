@@ -304,7 +304,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* Record status signals */
 
 	PBD::Signal0<void> RecordStateChanged;
-
+    PBD::Signal0<void> RecordArmStateChanged;
+    
 	/* Emited when session is loaded */
 	PBD::Signal0<void> SessionLoaded;
 

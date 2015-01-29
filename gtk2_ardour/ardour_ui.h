@@ -276,6 +276,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void update_sample_rate_dropdown ();
     void update_frame_rate_button ();
     void update_recent_session_menuitems();
+    
+    void set_topbar_buttons_sensitive (bool yn);
 
     PBD::ScopedConnectionList update_connections_to_toolbar_buttons;
     
