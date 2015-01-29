@@ -25,6 +25,8 @@
 #include <gdk/gdk.h>
 #include <stdint.h>
 
+#include <gdkmm/cursor.h>
+
 #include "ardour/types.h"
 
 #include "canvas/types.h"
