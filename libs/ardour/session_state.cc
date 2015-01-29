@@ -343,16 +343,36 @@ Session::post_engine_init ()
 	Port::set_connecting_blocked (false);
 
 	DirtyChanged (); /* EMIT SIGNAL */
+}
 
-	if (_is_new) {
-		save_state ("");
-	} else if (state_was_pending) {
-		save_state ("");
-		remove_pending_capture_state ();
-		state_was_pending = false;
-	}
+void
+Session::session_loaded ()
+{
+    SessionLoaded();
+    
+    _state_of_the_state = Clean;
+    
+    DirtyChanged (); /* EMIT SIGNAL */
+    
+    if (_is_new) {
+        save_state ("");
+    } else if (state_was_pending) {
+        save_state ("");
+        remove_pending_capture_state ();
+        state_was_pending = false;
+    }
 
-	return 0;
+    /* Now, finally, we can fill the playback buffers */
+    
+    BootMessage (_("Filling playback buffers"));
+    
+    boost::shared_ptr<RouteList> rl = routes.reader();
+    for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+	    boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (*r);
+	    if (trk && !trk->hidden()) {
+		    trk->seek (_transport_frame, true);
+	    }
+    }
 }
 
 void
