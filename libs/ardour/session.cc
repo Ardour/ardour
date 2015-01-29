@@ -358,7 +358,6 @@ Session::Session (AudioEngine &eng,
 	_engine.reset_timebase ();
 
 	BootMessage (_("Session loading complete"));
-
 }
 
 Session::~Session ()
