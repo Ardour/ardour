@@ -6,7 +6,7 @@
         skipbarheight="17"
         markerheight="18" >
   <style name="topbar_dropdown"
-         bgnormal="#43919A"
+         bgnormal="#0C474F"
          fgdisabled="#335b63"
          fgnormal="#ffffff"
          fgactive="#ffffff"
@@ -14,7 +14,10 @@
          winfont ="Arial 10"
          macfont ="Helvetica 10"
          width="63"
-         height="18"/>
+         height="18"
+         normalicon="topbar_button"
+         activeicon="topbar_button_active"
+         inactiveicon="topbar_button"/>
   <style name="generic_dropdown"
          bgnormal="#6C6C6C"
          bgactive="#454545"
@@ -79,58 +82,61 @@
               <Dropdown id="display_format_dropdown"
                         style="topbar_dropdown"
                         x="200"
-                        y="28"
-                        normalicon="topbar_button"
-                        activeicon="topbar_button_active">
-                <Label style="topbar_dropdown_menu"/>
+                        y="28">
+                <Label style="topbar_dropdown_menu"
+                       state="disabled"/>
                 <DropdownMenu style="topbar_dropdown_menu"/>
               </Dropdown>
               <Iconbutton id="bit_depth_button"
                           style="topbar_dropdown"
+                          bgnormal="#105C65"
                           x="269"
                           y="5"
                           normalicon="topbar_button_upper"
-                          activeicon="topbar_button_upper_active">
+                          activeicon="topbar_button_upper_active"
+                          inactiveicon="topbar_button_upper">
                 <HBox>
                   <VBox width="10"/>
                   <Label style="topbar_dropdown_menu"
+                         state="disabled"
                          horzalignment="start"/>
                 </HBox>
               </Iconbutton>
               <Iconbutton id="frame_rate_button"
                           style="topbar_dropdown"
                           x="338"
-                          y="28"
-                          normalicon="topbar_button"
-                          activeicon="topbar_button_active">
+                          y="28">
                 <HBox>
                   <VBox width="10"/>
                   <Label style="topbar_dropdown_menu"
+                         state="disabled"
                          horzalignment="start"/>
                 </HBox>
               </Iconbutton>
               <Dropdown id="sample_rate_dropdown"
                         style="topbar_dropdown"
                         x="269"
-                        y="28"
-                        normalicon="topbar_button"
-                        activeicon="topbar_button_active">
+                        y="28">
                 <HBox>
                   <VBox width="10"/>
                   <Label style="topbar_dropdown_menu"
+                         state="disabled"
                          horzalignment="start"/>
                 </HBox>
                 <DropdownMenu style="topbar_dropdown_menu"/>
               </Dropdown>
               <Dropdown id="timecode_selector_dropdown"
                         style="topbar_dropdown"
+                        bgnormal="#105C65"
                         x="338"
                         y="5"
                         normalicon="topbar_button_upper"
-                        activeicon="topbar_button_upper_active">
+                        activeicon="topbar_button_upper_active"
+                        inactiveicon="topbar_button_upper">
                 <HBox>
                   <VBox width="10"/>
                   <Label style="topbar_dropdown_menu"
+                         state="disabled"
                          horzalignment="start"/>
                 </HBox>
                 <DropdownMenu style="topbar_dropdown_menu"/>
