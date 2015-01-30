@@ -485,6 +485,8 @@ Graph::dump (int chain)
 int
 Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool& need_butler)
 {
+	if (!_threads_active) return 0;
+
         _process_nframes = nframes;
         _process_start_frame = start_frame;
         _process_end_frame = end_frame;
@@ -509,6 +511,8 @@ int
 Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+
+	if (!_threads_active) return 0;
 
         _process_nframes = nframes;
         _process_start_frame = start_frame;
