@@ -432,6 +432,7 @@ GainMeter::gain_activated ()
 	/* clamp to displayable values */
 	if (_data_type == DataType::AUDIO) {
 		f = min (f, 6.0f);
+        f = max (f, -120.0f);
         
         if (_route && _route->amp() == _amp) {
             
