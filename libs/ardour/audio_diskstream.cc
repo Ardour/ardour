@@ -1079,8 +1079,14 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 int
 AudioDiskstream::_do_refill_with_alloc (bool partial_fill)
 {
-	Sample* mix_buf  = new Sample[1048576];
-	float*  gain_buf = new float[1048576];
+	/* We limit disk reads to at most 4MB chunks, which with floating point
+	   samples would be 1M samples. But we might use 16 or 14 bit samples,
+	   in which case 4MB is more samples than that. Therefore size this for
+	   the smallest sample value .. 4MB = 2M samples (16 bit).
+	*/
+
+	Sample* mix_buf  = new Sample[2*1048576];
+	float*  gain_buf = new float[2*1048576];
 
 	int ret = _do_refill (mix_buf, gain_buf, (partial_fill ? disk_read_chunk_frames : 0));
 
