@@ -1243,9 +1243,23 @@ Editor::on_record_state_changed ()
     start_session_auto_save_event_timing ();
     
     if (_session->actively_recording() && _session->have_rec_enabled_track () ) {
+        set_record_restricted_actions_sensitive (false);
         set_track_header_dnd_active (false);
     } else {
+        set_record_restricted_actions_sensitive (true);
         set_track_header_dnd_active (true);
+    }
+}
+
+void
+Editor::set_record_restricted_actions_sensitive (bool yn)
+{
+    ActionManager::set_sensitive (ActionManager::record_restricted_actions, yn);
+    
+    // update actions we might activated prematurely
+    if (yn) {
+        // check if we should enable track selectin sensitive actions
+        ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, track_selected() );
     }
 }
 

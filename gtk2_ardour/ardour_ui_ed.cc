@@ -661,8 +661,11 @@ ARDOUR_UI::install_actions ()
 	/* these actions are intended to be shared across all windows */
 
 	common_actions = ActionGroup::create (X_("Common"));
+    
+    act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track"),
+                                          sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
+    
 	act = ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
-    ActionManager::record_restricted_actions.push_back (act);
     
 	/* windows visibility actions */
 

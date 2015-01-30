@@ -2085,6 +2085,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_tracks_active ();
     void set_track_header_dnd_active (bool yn);
     
+    void set_record_restricted_actions_sensitive (bool yn);
+    
 	bool _have_idled;
 	int resize_idle_id;
 	static gboolean _idle_resize (gpointer);

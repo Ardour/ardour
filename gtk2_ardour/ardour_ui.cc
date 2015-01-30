@@ -965,6 +965,13 @@ ARDOUR_UI::check_memory_locking ()
 void
 ARDOUR_UI::queue_finish ()
 {
+    if (_session) {
+        // do not queue finish if we are actively recording
+        if (_session->actively_recording () && _session->have_rec_enabled_track () ) {
+            return;
+        }
+    }
+    
 	Glib::signal_idle().connect (mem_fun (*this, &ARDOUR_UI::idle_finish));
 }
 
@@ -979,6 +986,11 @@ void
 ARDOUR_UI::finish()
 {
 	if (_session) {
+        
+        if (_session->actively_recording () && _session->have_rec_enabled_track () ) {
+            return;
+        }
+        
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 
 		if (_session->dirty()) {
@@ -1967,7 +1979,7 @@ void ARDOUR_UI::toggle_multi_out_mode ()
         return;
     }
     
-    if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
+    if (_session->actively_recording() && _session->have_rec_enabled_track ()) {
         return;
     }
 
@@ -1988,7 +2000,7 @@ void ARDOUR_UI::toggle_stereo_out_mode ()
         return;
     }
     
-    if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
+    if (_session->actively_recording () && _session->have_rec_enabled_track ()) {
         return;
     }
     
@@ -2257,7 +2269,7 @@ ARDOUR_UI::screen_lock_is_allowed() const
     if(!_session)
         return false;
     
-    if( (_session->record_status() == Session::Recording) && (ARDOUR_UI::config()->get_auto_lock_timer () != 0) )
+    if( (_session->actively_recording() ) && (ARDOUR_UI::config()->get_auto_lock_timer () != 0) )
         return true;
     else
         return false;
@@ -2269,7 +2281,7 @@ ARDOUR_UI::session_auto_save_is_allowed() const
     if(!_session)
         return false;
     
-    if( (_session->record_status() == Session::Recording) && (ARDOUR_UI::config()->get_auto_save_timer () != 0) )
+    if( (_session->actively_recording () ) && (ARDOUR_UI::config()->get_auto_save_timer () != 0) )
         return true;
     else
         return false;
@@ -4067,11 +4079,11 @@ ARDOUR_UI::xrun_handler (framepos_t where)
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::xrun_handler, where)
 
-	if (_session && Config->get_create_xrun_marker() && _session->actively_recording()) {
+	if (_session && Config->get_create_xrun_marker() && _session->actively_recording() ) {
 		create_xrun_marker(where);
 	}
 
-	if (_session && Config->get_stop_recording_on_xrun() && _session->actively_recording()) {
+	if (_session && Config->get_stop_recording_on_xrun() && _session->actively_recording() ) {
 		halt_on_xrun_message ();
 	}
 }
@@ -4382,15 +4394,13 @@ ARDOUR_UI::record_state_changed ()
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::record_state_changed);
 
 	if (!_session ) {
-		/* why bother - the clock isn't visible */
 		return;
 	}
 
-	if (_session->record_status () == Session::Recording && _session->have_rec_enabled_track ()) {
+	if (_session->actively_recording () && _session->have_rec_enabled_track ()) {
 
         tracks_control_panel.action()->set_sensitive(false);
         set_topbar_buttons_sensitive (false);
-		ActionManager::set_sensitive (ActionManager::record_restricted_actions, false);
         
         if (big_clock_window) {
             big_clock->set_active (true);
@@ -4400,8 +4410,7 @@ ARDOUR_UI::record_state_changed ()
         
         tracks_control_panel.action()->set_sensitive(true);
         set_topbar_buttons_sensitive (true);
-        ActionManager::set_sensitive (ActionManager::record_restricted_actions, true);
-        
+
         if (big_clock_window) {
             big_clock->set_active (false);
         }
