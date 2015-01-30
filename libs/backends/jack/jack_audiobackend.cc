@@ -841,7 +841,7 @@ JACKAudioBackend::join_process_threads ()
 #if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined(PLATFORM_WINDOWS)
 		// jack_client is not used by JACK2's implementation
 		// also jack_client_close() leaves threads active
-		if (jack_client_stop_thread ((jack_client_t)NULL, *i) != 0)
+		if (jack_client_stop_thread (NULL, *i) != 0)
 #else
 		void* status;
 		if (pthread_join (*i, &status) != 0)
