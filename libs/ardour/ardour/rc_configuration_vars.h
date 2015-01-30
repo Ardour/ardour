@@ -50,7 +50,7 @@ CONFIG_VARIABLE (int32_t, inter_scene_gap_msecs, "inter-scene-gap-msecs", 1)
 
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
-CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
+CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", false)
 CONFIG_VARIABLE (bool, timecode_source_2997, "timecode-source-2997", false)
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", Engine)
 CONFIG_VARIABLE (std::string, ltc_source_port, "ltc-source-port", "system:capture_1")
