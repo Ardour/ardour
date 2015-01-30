@@ -220,7 +220,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 		return 0;
-	} else {
+	} else if (!force) {
                 /* range locations must exceed a minimum duration */
                 if (_end - s < Config->get_range_location_minimum()) {
                         return -1;
@@ -251,7 +251,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 
 /** Set end position.
  *  @param s New end.
- *  @param force true to force setting, even if the given new start is after the current end.
+ *  @param force true to force setting, even if the given new end is before the current start.
  *  @param allow_bbt_recompute True to recompute BBT end time from the new given end time.
  */
 int
@@ -288,7 +288,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 		return 0;
-        } else {
+        } else if (!force) {
                 /* range locations must exceed a minimum duration */
                 if (e - _start < Config->get_range_location_minimum()) {
                         return -1;
