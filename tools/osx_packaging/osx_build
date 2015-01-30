@@ -217,7 +217,7 @@ chmod 775 $APPROOT/MacOS/Tracks
 MAIN_EXECUTABLE=Tracks.bin
 
 echo "Copying tracks executable ...."
-cp $BUILD_ROOT/gtk2_ardour/trackslive-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
+cp $BUILD_ROOT/gtk2_ardour/trackslive-${major_version}.${minor_version}.${micro_version} $APPROOT/MacOS/$MAIN_EXECUTABLE
 if test x$SAE != x ; then
     # cp $BUILD_ROOT/gtk2_ardour/evtest $APPROOT/MacOS/gtkevents
     cp  Ardour3-SAE.icns $Resources/appIcon.icns
