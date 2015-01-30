@@ -42,8 +42,9 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
         return stdPath;
 }
 
+/*
 std::vector<std::string>
-ARDOUR::open_file_dialog (std::vector<std::string> extantions, std::string initial_path, std::string title)
+ARDOUR::open_file_dialog (std::vector<std::string> extentions, std::string initial_path, std::string title)
 {
     NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
     //NP: we should find some gentle way to do this
@@ -51,7 +52,7 @@ ARDOUR::open_file_dialog (std::vector<std::string> extantions, std::string initi
     
     id fileTypesArray = [NSMutableArray new];
     
-    for (auto str : extantions) {
+    for (auto str:extentions) {
 		id nsstr = [NSString stringWithUTF8String:str.c_str()];
 		[fileTypesArray addObject:nsstr];
 	}
@@ -71,6 +72,7 @@ ARDOUR::open_file_dialog (std::vector<std::string> extantions, std::string initi
     // Returns pathes to selected files
     return stdPathes;
 }
+*/
 
 std::string
 ARDOUR::save_file_dialog (std::string initial_path, std::string title)
