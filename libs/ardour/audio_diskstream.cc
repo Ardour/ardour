@@ -1133,10 +1133,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 	if (fill_level) {
 		if (fill_level < total_space) {
-			cerr << name() << " adjust total space of " << total_space << " to leave " << fill_level << " to still refill\n";
-			if (fill_level < 0) {
-				PBD::stacktrace (cerr, 20);
-			}
+			// cerr << name() << " adjust total space of " << total_space << " to leave " << fill_level << " to still refill\n";
 			total_space -= fill_level;
 		} else {
 			/* we can't do anything with it */
@@ -1253,7 +1250,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 	
 	//cerr << name() << " will read " << byte_size_for_read << " out of total bytes " << total_bytes << " in buffer of "
 	// << c->front()->playback_buf->bufsize() * bits_per_sample / 8 << " bps = " << bits_per_sample << endl;
-	cerr << name () << " read samples = " << samples_to_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << " samples\n";
+	// cerr << name () << " read samples = " << samples_to_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << " samples\n";
 
 	uint64_t before = g_get_monotonic_time ();
 	uint64_t elapsed;
@@ -1338,7 +1335,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 	}
 
 	elapsed = g_get_monotonic_time () - before;
-	cerr << "\tbandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
+	// cerr << "\tbandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
 		
 	file_frame = file_frame_tmp;
 	assert (file_frame >= 0);
