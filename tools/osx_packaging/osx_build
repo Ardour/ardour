@@ -17,6 +17,7 @@ mkdir -p "$CACHEDIR"
 SAE=
 MIXBUS=
 WITH_HARVID=1
+WITH_HARRISON_LV2=
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -572,6 +573,16 @@ else
     echo "Creating $APPNAME packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
 
+fi
+
+if test x$WITH_HARRISON_LV2 != x ; then
+	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
+		OSX_ARCH=osx64
+	else 
+		OSX_ARCH=osx32
+	fi
+	curl -s http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_lv2s.zip \
+		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
 fi
 
 if test x$WITH_HARVID != x ; then
