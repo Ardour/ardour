@@ -5898,8 +5898,7 @@ Editor::set_loop_from_selection (bool play)
 	set_loop_range (start, end,  _("set loop range from selection"));
 
 	if (play) {
-		_session->request_locate (start, true);
-		_session->request_play_loop (true);
+		_session->request_play_loop (true, true);
 	}
 }
 
