@@ -368,7 +368,7 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".smp", ".SMP",
 		".snd", ".SND",
 		".maud", ".MAUD",
-		".voc", ".VOC"
+		".voc", ".VOC",
 		".vwe", ".VWE",
 		".w64", ".W64",
 		".wav", ".WAV",
