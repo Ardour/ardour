@@ -46,7 +46,6 @@
 #include "audio_time_axis.h"
 #include "editor.h"
 #include "waves_export_dialog.h"
-#include "export_dialog.h"
 #include "midi_export_dialog.h"
 #include "midi_region_view.h"
 #include "public_editor.h"
@@ -80,7 +79,7 @@ Editor::stem_export ()
 void
 Editor::export_selection ()
 {
-	ExportSelectionDialog dialog (*this);
+	WavesExportSelectionDialog dialog (*this);
 	dialog.set_session (_session);
 	dialog.run();
 }
