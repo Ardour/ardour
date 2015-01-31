@@ -16,8 +16,13 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <glib/gstdio.h>
+#include <glibmm/fileutils.h>
+
 #include "ardour/smf_source.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/session.h"
+#include "ardour/session_directory.h"
 
 #include "waves_import_dialog.h"
 #include "open_file_dialog_proxy.h"
@@ -32,7 +37,7 @@ WavesImportDialog::WavesImportDialog (ARDOUR::Session* session)
   , _copy_to_session_button (get_waves_button ("copy_to_session_button"))
 
 {
-	set_session (_session);
+	set_session (session);
 	_copy_to_session_home.set_visible (!ARDOUR::Config->get_only_copy_imported_files());
 
 	get_waves_button ("import_button").signal_clicked.connect (sigc::mem_fun (*this, &WavesImportDialog::_on_import_button));
@@ -144,7 +149,7 @@ WavesImportDialog::check_link_status ()
 		}
 	}
 
-	for (vector<string>::const_iterator i = _files_to_import.begin(); i != _files_to_import.end(); ++i) {
+	for (std::vector<std::string>::const_iterator i = _files_to_import.begin(); i != _files_to_import.end(); ++i) {
 
 		char tmpc[PATH_MAX+1];
 

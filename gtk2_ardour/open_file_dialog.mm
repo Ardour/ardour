@@ -37,14 +37,14 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
         NSString *nsDefaultPath = [NSString stringWithUTF8String:initial_path.c_str()];
         // Call the Objective-C method using Objective-C syntax
         NSString *nsPath = [FileDialog class_open_file_dialog:nsTitle withArg2:nsDefaultPath];
-        string stdPath = [nsPath UTF8String];
+        std::string stdPath = [nsPath UTF8String];
         
         return stdPath;
 }
 
-/*
+
 std::vector<std::string>
-ARDOUR::open_file_dialog (std::vector<std::string> extentions, std::string initial_path, std::string title)
+ARDOUR::open_file_dialog (std::vector<std::string> extensions, std::string initial_path, std::string title)
 {
     NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
     //NP: we should find some gentle way to do this
@@ -52,8 +52,8 @@ ARDOUR::open_file_dialog (std::vector<std::string> extentions, std::string initi
     
     id fileTypesArray = [NSMutableArray new];
     
-    for (auto str:extentions) {
-		id nsstr = [NSString stringWithUTF8String:str.c_str()];
+    for (std::vector<std::string>::iterator it = extensions.begin(); it != extensions.end(); ++it) {
+		id nsstr = [NSString stringWithUTF8String:(*it).c_str()];
 		[fileTypesArray addObject:nsstr];
 	}
     
@@ -65,14 +65,14 @@ ARDOUR::open_file_dialog (std::vector<std::string> extentions, std::string initi
     for (int i=0; i<count; i++) {
         NSURL *saveURL = [nsPathes objectAtIndex:i];
         NSString *filePath = [saveURL path];
-        string stdPath = [filePath UTF8String];
+        std::string stdPath = [filePath UTF8String];
         stdPathes.push_back (stdPath);
     }
     
     // Returns pathes to selected files
     return stdPathes;
 }
-*/
+
 
 std::string
 ARDOUR::save_file_dialog (std::string initial_path, std::string title)
@@ -83,7 +83,7 @@ ARDOUR::save_file_dialog (std::string initial_path, std::string title)
         NSString *nsDefaultPath = [NSString stringWithUTF8String:initial_path.c_str()];
         // Call the Objective-C method using Objective-C syntax
         NSString *nsPath = [FileDialog class_save_file_dialog:nsTitle withArg2:nsDefaultPath];
-        string stdPath = [nsPath UTF8String];    
+        std::string stdPath = [nsPath UTF8String];
         
         return stdPath;
 }
@@ -98,7 +98,7 @@ ARDOUR::choose_folder_dialog(std::string initial_path, std::string title)
         // Call the Objective-C method using Objective-C syntax
         NSString *nsPath = [FileDialog class_choose_folder_dialog:nsTitle withArg2:nsDefaultPath];
             
-        string stdPath = [nsPath UTF8String];
+        std::string stdPath = [nsPath UTF8String];
         
         return stdPath;
     }  
