@@ -16,16 +16,25 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include "ardour/smf_source.h"
+#include "ardour/audiofilesource.h"
+
 #include "waves_import_dialog.h"
-WavesImportDialog::WavesImportDialog ()
+#include "open_file_dialog_proxy.h"
+
+WavesImportDialog::WavesImportDialog (ARDOUR::Session* session)
   : WavesDialog ("waves_import_dialog.xml", true, false )
   , _add_as_dropdown (get_waves_dropdown ("add_as_dropdown"))
   , _insert_at_dropdown (get_waves_dropdown ("insert_at_dropdown"))
   , _mapping_dropdown (get_waves_dropdown ("mapping_dropdown"))
   , _quality_dropdown (get_waves_dropdown ("quality_dropdown"))
+  , _copy_to_session_home (get_container ("copy_to_session_home"))
   , _copy_to_session_button (get_waves_button ("copy_to_session_button"))
 
 {
+	set_session (_session);
+	_copy_to_session_home.set_visible (!ARDOUR::Config->get_only_copy_imported_files());
+
 	get_waves_button ("import_button").signal_clicked.connect (sigc::mem_fun (*this, &WavesImportDialog::_on_import_button));
 	get_waves_button ("cancel_button").signal_clicked.connect (sigc::mem_fun (*this, &WavesImportDialog::_on_cancel_button));
 }
@@ -80,6 +89,132 @@ WavesImportDialog::_get_import_mode() const
 	return import_mode;
 }
 
+const std::string __audiofile_types[] = {
+	"aif", "AIF", "aifc", "AIFC", "aiff", "AIFF", "amb", "AMB", "au", "AU",	"caf", "CAF",
+	"cdr", "CDR", "flac", "FLAC", "htk", "HTK", "iff", "IFF", "mat", "MAT", "oga", "OGA",
+	"ogg", "OGG", "paf", "PAF", "pvf", "PVF", "sf", "SF", "smp", "SMP", "snd", "SND",
+	"maud", "MAUD",	"voc", "VOC", "vwe", "VWE", "w64", "W64", "wav", "WAV",
+#ifdef HAVE_COREAUDIO
+	"aac", "AAC", "adts", "ADTS",
+	"ac3", "AC3", "amr", "AMR",
+	"mpa", "MPA", "mpeg", "MPEG",
+	"mp1", "MP1", "mp2", "MP2",
+	"mp3", "MP3", "mp4", "MP4",
+	"m4a", "M4A", "sd2", "SD2", 	// libsndfile supports sd2 also, but the resource fork is required to open.
+#endif // HAVE_COREAUDIO
+};
+
+int
+WavesImportDialog::run_import ()
+{
+	std::vector<std::string> audiofile_types (__audiofile_types,
+											 __audiofile_types + sizeof (__audiofile_types)/sizeof(__audiofile_types[0]));
+	for (;;) {
+		_files_to_import = ARDOUR::open_file_dialog (audiofile_types);
+		if (_files_to_import.empty ()) {
+			return Gtk::RESPONSE_CANCEL;
+		}
+
+		bool same_size;
+		bool src_needed;
+		bool selection_includes_multichannel;
+		bool selection_can_be_embedded_with_links = check_link_status ();
+		if (check_info (same_size, src_needed, selection_includes_multichannel)) {
+				WavesMessageDialog msg ("", string_compose (_("One or more of the selected files\ncannot be used by %1"), PROGRAM_NAME));
+				msg.run ();
+		} else {
+			break;
+		}
+	}
+	return run ();
+}
+
+bool
+WavesImportDialog::check_link_status ()
+{
+#ifdef PLATFORM_WINDOWS
+	return false;
+#else
+	std::string tmpdir(Glib::build_filename (_session->session_directory().sound_path(), "linktest"));
+	bool ret = false;
+
+	if (mkdir (tmpdir.c_str(), 0744)) {
+		if (errno != EEXIST) {
+			return false;
+		}
+	}
+
+	for (vector<string>::const_iterator i = _files_to_import.begin(); i != _files_to_import.end(); ++i) {
+
+		char tmpc[PATH_MAX+1];
+
+		snprintf (tmpc, sizeof(tmpc), "%s/%s", tmpdir.c_str(), Glib::path_get_basename (*i).c_str());
+
+		/* can we link ? */
+
+		if (link ((*i).c_str(), tmpc)) {
+			goto out;
+		}
+
+		::g_unlink (tmpc);
+	}
+
+	ret = true;
+
+  out:
+	rmdir (tmpdir.c_str());
+	return ret;
+#endif
+}
+
+bool
+WavesImportDialog::check_info (bool& same_size, bool& src_needed, bool& multichannel)
+{
+	ARDOUR::SoundFileInfo info;
+	framepos_t sz = 0;
+	bool err = false;
+	std::string errmsg;
+
+	same_size = true;
+	src_needed = false;
+	multichannel = false;
+
+	for (std::vector<std::string>::const_iterator i = _files_to_import.begin(); i != _files_to_import.end(); ++i) {
+
+		if (ARDOUR::AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
+			if (info.channels > 1) {
+				multichannel = true;
+			}
+			if (sz == 0) {
+				sz = info.length;
+			} else {
+				if (sz != info.length) {
+					same_size = false;
+				}
+			}
+
+			if (info.samplerate != _session->frame_rate()) {
+				src_needed = true;
+			}
+		} else if (ARDOUR::SMFSource::valid_midi_file (*i)) {
+			Evoral::SMF reader;
+			reader.open(*i);
+			if (reader.num_tracks() > 1) {
+				multichannel = true; // "channel" == track here...
+			}
+
+			/* XXX we need err = true handling here in case
+			   we can't check the file
+			*/
+
+		} else {
+			err = true;
+		}
+	}
+
+	return err;
+}
+
 void
 WavesImportDialog::_on_cancel_button (WavesButton*)
 {
@@ -91,7 +226,6 @@ WavesImportDialog::_on_import_button (WavesButton*)
 {
 	_done = true;
 	_status = Gtk::RESPONSE_OK;
-	ARDOUR::Session* session = ARDOUR_UI::instance()->the_session();
 	framepos_t where;
 
 	switch (_insert_at_dropdown.get_item_data_u (_insert_at_dropdown.get_current_item ())) {
@@ -102,11 +236,11 @@ WavesImportDialog::_on_import_button (WavesButton*)
 		where = -1;
 		break;
 	case Playhead:
-		where = session->transport_frame();
+		where = _session->transport_frame();
 		break;
 	case Start:
 	default:
-		where = session->current_start_frame();
+		where = _session->current_start_frame();
 		break;
 	}
 
