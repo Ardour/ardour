@@ -95,8 +95,11 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 void
 Editor::external_audio_dialog ()
 {
-	WavesImportDialog import_dialog;
-	import_dialog.run ();
+	WavesImportDialog import_dialog (_session);
+	int result = import_dialog.run_import ();
+
+	std::cout << "***************** import_dialog.run () returned with " << result << std::endl;
+
 	vector<string> paths;
 	uint32_t audio_track_cnt;
 	uint32_t midi_track_cnt;

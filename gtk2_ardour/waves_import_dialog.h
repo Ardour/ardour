@@ -38,7 +38,12 @@
 class WavesImportDialog : public WavesDialog
 {
 public:
-	WavesImportDialog ();
+	WavesImportDialog (ARDOUR::Session*);
+	int run_import ();
+
+protected:
+	bool check_link_status ();
+	bool check_info (bool&, bool&, bool&);
 
 private:
 	enum Impord {
@@ -71,11 +76,13 @@ private:
 	
     int _status;
     bool _done;
+	std::vector<std::string> _files_to_import;
 
 	WavesDropdown& _add_as_dropdown;
 	WavesDropdown& _insert_at_dropdown; 
 	WavesDropdown& _mapping_dropdown;
 	WavesDropdown& _quality_dropdown;
+	Gtk::Container& _copy_to_session_home;
 	WavesButton& _copy_to_session_button;
 };
 
