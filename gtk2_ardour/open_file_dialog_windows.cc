@@ -97,7 +97,7 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 }
 
 std::vector<std::string>
-ARDOUR::open_file_dialog (std::vector<std::string> extentions, std::string initial_path, std::string title)
+ARDOUR::open_file_dialog (std::vector<std::string> extensions, std::string initial_path, std::string title)
 {
 	TCHAR szFilePathName[_MAX_PATH] = "";
 	OPENFILENAME ofn = {0};
@@ -109,8 +109,8 @@ ARDOUR::open_file_dialog (std::vector<std::string> extentions, std::string initi
 
 	// Create filter for required file types
 	std::string filter;
-	for (int i = 0; i < extentions.size(); ++i) {
-		filter += "*."+extentions[i]+";";
+	for (int i = 0; i < extensions.size(); ++i) {
+		filter += "*."+extensions[i]+";";
 	}
 
 	char c_filter[2+filter.size()+2];
