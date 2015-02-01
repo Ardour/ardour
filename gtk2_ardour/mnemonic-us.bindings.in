@@ -99,7 +99,7 @@ This mode provides many different operations on both regions and control points,
 
 @trans|Transport/ToggleRoll|space|toggle roll
 @epp|Editor/PlaySelection|<@SECONDARY@>space|play edit range
-@epp|Editor/play-from-edit-point-and-return|<@LEVEL4@>space|play from EP \& return
+@epp|Editor/play-from-edit-point-and-return|<@PRIMARY@><@TERTIARY@>space|play from EP \& return
 @trans|Transport/ToggleRollMaybe|<@PRIMARY@><@SECONDARY@>space|stop (keep loop/range play)
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
@@ -143,8 +143,8 @@ This mode provides many different operations on both regions and control points,
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
 @select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
-@rop|Region/export-region|<@PRIMARY@><@LEVEL4@>e|export selected region(s)
-@sess|Main/ExportAudio|<@LEVEL4@>e|export session
+@rop|Region/export-region|<@PRIMARY@><@SECONDARY@>e|export selected region(s)
+@sess|Main/ExportAudio|<@SECONDARY@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|<@TERTIARY@>e|toggle editor window mixer
 @wvis|Common/goto-editor|<@SECONDARY@>e|toggle editor window
@@ -179,8 +179,8 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-objects|<@PRIMARY@>a|select all objects
 @aep|Region/align-regions-end|<@SECONDARY@>a|align end(s)
 @aep|Region/align-regions-sync|<@TERTIARY@>a|align sync points
-@aep|Region/align-regions-start|<@PRIMARY@><@LEVEL4@>a|align start(s)
-@aep|Region/align-regions-start-relative|<@LEVEL4@>a|align start(s) relative
+@aep|Region/align-regions-start|<@PRIMARY@><@SECONDARY@>a|align start(s)
+@aep|Region/align-regions-start-relative|<@PRIMARY@><@TERTIARY@>a|align start(s) relative
 @rop|Region/split-region|s|split
 @sess|Common/Save|<@PRIMARY@>s|save session
 @sess|Main/Snapshot|<@PRIMARY@><@TERTIARY@>s|snapshot session
@@ -238,20 +238,20 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>downarrow|move selected tracks down
 
 @movp|Editor/playhead-to-previous-region-boundary|leftarrow|to previous region edge
-@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>leftarrow|to previous edge \linebreak[4] (ignoring selection)
+;@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>leftarrow|to previous edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>leftarrow|to previous region sync
 @movp|Editor/tab-to-transient-backwards|<@PRIMARY@>leftarrow|to previous transient
 @movp|Editor/nudge-playhead-backward|<@SECONDARY@>leftarrow|nudge backward
-@movp|Editor/playhead-backward-to-grid|<@TERTIARY@><@LEVEL4@>leftarrow|to previous grid point
+@movp|Editor/playhead-backward-to-grid|<@SECONDARY@><@TERTIARY@>leftarrow|to previous grid point
 @trans|Transport/Rewind|<@TERTIARY@>leftarrow|rewind
 @markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>leftarrow|move to prev region edge
 
 @movp|Editor/playhead-to-next-region-boundary|rightarrow|to next region edge
-@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>rightarrow|to next region edge \linebreak[4] (ignoring selection)
+;@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>rightarrow|to next region edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>rightarrow|to next region sync
 @movp|Editor/tab-to-transient-forwards|<@PRIMARY@>rightarrow|to next transient
 @movp|Editor/nudge-playhead-forward|<@SECONDARY@>rightarrow|nudge forwards
-@movp|Editor/playhead-forward-to-grid|<@TERTIARY@><@LEVEL4@>rightarrow|to next grid point
+@movp|Editor/playhead-forward-to-grid|<@SECONDARY@><@TERTIARY@>rightarrow|to next grid point
 @trans|Transport/Forward|<@TERTIARY@>rightarrow|fast forward
 @markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>rightarrow|move to next region edge
 
