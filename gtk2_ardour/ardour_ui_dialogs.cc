@@ -52,7 +52,6 @@
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "splash.h"
-#include "sfdb_ui.h"
 #include "theme_manager.h"
 #include "time_info_box.h"
 

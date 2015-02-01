@@ -1251,8 +1251,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int  check_whether_and_how_to_import(std::string, bool all_or_nothing = true);
 	bool check_multichannel_status (const std::vector<std::string>& paths);
 
-	SoundFileOmega* sfbrowser;
-
 	void bring_in_external_audio (Editing::ImportMode mode,  framepos_t& pos);
 
 	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos, bool copy);

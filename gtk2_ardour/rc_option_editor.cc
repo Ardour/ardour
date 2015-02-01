@@ -52,7 +52,6 @@
 #include "rc_option_editor.h"
 #include "utils.h"
 #include "midi_port_dialog.h"
-#include "sfdb_ui.h"
 #include "keyboard.h"
 #include "i18n.h"
 
@@ -227,11 +226,13 @@ private:
 
 	void click_browse_clicked ()
 	{
+		/* TRACKs does not use it.
 		SoundFileChooser sfdb (_("Choose Click"));
 
 		if (sfdb.run () == RESPONSE_OK) {
 			click_chosen (sfdb.get_filename());
 		}
+		*/
 	}
 
 	void click_chosen (string const & path)

@@ -120,7 +120,6 @@
 #include "rgb_macros.h"
 #include "rhythm_ferret.h"
 #include "selection.h"
-#include "sfdb_ui.h"
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "master_bus_ui.h"
@@ -426,8 +425,6 @@ Editor::Editor ()
 	within_track_canvas = false;
 
 	scrubbing_direction = 0;
-
-	sfbrowser = 0;
 
 	zoom_focus = ZoomFocusLeft;
 	_edit_point = EditAtMouse;
@@ -1437,10 +1434,6 @@ Editor::set_session (Session *t)
 
 	if (analysis_window) {
 		analysis_window->set_session (_session);
-	}
-
-	if (sfbrowser) {
-		sfbrowser->set_session (_session);
 	}
 
 	compute_fixed_ruler_scale ();

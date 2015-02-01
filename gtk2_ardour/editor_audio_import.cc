@@ -48,7 +48,6 @@
 #include "file_sample_rate_mismatch_dialog.h"
 #include "ardour_ui.h"
 #include "editor.h"
-#include "sfdb_ui.h"
 #include "waves_import_dialog.h"
 #include "editing.h"
 #include "audio_time_axis.h"
@@ -74,18 +73,6 @@ using std::string;
 void
 Editor::add_external_audio_action (ImportMode mode_hint)
 {
-	if (_session == 0) {
-		WavesMessageDialog msg ("", _("You can't import or embed an audiofile until you have a session loaded."));
-		msg.run ();
-		return;
-	}
-
-	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (_("Add Existing Media"), _session, 0, true, mode_hint);
-	} else {
-		sfbrowser->set_mode (mode_hint);
-	}
-
 	external_audio_dialog ();
 }
 
@@ -125,15 +112,7 @@ Editor::external_audio_dialog ()
 	}
 
 	WavesImportDialog import_dialog (_session, audio_track_cnt);
-	int result = import_dialog.run_import ();
-
-	if (sfbrowser == 0) {
-		sfbrowser = new SoundFileOmega (_("Add Existing Media"), _session, audio_track_cnt, midi_track_cnt, true);
-	} else {
-		sfbrowser->reset (audio_track_cnt, midi_track_cnt);
-	}
-
-	sfbrowser->show_all ();
+	import_dialog.run_import ();
 }
 
 void
