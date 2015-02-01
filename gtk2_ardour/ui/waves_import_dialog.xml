@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Dialog title="Tracks Live - Add Existing Media" CACHEIT="false">
+<Dialog title="Tracks Live - Add Existing Media"
+        CACHEIT="false"
+        ImportAsTrack="as new tracks"
+        ImportToTrack="to selected tracks"
+        ImportAsRegion="to region list"
+        ImportAsTapeTrack="as new tape tracks"
+        OneTrackPerFile="one track per file"
+        OneTrackPerChannel="one track per channel"
+        SequenceFiles="sequence files"
+        AllFilesInOneTrack="all files in one track"
+        MergeFiles="merge files"
+        OneRegionPerFile="one region per file"
+        OneRegionPerChannel="one region per channel"
+        AllFilesInOneRegion="all files in one region">
   <style name="generic_control"
          winfont ="Arial Bold 10"
          macfont ="Helvetica Bold 10"
@@ -47,14 +60,10 @@
               <VBox width="5"/>
               <Label style="generic_dropdown_menu"/>
             </HBox>
-            <DropdownMenu style="generic_dropdown_menu">
-              <DropdownItem style="generic_dropdown_menu" title="new tracks" data="1"/>
-              <DropdownItem style="generic_dropdown_menu" title="region list" data="2"/>
-              <DropdownItem style="generic_dropdown_menu" title="new tape tracks" data="3"/>
-            </DropdownMenu>
+            <DropdownMenu style="generic_dropdown_menu"/>
           </Dropdown>
         </HBox>
-        <HBox spacing="5">
+        <HBox id="insert_at_home" spacing="5">
           <Label style="generic_label"
                  text="Insert at"/>
           <Dropdown id="insert_at_dropdown"
@@ -82,13 +91,15 @@
               <Label style="generic_dropdown_menu"/>
             </HBox>
             <DropdownMenu style="generic_dropdown_menu">
-              <DropdownItem style="generic_dropdown_menu" title="new tracks" data="0"/>
-              <DropdownItem style="generic_dropdown_menu" title="region list" data="2"/>
-              <DropdownItem style="generic_dropdown_menu" title="new tape tracks" data="3"/>
+              <DropdownItem style="generic_dropdown_menu" title="one track per file" data="0"/>
+              <DropdownItem style="generic_dropdown_menu" title="one track per channel" data="1"/>
+              <DropdownItem style="generic_dropdown_menu" title="sequence files" data="3"/>
+              <DropdownItem style="generic_dropdown_menu" title="all files in one region" data="6"/>
             </DropdownMenu>
           </Dropdown>
         </HBox>
-        <HBox spacing="5">
+        <HBox id="quality_home" 
+              spacing="5">
           <Label style="generic_label"
                  text="Conversion quality"/>
           <Dropdown id="quality_dropdown"
@@ -111,13 +122,13 @@
           <Label style="generic_label"
                  text="Copy files to session"/>
           <HBox style="generic_dropdown">
-          <Iconbutton id="copy_to_session_button"
-                      state="active"
-                      width="20"
-                      height="20"
-                      normalicon="waves_darker_check_box"
-                      activeicon="waves_darker_check_box_active"
-                      toggleable="true"/>
+            <Iconbutton id="copy_to_session_button"
+                        state="active"
+                        width="20"
+                        height="20"
+                        normalicon="waves_darker_check_box"
+                        activeicon="waves_darker_check_box_active"
+                        toggleable="true"/>
           </HBox>
         </HBox>
       </VBox>

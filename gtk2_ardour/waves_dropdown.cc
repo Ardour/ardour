@@ -38,6 +38,7 @@ void
 WavesDropdown::clear_items ()
 {
     _menu.items().clear ();
+	_current_item_number = -1;
 }
 
 void*

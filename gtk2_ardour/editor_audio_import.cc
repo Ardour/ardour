@@ -74,9 +74,6 @@ using std::string;
 void
 Editor::add_external_audio_action (ImportMode mode_hint)
 {
-	std::cout << "**********************************************" << std::endl;
-	std::cout << "Editor::add_external_audio_action" << std::endl;
-	std::cout << "**********************************************" << std::endl;
 	if (_session == 0) {
 		WavesMessageDialog msg ("", _("You can't import or embed an audiofile until you have a session loaded."));
 		msg.run ();
@@ -95,11 +92,6 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 void
 Editor::external_audio_dialog ()
 {
-	WavesImportDialog import_dialog (_session);
-	int result = import_dialog.run_import ();
-
-	std::cout << "***************** import_dialog.run () returned with " << result << std::endl;
-
 	vector<string> paths;
 	uint32_t audio_track_cnt;
 	uint32_t midi_track_cnt;
@@ -131,6 +123,9 @@ Editor::external_audio_dialog ()
 			}
 		}
 	}
+
+	WavesImportDialog import_dialog (_session, audio_track_cnt);
+	int result = import_dialog.run_import ();
 
 	if (sfbrowser == 0) {
 		sfbrowser = new SoundFileOmega (_("Add Existing Media"), _session, audio_track_cnt, midi_track_cnt, true);

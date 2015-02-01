@@ -33,7 +33,7 @@ class WavesDropdown : public WavesIconButton
     Gtk::Menu& get_menu () { return _menu; }
     void clear_items ();
     
-	int get_current_item () { return _current_item_number; }
+	int get_current_item () const { return _current_item_number; }
 	void set_current_item (int current_item_number);
     
     void* get_item_data_pv (size_t);
