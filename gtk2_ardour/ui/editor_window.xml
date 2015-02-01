@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
                              
 <Window timebarheight="17"
-        rulerheight="63"
-        rulerdivideheight="31"
+        rulerheight="64"
+        rulerdivideheight="32"
         skipbarheight="17"
-        markerheight="18" >
+        markerheight="17" >
   <style name="topbar_dropdown"
          bgnormal="#0C474F"
          fgdisabled="#335b63"
@@ -458,94 +458,97 @@
                     table.xfill="false"
                     table.yfill="false">
                 <VBox id="timebars_vbox">
-                  <EventBox height="1"
-                            bgnormal="#424242"/>
-                  <EventBox bgnormal="#6C6C6C">
-                    <HBox id="marker_lane_hbox" noshowall="true">
-                      <Icon source="marker_label"/>
-                      <EventBox width="1"
-                                bgnormal="#424242"/>
-                      <Dropdown id="midi_input_dropdown"
-                                style="generic_dropdown"
-                                width="65"
-                                height="16"
-                                normalicon="marker_midi_dropdown"
-                                activeicon="marker_midi_dropdown_active">
-                        <HBox>
-                          <!--
+                  <VBox id="marker_lane_hbox">
+                    <EventBox height="1"
+                              bgnormal="#424242"/>
+                    <EventBox bgnormal="#6C6C6C">
+                      <HBox noshowall="true">
+                        <Icon source="marker_label"/>
+                        <EventBox width="1"
+                                  bgnormal="#424242"/>
+                        <Dropdown id="midi_input_dropdown"
+                                  style="generic_dropdown"
+                                  width="65"
+                                  height="16"
+                                  normalicon="marker_midi_dropdown"
+                                  activeicon="marker_midi_dropdown_active">
+                          <HBox>
+                            <!--
                           The following three icons should be shown/hidden according to the
                           availability/activity of the MIDI inputs
                           -->
-                          <Icon id="midi_input_enabled_indicator"
-                                source="midi_input_enabled_indicator"
-                                noshowall="true"/>
-                          <Icon id="midi_input_disabled_indicator"
-                                source="midi_input_disabled_indicator"
-                                visible="false"
-                                noshowall="true"/>
-                          <Icon id="midi_input_activity_indicator"
-                                source="midi_input_activity_indicator"
-                                visible="false"
-                                noshowall="true"/>
-                        </HBox>
-                        <DropdownMenu style="generic_dropdown_menu"/>
-                      </Dropdown>
-                      <EventBox width="1"
-                                bgnormal="#424242"/>
-                      <Dropdown id="midi_output_dropdown"
-                                style="generic_dropdown"
-                                width="65"
-                                height="16"
-                                normalicon="marker_midi_dropdown"
-                                activeicon="marker_midi_dropdown_active">
-                        <HBox>
-                          <!--
+                            <Icon id="midi_input_enabled_indicator"
+                                  source="midi_input_enabled_indicator"
+                                  noshowall="true"/>
+                            <Icon id="midi_input_disabled_indicator"
+                                  source="midi_input_disabled_indicator"
+                                  visible="false"
+                                  noshowall="true"/>
+                            <Icon id="midi_input_activity_indicator"
+                                  source="midi_input_activity_indicator"
+                                  visible="false"
+                                  noshowall="true"/>
+                          </HBox>
+                          <DropdownMenu style="generic_dropdown_menu"/>
+                        </Dropdown>
+                        <EventBox width="1"
+                                  bgnormal="#424242"/>
+                        <Dropdown id="midi_output_dropdown"
+                                  style="generic_dropdown"
+                                  width="65"
+                                  height="16"
+                                  normalicon="marker_midi_dropdown"
+                                  activeicon="marker_midi_dropdown_active">
+                          <HBox>
+                            <!--
                           The following three icons should be shown/hidden according to the
                           availability/activity of the MIDI outputs
                           -->
-                          <Icon id="midi_output_enabled_indicator"
-                                source="midi_output_enabled_indicator"
-                                noshowall="true"/>
-                          <Icon id="midi_output_disabled_indicator"
-                                source="midi_output_disabled_indicator"
-                                visible="false"
-                                noshowall="true"/>
-                          <Icon id="midi_output_activity_indicator"
-                                source="midi_output_activity_indicator"
-                                visible="false"
-                                noshowall="true"/>
-                        </HBox>
-                        <DropdownMenu style="generic_dropdown_menu"/>
-                      </Dropdown>
-                      <EventBox width="1"
-                                bgnormal="#424242"/>
-                      <iconbutton id="add_marker_button"
-                                  width="41"
-                                  height="16"
-                                  normalicon="add_marker_button"
-                                  activeicon="add_marker_button_active"
-                                  tooltip="Add Marker"/>
-                      <EventBox width="1"
-                                bgnormal="#424242"/>
-                    </HBox>
-                  </EventBox>
-                  <EventBox height="1"
-                            bgnormal="#424242"/>
-                  <EventBox id="skip_button_home"
-                            bgnormal="#6C6C6C">
-                    <HBox>
-                      <icon source="skip_lane_label"/>
-                      <EventBox width="1"
-                                bgnormal="#424242"/>
-                      <iconbutton id="skip_button"
-                                  width="41"
-                                  height="16"
-                                  normalicon="skip_off"
-                                  activeicon="skip_on"/>
-                      <EventBox width="1"
-                                bgnormal="#424242"/>
-                    </HBox>
-                  </EventBox>
+                            <Icon id="midi_output_enabled_indicator"
+                                  source="midi_output_enabled_indicator"
+                                  noshowall="true"/>
+                            <Icon id="midi_output_disabled_indicator"
+                                  source="midi_output_disabled_indicator"
+                                  visible="false"
+                                  noshowall="true"/>
+                            <Icon id="midi_output_activity_indicator"
+                                  source="midi_output_activity_indicator"
+                                  visible="false"
+                                  noshowall="true"/>
+                          </HBox>
+                          <DropdownMenu style="generic_dropdown_menu"/>
+                        </Dropdown>
+                        <EventBox width="1"
+                                  bgnormal="#424242"/>
+                        <iconbutton id="add_marker_button"
+                                    width="41"
+                                    height="16"
+                                    normalicon="add_marker_button"
+                                    activeicon="add_marker_button_active"
+                                    tooltip="Add Marker"/>
+                        <EventBox width="1"
+                                  bgnormal="#424242"/>
+                      </HBox>
+                    </EventBox>
+                  </VBox>
+                  <VBox id="skip_playback_lane">
+                    <EventBox height="1"
+                              bgnormal="#424242"/>
+                    <EventBox bgnormal="#6C6C6C">
+                      <HBox>
+                        <icon source="skip_lane_label"/>
+                        <EventBox width="1"
+                                  bgnormal="#424242"/>
+                        <iconbutton id="skip_button"
+                                    width="41"
+                                    height="16"
+                                    normalicon="skip_off"
+                                    activeicon="skip_on"/>
+                        <EventBox width="1"
+                                  bgnormal="#424242"/>
+                      </HBox>
+                    </EventBox>
+                  </VBox>
                   <EventBox height="1"
                             bgnormal="#424242"/>
                   <HBox id="global_tracks_hbox"
