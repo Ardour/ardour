@@ -248,6 +248,7 @@ private:
 	
 	void click_emphasis_browse_clicked ()
 	{
+		/* TRACKs does not use it.
 		SoundFileChooser sfdb (_("Choose Click Emphasis"));
 
 		sfdb.show_all ();
@@ -256,6 +257,7 @@ private:
 		if (sfdb.run () == RESPONSE_OK) {
 			click_emphasis_chosen (sfdb.get_filename());
 		}
+		*/
 	}
 
 	void click_emphasis_chosen (string const & path)
