@@ -390,7 +390,7 @@ Editor::update_ruler_visibility ()
 
 	double pos = 0.0;
 	double old_unit_pos;
-	Gtk::Container& skip_playback_lane = get_container ("skip_button_home");
+	Gtk::Container& skip_playback_lane = get_container ("skip_playback_lane");
 
         if (ruler_marker_action->get_active()) {
                 old_unit_pos = marker_group->position().y;
