@@ -144,7 +144,7 @@ This mode provides many different operations on both regions and control points,
 
 @select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
 @rop|Region/export-region|<@PRIMARY@><@LEVEL4@>e|export selected region(s)
-@sess|Main/ExportSession|<@LEVEL4@>e|export session
+@sess|Main/ExportAudio|<@LEVEL4@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|<@TERTIARY@>e|toggle editor window mixer
 @wvis|Common/goto-editor|<@SECONDARY@>e|toggle editor window
