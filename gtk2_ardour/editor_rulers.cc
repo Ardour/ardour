@@ -263,6 +263,7 @@ Editor::store_ruler_visibility ()
 	node->add_property (X_("tempo"), ruler_tempo_action->get_active() ? "yes": "no");
 	node->add_property (X_("meter"), ruler_meter_action->get_active() ? "yes": "no");
 	node->add_property (X_("marker"), ruler_marker_action->get_active() ? "yes": "no");
+	node->add_property (X_("skip"), ruler_skip_action->get_active() ? "yes": "no");
 	node->add_property (X_("rangemarker"), ruler_range_action->get_active() ? "yes": "no");
 	node->add_property (X_("transportmarker"), ruler_loop_punch_action->get_active() ? "yes": "no");
 	node->add_property (X_("cdmarker"), ruler_cd_marker_action->get_active() ? "yes": "no");
@@ -330,6 +331,13 @@ Editor::restore_ruler_visibility ()
 				ruler_marker_action->set_active (false);
 			}
 		}
+		if ((prop = node->property ("skip")) != 0) {
+			if (string_is_affirmative (prop->value())) {
+				ruler_skip_action->set_active (true);
+			} else {
+				ruler_skip_action->set_active (false);
+			}
+		}
 		if ((prop = node->property ("rangemarker")) != 0) {
 			if (string_is_affirmative (prop->value())) {
 				ruler_range_action->set_active (true);
@@ -391,17 +399,18 @@ Editor::update_ruler_visibility ()
 	double pos = 0.0;
 	double old_unit_pos;
 	Gtk::Container& skip_playback_lane = get_container ("skip_playback_lane");
+	Gtk::Container& marker_lane = get_container ("marker_lane");
 
         if (ruler_marker_action->get_active()) {
                 old_unit_pos = marker_group->position().y;
                 if (pos != old_unit_pos) {
                         marker_group->move (ArdourCanvas::Duple (0.0, pos - old_unit_pos));
                 }
-                marker_lane_hbox.show ();
+                marker_lane.show ();
                 marker_group->show();
                 pos += marker_height; // marker_bar->y0() - marker_bar->y1();
         } else {
-                marker_lane_hbox.hide ();
+                marker_lane.hide ();
                 marker_group->hide();
         }
 

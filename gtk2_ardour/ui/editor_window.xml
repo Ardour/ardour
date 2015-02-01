@@ -458,7 +458,8 @@
                     table.xfill="false"
                     table.yfill="false">
                 <VBox id="timebars_vbox">
-                  <VBox id="marker_lane_hbox">
+                  <VBox id="marker_lane"
+                        noshowall="true">
                     <EventBox height="1"
                               bgnormal="#424242"/>
                     <EventBox bgnormal="#6C6C6C">
@@ -531,7 +532,8 @@
                       </HBox>
                     </EventBox>
                   </VBox>
-                  <VBox id="skip_playback_lane">
+                    <VBox id="skip_playback_lane"
+                          noshowall="true">
                     <EventBox height="1"
                               bgnormal="#424242"/>
                     <EventBox bgnormal="#6C6C6C">
