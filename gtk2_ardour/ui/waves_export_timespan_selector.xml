@@ -44,7 +44,7 @@
       <DropdownMenu style="generic_dropdown_menu">
         <Dropdownitem style="generic_dropdown_menu" title="Timecode" data="0"/>
         <Dropdownitem style="generic_dropdown_menu" title="Minutes:Seconds" data="1"/>
-        <Dropdownitem style="generic_dropdown_menu" title="Bars:Beats" data="2"/>
+        <Dropdownitem style="generic_dropdown_menu" title="Samples" data="2"/>
       </DropdownMenu>
     </Dropdown>
     <Button id="select_all_button"

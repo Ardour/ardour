@@ -119,8 +119,8 @@ WavesExportTimespanSelector::set_time_format_from_state ()
 	case ExportProfileManager::MinSec:
 		itemdata = MinSec;
 		break;
-	case ExportProfileManager::BBT:
-		itemdata = BBT; 
+	case ExportProfileManager::Frames:
+		itemdata = Samples;
 		break;
 	}
 	
@@ -151,8 +151,8 @@ WavesExportTimespanSelector::on_time_format_changed (WavesDropdown*, int format_
 	case MinSec:
 		state->time_format = ExportProfileManager::MinSec;
 		break;
-	case BBT:
-		state->time_format = ExportProfileManager::BBT;
+    case Samples:
+		state->time_format = ExportProfileManager::Frames;
 		break;
 	}
 

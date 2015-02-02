@@ -73,7 +73,7 @@ class WavesExportTimespanSelector : public Gtk::VBox, public WavesUI, public ARD
 	enum TimeFormatId {
 		Timecode=0,
 		MinSec=1,
-		BBT=2
+		Samples=2
 	};
 
   protected:
