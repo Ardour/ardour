@@ -334,6 +334,7 @@ WavesButton::on_button_press_event (GdkEventButton *ev)
 
 	if (ev->type == GDK_2BUTTON_PRESS) {
 		signal_double_clicked (this);
+        _pushed = false;
 	} else {
 		_pushed = true;
 		queue_draw ();
