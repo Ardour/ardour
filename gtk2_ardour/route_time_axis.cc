@@ -1373,6 +1373,31 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 	return;
 }
 
+void
+RouteTimeAxisView::get_selectable_regionviews (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results)
+{
+    double speed = 1.0;
+    
+    if (track() != 0) {
+        speed = track()->speed();
+    }
+    
+    framepos_t const start_adjusted = session_frame_to_track_frame(start, speed);
+    framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
+    
+    if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
+        _view->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+    }
+}
+
+void
+RouteTimeAxisView::get_inverted_selectable_regionviews (Selection& sel, list<Selectable*>& results)
+{
+    if (_view) {
+        _view->get_inverted_selectables (sel, results);
+    }
+}
+
 RouteGroup*
 RouteTimeAxisView::route_group () const
 {

@@ -1597,6 +1597,48 @@ Editor::select_all_objects (Selection::Operation op)
 }
 
 void
+Editor::select_all_regions ()
+{
+    list<Selectable *> touched;
+    TrackViewList ts  = track_views;
+    
+    begin_reversible_command (_("select all"));
+    
+    for (TrackViewList::iterator iter = ts.begin(); iter != ts.end(); ++iter) {
+        if ((*iter)->hidden()) {
+            continue;
+        }
+        
+        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
+        rtv->get_selectable_regionviews (0, max_framepos, 0, DBL_MAX, touched);
+    }
+    selection->set (touched);
+
+    commit_reversible_command ();
+}
+
+void
+Editor::invert_region_selection ()
+{
+    list<Selectable *> touched;
+    TrackViewList ts  = track_views;
+    
+    begin_reversible_command (_("invert selection"));
+    
+    for (TrackViewList::iterator iter = ts.begin(); iter != ts.end(); ++iter) {
+        if ((*iter)->hidden()) {
+            continue;
+        }
+        
+        RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*iter);
+        rtv->get_inverted_selectable_regionviews (*selection, touched);
+    }
+    selection->set (touched);
+    
+    commit_reversible_command ();
+}
+
+void
 Editor::invert_selection_in_track ()
 {
 	list<Selectable *> touched;

@@ -83,7 +83,7 @@
       <menuitem action='split-region'/>
       <menuitem action='split-on-playhead'/>
       <menu action="SelectMenu">	   
-        <menuitem action='deselect-all'/>
+        <menuitem action='select-all'/>
         <menuitem action='invert-selection'/>
       </menu>	   
       <separator/>

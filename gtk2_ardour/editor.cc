@@ -3829,7 +3829,8 @@ Editor::set_stationary_playhead (bool yn)
 	}
 }
 
-void Editor::toggle_enable_group_edit ()
+void
+Editor::toggle_enable_group_edit ()
 {
     RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-enable-group-edit"));
     if (act) {

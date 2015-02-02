@@ -263,6 +263,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void play_with_preroll ();
 	void select_all_in_track (Selection::Operation op);
 	void select_all_objects (Selection::Operation op);
+    void select_all_regions ();
+    void invert_region_selection ();
 	void invert_selection_in_track ();
 	void invert_selection ();
 	void deselect_all ();

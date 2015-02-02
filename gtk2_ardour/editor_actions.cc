@@ -197,8 +197,8 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "select-all-objects", _("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set));
 	reg_sens (editor_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(*this, &Editor::select_all_tracks));
-	reg_sens (editor_actions, "deselect-all", _("Select All/Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
-	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
+	reg_sens (editor_actions, "select-all", _("Select All"), sigc::mem_fun(*this, &Editor::select_all_regions ));
+	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection ));
     toggle_reg_sens (editor_actions, "toggle-enable-group-edit", _("Enable Group Edit"), sigc::mem_fun (*this, &Editor::toggle_enable_group_edit));
 
 	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));

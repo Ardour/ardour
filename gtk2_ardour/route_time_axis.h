@@ -97,6 +97,10 @@ public:
 	void set_selected_regionviews (RegionSelection&);
 	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
+    
+    void get_selectable_regionviews (framepos_t start, framepos_t end, double top, double bot, std::list<Selectable*>& results);
+    void get_inverted_selectable_regionviews (Selection& sel, std::list<Selectable*>& results);
+
 	void set_layer_display (LayerDisplay d, bool apply_to_selection = false);
 	LayerDisplay layer_display () const;
 
