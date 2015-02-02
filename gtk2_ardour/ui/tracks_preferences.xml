@@ -27,7 +27,6 @@
   <style name="preferences_tab_dropdown"
          style="generic_dropdown"
          bgdisabled="#373737"
-         width="216"
          normalicon="preference_general_preferences_dropdown"
          activeicon="preference_general_preferences_dropdown_active"/>
   <style name="generic_dropdown_menu"
