@@ -287,6 +287,31 @@
 		95D1C5211A78ED3A00BE28DB /* waves_edit_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D1C5201A78ED3A00BE28DB /* waves_edit_dialog.xml */; };
 		95D71D551A4C66F600DE5B3B /* waves_track_color_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D71D541A4C66F600DE5B3B /* waves_track_color_dialog.cc */; };
 		95D71D581A4C69AE00DE5B3B /* waves_track_color_dialog.logic.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D71D571A4C69AE00DE5B3B /* waves_track_color_dialog.logic.cc */; };
+		95D795E81A7BB40C00120A4F /* marker_inspector_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795DB1A7BB40C00120A4F /* marker_inspector_dialog.xml */; };
+		95D795E91A7BB40C00120A4F /* progressing_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795DC1A7BB40C00120A4F /* progressing_dialog.xml */; };
+		95D795EA1A7BB40C00120A4F /* waves_export_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795DD1A7BB40C00120A4F /* waves_export_dialog.xml */; };
+		95D795EB1A7BB40C00120A4F /* waves_export_file_notebook_page.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795DE1A7BB40C00120A4F /* waves_export_file_notebook_page.xml */; };
+		95D795EC1A7BB40C00120A4F /* waves_export_file_notebook.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795DF1A7BB40C00120A4F /* waves_export_file_notebook.xml */; };
+		95D795ED1A7BB40C00120A4F /* waves_export_filename_selector.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E01A7BB40C00120A4F /* waves_export_filename_selector.xml */; };
+		95D795EE1A7BB40C00120A4F /* waves_export_format_selector.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E11A7BB40C00120A4F /* waves_export_format_selector.xml */; };
+		95D795EF1A7BB40C00120A4F /* waves_export_preset_selector.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E21A7BB40C00120A4F /* waves_export_preset_selector.xml */; };
+		95D795F01A7BB40C00120A4F /* waves_export_timespan_selector.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E31A7BB40C00120A4F /* waves_export_timespan_selector.xml */; };
+		95D795F11A7BB40C00120A4F /* waves_port_export_channel_selector.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E41A7BB40C00120A4F /* waves_port_export_channel_selector.xml */; };
+		95D795F21A7BB40C00120A4F /* waves_region_export_channel_selector.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E51A7BB40C00120A4F /* waves_region_export_channel_selector.xml */; };
+		95D795F31A7BB40C00120A4F /* waves_track_color_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E61A7BB40C00120A4F /* waves_track_color_dialog.xml */; };
+		95D795F41A7BB40C00120A4F /* waves_track_export_channel_selector.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795E71A7BB40C00120A4F /* waves_track_export_channel_selector.xml */; };
+		95D7960B1A7BB9E000120A4F /* floating_text_entry.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D795FF1A7BB9E000120A4F /* floating_text_entry.cc */; };
+		95D7960C1A7BB9E000120A4F /* marker_inspector_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796001A7BB9E000120A4F /* marker_inspector_dialog.cc */; };
+		95D7960D1A7BB9E000120A4F /* marker_inspector_dialog.logic.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796011A7BB9E000120A4F /* marker_inspector_dialog.logic.cc */; };
+		95D7960E1A7BB9E000120A4F /* route_inspector.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796021A7BB9E000120A4F /* route_inspector.cc */; };
+		95D7960F1A7BB9E000120A4F /* waves_export_channel_selector.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796031A7BB9E000120A4F /* waves_export_channel_selector.cc */; };
+		95D796101A7BB9E000120A4F /* waves_export_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796041A7BB9E000120A4F /* waves_export_dialog.cc */; };
+		95D796111A7BB9E000120A4F /* waves_export_file_notebook.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796051A7BB9E000120A4F /* waves_export_file_notebook.cc */; };
+		95D796121A7BB9E000120A4F /* waves_export_filename_selector.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796061A7BB9E000120A4F /* waves_export_filename_selector.cc */; };
+		95D796131A7BB9E000120A4F /* waves_export_format_selector.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796071A7BB9E000120A4F /* waves_export_format_selector.cc */; };
+		95D796141A7BB9E000120A4F /* waves_export_preset_selector.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796081A7BB9E000120A4F /* waves_export_preset_selector.cc */; };
+		95D796151A7BB9E000120A4F /* waves_export_timespan_selector.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D796091A7BB9E000120A4F /* waves_export_timespan_selector.cc */; };
+		95D796161A7BB9E000120A4F /* waves_import_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D7960A1A7BB9E000120A4F /* waves_import_dialog.cc */; };
 		95F9DFD71A35A8BD0007E953 /* waves_message_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD61A35A8BD0007E953 /* waves_message_dialog.xml */; };
 		95F9DFE01A35F3310007E953 /* waves_clean_up_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */; };
 		95F9DFE11A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */; };
@@ -1159,6 +1184,46 @@
 		95D71D541A4C66F600DE5B3B /* waves_track_color_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_track_color_dialog.cc; path = ../waves_track_color_dialog.cc; sourceTree = "<group>"; };
 		95D71D561A4C697700DE5B3B /* waves_track_color_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_track_color_dialog.h; path = ../waves_track_color_dialog.h; sourceTree = "<group>"; };
 		95D71D571A4C69AE00DE5B3B /* waves_track_color_dialog.logic.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_track_color_dialog.logic.cc; path = ../waves_track_color_dialog.logic.cc; sourceTree = "<group>"; };
+		95D795DB1A7BB40C00120A4F /* marker_inspector_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = marker_inspector_dialog.xml; sourceTree = "<group>"; };
+		95D795DC1A7BB40C00120A4F /* progressing_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = progressing_dialog.xml; sourceTree = "<group>"; };
+		95D795DD1A7BB40C00120A4F /* waves_export_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_dialog.xml; sourceTree = "<group>"; };
+		95D795DE1A7BB40C00120A4F /* waves_export_file_notebook_page.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_file_notebook_page.xml; sourceTree = "<group>"; };
+		95D795DF1A7BB40C00120A4F /* waves_export_file_notebook.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_file_notebook.xml; sourceTree = "<group>"; };
+		95D795E01A7BB40C00120A4F /* waves_export_filename_selector.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_filename_selector.xml; sourceTree = "<group>"; };
+		95D795E11A7BB40C00120A4F /* waves_export_format_selector.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_format_selector.xml; sourceTree = "<group>"; };
+		95D795E21A7BB40C00120A4F /* waves_export_preset_selector.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_preset_selector.xml; sourceTree = "<group>"; };
+		95D795E31A7BB40C00120A4F /* waves_export_timespan_selector.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_export_timespan_selector.xml; sourceTree = "<group>"; };
+		95D795E41A7BB40C00120A4F /* waves_port_export_channel_selector.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_port_export_channel_selector.xml; sourceTree = "<group>"; };
+		95D795E51A7BB40C00120A4F /* waves_region_export_channel_selector.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_region_export_channel_selector.xml; sourceTree = "<group>"; };
+		95D795E61A7BB40C00120A4F /* waves_track_color_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_track_color_dialog.xml; sourceTree = "<group>"; };
+		95D795E71A7BB40C00120A4F /* waves_track_export_channel_selector.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_track_export_channel_selector.xml; sourceTree = "<group>"; };
+		95D795FF1A7BB9E000120A4F /* floating_text_entry.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = floating_text_entry.cc; path = ../floating_text_entry.cc; sourceTree = "<group>"; };
+		95D796001A7BB9E000120A4F /* marker_inspector_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = marker_inspector_dialog.cc; path = ../marker_inspector_dialog.cc; sourceTree = "<group>"; };
+		95D796011A7BB9E000120A4F /* marker_inspector_dialog.logic.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = marker_inspector_dialog.logic.cc; path = ../marker_inspector_dialog.logic.cc; sourceTree = "<group>"; };
+		95D796021A7BB9E000120A4F /* route_inspector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = route_inspector.cc; path = ../route_inspector.cc; sourceTree = "<group>"; };
+		95D796031A7BB9E000120A4F /* waves_export_channel_selector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_export_channel_selector.cc; path = ../waves_export_channel_selector.cc; sourceTree = "<group>"; };
+		95D796041A7BB9E000120A4F /* waves_export_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_export_dialog.cc; path = ../waves_export_dialog.cc; sourceTree = "<group>"; };
+		95D796051A7BB9E000120A4F /* waves_export_file_notebook.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_export_file_notebook.cc; path = ../waves_export_file_notebook.cc; sourceTree = "<group>"; };
+		95D796061A7BB9E000120A4F /* waves_export_filename_selector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_export_filename_selector.cc; path = ../waves_export_filename_selector.cc; sourceTree = "<group>"; };
+		95D796071A7BB9E000120A4F /* waves_export_format_selector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_export_format_selector.cc; path = ../waves_export_format_selector.cc; sourceTree = "<group>"; };
+		95D796081A7BB9E000120A4F /* waves_export_preset_selector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_export_preset_selector.cc; path = ../waves_export_preset_selector.cc; sourceTree = "<group>"; };
+		95D796091A7BB9E000120A4F /* waves_export_timespan_selector.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_export_timespan_selector.cc; path = ../waves_export_timespan_selector.cc; sourceTree = "<group>"; };
+		95D7960A1A7BB9E000120A4F /* waves_import_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_import_dialog.cc; path = ../waves_import_dialog.cc; sourceTree = "<group>"; };
+		95D7961A1A7BBA4E00120A4F /* floating_text_entry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = floating_text_entry.h; path = ../floating_text_entry.h; sourceTree = "<group>"; };
+		95D7961B1A7BBA4E00120A4F /* marker_inspector_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = marker_inspector_dialog.h; path = ../marker_inspector_dialog.h; sourceTree = "<group>"; };
+		95D7961C1A7BBA4E00120A4F /* marker_inspector_dialog.logic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = marker_inspector_dialog.logic.h; path = ../marker_inspector_dialog.logic.h; sourceTree = "<group>"; };
+		95D7961D1A7BBA4E00120A4F /* product_definition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = product_definition.h; path = ../product_definition.h; sourceTree = "<group>"; };
+		95D7961E1A7BBA4E00120A4F /* ruler_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ruler_dialog.h; path = ../ruler_dialog.h; sourceTree = "<group>"; };
+		95D7961F1A7BBA4E00120A4F /* trackslive_resource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = trackslive_resource.h; path = ../trackslive_resource.h; sourceTree = "<group>"; };
+		95D796201A7BBA4E00120A4F /* waves_export_channel_selector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_export_channel_selector.h; path = ../waves_export_channel_selector.h; sourceTree = "<group>"; };
+		95D796211A7BBA4E00120A4F /* waves_export_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_export_dialog.h; path = ../waves_export_dialog.h; sourceTree = "<group>"; };
+		95D796221A7BBA4E00120A4F /* waves_export_file_notebook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_export_file_notebook.h; path = ../waves_export_file_notebook.h; sourceTree = "<group>"; };
+		95D796231A7BBA4E00120A4F /* waves_export_filename_selector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_export_filename_selector.h; path = ../waves_export_filename_selector.h; sourceTree = "<group>"; };
+		95D796241A7BBA4E00120A4F /* waves_export_format_selector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_export_format_selector.h; path = ../waves_export_format_selector.h; sourceTree = "<group>"; };
+		95D796251A7BBA4E00120A4F /* waves_export_preset_selector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_export_preset_selector.h; path = ../waves_export_preset_selector.h; sourceTree = "<group>"; };
+		95D796261A7BBA4E00120A4F /* waves_export_timespan_selector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_export_timespan_selector.h; path = ../waves_export_timespan_selector.h; sourceTree = "<group>"; };
+		95D796271A7BBA4E00120A4F /* waves_grid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_grid.h; path = ../waves_grid.h; sourceTree = "<group>"; };
+		95D796281A7BBA4E00120A4F /* waves_import_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_import_dialog.h; path = ../waves_import_dialog.h; sourceTree = "<group>"; };
 		95F9DFD61A35A8BD0007E953 /* waves_message_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_message_dialog.xml; sourceTree = "<group>"; };
 		95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_clean_up_dialog.xml; sourceTree = "<group>"; };
 		95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_connect_to_backend_error_dialog.xml; sourceTree = "<group>"; };
@@ -1256,6 +1321,18 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				95D795FF1A7BB9E000120A4F /* floating_text_entry.cc */,
+				95D796001A7BB9E000120A4F /* marker_inspector_dialog.cc */,
+				95D796011A7BB9E000120A4F /* marker_inspector_dialog.logic.cc */,
+				95D796021A7BB9E000120A4F /* route_inspector.cc */,
+				95D796031A7BB9E000120A4F /* waves_export_channel_selector.cc */,
+				95D796041A7BB9E000120A4F /* waves_export_dialog.cc */,
+				95D796051A7BB9E000120A4F /* waves_export_file_notebook.cc */,
+				95D796061A7BB9E000120A4F /* waves_export_filename_selector.cc */,
+				95D796071A7BB9E000120A4F /* waves_export_format_selector.cc */,
+				95D796081A7BB9E000120A4F /* waves_export_preset_selector.cc */,
+				95D796091A7BB9E000120A4F /* waves_export_timespan_selector.cc */,
+				95D7960A1A7BB9E000120A4F /* waves_import_dialog.cc */,
 				95D1C51E1A78ED2100BE28DB /* waves_edit_dialog.cc */,
 				95D71D571A4C69AE00DE5B3B /* waves_track_color_dialog.logic.cc */,
 				95D71D541A4C66F600DE5B3B /* waves_track_color_dialog.cc */,
@@ -1862,6 +1939,19 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				95D795DB1A7BB40C00120A4F /* marker_inspector_dialog.xml */,
+				95D795DC1A7BB40C00120A4F /* progressing_dialog.xml */,
+				95D795DD1A7BB40C00120A4F /* waves_export_dialog.xml */,
+				95D795DE1A7BB40C00120A4F /* waves_export_file_notebook_page.xml */,
+				95D795DF1A7BB40C00120A4F /* waves_export_file_notebook.xml */,
+				95D795E01A7BB40C00120A4F /* waves_export_filename_selector.xml */,
+				95D795E11A7BB40C00120A4F /* waves_export_format_selector.xml */,
+				95D795E21A7BB40C00120A4F /* waves_export_preset_selector.xml */,
+				95D795E31A7BB40C00120A4F /* waves_export_timespan_selector.xml */,
+				95D795E41A7BB40C00120A4F /* waves_port_export_channel_selector.xml */,
+				95D795E51A7BB40C00120A4F /* waves_region_export_channel_selector.xml */,
+				95D795E61A7BB40C00120A4F /* waves_track_color_dialog.xml */,
+				95D795E71A7BB40C00120A4F /* waves_track_export_channel_selector.xml */,
 				95D1C5201A78ED3A00BE28DB /* waves_edit_dialog.xml */,
 				5BC67E581A408FCE00F29ABA /* progress_dialog.xml */,
 				95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */,
@@ -1919,6 +2009,21 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				95D7961A1A7BBA4E00120A4F /* floating_text_entry.h */,
+				95D7961B1A7BBA4E00120A4F /* marker_inspector_dialog.h */,
+				95D7961C1A7BBA4E00120A4F /* marker_inspector_dialog.logic.h */,
+				95D7961D1A7BBA4E00120A4F /* product_definition.h */,
+				95D7961E1A7BBA4E00120A4F /* ruler_dialog.h */,
+				95D7961F1A7BBA4E00120A4F /* trackslive_resource.h */,
+				95D796201A7BBA4E00120A4F /* waves_export_channel_selector.h */,
+				95D796211A7BBA4E00120A4F /* waves_export_dialog.h */,
+				95D796221A7BBA4E00120A4F /* waves_export_file_notebook.h */,
+				95D796231A7BBA4E00120A4F /* waves_export_filename_selector.h */,
+				95D796241A7BBA4E00120A4F /* waves_export_format_selector.h */,
+				95D796251A7BBA4E00120A4F /* waves_export_preset_selector.h */,
+				95D796261A7BBA4E00120A4F /* waves_export_timespan_selector.h */,
+				95D796271A7BBA4E00120A4F /* waves_grid.h */,
+				95D796281A7BBA4E00120A4F /* waves_import_dialog.h */,
 				95D1C51A1A78ED1100BE28DB /* waves_edit_dialog.h */,
 				95D71D561A4C697700DE5B3B /* waves_track_color_dialog.h */,
 				95D71D501A4C66DF00DE5B3B /* waves_track_color_dialog.logic.h */,
@@ -2356,7 +2461,9 @@
 				4327933B194F003A003C9FEA /* ardour_icon_256px.png in Resources */,
 				4327933C194F003A003C9FEA /* ardour_icon_32px.png in Resources */,
 				4327933D194F003A003C9FEA /* ardour_icon_48px.png in Resources */,
+				95D795F41A7BB40C00120A4F /* waves_track_export_channel_selector.xml in Resources */,
 				4327933E194F003A003C9FEA /* chord.png in Resources */,
+				95D795EE1A7BB40C00120A4F /* waves_export_format_selector.xml in Resources */,
 				4327933F194F003A003C9FEA /* close.png in Resources */,
 				43279340194F003A003C9FEA /* computer_keyboard.png in Resources */,
 				43279341194F003A003C9FEA /* computer_keyboard_active.png in Resources */,
@@ -2402,6 +2509,7 @@
 				43279368194F003A003C9FEA /* grabber_edit_point.png in Resources */,
 				43279369194F003A003C9FEA /* grabber_note.png in Resources */,
 				4327936A194F003A003C9FEA /* halfnote.png in Resources */,
+				95D795E91A7BB40C00120A4F /* progressing_dialog.xml in Resources */,
 				4327936B194F003A003C9FEA /* hide.png in Resources */,
 				4327936C194F003A003C9FEA /* horizontal_zoom_fader_face.png in Resources */,
 				4327936D194F003A003C9FEA /* i_beam_cursor.png in Resources */,
@@ -2440,10 +2548,13 @@
 				4327938D194F003A003C9FEA /* mode_multi_out_prelight.png in Resources */,
 				4327938E194F003A003C9FEA /* mode_stereo_out.png in Resources */,
 				4327938F194F003A003C9FEA /* mode_stereo_out_active.png in Resources */,
+				95D795EB1A7BB40C00120A4F /* waves_export_file_notebook_page.xml in Resources */,
 				43279390194F003A003C9FEA /* mode_stereo_out_prelight.png in Resources */,
+				95D795F21A7BB40C00120A4F /* waves_region_export_channel_selector.xml in Resources */,
 				43279391194F003A003C9FEA /* move_cursor.png in Resources */,
 				43279392194F003A003C9FEA /* mute-disabled.png in Resources */,
 				43279393194F003A003C9FEA /* mute-enabled.png in Resources */,
+				95D795E81A7BB40C00120A4F /* marker_inspector_dialog.xml in Resources */,
 				43279394194F003A003C9FEA /* muted-by-others.png in Resources */,
 				43279395194F003A003C9FEA /* nudge_left.png in Resources */,
 				43279396194F003A003C9FEA /* nudge_right.png in Resources */,
@@ -2498,11 +2609,13 @@
 				432793C4194F003A003C9FEA /* tool_audition.png in Resources */,
 				432793C5194F003A003C9FEA /* tool_cut.png in Resources */,
 				432793C6194F003A003C9FEA /* tool_cut_active.png in Resources */,
+				95D795EF1A7BB40C00120A4F /* waves_export_preset_selector.xml in Resources */,
 				432793C7194F003A003C9FEA /* tool_cut_prelight.png in Resources */,
 				432793C8194F003A003C9FEA /* tool_gain.png in Resources */,
 				5BC24BAA1A64328D006A2400 /* trackslive.menus.in in Resources */,
 				432793C9194F003A003C9FEA /* tool_marker.png in Resources */,
 				432793CA194F003A003C9FEA /* tool_marker_active.png in Resources */,
+				95D795EC1A7BB40C00120A4F /* waves_export_file_notebook.xml in Resources */,
 				432793CB194F003A003C9FEA /* tool_marker_prelight.png in Resources */,
 				432793CC194F003A003C9FEA /* tool_note.png in Resources */,
 				432793CD194F003A003C9FEA /* tool_object.png in Resources */,
@@ -2530,6 +2643,7 @@
 				432793E2194F003A003C9FEA /* transport_play_active.png in Resources */,
 				95176F871A092A2900E32046 /* yes_no_dialog.xml in Resources */,
 				432793E3194F003A003C9FEA /* transport_play_prelight.png in Resources */,
+				95D795F11A7BB40C00120A4F /* waves_port_export_channel_selector.xml in Resources */,
 				432793E4194F003A003C9FEA /* transport_range.png in Resources */,
 				432793E5194F003A003C9FEA /* transport_record.png in Resources */,
 				432793E6194F003A003C9FEA /* transport_record_active.png in Resources */,
@@ -2546,6 +2660,7 @@
 				432793F1194F003A003C9FEA /* trim_left_cursor_right_only.png in Resources */,
 				432793F2194F003A003C9FEA /* trim_right_cursor.png in Resources */,
 				432793F3194F003A003C9FEA /* trim_right_cursor_5.png in Resources */,
+				95D795F31A7BB40C00120A4F /* waves_track_color_dialog.xml in Resources */,
 				432793F4194F003A003C9FEA /* trim_right_cursor_left_only.png in Resources */,
 				432793F5194F003A003C9FEA /* trim_top_cursor.png in Resources */,
 				432793F6194F003A003C9FEA /* vertical_zoom_fader_face.png in Resources */,
@@ -2584,6 +2699,7 @@
 				43279447194F0062003C9FEA /* toggle-button-00.xpm in Resources */,
 				43279448194F0062003C9FEA /* toggle-button-01.xpm in Resources */,
 				43279449194F0062003C9FEA /* tool_audition.xpm in Resources */,
+				95D795ED1A7BB40C00120A4F /* waves_export_filename_selector.xml in Resources */,
 				95F9DFE51A35F3310007E953 /* waves_how_to_import_dialog_1.xml in Resources */,
 				95F9DFE21A35F3310007E953 /* waves_excessive_split_dialog.xml in Resources */,
 				4327944A194F0062003C9FEA /* tool_gain.xpm in Resources */,
@@ -2601,6 +2717,7 @@
 				43279455194F0062003C9FEA /* zoom_full.xpm in Resources */,
 				43279456194F0062003C9FEA /* zoom_in.xpm in Resources */,
 				43279457194F0062003C9FEA /* zoom_out.xpm in Resources */,
+				95D795EA1A7BB40C00120A4F /* waves_export_dialog.xml in Resources */,
 				43279458194F0062003C9FEA /* small-splash.png in Resources */,
 				43279459194F0062003C9FEA /* splash.png in Resources */,
 				4327945A194F0062003C9FEA /* device_capture_control.xml in Resources */,
@@ -2627,6 +2744,7 @@
 				CEB9D799197516BE00B21780 /* mixer_strip.xml in Resources */,
 				CEB9D79A197516BE00B21780 /* track_header_gain_meter.xml in Resources */,
 				CE294C5F19CAD4E300D12768 /* add_tracks_dialog.xml in Resources */,
+				95D795F01A7BB40C00120A4F /* waves_export_timespan_selector.xml in Resources */,
 				CE294C6019CAD4E300D12768 /* compact_meter_bridge.xml in Resources */,
 				CE294C6119CAD4E300D12768 /* compact_meter_strip.xml in Resources */,
 				CE294C6219CAD4E300D12768 /* marker_io_dialog.xml in Resources */,
@@ -2644,20 +2762,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				95D796151A7BB9E000120A4F /* waves_export_timespan_selector.cc in Sources */,
 				43279254194EFFF1003C9FEA /* main.m in Sources */,
 				4327925B194EFFF1003C9FEA /* AppDelegate.m in Sources */,
 				CEAFC770195445560016ACF0 /* bbt_time.cc in Sources */,
 				CEAFC771195445560016ACF0 /* time.cc in Sources */,
+				95D7960C1A7BB9E000120A4F /* marker_inspector_dialog.cc in Sources */,
 				95D71D581A4C69AE00DE5B3B /* waves_track_color_dialog.logic.cc in Sources */,
+				95D796121A7BB9E000120A4F /* waves_export_filename_selector.cc in Sources */,
+				95D7960F1A7BB9E000120A4F /* waves_export_channel_selector.cc in Sources */,
 				95176F901A092A5B00E32046 /* yes_no_dialog.cc in Sources */,
 				CEB0A9F219583F96006D269A /* session_close_dialog.cc in Sources */,
+				95D796141A7BB9E000120A4F /* waves_export_preset_selector.cc in Sources */,
+				95D7960B1A7BB9E000120A4F /* floating_text_entry.cc in Sources */,
 				CE1C6DCE19879F04006BDB03 /* compact_meter_bridge.cc in Sources */,
+				95D7960E1A7BB9E000120A4F /* route_inspector.cc in Sources */,
 				CE1C6DCF19879F04006BDB03 /* compact_meter_strip.cc in Sources */,
 				95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */,
 				CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */,
+				95D796101A7BB9E000120A4F /* waves_export_dialog.cc in Sources */,
 				954DCFBD1A0239DA00B7160E /* about_dialog.cc in Sources */,
 				CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */,
 				95176F7A1A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc in Sources */,
+				95D7960D1A7BB9E000120A4F /* marker_inspector_dialog.logic.cc in Sources */,
 				95D71D551A4C66F600DE5B3B /* waves_track_color_dialog.cc in Sources */,
 				95D1C51F1A78ED2100BE28DB /* waves_edit_dialog.cc in Sources */,
 				CE294C7519CAD54500D12768 /* marker_io_dialog.cc in Sources */,
@@ -2666,7 +2793,10 @@
 				CE294C7719CAD54500D12768 /* open_file_dialog_nix.cc in Sources */,
 				CE294C7819CAD54500D12768 /* open_file_dialog_windows.cc in Sources */,
 				5BC67E5F1A4090BD00F29ABA /* progress_dialog.cc in Sources */,
+				95D796161A7BB9E000120A4F /* waves_import_dialog.cc in Sources */,
 				CE294C7919CAD54500D12768 /* ruler_dialog.cc in Sources */,
+				95D796131A7BB9E000120A4F /* waves_export_format_selector.cc in Sources */,
+				95D796111A7BB9E000120A4F /* waves_export_file_notebook.cc in Sources */,
 				CE294C7A19CAD54500D12768 /* soundcloud_export_selector.cc in Sources */,
 				CE294C7B19CAD54500D12768 /* waves_dropdown.cc in Sources */,
 				CE294C7C19CAD54500D12768 /* waves_grid.cc in Sources */,
