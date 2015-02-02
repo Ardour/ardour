@@ -126,7 +126,6 @@ typedef uint64_t microseconds_t;
 #include "rc_option_editor.h"
 #include "route_time_axis.h"
 #include "route_params_ui.h"
-#include "session_dialog.h"
 #include "session_metadata_dialog.h"
 #include "session_option_editor.h"
 #include "shuttle_control.h"
@@ -179,6 +178,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, first_time_engine_run (true)
+    , session_dialog_was_hidden (false)
+    , program_starting (true)
 	, blink_timeout_tag (-1)
 	  /* transport */
 	, roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll))
@@ -203,7 +204,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
 	, tracks_control_panel (X_("tracks-control-panel"), _("Preferences"))
-    , _add_tracks_dialog(new AddTracksDialog())	
+    , _session_dialog (tracks_control_panel, false, "", "", "", false)
+    , _add_tracks_dialog(new AddTracksDialog())
 	, session_lock_dialog (X_("session-lock-dialog"), _("System Lock"))
 	, marker_inspector_dialog (X_("marker-inspector-dialog"), _("Marker Inspector"))
 	, track_color_dialog (X_("track_color-dialog"), _("Marker Inspector"))
@@ -226,8 +228,16 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     , _sample_rate_dropdown (0)
     , splash (0)
 {
-	show_splash ();
-	Gtkmm2ext::init(localedir);
+    // method Application::instance ()->ready ()
+    // must be called before show_splash
+    // otherwise signal application:openFile from
+    // OS X will not be received
+    Application::instance ()->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::load_from_application_api));
+    Application::instance ()->ready ();
+    
+    show_splash ();
+    
+   	Gtkmm2ext::init(localedir);
 
 	_numpad_locate_happening = false;
 
@@ -413,6 +423,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     
     // start the engine pushing state from the state controller
     EngineStateController::instance()->push_current_state_to_backend(true);
+    
+    _session_dialog.set_engine_state_controller (EngineStateController::instance());
 }
 
 GlobalPortMatrixWindow*
@@ -775,13 +787,10 @@ ARDOUR_UI::starting ()
 	const char *nsm_url;
     
 	app->ShouldQuit.connect (sigc::mem_fun (*this, &ARDOUR_UI::queue_finish));
-	app->ShouldLoad.connect (sigc::mem_fun (*this, &ARDOUR_UI::load_from_application_api));
 
 	if (!Profile->get_trx() && ARDOUR_COMMAND_LINE::check_announcements) {
 		check_announcements ();
 	}
-
-	app->ready ();
 
 	/* we need to create this early because it may need to set the
 	 *  audio backend end up.
@@ -864,13 +873,16 @@ ARDOUR_UI::starting ()
         bool brand_new_user = !Glib::file_test ( Glib::build_filename (user_config_directory (), ".a3"), Glib::FILE_TEST_EXISTS);
         const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
         
-		/* go get a session */
-
-		if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
-			std::cerr << "Cannot get session parameters."<< std::endl;
-			return -1;
-		}
-	}
+       // checking to see if any event sources are ready to be processed
+       // for example, signal application:openFile from OS X
+       Glib::MainContext::get_default()->iteration (false);
+        
+       /* go get a session */
+       if (get_session_parameters (false, new_session_required, ARDOUR_COMMAND_LINE::load_template)) {
+           std::cerr << "Cannot get session parameters."<< std::endl;
+           return -1;
+        }
+    }
 
 	use_config ();
 
@@ -1447,7 +1459,7 @@ ARDOUR_UI::get_recent_session_names_and_paths(std::vector<std::string>& session_
     
     int i=0;
     for (ARDOUR::RecentSessions::iterator it = rs.begin();
-         (i < MAX_RECENT_SESSION_COUNTS) && (it != rs.end());
+         (i < MAX_RECENT_SESSION_COUNT) && (it != rs.end());
          ++it)
     {
         std::vector<std::string> state_file_paths;
@@ -1505,7 +1517,7 @@ ARDOUR_UI::open_recent_session_from_menuitem(unsigned int num_of_recent_session)
     //check that cur_recent_session_path is still existing
     if ( !Glib::file_test (cur_recent_session_path, Glib::FileTest (G_FILE_TEST_EXISTS)) )
     {
-        WavesMessageDialog session_deleted ("",string_compose (_("There is no existing session at \"%1\""), cur_recent_session_path.c_str() ),WavesMessageDialog::BUTTON_OK);
+        WavesMessageDialog session_deleted ("",string_compose (_("There is no existing session in \"%1\""), cur_recent_session_path.c_str() ),WavesMessageDialog::BUTTON_OK);
         session_deleted.run ();
         return ;
     }
@@ -2732,33 +2744,57 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 }
 
 void
-ARDOUR_UI::load_from_application_api (const std::string& path)
+ARDOUR_UI::load_from_application_api (const std::string& path_from_user_choice)
 {
-    if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR)) { // session folder was chosen
-        string full_name_to_session_file = string_compose ("%1/%2.ardour", path, basename_nosuffix (path));
-        //check that session file is really existing in folder
-        if ( !Glib::file_test (full_name_to_session_file, Glib::FileTest (G_FILE_TEST_EXISTS)) )
-        {
-            WavesMessageDialog session_deleted ("",string_compose (_("There is no existing session at \"%1\""), full_name_to_session_file),WavesMessageDialog::BUTTON_OK);
-            session_deleted.run ();
-            return ;
-        }
-        load_session (path, basename_nosuffix (path));
-    }
-    else {  // session file was chosen
-        string temp_path, temp_name;
-        bool isnew;
-        //check that user choose right file format
-        if (ARDOUR::find_session (path, temp_path, temp_name, isnew) == 0) {
-            load_session (Glib::path_get_dirname (path), basename_nosuffix (path));
+    // this method could be called just on OS X
+    // as a result of opening folder/file
+    // with help of application api (dbl-click, drag-n-drop)
+    
+    string path_for_loading;
+    
+    // folder was chosen
+    if (Glib::file_test (path_from_user_choice, Glib::FILE_TEST_IS_DIR)) {
+        // get full name of session file
+        string full_name_to_session_file = string_compose ("%1/%2.ardour", path_from_user_choice, basename_nosuffix (path_from_user_choice));
+        
+        // check that session file is really existing in folder
+        if ( Glib::file_test (full_name_to_session_file, Glib::FileTest (G_FILE_TEST_EXISTS))) {
+            ARDOUR_COMMAND_LINE::session_name = full_name_to_session_file;
+            path_for_loading = path_from_user_choice;
         }
         else {
-            WavesMessageDialog session_wrong_format ("",string_compose (_("\"%1\" has wrong file format"), path),WavesMessageDialog::BUTTON_OK);
-            session_wrong_format.run ();
+            if ( !program_starting) {
+                WavesMessageDialog session_deleted ("",string_compose (_("There is no existing session in \"%1\""), full_name_to_session_file),WavesMessageDialog::BUTTON_OK);
+                session_deleted.run ();
+            }
             return ;
         }
     }
-    ARDOUR_COMMAND_LINE::session_name = path;
+    // file was chosen
+    else {
+        // check that user chose right file format
+        string temp_path, temp_name;
+        bool isnew;
+        if (ARDOUR::find_session (path_from_user_choice, temp_path, temp_name, isnew) == 0) {
+            ARDOUR_COMMAND_LINE::session_name = path_from_user_choice;
+            path_for_loading = Glib::path_get_dirname (path_from_user_choice);
+        }
+        else {
+            if ( !program_starting) {
+                WavesMessageDialog session_wrong_format ("",string_compose (_("\"%1\" has wrong file format"), path_from_user_choice), WavesMessageDialog::BUTTON_OK);
+                session_wrong_format.run ();
+            }
+            return ;
+        }
+    }
+    
+    // if the program was starting from application api
+    // we should not do nothing here
+    if ( !program_starting) {
+         session_dialog_was_hidden = true;
+        _session_dialog.hide ();
+        load_session (path_for_loading, basename_nosuffix (path_from_user_choice));
+    }
 }
 
 namespace
@@ -2870,6 +2906,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	int ret = -1;
 	bool likely_new = false;
 	bool cancel_not_quit;
+    
+    program_starting = false;
 
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible
@@ -2909,8 +2947,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			}
 		}
 	}
-
-	SessionDialog session_dialog (tracks_control_panel, should_be_new, session_name, session_path, load_template, cancel_not_quit);
+	//SessionDialog _session_dialog (tracks_control_panel, should_be_new, session_name, session_path, load_template, cancel_not_quit);
+    
+    _session_dialog.set_session_info (should_be_new, session_name, session_path);
+    _session_dialog.redisplay ();
 
 	while (ret != 0) {
 
@@ -2934,7 +2974,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 			session_path = "";
 			session_name = "";
-			session_dialog.clear_given ();
+			_session_dialog.clear_given ();
 		}
 		
 		if (ARDOUR_COMMAND_LINE::session_name.size ()) { 
@@ -2942,14 +2982,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			// from command line 
 			// we shouldn't run SessionDialog
 			// just open chosen session
-			session_dialog.set_selected_session_full_path (ARDOUR_COMMAND_LINE::session_name);
+			_session_dialog.set_selected_session_full_path (ARDOUR_COMMAND_LINE::session_name);
 		}
 		else { 
 			// session wasn't preliminary chosen
 			// so we must show SessionDialog
 			if (should_be_new || session_name.empty()) {
 				/* need the dialog to get info from user */
-				int response = session_dialog.run();
+				int response = _session_dialog.run();
 				switch (response) {
 					case Gtk::RESPONSE_ACCEPT: // existed session was choosen or new session was created
 						break;
@@ -2959,12 +2999,20 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 					case Gtk::RESPONSE_REJECT: // quit button pressed
 						UI::quit ();
 						return ret;
-					default: // this happens on Close Button pressed (at the top left corner only on Mac)
-						UI::quit ();
-						return ret;
+					default:
+                        // if session was chosen from application api (on mac) and
+                        // SessionDialog was hidden in method load_from_application_api
+                        if (session_dialog_was_hidden) {
+                            session_dialog_was_hidden = false;
+                            // normal continuation of program
+                            return 0;
+                        }
+                        // this happens on Close Button pressed (at the top left corner only on Mac)
+                        UI::quit ();
+                        return ret;
 				}
 
-				session_dialog.hide ();
+				_session_dialog.hide ();
 			}
 		}
 
@@ -2972,8 +3020,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		should_be_new = false;
         
-		full_session_name = session_name = session_dialog.session_name (likely_new);
-		session_path = session_dialog.session_folder ();
+		full_session_name = session_name = _session_dialog.session_name (likely_new);
+		session_path = _session_dialog.session_folder ();
         
 		if (nsm) {
 		        likely_new = true;
@@ -2992,8 +3040,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			continue;
 		}
 		
-		if (session_dialog.use_session_template()) {
-			template_name = session_dialog.session_template_name();
+		if (_session_dialog.use_session_template()) {
+			template_name = _session_dialog.session_template_name();
 			_session_is_new = true;
 		}
 		
@@ -3013,7 +3061,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			
 		} else {
 
-			session_path = session_dialog.session_folder();
+			session_path = _session_dialog.session_folder();
 			
 			char illegal = Session::session_name_is_legal (session_name);
 			
@@ -3066,7 +3114,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else {
 
 			if (!likely_new) {
-				pop_back_splash (session_dialog);
+				pop_back_splash (_session_dialog);
 				WavesMessageDialog msg ("", string_compose (_("There is no existing session at \"%1\""), session_path));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
@@ -3076,7 +3124,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			char illegal = Session::session_name_is_legal(session_name);
 
 			if (illegal) {
-				pop_back_splash (session_dialog);
+				pop_back_splash (_session_dialog);
 				WavesMessageDialog msg ("", string_compose(_("To ensure compatibility with various systems\n"
 										    "session names may not contain a '%1' character"), illegal));
 				msg.run ();
@@ -3089,7 +3137,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 		if (likely_new && template_name.empty()) {
 
-			ret = build_session_from_dialog (session_dialog, session_path, session_name);
+			ret = build_session_from_dialog (_session_dialog, session_path, session_name);
 
 		} else {
 

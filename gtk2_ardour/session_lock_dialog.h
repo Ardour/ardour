@@ -43,7 +43,7 @@
 //#include "ardour/utils.h"
 
 class EngineControl;
-#define MAX_RECENT_SESSION_COUNTS 10
+#define MAX_RECENT_SESSION_COUNT 10
 class SessionLockDialog : public WavesDialog {
   public:
 

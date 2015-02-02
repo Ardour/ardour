@@ -43,6 +43,7 @@
 #include <gtkmm/combobox.h>
 
 #include "ardour/utils.h"
+#include "ardour/engine_state_controller.h"
 
 #include "ardour_dialog.h"
 #include "window_manager.h"
@@ -50,7 +51,7 @@
 class TracksControlPanel;
 
 class EngineControl;
-#define MAX_RECENT_SESSION_COUNTS 10
+#define MAX_RECENT_SESSION_COUNT 10
 class SessionDialog : public WavesDialog {
   public:
     SessionDialog (WM::Proxy<TracksControlPanel>& system_configuration_dialog,
@@ -68,7 +69,7 @@ class SessionDialog : public WavesDialog {
 	WavesButton& _open_selected_button;
 	WavesButton& _open_saved_session_button;
 	WavesButton& _system_configuration_button;
-	WavesButton* _recent_session_button[MAX_RECENT_SESSION_COUNTS];
+	WavesButton* _recent_session_button[MAX_RECENT_SESSION_COUNT];
 	Gtk::Label& _session_details_label_1;
    	Gtk::Label& _session_details_label_2;
    	Gtk::Label& _session_details_label_3;

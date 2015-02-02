@@ -93,6 +93,7 @@
 #include "progress_dialog.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
+#include "session_dialog.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
 #include "theme_manager.h"
@@ -699,6 +700,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     WM::Proxy<MarkerInspectorDialog> marker_inspector_dialog;
     WM::Proxy<WavesTrackColorDialog> track_color_dialog;
     
+    SessionDialog _session_dialog;
+    
     /* Windows/Dialogs that require a creator method */
 
     WM::ProxyWithConstructor<SessionOptionEditor> session_option_editor;
@@ -866,6 +869,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     //full path to recent sessions
     std::vector<std::string> recent_session_full_paths;
     
+    bool session_dialog_was_hidden;
+    bool program_starting;
 };
 
 #endif /* __ardour_gui_h__ */

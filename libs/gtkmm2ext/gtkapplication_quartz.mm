@@ -1472,7 +1472,7 @@ extern "C" void
 gtk_application_ready ()
 {
 	[ NSApp finishLaunching ];
-    [[NSApplication sharedApplication] activateIgnoringOtherApps : YES];
+    //[[NSApplication sharedApplication] activateIgnoringOtherApps : YES];
 }
 
 extern "C" void

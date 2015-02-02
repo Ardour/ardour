@@ -509,7 +509,7 @@ ARDOUR_UI::update_recent_session_menuitems ()
             }
     }
     
-	for (int i=0; i < MAX_RECENT_SESSION_COUNTS; ++i){
+	for (int i=0; i < MAX_RECENT_SESSION_COUNT; ++i){
 		Glib::RefPtr<Action> act;
 
 		std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
@@ -570,7 +570,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
 	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
     /* register act for recent_session_menuitems */
-    for(int i=0;i<MAX_RECENT_SESSION_COUNTS;++i){
+    for(int i=0;i<MAX_RECENT_SESSION_COUNT;++i){
         std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
          ActionManager::register_action (main_actions, X_(label.c_str()), _(""),  sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session_from_menuitem), i));
     }

@@ -45,6 +45,12 @@
 	bool connect_outs_to_physical() const { return false; }
 	void set_selected_session_full_path (std::string path) { _selected_session_full_name = path; }
 
+    void set_session_info (bool require_new,
+                           const std::string& session_name,
+                           const std::string& session_path);
+    void set_engine_state_controller (ARDOUR::EngineStateController*);
+    void redisplay ();
+
   private:
 // data types:
     enum SessionSelectionType {
@@ -64,7 +70,7 @@
 	bool _new_only;
     std::string _provided_session_name;
     std::string _provided_session_path;
-	std::string _recent_session_full_name[MAX_RECENT_SESSION_COUNTS];
+	std::string _recent_session_full_name[MAX_RECENT_SESSION_COUNT];
 	std::string _selected_session_full_name;
 	bool _existing_session_chooser_used; ///< set to true when the existing session chooser has been used
 	Gtk::Label _info_scroller_label;
@@ -72,7 +78,6 @@
 	sigc::connection _info_scroller_connection;
 
 // methods
-	virtual void init();
 	void on_quit (WavesButton*);
 	void on_open_selected (WavesButton*);
 	void on_open_saved_session (WavesButton*);
@@ -89,6 +94,8 @@
 	int redisplay_recent_sessions ();
     void session_selected ();
     bool info_scroller_update();
+
+    void update_recent_session_buttons ();
 
 // connections
     PBD::ScopedConnectionList _system_config_update;
