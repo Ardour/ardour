@@ -96,26 +96,16 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/vertical-zoom-out|<@PRIMARY@>minus|vertical zoom out
 @eep|Editor/edit-cursor-to-previous-region-sync|apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|semicolon|EP to next region sync
-@eep|Editor/cycle-edit-point|grave|next EP w/o marker
-@eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>grave|next EP w/marker
 
 @trans|Transport/ToggleRoll|space|toggle roll
-@epp|Editor/play-edit-range|<@SECONDARY@>space|play edit range
-@epp|Editor/play-from-edit-point-and-return|<@LEVEL4@>space|play from EP \& return
 @trans|Transport/ToggleRollMaybe|<@PRIMARY@><@SECONDARY@>space|stop (keep loop/range play)
-;; @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
-@trans|Transport/record-roll|<@TERTIARY@>space|start recording
 
 @trans|Editor/add-location-from-playhead|nabla|add marker
-@trans|Editor/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
 ;@trans|Transport/GotoStart|Return|to start marker
 @movp|Transport/alternate-GotoStart|KP_Return|to edit point
 
 @trans|Editor/editor-fade-range|slash|fade range selection
 @rop|Region/set-fade-in-length|<@PRIMARY@>slash|set fade in length
-;;@rop|Region/toggle-region-fade-out|<@PRIMARY@>slash|toggle fade in active
-@rop|Region/set-fade-out-length|<@PRIMARY@>backslash|set fade out length
-;;@rop|Region/toggle-region-fade-out|<@PRIMARY@>backslash|toggle fade out active
 
 @eep|Editor/trim-to-previous-region|<@PRIMARY@>j|trim region to end of prev region
 @eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
@@ -123,57 +113,35 @@ This mode provides many different operations on both regions and control points,
 @ranges|Editor/set-loop-from-edit-range|bracketright|set loop range from edit range
 @ranges|Region/set-loop-from-region|<@PRIMARY@>L|set loop range from region(s)
 
-@ranges|Editor/set-punch-from-edit-range|bracketleft|set punch range from edit range
-@ranges|Region/set-punch-from-region|<@SECONDARY@>bracketleft|set punch range from region(s)
 
-@rop|Region/boost-region-gain|asciicircum|increase region gain
-@rop|Region/cut-region-gain|ampersand|reduce region gain
 
 ;; letters
 ;; TOP ROW
 
 @sess|Common/Quit|<@PRIMARY@>q|quit
-@rop|Region/quantize-region|<@SECONDARY@>q|quantize MIDI notes \linebreak[4] in selected region(s)
 @movp|Editor/jump-forward-to-mark|w|to next mark
 @movp|Editor/jump-backward-to-mark|q|to previous mark
 
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
-@mmode|MouseMode/toggle-internal-edit|e|toggle MIDI note editing
-@select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
 
 @sess|Main/ExportSession|<@LEVEL4@>e|export session
-@select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|i|toggle editor window mixer
 @vis|Common/toggle-mixer|m|toggle mixer
 @vis|Common/toggle-meterbridge|b|toggle meterBridge
-@wvis|Common/goto-editor|<@WINDOW@>e|toggle editor window
 @edit|Editor/redo|<@PRIMARY@>r|redo
-;;@rop|Region/reverse-region|<@SECONDARY@>r|reverse
 @trans|Transport/Record|<@TERTIARY@>r|engage record
-;; Tracks Live doesn't use it @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
-;; @rop|Region/pitch-shift-region|<@SECONDARY@>t|transpose
-@rop|Region/strip-region-silence|<@SECONDARY@>l|transpose
 @eep|Editor/select-all-tracks|<@PRIMARY@>t|select all tracks
-@mmode|MouseMode/set-mouse-mode-object-range|y|link object/range tools
 @edit|Editor/alternate-redo|<@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|<@PRIMARY@>u|all enclosed by edit range
 @select|Editor/select-all-within-cursors|u|all present in edit range
-@eep|Region/insert-region-from-region-list|i|insert from region list
 @select|Editor/invert-selection|<@TERTIARY@>i|invert selection
 @sess|Editor/addExistingAudioFiles|<@PRIMARY@>i|import audio files
-@sess|Editor/toggle-midi-input-active|<@SECONDARY@>i|toggle sel. track MIDI input
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
-@sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
 @sess|Window/toggle-tracks-control-panel|<@PRIMARY@>comma|open preferences dialog
-@wvis|Window/toggle-session-options-editor|<@WINDOW@>o|toggle preferences dialog
 @rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
-@wvis|Window/toggle-rc-options-editor|<@PRIMARY@><@TERTIARY@>p|toggle preferences dialog
-@wvis|Window/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
-@wvis|Window/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
-@midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
 @select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
 
 ;; MIDDLE ROW
@@ -187,21 +155,11 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/split-region|s|split
 @rop|Region/split-on-playhead|<@LEVEL4@>downarrow|split on playhead
 @sess|Common/Save|<@PRIMARY@>s|save session
-@sess|Main/Snapshot|<@PRIMARY@><@TERTIARY@>s|snapshot session
 @trans|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
-@-group|Editor/editor-separate|<@PRIMARY@><@SECONDARY@>s|some text
 @rop|Region/duplicate-region|<@SECONDARY@>d|duplicate region (once)
 @rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
-@select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
-@wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
-@wvis|Common/ToggleMaximalMixer|F12|maximise mixer space
-;; Tracks Live doesn't use it @wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window
-@mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
-@epp|Region/play-selected-regions|h|play selected region(s)
-@eep|Region/trim-front|j|trim front
-@eep|Region/trim-back|k|trim back
 @wvis|Window/toggle-key-editor|<@WINDOW@>k|toggle key bindings editor
 @trans|Transport/Loop|l|loop play (the loop range)
 @wvis|Window/toggle-locations|<@WINDOW@>l| toggle locations dialog
@@ -212,16 +170,11 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)
 @vis|Editor/zoom-to-region-both-axes|<@SECONDARY@>z|zoom (x+y) to selected region
-@vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 ;@-group|Editor/crop|c|some text
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
-@wvis|Window/toggle-theme-manager|<@WINDOW@>c|toggle color manager
-@rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
-@-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable
-@rop|Region/normalize-region|n|normalize
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
@@ -231,29 +184,21 @@ This mode provides many different operations on both regions and control points,
 
 @vis|Editor/step-tracks-up|uparrow|scroll up (step)
 @trans|Transport/TransitionToRoll|<@TERTIARY@>uparrow|transition to roll
-@select|Editor/select-prev-route|<@SECONDARY@>uparrow|select previous track/bus
 @vis|Editor/move-selected-tracks-up|<@PRIMARY@>uparrow|move selected tracks up
 
 @vis|Editor/step-tracks-down|downarrow|scroll down (step)
 @trans|Transport/TransitionToReverse|<@TERTIARY@>downarrow|transition to reverse
-@select|Editor/select-next-route|<@SECONDARY@>downarrow|select next track/bus
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>downarrow|move selected tracks down
 
 @movp|Editor/playhead-to-previous-region-boundary|leftarrow|to previous region edge
 @movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>leftarrow|to previous edge \linebreak[4] (ignoring selection)
-@movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>leftarrow|to previous region sync
-@movp|Editor/tab-to-transient-backwards|<@PRIMARY@>leftarrow|to previous transient
 @movp|Editor/nudge-playhead-backward|<@SECONDARY@>leftarrow|nudge backward
-@movp|Editor/playhead-backward-to-grid|<@TERTIARY@><@LEVEL4@>leftarrow|to previous grid point
 @trans|Transport/Rewind|<@TERTIARY@>leftarrow|rewind
 @markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>leftarrow|move to prev region edge
 
 @movp|Editor/playhead-to-next-region-boundary|rightarrow|to next region edge
 @movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>rightarrow|to next region edge \linebreak[4] (ignoring selection)
-@movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>rightarrow|to next region sync
-@movp|Editor/tab-to-transient-forwards|<@PRIMARY@>rightarrow|to next transient
 @movp|Editor/nudge-playhead-forward|<@SECONDARY@>rightarrow|nudge forwards
-@movp|Editor/playhead-forward-to-grid|<@TERTIARY@><@LEVEL4@>rightarrow|to next grid point
 @trans|Transport/Forward|<@TERTIARY@>rightarrow|fast forward
 @markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>rightarrow|move to next region edge
 
@@ -289,48 +234,8 @@ This mode provides many different operations on both regions and control points,
 
 @movp|Transport/numpad-decimal|KP_Decimal|numpad decimal should initiate and finalize a locate-to-marker
 
-@movp|Transport/numpad-0|KP_0|some text
-@-group|Transport/numpad-1|KP_1|some text
-@-group|Transport/numpad-2|KP_2|some text
-@-group|Transport/numpad-3|KP_3|some text
-@-group|Transport/numpad-4|KP_4|some text
-@-group|Transport/numpad-5|KP_5|some text
-@-group|Transport/numpad-6|KP_6|some text
-@-group|Transport/numpad-7|KP_7|some text
-@-group|Transport/numpad-8|KP_8|some text
-@-group|Transport/numpad-9|KP_9|some text
-
 ;; F-N keys
 
-@-group|Editor/edit-cursor-to-range-start|F1|some text
-@-group|Editor/edit-cursor-to-range-end|F2|some text
-@-group|Editor/pitch-shift-region|F5|some text
-
-@-group|Editor/save-visual-state-1|<@PRIMARY@>F1|some text
-@-group|Editor/save-visual-state-2|<@PRIMARY@>F2|some text
-@-group|Editor/save-visual-state-3|<@PRIMARY@>F3|some text
-@-group|Editor/save-visual-state-4|<@PRIMARY@>F4|some text
-@-group|Editor/save-visual-state-5|<@PRIMARY@>F5|some text
-@-group|Editor/save-visual-state-6|<@PRIMARY@>F6|some text
-@-group|Editor/save-visual-state-7|<@PRIMARY@>F7|some text
-@-group|Editor/save-visual-state-8|<@PRIMARY@>F8|some text
-@-group|Editor/save-visual-state-9|<@PRIMARY@>F9|some text
-@-group|Editor/save-visual-state-10|<@PRIMARY@>F10|some text
-@-group|Editor/save-visual-state-11|<@PRIMARY@>F11|some text
-@-group|Editor/save-visual-state-12|<@PRIMARY@>F12|some text
-
-@-group|Editor/goto-visual-state-1|F1|some text
-@-group|Editor/goto-visual-state-2|F2|some text
-@-group|Editor/goto-visual-state-3|F3|some text
-@-group|Editor/goto-visual-state-4|F4|some text
-@-group|Editor/goto-visual-state-5|F5|some text
-@-group|Editor/goto-visual-state-6|F6|some text
-@-group|Editor/goto-visual-state-7|F7|some text
-@-group|Editor/goto-visual-state-8|F8|some text
-@-group|Editor/goto-visual-state-9|F9|some text
-@-group|Editor/goto-visual-state-10|F10|some text
-@-group|Editor/goto-visual-state-11|F11|some text
-@-group|Editor/goto-visual-state-12|F12|some text
 
 
 ;; numbers
@@ -340,11 +245,6 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-zoom|4|zoom mode
 @eep|Editor/prev-snap-choice-music-only|<@PRIMARY@>3|use previous grid unit
 @eep|Editor/next-snap-choice-music-only|<@PRIMARY@>4|use next musical grid unit
-@trans|Transport/ToggleAutoPlay|5|toggle auto play
-@trans|Transport/ToggleAutoReturn|6|toggle auto return
-@trans|Transport/ToggleClick|7|toggle click (metronome)
-;;@ranges|Region/set-tempo-from-region|9|set tempo (1 bar) from region(s)
-@ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
 
 ; mouse stuff
 
