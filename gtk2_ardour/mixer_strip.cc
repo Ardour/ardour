@@ -506,11 +506,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	
 	gpm.set_type (rt->meter_type());
 	
-	if (route()->is_master()) {
-		master_mute_button.show ();
-	} else {
-		master_mute_button.hide ();
-	}
+	master_mute_button.set_visible (route()->is_master());
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
 
@@ -1909,6 +1905,7 @@ MixerStrip::deselect_all_processors ()
 bool
 MixerStrip::delete_processors ()
 {
+	return false;
 //	return processor_box.processor_operation (ProcessorBox::ProcessorsDelete);
 }
 

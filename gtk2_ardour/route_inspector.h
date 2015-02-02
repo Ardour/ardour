@@ -37,6 +37,7 @@ class RouteInspector : public MixerStrip
 
 	WavesButton&   color_palette_button;
 	Gtk::Container& color_palette_home;
+	Gtk::Container& color_palette_button_home;
 	Gtk::Container& color_buttons_home;
 
 	WavesButton&   info_panel_button;

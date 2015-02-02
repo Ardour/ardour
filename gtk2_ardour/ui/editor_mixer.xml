@@ -4,19 +4,16 @@
          selfdestruct="false"
          gainmeterscript="inspector_gain_meter.xml">
   <VBox>
-    <VBox>
-      <HBox>
-        <EventBox id="color_palette_home"
-                  noshowall="true"
-                  visible="false"
-                  bgnormal="#383838">
-          <iconbutton id="color_palette_button"
-                      width="97"
-                      height="17"
-                      normalicon="inspector_color_close"
-                      activeicon="inspector_color_open"/>
-        </EventBox>
-      </HBox>
+    <VBox id="color_palette_home"
+          noshowall="true">
+      <EventBox id="color_palette_button_home"
+                bgnormal="#383838">
+        <iconbutton id="color_palette_button"
+                    width="97"
+                    height="17"
+                    normalicon="inspector_color_close"
+                    activeicon="inspector_color_open"/>
+      </EventBox>
       <VBox id="color_buttons_home"
             noshowall="true"
             visible="false">
@@ -178,11 +175,9 @@
               visible="false"/>
         <VBox>
           <HBox>
-            
             <VBox id="track_buttons_home"
                   visible="true"
                   noshowall="true">
-              
               <HBox>
                 <iconbutton id="rec_enable_button"
                             width="49"
@@ -192,7 +187,6 @@
                             _prelighticon="inspector_record_prelight"
                             visible="false"
                             noshowall="true"/>
-                
                 <iconbutton id="monitor_input_button"
                             width="47"
                             height="21"
@@ -202,7 +196,6 @@
                             visible="false"
                             noshowall="true"/>
               </HBox>
-              
               <HBox>
                 <iconbutton id="mute_button"
                             width="49"
@@ -224,10 +217,7 @@
                             visible="false"
                             noshowall="true"/>
               </HBox>
-              
             </VBox>
-            
-
           </HBox>
           <iconbutton id="master_mute_button"
                       width="95"
@@ -239,7 +229,7 @@
                       noshowall="true"/>
           <HBox>
           <EventBox width="1"
-                    bgnormal="#383838"/>s
+                    bgnormal="#383838"/>
           <EventBox id="name_label_home">
           <HBox>
               <Button id="name_button"

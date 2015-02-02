@@ -33,6 +33,7 @@ RouteInspector::RouteInspector (Session* sess, const std::string& layout_script_
 	, MixerStrip(sess, layout_script_file, max_name_size)
 	, color_palette_button (get_waves_button ("color_palette_button"))
 	, color_palette_home (get_container ("color_palette_home"))
+	, color_palette_button_home (get_container ("color_palette_button_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
     , info_panel_button (get_waves_button ("info_panel_button"))
 	, info_panel_home (get_container ("info_panel_home"))
@@ -47,6 +48,7 @@ RouteInspector::RouteInspector (Session* sess, boost::shared_ptr<Route> rt, cons
 	, MixerStrip(sess, rt, layout_script_file, max_name_size)
 	, color_palette_button (get_waves_button ("color_palette_button"))
 	, color_palette_home (get_container ("color_palette_home"))
+	, color_palette_button_home (get_container ("color_palette_button_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
     , info_panel_button (get_waves_button ("info_panel_button"))
 	, info_panel_home (get_container ("info_panel_home"))
@@ -186,16 +188,7 @@ RouteInspector::set_route (boost::shared_ptr<Route> rt)
 {
 	MixerStrip::set_route (rt);
 	if (route ()) {
-		if (route()->is_master()) {
-			master_mute_button.show ();
-			color_buttons_home.set_visible (false);
-			color_palette_button.set_visible (false);
-			color_palette_button.set_active (false);
-		} else {
-			master_mute_button.hide ();
-			color_palette_button.set_visible (true);
-			color_palette_home.set_visible (true);
-		}
+		color_palette_home.set_visible (!route()->is_master());
 	}
 	update_inspector_info_panel ();
 }
@@ -209,9 +202,9 @@ RouteInspector::route_color_changed ()
 		color_button[i]->set_active (new_color == Gdk::Color (XMLColor[i]));
 	}
 	
-	color_palette_home.modify_bg (Gtk::STATE_NORMAL, new_color);
-	color_palette_home.modify_bg (Gtk::STATE_ACTIVE, new_color);
-	color_palette_home.queue_draw ();
+	color_palette_button_home.modify_bg (Gtk::STATE_NORMAL, new_color);
+	color_palette_button_home.modify_bg (Gtk::STATE_ACTIVE, new_color);
+	color_palette_button_home.queue_draw ();
 }
 
 void
