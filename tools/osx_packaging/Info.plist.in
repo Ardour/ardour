@@ -29,7 +29,7 @@
 	<key>CFBundleIconFile</key>
 	<string>appIcon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.ardour.Ardour3</string>
+	<string>com.waves.TracksLive</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -39,7 +39,7 @@
 	<key>CFBundleShortVersions</key>
 	<string>@VERSION@</string>
 	<key>CFBundleSignature</key>
-	<string>ArDr</string>
+	<string>TrkL</string>
 	<key>CFBundleVersion</key>
 	<string>@VERSION@</string>
 	<key>LSUIElement</key>
