@@ -1341,18 +1341,15 @@ RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top
 		speed = track()->speed();
 	}
 
-	framepos_t const start_adjusted = session_frame_to_track_frame(start, speed);
-	framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
-
-	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
-		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+	if (_view && (((top < 0.0 && bot < 0.0)) || touched (top, bot) ) ) {
+		_view->get_selectables (start, end, top, bot, results);
 	}
 
 	/* pick up visible automation tracks */
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
-			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+			(*i)->get_selectables (start, end, top, bot, results);
 		}
 	}
 }
@@ -1381,12 +1378,9 @@ RouteTimeAxisView::get_selectable_regionviews (framepos_t start, framepos_t end,
     if (track() != 0) {
         speed = track()->speed();
     }
-    
-    framepos_t const start_adjusted = session_frame_to_track_frame(start, speed);
-    framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
-    
-    if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
-        _view->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+
+    if (_view && (((top < 0.0 && bot < 0.0)) || touched (top, bot) ) ) {
+        _view->get_selectables (start, end, top, bot, results);
     }
 }
 
