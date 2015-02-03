@@ -19,8 +19,11 @@
 
 #include "ardour_ui.h"
 #include "main_clock.h"
+#include "public_editor.h"
 
 #include "i18n.h"
+
+#include "ardour/tempo.h"
 
 using namespace Gtk;
 
@@ -62,6 +65,12 @@ MainClock::build_ops_menu ()
 			c->set_active (true);
 		}
 	}
+
+	ops_items.push_back (SeparatorElem());
+	ops_items.push_back (MenuElem (_("Edit Tempo"), sigc::mem_fun(*this, &MainClock::edit_current_tempo)));
+	ops_items.push_back (MenuElem (_("Edit Meter"), sigc::mem_fun(*this, &MainClock::edit_current_meter)));
+	ops_items.push_back (MenuElem (_("Insert Tempo Change"), sigc::mem_fun(*this, &MainClock::insert_new_tempo)));
+	ops_items.push_back (MenuElem (_("Insert Meter Change"), sigc::mem_fun(*this, &MainClock::insert_new_meter)));
 }
 
 void
@@ -73,3 +82,31 @@ MainClock::display_delta_to_edit_cursor ()
 		ARDOUR_UI::config()->set_secondary_clock_delta_edit_cursor (!ARDOUR_UI::config()->get_secondary_clock_delta_edit_cursor ());
 	}
 }
+
+void
+MainClock::edit_current_tempo ()
+{
+	ARDOUR::TempoSection ts = PublicEditor::instance().session()->tempo_map().tempo_section_at(current_time());
+	PublicEditor::instance().edit_tempo_section (&ts);
+}
+
+void
+MainClock::edit_current_meter ()
+{
+	ARDOUR::Meter m = PublicEditor::instance().session()->tempo_map().meter_at(current_time());
+	ARDOUR::MeterSection ms(current_time(), m.divisions_per_bar(), m.note_divisor());
+	PublicEditor::instance().edit_meter_section (&ms);
+}
+
+void
+MainClock::insert_new_tempo ()
+{
+	PublicEditor::instance().mouse_add_new_tempo_event (current_time ());
+}
+
+void
+MainClock::insert_new_meter ()
+{
+	PublicEditor::instance().mouse_add_new_meter_event (current_time ());
+}
+

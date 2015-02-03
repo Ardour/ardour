@@ -419,6 +419,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
 	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const = 0;
 
+	virtual void mouse_add_new_tempo_event (framepos_t where) = 0;
+	virtual void mouse_add_new_meter_event (framepos_t where) = 0;
+	virtual void edit_tempo_section (ARDOUR::TempoSection*) = 0;
+	virtual void edit_meter_section (ARDOUR::MeterSection*) = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;

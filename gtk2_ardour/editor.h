@@ -524,6 +524,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (framepos_t);
 	
+	void mouse_add_new_tempo_event (framepos_t where);
+	void mouse_add_new_meter_event (framepos_t where);
+	void edit_tempo_section (ARDOUR::TempoSection*);
+	void edit_meter_section (ARDOUR::MeterSection*);
+
   protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
