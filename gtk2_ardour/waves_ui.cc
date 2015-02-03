@@ -125,6 +125,16 @@ WavesUI::~WavesUI ()
 Gtk::Widget*
 WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 {
+#if defined (__APPLE__)
+    if (false == xml_property (definition, "ui.os.macos", styles, true)) {
+        return 0;
+    }
+#elif defined (PLATFORM_WINDOWS)
+    if (false == xml_property (definition, "ui.os.windows", styles, true)) {
+        return 0;
+    }
+#endif
+    
 	Gtk::Object* child = NULL;
 	std::string widget_type = definition.name ();
 	std::string widget_id = xml_property (definition, "id", styles, "");
