@@ -5,7 +5,7 @@
          gainmeterscript="inspector_gain_meter.xml">
   <HBox>
     <VBox>
-      <VBox>
+      <VBox box.fill="true" box.expand="true">
         <VBox id="color_palette_home"
               noshowall="true">
           <EventBox id="color_palette_button_home"
