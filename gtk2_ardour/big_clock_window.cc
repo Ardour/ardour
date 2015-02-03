@@ -73,7 +73,7 @@ BigClockWindow::on_realize ()
 
 	ArdourWindow::on_realize ();
 
-	get_window()->set_decorations (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH);
+	get_window()->set_decorations (Gdk::DECOR_TITLE|Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH);
 	get_window()->get_geometry (x, y, w, h, d);
 
 	reset_aspect_ratio ();
