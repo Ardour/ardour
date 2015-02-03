@@ -786,9 +786,20 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
         draw_context->fill ();
         
         /* render canvas */
-        
-        render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
+#ifdef CANVAS_SINGLE_EXPOSE
+        render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
+#else
+        GdkRectangle* rects;
+        gint nrects;
+        
+        gdk_region_get_rectangles (ev->region, &rects, &nrects);
+        for (gint n = 0; n < nrects; ++n) {
+	        render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
+        }
+        g_free (rects);
+#endif	
+        
 #ifdef USE_CAIRO_IMAGE_SURFACE
 	/* now blit our private surface back to the GDK one */
 
