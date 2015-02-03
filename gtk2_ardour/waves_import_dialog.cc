@@ -114,6 +114,7 @@ WavesImportDialog::_get_import_mode() const
 		break;
 	case ToTrack:
 		import_mode = Editing::ImportToTrack;
+        break;
 	case AsRegion:
 		import_mode = Editing::ImportAsRegion;
 		break;
