@@ -47,6 +47,14 @@ ARDOUR::open_file_dialog (string /*initial_path*/, string /*title*/)
         return string();
 }
 
+vector<string>
+ARDOUR::open_file_dialog (vector<string> extensions, string initial_path, string title)
+{
+	vector<string> ret;
+
+	return ret;
+}
+
 string 
 ARDOUR::choose_folder_dialog (string /*initial_path*/, string /*title*/)
 {
