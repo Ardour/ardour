@@ -24,6 +24,7 @@
 #include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/gtk_ui.h>
 
+#include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/dB.h"
 #include "pbd/memento_command.h"
@@ -495,10 +496,12 @@ RouteUI::solo_press(GdkEventButton* ev)
     int momentary_mask = alt_modifier | Keyboard::TertiaryModifier; /* Alt+Shift */
 
     if (Keyboard::is_context_menu_event (ev)) {
-        if (solo_menu == 0) {
-            build_solo_menu ();
+        if (!ARDOUR::Profile->get_trx ()) {
+            if (solo_menu == 0) {
+                build_solo_menu ();
+            }
+            solo_menu->popup (1, ev->time);
         }
-        solo_menu->popup (1, ev->time);
     } else {
 		if ( ev->button == 1 )
         {
