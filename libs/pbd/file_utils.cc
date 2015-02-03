@@ -379,7 +379,7 @@ path_is_within (std::string const & haystack, std::string needle)
 		}
 
 		needle = Glib::path_get_dirname (needle);
-		if (needle == "." || needle == "/") {
+		if (needle == "." || needle == "/" || Glib::path_skip_root(needle).empty()) {
 			break;
 		}
 	}
