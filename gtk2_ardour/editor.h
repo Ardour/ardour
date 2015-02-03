@@ -286,9 +286,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
 	framecnt_t         get_current_zoom () const { return samples_per_pixel; }
-        void               cycle_zoom_focus ();
+	void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool coarser);
-        void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
+	void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top);
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
 
@@ -363,8 +363,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
-        bool scroll_up_one_track ();
-        bool scroll_down_one_track ();
+	bool scroll_up_one_track ();
+	bool scroll_down_one_track ();
 
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
@@ -419,7 +419,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	               framepos_t&                           pos,
 	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
-        void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
+	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
 
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const;
@@ -459,8 +459,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return _drags;
 	}
 
-        void maybe_autoscroll (bool, bool, bool);
-        bool autoscroll_active() const;
+	void maybe_autoscroll (bool, bool, bool);
+	bool autoscroll_active() const;
 
 	Gdk::Cursor* get_canvas_cursor () const;
 
@@ -570,7 +570,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cancel_visual_state_op (uint32_t n);
 
 	framepos_t         leftmost_frame;
-        framecnt_t         samples_per_pixel;
+	framecnt_t         samples_per_pixel;
 	Editing::ZoomFocus zoom_focus;
 
 	void set_samples_per_pixel (framecnt_t);
@@ -837,11 +837,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	 */
 	ArdourCanvas::Container* _drag_motion_group;
 
-        /* a rect that sits at the bottom of all tracks to act as a drag-no-drop/clickable
+	/* a rect that sits at the bottom of all tracks to act as a drag-no-drop/clickable
 	 * target area.
 	 */
-        ArdourCanvas::Rectangle* _canvas_drop_zone;
-        bool canvas_drop_zone_event (GdkEvent* event);
+	ArdourCanvas::Rectangle* _canvas_drop_zone;
+	bool canvas_drop_zone_event (GdkEvent* event);
 
 	enum RulerType {
 		ruler_metric_timecode = 0,
@@ -878,7 +878,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_just_timecode ();
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
-        void update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+	void update_tempo_based_rulers (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 					ARDOUR::TempoMap::BBTPointList::const_iterator& end);
 	void popup_ruler_menu (framepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
@@ -942,7 +942,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-        void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
+	void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper,
 				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_begin,
 				      ARDOUR::TempoMap::BBTPointList::const_iterator current_bbt_points_end);
 
@@ -1041,9 +1041,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/** the adjustment that controls the overall editor vertical scroll position */
 	Gtk::Adjustment     vertical_adjustment;
-        Gtk::Adjustment     horizontal_adjustment;
+	Gtk::Adjustment     horizontal_adjustment;
 
-        Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
+	Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
 	void reset_controls_layout_width ();
@@ -1119,7 +1119,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	static int _idle_visual_changer (void *arg);
 	int idle_visual_changer ();
-        void visual_changer (const VisualChange&);
+	void visual_changer (const VisualChange&);
 	void ensure_visual_change_idle_handler ();
 
 	/* track views */
@@ -1167,9 +1167,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void register_actions ();
 	void register_region_actions ();
 
-        void load_bindings ();
-        Gtkmm2ext::ActionMap editor_action_map;
-        Gtkmm2ext::Bindings  key_bindings;
+	void load_bindings ();
+	Gtkmm2ext::ActionMap editor_action_map;
+	Gtkmm2ext::Bindings  key_bindings;
 
 	/* CUT/COPY/PASTE */
 
@@ -1363,7 +1363,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	boost::shared_ptr<ARDOUR::AudioTrack> get_nth_selected_audio_track (int nth) const;
 	boost::shared_ptr<ARDOUR::MidiTrack> get_nth_selected_midi_track (int nth) const;
 
-        void toggle_midi_input_active (bool flip_others);
+	void toggle_midi_input_active (bool flip_others);
 
 	ARDOUR::InterThreadInfo* current_interthread_info;
 
@@ -1606,21 +1606,17 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Container* time_line_group;
 
 	void hide_measures ();
-        void draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
+	void draw_measures (ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 			    ARDOUR::TempoMap::BBTPointList::const_iterator& end);
 
 	void new_tempo_section ();
 
-	void mouse_add_new_tempo_event (framepos_t where);
-	void mouse_add_new_meter_event (framepos_t where);
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
 	gint real_remove_tempo_marker (ARDOUR::TempoSection*);
 	gint real_remove_meter_marker (ARDOUR::MeterSection*);
 
-	void edit_tempo_section (ARDOUR::TempoSection*);
-	void edit_meter_section (ARDOUR::MeterSection*);
 	void edit_tempo_marker (TempoMarker&);
 	void edit_meter_marker (MeterMarker&);
 	void edit_control_point (ArdourCanvas::Item*);
@@ -1672,7 +1668,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-        void compute_current_bbt_points (framepos_t left, framepos_t right, 
+	void compute_current_bbt_points (framepos_t left, framepos_t right, 
 					 ARDOUR::TempoMap::BBTPointList::const_iterator& begin,
 					 ARDOUR::TempoMap::BBTPointList::const_iterator& end);
 
@@ -1697,11 +1693,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourDropdown            visible_tracks_selector;
 	ArdourDropdown            zoom_preset_selector;
 
-    int32_t                   _visible_track_count;
-    void build_track_count_menu ();
-    void set_visible_track_count (int32_t);
-    
-    void set_zoom_preset(int64_t);
+	int32_t                   _visible_track_count;
+	void build_track_count_menu ();
+	void set_visible_track_count (int32_t);
+
+	void set_zoom_preset(int64_t);
 
 	Gtk::VBox                toolbar_clock_vbox;
 	Gtk::VBox                toolbar_selection_clock_vbox;
@@ -1793,7 +1789,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	SelectionMemento* _selection_memento;
 
 	void time_selection_changed ();
-        void update_time_selection_display ();
+	void update_time_selection_display ();
 	void track_selection_changed ();
 	void region_selection_changed ();
 	sigc::connection editor_regions_selection_changed_connection;
@@ -1866,15 +1862,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* autoscrolling */
 
-        sigc::connection autoscroll_connection;
-        bool autoscroll_horizontal_allowed;
-        bool autoscroll_vertical_allowed;
-        uint32_t autoscroll_cnt;
-        Gtk::Widget* autoscroll_widget;
-        ArdourCanvas::Rect autoscroll_boundary;
+	sigc::connection autoscroll_connection;
+	bool autoscroll_horizontal_allowed;
+	bool autoscroll_vertical_allowed;
+	uint32_t autoscroll_cnt;
+	Gtk::Widget* autoscroll_widget;
+	ArdourCanvas::Rect autoscroll_boundary;
 
 	bool autoscroll_canvas ();
-        void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
+	void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
@@ -1897,45 +1893,45 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* Drag-n-Drop */
 
 	int convert_drop_to_paths (
-                std::vector<std::string>&           paths,
-                const Glib::RefPtr<Gdk::DragContext>& context,
-                gint                                  x,
-                gint                                  y,
-                const Gtk::SelectionData&             data,
-                guint                                 info,
-                guint                                 time);
+	        std::vector<std::string>&           paths,
+	        const Glib::RefPtr<Gdk::DragContext>& context,
+	        gint                                  x,
+	        gint                                  y,
+	        const Gtk::SelectionData&             data,
+	        guint                                 info,
+	        guint                                 time);
 
 	void track_canvas_drag_data_received (
-                const Glib::RefPtr<Gdk::DragContext>& context,
-                gint                                  x,
-                gint                                  y,
-                const Gtk::SelectionData&             data,
-                guint                                 info,
-                guint                                 time);
+	        const Glib::RefPtr<Gdk::DragContext>& context,
+	        gint                                  x,
+	        gint                                  y,
+	        const Gtk::SelectionData&             data,
+	        guint                                 info,
+	        guint                                 time);
 
 	void drop_paths (
-                const Glib::RefPtr<Gdk::DragContext>& context,
-                gint                                  x,
-                gint                                  y,
-                const Gtk::SelectionData&             data,
-                guint                                 info,
-                guint                                 time);
+	        const Glib::RefPtr<Gdk::DragContext>& context,
+	        gint                                  x,
+	        gint                                  y,
+	        const Gtk::SelectionData&             data,
+	        guint                                 info,
+	        guint                                 time);
 
 	void drop_regions (
-                const Glib::RefPtr<Gdk::DragContext>& context,
-                gint                                  x,
-                gint                                  y,
-                const Gtk::SelectionData&             data,
-                guint                                 info,
-                guint                                 time);
+	        const Glib::RefPtr<Gdk::DragContext>& context,
+	        gint                                  x,
+	        gint                                  y,
+	        const Gtk::SelectionData&             data,
+	        guint                                 info,
+	        guint                                 time);
 
 	void drop_routes (
-                const Glib::RefPtr<Gdk::DragContext>& context,
-                gint                x,
-                gint                y,
-                const Gtk::SelectionData& data,
-                guint               info,
-                guint               time);
+	        const Glib::RefPtr<Gdk::DragContext>& context,
+	        gint                x,
+	        gint                y,
+	        const Gtk::SelectionData& data,
+	        guint               info,
+	        guint               time);
 
 	/* audio export */
 
@@ -1976,12 +1972,12 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void duplicate_range (bool with_dialog);
 
-        /** computes the timeline frame (sample) of an event whose coordinates
+	/** computes the timeline frame (sample) of an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included).
 	 */
 	framepos_t canvas_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
 
-        /** computes the timeline frame (sample) of an event whose coordinates
+	/** computes the timeline frame (sample) of an event whose coordinates
 	 * are in window units (pixels, no scroll offset).
 	 */
 	framepos_t window_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
@@ -2201,7 +2197,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool _following_mixer_selection;
 
 	int time_fx (ARDOUR::RegionList&, float val, bool pitching);
-        void note_edit_done (int, EditNoteDialog*);
+	void note_edit_done (int, EditNoteDialog*);
 	void toggle_sound_midi_notes ();
 
 	/** Flag for a bit of a hack wrt control point selection; see set_selected_control_point_from_click */
