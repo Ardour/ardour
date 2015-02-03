@@ -360,8 +360,10 @@ WTErr WCMRAudioDevice::ResetDevice ()
 	if (err == eNoErr && wasActive)
 		SetActive(true);
 
-	if (err == eNoErr && wasStreaming)
-		SetStreaming(true);
+    if (err == eNoErr && wasStreaming) {
+        m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
+        SetStreaming(true);
+    }
 
 	return err;
 }

@@ -1334,8 +1334,10 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 			ResetDevice();
 			// restore previous state for the device
 			SetActive(true);
-			if (wasStreaming)
+            if (wasStreaming) {
+                m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
 				SetStreaming(true);
+            }
 		}
 #else
 	pParam = pParam;
