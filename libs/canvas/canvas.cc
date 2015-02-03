@@ -795,6 +795,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
         
         gdk_region_get_rectangles (ev->region, &rects, &nrects);
         for (gint n = 0; n < nrects; ++n) {
+	        draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
 	        render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
         }
         g_free (rects);
