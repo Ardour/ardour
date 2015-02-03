@@ -2646,6 +2646,20 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 			if (track->init ()) {
 				goto failed;
 			}
+            
+            // TRACKS considers it's not a USE CASE, it's
+            // a piece of behavior of the session model:
+            //
+            // Gain for a newly created route depends on
+            // the current output_auto_connect mode:
+            //
+            // -18 for Stereo Out mode
+            // -0 Multi Out mode
+            if (Config->get_output_auto_connect() & AutoConnectMaster) {
+                track->set_gain (dB_to_coefficient (-18), 0);
+            } else if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+                track->set_gain (dB_to_coefficient(0), 0);
+            }
 
 			track->use_new_diskstream();
 
