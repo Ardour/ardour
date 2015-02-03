@@ -62,7 +62,8 @@
                 maxvalue="10"
                 step="0.1"
                 pagesize="1.0"/>
-    <EventBox bgnormal="#424242">
+    <EventBox bgnormal="#424242"
+              ui.os.macos="false">
       <VBox>
         <EventBox bgnormal="#000000"
                   height="2"/>
@@ -73,7 +74,6 @@
                     box.pack="end"
                     width="2"/>
         </HBox>
-        
       </VBox>
     </EventBox>
     <EventBox bgnormal="#000000">
