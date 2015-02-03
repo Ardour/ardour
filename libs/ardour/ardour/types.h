@@ -670,19 +670,6 @@ LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformSh
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
 LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
 
-
-static inline ARDOUR::framepos_t
-session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
-{
-	return (ARDOUR::framepos_t) ((long double) session_frame * (long double) speed);
-}
-
-static inline ARDOUR::framepos_t
-track_frame_to_session_frame (ARDOUR::framepos_t track_frame, double speed)
-{
-	return (ARDOUR::framepos_t) ((long double) track_frame / (long double) speed);
-}
-
 /* for now, break the rules and use "using" to make this "global" */
 
 using ARDOUR::framepos_t;

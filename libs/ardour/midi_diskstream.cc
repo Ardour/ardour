@@ -199,12 +199,7 @@ MidiDiskstream::non_realtime_input_change ()
 
 	/* now refill channel buffers */
 
-	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((framepos_t) (_session.transport_frame() * (double) speed()));
-	}
-	else {
-		seek (_session.transport_frame());
-	}
+	seek (_session.transport_frame());
 
 	g_atomic_int_set(const_cast<gint*> (&_frames_pending_write), 0);
 	g_atomic_int_set(const_cast<gint*> (&_num_captured_loops), 0);
@@ -545,7 +540,7 @@ MidiDiskstream::calculate_playback_distance (pframes_t nframes)
 
 	/* XXX: should be doing varispeed stuff once it's implemented in ::process() above */
 
-	if (_actual_speed < 0.0) {
+	if (_session.transport_speed() < 0.0) {
 		return -playback_distance;
 	} else {
 		return playback_distance;
@@ -557,7 +552,7 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 {
 	bool need_butler = false;
 
-	if (_actual_speed < 0.0) {
+	if (_session.transport_speed() < 0.0) {
 		playback_sample -= playback_distance;
 	} else {
 		playback_sample += playback_distance;
@@ -768,7 +763,7 @@ MidiDiskstream::do_refill ()
 {
 	int     ret         = 0;
 	size_t  write_space = _playback_buf->write_space();
-	bool    reversed    = (_visible_speed * _session.transport_speed()) < 0.0f;
+	bool    reversed    = _session.transport_speed() < 0.0f;
 
 	if (write_space == 0) {
 		return 0;

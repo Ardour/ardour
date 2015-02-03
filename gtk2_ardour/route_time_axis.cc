@@ -301,7 +301,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::map_frozen, this), gui_context());
-		track()->SpeedChanged.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::speed_changed, this), gui_context());
 
 		/* pick up the correct freeze state */
 		map_frozen ();
@@ -1047,17 +1046,11 @@ RouteTimeAxisView::reset_samples_per_pixel ()
 void
 RouteTimeAxisView::set_samples_per_pixel (double fpp)
 {
-	double speed = 1.0;
-
-	if (track()) {
-		speed = track()->speed();
-	}
-
 	if (_view) {
-		_view->set_samples_per_pixel (fpp * speed);
+		_view->set_samples_per_pixel (fpp);
 	}
 
-	TimeAxisView::set_samples_per_pixel (fpp * speed);
+	TimeAxisView::set_samples_per_pixel (fpp);
 }
 
 void
@@ -1273,12 +1266,6 @@ RouteTimeAxisView::clear_playlist ()
 }
 
 void
-RouteTimeAxisView::speed_changed ()
-{
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&RouteTimeAxisView::reset_samples_per_pixel, this));
-}
-
-void
 RouteTimeAxisView::update_diskstream_display ()
 {
 	if (!track()) {
@@ -1353,24 +1340,15 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
 void
 RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
-	double speed = 1.0;
-
-	if (track() != 0) {
-		speed = track()->speed();
-	}
-
-	framepos_t const start_adjusted = session_frame_to_track_frame(start, speed);
-	framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
-
 	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
-		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
+		_view->get_selectables (start, end, top, bot, results, within);
 	}
 
 	/* pick up visible automation tracks */
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
-			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
+			(*i)->get_selectables (start, end, top, bot, results, within);
 		}
 	}
 }
@@ -1482,19 +1460,10 @@ RouteTimeAxisView::fade_range (TimeSelection& selection)
 
 	playlist = tr->playlist();
 
-	TimeSelection time (selection);
-	float const speed = tr->speed();
-	if (speed != 1.0f) {
-		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
-			(*i).start = session_frame_to_track_frame((*i).start, speed);
-			(*i).end   = session_frame_to_track_frame((*i).end,   speed);
-		}
-	}
-
         playlist->clear_changes ();
         playlist->clear_owned_changes ();
 
-	playlist->fade_range (time);
+	playlist->fade_range (selection);
 
 	vector<Command*> cmds;
 	playlist->rdiff (cmds);
@@ -1517,23 +1486,14 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	playlist = tr->playlist();
 
-	TimeSelection time (selection.time);
-	float const speed = tr->speed();
-	if (speed != 1.0f) {
-		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
-			(*i).start = session_frame_to_track_frame((*i).start, speed);
-			(*i).end   = session_frame_to_track_frame((*i).end,   speed);
-		}
-	}
-
         playlist->clear_changes ();
         playlist->clear_owned_changes ();
 
 	switch (op) {
 	case Delete:
-		if (playlist->cut (time) != 0) {
+		if (playlist->cut (selection.time) != 0) {
 			if (Config->get_edit_mode() == Ripple)
-				playlist->ripple(time.start(), -time.length(), NULL);
+				playlist->ripple(selection.time.start(), -selection.time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
@@ -1545,10 +1505,10 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		break;
 		
 	case Cut:
-		if ((what_we_got = playlist->cut (time)) != 0) {
+		if ((what_we_got = playlist->cut (selection.time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 			if (Config->get_edit_mode() == Ripple)
-				playlist->ripple(time.start(), -time.length(), NULL);
+				playlist->ripple(selection.time.start(), -selection.time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
@@ -1559,15 +1519,15 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 		break;
 	case Copy:
-		if ((what_we_got = playlist->copy (time)) != 0) {
+		if ((what_we_got = playlist->copy (selection.time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
 		}
 		break;
 
 	case Clear:
-		if ((what_we_got = playlist->cut (time)) != 0) {
+		if ((what_we_got = playlist->cut (selection.time)) != 0) {
 			if (Config->get_edit_mode() == Ripple)
-				playlist->ripple(time.start(), -time.length(), NULL);
+				playlist->ripple(selection.time.start(), -selection.time.length(), NULL);
 				// no need to exclude any regions from rippling here
 
                         vector<Command*> cmds;
@@ -1597,11 +1557,6 @@ RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteConte
 	ctx.counts.increase_n_playlists(type);
 
         DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
-
-	if (track()->speed() != 1.0f) {
-		pos = session_frame_to_track_frame (pos, track()->speed());
-                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
-	}
 
 	/* add multi-paste offset if applicable */
 	std::pair<framepos_t, framepos_t> extent   = (*p)->get_extent();

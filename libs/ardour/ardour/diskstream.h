@@ -114,8 +114,6 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
 	bool           non_layered()  const { return _flags & NonLayered; }
-	bool           reversed()    const { return _actual_speed < 0.0f; }
-	double         speed()       const { return _visible_speed; }
 
 	virtual void punch_in()  {}
 	virtual void punch_out() {}
@@ -176,7 +174,6 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	}
 
 	PBD::Signal0<void>            RecordEnableChanged;
-	PBD::Signal0<void>            SpeedChanged;
 	PBD::Signal0<void>            ReverseChanged;
 	/* Emitted when this diskstream is set to use a different playlist */
 	PBD::Signal0<void>            PlaylistChanged;
@@ -248,7 +245,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	virtual void allocate_temporary_buffers () = 0;
 
-	virtual bool realtime_set_speed (double, bool global_change);
+	virtual bool realtime_set_speed (double);
 
 	std::list<boost::shared_ptr<Source> > _last_capture_sources;
 
@@ -287,8 +284,6 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	boost::shared_ptr<Playlist> _playlist;
 
 	mutable gint _record_enabled;
-	double       _visible_speed;
-	double       _actual_speed;
 	/* items needed for speed change logic */
 	bool         _buffer_reallocation_required;
 	bool         _seek_required;
@@ -317,9 +312,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	IOChange      input_change_pending;
 	framecnt_t    wrap_buffer_size;
 	framecnt_t    speed_buffer_size;
-
-	double        _speed;
-	double        _target_speed;
+	bool         _reversed;
 
 	/** The next frame position that we should be reading from in our playlist */
 	framepos_t     file_frame;

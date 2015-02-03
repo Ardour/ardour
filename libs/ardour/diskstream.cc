@@ -64,8 +64,6 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , i_am_the_modifier (0)
         , _track (0)
         , _record_enabled (0)
-        , _visible_speed (1.0f)
-        , _actual_speed (1.0f)
         , _buffer_reallocation_required (false)
         , _seek_required (false)
         , capture_start_frame (0)
@@ -87,8 +85,6 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , overwrite_queued (false)
         , wrap_buffer_size (0)
         , speed_buffer_size (0)
-        , _speed (1.0)
-        , _target_speed (_speed)
         , file_frame (0)
         , playback_sample (0)
         , in_set_state (false)
@@ -102,8 +98,6 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , i_am_the_modifier (0)
         , _track (0)
         , _record_enabled (0)
-        , _visible_speed (1.0f)
-        , _actual_speed (1.0f)
         , _buffer_reallocation_required (false)
         , _seek_required (false)
         , capture_start_frame (0)
@@ -125,8 +119,6 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , overwrite_queued (false)
         , wrap_buffer_size (0)
         , speed_buffer_size (0)
-        , _speed (1.0)
-        , _target_speed (_speed)
         , file_frame (0)
         , playback_sample (0)
         , in_set_state (false)
@@ -195,46 +187,18 @@ Diskstream::non_realtime_set_speed ()
 	}
 
 	if (_seek_required) {
-		if (speed() != 1.0f || speed() != -1.0f) {
-			seek ((framepos_t) (_session.transport_frame() * (double) speed()), true);
-		}
-		else {
-			seek (_session.transport_frame(), true);
-		}
-
+		seek (_session.transport_frame(), true);
 		_seek_required = false;
 	}
 }
 
 bool
-Diskstream::realtime_set_speed (double sp, bool global)
+Diskstream::realtime_set_speed (double new_speed)
 {
-	bool changed = false;
-	double new_speed = sp * _session.transport_speed();
-
-	if (_visible_speed != sp) {
-		_visible_speed = sp;
-		changed = true;
-	}
-
-	if (new_speed != _actual_speed) {
-
-		framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() *
-                                                                  fabs (new_speed)) + 2;
-
-		if (required_wrap_size > wrap_buffer_size) {
-			_buffer_reallocation_required = true;
-		}
-
-		_actual_speed = new_speed;
-		_target_speed = fabs(_actual_speed);
-	}
-
-	if (changed) {
-		if (!global) {
-			_seek_required = true;
-		}
-		SpeedChanged (); /* EMIT SIGNAL */
+	framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * fabs (new_speed)) + 2;
+	
+	if (required_wrap_size > wrap_buffer_size) {
+		_buffer_reallocation_required = true;
 	}
 
 	return _buffer_reallocation_required || _seek_required;
@@ -465,8 +429,6 @@ Diskstream::get_state ()
 	node->add_property("name", _name);
 	id().print (buf, sizeof (buf));
 	node->add_property("id", buf);
-	snprintf (buf, sizeof(buf), "%f", _visible_speed);
-	node->add_property ("speed", buf);
         node->add_property ("capture-alignment", enum_2_string (_alignment_choice));
 
 	if (_extra_xml) {
@@ -507,14 +469,6 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 
 	if (find_and_use_playlist (prop->value())) {
 		return -1;
-	}
-
-	if ((prop = node.property ("speed")) != 0) {
-		double sp = atof (prop->value().c_str());
-
-		if (realtime_set_speed (sp, false)) {
-			non_realtime_set_speed ();
-		}
 	}
 
         return 0;

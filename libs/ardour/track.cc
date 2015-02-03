@@ -558,7 +558,6 @@ Track::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	ds->PlaylistChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_playlist_changed, this));
 	diskstream_playlist_changed ();
 	ds->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_record_enable_changed, this));
-	ds->SpeedChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_speed_changed, this));
 	ds->AlignmentStyleChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_alignment_style_changed, this));
 }
 
@@ -572,12 +571,6 @@ void
 Track::diskstream_record_enable_changed ()
 {
 	RecordEnableChanged (); /* EMIT SIGNAL */
-}
-
-void
-Track::diskstream_speed_changed ()
-{
-	SpeedChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -738,9 +731,9 @@ Track::transport_looped (framepos_t p)
 }
 
 bool
-Track::realtime_set_speed (double s, bool g)
+Track::realtime_set_speed (double s)
 {
-	return _diskstream->realtime_set_speed (s, g);
+	return _diskstream->realtime_set_speed (s);
 }
 
 void
@@ -753,12 +746,6 @@ bool
 Track::pending_overwrite () const
 {
 	return _diskstream->pending_overwrite ();
-}
-
-double
-Track::speed () const
-{
-	return _diskstream->speed ();
 }
 
 void

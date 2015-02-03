@@ -192,23 +192,13 @@ AudioDiskstream::non_realtime_input_change ()
 
 	/* now refill channel buffers */
 
-	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((framepos_t) (_session.transport_frame() * (double) speed()));
-	} else {
-		seek (_session.transport_frame());
-	}
+	seek (_session.transport_frame());
 }
 
 void
 AudioDiskstream::non_realtime_locate (framepos_t location)
 {
-	/* now refill channel buffers */
-
-	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((framepos_t) (location * (double) speed()));
-	} else {
-		seek (location);
-	}
+	seek (location);
 }
 
 void
@@ -586,10 +576,10 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 
 		framecnt_t necessary_samples;
 
-		/* no varispeed playback if we're recording, because the output .... TBD */
+		/* no reverse of varispeed playback if we're recording, because the output .... TBD */
 
-		if (rec_nframes == 0 && _actual_speed != 1.0f) {
-			necessary_samples = (framecnt_t) ceil ((nframes * fabs (_actual_speed))) + 2;
+		if (rec_nframes == 0 && _session.transport_speed() != 1.0f) {
+			necessary_samples = (framecnt_t) ceil ((nframes * fabs (_session.transport_speed()))) + 2;
 		} else {
 			necessary_samples = nframes;
 		}
@@ -649,9 +639,9 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 			}
 		}
 
-		if (rec_nframes == 0 && _actual_speed != 1.0f && _actual_speed != -1.0f) {
+		if (rec_nframes == 0 && fabs (_session.transport_speed()) != 1.0f) {
 
-			interpolation.set_speed (_target_speed);
+			interpolation.set_speed (fabs (_session.transport_speed()));
 
 			int channel = 0;
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
@@ -666,8 +656,6 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 		} else {
 			playback_distance = nframes;
 		}
-
-		_speed = _target_speed;
 	}
 
 	if (need_disk_signal) {
@@ -720,8 +708,8 @@ AudioDiskstream::calculate_playback_distance (pframes_t nframes)
 
 	if (record_enabled()) {
 		playback_distance = nframes;
-	} else if (_actual_speed != 1.0f && _actual_speed != -1.0f) {
-		interpolation.set_speed (_target_speed);
+	} else if (fabs (_session.transport_speed()) != 1.0) {
+		interpolation.set_speed (fabs (_session.transport_speed()));
 		boost::shared_ptr<ChannelList> c = channels.reader();
 		int channel = 0;
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
@@ -731,7 +719,7 @@ AudioDiskstream::calculate_playback_distance (pframes_t nframes)
 		playback_distance = nframes;
 	}
 
-	if (_actual_speed < 0.0) {
+	if (_session.transport_speed() < 0.0) {
 		return -playback_distance;
 	} else {
 		return playback_distance;
@@ -750,8 +738,8 @@ AudioDiskstream::commit (framecnt_t playback_distance)
 	if (!_io || !_io->active()) {
 		return false;
 	}
-
-	if (_actual_speed < 0.0) {
+	
+	if (_session.transport_speed() < 0.0) {
 		playback_sample -= playback_distance;
 	} else {
 		playback_sample += playback_distance;
@@ -821,7 +809,7 @@ AudioDiskstream::overwrite_existing_buffers ()
 	Sample* mixdown_buffer;
 	float* gain_buffer;
 	int ret = -1;
-	bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
+	bool reversed = _session.transport_speed() < 0.0;
 
 	overwrite_queued = false;
 
@@ -1074,7 +1062,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	int32_t ret = 0;
 	framecnt_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
-	bool const reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
+	bool const reversed = _session.transport_speed() < 0.0f;
 	framecnt_t total_space;
 	framecnt_t zero_fill;
 	uint32_t chan_n;
@@ -1121,7 +1109,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	   the playback buffer is empty.
 	*/
 
-	if ((total_space < disk_read_chunk_frames) && fabs (_actual_speed) < 2.0f) {
+	if ((total_space < disk_read_chunk_frames) && fabs (_session.transport_speed()) < 2.0f) {
 		return 0;
 	}
 
@@ -2026,7 +2014,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 	   when slaving to MTC, Timecode etc.
 	*/
 
-	double const sp = max (fabsf (_actual_speed), 1.2f);
+	double const sp = max (fabsf (_session.transport_speed()), 1.2f);
 	framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * sp) + 2;
 
 	if (required_wrap_size > wrap_buffer_size) {

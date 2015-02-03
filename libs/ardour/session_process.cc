@@ -1125,10 +1125,6 @@ Session::process_event (SessionEvent* ev)
 		overwrite_some_buffers (static_cast<Track*>(ev->ptr));
 		break;
 
-	case SessionEvent::SetTrackSpeed:
-		set_track_speed (static_cast<Track*> (ev->ptr), ev->speed);
-		break;
-
 	case SessionEvent::SetSyncSource:
 		DEBUG_TRACE (DEBUG::Slave, "seen request for new slave\n");
 		use_sync_source (ev->slave);

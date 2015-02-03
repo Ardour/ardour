@@ -847,12 +847,9 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap)
 		return false;
 	}
 
-	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
-	double const speed = rtv.track()->speed ();
-
 	framepos_t const pre_trim_first_frame = _region->first_frame();
 
-	_region->trim_front ((framepos_t) (new_bound * speed));
+	_region->trim_front (new_bound);
 
 	if (no_overlap) {
 		// Get the next region on the left of this region and shrink/expand it.
@@ -883,12 +880,9 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap)
 		return false;
 	}
 
-	RouteTimeAxisView& rtv = dynamic_cast<RouteTimeAxisView&> (trackview);
-	double const speed = rtv.track()->speed ();
-
 	framepos_t const pre_trim_last_frame = _region->last_frame();
 
-	_region->trim_end ((framepos_t) (new_bound * speed));
+	_region->trim_end (new_bound);
 
 	if (no_overlap) {
 		// Get the next region on the right of this region and shrink/expand it.

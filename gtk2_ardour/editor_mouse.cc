@@ -1991,28 +1991,21 @@ Editor::region_view_item_click (AudioRegionView& rv, GdkEventButton* event)
 	*/
 
 	if (Keyboard::modifier_state_contains (event->state, Keyboard::PrimaryModifier)) {
-		TimeAxisView* tv = &rv.get_time_axis_view();
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(tv);
-		double speed = 1.0;
-		if (rtv && rtv->is_track()) {
-			speed = rtv->track()->speed();
-		}
-
 		framepos_t where = get_preferred_edit_position();
 
 		if (where >= 0) {
 
 			if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
-				align_region (rv.region(), SyncPoint, (framepos_t) (where * speed));
+				align_region (rv.region(), SyncPoint, where);
 
 			} else if (Keyboard::modifier_state_equals (event->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 
-				align_region (rv.region(), End, (framepos_t) (where * speed));
+				align_region (rv.region(), End, where);
 
 			} else {
 
-				align_region (rv.region(), Start, (framepos_t) (where * speed));
+				align_region (rv.region(), Start, where);
 			}
 		}
 	}
@@ -2188,11 +2181,10 @@ Editor::mouse_brush_insert_region (RegionView* rv, framepos_t pos)
 	}
 
 	boost::shared_ptr<Playlist> playlist = rtv->playlist();
-	double speed = rtv->track()->speed();
 
 	playlist->clear_changes ();
 	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region(), true));
-	playlist->add_region (new_region, (framepos_t) (pos * speed));
+	playlist->add_region (new_region, pos);
 	_session->add_command (new StatefulDiffCommand (playlist));
 
 	// playlist is frozen, so we have to update manually XXX this is disgusting

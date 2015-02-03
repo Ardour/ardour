@@ -139,10 +139,9 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	framecnt_t get_captured_frames (uint32_t n = 0) const;
 	int set_loop (Location *);
 	void transport_looped (framepos_t);
-	bool realtime_set_speed (double, bool);
+	bool realtime_set_speed (double);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
-	double speed () const;
 	void prepare_to_stop (framepos_t, framepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
@@ -165,7 +164,6 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	/* Emitted when our diskstream is set to use a different playlist */
 	PBD::Signal0<void> PlaylistChanged;
 	PBD::Signal0<void> RecordEnableChanged;
-	PBD::Signal0<void> SpeedChanged;
 	PBD::Signal0<void> AlignmentStyleChanged;
 
   protected:
@@ -227,7 +225,6 @@ private:
 	
 	void diskstream_playlist_changed ();
 	void diskstream_record_enable_changed ();
-	void diskstream_speed_changed ();
 	void diskstream_alignment_style_changed ();
 	void parameter_changed (std::string const & p);
 

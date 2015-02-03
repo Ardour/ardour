@@ -4758,8 +4758,7 @@ Editor::get_regions_at (RegionSelection& rs, framepos_t where, const TrackViewLi
 
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
-				boost::shared_ptr<RegionList> regions = pl->regions_at (
-						(framepos_t) floor ( (double) where * tr->speed()));
+				boost::shared_ptr<RegionList> regions = pl->regions_at (where);
 
 				for (RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 					RegionView* rv = rtv->view()->find_view (*i);
@@ -4791,8 +4790,7 @@ Editor::get_regions_after (RegionSelection& rs, framepos_t where, const TrackVie
 
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
-				boost::shared_ptr<RegionList> regions = pl->regions_touched (
-					(framepos_t) floor ( (double)where * tr->speed()), max_framepos);
+				boost::shared_ptr<RegionList> regions = pl->regions_touched (where, max_framepos);
 
 				for (RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 
