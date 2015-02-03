@@ -392,7 +392,8 @@ ExportProfileManager::init_timespans (XMLNodeList nodes)
 		timespans.push_back (state);
 
 		// Add session as default selection
-		Location * session_range = session.locations()->session_range_location();
+		Location * session_range = (session.get_play_loop () ? session.locations()->auto_loop_location () : 
+														   session.locations()->session_range_location());
 		if (!session_range) { return false; }
 
 		ExportTimespanPtr timespan = handler->add_timespan();
@@ -477,7 +478,8 @@ ExportProfileManager::update_ranges () {
 
 	/* Session */
 
-	Location * session_range = session.locations()->session_range_location();
+	Location * session_range = (session.get_play_loop () ? session.locations()->auto_loop_location () : 
+														   session.locations()->session_range_location());
 	if (session_range) {
 		ranges->push_back (session_range);
 	}
