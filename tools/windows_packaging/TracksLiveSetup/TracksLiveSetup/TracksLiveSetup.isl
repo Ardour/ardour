@@ -7733,6 +7733,7 @@
 		<col def="S255">ISBuildSourcePath</col>
 		<col def="I2">ISIconIndex</col>
 		<row><td>ARPPRODUCTICON.exe</td><td/><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\trackslive.ico</td><td>0</td></row>
+		<row><td>_0E06EFE6_72E0_4DE2_99E6_875E36DC599F</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
 		<row><td>gdb.exe1_8F6698E937CC4407B2318BA27F81AC78.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>gdb.exe1_FBDCDC11332647529BE07B2891D54F19.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>gdb.exe_144847CF8C3E4B199BB2A8D89E54EB26.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
@@ -8189,7 +8190,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<col def="S72">Icon_</col>
 		<col def="I2">IconIndex</col>
 		<col def="I4">ISAttributes</col>
-		<row><td>ardour.File</td><td/><td/><td/><td/><td>0</td><td/></row>
+		<row><td>ardour.File</td><td/><td/><td/><td>_0E06EFE6_72E0_4DE2_99E6_875E36DC599F</td><td>0</td><td/></row>
 	</table>
 
 	<table name="Property">
@@ -8265,7 +8266,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{F0161DF3-4910-4A87-9575-158266156670}</td><td/></row>
+		<row><td>ProductCode</td><td>{9DEE0027-ECB1-469F-B853-981939868DA0}</td><td/></row>
 		<row><td>ProductName</td><td>Tracks Live</td><td/></row>
 		<row><td>ProductVersion</td><td>1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
