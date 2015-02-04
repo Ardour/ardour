@@ -730,7 +730,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 		automation_state_changed (control_ui);
 
-		mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
 		mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 
 		input_controls.push_back (control_ui);
