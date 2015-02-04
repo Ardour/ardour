@@ -26,6 +26,7 @@
 namespace ARDOUR
 {
         std::string save_file_dialog (std::string initial_path = "", std::string title = _("Save"));
+        std::string save_as_file_dialog (std::string, std::string title, bool &);
         std::string open_file_dialog (std::string initial_path = "", std::string title = _("Open"));
         std::vector<std::string> open_file_dialog (std::vector<std::string> extensions, std::string initial_path = "", std::string title = _("Open"));
         std::string choose_folder_dialog (std::string initial_path = "", std::string title = _("Choose Folder"));

@@ -2300,20 +2300,14 @@ ARDOUR_UI::session_auto_save_is_allowed() const
 }
 
 bool
-ARDOUR_UI::save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar)
+ARDOUR_UI::save_as_progress_update (float fraction, int64_t cnt, int64_t total)
 {
 	char buf[256];
 
 	snprintf (buf, sizeof (buf), _("Copied %" PRId64 " of %" PRId64), cnt, total);
 
-	label->set_text (buf);
-	bar->set_fraction (fraction);
-
-	/* process events, redraws, etc. */
-	
-	while (gtk_events_pending()) {
-		gtk_main_iteration ();
-	}
+    _progress_dialog.set_bottom_label (buf);
+    _progress_dialog.set_progress (fraction);
 
 	return true; /* continue with save-as */
 }
@@ -2325,51 +2319,46 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 
-	ArdourDialog save_as_dialog (_("Save As"), true);
-	Gtk::Label label;
-	Gtk::ProgressBar progress_bar;
-
-	save_as_dialog.get_vbox()->pack_start (label);
-	save_as_dialog.get_vbox()->pack_start (progress_bar);
-	label.show ();
-	progress_bar.show ();
+    string save_as_session_full_file_name;
+    bool copy_media;
+    save_as_session_full_file_name = ARDOUR::save_as_file_dialog (Config->get_default_session_parent_dir(),_("Save As"), copy_media);
+    
+    // Button 'Cancel' was pressed
+    if (save_as_session_full_file_name.empty ())
+        return ;
 	
-	Session::SaveAs sa;
-
-        /* THIS IS A HARD-CODED SETTING OF THE OPTIONS FOR SAVE-AS.
-
-           IN REALITY SOME DIALOG NEEDS TO COLLECT THIS INFORMATION
-           FROM THE USER. 
-
-           BASED ON DISCUSSIONS WITH IGOR, TRACKS SHOULD NOT PRESENT
-           THE "copy_external" option, BUT SHOULD ALWAYS SET IT TO
-           TRUE.
-        */
-
-        sa.new_parent_folder = "/tmp";
-	sa.new_name = "foobar";
-	sa.switch_to = true;
-	sa.copy_media = true;
-	sa.copy_external = false;
+    Session::SaveAs sa;
+    sa.new_parent_folder = Glib::path_get_dirname (save_as_session_full_file_name);
+    sa.new_name = basename_nosuffix (save_as_session_full_file_name);
+	sa.copy_media = copy_media;
+   
+    // it should be always so
+    /* 
+        Paul's comment:
+        BASED ON DISCUSSIONS WITH IGOR, TRACKS SHOULD NOT PRESENT
+        THE "copy_external" option, BUT SHOULD ALWAYS SET IT TO
+        TRUE.
+     */
+    sa.switch_to = true;
+	sa.copy_external = true;
 
 	/* this signal will be emitted from within this, the calling thread,
 	 * after every file is copied. It provides information on percentage
 	 * complete (in terms of total data to copy), the number of files
 	 * copied so far, and the total number to copy.
 	 */
-
 	ScopedConnection c;
+	sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3));
 
-	sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3, &label, &progress_bar));
-
-	save_as_dialog.show_all ();
-	save_as_dialog.present ();
-	
+    // Show ProgressDialog
+    _progress_dialog.set_top_label (string_compose (("Saving session: %1"), sa.new_name));
+    _progress_dialog.show ();
 	if (_session->save_as (sa)) {
 		/* ERROR MESSAGE */
 		MessageDialog msg (string_compose (_("Save As failed: %1"), sa.failure_message));
 		msg.run ();
 	}
+    _progress_dialog.hide ();
 }
 
 /** Ask the user for the name of a new snapshot and then take it.

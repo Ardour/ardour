@@ -87,7 +87,24 @@ ARDOUR::save_file_dialog (std::string initial_path, std::string title)
         
         return stdPath;
 }
+
+std::string
+ARDOUR::save_as_file_dialog (std::string initial_path, std::string title, bool& copy_media)
+{
+    NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
     
+    //NP: we should find some gentle way to do this
+    NSString *nsDefaultPath = [NSString stringWithUTF8String:initial_path.c_str()];
+    // Call the Objective-C method using Objective-C syntax
+    BOOL temp_copy_media;
+    NSString *nsPath = [FileDialog class_save_as_file_dialog:nsTitle withArg2:nsDefaultPath withArg3: &temp_copy_media];
+    
+    std::string stdPath = [nsPath UTF8String];
+    copy_media = [temp_copy_media BOOL];
+    
+    return stdPath;
+}
+
 std::string
 ARDOUR::choose_folder_dialog(std::string initial_path, std::string title)
 {
@@ -209,6 +226,45 @@ ARDOUR::choose_folder_dialog(std::string initial_path, std::string title)
     
     return @"";
 }
+
+/* On save-as session */
++ (NSString*) class_save_as_file_dialog:(NSString *)title withArg2:(NSString *)initial_path withArg3:(BOOL *)copy_media
+{
+    NSSavePanel* saveDlg = [NSSavePanel savePanel];
+    [saveDlg setTitle:title];
+    [saveDlg setCanCreateDirectories:YES];
+    
+    NSFileManager *fm = [[NSFileManager alloc] init];
+    BOOL isDir;
+    BOOL exists = [fm fileExistsAtPath:initial_path isDirectory:&isDir];
+    
+    if(!exists)
+        initial_path = NSHomeDirectory();
+    
+    [saveDlg setDirectoryURL : [NSURL fileURLWithPath:initial_path]];
+    
+    // add checkBox
+    NSButton *button = [[NSButton alloc] init];
+    [button setButtonType:NSSwitchButton];
+    button.title = NSLocalizedString(@"Copy external media", @"");
+    [button sizeToFit];
+    [saveDlg setAccessoryView:button];
+    saveDlg.delegate = self;
+    
+    // Display the dialog box.  If the OK pressed,
+    // process the files.
+    if ( [saveDlg runModal] == NSOKButton )
+    {
+        // Gets list of all files selected
+        NSURL *saveURL = [saveDlg URL];
+        NSString *filePath = [saveURL path];
+        *copy_media = (((NSButton*)saveDlg.accessoryView).state == NSOnState);
+        return filePath;
+    }
+    
+    return @"";
+}
+
 
 + (NSString*) class_choose_folder_dialog:(NSString *)title withArg2:(NSString *)initial_path
 {

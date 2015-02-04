@@ -17,6 +17,7 @@
 
 // The Objective-C member function you want to call from C++
 + (NSString*) class_save_file_dialog:(NSString *) title withArg2:(NSString *)path;
++ (NSString*) class_save_as_file_dialog:(NSString *) title withArg2:(NSString *)path withArg3: (BOOL*) copy_media;
 + (NSString*) class_open_file_dialog:(NSString *) title withArg2:(NSString *)path;
 + (NSString*) class_choose_folder_dialog:(NSString *) title withArg2:(NSString *)path;
 
