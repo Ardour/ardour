@@ -99,3 +99,10 @@ WavesMessageDialog::_on_button_clicked (WavesButton* clicked_button)
 	    response (Gtk::RESPONSE_NO);
 	}
 }
+
+void
+WavesMessageDialog::set_markup (std::string markup)
+{
+    _message_label.set_use_markup (true);
+    _message_label.set_markup (markup);
+}

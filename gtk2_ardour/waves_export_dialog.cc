@@ -309,17 +309,9 @@ WavesExportDialog::update_warnings_and_example_filename ()
 void
 WavesExportDialog::show_conflicting_files (WavesButton*)
 {
-	ArdourDialog dialog (_("Files that will be overwritten"), true);
-
-	Gtk::Label label ("", Gtk::ALIGN_LEFT);
-	label.set_use_markup (true);
-	label.set_markup (list_files_string);
-
-	dialog.get_vbox()->pack_start (label);
-	dialog.add_button ("OK", 0);
-	dialog.show_all_children ();
-
-	dialog.run();
+	WavesMessageDialog message_dialog ("", "");
+    message_dialog.set_markup ("Files that will be overwritten\n" + list_files_string);
+	message_dialog.run();
 }
 
 void

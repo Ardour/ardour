@@ -42,6 +42,8 @@ public:
 	  BUTTON_YES = 1 << 6,
 	  BUTTON_NO = 1 << 7,
 	};
+    
+    void set_markup (std::string markup);
 
 protected:
 	void init (const std::string& title,
