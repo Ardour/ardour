@@ -2319,9 +2319,12 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 
-    string save_as_session_full_file_name;
+    string save_as_session_full_file_name="";
     bool copy_media;
-    save_as_session_full_file_name = ARDOUR::save_as_file_dialog (Config->get_default_session_parent_dir(),_("Save As"), copy_media);
+	#ifdef __APPLE__
+		save_as_session_full_file_name = ARDOUR::save_as_file_dialog (Config->get_default_session_parent_dir(),_("Save As"), copy_media);
+	#endif
+    
     
     // Button 'Cancel' was pressed
     if (save_as_session_full_file_name.empty ())
