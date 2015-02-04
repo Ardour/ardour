@@ -1496,15 +1496,6 @@ TracksControlPanel::on_multi_out (WavesButton*)
         return;
     }
     
-    ARDOUR::Session* session = ARDOUR_UI::instance()->the_session();
-    if (!session) {
-        return;
-    }
-    
-    if (session->record_status () == Session::Recording && session->have_rec_enabled_track ()) {
-        return;
-    }
-    
     Config->set_output_auto_connect(AutoConnectPhysical);
 }
 
@@ -1512,15 +1503,6 @@ void
 TracksControlPanel::on_stereo_out (WavesButton*)
 {
     if (Config->get_output_auto_connect() & AutoConnectMaster) {
-        return;
-    }
-    
-    ARDOUR::Session* session = ARDOUR_UI::instance()->the_session();
-    if (!session) {
-        return;
-    }
-    
-    if (session->record_status () == Session::Recording && session->have_rec_enabled_track ()) {
         return;
     }
     
