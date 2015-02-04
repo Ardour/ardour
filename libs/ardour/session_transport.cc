@@ -475,41 +475,41 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 	   the priority each flag.
 	*/
 	
-	if (autoreturn & LastLocate) {
+    if (jump_to < 0 && (autoreturn & RangeSelectionStart)) {
+        if (!_range_selection.empty()) {
+            jump_to = _range_selection.from;
+        } else {
+            if (transport_rolling()) {
+                /* Range selection no longer exists, but we're playing,
+                 so do nothing. Next stop will put us where
+                 we need to be.
+                 */
+                return false;
+            }
+        }
+    }
+    
+    if (jump_to < 0 && (autoreturn & Loop)) {
+        /* don't try to handle loop play when synced to JACK */
+        
+        if (!synced_to_engine()) {
+            Location *location = _locations->auto_loop_location();
+            
+            if (location) {
+                jump_to = location->start();
+            } 
+        }
+    }
+    
+    if (jump_to < 0 && (autoreturn & RegionSelectionStart)) {
+        if (!_object_selection.empty()) {
+            jump_to = _object_selection.from;
+        }
+    }
+    
+	if (jump_to < 0 && autoreturn & LastLocate) {
 		jump_to = _last_roll_location;
 	}
-	
-	if (jump_to < 0 && (autoreturn & RangeSelectionStart)) {
-		if (!_range_selection.empty()) {
-			jump_to = _range_selection.from;
-		} else {
-                        if (transport_rolling()) {
-                                /* Range selection no longer exists, but we're playing, 
-                                   so do nothing. Next stop will put us where
-                                   we need to be.
-                                */
-                                return false;
-                        }
-                }
-	}
-	
-	if (jump_to < 0 && (autoreturn & Loop)) {
-		/* don't try to handle loop play when synced to JACK */
-		
-		if (!synced_to_engine()) {
-			Location *location = _locations->auto_loop_location();
-			
-			if (location) {
-				jump_to = location->start();
-			} 
-		}
-	}
-	
-	if (jump_to < 0 && (autoreturn & RegionSelectionStart)) {
-		if (!_object_selection.empty()) {
-			jump_to = _object_selection.from;
-		}
-	} 
 
 	return jump_to >= 0;
 }

@@ -64,6 +64,12 @@
         <menuitem action='GotoStart'/>
         <menuitem action='GotoEnd'/>
       </menu>
+      <menu action="PlayHeadModes">
+        <menuitem action='play-from-selection'/>
+        <menuitem action='play-from-last-position'/>
+        <menuitem action='play-loop'/>
+        <menuitem action='play-from-selected-region'/>
+      </menu>
       <separator/>
       <menu action="PlayMenu">
 

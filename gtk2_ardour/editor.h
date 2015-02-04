@@ -336,6 +336,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	/* playhead/screen stuff */
 
+    void update_playhead_modes ();
+    void toggle_playhead_mode (ARDOUR::AutoReturnTarget t);
+    
 	void set_stationary_playhead (bool yn);
 	void toggle_stationary_playhead ();
 	bool stationary_playhead() const { return _stationary_playhead; }

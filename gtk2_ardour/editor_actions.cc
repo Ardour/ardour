@@ -121,6 +121,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_menu_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
 	ActionManager::register_action (editor_menu_actions, X_("MovePlayHeadMenu"), _("Playhead"));
+    ActionManager::register_action (editor_menu_actions, X_("PlayHeadModes"), _("Playhead Modes"));
 	ActionManager::register_action (editor_menu_actions, X_("PlayMenu"), _("Playhead Mode"));
 	ActionManager::register_action (editor_menu_actions, X_("PrimaryClockMenu"), _("Clock"));
 	ActionManager::register_action (editor_menu_actions, X_("Pullup"), _("Pullup / Pulldown"));
@@ -247,8 +248,13 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
 	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
 	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Marker"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
-	reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
-
+    reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+    
+    toggle_reg_sens (editor_actions, "play-from-selection", _("Play from Selection"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), RangeSelectionStart));
+    toggle_reg_sens (editor_actions, "play-from-last-position", _("Play from Last Position"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), LastLocate));
+    toggle_reg_sens (editor_actions, "play-loop", _("Play Loop"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), Loop));
+    toggle_reg_sens (editor_actions, "play-from-selected-region", _("Play from Selected Region"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), RegionSelectionStart));
+    
 	act = reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	reg_sens (editor_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
         add_marker_button.set_related_action (act);
@@ -1782,7 +1788,7 @@ Editor::parameter_changed (std::string p)
             if (act) {
 
                 Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-                if (tact->get_active () != s) {
+                if (tact && tact->get_active () != s) {
                     tact->set_active (s);
                 }
             }
@@ -1798,6 +1804,9 @@ Editor::parameter_changed (std::string p)
             }
             
         }
+    } else if (p == "auto-return-target-list") {
+        
+        update_playhead_modes ();
     }
 }
 

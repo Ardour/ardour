@@ -3782,6 +3782,130 @@ Editor::set_show_measures (bool yn)
 }
 
 void
+Editor::update_playhead_modes ()
+{
+    AutoReturnTarget art = Config->get_auto_return_target_list ();
+    
+    {   // RangeSelectionStart
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("play-from-selection"));
+        
+        if (act) {
+            Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+            
+            if (tact ) {
+                tact->set_active(art & RangeSelectionStart);
+            }
+        }
+    }
+    
+    {   // LastLocate
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("play-from-last-position"));
+        
+        if (act) {
+            Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+            
+            if (tact) {
+                tact->set_active(art & LastLocate);
+            }
+        }
+    }
+    
+    {   // Loop
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("play-loop"));
+        
+        if (act) {
+            Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+            
+            if (tact) {
+                tact->set_active(art & Loop);
+            }
+        }
+    }
+    
+    {   // RegionSelectionStart
+        Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("play-from-selected-region"));
+        
+        if (act) {
+            Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+            
+            if (tact) {
+                tact->set_active(art & RegionSelectionStart);
+            }
+        }
+    }
+}
+
+void
+Editor::toggle_playhead_mode (AutoReturnTarget t)
+{
+    AutoReturnTarget art = Config->get_auto_return_target_list ();
+    
+    Glib::RefPtr<Action> act;
+    switch (t) {
+        case RangeSelectionStart:
+            act = ActionManager::get_action (X_("Editor"), X_("play-from-selection"));
+            
+            if (act) {
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                
+                if (tact ) {
+                    if (tact->get_active() ) {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art | t));
+                    } else {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art & ~t));
+                    }
+                }
+            }
+            break;
+        case LastLocate:
+            act = ActionManager::get_action (X_("Editor"), X_("play-from-last-position"));
+            
+            if (act) {
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                
+                if (tact) {
+                    if (tact->get_active() ) {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art | t));
+                    } else {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art & ~t));
+                    }
+                }
+            }
+            break;
+        case Loop:
+            act = ActionManager::get_action (X_("Editor"), X_("play-loop"));
+            
+            if (act) {
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                
+                if (tact) {
+                    if (tact->get_active() ) {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art | t));
+                    } else {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art & ~t));
+                    }
+                }
+            }
+            break;
+        case RegionSelectionStart:
+            act = ActionManager::get_action (X_("Editor"), X_("play-from-selected-region"));
+            
+            if (act) {
+                Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+                
+                if (tact) {
+                    if (tact->get_active() ) {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art | t));
+                    } else {
+                        Config->set_auto_return_target_list (AutoReturnTarget (art & ~t));
+                    }
+                }
+            }
+            break;
+    }
+}
+
+void
 Editor::toggle_follow_playhead ()
 {
 	RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
