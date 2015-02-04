@@ -50,31 +50,45 @@
           <VBox id="timespan_selector_home"/>
           <VBox id="channel_selector_home"/>
         </EventBox>
-        <VBox spacing="10">
-          <VBox height="22">
-            <HBox id="warning_widget">
-              <Label id="warn_label"
-                 style="generic_control"
-                 usemarkup="true"
-                 box.fill="true"
-                 box.expand="true"
-                 fgnormal="#E2974B"/>
-              <HBox id="list_files_widget" spacing="10">
-                <Button id="list_files_button"
-                        style="generic_button"
-                        box.pack="end"
-                        text="List Files"/>
-                <Label style="generic_control"
-                       text="Some already existing files will be overwritten."
-                       box.pack="end"
-                       fgnormal="#E2974B"/>
-              </HBox>
+        <VBox spacing="10"
+              box.fill="false"
+              box.expand="">
+          <VBox spacing="10"
+                id="warning_widget">
+            <HBox box.expand="true">
+                <Label id="error_label"
+                       style="generic_control"
+                       usemarkup="true"
+                       box.pack="start"
+                       fgnormal="#FF0000"/>
             </HBox>
-            <VBox id="export_progress_widget">
+            <HBox box.expand="true">
+                <Label id="warn_label"
+                       style="generic_control"
+                       usemarkup="true"
+                       box.pack="start"
+                       fgnormal="#E2974B"/>
+            </HBox>
+            <VBox height="22">
+                <HBox id="list_files_widget"
+                      spacing="10"
+                      box.expand="true">
+                    <Label style="generic_control"
+                           text="Some already existing files will be overwritten."
+                           box.pack="start"
+                           fgnormal="#E2974B"/>
+                    <Button id="list_files_button"
+                            style="generic_button"
+                            box.pack="end"
+                            text="List Files"/>
+                </HBox>
+            </VBox>
+          </VBox>
+          <VBox id="export_progress_widget">
               <ProgressBar id="export_progress_bar"
                            height="22"
-                           bgnormal="#6B6B6B"/>
-            </VBox>
+                           bgnormal="#6B6B6B"
+                           bgselected="#20B2AA"/>
           </VBox>
           <HBox spacing="10" >
             <Button id="export_button"
@@ -92,7 +106,7 @@
                     noshowall="true"
                     text="Stop Export"/>
           </HBox>
-        </VBox>
+        </VBox>        
       </VBox>
     </VBox>
   </EventBox>

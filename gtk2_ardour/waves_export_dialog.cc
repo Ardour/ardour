@@ -49,6 +49,7 @@ WavesExportDialog::WavesExportDialog (PublicEditor & editor, std::string title, 
   , _stop_export_button (get_waves_button("stop_export_button"))
   , _export_progress_widget (get_widget ("export_progress_widget"))
   , _warning_widget (get_widget ("warning_widget"))
+  , _error_label (get_label ("error_label"))
   , _warn_label (get_label ("warn_label"))
   , _list_files_widget (get_widget ("list_files_widget"))
   , _file_format_selector_button (get_waves_button ("file_format_selector_button"))
@@ -272,6 +273,8 @@ WavesExportDialog::update_warnings_and_example_filename ()
 
 	warn_string = "";
 	_warn_label.set_text (warn_string);
+    error_string="";
+    _error_label.set_text (error_string);
 
 	_list_files_widget.hide ();
 	list_files_string = "";
@@ -366,6 +369,7 @@ WavesExportDialog::show_progress ()
 
 	_export_progress_bar.set_fraction (0.0);
 	_warning_widget.hide_all();
+    _error_label.hide();
 	_export_progress_widget.show_all ();
 	progress_connection = Glib::signal_timeout().connect (sigc::mem_fun(*this, &WavesExportDialog::progress_timeout), 100);
 
@@ -422,13 +426,13 @@ WavesExportDialog::add_error (string const & text)
 {
 	_export_button.set_sensitive (false);
 
-	if (warn_string.empty()) {
-		warn_string = _("Error: ") + text;
+	if (!error_string.empty()) {
+		error_string = _("Error: ") + text;
 	} else {
-		warn_string = _("Error: ") + text + "\n" + warn_string;
+		error_string = _("Error: ") + text + "\n" + error_string;
 	}
 
-	_warn_label.set_text (warn_string);
+	_error_label.set_text (error_string);
 }
 
 void

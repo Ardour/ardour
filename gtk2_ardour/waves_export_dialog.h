@@ -113,6 +113,7 @@ class WavesExportDialog : public WavesDialog, public PBD::ScopedConnectionList
 
 	/* Warning area */
 
+    std::string       error_string;
 	std::string       warn_string;
 	std::string       list_files_string;
 
@@ -135,6 +136,7 @@ class WavesExportDialog : public WavesDialog, public PBD::ScopedConnectionList
 	WavesButton& _stop_export_button;
 	Gtk::Widget& _export_progress_widget;
 	Gtk::Widget& _warning_widget;
+    Gtk::Label&  _error_label;
 	Gtk::Label&  _warn_label;
 	Gtk::Widget& _list_files_widget;
     WavesButton& _file_format_selector_button;
