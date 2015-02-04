@@ -65,16 +65,32 @@ cp -r "/Volumes/$build_dmg_name/TracksLive.app" "/Volumes/$installer_mount_name/
 #copy manual to template
 cp "${AD}/tracks/tools/Tracks Live Manual/Tracks Live Manual.pdf" "/Volumes/$installer_mount_name/"
 #copy script for 'preferences cleanup' to template
-cp "${OSX_INSTALLER_ROOT}/Tracks Preferences CleanUp" "/Volumes/$installer_mount_name/"
+cp -r "${OSX_INSTALLER_ROOT}/Tracks Preferences CleanUp.app" "/Volumes/$installer_mount_name/"
+
+# dmg window dimensions
+dmg_width=500
+dmg_height=300
+dmg_topleft_x=200
+dmg_topleft_y=200
+dmg_bottomright_x=`expr $dmg_topleft_x + $dmg_width`
+dmg_bottomright_y=`expr $dmg_topleft_y + $dmg_height`
 
 echo '
     tell application "Finder"
         tell disk "'${installer_mount_name}'"
         open
+            set current view of container window to icon view
+            set toolbar visible of container window to false
+            set statusbar visible of container window to false
+            set sidebar width of container window to {0}
+            set the bounds of container window to {'${dmg_topleft_x}', '${dmg_topleft_y}', '${dmg_bottomright_x}', '${dmg_bottomright_y}'}
+            set theViewOptions to the icon view options of container window
+            set arrangement of theViewOptions to not arranged
+            set icon size of theViewOptions to 80
             set position of item "'${installer_binary_name}'" of container window to {135, 108}
             set position of item "Applications" of container window to {365, 108}
-            set position of item "Tracks Live Manual.pdf" of container window to {80, 220}
-            set position of item "Tracks Preferences CleanUp" of container window to {420, 220}
+            set position of item "Tracks Live Manual.pdf" of container window to {80, 215}
+            set position of item "Tracks Preferences CleanUp.app" of container window to {420, 215}
             # set position of hidden files
             set position of item ".background" of container window to {250, 0}
             set position of item ".VolumeIcon" of container window to {250, 0}
@@ -83,7 +99,9 @@ echo '
             set position of item ".apdisk" of container window to {250, 0}
             set position of item ".DS_Store" of container window to {250, 0}
             set position of item ".fseventsd" of container window to {250, 0}
-            close
+            update without registering applications
+            delay 5
+        close
         end tell
     end tell
 ' | osascript
