@@ -507,6 +507,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	gpm.set_type (rt->meter_type());
 	
 	master_mute_button.set_visible (route()->is_master());
+	get_container ("track_buttons_home").set_visible (!route()->is_master());
 
 	if (_mixer_owned && (route()->is_master() || route()->is_monitor())) {
 

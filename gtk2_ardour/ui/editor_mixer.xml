@@ -5,7 +5,8 @@
          gainmeterscript="inspector_gain_meter.xml">
   <HBox>
     <VBox>
-      <VBox box.fill="true" box.expand="true">
+      <VBox box.fill="true"
+            box.expand="true">
         <VBox id="color_palette_home"
               noshowall="true">
           <EventBox id="color_palette_button_home"
@@ -28,32 +29,27 @@
                           width="19"
                           height="19"
                           normalicon="inspector_color_1"
-                          activeicon="inspector_color_1_active"
-                          _prelighticon="inspector_color_1_prelight"/>
+                          activeicon="inspector_color_1_active"/>
               <iconbutton id="color_button_2"
                           width="19"
                           height="19"
                           normalicon="inspector_color_2"
-                          activeicon="inspector_color_2_active"
-                          _prelighticon="inspector_color_2_prelight"/>
+                          activeicon="inspector_color_2_active"/>
               <iconbutton id="color_button_3"
                           width="19"
                           height="19"
                           normalicon="inspector_color_3"
-                          activeicon="inspector_color_3_active"
-                          _prelighticon="inspector_color_3_prelight"/>
+                          activeicon="inspector_color_3_active"/>
               <iconbutton id="color_button_4"
                           width="19"
                           height="19"
                           normalicon="inspector_color_4"
-                          activeicon="inspector_color_4_active"
-                          _prelighticon="inspector_color_4_prelight"/>
+                          activeicon="inspector_color_4_active"/>
               <iconbutton id="color_button_5"
                           width="19"
                           height="19"
                           normalicon="inspector_color_5"
-                          activeicon="inspector_color_5_active"
-                          _prelighticon="inspector_color_5_prelight"/>
+                          activeicon="inspector_color_5_active"/>
             </HBox>
             <HBox>
               <HBox width="1"/>
@@ -61,32 +57,27 @@
                           width="19"
                           height="19"
                           normalicon="inspector_color_6"
-                          activeicon="inspector_color_6_active"
-                          _prelighticon="inspector_color_6_prelight"/>
+                          activeicon="inspector_color_6_active"/>
               <iconbutton id="color_button_7"
                           width="19"
                           height="19"
                           normalicon="inspector_color_7"
-                          activeicon="inspector_color_7_active"
-                          _prelighticon="inspector_color_7_prelight"/>
+                          activeicon="inspector_color_7_active"/>
               <iconbutton id="color_button_8"
                           width="19"
                           height="19"
                           normalicon="inspector_color_8"
-                          activeicon="inspector_color_8_active"
-                          _prelighticon="inspector_color_8_prelight"/>
+                          activeicon="inspector_color_8_active"/>
               <iconbutton id="color_button_9"
                           width="19"
                           height="19"
                           normalicon="inspector_color_9"
-                          activeicon="inspector_color_9_active"
-                          _prelighticon="inspector_color_9_prelight"/>
+                          activeicon="inspector_color_9_active"/>
               <iconbutton id="color_button_10"
                           width="19"
                           height="19"
                           normalicon="inspector_color_10"
-                          activeicon="inspector_color_10_active"
-                          _prelighticon="inspector_color_10_prelight"/>
+                          activeicon="inspector_color_10_active"/>
             </HBox>
             <HBox>
               <HBox width="1"/>
@@ -94,35 +85,32 @@
                           width="19"
                           height="19"
                           normalicon="inspector_color_11"
-                          activeicon="inspector_color_11_active"
-                          _prelighticon="inspector_color_11_prelight"/>
+                          activeicon="inspector_color_11_active"/>
               <iconbutton id="color_button_12"
                           width="19"
                           height="19"
                           normalicon="inspector_color_12"
-                          activeicon="inspector_color_12_active"
-                          _prelighticon="inspector_color_12_prelight"/>
+                          activeicon="inspector_color_12_active"/>
               <iconbutton id="color_button_13"
                           width="19"
                           height="19"
                           normalicon="inspector_color_13"
-                          activeicon="inspector_color_13_active"
-                          _prelighticon="inspector_color_13_prelight"/>
+                          activeicon="inspector_color_13_active"/>
               <iconbutton id="color_button_14"
                           width="19"
                           height="19"
                           normalicon="inspector_color_14"
-                          activeicon="inspector_color_14_active"
-                          _prelighticon="inspector_color_14_prelight"/>
+                          activeicon="inspector_color_14_active"/>
               <iconbutton id="color_button_15"
                           width="19"
                           height="19"
                           normalicon="inspector_color_15"
-                          activeicon="inspector_color_15_active"
-                          _prelighticon="inspector_color_15_prelight"/>
+                          activeicon="inspector_color_15_active"/>
             </HBox>
             <VBox height="1"/>
           </VBox>
+          <EventBox bgnormal="#000000"
+                    height="1"/>
         </VBox>
         <EventBox bgnormal="#000000">
           <VBox>
@@ -130,8 +118,9 @@
                         width="97"
                         height="17"
                         normalicon="inspector_info_close"
-                        activeicon="inspector_info_open"
-                        box.padding="1"/>
+                        activeicon="inspector_info_open"/>
+            <EventBox bgnormal="#000000"
+                      height="1"/>
             <VBox id="info_panel_home"
                   noshowall="true"
                   visible="false">
@@ -173,107 +162,95 @@
           <HBox id="level_meter_home"/>
           <Vbox>
             <HBox id="gain_meter_home"/>
-            <HBox id="invert_button_box"
-                  visible="false"/>
-            <VBox>
+            <VBox id="track_buttons_home"
+                  visible="true"
+                  noshowall="true">
               <HBox>
-                <VBox id="track_buttons_home"
-                      visible="true"
-                      noshowall="true">
-                  <HBox>
-                    <iconbutton id="rec_enable_button"
-                                width="49"
-                                height="21"
-                                normalicon="inspector_record"
-                                activeicon="inspector_record_active"
-                                _prelighticon="inspector_record_prelight"
-                                visible="false"
-                                noshowall="true"/>
-                    <iconbutton id="monitor_input_button"
-                                width="47"
-                                height="21"
-                                normalicon="inspector_monitor_input"
-                                activeicon="inspector_monitor_input_active"
-                                _prelighticon="inspector_monitor_input_prelight"
-                                visible="false"
-                                noshowall="true"/>
-                  </HBox>
-                  <HBox>
-                    <iconbutton id="mute_button"
-                                width="49"
-                                height="21"
-                                normalicon="inspector_mute"
-                                activeicon="inspector_mute_active"
-                                implicitactiveicon="inspector_mute_implicit"
-                                _prelighticon="inspector_mute_prelight"
-                                visible="false"
-                                noshowall="true"/>
-
-                    <iconbutton id="solo_button"
-                                width="47"
-                                height="21"
-                                normalicon="inspector_solo"
-                                activeicon="inspector_solo_active"
-                                implicitactiveicon="inspector_solo_safe"
-                                _prelighticon="inspector_solo_prelight"
-                                visible="false"
-                                noshowall="true"/>
-                  </HBox>
-                </VBox>
+                <iconbutton id="rec_enable_button"
+                            width="47"
+                            height="20"
+                            normalicon="inspector_record"
+                            activeicon="inspector_record_active"
+                            visible="false"
+                            noshowall="true"
+                            box.padding="1"/>
+                <iconbutton id="monitor_input_button"
+                            width="47"
+                            height="20"
+                            normalicon="inspector_monitor_input"
+                            activeicon="inspector_monitor_input_active"
+                            visible="false"
+                            noshowall="true"/>
               </HBox>
-              <iconbutton id="master_mute_button"
-                          width="95"
-                          height="41"
-                          normalicon="inspector_master_mute"
-                          activeicon="inspector_master_mute_active"
-                          _prelighticon="inspector_master_mute_prelight"
-                          visible="false"
-                          noshowall="true"/>
+              <HBox height="1"/>
               <HBox>
-                <EventBox width="1"
-                          bgnormal="#383838"/>
-                <EventBox id="name_label_home">
-                  <HBox>
-                    <Button id="name_button"
+                <iconbutton id="mute_button"
+                            width="47"
+                            height="20"
+                            normalicon="inspector_mute"
+                            activeicon="inspector_mute_active"
+                            implicitactiveicon="inspector_mute_implicit"
+                            visible="false"
+                            noshowall="true"
+                            box.padding="1"/>
+                <iconbutton id="solo_button"
+                            width="47"
+                            height="20"
+                            normalicon="inspector_solo"
+                            activeicon="inspector_solo_active"
+                            implicitactiveicon="inspector_solo_safe"
+                            visible="false"
+                            noshowall="true"/>
+              </HBox>
+            </VBox>
+            <iconbutton id="master_mute_button"
+                        width="95"
+                        height="41"
+                        normalicon="inspector_master_mute"
+                        activeicon="inspector_master_mute_active"
+                        visible="false"
+                        noshowall="true"/>
+            <HBox height="1"/>
+            <HBox>
+              <EventBox width="1"
+                        bgnormal="#383838"/>
+              <EventBox id="name_label_home">
+                <HBox>
+                  <Button id="name_button"
+                          width="95"
+                          height="47"
+                          fgnormal="#D7D7D7"
+                          fghover="#D7D7D7"
+                          fgactive="#D7D7D7"
+                          winfont ="Arial 10"
+                          macfont ="Helvetica 10"/>
+                  <EventBox id="name_entry_eventbox"
                             width="95"
                             height="47"
-                            fgnormal="#D7D7D7"
-                            fghover="#D7D7D7"
-                            fgactive="#D7D7D7"
-                            winfont ="Arial 10"
-                            macfont ="Helvetica 10"
-                            textcolornormal="#ffffff"
-                            textcoloractive="#ffffff"
-                            textcolorselected="#ffffff"/>
-                    <EventBox id="name_entry_eventbox"
-                              width="95"
-                              height="47"
-                              noshowall="true"
-                              visible="false">
-                      <Layout width="97"
-                              height="47"
-                              color="#383838">
-                        <FocusEntry id="name_entry"
-                                    x="7"
-                                    y="13"
-                                    width="80"
-                                    height="20"
-                                    fgnormal="#ffffff"
-                                    winfont ="Arial 10"
-                                    macfont ="Helvetica 10"
-                                    cssname="EditorTrackNameDisplay"
-                                    textcolornormal="#ffffff"
-                                    textcoloractive="#ffffff"
-                                    textcolorselected="#ffffff"
-                                    noshowall="true"
-                                    visible="false"/>
-                      </Layout>
-                    </EventBox>
-                  </HBox>
-                </EventBox>
-              </HBox>
-
-            </VBox>
+                            noshowall="true"
+                            visible="false">
+                    <Layout width="97"
+                            height="47"
+                            color="#383838">
+                      <FocusEntry id="name_entry"
+                                  x="7"
+                                  y="13"
+                                  width="80"
+                                  height="20"
+                                  fgnormal="#ffffff"
+                                  winfont ="Arial 10"
+                                  macfont ="Helvetica 10"
+                                  cssname="EditorTrackNameDisplay"
+                                  textcolornormal="#ffffff"
+                                  textcoloractive="#ffffff"
+                                  textcolorselected="#ffffff"
+                                  noshowall="true"
+                                  visible="false"/>
+                    </Layout>
+                  </EventBox>
+                </HBox>
+              </EventBox>
+            </HBox>
             <HBox visible="false"
                   noshowall="true">
               <Button id="show_sends_button"/>
@@ -285,15 +262,14 @@
           </Vbox>
         </VBox>
       </VBox>
-
       <Icon id="rec_enable_indicator_on"
             source="rec_enable_indicator_on"
             ui.orphan="true"/>
-
       <Icon id="rec_enable_indicator_off"
             source="rec_enable_indicator_off"
             ui.orphan="true"/>
     </VBox>
-    <EventBox bgnormal="#000000" width="2"/>
+    <EventBox bgnormal="#000000"
+              width="2"/>
   </HBox>
 </RouteUI>
