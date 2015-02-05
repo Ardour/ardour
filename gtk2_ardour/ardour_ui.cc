@@ -2320,16 +2320,28 @@ ARDOUR_UI::save_session_as ()
 	}
 
     string save_as_session_full_file_name="";
-    bool copy_media;
-	#ifdef __APPLE__
+    bool copy_media = false;
+
+	#if defined (__APPLE__)
 		save_as_session_full_file_name = ARDOUR::save_as_file_dialog (Config->get_default_session_parent_dir(),_("Save As"), copy_media);
+		 // Button 'Cancel' was pressed
+		if (save_as_session_full_file_name.empty ())
+			return ;
+	#else
+		save_as_session_full_file_name = ARDOUR::save_file_dialog (Config->get_default_session_parent_dir(),_("Save As"));
+		// Button 'Cancel' was pressed
+		if (save_as_session_full_file_name.empty ())
+			return ;
+		WavesMessageDialog ask_for_copy_media ("","Do you want to copy external media?", WavesMessageDialog::BUTTON_YES | WavesMessageDialog::BUTTON_NO);
+		ask_for_copy_media.set_position (Gtk::WIN_POS_CENTER);
+		ask_for_copy_media.set_keep_above (true);
+		int response = ask_for_copy_media.run ();
+		if (response == Gtk::RESPONSE_YES)
+			copy_media = true;
+		else 
+			copy_media = false;
 	#endif
-    
-    
-    // Button 'Cancel' was pressed
-    if (save_as_session_full_file_name.empty ())
-        return ;
-	
+
     Session::SaveAs sa;
     sa.new_parent_folder = Glib::path_get_dirname (save_as_session_full_file_name);
     sa.new_name = basename_nosuffix (save_as_session_full_file_name);
