@@ -767,10 +767,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case StreamItem:
-			if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
-				_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
-				return true;
-			}
+			//in the past, we created a new midi region here, but perhaps that is best left to the Draw mode
 			break;
 
 		case AutomationTrackItem:
