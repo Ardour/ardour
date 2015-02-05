@@ -4507,6 +4507,15 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 	_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("range drag rect"));
 }
 
+RangeMarkerBarDrag::~RangeMarkerBarDrag()
+{
+	/* normal canvas items will be cleaned up when their parent group is deleted. But 
+	   this item is created as the child of a long-lived parent group, and so we
+	   need to explicitly delete it.
+	*/
+	delete _drag_rect;
+}
+
 void
 RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
@@ -4714,9 +4723,12 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-RangeMarkerBarDrag::aborted (bool)
+RangeMarkerBarDrag::aborted (bool movement_occured)
 {
-	/* XXX: TODO */
+	if (movement_occured) {
+		_crect->hide ();
+		_drag_rect->hide ();
+	}
 }
 
 void

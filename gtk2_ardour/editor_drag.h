@@ -995,7 +995,8 @@ public:
 	};
 
 	RangeMarkerBarDrag (Editor *, ArdourCanvas::Item *, Operation);
-
+	~RangeMarkerBarDrag ();
+	
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
