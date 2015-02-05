@@ -75,6 +75,8 @@ UI::UI (string namestr, int *argc, char ***argv)
 {
 	theMain = new Main (argc, argv);
 
+	pthread_set_name ("gui");
+	
 	_active = false;
 
 	if (!theGtkUI) {
