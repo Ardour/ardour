@@ -1409,13 +1409,13 @@ Session::set_auto_loop_location (Location* location)
 }
 
 void
-Session::update_loop (Location* loc)
+Session::update_loop (Location*)
 {
     set_dirty ();
 }
 
 void
-Session::update_marks (Location* loc)
+Session::update_marks (Location*)
 {
     set_dirty ();
 }
@@ -1423,32 +1423,21 @@ Session::update_marks (Location* loc)
 void
 Session::update_skips (Location* loc, bool consolidate)
 {
-        Locations::LocationList skips;
+	Locations::LocationList skips;
 
         if (consolidate) {
-
-                skips = consolidate_skips (loc);
-
-        } else {
-                Locations::LocationList all_locations = _locations->list ();
-                
-                for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ++l) {
-                        if ((*l)->is_skip ()) {
-                                skips.push_back (*l);
-                        }
-                }
+                consolidate_skips (loc);
         }
 
-        sync_locations_to_skips (skips);
-    
-    set_dirty ();
+        sync_locations_to_skips ();
+        
+        set_dirty ();
 }
 
-Locations::LocationList
+void
 Session::consolidate_skips (Location* loc)
 {
         Locations::LocationList all_locations = _locations->list ();
-        Locations::LocationList skips;
 
         for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ) {
 
@@ -1479,34 +1468,39 @@ Session::consolidate_skips (Location* loc)
                         break;
 
                 case Evoral::OverlapNone:
-                        skips.push_back (*l);
                         ++l;
                         break;
                 }
         }
-
-        /* add the new one, which now covers the maximal appropriate range based on overlaps with existing skips */
-
-        skips.push_back (loc);
-
-        return skips;
 }
 
 void
-Session::sync_locations_to_skips (const Locations::LocationList& locations)
+Session::sync_locations_to_skips ()
 {
-	clear_events (SessionEvent::Skip);
+	/* This happens asynchronously (in the audioengine thread). After the clear is done, we will call
+	 * Session::_sync_locations_to_skips() from the audioengine thread.
+	 */
+	clear_events (SessionEvent::Skip, boost::bind (&Session::_sync_locations_to_skips, this));
+}
 
-	for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-                
+void
+Session::_sync_locations_to_skips ()
+{
+	/* called as a callback after existing Skip events have been cleared from a realtime audioengine thread */
+
+	Locations::LocationList const & locs (_locations->list());
+
+	for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
+		
 		Location* location = *i;
-                
-		if (location->is_skipping()) {
+		
+		if (location->is_skip() && location->is_skipping()) {
 			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
 			queue_event (ev);
 		}
 	}
 }
+
 
 void
 Session::location_added (Location *location)
