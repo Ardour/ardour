@@ -52,15 +52,31 @@ SessionEvent::create_per_thread_pool (const std::string& name, uint32_t nitems)
 	pool->create_per_thread_pool (name, sizeof (SessionEvent), nitems);
 }
 
+SessionEvent::SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn, bool yn2, bool yn3)
+	: type (t)
+	, action (a)
+	, action_frame (when)
+	, target_frame (where)
+	, speed (spd)
+	, yes_or_no (yn)
+	, second_yes_or_no (yn2)
+	, third_yes_or_no (yn3)
+	, event_loop (0)
+{
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("NEW SESSION EVENT, type = %1 action = %2\n", enum_2_string (type), enum_2_string (action)));
+}
+
 void *
 SessionEvent::operator new (size_t)
 {
 	CrossThreadPool* p = pool->per_thread_pool ();
 	SessionEvent* ev = static_cast<SessionEvent*> (p->alloc ());
-	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3\n", pthread_name(), p->name(), ev));
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3 pool size %4 free %5 used %6\n", pthread_name(), p->name(), ev,
+	                                                   p->total(), p->available(), p->used()));
+	                                                   
 #ifndef NDEBUG
 	if (DEBUG::SessionEvents & PBD::debug_bits) {
-		stacktrace (cerr, 40);
+		// stacktrace (cerr, 40);
 	}
 #endif
 	ev->own_pool = p;
@@ -74,13 +90,13 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
 
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
-		             "%1 Deleting SessionEvent @ %2 ev thread pool = %3 ev pool = %4\n",
-		             pthread_name(), ev, p->name(), ev->own_pool->name()
+		             "%1 Deleting SessionEvent @ %2 type %3 action %4 ev thread pool = %5 ev pool = %6 size %7 free %8 used %9\n",
+		             pthread_name(), ev, enum_2_string (ev->type), enum_2_string (ev->action), p->name(), ev->own_pool->name(), ev->own_pool->total(), ev->own_pool->available(), ev->own_pool->used()
 		             ));
 
 #ifndef NDEBUG
 	if (DEBUG::SessionEvents & PBD::debug_bits) {
-		stacktrace (cerr, 40);
+		// stacktrace (cerr, 40);
 	}
 #endif
 
@@ -88,6 +104,10 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 		p->release (ptr);
 	} else {
 		ev->own_pool->push (ev);
+		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 was wrong thread for this pool, pushed event onto pending list, will be deleted on next alloc from %2 pool size %3 free %4 used %5 pending %6\n",
+		                                                   pthread_name(), ev->own_pool->name(),
+		                                                   ev->own_pool->total(), ev->own_pool->available(), ev->own_pool->used(),
+		                                                   ev->own_pool->pending_size()));
 	}
 }
 
@@ -119,6 +139,24 @@ SessionEventManager::clear_events (SessionEvent::Type type)
 	queue_event (ev);
 }
 
+void
+SessionEventManager::clear_events (SessionEvent::Type type, boost::function<void (void)> after)
+{
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Clear, SessionEvent::Immediate, 0, 0);
+	ev->rt_slot = after;
+
+	/* in the calling thread, after the clear is complete, arrange to flush things from the event
+	   pool pending list (i.e. to make sure they are really back in the free list and available
+	   for future events).
+	*/
+
+	ev->event_loop = PBD::EventLoop::get_event_loop_for_thread ();
+	if (ev->event_loop) {
+		ev->rt_return = boost::bind (&CrossThreadPool::flush_pending_with_ev, ev->event_pool(), _1);
+	}
+
+	queue_event (ev);
+}
 
 void
 SessionEventManager::dump_events () const
@@ -159,7 +197,14 @@ SessionEventManager::merge_event (SessionEvent* ev)
 
 	case SessionEvent::Clear:
 		_clear_event_type (ev->type);
-		delete ev;
+		/* run any additional realtime callback */
+		ev->rt_slot ();
+		if (ev->event_loop) {
+			/* run non-realtime callback (in some other thread) */
+			ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev));
+		} else {
+			delete ev;
+		}
 		return;
 
 	case SessionEvent::Add:
