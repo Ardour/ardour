@@ -396,6 +396,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void commit_reversible_selection_op () = 0;
 	virtual void begin_reversible_command (std::string cmd_name) = 0;
 	virtual void begin_reversible_command (GQuark) = 0;
+	virtual void abort_reversible_command () = 0;
 	virtual void commit_reversible_command () = 0;
 
 	virtual MouseCursors const * cursors () const = 0;

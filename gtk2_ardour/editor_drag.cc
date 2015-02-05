@@ -108,6 +108,7 @@ DragManager::abort ()
 	}
 
 	_drags.clear ();
+	_editor->abort_reversible_command();
 
 	_ending = false;
 }

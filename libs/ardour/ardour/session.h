@@ -747,6 +747,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void begin_reversible_command (const std::string& cmd_name);
 	void begin_reversible_command (GQuark);
+	void abort_reversible_command ();
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {

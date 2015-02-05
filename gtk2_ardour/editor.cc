@@ -3429,6 +3429,15 @@ Editor::begin_reversible_command (GQuark q)
 }
 
 void
+Editor::abort_reversible_command ()
+{
+	if (_session) {
+		before.clear();
+		_session->abort_reversible_command ();
+	}
+}
+
+void
 Editor::commit_reversible_command ()
 {
 	if (_session) {

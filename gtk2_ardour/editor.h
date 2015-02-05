@@ -452,6 +452,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void redo_selection_op ();
 	void begin_reversible_command (std::string cmd_name);
 	void begin_reversible_command (GQuark);
+	void abort_reversible_command ();
 	void commit_reversible_command ();
 
 	DragManager* drags () const {

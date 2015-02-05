@@ -2434,6 +2434,17 @@ Session::begin_reversible_command (GQuark q)
 }
 
 void
+Session::abort_reversible_command ()
+{
+	if (_current_trans != 0) {
+		_current_trans->clear();
+		delete _current_trans;
+		_current_trans = 0;
+		_current_trans_quarks.clear();
+	}
+}
+
+void
 Session::commit_reversible_command (Command *cmd)
 {
 	assert (_current_trans);
