@@ -1268,7 +1268,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 	}
 
 	PatchChangePtr p (new Evoral::PatchChange<TimeType> (time, channel, program, bank));
-	assert(id);
+	assert(n->property ("id"));
 	p->set_id (id);
 	return p;
 }
