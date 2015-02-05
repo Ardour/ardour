@@ -2012,7 +2012,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
 				const LV2_Atom* const atom = (const LV2_Atom*)&body[0];
-				if (!lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
+				if (!lv2_evbuf_write(&i, nframes - 1, 0, atom->type, atom->size,
 				                (const uint8_t*)(atom + 1))) {
 					error << "Failed to write data to LV2 event buffer\n";
 				}
