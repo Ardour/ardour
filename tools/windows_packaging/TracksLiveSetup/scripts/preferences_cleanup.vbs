@@ -17,4 +17,12 @@ Call DeleteFile (path_to_preferences+"instant.xml")
 Call DeleteFile (path_to_preferences+"sfdb")
 Call DeleteFile (path_to_preferences+"ui_config")
 
+path_to_export = path_to_preferences+"export"
+Dim fso
+Set fso = CreateObject("Scripting.FileSystemObject")
+If (fso.FolderExists(path_to_export)) Then
+	fso.DeleteFolder(path_to_export)
+End If
+
+
 

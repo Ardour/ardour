@@ -2059,10 +2059,10 @@
 		<row><td>ISSelfRegisterFinalize</td><td>1</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterFinalize</td><td/><td/></row>
 		<row><td>ISSetAllUsers</td><td>257</td><td>SetAllUsers.dll</td><td>SetAllUsers</td><td/><td/></row>
 		<row><td>ISUnSelfRegisterFiles</td><td>3073</td><td>ISSELFREG.DLL</td><td>ISUnSelfRegisterFiles</td><td/><td/></row>
+		<row><td>NewCustomAction1</td><td>1094</td><td>NewBinary27</td><td/><td/><td/></row>
 		<row><td>SetARPINSTALLLOCATION</td><td>51</td><td>ARPINSTALLLOCATION</td><td>[INSTALLDIR]</td><td/><td/></row>
 		<row><td>SetAllUsersProfileNT</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%SystemRoot]\Profiles\All Users</td><td/><td/></row>
 		<row><td>ShowMsiLog</td><td>226</td><td>SystemFolder</td><td>[SystemFolder]notepad.exe "[MsiLogFileLocation]"</td><td/><td>Shows Property-driven MSI Log</td></row>
-		<row><td>remove_preferences</td><td>1094</td><td>NewBinary27</td><td/><td/><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%ALLUSERSPROFILE]</td><td/><td/></row>
 		<row><td>setUserProfileNT</td><td>51</td><td>USERPROFILE</td><td>[%USERPROFILE]</td><td/><td/></row>
 	</table>
@@ -7816,6 +7816,7 @@
 		<row><td>MsiConfigureServices</td><td>VersionMsi &gt;= "5.00"</td><td>5850</td><td>MSI5 MsiConfigureServices</td><td/></row>
 		<row><td>MsiPublishAssemblies</td><td/><td>6250</td><td>MsiPublishAssemblies</td><td/></row>
 		<row><td>MsiUnpublishAssemblies</td><td/><td>1750</td><td>MsiUnpublishAssemblies</td><td/></row>
+		<row><td>NewCustomAction1</td><td>REMOVE="ALL"</td><td>6405</td><td/><td/></row>
 		<row><td>PatchFiles</td><td/><td>4090</td><td>PatchFiles</td><td/></row>
 		<row><td>ProcessComponents</td><td/><td>1600</td><td>ProcessComponents</td><td/></row>
 		<row><td>PublishComponents</td><td/><td>6200</td><td>PublishComponents</td><td/></row>
@@ -7862,7 +7863,6 @@
 		<row><td>WriteEnvironmentStrings</td><td/><td>5200</td><td>WriteEnvironmentStrings</td><td/></row>
 		<row><td>WriteIniValues</td><td/><td>5100</td><td>WriteIniValues</td><td/></row>
 		<row><td>WriteRegistryValues</td><td/><td>5000</td><td>WriteRegistryValues</td><td/></row>
-		<row><td>remove_preferences</td><td>REMOVE="ALL"</td><td>6405</td><td/><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>VersionNT &gt;= 500</td><td>980</td><td/><td/></row>
 		<row><td>setUserProfileNT</td><td>VersionNT</td><td>960</td><td/><td/></row>
 	</table>
@@ -8266,7 +8266,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{9DEE0027-ECB1-469F-B853-981939868DA0}</td><td/></row>
+		<row><td>ProductCode</td><td>{35C93E18-B736-475C-8DA5-733D170D4F3F}</td><td/></row>
 		<row><td>ProductName</td><td>Tracks Live</td><td/></row>
 		<row><td>ProductVersion</td><td>1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
