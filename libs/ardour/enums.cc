@@ -85,6 +85,7 @@ setup_enum_writer ()
 	ShuttleUnits _ShuttleUnits;
 	Session::RecordState _Session_RecordState;
 	SessionEvent::Type _SessionEvent_Type;
+	SessionEvent::Action _SessionEvent_Action;
 	TimecodeFormat _Session_TimecodeFormat;
 	Session::PullupFormat _Session_PullupFormat;
 	FadeShape _FadeShape;
@@ -387,6 +388,12 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoopDeclick);
 	REGISTER (_SessionEvent_Type);
 
+	REGISTER_CLASS_ENUM (SessionEvent, Add);
+	REGISTER_CLASS_ENUM (SessionEvent, Remove);
+	REGISTER_CLASS_ENUM (SessionEvent, Replace);
+	REGISTER_CLASS_ENUM (SessionEvent, Clear);
+	REGISTER (_SessionEvent_Action);
+	
 	REGISTER_CLASS_ENUM (Session, Stopped);
 	REGISTER_CLASS_ENUM (Session, Waiting);
 	REGISTER_CLASS_ENUM (Session, Running);
