@@ -363,6 +363,7 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
         , left_drag_handle (0)
         , right_drag_handle (0)
         , frame_position (start_pos)
+    , _selected (false)
 	, _type (type)
 	, _shown (false)
         , _height (height)
@@ -518,16 +519,19 @@ Marker::canvas_height_set (double h)
 void
 Marker::set_selected (bool yn)
 {
+    if(yn != _selected) {
+        _selected = yn;
         /* only show selection status for non-skip (range) markers */
         if (_location && !_location->is_skip()) {
-                if (yn) {
-                        set_color (ARDOUR_UI::config()->get_canvasvar_LocationSelected());
-                } else {
-                        reset_color ();
-                }
+            if (yn) {
+                set_color (ARDOUR_UI::config()->get_canvasvar_LocationSelected());
+            } else {
+                reset_color ();
+            }
         }
     
-    ARDOUR_UI::instance()->set_session_dirty ();
+        ARDOUR_UI::instance()->set_session_dirty ();
+    }
 }
 
 void

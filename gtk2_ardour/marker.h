@@ -85,12 +85,13 @@ class Marker : public sigc::trackable
 	void set_name (const std::string&);
 
         void set_selected (bool yn);
-        void set_color (ArdourCanvas::Color);
-        void reset_color ();
+    bool selected () const { return _selected; }
+    void set_color (ArdourCanvas::Color);
+    void reset_color ();
         
 	void set_position (framepos_t start, framepos_t end = -1) {
                 return _set_position (start, end);
-        }
+    }
 
 	framepos_t position() const { return frame_position; }
 
@@ -139,6 +140,7 @@ class Marker : public sigc::trackable
 	double        unit_position;
 	framepos_t    frame_position;
 	double       _shift;
+    bool         _selected;
 	Type         _type;
 	int           name_height;
 	bool         _shown;
