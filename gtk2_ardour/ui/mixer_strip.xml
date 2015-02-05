@@ -2,85 +2,81 @@
 
 <RouteUI gainmeterscript="mixer_gain_meter.xml">
   <HBox>
-    <EventBox bgnormal="#383838" bgactive="#424242">
+    <EventBox bgnormal="#383838"
+              bgactive="#424242">
       <VBox>
-        <EventBox id="panners_home" bgnormal="#383838" bgactive="#424242" height="59"/>
+        <EventBox id="panners_home"
+                  bgnormal="#383838"
+                  bgactive="#424242"
+                  height="59"/>
         <HBox id="level_meter_home"/>
         <Vbox>
           <HBox id="gain_meter_home"/>
-            <EventBox bgnormal="#383838" bgactive="#424242">
-            <VBox>
-              
-              <HBox>
-                <iconbutton id="rec_enable_button"
-                            width="28"
-                            height="21"
-                            normalicon="mixer_record"
-                            activeicon="mixer_record_active"
-                            _prelighticon="mixer_record_prelight"/>
-                
-                <iconbutton id="monitor_input_button"
-                            width="30"
-                            height="21"
-                            normalicon="mixer_monitor_input"
-                            activeicon="mixer_monitor_input_active"
-                            _prelighticon="mixer_monitor_input_prelight"/>
-              </HBox>
-              
-              <HBox>
-                <iconbutton id="mute_button"
-                            width="28"
-                            height="21"
-                            normalicon="mixer_mute"
-                            activeicon="mixer_mute_active"
-                            implicitactiveicon="mixer_mute_implicit"
-                            _prelighticon="mixer_mute_prelight"/>
-                
-                <iconbutton id="solo_button"
-                            width="30"
-                            height="21"
-                            normalicon="mixer_solo"
-                            activeicon="mixer_solo_active"
-                            implicitactiveicon="mixer_solo_safe"
-                            _prelighticon="mixer_solo_prelight"/>
-              </HBox>
-              
-              
-              <EventBox id="name_label_home">
-              <HBox>
-                  <Button id="name_button"
-                          width="57"
-                          height="28"
-                          fgnormal="#ffffff"
-                          fgactive="#ffffff"
-                          fghover="#ffffff"
-                          winfont ="Arial 10"
-                          macfont ="Helvetica 10"/>
-                  <EventBox id="name_entry_eventbox"
+          <EventBox bgnormal="#383838"
+                    bgactive="#424242">
+            <HBox>
+              <VBox box.padding="1"
+                    spacing="1">
+                <HBox  spacing="1">
+                  <iconbutton id="rec_enable_button"
+                              width="28"
+                              height="20"
+                              normalicon="mixer_record"
+                              activeicon="mixer_record_active"/>
+                  <iconbutton id="monitor_input_button"
+                              width="28"
+                              height="20"
+                              normalicon="mixer_monitor_input"
+                              activeicon="mixer_monitor_input_active"/>
+                </HBox>
+                <HBox spacing="1">
+                  <iconbutton id="mute_button"
+                              width="28"
+                              height="20"
+                              normalicon="mixer_mute"
+                              activeicon="mixer_mute_active"
+                              implicitactiveicon="mixer_mute_implicit"/>
+                  <iconbutton id="solo_button"
+                              width="28"
+                              height="20"
+                              normalicon="mixer_solo"
+                              activeicon="mixer_solo_active"
+                              implicitactiveicon="mixer_solo_safe"/>
+                </HBox>
+                <EventBox id="name_label_home">
+                  <HBox>
+                    <Button id="name_button"
                             width="57"
                             height="28"
-                            visible="false">
-                  <FocusEntry id="name_entry"
+                            fgnormal="#ffffff"
+                            fgactive="#ffffff"
+                            fghover="#ffffff"
+                            winfont ="Arial 10"
+                            macfont ="Helvetica 10"/>
+                    <EventBox id="name_entry_eventbox"
                               width="57"
                               height="28"
-                              fgnormal="#ffffff"
-                              winfont ="Arial 10"
-                              macfont ="Helvetica 10"
-                              cssname="EditorTrackNameDisplay"
-                              textcolornormal="#ffffff"
-                              textcoloractive="#ffffff"
-                              textcolorselected="#ffffff"
-                              noshowall="true"
-                              visible="false"/>
-                  </EventBox>
-              </HBox>
-              </EventBox>
-                
-              
-            </VBox>
+                              visible="false">
+                      <FocusEntry id="name_entry"
+                                  width="57"
+                                  height="28"
+                                  fgnormal="#ffffff"
+                                  winfont ="Arial 10"
+                                  macfont ="Helvetica 10"
+                                  cssname="EditorTrackNameDisplay"
+                                  textcolornormal="#ffffff"
+                                  textcoloractive="#ffffff"
+                                  textcolorselected="#ffffff"
+                                  noshowall="true"
+                                  visible="false"/>
+                    </EventBox>
+                  </HBox>
+                </EventBox>
+              </VBox>
+            </HBox>
           </EventBox>
         </Vbox>
-        
+        <HBox height="1"/>
       </VBox>
     </EventBox>
     <EventBox bgnormal="#000000"
@@ -98,7 +94,7 @@
   <Icon id="rec_enable_indicator_on"
         source="rec_enable_indicator_on"
         ui.orphan="true"/>
-  
+
   <Icon id="rec_enable_indicator_off"
         source="rec_enable_indicator_off"
         ui.orphan="true"/>

@@ -23,7 +23,9 @@
           <HBox height="25"/>
           <EventBox bgnormal="#000000"
                     height="1"/>
-          <Hbox id="mixer_strips_home"/>
+          <Hbox id="mixer_strips_home" height="383"/>
+          <EventBox bgnormal="#000000"
+                    height="1"/>
         </VBox>
       </EventBox>        
     </ScrolledWindow>
