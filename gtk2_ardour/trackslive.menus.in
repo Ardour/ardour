@@ -70,13 +70,6 @@
         <menuitem action='play-loop'/>
         <menuitem action='play-from-selected-region'/>
       </menu>
-      <separator/>
-      <menu action="PlayMenu">
-
-      </menu>
-
-
-      <separator/>
     </menu>
 
     <menu name='Edit' action='Edit'>

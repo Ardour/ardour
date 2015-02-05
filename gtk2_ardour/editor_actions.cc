@@ -122,7 +122,6 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
 	ActionManager::register_action (editor_menu_actions, X_("MovePlayHeadMenu"), _("Playhead"));
     ActionManager::register_action (editor_menu_actions, X_("PlayHeadModes"), _("Playhead Modes"));
-	ActionManager::register_action (editor_menu_actions, X_("PlayMenu"), _("Playhead Mode"));
 	ActionManager::register_action (editor_menu_actions, X_("PrimaryClockMenu"), _("Clock"));
 	ActionManager::register_action (editor_menu_actions, X_("Pullup"), _("Pullup / Pulldown"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionEditOps"), _("Region operations"));
