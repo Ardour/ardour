@@ -3748,6 +3748,10 @@ ARDOUR_UI::add_audio_track_instantly ()
 		return;
 	}
     
+    if (_session->actively_recording () && _session->have_rec_enabled_track () ) {
+        return;
+    }
+    
 	if (_add_tracks_dialog->is_visible()) {
 		/* we're already doing this */
 		return;
