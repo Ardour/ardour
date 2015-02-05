@@ -13,7 +13,16 @@
          horzalignment="start"/>
   <VBox width="104">
     <VBox id="empty_panel"
-          noshowall="true"/>
+          height="100"
+          noshowall="true">
+      <Label text="No MIDI Marker\ncurrently selected"
+             horzalignment="center"
+             vertalignment="center"
+             justify="center"
+             borderwidth="10"
+             box.fill="true"
+             box.expand="true"/>
+    </VBox>
     <VBox id="inspector_panel"
           visible="false"
           noshowall="true">
