@@ -197,8 +197,10 @@ SessionEventManager::merge_event (SessionEvent* ev)
 
 	case SessionEvent::Clear:
 		_clear_event_type (ev->type);
-		/* run any additional realtime callback */
-		ev->rt_slot ();
+		/* run any additional realtime callback, if any */
+		if (ev->rt_slot) {
+			ev->rt_slot ();
+		}
 		if (ev->event_loop) {
 			/* run non-realtime callback (in some other thread) */
 			ev->event_loop->call_slot (MISSING_INVALIDATOR, boost::bind (ev->rt_return, ev));
