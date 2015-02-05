@@ -3520,9 +3520,20 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MarkerDrag::aborted (bool)
+MarkerDrag::aborted (bool movement_occured)
 {
-	/* XXX: TODO */
+	if (!movement_occured) {
+		return;
+	}
+
+	for (CopiedLocationInfo::iterator x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+
+		/* move all markers to their original location */
+		
+		for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
+			(*m)->set_position ((*m)->location()->start(), (*m)->location()->end());
+		}
+	}
 }
 
 
