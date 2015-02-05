@@ -79,7 +79,7 @@ class /*LIBPBD_API*/ RingBuffer
 		g_atomic_int_set (&write_idx,  (g_atomic_int_get(&write_idx) + cnt) & size_mask);
 	}                
 
-	guint write_space () {
+	guint write_space () const {
 		guint w, r;
 		
 		w = g_atomic_int_get (&write_idx);
@@ -94,7 +94,7 @@ class /*LIBPBD_API*/ RingBuffer
 		}
 	}
 	
-	guint read_space () {
+	guint read_space () const {
 		guint w, r;
 		
 		w = g_atomic_int_get (&write_idx);
