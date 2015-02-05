@@ -705,6 +705,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
 		RegionView* rv = i->view;
+		double y_delta;
+
+		y_delta = 0;
 
 		if (rv->region()->locked() || rv->region()->video_locked()) {
 			continue;
@@ -724,7 +727,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			/* move the item so that it continues to appear at the
 			   same location now that its parent has changed.
 			*/
-			rvg->move (rv_canvas_offset - dmg_canvas_offset);
+                        rvg->move (rv_canvas_offset - dmg_canvas_offset);
 		}
 
 		/* If we have moved tracks, we'll fudge the layer delta so that the
@@ -746,7 +749,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			} else {
 				track_index = _time_axis_views.size() - 1 + delta_time_axis_view;
 			}
-			 
+			
 			if (track_index < 0 || track_index >= (int) _time_axis_views.size()) {
 				continue;
 			}
@@ -806,10 +809,12 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				 * equivalent coordinate space as the trackview
 				 * we are now dragging over.
 				 */
+
+				y_delta = track_origin.y - rv->get_canvas_group()->canvas_origin().y;
 				
-				/* Now move the region view */
-				rv->move (x_delta, track_origin.y - rv->get_canvas_group()->canvas_origin().y);
 			}
+
+
 		} else {
 
 			/* Only move the region into the empty dropzone at the bottom if the pointer
@@ -826,10 +831,13 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 					last_track_bottom_edge = 0;
 				}
 
-				rv->move (x_delta, last_track_bottom_edge - rv->get_canvas_group()->canvas_origin().y);
+				y_delta = last_track_bottom_edge - rv->get_canvas_group()->canvas_origin().y;
 				i->time_axis_view = -1;
 			}
 		}
+		
+		/* Now move the region view */
+		rv->move (x_delta, y_delta);
 		
 	} /* foreach region */
 
