@@ -41,7 +41,10 @@ class LIBPBD_API Pool
 	virtual void release (void *);
 	
 	std::string name() const { return _name; }
-
+	guint available() const { return free_list.read_space(); }
+	guint used() const { return free_list.bufsize() - available(); }
+	guint total() const { return free_list.bufsize(); }
+	
   protected:
 	RingBuffer<void*> free_list; ///< a list of pointers to free items within block
 	std::string _name;
@@ -104,7 +107,11 @@ class LIBPBD_API CrossThreadPool : public Pool
 	}
 
 	bool empty ();
-	
+	guint pending_size() const { return pending.read_space(); }
+
+	void flush_pending ();
+	void flush_pending_with_ev (void*);
+
   private:
 	RingBuffer<void*> pending;
 	PerThreadPool* _parent;
