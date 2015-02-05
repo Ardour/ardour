@@ -19,7 +19,7 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleTypeIconFile</key>
-			<string>typeIcon.icns</string>
+			<string>session_track.icns</string>
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
