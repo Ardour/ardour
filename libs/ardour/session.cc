@@ -1424,10 +1424,10 @@ Session::location_added (Location *location)
         if (location->is_skip()) {
                 /* listen for per-location signals that require us to update skip-locate events */
 
-                location->StartChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->EndChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->Changed.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->FlagsChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, false));
+                location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, false));
 
                 update_skips (location, true);
         }
