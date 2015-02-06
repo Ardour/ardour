@@ -2866,7 +2866,7 @@
 		<col def="S255">ProgId_</col>
 		<col def="S64">MIME_</col>
 		<col def="s38">Feature_</col>
-		<row><td>ardour</td><td>trackslive.exe</td><td>ardour.File</td><td/><td>AlwaysInstall</td></row>
+		<row><td>ardour</td><td>trackslive.exe</td><td>TracksLive.File</td><td/><td>AlwaysInstall</td></row>
 	</table>
 
 	<table name="Feature">
@@ -7734,6 +7734,7 @@
 		<col def="I2">ISIconIndex</col>
 		<row><td>ARPPRODUCTICON.exe</td><td/><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\trackslive.ico</td><td>0</td></row>
 		<row><td>_0E06EFE6_72E0_4DE2_99E6_875E36DC599F</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
+		<row><td>_F322CC43_3724_43AB_8430_3857429D65EA</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
 		<row><td>gdb.exe1_8F6698E937CC4407B2318BA27F81AC78.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>gdb.exe1_FBDCDC11332647529BE07B2891D54F19.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>gdb.exe_144847CF8C3E4B199BB2A8D89E54EB26.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
@@ -8190,7 +8191,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<col def="S72">Icon_</col>
 		<col def="I2">IconIndex</col>
 		<col def="I4">ISAttributes</col>
-		<row><td>ardour.File</td><td/><td/><td/><td>_0E06EFE6_72E0_4DE2_99E6_875E36DC599F</td><td>0</td><td/></row>
+		<row><td>TracksLive.File</td><td/><td/><td>TracksLive</td><td>_F322CC43_3724_43AB_8430_3857429D65EA</td><td>0</td><td/></row>
 	</table>
 
 	<table name="Property">
@@ -8266,7 +8267,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{35C93E18-B736-475C-8DA5-733D170D4F3F}</td><td/></row>
+		<row><td>ProductCode</td><td>{58870244-AFA5-42E2-8FC2-BDFF96859015}</td><td/></row>
 		<row><td>ProductName</td><td>Tracks Live</td><td/></row>
 		<row><td>ProductVersion</td><td>1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
