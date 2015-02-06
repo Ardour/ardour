@@ -3384,7 +3384,9 @@ MarkerDrag::motion (GdkEvent*, bool)
                    but without actually moving the real Location (yet)
                 */
 
-                _marker->set_position (copy_location->start(), copy_location->end());
+		for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
+			(*m)->set_position (copy_location->start(), copy_location->end());
+		}
 	}
 
 	assert (!_copied_locations.empty());
