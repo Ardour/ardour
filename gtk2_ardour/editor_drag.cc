@@ -3266,7 +3266,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 MarkerDrag::motion (GdkEvent*, bool)
 {
-	framecnt_t f_delta = 0;
+	framecnt_t delta = 0;
 	Location *real_location;
 	Location *copy_location = 0;
 
@@ -3306,7 +3306,7 @@ MarkerDrag::motion (GdkEvent*, bool)
         }
 
 	CopiedLocationInfo::iterator x;
-
+	
 	/* find the marker we're dragging, and compute the delta */
 
 	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
@@ -3317,19 +3317,19 @@ MarkerDrag::motion (GdkEvent*, bool)
 
                         switch (type) {
                         case TrimLeft:
-				f_delta = _drags->current_pointer_frame() - copy_location->start();
+				delta = _drags->current_pointer_frame() - copy_location->start();
                                 break;
                         case Move:
-				f_delta = _drags->current_pointer_frame() - last_pointer_frame();
+				delta = _drags->current_pointer_frame() - last_pointer_frame();
                                 break;
                         case TrimRight:
                         default:
-                                f_delta = _drags->current_pointer_frame() - copy_location->end();
+                                delta = _drags->current_pointer_frame() - copy_location->end();
                                 break;
                         }
 
                         /* found the CopiedLocationInfo, break */
-
+                        
 			break;
 		}
 	}
@@ -3339,53 +3339,70 @@ MarkerDrag::motion (GdkEvent*, bool)
 		return;
 	}
 
-	/* now move them all */
-        
+	framepos_t earliest_start = max_framepos;
+	
 	for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+		earliest_start = min (earliest_start, x->location->start());
+	}
 
-		copy_location = x->location;
+	/* if motion is to left (earlier), it cannot be larger than the distance to the start
+	   of the earliest marker.
+	*/
 
-		/* call this to find out if its the start or end */
+	if (delta < 0) {
+		delta = max (-((framecnt_t) earliest_start), delta);
+	}
 
-		if ((real_location = x->markers.front()->location()) == 0) {
-			continue;
-		}
+	/* now move them all */
 
-		if (real_location->locked()) {
-			continue;
-		}
-
-		if (copy_location->is_mark()) {
-
-			/* now move it */
-
-			copy_location->set_start (copy_location->start() + f_delta);
-
-		} else {
+	if (delta) {
+	
+		for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
 			
-                        framepos_t new_start = copy_location->start() + f_delta;
-                        framepos_t new_end = copy_location->end() + f_delta;
+			copy_location = x->location;
+			
+			/* call this to find out if its the start or end */
+			
+			if ((real_location = x->markers.front()->location()) == 0) {
+				continue;
+			}
+			
+			if (real_location->locked()) {
+				continue;
+			}
+			
+			if (copy_location->is_mark()) {
+				
+				/* now move it */
+				
+				copy_location->set_start (copy_location->start() + delta);
+				
+			} else {
+				
+				framepos_t new_start = copy_location->start() + delta;
+				framepos_t new_end = copy_location->end() + delta;
 
-                        if (type == Move) {
-                                _editor->snap_to (new_start, -1, true);
-                                _editor->snap_to (new_end, -1, true);
-                                copy_location->set (new_start, new_end);
-                        } else 	if (type == TrimLeft) {
-                                 _editor->snap_to (new_start, -1, true);
-                                copy_location->set_start (new_start);
-                        } else  {
-                                _editor->snap_to (new_end, -1, true);
-                                copy_location->set_end (new_end);
-                        }
-		}
-
-                /* doing things this way means that we still obey any logic
-                   in ARDOUR::Location that controls changing position,
-                   but without actually moving the real Location (yet)
-                */
-
-		for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
-			(*m)->set_position (copy_location->start(), copy_location->end());
+				if (type == Move) {
+					_editor->snap_to (new_start, -1, true);
+					_editor->snap_to (new_end, -1, true);
+					copy_location->set (new_start, new_end);
+				} else 	if (type == TrimLeft) {
+					_editor->snap_to (new_start, -1, true);
+					copy_location->set_start (new_start);
+				} else  {
+					_editor->snap_to (new_end, -1, true);
+					copy_location->set_end (new_end);
+				}
+			}
+			
+			/* doing things this way means that we still obey any logic
+			   in ARDOUR::Location that controls changing position,
+			   but without actually moving the real Location (yet)
+			*/
+			
+			for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
+				(*m)->set_position (copy_location->start(), copy_location->end());
+			}
 		}
 	}
 
