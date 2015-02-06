@@ -3358,8 +3358,12 @@ MarkerDrag::motion (GdkEvent*, bool)
 	if (delta) {
 	
 		for (x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+
+			/* "copy_location" must be left pointing at the copy location of the marker
+			   we initiated the drag on.
+			*/
 			
-			copy_location = x->location;
+			Location* copy = x->location;
 			
 			/* call this to find out if its the start or end */
 			
@@ -3371,27 +3375,27 @@ MarkerDrag::motion (GdkEvent*, bool)
 				continue;
 			}
 			
-			if (copy_location->is_mark()) {
+			if (copy->is_mark()) {
 				
 				/* now move it */
 				
-				copy_location->set_start (copy_location->start() + delta);
+				copy->set_start (copy->start() + delta);
 				
 			} else {
 				
-				framepos_t new_start = copy_location->start() + delta;
-				framepos_t new_end = copy_location->end() + delta;
+				framepos_t new_start = copy->start() + delta;
+				framepos_t new_end = copy->end() + delta;
 
 				if (type == Move) {
 					_editor->snap_to (new_start, -1, true);
 					_editor->snap_to (new_end, -1, true);
-					copy_location->set (new_start, new_end);
+					copy->set (new_start, new_end);
 				} else 	if (type == TrimLeft) {
 					_editor->snap_to (new_start, -1, true);
-					copy_location->set_start (new_start);
+					copy->set_start (new_start);
 				} else  {
 					_editor->snap_to (new_end, -1, true);
-					copy_location->set_end (new_end);
+					copy->set_end (new_end);
 				}
 			}
 			
@@ -3401,14 +3405,14 @@ MarkerDrag::motion (GdkEvent*, bool)
 			*/
 			
 			for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
-				(*m)->set_position (copy_location->start(), copy_location->end());
+				(*m)->set_position (copy->start(), copy->end());
 			}
 		}
 	}
 
 	assert (!_copied_locations.empty());
 
-        show_drag_text (copy_location);
+	show_drag_text (copy_location);
 }
 
 void
