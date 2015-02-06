@@ -609,3 +609,26 @@ ARDOUR::get_microseconds ()
 	return (microseconds_t) ts.tv_sec * 1000000 + (ts.tv_nsec/1000);
 #endif
 }
+
+/** Return the number of bits per sample for a given sample format.
+ *
+ * This is closely related to sndfile_data_width() but does NOT
+ * return a "magic" value to differentiate between 32 bit integer
+ * and 32 bit floating point values.
+ */
+
+int
+format_data_width (ARDOUR::SampleFormat format)
+{
+
+
+
+	switch (format) {
+	case ARDOUR::FormatInt16:
+		return 16;
+	case ARDOUR::FormatInt24:
+		return 24;
+	default:
+		return 32;
+	}
+}

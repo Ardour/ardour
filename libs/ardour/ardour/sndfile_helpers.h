@@ -49,7 +49,6 @@ int sndfile_header_format_by_index (int);
 int sndfile_endian_format_by_index (int);
 
 int sndfile_data_width (int format);
-int sndfile_data_width (ARDOUR::SampleFormat);
 
 // It'd be nice if libsndfile did this for us
 std::string sndfile_major_format (int);
