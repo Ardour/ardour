@@ -220,6 +220,13 @@ UndoHistory::add (UndoTransaction* const ut)
 	}
 
 	UndoList.push_back (ut);
+	/* Adding a transacrion means that redo is meaningless from this point. */
+	_clearing = true;
+	for (std::list<UndoTransaction*>::iterator i = RedoList.begin(); i != RedoList.end(); ++i) {
+                delete *i;
+        }
+	RedoList.clear ();
+	_clearing = false;
 
 	/* we are now owners of the transaction and must delete it when finished with it */
 
