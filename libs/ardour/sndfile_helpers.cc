@@ -133,23 +133,10 @@ sndfile_data_width (int format)
 	case SF_FORMAT_PCM_32:
 		return 32;
 	case SF_FORMAT_FLOAT:
-		return 32;
+		return 1; /* ridiculous but used as a magic value */
 	default:
 		// we don't handle anything else within ardour
 		return 0;
-	}
-}
-
-int
-sndfile_data_width (ARDOUR::SampleFormat format)
-{
-	switch (format) {
-	case ARDOUR::FormatInt16:
-		return sndfile_data_width (SF_FORMAT_PCM_16);
-	case ARDOUR::FormatInt24:
-		return sndfile_data_width (SF_FORMAT_PCM_24);
-	default:
-		return sndfile_data_width (SF_FORMAT_FLOAT);
 	}
 }
 
