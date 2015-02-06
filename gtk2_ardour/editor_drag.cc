@@ -3550,8 +3550,15 @@ MarkerDrag::aborted (bool movement_occured)
 
 		/* move all markers to their original location */
 		
+
 		for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
-			(*m)->set_position ((*m)->location()->start(), (*m)->location()->end());
+
+			bool is_start;
+			Location * location = _editor->find_location_from_marker (*m, is_start);
+
+			if (location) {
+				(*m)->set_position (is_start ? location->start() : location->end());
+			}
 		}
 	}
 }
@@ -4726,7 +4733,6 @@ void
 RangeMarkerBarDrag::aborted (bool movement_occured)
 {
 	if (movement_occured) {
-		_crect->hide ();
 		_drag_rect->hide ();
 	}
 }
@@ -5497,9 +5503,9 @@ void
 CrossfadeEdgeDrag::aborted (bool)
 {
 	if (start) {
-		arv->redraw_start_xfade ();
+		// arv->redraw_start_xfade ();
 	} else {
-		arv->redraw_end_xfade ();
+		// arv->redraw_end_xfade ();
 	}
 }
 
