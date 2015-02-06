@@ -8,7 +8,7 @@
     <EventBox height="1"
               bgnormal="#494949"
               bgactive="#494949"/>
-    <HBox height="29">
+    <HBox height="30">
       <HBox id="master_bus_hbox"
             noshowall="true">
           <EventBox width="1"
