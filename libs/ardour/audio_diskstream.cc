@@ -142,9 +142,13 @@ AudioDiskstream::config_parameter_changed (const std::string& what)
 void
 AudioDiskstream::allocate_working_buffers()
 {
-	_working_buffers_size = max (disk_write_chunk_frames, disk_read_chunk_frames);
-	_mixdown_buffer       = new Sample[_working_buffers_size];
-	_gain_buffer          = new gain_t[_working_buffers_size];
+	/* with varifill buffer refilling, we compute the read size in bytes (to optimize
+	   for disk i/o bandwidth) and then convert back into samples. These buffers
+	   need to reflect the maximum size we could use, which is 4MB reads, or 2M samples
+	   using 16 bit samples.
+	*/
+	_mixdown_buffer       = new Sample[2*1048576];
+	_gain_buffer          = new gain_t[2*1048576];
 }
 
 void
@@ -1258,8 +1262,8 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 	// << c->front()->playback_buf->bufsize() * bits_per_sample / 8 << " bps = " << bits_per_sample << endl;
 	// cerr << name () << " read samples = " << samples_to_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << " samples\n";
 
-	uint64_t before = g_get_monotonic_time ();
-	uint64_t elapsed;
+	// uint64_t before = g_get_monotonic_time ();
+	// uint64_t elapsed;
 	
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
 
@@ -1325,7 +1329,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 			   entire samples_to_read of data, so read some or
 			   all of vector.len[1] as well.
 			*/
-
+			
 			if (read (buf2, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan_n, reversed)) {
 				ret = -1;
 				goto out;
@@ -1340,7 +1344,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 	}
 
-	elapsed = g_get_monotonic_time () - before;
+	// elapsed = g_get_monotonic_time () - before;
 	// cerr << "\tbandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
 		
 	file_frame = file_frame_tmp;
