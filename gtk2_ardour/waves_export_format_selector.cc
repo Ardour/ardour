@@ -137,6 +137,9 @@ WavesExportFormatSelector::update_selector_sample_rate ()
 		case ARDOUR::ExportFormatBase::SR_96:
 			sample_rate = 96000;
 			break;
+        case ARDOUR::ExportFormatBase::SR_176_4:
+            sample_rate = 176400;
+            break;
 		case ARDOUR::ExportFormatBase::SR_192:
 			sample_rate = 192000;
 			break;
@@ -258,6 +261,9 @@ WavesExportFormatSelector::on_sample_rate_dropdown (WavesDropdown*, int item)
 		case 96000:
 			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_96);
 			break;
+        case 176400:
+            _state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_176_4);
+            break;
 		case 192000:
 			_state->format->set_sample_rate (ARDOUR::ExportFormatBase::SR_192);
 			break;

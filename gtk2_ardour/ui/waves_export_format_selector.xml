@@ -79,6 +79,7 @@
           <DropdownItem style="generic_dropdown_menu" title="48 kHz" data="48000"/>
           <DropdownItem style="generic_dropdown_menu" title="88.2 kHz" data="88200"/>
           <DropdownItem style="generic_dropdown_menu" title="96 kHz" data="96000"/>
+          <DropdownItem style="generic_dropdown_menu" title="176.4 kHz" data="176400"/>
           <DropdownItem style="generic_dropdown_menu" title="192 kHz" data="192000"/>
         </DropdownMenu>
       </Dropdown>
