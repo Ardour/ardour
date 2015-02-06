@@ -4577,7 +4577,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
                 _drag_rect->raise_to_top();
         }
         
-	if (start != end) {
+	if (start != end && first_move_occured() ) {
 		_editor->temp_location->set (start, end);
                 
 		double x1 = _editor->sample_to_pixel (start);
@@ -4602,7 +4602,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 	int flags;
 
 	if (movement_occurred) {
-		motion (event, false);
+		motion (event, !first_move_occured () );
 		_drag_rect->hide();
                 _crect->hide ();
 
