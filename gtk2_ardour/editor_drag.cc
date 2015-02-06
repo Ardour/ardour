@@ -4651,8 +4651,20 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 	} else {
-                /* toggle loop playback, leave rolling if already rolling */
+        switch (_operation) {
+            case CreateSkipMarker:
+            case CreateRangeMarker:
+            case CreateCDMarker:
+            case CreateMarker:
+            case CreateTransportMarker:
+                break;
+            case CreateLoopMarker:
+            {
+                // toggle loop playback, leave rolling if already rolling
                 _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), false);
+                break;
+            }
+        }
 	}
 
 	_editor->stop_canvas_autoscroll ();
