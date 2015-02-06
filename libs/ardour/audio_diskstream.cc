@@ -1245,7 +1245,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 	/* total_space is in samples. We want to optimize read sizes in various sizes using bytes */
 
-	const size_t bits_per_sample = sndfile_data_width (_session.config.get_native_file_data_format());
+	const size_t bits_per_sample = format_data_width (_session.config.get_native_file_data_format());
 	size_t total_bytes = total_space * bits_per_sample / 8;
 
 	/* chunk size range is 256kB to 4MB. Bigger is faster in terms of MB/sec, but bigger chunk size always takes longer
