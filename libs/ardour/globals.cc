@@ -635,7 +635,7 @@ ARDOUR::get_microseconds ()
  */
 
 int
-format_data_width (ARDOUR::SampleFormat format)
+ARDOUR::format_data_width (ARDOUR::SampleFormat format)
 {
 
 
