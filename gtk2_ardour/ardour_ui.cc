@@ -3894,7 +3894,10 @@ ARDOUR_UI::keyboard_settings () const
 void
 ARDOUR_UI::create_xrun_marker (framepos_t where)
 {
-	editor->mouse_add_new_marker (where, false, true);
+	if (_session) {
+		Location *location = new Location (*_session, where, where, _("xrun"), Location::IsMark);
+		_session->locations()->add (location);
+	}
 }
 
 void

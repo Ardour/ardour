@@ -519,7 +519,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
 
 	/* editing operations that need to be public */
-	void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false);
+	void mouse_add_new_marker (framepos_t where, bool is_cd=false);
 	void split_regions_at (framepos_t, RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (framepos_t);
