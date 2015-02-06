@@ -102,6 +102,9 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 
 	if (p == ev->own_pool) {
 		p->release (ptr);
+		DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
+			             "%1 Deletion complete pool \"%2\" size %3 free %4 used %5\n",
+			             pthread_name(), p->name(), p->total(), p->available(), p->used()));
 	} else {
 		ev->own_pool->push (ev);
 		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 was wrong thread for this pool, pushed event onto pending list, will be deleted on next alloc from %2 pool size %3 free %4 used %5 pending %6\n",
@@ -109,6 +112,7 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 		                                                   ev->own_pool->total(), ev->own_pool->available(), ev->own_pool->used(),
 		                                                   ev->own_pool->pending_size()));
 	}
+
 }
 
 void
