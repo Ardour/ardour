@@ -4640,11 +4640,11 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			break;
 		    }
 
-                case CreateMarker:
+        case CreateMarker:
 		case CreateTransportMarker:
                         break;
 
-                case CreateLoopMarker:
+        case CreateLoopMarker:
                         /* Ardour used to offer a menu to choose between setting loop + autopunch range here */
                         _editor->set_loop_range (_editor->temp_location->start(), _editor->temp_location->end(), _("set loop range"));
 			break;
@@ -4660,9 +4660,19 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
                 break;
             case CreateLoopMarker:
             {
-                // toggle loop playback, leave rolling if already rolling
-                _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), false);
-                break;
+                Location* loop = _editor->session()->locations()->auto_loop_location();
+                
+                if (loop) {
+                    framepos_t start = loop->start ();
+                    framepos_t end = loop->end ();
+                    framepos_t const pf = adjusted_current_frame (event);
+                    
+                    if (start <= pf && pf <= end) {
+                        // toggle loop playback, leave rolling if already rolling
+                        _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), false);
+                        break;
+                    }
+                }
             }
         }
 	}

@@ -237,6 +237,8 @@ protected:
 	double current_pointer_x () const;
 	double current_pointer_y () const;
 
+    bool first_move_occured () { return _starting_point_passed; }
+    
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
 
 	void show_verbose_cursor_time (framepos_t) const;
