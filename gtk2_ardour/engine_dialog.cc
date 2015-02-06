@@ -898,6 +898,9 @@ EngineControl::device_changed ()
 	assert (backend);
 	string device_name = device_combo.get_active_text ();
 	vector<string> s;
+	
+	//the device name must be set FIRST so ASIO can populate buffersizes and the control panel button
+	backend->set_device_name(device_name);
 
 	{
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
