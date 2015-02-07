@@ -1825,6 +1825,7 @@ Editor::temporal_zoom_by_frame (framepos_t start, framepos_t end)
 		new_leftmost = 0;
 	}
 
+    _zoom_tool_was_used = true;
 	reposition_and_zoom (new_leftmost, new_fpp);
 }
 
@@ -1876,12 +1877,19 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 		new_leftmost = 0;
 	}
 
+    _zoom_tool_was_used = true;
 	reposition_and_zoom (new_leftmost, new_spp);
 }
 
 void
 Editor::temporal_zoom_by_slider ()
 {
+    if (_zoom_tool_was_used) {
+        // tool zoom was used
+        // we shouldn't call temporal_zoom
+        _zoom_tool_was_used = false;
+        return ;
+    }
 	double value = _temporal_zoom_adjustment.get_value();
     int64_t spp = (int64_t)(pow (2.0f, (int)value) + 0.001);
     set_zoom_focus (ZoomFocusPlayhead);

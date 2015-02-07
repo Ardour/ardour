@@ -2192,6 +2192,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
     PBD::ScopedConnectionList port_state_connection_list;
     
     void update_progress_dialog_of_changing_tracks (bool);
+    
+    bool _zoom_tool_was_used;
 
         /* members and methods associated with MIDI + markers */
 

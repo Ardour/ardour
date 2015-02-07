@@ -307,6 +307,7 @@ Editor::Editor ()
 	  /* nudge */
 
 	, nudge_clock (new AudioClock (X_("nudge"), false, X_("nudge"), true, false, true))
+    , _zoom_tool_was_used (false)
 	, meters_running(false)
 	, _pending_locate_request (false)
 	, _pending_initial_locate (false)
