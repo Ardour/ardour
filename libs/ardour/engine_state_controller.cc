@@ -1333,7 +1333,7 @@ EngineStateController::_on_session_loaded ()
     _session->reconnect_mmc_ports (true);
     _session->reconnect_mmc_ports (false);
 	
-    if (_session && _desired_sample_rate && set_new_sample_rate_in_controller(_desired_sample_rate) )
+    if (_desired_sample_rate > 0 && set_new_sample_rate_in_controller(_desired_sample_rate) )
 	{
 		push_current_state_to_backend(false);
         SampleRateChanged(); // emit a signal
@@ -1770,7 +1770,7 @@ EngineStateController::push_current_state_to_backend(bool start)
 void
 EngineStateController::set_desired_sample_rate(framecnt_t session_desired_sr)
 {
-    if (session_desired_sr == 0 || session_desired_sr == _desired_sample_rate) {
+    if (session_desired_sr < 0) {
         return;
     }
 

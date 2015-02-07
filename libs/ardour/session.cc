@@ -306,6 +306,9 @@ Session::Session (AudioEngine &eng,
 	pre_engine_init (fullpath);
 	
 	if (_is_new) {
+        
+        sr = EngineStateController::instance()->get_current_sample_rate();
+        
 		if (ensure_engine (sr)) {
 			destroy ();
 			throw failed_constructor ();
