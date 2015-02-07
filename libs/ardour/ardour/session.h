@@ -1261,7 +1261,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
     PBD::ScopedConnectionList loop_update_connections;
     PBD::ScopedConnectionList mark_update_connections;
     PBD::ScopedConnectionList skip_update_connections;
-
+    bool                      _ignore_skips_updates;
+    
 	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);
 	void             auto_punch_end_changed (Location *);
