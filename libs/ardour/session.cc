@@ -208,6 +208,7 @@ Session::Session (AudioEngine &eng,
 	, _post_transport_work (0)
 	,  cumulative_rf_motion (0)
 	, rf_scale (1.0)
+    , _ignore_skips_updates (false)
 	, _locations (new Locations (*this))
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
@@ -1325,11 +1326,16 @@ Session::update_marks (Location*)
 void
 Session::update_skips (Location* loc, bool consolidate)
 {
+    if (_ignore_skips_updates) {
+        return;
+    }
+    
 	Locations::LocationList skips;
 
-	if (consolidate) {
-		consolidate_skips (loc);
-	}
+        if (consolidate) {
+	        PBD::Unwinder<bool> uw (_ignore_skips_updates, true);
+	        consolidate_skips (loc);
+        }
 
 	sync_locations_to_skips ();
         
