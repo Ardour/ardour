@@ -1843,12 +1843,12 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 		if (samples_per_pixel <= 1) {
 			new_spp = 2;
 		} else {
-			new_spp = samples_per_pixel + (samples_per_pixel/2);
+			new_spp = samples_per_pixel * 2;
 		}
-		range_before += range_before/2;
+        range_before *= 2;
 	} else {
 		if (samples_per_pixel >= 1) {
-			new_spp = samples_per_pixel - (samples_per_pixel/2);
+			new_spp = samples_per_pixel / 2;
 		} else {
 			/* could bail out here since we cannot zoom any finer,
 			   but leave that to the equality test below
@@ -1856,10 +1856,10 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 			new_spp = samples_per_pixel;
 		}
 
-		range_before -= range_before/2;
+		range_before /= 2;
 	}
 
-	if (new_spp == samples_per_pixel)  {
+	if (new_spp == 0)  {
 		return;
 	}
 
