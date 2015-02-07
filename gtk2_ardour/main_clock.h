@@ -38,5 +38,6 @@ private:
 	void edit_current_meter ();
 	void insert_new_tempo ();
 	void insert_new_meter ();
+	framepos_t absolute_time () const;
 	bool _primary;
 };

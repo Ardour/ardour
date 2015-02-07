@@ -73,6 +73,17 @@ MainClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Insert Meter Change"), sigc::mem_fun(*this, &MainClock::insert_new_meter)));
 }
 
+framepos_t
+MainClock::absolute_time () const
+{
+	if (get_is_duration ()) {
+		// delta to edit cursor
+		return current_time () + PublicEditor::instance().get_preferred_edit_position (true);
+	} else {
+		return current_time ();
+	}
+}
+
 void
 MainClock::display_delta_to_edit_cursor ()
 {
@@ -86,27 +97,27 @@ MainClock::display_delta_to_edit_cursor ()
 void
 MainClock::edit_current_tempo ()
 {
-	ARDOUR::TempoSection ts = PublicEditor::instance().session()->tempo_map().tempo_section_at(current_time());
+	ARDOUR::TempoSection ts = PublicEditor::instance().session()->tempo_map().tempo_section_at (absolute_time());
 	PublicEditor::instance().edit_tempo_section (&ts);
 }
 
 void
 MainClock::edit_current_meter ()
 {
-	ARDOUR::Meter m = PublicEditor::instance().session()->tempo_map().meter_at(current_time());
-	ARDOUR::MeterSection ms(current_time(), m.divisions_per_bar(), m.note_divisor());
+	ARDOUR::Meter m = PublicEditor::instance().session()->tempo_map().meter_at (absolute_time());
+	ARDOUR::MeterSection ms (absolute_time(), m.divisions_per_bar(), m.note_divisor());
 	PublicEditor::instance().edit_meter_section (&ms);
 }
 
 void
 MainClock::insert_new_tempo ()
 {
-	PublicEditor::instance().mouse_add_new_tempo_event (current_time ());
+	PublicEditor::instance().mouse_add_new_tempo_event (absolute_time ());
 }
 
 void
 MainClock::insert_new_meter ()
 {
-	PublicEditor::instance().mouse_add_new_meter_event (current_time ());
+	PublicEditor::instance().mouse_add_new_meter_event (absolute_time ());
 }
 

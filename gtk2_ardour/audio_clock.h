@@ -96,6 +96,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
   protected:
 	void render (cairo_t*, cairo_rectangle_t*);
+	bool get_is_duration () const { return is_duration; } ;
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;
