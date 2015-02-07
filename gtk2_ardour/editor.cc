@@ -3326,7 +3326,12 @@ Editor::begin_selection_op_history ()
 {
 	selection_op_cmd_depth = 0;
 	selection_op_history_it = 0;
-	selection_op_history.clear();
+
+	while(!selection_op_history.empty()) {
+		delete selection_op_history.front();
+		selection_op_history.pop_front();
+	}
+
 	selection_undo_action->set_sensitive (false);
 	selection_redo_action->set_sensitive (false);
 	selection_op_history.push_front (&_selection_memento->get_state ());
@@ -3349,10 +3354,19 @@ Editor::commit_reversible_selection_op ()
 		if (selection_op_cmd_depth == 1) {
 
 			if (selection_op_history_it > 0 && selection_op_history_it < selection_op_history.size()) {
-				/* the user has undone some selection ops and then made a new one */
+				/**
+				    The user has undone some selection ops and then made a new one,
+				    making anything earlier in the list invalid.
+				*/
+				
 				list<XMLNode *>::iterator it = selection_op_history.begin();
-				advance (it, selection_op_history_it);
-				selection_op_history.erase (selection_op_history.begin(), it);
+				list<XMLNode *>::iterator e_it = it;
+				advance (e_it, selection_op_history_it);
+				
+				for ( ; it != e_it; ++it) {
+					delete *it;
+				}
+				selection_op_history.erase (selection_op_history.begin(), e_it);
 			}
 
 			selection_op_history.push_front (&_selection_memento->get_state ());
@@ -3432,7 +3446,10 @@ void
 Editor::abort_reversible_command ()
 {
 	if (_session) {
-		before.clear();
+		while(!before.empty()) {
+			delete before.front();
+			before.pop_front();
+		}
 		_session->abort_reversible_command ();
 	}
 }

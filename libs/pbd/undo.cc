@@ -220,7 +220,7 @@ UndoHistory::add (UndoTransaction* const ut)
 	}
 
 	UndoList.push_back (ut);
-	/* Adding a transacrion means that redo is meaningless from this point. */
+	/* Adding a transacrion makes the redo list meaningless. */
 	_clearing = true;
 	for (std::list<UndoTransaction*>::iterator i = RedoList.begin(); i != RedoList.end(); ++i) {
                 delete *i;
