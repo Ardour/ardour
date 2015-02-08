@@ -61,7 +61,9 @@ Application::ready ()
 void
 Application::hide ()
 {
-    gtk_application_hide ();
+#ifdef __APPLE__
+	gtk_application_hide ();
+#endif 
 }
 
 void
