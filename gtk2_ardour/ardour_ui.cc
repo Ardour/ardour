@@ -997,6 +997,7 @@ ARDOUR_UI::idle_finish ()
 void
 ARDOUR_UI::finish()
 {
+    cout<<"ARDOUR_UI::finish()"<<endl;
 	if (_session) {
         
         if (_session->actively_recording () && _session->have_rec_enabled_track () ) {
@@ -4883,5 +4884,3 @@ ARDOUR_UI::hide_application ()
 {
     Application::instance ()-> hide ();
 }
-
-

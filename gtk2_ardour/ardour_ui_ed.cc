@@ -665,7 +665,7 @@ ARDOUR_UI::install_actions ()
     act = ActionManager::register_action (main_actions, X_("AddTrackBus"), _("Add Track"),
                                           sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
     
-	act = ActionManager::register_action (common_actions, X_("Quit"), _("Quit_custom"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
+	act = ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
     act = ActionManager::register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
     
