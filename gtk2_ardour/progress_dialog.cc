@@ -19,6 +19,9 @@
 
 #include <gtkmm/label.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm2ext/gtk_ui.h>
+#include "gui_thread.h"
+
 #include "progress_dialog.h"
 #include "i18n.h"
 
@@ -85,7 +88,7 @@ ProgressDialog::set_bottom_label (std::string message)
 void
 ProgressDialog::update_info (double new_progress, const char* top_message, const char* progress_message, const char* bottom_message)
 {
-    update_progress_gui (new_progress);
+    set_progress (new_progress);
     if (top_message)
         set_top_label (top_message);
     if (progress_message)
@@ -159,7 +162,21 @@ ProgressDialog::set_cancel_button_sensitive (bool sensitive)
 }
 
 void
-ProgressDialog::update_progress_gui (float p)
+ProgressDialog::set_progress (float p)
 {
+    if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
+        // IF WE ARE NOT IN GUI THREAD
+        // we push method set_progress () to gui event loop
+        // from which it will be called afterwards
+        Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ProgressDialog::set_progress , this, p));
+        return;
+    }
+
     _progress_bar.set_fraction (p);
+    
+    // Make sure the progress widget gets updated
+    // it can be called just from gui-thread
+    while (Glib::MainContext::get_default()->iteration (false)) {
+        /* do nothing */
+    }
 }

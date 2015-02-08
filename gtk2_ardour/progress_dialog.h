@@ -28,7 +28,7 @@ namespace Gtk {
     class ProgressBar;
 }
 
-class ProgressDialog : public WavesDialog, public ProgressReporter
+class ProgressDialog : public WavesDialog
 {
 public:
     ProgressDialog (const std::string& title="",
@@ -50,10 +50,10 @@ public:
     void show_cancel_button ();
     void hide_cancel_button ();
     void set_cancel_button_sensitive (bool sensitive);
+    void set_progress (float);
     PBD::Signal0<void> CancelClicked;
     
 private:
-    void update_progress_gui (float);
     void init (const std::string& title,
                const std::string& top_message,
                const std::string& progress_message,
