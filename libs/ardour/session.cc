@@ -4406,19 +4406,13 @@ Session::format_audio_source_name (const string& legalized_base, uint32_t nchan,
 {
 	ostringstream sstr;
 	const string ext = native_header_format_extension (config.get_native_file_header_format(), DataType::AUDIO);
-	
-	if (destructive) {
-		sstr << 'T';
-		sstr << setfill ('0') << setw (4) << cnt;
-		sstr << legalized_base;
-	} else {
-		sstr << legalized_base;
-		
-		if (take_required || related_exists) {
-			sstr << '-';
-			sstr << cnt;
-		}
-	}
+
+    sstr << legalized_base;
+    
+    if (take_required || related_exists) {
+        sstr << '-';
+        sstr << cnt;
+    }
 	
 	if (nchan == 2) {
 		if (chan == 0) {

@@ -134,6 +134,9 @@ Source::set_state (const XMLNode& node, int version)
 
 	if ((prop = node.property (X_("flags"))) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
+        
+        //GZ: Waves TracksLive does not support Destructive mode
+        _flags = Flag (_flags & ~Destructive);
 	} else {
 		_flags = Flag (0);
 

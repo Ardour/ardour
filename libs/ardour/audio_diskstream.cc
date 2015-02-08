@@ -385,9 +385,8 @@ AudioDiskstream::use_destructive_playlist ()
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
-        (*chan)->write_sources.clear ();
-
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+        (*chan)->write_sources.clear ();
 		(*chan)->write_sources.push_back(boost::dynamic_pointer_cast<AudioFileSource>(region->source (n)));
 		assert (!(*chan)->write_sources.empty());
 		(*chan)->write_sources.front()->set_allow_remove_if_empty (false);
@@ -2047,7 +2046,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 
 		if (!destructive()) {
 
-                        for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+            for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
 
 				if (mark_write_complete) {
 					(*s)->mark_streaming_write_completed ();
@@ -2060,7 +2059,7 @@ AudioDiskstream::reset_write_sources (bool mark_write_complete, bool /*force*/)
 				}
 			}
 
-                        (*chan)->write_sources.clear ();
+            (*chan)->write_sources.clear ();
                         
 			use_new_write_source (n);
 
@@ -2406,6 +2405,9 @@ AudioDiskstream::set_destructive (bool yn)
 bool
 AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 {
+    // GZ: Waves Tracks does not support destructive Audio Tracks
+    return false;
+    
 	if (!_playlist) {
 		requires_bounce = false;
 		return false;

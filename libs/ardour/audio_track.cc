@@ -62,9 +62,7 @@ AudioTrack::create_diskstream ()
 {
 	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (AudioDiskstream::Recordable);
 
-	if (_mode == Destructive) {
-		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);
-	} else if (_mode == NonLayered){
+	if (_mode == NonLayered){
 		dflags = AudioDiskstream::Flag(dflags | AudioDiskstream::NonLayered);
 	}
 
@@ -77,7 +75,8 @@ AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	Track::set_diskstream (ds);
 
 	_diskstream->set_track (this);
-	_diskstream->set_destructive (_mode == Destructive);
+	//GZ: Waves TracksLive does not support destructive Audio Tracks
+    _diskstream->set_destructive (false/*_mode == Destructive*/);
 	_diskstream->set_non_layered (_mode == NonLayered);
 
 	if (audio_diskstream()->deprecated_io_node) {
@@ -106,7 +105,8 @@ AudioTrack::set_mode (TrackMode m)
 {
 	if (m != _mode) {
 
-		if (_diskstream->set_destructive (m == Destructive)) {
+        //GZ: Waves TracksLive does not support destructive Audio Tracks
+		if (_diskstream->set_destructive (false/*m == Destructive*/)) {
 			return -1;
 		}
 
@@ -130,7 +130,7 @@ AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
 
 	case Destructive:
 	default:
-		return _diskstream->can_become_destructive (bounce_required);
+            return false; //_diskstream->can_become_destructive (bounce_required);
 	}
 }
 
@@ -197,6 +197,11 @@ AudioTrack::set_state (const XMLNode& node, int version)
 		_mode = Normal;
 	}
 
+    // TracksLive does not support destructive Tracks
+    if (_mode == Destructive) {
+        _mode = Normal;
+    }
+    
 	pending_state = const_cast<XMLNode*> (&node);
 
 	if (_session.state_of_the_state() & Session::Loading) {

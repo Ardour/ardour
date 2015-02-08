@@ -493,6 +493,9 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("flags")) != 0) {
 		_flags = Flag (string_2_enum (prop->value(), _flags));
+        
+        // ZG: Waves TracksLive does not support destructive mode
+        _flags = Flag (_flags & ~Destructive);
 	}
 
         if ((prop = node.property (X_("capture-alignment"))) != 0) {

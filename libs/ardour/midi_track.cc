@@ -112,7 +112,8 @@ MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	mds->reset_tracker ();	
 
 	_diskstream->set_track (this);
-	_diskstream->set_destructive (_mode == Destructive);
+    //GZ: Waves TracksLive does not support destructive Audio Tracks
+	_diskstream->set_destructive (false/*_mode == Destructive*/);
 	_diskstream->set_record_enabled (false);
 
 	_diskstream_data_recorded_connection.disconnect ();
