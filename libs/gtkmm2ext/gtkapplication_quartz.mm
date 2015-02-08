@@ -1221,7 +1221,7 @@ create_apple_menu ()
 	[menuitem release];
 	[_app_menu addItem: [NSMenuItem separatorItem]];
 	menuitem = [[NSMenuItem alloc] initWithTitle:@"Hide"
-		    action:@selector(hide:) keyEquivalent:@""];
+		    action:@selector(hide:) keyEquivalent:@"h"];
 	[menuitem setTarget: NSApp];
 	[_app_menu addItem: menuitem];
 	[menuitem release];
@@ -1474,6 +1474,12 @@ gtk_application_ready ()
 {
 	[ NSApp finishLaunching ];
         [[NSApplication sharedApplication] activateIgnoringOtherApps : YES];
+}
+
+extern "C" void
+gtk_application_hide ()
+{
+    [NSApp performSelector:@selector(hide:)];
 }
 
 extern "C" void

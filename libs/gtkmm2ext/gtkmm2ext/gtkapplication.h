@@ -34,6 +34,7 @@ typedef struct _GtkApplicationMenuGroup GtkApplicationMenuGroup;
 
 LIBGTKMM2EXT_API int  gtk_application_init (void);
 LIBGTKMM2EXT_API void gtk_application_ready (void);
+LIBGTKMM2EXT_API void gtk_application_hide (void);
 LIBGTKMM2EXT_API void gtk_application_cleanup (void);
 
 LIBGTKMM2EXT_API void                      gtk_application_set_menu_bar       (GtkMenuShell    *menu_shell);
