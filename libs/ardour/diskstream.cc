@@ -42,6 +42,7 @@
 #include "ardour/diskstream.h"
 #include "ardour/io.h"
 #include "ardour/pannable.h"
+#include "ardour/profile.h"
 #include "ardour/playlist.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -495,7 +496,9 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 		_flags = Flag (string_2_enum (prop->value(), _flags));
         
         // ZG: Waves TracksLive does not support destructive mode
-        _flags = Flag (_flags & ~Destructive);
+        if (Profile->get_trx() ) {
+            _flags = Flag (_flags & ~Destructive);
+        }
 	}
 
         if ((prop = node.property (X_("capture-alignment"))) != 0) {

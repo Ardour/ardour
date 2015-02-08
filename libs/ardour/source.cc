@@ -37,6 +37,7 @@
 #include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
+#include "ardour/profile.h"
 #include "ardour/transient_detector.h"
 
 #include "i18n.h"
@@ -136,7 +137,10 @@ Source::set_state (const XMLNode& node, int version)
 		_flags = Flag (string_2_enum (prop->value(), _flags));
         
         //GZ: Waves TracksLive does not support Destructive mode
-        _flags = Flag (_flags & ~Destructive);
+        if (Profile->get_trx() ) {
+            _flags = Flag (_flags & ~Destructive);
+        }
+        
 	} else {
 		_flags = Flag (0);
 

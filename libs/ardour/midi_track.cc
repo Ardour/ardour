@@ -32,6 +32,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/utils.h"
@@ -112,9 +113,13 @@ MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	mds->reset_tracker ();	
 
 	_diskstream->set_track (this);
+    
     //GZ: Waves TracksLive does not support destructive Audio Tracks
-	_diskstream->set_destructive (false/*_mode == Destructive*/);
-	_diskstream->set_record_enabled (false);
+    if (Profile->get_trx() ) {
+        _diskstream->set_record_enabled (false);
+    } else {
+        _diskstream->set_destructive (_mode == Destructive);
+    }
 
 	_diskstream_data_recorded_connection.disconnect ();
 	mds->DataRecorded.connect_same_thread (

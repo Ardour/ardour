@@ -47,6 +47,7 @@
 #include "ardour/debug.h"
 #include "ardour/io.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
@@ -2406,7 +2407,9 @@ bool
 AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 {
     // GZ: Waves Tracks does not support destructive Audio Tracks
-    return false;
+    if (Profile->get_trx() ) {
+        return false;
+    }
     
 	if (!_playlist) {
 		requires_bounce = false;

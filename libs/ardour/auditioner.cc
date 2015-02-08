@@ -30,6 +30,7 @@
 #include "ardour/data_type.h"
 #include "ardour/delivery.h"
 #include "ardour/plugin.h"
+#include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -323,8 +324,13 @@ Auditioner::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	Track::set_diskstream (ds);
 
 	_diskstream->set_track (this);
+    
     //GZ: Waves TracksLive does not support destructive Audio Tracks
-	_diskstream->set_destructive (false/*_mode == Destructive*/);
+    if (Profile->get_trx() ) {
+        _diskstream->set_destructive (false);
+    } else {
+        _diskstream->set_destructive (_mode == Destructive);
+    }
 	_diskstream->set_non_layered (_mode == NonLayered);
 	_diskstream->set_record_enabled (false);
 	_diskstream->request_input_monitoring (false);
