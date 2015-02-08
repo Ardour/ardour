@@ -59,6 +59,12 @@ Application::ready ()
 }
 
 void
+Application::hide ()
+{
+    gtk_application_hide ();
+}
+
+void
 Application::cleanup ()
 {
 	gtk_application_cleanup ();

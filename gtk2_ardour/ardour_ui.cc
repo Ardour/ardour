@@ -4878,3 +4878,10 @@ ARDOUR_UI::toggle_all_auto_return ()
 	}
 }
 	
+void
+ARDOUR_UI::hide_application ()
+{
+    Application::instance ()-> hide ();
+}
+
+
