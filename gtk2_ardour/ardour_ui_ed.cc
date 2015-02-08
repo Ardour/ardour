@@ -1069,6 +1069,7 @@ ARDOUR_UI::show_marker_inspector ()
 	marker_inspector_dialog->set_position (Gtk::WIN_POS_MOUSE);
 	track_color_dialog->hide ();
     marker_inspector_dialog->show ();
+    marker_inspector_dialog->present ();
 }
 
 void
