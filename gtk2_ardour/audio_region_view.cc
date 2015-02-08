@@ -373,6 +373,9 @@ AudioRegionView::update_ioconfig_label ()
     std::string label;
     
     switch (chan_count ) {
+        case 0:
+            label = "N/A";
+            break;
         case 1:
             label = "M";
             break;
