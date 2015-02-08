@@ -100,7 +100,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleRoll|space|toggle roll
 @trans|Transport/ToggleRollMaybe|<@PRIMARY@><@SECONDARY@>space|stop (keep loop/range play)
 
-@trans|Editor/add-location-from-playhead|nabla|add marker
+;@trans|Editor/add-location-from-playhead|nabla|add marker
 ;@trans|Transport/GotoStart|Return|to start marker
 @movp|Transport/alternate-GotoStart|KP_Return|to edit point
 
