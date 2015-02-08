@@ -47,3 +47,8 @@ void
 gtk_application_ready (void)
 {
 }
+
+void
+gtk_application_hide (void)
+{
+}

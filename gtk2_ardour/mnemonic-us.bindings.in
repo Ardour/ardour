@@ -137,6 +137,7 @@ This mode provides many different operations on both regions and control points,
 ;; TOP ROW
 
 @sess|Common/Quit|<@PRIMARY@>q|quit
+@sess|Common/Hide|<@PRIMARY@>h|hide
 @movp|Editor/jump-forward-to-mark|w|to next mark
 @movp|Editor/jump-backward-to-mark|q|to previous mark
 

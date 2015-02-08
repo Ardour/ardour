@@ -4864,3 +4864,9 @@ ARDOUR_UI::audioengine_became_silent ()
 		break;
 	}
 }
+	
+void
+ARDOUR_UI::hide_application ()
+{
+    Application::instance ()-> hide ();
+}

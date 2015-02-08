@@ -190,6 +190,7 @@ ARDOUR_UI::install_actions ()
 
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
+	ActionManager::register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
 	/* windows visibility actions */
 
