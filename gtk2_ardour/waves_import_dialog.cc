@@ -196,7 +196,7 @@ WavesImportDialog::_reset_options ()
 	int current_add_as_mode = AddingMode(_add_as_dropdown.get_item_data_i (_add_as_dropdown.get_current_item ()));
 	_add_as_dropdown.clear_items ();
 	_add_as_dropdown.add_menu_item (_import_as_track_str, (void*)AsTrack);
-	_add_as_dropdown.add_menu_item (_import_as_tape_track_str, (void*)AsTapeTrack);
+//	_add_as_dropdown.add_menu_item (_import_as_tape_track_str, (void*)AsTapeTrack);
 
 	if (_selected_audio_track_count > 0) {
 		if (_mapping_dropdown.get_current_item () >= 0) {
