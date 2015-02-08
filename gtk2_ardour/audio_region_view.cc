@@ -374,7 +374,7 @@ AudioRegionView::update_ioconfig_label ()
     
     switch (chan_count ) {
         case 0:
-            label = "N/A";
+            label = "File Not Found!";
             break;
         case 1:
             label = "M";
