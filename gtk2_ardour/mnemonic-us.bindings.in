@@ -162,7 +162,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Window/toggle-key-editor|<@WINDOW@>k|toggle key bindings editor
 @trans|Transport/Loop|l|loop play (the loop range)
-@wvis|Window/toggle-locations|<@WINDOW@>l| toggle locations dialog
+;@wvis|Window/toggle-locations|<@WINDOW@>l| toggle locations dialog
 
 ;; BOTTOM ROW
 
