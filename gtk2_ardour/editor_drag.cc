@@ -3376,7 +3376,7 @@ MarkerDrag::motion (GdkEvent*, bool)
 	   of the earliest marker.
 	*/
 
-	if (delta < 0) {
+	if ((type != TrimRight) && (delta < 0)) {
 		delta = max (-((framecnt_t) earliest_start), delta);
 	}
 
