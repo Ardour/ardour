@@ -1157,6 +1157,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT824</td><td>{58CFD39B-B603-474F-9E5F-302A98F96BF7}</td><td>CONF.D</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT825</td><td>{F16E55C9-FB63-4240-8B9C-29B3899E65F0}</td><td>FONTS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT826</td><td>{0456382F-57DE-4325-8556-75E599FFA846}</td><td>FONTS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT827</td><td>{8A55FBC9-9B0B-4D66-818A-CE2044B3C274}</td><td>TRACKS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT83</td><td>{3FA696A4-E586-407E-8624-E3AFE9DBCFA6}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td>{171F4C1F-B859-4228-9205-5C38FF3CF5B5}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td>{2CC2416F-B08C-4C57-B1B5-B4F007D9A97D}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -2059,10 +2060,10 @@
 		<row><td>ISSelfRegisterFinalize</td><td>1</td><td>ISSELFREG.DLL</td><td>ISSelfRegisterFinalize</td><td/><td/></row>
 		<row><td>ISSetAllUsers</td><td>257</td><td>SetAllUsers.dll</td><td>SetAllUsers</td><td/><td/></row>
 		<row><td>ISUnSelfRegisterFiles</td><td>3073</td><td>ISSELFREG.DLL</td><td>ISUnSelfRegisterFiles</td><td/><td/></row>
-		<row><td>NewCustomAction1</td><td>1094</td><td>NewBinary27</td><td/><td/><td/></row>
 		<row><td>SetARPINSTALLLOCATION</td><td>51</td><td>ARPINSTALLLOCATION</td><td>[INSTALLDIR]</td><td/><td/></row>
 		<row><td>SetAllUsersProfileNT</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%SystemRoot]\Profiles\All Users</td><td/><td/></row>
 		<row><td>ShowMsiLog</td><td>226</td><td>SystemFolder</td><td>[SystemFolder]notepad.exe "[MsiLogFileLocation]"</td><td/><td>Shows Property-driven MSI Log</td></row>
+		<row><td>remove_preferences</td><td>1094</td><td>NewBinary27</td><td/><td/><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>51</td><td>ALLUSERSPROFILE</td><td>[%ALLUSERSPROFILE]</td><td/><td/></row>
 		<row><td>setUserProfileNT</td><td>51</td><td>USERPROFILE</td><td>[%USERPROFILE]</td><td/><td/></row>
 	</table>
@@ -3697,6 +3698,7 @@
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT824</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT825</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT826</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT827</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT83</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT84</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT85</td></row>
@@ -4227,6 +4229,7 @@
 		<row><td>inspector_solo_prelight.png</td><td>ISX_DEFAULTCOMPONENT269</td><td>INSPEC~1.PNG|inspector_solo_prelight.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\inspector_solo_prelight.png</td><td>1</td><td/></row>
 		<row><td>inspector_solo_safe.png</td><td>ISX_DEFAULTCOMPONENT270</td><td>INSPEC~1.PNG|inspector_solo_safe.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\inspector_solo_safe.png</td><td>1</td><td/></row>
 		<row><td>join_tools.png</td><td>ISX_DEFAULTCOMPONENT272</td><td>JOIN_T~1.PNG|join_tools.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\join_tools.png</td><td>1</td><td/></row>
+		<row><td>keybindings.whitelist</td><td>ISX_DEFAULTCOMPONENT827</td><td>KEYBIN~1.WHI|keybindings.whitelist</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\keybindings.whitelist</td><td>1</td><td/></row>
 		<row><td>knob.png</td><td>ISX_DEFAULTCOMPONENT273</td><td>knob.png</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\knob.png</td><td>1</td><td/></row>
 		<row><td>left_arrow.xpm</td><td>ISX_DEFAULTCOMPONENT65</td><td>LEFT_A~1.XPM|left_arrow.xpm</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\pixmaps\left_arrow.xpm</td><td>1</td><td/></row>
 		<row><td>libart_lgpl_2_2.dll</td><td>libart_lgpl_2_2.dll</td><td>LIBART~1.DLL|libart_lgpl_2-2.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\a3\inst\bin\libart_lgpl_2-2.dll</td><td>1</td><td/></row>
@@ -5729,6 +5732,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT824</td><td/><td/><td>_5DB1D90A_1A00_46F5_A575_818BC63A683E_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT825</td><td/><td/><td>_A90263C3_803D_4726_9D2F_4C0E649737B7_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT826</td><td/><td/><td>_986C59C1_954E_4D0E_A230_FB589A65940D_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT827</td><td/><td/><td>_BF9037D8_6764_40F1_9541_D93546785E87_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT83</td><td/><td/><td>_15ED6A0E_5FE5_45B8_B3D2_EAFEFFC308A9_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td/><td/><td>_7EDC8F54_7F12_4722_A553_D3218A57F9E9_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td/><td/><td>_9DE256D6_C9BB_44B1_B3AF_6EE743985360_FILTER</td><td/><td/><td/><td/></row>
@@ -6491,7 +6495,7 @@
 		<col def="I2">Encoded</col>
 		<col def="S0">Comment</col>
 		<col def="I4">TimeStamp</col>
-		<row><td>COMPANY_NAME</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-794594687</td></row>
+		<row><td>COMPANY_NAME</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>1227091018</td></row>
 		<row><td>DN_AlwaysInstall</td><td>1033</td><td>Always Install</td><td>0</td><td/><td>1621317870</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_COLOR</td><td>1033</td><td>The color settings of your system are not adequate for running [ProductName].</td><td>0</td><td/><td>1621317870</td></row>
 		<row><td>IDPROP_EXPRESS_LAUNCH_CONDITION_OS</td><td>1033</td><td>The operating system is not adequate for running [ProductName].</td><td>0</td><td/><td>1621317870</td></row>
@@ -7614,11 +7618,11 @@
 		<row><td>ID_STRING14</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1889785454</td></row>
 		<row><td>ID_STRING15</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023999979</td></row>
 		<row><td>ID_STRING16</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023970352</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.waves.com</td><td>0</td><td/><td>-391967282</td></row>
-		<row><td>ID_STRING3</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>-794594687</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://www.WavesAudio.com</td><td>0</td><td/><td>1227091018</td></row>
+		<row><td>ID_STRING3</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>1227091018</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>TracksLive</td><td>0</td><td/><td>1621309294</td></row>
 		<row><td>ID_STRING5</td><td>1033</td><td>LAUNCH~1.EXE|Launch gdb.exe</td><td>0</td><td/><td>1621352975</td></row>
-		<row><td>ID_STRING6</td><td>1033</td><td>http://www.waves.com/support</td><td>0</td><td/><td>-391961138</td></row>
+		<row><td>ID_STRING6</td><td>1033</td><td>http://www.WavesAudio.com/support</td><td>0</td><td/><td>1227091018</td></row>
 		<row><td>ID_STRING7</td><td>1033</td><td>US: +1-865-909-9200, Worldwide: +972-3-608-4000</td><td>0</td><td/><td>1621317071</td></row>
 		<row><td>ID_STRING8</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621302927</td></row>
 		<row><td>ID_STRING9</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621351824</td></row>
@@ -7817,7 +7821,6 @@
 		<row><td>MsiConfigureServices</td><td>VersionMsi &gt;= "5.00"</td><td>5850</td><td>MSI5 MsiConfigureServices</td><td/></row>
 		<row><td>MsiPublishAssemblies</td><td/><td>6250</td><td>MsiPublishAssemblies</td><td/></row>
 		<row><td>MsiUnpublishAssemblies</td><td/><td>1750</td><td>MsiUnpublishAssemblies</td><td/></row>
-		<row><td>NewCustomAction1</td><td>REMOVE="ALL"</td><td>6405</td><td/><td/></row>
 		<row><td>PatchFiles</td><td/><td>4090</td><td>PatchFiles</td><td/></row>
 		<row><td>ProcessComponents</td><td/><td>1600</td><td>ProcessComponents</td><td/></row>
 		<row><td>PublishComponents</td><td/><td>6200</td><td>PublishComponents</td><td/></row>
@@ -7864,6 +7867,7 @@
 		<row><td>WriteEnvironmentStrings</td><td/><td>5200</td><td>WriteEnvironmentStrings</td><td/></row>
 		<row><td>WriteIniValues</td><td/><td>5100</td><td>WriteIniValues</td><td/></row>
 		<row><td>WriteRegistryValues</td><td/><td>5000</td><td>WriteRegistryValues</td><td/></row>
+		<row><td>remove_preferences</td><td>REMOVE="ALL"</td><td>6405</td><td/><td/></row>
 		<row><td>setAllUsersProfile2K</td><td>VersionNT &gt;= 500</td><td>980</td><td/><td/></row>
 		<row><td>setUserProfileNT</td><td>VersionNT</td><td>960</td><td/><td/></row>
 	</table>
@@ -8267,7 +8271,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{58870244-AFA5-42E2-8FC2-BDFF96859015}</td><td/></row>
+		<row><td>ProductCode</td><td>{5BDAEBC6-BE35-45CC-AA49-EA178C31492C}</td><td/></row>
 		<row><td>ProductName</td><td>Tracks Live</td><td/></row>
 		<row><td>ProductVersion</td><td>1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
