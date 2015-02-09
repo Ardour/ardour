@@ -1858,8 +1858,12 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 
 		range_before /= 2;
 	}
-
-	if (new_spp == 0)  {
+    
+    int64_t upper_value_spp = get_zoom_from_temporal_adjustment_value (_temporal_zoom_adjustment.get_upper ());
+    int64_t lower_value_spp = get_zoom_from_temporal_adjustment_value (_temporal_zoom_adjustment.get_lower ());
+	if (new_spp > upper_value_spp || new_spp < lower_value_spp)  {
+        // we shouldn't change temporal zoom value
+        // if we out of range
 		return;
 	}
 
@@ -1881,6 +1885,12 @@ Editor::temporal_zoom_to_frame (bool coarser, framepos_t frame)
 	reposition_and_zoom (new_leftmost, new_spp);
 }
 
+int64_t
+Editor::get_zoom_from_temporal_adjustment_value (double temporal_adjustment_value)
+{
+    return (int64_t)(pow (2.0f, (int)temporal_adjustment_value) + 0.001);
+}
+
 void
 Editor::temporal_zoom_by_slider ()
 {
@@ -1890,8 +1900,8 @@ Editor::temporal_zoom_by_slider ()
         _zoom_tool_was_used = false;
         return ;
     }
-	double value = _temporal_zoom_adjustment.get_value();
-    int64_t spp = (int64_t)(pow (2.0f, (int)value) + 0.001);
+    
+    int64_t spp = get_zoom_from_temporal_adjustment_value (_temporal_zoom_adjustment.get_value ());
     set_zoom_focus (ZoomFocusPlayhead);
 	temporal_zoom (spp);
 }

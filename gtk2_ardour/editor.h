@@ -2203,6 +2203,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void midi_output_chosen (WavesDropdown*, int);
 	void populate_midi_inout_dropdowns ();
 	void populate_midi_inout_dropdown (bool playback);
+    
+    int64_t get_zoom_from_temporal_adjustment_value (double);
 
         Gtk::Image& midi_marker_input_activity_image;
         Gtk::Image& midi_marker_output_activity_image;
