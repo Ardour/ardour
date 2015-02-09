@@ -281,6 +281,7 @@
 		954DCFC11A023AAB00B7160E /* about_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFBF1A023AAB00B7160E /* about_dialog.xml */; };
 		954DCFC21A023AAB00B7160E /* license_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFC01A023AAB00B7160E /* license_dialog.xml */; };
 		954DCFDE1A07A14E00B7160E /* read_only_session_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */; };
+		956D3F8A1A851805004F328C /* waves_import_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 956D3F891A851805004F328C /* waves_import_dialog.xml */; };
 		957EF44B1A30BFB300F1500E /* waves_message_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 957EF44A1A30BFB300F1500E /* waves_message_dialog.cc */; };
 		95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95A134DD1A0239080008E3D6 /* license_dialog.cc */; };
 		95D1C51F1A78ED2100BE28DB /* waves_edit_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D1C51E1A78ED2100BE28DB /* waves_edit_dialog.cc */; };
@@ -1173,6 +1174,7 @@
 		954DCFBF1A023AAB00B7160E /* about_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = about_dialog.xml; sourceTree = "<group>"; };
 		954DCFC01A023AAB00B7160E /* license_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = license_dialog.xml; sourceTree = "<group>"; };
 		954DCFDD1A07A14E00B7160E /* read_only_session_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = read_only_session_dialog.xml; sourceTree = "<group>"; };
+		956D3F891A851805004F328C /* waves_import_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_import_dialog.xml; sourceTree = "<group>"; };
 		957EF44A1A30BFB300F1500E /* waves_message_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_message_dialog.cc; path = ../waves_message_dialog.cc; sourceTree = "<group>"; };
 		957EF44F1A30BFBF00F1500E /* waves_message_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_message_dialog.h; path = ../waves_message_dialog.h; sourceTree = "<group>"; };
 		95A134DD1A0239080008E3D6 /* license_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = license_dialog.cc; path = ../license_dialog.cc; sourceTree = "<group>"; };
@@ -1939,6 +1941,7 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				956D3F891A851805004F328C /* waves_import_dialog.xml */,
 				95D795DB1A7BB40C00120A4F /* marker_inspector_dialog.xml */,
 				95D795DC1A7BB40C00120A4F /* progressing_dialog.xml */,
 				95D795DD1A7BB40C00120A4F /* waves_export_dialog.xml */,
@@ -2633,6 +2636,7 @@
 				432793D8194F003A003C9FEA /* tracks.png in Resources */,
 				432793D9194F003A003C9FEA /* tracks_active.png in Resources */,
 				432793DA194F003A003C9FEA /* tracks_prelight.png in Resources */,
+				956D3F8A1A851805004F328C /* waves_import_dialog.xml in Resources */,
 				432793DB194F003A003C9FEA /* transport_end.png in Resources */,
 				432793DC194F003A003C9FEA /* transport_end_active.png in Resources */,
 				432793DD194F003A003C9FEA /* transport_end_prelight.png in Resources */,
