@@ -8,7 +8,14 @@
            id="midi_device_name_label"
            text="-"
            fgnormal="#000000"
-           x="7" y="3"/>
+           x="7" y="3"
+           ui.os.macos="false"/>
+    <Label style="generic_control"
+           id="midi_device_name_label"
+           text="-"
+           fgnormal="#000000"
+           x="7" y="6"
+           ui.os.windows="false"/>
   </Layout>
   <Button id="capture_on_button"
     text="On"
