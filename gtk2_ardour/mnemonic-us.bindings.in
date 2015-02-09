@@ -169,7 +169,6 @@ This mode provides many different operations on both regions and control points,
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
 @wvis|Window/toggle-rc-options-editor|<@SECONDARY@>p|toggle preferences dialog
-@wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>p|toggle global audio patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
 @select|Editor/select-all-after-playhead|<@PRIMARY@><@TERTIARY@>p|all after playhead
 
@@ -221,6 +220,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
 @wvis|Window/toggle-big-clock|<@SECONDARY@>b|toggle big clock
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
+@wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>n|toggle global audio patchbay
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @wvis|Common/toggle-editor-mixer|<@SECONDARY@>m|rotate editor \& mixer window
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
