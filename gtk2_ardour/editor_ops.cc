@@ -3904,7 +3904,7 @@ Editor::cut_copy (CutCopyOp op)
 		Location* loc = find_location_from_marker (entered_marker, ignored);
 
 		if (_session && loc) {
-			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
+			Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, true, true));
 		}
 
 		_drags->abort ();

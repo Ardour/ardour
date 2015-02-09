@@ -454,6 +454,37 @@ Editor::mouse_add_new_range (framepos_t where)
 	commit_reversible_command ();
 }
 
+
+void
+Editor::remove_selected_markers ()
+{
+    MeterMarker* mm;
+    TempoMarker* tm;
+    bool begin_command = true;
+    for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+        dynamic_cast_marker_object (*x, &mm, &tm);
+
+        if (mm) {
+            remove_meter_marker (marker_menu_item);
+        } else if (tm) {
+            remove_tempo_marker (marker_menu_item);
+        } else {
+            bool is_start;
+            Location* loc = find_location_from_marker (*x, is_start);
+            
+            // loop range cannot be removed in TracksLive
+            if (loc->is_auto_loop() ) {
+                return;
+            }
+            if (_session && loc) {
+                Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, begin_command, (*x == selection->markers.back ())));
+            }
+            begin_command = false;
+        }
+    }
+}
+
+
 void
 Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 {
@@ -477,19 +508,23 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
     }
     
 	if (_session && loc) {
-	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
+	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, true, true));
 	}
 }
 
 gint
-Editor::really_remove_marker (Location* loc)
+Editor::really_remove_marker (Location* loc, bool begin_reversible_command, bool commit_reversible_command)
 {
-	_session->begin_reversible_command (_("remove marker"));
+	if (begin_reversible_command) {
+        _session->begin_reversible_command (_("remove marker"));
+    }
 	XMLNode &before = _session->locations()->get_state();
 	_session->locations()->remove (loc);
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	_session->commit_reversible_command ();
+	if (commit_reversible_command) {
+        _session->commit_reversible_command ();
+    }
 	return FALSE;
 }
 
@@ -1021,17 +1056,22 @@ Editor::marker_menu_edit ()
 void
 Editor::marker_menu_remove ()
 {
-	MeterMarker* mm;
-	TempoMarker* tm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+    Marker *marker = (Marker*)marker_menu_item->get_data ("marker");
+    if (marker && (std::find (selection->markers.begin (), selection->markers.end (), marker) == selection->markers.end ())) {
+        MeterMarker* mm;
+        TempoMarker* tm;
+        dynamic_cast_marker_object (marker, &mm, &tm);
 
-	if (mm) {
-		remove_meter_marker (marker_menu_item);
-	} else if (tm) {
-		remove_tempo_marker (marker_menu_item);
-	} else {
-		remove_marker (*marker_menu_item, (GdkEvent*) 0);
-	}
+        if (mm) {
+            remove_meter_marker (marker_menu_item);
+        } else if (tm) {
+            remove_tempo_marker (marker_menu_item);
+        } else {
+            remove_marker (*marker_menu_item, (GdkEvent*) 0);
+        }
+    } else {
+        remove_selected_markers ();
+    }
 }
 
 void
