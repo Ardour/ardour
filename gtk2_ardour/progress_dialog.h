@@ -58,7 +58,7 @@ private:
                const std::string& top_message,
                const std::string& progress_message,
                const std::string& bottom_message);
-
+    void set_progress_in_gui_thread (float);
     Gtk::Label& _top_label;
     Gtk::Label& _bottom_label;
     Gtk::ProgressBar& _progress_bar;

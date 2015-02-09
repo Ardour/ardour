@@ -127,18 +127,14 @@ ProgressDialog::show_pd ()
 {
     WavesDialog::show ();
     /* Make sure the progress dialog is drawn */
-    while (Glib::MainContext::get_default()->iteration (false)) {
-    /* do nothing */
-    }
+    Glib::MainContext::get_default()->iteration (false);
 }
 
 void
 ProgressDialog::hide_pd ()
 {
-	 /* Make sure the progress dialog is drawn */
-    while (Glib::MainContext::get_default()->iteration (false)) {
-    /* do nothing */
-	}
+    Glib::MainContext::get_default()->iteration (false);
+
     set_progress (0);
     WavesDialog::hide ();
 }
@@ -164,18 +160,20 @@ ProgressDialog::set_cancel_button_sensitive (bool sensitive)
 void
 ProgressDialog::set_progress (float p)
 {
-    if (!Gtkmm2ext::UI::instance()->caller_is_ui_thread()) {
-        // IF WE ARE NOT IN GUI THREAD
-        // we push method set_progress () to gui event loop
-        // from which it will be called afterwards
-        Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ProgressDialog::set_progress , this, p));
-        return;
-    }
+    // IF WE ARE NOT IN GUI THREAD
+    // we push method set_progress () to gui event loop
+    // from which it will be called afterwards
+    Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ProgressDialog::set_progress_in_gui_thread , this, p));
+}
 
+void
+ProgressDialog::set_progress_in_gui_thread (float p)
+{
+    // it's provided that this method can be called
+    // just from gui thread
     _progress_bar.set_fraction (p);
-    
+
     // Make sure the progress widget gets updated
-    // it can be called just from gui-thread
     while (Glib::MainContext::get_default()->iteration (false)) {
         /* do nothing */
     }
