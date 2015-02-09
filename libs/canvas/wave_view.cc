@@ -71,6 +71,7 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
 	, _region_amplitude (_region->scale_amplitude ())
+	, _start_shift (0.0)
 	, _region_start (region->start())
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
@@ -804,7 +805,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	 * draw "between" pixels at the start and/or end.
 	 */
 
-	const double draw_start = floor (draw.x0);
+	const double draw_start = floor (draw.x0) + _start_shift;
 	const double draw_end = floor (draw.x1);
 
 	// cerr << "Need to draw " << draw_start << " .. " << draw_end << endl;
@@ -1034,3 +1035,16 @@ WaveView::set_global_show_waveform_clipping (bool yn)
 		ClipLevelChanged ();
 	}
 }
+
+void
+WaveView::set_start_shift (double pixels)
+{
+	if (pixels < 0) {
+		return;
+	}
+
+	begin_visual_change ();
+	_start_shift = pixels;
+	end_visual_change ();
+}
+	
