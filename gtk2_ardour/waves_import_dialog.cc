@@ -70,6 +70,7 @@ WavesImportDialog::WavesImportDialog (ARDOUR::Session* session, uint32_t selecte
 	
 	_insert_at_dropdown.set_current_item (0);
 	_mapping_dropdown.set_current_item (0);
+    _quality_dropdown.set_current_item (0);
 
 	get_waves_button ("import_button").signal_clicked.connect (sigc::mem_fun (*this, &WavesImportDialog::_on_import_button));
 	get_waves_button ("cancel_button").signal_clicked.connect (sigc::mem_fun (*this, &WavesImportDialog::_on_cancel_button));
@@ -350,8 +351,10 @@ WavesImportDialog::_check_info (bool& same_size, bool& src_needed, bool& multich
 	multichannel = false;
 
 	for (std::vector<std::string>::const_iterator i = _files_to_import.begin(); i != _files_to_import.end(); ++i) {
-
 		if (ARDOUR::AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
+            if (info.channels > 2 ) {
+                err = true;
+            }
 			if (info.channels > 1) {
 				multichannel = true;
 			}
@@ -376,7 +379,7 @@ WavesImportDialog::_check_info (bool& same_size, bool& src_needed, bool& multich
 			/* XXX we need err = true handling here in case
 			   we can't check the file
 			*/
-
+			err = true;
 		} else {
 			err = true;
 		}

@@ -26,6 +26,7 @@
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/smf_source.h"
+#include "ardour/audiofilesource.h"
 
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
@@ -457,7 +458,23 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 bool
 Editor::idle_drop_paths (vector<string> paths, framepos_t frame, double ypos, bool copy)
 {
-	drop_paths_part_two (paths, frame, ypos, copy);
+    ARDOUR::SoundFileInfo info;
+	std::string errmsg;
+    bool go_ahead = true;
+    
+	for (std::vector<std::string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+        if (ARDOUR::AudioFileSource::get_soundfile_info (*i, info, errmsg)) {
+            if (info.channels > 2 ) {
+                WavesMessageDialog msg ("", string_compose (_("One or more of the selected files\ncannot be used by %1"), PROGRAM_NAME));
+                msg.run ();
+                go_ahead = false;
+                break;
+            }
+        }
+    }
+    if (go_ahead) {
+        drop_paths_part_two (paths, frame, ypos, copy);
+    }
 	return false;
 }
 
