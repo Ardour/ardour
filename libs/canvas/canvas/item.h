@@ -154,7 +154,7 @@ public:
 
         Duple item_to_window (Duple const&, bool rounded = true) const;
         Duple window_to_item (Duple const&) const;
-        Rect item_to_window (Rect const&) const;
+        Rect item_to_window (Rect const&, bool rounded = true) const;
         Rect window_to_item (Rect const&) const;
         
 	void raise_to_top ();
