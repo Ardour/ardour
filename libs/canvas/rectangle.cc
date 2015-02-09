@@ -65,14 +65,14 @@ Rectangle::get_self_for_render () const
 	   we should take that into account when rendering.
 	*/
 
-	return item_to_window (_rect.translate (_position));
+	return item_to_window (_rect.translate (_position), false);
 }
 
 void
 Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Rect self) const
 {
 	boost::optional<Rect> r = self.intersection (area);
-
+	
 	if (!r) {
 		return;
 	}
@@ -147,7 +147,34 @@ Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {
 		Rect r = _rect.fix ();
-		_bounding_box = r.expand (_outline_width + 0.5);
+
+		/* if the outline is 1 pixel, then the actual
+		   bounding box is 0.5 pixels outside the stated
+		   corners of the rectangle.
+
+		   if the outline is 2 pixels, then the actual
+		   bounding box is 1.0 pixels outside the stated
+		   corners of the rectangle (so that the middle
+		   of the 2 pixel wide border passes through
+		   the corners, alternatively described as 1 row 
+		   of pixels outside of the corners, and 1 row
+		   inside).
+
+		   if the outline is 3 pixels, then the actual
+		   bounding box is 1.5 outside the stated corners
+		   of the rectangle (so that the middle row of
+		   pixels of the border passes through the corners).
+
+		   if the outline is 4 pixels, then the actual bounding
+		   box is 2.0 pixels outside the stated corners
+		   of the rectangle, so that the border consists
+		   of 2 pixels outside the corners and 2 pixels inside.
+
+		   hence ... the bounding box is width * 0.5 larger
+		   than the rectangle itself.
+		*/
+
+		_bounding_box = r.expand (_outline_width * 0.5);
 	}
 
 	_bounding_box_dirty = false;
