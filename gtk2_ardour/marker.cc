@@ -341,8 +341,6 @@ RangeMarker::setup_name_display ()
                 
 		_name_item->show ();
                 _name_item->set_x_position (_label_offset);
-                /* Limit text to width of background rect */
-		_name_item->clamp_width (_name_background->get().width());
 		_name_item->set (_name);
         }
 }
