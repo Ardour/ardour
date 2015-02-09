@@ -1140,7 +1140,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_samples_per_pixel (samples_per_pixel);
 	wave->set_show_zero_line (true);
 	wave->set_clip_level (ARDOUR_UI::config()->get_waveform_clip_level ());
-
+	wave->set_start_shift (1.0);
+	
 	wave->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_wave_view_event), wave, this));
 	
 	switch (ARDOUR_UI::config()->get_waveform_shape()) {
