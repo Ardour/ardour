@@ -823,24 +823,27 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 		// Go to next whole hour down
 		Timecode::hours_floor (timecode);
 
-		for (n = 0; n < timecode_nmarks; ) {
+        // Round to the nearest multiply of the timecode_mark_modulo
+        timecode.hours = timecode.hours + (timecode_mark_modulo - (timecode.hours % timecode_mark_modulo) );
+            
+		for (n = 0; n < timecode_nmarks; ++n) {
 			_session->timecode_to_sample(timecode, pos, true /* use_offset */, false /* use_subframes */ );
-			if ((timecode.hours % timecode_mark_modulo) == 0) {
-				mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                if (timecode.hours) {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
-                                } else {
-                                        snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
-                                }
-                                mark.label = buf;
-                                mark.position = pos;
-                                marks.push_back (mark);
-                                ++n;
-                        } 
-                        /* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
-                           and doing it 1 hour at a time is just stupid (and slow).
-                        */
-                        timecode.hours += timecode_mark_modulo;
+            mark.style = ArdourCanvas::Ruler::Mark::Major;
+            
+            if (timecode.hours) {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds);
+            } else {
+                    snprintf (buf, sizeof(buf), "%s%u:%02u", timecode.negative ? "-" : "", timecode.minutes, timecode.seconds);
+            }
+            
+            mark.label = buf;
+            mark.position = pos;
+            marks.push_back (mark);
+
+            /* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
+               and doing it 1 hour at a time is just stupid (and slow).
+            */
+            timecode.hours += timecode_mark_modulo;
 		}
 	  break;
 
@@ -1781,13 +1784,13 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
                  
         case minsec_show_many_hours:
                 for (n = 0; n < minsec_nmarks; ) {
-                        sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+                    sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
                         if (hrs % minsec_mark_modulo == 0) {
-                                mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                snprintf (buf, sizeof(buf), "%02ld:00", hrs);
-                                mark.label = buf;
-                                mark.position = pos/1000.0;
-                                marks.push_back (mark);
+                    mark.style = ArdourCanvas::Ruler::Mark::Major;
+                    snprintf (buf, sizeof(buf), "%02ld:00", hrs);
+                    mark.label = buf;
+                    mark.position = pos/1000.0;
+                    marks.push_back (mark);
                                 ++n;
                         }
                         pos += minsec_mark_interval;
