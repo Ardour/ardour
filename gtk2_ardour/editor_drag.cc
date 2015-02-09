@@ -1036,6 +1036,9 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		_editor->begin_reversible_command (Operations::region_copy);
 	}
 
+	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
+	PlaylistMapping playlist_mapping;
+
 	/* insert the regions into their new playlists */
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
 
@@ -1052,13 +1055,23 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		} else {
 			where = i->view->region()->position();
 		}
-		
+
 		if (i->time_axis_view < 0) {
-			if (!new_time_axis_view) {
+			/* dragged to drop zone */
+
+			PlaylistMapping::iterator pm;
+			
+			if ((pm = playlist_mapping.find (i->view->region()->playlist())) == playlist_mapping.end()) {
+				/* first region from this original playlist: create a new track */
 				new_time_axis_view = create_destination_time_axis (i->view->region(), i->initial_time_axis_view);
+				playlist_mapping.insert (make_pair (i->view->region()->playlist(), new_time_axis_view));
+				dest_rtv = new_time_axis_view;
+			} else {
+				/* we already created a new track for regions from this playlist, use it */
+				dest_rtv = pm->second;
 			}
-			dest_rtv = new_time_axis_view;
 		} else {
+			/* destination time axis view is the one we dragged to */
 			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
 		}		
 		
@@ -1118,6 +1131,9 @@ RegionMoveDrag::finished_no_copy (
 		_editor->begin_reversible_command (Operations::region_drag);
 	}
 
+	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
+	PlaylistMapping playlist_mapping;
+
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = i->view;
@@ -1129,14 +1145,25 @@ RegionMoveDrag::finished_no_copy (
 		}
 		
 		if (i->time_axis_view < 0) {
-			if (!new_time_axis_view) {
-				new_time_axis_view = create_destination_time_axis (rv->region(), i->initial_time_axis_view);
-			}
-			dest_rtv = new_time_axis_view;
-		} else {
-			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
-		}
+			/* dragged to drop zone */
+
+			PlaylistMapping::iterator pm;
 			
+			if ((pm = playlist_mapping.find (i->view->region()->playlist())) == playlist_mapping.end()) {
+				/* first region from this original playlist: create a new track */
+				new_time_axis_view = create_destination_time_axis (i->view->region(), i->initial_time_axis_view);
+				playlist_mapping.insert (make_pair (i->view->region()->playlist(), new_time_axis_view));
+				dest_rtv = new_time_axis_view;
+			} else {
+				/* we already created a new track for regions from this playlist, use it */
+				dest_rtv = pm->second;
+			}
+			
+		} else {
+			/* destination time axis view is the one we dragged to */
+			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
+		}		
+
 		assert (dest_rtv);
 
 		double const dest_layer = i->layer;
