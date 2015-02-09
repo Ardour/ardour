@@ -1053,12 +1053,6 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		return;
 	}
 
-	if (_x_constrained) {
-		_editor->begin_reversible_command (Operations::fixed_time_region_copy);
-	} else {
-		_editor->begin_reversible_command (Operations::region_copy);
-	}
-
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
@@ -1148,18 +1142,9 @@ RegionMoveDrag::finished_no_copy (
 		return;
 	}
 
-<<<<<<< HEAD
-=======
-	if (_x_constrained) {
-		_editor->begin_reversible_command (_("fixed time region drag"));
-	} else {
-		_editor->begin_reversible_command (Operations::region_drag);
-	}
-
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
->>>>>>> 1faf1a1... After dragging from multiple tracks to the dropzone, create the right number of new tracks.
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = i->view;
