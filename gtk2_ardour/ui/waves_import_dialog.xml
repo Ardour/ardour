@@ -53,7 +53,7 @@
       <VBox spacing="10">
         <HBox spacing="5">
           <Label style="generic_label"
-                 text="Add files as"/>
+                 text="Add files"/>
           <Dropdown id="add_as_dropdown"
                     style="generic_dropdown">
             <HBox>
