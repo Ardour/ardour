@@ -3431,8 +3431,10 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 		copy_location = x->location;
 
-		/* call this to find out if its the start or end */
-
+		if ((type != TrimRight) && (delta < 0)) {
+			delta = max (-((framecnt_t) earliest_start), delta);
+		}
+		
 		if ((real_location = _editor->find_location_from_marker (x->markers.front(), is_start)) == 0) {
 			continue;
 		}
