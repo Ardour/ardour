@@ -760,7 +760,7 @@ gint
 MixerStrip::output_release (GdkEventButton *ev)
 {
 	switch (ev->button) {
-	case 1:
+	case 3:
 		edit_output_configuration ();
 		break;
 	}
@@ -781,10 +781,10 @@ MixerStrip::output_press (GdkEventButton *ev)
 	MenuList& citems = output_menu.items();
 	switch (ev->button) {
 
-	case 1:
+	case 3:
 		return false;  //wait for the mouse-up to pop the dialog
 
-	case 3:
+	case 1:
 	{
 		output_menu.set_name ("ArdourContextMenu");
 		citems.clear ();
@@ -792,15 +792,6 @@ MixerStrip::output_press (GdkEventButton *ev)
 
 		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 
-		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-			citems.push_back (
-				MenuElem (
-					string_compose ("Add %1 port", (*i).to_i18n_string()),
-					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
-					)
-				);
-		}
-		
 		citems.push_back (SeparatorElem());
 		uint32_t const n_with_separator = citems.size ();
 
@@ -834,6 +825,20 @@ MixerStrip::output_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
+		citems.push_back (SeparatorElem());
+
+		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			citems.push_back (
+				MenuElem (
+					string_compose ("Add %1 port", (*i).to_i18n_string()),
+					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
+					)
+				);
+		}
+		
+		citems.push_back (SeparatorElem());
+		citems.push_back (MenuElem (_("Connection Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
+
 		output_menu.popup (1, ev->time);
 		break;
 	}
@@ -849,7 +854,7 @@ MixerStrip::input_release (GdkEventButton *ev)
 {
 	switch (ev->button) {
 
-	case 1:
+	case 3:
 		edit_input_configuration ();
 		break;
 	default:
@@ -881,21 +886,12 @@ MixerStrip::input_press (GdkEventButton *ev)
 
 	switch (ev->button) {
 
-	case 1:
+	case 3:
 		return false;  //don't handle the mouse-down here.  wait for mouse-up to pop the menu
 
-	case 3:
+	case 1:
 	{
 		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
-
-		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-			citems.push_back (
-				MenuElem (
-					string_compose ("Add %1 port", (*i).to_i18n_string()),
-					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_input_port), *i)
-					)
-				);
-		}
 
 		citems.push_back (SeparatorElem());
 		uint32_t const n_with_separator = citems.size ();
@@ -932,7 +928,21 @@ MixerStrip::input_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
+		citems.push_back (SeparatorElem());
+		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			citems.push_back (
+				MenuElem (
+					string_compose ("Add %1 port", (*i).to_i18n_string()),
+					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_input_port), *i)
+					)
+				);
+		}
+
+		citems.push_back (SeparatorElem());
+		citems.push_back (MenuElem (_("Connection Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_input_configuration)));
+
 		input_menu.popup (1, ev->time);
+
 		break;
 	}
 	default:
