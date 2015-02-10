@@ -58,6 +58,8 @@ private:
                const std::string& top_message,
                const std::string& progress_message,
                const std::string& bottom_message);
+	void show_pd_in_gui_thread ();
+	void hide_pd_in_gui_thread ();
     void set_progress_in_gui_thread (float);
     Gtk::Label& _top_label;
     Gtk::Label& _bottom_label;

@@ -129,19 +129,35 @@ ProgressDialog::add_progress_step ()
 void
 ProgressDialog::show_pd ()
 {
-    WavesDialog::show ();
+    Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ProgressDialog::show_pd_in_gui_thread , this));
+}
+
+void
+ProgressDialog::show_pd_in_gui_thread ()
+{
+   WavesDialog::show ();
     /* Make sure the progress dialog is drawn */
-    Glib::MainContext::get_default()->iteration (false);
+    while (Glib::MainContext::get_default()->iteration (false)) {
+        /* do nothing */
+    }
 }
 
 void
 ProgressDialog::hide_pd ()
 {
-    Glib::MainContext::get_default()->iteration (false);
+   Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ProgressDialog::hide_pd_in_gui_thread , this)); 
+}
 
+void
+ProgressDialog::hide_pd_in_gui_thread ()
+{
+    while (Glib::MainContext::get_default()->iteration (false)) {
+        /* do nothing */
+    }
     set_progress (0);
     WavesDialog::hide ();
 }
+
 
 void
 ProgressDialog::show_cancel_button ()
