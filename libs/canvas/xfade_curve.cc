@@ -241,13 +241,6 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 
 #define IS (_xfadeposition == Start)
 
-	/* fill primary fade */
-	context->begin_new_path ();
-	context->append_path (IS ? *path_in : *path_out);
-	close_path(draw, context, IS ?_in : _out, false);
-	set_source_rgba (context, _fill_color);
-	context->fill ();
-
 	/* fill background fade */
 	context->save ();
 	context->begin_new_path ();
@@ -262,6 +255,13 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	context->set_fill_rule (Cairo::FILL_RULE_WINDING);
 	context->fill ();
 	context->restore ();
+
+	/* fill primary fade */
+	context->begin_new_path ();
+	context->append_path (IS ? *path_in : *path_out);
+	close_path(draw, context, IS ?_in : _out, false);
+	set_source_rgba (context, _fill_color);
+	context->fill ();
 
 	/* draw lines over fills */
 	set_source_rgba (context, IS ? _outline_color : outline_shaded);

@@ -232,8 +232,8 @@ Curve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	for (Points::const_iterator p = _points.begin(); p != _points.end(); ++p) {
 		Duple window_space (item_to_window (*p));
 		context->arc (window_space.x, window_space.y, 5.0, 0.0, 2 * M_PI);
-		context->stroke ();
 	}
+	context->stroke ();
 #endif
 }
 

@@ -28,6 +28,7 @@
 
 #include <glibmm/threads.h>
 #include <boost/function.hpp>
+#include <boost/scoped_array.hpp>
 
 #include "ardour/source.h"
 #include "ardour/ardour.h"
@@ -164,6 +165,11 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	framecnt_t peak_leftover_size;
 	Sample*    peak_leftovers;
 	framepos_t peak_leftover_frame;
+
+	mutable uint32_t _last_map_off;
+	mutable size_t  _last_raw_map_length;
+	mutable bool _first_run;
+	mutable boost::scoped_array<PeakData> staging;
 };
 
 }
