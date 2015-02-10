@@ -25,6 +25,7 @@
 
 #include "pbd/pool.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/stacktrace.h"
 #include "pbd/error.h"
 #include "pbd/debug.h"
 #include "pbd/compose.h"
@@ -183,6 +184,7 @@ PerThreadPool::per_thread_pool ()
 {
 	CrossThreadPool* p = _key.get();
 	if (!p) {
+		PBD::stacktrace(std::cout, 100);
 		fatal << "programming error: no per-thread pool \"" << _name << "\" for thread " << pthread_name() << endmsg;
 		/*NOTREACHED*/
 	}

@@ -710,8 +710,10 @@ def configure(conf):
                       lib='regex', uselib_store="REGEX", define_name='HAVE_REGEX_H')
         # TODO put this only where it is needed
         conf.env.append_value('LIB', 'regex')
-
-        # work around GdkDrawable BitBlt performance issue on windows
+        # For debugging
+        conf.env.append_value('LIB', 'dbghelp')
+        
+		# work around GdkDrawable BitBlt performance issue on windows
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
