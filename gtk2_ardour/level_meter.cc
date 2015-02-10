@@ -211,12 +211,10 @@ void
 LevelMeterBase::configuration_changed (ChanCount in, ChanCount out)
 {
         if (in != input_configuration) {
-                cerr << this << " INPUT CONFIGURATION CHANGED from " << input_configuration << " => " << in << endl;
                 input_configuration = in;
                 io_configuration_changed = true;
         }
         if (out != output_configuration) {
-                cerr << this << " OUTPUT CONFIGURATION CHANGED from " << output_configuration << " => " << out << endl;
                 output_configuration = out;
                 io_configuration_changed = true;
         }
