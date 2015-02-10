@@ -184,9 +184,9 @@ class WavesPortExportChannelSelector : public WavesExportChannelSelector, public
 	WavesButton& _channels_inc_button;
 	WavesButton& _channels_dec_button;
 	WavesButton& _split_button;
-	Gtk::ScrolledWindow          &_channel_scroller;
-	ChannelTreeView              _channel_view;
-	static uint32_t                     __max_channels;
+	Gtk::ScrolledWindow &_channel_scroller;
+	ChannelTreeView _channel_view;
+	static uint32_t __max_channels;
 };
 
 class WavesRegionExportChannelSelector : public WavesExportChannelSelector, public WavesUI

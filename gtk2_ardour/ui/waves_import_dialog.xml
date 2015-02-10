@@ -73,8 +73,8 @@
               <Label style="generic_dropdown_menu"/>
             </HBox>
             <DropdownMenu style="generic_dropdown_menu">
-              <DropdownItem style="generic_dropdown_menu" title="file timestamp" data="0"/>
               <DropdownItem style="generic_dropdown_menu" title="playhead" data="2"/>
+              <DropdownItem style="generic_dropdown_menu" title="file timestamp" data="0"/>
               <DropdownItem style="generic_dropdown_menu" title="session start" data="3"/>
             </DropdownMenu>
           </Dropdown>

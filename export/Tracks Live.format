@@ -11,7 +11,7 @@
     <Option name="broadcast-info" value="false"/>
   </EncodingOptions>
   <Processing>
-    <Normalize enabled="true" target="-0"/>
+    <Normalize enabled="false" target="-0"/>
     <Silence>
       <Start>
         <Trim enabled="false"/>

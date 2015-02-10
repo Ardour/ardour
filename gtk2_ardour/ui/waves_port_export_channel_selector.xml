@@ -24,8 +24,12 @@
          bgnormal="#6C6C6C"/>
   <style name="generic_dropdown_menu"
          style="generic_dropdown"/>
-  <VBox spacing="5">
-    <HBox spacing="5">
+  <VBox spacing="5"
+        _visible="false"
+        _noshowall="true">
+    <HBox spacing="5" 
+        visible="false"
+        noshowall="true">
       <Label style="generic_control"
              text="Channels:"/>
       <HBox box.fill="true" box.expand="true">
@@ -55,20 +59,22 @@
     </HBox>
     <Hbox>
       <IconButton id="split_button"
-              width="20"
-              height="20"
-              normalicon="waves_darker_check_box"
-              activeicon="waves_darker_check_box_active"
-              toggleable="true"/>
+                  width="20"
+                  height="20"
+                  normalicon="waves_darker_check_box"
+                  activeicon="waves_darker_check_box_active"
+                  toggleable="true"/>
       <Label style="generic_control"
              text="Split mono files"/>
     </Hbox>
   </VBox>
   <VBox box.fill="true"
-        box.expand="true">
-  <ScrolledWindow id="channel_scroller"
-                  box.fill="true"
-                  box.expand="true"/>
+        box.expand="true"
+        visible="false"
+        noshowall="true">
+    <ScrolledWindow id="channel_scroller"
+                    box.fill="true"
+                    box.expand="true"/>
   <VBox height="10"/>
   </VBox>
 </HBox>

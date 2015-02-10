@@ -41,7 +41,7 @@ using namespace Glib;
 using namespace ARDOUR;
 using namespace PBD;
 
-uint32_t WavesPortExportChannelSelector::__max_channels = 20;
+uint32_t WavesPortExportChannelSelector::__max_channels = 2;
 
 WavesPortExportChannelSelector::WavesPortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
   : WavesExportChannelSelector (session, manager)
@@ -187,18 +187,11 @@ WavesPortExportChannelSelector::ChannelTreeView::ChannelTreeView (uint32_t max_c
 
 	/* Add column with toggle and text */
 
-	append_column_editable (_("Bus or Track"), route_cols.selected);
-
-	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
-	text_renderer->property_editable() = false;
-
-	Gtk::TreeView::Column* column = get_column (0);
-	column->pack_start (*text_renderer);
-	column->add_attribute (text_renderer->property_text(), route_cols.name);
-
+	append_column_editable (_(""), route_cols.selected);
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(get_column_cell_renderer (0));
 	toggle->signal_toggled().connect (sigc::mem_fun (*this, &WavesPortExportChannelSelector::ChannelTreeView::update_toggle_selection));
 
+	append_column (_("Bus or Track"), route_cols.name);
 	static_columns = get_columns().size();
 }
 
@@ -323,9 +316,9 @@ WavesPortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t cha
 
 		Gtk::CellRendererCombo* combo_renderer = Gtk::manage (new Gtk::CellRendererCombo);
 		combo_renderer->property_text_column() = 2;
-		column->pack_start (*combo_renderer);
+		column->pack_start (*combo_renderer, false);
 
-		append_column (*column);
+		// append_column (*column);
 
 		column->add_attribute (combo_renderer->property_text(), route_cols.get_channel(n_channels).label);
 		column->add_attribute (combo_renderer->property_model(), route_cols.port_list_col);
@@ -343,11 +336,11 @@ WavesPortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t cha
 
 		/* set column width */
 
-		get_column (static_columns + n_channels - 1)->set_min_width (80);
+		// get_column (static_columns + n_channels - 1)->set_min_width (80);
 
 		--offset;
 	}
-
+	/*
 	while (offset < 0) {
 		--n_channels;
 
@@ -355,7 +348,7 @@ WavesPortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t cha
 
 		++offset;
 	}
-
+	*/
 	update_config ();
 }
 

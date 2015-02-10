@@ -63,9 +63,17 @@ using namespace Gtk;
 void
 Editor::export_audio ()
 {
-	WavesExportDialog dialog (*this, _("Export"), ExportProfileManager::RegularExport);
-	dialog.set_session (_session);
-	dialog.run();
+	if (Config->get_output_auto_connect() & AutoConnectPhysical) {
+        WavesMessageDialog read_only_session_dialog ("",
+                                                     "Not available in Multi Out mode.\nPlease switch to Stereo Out mode.",
+                                                     WavesMessageDialog::BUTTON_OK);
+        read_only_session_dialog.set_position (Gtk::WIN_POS_CENTER);
+        read_only_session_dialog.run ();
+	} else {
+		WavesExportDialog dialog (*this, _("Export"), ExportProfileManager::RegularExport);
+		dialog.set_session (_session);
+		dialog.run();
+	}
 }
 
 void
