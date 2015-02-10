@@ -4,7 +4,8 @@
         macfont ="Helvetica Bold 12"
         fgnormal="#6D6E72"
         borderwidth="5 5 5 5"
-        bordercolor="#000000">
+        bordercolor="#000000"
+        CACHEIT="false">
   
   <style name="generic_control"
          winfont ="Arial Bold 12"
@@ -26,13 +27,14 @@
 
   <EventBox bgnormal="#EDECE8">
       <VBox width="320">
+          <HBox height="8"/>
           <Label id="top_label"
                  style="generic_control"
                  vertalignment="center"
                  text="---"
-                 height="28"
-                 ellipsize="end"/>
-          <VBox height="4"/>
+                 ellipsize="end"
+                 justify="center"/>
+          <VBox height="12"/>
           <HBox width="320">
                 <VBox width="13"/>
                 <Layout width="294"
@@ -65,8 +67,8 @@
                  winfont ="Arial 10"
                  macfont ="Helvetica 10"
                  vertalignment="center"
-                 text="info-2"
-                 height="10"/>
+                 justify="center"
+                 text="info-2"/>
           <VBox height="11"/>
           <HBox width="320">
               <VBox width="105"/>

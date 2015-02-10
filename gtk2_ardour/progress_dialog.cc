@@ -25,6 +25,8 @@
 #include "progress_dialog.h"
 #include "i18n.h"
 
+#include "utils.h"
+
 using namespace Gtk;
 
 ProgressDialog::ProgressDialog (const std::string& title,
@@ -70,7 +72,8 @@ ProgressDialog::cancel_clicked (WavesButton*)
 void
 ProgressDialog::set_top_label (std::string message)
 {
-    _top_label.set_text (message);
+    const size_t n_characters_in_line = 300 / 6; // 300 - size of the label, see progress_dialog.xml, 6 - average width of the one character
+    _top_label.set_text ( ARDOUR_UI_UTILS::split_on_lines (message, n_characters_in_line) );
 }
 
 void
@@ -82,7 +85,8 @@ ProgressDialog::set_progress_label (std::string message)
 void
 ProgressDialog::set_bottom_label (std::string message)
 {
-    _bottom_label.set_text (message);
+    const size_t n_characters_in_line = 300 / 6; // 300 - size of the label, see progress_dialog.xml, 6 - average width of the one character
+    _bottom_label.set_text ( ARDOUR_UI_UTILS::split_on_lines (message,  n_characters_in_line) );
 }
 
 void
