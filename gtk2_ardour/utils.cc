@@ -1038,3 +1038,32 @@ ARDOUR_UI_UTILS::track_number_to_string (
 	rv += Glib::Markup::escape_text(postfix);
 	return rv;
 }
+
+std::string
+ARDOUR_UI_UTILS::split_on_lines (std::string message, size_t n_characters_in_line)
+{
+    if (message.size()<n_characters_in_line)
+        return message;
+    
+    std::string splited_message = "";
+    
+    std::vector<std::string> words;
+    boost::split (words, message, boost::is_any_of(" "));
+    
+    size_t i = 0;
+    
+    while( i < words.size() ) {
+        
+        std::string new_line = words[i++];
+        
+        // Create next line
+        while ( (i < words.size()) && (new_line.size() + words[i].size() < n_characters_in_line) )
+            new_line += " " + words[i++];
+        
+        if ( splited_message.size() > 0 ) // not first line
+            splited_message += "\n";
+        splited_message += new_line;
+    }
+    
+    return splited_message;
+}

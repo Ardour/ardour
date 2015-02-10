@@ -100,6 +100,7 @@ std::string rate_as_string (float r);
 ARDOUR::framecnt_t string_as_rate (const std::string& string_sr);
 
 std::string track_number_to_string (int64_t tracknumber, std::string sep = "", std::string postfix = "");
+std::string split_on_lines (std::string message, size_t n_characters_in_line);
 
 } // namespace
 #endif /* __ardour_gtk_utils_h__ */
