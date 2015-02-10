@@ -129,7 +129,7 @@
     <Option name="punch line" value="a80000ff"/>
     <Option name="skip drag bar rect" value="eb7801ff"/>
     <Option name="range drag bar rect" value="ffffffff"/>
-    <Option name="range drag rect" value="ffffffff"/>
+    <Option name="range drag rect" value="ffffff00"/>
     <Option name="range marker bar" value="575757ff"/>
     <Option name="recording rect" value="DA0000ff"/>
     <Option name="recorded waveform fill" value="ffffffff"/>
