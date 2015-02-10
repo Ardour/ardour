@@ -82,7 +82,12 @@ SessionCloseDialog::on_save (WavesButton*)
 void
 SessionCloseDialog::set_top_label (std::string message)
 {
-    const size_t n_characters_in_line = 400 / 7; // 400 - size of the label, see session_close_dialog.xml, 7 - average width of the one character
+#if defined (PLATFORM_WINDOWS)
+    const size_t character_width = 9; // average width of the one character on Windows
+#elif defined (__APPLE__)
+	const size_t character_width = 7; // average width of the one character on MacOS
+#endif
+    const size_t n_characters_in_line = 400 / character_width; // 400 - size of the label, see session_close_dialog.xml
     _top_label.set_text ( ARDOUR_UI_UTILS::split_on_lines (message, n_characters_in_line) );
 }
 
