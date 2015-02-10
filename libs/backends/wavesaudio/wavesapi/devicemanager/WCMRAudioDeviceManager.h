@@ -57,6 +57,7 @@ struct DeviceInfo
 	DeviceID m_DeviceId;
 	std::string m_DeviceName;
 	std::vector<int> m_AvailableSampleRates;
+	std::vector<int> m_AvailableBufferSizes;
 	unsigned int m_MaxInputChannels;
 	unsigned int m_MaxOutputChannels;
 

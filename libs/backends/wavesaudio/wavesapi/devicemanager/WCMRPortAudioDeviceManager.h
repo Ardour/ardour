@@ -172,6 +172,7 @@ protected:
 private:
 	// helper functions for this class only
     WTErr getDeviceAvailableSampleRates(DeviceID deviceId, std::vector<int>& sampleRates);
+	WTErr getDeviceAvailableBufferSizes(DeviceID deviceId, std::vector<int>& buffers);
 
 	WCMRAudioDevice*			m_NoneDevice;
 };
