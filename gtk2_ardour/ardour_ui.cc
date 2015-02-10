@@ -1078,12 +1078,8 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
     if (_session->snap_name() == _session->name()) {
 		prompt = string_compose(_("Do you want to save changes to \"%1\"?\n"), _session->snap_name());
         bottom_prompt = _("Changes will be lost if you choose \"don't save\"\n");
-        
-        session_close_dialog._top_label.set_text(prompt);
-        
-        
-        session_close_dialog._bottom_label.set_text(bottom_prompt);
-        session_close_dialog._bottom_label.set_alignment(ALIGN_CENTER);
+        session_close_dialog.set_top_label (prompt);
+        session_close_dialog.set_bottom_label (bottom_prompt);
 	} else {
 		prompt = string_compose(_("The snapshot \"%1\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
                                 _session->snap_name());

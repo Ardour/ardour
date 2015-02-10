@@ -1,10 +1,20 @@
-//
-//  session_close_dialog.cpp
-//  Tracks
-//
-//  Created by User on 6/12/14.
-//
-//
+/*
+ Copyright (C) 2014 Waves Audio Ltd.
+ 
+ This program is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ 
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ 
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
 
 #include "session_close_dialog.h"
 
@@ -20,6 +30,7 @@
 
 #include <gtkmm/filechooser.h>
 #include "dbg_msg.h"
+#include "utils.h"
 
 #include "i18n.h"
 
@@ -68,3 +79,16 @@ SessionCloseDialog::on_save (WavesButton*)
 	response (Gtk::RESPONSE_YES);
 }
 
+void
+SessionCloseDialog::set_top_label (std::string message)
+{
+    const size_t n_characters_in_line = 400 / 7; // 400 - size of the label, see session_close_dialog.xml, 7 - average width of the one character
+    _top_label.set_text ( ARDOUR_UI_UTILS::split_on_lines (message, n_characters_in_line) );
+}
+
+void
+SessionCloseDialog::set_bottom_label (std::string message)
+{
+    const size_t n_characters_in_line = 400 / 6; // 400 - size of the label, see session_close_dialog.xml, 6 - average width of the one character
+    _bottom_label.set_text ( ARDOUR_UI_UTILS::split_on_lines (message,  n_characters_in_line) );
+}
