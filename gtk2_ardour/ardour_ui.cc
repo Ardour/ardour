@@ -1077,7 +1077,7 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
     
     if (_session->snap_name() == _session->name()) {
 		prompt = string_compose(_("Do you want to save changes to \"%1\"?\n"), _session->snap_name());
-        bottom_prompt = _("Changes will be lost if you choose \"don't save\"\n");
+        bottom_prompt = _("Changes will be lost if you choose \"Don't Save\"\n");
         session_close_dialog.set_top_label (prompt);
         session_close_dialog.set_bottom_label (bottom_prompt);
 	} else {
@@ -3701,9 +3701,15 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
-    _add_tracks_dialog->setup();
-    _add_tracks_dialog->set_position (WIN_POS_CENTER);
-    int r = _add_tracks_dialog->run();
+	unsigned int existing_tracks_count = _session->get_tracks ()->size ();
+	if (existing_tracks_count >= _add_tracks_dialog->max_tracks_count ()) {
+		WavesMessageDialog("", "Impossible to add more tracks!").run ();
+		return;
+	}
+
+	_add_tracks_dialog->setup(_add_tracks_dialog->max_tracks_count () - existing_tracks_count);
+	_add_tracks_dialog->set_position (WIN_POS_CENTER);
+	int r = _add_tracks_dialog->run();
     
 	switch (r) {
 		case WavesDialog::RESPONSE_DEFAULT:
@@ -3787,6 +3793,11 @@ ARDOUR_UI::add_audio_track_instantly ()
     
 	if (_add_tracks_dialog->is_visible()) {
 		/* we're already doing this */
+		return;
+	}
+
+	if (_session->get_tracks ()->size () >= _add_tracks_dialog->max_tracks_count ()) {
+		WavesMessageDialog("", "Impossible to add more tracks!").run ();
 		return;
 	}
     

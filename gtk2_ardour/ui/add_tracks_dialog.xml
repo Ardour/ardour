@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Dialog title="Add Track" resizeable="False">
+<Dialog title="Add Track"
+        resizeable="false"
+        maxtrackscount="256">
   <style name="generic_control"
          winfont ="Arial Bold 10"
          macfont ="Helvetica Bold 10"

@@ -38,13 +38,15 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 
 AddTracksDialog::AddTracksDialog ()
-: WavesDialog (_("add_tracks_dialog.xml"), true, false)
-, _decrement_button (get_waves_button ("decrement_button"))
-, _increment_button (get_waves_button ("increment_button"))
-, _cancel_button (get_waves_button ("cancel_button"))
-, _ok_button (get_waves_button ("ok_button"))
-, _tracks_format_dropdown (get_waves_dropdown ("tracks_format_dropdown"))
-, _tracks_counter_entry (get_entry("tracks_counter_entry"))
+  : WavesDialog (_("add_tracks_dialog.xml"), true, false)
+  , _decrement_button (get_waves_button ("decrement_button"))
+  , _increment_button (get_waves_button ("increment_button"))
+  , _cancel_button (get_waves_button ("cancel_button"))
+  , _ok_button (get_waves_button ("ok_button"))
+  , _tracks_format_dropdown (get_waves_dropdown ("tracks_format_dropdown"))
+  , _tracks_counter_entry (get_entry("tracks_counter_entry"))
+  , _max_tracks_count (xml_property (*xml_tree ()->root (), "maxtrackscount", 256))
+
 {
     populate_tracks_format_dropdown();
     _tracks_counter_entry.set_text("1");
@@ -85,55 +87,44 @@ AddTracksDialog::on_ok_button (WavesButton*)
 void
 AddTracksDialog::on_decrement_button (WavesButton*)
 {
-    int track_count = count();
+    unsigned int track_count = count();
     
     if( track_count > 1 )
     {
-        --track_count;
-        set_track_count(track_count);
-    } else
-    {
-        set_track_count(1);
+        set_track_count ( track_count-1 );
+	    _tracks_counter_entry.set_position (-1); // set cursor at the last position
     }
-    _tracks_counter_entry.set_position (-1); // set cursor at the last position
 }
 
 void
 AddTracksDialog::on_increment_button (WavesButton*)
 {
-    int track_count = count();
+    unsigned int track_count = count();
     
-    if( 1<=track_count && track_count <= 256 )
-    {
-        ++track_count;
-        set_track_count(track_count);
-    } else
-    {
-        set_track_count(1);
+    if( track_count < _max_tracks_to_add ) {
+        set_track_count (track_count + 1);
+		_tracks_counter_entry.set_position (-1); // set cursor at the last position
     }
-    
-    input_channels ();
-    _tracks_counter_entry.set_position (-1); // set cursor at the last position
 }
 
-int
+unsigned int
 AddTracksDialog::count ()
 {
     string str_track_count = _tracks_counter_entry.get_text();
     char * pEnd;
     int number = strtol( str_track_count.c_str(), &pEnd, 10 );
     number = number >= 0 ? number : 0;
-    return number;
+    return std::min (_max_tracks_to_add, (unsigned int)number);
 }
 
 void
-AddTracksDialog::set_track_count (int track_count)
+AddTracksDialog::set_track_count (unsigned int track_count)
 {
     stringstream ss;
-    ss << track_count;
+    ss << std::min (track_count, _max_tracks_to_add);
     string str_track_count = ss.str();
     
-    _tracks_counter_entry.set_text(str_track_count);
+    _tracks_counter_entry.set_text( str_track_count);
 }
 
 ChanCount
@@ -154,8 +145,10 @@ AddTracksDialog::input_channels ()
 }
 
 void
-AddTracksDialog::setup ()
+AddTracksDialog::setup (unsigned int max_tracks_to_add)
 {
+	_max_tracks_to_add = max_tracks_to_add;
+
     set_track_count(1);
     _tracks_format_dropdown.set_text(TrackFormat::FormatMono);
 }

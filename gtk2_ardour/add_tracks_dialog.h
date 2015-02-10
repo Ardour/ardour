@@ -33,10 +33,11 @@ class AddTracksDialog : public WavesDialog {
 public:
     
     AddTracksDialog ();
-    void setup();
-    int count();
+    void setup (unsigned int);
+    unsigned int count();
     ARDOUR::ChanCount input_channels ();
     void on_show ();
+	unsigned int max_tracks_count () const { return _max_tracks_count; }
     
 private:
 	WavesButton& _decrement_button;
@@ -47,6 +48,9 @@ private:
 	WavesDropdown& _tracks_format_dropdown;
     Gtk::Entry& _tracks_counter_entry;
     
+	unsigned int _max_tracks_to_add;
+	unsigned int _max_tracks_count; // Just a storage for usecase's limit
+
     void populate_tracks_format_dropdown();
     
     void on_cancel_button (WavesButton*);
@@ -54,7 +58,7 @@ private:
     void on_decrement_button (WavesButton*);
     void on_increment_button (WavesButton*);
     
-    void set_track_count(int track_count);
+    void set_track_count(unsigned int track_count);
 };
 
 #endif
