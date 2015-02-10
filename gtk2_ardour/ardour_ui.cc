@@ -997,7 +997,6 @@ ARDOUR_UI::idle_finish ()
 void
 ARDOUR_UI::finish()
 {
-    cout<<"ARDOUR_UI::finish()"<<endl;
 	if (_session) {
         
         if (_session->actively_recording () && _session->have_rec_enabled_track () ) {
@@ -1527,7 +1526,12 @@ ARDOUR_UI::open_recent_session_from_menuitem(unsigned int num_of_recent_session)
     bool isnew;
     if (ARDOUR::find_session (cur_recent_session_path, path, name, isnew) == 0) {
         _session_is_new = isnew;
-        load_session (path, name);
+        if (load_session (path, name) < 0) {
+            // session file was corrupted
+            // close this session and show session dialog
+            close_session ();
+        }
+
     }
 }
 
@@ -1567,7 +1571,12 @@ ARDOUR_UI::open_session ()
 	if (session_path.length() > 0) {
 		if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
 			_session_is_new = isnew;
-			load_session (path, name);
+            if (load_session (path, name) < 0) {
+                // session file was corrupted
+                // close this session and show session dialog
+                close_session ();
+                
+            }
 		}
 	}
 }
@@ -2796,9 +2805,17 @@ ARDOUR_UI::load_from_application_api (const std::string& path_from_user_choice)
     // if the program was starting from application api
     // we should not do nothing here
     if ( !program_starting) {
-         session_dialog_was_hidden = true;
-        _session_dialog.hide ();
-        load_session (path_for_loading, basename_nosuffix (path_from_user_choice));
+        if ( _session_dialog.get_visible () ) {
+            session_dialog_was_hidden = true;
+            _session_dialog.hide ();
+        }
+        // we should save status session_loaded
+        // because it will be changed in load_session
+        bool temp_session_loaded = session_loaded;
+        if (load_session (path_for_loading, basename_nosuffix (path_from_user_choice)) < 0
+            && temp_session_loaded) {
+            close_session ();
+        }
     }
 }
 
@@ -2954,10 +2971,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	}
 	//SessionDialog _session_dialog (tracks_control_panel, should_be_new, session_name, session_path, load_template, cancel_not_quit);
     
-    _session_dialog.set_session_info (should_be_new, session_name, session_path);
-    _session_dialog.redisplay ();
 
 	while (ret != 0) {
+        _session_dialog.set_session_info (should_be_new, session_name, session_path);
+        _session_dialog.redisplay ();
 
 		if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 
@@ -3009,8 +3026,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
                         // SessionDialog was hidden in method load_from_application_api
                         if (session_dialog_was_hidden) {
                             session_dialog_was_hidden = false;
+                            ARDOUR_COMMAND_LINE::session_name = "";
+                            if (session_loaded) {
                             // normal continuation of program
-                            return 0;
+                                return 0;
+                            } else {
+                            // SessionDialg continue running
+                                continue;
+                            }
                         }
                         // this happens on Close Button pressed (at the top left corner only on Mac)
                         UI::quit ();
@@ -3164,7 +3187,8 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			ARDOUR_COMMAND_LINE::session_name = "";
             
-            return ret;
+            if (ret == 0)
+                return ret;
 		}
 	}
 
