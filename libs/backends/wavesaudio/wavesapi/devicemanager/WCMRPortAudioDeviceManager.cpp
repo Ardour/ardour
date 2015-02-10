@@ -1121,25 +1121,32 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 		case kAsioResyncRequest:
 			m_ResyncRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResyncRequest" << std::endl;
-			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
 			break;
 
 		case kAsioLatenciesChanged:
 			m_BufferSizeChangeRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioLatenciesChanged" << std::endl;
-			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			if (m_ResetRequested == 0) {
+				m_ResetRequested++;
+				m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			}
 			break;
 
 		case kAsioBufferSizeChange:
 			m_BufferSizeChangeRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- m_BufferSizeChangeRequested" << std::endl;
-			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			if (m_ResetRequested == 0) {
+				m_ResetRequested++;
+				m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			}
 			break;
 
 		case kAsioResetRequest:
-			m_ResetRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResetRequest" << std::endl;
-			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			if (m_ResetRequested == 0) {
+				m_ResetRequested++;
+				m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			}
 			break;
 
         case kAsioOverload:
