@@ -67,7 +67,7 @@ int WavesDataPort::connect (WavesDataPort *port)
     }
 
     if (is_connected (port)) {
-        std::cerr << "WavesDataPort::connect (): the ports are already connected!" << std::endl;
+        // std::cerr << "WavesDataPort::connect (): the ports are already connected!" << std::endl;
         return -1;
     }
 
