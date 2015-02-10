@@ -7618,11 +7618,11 @@
 		<row><td>ID_STRING14</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1889785454</td></row>
 		<row><td>ID_STRING15</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023999979</td></row>
 		<row><td>ID_STRING16</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>2023970352</td></row>
-		<row><td>ID_STRING2</td><td>1033</td><td>http://www.WavesAudio.com</td><td>0</td><td/><td>1227091018</td></row>
+		<row><td>ID_STRING2</td><td>1033</td><td>http://www.waves.com</td><td>0</td><td/><td>1361304332</td></row>
 		<row><td>ID_STRING3</td><td>1033</td><td>Waves Audio</td><td>0</td><td/><td>1227091018</td></row>
 		<row><td>ID_STRING4</td><td>1033</td><td>TracksLive</td><td>0</td><td/><td>1621309294</td></row>
 		<row><td>ID_STRING5</td><td>1033</td><td>LAUNCH~1.EXE|Launch gdb.exe</td><td>0</td><td/><td>1621352975</td></row>
-		<row><td>ID_STRING6</td><td>1033</td><td>http://www.WavesAudio.com/support</td><td>0</td><td/><td>1227091018</td></row>
+		<row><td>ID_STRING6</td><td>1033</td><td>http://www.waves.com/support</td><td>0</td><td/><td>1361251116</td></row>
 		<row><td>ID_STRING7</td><td>1033</td><td>US: +1-865-909-9200, Worldwide: +972-3-608-4000</td><td>0</td><td/><td>1621317071</td></row>
 		<row><td>ID_STRING8</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621302927</td></row>
 		<row><td>ID_STRING9</td><td>1033</td><td>Tracks Live</td><td>0</td><td/><td>1621351824</td></row>
@@ -7737,7 +7737,12 @@
 		<col def="S255">ISBuildSourcePath</col>
 		<col def="I2">ISIconIndex</col>
 		<row><td>ARPPRODUCTICON.exe</td><td/><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\icons\trackslive.ico</td><td>0</td></row>
+		<row><td>_03A42DC4_FDF0_467B_AACE_B90B46CEB7F1</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
 		<row><td>_0E06EFE6_72E0_4DE2_99E6_875E36DC599F</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
+		<row><td>_4CA11C50_ED1F_4A7B_AF93_88961016DFE8</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
+		<row><td>_979F832A_2FD1_40A8_803F_F172A1A402C3</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
+		<row><td>_D1FFA354_E100_44A8_A0B8_AC02A40E9A4A</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
+		<row><td>_E0E9AC8C_B753_48C8_B49D_E6F7B2EEA0AF</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
 		<row><td>_F322CC43_3724_43AB_8430_3857429D65EA</td><td/><td>C:\WS\GIT\tracks_daw\tracks\tools\windows_packaging\session_track.ico</td><td>0</td></row>
 		<row><td>gdb.exe1_8F6698E937CC4407B2318BA27F81AC78.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
 		<row><td>gdb.exe1_FBDCDC11332647529BE07B2891D54F19.exe</td><td/><td>&lt;ISProductFolder&gt;\redist\Language Independent\OS Independent\GenericExe.ico</td><td>0</td></row>
@@ -8195,7 +8200,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<col def="S72">Icon_</col>
 		<col def="I2">IconIndex</col>
 		<col def="I4">ISAttributes</col>
-		<row><td>TracksLive.File</td><td/><td/><td>TracksLive</td><td>_F322CC43_3724_43AB_8430_3857429D65EA</td><td>0</td><td/></row>
+		<row><td>TracksLive.File</td><td/><td/><td>Tracks Live</td><td>_03A42DC4_FDF0_467B_AACE_B90B46CEB7F1</td><td>0</td><td/></row>
 	</table>
 
 	<table name="Property">
@@ -8271,7 +8276,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{5BDAEBC6-BE35-45CC-AA49-EA178C31492C}</td><td/></row>
+		<row><td>ProductCode</td><td>{27D060E8-3FDF-4471-9BEA-377009DE2EC7}</td><td/></row>
 		<row><td>ProductName</td><td>Tracks Live</td><td/></row>
 		<row><td>ProductVersion</td><td>1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
