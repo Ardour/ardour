@@ -226,7 +226,7 @@ elif test x$MIXBUS != x ; then
 else
     cp  Tracks.icns $Resources/appIcon.icns
 fi
-cp  typeArdour.icns $Resources/
+cp  session_track.icns $Resources/
 if test x$STRIP != x ; then
     strip $APPROOT/MacOS/Tracks
 fi
