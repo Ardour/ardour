@@ -55,7 +55,7 @@ AddRouteDialog::AddRouteDialog ()
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
 	, configuration_label (_("Configuration:"))
-	, mode_label (_("Track mode:"))
+	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
 {
 	set_name ("AddRouteDialog");
