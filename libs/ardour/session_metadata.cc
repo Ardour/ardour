@@ -77,7 +77,7 @@ SessionMetadata::SessionMetadata ()
 	//map.insert (Property ("lyrics", ""));
 	//map.insert (Property ("media", ""));
 	//map.insert (Property ("label", ""));
-	//map.insert (Property ("barcode", ""));
+	map.insert (Property ("barcode", ""));
 	//map.insert (Property ("encoded_by", ""));
 	//map.insert (Property ("catalog_number", ""));
 
@@ -250,6 +250,12 @@ string
 SessionMetadata::grouping () const
 {
 	return get_value("grouping");
+}
+
+string
+SessionMetadata::barcode () const
+{
+	return get_value("barcode");
 }
 
 string
@@ -452,6 +458,12 @@ void
 SessionMetadata::set_grouping (const string & v)
 {
 	set_value ("grouping", v);
+}
+
+void
+SessionMetadata::set_barcode (const string & v)
+{
+	set_value ("barcode", v);
 }
 
 void
