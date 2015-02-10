@@ -587,7 +587,7 @@ AutomationTimeAxisView::build_display_menu ()
 		mode_line_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
 		mode_line_item->set_active (s == AutomationList::Linear);
 
-		items.push_back (MenuElem (_("Record Mode"), *auto_mode_menu));
+		items.push_back (MenuElem (_("Mode"), *auto_mode_menu));
 	}
 
 	/* make sure the automation menu state is correct */
