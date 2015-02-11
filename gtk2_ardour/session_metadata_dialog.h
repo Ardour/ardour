@@ -135,6 +135,9 @@ class EAN13MetadataField : public MetadataField {
 	Gtk::Widget & name_widget ();
 	Gtk::Widget & value_widget ();
 	Gtk::Widget & edit_widget ();
+
+	Gtk::Label* status_label;
+	void update_status ();
   private:
 	void update_value ();
         std::string numeric_string (std::string const & str) const;
