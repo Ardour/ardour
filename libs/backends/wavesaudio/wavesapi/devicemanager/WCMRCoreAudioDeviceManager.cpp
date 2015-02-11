@@ -1908,6 +1908,9 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
         m_IOProcThreadPort = 0;
         m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Starting AUHAL.");
         
+		// Prepare for streaming - tell Engine to do the initialization for process callback
+		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
+
         if (m_UseMultithreading)
         {
             //set thread constraints...

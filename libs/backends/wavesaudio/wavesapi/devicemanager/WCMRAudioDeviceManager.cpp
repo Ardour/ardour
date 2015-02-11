@@ -339,6 +339,10 @@ bool WCMRAudioDevice::Streaming ()
 //**********************************************************************************************
 WTErr WCMRAudioDevice::SetStreaming (bool newState)
 {
+	// We must notify angine about our intention to start streming
+	// so Engine will provide all the initializations in the first audio callback
+	m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
+
 	//This will most likely be overridden, the base class simply
 	//changes the member.
 	m_IsStreaming = newState;
@@ -361,8 +365,7 @@ WTErr WCMRAudioDevice::ResetDevice ()
 		SetActive(true);
 
     if (err == eNoErr && wasStreaming) {
-        m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
-        SetStreaming(true);
+        err = SetStreaming(true);
     }
 
 	return err;

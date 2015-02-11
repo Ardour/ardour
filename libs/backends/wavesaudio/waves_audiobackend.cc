@@ -405,7 +405,6 @@ WavesAudioBackend::set_sample_rate (float sample_rate)
        
     if (device_needs_restart) {
         // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;
-        _call_thread_init_callback = true;
         retVal  = _device->SetStreaming (true);
         if (retVal != eNoErr) {
             std::cerr << "WavesAudioBackend::set_sample_rate (): [" << _device->DeviceName () << "]->SetStreaming (true) failed (" << retVal << ") !" << std::endl;
@@ -454,7 +453,6 @@ WavesAudioBackend::set_buffer_size (uint32_t buffer_size)
     
     if (device_needs_restart) {
         // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;
-        _call_thread_init_callback = true;
         retVal  = _device->SetStreaming (true);
         if (retVal != eNoErr) {
             std::cerr << "WavesAudioBackend::set_buffer_size (): [" << _device->DeviceName () << "]->SetStreaming (true) failed (" << retVal << ") !" << std::endl;
@@ -479,8 +477,6 @@ int
 WavesAudioBackend::reset_device ()
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_reset_device ():" << std::endl;
-
-    WTErr retVal = eNoErr;
 
     if (!_device) {
         std::cerr << "WavesAudioBackend::set_buffer_size (): No device is set!" << std::endl;
@@ -690,7 +686,6 @@ WavesAudioBackend::_start (bool for_latency_measurement)
 
     manager.registration_callback ();
 
-    _call_thread_init_callback = true;
     WTErr retVal  = _device->SetStreaming (true);
     if (retVal != eNoErr) {
         std::cerr << "WavesAudioBackend::_start (): [" << _device->DeviceName () << "]->SetStreaming () failed!" << std::endl;
@@ -730,11 +725,22 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
     _read_audio_data_from_device (input_buffer, nframes);
     _read_midi_data_from_devices ();
 
+	static pthread_t process_id;
     if (_call_thread_init_callback) {
         _call_thread_init_callback = false;
         // COMMENTED DBG LOGS */ std::cout << "\tAudioEngine::thread_init_callback() invoked for " << std::hex << pthread_self() << std::dec << " !" << std::endl;
-        AudioEngine::thread_init_callback (this);
+        
+		process_id = pthread_self();
+		AudioEngine::thread_init_callback (this);
     }
+
+	if (process_id != pthread_self() ) {
+		std::cerr << "\tWavesAudioBackend::_audio_device_callback (): It's an attempt to call process callback from the thread which didn't initialize it " << std::endl;
+		std::cerr << "Expected thread: " << process_id << " current thread: " << pthread_self() << std::dec << " !" << std::endl;
+
+		process_id = pthread_self();
+		AudioEngine::thread_init_callback (this);
+	}
 
     engine.process_callback (nframes);
     

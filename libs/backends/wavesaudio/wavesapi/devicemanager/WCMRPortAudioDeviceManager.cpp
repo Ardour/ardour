@@ -944,6 +944,9 @@ void WCMRPortAudioDevice::startStreaming (bool callerIsWaiting/*=false*/)
 		unsigned int inChannelCount = pDeviceInfo->maxInputChannels;
 		unsigned int outChannelCount = pDeviceInfo->maxOutputChannels;
 		
+		// Prepare for streaming - tell Engine to do the initialization for process callback
+		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
+
 		paErr = Pa_StartStream( m_PortAudioStream );
 
 		if(paErr == paNoError)
@@ -1088,8 +1091,7 @@ void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 		// Resume streaming if the device was streaming before
 		if(wasStreaming && m_lastErr == eNoErr && m_ConnectionStatus == DeviceAvailable)
 		{
-			// Notify the Application to prepare for the stream start
-			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
+			// start streaming
 			startStreaming();
 		}
 	} else {
@@ -1342,7 +1344,6 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 			// restore previous state for the device
 			SetActive(true);
             if (wasStreaming) {
-                m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
 				SetStreaming(true);
             }
 		}
