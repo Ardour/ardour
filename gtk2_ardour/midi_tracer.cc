@@ -179,6 +179,8 @@ MidiTracer::port_changed ()
 
 		if (mp) {
 			mp->self_parser().any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
+			mp->set_trace_on (true);
+			traced_port = mp;
 		}
 		
 	} else {
@@ -190,6 +192,11 @@ void
 MidiTracer::disconnect ()
 {
 	_parser_connection.disconnect ();
+
+	if (traced_port) {
+		traced_port->set_trace_on (false);
+		traced_port.reset ();
+	}
 }
 
 void
