@@ -122,8 +122,8 @@ SessionMetadata::get_value (const string & name) const
 	if (it == map.end()) {
 		it = user_map.find (name);
 		if (it == user_map.end()) {
-			// Should not be reached!
-			std::cerr << "Programming error in SessionMetadata::get_value" << std::endl;
+			// Should not be reached, except if loading metadata from a newer version with a new type
+			std::cerr << "Programming error in SessionMetadata::get_value (" << name << ")" << std::endl;
 			return "";
 		}
 	}
@@ -144,8 +144,8 @@ SessionMetadata::set_value (const string & name, const string & value)
 	if (it == map.end()) {
 		it = user_map.find (name);
 		if (it == user_map.end()) {
-			// Should not be reached!
-			std::cerr << "Programming error in SessionMetadata::set_value" << std::endl;
+			// Should not be reached, except if loading metadata from a newer version with a new type
+			std::cerr << "Programming error in SessionMetadata::set_value (" << name << ")" << std::endl;
 			return;
 		}
 	}
