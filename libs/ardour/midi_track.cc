@@ -370,13 +370,13 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
+	/* filter captured data before meter sees it */
+	filter_channels (bufs, get_capture_channel_mode(), get_capture_channel_mask());
+
 	if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
 		_meter->run (bufs, start_frame, end_frame, nframes, true);
 	}
 
-	/* filter captured data before the diskstream sees it */
-
-	filter_channels (bufs, get_capture_channel_mode(), get_capture_channel_mask());
 
 	_silent = false;
 

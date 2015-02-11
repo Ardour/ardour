@@ -48,6 +48,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_track.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
@@ -404,8 +405,14 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
 		MidiBuffer& buf = sp->get_midi_buffer(nframes);
-		ChannelMode mode = AllChannels; // _track->get_capture_channel_mode ();
-		uint32_t mask = 0xffff; // _track->get_capture_channel_mask ();
+		ChannelMode mode = AllChannels;
+		uint32_t mask = 0xffff;
+
+		MidiTrack * mt = dynamic_cast<MidiTrack*> (_track);
+		if (mt) {
+			mode = mt->get_capture_channel_mode ();
+			mask = mt->get_capture_channel_mask ();
+		}
 
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
