@@ -578,7 +578,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		*/
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, frame, cy, copy));
 #else
-		drop_paths_part_two (paths, frame, cy, copy);
+		idle_drop_paths (paths, frame, cy, copy);
 #endif
 	}
 
