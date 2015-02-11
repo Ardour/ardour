@@ -428,7 +428,7 @@ WavesImportDialog::_on_import_button (WavesButton*)
 	Editing::ImportMode import_mode = _get_import_mode ();
 	Editing::ImportDisposition channel_disposition = _get_channel_disposition ();
 	ARDOUR::SrcQuality quality = _get_src_quality ();
-
+	hide ();
 	if (_copy_to_session_button.active_state () == Gtkmm2ext::ExplicitActive) {
 		PublicEditor::instance().do_import (_files_to_import, channel_disposition, import_mode, quality, where);
 	} else {
