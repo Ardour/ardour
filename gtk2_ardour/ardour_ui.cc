@@ -3455,15 +3455,13 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 	removed = rep.paths.size();
 
 	if (removed == 0) {
-		WavesMessageDialog msgd ("", _("No files were ready for clean-up\n"
-"If this seems suprising, \n\
-check for any existing snapshots.\n\
-These may still include regions that\n\
-require some unused files to continue to exist."));
+		WavesMessageDialog msgd ("", _("Nothing to clean-up."));
 		
 		msgd.run ();
 		return;
 	}
+
+	return;
 
 	ArdourDialog results (_("Clean-up"), true, false);
 
