@@ -569,15 +569,9 @@ Editor::Editor ()
 	// CAIROCANVAS
 	time_pad->show();
 
-	edit_packer.set_col_spacings (0);
-	edit_packer.set_row_spacings (0);
-	edit_packer.set_homogeneous (false);
-	edit_packer.set_border_width (0);
-	edit_packer.set_name ("EditorWindow");
+    /* rest of the packing is done in ui/editor_window.xml */
 
-        /* rest of the packing is done in ui/editor_window.xml */
-
-	edit_packer.attach (*_track_canvas_viewport,  1, 2, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (*_track_canvas_viewport,  1, 2, 1, 3,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);

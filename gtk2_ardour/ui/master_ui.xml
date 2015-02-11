@@ -39,7 +39,7 @@
             noshowall="true"/>
       <iconbutton id="master_mute_button"
                   width="83"
-                  height="29"
+                  height="30"
                   normalicon="master_mute"
                   activeicon="master_mute_active"
                   _prelighticon="master_mute_prelight"
