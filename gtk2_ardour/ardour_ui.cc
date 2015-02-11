@@ -2373,7 +2373,8 @@ ARDOUR_UI::save_session_as ()
 
     // Show ProgressDialog
     _progress_dialog.set_top_label (string_compose (("Saving session: %1"), sa.new_name));
-    _progress_dialog.show ();
+    _progress_dialog.update_info (0.0, NULL, NULL, NULL);
+    _progress_dialog.show_pd ();
 	if (_session->save_as (sa)) {
 		/* ERROR MESSAGE */
 		MessageDialog msg (string_compose (_("Save As failed: %1"), sa.failure_message));
@@ -3188,6 +3189,9 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 	}
 
+    _progress_dialog.set_progress (1);
+    _progress_dialog.hide_pd ();
+
     goto_editor_window ();
     
 	return ret;
@@ -3306,6 +3310,8 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
     
     tracks_control_panel->refresh_session_settings_info();
 
+    _progress_dialog.set_progress (1);
+    _progress_dialog.hide_pd ();
 	goto_editor_window ();
 
 #ifdef WINDOWS_VST_SUPPORT

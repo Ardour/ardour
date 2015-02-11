@@ -150,6 +150,10 @@ SessionDialog::on_new_session (WavesButton*)
             hide();
             _selection_type = NewSession;
             response (Gtk::RESPONSE_ACCEPT);
+        
+            ARDOUR_UI::instance()->_progress_dialog.set_top_label ("Creating session: "+Glib::path_get_basename(_selected_session_full_name));
+            ARDOUR_UI::instance()->_progress_dialog.update_info (0.0, NULL, NULL, "Creating elements...");
+            ARDOUR_UI::instance()->_progress_dialog.show_pd ();
     }
 }
 
