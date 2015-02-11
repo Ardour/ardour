@@ -123,6 +123,7 @@ PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibl
 void
 PBD::stacktrace( std::ostream& out, int)
 {
+#ifdef DEBUG
 	const size_t levels = 62; // does not support more then 62 levels of stacktrace
 	unsigned int   i;
 	void         * stack[ levels ];
@@ -152,6 +153,7 @@ PBD::stacktrace( std::ostream& out, int)
 	out.flush();
 
 	free( symbol );
+#endif
 }
 
 void
