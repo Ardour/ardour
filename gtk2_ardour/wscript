@@ -47,6 +47,7 @@ gtk2_ardour_sources = [
         'waves_ui.cc',
         'waves_grid.cc',
         'waves_edit_dialog.cc',
+        'waves_numeric_edit_dialog.cc',
         'about_dialog.cc',
         'actions.cc',
         'add_route_dialog.cc',

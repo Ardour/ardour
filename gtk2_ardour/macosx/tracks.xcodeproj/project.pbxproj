@@ -286,6 +286,8 @@
 		95A134DE1A0239080008E3D6 /* license_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95A134DD1A0239080008E3D6 /* license_dialog.cc */; };
 		95D1C51F1A78ED2100BE28DB /* waves_edit_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D1C51E1A78ED2100BE28DB /* waves_edit_dialog.cc */; };
 		95D1C5211A78ED3A00BE28DB /* waves_edit_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D1C5201A78ED3A00BE28DB /* waves_edit_dialog.xml */; };
+		95D5D1371A8A514300407F98 /* waves_numeric_edit_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D5D1361A8A514300407F98 /* waves_numeric_edit_dialog.cc */; };
+		95D5D1391A8A514300407F98 /* waves_numeric_edit_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D5D1381A8A514300407F98 /* waves_numeric_edit_dialog.xml */; };
 		95D71D551A4C66F600DE5B3B /* waves_track_color_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D71D541A4C66F600DE5B3B /* waves_track_color_dialog.cc */; };
 		95D71D581A4C69AE00DE5B3B /* waves_track_color_dialog.logic.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D71D571A4C69AE00DE5B3B /* waves_track_color_dialog.logic.cc */; };
 		95D795E81A7BB40C00120A4F /* marker_inspector_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95D795DB1A7BB40C00120A4F /* marker_inspector_dialog.xml */; };
@@ -1182,6 +1184,9 @@
 		95D1C51A1A78ED1100BE28DB /* waves_edit_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_edit_dialog.h; path = ../waves_edit_dialog.h; sourceTree = "<group>"; };
 		95D1C51E1A78ED2100BE28DB /* waves_edit_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_edit_dialog.cc; path = ../waves_edit_dialog.cc; sourceTree = "<group>"; };
 		95D1C5201A78ED3A00BE28DB /* waves_edit_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_edit_dialog.xml; sourceTree = "<group>"; };
+		95D5D1321A8A514300407F98 /* waves_numeric_edit_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_numeric_edit_dialog.h; path = ../waves_numeric_edit_dialog.h; sourceTree = "<group>"; };
+		95D5D1361A8A514300407F98 /* waves_numeric_edit_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_numeric_edit_dialog.cc; path = ../waves_numeric_edit_dialog.cc; sourceTree = "<group>"; };
+		95D5D1381A8A514300407F98 /* waves_numeric_edit_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_numeric_edit_dialog.xml; sourceTree = "<group>"; };
 		95D71D501A4C66DF00DE5B3B /* waves_track_color_dialog.logic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_track_color_dialog.logic.h; path = ../waves_track_color_dialog.logic.h; sourceTree = "<group>"; };
 		95D71D541A4C66F600DE5B3B /* waves_track_color_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_track_color_dialog.cc; path = ../waves_track_color_dialog.cc; sourceTree = "<group>"; };
 		95D71D561A4C697700DE5B3B /* waves_track_color_dialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_track_color_dialog.h; path = ../waves_track_color_dialog.h; sourceTree = "<group>"; };
@@ -1323,6 +1328,7 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				95D5D1361A8A514300407F98 /* waves_numeric_edit_dialog.cc */,
 				95D795FF1A7BB9E000120A4F /* floating_text_entry.cc */,
 				95D796001A7BB9E000120A4F /* marker_inspector_dialog.cc */,
 				95D796011A7BB9E000120A4F /* marker_inspector_dialog.logic.cc */,
@@ -1941,6 +1947,7 @@
 		43279429194F0062003C9FEA /* ui */ = {
 			isa = PBXGroup;
 			children = (
+				95D5D1381A8A514300407F98 /* waves_numeric_edit_dialog.xml */,
 				956D3F891A851805004F328C /* waves_import_dialog.xml */,
 				95D795DB1A7BB40C00120A4F /* marker_inspector_dialog.xml */,
 				95D795DC1A7BB40C00120A4F /* progressing_dialog.xml */,
@@ -2012,6 +2019,7 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				95D5D1321A8A514300407F98 /* waves_numeric_edit_dialog.h */,
 				95D7961A1A7BBA4E00120A4F /* floating_text_entry.h */,
 				95D7961B1A7BBA4E00120A4F /* marker_inspector_dialog.h */,
 				95D7961C1A7BBA4E00120A4F /* marker_inspector_dialog.logic.h */,
@@ -2581,6 +2589,7 @@
 				432793A8194F003A003C9FEA /* resize_right_cursor.png in Resources */,
 				432793A9194F003A003C9FEA /* resize_top_cursor.png in Resources */,
 				432793AA194F003A003C9FEA /* resize_top_left_cursor.png in Resources */,
+				95D5D1391A8A514300407F98 /* waves_numeric_edit_dialog.xml in Resources */,
 				432793AB194F003A003C9FEA /* resize_top_right_cursor.png in Resources */,
 				432793AC194F003A003C9FEA /* sae.png in Resources */,
 				432793AD194F003A003C9FEA /* sessionlock.png in Resources */,
@@ -2786,6 +2795,7 @@
 				CE1C6DE01987A924006BDB03 /* master_bus_ui.cc in Sources */,
 				95D796101A7BB9E000120A4F /* waves_export_dialog.cc in Sources */,
 				954DCFBD1A0239DA00B7160E /* about_dialog.cc in Sources */,
+				95D5D1371A8A514300407F98 /* waves_numeric_edit_dialog.cc in Sources */,
 				CE1A907A199A37AE00ECA62B /* add_tracks_dialog.cc in Sources */,
 				95176F7A1A08E6E800E32046 /* file_sample_rate_mismatch_dialog.cc in Sources */,
 				95D7960D1A7BB9E000120A4F /* marker_inspector_dialog.logic.cc in Sources */,

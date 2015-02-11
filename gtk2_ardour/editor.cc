@@ -125,6 +125,7 @@
 #include "master_bus_ui.h"
 #include "utils.h"
 #include "verbose_cursor.h"
+#include "waves_numeric_edit_dialog.h"
 
 #include "i18n.h"
 
@@ -3337,43 +3338,16 @@ Editor::duplicate_range (bool with_dialog)
 
 	if (with_dialog) {
 
-		ArdourDialog win (_("Duplicate"));
-		Label label (_("Number of duplications:"));
-		Adjustment adjustment (1.0, 1.0, 1000000.0, 1.0, 5.0);
-		SpinButton spinner (adjustment, 0.0, 1);
-		HBox hbox;
-
-		win.get_vbox()->set_spacing (12);
-		win.get_vbox()->pack_start (hbox);
-		hbox.set_border_width (6);
-		hbox.pack_start (label, PACK_EXPAND_PADDING, 12);
-
-		/* dialogs have ::add_action_widget() but that puts the spinner in the wrong
-		   place, visually. so do this by hand.
-		*/
-
-		hbox.pack_start (spinner, PACK_EXPAND_PADDING, 12);
-		spinner.signal_activate().connect (sigc::bind (sigc::mem_fun (win, &ArdourDialog::response), RESPONSE_ACCEPT));
-		spinner.grab_focus();
-
-		hbox.show ();
-		label.show ();
-		spinner.show ();
-
-		win.add_button ("CANCEL", RESPONSE_CANCEL);
-		win.add_button (_("Duplicate"), RESPONSE_ACCEPT);
-		win.set_default_response (RESPONSE_ACCEPT);
-
-		spinner.grab_focus ();
-
-		switch (win.run ()) {
-		case RESPONSE_ACCEPT:
+        WavesNumericEditDialog dialog("");
+ 
+		switch (dialog.run ()) {
+        case WavesDialog::RESPONSE_DEFAULT:
 			break;
 		default:
 			return;
 		}
 
-		times = adjustment.get_value();
+		times = dialog.get_count ();
 	}
 
 	if ((current_mouse_mode() == Editing::MouseRange)) {

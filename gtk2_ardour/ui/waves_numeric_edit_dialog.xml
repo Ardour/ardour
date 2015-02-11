@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog CACHEIT="false"
+        title="Tracks Live"
+        mincount="1"
+        maxcount="200"
+        errormsg="Incorrect value. Please input value between 1 and 200.">
+    <style name="generic_control"
+           winfont ="Arial Bold 12"
+           macfont ="Helvetica Bold 12"
+           fgnormal="#6D6E72"
+           bgnormal="#6C6C6C"
+           fgactive="#BFBFBF"
+           bgactive="#454545"
+           fghover="#CCCCCC"
+           bghover="#898989"/>
+    <style name="generic_button"
+           winfont ="Arial Bold 10"
+           macfont ="Helvetica Bold 10"
+           fgnormal="#6D6E72"
+           textcolornormal="#6D6E72"
+           bgnormal="#CACAC5"
+           basenormal="#CACAC5"
+           fgactive="#EDECE8"
+           bgactive="#6D6E72"
+           borderwidth="0 0 0 0"
+           bordercolor="#6D6E72"
+           width="80"
+           height="22"/>
+
+  <EventBox bgnormal="#EDECE8">
+    <VBox borderwidth="10"
+          spacing="15">
+      <Label id="top_label"
+             style="generic_control"
+             text="Duplicate"
+             fgnormal="#6D6E72"
+             horzalignment="center"
+             justify="center"/>
+      <HBox>
+          <Label id="bottom_label"
+                 style="generic_control"
+                 text="Number of duplication:   "/>
+          <Entry id="numeric_entry"
+                 hasframe="false"
+                 bgnormal="#6C6C6C"
+                 basenormal="#6C6C6C"
+                 fgnormal="#C1C1C1"
+                 textcolornormal="#C1C1C1"
+                 text="1"
+                 height="22"
+                 width="40"
+                 horzalignment="start"/>
+          <VBox>
+              <iconbutton id="inc_button"
+                          width="12"
+                          height="11"
+                          normalicon="spin_up_12x11"
+                          activeicon="spin_up_12x11_inactive"
+                          inactiveicon="spin_up_12x11_inactive"/>
+              <iconbutton id="dec_button"
+                          width="12"
+                          height="11"
+                          normalicon="spin_down_12x11"
+                          activeicon="spin_down_12x11_inactive"
+                          inactiveicon="spin_down_12x11_inactive"/>
+          </VBox>
+      </HBox>
+      <HBox spacing="10">
+        <Button id="ok_button"
+                style="generic_button"
+                box.pack="end"
+                text="Duplicate"
+                visible="true"/>
+        <Button id="cancel_button"
+                style="generic_button"
+                box.pack="end"
+                text="Cancel"
+                visible="true"/>
+      </HBox>
+    </VBox>
+  </EventBox>
+
+</Dialog>
