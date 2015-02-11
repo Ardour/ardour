@@ -188,18 +188,16 @@ AddRouteDialog::channel_combo_changed ()
 AddRouteDialog::TypeWanted
 AddRouteDialog::type_wanted() const
 {
-	switch (track_bus_combo.get_active_row_number ()) {
-	case 0:
-		return AudioTrack;
-	case 1:
+	std::string str = track_bus_combo.get_active_text();
+	if (str == _("Busses")) {
+		return AudioBus;
+	} else if (str == _("MIDI Tracks")){
 		return MidiTrack;
-	case 2:
+	} else if (str == _("Audio+MIDI Tracks")) {
 		return MixedTrack;
-	default:
-		break;
+	} else {
+		return AudioTrack;
 	}
-
-	return AudioBus;
 }
 
 void
