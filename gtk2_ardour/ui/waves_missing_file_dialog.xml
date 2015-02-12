@@ -70,7 +70,6 @@
         </IconButton>
         <IconButton id="skip_file_button"
                     text="Skip this file"
-                    width="24"
                     height="14"
                     normalicon="waves_darker_radio_button"
                     activeicon="waves_darker_radio_button_active"
@@ -82,7 +81,6 @@
         </IconButton>
         <IconButton id="skip_all_files_button"
                     text="Skip all missing files"
-                    width="24"
                     height="14"
                     normalicon="waves_darker_radio_button"
                     activeicon="waves_darker_radio_button_active"
@@ -94,7 +92,6 @@
         </IconButton>
         <IconButton id="stop_loading_button"
                     text="Stop loading this session"
-                    width="24"
                     height="14"
                     normalicon="waves_darker_radio_button"
                     activeicon="waves_darker_radio_button_active"
