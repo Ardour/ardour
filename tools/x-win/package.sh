@@ -95,6 +95,7 @@ mkdir -p $ALIBDIR/surfaces
 mkdir -p $ALIBDIR/backends
 mkdir -p $ALIBDIR/panners
 mkdir -p $ALIBDIR/vamp
+mkdir -p $ALIBDIR/suil
 
 cp build/libs/gtkmm2ext/gtkmm2ext-*.dll $DESTDIR/bin/
 cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
@@ -121,6 +122,7 @@ cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 
 cp -r build/libs/LV2 $ALIBDIR/
 cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvampplugins.dll
+cp $PREFIX/lib/suil-*/*.dll $ALIBDIR/suil/
 
 # lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
 if test -d $PREFIX/lib/lv2/lv2core.lv2 ; then

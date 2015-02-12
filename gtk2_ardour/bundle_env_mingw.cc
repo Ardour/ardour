@@ -111,6 +111,8 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 	path += G_SEARCHPATH_SEPARATOR;
 	path += "%COMMONPROGRAMFILES%\\Vamp Plugins";
 	Glib::setenv ("VAMP_PATH", path, true);
+
+	Glib::setenv ("SUIL_MODULE_DIR", Glib::build_filename(ardour_dll_directory(), "suil"), true);
 }
 
 static __cdecl void
