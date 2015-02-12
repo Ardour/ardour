@@ -804,8 +804,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	 * window. We round down in case we were asked to
 	 * draw "between" pixels at the start and/or end.
 	 */
-
-	const double draw_start = floor (draw.x0) + _start_shift;
+	
+	double draw_start = floor (draw.x0);
 	const double draw_end = floor (draw.x1);
 
 	// cerr << "Need to draw " << draw_start << " .. " << draw_end << endl;
@@ -824,7 +824,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	/* sample coordinates - note, these are not subject to rounding error */
 	framepos_t sample_start = _region_start + (image_start * _samples_per_pixel);
 	framepos_t sample_end   = _region_start + (image_end * _samples_per_pixel);
-
+	
 	// cerr << "Sample space: " << sample_start << " .. " << sample_end << endl;
 
 	Cairo::RefPtr<Cairo::ImageSurface> image;
@@ -834,6 +834,16 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	// cerr << "Offset into image to place at zero: " << image_offset << endl;
 
+	if (_start_shift && (sample_start == _region_start) && (self.x0 == draw.x0)) {
+		/* we are going to draw the first pixel for this region, but 
+		   we may not want this to overlap a border around the
+		   waveform. If so, _start_shift will be set.
+		*/
+		//cerr << name.substr (23) << " ss = " << sample_start << " rs = " << _region_start << " sf = " << _start_shift << " ds = " << draw_start << " self = " << self << " draw = " << draw << endl;
+		//draw_start += _start_shift;
+		//image_offset += _start_shift;
+	}
+	
 	context->rectangle (draw_start, draw.y0, draw_end - draw_start, draw.height());
 
 	/* round image origin position to an exact pixel in device space to
