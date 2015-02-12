@@ -1351,9 +1351,7 @@ EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
             sample_rate_to_set = AudioEngine::instance()->session()->frame_rate ();
         }
         
-        if ( set_new_sample_rate_in_controller (sample_rate_to_set) ) {
-            SampleRateChanged(); // emit a signal
-        } else {
+        if ( !set_new_sample_rate_in_controller (sample_rate_to_set) ) {
             // if sample rate can't be set
             // switch to NONE device
             set_new_device_as_current ("None");
@@ -1361,6 +1359,8 @@ EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
 			DeviceError();
         }
     }
+    
+    SampleRateChanged(); // emit a signal
 }
 
 
@@ -1369,8 +1369,9 @@ EngineStateController::_on_buffer_size_change(pframes_t new_buffer_size)
 {
     if (_current_state->buffer_size != new_buffer_size) {
         _current_state->buffer_size = new_buffer_size;
-        BufferSizeChanged(); // emit a signal
     }
+    
+    BufferSizeChanged(); // emit a signal
 }
 
 
