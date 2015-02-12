@@ -662,12 +662,9 @@ Editor::build_marker_menu (Location* loc)
 	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
-	items.push_back (CheckMenuElem (_("Lock")));
-	Gtk::CheckMenuItem* lock_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
-	if (loc->locked ()) {
-		lock_item->set_active ();
-	}
-	lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
+    
+    items.push_back (MenuElem (_("Lock"), sigc::mem_fun(*this, &Editor::toggle_marker_menu_lock)));
+    
     items.push_back (MenuElem (_("Delete"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 	items.push_back (SeparatorElem());
     
