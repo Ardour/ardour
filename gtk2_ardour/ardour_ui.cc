@@ -336,8 +336,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
     // initialize engine state controller
     EngineStateController::instance();
     
-    EngineStateController::instance()->SampleRateChanged.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this) );
-    EngineStateController::instance()->EngineRunning.connect_same_thread (update_connections_to_toolbar_buttons, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this) );
+    EngineStateController::instance()->SampleRateChanged.connect (update_connections_to_toolbar_buttons, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this), gui_context());
+    EngineStateController::instance()->EngineRunning.connect (update_connections_to_toolbar_buttons, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate_dropdown, this), gui_context());
     
 	/* lets get this party started */
 
