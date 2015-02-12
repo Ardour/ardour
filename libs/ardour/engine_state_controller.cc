@@ -802,8 +802,6 @@ EngineStateController::set_new_sample_rate_in_controller(framecnt_t sample_rate)
 }
 
 
-
-
 bool
 EngineStateController::set_new_buffer_size_in_controller(pframes_t buffer_size)
 {    
@@ -1350,11 +1348,10 @@ EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
         framecnt_t sample_rate_to_set = new_sample_rate;
         if (AudioEngine::instance()->session() ) {
             // and we have current session we should restore it back to the one tracks uses
-            sample_rate_to_set = _current_state->sample_rate;
+            sample_rate_to_set = AudioEngine::instance()->session()->frame_rate ();
         }
         
         if ( set_new_sample_rate_in_controller (sample_rate_to_set) ) {
-            push_current_state_to_backend(false);
             SampleRateChanged(); // emit a signal
         } else {
             // if sample rate can't be set
@@ -1412,7 +1409,7 @@ EngineStateController::_on_device_list_change()
                 _states.push_front(_current_state);
             }
             
-            push_current_state_to_backend(false);
+            push_current_state_to_backend(true);
             current_device_disconnected = true;
         }
     } else {

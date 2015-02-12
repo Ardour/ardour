@@ -420,19 +420,17 @@ AudioEngine::do_reset_backend()
 
             // backup the device name
             std::string name = _backend->device_name ();
-            
-			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
-			stop();
 
 			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
-			if ( 0 == _backend->reset_device () ) {
+			if ( ( 0 == stop () ) &&
+                 ( 0 == _backend->reset_device () ) &&
+                 ( 0 == start () ) ) {
 				
-				std::cout << "AudioEngine::RESET::Starting engine..." << std::endl;
-				start ();
-
+				std::cout << "AudioEngine::RESET::Engine started..." << std::endl;
+				
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
-			} else {
+            } else {
 				DeviceError();
 			}
             
@@ -471,9 +469,11 @@ AudioEngine::do_devicelist_update()
 
             _devicelist_update_lock.unlock();
             
+            Glib::Threads::RecMutex::Lock pl (_state_lock);
+            
             g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
             DeviceListChanged (); /* EMIT SIGNAL */
-        
+            
             _devicelist_update_lock.lock();
             
         } else {

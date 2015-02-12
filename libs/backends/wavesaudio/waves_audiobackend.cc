@@ -42,6 +42,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
         case WCMRAudioDeviceManagerClient::BufferSizeChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::BufferSizeChanged: " << *(uint32_t*)parameter << std::endl;
 			_buffer_size_change(*(uint32_t*)parameter);
+			_buffer_size_change(*(int*)parameter);
             break;
         case WCMRAudioDeviceManagerClient::RequestReset:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestReset" << std::endl;
@@ -51,8 +52,8 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestResync" << std::endl;
             break;
         case WCMRAudioDeviceManagerClient::SamplingRateChanged:
-            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::SamplingRateChanged: " << *(float*)parameter << std::endl;
-			set_sample_rate(*(float*)parameter);
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::SamplingRateChanged: " << *(int*)parameter << std::endl;
+			_sample_rate_change(*(float*)parameter);
             break;
         case WCMRAudioDeviceManagerClient::Dropout:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::Dropout: " << std::endl;
@@ -401,7 +402,11 @@ WavesAudioBackend::set_sample_rate (float sample_rate)
         return -1;
     }
 
-	_sample_rate_change(sample_rate);
+    // if call to set sample rate is successful
+    // but device sample rate differs from the value we tried to set
+    // this means we are driven by device for buffer size
+    sample_rate = _device->CurrentSamplingRate ();
+    _sample_rate_change(sample_rate);
        
     if (device_needs_restart) {
         // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;

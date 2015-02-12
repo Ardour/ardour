@@ -138,6 +138,7 @@ protected:
 #endif //WV_USE_TONE_GEN
 	
 	WTErr UpdateDeviceInfo ();
+    WTErr UpdateDeviceId ();
 	WTErr UpdateDeviceName();
 	WTErr UpdateDeviceInputs();
 	WTErr UpdateDeviceOutputs();
@@ -167,8 +168,7 @@ protected:
 	static OSStatus StaticPropertyChangeProc (AudioDeviceID inDevice, UInt32 inChannel, Boolean isInput,
 	AudioDevicePropertyID inPropertyID, void *inClientData);
 	void PropertyChangeProc (AudioDevicePropertyID inPropertyID);
-    
-    void resetAudioDevice();
+
 private:
 
 };
