@@ -178,6 +178,10 @@ public:
 		return true;
 	}
 
+	bool initially_vertical() const {
+		return _initially_vertical;
+	}
+	
 	/** Set up the _pointer_frame_offset */
 	virtual void setup_pointer_frame_offset () {
 		_pointer_frame_offset = 0;
@@ -330,6 +334,7 @@ protected:
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
+	bool _single_axis;
 };
 
 
