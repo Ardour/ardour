@@ -270,7 +270,6 @@ Editor::Editor ()
 	, inspector_home (get_container ("inspector_home"))
 	, _master_bus_ui_home (get_container ("master_bus_ui_home"))
 	, vpacker (get_v_box ("vpacker"))
-    , timebars_vbox (get_v_box ("timebars_vbox"))
 	, skip_button (get_waves_button ("skip_button"))
     , add_marker_button (get_waves_button ("add_marker_button"))
     , global_solo_button (get_waves_button ("global_solo_button"))
@@ -524,8 +523,9 @@ Editor::Editor ()
     this->signal_hide().connect ( sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::on_editor_hiding));
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
-    
-    EngineStateController::instance()->OutputConnectionModeChanged.connect (*this, invalidator (*this),  boost::bind (&Editor::output_connection_mode_changed, this), gui_context() );
+
+	EngineStateController::instance()->SampleRateChanged.connect (*this, invalidator (*this), boost::bind (&Editor::update_ruler_visibility, this), gui_context());
+    EngineStateController::instance()->OutputConnectionModeChanged.connect (*this, invalidator (*this), boost::bind (&Editor::output_connection_mode_changed, this), gui_context() );
 
         /* Connect to relevant signal so that we will be notified of port registration changes */
 	ARDOUR::EngineStateController::instance()->PortRegistrationChanged.connect (port_state_connection_list, invalidator (*this), boost::bind (&Editor::port_registration_handler, this), gui_context());
