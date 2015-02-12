@@ -1308,7 +1308,7 @@ Session::auto_loop_changed (Location* location)
 
 	framepos_t pos;
 
-	if (!transport_rolling() && select_playhead_priority_target (pos)) {
+	if (select_playhead_priority_target (pos) ) {
 		if (pos == location->start()) {
 			request_locate (pos);
 		}
@@ -6175,27 +6175,43 @@ Session::reconnect_ltc_output ()
 void
 Session::set_range_selection (framepos_t start, framepos_t end)
 {
-	_range_selection = Evoral::Range<framepos_t> (start, end);
-	follow_playhead_priority ();
+    _range_selection = Evoral::Range<framepos_t> (start, end);
+    AutoReturnTarget autoreturn = Config->get_auto_return_target_list ();
+    
+    if (autoreturn & RangeSelectionStart) {
+        follow_playhead_priority ();
+    }
 }
 
 void
 Session::set_object_selection (framepos_t start, framepos_t end)
 {
-	_object_selection = Evoral::Range<framepos_t> (start, end);
-	follow_playhead_priority ();
+    _object_selection = Evoral::Range<framepos_t> (start, end);
+    AutoReturnTarget autoreturn = Config->get_auto_return_target_list ();
+    
+    if (autoreturn & RegionSelectionStart) {
+        follow_playhead_priority ();
+    }
 }
 
 void
 Session::clear_range_selection ()
 {
-	_range_selection = Evoral::Range<framepos_t> (-1,-1);
-	follow_playhead_priority ();
+    _range_selection = Evoral::Range<framepos_t> (-1,-1);
+    AutoReturnTarget autoreturn = Config->get_auto_return_target_list ();
+    
+    if (autoreturn & RangeSelectionStart) {
+        follow_playhead_priority ();
+    }
 }
 
 void
 Session::clear_object_selection ()
 {
-	_object_selection = Evoral::Range<framepos_t> (-1,-1);
-	follow_playhead_priority ();
+    _object_selection = Evoral::Range<framepos_t> (-1,-1);
+    AutoReturnTarget autoreturn = Config->get_auto_return_target_list ();
+    
+    if (autoreturn & RegionSelectionStart) {
+        follow_playhead_priority ();
+    }
 }

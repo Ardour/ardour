@@ -195,23 +195,25 @@ Session::request_play_loop (bool yn, bool change_transport_roll)
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request set loop = %1, change roll state ? %2\n", yn, change_transport_roll));
 	queue_event (ev);
 
-	if (yn) {
-		if (!change_transport_roll) {
-			if (!transport_rolling()) {
-				/* we're not changing transport state, but we do want
-				   to set up position for the new loop. Don't
-				   do this if we're rolling already.
-				*/
-				request_locate (location->start(), false);
-			}
-		}
-	} else {
-		if (!change_transport_roll && Config->get_seamless_loop() && transport_rolling()) {
-			// request an immediate locate to refresh the tracks
-			// after disabling looping
-			request_locate (_transport_frame-1, false);
-		}
-	}
+    if (!Profile->get_trx() ) {
+        if (yn) {
+            if (!change_transport_roll) {
+                if (!transport_rolling()) {
+                    /* we're not changing transport state, but we do want
+                     to set up position for the new loop. Don't
+                     do this if we're rolling already.
+                     */
+                    request_locate (location->start(), false);
+                }
+            }
+        } else {
+            if (!change_transport_roll && Config->get_seamless_loop() && transport_rolling()) {
+                // request an immediate locate to refresh the tracks
+                // after disabling looping
+                request_locate (_transport_frame-1, false);
+            }
+        }
+    }
 }
 
 void
@@ -470,6 +472,13 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 	if (!autoreturn) {
 		return false;
 	}
+    
+    if (Profile->get_trx() && transport_rolling() ) {
+        // We're playing, so do nothing.
+        // Next stop will put us where we need to be.
+        return false;
+    }
+
 
 	/* Note that the order of checking each AutoReturnTarget flag defines
 	   the priority each flag.
@@ -489,7 +498,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
         }
     }
     
-    if (jump_to < 0 && (autoreturn & Loop)) {
+    if (jump_to < 0 && (autoreturn & Loop) && get_play_loop() ) {
         /* don't try to handle loop play when synced to JACK */
         
         if (!synced_to_engine()) {
@@ -884,6 +893,8 @@ Session::set_play_loop (bool yn, double speed)
 		unset_play_loop ();
 	}
 
+    follow_playhead_priority ();
+    
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC2 with speed = %1\n", _transport_speed));
     
     set_dirty ();
@@ -1187,13 +1198,13 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 
 		/* we are stopped and we want to start rolling at speed 1 */
 
-		if (Config->get_loop_is_mode() && play_loop) {
+		if (!Profile->get_trx() && Config->get_loop_is_mode() && play_loop) {
 
 			Location *location = _locations->auto_loop_location();
 			
 			if (location != 0) {
 				if (_transport_frame != location->start()) {
-					/* jump to start and then roll from there */
+					// jump to start and then roll from there
 					request_locate (location->start(), true);
 					return;
 				}
