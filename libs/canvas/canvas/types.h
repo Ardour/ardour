@@ -152,7 +152,7 @@ struct LIBCANVAS_API Rect
 	}
 		
 	bool contains (Duple const & point) const throw () {
-		return point.x >= x0 && point.x <= x1 && point.y >= y0 && point.y <= y1;
+		return point.x >= x0 && point.x < x1 && point.y >= y0 && point.y < y1;
 	}
 	Rect fix () const throw () {
 		return Rect (std::min (x0, x1), std::min (y0, y1),
