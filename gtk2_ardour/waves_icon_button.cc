@@ -63,11 +63,8 @@ WavesIconButton::render (cairo_t* cr, cairo_rectangle_t*)
 
 	// pixbuf, if any
 	if (pixbuf) {
-		double x = (get_width() - pixbuf->get_width())/2.0;
-		double y = (get_height() - pixbuf->get_height())/2.0;
-
-		cairo_rectangle (cr, x, y, pixbuf->get_width(), pixbuf->get_height());
-		gdk_cairo_set_source_pixbuf (cr, pixbuf->gobj(), x, y);
+		cairo_rectangle (cr, 0, 0, pixbuf->get_width(), pixbuf->get_height());
+		gdk_cairo_set_source_pixbuf (cr, pixbuf->gobj(), 0, 0);
 		cairo_fill (cr);
 	}
 }

@@ -113,7 +113,7 @@ typedef uint64_t microseconds_t;
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "main_clock.h"
-#include "missing_file_dialog.h"
+#include "waves_missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "mixer_ui.h"
 #include "mouse_cursors.h"
@@ -4642,13 +4642,10 @@ ARDOUR_UI::setup_profile ()
 int
 ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 {
-	MissingFileDialog dialog (s, str, type);
-
-	dialog.show ();
-	dialog.present ();
-
+	WavesMissingFileDialog dialog (s, str, type);
+	ARDOUR_UI::instance()->_progress_dialog.hide (); // HOT FIX. (REWORK IT)
 	int result = dialog.run ();
-	dialog.hide ();
+	ARDOUR_UI::instance()->_progress_dialog.show (); // HOT FIX. (REWORK IT)
 
 	switch (result) {
 	case RESPONSE_OK:

@@ -92,7 +92,17 @@ WavesDialog::WavesDialog (const std::string& layout_script_file, bool modal, boo
 	bool resizeable = xml_property (*root, "resizeable", false);
 	set_resizable(resizeable);
 
-	set_position (Gtk::WIN_POS_MOUSE);
+	std::string position = (xml_property (*xml_tree ()->root (), "ui.position", "center"));
+	if (position == "center") {
+	    set_position (Gtk::WIN_POS_CENTER);
+	} else if (position == "mouse") {
+		set_position (Gtk::WIN_POS_MOUSE);
+	} else if (position == "centeronparent") {
+		set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
+	}
+
+	double opacity = xml_property (*xml_tree ()->root (), "ui.opacity", 1.0);
+	set_opacity (opacity);
 }
 
 WavesDialog::~WavesDialog ()

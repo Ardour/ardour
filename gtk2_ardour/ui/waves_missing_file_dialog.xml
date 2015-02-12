@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Tracks Live - Missing File"
+        CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6F6F6F"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"/>
+  <style name="generic_label"
+         style="generic_control"
+         box.expand="true"
+         box.fill="true"
+         horzalignment="end"/>
+  <style name="generic_button"
+         style="generic_control"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         width="80"
+         height="22"/>
+  <style name="generic_dropdown"
+         style="generic_button"
+         fgnormal="#C1C1C1"
+         textcolornormal="#C1C1C1"
+         bgnormal="#6C6C6C"
+         normalicon="dropdown_126x20"
+         activeicon="dropdown_126x20_active"
+         inactiveicon="dropdown_126x20_inactive"
+         width="126"
+         height="20"
+         horzalignment="start"/>
+  <EventBox bgnormal="#EDECE8">
+    <VBox borderwidth="10">
+      <HBox>
+        <Label style="generic_control"
+               text="Tracks Live cannot find the "
+               vertalignment="top"/>
+        <Label id="file_type_label"
+               style="generic_control"
+               vertalignment="top"/>
+        <Label style="generic_control"
+               text=" file\n"
+               vertalignment="top"/>
+      </HBox>
+      <Label id="file_name_label"
+             style="generic_control"
+             text="some_file.some_ext"
+             horzalignment="start"/>
+      <Label style="generic_control"
+             text="\nin any of these folders:\n"
+             horzalignment="start"/>
+      <Label id="folder_path_label"
+             style="generic_control"
+             text="/some/path/some/location/etc/..."
+             horzalignment="start"/>
+      <VBox spacing="10">
+        <IconButton id="add_folder_button"
+                    text="Add chosen folder to search path, and try again"
+                    height="14"
+                    normalicon="waves_darker_radio_button"
+                    activeicon="waves_darker_radio_button_active"
+                    toggleable="true"
+                    state="active">
+          <HBox>
+            <VBox width="20"/>
+            <Label style="generic_control"/>
+          </HBox>
+        </IconButton>
+        <IconButton id="skip_file_button"
+                    text="Skip this file"
+                    width="24"
+                    height="14"
+                    normalicon="waves_darker_radio_button"
+                    activeicon="waves_darker_radio_button_active"
+                    toggleable="true">
+          <HBox>
+            <VBox width="20"/>
+            <Label style="generic_control"/>
+          </HBox>
+        </IconButton>
+        <IconButton id="skip_all_files_button"
+                    text="Skip all missing files"
+                    width="24"
+                    height="14"
+                    normalicon="waves_darker_radio_button"
+                    activeicon="waves_darker_radio_button_active"
+                    toggleable="true">
+          <HBox>
+            <VBox width="20"/>
+            <Label style="generic_control"/>
+          </HBox>
+        </IconButton>
+        <IconButton id="stop_loading_button"
+                    text="Stop loading this session"
+                    width="24"
+                    height="14"
+                    normalicon="waves_darker_radio_button"
+                    activeicon="waves_darker_radio_button_active"
+                    toggleable="true">
+          <HBox>
+            <VBox width="20"/>
+            <Label style="generic_control"/>
+          </HBox>
+        </IconButton>
+        <VBox spacing="10">
+          <Label style="generic_control"
+                 text="Additional folder to search:"
+                 horzalignment="start"/>
+          <HBox spacing="5">
+            <Label id="additional_folder_path_label"
+                   style="generic_control"
+                   text=""
+                   horzalignment="start"/>
+            <Button id="browse_button"
+                    style="generic_button"
+                    box.pack="end"
+                    text="Browse"/>
+          </HBox>
+          <HBox>
+            <Button id="done_button"
+                    style="generic_button"
+                    box.pack="end"
+                    text="Done"/>
+          </HBox>
+        </VBox>
+      </VBox>
+    </VBox>
+  </EventBox>
+</Dialog>
