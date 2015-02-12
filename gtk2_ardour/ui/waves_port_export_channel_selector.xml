@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<HBox CACHEIT="false" 
+<HBox CACHEIT="false"
       UI.NEEDINIT="true"
       spacing="5">
   <style name="generic_control"
@@ -27,7 +27,7 @@
   <VBox spacing="5"
         _visible="false"
         _noshowall="true">
-    <HBox spacing="5" 
+    <HBox spacing="5"
         visible="false"
         noshowall="true">
       <Label style="generic_control"
@@ -57,16 +57,18 @@
         </VBox>
       </HBox>
     </HBox>
-    <Hbox>
-      <IconButton id="split_button"
-                  width="20"
-                  height="20"
-                  normalicon="waves_darker_check_box"
-                  activeicon="waves_darker_check_box_active"
-                  toggleable="true"/>
-      <Label style="generic_control"
-             text="Split mono files"/>
-    </Hbox>
+    <IconButton id="split_button"
+                text="Split mono files"
+                height="20"
+                normalicon="waves_darker_check_box"
+                activeicon="waves_darker_check_box_active"
+                toggleable="true">
+      <HBox>
+        <VBox width="20"/>
+        <Label style="generic_control"
+               text="Split mono files"/>
+      </HBox>
+    </IconButton>
   </VBox>
   <VBox box.fill="true"
         box.expand="true"
@@ -75,6 +77,6 @@
     <ScrolledWindow id="channel_scroller"
                     box.fill="true"
                     box.expand="true"/>
-  <VBox height="10"/>
+    <VBox height="10"/>
   </VBox>
 </HBox>

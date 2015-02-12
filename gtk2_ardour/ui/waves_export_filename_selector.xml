@@ -64,16 +64,17 @@
              height="22"
              box.fill="true"
              box.expand="true"/>
-      <HBox>
-        <Iconbutton id="session_button"
-                    width="20"
-                    height="20"
-                    normalicon="waves_darker_check_box"
-                    activeicon="waves_darker_check_box_active"
-                    toggleable="true"/>
-        <Label style="generic_control"
-               text="Session Name"/>
-      </HBox>
+      <Iconbutton id="session_button"
+                  text="Session Name"
+                  height="20"
+                  normalicon="waves_darker_check_box"
+                  activeicon="waves_darker_check_box_active"
+                  toggleable="true">
+        <HBox>
+          <VBox width="20"/>
+          <Label style="generic_control"/>
+        </HBox>
+      </Iconbutton>
       <Dropdown style="generic_dropdown"
                 id="date_format_dropdown"
                 width="90"
@@ -102,16 +103,17 @@
         </HBox>
         <DropdownMenu style="generic_dropdown_menu"/>
       </Dropdown>
+      <Iconbutton id="revision_button"
+                  text="Revision:"
+                  height="20"
+                  normalicon="waves_darker_check_box"
+                  activeicon="waves_darker_check_box_active"
+                  toggleable="true">
       <HBox>
-        <Iconbutton id="revision_button"
-                    width="20"
-                    height="20"
-                    normalicon="waves_darker_check_box"
-                    activeicon="waves_darker_check_box_active"
-                    toggleable="true"/>
-        <Label style="generic_control"
-               text="Revision:"/>
+        <VBox width="20"/>
+        <Label style="generic_control"/>
       </HBox>
+      </Iconbutton>
       <HBox>
         <Entry id="revision_entry"
                style="generic_dropdown"

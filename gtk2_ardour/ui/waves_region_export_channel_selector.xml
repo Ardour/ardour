@@ -34,48 +34,51 @@
   <style name="generic_dropdown_menu"
          style="generic_dropdown"/>
   <VBox spacing="10">
-    <HBox>
-      <IconButton id="raw_button"
-                  width="24"
-                  height="14"
-                  normalicon="waves_darker_radio_button"
-                  activeicon="waves_darker_radio_button_active"
-                  toggleable="true"/>
-      <Label style="generic_control"
-             text="Region contents without fades nor region gain (channels: "/>
-      <Label id="raw_label"
-             style="generic_control"/>
-      <Label style="generic_control"
-             text=")"/>
-    </HBox>
-    <HBox>
-      <IconButton id="fades_button"
-                  width="24"
-                  height="14"
-                  normalicon="waves_darker_radio_button"
-                  activeicon="waves_darker_radio_button_active"
-                  toggleable="true"
-                  state="active"/>
-      <Label style="generic_control"
-             text="Region contents with fades and region gain (channels: "/>
-      <Label id="fades_label"
-             style="generic_control"/>
-      <Label style="generic_control"
-             text=")"/>
-    </HBox>
-    <HBox>
-      <IconButton id="processed_button"
-                  width="24"
-                  height="14"
-                  normalicon="waves_darker_radio_button"
-                  activeicon="waves_darker_radio_button_active"
-                  toggleable="true"/>
-      <Label style="generic_control"
-             text="Track output (channels: "/>
-      <Label id="processed_label"
-             style="generic_control"/>
-      <Label style="generic_control"
-             text=")"/>
-    </HBox>
+    <IconButton id="raw_button"
+                text="Region contents without fades nor region gain (channels: "
+                height="14"
+                normalicon="waves_darker_radio_button"
+                activeicon="waves_darker_radio_button_active"
+                toggleable="true">
+      <HBox>
+        <VBox width="20"/>
+        <Label style="generic_control"/>
+        <Label id="raw_label"
+                style="generic_control"/>
+        <Label style="generic_control"
+                text=")"/>
+      </HBox>
+    </IconButton>
+    <IconButton id="fades_button"
+                text="Region contents with fades and region gain (channels: "
+                height="14"
+                normalicon="waves_darker_radio_button"
+                activeicon="waves_darker_radio_button_active"
+                toggleable="true"
+                state="active">
+      <HBox>
+        <VBox width="20"/>
+        <Label style="generic_control"/>
+        <Label id="fades_label"
+                style="generic_control"/>
+        <Label style="generic_control"
+                text=")"/>
+      </HBox>
+    </IconButton>
+    <IconButton id="processed_button"
+                text="Track output (channels: "
+                height="14"
+                normalicon="waves_darker_radio_button"
+                activeicon="waves_darker_radio_button_active"
+                toggleable="true">
+      <HBox>
+        <VBox width="20"/>
+        <Label style="generic_control"/>
+        <Label id="processed_label"
+                style="generic_control"/>
+        <Label style="generic_control"
+                text=")"/>
+      </HBox>
+    </IconButton>
   </VBox>
 </HBox>
