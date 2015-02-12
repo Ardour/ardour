@@ -390,22 +390,6 @@ ARDOUR_UI::get_sample_rate () const
 }
 
 void
-ARDOUR_UI::sample_rate_changed()
-{
-	if (_ignore_changes) {
-		return;
-	}
-    
-    framecnt_t new_sample_rate = get_sample_rate ();
-    if ( EngineStateController::instance()->set_new_sample_rate_in_controller(new_sample_rate) )
-    {
-        return;
-    } 
-    // ELSE restore previous buffer size value in combo box
-    update_sample_rate_dropdown ();
-}
-
-void
 ARDOUR_UI::on_sample_rate_dropdown_item_clicked (WavesDropdown* dropdown, int el_number)
 {
     void* data = dropdown->get_item_data_pv(el_number);

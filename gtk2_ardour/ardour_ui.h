@@ -260,7 +260,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     
     WavesDropdown* _sample_rate_dropdown;
     void on_sample_rate_dropdown_item_clicked (WavesDropdown*, int);
-    void sample_rate_changed();
     ARDOUR::framecnt_t get_sample_rate () const;
     void populate_sample_rate_dropdown ();
     
