@@ -241,7 +241,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	}
 
         double sample_to_pixel (framepos_t sample) const {
-		return sample / samples_per_pixel;
+	        return round (sample / (double) samples_per_pixel);
 	}
 
 	double sample_to_pixel_unrounded (framepos_t sample) const {
