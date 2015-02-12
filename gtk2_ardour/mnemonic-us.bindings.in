@@ -169,8 +169,8 @@ This mode provides many different operations on both regions and control points,
 
 @edit|Editor/undo|<@PRIMARY@>z|undo
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
-@vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)
-@vis|Editor/zoom-to-region-both-axes|<@SECONDARY@>z|zoom (x+y) to selected region
+;@vis|Editor/zoom-to-region|<@PRIMARY@><@SECONDARY@>z|zoom (x) to selected region(s)
+;@vis|Editor/zoom-to-region-both-axes|<@SECONDARY@>z|zoom (x+y) to selected region
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 ;@-group|Editor/crop|c|some text
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
