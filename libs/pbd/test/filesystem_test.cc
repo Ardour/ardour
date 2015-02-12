@@ -78,6 +78,8 @@ FilesystemTest::testCopyFileUTF8Filename ()
 
 	PBD::find_files_matching_pattern (i18n_files, i18n_path, "*.tst");
 
+	CPPUNIT_ASSERT (i18n_files.size() == 8);
+
 	cerr << endl;
 	cerr << "Copying " << i18n_files.size() << " test files from: "
 	     << i18n_path.to_string () << endl;
@@ -129,6 +131,8 @@ create_test_directory (std::string test_dir)
 	cerr << endl;
 	cerr << "Copying " << test_files.size() << " test files from: "
 	     << test_dir_path << " to " << output_dir << endl;
+
+	CPPUNIT_ASSERT (test_files.size() != 0);
 
 	PBD::copy_files (test_dir_path, output_dir);
 
