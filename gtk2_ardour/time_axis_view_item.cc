@@ -431,7 +431,6 @@ TimeAxisViewItem::set_position(framepos_t pos, void* src, double* delta)
 	}
 
 	group->set_x_position (new_unit_pos);
-
 	PositionChanged (frame_position, src); /* EMIT_SIGNAL */
 
 	return true;
@@ -469,7 +468,10 @@ TimeAxisViewItem::set_duration (framecnt_t dur, void* src)
 
 	item_duration = dur;
 
-	reset_width_dependent_items (trackview.editor().sample_to_pixel (dur));
+	double end_pixel = trackview.editor().sample_to_pixel (frame_position + dur);
+	double first_pixel = trackview.editor().sample_to_pixel (frame_position);
+
+	reset_width_dependent_items (end_pixel - first_pixel);
 
 	DurationChanged (dur, src); /* EMIT_SIGNAL */
 	return true;
@@ -1105,7 +1107,11 @@ TimeAxisViewItem::set_samples_per_pixel (double fpp)
 {
 	samples_per_pixel = fpp;
 	set_position (this->get_position(), this);
-	reset_width_dependent_items ((double) get_duration() / samples_per_pixel);
+
+	double end_pixel = trackview.editor().sample_to_pixel (frame_position + get_duration());
+	double first_pixel = trackview.editor().sample_to_pixel (frame_position);
+
+	reset_width_dependent_items (end_pixel - first_pixel);
 }
 
 void
@@ -1135,6 +1141,9 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 		if (frame) {
 			frame->show();
+			/* Note: x0 is always zero - the position is defined by
+			 * the position of the group, not the frame.
+			 */
 			frame->set_x1 (pixel_width + RIGHT_EDGE_SHIFT);
 		}
 
