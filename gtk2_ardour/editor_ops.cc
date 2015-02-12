@@ -2568,6 +2568,9 @@ Editor::rename_region ()
     WavesEditDialog waves_edit_dialog ("", "Rename region");
     waves_edit_dialog.set_entry_text (rs.front()->region()->name());
 
+    // disable Main menu
+    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    
     int const ret = waves_edit_dialog.run ();
 
 	if (ret != WavesDialog::RESPONSE_DEFAULT) {

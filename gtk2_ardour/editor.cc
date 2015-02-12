@@ -521,6 +521,7 @@ Editor::Editor ()
 
 	_summary = new EditorSummary (this);
 
+    this->signal_hide().connect ( sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::on_editor_hiding));
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
     
@@ -3335,6 +3336,9 @@ Editor::duplicate_range (bool with_dialog)
 	if ( selection->time.length() == 0 && rs.empty()) {
 		return;
 	}
+
+    // disable Main menu
+    MainMenuDisabled m; // HOT FIX. (REWORK IT)
 
 	if (with_dialog) {
 

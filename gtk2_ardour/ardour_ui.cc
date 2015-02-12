@@ -3713,8 +3713,13 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
 	_add_tracks_dialog->setup(_add_tracks_dialog->max_tracks_count () - existing_tracks_count);
 	_add_tracks_dialog->set_position (WIN_POS_CENTER);
-	int r = _add_tracks_dialog->run();
     
+
+    // disable Main menu
+    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+
+    int r = _add_tracks_dialog->run();
+   
 	switch (r) {
 		case WavesDialog::RESPONSE_DEFAULT:
 			break;
@@ -4915,4 +4920,32 @@ void
 ARDOUR_UI::hide_application ()
 {
     Application::instance ()-> hide ();
+}
+
+void
+ARDOUR_UI::on_editor_hiding ()
+{
+    // here we should close
+    // all opening graphical elements
+    
+    tracks_control_panel->deiconify ();
+    tracks_control_panel->hide ();
+
+    key_editor->deiconify ();
+    key_editor->hide ();
+    
+    big_clock_window->deiconify ();
+    big_clock_window->hide ();
+    
+    session_lock_dialog->deiconify ();// HOT FIX. (REWORK IT)
+    session_lock_dialog->hide ();// HOT FIX. (REWORK IT)
+    
+    about->deiconify ();
+    about->hide ();
+    
+    track_color_dialog->deiconify ();
+    track_color_dialog->hide ();
+    
+    marker_inspector_dialog->deiconify ();
+    marker_inspector_dialog->hide ();
 }

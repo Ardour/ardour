@@ -24,6 +24,7 @@
 #include "i18n.h"
 #include "about_dialog.h"
 #include "license_dialog.h"
+#include "public_editor.h"
 
 using namespace Gtk;
 using namespace Gdk;
@@ -88,6 +89,7 @@ About::on_esc_pressed ()
 void
 About::about_button_pressed (WavesButton*)
 {
+    MainMenuDisabled m;
     LicenseDialog license_dialog;
     license_dialog.set_position (WIN_POS_CENTER);
     license_dialog.run ();

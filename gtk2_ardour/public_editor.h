@@ -43,6 +43,7 @@
 #include "canvas/fwd.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
+#include "actions.h"
 #include "editing.h"
 #include "selection.h"
 
@@ -438,6 +439,24 @@ class DisplaySuspender {
 				PublicEditor::instance().resume_route_redisplay ();
 			}
 		}
+};
+
+class MainMenuDisabled {
+public:
+    MainMenuDisabled() {
+        #ifdef __APPLE__
+        /* The global menu bar continues to be accessible to applications
+         with modal dialogs on mac, which means that we need to desensitize
+         all items in the menu bar. 
+         */
+            ActionManager::disable_all_actions (); // HOT FIX. (REWORK IT)
+        #endif
+    }
+    ~MainMenuDisabled () {
+        #ifdef __APPLE__
+            ActionManager::pop_action_state (); // HOT FIX. (REWORK IT)
+        #endif
+    }
 };
 
 #endif // __gtk_ardour_public_editor_h__

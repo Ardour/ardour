@@ -42,6 +42,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/types.h"
 
+#include "actions.h"
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
 #include "editor.h"
@@ -63,6 +64,9 @@ using namespace Gtk;
 void
 Editor::export_audio ()
 {
+    // disable Main menu
+    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+
 	if (Config->get_output_auto_connect() & AutoConnectPhysical) {
         WavesMessageDialog read_only_session_dialog ("",
                                                      "Not available in Multi Out mode.\nPlease switch to Stereo Out mode.",
@@ -79,6 +83,9 @@ Editor::export_audio ()
 void
 Editor::stem_export ()
 {
+    // disable Main menu
+    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    
 	WavesStemExportDialog dialog (*this);
 	dialog.set_session (_session);
 	dialog.run();
@@ -124,6 +131,9 @@ Editor::export_region ()
 	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion>(r);
 	boost::shared_ptr<MidiRegion> midi_region = boost::dynamic_pointer_cast<MidiRegion>(r);
 	
+    // disable Main menu
+    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+
 	if (audio_region) {
 		
 		RouteTimeAxisView & rtv (dynamic_cast<RouteTimeAxisView &> (selection->regions.front()->get_time_axis_view()));
