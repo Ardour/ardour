@@ -389,8 +389,6 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				} else {
 					_initially_vertical = false;
 				}
-
-				cerr << "IV = " << _initially_vertical << endl;
 			}
 			
 			if (!from_autoscroll) {
@@ -552,6 +550,7 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	, _total_x_delta (0)
 	, _last_pointer_time_axis_view (0)
 	, _last_pointer_layer (0)
+	, _single_axis (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMotionDrag\n");
 }
@@ -561,6 +560,10 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
+	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+		_single_axis = true;
+	}
+	
 	show_verbose_cursor_time (_last_frame_position);
 
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (current_pointer_y ());
@@ -635,6 +638,10 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 bool
 RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 {
+	if (_y_constrained) {
+		return false;
+	}
+	
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		int const n = i->time_axis_view + delta_track;
 		if (n < 0 || n >= int (_time_axis_views.size())) {
@@ -679,6 +686,18 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (current_pointer_y ());
 	TimeAxisView* tv = r.first;
 
+	if (first_move) {
+		if (_single_axis) {
+			if (initially_vertical()) {
+				_y_constrained = false;
+				_x_constrained = true;
+			} else {
+				_y_constrained = true;
+				_x_constrained = false;
+			}
+		}
+	}
+	
 	if (tv && tv->view()) {
 		double layer = r.second;
 
@@ -978,7 +997,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	bool const changed_position = (_last_frame_position != _primary->region()->position());
 	bool const changed_tracks = (_time_axis_views[_views.front().time_axis_view] != &_views.front().view->get_time_axis_view());
 	framecnt_t const drag_delta = _primary->region()->position() - _last_frame_position;
-	
+
 	if (_copy) {
 
 		finished_copy (
