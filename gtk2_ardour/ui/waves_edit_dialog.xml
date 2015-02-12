@@ -55,7 +55,7 @@
         <Button id="ok_button"
                 style="generic_button"
                 box.pack="end"
-                text="ok"
+                text="Ok"
                 visible="true"/>
         <Button id="cancel_button"
                 style="generic_button"
