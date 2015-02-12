@@ -884,7 +884,12 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			const boost::shared_ptr<const Region> original = rv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true);
 			region_copy->set_position (original->position());
-
+			/* need to set this so that the drop zone code can work. This doesn't
+			   actually put the region into the playlist, but just sets a weak pointer
+			   to it.
+			*/
+			region_copy->set_playlist (original->playlist());
+			
 			RegionView* nrv;
 			if (arv) {
 				boost::shared_ptr<AudioRegion> audioregion_copy
