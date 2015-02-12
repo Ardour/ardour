@@ -216,7 +216,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _pointer_frame_offset (0)
 	, _trackview_only (trackview_only)
 	, _move_threshold_passed (false)
-    , _starting_point_passed (false)
+	, _starting_point_passed (false)
+	, _initially_vertical (false)
 	, _was_double_click (false)
 	, _raw_grab_frame (0)
 	, _grab_frame (0)
@@ -378,21 +379,35 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	if (active (_editor->mouse_mode) && _move_threshold_passed) {
 
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
+
+			if (old_move_threshold_passed != _move_threshold_passed) {
+
+				/* just changed */
+
+				if (fabs (current_pointer_y() - _grab_y) > fabs (current_pointer_x() - _grab_x)) {
+					_initially_vertical = true;
+				} else {
+					_initially_vertical = false;
+				}
+
+				cerr << "IV = " << _initially_vertical << endl;
+			}
+			
 			if (!from_autoscroll) {
 				_editor->maybe_autoscroll (true, allow_vertical_autoscroll (), false);
 			}
-
+			
 			if (!_editor->autoscroll_active() || from_autoscroll) {
-                
-                bool first_move = (_move_threshold_passed != old_move_threshold_passed) ||
-                                   (from_autoscroll && !_starting_point_passed);
-                
+				
+				bool first_move = (_move_threshold_passed != old_move_threshold_passed) ||
+					(from_autoscroll && !_starting_point_passed);
+				
 				motion (event, first_move);
 				
-                if (first_move) {
-                    _starting_point_passed = true;
-                }
-                
+				if (first_move) {
+					_starting_point_passed = true;
+				}
+				
 				_last_pointer_x = _drags->current_pointer_x ();
 				_last_pointer_y = current_pointer_y ();
 				_last_pointer_frame = adjusted_current_frame (event);
@@ -1446,8 +1461,8 @@ RegionMotionDrag::aborted (bool)
  *  @param c true to make copies of the regions being moved, otherwise false.
  */
 RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
-	: RegionMotionDrag (e, i, p, v, b),
-	  _copy (c)
+	: RegionMotionDrag (e, i, p, v, b)
+	, _copy (c)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMoveDrag\n");
 
