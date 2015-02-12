@@ -568,7 +568,7 @@ EditorRoutes::redisplay_real ()
 void
 EditorRoutes::redisplay ()
 {
-	if (_no_redisplay || !_session || _session->deletion_in_progress()) {
+	if (_no_redisplay || !_session || _session->deletion_in_progress() || _session->reconnection_in_progress() ) {
 		return;
 	}
 

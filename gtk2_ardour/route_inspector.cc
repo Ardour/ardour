@@ -84,7 +84,7 @@ RouteInspector::init ()
 		color_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &RouteInspector::color_button_clicked));
 	}
 
-    _session->session_routes_reconnected.connect(_input_output_channels_update, invalidator (*this), boost::bind (&RouteInspector::update_inspector_info_panel, this), gui_context());
+    EngineStateController::instance()->OutputConfigChanged.connect(_input_output_channels_update, invalidator (*this), boost::bind (&RouteInspector::update_inspector_info_panel, this), gui_context());
 }
 
 RouteInspector::~RouteInspector ()

@@ -5838,6 +5838,8 @@ Editor::output_connection_mode_changed ()
             delete tv;
         }
     }
+    
+    _routes->redisplay ();
 }
 
 
