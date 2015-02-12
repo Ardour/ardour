@@ -334,9 +334,15 @@ void
 WavesExportTimespanSelector::on_selection_all_buttons (WavesButton* button)
 {
 	bool selected = (button == &_select_all_button);
+    state->timespans->clear();
+    
 	for (Gtk::ListStore::Children::iterator it = range_list->children().begin(); it != range_list->children().end(); ++it) {
 		it->set_value (range_cols.selected, selected);
+        if (selected)
+            add_range_to_selection (it->get_value (range_cols.location));
 	}
+    
+    CriticalSelectionChanged();
 }
 
 /*** WavesExportTimespanSelectorSingle ***/
