@@ -147,7 +147,7 @@ WavesUI::create_widget (const XMLNode& definition, const XMLNodeMap& styles)
 	if (widget_type == "BUTTON") {
 		child = manage (new WavesButton (text));
 	} else if (widget_type == "ICONBUTTON") {
-		child = manage (new WavesIconButton);
+		child = manage (new WavesIconButton (text));
 	} else if (widget_type == "DROPDOWN") {
 		child = manage (new WavesDropdown (text));
 	} else if (widget_type == "DROPDOWNITEM") {

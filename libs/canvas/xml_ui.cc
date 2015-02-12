@@ -179,7 +179,7 @@ xml_property (const XMLNode &node, const char *prop_name, const XMLNodeMap& styl
 std::string
 xml_property (const XMLNode &node, const char *prop_name, const std::string& default_value)
 {
-	return node.property (prop_name) ? node.property(prop_name)->value() : "";
+	return node.property (prop_name) ? node.property(prop_name)->value() : default_value;
 }
 
 std::string
