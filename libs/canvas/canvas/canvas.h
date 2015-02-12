@@ -225,6 +225,8 @@ private:
 	Item * _grabbed_item;
         /** the item that currently has key focus or 0 */
 	Item * _focused_item;
+	
+	bool _single_exposure;
 
 	sigc::connection tooltip_timeout_connection;
 	Item* current_tooltip_item;

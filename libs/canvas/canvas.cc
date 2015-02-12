@@ -382,6 +382,7 @@ GtkCanvas::GtkCanvas ()
 	, _new_current_item (0)
 	, _grabbed_item (0)
 	, _focused_item (0)
+	, _single_exposure (1)
 	, current_tooltip_item (0)
 	, tooltip_window (0)
 {
@@ -786,22 +787,22 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
         draw_context->fill ();
         
         /* render canvas */
+		if ( _single_exposure ) {
+	
+			render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
-#define CANVAS_SINGLE_EXPOSE
-#ifdef CANVAS_SINGLE_EXPOSE
-        render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
-#else
-        GdkRectangle* rects;
-        gint nrects;
-        
-        gdk_region_get_rectangles (ev->region, &rects, &nrects);
-        for (gint n = 0; n < nrects; ++n) {
-	        draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
-	        render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
-        }
-        g_free (rects);
-#endif	
-        
+		} else {
+			GdkRectangle* rects;
+			gint nrects;
+			
+			gdk_region_get_rectangles (ev->region, &rects, &nrects);
+			for (gint n = 0; n < nrects; ++n) {
+				draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
+				render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
+			}
+			g_free (rects);
+		}
+		
 #ifdef USE_CAIRO_IMAGE_SURFACE
 	/* now blit our private surface back to the GDK one */
 
