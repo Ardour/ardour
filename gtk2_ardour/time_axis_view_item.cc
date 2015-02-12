@@ -191,7 +191,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	}
 
 	if (visibility & ShowFrame) {
-		frame = new ArdourCanvas::TimeRectangle (group, 
+		frame = new ArdourCanvas::Rectangle (group, 
 						     ArdourCanvas::Rect (0.0, 0.0, 
 									 trackview.editor().sample_to_pixel(duration), 
 									 trackview.current_height()));
@@ -513,7 +513,7 @@ TimeAxisViewItem::set_selected(bool yn)
 
 	if (_selected && frame) {
 		if (!selection_frame) {
-			selection_frame = new ArdourCanvas::TimeRectangle (group);
+			selection_frame = new ArdourCanvas::Rectangle (group);
 			selection_frame->set_fill (false);
 			selection_frame->set_outline_color (ARDOUR_UI::config()->color ("selected time axis frame"));
 			selection_frame->set_ignore_events (true);
@@ -842,7 +842,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		if (show_vestigial) {
 
 			if (!vestigial_frame) {
-				vestigial_frame = new ArdourCanvas::TimeRectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
+				vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
 				CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
 				vestigial_frame->set_outline_color (ARDOUR_UI::config()->color ("vestigial frame"));
 				vestigial_frame->set_fill_color (ARDOUR_UI::config()->color ("vestigial frame"));
