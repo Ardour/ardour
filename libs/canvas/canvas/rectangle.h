@@ -88,18 +88,6 @@ public:
 	What _outline_what;
 };
 
-class TimeRectangle : public Rectangle 
-{
-    public:
-	TimeRectangle (Canvas* c) : Rectangle (c) {}
-	TimeRectangle (Canvas* c, Rect const & r) : Rectangle (c, r) {}
-	TimeRectangle (Item* i) : Rectangle (i) {}
-	TimeRectangle (Item* i, Rect const & r) : Rectangle (i, r) {}
-	
-	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
-	void compute_bounding_box () const;
-};
-
 }
 
 #endif
