@@ -80,6 +80,7 @@ AudioSource::AudioSource (Session& s, string name)
 	, peak_leftover_size (0)
 	, peak_leftovers (0)
 	, _first_run (true)
+	, _last_scale (0.0)
 {
 }
 
@@ -93,6 +94,7 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 	, peak_leftover_size (0)
 	, peak_leftovers (0)
 	, _first_run (true)
+	, _last_scale (0.0)
 {
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
@@ -397,9 +399,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		size_t raw_map_length = bytes_to_read;
 		size_t map_length = bytes_to_read + map_delta;
 
-		if (_first_run || (_last_map_off != map_off) ||  (_last_raw_map_length < raw_map_length)) {
-			
-			staging.reset (new PeakData[raw_map_length]);
+		if (_first_run  || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
+			peak_cache.reset (new PeakData[npeaks]);
+			staging.reset (new PeakData[npeaks]);
 
 			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
 
@@ -409,19 +411,21 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 				return -1;
 			}
 		
-			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length * sizeof(PeakData));
+			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
 			munmap (addr, map_length);
+			memcpy ((void*)peak_cache.get(), (void*)staging.get(), bytes_to_read);
+			
 			_last_map_off = map_off;
 			_last_raw_map_length = raw_map_length;
 			_first_run = false;
+
+			if (zero_fill) {
+				memset (&peak_cache[npeaks], 0, sizeof (PeakData) * zero_fill);
+			}
+
 		}
-
-		memcpy ((void*)peaks, (void*)staging.get(), bytes_to_read);
-
-		if (zero_fill) {
-			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
-		}
-
+		_last_scale = samples_per_visual_peak;
+		memcpy ((void*)peaks, (void*)peak_cache.get(), npeaks * sizeof(PeakData));
 		return 0;
 	}
 
@@ -461,49 +465,56 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		size_t raw_map_length = chunksize * sizeof(PeakData);
 		size_t map_length = (chunksize * sizeof(PeakData)) + map_delta;
 
-		if (_first_run || (_last_map_off != map_off) ||  (_last_raw_map_length < raw_map_length)) {
-			
+		if (_first_run || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
+			peak_cache.reset (new PeakData[npeaks]);
 			staging.reset (new PeakData[chunksize]);
 
 			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
 
-			char* addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
+			char* addr;
+			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
 			if (addr ==  MAP_FAILED) {
 				cerr << "mmap error - could not map peak file to mem." << endl;
 				return -1;
 			}
 		
-			memcpy ((void*)staging.get(), (void*)(addr + map_delta), chunksize * sizeof(PeakData));
+			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
 			munmap (addr, map_length);
+
 			_last_map_off = map_off;
 			_last_raw_map_length = raw_map_length;
 			_first_run = false;
-		}
-		while (nvisual_peaks < npeaks) {
+			_last_scale = samples_per_visual_peak;
+		
+			while (nvisual_peaks < npeaks) {
 
-			xmax = -1.0;
-			xmin = 1.0;
+				xmax = -1.0;
+				xmin = 1.0;
 
-			while (current_stored_peak <= stored_peak_before_next_visual_peak) {
+				while (current_stored_peak <= stored_peak_before_next_visual_peak) {
 
-				xmax = max (xmax, staging[i].max);
-				xmin = min (xmin, staging[i].min);
-				++i;
-				++current_stored_peak;
+					xmax = max (xmax, staging[i].max);
+					xmin = min (xmin, staging[i].min);
+					++i;
+					++current_stored_peak;
+				}
+
+				peak_cache[nvisual_peaks].max = xmax;
+				peak_cache[nvisual_peaks].min = xmin;
+				++nvisual_peaks;
+				next_visual_peak_frame =  min ((double) start + cnt, (next_visual_peak_frame + samples_per_visual_peak));
+				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_frame / samples_per_file_peak;
 			}
 
-			peaks[nvisual_peaks].max = xmax;
-			peaks[nvisual_peaks].min = xmin;
-			++nvisual_peaks;
-			next_visual_peak_frame =  min ((double) start + cnt, (next_visual_peak_frame + samples_per_visual_peak));
-			stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_frame / samples_per_file_peak;
-		}
+			if (zero_fill) {
+				cerr << "Zero fill end of peaks (@ " << npeaks << " with " << zero_fill << endl;
+				memset (&peak_cache[npeaks], 0, sizeof (PeakData) * zero_fill);
+			}
 
-		if (zero_fill) {
-			cerr << "Zero fill end of peaks (@ " << npeaks << " with " << zero_fill << endl;
-			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
+		memcpy ((void*)peaks, (void*)peak_cache.get(), npeaks * sizeof(PeakData));
 
+		return 0;
 	} else {
 		DEBUG_TRACE (DEBUG::Peaks, "UPSAMPLE\n");
 

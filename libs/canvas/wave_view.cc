@@ -42,7 +42,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
 
-#define CACHE_HIGH_WATER (3)
+#define CACHE_HIGH_WATER (2)
 
 std::map <boost::shared_ptr<AudioSource>, std::vector<WaveView::CacheEntry> >  WaveView::_image_cache;
 double WaveView::_global_gradient_depth = 0.6;
