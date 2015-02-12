@@ -19,14 +19,36 @@ using namespace PBD;
 
 CPPUNIT_TEST_SUITE_REGISTRATION (FilesystemTest);
 
+namespace {
+
+class PwdReset
+{
+public:
+
+	PwdReset(const string& new_pwd)
+		: m_old_pwd(Glib::get_current_dir()) {
+		CPPUNIT_ASSERT (g_chdir (new_pwd.c_str()) == 0);
+	}
+
+	~PwdReset()
+	{
+		CPPUNIT_ASSERT (g_chdir (m_old_pwd.c_str()) == 0);
+	}
+
+private:
+
+	string m_old_pwd;
+
+};
+
+} // anon
+
 void
 FilesystemTest::testPathIsWithin ()
 {
 #ifndef PLATFORM_WINDOWS
 	string output_path = test_output_directory ("testPathIsWithin");
-	string orig_path = Glib::get_current_dir ();
-
-	CPPUNIT_ASSERT (g_chdir (output_path.c_str()) == 0);
+	PwdReset pwd_reset(output_path);
 
 	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
 
@@ -48,7 +70,6 @@ FilesystemTest::testPathIsWithin ()
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar"));
 
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/jim/baz", "frobozz") == false);
-	CPPUNIT_ASSERT (g_chdir (orig_path.c_str()) == 0);
 #endif
 }
 
@@ -219,9 +240,7 @@ FilesystemTest::testCanonicalPath ()
 {
 #ifndef PLATFORM_WINDOWS
 	string top_dir = test_output_directory ("testCanonicalPath");
-	string orig_path = Glib::get_current_dir ();
-
-	CPPUNIT_ASSERT (g_chdir (top_dir.c_str()) == 0);
+	PwdReset pwd_reset(top_dir);
 
 	string pwd = Glib::get_current_dir ();
 
@@ -239,7 +258,5 @@ FilesystemTest::testCanonicalPath ()
 
 	CPPUNIT_ASSERT (canonical_path == expected_path);
 	CPPUNIT_ASSERT (expanded_path == expected_path);
-
-	CPPUNIT_ASSERT (g_chdir (orig_path.c_str()) == 0);
 #endif
 }
