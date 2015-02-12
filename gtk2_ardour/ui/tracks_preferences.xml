@@ -987,7 +987,7 @@
             <Label style="generic_control"
                    text="  commands"/>
           </HBox>
-          <HBox>
+          <HBox ui.os.windows="false">
             <Label style="parameter_label"
                    text="Always Copy Imported Files"/>
             <VBox style="parameter_spacing"/>
@@ -998,6 +998,21 @@
                         activeicon="waves_check_box_active"
                         toggleable="true"/>
           </HBox>
+          <Label style="parameter_label"
+                 text="Always Copy Imported Files"
+                 ui.orphan="true"
+                 ui.os.macos="false"/>
+          <VBox style="parameter_spacing"
+                ui.orphan="true"
+                ui.os.macos="false"/>
+          <Iconbutton id="copy_imported_files_button"
+                      width="20"
+                      height="20"
+                      normalicon="waves_check_box"
+                      activeicon="waves_check_box_active"
+                      toggleable="true"
+                      ui.orphan="true"
+                      ui.os.macos="false"/>
         </VBox>
       </HBox>
       <!--<ScrolledWindow
