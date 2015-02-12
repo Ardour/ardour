@@ -19,14 +19,36 @@ using namespace PBD;
 
 CPPUNIT_TEST_SUITE_REGISTRATION (FilesystemTest);
 
+namespace {
+
+class PwdReset
+{
+public:
+
+	PwdReset(const string& new_pwd)
+		: m_old_pwd(Glib::get_current_dir()) {
+		CPPUNIT_ASSERT (g_chdir (new_pwd.c_str()) == 0);
+	}
+
+	~PwdReset()
+	{
+		CPPUNIT_ASSERT (g_chdir (m_old_pwd.c_str()) == 0);
+	}
+
+private:
+
+	string m_old_pwd;
+
+};
+
+} // anon
+
 void
 FilesystemTest::testPathIsWithin ()
 {
 #ifndef PLATFORM_WINDOWS
 	string output_path = test_output_directory ("testPathIsWithin");
-	string orig_path = Glib::get_current_dir ();
-
-	CPPUNIT_ASSERT (g_chdir (output_path.c_str()) == 0);
+	PwdReset pwd_reset(output_path);
 
 	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
 
@@ -48,7 +70,6 @@ FilesystemTest::testPathIsWithin ()
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar"));
 
 	CPPUNIT_ASSERT (PBD::path_is_within ("foo/jim/baz", "frobozz") == false);
-	CPPUNIT_ASSERT (g_chdir (orig_path.c_str()) == 0);
 #endif
 }
 
@@ -77,6 +98,8 @@ FilesystemTest::testCopyFileUTF8Filename ()
 	i18n_path.add_subdirectory_to_paths("i18n_test");
 
 	PBD::find_files_matching_pattern (i18n_files, i18n_path, "*.tst");
+
+	CPPUNIT_ASSERT (i18n_files.size() == 8);
 
 	cerr << endl;
 	cerr << "Copying " << i18n_files.size() << " test files from: "
@@ -129,6 +152,8 @@ create_test_directory (std::string test_dir)
 	cerr << endl;
 	cerr << "Copying " << test_files.size() << " test files from: "
 	     << test_dir_path << " to " << output_dir << endl;
+
+	CPPUNIT_ASSERT (test_files.size() != 0);
 
 	PBD::copy_files (test_dir_path, output_dir);
 
@@ -215,9 +240,7 @@ FilesystemTest::testCanonicalPath ()
 {
 #ifndef PLATFORM_WINDOWS
 	string top_dir = test_output_directory ("testCanonicalPath");
-	string orig_path = Glib::get_current_dir ();
-
-	CPPUNIT_ASSERT (g_chdir (top_dir.c_str()) == 0);
+	PwdReset pwd_reset(top_dir);
 
 	string pwd = Glib::get_current_dir ();
 
@@ -235,7 +258,5 @@ FilesystemTest::testCanonicalPath ()
 
 	CPPUNIT_ASSERT (canonical_path == expected_path);
 	CPPUNIT_ASSERT (expanded_path == expected_path);
-
-	CPPUNIT_ASSERT (g_chdir (orig_path.c_str()) == 0);
 #endif
 }

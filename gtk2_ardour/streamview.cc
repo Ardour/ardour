@@ -412,7 +412,7 @@ StreamView::create_rec_box(framepos_t frame_pos, double width)
 	const double   xend       = xstart + width;
 	const uint32_t fill_color = ARDOUR_UI::config()->color_mod("recording rect", "recording_rect");
 
-	ArdourCanvas::Rectangle* rec_rect = new ArdourCanvas::TimeRectangle(_canvas_group);
+	ArdourCanvas::Rectangle* rec_rect = new ArdourCanvas::Rectangle(_canvas_group);
 	rec_rect->set_x0(xstart);
 	rec_rect->set_y0(0);
 	rec_rect->set_x1(xend);

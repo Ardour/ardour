@@ -103,6 +103,15 @@ public:
 	void set_channel (int);
 	void set_region_start (ARDOUR::frameoffset_t);
 
+	/** Change the first position drawn by @param pixels.
+	 * @param pixels must be positive. This is used by
+	 * AudioRegionViews in Ardour to avoid drawing the
+	 * first pixel of a waveform, and exists in case
+	 * there are uses for WaveView where we do not
+	 * want this behaviour.
+	 */
+	void set_start_shift (double pixels);
+	
         void set_fill_color (Color);
         void set_outline_color (Color);
 	
@@ -171,7 +180,8 @@ private:
         bool   _gradient_depth_independent;
         double _amplitude_above_axis;
 	float  _region_amplitude;
-
+	double _start_shift;
+	
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
 	 */

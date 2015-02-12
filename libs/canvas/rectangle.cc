@@ -65,14 +65,14 @@ Rectangle::get_self_for_render () const
 	   we should take that into account when rendering.
 	*/
 
-	return item_to_window (_rect.translate (_position));
+	return item_to_window (_rect.translate (_position), false);
 }
 
 void
 Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Rect self) const
 {
 	boost::optional<Rect> r = self.intersection (area);
-
+	
 	if (!r) {
 		return;
 	}
@@ -99,36 +99,43 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 		 * coordinates of the rectangle. So if the rectangle
 		 * has a left edge at 0 and a right edge at 10, then
 		 * the left edge must span 0..1, the right edge
-		 * must span 9..10 because the first and final pixels
-		 * to be colored are actually "at" 0.5 and 9.5 (midway
-		 * between the integer coordinates.
+		 * must span 10..11 because the first and final pixels
+		 * to be colored are actually "at" 0.5 and 10.5 (midway
+		 * between the integer coordinates).
+		 *
+		 * See the Cairo FAQ on single pixel lines for more 
+		 * detail.
 		 */
 
+		if (fmod (_outline_width, 2.0)  != 0.0) {
+			const double shift = _outline_width * 0.5;
+			self = self.translate (Duple (shift, shift));
+		}
+		
 		if (_outline_what == What (LEFT|RIGHT|BOTTOM|TOP)) {
 			
-			self = self.shrink (0.5);
 			context->rectangle (self.x0, self.y0, self.width(), self.height());
 
 		} else {
 
 			if (_outline_what & LEFT) {
-				context->move_to (self.x0+0.5, self.y0);
-				context->line_to (self.x0+0.5, self.y1);
+				context->move_to (self.x0, self.y0);
+				context->line_to (self.x0, self.y1);
 			}
 			
 			if (_outline_what & TOP) {
-				context->move_to (self.x0, self.y0+0.5);
-				context->line_to (self.x1, self.y0+0.5);
+				context->move_to (self.x0, self.y0);
+				context->line_to (self.x1, self.y0);
 			}
 
 			if (_outline_what & BOTTOM) {
-				context->move_to (self.x0, self.y1-0.5);
-				context->line_to (self.x1, self.y1-0.5);
+				context->move_to (self.x0, self.y1);
+				context->line_to (self.x1, self.y1);
 			}
 			
 			if (_outline_what & RIGHT) {
-				context->move_to (self.x1-0.5, self.y0);
-				context->line_to (self.x1-0.5, self.y1);
+				context->move_to (self.x1, self.y0);
+				context->line_to (self.x1, self.y1);
 			}
 		}
 		
@@ -147,7 +154,34 @@ Rectangle::compute_bounding_box () const
 {
 	if (!_rect.empty()) {
 		Rect r = _rect.fix ();
-		_bounding_box = r.expand (_outline_width + 0.5);
+
+		/* if the outline is 1 pixel, then the actual
+		   bounding box is 0.5 pixels outside the stated
+		   corners of the rectangle.
+
+		   if the outline is 2 pixels, then the actual
+		   bounding box is 1.0 pixels outside the stated
+		   corners of the rectangle (so that the middle
+		   of the 2 pixel wide border passes through
+		   the corners, alternatively described as 1 row 
+		   of pixels outside of the corners, and 1 row
+		   inside).
+
+		   if the outline is 3 pixels, then the actual
+		   bounding box is 1.5 outside the stated corners
+		   of the rectangle (so that the middle row of
+		   pixels of the border passes through the corners).
+
+		   if the outline is 4 pixels, then the actual bounding
+		   box is 2.0 pixels outside the stated corners
+		   of the rectangle, so that the border consists
+		   of 2 pixels outside the corners and 2 pixels inside.
+
+		   hence ... the bounding box is width * 0.5 larger
+		   than the rectangle itself.
+		*/
+
+		_bounding_box = r.expand (_outline_width * 0.5);
 	}
 
 	_bounding_box_dirty = false;
@@ -231,38 +265,4 @@ Rectangle::set_outline_what (What what)
 		_outline_what = what;
 		end_visual_change ();
 	}
-}
-
-
-/*-------------------*/
-
-void
-TimeRectangle::compute_bounding_box () const
-{
-	Rectangle::compute_bounding_box ();
-
-	if (_bounding_box) {
-		Rect r = _bounding_box.get ();
-		
-		/* This is a TimeRectangle, so its right edge is drawn 1 pixel beyond
-		 * (larger x-axis coordinates) than a normal Rectangle.
-		 */
-		
-		r.x1 += 1.0; /* this should be using safe_add() */
-		
-		_bounding_box = r;
-	}
-}
-
-void 
-TimeRectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
-{
-	Rect self = get_self_for_render ();
-	
-	/* This is a TimeRectangle, so its right edge is drawn 1 pixel beyond
-	 * (larger x-axis coordinates) than a normal Rectangle.
-	 */
-
-	self.x1 += 1.0; /* this should be using safe_add() */
-	render_self (area, context, self);
 }

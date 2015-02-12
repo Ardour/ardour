@@ -30,7 +30,7 @@
 namespace PBD {
 
 	LIBPBD_API extern uint64_t debug_bits;
-        LIBPBD_API uint64_t new_debug_bit (const char* name);
+	LIBPBD_API uint64_t new_debug_bit (const char* name);
 	LIBPBD_API void debug_print (const char* prefix, std::string str);
 	LIBPBD_API void set_debug_bits (uint64_t bits);
 	LIBPBD_API int parse_debug_options (const char* str);
@@ -40,8 +40,8 @@ namespace PBD {
 
 		/* this namespace is so that we can write DEBUG::bit_name */
                 
-                LIBPBD_API extern uint64_t Stateful;
-                LIBPBD_API extern uint64_t Properties;
+		LIBPBD_API extern uint64_t Stateful;
+		LIBPBD_API extern uint64_t Properties;
 		LIBPBD_API extern uint64_t FileManager;
 		LIBPBD_API extern uint64_t Pool;
 		LIBPBD_API extern uint64_t EventLoop;

@@ -787,6 +787,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
         
         /* render canvas */
 
+#define CANVAS_SINGLE_EXPOSE
 #ifdef CANVAS_SINGLE_EXPOSE
         render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 #else

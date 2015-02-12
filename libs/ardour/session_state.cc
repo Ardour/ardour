@@ -1379,9 +1379,11 @@ Session::load_routes (const XMLNode& node, int version)
 		new_routes.push_back (route);
 	}
 
+	BootMessage (_("Tracks/busses loaded;  Adding to Session"));
+
 	add_routes (new_routes, false, false, false);
 
-	BootMessage (_("Finished loading tracks/busses."));
+	BootMessage (_("Finished adding tracks/busses"));
 
 	return 0;
 }

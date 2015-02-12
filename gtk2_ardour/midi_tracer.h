@@ -39,6 +39,10 @@ namespace MIDI {
 	class Parser;
 }
 
+namespace ARDOUR {
+	class MidiPort;
+}
+
 class MidiTracer : public ArdourWindow
 {
   public:
@@ -87,6 +91,8 @@ class MidiTracer : public ArdourWindow
 	void disconnect ();
 	PBD::ScopedConnection _parser_connection;
 	PBD::ScopedConnection _manager_connection;
+
+	boost::shared_ptr<ARDOUR::MidiPort> traced_port;
 };
 
 #endif /* __ardour_gtk_midi_tracer_h__ */

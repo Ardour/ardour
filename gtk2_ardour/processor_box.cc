@@ -1148,6 +1148,8 @@ ProcessorBox::show_processor_menu (int arg)
 				gtk_menu_item_set_submenu (controls_menu_item->gobj(), 0);
 				controls_menu_item->set_sensitive (false);
 			}
+		} else {
+			controls_menu_item->set_sensitive (false);
 		}
 	}
 
@@ -1162,6 +1164,8 @@ ProcessorBox::show_processor_menu (int arg)
 				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}
+		} else {
+			send_menu_item->set_sensitive (false);
 		}
 	}
 

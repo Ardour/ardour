@@ -790,7 +790,7 @@ RouteTimeAxisView::build_display_menu ()
 			i->set_active (normal == 0 && tape == 0 && non_layered != 0);
 			i->set_inconsistent (non_layered != 0 && (normal != 0 || tape != 0));
 
-			items.push_back (MenuElem (_("Mode"), *mode_menu));
+			items.push_back (MenuElem (_("Record Mode"), *mode_menu));
 		}
 
 
@@ -916,7 +916,7 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 
 	if (timestretch_rect == 0) {
 		timestretch_rect = new ArdourCanvas::Rectangle (canvas_display ());
-		timestretch_rect->set_fill_color (ARDOUR_UI::config()->color ("time stretch fill"));
+		timestretch_rect->set_fill_color (ArdourCanvas::HSV (ARDOUR_UI::config()->color ("time stretch fill")).mod (ARDOUR_UI::config()->modifier ("time stretch fill")).color());
 		timestretch_rect->set_outline_color (ARDOUR_UI::config()->color ("time stretch outline"));
 	}
 
