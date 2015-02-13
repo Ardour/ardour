@@ -1446,7 +1446,7 @@ RegionMoveDrag::finished_no_copy (
 	if (new_views.size() > 0) {
 		_editor->selection->set (new_views);
 	} else {
-        _editor->selection->clear_time (); // Perhaps "no copy" movement needs the time updated. 
+        _editor->selection->RegionsChanged(); // Perhaps "no copy" movement needs the thing updated.
     }
 
 	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
