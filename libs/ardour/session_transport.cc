@@ -1172,6 +1172,10 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 			
 			if (location != 0) {
 				if (_transport_frame != location->start()) {
+					if (Config->get_seamless_loop()) {
+						/* force tracks to do their thing */
+						set_track_loop (true);
+					}
 					/* jump to start and then roll from there */
 					request_locate (location->start(), true);
 					return;
