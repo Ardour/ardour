@@ -1161,6 +1161,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT828</td><td>{7D67DE1A-258E-4FE6-9FFB-B8634B193D08}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT829</td><td>{0CDE56A1-43DD-412E-90C9-04593627A00A}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT83</td><td>{3FA696A4-E586-407E-8624-E3AFE9DBCFA6}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT830</td><td>{933AA2D0-9025-4019-A6E7-BA29A12C542E}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td>{171F4C1F-B859-4228-9205-5C38FF3CF5B5}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td>{2CC2416F-B08C-4C57-B1B5-B4F007D9A97D}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT86</td><td>{34A92246-9928-4403-AAEF-A7DEABF9E4B1}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -3704,6 +3705,7 @@
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT828</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT829</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT83</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT830</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT84</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT85</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT86</td></row>
@@ -4763,6 +4765,7 @@
 		<row><td>waves_how_to_import_dialog_1</td><td>ISX_DEFAULTCOMPONENT156</td><td>WAVES_~1.XML|waves_how_to_import_dialog_1.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_how_to_import_dialog_1.xml</td><td>1</td><td/></row>
 		<row><td>waves_how_to_import_dialog_2</td><td>ISX_DEFAULTCOMPONENT157</td><td>WAVES_~1.XML|waves_how_to_import_dialog_2.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_how_to_import_dialog_2.xml</td><td>1</td><td/></row>
 		<row><td>waves_import_dialog.xml</td><td>ISX_DEFAULTCOMPONENT158</td><td>WAVES_~1.XML|waves_import_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_import_dialog.xml</td><td>1</td><td/></row>
+		<row><td>waves_keyeditor.xml</td><td>ISX_DEFAULTCOMPONENT830</td><td>WAVES_~1.XML|waves_keyeditor.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_keyeditor.xml</td><td>1</td><td/></row>
 		<row><td>waves_message_dialog.xml</td><td>ISX_DEFAULTCOMPONENT159</td><td>WAVES_~1.XML|waves_message_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_message_dialog.xml</td><td>1</td><td/></row>
 		<row><td>waves_missing_file_dialog.xm</td><td>ISX_DEFAULTCOMPONENT828</td><td>WAVES_~1.XML|waves_missing_file_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_missing_file_dialog.xml</td><td>1</td><td/></row>
 		<row><td>waves_numeric_edit_dialog.xm</td><td>ISX_DEFAULTCOMPONENT829</td><td>WAVES_~1.XML|waves_numeric_edit_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\waves_numeric_edit_dialog.xml</td><td>1</td><td/></row>
@@ -5742,6 +5745,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT828</td><td/><td/><td>_D1253CAD_2208_4BAB_994B_CE608B1CFF92_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT829</td><td/><td/><td>_42606B9F_6DC1_4A38_B5B2_20C9C0BCD2B8_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT83</td><td/><td/><td>_15ED6A0E_5FE5_45B8_B3D2_EAFEFFC308A9_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT830</td><td/><td/><td>_54897642_8CFD_41FE_9126_74DE646B5DF8_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td/><td/><td>_7EDC8F54_7F12_4722_A553_D3218A57F9E9_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td/><td/><td>_9DE256D6_C9BB_44B1_B3AF_6EE743985360_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT86</td><td/><td/><td>_881319D8_8A0C_4EE3_A6FB_5078845D784A_FILTER</td><td/><td/><td/><td/></row>
@@ -8284,7 +8288,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{A68CD518-9E43-4569-B91C-46A782A2CDC6}</td><td/></row>
+		<row><td>ProductCode</td><td>{0DA67258-3507-4D6A-9E33-10DB30A00B90}</td><td/></row>
 		<row><td>ProductName</td><td>Tracks Live</td><td/></row>
 		<row><td>ProductVersion</td><td>1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
