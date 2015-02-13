@@ -227,3 +227,183 @@ CurveTest::ctrlListEval ()
 	CPPUNIT_ASSERT_EQUAL(8.5, cl->unlocked_eval(350.));
 	CPPUNIT_ASSERT_EQUAL(9.0, cl->unlocked_eval(999.));
 }
+
+void
+CurveTest::constrainedCubic ()
+{
+
+	struct point {
+		int x, y;
+	};
+
+	static const struct point data[] = {
+		/* values from worked example in www.korf.co.uk/spline.pdf */
+		{   0,  30 },
+		{  10, 130 },
+		{  30, 150 },
+		{  50, 150 },
+		{  70, 170 },
+		{  90, 220 },
+		{ 100, 320 },
+	};
+
+	int32_t type = 0;
+	Evoral::Parameter p(type);
+	Evoral::ParameterDescriptor pd;
+	Evoral::ControlList l(p,pd);
+
+	size_t i;
+	l.set_interpolation(Evoral::ControlList::Curved);
+
+	for (i=0; i<sizeof(data)/sizeof(data[0]); i++) {
+		l.add (data[i].x, data[i].y);
+	}
+
+	Evoral::Curve curve(l);
+
+	float f[121];
+	curve.get_vector(-10, 110, f, 121);
+
+	const float *g = &f[10]; /* so g starts at x==0 */
+
+	/* given points - should be exactly equal */
+	CPPUNIT_ASSERT_EQUAL( 30.0f, g[-10]);
+	CPPUNIT_ASSERT_EQUAL( 30.0f, g[  0]);
+	CPPUNIT_ASSERT_EQUAL(130.0f, g[ 10]);
+	CPPUNIT_ASSERT_EQUAL(150.0f, g[ 30]);
+	CPPUNIT_ASSERT_EQUAL(150.0f, g[ 40]);
+	CPPUNIT_ASSERT_EQUAL(150.0f, g[ 50]);
+	CPPUNIT_ASSERT_EQUAL(320.0f, g[100]);
+	CPPUNIT_ASSERT_EQUAL(320.0f, g[110]);
+
+	/*
+	   First segment, i=1, for 0 <= x <= 10
+	   f'1(x1) = 2/((x2 – x1)/(y2 – y1) + (x1 – x0)/(y1 – y0))
+	           = 2/((30 – 10)/(150 – 130) + (10 – 0)/(130 – 30))
+	           = 1.8181
+	   f'1(x0) = 3/2*(y1 – y0)/(x1 – x0) - f'1(x1)/2
+	           = 3/2*(130 – 30)/(10 – 0) – 1.818/2
+	           = 14.0909
+	   f"1(x0) = -2*(f'1(x1) + 2* f'1(x0))/(x1 – x0) + 6*(y1 – y0)/ (x1 – x0)^2
+	           = -2*(1.8181 + 2*14.0909)/(10 – 0) + 6*(130 – 30)/(10 – 0)^2
+	           = 0
+	   f"1(x1) = 2*(2*f'1(x1) + f'1(x0))/(x1 – x0) - 6*(y1 – y0)/ (x1 – x0)^2
+	           = 2*(2*1.818 + 14.0909)/(10 – 0) – 6*(130 – 30)/(10 – 0)^2
+	           = -2.4545
+	   d1 = 1/6 * (f"1(x1) - f"1(x0))/(x1 – x0)
+	      = 1/6 * (-2.4545 – 0)/(10 – 0)
+	      = -0.0409
+	   c1 = 1/2 * (x1*f"1(x0) – x0*f"1(x1))/(x1 – x0)
+	      = 1/2 * (10*0 – 0*1.8181)/(10 – 0)
+	      = 0
+	   b1 = ((y1 – y0) – c1*(x21 – x20) – d1*( x31 – x30))/(x1 – x0)
+	      = ((130 – 30) – 0*(102 – 02) + 0.0409*(103 – 03))/(10 – 0)
+	      = 14.09
+	   a1 = y0 – b1*x0 – c1*x20 – d1*x30
+	      = 30
+	   y1 = 30 + 14.09x - 0.0409x3 for 0 <= x <= 10
+	 */
+	/*
+	   Second segment, i=2, for 10 <= x <= 30
+	   f'2(x2) = 2/((x3 – x2)/(y3 – y2) + (x2 – x1)/(y2 – y1))
+	           = 2/((50 – 30)/(150 – 150) + (30 – 10)/(150 – 130))
+	           = 0
+	   f'2(x1) = 2/((x2 – x1)/(y2 – y1) + (x1 – x0)/(y1 – y0))
+	           = 1.8181
+
+	   f"2(x1) = -2*(f'2(x2) + 2* f'2(x1))/(x2 – x1) + 6*(y2 – y1)/ (x2 – x1)^2
+	           = -2*(0 + 2*1.8181)/(30 – 10) + 6*(150 – 130)/(30 – 10)2
+	           = -0.063636
+	   f"2(x2) = 2*(2*f'2(x2) + f'2(x1))/(x2 – x1) - 6*(y2 – y1)/ (x2 – x1)^2
+	           = 2*(2*0 + 1.8181)/(30 – 10) – 6*(150 – 130)/(30 – 10)^2
+	           = -0.11818
+	   
+	   d2 = 1/6 * (f"2(x2) - f"2(x1))/(x2 – x1)
+	      = 1/6 * (-0.11818 + 0.063636)/(30 – 10)
+	      = -0.0004545
+	   c2 = 1/2 * (x2*f"2(x1) – x1*f"2(x2))/(x2 – x1)
+	      = 1/2 * (-30*0.063636 + 10*0.11818)/(30 – 10)
+	      = -0.01818
+	   b2 = ((y2 – y1) – c2*(x2^2 – x1^2) – d2*( x2^3 – x1^3))/(x2 – x1)
+	      = ((150 – 130) + 0.01818*(302 – 102) + 0.0004545*(303 – 103))/(30 – 10)
+	      = 2.31818
+	   a2 = y1 – b2*x1 – c2*x1^2 – d2*x1^3
+	      = 130 – 2.31818*10 + 0.01818*102 + 0.0004545*103
+	      = 109.09
+	   y2 = 109.09 + 2.31818x - 0.01818x^2 - 0.0004545x^3 for 10 <= x <= 30
+	 */
+
+
+	int x;
+	long double a1, b1, c1, d1, a2, b2, c2, d2, fdx0, fddx0, fdx1, fdx2, fddx1, fddx2;
+	double x0 = data[0].x;
+	double y0 = data[0].y;
+	double x1 = data[1].x;
+	double y1 = data[1].y;
+	double x2 = data[2].x;
+	double y2 = data[2].y;
+	double x3 = data[3].x;
+	double y3 = data[3].y;
+
+	double dx0 = x1 - x0;
+	double dy0 = y1 - y0;
+	double dx1 = x2 - x1;
+	double dy1 = y2 - y1;
+	double dx2 = x3 - x2;
+	double dy2 = y3 - y2;
+
+	// First (leftmost) segment
+	fdx1 = 2.0 / ( dx1 / dy1 + dx0 / dy0 );
+	fdx0 = 3.0 / 2.0 * dy0 / dx0 - fdx1 / 2.0;
+
+	fddx0 = -2.0 * (fdx1 + 2.0 * fdx0) / dx0 + 6.0 * dy0 / (dx0*dx0);
+	fddx1 =  2.0 * (2.0 * fdx1 + fdx0) / dx0 - 6.0 * dy0 / (dx0*dx0);
+	d1 = 1.0 / 6.0 * (fddx1 - fddx0) / dx0;
+	c1 = 1.0 / 2.0 * (x1 * fddx0 - x0 * fddx1) / dx0;
+	b1 = (dy0 - c1 * (x1* x1 - x0*x0) - d1 * (x1*x1*x1 - x0*x0*x0)) / dx0;
+	a1 = y0 - b1*x0 - c1*x0*x0 - d1*x0*x0*x0;
+
+	// printf("dx0=%f, dy0=%f, dx1=%f, dy1=%f\n", dx0, dy0, dx1, dy1);
+	// printf("fdx0=%Lf, fdx1=%Lf, fddx0=%Lf, fddx1=%Lf\n", fdx0, fdx1, fddx0, fddx1);
+	// printf("a1=%Lf, b1=%Lf, c1=%Lf, d1=%Lf\n", a1, b1, c1, d1);
+
+	// values from worked example: deltas rather arbitrary, I'm afraid
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, a1, 0);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(14.09, b1, 0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, c1, 0);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.0409, d1, 0.00001);
+
+	for (x = 0; x <= 10; x++) {
+		double v = a1 + b1*x + c1*x*x  + d1*x*x*x;
+		char msg[64];
+		snprintf(msg, 64, "interpolating %d: v=%f, x=%f...\n", x, v, g[x]);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(v, g[x], 0.000004);
+	}
+
+	// Second segment
+	fdx2 = 2.0 / ( dx2 / dy2 + dx1 / dy1 );
+
+	fddx1 = -2.0 * (fdx2 + 2.0 * fdx1) / dx1 + 6.0 * dy1 / (dx1*dx1);
+	fddx2 =  2.0 * (2.0 * fdx2 + fdx1) / dx1 - 6.0 * dy1 / (dx1*dx1);
+	d2 = 1.0 / 6.0 * (fddx2 - fddx1) / dx1;
+	c2 = 1.0 / 2.0 * (x2 * fddx1 - x1 * fddx2) / dx1;
+	b2 = (dy1 - c2 * (x2*x2 - x1*x1) - d2 * (x2*x2*x2 - x1*x1*x1)) / dx1;
+	a2 = y1 - b2*x1 - c2*x1*x1 - d2*x1*x1*x1;
+
+	// printf("dx0=%f, dy0=%f, dx1=%f, dy1=%f dx2=%f, dy2=%f\n", dx0, dy0, dx1, dy1, dx2, dy2);
+	// printf("fdx1=%Lf, fdx2=%Lf, fddx1=%Lf, fddx2=%Lf\n", fdx1, fdx2, fddx1, fddx2);
+	// printf("a2=%Lf, b2=%Lf, c2=%Lf, d2=%Lf\n", a2, b2, c2, d2);
+
+	// values from worked example: deltas rather arbitrary, I'm afraid
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(109.09, a2, 0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(2.31818, b2, 0.00001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.01818, c2, 0.00001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.0004545, d2, 0.0000001);
+
+	for (x = 10; x <= 30; x++) {
+		double v = a2 + b2*x + c2*x*x  + d2*x*x*x;
+		char msg[64];
+		snprintf(msg, 64, "interpolating %d: v=%f, x=%f...\n", x, v, g[x]);
+		CPPUNIT_ASSERT_DOUBLES_EQUAL(v, g[x], 0.000008);
+	}
+}
