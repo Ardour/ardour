@@ -387,6 +387,7 @@ Session::butler_transport_work ()
 	}
 
 	if (ptw & PostTransportLocate) {
+		DEBUG_TRACE (DEBUG::Transport, "nonrealtime locate invoked from BTW\n");
 		non_realtime_locate ();
 	}
 
@@ -448,6 +449,18 @@ Session::non_realtime_overwrite (int on_entry, bool& finished)
 void
 Session::non_realtime_locate ()
 {
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("locate tracks to %1\n", _transport_frame));
+
+	if (Config->get_loop_is_mode() && get_play_loop()) {
+		Location *loc  = _locations->auto_loop_location();
+		if (!loc || (_transport_frame < loc->start() || _transport_frame >= loc->end())) {
+			/* jumped out of loop range: stop tracks from looping,
+			   but leave loop (mode) enabled.
+			 */
+			set_track_loop (false);
+		}
+	}
+	
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		(*i)->non_realtime_locate (_transport_frame);
@@ -506,6 +519,11 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
             
             if (location) {
                 jump_to = location->start();
+
+                if (Config->get_seamless_loop()) {
+	                /* need to get track buffers reloaded */
+	                set_track_loop (true);
+                }
             } 
         }
     }
@@ -797,13 +815,24 @@ Session::unset_play_loop ()
 	play_loop = false;
 	clear_events (SessionEvent::AutoLoop);
 	clear_events (SessionEvent::AutoLoopDeclick);
+	set_track_loop (false);
+}
 
+void
+Session::set_track_loop (bool yn)
+{
+	Location* loc = _locations->auto_loop_location ();
+
+	if (!loc) {
+		yn = false;
+	}
+	
 	// set all tracks to NOT use internal looping
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && !tr->hidden()) {
-			tr->set_loop (0);
+			tr->set_loop (yn ? loc : 0);
 		}
 	}
 }
@@ -838,23 +867,10 @@ Session::set_play_loop (bool yn, double speed)
 
 			if (Config->get_seamless_loop()) {
 				// set all tracks to use internal looping
-				boost::shared_ptr<RouteList> rl = routes.reader ();
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					if (tr && !tr->hidden()) {
-						tr->set_loop (loc);
-					}
-				}
-			}
-			else {
+				set_track_loop (true);
+			} else {
 				// set all tracks to NOT use internal looping
-				boost::shared_ptr<RouteList> rl = routes.reader ();
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					if (tr && !tr->hidden()) {
-						tr->set_loop (0);
-					}
-				}
+				set_track_loop (false);
 			}
 
 			/* Put the delick and loop events in into the event list.  The declick event will
@@ -1087,6 +1103,8 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 				if (!Config->get_loop_is_mode()) {
 					set_play_loop (false, _transport_speed);
+				} else {
+					/* handled in ::non_realtime_locate() */
 				}
 				
 			} else if (_transport_frame == al->start()) {
