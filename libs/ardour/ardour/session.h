@@ -1360,7 +1360,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void post_transport ();
 	void engine_halted ();
 	void xrun_recovery ();
-
+	void set_track_loop (bool);
+	
 	/* These are synchronous and so can only be called from within the process
 	 * cycle
 	 */

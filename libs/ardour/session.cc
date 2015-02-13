@@ -1439,7 +1439,8 @@ void
 Session::location_removed (Location *location)
 {
         if (location->is_auto_loop()) {
-                set_auto_loop_location (0);
+	        set_auto_loop_location (0);
+	        set_track_loop (false);
         }
         
         if (location->is_auto_punch()) {
