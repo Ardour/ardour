@@ -27,17 +27,15 @@
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/scrolledwindow.h>
+#include "waves_dialog.h"
 
-#include "ardour_window.h"
-
-class KeyEditor : public ArdourWindow
+class KeyEditor : public WavesDialog
 {
   public:
 	KeyEditor ();
 
   protected:
 	void on_show ();
-	void on_unmap ();
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
@@ -55,18 +53,13 @@ class KeyEditor : public ArdourWindow
 	    Gtk::TreeModelColumn<bool> bindable;
 	};
 
-        Gtk::VBox vpacker;
-	Gtk::ScrolledWindow scroller;
-	Gtk::TreeView view;
 	Glib::RefPtr<Gtk::TreeStore> model;
 	KeyEditorColumns columns;
-	Gtk::Button unbind_button;
-	Gtk::HButtonBox unbind_box;
-	Gtk::HBox reset_box;
-	Gtk::Button reset_button;
-	Gtk::Label reset_label;
+	Gtk::TreeView& view;
+	WavesButton& unbind_button;
+	WavesButton& reset_button;
 
-	void unbind ();
+	void unbind (WavesButton*);
 
 	bool can_bind;
 	guint last_state;
@@ -74,11 +67,11 @@ class KeyEditor : public ArdourWindow
 	void action_selected ();
 	void populate ();
 
-	void reset ();
+	void reset (WavesButton*);
 
-        std::map<std::string,std::string> action_blacklist;
-        std::map<std::string,std::string> action_whitelist;
-        void load_blackwhitelists ();
+    std::map<std::string,std::string> action_blacklist;
+    std::map<std::string,std::string> action_whitelist;
+    void load_blackwhitelists ();
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */

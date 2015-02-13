@@ -51,10 +51,10 @@ using namespace PBD;
 using Gtkmm2ext::Keyboard;
 
 KeyEditor::KeyEditor ()
-	: ArdourWindow (_("Key Bindings"))
-	, unbind_button (_("Remove shortcut"))
-	, unbind_box (BUTTONBOX_END)
-
+	: WavesDialog ("waves_keyeditor.xml", true, false)
+	, view (get_tree_view ("view"))
+	, unbind_button (get_waves_button ("unbind_button"))
+	, reset_button (get_waves_button ("reset_button"))
 {
 	can_bind = false;
 	last_state = 0;
@@ -73,48 +73,11 @@ KeyEditor::KeyEditor ()
 	view.set_name (X_("KeyEditorTree"));
 
 	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &KeyEditor::action_selected));
-
-	scroller.add (view);
-	scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	vpacker.set_spacing (6);
-	vpacker.set_border_width (12);
-	vpacker.pack_start (scroller);
-
-	if (!ARDOUR::Profile->get_sae()) {
-
-		Label* hint = manage (new Label (_("Select an action, then press the key(s) to (re)set its shortcut")));
-		hint->show ();
-		unbind_box.set_spacing (6);
-		unbind_box.pack_start (*hint, false, true);
-		unbind_box.pack_start (unbind_button, false, false);
-		unbind_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::unbind));
-
-		vpacker.pack_start (unbind_box, false, false);
-		unbind_box.show ();
-		unbind_button.show ();
-
-	}
-	
-	reset_button.add (reset_label);
-	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
-				
-	reset_box.pack_start (reset_button, true, false);
-	reset_box.show ();
-	reset_button.show ();
-	reset_label.show ();
-	reset_button.signal_clicked().connect (sigc::mem_fun (*this, &KeyEditor::reset));
-	vpacker.pack_start (reset_box, false, false);
-
-	add (vpacker);
-
-	view.show ();
-	scroller.show ();
-	vpacker.show ();
-
+	unbind_button.signal_clicked.connect (sigc::mem_fun (*this, &KeyEditor::unbind));
+	reset_button.signal_clicked.connect (sigc::mem_fun (*this, &KeyEditor::reset));
 	unbind_button.set_sensitive (false);
 
-        load_blackwhitelists ();
+    load_blackwhitelists ();
 }
 
 void
@@ -144,7 +107,7 @@ KeyEditor::load_blackwhitelists ()
 }
 
 void
-KeyEditor::unbind ()
+KeyEditor::unbind (WavesButton*)
 {
 	TreeModel::iterator i = view.get_selection()->get_selected();
 
@@ -172,13 +135,7 @@ KeyEditor::on_show ()
 {
 	populate ();
 	view.get_selection()->unselect_all ();
-	ArdourWindow::on_show ();
-}
-
-void
-KeyEditor::on_unmap ()
-{
-	ArdourWindow::on_unmap ();
+	WavesDialog::on_show ();
 }
 
 void
@@ -350,7 +307,10 @@ KeyEditor::populate ()
 }
 
 void
-KeyEditor::reset ()
+KeyEditor::reset (WavesButton*)
 {
 	Keyboard::the_keyboard().reset_bindings ();
+	populate ();
+	view.get_selection()->unselect_all ();
+	unbind_button.set_sensitive (false);
 }
