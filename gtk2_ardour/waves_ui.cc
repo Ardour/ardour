@@ -1009,7 +1009,7 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 
 	Gtk::TreeView* tree_view = dynamic_cast<Gtk::TreeView*> (&widget);
 	if (tree_view) {
-		if (xml_property (definition, "hscroll", styles, false)) {
+		if (xml_property (definition, "headersvisible", styles, false)) {
 			tree_view->set_headers_visible (true);
 		}
 	}

@@ -103,6 +103,7 @@ WavesDialog::WavesDialog (const std::string& layout_script_file, bool modal, boo
 
 	double opacity = xml_property (*xml_tree ()->root (), "ui.opacity", 1.0);
 	set_opacity (opacity);
+	set_modal (xml_property (*xml_tree ()->root (), "ui.dialog.modal", true));
 }
 
 WavesDialog::~WavesDialog ()
@@ -121,7 +122,15 @@ void
 WavesDialog::on_realize ()
 {
 	Gtk::Dialog::on_realize();
-	get_window()->set_decorations (Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_TITLE));
+	Gdk::WMDecoration decoration (Gdk::DECOR_BORDER|Gdk::DECOR_TITLE);
+	if (xml_property (*xml_tree ()->root (), "ui.decor.menu", false)) {
+		decoration |= Gdk::DECOR_MENU;
+	}
+	if (xml_property (*xml_tree ()->root (), "ui.decor.resize", false)) {
+		decoration |= Gdk::DECOR_RESIZEH;
+	}
+
+	get_window()->set_decorations (decoration);
 }
 
 bool
