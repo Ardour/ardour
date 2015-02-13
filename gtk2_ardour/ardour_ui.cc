@@ -2277,7 +2277,15 @@ ARDOUR_UI::lock_session () {
     SessionLockDialog session_lock_dialog;
     session_lock_dialog.set_deletable (false);
     session_lock_dialog.set_modal (true);
-    session_lock_dialog.run ();
+    while (1) {
+        int response = session_lock_dialog.run ();
+        switch (response) {
+            case Gtk::RESPONSE_OK:
+                return; // Unlock button was pressed
+            default:
+                continue; // close button (on mac) shouldn't close window
+        }
+    }
 }
 
 bool
