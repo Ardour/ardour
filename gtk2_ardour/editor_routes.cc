@@ -517,17 +517,17 @@ EditorRoutes::redisplay_real ()
 			continue;
 		}
         
-        if (route->is_master()) {
-            
-            tv->hide(); // never show master bus
-            if (_editor->master_bus_ui ()) {
+		if (route->is_master()) {
+			
+			tv->hide(); // never show master bus
+			if (_editor->master_bus_ui ()) {
 				_editor->master_bus_ui ()->set_route (route);
 			}
-            continue;
-        }
-
+			continue;
+		}
+		
 		bool visible = tv->marked_for_display ();
-        
+		
 		/* show or hide the TimeAxisView */
 		if (visible && !route->is_master() ) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
