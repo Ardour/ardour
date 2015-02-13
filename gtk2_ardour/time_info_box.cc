@@ -72,43 +72,7 @@ TimeInfoBox::TimeInfoBox ()
 	punch_end.set_draw_background (false);
 	punch_end.set_visible_window (false);
 
-	//left.set_homogeneous (false);
-	//left.set_spacings (0);
-	//left.set_border_width (2);
-	//left.set_col_spacings (2);
-
-	//right.set_homogeneous (false);
-	//right.set_spacings (0);
-	//right.set_border_width (2);
-	//right.set_col_spacings (2);
-
-    //left.attach (*selection_start, 1, 2, 1, 2);
-
-    //left.attach (*l, 0, 1, 2, 3, FILL);
-    //left.attach (*selection_end, 1, 2, 2, 3);
-
-    //left.attach (*l, 0, 1, 3, 4, FILL);
-    //left.attach (*selection_length, 1, 2, 3, 4);
-
-	//punch_in_button.set_name ("punch button");
-	//punch_out_button.set_name ("punch button");
-	//punch_in_button.set_text (_("In"));
-	//punch_out_button.set_text (_("Out"));
-
-	//Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", "TogglePunchIn");
-	//punch_in_button.set_related_action (act);
-	//act = ActionManager::get_action ("Transport", "TogglePunchOut");
-	//punch_out_button.set_related_action (act);
-
-	//Gtkmm2ext::UI::instance()->set_tip (punch_in_button, _("Start recording at auto-punch start"));
-	//Gtkmm2ext::UI::instance()->set_tip (punch_out_button, _("Stop recording at auto-punch end"));
-
-        //right.attach (punch_in_button, 2, 3, 1, 2, FILL, SHRINK);
-        //right.attach (*punch_start, 3, 4, 1, 2);
-        //right.attach (punch_out_button, 2, 3, 2, 3, FILL, SHRINK);
-        //right.attach (*punch_end, 3, 4, 2, 3);
-
-        show_all ();
+    show_all ();
 
 	selection_start.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), &selection_start));
 	selection_end.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &TimeInfoBox::sync_selection_mode), &selection_end));
