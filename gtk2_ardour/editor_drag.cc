@@ -2685,6 +2685,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		i->view->region()->resume_property_changes ();
 	}
+    _editor->selection->RegionsChanged();
 }
 
 void
