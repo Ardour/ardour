@@ -833,18 +833,16 @@ AudioEngine::stop (bool for_latency)
 		return 0;
 	}
 
-	if (_session && _running) {
-		// it's not a halt, but should be handled the same way:
-		// disable record, stop transport and I/O processign but save the data.
-		_session->engine_halted ();
-	}
-
-	Glib::Threads::Mutex::Lock lm (_process_lock);
-
 	if (_backend->stop ()) {
 		return -1;
 	}
-	
+
+    if (_session && _running) {
+        // it's not a halt, but should be handled the same way:
+        // disable record, stop transport and I/O processign but save the data.
+        _session->engine_halted ();
+    }
+    
 	_running = false;
 	_processed_frames = 0;
 	_measuring_latency = MeasureNone;
