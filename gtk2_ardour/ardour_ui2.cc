@@ -154,7 +154,7 @@ ARDOUR_UI::setup_transport ()
 	editor->get_waves_button ("transport_loop_button").set_controllable (auto_loop_controllable);
 	editor->get_waves_button ("transport_record_button").set_controllable (rec_controllable);
 	
-	act = ActionManager::get_action (X_("Main"), X_("LockSession"));
+	act = ActionManager::get_action (X_("Main"), X_("toggle-session-lock-dialog"));
 	editor->get_waves_button ("lock_session_button").set_related_action (act);
     
 	act = ActionManager::get_action (X_("Main"), X_("ToggleMultiOutMode"));

@@ -206,7 +206,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, tracks_control_panel (X_("tracks-control-panel"), _("Preferences"))
     , _session_dialog (tracks_control_panel, false, "", "", "", false)
     , _add_tracks_dialog(new AddTracksDialog())
-	, session_lock_dialog (X_("session-lock-dialog"), _("System Lock"))
 	, marker_inspector_dialog (X_("marker-inspector-dialog"), _("Marker Inspector"))
 	, track_color_dialog (X_("track_color-dialog"), _("Marker Inspector"))
     , session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
@@ -395,7 +394,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&add_video_dialog);
 	WM::Manager::instance().register_window (&route_params);
 	WM::Manager::instance().register_window (&tracks_control_panel);
-	WM::Manager::instance().register_window (&session_lock_dialog);
 	WM::Manager::instance().register_window (&marker_inspector_dialog);
 	WM::Manager::instance().register_window (&track_color_dialog);
 	WM::Manager::instance().register_window (&bundle_manager);
@@ -404,8 +402,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 //	WM::Manager::instance().register_window (&audio_port_matrix);
 //	WM::Manager::instance().register_window (&midi_port_matrix);
     
-    session_lock_dialog->set_deletable (false);
-	session_lock_dialog->set_modal (true); 
     
 	/* We need to instantiate the theme manager because it loads our
 	   theme files. This should really change so that its window
@@ -2278,7 +2274,10 @@ ARDOUR_UI::on_unlock_session ()
 
 void
 ARDOUR_UI::lock_session () {
-    session_lock_dialog->run ();
+    SessionLockDialog session_lock_dialog;
+    session_lock_dialog.set_deletable (false);
+    session_lock_dialog.set_modal (true);
+    session_lock_dialog.run ();
 }
 
 bool
@@ -4936,9 +4935,6 @@ ARDOUR_UI::on_editor_hiding ()
     
     big_clock_window->deiconify ();
     big_clock_window->hide ();
-    
-    session_lock_dialog->deiconify ();// HOT FIX. (REWORK IT)
-    session_lock_dialog->hide ();// HOT FIX. (REWORK IT)
     
     about->deiconify ();
     about->hide ();

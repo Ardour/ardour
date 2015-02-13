@@ -7205,23 +7205,8 @@ Editor::toggle_midi_input_active (bool flip_others)
 void
 Editor::lock ()
 {
-#ifdef __APPLE__
-	/* The global menu bar continues to be accessible to applications
-     with modal dialogs, which means that we need to desensitize
-     all items in the menu bar. Since those items are really just
-     proxies for actions, that means disabling all actions.
-     */
-	ActionManager::disable_all_actions ();
-#endif
-    
     timeout_connection.disconnect();
-    
     ARDOUR_UI::instance()->lock_session();
-    
-#ifdef __APPLE__
-	ActionManager::pop_action_state ();
-#endif
-    
     start_lock_event_timing ();
 }
 

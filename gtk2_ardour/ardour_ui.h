@@ -698,7 +698,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     WM::Proxy<LocationUIWindow> location_ui;
     WM::Proxy<RouteParams_UI> route_params;
     WM::Proxy<TracksControlPanel> tracks_control_panel;
-    WM::Proxy<SessionLockDialog> session_lock_dialog;
     WM::Proxy<MarkerInspectorDialog> marker_inspector_dialog;
     WM::Proxy<WavesTrackColorDialog> track_color_dialog;
     
