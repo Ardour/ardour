@@ -1286,8 +1286,9 @@ TracksControlPanel::device_changed ()
 		// restore previous device name in combo box
         _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name() );
 	}
-    
-    MessageDialog( _("Error activating selected device"), PROGRAM_NAME).run();
+    set_keep_above (false);
+    WavesMessageDialog (PROGRAM_NAME, _("Error activating selected device.")).run();
+    set_keep_above (true);
 }
 
 void
