@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Window title="Tracks Live - Key Bindings"
+        ui.dialog.modal="false"
+        ui.decor.menu="true"
+        ui.decor.resize="true">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6F6F6F"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"/>
+  <style name="generic_label"
+         style="generic_control"
+         box.expand="true"
+         box.fill="true"
+         horzalignment="end"/>
+  <style name="generic_button"
+         style="generic_control"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         width="80"
+         height="22"/>
+  <style name="generic_dropdown"
+         style="generic_button"
+         fgnormal="#C1C1C1"
+         textcolornormal="#C1C1C1"
+         bgnormal="#6C6C6C"
+         normalicon="dropdown_126x20"
+         activeicon="dropdown_126x20_active"
+         inactiveicon="dropdown_126x20_inactive"
+         width="126"
+         height="20"
+         horzalignment="start"/>
+  <EventBox bgnormal="#EDECE8"
+            box.fill="true"
+            box.expand="true">
+    <VBox spacing="10"
+          borderwidth="10">
+    <ScrolledWindow hscroll="never"
+                    vscroll="auto"
+                    box.fill="true"
+                    box.expand="true">
+      <TreeView id="view"/>
+    </ScrolledWindow>
+
+    <HBox spacing="10">
+      <Label style="generic_control"
+             text="Select an action, then press the key(s) to (re)set its shortcut"/>
+      <Button id="unbind_button"
+              style="generic_button"
+              text="Remove shortcut"
+              width="300"
+              box.pack="end"/>
+    </HBox>
+      <HBox spacing="10">
+        <VBox box.fill="true"
+              box.expand="true"/>
+        <Button id="reset_button"
+                style="generic_button"
+                text="Reset Bindings to Defaults"
+                width="200"/>
+        <VBox box.fill="true"
+              box.expand="true"/>
+      </HBox>
+    </VBox>
+  </EventBox>
+</Window>
