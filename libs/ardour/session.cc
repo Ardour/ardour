@@ -1793,6 +1793,7 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 
 	clear_clicks ();
 
+    reset_write_sources (false);
 	// XXX we need some equivalent to this, somehow
 	// SndFileSource::setup_standard_crossfades (frames_per_second);
 

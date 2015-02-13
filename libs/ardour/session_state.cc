@@ -1903,6 +1903,18 @@ Session::get_sources_as_xml ()
 	return *node;
 }
 
+void
+Session::reset_write_sources (bool mark_write_complete, bool force)
+{
+    boost::shared_ptr<RouteList> rl = routes.reader();
+    for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+        boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+        if (tr) {
+            tr->reset_write_sources(mark_write_complete, force);
+        }
+    }
+}
+
 int
 Session::load_sources (const XMLNode& node)
 {

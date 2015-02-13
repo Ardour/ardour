@@ -1507,6 +1507,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
   private:
+    void reset_write_sources (bool mark_write_complete, bool force = false);
+    
 	SourceMap sources;
 
   private:
