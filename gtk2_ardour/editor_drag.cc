@@ -1096,9 +1096,6 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
-	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
-	PlaylistMapping playlist_mapping;
-
 	/* insert the regions into their new playlists */
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
 
@@ -1184,9 +1181,6 @@ RegionMoveDrag::finished_no_copy (
 		_editor->commit_reversible_command ();
 		return;
 	}
-
-	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
-	PlaylistMapping playlist_mapping;
 
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
@@ -3467,10 +3461,6 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 		copy_location = x->location;
 
-		if ((type != TrimRight) && (delta < 0)) {
-			delta = max (-((framecnt_t) earliest_start), delta);
-		}
-		
 		if ((real_location = _editor->find_location_from_marker (x->markers.front(), is_start)) == 0) {
 			continue;
 		}
