@@ -3150,12 +3150,12 @@ FadeInDrag::motion (GdkEvent* event, bool)
 
 	framepos_t const pos = adjusted_current_frame (event);
 
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos < (region->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	} else if (pos > region->last_frame()) {
-		fade_length = region->length();
+	} else if (pos > region->length() - region->fade_out()->back()->when) {
+		fade_length = region->length() - region->fade_out()->back()->when - 1;
 	} else {
 		fade_length = pos - region->position();
 	}
@@ -3185,12 +3185,12 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	framepos_t const pos = adjusted_current_frame (event);
 
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos < (region->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	} else if (pos > region->last_frame()) {
-		fade_length = region->length();
+	} else if (pos >= region->length() - region->fade_out()->back()->when) {
+		fade_length = region->length() - region->fade_out()->back()->when - 1;
 	} else {
 		fade_length = pos - region->position();
 	}
@@ -3264,16 +3264,14 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 
 	framepos_t const pos = adjusted_current_frame (event);
 
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos > (region->last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
-	}
-	else if (pos < region->position()) {
-		fade_length = region->length();
-	}
-	else {
-		fade_length = region->last_frame() - pos;
+	} else if (pos <= region->fade_in()->back()->when) {
+		fade_length = region->length() - region->fade_in()->back()->when - 1;
+	} else {
+		fade_length = region->length() - pos;
 	}
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -3301,16 +3299,14 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	framepos_t const pos = adjusted_current_frame (event);
 
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos > (region->last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
-	}
-	else if (pos < region->position()) {
-		fade_length = region->length();
-	}
-	else {
-		fade_length = region->last_frame() - pos;
+	} else if (pos <= region->fade_in()->back()->when) {
+		fade_length = region->length() - region->fade_in()->back()->when - 1;
+	} else {
+		fade_length = region->length() - pos;
 	}
 
 	_editor->begin_reversible_command (_("change fade out length"));
