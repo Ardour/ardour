@@ -192,7 +192,7 @@ int
 SessionDialog::redisplay_recent_sessions ()
 {
 	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
-		_recent_session_button[i]->set_sensitive(false);
+        _recent_session_button[i]->set_active_state (Gtkmm2ext::Off);
 	}
 
 	std::vector<std::string> session_directories;
