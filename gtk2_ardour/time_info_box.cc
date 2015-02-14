@@ -187,6 +187,7 @@ TimeInfoBox::selection_changed ()
 
 	switch (Editor::instance().current_mouse_mode()) {
 
+    case Editing::MouseCut: // In Tracks cut finishes with object selection.
 	case Editing::MouseObject:
 		if (Editor::instance().internal_editing()) {
 			/* displaying MIDI note selection is tricky */
@@ -244,10 +245,7 @@ TimeInfoBox::selection_changed ()
 
 	case Editing::MouseRange:
 		if (selection.time.empty()) {
-			Glib::RefPtr<Action> act = ActionManager::get_action ("MouseMode", "set-mouse-mode-object-range");
-			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
-
-			if (tact && tact->get_active() &&  !selection.regions.empty()) {	
+			if (!selection.regions.empty()) {
 				/* show selected regions */
 				s = selection.regions.start();
 				e = selection.regions.end_frame();
