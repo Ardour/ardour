@@ -805,11 +805,23 @@ WavesAudioBackend::freewheel (bool start_stop)
             }
             _call_thread_init_callback = true;
             _freewheel_thread ();
-            engine.freewheel_callback (start_stop);
+            
+            while (!engine.freewheeling()) {
+                sleep(0);
+            }
+            
+            // freewheel thread was not activated successfully
+            if (_freewheel_thread_active == false) {
+                engine.freewheel_callback(false);
+            }
         }
         else {
             _freewheel_thread_active = false; // stop _freewheel_thread ()
-            engine.freewheel_callback (start_stop);
+            
+            while (engine.freewheeling()) {
+                sleep(0);
+            }
+            
             _call_thread_init_callback = true;
             WTErr retval = _device->SetStreaming (true);
             if (retval != eNoErr) {
@@ -849,6 +861,10 @@ WavesAudioBackend::_freewheel_thread ()
         _freewheel_thread_active = true;
         if ((pthread_create (&thread_id, &attributes, __start_process_thread, thread_data))) {
             _freewheel_thread_active = false;
+            
+            // release invoking thread
+            engine.freewheel_callback(true);
+            
             std::cerr << "WavesAudioBackend::freewheel_thread (): pthread_create () failed!" << std::endl;
             return;
         }
@@ -856,6 +872,9 @@ WavesAudioBackend::_freewheel_thread ()
         // COMMENTED DBG LOGS */ std::cout << "\t. . . _freewheel_thread () complete." << std::endl;
         return;
     }
+    
+    // notify angine that freewheeling is started
+    engine.freewheel_callback(true);
     
     if (_call_thread_init_callback) {
         _call_thread_init_callback = false;
@@ -865,6 +884,10 @@ WavesAudioBackend::_freewheel_thread ()
     while (_freewheel_thread_active) {
         engine.process_callback (_buffer_size);
     }
+    
+    // notify angine that freewheeling is stopped
+    engine.freewheel_callback(false);
+    
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_freewheel_thread (): FINISHED" << std::endl;
     return;
 }
