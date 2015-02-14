@@ -1910,7 +1910,11 @@ Session::reset_write_sources (bool mark_write_complete, bool force)
     for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
         boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
         if (tr) {
-            tr->reset_write_sources(mark_write_complete, force);
+			
+			// block state saving
+			_state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
+			tr->reset_write_sources(mark_write_complete, force);
+			_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
         }
     }
 }
