@@ -52,6 +52,7 @@ class MixerBridgeView :
 	void set_session (ARDOUR::Session *);
     void set_max_name_size(size_t size) {_max_name_size = size;}
 	void track_editor_selection ();
+    void all_gain_sliders_set_visible (bool);
 
   protected:
 	void set_route_targets_for_operation ();

@@ -26,7 +26,7 @@
            <icon source="mixer_strip_meter_marks"/>
         </HBox>
       </VBox>
-      <VBox>
+      <VBox height="217">
         <!--<HBox height="6"/>-->
         <Fader id="gain_slider"
                adjustment="gain_adjustment"
@@ -55,7 +55,8 @@
            textcolornormal="#ffffff"
            textcoloractive="#ffffff"
            textcolorselected="#ffffff"/>
-    <Button id="gain_display_button"
+    <VBox height="18">
+        <Button id="gain_display_button"
             width="58"
             height="18"
             winfont="Arial Bold 9"
@@ -68,5 +69,6 @@
             bghover="#B1B1B1"
             bordercolor="#C9C9C9"
             borderwidth="0 0 0 0"/>
+    </VBox>
   </VBox>
 </GainSlider>

@@ -1776,6 +1776,15 @@ MixerStrip::set_button_names ()
 	}
 }
 
+void
+MixerStrip::gain_slider_set_visible (bool visibility)
+{
+   gpm.get_gain_slider().set_visible (visibility);
+   gpm.get_gain_slider().set_no_show_all (!visibility);
+   gpm.get_gain_display_button().set_visible (visibility);
+   gpm.get_gain_display_button().set_no_show_all (!visibility);
+}
+
 PluginSelector*
 MixerStrip::plugin_selector()
 {

@@ -92,8 +92,10 @@ class MixerStrip : public RouteUI
 	void set_button_names ();
 	void show_send (boost::shared_ptr<ARDOUR::Send>);
 	void revert_to_default_display ();
-
-	/** @return the delivery that is being edited using our fader; it will be the
+    
+    void gain_slider_set_visible (bool);
+    
+   	/** @return the delivery that is being edited using our fader; it will be the
 	 *  last send passed to ::show_send, or our route's main out delivery.
 	 */
 	boost::shared_ptr<ARDOUR::Delivery> current_delivery () const {

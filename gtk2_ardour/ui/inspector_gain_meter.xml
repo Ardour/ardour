@@ -55,7 +55,8 @@
            textcolornormal="#ffffff"
            textcoloractive="#ffffff"
            textcolorselected="#ffffff"
-           visible="false"/>
+           visible="false"
+           noshowall="true"/>
     <Button id="gain_display_button"
             x="1"
             y="242"

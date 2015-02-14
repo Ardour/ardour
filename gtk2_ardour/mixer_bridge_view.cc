@@ -142,6 +142,17 @@ MixerBridgeView::session_going_away ()
 	_session = 0;
 }
 
+
+void
+MixerBridgeView::all_gain_sliders_set_visible (bool visibility)
+{
+    for (std::map <boost::shared_ptr<ARDOUR::Route>, MixerStrip*>::iterator i = _strips.begin(); i != _strips.end(); ++i) {
+         //(*i).second->gain_meter().get_gain_slider().set_visible (visibility);
+         //(*i).second->gain_meter().get_gain_display_button().set_visible (visibility);
+        (*i).second->gain_slider_set_visible (visibility);
+    }
+}
+
 gint
 MixerBridgeView::start_updating ()
 {
@@ -186,6 +197,11 @@ MixerBridgeView::add_strips (RouteList& routes)
 
 		MixerStrip* strip = new MixerStrip (_session, route, _mixer_strip_script_name, _max_name_size);
 		strip->signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &MixerBridgeView::strip_button_release_event), strip));
+        
+        // in Multi-Out mode, new created strip mustn't show gain slider
+        bool set_gain_slider_visible = Config->get_output_auto_connect() & AutoConnectMaster; 
+        strip->gain_slider_set_visible (set_gain_slider_visible);
+        
 		_strips [route] = strip;
 		strip->show();
 	}

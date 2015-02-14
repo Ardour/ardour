@@ -1558,8 +1558,10 @@ Editor::set_session (Session *t)
         _master_bus_ui->init(_session);
     }
     
-    bool set_master_bus_visible = Config->get_output_auto_connect() & AutoConnectMaster;
-    _master_bus_ui->master_bus_set_visible ( set_master_bus_visible );
+    bool stereo_out_mode_active = Config->get_output_auto_connect() & AutoConnectMaster;
+    _master_bus_ui->master_bus_set_visible ( stereo_out_mode_active );
+    _mixer_bridge_view.all_gain_sliders_set_visible (stereo_out_mode_active);
+    current_mixer_strip->gain_slider_set_visible (stereo_out_mode_active);
     
     _set_session_in_progress = false;
 }
@@ -5812,6 +5814,8 @@ Editor::output_connection_mode_changed ()
         
         _master_bus_ui->master_bus_set_visible (true);
         
+        _mixer_bridge_view.all_gain_sliders_set_visible (true);
+        current_mixer_strip->gain_slider_set_visible (true);
         if (_session->master_out() && !axis_view_from_route(_session->master_out() ) ) {
 
             selection->block_tracks_changed(true);
@@ -5837,6 +5841,8 @@ Editor::output_connection_mode_changed ()
         
         _master_bus_ui->master_bus_set_visible (false);
         
+        _mixer_bridge_view.all_gain_sliders_set_visible (false);
+        current_mixer_strip->gain_slider_set_visible (false);
         TimeAxisView* tv = 0;
         if (_session->master_out() && (tv = axis_view_from_route(_session->master_out() ) ) ) {
             delete tv;
