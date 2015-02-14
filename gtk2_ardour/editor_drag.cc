@@ -4634,7 +4634,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 void
 SelectionDrag::aborted (bool)
 {
-	/* XXX: TODO */
+	_editor->selection->clear ();
 }
 
 MarkerBarDrag::MarkerBarDrag (Editor* e, ArdourCanvas::Item* i)
