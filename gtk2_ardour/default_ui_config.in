@@ -49,12 +49,12 @@
     <Option name="inactive group tab" value="434343ff"/>
     <Option name="location cd marker" value="B700FFff"/>
     <Option name="location loop" value="acacac60"/>
-    <Option name="location marker" value="025951ff"/>
+    <Option name="location marker" value="1DB0EDff"/>
     <Option name="location punch" value="B700FFff"/>
     <Option name="location skip" value="6c6c6cff"/>
     <Option name="location skipping" value="eb7801ff"/>
     <Option name="location range" value="E0922Fff"/>
-    <Option name="location selected" value="1d9b9b60"/>
+    <Option name="location selected" value="1DB0EDFF"/>
     <Option name="location outline" value="ffffff33"/>
     <Option name="location handle" value="ffffffcc"/>
     <Option name="loop range marker: active" value="1d9b9b60"/>
@@ -62,7 +62,8 @@
     <Option name="marker bar" value="575757ff"/>
     <Option name="marker bar separator" value="ffffff15"/>
     <Option name="marker drag line" value="004f00f9"/>
-    <Option name="marker label" value="000000ff"/>
+    <Option name="marker label" value="ffffffff"/>
+    <Option name="selected marker label" value="000000ff"/>
     <Option name="marker track" value="ddddd8ff"/>
     <Option name="measure line bar" value="ffffff25"/>
     <Option name="measure line beat" value="ffffff15"/>

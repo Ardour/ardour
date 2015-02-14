@@ -85,11 +85,11 @@ RulerMarker::RulerMarker (ARDOUR::Location* l, PublicEditor& editor, ArdourCanva
 void
 RulerMarker::use_color ()
 {
-        Marker::use_color ();
+	Marker::use_color ();
 
-        if (_end_line) {
-                _end_line->set_outline_color (_color);
-        }
+	if (_end_line) {
+		_end_line->set_outline_color (_color);
+	}
 }
 
 void
@@ -782,45 +782,46 @@ Marker::hide ()
 void
 Marker::use_color ()
 {
-        if (mark) {
-                mark->set_fill_color (_color);
-                mark->set_outline_color (_color);
-        }
+    if (mark) {
+        mark->set_fill_color (_color);
+        mark->set_outline_color (_color);
+    }
 
 	if (_start_line) {
 		_start_line->set_outline_color (_color);
 	}
         
-        if (_name_background) {
-                _name_background->set_fill (true);
+    if (_name_background) {
+        _name_background->set_fill (true);
 
-                if (_have_scene_change && _location && !_location->scene_change()->color_out_of_bounds()) {
-                        _name_background->set_fill_color (_location->scene_change()->color());
-                } else {
-                        _name_background->set_fill_color (_color);
-                }
-
-                /* white with 20% opacity */
-                _name_background->set_outline_color (ARDOUR_UI::config()->get_canvasvar_LocationOutline());
-                _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
-                                                                                   ArdourCanvas::Rectangle::LEFT|
-                                                                                   ArdourCanvas::Rectangle::RIGHT));
+        if (_have_scene_change && _location && !_location->scene_change()->color_out_of_bounds()) {
+                _name_background->set_fill_color (_location->scene_change()->color());
+        } else {
+                _name_background->set_fill_color (_color);
         }
 
-        ArdourCanvas::Color contrast = ArdourCanvas::contrasting_text_color (_color);
+        /* white with 20% opacity */
+        _name_background->set_outline_color (ARDOUR_UI::config()->get_canvasvar_LocationOutline());
+        _name_background->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::TOP|
+                                                                            ArdourCanvas::Rectangle::LEFT|
+                                                                            ArdourCanvas::Rectangle::RIGHT));
+    }
 
-        if (_name_item) {
-                _name_item->set_color (contrast);
-        }
-        if (_scene_change_rect) {
-                _scene_change_rect->set_outline_color (contrast);
-        }
-        if (_scene_change_text) {
-                _scene_change_text->set_color (contrast);
-        }
-        if (_marker_lock_text) {
-                _marker_lock_text->set_color (contrast);
-        }
+    ArdourCanvas::Color contrast = (_selected ? ARDOUR_UI::config()->get_canvasvar_SelectedMarkerLabel() :
+												ARDOUR_UI::config()->get_canvasvar_MarkerLabel());
+
+    if (_name_item) {
+        _name_item->set_color (contrast);
+    }
+    if (_scene_change_rect) {
+        _scene_change_rect->set_outline_color (contrast);
+    }
+    if (_scene_change_text) {
+        _scene_change_text->set_color (contrast);
+    }
+    if (_marker_lock_text) {
+        _marker_lock_text->set_color (contrast);
+    }
 }
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */
