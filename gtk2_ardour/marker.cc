@@ -520,11 +520,19 @@ Marker::set_selected (bool yn)
     if(yn != _selected) {
         _selected = yn;
         /* only show selection status for non-skip (range) markers */
-        if (_location && !_location->is_skip()) {
+        if (_location) {
             if (yn) {
-                set_color (ARDOUR_UI::config()->get_canvasvar_LocationSelected());
+                if (!_location->is_skip()) {
+                    set_color (ARDOUR_UI::config()->get_canvasvar_LocationSelected());
+                } else {
+                    use_color ();
+                }
             } else {
-                reset_color ();
+                if (!_location->is_skip()) {
+                    reset_color ();
+                } else {
+                    use_color ();
+                }
             }
         }
     
