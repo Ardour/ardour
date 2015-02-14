@@ -941,21 +941,6 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
     OSStatus err = kAudioHardwareNoError;
     UInt32 propSize = 0;
     
-    // Check current sample rate
-    /*
-    propSize = sizeof (Float64);
-    Float64 currentSamplingRate = 0.0;
-    err = AudioDeviceGetProperty(m_DeviceID, 0, 0, kAudioDevicePropertyNominalSampleRate, &propSize, &currentSamplingRate);
-    if (err == kAudioHardwareNoError)
-    {
-        if (currentSamplingRate == newRate)
-        {
-            // nothing to do
-            return (retVal);
-        }
-    }*/
-
-    
     // 1. Set new sampling rate
     Float64 newNominalRate = newRate;
     propSize = sizeof (Float64);
@@ -1016,15 +1001,28 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
         // If sample rate did not change after time out
         else
         {
-            // Update member with last read value
-            m_CurrentSamplingRate = static_cast<int>(actualSamplingRate);
+            // Check if current device sample rate is supported
+            bool found = false;
+            for(int i = 0; gAllSampleRates[i] > 0; i++)
+            {
+                if (gAllSampleRates[i] - actualSamplingRate < 0.01) {
+                    found = true;
+                }
+            }
             
-            char debugMsg[128];
-            snprintf (debugMsg, sizeof(debugMsg), "Unable to change SR, even after waiting for %d milliseconds", actualWait * PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
-            m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)debugMsg);
-            
-            float sample_rate_update = actualSamplingRate;
-            m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::SamplingRateChanged, (void *)&sample_rate_update);
+            if (found) {
+                // Update member with last read value
+                m_CurrentSamplingRate = static_cast<int>(actualSamplingRate);
+                
+                char debugMsg[128];
+                snprintf (debugMsg, sizeof(debugMsg), "Unable to change SR, even after waiting for %d milliseconds", actualWait * PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
+                m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)debugMsg);
+                
+                float sample_rate_update = actualSamplingRate;
+                m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::SamplingRateChanged, (void *)&sample_rate_update);
+            } else {
+                retVal = eGenericErr;
+            }
         }
     }
     
