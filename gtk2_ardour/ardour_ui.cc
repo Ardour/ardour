@@ -100,7 +100,6 @@ typedef uint64_t microseconds_t;
 #include "about_dialog.h"
 #include "actions.h"
 #include "add_tracks_dialog.h"
-#include "ambiguous_file_dialog.h"
 #include "ardour_ui.h"
 #include "audio_clock.h"
 #include "big_clock_window.h"
@@ -143,6 +142,7 @@ typedef uint64_t microseconds_t;
 
 #include "open_file_dialog_proxy.h"
 #include "waves_message_dialog.h"
+#include "waves_ambiguous_file_dialog.h"
 #include "crash_recovery_dialog.h"
 #include "selection.h"
 
@@ -4674,13 +4674,9 @@ ARDOUR_UI::missing_file (Session*s, std::string str, DataType type)
 int
 ARDOUR_UI::ambiguous_file (std::string file, std::vector<std::string> hits)
 {
-	AmbiguousFileDialog dialog (file, hits);
-
-	dialog.show ();
-	dialog.present ();
-
+	WavesAmbiguousFileDialog dialog (file, hits);
 	dialog.run ();
-	return dialog.get_which ();
+	return dialog.get_selected_num ();
 }
 
 /** Allocate our thread-local buffers */

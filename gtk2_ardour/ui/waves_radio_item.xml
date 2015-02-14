@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RadioItem bgnormal="#353535">
+    <style name="generic_control"
+           winfont ="Arial Bold 10"
+           macfont ="Helvetica Bold 10"
+           fgnormal="#6F6F6F"
+           bgnormal="#6C6C6C"
+           fgactive="#BFBFBF"
+           bgactive="#454545"/>
+    <style name="generic_label"
+           style="generic_control"
+           box.expand="true"
+           box.fill="true"
+           horzalignment="end"/>
+    <EventBox bgnormal="#EDECE8">
+        <IconButton id="button"
+                    height="14"
+                    normalicon="waves_darker_radio_button"
+                    activeicon="waves_darker_radio_button_active"
+                    toggleable="true">
+            <HBox>
+                <VBox width="20"/>
+                <Label style="generic_control"
+                       id="label"
+                       visible="true"/>
+            </HBox>
+        </IconButton>
+    </EventBox>
+</RadioItem>

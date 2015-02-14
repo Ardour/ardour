@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Tracks Live - Ambiguous File"
+        CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6F6F6F"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"/>
+  <style name="generic_label"
+         style="generic_control"
+         box.expand="true"
+         box.fill="true"
+         horzalignment="end"/>
+  <style name="generic_button"
+         style="generic_control"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         width="80"
+         height="22"/>
+   <EventBox bgnormal="#EDECE8">
+    <VBox borderwidth="10"
+          spacing="10">
+      <Label id="top_label"
+             style="generic_label"
+             text="info"
+             horzalignment="start"/>
+       <VBox id="radio_items_home"
+             spacing="10"/>
+      <Label style="generic_label"
+             text="\nPlease select the path you want to get the file from."
+             horzalignment="start"/>
+      <HBox>
+          <Button id="done_button"
+                  style="generic_button"
+                  box.pack="end"
+                  text="Done"/>
+      </HBox>
+    </VBox>
+  </EventBox>
+</Dialog>
