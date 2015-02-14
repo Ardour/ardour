@@ -52,24 +52,24 @@ FilesystemTest::testPathIsWithin ()
 
 	CPPUNIT_ASSERT (g_mkdir_with_parents ("foo/bar/baz", 0755) == 0);
 
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar/baz", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar"));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/bar/baz"), Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/bar"),     Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo"),         Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/bar"),     Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/bar"),     Glib::build_filename(output_path, "foo/bar")));
 
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar/baz", "frobozz") == false);
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/bar/baz"), Glib::build_filename(output_path, "frobozz")) == false);
 
 	int const r = symlink ("bar", "foo/jim");
 	CPPUNIT_ASSERT (r == 0);
 
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar/baz", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar/baz"));
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/bar", "foo/bar"));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/jim/baz"), Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/jim"),     Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo"),         Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/jim"),     Glib::build_filename(output_path, "foo/bar/baz")));
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/jim"),     Glib::build_filename(output_path, "foo/bar")));
 
-	CPPUNIT_ASSERT (PBD::path_is_within ("foo/jim/baz", "frobozz") == false);
+	CPPUNIT_ASSERT (PBD::path_is_within (Glib::build_filename(output_path, "foo/jim/baz"), Glib::build_filename(output_path, "frobozz")) == false);
 #endif
 }
 
