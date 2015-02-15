@@ -78,6 +78,10 @@ Editor::show_editor_mixer (bool yn)
 	boost::shared_ptr<ARDOUR::Route> r;
 
 	show_editor_mixer_when_tracks_arrive = false;
+    if (current_mixer_strip) {
+        bool stereo_out_mode_active = Config->get_output_auto_connect() & AutoConnectMaster;
+        current_mixer_strip->gain_slider_set_visible (stereo_out_mode_active);
+    }
 
 	if (yn) {
 		Glib::RefPtr<Gdk::Window> win = get_window ();
