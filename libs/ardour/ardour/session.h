@@ -1250,10 +1250,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
         void              locations_changed ();
         void             _locations_changed (const Locations::LocationList&);
 
-        void              update_skips (Location*, bool consolidate);
+        void update_skips (Location*, bool consolidate);
         void update_marks (Location* loc);
-        void update_loop (Location* loc);
         void consolidate_skips (Location*);
+    
 	void              sync_locations_to_skips ();
 	void              _sync_locations_to_skips ();
     

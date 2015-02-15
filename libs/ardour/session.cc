@@ -1316,6 +1316,8 @@ Session::auto_loop_changed (Location* location)
 
 	
 	last_loopend = location->end();
+    
+    set_dirty();
 }
 
 void
@@ -1389,6 +1391,7 @@ Session::set_auto_loop_location (Location* location)
 	location->StartChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
 	location->EndChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
 	location->Changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
+    location->FlagsChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
 
 	location->set_auto_loop (true, this);
 
@@ -1410,12 +1413,6 @@ Session::set_auto_loop_location (Location* location)
 	/* now tell everyone else */
 
 	auto_loop_location_changed (location);
-}
-
-void
-Session::update_loop (Location*)
-{
-    set_dirty ();
 }
 
 void
@@ -1519,11 +1516,6 @@ Session::location_added (Location *location)
     }
 
     if (location->is_auto_loop()) {
-        location->StartChanged.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
-        location->EndChanged.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
-        location->Changed.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
-        location->FlagsChanged.connect_same_thread (loop_update_connections, boost::bind (&Session::update_loop, this, location));
-        
         set_auto_loop_location (location);
     }
     
