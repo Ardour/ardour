@@ -522,16 +522,16 @@ Marker::set_selected (bool yn)
         /* only show selection status for non-skip (range) markers */
         if (_location) {
             if (yn) {
-                if (!_location->is_skip()) {
-                    set_color (ARDOUR_UI::config()->get_canvasvar_LocationSelected());
-                } else {
+                if (_location->is_skip() || _location->is_auto_loop()) {
                     use_color ();
+                } else {
+                    set_color (ARDOUR_UI::config()->get_canvasvar_LocationSelected());
                 }
             } else {
-                if (!_location->is_skip()) {
-                    reset_color ();
-                } else {
+                if (_location->is_skip() || _location->is_auto_loop()) {
                     use_color ();
+                } else {
+                    reset_color ();
                 }
             }
         }
