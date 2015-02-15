@@ -5752,6 +5752,9 @@ RegionCutDrag::finished (GdkEvent*, bool)
 		return;
 	}
 
+    // clear selection before cutting
+    _editor->get_selection().clear_regions();
+    
 	_editor->split_regions_at (pos, rs);
 }
 

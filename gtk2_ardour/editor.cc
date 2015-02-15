@@ -885,7 +885,18 @@ Editor::set_entered_regionview (RegionView* rv)
 
 	if (entered_regionview  != 0) {
 		entered_regionview->entered (internal_editing ());
-	}
+        
+        if (mouse_mode == MouseCut) {
+            Gdk::Cursor* cursor = which_mode_cursor ();
+            set_canvas_cursor (cursor);
+        }
+        
+    } else {
+        if (mouse_mode == MouseCut) {
+            Gdk::Cursor* cursor = which_mode_cursor ();
+            set_canvas_cursor (cursor);
+        }
+    }
 
 	if (!_all_region_actions_sensitized && _last_region_menu_was_main) {
 		/* This RegionView entry might have changed what region actions
@@ -4839,12 +4850,12 @@ Editor::get_regions_from_selection_and_mouse (framepos_t pos)
 {
 	RegionSelection regions;
 
-    regions = selection->regions;
-    
-    if (entered_regionview ) {
-		regions.add (entered_regionview);
+    if (selection->selected (entered_regionview) ) {
+        regions = selection->regions;
     }
-
+    
+    regions.add (entered_regionview);
+    
     // Greg Zharun: Waves Tracks PRD does not say this.
     // So let's skip this.
 	//if ( regions.empty() ) {

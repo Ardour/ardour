@@ -926,16 +926,31 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RegionItem:
 		case FadeInHandleItem:
 		case FadeOutHandleItem:
-		case LeftFrameHandle:
-		case RightFrameHandle:
-		case FeatureLineItem:
 		case RegionViewNameHighlight:
 		case RegionViewName:
-		case StreamItem:
-		case AutomationTrackItem:
-			_drags->set (new RegionCutDrag (this, item, canvas_event_sample (event)), event, current_canvas_cursor);
+            if (entered_regionview) {
+                _drags->set (new RegionCutDrag (this, item, canvas_event_sample (event)), event, current_canvas_cursor);
+            }
 			return true;
 			break;
+        case StreamItem:
+                
+            if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier) &&
+                !Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier) ) {
+                
+                selection->clear_regions();
+                selection->clear_time ();
+                selection->clear_points ();
+                selection->clear_lines ();
+            }
+            
+            _drags->set (new EditorRubberbandSelectDrag (this, item), event);
+
+            break;
+    case LeftFrameHandle:
+    case RightFrameHandle:
+    case FeatureLineItem:
+    case AutomationTrackItem:
 		default:
 			break;
 		}
@@ -1898,7 +1913,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	case SelectionItem:
 		break;
-
+    
 	default:
 		break;
 	}
@@ -1962,9 +1977,9 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		if (rect) {
 			rect->set_fill_color (ARDOUR_UI::config()->get_canvasvar_InactiveFadeHandle());
 		}
-	}
-	break;
-
+    }
+    break;
+            
 	case AutomationTrackItem:
 		break;
 

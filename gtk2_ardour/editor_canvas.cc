@@ -1223,9 +1223,13 @@ Editor::which_mode_cursor () const
 		break;
 
 	case MouseCut:
-		mode_cursor = _cursors->scissors;
-		break;
-			
+        if (entered_regionview) {
+            mode_cursor = _cursors->scissors;
+        } else {
+            mode_cursor = which_grabber_cursor();
+        }
+        break;
+            
 	case MouseObject:
 		/* don't use mode cursor, pick a grabber cursor based on the item */
 		break;
