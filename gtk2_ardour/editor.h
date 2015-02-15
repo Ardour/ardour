@@ -593,6 +593,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourCanvas::Container* add_new_location_internal (ARDOUR::Location *);
 	void location_gone (ARDOUR::Location *);
 	void remove_selected_markers ();
+	void remove_selected_range_markers ();
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
 	gint really_remove_marker (ARDOUR::Location* loc, bool begin_reversible_command, bool commit_reversible_command);
 	void goto_nth_marker (int nth);
@@ -1556,6 +1557,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void marker_menu_edit ();
 	void marker_menu_remove ();
+	void range_marker_menu_remove ();
 	void marker_menu_rename ();
 	void rename_marker (Marker *marker);
 	void finish_rename_marker (std::string, Marker *marker);

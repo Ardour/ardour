@@ -458,32 +458,61 @@ Editor::mouse_add_new_range (framepos_t where)
 void
 Editor::remove_selected_markers ()
 {
-    MeterMarker* mm;
-    TempoMarker* tm;
-    bool begin_command = true;
-    for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-        dynamic_cast_marker_object (*x, &mm, &tm);
-
-        if (mm) {
-            remove_meter_marker (marker_menu_item);
-        } else if (tm) {
-            remove_tempo_marker (marker_menu_item);
-        } else {
-            bool is_start;
+    if (_session) {
+        bool is_start;
+        std::vector<Marker*> markers;
+        for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
             Location* loc = find_location_from_marker (*x, is_start);
-            
             // loop range cannot be removed in TracksLive
             if (loc->is_auto_loop() ) {
-                return;
+                continue;
             }
-            if (_session && loc) {
-                Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, begin_command, (*x == selection->markers.back ())));
+            Marker *marker = reinterpret_cast<Marker*>(*x);
+            if (marker && !dynamic_cast <RangeMarker*> (marker)) {
+                markers.push_back (marker);
             }
+        }
+    
+        MeterMarker* mm;
+        TempoMarker* tm;
+        bool begin_command = true;
+        for (std::vector<Marker*>::iterator x = markers.begin(); x != markers.end(); ++x) {
+            Location* loc = find_location_from_marker (*x, is_start);
+            bool commit_command = (*x == markers.back ());
+            Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, begin_command, commit_command));
             begin_command = false;
         }
     }
 }
 
+void
+Editor::remove_selected_range_markers ()
+{
+    bool is_start;
+    if (_session) {
+        std::vector<RangeMarker*> markers;
+        for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+            Location* loc = find_location_from_marker (*x, is_start);
+            // loop range cannot be removed in TracksLive
+            if (loc->is_auto_loop() ) {
+                continue;
+            }
+            RangeMarker *marker = dynamic_cast<RangeMarker*>(*x);
+            if (marker) {
+                markers.push_back (marker);
+            }
+        }
+    
+        bool begin_command = true;
+
+        for (std::vector<RangeMarker*>::iterator x = markers.begin(); x != markers.end(); ++x) {
+            bool commit_command = (*x == markers.back ());
+            Location* loc = find_location_from_marker (*x, is_start);
+            Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, begin_command, commit_command));
+            begin_command = false;
+        }
+    }
+}
 
 void
 Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
@@ -688,7 +717,7 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	markerMenu->set_name ("ArdourContextMenu");
 
 	if (!session) {
-		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
+		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::range_marker_menu_remove)));
 	}
 }
 
@@ -1068,6 +1097,19 @@ Editor::marker_menu_remove ()
         }
     } else {
         remove_selected_markers ();
+    }
+}
+
+void
+Editor::range_marker_menu_remove ()
+{
+    RangeMarker *marker = dynamic_cast<RangeMarker*>((Marker*)marker_menu_item->get_data ("marker"));
+    if (marker) {
+        if (std::find (selection->markers.begin (), selection->markers.end (), marker) == selection->markers.end ()) {
+            remove_marker (*marker_menu_item, (GdkEvent*) 0);
+        } else {
+            remove_selected_range_markers ();
+        }
     }
 }
 
