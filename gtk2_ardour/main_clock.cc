@@ -116,3 +116,24 @@ MainClock::insert_new_meter ()
 	PublicEditor::instance().mouse_add_new_meter_event (absolute_time ());
 }
 
+bool
+MainClock::on_button_press_event (GdkEventButton *ev)
+{
+	if (ev->button == 1) {
+		if (mode() == BBT) {
+			if (is_lower_layout_click(ev->y)) {
+				if (is_right_layout_click(ev->x)) {
+					// meter on the right
+					edit_current_meter();
+				} else {
+					// tempo on the left
+					edit_current_tempo();
+				}
+				return true;
+			}
+		}
+	}
+
+	return AudioClock::on_button_press_event (ev);
+}
+
