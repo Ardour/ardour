@@ -58,6 +58,7 @@ Location::Location (Session& s)
 	, _flags (Flags (0))
 	, _locked (false)
 	, _position_lock_style (AudioTime)
+    , _block_change_notifications (false)
 {
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -72,6 +73,8 @@ Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, 
 	, _flags (bits)
 	, _locked (false)
 	, _position_lock_style (s.config.get_glue_new_markers_to_bars_and_beats() ? MusicTime : AudioTime)
+    , _block_change_notifications (false)
+
 {
 	recompute_bbt_from_frames ();
 
@@ -89,6 +92,8 @@ Location::Location (const Location& other)
 	, _bbt_end (other._bbt_end)
 	, _flags (other._flags)
 	, _position_lock_style (other._position_lock_style)
+    , _block_change_notifications (false)
+
 {
 	/* copy is not locked even if original was */
 
@@ -405,7 +410,10 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 
         if (start_change && end_change) {
                 changed (this);
+            
+            if (!_block_change_notifications) {
                 Changed ();
+            }
         }
 
         return 0;
@@ -427,8 +435,11 @@ Location::move_to (framepos_t pos)
 		_end = _start + length();
 		recompute_bbt_from_frames ();
 
-		changed (this); /* EMIT SIGNAL */
-		Changed (); /* EMIT SIGNAL */
+        changed (this); /* EMIT SIGNAL */
+        
+        if (!_block_change_notifications) {
+            Changed (); /* EMIT SIGNAL */
+        }
 	}
 
 	assert (_start >= 0);
@@ -687,8 +698,11 @@ Location::set_state (const XMLNode& node, int version)
 
 	recompute_bbt_from_frames ();
 
-	changed (this); /* EMIT SIGNAL */
-	Changed (); /* EMIT SIGNAL */
+    changed (this); /* EMIT SIGNAL */
+    
+    if (!_block_change_notifications) {
+        Changed (); /* EMIT SIGNAL */
+    }
 
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -1069,7 +1083,11 @@ Locations::set_state (const XMLNode& node, int version)
 				if (i != locations.end()) {
 					/* we can re-use an old Location object */
 					loc = *i;
+                    
+                    // changed locations will be updated by Locations::changed signal
+                    loc->set_block_change_notifications (true);
 					loc->set_state (**niter, version);
+                    loc->set_block_change_notifications (false);
 				} else {
 					loc = new Location (_session, **niter);
 				}

@@ -123,11 +123,13 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
            changes to this object 
         */
 
+    PBD::Signal0<void> Changed;
+    void set_block_change_notifications (bool yn) {_block_change_notifications = yn;}
+    
 	PBD::Signal0<void> NameChanged;
 	PBD::Signal0<void> EndChanged;
 	PBD::Signal0<void> StartChanged;
-	PBD::Signal0<void> Changed;
-	PBD::Signal0<void> FlagsChanged;
+    PBD::Signal0<void> FlagsChanged;
 	PBD::Signal0<void> LockChanged;
 	PBD::Signal0<void> PositionLockStyleChanged;
         
@@ -155,6 +157,8 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	bool               _locked;
 	PositionLockStyle  _position_lock_style;
 	boost::shared_ptr<SceneChange> _scene_change;
+    
+    bool _block_change_notifications; // required for group operations
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
@@ -199,7 +203,7 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 	void marks_either_side (framepos_t const, framepos_t &, framepos_t &) const;
 
 	void find_all_between (framepos_t start, framepos_t, LocationList&, Location::Flags);
-
+    
 	PBD::Signal1<void,Location*> current_changed;
 
         /* Objects that care about individual addition and removal of Locations should connect to added/removed.
