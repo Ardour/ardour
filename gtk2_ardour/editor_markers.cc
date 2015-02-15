@@ -467,7 +467,7 @@ Editor::remove_selected_markers ()
             if (loc->is_auto_loop() ) {
                 continue;
             }
-            Marker *marker = reinterpret_cast<Marker*>(*x);
+            Marker *marker = *x;
             if (marker && !dynamic_cast <RangeMarker*> (marker)) {
                 markers.push_back (marker);
             }
@@ -709,26 +709,30 @@ Editor::get_marker_menu_lock_items_locked (const ARDOUR::Location* location,  bo
 		// - the passed location is in the current selection
 		// - and, if so, all the selected markers are checked.
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+			
+			Marker *marker = *x;
+			
 			bool is_start;
-			Location* loc = find_location_from_marker (*x, is_start);
+			Location* loc = find_location_from_marker (marker, is_start);
 			// loop range cannot be the manipulated object in this case
-			if (loc->is_auto_loop() ) {
+			
+			if (loc->is_auto_loop() || (loc->is_mark () == false) || dynamic_cast <RangeMarker*> (marker)) {
 				continue;
 			}
 
 			// the passed location is in the current selection.
 			location_is_selected = (location_is_selected || (location == loc));
+			if (location_is_selected && !all_locked) {
+				break;
+			}
 
-			Marker *marker = reinterpret_cast<Marker*>(*x);
-			if (marker && loc->is_mark () && !dynamic_cast <RangeMarker*> (marker)) {
-				if (!loc->locked ()) {
-					all_locked = false;
-					// as the passed location is in the current selection
-					// we can break as at least one marker is not locked
-					// and that's enough to return with "Lock"
-					if (location_is_selected) {
-						break;
-					}
+			if (!loc->locked ()) {
+				all_locked = false;
+				// as the passed location is in the current selection
+				// we can break as at least one marker is not locked
+				// and that's enough to return with "NOT ALL locked"
+				if (location_is_selected) {
+					break;
 				}
 			}
 		}
@@ -1153,10 +1157,10 @@ Editor::range_marker_menu_remove ()
 }
 
 void
-Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock_all)
+Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock)
 {
 	if (location) { // null says: deal with selection
-		if (lock_all) {
+		if (lock) {
 			location->lock ();
 		} else {
 			location->unlock ();
@@ -1166,16 +1170,16 @@ Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock_all)
 			bool is_start;
 			Location* loc = find_location_from_marker (*x, is_start);
 			// loop range cannot be the manipulated object in this case
-			if (loc->is_auto_loop() ) {
+			if (loc->is_auto_loop()) {
 				continue;
 			}
 
-			Marker *marker = reinterpret_cast<Marker*>(*x);
+			Marker *marker = *x;
 			if (marker && loc->is_mark () && !dynamic_cast <RangeMarker*> (marker)) {
-				if (loc->locked () && !lock_all) {
+				if (loc->locked () && !lock) {
 					loc->unlock ();
 				} else {
-					if (lock_all && !loc->locked ()) {
+					if (lock && !loc->locked ()) {
 						loc->lock ();
 					}
 				}
