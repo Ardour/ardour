@@ -459,58 +459,15 @@ void
 Editor::remove_selected_markers ()
 {
     if (_session) {
-        bool is_start;
-        std::vector<Marker*> markers;
-        for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-            Location* loc = find_location_from_marker (*x, is_start);
-            // loop range cannot be removed in TracksLive
-            if (loc->is_auto_loop() ) {
-                continue;
-            }
-            Marker *marker = *x;
-            if (marker && !dynamic_cast <RangeMarker*> (marker)) {
-                markers.push_back (marker);
-            }
-        }
-    
-        MeterMarker* mm;
-        TempoMarker* tm;
-        bool begin_command = true;
-        for (std::vector<Marker*>::iterator x = markers.begin(); x != markers.end(); ++x) {
-            Location* loc = find_location_from_marker (*x, is_start);
-            bool commit_command = (*x == markers.back ());
-            Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, begin_command, commit_command));
-            begin_command = false;
-        }
+        Glib::signal_idle().connect (sigc::bind(sigc::mem_fun(*this, &Editor::really_remove_selected_markers), Marker::Mark) );
     }
 }
 
 void
 Editor::remove_selected_range_markers ()
 {
-    bool is_start;
     if (_session) {
-        std::vector<RangeMarker*> markers;
-        for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-            Location* loc = find_location_from_marker (*x, is_start);
-            // loop range cannot be removed in TracksLive
-            if (loc->is_auto_loop() ) {
-                continue;
-            }
-            RangeMarker *marker = dynamic_cast<RangeMarker*>(*x);
-            if (marker) {
-                markers.push_back (marker);
-            }
-        }
-    
-        bool begin_command = true;
-
-        for (std::vector<RangeMarker*>::iterator x = markers.begin(); x != markers.end(); ++x) {
-            bool commit_command = (*x == markers.back ());
-            Location* loc = find_location_from_marker (*x, is_start);
-            Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, begin_command, commit_command));
-            begin_command = false;
-        }
+        Glib::signal_idle().connect (sigc::bind(sigc::mem_fun(*this, &Editor::really_remove_selected_markers),Marker::Range) );
     }
 }
 
@@ -537,24 +494,66 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
     }
     
 	if (_session && loc) {
-	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc, true, true));
+	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 	}
 }
 
 gint
-Editor::really_remove_marker (Location* loc, bool begin_reversible_command, bool commit_reversible_command)
+Editor::really_remove_marker (Location* loc)
 {
-	if (begin_reversible_command) {
-        _session->begin_reversible_command (_("remove marker"));
-    }
-	XMLNode &before = _session->locations()->get_state();
+    _session->begin_reversible_command (_("remove marker"));
+	
+    XMLNode &before = _session->locations()->get_state();
 	_session->locations()->remove (loc);
 	XMLNode &after = _session->locations()->get_state();
-	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	if (commit_reversible_command) {
-        _session->commit_reversible_command ();
-    }
+	
+    _session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+    _session->commit_reversible_command ();
+
 	return FALSE;
+}
+
+gint
+Editor::really_remove_selected_markers (Marker::Type type)
+{
+    _session->begin_reversible_command (_("remove selected markers"));
+    
+    // we can't iterate through selection and remove locations at the same time
+    // this will change the selection and invalidate iterator
+    std::list<Location*> locations_to_remove;
+    
+    for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+        
+        Marker* marker = *x;
+        assert (marker);
+        
+        Location* loc = marker->location();
+        
+        // loop range cannot be removed in TracksLive
+        if (loc->is_auto_loop() ) {
+            continue;
+        }
+        
+        // it's not a range marker
+        if (marker->type() == type ) {
+            locations_to_remove.push_back (loc);
+        }
+    }
+    
+    XMLNode &before = _session->locations()->get_state();
+    
+    {
+        std::list<Location*>::iterator loc_iter = locations_to_remove.begin();
+        for (;loc_iter != locations_to_remove.end(); ++loc_iter) {
+            _session->locations()->remove (*loc_iter);
+        }
+    }
+    
+    XMLNode &after = _session->locations()->get_state();
+    _session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+    _session->commit_reversible_command ();
+    
+    return FALSE;
 }
 
 void

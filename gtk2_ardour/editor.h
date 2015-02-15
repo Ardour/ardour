@@ -595,7 +595,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_selected_markers ();
 	void remove_selected_range_markers ();
 	void remove_marker (ArdourCanvas::Item&, GdkEvent*);
-	gint really_remove_marker (ARDOUR::Location* loc, bool begin_reversible_command, bool commit_reversible_command);
+	gint really_remove_marker (ARDOUR::Location* loc);
+    gint really_remove_selected_markers (Marker::Type);
 	void goto_nth_marker (int nth);
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
