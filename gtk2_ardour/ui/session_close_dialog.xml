@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Session Close"
-        resizeable="false"
-        CACHEIT="false">
+        resizeable="false">
   <style name="generic_control"
          winfont ="Arial Bold 12"
          macfont ="Helvetica Bold 12"

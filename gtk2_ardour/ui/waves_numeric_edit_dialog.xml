@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Dialog CACHEIT="false"
-        title="Tracks Live"
+<Dialog title="Tracks Live"
         mincount="1"
         maxcount="200"
         errormsg="Incorrect value. Please input value between 1 and 200.">
