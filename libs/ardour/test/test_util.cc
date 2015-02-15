@@ -23,13 +23,13 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
-#include "pbd/textreceiver.h"
 #include "pbd/file_utils.h"
 
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
 
 #include "test_util.h"
+#include "test_receiver.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -96,42 +96,6 @@ write_ref (XMLNode* node, string ref_file)
 	ref.set_root (0);
 	return rv;
 }
-
-class TestReceiver : public Receiver 
-{
-protected:
-	void receive (Transmitter::Channel chn, const char * str) {
-		const char *prefix = "";
-		
-		switch (chn) {
-		case Transmitter::Error:
-			prefix = ": [ERROR]: ";
-			break;
-		case Transmitter::Info:
-			/* ignore */
-			return;
-		case Transmitter::Warning:
-			prefix = ": [WARNING]: ";
-			break;
-		case Transmitter::Fatal:
-			prefix = ": [FATAL]: ";
-			break;
-		case Transmitter::Throw:
-			/* this isn't supposed to happen */
-			abort ();
-		}
-		
-		/* note: iostreams are already thread-safe: no external
-		   lock required.
-		*/
-		
-		cout << prefix << str << endl;
-		
-		if (chn == Transmitter::Fatal) {
-			exit (9);
-		}
-	}
-};
 
 TestReceiver test_receiver;
 
