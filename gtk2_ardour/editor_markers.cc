@@ -676,7 +676,7 @@ Editor::new_transport_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Ite
 }
 
 void
-Editor::build_marker_menu (Location* loc)
+Editor::build_marker_menu (ARDOUR::Location* loc)
 {
 	using namespace Menu_Helpers;
 
@@ -686,18 +686,57 @@ Editor::build_marker_menu (Location* loc)
 
 	items.push_back (MenuElem (_("Move Playhead to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Move Marker to Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
-//    Tracks Live doesn't use it
-//    items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Rename"), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
     
-    items.push_back (MenuElem (_("Lock"), sigc::mem_fun(*this, &Editor::toggle_marker_menu_lock)));
-    
+	bool location_is_selected = false;
+	bool all_locked = get_marker_menu_lock_items_locked (loc, location_is_selected);
+    items.push_back (MenuElem (all_locked ? _("Unlock") : _( "Lock"), sigc::bind (sigc::mem_fun(*this, &Editor::toggle_marker_menu_lock), location_is_selected ? 0 : loc, !all_locked)));
     items.push_back (MenuElem (_("Delete"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 	items.push_back (SeparatorElem());
     
     items.push_back (MenuElem (_("Show Marker Inspector"), sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::show_marker_inspector)));
+}
+
+bool
+Editor::get_marker_menu_lock_items_locked (const ARDOUR::Location* location,  bool& location_is_selected)
+{
+	bool all_locked = true;
+	location_is_selected = false;
+	if (_session) {
+		// In the "for" loop below we check for two conditions:
+		// - the passed location is in the current selection
+		// - and, if so, all the selected markers are checked.
+		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+			bool is_start;
+			Location* loc = find_location_from_marker (*x, is_start);
+			// loop range cannot be the manipulated object in this case
+			if (loc->is_auto_loop() ) {
+				continue;
+			}
+
+			// the passed location is in the current selection.
+			location_is_selected = (location_is_selected || (location == loc));
+
+			Marker *marker = reinterpret_cast<Marker*>(*x);
+			if (marker && loc->is_mark () && !dynamic_cast <RangeMarker*> (marker)) {
+				if (!loc->locked ()) {
+					all_locked = false;
+					// as the passed location is in the current selection
+					// we can break as at least one marker is not locked
+					// and that's enough to return with "Lock"
+					if (location_is_selected) {
+						break;
+					}
+				}
+			}
+		}
+		if (!location_is_selected) {
+			all_locked = location->locked ();
+		}
+	}
+	return all_locked;
 }
 
 void
@@ -1114,28 +1153,34 @@ Editor::range_marker_menu_remove ()
 }
 
 void
-Editor::toggle_marker_menu_lock ()
+Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock_all)
 {
-	Marker* marker;
-
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
-		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		/*NOTREACHED*/
-	}
-
-	Location* loc;
-	bool ignored;
-
-	loc = find_location_from_marker (marker, ignored);
-
-	if (!loc) {
-		return;
-	}
-
-	if (loc->locked()) {
-		loc->unlock ();
+	if (location) { // null says: deal with selection
+		if (lock_all) {
+			location->lock ();
+		} else {
+			location->unlock ();
+		}
 	} else {
-		loc->lock ();
+		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
+			bool is_start;
+			Location* loc = find_location_from_marker (*x, is_start);
+			// loop range cannot be the manipulated object in this case
+			if (loc->is_auto_loop() ) {
+				continue;
+			}
+
+			Marker *marker = reinterpret_cast<Marker*>(*x);
+			if (marker && loc->is_mark () && !dynamic_cast <RangeMarker*> (marker)) {
+				if (loc->locked () && !lock_all) {
+					loc->unlock ();
+				} else {
+					if (lock_all && !loc->locked ()) {
+						loc->lock ();
+					}
+				}
+			}
+		}
 	}
 }
 

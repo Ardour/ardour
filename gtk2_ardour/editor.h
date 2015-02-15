@@ -1561,7 +1561,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_rename ();
 	void rename_marker (Marker *marker);
 	void finish_rename_marker (std::string, Marker *marker);
-	void toggle_marker_menu_lock ();
+	void toggle_marker_menu_lock (ARDOUR::Location*, bool);
 	void toggle_marker_menu_glue ();
 	void marker_menu_hide ();
 	void marker_menu_loop_range ();
@@ -1585,6 +1585,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void build_range_marker_menu (bool, bool);
 	void build_marker_menu (ARDOUR::Location *);
+	bool get_marker_menu_lock_items_locked (const ARDOUR::Location*, bool&);
 	void build_tempo_or_meter_marker_menu (bool);
 	void build_new_transport_marker_menu ();
 	void dynamic_cast_marker_object (void*, MeterMarker**, TempoMarker**) const;
