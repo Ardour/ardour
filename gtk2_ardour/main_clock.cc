@@ -29,15 +29,10 @@ using namespace Gtk;
 
 MainClock::MainClock (
 	const std::string& clock_name,
-	bool is_transient,
 	const std::string& widget_name,
-	bool editable,
-	bool follows_playhead,
-	bool primary,
-	bool duration,
-	bool with_info
+	bool primary
 	)
-	: AudioClock (clock_name, is_transient, widget_name, editable, follows_playhead, duration, with_info)
+	: AudioClock (clock_name, false, widget_name, true, true, false, true)
 	  , _primary (primary)
 {
 

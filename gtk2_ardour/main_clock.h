@@ -25,8 +25,7 @@
 class MainClock : public AudioClock
 {
 public:
-	MainClock (const std::string& clock_name, bool is_transient, const std::string& widget_name,
-	           bool editable, bool follows_playhead, bool primary, bool duration = false, bool with_info = false);
+	MainClock (const std::string& clock_name, const std::string& widget_name, bool primary);
 
 private:
 	
