@@ -43,32 +43,32 @@
                box.padding="2"/>
       </VBox>
     </HBox>
-    <Entry id="gain_display_entry"
-           width="58"
-           height="18"
-           winfont="Arial Bold 9"
-           macfont="Helvetica Bold 9"
-           horzalignment="end"
-           noshowall="true"
-           visible="false"
-           cssname="EditorTrackNameDisplay"
-           textcolornormal="#ffffff"
-           textcoloractive="#ffffff"
-           textcolorselected="#ffffff"/>
     <VBox height="18">
-        <Button id="gain_display_button"
-            width="58"
-            height="18"
-            winfont="Arial Bold 9"
-            macfont="Helvetica Bold 9"
-            bgnormal="#383838"
-            bgactive="#afafaf"
-            fgnormal="#24FCD6"
-            fgactive="#afafaf"
-            fghover="#000000"
-            bghover="#B1B1B1"
-            bordercolor="#C9C9C9"
-            borderwidth="0 0 0 0"/>
+      <Entry id="gain_display_entry"
+             width="58"
+             height="18"
+             winfont="Arial Bold 9"
+             macfont="Helvetica Bold 9"
+             horzalignment="end"
+             noshowall="true"
+             visible="false"
+             cssname="EditorTrackNameDisplay"
+             textcolornormal="#ffffff"
+             textcoloractive="#ffffff"
+             textcolorselected="#ffffff"/>
+      <Button id="gain_display_button"
+              width="58"
+              height="18"
+              winfont="Arial Bold 9"
+              macfont="Helvetica Bold 9"
+              bgnormal="#383838"
+              bgactive="#afafaf"
+              fgnormal="#24FCD6"
+              fgactive="#afafaf"
+              fghover="#000000"
+              bghover="#B1B1B1"
+              bordercolor="#C9C9C9"
+              borderwidth="0 0 0 0"/>
     </VBox>
   </VBox>
 </GainSlider>
