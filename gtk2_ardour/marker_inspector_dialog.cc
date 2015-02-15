@@ -40,6 +40,7 @@ MarkerInspectorDialog::MarkerInspectorDialog ()
 	, _channel_dropdown (get_waves_dropdown ("channel_dropdown"))
 	, _marker (0)
 {
+    set_title (xml_property (*xml_tree ()->root (), "title", ""));
 	_init ();
 }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Dialog title="Tracks Live" resizeable="False">
+<Dialog resizeable="False" title="Color Palette">
   <style name="generic_control"
          winfont ="Arial Bold 12"
          macfont ="Helvetica Bold 12"

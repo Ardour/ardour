@@ -41,6 +41,7 @@ WavesTrackColorDialog::WavesTrackColorDialog ()
 	color_button[13] = &get_waves_button ("color_button_14");
 	color_button[14] = &get_waves_button ("color_button_15");
 
+    set_title (xml_property (*xml_tree ()->root (), "title", ""));
 	_init ();
 }
 
