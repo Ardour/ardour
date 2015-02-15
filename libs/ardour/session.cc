@@ -1598,10 +1598,18 @@ Session::_locations_changed (const Locations::LocationList& locations)
            We might be re-adding a location here but it doesn't actually matter
            for all the locations that the Session takes an interest in.
         */
-
-	for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-                location_added (*i);
-        }
+    loop_update_connections.drop_connections ();
+    mark_update_connections.drop_connections ();
+    skip_update_connections.drop_connections ();
+    
+    {
+        PBD::Unwinder<bool> protect_ignore_skip_updates (_ignore_skips_updates, true);
+        for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+                    location_added (*i);
+            }
+    }
+    
+    update_skips (NULL, false);
 }
 
 void
