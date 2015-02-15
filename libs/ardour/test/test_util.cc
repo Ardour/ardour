@@ -29,7 +29,6 @@
 #include "ardour/audioengine.h"
 
 #include "test_util.h"
-#include "test_receiver.h"
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -95,25 +94,6 @@ write_ref (XMLNode* node, string ref_file)
 	bool rv = ref.write (ref_file);
 	ref.set_root (0);
 	return rv;
-}
-
-TestReceiver test_receiver;
-
-bool
-test_init ()
-{
-	SessionEvent::create_per_thread_pool ("test", 512);
-
-	test_receiver.listen_to (error);
-	test_receiver.listen_to (info);
-	test_receiver.listen_to (fatal);
-	test_receiver.listen_to (warning);
-
-	/* We can't use VSTs here as we have a stub instead of the
-	   required bits in gtk2_ardour.
-	*/
-	Config->set_use_lxvst (false);
-	return true;
 }
 
 void

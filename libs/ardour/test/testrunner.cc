@@ -11,7 +11,7 @@
 
 #include "pbd/debug.h"
 #include "ardour/ardour.h"
-#include "test_util.h"
+#include "test_ui.h"
 
 static const char* localedir = LOCALEDIR;
 
@@ -51,8 +51,8 @@ main(int argc, char* argv[])
 
 	CPPUNIT_ASSERT (ARDOUR::init (false, true, localedir));
 
-	CPPUNIT_ASSERT (test_init ());
-	
+	TestUI* test_ui = new TestUI();
+
 	CppUnit::TestResult testresult;
 	
 	CppUnit::TestResultCollector collectedresults;
@@ -67,6 +67,8 @@ main(int argc, char* argv[])
 	
 	CppUnit::CompilerOutputter compileroutputter (&collectedresults, std::cerr);
 	compileroutputter.write ();
+
+	delete test_ui;
 
 	ARDOUR::cleanup ();
 	
