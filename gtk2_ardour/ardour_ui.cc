@@ -4514,7 +4514,7 @@ ARDOUR_UI::record_state_changed ()
 	} else {
         
         tracks_control_panel.action()->set_sensitive(true);
-        key_editor.action()->set_sensitive(false);
+        key_editor.action()->set_sensitive(true);
         set_topbar_buttons_sensitive (true);
 
         if (big_clock_window) {
