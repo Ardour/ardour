@@ -5,8 +5,8 @@
 /Common/Quit
 /Main/AddTrackBus
 /Main/Close
-/Main/Export
 /Main/ExportAudio
+/Main/StemExport
 /Common/toggle-meter-bridge
 /Editor/show-editor-mixer
 /Common/toggle-mixer
