@@ -1970,7 +1970,9 @@ Editor::add_region_context_items (Gtk::Menu_Helpers::MenuList& edit_items)
     edit_items.push_back (SeparatorElem());
     
     edit_items.push_back (MenuElem (_("Import Audio File"), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
-    edit_items.push_back (*manage (ActionManager::get_action_from_name ("reverse-region")->create_menu_item ()));
+	#if defined (__APPLE__)
+		edit_items.push_back (*manage (ActionManager::get_action_from_name ("reverse-region")->create_menu_item ()));
+	#endif
 //    Tracks Live doesn't use it
 //    edit_items.push_back (*manage (ActionManager::get_action_from_name ("strip-region-silence")->create_menu_item ()));
 //    edit_items.back().set_label ("Strip Silence");
