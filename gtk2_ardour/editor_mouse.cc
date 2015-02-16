@@ -1244,7 +1244,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MouseZoom:
-		if (entered_regionview && (event->type == GDK_BUTTON_PRESS)) {
+		if (entered_track && (event->type == GDK_BUTTON_PRESS)) {
 			_drags->set (new MouseZoomDrag (this, item), event);
 		}
 
