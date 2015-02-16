@@ -37,16 +37,17 @@
 
 #include "evoral/Curve.hpp"
 
+#include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"
-#include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/debug.h"
 #include "ardour/playlist.h"
-#include "ardour/audiofilesource.h"
+#include "ardour/profile.h"
+#include "ardour/progress.h"
 #include "ardour/region_factory.h"
 #include "ardour/runtime_functions.h"
+#include "ardour/session.h"
 #include "ardour/transient_detector.h"
-#include "ardour/progress.h"
 
 #include "ardour/sndfilesource.h"
 #ifdef HAVE_COREAUDIO
@@ -1299,6 +1300,13 @@ AudioRegion::recompute_at_end ()
 		send_change (PropertyChange (Properties::fade_in));
 	}
 
+	if (Profile->get_trx()) {
+		/* limit fade out so that it does not overlap fade in */
+		if (_fade_in->back()->when >= _length - _fade_out->back()->when) {
+			_fade_out->extend_to (_length - _fade_in->back()->when - 1);
+		}
+	}
+	
 	resume_property_changes();
 }
 
@@ -1324,6 +1332,13 @@ AudioRegion::recompute_at_start ()
 		send_change (PropertyChange (Properties::fade_out));
 	}
 
+	if (Profile->get_trx()) {
+		/* limit fade in so that it does not overlap fade out */
+		if (_fade_in->back()->when >= _length - _fade_out->back()->when) {
+			_fade_in->extend_to (_length - _fade_out->back()->when - 1);
+		}
+	}
+	
 	resume_property_changes();
 }
 
