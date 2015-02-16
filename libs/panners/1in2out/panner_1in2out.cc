@@ -51,6 +51,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/pannable.h"
+#include "ardour/profile.h"
 
 #include "i18n.h"
 #include "panner_1in2out.h"
@@ -75,8 +76,10 @@ extern "C" ARDOURPANNER_API PanPluginDescriptor*  panner_descriptor () { return 
 Panner1in2out::Panner1in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
 {
-        if (!_pannable->has_state()) {
+        if (!Profile->get_trx () ) {
+            if (!_pannable->has_state ()) {
                 _pannable->pan_azimuth_control->set_value (0.5);
+            }
         }
         
         update ();
