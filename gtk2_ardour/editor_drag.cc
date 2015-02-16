@@ -3710,11 +3710,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if (location) {
 
-			if (location->locked()) {
-				return;
-			}
-
-			if (location->is_mark()) {
+			if (location->locked() && location->is_mark()) {
 				location->set_start (((*x).location)->start());
 			} else {
 				location->set (((*x).location)->start(), ((*x).location)->end());
