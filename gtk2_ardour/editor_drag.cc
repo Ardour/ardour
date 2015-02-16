@@ -3172,14 +3172,12 @@ void
 FadeInDrag::motion (GdkEvent* event, bool)
 {
 	framecnt_t fade_length;
-
 	framepos_t const pos = adjusted_current_frame (event);
-
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos < (region->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	} else if (pos > region->length() - region->fade_out()->back()->when) {
+	} else if (pos > region->position() + region->length() - region->fade_out()->back()->when) {
 		fade_length = region->length() - region->fade_out()->back()->when - 1;
 	} else {
 		fade_length = pos - region->position();
@@ -3214,7 +3212,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	if (pos < (region->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	} else if (pos >= region->length() - region->fade_out()->back()->when) {
+	} else if (pos >= region->position() + region->length() - region->fade_out()->back()->when) {
 		fade_length = region->length() - region->fade_out()->back()->when - 1;
 	} else {
 		fade_length = pos - region->position();
@@ -3293,10 +3291,10 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 
 	if (pos > (region->last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
-	} else if (pos <= region->fade_in()->back()->when) {
+	} else if (pos <= region->position() + region->fade_in()->back()->when) {
 		fade_length = region->length() - region->fade_in()->back()->when - 1;
 	} else {
-		fade_length = region->length() - pos;
+		fade_length = region->last_frame() - pos;
 	}
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -3328,10 +3326,10 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	if (pos > (region->last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
-	} else if (pos <= region->fade_in()->back()->when) {
+	} else if (pos <= region->position() + region->fade_in()->back()->when) {
 		fade_length = region->length() - region->fade_in()->back()->when - 1;
 	} else {
-		fade_length = region->length() - pos;
+		fade_length = region->last_frame() - pos;
 	}
 
 	_editor->begin_reversible_command (_("change fade out length"));
