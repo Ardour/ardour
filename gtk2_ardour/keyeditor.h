@@ -59,6 +59,9 @@ class KeyEditor : public WavesDialog
 	WavesButton& unbind_button;
 	WavesButton& reset_button;
 
+	static const char* blacklist_filename;
+	static const char* whitelist_filename;
+
 	void unbind (WavesButton*);
 
 	bool can_bind;

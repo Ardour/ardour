@@ -50,6 +50,16 @@ using namespace PBD;
 
 using Gtkmm2ext::Keyboard;
 
+#if defined(PLATFORM_WINDOWS)
+const char* KeyEditor::blacklist_filename = "keybindings.win.blacklist";
+#elif defined(__APPLE__)
+const char* KeyEditor::blacklist_filename = "keybindings.mac.blacklist";
+#else
+const char* KeyEditor::blacklist_filename = "keybindings.blacklist";
+#endif
+
+const char* KeyEditor::whitelist_filename = "keybindings.whitelist";
+
 KeyEditor::KeyEditor ()
 	: WavesDialog ("waves_keyeditor.xml", true, false)
 	, view (get_tree_view ("view"))
@@ -85,7 +95,7 @@ KeyEditor::load_blackwhitelists ()
 {
         string list;
         
-        if (find_file (ARDOUR::ardour_data_search_path(), X_("keybindings.blacklist"), list)) {
+        if (find_file (ARDOUR::ardour_data_search_path(), X_(blacklist_filename), list)) {
                 ifstream in (list.c_str());
                 
                 while (in) {
@@ -95,7 +105,7 @@ KeyEditor::load_blackwhitelists ()
                 }
         }
 
-        if (find_file (ARDOUR::ardour_data_search_path(), X_("keybindings.whitelist"), list)) {
+        if (find_file (ARDOUR::ardour_data_search_path(), X_(whitelist_filename), list)) {
                 ifstream in (list.c_str());
                 
                 while (in) {
