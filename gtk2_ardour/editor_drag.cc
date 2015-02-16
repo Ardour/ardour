@@ -3414,32 +3414,41 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		break;
 	case Selection::Extend:
 	{
-		Locations::LocationList ll;
-		list<Marker*> to_add;
-		framepos_t s, e;
-		_editor->selection->markers.range (s, e);
-		s = min (_marker->position(), s);
-		e = max (_marker->position(), e);
-		s = min (s, e);
-		e = max (s, e);
-		if (e < max_framepos) {
-			++e;
-		}
-		_editor->session()->locations()->find_all_between (s, e, ll, Location::Flags (0));
-		for (Locations::LocationList::iterator i = ll.begin(); i != ll.end(); ++i) {
-			Editor::LocationMarkers* lm = _editor->find_location_markers (*i);
-			if (lm) {
-				if (lm->start) {
-					to_add.push_back (lm->start);
-				}
-				if (lm->end) {
-					to_add.push_back (lm->end);
-				}
-			}
-		}
-		if (!to_add.empty()) {
-			_editor->selection->add (to_add);
-		}
+        // Range Markers should not be multiselected.
+        // There must not be any Range Marker in any multi-selection
+        if ((_marker->type () == Marker::Range) ||
+            (_editor->selection->markers.front ()->type () == Marker::Range)) {
+            if (!_editor->selection->selected (_marker)) {
+                _editor->selection->set (_marker);
+            }
+        } else {
+            Locations::LocationList ll;
+            list<Marker*> to_add;
+            framepos_t s, e;
+            _editor->selection->markers.range (s, e);
+            s = min (_marker->position(), s);
+            e = max (_marker->position(), e);
+            s = min (s, e);
+            e = max (s, e);
+            if (e < max_framepos) {
+                ++e;
+            }
+            _editor->session()->locations()->find_all_between (s, e, ll, Location::Flags (ARDOUR::Location::IsMark));
+            for (Locations::LocationList::iterator i = ll.begin(); i != ll.end(); ++i) {
+                Editor::LocationMarkers* lm = _editor->find_location_markers (*i);
+                if (lm) {
+                    if (lm->start) {
+                        to_add.push_back (lm->start);
+                    }
+                    if (lm->end) {
+                        to_add.push_back (lm->end);
+                    }
+                }
+            }
+            if (!to_add.empty()) {
+                _editor->selection->add (to_add);
+            }
+        }
 		break;
 	}
 	case Selection::Add:
