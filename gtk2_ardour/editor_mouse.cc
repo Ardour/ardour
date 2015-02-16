@@ -659,12 +659,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 
         case LeftDragHandle:
-                _drags->set (new MarkerDrag (this, item, MarkerDrag::TrimLeft), event);
-                break;
+            _drags->set (new MarkerDrag (this, item, MarkerDrag::TrimLeft), event);
+            return true;
+            break;
 
         case RightDragHandle:
-                _drags->set (new MarkerDrag (this, item, MarkerDrag::TrimRight), event);
-                break;
+            _drags->set (new MarkerDrag (this, item, MarkerDrag::TrimRight), event);
+            return true;
+            break;
 
 	case TempoMarkerItem:
 	{
@@ -1242,7 +1244,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MouseZoom:
-		if (event->type == GDK_BUTTON_PRESS) {
+		if (entered_regionview && (event->type == GDK_BUTTON_PRESS)) {
 			_drags->set (new MouseZoomDrag (this, item), event);
 		}
 
