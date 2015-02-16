@@ -627,6 +627,8 @@ tar -cjf $APPDIR.tar.bz2 $APPDIR
 echo "Calculating bundle size"
 du -sb $APPDIR/  | awk '{print $1}' > $APPDIR.size
 
+( cd $APPDIR ; find . ) > file_list.txt
+
 rm -rf $APPDIR/
 
 echo "Done."

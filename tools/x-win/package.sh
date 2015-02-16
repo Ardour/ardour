@@ -162,6 +162,8 @@ cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 echo " === complete"
 du -sh $DESTDIR
 
+( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt
+
 ################################################################################
 ### get video tools
 if test -z "$NOVIDEOTOOLS"; then

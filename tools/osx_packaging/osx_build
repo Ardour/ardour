@@ -615,6 +615,8 @@ if test x$WITH_HARVID != x ; then
 	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
 
+( cd $PRODUCT_PKG_DIR ; find . ) > file_list.txt
+
 echo "Building DMG ..."
 
 # UC_DMG=$APPNAME-${release_version}-UC.dmg
