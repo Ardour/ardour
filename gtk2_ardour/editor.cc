@@ -4850,11 +4850,13 @@ Editor::get_regions_from_selection_and_mouse (framepos_t pos)
 {
 	RegionSelection regions;
 
-    if (selection->selected (entered_regionview) ) {
-        regions = selection->regions;
+    if (entered_regionview) {
+        if (selection->selected (entered_regionview) ) {
+            regions = selection->regions;
+        }
+        
+        regions.add (entered_regionview);
     }
-    
-    regions.add (entered_regionview);
     
     // Greg Zharun: Waves Tracks PRD does not say this.
     // So let's skip this.
