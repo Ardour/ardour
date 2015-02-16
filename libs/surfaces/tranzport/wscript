@@ -2,12 +2,6 @@
 from waflib.extras import autowaf as autowaf
 import os
 
-# Library version (UNIX style major, minor, micro)
-# major increment <=> incompatible changes
-# minor increment <=> compatible changes (additions)
-# micro increment <=> no interface changes
-LIBARDOUR_TRANZPORT_LIB_VERSION = '4.1.0'
-
 # Mandatory variables
 top = '.'
 out = 'build'
@@ -45,7 +39,6 @@ def build(bld):
     obj.name         = 'libardour_tranzport'
     obj.target       = 'ardour_tranzport'
     obj.use          = 'libardour libardour_cp'
-    obj.vnum         = LIBARDOUR_TRANZPORT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():
