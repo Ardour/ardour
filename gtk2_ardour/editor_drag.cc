@@ -3660,28 +3660,16 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 
-                Location* loc = _marker->location ();
+        Location* loc = _marker->location ();
+        if (loc && loc->is_auto_loop()) {
+            /* toggle loop playback, leave rolling if already rolling */
+            _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), false);
+            return;
+        }
 
-                if (loc) {
-                        if (loc->is_skip()) {
-                                /* skip range - click toggles active skip status */
-
-                                Glib::RefPtr<Gtk::Settings> settings (Gtk::Settings::get_default());
-
-                                timeout_connection = Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (timeout_set_skipping), loc, !loc->is_skipping()), 
-                                                                                     settings->property_gtk_double_click_time() + 10);
-                                return;
-                        } else if (loc->is_auto_loop()) {
-                                /* toggle loop playback, leave rolling if already rolling */
-                                _editor->session()->request_play_loop (!_editor->session()->get_play_loop(), false);
-                                return;
-                        }
-                }
-
-                /* other markers: do nothing but finish
+        /* other markers: do nothing but finish
 		   off the selection process
 		*/
-
 
 		switch (op) {
 		case Selection::Set:
@@ -3693,11 +3681,21 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		case Selection::Toggle:
             // Range Markers should not be multiselected.
             // There must not be any Range Marker in any multi-selection
-            if ((_marker->type () == Marker::Mark) &&
-                (!_editor->selection->markers.empty()) &&
-                (_editor->selection->markers.front ()->type () == Marker::Range)) {
-                _editor->selection->markers.clear ();
+            if (_marker->type () == Marker::Mark) {
+                if ((!_editor->selection->markers.empty()) &&
+                    (_editor->selection->markers.front ()->type () == Marker::Range)) {
+                    _editor->selection->markers.clear ();
+                }
                 
+            } else {
+                Location* loc = _marker->location ();
+                
+                if (loc) {
+                    if (loc->is_skip()) {
+                        loc->set_skipping (!loc->is_skipping ());
+                    }
+                }
+                break;
             }
 			_editor->selection->toggle (_marker);
 			break;
