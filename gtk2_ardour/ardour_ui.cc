@@ -4504,6 +4504,7 @@ ARDOUR_UI::record_state_changed ()
 	if (_session->actively_recording () && _session->have_rec_enabled_track ()) {
 
         tracks_control_panel.action()->set_sensitive(false);
+        key_editor.action()->set_sensitive(false);
         set_topbar_buttons_sensitive (false);
         
         if (big_clock_window) {
@@ -4513,6 +4514,7 @@ ARDOUR_UI::record_state_changed ()
 	} else {
         
         tracks_control_panel.action()->set_sensitive(true);
+        key_editor.action()->set_sensitive(false);
         set_topbar_buttons_sensitive (true);
 
         if (big_clock_window) {

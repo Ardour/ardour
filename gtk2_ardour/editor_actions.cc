@@ -65,11 +65,12 @@ reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc
 	return act;
 }
 
-static void
+static RefPtr<Action>
 toggle_reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
 {
 	RefPtr<Action> act = ActionManager::register_toggle_action (group, name, label, slot);
 	ActionManager::session_sensitive_actions.push_back (act);
+    return act;
 }
 
 static void
@@ -120,8 +121,11 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("MiscOptions"), _("Misc Options"));
 	ActionManager::register_action (editor_menu_actions, X_("Monitoring"), _("Monitoring"));
 	ActionManager::register_action (editor_menu_actions, X_("MoveActiveMarkMenu"), _("Active Mark"));
-	ActionManager::register_action (editor_menu_actions, X_("MovePlayHeadMenu"), _("Playhead"));
-    ActionManager::register_action (editor_menu_actions, X_("PlayHeadModes"), _("Playhead Modes"));
+	act = ActionManager::register_action (editor_menu_actions, X_("MovePlayHeadMenu"), _("Playhead"));
+    ActionManager::record_restricted_actions.push_back (act);
+    act = ActionManager::register_action (editor_menu_actions, X_("PlayHeadModes"), _("Playhead Modes"));
+    ActionManager::record_restricted_actions.push_back (act);
+    
 	ActionManager::register_action (editor_menu_actions, X_("PrimaryClockMenu"), _("Clock"));
 	ActionManager::register_action (editor_menu_actions, X_("Pullup"), _("Pullup / Pulldown"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionEditOps"), _("Region operations"));
@@ -131,7 +135,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("ScrollMenu"), _("Scroll"));
 	ActionManager::register_action (editor_menu_actions, X_("SecondaryClockMenu"), _("Secondary Clock"));
 	ActionManager::register_action (editor_menu_actions, X_("Select"), _("Select"));
-	ActionManager::register_action (editor_menu_actions, X_("SelectMenu"), _("Select"));
+	act = ActionManager::register_action (editor_menu_actions, X_("SelectMenu"), _("Select"));
+    ActionManager::record_restricted_actions.push_back (act);
 	ActionManager::register_action (editor_menu_actions, X_("SeparateMenu"), _("Separate"));
 	ActionManager::register_action (editor_menu_actions, X_("SetLoopMenu"), _("Loop"));
 	ActionManager::register_action (editor_menu_actions, X_("SetPunchMenu"), _("Punch"));
@@ -197,9 +202,12 @@ Editor::register_actions ()
 
 	reg_sens (editor_actions, "select-all-objects", _("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set));
 	reg_sens (editor_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(*this, &Editor::select_all_tracks));
-	reg_sens (editor_actions, "select-all", _("Select All"), sigc::mem_fun(*this, &Editor::select_all_regions ));
-	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection ));
-    toggle_reg_sens (editor_actions, "toggle-enable-group-edit", _("Enable Group Edit"), sigc::mem_fun (*this, &Editor::toggle_enable_group_edit));
+	act = reg_sens (editor_actions, "select-all", _("Select All"), sigc::mem_fun(*this, &Editor::select_all_regions ));
+    ActionManager::record_restricted_actions.push_back (act);
+	act = reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection ));
+    ActionManager::record_restricted_actions.push_back (act);
+    act = toggle_reg_sens (editor_actions, "toggle-enable-group-edit", _("Enable Group Edit"), sigc::mem_fun (*this, &Editor::toggle_enable_group_edit));
+    ActionManager::record_restricted_actions.push_back (act);
 
 	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
 	reg_sens (editor_actions, "alternate-select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
@@ -244,15 +252,26 @@ Editor::register_actions ()
 		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::goto_nth_marker), i - 1));
 	}
 
-	reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
-	reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
-	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Marker"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
-    reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+	act = reg_sens (editor_actions, "jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
+    ActionManager::record_restricted_actions.push_back (act);
     
-    toggle_reg_sens (editor_actions, "play-from-selection", _("Play from Selection"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), RangeSelectionStart));
-    toggle_reg_sens (editor_actions, "play-from-last-position", _("Play from Last Position"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), LastLocate));
-    toggle_reg_sens (editor_actions, "play-loop", _("Play Loop"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), Loop));
-    toggle_reg_sens (editor_actions, "play-from-selected-region", _("Play from Selected Region"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), RegionSelectionStart));
+	act = reg_sens (editor_actions, "alternate-jump-forward-to-mark", _("Jump to Next Marker"), sigc::mem_fun(*this, &Editor::jump_forward_to_mark));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+	act = reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Marker"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+    act = reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+    act = toggle_reg_sens (editor_actions, "play-from-selection", _("Play from Selection"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), RangeSelectionStart));
+    ActionManager::record_restricted_actions.push_back (act);
+    act = toggle_reg_sens (editor_actions, "play-from-last-position", _("Play from Last Position"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), LastLocate));
+    ActionManager::record_restricted_actions.push_back (act);
+    act = toggle_reg_sens (editor_actions, "play-loop", _("Play Loop"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), Loop));
+    ActionManager::record_restricted_actions.push_back (act);
+    act = toggle_reg_sens (editor_actions, "play-from-selected-region", _("Play from Selected Region"), sigc::bind(sigc::mem_fun(*this, &Editor::toggle_playhead_mode), RegionSelectionStart));
+    ActionManager::record_restricted_actions.push_back (act);
     
 	act = reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	reg_sens (editor_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
@@ -358,12 +377,20 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "crop", _("Crop"), sigc::mem_fun(*this, &Editor::crop_region_to_selection));
 
-	reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
-	reg_sens (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
+	act = reg_sens (editor_actions, "editor-cut", _("Cut"), sigc::mem_fun(*this, &Editor::cut));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+	act = reg_sens (editor_actions, "editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
+    ActionManager::record_restricted_actions.push_back (act);
+    
 	reg_sens (editor_actions, "alternate-editor-delete", _("Delete"), sigc::mem_fun(*this, &Editor::delete_));
+    ActionManager::record_restricted_actions.push_back (act);
 
-	reg_sens (editor_actions, "editor-copy", _("Copy"), sigc::mem_fun(*this, &Editor::copy));
-	reg_sens (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
+	act = reg_sens (editor_actions, "editor-copy", _("Copy"), sigc::mem_fun(*this, &Editor::copy));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+	act = reg_sens (editor_actions, "editor-paste", _("Paste"), sigc::mem_fun(*this, &Editor::keyboard_paste));
+    ActionManager::record_restricted_actions.push_back (act);
 
 	reg_sens (editor_actions, "editor-fade-range", _("Fade Range Selection"), sigc::mem_fun(*this, &Editor::fade_range));
 
@@ -720,6 +747,7 @@ Editor::register_actions ()
 	/* the next two are duplicate items with different names for use in two different contexts */
 
 	act = reg_sens (editor_actions, X_("addExistingAudioFiles"), _("Import"), sigc::mem_fun (*this, &Editor::external_audio_dialog));
+    ActionManager::record_restricted_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
@@ -2065,11 +2093,15 @@ Editor::register_region_actions ()
 		);
 
 	/* PART 3: actions that operate on the selection and also require the edit point location */
-
+    Glib::RefPtr<Gtk::Action> act;
 	reg_sens (_region_actions, "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
 	reg_sens (_region_actions, "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
-	reg_sens (_region_actions, "split-region", _("Split"), sigc::mem_fun (*this, &Editor::split_region));
-    reg_sens (_region_actions, "split-on-playhead", _("Split On Playhead"), sigc::mem_fun (*this, &Editor::split_region_on_playhead));
+	act = reg_sens (_region_actions, "split-region", _("Split"), sigc::mem_fun (*this, &Editor::split_region));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+    act = reg_sens (_region_actions, "split-on-playhead", _("Split On Playhead"), sigc::mem_fun (*this, &Editor::split_region_on_playhead));
+    ActionManager::record_restricted_actions.push_back (act);
+    
 	reg_sens (_region_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
 	reg_sens (_region_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
 

@@ -529,6 +529,7 @@ ARDOUR_UI::install_actions ()
 	act=ActionManager::register_action (main_menu_actions, X_("Session"), _("File"));
     ActionManager::session_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (main_actions, X_("Cleanup"), _("CleanUp"));
+    ActionManager::record_restricted_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::register_action (main_menu_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_menu_actions, X_("TransportOptions"), _("Options"));
@@ -550,9 +551,14 @@ ARDOUR_UI::install_actions ()
 
 
 	act = ActionManager::register_action (main_actions, X_("New"), _("New"),  hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::get_session_parameters), false, true, "")));
-
-	ActionManager::register_action (main_actions, X_("Open"), _("Open"),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
-	ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+	act = ActionManager::register_action (main_actions, X_("Open"), _("Open"),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
+    ActionManager::record_restricted_actions.push_back (act);
+    
+	act = ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
+    ActionManager::record_restricted_actions.push_back (act);
+    
     /* register act for recent_session_menuitems */
     for(int i=0;i<MAX_RECENT_SESSION_COUNT;++i){
         std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
@@ -604,6 +610,7 @@ ARDOUR_UI::install_actions ()
 
 	act = ActionManager::register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
 	ActionManager::session_sensitive_actions.push_back (act);
+    ActionManager::record_restricted_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
@@ -623,24 +630,31 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Mixdown"),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
+    ActionManager::record_restricted_actions.push_back (act);
 	//ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("StemExport"), _("Stem Export"),  sigc::mem_fun (*editor, &PublicEditor::stem_export));
+    ActionManager::record_restricted_actions.push_back (act);
 	//ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
+    ActionManager::record_restricted_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("CleanupUnused"), _("Delete Unused Sources"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
     ActionManager::record_restricted_actions.push_back (act);
 	//ActionManager::session_sensitive_actions.push_back (act);
     act = ActionManager::register_action (main_actions, X_("ShowUnused"), _("Show Unused"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::open_dead_folder));
+    ActionManager::record_restricted_actions.push_back (act);
     //ActionManager::session_sensitive_actions.push_back (act);
     
-    ActionManager::register_action (main_actions, X_("recent-sessions"), _("Recent Sessions"));
+    act = ActionManager::register_action (main_actions, X_("recent-sessions"), _("Recent Sessions"));
+    ActionManager::record_restricted_actions.push_back (act);
+    
 	act = ActionManager::register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
+    ActionManager::record_restricted_actions.push_back (act);
 
 	/* these actions are intended to be shared across all windows */
 
