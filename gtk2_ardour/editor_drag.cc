@@ -3417,7 +3417,8 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
         // Range Markers should not be multiselected.
         // There must not be any Range Marker in any multi-selection
         if ((_marker->type () == Marker::Range) ||
-            (_editor->selection->markers.front ()->type () == Marker::Range)) {
+            ((!_editor->selection->markers.empty()) &&
+             (_editor->selection->markers.front ()->type () == Marker::Range))) {
             if (!_editor->selection->selected (_marker)) {
                 _editor->selection->set (_marker);
             }
@@ -3690,7 +3691,14 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			break;
 
 		case Selection::Toggle:
-			/* we toggle on the button release, click only */
+            // Range Markers should not be multiselected.
+            // There must not be any Range Marker in any multi-selection
+            if ((_marker->type () == Marker::Mark) &&
+                (!_editor->selection->markers.empty()) &&
+                (_editor->selection->markers.front ()->type () == Marker::Range)) {
+                _editor->selection->markers.clear ();
+                
+            }
 			_editor->selection->toggle (_marker);
 			break;
 
