@@ -1981,11 +1981,7 @@ Editor::add_region_context_items (Gtk::Menu_Helpers::MenuList& edit_items)
     
     // Gain
     
-    Menu *gain_menu = manage (new Menu);
-    MenuList& gain_items = gain_menu->items();
-    gain_items.push_back (*manage (ActionManager::get_action_from_name ("boost-region-gain")->create_menu_item ()));
-    gain_items.push_back (*manage (ActionManager::get_action_from_name ("cut-region-gain")->create_menu_item ()));
-    edit_items.push_back (MenuElem (_("Gain"), *gain_menu));
+    edit_items.push_back (MenuElem (_("Mute"), sigc::mem_fun(*this, &Editor::toggle_region_mute)));
 }
 
 
