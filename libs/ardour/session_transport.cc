@@ -461,7 +461,9 @@ Session::non_realtime_locate ()
 			 */
 			set_track_loop (false);
 
-		} else if (loc && Config->get_seamless_loop() && (loc->start() == _transport_frame)) {
+		} else if (loc && Config->get_seamless_loop() &&
+                   ((loc->start() <= _transport_frame) ||
+                   (loc->end() > _transport_frame) ) ) {
 
 			/* jumping to start of loop. This  might have been done before but it is
 			 * idempotent and cheap. Doing it here ensures that when we start playback
