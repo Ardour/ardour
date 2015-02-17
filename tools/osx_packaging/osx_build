@@ -422,7 +422,7 @@ while [ true ] ; do
 		strip -u -r -arch all $file &>/dev/null
 	fi
 
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
 	# echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
