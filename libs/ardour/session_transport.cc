@@ -1023,6 +1023,8 @@ Session::micro_locate (framecnt_t distance)
 void
 Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool for_seamless_loop, bool force, bool with_mmc)
 {
+	bool need_butler = false;
+	
 	/* Locates for seamless looping are fairly different from other
 	 * locates. They assume that the diskstream buffers for each track
 	 * already have the correct data in them, and thus there is no need to
@@ -1098,7 +1100,8 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		}
 
 		add_post_transport_work (todo);
-
+		need_butler = true;
+		
 	} else {
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
@@ -1165,6 +1168,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 							 * end.
 							 */
 							add_post_transport_work (PostTransportLocate);
+							need_butler = true;
 						}
 						    
 					}
@@ -1189,7 +1193,9 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		}
 	}
 
-	_butler->schedule_transport_work ();
+	if (need_butler) {
+		_butler->schedule_transport_work ();
+	}
 
 	loop_changing = false;
 
