@@ -123,13 +123,13 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
            changes to this object 
         */
 
-    PBD::Signal0<void> Changed;
-    void set_block_change_notifications (bool yn) {_block_change_notifications = yn;}
+	PBD::Signal0<void> Changed;
+	void set_block_change_notifications (bool yn) {_block_change_notifications = yn;}
     
 	PBD::Signal0<void> NameChanged;
 	PBD::Signal0<void> EndChanged;
 	PBD::Signal0<void> StartChanged;
-    PBD::Signal0<void> FlagsChanged;
+	PBD::Signal0<void> FlagsChanged;
 	PBD::Signal0<void> LockChanged;
 	PBD::Signal0<void> PositionLockStyleChanged;
         
@@ -158,7 +158,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	PositionLockStyle  _position_lock_style;
 	boost::shared_ptr<SceneChange> _scene_change;
     
-    bool _block_change_notifications; // required for group operations
+	bool _block_change_notifications; // required for group operations
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
