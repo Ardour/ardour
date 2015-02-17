@@ -1158,6 +1158,12 @@ Editor::range_marker_menu_remove ()
 void
 Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock)
 {
+	bool many = (selection->markers.size ()) > 1 && (!location);
+   
+    begin_reversible_command (many ? (lock ? _("lock markers"):_("unlock markers")) :
+									(lock ? _("lock marker"):_("unlock marker")));
+	XMLNode &before = _session->locations()->get_state();
+    
 	if (location) { // null says: deal with selection
 		if (lock) {
 			location->lock ();
@@ -1166,14 +1172,13 @@ Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock)
 		}
 	} else {
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
-			bool is_start;
-			Location* loc = find_location_from_marker (*x, is_start);
+			Marker *marker = *x;
+			Location* loc = marker->location ();
 			// loop range cannot be the manipulated object in this case
 			if (loc->is_auto_loop()) {
 				continue;
 			}
 
-			Marker *marker = *x;
 			if (marker && loc->is_mark () && !dynamic_cast <RangeMarker*> (marker)) {
 				if (loc->locked () && !lock) {
 					loc->unlock ();
@@ -1185,6 +1190,9 @@ Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock)
 			}
 		}
 	}
+	XMLNode &after = _session->locations()->get_state();
+	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+	commit_reversible_command ();
 }
 
 void
