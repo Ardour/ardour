@@ -1205,6 +1205,7 @@ Session::auto_loop_changed (Location* location)
 	}
 
 	last_loopend = location->end();
+	set_dirty ();
 }
 
 void
