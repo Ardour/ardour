@@ -657,9 +657,13 @@ Location::set_state (const XMLNode& node, int version)
 	_flags = Flags (string_2_enum (prop->value(), _flags));
 
 	if ((prop = node.property ("locked")) != 0) {
-		_locked = string_is_affirmative (prop->value());
+		if (string_is_affirmative (prop->value())) {
+			lock ();
+		} else {
+			unlock ();  
+        }
 	} else {
-		_locked = false;
+		unlock ();
 	}
 
 	for (cd_iter = cd_list.begin(); cd_iter != cd_list.end(); ++cd_iter) {
@@ -1096,7 +1100,7 @@ Locations::set_state (const XMLNode& node, int version)
                     // changed locations will be updated by Locations::changed signal
                     loc->set_block_change_notifications (true);
 					loc->set_state (**niter, version);
-                    loc->set_block_change_notifications (false);
+					loc->set_block_change_notifications (false);
 				} else {
 					loc = new Location (_session, **niter);
 				}
