@@ -4391,7 +4391,8 @@ what you would like to do.\n"), PROGRAM_NAME),
 int
 ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
 {
- 	
+// Tracks doesn't use it
+/*
      WavesMessageDialog message_dialog (_("Sample Rate Mismatch"),
 										string_compose (_("\
 This session was created with a sample rate of %1 Hz, but\n\
@@ -4406,7 +4407,8 @@ audio may be played at the wrong sample rate.\n"),
     message_dialog.set_position (WIN_POS_CENTER);
     
 	int result = message_dialog.run ();
-	
+*/
+    int result = Gtk::RESPONSE_ACCEPT;
 	return (result == Gtk::RESPONSE_ACCEPT || result == WavesDialog::RESPONSE_DEFAULT) ? 0 : 1;
 }
 
