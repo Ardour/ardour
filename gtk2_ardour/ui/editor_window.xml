@@ -655,18 +655,23 @@
                           table.bottomattach="4"
                           table.xfill="true"
                           bgnormal="#353535"/>
-              <HBox table.leftattach="0"
+              <VBox table.leftattach="0"
                     table.rightattach="1"
                     table.topattach="3"
                     table.bottomattach="4"
                     table.xfill="true"
                     table.yfill="true">
-                <EventBox bgnormal="#383838"
-                          box.fill="true"
-                          box.expand="true"/>
                 <EventBox bgnormal="#000000"
-                          width="1"/>
-              </HBox>
+                          height="1"/>
+                <HBox box.fill="true"
+                      box.expand="true">
+                    <EventBox bgnormal="#6C6C6C"
+                              box.fill="true"
+                              box.expand="true"/>
+                    <EventBox bgnormal="#000000"
+                              width="1"/>
+                </HBox>
+              </VBox>
             </Table>
           </VPaned>
         </HPaned>
