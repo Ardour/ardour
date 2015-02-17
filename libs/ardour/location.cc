@@ -1098,9 +1098,7 @@ Locations::set_state (const XMLNode& node, int version)
 					loc = *i;
                     
                     // changed locations will be updated by Locations::changed signal
-                    loc->set_block_change_notifications (true);
 					loc->set_state (**niter, version);
-					loc->set_block_change_notifications (false);
 				} else {
 					loc = new Location (_session, **niter);
 				}
