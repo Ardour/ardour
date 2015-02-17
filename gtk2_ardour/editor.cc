@@ -80,6 +80,7 @@
 #include "ardour/utils.h"
 
 #include "canvas/debug.h"
+#include "canvas/scroll_group.h"
 #include "canvas/text.h"
 
 #include "control_protocol/control_protocol.h"
@@ -2578,6 +2579,18 @@ Editor::get_state ()
 	node->add_property ("nudge-clock-value", buf);
 
 	return *node;
+}
+
+/** Return true if coordinate given by (@param x, @param @y) is within what we define as the "track area". 
+ *  Return false otherwise.
+ *
+ * @param x : x-axis coordinate in canvas coordinate space
+ * @param y : x-axis coordinate in canvas coordinate space
+ */
+bool
+Editor::inside_track_area (double x, double y) const
+{
+	return hv_scroll_group->covers (ArdourCanvas::Duple (x, y));
 }
 
 /** if @param trackview_relative_offset is true, @param y y is an offset into the trackview area, in pixel units

@@ -485,6 +485,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
         ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
+	bool inside_track_area (double x, double y) const;
+	
         void override_visible_track_count ();
 
 	/* Ruler metrics methods */
