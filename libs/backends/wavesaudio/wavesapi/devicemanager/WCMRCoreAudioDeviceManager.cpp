@@ -2945,7 +2945,6 @@ WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
     if (eNoErr != err)
     {
         std::cout << "API::PortAudioDeviceManager::updateDeviceListImpl: Device list update error: "<< err << std::endl;
-        return err;
     }
     
     if (m_CurrentDevice)
