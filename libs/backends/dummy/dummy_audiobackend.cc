@@ -23,6 +23,10 @@
 
 #include <glibmm.h>
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#endif
+
 #include "dummy_audiobackend.h"
 #include "dummy_midi_seq.h"
 
