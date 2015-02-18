@@ -74,7 +74,7 @@ const double TimeAxisViewItem::NAME_HIGHLIGHT_X_OFFSET = 10.0;
 const double TimeAxisViewItem::NAME_HIGHLIGHT_Y_OFFSET = 5.0;
 const double TimeAxisViewItem::GRAB_HANDLE_TOP = 2.0;
 const double TimeAxisViewItem::GRAB_HANDLE_WIDTH = 5.0;
-const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 2.0;
+const double TimeAxisViewItem::RIGHT_EDGE_SHIFT = 0.0;
 
 const double TimeAxisViewItem::REGION_TOP_OFFSET = 2.0;
 const double TimeAxisViewItem::REGION_BOTTOM_OFFSET = 3.0;
