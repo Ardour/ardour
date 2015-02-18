@@ -447,6 +447,9 @@ static void synth_parse_midi(void *synth, const uint8_t *data, const size_t size
       ev.type=NOTE_ON;
       ev.d.tone.note=data[1]&0x7f;
       ev.d.tone.velocity=data[2]&0x7f;
+      if (ev.d.tone.velocity == 0) {
+        ev.type=NOTE_OFF;
+      }
       break;
     case 0xB0:
       ev.type=CONTROL_CHANGE;
