@@ -1,6 +1,5 @@
 /*
-    Copyright (C) 2011 Paul Davis
-    Copyright (C) 2011 Tim Mayberry
+    Copyright (C) 2015 Tim Mayberry
 
     This program is free software; you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -17,30 +16,33 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef ARDOUR_TEST_UTIL_H
-#define ARDOUR_TEST_UTIL_H
+//#ifndef ABSTRACT_UI_EXPORTS
+//#define ABSTRACT_UI_EXPORTS
+//#endif
 
-#include <string>
-#include <list>
+#include "pbd/abstract_ui.h"
 
-#include "pbd/search_path.h"
+#include "test_receiver.h"
 
-class XMLNode;
+class TestUIRequest : public BaseUI::BaseRequestObject
+{
 
-namespace ARDOUR {
-	class Session;
-}
+};
 
-PBD::Searchpath test_search_path ();
+class TestUI : public AbstractUI<TestUIRequest>
+{
+public: // ctors
 
-std::string new_test_output_dir (std::string prefix = "");
+	TestUI ();
 
-int get_test_sample_rate ();
+	~TestUI ();
 
-extern void check_xml (XMLNode *, std::string, std::list<std::string> const &);
-extern bool write_ref (XMLNode *, std::string);
-extern void create_and_start_dummy_backend ();
-extern void stop_and_destroy_backend ();
-extern ARDOUR::Session* load_session (std::string, std::string);
+public: // AbstractUI Interface
 
-#endif
+	virtual void do_request (TestUIRequest*);
+
+private: // member data
+
+	TestReceiver m_test_receiver;
+
+};

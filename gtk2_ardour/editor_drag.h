@@ -178,6 +178,10 @@ public:
 		return true;
 	}
 
+	bool initially_vertical() const {
+		return _initially_vertical;
+	}
+	
 	/** Set up the _pointer_frame_offset */
 	virtual void setup_pointer_frame_offset () {
 		_pointer_frame_offset = 0;
@@ -235,6 +239,7 @@ private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 	bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
+	bool _initially_vertical; ///< true if after move threshold is passed we appear to be moving vertically; undefined before that
         bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true
@@ -328,6 +333,7 @@ protected:
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
+	bool _single_axis;
 };
 
 

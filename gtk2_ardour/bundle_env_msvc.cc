@@ -411,6 +411,10 @@ fixup_bundle_environment (int argc, char* argv[], const char** localedir)
 	Glib::setenv ("LADSPA_PATH", path, true);
 
 
+	// Next, set up 'SUIL_MODULE_DIR'
+	Glib::setenv ("SUIL_MODULE_DIR", Glib::build_filename(ardour_dll_directory(), "suil"), true);
+
+
 	// Next, set up 'VAMP_PATH'
 	cstr = getenv ("VAMP_PATH");
 	if (cstr) {

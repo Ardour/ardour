@@ -384,6 +384,7 @@ Session::butler_transport_work ()
 	}
 
 	if (ptw & PostTransportLocate) {
+		DEBUG_TRACE (DEBUG::Transport, "nonrealtime locate invoked from BTW\n");
 		non_realtime_locate ();
 	}
 
@@ -445,6 +446,39 @@ Session::non_realtime_overwrite (int on_entry, bool& finished)
 void
 Session::non_realtime_locate ()
 {
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("locate tracks to %1\n", _transport_frame));
+
+	if (Config->get_loop_is_mode() && get_play_loop()) {
+
+		Location *loc  = _locations->auto_loop_location();
+
+		if (!loc || (_transport_frame < loc->start() || _transport_frame >= loc->end())) {
+			/* jumped out of loop range: stop tracks from looping,
+			   but leave loop (mode) enabled.
+			 */
+			set_track_loop (false);
+
+		} else if (loc && Config->get_seamless_loop() &&
+                   ((loc->start() <= _transport_frame) ||
+                   (loc->end() > _transport_frame) ) ) {
+
+			/* jumping to start of loop. This  might have been done before but it is
+			 * idempotent and cheap. Doing it here ensures that when we start playback
+			 * outside the loop we still flip tracks into the magic seamless mode
+			 * when needed.
+			 */
+			set_track_loop (true);
+
+		} else if (loc) {
+			set_track_loop (false);
+		}
+		
+	} else {
+
+		/* no more looping .. should have been noticed elsewhere */
+	}
+
+	
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		(*i)->non_realtime_locate (_transport_frame);
@@ -458,7 +492,6 @@ Session::non_realtime_locate ()
 	 */
 	clear_clicks ();
 }
-
 
 void
 Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
@@ -752,13 +785,30 @@ Session::unset_play_loop ()
 	play_loop = false;
 	clear_events (SessionEvent::AutoLoop);
 	clear_events (SessionEvent::AutoLoopDeclick);
+	set_track_loop (false);
 
-	// set all tracks to NOT use internal looping
+	if (Config->get_seamless_loop()) {
+		/* likely need to flush track buffers: this will locate us to wherever we are */
+		add_post_transport_work (PostTransportLocate);
+		_butler->schedule_transport_work ();
+	}
+}
+
+void
+Session::set_track_loop (bool yn)
+{
+	Location* loc = _locations->auto_loop_location ();
+
+	if (!loc) {
+		yn = false;
+	}
+
 	boost::shared_ptr<RouteList> rl = routes.reader ();
+
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && !tr->hidden()) {
-			tr->set_loop (0);
+			tr->set_loop (yn ? loc : 0);
 		}
 	}
 }
@@ -786,30 +836,24 @@ Session::set_play_loop (bool yn, double speed)
 	if (yn) {
 
 		play_loop = true;
-
+		have_looped = false;
+		
 		if (loc) {
 
 			unset_play_range ();
 
 			if (Config->get_seamless_loop()) {
-				// set all tracks to use internal looping
-				boost::shared_ptr<RouteList> rl = routes.reader ();
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					if (tr && !tr->hidden()) {
-						tr->set_loop (loc);
-					}
+				if (!Config->get_loop_is_mode()) {
+					/* set all tracks to use internal looping */
+					set_track_loop (true);
+				} else {
+					/* we will do this in the locate to the start OR when we hit the end 
+					 * of the loop for the first time 
+					 */
 				}
-			}
-			else {
-				// set all tracks to NOT use internal looping
-				boost::shared_ptr<RouteList> rl = routes.reader ();
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					if (tr && !tr->hidden()) {
-						tr->set_loop (0);
-					}
-				}
+			} else {
+				/* set all tracks to NOT use internal looping */
+				set_track_loop (false);
 			}
 
 			/* Put the delick and loop events in into the event list.  The declick event will
@@ -929,6 +973,8 @@ Session::micro_locate (framecnt_t distance)
 void
 Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool for_seamless_loop, bool force, bool with_mmc)
 {
+	bool need_butler = false;
+	
 	/* Locates for seamless looping are fairly different from other
 	 * locates. They assume that the diskstream buffers for each track
 	 * already have the correct data in them, and thus there is no need to
@@ -937,6 +983,9 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	 * changes in the value of _transport_frame. 
 	 */
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 seamless %4 force %5 mmc %6\n",
+	                                               target_frame, with_roll, with_flush, for_seamless_loop, force, with_mmc));
+	
 	if (actively_recording() && !for_seamless_loop) {
 		return;
 	}
@@ -983,7 +1032,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	 */
 
 	bool transport_was_stopped = !transport_rolling();
-
+	
 	if (transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_engine() && play_loop)) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
 		transport_was_stopped = true;
@@ -1001,8 +1050,8 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		}
 
 		add_post_transport_work (todo);
-		_butler->schedule_transport_work ();
-
+		need_butler = true;
+		
 	} else {
 
 		/* this is functionally what clear_clicks() does but with a tentative lock */
@@ -1041,8 +1090,18 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 				// located outside the loop: cancel looping directly, this is called from event handling context
 
+				have_looped = false;
+				
 				if (!Config->get_loop_is_mode()) {
 					set_play_loop (false, _transport_speed);
+				} else {
+					if (Config->get_seamless_loop()) {
+						/* this will make the non_realtime_locate() in the butler
+						   which then causes seek() in tracks actually do the right
+						   thing.
+						*/
+						set_track_loop (false);
+					}
 				}
 				
 			} else if (_transport_frame == al->start()) {
@@ -1051,6 +1110,19 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 				if (for_seamless_loop) {
 
+					if (!have_looped) {
+						/* first time */
+						if (_last_roll_location != al->start()) {
+							/* didn't start at loop start - playback must have
+							 * started before loop since we've now hit the loop
+							 * end.
+							 */
+							add_post_transport_work (PostTransportLocate);
+							need_butler = true;
+						}
+						    
+					}
+				
 					// this is only necessary for seamless looping
 					
 					boost::shared_ptr<RouteList> rl = routes.reader();
@@ -1069,6 +1141,10 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 				TransportLooped(); // EMIT SIGNAL
 			}
 		}
+	}
+
+	if (need_butler) {
+		_butler->schedule_transport_work ();
 	}
 
 	loop_changing = false;
@@ -1160,7 +1236,14 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 			
 			if (location != 0) {
 				if (_transport_frame != location->start()) {
+
+					if (Config->get_seamless_loop()) {
+						/* force tracks to do their thing */
+						set_track_loop (true);
+					}
+
 					/* jump to start and then roll from there */
+
 					request_locate (location->start(), true);
 					return;
 				}

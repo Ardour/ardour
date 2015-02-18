@@ -276,6 +276,8 @@ def configure(conf):
                           atleast_version='0.16.0', mandatory=False)
         autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV_0_19_2',
                           atleast_version='0.19.2', mandatory=False)
+        autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV_0_21_1',
+                          atleast_version='0.21.1', mandatory=False)
         autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
                           atleast_version='0.6.0', mandatory=False)
         conf.define ('LV2_SUPPORT', 1)
@@ -419,7 +421,7 @@ def build(bld):
         testcommon              = bld(features = 'cxx')
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
         testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
-                                   'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
+                                   'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc', 'test/test_ui.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
         testcommon.use          = ['libpbd','libmidipp','libevoral',

@@ -451,6 +451,9 @@ while [ true ] ; do
 		done
 		depCheckedList[$checkIdx]=$file
 		checkIdx=$(($checkIdx + 1))
+
+		# ignore suil/qt wrappers - the plugin will pull in QT4.
+		if echo $file | grep -qs 'libsuil_.*qt4' ; then continue; fi
 		
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
@@ -623,6 +626,8 @@ tar -cjf $APPDIR.tar.bz2 $APPDIR
 
 echo "Calculating bundle size"
 du -sb $APPDIR/  | awk '{print $1}' > $APPDIR.size
+
+( cd $APPDIR ; find . ) > file_list.txt
 
 rm -rf $APPDIR/
 

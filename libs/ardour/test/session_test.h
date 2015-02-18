@@ -10,8 +10,6 @@ class SessionTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
-	virtual void setUp ();
-	virtual void tearDown ();
 
 	void new_session ();
 	void new_session_from_template ();

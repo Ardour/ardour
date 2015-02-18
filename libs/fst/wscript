@@ -73,6 +73,7 @@ def build(bld):
         if bld.is_defined('WINDOWS_VST_SUPPORT'):
             bld (features = 'c', name='vstwin', source='vstwin.c', uselib = 'GIOMM', includes  = [ '../pbd/', '../ardour/', '.' ])
             obj.uselib = ['GIOMM', 'DL', 'GDI32']
+            obj.linkflags = ['-mwindows']
             obj.use = [ 'libpbd', 'vstwin' ]
         else:
             obj.uselib = ['GIOMM', 'DL']

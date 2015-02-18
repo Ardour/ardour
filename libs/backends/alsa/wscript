@@ -4,11 +4,6 @@ import os
 import sys
 import re
 
-# Library version (UNIX style major, minor, micro)
-# major increment <=> incompatible changes
-# minor increment <=> compatible changes (additions)
-# micro increment <=> no interface changes
-ALSABACKEND_VERSION = '0.0.1'
 I18N_PACKAGE = 'alsa-backend'
 
 # Mandatory variables
@@ -35,7 +30,6 @@ def build(bld):
     obj.target   = 'alsa_audiobackend'
     obj.use      = 'libardour libpbd ardouralsautil'
     obj.uselib   = 'ALSA'
-    obj.vnum     = ALSABACKEND_VERSION
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'

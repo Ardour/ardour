@@ -208,6 +208,7 @@ Session::Session (AudioEngine &eng,
 	, _post_transport_work (0)
 	,  cumulative_rf_motion (0)
 	, rf_scale (1.0)
+    , _ignore_skips_updates (false)
 	, _locations (new Locations (*this))
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
@@ -1205,6 +1206,7 @@ Session::auto_loop_changed (Location* location)
 	}
 
 	last_loopend = location->end();
+	set_dirty ();
 }
 
 void
@@ -1324,11 +1326,16 @@ Session::update_marks (Location*)
 void
 Session::update_skips (Location* loc, bool consolidate)
 {
+    if (_ignore_skips_updates) {
+        return;
+    }
+    
 	Locations::LocationList skips;
 
-	if (consolidate) {
-		consolidate_skips (loc);
-	}
+        if (consolidate) {
+	        PBD::Unwinder<bool> uw (_ignore_skips_updates, true);
+	        consolidate_skips (loc);
+        }
 
 	sync_locations_to_skips ();
         
@@ -1439,7 +1446,8 @@ void
 Session::location_removed (Location *location)
 {
         if (location->is_auto_loop()) {
-                set_auto_loop_location (0);
+	        set_auto_loop_location (0);
+	        set_track_loop (false);
         }
         
         if (location->is_auto_punch()) {
@@ -1468,15 +1476,20 @@ Session::locations_changed ()
 void
 Session::_locations_changed (const Locations::LocationList& locations)
 {
-        /* There was some mass-change in the Locations object. 
+	/* There was some mass-change in the Locations object. 
 
-           We might be re-adding a location here but it doesn't actually matter
-           for all the locations that the Session takes an interest in.
-        */
+	   We might be re-adding a location here but it doesn't actually matter
+	   for all the locations that the Session takes an interest in.
+	*/
 
-	for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-                location_added (*i);
-        }
+	{
+		PBD::Unwinder<bool> protect_ignore_skip_updates (_ignore_skips_updates, true);
+		for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+			location_added (*i);
+		}
+	}
+    
+	update_skips (NULL, false);
 }
 
 void

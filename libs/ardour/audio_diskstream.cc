@@ -995,6 +995,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		if (loc && start >= loop_end) {
 			start = loop_start + ((start - loop_start) % loop_length);
 		}
+
 	}
 
 	if (reversed) {

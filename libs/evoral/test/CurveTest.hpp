@@ -9,6 +9,7 @@ class CurveTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (twoPointLinear);
 	CPPUNIT_TEST (threePointLinear);
 	CPPUNIT_TEST (threePointDiscete);
+	CPPUNIT_TEST (constrainedCubic);
 	CPPUNIT_TEST (ctrlListEval);
 	CPPUNIT_TEST_SUITE_END ();
 
@@ -16,6 +17,7 @@ public:
 	void twoPointLinear ();
 	void threePointLinear ();
 	void threePointDiscete ();
+	void constrainedCubic ();
 	void ctrlListEval ();
 
 private:

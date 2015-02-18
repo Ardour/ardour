@@ -1196,9 +1196,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void sync_locations_to_skips ();
 	void _sync_locations_to_skips ();
     
-	PBD::ScopedConnectionList loop_update_connections;
-	PBD::ScopedConnectionList mark_update_connections;
 	PBD::ScopedConnectionList skip_update_connections;
+	bool _ignore_skips_updates;
 
 	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);
@@ -1360,7 +1359,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void post_transport ();
 	void engine_halted ();
 	void xrun_recovery ();
-
+	void set_track_loop (bool);
+	
 	/* These are synchronous and so can only be called from within the process
 	 * cycle
 	 */

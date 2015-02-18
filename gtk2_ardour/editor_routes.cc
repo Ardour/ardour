@@ -516,7 +516,7 @@ EditorRoutes::redisplay_real ()
 		}
 
 		bool visible = tv->marked_for_display ();
-
+		
 		/* show or hide the TimeAxisView */
 		if (visible) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);

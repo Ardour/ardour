@@ -23,7 +23,6 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"
-#include "pbd/textreceiver.h"
 #include "pbd/file_utils.h"
 
 #include "ardour/session.h"
@@ -97,43 +96,27 @@ write_ref (XMLNode* node, string ref_file)
 	return rv;
 }
 
-class TestReceiver : public Receiver 
+void
+create_and_start_dummy_backend ()
 {
-protected:
-	void receive (Transmitter::Channel chn, const char * str) {
-		const char *prefix = "";
-		
-		switch (chn) {
-		case Transmitter::Error:
-			prefix = ": [ERROR]: ";
-			break;
-		case Transmitter::Info:
-			/* ignore */
-			return;
-		case Transmitter::Warning:
-			prefix = ": [WARNING]: ";
-			break;
-		case Transmitter::Fatal:
-			prefix = ": [FATAL]: ";
-			break;
-		case Transmitter::Throw:
-			/* this isn't supposed to happen */
-			abort ();
-		}
-		
-		/* note: iostreams are already thread-safe: no external
-		   lock required.
-		*/
-		
-		cout << prefix << str << endl;
-		
-		if (chn == Transmitter::Fatal) {
-			exit (9);
-		}
-	}
-};
+	AudioEngine* engine = AudioEngine::create ();
 
-TestReceiver test_receiver;
+	CPPUNIT_ASSERT (AudioEngine::instance ());
+	CPPUNIT_ASSERT (engine);
+	CPPUNIT_ASSERT (engine->set_backend ("Dummy", "", ""));
+
+	init_post_engine ();
+
+	CPPUNIT_ASSERT (engine->start () == 0);
+}
+
+void
+stop_and_destroy_backend ()
+{
+	AudioEngine::instance()->remove_session ();
+	AudioEngine::instance()->stop ();
+	AudioEngine::destroy ();
+}
 
 /** @param dir Session directory.
  *  @param state Session state file, without .ardour suffix.
@@ -141,28 +124,8 @@ TestReceiver test_receiver;
 Session *
 load_session (string dir, string state)
 {
-	SessionEvent::create_per_thread_pool ("test", 512);
-
-	test_receiver.listen_to (error);
-	test_receiver.listen_to (info);
-	test_receiver.listen_to (fatal);
-	test_receiver.listen_to (warning);
-
-	/* We can't use VSTs here as we have a stub instead of the
-	   required bits in gtk2_ardour.
-	*/
-	Config->set_use_lxvst (false);
-
-	AudioEngine* engine = AudioEngine::create ();
-
-	CPPUNIT_ASSERT (engine->set_backend ("Dummy", "", ""));
-
-	init_post_engine ();
-
-	CPPUNIT_ASSERT (engine->start () == 0);
-
-	Session* session = new Session (*engine, dir, state);
-	engine->set_session (session);
+	Session* session = new Session (*AudioEngine::instance(), dir, state);
+	AudioEngine::instance ()->set_session (session);
 	return session;
 }
 
