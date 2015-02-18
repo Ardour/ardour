@@ -3688,10 +3688,8 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
             } else {
                 Location* loc = _marker->location ();
                 
-                if (loc) {
-                    if (loc->is_skip()) {
-                        loc->set_skipping (!loc->is_skipping ());
-                    }
+                if (loc &&  loc->is_skip()) {
+					loc->set_skipping (!loc->is_skipping ());
                 }
                 break;
             }
@@ -3710,22 +3708,23 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->begin_reversible_command ( _("move marker") );
 	XMLNode &before = _editor->session()->locations()->get_state();
+	bool do_commit = false;
 
 	MarkerSelection::iterator i;
 	CopiedLocationInfo::iterator x;
-	bool do_commit = false;
 
 	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
 	     x != _copied_locations.end() && i != _editor->selection->markers.end();
 	     ++i, ++x) {
 
-		Location * location = (*i)->location ();
+		Location* location = (*i)->location ();
+		Location* copy = (*x).location;
 
 		if (location && !location->locked()) {
 			if (location->is_mark()) {
-				do_commit = (do_commit || !location->set_start (((*x).location)->start()));
+				do_commit += !location->set_start (copy->start());
 			} else {
-				do_commit = (do_commit || !location->set (((*x).location)->start(), ((*x).location)->end()));
+				do_commit += !location->set (copy->start(), copy->end());
 			}
 		}
 	}

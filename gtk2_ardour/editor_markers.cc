@@ -1163,12 +1163,15 @@ Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock)
     begin_reversible_command (many ? (lock ? _("lock markers"):_("unlock markers")) :
 									(lock ? _("lock marker"):_("unlock marker")));
 	XMLNode &before = _session->locations()->get_state();
+	bool do_commit = false;
     
-	if (location) { // null says: deal with selection
+	if (location && (location->locked () != lock)) { // null says: deal with selection
 		if (lock) {
 			location->lock ();
+			do_commit = true;
 		} else {
 			location->unlock ();
+			do_commit = true;
 		}
 	} else {
 		for (MarkerSelection::iterator x = selection->markers.begin(); x != selection->markers.end(); ++x) {
@@ -1179,20 +1182,22 @@ Editor::toggle_marker_menu_lock (ARDOUR::Location* location, bool lock)
 				continue;
 			}
 
-			if (marker && loc->is_mark () && !dynamic_cast <RangeMarker*> (marker)) {
-				if (loc->locked () && !lock) {
-					loc->unlock ();
+			if (marker && loc->is_mark ()  && (loc->locked () != lock)) {
+				if (lock) {
+					do_commit = true;
+					loc->lock ();
 				} else {
-					if (lock && !loc->locked ()) {
-						loc->lock ();
-					}
+					loc->unlock ();
+					do_commit = true;
 				}
 			}
 		}
 	}
-	XMLNode &after = _session->locations()->get_state();
-	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	commit_reversible_command ();
+	if (do_commit) {
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		commit_reversible_command ();
+	}
 }
 
 void
