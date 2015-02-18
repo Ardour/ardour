@@ -729,6 +729,11 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (current_pointer_y ());
 	TimeAxisView* tv = r.first;
 
+	if (!tv && current_pointer_y() < 0) {
+		/* above trackview area, autoscroll hasn't moved us since last time, nothing to do */
+		return;
+	}
+	
 	if (tv && tv->view()) {
 		double layer = r.second;
 
