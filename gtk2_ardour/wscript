@@ -95,6 +95,7 @@ gtk2_ardour_sources = [
         'edit_note_dialog.cc',
         'editing.cc',
         'editor.cc',
+        'editor_undoable.cc',
         'editor_actions.cc',
         'editor_audio_import.cc',
         'editor_audiotrack.cc',

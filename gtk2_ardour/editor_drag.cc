@@ -3710,32 +3710,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	_editor->_dragging_edit_point = false;
-
-	XMLNode &before = _editor->session()->locations()->get_state();
-
-	MarkerSelection::iterator i;
-	CopiedLocationInfo::iterator x;
-
-	for (i = _editor->selection->markers.begin(), x = _copied_locations.begin();
-	     x != _copied_locations.end() && i != _editor->selection->markers.end();
-	     ++i, ++x) {
-
-		Location* location = (*i)->location ();
-		Location* copy = (*x).location;
-
-		if (location && !location->locked()) {
-			if (location->is_mark()) {
-				location->set_start (copy->start());
-			} else {
-				location->set (copy->start(), copy->end());
-			}
-		}
-	}
-
-	_editor->begin_reversible_command ( _("move marker") );
-	XMLNode &after = _editor->session()->locations()->get_state();
-	_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
-	_editor->commit_reversible_command ();
+	_editor->move_markers_command (_editor->selection->markers, _copied_locations.locations ());
 }
 
 void

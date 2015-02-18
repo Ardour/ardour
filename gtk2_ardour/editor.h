@@ -174,6 +174,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
+	
+	//	UNDOable commands:
+	
+	void move_markers_command (std::list<Marker*>&, const std::list<ARDOUR::Location*>&);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);

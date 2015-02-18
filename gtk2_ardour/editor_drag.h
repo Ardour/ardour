@@ -814,12 +814,24 @@ private:
 	    CopiedLocationMarkerInfo (ARDOUR::Location* l, Marker* m);
 	};
 
-        typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
-        CopiedLocationInfo _copied_locations;
+    class CopiedLocationInfo : public std::list<CopiedLocationMarkerInfo>
+	{
+	public:
+		std::list<ARDOUR::Location*> locations () {
+			std::list<ARDOUR::Location*> result;
+			for (std::list<CopiedLocationMarkerInfo>::iterator i = begin ();
+				i != end ();
+				++i) {
+				result.push_back ((*i).location);
+			}
+			return result;
+		}
+	};
+    CopiedLocationInfo _copied_locations;
         
-        void show_drag_text (ARDOUR::Location*) const;
+    void show_drag_text (ARDOUR::Location*) const;
 
-        static sigc::connection timeout_connection;
+    static sigc::connection timeout_connection;
 };
 
 /** Control point drag */
