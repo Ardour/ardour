@@ -37,6 +37,10 @@
 #include <errno.h>
 #include <time.h>
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h> // for LARGE_INTEGER
+#endif
+
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
