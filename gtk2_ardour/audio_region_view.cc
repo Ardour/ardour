@@ -685,7 +685,7 @@ AudioRegionView::reset_fade_out_shape_width (boost::shared_ptr<AudioRegion> ar, 
 	points.assign (list->size(), Duple());
 
 	for (x = list->begin(), pi = 0; x != list->end(); ++x, ++pi) {
-		points[pi].x = 1.0 + _pixel_width - pwidth + (pwidth * ((*x)->when/length));
+		points[pi].x = _pixel_width - pwidth + (pwidth * ((*x)->when/length));
 		points[pi].y = effective_height - ((*x)->value * effective_height) + TimeAxisViewItem::REGION_TOP_OFFSET + 1;
 	}
 
