@@ -733,8 +733,20 @@ static const MIDISequence s4[] = { // channel1, sustain pedal test
 	{ 4.00, 3, {0xff,  255, 0xff} }, // sentinel
 };
 
+static const MIDISequence s5[] = { // channel1, nonsense
+	{ 0.00, 3, {0x90,   64, 0x7f} }, // note-on
+	{ 0.50, 3, {0x90,   64, 0x7f} }, // duplicate note-on
+	{ 1.00, 3, {0x80,   64, 0x00} }, // note-off
+	{ 1.50, 3, {0x80,   64, 0x00} }, // dup note-off
+	{ 2.00, 3, {0x80,   64, 0x00} }, // 3rd note-off
+	{ 3.00, 3, {0x90,   66, 0x7f} },
+	{ 3.50, 3, {0x90,   66, 0x00} }, // note-on velocity zero
+	{ 3.75, 3, {0x80,   66, 0x00} }, // note-off
+	{ 4.00, 3, {0xff,  255, 0xff} }, // sentinel
+};
+
 static const MIDISequence *sequences[] = {
-	s0, s1, s2, s3, s4
+	s0, s1, s2, s3, s4, s5
 };
 
 }} // namespace
