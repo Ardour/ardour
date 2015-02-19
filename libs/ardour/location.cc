@@ -645,7 +645,12 @@ Location::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
+	Flags old_flags (_flags);
 	_flags = Flags (string_2_enum (prop->value(), _flags));
+
+	if (old_flags != _flags) {
+		FlagsChanged ();
+	}
 
 	if ((prop = node.property ("locked")) != 0) {
 		_locked = string_is_affirmative (prop->value());
