@@ -336,7 +336,7 @@ class LIBARDOUR_API PortEngine {
      *
      * XXX to be removed after some more design cleanup. 
      */
-    virtual pframes_t sample_time_at_cycle_start () = 0;
+    virtual framepos_t sample_time_at_cycle_start () = 0;
 
   protected:
     PortManager& manager;

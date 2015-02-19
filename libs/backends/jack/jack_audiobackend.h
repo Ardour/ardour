@@ -98,8 +98,8 @@ class JACKAudioBackend : public AudioBackend {
 
     float dsp_load() const;
 
-    pframes_t sample_time ();
-    pframes_t sample_time_at_cycle_start ();
+    framepos_t sample_time ();
+    framepos_t sample_time_at_cycle_start ();
     pframes_t samples_since_cycle_start ();
 
     size_t raw_buffer_size (DataType t);

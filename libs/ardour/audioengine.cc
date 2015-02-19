@@ -984,7 +984,7 @@ AudioEngine::raw_buffer_size (DataType t)
 	return _backend->raw_buffer_size (t);
 }
 
-pframes_t
+framepos_t
 AudioEngine::sample_time ()
 {
 	if (!_backend) {
@@ -993,7 +993,7 @@ AudioEngine::sample_time ()
 	return _backend->sample_time ();
 }
 
-pframes_t
+framepos_t
 AudioEngine::sample_time_at_cycle_start ()
 {
 	if (!_backend) {

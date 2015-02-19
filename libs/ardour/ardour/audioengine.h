@@ -79,6 +79,7 @@ public:
 
     ProcessThread* main_thread() const { return _main_thread; }
     
+<<<<<<< HEAD
     /* START BACKEND PROXY API 
      *
      * See audio_backend.h for full documentation and semantics. These wrappers
@@ -98,8 +99,8 @@ public:
     pframes_t      samples_per_cycle () const;
     int            usecs_per_cycle () const;
     size_t         raw_buffer_size (DataType t);
-    pframes_t      sample_time ();
-    pframes_t      sample_time_at_cycle_start ();
+    framepos_t     sample_time ();
+    framepos_t     sample_time_at_cycle_start ();
     pframes_t      samples_since_cycle_start ();
     bool           get_sync_offset (pframes_t& offset) const;
 

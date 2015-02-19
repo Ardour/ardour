@@ -663,14 +663,14 @@ JACKAudioBackend::get_sync_offset (pframes_t& offset) const
 	return false;
 }
 
-pframes_t
+framepos_t
 JACKAudioBackend::sample_time ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
 	return jack_frame_time (_priv_jack);
 }
 
-pframes_t
+framepos_t
 JACKAudioBackend::sample_time_at_cycle_start ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
