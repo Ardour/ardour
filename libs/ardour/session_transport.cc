@@ -833,15 +833,18 @@ Session::check_declick_out ()
 void
 Session::unset_play_loop ()
 {
-	play_loop = false;
-	clear_events (SessionEvent::AutoLoop);
-	clear_events (SessionEvent::AutoLoopDeclick);
-	set_track_loop (false);
-
-	if (Config->get_seamless_loop()) {
-		/* likely need to flush track buffers: this will locate us to wherever we are */
-		add_post_transport_work (PostTransportLocate);
-		_butler->schedule_transport_work ();
+	if (play_loop) {
+		play_loop = false;
+		clear_events (SessionEvent::AutoLoop);
+		clear_events (SessionEvent::AutoLoopDeclick);
+		set_track_loop (false);
+		
+	
+		if (Config->get_seamless_loop()) {
+			/* likely need to flush track buffers: this will locate us to wherever we are */
+			add_post_transport_work (PostTransportLocate);
+			_butler->schedule_transport_work ();
+		}
 	}
 }
 
