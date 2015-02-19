@@ -3338,8 +3338,10 @@ Editor::history_changed ()
 	if (undo_action && _session) {
 		if (_session->undo_depth() == 0) {
 			label = S_("Command|Undo");
+			undo_action->set_sensitive (false);
 		} else {
 			label = string_compose(S_("Command|Undo (%1)"), _session->next_undo());
+			undo_action->set_sensitive (true);
 		}
 		undo_action->property_label() = label;
 	}
@@ -3347,8 +3349,10 @@ Editor::history_changed ()
 	if (redo_action && _session) {
 		if (_session->redo_depth() == 0) {
 			label = _("Redo");
+			redo_action->set_sensitive (false);
 		} else {
 			label = string_compose(_("Redo (%1)"), _session->next_redo());
+			redo_action->set_sensitive (true);
 		}
 		redo_action->property_label() = label;
 	}
