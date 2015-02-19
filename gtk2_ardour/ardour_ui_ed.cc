@@ -211,8 +211,11 @@ ARDOUR_UI::update_timecode_source_dropdown_items()
 void
 ARDOUR_UI::set_mtc_indicator_active (bool set_active)
 {
-    _mtc_sync_icon->set_visible (set_active);
-    _mtc_idle_icon->set_visible (!set_active);
+    // GZ: do not show MTC idle indicator so far
+    _mtc_sync_icon->set_visible (false);
+    _mtc_idle_icon->set_visible (false);
+    //_mtc_sync_icon->set_visible (set_active);
+    //_mtc_idle_icon->set_visible (!set_active);
 }
 
 void
