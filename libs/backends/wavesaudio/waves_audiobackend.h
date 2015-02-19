@@ -391,7 +391,7 @@ class WavesMidiPort;
 	static uint64_t __performance_counter_frequency;
 #endif
 	uint64_t _cycle_start_time_nanos;
-    pframes_t _sample_time_at_cycle_start;
+    framepos_t _sample_time_at_cycle_start;
 
     bool _freewheeling;
     bool _freewheel_thread_active;
