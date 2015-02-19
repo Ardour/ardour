@@ -41,7 +41,7 @@
 #include "utils.h"
 #include "i18n.h"
 
-void 
+void
 Editor::move_markers_command (std::list<Marker*>&markers, const std::list<ARDOUR::Location*>& locations)
 {
 	const size_t markers_count = markers.size ();
@@ -79,6 +79,26 @@ Editor::move_markers_command (std::list<Marker*>&markers, const std::list<ARDOUR
 			}
 		}
 	}
+
+	XMLNode &after = session()->locations()->get_state();
+	session()->add_command(new MementoCommand<ARDOUR::Locations>(*(session()->locations()), &before, &after));
+	commit_reversible_command ();
+}
+
+void 
+Editor::toggle_location_skipping_command (Marker* marker)
+{
+
+	ARDOUR::Location* loc = marker ? marker->location () : 0;
+    if (!(loc &&  loc->is_skip ())) {
+		WavesMessageDialog (_("Skip State"), _("MOVE MARKERS: Invalid argument!")).run ();
+		return;
+	}
+
+	begin_reversible_command (_("skip state"));
+	XMLNode &before = session()->locations()->get_state();
+
+	loc->set_skipping (!loc->is_skipping ());
 
 	XMLNode &after = session()->locations()->get_state();
 	session()->add_command(new MementoCommand<ARDOUR::Locations>(*(session()->locations()), &before, &after));

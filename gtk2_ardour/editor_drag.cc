@@ -3689,13 +3689,8 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
                     (_editor->selection->markers.front ()->type () == Marker::Range)) {
                     _editor->selection->markers.clear ();
                 }
-                
             } else {
-                Location* loc = _marker->location ();
-                
-                if (loc &&  loc->is_skip()) {
-					loc->set_skipping (!loc->is_skipping ());
-                }
+                _editor->toggle_location_skipping_command (_marker);
                 break;
             }
 			_editor->selection->toggle (_marker);

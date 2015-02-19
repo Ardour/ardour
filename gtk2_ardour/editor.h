@@ -178,6 +178,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	//	UNDOable commands:
 	
 	void move_markers_command (std::list<Marker*>&, const std::list<ARDOUR::Location*>&);
+	void toggle_location_skipping_command (Marker*);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
