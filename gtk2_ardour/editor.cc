@@ -5261,6 +5261,9 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 			 */
 
 			ActionManager::uncheck_toggleaction ("<Actions>/Editor/show-editor-mixer");
+            delete current_mixer_strip;
+            current_mixer_strip = 0;
+            ARDOUR_UI::instance()->reset_track_color_dialog ();
 		}
 	}
 }

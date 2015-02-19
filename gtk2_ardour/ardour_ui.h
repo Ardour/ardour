@@ -382,6 +382,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void update_track_color_dialog (boost::shared_ptr<ARDOUR::Route> route);
     void show_marker_inspector();
     void show_track_color_dialog();
+    void reset_track_color_dialog ();
     void hide_application ();
 
   protected:

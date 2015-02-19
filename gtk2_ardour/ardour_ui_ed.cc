@@ -1079,3 +1079,9 @@ ARDOUR_UI::show_track_color_dialog ()
 	marker_inspector_dialog->hide ();
     track_color_dialog->show();
 }
+
+void
+ARDOUR_UI::reset_track_color_dialog ()
+{
+    track_color_dialog->reset_route ();
+}

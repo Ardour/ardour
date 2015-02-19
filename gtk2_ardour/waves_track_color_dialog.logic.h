@@ -22,6 +22,7 @@
 
 public:
 	void set_route (boost::shared_ptr<ARDOUR::Route> _route);
+    void reset_route ();
 
 private:
 

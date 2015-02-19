@@ -95,3 +95,12 @@ WavesTrackColorDialog::_route_color_changed ()
 		}
 	}
 }
+
+void
+WavesTrackColorDialog::reset_route ()
+{
+    _route_connections.drop_connections ();
+    _route.reset ();
+    _color_buttons_home.set_visible (false);
+    _empty_panel.set_visible (true);
+}
