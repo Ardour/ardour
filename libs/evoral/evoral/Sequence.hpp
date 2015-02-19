@@ -331,11 +331,11 @@ private:
 	bool overlaps_unlocked (const NotePtr& ev, const NotePtr& ignore_this_note) const;
 	bool contains_unlocked (const NotePtr& ev) const;
 
-	void append_note_on_unlocked (NotePtr, Evoral::event_id_t);
-	void append_note_off_unlocked(NotePtr);
+	void append_note_on_unlocked(const MIDIEvent<Time>& event, Evoral::event_id_t);
+	void append_note_off_unlocked(const MIDIEvent<Time>& event);
 	void append_control_unlocked(const Parameter& param, Time time, double value, Evoral::event_id_t);
 	void append_sysex_unlocked(const MIDIEvent<Time>& ev, Evoral::event_id_t);
-	void append_patch_change_unlocked (const PatchChange<Time>&, Evoral::event_id_t);
+	void append_patch_change_unlocked(const PatchChange<Time>&, Evoral::event_id_t);
 
 	void get_notes_by_pitch (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
 	void get_notes_by_velocity (Notes&, NoteOperator, uint8_t val, int chan_mask = 0) const;
