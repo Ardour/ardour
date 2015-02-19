@@ -1241,6 +1241,7 @@ Selection::get_state () const
 	}
 	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rn_it;
 	for (rn_it = rid_notes.begin(); rn_it != rid_notes.end(); ++rn_it) {
+		assert(n); // hint for clang static analysis
 		n->add_property (X_("region_id"), atoi((*rn_it).first.to_s().c_str()));
 
 		for (std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {

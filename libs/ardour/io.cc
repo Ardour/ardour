@@ -1176,7 +1176,6 @@ IO::parse_gain_string (const string& str, vector<string>& ports)
 {
 	string::size_type pos, opos;
 
-	pos = 0;
 	opos = 0;
 	ports.clear ();
 
