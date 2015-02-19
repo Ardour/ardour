@@ -624,39 +624,33 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes) delete stuck option %3 @ %4\n", this, _notes.size(), option, when));
 
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	if (!_percussive) {
-	#endif
-		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
-			typename Notes::iterator next = n;
-			++next;
+	for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
+		typename Notes::iterator next = n;
+		++next;
 
-			if (!(*n)->length()) {
-				switch (option) {
-				case Relax:
-					break;
-				case DeleteStuckNotes:
-					cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
-					_notes.erase(n);
-					break;
-				case ResolveStuckNotes:
-					if (when <= (*n)->time()) {
-						cerr << "WARNING: Stuck note resolution - end time @ "
-						     << when << " is before note on: " << (**n) << endl;
-						_notes.erase (*n);
-					} else {
-						(*n)->set_length (when - (*n)->time());
-						cerr << "WARNING: resolved note-on with no note-off to generate " << (**n) << endl;
-					}
-					break;
+		if (!(*n)->length()) {
+			switch (option) {
+			case Relax:
+				break;
+			case DeleteStuckNotes:
+				cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
+				_notes.erase(n);
+				break;
+			case ResolveStuckNotes:
+				if (when <= (*n)->time()) {
+					cerr << "WARNING: Stuck note resolution - end time @ "
+					     << when << " is before note on: " << (**n) << endl;
+					_notes.erase (*n);
+				} else {
+					(*n)->set_length (when - (*n)->time());
+					cerr << "WARNING: resolved note-on with no note-off to generate " << (**n) << endl;
 				}
+				break;
 			}
-
-			n = next;
 		}
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
+
+		n = next;
 	}
-	#endif
 
 	for (int i = 0; i < 16; ++i) {
 		_write_notes[i].clear();
@@ -971,19 +965,9 @@ Sequence<Time>::append_note_on_unlocked (NotePtr note, event_id_t evid)
 
 	add_note_unlocked (note);
 
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	if (!_percussive) {
-	#endif
-
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sustained: Appending active note on %1 channel %2\n",
-		                                              (unsigned)(uint8_t)note->note(), note->channel()));
-		_write_notes[note->channel()].insert (note);
-
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	} else {
-		DEBUG_TRACE(DEBUG::Sequence, "Percussive: NOT appending active note on\n");
-	}
-	#endif
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Appending active note on %1 channel %2\n",
+	                                              (unsigned)(uint8_t)note->note(), note->channel()));
+	_write_notes[note->channel()].insert (note);
 
 }
 
@@ -1006,13 +990,6 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 	}
 
 	_edited = true;
-
-#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	if (_percussive) {
-		DEBUG_TRACE(DEBUG::Sequence, "Sequence Ignoring note off (percussive mode)\n");
-		return;
-	}
-#endif
 
 	bool resolved = false;
 
