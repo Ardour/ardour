@@ -627,10 +627,6 @@ TimeAxisView::end_name_edit (int response)
 				if (++i == allviews.end()) {
 					return;
 				}
-				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-				if (rtav && rtav->route()->record_enabled()) {
-					continue;
-				}
 				if (!(*i)->hidden()) {
 					break;
 				}
@@ -655,12 +651,6 @@ TimeAxisView::end_name_edit (int response)
 				}
 				
 				--i;
-				
-				RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*>(*i);
-				
-				if (rtav && rtav->route()->record_enabled()) {
-					continue;
-				}
 				
 				if (!(*i)->hidden()) {
 					break;
