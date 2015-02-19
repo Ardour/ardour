@@ -79,7 +79,6 @@ public:
 
     ProcessThread* main_thread() const { return _main_thread; }
     
-<<<<<<< HEAD
     /* START BACKEND PROXY API 
      *
      * See audio_backend.h for full documentation and semantics. These wrappers
