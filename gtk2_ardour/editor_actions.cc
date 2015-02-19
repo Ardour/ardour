@@ -354,14 +354,14 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "duplicate-range", _("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false));
 
 	undo_action = reg_sens (editor_actions, "undo", _("Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
-    ActionManager::record_restricted_actions.push_back (undo_action);
+	ActionManager::record_restricted_actions.push_back (undo_action);
 
 	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
-    ActionManager::record_restricted_actions.push_back (redo_action);
-	redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
-    ActionManager::record_restricted_actions.push_back (redo_action);
-	redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
-    ActionManager::record_restricted_actions.push_back (redo_action);
+	ActionManager::record_restricted_actions.push_back (redo_action);
+	reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+	ActionManager::record_restricted_actions.push_back (redo_action);
+	reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+	ActionManager::record_restricted_actions.push_back (redo_action);
 
 	reg_sens (editor_actions, "export-audio", _("Export Audio"), sigc::mem_fun(*this, &Editor::export_audio));
 	reg_sens (editor_actions, "export-range", _("Export Range"), sigc::mem_fun(*this, &Editor::export_range));
