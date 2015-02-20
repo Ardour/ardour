@@ -81,7 +81,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             break;
         case WCMRAudioDeviceManagerClient::AudioCallback:
             if (parameter) {
-                AudioCallbackData* audio_callback_data = (AudioCallbackData*)parameter;
+                const AudioCallbackData* audio_callback_data = (AudioCallbackData*)parameter;
                 _audio_device_callback (
                     audio_callback_data->acdInputBuffer,
                     audio_callback_data->acdOutputBuffer,

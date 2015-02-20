@@ -100,8 +100,8 @@ protected:
 	AudioDeviceID m_DeviceID; ///< The CoreAudio device id
 	bool m_StopRequested; ///< should be set to true when want to stop, set to false otherwise.
     float *m_pInputData; ///< This is what came in with the most recent callback.
-	int m_SampleCounter; ///< The current running sample counter, updated by the audio callback.
-	int m_SampleCountAtLastIdle; ///< What was the sample count last time we checked...
+	uint64_t m_SampleCounter; ///< The current running sample counter, updated by the audio callback.
+	uint64_t m_SampleCountAtLastIdle; ///< What was the sample count last time we checked...
 	int m_StalledSampleCounter; ///< The number of idle calls with same sample count detected
 	int m_ChangeCheckCounter; ///< The number of idle calls passed since we checked the buffer size change.
 
