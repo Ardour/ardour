@@ -126,8 +126,8 @@ class WCMRAudioDeviceManagerClient
         const float *acdInputBuffer;
         float *acdOutputBuffer;
         size_t acdFrames;
-        uint64_t acdSampleTime;
-        uint64_t acdCycleStartTimeNanos;
+        int64_t acdSampleTime;
+        int64_t acdCycleStartTimeNanos;
     };
 
 	virtual void AudioDeviceManagerNotification (NotificationReason WCUNUSEDPARAM(reason), void *WCUNUSEDPARAM(pParam)) {}
