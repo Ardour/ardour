@@ -581,6 +581,17 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				wave_context->move_to (i, tips[i].top);
 				wave_context->line_to (i, tips[i].bot);
 			}
+			/* draw square waves and other discontiguous points clearly */
+			if (i > 0) {
+				if (tips[i-1].top + 2 < tips[i].top) {
+					wave_context->move_to (i, tips[i-1].top);
+					wave_context->line_to (i, tips[i].top);
+				}
+				if (tips[i-1].bot > tips[i].bot + 2) {
+					wave_context->move_to (i, tips[i-1].bot);
+					wave_context->line_to (i, tips[i].bot);
+				}
+			}
 
 			/* zero line */
 
