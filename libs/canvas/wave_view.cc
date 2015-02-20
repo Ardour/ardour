@@ -597,9 +597,9 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 					const double sign = tips[i].bot > height_2 ? -1 : 1;
 					clip_context->rel_line_to (0, sign * min (clip_height, ceil (tips[i].spread + .5)));
 				} else {
-					outline_context->move_to (i, tips[i].bot);
+					outline_context->move_to (i, tips[i].bot - 0.5);
 					/* normal lower terminal dot */
-					outline_context->close_path ();
+					outline_context->rel_line_to (0, 0.5);
 				}
 			} else {
 				if (tips[i].clip_min) {
@@ -615,9 +615,9 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				const double sign = tips[i].top > height_2 ? -1 : 1;
 				clip_context->rel_line_to (0, sign * min(clip_height, ceil(tips[i].spread + .5)));
 			} else {
-				outline_context->move_to (i, tips[i].top);
+				outline_context->move_to (i, tips[i].top + 0.5);
 				/* normal upper terminal dot */
-				outline_context->close_path ();
+				outline_context->rel_line_to (0, -0.5);
 			}
 		}
 
