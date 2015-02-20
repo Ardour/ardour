@@ -328,6 +328,7 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceId()
     }
     
     delete [] deviceIDs;
+	return retVal;
 }
 
 
@@ -2315,9 +2316,9 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
     
     //is this an input only device?
     if (m_OutputChannels.empty())
-        AudioCallback (NULL, inNumberFrames, (uint32_t)inTimeStamp->mSampleTime, theStartTime);
+        AudioCallback (NULL, inNumberFrames, (uint64_t)inTimeStamp->mSampleTime, theStartTime);
     else if ((!m_OutputChannels.empty()) && (ioData->mBuffers[0].mNumberChannels == m_OutputChannels.size()))
-        AudioCallback ((float *)ioData->mBuffers[0].mData, inNumberFrames, (uint32_t)inTimeStamp->mSampleTime, theStartTime);
+        AudioCallback ((float *)ioData->mBuffers[0].mData, inNumberFrames, (uint64_t)inTimeStamp->mSampleTime, theStartTime);
     
     return retVal;
 }
@@ -2338,7 +2339,7 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
 //! \return true
 //! 
 //**********************************************************************************************
-int WCMRCoreAudioDevice::AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, uint32_t inSampleTime, uint64_t inCycleStartTime)
+int WCMRCoreAudioDevice::AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, uint64_t inSampleTime, uint64_t inCycleStartTime)
 {
     struct WCMRAudioDeviceManagerClient::AudioCallbackData audioCallbackData =
     {
