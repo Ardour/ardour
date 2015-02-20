@@ -2538,6 +2538,23 @@ AudioDiskstream::ChannelInfo::resize_capture (framecnt_t capture_bufsize)
 
 AudioDiskstream::ChannelInfo::~ChannelInfo ()
 {
+	for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+		if ((*s)->removable()) {
+			/* this is a "stub" write source which exists in the
+			   Session source list, but is removable. We must emit
+			   a drop references call because it should not
+			   continue to exist. If we do not do this, then the
+			   Session retains a reference to it, it is not
+			   deleted, and later attempts to create a new source
+			   file will use wierd naming because it already 
+			   exists.
+
+			   XXX longer term TO-DO: do not add to session source
+			   list until we write to the source.
+			*/
+			(*s)->drop_references ();
+		}
+	}
         write_sources.clear ();
 
 	delete [] speed_buffer;
