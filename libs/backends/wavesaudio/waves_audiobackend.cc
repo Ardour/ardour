@@ -731,7 +731,7 @@ void
 WavesAudioBackend::_audio_device_callback (const float* input_buffer, 
                                            float* output_buffer, 
                                            unsigned long nframes,
-                                           pframes_t sample_time,
+                                           framepos_t sample_time,
                                            uint64_t cycle_start_time_nanos)
 {
     uint64_t dsp_start_time_nanos = __get_time_nanos();
@@ -988,7 +988,7 @@ WavesAudioBackend::raw_buffer_size (DataType data_type)
 }
 
 
-pframes_t
+framepos_t
 WavesAudioBackend::sample_time ()
 {
     // WARNING: This is approximate calculation. Implementation of accurate calculation is pending.
@@ -1015,7 +1015,7 @@ WavesAudioBackend::__get_time_nanos ()
 }
 
 
-pframes_t
+framepos_t
 WavesAudioBackend::sample_time_at_cycle_start ()
 {
     // COMMENTED FREQUENT DBG LOGS */ std::cout << "WavesAudioBackend::sample_time_at_cycle_start (): " << _sample_time_at_cycle_start << std::endl;

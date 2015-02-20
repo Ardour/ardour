@@ -294,6 +294,9 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 #endif
 	if (!ui_bundle_path || !ui_binary_path) {
 		error << _("failed to get path for UI bindle or binary") << endmsg;
+		free(ui_bundle_path);
+		free(ui_binary_path);
+		free(features);
 		return;
 	}
 

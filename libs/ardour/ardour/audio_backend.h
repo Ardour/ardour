@@ -477,12 +477,12 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      *
      * Can be called from any thread.
      */
-    virtual pframes_t sample_time () = 0;
+    virtual framepos_t sample_time () = 0;
 
     /** Return the time according to the sample clock in use when the most
      * recent buffer process cycle began. Can be called from any thread.
      */
-    virtual pframes_t sample_time_at_cycle_start () = 0;
+    virtual framepos_t sample_time_at_cycle_start () = 0;
 
     /** Return the time since the current buffer process cycle started,
      * in samples, according to the sample clock in use.

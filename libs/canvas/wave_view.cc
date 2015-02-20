@@ -419,7 +419,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				}
 
 				if (fabs (_peaks[i].min) >= clip_level) {
-					tips[i].clip_max = true;
+					tips[i].clip_min = true;
 				}
 			}
 

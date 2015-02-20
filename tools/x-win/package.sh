@@ -129,7 +129,7 @@ if test -d $PREFIX/lib/lv2/lv2core.lv2 ; then
 	cp -R $PREFIX/lib/lv2/lv2core.lv2 $ALIBDIR/LV2/
 fi
 
-mv $ALIBDIR/surfaces/ardourcp-*.dll $DESTDIR/bin/
+mv $ALIBDIR/surfaces/ardourcp*.dll $DESTDIR/bin/
 
 # TODO use -static-libgcc -static-libstdc++ -- but for .exe files only
 if update-alternatives --query ${XPREFIX}-gcc | grep Value: | grep -q win32; then

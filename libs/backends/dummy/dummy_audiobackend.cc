@@ -470,13 +470,13 @@ DummyAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-pframes_t
+framepos_t
 DummyAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-pframes_t
+framepos_t
 DummyAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;
