@@ -126,7 +126,7 @@ class WCMRAudioDeviceManagerClient
         const float *acdInputBuffer;
         float *acdOutputBuffer;
         size_t acdFrames;
-        uint32_t acdSampleTime;
+        uint64_t acdSampleTime;
         uint64_t acdCycleStartTimeNanos;
     };
 
