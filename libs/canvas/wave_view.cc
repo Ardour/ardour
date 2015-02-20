@@ -384,6 +384,10 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	Cairo::RefPtr<Cairo::Context> outline_context = Cairo::Context::create (images.outline);
 	Cairo::RefPtr<Cairo::Context> clip_context = Cairo::Context::create (images.clip);
 	Cairo::RefPtr<Cairo::Context> zero_context = Cairo::Context::create (images.zero);
+	wave_context->set_antialias (Cairo::ANTIALIAS_NONE);
+	outline_context->set_antialias (Cairo::ANTIALIAS_NONE);
+	clip_context->set_antialias (Cairo::ANTIALIAS_NONE);
+	zero_context->set_antialias (Cairo::ANTIALIAS_NONE);
 
 	boost::scoped_array<LineTips> tips (new LineTips[n_peaks]);
 
@@ -414,16 +418,17 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				tips[i].top = y_extent (p, false);
 				tips[i].spread = p * (_height - 1.0);
 
-				if (fabs (_peaks[i].max) >= clip_level) {
+				if (_peaks[i].max >= clip_level) {
 					tips[i].clip_max = true;
 				}
 
-				if (fabs (_peaks[i].min) >= clip_level) {
+				if (-(_peaks[i].min) >= clip_level) {
 					tips[i].clip_min = true;
 				}
 			}
 
-		} else {for (int i = 0; i < n_peaks; ++i) {
+		} else {
+			for (int i = 0; i < n_peaks; ++i) {
 
 				tips[i].bot = height() - 1.0;
 				const double p = max(fabs (_peaks[i].max), fabs (_peaks[i].min));
@@ -443,22 +448,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				double top = _peaks[i].max;
 				double bot = _peaks[i].min;
 
-				if (_peaks[i].max > 0 && _peaks[i].min > 0) {
-					if (fabs (_peaks[i].max) >= clip_level) {
+				if (_peaks[i].max >= clip_level) {
 						tips[i].clip_max = true;
-					}
 				}
-				else if (_peaks[i].max < 0 && _peaks[i].min < 0) {
-					if (fabs (_peaks[i].min) >= clip_level) {
-						tips[i].clip_min = true;
-					}
-				} else {
-					if (fabs (_peaks[i].max) >= clip_level) {
-						tips[i].clip_max = true;
-					}
-					if (fabs (_peaks[i].min) >= clip_level) {
-						tips[i].clip_min = true;
-					}
+				if (-(_peaks[i].min) >= clip_level) {
+					tips[i].clip_min = true;
 				}
 
 				if (top > 0.0) {
@@ -479,32 +473,21 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 				tips[i].top = y_extent (top, false);
 				tips[i].bot = y_extent (bot, true);
-				tips[i].spread = fabs (tips[i].top - tips[i].bot);
+				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
 		} else {
 			for (int i = 0; i < n_peaks; ++i) {
-				if (_peaks[i].max > 0 && _peaks[i].min > 0) {
-					if (fabs (_peaks[i].max) >= clip_level) {
-						tips[i].clip_max = true;
-					}
+				if (_peaks[i].max >= clip_level) {
+					tips[i].clip_max = true;
 				}
-				else if (_peaks[i].max < 0 && _peaks[i].min < 0) {
-					if (fabs (_peaks[i].min) >= clip_level) {
-						tips[i].clip_min = true;
-					}
-				} else {
-					if (fabs (_peaks[i].max) >= clip_level) {
-						tips[i].clip_max = true;
-					}
-					if (fabs (_peaks[i].min) >= clip_level) {
-						tips[i].clip_min = true;
-					}
+				if (-(_peaks[i].min) >= clip_level) {
+					tips[i].clip_min = true;
 				}
 
 				tips[i].top = y_extent (_peaks[i].max, false);
 				tips[i].bot = y_extent (_peaks[i].min, true);
-				tips[i].spread = fabs (tips[i].top - tips[i].bot);
+				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
 		}
@@ -521,7 +504,6 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	wave_context->set_line_width (1.0);
 	wave_context->translate (0.5, +0.5);
 
-	outline_context->set_line_cap (Cairo::LINE_CAP_ROUND);
 	outline_context->set_line_width (1.0);
 	outline_context->translate (0.5, +0.5);
 
@@ -594,20 +576,10 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		for (int i = 0; i < n_peaks; ++i) {
 
 			/* waveform line */
-
+			
 			if (tips[i].spread >= 2.0) {
 				wave_context->move_to (i, tips[i].top);
 				wave_context->line_to (i, tips[i].bot);
-			}
-			if (i > 0) {
-				if (tips[i-1].top + 2 < tips[i].bot) {
-					wave_context->move_to (i-1, tips[i-1].top);
-					wave_context->line_to (i, tips[i].bot);
-				}
-				else if (tips[i-1].bot > tips[i].top + 2) {
-					wave_context->move_to (i-1, tips[i-1].bot);
-					wave_context->line_to (i, tips[i].top);
-				}
 			}
 
 			/* zero line */
