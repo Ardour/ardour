@@ -266,68 +266,6 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInfo ()
     return retVal;  
 }
 
-WTErr WCMRCoreAudioDevice::UpdateDeviceId()
-{
-    //Get device count...
-    UInt32 propSize = 0;
-    WTErr retVal = eNoErr;
-    OSStatus osErr = AudioHardwareGetPropertyInfo (kAudioHardwarePropertyDevices, &propSize, NULL);
-    ASSERT_ERROR(osErr, "AudioHardwareGetProperty 1");
-    if (WUIsError(osErr))
-        throw osErr;
-    
-    size_t numDevices = propSize / sizeof (AudioDeviceID);
-    AudioDeviceID* deviceIDs = new AudioDeviceID[numDevices];
-    
-    //retrieve the device IDs
-    propSize = numDevices * sizeof (AudioDeviceID);
-    osErr = AudioHardwareGetProperty (kAudioHardwarePropertyDevices, &propSize, deviceIDs);
-    ASSERT_ERROR(osErr, "Error while getting audio devices: AudioHardwareGetProperty 2");
-    if (WUIsError(osErr))
-        throw osErr;
-    
-    //now add the ones that are not there...
-    for (size_t deviceIndex = 0; deviceIndex < numDevices; deviceIndex++)
-    {
-        DeviceInfo* pDevInfo = 0;
-        
-        //Get device name and create new DeviceInfo entry
-        //Get property name size.
-        osErr = AudioDeviceGetPropertyInfo(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, NULL);
-        if (osErr == kAudioHardwareNoError)
-        {
-            //Get property: name.
-            char* deviceName = new char[propSize];
-            osErr = AudioDeviceGetProperty(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, deviceName);
-            if (osErr == kAudioHardwareNoError)
-            {
-                if ( (m_DeviceName == deviceName) &&
-                     (m_DeviceID != deviceIDs[deviceIndex]) ) {
-                    
-                    m_DeviceID = deviceIDs[deviceIndex];
-                    
-                    m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Current device has changed it's id.");
-                }
-            }
-            else
-            {
-                retVal = eCoreAudioFailed;
-                DEBUG_MSG("Failed to get device name. Device ID: " << m_DeviceID);
-            }
-            
-            delete [] deviceName;
-        }
-        else
-        {
-            retVal = eCoreAudioFailed;
-            DEBUG_MSG("Failed to get device name prop Info. Device ID: " << m_DeviceID);
-        }
-    }
-    
-    delete [] deviceIDs;
-	return retVal;
-}
-
 //**********************************************************************************************
 // WCMRCoreAudioDevice::UpdateDeviceName 
 //
