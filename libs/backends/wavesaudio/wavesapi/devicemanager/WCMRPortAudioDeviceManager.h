@@ -96,8 +96,8 @@ protected:
 	PaStream* m_PortAudioStream; ///< Port audio stream, when the device is active!
 	bool m_StopRequested; ///< should be set to true when want to stop, set to false otherwise.
 	const float *m_pInputData; ///< This is what came in with the most recent callback.
-	uint64_t m_SampleCounter; ///< The current running sample counter, updated by the audio callback.
-	uint64_t m_SampleCountAtLastIdle;
+	int64_t m_SampleCounter; ///< The current running sample counter, updated by the audio callback.
+	int64_t m_SampleCountAtLastIdle;
 
 	int m_DropsDetected; ///< Number of times audio drops have been detected so far.
 	int m_DropsReported; ///< Number of times audio drops have been reported so far to the client.

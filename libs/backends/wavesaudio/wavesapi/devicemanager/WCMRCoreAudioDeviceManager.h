@@ -87,7 +87,7 @@ public:
 	
 	virtual WTErr ShowConfigPanel (void *pParam);///< Show Control Panel - in case of ASIO this will work only with Active device!
 
-	virtual int AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, uint64_t inSampleTime, uint64_t inCycleStartTime);
+	virtual int AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, int64_t inSampleTime, uint64_t inCycleStartTime);
 	
 	AudioDeviceID DeviceID () {return m_DeviceID;}
     
@@ -100,8 +100,8 @@ protected:
 	AudioDeviceID m_DeviceID; ///< The CoreAudio device id
 	bool m_StopRequested; ///< should be set to true when want to stop, set to false otherwise.
     float *m_pInputData; ///< This is what came in with the most recent callback.
-	uint64_t m_SampleCounter; ///< The current running sample counter, updated by the audio callback.
-	uint64_t m_SampleCountAtLastIdle; ///< What was the sample count last time we checked...
+	int64_t m_SampleCounter; ///< The current running sample counter, updated by the audio callback.
+	int64_t m_SampleCountAtLastIdle; ///< What was the sample count last time we checked...
 	int m_StalledSampleCounter; ///< The number of idle calls with same sample count detected
 	int m_ChangeCheckCounter; ///< The number of idle calls passed since we checked the buffer size change.
 
