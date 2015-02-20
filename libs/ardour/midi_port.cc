@@ -117,9 +117,9 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				if (buf[0] == 0xfe) {
 					/* throw away active sensing */
 					continue;
-				} if (buf[0] == 0x90 && buf[2] == 0) {
+				} else if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
 					/* normalize note on with velocity 0 to proper note off */
-					buf[0] = 0x80;  /* note off */
+					buf[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
 					buf[2] = 0x40;  /* default velocity */
 				}
 				
