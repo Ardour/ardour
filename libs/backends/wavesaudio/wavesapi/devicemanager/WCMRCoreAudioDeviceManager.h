@@ -87,7 +87,7 @@ public:
 	
 	virtual WTErr ShowConfigPanel (void *pParam);///< Show Control Panel - in case of ASIO this will work only with Active device!
 
-	virtual int AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, uint32_t inSampleTime, uint64_t inCycleStartTime);
+	virtual int AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, uint64_t inSampleTime, uint64_t inCycleStartTime);
 	
 	AudioDeviceID DeviceID () {return m_DeviceID;}
     
