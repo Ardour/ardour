@@ -518,6 +518,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	 */
 
 	const double clip_height = min (7.0, ceil (_height * 0.05));
+	bool draw_outline_as_wave = false;
 
 	/* There are 3 possible components to draw at each x-axis position: the
 	   waveform "line", the zero line and an outline/clip indicator.  We
@@ -586,8 +587,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				if (tips[i-1].top + 2 < tips[i].top) {
 					wave_context->move_to (i, tips[i-1].top);
 					wave_context->line_to (i, tips[i].top);
-				}
-				if (tips[i-1].bot > tips[i].bot + 2) {
+				} else if (tips[i-1].bot > tips[i].bot + 2) {
 					wave_context->move_to (i, tips[i-1].bot);
 					wave_context->line_to (i, tips[i].bot);
 				}
@@ -601,6 +601,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			}
 
 			if (tips[i].spread > 1.0) {
+				draw_outline_as_wave = false;
 				/* lower outline/clip indicator */
 				if (_global_show_waveform_clipping && tips[i].clip_min) {
 					clip_context->move_to (i, tips[i].bot);
@@ -608,11 +609,12 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 					const double sign = tips[i].bot > height_2 ? -1 : 1;
 					clip_context->rel_line_to (0, sign * min (clip_height, ceil (tips[i].spread + .5)));
 				} else {
-					outline_context->move_to (i, tips[i].bot - 0.5);
+					outline_context->move_to (i, tips[i].bot + 0.5);
 					/* normal lower terminal dot */
-					outline_context->rel_line_to (0, 0.5);
+					outline_context->rel_line_to (0, -0.5);
 				}
 			} else {
+				draw_outline_as_wave = true;
 				if (tips[i].clip_min) {
 					// make sure we draw the clip
 					tips[i].clip_max = true;
@@ -626,9 +628,17 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				const double sign = tips[i].top > height_2 ? -1 : 1;
 				clip_context->rel_line_to (0, sign * min(clip_height, ceil(tips[i].spread + .5)));
 			} else {
-				outline_context->move_to (i, tips[i].top + 0.5);
-				/* normal upper terminal dot */
-				outline_context->rel_line_to (0, -0.5);
+				if (draw_outline_as_wave) {
+					wave_context->move_to (i, tips[i].top + 0.5);
+					/* special case where outline only is drawn.
+					   is this correct? too short by 0.5?
+					*/
+					wave_context->rel_line_to (0, -0.5);
+				} else {
+					outline_context->move_to (i, tips[i].top + 0.5);
+					/* normal upper terminal dot */
+					outline_context->rel_line_to (0, -0.5);
+				}
 			}
 		}
 
