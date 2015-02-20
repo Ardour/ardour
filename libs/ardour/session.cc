@@ -3638,8 +3638,19 @@ Session::new_audio_source_path_for_embedded (const std::string& path)
 	return newpath;
 }
 
+/** Return true if there are no audio file sources that use @param name as 
+ * the filename component of their path. 
+ *
+ * Return false otherwise.
+ *
+ * This method MUST ONLY be used to check in-session, mono files since it 
+ * hard-codes the channel of the audio file source we are looking for as zero.
+ * 
+ * If/when Ardour supports native files in non-mono formats, the logic here
+ * will need to be revisited.
+ */
 bool
-Session::audio_source_name_is_unique (const string& name, uint32_t chan)
+Session::audio_source_name_is_unique (const string& name)
 {
 	std::vector<string> sdirs = source_search_path (DataType::AUDIO);
 	vector<space_and_path>::iterator i;
@@ -3672,7 +3683,7 @@ Session::audio_source_name_is_unique (const string& name, uint32_t chan)
 		
 		string possible_path = Glib::build_filename (spath, name);
 
-		if (audio_source_by_path_and_channel (possible_path, chan)) {
+		if (audio_source_by_path_and_channel (possible_path, 0)) {
 			existing++;
 			break;
 		}
@@ -3740,7 +3751,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 
 		possible_name = format_audio_source_name (legalized, nchan, chan, destructive, take_required, cnt, some_related_source_name_exists);
 		
-		if (audio_source_name_is_unique (possible_name, chan)) {
+		if (audio_source_name_is_unique (possible_name)) {
 			break;
 		}
 		
