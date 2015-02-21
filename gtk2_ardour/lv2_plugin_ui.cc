@@ -341,6 +341,8 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 				container->add(*Gtk::manage(Glib::wrap(c_widget)));
 			}
 			container->show_all();
+			gtk_widget_set_can_focus(c_widget, true);
+			gtk_widget_grab_focus(c_widget);
 		} else {
 			_external_ui_ptr = (struct lv2_external_ui*)GET_WIDGET(_inst);
 		}
@@ -365,6 +367,15 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	if (_lv2->has_message_output()) {
 		_message_update_connection = Timers::super_rapid_connect (
 			sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
+	}
+}
+
+void
+LV2PluginUI::grab_focus()
+{
+	if (_inst && !_lv2->is_external_ui()) {
+		GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
+		gtk_widget_grab_focus(c_widget);
 	}
 }
 

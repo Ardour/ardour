@@ -353,6 +353,7 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
 	if (_keyboard_focused) {
 		if (_pluginui) {
+			_pluginui->grab_focus();
 			if (_pluginui->non_gtk_gui()) {
 				_pluginui->forward_key_event (event);
 			} else {
@@ -366,6 +367,7 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 		*/
 
 		if (_pluginui) {
+			_pluginui->grab_focus();
 			if (_pluginui->non_gtk_gui()) {
 				/* pass editor window as the window for the event
 				   to be handled in, not this one, because there are

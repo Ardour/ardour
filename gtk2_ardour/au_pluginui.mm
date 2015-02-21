@@ -678,6 +678,13 @@ AUPluginUI::parent_cocoa_window ()
 }
 
 void
+AUPluginUI::grab_focus()
+{
+	if (au_view) {
+		[au_view becomeFirstResponder];
+	}
+}
+void
 AUPluginUI::forward_key_event (GdkEventKey* ev)
 {
 	NSEvent* nsevent = gdk_quartz_event_get_nsevent ((GdkEvent*)ev);

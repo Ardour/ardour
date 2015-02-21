@@ -103,7 +103,8 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	virtual void on_window_hide() {}
 
 	virtual void forward_key_event (GdkEventKey*) {}
-        virtual bool non_gtk_gui() const { return false; }
+	virtual void grab_focus () {}
+  virtual bool non_gtk_gui() const { return false; }
 
 	sigc::signal<void,bool> KeyboardFocused;
 

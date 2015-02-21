@@ -76,6 +76,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void lower_box_realized ();
 	void cocoa_view_resized ();
 	void on_realize ();
+	void grab_focus();
 	void forward_key_event (GdkEventKey*);
 
 	bool on_window_show (const std::string& /*title*/);
