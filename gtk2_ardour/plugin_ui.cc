@@ -333,6 +333,7 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 		_pluginui = lpu;
 		add (*lpu);
 		lpu->package (*this);
+		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 	}
 
 	return true;
