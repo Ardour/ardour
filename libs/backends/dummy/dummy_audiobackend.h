@@ -156,6 +156,8 @@ class DummyAudioPort : public DummyPort {
 			KronekerDelta,
 			SineSweep,
 			SineSweepSwell,
+			SquareSweep,
+			SquareSweepSwell,
 			Loopback,
 		};
 		void setup_generator (GeneratorType const, float const);

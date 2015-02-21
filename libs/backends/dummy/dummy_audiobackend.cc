@@ -112,6 +112,8 @@ DummyAudioBackend::enumerate_devices () const
 		_device_status.push_back (DeviceStatus (_("Pink Noise (low CPU)"), true));
 		_device_status.push_back (DeviceStatus (_("Sine Sweep"), true));
 		_device_status.push_back (DeviceStatus (_("Sine Sweep Swell"), true));
+		_device_status.push_back (DeviceStatus (_("Square Sweep"), true));
+		_device_status.push_back (DeviceStatus (_("Square Sweep Swell"), true));
 		_device_status.push_back (DeviceStatus (_("Loopback"), true));
 	}
 	return _device_status;
@@ -744,6 +746,10 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::SineSweep;
 	} else if (_device == _("Sine Sweep Swell")) {
 		gt = DummyAudioPort::SineSweepSwell;
+	} else if (_device == _("Square Sweep")) {
+		gt = DummyAudioPort::SquareSweep;
+	} else if (_device == _("Square Sweep Swell")) {
+		gt = DummyAudioPort::SquareSweepSwell;
 	} else if (_device == _("Loopback")) {
 		gt = DummyAudioPort::Loopback;
 	} else {
@@ -1563,6 +1569,8 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 				_wavetable[i] = .12589f * sinf(2.0f * M_PI * (float)i / (float)_gen_period); // -18dBFS
 			}
 			break;
+		case SquareSweep:
+		case SquareSweepSwell:
 		case SineSweep:
 		case SineSweepSwell:
 			{
@@ -1596,6 +1604,16 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 					const double phase = a * exp (b * j) - a;
 #endif
 					_wavetable[i] = (float)sin (2. * M_PI * (phase - floor (phase)));
+				}
+				if (_gen_type == SquareSweep) {
+					for (uint32_t i = 0 ; i < _gen_period; ++i) {
+						_wavetable[i] = _wavetable[i] < 0 ? -.40709f : .40709f;
+					}
+				}
+				else if (_gen_type == SquareSweepSwell) {
+					for (uint32_t i = 0 ; i < _gen_period; ++i) {
+						_wavetable[i] = _wavetable[i] < 0 ? -1 : 1;
+					}
 				}
 			}
 			break;
@@ -1690,6 +1708,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			}
 			break;
 		case SineSweepSwell:
+		case SquareSweepSwell:
 			assert(_wavetable && _gen_period > 0);
 			{
 				const float vols = 2.f / (float)_gen_perio2;
@@ -1705,6 +1724,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			_gen_period = n_samples; // XXX DummyBackend::_samples_per_period;
 		case SineWave:
 		case SineSweep:
+		case SquareSweep:
 			assert(_wavetable && _gen_period > 0);
 			{
 				pframes_t written = 0;
