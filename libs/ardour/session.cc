@@ -200,6 +200,7 @@ Session::Session (AudioEngine &eng,
 	, average_dir (0)
 	, have_first_delta_accumulator (false)
 	, _slave_state (Stopped)
+    , _mtc_active (false)
 	, post_export_sync (false)
 	, post_export_position (0)
 	, _exporting (false)

@@ -301,6 +301,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal0<void> IOConnectionsComplete;
 
+    /* Record status signals */
+    PBD::Signal1<void, bool> MTCSyncStateChanged;
+    
 	/* Record status signals */
 
 	PBD::Signal0<void> RecordStateChanged;
@@ -599,6 +602,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void   request_sync_source (Slave*);
 	bool   synced_to_engine() const { return config.get_external_sync() && Config->get_sync_source() == Engine; }
+    bool   synced_to_mtc() const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (&_mtc_active); }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
@@ -1073,6 +1077,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool                    _was_seamless;
 	bool                    _under_nsm_control;
 
+    void mtc_status_changed (bool);
+    PBD::ScopedConnection mtc_status_connection;
+    
 	void initialize_latencies ();
 	void set_worst_io_latencies ();
 	void set_worst_playback_latency ();
@@ -1110,6 +1117,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool have_first_delta_accumulator;
 
 	SlaveState _slave_state;
+    gint _mtc_active;
 	framepos_t slave_wait_end;
 
 	void reset_slave_state ();

@@ -1838,17 +1838,17 @@ ARDOUR_UI::transport_roll ()
 		return;
 	}
 
-#if 0
 	if (_session->config.get_external_sync()) {
 		switch (Config->get_sync_source()) {
 		case Engine:
 			break;
+        case MTC:
+            return;
 		default:
 			/* transport controlled by the master */
 			return;
 		}
 	}
-#endif
 
 	bool rolling = _session->transport_rolling();
 

@@ -325,7 +325,9 @@ ARDOUR_UI::parameter_changed (std::string p)
             
             if (MTC == Config->get_sync_source() ) {
                 // show MTC indicator, but in non lit mode
-                set_mtc_indicator_active(false);
+                if (_session) {
+                    set_mtc_indicator_active(_session->synced_to_mtc() );
+                }
             }
 		}
 
