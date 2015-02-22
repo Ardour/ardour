@@ -2538,7 +2538,7 @@ AudioDiskstream::ChannelInfo::resize_capture (framecnt_t capture_bufsize)
 
 AudioDiskstream::ChannelInfo::~ChannelInfo ()
 {
-	for (ChannelInfo::Sources::iterator s = (*chan)->write_sources.begin(); s != (*chan)->write_sources.end(); ++s) {
+	for (Sources::iterator s = write_sources.begin(); s != write_sources.end(); ++s) {
 		if ((*s)->removable()) {
 			/* this is a "stub" write source which exists in the
 			   Session source list, but is removable. We must emit
