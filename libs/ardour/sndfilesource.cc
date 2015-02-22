@@ -463,7 +463,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 		return 0;
 	}
 
-	int32_t frame_pos = _length;
+	framepos_t frame_pos = _length;
 
 	if (write_float (data, frame_pos, cnt) != cnt) {
 		return 0;
