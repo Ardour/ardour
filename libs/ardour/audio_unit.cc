@@ -1037,7 +1037,11 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	//configurations in most cases. so first lets see
 	//if there's a configuration that keeps out==in
 
-	audio_out = audio_in;
+	if (in.n_midi() > 0 && audio_in == 0) {
+		audio_out = -1;
+	} else {
+		audio_out = audio_in;
+	}
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 

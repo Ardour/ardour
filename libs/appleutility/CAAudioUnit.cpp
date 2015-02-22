@@ -348,6 +348,42 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 		{
 			return 1;
 		}
+		else if (Comp().Desc().IsGenerator() || Comp().Desc().IsMusicDevice()) {
+			// directly query Bus Formats
+			// Note that that these may refer to different subBusses
+			// (eg. Kick, Snare,.. on a Drummachine)
+			// eventually the Bus-Name for each configuration should be exposed
+			// for the User to select..
+
+			UInt32 elCountIn, elCountOut, elCount;
+
+			if (GetElementCount (kAudioUnitScope_Input, elCountIn)) return 1;
+			if (GetElementCount (kAudioUnitScope_Output, elCountOut)) return 1;
+
+			elCount = std::max(elCountIn, elCountOut);
+
+			*chaninfo = (AUChannelInfo*) malloc (sizeof (AUChannelInfo) * elCount);
+
+			for (unsigned int i = 0; i < elCountIn; ++i) {
+				UInt32 numChans;
+				if (NumberChannels (kAudioUnitScope_Input, i, numChans)) return 1;
+				(*chaninfo)[i].inChannels = numChans;
+			}
+			for (unsigned int i = elCountIn; i < elCount; ++i) {
+				(*chaninfo)[i].inChannels = 0;
+			}
+
+
+			for (unsigned int i = 0; i < elCountOut; ++i) {
+				UInt32 numChans;
+				if (NumberChannels (kAudioUnitScope_Output, i, numChans)) return 1;
+				(*chaninfo)[i].outChannels = numChans;
+			}
+			for (unsigned int i = elCountOut; i < elCount; ++i) {
+				(*chaninfo)[i].outChannels = 0;
+			}
+			return 0;
+		}
 		else 
 		{
 			// the au should either really tell us about this
