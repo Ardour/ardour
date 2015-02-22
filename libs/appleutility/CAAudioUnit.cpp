@@ -357,8 +357,8 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 
 			UInt32 elCountIn, elCountOut, elCount;
 
-			if (GetElementCount (kAudioUnitScope_Input, elCountIn)) return 1;
-			if (GetElementCount (kAudioUnitScope_Output, elCountOut)) return 1;
+			if (GetElementCount (kAudioUnitScope_Input, elCountIn)) return -1;
+			if (GetElementCount (kAudioUnitScope_Output, elCountOut)) return -1;
 
 			elCount = std::max(elCountIn, elCountOut);
 
@@ -366,17 +366,16 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 
 			for (unsigned int i = 0; i < elCountIn; ++i) {
 				UInt32 numChans;
-				if (NumberChannels (kAudioUnitScope_Input, i, numChans)) return 1;
+				if (NumberChannels (kAudioUnitScope_Input, i, numChans)) return -1;
 				(*chaninfo)[i].inChannels = numChans;
 			}
 			for (unsigned int i = elCountIn; i < elCount; ++i) {
 				(*chaninfo)[i].inChannels = 0;
 			}
 
-
 			for (unsigned int i = 0; i < elCountOut; ++i) {
 				UInt32 numChans;
-				if (NumberChannels (kAudioUnitScope_Output, i, numChans)) return 1;
+				if (NumberChannels (kAudioUnitScope_Output, i, numChans)) return -1;
 				(*chaninfo)[i].outChannels = numChans;
 			}
 			for (unsigned int i = elCountOut; i < elCount; ++i) {
