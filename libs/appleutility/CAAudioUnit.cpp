@@ -305,8 +305,8 @@ bool		CAAudioUnit::CanDo (	int 				inChannelsIn,
 		// is expected to deal with same channel valance in and out
 	if (result) 
 	{
-		if (Comp().Desc().IsEffect() && (inChannelsIn == inChannelsOut)
-			|| Comp().Desc().IsOffline() && (inChannelsIn == inChannelsOut))
+		if ((Comp().Desc().IsEffect() && (inChannelsIn == inChannelsOut))
+			|| (Comp().Desc().IsOffline() && (inChannelsIn == inChannelsOut)))
 		{
 			return true;
 		}
