@@ -350,9 +350,9 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 {
 	assert (cnt >= 0);
 	
-	int32_t nread;
+	framecnt_t nread;
 	float *ptr;
-	uint32_t real_cnt;
+	framecnt_t real_cnt;
 	framepos_t file_cnt;
 
         if (writable() && !_open) {
@@ -426,7 +426,7 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 	/* stride through the interleaved data */
 
-	for (int32_t n = 0; n < nread; ++n) {
+	for (framecnt_t n = 0; n < nread; ++n) {
 		dst[n] = *ptr;
 		ptr += _info.channels;
 	}
