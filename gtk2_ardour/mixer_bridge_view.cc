@@ -92,6 +92,8 @@ MixerBridgeView::MixerBridgeView (const std::string& mixer_bridge_script_name, c
 	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&MixerBridgeView::sync_order_keys, this), gui_context());
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&MixerBridgeView::remove_strip, this, _1), gui_context());
+    MixerStrip::EndStripNameEdit.connect (*this, invalidator (*this), boost::bind (&MixerBridgeView::begin_strip_name_edit, this, _1, _2), gui_context());
+
 
 	if (dynamic_cast <WavesGrid*> (&_mixer_strips_home)) {
 		_mixer_strips_home.get_parent()->signal_size_allocate().connect (sigc::mem_fun(*this, &MixerBridgeView::parent_on_size_allocate));
@@ -199,6 +201,8 @@ MixerBridgeView::add_strips (RouteList& routes)
         // in Multi-Out mode, new created strip mustn't show gain slider
         bool set_gain_slider_visible = Config->get_output_auto_connect() & AutoConnectMaster; 
         strip->gain_slider_set_visible (set_gain_slider_visible);
+        
+        //strip->EndStripNameEdit.connect (*this, invalidator (*this), (sigc::bind (sigc::mem_fun(*this, &MixerBridgeView::begin_strip_name_edit), strip)), gui_context());
         
 		_strips [route] = strip;
 		strip->show();
@@ -499,4 +503,32 @@ void MixerBridgeView::delete_processors ()
 void MixerBridgeView::select_none ()
 {
         /* does nothing in Tracks */
+}
+
+void
+MixerBridgeView::begin_strip_name_edit (MixerStrip::TabToStrip edit_next, const MixerStrip* cur_strip)
+{
+    std::vector<Gtk::Widget*> strips = _mixer_strips_home.get_children();
+    if (edit_next == MixerStrip::TabToNext) {
+        for (std::vector<Gtk::Widget*>::iterator it = strips.begin (); it != strips.end (); ++it) {
+            if (*it == cur_strip) {
+                if (++it != strips.end ()) {
+                    MixerStrip* strip = dynamic_cast<MixerStrip*> (*it);
+                    strip->begin_name_edit ();
+                }
+                break;
+            }
+        }
+    } else { // MixerStrip::TabToPrev
+        for (std::vector<Gtk::Widget*>::iterator it = strips.begin (); it != strips.end (); ++it) {
+            if (*it == cur_strip) {
+                if (it != strips.begin ()) {
+                    --it;
+                    MixerStrip* strip = dynamic_cast<MixerStrip*> (*it);
+                    strip->begin_name_edit ();
+                }
+                break;
+            }
+        }
+    }
 }

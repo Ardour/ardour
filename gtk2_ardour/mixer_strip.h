@@ -77,6 +77,7 @@ class ArdourWindow;
 class MixerStrip : public RouteUI
 {
   public:
+    enum TabToStrip { TabToPrev, TabToNext };
 	MixerStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, const std::string& layout_script_file, size_t max_name_size = 0);
 	MixerStrip (ARDOUR::Session*, const std::string& layout_script_file, size_t max_name_size = 0);
 	~MixerStrip ();
@@ -112,6 +113,9 @@ class MixerStrip : public RouteUI
 	PBD::Signal1<void, boost::weak_ptr<ARDOUR::Delivery> > DeliveryChanged;
 
 	static PBD::Signal1<void,MixerStrip*> CatchDeletion;
+    
+    // name of next(true) or prev(false) MixerStrip should be changed
+    static PBD::Signal2<void, MixerStrip::TabToStrip, const MixerStrip*> EndStripNameEdit;
 
 	std::string state_id() const;
 
@@ -129,6 +133,7 @@ class MixerStrip : public RouteUI
 
     void route_rec_enable_changed();
 	void route_color_changed ();
+    void begin_name_edit ()         { _begin_name_edit(); }
     
   protected:
 	void set_packed (bool yn);
@@ -176,7 +181,7 @@ class MixerStrip : public RouteUI
     
     Gtk::Entry& _name_entry;
     Gtk::EventBox& _name_entry_eventbox;
-    void begin_name_edit ();
+    void _begin_name_edit ();
     void end_name_edit (int);
     
     bool name_entry_key_release (GdkEventKey *ev);

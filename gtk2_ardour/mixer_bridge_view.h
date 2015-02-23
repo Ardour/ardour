@@ -79,6 +79,7 @@ class MixerBridgeView :
 	void follow_editor_selection ();
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
 	void parent_on_size_allocate (Gtk::Allocation&);
+    void begin_strip_name_edit (MixerStrip::TabToStrip, const MixerStrip*);
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route> route);
 	MixerStrip* strip_under_pointer ();

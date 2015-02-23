@@ -85,6 +85,7 @@ using namespace ArdourMeter;
 
 int MixerStrip::scrollbar_height = 0;
 PBD::Signal1<void,MixerStrip*> MixerStrip::CatchDeletion;
+PBD::Signal2<void,MixerStrip::TabToStrip,const MixerStrip*> MixerStrip::EndStripNameEdit;
 
 MixerStrip::MixerStrip (Session* sess, const std::string& layout_script_file, size_t max_name_size)
 	: AxisView(sess)
@@ -301,7 +302,7 @@ MixerStrip::controls_ebox_button_press (GdkEventButton* event)
 			_name_button_home.translate_coordinates (name_button, event->x, event->y, nlx, nly);
 			Gtk::Allocation a = name_button.get_allocation ();
 			if (nlx > 0 && nlx < a.get_width() && nly > 0 && nly < a.get_height()) {
-				begin_name_edit ();
+				_begin_name_edit ();
 				return true;
 			}
 		}
@@ -373,8 +374,9 @@ MixerStrip::name_entry_focus_out (GdkEventFocus*)
 	return false;
 }
 
+
 void
-MixerStrip::begin_name_edit ()
+MixerStrip::_begin_name_edit ()
 {
     if (!_route)
         return;
@@ -416,6 +418,9 @@ MixerStrip::on_record_state_changed ()
 void
 MixerStrip::end_name_edit (int response)
 {
+    bool edit_next = false;
+    bool edit_prev = false;
+    
 	switch (response) {
         case RESPONSE_CANCEL:
             break;
@@ -424,8 +429,10 @@ MixerStrip::end_name_edit (int response)
             break;
         case RESPONSE_ACCEPT:
             name_entry_changed ();
+            edit_next = true;
         case RESPONSE_APPLY:
             name_entry_changed ();
+            edit_prev = true;
 	}
     
     // _name_entry's text and _route->name must be synchronized
@@ -435,6 +442,12 @@ MixerStrip::end_name_edit (int response)
     name_button.show ();
 	_name_entry.hide ();
     _name_entry_eventbox.hide ();
+    if (edit_next) {
+        EndStripNameEdit (TabToNext, this); //EMIT SIGNAL
+    }
+    else if (edit_prev) {
+        EndStripNameEdit (TabToPrev, this); //EMIT SIGNAL
+    }
 }
 
 void
