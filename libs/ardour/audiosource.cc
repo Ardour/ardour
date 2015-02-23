@@ -392,7 +392,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 	if (scale == 1.0) {
 		off_t first_peak_byte = (start / samples_per_file_peak) * sizeof (PeakData);
-		ssize_t bytes_to_read = sizeof (PeakData)* npeaks;
+		size_t bytes_to_read = sizeof (PeakData)* npeaks;
 		/* open, read, close */
 
 		DEBUG_TRACE (DEBUG::Peaks, "DIRECT PEAKS\n");
@@ -400,27 +400,23 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		uint32_t  map_off =  first_peak_byte;
 		uint32_t  read_map_off = map_off & ~(BUFSIZE - 1);
 		uint32_t  map_delta = map_off - read_map_off;
-		size_t raw_map_length = bytes_to_read;
 		size_t map_length = bytes_to_read + map_delta;
 
-		if (_first_run  || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
+		if (_first_run  || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < bytes_to_read)) {
 			peak_cache.reset (new PeakData[npeaks]);
-			staging.reset (new PeakData[npeaks]);
-
-			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
+			boost::scoped_array<PeakData> staging (new PeakData[npeaks]);
 
 			char* addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
 			if (addr ==  MAP_FAILED) {
-				cerr << "mmap error - could not map peak file to mem." << endl;
+				error << _("map failed - could not mmap peakfile.") << endmsg;
 				return -1;
 			}
 		
-			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
+			memcpy ((void*)peak_cache.get(), (void*)(addr + map_delta), bytes_to_read);
 			munmap (addr, map_length);
-			memcpy ((void*)peak_cache.get(), (void*)staging.get(), bytes_to_read);
-			
+
 			_last_map_off = map_off;
-			_last_raw_map_length = raw_map_length;
+			_last_raw_map_length = bytes_to_read;
 			_first_run = false;
 
 			if (zero_fill) {
@@ -471,14 +467,12 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if (_first_run || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
 			peak_cache.reset (new PeakData[npeaks]);
-			staging.reset (new PeakData[chunksize]);
-
-			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
+			boost::scoped_array<PeakData> staging (new PeakData[chunksize]);
 
 			char* addr;
 			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
 			if (addr ==  MAP_FAILED) {
-				cerr << "mmap error - could not map peak file to mem." << endl;
+				error << _("map failed - could not mmap peakfile.") << endmsg;
 				return -1;
 			}
 		
