@@ -336,9 +336,13 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	PeakData::PeakDatum xmax;
 	PeakData::PeakDatum xmin;
 	int32_t to_read;
-	ssize_t nread;
 	framecnt_t zero_fill = 0;
+
+#ifdef PLATFORM_WINDOWS
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NONBLOCK));
+#else
 	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME | O_NONBLOCK));
+#endif
 
 	if (sfd < 0) {
 		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), peakpath, strerror (errno)) << endmsg;
