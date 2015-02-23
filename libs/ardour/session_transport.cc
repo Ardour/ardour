@@ -283,7 +283,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 	_clear_event_type (SessionEvent::RangeLocate);
 
 	/* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
-	disable_record (true, (!Config->get_latched_record_enable() && clear_state));
+        disable_record (true, (!Config->get_latched_record_enable() && clear_state));
 
 	reset_slave_state ();
 
@@ -1086,7 +1086,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 	bool transport_was_stopped = !transport_rolling();
 	
-	if (transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_engine() && play_loop)) {
+    if (transport_was_stopped && (!auto_play_legal || !config.get_auto_play()) && !with_roll && !(synced_to_engine() && play_loop ) && !(config.get_external_sync() && !synced_to_engine() ) ) {
 		realtime_stop (false, true); // XXX paul - check if the 2nd arg is really correct
 		transport_was_stopped = true;
 	} else {
@@ -1265,7 +1265,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 				unset_play_loop ();
 			}
 			_engine.transport_stop ();
-		} else {
+        } else {
 			bool const auto_return_enabled = (!config.get_external_sync() && (Config->get_auto_return_target_list() || abort));
 
 			if (!auto_return_enabled) {
@@ -1589,7 +1589,7 @@ Session::use_sync_source (Slave* new_slave)
 
 	delete _slave;
 	_slave = new_slave;
-
+    
     MTC_Slave* mtc_slave = dynamic_cast<MTC_Slave*>(_slave);
     if (mtc_slave) {
         mtc_slave->ActiveChanged.connect_same_thread (mtc_status_connection, boost::bind (&Session::mtc_status_changed, this, _1));
