@@ -339,9 +339,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	framecnt_t zero_fill = 0;
 
 #ifdef PLATFORM_WINDOWS
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NONBLOCK));
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));
 #else
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME | O_NONBLOCK));
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME));
 #endif
 
 	if (sfd < 0) {
