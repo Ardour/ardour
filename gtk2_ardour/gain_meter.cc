@@ -646,7 +646,7 @@ GainMeter::effective_gain_display ()
 		break;
 	}
 
-	if (gain_adjustment.get_value() != value) {
+	if (abs(gain_adjustment.get_value() - value) > 0.0000000001) {
 		ignore_toggle = true;
 		gain_adjustment.set_value (value);
 		ignore_toggle = false;
