@@ -754,8 +754,8 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 	/* we can request data from anywhere in the Source, between 0 and its length
 	 */
 
-	framepos_t sample_start = max ((framepos_t) 0, (center - canvas_samples));
-	framepos_t sample_end = min (center + canvas_samples, _region->source_length (0));
+	framepos_t sample_start = max ((framepos_t) _region->start(), (center - canvas_samples));
+	framepos_t sample_end = min (center + canvas_samples, _region->start() + _region->length());
 
 	const int n_peaks = llrintf ((sample_end - sample_start)/ (double) _samples_per_pixel);
 

@@ -170,6 +170,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	mutable size_t  _last_raw_map_length;
 	mutable bool _first_run;
 	mutable double _last_scale;
+	mutable boost::scoped_array<PeakData> staging;
 	mutable boost::scoped_array<PeakData> peak_cache;
 };
 

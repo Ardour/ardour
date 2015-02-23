@@ -339,9 +339,9 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	framecnt_t zero_fill = 0;
 
 #ifdef PLATFORM_WINDOWS
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NONBLOCK));
 #else
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME));
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME | O_NONBLOCK));
 #endif
 
 	if (sfd < 0) {
@@ -405,7 +405,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if (_first_run  || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
 			peak_cache.reset (new PeakData[npeaks]);
-			boost::scoped_array<PeakData> staging;
 			staging.reset (new PeakData[npeaks]);
 
 			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
@@ -456,7 +455,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		framepos_t stored_peak_before_next_visual_peak = (framepos_t) next_visual_peak_frame / samples_per_file_peak;
 		framecnt_t nvisual_peaks = 0;
 		uint32_t i = 0;
-		framecnt_t chunksize = (framecnt_t) expected_peaks;
+		framecnt_t chunksize = (framecnt_t) expected_peaks; // we read all the peaks we need in one hit.
 
 		/* handle the case where the initial visual peak is on a pixel boundary */
 
@@ -472,7 +471,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if (_first_run || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
 			peak_cache.reset (new PeakData[npeaks]);
-			boost::scoped_array<PeakData> staging;
 			staging.reset (new PeakData[chunksize]);
 
 			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
