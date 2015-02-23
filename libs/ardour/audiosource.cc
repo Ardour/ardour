@@ -456,7 +456,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		framepos_t stored_peak_before_next_visual_peak = (framepos_t) next_visual_peak_frame / samples_per_file_peak;
 		framecnt_t nvisual_peaks = 0;
 		uint32_t i = 0;
-		framecnt_t chunksize = (framecnt_t) min (expected_peaks, 65536.0);
+		framecnt_t chunksize = (framecnt_t) expected_peaks;
 
 		/* handle the case where the initial visual peak is on a pixel boundary */
 
