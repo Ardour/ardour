@@ -212,15 +212,21 @@ MonoPanner::on_button_press_event (GdkEventButton* ev)
                     ARDOUR::RouteList::const_iterator iter = routes->begin();
                     for (; iter != routes->end(); ++iter) {
                         
-                        boost::shared_ptr<ARDOUR::AutomationControl> control;
-                        control = (*iter)->panner()->pannable()->pan_azimuth_control;
-                        control->set_value (DEFAULT_VALUE);
+                        // in multi out mode mono track will have no panner
+                        if ((*iter)->panner() ) {
+                            boost::shared_ptr<ARDOUR::AutomationControl> control;
+                            control = (*iter)->panner()->pannable()->pan_azimuth_control;
+                            control->set_value (DEFAULT_VALUE);
+                        }
                     }
                 } else {
                     
-                    boost::shared_ptr<ARDOUR::AutomationControl> control;
-                    control = _route->panner()->pannable()->pan_azimuth_control;
-                    control->set_value (DEFAULT_VALUE);
+                    // in multi out mode mono track will have no panner
+                    if (_route->panner() ) {
+                        boost::shared_ptr<ARDOUR::AutomationControl> control;
+                        control = _route->panner()->pannable()->pan_azimuth_control;
+                        control->set_value (DEFAULT_VALUE);
+                    }
                 }
 
             } else {
@@ -400,20 +406,26 @@ MonoPanner::adjust_pan_value_by (double delta)
             ARDOUR::RouteList::const_iterator iter = routes->begin();
             for (; iter != routes->end(); ++iter) {
                 
-                boost::shared_ptr<ARDOUR::AutomationControl> control;
-                control = (*iter)->panner()->pannable()->pan_azimuth_control;
+                // in multi out mode mono track will have no panner
+                if ((*iter)->panner() ) {
+                    boost::shared_ptr<ARDOUR::AutomationControl> control;
+                    control = (*iter)->panner()->pannable()->pan_azimuth_control;
                 
-                double pv = control->get_value(); // 0..1.0 ; 0 = left
-                control->set_value (pv + update_by_delta);
+                    double pv = control->get_value(); // 0..1.0 ; 0 = left
+                    control->set_value (pv + update_by_delta);
+                }
             }
             
         } else {
             
-            boost::shared_ptr<ARDOUR::AutomationControl> control;
-            control = _route->panner()->pannable()->pan_azimuth_control;
-            
-            double pv = control->get_value(); // 0..1.0 ; 0 = left
-            control->set_value (pv + update_by_delta);
+            // in multi out mode mono track will have no panner
+            if (_route->panner() ) {
+                boost::shared_ptr<ARDOUR::AutomationControl> control;
+                control = _route->panner()->pannable()->pan_azimuth_control;
+    
+                double pv = control->get_value(); // 0..1.0 ; 0 = left
+                control->set_value (pv + update_by_delta);
+            }
         }
         
     } else { // apply change to the panner directly
