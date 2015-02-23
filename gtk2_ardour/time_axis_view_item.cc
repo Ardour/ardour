@@ -721,26 +721,26 @@ TimeAxisViewItem::manage_name_highlight ()
 	}
 
     double highlite_x1 = name_text_width + 2*NAME_HIGHLIGHT_X_INDENT + NAME_HIGHLIGHT_X_OFFSET;
-	if (_width < highlite_x1) {
-        highlite_x1 = _width;
-	}
+        if (_width < highlite_x1) {
+            highlite_x1 = _width;
+        }
 
-    if (highlite_x1 < NAME_HIGHLIGHT_X_OFFSET) {
-    	wide_enough_for_name = false;
-	} else {
-		wide_enough_for_name = true;
-	}
+        if (highlite_x1 < NAME_HIGHLIGHT_X_OFFSET) {
+            wide_enough_for_name = false;
+        } else {
+            wide_enough_for_name = true;
+        }
     
-	if (wide_enough_for_name && high_enough_for_name && !name_text->text().empty() ) {
+    if (wide_enough_for_name && high_enough_for_name && !name_text->text().empty() ) {
 		name_highlight->set (ArdourCanvas::Rect (NAME_HIGHLIGHT_X_OFFSET,
                                                  NAME_HIGHLIGHT_Y_OFFSET,
                                                  highlite_x1,
                                                  NAME_HIGHLIGHT_HEIGHT + NAME_HIGHLIGHT_Y_OFFSET) );
         name_highlight->show();
         name_highlight->raise_to_top();
-	} else {
-		name_highlight->hide();
-	}
+    } else {
+        name_highlight->hide();
+    }
     
     manage_name_text ();
     
@@ -790,8 +790,8 @@ TimeAxisViewItem::manage_ioconfig_highlight ()
                                                  name_highlight->y0 (),
                                                  ioconfig_x1,
                                                  name_highlight->y1 () ) );
-    ioconfig_highlight->show();
-    ioconfig_highlight->raise_to_top();
+        ioconfig_highlight->show();
+        ioconfig_highlight->raise_to_top();
     
     manage_ioconfig_text ();
 }
@@ -836,8 +836,8 @@ TimeAxisViewItem::manage_sr_highlight ()
                                                  ioconfig_highlight->y0 (),
                                                  sr_x1,
                                                  ioconfig_highlight->y1 () ) );
-    sample_rate_highlight->show();
-    sample_rate_highlight->raise_to_top();
+        sample_rate_highlight->show();
+        sample_rate_highlight->raise_to_top();
     
     manage_sr_text ();
 }
@@ -1005,8 +1005,8 @@ TimeAxisViewItem::set_frame_color()
         outline_color_rgba = RGBA_TO_UINT (255, 255, 255, opacity);
     }
     else{
-        uint32_t opacity = 255 * 0.7; //70% opacity
-        outline_color_rgba = RGBA_TO_UINT (0, 0, 0, opacity);
+        uint32_t opacity = 255 * 0.5; //70% opacity
+        outline_color_rgba = RGBA_TO_UINT (50, 50, 50, opacity);
     }
     frame->set_outline_color (outline_color_rgba );
 }
@@ -1016,23 +1016,22 @@ TimeAxisViewItem::set_frame_gradient ()
 {
 	ArdourCanvas::Fill::StopList stops;
 	double r, g, b, a;
-	double h, s, v;
 	ArdourCanvas::Color fill_color (get_fill_color() );
     
 	/* need to get alpha value */
 	ArdourCanvas::color_to_rgba (fill_color, r, g, b, a);
     
-    /* set base apacity 90% */
+    /* set base apacity 95% */
     ArdourCanvas::Color base = ArdourCanvas::rgba_to_color (r, g, b, 0.95);
-    /* set middle apacity 80%*/
-    ArdourCanvas::Color middle  = ArdourCanvas::rgba_to_color (r, g, b, 0.8);
-    /* set top color as white with 75% apacity*/
-    ArdourCanvas::Color top  = ArdourCanvas::rgba_to_color (r, g, b, 0.65);
+    /* set middle apacity 80%, add 20% to each color*/
+    ArdourCanvas::Color middle  = ArdourCanvas::rgba_to_color (r+0.2, g+0.2, b+0.2, 0.8);
+    /* set top apacity 65%, add 50% to each color*/
+    ArdourCanvas::Color top  = ArdourCanvas::rgba_to_color (r+0.5, g+0.5, b+0.5, 0.65);
 	
     /*set base color starting from the beginning*/
 	stops.push_back (std::make_pair (0.0, top));
-	/*set middle color starting from 70% of height*/
-    stops.push_back (std::make_pair (0.7, middle));
+	/*set middle color starting from 40% of height*/
+    stops.push_back (std::make_pair (0.4, middle));
     /*set middle color starting from on top*/
 	stops.push_back (std::make_pair (1.0, base));
 	
@@ -1207,7 +1206,7 @@ TimeAxisViewItem::manage_ioconfig_text ()
         return;
     }
     
-    if (!ioconfig_highlight->visible() ) {
+    if (!ioconfig_highlight->visible() && !_selected ) {
         ioconfig_text->hide ();
         return;
     }
@@ -1239,7 +1238,7 @@ TimeAxisViewItem::manage_sr_text ()
         return;
     }
     
-    if (!sample_rate_highlight->visible() ) {
+    if (!sample_rate_highlight->visible() && !_selected) {
         sample_rate_text->hide ();
         return;
     }
