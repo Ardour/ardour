@@ -355,21 +355,21 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 			// eventually the Bus-Name for each configuration should be exposed
 			// for the User to select..
 
-			UInt32 elCountIn, elCountOut, elCount;
+			UInt32 elCountIn, elCountOut;
 
 			if (GetElementCount (kAudioUnitScope_Input, elCountIn)) return -1;
 			if (GetElementCount (kAudioUnitScope_Output, elCountOut)) return -1;
 
-			elCount = std::max(elCountIn, elCountOut);
+			cnt = std::max(elCountIn, elCountOut);
 
-			*chaninfo = (AUChannelInfo*) malloc (sizeof (AUChannelInfo) * elCount);
+			*chaninfo = (AUChannelInfo*) malloc (sizeof (AUChannelInfo) * cnt);
 
 			for (unsigned int i = 0; i < elCountIn; ++i) {
 				UInt32 numChans;
 				if (NumberChannels (kAudioUnitScope_Input, i, numChans)) return -1;
 				(*chaninfo)[i].inChannels = numChans;
 			}
-			for (unsigned int i = elCountIn; i < elCount; ++i) {
+			for (unsigned int i = elCountIn; i < cnt; ++i) {
 				(*chaninfo)[i].inChannels = 0;
 			}
 
@@ -378,7 +378,7 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 				if (NumberChannels (kAudioUnitScope_Output, i, numChans)) return -1;
 				(*chaninfo)[i].outChannels = numChans;
 			}
-			for (unsigned int i = elCountOut; i < elCount; ++i) {
+			for (unsigned int i = elCountOut; i < cnt; ++i) {
 				(*chaninfo)[i].outChannels = 0;
 			}
 			return 0;
