@@ -405,6 +405,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if (_first_run  || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
 			peak_cache.reset (new PeakData[npeaks]);
+			boost::scoped_array<PeakData> staging;
 			staging.reset (new PeakData[npeaks]);
 
 			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
@@ -471,6 +472,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if (_first_run || (_last_map_off != map_off) || (_last_scale != samples_per_visual_peak) || (_last_raw_map_length < raw_map_length)) {
 			peak_cache.reset (new PeakData[npeaks]);
+			boost::scoped_array<PeakData> staging;
 			staging.reset (new PeakData[chunksize]);
 
 			//posix_fadvise (sfd,  read_map_off, map_length, POSIX_FADV_WILLNEED);
