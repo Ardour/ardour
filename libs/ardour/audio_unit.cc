@@ -979,7 +979,7 @@ AUPlugin::input_streams() const
 
 
 	if (input_channels < 0) {
-		// force PluginIoReConfigure
+		// force PluginIoReConfigure -- see also commit msg e38eb06
 		c.set (DataType::AUDIO, 0);
 		c.set (DataType::MIDI, 0);
 	} else {
@@ -997,7 +997,7 @@ AUPlugin::output_streams() const
 	ChanCount c;
 
 	if (output_channels < 0) {
-		// force PluginIoReConfigure
+		// force PluginIoReConfigure - see also commit msg e38eb06
 		c.set (DataType::AUDIO, 0);
 		c.set (DataType::MIDI, 0);
 	} else {
