@@ -117,7 +117,6 @@ EngineControl::EngineControl ()
 	}
 
 	set_popdown_strings (backend_combo, strings);
-	backend_combo.set_active_text (strings.front());
 	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
 
 	/* setup basic packing characteristics for the table used on the main
@@ -279,10 +278,12 @@ EngineControl::EngineControl ()
 	ARDOUR::AudioEngine::instance()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 
-	if (audio_setup)
-	{
+	if (audio_setup) {
 		set_state (*audio_setup);
+	} else {
+		backend_combo.set_active_text (strings.front());
 	}
+
 	{
 		/* ignore: don't save state */
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
@@ -825,15 +826,22 @@ EngineControl::list_devices ()
 		update_sensitivity ();
 
 		{
-			string current_device;
-			current_device = backend->device_name ();
+			string current_device, found_device;
+			current_device = device_combo.get_active_text ();
 			if (current_device == "") {
-				// device might not have been set yet
-				current_device = device_combo.get_active_text ();
-				if (current_device == "")
-					// device has never been set, make sure it's not blank
-					current_device = available_devices.front ();
+				current_device = backend->device_name ();
 			}
+
+			// Make sure that the active text is still relevant for this
+			// device (it might only be relevant to the previous device!!)
+			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
+				if (*i == current_device)
+					found_device = current_device;
+			}
+			if (found_device == "")
+				// device has never been set (or was not relevant
+				// for this backend) Let's make sure it's not blank
+				current_device = available_devices.front ();
 
 			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			set_popdown_strings (device_combo, available_devices);
