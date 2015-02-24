@@ -209,6 +209,9 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	void latency_callback (bool for_playback);
 	void halted_callback (const char* reason);
 
+	/* checks if current thread is properly set up for audio processing */
+	static bool thread_initialised_for_audio_processing ();
+
 	/* sets up the process callback thread */
 	static void thread_init_callback (void *);
 
