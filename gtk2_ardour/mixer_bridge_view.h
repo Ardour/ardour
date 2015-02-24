@@ -62,7 +62,8 @@ class MixerBridgeView :
 
   private:
 	Gtk::Container& _mixer_strips_home;
-	bool _following_editor_selection;
+    Gtk::ScrolledWindow& _scroll;
+    bool _following_editor_selection;
 	std::string _mixer_strip_script_name;
 	
 	gint start_updating ();
@@ -80,6 +81,9 @@ class MixerBridgeView :
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
 	void parent_on_size_allocate (Gtk::Allocation&);
     void begin_strip_name_edit (MixerStrip::TabToStrip, const MixerStrip*);
+    void ensure_strip_is_visible (const MixerStrip*);
+    int get_number_of_strip (const MixerStrip*);
+    int get_line_of_strip (const MixerStrip*);
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route> route);
 	MixerStrip* strip_under_pointer ();

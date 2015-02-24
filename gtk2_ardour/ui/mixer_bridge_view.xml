@@ -9,7 +9,8 @@
     </VBox>
     <EventBox bgnormal="#000000"
               width="1"/>
-    <ScrolledWindow hscroll="always"
+    <ScrolledWindow id="scroller"
+                    hscroll="always"
                     vscroll="never"
                     box.expand="true"
                     box.fill="true">

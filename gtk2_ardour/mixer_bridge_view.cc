@@ -85,7 +85,8 @@ MixerBridgeView::MixerBridgeView (const std::string& mixer_bridge_script_name, c
 	: Gtk::EventBox()
 	, WavesUI (mixer_bridge_script_name, *this)
 	, _mixer_strips_home (get_container ("mixer_strips_home"))
-	, _following_editor_selection (false)
+    , _scroll (get_scrolled_window ("scroller"))
+   	, _following_editor_selection (false)
 	, _mixer_strip_script_name (mixer_strip_script_name)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
@@ -514,6 +515,7 @@ MixerBridgeView::begin_strip_name_edit (MixerStrip::TabToStrip edit_next, const 
             if (*it == cur_strip) {
                 if (++it != strips.end ()) {
                     MixerStrip* strip = dynamic_cast<MixerStrip*> (*it);
+                    ensure_strip_is_visible (strip);
                     strip->begin_name_edit ();
                 }
                 break;
@@ -525,10 +527,95 @@ MixerBridgeView::begin_strip_name_edit (MixerStrip::TabToStrip edit_next, const 
                 if (it != strips.begin ()) {
                     --it;
                     MixerStrip* strip = dynamic_cast<MixerStrip*> (*it);
+                    ensure_strip_is_visible (strip);
                     strip->begin_name_edit ();
                 }
                 break;
             }
         }
     }
+}
+
+int
+MixerBridgeView::get_number_of_strip (const MixerStrip* cur_strip)
+{
+    // return number of strip in container '_mixer_strips_home'
+    std::vector<Gtk::Widget*> strips = _mixer_strips_home.get_children();
+    for (std::vector<Gtk::Widget*>::iterator it = strips.begin (); it != strips.end (); ++it) {
+        if (*it == cur_strip) {
+            return std::distance (strips.begin (), it);
+        }
+    }
+    return -1;
+}
+
+int
+MixerBridgeView::get_line_of_strip (const MixerStrip* cur_strip)
+{
+    // this method is actual just for Meterbridge
+    const int STRIP_WIDTH = cur_strip->get_width ();
+    int strips_per_line = _mixer_strips_home.get_width () / STRIP_WIDTH;
+    int strip_number = get_number_of_strip (cur_strip);
+    if (strip_number == -1) {
+        return -1;
+    }
+    
+    int strip_line_number = strip_number / strips_per_line;
+    return strip_line_number;
+}
+
+
+void
+MixerBridgeView::ensure_strip_is_visible (const MixerStrip* cur_mixer)
+{
+    Gtk::Adjustment* horizontal_adjustment = _scroll.get_hadjustment ();
+    Gtk::Adjustment* vertical_adjustment = _scroll.get_vadjustment ();
+    Gtk::Adjustment* using_adjustment;
+    
+    Gtk::Box* the_box = dynamic_cast <Gtk::Box*> (&_mixer_strips_home);
+    WavesGrid* the_grid = dynamic_cast <WavesGrid*> (&_mixer_strips_home);
+    
+    double current_view_min_pos, current_view_max_pos;
+    double strip_min_pos, strip_max_pos;
+    
+    if (the_box) { // Mixer
+        const int STRIP_WIDTH = cur_mixer->get_width ();
+
+        current_view_min_pos = horizontal_adjustment->get_value ();
+        current_view_max_pos = current_view_min_pos + horizontal_adjustment->get_page_size ();
+        
+        strip_min_pos = get_number_of_strip (cur_mixer) * STRIP_WIDTH;
+        strip_max_pos = strip_min_pos + STRIP_WIDTH;
+
+        using_adjustment = horizontal_adjustment;
+    } else if (the_grid) { //MeterBridge
+        const int STRIP_HEIGHT = cur_mixer->get_height ();
+        
+        current_view_min_pos = vertical_adjustment->get_value ();
+        current_view_max_pos = current_view_min_pos + vertical_adjustment->get_page_size ();
+        
+        strip_min_pos = get_line_of_strip (cur_mixer) * STRIP_HEIGHT;
+        strip_max_pos = strip_min_pos + STRIP_HEIGHT;
+      
+        using_adjustment = vertical_adjustment;
+    }
+    else {
+        return ;
+    }
+    
+    if ( strip_min_pos >= current_view_min_pos &&
+        strip_max_pos < current_view_max_pos ) {
+        // already visible
+        return;
+    }
+    
+    double new_value = 0.0;
+    if (strip_min_pos < current_view_min_pos) {
+        // Strip is left (above) the current view
+        new_value = strip_min_pos;
+    } else {
+        // Strip is right (below) the current view
+        new_value = strip_max_pos - using_adjustment->get_page_size ();
+    }
+    using_adjustment->set_value (new_value);
 }

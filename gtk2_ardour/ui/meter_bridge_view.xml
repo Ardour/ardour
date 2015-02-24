@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <CompactMeterbridge bgnormal="#353535">
-  <ScrolledWindow hscroll="never"
+  <ScrolledWindow id="scroller"
+                  hscroll="never"
                   vscroll="always"
                   box.expand="true"
                   box.fill="true">
