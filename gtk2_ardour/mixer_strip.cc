@@ -1068,7 +1068,6 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, bool for_i
 	string system_port;
 
 	ostringstream tooltip;
-	char * tooltip_cstr;
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
@@ -1152,9 +1151,6 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, bool for_i
 	if (total_connection_count == 0) {
 		tooltip << endl << _("Disconnected");
 	}
-
-	tooltip_cstr = new char[tooltip.str().size() + 1];
-	strcpy(tooltip_cstr, tooltip.str().c_str());
 
 	if (each_io_has_one_connection) {
 		if (total_connection_count == ardour_connection_count) {
