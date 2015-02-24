@@ -1038,7 +1038,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	//if there's a configuration that keeps out==in
 
 	if (in.n_midi() > 0 && audio_in == 0) {
-		audio_out = -1;
+		audio_out = 2; // prefer stereo version if available.
 	} else {
 		audio_out = audio_in;
 	}
