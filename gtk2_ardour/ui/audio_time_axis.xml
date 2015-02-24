@@ -103,15 +103,13 @@
             
         </HBox>
       </VBox>
-      <HBox visible="false" noshowall="true">
-        <Button id="show_sends_button"/>
-        <Button id="monitor_disk_button"/>
-        <Button id="comment_button"/>
-        <Button id="midi_input_enable_button"/>
-        <Button id="group_button" text="Grp"/>
-        <Button id="route_group_button"/>
-        <Button id="automation_button"/>
-      </HBox>
+      <Button id="show_sends_button" ui.orphan="true"/>
+      <Button id="monitor_disk_button" ui.orphan="true"/>
+      <Button id="comment_button" ui.orphan="true"/>
+      <Button id="midi_input_enable_button" ui.orphan="true"/>
+      <Button id="group_button" text="Grp" ui.orphan="true"/>
+      <Button id="route_group_button" ui.orphan="true"/>
+      <Button id="automation_button" ui.orphan="true"/>
       <VBox width="4"/>
       <VBox  id="gain_meter_home" width="7" />
     </HBox>
