@@ -227,8 +227,9 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = reg_sens (editor_actions, "track-solo-toggle", _("Toggle Solo"), sigc::mem_fun(*this, &Editor::toggle_solo));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+    // Tracks Live doesn't use it
+    //	act = reg_sens (editor_actions, "track-solo-toggle", _("Toggle Solo"), sigc::mem_fun(*this, &Editor::toggle_solo));
+    //	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-mute-toggle", _("Toggle Mute"), sigc::mem_fun(*this, &Editor::toggle_mute));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-solo-isolate-toggle", _("Toggle Solo Isolate"), sigc::mem_fun(*this, &Editor::toggle_solo_isolate));

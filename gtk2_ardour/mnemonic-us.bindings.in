@@ -156,7 +156,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/split-region|s|split
 @rop|Region/split-on-playhead|<@LEVEL4@>downarrow|split on playhead
 @sess|Common/Save|<@PRIMARY@>s|save session
-@trans|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
+;@trans|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
 @rop|Region/duplicate-region|<@SECONDARY@>d|duplicate region (once)
 @rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
