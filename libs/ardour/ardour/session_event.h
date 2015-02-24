@@ -134,6 +134,7 @@ public:
 
 	static const framepos_t Immediate = -1;
 
+    static bool has_per_thread_pool ();
 	static void create_per_thread_pool (const std::string& n, uint32_t nitems);
 	static void init_event_pool ();
 

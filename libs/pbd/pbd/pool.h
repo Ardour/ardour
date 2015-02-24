@@ -128,6 +128,7 @@ class LIBPBD_API PerThreadPool
         const Glib::Threads::Private<CrossThreadPool>& key() const { return _key; }
 
 	void  create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems);
+    bool has_per_thread_pool ();
 	CrossThreadPool* per_thread_pool ();
 
 	void set_trash (RingBuffer<CrossThreadPool*>* t);

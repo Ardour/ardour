@@ -739,11 +739,14 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
 		AudioEngine::thread_init_callback (this);
     }
 
-	if (process_id != pthread_self() ) {
+    if ( !engine.thread_initialised_for_audio_processing () ) {
 		std::cerr << "\tWavesAudioBackend::_audio_device_callback (): It's an attempt to call process callback from the thread which didn't initialize it " << std::endl;
-		std::cerr << "Expected thread: " << process_id << " current thread: " << pthread_self() << std::dec << " !" << std::endl;
+        
+        if (process_id != pthread_self() ) {
+            std::cerr << "Process thread ID has changed. Expected thread: " << process_id << " current thread: " << pthread_self() << std::dec << " !" << std::endl;
+            process_id = pthread_self();
+        }
 
-		process_id = pthread_self();
 		AudioEngine::thread_init_callback (this);
 	}
 
