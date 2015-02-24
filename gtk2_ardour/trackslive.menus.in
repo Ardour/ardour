@@ -141,6 +141,7 @@
 #endif
       <menuitem action='Minimize'/>
       <menuitem action='Zoom'/>
+      <menuitem action='toggle-log-window'/>
     </menu>
 
 
