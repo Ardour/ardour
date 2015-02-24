@@ -758,6 +758,17 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
         AudioEngine::thread_init_callback (this);
     }
 
+    if ( !engine.thread_initialised_for_audio_processing () ) {
+	    std::cerr << "\tWavesAudioBackend::_audio_device_callback (): It's an attempt to call process callback from the thread which didn't initialize it " << std::endl;
+	    
+	    if (process_id != pthread_self() ) {
+		    std::cerr << "Process thread ID has changed. Expected thread: " << process_id << " current thread: " << pthread_self() << std::dec << " !" << std::endl;
+		    process_id = pthread_self();
+	    }
+	    
+	    AudioEngine::thread_init_callback (this);
+    }
+
     engine.process_callback (nframes);
     
     _write_audio_data_to_device (output_buffer, nframes);

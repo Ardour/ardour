@@ -175,6 +175,20 @@ PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned l
 	_key.set (new CrossThreadPool (n, isize, nitems, this));
 }
 
+/** @return True if CrossThreadPool for the current thread exists,
+ *  False otherwise
+ */
+bool
+PerThreadPool::has_per_thread_pool ()
+{
+    CrossThreadPool* p = _key.get();
+    if (p) {
+        return true;
+    }
+    return false;
+}
+
+
 /** @return CrossThreadPool for the current thread, which must previously have been created by
  *  calling create_per_thread_pool in the current thread.
  */

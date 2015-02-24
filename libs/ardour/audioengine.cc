@@ -1151,6 +1151,12 @@ AudioEngine::set_systemic_output_latency (uint32_t ol)
 	return _backend->set_systemic_output_latency  (ol);
 }
 
+bool
+AudioEngine::thread_initialised_for_audio_processing ()
+{
+    return SessionEvent::has_per_thread_pool () && AsyncMIDIPort::is_process_thread();
+}
+
 /* END OF BACKEND PROXY API */
 
 void

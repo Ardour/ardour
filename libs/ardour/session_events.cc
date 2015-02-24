@@ -42,6 +42,12 @@ SessionEvent::init_event_pool ()
 	pool = new PerThreadPool;
 }
 
+bool
+SessionEvent::has_per_thread_pool ()
+{
+    return pool->has_per_thread_pool ();
+}
+
 void
 SessionEvent::create_per_thread_pool (const std::string& name, uint32_t nitems)
 {
