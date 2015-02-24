@@ -203,13 +203,16 @@
                             noshowall="true"/>
               </HBox>
             </VBox>
-            <iconbutton id="master_mute_button"
-                        width="95"
-                        height="41"
-                        normalicon="inspector_master_mute"
-                        activeicon="inspector_master_mute_active"
-                        visible="false"
-                        noshowall="true"/>
+            <HBox>
+              <iconbutton id="master_mute_button"
+                          width="95"
+                          height="41"
+                          normalicon="inspector_master_mute"
+                          activeicon="inspector_master_mute_active"
+                          visible="false"
+                          noshowall="true"
+                          box.padding="1"/>
+			</HBox>
             <HBox height="1"/>
             <HBox>
               <EventBox width="1"
