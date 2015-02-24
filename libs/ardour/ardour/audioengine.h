@@ -74,7 +74,7 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	bool setup_required () const;
 
 	ProcessThread* main_thread() const { return _main_thread; }
-    
+
 	/* START BACKEND PROXY API 
 	 *
 	 * See audio_backend.h for full documentation and semantics. These wrappers
@@ -106,6 +106,7 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 
 	void           request_backend_reset();
 	void           request_device_list_update();
+	void           launch_device_control_app();
 
 	bool           is_realtime() const;
 	bool           connected() const;

@@ -377,6 +377,16 @@ AudioEngine::process_callback (pframes_t nframes)
 
 
 void
+AudioEngine::launch_device_control_app()
+{
+	if (_state_lock.trylock () ) {
+		_backend->launch_control_app ();
+		_state_lock.unlock ();
+	}
+}
+
+
+void
 AudioEngine::request_backend_reset()
 {
     Glib::Threads::Mutex::Lock guard (_reset_request_lock);
