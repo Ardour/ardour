@@ -1145,10 +1145,8 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 
 		case kAsioResetRequest:
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResetRequest" << std::endl;
-			if (m_ResetRequested == 0) {
-				m_ResetRequested++;
-				m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
-			}
+			m_ResetRequested++;
+			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
 			break;
 
         case kAsioOverload:
