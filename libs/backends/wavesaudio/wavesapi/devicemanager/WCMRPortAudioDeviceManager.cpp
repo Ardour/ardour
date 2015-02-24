@@ -1328,7 +1328,7 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
     AUTO_FUNC_DEBUG;
 	WTErr retVal = eNoErr;
 	
-	if (Active())
+	if (Active() && !m_ResetRequested )
 	{
 #ifdef PLATFORM_WINDOWS
 		if(Pa_GetHostApiInfo(Pa_GetDeviceInfo(m_DeviceID)->hostApi)->type == paASIO)
@@ -1336,16 +1336,21 @@ WTErr WCMRPortAudioDevice::ShowConfigPanel (void *pParam)
 			// stop and deactivate the device
 			bool wasStreaming = Streaming();
 			SetActive(false);
+
 			// show control panel for the device
 			if (PaAsio_ShowControlPanel (m_DeviceID, pParam) != paNoError)
 				retVal = eGenericErr;
-			// reset device to pick up changes
-			ResetDevice();
+			
 			// restore previous state for the device
 			SetActive(true);
             if (wasStreaming) {
 				SetStreaming(true);
             }
+
+			// reset device to pick up changes
+			if (!m_ResetRequested) {
+				m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
+			}
 		}
 #else
 	pParam = pParam;

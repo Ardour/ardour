@@ -108,6 +108,8 @@ public:
     bool           in_process_thread ();
     uint32_t       process_thread_count ();
 
+	void           launch_device_control_app();
+
 	void		   request_backend_reset();
     void           request_device_list_update();
 

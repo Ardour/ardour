@@ -1334,10 +1334,7 @@ TracksControlPanel::on_no_button(WavesButton*)
 void
 TracksControlPanel::on_control_panel_button(WavesButton*)
 {
-    boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
-    assert(backend);
-    
-    backend->launch_control_app ();
+    AudioEngine::instance()->launch_device_control_app ();
 }
 
 void
