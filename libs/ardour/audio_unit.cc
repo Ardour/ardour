@@ -977,11 +977,11 @@ AUPlugin::input_streams() const
 {
 	ChanCount c;
 
-	c.set (DataType::AUDIO, 1);
-	c.set (DataType::MIDI, 0);
 
 	if (input_channels < 0) {
-		warning << string_compose (_("AUPlugin: %1 input_streams() called without any format set!"), name()) << endmsg;
+		// force PluginIoReConfigure
+		c.set (DataType::AUDIO, 0);
+		c.set (DataType::MIDI, 0);
 	} else {
 		c.set (DataType::AUDIO, input_channels);
 		c.set (DataType::MIDI, _has_midi_input ? 1 : 0);
@@ -996,11 +996,10 @@ AUPlugin::output_streams() const
 {
 	ChanCount c;
 
-	c.set (DataType::AUDIO, 1);
-	c.set (DataType::MIDI, 0);
-
 	if (output_channels < 0) {
-		warning << string_compose (_("AUPlugin: %1 output_streams() called without any format set!"), name()) << endmsg;
+		// force PluginIoReConfigure
+		c.set (DataType::AUDIO, 0);
+		c.set (DataType::MIDI, 0);
 	} else {
 		c.set (DataType::AUDIO, output_channels);
 		c.set (DataType::MIDI, _has_midi_output ? 1 : 0);
