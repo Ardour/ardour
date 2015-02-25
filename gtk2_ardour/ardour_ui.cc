@@ -1799,6 +1799,15 @@ ARDOUR_UI::transport_record (bool roll)
 {
 
 	if (_session) {
+
+        // make sure we are ready to change record state
+		if (AudioEngine::instance()->state_lock().trylock () ) {
+			// release the look
+			AudioEngine::instance()->state_lock().unlock ();
+		} else {
+			return;
+		}
+
 		switch (_session->record_status()) {
 		case Session::Disabled:
 			if (_session->ntracks() == 0) {
