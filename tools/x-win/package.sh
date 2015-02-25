@@ -212,6 +212,31 @@ else
 fi
 
 ################################################################################
+### Mixbus plugins, etc
+if test -n "$MIXBUS"; then
+
+	mkdir -p $ALIBDIR/LV2
+	METERS_VERSION=$(curl -s -S http://gareus.org/x42/win/x42-meters.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/win/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
+		"${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
+	unzip -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
+
+	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/win/setBfree.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/win/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip \
+		"${SRCDIR}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
+	unzip -d "$ALIBDIR/LV2/" "${SRCDIR}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
+
+	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/win/x42-midifilter.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/win/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip \
+		"${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	unzip -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+
+fi
+
+################################################################################
 echo " === Preparing Windows Installer"
 NSISFILE=$DESTDIR/a3.nsis
 

@@ -171,7 +171,7 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
 elif test x$MIXBUS != x ; then
-    appname="Ardour3/Mixbus"
+    appname="Mixbus"
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
     # current default for MIXBUS version is US keyboard layout without a keypad
@@ -614,6 +614,38 @@ if test x$WITH_HARVID != x ; then
 
 	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
+
+###################################################################
+### Mixbus plugins, etc
+if test -n "$MIXBUS"; then
+	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
+		OSX_ARCH=x86_64
+	else
+		OSX_ARCH=i386
+	fi
+
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
+
+	# TODO use rsync://gareus.org/x42/ and cache locally - see harvid/xjadeo below
+	METERS_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-meters.latest.txt)
+	curl -s http://gareus.org/x42/osx/x42-meters-lv2-osx-${METERS_VERSION}.zip \
+		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
+
+	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/osx/setBfree.latest.txt)
+	curl -s http://gareus.org/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \
+		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
+
+	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-midifilter.latest.txt)
+	curl -s http://gareus.org/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
+		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
+
+	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/.dylib ; do
+		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
+		mv ${file}.thin ${file}
+	done
+
+fi
+################################################################################
 
 ( cd $PRODUCT_PKG_DIR ; find . ) > file_list.txt
 

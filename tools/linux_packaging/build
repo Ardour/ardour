@@ -110,12 +110,14 @@ case `uname -m` in
 	i[3456789]86|x86|i86pc)
 		echo "Architecture is x86"
 		ARCH='x86'
+		WARCH='i386'
 		ARCH_BITS='32-bit'
 		MULTIARCH='i386-linux-gnu'
 		;;
 	x86_64|amd64|AMD64)
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
+		WARCH='x86_64'
 		ARCH_BITS='64-bit'
 		MULTIARCH='x86_64-linux-gnu'
 		;;
@@ -580,6 +582,34 @@ fi
 for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir
 done
+
+
+################################################################################
+### Mixbus plugins, etc
+if test -n "$MIXBUS"; then
+
+	mkdir -p $APPLIB/LV2
+	METERS_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-meters.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/linux/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
+		"${SRCDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${SRCDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+
+	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/linux/setBfree.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/linux/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip \
+		"${SRCDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${SRCDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
+
+	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-midifilter.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/linux/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip \
+		"${SRCDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${SRCDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
+
+fi
+################################################################################
+
 
 if test x$WITH_HARVID != x ; then
 	cd $APPBIN
