@@ -389,8 +389,8 @@
                         minvalue="0"
                         maxvalue="23"
                         initialvalue="4"
-                        step="1"
-                        pageincrement="1"/>
+                        step="-1"
+                        pageincrement="-1"/>
             <Adjustment id="vertical_zoom_adjustment"
                         minvalue="1"
                         maxvalue="40"
