@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<VBox CACHEIT="false">
+<VBox>
   <style name="generic_control"
          winfont ="Arial Bold 10"
          macfont ="Helvetica Bold 10"

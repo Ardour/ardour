@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<HBox CACHEIT="false">
+<HBox>
   <style name="generic_control"
         winfont ="Arial Bold 12"
         macfont ="Helvetica Bold 12"

@@ -4,8 +4,7 @@
         macfont ="Helvetica Bold 12"
         fgnormal="#6D6E72"
         borderwidth="5 5 5 5"
-        bordercolor="#000000"
-        CACHEIT="false">
+        bordercolor="#000000">
   
   <style name="generic_control"
          winfont ="Arial Bold 12"

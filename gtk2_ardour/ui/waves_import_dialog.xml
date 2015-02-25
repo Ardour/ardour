@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Tracks Live - Add Existing Media"
-        CACHEIT="false"
         ImportAsTrack="as new tracks"
         ImportToTrack="to selected tracks"
         ImportAsRegion="to region list"

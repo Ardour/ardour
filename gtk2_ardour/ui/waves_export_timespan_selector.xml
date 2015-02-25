@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<VBox CACHEIT="false" UI.NEEDINIT="true" spacing="10">
+<VBox UI.NEEDINIT="true" spacing="10">
   <style name="generic_control"
          winfont ="Arial Bold 10"
          macfont ="Helvetica Bold 10"

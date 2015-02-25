@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<HBox CACHEIT="false"
-      UI.NEEDINIT="true"
+<HBox UI.NEEDINIT="true"
       spacing="5">
   <style name="generic_control"
          winfont ="Arial Bold 10"
