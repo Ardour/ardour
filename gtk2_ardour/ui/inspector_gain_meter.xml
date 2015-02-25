@@ -3,7 +3,8 @@
             thinmeterwidth="6">
   <Adjustment id="gain_adjustment"
               minvalue="0"
-              maxvalue="1"/>
+              maxvalue="1"
+              step="0.00535"/>
   <Layout bgnormal="#383838"
           width="97"
           height="258">

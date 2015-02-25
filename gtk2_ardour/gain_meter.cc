@@ -84,8 +84,6 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	gain_adjustment.set_value (gain_to_slider_position_with_max (1.0, Config->get_max_gain()));
 	gain_adjustment.set_lower (0.0);
 	gain_adjustment.set_upper (1.0);
-	gain_adjustment.set_step_increment (0.01);
-	gain_adjustment.set_page_increment (0.1);
 	set_session (s);
 
 	ignore_toggle = false;
@@ -240,15 +238,11 @@ GainMeter::setup_gain_adjustment ()
 		_data_type = DataType::AUDIO;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (1.0);
-		gain_adjustment.set_step_increment (0.01);
-		gain_adjustment.set_page_increment (0.1);
 		gain_slider.set_default_value (gain_to_slider_position (1));
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
 		gain_adjustment.set_upper (2.0);
-		gain_adjustment.set_step_increment (1.0/128.0);
-		gain_adjustment.set_page_increment (10.0/128.0);
 		gain_slider.set_default_value (1.0);
 	}
 

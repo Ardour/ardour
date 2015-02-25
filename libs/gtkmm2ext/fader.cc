@@ -307,26 +307,16 @@ Fader::on_scroll_event (GdkEventScroll* ev)
 	}
 
 	bool ret = false;
-	double scale;
-	if (ev->state & Keyboard::GainFineScaleModifier) {
-		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
-			scale = 0.01;
-		} else {
-			scale = 0.05;
-		}
-	} else {
-		scale = 1;
-	}
 
 	switch (ev->direction) {
 	case GDK_SCROLL_RIGHT:
 	case GDK_SCROLL_UP:
-		adjustment.set_value (adjustment.get_value() + (adjustment.get_page_increment() * scale));
+		adjustment.set_value (adjustment.get_value() + (adjustment.get_step_increment() ));
 		ret = true;
 		break;
 	case GDK_SCROLL_LEFT:
 	case GDK_SCROLL_DOWN:
-		adjustment.set_value (adjustment.get_value() - (adjustment.get_page_increment() * scale));
+		adjustment.set_value (adjustment.get_value() - (adjustment.get_step_increment() ));
 		ret = true;
 		break;
 	default:

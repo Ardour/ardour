@@ -3,7 +3,8 @@
             thinmeterwidth="6">
   <Adjustment id="gain_adjustment"
           minvalue="0"
-          maxvalue="1"/>
+          maxvalue="1"
+          step="0.00535"/>
   <VBox>
     <Button id="peak_display_button"
             width="58" height="18"
