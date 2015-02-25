@@ -837,7 +837,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		}
 		
 		citems.push_back (SeparatorElem());
-		citems.push_back (MenuElem (_("Connection Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
+		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
 
 		output_menu.popup (1, ev->time);
 		break;
@@ -939,7 +939,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		}
 
 		citems.push_back (SeparatorElem());
-		citems.push_back (MenuElem (_("Connection Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_input_configuration)));
+		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_input_configuration)));
 
 		input_menu.popup (1, ev->time);
 
@@ -1161,6 +1161,11 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	ostringstream tooltip;
 	char * tooltip_cstr;
+	
+	//to avoid confusion, the button caption should only show connections that match the datatype of the track
+	DataType dt = DataType::AUDIO;
+	if ( boost::dynamic_pointer_cast<MidiTrack>(route) != 0 )
+		dt = DataType::MIDI;
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
@@ -1177,6 +1182,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		} else {
 			port = route->output()->nth (io_index);
 		}
+		
+		//ignore any port connections that don't match our DataType
+		if (port->type() != dt)
+			continue;  
 
 		port_connections.clear ();
 		port->get_connections(port_connections);
