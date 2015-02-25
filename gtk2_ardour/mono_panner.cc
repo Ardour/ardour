@@ -280,29 +280,22 @@ MonoPanner::on_button_release_event (GdkEventButton* ev)
 bool
 MonoPanner::on_scroll_event (GdkEventScroll* ev)
 {
-	double one_degree = 1.0/180.0; // one degree as a number from 0..1, since 180 degrees is the full L/R axis
-	double pv = position_control->get_value(); // 0..1.0 ; 0 = left
-	double step;
-
 	if (_panner_shell->bypassed()) {
 		return false;
 	}
 
-	if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-		step = one_degree;
-	} else {
-		step = one_degree * 5.0;
-	}
+	double pv = position_control->get_value(); // 0..1.0 ; 0 = left
+	double step = 0.01;
 
 	switch (ev->direction) {
 		case GDK_SCROLL_UP:
 		case GDK_SCROLL_LEFT:
-			pv -= step;
+			pv += step;
 			position_control->set_value (pv);
 			break;
 		case GDK_SCROLL_DOWN:
 		case GDK_SCROLL_RIGHT:
-			pv += step;
+			pv -= step;
 			position_control->set_value (pv);
 			break;
 	}
