@@ -1037,6 +1037,16 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 bool
 Editor::track_selected ()
 {
+    // check if only muster bus is selected
+    if ( selection->tracks.size() == 1 ) {
+        TrackViewList::const_iterator i = selection->tracks.begin ();
+        RouteTimeAxisView* v = dynamic_cast<RouteTimeAxisView*>(*i);
+        
+        if ( v && v->route()->is_master() ) {
+            return false;
+        }
+	}
+    
     if( !selection->tracks.empty() )
         return true;
     
