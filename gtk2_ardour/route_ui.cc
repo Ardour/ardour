@@ -1478,7 +1478,13 @@ RouteUI::remove_this_route (bool apply_to_selection)
         routes_to_remove->push_back(this->route() );
 	}
     
-    ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
+    Session* session = ARDOUR_UI::instance()->the_session();
+    
+    if (session) {
+        Session::StateProtector sp (session);
+        session->remove_routes (routes_to_remove);
+        routes_to_remove->clear ();
+    }
 }
 
 gint

@@ -3787,8 +3787,14 @@ ARDOUR_UI::delete_selected_tracks()
     _progress_dialog.set_num_of_steps (routes_to_remove->size ());
     _progress_dialog.show_pd ();
 	
-    ARDOUR_UI::instance()->the_session()->remove_routes (routes_to_remove);
-
+    Session* session = ARDOUR_UI::instance()->the_session();
+    
+    if (session) {
+        Session::StateProtector sp (session);
+        session->remove_routes (routes_to_remove);
+        routes_to_remove->clear ();
+    }
+    
     /* restore selection notifications and update the selection */
     editor->get_selection().block_tracks_changed (false);
     editor->get_selection().TracksChanged();
