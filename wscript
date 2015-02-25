@@ -797,7 +797,12 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'AudioToolbox', '-framework', 'AudioUnit'])
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Cocoa'])
 
-        if ( re.search ("^[1-9][0-9]\.", os.uname()[2]) == None or os.uname()[2] == "10" ) and (Options.options.generic or Options.options.ppc) and not Options.options.nocarbon:
+        if (
+                # osx up to and including 10.6 (uname 10.X.X)
+                (re.search ("^[1-9][0-9]\.", os.uname()[2]) == None or not re.search ("^10\.", os.uname()[2]) == None)
+                and (Options.options.generic or Options.options.ppc)
+                and not Options.options.nocarbon
+           ):
             conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DWITH_CARBON")
             conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon'])
         else:
