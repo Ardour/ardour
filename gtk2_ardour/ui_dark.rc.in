@@ -195,7 +195,8 @@ style "default" = "medium_text"
   engine "clearlooks" 
   {
     #style              = GLOSSY
-    #colorize_scrollbar = TRUE
+    scrollbar_color   = "#6e6e6e"
+    colorize_scrollbar = TRUE
     menubarstyle       = 1 # 0 = flat, 1 = sunken, 2 = flat gradient
     #toolbarstyle       = 0 # 0 = flat, 1 = enable effects
   }
