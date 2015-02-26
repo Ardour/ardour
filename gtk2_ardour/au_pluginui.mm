@@ -190,7 +190,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	cocoa_parent = 0;
 	cocoa_window = 0;
 
-#ifdef WITH_CARBBON
+#ifdef WITH_CARBON
 	_activating_from_app = false;
 	_notify = 0;
 	au_view = 0;
