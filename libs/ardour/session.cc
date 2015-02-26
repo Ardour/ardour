@@ -2648,8 +2648,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
                 // Gain for a newly created route depends on
                 // the current output_auto_connect mode:
                 //
-                // -18 for Stereo Out mode
-                // -0 Multi Out mode
+                //  0 for Stereo Out mode
+                //  0 Multi Out mode
                 if (Config->get_output_auto_connect() & AutoConnectMaster) {
                     track->set_gain (dB_to_coefficient (0), 0);
                 }
