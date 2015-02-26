@@ -639,7 +639,7 @@ if test -n "$MIXBUS"; then
 	curl -s http://gareus.org/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
 		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
 
-	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/.dylib ; do
+	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
 		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
 		mv ${file}.thin ${file}
 	done
