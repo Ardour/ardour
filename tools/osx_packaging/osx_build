@@ -618,6 +618,7 @@ fi
 ###################################################################
 ### Mixbus plugins, etc
 if test -n "$MIXBUS"; then
+	echo "bundling x42 plugins"
 	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
 		OSX_ARCH=x86_64
 	else
@@ -626,18 +627,26 @@ if test -n "$MIXBUS"; then
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	# TODO use rsync://gareus.org/x42/ and cache locally - see harvid/xjadeo below
 	METERS_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-meters.latest.txt)
-	curl -s http://gareus.org/x42/osx/x42-meters-lv2-osx-${METERS_VERSION}.zip \
-		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/osx/x42-meters-lv2-osx-${METERS_VERSION}.zip \
+		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
 
 	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/osx/setBfree.latest.txt)
-	curl -s http://gareus.org/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \
-		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \
+		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
 
 	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-midifilter.latest.txt)
-	curl -s http://gareus.org/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
-		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
+		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
 
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
 		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
