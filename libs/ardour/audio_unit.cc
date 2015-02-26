@@ -532,7 +532,7 @@ AUPlugin::discover_parameters ()
 
 	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
 
-		AUParamInfo param_info (unit->AU(), false, false, scopes[i]);
+		AUParamInfo param_info (unit->AU(), false, /* include read only */ false, scopes[i]);
 
 		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
 
@@ -1674,7 +1674,7 @@ AUPlugin::parameter_is_control (uint32_t) const
 bool
 AUPlugin::parameter_is_input (uint32_t) const
 {
-	return false;
+	return true;
 }
 
 bool
