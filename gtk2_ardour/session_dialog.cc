@@ -425,7 +425,7 @@ SessionDialog::setup_initial_choice_box ()
 	/* --disable plugins UI */
 
 	_disable_plugins.set_label (_("Safe Mode: Disable all Plugins"));
-	_disable_plugins.set_flags (Gtk::CAN_FOCUS);
+	_disable_plugins.set_can_focus (true);
 	_disable_plugins.set_relief (Gtk::RELIEF_NORMAL);
 	_disable_plugins.set_mode (true);
 	_disable_plugins.set_active (ARDOUR::Session::get_disable_all_loaded_plugins());
@@ -911,14 +911,14 @@ SessionDialog::setup_more_options_box ()
 	input_label.set_markup (_("<b>Inputs</b>"));
 	output_label.set_markup (_("<b>Outputs</b>"));
 
-	_master_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
+	_master_bus_channel_count.set_can_focus (true);
 	_master_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
 	_master_bus_channel_count.set_numeric(true);
 	_master_bus_channel_count.set_digits(0);
 	_master_bus_channel_count.set_wrap(false);
 
 	_create_master_bus.set_label (_("Create master bus"));
-	_create_master_bus.set_flags(Gtk::CAN_FOCUS);
+	_create_master_bus.set_can_focus (true);
 	_create_master_bus.set_relief(Gtk::RELIEF_NORMAL);
 	_create_master_bus.set_mode(true);
 	_create_master_bus.set_active(true);
@@ -928,20 +928,20 @@ SessionDialog::setup_more_options_box ()
 	advanced_table.set_col_spacings(0);
 
 	_connect_inputs.set_label (_("Automatically connect to physical inputs"));
-	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
+	_connect_inputs.set_can_focus (true);
 	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_inputs.set_mode(true);
 	_connect_inputs.set_active(Config->get_input_auto_connect() != ManualConnect);
 	_connect_inputs.set_border_width(0);
 
 	_limit_input_ports.set_label (_("Use only"));
-	_limit_input_ports.set_flags(Gtk::CAN_FOCUS);
+	_limit_input_ports.set_can_focus (true);
 	_limit_input_ports.set_relief(Gtk::RELIEF_NORMAL);
 	_limit_input_ports.set_mode(true);
 	_limit_input_ports.set_sensitive(true);
 	_limit_input_ports.set_border_width(0);
 
-	_input_limit_count.set_flags(Gtk::CAN_FOCUS);
+	_input_limit_count.set_can_focus (true);
 	_input_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
 	_input_limit_count.set_numeric(true);
 	_input_limit_count.set_digits(0);
@@ -988,18 +988,18 @@ SessionDialog::setup_more_options_box ()
 	input_frame.set_label_widget(input_label);
 
 	_connect_outputs.set_label (_("Automatically connect outputs"));
-	_connect_outputs.set_flags(Gtk::CAN_FOCUS);
+	_connect_outputs.set_can_focus (true);
 	_connect_outputs.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_outputs.set_mode(true);
 	_connect_outputs.set_active(Config->get_output_auto_connect() != ManualConnect);
 	_connect_outputs.set_border_width(0);
 	_limit_output_ports.set_label (_("Use only"));
-	_limit_output_ports.set_flags(Gtk::CAN_FOCUS);
+	_limit_output_ports.set_can_focus (true);
 	_limit_output_ports.set_relief(Gtk::RELIEF_NORMAL);
 	_limit_output_ports.set_mode(true);
 	_limit_output_ports.set_sensitive(true);
 	_limit_output_ports.set_border_width(0);
-	_output_limit_count.set_flags(Gtk::CAN_FOCUS);
+	_output_limit_count.set_can_focus (true);
 	_output_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
 	_output_limit_count.set_numeric(false);
 	_output_limit_count.set_digits(0);
@@ -1010,7 +1010,7 @@ SessionDialog::setup_more_options_box ()
 	output_port_limit_hbox.pack_start(chan_count_label_4, Gtk::PACK_SHRINK, 6);
 
 	_connect_outputs_to_master.set_label (_("... to master bus"));
-	_connect_outputs_to_master.set_flags(Gtk::CAN_FOCUS);
+	_connect_outputs_to_master.set_can_focus (true);
 	_connect_outputs_to_master.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_outputs_to_master.set_mode(true);
 	_connect_outputs_to_master.set_active(Config->get_output_auto_connect() == AutoConnectMaster);
@@ -1020,7 +1020,7 @@ SessionDialog::setup_more_options_box ()
 	_connect_outputs_to_physical.set_group (connect_outputs_group);
 
 	_connect_outputs_to_physical.set_label (_("... to physical outputs"));
-	_connect_outputs_to_physical.set_flags(Gtk::CAN_FOCUS);
+	_connect_outputs_to_physical.set_can_focus (true);
 	_connect_outputs_to_physical.set_relief(Gtk::RELIEF_NORMAL);
 	_connect_outputs_to_physical.set_mode(true);
 	_connect_outputs_to_physical.set_active(Config->get_output_auto_connect() == AutoConnectPhysical);

@@ -36,7 +36,7 @@ PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 	, _send_mode (false)
 	, _editor (0)
 {
-        set_flags (Gtk::CAN_FOCUS);
+        set_can_focus (true);
 
         add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|
                     Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|

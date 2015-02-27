@@ -589,7 +589,7 @@ EngineControl::build_full_control_notebook ()
 	row++;
 
 	input_channels.set_name ("InputChannels");
-	input_channels.set_flags (Gtk::CAN_FOCUS);
+	input_channels.set_can_focus (true);
 	input_channels.set_digits (0);
 	input_channels.set_wrap (false);
 	output_channels.set_editable (true);
@@ -602,7 +602,7 @@ EngineControl::build_full_control_notebook ()
 	}
 
 	output_channels.set_name ("OutputChannels");
-	output_channels.set_flags (Gtk::CAN_FOCUS);
+	output_channels.set_can_focus (true);
 	output_channels.set_digits (0);
 	output_channels.set_wrap (false);
 	output_channels.set_editable (true);
@@ -615,7 +615,7 @@ EngineControl::build_full_control_notebook ()
 	}
 
 	input_latency.set_name ("InputLatency");
-	input_latency.set_flags (Gtk::CAN_FOCUS);
+	input_latency.set_can_focus (true);
 	input_latency.set_digits (0);
 	input_latency.set_wrap (false);
 	input_latency.set_editable (true);
@@ -628,7 +628,7 @@ EngineControl::build_full_control_notebook ()
 	++row;
 
 	output_latency.set_name ("OutputLatency");
-	output_latency.set_flags (Gtk::CAN_FOCUS);
+	output_latency.set_can_focus (true);
 	output_latency.set_digits (0);
 	output_latency.set_wrap (false);
 	output_latency.set_editable (true);
@@ -961,7 +961,7 @@ EngineControl::refresh_midi_display (std::string focus)
 
 		m = manage (new ArdourButton ((*p)->name, ArdourButton::led_default_elements));
 		m->set_name ("midi device");
-		m->set_can_focus (Gtk::CAN_FOCUS);
+		m->set_can_focus (true);
 		m->add_events (Gdk::BUTTON_RELEASE_MASK);
 		m->set_active (enabled);
 		m->signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &EngineControl::midi_device_enabled_toggled), m, *p));

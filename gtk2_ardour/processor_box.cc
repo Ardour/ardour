@@ -1832,7 +1832,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	processor_scroller.add (processor_display);
 	pack_start (processor_scroller, true, true);
 
-	processor_display.set_flags (CAN_FOCUS);
+	processor_display.set_can_focus (true);
 	processor_display.set_name ("ProcessorList");
 	processor_display.set_data ("processorbox", this);
 	processor_display.set_size_request (48, -1);

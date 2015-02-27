@@ -143,7 +143,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	peak_display.set_events (peak_display.get_events() & ~(Gdk::EventMask (Gdk::LEAVE_NOTIFY_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::POINTER_MOTION_MASK)));
 	peak_display.signal_map().connect (sigc::bind (sigc::ptr_fun (reset_cursor_to_default), &peak_display));
 	peak_display.signal_state_changed().connect (sigc::bind (sigc::ptr_fun (reset_cursor_to_default_state), &peak_display));
-	peak_display.unset_flags (Gtk::CAN_FOCUS);
+	peak_display.set_can_focus (false);
 	peak_display.set_editable (false);
 
 	gain_automation_style_button.set_name ("mixer strip button");
@@ -152,8 +152,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
 	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
-	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
+	gain_automation_style_button.set_can_focus (false);
+	gain_automation_state_button.set_can_focus (false);
 
 	gain_automation_state_button.set_size_request(15, 15);
 	gain_automation_style_button.set_size_request(15, 15);
@@ -980,8 +980,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
 	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
-	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
+	gain_automation_style_button.set_can_focus (false);
+	gain_automation_state_button.set_can_focus (false);
 
 	gain_automation_state_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
 	gain_automation_style_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));

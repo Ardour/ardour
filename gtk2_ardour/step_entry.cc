@@ -441,7 +441,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	_piano = (PianoKeyboard*) piano_keyboard_new ();
 	piano = wrap ((GtkWidget*) _piano);
 
-	piano->set_flags (Gtk::CAN_FOCUS);
+	piano->set_can_focus (true);
 
 	g_signal_connect(G_OBJECT(_piano), "note-off", G_CALLBACK(_note_off_event_handler), this);
 	g_signal_connect(G_OBJECT(_piano), "rest", G_CALLBACK(_rest_event_handler), this);

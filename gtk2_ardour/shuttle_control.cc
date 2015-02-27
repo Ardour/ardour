@@ -76,7 +76,7 @@ ShuttleControl::ShuttleControl ()
 	shuttle_context_menu = 0;
 	_hovering = false;
 
-	set_flags (CAN_FOCUS);
+	set_can_focus (true);
 	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::BUTTON_PRESS_MASK|Gdk::POINTER_MOTION_MASK|Gdk::SCROLL_MASK);
 	set_size_request (85, 20);
 	set_name (X_("ShuttleControl"));

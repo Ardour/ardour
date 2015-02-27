@@ -60,7 +60,7 @@ EditorSummary::EditorSummary (Editor* e)
 	  _background_dirty (true)
 {
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
-	set_flags (get_flags() | Gtk::CAN_FOCUS);
+	set_can_focus (true);
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &EditorSummary::parameter_changed));
 }

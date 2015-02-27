@@ -35,7 +35,7 @@ NoteSelectDialog::NoteSelectDialog()
 	, _pianomm(Glib::wrap((GtkWidget*)_piano))
 	, _note_number(60)
 {
-	_pianomm->set_flags(Gtk::CAN_FOCUS);
+	_pianomm->set_can_focus (true);
 	_pianomm->show();
 	g_signal_connect(G_OBJECT(_piano), "note-on", G_CALLBACK(_note_on_event_handler), this);
 	piano_keyboard_set_monophonic(_piano, TRUE);

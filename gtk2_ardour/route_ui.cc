@@ -325,8 +325,8 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		update_monitoring_display ();
 	}
 
-	mute_button->unset_flags (Gtk::CAN_FOCUS);
-	solo_button->unset_flags (Gtk::CAN_FOCUS);
+	mute_button->set_can_focus (false);
+	solo_button->set_can_focus (false);
 
 	mute_button->show();
 
