@@ -63,9 +63,8 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace VideoUtils;
 
-ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range)
+ExportVideoDialog::ExportVideoDialog ()
 	: ArdourDialog (_("Export Video File "))
-	, export_range (tme)
 	, outfn_path_label (_("File:"), Gtk::ALIGN_LEFT)
 	, outfn_browse_button (_("Browse"))
 	, invid_path_label (_("Video:"), Gtk::ALIGN_LEFT)
@@ -90,8 +89,6 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	, debug_checkbox (_("Debug Mode: Print ffmpeg command and output to stdout."))
 #endif
 {
-	set_session (s);
-
 	set_name ("ExportVideoDialog");
 	set_modal (true);
 	set_skip_taskbar_hint (true);
@@ -144,53 +141,7 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 
 	insnd_combo.set_name ("PaddedButton");
 	insnd_combo.append_text (string_compose (_("from the %1 session's start to the session's end"), PROGRAM_NAME));
-
-	frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
-	if (av_offset < 0 ) {
-		insnd_combo.append_text (_("from 00:00:00:00 to the video's end"));
-	} else {
-		insnd_combo.append_text (_("from the video's start to the video's end"));
-	}
-	if (!export_range.empty()) {
-		insnd_combo.append_text (_("Selected range"));  // TODO show export_range.start() -> export_range.end_frame()
-	}
-	if (range) {
-		insnd_combo.set_active(2);
-	} else {
-		insnd_combo.set_active(0);
-	}
-
 	outfn_path_entry.set_width_chars(38);
-	outfn_path_entry.set_text (_session->session_directory().export_path() + G_DIR_SEPARATOR +"export.avi");
-
-	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
-	if (node) {
-		bool filenameset = false;
-		if (node->property(X_("OriginalVideoFile"))) {
-			std::string filename = node->property(X_("OriginalVideoFile"))->value();
-			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
-				invid_path_entry.set_text (filename);
-				filenameset = true;
-			}
-		}
-		if (!filenameset
-				&& node->property(X_("Filename"))
-				&& node->property(X_("LocalFile"))
-				&& node->property(X_("LocalFile"))->value() == X_("1")
-				) {
-			std::string filename = node->property(X_("Filename"))->value();
-			if (filename.at(0) != G_DIR_SEPARATOR) {
-				filename = Glib::build_filename (_session->session_directory().video_path(), filename);
-			}
-			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
-				invid_path_entry.set_text (filename);
-				filenameset = true;
-			}
-		}
-		if (!filenameset) {
-			invid_path_entry.set_text (X_(""));
-		}
-	}
 
 	l = manage (new Label (_("<b>Settings:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
@@ -306,16 +257,6 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	fps_combo.append_text("30");
 	fps_combo.append_text("59.94");
 	fps_combo.append_text("60");
-	float tcfps = _session->timecode_frames_per_second();
-	if      (fabs(tcfps - 23.976) < 0.01) { fps_combo.set_active(0); }
-	else if (fabs(tcfps - 24.0  ) < 0.01) { fps_combo.set_active(1); }
-	else if (fabs(tcfps - 24.976) < 0.01) { fps_combo.set_active(2); }
-	else if (fabs(tcfps - 25.0  ) < 0.01) { fps_combo.set_active(3); }
-	else if (fabs(tcfps - 29.97 ) < 0.01) { fps_combo.set_active(4); }
-	else if (fabs(tcfps - 30.0  ) < 0.01) { fps_combo.set_active(5); }
-	else if (fabs(tcfps - 59.94 ) < 0.01) { fps_combo.set_active(6); }
-	else if (fabs(tcfps - 60.0  ) < 0.01) { fps_combo.set_active(7); }
-	else { fps_combo.set_active(5); }
 
 	aspect_combo.set_name ("PaddedButton");
 	aspect_combo.append_text("4:3");
@@ -356,6 +297,90 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 ExportVideoDialog::~ExportVideoDialog ()
 {
 	if (transcoder) { delete transcoder; transcoder = 0;}
+}
+
+
+void
+ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
+{
+	export_range = tme;
+	outfn_path_entry.set_text (_session->session_directory().export_path() + G_DIR_SEPARATOR +"export.avi");
+
+	frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+	if (av_offset < 0 ) {
+		insnd_combo.append_text (_("from 00:00:00:00 to the video's end"));
+	} else {
+		insnd_combo.append_text (_("from the video's start to the video's end"));
+	}
+	if (!export_range.empty()) {
+		insnd_combo.append_text (_("Selected range"));  // TODO show export_range.start() -> export_range.end_frame()
+	}
+	if (range) {
+		insnd_combo.set_active(2);
+	} else {
+		insnd_combo.set_active(0);
+	}
+
+	float tcfps = _session->timecode_frames_per_second();
+	if      (fabs(tcfps - 23.976) < 0.01) { fps_combo.set_active(0); }
+	else if (fabs(tcfps - 24.0  ) < 0.01) { fps_combo.set_active(1); }
+	else if (fabs(tcfps - 24.976) < 0.01) { fps_combo.set_active(2); }
+	else if (fabs(tcfps - 25.0  ) < 0.01) { fps_combo.set_active(3); }
+	else if (fabs(tcfps - 29.97 ) < 0.01) { fps_combo.set_active(4); }
+	else if (fabs(tcfps - 30.0  ) < 0.01) { fps_combo.set_active(5); }
+	else if (fabs(tcfps - 59.94 ) < 0.01) { fps_combo.set_active(6); }
+	else if (fabs(tcfps - 60.0  ) < 0.01) { fps_combo.set_active(7); }
+	else { fps_combo.set_active(5); }
+
+	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
+	if (node) {
+		bool filenameset = false;
+		if (node->property(X_("OriginalVideoFile"))) {
+			std::string filename = node->property(X_("OriginalVideoFile"))->value();
+			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
+				invid_path_entry.set_text (filename);
+				filenameset = true;
+			}
+		}
+		if (!filenameset
+				&& node->property(X_("Filename"))
+				&& node->property(X_("LocalFile"))
+				&& node->property(X_("LocalFile"))->value() == X_("1")
+		   )
+		{
+			std::string filename = node->property(X_("Filename"))->value();
+			if (filename.at(0) != G_DIR_SEPARATOR)
+			{
+				filename = Glib::build_filename (_session->session_directory().video_path(), filename);
+			}
+			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS))
+			{
+				invid_path_entry.set_text (filename);
+				filenameset = true;
+			}
+		}
+		if (!filenameset) {
+			invid_path_entry.set_text (X_(""));
+		}
+	}
+
+	node = _session->extra_xml (X_("Videoexport"));
+	if (node) {
+		if (node->property(X_("OriginalVideoFile"))) {
+		}
+	}
+}
+
+XMLNode&
+ExportVideoDialog::get_state ()
+{
+	XMLNode* node = new XMLNode (X_("Videoexport"));
+	return *node;
+}
+
+void
+ExportVideoDialog::set_state (const XMLNode &)
+{
 }
 
 void

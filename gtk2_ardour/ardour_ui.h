@@ -73,6 +73,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "engine_dialog.h"
+#include "export_video_dialog.h"
 #include "meterbridge.h"
 #include "ui_config.h"
 #include "enums.h"
@@ -243,6 +244,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool start_video_server (Gtk::Window* float_window, bool popup_msg);
 	void stop_video_server (bool ask_confirm=false);
 	void flush_videotimeline_cache (bool localcacheonly=false);
+	void export_video (bool range = false);
 
 	void session_add_audio_track (
 		int input_channels,
@@ -624,6 +626,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<LocationUIWindow> location_ui;
         WM::Proxy<RouteParams_UI> route_params;
         WM::Proxy<EngineControl> audio_midi_setup;
+        WM::Proxy<ExportVideoDialog> export_video_dialog;
 
         /* Windows/Dialogs that require a creator method */
 

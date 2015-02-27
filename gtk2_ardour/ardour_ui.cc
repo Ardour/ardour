@@ -105,6 +105,8 @@ typedef uint64_t microseconds_t;
 #include "big_clock_window.h"
 #include "bundle_manager.h"
 #include "engine_dialog.h"
+#include "export_video_dialog.h"
+#include "export_video_infobox.h"
 #include "gain_meter.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
@@ -206,6 +208,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, location_ui (X_("locations"), _("Locations"))
 	, route_params (X_("inspector"), _("Tracks and Busses"))
 	, audio_midi_setup (X_("audio-midi-setup"), _("Audio/MIDI Setup"))
+	, export_video_dialog (X_("video-export"), _("Video Export Dialog"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -358,6 +361,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		big_clock_window.set_state (*ui_xml);
 		audio_port_matrix.set_state (*ui_xml);
 		midi_port_matrix.set_state (*ui_xml);
+		export_video_dialog.set_state (*ui_xml);
 	}
 
 	WM::Manager::instance().register_window (&key_editor);
@@ -369,6 +373,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&add_video_dialog);
 	WM::Manager::instance().register_window (&route_params);
 	WM::Manager::instance().register_window (&audio_midi_setup);
+	WM::Manager::instance().register_window (&export_video_dialog);
 	WM::Manager::instance().register_window (&bundle_manager);
 	WM::Manager::instance().register_window (&location_ui);
 	WM::Manager::instance().register_window (&big_clock_window);
@@ -2439,6 +2444,10 @@ ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 
 	_session->add_extra_xml (*node);
 
+	if (export_video_dialog) {
+		_session->add_extra_xml (export_video_dialog->get_state());
+	}
+
 	save_state_canfail (name, switch_to_it);
 }
 
@@ -3821,6 +3830,8 @@ ARDOUR_UI::remove_video ()
 	_session->add_extra_xml(*node);
 	node = new XMLNode(X_("Videomonitor"));
 	_session->add_extra_xml(*node);
+	node = new XMLNode(X_("Videoexport"));
+	_session->add_extra_xml(*node);
 	stop_video_server();
 }
 
@@ -3833,6 +3844,29 @@ ARDOUR_UI::flush_videotimeline_cache (bool localcacheonly)
 		video_timeline->flush_cache();
 	}
 	editor->queue_visual_videotimeline_update();
+}
+
+void
+ARDOUR_UI::export_video (bool range)
+{
+	if (ARDOUR::Config->get_show_video_export_info()) {
+		ExportVideoInfobox infobox (_session);
+		Gtk::ResponseType rv = (Gtk::ResponseType) infobox.run();
+		if (infobox.show_again()) {
+			ARDOUR::Config->set_show_video_export_info(false);
+		}
+		switch (rv) {
+			case GTK_RESPONSE_YES:
+				PBD::open_uri (ARDOUR::Config->get_reference_manual_url() + "/video-timeline/operations/#export");
+				break;
+			default:
+				break;
+		}
+	}
+	export_video_dialog->set_session (_session);
+	export_video_dialog->apply_state(editor->get_selection().time, range);
+	export_video_dialog->run ();
+	export_video_dialog->hide ();
 }
 
 XMLNode*

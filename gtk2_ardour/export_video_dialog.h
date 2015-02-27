@@ -41,13 +41,18 @@
 class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 {
   public:
-	ExportVideoDialog (ARDOUR::Session*, TimeSelection &tme, bool range = false);
+	ExportVideoDialog ();
 	~ExportVideoDialog ();
 
 	std::string get_exported_filename () { return outfn_path_entry.get_text(); }
 
+	void apply_state(TimeSelection &tme, bool range);
+
+	XMLNode& get_state ();
+	void set_state (const XMLNode &);
+
   private:
-	TimeSelection &export_range;
+	TimeSelection export_range;
 
 	void on_show ();
 	void abort_clicked ();
