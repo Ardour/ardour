@@ -115,7 +115,7 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	}
 	delete transcoder; transcoder = 0;
 
-	l = manage (new Label (_("<b>Output:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Output:</b> (file extension defines format)"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	vbox->pack_start (*l, false, false, 4);
 
@@ -125,7 +125,7 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	path_hbox->pack_start (outfn_browse_button, false, false, 3);
 	vbox->pack_start (*path_hbox, false, false, 2);
 
-	l = manage (new Label (_("<b>Input:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Input Video:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	vbox->pack_start (*l, false, false, 4);
 
@@ -251,15 +251,17 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	preset_combo.set_active(0);
 
 	audio_codec_combo.set_name ("PaddedButton");
+	audio_codec_combo.append_text(_("(default for format)"));
 	audio_codec_combo.append_text("ac3");
 	audio_codec_combo.append_text("aac");
 	audio_codec_combo.append_text("libmp3lame");
 	audio_codec_combo.append_text("libvorbis");
 	audio_codec_combo.append_text("mp2");
 	audio_codec_combo.append_text("pcm_s16le");
-	audio_codec_combo.set_active(2);
+	audio_codec_combo.set_active(0);
 
 	video_codec_combo.set_name ("PaddedButton");
+	video_codec_combo.append_text(_("(default for format)"));
 	video_codec_combo.append_text("flv");
 	video_codec_combo.append_text("libtheora");
 	video_codec_combo.append_text("mjpeg");
@@ -268,15 +270,16 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	video_codec_combo.append_text("h264");
 	video_codec_combo.append_text("vpx (webm)");
 	video_codec_combo.append_text("copy");
-	video_codec_combo.set_active(4);
+	video_codec_combo.set_active(0);
 
 	audio_bitrate_combo.set_name ("PaddedButton");
+	audio_bitrate_combo.append_text(_("(default)"));
 	audio_bitrate_combo.append_text("64k");
 	audio_bitrate_combo.append_text("128k");
 	audio_bitrate_combo.append_text("192k");
 	audio_bitrate_combo.append_text("256k");
 	audio_bitrate_combo.append_text("320k");
-	audio_bitrate_combo.set_active(2);
+	audio_bitrate_combo.set_active(0);
 
 	audio_samplerate_combo.set_name ("PaddedButton");
 	audio_samplerate_combo.append_text("22050");
@@ -285,13 +288,14 @@ ExportVideoDialog::ExportVideoDialog (Session* s, TimeSelection &tme, bool range
 	audio_samplerate_combo.set_active(2);
 
 	video_bitrate_combo.set_name ("PaddedButton");
+	video_bitrate_combo.append_text(_("(default)"));
+	video_bitrate_combo.append_text(_("(retain)"));
 	video_bitrate_combo.append_text("200k");
 	video_bitrate_combo.append_text("800k");
 	video_bitrate_combo.append_text("2000k");
 	video_bitrate_combo.append_text("5000k");
 	video_bitrate_combo.append_text("8000k");
-	video_bitrate_combo.append_text("retain");
-	video_bitrate_combo.set_active(3);
+	video_bitrate_combo.set_active(0);
 
 	fps_combo.set_name ("PaddedButton");
 	fps_combo.append_text("23.976");
@@ -636,15 +640,26 @@ ExportVideoDialog::encode_pass (int pass)
 	if (scale_checkbox.get_active()) {
 		ffs["-s"] = string_compose("%1x%2", width_spinner.get_value(), height_spinner.get_value());
 	}
-	ffs["-vcodec"] = video_codec_combo.get_active_text();
-	ffs["-acodec"] = audio_codec_combo.get_active_text();
 
-	if (video_bitrate_combo.get_active_text() == "retain" ) {
+	if (video_codec_combo.get_active_text() != _("(default for format)")) {
+		ffs["-vcodec"] = video_codec_combo.get_active_text();
+	}
+	if (audio_codec_combo.get_active_text() != _("(default for format)")) {
+		ffs["-acodec"] = audio_codec_combo.get_active_text();
+	}
+
+	if (video_bitrate_combo.get_active_text() == _("(default)") ) {
+		;
+	}
+	else if (video_bitrate_combo.get_active_text() == _("(retain)") ) {
 		ffs["-qscale"]  = "0";
 	} else {
 		ffs["-b:v"]  = video_bitrate_combo.get_active_text();
 	}
-	ffs["-b:a"] = audio_bitrate_combo.get_active_text();
+
+	if (audio_bitrate_combo.get_active_text() != _("(default)") ) {
+		ffs["-b:a"] = audio_bitrate_combo.get_active_text();
+	}
 
 	if (audio_codec_combo.get_active_text() == "aac" ) {
 		ffs["-strict"] = "-2";
