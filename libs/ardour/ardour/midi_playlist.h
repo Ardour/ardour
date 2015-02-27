@@ -47,13 +47,30 @@ public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);
 	MidiPlaylist (Session&, std::string name, bool hidden = false);
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, std::string name, bool hidden = false);
-	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, framepos_t start, framecnt_t cnt,
-	              std::string name, bool hidden = false);
+
+	/** This constructor does NOT notify others (session) */
+	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
+	              framepos_t                            start,
+	              framecnt_t                            cnt,
+	              std::string                           name,
+	              bool                                  hidden = false);
 
 	~MidiPlaylist ();
 
+	/** Read a range from the playlist into an event sink.
+	 *
+	 * @param buf Destination for events.
+	 * @param start First frame of read range.
+	 * @param cnt Number of frames in read range.
+	 * @param chan_n Must be 0 (this is the audio-style "channel", where each
+	 * channel is backed by a separate region, not MIDI channels, which all
+	 * exist in the same region and are not handled here).
+	 * @return The number of frames read (time, not an event count).
+	 */
 	framecnt_t read (Evoral::EventSink<framepos_t>& buf,
-			 framepos_t start, framecnt_t cnt, uint32_t chan_n = 0);
+	                 framepos_t                     start,
+	                 framecnt_t                     cnt,
+	                 uint32_t                       chan_n = 0);
 
 	int set_state (const XMLNode&, int version);
 
@@ -86,7 +103,6 @@ private:
 
 	typedef std::map<Region*,MidiStateTracker*> NoteTrackers;
 	NoteTrackers _note_trackers;
-
 };
 
 } /* namespace ARDOUR */

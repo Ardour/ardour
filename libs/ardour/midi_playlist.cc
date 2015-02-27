@@ -70,11 +70,14 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string 
 {
 }
 
-MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, framepos_t start, framecnt_t dur, string name, bool hidden)
+MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
+                            framepos_t                            start,
+                            framecnt_t                            dur,
+                            string                                name,
+                            bool                                  hidden)
 	: Playlist (other, start, dur, name, hidden)
 	, _note_mode(other->_note_mode)
 {
-	/* this constructor does NOT notify others (session) */
 }
 
 MidiPlaylist::~MidiPlaylist ()
@@ -97,35 +100,22 @@ struct EventsSortByTimeAndType {
     }
 };
 
-/** Returns the number of frames in time duration read (eg could be large when 0 events are read) */
 framecnt_t
 MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framecnt_t dur, unsigned chan_n)
 {
-	/* this function is never called from a realtime thread, so
-	   its OK to block (for short intervals).
-	*/
-
 	Playlist::RegionReadLock rl (this);
 
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("++++++ %1 .. %2  +++++++ %3 trackers +++++++++++++++++\n", 
-							    start, start + dur, _note_trackers.size()));
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO,
+	             string_compose ("---- MidiPlaylist::read %1 .. %2 (%3 trackers) ----\n",
+	                             start, start + dur, _note_trackers.size()));
 
-	framepos_t end = start + dur - 1;
-
-	// relevent regions overlapping start <--> end
-	vector< boost::shared_ptr<Region> > regs;
-	vector< boost::shared_ptr<Region> > ended;
 	typedef pair<MidiStateTracker*,framepos_t> TrackerInfo;
-	vector<TrackerInfo> tracker_info;
-	NoteTrackers::iterator t;
 
+	/* Find relevant regions that overlap [start..end] */
+	const framepos_t                         end = start + dur - 1;
+	std::vector< boost::shared_ptr<Region> > regs;
+	std::vector< boost::shared_ptr<Region> > ended;
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		/* in this call to coverage, the return value indicates the
-		 * overlap status of the read range (start...end) WRT to 
-		 * the region.
-		 */
-
 		switch ((*i)->coverage (start, end)) {
 		case Evoral::OverlapStart:
 		case Evoral::OverlapInternal:
@@ -143,152 +133,89 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 			regs.push_back (*i);
 			ended.push_back (*i);
 			break;
+
 		default:
 			/* we don't care */
 			break;
 		}
 	}
 
-	if (regs.size() == 1 && 
-	    (ended.empty() || (ended.size() == 1 && ended.front() == regs.front()))) {
+	/* If we are reading from a single region, we can read directly into dst.  Otherwise,
+	   we read into a temporarily list, sort it, then write that to dst. */
+	const bool direct_read = regs.size() == 1 &&
+		(ended.empty() || (ended.size() == 1 && ended.front() == regs.front()));
 
-		/* just a single region - read directly into dst */
+	Evoral::EventList<framepos_t>  evlist;
+	Evoral::EventSink<framepos_t>& tgt = direct_read ? dst : evlist;
 
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("Single region (%1) read, ended during this read %2\n", regs.front()->name(),
-								    ended.size()));
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO,
+	             string_compose ("\t%1 regions to read, direct: %2\n", regs.size(), direct_read));
 
-		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(regs.front());
-
-		if (mr) {
-
-			NoteTrackers::iterator t = _note_trackers.find (mr.get());
-			MidiStateTracker* tracker;
-			bool new_tracker = false;
-
-			if (t == _note_trackers.end()) {
-				tracker = new MidiStateTracker;
-				new_tracker = true;
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tBEFORE: new tracker\n");
-			} else {
-				tracker = t->second;
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tBEFORE: tracker says there are %1 on notes\n", tracker->on()));
-			}
-
-			mr->read_at (dst, start, dur, chan_n, _note_mode, tracker);
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tAFTER: tracker says there are %1 on notes\n", tracker->on()));
-
-			if (!ended.empty()) {
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 ended in this read, resolve notes and delete (%2) tracker\n",
-										    mr->name(), ((new_tracker) ? "new" : "old")));
-				tracker->resolve_notes (dst, mr->last_frame());
-				delete tracker;
-				if (!new_tracker) {
-					_note_trackers.erase (t);
-				}
-			} else {
-				if (new_tracker) {
-					pair<Region*,MidiStateTracker*> newpair;
-					newpair.first = mr.get();
-					newpair.second = tracker;
-					_note_trackers.insert (newpair);
-					DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tadded tracker to trackers\n");
-				}
-			}
+	for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
+		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
+		if (!mr) {
+			continue;
 		}
 
-	} else {
-
-		/* multiple regions and/or note resolution: sort by layer, read into a temporary non-monotonically
-		   sorted EventSink, sort and then insert into dst.
-		*/
-
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("%1 regions to read, plus %2 trackers\n", regs.size(), tracker_info.size()));
-
-		Evoral::EventList<framepos_t> evlist;
-
-		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("for %1 .. %2 we have %3 to consider\n", start, start+dur-1, regs.size()));
-
-		for (vector<boost::shared_ptr<Region> >::iterator i = regs.begin(); i != regs.end(); ++i) {
-
-			boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(*i);
-
-			if (!mr) {
-				continue;
-			}
-
-			NoteTrackers::iterator t = _note_trackers.find (mr.get());
-			MidiStateTracker* tracker;
-			bool new_tracker = false;
-
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("Before %1 (%2 .. %3) we now have %4 events\n", mr->name(), mr->position(), mr->last_frame(), evlist.size()));
-
-			if (t == _note_trackers.end()) {
-				tracker = new MidiStateTracker;
-				new_tracker = true;
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tBEFORE: new tracker\n");
-			} else {
-				tracker = t->second;
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tBEFORE: tracker says there are %1 on notes\n", tracker->on()));
-			}
-
-
-			mr->read_at (evlist, start, dur, chan_n, _note_mode, tracker);
-
-#ifndef NDEBUG
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("After %1 (%2 .. %3) we now have %4\n", mr->name(), mr->position(), mr->last_frame(), evlist.size()));
-			for (Evoral::EventList<framepos_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1\n", **x));
-			}
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\tAFTER: tracker says there are %1 on notes\n", tracker->on()));
-#endif
-			if (find (ended.begin(), ended.end(), *i) != ended.end()) {
-
-				/* the region ended within the read range, so
-				 * resolve any dangling notes (i.e. notes whose
-				 * end is beyond the end of the region).
-				 */
-				
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 ended in this read, resolve notes and delete (%2) tracker\n",
-										    mr->name(), ((new_tracker) ? "new" : "old")));
-
-				tracker->resolve_notes (evlist, (*i)->last_frame());
-				delete tracker;
-				if (!new_tracker) {
-					_note_trackers.erase (t);
-				}
-
-			} else {
-
-				if (new_tracker) {
-					_note_trackers.insert (make_pair (mr.get(), tracker));
-					DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tadded tracker to trackers\n");
-				}
-			}
+		/* Get the existing note tracker for this region, or create a new one. */
+		NoteTrackers::iterator t           = _note_trackers.find (mr.get());
+		MidiStateTracker*      tracker     = NULL;
+		bool                   new_tracker = false;
+		if (t == _note_trackers.end()) {
+			tracker = new MidiStateTracker;
+			new_tracker = true;
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
+			             string_compose ("\tPre-read %1 (%2 .. %3): new tracker\n",
+			                             mr->name(), mr->position(), mr->last_frame()));
+		} else {
+			tracker = t->second;
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
+			             string_compose ("\tPre-read %1 (%2 .. %3): %4 active notes\n",
+			                             mr->name(), mr->position(), mr->last_frame(), tracker->on()));
 		}
 
-		if (!evlist.empty()) {
+		/** Read from region into target. */
+		mr->read_at (tgt, start, dur, chan_n, _note_mode, tracker);
+		DEBUG_TRACE (DEBUG::MidiPlaylistIO,
+		             string_compose ("\tPost-read: %1 active notes\n", tracker->on()));
 
-			/* sort the event list */
-			EventsSortByTimeAndType<framepos_t> cmp;
-			evlist.sort (cmp);
+		if (find (ended.begin(), ended.end(), *i) != ended.end()) {
+			/* Region ended within the read range, so resolve any active notes
+			   (either stuck notes in the data, or notes that end after the end
+			   of the region). */
+			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
+			             string_compose ("\t%1 ended, resolve notes and delete (%2) tracker\n",
+			                             mr->name(), ((new_tracker) ? "new" : "old")));
 
-#ifndef NDEBUG
-			DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("Final we now have %1 events\n",  evlist.size()));
-			for (Evoral::EventList<framepos_t>::iterator x = evlist.begin(); x != evlist.end(); ++x) {
-				DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1\n", **x));
+			tracker->resolve_notes (tgt, (*i)->last_frame());
+			delete tracker;
+			if (!new_tracker) {
+				_note_trackers.erase (t);
 			}
-#endif
-			/* write into dst */
-			for (Evoral::EventList<framepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
-				Evoral::Event<framepos_t>* ev (*e);
-				dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
-				delete ev;
-			}
 
+		} else {
+
+			if (new_tracker) {
+				_note_trackers.insert (make_pair (mr.get(), tracker));
+				DEBUG_TRACE (DEBUG::MidiPlaylistIO, "\tadded tracker to trackers\n");
+			}
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "-------------------------------------------------------------\n");
+	if (!direct_read && !evlist.empty()) {
+		/* We've read from multiple regions, sort the event list by time. */
+		EventsSortByTimeAndType<framepos_t> cmp;
+		evlist.sort (cmp);
+
+		/* Copy ordered events from event list to dst. */
+		for (Evoral::EventList<framepos_t>::iterator e = evlist.begin(); e != evlist.end(); ++e) {
+			Evoral::Event<framepos_t>* ev (*e);
+			dst.write (ev->time(), ev->event_type(), ev->size(), ev->buffer());
+			delete ev;
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- End MidiPlaylist::read ----\n");
 	return dur;
 }
 
