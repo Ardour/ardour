@@ -495,7 +495,8 @@
                     x="16"
                     y="369"
                     width="136"
-                    height="39"/>
+                    height="39"
+                    ui.orphan="true"/>
         <Button id="reset_tracks_name_to_default_button"
         			style="generic_button"
                     text="Reset Track\nNames To Default"
@@ -508,7 +509,8 @@
                     x="153"
                     y="369"
                     width="136"
-                    height="39"/>
+                    height="39"
+                    ui.orphan="true"/>
         <Button id="yes_button"
                     text="Yes"
                     style="generic_button"
