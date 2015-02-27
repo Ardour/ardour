@@ -35,6 +35,7 @@
 #undef verify
 
 #include <gtkmm/box.h>
+#include <gtkmm/eventbox.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/button.h>
 #include <gtkmm/label.h>
@@ -74,6 +75,8 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
         bool non_gtk_gui() const { return true; }
 
 	void lower_box_realized ();
+	bool lower_box_visibility_notify (GdkEventVisibility*);
+
 	void cocoa_view_resized ();
 	void on_realize ();
 	void grab_focus();
@@ -91,7 +94,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	int prefwidth;
 
 	Gtk::HBox     top_box;
-	Gtk::HBox low_box;
+	Gtk::EventBox low_box;
 	Gtk::VBox vpacker;
 	Gtk::Label automation_mode_label;
 	Gtk::ComboBoxText automation_mode_selector;

@@ -210,7 +210,10 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 		create_cocoa_view ();
 	}
 
+	low_box.add_events(Gdk::VISIBILITY_NOTIFY_MASK);
+
 	low_box.signal_realize().connect (mem_fun (this, &AUPluginUI::lower_box_realized));
+	low_box.signal_visibility_notify_event ().connect (mem_fun (this, &AUPluginUI::lower_box_visibility_notify));
 }
 
 AUPluginUI::~AUPluginUI ()
@@ -496,7 +499,7 @@ AUPluginUI::create_carbon_view ()
 						  kWindowNoShadowAttribute|
 						  kWindowNoTitleBarAttribute);
 
-	if ((err = CreateNewWindow(kDocumentWindowClass, attr, &r, &carbon_window)) != noErr) {
+	if ((err = CreateNewWindow(kUtilityWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
 	        CloseComponent (editView);
 		return -1;
@@ -626,6 +629,7 @@ AUPluginUI::parent_carbon_window ()
 	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:cocoa_parent andTopLevelParent:win ]; 
 
 	[win addChildWindow:cocoa_parent ordered:NSWindowAbove];
+	[win setAutodisplay:1]; // turn of GTK stuff for this window
 
 	return 0;
 #else
@@ -727,6 +731,19 @@ AUPluginUI::lower_box_realized ()
 	} else if (carbon_window) {
 		parent_carbon_window ();
 	}
+}
+
+bool
+AUPluginUI::lower_box_visibility_notify (GdkEventVisibility* ev)
+{
+#ifdef WITH_CARBON
+	if (carbon_window  && ev->state != GDK_VISIBILITY_UNOBSCURED) {
+		ShowWindow (carbon_window);
+		ActivateWindow (carbon_window, TRUE);
+		return true;
+	}
+#endif
+	return false;
 }
 
 void
