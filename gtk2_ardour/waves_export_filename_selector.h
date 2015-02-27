@@ -50,9 +50,7 @@ class WavesExportFilenameSelector : public Gtk::VBox, public WavesUI, public ARD
 	void load_state ();
 
 	void update_label ();
-	void update_folder ();
 	void update_revision ();
-	void check_folder ();
 
 	void change_date_format (WavesDropdown*, int);
 	void change_time_format (WavesDropdown*, int);
@@ -72,7 +70,7 @@ class WavesExportFilenameSelector : public Gtk::VBox, public WavesUI, public ARD
 	WavesButton& _session_button;
 	WavesButton& _revision_button;
 	Gtk::Entry& _label_entry;
-	Gtk::Entry& _path_entry;
+	Gtk::Label& _path_label;
 	Gtk::Entry& _revision_entry;
 	WavesButton& _revision_inc_button;
 	WavesButton& _revision_dec_button;

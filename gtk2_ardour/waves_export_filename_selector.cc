@@ -37,7 +37,7 @@ WavesExportFilenameSelector::WavesExportFilenameSelector ()
  , _session_button (get_waves_button ("session_button"))
  , _revision_button (get_waves_button ("revision_button"))
  , _label_entry (get_entry ("label_entry"))
- , _path_entry (get_entry ("path_entry"))
+ , _path_label (get_label ("path_label"))
  , _revision_entry (get_entry ("revision_entry"))
  , _revision_inc_button (get_waves_button ("revision_inc_button"))
  , _revision_dec_button (get_waves_button ("revision_dec_button"))
@@ -52,9 +52,7 @@ WavesExportFilenameSelector::WavesExportFilenameSelector ()
 
 	/* Signals */
 	_label_entry.signal_changed().connect (sigc::mem_fun (*this, &WavesExportFilenameSelector::update_label));
-	_path_entry.signal_changed().connect (sigc::mem_fun (*this, &WavesExportFilenameSelector::update_folder));
 	_revision_entry.signal_changed().connect (sigc::mem_fun (*this, &WavesExportFilenameSelector::update_revision));
-	_path_entry.signal_activate().connect (sigc::mem_fun (*this, &WavesExportFilenameSelector::check_folder), false);
 
 	_session_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFilenameSelector::change_session_selection));
 	_revision_inc_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportFilenameSelector::on_revision_inc_button));
@@ -82,7 +80,7 @@ WavesExportFilenameSelector::load_state ()
 	_revision_entry.set_sensitive (filename->include_revision);
 	_revision_inc_button.set_sensitive (filename->include_revision);
 	_revision_dec_button.set_sensitive (filename->include_revision);
-	_path_entry.set_text (filename->get_folder());
+	_path_label.set_text (filename->get_folder());
 
 	int size = _date_format_dropdown.get_menu ().items ().size ();
 	for (int i = 0; i < size; i++) {
@@ -175,34 +173,6 @@ WavesExportFilenameSelector::change_revision_value (int change)
 }
 
 void
-WavesExportFilenameSelector::update_folder ()
-{
-	if (!filename) {
-		return;
-	}
-
-	filename->set_folder (_path_entry.get_text());
-	CriticalSelectionChanged();
-}
-
-void
-WavesExportFilenameSelector::check_folder ()
-{
-	if (!filename) {
-		return;
-	}
-
-	if (!Glib::file_test (_path_entry.get_text(), Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-		WavesMessageDialog msg ("", string_compose (_("%1: this is only the directory/folder name, not the filename.\n\
-The filename will be chosen from the information just above the folder selector."), _path_entry.get_text()));
-		msg.run ();
-		_path_entry.set_text (Glib::path_get_dirname (_path_entry.get_text()));
-		filename->set_folder (_path_entry.get_text());
-		CriticalSelectionChanged();
-	}
-}
-
-void
 WavesExportFilenameSelector::change_date_format (WavesDropdown*, int item)
 {
 	if (!filename) {
@@ -266,9 +236,10 @@ WavesExportFilenameSelector::update_revision ()
 void
 WavesExportFilenameSelector::open_browse_dialog (WavesButton*)
 {
-	std::string filename = ARDOUR::choose_folder_dialog(_path_entry.get_text(), _("Choose export folder"));
+	std::string filename = ARDOUR::choose_folder_dialog (_path_label.get_text (), _("Choose export folder"));
 	if (!filename.empty ()) {
-		_path_entry.set_text (filename);
+		_path_label.set_text (filename);
+      	this->filename->set_folder (filename);
 	}
 	CriticalSelectionChanged();
 	return;
