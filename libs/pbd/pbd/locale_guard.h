@@ -29,9 +29,11 @@ namespace PBD {
 struct LIBPBD_API LocaleGuard {
     LocaleGuard (const char*);
     ~LocaleGuard ();
-    const char* old;
 
 	static std::string current;
+
+private:
+    char* old;
 };
 
 }

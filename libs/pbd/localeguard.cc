@@ -10,13 +10,14 @@
 std::string PBD::LocaleGuard::current;
 
 PBD::LocaleGuard::LocaleGuard (const char* str)
- : old(0)
+	: old(0)
 {
 	if (current != str) {
 		old = strdup (setlocale (LC_NUMERIC, NULL));
 		if (strcmp (old, str)) {
-			if (setlocale (LC_NUMERIC, str))
-				current = str; 
+			if (setlocale (LC_NUMERIC, str)) {
+				current = str;
+			}
 		}
 	}
 }
@@ -24,10 +25,11 @@ PBD::LocaleGuard::LocaleGuard (const char* str)
 PBD::LocaleGuard::~LocaleGuard ()
 {
 	if (old) {
-		if (setlocale (LC_NUMERIC, old))
+		if (setlocale (LC_NUMERIC, old)) {
 			current = old;
+		}
 
-		free ((char*)old);
+		free (old);
 	}
 }
 
