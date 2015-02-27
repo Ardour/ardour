@@ -2324,6 +2324,7 @@ Route::set_state (const XMLNode& node, int version)
 int
 Route::set_state_2X (const XMLNode& node, int version)
 {
+	LocaleGuard lg (X_("C"));
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;
