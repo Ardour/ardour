@@ -66,7 +66,7 @@ class ExportPresetSelector : public Gtk::HBox
 	PresetPtr                    previous;
 
 	Gtk::Label          label;
-	Gtk::ComboBoxEntry  entry;
+	Gtk::ComboBox       entry;
 
 	Gtk::Button         save_button;
 	Gtk::Button         remove_button;

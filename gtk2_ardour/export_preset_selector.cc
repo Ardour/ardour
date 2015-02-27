@@ -26,6 +26,7 @@
 
 ExportPresetSelector::ExportPresetSelector () :
   label (_("Preset"), Gtk::ALIGN_START),
+  entry(true),
   save_button (Gtk::Stock::SAVE),
   remove_button (Gtk::Stock::REMOVE),
   new_button (Gtk::Stock::NEW)
@@ -33,7 +34,7 @@ ExportPresetSelector::ExportPresetSelector () :
 	list = Gtk::ListStore::create (cols);
         list->set_sort_column (cols.label, Gtk::SORT_ASCENDING);
 	entry.set_model (list);
-	entry.set_text_column (cols.label);
+	entry.set_entry_text_column (cols.label);
 
 	pack_start (label, false, false, 0);
 	pack_start (entry, true, true, 6);
