@@ -39,7 +39,7 @@ using namespace PBD;
 using std::string;
 
 WavesExportDialog::WavesExportDialog (PublicEditor & editor, std::string title, ARDOUR::ExportProfileManager::ExportType type)
-  : WavesDialog ("waves_export_dialog.xml", true, false )
+  : WavesDialog ("waves_export_dialog.xml", true, false)
   , type (type)
   , editor (editor)
   , _channel_selector_button (get_waves_button ("channel_selector_button"))
@@ -152,7 +152,7 @@ WavesExportDialog::init ()
 
 	_cancel_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportDialog::close_dialog));
 	_stop_export_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportDialog::close_dialog));
-	_export_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportDialog::do_export));
+	_export_button.signal_clicked.connect (sigc::mem_fun (*this, &WavesExportDialog::on_export));
 
 	file_notebook->soundcloud_export_selector = soundcloud_selector;
 
@@ -184,6 +184,30 @@ WavesExportDialog::init_components ()
 }
 
 void
+WavesExportDialog::on_default_response ()
+{
+	if (!(status->running || status->aborted ())) {
+		do_export ();
+	} else {
+		WavesDialog::on_default_response ();
+	}
+}
+
+void
+WavesExportDialog::on_response (int response_id)
+{
+	switch (response_id) {
+	case WavesDialog::RESPONSE_DEFAULT:
+	case Gtk::RESPONSE_CANCEL:
+		if (status->running) {
+			status->abort();
+		}
+		break;
+	}
+    WavesDialog::on_response (response_id);
+}
+
+void
 WavesExportDialog::notify_errors (bool force)
 {
 	if (force || status->errors()) {
@@ -196,10 +220,6 @@ WavesExportDialog::notify_errors (bool force)
 void
 WavesExportDialog::close_dialog (WavesButton*)
 {
-	if (status->running) {
-		status->abort();
-	}
-
 	response (Gtk::RESPONSE_CANCEL);
 }
 
@@ -321,7 +341,13 @@ WavesExportDialog::soundcloud_upload_progress(double total, double now, std::str
 }
 
 void
-WavesExportDialog::do_export (WavesButton*)
+WavesExportDialog::on_export (WavesButton*)
+{
+	do_export ();
+}
+
+void
+WavesExportDialog::do_export ()
 {
 	try {
 		get_container ("settings_home").hide ();

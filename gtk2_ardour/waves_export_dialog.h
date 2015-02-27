@@ -75,6 +75,9 @@ class WavesExportDialog : public WavesDialog, public PBD::ScopedConnectionList
 	// Must initialize all the shared_ptrs below
 	virtual void init_components ();
 
+	void on_default_response ();
+	void on_response(int response_id);
+
 	boost::scoped_ptr<WavesExportPresetSelector>   preset_selector;
 	boost::scoped_ptr<WavesExportTimespanSelector> timespan_selector;
 	boost::scoped_ptr<WavesExportChannelSelector>  channel_selector;
@@ -100,7 +103,8 @@ class WavesExportDialog : public WavesDialog, public PBD::ScopedConnectionList
 	void update_warnings_and_example_filename ();
 	void show_conflicting_files (WavesButton*);
 
-	void do_export (WavesButton*);
+	void on_export (WavesButton*);
+	void do_export ();
 
 	void show_progress ();
 	gint progress_timeout ();
