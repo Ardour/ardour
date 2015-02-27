@@ -1244,25 +1244,22 @@ TracksControlPanel::on_device_dropdown_item_clicked (WavesDropdown*, int)
     std::string message = _("Would you like to switch to ") + device_name + "?";
 
     set_keep_above (false);
-    WavesMessageDialog yes_no_dialog ("", 
+    WavesMessageDialog message_dialog ("",
 									  message,
 									  WavesMessageDialog::BUTTON_YES |
 									  WavesMessageDialog::BUTTON_NO);
-    
-    yes_no_dialog.set_position (Gtk::WIN_POS_MOUSE);
-
-    switch (yes_no_dialog.run()) {
-	case Gtk::RESPONSE_NO:
-            // set _ignore_changes flag to ignore changes in combo-box callbacks
-            PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
-                
-            _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name());
-            set_keep_above (true);
-            return;
-    } 
-
-    set_keep_above (true);
-	device_changed ();
+    int response = message_dialog.run ();
+    if ( response == Gtk::RESPONSE_YES || response == WavesDialog::RESPONSE_DEFAULT ) {
+        set_keep_above (true);
+        device_changed ();
+    } else {
+        // set _ignore_changes flag to ignore changes in combo-box callbacks
+        PBD::Unwinder<uint32_t> protect_ignore_changes (_ignore_changes, _ignore_changes + 1);
+        
+        _device_dropdown.set_text (EngineStateController::instance()->get_current_device_name());
+        set_keep_above (true);
+        return;
+    }
 }
 
 void
