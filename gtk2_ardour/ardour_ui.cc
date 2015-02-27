@@ -4806,7 +4806,7 @@ ARDOUR_UI::cancel_plugin_timeout ()
 void
 ARDOUR_UI::plugin_scan_timeout (int timeout)
 {
-	if (!scan_dlg || !scan_dlg->is_mapped() || !scan_pbar) {
+	if (!scan_dlg || !scan_dlg->get_mapped() || !scan_pbar) {
 		return;
 	}
 	if (timeout > 0) {
@@ -4824,13 +4824,13 @@ ARDOUR_UI::plugin_scan_timeout (int timeout)
 void
 ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_cancel)
 {
-	if (type == X_("closeme") && !(scan_dlg && scan_dlg->is_mapped())) {
+	if (type == X_("closeme") && !(scan_dlg && scan_dlg->get_mapped())) {
 		return;
 	}
 
 	const bool cancelled = PluginManager::instance().cancelled();
 	if (type != X_("closeme") && (!UIConfiguration::instance().get_show_plugin_scan_window()) && !_initial_verbose_plugin_scan) {
-		if (cancelled && scan_dlg->is_mapped()) {
+		if (cancelled && scan_dlg->get_mapped()) {
 			scan_dlg->hide();
 			gui_idle_handler();
 			return;

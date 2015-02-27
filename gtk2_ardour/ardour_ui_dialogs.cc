@@ -357,7 +357,7 @@ ARDOUR_UI::toggle_editor_and_mixer ()
 		if (!mwin) {
 			/* mixer's own window doesn't exist */
 			mixer->make_visible ();
-		} else if (!mwin->is_mapped ()) {
+		} else if (!mwin->get_mapped ()) {
 			/* mixer's own window exists but isn't mapped */
 			mixer->make_visible ();
 		} else {
@@ -381,7 +381,7 @@ ARDOUR_UI::toggle_editor_and_mixer ()
 		if (!ewin) {
 			/* mixer's own window doesn't exist */
 			editor->make_visible ();
-		} else if (!ewin->is_mapped ()) {
+		} else if (!ewin->get_mapped ()) {
 			/* editor's own window exists but isn't mapped */
 			editor->make_visible ();
 		} else {

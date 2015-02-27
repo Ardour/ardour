@@ -206,7 +206,7 @@ Splash::idle_after_expose ()
 void
 Splash::display ()
 {
-	bool was_mapped = is_mapped ();
+	bool was_mapped = get_mapped ();
 
 	if (!was_mapped) {
 		expose_done = false;

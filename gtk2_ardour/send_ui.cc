@@ -121,7 +121,7 @@ SendUI::update ()
 void
 SendUI::fast_update ()
 {
-	if (!is_mapped()) {
+	if (!get_mapped()) {
 		return;
 	}
 
