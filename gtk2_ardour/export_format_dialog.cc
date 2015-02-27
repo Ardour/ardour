@@ -1081,7 +1081,7 @@ ExportFormatDialog::fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampl
 void
 ExportFormatDialog::end_dialog ()
 {
-	hide_all ();
+	hide ();
 }
 
 void

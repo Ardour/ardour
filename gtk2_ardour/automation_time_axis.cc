@@ -481,7 +481,7 @@ AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 			hide_button.show();
 
 		} else if (h >= preset_height (HeightSmall)) {
-			controls_table.hide_all ();
+			controls_table.hide();
 			auto_dropdown.hide();
 			name_label.hide();
 		}

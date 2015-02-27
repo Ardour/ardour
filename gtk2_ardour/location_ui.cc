@@ -1201,5 +1201,5 @@ void
 LocationUIWindow::session_going_away ()
 {
 	ArdourWindow::session_going_away ();
-	hide_all();
+	hide ();
 }

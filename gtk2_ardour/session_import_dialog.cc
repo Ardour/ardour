@@ -273,7 +273,7 @@ SessionImportDialog::show_info(const TreeModel::Path& path, TreeViewColumn*)
 void
 SessionImportDialog::end_dialog ()
 {
-	hide_all();
+	hide ();
 
 	set_modal (false);
 	ok_button->set_sensitive(true);

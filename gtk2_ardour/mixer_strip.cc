@@ -673,7 +673,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (has_audio_outputs ()) {
 		panners.show_all ();
 	} else {
-		panners.hide_all ();
+		panners.hide ();
 	}
 
 	update_diskstream_display ();
@@ -1124,7 +1124,7 @@ void
 MixerStrip::update_diskstream_display ()
 {
         if (is_track() && input_selector) {
-                        input_selector->hide_all ();
+                        input_selector->hide ();
         }
 
         route_color_changed ();
@@ -1483,7 +1483,7 @@ MixerStrip::update_input_display ()
 	if (has_audio_outputs ()) {
 		panners.show_all ();
 	} else {
-		panners.hide_all ();
+		panners.hide ();
 	}
 
 }
@@ -1498,7 +1498,7 @@ MixerStrip::update_output_display ()
 	if (has_audio_outputs ()) {
 		panners.show_all ();
 	} else {
-		panners.hide_all ();
+		panners.hide ();
 	}
 }
 
@@ -2196,7 +2196,7 @@ MixerStrip::revert_to_default_display ()
 	if (has_audio_outputs ()) {
 		panners.show_all ();
 	} else {
-		panners.hide_all ();
+		panners.hide ();
 	}
 
 	reset_strip_style ();

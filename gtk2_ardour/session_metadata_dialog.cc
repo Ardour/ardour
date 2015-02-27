@@ -605,7 +605,7 @@ template <typename DataSet>
 void
 SessionMetadataDialog<DataSet>::end_dialog ()
 {
-	hide_all();
+	hide ();
 }
 
 template <typename DataSet>
