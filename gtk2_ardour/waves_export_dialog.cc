@@ -324,6 +324,7 @@ void
 WavesExportDialog::do_export (WavesButton*)
 {
 	try {
+		get_container ("settings_home").hide ();
 		profile_manager->prepare_for_export ();
 		handler->soundcloud_username     = soundcloud_selector->username ();
 		handler->soundcloud_password     = soundcloud_selector->password ();
