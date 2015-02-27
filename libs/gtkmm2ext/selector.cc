@@ -63,7 +63,7 @@ Selector::~Selector ()
 
 {
 	/* ensure that any row data set with set_row_data_full() is deleted */
-	hide_all ();
+	hide ();
 	lstore.clear ();
 }
 
