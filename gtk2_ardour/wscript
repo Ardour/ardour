@@ -52,7 +52,6 @@ gtk2_ardour_sources = [
         'waves_numeric_edit_dialog.cc',
         'about_dialog.cc',
         'actions.cc',
-        'add_route_dialog.cc',
         'add_tracks_dialog.cc',
         'ambiguous_file_dialog.cc',
         'analysis_window.cc',
