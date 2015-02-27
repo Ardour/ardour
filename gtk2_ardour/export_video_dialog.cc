@@ -935,18 +935,18 @@ ExportVideoDialog::preset_combo_changed ()
 
 	if (p == "flv") {
 		change_file_extension(".flv");
-		audio_codec_combo.set_active(1);
-		video_codec_combo.set_active(0);
-		audio_bitrate_combo.set_active(1);
-		video_bitrate_combo.set_active(1);
+		audio_codec_combo.set_active(2);
+		video_codec_combo.set_active(1);
+		audio_bitrate_combo.set_active(2);
+		video_bitrate_combo.set_active(3);
 		audio_samplerate_combo.set_active(1);
 	}
 	else if (p == "you-tube") {
 		change_file_extension(".avi");
-		audio_codec_combo.set_active(2);
-		video_codec_combo.set_active(5);
-		audio_bitrate_combo.set_active(1);
-		video_bitrate_combo.set_active(2);
+		audio_codec_combo.set_active(3);
+		video_codec_combo.set_active(6);
+		audio_bitrate_combo.set_active(2);
+		video_bitrate_combo.set_active(4);
 		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
@@ -955,10 +955,22 @@ ExportVideoDialog::preset_combo_changed ()
 	}
 	else if (p == "ogg") {
 		change_file_extension(".ogv");
-		audio_codec_combo.set_active(3);
-		video_codec_combo.set_active(1);
-		audio_bitrate_combo.set_active(2);
-		video_bitrate_combo.set_active(2);
+		audio_codec_combo.set_active(4);
+		video_codec_combo.set_active(2);
+		audio_bitrate_combo.set_active(3);
+		video_bitrate_combo.set_active(4);
+		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
+			audio_samplerate_combo.set_active(2);
+		} else {
+			audio_samplerate_combo.set_active(1);
+		}
+	}
+	else if (p == "webm") {
+		change_file_extension(".webm");
+		audio_codec_combo.set_active(4);
+		video_codec_combo.set_active(7);
+		audio_bitrate_combo.set_active(3);
+		video_bitrate_combo.set_active(4);
 		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
@@ -967,18 +979,18 @@ ExportVideoDialog::preset_combo_changed ()
 	}
 	else if (p == "dvd-mp2") {
 		change_file_extension(".mpg");
-		audio_codec_combo.set_active(4);
-		video_codec_combo.set_active(3);
-		audio_bitrate_combo.set_active(3);
-		video_bitrate_combo.set_active(3);
+		audio_codec_combo.set_active(5);
+		video_codec_combo.set_active(4);
+		audio_bitrate_combo.set_active(4);
+		video_bitrate_combo.set_active(5);
 		audio_samplerate_combo.set_active(2);
 	}
 	else if (p == "dvd-NTSC" || p == "dvd-PAL") {
 		change_file_extension(".mpg");
-		audio_codec_combo.set_active(5);
-		video_codec_combo.set_active(3);
-		audio_bitrate_combo.set_active(3);
-		video_bitrate_combo.set_active(3);
+		audio_codec_combo.set_active(6);
+		video_codec_combo.set_active(4);
+		audio_bitrate_combo.set_active(4);
+		video_bitrate_combo.set_active(5);
 		audio_samplerate_combo.set_active(2);
 
 		scale_checkbox.set_active(false);
@@ -986,10 +998,10 @@ ExportVideoDialog::preset_combo_changed ()
 	}
 	else if (p == "mpeg4") {
 		change_file_extension(".mp4");
-		audio_codec_combo.set_active(0);
-		video_codec_combo.set_active(4);
-		audio_bitrate_combo.set_active(3);
-		video_bitrate_combo.set_active(3);
+		audio_codec_combo.set_active(1);
+		video_codec_combo.set_active(5);
+		audio_bitrate_combo.set_active(4);
+		video_bitrate_combo.set_active(5);
 		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
