@@ -1072,15 +1072,13 @@ GainMeter::set_controls (boost::shared_ptr<Route> r,
 int
 GainMeter::get_gm_width ()
 {
-	Gtk::Requisition sz;
+	Gtk::Requisition sz = meter_metric_area.size_request ();
 	int min_w = 0;
-	sz.width = 0;
-	meter_metric_area.size_request (sz);
 	min_w += sz.width;
-	level_meter->size_request (sz);
+	sz = level_meter->size_request ();
 	min_w += sz.width;
 
-	fader_alignment.size_request (sz);
+	sz = fader_alignment.size_request ();
 	if (_width == Wide)
 		return max(sz.width * 2, min_w * 2) + 6;
 	else
