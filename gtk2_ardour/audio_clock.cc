@@ -960,7 +960,7 @@ AudioClock::session_configuration_changed (std::string p)
 void
 AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 {
- 	if ((!force && !is_visible()) || _session == 0) {
+	if ((!force && !get_visible()) || _session == 0) {
 		return;
 	}
 

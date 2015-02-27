@@ -1175,7 +1175,7 @@ ARDOUR_UI::starting ()
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 
-	if (splash && splash->is_visible()) {
+	if (splash && splash->get_visible()) {
 		// in 1 second, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
@@ -1820,7 +1820,7 @@ ARDOUR_UI::open_recent_session ()
 
 		can_return = false;
 	}
-	if (splash && splash->is_visible()) {
+	if (splash && splash->get_visible()) {
 		// in 1 second, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
@@ -3436,7 +3436,7 @@ ARDOUR_UI::close_session()
 	if (get_session_parameters (true, false)) {
 		exit (1);
 	}
-	if (splash && splash->is_visible()) {
+	if (splash && splash->get_visible()) {
 		// in 1 second, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
@@ -4108,7 +4108,7 @@ ARDOUR_UI::add_route ()
 		return;
 	}
 
-	if (add_route_dialog->is_visible()) {
+	if (add_route_dialog->get_visible()) {
 		/* we're already doing this */
 		return;
 	}
@@ -4434,7 +4434,7 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		add_video_dialog->set_transient_for (*float_window);
 	}
 
-	if (add_video_dialog->is_visible()) {
+	if (add_video_dialog->get_visible()) {
 		/* we're already doing this */
 		return;
 	}
