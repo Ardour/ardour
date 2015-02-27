@@ -925,12 +925,12 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 	
-		} else if (child->name() == "InverseFadeIn") {
+		} else if ( (child->name() == "InverseFadeIn") || (child->name() == "InvFadeIn")  ) {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
 				_inverse_fade_in->set_state (*grandchild, version);
 			}
-		} else if (child->name() == "InverseFadeOut") {
+		} else if ( (child->name() == "InverseFadeOut") || (child->name() == "InvFadeOut") ) {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
 				_inverse_fade_out->set_state (*grandchild, version);
