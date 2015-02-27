@@ -381,9 +381,7 @@ WavesExportDialog::show_progress ()
 	}
 
 	status->finish ();
-	if (!aborted) {
-		response (Gtk::RESPONSE_OK);
-	}
+	response (aborted ? Gtk::RESPONSE_OK : Gtk::RESPONSE_CANCEL);
 }
 
 gint
