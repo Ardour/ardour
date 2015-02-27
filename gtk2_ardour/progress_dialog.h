@@ -51,7 +51,13 @@ public:
     void hide_cancel_button ();
     void set_cancel_button_sensitive (bool sensitive);
     void set_progress (float);
+    bool on_key_press_event (GdkEventKey*);
     PBD::Signal0<void> CancelClicked;
+
+protected:
+    void on_response(int response_id);
+    void on_default_response ();
+    void on_esc_response ();
     
 private:
     void init (const std::string& title,
@@ -59,7 +65,6 @@ private:
                const std::string& progress_message,
                const std::string& bottom_message);
 	void show_pd_in_gui_thread ();
-	void hide_pd_in_gui_thread ();
     void set_progress_in_gui_thread (float);
     Gtk::Label& _top_label;
     Gtk::Label& _bottom_label;
@@ -70,6 +75,7 @@ private:
     unsigned int num_of_steps;
     unsigned int cur_step;
     bool hide_automatically;
+    bool cancel_visible;
 };
 
 #endif /* __progress_dialog_h__ */

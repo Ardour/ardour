@@ -40,7 +40,8 @@ ProgressDialog::ProgressDialog (const std::string& title,
 , _cancel_button ((get_waves_button ("cancel_button")))
 , num_of_steps (0)
 , cur_step (0)
-, hide_automatically(false)
+, hide_automatically (false)
+, cancel_visible (false)
 {
     init (title, top_message, progress_message, bottom_message);
 }
@@ -66,7 +67,7 @@ ProgressDialog::init (const std::string& title,
 void
 ProgressDialog::cancel_clicked (WavesButton*)
 {
-    CancelClicked ();
+    CancelClicked (); // EMIT SIGNAL
 }
 
 void
@@ -145,30 +146,22 @@ ProgressDialog::show_pd_in_gui_thread ()
 void
 ProgressDialog::hide_pd ()
 {
-   Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ProgressDialog::hide_pd_in_gui_thread , this)); 
-}
-
-void
-ProgressDialog::hide_pd_in_gui_thread ()
-{
-    while (Glib::MainContext::get_default()->iteration (false)) {
-        /* do nothing */
-    }
     set_progress (0);
     WavesDialog::hide ();
 }
-
 
 void
 ProgressDialog::show_cancel_button ()
 {
     _cancel_button.show ();
+    cancel_visible = true;
 }
 
 void
 ProgressDialog::hide_cancel_button ()
 {
     _cancel_button.hide ();
+    cancel_visible = false;
 }
 
 void
@@ -197,4 +190,47 @@ ProgressDialog::set_progress_in_gui_thread (float p)
     while (Glib::MainContext::get_default()->iteration (false)) {
         /* do nothing */
     }
+}
+
+void
+ProgressDialog::on_response (int response_id)
+{
+    if (response_id == Gtk::RESPONSE_DELETE_EVENT && cancel_visible) {
+        // this happens on Close Button pressed (at the top left corner only on Mac)
+        // and cancel button is visible
+        CancelClicked (); // EMIT SIGNAL
+    }
+}
+
+void
+ProgressDialog::on_default_response ()
+{
+    // we should do nothing here
+    return ;
+}
+
+void
+ProgressDialog::on_esc_response ()
+{
+    // if cancel button is using
+    // we should emit signal
+    if (cancel_visible) {
+        CancelClicked (); // EMIT SIGNAL
+    }
+}
+
+bool
+ProgressDialog::on_key_press_event (GdkEventKey* ev)
+{
+    switch (ev->keyval)
+    {
+        case GDK_Return:
+        case GDK_KP_Enter:
+            on_default_response ();
+            return true;
+        case GDK_Escape:
+            on_esc_response ();
+            return true;
+    }
+    return Gtk::Dialog::on_key_press_event (ev);
 }
