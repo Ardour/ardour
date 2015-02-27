@@ -2211,7 +2211,7 @@ list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost::shared_ptr<PluginInfo> instrument, 
 			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
-	char track_name[32];
+	char track_name[1024];
 	uint32_t track_id = 0;
 	string port;
 	RouteList new_routes;
@@ -2747,7 +2747,7 @@ list< boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group, 
 			  uint32_t how_many, string name_template)
 {
-	char track_name[32];
+	char track_name[1024];
 	uint32_t track_id = 0;
 	string port;
 	RouteList new_routes;
