@@ -33,13 +33,18 @@
     <HBox spacing="6">
       <Label style="generic_control"
              text="Folder:"/>
-      <Label id="path_label"
-             style="generic_control"
-             box.fill="true"
-             box.expand="true"
-             ellipsize="end"
-             horzalignment="start"
-             height="22"/>
+      <EventBox bgnormal="#6C6C6C"
+                box.fill="true"
+                box.expand="true">
+          <Label id="path_label"
+                 style="generic_control"
+                 box.fill="true"
+                 box.expand="true"
+                 ellipsize="end"
+                 horzalignment="start"
+                 height="22"
+                 fgnormal="#C1C1C1"/>
+      </EventBox>
       <Button id="browse_button"
               style="generic_button"
               text="Browse"
