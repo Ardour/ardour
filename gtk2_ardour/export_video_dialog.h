@@ -55,6 +55,9 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	void encode_pass (int);
 	void change_file_extension (std::string);
 
+	bool on_focus_in_event (GdkEventFocus*);
+	bool on_focus_out_event (GdkEventFocus*);
+
 	void open_outfn_dialog ();
 	void open_invid_dialog ();
 	void scale_checkbox_toggled ();
