@@ -1811,7 +1811,7 @@ ARDOUR_UI::transport_record (bool roll)
 		switch (_session->record_status()) {
 		case Session::Disabled:
 			if (_session->ntracks() == 0) {
-				WavesMessageDialog msg ("", _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
+				WavesMessageDialog msg ("", _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track\" option in the Track menu."));
 				msg.run ();
 				return;
 			}
