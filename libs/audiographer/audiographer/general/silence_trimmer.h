@@ -128,7 +128,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 		check_flags (*this, c);
 		
 		if (throw_level (ThrowStrict) && in_end) {
-			throw Exception(*this, "process() after reacing end of input");
+			throw Exception(*this, "process() after reaching end of input");
 		}
 		in_end = c.has_flag (ProcessContext<T>::EndOfInput);
 

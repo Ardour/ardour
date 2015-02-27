@@ -67,7 +67,7 @@ class /*LIBAUDIOGRAPHER_API*/ Chunker
 			position += frames_left;
 		}
 		
-		if (context.has_flag (ProcessContext<T>::EndOfInput)) {
+		if (context.has_flag (ProcessContext<T>::EndOfInput) && position > 0) {
 			ProcessContext<T> c_out (context, buffer, position);
 			ListedSource<T>::output (c_out);
 		}
