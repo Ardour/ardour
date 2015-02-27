@@ -140,8 +140,7 @@ WavesDialog::on_key_press_event (GdkEventKey* ev)
     {
         case GDK_Return:
         case GDK_KP_Enter:
-            hide ();
-            response (WavesDialog::RESPONSE_DEFAULT);
+			on_default_response();
             return true;
         case GDK_Escape:
             hide ();
@@ -168,8 +167,15 @@ WavesDialog::on_delete_event (GdkEventAny*)
 }
 
 void
+WavesDialog::on_default_response ()
+{
+	hide ();
+    response (WavesDialog::RESPONSE_DEFAULT);
+}
+
+void
 WavesDialog::on_response(int response_id)
 {
-    Dialog::on_response (response_id);
+    Gtk::Dialog::on_response (response_id);
     hide ();
 }

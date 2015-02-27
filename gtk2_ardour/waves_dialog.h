@@ -59,7 +59,8 @@ class WavesDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr, public 
 	};
 
   protected:
-    void on_response(int response_id);
+	virtual void on_default_response ();
+    void on_response (int response_id);
 
   private:
 
