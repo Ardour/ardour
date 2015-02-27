@@ -73,9 +73,9 @@ ExportVideoDialog::ExportVideoDialog ()
 	, _transcoder(0)
 	, _video_source_aspect_ratio(-1)
 	, _suspend_signals(false)
-	, outfn_path_label (_("File:"), Gtk::ALIGN_LEFT)
+	, outfn_path_label (_("File:"), Gtk::ALIGN_START)
 	, outfn_browse_button (_("Browse"))
-	, invid_path_label (_("Video:"), Gtk::ALIGN_LEFT)
+	, invid_path_label (_("Video:"), Gtk::ALIGN_START)
 	, invid_browse_button (_("Browse"))
 	, transcode_button (_("Export"))
 	, abort_button (_("Abort"))
@@ -112,7 +112,9 @@ ExportVideoDialog::ExportVideoDialog ()
 	/* check if ffmpeg can be found */
 	_transcoder = new TranscodeFfmpeg(X_(""));
 	if (!_transcoder->ffexec_ok()) {
-		l = manage (new Label (_("ffmpeg installation was not found. Video Export is not possible. See the Log window for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("ffmpeg installation was not found. Video Export is not possible. "
+		                          "See the Log window for more information."),
+		                       Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		l->set_line_wrap();
 		vbox->pack_start (*l, false, false, 8);
 		get_vbox()->pack_start (*vbox, false, false);
@@ -123,7 +125,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	}
 	delete _transcoder; _transcoder = 0;
 
-	l = manage (new Label (_("<b>Output:</b> (file extension defines format)"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Output:</b> (file extension defines format)"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	vbox->pack_start (*l, false, false, 4);
 
@@ -133,7 +135,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	path_hbox->pack_start (outfn_browse_button, false, false, 3);
 	vbox->pack_start (*path_hbox, false, false, 2);
 
-	l = manage (new Label (_("<b>Input Video:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Input Video:</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	vbox->pack_start (*l, false, false, 4);
 
@@ -144,16 +146,16 @@ ExportVideoDialog::ExportVideoDialog ()
 	vbox->pack_start (*path_hbox, false, false, 2);
 
 	path_hbox = manage (new HBox);
-	l = manage (new Label (_("Audio:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Audio:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	path_hbox->pack_start (*l, false, false, 3);
-	l = manage (new Label (_("Master Bus"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Master Bus"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	path_hbox->pack_start (*l, false, false, 2);
 	vbox->pack_start (*path_hbox, false, false, 2);
 
 	insnd_combo.append (string_compose (_("from the %1 session's start to the session's end"), PROGRAM_NAME));
 	outfn_path_entry.set_width_chars(38);
 
-	l = manage (new Label (_("<b>Settings:</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Settings:</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true, 4);
 
@@ -161,25 +163,25 @@ ExportVideoDialog::ExportVideoDialog ()
 	t->set_spacings (4);
 	int ty = 0;
 	options_box->pack_start (*t, true, true, 4);
-	l = manage (new Label (_("Range:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Range:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty+1);
 	t->attach (insnd_combo, 1, 4, ty, ty+1); ty++;
-	l = manage (new Label (_("Preset:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Preset:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty+1);
 	t->attach (preset_combo, 1, 4, ty, ty+1); ty++;
-	l = manage (new Label (_("Video Codec:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Video Codec:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty+1);
 	t->attach (video_codec_combo, 1, 2, ty, ty+1);
-	l = manage (new Label (_("Video KBit/s:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Video KBit/s:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 2, 3, ty, ty+1);
 	t->attach (video_bitrate_combo, 3, 4, ty, ty+1); ty++;
-	l = manage (new Label (_("Audio Codec:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Audio Codec:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty+1);
 	t->attach (audio_codec_combo, 1, 2, ty, ty+1);
-	l = manage (new Label (_("Audio KBit/s:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Audio KBit/s:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 2, 3, ty, ty+1);
 	t->attach (audio_bitrate_combo, 3, 4, ty, ty+1); ty++;
-	l = manage (new Label (_("Audio Samplerate:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Audio Samplerate:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	t->attach (*l, 0, 1, ty, ty+1);
 	t->attach (audio_samplerate_combo, 1, 2, ty, ty+1);
 	t->attach (normalize_checkbox, 2, 4, ty, ty+1); ty++;

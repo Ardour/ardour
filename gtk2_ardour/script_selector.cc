@@ -169,7 +169,7 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	++ty;
 
 	if (_lsp.size () > 0) {
-		l = manage (new Label (_("<b>Instance Parameters</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("<b>Instance Parameters</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		l->set_use_markup ();
 		t->attach (*l, 0, 2, ty, ty+1);
 		++ty;

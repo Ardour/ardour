@@ -1379,9 +1379,9 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 
 	prompt_label.set_text (prompt);
 	prompt_label.set_name (X_("PrompterLabel"));
-	prompt_label.set_alignment(ALIGN_LEFT, ALIGN_TOP);
+	prompt_label.set_alignment(ALIGN_START, ALIGN_START);
 
-	dimage->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	dimage->set_alignment(ALIGN_CENTER, ALIGN_START);
 	dhbox.set_homogeneous (false);
 	dhbox.pack_start (*dimage, false, false, 5);
 	dhbox.pack_start (prompt_label, true, false, 5);
@@ -3847,7 +3847,7 @@ require some unused files to continue to exist."));
 	Gtk::HBox ddhbox; // the hbox we eventually pack into the dialog's vbox
 	Gtk::Image* dimage = manage (new Gtk::Image(Stock::DIALOG_INFO,  Gtk::ICON_SIZE_DIALOG));
 
-	dimage->set_alignment(ALIGN_LEFT, ALIGN_TOP);
+	dimage->set_alignment(ALIGN_START, ALIGN_START);
 
 	const string dead_directory = _session->session_directory().dead_path();
 
@@ -4951,7 +4951,7 @@ the computer was shutdown.\n\
 %1 can recover any captured audio for\n\
 you, or it can ignore it. Please decide\n\
 what you would like to do.\n"), PROGRAM_NAME));
-	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	image->set_alignment(ALIGN_CENTER, ALIGN_START);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);
@@ -4982,7 +4982,7 @@ This session was created with a sample rate of %1 Hz, but\n\
 %2 is currently running at %3 Hz.  If you load this session,\n\
 audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual));
 
-	image->set_alignment(ALIGN_CENTER, ALIGN_TOP);
+	image->set_alignment(ALIGN_CENTER, ALIGN_START);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
 	hbox->pack_end (message, PACK_EXPAND_PADDING, 12);
 	dialog.get_vbox()->pack_start(*hbox, PACK_EXPAND_PADDING, 6);

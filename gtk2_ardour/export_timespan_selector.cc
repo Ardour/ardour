@@ -42,7 +42,7 @@ using std::string;
 ExportTimespanSelector::ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager, bool multi)
 	: manager (manager)
 	, _realtime_available (true)
-	, time_format_label (_("Show Times as:"), Gtk::ALIGN_LEFT)
+	, time_format_label (_("Show Times as:"), Gtk::ALIGN_START)
 	, realtime_checkbutton (_("Realtime Export"))
 {
 	set_session (session);

@@ -55,10 +55,10 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	: ArdourDialog (_("Set Video Track"))
 	, seek_slider (0,1000,1)
 	, preview_path ("")
-	, pi_tcin ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
-	, pi_tcout ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
-	, pi_aspect ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
-	, pi_fps ("-", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false)
+	, pi_tcin ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
+	, pi_tcout ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
+	, pi_aspect ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
+	, pi_fps ("-", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false)
 	, chooser (FILE_CHOOSER_ACTION_OPEN)
 	, xjadeo_checkbox (_("Open Video Monitor Window"))
 	, set_session_fps_checkbox (_("Adjust Session Framerate to Match Video Framerate"))
@@ -133,7 +133,7 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	Gtk::Label* l;
 	VBox* options_box = manage (new VBox);
 
-	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 
 	options_box->pack_start (*l, false, true, 4);
@@ -150,16 +150,16 @@ AddVideoDialog::AddVideoDialog (Session* s)
 	l = manage (new Label (_("<b>Video Information</b>"), Gtk::ALIGN_CENTER, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	table->attach (*l, 0, 2, 0, 1, FILL, FILL);
-	l = manage (new Label (_("Start:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Start:"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 1, 2, FILL, FILL);
 	table->attach (pi_tcin, 1, 2, 1, 2, FILL, FILL);
-	l = manage (new Label (_("End:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("End:"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 2, 3, FILL, FILL);
 	table->attach (pi_tcout, 1, 2, 2, 3, FILL, FILL);
-	l = manage (new Label (_("Frame rate:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Frame rate:"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 3, 4, FILL, FILL);
 	table->attach (pi_fps, 1, 2, 3, 4, FILL, FILL);
-	l = manage (new Label (_("Aspect Ratio:"), Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Aspect Ratio:"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 	table->attach (*l, 0, 1, 4, 5, FILL, FILL);
 	table->attach (pi_aspect, 1, 2, 4, 5, FILL, FILL);
 

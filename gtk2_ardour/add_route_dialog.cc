@@ -118,47 +118,47 @@ AddRouteDialog::AddRouteDialog ()
 	table2->set_row_spacings (6);
 	table2->set_col_spacing	(1, 6);
 
-	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_use_markup ();
 	options_box->pack_start (*l, false, true);
 
-	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	l->set_padding (8, 0);
 	table2->attach (*l, 0, 1, 0, 3, Gtk::FILL, Gtk::FILL, 0, 0);
 
 	int n = 0;
 
-	l = manage (new Label (_("Name:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Name:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (name_template_entry, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
 	/* Route configuration */
 
-	configuration_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	configuration_label.set_alignment (Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 	table2->attach (configuration_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (channel_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
-	mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	mode_label.set_alignment (Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 	table2->attach (mode_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (mode_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
-	instrument_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
+	instrument_label.set_alignment (Gtk::ALIGN_START, Gtk::ALIGN_CENTER);
 	table2->attach (instrument_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (instrument_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
 	/* Group choice */
 
-	l = manage (new Label (_("Group:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Group:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (route_group_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
 	/* New route will be inserted at.. */
-	l = manage (new Label (_("Insert:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	l = manage (new Label (_("Insert:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (insert_at_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
@@ -168,7 +168,7 @@ AddRouteDialog::AddRouteDialog ()
 	if (Profile->get_mixbus ()) {
 		strict_io_combo.set_active (1);
 	} else {
-		l = manage (new Label (_("Output Ports:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+		l = manage (new Label (_("Output Ports:"), Gtk::ALIGN_START, Gtk::ALIGN_CENTER, false));
 		table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		table2->attach (strict_io_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 
