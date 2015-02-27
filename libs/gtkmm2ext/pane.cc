@@ -230,7 +230,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
         /* skip initial hidden children */
 
         while (child != children.end()) {
-	        if (child->w->is_visible()) {
+	        if (child->w->get_visible()) {
 		        break;
 	        }
 	        ++child;
@@ -245,7 +245,7 @@ Pane::reallocate (Gtk::Allocation const & alloc)
 	        /* Move on to next *visible* child */
 
 	        while (++next != children.end()) {
-		        if (next->w->is_visible()) {
+		        if (next->w->get_visible()) {
 			        break;
 		        }
 	        }
@@ -333,12 +333,12 @@ Pane::on_expose_event (GdkEventExpose* ev)
 
 	for (child = children.begin(), div = dividers.begin(); child != children.end(); ++child) {
 
-		if (child->w->is_visible()) {
+		if (child->w->get_visible()) {
 			propagate_expose (*(child->w), ev);
 		}
 
 		if (div != dividers.end()) {
-			if ((*div)->is_visible()) {
+			if ((*div)->get_visible()) {
 				propagate_expose (**div, ev);
 			}
 			++div;

@@ -85,7 +85,7 @@ Tabbable::window_visible () const
 		return false;
 	}
 
-	return _window->is_visible();
+	return _window->get_visible();
 }
 
 Window*
