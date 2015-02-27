@@ -141,7 +141,7 @@ AudioClock::set_widget_name (const string& str)
 		set_name (str + " clock");
 	}
 
-	if (is_realized()) {
+	if (get_realized()) {
 		set_colors ();
 	}
 }
@@ -464,7 +464,7 @@ AudioClock::set_clock_dimensions (Gtk::Requisition& req)
 
 	tmp = Pango::Layout::create (get_pango_context());
 
-	if (!is_realized()) {
+	if (!get_realized()) {
 		font = get_font_for_style (get_name());
 	} else {
 		font = style->get_font();
@@ -512,7 +512,7 @@ AudioClock::on_size_request (Gtk::Requisition* req)
 
 		tmp = Pango::Layout::create (get_pango_context());
 
-		if (!is_realized()) {
+		if (!get_realized()) {
 			font = get_font_for_style (get_name());
 		} else {
 			font = style->get_font();
