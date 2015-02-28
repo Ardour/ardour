@@ -2346,6 +2346,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		case kAudioUnitType_Panner:
 		case kAudioUnitType_OfflineEffect:
 		case kAudioUnitType_FormatConverter:
+			comp = FindNextComponent (comp, &desc);
 			continue;
 
 		case kAudioUnitType_Output:
