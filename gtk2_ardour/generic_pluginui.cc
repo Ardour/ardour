@@ -504,18 +504,18 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		prefheight = 30 * i;
 	}
 
-	if (box->children().empty()) {
+	if (box->get_children().empty()) {
 		hpacker.remove (*frame);
 	}
 
-	if (button_table->children().empty()) {
+	if (button_table->get_children().empty()) {
 		hpacker.remove (*bt_frame);
 		delete button_table;
 	} else {
 		button_table->show_all ();
 	}
 
-	if (!output_table->children().empty()) {
+	if (!output_table->get_children().empty()) {
 		frame = manage (new Frame);
 		frame->set_name ("BaseFrame");
 		frame->set_label(_("Meters"));
