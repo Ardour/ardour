@@ -42,7 +42,9 @@ ExportFileNotebook::ExportFileNotebook () :
 
 	new_file_hbox.pack_start (new_file_button, true, true);
 	append_page (new_file_dummy, new_file_hbox);
+#ifndef GTKMM_DISABLE_DEPRECATED
 	set_tab_label_packing (new_file_dummy, true, true, Gtk::PACK_START);
+#endif
 	new_file_hbox.show_all_children ();
 
 	page_change_connection = signal_switch_page().connect (sigc::mem_fun (*this, &ExportFileNotebook::handle_page_change));
