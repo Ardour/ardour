@@ -57,6 +57,10 @@
 #include "utils_videotl.h"
 #include "i18n.h"
 
+#ifdef COMPILER_MSVC
+#define rintf(x) round((x) + 0.5)
+#endif
+
 using namespace Gtk;
 using namespace std;
 using namespace PBD;
