@@ -333,10 +333,12 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (_freewheeling) {
+		PortManager::cycle_end (nframes);
 		return 0;
 	}
 
 	if (!_running) {
+		PortManager::cycle_end (nframes);
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
