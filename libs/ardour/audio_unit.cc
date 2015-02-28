@@ -532,7 +532,7 @@ AUPlugin::discover_parameters ()
 
 	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
 
-		AUParamInfo param_info (unit->AU(), false, /* include read only */ false, scopes[i]);
+		AUParamInfo param_info (unit->AU(), false, /* include read only */ true, scopes[i]);
 
 		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
 
