@@ -56,6 +56,8 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	void cancel_plugin_timeout();
 	void clear_vst_cache ();
 	void clear_vst_blacklist ();
+	void clear_au_cache ();
+	void clear_au_blacklist ();
 
 	const std::string get_default_windows_vst_path() const { return windows_vst_path; }
 	const std::string get_default_lxvst_path() const { return lxvst_path; }

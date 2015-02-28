@@ -49,6 +49,8 @@
 #include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include "pbd/whitespace.h"
 #include "pbd/file_utils.h"
@@ -342,6 +344,29 @@ PluginManager::clear_vst_blacklist ()
 }
 
 void
+PluginManager::clear_au_cache ()
+{
+#ifdef AUDIOUNIT_SUPPORT
+	// AUPluginInfo::au_cache_path ()
+	string fn = Glib::build_filename (ARDOUR::user_config_directory(), "au_cache");
+	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		::g_unlink(fn.c_str());
+	}
+#endif
+}
+
+void
+PluginManager::clear_au_blacklist ()
+{
+#ifdef AUDIOUNIT_SUPPORT
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		::g_unlink(fn.c_str());
+	}
+#endif
+}
+
+void
 PluginManager::ladspa_refresh ()
 {
 	if (_ladspa_plugin_info) {
@@ -622,6 +647,19 @@ PluginManager::au_refresh (bool cache_only)
 	// disable automatic scan in case we crash
 	Config->set_discover_audio_units (false);
 	Config->save_state();
+
+	/* note: AU require a CAComponentDescription pointer provided by the OS.
+	 * Ardour only caches port and i/o config. It can't just 'scan' without
+	 * 'discovering' (like we do for VST).
+	 *
+	 * So in case discovery fails, we assume the worst: the Description
+	 * is broken (malicious plugins) and even a simple 'scan' would always
+	 * crash ardour on startup. Hence we disable Auto-Scan on start.
+	 *
+	 * If the crash happens at any later time (description is available),
+	 * Ardour will blacklist the plugin in question -- unless
+	 * the crash happens during realtime-run.
+	 */
 
 	_au_plugin_info = AUPluginInfo::discover();
 
