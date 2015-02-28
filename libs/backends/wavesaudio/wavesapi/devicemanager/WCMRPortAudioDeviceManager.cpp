@@ -604,7 +604,6 @@ WTErr WCMRPortAudioDevice::SetCurrentSamplingRate (int newRate)
 	//make the change...
 	m_CurrentSamplingRate = newRate;
 	PaError paErr = PaAsio_SetStreamSampleRate (m_PortAudioStream, m_CurrentSamplingRate);
-	std::cout << "Sleeping after sample rate change " << std::endl;
 	Pa_Sleep(PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS); // sleep some time to make sure the change has place
 
 	if (paErr != paNoError)
