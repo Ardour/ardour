@@ -74,6 +74,75 @@ static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
 FILE * AUPluginInfo::_crashlog_fd = NULL;
 
+
+static void au_blacklist (std::string id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	FILE * blacklist_fd = NULL;
+	if (! (blacklist_fd = fopen(fn.c_str(), "a"))) {
+		PBD::error << "Cannot append to AU blacklist for '"<< id <<"'\n";
+		return;
+	}
+	assert(id.find("\n") == string::npos);
+	fprintf(blacklist_fd, "%s\n", id.c_str());
+	::fclose(blacklist_fd);
+}
+
+static void au_unblacklist (std::string id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		PBD::warning << "Expected Blacklist file does not exist.\n";
+		return;
+	}
+
+	std::string bl;
+	std::ifstream ifs(fn.c_str());
+	bl.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+	::g_unlink(fn.c_str());
+
+	assert(id.find("\n") == string::npos);
+
+	id += "\n"; // add separator
+	const size_t rpl = bl.find(id);
+	if (rpl != string::npos) {
+		bl.replace(rpl, id.size(), "");
+	}
+	if (bl.empty()) {
+		return;
+	}
+
+	FILE * blacklist_fd = NULL;
+	if (! (blacklist_fd = fopen(fn.c_str(), "w"))) {
+		PBD::error << "Cannot open AU blacklist.\n";
+		return;
+	}
+	fprintf(blacklist_fd, "%s", bl.c_str());
+	::fclose(blacklist_fd);
+}
+
+static bool is_blacklisted (std::string id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+	std::string bl;
+	std::ifstream ifs(fn.c_str());
+	bl.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+
+	assert(id.find("\n") == string::npos);
+
+	id += "\n"; // add separator
+	const size_t rpl = bl.find(id);
+	if (rpl != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
 static OSStatus
 _render_callback(void *userData,
 		 AudioUnitRenderActionFlags *ioActionFlags,
@@ -443,6 +512,7 @@ void
 AUPlugin::init ()
 {
 	OSErr err;
+	CFStringRef itemName;
 
 	/* these keep track of *configured* channel set up,
 	   not potential set ups.
@@ -450,6 +520,20 @@ AUPlugin::init ()
 
 	input_channels = -1;
 	output_channels = -1;
+	{
+		CAComponentDescription temp;
+		GetComponentInfo (comp.get()->Comp(), &temp, NULL, NULL, NULL);
+		CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
+		CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
+		CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
+		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
+				compTypeString, compManufacturerString, compSubTypeString);
+		if (compTypeString != NULL) CFRelease(compTypeString);
+		if (compSubTypeString != NULL) CFRelease(compSubTypeString);
+		if (compManufacturerString != NULL) CFRelease(compManufacturerString);
+	}
+
+	au_blacklist(CFStringRefToStdString(itemName));
 
 	try {
 		DEBUG_TRACE (DEBUG::AudioUnits, "opening AudioUnit\n");
@@ -515,6 +599,9 @@ AUPlugin::init ()
 	discover_factory_presets ();
 
 	// Plugin::setup_controls ();
+
+	au_blacklist(CFStringRefToStdString(itemName));
+	if (itemName != NULL) CFRelease(itemName);
 }
 
 void
@@ -2314,12 +2401,14 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 	while (comp != NULL) {
 		CAComponentDescription temp;
 		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
+		CFStringRef itemName = NULL;
 
 		{
+			if (itemName != NULL) CFRelease(itemName);
 			CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
 			CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
 			CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
-			CFStringRef itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
+			itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
 					compTypeString, compManufacturerString, compSubTypeString);
 			au_crashlog(string_compose("Scanning ID: %1", CFStringRefToStdString(itemName)));
 			if (compTypeString != NULL)
@@ -2328,6 +2417,12 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 				CFRelease(compSubTypeString);
 			if (compManufacturerString != NULL)
 				CFRelease(compManufacturerString);
+		}
+
+		if (is_blacklisted(CFStringRefToStdString(itemName))) {
+			info << string_compose (_("Skipped blacklisted AU plugin %1 "), CFStringRefToStdString(itemName)) << endmsg;
+			comp = FindNextComponent (comp, &desc);
+			continue;
 		}
 
 		AUPluginInfoPtr info (new AUPluginInfo
@@ -2372,6 +2467,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			break;
 		}
 
+		au_blacklist(CFStringRefToStdString(itemName));
 		AUPluginInfo::get_names (temp, info->name, info->creator);
 		ARDOUR::PluginScanMessage(_("AU"), info->name, false);
 		au_crashlog(string_compose("Plugin: %1", info->name));
@@ -2427,8 +2523,10 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			error << string_compose (_("Cannot get I/O configuration info for AU %1"), info->name) << endmsg;
 		}
 
+		au_unblacklist(CFStringRefToStdString(itemName));
 		au_crashlog("Success.");
 		comp = FindNextComponent (comp, &desc);
+		if (itemName != NULL) CFRelease(itemName); itemName = NULL;
 	}
 	au_crashlog(string_compose("End AU discovery for Type: %1", (int)desc.componentType));
 }
