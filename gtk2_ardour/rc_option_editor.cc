@@ -1098,10 +1098,27 @@ public:
 #endif // any VST
 
 #ifdef AUDIOUNIT_SUPPORT
+		ss.str("");
+		ss << "<b>" << _("Audio Unit") << "</b>";
+		l = manage (left_aligned_label (ss.str()));
+		l->set_use_markup (true);
+		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
+		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
+
 		t->attach (_discover_au_on_start, 0, 2, n, n+1); ++n;
 		_discover_au_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_au_on_start_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_discover_au_on_start,
 					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
+
+		++n;
+		b = manage (new Button (_("Clear AU Cache")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_au_cache_clicked));
+		t->attach (*b, 0, 1, n, n+1, FILL);
+
+		b = manage (new Button (_("Clear AU Blacklist")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_au_blacklist_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL);
+		++n;
 #endif
 
 		_box->pack_start (*t,true,true);
@@ -1169,6 +1186,15 @@ private:
 	void clear_vst_blacklist_clicked () {
 		PluginManager::instance().clear_vst_blacklist();
 	}
+
+	void clear_au_cache_clicked () {
+		PluginManager::instance().clear_au_cache();
+	}
+
+	void clear_au_blacklist_clicked () {
+		PluginManager::instance().clear_au_blacklist();
+	}
+
 
 	void edit_vst_path_clicked () {
 		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
