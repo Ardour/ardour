@@ -1897,6 +1897,8 @@ AUPlugin::do_save_preset (string preset_name)
 
 	CFRelease(propertyList);
 
+	user_preset_map[preset_name] = user_preset_path;;
+
 	return string ("file:///") + user_preset_path;
 }
 

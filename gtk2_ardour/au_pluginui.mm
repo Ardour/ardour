@@ -153,8 +153,15 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	smaller_hbox->set_spacing (6);
 	smaller_hbox->pack_start (preset_label, false, false, 4);
+	smaller_hbox->pack_start (_preset_modified, false, false);
 	smaller_hbox->pack_start (_preset_combo, false, false);
+	smaller_hbox->pack_start (add_button, false, false);
+#if 0
+	/* Ardour does not currently allow to overwrite existing presets
+	 * see save_property_list() in audio_unit.cc
+	 */
 	smaller_hbox->pack_start (save_button, false, false);
+#endif
 #if 0
 	/* one day these might be useful with an AU plugin, but not yet */
 	smaller_hbox->pack_start (automation_mode_label, false, false);
