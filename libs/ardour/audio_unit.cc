@@ -1666,21 +1666,36 @@ AUPlugin::parameter_is_audio (uint32_t) const
 }
 
 bool
-AUPlugin::parameter_is_control (uint32_t) const
+AUPlugin::parameter_is_control (uint32_t param) const
 {
-	return true;
-}
-
-bool
-AUPlugin::parameter_is_input (uint32_t) const
-{
-	return true;
-}
-
-bool
-AUPlugin::parameter_is_output (uint32_t) const
-{
+	assert(param < descriptors.size());
+	if (descriptors[param].automatable) {
+		/* corrently ardour expects all controls to be automatable
+		 * IOW ardour GUI elements mandate an Evoral::Parameter
+		 * for all input+control ports.
+		 */
+		return true;
+	}
 	return false;
+}
+
+bool
+AUPlugin::parameter_is_input (uint32_t param) const
+{
+	/* AU params that are both readable and writeable,
+	 * are listed in kAudioUnitScope_Global
+	 */
+	return (descriptors[param].scope == kAudioUnitScope_Input || descriptors[param].scope == kAudioUnitScope_Global);
+}
+
+bool
+AUPlugin::parameter_is_output (uint32_t param) const
+{
+	assert(param < descriptors.size());
+	// TODO check if ardour properly handles ports
+	// that report is_input + is_output == true
+	// -> add || descriptors[param].scope == kAudioUnitScope_Global
+	return (descriptors[param].scope == kAudioUnitScope_Output);
 }
 
 void
