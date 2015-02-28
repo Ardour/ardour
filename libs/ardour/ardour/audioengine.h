@@ -104,6 +104,7 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	bool           in_process_thread ();
 	uint32_t       process_thread_count ();
 
+	int            backend_reset_requested();
 	void           request_backend_reset();
 	void           request_device_list_update();
 	void           launch_device_control_app();

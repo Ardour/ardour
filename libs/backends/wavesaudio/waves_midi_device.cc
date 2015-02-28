@@ -124,32 +124,53 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 void
 WavesMidiDevice::close ()
 {
-    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::close ():" << name () << std::endl;
-    WavesMidiEvent *waves_midi_event;
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::close (): %1\n", name ()));
+        WavesMidiEvent *waves_midi_event;
+        
+        if (_input_pm_stream) {
+                PmError err = Pm_Close (_input_pm_stream);
 
-    if (_input_pm_stream) {
-        Pm_Close (_input_pm_stream);
-        while (1 == Pm_Dequeue (_input_queue, &waves_midi_event)) {
-            delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+                if (err != pmNoError) {
+	                std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+	                char* err_msg = new char[256];
+	                Pm_GetHostErrorText(err_msg, 256);
+	                std::cerr << "Error: " << err_msg << std::endl;
+	                std::cerr << "Aborting!" << std::endl;
+	                Pm_Abort (_input_pm_stream);
+                }
+
+                while (1 == Pm_Dequeue (_input_queue, &waves_midi_event)) {
+                        delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+                }
+
+                Pm_QueueDestroy (_input_queue);
+                _input_queue = NULL;
+                _input_pm_stream = NULL;
+                _pm_input_id = pmNoDevice;
         }
+        
+        
+        if ( _output_pm_stream ) {
+                PmError err = Pm_Close (_output_pm_stream);
 
-        Pm_QueueDestroy (_input_queue);
-        _input_queue = NULL;
-        _input_pm_stream = NULL;
-        _pm_input_id = pmNoDevice;
-    }
+                if (err != pmNoError) {
+	                std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
+	                char* err_msg = new char[256];
+	                Pm_GetHostErrorText(err_msg, 256);
+	                std::cerr << "Error: " << err_msg << std::endl;
+	                std::cerr << "Aborting!" << std::endl;
+	                Pm_Abort (_output_pm_stream);
+                }
+                
+                while (1 == Pm_Dequeue (_output_queue, &waves_midi_event)) {
+                        delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+                }
 
-
-    if ( _output_pm_stream ) {
-        Pm_Close (_output_pm_stream);
-        while (1 == Pm_Dequeue (_output_queue, &waves_midi_event)) {
-            delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
+                Pm_QueueDestroy (_output_queue);
+                _output_queue = NULL;
+                _output_pm_stream = NULL;
+                _pm_output_id = pmNoDevice;
         }
-        Pm_QueueDestroy (_output_queue);
-        _output_queue = NULL;
-        _output_pm_stream = NULL;
-        _pm_output_id = pmNoDevice;
-    }
 }
 
 void
