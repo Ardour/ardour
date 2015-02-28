@@ -355,7 +355,7 @@ Meterbridge::on_size_allocate (Gtk::Allocation& a)
 	const Gtk::Scrollbar * hsc = scroller.get_hscrollbar();
 
 	/* switch left/right edge patterns depending on horizontal scroll-position */
-	if (scroller.get_hscrollbar_visible() && hsc) {
+	if (scroller.get_hscrollbar()->get_visible() && hsc) {
 		if (!scroll_connection.connected()) {
 			scroll_connection = scroller.get_hscrollbar()->get_adjustment()->signal_value_changed().connect(sigc::mem_fun (*this, &Meterbridge::on_scroll));
 			scroller.get_hscrollbar()->get_adjustment()->signal_changed().connect(sigc::mem_fun (*this, &Meterbridge::on_scroll));
