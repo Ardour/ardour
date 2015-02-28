@@ -431,7 +431,8 @@ AudioEngine::do_reset_backend()
             g_atomic_int_dec_and_test (&_hw_reset_request_count);
 
 			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;
-
+            DeviceResetStarted(); // notify about device reset to be started
+            
             // backup the device name
             std::string name = _backend->device_name ();
 
@@ -444,8 +445,13 @@ AudioEngine::do_reset_backend()
 				
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
+                DeviceResetFinished(); // notify about device reset finish
+            
             } else {
-				DeviceError();
+            
+                DeviceResetFinished(); // notify about device reset finish
+				// we've got an error
+                DeviceError();
 			}
             
 			std::cout << "AudioEngine::RESET::Done." << std::endl;
