@@ -355,7 +355,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\localeguard.cc"
+				RelativePath="..\locale_guard.cc"
 				>
 			</File>
 			<File
@@ -705,7 +705,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pbd\localeguard.h"
+				RelativePath="..\pbd\locale_guard.h"
 				>
 			</File>
 			<File
