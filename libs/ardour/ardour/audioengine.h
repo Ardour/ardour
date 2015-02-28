@@ -110,6 +110,7 @@ public:
 
 	void           launch_device_control_app();
 
+	int            backend_reset_requested();
 	void		   request_backend_reset();
     void           request_device_list_update();
 

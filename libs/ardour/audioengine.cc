@@ -408,6 +408,11 @@ AudioEngine::request_backend_reset()
     _hw_reset_condition.signal ();
 }
 
+int
+AudioEngine::backend_reset_requested()
+{
+	return g_atomic_int_get (&_hw_reset_request_count);
+}
 
 void
 AudioEngine::do_reset_backend()
@@ -423,7 +428,6 @@ AudioEngine::do_reset_backend()
 			_reset_request_lock.unlock();
             
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
-
             g_atomic_int_dec_and_test (&_hw_reset_request_count);
 
 			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;

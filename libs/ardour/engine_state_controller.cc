@@ -1727,25 +1727,11 @@ EngineStateController::push_current_state_to_backend(bool start)
 			DeviceError();
 		}
 
-        //if (backend->set_input_channels (get_input_channels())) {
-        //	error << string_compose (_("Cannot set input channels to %1"), get_input_channels()) << endmsg;
-        //	return -1;
-        //}
-        
-        //if (backend->set_output_channels (get_output_channels())) {
-        //	error << string_compose (_("Cannot set output channels to %1"), get_output_channels()) << endmsg;
-        //	return -1;
-        //}
-        
-        //if (backend->set_systemic_input_latency (get_input_latency())) {
-        //	error << string_compose (_("Cannot set input latency to %1"), get_input_latency()) << endmsg;
-        //	return -1;
-        //}
-        
-        //if (backend->set_systemic_output_latency (get_output_latency())) {
-        //	error << string_compose (_("Cannot set output latency to %1"), get_output_latency()) << endmsg;
-        //	return -1;
-        //}
+		if (AudioEngine::instance()->backend_reset_requested() ) {
+			// device asked for reset, do not start engine now
+			// free sate lock and let Engine reset the device as it's required
+			return true;
+		}
     }
     
 	if(start || (was_running && state_changed) ) {
