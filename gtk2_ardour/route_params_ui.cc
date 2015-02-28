@@ -100,10 +100,10 @@ RouteParams_UI::RouteParams_UI ()
 
 	list_vpacker.pack_start (route_select_frame, true, true);
 
-	notebook.pages().push_back (TabElem (input_frame, _("Inputs")));
-	notebook.pages().push_back (TabElem (output_frame, _("Outputs")));
-	notebook.pages().push_back (TabElem (redir_hpane, _("Plugins, Inserts & Sends")));
-	notebook.pages().push_back (TabElem (latency_frame, _("Latency")));
+	notebook.append_page (input_frame, _("Inputs"));
+	notebook.append_page (output_frame, _("Outputs"));
+	notebook.append_page (redir_hpane, _("Plugins, Inserts & Sends"));
+	notebook.append_page (latency_frame, _("Latency"));
 
 	notebook.set_name ("InspectorNotebook");
 

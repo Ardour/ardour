@@ -835,7 +835,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		l->show();
 		tab->show();
 		img->hide();
-		pages.pages ().push_back (Notebook_Helpers::TabElem (*vb, *tab));
+		pages.append_page (*vb, *tab);
 		pages.signal_switch_page().connect (sigc::mem_fun (*this, &ExportReport::on_switch_page));
 
 		if (png_surface) {

@@ -244,9 +244,9 @@ EngineControl::EngineControl ()
 
 	/* pack it all up */
 
-	notebook.pages().push_back (TabElem (basic_vbox, _("Audio")));
-	notebook.pages().push_back (TabElem (lm_vbox, _("Latency")));
-	notebook.pages().push_back (TabElem (midi_vbox, _("MIDI")));
+	notebook.append_page (basic_vbox, _("Audio"));
+	notebook.append_page (lm_vbox, _("Latency"));
+	notebook.append_page (midi_vbox, _("MIDI"));
 	notebook.set_border_width (12);
 
 	notebook.set_show_tabs (false);

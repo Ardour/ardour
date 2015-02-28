@@ -67,7 +67,7 @@ LuaScriptManager::LuaScriptManager ()
 	vbox->pack_end (*edit_box, false, false);
 	vbox->show_all ();
 
-	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Action Scripts"));
+	pages.append_page (*vbox, "Action Scripts");
 
 	/* action hooks page */
 
@@ -96,8 +96,7 @@ LuaScriptManager::LuaScriptManager ()
 	vbox->pack_end (*edit_box, false, false);
 	vbox->show_all ();
 
-	pages.pages ().push_back (Notebook_Helpers::TabElem (*vbox, "Action Hooks"));
-
+	pages.append_page (*vbox, "Action Hooks");
 
 	add (pages);
 	pages.show();
