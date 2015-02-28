@@ -612,7 +612,7 @@ AUPlugin::discover_parameters ()
 			d.toggled = (info.unit == kAudioUnitParameterUnit_Boolean) ||
 				(d.integer_step && ((d.upper - d.lower) == 1.0));
 			d.sr_dependent = (info.unit == kAudioUnitParameterUnit_SampleFrames);
-			d.automatable = !d.toggled &&
+			d.automatable = /* !d.toggled && -- ardour can automate toggles, can AU ? */
 				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
 				(info.flags & kAudioUnitParameterFlag_IsWritable);
 
