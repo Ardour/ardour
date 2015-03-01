@@ -95,7 +95,7 @@ EngineControl::EngineControl ()
 	, started_at_least_once (false)
 {
 	using namespace Notebook_Helpers;
-	vector<string> strings;
+	vector<string> backend_names;
 	Label* label;
 	AttachOptions xopt = AttachOptions (FILL|EXPAND);
 	int row;
@@ -113,10 +113,10 @@ EngineControl::EngineControl ()
 	}
 
 	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
-		strings.push_back ((*b)->name);
+		backend_names.push_back ((*b)->name);
 	}
 
-	set_popdown_strings (backend_combo, strings);
+	set_popdown_strings (backend_combo, backend_names);
 	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
 
 	/* setup basic packing characteristics for the table used on the main
@@ -280,8 +280,10 @@ EngineControl::EngineControl ()
 
 	if (audio_setup) {
 		set_state (*audio_setup);
-	} else {
-		backend_combo.set_active_text (strings.front());
+	}
+
+	if (backend_combo.get_active_text().empty()) {
+		backend_combo.set_active_text (backend_names.front());
 	}
 
 	{
@@ -289,6 +291,15 @@ EngineControl::EngineControl ()
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 		backend_changed ();
 	}
+
+	/* in case the setting the backend failed, e.g. stale config, from set_state(), try again */
+	if (0 == ARDOUR::AudioEngine::instance()->current_backend()) {
+		backend_combo.set_active_text (backend_names.back());
+		/* ignore: don't save state */
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+		backend_changed ();
+	}
+
 
 	/* Connect to signals */
 
@@ -709,6 +720,7 @@ EngineControl::backend_changed ()
 
 	if (!(backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, "ardour", ""))) {
 		/* eh? setting the backend failed... how ? */
+		/* A: stale config contains a backend that does not exist in current build */
 		return;
 	}
 
