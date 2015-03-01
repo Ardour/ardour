@@ -477,12 +477,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::HBox               _editor_transport_box;
 	Gtk::HBox                transport_hbox;
 	Gtk::Fixed               transport_base;
-	Gtk::Fixed               transport_button_base;
-	Gtk::Frame               transport_button_frame;
-	Gtk::HBox                transport_button_hbox;
-	Gtk::VBox                transport_button_vbox;
-	Gtk::HBox                transport_option_button_hbox;
-	Gtk::VBox                transport_option_button_vbox;
 
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {
