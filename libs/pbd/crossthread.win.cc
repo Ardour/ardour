@@ -152,11 +152,38 @@ CrossThreadChannel::deliver (char msg)
 	return status;
 }
 
+bool
+CrossThreadChannel::poll_for_request()
+{
+	// windows before Vista has no poll
+	while(true) {
+		fd_set rfds;
+		FD_ZERO(&rfds);
+		FD_SET(receive_socket, &rfds);
+		if ((select(receive_socket+1, &rfds, NULL, NULL, NULL)) < 0) {
+			if (errno == EINTR) {
+				continue;
+			}
+			break;
+		}
+		if(FD_ISSET(receive_socket, &rfds)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int 
-CrossThreadChannel::receive (char& msg)
+CrossThreadChannel::receive (char& msg, bool wait)
 {
 	gsize read = 0;
 	GError *g_error = 0;
+
+	if (wait) {
+		if (!poll_for_request ()) {
+			return -1;
+		}
+	}
 	
 	// fetch the message from the channel.
 	GIOStatus g_status = g_io_channel_read_chars (receive_channel, &msg, sizeof(msg), &read, &g_error);
