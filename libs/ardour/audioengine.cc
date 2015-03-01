@@ -403,52 +403,51 @@ AudioEngine::backend_reset_requested()
 void
 AudioEngine::do_reset_backend()
 {
-    SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
+	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
     
-    Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
     
-    while (!_stop_hw_reset_processing) {
+	while (!_stop_hw_reset_processing) {
         
-        if (_hw_reset_request_count && _backend) {
-
+		if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
+	        
 			_reset_request_lock.unlock();
-            
+	        
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
-            g_atomic_int_dec_and_test (&_hw_reset_request_count);
-
-			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;
-
-            // backup the device name
-            std::string name = _backend->device_name ();
-            
+			g_atomic_int_dec_and_test (&_hw_reset_request_count);
+	        
+			std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
+			DeviceResetStarted(); // notify about device reset to be started
+	        
+			// backup the device name
+			std::string name = _backend->device_name ();
+	        
 			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
 			stop();
-
+	        
 			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
 			if ( 0 == _backend->reset_device () ) {
-				
+		        
 				std::cout << "AudioEngine::RESET::Starting engine..." << std::endl;
 				start ();
-
+		        
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
 			} else {
 				DeviceError();
 			}
-            
+			
 			std::cout << "AudioEngine::RESET::Done." << std::endl;
 
-            _reset_request_lock.lock();
+			_reset_request_lock.lock();
             
-        } else {
+		} else {
             
-            _hw_reset_condition.wait (_reset_request_lock);
+			_hw_reset_condition.wait (_reset_request_lock);
             
-        }
-    }
+		}
+	}
 }
-
-
 void
 AudioEngine::request_device_list_update()
 {
