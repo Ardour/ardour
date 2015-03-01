@@ -444,6 +444,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void engine_halted (const char* reason, bool free_reason);
 	void engine_stopped ();
 	void engine_running ();
+	void device_reset_started ();
+	void device_reset_finished ();
 
 	void use_config ();
 
@@ -477,6 +479,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::HBox               _editor_transport_box;
 	Gtk::HBox                transport_hbox;
 	Gtk::Fixed               transport_base;
+	WavesDialog _audio_engine_reset_info_dialog;
 
 	struct TransportControllable : public PBD::Controllable {
 	    enum ToggleType {

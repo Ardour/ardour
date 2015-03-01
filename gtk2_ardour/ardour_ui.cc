@@ -212,6 +212,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
+	, _audio_engine_reset_info_dialog ("audio_engine_reset_info_dialog.xml")
 //	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 //	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, _feedback_exists (false)
@@ -436,6 +437,8 @@ void
 ARDOUR_UI::attach_to_engine ()
 {
 	AudioEngine::instance()->Running.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_running, this), gui_context());
+	AudioEngine::instance()->DeviceResetStarted.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::device_reset_started, this), gui_context());
+	AudioEngine::instance()->DeviceResetFinished.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::device_reset_finished, this), gui_context());
 	ARDOUR::Port::set_connecting_blocked (ARDOUR_COMMAND_LINE::no_connect_ports);
 }
 
@@ -459,6 +462,19 @@ ARDOUR_UI::engine_running ()
     update_disk_usage ();
 	update_cpu_load ();
     populate_sample_rate_dropdown ();
+}
+
+void
+ARDOUR_UI::device_reset_started ()
+{
+	_audio_engine_reset_info_dialog.set_keep_above (true);
+    _audio_engine_reset_info_dialog.show ();
+}
+
+void
+ARDOUR_UI::device_reset_finished ()
+{
+	_audio_engine_reset_info_dialog.hide ();
 }
 
 void

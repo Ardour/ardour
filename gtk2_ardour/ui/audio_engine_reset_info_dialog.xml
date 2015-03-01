@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Tracks Live" resizeable="False" CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#BFBFBF"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  
+  <style name="generic_button"
+         winfont ="Arial Bold 12"
+         macfont ="Helvetica Bold 12"
+         fgnormal="#6D6E72"
+         bgnormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         visible="false"
+         noshowall="true"
+         width="80"
+         height="22"/>
+
+  <EventBox bgnormal="#EDECE8" height="50" width="450">
+    <Label id="message_label"
+            style="generic_control"
+            text="Restarting Audio Engine. . ."
+            fgnormal="#6D6E72"
+            horzalignment="center"
+            justify="center"/>
+  </EventBox>
+
+</Dialog>
