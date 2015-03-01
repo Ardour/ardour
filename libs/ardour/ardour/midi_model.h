@@ -126,7 +126,6 @@ public:
 
 		static Variant::Type value_type (Property prop);
 
-	private:
 		struct NoteChange {
 			NoteDiffCommand::Property property;
 			NotePtr note;
@@ -135,12 +134,17 @@ public:
 			Variant new_value;
 		};
 
-		typedef std::list<NoteChange> ChangeList;
-		ChangeList _changes;
-
+		typedef std::list<NoteChange>                                    ChangeList;
 		typedef std::list< boost::shared_ptr< Evoral::Note<TimeType> > > NoteList;
-		NoteList _added_notes;
-		NoteList _removed_notes;
+
+		const ChangeList& changes()       const { return _changes; }
+		const NoteList&   added_notes()   const { return _added_notes; }
+		const NoteList&   removed_notes() const { return _removed_notes; }
+
+	private:
+		ChangeList _changes;
+		NoteList   _added_notes;
+		NoteList   _removed_notes;
 
 		std::set<NotePtr> side_effect_removals;
 
@@ -285,6 +289,8 @@ public:
 	void insert_silence_at_start (TimeType);
 	void transpose (TimeType, TimeType, int);
 
+	std::set<WeakNotePtr>& active_notes() { return _active_notes; }
+
 protected:
 	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
 
@@ -302,7 +308,6 @@ private:
 
 public:
 	WriteLock edit_lock();
-	WriteLock write_lock();
 
 private:
 	friend class DeltaCommand;
@@ -319,6 +324,8 @@ private:
 	// We cannot use a boost::shared_ptr here to avoid a retain cycle
 	boost::weak_ptr<MidiSource> _midi_source;
 	InsertMergePolicy _insert_merge_policy;
+
+	std::set<WeakNotePtr> _active_notes;
 };
 
 } /* namespace ARDOUR */

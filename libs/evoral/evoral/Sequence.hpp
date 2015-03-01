@@ -82,14 +82,15 @@ protected:
 
 public:
 
-	typedef typename boost::shared_ptr<Evoral::Note<Time> >  NotePtr;
-	typedef typename boost::shared_ptr<const Evoral::Note<Time> >  constNotePtr;
+	typedef typename boost::shared_ptr<Evoral::Note<Time> >       NotePtr;
+	typedef typename boost::weak_ptr<Evoral::Note<Time> >         WeakNotePtr;
+	typedef typename boost::shared_ptr<const Evoral::Note<Time> > constNotePtr;
 
 	typedef boost::shared_ptr<Glib::Threads::RWLock::ReaderLock> ReadLock;
-	typedef boost::shared_ptr<WriteLockImpl>            WriteLock;
+	typedef boost::shared_ptr<WriteLockImpl>                     WriteLock;
 
 	virtual ReadLock  read_lock() const { return ReadLock(new Glib::Threads::RWLock::ReaderLock(_lock)); }
-        virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
+	virtual WriteLock write_lock()      { return WriteLock(new WriteLockImpl(_lock, _control_lock)); }
 
 	void clear();
 
@@ -182,7 +183,7 @@ public:
 	OverlapPitchResolution overlap_pitch_resolution() const { return _overlap_pitch_resolution; }
 	void set_overlap_pitch_resolution(OverlapPitchResolution opr);
 
-	void set_notes (const typename Sequence<Time>::Notes& n);
+	void set_notes (const Sequence<Time>::Notes& n);
 
 	typedef boost::shared_ptr< Event<Time> > SysExPtr;
 	typedef boost::shared_ptr<const Event<Time> > constSysExPtr;
@@ -220,13 +221,15 @@ public:
 	class LIBEVORAL_API const_iterator {
 	public:
 		const_iterator();
-		const_iterator(const Sequence<Time>& seq, Time t, bool, std::set<Evoral::Parameter> const &);
-		~const_iterator();
+		const_iterator(const Sequence<Time>&              seq,
+		               Time                               t,
+		               bool                               force_discrete,
+		               const std::set<Evoral::Parameter>& filtered,
+		               const std::set<WeakNotePtr>*       active_notes=NULL);
 
 		inline bool valid() const { return !_is_end && _event; }
-		//inline bool locked() const { return _locked; }
 
-		void invalidate();
+		void invalidate(std::set<WeakNotePtr>* notes);
 
 		const Event<Time>& operator*()  const { return *_event;  }
 		const boost::shared_ptr< Event<Time> > operator->() const  { return _event; }
@@ -267,10 +270,11 @@ public:
 	};
 
 	const_iterator begin (
-		Time t = Time(),
-		bool force_discrete = false,
-		std::set<Evoral::Parameter> const & f = std::set<Evoral::Parameter> ()) const {
-		return const_iterator (*this, t, force_discrete, f);
+		Time                               t              = Time(),
+		bool                               force_discrete = false,
+		const std::set<Evoral::Parameter>& f              = std::set<Evoral::Parameter>(),
+		const std::set<WeakNotePtr>*       active_notes   = NULL) const {
+		return const_iterator (*this, t, force_discrete, f, active_notes);
 	}
 
 	const const_iterator& end() const { return _end_iter; }

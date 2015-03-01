@@ -49,6 +49,8 @@ public:
 #ifdef EVORAL_EVENT_ALLOC
 	Event (EventType type=0, Time time=Time(), uint32_t size=0, uint8_t* buf=NULL, bool alloc=false);
 
+	Event (EventType type, Time time, uint32_t size, const uint8_t* buf);
+
 	/** Copy \a copy.
 	 *
 	 * If \a alloc is true, the buffer will be copied and this method

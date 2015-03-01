@@ -53,7 +53,6 @@ using namespace PBD;
 
 namespace ARDOUR {
 	namespace Properties {
-		PBD::PropertyDescriptor<void*>         midi_data;
 		PBD::PropertyDescriptor<Evoral::Beats> start_beats;
 		PBD::PropertyDescriptor<Evoral::Beats> length_beats;
 	}
@@ -62,8 +61,6 @@ namespace ARDOUR {
 void
 MidiRegion::make_property_quarks ()
 {
-	Properties::midi_data.property_id = g_quark_from_static_string (X_("midi-data"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for midi-data = %1\n", Properties::midi_data.property_id));
 	Properties::start_beats.property_id = g_quark_from_static_string (X_("start-beats"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start-beats = %1\n", Properties::start_beats.property_id));
 	Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
@@ -245,11 +242,16 @@ MidiRegion::master_read_at (MidiRingBuffer<framepos_t>& out, framepos_t position
 }
 
 framecnt_t
-MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>& dst, framepos_t position, framecnt_t dur, uint32_t chan_n,
-		      NoteMode mode, MidiStateTracker* tracker) const
+MidiRegion::_read_at (const SourceList&              /*srcs*/,
+                      Evoral::EventSink<framepos_t>& dst,
+                      framepos_t                     position,
+                      framecnt_t                     dur,
+                      uint32_t                       chan_n,
+                      NoteMode                       mode,
+                      MidiStateTracker*              tracker) const
 {
 	frameoffset_t internal_offset = 0;
-	framecnt_t to_read         = 0;
+	framecnt_t    to_read         = 0;
 
 	/* precondition: caller has verified that we cover the desired section */
 
@@ -408,24 +410,6 @@ MidiRegion::model_changed ()
 	midi_source()->AutomationStateChanged.connect_same_thread (
 		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
-
-	model()->ContentsChanged.connect_same_thread (
-	        _model_contents_connection, boost::bind (&MidiRegion::model_contents_changed, this));
-}
-
-void
-MidiRegion::model_contents_changed ()
-{
-	{
-		/* Invalidate source iterator to force reading new contents even if the
-		   calls to read() progress linearly.  Try-lock only to avoid deadlock
-		   when called while writing with the source already locked. */
-		Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
-		if (lm.locked()) {
-			midi_source(0)->invalidate (lm);
-		}
-	}
-	send_change (PropertyChange (Properties::midi_data));
 }
 
 void
@@ -448,6 +432,7 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	*/
 	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
 	if (lm.locked()) {
+		/* TODO: This is too aggressive, we need more fine-grained invalidation. */
 		midi_source(0)->invalidate (lm);
 	}
 }

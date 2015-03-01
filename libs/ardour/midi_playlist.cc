@@ -17,21 +17,22 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include <cassert>
-
 #include <algorithm>
+#include <cassert>
+#include <cstdlib>
 #include <iostream>
 #include <utility>
 
-#include <stdlib.h>
-
 #include "evoral/EventList.hpp"
 
+#include "ardour/beats_frames_converter.h"
 #include "ardour/debug.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
 #include "ardour/midi_state_tracker.h"
+#include "ardour/session.h"
 #include "ardour/types.h"
 
 #include "i18n.h"
@@ -43,6 +44,7 @@ using namespace std;
 MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 	: Playlist (session, node, DataType::MIDI, hidden)
 	, _note_mode(Sustained)
+	, _read_end(0)
 {
 #ifndef NDEBUG
 	const XMLProperty* prop = node.property("type");
@@ -61,12 +63,14 @@ MidiPlaylist::MidiPlaylist (Session& session, const XMLNode& node, bool hidden)
 MidiPlaylist::MidiPlaylist (Session& session, string name, bool hidden)
 	: Playlist (session, name, DataType::MIDI, hidden)
 	, _note_mode(Sustained)
+	, _read_end(0)
 {
 }
 
 MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, string name, bool hidden)
 	: Playlist (other, name, hidden)
 	, _note_mode(other->_note_mode)
+	, _read_end(0)
 {
 }
 
@@ -77,6 +81,7 @@ MidiPlaylist::MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
                             bool                                  hidden)
 	: Playlist (other, start, dur, name, hidden)
 	, _note_mode(other->_note_mode)
+	, _read_end(0)
 {
 }
 
@@ -103,13 +108,18 @@ struct EventsSortByTimeAndType {
 framecnt_t
 MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framecnt_t dur, unsigned chan_n)
 {
+	typedef pair<MidiStateTracker*,framepos_t> TrackerInfo;
+
 	Playlist::RegionReadLock rl (this);
 
 	DEBUG_TRACE (DEBUG::MidiPlaylistIO,
 	             string_compose ("---- MidiPlaylist::read %1 .. %2 (%3 trackers) ----\n",
 	                             start, start + dur, _note_trackers.size()));
 
-	typedef pair<MidiStateTracker*,framepos_t> TrackerInfo;
+	/* First, emit any queued edit fixup events at start. */
+	for (NoteTrackers::iterator t = _note_trackers.begin(); t != _note_trackers.end(); ++t) {
+		t->second->fixer.emit(dst, _read_end, t->second->tracker);
+	}
 
 	/* Find relevant regions that overlap [start..end] */
 	const framepos_t                         end = start + dur - 1;
@@ -158,11 +168,11 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 		}
 
 		/* Get the existing note tracker for this region, or create a new one. */
-		NoteTrackers::iterator t           = _note_trackers.find (mr.get());
-		MidiStateTracker*      tracker     = NULL;
-		bool                   new_tracker = false;
+		NoteTrackers::iterator           t           = _note_trackers.find (mr.get());
+		bool                             new_tracker = false;
+		boost::shared_ptr<RegionTracker> tracker;
 		if (t == _note_trackers.end()) {
-			tracker = new MidiStateTracker;
+			tracker     = boost::shared_ptr<RegionTracker>(new RegionTracker);
 			new_tracker = true;
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
 			             string_compose ("\tPre-read %1 (%2 .. %3): new tracker\n",
@@ -171,13 +181,13 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 			tracker = t->second;
 			DEBUG_TRACE (DEBUG::MidiPlaylistIO,
 			             string_compose ("\tPre-read %1 (%2 .. %3): %4 active notes\n",
-			                             mr->name(), mr->position(), mr->last_frame(), tracker->on()));
+			                             mr->name(), mr->position(), mr->last_frame(), tracker->tracker.on()));
 		}
 
-		/** Read from region into target. */
-		mr->read_at (tgt, start, dur, chan_n, _note_mode, tracker);
+		/* Read from region into target. */
+		mr->read_at (tgt, start, dur, chan_n, _note_mode, &tracker->tracker);
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO,
-		             string_compose ("\tPost-read: %1 active notes\n", tracker->on()));
+		             string_compose ("\tPost-read: %1 active notes\n", tracker->tracker.on()));
 
 		if (find (ended.begin(), ended.end(), *i) != ended.end()) {
 			/* Region ended within the read range, so resolve any active notes
@@ -187,8 +197,7 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 			             string_compose ("\t%1 ended, resolve notes and delete (%2) tracker\n",
 			                             mr->name(), ((new_tracker) ? "new" : "old")));
 
-			tracker->resolve_notes (tgt, (*i)->last_frame());
-			delete tracker;
+			tracker->tracker.resolve_notes (tgt, (*i)->last_frame());
 			if (!new_tracker) {
 				_note_trackers.erase (t);
 			}
@@ -216,7 +225,33 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 	}
 
 	DEBUG_TRACE (DEBUG::MidiPlaylistIO, "---- End MidiPlaylist::read ----\n");
+	_read_end = start + dur;
 	return dur;
+}
+
+void
+MidiPlaylist::region_edited(boost::shared_ptr<Region>         region,
+                            const MidiModel::NoteDiffCommand* cmd)
+{
+	typedef MidiModel::NoteDiffCommand Command;
+
+	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
+	if (!mr || !_session.transport_rolling()) {
+		return;
+	}
+
+	/* Take write lock to prevent concurrency with read(). */
+	Playlist::RegionWriteLock lock(this);
+
+	NoteTrackers::iterator t = _note_trackers.find(mr.get());
+	if (t == _note_trackers.end()) {
+		return; /* Region is not currently active, nothing to do. */
+	}
+
+	/* Queue any necessary edit compensation events. */
+	t->second->fixer.prepare(
+		_session.tempo_map(), cmd, mr->position() - mr->start(),
+		_read_end, mr->midi_source()->model()->active_notes());
 }
 
 void
@@ -224,9 +259,6 @@ MidiPlaylist::reset_note_trackers ()
 {
 	Playlist::RegionWriteLock rl (this, false);
 
-	for (NoteTrackers::iterator n = _note_trackers.begin(); n != _note_trackers.end(); ++n) {
-		delete n->second;
-	}
 	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 reset all note trackers\n", name()));
 	_note_trackers.clear ();
 }
@@ -237,8 +269,7 @@ MidiPlaylist::resolve_note_trackers (Evoral::EventSink<framepos_t>& dst, framepo
 	Playlist::RegionWriteLock rl (this, false);
 
 	for (NoteTrackers::iterator n = _note_trackers.begin(); n != _note_trackers.end(); ++n) {
-		n->second->resolve_notes(dst, time);
-		delete n->second;
+		n->second->tracker.resolve_notes(dst, time);
 	}
 	DEBUG_TRACE (DEBUG::MidiTrackers, string_compose ("%1 resolve all note trackers\n", name()));
 	_note_trackers.clear ();
@@ -248,14 +279,7 @@ void
 MidiPlaylist::remove_dependents (boost::shared_ptr<Region> region)
 {
 	/* MIDI regions have no dependents (crossfades) but we might be tracking notes */
-	NoteTrackers::iterator t = _note_trackers.find (region.get());
-
-	/* GACK! THREAD SAFETY! */
-
-	if (t != _note_trackers.end()) {
-		delete t->second;
-		_note_trackers.erase (t);
-	}
+	_note_trackers.erase(region.get());
 }
 
 int
@@ -355,24 +379,3 @@ MidiPlaylist::contained_automation()
 
 	return ret;
 }
-
-
-bool
-MidiPlaylist::region_changed (const PBD::PropertyChange& what_changed, boost::shared_ptr<Region> region)
-{
-	if (in_flush || in_set_state) {
-		return false;
-	}
-
-	PBD::PropertyChange our_interests;
-	our_interests.add (Properties::midi_data);
-
-	bool parent_wants_notify = Playlist::region_changed (what_changed, region);
-
-	if (parent_wants_notify || what_changed.contains (our_interests)) {
-		notify_contents_changed ();
-	}
-
-	return true;
-}
-

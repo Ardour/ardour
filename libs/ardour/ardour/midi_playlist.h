@@ -23,8 +23,15 @@
 #include <vector>
 #include <list>
 
+#include <boost/utility.hpp>
+
 #include "ardour/ardour.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_state_tracker.h"
+#include "ardour/note_fixer.h"
 #include "ardour/playlist.h"
+#include "evoral/Beats.hpp"
+#include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
 
 namespace Evoral {
@@ -34,10 +41,10 @@ template<typename Time> class EventSink;
 namespace ARDOUR
 {
 
-class Session;
+class BeatsFramesConverter;
 class MidiRegion;
+class Session;
 class Source;
-class MidiStateTracker;
 
 template<typename T> class MidiRingBuffer;
 
@@ -80,6 +87,15 @@ public:
 
 	std::set<Evoral::Parameter> contained_automation();
 
+	/** Handle a region edit during read.
+	 *
+	 * This must be called before the command is applied to the model.  Events
+	 * are injected into the playlist output to compensate for edits to active
+	 * notes and maintain coherent output and tracker state.
+	 */
+	void region_edited(boost::shared_ptr<Region>         region,
+	                   const MidiModel::NoteDiffCommand* cmd);
+
 	/** Clear all note trackers. */
 	void reset_note_trackers ();
 
@@ -91,18 +107,24 @@ public:
 	void resolve_note_trackers (Evoral::EventSink<framepos_t>& dst, framepos_t time);
 
 protected:
-
 	void remove_dependents (boost::shared_ptr<Region> region);
 
 private:
+	typedef Evoral::Note<Evoral::Beats> Note;
+	typedef Evoral::Event<framepos_t>   Event;
+
+	struct RegionTracker : public boost::noncopyable {
+		MidiStateTracker tracker;  ///< Active note tracker
+		NoteFixer        fixer;    ///< Edit compensation
+	};
+
+	typedef std::map< Region*, boost::shared_ptr<RegionTracker> > NoteTrackers;
+
 	void dump () const;
 
-	bool region_changed (const PBD::PropertyChange&, boost::shared_ptr<Region>);
-
-	NoteMode _note_mode;
-
-	typedef std::map<Region*,MidiStateTracker*> NoteTrackers;
 	NoteTrackers _note_trackers;
+	NoteMode     _note_mode;
+	framepos_t   _read_end;
 };
 
 } /* namespace ARDOUR */

@@ -177,10 +177,10 @@ MidiSource::update_length (framecnt_t)
 }
 
 void
-MidiSource::invalidate (const Lock& lock)
+MidiSource::invalidate (const Lock& lock, std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes)
 {
 	_model_iter_valid = false;
-	_model_iter.invalidate();
+	_model_iter.invalidate(notes);
 }
 
 framecnt_t
@@ -201,10 +201,15 @@ MidiSource::midi_read (const Lock&                        lm,
 	if (_model) {
 		// Find appropriate model iterator
 		Evoral::Sequence<Evoral::Beats>::const_iterator& i = _model_iter;
-		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
+		const bool linear_read = _last_read_end != 0 && start == _last_read_end;
+		if (!linear_read || !_model_iter_valid) {
 			// Cached iterator is invalid, search for the first event past start
-			i                 = _model->begin(converter.from(start), false, filtered);
+			i = _model->begin(converter.from(start), false, filtered,
+			                  linear_read ? &_model->active_notes() : NULL);
 			_model_iter_valid = true;
+			if (!linear_read) {
+				_model->active_notes().clear();
+			}
 		}
 
 		_last_read_end = start + cnt;

@@ -33,6 +33,7 @@
 #include "pbd/stateful_diff_command.h"
 
 #include "ardour/midi_model.h"
+#include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
@@ -1066,6 +1067,9 @@ MidiRegionView::apply_diff (bool as_subcommand)
 		}
 	}
 
+	midi_view()->midi_track()->midi_playlist()->region_edited(
+		_region, _note_diff_command);
+
 	if (as_subcommand) {
 		_model->apply_command_as_subcommand (*trackview.session(), _note_diff_command);
 	} else {
@@ -1074,7 +1078,6 @@ MidiRegionView::apply_diff (bool as_subcommand)
 	}
 
 	_note_diff_command = 0;
-	midi_view()->midi_track()->playlist_modified();
 
 	if (add_or_remove) {
 		_marked_for_selection.clear();

@@ -32,11 +32,6 @@ class XMLNode;
 
 namespace ARDOUR {
 	namespace Properties {
-		/* this is pseudo-property: nothing has this as an actual
-		   property, but it allows us to signal changes to the
-		   MidiModel used by the MidiRegion
-		*/
-		LIBARDOUR_API extern PBD::PropertyDescriptor<void*> midi_data;
 		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> start_beats;
 		LIBARDOUR_API extern PBD::PropertyDescriptor<Evoral::Beats> length_beats;
 	}
@@ -141,7 +136,6 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void model_changed ();
 	void model_automation_state_changed (Evoral::Parameter const &);
-	void model_contents_changed ();
 
 	void set_start_beats_from_start_frames ();
 	void update_after_tempo_map_change ();

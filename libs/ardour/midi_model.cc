@@ -1612,25 +1612,19 @@ MidiModel::find_sysex (gint sysex_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
+	boost::shared_ptr<MidiSource> ms          = _midi_source.lock();
+	Glib::Threads::Mutex::Lock*   source_lock = 0;
 
-	Glib::Threads::Mutex::Lock* source_lock = new Glib::Threads::Mutex::Lock (ms->mutex());
-	ms->invalidate(*source_lock); // Release cached iterator's read lock on model
+	if (ms) {
+		/* Take source lock and invalidate iterator to release its lock on model.
+		   Add currently active notes to _active_notes so we can restore them
+		   if playback resumes at the same point after the edit. */
+		source_lock = new Glib::Threads::Mutex::Lock(ms->mutex());
+		ms->invalidate(*source_lock,
+		               ms->session().transport_rolling() ? &_active_notes : NULL);
+	}
+
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
-}
-
-/** Lock just the model, the source lock must already be held.
- * This should only be called from libardour/evoral places
- */
-MidiModel::WriteLock
-MidiModel::write_lock()
-{
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	assert (!ms->mutex().trylock ());
-	return WriteLock(new WriteLockImpl(0, _lock, _control_lock));
 }
 
 int

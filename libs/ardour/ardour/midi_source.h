@@ -154,8 +154,12 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	virtual void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false) = 0;
 	virtual void destroy_model(const Glib::Threads::Mutex::Lock& lock) = 0;
 
-	/** Reset cached information (like iterators) when things have changed. */
-	void invalidate(const Glib::Threads::Mutex::Lock& lock);
+	/** Reset cached information (like iterators) when things have changed.
+	 * @param lock Source lock, which must be held by caller.
+	 * @param notes If non-NULL, currently active notes are added to this set.
+	 */
+	void invalidate(const Glib::Threads::Mutex::Lock&                       lock,
+	                std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes=NULL);
 
 	void set_note_mode(const Glib::Threads::Mutex::Lock& lock, NoteMode mode);
 

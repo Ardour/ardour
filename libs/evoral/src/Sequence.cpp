@@ -72,7 +72,11 @@ Sequence<Time>::const_iterator::const_iterator()
 
 /** @param force_discrete true to force ControlLists to use discrete evaluation, otherwise false to get them to use their configured mode */
 template<typename Time>
-Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t, bool force_discrete, std::set<Evoral::Parameter> const & filtered)
+Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&              seq,
+                                               Time                               t,
+                                               bool                               force_discrete,
+                                               const std::set<Evoral::Parameter>& filtered,
+                                               const std::set<WeakNotePtr>*       active_notes)
 	: _seq(&seq)
 	, _active_patch_change_message (0)
 	, _type(NIL)
@@ -90,6 +94,17 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	}
 
 	_lock = seq.read_lock();
+
+	// Add currently active notes, if given
+	if (active_notes) {
+		for (typename std::set<WeakNotePtr>::const_iterator i = active_notes->begin();
+		     i != active_notes->end(); ++i) {
+			NotePtr note = i->lock();
+			if (note && note->time() <= t && note->end_time() > t) {
+				_active_notes.push(note);
+			}
+		}
+	}
 
 	// Find first note which begins at or after t
 	_note_iter = seq.note_lower_bound(t);
@@ -193,15 +208,13 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 }
 
 template<typename Time>
-Sequence<Time>::const_iterator::~const_iterator()
-{
-}
-
-template<typename Time>
 void
-Sequence<Time>::const_iterator::invalidate()
+Sequence<Time>::const_iterator::invalidate(std::set< boost::weak_ptr< Note<Time> > >* notes)
 {
 	while (!_active_notes.empty()) {
+		if (notes) {
+			notes->insert(_active_notes.top());
+		}
 		_active_notes.pop();
 	}
 	_type = NIL;
@@ -278,7 +291,7 @@ Sequence<Time>::const_iterator::set_event()
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
 		assert(!_active_notes.empty());
 		*_event = _active_notes.top()->off_event();
-		_active_notes.pop();
+		// We don't pop the active note until we increment past it
 		break;
 	case SYSEX:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
@@ -338,6 +351,7 @@ Sequence<Time>::const_iterator::operator++()
 		++_note_iter;
 		break;
 	case NOTE_OFF:
+		_active_notes.pop();
 		break;
 	case CONTROL:
 		// Increment current controller iterator
