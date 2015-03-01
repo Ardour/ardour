@@ -600,7 +600,7 @@ AUPlugin::init ()
 
 	// Plugin::setup_controls ();
 
-	au_blacklist(CFStringRefToStdString(itemName));
+	au_unblacklist(CFStringRefToStdString(itemName));
 	if (itemName != NULL) CFRelease(itemName);
 }
 
