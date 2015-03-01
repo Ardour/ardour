@@ -1708,14 +1708,22 @@ EngineStateController::push_current_state_to_backend(bool start)
 				error << string_compose (_("Cannot set device name to %1"), get_current_device_name()) << endmsg;
 			}
         
-			std::cout << "EngineStateController::Setting device sample rate " << _current_state->sample_rate << std::endl;
-			if (!result && (result = backend->set_sample_rate (_current_state->sample_rate)) ) {
-				error << string_compose (_("Cannot set sample rate to %1"), get_current_sample_rate()) << endmsg;
+			if (!result ) {
+				std::cout << "EngineStateController::Setting device sample rate " << _current_state->sample_rate << std::endl;
+				result = backend->set_sample_rate (_current_state->sample_rate);
+				
+				if (result) {
+					error << string_compose (_("Cannot set sample rate to %1"), get_current_sample_rate()) << endmsg;
+				}
 			}
         
-			std::cout << "EngineStateController::Setting device buffer size " << _current_state->buffer_size << std::endl;
-			if (!result && (result = backend->set_buffer_size (_current_state->buffer_size)) ) {
-				error << string_compose (_("Cannot set buffer size to %1"), get_current_buffer_size()) << endmsg;
+			if (!result ) {
+				std::cout << "EngineStateController::Setting device buffer size " << _current_state->buffer_size << std::endl;
+				result = backend->set_buffer_size (_current_state->buffer_size);
+
+				if (result) {
+					error << string_compose (_("Cannot set buffer size to %1"), get_current_buffer_size()) << endmsg;
+				}
 			}
 		}
         

@@ -40,8 +40,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceDebugInfo -- " << (char*)parameter << std::endl;
             break;
         case WCMRAudioDeviceManagerClient::BufferSizeChanged:
-            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::BufferSizeChanged: " << *(uint32_t*)parameter << std::endl;
-			_buffer_size_change(*(uint32_t*)parameter);
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::BufferSizeChanged: " << *(int*)parameter << std::endl;
 			_buffer_size_change(*(int*)parameter);
             break;
         case WCMRAudioDeviceManagerClient::RequestReset:

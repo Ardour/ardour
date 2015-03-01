@@ -423,14 +423,14 @@ AudioEngine::do_reset_backend()
     
     while (!_stop_hw_reset_processing) {
         
-        if (_hw_reset_request_count && _backend) {
+        if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
 
 			_reset_request_lock.unlock();
             
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
             g_atomic_int_dec_and_test (&_hw_reset_request_count);
 
-			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;
+			std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
             DeviceResetStarted(); // notify about device reset to be started
             
             // backup the device name
