@@ -50,10 +50,12 @@ WavesAudioBackend::set_midi_option (const std::string& option)
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::set_midi_option ( " << option << " )" << std::endl;
     if (option == __available_midi_options[0]) {
         _use_midi = false;
+		_do_not_reset_midi = false;
         // COMMENTED DBG LOGS */ std::cout << "\tNO MIDI system used)" << std::endl;
     }
     else if (option == __available_midi_options[1]) {
         _use_midi = true;
+		_do_not_reset_midi = false;
         // COMMENTED DBG LOGS */ std::cout << "\tNO MIDI system used)" << std::endl;
     }
     else {

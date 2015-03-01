@@ -115,6 +115,7 @@ WavesAudioBackend::WavesAudioBackend (AudioEngine& e, AudioBackendInfo& info)
     , _systemic_output_latency (0)
     , _call_thread_init_callback (false)
     , _use_midi (true)
+	, _do_not_reset_midi (false)
     , _sample_time_at_cycle_start (0)
     , _freewheeling (false)
     , _freewheel_thread_active (false)
@@ -672,12 +673,15 @@ WavesAudioBackend::_start (bool for_latency_measurement)
 		return -1;
     }
 
-    if (_use_midi) {
+    if (_use_midi && !_do_not_reset_midi ) {
         if (_midi_device_manager.start () != 0) {
             std::cerr << "WavesAudioBackend::_start (): _midi_device_manager.start () failed!" << std::endl;
             stop();
 			return -1;
         }
+	}
+
+	if (_use_midi) {
         if (_register_system_midi_ports () != 0) {
             std::cerr << "WavesAudioBackend::_start (): _register_system_midi_ports () failed!" << std::endl;
             stop();
@@ -698,12 +702,16 @@ WavesAudioBackend::_start (bool for_latency_measurement)
         return -1;
     }
 
-    if (_use_midi) {
+    if (_use_midi && !_do_not_reset_midi ) {
         if (_midi_device_manager.stream (true)) {
             std::cerr << "WavesAudioBackend::_start (): _midi_device_manager.stream (true) failed!" << std::endl;
             stop();
 			return -1;
         }
+#ifdef PLATFORM_WINDOWS
+		// GZ: fix for the issue with midi reset - do not reset MIDI on Wondows 
+		_do_not_reset_midi = true;
+#endif
     }
 
     return 0;
@@ -785,10 +793,12 @@ WavesAudioBackend::stop ()
 		}
 	}
 
-    _midi_device_manager.stop ();
+	if (!_do_not_reset_midi) {
+		_midi_device_manager.stop ();
+	}
 
     _unregister_system_audio_ports ();
-    _unregister_system_midi_ports ();
+	_unregister_system_midi_ports ();
 
     return retVal;
 }

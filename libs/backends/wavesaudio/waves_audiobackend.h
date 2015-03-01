@@ -319,7 +319,8 @@ class WavesMidiPort;
     static const size_t __max_raw_midi_buffer_size;
 
     static const std::vector<std::string> __available_midi_options;
-    bool  _use_midi;
+    bool _use_midi;
+	bool _do_not_reset_midi; 
 
     struct ThreadData {
         WavesAudioBackend* engine;
