@@ -28,6 +28,7 @@
 #include "pbd/glib_semaphore.h"
 #endif
 
+#include "pbd/crossthread.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/pool.h"
 #include "ardour/libardour_visibility.h"
@@ -86,37 +87,16 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 	uint32_t     midi_dstream_buffer_size;
 	RingBuffer<CrossThreadPool*> pool_trash;
 
-#ifdef PLATFORM_WINDOWS
-	PBD::atomic_counter m_request_state;
-	PBD::GlibSemaphore   m_request_sem;
-#else
-	int          request_pipe[2];
-#endif
-
 private:
 	void empty_pool_trash ();
 	void config_changed (std::string);
-
-#ifndef PLATFORM_WINDOWS
-	int setup_request_pipe ();
-#endif
-
-	/**
-	 * return true if there are requests to be processed
-	 */
-	bool wait_for_requests ();
-
-	/**
-	 * Remove request from butler request queue
-	 *
-	 * return true if there was another request and req is valid
-	 */
-	bool dequeue_request (Request::Type& req);
 
 	/**
 	 * Add request to butler thread request queue
 	 */
 	void queue_request (Request::Type r);
+
+	CrossThreadChannel _xthread;
 
 };
 
