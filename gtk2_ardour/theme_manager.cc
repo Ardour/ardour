@@ -112,8 +112,10 @@ ThemeManager::ThemeManager()
 
 	show_all ();
 
+#ifndef GTKMM_DISABLE_DEPRECATED
 	waveform_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
 	timeline_item_gradient_depth.set_update_policy (Gtk::UPDATE_DELAYED);
+#endif
 
 	set_ui_to_state();
 
