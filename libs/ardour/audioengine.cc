@@ -763,11 +763,6 @@ void
 AudioEngine::drop_backend ()
 {
 	if (_backend) {
-
-		// Fix for the issue with midi restart: alow to stop midi as we are droping current backend
-		std::string midi_option = _backend->midi_option ();
-		_backend->set_midi_option (midi_option);
-
 		_backend->stop ();
 		_backend->drop_device ();
 		_backend.reset ();
