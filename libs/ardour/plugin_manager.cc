@@ -643,6 +643,7 @@ PluginManager::au_refresh (bool cache_only)
 		return;
 	}
 	delete _au_plugin_info;
+	_au_plugin_info = AUPluginInfo::discover();
 
 	// disable automatic scan in case we crash
 	Config->set_discover_audio_units (false);
@@ -660,8 +661,6 @@ PluginManager::au_refresh (bool cache_only)
 	 * Ardour will blacklist the plugin in question -- unless
 	 * the crash happens during realtime-run.
 	 */
-
-	_au_plugin_info = AUPluginInfo::discover();
 
 	// successful scan re-enabled automatic discovery
 	Config->set_discover_audio_units (true);
