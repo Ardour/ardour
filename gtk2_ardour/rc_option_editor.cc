@@ -1041,7 +1041,9 @@ public:
 		const std::string empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
 
 		_dpi_slider.set_name("FontScaleSlider");
+#ifndef GTKMM_DISABLE_DEPRECATED
 		_dpi_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+#endif
 		_dpi_slider.set_draw_value(false);
 		_dpi_slider.add_mark(50,  Gtk::POS_TOP, empty);
 		_dpi_slider.add_mark(60,  Gtk::POS_TOP, empty);
@@ -1167,7 +1169,9 @@ public:
 		Label* l = manage (new Label (_("Waveform Clip Level (dBFS):")));
 		l->set_name ("OptionsLabel");
 
+#ifndef GTKMM_DISABLE_DEPRECATED
 		_clip_level_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+#endif
 		HBox* h = manage (new HBox);
 		h->set_spacing (4);
 		h->pack_start (*l, false, false);
@@ -1239,7 +1243,9 @@ public:
 		l = manage (new Label (_("Playback (seconds of buffering):")));
 		l->set_name ("OptionsLabel");
 
+#ifndef GTKMM_DISABLE_DEPRECATED
 		_playback_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+#endif
 		h = manage (new HBox);
 		h->set_spacing (4);
 		h->pack_start (*l, false, false);
@@ -1252,7 +1258,9 @@ public:
 		l = manage (new Label (_("Recording (seconds of buffering):")));
 		l->set_name ("OptionsLabel");
 
+#ifndef GTKMM_DISABLE_DEPRECATED
 		_capture_slider.set_update_policy (UPDATE_DISCONTINUOUS);
+#endif
 		h = manage (new HBox);
 		h->set_spacing (4);
 		h->pack_start (*l, false, false);
