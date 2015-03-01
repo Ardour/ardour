@@ -1224,7 +1224,7 @@ ExportVideoDialog::preset_combo_changed ()
 		video_bitrate_combo.set_sensitive(false);
 		audio_samplerate_combo.set_sensitive(false);
 	}
-
+#ifndef GTKMM_DISABLE_DEPRECATED
 	Gtk::Table *t = (Gtk::Table*) preset_combo.get_parent();
 	Gtk::Table_Helpers::TableList c = t->children();
 	Gtk::Table_Helpers::TableList::iterator it;
@@ -1243,6 +1243,7 @@ ExportVideoDialog::preset_combo_changed ()
 			}
 		}
 	}
+#endif
 
 	video_codec_combo_changed();
 }
