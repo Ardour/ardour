@@ -78,7 +78,6 @@ SessionDialog::SessionDialog (WM::Proxy<TracksControlPanel>& system_configuratio
         _recent_session_button[i]->signal_double_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session_double_click ));
     }
    
-    set_keep_above (true);
     set_position (WIN_POS_CENTER);
     _open_selected_button.set_sensitive (false);
 }

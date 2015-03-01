@@ -212,7 +212,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, add_video_dialog (X_("add-video"), _("Add Tracks/Busses"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
-	, _audio_engine_reset_info_dialog ("audio_engine_reset_info_dialog.xml")
+	, _audio_engine_reset_info_dialog ("audio_engine_reset_info_dialog.xml") // HOT FIX. (REWORK IT)
+    , _audio_engine_reset_menu_disabler (0) // HOT FIX. (REWORK IT)
 //	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 //	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
 	, _feedback_exists (false)
@@ -467,6 +468,9 @@ ARDOUR_UI::engine_running ()
 void
 ARDOUR_UI::device_reset_started ()
 {
+	if (!_audio_engine_reset_menu_disabler) {
+		_audio_engine_reset_menu_disabler = new MainMenuDisabled ();
+	}
 	_audio_engine_reset_info_dialog.set_keep_above (true);
     _audio_engine_reset_info_dialog.show ();
 }
@@ -474,6 +478,10 @@ ARDOUR_UI::device_reset_started ()
 void
 ARDOUR_UI::device_reset_finished ()
 {
+	if (_audio_engine_reset_menu_disabler) {
+		delete _audio_engine_reset_menu_disabler;
+		_audio_engine_reset_menu_disabler = 0;
+	}
 	_audio_engine_reset_info_dialog.hide ();
 }
 
