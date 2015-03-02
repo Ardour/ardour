@@ -136,6 +136,7 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 						std::cerr << "Error: " << err_msg << std::endl;
                         _output_pm_stream = NULL;
                         _pm_output_id = pmNoDevice;
+						close ();
                         return -1;
                 }
 			}
