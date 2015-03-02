@@ -87,6 +87,8 @@ class SndfileHandle
 			SndfileHandle (const SndfileHandle &orig) ;
 			SndfileHandle & operator = (const SndfileHandle &rhs) ;
 
+			void close (void) ;
+
 		/* Mainly for debugging/testing. */
 		int refCount (void) const { return (p == NULL) ? 0 : p->ref ; }
 
@@ -151,6 +153,18 @@ SndfileHandle::SNDFILE_ref::SNDFILE_ref (void)
 inline
 SndfileHandle::SNDFILE_ref::~SNDFILE_ref (void)
 {	if (sf != NULL) { sf_close (sf) ; } }
+
+
+void
+SndfileHandle::close (void)
+{
+	if (p != NULL && --p->ref == 0)
+	{
+		delete p ;
+		p = NULL;
+	}
+}
+
 
 inline
 SndfileHandle::SndfileHandle (const char *path, int mode, int fmt, int chans, int srate)
