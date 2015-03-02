@@ -328,7 +328,19 @@ void
 Butler::queue_request (Request::Type r)
 {
 	char c = r;
-	_xthread.deliver (c);
+	if (_xthread.deliver (c) != 1) {
+		/* the x-thread channel is non-blocking
+		 * write may fail, but we really don't want to wait
+		 * under normal circumstances.
+		 *
+		 * a lost "run" requests under normal RT operation
+		 * is mostly harmless.
+		 *
+		 * TODO if ardour is freehweeling, wait & retry.
+		 * ditto for Request::Type Quit
+		 */
+		assert(1); // we're screwd
+	}
 }
 
 void
