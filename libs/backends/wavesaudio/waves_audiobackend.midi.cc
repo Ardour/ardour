@@ -170,6 +170,7 @@ WavesAudioBackend::_changed_midi_devices ()
         return;
     }
 
+	_unregister_system_midi_ports ();
     _midi_device_manager.stop ();
 
     if (_midi_device_manager.start () != 0) {
@@ -317,8 +318,7 @@ WavesAudioBackend::_read_midi_data_from_devices ()
             
             if (timestamp_st < 0) {
                 timestamp_st = 0;
-            }
-            else if (timestamp_st >= (int32_t)_buffer_size) {
+            } else if (timestamp_st >= (int32_t)_buffer_size) {
                 timestamp_st = _buffer_size - 1;
             }
             waves_midi_event->set_timestamp (timestamp_st);

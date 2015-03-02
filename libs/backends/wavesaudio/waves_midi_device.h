@@ -48,7 +48,6 @@ public:
 
     inline bool is_input () const { return _pm_input_id != pmNoDevice; };
     inline bool is_output () const { return _pm_output_id != pmNoDevice; };
-    void validate ();
 
 private:
 
