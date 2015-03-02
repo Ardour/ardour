@@ -785,6 +785,8 @@ WavesAudioBackend::stop ()
 
     // COMMENTED DBG LOGS */ std::cout << "\t[" << _device->DeviceName () << "]" << std::endl;
 
+	 _midi_device_manager.stop ();
+
 	if (_device) {
 		wtErr = _device->SetStreaming (false);
 		if (wtErr != eNoErr) {
@@ -792,8 +794,6 @@ WavesAudioBackend::stop ()
 			retVal = -1;
 		}
 	}
-
-    _midi_device_manager.stop ();
 
     _unregister_system_audio_ports ();
     _unregister_system_midi_ports ();
