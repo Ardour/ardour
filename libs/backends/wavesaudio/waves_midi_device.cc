@@ -108,7 +108,8 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
         
         if (is_output () ) {
 	        std::cout << "WavesMidiDevice::open (): OUTPUT" << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-	        if (_output_queue) {
+
+	        if (!_output_queue) {
 		        _output_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
 		        if (NULL == _output_queue) {
 			        std::cerr << "WavesMidiDevice::open (): _output_queue = Pm_QueueCreate () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
@@ -135,102 +136,13 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 	        }
         }
 
-        if (is_output () && !_output_pm_stream) {
-	        if (pmNoError != Pm_OpenOutput (&_output_pm_stream, 
-	                                        _pm_output_id, 
-	                                        NULL,
-	                                        1024,
-	                                        time_proc,
-	                                        time_info,
-	                                        LATENCY)) {
-		        std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-		        _output_pm_stream = NULL;
-		        _pm_output_id = pmNoDevice;
-		        return -1;
-	        }
-	        _output_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
-	        if (NULL == _output_queue) {
-		        std::cerr << "WavesMidiDevice::open (): _output_queue = Pm_QueueCreate () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-		        close ();
-		        return -1;
-	        }
-        }
-    return 0;
+        return 0;
 }
 
 
 void
 WavesMidiDevice::close ()
 {
-        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::close (): %1\n", name ()));
-        WavesMidiEvent *waves_midi_event;
-        
-<<<<<<< HEAD
-        if (_input_pm_stream) {
-                PmError err = Pm_Close (_input_pm_stream);
-
-                if (err != pmNoError) {
-	                std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-	                char* err_msg = new char[256];
-	                Pm_GetHostErrorText(err_msg, 256);
-	                std::cerr << "Error: " << err_msg << std::endl;
-	                std::cerr << "Aborting!" << std::endl;
-	                Pm_Abort (_input_pm_stream);
-                }
-
-=======
-		if (_input_queue) {
->>>>>>> b7d650c... [Summary] Very seldom crash. Cleared temp data gave almost stable work
-                while (1 == Pm_Dequeue (_input_queue, &waves_midi_event)) {
-                        delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
-                }
-
-                Pm_QueueDestroy (_input_queue);
-                _input_queue = NULL;
-                _input_pm_stream = NULL;
-                _pm_input_id = pmNoDevice;
-        }
-
-        if (_input_pm_stream) {
-                PmError err = Pm_Close (_input_pm_stream);
-
-<<<<<<< HEAD
-                if (err != pmNoError) {
-	                std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-	                char* err_msg = new char[256];
-	                Pm_GetHostErrorText(err_msg, 256);
-	                std::cerr << "Error: " << err_msg << std::endl;
-	                std::cerr << "Aborting!" << std::endl;
-	                Pm_Abort (_output_pm_stream);
-                }
-                
-=======
-				if (err != pmNoError) {
-					std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-					std::cerr << "Error: " << err << std::endl;
-				}
-		}
-        
-		if (_output_queue) {
->>>>>>> b7d650c... [Summary] Very seldom crash. Cleared temp data gave almost stable work
-                while (1 == Pm_Dequeue (_output_queue, &waves_midi_event)) {
-                        delete waves_midi_event; // XXX possible dup free in ~WavesMidiBuffer() (?)
-                }
-
-                Pm_QueueDestroy (_output_queue);
-                _output_queue = NULL;
-                _output_pm_stream = NULL;
-                _pm_output_id = pmNoDevice;
-        }
-
-        if ( _output_pm_stream ) {
-                PmError err = Pm_Close (_output_pm_stream);
-
-				if (err != pmNoError) {
-					std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-					std::cerr << "Error: " << err << std::endl;
-				}
-		}
 }
 
 void
