@@ -34,6 +34,10 @@ class TmpFile : public SndfileWriter<T>, public SndfileReader<T>
 
 	~TmpFile()
 	{
+		/* explicitly close first, some OS (yes I'm looking at you windows)
+		 * cannot delet files that are still open
+		 */
+		SndfileBase::close();
 		if (!filename.empty()) {
 			std::remove(filename.c_str());
 		}
