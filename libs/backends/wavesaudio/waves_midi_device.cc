@@ -45,37 +45,31 @@ WavesMidiDevice::WavesMidiDevice (const std::string& device_name)
     , _output_pm_stream (NULL)
     , _incomplete_waves_midi_event (NULL)
 {
-    validate ();
+	_pm_input_id = _pm_output_id = pmNoDevice;
+	int count = Pm_CountDevices ();
+	
+	for (int i = 0; i < count; i++) {
+		
+		const PmDeviceInfo* pm_device_info = Pm_GetDeviceInfo (i);
+		
+		if (pm_device_info == NULL) {
+			continue;
+		}
+		if (name () == pm_device_info->name) {
+			if (pm_device_info->input){
+				_pm_input_id = i;
+			}
+			if (pm_device_info->output){
+				_pm_output_id = i;
+			}
+		}
+	}
 }
 
 WavesMidiDevice::~WavesMidiDevice ()
 {
         DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::~WavesMidiDevice (): %1\n", name()));
         close ();
-}
-
-void
-WavesMidiDevice::validate ()
-{
-        _pm_input_id = _pm_output_id = pmNoDevice;
-        int count = Pm_CountDevices ();
-        
-        for (int i = 0; i < count; i++) {
-                
-                const PmDeviceInfo* pm_device_info = Pm_GetDeviceInfo (i);
-                
-                if (pm_device_info == NULL) {
-                        continue;
-                }
-                if (name () == pm_device_info->name) {
-                        if (pm_device_info->input){
-                                _pm_input_id = i;
-                        }
-                        if (pm_device_info->output){
-                                _pm_output_id = i;
-                        }
-                }
-        }
 }
 
 int
