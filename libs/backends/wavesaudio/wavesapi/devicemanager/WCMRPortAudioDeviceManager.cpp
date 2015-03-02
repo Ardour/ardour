@@ -951,9 +951,23 @@ void WCMRPortAudioDevice::stopStreaming (bool callerIsWaiting/*=false*/)
 		}
 		else
 		{
-			std::cout << "Failed to stop PA stream normaly! Error:" <<  Pa_GetErrorText (paErr) << std::endl;
-			DEBUG_MSG( "Failed to stop PA stream normaly! Error:" << Pa_GetErrorText (paErr) );
-			m_lastErr = eGenericErr;
+			std::cout << "Failed to stop PA stream normaly! Aborting the stream. Error:" <<  Pa_GetErrorText (paErr) << std::endl;
+			DEBUG_MSG( "Failed to stop PA stream normaly! Aborting the stream. Error:" << Pa_GetErrorText (paErr) );
+			Pa_Sleep(PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS); // sleep some time to make sure the change has place
+			PaError abortionError = Pa_AbortStream( m_PortAudioStream );
+
+			if(abortionError == paNoError || abortionError == paStreamIsStopped)
+			{
+				// if the stream was stopped successfully
+				m_IsStreaming = false;
+				m_pInputData = NULL;
+			}
+			else
+			{
+				std::cout << "Failed to stop PA stream: " <<  Pa_GetErrorText (paErr) << std::endl;
+				DEBUG_MSG( "Failed to stop PA stream " << Pa_GetErrorText (paErr) );
+				m_lastErr = eGenericErr;
+			}
 		}
 	}
 
