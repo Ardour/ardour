@@ -1165,6 +1165,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT831</td><td>{DBA389A3-2DFD-4C1C-9DEA-0269520058A6}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT832</td><td>{17A1D37B-534B-4997-A808-EF5DF1C969B4}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT833</td><td>{A9A2FEDB-611C-4724-8C9A-07F3D4472D39}</td><td>TRACKS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
+		<row><td>ISX_DEFAULTCOMPONENT834</td><td>{2517246A-FE9B-47DF-8EC2-5131E665FCA1}</td><td>UI</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td>{171F4C1F-B859-4228-9205-5C38FF3CF5B5}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td>{2CC2416F-B08C-4C57-B1B5-B4F007D9A97D}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
 		<row><td>ISX_DEFAULTCOMPONENT86</td><td>{34A92246-9928-4403-AAEF-A7DEABF9E4B1}</td><td>PIXMAPS</td><td>258</td><td/><td/><td>17</td><td/><td/><td/><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td><td>/LogFile=</td></row>
@@ -3712,6 +3713,7 @@
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT831</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT832</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT833</td></row>
+		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT834</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT84</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT85</td></row>
 		<row><td>AlwaysInstall</td><td>ISX_DEFAULTCOMPONENT86</td></row>
@@ -4041,6 +4043,7 @@
 		<row><td>ardourcp.dll</td><td>ardourcp.dll</td><td>ardourcp.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\build\libs\surfaces\control_protocol\ardourcp.dll</td><td>1</td><td/></row>
 		<row><td>ardourmono.ttf</td><td>ISX_DEFAULTCOMPONENT13</td><td>ARDOUR~1.TTF|ArdourMono.ttf</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ArdourMono.ttf</td><td>1</td><td/></row>
 		<row><td>ardourvampplugins.dll</td><td>ardourvampplugins.dll</td><td>ARDOUR~1.DLL|ardourvampplugins.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\build\libs\vamp-plugins\ardourvampplugins.dll</td><td>1</td><td/></row>
+		<row><td>audio_engine_reset_info_dial</td><td>ISX_DEFAULTCOMPONENT834</td><td>AUDIO_~1.XML|audio_engine_reset_info_dialog.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\audio_engine_reset_info_dialog.xml</td><td>1</td><td/></row>
 		<row><td>audio_time_axis.xml</td><td>ISX_DEFAULTCOMPONENT17</td><td>AUDIO_~1.XML|audio_time_axis.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\audio_time_axis.xml</td><td>1</td><td/></row>
 		<row><td>audiographer.dll</td><td>audiographer.dll</td><td>AUDIOG~1.DLL|audiographer.dll</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\build\libs\audiographer\audiographer.dll</td><td>1</td><td/></row>
 		<row><td>automation_time_axis.xml</td><td>ISX_DEFAULTCOMPONENT18</td><td>AUTOMA~1.XML|automation_time_axis.xml</td><td>0</td><td/><td/><td/><td>1</td><td>C:\WS\GIT\tracks_daw\tracks\gtk2_ardour\ui\automation_time_axis.xml</td><td>1</td><td/></row>
@@ -5758,6 +5761,7 @@
 		<row><td>ISX_DEFAULTCOMPONENT831</td><td/><td/><td>_776A7431_0A39_4A97_B50B_1B49D0AE930D_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT832</td><td/><td/><td>_8B5FD959_C617_44EF_BA9F_AA3CF3E935DF_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT833</td><td/><td/><td>_1DE785F8_22F1_4B11_8781_BF98329A840A_FILTER</td><td/><td/><td/><td/></row>
+		<row><td>ISX_DEFAULTCOMPONENT834</td><td/><td/><td>_6D0CBFAB_3285_474D_AF6C_75A0ACAAF0F1_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT84</td><td/><td/><td>_7EDC8F54_7F12_4722_A553_D3218A57F9E9_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT85</td><td/><td/><td>_9DE256D6_C9BB_44B1_B3AF_6EE743985360_FILTER</td><td/><td/><td/><td/></row>
 		<row><td>ISX_DEFAULTCOMPONENT86</td><td/><td/><td>_881319D8_8A0C_4EE3_A6FB_5078845D784A_FILTER</td><td/><td/><td/><td/></row>
@@ -8300,7 +8304,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>PROGMSG_IIS_ROLLBACKAPPPOOLS</td><td>##IDS_PROGMSG_IIS_ROLLBACKAPPPOOLS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKVROOTS</td><td>##IDS_PROGMSG_IIS_ROLLBACKVROOTS##</td><td/></row>
 		<row><td>PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS</td><td>##IDS_PROGMSG_IIS_ROLLBACKWEBSERVICEEXTENSIONS##</td><td/></row>
-		<row><td>ProductCode</td><td>{2A36163E-BCDF-43F1-BC3E-E672F7F053E0}</td><td/></row>
+		<row><td>ProductCode</td><td>{DA203BCF-361D-48F4-BA36-A7BBC0724830}</td><td/></row>
 		<row><td>ProductName</td><td>Tracks Live</td><td/></row>
 		<row><td>ProductVersion</td><td>1.0</td><td/></row>
 		<row><td>ProgressType0</td><td>install</td><td/></row>
@@ -8318,7 +8322,7 @@ QwBEAF8AUgBPAE0AAQBFAHgAcAByAGUAcwBzAA==
 		<row><td>SecureCustomProperties</td><td>ISFOUNDNEWERPRODUCTVERSION;USERNAME;COMPANYNAME;ISX_SERIALNUM;SUPPORTDIR;ISACTIONPROP1</td><td/></row>
 		<row><td>SelectedSetupType</td><td>##IDS__DisplayName_Typical##</td><td/></row>
 		<row><td>SetupType</td><td>Typical</td><td/></row>
-		<row><td>UpgradeCode</td><td>{9724BEB5-D35F-45DA-BD4A-D55B5EEA0816}</td><td/></row>
+		<row><td>UpgradeCode</td><td>{C020DE14-2320-4AAA-A204-B79EB29C8315}</td><td/></row>
 		<row><td>_IsMaintenance</td><td>Change</td><td/></row>
 		<row><td>_IsSetupTypeMin</td><td>Typical</td><td/></row>
 	</table>
