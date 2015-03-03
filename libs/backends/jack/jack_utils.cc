@@ -960,11 +960,11 @@ ARDOUR::enumerate_midi_options ()
 
 	vector<string> v;
 
-	v.push_back (get_none_string());
-
 	for (MidiOptions::const_iterator i = midi_options.begin(); i != midi_options.end(); ++i) {
 		v.push_back (i->first);
 	}
+
+	v.push_back (get_none_string());
 
 	return v;
 }

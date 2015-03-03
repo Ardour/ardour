@@ -317,13 +317,13 @@ std::vector<std::string>
 DummyAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
-		_midi_options.push_back (_("No MIDI I/O"));
 		_midi_options.push_back (_("1 in, 1 out, Silence"));
 		_midi_options.push_back (_("2 in, 2 out, Silence"));
 		_midi_options.push_back (_("8 in, 8 out, Silence"));
 		_midi_options.push_back (_("Midi Event Generators"));
 		_midi_options.push_back (_("8 in, 8 out, Loopback"));
 		_midi_options.push_back (_("MIDI to Audio, Loopback"));
+		_midi_options.push_back (_("No MIDI I/O"));
 	}
 	return _midi_options;
 }

@@ -409,9 +409,9 @@ std::vector<std::string>
 AlsaAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
-		_midi_options.push_back (_("None"));
 		_midi_options.push_back (_("ALSA raw devices"));
 		_midi_options.push_back (_("ALSA sequencer"));
+		_midi_options.push_back (_("None"));
 	}
 	return _midi_options;
 }
