@@ -78,28 +78,28 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
     DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::open (): %1", name ()));
 
     if (is_input () ) {
-		/* COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::open (): INPUT" << _pm_input_id << "-[" << name () <<  "]" << std::endl;
+		// COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::open (): INPUT" << _pm_input_id << "-[" << name () <<  "]" << std::endl;
 			
 		if (!_input_pm_stream) {
 			// create queue
 			if (!_input_queue) {
-				/* COMMENTED DBG LOGS */ std::cout << "    going to Pm_QueueCreate for INPUT: " << std::endl;
+				// COMMENTED DBG LOGS */ std::cout << "    going to Pm_QueueCreate for INPUT: " << std::endl;
 				_input_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
-				/* COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
+				// COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
 				if (NULL == _input_queue) {
                     std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
                     return -1;
 				}
 			} 
 			// create stream
-			/* COMMENTED DBG LOGS */ std::cout << "    going to Pm_OpenInput : " << std::endl;
+			// COMMENTED DBG LOGS */ std::cout << "    going to Pm_OpenInput : " << std::endl;
             if (pmNoError != Pm_OpenInput (&_input_pm_stream, 
                                             _pm_input_id,
                                             NULL,
                                             1024,
                                             time_proc,
                                             time_info)) {
-					/* COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
+					// COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
                     char* err_msg = new char[256];
 					Pm_GetHostErrorText(err_msg, 256);
 					std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
@@ -107,26 +107,26 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 					close ();
                     return -1;
             }
-			/* COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
+			// COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
 		} 
 	} 
         
     if (is_output () ) {
-		/* COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::open (): OUTPUT" << _pm_output_id << "-[" << name () <<  "]" << std::endl;
+		// COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::open (): OUTPUT" << _pm_output_id << "-[" << name () <<  "]" << std::endl;
 
 		if (!_output_pm_stream) {
 			// create queue
 			if (!_output_queue) {
-				/* COMMENTED DBG LOGS */ std::cout << "    going to Pm_QueueCreate for OUTPUT : " << std::endl;
+				// COMMENTED DBG LOGS */ std::cout << "    going to Pm_QueueCreate for OUTPUT : " << std::endl;
 				_output_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
-				/* COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
+				// COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
 			if (NULL == _output_queue) {
                     std::cerr << "WavesMidiDevice::open (): _output_queue = Pm_QueueCreate () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
                     return -1;
 				}
 			}
 			// create stream
-				/* COMMENTED DBG LOGS */ std::cout << "    going to Pm_OpenOutput : " << std::endl;
+				// COMMENTED DBG LOGS */ std::cout << "    going to Pm_OpenOutput : " << std::endl;
             if (pmNoError != Pm_OpenOutput (&_output_pm_stream, 
                                             _pm_output_id, 
                                             NULL,
@@ -134,7 +134,7 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
                                             time_proc,
                                             time_info,
                                             LATENCY)) {
-					/* COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
+					// COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
                     char* err_msg = new char[256];
 					Pm_GetHostErrorText(err_msg, 256);
 					std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
@@ -142,7 +142,7 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 					close ();
                     return -1;
             }
-			/* COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
+			// COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
 		}
     }
 	return 0;
