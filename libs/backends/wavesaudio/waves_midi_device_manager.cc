@@ -150,8 +150,8 @@ WavesMidiDeviceManager::_portmidi_callback (PtTimestamp timestamp)
     if ((_input_device_count != midiInGetNumDevs ()) || (_output_device_count != midiOutGetNumDevs ())) {
         _audiobackend._changed_midi_devices ();
 	    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_portmidi_callback ():" << std::endl;
- 	    /* COMMENTED DBG LOGS */ std::cout << "                        _input_device_count ?= midiInGetNumDevs () :" << _input_device_count << "?=" << midiInGetNumDevs () << std::endl;
- 	    /* COMMENTED DBG LOGS */ std::cout << "                        _output_device_count ?= midiOutGetNumDevs () :" << _output_device_count << "?=" << midiOutGetNumDevs () << std::endl;
+ 	    /* COMMENTED DBG LOGS */ std::cout << "                        _input_device_count ?= midiInGetNumDevs () :" << _input_device_count << " ?= " << midiInGetNumDevs () << std::endl;
+ 	    /* COMMENTED DBG LOGS */ std::cout << "                        _output_device_count ?= midiOutGetNumDevs () :" << _output_device_count << " ?= " << midiOutGetNumDevs () << std::endl;
    }
 }
 

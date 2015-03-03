@@ -85,6 +85,7 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 			if (!_input_queue) {
 				_input_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
 				if (NULL == _input_queue) {
+                    char* err_msg = new char[256];
                     std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
                     return -1;
 				}
@@ -99,7 +100,7 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
                     char* err_msg = new char[256];
 					Pm_GetHostErrorText(err_msg, 256);
 					std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-					std::cerr << "Error: " << err_msg << std::endl;
+					std::cerr << "    Port Midi Host Error: " << err_msg << std::endl;
 					close ();
                     return -1;
             }
@@ -129,7 +130,7 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
                     char* err_msg = new char[256];
 					Pm_GetHostErrorText(err_msg, 256);
 					std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-					std::cerr << "Error: " << err_msg << std::endl;
+					std::cerr << "    Port Midi Host Error: " << err_msg << std::endl;
 					close ();
                     return -1;
             }
@@ -146,20 +147,21 @@ WavesMidiDevice::close ()
 	WavesMidiEvent *waves_midi_event;
 
 	// save _input_pm_stream and _output_pm_stream to local buf
-	PmStream* buf_input_pm_stream = _input_pm_stream;
-	PmStream* buf_output_pm_stream = _output_pm_stream;
+	PmStream* input_pm_stream = _input_pm_stream;
+	PmStream* output_pm_stream = _output_pm_stream;
 	_input_pm_stream = _output_pm_stream = NULL;
 
 //input
-	if (buf_input_pm_stream) {
+	if (input_pm_stream) {
 		// close stream
-		PmError err = Pm_Close (buf_input_pm_stream);
+		PmError err = Pm_Close (input_pm_stream);
 		if (err != pmNoError) {
-			std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << buf_input_pm_stream << "-[" << name () <<  "]!" << std::endl;
-			std::cerr << "Error: " << err << std::endl;
-		} else {
-			_pm_input_id = pmNoDevice;
+            char* err_msg = new char[256];
+			Pm_GetHostErrorText(err_msg, 256);
+			std::cerr << "WavesMidiDevice::close (): Pm_Close (input_pm_stream) failed (" << err << ") for " << input_pm_stream << "-[" << name () <<  "]!" << std::endl;
+			std::cerr << "    Port Midi Host Error: " << err_msg << std::endl;
 		}
+		_pm_input_id = pmNoDevice;
 	}
 
 	// close queue
@@ -172,15 +174,16 @@ WavesMidiDevice::close ()
 	}
 
 //output	
-	if ( buf_output_pm_stream ) {
+	if ( output_pm_stream ) {
 		// close stream
-		PmError err = Pm_Close (buf_output_pm_stream);
+		PmError err = Pm_Close (output_pm_stream);
 		if (err != pmNoError) {
-			std::cerr << "WavesMidiDevice::close (): Pm_Close () failed for " << buf_output_pm_stream << "-[" << name () <<  "]!" << std::endl;
-			std::cerr << "Error: " << err << std::endl;
-		} else {
-			_pm_output_id = pmNoDevice;
+            char* err_msg = new char[256];
+			Pm_GetHostErrorText(err_msg, 256);
+			std::cerr << "WavesMidiDevice::close (): Pm_Close (output_pm_stream) failed (" << err << ") for " << output_pm_stream << "-[" << name () <<  "]!" << std::endl;
+			std::cerr << "    Port Midi Host Error: " << err_msg << std::endl;
 		}
+		_pm_output_id = pmNoDevice;
 	}
 
 	// close queue
