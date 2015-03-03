@@ -75,66 +75,66 @@ WavesMidiDevice::~WavesMidiDevice ()
 int
 WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 {
-        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::open (): %1", name ()));
+    DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::open (): %1", name ()));
 
-        if (is_input () ) {
-			std::cout << "WavesMidiDevice::open (): INPUT" << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+    if (is_input () ) {
+		std::cout << "WavesMidiDevice::open (): INPUT" << _pm_input_id << "-[" << name () <<  "]" << std::endl;
 			
-			if (!_input_pm_stream) {
-				// create queue
-				if (!_input_queue) {
-					_input_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
-					if (NULL == _input_queue) {
-                        std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-                        return -1;
-					}
-				} 
-				// create stream
-                if (pmNoError != Pm_OpenInput (&_input_pm_stream, 
-                                               _pm_input_id,
-                                               NULL,
-                                               1024,
-                                               time_proc,
-                                               time_info)) {
-                        char* err_msg = new char[256];
-						Pm_GetHostErrorText(err_msg, 256);
-						std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
-						std::cerr << "Error: " << err_msg << std::endl;
-						close ();
-                        return -1;
-                }
-			} 
-		} 
-        
-        if (is_output () ) {
-			std::cout << "WavesMidiDevice::open (): OUTPUT" << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-
-			if (!_output_pm_stream) {
-				// create queue
-				if (!_output_queue) {
-					_output_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
-					if (NULL == _output_queue) {
-                        std::cerr << "WavesMidiDevice::open (): _output_queue = Pm_QueueCreate () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-                        return -1;
-					}
+		if (!_input_pm_stream) {
+			// create queue
+			if (!_input_queue) {
+				_input_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
+				if (NULL == _input_queue) {
+                    std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+                    return -1;
 				}
-				// create stream
-                if (pmNoError != Pm_OpenOutput (&_output_pm_stream, 
-                                                _pm_output_id, 
-                                                NULL,
-                                                1024,
-                                                time_proc,
-                                                time_info,
-                                                LATENCY)) {
-                        char* err_msg = new char[256];
-						Pm_GetHostErrorText(err_msg, 256);
-						std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
-						std::cerr << "Error: " << err_msg << std::endl;
-						close ();
-                        return -1;
-                }
+			} 
+			// create stream
+            if (pmNoError != Pm_OpenInput (&_input_pm_stream, 
+                                            _pm_input_id,
+                                            NULL,
+                                            1024,
+                                            time_proc,
+                                            time_info)) {
+                    char* err_msg = new char[256];
+					Pm_GetHostErrorText(err_msg, 256);
+					std::cerr << "WavesMidiDevice::open (): Pm_OpenInput () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
+					std::cerr << "Error: " << err_msg << std::endl;
+					close ();
+                    return -1;
+            }
+		} 
+	} 
+        
+    if (is_output () ) {
+		std::cout << "WavesMidiDevice::open (): OUTPUT" << _pm_output_id << "-[" << name () <<  "]" << std::endl;
+
+		if (!_output_pm_stream) {
+			// create queue
+			if (!_output_queue) {
+				_output_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
+				if (NULL == _output_queue) {
+                    std::cerr << "WavesMidiDevice::open (): _output_queue = Pm_QueueCreate () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
+                    return -1;
+				}
 			}
-        }
+			// create stream
+            if (pmNoError != Pm_OpenOutput (&_output_pm_stream, 
+                                            _pm_output_id, 
+                                            NULL,
+                                            1024,
+                                            time_proc,
+                                            time_info,
+                                            LATENCY)) {
+                    char* err_msg = new char[256];
+					Pm_GetHostErrorText(err_msg, 256);
+					std::cerr << "WavesMidiDevice::open (): Pm_OpenOutput () failed for " << _pm_output_id << "-[" << name () <<  "]!" << std::endl;
+					std::cerr << "Error: " << err_msg << std::endl;
+					close ();
+                    return -1;
+            }
+		}
+    }
 	return 0;
 }
 
