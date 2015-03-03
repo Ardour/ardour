@@ -27,11 +27,11 @@ using namespace ARDOUR;
 
 #ifdef __APPLE__
 
-const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("None") ("CoreMIDI");
+const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("CoreMIDI") ("None");
 
 #elif PLATFORM_WINDOWS
 
-const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("None") ("Multimedia Extensions");
+const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("Multimedia Extensions") ("None");
 
 #endif
 
@@ -48,11 +48,11 @@ int
 WavesAudioBackend::set_midi_option (const std::string& option)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::set_midi_option ( " << option << " )" << std::endl;
-    if (option == __available_midi_options[0]) {
+    if (option == __available_midi_options[1]) {
         _use_midi = false;
         // COMMENTED DBG LOGS */ std::cout << "\tNO MIDI system used)" << std::endl;
     }
-    else if (option == __available_midi_options[1]) {
+    else if (option == __available_midi_options[0]) {
         _use_midi = true;
         // COMMENTED DBG LOGS */ std::cout << "\tNO MIDI system used)" << std::endl;
     }
