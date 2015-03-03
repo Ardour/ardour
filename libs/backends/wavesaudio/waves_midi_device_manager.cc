@@ -192,13 +192,23 @@ WavesMidiDevice* WavesMidiDeviceManager::_get_device (const std::string& name)
 int
 WavesMidiDeviceManager::_create_devices ()
 {
-    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_create_devices ():" << std::endl;
+    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_create_devices () :" << std::endl;
     int count = Pm_CountDevices ();
 
     for (int i = 0; i < count; i++) {
 
         const PmDeviceInfo* pm_device_info = Pm_GetDeviceInfo (i);
-
+	    /* COMMENTED DBG LOGS */ std::cout << "                                    interf : " << pm_device_info->interf << std::endl;
+	    /* COMMENTED DBG LOGS */ std::cout << "                                      name : " << pm_device_info->name << std::endl;
+	    /* COMMENTED DBG LOGS */ std::cout << "                                     input : " << pm_device_info->input << std::endl;
+	    /* COMMENTED DBG LOGS */ std::cout << "                                    output : " << pm_device_info->output << std::endl;
+	    /* COMMENTED DBG LOGS */ std::cout << "                                    opened : " << pm_device_info->opened << std::endl;
+#if defined (PLATFORM_WINDOWS)
+		if (strncmp (pm_device_info->name, "Microsoft", strlen ("Microsoft")) == 0) {
+			/* COMMENTED DBG LOGS */ std::cout << "      skipping anything from Microsoft :" << pm_device_info->name << std::endl;
+			continue;
+		}
+#endif
         if (pm_device_info == NULL) {
             std::cerr << "WavesMidiDeviceManager::_create_devices (): Pm_GetDeviceInfo (" << i << ") failed!" << std::endl;
             continue;
