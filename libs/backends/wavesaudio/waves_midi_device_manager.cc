@@ -54,7 +54,7 @@ WavesMidiDeviceManager::~WavesMidiDeviceManager ()
 int
 WavesMidiDeviceManager::start ()
 {
-    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::start ():" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::start ():" << std::endl;
     if ( _active == true ) {
         return -1;
     }
@@ -77,7 +77,7 @@ WavesMidiDeviceManager::start ()
 int
 WavesMidiDeviceManager::stream (bool yn)
 {
-    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::stream (" << (yn?"true":"false") << "):" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::stream (" << (yn?"true":"false") << "):" << std::endl;
     if (!_active) {
         std::cerr << "WavesMidiDeviceManager::stream (): the midi device manager is not started up !" << std::endl;
         return -1;
@@ -88,7 +88,8 @@ WavesMidiDeviceManager::stream (bool yn)
     }
 
     if (yn)    {
-        if ( Pt_Start (1, __portmidi_callback, this) != ptNoError) {
+		// __portmidi_callback will be called once per 50 msec
+        if ( Pt_Start (50, __portmidi_callback, this) != ptNoError) {
             std::cerr << "WavesMidiDeviceManager::stream (): Pt_Start () failed!" << std::endl;
             return -1;
         }
@@ -108,7 +109,7 @@ WavesMidiDeviceManager::stream (bool yn)
 int
 WavesMidiDeviceManager::stop ()
 {
-    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::stop ():" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::stop ():" << std::endl;
 
     if ( _active == false ) {
         return 0;
@@ -149,9 +150,9 @@ WavesMidiDeviceManager::_portmidi_callback (PtTimestamp timestamp)
 
     if ((_input_device_count != midiInGetNumDevs ()) || (_output_device_count != midiOutGetNumDevs ())) {
         _audiobackend._changed_midi_devices ();
-	    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_portmidi_callback ():" << std::endl;
- 	    /* COMMENTED DBG LOGS */ std::cout << "                        _input_device_count ?= midiInGetNumDevs () :" << _input_device_count << " ?= " << midiInGetNumDevs () << std::endl;
- 	    /* COMMENTED DBG LOGS */ std::cout << "                        _output_device_count ?= midiOutGetNumDevs () :" << _output_device_count << " ?= " << midiOutGetNumDevs () << std::endl;
+	    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_portmidi_callback ():" << std::endl;
+ 	    // COMMENTED DBG LOGS */ std::cout << "                        _input_device_count ?= midiInGetNumDevs () :" << _input_device_count << " ?= " << midiInGetNumDevs () << std::endl;
+ 	    // COMMENTED DBG LOGS */ std::cout << "                        _output_device_count ?= midiOutGetNumDevs () :" << _output_device_count << " ?= " << midiOutGetNumDevs () << std::endl;
    }
 }
 
@@ -179,7 +180,7 @@ WavesMidiDeviceManager::__get_time_ms (void *time_info)
 
 WavesMidiDevice* WavesMidiDeviceManager::_get_device (const std::string& name)
 {
-    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_get_device ():" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_get_device ():" << std::endl;
     for (size_t i = 0; i < _devices.size (); i++) {
         if (name == _devices[i]->name ()) {
             return _devices[i];
@@ -192,20 +193,20 @@ WavesMidiDevice* WavesMidiDeviceManager::_get_device (const std::string& name)
 int
 WavesMidiDeviceManager::_create_devices ()
 {
-    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_create_devices () :" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_create_devices () :" << std::endl;
     int count = Pm_CountDevices ();
 
     for (int i = 0; i < count; i++) {
 
         const PmDeviceInfo* pm_device_info = Pm_GetDeviceInfo (i);
-	    /* COMMENTED DBG LOGS */ std::cout << "                                    interf : " << pm_device_info->interf << std::endl;
-	    /* COMMENTED DBG LOGS */ std::cout << "                                      name : " << pm_device_info->name << std::endl;
-	    /* COMMENTED DBG LOGS */ std::cout << "                                     input : " << pm_device_info->input << std::endl;
-	    /* COMMENTED DBG LOGS */ std::cout << "                                    output : " << pm_device_info->output << std::endl;
-	    /* COMMENTED DBG LOGS */ std::cout << "                                    opened : " << pm_device_info->opened << std::endl;
+	    // COMMENTED DBG LOGS */ std::cout << "                                    interf : " << pm_device_info->interf << std::endl;
+	    // COMMENTED DBG LOGS */ std::cout << "                                      name : " << pm_device_info->name << std::endl;
+	    // COMMENTED DBG LOGS */ std::cout << "                                     input : " << pm_device_info->input << std::endl;
+	    // COMMENTED DBG LOGS */ std::cout << "                                    output : " << pm_device_info->output << std::endl;
+	    // COMMENTED DBG LOGS */ std::cout << "                                    opened : " << pm_device_info->opened << std::endl;
 #if defined (PLATFORM_WINDOWS)
 		if (strncmp (pm_device_info->name, "Microsoft", strlen ("Microsoft")) == 0) {
-			/* COMMENTED DBG LOGS */ std::cout << "      skipping anything from Microsoft :" << pm_device_info->name << std::endl;
+			// COMMENTED DBG LOGS */ std::cout << "      skipping anything from Microsoft :" << pm_device_info->name << std::endl;
 			continue;
 		}
 #endif
@@ -231,7 +232,7 @@ WavesMidiDeviceManager::_create_devices ()
 int
 WavesMidiDeviceManager::_delete_devices ()
 {
-    /* COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_delete_devices ():" << std::endl;
+    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_delete_devices ():" << std::endl;
     while (!_devices.empty ()) {
         WavesMidiDevice * device = _devices.back ();
         _devices.pop_back ();
