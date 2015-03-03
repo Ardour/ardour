@@ -97,6 +97,7 @@ vstfx_cache_file (const char* dllpath, int personal, const char *ext)
 	string dir;
 	if (personal) {
 		dir = get_personal_vst_info_cache_dir();
+		// TODO prefix path relative to scan-root to avoid duplicates
 	} else {
 		dir = Glib::path_get_dirname (std::string(dllpath));
 	}

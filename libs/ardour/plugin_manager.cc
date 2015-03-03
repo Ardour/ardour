@@ -278,7 +278,7 @@ PluginManager::clear_vst_cache ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -288,7 +288,7 @@ PluginManager::clear_vst_cache ()
 #ifdef LXVST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -299,7 +299,7 @@ PluginManager::clear_vst_cache ()
 	{
 		string personal = get_personal_vst_info_cache_dir();
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\.fsi$");
+		find_files_matching_regex (fsi_files, personal, "\\.fsi$", /* user cache is flat, no recursion */ false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -313,7 +313,7 @@ PluginManager::clear_vst_blacklist ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsb$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsb$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -323,7 +323,7 @@ PluginManager::clear_vst_blacklist ()
 #ifdef LXVST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsb$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsb$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -335,7 +335,7 @@ PluginManager::clear_vst_blacklist ()
 		string personal = get_personal_vst_blacklist_dir();
 
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\.fsb$");
+		find_files_matching_regex (fsi_files, personal, "\\.fsb$", /* flat user cache */ false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -699,7 +699,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
 
-	find_files_matching_filter (plugin_objects, Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true);
+	find_files_matching_filter (plugin_objects, Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("VST"), *x, !cache_only && !cancelled());
@@ -818,7 +818,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
-	find_files_matching_filter (plugin_objects, Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true);
+	find_files_matching_filter (plugin_objects, Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("LXVST"), *x, !cache_only && !cancelled());
