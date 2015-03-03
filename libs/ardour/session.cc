@@ -1782,8 +1782,6 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 	_base_frame_rate = frames_per_second;
 	_nominal_frame_rate = frames_per_second;
 
-    ARDOUR::EngineStateController::instance()->set_desired_sample_rate (frames_per_second);
-    
 	sync_time_vars();
 
 	clear_clicks ();
