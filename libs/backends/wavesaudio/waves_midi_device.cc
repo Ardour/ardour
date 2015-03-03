@@ -87,7 +87,6 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 				_input_queue = Pm_QueueCreate (QUEUE_LENGTH, sizeof (const WavesMidiEvent*));
 				/* COMMENTED DBG LOGS */ std::cout << "    DONE : " << std::endl;
 				if (NULL == _input_queue) {
-                    char* err_msg = new char[256];
                     std::cerr << "WavesMidiDevice::open (): _input_queue = Pm_QueueCreate () failed for " << _pm_input_id << "-[" << name () <<  "]!" << std::endl;
                     return -1;
 				}
