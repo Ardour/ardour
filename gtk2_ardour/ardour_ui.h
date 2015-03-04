@@ -480,7 +480,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::HBox               _editor_transport_box;
 	Gtk::HBox                transport_hbox;
 	Gtk::Fixed               transport_base;
-	WavesDialog _audio_engine_reset_info_dialog; // HOT FIX. (REWORK IT)
+	WavesDialog *_audio_engine_reset_info_dialog; // HOT FIX. (REWORK IT)
 	MainMenuDisabled *_audio_engine_reset_menu_disabler; // HOT FIX. (REWORK IT)
 
 	struct TransportControllable : public PBD::Controllable {
