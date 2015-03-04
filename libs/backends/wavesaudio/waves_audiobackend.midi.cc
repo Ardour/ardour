@@ -69,7 +69,7 @@ std::string
 WavesAudioBackend::midi_option () const
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::midi_option ():" << std::endl;
-    return * (__available_midi_options.begin () + (_use_midi?1:0));
+    return * (__available_midi_options.begin () + (_use_midi?0:1));
 }
 
 
