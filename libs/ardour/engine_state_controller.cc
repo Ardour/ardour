@@ -61,7 +61,6 @@ EngineStateController::instance()
 EngineStateController::EngineStateController()
 : _current_state()
 , _last_used_real_device("")
-, _desired_sample_rate(0)
 , _have_control(false)
 
 {
@@ -553,9 +552,9 @@ EngineStateController::_validate_current_device_state()
     std::vector<float> sample_rates = backend->available_sample_rates (_current_state->device_name);
     
     // check if session desired sample rate (if it's set) could be used with this device
-    if (_desired_sample_rate != 0) {
+    if (_session != 0) {
         
-        if ( !set_new_sample_rate_in_controller (_desired_sample_rate) ) {
+        if ( !set_new_sample_rate_in_controller (_session->nominal_frame_rate ()) ) {
             if ( !set_new_sample_rate_in_controller (backend->default_sample_rate() ) ) {
                 return false;
             }
@@ -1331,7 +1330,8 @@ EngineStateController::_on_session_loaded ()
     _session->reconnect_mmc_ports (true);
     _session->reconnect_mmc_ports (false);
 	
-    if (_desired_sample_rate > 0 && set_new_sample_rate_in_controller(_desired_sample_rate) )
+    framecnt_t desired_sample_rate = _session->nominal_frame_rate ();
+    if ( desired_sample_rate > 0 && set_new_sample_rate_in_controller(desired_sample_rate) )
 	{
 		push_current_state_to_backend(false);
         SampleRateChanged(); // emit a signal
@@ -1757,15 +1757,3 @@ EngineStateController::push_current_state_to_backend(bool start)
     
     return true;
 }
-
-
-void
-EngineStateController::set_desired_sample_rate(framecnt_t session_desired_sr)
-{
-    if (session_desired_sr < 0) {
-        return;
-    }
-
-    _desired_sample_rate = session_desired_sr;
-}
-

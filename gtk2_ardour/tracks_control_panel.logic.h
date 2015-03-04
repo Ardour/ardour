@@ -31,8 +31,7 @@
   private:
 
 // attributes
-    uint32_t _desired_sample_rate;
-    bool  _have_control;
+  bool  _have_control;
 
 // this flag is set for immediate return during combo-box change callbacks
 // when we do not need to process current combo-box change

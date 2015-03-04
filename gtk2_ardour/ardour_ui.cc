@@ -4806,7 +4806,7 @@ ARDOUR_UI::reset_route_peak_display (Route* route)
 int
 ARDOUR_UI::do_engine_setup (framecnt_t desired_sample_rate)
 {
-    ARDOUR::EngineStateController::instance()->set_desired_sample_rate (desired_sample_rate);
+    // nothing to do so far
     
 	return 0;
 }

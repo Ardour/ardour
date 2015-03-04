@@ -162,8 +162,6 @@ public:
     bool        set_new_backend_as_current(const std::string&);
     // switch engine to new device
     bool        set_new_device_as_current(const std::string& device_name);
-    // switch backend to session sample rate
-    void        set_desired_sample_rate(framecnt_t);
 
     XMLNode&    serialize_audio_midi_settings();
     void        save_audio_midi_settings();
@@ -313,7 +311,6 @@ private:
     // last active non-default (real) device
     std::string _last_used_real_device;
     
-    ARDOUR::framecnt_t  _desired_sample_rate;
     bool                _have_control;
     
 	Session* _session;
