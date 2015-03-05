@@ -713,7 +713,6 @@ AlsaAudioBackend::samples_since_cycle_start ()
 	}
 
 	const int64_t elapsed_time_us = _last_process_start - g_get_monotonic_time();
-	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
 
 	assert(elapsed_time_us >=0);
 
