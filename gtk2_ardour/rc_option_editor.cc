@@ -2067,6 +2067,16 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("MIDI"),
+		    new SpinOption<float> (
+			    "midi-readahead",
+			    _("MIDI read-ahead time (seconds)"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_readahead),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_readahead),
+			    0.1, 10, 0.1, 1,
+			    "", 1.0, 1
+			    ));
+
+	add_option (_("MIDI"),
 		    new BoolOption (
 			    "send-midi-clock",
 			    _("Send MIDI Clock"),

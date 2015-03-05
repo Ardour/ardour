@@ -65,14 +65,16 @@ Butler::~Butler()
 void
 Butler::config_changed (std::string p)
 {
-        if (p == "playback-buffer-seconds") {
-                /* size is in Samples, not bytes */
-                audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
-                _session.adjust_playback_buffering ();
-        } else if (p == "capture-buffer-seconds") {
-                audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
-                _session.adjust_capture_buffering ();
-        }
+	if (p == "playback-buffer-seconds") {
+		/* size is in Samples, not bytes */
+		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
+		_session.adjust_playback_buffering ();
+	} else if (p == "capture-buffer-seconds") {
+		audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
+		_session.adjust_capture_buffering ();
+	} else if (p == "midi-readahead") {
+		MidiDiskstream::set_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * _session.frame_rate()));
+	}
 }
 
 int
