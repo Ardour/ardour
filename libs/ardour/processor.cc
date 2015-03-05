@@ -150,7 +150,9 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 			
 			set_id (**i);
 
-			if ((prop = (*i)->property ("active")) != 0) {
+			//note:  in A2, active state was stored in the Redirect node, not the child IO node
+			/*
+			 * if ((prop = (*i)->property ("active")) != 0) {
 				bool const a = string_is_affirmative (prop->value ());
 				if (_active != a) {
 					if (a) {
@@ -159,7 +161,8 @@ Processor::set_state_2X (const XMLNode & node, int /*version*/)
 						deactivate ();
 					}
 				}
-			}
+			}*/
+			
 		}
 	}
 
