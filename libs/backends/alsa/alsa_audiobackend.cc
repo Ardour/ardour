@@ -50,6 +50,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _freewheel (false)
 	, _freewheeling (false)
 	, _measure_latency (false)
+	, _last_process_start (0)
+	, _process_speed_samples_per_ms (0)
 	, _audio_device("")
 	, _midi_driver_option(_("None"))
 	, _device_reservation(0)
@@ -500,6 +502,13 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		_ports.clear();
 	}
 
+	/* reset internal state */
+	_dsp_load = 0;
+	_freewheeling = false;
+	_freewheel = false;
+	_last_process_start = 0;
+	_process_speed_samples_per_ms = 0;
+
 	release_device();
 
 	assert(_rmidi_in.size() == 0);
@@ -696,7 +705,25 @@ AlsaAudioBackend::sample_time_at_cycle_start ()
 pframes_t
 AlsaAudioBackend::samples_since_cycle_start ()
 {
-	return 0;
+	if (!_active || !_run || _freewheeling || _freewheel) {
+		return 0;
+	}
+	if (_last_process_start == 0 || _process_speed_samples_per_ms) {
+		return 0;
+	}
+
+	const int64_t elapsed_time_us = _last_process_start - g_get_monotonic_time();
+	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
+
+	assert(elapsed_time_us >=0);
+
+	/* linear extrapolation, using [low pass] filtered process-speed. */
+	const pframes_t processed_samples = elapsed_time_us * _process_speed_samples_per_ms * 1e-3;
+
+	if (processed_samples >= _samples_per_period) {
+		return _samples_per_period;
+	}
+	return processed_samples;
 }
 
 
@@ -1465,6 +1492,8 @@ AlsaAudioBackend::main_process_thread ()
 					memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 				}
 
+				/* call engine process callback */
+				_last_process_start = g_get_monotonic_time();
 				if (engine.process_callback (_samples_per_period)) {
 					_pcmi->pcm_stop ();
 					_active = false;
@@ -1504,6 +1533,12 @@ AlsaAudioBackend::main_process_thread ()
 				clock2 = g_get_monotonic_time();
 				const int64_t elapsed_time = clock2 - clock1;
 				_dsp_load = elapsed_time / (float) nomial_time;
+
+				const double ps = 1e3 * _samples_per_period / elapsed_time;
+				// low pass filter, The time-constant should really be
+				// 1.0 - e^(-2.0 * π * v / SR);
+				// with v = _samples_per_period / N, and SR = _samples_per_period;
+				_process_speed_samples_per_ms  = _process_speed_samples_per_ms + .05 * (ps - _process_speed_samples_per_ms) + 1e-12;
 			}
 
 			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {
@@ -1539,6 +1574,7 @@ AlsaAudioBackend::main_process_thread ()
 				rm->sync_time (clock1);
 			}
 
+			_last_process_start = -1;
 			if (engine.process_callback (_samples_per_period)) {
 				_pcmi->pcm_stop ();
 				_active = false;
