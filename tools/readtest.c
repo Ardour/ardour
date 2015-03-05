@@ -14,12 +14,6 @@
 
 char* data = 0;
 
-int
-read_one (int fd, ssize_t sz)
-{
-	return 0;
-}
-
 void
 usage ()
 {
