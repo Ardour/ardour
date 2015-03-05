@@ -141,7 +141,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Window/toggle-tracks-control-panel|<@PRIMARY@>comma|open preferences dialog
 @rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
-@trans|Editor/set-playhead|p|set playhead position
+;@trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
 @select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
 
