@@ -19,7 +19,6 @@ while [ $# -gt 1 ] ; do
 	-d) dir=$2; shift; shift ;;
 	-f) filesize=$2; shift; shift ;;
 	-n) numfiles=$2; shift; shift ;;
-	-N) nocache="-s"; shift;;
         *) break ;;
     esac
 done
@@ -82,5 +81,5 @@ for bs in $@ ; do
     fi
     
     echo "# Blocksize $bs"
-    ./readtest $nocache -b $bs -q $dir/testfile_%d
+    ./readtest -b $bs -q $dir/testfile_%d
 done
