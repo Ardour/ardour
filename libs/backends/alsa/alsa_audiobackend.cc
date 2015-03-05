@@ -1573,7 +1573,7 @@ AlsaAudioBackend::main_process_thread ()
 				rm->sync_time (clock1);
 			}
 
-			_last_process_start = -1;
+			_last_process_start = 0;
 			if (engine.process_callback (_samples_per_period)) {
 				_pcmi->pcm_stop ();
 				_active = false;
