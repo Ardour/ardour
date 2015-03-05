@@ -1136,10 +1136,10 @@ AudioEngine::thread_init_callback (void* arg)
 
 	pthread_set_name (X_("audioengine"));
 
+	SessionEvent::create_per_thread_pool (X_("AudioEngine"), 512);
+
 	PBD::notify_gui_about_thread_creation ("gui", pthread_self(), X_("AudioEngine"), 4096);
 	PBD::notify_gui_about_thread_creation ("midiui", pthread_self(), X_("AudioEngine"), 128);
-
-	SessionEvent::create_per_thread_pool (X_("AudioEngine"), 512);
 
 	AsyncMIDIPort::set_process_thread (pthread_self());
 
