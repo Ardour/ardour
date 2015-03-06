@@ -41,6 +41,13 @@ std::vector<std::string> CoreAudioBackend::_midi_options;
 std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_audio_device_status;
 std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_midi_device_status;
 
+
+static void hw_changed_callback_ptr (void *arg)
+{
+	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
+	d->hw_changed_callback();
+}
+
 CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
 	, _run (false)
@@ -70,6 +77,7 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	_pcmio = new CoreAudioPCM ();
 	_midiio = new CoreMidiIo ();
 
+	_pcmio->set_hw_changed_callback (hw_changed_callback_ptr, this);
 	_pcmio->discover();
 	_midiio->discover();
 }
@@ -114,25 +122,16 @@ CoreAudioBackend::enumerate_devices () const
 std::vector<float>
 CoreAudioBackend::available_sample_rates (const std::string&) const
 {
-	// TODO ask _pcmio for available rates
 	std::vector<float> sr;
-	sr.push_back (44100.0);
-	sr.push_back (48000.0);
+	_pcmio->available_sample_rates(name_to_id(_audio_device), sr);
 	return sr;
 }
 
 std::vector<uint32_t>
 CoreAudioBackend::available_buffer_sizes (const std::string&) const
 {
-	// TODO ask _pcmio for available rates
 	std::vector<uint32_t> bs;
-	bs.push_back (64);
-	bs.push_back (128);
-	bs.push_back (256);
-	bs.push_back (512);
-	bs.push_back (1024);
-	bs.push_back (2048);
-	bs.push_back (4096);
+	_pcmio->available_buffer_sizes(name_to_id(_audio_device), bs);
 	return bs;
 }
 
@@ -164,6 +163,8 @@ int
 CoreAudioBackend::set_device_name (const std::string& d)
 {
 	_audio_device = d;
+	const float sr = _pcmio->current_sample_rate(name_to_id(_audio_device));
+	if (sr > 0) { set_sample_rate(sr); }
 	return 0;
 }
 
@@ -171,6 +172,7 @@ int
 CoreAudioBackend::set_sample_rate (float sr)
 {
 	if (sr <= 0) { return -1; }
+	// TODO check if it's in the list of valid SR
 	_samplerate = sr;
 	engine.sample_rate_change (sr);
 	return 0;
@@ -363,6 +365,12 @@ CoreAudioBackend::midi_device_enabled (std::string const device) const
 	return nfo->enabled;
 }
 
+void
+CoreAudioBackend::launch_control_app ()
+{
+    _pcmio->launch_control_app(name_to_id(_audio_device));
+}
+
 /* State Control */
 
 static void * pthread_freewheel (void *arg)
@@ -391,7 +399,6 @@ static void midi_port_change (void *arg)
 	d->coremidi_rediscover ();
 }
 
-
 int
 CoreAudioBackend::_start (bool for_latency_measurement)
 {
@@ -414,21 +421,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_ports.clear();
 	}
 
-#if 0
-	assert(_rmidi_in.size() == 0);
-	assert(_rmidi_out.size() == 0);
-#endif
-
-	uint32_t device_id = UINT32_MAX;
-	std::map<size_t, std::string> devices;
-	_pcmio->device_list(devices);
-
-	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->second == _audio_device) {
-			device_id = i->first;
-			break;
-		}
-	}
+	uint32_t device_id = name_to_id(_audio_device);
 
 	assert(_active_ca == false);
 	assert(_active_fw == false);
@@ -485,11 +478,8 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag = false;
 
-	printf("MIDI: %s\n", _midi_driver_option.c_str());
-
 	if (_midi_driver_option == _("CoreMidi")) {
-		//register_system_midi_ports();
-		_midiio->setPortChangedCallback(midi_port_change, this);
+		_midiio->set_port_changed_callback(midi_port_change, this);
 		_midiio->discover();
 	}
 
@@ -510,7 +500,6 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 
 	engine.reconnect_ports ();
 
-
 	if (pthread_create (&_freeewheel_thread, NULL, pthread_freewheel, this))
 	{
 		PBD::error << _("CoreAudioBackend: failed to create process thread.") << endmsg;
@@ -523,13 +512,11 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	while ((!_active_ca || !_active_fw) && --timeout > 0) { Glib::usleep (1000); }
 
 	if (timeout == 0) {
-		printf("CoreAudioBackend: failed to start.");
 		PBD::error << _("CoreAudioBackend: failed to start.") << endmsg;
 	}
 
 	if (!_active_fw) {
 		PBD::error << _("CoreAudioBackend: failed to start freewheeling thread.") << endmsg;
-		printf("CoreAudioBackend: fw .\n");
 		_run = false;
 		_pcmio->pcm_stop();
 		unregister_ports();
@@ -539,7 +526,6 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	if (!_active_ca) {
-		printf("CoreAudioBackend: ca .\n");
 		PBD::error << _("CoreAudioBackend: failed to start coreaudio.") << endmsg;
 		stop();
 		_run = false;
@@ -560,27 +546,12 @@ CoreAudioBackend::stop ()
 
 	_run = false;
 	_pcmio->pcm_stop();
-	_midiio->setPortChangedCallback(NULL, NULL);
+	_midiio->set_port_changed_callback(NULL, NULL);
 
 	if (pthread_join (_freeewheel_thread, &status)) {
 		PBD::error << _("CoreAudioBackend: failed to terminate.") << endmsg;
 		return -1;
 	}
-
-#if 0
-	while (!_rmidi_out.empty ()) {
-		CoreMidiIO *m = _rmidi_out.back ();
-		m->stop();
-		_rmidi_out.pop_back ();
-		delete m;
-	}
-	while (!_rmidi_in.empty ()) {
-		CoreMidiIO *m = _rmidi_in.back ();
-		m->stop();
-		_rmidi_in.pop_back ();
-		delete m;
-	}
-#endif
 
 	unregister_ports();
 
@@ -637,6 +608,20 @@ CoreAudioBackend::samples_since_cycle_start ()
 	return 0;
 }
 
+uint32_t
+CoreAudioBackend::name_to_id(std::string device_name) const {
+	uint32_t device_id = UINT32_MAX;
+	std::map<size_t, std::string> devices;
+	_pcmio->device_list(devices);
+
+	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (i->second == device_name) {
+			device_id = i->first;
+			break;
+		}
+	}
+	return device_id;
+}
 
 void *
 CoreAudioBackend::coreaudio_process_thread (void *arg)
@@ -872,8 +857,12 @@ int
 CoreAudioBackend::register_system_audio_ports()
 {
 	LatencyRange lr;
+	printf("COREAUDIO LATENCY: i:%d, o:%d\n",
+			_pcmio->get_latency(name_to_id(_audio_device), true),
+			_pcmio->get_latency(name_to_id(_audio_device), false));
 
-	// TODO ask _pcmio for port latencies
+	//TODO set latencies
+	//TODO query port names
 
 	const int a_ins = _n_inputs > 0 ? _n_inputs : 2;
 	const int a_out = _n_outputs > 0 ? _n_outputs : 2;
@@ -907,6 +896,7 @@ CoreAudioBackend::register_system_midi_ports()
 	int midi_ins = _system_midi_out.size();
 	int midi_outs =  _system_midi_in.size();
 
+	//TODO query port names
 	for (uint32_t i = midi_ins; i < _midiio->n_midi_outputs(); ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", ++midi_ins);
@@ -917,7 +907,6 @@ CoreAudioBackend::register_system_midi_ports()
 		LatencyRange lr;
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
-		//static_cast<CoreMidiPort*>(p)->set_n_periods(2);
 		_system_midi_out.push_back(static_cast<CoreBackendPort*>(p));
 	}
 
@@ -931,7 +920,6 @@ CoreAudioBackend::register_system_midi_ports()
 		LatencyRange lr;
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
-		//static_cast<CoreMidiPort*>(p)->set_n_periods(2);
 		_system_midi_in.push_back(static_cast<CoreBackendPort*>(p));
 	}
 
@@ -946,6 +934,8 @@ CoreAudioBackend::coremidi_rediscover()
 
 	pthread_mutex_lock (&_process_callback_mutex);
 
+	// TODO maintain device-specific connections, rather
+	// than re-map.
 	while (_system_midi_out.size() > _midiio->n_midi_outputs()) {
 		CoreBackendPort* p = _system_midi_out.back();
 		_system_midi_out.pop_back();
@@ -961,7 +951,6 @@ CoreAudioBackend::coremidi_rediscover()
 	register_system_midi_ports();
 
 	_port_change_flag = true;
-	_reinit_thread_callback = true; // XXX, rather hook into _pcmio's  hardwarePropertyChangeCallback
 	pthread_mutex_unlock (&_process_callback_mutex);
 }
 
@@ -1404,7 +1393,6 @@ CoreAudioBackend::process_callback ()
 	}
 
 	if (_reinit_thread_callback || _main_thread != pthread_self()) {
-		printf("REINIT THREAD\n");
 		_reinit_thread_callback = false;
 		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
@@ -1417,6 +1405,7 @@ CoreAudioBackend::process_callback ()
 
 #if 0 // here in RT callback ?? XXX
 	if (_samples_per_period != n_samples) {
+		printf("CoreAudio Adjust SPP %zu -> %d\n", _samples_per_period, n_samples);
 		_samples_per_period = n_samples;
 		engine.buffer_size_change (_samples_per_period);
 		// TODO update latencies
@@ -1428,7 +1417,7 @@ CoreAudioBackend::process_callback ()
 
 	clock1 = g_get_monotonic_time();
 
-	// TODO get midi
+	/* get midi */
 	i=0;
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 		CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>((*it)->get_buffer(0));
@@ -1465,12 +1454,12 @@ CoreAudioBackend::process_callback ()
 		return -1;
 	}
 
-	// mixdown midi
+	/* mixdown midi */
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-		//static_cast<CoreMidiPort*>(*it)->next_period();
 		static_cast<CoreMidiPort*>(*it)->get_buffer(0);
 	}
-	// queue outgoing midi
+
+	/* queue outgoing midi */
 	i = 0;
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
@@ -1487,15 +1476,14 @@ CoreAudioBackend::process_callback ()
 
 	_processed_samples += n_samples;
 
-	// calc DSP load.
-
+	/* calc DSP load. */
 	clock2 = g_get_monotonic_time();
 	const int64_t elapsed_time = clock2 - clock1;
 	_dsp_load = elapsed_time / (float) nominal_time;
 
 	//engine.Xrun (); // TODO, if any
 
-	// port-connection change
+	/* port-connection change */
 	post_process();
 	pthread_mutex_unlock (&_process_callback_mutex);
 	return 0;
@@ -1504,11 +1492,16 @@ CoreAudioBackend::process_callback ()
 void
 CoreAudioBackend::error_callback ()
 {
-	printf("ERROR CALLBACK\n");
 	_pcmio->set_error_callback (NULL, NULL);
 	engine.halted_callback("CoreAudio Process aborted.");
 }
 
+void
+CoreAudioBackend::hw_changed_callback ()
+{
+	_reinit_thread_callback = true;
+	engine.request_device_list_update();
+}
 
 /******************************************************************************/
 

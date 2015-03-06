@@ -76,7 +76,7 @@ public:
 
 	void notify_proc (const MIDINotification *message);
 
-	void setPortChangedCallback (void (changed_callback (void*)), void *arg) {
+	void set_port_changed_callback (void (changed_callback (void*)), void *arg) {
 		_changed_callback = changed_callback;
 		_changed_arg = arg;
 	}
@@ -84,19 +84,20 @@ public:
 private:
 	void cleanup ();
 
-	MIDIClientRef     _midiClient;
-	MIDIEndpointRef * _inputEndPoints;
-	MIDIEndpointRef * _outputEndPoints;
-	MIDIPortRef *     _inputPorts;
-	MIDIPortRef *     _outputPorts;
-	CoreMIDIQueue *  _inputQueue;
+	MIDIClientRef     _midi_client;
+	MIDIEndpointRef * _input_endpoints;
+	MIDIEndpointRef * _output_endpoints;
+	MIDIPortRef     * _input_ports;
+	MIDIPortRef     * _output_ports;
+	CoreMIDIQueue   * _input_queue;
+
 	RingBuffer<uint8_t> ** _rb;
 
-	uint32_t _n_midi_in;
-	uint32_t _n_midi_out;
+	uint32_t          _n_midi_in;
+	uint32_t          _n_midi_out;
 
-	MIDITimeStamp _time_at_cycle_start;
-	bool _active;
+	MIDITimeStamp     _time_at_cycle_start;
+	bool              _active;
 
 	void (* _changed_callback) (void*);
 	void  * _changed_arg;

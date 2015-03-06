@@ -24,6 +24,7 @@
 #include <AudioToolbox/AudioToolbox.h>
 
 #include <map>
+#include <vector>
 #include <string>
 
 #define AUHAL_OUTPUT_ELEMENT 0
@@ -43,6 +44,16 @@ public:
 	void     discover();
 	void     device_list(std::map<size_t, std::string> &devices) const { devices = _devices;}
 
+	int      available_sample_rates (uint32_t device_id, std::vector<float>& sampleRates);
+	int      available_buffer_sizes (uint32_t device_id, std::vector<uint32_t>& sampleRates);
+	uint32_t available_channels (uint32_t device_id, bool input);
+	float    current_sample_rate(uint32 device_id, bool input = false);
+	uint32_t get_latency(uint32 device_id, bool input);
+
+	std::string cached_port_name(uint32_t portnum, bool input) const;
+
+	void     launch_control_app (uint32_t device_id);
+
 	void     pcm_stop (void);
 	int      pcm_start (
 			uint32_t input_device,
@@ -53,13 +64,22 @@ public:
 			void * process_arg
 			);
 
+	// TODO: combine callbacks below, add a enum type
 	void     set_error_callback (
 			void ( error_callback (void*)),
 			void * error_arg
-                        ) {
-                _error_callback = error_callback;
-                _error_arg = error_arg;
-        }
+			) {
+		_error_callback = error_callback;
+		_error_arg = error_arg;
+	}
+
+	void     set_hw_changed_callback (
+			void ( callback (void*)),
+			void * arg
+			) {
+		_hw_changed_callback = callback;
+		_hw_changed_arg = arg;
+	}
 
 	// must be called from process_callback;
 	int      get_capture_channel (uint32_t chn, float *input, uint32_t n_samples);
@@ -74,13 +94,17 @@ public:
 			UInt32 inNumberFrames,
 			AudioBufferList* ioData);
 
-        void hwPropertyChange();
+	void hwPropertyChange();
 
 private:
+	int set_device_sample_rate (uint32 device_id, float rate, bool input);
+	void get_stream_latencies(uint32 device_id, bool input, std::vector<uint32>& latencies);
+	void cache_port_names(uint32 device_id, bool input);
+
 	AudioUnit _auhal;
-	AudioDeviceID* _deviceIDs;
-	AudioBufferList* _inputAudioBufferList;
-	AudioBufferList* _outputAudioBufferList;
+	AudioDeviceID* _device_ids;
+	AudioBufferList* _input_audio_buffer_list;
+	AudioBufferList* _output_audio_buffer_list;
 
 	int _state;
 
@@ -89,7 +113,7 @@ private:
 	uint32_t _capture_channels;
 	uint32_t _playback_channels;
 	bool     _in_process;
-	size_t   _numDevices;
+	size_t   _n_devices;
 
 	int (* _process_callback) (void*);
 	void * _process_arg;
@@ -97,9 +121,15 @@ private:
 	void (* _error_callback) (void*);
 	void  * _error_arg;
 
+	void (* _hw_changed_callback) (void*);
+	void  * _hw_changed_arg;
+
+	// TODO proper device info struct
 	std::map<size_t, std::string> _devices;
-        // TODO proper device info struct
 	uint32_t * _device_ins;
 	uint32_t * _device_outs;
+	std::vector<std::string> _input_names;
+	std::vector<std::string> _output_names;
 
+	pthread_mutex_t _discovery_lock;
 };

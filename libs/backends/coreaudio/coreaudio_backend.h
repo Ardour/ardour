@@ -199,8 +199,8 @@ class CoreAudioBackend : public AudioBackend {
 		bool can_set_systemic_midi_latencies () const { return false; /* XXX */}
 
 		/* External control app */
-		std::string control_app_name () const { return std::string (); }
-		void launch_control_app () {}
+		std::string control_app_name () const { return std::string ("Apple"); }
+		void launch_control_app ();
 
 		/* MIDI */
 		std::vector<std::string> enumerate_midi_options () const;
@@ -214,6 +214,7 @@ class CoreAudioBackend : public AudioBackend {
 		// really private, but needing static access:
 		int process_callback();
 		void error_callback();
+		void hw_changed_callback();
 
 	protected:
 		/* State Control */
@@ -333,6 +334,9 @@ class CoreAudioBackend : public AudioBackend {
 		uint32_t _systemic_audio_input_latency;
 		uint32_t _systemic_audio_output_latency;
 
+		/* coreaudio specific  */
+		uint32_t name_to_id(std::string) const;
+
 		/* midi settings */
 		struct CoreMidiDeviceInfo {
 			bool     enabled;
@@ -379,9 +383,6 @@ class CoreAudioBackend : public AudioBackend {
 		std::vector<CoreBackendPort *> _system_outputs;
 		std::vector<CoreBackendPort *> _system_midi_in;
 		std::vector<CoreBackendPort *> _system_midi_out;
-
-		//std::vector<CoreMidiOut *> _rmidi_out;
-		//std::vector<CoreMidiIn  *> _rmidi_in;
 
 		struct PortConnectData {
 			std::string a;

@@ -31,3 +31,6 @@ def build(bld):
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS', 'COREAUDIO_108'
                   ]
+
+    # OSX 10.6 or later
+    obj.defines += ['COREAUDIO_108']

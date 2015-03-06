@@ -40,12 +40,12 @@ static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *s
 
 
 CoreMidiIo::CoreMidiIo() 
-	: _midiClient (0)
-	, _inputEndPoints (0)
-	, _outputEndPoints (0)
-	, _inputPorts (0)
-	, _outputPorts (0)
-	, _inputQueue (0)
+	: _midi_client (0)
+	, _input_endpoints (0)
+	, _output_endpoints (0)
+	, _input_ports (0)
+	, _output_ports (0)
+	, _input_queue (0)
 	, _rb (0)
 	, _n_midi_in (0)
 	, _n_midi_out (0)
@@ -55,7 +55,7 @@ CoreMidiIo::CoreMidiIo()
 	, _changed_arg (0)
 {
 	OSStatus err;
-	err = MIDIClientCreate(CFSTR("Ardour"), &notifyProc, this, &_midiClient);
+	err = MIDIClientCreate(CFSTR("Ardour"), &notifyProc, this, &_midi_client);
 	if (noErr != err) {
 		fprintf(stderr, "Creating Midi Client failed\n");
 	}
@@ -65,7 +65,7 @@ CoreMidiIo::CoreMidiIo()
 CoreMidiIo::~CoreMidiIo() 
 {
 	cleanup();
-	MIDIClientDispose(_midiClient); _midiClient = 0;
+	MIDIClientDispose(_midi_client); _midi_client = 0;
 }
 
 void
@@ -73,19 +73,19 @@ CoreMidiIo::cleanup()
 {
 	_active = false;
 	for (uint32_t i = 0 ; i < _n_midi_in ; ++i) {
-		MIDIPortDispose(_inputPorts[i]);
-		_inputQueue[i].clear();
+		MIDIPortDispose(_input_ports[i]);
+		_input_queue[i].clear();
 		delete _rb[i];
 	}
 	for (uint32_t i = 0 ; i < _n_midi_out ; ++i) {
-		MIDIPortDispose(_outputPorts[i]);
+		MIDIPortDispose(_output_ports[i]);
 	}
 
-	free(_inputPorts); _inputPorts = 0;
-	free(_inputEndPoints); _inputEndPoints = 0;
-	free(_inputQueue); _inputQueue = 0;
-	free(_outputPorts); _outputPorts = 0;
-	free(_outputEndPoints); _outputEndPoints = 0;
+	free(_input_ports); _input_ports = 0;
+	free(_input_endpoints); _input_endpoints = 0;
+	free(_input_queue); _input_queue = 0;
+	free(_output_ports); _output_ports = 0;
+	free(_output_endpoints); _output_endpoints = 0;
 	free(_rb); _rb = 0;
 
 	_n_midi_in = 0;
@@ -103,37 +103,37 @@ CoreMidiIo::notify_proc(const MIDINotification *message)
 {
 	switch(message->messageID) {
 		case kMIDIMsgSetupChanged:
-			printf("kMIDIMsgSetupChanged\n");
+			/* this one catches all of the added/removed/changed below */
+			//printf("kMIDIMsgSetupChanged\n");
 			discover();
 			break;
 		case kMIDIMsgObjectAdded:
 			{
-			const MIDIObjectAddRemoveNotification *n = (const MIDIObjectAddRemoveNotification*) message;
-			printf("kMIDIMsgObjectAdded\n");
+			//const MIDIObjectAddRemoveNotification *n = (const MIDIObjectAddRemoveNotification*) message;
+			//printf("kMIDIMsgObjectAdded\n");
 			}
 			break;
 		case kMIDIMsgObjectRemoved:
 			{
-			const MIDIObjectAddRemoveNotification *n = (const MIDIObjectAddRemoveNotification*) message;
-			printf("kMIDIMsgObjectRemoved\n");
+			//const MIDIObjectAddRemoveNotification *n = (const MIDIObjectAddRemoveNotification*) message;
+			//printf("kMIDIMsgObjectRemoved\n");
 			}
 			break;
 		case kMIDIMsgPropertyChanged:
 			{
-			const MIDIObjectPropertyChangeNotification *n = (const MIDIObjectPropertyChangeNotification*) message;
-			printf("kMIDIMsgObjectRemoved\n");
+			//const MIDIObjectPropertyChangeNotification *n = (const MIDIObjectPropertyChangeNotification*) message;
+			//printf("kMIDIMsgObjectRemoved\n");
 			}
 			break;
 		case kMIDIMsgThruConnectionsChanged:
-			printf("kMIDIMsgThruConnectionsChanged\n");
+			//printf("kMIDIMsgThruConnectionsChanged\n");
 			break;
 		case kMIDIMsgSerialPortOwnerChanged:
-			printf("kMIDIMsgSerialPortOwnerChanged\n");
+			//printf("kMIDIMsgSerialPortOwnerChanged\n");
 			break;
 		case kMIDIMsgIOError:
-			printf("kMIDIMsgIOError\n");
-			cleanup();
-			//discover();
+			fprintf(stderr, "kMIDIMsgIOError\n");
+			discover();
 			break;
 	}
 }
@@ -150,19 +150,19 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		MIDIPacket packet;
 		size_t rv = _rb[port]->read((uint8_t*)&packet, sizeof(MIDIPacket));
 		assert(rv == sizeof(MIDIPacket));
-		_inputQueue[port].push_back(boost::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet))); 
+		_input_queue[port].push_back(boost::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet))); 
 	}
 
 	UInt64 start = _time_at_cycle_start;
 	UInt64 end = AudioConvertNanosToHostTime(AudioConvertHostTimeToNanos(_time_at_cycle_start) + cycle_time_us * 1e3);
 
-	for (CoreMIDIQueue::iterator it = _inputQueue[port].begin (); it != _inputQueue[port].end (); ) {
+	for (CoreMIDIQueue::iterator it = _input_queue[port].begin (); it != _input_queue[port].end (); ) {
 		if ((*it)->timeStamp < end) {
 			if ((*it)->timeStamp < start) {
 				uint64_t dt = AudioConvertHostTimeToNanos(start - (*it)->timeStamp);
 				//printf("Stale Midi Event dt:%.2fms\n", dt * 1e-6);
 				if (dt > 1e-4) { // 100ms, maybe too large
-					it = _inputQueue[port].erase(it);
+					it = _input_queue[port].erase(it);
 					continue;
 				}
 				time = 0;
@@ -173,7 +173,7 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 			if (s > 0) {
 				memcpy(d, (*it)->data, s);
 			}
-			_inputQueue[port].erase(it);
+			_input_queue[port].erase(it);
 			return s;
 		}
 		++it;
@@ -204,7 +204,7 @@ CoreMidiIo::send_event (uint32_t port, double reltime_us, const uint8_t *d, cons
 	assert(s < 256);
 	memcpy(mp->data, d, s);
 
-	MIDISend(_outputPorts[port], _outputEndPoints[port], &pl);
+	MIDISend(_output_ports[port], _output_endpoints[port], &pl);
 	return 0;
 }
 
@@ -213,20 +213,20 @@ CoreMidiIo::discover()
 {
 	cleanup();
 
-	assert(!_active && _midiClient);
+	assert(!_active && _midi_client);
 
 	ItemCount srcCount = MIDIGetNumberOfSources();
 	ItemCount dstCount = MIDIGetNumberOfDestinations();
 
 	if (srcCount > 0) {
-		_inputPorts = (MIDIPortRef *) malloc (srcCount * sizeof(MIDIPortRef));
-		_inputEndPoints = (MIDIEndpointRef*) malloc (srcCount * sizeof(MIDIEndpointRef));
-		_inputQueue = (CoreMIDIQueue*) calloc (srcCount, sizeof(CoreMIDIQueue));
+		_input_ports = (MIDIPortRef *) malloc (srcCount * sizeof(MIDIPortRef));
+		_input_endpoints = (MIDIEndpointRef*) malloc (srcCount * sizeof(MIDIEndpointRef));
+		_input_queue = (CoreMIDIQueue*) calloc (srcCount, sizeof(CoreMIDIQueue));
 		_rb = (RingBuffer<uint8_t> **) malloc (srcCount * sizeof(RingBuffer<uint8_t>*));
 	}
 	if (dstCount > 0) {
-		_outputPorts = (MIDIPortRef *) malloc (dstCount * sizeof(MIDIPortRef));
-		_outputEndPoints = (MIDIEndpointRef*) malloc (dstCount * sizeof(MIDIEndpointRef));
+		_output_ports = (MIDIPortRef *) malloc (dstCount * sizeof(MIDIPortRef));
+		_output_endpoints = (MIDIEndpointRef*) malloc (dstCount * sizeof(MIDIEndpointRef));
 	}
 
 	for (ItemCount i = 0; i < srcCount; i++) {
@@ -235,17 +235,18 @@ CoreMidiIo::discover()
 		CFStringRef port_name;
 		port_name = CFStringCreateWithFormat(NULL, NULL, CFSTR("midi_capture_%lu"), i);
 
-		err = MIDIInputPortCreate (_midiClient, port_name, midiInputCallback, this, &_inputPorts[_n_midi_in]);
+		err = MIDIInputPortCreate (_midi_client, port_name, midiInputCallback, this, &_input_ports[_n_midi_in]);
 		if (noErr != err) {
 			fprintf(stderr, "Cannot create Midi Output\n");
 			// TODO  handle errors
 			continue;
 		}
+		// TODO get device name/ID
 		_rb[_n_midi_in] = new RingBuffer<uint8_t>(1024 * sizeof(MIDIPacket));
-		_inputQueue[_n_midi_in] = CoreMIDIQueue();
-		MIDIPortConnectSource(_inputPorts[_n_midi_in], src, (void*) _rb[_n_midi_in]);
+		_input_queue[_n_midi_in] = CoreMIDIQueue();
+		MIDIPortConnectSource(_input_ports[_n_midi_in], src, (void*) _rb[_n_midi_in]);
 		CFRelease(port_name);
-		_inputEndPoints[_n_midi_in] = src;
+		_input_endpoints[_n_midi_in] = src;
 		++_n_midi_in;
 	}
 
@@ -255,15 +256,16 @@ CoreMidiIo::discover()
 		port_name = CFStringCreateWithFormat(NULL, NULL, CFSTR("midi_playback_%lu"), i);
 
 		OSStatus err;
-		err = MIDIOutputPortCreate (_midiClient, port_name, &_outputPorts[_n_midi_out]);
+		err = MIDIOutputPortCreate (_midi_client, port_name, &_output_ports[_n_midi_out]);
 		if (noErr != err) {
 			fprintf(stderr, "Cannot create Midi Output\n");
 			// TODO  handle errors
 			continue;
 		}
-		MIDIPortConnectSource(_outputPorts[_n_midi_out], dst, NULL);
+		// TODO get device name/ID
+		MIDIPortConnectSource(_output_ports[_n_midi_out], dst, NULL);
 		CFRelease(port_name);
-		_outputEndPoints[_n_midi_out] = dst;
+		_output_endpoints[_n_midi_out] = dst;
 		++_n_midi_out;
 	}
 
