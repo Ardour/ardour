@@ -277,6 +277,7 @@ EngineControl::EngineControl ()
 	ARDOUR::AudioEngine::instance()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_running, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
+	ARDOUR::AudioEngine::instance()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::device_list_changed, this), gui_context());
 
 	if (audio_setup) {
 		set_state (*audio_setup);
@@ -2189,6 +2190,13 @@ EngineControl::engine_stopped ()
 	sample_rate_combo.set_sensitive (true);
 	buffer_size_combo.set_sensitive (true);
 	engine_status.set_markup(string_compose ("<span foreground=\"red\">%1</span>", _("Inactive")));
+}
+
+void
+EngineControl::device_list_changed ()
+{
+	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+	backend_changed();
 }
 
 void
