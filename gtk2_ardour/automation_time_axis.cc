@@ -471,7 +471,10 @@ AutomationTimeAxisView::set_height (uint32_t h)
 		first_call_to_set_height = false;
 
 		if (h >= preset_height (HeightNormal)) {
-			auto_button.show();
+			if (!(_parameter.type() >= MidiCCAutomation &&
+			      _parameter.type() <= MidiChannelPressureAutomation)) {
+				auto_button.show();
+			}
 			name_label.show();
 			hide_button.show();
 
@@ -560,7 +563,10 @@ AutomationTimeAxisView::build_display_menu ()
 			(AutoState) Touch)));
 	auto_touch_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 
-	items.push_back (MenuElem (_("State"), *auto_state_menu));
+	if (!(_parameter.type() >= MidiCCAutomation &&
+	      _parameter.type() <= MidiChannelPressureAutomation)) {
+		items.push_back (MenuElem (_("State"), *auto_state_menu));
+	}
 
 	/* mode menu */
 
