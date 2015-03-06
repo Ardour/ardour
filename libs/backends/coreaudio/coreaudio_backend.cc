@@ -95,8 +95,7 @@ CoreAudioBackend::~CoreAudioBackend ()
 std::string
 CoreAudioBackend::name () const
 {
-	// XXX avoid name -conflict w/waves
-	return X_("CoreAudio2");
+	return X_("CoreAudio");
 }
 
 bool
@@ -1514,7 +1513,7 @@ static bool already_configured ();
 static bool available ();
 
 static ARDOUR::AudioBackendInfo _descriptor = {
-	"CoreAudio2",
+	"CoreAudio",
 	instantiate,
 	deinstantiate,
 	backend_factory,

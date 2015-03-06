@@ -572,7 +572,7 @@ def options(opt):
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
-                    help='Specify which backend modules are to be included(jack,alsa,wavesaudio,dummy)')
+                    help='Specify which backend modules are to be included(jack,alsa,wavesaudio,dummy,coreaudio)')
     opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -963,6 +963,24 @@ def configure(conf):
     conf.env['BUILD_ALSABACKEND'] = any('alsa' in b for b in backends)
     conf.env['BUILD_DUMMYBACKEND'] = any('dummy' in b for b in backends)
     conf.env['BUILD_WAVESBACKEND'] = any('wavesaudio' in b for b in backends)
+    conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
+
+    if conf.env['BUILD_CORECRAPPITA'] and conf.env['BUILD_WAVESBACKEND']:
+        print("Coreaudio + Waves Backend are mutually exclusive")
+        sys.exit(1)
+
+    if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
+        print("Coreaudio backend is only available for OSX")
+        sys.exit(1)
+
+    if sys.platform == 'linux' and conf.env['BUILD_WAVESBACKEND']:
+        print("Waves Backend is not for Linux")
+        sys.exit(1)
+
+    if sys.platform != 'linux' and conf.env['BUILD_ALSABACKEND']:
+        print("ALSA Backend is only available on Linux")
+        sys.exit(1)
+
 
     set_compiler_flags (conf, Options.options)
 
@@ -1008,6 +1026,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('No plugin state',       conf.is_defined('NO_PLUGIN_STATE'))
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
+    write_config_text('CoreAudio/Midi Backend',conf.env['BUILD_CORECRAPPITA'])
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
     write_config_text('Debug Symbols',         conf.is_defined('debug_symbols') or conf.env['DEBUG'])
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])

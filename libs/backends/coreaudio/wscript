@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
 import sys
 import re
@@ -15,6 +16,8 @@ def options(opt):
 
 def configure(conf):
     autowaf.configure(conf)
+    if Options.options.ppc:
+        conf.env['build_arch'] = "ppc"
 
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
@@ -32,5 +35,8 @@ def build(bld):
                    'ARDOURBACKEND_DLL_EXPORTS', 'COREAUDIO_108'
                   ]
 
-    # OSX 10.6 or later
-    obj.defines += ['COREAUDIO_108']
+    # use new coreaudio API (the old one was deprecated in 10.6, yet still works)
+    # only use with OSX intel 10.6 or later, but for all OSX/PPC (<= 10.6)
+    if not bld.env['build_target'] in ['panther', 'tiger', 'leopard']:
+        if not (bld.env['build_target'] == 'snow leopard' and conf.env['build_arch'] == "ppc"):
+            obj.defines += ['COREAUDIO_108']
