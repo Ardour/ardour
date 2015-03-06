@@ -42,11 +42,31 @@ std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_audio_device_status;
 std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_midi_device_status;
 
 
+/* static class instance access */
 static void hw_changed_callback_ptr (void *arg)
 {
 	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
 	d->hw_changed_callback();
 }
+
+static void error_callback_ptr (void *arg)
+{
+	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
+	d->error_callback();
+}
+
+static void xrun_callback_ptr (void *arg)
+{
+	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
+	d->xrun_callback();
+}
+
+static void midi_port_change (void *arg)
+{
+	CoreAudioBackend *d = static_cast<CoreAudioBackend *>(arg);
+	d->coremidi_rediscover ();
+}
+
 
 CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
@@ -386,18 +406,6 @@ static int process_callback_ptr (void *arg)
 	return d->process_callback();
 }
 
-static void error_callback_ptr (void *arg)
-{
-	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
-	d->error_callback();
-}
-
-static void midi_port_change (void *arg)
-{
-	CoreAudioBackend *d = static_cast<CoreAudioBackend *>(arg);
-	d->coremidi_rediscover ();
-}
-
 int
 CoreAudioBackend::_start (bool for_latency_measurement)
 {
@@ -463,13 +471,13 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_samples_per_period = _pcmio->sample_per_period();
 		PBD::warning << _("CoreAudioBackend: samples per period does not match.") << endmsg;
 	}
+#endif
 
-	if (_pcmio->samplerate() != _samplerate) {
-		_samplerate = _pcmio->samplerate();
+	if (_pcmio->current_sample_rate(name_to_id(_audio_device)) != _samplerate) {
+		_samplerate = _pcmio->current_sample_rate(name_to_id(_audio_device));
 		engine.sample_rate_change (_samplerate);
 		PBD::warning << _("CoreAudioBackend: sample rate does not match.") << endmsg;
 	}
-#endif
 
 	_measure_latency = for_latency_measurement;
 
@@ -531,6 +539,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		return -1;
 	}
 	_preinit = false;
+	_pcmio->set_xrun_callback (xrun_callback_ptr, this);
 
 	return 0;
 }
@@ -856,31 +865,34 @@ int
 CoreAudioBackend::register_system_audio_ports()
 {
 	LatencyRange lr;
-	printf("COREAUDIO LATENCY: i:%d, o:%d\n",
-			_pcmio->get_latency(name_to_id(_audio_device), true),
-			_pcmio->get_latency(name_to_id(_audio_device), false));
-
-	//TODO set latencies
-	//TODO query port names
 
 	const int a_ins = _n_inputs > 0 ? _n_inputs : 2;
 	const int a_out = _n_outputs > 0 ? _n_outputs : 2;
 
+	const uint32_t coreaudio_reported_input_latency = _pcmio->get_latency(name_to_id(_audio_device), true);
+	const uint32_t coreaudio_reported_output_latency = _pcmio->get_latency(name_to_id(_audio_device), false);
+
+#ifndef NDEBUG
+	printf("COREAUDIO LATENCY: i:%d, o:%d\n",
+			coreaudio_reported_input_latency,
+			coreaudio_reported_output_latency);
+#endif
+
 	/* audio ports */
-	lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : _systemic_audio_input_latency);
-	for (int i = 1; i <= a_ins; ++i) {
+	lr.min = lr.max = _samples_per_period + coreaudio_reported_input_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	for (int i = 0; i < a_ins; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
+		snprintf(tmp, sizeof(tmp), "system:capture_%s", _pcmio->cached_port_name(i, true).c_str());
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
 		_system_inputs.push_back(static_cast<CoreBackendPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : _systemic_audio_output_latency);
-	for (int i = 1; i <= a_out; ++i) {
+	lr.min = lr.max = _samples_per_period + coreaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	for (int i = 0; i < a_out; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
+		snprintf(tmp, sizeof(tmp), "system:playback_%s", _pcmio->cached_port_name(i, false).c_str());
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
@@ -1434,7 +1446,7 @@ CoreAudioBackend::process_callback ()
 
 	/* get audio */
 	i = 0;
-	for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++i) {
 		_pcmio->get_capture_channel (i, (float*)((*it)->get_buffer(n_samples)), n_samples);
 	}
 
@@ -1480,8 +1492,6 @@ CoreAudioBackend::process_callback ()
 	const int64_t elapsed_time = clock2 - clock1;
 	_dsp_load = elapsed_time / (float) nominal_time;
 
-	//engine.Xrun (); // TODO, if any
-
 	/* port-connection change */
 	post_process();
 	pthread_mutex_unlock (&_process_callback_mutex);
@@ -1493,6 +1503,12 @@ CoreAudioBackend::error_callback ()
 {
 	_pcmio->set_error_callback (NULL, NULL);
 	engine.halted_callback("CoreAudio Process aborted.");
+}
+
+void
+CoreAudioBackend::xrun_callback ()
+{
+	engine.Xrun ();
 }
 
 void

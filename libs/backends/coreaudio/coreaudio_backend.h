@@ -214,6 +214,7 @@ class CoreAudioBackend : public AudioBackend {
 		// really private, but needing static access:
 		int process_callback();
 		void error_callback();
+		void xrun_callback();
 		void hw_changed_callback();
 
 	protected:

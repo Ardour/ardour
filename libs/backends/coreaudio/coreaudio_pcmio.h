@@ -64,7 +64,6 @@ public:
 			void * process_arg
 			);
 
-	// TODO: combine callbacks below, add a enum type
 	void     set_error_callback (
 			void ( error_callback (void*)),
 			void * error_arg
@@ -80,6 +79,13 @@ public:
 		_hw_changed_callback = callback;
 		_hw_changed_arg = arg;
 	}
+	void     set_xrun_callback (
+			void ( callback (void*)),
+			void * arg
+			) {
+		_xrun_callback = callback;
+		_xrun_arg = arg;
+	}
 
 	// must be called from process_callback;
 	int      get_capture_channel (uint32_t chn, float *input, uint32_t n_samples);
@@ -94,7 +100,8 @@ public:
 			UInt32 inNumberFrames,
 			AudioBufferList* ioData);
 
-	void hwPropertyChange();
+	void xrun_callback ();
+	void hw_changed_callback ();
 
 private:
 	int set_device_sample_rate (uint32 device_id, float rate, bool input);
@@ -105,6 +112,9 @@ private:
 	AudioDeviceID* _device_ids;
 	AudioBufferList* _input_audio_buffer_list;
 	AudioBufferList* _output_audio_buffer_list;
+
+	AudioDeviceID _active_input;
+	AudioDeviceID _active_output;
 
 	int _state;
 
@@ -123,6 +133,10 @@ private:
 
 	void (* _hw_changed_callback) (void*);
 	void  * _hw_changed_arg;
+
+	void (* _xrun_callback) (void*);
+	void  * _xrun_arg;
+
 
 	// TODO proper device info struct
 	std::map<size_t, std::string> _devices;

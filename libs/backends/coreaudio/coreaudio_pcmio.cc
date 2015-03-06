@@ -20,25 +20,60 @@
 #include "coreaudio_pcmio.h"
 
 #ifdef COREAUDIO_108
-static OSStatus hardwarePropertyChangeCallback(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress inAddresses[], void* arg) {
+static OSStatus hw_changed_callback_ptr(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress inAddresses[], void* arg) {
 	CoreAudioPCM * self = static_cast<CoreAudioPCM*>(arg);
-	self->hwPropertyChange();
+	self->hw_changed_callback();
 	return noErr;
 }
 #else
-static OSStatus hardwarePropertyChangeCallback (AudioHardwarePropertyID inPropertyID, void* arg) {
+static OSStatus hw_changed_callback_ptr (AudioHardwarePropertyID inPropertyID, void* arg) {
 	if (inPropertyID == kAudioHardwarePropertyDevices) {
 		CoreAudioPCM * self = static_cast<CoreAudioPCM*>(arg);
-		self->hwPropertyChange();
+		self->hw_changed_callback();
 	}
 	return noErr;
 }
 #endif
 
+#ifdef COREAUDIO_108
+static OSStatus xrun_callback_ptr(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress inAddresses[], void* arg) {
+	CoreAudioPCM * self = static_cast<CoreAudioPCM*>(arg);
+	self->xrun_callback();
+	return noErr;
+}
+#else
+static OSStatus xrun_callback_ptr(
+		AudioDeviceID inDevice,
+		UInt32 inChannel,
+		Boolean isInput,
+		AudioDevicePropertyID inPropertyID,
+		void* inClientData)
+{
+	CoreAudioPCM * d = static_cast<CoreAudioPCM*> (inClientData);
+	d->xrun_callback();
+	return noErr;
+}
+#endif
+
+static OSStatus render_callback_ptr (
+		void* inRefCon,
+		AudioUnitRenderActionFlags* ioActionFlags,
+		const AudioTimeStamp* inTimeStamp,
+		UInt32 inBusNumber,
+		UInt32 inNumberFrames,
+		AudioBufferList* ioData)
+{
+	CoreAudioPCM * d = static_cast<CoreAudioPCM*> (inRefCon);
+	return d->render_callback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+}
+
+
 CoreAudioPCM::CoreAudioPCM ()
 	: _auhal (0)
 	, _device_ids (0)
 	, _input_audio_buffer_list (0)
+	, _active_input (0)
+	, _active_output (0)
 	, _state (-1)
 	, _capture_channels (0)
 	, _playback_channels (0)
@@ -47,6 +82,7 @@ CoreAudioPCM::CoreAudioPCM ()
 	, _process_callback (0)
 	, _error_callback (0)
 	, _hw_changed_callback (0)
+	, _xrun_callback (0)
 	, _device_ins (0)
 	, _device_outs (0)
 {
@@ -61,9 +97,9 @@ CoreAudioPCM::CoreAudioPCM ()
 	prop.mSelector = kAudioHardwarePropertyDevices;
 	prop.mScope = kAudioObjectPropertyScopeGlobal;
 	prop.mElement = 0;
-	AudioObjectAddPropertyListener(kAudioObjectSystemObject, &prop, hardwarePropertyChangeCallback, this);
+	AudioObjectAddPropertyListener(kAudioObjectSystemObject, &prop, hw_changed_callback_ptr, this);
 #else
-	AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, hardwarePropertyChangeCallback, this);
+	AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, hw_changed_callback_ptr, this);
 #endif
 }
 
@@ -80,9 +116,9 @@ CoreAudioPCM::~CoreAudioPCM ()
 	prop.mSelector = kAudioHardwarePropertyDevices;
 	prop.mScope = kAudioObjectPropertyScopeGlobal;
 	prop.mElement = 0;
-	AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &prop, &hardwarePropertyChangeCallback, this);
+	AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &prop, &hw_changed_callback_ptr, this);
 #else
-	AudioHardwareRemovePropertyListener(kAudioHardwarePropertyDevices, hardwarePropertyChangeCallback);
+	AudioHardwareRemovePropertyListener(kAudioHardwarePropertyDevices, hw_changed_callback_ptr);
 #endif
 	free(_input_audio_buffer_list);
 	pthread_mutex_destroy (&_discovery_lock);
@@ -90,7 +126,8 @@ CoreAudioPCM::~CoreAudioPCM ()
 
 
 void
-CoreAudioPCM::hwPropertyChange() {
+CoreAudioPCM::hw_changed_callback() {
+	printf("CHANGE..\n");
 	discover();
 	// TODO Filter events..
 	if (_hw_changed_callback) {
@@ -305,7 +342,7 @@ CoreAudioPCM::get_stream_latencies(uint32 device_id, bool input, std::vector<uin
 			return;
 		}
 #ifndef NDEBUG
-		printf("Stream %d latency: %d\n", i, stream_latency);
+		printf("  ^ Stream %d latency: %d\n", i, stream_latency);
 #endif
 		latencies.push_back(stream_latency);
 	}
@@ -349,7 +386,8 @@ CoreAudioPCM::get_latency(uint32 device_id, bool input)
 	}
 
 #ifndef NDEBUG
-	printf("Base Latency systemic+safetyoffset = %d+%d\n", lat0, latS);
+	printf("%s Latency systemic+safetyoffset = %d + %d\n",
+			input ? "Input" : "Output", lat0, latS);
 #endif
 	latency = lat0 + latS;
 
@@ -543,11 +581,40 @@ CoreAudioPCM::discover()
 }
 
 void
+CoreAudioPCM::xrun_callback ()
+{
+#ifndef NDEBUG
+	printf("Coreaudio XRUN\n");
+#endif
+	if (_xrun_callback) {
+		_xrun_callback(_xrun_arg);
+	}
+}
+
+void
 CoreAudioPCM::pcm_stop ()
 {
 	if (!_auhal) return;
 
 	AudioOutputUnitStop(_auhal);
+	if (_state == 0) {
+#ifdef COREAUDIO_108
+		AudioObjectPropertyAddress prop;
+		prop.mSelector = kAudioDeviceProcessorOverload;
+		prop.mScope = kAudioObjectPropertyScopeGlobal;
+		prop.mElement = 0;
+		if (_active_output > 0) {
+			AudioObjectRemovePropertyListener(_active_input, &prop, &xrun_callback_ptr, this);
+		}
+		if (_active_input > 0 && _active_output != _active_input) {
+			AudioObjectRemovePropertyListener(_active_output, &prop, &xrun_callback_ptr, this);
+		}
+#else
+		AudioDeviceRemovePropertyListener(_active_input, 0 , true, kAudioDeviceProcessorOverload, xrun_callback_ptr);
+		AudioDeviceRemovePropertyListener(_active_output, 0 , false, kAudioDeviceProcessorOverload, xrun_callback_ptr);
+#endif
+	}
+
 	AudioUnitUninitialize(_auhal);
 #ifdef COREAUDIO_108
 	AudioComponentInstanceDispose(_auhal);
@@ -567,6 +634,7 @@ CoreAudioPCM::pcm_stop ()
 
 	_error_callback = 0;
 	_process_callback = 0;
+	_xrun_callback = 0;
 }
 
 #ifndef NDEBUG
@@ -584,20 +652,6 @@ static void PrintStreamDesc (AudioStreamBasicDescription *inDesc)
 	printf ("- - - - - - - - - - - - - - - - - - - -\n");
 }
 #endif
-
-static OSStatus render_callback_ptr (
-		void* inRefCon,
-		AudioUnitRenderActionFlags* ioActionFlags,
-		const AudioTimeStamp* inTimeStamp,
-		UInt32 inBusNumber,
-		UInt32 inNumberFrames,
-		AudioBufferList* ioData)
-{
-	CoreAudioPCM * d = static_cast<CoreAudioPCM*> (inRefCon);
-	return d->render_callback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
-}
-
-
 
 int
 CoreAudioPCM::pcm_start (
@@ -618,6 +672,7 @@ CoreAudioPCM::pcm_start (
 	_process_arg = process_arg;
 	_max_samples_per_period = samples_per_period;
 	_cur_samples_per_period = 0;
+	_active_input = _active_output = 0;
 
 	ComponentResult err;
 	UInt32 uint32val;
@@ -715,6 +770,7 @@ CoreAudioPCM::pcm_start (
 #endif
 	if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat Input"; goto error; }
 
+	/* read back stream descriptions */
 	UInt32 size;
 	size = sizeof(AudioStreamBasicDescription);
 	err = AudioUnitGetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, &size);
@@ -733,9 +789,31 @@ CoreAudioPCM::pcm_start (
 	PrintStreamDesc(&dstFormat);
 #endif
 
+	/* prepare buffers for input */
 	_input_audio_buffer_list = (AudioBufferList*)malloc(sizeof(UInt32) + _capture_channels * sizeof(AudioBuffer));
 	assert(_input_audio_buffer_list);
 	if (!_input_audio_buffer_list) { errorMsg="Out of Memory."; goto error; }
+
+	_active_input = _device_ids[device_id_in];
+	_active_output = _device_ids[device_id_out];
+
+#ifdef COREAUDIO_108
+	AudioObjectPropertyAddress prop;
+	prop.mSelector = kAudioDeviceProcessorOverload;
+	prop.mScope = kAudioObjectPropertyScopeGlobal;
+	prop.mElement = 0;
+	AudioObjectAddPropertyListener(_active_output, &prop, xrun_callback_ptr, this);
+	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Output"; goto error; }
+	if (_active_input != _active_output)  {
+		AudioObjectAddPropertyListener(_active_input, &prop, xrun_callback_ptr, this);
+		if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Input"; goto error; }
+	}
+#else
+	err = AudioDeviceAddPropertyListener(_device_ids[device_id_out], 0 , false, kAudioDeviceProcessorOverload, xrun_callback_ptr, this);
+	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Output"; goto error; }
+	err = AudioDeviceAddPropertyListener(_device_ids[device_id_in], 0 , true, kAudioDeviceProcessorOverload, xrun_callback_ptr, this);
+	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Input"; goto error; }
+#endif
 
 	// Setup callbacks
 	AURenderCallbackStruct renderCallback;
@@ -748,6 +826,7 @@ CoreAudioPCM::pcm_start (
 			&renderCallback, sizeof (renderCallback));
 	if (err != noErr) { errorMsg="kAudioUnitProperty_SetRenderCallback"; goto error; }
 
+	/* setup complete, now get going.. */
 	if (AudioOutputUnitStart(_auhal) == noErr) {
 		_input_names.clear();
 		_output_names.clear();
@@ -762,6 +841,7 @@ error:
 	fprintf(stderr, "CoreaudioPCM Error: %c%c%c%c %s\n", rv[0], rv[1], rv[2], rv[3], errorMsg.c_str());
 	pcm_stop();
 	_state = -3;
+	_active_input = _active_output = 0;
 	return -1;
 }
 
@@ -810,7 +890,7 @@ CoreAudioPCM::cache_port_names(uint32 device_id, bool input)
 					&name);
 #endif
 		}
- 
+
 		bool decoded = false;
 		char* cstr_name = 0;
 		if (err == kAudioHardwareNoError) {
@@ -820,19 +900,14 @@ CoreAudioPCM::cache_port_names(uint32 device_id, bool input)
 			decoded = CFStringGetCString(name, cstr_name, maxSize, kCFStringEncodingUTF8);
 		}
 
-		ss << (c + 1) << " - ";
+		ss << (c + 1);
 
 		if (cstr_name && decoded && (0 != std::strlen(cstr_name) ) ) {
-			ss << cstr_name;
-		} else {
-			if (input) {
-				ss << "Input " << (c + 1);
-			} else {
-				ss << "Output " << (c + 1);
-			}
+			ss << " - " <<  cstr_name;
 		}
-
+#if 0
 		printf("%s %d Name: %s\n", input ? "Input" : "Output", c+1, ss.str().c_str());
+#endif
 
 		if (input) {
 			_input_names.push_back (ss.str());
