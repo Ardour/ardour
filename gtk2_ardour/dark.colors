@@ -482,7 +482,7 @@
     <Modifier name="covered region base" modifier="= alpha:0.7"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
     <Modifier name="dragging region" modifier="= alpha:0.9"/>
-    <Modifier name="editable region" modifier="= alpha:0.1"/>
+    <Modifier name="editable region" modifier="= alpha:0.25"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>
     <Modifier name="ghost track base" modifier="= alpha:0.640782"/>
     <Modifier name="ghost track midi fill" modifier="= alpha:0.3"/>
@@ -497,7 +497,7 @@
     <Modifier name="midi sysex fill" modifier="= alpha:0.4666"/>
     <Modifier name="midi track base" modifier="= alpha:0.3"/>
     <Modifier name="mono panner position fill" modifier="= alpha:0.8"/>
-    <Modifier name="opaque region base" modifier="= alpha:0.7"/>
+    <Modifier name="opaque region base" modifier="= alpha:0.75"/>
     <Modifier name="panner fill" modifier="= alpha:0.7882"/>
     <Modifier name="piano roll black" modifier="= alpha:0.2"/>
     <Modifier name="piano roll white" modifier="= alpha:0.2"/>
@@ -508,7 +508,7 @@
     <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
     <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
     <Modifier name="time axis view item base" modifier="= alpha:0.7"/>
-    <Modifier name="transparent region base" modifier="= alpha:0.5"/> 
+    <Modifier name="transparent region base" modifier="= alpha:0.6"/>
    <Modifier name="time stretch fill" modifier="= alpha:0.5"/>
     <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
   </Modifiers>
