@@ -89,7 +89,7 @@ class AlsaPort {
 
 		virtual void* get_buffer (pframes_t nframes) = 0;
 
-		const LatencyRange& latency_range (bool for_playback) const
+		const LatencyRange latency_range (bool for_playback) const
 		{
 			return for_playback ? _playback_latency_range : _capture_latency_range;
 		}

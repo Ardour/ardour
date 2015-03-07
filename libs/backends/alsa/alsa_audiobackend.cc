@@ -232,7 +232,7 @@ AlsaAudioBackend::can_change_sample_rate_when_running () const
 bool
 AlsaAudioBackend::can_change_buffer_size_when_running () const
 {
-	return false;
+	return false; // why not? :)
 }
 
 int
@@ -255,6 +255,9 @@ int
 AlsaAudioBackend::set_buffer_size (uint32_t bs)
 {
 	if (bs <= 0 || bs >= _max_buffer_size) {
+		return -1;
+	}
+	if (_run) {
 		return -1;
 	}
 	_samples_per_period = bs;
@@ -965,7 +968,7 @@ AlsaAudioBackend::register_system_audio_ports()
 	const int a_out = _n_outputs > 0 ? _n_outputs : 2;
 
 	/* audio ports */
-	lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
@@ -975,7 +978,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back(static_cast<AlsaPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -1036,7 +1039,7 @@ AlsaAudioBackend::register_system_midi_ports()
 					delete mout;
 				}
 				LatencyRange lr;
-				lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : nfo->systemic_output_latency);
+				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
 				set_latency_range (p, false, lr);
 				static_cast<AlsaMidiPort*>(p)->set_n_periods(2);
 				_system_midi_out.push_back(static_cast<AlsaPort*>(p));
@@ -1074,7 +1077,7 @@ AlsaAudioBackend::register_system_midi_ports()
 					continue;
 				}
 				LatencyRange lr;
-				lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : nfo->systemic_input_latency);
+				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
 				_system_midi_in.push_back(static_cast<AlsaPort*>(p));
 				_rmidi_in.push_back (midin);
@@ -1317,14 +1320,28 @@ AlsaAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playb
 LatencyRange
 AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playback)
 {
+	LatencyRange r;
 	if (!valid_port (port)) {
 		PBD::error << _("AlsaPort::get_latency_range (): invalid port.") << endmsg;
-		LatencyRange r;
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	return static_cast<AlsaPort*>(port)->latency_range (for_playback);
+	AlsaPort *p = static_cast<AlsaPort*>(port);
+	assert(p);
+
+	r = p->latency_range (for_playback);
+	if (p->is_physical() && p->is_terminal()) {
+		if (p->is_input() && for_playback) {
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+		if (p->is_output() && !for_playback) {
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+	}
+	return r;
 }
 
 /* Discovering physical ports */

@@ -206,10 +206,8 @@ DummyAudioBackend::set_buffer_size (uint32_t bs)
 	 * with 'Loopback' there is exactly once cycle latency,
 	 * divide it between In + Out;
 	 */
-	const size_t l_in = _samples_per_period * .25;
-	const size_t l_out = _samples_per_period - l_in;
 	LatencyRange lr;
-	lr.min = lr.max = l_in + _systemic_input_latency;
+	lr.min = lr.max = _systemic_input_latency;
 	for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 		set_latency_range (*it, false, lr);
 	}
@@ -217,7 +215,7 @@ DummyAudioBackend::set_buffer_size (uint32_t bs)
 		set_latency_range (*it, false, lr);
 	}
 
-	lr.min = lr.max = l_out + _systemic_output_latency;
+	lr.min = lr.max = _systemic_output_latency;
 	for (std::vector<DummyAudioPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		set_latency_range (*it, true, lr);
 	}
@@ -765,12 +763,9 @@ DummyAudioBackend::register_system_ports()
 	const int m_ins = _n_midi_inputs == UINT_MAX ? 0 : _n_midi_inputs;
 	const int m_out = _n_midi_outputs == UINT_MAX ? a_ins : _n_midi_outputs;
 
-	/* with 'Loopback' there is exactly once cycle latency, divide it between In + Out; */
-	const size_t l_in = _samples_per_period * .25;
-	const size_t l_out = _samples_per_period - l_in;
 
 	/* audio ports */
-	lr.min = lr.max = l_in + _systemic_input_latency;
+	lr.min = lr.max = _systemic_input_latency;
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
@@ -781,7 +776,7 @@ DummyAudioBackend::register_system_ports()
 		static_cast<DummyAudioPort*>(p)->setup_generator (gt, _samplerate);
 	}
 
-	lr.min = lr.max = l_out + _systemic_output_latency;
+	lr.min = lr.max = _systemic_output_latency;
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -792,7 +787,7 @@ DummyAudioBackend::register_system_ports()
 	}
 
 	/* midi ports */
-	lr.min = lr.max = l_in + _systemic_input_latency;
+	lr.min = lr.max = _systemic_input_latency;
 	for (int i = 0; i < m_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_capture_%d", i+1);
@@ -805,7 +800,7 @@ DummyAudioBackend::register_system_ports()
 		}
 	}
 
-	lr.min = lr.max = l_out + _systemic_output_latency;
+	lr.min = lr.max = _systemic_output_latency;
 	for (int i = 1; i <= m_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:midi_playback_%d", i);
@@ -1049,14 +1044,32 @@ DummyAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_play
 LatencyRange
 DummyAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playback)
 {
+	LatencyRange r;
 	if (!valid_port (port)) {
 		PBD::error << _("DummyPort::get_latency_range (): invalid port.") << endmsg;
-		LatencyRange r;
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	return static_cast<DummyPort*>(port)->latency_range (for_playback);
+	DummyPort *p =  static_cast<DummyPort*>(port);
+	assert(p);
+
+	r = p->latency_range (for_playback);
+	if (p->is_physical() && p->is_terminal()) {
+		if (p->is_input() && for_playback) {
+			const size_t l_in = _samples_per_period * .25;
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+		if (p->is_output() && !for_playback) {
+			/* with 'Loopback' there is exactly once cycle latency, divide it between In + Out; */
+			const size_t l_in = _samples_per_period * .25;
+			const size_t l_out = _samples_per_period - l_in;
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+	}
+	return r;
 }
 
 /* Discovering physical ports */

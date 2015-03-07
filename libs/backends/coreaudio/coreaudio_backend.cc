@@ -895,7 +895,7 @@ CoreAudioBackend::register_system_audio_ports()
 #endif
 
 	/* audio ports */
-	lr.min = lr.max = _samples_per_period + coreaudio_reported_input_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = coreaudio_reported_input_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (int i = 0; i < a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%s", _pcmio->cached_port_name(i, true).c_str());
@@ -905,7 +905,7 @@ CoreAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back(static_cast<CoreBackendPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period + coreaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = coreaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (int i = 0; i < a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%s", _pcmio->cached_port_name(i, false).c_str());
@@ -1247,14 +1247,27 @@ CoreAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playb
 LatencyRange
 CoreAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playback)
 {
+	LatencyRange r;
 	if (!valid_port (port)) {
 		PBD::error << _("CoreBackendPort::get_latency_range (): invalid port.") << endmsg;
-		LatencyRange r;
 		r.min = 0;
 		r.max = 0;
-		return r;
 	}
-	return static_cast<CoreBackendPort*>(port)->latency_range (for_playback);
+	CoreBackendPort* p = static_cast<CoreBackendPort*>(port);
+	assert(p);
+
+	r = p->latency_range (for_playback);
+	if (p->is_physical() && p->is_terminal() && p->type() == DataType::AUDIO) {
+		if (p->is_input() && for_playback) {
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+		if (p->is_output() && !for_playback) {
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+	}
+	return r;
 }
 
 /* Discovering physical ports */
