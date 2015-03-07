@@ -352,7 +352,7 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
-for backend in jack wavesaudio dummy; do
+for backend in jack wavesaudio dummy coreaudio; do
     cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
 done
 
