@@ -973,7 +973,7 @@ def configure(conf):
         print("Coreaudio backend is only available for OSX")
         sys.exit(1)
 
-    if re.search ("linux", sys.platform) != None and conf.env['BUILD_WAVESBACKEND']:
+    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_WAVESBACKEND']:
         print("Waves Backend is not for Linux")
         sys.exit(1)
 
