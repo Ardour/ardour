@@ -183,7 +183,7 @@ public:
 	OverlapPitchResolution overlap_pitch_resolution() const { return _overlap_pitch_resolution; }
 	void set_overlap_pitch_resolution(OverlapPitchResolution opr);
 
-	void set_notes (const Sequence<Time>::Notes& n);
+	void set_notes (const typename Sequence<Time>::Notes& n);
 
 	typedef boost::shared_ptr< Event<Time> > SysExPtr;
 	typedef boost::shared_ptr<const Event<Time> > constSysExPtr;
