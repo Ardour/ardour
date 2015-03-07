@@ -2196,7 +2196,8 @@ void
 EngineControl::device_list_changed ()
 {
 	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-	backend_changed();
+	list_devices ();
+	midi_option_changed();
 }
 
 void
