@@ -49,9 +49,10 @@
 #include "ardour/plugin.h"
 #include "ardour/variant.h"
 
-#include "automation_controller.h"
 #include "ardour_button.h"
+#include "ardour_dropdown.h"
 #include "ardour_window.h"
+#include "automation_controller.h"
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -115,15 +116,15 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	/* UI elements that can subclasses can add to their widgets */
 
 	/** a ComboBoxText which lists presets and manages their selection */
-	Gtk::ComboBoxText _preset_combo;
+	ArdourDropdown _preset_combo;
 	/** a label which has a * in if the current settings are different from the preset being shown */
 	Gtk::Label _preset_modified;
 	/** a button to add a preset */
-	Gtk::Button add_button;
+	ArdourButton add_button;
 	/** a button to save the current settings as a new user preset */
-	Gtk::Button save_button;
+	ArdourButton save_button;
 	/** a button to delete the current preset (if it is a user one) */
-	Gtk::Button delete_button;
+	ArdourButton delete_button;
 	/** a button to bypass the plugin */
 	ArdourButton bypass_button;
 	/** a button to acquire keyboard focus */
@@ -132,10 +133,8 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	Gtk::Expander description_expander;
 	/** an expander containing the plugin analysis graph */
 	Gtk::Expander plugin_analysis_expander;
-	/** a label indicating the plugin latency */
-	Gtk::Label latency_label;
 	/** a button which, when clicked, opens the latency GUI */
-	Gtk::Button latency_button;
+	ArdourButton latency_button;
 	/** a button which sets all controls' automation setting to Manual */
 	ArdourButton automation_manual_all_button;
 	/** a button which sets all controls' automation setting to Play */
@@ -157,7 +156,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	Gtk::Image* focus_in_image;
 	int _no_load_preset;
 
-	virtual void preset_selected ();
+	virtual void preset_selected (ARDOUR::Plugin::PresetRecord preset);
 	void add_plugin_setting ();
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
