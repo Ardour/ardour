@@ -32,7 +32,7 @@ def build(bld):
     obj.framework = [ 'CoreAudio', 'AudioToolbox', 'CoreServices', 'CoreMidi' ]
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
-                   'ARDOURBACKEND_DLL_EXPORTS', 'COREAUDIO_108'
+                   'ARDOURBACKEND_DLL_EXPORTS'
                   ]
 
     # use new coreaudio API (the old one was deprecated in 10.6, yet still works)

@@ -16,6 +16,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#include <sstream>
 #include "coremidi_io.h"
 #include <CoreAudio/HostTime.h>
 
@@ -25,12 +26,16 @@ static void notifyProc (const MIDINotification *message, void *refCon) {
 }
 
 static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *srcRef) {
-	// TODO skip while freewheeling
+	CoreMidiIo *self = static_cast<CoreMidiIo*> (procRef);
+	if (!self || !self->enabled()) {
+		// skip while freewheeling
+		return;
+	}
 	RingBuffer<uint8_t> * rb  = static_cast<RingBuffer < uint8_t > *> (srcRef);
 	if (!rb) return;
 	for (UInt32 i = 0; i < list->numPackets; i++) {
 		const MIDIPacket *packet = &list->packet[i];
-		if (rb->write_space() < sizeof(MIDIPacket)) { 
+		if (rb->write_space() < sizeof(MIDIPacket)) {
 			fprintf(stderr, "CoreMIDI: dropped MIDI event\n");
 			continue;
 		}
@@ -38,8 +43,19 @@ static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *s
 	}
 }
 
+static std::string getDisplayName(MIDIObjectRef object)
+{
+	CFStringRef name = nil;
+	if (noErr != MIDIObjectGetStringProperty(object, kMIDIPropertyDisplayName, &name) && name) {
+		return "";
+	}
+	std::string rv (CFStringGetCStringPtr(name, kCFStringEncodingUTF8));
+	CFRelease(name);
 
-CoreMidiIo::CoreMidiIo() 
+	return rv;
+}
+
+CoreMidiIo::CoreMidiIo()
 	: _midi_client (0)
 	, _input_endpoints (0)
 	, _output_endpoints (0)
@@ -51,25 +67,28 @@ CoreMidiIo::CoreMidiIo()
 	, _n_midi_out (0)
 	, _time_at_cycle_start (0)
 	, _active (false)
+	, _enabled (true)
+	, _run (false)
 	, _changed_callback (0)
 	, _changed_arg (0)
 {
-	OSStatus err;
-	err = MIDIClientCreate(CFSTR("Ardour"), &notifyProc, this, &_midi_client);
-	if (noErr != err) {
-		fprintf(stderr, "Creating Midi Client failed\n");
-	}
-
+	pthread_mutex_init (&_discovery_lock, 0);
 }
 
-CoreMidiIo::~CoreMidiIo() 
+CoreMidiIo::~CoreMidiIo()
 {
+	pthread_mutex_lock (&_discovery_lock);
 	cleanup();
-	MIDIClientDispose(_midi_client); _midi_client = 0;
+	if (_midi_client) {
+		MIDIClientDispose(_midi_client);
+		_midi_client = 0;
+	}
+	pthread_mutex_unlock (&_discovery_lock);
+	pthread_mutex_destroy (&_discovery_lock);
 }
 
 void
-CoreMidiIo::cleanup() 
+CoreMidiIo::cleanup()
 {
 	_active = false;
 	for (uint32_t i = 0 ; i < _n_midi_in ; ++i) {
@@ -93,13 +112,13 @@ CoreMidiIo::cleanup()
 }
 
 void
-CoreMidiIo::start_cycle() 
+CoreMidiIo::start_cycle()
 {
 	_time_at_cycle_start = AudioGetCurrentHostTime();
 }
 
 void
-CoreMidiIo::notify_proc(const MIDINotification *message) 
+CoreMidiIo::notify_proc(const MIDINotification *message)
 {
 	switch(message->messageID) {
 		case kMIDIMsgSetupChanged:
@@ -150,7 +169,7 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		MIDIPacket packet;
 		size_t rv = _rb[port]->read((uint8_t*)&packet, sizeof(MIDIPacket));
 		assert(rv == sizeof(MIDIPacket));
-		_input_queue[port].push_back(boost::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet))); 
+		_input_queue[port].push_back(boost::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet)));
 	}
 
 	UInt64 start = _time_at_cycle_start;
@@ -208,12 +227,68 @@ CoreMidiIo::send_event (uint32_t port, double reltime_us, const uint8_t *d, cons
 	return 0;
 }
 
-void
-CoreMidiIo::discover() 
+std::string
+CoreMidiIo::port_name (uint32_t port, bool input)
 {
-	cleanup();
+	std::stringstream ss;
+	std::string pn;
+	// XXX including the number will not yield persistent port-names
+	// when disconnecting devices in the middle.
+	if (input) {
+		ss << "system:midi_capture_" << port;
+		if (port < _n_midi_in) {
+			pn = getDisplayName(_input_endpoints[port]);
+		}
+	} else {
+		ss << "system:midi_playback_" << port;
+		if (port < _n_midi_out) {
+			pn = getDisplayName(_output_endpoints[port]);
+		}
+	}
+	if (!pn.empty()) {
+		ss << " - " << pn;
+	}
+	return ss.str();
+}
 
-	assert(!_active && _midi_client);
+void
+CoreMidiIo::start () {
+	_run = true;
+	if (!_midi_client) {
+		OSStatus err;
+		err = MIDIClientCreate(CFSTR("Ardour"), &notifyProc, this, &_midi_client);
+		if (noErr != err) {
+			fprintf(stderr, "Creating Midi Client failed\n");
+		}
+	}
+	discover();
+}
+
+void
+CoreMidiIo::stop ()
+{
+	_run = false;
+	pthread_mutex_lock (&_discovery_lock);
+	cleanup();
+	pthread_mutex_unlock (&_discovery_lock);
+#if 0
+	if (_midi_client) {
+		MIDIClientDispose(_midi_client);
+		_midi_client = 0;
+	}
+#endif
+}
+
+void
+CoreMidiIo::discover()
+{
+	if (!_run || !_midi_client) { return; }
+
+	if (pthread_mutex_trylock (&_discovery_lock)) {
+		return;
+	}
+
+	cleanup();
 
 	ItemCount srcCount = MIDIGetNumberOfSources();
 	ItemCount dstCount = MIDIGetNumberOfDestinations();
@@ -232,16 +307,19 @@ CoreMidiIo::discover()
 	for (ItemCount i = 0; i < srcCount; i++) {
 		OSStatus err;
 		MIDIEndpointRef src = MIDIGetSource(i);
+		if (!src) continue;
+#ifndef NDEBUG
+		printf("MIDI IN DEVICE: %s\n", getDisplayName(src).c_str());
+#endif
+
 		CFStringRef port_name;
 		port_name = CFStringCreateWithFormat(NULL, NULL, CFSTR("midi_capture_%lu"), i);
 
 		err = MIDIInputPortCreate (_midi_client, port_name, midiInputCallback, this, &_input_ports[_n_midi_in]);
 		if (noErr != err) {
 			fprintf(stderr, "Cannot create Midi Output\n");
-			// TODO  handle errors
 			continue;
 		}
-		// TODO get device name/ID
 		_rb[_n_midi_in] = new RingBuffer<uint8_t>(1024 * sizeof(MIDIPacket));
 		_input_queue[_n_midi_in] = CoreMIDIQueue();
 		MIDIPortConnectSource(_input_ports[_n_midi_in], src, (void*) _rb[_n_midi_in]);
@@ -259,10 +337,13 @@ CoreMidiIo::discover()
 		err = MIDIOutputPortCreate (_midi_client, port_name, &_output_ports[_n_midi_out]);
 		if (noErr != err) {
 			fprintf(stderr, "Cannot create Midi Output\n");
-			// TODO  handle errors
 			continue;
 		}
-		// TODO get device name/ID
+
+#ifndef NDEBUG
+		printf("MIDI OUT DEVICE: %s\n", getDisplayName(dst).c_str());
+#endif
+
 		MIDIPortConnectSource(_output_ports[_n_midi_out], dst, NULL);
 		CFRelease(port_name);
 		_output_endpoints[_n_midi_out] = dst;
@@ -274,4 +355,5 @@ CoreMidiIo::discover()
 	}
 
 	_active = true;
+	pthread_mutex_unlock (&_discovery_lock);
 }

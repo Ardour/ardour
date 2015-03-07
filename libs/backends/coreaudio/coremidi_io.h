@@ -64,8 +64,9 @@ public:
 	CoreMidiIo (void);
 	~CoreMidiIo (void);
 
-	// TODO explicit start/stop, add/remove devices as needed.
-	void discover ();
+	void start ();
+	void stop ();
+
 	void start_cycle ();
 
 	int send_event (uint32_t, double, const uint8_t *, const size_t);
@@ -73,8 +74,12 @@ public:
 
 	uint32_t n_midi_inputs (void) const { return _n_midi_in; }
 	uint32_t n_midi_outputs (void) const { return _n_midi_out; }
+	std::string port_name (uint32_t, bool input);
 
 	void notify_proc (const MIDINotification *message);
+
+	void set_enabled (bool yn = true) { _enabled = yn; }
+	bool enabled (void) const { return _active && _enabled; }
 
 	void set_port_changed_callback (void (changed_callback (void*)), void *arg) {
 		_changed_callback = changed_callback;
@@ -82,6 +87,7 @@ public:
 	}
 
 private:
+	void discover ();
 	void cleanup ();
 
 	MIDIClientRef     _midi_client;
@@ -97,8 +103,12 @@ private:
 	uint32_t          _n_midi_out;
 
 	MIDITimeStamp     _time_at_cycle_start;
-	bool              _active;
+	bool              _active; // internal deactivate during discovery etc
+	bool              _enabled; // temporary disable, e.g. during freewheeli
+	bool              _run; // general status
 
 	void (* _changed_callback) (void*);
 	void  * _changed_arg;
+
+	pthread_mutex_t _discovery_lock;
 };

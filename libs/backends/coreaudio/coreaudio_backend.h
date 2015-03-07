@@ -215,6 +215,8 @@ class CoreAudioBackend : public AudioBackend {
 		int process_callback();
 		void error_callback();
 		void xrun_callback();
+		void buffer_size_callback();
+		void sample_rate_callback();
 		void hw_changed_callback();
 
 	protected:
@@ -376,7 +378,6 @@ class CoreAudioBackend : public AudioBackend {
 		/* port engine */
 		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 		int register_system_audio_ports ();
-		int register_system_midi_ports ();
 		void unregister_ports (bool system_only = false);
 
 		std::vector<CoreBackendPort *> _ports;
@@ -416,6 +417,15 @@ class CoreAudioBackend : public AudioBackend {
 
 		CoreBackendPort * find_port (const std::string& port_name) const {
 			for (std::vector<CoreBackendPort*>::const_iterator it = _ports.begin (); it != _ports.end (); ++it) {
+				if ((*it)->name () == port_name) {
+					return *it;
+				}
+			}
+			return NULL;
+		}
+
+		CoreBackendPort * find_port_in (std::vector<CoreBackendPort *> plist, const std::string& port_name) const {
+			for (std::vector<CoreBackendPort*>::const_iterator it = plist.begin (); it != plist.end (); ++it) {
 				if ((*it)->name () == port_name) {
 					return *it;
 				}

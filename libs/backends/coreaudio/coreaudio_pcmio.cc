@@ -19,13 +19,132 @@
 #include <glibmm.h>
 #include "coreaudio_pcmio.h"
 
+/* abstraction for deprecated CoreAudio */
+
+static OSStatus GetPropertyWrapper (
+		AudioDeviceID id, UInt32 elem, bool input, AudioDevicePropertyID prop, UInt32* size, void * data)
+{
 #ifdef COREAUDIO_108
-static OSStatus hw_changed_callback_ptr(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress inAddresses[], void* arg) {
+	AudioObjectPropertyAddress property_address;
+	property_address.mSelector = prop;
+	switch (prop) {
+		case kAudioDevicePropertyBufferFrameSize:
+		case kAudioDevicePropertyBufferFrameSizeRange:
+			property_address.mScope = kAudioObjectPropertyScopeGlobal;
+			break;
+		default:
+			property_address.mScope = input ? kAudioDevicePropertyScopeInput: kAudioDevicePropertyScopeOutput;
+			break;
+	}
+	property_address.mElement = kAudioObjectPropertyElementMaster;
+	return AudioObjectGetPropertyData(id, &property_address, elem, NULL, size, data);
+#else
+	return AudioDeviceGetProperty(id, elem, input, prop, size, data);
+#endif
+}
+
+static OSStatus SetPropertyWrapper (
+		AudioDeviceID id, const AudioTimeStamp* when, UInt32 chn, bool input, AudioDevicePropertyID prop, UInt32 size, void * data)
+{
+#ifdef COREAUDIO_108
+	AudioObjectPropertyAddress property_address;
+	property_address.mSelector = prop;
+	property_address.mScope = input ? kAudioDevicePropertyScopeInput: kAudioDevicePropertyScopeOutput;
+	property_address.mElement = kAudioObjectPropertyElementMaster;
+	return AudioObjectSetPropertyData (id, &property_address, 0, NULL, size, data);
+#else
+	return AudioDeviceSetProperty (id, when, chn, input, prop, size, data);
+#endif
+}
+
+static OSStatus GetHardwarePropertyInfoWrapper (AudioDevicePropertyID prop, UInt32* size)
+{
+#ifdef COREAUDIO_108
+	AudioObjectPropertyAddress property_address;
+	property_address.mSelector = prop;
+	property_address.mScope = kAudioObjectPropertyScopeGlobal;
+	property_address.mElement = kAudioObjectPropertyElementMaster;
+	return AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &property_address, 0, NULL, size);
+#else
+	Boolean outWritable;
+	return AudioHardwareGetPropertyInfo(prop, size, &outWritable);
+#endif
+}
+
+static OSStatus GetHardwarePropertyWrapper (AudioDevicePropertyID prop, UInt32* size, void *d)
+{
+#ifdef COREAUDIO_108
+	AudioObjectPropertyAddress property_address;
+	property_address.mSelector = prop;
+	property_address.mScope = kAudioObjectPropertyScopeGlobal;
+	property_address.mElement = kAudioObjectPropertyElementMaster;
+	return AudioObjectGetPropertyData(kAudioObjectSystemObject, &property_address, 0, NULL, size, d);
+#else
+	return AudioHardwareGetProperty (kAudioHardwarePropertyDevices, size, d);
+#endif
+}
+
+static OSStatus GetPropertyInfoWrapper (AudioDeviceID id, UInt32 elem, bool input, AudioDevicePropertyID prop, UInt32* size)
+{
+#ifdef COREAUDIO_108
+	AudioObjectPropertyAddress property_address;
+	property_address.mSelector = prop;
+	property_address.mScope = input ? kAudioDevicePropertyScopeInput: kAudioDevicePropertyScopeOutput;
+	property_address.mElement = elem;
+	return AudioObjectGetPropertyDataSize(id, &property_address, 0, NULL, size);
+#else
+	Boolean outWritable;
+	return AudioDeviceGetPropertyInfo(id, elem, input, prop, size, &outWritable);
+#endif
+}
+
+static OSStatus GetDeviceNameFromID(AudioDeviceID id, char* name)
+{
+    UInt32 size = 256;
+    return GetPropertyWrapper (id, 0, 0, kAudioDevicePropertyDeviceName, &size, name);
+}
+
+static CFStringRef GetDeviceName(AudioDeviceID id)
+{
+    UInt32 size = sizeof(CFStringRef);
+    CFStringRef UIname;
+    OSStatus err = GetPropertyWrapper (id, 0, 0, kAudioDevicePropertyDeviceUID, &size, &UIname);
+    return (err == noErr) ? UIname : NULL;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+#include "coreaudio_pcmio_aggregate.cc"
+
+/* callbacks */
+
+#ifdef COREAUDIO_108
+
+static OSStatus property_callback_ptr (AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress inAddresses[], void* arg) {
 	CoreAudioPCM * self = static_cast<CoreAudioPCM*>(arg);
-	self->hw_changed_callback();
+	for (UInt32 i = 0; i < inNumberAddresses; ++i) {
+		switch (inAddresses[i].mSelector) {
+			case kAudioHardwarePropertyDevices:
+				self->hw_changed_callback();
+				break;
+			case kAudioDeviceProcessorOverload:
+				self->xrun_callback();
+				break;
+			case kAudioDevicePropertyBufferFrameSize:
+				self->buffer_size_callback();
+				break;
+			case kAudioDevicePropertyNominalSampleRate:
+				self->sample_rate_callback();
+				break;
+			default:
+				break;
+		}
+	}
 	return noErr;
 }
+
 #else
+
 static OSStatus hw_changed_callback_ptr (AudioHardwarePropertyID inPropertyID, void* arg) {
 	if (inPropertyID == kAudioHardwarePropertyDevices) {
 		CoreAudioPCM * self = static_cast<CoreAudioPCM*>(arg);
@@ -33,16 +152,8 @@ static OSStatus hw_changed_callback_ptr (AudioHardwarePropertyID inPropertyID, v
 	}
 	return noErr;
 }
-#endif
 
-#ifdef COREAUDIO_108
-static OSStatus xrun_callback_ptr(AudioObjectID inObjectID, UInt32 inNumberAddresses, const AudioObjectPropertyAddress inAddresses[], void* arg) {
-	CoreAudioPCM * self = static_cast<CoreAudioPCM*>(arg);
-	self->xrun_callback();
-	return noErr;
-}
-#else
-static OSStatus xrun_callback_ptr(
+static OSStatus property_callback_ptr (
 		AudioDeviceID inDevice,
 		UInt32 inChannel,
 		Boolean isInput,
@@ -50,9 +161,20 @@ static OSStatus xrun_callback_ptr(
 		void* inClientData)
 {
 	CoreAudioPCM * d = static_cast<CoreAudioPCM*> (inClientData);
-	d->xrun_callback();
+	switch (inPropertyID) {
+		case kAudioDeviceProcessorOverload:
+			d->xrun_callback();
+			break;
+		case kAudioDevicePropertyBufferFrameSize:
+			d->buffer_size_callback();
+			break;
+		case kAudioDevicePropertyNominalSampleRate:
+			d->sample_rate_callback();
+			break;
+	}
 	return noErr;
 }
+
 #endif
 
 static OSStatus render_callback_ptr (
@@ -68,12 +190,28 @@ static OSStatus render_callback_ptr (
 }
 
 
+static OSStatus add_listener (AudioDeviceID id, AudioDevicePropertyID selector, void *arg) {
+#ifdef COREAUDIO_108
+	AudioObjectPropertyAddress property_address;
+	property_address.mSelector = selector;
+	property_address.mScope = kAudioObjectPropertyScopeGlobal;
+	property_address.mElement = 0;
+	return AudioObjectAddPropertyListener(id, &property_address, property_callback_ptr, arg);
+#else
+        return AudioDeviceAddPropertyListener(id, 0, true, selector, property_callback_ptr, arg);
+#endif
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 CoreAudioPCM::CoreAudioPCM ()
 	: _auhal (0)
 	, _device_ids (0)
 	, _input_audio_buffer_list (0)
-	, _active_input (0)
-	, _active_output (0)
+	, _active_device_id (0)
+	, _aggregate_device_id (0)
+	, _aggregate_plugin_id (0)
 	, _state (-1)
 	, _capture_channels (0)
 	, _playback_channels (0)
@@ -83,6 +221,8 @@ CoreAudioPCM::CoreAudioPCM ()
 	, _error_callback (0)
 	, _hw_changed_callback (0)
 	, _xrun_callback (0)
+	, _buffer_size_callback (0)
+	, _sample_rate_callback (0)
 	, _device_ins (0)
 	, _device_outs (0)
 {
@@ -93,11 +233,10 @@ CoreAudioPCM::CoreAudioPCM ()
 	AudioObjectPropertyAddress property = { kAudioHardwarePropertyRunLoop, kAudioObjectPropertyScopeGlobal, kAudioHardwarePropertyDevices };
 	AudioObjectSetPropertyData (kAudioObjectSystemObject, &property, 0, NULL, sizeof(CFRunLoopRef), &theRunLoop);
 
-	AudioObjectPropertyAddress prop;
-	prop.mSelector = kAudioHardwarePropertyDevices;
-	prop.mScope = kAudioObjectPropertyScopeGlobal;
-	prop.mElement = 0;
-	AudioObjectAddPropertyListener(kAudioObjectSystemObject, &prop, hw_changed_callback_ptr, this);
+	property.mSelector = kAudioHardwarePropertyDevices;
+	property.mScope = kAudioObjectPropertyScopeGlobal;
+	property.mElement = 0;
+	AudioObjectAddPropertyListener(kAudioObjectSystemObject, &property, property_callback_ptr, this);
 #else
 	AudioHardwareAddPropertyListener (kAudioHardwarePropertyDevices, hw_changed_callback_ptr, this);
 #endif
@@ -116,7 +255,7 @@ CoreAudioPCM::~CoreAudioPCM ()
 	prop.mSelector = kAudioHardwarePropertyDevices;
 	prop.mScope = kAudioObjectPropertyScopeGlobal;
 	prop.mElement = 0;
-	AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &prop, &hw_changed_callback_ptr, this);
+	AudioObjectRemovePropertyListener(kAudioObjectSystemObject, &prop, &property_callback_ptr, this);
 #else
 	AudioHardwareRemovePropertyListener(kAudioHardwarePropertyDevices, hw_changed_callback_ptr);
 #endif
@@ -127,9 +266,10 @@ CoreAudioPCM::~CoreAudioPCM ()
 
 void
 CoreAudioPCM::hw_changed_callback() {
-	printf("CHANGE..\n");
+#ifndef NDEBUG
+	printf("CoreAudio HW change..\n");
+#endif
 	discover();
-	// TODO Filter events..
 	if (_hw_changed_callback) {
 		_hw_changed_callback(_hw_changed_arg);
 	}
@@ -147,15 +287,7 @@ CoreAudioPCM::available_sample_rates(uint32_t device_id, std::vector<float>& sam
 		return -1;
 	}
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyAvailableNominalSampleRates;
-	property_address.mScope = kAudioDevicePropertyScopeOutput;
-	property_address.mElement = kAudioObjectPropertyElementMaster;
-	err = AudioObjectGetPropertyDataSize(_device_ids[device_id], &property_address, 0, NULL, &size);
-#else
-	err = AudioDeviceGetPropertyInfo(_device_ids[device_id], 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &size, NULL);
-#endif
+	err = GetPropertyInfoWrapper (_device_ids[device_id], 0, false, kAudioDevicePropertyAvailableNominalSampleRates, &size);
 
 	if (err != kAudioHardwareNoError) {
 		return -1;
@@ -164,11 +296,7 @@ CoreAudioPCM::available_sample_rates(uint32_t device_id, std::vector<float>& sam
 	int numRates = size / sizeof(AudioValueRange);
 	AudioValueRange* supportedRates = new AudioValueRange[numRates];
 
-#ifdef COREAUDIO_108
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, supportedRates);
-#else
-	err = AudioDeviceGetProperty(_device_ids[device_id], 0, 0, kAudioDevicePropertyAvailableNominalSampleRates, &size, supportedRates);
-#endif
+	err = GetPropertyWrapper (_device_ids[device_id], 0, false, kAudioDevicePropertyAvailableNominalSampleRates, &size, supportedRates);
 
 	if (err != kAudioHardwareNoError) {
 		delete [] supportedRates;
@@ -205,15 +333,8 @@ CoreAudioPCM::available_buffer_sizes(uint32_t device_id, std::vector<uint32_t>& 
 	AudioValueRange supportedRange;
 	size = sizeof (AudioValueRange);
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyBufferFrameSizeRange;
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &supportedRange);
-#else
-	err = AudioDeviceGetProperty(_device_ids[device_id], 0, 0, kAudioDevicePropertyBufferFrameSizeRange, &size, &supportedRange);
-#endif
-
-	if (err != kAudioHardwareNoError) {
+	err = GetPropertyWrapper (_device_ids[device_id], 0, 0, kAudioDevicePropertyBufferFrameSizeRange, &size, &supportedRange);
+	if (err != noErr) {
 		return -1;
 	}
 
@@ -246,11 +367,7 @@ CoreAudioPCM::available_channels(uint32_t device_id, bool input)
 	}
 
 	/* query number of inputs */
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyStreamConfiguration;
-	property_address.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-	err = AudioObjectGetPropertyDataSize(_device_ids[device_id], &property_address, 0, NULL, &size);
+	err = GetPropertyInfoWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertyStreamConfiguration, &size);
 	if (kAudioHardwareNoError != err) {
 		fprintf(stderr, "CoreaAudioPCM: kAudioDevicePropertyStreamConfiguration failed: %i\n", err);
 		return 0;
@@ -259,23 +376,8 @@ CoreAudioPCM::available_channels(uint32_t device_id, bool input)
 	bufferList = (AudioBufferList *)(malloc(size));
 	assert(bufferList);
 	if (!bufferList) { fprintf(stderr, "OUT OF MEMORY\n"); return 0; }
-
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, bufferList);
-
-#else
-	err = AudioDeviceGetPropertyInfo (_device_ids[device_id], 0, input ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT, kAudioDevicePropertyStreamConfiguration, &size, NULL);
-	if (kAudioHardwareNoError != err) {
-		fprintf(stderr, "CoreaAudioPCM: kAudioDevicePropertyStreamConfiguration failed: %i\n", err);
-		return 0;
-	}
-
-	bufferList = (AudioBufferList *)(malloc(size));
-	assert(bufferList);
-	if (!bufferList) { fprintf(stderr, "OUT OF MEMORY\n"); return 0; }
-
 	bufferList->mNumberBuffers = 0;
-	err = AudioDeviceGetProperty(_device_ids[device_id], 0, input ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT, kAudioDevicePropertyStreamConfiguration, &size, bufferList);
-#endif
+	err = GetPropertyWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertyStreamConfiguration, &size, bufferList);
 
 	if(kAudioHardwareNoError != err) {
 		fprintf(stderr, "CoreaAudioPCM: kAudioDevicePropertyStreamConfiguration failed: %i\n", err);
@@ -291,7 +393,7 @@ CoreAudioPCM::available_channels(uint32_t device_id, bool input)
 }
 
 void
-CoreAudioPCM::get_stream_latencies(uint32 device_id, bool input, std::vector<uint32>& latencies)
+CoreAudioPCM::get_stream_latencies(uint32_t device_id, bool input, std::vector<uint32_t>& latencies)
 {
 	OSStatus err;
 	UInt32 size = 0;
@@ -300,42 +402,29 @@ CoreAudioPCM::get_stream_latencies(uint32 device_id, bool input, std::vector<uin
 		return;
 	}
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyStreams;
-	property_address.mScope = input ? kAudioDevicePropertyScopeInput: kAudioDevicePropertyScopeOutput;
-	property_address.mElement = kAudioObjectPropertyElementMaster;
-	err = AudioObjectGetPropertyDataSize(_device_ids[device_id], &property_address, 0, NULL, &size);
-#else
-	Boolean	outWritable;
-	const int elem = input ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT;
-	err = AudioDeviceGetPropertyInfo(_device_ids[device_id], 0, elem, kAudioDevicePropertyStreams, &size, &outWritable);
-#endif
-	if (err != noErr) {
-		return;
-	}
+	err = GetPropertyInfoWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertyStreams, &size);
+	if (err != noErr) { return; }
 
-	uint32 stream_count = size / sizeof(UInt32);
+	uint32_t stream_count = size / sizeof(UInt32);
 	AudioStreamID streamIDs[stream_count];
 
-#ifdef COREAUDIO_108
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &streamIDs);
-#else
-	err = AudioDeviceGetProperty(_device_ids[device_id], 0, elem, kAudioDevicePropertyStreams, &size, streamIDs);
-#endif
+	err = GetPropertyWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertyStreams, &size, &streamIDs);
 	if (err != noErr) {
 		fprintf(stderr, "GetStreamLatencies kAudioDevicePropertyStreams\n");
 		return;
 	}
 
-	for (uint32 i = 0; i < stream_count; i++) {
+	for (uint32_t i = 0; i < stream_count; i++) {
 		UInt32 stream_latency;
 		size = sizeof(UInt32);
 #ifdef COREAUDIO_108
+		AudioObjectPropertyAddress property_address;
 		property_address.mSelector = kAudioDevicePropertyStreams;
+		property_address.mScope = input ? kAudioDevicePropertyScopeInput: kAudioDevicePropertyScopeOutput;
+		property_address.mElement = i; // ??
 		err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &stream_latency);
 #else
-		err = AudioStreamGetProperty(streamIDs[i], elem, kAudioStreamPropertyLatency, &size, &stream_latency);
+		err = AudioStreamGetProperty(streamIDs[i], input, kAudioStreamPropertyLatency, &size, &stream_latency);
 #endif
 		if (err != noErr) {
 			fprintf(stderr, "GetStreamLatencies kAudioStreamPropertyLatency\n");
@@ -349,10 +438,10 @@ CoreAudioPCM::get_stream_latencies(uint32 device_id, bool input, std::vector<uin
 }
 
 uint32_t
-CoreAudioPCM::get_latency(uint32 device_id, bool input)
+CoreAudioPCM::get_latency(uint32_t device_id, bool input)
 {
 	OSStatus err;
-	uint32 latency = 0;
+	uint32_t latency = 0;
 	UInt32 size = sizeof(UInt32);
 	UInt32 lat0 = 0;
 	UInt32 latS = 0;
@@ -361,26 +450,12 @@ CoreAudioPCM::get_latency(uint32 device_id, bool input)
 		return 0;
 	}
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyLatency;
-	property_address.mScope = input? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-	property_address.mElement = 0;
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &lat0);
-#else
-	const int elem = input ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT;
-	err = AudioDeviceGetProperty(_device_ids[device_id], 0, elem, kAudioDevicePropertyLatency, &size, &lat0);
-#endif
+	err = GetPropertyWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertyLatency, &size, &lat0);
 	if (err != kAudioHardwareNoError) {
 		fprintf(stderr, "GetLatency kAudioDevicePropertyLatency\n");
 	}
 
-#ifdef COREAUDIO_108
-	property_address.mSelector = kAudioDevicePropertySafetyOffset;
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &latS);
-#else
-	err = AudioDeviceGetProperty(_device_ids[device_id], 0, elem, kAudioDevicePropertySafetyOffset, &size, &latS);
-#endif
+	err = GetPropertyWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertySafetyOffset, &size, &latS);
 	if (err != kAudioHardwareNoError) {
 		fprintf(stderr, "GetLatency kAudioDevicePropertySafetyOffset\n");
 	}
@@ -392,7 +467,7 @@ CoreAudioPCM::get_latency(uint32 device_id, bool input)
 	latency = lat0 + latS;
 
 	uint32_t max_stream_latency = 0;
-	std::vector<uint32> stream_latencies;
+	std::vector<uint32_t> stream_latencies;
 	get_stream_latencies(device_id, input, stream_latencies);
 	for (size_t i = 0; i < stream_latencies.size(); ++i) {
 		max_stream_latency = std::max(max_stream_latency, stream_latencies[i]);
@@ -402,76 +477,64 @@ CoreAudioPCM::get_latency(uint32 device_id, bool input)
 	return latency;
 }
 
-
+uint32_t
+CoreAudioPCM::current_buffer_size_id(AudioDeviceID id) {
+	UInt32 buffer_size;
+	UInt32 size = sizeof(UInt32);
+	OSStatus err;
+	err = GetPropertyWrapper (id, 0, 0, kAudioDevicePropertyBufferFrameSize, &size, &buffer_size);
+	if (err != noErr) {
+		return _samples_per_period;
+	}
+	return buffer_size;
+}
 
 
 float
-CoreAudioPCM::current_sample_rate(uint32 device_id, bool input) {
+CoreAudioPCM::current_sample_rate_id(AudioDeviceID id, bool input) {
 	OSStatus err;
 	UInt32 size = 0;
-
-	if (device_id >= _n_devices) {
-		return -1;
-	}
-
-	float sample_rate = 0;
-
 	Float64 rate;
 	size = sizeof (rate);
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyNominalSampleRate;
-	property_address.mScope = input ? kAudioDevicePropertyScopeInput: kAudioDevicePropertyScopeOutput;
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &rate);
-#else
-	err = AudioDeviceGetPropertyInfo(_device_ids[device_id], 0, input ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT, kAudioDevicePropertyNominalSampleRate, &size, &rate);
-#endif
-
-	if (err == kAudioHardwareNoError) {
-		sample_rate = rate;
+	err = GetPropertyWrapper(id, 0, input, kAudioDevicePropertyNominalSampleRate, &size, &rate);
+	if (err == noErr) {
+		return rate;
 	}
+	return 0;
+}
 
-	// prefer input, if vailable
-
-#ifdef COREAUDIO_108
-	property_address.mSelector = kAudioDevicePropertyNominalSampleRate;
-	property_address.mScope = kAudioDevicePropertyScopeInput;
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &rate);
-#else
-	err = AudioDeviceGetPropertyInfo(_device_ids[device_id], 0, AUHAL_INPUT_ELEMENT, kAudioDevicePropertyNominalSampleRate, &size, &rate);
-#endif
-
-	if (err == kAudioHardwareNoError) {
-		sample_rate = rate;
+float
+CoreAudioPCM::current_sample_rate(uint32_t device_id, bool input) {
+	if (device_id >= _n_devices) {
+		return -1;
 	}
+	return current_sample_rate_id(_device_ids[device_id], input);
+}
 
-	return sample_rate;
+float
+CoreAudioPCM::sample_rate() {
+	if (_active_device_id == 0) {
+		return 0;
+	}
+	return current_sample_rate_id(_active_device_id, _playback_channels > 0 ? false : true);
 }
 
 int
-CoreAudioPCM::set_device_sample_rate (uint32 device_id, float rate, bool input)
+CoreAudioPCM::set_device_sample_rate_id (AudioDeviceID id, float rate, bool input)
 {
 	std::vector<int>::iterator intIter;
 	OSStatus err;
 	UInt32 size = 0;
 
-	if (current_sample_rate(device_id, input) == rate) {
+	if (current_sample_rate_id(id, input) == rate) {
 		return 0;
 	}
 
 	Float64 newNominalRate = rate;
 	size = sizeof (Float64);
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyNominalSampleRate;
-	property_address.mScope = input ? kAudioDevicePropertyScopeInput : kAudioDevicePropertyScopeOutput;
-	property_address.mElement = kAudioObjectPropertyElementMaster;
-	err = AudioObjectSetPropertyData (_device_ids[device_id], &property_address, 0, NULL, size, &newNominalRate);
-#else
-	err = AudioDeviceSetProperty(_device_ids[device_id], NULL, 0, input ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT, kAudioDevicePropertyNominalSampleRate, size, &newNominalRate);
-#endif
+	err = SetPropertyWrapper(id, NULL, 0, input, kAudioDevicePropertyNominalSampleRate, size, &newNominalRate);
 	if (err != noErr) {
 		fprintf(stderr, "CoreAudioPCM: failed to set samplerate\n");
 		return 0;
@@ -479,7 +542,7 @@ CoreAudioPCM::set_device_sample_rate (uint32 device_id, float rate, bool input)
 
 	int timeout = 3000; // 3 sec
 	while (--timeout > 0) {
-		if (current_sample_rate(device_id) == rate) {
+		if (current_sample_rate_id(id, input) == rate) {
 			break;
 		}
 		Glib::usleep (1000);
@@ -492,6 +555,12 @@ CoreAudioPCM::set_device_sample_rate (uint32 device_id, float rate, bool input)
 	}
 
 	return 0;
+}
+
+int
+CoreAudioPCM::set_device_sample_rate (AudioDeviceID device_id, float rate, bool input)
+{
+	return set_device_sample_rate_id(_device_ids[device_id], rate, input);
 }
 
 void
@@ -511,15 +580,7 @@ CoreAudioPCM::discover()
 	}
 	_devices.clear();
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioHardwarePropertyDevices;
-	property_address.mScope = kAudioObjectPropertyScopeGlobal;
-	property_address.mElement = kAudioObjectPropertyElementMaster;
-	err = AudioObjectGetPropertyDataSize(kAudioObjectSystemObject, &property_address, 0, NULL, &size);
-#else
-	err = AudioHardwareGetPropertyInfo (kAudioHardwarePropertyDevices, &size, NULL);
-#endif
+	err = GetHardwarePropertyInfoWrapper (kAudioHardwarePropertyDevices, &size);
 
 	_n_devices = size / sizeof (AudioDeviceID);
 	size = _n_devices * sizeof (AudioDeviceID);
@@ -538,24 +599,12 @@ CoreAudioPCM::discover()
 		return;
 	}
 
-
-#ifdef COREAUDIO_108
-	property_address.mSelector = kAudioHardwarePropertyDevices;
-	err = AudioObjectGetPropertyData(kAudioObjectSystemObject, &property_address, 0, NULL, &size, _device_ids);
-#else
-	err = AudioHardwareGetProperty (kAudioHardwarePropertyDevices, &size, _device_ids);
-#endif
+	err = GetHardwarePropertyWrapper (kAudioHardwarePropertyDevices, &size, _device_ids);
 
 	for (size_t idx = 0; idx < _n_devices; ++idx) {
 		size = 64;
 		char deviceName[64];
-#ifdef COREAUDIO_108
-		property_address.mSelector = kAudioDevicePropertyDeviceName;
-		property_address.mScope = kAudioDevicePropertyScopeOutput;
-		err = AudioObjectGetPropertyData(_device_ids[idx], &property_address, 0, NULL, &size, deviceName);
-#else
-		err = AudioDeviceGetProperty(_device_ids[idx], 0, 0, kAudioDevicePropertyDeviceName, &size, deviceName);
-#endif
+		err = GetPropertyWrapper (_device_ids[idx], 0, 0, kAudioDevicePropertyDeviceName, &size, deviceName);
 
 		if (kAudioHardwareNoError != err) {
 			fprintf(stderr, "CoreAudioPCM: device name query failed: %i\n", err);
@@ -570,9 +619,9 @@ CoreAudioPCM::discover()
 			_device_ins[idx] = inputChannelCount;
 			_device_outs[idx] = outputChannelCount;
 #ifndef NDEBUG
-			printf("CoreAudio Device: #%ld '%s' in:%d out:%d\n", idx, deviceName, inputChannelCount, outputChannelCount);
+			printf("CoreAudio Device: #%ld (id:%u) '%s' in:%d out:%d\n", idx, _device_ids[idx], deviceName, inputChannelCount, outputChannelCount);
 #endif
-			if (outputChannelCount > 0 && inputChannelCount > 0) {
+			if (outputChannelCount > 0 || inputChannelCount > 0) {
 				_devices.insert (std::pair<size_t, std::string> (idx, dn));
 			}
 		}
@@ -592,6 +641,27 @@ CoreAudioPCM::xrun_callback ()
 }
 
 void
+CoreAudioPCM::buffer_size_callback ()
+{
+	_samples_per_period = current_buffer_size_id(_active_device_id);
+
+	if (_buffer_size_callback) {
+		_buffer_size_callback(_buffer_size_arg);
+	}
+}
+
+void
+CoreAudioPCM::sample_rate_callback ()
+{
+#ifndef NDEBUG
+	printf("Sample Rate Changed!\n");
+#endif
+	if (_sample_rate_callback) {
+		_sample_rate_callback(_sample_rate_arg);
+	}
+}
+
+void
 CoreAudioPCM::pcm_stop ()
 {
 	if (!_auhal) return;
@@ -600,19 +670,26 @@ CoreAudioPCM::pcm_stop ()
 	if (_state == 0) {
 #ifdef COREAUDIO_108
 		AudioObjectPropertyAddress prop;
-		prop.mSelector = kAudioDeviceProcessorOverload;
 		prop.mScope = kAudioObjectPropertyScopeGlobal;
 		prop.mElement = 0;
-		if (_active_output > 0) {
-			AudioObjectRemovePropertyListener(_active_input, &prop, &xrun_callback_ptr, this);
-		}
-		if (_active_input > 0 && _active_output != _active_input) {
-			AudioObjectRemovePropertyListener(_active_output, &prop, &xrun_callback_ptr, this);
+		if (_active_device_id > 0) {
+			prop.mSelector = kAudioDeviceProcessorOverload;
+			AudioObjectRemovePropertyListener(_active_device_id, &prop, &property_callback_ptr, this);
+			prop.mSelector = kAudioDevicePropertyBufferFrameSize;
+			AudioObjectRemovePropertyListener(_active_device_id, &prop, &property_callback_ptr, this);
+			prop.mSelector = kAudioDevicePropertyNominalSampleRate;
+			AudioObjectRemovePropertyListener(_active_device_id, &prop, &property_callback_ptr, this);
 		}
 #else
-		AudioDeviceRemovePropertyListener(_active_input, 0 , true, kAudioDeviceProcessorOverload, xrun_callback_ptr);
-		AudioDeviceRemovePropertyListener(_active_output, 0 , false, kAudioDeviceProcessorOverload, xrun_callback_ptr);
+		if (_active_device_id > 0) {
+			AudioDeviceRemovePropertyListener(_active_device_id, 0, true, kAudioDeviceProcessorOverload, property_callback_ptr);
+			AudioDeviceRemovePropertyListener(_active_device_id, 0, true, kAudioDevicePropertyBufferFrameSize, property_callback_ptr);
+			AudioDeviceRemovePropertyListener(_active_device_id, 0, true, kAudioDevicePropertyNominalSampleRate, property_callback_ptr);
+		}
 #endif
+	}
+	if (_aggregate_plugin_id) {
+		destroy_aggregate_device();
 	}
 
 	AudioUnitUninitialize(_auhal);
@@ -625,6 +702,9 @@ CoreAudioPCM::pcm_stop ()
 	_state = -1;
 	_capture_channels = 0;
 	_playback_channels = 0;
+	_aggregate_plugin_id = 0;
+	_aggregate_device_id = 0;
+	_active_device_id = 0;
 
 	free(_input_audio_buffer_list);
 	_input_audio_buffer_list = 0;
@@ -654,6 +734,31 @@ static void PrintStreamDesc (AudioStreamBasicDescription *inDesc)
 #endif
 
 int
+CoreAudioPCM::set_device_buffer_size_id (AudioDeviceID id, uint32_t samples_per_period)
+{
+	OSStatus err;
+	UInt32 uint32val;
+
+	uint32val = samples_per_period;
+	err = SetPropertyWrapper(id, NULL, 0, true, kAudioDevicePropertyBufferFrameSize, sizeof(UInt32), &uint32val);
+	if (err != noErr) { return -1; }
+	err = SetPropertyWrapper(id, NULL, 0, false, kAudioDevicePropertyBufferFrameSize, sizeof(UInt32), &uint32val);
+	if (err != noErr) { return -1; }
+	return 0;
+}
+
+int
+CoreAudioPCM::set_samples_per_period (uint32_t n_samples)
+{
+
+	if (_state != 0 || _active_device_id == 0) {
+		return -1;
+	}
+	set_device_buffer_size_id (_active_device_id, n_samples);
+	return 0;
+}
+
+int
 CoreAudioPCM::pcm_start (
 		uint32_t device_id_in, uint32_t device_id_out,
 		uint32_t sample_rate, uint32_t samples_per_period,
@@ -664,18 +769,31 @@ CoreAudioPCM::pcm_start (
 	std::string errorMsg;
 	_state = -2;
 
+	// TODO add "none' device to force half-duplex
+
 	if (device_id_out >= _n_devices || device_id_in >= _n_devices) {
 		return -1;
 	}
 
+	pthread_mutex_lock (&_discovery_lock);
+
 	_process_callback = process_callback;
 	_process_arg = process_arg;
-	_max_samples_per_period = samples_per_period;
+	_samples_per_period = samples_per_period;
 	_cur_samples_per_period = 0;
-	_active_input = _active_output = 0;
+	_active_device_id = 0;
+	_capture_channels = 0;
+	_playback_channels = 0;
+
+	const uint32_t chn_in = _device_ins[device_id_in] + ((device_id_out != device_id_in) ? _device_ins[device_id_out] : 0);
+	const uint32_t chn_out = _device_outs[device_id_out] + ((device_id_out != device_id_in) ? _device_outs[device_id_in] : 0);
+
+	assert (chn_in > 0 || chn_out > 0);
 
 	ComponentResult err;
 	UInt32 uint32val;
+	UInt32 size;
+	AudioDeviceID device_id;
 	AudioStreamBasicDescription srcFormat, dstFormat;
 
 	AudioComponentDescription cd = {kAudioUnitType_Output, kAudioUnitSubType_HALOutput, kAudioUnitManufacturer_Apple, 0, 0};
@@ -697,142 +815,153 @@ CoreAudioPCM::pcm_start (
 	}
 
 	// explicitly request device buffer size
-	uint32val = samples_per_period;
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyBufferFrameSize;
-	property_address.mScope = kAudioDevicePropertyScopeInput;
-	property_address.mElement = kAudioObjectPropertyElementMaster;
-	err = AudioObjectSetPropertyData (_device_ids[device_id_in], &property_address, 0, NULL, sizeof(UInt32), &uint32val);
-	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Input"; goto error; }
+	if (set_device_buffer_size_id(_device_ids[device_id_in], samples_per_period)) {
+		errorMsg="kAudioDevicePropertyBufferFrameSize, Input"; goto error;
+	}
+	if (set_device_buffer_size_id(_device_ids[device_id_out], samples_per_period)) {
+		errorMsg="kAudioDevicePropertyBufferFrameSize, Output"; goto error;
+	}
 
-	property_address.mScope = kAudioDevicePropertyScopeOutput;
-	err = AudioObjectSetPropertyData (_device_ids[device_id_out], &property_address, 0, NULL, sizeof(UInt32), &uint32val);
-	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Output"; goto error; }
-#else
-	err = AudioDeviceSetProperty(_device_ids[device_id_in], NULL, 0, AUHAL_INPUT_ELEMENT, kAudioDevicePropertyBufferFrameSize, sizeof(UInt32), &uint32val);
-	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Input"; goto error; }
-	err = AudioDeviceSetProperty(_device_ids[device_id_out], NULL, 0, AUHAL_OUTPUT_ELEMENT, kAudioDevicePropertyBufferFrameSize, sizeof(UInt32), &uint32val);
-	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Output"; goto error; }
-#endif
+	// create aggregate device..
+	if (_device_ids[device_id_in] != _device_ids[device_id_out]) {
+		if (0 == create_aggregate_device(_device_ids[device_id_in], _device_ids[device_id_out], sample_rate, &_aggregate_device_id)) {
+			device_id = _aggregate_device_id;
+		} else {
+			_aggregate_device_id = 0;
+			_aggregate_plugin_id = 0;
+			errorMsg="Cannot create Aggregate Device"; goto error;
+		}
+	} else {
+		device_id = _device_ids[device_id_out];
+	}
 
-	uint32val = 1;
+	if (device_id_out != device_id_in) {
+		assert(_aggregate_device_id > 0);
+	}
+
+	// enableIO to progress further
+	uint32val = (chn_in > 0) ? 1 : 0;
 	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, AUHAL_INPUT_ELEMENT, &uint32val, sizeof(UInt32));
 	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_EnableIO, Input"; goto error; }
-	uint32val = 1;
+
+	uint32val = (chn_out > 0) ? 1 : 0;
 	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, AUHAL_OUTPUT_ELEMENT, &uint32val, sizeof(UInt32));
 	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_EnableIO, Output"; goto error; }
 
-	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, &_device_ids[device_id_out], sizeof(AudioDeviceID));
-	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_CurrentDevice, Output"; goto error; }
-
-	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, &_device_ids[device_id_in], sizeof(AudioDeviceID));
+	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &device_id, sizeof(AudioDeviceID));
 	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_CurrentDevice, Input"; goto error; }
 
-	// Set buffer size
-	err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, (UInt32*)&_max_samples_per_period, sizeof(UInt32));
-	if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Input"; goto error; }
-	err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, (UInt32*)&_max_samples_per_period, sizeof(UInt32));
-	if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Output"; goto error; }
+	if (chn_in > 0) {
+		// set sample format
+		srcFormat.mSampleRate = sample_rate;
+		srcFormat.mFormatID = kAudioFormatLinearPCM;
+		srcFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
+		srcFormat.mBytesPerPacket = sizeof(float);
+		srcFormat.mFramesPerPacket = 1;
+		srcFormat.mBytesPerFrame = sizeof(float);
+		srcFormat.mChannelsPerFrame = chn_in;
+		srcFormat.mBitsPerChannel = 32;
 
-	// set sample format
-	srcFormat.mSampleRate = sample_rate;
-	srcFormat.mFormatID = kAudioFormatLinearPCM;
-	srcFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
-	srcFormat.mBytesPerPacket = sizeof(float);
-	srcFormat.mFramesPerPacket = 1;
-	srcFormat.mBytesPerFrame = sizeof(float);
-	srcFormat.mChannelsPerFrame = _device_ins[device_id_in];
-	srcFormat.mBitsPerChannel = 32;
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, sizeof(AudioStreamBasicDescription));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat, Output"; goto error; }
 
-#if 0
-	property_address = { kAudioDevicePropertyStreamFormat, kAudioDevicePropertyScopeOutput, kAudioObjectPropertyElementMaster };
-	err = AudioObjectSetPropertyData (_device_ids[device_id_in], &property_address, 0, NULL, sizeof(AudioStreamBasicDescription), &srcFormat);
-#else
-	err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, sizeof(AudioStreamBasicDescription));
-#endif
-	if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat, Output"; goto error; }
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Input"; goto error; }
+	}
 
-	dstFormat.mSampleRate = sample_rate;
-	dstFormat.mFormatID = kAudioFormatLinearPCM;
-	dstFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
-	dstFormat.mBytesPerPacket = sizeof(float);
-	dstFormat.mFramesPerPacket = 1;
-	dstFormat.mBytesPerFrame = sizeof(float);
-	dstFormat.mChannelsPerFrame = _device_outs[device_id_out];
-	dstFormat.mBitsPerChannel = 32;
+	if (chn_out > 0) {
+		dstFormat.mSampleRate = sample_rate;
+		dstFormat.mFormatID = kAudioFormatLinearPCM;
+		dstFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
+		dstFormat.mBytesPerPacket = sizeof(float);
+		dstFormat.mFramesPerPacket = 1;
+		dstFormat.mBytesPerFrame = sizeof(float);
+		dstFormat.mChannelsPerFrame = chn_out;
+		dstFormat.mBitsPerChannel = 32;
 
-#if 0
-	property_address = { kAudioDevicePropertyStreamFormat, kAudioDevicePropertyScopeInput, 0 };
-	err = AudioObjectSetPropertyData (_device_ids[device_id_out], &property_address, 0, NULL, sizeof(AudioStreamBasicDescription), &dstFormat);
-#else
-	err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, sizeof(AudioStreamBasicDescription));
-#endif
-	if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat Input"; goto error; }
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, sizeof(AudioStreamBasicDescription));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat Input"; goto error; }
+
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Output"; goto error; }
+	}
 
 	/* read back stream descriptions */
-	UInt32 size;
-	size = sizeof(AudioStreamBasicDescription);
-	err = AudioUnitGetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, &size);
-	if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Output"; goto error; }
-	_capture_channels = srcFormat.mChannelsPerFrame;
+	if (chn_in > 0) {
+		size = sizeof(AudioStreamBasicDescription);
+		err = AudioUnitGetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, &size);
+		if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Output"; goto error; }
+		_capture_channels = srcFormat.mChannelsPerFrame;
 #ifndef NDEBUG
-	PrintStreamDesc(&srcFormat);
+		PrintStreamDesc(&srcFormat);
 #endif
+	}
 
-	size = sizeof(AudioStreamBasicDescription);
-	err = AudioUnitGetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, &size);
-	if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Input"; goto error; }
-	_playback_channels = dstFormat.mChannelsPerFrame;
+	if (chn_out > 0) {
+		size = sizeof(AudioStreamBasicDescription);
+		err = AudioUnitGetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, &size);
+		if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Input"; goto error; }
+		_playback_channels = dstFormat.mChannelsPerFrame;
 
 #ifndef NDEBUG
-	PrintStreamDesc(&dstFormat);
+		PrintStreamDesc(&dstFormat);
 #endif
+	}
 
 	/* prepare buffers for input */
-	_input_audio_buffer_list = (AudioBufferList*)malloc(sizeof(UInt32) + _capture_channels * sizeof(AudioBuffer));
-	assert(_input_audio_buffer_list);
-	if (!_input_audio_buffer_list) { errorMsg="Out of Memory."; goto error; }
-
-	_active_input = _device_ids[device_id_in];
-	_active_output = _device_ids[device_id_out];
-
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress prop;
-	prop.mSelector = kAudioDeviceProcessorOverload;
-	prop.mScope = kAudioObjectPropertyScopeGlobal;
-	prop.mElement = 0;
-	AudioObjectAddPropertyListener(_active_output, &prop, xrun_callback_ptr, this);
-	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Output"; goto error; }
-	if (_active_input != _active_output)  {
-		AudioObjectAddPropertyListener(_active_input, &prop, xrun_callback_ptr, this);
-		if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Input"; goto error; }
+	if (_capture_channels > 0) {
+		_input_audio_buffer_list = (AudioBufferList*)malloc(sizeof(UInt32) + _capture_channels * sizeof(AudioBuffer));
+		assert(_input_audio_buffer_list);
+		if (!_input_audio_buffer_list) { errorMsg="Out of Memory."; goto error; }
 	}
-#else
-	err = AudioDeviceAddPropertyListener(_device_ids[device_id_out], 0 , false, kAudioDeviceProcessorOverload, xrun_callback_ptr, this);
-	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Output"; goto error; }
-	err = AudioDeviceAddPropertyListener(_device_ids[device_id_in], 0 , true, kAudioDeviceProcessorOverload, xrun_callback_ptr, this);
-	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Input"; goto error; }
-#endif
 
-	// Setup callbacks
+	_active_device_id = device_id;
+
+	// add Listeners
+	err = add_listener (_active_device_id, kAudioDeviceProcessorOverload, this);
+	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Listen"; goto error; }
+
+	err = add_listener (_active_device_id, kAudioDevicePropertyBufferFrameSize, this);
+	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Listen"; goto error; }
+
+	err = add_listener (_active_device_id, kAudioDevicePropertyNominalSampleRate, this);
+	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Listen"; goto error; }
+
+	_samples_per_period = current_buffer_size_id(_active_device_id);
+
+	// Setup callback
 	AURenderCallbackStruct renderCallback;
 	memset (&renderCallback, 0, sizeof (renderCallback));
 	renderCallback.inputProc = render_callback_ptr;
 	renderCallback.inputProcRefCon = this;
-	err = AudioUnitSetProperty(_auhal,
-			kAudioUnitProperty_SetRenderCallback,
-			kAudioUnitScope_Output, AUHAL_OUTPUT_ELEMENT,
-			&renderCallback, sizeof (renderCallback));
+	if (_playback_channels == 0) {
+		err = AudioUnitSetProperty(_auhal,
+				kAudioOutputUnitProperty_SetInputCallback,
+				kAudioUnitScope_Output, 1,
+				&renderCallback, sizeof (renderCallback));
+	} else {
+		err = AudioUnitSetProperty(_auhal,
+				kAudioUnitProperty_SetRenderCallback,
+				kAudioUnitScope_Output, 0,
+				&renderCallback, sizeof (renderCallback));
+	}
+
 	if (err != noErr) { errorMsg="kAudioUnitProperty_SetRenderCallback"; goto error; }
 
 	/* setup complete, now get going.. */
 	if (AudioOutputUnitStart(_auhal) == noErr) {
 		_input_names.clear();
 		_output_names.clear();
-		cache_port_names( device_id_in, true);
-		cache_port_names( device_id_out, false);
+		cache_port_names (device_id, true);
+		cache_port_names (device_id, false);
 		_state = 0;
+		pthread_mutex_unlock (&_discovery_lock);
+
+		// kick device
+		if (set_device_buffer_size_id(_active_device_id, samples_per_period)) {
+			errorMsg="kAudioDevicePropertyBufferFrameSize"; goto error;
+		}
+
 		return 0;
 	}
 
@@ -841,15 +970,15 @@ error:
 	fprintf(stderr, "CoreaudioPCM Error: %c%c%c%c %s\n", rv[0], rv[1], rv[2], rv[3], errorMsg.c_str());
 	pcm_stop();
 	_state = -3;
-	_active_input = _active_output = 0;
+	_active_device_id = 0;
+	pthread_mutex_unlock (&_discovery_lock);
 	return -1;
 }
 
 void
-CoreAudioPCM::cache_port_names(uint32 device_id, bool input)
+CoreAudioPCM::cache_port_names(AudioDeviceID id, bool input)
 {
 	uint32_t n_chn;
-	assert (device_id < _n_devices);
 
 	if (input) {
 		n_chn = _capture_channels;
@@ -860,8 +989,6 @@ CoreAudioPCM::cache_port_names(uint32 device_id, bool input)
 	AudioObjectPropertyAddress property_address;
 	property_address.mSelector = kAudioObjectPropertyElementName;
 	property_address.mScope = input ? kAudioDevicePropertyScopeInput: kAudioDevicePropertyScopeOutput;
-#else
-	const int elem = input ? AUHAL_INPUT_ELEMENT : AUHAL_OUTPUT_ELEMENT;
 #endif
 
 	for (uint32_t c = 0; c < n_chn; ++c) {
@@ -872,9 +999,9 @@ CoreAudioPCM::cache_port_names(uint32 device_id, bool input)
 
 #ifdef COREAUDIO_108
 		property_address.mElement = c + 1;
-		err = AudioObjectGetPropertyDataSize(_device_ids[device_id], &property_address, 0, NULL, &size);
+		err = AudioObjectGetPropertyDataSize(id, &property_address, 0, NULL, &size);
 #else
-		err = AudioDeviceGetPropertyInfo (_device_ids[device_id], c + 1, elem,
+		err = AudioDeviceGetPropertyInfo (id, c + 1, input,
 				kAudioDevicePropertyChannelNameCFString,
 				&size,
 				NULL);
@@ -882,9 +1009,9 @@ CoreAudioPCM::cache_port_names(uint32 device_id, bool input)
 
 		if (err == kAudioHardwareNoError) {
 #ifdef COREAUDIO_108
-			err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, c + 1, NULL, &size, &name);
+			err = AudioObjectGetPropertyData(id, &property_address, c + 1, NULL, &size, &name);
 #else
-			err = AudioDeviceGetProperty (_device_ids[device_id], c + 1, elem,
+			err = AudioDeviceGetProperty (id, c + 1, input,
 					kAudioDevicePropertyChannelNameCFString,
 					&size,
 					&name);
@@ -923,17 +1050,17 @@ CoreAudioPCM::cache_port_names(uint32 device_id, bool input)
 }
 
 std::string
-CoreAudioPCM::cached_port_name(uint32 port, bool input) const
+CoreAudioPCM::cached_port_name(uint32_t port, bool input) const
 {
 	if (_state != 0) { return ""; }
 
 	if (input) {
-		if (port > _input_names.size()) {
+		if (port >= _input_names.size()) {
 			return "";
 		}
 		return _input_names[port];
 	} else {
-		if (port > _output_names.size()) {
+		if (port >= _output_names.size()) {
 			return "";
 		}
 		return _output_names[port];
@@ -949,22 +1076,34 @@ CoreAudioPCM::render_callback (
 		UInt32 inNumberFrames,
 		AudioBufferList* ioData)
 {
-	OSStatus retVal = 0;
+	OSStatus retVal = kAudioHardwareNoError;
 
-	assert(_max_samples_per_period >= inNumberFrames);
-	assert(ioData->mNumberBuffers = _playback_channels);
+	if (_samples_per_period < inNumberFrames) {
+#ifndef NDEBUG
+		printf("samples per period exceeds configured value, skip cycle. %d < %d\n", _samples_per_period, inNumberFrames);
+#endif
+		for (uint32_t i = 0; _playback_channels > 0 && i < ioData->mNumberBuffers; ++i) {
+			float* ob = (float*) ioData->mBuffers[i].mData;
+			memset(ob, 0, sizeof(float) * inNumberFrames);
+		}
+		return noErr;
+	}
+
+	assert(_playback_channels == 0 || ioData->mNumberBuffers == _playback_channels);
 
 	_cur_samples_per_period = inNumberFrames;
 
 
-	_input_audio_buffer_list->mNumberBuffers = _capture_channels;
-	for (uint32_t i = 0; i < _capture_channels; ++i) {
-		_input_audio_buffer_list->mBuffers[i].mNumberChannels = 1;
-		_input_audio_buffer_list->mBuffers[i].mDataByteSize = inNumberFrames * sizeof(float);
-		_input_audio_buffer_list->mBuffers[i].mData = NULL;
-	}
+	if (_capture_channels > 0) {
+		_input_audio_buffer_list->mNumberBuffers = _capture_channels;
+		for (uint32_t i = 0; i < _capture_channels; ++i) {
+			_input_audio_buffer_list->mBuffers[i].mNumberChannels = 1;
+			_input_audio_buffer_list->mBuffers[i].mDataByteSize = inNumberFrames * sizeof(float);
+			_input_audio_buffer_list->mBuffers[i].mData = NULL;
+		}
 
-	retVal = AudioUnitRender(_auhal, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberFrames, _input_audio_buffer_list);
+		retVal = AudioUnitRender(_auhal, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberFrames, _input_audio_buffer_list);
+	}
 
 	if (retVal != kAudioHardwareNoError) {
 #if 0
@@ -989,7 +1128,7 @@ CoreAudioPCM::render_callback (
 
 	_in_process = false;
 
-	if (rv != 0) {
+	if (rv != 0 && _playback_channels > 0) {
 		// clear output
 		for (uint32_t i = 0; i < ioData->mNumberBuffers; ++i) {
 			float* ob = (float*) ioData->mBuffers[i].mData;
@@ -1017,7 +1156,7 @@ CoreAudioPCM::set_playback_channel (uint32_t chn, const float *output, uint32_t 
 		return -1;
 	}
 
-	assert(_output_audio_buffer_list->mNumberBuffers > chn);
+	assert(_output_audio_buffer_list && _output_audio_buffer_list->mNumberBuffers > chn);
 	memcpy((void*)_output_audio_buffer_list->mBuffers[chn].mData, (void*)output, sizeof(float) * n_samples);
 	return 0;
 }
@@ -1034,15 +1173,7 @@ CoreAudioPCM::launch_control_app (uint32_t device_id)
 	UInt32 size = sizeof (config_app);
 	OSStatus err;
 
-#ifdef COREAUDIO_108
-	AudioObjectPropertyAddress property_address;
-	property_address.mSelector = kAudioDevicePropertyConfigurationApplication;
-	property_address.mScope = kAudioDevicePropertyScopeOutput;
-	property_address.mElement = kAudioObjectPropertyElementMaster;
-	err = AudioObjectGetPropertyData(_device_ids[device_id], &property_address, 0, NULL, &size, &config_app);
-#else
-	err = AudioDeviceGetProperty(_device_ids[device_id], 0, 0, kAudioDevicePropertyConfigurationApplication, &size, &config_app);
-#endif
+	err = GetPropertyWrapper(_device_ids[device_id], 0, false, kAudioDevicePropertyConfigurationApplication, &size, &config_app);
 	if (kAudioHardwareNoError != err) {
 		return;
 	}

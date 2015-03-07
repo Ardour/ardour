@@ -42,15 +42,20 @@ public:
 	uint32_t n_capture_channels (void) const { return _capture_channels; }
 
 	void     discover();
-	void     device_list(std::map<size_t, std::string> &devices) const { devices = _devices;}
+	void     device_list (std::map<size_t, std::string> &devices) const { devices = _devices;}
 
 	int      available_sample_rates (uint32_t device_id, std::vector<float>& sampleRates);
 	int      available_buffer_sizes (uint32_t device_id, std::vector<uint32_t>& sampleRates);
 	uint32_t available_channels (uint32_t device_id, bool input);
-	float    current_sample_rate(uint32 device_id, bool input = false);
-	uint32_t get_latency(uint32 device_id, bool input);
+	float    current_sample_rate (uint32_t device_id, bool input = false);
+	uint32_t get_latency (uint32_t device_id, bool input);
 
-	std::string cached_port_name(uint32_t portnum, bool input) const;
+	std::string cached_port_name (uint32_t portnum, bool input) const;
+
+	float    sample_rate ();
+	uint32_t samples_per_period () const { return _samples_per_period; };
+
+	int      set_samples_per_period (uint32_t);
 
 	void     launch_control_app (uint32_t device_id);
 
@@ -79,12 +84,27 @@ public:
 		_hw_changed_callback = callback;
 		_hw_changed_arg = arg;
 	}
+
 	void     set_xrun_callback (
 			void ( callback (void*)),
 			void * arg
 			) {
 		_xrun_callback = callback;
 		_xrun_arg = arg;
+	}
+	void     set_buffer_size_callback (
+			void ( callback (void*)),
+			void * arg
+			) {
+		_buffer_size_callback = callback;
+		_buffer_size_arg = arg;
+	}
+	void     set_sample_rate_callback (
+			void ( callback (void*)),
+			void * arg
+			) {
+		_sample_rate_callback = callback;
+		_sample_rate_arg = arg;
 	}
 
 	// must be called from process_callback;
@@ -101,24 +121,39 @@ public:
 			AudioBufferList* ioData);
 
 	void xrun_callback ();
+	void buffer_size_callback ();
+	void sample_rate_callback ();
 	void hw_changed_callback ();
 
 private:
-	int set_device_sample_rate (uint32 device_id, float rate, bool input);
-	void get_stream_latencies(uint32 device_id, bool input, std::vector<uint32>& latencies);
-	void cache_port_names(uint32 device_id, bool input);
+	float    current_sample_rate_id (AudioDeviceID id, bool input);
+	uint32_t current_buffer_size_id (AudioDeviceID id);
+	int      set_device_sample_rate_id (AudioDeviceID id, float rate, bool input);
+	int      set_device_buffer_size_id (AudioDeviceID id, uint32_t samples_per_period);
+	int      set_device_sample_rate (uint32_t device_id, float rate, bool input);
+	void     get_stream_latencies (uint32_t device_id, bool input, std::vector<uint32_t>& latencies);
+	void     cache_port_names (AudioDeviceID id, bool input);
+
+	void destroy_aggregate_device();
+	int  create_aggregate_device(
+			AudioDeviceID input_device_id,
+			AudioDeviceID output_device_id,
+			uint32_t sample_rate,
+			AudioDeviceID *created_device);
+
 
 	AudioUnit _auhal;
 	AudioDeviceID* _device_ids;
 	AudioBufferList* _input_audio_buffer_list;
 	AudioBufferList* _output_audio_buffer_list;
 
-	AudioDeviceID _active_input;
-	AudioDeviceID _active_output;
+	AudioDeviceID _active_device_id;
+	AudioDeviceID _aggregate_device_id;
+	AudioDeviceID _aggregate_plugin_id;
 
 	int _state;
 
-	uint32_t _max_samples_per_period;
+	uint32_t _samples_per_period;
 	uint32_t _cur_samples_per_period;
 	uint32_t _capture_channels;
 	uint32_t _playback_channels;
@@ -136,6 +171,12 @@ private:
 
 	void (* _xrun_callback) (void*);
 	void  * _xrun_arg;
+
+	void (* _buffer_size_callback) (void*);
+	void  * _buffer_size_arg;
+
+	void (* _sample_rate_callback) (void*);
+	void  * _sample_rate_arg;
 
 
 	// TODO proper device info struct
