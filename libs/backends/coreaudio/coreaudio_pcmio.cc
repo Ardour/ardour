@@ -913,7 +913,7 @@ CoreAudioPCM::pcm_start (
 
 	/* prepare buffers for input */
 	if (_capture_channels > 0) {
-		_input_audio_buffer_list = (AudioBufferList*)malloc(sizeof(UInt32) + _capture_channels * sizeof(AudioBuffer));
+		_input_audio_buffer_list = (AudioBufferList*)malloc(sizeof(AudioBufferList) + (_capture_channels - 1) * sizeof(AudioBuffer));
 		assert(_input_audio_buffer_list);
 		if (!_input_audio_buffer_list) { errorMsg="Out of Memory."; goto error; }
 	}
