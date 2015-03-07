@@ -1058,15 +1058,15 @@ DummyAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_play
 	if (p->is_physical() && p->is_terminal()) {
 		if (p->is_input() && for_playback) {
 			const size_t l_in = _samples_per_period * .25;
-			r.min += _samples_per_period;
-			r.max += _samples_per_period;
+			r.min += l_in;
+			r.max += l_in;
 		}
 		if (p->is_output() && !for_playback) {
 			/* with 'Loopback' there is exactly once cycle latency, divide it between In + Out; */
 			const size_t l_in = _samples_per_period * .25;
 			const size_t l_out = _samples_per_period - l_in;
-			r.min += _samples_per_period;
-			r.max += _samples_per_period;
+			r.min += l_out;
+			r.max += l_out;
 		}
 	}
 	return r;
