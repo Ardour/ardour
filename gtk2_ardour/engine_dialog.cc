@@ -93,6 +93,7 @@ EngineControl::EngineControl ()
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 	, started_at_least_once (false)
+	, queue_device_changed (false)
 {
 	using namespace Notebook_Helpers;
 	vector<string> backend_names;
@@ -919,6 +920,15 @@ EngineControl::device_changed ()
 	assert (backend);
 	string device_name = device_combo.get_active_text ();
 	vector<string> s;
+
+	if (device_name != backend->device_name()) {
+		/* we set the backend-device to query various device related intormation.
+		 * This has the side effect that backend->device_name() will match
+		 * the device_name and  'change_device' will never be true.
+		 * so work around this by setting...
+		 */
+		queue_device_changed = true;
+	}
 	
 	//the device name must be set FIRST so ASIO can populate buffersizes and the control panel button
 	backend->set_device_name(device_name);
@@ -1502,7 +1512,7 @@ EngineControl::push_state_to_backend (bool start)
 				}
 			}
 
-			if (get_device_name() != backend->device_name()) {
+			if (queue_device_changed || get_device_name() != backend->device_name()) {
 				change_device = true;
 			}
 
@@ -1570,6 +1580,8 @@ EngineControl::push_state_to_backend (bool start)
 			change_bufsize = true;
 		}
 	}
+
+	queue_device_changed = false;
 
 	if (!_have_control) {
 

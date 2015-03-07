@@ -119,6 +119,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     uint32_t ignore_changes;
     uint32_t _desired_sample_rate;
     bool     started_at_least_once;
+    bool     queue_device_changed;
 
     void driver_changed ();
     void backend_changed ();
