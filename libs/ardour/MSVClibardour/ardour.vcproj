@@ -736,6 +736,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\note_fixer.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\onset_detector.cc"
 				>
 			</File>
@@ -1815,6 +1819,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\noise.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\note_fixer.h"
 				>
 			</File>
 			<File
