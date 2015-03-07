@@ -973,11 +973,11 @@ def configure(conf):
         print("Coreaudio backend is only available for OSX")
         sys.exit(1)
 
-    if sys.platform == 'linux' and conf.env['BUILD_WAVESBACKEND']:
+    if re.search ("linux", sys.platform) != None and conf.env['BUILD_WAVESBACKEND']:
         print("Waves Backend is not for Linux")
         sys.exit(1)
 
-    if sys.platform != 'linux' and conf.env['BUILD_ALSABACKEND']:
+    if re.search ("linux", sys.platform) == None and conf.env['BUILD_ALSABACKEND']:
         print("ALSA Backend is only available on Linux")
         sys.exit(1)
 
