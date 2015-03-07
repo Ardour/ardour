@@ -369,7 +369,7 @@ CoreAudioPCM::available_channels(uint32_t device_id, bool input)
 	/* query number of inputs */
 	err = GetPropertyInfoWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertyStreamConfiguration, &size);
 	if (kAudioHardwareNoError != err) {
-		fprintf(stderr, "CoreaAudioPCM: kAudioDevicePropertyStreamConfiguration failed: %i\n", err);
+		fprintf(stderr, "CoreaAudioPCM: kAudioDevicePropertyStreamConfiguration failed\n");
 		return 0;
 	}
 
@@ -380,7 +380,7 @@ CoreAudioPCM::available_channels(uint32_t device_id, bool input)
 	err = GetPropertyWrapper (_device_ids[device_id], 0, input, kAudioDevicePropertyStreamConfiguration, &size, bufferList);
 
 	if(kAudioHardwareNoError != err) {
-		fprintf(stderr, "CoreaAudioPCM: kAudioDevicePropertyStreamConfiguration failed: %i\n", err);
+		fprintf(stderr, "CoreaAudioPCM: kAudioDevicePropertyStreamConfiguration failed\n");
 		free(bufferList);
 		return 0;
 	}
@@ -461,8 +461,8 @@ CoreAudioPCM::get_latency(uint32_t device_id, bool input)
 	}
 
 #ifndef NDEBUG
-	printf("%s Latency systemic+safetyoffset = %d + %d\n",
-			input ? "Input" : "Output", lat0, latS);
+	printf("%s Latency systemic+safetyoffset = %u + %u\n",
+			input ? "Input" : "Output", (unsigned int)lat0, (unsigned int)latS);
 #endif
 	latency = lat0 + latS;
 
@@ -558,7 +558,7 @@ CoreAudioPCM::set_device_sample_rate_id (AudioDeviceID id, float rate, bool inpu
 }
 
 int
-CoreAudioPCM::set_device_sample_rate (AudioDeviceID device_id, float rate, bool input)
+CoreAudioPCM::set_device_sample_rate (uint32_t device_id, float rate, bool input)
 {
 	return set_device_sample_rate_id(_device_ids[device_id], rate, input);
 }
@@ -607,7 +607,7 @@ CoreAudioPCM::discover()
 		err = GetPropertyWrapper (_device_ids[idx], 0, 0, kAudioDevicePropertyDeviceName, &size, deviceName);
 
 		if (kAudioHardwareNoError != err) {
-			fprintf(stderr, "CoreAudioPCM: device name query failed: %i\n", err);
+			fprintf(stderr, "CoreAudioPCM: device name query failed\n");
 			continue;
 		}
 
@@ -619,7 +619,10 @@ CoreAudioPCM::discover()
 			_device_ins[idx] = inputChannelCount;
 			_device_outs[idx] = outputChannelCount;
 #ifndef NDEBUG
-			printf("CoreAudio Device: #%ld (id:%u) '%s' in:%d out:%d\n", idx, _device_ids[idx], deviceName, inputChannelCount, outputChannelCount);
+			printf("CoreAudio Device: #%ld (id:%lu) '%s' in:%u out:%u\n", idx,
+					(long unsigned int)_device_ids[idx],
+					deviceName,
+					(unsigned int)inputChannelCount, (unsigned int)outputChannelCount);
 #endif
 			if (outputChannelCount > 0 || inputChannelCount > 0) {
 				_devices.insert (std::pair<size_t, std::string> (idx, dn));
@@ -721,14 +724,14 @@ CoreAudioPCM::pcm_stop ()
 static void PrintStreamDesc (AudioStreamBasicDescription *inDesc)
 {
 	printf ("- - - - - - - - - - - - - - - - - - - -\n");
-	printf ("  Sample Rate:%f", inDesc->mSampleRate);
-	printf ("  Format ID:%.*s\n", (int)sizeof(inDesc->mFormatID), (char*)&inDesc->mFormatID);
-	printf ("  Format Flags:%X\n", inDesc->mFormatFlags);
-	printf ("  Bytes per Packet:%d\n", inDesc->mBytesPerPacket);
-	printf ("  Frames per Packet:%d\n", inDesc->mFramesPerPacket);
-	printf ("  Bytes per Frame:%d\n", inDesc->mBytesPerFrame);
-	printf ("  Channels per Frame:%d\n", inDesc->mChannelsPerFrame);
-	printf ("  Bits per Channel:%d\n", inDesc->mBitsPerChannel);
+	printf ("  Sample Rate:%.2f",        inDesc->mSampleRate);
+	printf ("  Format ID:%.*s\n",        (int)sizeof(inDesc->mFormatID), (char*)&inDesc->mFormatID);
+	printf ("  Format Flags:%X\n",       (unsigned int)inDesc->mFormatFlags);
+	printf ("  Bytes per Packet:%d\n",   (int)inDesc->mBytesPerPacket);
+	printf ("  Frames per Packet:%d\n",  (int)inDesc->mFramesPerPacket);
+	printf ("  Bytes per Frame:%d\n",    (int)inDesc->mBytesPerFrame);
+	printf ("  Channels per Frame:%d\n", (int)inDesc->mChannelsPerFrame);
+	printf ("  Bits per Channel:%d\n",   (int)inDesc->mBitsPerChannel);
 	printf ("- - - - - - - - - - - - - - - - - - - -\n");
 }
 #endif
@@ -1080,7 +1083,8 @@ CoreAudioPCM::render_callback (
 
 	if (_samples_per_period < inNumberFrames) {
 #ifndef NDEBUG
-		printf("samples per period exceeds configured value, skip cycle. %d < %d\n", _samples_per_period, inNumberFrames);
+		printf("samples per period exceeds configured value, cycle skipped (%u < %u)\n",
+				(unsigned int)_samples_per_period, (unsigned int)inNumberFrames);
 #endif
 		for (uint32_t i = 0; _playback_channels > 0 && i < ioData->mNumberBuffers; ++i) {
 			float* ob = (float*) ioData->mBuffers[i].mData;

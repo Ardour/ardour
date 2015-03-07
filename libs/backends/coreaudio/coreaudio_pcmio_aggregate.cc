@@ -46,7 +46,9 @@ CoreAudioPCM::destroy_aggregate_device ()
 		return;
 	}
 #ifndef NDEBUG
-	printf("DestroyAggregateDevice : OK (plugin: %u device:%u)\n", _aggregate_plugin_id, _aggregate_device_id);
+	printf("DestroyAggregateDevice : OK (plugin: %u device:%u)\n",
+			(unsigned int)_aggregate_plugin_id,
+			(unsigned int)_aggregate_device_id);
 #endif
 }
 
@@ -304,7 +306,7 @@ CoreAudioPCM::create_aggregate_device (
 		//	Calculate the number of object IDs
 		subDevicesNum = size / sizeof(AudioObjectID);
 #ifndef NDEBUG
-		printf("AggregateDevice: clock drift compensation, number of sub-devices = %d\n", subDevicesNum);
+		printf("AggregateDevice: clock drift compensation, number of sub-devices = %u\n", (unsigned int)subDevicesNum);
 #endif
 		AudioObjectID subDevices[subDevicesNum];
 		size = sizeof(subDevices);
@@ -348,7 +350,7 @@ CoreAudioPCM::create_aggregate_device (
 	}
 
 #ifndef NDEBUG
-	printf("AggregateDevice: new aggregate device %u\n", *created_device);
+	printf("AggregateDevice: new aggregate device %u\n", (unsigned int)*created_device);
 #endif
 	return 0;
 
