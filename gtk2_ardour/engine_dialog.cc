@@ -795,7 +795,6 @@ bool
 EngineControl::print_channel_count (Gtk::SpinButton* sb)
 {
 	if (ARDOUR::Profile->get_mixbus()) {
-		cout << "Mixbus crash trap. sb->get_value(): " << sb->get_value();
 		return true;
 	}
 	
