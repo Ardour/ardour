@@ -34,6 +34,13 @@
 #undef require
 #undef verify
 
+#ifdef YES
+#undef YES
+#endif
+#ifdef NO
+#undef NO
+#endif
+
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/combobox.h>
