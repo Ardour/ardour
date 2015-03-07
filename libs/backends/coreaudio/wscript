@@ -38,5 +38,5 @@ def build(bld):
     # use new coreaudio API (the old one was deprecated in 10.6, yet still works)
     # only use with OSX intel 10.6 or later, but for all OSX/PPC (<= 10.6)
     if not bld.env['build_target'] in ['panther', 'tiger', 'leopard']:
-        if not (bld.env['build_target'] == 'snow leopard' and conf.env['build_arch'] == "ppc"):
+        if not (bld.env['build_target'] == 'snowleopard' and bld.env['build_arch'] == "ppc"):
             obj.defines += ['COREAUDIO_108']

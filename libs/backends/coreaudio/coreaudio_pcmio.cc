@@ -293,7 +293,7 @@ CoreAudioPCM::available_sample_rates(uint32_t device_id, std::vector<float>& sam
 		return -1;
 	}
 
-	int numRates = size / sizeof(AudioValueRange);
+	uint32_t numRates = size / sizeof(AudioValueRange);
 	AudioValueRange* supportedRates = new AudioValueRange[numRates];
 
 	err = GetPropertyWrapper (_device_ids[device_id], 0, false, kAudioDevicePropertyAvailableNominalSampleRates, &size, supportedRates);
@@ -431,7 +431,7 @@ CoreAudioPCM::get_stream_latencies(uint32_t device_id, bool input, std::vector<u
 			return;
 		}
 #ifndef NDEBUG
-		printf("  ^ Stream %d latency: %d\n", i, stream_latency);
+		printf("  ^ Stream %u latency: %u\n", (unsigned int)i, (unsigned int)stream_latency);
 #endif
 		latencies.push_back(stream_latency);
 	}
