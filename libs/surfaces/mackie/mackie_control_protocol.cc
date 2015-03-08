@@ -724,15 +724,13 @@ MackieControlProtocol::create_surfaces ()
 				session->engine().make_port_name_non_relative (surface->port().output_port().name())
 				);
 
-			session->BundleAdded (_input_bundle);
-			session->BundleAdded (_output_bundle);
+			session->BundleAddedOrRemoved ();
 
 		} else {
 			_input_bundle.reset ((ARDOUR::Bundle*) 0);
 			_output_bundle.reset ((ARDOUR::Bundle*) 0);
 
-			session->BundleRemoved (_input_bundle);
-			session->BundleRemoved (_output_bundle);
+			session->BundleAddedOrRemoved ();
 		}
 
 		MIDI::Port& input_port (surface->port().input_port());
