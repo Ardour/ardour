@@ -442,6 +442,19 @@ Session::immediately_post_engine ()
 		return -1;
 	}
 
+	/* TODO somehow keep bundles in sync with engine.
+	 *
+	 * eg. midi ports may come and go dynamically (currently both with jack as well
+	 * as with CoreMidi. But also changing the engine or device will do the trick..
+	 *
+	 * We need to keep track of bundles added during setup_bundles(),
+	 * and add/remove the changes.
+	 *
+	 * also doing so in a background thread would be nice (same_thread may be RT thread).
+	 * but in principle it's going to be sth like:
+	 * _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::do_the_bundles, this));
+	 */
+
 	return 0;
 }
 
@@ -704,7 +717,12 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < outputs[DataType::AUDIO].size(); ++np) {
 		char buf[32];
-		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
+		std::string pn = _engine.get_pretty_name_by_name (outputs[DataType::AUDIO][np]);
+		if (!pn.empty()) {
+			snprintf (buf, sizeof (buf), _("out %s"), pn.substr(0,12).c_str());
+		} else {
+			snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
+		}
 
 		boost::shared_ptr<Bundle> c (new Bundle (buf, true));
 		c->add_channel (_("mono"), DataType::AUDIO);
@@ -733,7 +751,12 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < inputs[DataType::AUDIO].size(); ++np) {
 		char buf[32];
-		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
+		std::string pn = _engine.get_pretty_name_by_name (inputs[DataType::AUDIO][np]);
+		if (!pn.empty()) {
+			snprintf (buf, sizeof (buf), _("in %s"), pn.substr(0,12).c_str());
+		} else {
+			snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
+		}
 
 		boost::shared_ptr<Bundle> c (new Bundle (buf, false));
 		c->add_channel (_("mono"), DataType::AUDIO);
@@ -763,8 +786,12 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < inputs[DataType::MIDI].size(); ++np) {
 		string n = inputs[DataType::MIDI][np];
-		boost::erase_first (n, X_("alsa_pcm:"));
-
+		std::string pn = _engine.get_pretty_name_by_name (n);
+		if (!pn.empty()) {
+			n = pn;
+		} else {
+			boost::erase_first (n, X_("alsa_pcm:"));
+		}
 		boost::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, inputs[DataType::MIDI][np]);
@@ -775,8 +802,12 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < outputs[DataType::MIDI].size(); ++np) {
 		string n = outputs[DataType::MIDI][np];
-		boost::erase_first (n, X_("alsa_pcm:"));
-
+		std::string pn = _engine.get_pretty_name_by_name (n);
+		if (!pn.empty()) {
+			n = pn;
+		} else {
+			boost::erase_first (n, X_("alsa_pcm:"));
+		}
 		boost::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, outputs[DataType::MIDI][np]);
