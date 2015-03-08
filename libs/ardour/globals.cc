@@ -328,7 +328,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	/* singletons - first object is "it" */
 	(void) PluginManager::instance();
+#ifdef LV2_SUPPORT
 	(void) URIMap::instance();
+#endif
 	(void) EventTypeMap::instance();
 
         ProcessThread::init ();

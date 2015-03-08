@@ -41,7 +41,11 @@ EventTypeMap&
 EventTypeMap::instance()
 {
 	if (!EventTypeMap::event_type_map) {
-		EventTypeMap::event_type_map = new EventTypeMap(URIMap::instance());
+#ifdef LV2_SUPPORT
+		EventTypeMap::event_type_map = new EventTypeMap(&URIMap::instance());
+#else
+		EventTypeMap::event_type_map = new EventTypeMap(NULL);
+#endif
 	}
 	return *EventTypeMap::event_type_map;
 }
@@ -149,14 +153,16 @@ EventTypeMap::from_symbol(const string& str) const
 	} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
 		p_type = PluginAutomation;
 		p_id = atoi(str.c_str()+10);
+#ifdef LV2_SUPPORT
 	} else if (str.length() > 9 && str.substr(0, 9) == "property-") {
 		p_type = PluginPropertyAutomation;
 		const char* name = str.c_str() + 9;
 		if (isdigit(str.c_str()[0])) {
 			p_id = atoi(name);
 		} else {
-			p_id = _uri_map.uri_to_id(name);
+			p_id = _uri_map->uri_to_id(name);
 		}
+#endif
 	} else if (str.length() > 7 && str.substr(0, 7) == "midicc-") {
 		p_type = MidiCCAutomation;
 		uint32_t channel = 0;
@@ -223,13 +229,15 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "envelope";
 	} else if (t == PluginAutomation) {
 		return string_compose("parameter-%1", param.id());
+#ifdef LV2_SUPPORT
 	} else if (t == PluginPropertyAutomation) {
-		const char* uri = _uri_map.id_to_uri(param.id());
+		const char* uri = _uri_map->id_to_uri(param.id());
 		if (uri) {
 			return string_compose("property-%1", uri);
 		} else {
 			return string_compose("property-%1", param.id());
 		}
+#endif
 	} else if (t == MidiCCAutomation) {
 		return string_compose("midicc-%1-%2", int(param.channel()), param.id());
 	} else if (t == MidiPgmChangeAutomation) {
