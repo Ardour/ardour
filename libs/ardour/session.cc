@@ -4129,7 +4129,7 @@ Session::available_capture_duration ()
 }
 
 void
-Session::add_bundle (boost::shared_ptr<Bundle> bundle)
+Session::add_bundle (boost::shared_ptr<Bundle> bundle, bool emit_signal)
 {
 	{
 		RCUWriter<BundleList> writer (_bundles);
@@ -4137,7 +4137,9 @@ Session::add_bundle (boost::shared_ptr<Bundle> bundle)
 		b->push_back (bundle);
 	}
 
-	BundleAdded (bundle); /* EMIT SIGNAL */
+	if (emit_signal) {
+		BundleAddedOrRemoved (); /* EMIT SIGNAL */
+	}
 
 	set_dirty();
 }
@@ -4159,7 +4161,7 @@ Session::remove_bundle (boost::shared_ptr<Bundle> bundle)
 	}
 
 	if (removed) {
-		 BundleRemoved (bundle); /* EMIT SIGNAL */
+		 BundleAddedOrRemoved (); /* EMIT SIGNAL */
 	}
 
 	set_dirty();

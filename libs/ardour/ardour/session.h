@@ -716,12 +716,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* I/O bundles */
 
-	void add_bundle (boost::shared_ptr<Bundle>);
+	void add_bundle (boost::shared_ptr<Bundle>, bool emit_signal = true);
 	void remove_bundle (boost::shared_ptr<Bundle>);
 	boost::shared_ptr<Bundle> bundle_by_name (std::string) const;
 
-	PBD::Signal1<void,boost::shared_ptr<Bundle> > BundleAdded;
-	PBD::Signal1<void,boost::shared_ptr<Bundle> > BundleRemoved;
+	PBD::Signal0<void> BundleAddedOrRemoved;
 
 	void midi_panic ();
 
