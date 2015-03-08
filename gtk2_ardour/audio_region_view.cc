@@ -1052,6 +1052,8 @@ AudioRegionView::update_envelope_visibility ()
 
 	if (ARDOUR_UI::config()->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
+		gain_line->canvas_group().raise_to_top ();
+
 	} else {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(0));
 	}
