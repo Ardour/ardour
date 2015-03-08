@@ -37,6 +37,9 @@ def configure(conf):
     else:
         conf.env['libjack_link'] = "link"
 
+    if not Options.options.libjack_meta:
+        conf.define ('NO_JACK_METADATA', 1)
+
 
 def build(bld):
     obj = bld(features = 'c cxx cxxshlib')
@@ -62,7 +65,6 @@ def build(bld):
 
     if (bld.env['build_target'] == 'mingw'):
         obj.uselib   = [ 'PORTAUDIO' ]
-        obj.defines += [ 'NO_JACK_METADATA' ] # TODO bug stephane to at least update the headers
     else:
         obj.uselib   = [ ]
 
