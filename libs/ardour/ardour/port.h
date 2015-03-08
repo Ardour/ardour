@@ -55,6 +55,9 @@ public:
 		return _name;
 	}
 
+	/** @return Port human readable name */
+	std::string pretty_name (bool fallback_to_name = false) const;
+
 	int set_name (std::string const &);
 
 	/** @return flags */
