@@ -115,7 +115,9 @@ JPFUN(0, int,            acquire_real_time_scheduling, (jack_native_thread_t t, 
 JPFUN(0, int,            drop_real_time_scheduling, (jack_native_thread_t t), (t), 0)
 JPFUN(0, int,            client_stop_thread, (jack_client_t* c, jack_native_thread_t t), (c,t), 0)
 JPFUN(0, int,            client_kill_thread, (jack_client_t* c, jack_native_thread_t t), (c,t), 0)
+#ifndef WIN32
 JVFUN(0,                 set_thread_creator, (jack_thread_creator_t c), (c),)
+#endif
 JPFUN(1, int,            client_create_thread, \
 		(jack_client_t* c, jack_native_thread_t *t, int p, int r, void *(*f)(void*), void *a), (c,t,p,r,f,a), 0)
 
