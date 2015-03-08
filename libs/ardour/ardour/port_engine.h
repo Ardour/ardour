@@ -119,6 +119,25 @@ class LIBARDOUR_API PortEngine {
      */
     virtual std::string get_port_name (PortHandle) const = 0;
 
+    /** Return the port-property value and type for a given key.
+     * (eg query a human readable port name)
+     *
+     * The API follows jack_get_property():
+     *
+     * @param key The key of the property to retrieve
+     * @param value Set to the value of the property if found
+     * @param type The type of the property if set (
+     *             Type of data, either a MIME type or URI.
+     *             If type is empty, the data is assumed to be a UTF-8 encoded string.
+     *
+     * @return 0 on success, -1 if the @p subject has no @p key property.
+     *
+     * for available keys, see
+     * https://github.com/jackaudio/headers/blob/master/metadata.h
+     * https://github.com/drobilla/jackey/blob/master/jackey.h
+     */
+    virtual int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const { return -1; }
+
     /** Return a reference to a port with the fullname @param name. Return
      * an "empty" PortHandle (analogous to a null pointer) if no such port exists.
      */
