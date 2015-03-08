@@ -62,6 +62,7 @@ def build(bld):
 
     if (bld.env['build_target'] == 'mingw'):
         obj.uselib   = [ 'PORTAUDIO' ]
+        obj.defines += [ 'NO_JACK_METADATA' ] # TODO bug stephane to at least update the headers
     else:
         obj.uselib   = [ ]
 
