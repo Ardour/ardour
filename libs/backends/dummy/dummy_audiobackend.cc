@@ -1600,8 +1600,9 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 				const double b = log (f_max / f_min) / g_p2;
 				const double a = f_min / (b * samplerate);
 #endif
+				const uint32_t g_p2i = rint(g_p2);
 				_wavetable = (Sample*) malloc (_gen_period * sizeof(Sample));
-				for (uint32_t i = 0 ; i < g_p2; ++i) {
+				for (uint32_t i = 0 ; i < g_p2i; ++i) {
 #ifdef LINEAR_SWEEP
 					const double phase = i * (a + b * i);
 #else
@@ -1609,7 +1610,7 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 #endif
 					_wavetable[i] = (float)sin (2. * M_PI * (phase - floor (phase)));
 				}
-				for (uint32_t i = g_p2; i < _gen_period; ++i) {
+				for (uint32_t i = g_p2i; i < _gen_period; ++i) {
 					const uint32_t j = _gen_period - i;
 #ifdef LINEAR_SWEEP
 					const double phase = j * (a + b * j);
