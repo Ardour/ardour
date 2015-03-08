@@ -300,7 +300,7 @@ class CoreAudioBackend : public AudioBackend {
 		void* get_buffer (PortHandle, pframes_t);
 
 		void* freewheel_thread ();
-		void post_process ();
+		void pre_process ();
 		void coremidi_rediscover ();
 
 	private:
@@ -317,7 +317,11 @@ class CoreAudioBackend : public AudioBackend {
 		bool  _freewheel_ack;
 		bool  _reinit_thread_callback;
 		bool  _measure_latency;
+
 		pthread_mutex_t _process_callback_mutex;
+
+		pthread_mutex_t _freewheel_mutex;
+		pthread_cond_t  _freewheel_signal;
 
 		static std::vector<std::string> _midi_options;
 		static std::vector<AudioBackend::DeviceStatus> _audio_device_status;

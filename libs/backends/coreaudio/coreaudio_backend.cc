@@ -105,6 +105,8 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
 	pthread_mutex_init (&_process_callback_mutex, 0);
+	pthread_mutex_init (&_freewheel_mutex, 0);
+	pthread_cond_init  (&_freewheel_signal, 0);
 
 	_pcmio = new CoreAudioPCM ();
 	_midiio = new CoreMidiIo ();
@@ -119,6 +121,8 @@ CoreAudioBackend::~CoreAudioBackend ()
 	delete _midiio; _midiio = 0;
 	pthread_mutex_destroy (&_port_callback_mutex);
 	pthread_mutex_destroy (&_process_callback_mutex);
+	pthread_mutex_destroy (&_freewheel_mutex);
+	pthread_cond_destroy  (&_freewheel_signal);
 }
 
 /* AUDIOBACKEND API */
@@ -502,7 +506,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	if (_midi_driver_option == _("CoreMidi")) {
 		_midiio->set_enabled(true);
 		_midiio->set_port_changed_callback(midi_port_change, this);
-		_midiio->start();
+		_midiio->start(); // triggers port discovery, callback coremidi_rediscover()
 	}
 
 	if (register_system_audio_ports()) {
@@ -519,8 +523,6 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_run = false;
 		return -1;
 	}
-
-	engine.reconnect_ports ();
 
 	if (pthread_create (&_freeewheel_thread, NULL, pthread_freewheel, this))
 	{
@@ -553,8 +555,16 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_run = false;
 		return -1;
 	}
-	_preinit = false;
+
+	engine.reconnect_ports ();
+
+	// force  an initial registration_callback() & latency re-compute
+	_port_change_flag = true;
+	pre_process ();
+
+	// all systems go.
 	_pcmio->set_xrun_callback (xrun_callback_ptr, this);
+	_preinit = false;
 
 	return 0;
 }
@@ -571,6 +581,10 @@ CoreAudioBackend::stop ()
 	_pcmio->pcm_stop();
 	_midiio->set_port_changed_callback(NULL, NULL);
 	_midiio->stop();
+
+	pthread_mutex_lock (&_freewheel_mutex);
+	pthread_cond_signal (&_freewheel_signal);
+	pthread_mutex_unlock (&_freewheel_mutex);
 
 	if (pthread_join (_freeewheel_thread, &status)) {
 		PBD::error << _("CoreAudioBackend: failed to terminate.") << endmsg;
@@ -592,6 +606,11 @@ CoreAudioBackend::freewheel (bool onoff)
 		return 0;
 	}
 	_freewheeling = onoff;
+	// wake up freewheeling thread
+	if (0 == pthread_mutex_trylock (&_freewheel_mutex)) {
+		pthread_cond_signal (&_freewheel_signal);
+		pthread_mutex_unlock (&_freewheel_mutex);
+	}
 	return 0;
 }
 
@@ -882,8 +901,8 @@ CoreAudioBackend::register_system_audio_ports()
 {
 	LatencyRange lr;
 
-	const int a_ins = _n_inputs;
-	const int a_out = _n_outputs;
+	const uint32_t a_ins = _n_inputs;
+	const uint32_t a_out = _n_outputs;
 
 	const uint32_t coreaudio_reported_input_latency = _pcmio->get_latency(name_to_id(_audio_device), true);
 	const uint32_t coreaudio_reported_output_latency = _pcmio->get_latency(name_to_id(_audio_device), false);
@@ -896,7 +915,7 @@ CoreAudioBackend::register_system_audio_ports()
 
 	/* audio ports */
 	lr.min = lr.max = coreaudio_reported_input_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
-	for (int i = 0; i < a_ins; ++i) {
+	for (uint32_t i = 0; i < a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%s", _pcmio->cached_port_name(i, true).c_str());
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
@@ -906,7 +925,7 @@ CoreAudioBackend::register_system_audio_ports()
 	}
 
 	lr.min = lr.max = coreaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
-	for (int i = 0; i < a_out; ++i) {
+	for (uint32_t i = 0; i < a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%s", _pcmio->cached_port_name(i, false).c_str());
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
@@ -1357,7 +1376,7 @@ CoreAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 }
 
 void
-CoreAudioBackend::post_process ()
+CoreAudioBackend::pre_process ()
 {
 	bool connections_changed = false;
 	bool ports_changed = false;
@@ -1394,38 +1413,63 @@ CoreAudioBackend::freewheel_thread ()
 {
 	_active_fw = true;
 	bool first_run = false;
+	/* Freewheeling - use for export.   The first call to
+	 * engine.process_callback() after engine.freewheel_callback will
+	 * if the first export cycle.
+	 * For reliable precise export timing, the calls need to be in sync.
+	 *
+	 * Furthermore we need to make sure the registered process thread
+	 * is correct.
+	 *
+	 * _freewheeling = GUI thread state as set by ::freewheel()
+	 * _freewheel = in sync here (export thread)
+	 */
+	pthread_mutex_lock (&_freewheel_mutex);
 	while (_run) {
 		// check if we should run,
 		if (_freewheeling != _freewheel) {
 			if (!_freewheeling) {
-				// handshake w/ coreaudio
-				_reinit_thread_callback = true;
-				_freewheel_ack = false;
+				// prepare leaving freewheeling mode
+				_freewheel = false; // first mark as disabled
+				_reinit_thread_callback = true; // hand over _main_thread
+				_freewheel_ack = false; // prepare next handshake
 				_midiio->set_enabled(true);
+			} else {
+				first_run = true;
+				_freewheel = true;
 			}
-
-			engine.freewheel_callback (_freewheeling);
-			first_run = true;
-			_freewheel = _freewheeling;
 		}
 
 		if (!_freewheel || !_freewheel_ack) {
-			// TODO use a pthread sync/sleep
-			Glib::usleep(200000);
+			// wait for a change, we use a timed wait to
+			// terminate early in case some error sets _run = 0
+			struct timeval tv;
+			struct timespec ts;
+			gettimeofday (&tv, NULL);
+			ts.tv_sec = tv.tv_sec + 3;
+			ts.tv_nsec = 0;
+			pthread_cond_timedwait (&_freewheel_signal, &_freewheel_mutex, &ts);
 			continue;
 		}
 
 		if (first_run) {
+			// tell the engine we're ready to GO.
+			engine.freewheel_callback (_freewheeling);
 			first_run = false;
 			_main_thread = pthread_self();
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
 		}
 
-		post_process();
+		// process port updates first in every cycle.
+		pre_process();
 
+		// prevent coreaudio device changes
 		pthread_mutex_lock (&_process_callback_mutex);
-		// Freewheelin'
+
+		/* Freewheelin' */
+		
+		// clear input buffers
 		for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
 			memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 		}
@@ -1443,9 +1487,12 @@ CoreAudioBackend::freewheel_thread ()
 		Glib::usleep (100); // don't hog cpu
 	}
 
+	pthread_mutex_unlock (&_freewheel_mutex);
+
 	_active_fw = false;
 
 	if (_run) {
+		// engine.process_callback() returner error
 		engine.halted_callback("CoreAudio Freehweeling aborted.");
 	}
 	return 0;
@@ -1460,14 +1507,21 @@ CoreAudioBackend::process_callback ()
 	_active_ca = true;
 
 	if (_run && _freewheel && !_freewheel_ack) {
-		_freewheel_ack = true;
+		// acknowledge freewheeling; hand-over thread ID
+		pthread_mutex_lock (&_freewheel_mutex);
+		if (_freewheel) _freewheel_ack = true;
+		pthread_cond_signal (&_freewheel_signal);
+		pthread_mutex_unlock (&_freewheel_mutex);
 	}
 
 	if (!_run || _freewheel || _preinit) {
+		// NB if we return 1, the output is
+		// zeroed by the coreaudio callback
 		return 1;
 	}
 
 	if (pthread_mutex_trylock (&_process_callback_mutex)) {
+		// block while devices are added/removed
 		return 1;
 	}
 
@@ -1475,13 +1529,10 @@ CoreAudioBackend::process_callback ()
 		_reinit_thread_callback = false;
 		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
-
-		manager.registration_callback();
-		manager.graph_order_callback();
 	}
 
 	/* port-connection change */
-	post_process();
+	pre_process();
 
 	const uint32_t n_samples = _pcmio->n_samples();
 
