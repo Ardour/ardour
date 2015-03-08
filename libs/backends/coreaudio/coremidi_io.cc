@@ -46,16 +46,16 @@ static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *s
 static std::string getDisplayName(MIDIObjectRef object)
 {
 	CFStringRef name = nil;
-	if (noErr != MIDIObjectGetStringProperty(object, kMIDIPropertyDisplayName, &name)) {
-		return "";
+	std::string rv = "";
+	if (noErr == MIDIObjectGetStringProperty(object, kMIDIPropertyDisplayName, &name)) {
+		const CFIndex size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(name), kCFStringEncodingUTF8);
+		char *tmp = (char*) malloc(size);
+		if (CFStringGetCString(name, tmp, size, kCFStringEncodingUTF8)) {
+			rv = tmp;
+		}
+		free(tmp);
+		CFRelease(name);
 	}
-	if (!CFStringGetCStringPtr(name, kCFStringEncodingUTF8)) {
-		if (name) CFRelease(name);
-		return "";
-	}
-	std::string rv (CFStringGetCStringPtr(name, kCFStringEncodingUTF8));
-	CFRelease(name);
-
 	return rv;
 }
 
