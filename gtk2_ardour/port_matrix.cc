@@ -152,8 +152,7 @@ PortMatrix::init ()
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
 
 	/* and also bundles */
-	_session->BundleAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
-	_session->BundleRemoved.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+	_session->BundleAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	/* and also ports */
 	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
