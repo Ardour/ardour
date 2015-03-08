@@ -793,6 +793,23 @@ CoreAudioBackend::get_port_name (PortEngine::PortHandle port) const
 	return static_cast<CoreBackendPort*>(port)->name ();
 }
 
+int
+CoreAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
+{
+	if (!valid_port (port)) {
+		PBD::error << _("CoreAudioBackend::get_port_name: Invalid Port(s)") << endmsg;
+		return -1;
+	}
+	if (key == "http://jackaudio.org/metadata/pretty-name") {
+		type = "";
+		value = static_cast<CoreBackendPort*>(port)->pretty_name ();
+		if (!value.empty()) {
+			return 0;
+		}
+	}
+	return -1;
+}
+
 PortEngine::PortHandle
 CoreAudioBackend::get_port_by_name (const std::string& name) const
 {
@@ -917,21 +934,25 @@ CoreAudioBackend::register_system_audio_ports()
 	lr.min = lr.max = coreaudio_reported_input_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (uint32_t i = 0; i < a_ins; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:capture_%s", _pcmio->cached_port_name(i, true).c_str());
+		snprintf(tmp, sizeof(tmp), "system:capture_%d", i+1);
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		_system_inputs.push_back(static_cast<CoreBackendPort*>(p));
+		CoreBackendPort *cp = static_cast<CoreBackendPort*>(p);
+		cp->set_pretty_name (_pcmio->cached_port_name(i, true));
+		_system_inputs.push_back(cp);
 	}
 
 	lr.min = lr.max = coreaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (uint32_t i = 0; i < a_out; ++i) {
 		char tmp[64];
-		snprintf(tmp, sizeof(tmp), "system:playback_%s", _pcmio->cached_port_name(i, false).c_str());
+		snprintf(tmp, sizeof(tmp), "system:playback_%d", i+1);
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
-		_system_outputs.push_back(static_cast<CoreBackendPort*>(p));
+		CoreBackendPort *cp = static_cast<CoreBackendPort*>(p);
+		cp->set_pretty_name (_pcmio->cached_port_name(i, false));
+		_system_outputs.push_back(cp);
 	}
 	return 0;
 }

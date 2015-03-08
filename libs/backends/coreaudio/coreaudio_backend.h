@@ -65,9 +65,11 @@ class CoreBackendPort {
 		virtual ~CoreBackendPort ();
 
 		const std::string& name () const { return _name; }
+		const std::string& pretty_name () const { return _pretty_name; }
 		PortFlags flags () const { return _flags; }
 
 		int set_name (const std::string &name) { _name = name; return 0; }
+		int set_pretty_name (const std::string &name) { _pretty_name = name; return 0; }
 
 		virtual DataType type () const = 0;
 
@@ -107,6 +109,7 @@ class CoreBackendPort {
 	private:
 		CoreAudioBackend &_osx_backend;
 		std::string _name;
+		std::string _pretty_name;
 		const PortFlags _flags;
 		LatencyRange _capture_latency_range;
 		LatencyRange _playback_latency_range;
@@ -250,6 +253,7 @@ class CoreAudioBackend : public AudioBackend {
 		int         set_port_name (PortHandle, const std::string&);
 		std::string get_port_name (PortHandle) const;
 		PortHandle  get_port_by_name (const std::string&) const;
+		int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
 
 		int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
 
