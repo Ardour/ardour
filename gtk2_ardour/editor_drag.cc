@@ -706,7 +706,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 {
 	double delta_layer = 0;
 	int delta_time_axis_view = 0;
-	int current_pointer_time_axis_view;
+	int current_pointer_time_axis_view = -1;
 
 	assert (!_views.empty ());
 
