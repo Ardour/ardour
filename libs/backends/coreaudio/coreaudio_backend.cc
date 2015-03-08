@@ -968,7 +968,7 @@ CoreAudioBackend::coremidi_rediscover()
 	for (std::vector<CoreBackendPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end ();) {
 		bool found = false;
 		for (size_t i = 0; i < _midiio->n_midi_outputs(); ++i) {
-			if ((*it)->name() == _midiio->port_name(i, false)) {
+			if ((*it)->name() == _midiio->port_id(i, false)) {
 				found = true;
 				break;
 			}
@@ -988,7 +988,7 @@ CoreAudioBackend::coremidi_rediscover()
 	for (std::vector<CoreBackendPort*>::iterator it = _system_midi_in.begin (); it != _system_midi_in.end ();) {
 		bool found = false;
 		for (size_t i = 0; i < _midiio->n_midi_inputs(); ++i) {
-			if ((*it)->name() == _midiio->port_name(i, true)) {
+			if ((*it)->name() == _midiio->port_id(i, true)) {
 				found = true;
 				break;
 			}
@@ -1006,7 +1006,7 @@ CoreAudioBackend::coremidi_rediscover()
 	}
 
 	for (size_t i = 0; i < _midiio->n_midi_inputs(); ++i) {
-		std::string name = _midiio->port_name(i, true);
+		std::string name = _midiio->port_id(i, true);
 		if (find_port_in(_system_midi_in, name)) {
 			continue;
 		}
@@ -1022,12 +1022,14 @@ CoreAudioBackend::coremidi_rediscover()
 		LatencyRange lr;
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
-		_system_midi_in.push_back(static_cast<CoreBackendPort*>(p));
+		CoreBackendPort *pp = static_cast<CoreBackendPort*>(p);
+		pp->set_pretty_name(_midiio->port_name(i, true));
+		_system_midi_in.push_back(pp);
 		_port_change_flag = true;
 	}
 
 	for (size_t i = 0; i < _midiio->n_midi_outputs(); ++i) {
-		std::string name = _midiio->port_name(i, false);
+		std::string name = _midiio->port_id(i, false);
 		if (find_port_in(_system_midi_out, name)) {
 			continue;
 		}
@@ -1043,7 +1045,9 @@ CoreAudioBackend::coremidi_rediscover()
 		LatencyRange lr;
 		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
-		_system_midi_out.push_back(static_cast<CoreBackendPort*>(p));
+		CoreBackendPort *pp = static_cast<CoreBackendPort*>(p);
+		pp->set_pretty_name(_midiio->port_name(i, false));
+		_system_midi_out.push_back(pp);
 		_port_change_flag = true;
 	}
 

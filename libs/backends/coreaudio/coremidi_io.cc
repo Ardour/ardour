@@ -43,11 +43,11 @@ static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *s
 	}
 }
 
-static std::string getDisplayName(MIDIObjectRef object)
+static std::string getPropertyString (MIDIObjectRef object, CFStringRef key)
 {
 	CFStringRef name = nil;
 	std::string rv = "";
-	if (noErr == MIDIObjectGetStringProperty(object, kMIDIPropertyDisplayName, &name)) {
+	if (noErr == MIDIObjectGetStringProperty(object, key, &name)) {
 		const CFIndex size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(name), kCFStringEncodingUTF8);
 		char *tmp = (char*) malloc(size);
 		if (CFStringGetCString(name, tmp, size, kCFStringEncodingUTF8)) {
@@ -57,6 +57,10 @@ static std::string getDisplayName(MIDIObjectRef object)
 		CFRelease(name);
 	}
 	return rv;
+}
+
+static std::string getDisplayName (MIDIObjectRef object) {
+	return getPropertyString(object, kMIDIPropertyDisplayName);
 }
 
 CoreMidiIo::CoreMidiIo()
@@ -231,28 +235,44 @@ CoreMidiIo::send_event (uint32_t port, double reltime_us, const uint8_t *d, cons
 	return 0;
 }
 
+
+std::string
+CoreMidiIo::port_id (uint32_t port, bool input)
+{
+	std::stringstream ss;
+	if (input) {
+		ss << "system:midi_capture_";
+		SInt32 id;
+		if (noErr == MIDIObjectGetIntegerProperty(_input_endpoints[port], kMIDIPropertyUniqueID, &id)) {
+			ss << (int)id;
+		} else {
+			ss << port;
+		}
+	} else {
+		ss << "system:midi_playback_";
+		SInt32 id;
+		if (noErr == MIDIObjectGetIntegerProperty(_output_endpoints[port], kMIDIPropertyUniqueID, &id)) {
+			ss << (int)id;
+		} else {
+			ss << port;
+		}
+	}
+	return ss.str();
+}
+
 std::string
 CoreMidiIo::port_name (uint32_t port, bool input)
 {
-	std::stringstream ss;
-	std::string pn;
-	// XXX including the number will not yield persistent port-names
-	// when disconnecting devices in the middle.
 	if (input) {
-		ss << "system:midi_capture_" << port;
 		if (port < _n_midi_in) {
-			pn = getDisplayName(_input_endpoints[port]);
+			return getDisplayName(_input_endpoints[port]);
 		}
 	} else {
-		ss << "system:midi_playback_" << port;
 		if (port < _n_midi_out) {
-			pn = getDisplayName(_output_endpoints[port]);
+			return getDisplayName(_output_endpoints[port]);
 		}
 	}
-	if (!pn.empty()) {
-		ss << " - " << pn;
-	}
-	return ss.str();
+	return "";
 }
 
 void

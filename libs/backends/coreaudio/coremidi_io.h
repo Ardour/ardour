@@ -74,6 +74,7 @@ public:
 
 	uint32_t n_midi_inputs (void) const { return _n_midi_in; }
 	uint32_t n_midi_outputs (void) const { return _n_midi_out; }
+	std::string port_id (uint32_t, bool input);
 	std::string port_name (uint32_t, bool input);
 
 	void notify_proc (const MIDINotification *message);
