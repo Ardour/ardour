@@ -92,6 +92,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
 #include "ardour/track.h"
+#include "ardour/user_bundle.h"
 #include "ardour/utils.h"
 
 #include "midi++/port.h"
@@ -442,18 +443,9 @@ Session::immediately_post_engine ()
 		return -1;
 	}
 
-	/* TODO somehow keep bundles in sync with engine.
-	 *
-	 * eg. midi ports may come and go dynamically (currently both with jack as well
-	 * as with CoreMidi. But also changing the engine or device will do the trick..
-	 *
-	 * We need to keep track of bundles added during setup_bundles(),
-	 * and add/remove the changes.
-	 *
-	 * also doing so in a background thread would be nice (same_thread may be RT thread).
-	 * but in principle it's going to be sth like:
-	 * _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::do_the_bundles, this));
-	 */
+	/* TODO, connect in different thread. (PortRegisteredOrUnregistered may be in RT context)
+	 * can we do that? */
+	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
 
 	return 0;
 }
@@ -698,6 +690,19 @@ Session::setup_click_state (const XMLNode* node)
 void
 Session::setup_bundles ()
 {
+
+	{
+		RCUWriter<BundleList> writer (_bundles);
+		boost::shared_ptr<BundleList> b = writer.get_copy ();
+		for (BundleList::iterator i = b->begin(); i != b->end();) {
+			if (boost::dynamic_pointer_cast<UserBundle>(*i)) {
+				++i;
+				continue;
+			}
+			i = b->erase(i);
+		}
+	}
+
 	vector<string> inputs[DataType::num_types];
 	vector<string> outputs[DataType::num_types];
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
@@ -728,7 +733,7 @@ Session::setup_bundles ()
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, outputs[DataType::AUDIO][np]);
 
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
 	/* stereo output bundles */
@@ -743,7 +748,7 @@ Session::setup_bundles ()
 			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, outputs[DataType::AUDIO][np + 1]);
 
-			add_bundle (c);
+			add_bundle (c, false);
 		}
 	}
 
@@ -762,7 +767,7 @@ Session::setup_bundles ()
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, inputs[DataType::AUDIO][np]);
 
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
 	/* stereo input bundles */
@@ -778,7 +783,7 @@ Session::setup_bundles ()
 			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, inputs[DataType::AUDIO][np + 1]);
 
-			add_bundle (c);
+			add_bundle (c, false);
 		}
 	}
 
@@ -795,7 +800,7 @@ Session::setup_bundles ()
 		boost::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, inputs[DataType::MIDI][np]);
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
 	/* MIDI output bundles */
@@ -811,9 +816,11 @@ Session::setup_bundles ()
 		boost::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, outputs[DataType::MIDI][np]);
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
+	// we trust the backend to only calls us if there's a change
+	BundleAddedOrRemoved (); /* EMIT SIGNAL */
 }
 
 void
