@@ -1583,6 +1583,33 @@ TempoMap::tempo_at (framepos_t frame) const
 	return m.tempo();
 }
 
+const MeterSection&
+TempoMap::meter_section_at (framepos_t frame) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+	Metrics::const_iterator i;
+	MeterSection* prev = 0;
+
+	for (i = metrics.begin(); i != metrics.end(); ++i) {
+		MeterSection* t;
+
+		if ((t = dynamic_cast<MeterSection*> (*i)) != 0) {
+
+			if ((*i)->frame() > frame) {
+				break;
+			}
+
+			prev = t;
+		}
+	}
+
+	if (prev == 0) {
+		fatal << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	return *prev;
+}
 
 const Meter&
 TempoMap::meter_at (framepos_t frame) const
