@@ -1205,7 +1205,7 @@ CoreAudioBackend::midi_event_get (
 		size_t& size, uint8_t** buf, void* port_buffer,
 		uint32_t event_index)
 {
-	assert (buf && port_buffer);
+	if (!buf || !port_buffer) return -1;
 	CoreMidiBuffer& source = * static_cast<CoreMidiBuffer*>(port_buffer);
 	if (event_index >= source.size ()) {
 		return -1;
@@ -1224,7 +1224,7 @@ CoreAudioBackend::midi_event_put (
 		pframes_t timestamp,
 		const uint8_t* buffer, size_t size)
 {
-	assert (buffer && port_buffer);
+	if (!buffer || !port_buffer) return -1;
 	CoreMidiBuffer& dst = * static_cast<CoreMidiBuffer*>(port_buffer);
 	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
 		fprintf (stderr, "CoreMidiBuffer: it's too late for this event. %d > %d\n",
@@ -1238,14 +1238,14 @@ CoreAudioBackend::midi_event_put (
 uint32_t
 CoreAudioBackend::get_midi_event_count (void* port_buffer)
 {
-	assert (port_buffer);
+	if (!port_buffer) return 0;
 	return static_cast<CoreMidiBuffer*>(port_buffer)->size ();
 }
 
 void
 CoreAudioBackend::midi_clear (void* port_buffer)
 {
-	assert (port_buffer);
+	if (port_buffer) return;
 	CoreMidiBuffer * buf = static_cast<CoreMidiBuffer*>(port_buffer);
 	assert (buf);
 	buf->clear ();
@@ -1395,8 +1395,7 @@ CoreAudioBackend::n_physical_inputs () const
 void*
 CoreAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 {
-	assert (port);
-	assert (valid_port (port));
+	if (!port || !valid_port (port)) return NULL;
 	return static_cast<CoreBackendPort*>(port)->get_buffer (nframes);
 }
 
