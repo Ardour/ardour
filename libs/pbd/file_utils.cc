@@ -283,8 +283,8 @@ copy_file(const std::string & from_path, const std::string & to_path)
 {
 	if (!Glib::file_test (from_path, Glib::FILE_TEST_EXISTS)) return false;
 
-	PBD::ScopedFileDescriptor fd_from (::open (from_path.c_str(), O_RDONLY));
-	PBD::ScopedFileDescriptor fd_to (::open (to_path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
+	PBD::ScopedFileDescriptor fd_from (g_open (from_path.c_str(), O_RDONLY, 0444));
+	PBD::ScopedFileDescriptor fd_to (g_open (to_path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 
 	char buf[4096]; // BUFSIZ  ??
 	ssize_t nread;
