@@ -817,7 +817,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		RouteList copy = *routes;
 		copy.sort (RouteCompareByName ());
 		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current);
+			maybe_add_bundle_to_output_menu ((*i)->output()->bundle(), current);
 		}
 
 		if (citems.size() == n_with_separator) {
