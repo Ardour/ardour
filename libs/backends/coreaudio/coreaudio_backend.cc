@@ -1227,9 +1227,11 @@ CoreAudioBackend::midi_event_put (
 	if (!buffer || !port_buffer) return -1;
 	CoreMidiBuffer& dst = * static_cast<CoreMidiBuffer*>(port_buffer);
 	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
-		fprintf (stderr, "CoreMidiBuffer: it's too late for this event. %d > %d\n",
+#ifndef NDEBUG
+		// nevermind, ::get_buffer() sorts events
+		fprintf (stderr, "CoreMidiBuffer: unordered event: %d > %d\n",
 				(pframes_t)dst.back ()->timestamp (), timestamp);
-		return -1;
+#endif
 	}
 	dst.push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (timestamp, buffer, size)));
 	return 0;

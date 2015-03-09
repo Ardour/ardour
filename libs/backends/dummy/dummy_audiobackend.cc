@@ -981,8 +981,8 @@ DummyAudioBackend::midi_event_put (
 	assert (buffer && port_buffer);
 	DummyMidiBuffer& dst = * static_cast<DummyMidiBuffer*>(port_buffer);
 	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
+		// nevermind, ::get_buffer() sorts events, but always print warning
 		fprintf (stderr, "DummyMidiBuffer: it's too late for this event.\n");
-		return -1;
 	}
 	dst.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (timestamp, buffer, size)));
 	return 0;

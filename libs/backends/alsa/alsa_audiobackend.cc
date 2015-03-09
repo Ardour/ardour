@@ -1256,9 +1256,11 @@ AlsaAudioBackend::midi_event_put (
 	assert (buffer && port_buffer);
 	AlsaMidiBuffer& dst = * static_cast<AlsaMidiBuffer*>(port_buffer);
 	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
+#ifndef NDEBUG
+		// nevermind, ::get_buffer() sorts events
 		fprintf (stderr, "AlsaMidiBuffer: it's too late for this event. %d > %d\n",
 				(pframes_t)dst.back ()->timestamp (), timestamp);
-		return -1;
+#endif
 	}
 	dst.push_back (boost::shared_ptr<AlsaMidiEvent>(new AlsaMidiEvent (timestamp, buffer, size)));
 	return 0;
