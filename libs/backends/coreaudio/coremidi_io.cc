@@ -200,10 +200,16 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		if ((*it)->timeStamp < end) {
 			if ((*it)->timeStamp < start) {
 				uint64_t dt = AudioConvertHostTimeToNanos(start - (*it)->timeStamp);
-				//printf("Stale Midi Event dt:%.2fms\n", dt * 1e-6);
-				if (dt > 1e-4) { // 100ms, maybe too large
+				if (dt > 1e7) { // 10ms,
+#ifndef NDEBUG
+					printf("Dropped Stale Midi Event. dt:%.2fms\n", dt * 1e-6);
+#endif
 					it = _input_queue[port].erase(it);
 					continue;
+				} else {
+#if 0
+					printf("Stale Midi Event. dt:%.2fms\n", dt * 1e-6);
+#endif
 				}
 				time = 0;
 			} else {
