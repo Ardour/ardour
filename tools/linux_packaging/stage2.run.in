@@ -8,7 +8,7 @@
 #
 ###################################
 
-MAJOR_VERSION=3
+MAJOR_VERSION="%REPLACE_MAJOR_VERSION%"
 
 PGM_NAME="Ardour"
 PGM_VENDOR="Ardour"

@@ -643,6 +643,13 @@ fi
 sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
 chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 
+#
+# Add the stage2.run script
+#
+sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/" < stage2.run.in > stage2.run
+chmod a+x stage2.run
+
+
 #Sanity Check file
 if [ -e $BUILD_ROOT/tools/sanity_check/sanityCheck ]; then
 	cp $BUILD_ROOT/tools/sanity_check/sanityCheck $APPBIN
