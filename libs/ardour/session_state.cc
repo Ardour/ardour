@@ -2071,7 +2071,7 @@ Session::refresh_disk_space ()
 			_total_free_4k_blocks_uncertain = true;
 		}
 	}
-#elif defined (COMPILER_MSVC)
+#elif defined PLATFORM_WINDOWS
 	vector<string> scanned_volumes;
 	vector<string>::iterator j;
 	vector<space_and_path>::iterator i;
