@@ -8,11 +8,11 @@
 #
 ###################################
 
-
+MAJOR_VERSION=3
 
 PGM_NAME="Ardour"
 PGM_VENDOR="Ardour"
-PGM_EXEC_FILE="ardour3"
+PGM_EXEC_FILE="ardour${MAJOR_VERSION}"
 
 THE_SHELL="/bin/sh"
 
@@ -500,16 +500,16 @@ ${SUPER} cp -f ${BUNDLE_DIR}/bin/*.uninstall.sh ${INSTALL_DEST_BASE}/.
 # Create link to the program in user bin
 
 echo ""
-echo "Creating link ${PGM_NAME}3 in ${USER_BIN_DIR}"
+echo "Creating link ${PGM_NAME}${MAJOR_VERSION} in ${USER_BIN_DIR}"
 echo ""
 
 if [ -d "${USER_BIN_DIR}" ]; then
-	if [ -e "${USER_BIN_DIR}/${PGM_NAME}3" ]; then
-		${SUPER} rm -f ${USER_BIN_DIR}/${PGM_NAME}3
+	if [ -e "${USER_BIN_DIR}/${PGM_NAME}${MAJOR_VERSION}" ]; then
+		${SUPER} rm -f ${USER_BIN_DIR}/${PGM_NAME}${MAJOR_VERSION}
 	fi
 
 	cd "${USER_BIN_DIR}"
-	${SUPER} ln -sf ${PGM_EXEC_PATH} ${PGM_NAME}3 
+	${SUPER} ln -sf ${PGM_EXEC_PATH} ${PGM_NAME}${MAJOR_VERSION}
 	cd "${PKG_PATH}"
 	
 else

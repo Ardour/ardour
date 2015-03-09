@@ -14,6 +14,8 @@ ARDOURSTACK_ROOT=$HOME/a3/inst
 # the waf build tree to use when copying built/generated files
 BUILD_ROOT=../../build
 
+. ../define_versions.sh
+
 # where harvid and xjadeo binaries are cached
 if test -z "$CACHEDIR" -o ! -d "$CACHEDIR"; then
 	CACHEDIR=`pwd`
@@ -233,8 +235,8 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 
 # create startup helper script
 
-sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour3
-rm $ENVIRONMENT && chmod 775 $APPBIN/ardour3
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour${major_version}
+rm $ENVIRONMENT && chmod 775 $APPBIN/ardour${major_version}
 MAIN_EXECUTABLE=ardour-${release_version}
 
 echo "Copying ardour executable ...."
@@ -638,7 +640,7 @@ fi
 #
 # Add the uninstaller
 #
-sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
 chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 
 #Sanity Check file
