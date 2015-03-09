@@ -624,7 +624,7 @@ public:
         Gtk::Widget& tip_widget() { return _file_chooser; }
 
 private:
-	void file_set ();
+	void selection_changed ();
 	void current_folder_set ();
 	
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value

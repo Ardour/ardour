@@ -29,6 +29,7 @@
 #include "ardour/utils.h"
 
 #include "pbd/configuration.h"
+#include "pbd/replace_all.h"
 
 #include "public_editor.h"
 #include "option_editor.h"
@@ -39,6 +40,13 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
+
+static string poor_mans_glob (string path)
+{
+	string copy = path;
+	replace_all (copy, "~", Glib::get_home_dir());
+	return copy;
+}
 
 void
 OptionEditorComponent::add_widget_to_page (OptionEditorPage* p, Gtk::Widget* w)
@@ -483,7 +491,7 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 	, _set (s)
 {
 	_file_chooser.set_action (Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
-	_file_chooser.signal_file_set().connect (sigc::mem_fun (*this, &DirectoryOption::file_set));
+	_file_chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &DirectoryOption::selection_changed));
 	_file_chooser.signal_current_folder_changed().connect (sigc::mem_fun (*this, &DirectoryOption::current_folder_set));
 }
 
@@ -491,7 +499,7 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 void
 DirectoryOption::set_state_from_config ()
 {
-	_file_chooser.set_current_folder (_get ());
+	_file_chooser.set_current_folder (poor_mans_glob(_get ()));
 }
 
 void
@@ -504,13 +512,13 @@ DirectoryOption::add_to_page (OptionEditorPage* p)
 }
 
 void
-DirectoryOption::file_set ()
+DirectoryOption::selection_changed ()
 {
-	_set (_file_chooser.get_filename ());
+	_set (poor_mans_glob(_file_chooser.get_filename ()));
 }
 
 void
 DirectoryOption::current_folder_set ()
 {
-	_set (_file_chooser.get_current_folder ());
+	_set (poor_mans_glob(_file_chooser.get_current_folder ()));
 }
