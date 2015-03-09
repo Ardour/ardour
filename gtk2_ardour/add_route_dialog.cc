@@ -170,6 +170,8 @@ AddRouteDialog::AddRouteDialog ()
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);
+	set_response_sensitive (RESPONSE_ACCEPT, true);
+	set_default_response (RESPONSE_ACCEPT);
 
 	track_type_chosen ();
 }
