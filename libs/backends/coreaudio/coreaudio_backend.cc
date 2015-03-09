@@ -1247,7 +1247,7 @@ CoreAudioBackend::get_midi_event_count (void* port_buffer)
 void
 CoreAudioBackend::midi_clear (void* port_buffer)
 {
-	if (port_buffer) return;
+	if (!port_buffer) return;
 	CoreMidiBuffer * buf = static_cast<CoreMidiBuffer*>(port_buffer);
 	assert (buf);
 	buf->clear ();
