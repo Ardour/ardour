@@ -336,7 +336,9 @@ ARDOUR_UI::goto_editor_window ()
 	editor->show_window ();
 	editor->present ();
 	/* mixer should now be on top */
-	WM::Manager::instance().set_transient_for (editor);
+	if (ARDOUR_UI::config()->get_transients_follow_front()) {
+		WM::Manager::instance().set_transient_for (editor);
+	}
 	_mixer_on_top = false;
 }
 
@@ -365,7 +367,9 @@ ARDOUR_UI::goto_mixer_window ()
 	mixer->show_window ();
 	mixer->present ();
 	/* mixer should now be on top */
-	WM::Manager::instance().set_transient_for (mixer);
+	if (ARDOUR_UI::config()->get_transients_follow_front()) {
+		WM::Manager::instance().set_transient_for (mixer);
+	}
 	_mixer_on_top = true;
 }
 
