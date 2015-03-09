@@ -439,7 +439,7 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 		   free it later.
 		*/
 		char *copy = strdup (reason);
-		Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&ARDOUR_UI::engine_halted, this, copy, true));
+		Gtkmm2ext::UI::instance()->call_slot (MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_halted, this, copy, true));
 		return;
 	}
 
