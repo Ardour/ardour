@@ -301,7 +301,6 @@ int main (int argc, char *argv[])
 	}
 
 	ui->run (text_receiver);
-	ui->disconnect_from_engine();
 	Gtkmm2ext::Application::instance()->cleanup();
 	delete ui;
 	ui = 0;
