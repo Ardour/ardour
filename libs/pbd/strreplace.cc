@@ -18,6 +18,7 @@
 */
 
 #include "pbd/replace_all.h"
+#include "glibmm/miscutils.h"
 
 int
 replace_all (std::string& str,
@@ -34,5 +35,13 @@ replace_all (std::string& str,
 	}
 
 	return cnt;
+}
+
+std::string
+poor_mans_glob (std::string path)
+{
+	std::string copy = path;
+	replace_all (copy, "~", Glib::get_home_dir());
+	return copy;
 }
 

@@ -60,13 +60,6 @@ using namespace ARDOUR_UI_UTILS;
 
 ArdourStartup* ArdourStartup::the_startup = 0;
 
-static string poor_mans_glob (string path)
-{
-	string copy = path;
-	replace_all (copy, "~", Glib::get_home_dir());
-	return copy;
-}
-
 ArdourStartup::ArdourStartup ()
 	: _response (RESPONSE_OK)
 	, config_modified (false)

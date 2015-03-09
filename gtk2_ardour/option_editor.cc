@@ -41,13 +41,6 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
-static string poor_mans_glob (string path)
-{
-	string copy = path;
-	replace_all (copy, "~", Glib::get_home_dir());
-	return copy;
-}
-
 void
 OptionEditorComponent::add_widget_to_page (OptionEditorPage* p, Gtk::Widget* w)
 {

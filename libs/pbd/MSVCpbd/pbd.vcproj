@@ -753,6 +753,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\replace_all.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\resource.h"
 				>
 			</File>
