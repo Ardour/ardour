@@ -1577,7 +1577,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	pre_process();
 
 	// cycle-length in usec
-	const int64_t nominal_time = 1e6 * n_samples / _samplerate;
+	const double nominal_time = 1e6 * n_samples / _samplerate;
 
 	clock1 = g_get_monotonic_time();
 
@@ -1627,10 +1627,15 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* queue outgoing midi */
 	i = 0;
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
+#if 0 // something's still b0rked with CoreMidiIo::send_events()
+		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
+		_midiio->send_events (i, nominal_time, (void*)src);
+#else // works..
 		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
 		for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
 			_midiio->send_event (i, (*mit)->timestamp() / nominal_time, (*mit)->data(), (*mit)->size());
 		}
+#endif
 	}
 
 	/* write back audio */
@@ -1644,7 +1649,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* calc DSP load. */
 	clock2 = g_get_monotonic_time();
 	const int64_t elapsed_time = clock2 - clock1;
-	_dsp_load = elapsed_time / (float) nominal_time;
+	_dsp_load = elapsed_time / nominal_time;
 
 	pthread_mutex_unlock (&_process_callback_mutex);
 	return 0;

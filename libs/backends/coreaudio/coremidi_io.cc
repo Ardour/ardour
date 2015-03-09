@@ -20,6 +20,7 @@
 #include <CoreAudio/HostTime.h>
 
 #include "coremidi_io.h"
+#include "coreaudio_backend.h"
 
 using namespace ARDOUR;
 
@@ -36,13 +37,16 @@ static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *s
 	}
 	RingBuffer<uint8_t> * rb  = static_cast<RingBuffer < uint8_t > *> (srcRef);
 	if (!rb) return;
-	for (UInt32 i = 0; i < list->numPackets; i++) {
-		const MIDIPacket *packet = &list->packet[i];
-		if (rb->write_space() < sizeof(MIDIPacket)) {
+	MIDIPacket const *p = &list->packet[0];
+	for (UInt32 i = 0; i < list->numPackets; ++i) {
+		uint32_t len = ((p->length + 3)&~3) + sizeof(MIDITimeStamp) + sizeof(UInt16);
+		if (rb->write_space() < sizeof(uint32_t) + len) {
 			fprintf(stderr, "CoreMIDI: dropped MIDI event\n");
 			continue;
 		}
-		rb->write((uint8_t*)packet, sizeof(MIDIPacket));
+		rb->write ((uint8_t*)&len, sizeof(uint32_t));
+		rb->write ((uint8_t*)p, len);
+		p = MIDIPacketNext (p);
 	}
 }
 
@@ -176,10 +180,16 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 	}
 	assert(port < _n_midi_in);
 
-	while (_rb[port]->read_space() >= sizeof(MIDIPacket)) {
+	const size_t minsize = 1 + sizeof(uint32_t) + sizeof(MIDITimeStamp) + sizeof(UInt16);
+
+	while (_rb[port]->read_space() > minsize) {
 		MIDIPacket packet;
-		size_t rv = _rb[port]->read((uint8_t*)&packet, sizeof(MIDIPacket));
-		assert(rv == sizeof(MIDIPacket));
+		size_t rv;
+		uint32_t s = 0;
+		rv = _rb[port]->read((uint8_t*)&s, sizeof(uint32_t));
+		assert(rv == sizeof(uint32_t));
+		rv = _rb[port]->read((uint8_t*)&packet, s);
+		assert(rv == s);
 		_input_queue[port].push_back(boost::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet)));
 	}
 
@@ -208,6 +218,40 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		}
 		++it;
 
+	}
+	return 0;
+}
+
+int
+CoreMidiIo::send_events (uint32_t port, double timescale, const void *b)
+{
+	if (!_active || _time_at_cycle_start == 0) {
+		return 0;
+	}
+
+	assert(port < _n_midi_out);
+	const UInt64 ts = AudioConvertHostTimeToNanos(_time_at_cycle_start);
+
+	const CoreMidiBuffer *src = static_cast<CoreMidiBuffer const *>(b);
+
+	int32_t bytes[8192]; // int for alignment
+	MIDIPacketList *mpl = (MIDIPacketList*)bytes;
+	MIDIPacket *cur = MIDIPacketListInit(mpl);
+
+	for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
+		assert((*mit)->size() < 256);
+		cur = MIDIPacketListAdd(mpl, sizeof(bytes), cur,
+				AudioConvertNanosToHostTime(ts + (*mit)->timestamp() / timescale),
+				(*mit)->size(), (*mit)->data());
+		if (!cur) {
+#ifndef DEBUG
+			printf("CoreMidi: Packet list overflow, dropped events\n");
+#endif
+			break;
+		}
+	}
+	if (mpl->numPackets > 0) {
+		MIDISend(_output_ports[port], _output_endpoints[port], mpl);
 	}
 	return 0;
 }
