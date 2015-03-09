@@ -17,8 +17,11 @@
  */
 
 #include <sstream>
-#include "coremidi_io.h"
 #include <CoreAudio/HostTime.h>
+
+#include "coremidi_io.h"
+
+using namespace ARDOUR;
 
 static void notifyProc (const MIDINotification *message, void *refCon) {
 	CoreMidiIo *self = static_cast<CoreMidiIo*>(refCon);
@@ -45,7 +48,7 @@ static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *s
 
 static std::string getPropertyString (MIDIObjectRef object, CFStringRef key)
 {
-	CFStringRef name = nil;
+	CFStringRef name = NULL;
 	std::string rv = "";
 	if (noErr == MIDIObjectGetStringProperty(object, key, &name)) {
 		const CFIndex size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(name), kCFStringEncodingUTF8);

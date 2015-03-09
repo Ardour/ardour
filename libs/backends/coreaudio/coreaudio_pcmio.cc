@@ -19,6 +19,8 @@
 #include <glibmm.h>
 #include "coreaudio_pcmio.h"
 
+using namespace ARDOUR;
+
 /* abstraction for deprecated CoreAudio */
 
 static OSStatus GetPropertyWrapper (

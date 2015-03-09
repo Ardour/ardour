@@ -16,6 +16,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#ifndef __libbackend_coreaudio_pcmio_h__
+#define __libbackend_coreaudio_pcmio_h__
+
 #include <CoreServices/CoreServices.h>
 #include <CoreAudio/CoreAudio.h>
 #include <AudioUnit/AudioUnit.h>
@@ -30,6 +33,8 @@
 #define AUHAL_OUTPUT_ELEMENT 0
 #define AUHAL_INPUT_ELEMENT 1
 
+
+namespace ARDOUR {
 
 class CoreAudioPCM {
 public:
@@ -142,7 +147,7 @@ private:
 			AudioDeviceID *created_device);
 
 
-	AudioUnit _auhal;
+	::AudioUnit _auhal;
 	AudioDeviceID* _device_ids;
 	AudioBufferList* _input_audio_buffer_list;
 	AudioBufferList* _output_audio_buffer_list;
@@ -188,3 +193,7 @@ private:
 
 	pthread_mutex_t _discovery_lock;
 };
+
+} // namespace
+
+#endif /* __libbackend_coreaudio_pcmio_h__ */

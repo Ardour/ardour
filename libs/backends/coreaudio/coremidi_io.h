@@ -16,6 +16,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+#ifndef __libbackend_coremidi_io_h__
+#define __libbackend_coremidi_io_h__
+
 #include <CoreServices/CoreServices.h>
 #include <CoreAudio/CoreAudio.h>
 #include <AudioUnit/AudioUnit.h>
@@ -30,7 +33,9 @@
 #include <boost/shared_ptr.hpp>
 #include "pbd/ringbuffer.h"
 
-typedef struct _CoreMIDIPacket { 
+namespace ARDOUR {
+
+typedef struct _CoreMIDIPacket {
 	MIDITimeStamp timeStamp; 
 	UInt16 length; 
 	Byte data[256]; 
@@ -113,3 +118,7 @@ private:
 
 	pthread_mutex_t _discovery_lock;
 };
+
+} // namespace
+
+#endif /* __libbackend_coremidi_io */
