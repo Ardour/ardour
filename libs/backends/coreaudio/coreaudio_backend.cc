@@ -90,6 +90,7 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _freewheel_ack (false)
 	, _reinit_thread_callback (false)
 	, _measure_latency (false)
+	, _last_process_start (0)
 	, _audio_device("")
 	, _midi_driver_option(_("None"))
 	, _samplerate (48000)
@@ -416,10 +417,10 @@ static void * pthread_freewheel (void *arg)
 	return 0;
 }
 
-static int process_callback_ptr (void *arg)
+static int process_callback_ptr (void *arg, const uint32_t n_samples, const uint64_t host_time)
 {
 	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
-	return d->process_callback();
+	return d->process_callback(n_samples, host_time);
 }
 
 int
@@ -452,6 +453,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 
 	_freewheel_ack = false;
 	_reinit_thread_callback = true;
+	_last_process_start = 0;
 
 	_pcmio->set_error_callback (error_callback_ptr, this);
 	_pcmio->set_buffer_size_callback (buffer_size_callback_ptr, this);
@@ -648,7 +650,16 @@ CoreAudioBackend::sample_time_at_cycle_start ()
 pframes_t
 CoreAudioBackend::samples_since_cycle_start ()
 {
-	return 0;
+	if (!_active_ca || !_run || _freewheeling || _freewheel) {
+		return 0;
+	}
+	if (_last_process_start == 0) {
+		return 0;
+	}
+
+	const uint64_t now = AudioGetCurrentHostTime ();
+	const int64_t elapsed_time_ns = AudioConvertHostTimeToNanos(now - _last_process_start);
+	return std::max((pframes_t)0, (pframes_t)rint(1e-9 * elapsed_time_ns * _samplerate));
 }
 
 uint32_t
@@ -1503,6 +1514,7 @@ CoreAudioBackend::freewheel_thread ()
 			static_cast<CoreMidiBuffer*>((*it)->get_buffer(0))->clear ();
 		}
 
+		_last_process_start = 0;
 		if (engine.process_callback (_samples_per_period)) {
 			pthread_mutex_unlock (&_process_callback_mutex);
 			break;
@@ -1525,7 +1537,7 @@ CoreAudioBackend::freewheel_thread ()
 }
 
 int
-CoreAudioBackend::process_callback ()
+CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t host_time)
 {
 	uint32_t i = 0;
 	uint64_t clock1, clock2;
@@ -1548,6 +1560,10 @@ CoreAudioBackend::process_callback ()
 
 	if (pthread_mutex_trylock (&_process_callback_mutex)) {
 		// block while devices are added/removed
+#ifndef NDEBUG
+		printf("Xrun due to device change\n");
+#endif
+		engine.Xrun();
 		return 1;
 	}
 
@@ -1559,8 +1575,6 @@ CoreAudioBackend::process_callback ()
 
 	/* port-connection change */
 	pre_process();
-
-	const uint32_t n_samples = _pcmio->n_samples();
 
 	// cycle-length in usec
 	const int64_t nominal_time = 1e6 * n_samples / _samplerate;
@@ -1595,6 +1609,7 @@ CoreAudioBackend::process_callback ()
 	}
 
 	_midiio->start_cycle();
+	_last_process_start = host_time;
 
 	if (engine.process_callback (n_samples)) {
 		fprintf(stderr, "ENGINE PROCESS ERROR\n");

@@ -65,7 +65,7 @@ public:
 			uint32_t output_device,
 			uint32_t sample_rate,
 			uint32_t samples_per_period,
-			int (process_callback (void*)),
+			int (process_callback (void*, const uint32_t, const uint64_t)),
 			void * process_arg
 			);
 
@@ -160,7 +160,7 @@ private:
 	bool     _in_process;
 	size_t   _n_devices;
 
-	int (* _process_callback) (void*);
+	int (* _process_callback) (void*, const uint32_t, const uint64_t);
 	void * _process_arg;
 
 	void (* _error_callback) (void*);

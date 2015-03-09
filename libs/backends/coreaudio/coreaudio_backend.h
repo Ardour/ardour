@@ -215,7 +215,7 @@ class CoreAudioBackend : public AudioBackend {
 		bool midi_device_enabled (std::string const) const;
 
 		// really private, but needing static access:
-		int process_callback();
+		int process_callback(uint32_t, uint64_t);
 		void error_callback();
 		void xrun_callback();
 		void buffer_size_callback();
@@ -321,6 +321,8 @@ class CoreAudioBackend : public AudioBackend {
 		bool  _freewheel_ack;
 		bool  _reinit_thread_callback;
 		bool  _measure_latency;
+
+		uint64_t _last_process_start;
 
 		pthread_mutex_t _process_callback_mutex;
 

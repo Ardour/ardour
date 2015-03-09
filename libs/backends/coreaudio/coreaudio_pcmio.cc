@@ -765,7 +765,7 @@ int
 CoreAudioPCM::pcm_start (
 		uint32_t device_id_in, uint32_t device_id_out,
 		uint32_t sample_rate, uint32_t samples_per_period,
-		int (process_callback (void*)), void *process_arg)
+		int (process_callback (void*, const uint32_t, const uint64_t)), void *process_arg)
 {
 
 	assert(_device_ids);
@@ -1095,8 +1095,8 @@ CoreAudioPCM::render_callback (
 
 	assert(_playback_channels == 0 || ioData->mNumberBuffers == _playback_channels);
 
+	UInt64 cur_cycle_start = AudioGetCurrentHostTime ();
 	_cur_samples_per_period = inNumberFrames;
-
 
 	if (_capture_channels > 0) {
 		_input_audio_buffer_list->mNumberBuffers = _capture_channels;
@@ -1127,7 +1127,7 @@ CoreAudioPCM::render_callback (
 	int rv = -1;
 
 	if (_process_callback) {
-		rv = _process_callback(_process_arg);
+		rv = _process_callback(_process_arg, inNumberFrames, cur_cycle_start);
 	}
 
 	_in_process = false;
