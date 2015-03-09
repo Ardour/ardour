@@ -53,12 +53,12 @@ private:
 	bool bpm_button_release (GdkEventButton* );
 	bool entry_key_release (GdkEventKey* );
 	void pulse_change ();
-	void tap_tempo ();
+	bool tap_tempo_button_press (GdkEventButton* );
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
-	gint64 last_tap;
+	guint32 last_tap;
 	double average_interval;
 
 	Gtk::ComboBoxText pulse_selector;

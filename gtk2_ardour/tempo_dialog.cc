@@ -178,7 +178,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	when_beat_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &TempoDialog::response), RESPONSE_ACCEPT));
 	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	pulse_selector.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::pulse_change));
-	tap_tempo_button.signal_clicked().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo));
+	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
 }
 
 bool
@@ -258,17 +258,18 @@ TempoDialog::pulse_change ()
 	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
-void
-TempoDialog::tap_tempo ()
+
+bool
+TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 {
 	gint64 now;
-	now = g_get_monotonic_time (); // microseconds
+	now = ev->time; // milliseconds
 
 	if (last_tap > 0) {
 		double interval, bpm;
 		static const double decay = 0.5;
 
-		interval = (now - last_tap) * 1.0e-6;
+		interval = (now - last_tap) * 1.0e-3;
 		if (interval <= 6.0) {
 			// >= 10 bpm, say
 			if (average_interval > 0) {
@@ -287,6 +288,7 @@ TempoDialog::tap_tempo ()
 		average_interval = 0;
 	}
 	last_tap = now;
+	return false;
 }
 
 MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
