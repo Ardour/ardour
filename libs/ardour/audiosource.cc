@@ -34,10 +34,11 @@
 #include <algorithm>
 #include <vector>
 
+#include <sys/mman.h>
+
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include <boost/scoped_array.hpp>
 #include <boost/scoped_ptr.hpp>
 
 #include <glibmm/fileutils.h>
@@ -78,6 +79,10 @@ AudioSource::AudioSource (Session& s, string name)
 	, peak_leftover_cnt (0)
 	, peak_leftover_size (0)
 	, peak_leftovers (0)
+	, _first_run (true)
+	, _last_scale (0.0)
+	, _last_map_off (0)
+	, _last_raw_map_length (0)
 {
 }
 
@@ -90,6 +95,10 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 	, peak_leftover_cnt (0)
 	, peak_leftover_size (0)
 	, peak_leftovers (0)
+	, _first_run (true)
+	, _last_scale (0.0)
+	, _last_map_off (0)
+	, _last_raw_map_length (0)
 {
 	if (set_state (node, Stateful::loading_state_version)) {
 		throw failed_constructor();
@@ -331,10 +340,14 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	PeakData::PeakDatum xmax;
 	PeakData::PeakDatum xmin;
 	int32_t to_read;
-	ssize_t nread;
+	const int bufsize = sysconf(_SC_PAGESIZE);
 	framecnt_t zero_fill = 0;
 
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));
+#ifdef PLATFORM_WINDOWS
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NONBLOCK));
+#else
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME | O_NONBLOCK));
+#endif
 
 	if (sfd < 0) {
 		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), peakpath, strerror (errno)) << endmsg;
@@ -383,38 +396,44 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	}
 
 	if (scale == 1.0) {
-
-		off_t offset = 0;
 		off_t first_peak_byte = (start / samples_per_file_peak) * sizeof (PeakData);
-		ssize_t bytes_to_read = sizeof (PeakData)* npeaks;
+		size_t bytes_to_read = sizeof (PeakData)* npeaks;
 		/* open, read, close */
 
 		DEBUG_TRACE (DEBUG::Peaks, "DIRECT PEAKS\n");
 
-		offset = lseek (sfd, first_peak_byte, SEEK_SET);
+		off_t  map_off =  first_peak_byte;
+		off_t  read_map_off = map_off & ~(bufsize - 1);
+		off_t  map_delta = map_off - read_map_off;
+		size_t map_length = bytes_to_read + map_delta;
 
-		if (offset != first_peak_byte) {
-			error << string_compose(_("AudioSource: could not seek to correct location in peak file \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
-			return -1;
+		if (_first_run  || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length  < bytes_to_read)) {
+			peak_cache.reset (new PeakData[npeaks]);
+			boost::scoped_array<PeakData> staging (new PeakData[npeaks]);
+
+			char* addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
+			if (addr ==  MAP_FAILED) {
+				error << string_compose (_("map failed - could not mmap peakfile %1."), peakpath) << endmsg;
+				return -1;
+			}
+
+			memcpy ((void*)peak_cache.get(), (void*)(addr + map_delta), bytes_to_read);
+			munmap (addr, map_length);
+
+			if (zero_fill) {
+				memset (&peak_cache[npeaks], 0, sizeof (PeakData) * zero_fill);
+			}
+
+			_first_run = false;
+			_last_scale = samples_per_visual_peak;
+			_last_map_off = map_off;
+			_last_raw_map_length = bytes_to_read;
 		}
 
-		nread = ::read (sfd, peaks, bytes_to_read);
-
-		if (nread != bytes_to_read) {
-			DEBUG_TRACE (DEBUG::Peaks,  string_compose ("[%1]: Cannot read peaks from peakfile! (read only %2 not %3 at sample %4 = byte %5 )\n"
-			     , _name, nread, npeaks, start, first_peak_byte));
-			return -1;
-		}
-
-		if (zero_fill) {
-			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
-		}
+		memcpy ((void*)peaks, (void*)peak_cache.get(), npeaks * sizeof(PeakData));
 
 		return 0;
 	}
-
-
-	framecnt_t tnp;
 
 	if (scale < 1.0) {
 
@@ -430,20 +449,16 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		    to avoid confusion, I'll refer to the requested peaks as visual_peaks and the peakfile peaks as stored_peaks
 		*/
 
-		const framecnt_t chunksize = (framecnt_t) min (expected_peaks, 65536.0);
-
-		boost::scoped_array<PeakData> staging(new PeakData[chunksize]);
+		const framecnt_t chunksize = (framecnt_t) expected_peaks; // we read all the peaks we need in one hit.
 
 		/* compute the rounded up frame position  */
 
-		framepos_t current_frame = start;
-		framepos_t current_stored_peak = (framepos_t) ceil (current_frame / (double) samples_per_file_peak);
-		framepos_t next_visual_peak  = (framepos_t) ceil (current_frame / samples_per_visual_peak);
+		framepos_t current_stored_peak = (framepos_t) ceil (start / (double) samples_per_file_peak);
+		framepos_t next_visual_peak  = (framepos_t) ceil (start / samples_per_visual_peak);
 		double     next_visual_peak_frame = next_visual_peak * samples_per_visual_peak;
 		framepos_t stored_peak_before_next_visual_peak = (framepos_t) next_visual_peak_frame / samples_per_file_peak;
 		framecnt_t nvisual_peaks = 0;
-		framecnt_t stored_peaks_read = 0;
-		framecnt_t i = 0;
+		uint32_t i = 0;
 
 		/* handle the case where the initial visual peak is on a pixel boundary */
 
@@ -451,67 +466,60 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		/* open ... close during out: handling */
 
-		while (nvisual_peaks < npeaks) {
+		off_t  map_off =  (uint32_t) (ceil (start / (double) samples_per_file_peak)) * sizeof(PeakData);
+		off_t  read_map_off = map_off & ~(bufsize - 1);
+		off_t  map_delta = map_off - read_map_off;
+		size_t raw_map_length = chunksize * sizeof(PeakData);
+		size_t map_length = (chunksize * sizeof(PeakData)) + map_delta;
 
-			if (i == stored_peaks_read) {
+		if (_first_run || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length < raw_map_length)) {
+			peak_cache.reset (new PeakData[npeaks]);
+			boost::scoped_array<PeakData> staging (new PeakData[chunksize]);
 
-				uint32_t       start_byte = current_stored_peak * sizeof(PeakData);
-				tnp = min ((framecnt_t)(_length/samples_per_file_peak - current_stored_peak), (framecnt_t) expected_peaks);
-				to_read = min (chunksize, tnp);
-				ssize_t bytes_to_read = sizeof (PeakData) * to_read;
-
-				DEBUG_TRACE (DEBUG::Peaks, string_compose ("reading %1 bytes from peakfile @ %2\n"
-						, bytes_to_read, start_byte));
-
-
-				off_t offset = lseek (sfd, start_byte, SEEK_SET);
-
-				if (offset != start_byte) {
-					error << string_compose(_("AudioSource: could not seek to correct location in peak file \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
-					return -1;
-				}
-
-				if ((nread = ::read (sfd, staging.get(), bytes_to_read)) != bytes_to_read) {
-
-					off_t fend = lseek (sfd, 0, SEEK_END);
-
-					DEBUG_TRACE (DEBUG::Peaks, string_compose ("[%1]: cannot read peak data from peakfile (%2 peaks instead of %3) (%4) at start_byte = %5 _length = %6 versus len = %7 expected maxpeaks = %8 npeaks was %9"
-					     , _name, (nread / sizeof(PeakData)), to_read, g_strerror (errno), start_byte, _length, fend, ((_length - current_frame)/samples_per_file_peak), npeaks));
-					return -1;
-				}
-				i = 0;
-				stored_peaks_read = nread / sizeof(PeakData);
+			char* addr;
+			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
+			if (addr ==  MAP_FAILED) {
+				error << string_compose (_("map failed - could not mmap peakfile %1."), peakpath) << endmsg;
+				return -1;
 			}
 
-			xmax = -1.0;
-			xmin = 1.0;
+			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
+			munmap (addr, map_length);
 
-			while ((i < stored_peaks_read) && (current_stored_peak <= stored_peak_before_next_visual_peak)) {
+			while (nvisual_peaks < npeaks) {
 
-				xmax = max (xmax, staging[i].max);
-				xmin = min (xmin, staging[i].min);
-				++i;
-				++current_stored_peak;
-				--expected_peaks;
+				xmax = -1.0;
+				xmin = 1.0;
+
+				while ((current_stored_peak <= stored_peak_before_next_visual_peak) && (i < raw_map_length)) {
+
+					xmax = max (xmax, staging[i].max);
+					xmin = min (xmin, staging[i].min);
+					++i;
+					++current_stored_peak;
+				}
+
+				peak_cache[nvisual_peaks].max = xmax;
+				peak_cache[nvisual_peaks].min = xmin;
+				++nvisual_peaks;
+				next_visual_peak_frame =  min ((double) start + cnt, (next_visual_peak_frame + samples_per_visual_peak));
+				stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_frame / samples_per_file_peak;
 			}
 
-			peaks[nvisual_peaks].max = xmax;
-			peaks[nvisual_peaks].min = xmin;
-			++nvisual_peaks;
-			++next_visual_peak;
+			if (zero_fill) {
+				cerr << "Zero fill end of peaks (@ " << npeaks << " with " << zero_fill << endl;
+				memset (&peak_cache[npeaks], 0, sizeof (PeakData) * zero_fill);
+			}
 
-			//next_visual_peak_frame = min ((next_visual_peak * samples_per_visual_peak), (next_visual_peak_frame+samples_per_visual_peak) );
-			next_visual_peak_frame =  min ((double) start+cnt, (next_visual_peak_frame+samples_per_visual_peak) );
-			stored_peak_before_next_visual_peak = (uint32_t) next_visual_peak_frame / samples_per_file_peak;
+			_first_run = false;
+			_last_scale = samples_per_visual_peak;
+			_last_map_off = map_off;
+			_last_raw_map_length = raw_map_length;
 		}
 
-		if (zero_fill) {
-			cerr << "Zero fill end of peaks (@ " << npeaks << " with " << zero_fill << endl;
-			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
-		}
+		memcpy ((void*)peaks, (void*)peak_cache.get(), npeaks * sizeof(PeakData));
 
 	} else {
-
 		DEBUG_TRACE (DEBUG::Peaks, "UPSAMPLE\n");
 
 		/* the caller wants
