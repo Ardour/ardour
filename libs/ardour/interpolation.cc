@@ -81,8 +81,10 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
     if (nframes < 3) {
 	    /* no interpolation possible */
 
-	    for (i = 0; i < nframes; ++i) {
-		    output[i] = input[i];
+	    if (input && output) {
+		    for (i = 0; i < nframes; ++i) {
+			    output[i] = input[i];
+		    }
 	    }
 
 	    return nframes;
