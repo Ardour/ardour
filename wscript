@@ -124,6 +124,7 @@ compiler_flags_dictionaries['clang'] = clang_dict;
 
 clang_darwin_dict = compiler_flags_dictionaries['clang'].copy();
 clang_darwin_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', ]
+clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math', '-fstrength-reduce' ]
 compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict;
 
 def fetch_git_revision ():
