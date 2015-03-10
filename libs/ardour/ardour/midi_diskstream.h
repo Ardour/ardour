@@ -38,6 +38,7 @@
 #include "ardour/diskstream.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/utils.h"
+#include "ardour/interpolation.h"
 
 struct tm;
 
@@ -186,6 +187,8 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	*/
 	MidiBuffer                   _gui_feed_buffer;
 	mutable Glib::Threads::Mutex _gui_feed_buffer_mutex;
+
+	CubicMidiInterpolation interpolation;
 };
 
 }; /* namespace ARDOUR */

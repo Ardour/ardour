@@ -135,6 +135,7 @@ MidiDiskstream::init ()
 	_capture_buf = new MidiRingBuffer<framepos_t>(size);
 
 	_n_channels = ChanCount(DataType::MIDI, 1);
+	interpolation.add_channel_to (0,0);
 }
 
 MidiDiskstream::~MidiDiskstream ()
@@ -522,44 +523,35 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 		playback_distance = nframes;
 
+	} else if (_actual_speed != 1.0f && _target_speed > 0) {
+
+		interpolation.set_speed (_target_speed);
+
+		playback_distance = interpolation.distance  (nframes);
+
 	} else {
-
-		/* XXX: should be doing varispeed stuff here, similar to the code in AudioDiskstream::process */
-
 		playback_distance = nframes;
-
-#ifndef NO_SIMPLE_MIDI_VARISPEED
-		if (_target_speed > 0) {
-			playback_distance = nframes * _target_speed;
-		}
-#endif
-
 	}
 
 	if (need_disk_signal) {
 		/* copy the diskstream data to all output buffers */
 		
 		MidiBuffer& mbuf (bufs.get_midi (0));
-#ifndef NO_SIMPLE_MIDI_VARISPEED
-		get_playback (mbuf, nframes * _target_speed);
-#else
-		get_playback (mbuf, nframes);
-#endif
+		get_playback (mbuf, playback_distance);
 
 		/* leave the audio count alone */
 		ChanCount cnt (DataType::MIDI, 1);
 		cnt.set (DataType::AUDIO, bufs.count().n_audio());
 		bufs.set_count (cnt);
 
-#ifndef NO_SIMPLE_MIDI_VARISPEED
-		if (_target_speed > 0 && playback_distance != nframes) {
+		/* vari-speed */
+		if (_target_speed > 0 && _actual_speed != 1.0f) {
 			MidiBuffer& mbuf (bufs.get_midi (0));
 			for (MidiBuffer::iterator i = mbuf.begin(); i != mbuf.end(); ++i) {
 				MidiBuffer::TimeType *tme = i.timeptr();
-				*tme = (*tme) / _target_speed;
+				*tme = (*tme) * nframes / playback_distance;
 			}
 		}
-#endif
 	}
 
 	return 0;
@@ -568,14 +560,13 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 frameoffset_t
 MidiDiskstream::calculate_playback_distance (pframes_t nframes)
 {
-#ifndef NO_SIMPLE_MIDI_VARISPEED
-	frameoffset_t playback_distance = nframes * _target_speed;
-#else
 	frameoffset_t playback_distance = nframes;
 
-	/* XXX: should be doing varispeed stuff once it's implemented in ::process() above */
+	if (!record_enabled() && _actual_speed != 1.0f && _actual_speed > 0.f) {
+		interpolation.set_speed (_target_speed);
+		playback_distance = interpolation.distance (nframes, false);
+	}
 
-#endif
 	if (_actual_speed < 0.0) {
 		return -playback_distance;
 	} else {

@@ -21,6 +21,7 @@
 #include <cstdio>
 
 #include "ardour/interpolation.h"
+#include "ardour/midi_buffer.h"
 
 using namespace ARDOUR;
 
@@ -149,4 +150,39 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
     }
 
     return i;
+}
+
+framecnt_t
+CubicMidiInterpolation::distance (framecnt_t nframes, bool roll)
+{
+	assert(phase.size() == 1);
+
+	framecnt_t i = 0;
+
+	double acceleration;
+	double distance = 0.0;
+
+	if (nframes < 3) {
+		return nframes;
+	}
+
+	if (_speed != _target_speed) {
+		acceleration = _target_speed - _speed;
+	} else {
+		acceleration = 0.0;
+	}
+
+	distance = phase[0];
+
+	for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
+		distance += _speed + acceleration;
+	}
+
+	if (roll) {
+		phase[0] = distance - floor(distance);
+	}
+
+	i = floor(distance);
+
+	return i;
 }
