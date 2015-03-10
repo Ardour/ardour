@@ -1321,7 +1321,28 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 		}
 
 		DEBUG_TRACE (DEBUG::Transport, string_compose ("send TSC3 with speed = %1\n", _transport_speed));
-		TransportStateChange (); /* EMIT SIGNAL */
+
+		/* throttle signal emissions. 
+		 * when slaved [_last]_transport_speed
+		 * usually changes every cycle (tiny amounts due to DLL).
+		 * Emitting a signal every cycle is overkill and unwarranted.
+		 *
+		 * Using _last_transport_speed is not acceptable,
+		 * since it allows for large changes over a long period 
+		 * of time. Hence we introduce a dedicated variable to keep track
+		 *
+		 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
+		 * for TransportStateChange() here is the ShuttleControl display.
+		 */
+		if (fabsf(_signalled_varispeed - speed) > .002f
+		    // still, signal hard changes to 1.0 and 0.0:
+		    || ( speed == 1.f && _signalled_varispeed != 1.f)
+		    || ( speed == 0.f && _signalled_varispeed != 0.f)
+		   )
+		{
+			TransportStateChange (); /* EMIT SIGNAL */
+			_signalled_varispeed = speed;
+		}
 	}
 }
 

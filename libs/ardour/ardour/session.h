@@ -992,6 +992,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	double                  _transport_speed;
 	double                  _default_transport_speed;
 	double                  _last_transport_speed;
+	double                  _signalled_varispeed;
 	double                  _target_transport_speed;
 	CubicInterpolation       interpolation;
 
