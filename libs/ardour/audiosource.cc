@@ -343,7 +343,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	const int bufsize = sysconf(_SC_PAGESIZE);
 	framecnt_t zero_fill = 0;
 
-#ifdef PLATFORM_WINDOWS
+#if defined (PLATFORM_WINDOWS) || defined ( __APPLE__)
 	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NONBLOCK));
 #else
 	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME | O_NONBLOCK));
