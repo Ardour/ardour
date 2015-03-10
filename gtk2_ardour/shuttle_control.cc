@@ -568,9 +568,9 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 				snprintf (buf, sizeof (buf), "%s", _("Playing"));
 			} else {
 				if (speed < 0.0) {
-					snprintf (buf, sizeof (buf), "<<< %d%%", (int) round (-speed * 100));
+					snprintf (buf, sizeof (buf), "<<< %.1f%%", -speed * 100.f);
 				} else {
-					snprintf (buf, sizeof (buf), ">>> %d%%", (int) round (speed * 100));
+					snprintf (buf, sizeof (buf), ">>> %.1f%%", speed * 100.f);
 				}
 			}
 
