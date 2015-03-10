@@ -86,7 +86,7 @@ SessionEvent::operator new (size_t)
 void
 SessionEvent::operator delete (void *ptr, size_t /*size*/)
 {
-	Pool* p = pool->per_thread_pool ();
+	Pool* p = pool->per_thread_pool (false);
 	SessionEvent* ev = static_cast<SessionEvent*> (ptr);
 
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose (
@@ -100,9 +100,10 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 	}
 #endif
 
-	if (p == ev->own_pool) {
+	if (p && p == ev->own_pool) {
 		p->release (ptr);
 	} else {
+		assert(ev->own_pool);
 		ev->own_pool->push (ev);
 		DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 was wrong thread for this pool, pushed event onto pending list, will be deleted on next alloc from %2 pool size %3 free %4 used %5 pending %6\n",
 		                                                   pthread_name(), ev->own_pool->name(),

@@ -179,10 +179,10 @@ PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned l
  *  calling create_per_thread_pool in the current thread.
  */
 CrossThreadPool*
-PerThreadPool::per_thread_pool ()
+PerThreadPool::per_thread_pool (bool must_exist)
 {
 	CrossThreadPool* p = _key.get();
-	if (!p) {
+	if (!p && must_exist) {
 		fatal << "programming error: no per-thread pool \"" << _name << "\" for thread " << pthread_name() << endmsg;
 		abort(); /*NOTREACHED*/
 	}
