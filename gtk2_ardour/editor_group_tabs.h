@@ -36,7 +36,6 @@ private:
 		return get_height();
 	}
 	void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *);
-	PBD::PropertyList default_properties () const;
 	ARDOUR::RouteList selected_routes () const;
 	void sync_order_keys ();
 };
