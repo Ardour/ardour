@@ -519,8 +519,6 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	//black border
 	cairo_set_source_rgb (cr, 0, 0.0, 0.0);
 	rounded_rectangle (cr, 0, 0, get_width(), get_height(), 4);
-//	cairo_fill_preserve (cr);
-//	cairo_stroke (cr);
 	cairo_fill (cr);
 
 	float speed = 0.0;
@@ -530,23 +528,22 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	}
 
 	/* Marker */
-	float visual_fraction = std::min (1.0f, speed/shuttle_max_speed);
-	float marker_size = get_height()-4;
-	float avail_width = get_width() - marker_size;
-	float x = get_width()*0.5 + visual_fraction * avail_width*0.5;
-	float offset = x - marker_size*0.5;
+	float visual_fraction = std::min (1.0f, speed / shuttle_max_speed);
+	float marker_size = get_height() - 5.0;
+	float avail_width = get_width() - marker_size - 4;
+	float x = get_width() * 0.5 + visual_fraction * avail_width * 0.5;
 //	cairo_set_source_rgb (cr, 0, 1, 0.0);
 	cairo_set_source (cr, pattern);
 	if (speed == 1.0) {
-		cairo_move_to( cr, offset-4, 2);
-		cairo_line_to( cr, offset+4, 2+marker_size*0.5);
-		cairo_line_to( cr, offset-4, 2+marker_size);
-		cairo_line_to( cr, offset-4, 2);
+		cairo_move_to( cr, x, 2.5);
+		cairo_line_to( cr, x + marker_size * .577, 2.5 + marker_size * 0.5);
+		cairo_line_to( cr, x, 2.5 + marker_size);
+		cairo_close_path(cr);
 	} else if ( speed ==0.0 )
-		rounded_rectangle (cr, offset, 4, marker_size-2, marker_size-2, 1);
+		rounded_rectangle (cr, x, 2.5, marker_size, marker_size, 1);
 	else
-		cairo_arc (cr, offset + marker_size*0.5, 2 + marker_size*0.5, marker_size*0.5, 0, 2. * M_PI);
-	cairo_set_line_width (cr, 2);
+		cairo_arc (cr, x, 2.5 + marker_size * .5, marker_size * 0.47, 0, 2.0 * M_PI);
+	cairo_set_line_width (cr, 1.75);
 	cairo_stroke (cr);
 
 	/* speed text */
@@ -585,10 +582,13 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 
 	last_speed_displayed = speed;
 
+	// TODO use a proper pango layout, scale font
 	cairo_set_source_rgb (cr, 0.6, 0.6, 0.6);
-	cairo_text_extents (cr, buf, &extents);
-	cairo_move_to (cr, 10, extents.height + 4);
 	cairo_set_font_size (cr, 13.0);
+	cairo_text_extents (cr, "0|", &extents); // note the descender
+	const float text_ypos = (get_height() + extents.height - 1.) * .5;
+
+	cairo_move_to (cr, 10, text_ypos);
 	cairo_show_text (cr, buf);
 
 	/* style text */
@@ -604,20 +604,12 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	}
 
 	cairo_text_extents (cr, buf, &extents);
-	cairo_move_to (cr, get_width() - (fabs(extents.x_advance) + 5), extents.height + 4);
+	cairo_move_to (cr, get_width() - (fabs(extents.x_advance) + 5), text_ypos);
 	cairo_show_text (cr, buf);
 
-	float _corner_radius = 4.0;
-
-/*	//reflection
-	float rheight = 10.0;
-	Gtkmm2ext::rounded_rectangle (cr, 2, 1, get_width()-4, rheight, _corner_radius);
-	cairo_set_source (cr, shine_pattern);
-	cairo_fill (cr);
-*/
 	if (ARDOUR_UI::config()->get_widget_prelight()) {
 		if (_hovering) {
-			rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, _corner_radius);
+			rounded_rectangle (cr, 1, 1, get_width()-2, get_height()-2, 4.0);
 			cairo_set_source_rgba (cr, 1, 1, 1, 0.2);
 			cairo_fill (cr);
 		}
@@ -648,7 +640,12 @@ ShuttleControl::set_shuttle_units (ShuttleUnits s)
 void
 ShuttleControl::update_speed_display ()
 {
-	if (_session->transport_speed() != last_speed_displayed) {
+	const float speed = _session->transport_speed();
+	if ( (fabsf( speed - last_speed_displayed) > 0.009f) // dead-zone just below 1%, except..
+			|| ( speed == 1.f && last_speed_displayed != 1.f)
+			|| ( speed == 0.f && last_speed_displayed != 0.f)
+	   )
+	{
 		queue_draw ();
 	}
 }
