@@ -545,7 +545,7 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	} else if ( speed ==0.0 )
 		rounded_rectangle (cr, offset, 4, marker_size-2, marker_size-2, 1);
 	else
-		cairo_arc (cr, offset + marker_size*0.5, 2 + marker_size*0.5, marker_size*0.5, 0, 360);
+		cairo_arc (cr, offset + marker_size*0.5, 2 + marker_size*0.5, marker_size*0.5, 0, 2. * M_PI);
 	cairo_set_line_width (cr, 2);
 	cairo_stroke (cr);
 
