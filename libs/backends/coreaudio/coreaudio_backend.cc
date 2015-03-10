@@ -1558,6 +1558,12 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		return 1;
 	}
 
+	if (_reinit_thread_callback || _main_thread != pthread_self()) {
+		_reinit_thread_callback = false;
+		_main_thread = pthread_self();
+		AudioEngine::thread_init_callback (this);
+	}
+
 	if (pthread_mutex_trylock (&_process_callback_mutex)) {
 		// block while devices are added/removed
 #ifndef NDEBUG
@@ -1566,13 +1572,6 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		engine.Xrun();
 		return 1;
 	}
-
-	if (_reinit_thread_callback || _main_thread != pthread_self()) {
-		_reinit_thread_callback = false;
-		_main_thread = pthread_self();
-		AudioEngine::thread_init_callback (this);
-	}
-
 	/* port-connection change */
 	pre_process();
 
