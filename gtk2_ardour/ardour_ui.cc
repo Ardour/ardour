@@ -1141,7 +1141,8 @@ ARDOUR_UI::every_second ()
 void
 ARDOUR_UI::every_point_one_seconds ()
 {
-	shuttle_box->update_speed_display ();
+	// TODO get rid of this..
+	// ShuttleControl is updated directly via TransportStateChange signal
 }
 
 void

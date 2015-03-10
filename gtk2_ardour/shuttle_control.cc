@@ -132,6 +132,15 @@ ShuttleControl::map_transport_state ()
 {
 	float speed = _session->transport_speed ();
 
+	if ( (fabsf( speed - last_speed_displayed) < 0.005f) // dead-zone
+			&& !( speed == 1.f && last_speed_displayed != 1.f)
+			&& !( speed == 0.f && last_speed_displayed != 0.f)
+	   )
+	{
+		return; // nothing to see here, move along.
+	}
+
+	// Q: is there a good reason why we  re-calculate this every time?
 	if (fabs(speed) <= (2*DBL_EPSILON)) {
 		shuttle_fract = 0;
 	} else {
@@ -232,6 +241,7 @@ void
 ShuttleControl::set_shuttle_max_speed (float speed)
 {
 	shuttle_max_speed = speed;
+	last_speed_displayed = -99999999;
 }
 
 bool
@@ -635,19 +645,6 @@ void
 ShuttleControl::set_shuttle_units (ShuttleUnits s)
 {
 	Config->set_shuttle_units (s);
-}
-
-void
-ShuttleControl::update_speed_display ()
-{
-	const float speed = _session->transport_speed();
-	if ( (fabsf( speed - last_speed_displayed) > 0.009f) // dead-zone just below 1%, except..
-			|| ( speed == 1.f && last_speed_displayed != 1.f)
-			|| ( speed == 0.f && last_speed_displayed != 0.f)
-	   )
-	{
-		queue_draw ();
-	}
 }
 
 ShuttleControl::ShuttleControllable::ShuttleControllable (ShuttleControl& s)

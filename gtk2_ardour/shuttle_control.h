@@ -39,8 +39,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	~ShuttleControl ();
 
 	void map_transport_state ();
-	void update_speed_display ();
-        void set_shuttle_fract (double, bool zero_ok = false);
+	void set_shuttle_fract (double, bool zero_ok = false);
 	double get_shuttle_fract () const { return shuttle_fract; }
 	void set_session (ARDOUR::Session*);
 
