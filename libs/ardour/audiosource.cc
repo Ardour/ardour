@@ -34,7 +34,13 @@
 #include <algorithm>
 #include <vector>
 
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+
+#else
 #include <sys/mman.h>
+
+#endif
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -340,10 +346,18 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	PeakData::PeakDatum xmax;
 	PeakData::PeakDatum xmin;
 	int32_t to_read;
+#ifdef PLATFORM_WINDOWS
+	SYSTEM_INFO system_info;
+        GetSystemInfo (&system_info);
+	const int bufsize = system_info.dwAllocationGranularity;;
+#else
 	const int bufsize = sysconf(_SC_PAGESIZE);
+#endif
 	framecnt_t zero_fill = 0;
 
-#if defined (PLATFORM_WINDOWS) || defined ( __APPLE__)
+#ifdef PLATFORM_WINDOWS
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));	
+#elif defined (__APPLE__)
 	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NONBLOCK));
 #else
 	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME | O_NONBLOCK));
@@ -410,8 +424,37 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		if (_first_run  || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length  < bytes_to_read)) {
 			peak_cache.reset (new PeakData[npeaks]);
 			boost::scoped_array<PeakData> staging (new PeakData[npeaks]);
+			char* addr;
+#ifdef PLATFORM_WINDOWS
+			HANDLE file_handle = (HANDLE) _get_osfhandle(int(sfd));
+			HANDLE map_handle;
+			LPVOID view_handle;
+			bool err_flag;
 
-			char* addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
+			map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
+			if (map_handle == NULL) {
+				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), peakpath) << endmsg;
+				return -1;
+			}
+
+			view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
+			if (view_handle == NULL) {
+				error << string_compose (_("map failed - could not map peakfile %1."), peakpath) << endmsg;
+				return -1;
+			}
+
+			addr = (char*) view_handle;
+
+			memcpy ((void*)peak_cache.get(), (void*)(addr + map_delta), bytes_to_read);
+
+			err_flag = UnmapViewOfFile (view_handle);
+			err_flag = CloseHandle(map_handle);
+			if(!err_flag) {
+				error << string_compose (_("unmap failed - could not unmap peakfile %1."), peakpath) << endmsg;
+				return -1;
+			}
+#else
+			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
 			if (addr ==  MAP_FAILED) {
 				error << string_compose (_("map failed - could not mmap peakfile %1."), peakpath) << endmsg;
 				return -1;
@@ -419,7 +462,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 			memcpy ((void*)peak_cache.get(), (void*)(addr + map_delta), bytes_to_read);
 			munmap (addr, map_length);
-
+#endif
 			if (zero_fill) {
 				memset (&peak_cache[npeaks], 0, sizeof (PeakData) * zero_fill);
 			}
@@ -477,6 +520,35 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			boost::scoped_array<PeakData> staging (new PeakData[chunksize]);
 
 			char* addr;
+#ifdef PLATFORM_WINDOWS
+			HANDLE file_handle =  (HANDLE) _get_osfhandle(int(sfd));
+			HANDLE map_handle;
+			LPVOID view_handle;
+			bool err_flag;
+
+			map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
+			if (map_handle == NULL) {
+				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), peakpath) << endmsg;
+				return -1;
+			}
+
+			view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
+			if (view_handle == NULL) {
+				error << string_compose (_("map failed - could not map peakfile %1."), peakpath) << endmsg;
+				return -1;
+			}
+
+			addr = (char *) view_handle;
+
+			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
+
+			err_flag = UnmapViewOfFile (view_handle);
+			err_flag = CloseHandle(map_handle);
+			if(!err_flag) {
+				error << string_compose (_("unmap failed - could not unmap peakfile %1."), peakpath) << endmsg;
+				return -1;
+			}
+#else
 			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
 			if (addr ==  MAP_FAILED) {
 				error << string_compose (_("map failed - could not mmap peakfile %1."), peakpath) << endmsg;
@@ -485,7 +557,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
 			munmap (addr, map_length);
-
+#endif
 			while (nvisual_peaks < npeaks) {
 
 				xmax = -1.0;
