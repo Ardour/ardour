@@ -2,7 +2,12 @@
 
 # we assume this script is <ardour-src>/tools/x-win/package.sh
 pushd "`/usr/bin/dirname \"$0\"`" > /dev/null; this_script_dir="`pwd`"; popd > /dev/null
+cd $this_script_dir
+
+. ../define_versions.sh
+
 cd $this_script_dir/../..
+
 test -f gtk2_ardour/wscript || exit 1
 
 # Defaults (overridden by environment)
@@ -23,9 +28,10 @@ while [ $# -gt 0 ] ; do
 done
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
+# registry keys based on this are used there
 PROGRAM_NAME=Ardour
 PRODUCT_NAME=ardour
-PROGRAM_VERSION=3
+PROGRAM_VERSION=${major_version}
 
 LOWERCASE_DIRNAME=ardour3 # see wscript 'lwrcase_dirname' used for lib/ardour3 and share/ardour3
 STATEFILE_SUFFIX=ardour # see filename_extensions.cc
@@ -41,6 +47,8 @@ PRODUCT_EXE=${PRODUCT_NAME}.exe
 PRODUCT_ICON=${PRODUCT_NAME}.ico
 
 ###############################################################################
+
+echo "Packaging $PRODUCT_ID"
 
 if test "$XARCH" = "x86_64" -o "$XARCH" = "amd64"; then
 	echo "Target: 64bit Windows (x86_64)"
@@ -389,10 +397,6 @@ Section "Uninstall"
   SetShellVarContext all
   DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}"
   DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}"
-# XXX XXX XXX
-# TODO: remove the following line before release. But for now, clean up old version agnnstic registry
-  DeleteRegKey HKLM "Software\\${PROGRAM_NAME}"
-# XXX XXX XXX
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"
