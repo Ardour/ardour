@@ -125,7 +125,6 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 		}
 	}
 
-	CubicInterpolation interpolation;
 
   protected:
 	friend class Session;
@@ -204,6 +203,8 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 	};
 
 	typedef std::vector<ChannelInfo*> ChannelList;
+
+	CubicInterpolation interpolation;
 
 	/* The two central butler operations */
 	int do_flush (RunContext context, bool force = false);
