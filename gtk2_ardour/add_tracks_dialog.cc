@@ -61,7 +61,7 @@ void
 AddTracksDialog::on_show ()
 {
     WavesDialog::on_show ();
-    _tracks_counter_entry.set_position (-1); // set cursor at the last position
+    _tracks_counter_entry.select_region (0, -1);
 }
 
 void
