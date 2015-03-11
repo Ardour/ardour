@@ -82,7 +82,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_led_left (bool yn);
 	void set_distinct_led_click (bool yn);
 
-	void set_layout_ellisize_width (int w);
+	void set_layout_ellipsize_width (int w);
 	void set_layout_font (const Pango::FontDescription&);
 	void set_text_ellipsize (Pango::EllipsizeMode);
 	

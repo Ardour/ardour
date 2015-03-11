@@ -1657,19 +1657,19 @@ MixerStrip::name_changed ()
 void
 MixerStrip::input_button_resized (Gtk::Allocation& alloc)
 {
-	input_button.set_layout_ellisize_width (alloc.get_width() * PANGO_SCALE);
+	input_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
 }
 
 void
 MixerStrip::output_button_resized (Gtk::Allocation& alloc)
 {
-	output_button.set_layout_ellisize_width (alloc.get_width() * PANGO_SCALE);
+	output_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
 }
 
 void
 MixerStrip::name_button_resized (Gtk::Allocation& alloc)
 {
-	name_button.set_layout_ellisize_width (alloc.get_width() * PANGO_SCALE);
+	name_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
 }
 
 bool

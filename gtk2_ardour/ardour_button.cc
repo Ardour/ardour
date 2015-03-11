@@ -1085,7 +1085,7 @@ ArdourButton::action_sensitivity_changed ()
 }
 
 void
-ArdourButton::set_layout_ellisize_width (int w)
+ArdourButton::set_layout_ellipsize_width (int w)
 {
 	if (_layout_ellipsize_width == w) {
 		return;

@@ -176,7 +176,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
 	name_label.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	name_label.set_layout_ellisize_width(48 * PANGO_SCALE);
+	name_label.set_layout_ellipsize_width(48 * PANGO_SCALE);
 	name_label.set_size_request(18, 50);
 	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
@@ -186,7 +186,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_name("tracknumber label");
 	number_label.set_angle(-90.0);
-	number_label.set_layout_ellisize_width(18 * PANGO_SCALE);
+	number_label.set_layout_ellipsize_width(18 * PANGO_SCALE);
 	number_label.set_alignment(.5, .5);
 
 	namebx.set_size_request(18, 52);
@@ -558,7 +558,7 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		int nlh = nh + (_route->is_master() ? tnh : -1);
 		name_label.get_size_request(ignored, prev_height);
 		name_label.set_size_request(18, nlh);
-		name_label.set_layout_ellisize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
+		name_label.set_layout_ellipsize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
 		if (prev_height != nlh) {
 			need_relayout = true;
 		}
