@@ -50,7 +50,7 @@
              height="18"
              winfont="Arial Bold 9"
              macfont="Helvetica Bold 9"
-             horzalignment="end"
+             justify="center"
              noshowall="true"
              visible="false"
              cssname="EditorTrackNameDisplay"
