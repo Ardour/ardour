@@ -131,6 +131,7 @@ PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 PBD::Signal3<void,std::string,std::string,bool> ARDOUR::PluginScanMessage;
 PBD::Signal1<void,int> ARDOUR::PluginScanTimeout;
 PBD::Signal0<void> ARDOUR::GUIIdle;
+PBD::Signal2<void,std::string,std::string> ARDOUR::CopyConfigurationFiles;
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -238,6 +239,23 @@ lotsa_files_please ()
 #endif
 }
 
+static void
+maybe_copy_old_configuration_files ()
+{
+	int version = atoi (X_(PROGRAM_VERSION));
+
+	if (version <= 1) {
+		return;
+	}
+
+	string old_config_dir = user_config_directory (version-1);
+	string current_config_dir = user_config_directory ();
+	
+	if (Glib::file_test (old_config_dir, Glib::FILE_TEST_IS_DIR)) {
+		CopyConfigurationFiles (old_config_dir, current_config_dir); /* EMIT SIGNAL */
+	}
+}
+
 bool
 ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir)
 {
@@ -284,6 +302,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	// allow ardour the absolute maximum number of open files
 	lotsa_files_please ();
 
+	maybe_copy_old_configuration_files ();
+	
 #ifdef HAVE_LRDF
 	lrdf_init();
 #endif

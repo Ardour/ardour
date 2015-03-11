@@ -32,7 +32,7 @@ namespace ARDOUR {
 	 * If @param version is negative, the build-time string PROGRAM_VERSION
 	 * will be used to determine the version number.
 	 *
-	 * @post user_config_directory() exists
+	 * @post user_config_directory() exists IF version was negative.
 	 *
 	 * 
 	 */
