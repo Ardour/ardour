@@ -638,15 +638,6 @@ SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t
 
 	set_header_timeline_position ();
 
-	if (!_broadcast_info->write_to_file (_sndfile)) {
-		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
-		                           _path, _broadcast_info->get_error())
-		      << endmsg;
-		_flags = Flag (_flags & ~Broadcast);
-		delete _broadcast_info;
-		_broadcast_info = 0;
-	}
-
 	return 0;
 }
 
@@ -656,6 +647,7 @@ SndFileSource::set_header_timeline_position ()
 	if (!(_flags & Broadcast)) {
 		return;
 	}
+	assert (_broadcast_info);
 
 	_broadcast_info->set_time_reference (_timeline_position);
 
