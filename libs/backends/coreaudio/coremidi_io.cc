@@ -297,7 +297,7 @@ CoreMidiIo::port_id (uint32_t port, bool input)
 		ss << "system:midi_capture_";
 		SInt32 id;
 		if (noErr == MIDIObjectGetIntegerProperty(_input_endpoints[port], kMIDIPropertyUniqueID, &id)) {
-			ss << (int)id;
+			ss << (unsigned int)id;
 		} else {
 			ss << port;
 		}
@@ -305,7 +305,7 @@ CoreMidiIo::port_id (uint32_t port, bool input)
 		ss << "system:midi_playback_";
 		SInt32 id;
 		if (noErr == MIDIObjectGetIntegerProperty(_output_endpoints[port], kMIDIPropertyUniqueID, &id)) {
-			ss << (int)id;
+			ss << (unsigned int)id;
 		} else {
 			ss << port;
 		}
