@@ -80,6 +80,12 @@ AddRouteDialog::AddRouteDialog ()
 	track_bus_combo.append_text (_("Busses"));
 	track_bus_combo.set_active (0);
 
+	insert_at_combo.append_text (_("Editor Selection"));
+	insert_at_combo.append_text (_("Mixer Selection"));
+	insert_at_combo.append_text (_("End"));
+
+	insert_at_combo.set_active (0);
+
 	VBox* vbox = manage (new VBox);
 	Gtk::Label* l;
 
@@ -149,6 +155,12 @@ AddRouteDialog::AddRouteDialog ()
 	l = manage (new Label (_("Group:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	table2->attach (route_group_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	++n;
+
+	/* New route will be inserted at.. */
+	l = manage (new Label (_("Insert at:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (insert_at_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
 	options_box->pack_start (*table2, false, true);
@@ -536,6 +548,20 @@ AddRouteDialog::group_changed ()
 			route_group_combo.set_active (3);
 		}
 	}
+}
+
+AddRouteDialog::InsertAt
+AddRouteDialog::insert_at ()
+{
+	std::string str = insert_at_combo.get_active_text();
+
+	if (str == _("Editor Selection")) {
+		return EditorSelection;
+	} else if (str == _("Mixer Selection")){
+		return MixerSelection;
+	}
+
+	return End;
 }
 
 bool

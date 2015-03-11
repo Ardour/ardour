@@ -3424,7 +3424,7 @@ ARDOUR_UI::flush_trash ()
 }
 
 void
-ARDOUR_UI::setup_order_hint ()
+ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
 {
 	uint32_t order_hint = 0;
 
@@ -3432,7 +3432,7 @@ ARDOUR_UI::setup_order_hint ()
 	  we want the new routes to have their order keys set starting from 
 	  the highest order key in the selection + 1 (if available).
 	*/
-	if (add_route_dialog->get_transient_for () == mixer->get_toplevel()) {
+	if (place == AddRouteDialog::MixerSelection) {
 		for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
 			if ((*s)->route()->order_key() > order_hint) {
 				order_hint = (*s)->route()->order_key();
@@ -3443,7 +3443,7 @@ ARDOUR_UI::setup_order_hint ()
 			order_hint++;
 		}
 
-	} else {
+	} else if (place == AddRouteDialog::EditorSelection){
 		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
 			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
 			if (tav && tav->route() && tav->route()->order_key() > order_hint) {
@@ -3454,28 +3454,34 @@ ARDOUR_UI::setup_order_hint ()
 		if (!editor->get_selection().tracks.empty()) {
 			order_hint++;
 		}
+	} else {
+		/** AddRouteDialog::End
+		 * an order hint of '0' means place new routes at the end.
+		 * do nothing
+		 */
 	}
 
 	_session->set_order_hint (order_hint);
 
 	/* create a gap in the existing route order keys to accomodate new routes.*/
+	if (order_hint != 0) {
+		boost::shared_ptr <RouteList> rd = _session->get_routes();
+		for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
+			boost::shared_ptr<Route> rt (*ri);
 
-	boost::shared_ptr <RouteList> rd = _session->get_routes();
-	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
-		boost::shared_ptr<Route> rt (*ri);
-			
-		if (rt->is_monitor()) {
-			continue;
-		}
+			if (rt->is_monitor()) {
+				continue;
+			}
 
-		if (rt->order_key () >= order_hint) {
-			rt->set_order_key (rt->order_key () + add_route_dialog->count());
+			if (rt->order_key () >= order_hint) {
+				rt->set_order_key (rt->order_key () + add_route_dialog->count());
+			}
 		}
 	}
 }
 
 void
-ARDOUR_UI::add_route (Gtk::Window* float_window)
+ARDOUR_UI::add_route (Gtk::Window* /* ignored */)
 {
 	int count;
 
@@ -3486,11 +3492,6 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 	if (add_route_dialog->is_visible()) {
 		/* we're already doing this */
 		return;
-	}
-
-	if (float_window) {
-		add_route_dialog->unset_transient_for ();
-		add_route_dialog->set_transient_for (*float_window);
 	}
 
 	ResponseType r = (ResponseType) add_route_dialog->run ();
@@ -3509,7 +3510,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 		return;
 	}
 
-	setup_order_hint();
+	setup_order_hint(add_route_dialog->insert_at());
 
 	string template_path = add_route_dialog->track_template();
 	DisplaySuspender ds;

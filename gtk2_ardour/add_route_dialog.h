@@ -67,6 +67,12 @@ class AddRouteDialog : public ArdourDialog
 	
 	ARDOUR::TrackMode mode();
 	ARDOUR::RouteGroup* route_group ();
+	enum InsertAt {
+		EditorSelection,
+		MixerSelection,
+		End
+	};
+	InsertAt insert_at();
 
   private:
 	Gtk::Entry name_template_entry;
@@ -80,6 +86,8 @@ class AddRouteDialog : public ArdourDialog
 	Gtk::ComboBoxText mode_combo;
 	Gtk::ComboBoxText route_group_combo;
 	InstrumentSelector instrument_combo;
+	Gtk::Label insert_at_label;
+	Gtk::ComboBoxText insert_at_combo;
 
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 
