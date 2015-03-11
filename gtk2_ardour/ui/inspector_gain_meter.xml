@@ -49,7 +49,7 @@
            y="242"
            width="95"
            height="16"
-           horzalignment="end"
+           justify="center"
            winfont="Arial Bold 12"
            macfont="Helvetica Bold 12"
            cssname="EditorTrackNameDisplay"
