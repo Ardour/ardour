@@ -69,8 +69,6 @@ private:
 	void reset_group_peak_display (ARDOUR::RouteGroup* group);
 	void on_peak_display_button (WavesButton*);
 	bool on_master_mute_button_press (GdkEventButton*);
-    void on_clear_solo_button (WavesButton*);
-	void on_global_rec_button (WavesButton*);
     void on_output_connection_mode_changed ();
     bool on_level_meter_button_press (GdkEventButton*);
     bool on_master_event_box_button_press (GdkEventButton*);
@@ -85,15 +83,11 @@ private:
     PBD::ScopedConnectionList _route_state_connections;
     PBD::ScopedConnectionList _session_connections;
     
-    void record_state_changed ();
-    bool check_all_tracks_are_record_armed ();
-    
     // MASTER MUTE staff
     void route_mute_state_changed (void* );
     bool check_all_tracks_are_muted();
     
     // CLEAR SOLO staff
-    void solo_blink (bool onoff);
     bool exists_soloed_track();
         
 	boost::shared_ptr<ARDOUR::Route> _route;
@@ -104,8 +98,6 @@ private:
 	LevelMeterHBox _level_meter;
 	WavesButton& _peak_display_button;
 	WavesButton& _master_mute_button;
-	WavesButton& _clear_solo_button;
-	WavesButton& _global_rec_button;
     Gtk::EventBox& _no_peak_display_box;
     Gtk::HBox& _master_bus_hbox;
     Gtk::HBox& _master_bus_empty_hbox;

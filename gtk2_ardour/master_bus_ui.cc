@@ -103,8 +103,6 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 	, _level_meter (sess)
 	, _peak_display_button (get_waves_button ("peak_display_button"))
 	, _master_mute_button (get_waves_button ("master_mute_button"))
-	, _clear_solo_button (get_waves_button ("clear_solo_button"))
-	, _global_rec_button (get_waves_button ("global_rec_button"))
     , _no_peak_display_box (get_event_box("no_peak_display_box") )
     , _master_bus_hbox (get_h_box("master_bus_hbox") )
     , _master_bus_empty_hbox (get_h_box("master_bus_empty_hbox"))
@@ -118,8 +116,6 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 	_level_meter_home.pack_start (_level_meter, true, true);
 	_peak_display_button.unset_flags (Gtk::CAN_FOCUS);
 	_master_mute_button.unset_flags (Gtk::CAN_FOCUS);
-	_clear_solo_button.unset_flags (Gtk::CAN_FOCUS);
-	_global_rec_button.unset_flags (Gtk::CAN_FOCUS);
     _master_event_box.set_flags (CAN_FOCUS);
     
     _master_event_box.add_events (Gdk::BUTTON_RELEASE_MASK);
@@ -130,8 +126,6 @@ MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 
 	_peak_display_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_peak_display_button));
 	_master_mute_button.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_mute_button_press));
-	_clear_solo_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_clear_solo_button));
-	_global_rec_button.signal_clicked.connect (sigc::mem_fun (*this, &MasterBusUI::on_global_rec_button));
     _master_event_box.signal_button_press_event().connect (sigc::mem_fun (*this, &MasterBusUI::on_master_event_box_button_press));
     
     _editor.get_selection().TracksChanged.connect (sigc::mem_fun(*this, &MasterBusUI::update_master_bus_selection));
@@ -166,8 +160,6 @@ void MasterBusUI::init(ARDOUR::Session *session)
 
     on_output_connection_mode_changed();
     update_master();
-    
-    //ARDOUR_UI::Blink.connect (sigc::mem_fun (*this, &MasterBusUI::solo_blink));
     
     _level_meter.set_session(session);
 }
@@ -416,15 +408,6 @@ void MasterBusUI::connect_route_state_signals(RouteList& tracks)
 {
     for (RouteList::iterator i = tracks.begin(); i != tracks.end(); ++i)
     {
-        boost::shared_ptr<Track> t;
-        
-        if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
-            t->RecordEnableChanged.connect (_route_state_connections,
-                                            invalidator (*this),
-                                            boost::bind (&MasterBusUI::record_state_changed, this),
-                                            gui_context() );
-		}
-        
         (*i)->mute_changed.connect (_route_state_connections,
                                     invalidator (*this),
                                     boost::bind (&MasterBusUI::route_mute_state_changed, this, _1),
@@ -447,7 +430,6 @@ void MasterBusUI::connect_route_state_signals(RouteList& tracks)
 
 void MasterBusUI::update_master()
 {
-    record_state_changed();
     route_mute_state_changed(0);
 }
 
@@ -461,7 +443,7 @@ bool MasterBusUI::check_all_tracks_are_muted()
     
     boost::shared_ptr<RouteList> tracks = session->get_tracks();
     
-    if(tracks->size() == 0)
+    if (tracks->empty ())
         return false;
     
     bool all_tracks_are_muted = true;
@@ -550,68 +532,4 @@ bool MasterBusUI::exists_soloed_track()
     }
     
     return exists_soled_track;
-}
-
-void MasterBusUI::solo_blink (bool onoff)
-{
-    if ( exists_soloed_track() )
-       _clear_solo_button.set_active( onoff );
-    else
-        _clear_solo_button.set_active( false );
-}
-
-void MasterBusUI::on_clear_solo_button (WavesButton*)
-{
-    Session* session = ARDOUR_UI::instance()->the_session();
-    
-    if( !session )
-        return;
-    
-    boost::shared_ptr<RouteList> rl = session->get_tracks ();
-    session->set_solo(rl, false); // set all tracks not soled
-}
-
-// Global record staff
-bool MasterBusUI::check_all_tracks_are_record_armed ()
-{
-    Session* session = ARDOUR_UI::instance()->the_session();
-    
-    if( !session )
-        return false;
-    
-    boost::shared_ptr<RouteList> tracks = session->get_tracks ();
-    
-    if(tracks->size() == 0)
-        return false;
-    
-    bool all_tracks_are_record_armed = true;
-    for (RouteList::iterator i = tracks->begin(); i != tracks->end(); ++i)
-    {
-        if ( !(*i)->record_enabled() )
-        {
-            all_tracks_are_record_armed = false;
-            break;
-        }
-    }
-    
-    return all_tracks_are_record_armed;
-}
-
-void MasterBusUI::record_state_changed ()
-{
-    _global_rec_button.set_active (check_all_tracks_are_record_armed());
-}
-
-void MasterBusUI::on_global_rec_button (WavesButton*)
-{
-    Session* session = ARDOUR_UI::instance()->the_session();
-    
-    if( !session )
-        return;
-    
-    boost::shared_ptr<RouteList> rl = session->get_tracks ();
-    
-    bool all_tracks_are_record_armed = this->check_all_tracks_are_record_armed();    
-    session->set_record_enabled (rl, !all_tracks_are_record_armed);
-    _global_rec_button.set_active(!all_tracks_are_record_armed);
 }
