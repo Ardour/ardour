@@ -490,6 +490,10 @@ MasterBusUI::on_master_mute_button_press (GdkEventButton*)
     if (Config->get_output_auto_connect() & AutoConnectPhysical) // Multi out
     {
         boost::shared_ptr<RouteList> tracks = session->get_tracks();
+        if ( tracks->empty () ) {
+            _master_mute_button.set_active (false);
+            return true;
+        }
         bool all_tracks_are_muted = this->check_all_tracks_are_muted();
         session->set_mute(tracks, !all_tracks_are_muted);
         _master_mute_button.set_active( !all_tracks_are_muted );
