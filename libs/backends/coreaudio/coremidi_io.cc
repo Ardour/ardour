@@ -397,7 +397,7 @@ CoreMidiIo::discover()
 			fprintf(stderr, "Cannot create Midi Output\n");
 			continue;
 		}
-		_rb[_n_midi_in] = new RingBuffer<uint8_t>(1024 * sizeof(MIDIPacket));
+		_rb[_n_midi_in] = new RingBuffer<uint8_t>(32768);
 		_input_queue[_n_midi_in] = CoreMIDIQueue();
 		MIDIPortConnectSource(_input_ports[_n_midi_in], src, (void*) _rb[_n_midi_in]);
 		CFRelease(port_name);
