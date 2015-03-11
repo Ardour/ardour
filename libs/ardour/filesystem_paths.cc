@@ -50,7 +50,7 @@ user_config_directory_name (int version = -1)
 	}
 
 	const string config_dir_name = string_compose ("%1%2", X_(PROGRAM_NAME), version);
-	
+
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
 	return config_dir_name;
 #else
@@ -61,9 +61,7 @@ user_config_directory_name (int version = -1)
 std::string
 user_config_directory (int version)
 {
-	static std::string p;
-
-	if (!p.empty()) return p;
+	std::string p;
 
 #ifdef __APPLE__
 
