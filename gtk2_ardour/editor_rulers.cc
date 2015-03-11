@@ -239,24 +239,42 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 		break;
 
 	case VideoBarItem:
-		ruler_items.push_back (MenuElem (_("Timeline height")));
-		static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
+		/* proper headings would be nice
+		 * but AFAICT the only way to get them will be to define a
+		 * special GTK style for insensitive Elements or subclass MenuItem
+		 */
+		//ruler_items.push_back (MenuElem (_("Timeline height"))); // heading
+		//static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
 		ruler_items.push_back (CheckMenuElem (_("Large"),  sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 6)));
 		if (videotl_bar_height == 6) { static_cast<Gtk::CheckMenuItem*>(&ruler_items.back())->set_active(true);}
 		ruler_items.push_back (CheckMenuElem (_("Normal"), sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 4)));
 		if (videotl_bar_height == 4) { static_cast<Gtk::CheckMenuItem*>(&ruler_items.back())->set_active(true);}
 		ruler_items.push_back (CheckMenuElem (_("Small"),  sigc::bind ( sigc::mem_fun(*this, &Editor::set_video_timeline_height), 3)));
 		if (videotl_bar_height == 3) { static_cast<Gtk::CheckMenuItem*>(&ruler_items.back())->set_active(true);}
+
 		ruler_items.push_back (SeparatorElem ());
 
-		ruler_items.push_back (MenuElem (_("Align Video Track")));
-		static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
-
+		//ruler_items.push_back (MenuElem (_("Align Video Track"))); // heading
+		//static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
 		ruler_items.push_back (CheckMenuElem (_("Lock")));
 		{
 			Gtk::CheckMenuItem* vtl_lock = static_cast<Gtk::CheckMenuItem*>(&ruler_items.back());
 			vtl_lock->set_active(is_video_timeline_locked());
 			vtl_lock->signal_activate().connect (sigc::mem_fun(*this, &Editor::toggle_video_timeline_locked));
+		}
+
+		ruler_items.push_back (SeparatorElem ());
+
+		//ruler_items.push_back (MenuElem (_("Video Monitor"))); // heading
+		//static_cast<MenuItem*>(&ruler_items.back())->set_sensitive(false);
+		ruler_items.push_back (CheckMenuElem (_("Video Monitor")));
+		{
+			Gtk::CheckMenuItem* xjadeo_toggle = static_cast<Gtk::CheckMenuItem*>(&ruler_items.back());
+			if (!ARDOUR_UI::instance()->video_timeline->found_xjadeo()) {
+				xjadeo_toggle->set_sensitive(false);
+			}
+			xjadeo_toggle->set_active(xjadeo_proc_action->get_active());
+			xjadeo_toggle->signal_activate().connect (sigc::bind(sigc::mem_fun(*this, &Editor::toggle_xjadeo_proc), -1));
 		}
 		break;
 
