@@ -132,7 +132,7 @@ PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 PBD::Signal3<void,std::string,std::string,bool> ARDOUR::PluginScanMessage;
 PBD::Signal1<void,int> ARDOUR::PluginScanTimeout;
 PBD::Signal0<void> ARDOUR::GUIIdle;
-PBD::Signal3<void,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
+PBD::Signal3<bool,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -265,19 +265,19 @@ ARDOUR::copy_configuration_files (string const & old_dir, string const & new_dir
 		old_name = Glib::build_filename (old_dir, "templates");
 		new_name = Glib::build_filename (new_dir, "templates");
 
-		copy_files (old_name, new_name);
+		copy_recurse (old_name, new_name);
 
 		old_name = Glib::build_filename (old_dir, "route_templates");
 		new_name = Glib::build_filename (new_dir, "route_templates");
 
-		copy_files (old_name, new_name);
+		copy_recurse (old_name, new_name);
 
 		/* presets */
 
 		old_name = Glib::build_filename (old_dir, "presets");
 		new_name = Glib::build_filename (new_dir, "presets");
-
-		copy_files (old_name, new_name);
+		
+		copy_recurse (old_name, new_name);
 
 		/* presets */
 
@@ -319,7 +319,12 @@ maybe_copy_old_configuration_files ()
 
 	if (Glib::file_test (old_config_dir, Glib::FILE_TEST_IS_DIR)) {
 		string current_config_dir = user_config_directory ();
-		CopyConfigurationFiles (old_config_dir, current_config_dir, version); /* EMIT SIGNAL */
+		boost::optional<bool> r = CopyConfigurationFiles (old_config_dir, current_config_dir, version); /* EMIT SIGNAL */
+		if (r) {
+			if (r.get()) {
+				copy_configuration_files (old_config_dir, current_config_dir, version);
+			}
+		}
 	}
 }
 
