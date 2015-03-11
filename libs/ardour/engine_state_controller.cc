@@ -551,6 +551,10 @@ EngineStateController::_validate_current_device_state()
     // validate sample rate
     std::vector<float> sample_rates = backend->available_sample_rates (_current_state->device_name);
     
+    if (sample_rates.empty() ) {
+        return false;
+    }
+
     // check if session desired sample rate (if it's set) could be used with this device
     if (_session != 0) {
         
@@ -564,7 +568,9 @@ EngineStateController::_validate_current_device_state()
         // check if current sample rate is supported because we have no session desired sample rate value
         if ( !set_new_sample_rate_in_controller (_current_state->sample_rate) ) {
             if ( !set_new_sample_rate_in_controller (backend->default_sample_rate() ) ) {
-                return false;
+                if (!set_new_sample_rate_in_controller (sample_rates.front() ) ) {
+                    return false;
+                }
             }
         }
     }
