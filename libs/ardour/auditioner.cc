@@ -429,7 +429,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 
 		if (!_synth_added && asynth) {
-			int rv = add_processor_by_index(asynth, PreFader, &ps, true);
+			int rv = add_processor (asynth, PreFader, &ps, true);
 			if (rv) {
 				error << _("Failed to load synth for MIDI-Audition.") << endmsg;
 			} else {
