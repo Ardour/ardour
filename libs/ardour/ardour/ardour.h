@@ -51,7 +51,7 @@ namespace ARDOUR {
 	extern LIBARDOUR_API PBD::Signal3<void,std::string,std::string,bool> PluginScanMessage;
 	extern LIBARDOUR_API PBD::Signal1<void,int> PluginScanTimeout;
 	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
-	extern LIBARDOUR_API PBD::Signal2<void,std::string,std::string> CopyConfigurationFiles;
+	extern LIBARDOUR_API PBD::Signal3<void,std::string,std::string,int> CopyConfigurationFiles;
 
 	/**
 	 * @param with_vst true to enable VST Support
@@ -82,6 +82,8 @@ namespace ARDOUR {
 
 	LIBARDOUR_API void setup_fpu ();
 	LIBARDOUR_API std::vector<SyncSource> get_available_sync_options();
+
+	LIBARDOUR_API int copy_configuration_files (std::string const & old_dir, std::string const & new_dir, int old_version);
 }
 
 #endif /* __ardour_ardour_h__ */
