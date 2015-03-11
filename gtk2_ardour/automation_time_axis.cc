@@ -91,12 +91,26 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _automatable (a)
 	, _parameter (p)
 	, _base_rect (new ArdourCanvas::Rectangle (_canvas_display))
-	, _name (nom)
 	, _view (show_regions ? new AutomationStreamView (*this) : 0)
 	, auto_button (X_("")) /* force addition of a label */
 	, _show_regions (show_regions)
 {
+	//concatenate plugin name and param name into the tooltip
+	string tipname = nomparent;
+	if (!tipname.empty()) {
+		tipname += ": ";
+	}
+	tipname += nom;
+	ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
 
+	//plugin name and param name appear on 2 separate lines in the track header
+	tipname = nomparent;
+	if (!tipname.empty()) {
+		tipname += "\n";
+	}
+	tipname += nom;
+	_name = tipname;
+	
 	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, r->name()));
@@ -169,13 +183,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	name_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	name_label.set_name (X_("TrackParameterName"));
 	name_label.set_ellipsize (Pango::ELLIPSIZE_END);
-
-	string tipname = nomparent;
-	if (!tipname.empty()) {
-		tipname += ": ";
-	}
-	tipname += _name;
-	ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
 
 	/* add the buttons */
 	controls_table.set_border_width (1);
