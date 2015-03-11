@@ -27,11 +27,16 @@
 namespace ARDOUR {
 
 	/**
-	 * @return the path to the directory used to store user specific ardour
-	 * configuration files.
+	 * @return the path to the directory used to store user specific 
+	 * configuration files for the given @param version of the program.
+	 * If @param version is negative, the build-time string PROGRAM_VERSION
+	 * will be used to determine the version number.
+	 *
 	 * @post user_config_directory() exists
+	 *
+	 * 
 	 */
-	LIBARDOUR_API std::string user_config_directory ();
+        LIBARDOUR_API std::string user_config_directory (int version = -1);
 
 	/**
 	 * @return the path to the directory used to store user specific
