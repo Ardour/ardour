@@ -98,16 +98,21 @@ user_config_directory (int version)
 
 	p = Glib::build_filename (p, user_config_directory_name (version));
 
-	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
-		if (g_mkdir_with_parents (p.c_str(), 0755)) {
-			error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
-						   p) << endmsg;
+	if (version < 0) {
+		/* Only create the user config dir if the version was negative,
+		   meaning "for the current version.
+		*/
+		if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
+			if (g_mkdir_with_parents (p.c_str(), 0755)) {
+				error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
+				                         p) << endmsg;
+				exit (1);
+			}
+			} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
+			error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
+			                         p) << endmsg;
 			exit (1);
 		}
-	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
-		error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
-					   p) << endmsg;
-		exit (1);
 	}
 
 	return p;
