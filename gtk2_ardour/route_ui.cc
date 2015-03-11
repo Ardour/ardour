@@ -474,7 +474,7 @@ RouteUI::edit_output_configuration ()
 		output_selector->present ();
 	}
 
-	output_selector->set_keep_above (true);
+	//output_selector->set_keep_above (true);
 }
 
 void
@@ -490,7 +490,7 @@ RouteUI::edit_input_configuration ()
 		input_selector->present ();
 	}
 
-	input_selector->set_keep_above (true);
+	//input_selector->set_keep_above (true);
 }
 
 bool
