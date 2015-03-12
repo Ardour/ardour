@@ -1440,8 +1440,6 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 
 	size_t events_read = 0;	
 
-	_playback_buf->skip_to (playback_sample);
-
 	if (loc) {
 		framepos_t effective_start;
 
@@ -1460,6 +1458,8 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 
 			_playback_buf->resolve_tracker (dst, 0);
 		}
+
+		_playback_buf->skip_to (effective_start);
 
 		if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
 			/* end of loop is within the range we are reading, so
@@ -1492,6 +1492,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes);
 		}
 	} else {
+		_playback_buf->skip_to (playback_sample);
 		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
 	}
 
