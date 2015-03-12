@@ -1237,10 +1237,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 				} else if (connection_name.find("system:midi_") == 0) {
 					if (for_input) {
 						// "system:midi_capture_123" -> "123"
-						system_port = connection_name.substr(20);
+						system_port = "M " + connection_name.substr(20);
 					} else {
 						// "system:midi_playback_123" -> "123"
-						system_port = connection_name.substr(21);
+						system_port = "M " + connection_name.substr(21);
 					}
 
 					if (system_ports.empty()) {
