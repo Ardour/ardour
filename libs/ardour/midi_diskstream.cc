@@ -579,6 +579,10 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 {
 	bool need_butler = false;
 
+	if (!_io || !_io->active()) {
+		return false;
+	}
+
 	if (_actual_speed < 0.0) {
 		playback_sample -= playback_distance;
 	} else {
@@ -606,10 +610,33 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 	 * need the butler is done correctly.
 	 */
 	
+	/* furthermore..
+	 *
+	 * Doing heavy GUI operations[1] can stall also the butler.
+	 * The RT-thread meanwhile will happily continue and
+	 * ‘frames_read’ (from buffer to output) will become larger
+	 * than ‘frames_written’ (from disk to buffer).
+	 *
+	 * The disk-stream is now behind..
+	 *
+	 * In those cases the butler needs to be summed to refill the buffer (done now)
+	 * AND we need to skip (frames_read - frames_written). ie remove old events
+	 * before playback_sample from the rinbuffer. (not yet done)
+	 *
+	 * [1] one way to do so is described at #6170.
+	 * For me just popping up the context-menu on a MIDI-track header
+	 * of a track with a large (think beethoven :) midi-region also did the
+	 * trick. The playhead stalls for 2 or 3 sec, until the context-menu shows.
+	 *
+	 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
+	 * and can stall
+	 */
 	if (frames_read <= frames_written) {
 		if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 			need_butler = true;
 		}
+	} else {
+		need_butler = true;
 	}
 
 
@@ -812,16 +839,17 @@ MidiDiskstream::do_refill ()
 
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
-	if ((frames_written - frames_read) >= midi_readahead) {
+	if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
 		return 0;
 	}
 
-	framecnt_t to_read = midi_readahead - (frames_written - frames_read);
+	framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
 
 	//cout << "MDS read for midi_readahead " << to_read << "  rb_contains: "
 	//	<< frames_written - frames_read << endl;
 
-	to_read = (framecnt_t) min ((framecnt_t) to_read, (framecnt_t) (max_framepos - file_frame));
+	to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
+	to_read = min (to_read, (framecnt_t) write_space);
 
 	if (read (file_frame, to_read, reversed)) {
 		ret = -1;
