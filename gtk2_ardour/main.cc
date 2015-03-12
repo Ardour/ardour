@@ -228,23 +228,6 @@ static void console_madness_end () {}
 static void command_line_parse_error (int *argc, char** argv[]) {}
 #endif
 
-static bool
-ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
-{
-	MessageDialog msg (string_compose (_("%1 %2.x has discovered configuration files from %1 %3.x.\n\n"
-	                                     "Would you like to copy them before starting to use the program?\n\n"
-	                                     "\n"
-	                                     "(Note that not all files will be copied, since some are no longer relevant)"),
-	                                   PROGRAM_NAME, PROGRAM_VERSION, version), true);
-
-	msg.add_button (Gtk::Stock::NO, Gtk::RESPONSE_NO);
-	msg.add_button (Gtk::Stock::YES, Gtk::RESPONSE_YES);
-	msg.show_all ();
-
-	return (msg.run() == Gtk::RESPONSE_YES);
-}
-
-
 #if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
 /*
  *  Release build with MSVC uses ardour_main()

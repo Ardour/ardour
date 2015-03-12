@@ -157,6 +157,21 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
+
+static bool
+ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
+{
+	MessageDialog msg (string_compose (_("%1 %2.x has discovered configuration files from %1 %3.x.\n\n"
+	                                     "Would you like to copy the relevant files before starting to use the program?\n\n"
+	                                     "(This will require you to restart %1.)"),
+	                                   PROGRAM_NAME, PROGRAM_VERSION, version), true);
+
+	msg.add_button (Gtk::Stock::NO, Gtk::RESPONSE_NO);
+	msg.show_all ();
+
+	return (msg.run() == Gtk::RESPONSE_OK);
+}
+
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
@@ -223,6 +238,14 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 {
 	Gtkmm2ext::init(localedir);
 
+	if (ARDOUR::check_for_old_configuration_files (boost::bind (ask_about_configuration_copy, _1, _2, _3))) {
+		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
+		msg.run ();
+		/* configuration was modified, exit immediately */
+		_exit (0);
+	}
+
+	
 	splash = 0;
 
 	_numpad_locate_happening = false;
