@@ -60,6 +60,10 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
 		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
 
+		if (this->read_space() < ev_size) {
+			break;;
+		}
+
 		if (ev_time >= end) {
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MRB event @ %1 past end @ %2\n", ev_time, end));
 			break;
@@ -123,6 +127,59 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 
 	return count;
 }
+
+template<typename T>
+size_t
+MidiRingBuffer<T>::skip_to(framepos_t start)
+{
+	if (this->read_space() == 0) {
+		return 0;
+	}
+
+	T                 ev_time;
+	uint32_t          ev_size;
+	size_t            count = 0;
+	const size_t      prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
+
+	while (this->read_space() >= prefix_size) {
+
+		uint8_t peekbuf[prefix_size];
+		this->peek (peekbuf, prefix_size);
+
+		ev_time = *(reinterpret_cast<T*>((uintptr_t)peekbuf));
+		ev_size = *(reinterpret_cast<uint32_t*>((uintptr_t)(peekbuf + sizeof(T) + sizeof (Evoral::EventType))));
+
+		if (ev_time >= start) {
+			return count;
+		}
+
+		if (this->read_space() < ev_size) {
+			continue;
+		}
+
+		this->increment_read_ptr (prefix_size);
+
+		uint8_t status;
+		bool r = this->peek (&status, sizeof(uint8_t));
+		assert (r); // If this failed, buffer is corrupt, all hope is lost
+
+		++count;
+
+		if (ev_size < 8) {
+			this->increment_read_ptr (ev_size);
+		} else {
+			// we only track note on/off, 8 bytes are plenty.
+			uint8_t write_loc[8];
+			bool success = read_contents (ev_size, write_loc);
+			if (success) {
+				_tracker.track(write_loc);
+			}
+		}
+	}
+	return count;
+}
+
+
 
 template<typename T>
 void

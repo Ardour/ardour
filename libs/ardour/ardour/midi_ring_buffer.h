@@ -49,6 +49,7 @@ public:
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
 	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0, bool stop_on_overflow_in_destination=false);
+	size_t skip_to(framepos_t start);
 
 	void dump(std::ostream& dst);
 	void flush (framepos_t start, framepos_t end);

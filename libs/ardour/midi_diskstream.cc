@@ -621,7 +621,7 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 	 *
 	 * In those cases the butler needs to be summed to refill the buffer (done now)
 	 * AND we need to skip (frames_read - frames_written). ie remove old events
-	 * before playback_sample from the rinbuffer. (not yet done)
+	 * before playback_sample from the rinbuffer.
 	 *
 	 * [1] one way to do so is described at #6170.
 	 * For me just popping up the context-menu on a MIDI-track header
@@ -1439,6 +1439,8 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
         // cerr << "----------------\n";
 
 	size_t events_read = 0;	
+
+	_playback_buf->skip_to (playback_sample);
 
 	if (loc) {
 		framepos_t effective_start;
