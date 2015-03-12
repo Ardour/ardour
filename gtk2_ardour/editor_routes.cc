@@ -685,10 +685,6 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
 		row[_columns.name_editable] = true;
 
-		if (!from_scratch) {
-			_editor->selection->add(*x);
-		}
-
 		boost::weak_ptr<Route> wr ((*x)->route());
 
 		(*x)->route()->gui_changed.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::handle_gui_changes, this, _1, _2), gui_context());

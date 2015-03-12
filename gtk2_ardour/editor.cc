@@ -5220,6 +5220,8 @@ Editor::add_routes (RouteList& routes)
 
 	RouteTimeAxisView *rtv;
 	list<RouteTimeAxisView*> new_views;
+	TrackViewList new_selection;
+	bool from_scratch = (track_views.size() == 0);
 
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
@@ -5242,6 +5244,7 @@ Editor::add_routes (RouteList& routes)
 
 		new_views.push_back (rtv);
 		track_views.push_back (rtv);
+		new_selection.push_back (rtv);
 
 		rtv->effective_gain_display ();
 
@@ -5252,6 +5255,11 @@ Editor::add_routes (RouteList& routes)
 	if (new_views.size() > 0) {
 		_routes->routes_added (new_views);
 		_summary->routes_added (new_views);
+	}
+
+	if (!from_scratch) {
+		selection->add (new_selection);
+		begin_selection_op_history();
 	}
 
 	if (show_editor_mixer_when_tracks_arrive) {
