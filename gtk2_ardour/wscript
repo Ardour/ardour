@@ -678,7 +678,7 @@ def build(bld):
     bld.install_files(bld.env['CONFDIR'], 'dark.colors')
 
     # Default export stuff
-    bld.install_files(os.path.join(bld.env['CONFDIR'],' export'), bld.path.ant_glob('export/*.format'))
+    bld.install_files(os.path.join(bld.env['CONFDIR'], 'export'), bld.path.ant_glob('export/*.format'))
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):
