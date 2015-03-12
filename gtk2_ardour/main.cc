@@ -203,20 +203,24 @@ console_madness_end ()
 	}
 }
 
-#if defined(NDEBUG) && !defined(RDC_BUILD))
-// Since we don't ordinarily have access to stdout and stderr with
-// an MSVC app, let the user know we encountered a parsing error.
-static void
-command_line_parse_error (int* argc, char** argv[])
-{
-	Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
-	
-	Gtk::MessageDialog msg (_("\n   Ardour could not understand your command line      "),
-	                                        false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
-	msg.set_title (_("An error was encountered while launching Ardour"));
-	msg.run ();
+static void command_line_parse_error (int *argc, char** argv[]) {}
+
+#elif (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+
+// these are not used here. for MSVC see  gtk2_ardour/msvc/winmain.cc
+static void console_madness_begin () {}
+static void console_madness_end () {}
+
+static void command_line_parse_error (int *argc, char** argv[]) {
+        // Since we don't ordinarily have access to stdout and stderr with
+        // an MSVC app, let the user know we encountered a parsing error.
+        Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
+
+        Gtk::MessageDialog dlgReportParseError (_("\n   Ardour could not understand your command line      "),
+                                                      false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
+        dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
+        dlgReportParseError.run ();
 }
-#endif
 
 #else
 static void console_madness_begin () {}
