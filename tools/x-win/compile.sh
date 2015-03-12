@@ -72,3 +72,7 @@ LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 	$ARDOURCFG \
 	--prefix=${PREFIX}
 ./waf ${CONCURRENCY}
+
+echo " === build complete, creating translations"
+./waf i18n
+echo " === done"

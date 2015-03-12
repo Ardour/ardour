@@ -83,6 +83,9 @@ if ! test -f build/gtk2_ardour/ardour-${BINVERSION}.exe; then
 	echo "*** Please compile ardour ${ARDOURVERSION} first."
 	exit 1
 fi
+
+echo " === bundle to $DESTDIR"
+
 ./waf install
 
 ################################################################################
@@ -156,6 +159,7 @@ if test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
 fi
 
 cp -r $PREFIX/share/${LOWERCASE_DIRNAME} $DESTDIR/share/
+cp -r $PREFIX/share/locale $DESTDIR/share/
 cp -r $PREFIX/etc/${LOWERCASE_DIRNAME}/* $DESTDIR/share/${LOWERCASE_DIRNAME}/
 
 cp COPYING $DESTDIR/share/
@@ -166,6 +170,7 @@ cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
 cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 
 # clean build-dir after depoyment
+echo " === bundle completed, cleaning up"
 ./waf uninstall
 echo " === complete"
 du -sh $DESTDIR
