@@ -73,6 +73,9 @@ LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 	--prefix=${PREFIX}
 ./waf ${CONCURRENCY}
 
+if [ "$(id -u)" = "0" ]; then
+	apt-get -qq -y install gettext
+fi
 echo " === build complete, creating translations"
 ./waf i18n
 echo " === done"
