@@ -1094,8 +1094,11 @@ ArdourButton::set_layout_ellipsize_width (int w)
 	if (!_layout) {
 		return;
 	}
-	if (_layout_ellipsize_width > 0) {
-	_layout->set_width (_layout_ellipsize_width);
+	if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
+		_layout->set_width (_layout_ellipsize_width - 3 * PANGO_SCALE);
+	}
+	if (is_realized ()) {
+		queue_resize ();
 	}
 }
 
@@ -1110,8 +1113,8 @@ ArdourButton::set_text_ellipsize (Pango::EllipsizeMode e)
 		return;
 	}
 	_layout->set_ellipsize(_ellipsis);
-	if (_layout_ellipsize_width > 0) {
-		_layout->set_width (_layout_ellipsize_width);
+	if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
+		_layout->set_width (_layout_ellipsize_width - 3 * PANGO_SCALE);
 	}
 	if (is_realized ()) {
 		queue_resize ();
@@ -1125,8 +1128,8 @@ ArdourButton::ensure_layout ()
 		ensure_style ();
 		_layout = Pango::Layout::create (get_pango_context());
 		_layout->set_ellipsize(_ellipsis);
-		if (_layout_ellipsize_width > 0) {
-			_layout->set_width (_layout_ellipsize_width);
+		if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
+			_layout->set_width (_layout_ellipsize_width - 3* PANGO_SCALE);
 		}
 	}
 }
