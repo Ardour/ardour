@@ -5258,6 +5258,7 @@ Editor::add_routes (RouteList& routes)
 	}
 
 	if (!from_scratch) {
+		selection->tracks.clear();
 		selection->add (new_selection);
 		begin_selection_op_history();
 	}
