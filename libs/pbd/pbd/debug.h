@@ -57,7 +57,11 @@ namespace PBD {
 #define DEBUG_STR(id) __debug_str ## id
 #define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
 #define DEBUG_ENABLED(bits) ((bits) & PBD::debug_bits)
-#define DEBUG_THREAD_SELF 0
+#ifdef PLATFORM_WINDOWS
+#define DEBUG_THREAD_SELF pthread_self().p
+#else
+#define DEBUG_THREAD_SELF pthread_self()
+#endif
 
 #define DEBUG_TIMING_START(bits,td) if ((bits) & PBD::debug_bits) { td.start_timing (); }
 #define DEBUG_TIMING_ADD_ELAPSED(bits,td) if ((bits) & PBD::debug_bits) { td.add_elapsed (); }
@@ -68,11 +72,7 @@ namespace PBD {
 #define DEBUG_STR(a) /* empty */
 #define DEBUG_STR_APPEND(a,b) /* empty */
 #define DEBUG_ENABLED(b) (0)
-#ifdef PLATFORM_WINDOWS
-#define DEBUG_THREAD_SELF pthread_self().p
-#else
-#define DEBUG_THREAD_SELF pthread_self()
-#endif
+#define DEBUG_THREAD_SELF 0
 
 #define DEBUG_TIMING_START(bits,td) /*empty*/
 #define DEBUG_TIMING_ADD_ELAPSED(bits,td) /*empty*/
