@@ -57,7 +57,7 @@ namespace PBD {
 #define DEBUG_STR(id) __debug_str ## id
 #define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
 #define DEBUG_ENABLED(bits) ((bits) & PBD::debug_bits)
-#ifdef PLATFORM_WINDOWS
+#ifdef PTW32_VERSION
 #define DEBUG_THREAD_SELF pthread_self().p
 #else
 #define DEBUG_THREAD_SELF pthread_self()
