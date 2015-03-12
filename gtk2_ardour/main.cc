@@ -119,7 +119,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 	} else {
 
 		/* engine has already run, so this is a mid-session backend death */
-			
+
 		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_secondary_text (string_compose (_("%2 exited unexpectedly, and without notifying %1."),
 							 PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
@@ -132,8 +132,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 static void
 sigpipe_handler (int /*signal*/)
 {
-	/* XXX fix this so that we do this again after a reconnect to the backend
-	 */
+	/* XXX fix this so that we do this again after a reconnect to the backend */
 
 	static bool done_the_backend_thing = false;
 
@@ -158,6 +157,7 @@ IsAConsolePort (HANDLE handle)
 	DWORD mode;
 	return (GetConsoleMode(handle, &mode) != 0);
 }
+
 static void
 console_madness_begin ()
 {
@@ -212,14 +212,14 @@ static void console_madness_begin () {}
 static void console_madness_end () {}
 
 static void command_line_parse_error (int *argc, char** argv[]) {
-        // Since we don't ordinarily have access to stdout and stderr with
-        // an MSVC app, let the user know we encountered a parsing error.
-        Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
+	// Since we don't ordinarily have access to stdout and stderr with
+	// an MSVC app, let the user know we encountered a parsing error.
+	Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
 
-        Gtk::MessageDialog dlgReportParseError (_("\n   Ardour could not understand your command line      "),
-                                                      false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
-        dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
-        dlgReportParseError.run ();
+	Gtk::MessageDialog dlgReportParseError (_("\n   Ardour could not understand your command line      "),
+			false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
+	dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
+	dlgReportParseError.run ();
 }
 
 #else
@@ -281,7 +281,7 @@ int main (int argc, char *argv[])
 #endif
 
 	console_madness_begin();
-	
+
 #if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
 	/* this does some magic that is needed to make GTK and X11 client interact properly.
 	 * the platform dependent code is in windows_vst_plugin_ui.cc
@@ -376,7 +376,7 @@ int main (int argc, char *argv[])
 	pthread_cancel_all ();
 
 	console_madness_end ();
-	
+
 	return 0;
 }
 #if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
