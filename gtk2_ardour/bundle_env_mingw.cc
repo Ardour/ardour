@@ -95,6 +95,8 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 	// Unset GTK_RC_FILES so that only ardour specific files are loaded
 	Glib::unsetenv ("GTK_RC_FILES");
 
+	std::string path;
+
 	if (ARDOUR::translations_are_enabled ()) {
 		path = windows_search_path().to_string();
 		path += "\\locale";
@@ -104,7 +106,6 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 		(*localedir) = strdup (path.c_str());
 	}
 
-	std::string path;
 	const char *cstr;
 	cstr = getenv ("VAMP_PATH");
 	if (cstr) {
