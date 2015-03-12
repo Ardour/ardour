@@ -259,6 +259,7 @@ out:
 		printf ("# Min: %.4f MB/sec Avg: %.4f MB/sec  || Max: %.3f sec \n", min_throughput, bandwidth, max_elapsed/1000000.0);
 		printf ("# Max Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * bandwidth / (4 * 48000.)));
 		printf ("# Sus Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * min_throughput / (4 * 48000.)));
+		printf ("# seeks: %llu: bytes: %llu total_time: %f\n", cnt * nfiles, (nfiles * _read), total_time/1000000.0);
 		printf ("%d %.4f %.4f %.4f %.5f\n", block_size, min_throughput, bandwidth, max_elapsed/1000000.0, stddev/1000000.0);
 	}
 
