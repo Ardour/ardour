@@ -2203,7 +2203,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* USER INTERACTION */
 
-	if (getenv ("ARDOUR_BUNDLED")) {
+	if (
+#ifdef PLATFORM_WINDOWS
+			true
+#else
+			getenv ("ARDOUR_BUNDLED")
+#endif
+	   )
+	{
 		add_option (_("User interaction"), 
 			    new BoolOption (
 				    "enable-translation",
