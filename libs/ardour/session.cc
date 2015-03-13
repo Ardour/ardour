@@ -2923,8 +2923,6 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 void
 Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output_auto_connect, bool save)
 {
-    std::cout << "*-*-*-*-* Adding routes: " << std::endl;
-    long start_time = get_time_measurement();
 	try {
 		PBD::Unwinder<bool> aip (_adding_routes_in_progress, true);
 		add_routes_inner (new_routes, input_auto_connect, output_auto_connect);
@@ -2949,8 +2947,6 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
     update_route_record_state ();
     
 	RouteAdded (new_routes); /* EMIT SIGNAL */
-    long end_time = get_time_measurement();
-    std::cout << "*-*-*-*-* time: " << end_time - start_time << std::endl;
 }
 
 void
