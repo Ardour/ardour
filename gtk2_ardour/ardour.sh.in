@@ -23,7 +23,7 @@ fi
 
 ## Glib atomic test
 
-GLIB=$(ldd @LIBDIR@/ardour-@VERSION@ 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
+GLIB=$(ldd @LIBDIR@/@PROG_EXE_NAME@-@VERSION@ 2> /dev/null | grep glib-2.0 | sed 's/.*=> \([^ ]*\) .*/\1/')
 
 if [ "$GLIB" = "" ]; then
 	echo "WARNING: Could not check your glib-2.0 for mutex locking atomic operations."
@@ -59,6 +59,6 @@ if [ $# -gt 0 ] ; then
     esac
 fi
 
-exec $GDB @LIBDIR@/ardour-@VERSION@ "$@"
+exec $GDB @LIBDIR@/@PROG_EXE_NAME@-@VERSION@ "$@"
 
 
