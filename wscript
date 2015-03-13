@@ -568,6 +568,8 @@ def options(opt):
     autowaf.set_options(opt, debug_by_default=True)
     opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
                     help='The user-visible name of the program being built')
+    opt.add_option('--program-exe-name', type='string', action='store', default='ardour', dest='program_exe_name',
+                    help='The executable name of the program being built')
     opt.add_option ('--trx', action='store_true', default=False, dest='trx_build',
                     help='Whether to build for TRX')
     opt.add_option('--arch', type='string', action='store', dest='arch',
@@ -691,6 +693,7 @@ def configure(conf):
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
     conf.env['MINOR'] = MINOR
+    conf.env['PROGRAM_EXE_NAME'] = Options.options.program_exe_name
     conf.line_just = 52
     autowaf.set_recursive()
     autowaf.configure(conf)
@@ -1082,7 +1085,7 @@ def build(bld):
     bld.path.find_dir ('libs/pbd/pbd')
 
     # set up target directories
-    lwrcase_dirname = 'ardour' + bld.env['MAJOR']
+    lwrcase_dirname = bld.env['PROGRAM_EXE_NAME'] + bld.env['MAJOR']
 
     if bld.is_defined ('TRX_BUILD'):
         lwrcase_dirname = 'trx'
