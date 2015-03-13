@@ -34,7 +34,7 @@
 #include <shlguid.h>   // 'IShellLink'
 #endif
 
-#ifdef HAVE_PORTAUDIO
+#if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
 #include <portaudio.h>
 #endif
 
@@ -373,7 +373,7 @@ ARDOUR::get_jack_coreaudio_device_names (device_map_t& devices)
 void
 ARDOUR::get_jack_portaudio_device_names (device_map_t& devices)
 {
-#ifdef HAVE_PORTAUDIO
+#if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
 	if (Pa_Initialize() != paNoError) {
 		return;
 	}
@@ -947,7 +947,7 @@ ARDOUR::enumerate_midi_options ()
 		midi_options.push_back (make_pair (_("ALSA (JACK1, 0.124 and later)"), alsa_seq_midi_driver_name));
 		midi_options.push_back (make_pair (_("ALSA (JACK2, 1.9.8 and later)"), alsa_raw_midi_driver_name));
 #endif
-#ifdef HAVE_PORTAUDIO
+#if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
 		/* Windows folks: what name makes sense here? Are there other
 		   choices as well ?
 		*/
