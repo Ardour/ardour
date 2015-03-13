@@ -1925,7 +1925,6 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 	}
 
 	ControlPointDialog d (p);
-	ensure_float (d);
 
 	if (d.run () != RESPONSE_ACCEPT) {
 		return;
@@ -1945,7 +1944,6 @@ Editor::edit_notes (MidiRegionView* mrv)
 
 	EditNoteDialog* d = new EditNoteDialog (mrv, s);
 	d->show_all ();
-	ensure_float (*d);
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &Editor::note_edit_done), d));
 }

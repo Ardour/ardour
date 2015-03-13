@@ -196,8 +196,6 @@ Editor::mouse_add_new_tempo_event (framepos_t frame)
 	//this causes compiz to display no border.
 	//tempo_dialog.signal_realize().connect (sigc::bind (sigc::ptr_fun (set_decoration), &tempo_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
 
-	ensure_float (tempo_dialog);
-
 	switch (tempo_dialog.run()) {
 	case RESPONSE_ACCEPT:
 		break;
@@ -237,8 +235,6 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 
 	//this causes compiz to display no border..
 	//meter_dialog.signal_realize().connect (sigc::bind (sigc::ptr_fun (set_decoration), &meter_dialog, Gdk::WMDecoration (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH)));
-
-	ensure_float (meter_dialog);
 
 	switch (meter_dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -290,8 +286,6 @@ Editor::edit_meter_section (MeterSection* section)
 {
 	MeterDialog meter_dialog (*section, _("done"));
 
-	ensure_float (meter_dialog);
-
 	switch (meter_dialog.run()) {
 	case RESPONSE_ACCEPT:
 		break;
@@ -319,8 +313,6 @@ void
 Editor::edit_tempo_section (TempoSection* section)
 {
 	TempoDialog tempo_dialog (*section, _("done"));
-
-	ensure_float (tempo_dialog);
 
 	switch (tempo_dialog.run ()) {
 	case RESPONSE_ACCEPT:
