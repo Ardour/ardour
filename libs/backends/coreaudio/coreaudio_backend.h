@@ -182,8 +182,8 @@ class CoreAudioBackend : public AudioBackend {
 		int set_output_channels (uint32_t);
 		int set_systemic_input_latency (uint32_t);
 		int set_systemic_output_latency (uint32_t);
-		int set_systemic_midi_input_latency (std::string const, uint32_t);
-		int set_systemic_midi_output_latency (std::string const, uint32_t);
+		int set_systemic_midi_input_latency (std::string const, uint32_t) { return 0; }
+		int set_systemic_midi_output_latency (std::string const, uint32_t) { return 0; }
 
 		int reset_device () { return 0; };
 
@@ -196,8 +196,8 @@ class CoreAudioBackend : public AudioBackend {
 		uint32_t     output_channels () const;
 		uint32_t     systemic_input_latency () const;
 		uint32_t     systemic_output_latency () const;
-		uint32_t     systemic_midi_input_latency (std::string const) const;
-		uint32_t     systemic_midi_output_latency (std::string const) const;
+		uint32_t     systemic_midi_input_latency (std::string const) const { return 0; }
+		uint32_t     systemic_midi_output_latency (std::string const) const { return 0; }
 
 		bool can_set_systemic_midi_latencies () const { return false; /* XXX */}
 
@@ -210,9 +210,15 @@ class CoreAudioBackend : public AudioBackend {
 		int set_midi_option (const std::string&);
 		std::string midi_option () const;
 
-		std::vector<DeviceStatus> enumerate_midi_devices () const;
-		int set_midi_device_enabled (std::string const, bool);
-		bool midi_device_enabled (std::string const) const;
+		std::vector<DeviceStatus> enumerate_midi_devices () const {
+			return std::vector<AudioBackend::DeviceStatus> ();
+		}
+		int set_midi_device_enabled (std::string const, bool) {
+			return true;
+		}
+		bool midi_device_enabled (std::string const) const {
+			return false;
+		}
 
 		// really private, but needing static access:
 		int process_callback(uint32_t, uint64_t);
@@ -349,21 +355,6 @@ class CoreAudioBackend : public AudioBackend {
 
 		/* coreaudio specific  */
 		uint32_t name_to_id(std::string) const;
-
-		/* midi settings */
-		struct CoreMidiDeviceInfo {
-			bool     enabled;
-			uint32_t systemic_input_latency;
-			uint32_t systemic_output_latency;
-			CoreMidiDeviceInfo()
-				: enabled (true)
-				, systemic_input_latency (0)
-				, systemic_output_latency (0)
-			{}
-		};
-
-		mutable std::map<std::string, struct CoreMidiDeviceInfo *> _midi_devices;
-		struct CoreMidiDeviceInfo * midi_device_info(std::string const) const;
 
 		/* processing */
 		float  _dsp_load;

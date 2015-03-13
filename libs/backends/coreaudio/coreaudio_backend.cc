@@ -39,7 +39,6 @@ static std::string s_instance_name;
 size_t CoreAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> CoreAudioBackend::_midi_options;
 std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_audio_device_status;
-std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_midi_device_status;
 
 
 /* static class instance access */
@@ -260,24 +259,6 @@ CoreAudioBackend::set_systemic_output_latency (uint32_t sl)
 	return 0;
 }
 
-int
-CoreAudioBackend::set_systemic_midi_input_latency (std::string const device, uint32_t sl)
-{
-	struct CoreMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return -1;
-	nfo->systemic_input_latency = sl;
-	return 0;
-}
-
-int
-CoreAudioBackend::set_systemic_midi_output_latency (std::string const device, uint32_t sl)
-{
-	struct CoreMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return -1;
-	nfo->systemic_output_latency = sl;
-	return 0;
-}
-
 /* Retrieving parameters */
 std::string
 CoreAudioBackend::device_name () const
@@ -327,27 +308,7 @@ CoreAudioBackend::systemic_output_latency () const
 	return _systemic_audio_output_latency;
 }
 
-uint32_t
-CoreAudioBackend::systemic_midi_input_latency (std::string const device) const
-{
-	struct CoreMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return 0;
-	return nfo->systemic_input_latency;
-}
-
-uint32_t
-CoreAudioBackend::systemic_midi_output_latency (std::string const device) const
-{
-	struct CoreMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return 0;
-	return nfo->systemic_output_latency;
-}
-
 /* MIDI */
-struct CoreAudioBackend::CoreMidiDeviceInfo *
-CoreAudioBackend::midi_device_info(std::string const name) const {
-	return 0;
-}
 
 std::vector<std::string>
 CoreAudioBackend::enumerate_midi_options () const
@@ -357,15 +318,6 @@ CoreAudioBackend::enumerate_midi_options () const
 		_midi_options.push_back (_("None"));
 	}
 	return _midi_options;
-}
-
-std::vector<AudioBackend::DeviceStatus>
-CoreAudioBackend::enumerate_midi_devices () const
-{
-	_midi_device_status.clear();
-	std::map<std::string, std::string> devices;
-	//_midi_device_status.push_back (DeviceStatus (_("CoreMidi"), true));
-	return _midi_device_status;
 }
 
 int
@@ -382,23 +334,6 @@ std::string
 CoreAudioBackend::midi_option () const
 {
 	return _midi_driver_option;
-}
-
-int
-CoreAudioBackend::set_midi_device_enabled (std::string const device, bool enable)
-{
-	struct CoreMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return -1;
-	nfo->enabled = enable;
-	return 0;
-}
-
-bool
-CoreAudioBackend::midi_device_enabled (std::string const device) const
-{
-	struct CoreMidiDeviceInfo * nfo = midi_device_info(device);
-	if (!nfo) return false;
-	return nfo->enabled;
 }
 
 void
@@ -1309,6 +1244,7 @@ CoreAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playb
 		PBD::error << _("CoreBackendPort::get_latency_range (): invalid port.") << endmsg;
 		r.min = 0;
 		r.max = 0;
+		return r;
 	}
 	CoreBackendPort* p = static_cast<CoreBackendPort*>(port);
 	assert(p);
@@ -1586,7 +1522,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		CoreMidiBuffer* mbuf = static_cast<CoreMidiBuffer*>((*it)->get_buffer(0));
 		mbuf->clear();
 		uint64_t time_ns;
-		uint8_t data[64]; // match MaxAlsaEventSize in alsa_rawmidi.cc
+		uint8_t data[128]; // matches CoreMidi's MIDIPacket
 		size_t size = sizeof(data);
 		while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
 			pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
