@@ -1013,8 +1013,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (_copy && first_move) {
+	if (_copy && !_made_copy) {
 
+		_made_copy = true;
 		/* duplicate the regionview(s) and region(s) */
 
 		list<DraggingView> new_regionviews;
@@ -1183,6 +1184,10 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 	PlaylistSet modified_playlists;
 	RouteTimeAxisView* new_time_axis_view = 0;	
 
+	if (_copy && !_made_copy) {
+		return;
+	}
+	
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
 
@@ -1614,6 +1619,7 @@ RegionMotionDrag::aborted (bool)
 RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
 	: RegionMotionDrag (e, i, p, v, b)
 	, _copy (c)
+	, _made_copy (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMoveDrag\n");
 

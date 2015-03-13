@@ -418,6 +418,7 @@ private:
 	RouteTimeAxisView* create_destination_time_axis (boost::shared_ptr<ARDOUR::Region>, TimeAxisView* original);
 
 	bool _copy;
+	bool _made_copy;
 	RegionView* _new_region_view;
 };
 
