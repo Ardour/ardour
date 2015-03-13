@@ -316,6 +316,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 	snprintf (buf, sizeof (buf), "%.2f", bpb);
 	bpb_entry.set_text (buf);
 	bpb_entry.select_region (0, -1);
+	bpb_entry.set_alignment (1.0);
 
 	note_types.insert (make_pair (_("whole"), 1.0));
 	strings.push_back (_("whole"));
