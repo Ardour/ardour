@@ -221,7 +221,8 @@ Editor::popup_ruler_menu (framepos_t where, ItemType t)
 
 		break;
 	case TransportMarkerBarItem:
-
+		ruler_items.push_back (MenuElem (_("Make Loop range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_loop), where)));
+		ruler_items.push_back (MenuElem (_("Make Punch range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_punch), where)));
 		break;
 
 	case CdMarkerBarItem:

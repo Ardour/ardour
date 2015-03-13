@@ -678,6 +678,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
 	void mouse_add_new_range (framepos_t);
+	void mouse_add_new_loop (framepos_t);
+	void mouse_add_new_punch (framepos_t);
 	bool choose_new_marker_name(std::string &name);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
