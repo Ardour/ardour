@@ -1,3 +1,5 @@
+gtk-button-images = 0							      # [ Default value: 1 ] Show stock icons on buttons.
+
 style "default" = "medium_text"
 {
   #Original values for reference
