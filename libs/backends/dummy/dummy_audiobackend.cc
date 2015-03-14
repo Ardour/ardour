@@ -819,17 +819,17 @@ DummyAudioBackend::register_system_ports()
 void
 DummyAudioBackend::unregister_ports (bool system_only)
 {
-	size_t i = 0;
 	_system_inputs.clear();
 	_system_outputs.clear();
 	_system_midi_in.clear();
 	_system_midi_out.clear();
-	while (i <  _ports.size ()) {
-		DummyPort* port = _ports[i];
+
+	for (std::vector<DummyPort*>::iterator i = _ports.begin (); i != _ports.end ();) {
+		DummyPort* port = *i;
 		if (! system_only || (port->is_physical () && port->is_terminal ())) {
 			port->disconnect_all ();
 			delete port;
-			_ports.erase (_ports.begin() + i);
+			i = _ports.erase (i);
 		} else {
 			++i;
 		}
