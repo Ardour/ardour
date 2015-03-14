@@ -136,7 +136,6 @@ void
 Editor::session_import_dialog ()
 {
 	SessionImportDialog dialog (_session);
-	ensure_float (dialog);
 	dialog.run ();
 }
 
