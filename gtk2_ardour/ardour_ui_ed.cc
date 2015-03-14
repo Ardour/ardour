@@ -527,7 +527,7 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
 
-	menu_hbox.pack_end (*ev, false, false, 6);
+	menu_hbox.pack_end (*ev, false, false, 2);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);

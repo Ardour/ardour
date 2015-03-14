@@ -106,7 +106,7 @@ ARDOUR_UI::setup_windows ()
 	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
 
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
-	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
+	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 2);
 #else
 	top_packer.pack_start (menu_bar_base, false, false);
 #endif
