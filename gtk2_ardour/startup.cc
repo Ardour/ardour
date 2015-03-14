@@ -73,7 +73,6 @@ ArdourStartup::ArdourStartup ()
 	, monitoring_page_index (-1)
 	, final_page_index (-1)
 {
-	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
 	

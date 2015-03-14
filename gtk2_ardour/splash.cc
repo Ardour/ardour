@@ -129,8 +129,6 @@ Splash::pop_front ()
         if (get_window()) {
                 show ();
         }
-#else
-	set_keep_above (true);
 #endif
 }
 

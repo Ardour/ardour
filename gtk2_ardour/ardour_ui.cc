@@ -489,7 +489,6 @@ the audio backend and save the session."), PROGRAM_NAME);
 
 	MessageDialog msg (*editor, msgstr);
 	pop_back_splash (msg);
-	msg.set_keep_above (true);
 	msg.run ();
 	
 	if (free_reason) {
@@ -1119,7 +1118,6 @@ ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 	prompt_label.show();
 	dimage->show();
 	window.show();
-	window.set_keep_above (true);
 	window.present ();
 
 	ResponseType r = (ResponseType) window.run();
@@ -2609,7 +2607,7 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 	msg.set_name (X_("OpenExistingDialog"));
 	msg.set_title (_("Open Existing Session"));
 	msg.set_wmclass (X_("existing_session"), PROGRAM_NAME);
-	msg.set_position (Gtk::WIN_POS_MOUSE);
+	msg.set_position (Gtk::WIN_POS_CENTER);
 	pop_back_splash (msg);
 
 	switch (msg.run()) {
@@ -3003,7 +3001,6 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		                   Gtk::MESSAGE_INFO,
 		                   BUTTONS_OK);
 
-		msg.set_keep_above (true);
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash (msg);
@@ -3027,8 +3024,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 				   true,
 				   Gtk::MESSAGE_INFO,
 				   BUTTONS_OK);
-		
-		msg.set_keep_above (true);
+
 		msg.set_title (_("Read-only Session"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash (msg);
