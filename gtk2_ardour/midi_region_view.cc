@@ -1665,7 +1665,7 @@ MidiRegionView::note_in_region_range (const boost::shared_ptr<NoteType> note, bo
 	const framecnt_t tick_frames       = Evoral::Beats::tick().to_ticks(trackview.session()->frame_rate());
 	const framepos_t note_start_frames = source_beats_to_region_frames (note->time());
 	const bool       outside           = ((note_start_frames <= -tick_frames) ||
-	                                      (note_start_frames > _region->last_frame()));
+	                                      (note_start_frames >= _region->length()));
 
 	visible = (note->note() >= midi_stream_view()->lowest_note()) &&
 		(note->note() <= midi_stream_view()->highest_note());
