@@ -457,6 +457,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton auditioning_alert_button;
 	ArdourButton solo_alert_button;
 	ArdourButton feedback_alert_button;
+	ArdourButton error_alert_button;
 
 	Gtk::VBox alert_box;
 	Gtk::VBox meter_box;
@@ -472,6 +473,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void sync_blink (bool);
 	void audition_blink (bool);
 	void feedback_blink (bool);
+	void error_blink (bool);
 	
 	void set_flat_buttons();
 
@@ -482,6 +484,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool solo_alert_press (GdkEventButton* ev);
 	bool audition_alert_press (GdkEventButton* ev);
 	bool feedback_alert_press (GdkEventButton *);
+	bool error_alert_press (GdkEventButton *);
 
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
@@ -731,7 +734,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 			const char *msg);
 	Gtk::Label status_bar_label;
         bool status_bar_button_press (GdkEventButton*);
-	Gtk::ToggleButton error_log_button;
 
 	void loading_message (const std::string& msg);
 
@@ -768,6 +770,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void successful_graph_sort ();
 	bool _feedback_exists;
+	bool _error_not_acknowledged;
 
 	void resize_text_widgets ();
 

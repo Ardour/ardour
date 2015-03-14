@@ -580,10 +580,6 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 			cerr << prefix << str << endl;
 		} else {
 			display_message (prefix, prefix_len, ptag, mtag, str);
-			
-			if (!errors->is_visible() && chn != Transmitter::Info) {
-				show_errors ();
-			}
 		}
 	}
 

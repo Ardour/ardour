@@ -96,14 +96,13 @@ ARDOUR_UI::setup_windows ()
 	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	status_bar_label.set_size_request (300, -1);
 	status_bar_packer->pack_start (*status_bar_event_box, true, true, 6);
-	status_bar_packer->pack_start (error_log_button, false, false);
+	status_bar_packer->pack_start (error_alert_button, false, false);
 
 	status_bar_label.show ();
 	status_bar_event_box->show ();
 	status_bar_packer->show ();
-	error_log_button.show ();
+	error_alert_button.show ();
 
-	error_log_button.signal_clicked().connect (mem_fun (*this, &UI::toggle_errors));
 	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
 
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
@@ -175,6 +174,11 @@ ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuff
 	string text;
 
 	UI::display_message (prefix, prefix_len, ptag, mtag, msg);
+
+	if (!strcmp (prefix, _("[ERROR]: ")) || !strcmp (prefix, _("[WARNING]: "))) {
+		_error_not_acknowledged = true;
+	}
+
 #ifdef TOP_MENUBAR
 
 	if (strcmp (prefix, _("[ERROR]: ")) == 0) {
@@ -325,6 +329,8 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
 	feedback_alert_button.set_name ("feedback alert");
 	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
+	error_alert_button.set_name ("error alert");
+	error_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
 
 	alert_box.set_homogeneous (true);
 	alert_box.set_spacing (2);
@@ -536,6 +542,14 @@ ARDOUR_UI::feedback_alert_press (GdkEventButton *)
 	return true;
 }
 
+bool
+ARDOUR_UI::error_alert_press (GdkEventButton*)
+{
+	_error_not_acknowledged = false;
+	UI::show_errors();
+	return true;
+}
+
 void
 ARDOUR_UI::solo_blink (bool onoff)
 {
@@ -608,6 +622,22 @@ ARDOUR_UI::feedback_blink (bool onoff)
 		feedback_alert_button.set_active (false);
 	}
 }
+
+void
+ARDOUR_UI::error_blink (bool onoff)
+{
+	if (_error_not_acknowledged) {
+		if (onoff) {
+			error_alert_button.set_active (true);
+		} else {
+			error_alert_button.set_active (false);
+		}
+	} else {
+		error_alert_button.set_active (false);
+	}
+}
+
+
 
 void
 ARDOUR_UI::set_transport_sensitivity (bool yn)

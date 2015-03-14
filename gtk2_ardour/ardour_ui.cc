@@ -211,6 +211,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, auditioning_alert_button (_("Audition"))
 	, solo_alert_button (_("Solo"))
 	, feedback_alert_button (_("Feedback"))
+	, error_alert_button (_("Errors"))
 
 	, editor_meter(0)
 	, editor_meter_peak_display()
@@ -230,8 +231,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
-
-	, error_log_button (_("Errors"))
 
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
@@ -2288,6 +2287,7 @@ ARDOUR_UI::blink_handler (bool blink_on)
 	sync_blink (blink_on);
 	audition_blink (blink_on);
 	feedback_blink (blink_on);
+	error_blink (blink_on);
 }
 
 void
