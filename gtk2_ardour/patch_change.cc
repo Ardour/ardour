@@ -60,7 +60,8 @@ PatchChange::PatchChange(MidiRegionView&                   region,
 		height,
 		ARDOUR_UI::config()->color ("midi patch change outline"),
 		ARDOUR_UI::config()->color_mod ("midi patch change fill", "midi patch change fill"),
-		ArdourCanvas::Duple (x, y));
+		ArdourCanvas::Duple (x, y),
+		true);
 	
 	CANVAS_DEBUG_NAME (_flag, text);
 

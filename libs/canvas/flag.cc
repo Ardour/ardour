@@ -25,18 +25,20 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Flag::Flag (Canvas* canvas, Distance height, Color outline_color, Color fill_color, Duple position)
+Flag::Flag (Canvas* canvas, Distance height, Color outline_color, Color fill_color, Duple position, bool invert)
 	: Container (canvas)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)
+	, _invert (invert)
 {
 	setup (height, position);
 }
 
-Flag::Flag (Item* parent, Distance height, Color outline_color, Color fill_color, Duple position)
+Flag::Flag (Item* parent, Distance height, Color outline_color, Color fill_color, Duple position, bool invert)
 	: Container (parent)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)
+	, _invert (invert)
 {
 	setup (height, position);
 }
@@ -50,7 +52,6 @@ Flag::setup (Distance height, Duple position)
 
 	_line = new Line (this);
 	_line->set_outline_color (_outline_color);
-	set_height (height);
 
 	_rectangle = new Rectangle (this);
 	_rectangle->set_outline_color (_outline_color);
@@ -58,6 +59,7 @@ Flag::setup (Distance height, Duple position)
 
 	_text->raise_to_top ();
 
+	set_height (height);
 	set_position (position);
 }
 
@@ -76,14 +78,29 @@ Flag::set_text (string const & text)
 
 	Duple flag_size (bbox.get().width() + 10, bbox.get().height() + 4);
 	
-	_text->set_position (Duple (5, 2));
-	_rectangle->set (Rect (0, 0, flag_size.x, flag_size.y));
+	if (_invert) {
+		const Distance h = fabs(_line->y1() - _line->y0());
+		_text->set_position (Duple (5, h - flag_size.y + 2));
+		_rectangle->set (Rect (0, h - flag_size.y, flag_size.x, h));
+	} else {
+		_text->set_position (Duple (5, 2));
+		_rectangle->set (Rect (0, 0, flag_size.x, flag_size.y));
+	}
 }
 
 void
 Flag::set_height (Distance h)
 {
 	_line->set (Duple (0, 0), Duple (0, h));
+
+	if (_invert) {
+		boost::optional<Rect> bbox = _text->bounding_box ();
+		if (bbox) {
+			Duple flag_size (bbox.get().width() + 10, bbox.get().height() + 4);
+			_rectangle->set (Rect (0, h - flag_size.y, flag_size.x, h));
+			_text->set_position (Duple (5, h - flag_size.y + 2));
+		}
+	}
 }
 
 bool
