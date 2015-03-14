@@ -772,6 +772,11 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
+	if (is_master() || is_monitor() || is_auditioner()) {
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change (master, monitor or auditioner)\n", name()));
+		return;
+	}
+
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
 		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, _route_group));
 		return;
