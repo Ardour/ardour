@@ -1299,25 +1299,27 @@ Editor::generic_event_handler (GdkEvent* ev)
         case GDK_MOTION_NOTIFY:
         case GDK_KEY_PRESS:
         case GDK_KEY_RELEASE:
-                gettimeofday (&last_event_time, 0);
-                break;
-	case GDK_LEAVE_NOTIFY:
-		switch (ev->crossing.detail) {
-		case GDK_NOTIFY_UNKNOWN:
-		case GDK_NOTIFY_INFERIOR:
-		case GDK_NOTIFY_ANCESTOR:
-			break; 
-		case GDK_NOTIFY_VIRTUAL:
-		case GDK_NOTIFY_NONLINEAR:
-		case GDK_NOTIFY_NONLINEAR_VIRTUAL:
+			gettimeofday (&last_event_time, 0);
 			break;
-        case GDK_FOCUS_CHANGE:
-            reset_focus();
-            break;
-		}
+		case GDK_LEAVE_NOTIFY:
+			switch (ev->crossing.detail) {
+			case GDK_NOTIFY_UNKNOWN:
+			case GDK_NOTIFY_INFERIOR:
+			case GDK_NOTIFY_ANCESTOR:
+			break; 
+			case GDK_NOTIFY_VIRTUAL:
+			case GDK_NOTIFY_NONLINEAR:
+			case GDK_NOTIFY_NONLINEAR_VIRTUAL:
+			break;
+			}
 		break;
-        default:
-                break;
+		case GDK_FOCUS_CHANGE:
+			if (((GdkEventFocus*)ev)->in) {
+				reset_focus();
+			}
+			break;
+       default:
+			break;
         }
         return false;
 }
@@ -1514,10 +1516,6 @@ Editor::set_session (Session *t)
     ARDOUR_UI::Blink.connect (sigc::mem_fun(*this, &Editor::solo_blink));
     
     update_horizontal_adjustment_limits();
-    
-    // Global record button staff
-    // if new tracks is added, they must effect on Global Record button and Master Mute button
-    _session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Editor::connect_routes_and_update_global_rec_button, this, _1), gui_context());
     
     // one route was removed/added
     _session->RouteAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_progress_dialog_of_changing_tracks, this, _1), gui_context());
@@ -4453,13 +4451,13 @@ Editor::set_samples_per_pixel (framecnt_t spp)
 		return;
 	}
 
+#if !UNLIMITED_TEMPORAL_ZOOM // TRACKS needs no limitations
 	const framecnt_t three_days = 3 * 24 * 60 * 60 * (_session ? _session->frame_rate() : 48000);
 	const framecnt_t lots_of_pixels = 4000;
 
 	/* if the zoom level is greater than what you'd get trying to display 3
 	 * days of audio on a really big screen, then it's too big.
 	 */
-#if !UNLIMITED_TEMPORAL_ZOOM // TRACKS needs no limitations
 	if (spp * lots_of_pixels > three_days) {
 		return;
 	}
@@ -5196,6 +5194,7 @@ Editor::add_routes (RouteList& routes)
 	}
 
 	editor_list_button.set_sensitive (true);
+	connect_routes_and_update_global_rec_button (routes);
 }
 
 void
