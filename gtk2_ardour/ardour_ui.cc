@@ -4241,6 +4241,7 @@ int
 ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
+		// TODO somehow make this the topmost window (above any dialogs currently visible)
 		if (editor) {
 			MessageDialog msg (*editor,  _("Could not reconnect to the Audio/MIDI engine"));
 			msg.run ();
