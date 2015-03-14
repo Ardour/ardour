@@ -532,7 +532,9 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
+#ifndef GTKOSX
 	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), wall_clock);
+#endif
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
 	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
