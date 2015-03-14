@@ -391,7 +391,6 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 
 	case GDK_BUTTON_RELEASE:
 		r = button_release (&ev->button);
-		_note_player.reset();
 		return r;
 
 	case GDK_MOTION_NOTIFY:
@@ -1647,13 +1646,13 @@ MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > n
 		return;
 	}
 
-	_note_player = boost::shared_ptr<NotePlayer>(new NotePlayer(route_ui->midi_track()));
+	NotePlayer* player = new NotePlayer (route_ui->midi_track());
 
 	for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
-		_note_player->add (*n);
+		player->add (*n);
 	}
 
-	_note_player->on ();
+	player->play ();
 }
 
 
@@ -4026,12 +4025,6 @@ MidiRegionView::selection_cleared (MidiRegionView* rv)
 
 	/* Clear our selection in sympathy; but don't signal the fact */
 	clear_selection (false);
-}
-
-void
-MidiRegionView::note_button_release ()
-{
-	_note_player.reset();
 }
 
 ChannelMode

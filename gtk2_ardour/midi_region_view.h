@@ -58,7 +58,6 @@ class AutomationRegionView;
 class MidiCutBuffer;
 class MidiListEditor;
 class EditNoteDialog;
-class NotePlayer;
 class PatchChange;
 class ItemCounts;
 class CursorContext;
@@ -243,8 +242,6 @@ public:
 	};
 
 	MouseState mouse_state() const { return _mouse_state; }
-
-	void note_button_release ();
 
 	struct NoteResizeData {
 		Note                     *note;
@@ -511,8 +508,6 @@ private:
 	PBD::ScopedConnection _mouse_mode_connection;
 
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;
-
-	boost::shared_ptr<NotePlayer> _note_player;
 
         ARDOUR::ChannelMode get_channel_mode() const;
         uint16_t get_selected_channels () const;
