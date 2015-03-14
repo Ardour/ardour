@@ -315,14 +315,11 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	channel_selector_button->set_name ("route button");
 	ARDOUR_UI::instance()->set_tip (channel_selector_button, _("Click to edit channel settings"));
 	
-	/* fixed sized labels to prevent silly nonsense (though obviously,
-	 * they cause their own too)
-	 */
-	set_size_request_to_display_given_text(_playback_channel_status, "Play: somemo", 2, 2); // TODO use _("Play: all/some")
-	set_size_request_to_display_given_text(_capture_channel_status, "Rec: somemo", 2, 2); // TODO use _("Rec: all/some")
-
-	_channel_status_box.pack_start (_playback_channel_status, false, false);
-	_channel_status_box.pack_start (_capture_channel_status, false, false);
+	// Insert expanding space labels to get full width justification
+	_channel_status_box.pack_start (_playback_channel_status, false, false, 2);
+	_channel_status_box.pack_start (*Gtk::manage(new Gtk::Label(" ")), true, true);
+	_channel_status_box.pack_start (_capture_channel_status, false, false, 2);
+	_channel_status_box.pack_start (*Gtk::manage(new Gtk::Label(" ")), true, true);
 	_channel_status_box.pack_end (*channel_selector_button, false, false);
 	_channel_status_box.show_all ();
 
