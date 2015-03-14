@@ -636,7 +636,7 @@ void
 EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	PBD::Unwinder<bool> at (_adding_routes, true);
-
+	bool from_scratch = (_model->children().size() == 0);
 	Gtk::TreeModel::Children::iterator insert_iter = _model->children().end();
 
 	for (Gtk::TreeModel::Children::iterator it = _model->children().begin(); it != _model->children().end(); ++it) {
@@ -716,8 +716,9 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	_display.set_model (_model);
 
 	/* now update route order keys from the treeview/track display order */
-
-	sync_order_keys_from_treeview ();
+	if (!from_scratch) {
+		sync_order_keys_from_treeview ();
+	}
 }
 
 void
