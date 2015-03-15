@@ -70,7 +70,8 @@ class AddRouteDialog : public ArdourDialog
 	enum InsertAt {
 		EditorSelection,
 		MixerSelection,
-		End
+		First,
+		Last
 	};
 	InsertAt insert_at();
 

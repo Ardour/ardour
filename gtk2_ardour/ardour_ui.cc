@@ -3458,6 +3458,8 @@ ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
 
 		if (!mixer->selection().routes.empty()) {
 			order_hint++;
+		} else {
+			return;
 		}
 
 	} else if (place == AddRouteDialog::EditorSelection){
@@ -3470,29 +3472,32 @@ ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
 
 		if (!editor->get_selection().tracks.empty()) {
 			order_hint++;
+		} else {
+			return;
 		}
+
+	} else if (place == AddRouteDialog::First) {
+		order_hint = 0;
 	} else {
-		/** AddRouteDialog::End
-		 * an order hint of '0' means place new routes at the end.
-		 * do nothing
+		/** AddRouteDialog::Last
+		 * not setting an order hint will place new routes last.
 		 */
+		return;
 	}
 
 	_session->set_order_hint (order_hint);
 
 	/* create a gap in the existing route order keys to accomodate new routes.*/
-	if (order_hint != 0) {
-		boost::shared_ptr <RouteList> rd = _session->get_routes();
-		for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
-			boost::shared_ptr<Route> rt (*ri);
+	boost::shared_ptr <RouteList> rd = _session->get_routes();
+	for (RouteList::iterator ri = rd->begin(); ri != rd->end(); ++ri) {
+		boost::shared_ptr<Route> rt (*ri);
 
-			if (rt->is_monitor()) {
-				continue;
-			}
+		if (rt->is_monitor()) {
+			continue;
+		}
 
-			if (rt->order_key () >= order_hint) {
-				rt->set_order_key (rt->order_key () + add_route_dialog->count());
-			}
+		if (rt->order_key () >= order_hint) {
+			rt->set_order_key (rt->order_key () + add_route_dialog->count());
 		}
 	}
 }

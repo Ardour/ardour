@@ -243,7 +243,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
-	void set_order_hint (uint32_t order_hint) {_order_hint = order_hint;};
+	void set_order_hint (int32_t order_hint) {_order_hint = order_hint;};
 	void notify_remote_id_change ();
 	void sync_order_keys ();
 
@@ -1677,7 +1677,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	GraphEdges _current_route_graph;
 
 	uint32_t next_control_id () const;
-	uint32_t _order_hint;
+	int32_t _order_hint;
 	bool ignore_route_processor_changes;
 
 	MidiClockTicker* midi_clock;

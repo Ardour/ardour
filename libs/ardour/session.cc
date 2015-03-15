@@ -266,7 +266,7 @@ Session::Session (AudioEngine &eng,
 	, _step_editors (0)
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
-	, _order_hint (0)
+	, _order_hint (-1)
 	, ignore_route_processor_changes (false)
 	, _scene_changer (0)
 	, _midi_ports (0)
@@ -2554,9 +2554,9 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
         ChanCount existing_outputs;
 	uint32_t order = next_control_id();
 
-	if (_order_hint != 0) {
+	if (_order_hint > -1) {
 		order = _order_hint;
-		_order_hint = 0;
+		_order_hint = -1;
 	}
 
         count_existing_track_channels (existing_inputs, existing_outputs);
