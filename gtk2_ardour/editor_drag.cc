@@ -652,30 +652,27 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 		int n = i->time_axis_view + delta_track;
 		if (i->time_axis_view < 0) {
 			/* already in the drop zone */
-			if (delta_track > 0) {
+			if (delta_track >= 0) {
 				/* downward motion - might be OK if others are still not in the dropzone,
 				   so check at the end of the loop if that is the case.
 				 */
 				continue;
-			} 
-			/* upward motion, and this view is currently in the drop zone. That's fine, so 
-			   we have to set all_in_drop_zone correctly to avoid blocking upward motion.
-			*/
-			all_in_drop_zone = false; 
-			continue;
-		} else {
-
-			all_in_drop_zone = false;
-			
-			if (n < 0) {
-				/* off the top */
-				return false;
 			}
+
+			/* upward motion - set n to the track we would end up in if motion
+			   is successful, and check validity below. */
+			n = _time_axis_views.size() + delta_track;
 		}
 
-		if (n >= int (_time_axis_views.size())) {
+		if (n < 0) {
+			/* off the top */
+			return false;
+		} else if (n >= int (_time_axis_views.size())) {
 			/* downward motion into drop zone. That's fine. */
 			continue;
+		} else {
+			/* target is not in the drop zone */
+			all_in_drop_zone = false;
 		}
 		
 		RouteTimeAxisView const * to = dynamic_cast<RouteTimeAxisView const *> (_time_axis_views[n]);
@@ -749,8 +746,11 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		/* Work out the change in y */
 
 		if (_last_pointer_time_axis_view < 0) {
-			/* we can only move up */
-			delta_time_axis_view = -1;
+			/* We can only move up, set delta to move up the correct number of
+			   tracks from the bottom.  This is necessary because steps may be
+			   skipped if the lowest track is not a valid target, so e.g. delta
+			   -2 may be the first valid value. */
+			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size();
 		} else {
 			delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
 		}
