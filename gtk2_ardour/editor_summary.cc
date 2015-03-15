@@ -639,12 +639,16 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 			xr.first += dx;
 		} else if (_zoom_position == RIGHT || _zoom_position == RIGHT_TOP || _zoom_position == RIGHT_BOTTOM) {
 			xr.second += dx;
+		} else {
+			xr.first = -1; /* do not change */
 		}
 
 		if (_zoom_position == TOP || _zoom_position == LEFT_TOP || _zoom_position == RIGHT_TOP) {
 			yr.first += dy;
 		} else if (_zoom_position == BOTTOM || _zoom_position == LEFT_BOTTOM || _zoom_position == RIGHT_BOTTOM) {
 			yr.second += dy;
+		} else {
+			yr.first = -1; /* do not change y */
 		}
 
 		set_overlays_dirty ();
@@ -799,8 +803,12 @@ EditorSummary::set_editor (pair<double,double> const x, pair<double, double> con
 		return;
 	}
 
-	set_editor_x (x);
-	set_editor_y (y);
+	if (x.first >= 0) {
+		set_editor_x (x);
+	}
+	if (y.first >= 0) {
+		set_editor_y (y);
+	}
 }
 
 /** Set the left of the x range visible in the editor.
@@ -904,7 +912,7 @@ EditorSummary::set_editor_y (pair<double, double> const y)
 		set_dirty ();
 		return;
 	}
-	
+
 	/* Compute current height of tracks between y.first and y.second.  We add up
 	   the total height into `total_height' and the height of complete tracks into
 	   `scale height'.
@@ -946,7 +954,7 @@ EditorSummary::set_editor_y (pair<double, double> const y)
 	/* Height that we will use for scaling; use the whole editor height unless there are not
 	   enough tracks to fill it.
 	*/
-	double const ch = min (total_height, _editor->visible_canvas_height());
+	double const ch = min (total_height, (_editor->visible_canvas_height() - _editor->get_trackview_group()->canvas_origin().y));
 
 	/* hence required scale factor of the complete tracks to fit the required y range;
 	   the amount of space they should take up divided by the amount they currently take up.
