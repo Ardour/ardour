@@ -1013,7 +1013,7 @@ EngineControl::device_changed ()
 			if (0 == period) {
 				period = backend->default_buffer_size(device_name);
 			}
-			buffer_size_combo.set_active_text (bufsize_as_string (period));
+			set_active_text_if_present (buffer_size_combo, bufsize_as_string (period));
 			show_buffer_duration ();
 		} else {
 			buffer_size_combo.set_sensitive (false);
@@ -1247,7 +1247,7 @@ EngineControl::maybe_display_saved_state ()
 		if (!_desired_sample_rate) {
 			sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 		}
-		buffer_size_combo.set_active_text (bufsize_as_string (state->buffer_size));
+		set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
 		/* call this explicitly because we're ignoring changes to
 		   the controls at this point.
 		 */
@@ -1465,7 +1465,7 @@ EngineControl::set_state (const XMLNode& root)
 			driver_combo.set_active_text ((*i)->driver);
 			device_combo.set_active_text ((*i)->device);
 			sample_rate_combo.set_active_text (rate_as_string ((*i)->sample_rate));
-			buffer_size_combo.set_active_text (bufsize_as_string ((*i)->buffer_size));
+			set_active_text_if_present (buffer_size_combo, bufsize_as_string ((*i)->buffer_size));
 			input_latency.set_value ((*i)->input_latency);
 			output_latency.set_value ((*i)->output_latency);
 			midi_option_combo.set_active_text ((*i)->midi_option);
@@ -1784,6 +1784,8 @@ EngineControl::get_buffer_size () const
 	uint32_t samples;
 
 	if (sscanf (txt.c_str(), "%d", &samples) != 1) {
+		fprintf(stderr, "Find a trout and repeatedly slap the nearest C++ who throws exceptions without catching them.\n");
+		fprintf(stderr, "Ardour will likely crash now, giving you time to get the trout.\n");
 		throw exception ();
 	}
 
@@ -2175,7 +2177,7 @@ EngineControl::engine_running ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
-	buffer_size_combo.set_active_text (bufsize_as_string (backend->buffer_size()));
+	set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size()));
 	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
 
 	buffer_size_combo.set_sensitive (true);
