@@ -77,6 +77,8 @@ ArdourButton::ArdourButton (Element e)
 	, text_inactive_color(0)
 	, led_active_color(0)
 	, led_inactive_color(0)
+	, led_custom_color (0)
+	, use_custom_led_color (false)
 	, convex_pattern (0)
 	, concave_pattern (0)
 	, led_inset_pattern (0)
@@ -113,6 +115,8 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, text_inactive_color(0)
 	, led_active_color(0)
 	, led_inactive_color(0)
+	, led_custom_color (0)
+	, use_custom_led_color (false)
 	, convex_pattern (0)
 	, concave_pattern (0)
 	, led_inset_pattern (0)
@@ -207,6 +211,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	} else {
 		text_color = text_inactive_color;
 		led_color = led_inactive_color;
+	}
+
+	if (use_custom_led_color) {
+		led_color = led_custom_color;
 	}
 
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
