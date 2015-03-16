@@ -125,8 +125,7 @@ ArdourStartup::required ()
 std::string
 ArdourStartup::been_here_before_path ()
 {
-	// XXXX use more specific version so we can catch upgrades
-	return Glib::build_filename (user_config_directory (), ".a3");
+	return Glib::build_filename (user_config_directory (), ".a" PROGRAM_VERSION);
 }
 
 void

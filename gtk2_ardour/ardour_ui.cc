@@ -885,6 +885,50 @@ ARDOUR_UI::starting ()
 			}
 		}
 
+#ifdef NO_PLUGIN_STATE
+
+		ARDOUR::RecentSessions rs;
+		ARDOUR::read_recent_sessions (rs);
+
+		string path = Glib::build_filename (user_config_directory(), ".iknowaboutfreeversion");
+		
+		if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS) && !rs.empty()) {
+			
+			/* already used Ardour, have sessions ... warn about plugin state */
+			
+			ArdourDialog d (_("Free/Demo Version Warning"), true);
+			Label l;
+			LinkButton b (string_compose (_("Subscribe and support development of %1"), PROGRAM_NAME));
+			CheckButton c (_("Don't warn me about this again"));
+			
+			l.set_markup (string_compose (_("<span weight=\"bold\" size=\"large\">%1</span>\n\n<b>%2</b>\n\n<i>%3</i>\n\n%4"),
+			                              string_compose (_("This is a free/demo version of %1"), PROGRAM_NAME),
+			                              _("It will not restore OR save any plugin settings"),
+			                              _("If you load an existing session with plugin settings\n"
+			                                "they will not be used and will be lost."),
+			                              _("To get full access to updates without this limitation\n"
+			                                "consider become a subscriber for a low cost every month")));
+			l.set_justify (JUSTIFY_CENTER);
+			
+			b.set_uri (X_("https://community.ardour.org/s/subscribe "));
+			
+			d.get_vbox()->pack_start (l, true, true);
+			d.get_vbox()->pack_start (b, false, false, 12);
+			d.get_vbox()->pack_start (c, false, false, 12);
+			
+			d.add_button (_("Quit now"), RESPONSE_CANCEL);
+			d.add_button (string_compose (_("Continue using %1"), PROGRAM_NAME), RESPONSE_OK);
+			
+			d.show_all ();
+
+			c.signal_toggled().connect (sigc::hide_return (sigc::bind (sigc::ptr_fun (toggle_file_existence), path)));
+			
+			if (d.run () != RESPONSE_OK) {
+				_exit (0);
+			}
+		}
+#endif
+			
 		/* go get a session */
 
 		const bool new_session_required = (ARDOUR_COMMAND_LINE::new_session || brand_new_user);
