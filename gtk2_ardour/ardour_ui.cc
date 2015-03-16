@@ -908,7 +908,7 @@ ARDOUR_UI::starting ()
 			                              _("If you load an existing session with plugin settings\n"
 			                                "they will not be used and will be lost."),
 			                              _("To get full access to updates without this limitation\n"
-			                                "consider become a subscriber for a low cost every month")));
+			                                "consider becoming a subscriber for a low cost every month.")));
 			l.set_justify (JUSTIFY_CENTER);
 			
 			b.set_uri (X_("https://community.ardour.org/s/subscribe "));
