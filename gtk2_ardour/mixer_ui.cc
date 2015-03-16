@@ -473,6 +473,17 @@ Mixer_UI::reset_remote_control_ids ()
 	uint32_t invisible_key = UINT32_MAX;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+
+		/* skip two special values */
+		
+		if (rid == Route::MasterBusRemoteControlID) {
+			rid++;
+		}
+		
+		if (rid == Route::MonitorBusRemoteControlID) {
+			rid++;
+		}
+
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		bool visible = (*ri)[track_columns.visible];
 

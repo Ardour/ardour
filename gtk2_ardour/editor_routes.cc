@@ -871,9 +871,18 @@ EditorRoutes::reset_remote_control_ids ()
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 
+		/* skip two special values */
+		
+		if (rid == Route::MasterBusRemoteControlID) {
+			rid++;
+		}
+		
+		if (rid == Route::MonitorBusRemoteControlID) {
+			rid++;
+		}
+
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 		bool visible = (*ri)[_columns.visible];
-
 
 		if (!route->is_master() && !route->is_monitor()) {
 
