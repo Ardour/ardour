@@ -484,4 +484,17 @@ tmp_writable_directory (const char* domain, const string& prefix)
 	return new_test_dir;
 }
 
+int
+toggle_file_existence (string const & path)
+{
+	if (Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+		return g_unlink (path.c_str());
+	} 
+
+	int fd = g_open (path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
+	GError* err;
+	g_close (fd, &err);
+	return !(fd >= 0);
+}
+
 } // namespace PBD
