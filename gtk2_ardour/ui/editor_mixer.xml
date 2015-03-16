@@ -265,12 +265,10 @@
           </Vbox>
         </VBox>
       </VBox>
-      <Icon id="rec_enable_indicator_on"
-            source="rec_enable_indicator_on"
-            ui.orphan="true"/>
-      <Icon id="rec_enable_indicator_off"
-            source="rec_enable_indicator_off"
-            ui.orphan="true"/>
+      <EventBox id="rec_enable_indicator_on"
+                ui.orphan="true"/>
+      <EventBox id="rec_enable_indicator_off"
+                ui.orphan="true"/>
     </VBox>
     <EventBox bgnormal="#000000"
               width="2"/>

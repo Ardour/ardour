@@ -124,10 +124,8 @@
       _prelighticon="time_axis_playlist"
       ui.orphan="true"/>
   <Button id="master_mute_button" ui.orphan="true"/>
-  <Icon id="rec_enable_indicator_on"
-        source="rec_enable_indicator_on"
-        ui.orphan="true"/>
-  <Icon id="rec_enable_indicator_off"
-        source="rec_enable_indicator_off"
-        ui.orphan="true"/>
+  <EventBox id="rec_enable_indicator_on"
+            ui.orphan="true"/>
+  <EventBox id="rec_enable_indicator_off"
+            ui.orphan="true"/>
 </RouteUI>

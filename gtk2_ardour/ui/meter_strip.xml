@@ -1,34 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <RouteUI gainmeterscript="meter_strip_gain_meter.xml">
-  <EventBox id="panners_home" bgnormal="#383838" bgactive="#424242" height="59" ui.orphan="true"/>
+  <EventBox id="panners_home"
+            bgnormal="#383838"
+            bgactive="#424242"
+            height="59"
+            ui.orphan="true"/>
   <HBox>
     <EventBox bgnormal="#383838" bgactive="#424242">
       <VBox>
         <HBox id="level_meter_home"/>
         <Vbox>
           <HBox id="gain_meter_home"/>
-          <EventBox bgnormal="#383838" bgactive="#424242">
+          <EventBox bgnormal="#383838"
+                    bgactive="#424242">
             <VBox>
               <HBox>
-                <Icon id="rec_enable_indicator_on"
-                            source="rec_enable_indicator_on"
-                            visible="false"
-                            noshowall="true"/>
-                
-                <Icon id="rec_enable_indicator_off"
-                            source="rec_enable_indicator_off"
-                            visible="false"
-                            noshowall="true"/>
-                
+                <EventBox id="rec_enable_indicator_on"
+                          width="38"
+                          height="3"
+                          bgnormal="#ED1C24"
+                          bgactive="#ED1C24"
+                          visible="false"
+                          noshowall="true"/>
+                <EventBox id="rec_enable_indicator_off"
+                          width="38"
+                          height="3"
+                          bgnormal="#000000"
+                          bgactive="#000000"
+                          visible="false"
+                          noshowall="true"/>
                 <Button id="rec_enable_button"
-                            width="19"
-                            height="13"
-                            ui.orphan="true"/>
+                        width="19"
+                        height="13"
+                        ui.orphan="true"/>
                 <Button id="monitor_input_button"
-                            width="19"
-                            height="13"
-                            ui.orphan="true"/>
+                        width="19"
+                        height="13"
+                        ui.orphan="true"/>
               </HBox>
               <HBox>
                 <Button id="mute_button"
@@ -36,13 +45,13 @@
                             height="13"
                             ui.orphan="true"/>
                 <Button id="solo_button"
-                            width="19"
-                            height="13"
-                            ui.orphan="true"/>
+                        width="19"
+                        height="13"
+                        ui.orphan="true"/>
               </HBox>
-              
+
               <EventBox id="name_label_home">
-              <HBox>
+                <HBox>
                   <Button id="name_button"
                           width="38"
                           height="24"
@@ -51,10 +60,10 @@
                           fghover="#ffffff"
                           winfont="Arial 8"
                           macfont="Helvetica 8"/>
-                    <EventBox id="name_entry_eventbox"
-                              width="37"
-                              height="24"
-                              visible="false">
+                  <EventBox id="name_entry_eventbox"
+                            width="37"
+                            height="24"
+                            visible="false">
                     <FocusEntry id="name_entry"
                                 width="38"
                                 height="24"
@@ -67,10 +76,10 @@
                                 textcolorselected="#ffffff"
                                 noshowall="true"
                                 visible="false"/>
-                    </EventBox>
-              </HBox>
+                  </EventBox>
+                </HBox>
               </EventBox>
-                
+
               <EventBox bgnormal="#000000"
                         bgactive="#000000"
                         height="1"/>

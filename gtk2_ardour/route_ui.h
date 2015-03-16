@@ -137,8 +137,8 @@ class RouteUI : public Gtk::EventBox, public WavesUI, public virtual AxisView
 	WavesButton& monitor_input_button;
     
     /* this indicator used just in meterBridge */
-    Gtk::Image& rec_enable_indicator_on;
-    Gtk::Image& rec_enable_indicator_off;
+    Gtk::Widget& rec_enable_indicator_on;
+    Gtk::Widget& rec_enable_indicator_off;
 	
 	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
