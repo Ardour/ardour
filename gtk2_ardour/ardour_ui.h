@@ -770,7 +770,15 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void successful_graph_sort ();
 	bool _feedback_exists;
-	bool _error_not_acknowledged;
+
+	enum ArdourLogLevel {
+		LogLevelNone = 0,
+		LogLevelInfo,
+		LogLevelWarning,
+		LogLevelError
+	};
+
+	ArdourLogLevel _log_not_acknowledged;
 
 	void resize_text_widgets ();
 
