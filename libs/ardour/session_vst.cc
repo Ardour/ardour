@@ -81,11 +81,11 @@ intptr_t Session::vst_callback (
 	if (effect && effect->user) {
 		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
-		SHOW_CALLBACK ("am callback 0x%p, opcode = %d, plugin = \"%s\" ", DEBUG_THREAD_SELF, opcode, plug->name());
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d, plugin = \"%s\" ", (void*) DEBUG_THREAD_SELF, opcode, plug->name());
 	} else {
 		plug = 0;
 		session = 0;
-		SHOW_CALLBACK ("am callback 0x%p, opcode = %d", DEBUG_THREAD_SELF, opcode);
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d", (void*) DEBUG_THREAD_SELF, opcode);
 	}
 
 	switch(opcode){
