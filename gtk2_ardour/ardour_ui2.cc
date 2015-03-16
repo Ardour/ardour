@@ -96,12 +96,10 @@ ARDOUR_UI::setup_windows ()
 	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	status_bar_label.set_size_request (300, -1);
 	status_bar_packer->pack_start (*status_bar_event_box, true, true, 6);
-	status_bar_packer->pack_start (error_alert_button, false, false);
 
 	status_bar_label.show ();
 	status_bar_event_box->show ();
 	status_bar_packer->show ();
-	error_alert_button.show ();
 
 	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
 

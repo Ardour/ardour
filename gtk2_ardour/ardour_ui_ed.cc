@@ -515,10 +515,8 @@ ARDOUR_UI::build_menu_bar ()
 		disk_space = true;
 	}
 
-#ifndef TOP_MENUBAR
 	hbox->pack_end (error_alert_button, false, false, 2);
-#endif
-	
+
 	hbox->pack_end (wall_clock_label, false, false, 2);
 	hbox->pack_end (disk_space_label, false, false, 4);
 	hbox->pack_end (cpu_load_label, false, false, 4);
