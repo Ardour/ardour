@@ -491,10 +491,8 @@ toggle_file_existence (string const & path)
 		return g_unlink (path.c_str());
 	} 
 
-	int fd = g_open (path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
-	GError* err;
-	g_close (fd, &err);
-	return !(fd >= 0);
+	PBD::ScopedFileDescriptor fd = g_open (path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
+	return !((int) fd >= 0);
 }
 
 } // namespace PBD
