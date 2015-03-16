@@ -19,6 +19,7 @@
 */
 
 #include <map>
+#include <algorithm>
 
 #include <gtk/gtkpaned.h>
 #include <gtk/gtk.h>
@@ -304,6 +305,39 @@ Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& str
 	for (i = strings.begin(); i != strings.end(); ++i) {
 		cr.append_text (*i);
 	}
+}
+
+void
+Gtkmm2ext::get_popdown_strings (Gtk::ComboBoxText& cr, std::vector<std::string>& strings)
+{
+	strings.clear ();
+	Glib::RefPtr<const Gtk::TreeModel> m = cr.get_model();
+	if (!m) {
+		return;
+	}
+	for(Gtk::TreeModel::iterator i = m->children().begin(); i != m->children().end(); ++i) {
+		Glib::ustring txt;
+		(*i)->get_value(0, txt);
+		strings.push_back (txt);
+	}
+}
+
+bool
+Gtkmm2ext::contains_value (Gtk::ComboBoxText& cr, const std::string text)
+{
+	std::vector<std::string> s;
+	get_popdown_strings (cr, s);
+	return (std::find (s.begin(), s.end(), text) != s.end());
+}
+
+bool
+Gtkmm2ext::set_active_text_if_present (Gtk::ComboBoxText& cr, const std::string text)
+{
+	if (contains_value(cr, text)) {
+		cr.set_active_text (text);
+		return true;
+	}
+	return false;
 }
 
 GdkWindow*
