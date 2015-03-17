@@ -1496,7 +1496,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				default:
 					break;
 				}
-			} else {
+			} else if (_session) {
 				/* make sure we stop */
 				_session->request_transport_speed (0.0);
 			}
