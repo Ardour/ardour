@@ -53,7 +53,7 @@ std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > __icon_cache;
 
 static Glib::RefPtr<Gdk::Pixbuf> get_cached_icon (const char* image_file_name)
 {
-	if (*image_file_name) {
+	if (image_file_name && *image_file_name) {
 		std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> >::iterator it = __icon_cache.find(image_file_name);
 		if (it != __icon_cache.end()) {
 			return (*it).second;
