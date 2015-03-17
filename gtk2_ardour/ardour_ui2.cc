@@ -332,6 +332,8 @@ ARDOUR_UI::setup_transport ()
 	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
 	error_alert_button.set_name ("error alert");
 	error_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
+	act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+	error_alert_button.set_related_action(act);
 
 	alert_box.set_homogeneous (true);
 	alert_box.set_spacing (2);
@@ -548,7 +550,6 @@ ARDOUR_UI::error_alert_press (GdkEventButton*)
 {
 	_log_not_acknowledged = LogLevelNone;
 	error_blink (false); // immediate acknowledge
-	UI::show_errors();
 	return true;
 }
 
@@ -633,23 +634,18 @@ ARDOUR_UI::error_blink (bool onoff)
 			// blink
 			if (onoff) {
 				error_alert_button.set_custom_led_color(0xff0000ff); // bright red
-				error_alert_button.set_active (true);
 			} else {
 				error_alert_button.set_custom_led_color(0x880000ff); // dark red
-				error_alert_button.set_active (false);
 			}
 			break;
 		case LogLevelWarning:
 			error_alert_button.set_custom_led_color(0xccaa00ff); // yellow
-			error_alert_button.set_active (true);
 			break;
 		case LogLevelInfo:
 			error_alert_button.set_custom_led_color(0x88cc00ff); // lime green
-			error_alert_button.set_active (true);
 			break;
 		default:
 			error_alert_button.set_custom_led_color(0x333333ff); // gray
-			error_alert_button.set_active (false);
 			break;
 	}
 }

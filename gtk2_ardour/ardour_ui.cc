@@ -211,7 +211,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, auditioning_alert_button (_("Audition"))
 	, solo_alert_button (_("Solo"))
 	, feedback_alert_button (_("Feedback"))
-	, error_alert_button ( ArdourButton::Element (ArdourButton::Edge | ArdourButton::Indicator) )
+	, error_alert_button ( ArdourButton::just_led_default_elements )
 
 	, editor_meter(0)
 	, editor_meter_peak_display()
