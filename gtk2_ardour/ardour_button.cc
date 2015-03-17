@@ -793,7 +793,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 {
 	focus_handler ();
 
-	if ((_elements & Indicator) && _led_rect && _distinct_led_click) {
+	if (ev->button == 1 && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
 			return true;
@@ -807,7 +807,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 	_grabbed = true;
 	CairoWidget::set_dirty ();
 
-	if (!_act_on_release) {
+	if (ev->button == 1 && !_act_on_release) {
 		if (_action) {
 			_action->activate ();
 			return true;
@@ -823,7 +823,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 bool
 ArdourButton::on_button_release_event (GdkEventButton *ev)
 {
-	if (_hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
+	if (ev->button == 1 && _hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
 			signal_led_clicked(); /* EMIT SIGNAL */
@@ -834,7 +834,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	_grabbed = false;
 	CairoWidget::set_dirty ();
 
-	if (_hovering) {
+	if (ev->button == 1 && _hovering) {
 		signal_clicked ();
 		if (_act_on_release) {
 			if (_action) {
