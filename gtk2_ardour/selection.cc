@@ -1233,7 +1233,7 @@ Selection::get_state () const
 	}
 
 	/* midi region views have thir own internal selection. */
-	XMLNode* n;
+	XMLNode* n = NULL;
 	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > rid_notes;
 	editor->get_per_region_note_selection (rid_notes);
 	if (!rid_notes.empty()) {
