@@ -22,8 +22,6 @@
 #endif
 #include <cstdio>
 
-#include "pbd/debug.h"
-
 #include "ardour/audioengine.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -33,6 +31,8 @@
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>
 #endif
+
+#include "pbd/debug.h"
 
 #include "i18n.h"
 
