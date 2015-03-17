@@ -272,7 +272,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	//show the "convex" or "concave" gradient
 	if (!_flat_buttons) {
-		if ( active_state() == Gtkmm2ext::ExplicitActive && !((_elements & Indicator)==Indicator) ) {
+		if ( active_state() == Gtkmm2ext::ExplicitActive && ( !((_elements & Indicator)==Indicator) || use_custom_led_color) ) {
 			//concave
 			cairo_set_source (cr, concave_pattern);
 			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
