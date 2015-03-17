@@ -1194,3 +1194,15 @@ ArdourButton::add_elements (Element e)
 	_elements = (ArdourButton::Element) (_elements | e);
 	CairoWidget::set_dirty ();
 }
+
+void
+ArdourButton::set_custom_led_color (uint32_t c, bool useit)
+{
+	if (led_custom_color == c && use_custom_led_color == useit) {
+		return;
+	}
+
+	led_custom_color = c;
+	use_custom_led_color = useit;
+	CairoWidget::set_dirty ();
+}

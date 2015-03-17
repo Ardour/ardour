@@ -65,7 +65,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_active_state (Gtkmm2ext::ActiveState);
 	void set_visual_state (Gtkmm2ext::VisualState);
 
-	void set_custom_led_color (uint32_t c, bool useit = true) { led_custom_color = c; use_custom_led_color = useit; }
+	void set_custom_led_color (const uint32_t c, const bool useit = true);
 
 	void set_act_on_release (bool onRelease) { _act_on_release = onRelease; }
 
