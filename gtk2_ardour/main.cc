@@ -214,7 +214,7 @@ static void console_madness_end () {}
 static void command_line_parse_error (int *argc, char** argv[]) {
 	// Since we don't ordinarily have access to stdout and stderr with
 	// an MSVC app, let the user know we encountered a parsing error.
-	Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
+	Gtk::Main app(argc, argv); // Calls 'gtk_init()'
 
 	Gtk::MessageDialog dlgReportParseError (_("\n   Ardour could not understand your command line      "),
 			false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
