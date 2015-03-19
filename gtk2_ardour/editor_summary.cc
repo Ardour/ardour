@@ -972,7 +972,7 @@ EditorSummary::set_editor_y (pair<double, double> const y)
 		}
 
 		if (yc.first <= 0 && yc.second >= _track_height) {
-			(*i)->set_height (max (TimeAxisView::preset_height (HeightSmall), (uint32_t) ((*i)->effective_height() * scale)));
+			(*i)->set_height (max (TimeAxisView::preset_height (HeightSmall), (uint32_t) ((*i)->effective_height() * scale)), TimeAxisView::TotalHeight);
 		}
 
 		yc.first -= _track_height;

@@ -3769,7 +3769,7 @@ Editor::set_visible_track_count (int32_t n)
 	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_height (h);
+		(*i)->set_height (h, TimeAxisView::HeightPerLane);
 	}
 	
 	if (str != visible_tracks_selector.get_text()) {
