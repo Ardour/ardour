@@ -69,7 +69,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	~AutomationTimeAxisView();
 
-	virtual void set_height (uint32_t);
+	virtual void set_height (uint32_t, TrackHeightMode m = OnlySelf);
 	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 

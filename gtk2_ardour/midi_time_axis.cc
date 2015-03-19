@@ -467,7 +467,7 @@ MidiTimeAxisView::midi_view()
 }
 
 void
-MidiTimeAxisView::set_height (uint32_t h)
+MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
 	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
 		_midi_controls_box.show ();
@@ -496,7 +496,7 @@ MidiTimeAxisView::set_height (uint32_t h)
 	   which needs to know if we have just shown or hidden a scroomer /
 	   piano roll.
 	*/
-	RouteTimeAxisView::set_height (h);
+	RouteTimeAxisView::set_height (h, m);
 }
 
 void

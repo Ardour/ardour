@@ -454,13 +454,13 @@ AutomationTimeAxisView::clear_clicked ()
 }
 
 void
-AutomationTimeAxisView::set_height (uint32_t h)
+AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
 	bool const changed = (height != (uint32_t) h) || first_call_to_set_height;
 	uint32_t const normal = preset_height (HeightNormal);
 	bool const changed_between_small_and_normal = ( (height < normal && h >= normal) || (height >= normal || h < normal) );
 
-	TimeAxisView::set_height (h);
+	TimeAxisView::set_height (h, m);
 
 	_base_rect->set_y1 (h);
 

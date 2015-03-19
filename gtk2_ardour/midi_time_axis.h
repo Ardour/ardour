@@ -78,7 +78,7 @@ public:
 
 	MidiStreamView* midi_view();
 
-	void set_height (uint32_t);
+	void set_height (uint32_t, TrackHeightMode m = OnlySelf);
 
 	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool);
 

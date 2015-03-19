@@ -142,7 +142,13 @@ class TimeAxisView : public virtual AxisView
 	virtual void entered () {}
 	virtual void exited () {}
 
-	virtual void set_height (uint32_t h);
+	enum TrackHeightMode {
+		OnlySelf,
+		TotalHeight,
+		HeightPerLane
+	};
+
+	virtual void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
 	void set_height_enum (Height, bool apply_to_selection = false);
 	void reset_height();
 

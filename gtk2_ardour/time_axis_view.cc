@@ -568,8 +568,16 @@ TimeAxisView::set_height_enum (Height h, bool apply_to_selection)
 }
 
 void
-TimeAxisView::set_height (uint32_t h)
+TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
+	uint32_t lanes = 0;
+	if (m == TotalHeight) {
+		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+			if ( !(*i)->hidden()) ++lanes;
+		}
+	}
+	h /= (lanes + 1);
+
 	if (h < preset_height (HeightSmall)) {
 		h = preset_height (HeightSmall);
 	}
@@ -588,6 +596,12 @@ TimeAxisView::set_height (uint32_t h)
 	if (selection_group->visible ()) {
 		/* resize the selection rect */
 		show_selection (_editor.get_selection().time);
+	}
+
+	if (m != OnlySelf) {
+		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+			(*i)->set_height(h, OnlySelf);
+		}
 	}
 
 	_editor.override_visible_track_count ();
