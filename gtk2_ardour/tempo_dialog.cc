@@ -179,6 +179,9 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	when_beat_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TempoDialog::entry_key_release), false);
 	pulse_selector.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::pulse_change));
 	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
+	tap_tempo_button.signal_focus_out_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_focus_out));
+
+	tapped = false;
 }
 
 bool
@@ -262,17 +265,17 @@ TempoDialog::pulse_change ()
 bool
 TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 {
-	gint64 now;
+	guint32 now;
 	now = ev->time; // milliseconds
 
-	if (last_tap > 0) {
+	if (tapped) {
 		double interval, bpm;
 		static const double decay = 0.5;
 
 		interval = (now - last_tap) * 1.0e-3;
 		if (interval <= 6.0) {
-			// >= 10 bpm, say
-			if (average_interval > 0) {
+			// <= 6 seconds (say): >= 10 bpm
+			if (average_interval > 0 && average_interval > interval / 1.2 && average_interval < interval * 1.2) {
 				average_interval = interval * decay
 					+ average_interval * (1.0-decay);
 			} else {
@@ -286,8 +289,16 @@ TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 		}
 	} else {
 		average_interval = 0;
+		tapped = true;
 	}
 	last_tap = now;
+	return false;
+}
+
+bool
+TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
+{
+	tapped = false;
 	return false;
 }
 

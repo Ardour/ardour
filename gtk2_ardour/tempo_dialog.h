@@ -54,12 +54,14 @@ private:
 	bool entry_key_release (GdkEventKey* );
 	void pulse_change ();
 	bool tap_tempo_button_press (GdkEventButton* );
+	bool tap_tempo_focus_out (GdkEventFocus* );
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
-	guint32 last_tap;
-	double average_interval;
+	bool tapped;      // whether the tap-tempo button has been clicked
+	guint32 last_tap; // time of the last tap (in mS, from GdkEventButton::time). Only valid if tapped is true
+	double average_interval; // running average of tap tempo button press interval times
 
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
