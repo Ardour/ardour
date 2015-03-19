@@ -1411,10 +1411,9 @@ Editor::scroll_tracks_up_line ()
 }
 
 bool
-Editor::scroll_down_one_track ()
+Editor::scroll_down_one_track (bool skip_child_views)
 {
 	TrackViewList::reverse_iterator next = track_views.rend();
-	std::pair<TimeAxisView*,double> res;
 	const double top_of_trackviews = vertical_adjustment.get_value();
 
 	for (TrackViewList::reverse_iterator t = track_views.rbegin(); t != track_views.rend(); ++t) {
@@ -1422,14 +1421,51 @@ Editor::scroll_down_one_track ()
 			continue;
 		}
 
-
 		/* If this is the upper-most visible trackview, we want to display
-		   the one above it (next)
-		*/
-
-		res = (*t)->covers_y_position (top_of_trackviews);
+		 * the one above it (next)
+		 *
+		 * Note that covers_y_position() is recursive and includes child views
+		 */
+		std::pair<TimeAxisView*,double> res = (*t)->covers_y_position (top_of_trackviews);
 
 		if (res.first) {
+			if (skip_child_views) {
+				break;
+			}
+			/* automation lane (one level, non-recursive)
+			 *
+			 * - if no automation lane exists -> move to next tack
+			 * - if the first (here: bottom-most) matches -> move to next tack
+			 * - if no y-axis match is found -> the current track is at the top
+			 *     -> move to last (here: top-most) automation lane
+			 */
+			TimeAxisView::Children kids = (*t)->get_child_list();
+			TimeAxisView::Children::reverse_iterator nkid = kids.rend();
+
+			for (TimeAxisView::Children::reverse_iterator ci = kids.rbegin(); ci != kids.rend(); ++ci) {
+				if ((*ci)->hidden()) {
+					continue;
+				}
+
+				std::pair<TimeAxisView*,double> dev;
+				dev = (*ci)->covers_y_position (top_of_trackviews);
+				if (dev.first) {
+					/* some automation lane is currently at the top */
+					if (ci == kids.rbegin()) {
+						/* first (bottom-most) autmation lane is at the top.
+						 * -> move to next track
+						 */
+						nkid = kids.rend();
+					}
+					break;
+				}
+				nkid = ci;
+			}
+
+			if (nkid != kids.rend()) {
+				ensure_time_axis_view_is_visible (**nkid, true);
+				return true;
+			}
 			break;
 		}
 		next = t;
@@ -1446,10 +1482,9 @@ Editor::scroll_down_one_track ()
 }	
 
 bool
-Editor::scroll_up_one_track ()
+Editor::scroll_up_one_track (bool skip_child_views)
 {
 	TrackViewList::iterator prev = track_views.end();
-	std::pair<TimeAxisView*,double> res;
 	double top_of_trackviews = vertical_adjustment.get_value ();
 	
 	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
@@ -1458,10 +1493,55 @@ Editor::scroll_up_one_track ()
 			continue;
 		}
 
-		/* find the trackview at the top of the trackview group */
-		res = (*t)->covers_y_position (top_of_trackviews);
+		/* find the trackview at the top of the trackview group 
+		 *
+		 * Note that covers_y_position() is recursive and includes child views
+		 */
+		std::pair<TimeAxisView*,double> res = (*t)->covers_y_position (top_of_trackviews);
 		
 		if (res.first) {
+			if (skip_child_views) {
+				break;
+			}
+			/* automation lane (one level, non-recursive)
+			 *
+			 * - if no automation lane exists -> move to prev tack
+			 * - if no y-axis match is found -> the current track is at the top -> move to prev track 
+			 *     (actually last automation lane of previous track, see below)
+			 * - if first (top-most) lane is at the top -> move to this track
+			 * - else move up one lane
+			 */
+			TimeAxisView::Children kids = (*t)->get_child_list();
+			TimeAxisView::Children::iterator pkid = kids.end();
+
+			for (TimeAxisView::Children::iterator ci = kids.begin(); ci != kids.end(); ++ci) {
+				if ((*ci)->hidden()) {
+					continue;
+				}
+
+				std::pair<TimeAxisView*,double> dev;
+				dev = (*ci)->covers_y_position (top_of_trackviews);
+				if (dev.first) {
+					/* some automation lane is currently at the top */
+					if (ci == kids.begin()) {
+						/* first (top-most) autmation lane is at the top.
+						 * jump directly to this track's top
+						 */
+						ensure_time_axis_view_is_visible (**t, true);
+						return true;
+					}
+					else if (pkid != kids.end()) {
+						/* some other automation lane is at the top.
+						 * move up to prev automation lane.
+						 */
+						ensure_time_axis_view_is_visible (**pkid, true);
+						return true;
+					}
+					assert(0); // not reached
+					break;
+				}
+				pkid = ci;
+			}
 			break;
 		}
 
@@ -1469,7 +1549,23 @@ Editor::scroll_up_one_track ()
 	}
 	
 	if (prev != track_views.end()) {
-		ensure_time_axis_view_is_visible (**prev, true);
+		// move to bottom-most automation-lane of the previous track
+		TimeAxisView::Children kids = (*prev)->get_child_list();
+		TimeAxisView::Children::reverse_iterator pkid = kids.rend();
+		if (!skip_child_views) {
+			// find the last visible lane
+			for (TimeAxisView::Children::reverse_iterator ci = kids.rbegin(); ci != kids.rend(); ++ci) {
+				if (!(*ci)->hidden()) {
+					pkid = ci;
+					break;
+				}
+			}
+		}
+		if (pkid != kids.rend()) {
+			ensure_time_axis_view_is_visible (**pkid, true);
+		} else  {
+			ensure_time_axis_view_is_visible (**prev, true);
+		}
 		return true;
 	}
 

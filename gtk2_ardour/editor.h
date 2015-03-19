@@ -363,8 +363,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
-        bool scroll_up_one_track ();
-        bool scroll_down_one_track ();
+        bool scroll_up_one_track (bool skip_child_views = false);
+        bool scroll_down_one_track (bool skip_child_views = false);
 
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
