@@ -261,18 +261,17 @@ TempoDialog::pulse_change ()
 	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
-
 bool
 TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 {
-	guint32 now;
-	now = ev->time; // milliseconds
+	gint64 now;
+	now = g_get_monotonic_time (); // microseconds
 
 	if (tapped) {
 		double interval, bpm;
 		static const double decay = 0.5;
 
-		interval = (now - last_tap) * 1.0e-3;
+		interval = (now - last_tap) * 1.0e-6;
 		if (interval <= 6.0) {
 			// <= 6 seconds (say): >= 10 bpm
 			if (average_interval > 0 && average_interval > interval / 1.2 && average_interval < interval * 1.2) {
@@ -292,7 +291,6 @@ TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 		tapped = true;
 	}
 	last_tap = now;
-	return false;
 }
 
 bool

@@ -60,8 +60,8 @@ private:
 	NoteTypes note_types;
 
 	bool tapped;      // whether the tap-tempo button has been clicked
-	guint32 last_tap; // time of the last tap (in mS, from GdkEventButton::time). Only valid if tapped is true
-	double average_interval; // running average of tap tempo button press interval times
+	gint64 last_tap;
+	double average_interval;
 
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
