@@ -22,6 +22,9 @@
 #include <assert.h>
 #include "portaudio_io.h"
 
+#define INTERLEAVED_INPUT
+#define INTERLEAVED_OUTPUT
+
 using namespace ARDOUR;
 
 PortAudioIO::PortAudioIO ()
@@ -317,7 +320,11 @@ PortAudioIO::pcm_setup (
 	if (nfo_in) {
 		inputParam.device = device_input;
 		inputParam.channelCount = _capture_channels;
+#ifdef INTERLEAVED_INPUT
 		inputParam.sampleFormat = paFloat32;
+#else
+		inputParam.sampleFormat = paFloat32 | paNonInterleaved;
+#endif
 		inputParam.suggestedLatency = nfo_in->defaultLowInputLatency;
 		inputParam.hostApiSpecificStreamInfo = NULL;
 	}
@@ -325,7 +332,11 @@ PortAudioIO::pcm_setup (
 	if (nfo_out) {
 		outputParam.device = device_output;
 		outputParam.channelCount = _playback_channels;
+#ifdef INTERLEAVED_OUTPUT
 		outputParam.sampleFormat = paFloat32;
+#else
+		outputParam.sampleFormat = paFloat32 | paNonInterleaved;
+#endif
 		outputParam.suggestedLatency = nfo_out->defaultLowOutputLatency;
 		outputParam.hostApiSpecificStreamInfo = NULL;
 	}
@@ -425,6 +436,9 @@ PortAudioIO::next_cycle (uint32_t n_samples)
 	return xrun ? 1 : 0;
 }
 
+
+#ifdef INTERLEAVED_INPUT
+
 int
 PortAudioIO::get_capture_channel (uint32_t chn, float *input, uint32_t n_samples)
 {
@@ -438,6 +452,20 @@ PortAudioIO::get_capture_channel (uint32_t chn, float *input, uint32_t n_samples
 	return 0;
 }
 
+#else
+
+int
+PortAudioIO::get_capture_channel (uint32_t chn, float *input, uint32_t n_samples)
+{
+	assert(chn < _capture_channels);
+	memcpy((void*)input, &(_input_buffer[chn * n_samples]), n_samples * sizeof(float));
+}
+
+#endif
+
+
+#ifdef INTERLEAVED_OUTPUT
+
 int
 PortAudioIO::set_playback_channel (uint32_t chn, const float *output, uint32_t n_samples)
 {
@@ -450,3 +478,15 @@ PortAudioIO::set_playback_channel (uint32_t chn, const float *output, uint32_t n
 	}
 	return 0;
 }
+
+#else
+
+int
+PortAudioIO::set_playback_channel (uint32_t chn, const float *output, uint32_t n_samples)
+{
+	assert(chn < _playback_channels);
+	memcpy((void*)&(_output_buffer[chn * n_samples]), (void*)output, n_samples * sizeof(float));
+	return 0;
+}
+
+#endif
