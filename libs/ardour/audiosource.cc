@@ -355,13 +355,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 #endif
 	framecnt_t zero_fill = 0;
 
-#ifdef PLATFORM_WINDOWS
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));	
-#elif defined (__APPLE__)
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NONBLOCK));
-#else
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY | O_NOATIME | O_NONBLOCK));
-#endif
+	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));
 
 	if (sfd < 0) {
 		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), peakpath, strerror (errno)) << endmsg;
