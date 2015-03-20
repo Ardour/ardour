@@ -1005,6 +1005,10 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
                 return -1;
         }
 
+	if (!pip->parameter_is_input(par)) {
+		return -1;
+	}
+
         ParameterDescriptor pd;
         pi->plugin()->get_parameter_descriptor (controlid,pd);
 
