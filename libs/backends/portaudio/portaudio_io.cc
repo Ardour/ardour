@@ -459,6 +459,7 @@ PortAudioIO::get_capture_channel (uint32_t chn, float *input, uint32_t n_samples
 {
 	assert(chn < _capture_channels);
 	memcpy((void*)input, &(_input_buffer[chn * n_samples]), n_samples * sizeof(float));
+	return 0;
 }
 
 #endif
