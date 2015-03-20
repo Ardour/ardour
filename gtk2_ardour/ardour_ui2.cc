@@ -549,12 +549,21 @@ ARDOUR_UI::feedback_alert_press (GdkEventButton *)
 bool
 ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 {
+	bool do_toggle = true;
 	if (ev->button == 1) {
+		if (_log_not_acknowledged == LogLevelError) {
+			// just acknowledge the error, don't hide the log if it's already visible
+			RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			if (tact && tact->get_active()) {
+				do_toggle = false;
+			}
+		}
 		_log_not_acknowledged = LogLevelNone;
 		error_blink (false); // immediate acknowledge
 	}
-	// fall through to to button toggle
-	return false;
+	// maybe fall through to to button toggle
+	return !do_toggle;
 }
 
 void
