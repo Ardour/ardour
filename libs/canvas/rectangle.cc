@@ -181,7 +181,7 @@ Rectangle::compute_bounding_box () const
 		   than the rectangle itself.
 		*/
 
-		_bounding_box = r.expand (_outline_width * 0.5);
+		_bounding_box = r.expand (1.0 + _outline_width * 0.5);
 	}
 
 	_bounding_box_dirty = false;
