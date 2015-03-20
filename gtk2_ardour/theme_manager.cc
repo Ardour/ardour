@@ -112,7 +112,9 @@ ThemeManager::ThemeManager()
 	theme_selection_hbox.pack_start (light_button);
 
 	set_homogeneous (false);
+#if 0 // disable light/dark theme choice. until the 'light theme gets some attention.
 	pack_start (theme_selection_hbox, PACK_SHRINK);
+#endif
 	pack_start (reset_button, PACK_SHRINK);
 #ifndef __APPLE__
 	pack_start (all_dialogs, PACK_SHRINK);
