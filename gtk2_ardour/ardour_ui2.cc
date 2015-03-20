@@ -331,7 +331,7 @@ ARDOUR_UI::setup_transport ()
 	feedback_alert_button.set_name ("feedback alert");
 	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
 	error_alert_button.set_name ("error alert");
-	error_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
+	error_alert_button.signal_button_release_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
 	act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
 	error_alert_button.set_related_action(act);
 	error_alert_button.set_fallthrough_to_parent(true);
@@ -549,12 +549,12 @@ ARDOUR_UI::feedback_alert_press (GdkEventButton *)
 bool
 ARDOUR_UI::error_alert_press (GdkEventButton* ev)
 {
-	if (ev->button != 1) {
-		return false;
+	if (ev->button == 1) {
+		_log_not_acknowledged = LogLevelNone;
+		error_blink (false); // immediate acknowledge
 	}
-	_log_not_acknowledged = LogLevelNone;
-	error_blink (false); // immediate acknowledge
-	return true;
+	// fall through to to button toggle
+	return false;
 }
 
 void
