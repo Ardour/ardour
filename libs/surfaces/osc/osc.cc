@@ -981,18 +981,21 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
         boost::shared_ptr<Route> r = session->route_by_remote_id (rid);  
 
         if (!r) {
+		PBD::error << "OSC: Invalid Remote Control ID '" << rid << "'" << endmsg;
                 return -1;
         }
 
         boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
         
         if (!redi) {
+		PBD::error << "OSC: cannot find plugin # " << piid << " for RID '" << rid << "'" << endmsg;
                 return -1;
         }
 
         boost::shared_ptr<PluginInsert> pi;
         
         if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+		PBD::error << "OSC: given processor # " << piid << " on RID '" << rid << "' is not a Plugin." << endmsg;
                 return -1;
         }
 
@@ -1002,10 +1005,12 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
         uint32_t controlid = pip->nth_parameter (par,ok);
         
         if (!ok) {
+		PBD::error << "OSC: Cannot find parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "'" << endmsg;
                 return -1;
         }
 
 	if (!pip->parameter_is_input(par)) {
+		PBD::error << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "' is not a control input" << endmsg;
 		return -1;
 	}
 
@@ -1014,10 +1019,13 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
 
         if (val >= pd.lower && val < pd.upper) {
                 
-                boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));;
-                cerr << "parameter:" << redi->describe_parameter(controlid) << " val:" << val << "\n";
+                boost::shared_ptr<AutomationControl> c = pi->automation_control (Evoral::Parameter(PluginAutomation, 0, controlid));
+                // cerr << "parameter:" << redi->describe_parameter(controlid) << " val:" << val << "\n";
                 c->set_value (val);
-        }  
+        } else {
+		PBD::warning << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "' is out of range" << endmsg;
+		PBD::info << "OSC: Valid range min=" << pd.lower << " max=" << pd.upper << endmsg;
+	}
 
         return 0;
 }
