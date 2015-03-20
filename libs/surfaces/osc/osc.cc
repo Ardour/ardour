@@ -984,7 +984,7 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
                 return -1;
         }
 
-        boost::shared_ptr<Processor> redi=r->nth_processor (piid);
+        boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
         
         if (!redi) {
                 return -1;
