@@ -560,7 +560,9 @@ EngineStateController::_validate_current_device_state()
         
         if ( !set_new_sample_rate_in_controller (_session->nominal_frame_rate ()) ) {
             if ( !set_new_sample_rate_in_controller (backend->default_sample_rate() ) ) {
-                return false;
+                if (!set_new_sample_rate_in_controller (sample_rates.front() ) ) {
+                    return false;
+                }
             }
         }
     
