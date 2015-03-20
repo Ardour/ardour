@@ -977,12 +977,12 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
 	if (!session)
 		return -1;
 
-	boost::shared_ptr<Route> r = session->route_by_remote_id (rid)
+	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
-		if (!r) {
-			PBD::error << "OSC: Invalid Remote Control ID '" << rid << "'" << endmsg;
-			return -1;
-		}
+	if (!r) {
+		PBD::error << "OSC: Invalid Remote Control ID '" << rid << "'" << endmsg;
+		return -1;
+	}
 
 	boost::shared_ptr<Processor> redi=r->nth_plugin (piid);
 
