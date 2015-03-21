@@ -274,15 +274,21 @@ TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 		interval = (now - last_tap) * 1.0e-6;
 		if (interval <= 6.0) {
 			// <= 6 seconds (say): >= 10 bpm
-			if (average_interval > 0 && average_interval > interval / 1.2 && average_interval < interval * 1.2) {
+			if (average_interval > 0) {
+				if (average_interval > interval / 1.2 && average_interval < interval * 1.2) {
 				average_interval = interval * decay
 					+ average_interval * (1.0-decay);
+				} else {
+					average_interval = 0;
+				}
 			} else {
 				average_interval = interval;
 			}
 
-			bpm = 60.0 / average_interval;
-			bpm_spinner.set_value (bpm);
+			if (average_interval > 0) {
+				bpm = 60.0 / average_interval;
+				bpm_spinner.set_value (bpm);
+			}
 		} else {
 			average_interval = 0;
 		}
