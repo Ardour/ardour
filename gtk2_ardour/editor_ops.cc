@@ -7079,7 +7079,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	}
 
 	undo_visual_stack.push_back (current_visual_state (true));
-	no_save_visual = true;
+	PBD::Unwinder<bool> nsv (no_save_visual, true);
 
 	/* build a list of all tracks, including children */
 
