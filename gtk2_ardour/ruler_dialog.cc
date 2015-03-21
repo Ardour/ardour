@@ -29,16 +29,16 @@ RulerDialog::RulerDialog ()
 {
 	add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
 
-	get_vbox()->pack_start (samples_button);
-	get_vbox()->pack_start (timecode_button);
 	get_vbox()->pack_start (minsec_button);
+	get_vbox()->pack_start (timecode_button);
+	get_vbox()->pack_start (samples_button);
 	get_vbox()->pack_start (bbt_button);
-	get_vbox()->pack_start (tempo_button);
 	get_vbox()->pack_start (meter_button);
-	get_vbox()->pack_start (loop_punch_button);
+	get_vbox()->pack_start (tempo_button);
 	get_vbox()->pack_start (range_button);
-	get_vbox()->pack_start (mark_button);
+	get_vbox()->pack_start (loop_punch_button);
 	get_vbox()->pack_start (cdmark_button);
+	get_vbox()->pack_start (mark_button);
 	get_vbox()->pack_start (video_button);
 
 	get_vbox()->show_all ();
