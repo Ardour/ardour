@@ -72,6 +72,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	bpm_spinner.set_digits (2);
 	bpm_spinner.set_wrap (true);
 	bpm_spinner.set_value (bpm);
+	bpm_spinner.set_alignment (1.0);
 
 	note_types.insert (make_pair (_("whole"), 1.0));
 	strings.push_back (_("whole"));
@@ -139,6 +140,8 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double note_type,
 	if (movable) {
 		when_bar_entry.set_width_chars(4);
 		when_beat_entry.set_width_chars (4);
+		when_bar_entry.set_alignment (1.0);
+		when_beat_entry.set_alignment (1.0);
 
 		when_bar_label.set_name ("MetricLabel");
 		when_beat_label.set_name ("MetricLabel");
@@ -362,6 +365,7 @@ MeterDialog::init (const Timecode::BBT_Time& when, double bpb, double divisor, b
 
 	snprintf (buf, sizeof (buf), "%" PRIu32, when.bars);
 	when_bar_entry.set_text (buf);
+	when_bar_entry.set_alignment (1.0);
 
 	if (movable) {
 		Label* when_label = manage (new Label(_("Meter begins at bar:"), ALIGN_LEFT, ALIGN_CENTER));
