@@ -75,6 +75,7 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 	virtual bool set_marked_for_display (bool);
 
 	static GUIObjectState& gui_object_state();
+	void clear_property_cache() { property_hashtable.clear(); }
 	
   protected:
 

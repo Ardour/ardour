@@ -4461,6 +4461,7 @@ Editor::use_visual_state (VisualState& vs)
 		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
 		
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
+			(*i)->clear_property_cache();
 			(*i)->reset_visual_state ();
 		}
 	}
