@@ -1226,7 +1226,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
 		if (i != children.end()) {
 			if ((prop = (*i)->property (X_("active"))) != 0) {
-				if ( string_is_affirmative (prop->value()) )
+				if ( string_is_affirmative (prop->value()) && !_session.get_disable_all_loaded_plugins() )
 					processor->activate();
 				else
 					processor->deactivate();
