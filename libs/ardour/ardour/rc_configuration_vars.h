@@ -91,7 +91,7 @@ CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "regio
 
 /* monitoring, mute, solo etc */
 
-CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", true)
+CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", false)
 CONFIG_VARIABLE (bool, mute_affects_post_fader, "mute-affects-post-fader", true)
 CONFIG_VARIABLE (bool, mute_affects_control_outs, "mute-affects-control-outs", true)
 CONFIG_VARIABLE (bool, mute_affects_main_outs, "mute-affects-main-outs", true)
