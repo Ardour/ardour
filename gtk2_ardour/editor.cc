@@ -403,7 +403,7 @@ Editor::Editor ()
 	location_loop_color = ARDOUR_UI::config()->color ("location loop");
 	location_punch_color = ARDOUR_UI::config()->color ("location punch");
 
-	zoom_focus = ZoomFocusLeft;
+	zoom_focus = ZoomFocusPlayhead;
 	_edit_point = EditAtMouse;
 	_visible_track_count = -1;
 
