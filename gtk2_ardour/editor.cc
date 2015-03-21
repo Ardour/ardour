@@ -2321,37 +2321,16 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("show-measures"))) {
 		bool yn = string_is_affirmative (prop->value());
 		_show_measures = yn;
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
 	}
 
 	if ((prop = node.property ("follow-playhead"))) {
 		bool yn = string_is_affirmative (prop->value());
 		set_follow_playhead (yn);
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			if (tact->get_active() != yn) {
-				tact->set_active (yn);
-			}
-		}
 	}
 
 	if ((prop = node.property ("stationary-playhead"))) {
 		bool yn = string_is_affirmative (prop->value());
 		set_stationary_playhead (yn);
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			if (tact->get_active() != yn) {
-				tact->set_active (yn);
-			}
-		}
 	}
 
 	if ((prop = node.property ("region-list-sort-type"))) {
@@ -2425,6 +2404,42 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	} else {
 		nudge_clock->set_mode (AudioClock::Timecode);
 		nudge_clock->set (_session->frame_rate() * 5, true);
+	}
+
+	{
+		/* apply state
+		 * Not all properties may have been in XML, but
+		 * those that are linked to a private variable may need changing
+		 */
+		RefPtr<Action> act;
+		bool yn;
+
+		act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+		if (act) {
+			yn = _show_measures;
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			/* do it twice to force the change */
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
+
+		act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
+		yn = _follow_playhead;
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
+		}
+
+		act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+		yn = _stationary_playhead;
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
+		}
 	}
 
 	return 0;
