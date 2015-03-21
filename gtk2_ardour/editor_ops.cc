@@ -7092,36 +7092,36 @@ Editor::fit_tracks (TrackViewList & tracks)
 		}
 	}
 
-	bool prev_was_selected = false;
-	bool is_selected = tracks.contains (all.front());
-	bool next_is_selected;
 
-	for (TrackViewList::iterator t = all.begin(); t != all.end(); ++t) {
-
-		TrackViewList::iterator next;
-
-		next = t;
-		++next;
-
-		if (next != all.end()) {
-			next_is_selected = tracks.contains (*next);
-		} else {
-			next_is_selected = false;
-		}
-
+	// find selection range.
+	// if someone knows how to user TrackViewList::iterator for this
+	// I'm all ears.
+	int selected_top = -1;
+	int selected_bottom = -1;
+	int i = 0;
+	for (TrackViewList::iterator t = all.begin(); t != all.end(); ++t, ++i) {
 		if ((*t)->marked_for_display ()) {
-			if (is_selected) {
+			if (tracks.contains(*t)) {
+				if (selected_top == -1) {
+					selected_top = i;
+				}
+				selected_bottom = i;
+			}
+		}
+	}
+
+	i = 0;
+	for (TrackViewList::iterator t = all.begin(); t != all.end(); ++t, ++i) {
+		if ((*t)->marked_for_display ()) {
+			if (tracks.contains(*t)) {
 				(*t)->set_height (h);
 				first_y_pos = std::min ((*t)->y_position (), first_y_pos);
 			} else {
-				if (prev_was_selected && next_is_selected) {
+				if (i > selected_top && i < selected_bottom) {
 					hide_track_in_display (*t);
 				}
 			}
 		}
-
-		prev_was_selected = is_selected;
-		is_selected = next_is_selected;
 	}
 
 	/*
