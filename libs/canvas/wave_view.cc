@@ -349,6 +349,38 @@ WaveView::y_extent (double s, bool /*round_to_lower_edge*/) const
 	}
 }
 
+void
+WaveView::draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peaks, int n_peaks) const
+{
+	Cairo::RefPtr<Cairo::ImageSurface> stripe = Cairo::ImageSurface::create (Cairo::FORMAT_A8, n_peaks, _height);
+
+	Cairo::RefPtr<Cairo::Context> stripe_context = Cairo::Context::create (stripe);
+	stripe_context->set_antialias (Cairo::ANTIALIAS_NONE);
+
+	uint32_t stripe_separation = 150;
+	double start = - floor (_height / stripe_separation) * stripe_separation;
+	int stripe_x = 0;
+
+	while (start < n_peaks) {
+
+		stripe_context->move_to (start, 0);
+		stripe_x = start + _height;
+		stripe_context->line_to (stripe_x, _height);
+		start += stripe_separation;
+	}
+
+	stripe_context->set_source_rgba (1.0, 1.0, 1.0, 1.0);
+	stripe_context->set_line_cap (Cairo::LINE_CAP_SQUARE);
+	stripe_context->set_line_width(50);
+	stripe_context->stroke();
+
+	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (image);
+
+	context->set_source_rgba (1.0, 1.0, 0.0, 0.3);
+	context->mask (stripe, 0, 0);
+	context->fill ();
+}
+
 struct LineTips {
 	double top;
 	double bot;
@@ -761,14 +793,19 @@ WaveView::get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start
 
 	boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
 
-	_region->read_peaks (peaks.get(), n_peaks,
+	framecnt_t peaks_read;
+	peaks_read = _region->read_peaks (peaks.get(), n_peaks,
 			     sample_start, sample_end - sample_start,
 			     _channel,
 			     _samples_per_pixel);
 
 	image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, _height);
 
-	draw_image (image, peaks.get(), n_peaks);
+	if (peaks_read > 0) {
+		draw_image (image, peaks.get(), n_peaks);
+	} else {
+		draw_absent_image (image, peaks.get(), n_peaks);
+	}
 
 	_image_cache[_region->audio_source ()].push_back (CacheEntry (_channel, _height, _region_amplitude, _fill_color, sample_start,  sample_end, image));
 
