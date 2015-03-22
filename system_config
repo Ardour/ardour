@@ -1,37 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
   <MIDI-port tag="@MIDITAG@" device="ardour" type="@MIDITYPE@" mode="duplex"/>
-  <Config>
-    <Option name="track-buffer-seconds" value="5.000000"/>
-    <Option name="mute-affects-pre-fader" value="1"/>
-    <Option name="mute-affects-post-fader" value="1"/>
-    <Option name="mute-affects-control-outs" value="1"/>
-    <Option name="mute-affects-main-outs" value="1"/>
-    <Option name="monitoring-model" value="ExternalMonitoring"/>
-    <Option name="solo-latch" value="1"/>
-    <Option name="mtc-port" value="mtc"/>
-    <Option name="mmc-port" value="mmc"/>
-    <Option name="midi-port" value="control"/>
-    <Option name="jack-time-master" value="1"/>
-    <Option name="trace-midi-input" value="0"/>
-    <Option name="trace-midi-output" value="0"/>
-    <Option name="plugins-stop-with-transport" value="0"/>
-    <Option name="no-sw-monitoring" value="0"/>
-    <Option name="stop-recording-on-xrun" value="0"/>
-    <Option name="create-xrun-marker" value="1"/>
-    <Option name="stop-at-session-end" value="0"/>
-    <Option name="timecode-source-is-synced" value="1"/>
-    <Option name="auditioner-left-out" value="default"/>
-    <Option name="auditioner-right-out" value="default"/>
-    <Option name="quieten-at-speed" value="1.000000"/>
-    <Option name="use-vst" value="1"/>
-    <Option name="use-tranzport" value="1"/>
-    <Option name="disk-choice-space-threshold" value="57600000"/>
-    <Option name="periodic-safety-backups" value="1"/>
-    <Option name="periodic-safety-backup-interval" value="120"/>
-    <Option name="timecode-format" value="timecode_30"/>
-    <Option name="seamless-loop" value="1"/>
-  </Config>
+  <Config/>
   <extra>
     <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
   </extra>
