@@ -197,6 +197,7 @@ children = [
         'libs/fst',
         'libs/vfork',
         'libs/ardouralsautil',
+        'cfgtool',
 ]
 
 i18n_children = [
