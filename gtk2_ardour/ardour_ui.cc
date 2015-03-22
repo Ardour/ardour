@@ -899,7 +899,7 @@ ARDOUR_UI::starting ()
 			
 			ArdourDialog d (_("Free/Demo Version Warning"), true);
 			Label l;
-			LinkButton b (string_compose (_("Subscribe and support development of %1"), PROGRAM_NAME));
+			Button b (string_compose (_("Subscribe and support development of %1"), PROGRAM_NAME));
 			CheckButton c (_("Don't warn me about this again"));
 			
 			l.set_markup (string_compose (_("<span weight=\"bold\" size=\"large\">%1</span>\n\n<b>%2</b>\n\n<i>%3</i>\n\n%4"),
@@ -911,7 +911,7 @@ ARDOUR_UI::starting ()
 			                                "consider becoming a subscriber for a low cost every month.")));
 			l.set_justify (JUSTIFY_CENTER);
 			
-			b.set_uri (X_("https://community.ardour.org/s/subscribe "));
+			b.signal_clicked().connect (mem_fun(*this, &ARDOUR_UI::launch_subscribe));
 			
 			d.get_vbox()->pack_start (l, true, true);
 			d.get_vbox()->pack_start (b, false, false, 12);
@@ -3198,6 +3198,12 @@ void
 ARDOUR_UI::launch_tracker ()
 {
 	PBD::open_uri ("http://tracker.ardour.org/bug_report_page.php");
+}
+
+void
+ARDOUR_UI::launch_subscribe ()
+{
+	PBD::open_uri ("https://community.ardour.org/s/subscribe");
 }
 
 void
