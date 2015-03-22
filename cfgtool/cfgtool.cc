@@ -1,17 +1,20 @@
 #include <stdio.h>
-
-#include "pbd/pbd.h"
 #include "pbd/xml++.h"
 #include "ardour/rc_configuration.h"
-#include "pbd/enumwriter.h"
 
 using namespace ARDOUR;
 using namespace std;
 
 int main (int argc, char **argv) {
 	if (argc < 2) {
-		fprintf(stderr, "usage %s <file-name>\n", argv[0]);
+		fprintf(stderr, "Usage: %s [-h] <file-name>\n", argv[0]);
 		return -1;
+	}
+
+	if (!strcmp (argv[1], "-h") || !strcmp (argv[1], "--help")) {
+		fprintf(stdout, "Usage: %s <file-name>\n\n", argv[0]);
+		fprintf(stdout, "Writes the default Ardour config to the given file\n");
+		return 0;
 	}
 
 	setenv ("ARDOUR_DLL_PATH", "/xxx", 1);
@@ -25,7 +28,12 @@ int main (int argc, char **argv) {
 	RCConfiguration * rc = new RCConfiguration;
 	XMLNode& state = rc->get_state();
 
-	// TODO strip some nodes here ?
+	XMLNode* cfg = state.child ("Config");
+	cfg->remove_nodes_and_delete ("name", "donate-url");
+	cfg->remove_nodes_and_delete ("name", "osx_pingback-url");
+	cfg->remove_nodes_and_delete ("name", "linux-pingback-url");
+	cfg->remove_nodes_and_delete ("name", "updates-url");
+	cfg->remove_nodes_and_delete ("name", "freesound-download-dir"); // user specific
 
 	XMLTree tree;
 	tree.set_root (&state);
