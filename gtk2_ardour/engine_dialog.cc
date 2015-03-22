@@ -285,14 +285,11 @@ EngineControl::EngineControl ()
 	}
 
 	if (backend_combo.get_active_text().empty()) {
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 		backend_combo.set_active_text (backend_names.front());
 	}
 
-	{
-		/* ignore: don't save state */
-		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-		backend_changed ();
-	}
+	backend_changed ();
 
 	/* in case the setting the backend failed, e.g. stale config, from set_state(), try again */
 	if (0 == ARDOUR::AudioEngine::instance()->current_backend()) {
@@ -1051,9 +1048,6 @@ EngineControl::sample_rate_changed ()
 	 */
 
 	show_buffer_duration ();
-	if (!ignore_changes) {
-		save_state ();
-	}
 
 }
 
@@ -1061,9 +1055,6 @@ void
 EngineControl::buffer_size_changed ()
 {
 	show_buffer_duration ();
-	if (!ignore_changes) {
-		save_state ();
-	}
 }
 
 void
@@ -1137,18 +1128,11 @@ EngineControl::midi_option_changed ()
 	} else {
 		midi_devices_button.set_sensitive (true);
 	}
-
-	if (!ignore_changes) {
-		save_state ();
-	}
 }
 
 void
 EngineControl::parameter_changed ()
 {
-	if (!ignore_changes) {
-		save_state ();
-	}
 }
 
 EngineControl::State
@@ -1460,7 +1444,7 @@ EngineControl::set_state (const XMLNode& root)
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
 		if ((*i)->active) {
-			ignore_changes++;
+			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			backend_combo.set_active_text ((*i)->backend);
 			driver_combo.set_active_text ((*i)->driver);
 			device_combo.set_active_text ((*i)->device);
@@ -1469,7 +1453,6 @@ EngineControl::set_state (const XMLNode& root)
 			input_latency.set_value ((*i)->input_latency);
 			output_latency.set_value ((*i)->output_latency);
 			midi_option_combo.set_active_text ((*i)->midi_option);
-			ignore_changes--;
 			break;
 		}
 	}
@@ -1740,6 +1723,8 @@ EngineControl::post_push ()
 	if (!state) {
 		state = save_state ();
 		assert (state);
+	} else {
+		store_state(state);
 	}
 
 	/* all off */
@@ -2208,7 +2193,7 @@ EngineControl::engine_stopped ()
 void
 EngineControl::device_list_changed ()
 {
-	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1); // ??
 	list_devices ();
 	midi_option_changed();
 }
