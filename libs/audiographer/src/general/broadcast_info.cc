@@ -110,9 +110,13 @@ BroadcastInfo::get_time_reference () const
 		return 0;
 	}
 
-	int64_t ret = (uint32_t) info->time_reference_high;
+	if (info->time_reference_high & 0x80000000) {
+		return 0;
+	}
+
+	int64_t ret = (uint32_t) (info->time_reference_high & 0x7fffffff);
 	ret <<= 32;
-	ret |= (uint32_t) info->time_reference_low;
+	ret |= (uint32_t) (info->time_reference_low & 0xffffffff);
 	return ret;
 }
 
