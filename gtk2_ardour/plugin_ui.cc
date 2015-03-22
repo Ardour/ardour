@@ -560,6 +560,19 @@ PlugUIBase::preset_selected (Plugin::PresetRecord preset)
 
 #ifdef NO_PLUGIN_STATE
 static bool seen_saving_message = false;
+
+static void show_no_plugin_message()
+{
+	info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
+			PROGRAM_NAME)
+	     << endmsg;
+	info << _("To get full access to updates without this limitation\n"
+	          "consider becoming a subscriber for a low cost every month.")
+	     << endmsg;
+	info << X_("https://community.ardour.org/s/subscribe")
+	     << endmsg;
+	ARDOUR_UI::instance()->popup_error(_("Plugin presets are not supported in this build, see the Log window for more information."));
+}
 #endif
 
 void
@@ -586,10 +599,8 @@ PlugUIBase::add_plugin_setting ()
 	}
 #else 
 	if (!seen_saving_message) {
-		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
-					PROGRAM_NAME)
-		     << endmsg;
 		seen_saving_message = true;
+		show_no_plugin_message();
 	}
 #endif
 }
@@ -606,10 +617,8 @@ PlugUIBase::save_plugin_setting ()
 	}
 #else 
 	if (!seen_saving_message) {
-		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
 		seen_saving_message = true;
+		show_no_plugin_message();
 	}
 #endif
 }
@@ -621,10 +630,8 @@ PlugUIBase::delete_plugin_setting ()
 	plugin->remove_preset (_preset_combo.get_text ());
 #else
 	if (!seen_saving_message) {
-		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
 		seen_saving_message = true;
+		show_no_plugin_message();
 	}
 #endif
 }
