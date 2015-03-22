@@ -45,3 +45,9 @@ int main (int argc, char **argv) {
 
 	return 0;
 }
+
+
+#include "ardour/vst_types.h"
+int vstfx_init (void*) { return 0; }
+void vstfx_exit () {}
+void vstfx_destroy_editor (VSTState*) {}

@@ -13,6 +13,9 @@ def configure(conf):
     autowaf.configure(conf)
 
 def build(bld):
+    if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
+	    return;
+
     obj = bld (features = 'cxx c cxxprogram')
     obj.source       = 'cfgtool.cc'
     obj.target       = 'cfgtool'
