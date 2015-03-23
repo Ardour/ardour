@@ -1503,7 +1503,6 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
 		);
 
-	populate_sync_options ();
 	add_option (_("Transport"), _sync_source);
 
 	_sync_framerate = new BoolOption (
@@ -1574,6 +1573,8 @@ RCOptionEditor::RCOptionEditor ()
 	physical_inputs.push_back (_("None"));
 	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
 	_ltc_port->set_popdown_strings (physical_inputs);
+
+	populate_sync_options ();
 
 	add_option (_("Transport"), _ltc_port);
 
@@ -2507,5 +2508,13 @@ RCOptionEditor::populate_sync_options ()
 
 	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
 		_sync_source->add (*i, sync_source_to_string (*i));
+	}
+
+	if (sync_opts.empty()) {
+		_sync_source->set_sensitive(false);
+	} else {
+		if (std::find(sync_opts.begin(), sync_opts.end(), _rc_config->get_sync_source()) == sync_opts.end()) {
+			_rc_config->set_sync_source(sync_opts.front());
+		}
 	}
 }
