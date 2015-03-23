@@ -304,23 +304,7 @@ fi
 # 
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
-echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.8.0/modules/*.so $Frameworks/modules
-echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
-# charset alias file
 cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
-
-# generate new Pango module file
-cat > pangorc <<EOF 
-[Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.8.0/modules
-EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
-rm pangorc
-
-# generate a new GDK pixbufs loaders file
-gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
 
 # We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Frameworks/gtkengines

@@ -110,37 +110,8 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 	 */
 
 	g_unsetenv ("GTK_RC_FILES");
-
-	/* write a pango.rc file and tell pango to use it. we'd love
-	   to put this into the PROGRAM_NAME.app bundle and leave it there,
-	   but the user may not have write permission. so ...
-
-	   we also have to make sure that the user ardour directory
-	   actually exists ...
-	*/
-
-	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
-		      << endmsg;
-	} else {
-		
-		path = Glib::build_filename (userconfigdir, "pango.rc");
-		std::ofstream pangorc (path.c_str());
-		if (!pangorc) {
-			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-		} else {
-			pangorc << "[Pango]\nModuleFiles="
-				<< Glib::build_filename (bundle_dir, "Resources/pango.modules") 
-				<< endl;
-			pangorc.close ();
-			
-			g_setenv ("PANGO_RC_FILE", path.c_str(), 1);
-		}
-	}
-	
 	g_setenv ("CHARSETALIASDIR", bundle_dir.c_str(), 1);
 	g_setenv ("FONTCONFIG_FILE", Glib::build_filename (bundle_dir, "Resources/fonts.conf").c_str(), 1);
-	g_setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (bundle_dir, "Resources/gdk-pixbuf.loaders").c_str(), 1);
 }
 
 void load_custom_fonts() 
