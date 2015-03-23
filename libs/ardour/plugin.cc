@@ -328,6 +328,7 @@ Plugin::get_presets ()
 		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
 					PROGRAM_NAME)
 		     << endmsg;
+		seen_set_state_message = true;
 	}
 #endif
 
