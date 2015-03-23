@@ -754,6 +754,7 @@ Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
 SetFile -a C "$UC_DMG"
 
 rm ${ICNSTMP}.icns ${ICNSTMP}.rsrc
+rm -rf ${PRODUCT_PKG_DIR}
 
 echo
 echo "packaging suceeded."
