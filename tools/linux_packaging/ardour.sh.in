@@ -45,12 +45,6 @@ export GTK_MODULES=""
 # Set this so that the executable will find all the right libraries inside the bundle
 export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
-# create install-location-dependent config files for Pango and GDK image loaders
-# We have to do this every time because its possible that BIN_DIR has changed
-
-sed "s?@ROOTDIR@/modules?$LIB_DIR/modules?" < $ETC_DIR/pango.modules.in > $USER_ARDOUR_DIR/pango.modules
-sed "s?@ROOTDIR@/loaders?$LIB_DIR/loaders?" < $ETC_DIR/gdk-pixbuf.loaders.in > $USER_ARDOUR_DIR/gdk-pixbuf.loaders
-
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
 	exec gdb $INSTALL_DIR/bin/ardour-%VER%

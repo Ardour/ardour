@@ -106,39 +106,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[], const char** localedir)
 		error << _("No fontconfig file found on your system. Things may looked very odd or ugly") << endmsg;
 	}
 
-	/* write a pango.rc file and tell pango to use it. we'd love
-	   to put this into the Ardour.app bundle and leave it there,
-	   but the user may not have write permission. so ...
-
-	   we also have to make sure that the user ardour directory
-	   actually exists ...
-	*/
-
-	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
-		      << endmsg;
-	} else {
-		
-		path = Glib::build_filename (userconfigdir, "pango.rc");
-		std::ofstream pangorc (path.c_str());
-		if (!pangorc) {
-			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-		} else {
-			pangorc << "[Pango]\nModuleFiles="
-				<< Glib::build_filename (userconfigdir, "pango.modules")
-				<< endl;
-			pangorc.close ();
-		}
-		
-		g_setenv ("PANGO_RC_FILE", path.c_str(), 1);
-		
-		/* similar for GDK pixbuf loaders, but there's no RC file required
-		   to specify where it lives.
-		*/
-		
-		g_setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
-	}
-
         /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack
            from looking outside the bundle to find the charset.alias file.
         */
