@@ -2342,6 +2342,11 @@ Session::auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing
 void
 Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool reconnect_inputs, bool reconnect_outputs)
 {
+    // it is not allowed to perform connection
+    if (!IO::connecting_legal) {
+        return;
+    }
+    
     // if we are deleting routes we will call this once at the end
     if (_route_deletion_in_progress) {
         return;
