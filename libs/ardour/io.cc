@@ -39,6 +39,7 @@
 #include "ardour/debug.h"
 #include "ardour/io.h"
 #include "ardour/port.h"
+#include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/user_bundle.h"
@@ -692,13 +693,16 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 int
 IO::connecting_became_legal ()
 {
-	int ret;
+	int ret = 0;
 
 	assert (pending_state_node);
 
 	connection_legal_c.disconnect ();
 
-	ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
+    // it's not required for TracksLive, as long as TracksLive's session does all the cennections when it's being loaded
+    if (!Profile->get_trx() ) {
+        ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
+    }
 
 	delete pending_state_node;
 	pending_state_node = 0;
