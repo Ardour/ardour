@@ -397,6 +397,14 @@ ArdourStartup::on_delete_event (GdkEventAny*)
 void
 ArdourStartup::on_apply ()
 {
+	/* file-chooser button does not emit 'current_folder_changed' signal
+	 * when a folder from the dropdown or the sidebar is chosen.
+	 * -> explicitly poll for the dir as suggested by the gtk documentation.
+	 */
+	if (default_dir_chooser && default_dir_chooser->get_filename() != Config->get_default_session_parent_dir ()) {
+		config_modified = true;
+	}
+
 	if (config_modified) {
 
 		if (default_dir_chooser) {
@@ -433,6 +441,3 @@ ArdourStartup::move_along_now ()
 {
 	on_apply ();
 }
-
-
-		
