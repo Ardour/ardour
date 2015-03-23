@@ -1885,20 +1885,34 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
 		);
 
+	int dmsize = 1;
 	dm->add (DenormalNone, _("no processor handling"));
 
 	FPU fpu;
 
 	if (fpu.has_flush_to_zero()) {
+		++dmsize;
 		dm->add (DenormalFTZ, _("use FlushToZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
+		_rc_config->set_denormal_model(DenormalNone);
 	}
 
 	if (fpu.has_denormals_are_zero()) {
+		++dmsize;
 		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
 	}
 
 	if (fpu.has_flush_to_zero() && fpu.has_denormals_are_zero()) {
+		++dmsize;
 		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (dmsize == 1) {
+		dm->set_sensitive(false);
 	}
 
 	add_option (_("Audio"), dm);
