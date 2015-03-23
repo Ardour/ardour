@@ -251,6 +251,8 @@ int ardour_main (int argc, char *argv[])
 int main (int argc, char *argv[])
 #endif
 {
+	ARDOUR::check_for_old_configuration_files();
+
 	fixup_bundle_environment (argc, argv, &localedir);
 
 	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */

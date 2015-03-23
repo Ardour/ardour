@@ -88,7 +88,8 @@ namespace ARDOUR {
 	 * action, and return true or false depending on whether or not the
 	 * copy should take place.
 	 */
-	LIBARDOUR_API int check_for_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler);
+	LIBARDOUR_API void check_for_old_configuration_files ();
+	LIBARDOUR_API int handle_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler);
 }
 
 #endif /* __ardour_ardour_h__ */

@@ -238,7 +238,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 {
 	Gtkmm2ext::init(localedir);
 
-	if (ARDOUR::check_for_old_configuration_files (boost::bind (ask_about_configuration_copy, _1, _2, _3))) {
+	if (ARDOUR::handle_old_configuration_files (boost::bind (ask_about_configuration_copy, _1, _2, _3))) {
 		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
 		msg.run ();
 		/* configuration was modified, exit immediately */

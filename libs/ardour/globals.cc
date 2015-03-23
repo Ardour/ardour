@@ -138,6 +138,8 @@ PBD::Signal1<void,int> ARDOUR::PluginScanTimeout;
 PBD::Signal0<void> ARDOUR::GUIIdle;
 PBD::Signal3<bool,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
 
+static bool have_old_configuration_files = false;
+
 namespace ARDOUR {
 extern void setup_enum_writer ();
 }
@@ -263,6 +265,11 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 
 		copy_file (old_name, new_name);
 
+		old_name = Glib::build_filename (old_dir, X_("sfdb"));
+		new_name = Glib::build_filename (new_dir, X_("sfdb"));
+
+		copy_file (old_name, new_name);
+
 		/* can only copy ardour.rc - UI config is not compatible */
 
 		old_name = Glib::build_filename (old_dir, X_("ardour.rc"));
@@ -314,31 +321,43 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 	return 0;
 }
 
-int
-ARDOUR::check_for_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler)
+void
+ARDOUR::check_for_old_configuration_files ()
 {
 	int current_version = atoi (X_(PROGRAM_VERSION));
 	
 	if (current_version <= 1) {
-		return 0;
+		return;
 	}
 
 	int old_version = current_version - 1;
 
 	string old_config_dir = user_config_directory (old_version);
 	/* pass in the current version explicitly to avoid creation */
-	string current_config_dir = user_config_directory (current_version); 
+	string current_config_dir = user_config_directory (current_version);
 
 	if (!Glib::file_test (current_config_dir, Glib::FILE_TEST_IS_DIR)) {
 		if (Glib::file_test (old_config_dir, Glib::FILE_TEST_IS_DIR)) {
-			
-			if (ui_handler (old_config_dir, current_config_dir, old_version)) {
-				copy_configuration_files (old_config_dir, current_config_dir, old_version);
-				return 1;
-			}
+			have_old_configuration_files = true;
 		}
 	}
+}
 
+int
+ARDOUR::handle_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler)
+{
+	if (have_old_configuration_files) {
+		int current_version = atoi (X_(PROGRAM_VERSION));
+		assert (current_version > 1); // established in check_for_old_configuration_files ()
+		int old_version = current_version - 1;
+		string old_config_dir = user_config_directory (old_version);
+		string current_config_dir = user_config_directory (current_version);
+
+		if (ui_handler (old_config_dir, current_config_dir, old_version)) {
+			copy_configuration_files (old_config_dir, current_config_dir, old_version);
+			return 1;
+		}
+	}
 	return 0;
 }
 
