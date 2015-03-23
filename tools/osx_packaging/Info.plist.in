@@ -23,13 +23,13 @@
 		</dict>
 	</array>
 	<key>CFBundleExecutable</key>
-	<string>Ardour3</string>
+	<string>@EXECUTABLE@</string>
 	<key>CFBundleGetInfoString</key>
 	<string>@INFOSTRING@</string>
 	<key>CFBundleIconFile</key>
 	<string>appIcon.icns</string>
 	<key>CFBundleIdentifier</key>
-	<string>org.ardour.Ardour3</string>
+	<string>org.ardour.@IDSUFFIX@</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>

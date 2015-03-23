@@ -99,7 +99,7 @@ fi
 
 # setup directory structure
 
-APPDIR=${APPNAME}.app
+APPDIR=${APPNAME}${major_version}.app
 APPROOT=$APPDIR/Contents
 Frameworks=$APPROOT/lib
 Resources=$APPROOT/Resources
@@ -163,7 +163,8 @@ mkdir -p $PatchFiles
 # maybe set variables
 env=""
 if test x$SAE != x ; then
-    appname="Ardour3/SAE"
+    appname="Ardour${major_version}-SAE"
+    EXECUTABLE=${appname}
     env="$env<key>ARDOUR_SAE</key><string>true</string>"
     #
     # current default for SAE version is German keyboard layout without a keypad
@@ -172,6 +173,7 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
 elif test x$MIXBUS != x ; then
     appname="Mixbus"
+    EXECUTABLE=${appname}${major_version}
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
     # current default for MIXBUS version is US keyboard layout without a keypad
@@ -179,7 +181,8 @@ elif test x$MIXBUS != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>us-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui.conf</string>"
 else
-    appname="Ardour3"
+    appname="Ardour${major_version}"
+    EXECUTABLE=${appname}
 fi
 
 #
@@ -192,10 +195,13 @@ env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</
 
 env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</string></dict>"
 
+
 # edit plist
 sed -e "s?@ENV@?$env?g" \
     -e "s?@VERSION@?$release_version?g" \
-    -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
+    -e "s?@INFOSTRING@?$info_string?g" \
+    -e "s?@IDSUFFIX@?$EXECUTABLE?g" \
+    -e "s?@EXECUTABLE@?$EXECUTABLE?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
     -e "s?@ENV@?$env?g" \
@@ -213,14 +219,14 @@ rm -f Resources/InfoPlist.strings
 
 #
 # if we build a bundle without jack, then
-# make the Ardour3 executable a helper
+# make the Ardour executable a helper
 # script that checks to see if JACK is
 # installed.
 #
 
-cp startup_script $APPROOT/MacOS/Ardour3
-chmod 775 $APPROOT/MacOS/Ardour3
-MAIN_EXECUTABLE=Ardour3.bin
+cp startup_script $APPROOT/MacOS/$EXECUTABLE
+chmod 775 $APPROOT/MacOS/$EXECUTABLE
+MAIN_EXECUTABLE=Ardour.bin  ## used in startup_script
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
@@ -230,7 +236,7 @@ if test x$SAE != x ; then
 elif test x$MIXBUS != x ; then
     cp  Mixbus.icns $Resources/appIcon.icns
 else
-    cp  Ardour3.icns $Resources/appIcon.icns
+    cp  Ardour.icns $Resources/appIcon.icns
 fi
 cp  typeArdour.icns $Resources/
 
