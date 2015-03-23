@@ -33,7 +33,7 @@ PROGRAM_NAME=Ardour
 PRODUCT_NAME=ardour
 PROGRAM_VERSION=${major_version}
 
-LOWERCASE_DIRNAME=ardour3 # see wscript 'lwrcase_dirname' used for lib/ardour3 and share/ardour3
+LOWERCASE_DIRNAME=ardour${major_version}
 STATEFILE_SUFFIX=ardour # see filename_extensions.cc
 
 if test -n "$MIXBUS"; then
