@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <glib.h>
+
 #include "pbd/xml++.h"
 #include "ardour/rc_configuration.h"
 
@@ -17,8 +19,8 @@ int main (int argc, char **argv) {
 		return 0;
 	}
 
-	setenv ("ARDOUR_DLL_PATH", "/xxx", 1);
-	setenv ("ARDOUR_CONFIG_PATH", "/xxx", 1);
+	g_setenv ("ARDOUR_DLL_PATH", "/xxx", 1);
+	g_setenv ("ARDOUR_CONFIG_PATH", "/xxx", 1);
 
 	if (!ARDOUR::init (false, true, "/xxx")) {
 		fprintf(stderr, "Failed to initialize libardour\n");
