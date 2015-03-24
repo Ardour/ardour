@@ -835,7 +835,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 			citems.push_back (
 				MenuElem (
-					string_compose ("Add %1 port", (*i).to_i18n_string()),
+					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
 					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
 					)
 				);
@@ -937,7 +937,7 @@ MixerStrip::input_press (GdkEventButton *ev)
 		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
 			citems.push_back (
 				MenuElem (
-					string_compose ("Add %1 port", (*i).to_i18n_string()),
+					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
 					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_input_port), *i)
 					)
 				);
