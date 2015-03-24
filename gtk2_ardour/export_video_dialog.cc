@@ -121,6 +121,7 @@ ExportVideoDialog::ExportVideoDialog ()
 		get_vbox()->pack_start (*vbox, false, false);
 		add_button (Stock::OK, RESPONSE_CANCEL);
 		show_all_children ();
+		delete _transcoder; _transcoder = 0;
 		return;
 	}
 	delete _transcoder; _transcoder = 0;
