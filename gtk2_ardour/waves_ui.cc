@@ -921,6 +921,9 @@ WavesUI::set_attributes (Gtk::Widget& widget, const XMLNode& definition, const X
 		if (xml_property (definition, "usemarkup", styles, false)) {
 			label->set_use_markup (true);
 		}
+		if (xml_property (definition, "linewrap", styles, false)){
+			label->set_line_wrap (true);
+		}
 	}
 
 	Gtk::SpinButton* spin_button = dynamic_cast<Gtk::SpinButton*> (&widget);
