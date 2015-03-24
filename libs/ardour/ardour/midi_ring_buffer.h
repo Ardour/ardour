@@ -56,6 +56,7 @@ public:
 
 	void reset_tracker ();
 	void resolve_tracker (MidiBuffer& dst, framepos_t);
+	void resolve_tracker (Evoral::EventSink<framepos_t>& dst, framepos_t);
 
 private:
 	MidiStateTracker _tracker;

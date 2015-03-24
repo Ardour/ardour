@@ -72,6 +72,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	void set_record_enabled (bool yn);
 	
 	void reset_tracker ();
+	void resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t time);
 
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 

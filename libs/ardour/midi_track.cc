@@ -892,7 +892,7 @@ MidiTrack::act_on_mute ()
 		return;
 	}
 
-	if (muted()) {
+	if (muted() || _mute_master->muted_by_others_at(MuteMaster::AllPoints)) {
 		/* only send messages for channels we are using */
 
 		uint16_t mask = get_playback_channel_mask();
@@ -904,10 +904,14 @@ MidiTrack::act_on_mute ()
 				DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 delivers mute message to channel %2\n", name(), channel+1));
 				uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
 				write_immediate_event (3, ev);
-				ev[1] = MIDI_CTL_ALL_NOTES_OFF;
-				write_immediate_event (3, ev);
+
+				/* Note we do not send MIDI_CTL_ALL_NOTES_OFF here, since this may
+				   silence notes that came from another non-muted track. */
 			}
 		}
+
+		/* Resolve active notes. */
+		midi_diskstream()->resolve_tracker(_immediate_events, 0);
 	}
 }
 	

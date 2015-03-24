@@ -303,6 +303,13 @@ MidiRingBuffer<T>::resolve_tracker (MidiBuffer& dst, framepos_t t)
 	_tracker.resolve_notes (dst, t);
 }
 
+template<typename T>
+void
+MidiRingBuffer<T>::resolve_tracker (Evoral::EventSink<framepos_t>& dst, framepos_t t)
+{
+	_tracker.resolve_notes(dst, t);
+}
+
 template class MidiRingBuffer<framepos_t>;
 
 }  // namespace ARDOUR

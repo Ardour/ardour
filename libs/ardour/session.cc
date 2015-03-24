@@ -3022,6 +3022,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
 	for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1, which neither feeds or is fed by %2\n", (*i)->name(), route->name()));
+		(*i)->act_on_mute ();
 		(*i)->mute_changed (this);
 	}
 

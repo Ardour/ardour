@@ -1554,6 +1554,19 @@ MidiDiskstream::reset_tracker ()
 	}
 }
 
+void
+MidiDiskstream::resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t time)
+{
+	_playback_buf->resolve_tracker(buffer, time);
+
+	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
+
+	if (mp) {
+		mp->reset_note_trackers ();
+	}
+}
+
+
 boost::shared_ptr<MidiPlaylist>
 MidiDiskstream::midi_playlist ()
 {
