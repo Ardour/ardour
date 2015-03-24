@@ -87,6 +87,7 @@
 #include "ardour/system_exec.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
+#include "waves_prompter.h"
 #include "dbg_msg.h"
 
 #ifdef WINDOWS_VST_SUPPORT
@@ -2690,23 +2691,17 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 void
 ARDOUR_UI::save_template ()
 {
-	ArdourPrompter prompter (true);
-	string name;
-
 	if (!check_audioengine()) {
 		return;
 	}
 
-	prompter.set_name (X_("Prompter"));
-	prompter.set_title (_("Save Template"));
-	prompter.set_prompt (_("Name for template:"));
-	prompter.set_initial_text(_session->name() + _("-template"));
-	prompter.add_button ("SAVE", Gtk::RESPONSE_ACCEPT);
+	std::string name;
+	WavesPrompter the_prompter ("waves_save_template_dialog.xml");
+	the_prompter.set_initial_text(_session->name() + _("-template"));
 
-	switch (prompter.run()) {
+	switch (the_prompter.run()) {
 	case RESPONSE_ACCEPT:
-		prompter.get_result (name);
-
+		the_prompter.get_result (name);
 		if (name.length()) {
 			_session->save_template (name);
 		}

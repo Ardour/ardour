@@ -18,6 +18,7 @@
       <menuitem action='Open'/>
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
+      <menuitem action='SaveTemplate'/>
       <menuitem action='Close'/>
       <menu name='recent-sessions' action='recent-sessions'>
         <menuitem action='recent-session-0'/>

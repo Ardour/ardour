@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Dialog title="Save Template - Tracks Live" resizeable="False" CACHEIT="false">
+  <style name="generic_control"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         bgnormal="#6C6C6C"
+         fgactive="#BFBFBF"
+         bgactive="#454545"
+         fghover="#CCCCCC"
+         bghover="#898989"/>
+  <style name="generic_button"
+         winfont ="Arial Bold 10"
+         macfont ="Helvetica Bold 10"
+         fgnormal="#6D6E72"
+         textcolornormal="#6D6E72"
+         bgnormal="#CACAC5"
+         basenormal="#CACAC5"
+         fgactive="#EDECE8"
+         bgactive="#6D6E72"
+         borderwidth="0 0 0 0"
+         bordercolor="#6D6E72"
+         width="80"
+         height="22"/>
+  <style name="generic_entry"
+         style="generic_control"
+         bgnormal="#6C6C6C"
+         basenormal="#6C6C6C"
+         fgnormal="#C1C1C1"
+         textcolornormal="#C1C1C1"
+         height="22"
+         hasframe="false"/>
+
+  <EventBox bgnormal="#EDECE8">
+    <VBox borderwidth="10"
+          spacing="10">
+      <HBox spacing="10">
+        <Label id="entry_label"
+               style="generic_control"
+               text="Name for template"/>
+        <Entry id="entry"
+               style="generic_entry"
+               horzalignment="start"
+               width="200"/>
+      </HBox>
+      <HBox spacing="10">
+        <Button id="accept_button"
+                style="generic_button"
+                box.pack="end"
+                text="Save"/>
+        <Button id="cancel_button"
+                style="generic_button"
+                box.pack="end"
+                text="Cancel"/>
+      </HBox>
+    </VBox>
+  </EventBox>
+</Dialog>
