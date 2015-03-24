@@ -541,7 +541,7 @@ RegionDrag::find_time_axis_view (TimeAxisView* t) const
 		++i;
 	}
 
-	if (i == N) {
+	if (_time_axis_views[i] != t) {
 		return -1;
 	}
 
@@ -573,6 +573,7 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (current_pointer_y ());
 	if (tv.first) {
 		_last_pointer_time_axis_view = find_time_axis_view (tv.first);
+		assert(_last_pointer_time_axis_view >= 0);
 		_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
 	}
 }
@@ -650,6 +651,35 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 	
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		int n = i->time_axis_view + delta_track;
+		/* TODO:  for i > 0, account for hidden tracks
+		 *
+		 * example. top-to-bottom:
+		 * 2 Audio Tracks [one region each]   1 Bus  1 Audio Track.
+		 * Hide the Bus. (looks like 3 audio tracks)
+		 *
+		 * select both region, grab the upper and move down 1 track
+		 * -> delta_track = 1;
+		 *
+		 * real_delta_track=1 (for region on track1)
+		 * real_delta_track=2 (for region on track2, skip the hidden bus)
+		 * -> fail
+		 *
+		 * assuming it worked..
+		 * Audio Track  Audio Track[with region]  hidden-Bus  Audio Track[with region]
+		 *
+		 * selected both regions, grab the lower region and
+		 * move up one track -> given delta == -2 (skip the bus)
+		 *
+		 * real_delta_track=-1
+		 * real_delta_track=-2
+		 *
+		 * It gets worse if both regions have to ignore differen numbers of hidden tracks
+		 * in between.
+		 *
+		 *
+		 * Proposed solution:  if i == 0, count number of hidden tracks crossed
+		 * subtract that number for i > 0 AND also subtract hidden tracks crossed
+		 */
 		if (i->time_axis_view < 0) {
 			/* already in the drop zone */
 			if (delta_track >= 0) {
@@ -676,7 +706,7 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 		}
 		
 		RouteTimeAxisView const * to = dynamic_cast<RouteTimeAxisView const *> (_time_axis_views[n]);
-		if (to == 0 || !to->is_track() || to->track()->data_type() != i->view->region()->data_type()) {
+		if (to == 0 || to->hidden() || !to->is_track() || to->track()->data_type() != i->view->region()->data_type()) {
 			/* not a track, or the wrong type */
 			return false;
 		}
@@ -740,21 +770,48 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		/* Here's the current pointer position in terms of time axis view and layer */
 		current_pointer_time_axis_view = find_time_axis_view (tv);
+		assert(current_pointer_time_axis_view >= 0);
 
 		double const current_pointer_layer = tv->layer_display() == Overlaid ? 0 : layer;
 		
 		/* Work out the change in y */
 
 		if (_last_pointer_time_axis_view < 0) {
-			/* We can only move up, set delta to move up the correct number of
-			   tracks from the bottom.  This is necessary because steps may be
-			   skipped if the lowest track is not a valid target, so e.g. delta
-			   -2 may be the first valid value. */
-			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size();
+			/* Was in the drop-zone, now over a track.
+			 * Hence it must be an upward move (from the bottom)
+			 *
+			 * track_index is still -1, so delta must be set to
+			 * move up the correct number of tracks from the bottom.
+			 *
+			 * This is necessary because steps may be skipped if
+			 * the bottom-most track is not a valid target,
+			 */
+			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size ();
 		} else {
 			delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
 		}
 
+		/* TODO needs adjustment per DraggingView,
+		 *
+		 * e.g. select one region on the top-layer of a track
+		 * and one region which is at the bottom-layer of another track
+		 * drag both.
+		 *
+		 * Indicated drop-zones and layering is wrong.
+		 * and may infer additional layers on the target-track
+		 * (depending how many layers the original track had).
+		 *
+		 * Or select two regions (different layers) on a same track,
+		 * move across a non-layer track.. -> layering info is lost.
+		 * on drop either of the regions may be on top.
+		 *
+		 * Proposed solution: screw it :) well,
+		 *   don't use delta_layer, use an absolute value
+		 *   1) remember DraggingView's layer  as float 0..1  [current layer / all layers of source]
+		 *   2) calculate current mouse pos, y-pos inside track divided by height of mouse-over track.
+		 *   3) iterate over all DraggingView, find the one that is over the track with most layers
+		 *   4) proportionally scale layer to layers available on target
+		 */
 		delta_layer = current_pointer_layer - _last_pointer_layer;
 	} 
 
@@ -859,6 +916,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			if (track_index < 0 || track_index >= (int) _time_axis_views.size()) {
+				// Velociraptor was here
 				goto dropzone;
 			}
 
@@ -992,6 +1050,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 			if (delta_time_axis_view < 0) {
 				/* was in the drop zone, moving up */
+				assert(current_pointer_time_axis_view >= 0);
 				_last_pointer_time_axis_view = current_pointer_time_axis_view;
 			} else {
 				/* was in the drop zone, moving down ... not possible */
@@ -1001,7 +1060,8 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 			/* last motion event was also over a time axis view */
 			
-			_last_pointer_time_axis_view = current_pointer_time_axis_view;
+			_last_pointer_time_axis_view += delta_time_axis_view;
+			assert(_last_pointer_time_axis_view >= 0);
 		}
 
 	} else {
