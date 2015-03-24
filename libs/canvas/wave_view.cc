@@ -211,6 +211,21 @@ WaveView::invalidate_image_cache ()
 	vector <uint32_t> deletion_list;
 	vector <CacheEntry> caches;
 
+	/* The source may have disappeared in the case of rec regions.*/
+	if (_region->n_channels() == 0) {
+		std::map <boost::shared_ptr<ARDOUR::AudioSource>, std::vector <CacheEntry> >::iterator i;
+		for (i = _image_cache.begin(); i != _image_cache.end(); ++i) {
+			if (i->first.unique()) {
+				for (uint32_t n = 0; n < (*i).second.size (); ++n) {
+					(*i).second[n].image.clear ();
+				}
+				(*i).second.clear ();
+				_image_cache.erase(i->first);
+			}
+		}
+		return;
+	}
+
 	if (_image_cache.find (_region->audio_source ()) != _image_cache.end ()) {
 		caches = _image_cache.find (_region->audio_source ())->second;
 	} else {
@@ -228,7 +243,6 @@ WaveView::invalidate_image_cache ()
 		}
 
 		deletion_list.push_back (i);
-
 	}
 
 	while (deletion_list.size() > 0) {
@@ -242,7 +256,6 @@ WaveView::invalidate_image_cache ()
 	} else {
 		_image_cache[_region->audio_source ()] = caches;
 	}
-
 }
 
 void
