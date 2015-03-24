@@ -292,6 +292,7 @@ protected:
 	/** a list of the non-hidden TimeAxisViews sorted by editor order key */
 	std::vector<TimeAxisView*> _time_axis_views;
 	int find_time_axis_view (TimeAxisView *) const;
+	int apply_track_delta (const int start, const int delta, const int skip) const;
 
 	int _visible_y_low;
 	int _visible_y_high;
@@ -326,7 +327,7 @@ public:
 protected:
 
 	double compute_x_delta (GdkEvent const *, ARDOUR::framepos_t *);
-	virtual bool y_movement_allowed (int, double) const;
+	virtual bool y_movement_allowed (int, double, int skip_invisible = 0) const;
 
 	bool _brushing;
 	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
@@ -436,7 +437,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 protected:
-	bool y_movement_allowed (int delta_track, double delta_layer) const;
+	bool y_movement_allowed (int delta_track, double delta_layer, int skip_invisible = 0) const;
 
 private:
 	TimeAxisView *prev_tav;		// where regions were most recently dragged from
