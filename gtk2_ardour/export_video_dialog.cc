@@ -113,7 +113,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	HBox* path_hbox;
 
 	/* check if ffmpeg can be found */
-	_transcoder = new TranscodeFfmpeg("");
+	_transcoder = new TranscodeFfmpeg(X_(""));
 	if (!_transcoder->ffexec_ok()) {
 		l = manage (new Label (_("No ffprobe or ffmpeg executables could be found on this system. Video Export is not possible until you install those tools. See the Log window for more information."), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
 		l->set_line_wrap();
@@ -381,8 +381,8 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 	LocaleGuard lg (X_("C"));
 
 	XMLNode* node = _session->extra_xml (X_("Videotimeline"));
+	bool filenameset = false;
 	if (node) {
-		bool filenameset = false;
 		if (node->property(X_("OriginalVideoFile"))) {
 			std::string filename = node->property(X_("OriginalVideoFile"))->value();
 			if (Glib::file_test(filename, Glib::FILE_TEST_EXISTS)) {
@@ -407,9 +407,9 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 				filenameset = true;
 			}
 		}
-		if (!filenameset) {
-			invid_path_entry.set_text (X_(""));
-		}
+	}
+	if (!filenameset) {
+		invid_path_entry.set_text (X_(""));
 	}
 
 	node = _session->extra_xml (X_("Videoexport"));
