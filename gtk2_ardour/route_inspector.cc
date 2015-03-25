@@ -138,7 +138,7 @@ RouteInspector::update_inspector_info_panel ()
     std::string output_text = "";
     PortSet& out_ports (_route->output()->ports() );
     
-    if( track_name != "master")
+    if( !_route->is_master () )
     {
         // if multi out mode
         if( auto_connection_options == AutoConnectPhysical )
