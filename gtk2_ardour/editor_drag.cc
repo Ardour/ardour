@@ -756,6 +756,12 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 	return true;
 }
 
+struct DraggingViewSorter {
+	bool operator() (const DraggingView& a, const DraggingView& b) {
+		return a.time_axis_view < b.time_axis_view;
+	}
+};
+
 void
 RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 {
@@ -938,6 +944,14 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			last_track_bottom_edge = (*t)->canvas_display()->canvas_origin ().y + (*t)->effective_height();
 			break;
 		}
+	}
+
+	if (first_move) {
+		/* sort views by time_axis.
+		 * This retains track order in the dropzone, regardless
+		 * of actual selection order
+		 */
+		_views.sort (DraggingViewSorter());
 	}
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
