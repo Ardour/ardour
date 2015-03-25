@@ -6038,7 +6038,7 @@ Editor::set_session_extents_from_selection ()
 	if (!get_selection_extents ( start, end))
 		return;
 
-	begin_reversible_command (_("set session start/stop from selection"));
+	begin_reversible_command (_("set session start/end from selection"));
 
 	Location* loc;
 	if ((loc = _session->locations()->session_range_location()) == 0) {
