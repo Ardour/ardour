@@ -823,7 +823,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		 */
 		delta_layer = current_pointer_layer - _last_pointer_layer;
 
-	} else if (current_pointer_y() >= 0 && _last_pointer_time_axis_view >= 0) {
+	}
+	/* for automation lanes, there is a TimeAxisView but no ->view() */
+	else if (!tv && current_pointer_y() >= 0 && _last_pointer_time_axis_view >= 0) {
 		/* Moving into the drop-zone..
 		 *
 		 * TODO allow moving further down in drop-zone:
