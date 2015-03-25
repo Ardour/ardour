@@ -835,6 +835,16 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		 *
 		 * B) grab the lower, drag 1 down, region (and mouse) are in dropzone, The End.
 		 *    upper region is only down one track and cannot be moved into the zone.
+		 *
+		 * Proposed solution:
+		 *  keep track of how many regions are in the DZ (private var),
+		 *  also count from how many tracks the dragged-regions come from (first move)
+		 *
+		 *  if not all regions are in the DZ, keep going.
+		 *
+		 *  Using 'default height' H for all dropzone regions will make things
+		 *  a lot simpler: (number_of_DZ_entries * H + Pointer_YPOS - DZ_YPOS) / H.
+		 *  (because at this point in time PlaylistDropzoneMap is not yet populated)
 		 */
 		delta_time_axis_view = _time_axis_views.size () - _last_pointer_time_axis_view;
 #ifdef DEBUG_DROPZONEDRAG
