@@ -31,6 +31,7 @@
                        text="32"
                        fgnormal="#BAB9B9"
                        fgactive="#ffffff"
+                       justify="right"
                        winfont ="Arial Bold 10"
                        macfont ="Helvetica Bold 10"/>
               </VBox>
