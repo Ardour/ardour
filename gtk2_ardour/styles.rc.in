@@ -1,7 +1,7 @@
 style "contrasting_popup" = "medium_monospace_text"
 {
-  bg[NORMAL]          = @@COLPREFIX@_lightest
-  fg[NORMAL]          = @@COLPREFIX@_darkest
+  bg[NORMAL]          = @@COLPREFIX@_bg_tooltip
+  fg[NORMAL]          = @@COLPREFIX@_fg_tooltip
   base[NORMAL]        = @@COLPREFIX@_lightest
   text[NORMAL]        = @@COLPREFIX@_darkest
   text[ACTIVE]        = @@COLPREFIX@_darkest
