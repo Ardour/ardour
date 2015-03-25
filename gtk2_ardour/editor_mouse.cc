@@ -525,7 +525,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 			set_selected_track_as_side_effect (op);
 
 			/* We won't get a release.*/
-			begin_reversible_selection_op (_("Button 3 Menu Select"));
+			begin_reversible_selection_op (X_("Button 3 Menu Select"));
 			commit_reversible_selection_op ();
 		}
 		break;
@@ -539,7 +539,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	}
 
 	if ((!press) && _mouse_changed_selection) {
-		begin_reversible_selection_op (_("Button Selection"));
+		begin_reversible_selection_op (X_("Button Selection"));
 		commit_reversible_selection_op ();
 		_mouse_changed_selection = false;
 	}

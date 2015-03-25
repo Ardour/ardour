@@ -182,7 +182,7 @@ Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
 	_track_canvas->grab_focus();
 	if (!Keyboard::is_context_menu_event (event)) {
-		begin_reversible_selection_op (_("Clear Selection Click (track canvas)"));
+		begin_reversible_selection_op (X_("Clear Selection Click (track canvas)"));
 		selection->clear ();
 		commit_reversible_selection_op();
         }
@@ -1130,7 +1130,7 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 	switch (event->type) {
 	case GDK_BUTTON_RELEASE:
 		if (event->button.button == 1) {
-			begin_reversible_selection_op (_("Nowhere Click"));
+			begin_reversible_selection_op (X_("Nowhere Click"));
 			selection->clear_objects ();
 			selection->clear_tracks ();
 			commit_reversible_selection_op ();

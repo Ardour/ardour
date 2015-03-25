@@ -1309,7 +1309,7 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 {
 	uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
-	_editor.begin_reversible_selection_op(_("Set Note Selection"));
+	_editor.begin_reversible_selection_op (X_("Set Note Selection"));
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1329,7 +1329,7 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
-	_editor.begin_reversible_selection_op(_("Add Note Selection"));
+	_editor.begin_reversible_selection_op (X_("Add Note Selection"));
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1349,7 +1349,7 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
-	_editor.begin_reversible_selection_op(_("Extend Note Selection"));
+	_editor.begin_reversible_selection_op (X_("Extend Note Selection"));
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
@@ -1369,7 +1369,7 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
-	_editor.begin_reversible_selection_op(_("Toggle Note Selection"));
+	_editor.begin_reversible_selection_op (X_("Toggle Note Selection"));
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (

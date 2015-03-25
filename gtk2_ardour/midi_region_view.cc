@@ -599,7 +599,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 	}
 
 	if (_mouse_changed_selection) {
-		trackview.editor().begin_reversible_selection_op (_("Mouse Selection Change"));
+		trackview.editor().begin_reversible_selection_op (X_("Mouse Selection Change"));
 		trackview.editor().commit_reversible_selection_op ();
 	}
 
@@ -760,7 +760,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 
 	} else if (ev->keyval == GDK_Tab || ev->keyval == GDK_ISO_Left_Tab) {
 
-		trackview.editor().begin_reversible_selection_op (_("Select Adjacent Note"));
+		trackview.editor().begin_reversible_selection_op (X_("Select Adjacent Note"));
 
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));

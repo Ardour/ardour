@@ -4712,7 +4712,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	Session* s = _editor->session();
 
-	_editor->begin_reversible_selection_op (_("Change Time Selection"));
+	_editor->begin_reversible_selection_op (X_("Change Time Selection"));
 	if (movement_occurred) {
 		motion (event, false);
 		/* XXX this is not object-oriented programming at all. ick */
@@ -5062,7 +5062,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 				_region->unique_select (_primary);
 			}
 
-			_editor->begin_reversible_selection_op(_("Select Note Press"));
+			_editor->begin_reversible_selection_op(X_("Select Note Press"));
 			_editor->commit_reversible_selection_op();
 		}
 	}
@@ -5173,7 +5173,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 
 			if (changed) {
-				_editor->begin_reversible_selection_op(_("Select Note Release"));
+				_editor->begin_reversible_selection_op(X_("Select Note Release"));
 				_editor->commit_reversible_selection_op();
 			}
 		}
@@ -5569,7 +5569,7 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 
 	Selection::Operation op = ArdourKeyboard::selection_type (button_state);
 
-	_editor->begin_reversible_selection_op (_("rubberband selection"));
+	_editor->begin_reversible_selection_op (X_("rubberband selection"));
 
 	_editor->select_all_within (x1, x2 - 1, y1, y2, _editor->track_views, op, false);
 
@@ -5579,7 +5579,7 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 void
 EditorRubberbandSelectDrag::deselect_things ()
 {
-	_editor->begin_reversible_selection_op (_("Clear Selection (rubberband)"));
+	_editor->begin_reversible_selection_op (X_("Clear Selection (rubberband)"));
 
 	_editor->selection->clear_tracks();
 	_editor->selection->clear_regions();
