@@ -4499,7 +4499,6 @@ SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i)
 	, _operation (o)
 	, _add (false)
-	, _original_pointer_time_axis (-1)
 	, _time_selection_at_start (!_editor->get_selection().time.empty())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
@@ -4558,8 +4557,6 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	} else {
 		show_verbose_cursor_time (adjusted_current_frame (event));
 	}
-
-	_original_pointer_time_axis = _editor->trackview_by_y_position (current_pointer_y ()).first->order ();
 }
 
 void

@@ -983,7 +983,6 @@ public:
 private:
 	Operation _operation;
 	bool _add;
-	int _original_pointer_time_axis;
 	std::list<TimeAxisView*> _added_time_axes;
 	bool _time_selection_at_start;
         framepos_t start_at_start;
