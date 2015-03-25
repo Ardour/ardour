@@ -173,14 +173,16 @@
                             activeicon="inspector_record_active"
                             visible="false"
                             noshowall="true"
-                            box.padding="1"/>
+                            box.padding="1"
+                            tooltip="Record Enable"/>
                 <iconbutton id="monitor_input_button"
                             width="47"
                             height="20"
                             normalicon="inspector_monitor_input"
                             activeicon="inspector_monitor_input_active"
                             visible="false"
-                            noshowall="true"/>
+                            noshowall="true"
+                            tooltip="Input Monitoring"/>
               </HBox>
               <HBox height="1"/>
               <HBox>
@@ -192,7 +194,8 @@
                             implicitactiveicon="inspector_mute_implicit"
                             visible="false"
                             noshowall="true"
-                            box.padding="1"/>
+                            box.padding="1"
+                            tooltip="Mute"/>
                 <iconbutton id="solo_button"
                             width="47"
                             height="20"
@@ -200,7 +203,8 @@
                             activeicon="inspector_solo_active"
                             implicitactiveicon="inspector_solo_safe"
                             visible="false"
-                            noshowall="true"/>
+                            noshowall="true"
+                            tooltip="Solo"/>
               </HBox>
             </VBox>
             <HBox>
@@ -211,7 +215,8 @@
                           activeicon="inspector_master_mute_active"
                           visible="false"
                           noshowall="true"
-                          box.padding="1"/>
+                          box.padding="1"
+                          tooltip="Mute"/>
 			</HBox>
             <HBox height="1"/>
             <HBox>

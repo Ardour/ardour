@@ -22,12 +22,14 @@
                               width="28"
                               height="20"
                               normalicon="mixer_record"
-                              activeicon="mixer_record_active"/>
+                              activeicon="mixer_record_active"
+                              tooltip="Record Enable"/>
                   <iconbutton id="monitor_input_button"
                               width="28"
                               height="20"
                               normalicon="mixer_monitor_input"
-                              activeicon="mixer_monitor_input_active"/>
+                              activeicon="mixer_monitor_input_active"
+                              tooltip="Input Monitoring"/>
                 </HBox>
                 <HBox spacing="1">
                   <iconbutton id="mute_button"
@@ -35,13 +37,15 @@
                               height="20"
                               normalicon="mixer_mute"
                               activeicon="mixer_mute_active"
-                              implicitactiveicon="mixer_mute_implicit"/>
+                              implicitactiveicon="mixer_mute_implicit"
+                              tooltip="Mute"/>
                   <iconbutton id="solo_button"
                               width="28"
                               height="20"
                               normalicon="mixer_solo"
                               activeicon="mixer_solo_active"
-                              implicitactiveicon="mixer_solo_safe"/>
+                              implicitactiveicon="mixer_solo_safe"
+                              tooltip="Solo"/>
                 </HBox>
                 <EventBox id="name_label_home">
                   <HBox>
