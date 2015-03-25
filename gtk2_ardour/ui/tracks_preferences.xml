@@ -650,18 +650,24 @@
                  width="117"/>
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
-          <Dropdownitem title="0 Min"
-                        style="generic_dropdown_item"/>
+          <Dropdownitem title="none"
+                        style="generic_dropdown_item"
+                        data="0"/>
           <Dropdownitem title="1 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="1"/>
           <Dropdownitem title="3 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="3"/>
           <Dropdownitem title="5 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="5"/>
           <Dropdownitem title="10 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="10"/>
           <Dropdownitem title="15 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="15"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control" text="Auto Save Timer" x="24" y="205"/>
@@ -681,18 +687,24 @@
                  width="117"/>
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
-          <Dropdownitem title="0 Min"
-                        style="generic_dropdown_item"/>
+          <Dropdownitem title="none"
+                        style="generic_dropdown_item"
+                        data="0"/>
           <Dropdownitem title="1 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="1"/>
           <Dropdownitem title="3 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="3"/>
           <Dropdownitem title="5 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="5"/>
           <Dropdownitem title="10 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="10"/>
           <Dropdownitem title="15 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="15"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"
@@ -719,10 +731,12 @@
                  width="117"/>
         </HBox>
         <DropdownMenu style="generic_dropdown_menu">
-          <Dropdownitem title="0 Min"
-                        style="generic_dropdown_item"/>
+          <Dropdownitem title="none"
+                        style="generic_dropdown_item"
+                        data="0"/>
           <Dropdownitem title="1 Min"
-                        style="generic_dropdown_item"/>
+                        style="generic_dropdown_item"
+                        data="1"/>
         </DropdownMenu>
       </Dropdown>
       <Label style="generic_control"

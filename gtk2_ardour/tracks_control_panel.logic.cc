@@ -522,33 +522,39 @@ void
 TracksControlPanel::populate_auto_lock_timer_dropdown()
 {
     int time = ARDOUR_UI::config()->get_auto_lock_timer();
-    std::stringstream ss;
-    ss << time;
-    std::string str_time = ss.str() + " Min";
-    
-    _auto_lock_timer_dropdown.set_text( str_time );
+    int size = _auto_lock_timer_dropdown.get_menu ().items ().size ();
+    for (int i = 0; i < size; ++i) {
+        if (_auto_lock_timer_dropdown.get_item_data_u (i) == time) {
+        	_auto_lock_timer_dropdown.set_current_item (i);
+            break;
+        }
+    }
 }
 
 void
 TracksControlPanel::populate_auto_save_timer_dropdown()
 {
     int time = ARDOUR_UI::config()->get_auto_save_timer();
-    std::stringstream ss;
-    ss << time;
-    std::string str_time = ss.str() + " Min";
-    
-    _auto_save_timer_dropdown.set_text( str_time );
+    int size = _auto_save_timer_dropdown.get_menu ().items ().size ();
+    for (int i = 0; i < size; ++i) {
+        if (_auto_save_timer_dropdown.get_item_data_u (i) == time) {
+            _auto_save_timer_dropdown.set_current_item (i);
+            break;
+        }
+    }
 }
 
 void
 TracksControlPanel::populate_pre_record_buffer_dropdown()
 {
     int time = ARDOUR_UI::config()->get_pre_record_buffer();
-    std::stringstream ss;
-    ss << time;
-    std::string str_time = ss.str() + " Min";
-    
-    _pre_record_buffer_dropdown.set_text( str_time );
+    int size = _pre_record_buffer_dropdown.get_menu ().items ().size ();
+    for (int i = 0; i < size; ++i) {
+        if (_pre_record_buffer_dropdown.get_item_data_u (i) == time) {
+        	_pre_record_buffer_dropdown.set_current_item (i);
+            break;
+        }
+    }
 }
 
 #define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
@@ -1569,27 +1575,21 @@ TracksControlPanel::save_default_session_path()
 void
 TracksControlPanel::save_auto_lock_time()
 {
-    std::string s = _auto_lock_timer_dropdown.get_text();
-    char * pEnd;
-    int time = strtol( s.c_str(), &pEnd, 10 );
+    int time = _auto_lock_timer_dropdown.get_item_data_u (_auto_lock_timer_dropdown.get_current_item ());
     ARDOUR_UI::config()->set_auto_lock_timer(time);
 }
 
 void
 TracksControlPanel::save_auto_save_time()
 {
-    std::string s = _auto_save_timer_dropdown.get_text();
-    char * pEnd;
-    int time = strtol( s.c_str(), &pEnd, 10 );
+    int time = _auto_save_timer_dropdown.get_item_data_u (_auto_save_timer_dropdown.get_current_item ());
     ARDOUR_UI::config()->set_auto_save_timer(time);
 }
 
 void
 TracksControlPanel::save_pre_record_buffer()
 {
-    std::string s = _pre_record_buffer_dropdown.get_text();
-    char * pEnd;
-    int time = strtol( s.c_str(), &pEnd, 10 );
+    int time = _pre_record_buffer_dropdown.get_item_data_u (_pre_record_buffer_dropdown.get_current_item ());
     ARDOUR_UI::config()->set_pre_record_buffer(time);
 }
 
@@ -1648,29 +1648,9 @@ TracksControlPanel::reject ()
 	response(Gtk::RESPONSE_CANCEL);
     
     // restore previous value in combo-boxes
-    std::stringstream ss;
-    int temp;
-    std::string str;
-    temp = ARDOUR_UI::config()->get_auto_lock_timer();
-    ss.str(std::string(""));
-    ss.clear();
-    ss << temp;
-    str = ss.str() + " Min";
-    _auto_lock_timer_dropdown.set_text(str);
-    
-    temp = ARDOUR_UI::config()->get_auto_save_timer();
-    ss.str(std::string(""));
-    ss.clear();
-    ss << temp;
-    str = ss.str() + " Min";
-    _auto_save_timer_dropdown.set_text(str);
-    
-    temp = ARDOUR_UI::config()->get_pre_record_buffer();
-    ss.str(std::string(""));
-    ss.clear();
-    ss << temp;
-    str = ss.str() + " Min";
-    _pre_record_buffer_dropdown.set_text(str);
+    populate_auto_lock_timer_dropdown ();
+    populate_auto_save_timer_dropdown ();
+    populate_pre_record_buffer_dropdown ();
     
     std::string buffer_size_str = bufsize_as_string (EngineStateController::instance()->get_current_buffer_size() );
     _buffer_size_dropdown.set_text(buffer_size_str);
