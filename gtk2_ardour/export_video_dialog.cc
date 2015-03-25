@@ -83,6 +83,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	, invid_browse_button (_("Browse"))
 	, transcode_button (_("Export"))
 	, abort_button (_("Abort"))
+	, progress_box (0)
 	, scale_checkbox (_("Scale Video (W x H):"))
 	, scale_aspect (_("Retain Aspect"))
 	, width_adjustment (768, 128, 1920, 1, 16, 0)
@@ -486,7 +487,9 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 	_suspend_dirty = false;
 
 	show_all_children ();
-	progress_box->hide();
+	if (progress_box) {
+		progress_box->hide();
+	}
 }
 
 XMLNode&
