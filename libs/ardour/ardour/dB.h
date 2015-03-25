@@ -22,6 +22,10 @@
 
 #include "pbd/fastlog.h"
 
+#define GAIN_COEFF_ZERO 0.0
+#define GAIN_COEFF_SMALL 0.0000001  //-140dB
+#define GAIN_COEFF_UNITY 1.0
+
 static inline float dB_to_coefficient (float dB) {
 	return dB > -318.8f ? pow (10.0f, dB * 0.05f) : 0.0f;
 }

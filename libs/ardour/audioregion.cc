@@ -72,8 +72,6 @@ namespace ARDOUR {
 	}
 }
 
-static const double VERY_SMALL_SIGNAL = 0.0000001;  //-140dB
-
 /* Curve manipulations */
 
 static void
@@ -106,14 +104,14 @@ generate_db_fade (boost::shared_ptr<Evoral::ControlList> dst, double len, int nu
 	//generate a fade-out curve by successively applying a gain drop
 	float fade_speed = dB_to_coefficient(dB_drop / (float) num_steps);
 	for (int i = 1; i < (num_steps-1); i++) {
-		float coeff = 1.0;
+		float coeff = GAIN_COEFF_UNITY;
 		for (int j = 0; j < i; j++) {
 			coeff *= fade_speed;
 		}
 		dst->fast_simple_add (len*(double)i/(double)num_steps, coeff);
 	}
 
-	dst->fast_simple_add (len, VERY_SMALL_SIGNAL);
+	dst->fast_simple_add (len, GAIN_COEFF_SMALL);
 }
 
 static void
@@ -791,8 +789,8 @@ AudioRegion::state ()
 	// so, if they are both at 1.0f, that means the default region.
 
 	if (_envelope->size() == 2 &&
-	    _envelope->front()->value == 1.0f &&
-	    _envelope->back()->value==1.0f) {
+	    _envelope->front()->value == GAIN_COEFF_UNITY &&
+	    _envelope->back()->value==GAIN_COEFF_UNITY) {
 		if (_envelope->front()->when == 0 && _envelope->back()->when == _length) {
 			default_env = true;
 		}
@@ -1026,8 +1024,8 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 
 	switch (shape) {
 	case FadeLinear:
-		_fade_in->fast_simple_add (0.0, VERY_SMALL_SIGNAL);
-		_fade_in->fast_simple_add (len, 1.0);
+		_fade_in->fast_simple_add (0.0, GAIN_COEFF_SMALL);
+		_fade_in->fast_simple_add (len, GAIN_COEFF_UNITY);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 
@@ -1048,12 +1046,12 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		break;
 
 	case FadeConstantPower:
-		_fade_in->fast_simple_add (0.0, VERY_SMALL_SIGNAL);
+		_fade_in->fast_simple_add (0.0, GAIN_COEFF_SMALL);
 		for (int i = 1; i < num_steps; ++i) {
 			const float dist = i / (num_steps + 1.f);
 			_fade_in->fast_simple_add (len * dist, sin (dist * M_PI / 2.0));
 		}
-		_fade_in->fast_simple_add (len, 1.0);
+		_fade_in->fast_simple_add (len, GAIN_COEFF_UNITY);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
 		break;
 		
@@ -1065,9 +1063,9 @@ AudioRegion::set_fade_in (FadeShape shape, framecnt_t len)
 		const double breakpoint = 0.7;  //linear for first 70%
 		for (int i = 2; i < 9; ++i) {
 			const float coeff = (1.f - breakpoint) * powf (0.5, i);
-			_fade_in->fast_simple_add (len * (breakpoint + ((1.0 - breakpoint) * (double)i / 9.0)), coeff);
+			_fade_in->fast_simple_add (len * (breakpoint + ((GAIN_COEFF_UNITY - breakpoint) * (double)i / 9.0)), coeff);
 		}
-		_fade_in->fast_simple_add (len, VERY_SMALL_SIGNAL);
+		_fade_in->fast_simple_add (len, GAIN_COEFF_SMALL);
 		reverse_curve (c3, _fade_in.val());
 		_fade_in->copy_events (*c3);
 		reverse_curve (_inverse_fade_in.val(), _fade_in.val());
@@ -1108,8 +1106,8 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 
 	switch (shape) {
 	case FadeLinear:
-		_fade_out->fast_simple_add (0.0, 1.0);
-		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
+		_fade_out->fast_simple_add (0.0, GAIN_COEFF_UNITY);
+		_fade_out->fast_simple_add (len, GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 		
@@ -1128,12 +1126,12 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 	case FadeConstantPower:
 		//constant-power fades use a sin/cos relationship
 		//the cutoff is abrupt but it has the benefit of being symmetrical
-		_fade_out->fast_simple_add (0.0, 1.0);
+		_fade_out->fast_simple_add (0.0, GAIN_COEFF_UNITY);
 		for (int i = 1; i < num_steps; ++i) {
 			const float dist = i / (num_steps + 1.f);
 			_fade_out->fast_simple_add (len * dist, cos (dist * M_PI / 2.0));
 		}
-		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
+		_fade_out->fast_simple_add (len, GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 		
@@ -1145,9 +1143,9 @@ AudioRegion::set_fade_out (FadeShape shape, framecnt_t len)
 		const double breakpoint = 0.7;  //linear for first 70%
 		for (int i = 2; i < 9; ++i) {
 			const float coeff = (1.f - breakpoint) * powf (0.5, i);
-			_fade_out->fast_simple_add (len * (breakpoint + ((1.0 - breakpoint) * (double)i / 9.0)), coeff);
+			_fade_out->fast_simple_add (len * (breakpoint + ((GAIN_COEFF_UNITY - breakpoint) * (double)i / 9.0)), coeff);
 		}
-		_fade_out->fast_simple_add (len, VERY_SMALL_SIGNAL);
+		_fade_out->fast_simple_add (len, GAIN_COEFF_SMALL);
 		reverse_curve (_inverse_fade_out.val(), _fade_out.val());
 		break;
 	}
@@ -1266,8 +1264,8 @@ AudioRegion::set_default_envelope ()
 {
 	_envelope->freeze ();
 	_envelope->clear ();
-	_envelope->fast_simple_add (0, 1.0f);
-	_envelope->fast_simple_add (_length, 1.0f);
+	_envelope->fast_simple_add (0, GAIN_COEFF_UNITY);
+	_envelope->fast_simple_add (_length, GAIN_COEFF_UNITY);
 	_envelope->thaw ();
 }
 
@@ -1447,14 +1445,14 @@ AudioRegion::normalize (float max_amplitude, float target_dB)
 {
 	gain_t target = dB_to_coefficient (target_dB);
 
-	if (target == 1.0f) {
+	if (target == GAIN_COEFF_UNITY) {
 		/* do not normalize to precisely 1.0 (0 dBFS), to avoid making it appear
 		   that we may have clipped.
 		*/
 		target -= FLT_EPSILON;
 	}
 
-	if (max_amplitude == 0.0f) {
+	if (max_amplitude < GAIN_COEFF_SMALL) {
 		/* don't even try */
 		return;
 	}

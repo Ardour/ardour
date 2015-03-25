@@ -182,9 +182,9 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 
                         if ((prop = (*i)->property ("cut")) != 0) {
                                 if (string_is_affirmative (prop->value())){
-                                        cr.cut = 0.0f;
+                                        cr.cut = GAIN_COEFF_ZERO;
                                 } else {
-                                        cr.cut = 1.0f;
+                                        cr.cut = GAIN_COEFF_UNITY;
                                 }
                         }
 
@@ -256,8 +256,8 @@ MonitorProcessor::state (bool full)
                 snprintf (buf, sizeof (buf), "%u", chn);
                 chn_node->add_property ("id", buf);
 
-                chn_node->add_property (X_("cut"), (*x)->cut == 1.0f ? "no" : "yes");
-                chn_node->add_property (X_("invert"), (*x)->polarity == 1.0f ? "no" : "yes");
+                chn_node->add_property (X_("cut"), (*x)->cut == GAIN_COEFF_UNITY ? "no" : "yes");
+                chn_node->add_property (X_("invert"), (*x)->polarity == GAIN_COEFF_UNITY ? "no" : "yes");
                 chn_node->add_property (X_("dim"), (*x)->dim ? "yes" : "no");
                 chn_node->add_property (X_("solo"), (*x)->soloed ? "yes" : "no");
 
@@ -273,21 +273,21 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
         uint32_t chn = 0;
         gain_t target_gain;
         gain_t dim_level_this_time = _dim_level;
-        gain_t global_cut = (_cut_all ? 0.0f : 1.0f);
-        gain_t global_dim = (_dim_all ? dim_level_this_time : 1.0);
+        gain_t global_cut = (_cut_all ? GAIN_COEFF_ZERO : GAIN_COEFF_UNITY);
+        gain_t global_dim = (_dim_all ? dim_level_this_time : GAIN_COEFF_UNITY);
         gain_t solo_boost;
 
         if (_session.listening() || _session.soloing()) {
                 solo_boost = _solo_boost_level;
         } else {
-                solo_boost = 1.0;
+                solo_boost = GAIN_COEFF_UNITY;
         }
 
         for (BufferSet::audio_iterator b = bufs.audio_begin(); b != bufs.audio_end(); ++b) {
 
                 /* don't double-scale by both track dim and global dim coefficients */
 
-                gain_t dim_level = (global_dim == 1.0 ? (_channels[chn]->dim ? dim_level_this_time : 1.0) : 1.0);
+                gain_t dim_level = (global_dim == GAIN_COEFF_UNITY ? (_channels[chn]->dim ? dim_level_this_time : GAIN_COEFF_UNITY) : GAIN_COEFF_UNITY);
 		
                 if (_channels[chn]->soloed) {
                         target_gain = _channels[chn]->polarity * _channels[chn]->cut * dim_level * global_cut * global_dim * solo_boost;
@@ -295,11 +295,11 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
                         if (solo_cnt == 0) {
                                 target_gain = _channels[chn]->polarity * _channels[chn]->cut * dim_level * global_cut * global_dim * solo_boost;
                         } else {
-                                target_gain = 0.0;
+                                target_gain = GAIN_COEFF_ZERO;
                         }
                 }
 
-                if (target_gain != _channels[chn]->current_gain || target_gain != 1.0f) {
+                if (target_gain != _channels[chn]->current_gain || target_gain != GAIN_COEFF_UNITY) {
 
                         _channels[chn]->current_gain = Amp::apply_gain (*b, _session.nominal_frame_rate(), nframes, _channels[chn]->current_gain, target_gain);
                 }
@@ -380,9 +380,9 @@ void
 MonitorProcessor::set_cut (uint32_t chn, bool yn)
 {
         if (yn) {
-                _channels[chn]->cut = 0.0f;
+                _channels[chn]->cut = GAIN_COEFF_ZERO;
         } else {
-                _channels[chn]->cut = 1.0f;
+                _channels[chn]->cut = GAIN_COEFF_UNITY;
         }
 }
 
@@ -443,7 +443,7 @@ MonitorProcessor::inverted (uint32_t chn) const
 bool
 MonitorProcessor::cut (uint32_t chn) const
 {
-        return _channels[chn]->cut == 0.0f;
+        return _channels[chn]->cut == GAIN_COEFF_ZERO;
 }
 
 bool
@@ -507,7 +507,7 @@ MonitorProcessor::channel_solo_control (uint32_t chn) const
 }
 
 MonitorProcessor::ChannelRecord::ChannelRecord (uint32_t chn)
-	: current_gain (1.0)
+	: current_gain (GAIN_COEFF_UNITY)
 	, cut_ptr (new MPControl<gain_t> (1.0, string_compose (_("cut control %1"), chn), PBD::Controllable::GainLike))
 	, dim_ptr (new MPControl<bool> (false, string_compose (_("dim control"), chn), PBD::Controllable::Toggle))
 	, polarity_ptr (new MPControl<gain_t> (1.0, string_compose (_("polarity control"), chn), PBD::Controllable::Toggle, -1, 1))

@@ -52,7 +52,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
-	, _current_gain (1.0)
+	, _current_gain (GAIN_COEFF_UNITY)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, _no_panner_reset (false)
@@ -76,7 +76,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name, "", DataType::AUDIO, (r == Send))
 	, _role (r)
 	, _output_buffers (new BufferSet())
-	, _current_gain (1.0)
+	, _current_gain (GAIN_COEFF_UNITY)
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, _no_panner_reset (false)
@@ -264,7 +264,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 
 		_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
 
-	} else if (tgain == 0.0) {
+	} else if (tgain < GAIN_COEFF_SMALL) {
 
 		/* we were quiet last time, and we're still supposed to be quiet.
 		   Silence the outputs, and make sure the buffers are quiet too,
@@ -273,11 +273,11 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		_output->silence (nframes);
 		if (result_required) {
 			bufs.set_count (output_buffers().count ());
-			Amp::apply_simple_gain (bufs, nframes, 0.0);
+			Amp::apply_simple_gain (bufs, nframes, GAIN_COEFF_ZERO);
 		}
 		goto out;
 
-	} else if (tgain != 1.0) {
+	} else if (tgain != GAIN_COEFF_UNITY) {
 
 		/* target gain has not changed, but is not unity */
 		Amp::apply_simple_gain (bufs, nframes, tgain);
@@ -498,7 +498,7 @@ Delivery::target_gain ()
 	/* if we've been requested to deactivate, our target gain is zero */
 
 	if (!_pending_active) {
-		return 0.0;
+		return GAIN_COEFF_ZERO;
 	}
 
 	/* if we've been told not to output because its a monitoring situation and
@@ -506,7 +506,7 @@ Delivery::target_gain ()
 	*/
 
 	if (_no_outs_cuz_we_no_monitor) {
-		return 0.0;
+		return GAIN_COEFF_ZERO;
 	}
 
         MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
@@ -538,7 +538,7 @@ Delivery::target_gain ()
                    it gets its signal from the master out.
                 */
 
-                desired_gain = 0.0;
+                desired_gain = GAIN_COEFF_ZERO;
 
         }
 

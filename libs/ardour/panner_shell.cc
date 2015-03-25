@@ -284,13 +284,13 @@ PannerShell::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, pf
 
 		AudioBuffer& dst = outbufs.get_audio(0);
 
-		if (gain_coeff == 0.0f) {
+		if (gain_coeff == GAIN_COEFF_ZERO) {
 
 			/* gain was zero, so make it silent */
 
 			dst.silence (nframes);
 
-		} else if (gain_coeff == 1.0f){
+		} else if (gain_coeff == GAIN_COEFF_UNITY){
 
 			/* mix all input buffers into the output */
 
@@ -386,7 +386,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 	if (!(as & Play || ((as & Touch) && !_panner->touching()))) {
 
 		// Speed quietning
-		gain_t gain_coeff = 1.0;
+		gain_t gain_coeff = GAIN_COEFF_UNITY;
 
 		if (fabsf(_session.transport_speed()) > 1.5f && Config->get_quieten_at_speed ()) {
 			gain_coeff = speed_quietning;

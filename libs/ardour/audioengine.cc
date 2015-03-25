@@ -283,7 +283,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 			/* fade out over 1 second */
 			session_removal_countdown = sample_rate()/2;
-			session_removal_gain = 1.0;
+			session_removal_gain = GAIN_COEFF_UNITY;
 			session_removal_gain_step = 1.0/session_removal_countdown;
 
 		} else if (session_removal_countdown > 0) {

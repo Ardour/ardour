@@ -265,11 +265,11 @@ GainMeterBase::setup_gain_adjustment ()
 
 	if (_amp->output_streams().n_midi() <=  _amp->output_streams().n_audio()) {
 		_data_type = DataType::AUDIO;
-		gain_adjustment.set_lower (0.0);
-		gain_adjustment.set_upper (1.0);
+		gain_adjustment.set_lower (GAIN_COEFF_ZERO);
+		gain_adjustment.set_upper (GAIN_COEFF_UNITY);
 		gain_adjustment.set_step_increment (dB_coeff_step(Config->get_max_gain()) / 10.0);
 		gain_adjustment.set_page_increment (dB_coeff_step(Config->get_max_gain()));
-		gain_slider->set_default_value (gain_to_slider_position (1));
+		gain_slider->set_default_value (gain_to_slider_position (GAIN_COEFF_UNITY));
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
@@ -544,7 +544,7 @@ GainMeterBase::gain_adjusted ()
 void
 GainMeterBase::effective_gain_display ()
 {
-	float value = 0.0;
+	float value = GAIN_COEFF_ZERO;
 
 	switch (_data_type) {
 	case DataType::AUDIO:

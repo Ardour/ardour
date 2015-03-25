@@ -3457,9 +3457,9 @@ Route::SoloControllable::get_value () const
 	}
 
 	if (Config->get_solo_control_is_listen_control()) {
-		return r->listening_via_monitor() ? 1.0f : 0.0f;
+		return r->listening_via_monitor() ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
 	} else {
-		return r->self_soloed() ? 1.0f : 0.0f;
+		return r->self_soloed() ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
 	}
 }
 
@@ -3521,7 +3521,7 @@ Route::MuteControllable::get_value () const
 
 	// Not playing back automation, get the actual route mute value
 	boost::shared_ptr<Route> r = _route.lock ();
-	return (r && r->muted()) ? 1.0 : 0.0;
+	return (r && r->muted()) ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO;
 }
 
 void

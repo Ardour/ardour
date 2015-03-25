@@ -74,10 +74,10 @@ InternalSend::init_gain ()
 {
 	if (_role == Listen) {
 		/* send to monitor bus is always at unity */
-		_amp->set_gain (1.0, this);
+		_amp->set_gain (GAIN_COEFF_UNITY, this);
 	} else {
 		/* aux sends start at -inf dB */
-		_amp->set_gain (0, this);
+		_amp->set_gain (GAIN_COEFF_ZERO, this);
 	}
 }
 
@@ -196,16 +196,16 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
 
-	} else if (tgain == 0.0) {
+	} else if (tgain == GAIN_COEFF_ZERO) {
 
 		/* we were quiet last time, and we're still supposed to be quiet.
 		*/
 
 		_meter->reset ();
-		Amp::apply_simple_gain (mixbufs, nframes, 0.0);
+		Amp::apply_simple_gain (mixbufs, nframes, GAIN_COEFF_ZERO);
 		goto out;
 
-	} else if (tgain != 1.0) {
+	} else if (tgain != GAIN_COEFF_UNITY) {
 
 		/* target gain has not changed, but is not zero or unity */
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
@@ -220,7 +220,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	/* consider metering */
 
 	if (_metering) {
-		if (_amp->gain_control()->get_value() == 0) {
+		if (_amp->gain_control()->get_value() == GAIN_COEFF_ZERO) {
 			_meter->reset();
 		} else {
 			_meter->run (mixbufs, start_frame, end_frame, nframes, true);

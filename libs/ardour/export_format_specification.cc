@@ -167,7 +167,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _silence_end (s)
 
 	, _normalize (false)
-	, _normalize_target (1.0)
+	, _normalize_target (GAIN_COEFF_UNITY)
 	, _with_toc (false)
 	, _with_cue (false)
 	, _with_mp4chaps (false)

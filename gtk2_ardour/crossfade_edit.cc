@@ -30,6 +30,7 @@
 #include "ardour/automation_list.h"
 #include "evoral/Curve.hpp"
 #include "ardour/crossfade.h"
+#include "ardour/dB.h"
 #include "ardour/session.h"
 #include "ardour/auditioner.h"
 #include "ardour/audioplaylist.h"
@@ -884,87 +885,86 @@ CrossfadeEditor::build_presets ()
 	/* FADE IN */
 
 	p = new Preset ("Linear (-6dB)", "fadein-linear");
-	p->push_back (PresetPoint (0, 0));
-	p->push_back (PresetPoint (0.000000, 0.000000));
+	p->push_back (PresetPoint (0.000000, GAIN_COEFF_SMALL));
 	p->push_back (PresetPoint (0.166667, 0.166366));
 	p->push_back (PresetPoint (0.333333, 0.332853));
 	p->push_back (PresetPoint (0.500000, 0.499459));
 	p->push_back (PresetPoint (0.666667, 0.666186));
 	p->push_back (PresetPoint (0.833333, 0.833033));
-	p->push_back (PresetPoint (1.000000, 1.000000));
+	p->push_back (PresetPoint (1.000000, GAIN_COEFF_UNITY));
 	fade_in_presets->push_back (p);
 
 	p = new Preset ("S(1)-curve", "fadein-S1");
-	p->push_back (PresetPoint (0, 0));
+	p->push_back (PresetPoint (0, GAIN_COEFF_SMALL));
 	p->push_back (PresetPoint (0.1, 0.01));
 	p->push_back (PresetPoint (0.2, 0.03));
 	p->push_back (PresetPoint (0.8, 0.97));
 	p->push_back (PresetPoint (0.9, 0.99));
-	p->push_back (PresetPoint (1, 1));
+	p->push_back (PresetPoint (1, GAIN_COEFF_UNITY));
 	fade_in_presets->push_back (p);
 
 	p = new Preset ("S(2)-curve", "fadein-S2");
-	p->push_back (PresetPoint (0.0, 0.0));
+	p->push_back (PresetPoint (0.0, GAIN_COEFF_SMALL));
 	p->push_back (PresetPoint (0.055, 0.222));
 	p->push_back (PresetPoint (0.163, 0.35));
 	p->push_back (PresetPoint (0.837, 0.678));
 	p->push_back (PresetPoint (0.945, 0.783));
-	p->push_back (PresetPoint (1.0, 1.0));
+	p->push_back (PresetPoint (1.0, GAIN_COEFF_UNITY));
 	fade_in_presets->push_back (p);
 
 	p = new Preset ("Constant power (-3dB)", "fadein-constant-power");
 
-	p->push_back (PresetPoint (0.000000, 0.000000));
+	p->push_back (PresetPoint (0.000000, GAIN_COEFF_SMALL));
 	p->push_back (PresetPoint (0.166667, 0.282192));
 	p->push_back (PresetPoint (0.333333, 0.518174));
 	p->push_back (PresetPoint (0.500000, 0.707946));
 	p->push_back (PresetPoint (0.666667, 0.851507));
 	p->push_back (PresetPoint (0.833333, 0.948859));
-	p->push_back (PresetPoint (1.000000, 1.000000));
+	p->push_back (PresetPoint (1.000000, GAIN_COEFF_UNITY));
 
 	fade_in_presets->push_back (p);
 
 	if (!Profile->get_sae()) {
 
 	  	p = new Preset ("Short cut", "fadein-short-cut");
-		p->push_back (PresetPoint (0, 0));
+		p->push_back (PresetPoint (0, GAIN_COEFF_SMALL));
 		p->push_back (PresetPoint (0.389401, 0.0333333));
 		p->push_back (PresetPoint (0.629032, 0.0861111));
 		p->push_back (PresetPoint (0.829493, 0.233333));
 		p->push_back (PresetPoint (0.9447, 0.483333));
 		p->push_back (PresetPoint (0.976959, 0.697222));
-		p->push_back (PresetPoint (1, 1));
+		p->push_back (PresetPoint (1, GAIN_COEFF_UNITY));
 		fade_in_presets->push_back (p);
 
 		p = new Preset ("Slow cut", "fadein-slow-cut");
-		p->push_back (PresetPoint (0, 0));
+		p->push_back (PresetPoint (0, GAIN_COEFF_SMALL));
 		p->push_back (PresetPoint (0.304147, 0.0694444));
 		p->push_back (PresetPoint (0.529954, 0.152778));
 		p->push_back (PresetPoint (0.725806, 0.333333));
 		p->push_back (PresetPoint (0.847926, 0.558333));
 		p->push_back (PresetPoint (0.919355, 0.730556));
-		p->push_back (PresetPoint (1, 1));
+		p->push_back (PresetPoint (1, GAIN_COEFF_UNITY));
 		fade_in_presets->push_back (p);
 
 		p = new Preset ("Fast cut", "fadein-fast-cut");
-		p->push_back (PresetPoint (0, 0));
+		p->push_back (PresetPoint (0, GAIN_COEFF_SMALL));
 		p->push_back (PresetPoint (0.0737327, 0.308333));
 		p->push_back (PresetPoint (0.246544, 0.658333));
 		p->push_back (PresetPoint (0.470046, 0.886111));
 		p->push_back (PresetPoint (0.652074, 0.972222));
 		p->push_back (PresetPoint (0.771889, 0.988889));
-		p->push_back (PresetPoint (1, 1));
+		p->push_back (PresetPoint (1, GAIN_COEFF_UNITY));
 		fade_in_presets->push_back (p);
 
 		p = new Preset ("Long cut", "fadein-long-cut");
-		p->push_back (PresetPoint (0, 0));
+		p->push_back (PresetPoint (0, GAIN_COEFF_SMALL));
 		p->push_back (PresetPoint (0.0207373, 0.197222));
 		p->push_back (PresetPoint (0.0645161, 0.525));
 		p->push_back (PresetPoint (0.152074, 0.802778));
 		p->push_back (PresetPoint (0.276498, 0.919444));
 		p->push_back (PresetPoint (0.481567, 0.980556));
 		p->push_back (PresetPoint (0.767281, 1));
-		p->push_back (PresetPoint (1, 1));
+		p->push_back (PresetPoint (1, GAIN_COEFF_UNITY));
 		fade_in_presets->push_back (p);
 	}
 
@@ -972,85 +972,84 @@ CrossfadeEditor::build_presets ()
 
 	// p = new Preset ("regout.xpm");
 	p = new Preset ("Linear (-6dB cut)", "fadeout-linear");
-	p->push_back (PresetPoint (0, 1));
-	p->push_back (PresetPoint (0.000000, 1.000000));
+	p->push_back (PresetPoint (0.000000, GAIN_COEFF_UNITY));
 	p->push_back (PresetPoint (0.166667, 0.833033));
 	p->push_back (PresetPoint (0.333333, 0.666186));
 	p->push_back (PresetPoint (0.500000, 0.499459));
 	p->push_back (PresetPoint (0.666667, 0.332853));
 	p->push_back (PresetPoint (0.833333, 0.166366));
-	p->push_back (PresetPoint (1.000000, 0.000000));
+	p->push_back (PresetPoint (1.000000, GAIN_COEFF_SMALL));
 	fade_out_presets->push_back (p);
 
 	p = new Preset ("S(1)-Curve", "fadeout-S1");
-	p->push_back (PresetPoint (0, 1));
+	p->push_back (PresetPoint (0, GAIN_COEFF_UNITY));
 	p->push_back (PresetPoint (0.1, 0.99));
 	p->push_back (PresetPoint (0.2, 0.97));
 	p->push_back (PresetPoint (0.8, 0.03));
 	p->push_back (PresetPoint (0.9, 0.01));
-	p->push_back (PresetPoint (1, 0));
+	p->push_back (PresetPoint (1, GAIN_COEFF_SMALL));
 	fade_out_presets->push_back (p);
 
 	p = new Preset ("S(2)-Curve", "fadeout-S2");
-	p->push_back (PresetPoint (0.0, 1.0));
+	p->push_back (PresetPoint (0.0, GAIN_COEFF_UNITY));
 	p->push_back (PresetPoint (0.163, 0.678));
 	p->push_back (PresetPoint (0.055, 0.783));
 	p->push_back (PresetPoint (0.837, 0.35));
 	p->push_back (PresetPoint (0.945, 0.222));
-	p->push_back (PresetPoint (1.0, 0.0));
+	p->push_back (PresetPoint (1.0, GAIN_COEFF_SMALL));
 	fade_out_presets->push_back (p);
 
 	// p = new Preset ("linout.xpm");
 	p = new Preset ("Constant power (-3dB cut)", "fadeout-constant-power");
-	p->push_back (PresetPoint (0.000000, 1.000000));
+	p->push_back (PresetPoint (0.000000, GAIN_COEFF_UNITY));
 	p->push_back (PresetPoint (0.166667, 0.948859));
 	p->push_back (PresetPoint (0.333333, 0.851507));
 	p->push_back (PresetPoint (0.500000, 0.707946));
 	p->push_back (PresetPoint (0.666667, 0.518174));
 	p->push_back (PresetPoint (0.833333, 0.282192));
-	p->push_back (PresetPoint (1.000000, 0.000000));
+	p->push_back (PresetPoint (1.000000, GAIN_COEFF_SMALL));
 	fade_out_presets->push_back (p);
 
 	if (!Profile->get_sae()) {
 		// p = new Preset ("hiout.xpm");
 		p = new Preset ("Short cut", "fadeout-short-cut");
-		p->push_back (PresetPoint (0, 1));
-		p->push_back (PresetPoint (0.305556, 1));
+		p->push_back (PresetPoint (0, GAIN_COEFF_UNITY));
+		p->push_back (PresetPoint (0.305556, GAIN_COEFF_UNITY));
 		p->push_back (PresetPoint (0.548611, 0.991736));
 		p->push_back (PresetPoint (0.759259, 0.931129));
 		p->push_back (PresetPoint (0.918981, 0.68595));
 		p->push_back (PresetPoint (0.976852, 0.22865));
-		p->push_back (PresetPoint (1, 0));
+		p->push_back (PresetPoint (1, GAIN_COEFF_SMALL));
 		fade_out_presets->push_back (p);
 
 		p = new Preset ("Slow cut", "fadeout-slow-cut");
-		p->push_back (PresetPoint (0, 1));
+		p->push_back (PresetPoint (0, GAIN_COEFF_UNITY));
 		p->push_back (PresetPoint (0.228111, 0.988889));
 		p->push_back (PresetPoint (0.347926, 0.972222));
 		p->push_back (PresetPoint (0.529954, 0.886111));
 		p->push_back (PresetPoint (0.753456, 0.658333));
 		p->push_back (PresetPoint (0.9262673, 0.308333));
-		p->push_back (PresetPoint (1, 0));
+		p->push_back (PresetPoint (1, GAIN_COEFF_SMALL));
 		fade_out_presets->push_back (p);
 
 		p = new Preset ("Fast cut", "fadeout-fast-cut");
-		p->push_back (PresetPoint (0, 1));
+		p->push_back (PresetPoint (0, GAIN_COEFF_UNITY));
 		p->push_back (PresetPoint (0.080645, 0.730556));
 		p->push_back (PresetPoint (0.277778, 0.289256));
 		p->push_back (PresetPoint (0.470046, 0.152778));
 		p->push_back (PresetPoint (0.695853, 0.0694444));
-		p->push_back (PresetPoint (1, 0));
+		p->push_back (PresetPoint (1, GAIN_COEFF_SMALL));
 		fade_out_presets->push_back (p);
 
 		// p = new Preset ("loout.xpm");
 		p = new Preset ("Long cut", "fadeout-long-cut");
-		p->push_back (PresetPoint (0, 1));
+		p->push_back (PresetPoint (0, GAIN_COEFF_UNITY));
 		p->push_back (PresetPoint (0.023041, 0.697222));
 		p->push_back (PresetPoint (0.0553,   0.483333));
 		p->push_back (PresetPoint (0.170507, 0.233333));
 		p->push_back (PresetPoint (0.370968, 0.0861111));
 		p->push_back (PresetPoint (0.610599, 0.0333333));
-		p->push_back (PresetPoint (1, 0));
+		p->push_back (PresetPoint (1, GAIN_COEFF_SMALL));
 		fade_out_presets->push_back (p);
 
 	}
