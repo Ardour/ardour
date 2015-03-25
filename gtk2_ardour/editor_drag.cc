@@ -1413,7 +1413,7 @@ RegionMoveDrag::finished_no_copy (
 			continue;
 		}
 
-		if (i->time_axis_view < 0) {
+		if (i->time_axis_view < 0 || i->time_axis_view >= _time_axis_views.size()) {
 			/* dragged to drop zone */
 
 			PlaylistMapping::iterator pm;
@@ -1759,7 +1759,10 @@ RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, Rout
 void
 RegionInsertDrag::finished (GdkEvent *, bool)
 {
-	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[_views.front().time_axis_view]);
+	int pos = _views.front().time_axis_view;
+	assert(pos >= 0 && pos < _time_axis_views.size());
+
+	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[pos]);
 
 	_primary->get_canvas_group()->reparent (dest_rtv->view()->canvas_item());
 	_primary->get_canvas_group()->set_y_position (0);
