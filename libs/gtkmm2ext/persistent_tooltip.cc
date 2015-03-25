@@ -21,6 +21,8 @@
 #include <gtkmm/label.h>
 #include "gtkmm2ext/persistent_tooltip.h"
 
+#include "pbd/stacktrace.h"
+
 #include "i18n.h"
 
 using namespace std;
@@ -60,7 +62,7 @@ bool
 PersistentTooltip::timeout ()
 {
 	show ();
-	return false;
+	return true;
 }
 
 bool
@@ -114,6 +116,7 @@ PersistentTooltip::show ()
 	if (_tip.empty()) {
 		return;
 	}
+
 	if (!_window) {
 		_window = new Window (WINDOW_POPUP);
 		_window->set_name (X_("ContrastingPopup"));
@@ -136,18 +139,22 @@ PersistentTooltip::show ()
 	set_tip (_tip);
 
 	if (!_window->is_visible ()) {
-		int rx, ry, sw;
-		sw= gdk_screen_width();
-		_target->get_window()->get_origin (rx, ry);
-		_window->move (rx, ry + _target->get_height() + _margin_y);
-		_window->present ();
+		int rx, ry;
+		int sw = gdk_screen_width();
 
+		_target->get_window()->get_origin (rx, ry);
+		
 		/* the window needs to be realized first
 		 * for _window->get_width() to be correct.
 		 */
+
+		_window->present ();
+
 		if (sw < rx + _window->get_width()) {
 			rx = sw - _window->get_width();
 			_window->move (rx, ry + _target->get_height());
+		} else {
+			_window->move (rx + (_target->get_width () - _window->get_width ()) / 2, ry + _target->get_height());
 		}
 	}
 }
