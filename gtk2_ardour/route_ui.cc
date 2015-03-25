@@ -133,7 +133,8 @@ RouteUI::init ()
 	_i_am_the_modifier = 0;
     _momentary_solo = 0;
     
-	setup_invert_buttons ();
+    // Not used in TracksLive
+	//setup_invert_buttons ();
 
 	_session->SoloChanged.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::solo_changed_so_update_mute, this), gui_context());
 	_session->TransportStateChange.connect (_session_connections, invalidator (*this), boost::bind (&RouteUI::check_rec_enable_sensitivity, this), gui_context());
@@ -238,11 +239,13 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	_route->solo_safe_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->listen_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
 	_route->solo_isolated_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_solo_display, this), gui_context());
-
-    _route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
+    
 	_route->PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::property_changed, this, _1), gui_context());
 
-	_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context ());
+    // Not used in TracksLive
+    //_route->phase_invert_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::polarity_changed, this), gui_context());
+	//_route->io_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::setup_invert_buttons, this), gui_context ());
+    
 	_route->gui_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_gui_changed, this, _1), gui_context ());
 
 	if (_session && _session->writable() && is_track()) {
@@ -284,8 +287,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	map_frozen ();
 
-	setup_invert_buttons ();
-	set_invert_button_state ();
+    // Not used in TracksLive
+	//setup_invert_buttons ();
+	//set_invert_button_state ();
 
 	boost::shared_ptr<Route> s = _showing_sends_to.lock ();
 	bus_send_display_changed (s);
@@ -379,9 +383,9 @@ RouteUI::on_route_drag_data_received(const Glib::RefPtr<Gdk::DragContext>& conte
 void
 RouteUI::polarity_changed ()
 {
-        if (!_route) {
-                return;
-        }
+    if (!_route) {
+            return;
+    }
 
 	set_invert_button_state ();
 }
@@ -1832,6 +1836,8 @@ RouteUI::open_remote_control_id_dialog ()
 void
 RouteUI::setup_invert_buttons ()
 {
+// not used in TracksLive
+#if 0
 	/* remove old invert buttons */
 	for (vector<ArdourButton*>::iterator i = _invert_buttons.begin(); i != _invert_buttons.end(); ++i) {
 		//_invert_button_box.remove (**i);
@@ -1874,13 +1880,16 @@ RouteUI::setup_invert_buttons ()
 		//_invert_button_box.pack_start (*b);
 	}
 
+    
 	//_invert_button_box.set_spacing (1);
 //	_invert_button_box.show_all ();
+#endif
 }
 
 void
 RouteUI::set_invert_button_state ()
 {
+#if 0 // Not used in TracksLive
 	uint32_t const N = _route->input()->n_ports().n_audio();
 	if (N > _max_invert_buttons) {
 
@@ -1908,11 +1917,13 @@ RouteUI::set_invert_button_state ()
 		}
 		
 	}
+#endif
 }
 
 bool
 RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 {
+#if 0 // Not used in TracksLive
 	if (ev->button == 1 && i < _invert_buttons.size()) {
 		uint32_t const N = _route->input()->n_ports().n_audio ();
 		if (N <= _max_invert_buttons) {
@@ -1921,6 +1932,7 @@ RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 			return true;
 		}
 	}
+#endif
 	return false;
 }
 
@@ -1928,6 +1940,7 @@ RouteUI::invert_release (GdkEventButton* ev, uint32_t i)
 bool
 RouteUI::invert_press (GdkEventButton* ev)
 {
+#if 0 // Not used in TracksLive
 	using namespace Menu_Helpers;
 
 	uint32_t const N = _route->input()->n_ports().n_audio();
@@ -1953,7 +1966,7 @@ RouteUI::invert_press (GdkEventButton* ev)
 	}
 
 	_invert_menu->popup (0, ev->time);
-
+#endif
 	return false;
 }
 
@@ -1970,9 +1983,11 @@ RouteUI::invert_menu_toggled (uint32_t c)
 void
 RouteUI::set_invert_sensitive (bool yn)
 {
+#if 0 // Not used in TracksLive
         for (vector<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
                 (*b)->set_sensitive (yn);
         }
+#endif
 }
 
 void
