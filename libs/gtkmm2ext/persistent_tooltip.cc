@@ -135,8 +135,10 @@ PersistentTooltip::show ()
 		int rx, ry, sw;
 		sw= gdk_screen_width();
 		_target->get_window()->get_origin (rx, ry);
-		_window->move (rx, ry + _target->get_height());
+        
+        _window->move (rx + (_target->get_width () - _window->get_width ()) / 2, ry + _target->get_height());
 		_window->present ();
+        _window->move (rx + (_target->get_width () - _window->get_width ()) / 2, ry + _target->get_height());
 
 		/* the window needs to be realized first
 		 * for _window->get_width() to be correct.
