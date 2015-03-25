@@ -686,7 +686,7 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 #endif
 		assert (n < 0 || n >= _time_axis_views.size() || !_time_axis_views[n]->hidden());
 
-		if (i->time_axis_view < 0) {
+		if (i->time_axis_view < 0 || i->time_axis_view >= _time_axis_views.size()) {
 			/* already in the drop zone */
 			if (delta_track >= 0) {
 				/* downward motion - might be OK if others are still not in the dropzone,
@@ -1331,7 +1331,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 			where = i->view->region()->position();
 		}
 
-		if (i->time_axis_view < 0) {
+		if (i->time_axis_view < 0 || i->time_axis_view >= _time_axis_views.size()) {
 			/* dragged to drop zone */
 
 			PlaylistMapping::iterator pm;
