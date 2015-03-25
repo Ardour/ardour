@@ -418,6 +418,10 @@ MixerStrip::on_record_state_changed ()
 void
 MixerStrip::end_name_edit (int response)
 {
+    if (_name_entry.get_visible () == false) {
+        return;
+    }
+    
     bool edit_next = false;
     bool edit_prev = false;
     
@@ -1481,9 +1485,15 @@ MixerStrip::property_changed (const PropertyChange& what_changed)
 void
 MixerStrip::name_changed ()
 {
-	name_button.set_text ( cut_string(_route->name(), _max_name_size) );
-    _name_entry.set_text (_route->name() );
-	ARDOUR_UI::instance()->set_tip (name_button, _route->name());
+    std::string name;
+    if (_route->is_master ()) {
+        name = "Master Bus";
+    } else {
+        name = _route->name ();
+    }
+	name_button.set_text ( cut_string( name, _max_name_size) );
+    _name_entry.set_text ( name );
+	ARDOUR_UI::instance()->set_tip (name_button, name);
 }
 
 void
