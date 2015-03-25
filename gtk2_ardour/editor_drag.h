@@ -292,7 +292,7 @@ protected:
 	/** a list of the non-hidden TimeAxisViews sorted by editor order key */
 	std::vector<TimeAxisView*> _time_axis_views;
 	int find_time_axis_view (TimeAxisView *) const;
-	int apply_track_delta (const int start, const int delta, const int skip) const;
+	int apply_track_delta (const int start, const int delta, const int skip, const bool distance_only = false) const;
 
 	int _visible_y_low;
 	int _visible_y_high;

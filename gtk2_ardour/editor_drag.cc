@@ -641,7 +641,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 }
 
 int
-RegionDrag::apply_track_delta (const int start, const int delta, const int skip) const
+RegionDrag::apply_track_delta (const int start, const int delta, const int skip, const bool distance_only) const
 {
 	if (delta == 0) {
 		return start;
@@ -657,16 +657,39 @@ RegionDrag::apply_track_delta (const int start, const int delta, const int skip)
 #ifdef DEBUG_DROPZONEDRAG
 	if (current >= _time_axis_views.size() && target >= 0 && target < _time_axis_views.size()) {
 		printf("MOVE OUT OF THE ZONE cur: %d  d: %d s: %d\n", start, delta, skip);
+	} else {
+		printf("CALC DISTANCE cur: %d  d: %d s: %d\n", start, delta, skip);
 	}
 #endif
 
 	while (current >= 0 && current != target) {
 		current += dt;
+		if (current < 0 && dt < 0) {
+#ifdef DEBUG_DROPZONEDRAG
+			printf("BREAK AT BOTTOM\n");
+#endif
+			break;
+		}
+		if (current >= _time_axis_views.size() && dt > 0) {
+#ifdef DEBUG_DROPZONEDRAG
+			printf("BREAK AT TOP\n");
+#endif
+			break;
+		}
 		if (current < 0 || current >= _time_axis_views.size()) {
 			continue;
 		}
-		if (_time_axis_views[current]->hidden()) {
+
+		RouteTimeAxisView const * rtav = dynamic_cast<RouteTimeAxisView const *> (_time_axis_views[current]);
+		if (_time_axis_views[current]->hidden() || !rtav || !rtav->is_track()) {
 			target += dt;
+		}
+
+		if (distance_only && current == start + delta) {
+#ifdef DEBUG_DROPZONEDRAG
+			printf("BREAK AFTER DISTANCE\n");
+#endif
+			break;
 		}
 	}
 	return target;
@@ -682,7 +705,9 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		int n = apply_track_delta (i->time_axis_view, delta_track, skip_invisible);
 #ifdef DEBUG_DROPZONEDRAG
-		printf("Y MOVEMENT CHECK: from %d to %d  skip: %d\n", i->time_axis_view, i->time_axis_view + delta_track, skip_invisible);
+		printf("Y MOVEMENT CHECK: from %d to %d skip: %d\n",
+				i->time_axis_view, i->time_axis_view + delta_track,
+				skip_invisible);
 #endif
 		assert (n < 0 || n >= _time_axis_views.size() || !_time_axis_views[n]->hidden());
 
@@ -777,6 +802,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		/* Here's the current pointer position in terms of time axis view and layer */
 		current_pointer_time_axis_view = find_time_axis_view (tv);
 		assert(current_pointer_time_axis_view >= 0);
+#ifdef DEBUG_DROPZONEDRAG
+		printf("            On AXIS: %d\n", current_pointer_time_axis_view);
+#endif
 
 		double const current_pointer_layer = tv->layer_display() == Overlaid ? 0 : layer;
 
@@ -861,14 +889,14 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	int delta_skip = 0;
 	if (_last_pointer_time_axis_view < 0) {
 		// Moving out of the zone, check for hidden tracks at the bottom.
-		delta_skip = apply_track_delta(_time_axis_views.size(), delta_time_axis_view, 0)
+		delta_skip = apply_track_delta(_time_axis_views.size(), delta_time_axis_view, 0, true)
 			     -_time_axis_views.size() - delta_time_axis_view;
 #ifdef DEBUG_DROPZONEDRAG
 		printf("NOW WHAT?? last: %d  delta %d || skip %d\n", _last_pointer_time_axis_view, delta_time_axis_view, delta_skip);
 #endif
 	} else {
 		// calculate hidden tracks that are skipped by the pointer movement
-		delta_skip = apply_track_delta(_last_pointer_time_axis_view, delta_time_axis_view, 0)
+		delta_skip = apply_track_delta(_last_pointer_time_axis_view, delta_time_axis_view, 0, true)
 			     - _last_pointer_time_axis_view
 		             - delta_time_axis_view;
 #ifdef DEBUG_DROPZONEDRAG
