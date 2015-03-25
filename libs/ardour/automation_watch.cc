@@ -131,7 +131,7 @@ AutomationWatch::timer ()
 		} else {  //transport stopped or reversed.  stop the automation pass and start a new one (for bonus points, someday store the previous pass in an undo record)
 			for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 				DEBUG_TRACE (DEBUG::Automation, string_compose ("%1: transport in rewind, speed %2, in write pass ? %3 writing ? %4\n", 
-										(*aw)->name(), _session->transport_speed(), rolling,
+										(*aw)->name(), _session->transport_speed(), _session->transport_rolling(),
 										(*aw)->alist()->automation_write()));
 				(*aw)->list()->set_in_write_pass (false);
 				if ( (*aw)->alist()->automation_write() ) {
