@@ -790,10 +790,12 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	/* Find the TimeAxisView that the pointer is now over */
 
-	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (current_pointer_y ());
+	const double cur_y = current_pointer_y ();
+
+	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (cur_y);
 	TimeAxisView* tv = r.first;
 
-	if (!tv && current_pointer_y() < 0) {
+	if (!tv && cur_y < 0) {
 		/* above trackview area, autoscroll hasn't moved us since last time, nothing to do */
 		return;
 	}
@@ -859,7 +861,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	}
 	/* for automation lanes, there is a TimeAxisView but no ->view() */
-	else if (!tv && current_pointer_y() >= 0 && _last_pointer_time_axis_view >= 0) {
+	else if (!tv && cur_y >= 0 && _last_pointer_time_axis_view >= 0) {
 		/* Moving into the drop-zone..
 		 *
 		 * TODO allow moving further down in drop-zone:
@@ -1004,7 +1006,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			printf("IN THE ZONE\n");
 #endif
 			assert(i->time_axis_view >= _time_axis_views.size());
-			if (current_pointer_y() >= 0) {
+			if (cur_y >= 0) {
 
 				int dzoffset;
 				NewTrackIndexAndPosition ip;
