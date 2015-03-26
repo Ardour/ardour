@@ -150,6 +150,11 @@ IO::silence (framecnt_t nframes)
 void
 IO::check_bundles_connected ()
 {
+    // Not used in TracksLive
+    if (Profile->get_trx() ) {
+        return;
+    }
+    
 	std::vector<UserBundleInfo*> new_list;
 
 	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
@@ -211,7 +216,10 @@ IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
                         return -1;
                 }
 
-                check_bundles_connected ();
+                // Not used in TracksLive
+                if (!Profile->get_trx() ) {
+                    check_bundles_connected ();
+                }
         }
 
         changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -278,7 +286,11 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 				}
 
 				_session.engine().unregister_port (port);
-				check_bundles_connected ();
+				
+                // Not used in TracksLive
+                if (!Profile->get_trx() ) {
+                    check_bundles_connected ();
+                }
 			}
 		}
 
@@ -384,8 +396,10 @@ IO::disconnect (void* src)
 		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 			i->disconnect_all ();
 		}
-
-		check_bundles_connected ();
+        
+        if (!Profile->get_trx() ) {
+            check_bundles_connected ();
+        }
 	}
 
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -451,7 +465,10 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 	}
 
 	if (changed) {
-		check_bundles_connected ();
+        // Not used in TracksLive
+        if (!Profile->get_trx() ) {
+            check_bundles_connected ();
+        }
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
@@ -537,11 +554,14 @@ IO::state (bool /*full_state*/)
 	node->add_property ("direction", enum_2_string (_direction));
 	node->add_property ("default-type", _default_type.to_string());
 
-	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-		XMLNode* n = new XMLNode ("Bundle");
-		n->add_property ("name", (*i)->bundle->name ());
-		node->add_child_nocopy (*n);
-	}
+    // Not used in TracksLive
+    if (!Profile->get_trx() ) {
+        for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
+            XMLNode* n = new XMLNode ("Bundle");
+            n->add_property ("name", (*i)->bundle->name ());
+            node->add_child_nocopy (*n);
+        }
+    }
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 
@@ -1254,6 +1274,11 @@ IO::latency () const
 int
 IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* src)
 {
+    // Not used in TracksLive
+    if (Profile->get_trx() ) {
+        return 0;
+    }
+    
 	BLOCK_PROCESS_CALLBACK ();
 
 	{
@@ -1292,6 +1317,11 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* 
 int
 IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 {
+    // Not used in TracksLive
+    if (Profile->get_trx() ) {
+        return 0;
+    }
+    
 	BLOCK_PROCESS_CALLBACK ();
 
 	{
@@ -1490,6 +1520,11 @@ IO::setup_bundle ()
 BundleList
 IO::bundles_connected ()
 {
+    // Not used in TrackLive
+    if (Profile->get_trx() ) {
+        return BundleList();
+    }
+    
 	BundleList bundles;
 
 	/* User bundles */
