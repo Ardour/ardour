@@ -485,8 +485,9 @@ struct EditorOrderTimeAxisViewSorter {
 };
 
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: Drag (e, i),
-	  _primary (p)
+	: Drag (e, i)
+	, _primary (p)
+	, _ntracks (0)
 {
 	_editor->visible_order_range (&_visible_y_low, &_visible_y_high);
 
@@ -555,6 +556,9 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	, _last_pointer_time_axis_view (0)
 	, _last_pointer_layer (0)
 	, _single_axis (false)
+	, _ndropzone (0)
+	, _pdropzone (0)
+	, _ddropzone (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMotionDrag\n");
 }
@@ -654,26 +658,12 @@ RegionDrag::apply_track_delta (const int start, const int delta, const int skip,
 	assert (current < 0 || current >= _time_axis_views.size() || !_time_axis_views[current]->hidden());
 	assert (skip == 0 || (skip < 0 && delta < 0) || (skip > 0 && delta > 0));
 
-#ifdef DEBUG_DROPZONEDRAG
-	if (current >= _time_axis_views.size() && target >= 0 && target < _time_axis_views.size()) {
-		printf("MOVE OUT OF THE ZONE cur: %d  d: %d s: %d\n", start, delta, skip);
-	} else {
-		printf("CALC DISTANCE cur: %d  d: %d s: %d\n", start, delta, skip);
-	}
-#endif
-
 	while (current >= 0 && current != target) {
 		current += dt;
 		if (current < 0 && dt < 0) {
-#ifdef DEBUG_DROPZONEDRAG
-			printf("BREAK AT BOTTOM\n");
-#endif
 			break;
 		}
 		if (current >= _time_axis_views.size() && dt > 0) {
-#ifdef DEBUG_DROPZONEDRAG
-			printf("BREAK AT TOP\n");
-#endif
 			break;
 		}
 		if (current < 0 || current >= _time_axis_views.size()) {
@@ -686,9 +676,6 @@ RegionDrag::apply_track_delta (const int start, const int delta, const int skip,
 		}
 
 		if (distance_only && current == start + delta) {
-#ifdef DEBUG_DROPZONEDRAG
-			printf("BREAK AFTER DISTANCE\n");
-#endif
 			break;
 		}
 	}
@@ -704,25 +691,15 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		int n = apply_track_delta (i->time_axis_view, delta_track, skip_invisible);
-#ifdef DEBUG_DROPZONEDRAG
-		printf("Y MOVEMENT CHECK: from %d to %d skip: %d\n",
-				i->time_axis_view, i->time_axis_view + delta_track,
-				skip_invisible);
-#endif
 		assert (n < 0 || n >= _time_axis_views.size() || !_time_axis_views[n]->hidden());
 
 		if (i->time_axis_view < 0 || i->time_axis_view >= _time_axis_views.size()) {
 			/* already in the drop zone */
 			if (delta_track >= 0) {
-				/* downward motion - might be OK if others are still not in the dropzone,
-				   so check at the end of the loop if that is the case.
-				 */
+				/* downward motion - OK if others are still not in the dropzone */
 				continue;
 			}
 
-			/* upward motion - set n to the track we would end up in if motion
-			   is successful, and check validity below. */
-			n = _time_axis_views.size() + delta_track;
 		}
 
 		if (n < 0) {
@@ -783,15 +760,10 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-#ifdef DEBUG_DROPZONEDRAG
-	printf("--------- LAST AXIS: %d\n", _last_pointer_time_axis_view);
-#endif
 	/* Note: time axis views in this method are often expressed as an index into the _time_axis_views vector */
 
 	/* Find the TimeAxisView that the pointer is now over */
-
 	const double cur_y = current_pointer_y ();
-
 	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (cur_y);
 	TimeAxisView* tv = r.first;
 
@@ -800,7 +772,18 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
+	/* find drop-zone y-position */
+	Coord last_track_bottom_edge;
+	last_track_bottom_edge = 0;
+	for (std::vector<TimeAxisView*>::reverse_iterator t = _time_axis_views.rbegin(); t != _time_axis_views.rend(); ++t) {
+		if (!(*t)->hidden()) {
+			last_track_bottom_edge = (*t)->canvas_display()->canvas_origin ().y + (*t)->effective_height();
+			break;
+		}
+	}
+
 	if (tv && tv->view()) {
+		/* the mouse is over a track */
 		double layer = r.second;
 
 		if (first_move && tv->view()->layer_display() == Stacked) {
@@ -810,9 +793,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		/* Here's the current pointer position in terms of time axis view and layer */
 		current_pointer_time_axis_view = find_time_axis_view (tv);
 		assert(current_pointer_time_axis_view >= 0);
-#ifdef DEBUG_DROPZONEDRAG
-		printf("            On AXIS: %d\n", current_pointer_time_axis_view);
-#endif
 
 		double const current_pointer_layer = tv->layer_display() == Overlaid ? 0 : layer;
 
@@ -826,12 +806,13 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			 * move up the correct number of tracks from the bottom.
 			 *
 			 * This is necessary because steps may be skipped if
-			 * the bottom-most track is not a valid target,
+			 * the bottom-most track is not a valid target and/or
+			 * if there are hidden tracks at the bottom.
+			 * Hence the initial offset (_ddropzone) as well as the
+			 * last valid pointer position (_pdropzone) need to be
+			 * taken into account.
 			 */
-#ifdef DEBUG_DROPZONEDRAG
-			printf("MOVE OUT OF THE ZONE...\n");
-#endif
-			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size ();
+			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size () + _ddropzone - _pdropzone;
 		} else {
 			delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
 		}
@@ -860,32 +841,44 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		delta_layer = current_pointer_layer - _last_pointer_layer;
 
 	}
-	/* for automation lanes, there is a TimeAxisView but no ->view() */
+	/* for automation lanes, there is a TimeAxisView but no ->view()
+	 * if (!tv) -> dropzone 
+	 */
 	else if (!tv && cur_y >= 0 && _last_pointer_time_axis_view >= 0) {
-		/* Moving into the drop-zone..
-		 *
-		 * TODO allow moving further down in drop-zone:
-		 * e.g. 2 Tracks, select a region on both of them.
-		 *
-		 * A) grab the upper, drag 2 down, both regions are in  the dropzone: all fine (works)
-		 *
-		 * B) grab the lower, drag 1 down, region (and mouse) are in dropzone, The End.
-		 *    upper region is only down one track and cannot be moved into the zone.
-		 *
-		 * Proposed solution:
-		 *  keep track of how many regions are in the DZ (private var),
-		 *  also count from how many tracks the dragged-regions come from (first move)
-		 *
-		 *  if not all regions are in the DZ, keep going.
-		 *
-		 *  Using 'default height' H for all dropzone regions will make things
-		 *  a lot simpler: (number_of_DZ_entries * H + Pointer_YPOS - DZ_YPOS) / H.
-		 *  (because at this point in time PlaylistDropzoneMap is not yet populated)
-		 */
+		/* Moving into the drop-zone.. */
 		delta_time_axis_view = _time_axis_views.size () - _last_pointer_time_axis_view;
-#ifdef DEBUG_DROPZONEDRAG
-		printf("INTO THE ZONE DELTA: %d\n", delta_time_axis_view);
-#endif
+		/* delta_time_axis_view may not be sufficient to move into the DZ
+		 * the mouse may enter it, but it may not be a valid move due to
+		 * constraints.
+		 *
+		 * -> remember the delta needed to move into the dropzone
+		 */
+		_ddropzone = delta_time_axis_view;
+		/* ..but subtract hidden tracks (or routes) at the bottom.
+		 * we silently move mover them
+		 */
+		_ddropzone -= apply_track_delta(_last_pointer_time_axis_view, delta_time_axis_view, 0, true)
+			      - _time_axis_views.size();
+	}
+	else if (!tv && cur_y >= 0 && _last_pointer_time_axis_view < 0) {
+		/* move around inside the zone.
+		 * This allows to move further down until all regions are in the zone.
+		 */
+		const double ptr_y = cur_y + _editor->get_trackview_group()->canvas_origin().y;
+		assert(ptr_y >= last_track_bottom_edge);
+		assert(_ddropzone > 0);
+
+		/* calculate mouse position in 'tracks' below last track. */
+		const double dzi_h = TimeAxisView::preset_height (HeightNormal);
+		uint32_t dzpos = _ddropzone + floor((1 + ptr_y - last_track_bottom_edge) / dzi_h);
+
+		if (dzpos > _pdropzone && _ndropzone < _ntracks) {
+			// move further down
+			delta_time_axis_view =  dzpos - _pdropzone;
+		} else if (dzpos < _pdropzone && _ndropzone > 0) {
+			// move up inside the DZ
+			delta_time_axis_view =  dzpos - _pdropzone;
+		}
 	}
 
 	/* Work out the change in x */
@@ -893,26 +886,35 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	double const x_delta = compute_x_delta (event, &pending_region_position);
 	_last_frame_position = pending_region_position;
 
-	/* calculate hidden tracks in current delta */
+	/* calculate hidden tracks in current y-axis delta */
 	int delta_skip = 0;
-	if (_last_pointer_time_axis_view < 0) {
-		// Moving out of the zone, check for hidden tracks at the bottom.
+	if (_last_pointer_time_axis_view < 0 && _pdropzone > 0) {
+		/* The mouse is more than one track below the dropzone.
+		 * distance calculation is not needed (and would not work, either
+		 * because the dropzone is "packed").
+		 *
+		 * Except when partially(!) moving regions out of dropzone in a large step.
+		 * (the mouse may or may not remain in the DZ)
+		 * Hidden tracks at the bottom of the TAV need to be skipped.
+		 */
+		assert(_pdropzone >= _ddropzone);
+		if (delta_time_axis_view < 0 && -delta_time_axis_view >= _pdropzone - _ddropzone)
+		{
+			const int dt = delta_time_axis_view + _pdropzone - _ddropzone;
+			assert (dt <= 0);
+			delta_skip = apply_track_delta(_time_axis_views.size(), dt, 0, true)
+				-_time_axis_views.size() - dt;
+		}
+	}
+	else if (_last_pointer_time_axis_view < 0) {
+		/* Moving out of the zone. Check for hidden tracks at the bottom. */
 		delta_skip = apply_track_delta(_time_axis_views.size(), delta_time_axis_view, 0, true)
 			     -_time_axis_views.size() - delta_time_axis_view;
-#ifdef DEBUG_DROPZONEDRAG
-		printf("NOW WHAT?? last: %d  delta %d || skip %d\n", _last_pointer_time_axis_view, delta_time_axis_view, delta_skip);
-#endif
 	} else {
-		// calculate hidden tracks that are skipped by the pointer movement
+		/* calculate hidden tracks that are skipped by the pointer movement */
 		delta_skip = apply_track_delta(_last_pointer_time_axis_view, delta_time_axis_view, 0, true)
 			     - _last_pointer_time_axis_view
 		             - delta_time_axis_view;
-#ifdef DEBUG_DROPZONEDRAG
-		printf("Drag from %d to %d || skip %d\n",
-				_last_pointer_time_axis_view,
-				_last_pointer_time_axis_view + delta_time_axis_view,
-				delta_skip);
-#endif
 	}
 
 	/* Verify change in y */
@@ -921,9 +923,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		delta_time_axis_view = 0;
 		delta_layer = 0;
 		delta_skip = 0;
-#ifdef DEBUG_DROPZONEDRAG
-		printf(" ** NOT ALLOWED\n");
-#endif
 	}
 
 	if (x_delta == 0 && (tv && tv->view() && delta_time_axis_view == 0) && delta_layer == 0 && !first_move) {
@@ -933,20 +932,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
-	typedef pair<int,double> NewTrackIndexAndPosition;
-	typedef map<boost::shared_ptr<Playlist>,NewTrackIndexAndPosition> PlaylistDropzoneMap;
+	typedef map<boost::shared_ptr<Playlist>, double> PlaylistDropzoneMap;
 	PlaylistDropzoneMap playlist_dropzone_map;
-	int biggest_drop_zone_offset = 0;
-
-	/* find drop-zone y-position */
-	Coord last_track_bottom_edge;
-	last_track_bottom_edge = 0;
-	for (std::vector<TimeAxisView*>::reverse_iterator t = _time_axis_views.rbegin(); t != _time_axis_views.rend(); ++t) {
-		if (!(*t)->hidden()) {
-			last_track_bottom_edge = (*t)->canvas_display()->canvas_origin ().y + (*t)->effective_height();
-			break;
-		}
-	}
+	_ndropzone = 0; // number of elements currently in the dropzone
 
 	if (first_move) {
 		/* sort views by time_axis.
@@ -954,6 +942,27 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		 * of actual selection order
 		 */
 		_views.sort (DraggingViewSorter());
+
+		/* count number of distinct tracks of all regions
+		 * being dragged, used for dropzone.
+		 */
+		int prev_track = -1;
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			if (i->time_axis_view != prev_track) {
+				prev_track = i->time_axis_view;
+				++_ntracks;
+			}
+		}
+#ifndef NDEBUG
+		int spread =
+			_views.back().time_axis_view -
+			_views.front().time_axis_view;
+
+		spread -= apply_track_delta (_views.front().time_axis_view, spread, 0, true)
+		          -  _views.back().time_axis_view;
+
+		printf("Dragging region(s) from %d different track(s), max dist: %d\n", _ntracks, spread);
+#endif
 	}
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -1001,26 +1010,20 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		assert(track_index >= 0);
 
 		if (track_index < 0 || track_index >= (int) _time_axis_views.size()) {
+			/* Track is in the Dropzone */
+
 			i->time_axis_view = track_index;
-#ifdef DEBUG_DROPZONEDRAG
-			printf("IN THE ZONE\n");
-#endif
 			assert(i->time_axis_view >= _time_axis_views.size());
 			if (cur_y >= 0) {
 
-				int dzoffset;
-				NewTrackIndexAndPosition ip;
+				double yposition = 0;
 				PlaylistDropzoneMap::iterator pdz = playlist_dropzone_map.find (i->view->region()->playlist());
+				rv->set_height (TimeAxisView::preset_height (HeightNormal));
+				++_ndropzone;
 
 				/* store index of each new playlist as a negative count, starting at -1 */
 
 				if (pdz == playlist_dropzone_map.end()) {
-
-					/* TODO
-					 * retain the ordering top -> bottom in the drop-zone
-					 * this can be done by sorting the regions according to
-					 * i->time_axis_view Y, prior to iterating over DraggingView
-					 */
 
 					int n = playlist_dropzone_map.size() + 1;
 
@@ -1028,8 +1031,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 					   on the y-axis.
 					*/
 
-					ip.first = -n;  /* in time axis units, negative to signify "in drop zone " */
-					ip.second = last_track_bottom_edge; /* where to place the top edge of the regionview */
+					yposition = last_track_bottom_edge; /* where to place the top edge of the regionview */
 
 					/* How high is this region view ? */
 
@@ -1042,17 +1044,14 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 					last_track_bottom_edge += bbox.height();
 
-					playlist_dropzone_map.insert (make_pair (i->view->region()->playlist(), ip));
-					dzoffset = -n;
+					playlist_dropzone_map.insert (make_pair (i->view->region()->playlist(), yposition));
 
 				} else {
-					ip = pdz->second;
-					dzoffset = ip.first;
+					yposition = pdz->second;
 				}
 
 				/* values are zero or negative, hence the use of min() */
-				biggest_drop_zone_offset = min (biggest_drop_zone_offset, dzoffset);
-				y_delta = ip.second - rv->get_canvas_group()->canvas_origin().y;
+				y_delta = yposition - rv->get_canvas_group()->canvas_origin().y;
 			}
 
 		} else {
@@ -1129,26 +1128,47 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_time (_last_frame_position);
 	}
 
+	/* keep track of pointer movement */
 	if (tv) {
-
 		/* the pointer is currently over a time axis view */
 
 		if (_last_pointer_time_axis_view < 0) {
-
-			/* last motion event was not over a time axis view */
-
+			/* last motion event was not over a time axis view
+			 * or last y-movement out of the dropzone was not valid
+			 */
+			int dtz = 0;
 			if (delta_time_axis_view < 0) {
-				/* was in the drop zone, moving up */
+				/* in the drop zone, moving up */
+
+				/* _pdropzone is the last known pointer y-axis position inside the DZ.
+				 * We do not use negative _last_pointer_time_axis_view because
+				 * the dropzone is "packed" (the actual track offset is ignored)
+				 *
+				 * As opposed to the actual number 
+				 * of elements in the dropzone (_ndropzone)
+				 * _pdropzone is not constrained. This is necessary
+				 * to allow moving multiple regions with y-distance
+				 * into the DZ.
+				 *
+				 * There can be 0 elements in the dropzone,
+				 * even though the drag-pointer is inside the DZ.
+				 *
+				 * example:
+				 * [ Audio-track, Midi-track, Audio-track, DZ ]
+				 * move regions from both audio tracks at the same time into the
+				 * DZ by grabbing the region in the bottom track.
+				 */
 				assert(current_pointer_time_axis_view >= 0);
-				_last_pointer_time_axis_view = current_pointer_time_axis_view;
-			} else {
-				/* was in the drop zone, moving down ... not possible */
+				dtz = std::min((int)_pdropzone, -delta_time_axis_view);
+				_pdropzone -= dtz;
 			}
 
+			/* only move out of the zone if the movement is OK */
+			if (_pdropzone == 0 && delta_time_axis_view != 0) {
+				_last_pointer_time_axis_view = current_pointer_time_axis_view;
+			}
 		} else {
-
 			/* last motion event was also over a time axis view */
-
 			_last_pointer_time_axis_view += delta_time_axis_view;
 			assert(_last_pointer_time_axis_view >= 0);
 		}
@@ -1156,8 +1176,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	} else {
 
 		/* the pointer is not over a time axis view */
-
-		_last_pointer_time_axis_view = biggest_drop_zone_offset;
+		assert ((delta_time_axis_view > 0) || (((int)_pdropzone) >= (delta_skip - delta_time_axis_view)));
+		_pdropzone += delta_time_axis_view - delta_skip;
+		_last_pointer_time_axis_view = -1; // <0 : we're in the zone, value does not matter.
 	}
 
 	_last_pointer_layer += delta_layer;

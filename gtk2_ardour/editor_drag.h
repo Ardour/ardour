@@ -296,6 +296,7 @@ protected:
 
 	int _visible_y_low;
 	int _visible_y_high;
+	uint32_t _ntracks;
 
 	friend class DraggingView;
 
@@ -335,6 +336,11 @@ protected:
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
 	bool _single_axis;
+
+private:
+	uint32_t _ndropzone;
+	uint32_t _pdropzone;
+	uint32_t _ddropzone;
 };
 
 
