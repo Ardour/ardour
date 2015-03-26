@@ -104,6 +104,21 @@ public:
 		return this->size() == 10    && this->_buf[0] == 0xf0 && this->_buf[1] == 0x7f && 
 		       this->_buf[3] == 0x01 && this->_buf[4] == 0x01;
 	}
+
+	inline uint16_t value() const {
+		switch (type()) {
+		case MIDI_CMD_CONTROL:
+			return cc_value();
+		case MIDI_CMD_BENDER:
+			return pitch_bender_value();
+		case MIDI_CMD_NOTE_PRESSURE:
+			return aftertouch();
+		case MIDI_CMD_CHANNEL_PRESSURE:
+			return channel_pressure();
+		default:
+			return 0;
+		}
+	}
 };
 
 } // namespace Evoral

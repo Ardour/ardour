@@ -34,6 +34,7 @@
 #include "pbd/convert.h"
 #include "evoral/midi_util.h"
 
+#include "ardour/beats_frames_converter.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
@@ -42,6 +43,7 @@
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_port.h"
+#include "ardour/midi_region.h"
 #include "ardour/midi_track.h"
 #include "ardour/parameter_types.h"
 #include "ardour/port.h"
@@ -318,6 +320,20 @@ MidiTrack::set_state_part_two ()
 	return;
 }
 
+void
+MidiTrack::update_controls(const BufferSet& bufs)
+{
+	const MidiBuffer& buf = bufs.get_midi(0);
+	for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
+		const Evoral::MIDIEvent<framepos_t>&     ev      = *e;
+		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
+		const boost::shared_ptr<Evoral::Control> control = this->control(param);
+		if (control) {
+			control->set_double(ev.value(), _session.transport_frame(), false);
+		}
+	}
+}
+
 /** @param need_butler to be set to true if this track now needs the butler, otherwise it can be left alone
  *  or set to false.
  */
@@ -471,6 +487,42 @@ MidiTrack::realtime_handle_transport_stopped ()
 }
 
 void
+MidiTrack::non_realtime_locate (framepos_t pos)
+{
+	Track::non_realtime_locate(pos);
+
+	boost::shared_ptr<MidiPlaylist> playlist = midi_diskstream()->midi_playlist();
+	if (!playlist) {
+		return;
+	}
+
+	/* Get the top unmuted region at this position. */
+	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion>(
+		playlist->top_unmuted_region_at(pos));
+	if (!region) {
+		return;
+	}
+
+	Glib::Threads::Mutex::Lock lm (_control_lock, Glib::Threads::TRY_LOCK);
+	if (!lm.locked()) {
+		return;
+	}
+
+	/* Update track controllers based on its "automation". */
+	const framepos_t     origin = region->position() - region->start();
+	BeatsFramesConverter bfc(_session.tempo_map(), origin);
+	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
+		boost::shared_ptr<MidiTrack::MidiControl> tcontrol;
+		boost::shared_ptr<Evoral::Control>        rcontrol;
+		if ((tcontrol = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) &&
+		    (rcontrol = region->control(tcontrol->parameter()))) {
+			const Evoral::Beats pos_beats = bfc.from(pos - origin);
+			tcontrol->set_value(rcontrol->list()->eval(pos_beats.to_double()));
+		}
+	}
+}
+
+void
 MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 {
 	PortSet& ports (_input->ports());
@@ -538,6 +590,8 @@ void
 MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framepos_t /*end*/, framecnt_t nframes)
 {
 	MidiBuffer& buf (bufs.get_midi (0));
+
+	update_controls (bufs);
 
 	// Append immediate events
 

@@ -47,6 +47,7 @@ public:
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
+	void non_realtime_locate (framepos_t);
 
 	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
@@ -182,6 +183,9 @@ private:
 
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);
+
+	/** Update automation controls to reflect any changes in buffers. */
+	void update_controls (const BufferSet& bufs);
 
 	void filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask); 
 

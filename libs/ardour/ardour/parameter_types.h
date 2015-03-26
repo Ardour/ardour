@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "ardour/types.h"
+#include "evoral/Parameter.hpp"
 #include "evoral/midi_events.h"
 
 namespace ARDOUR {
@@ -51,6 +52,26 @@ midi_parameter_type(uint8_t status)
 	case MIDI_CMD_BENDER:           return MidiPitchBenderAutomation;     break;
 	case MIDI_CMD_COMMON_SYSEX:     return MidiSystemExclusiveAutomation; break;
 	default: return NullAutomation;
+	}
+}
+
+inline Evoral::Parameter
+midi_parameter(const uint8_t* buf, const uint32_t len)
+{
+	const uint8_t channel = buf[0] & 0x0F;
+	switch (midi_parameter_type(buf[0])) {
+	case MidiCCAutomation:
+		return Evoral::Parameter(MidiCCAutomation, channel, buf[1]);
+	case MidiPgmChangeAutomation:
+		return Evoral::Parameter(MidiPgmChangeAutomation, channel);
+	case MidiChannelPressureAutomation:
+		return Evoral::Parameter(MidiChannelPressureAutomation, channel);
+	case MidiPitchBenderAutomation:
+		return Evoral::Parameter(MidiPitchBenderAutomation, channel);
+	case MidiSystemExclusiveAutomation:
+		return Evoral::Parameter(MidiSystemExclusiveAutomation, channel);
+	default:
+		return Evoral::Parameter(NullAutomation);
 	}
 }
 
