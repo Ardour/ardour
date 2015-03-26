@@ -202,8 +202,8 @@ private:
 	typedef boost::shared_ptr<ContiguousControlPoints> CCP;
 	std::vector<CCP> contiguous_points;
 
-	void sync_model_with_view_point (ControlPoint&);
-	void sync_model_with_view_points (std::list<ControlPoint*>);
+	bool sync_model_with_view_point (ControlPoint&);
+	bool sync_model_with_view_points (std::list<ControlPoint*>);
 	void start_drag_common (double, float);
 
 	void reset_callback (const Evoral::ControlList&);
