@@ -1419,17 +1419,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
-		     "stop-recording-on-xrun",
-		     _("Stop recording when an xrun occurs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
-					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
-							    PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
-
-	tsf = new BoolOption (
 		     "loop-is-mode",
 		     _("Play loop is a transport mode"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_is_mode),
@@ -1440,6 +1429,17 @@ RCOptionEditor::RCOptionEditor ()
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
 	add_option (_("Transport"), tsf);
 	
+	tsf = new BoolOption (
+		     "stop-recording-on-xrun",
+		     _("Stop recording when an xrun occurs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
+							    PROGRAM_NAME));
+	add_option (_("Transport"), tsf);
+
 	tsf = new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
