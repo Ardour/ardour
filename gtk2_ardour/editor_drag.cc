@@ -651,11 +651,12 @@ RegionDrag::apply_track_delta (const int start, const int delta, const int skip,
 		return start;
 	}
 
+	const int tavsize  = _time_axis_views.size();
 	const int dt = delta > 0 ? +1 : -1;
-	int current = start;
-	int target  = start + delta - skip;
+	int current  = start;
+	int target   = start + delta - skip;
 
-	assert (current < 0 || current >= _time_axis_views.size() || !_time_axis_views[current]->hidden());
+	assert (current < 0 || current >= tavsize || !_time_axis_views[current]->hidden());
 	assert (skip == 0 || (skip < 0 && delta < 0) || (skip > 0 && delta > 0));
 
 	while (current >= 0 && current != target) {
@@ -663,10 +664,10 @@ RegionDrag::apply_track_delta (const int start, const int delta, const int skip,
 		if (current < 0 && dt < 0) {
 			break;
 		}
-		if (current >= _time_axis_views.size() && dt > 0) {
+		if (current >= tavsize && dt > 0) {
 			break;
 		}
-		if (current < 0 || current >= _time_axis_views.size()) {
+		if (current < 0 || current >= tavsize) {
 			continue;
 		}
 
@@ -689,11 +690,12 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 		return false;
 	}
 
+	const int tavsize  = _time_axis_views.size();
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		int n = apply_track_delta (i->time_axis_view, delta_track, skip_invisible);
-		assert (n < 0 || n >= _time_axis_views.size() || !_time_axis_views[n]->hidden());
+		assert (n < 0 || n >= tavsize || !_time_axis_views[n]->hidden());
 
-		if (i->time_axis_view < 0 || i->time_axis_view >= _time_axis_views.size()) {
+		if (i->time_axis_view < 0 || i->time_axis_view >= tavsize) {
 			/* already in the drop zone */
 			if (delta_track >= 0) {
 				/* downward motion - OK if others are still not in the dropzone */
@@ -705,7 +707,7 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer, int s
 		if (n < 0) {
 			/* off the top */
 			return false;
-		} else if (n >= int (_time_axis_views.size())) {
+		} else if (n >= tavsize) {
 			/* downward motion into drop zone. That's fine. */
 			continue;
 		}
@@ -1017,7 +1019,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			/* Track is in the Dropzone */
 
 			i->time_axis_view = track_index;
-			assert(i->time_axis_view >= _time_axis_views.size());
+			assert(i->time_axis_view >= (int) _time_axis_views.size());
 			if (cur_y >= 0) {
 
 				double yposition = 0;
@@ -1028,13 +1030,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				/* store index of each new playlist as a negative count, starting at -1 */
 
 				if (pdz == playlist_dropzone_map.end()) {
-
-					int n = playlist_dropzone_map.size() + 1;
-
 					/* compute where this new track (which doesn't exist yet) will live
 					   on the y-axis.
 					*/
-
 					yposition = last_track_bottom_edge; /* where to place the top edge of the regionview */
 
 					/* How high is this region view ? */
@@ -1412,7 +1410,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 			where = i->view->region()->position();
 		}
 
-		if (i->time_axis_view < 0 || i->time_axis_view >= _time_axis_views.size()) {
+		if (i->time_axis_view < 0 || i->time_axis_view >= (int)_time_axis_views.size()) {
 			/* dragged to drop zone */
 
 			PlaylistMapping::iterator pm;
@@ -1494,7 +1492,7 @@ RegionMoveDrag::finished_no_copy (
 			continue;
 		}
 
-		if (i->time_axis_view < 0 || i->time_axis_view >= _time_axis_views.size()) {
+		if (i->time_axis_view < 0 || i->time_axis_view >= (int)_time_axis_views.size()) {
 			/* dragged to drop zone */
 
 			PlaylistMapping::iterator pm;
@@ -1841,7 +1839,7 @@ void
 RegionInsertDrag::finished (GdkEvent *, bool)
 {
 	int pos = _views.front().time_axis_view;
-	assert(pos >= 0 && pos < _time_axis_views.size());
+	assert(pos >= 0 && pos < (int)_time_axis_views.size());
 
 	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[pos]);
 
