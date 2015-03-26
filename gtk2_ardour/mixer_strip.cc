@@ -1198,8 +1198,11 @@ void
 MixerStrip::update_input_display ()
 {
 //	update_io_button (_route, _width, true);
-	update_io_button (_route, true);
-  	panners.setup_pan ();
+	
+    // Not used by TracksLive
+    //update_io_button (_route, true);
+  	
+    panners.setup_pan ();
 
 	if (has_audio_outputs ()) {
 		panners.show_all ();
@@ -1212,7 +1215,9 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-	update_io_button (_route, false);
+    // Not used by TracksLive
+	//update_io_button (_route, false);
+    
   	gpm.setup_meters ();
   	panners.setup_pan ();
 
