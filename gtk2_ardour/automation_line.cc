@@ -105,7 +105,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new ArdourCanvas::Container (&parent);
+	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "region gain envelope group");
 
 	line = new ArdourCanvas::PolyLine (group);

@@ -96,7 +96,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 				_parameter,
 				&_source_relative_time_converter));
 	_line->set_colors();
-	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
+	_line->set_height ((uint32_t)rint(trackview.current_height() - 2.5 - NAME_HIGHLIGHT_SIZE));
 	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
 	_line->set_maximum_time (_region->length());
 	_line->set_offset (_region->start ());
@@ -235,7 +235,7 @@ AutomationRegionView::set_height (double h)
 	RegionView::set_height(h);
 
 	if (_line) {
-		_line->set_height ((uint32_t)rint(h - NAME_HIGHLIGHT_SIZE));
+		_line->set_height ((uint32_t)rint(h - 2.5 - NAME_HIGHLIGHT_SIZE));
 	}
 }
 

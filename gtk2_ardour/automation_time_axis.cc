@@ -465,7 +465,7 @@ AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	_base_rect->set_y1 (h);
 
 	if (_line) {
-		_line->set_height(h);
+		_line->set_height(h - 2.5);
 	}
 
 	if (_view) {
