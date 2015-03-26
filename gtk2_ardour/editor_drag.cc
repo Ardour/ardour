@@ -814,7 +814,11 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			 */
 			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size () + _ddropzone - _pdropzone;
 		} else {
-			delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
+			/* ignore busses early on. we can't move any regions on them */
+			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+			if (rtv && rtv->is_track()) {
+				delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
+			}
 		}
 
 		/* TODO needs adjustment per DraggingView,
