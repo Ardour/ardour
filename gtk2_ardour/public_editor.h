@@ -65,6 +65,7 @@ namespace Gtkmm2ext {
         class TearOff;
 }
 
+class MixerBridgeView;
 class AudioRegionView;
 class AutomationLine;
 class AutomationTimeAxisView;
@@ -222,6 +223,9 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
 
+    virtual MixerBridgeView& get_mixer_bridge () = 0;
+    virtual MixerBridgeView& get_meter_bridge () = 0;
+    
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
         /** Import existing media */

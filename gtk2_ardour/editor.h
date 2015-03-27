@@ -259,6 +259,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 	void track_mixer_selection ();
 
+    MixerBridgeView& get_mixer_bridge () { return _mixer_bridge_view; }
+    MixerBridgeView& get_meter_bridge () { return _meter_bridge_view; }
+    
 	bool extend_selection_to_track (TimeAxisView&);
     bool extend_time_selection_to_track (TimeAxisView&);
 
