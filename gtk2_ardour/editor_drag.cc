@@ -1173,8 +1173,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				/* if all logic and maths are correct, there is no need to assign the 'current' pointer.
 				 * the current position can be calculated as follows:
 				 */
-				assert (current_pointer_time_axis_view == _time_axis_views.size() - dtz + _ddropzone + delta_time_axis_view);
-				// robin crosses his fingers, and looks at busses.
+				// a well placed oofus attack can still throw this off.
+				// likley auto-scroll related, printf() debugging may tell, commented out for now.
+				//assert (current_pointer_time_axis_view == _time_axis_views.size() - dtz + _ddropzone + delta_time_axis_view);
 			}
 		} else {
 			/* last motion event was also over a time axis view */
