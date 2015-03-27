@@ -133,6 +133,7 @@ typedef uint64_t microseconds_t;
 #include "splash.h"
 #include "theme_manager.h"
 #include "time_axis_view_item.h"
+#include "mixer_bridge_view.h"
 #include "utils.h"
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
@@ -3803,6 +3804,12 @@ ARDOUR_UI::delete_selected_tracks()
     TrackSelection& track_selection =  editor->get_selection().tracks;
     editor->get_selection().block_tracks_changed (true);
     
+    MixerBridgeView& mixer_view = editor->get_mixer_bridge ();
+    mixer_view.selection().block_routes_changed(true);
+    
+    MixerBridgeView& meter_view = editor->get_meter_bridge ();
+    meter_view.selection().block_routes_changed(true);
+    
     boost::shared_ptr<RouteList> routes_to_remove(new RouteList);
     for (list<TimeAxisView*>::iterator i = track_selection.begin(); i != track_selection.end(); ++i) {
         RouteUI* t = dynamic_cast<RouteUI*> (*i);
@@ -3829,6 +3836,8 @@ ARDOUR_UI::delete_selected_tracks()
     
     /* restore selection notifications and update the selection */
     editor->get_selection().block_tracks_changed (false);
+    mixer_view.selection().block_routes_changed(false);
+    meter_view.selection().block_routes_changed(false);
     editor->get_selection().TracksChanged();
     
     _progress_dialog.hide_pd ();
