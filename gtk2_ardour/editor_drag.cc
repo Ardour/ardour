@@ -1357,7 +1357,11 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 	try {
 		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
 			list<boost::shared_ptr<AudioTrack> > audio_tracks;
-			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), region->n_channels(), ARDOUR::Normal, 0, 1, region->name());
+			uint32_t output_chan = region->n_channels();
+			if ((Config->get_output_auto_connect() & AutoConnectMaster) && _editor->session()->master_out()) {
+				output_chan =  _editor->session()->master_out()->n_inputs().n_audio();
+			}
+			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), output_chan, ARDOUR::Normal, 0, 1, region->name());
 			RouteTimeAxisView* rtav = _editor->axis_view_from_route (audio_tracks.front());
 			if (rtav) {
 				rtav->set_height (original->current_height());
