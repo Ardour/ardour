@@ -1,13 +1,13 @@
 # Copyright (C) YEAR "Paul Davis"
 # This file is distributed under the same license as the PACKAGE package.
 #
-# Edgar Aichinger <edgar.aichinger@aon.at>, 2013.
+# Edgar Aichinger <edgar.aichinger@aon.at>, 2013, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-04 19:07-0400\n"
-"PO-Revision-Date: 2013-02-05 19:50+0100\n"
+"POT-Creation-Date: 2015-03-18 16:48+0100\n"
+"PO-Revision-Date: 2015-01-18 11:41+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -19,7 +19,7 @@ msgstr ""
 
 #: actions.cc:336
 msgid "programming error: %1"
-msgstr ""
+msgstr "Programmierfehler: %1"
 
 #: actions.cc:511
 msgid "Unknown action name: %1"
@@ -35,11 +35,19 @@ msgstr ""
 "Schaltfläche kann den Status des nichtexistenten Kontrollzieles nicht "
 "verfolgen\n"
 
-#: gtk_ui.cc:111
+#: cursors.cc:82
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr "Die Datei mit den Cursor-Hotspot-Infos %1 hat einen Fehler in Zeile %2"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: gtk_ui.cc:113
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:368
+#: gtk_ui.cc:370
 msgid ""
 "\n"
 "\n"
@@ -49,11 +57,11 @@ msgstr ""
 "\n"
 "Kurzbefehl: "
 
-#: gtk_ui.cc:640
+#: gtk_ui.cc:638
 msgid "Press To Exit"
 msgstr "Zum Beenden drücken"
 
-#: gtk_ui.cc:676
+#: gtk_ui.cc:674
 msgid "I'm sorry %1, I can't do that"
 msgstr "Leider kann ich das nicht tun, %1"
 
@@ -93,39 +101,40 @@ msgstr ""
 
 #: keyboard.cc:602
 msgid "Cannot rename your own keybinding file (%1)"
-msgstr ""
+msgstr "Kann Ihre eigene Tastaturkürzeldatei nicht umbenennen (%1)"
 
 #: motionfeedback.cc:486
 msgid "motionfeedback: failed to open a temporary file for writing: %1"
 msgstr ""
+"motionfeedback: konnte eine Temporärdatei nicht zum Schreiben öffnen: %1"
 
 #: motionfeedback.cc:516
 msgid "motionfeedback: could not save image set to %1"
-msgstr ""
+msgstr "motionfeedback: konnte den Satz Bilder nicht in %1 speichern"
 
 #: motionfeedback.cc:526
 msgid "motionfeedback: caught PixbufError: %1"
-msgstr ""
+msgstr "motionfeedback: abgefangener PixbufError: %1"
 
 #: motionfeedback.cc:528
 msgid "motionfeedback: unknown exception"
-msgstr ""
+msgstr "motionfeedback: unbekannter Ausnahmefehler"
 
 #: paths_dialog.cc:32
 msgid "Add"
-msgstr ""
+msgstr "Hinzufügen"
 
 #: paths_dialog.cc:33
 msgid "Delete"
-msgstr ""
+msgstr "Löschen"
 
 #: paths_dialog.cc:34
 msgid "Reset to Default"
-msgstr ""
+msgstr "Auf Vorgabewert zurücksetzen"
 
 #: paths_dialog.cc:109
 msgid "Add folder to search path"
-msgstr ""
+msgstr "Ordner dem Suchpfad hinzufügen"
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
