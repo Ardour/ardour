@@ -800,7 +800,10 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		/* Work out the change in y */
 
-		if (_last_pointer_time_axis_view < 0) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+		if (!rtv || !rtv->is_track()) {
+			/* ignore busses early on. we can't move any regions on them */
+		} else if (_last_pointer_time_axis_view < 0) {
 			/* Was in the drop-zone, now over a track.
 			 * Hence it must be an upward move (from the bottom)
 			 *
@@ -816,11 +819,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			 */
 			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size () + _ddropzone - _pdropzone;
 		} else {
-			/* ignore busses early on. we can't move any regions on them */
-			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
-			if (rtv && rtv->is_track()) {
-				delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
-			}
+			delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
 		}
 
 		/* TODO needs adjustment per DraggingView,
@@ -899,15 +898,17 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		 * distance calculation is not needed (and would not work, either
 		 * because the dropzone is "packed").
 		 *
-		 * Except when partially(!) moving regions out of dropzone in a large step.
+		 * Except when [partially] moving regions out of dropzone in a large step.
 		 * (the mouse may or may not remain in the DZ)
 		 * Hidden tracks at the bottom of the TAV need to be skipped.
+		 *
+		 * This also handles the case if the mouse entered the DZ
+		 * in a large step (exessive delta), either due to fast-movement,
+		 * autoscroll, laggy UI. _ddropzone copensates for that (see "move into dz" above)
 		 */
-		assert(_pdropzone >= _ddropzone);
-		if (delta_time_axis_view < 0 && -delta_time_axis_view >= _pdropzone - _ddropzone)
-		{
-			const int dt = delta_time_axis_view + _pdropzone - _ddropzone;
-			assert (dt <= 0);
+		if (delta_time_axis_view < 0 && (int)_ddropzone - delta_time_axis_view >= (int)_pdropzone) {
+			const int dt = delta_time_axis_view + (int)_pdropzone - (int)_ddropzone;
+			assert(dt <= 0);
 			delta_skip = apply_track_delta(_time_axis_views.size(), dt, 0, true)
 				-_time_axis_views.size() - dt;
 		}
@@ -1161,13 +1162,19 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				 * DZ by grabbing the region in the bottom track.
 				 */
 				assert(current_pointer_time_axis_view >= 0);
-				dtz = std::min((int)_pdropzone, -delta_time_axis_view);
+				dtz = std::min((int)_pdropzone, (int)_ddropzone - delta_time_axis_view);
 				_pdropzone -= dtz;
 			}
 
 			/* only move out of the zone if the movement is OK */
 			if (_pdropzone == 0 && delta_time_axis_view != 0) {
+				assert(delta_time_axis_view < 0);
 				_last_pointer_time_axis_view = current_pointer_time_axis_view;
+				/* if all logic and maths are correct, there is no need to assign the 'current' pointer.
+				 * the current position can be calculated as follows:
+				 */
+				assert (current_pointer_time_axis_view == _time_axis_views.size() - dtz + _ddropzone + delta_time_axis_view);
+				// robin crosses his fingers, and looks at busses.
 			}
 		} else {
 			/* last motion event was also over a time axis view */
