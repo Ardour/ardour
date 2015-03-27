@@ -490,7 +490,7 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (lm_button_audio, 3, 4, row-1, row+1, xopt, xopt);
 	++row;
 
-	label = manage (left_aligned_label (_("MIDI System")));
+	label = manage (left_aligned_label (_("MIDI System:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, SHRINK, (AttachOptions) 0);
 	basic_packer.attach (midi_devices_button, 3, 4, row, row+1, xopt, xopt);
