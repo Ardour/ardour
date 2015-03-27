@@ -31,7 +31,7 @@ const std::vector<std::string> WavesAudioBackend::__available_midi_options = boo
 
 #elif PLATFORM_WINDOWS
 
-const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("Multimedia Extensions") ("None");
+const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("System MIDI (MME)") ("None");
 
 #endif
 

@@ -951,7 +951,7 @@ ARDOUR::enumerate_midi_options ()
 		/* Windows folks: what name makes sense here? Are there other
 		   choices as well ?
 		*/
-		midi_options.push_back (make_pair (_("Multimedia Extension"), winmme_midi_driver_name));
+		midi_options.push_back (make_pair (_("System MIDI (MME)"), winmme_midi_driver_name));
 #endif
 #ifdef __APPLE__
 		midi_options.push_back (make_pair (_("CoreMIDI"), coremidi_midi_driver_name));
