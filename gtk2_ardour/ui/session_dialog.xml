@@ -37,6 +37,16 @@
                     borderwidth="0 0 1 1"
                     width="196"
                     height="40"/>
+            <Button id="new_session_with_template_button"
+                    text="Open Template"
+                    style="generic_control"
+                    fgnormal="#ffffff"
+                    bgnormal="#303030"
+                    fgactive="#000000"
+                    bgactive="#dcdcdc"
+                    borderwidth="0 0 1 1"
+                    width="196"
+                    height="40"/>
             <Button id="open_saved_session_button"
                     style="generic_control"
                     text="Open Saved Session"
@@ -119,13 +129,16 @@
                     borderwidth="0 0 0 1"
                     width="195"
                     height="40"/>
-            <EventBox bgnormal="#303030">
-              <VBox spacing="1">
-                <HBox height="6"/>
+            <EventBox bgnormal="#303030"
+                      box.fill="true"
+                      box.expand="true">
+              <VBox>
                 <Label style="generic_control"
                        text="Recent Sessions"
                        winfont ="Arial Bold 11"
-                       macfont ="Helvetica Bold 11"/>
+                       macfont ="Helvetica Bold 11"
+                       box.fill="true"
+                       box.expand="true"/>
                 <HBox box.padding="2">
                   <VBox spacing="1" box.padding="5">
                     <Button style="recent_session_button"
@@ -170,7 +183,7 @@
                             height="19"/>
                   </VBox>
                 </HBox>
-                <HBox height="2"/>
+                <HBox height="3"/>
               </VBox>
             </EventBox>
           </VBox>

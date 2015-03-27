@@ -42,7 +42,7 @@
 #include "timecode/time.h"
 #include "time.h"
 
-#include "open_file_dialog_proxy.h"
+#include "open_file_dialog.h"
 #include "yes_no_dialog.h"
 #include "waves_message_dialog.h"
 #include "dbg_msg.h"

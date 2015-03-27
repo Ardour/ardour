@@ -20,7 +20,7 @@
 */
 
 #include <gtkmm/messagedialog.h>
-#include "open_file_dialog_proxy.h"
+#include "open_file_dialog.h"
 
 #include "waves_export_filename_selector.h"
 #include "waves_message_dialog.h"

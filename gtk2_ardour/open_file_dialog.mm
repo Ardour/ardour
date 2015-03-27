@@ -18,12 +18,21 @@
 */
 
 #import "open_file_dialog.h"
+#import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 
 #include <string>
 #include <vector>
 
 #include <iostream>
+
+// An Objective-C class that needs to be accessed from C++
+@interface FileDialog : NSObject
+{
+	
+}
+
+@end
 
 using namespace std;
 
@@ -44,7 +53,7 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 
 
 std::vector<std::string>
-ARDOUR::open_file_dialog (std::vector<std::string> extensions, std::string initial_path, std::string title)
+ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_selection, std::string initial_path, std::string title)
 {
     NSString *nsTitle = [NSString stringWithUTF8String:title.c_str()];
     //NP: we should find some gentle way to do this
@@ -56,8 +65,8 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, std::string initi
 		id nsstr = [NSString stringWithUTF8String:(*it).c_str()];
 		[fileTypesArray addObject:nsstr];
 	}
-    
-    NSArray *nsPathes = [FileDialog class_open_file_dialog:nsTitle withArg2:nsDefaultPath withArg3:fileTypesArray];
+	
+    NSArray *nsPathes = [FileDialog class_open_file_dialog:nsTitle withArg2:nsDefaultPath withArg3:fileTypesArray withArg4:multi_selection];
     
     std::vector<std::string> stdPathes;
     
@@ -164,14 +173,14 @@ ARDOUR::choose_folder_dialog(std::string initial_path, std::string title)
 }
 
 /* On choose many files */
-+ (NSArray*) class_open_file_dialog:(NSString *)title withArg2:(NSString *)initial_path withArg3:(NSArray*) fileTypesArray
++ (NSArray*) class_open_file_dialog:(NSString *)title withArg2:(NSString *)initial_path withArg3:(NSArray*) fileTypesArray withArg4:(bool) multiSelection
 {
     // Create a File Open Dialog class.
     NSOpenPanel* openDlg = [NSOpenPanel openPanel];
     
     [openDlg setCanChooseFiles:YES];
     [openDlg setAllowedFileTypes:fileTypesArray];
-    [openDlg setAllowsMultipleSelection:TRUE];
+	[openDlg setAllowsMultipleSelection:multiSelection];
     [openDlg setTitle:title];
     
     NSFileManager *fm = [[NSFileManager alloc] init];

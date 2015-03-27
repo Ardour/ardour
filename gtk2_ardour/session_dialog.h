@@ -44,6 +44,7 @@
 
 #include "ardour/utils.h"
 #include "ardour/engine_state_controller.h"
+#include "ardour/template_utils.h"
 
 #include "ardour_dialog.h"
 #include "window_manager.h"
@@ -66,6 +67,7 @@ class SessionDialog : public WavesDialog {
   private:
 	WavesButton& _quit_button;
 	WavesButton& _new_session_button;
+	WavesButton& _new_session_with_template_button;
 	WavesButton& _open_selected_button;
 	WavesButton& _open_saved_session_button;
 	WavesButton& _system_configuration_button;

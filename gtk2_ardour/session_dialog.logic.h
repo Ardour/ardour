@@ -25,8 +25,8 @@
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
     
-	bool use_session_template() { return false; }
-	std::string session_template_name() { return ""; }
+	bool use_session_template() { return _session_template.empty () == false; }
+	std::string session_template_name() { return _session_template; }
 
 	// advanced session options
 
@@ -76,26 +76,27 @@
 	Gtk::Label _info_scroller_label;
     std::string::size_type _info_scroller_count;
 	sigc::connection _info_scroller_connection;
+	std::string _session_template;
 
 // methods
 	void on_quit (WavesButton*);
 	void on_open_selected (WavesButton*);
 	void on_open_saved_session (WavesButton*);
     void on_new_session (WavesButton*);
+    void on_new_session_with_template (WavesButton*);
     void on_recent_session (WavesButton*);
     void on_recent_session_double_click (WavesButton*);
 	void on_system_configuration (WavesButton*);
 	bool on_delete_event (GdkEventAny*);
-
 	bool on_key_press_event (GdkEventKey*);
-
     void on_system_configuration_change();
+
 	void redisplay_system_configuration();
 	int redisplay_recent_sessions ();
     void session_selected ();
     bool info_scroller_update();
-
-    void update_recent_session_buttons ();
+	void update_recent_session_buttons ();
+    void new_session (bool with_template);
 
 // connections
     PBD::ScopedConnectionList _system_config_update;

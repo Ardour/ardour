@@ -141,7 +141,7 @@ typedef uint64_t microseconds_t;
 
 #include "i18n.h"
 
-#include "open_file_dialog_proxy.h"
+#include "open_file_dialog.h"
 #include "waves_message_dialog.h"
 #include "waves_ambiguous_file_dialog.h"
 #include "crash_recovery_dialog.h"
@@ -2695,20 +2695,11 @@ ARDOUR_UI::save_template ()
 		return;
 	}
 
-	std::string name;
-	WavesPrompter the_prompter ("waves_save_template_dialog.xml");
-	the_prompter.set_initial_text(_session->name() + _("-template"));
-
-	switch (the_prompter.run()) {
-	case RESPONSE_ACCEPT:
-		the_prompter.get_result (name);
-		if (name.length()) {
-			_session->save_template (name);
+    std::string template_path = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Save Session"));
+	if (!template_path.empty()) {
+		if (_session->save_template (template_path)) {
+			 WavesMessageDialog ("", string_compose(_("Could not save Session template\n%1"), template_path)).run ();
 		}
-		break;
-
-	default:
-		break;
 	}
 }
 
@@ -3051,7 +3042,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			// so we must show SessionDialog
 			if (should_be_new || session_name.empty()) {
 				/* need the dialog to get info from user */
+				std::cout << "#########################################################################################" << std::endl;
+				std::cout << "#########################################################################################" << std::endl;
+				std::cout << "int response = _session_dialog.run();" << std::endl;
 				int response = _session_dialog.run();
+				std::cout << "#########################################################################################" << std::endl;
+				std::cout << "#########################################################################################" << std::endl;
 				switch (response) {
 					case Gtk::RESPONSE_ACCEPT: // existed session was choosen or new session was created
 						break;
@@ -3110,6 +3106,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		if (_session_dialog.use_session_template()) {
 			template_name = _session_dialog.session_template_name();
+			std::cout << "#########################################################################################" << std::endl;
+			std::cout << "#########################################################################################" << std::endl;
+			std::cout << "template_name : " << template_name << std::endl;
+			std::cout << "#########################################################################################" << std::endl;
+			std::cout << "#########################################################################################" << std::endl;
 			_session_is_new = true;
 		}
 		

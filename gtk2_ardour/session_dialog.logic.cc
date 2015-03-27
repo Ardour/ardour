@@ -23,6 +23,7 @@
 
 #include <fstream>
 #include <algorithm>
+#include <boost/assign/list_of.hpp>
 
 #include "waves_button.h"
 
@@ -51,7 +52,7 @@
 #include "utils.h"
 #include "gui_thread.h" 
 
-#include "open_file_dialog_proxy.h"
+#include "open_file_dialog.h"
 #include "dbg_msg.h"
 
 using namespace std;
@@ -134,27 +135,13 @@ SessionDialog::session_selected ()
 void
 SessionDialog::on_new_session (WavesButton*)
 {
-    string temp_session_full_file_name;
-    
-    set_keep_above(false);
-    temp_session_full_file_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
-    set_keep_above(true);
-    
-    if (!temp_session_full_file_name.empty()) {
-        _selected_session_full_name = temp_session_full_file_name;
-        
-            for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
-                _recent_session_button[i]->set_active_state (Gtkmm2ext::Off);
-            }
-            
-            hide();
-            _selection_type = NewSession;
-            response (Gtk::RESPONSE_ACCEPT);
-        
-            ARDOUR_UI::instance()->_progress_dialog.set_top_label ("Creating session: "+Glib::path_get_basename(_selected_session_full_name));
-            ARDOUR_UI::instance()->_progress_dialog.update_info (0.0, NULL, NULL, "Creating elements...");
-            ARDOUR_UI::instance()->_progress_dialog.show_pd ();
-    }
+	new_session (false);
+}
+
+void
+SessionDialog::on_new_session_with_template (WavesButton*)
+{
+	new_session (true);
 }
 
 void
@@ -379,4 +366,41 @@ SessionDialog::set_session_info (bool require_new,
     _new_only = require_new;
     _provided_session_name = session_name;
     _provided_session_path = session_path;
+}
+
+void
+SessionDialog::new_session (bool with_template)
+{
+    set_keep_above(false);
+	if (with_template) {
+		std::vector<std::string> template_types = boost::assign::list_of (ARDOUR::template_suffix + 1); //WOW!!!!
+		std::vector<std::string> selected_files = ARDOUR::open_file_dialog(template_types, false, Config->get_default_session_parent_dir(), _("Select Template"));
+		if (selected_files.empty ()) {
+			set_keep_above(true);
+			return;
+		} else {
+			_session_template =  Glib::path_get_dirname (selected_files [0]);
+		}
+	} else {
+		_session_template.clear ();
+	}
+
+    std::string temp_session_full_file_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
+    set_keep_above(true);
+    
+    if (!temp_session_full_file_name.empty()) {
+        _selected_session_full_name = temp_session_full_file_name;
+        
+        for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
+            _recent_session_button[i]->set_active_state (Gtkmm2ext::Off);
+        }
+            
+        hide();
+        _selection_type = NewSession;
+        response (Gtk::RESPONSE_ACCEPT);
+        
+        ARDOUR_UI::instance()->_progress_dialog.set_top_label ("Creating session: " + Glib::path_get_basename (_selected_session_full_name));
+        ARDOUR_UI::instance()->_progress_dialog.update_info (0.0, NULL, NULL, "Creating elements...");
+        ARDOUR_UI::instance()->_progress_dialog.show_pd ();
+    }
 }

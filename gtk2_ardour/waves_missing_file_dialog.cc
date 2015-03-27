@@ -24,7 +24,7 @@
 #include "ardour/session.h"
 #include "ardour/rc_configuration.h"
 
-#include "open_file_dialog_proxy.h"
+#include "open_file_dialog.h"
 #include "waves_missing_file_dialog.h"
 #include "i18n.h"
 

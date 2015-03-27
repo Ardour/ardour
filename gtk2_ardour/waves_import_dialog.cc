@@ -25,7 +25,7 @@
 #include "ardour/session_directory.h"
 
 #include "waves_import_dialog.h"
-#include "open_file_dialog_proxy.h"
+#include "open_file_dialog.h"
 #include "audio_time_axis.h"
 
 std::string WavesImportDialog::__initial_folder;
@@ -149,7 +149,7 @@ WavesImportDialog::run_import ()
 	std::vector<std::string> audiofile_types (__audiofile_types,
 											 __audiofile_types + sizeof (__audiofile_types)/sizeof(__audiofile_types[0]));
 	do {
-		_files_to_import = ARDOUR::open_file_dialog (audiofile_types, __initial_folder);
+		_files_to_import = ARDOUR::open_file_dialog (audiofile_types, true, __initial_folder);
 		if (_files_to_import.empty ()) {
 			return Gtk::RESPONSE_CANCEL;
 		}

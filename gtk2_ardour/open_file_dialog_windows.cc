@@ -27,7 +27,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "open_file_dialog_proxy.h"
+#include "open_file_dialog.h"
 
 using namespace std;
 
@@ -97,7 +97,7 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 }
 
 std::vector<std::string>
-ARDOUR::open_file_dialog (std::vector<std::string> extensions, std::string initial_path, std::string title)
+ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_selection, std::string initial_path, std::string title)
 {
 	TCHAR szFilePathName[_MAX_PATH] = "";
 	OPENFILENAME ofn = {0};
@@ -105,7 +105,10 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, std::string initi
 	ofn.lpstrFile = szFilePathName;  // This will hold the file name
 	ofn.nMaxFile = _MAX_PATH;
 	ofn.lpstrTitle = title.c_str();
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_EXPLORER;
+	if (multi_selection) {
+		ofn.Flags |= OFN_ALLOWMULTISELECT;
+	}
 
 	// Create filter for required file types
 	std::string filter;
