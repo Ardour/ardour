@@ -5,8 +5,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-28 20:49+0100\n"
-"PO-Revision-Date: 2015-03-28 20:54+0100\n"
+"POT-Creation-Date: 2015-03-28 20:55+0100\n"
+"PO-Revision-Date: 2015-03-28 20:57+0100\n"
 "Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
 "Language-Team: \n"
 "Language: fr\n"
@@ -25,28 +25,25 @@ msgstr "erreur de programmation : %1"
 
 #: actions.cc:511
 msgid "Unknown action name: %1"
-msgstr "Nom de l'action inconnue: %1"
+msgstr "Nom d'action inconnu : %1"
 
 #: binding_proxy.cc:81
-#, fuzzy
 msgid "operate controller now"
 msgstr "actionnez maintenant le contrôleur"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
-msgstr "Le bouton ne peut pas surveiller l'état d'un Controllable inexistant\n"
+msgstr "le bouton ne peut pas surveiller l'état d'un Contrôlable inexistant\n"
 
 #: cursors.cc:82
 msgid "cursor hotspots info file %1 has an error on line %2"
 msgstr ""
 
 #: emscale.cc:52
-#, fuzzy
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 #: gtk_ui.cc:113
-#, fuzzy
 msgid "Log"
 msgstr "Journal"
 
@@ -58,14 +55,13 @@ msgid ""
 msgstr ""
 "\n"
 "\n"
-"Raccourci : "
+"Raccourci : "
 
 #: gtk_ui.cc:638
 msgid "Press To Exit"
 msgstr "Appuyer pour quitter"
 
 #: gtk_ui.cc:674
-#, fuzzy
 msgid "I'm sorry %1, I can't do that"
 msgstr "Je suis désolé %1, je ne peux pas faire ça"
 
@@ -74,78 +70,73 @@ msgid "Command"
 msgstr "Commande"
 
 #: keyboard.cc:74 keyboard.cc:77 keyboard.cc:90 keyboard.cc:94
-#, fuzzy
 msgid "Control"
 msgstr "Ctrl"
 
 #: keyboard.cc:75 keyboard.cc:78 keyboard.cc:92 keyboard.cc:95
 msgid "Key|Shift"
-msgstr "Majuscule"
+msgstr "Maj."
 
 #: keyboard.cc:76
-#, fuzzy
 msgid "Option"
 msgstr "Option"
 
 #: keyboard.cc:91
-#, fuzzy
 msgid "Alt"
 msgstr "Alt"
 
 #: keyboard.cc:93
 msgid "Meta"
-msgstr "Méta"
+msgstr "Meta"
 
 #: keyboard.cc:144 keyboard.cc:540
 msgid "Unknown"
 msgstr "Inconnu"
 
 #: keyboard.cc:551
-#, fuzzy
 msgid "key bindings file not found at \"%2\" or contains errors."
-msgstr "fichier de raccourcis claviers contient des erreurs ou introuvable dans « %2 »."
+msgstr ""
+"fichier de raccourcis claviers contient des erreurs ou introuvable dans "
+"« %2 »."
 
 #: keyboard.cc:602
-#, fuzzy
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Impossible de renommer votre propre fichier de raccourcis clavier (%1)"
 
 #: motionfeedback.cc:486
-#, fuzzy
 msgid "motionfeedback: failed to open a temporary file for writing: %1"
-msgstr "rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en écriture : %1"
+msgstr ""
+"rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en "
+"écriture : %1"
 
+# Or is it "image set"?
 #: motionfeedback.cc:516
+#, fuzzy
 msgid "motionfeedback: could not save image set to %1"
 msgstr ""
+"rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
 
 #: motionfeedback.cc:526
-#, fuzzy
 msgid "motionfeedback: caught PixbufError: %1"
 msgstr "rétroaction de mouvement : PixbufError attrapée : %1"
 
 #: motionfeedback.cc:528
-#, fuzzy
 msgid "motionfeedback: unknown exception"
 msgstr "rétroaction de mouvement : exception inconnue"
 
 #: paths_dialog.cc:32
-#, fuzzy
 msgid "Add"
 msgstr "Ajouter"
 
 #: paths_dialog.cc:33
-#, fuzzy
 msgid "Delete"
 msgstr "Supprimer"
 
 #: paths_dialog.cc:34
-#, fuzzy
 msgid "Reset to Default"
 msgstr "Réinitialiser"
 
 #: paths_dialog.cc:109
-#, fuzzy
 msgid "Add folder to search path"
 msgstr "Ajouter le dossier au chemin de recherche"
 
