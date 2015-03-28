@@ -1498,6 +1498,21 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 			const double y0 = 1. + floor (midi_stream_view()->note_to_y(note->note()));
 			const double y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1.);
 
+			if (y0 < 0 || y1 >= _height) {
+				/* During DnD, the region uses the 'old/current'
+				 * midi_stream_view()'s range and its position/height calculation.
+				 *
+				 * Ideally DnD would decouple the midi_stream_view() for the
+				 * region(s) being dragged and set it to the target's range
+				 * (or in case of the drop-zone, FullRange).
+				 * but I don't see how this can be done without major rework.
+				 *
+				 * For now, just prevent visual bleeding of events in case
+				 * the target-track is smaller.
+				 */
+				event->hide();
+				continue;
+			}
 			cnote->set_y0 (y0);
 			cnote->set_y1 (y1);
 
@@ -1753,6 +1768,13 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 	const double x = trackview.editor().sample_to_pixel(note_start_frames);
 	const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
 	const double y = 1.5 + floor(midi_stream_view()->note_to_y(note->note())) + diamond_size * .5;
+
+	// see DnD note in MidiRegionView::apply_note_range() above
+	if (y <= 0 || y >= _height) {
+		ev->hide();
+	} else {
+		ev->show();
+	}
 
 	ev->set_position (ArdourCanvas::Duple (x, y));
 	ev->set_height (diamond_size);
