@@ -163,6 +163,7 @@ private:
 
 	static std::map <boost::shared_ptr<ARDOUR::AudioSource>, std::vector <CacheEntry> > _image_cache;
 	void consolidate_image_cache () const;
+	void invalidate_source (boost::weak_ptr<ARDOUR::AudioSource>);
 	void invalidate_image_cache ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
@@ -188,6 +189,7 @@ private:
 	ARDOUR::frameoffset_t _region_start;
 
         PBD::ScopedConnectionList invalidation_connection;
+	PBD::ScopedConnection _source_invalidated_connection;
 
         static double _global_gradient_depth;
         static bool   _global_logscaled;

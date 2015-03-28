@@ -38,6 +38,8 @@
 
 #include <gdkmm/general.h>
 
+#include "gtk2_ardour/gui_thread.h"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace ArdourCanvas;
@@ -74,6 +76,10 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _start_shift (0.0)
 	, _region_start (region->start())
 {
+	_region->DropReferences.connect (_source_invalidated_connection, MISSING_INVALIDATOR,
+						     boost::bind (&ArdourCanvas::WaveView::invalidate_source,
+								  this, boost::weak_ptr<AudioSource>(_region->audio_source())), gui_context());
+
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 }
@@ -97,12 +103,17 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _region_amplitude (_region->scale_amplitude ())
 	, _region_start (region->start())
 {
+	_region->DropReferences.connect (_source_invalidated_connection, MISSING_INVALIDATOR,
+						     boost::bind (&ArdourCanvas::WaveView::invalidate_source,
+								  this, boost::weak_ptr<AudioSource>(_region->audio_source())), gui_context());
+
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 }
 
 WaveView::~WaveView ()
 {
+	_source_invalidated_connection.disconnect();
 	invalidate_image_cache ();
 }
 
@@ -206,23 +217,32 @@ WaveView::set_clip_level (double dB)
 }
 
 void
+WaveView::invalidate_source (boost::weak_ptr<AudioSource> src)
+{
+	if (boost::shared_ptr<AudioSource> source = src.lock()) {
+
+		std::map <boost::shared_ptr<ARDOUR::AudioSource>, std::vector <CacheEntry> >::iterator i;
+		for (i = _image_cache.begin (); i != _image_cache.end (); ++i) {
+			if (i->first == source) {
+				for (uint32_t n = 0; n < i->second.size (); ++n) {
+					i->second[n].image.clear ();
+				}
+				i->second.clear ();
+				_image_cache.erase (i->first);
+			}
+		}
+	}
+}
+
+void
 WaveView::invalidate_image_cache ()
 {
 	vector <uint32_t> deletion_list;
 	vector <CacheEntry> caches;
 
-	/* The source may have disappeared in the case of rec regions.*/
+	/* The source may have disappeared.*/
+
 	if (_region->n_channels() == 0) {
-		std::map <boost::shared_ptr<ARDOUR::AudioSource>, std::vector <CacheEntry> >::iterator i;
-		for (i = _image_cache.begin(); i != _image_cache.end(); ++i) {
-			if (i->first.unique()) {
-				for (uint32_t n = 0; n < (*i).second.size (); ++n) {
-					(*i).second[n].image.clear ();
-				}
-				(*i).second.clear ();
-				_image_cache.erase(i->first);
-			}
-		}
 		return;
 	}
 
