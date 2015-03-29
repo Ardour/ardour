@@ -243,18 +243,22 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_view->RegionViewAdded.connect (
 			sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 
-		midi_track()->PlaybackChannelModeChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
-								  gui_context());
-		midi_track()->PlaybackChannelMaskChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
-								  gui_context());
-		midi_track()->CaptureChannelModeChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
-								  gui_context());
-		midi_track()->CaptureChannelMaskChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
-								  gui_context());
+		midi_track()->playback_filter().ChannelModeChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+			gui_context());
+		midi_track()->playback_filter().ChannelMaskChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+			gui_context());
+		midi_track()->capture_filter().ChannelModeChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+			gui_context());
+		midi_track()->capture_filter().ChannelMaskChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+			gui_context());
 
 		playback_channel_mode_changed ();
 		capture_channel_mode_changed ();

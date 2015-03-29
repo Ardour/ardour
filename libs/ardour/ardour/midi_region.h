@@ -43,13 +43,14 @@ template<typename Time> class EventSink;
 
 namespace ARDOUR {
 
-class Route;
-class Playlist;
-class Session;
+class MidiChannelFilter;
 class MidiFilter;
 class MidiModel;
 class MidiSource;
 class MidiStateTracker;
+class Playlist;
+class Route;
+class Session;
 
 template<typename T> class MidiRingBuffer;
 
@@ -74,7 +75,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	                    framecnt_t dur,
 	                    uint32_t  chan_n = 0,
 	                    NoteMode  mode = Sustained,
-	                    MidiStateTracker* tracker = 0) const;
+	                    MidiStateTracker* tracker = 0,
+	                    MidiChannelFilter* filter = 0) const;
 
 	framecnt_t master_read_at (MidiRingBuffer<framepos_t>& dst,
 	                           framepos_t position,
@@ -121,7 +123,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	                     framecnt_t dur,
 	                     uint32_t chan_n = 0,
 	                     NoteMode mode = Sustained,
-	                     MidiStateTracker* tracker = 0) const;
+	                     MidiStateTracker* tracker = 0,
+	                     MidiChannelFilter* filter = 0) const;
 
 	void register_properties ();
 	void post_set (const PBD::PropertyChange&);

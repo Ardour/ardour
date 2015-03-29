@@ -65,7 +65,8 @@ protected:
 	                          framepos_t                     position,
 	                          framepos_t                     start,
 	                          framecnt_t                     cnt,
-	                          MidiStateTracker*              tracker) const;
+	                          MidiStateTracker*              tracker,
+	                          MidiChannelFilter*             filter) const;
 
 	framecnt_t write_unlocked (const Lock&                 lock,
 	                           MidiRingBuffer<framepos_t>& dst,

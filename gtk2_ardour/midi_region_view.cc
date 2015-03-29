@@ -299,7 +299,7 @@ MidiRegionView::init (bool wfd)
 
 	group->raise_to_top();
 
-	midi_view()->midi_track()->PlaybackChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
+	midi_view()->midi_track()->playback_filter().ChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
 								       boost::bind (&MidiRegionView::midi_channel_mode_changed, this),
 								       gui_context ());
 
