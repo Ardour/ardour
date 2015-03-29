@@ -38,7 +38,7 @@
 
 #include <gdkmm/general.h>
 
-#include "gtk2_ardour/gui_thread.h"
+#include "gtkmm2ext/gui_thread.h"
 
 using namespace std;
 using namespace ARDOUR;
