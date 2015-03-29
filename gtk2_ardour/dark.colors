@@ -341,7 +341,7 @@
     <ColorAlias name="processor automation line" alias="color 77"/>
     <ColorAlias name="processor control button: fill" alias="color 29"/>
     <ColorAlias name="processor control button: fill active" alias="color 46"/>
-    <ColorAlias name="processor control button: led active" alias="color 16"/>
+    <ColorAlias name="processor control button: led active" alias="color 62"/>
     <ColorAlias name="processor fader: fill" alias="color 16"/>
     <ColorAlias name="processor fader: fill active" alias="color 78"/>
     <ColorAlias name="processor fader: led active" alias="color 37"/>
