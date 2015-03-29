@@ -3147,6 +3147,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	XMLNode* n;
 	n = Config->instant_xml (X_("Editor"));
 	if (n) {
+		n->remove_nodes_and_delete ("Selection"); // no not apply selection to new sessions.
 		new_session->add_instant_xml (*n, false);
 	}
 	n = Config->instant_xml (X_("Mixer"));
