@@ -644,6 +644,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\midi_channel_filter.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\midi_clock_slave.cc"
 				>
 			</File>
@@ -1719,6 +1723,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\midi_buffer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\midi_channel_filter.h"
 				>
 			</File>
 			<File
