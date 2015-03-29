@@ -348,7 +348,11 @@ cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
 for backend in jack wavesaudio ; do
-    cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
+    if [ -d $BUILD_ROOT/libs/backends/$backend ] ; then
+        for onelib in `find $BUILD_ROOT/libs/backends/$backend/lib*.dylib -type f` ; do
+            cp $onelib $Backends
+        done
+    fi
 done
 
 # Export Formats/Presets
