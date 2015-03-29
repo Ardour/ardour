@@ -1010,8 +1010,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			this_delta_layer = - i->layer;
 		}
 
-		int this_delta_time_axis_view = delta_time_axis_view;
-		this_delta_time_axis_view = apply_track_delta(i->time_axis_view, delta_time_axis_view, delta_skip) - i->time_axis_view;
+		int this_delta_time_axis_view = apply_track_delta(i->time_axis_view, delta_time_axis_view, delta_skip) - i->time_axis_view;
 
 		int track_index = i->time_axis_view + this_delta_time_axis_view;
 		assert(track_index >= 0);
