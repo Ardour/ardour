@@ -634,11 +634,7 @@ ProcessorEntry::Control::control_changed ()
 	} else {
 
 		_adjustment.set_value (c->internal_to_interface(c->get_value ()));
-		
-		stringstream s;
-		s.precision (1);
-		s.setf (ios::fixed, ios::floatfield);
-		s << c->internal_to_user (c->get_value ());
+		set_tooltip ();
 	}
 	
 	_ignore_ui_adjustment = false;
