@@ -1,0 +1,17 @@
+[main]
+host = https://www.transifex.com
+
+[ardour.ardour]
+file_filter = gtk2_ardour/po/<lang>.po
+source_file = gtk2_ardour/gtk2_ardour3.pot
+source_lang = en
+
+[ardour.libardour]
+file_filter = libs/ardour/po/<lang>.po
+source_file = libs/ardour/ardour3.pot
+source_lang = en
+
+[ardour.gtkmm2ext]
+file_filter = libs/gtkmm2ext/po/<lang>.po
+source_file = libs/gtkmm2ext/gtkmm2ext3.pot
+source_lang = en
