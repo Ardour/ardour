@@ -372,7 +372,7 @@ MixerStrip::init ()
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 
 	parameter_changed (X_("mixer-element-visibility"));
-
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
