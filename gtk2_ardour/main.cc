@@ -218,7 +218,7 @@ static void command_line_parse_error (int *argc, char** argv[]) {
 
 	Gtk::MessageDialog dlgReportParseError (string_compose (_("\n   %1 could not understand your command line      "), PROGRAM_NAME),
 			false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
-	dlgReportParseError.set_title (string_compose (_("An error was encountered while launching %1"), PROGRAM_NAME);
+	dlgReportParseError.set_title (string_compose (_("An error was encountered while launching %1"), PROGRAM_NAME));
 	dlgReportParseError.run ();
 }
 
