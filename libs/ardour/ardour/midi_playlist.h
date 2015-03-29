@@ -42,6 +42,7 @@ namespace ARDOUR
 {
 
 class BeatsFramesConverter;
+class MidiChannelFilter;
 class MidiRegion;
 class Session;
 class Source;
@@ -77,7 +78,8 @@ public:
 	framecnt_t read (Evoral::EventSink<framepos_t>& buf,
 	                 framepos_t                     start,
 	                 framecnt_t                     cnt,
-	                 uint32_t                       chan_n = 0);
+	                 uint32_t                       chan_n = 0,
+	                 MidiChannelFilter*             filter = NULL);
 
 	int set_state (const XMLNode&, int version);
 

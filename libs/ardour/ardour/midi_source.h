@@ -34,6 +34,7 @@
 
 namespace ARDOUR {
 
+class MidiChannelFilter;
 class MidiStateTracker;
 class MidiModel;
 
@@ -77,6 +78,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                              framepos_t                         start,
 	                              framecnt_t                         cnt,
 	                              MidiStateTracker*                  tracker,
+	                              MidiChannelFilter*                 filter,
 	                              const std::set<Evoral::Parameter>& filtered) const;
 
 	/** Write data from a MidiRingBuffer to this source.
@@ -192,7 +194,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                                  framepos_t                     position,
 	                                  framepos_t                     start,
 	                                  framecnt_t                     cnt,
-	                                  MidiStateTracker*              tracker) const = 0;
+	                                  MidiStateTracker*              tracker,
+	                                  MidiChannelFilter*             filter) const = 0;
 
 	/** Write data to this source from a MidiRingBuffer.
 	 *  @param source Buffer to read from.

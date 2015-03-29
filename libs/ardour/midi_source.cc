@@ -38,10 +38,11 @@
 #include "evoral/EventSink.hpp"
 
 #include "ardour/debug.h"
-#include "ardour/midi_model.h"
-#include "ardour/midi_state_tracker.h"
-#include "ardour/midi_source.h"
 #include "ardour/file_source.h"
+#include "ardour/midi_channel_filter.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
@@ -190,6 +191,7 @@ MidiSource::midi_read (const Lock&                        lm,
                        framepos_t                         start,
                        framecnt_t                         cnt,
                        MidiStateTracker*                  tracker,
+                       MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered) const
 {
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
@@ -218,6 +220,13 @@ MidiSource::midi_read (const Lock&                        lm,
 		for (; i != _model->end(); ++i) {
 			const framecnt_t time_frames = converter.to(i->time());
 			if (time_frames < start + cnt) {
+				if (filter && filter->filter(i->buffer(), i->size())) {
+					DEBUG_TRACE (DEBUG::MidiSourceIO,
+					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
+					                             _name, time_frames + source_start, i->event_type(), i->size()));
+					continue;
+				}
+
 				// Offset by source start to convert event time to session time
 				dst.write (time_frames + source_start, i->event_type(), i->size(), i->buffer());
 
@@ -237,7 +246,7 @@ MidiSource::midi_read (const Lock&                        lm,
 		}
 		return cnt;
 	} else {
-		return read_unlocked (lm, dst, source_start, start, cnt, tracker);
+		return read_unlocked (lm, dst, source_start, start, cnt, tracker, filter);
 	}
 }
 

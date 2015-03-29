@@ -403,17 +403,10 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 	}
 
 	if (nominally_recording || rec_nframes) {
-
-		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
-		MidiBuffer& buf = sp->get_midi_buffer(nframes);
-		ChannelMode mode = AllChannels;
-		uint32_t mask = 0xffff;
-
-		MidiTrack * mt = dynamic_cast<MidiTrack*> (_track);
-		if (mt) {
-			mode = mt->get_capture_channel_mode ();
-			mask = mt->get_capture_channel_mask ();
-		}
+		// Pump entire port buffer into the ring buffer (TODO: split cycles?)
+		MidiBuffer&        buf    = sp->get_midi_buffer(nframes);
+		MidiTrack*         mt     = dynamic_cast<MidiTrack*>(_track);
+		MidiChannelFilter* filter = mt ? &mt->capture_filter() : NULL;
 
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
@@ -447,31 +440,12 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 			const framecnt_t loop_offset = _num_captured_loops * loop_length;
 			const framepos_t event_time = transport_frame + loop_offset - _accumulated_capture_offset + ev.time();
 			if (event_time < 0 || event_time < first_recordable_frame) {
+				/* Event out of range, skip */
 				continue;
 			}
-			switch (mode) {
-			case AllChannels:
-				_capture_buf->write(event_time,
-						    ev.type(), ev.size(), ev.buffer());
-				break;
-			case FilterChannels:
-				if (ev.is_channel_event()) {
-					if ((1<<ev.channel()) & mask) {
-						_capture_buf->write(event_time,
-								    ev.type(), ev.size(), ev.buffer());
-					}
-				} else {
-					_capture_buf->write(event_time,
-							    ev.type(), ev.size(), ev.buffer());
-				}
-				break;
-			case ForceChannel:
-				if (ev.is_channel_event()) {
-					ev.set_channel (PBD::ffs(mask) - 1);
-				}
-				_capture_buf->write(event_time,
-						    ev.type(), ev.size(), ev.buffer());
-				break;
+
+			if (!filter || !filter->filter(ev.buffer(), ev.size())) {
+				_capture_buf->write(event_time, ev.type(), ev.size(), ev.buffer());
 			}
 		}
 		g_atomic_int_add(const_cast<gint*>(&_frames_pending_write), nframes);
@@ -736,6 +710,9 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 	framecnt_t loop_length = 0;
 	Location*  loc         = 0;
 
+	MidiTrack*         mt     = dynamic_cast<MidiTrack*>(_track);
+	MidiChannelFilter* filter = mt ? &mt->playback_filter() : NULL;
+
 	if (!reversed) {
 
 		loc = loop_location;
@@ -772,7 +749,7 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 
 		this_read = min(dur,this_read);
 
-		if (midi_playlist()->read (*_playback_buf, start, this_read) != this_read) {
+		if (midi_playlist()->read (*_playback_buf, start, this_read, 0, filter) != this_read) {
 			error << string_compose(
 					_("MidiDiskstream %1: cannot read %2 from playlist at frame %3"),
 					id(), this_read, start) << endmsg;

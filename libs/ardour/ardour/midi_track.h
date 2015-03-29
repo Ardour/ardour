@@ -20,10 +20,9 @@
 #ifndef __ardour_midi_track_h__
 #define __ardour_midi_track_h__
 
-#include "pbd/ffs.h"
-
-#include "ardour/track.h"
+#include "ardour/midi_channel_filter.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/track.h"
 
 namespace ARDOUR
 {
@@ -109,38 +108,22 @@ public:
 
 	boost::shared_ptr<SMFSource> write_source (uint32_t n = 0);
 
-	/** Channel filtering mode.
-	 * @param mask If mode is FilterChannels, each bit represents a midi channel:
-	 *     bit 0 = channel 0, bit 1 = channel 1 etc. the read and write methods will only
-	 *     process events whose channel bit is 1.
-	 *     If mode is ForceChannel, mask is simply a channel number which all events will
-	 *     be forced to while reading.
-	 */
+	/* Configure capture/playback channels (see MidiChannelFilter). */
 	void set_capture_channel_mode (ChannelMode mode, uint16_t mask);
 	void set_playback_channel_mode (ChannelMode mode, uint16_t mask);
 	void set_playback_channel_mask (uint16_t mask);
 	void set_capture_channel_mask (uint16_t mask);
 
-	ChannelMode get_playback_channel_mode() const {
-		return static_cast<ChannelMode>((g_atomic_int_get(&_playback_channel_mask) & 0xffff0000) >> 16);
-	}
-	uint16_t get_playback_channel_mask() const {
-		return g_atomic_int_get(&_playback_channel_mask) & 0x0000ffff;
-	}
-	ChannelMode get_capture_channel_mode() const {
-		return static_cast<ChannelMode>((g_atomic_int_get(&_capture_channel_mask) & 0xffff0000) >> 16);
-	}
-	uint16_t get_capture_channel_mask() const {
-		return g_atomic_int_get(&_capture_channel_mask) & 0x0000ffff;
-	}
+	ChannelMode get_playback_channel_mode() const { return _playback_filter.get_channel_mode(); }
+	ChannelMode get_capture_channel_mode()  const { return _capture_filter.get_channel_mode(); }
+	uint16_t    get_playback_channel_mask() const { return _playback_filter.get_channel_mask(); }
+	uint16_t    get_capture_channel_mask()  const { return _capture_filter.get_channel_mask(); }
+
+	MidiChannelFilter& playback_filter() { return _playback_filter; }
+	MidiChannelFilter& capture_filter()  { return _capture_filter; }
 
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 
-	PBD::Signal0<void> PlaybackChannelMaskChanged;
-	PBD::Signal0<void> PlaybackChannelModeChanged;
-	PBD::Signal0<void> CaptureChannelMaskChanged;
-	PBD::Signal0<void> CaptureChannelModeChanged;
-    
 	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
@@ -162,8 +145,8 @@ private:
 	NoteMode                   _note_mode;
 	bool                       _step_editing;
 	bool                       _input_active;
-	uint32_t                   _playback_channel_mask; // 16 bits mode, 16 bits mask
-	uint32_t                   _capture_channel_mask; // 16 bits mode, 16 bits mask
+	MidiChannelFilter          _playback_filter;
+	MidiChannelFilter          _capture_filter;
 
 	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
 	
@@ -186,32 +169,6 @@ private:
 
 	/** Update automation controls to reflect any changes in buffers. */
 	void update_controls (const BufferSet& bufs);
-
-	void filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask); 
-
-/* if mode is ForceChannel, force mask to the lowest set channel or 1 if no
- * channels are set.
- */
-#define force_mask(mode,mask) (((mode) == ForceChannel) ? (((mask) ? (1<<(PBD::ffs((mask))-1)) : 1)) : mask)
-
-	void _set_playback_channel_mode(ChannelMode mode, uint16_t mask) {
-		mask = force_mask (mode, mask);
-		g_atomic_int_set(&_playback_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
-	}
-	void _set_playback_channel_mask (uint16_t mask) {
-		mask = force_mask (get_playback_channel_mode(), mask);
-		g_atomic_int_set(&_playback_channel_mask, (uint32_t(get_playback_channel_mode()) << 16) | uint32_t(mask));
-	}
-	void _set_capture_channel_mode(ChannelMode mode, uint16_t mask) {
-		mask = force_mask (mode, mask);
-		g_atomic_int_set(&_capture_channel_mask, (uint32_t(mode) << 16) | uint32_t(mask));
-	}
-	void _set_capture_channel_mask (uint16_t mask) {
-		mask = force_mask (get_capture_channel_mode(), mask);
-		g_atomic_int_set(&_capture_channel_mask, (uint32_t(get_capture_channel_mode()) << 16) | uint32_t(mask));
-	}
-
-#undef force_mask
 };
 
 } /* namespace ARDOUR*/

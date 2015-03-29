@@ -29,7 +29,6 @@
 #define isnan_local std::isnan
 #endif
 
-#include "pbd/ffs.h"
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
 #include "evoral/midi_util.h"
@@ -72,8 +71,6 @@ MidiTrack::MidiTrack (Session& sess, string name, Route::Flag flag, TrackMode mo
 	, _note_mode(Sustained)
 	, _step_editing (false)
 	, _input_active (true)
-	, _playback_channel_mask(0x0000ffff)
-	, _capture_channel_mask(0x0000ffff)
 {
 }
 
@@ -387,7 +384,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	fill_buffers_with_input (bufs, _input, nframes);
 
 	/* filter captured data before meter sees it */
-	filter_channels (bufs, get_capture_channel_mode(), get_capture_channel_mask());
+	_capture_filter.filter (bufs);
 
 	if (_meter_point == MeterInput && (_monitoring & MonitorInput || _diskstream->record_enabled())) {
 		_meter->run (bufs, start_frame, end_frame, nframes, true);
@@ -402,9 +399,7 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 		return dret;
 	}
 
-	/* filter playback data before we do anything else */
-	
-	filter_channels (bufs, get_playback_channel_mode(), get_playback_channel_mask ());
+	/* note diskstream uses our filter to filter/map playback channels appropriately. */
 
 	if (monitoring_state() == MonitoringInput) {
 
@@ -545,43 +540,6 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 				/* we don't care about the time for this purpose */
 				_step_edit_ring_buffer.write (0, ev.type(), ev.size(), ev.buffer());
 			}
-		}
-	}
-}
-
-void 
-MidiTrack::filter_channels (BufferSet& bufs, ChannelMode mode, uint32_t mask)
-{
-	if (mode == AllChannels) {
-		return;
-	}
-
-	MidiBuffer& buf (bufs.get_midi (0));
-	
-	for (MidiBuffer::iterator e = buf.begin(); e != buf.end(); ) {
-		
-		Evoral::MIDIEvent<framepos_t> ev(*e, false);
-
-		if (ev.is_channel_event()) {
-			switch (mode) {
-			case FilterChannels:
-				if (0 == ((1<<ev.channel()) & mask)) {
-					e = buf.erase (e);
-				} else {
-					++e;
-				}
-				break;
-			case ForceChannel:
-				ev.set_channel (PBD::ffs (mask) - 1);
-				++e;
-				break;
-			case AllChannels:
-				/* handled by the opening if() */
-				++e;
-				break;
-			}
-		} else {
-			++e;
 		}
 	}
 }
@@ -815,52 +773,34 @@ MidiTrack::write_source (uint32_t)
 }
 
 void
-MidiTrack::set_playback_channel_mode(ChannelMode mode, uint16_t mask) 
+MidiTrack::set_playback_channel_mode(ChannelMode mode, uint16_t mask)
 {
-	ChannelMode old = get_playback_channel_mode ();
-	uint16_t old_mask = get_playback_channel_mask ();
-
-	if (old != mode || mask != old_mask) {
-		_set_playback_channel_mode (mode, mask);
-		PlaybackChannelModeChanged ();
-		_session.set_dirty ();
+	if (_playback_filter.set_channel_mode(mode, mask)) {
+		_session.set_dirty();
 	}
 }
 
 void
-MidiTrack::set_capture_channel_mode(ChannelMode mode, uint16_t mask) 
+MidiTrack::set_capture_channel_mode(ChannelMode mode, uint16_t mask)
 {
-	ChannelMode old = get_capture_channel_mode ();
-	uint16_t old_mask = get_capture_channel_mask ();
-
-	if (old != mode || mask != old_mask) {
-		_set_capture_channel_mode (mode, mask);
-		CaptureChannelModeChanged ();
-		_session.set_dirty ();
+	if (_capture_filter.set_channel_mode(mode, mask)) {
+		_session.set_dirty();
 	}
 }
 
 void
 MidiTrack::set_playback_channel_mask (uint16_t mask)
 {
-	uint16_t old = get_playback_channel_mask();
-
-	if (old != mask) {
-		_set_playback_channel_mask (mask);
-		PlaybackChannelMaskChanged ();
-		_session.set_dirty ();
+	if (_playback_filter.set_channel_mask(mask)) {
+		_session.set_dirty();
 	}
 }
 
 void
 MidiTrack::set_capture_channel_mask (uint16_t mask)
 {
-	uint16_t old = get_capture_channel_mask();
-
-	if (old != mask) {
-		_set_capture_channel_mask (mask);
-		CaptureChannelMaskChanged ();
-		_session.set_dirty ();
+	if (_capture_filter.set_channel_mask(mask)) {
+		_session.set_dirty();
 	}
 }
 
@@ -949,7 +889,7 @@ MidiTrack::act_on_mute ()
 	if (muted() || _mute_master->muted_by_others_at(MuteMaster::AllPoints)) {
 		/* only send messages for channels we are using */
 
-		uint16_t mask = get_playback_channel_mask();
+		uint16_t mask = _playback_filter.get_channel_mask();
 
 		for (uint8_t channel = 0; channel <= 0xF; channel++) {
 

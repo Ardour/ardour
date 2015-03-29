@@ -126,7 +126,8 @@ MidiPlaylistSource::read_unlocked (const Lock& lock,
 				   Evoral::EventSink<framepos_t>& dst,
 				   framepos_t /*position*/,
 				   framepos_t start, framecnt_t cnt,
-				   MidiStateTracker*) const
+				   MidiStateTracker*,
+				   MidiChannelFilter*) const
 {
 	boost::shared_ptr<MidiPlaylist> mp = boost::dynamic_pointer_cast<MidiPlaylist> (_playlist);
 

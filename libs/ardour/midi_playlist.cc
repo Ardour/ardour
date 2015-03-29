@@ -106,7 +106,11 @@ struct EventsSortByTimeAndType {
 };
 
 framecnt_t
-MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framecnt_t dur, unsigned chan_n)
+MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst,
+                    framepos_t                     start,
+                    framecnt_t                     dur,
+                    unsigned                       chan_n,
+                    MidiChannelFilter*             filter)
 {
 	typedef pair<MidiStateTracker*,framepos_t> TrackerInfo;
 
@@ -185,7 +189,7 @@ MidiPlaylist::read (Evoral::EventSink<framepos_t>& dst, framepos_t start, framec
 		}
 
 		/* Read from region into target. */
-		mr->read_at (tgt, start, dur, chan_n, _note_mode, &tracker->tracker);
+		mr->read_at (tgt, start, dur, chan_n, _note_mode, &tracker->tracker, filter);
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO,
 		             string_compose ("\tPost-read: %1 active notes\n", tracker->tracker.on()));
 

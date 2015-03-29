@@ -37,13 +37,14 @@
 #include "evoral/Control.hpp"
 #include "evoral/SMF.hpp"
 
+#include "ardour/debug.h"
+#include "ardour/midi_channel_filter.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/parameter_types.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
-#include "ardour/debug.h"
 
 #include "i18n.h"
 
@@ -208,7 +209,8 @@ SMFSource::read_unlocked (const Lock&                    lock,
                           framepos_t const               source_start,
                           framepos_t                     start,
                           framecnt_t                     duration,
-                          MidiStateTracker*              tracker) const
+                          MidiStateTracker*              tracker,
+                          MidiChannelFilter*             filter) const
 {
 	int      ret  = 0;
 	uint64_t time = 0; // in SMF ticks, 1 tick per _ppqn
@@ -281,9 +283,11 @@ SMFSource::read_unlocked (const Lock&                    lock,
 		const framepos_t ev_frame_time = converter.to(Evoral::Beats::ticks_at_rate(time, ppqn())) + source_start;
 
 		if (ev_frame_time < start + duration) {
-			destination.write (ev_frame_time, ev_type, ev_size, ev_buffer);
-			if (tracker) {
-				tracker->track(ev_buffer);
+			if (!filter || !filter->filter(ev_buffer, ev_size)) {
+				destination.write (ev_frame_time, ev_type, ev_size, ev_buffer);
+				if (tracker) {
+					tracker->track(ev_buffer);
+				}
 			}
 		} else {
 			break;

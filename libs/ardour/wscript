@@ -109,6 +109,7 @@ libardour_sources = [
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',
+        'midi_channel_filter.cc',
         'midi_clock_slave.cc',
         'midi_diskstream.cc',
         'midi_model.cc',

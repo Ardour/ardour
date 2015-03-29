@@ -230,9 +230,15 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 }
 
 framecnt_t
-MidiRegion::read_at (Evoral::EventSink<framepos_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
+MidiRegion::read_at (Evoral::EventSink<framepos_t>& out,
+                     framepos_t                     position,
+                     framecnt_t                     dur,
+                     uint32_t                       chan_n,
+                     NoteMode                       mode,
+                     MidiStateTracker*              tracker,
+                     MidiChannelFilter*             filter) const
 {
-	return _read_at (_sources, out, position, dur, chan_n, mode, tracker);
+	return _read_at (_sources, out, position, dur, chan_n, mode, tracker, filter);
 }
 
 framecnt_t
@@ -248,7 +254,8 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
                       framecnt_t                     dur,
                       uint32_t                       chan_n,
                       NoteMode                       mode,
-                      MidiStateTracker*              tracker) const
+                      MidiStateTracker*              tracker,
+                      MidiChannelFilter*             filter) const
 {
 	frameoffset_t internal_offset = 0;
 	framecnt_t    to_read         = 0;
@@ -301,6 +308,7 @@ MidiRegion::_read_at (const SourceList&              /*srcs*/,
 			_start + internal_offset, // where to start reading in the source
 			to_read, // read duration in frames
 			tracker,
+			filter,
 			_filtered_parameters
 		    ) != to_read) {
 		return 0; /* "read nothing" */
