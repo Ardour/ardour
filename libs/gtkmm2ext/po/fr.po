@@ -3,52 +3,67 @@
 # Romain Arnaud <roming22@gmail.com>, 2011.
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-04 19:07-0400\n"
-"PO-Revision-Date: 2011-06-13 00:30+0200\n"
-"Language-Team: American English <kde-i18n-doc@kde.org>\n"
-"Language: en_US\n"
+"POT-Creation-Date: 2015-03-28 20:55+0100\n"
+"PO-Revision-Date: 2015-03-28 20:57+0100\n"
+"Last-Translator: Raphaël Doursenaud <rdoursenaud@free.fr>\n"
+"Language-Team: \n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.2\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.7.4\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: ../\n"
 
 #: actions.cc:336
+#, fuzzy
 msgid "programming error: %1"
-msgstr ""
+msgstr "erreur de programmation : %1"
 
 #: actions.cc:511
 msgid "Unknown action name: %1"
-msgstr "Nom de l'action inconnue: %1"
+msgstr "Nom d'action inconnu : %1"
 
 #: binding_proxy.cc:81
 msgid "operate controller now"
-msgstr ""
+msgstr "actionnez maintenant le contrôleur"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
-msgstr "Le bouton ne peut pas surveiller l'état d'un Controllable inexistant\n"
+msgstr "le bouton ne peut pas surveiller l'état d'un Contrôlable inexistant\n"
 
-#: gtk_ui.cc:111
+#: cursors.cc:82
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr ""
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: gtk_ui.cc:113
 msgid "Log"
-msgstr "Log"
+msgstr "Journal"
 
-#: gtk_ui.cc:368
+#: gtk_ui.cc:370
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
+"\n"
+"\n"
+"Raccourci : "
 
-#: gtk_ui.cc:640
+#: gtk_ui.cc:638
 msgid "Press To Exit"
 msgstr "Appuyer pour quitter"
 
-#: gtk_ui.cc:676
+#: gtk_ui.cc:674
 msgid "I'm sorry %1, I can't do that"
-msgstr ""
+msgstr "Je suis désolé %1, je ne peux pas faire ça"
 
 #: keyboard.cc:73
 msgid "Command"
@@ -60,7 +75,7 @@ msgstr "Ctrl"
 
 #: keyboard.cc:75 keyboard.cc:78 keyboard.cc:92 keyboard.cc:95
 msgid "Key|Shift"
-msgstr ""
+msgstr "Maj."
 
 #: keyboard.cc:76
 msgid "Option"
@@ -81,42 +96,49 @@ msgstr "Inconnu"
 #: keyboard.cc:551
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
+"fichier de raccourcis claviers contient des erreurs ou introuvable dans "
+"« %2 »."
 
 #: keyboard.cc:602
 msgid "Cannot rename your own keybinding file (%1)"
-msgstr ""
+msgstr "Impossible de renommer votre propre fichier de raccourcis clavier (%1)"
 
 #: motionfeedback.cc:486
 msgid "motionfeedback: failed to open a temporary file for writing: %1"
 msgstr ""
+"rétroaction de mouvement : impossible d'ouvrir un fichier temporaire en "
+"écriture : %1"
 
+# Or is it "image set"?
 #: motionfeedback.cc:516
+#, fuzzy
 msgid "motionfeedback: could not save image set to %1"
 msgstr ""
+"rétroaction de mouvement : impossible de sauvegarder l'image réglée à %1"
 
 #: motionfeedback.cc:526
 msgid "motionfeedback: caught PixbufError: %1"
-msgstr ""
+msgstr "rétroaction de mouvement : PixbufError attrapée : %1"
 
 #: motionfeedback.cc:528
 msgid "motionfeedback: unknown exception"
-msgstr ""
+msgstr "rétroaction de mouvement : exception inconnue"
 
 #: paths_dialog.cc:32
 msgid "Add"
-msgstr ""
+msgstr "Ajouter"
 
 #: paths_dialog.cc:33
 msgid "Delete"
-msgstr ""
+msgstr "Supprimer"
 
 #: paths_dialog.cc:34
 msgid "Reset to Default"
-msgstr ""
+msgstr "Réinitialiser"
 
 #: paths_dialog.cc:109
 msgid "Add folder to search path"
-msgstr ""
+msgstr "Ajouter le dossier au chemin de recherche"
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
