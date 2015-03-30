@@ -165,7 +165,7 @@ MidiRingBuffer<T>::skip_to(framepos_t start)
 
 		++count;
 
-		if (ev_size < 8) {
+		if (ev_size >= 8) {
 			this->increment_read_ptr (ev_size);
 		} else {
 			// we only track note on/off, 8 bytes are plenty.
