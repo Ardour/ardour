@@ -22,6 +22,10 @@
 #include "ardour/session_event.h"
 #include "ardour/transient_detector.h"
 
+#include "pbd/compose.h"
+#include "pbd/error.h"
+#include "i18n.h"
+
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
@@ -102,13 +106,16 @@ Analyser::analyse_audio_file_source (boost::shared_ptr<AudioFileSource> src)
 {
 	AnalysisFeatureList results;
 
-	TransientDetector td (src->sample_rate());
-
-	if (td.run (src->get_transients_path(), src.get(), 0, results) == 0) {
-		src->set_been_analysed (true);
-	} else {
+	try {
+		TransientDetector td (src->sample_rate());
+		if (td.run (src->get_transients_path(), src.get(), 0, results) == 0) {
+			src->set_been_analysed (true);
+		} else {
+			src->set_been_analysed (false);
+		}
+	} catch (...) {
+		error << string_compose(_("Transient Analysis failed for %1."), _("Audio File Source")) << endmsg;;
 		src->set_been_analysed (false);
+		return;
 	}
-
 }
-

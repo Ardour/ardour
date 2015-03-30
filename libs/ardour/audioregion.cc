@@ -1696,31 +1696,38 @@ in this and future transient-detection operations.\n\
 		}
 	}
 
-	TransientDetector t (pl->session().frame_rate());
 	bool existing_results = !results.empty();
 
-	_transients.clear ();
-	_valid_transients = false;
+	try {
 
-	for (uint32_t i = 0; i < n_channels(); ++i) {
+		TransientDetector t (pl->session().frame_rate());
 
-		AnalysisFeatureList these_results;
+		_transients.clear ();
+		_valid_transients = false;
 
-		t.reset ();
+		for (uint32_t i = 0; i < n_channels(); ++i) {
 
-		if (t.run ("", this, i, these_results)) {
-			return -1;
+			AnalysisFeatureList these_results;
+
+			t.reset ();
+
+			if (t.run ("", this, i, these_results)) {
+				return -1;
+			}
+
+			/* translate all transients to give absolute position */
+
+			for (AnalysisFeatureList::iterator i = these_results.begin(); i != these_results.end(); ++i) {
+				(*i) += _position;
+			}
+
+			/* merge */
+
+			_transients.insert (_transients.end(), these_results.begin(), these_results.end());
 		}
-
-		/* translate all transients to give absolute position */
-
-		for (AnalysisFeatureList::iterator i = these_results.begin(); i != these_results.end(); ++i) {
-			(*i) += _position;
-		}
-
-		/* merge */
-
-		_transients.insert (_transients.end(), these_results.begin(), these_results.end());
+	} catch (...) {
+		error << string_compose(_("Transient Analysis failed for %1."), _("Audio Region")) << endmsg;
+		return -1;
 	}
 
 	if (!results.empty()) {
