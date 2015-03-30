@@ -53,3 +53,15 @@ int main (int argc, char **argv) {
 int vstfx_init (void*) { return 0; }
 void vstfx_exit () {}
 void vstfx_destroy_editor (VSTState*) {}
+
+#ifdef WINDOWS_VST_SUPPORT
+extern "C" {
+int        fst_init (void* possible_hmodule) { return -1;}
+void       fst_exit (void) {}
+VSTHandle* fst_load (const char*) { return 0; }
+int        fst_unload (VSTHandle**) { return -1; }
+VSTState * fst_instantiate (VSTHandle *, audioMasterCallback amc, void* userptr) { return 0; }
+void       fst_close (VSTState *) {}
+void       fst_audio_master_idle(void) {}
+};
+#endif
