@@ -165,6 +165,18 @@ MidiRingBuffer<T>::skip_to(framepos_t start)
 
 		++count;
 
+		/* TODO investigate and think:
+		 *
+		 * Does it makes sense to keep track of notes
+		 * that are skipped (because they're either too late
+		 * (underrun) or never used (read-ahead, loop) ?
+		 *
+		 * skip_to() is called on the rinbuffer between
+		 * disk and process. it seems wrong to track them
+		 * (a potential synth never sees skipped notes, either)
+		 * but there may be more to this.
+		 */
+
 		if (ev_size >= 8) {
 			this->increment_read_ptr (ev_size);
 		} else {
