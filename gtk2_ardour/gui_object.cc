@@ -71,6 +71,16 @@ GUIObjectState::get_or_add_node (const string& id)
 	return get_or_add_node (&_state, id);
 }
 
+/** Remove node with provided id.
+ *  @param id property of Object node to look for.
+ */
+
+void
+GUIObjectState::remove_node (const std::string& id)
+{
+	_state.remove_nodes_and_delete(X_("id"), id );
+}
+
 /** Get a string from our state.
  *  @param id property of Object node to look for.
  *  @param prop_name name of the Object property to return.

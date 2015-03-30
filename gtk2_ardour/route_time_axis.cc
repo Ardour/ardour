@@ -323,6 +323,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 RouteTimeAxisView::~RouteTimeAxisView ()
 {
+	cleanup_gui_properties ();
+	
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		delete *i;
 	}

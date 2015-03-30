@@ -285,6 +285,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
 {
+	cleanup_gui_properties ();
 	delete _view;
 }
 
