@@ -2,16 +2,16 @@
 # This file is distributed under the same license as the gtkmm2ext package.
 # Igor Blinov pitstop@nm.ru, 2004.
 # Александр Прокудин <alexandre.prokoudine@gmail.com>, 2012.
-#
+# Александр Кольцов <ag1455@mail.ru>, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-04 19:07-0400\n"
-"PO-Revision-Date: 2013-10-15 21:54+0300\n"
-"Last-Translator: Александр Прокудин <alexandre.prokoudine@gmail.com>\n"
-"Language-Team: русский <>\n"
-"Language: \n"
+"POT-Creation-Date: 2015-03-23 23:09+0300\n"
+"PO-Revision-Date: 2014-10-10 23:22+0300\n"
+"Last-Translator: Александр Кольцов <ag1455@mail.ru>\n"
+"Language-Team: русский <ru>\n"
+"Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -22,7 +22,7 @@ msgstr ""
 
 #: actions.cc:336
 msgid "programming error: %1"
-msgstr ""
+msgstr "программная ошибка: %1"
 
 #: actions.cc:511
 msgid "Unknown action name: %1"
@@ -30,17 +30,25 @@ msgstr "Неизвестное название действия: %1"
 
 #: binding_proxy.cc:81
 msgid "operate controller now"
-msgstr ""
+msgstr "Контроллеру действовать сейчас"
 
 #: bindable_button.cc:48
 msgid "button cannot watch state of non-existing Controllable\n"
+msgstr "Кнопка не может отслеживать состояние несуществующей управляемой \n"
+
+#: cursors.cc:82
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr "Информационный файл курсора горячих точек %1 имеет ошибку в строке %2"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr ""
 
-#: gtk_ui.cc:111
+#: gtk_ui.cc:113
 msgid "Log"
 msgstr "Журнал"
 
-#: gtk_ui.cc:368
+#: gtk_ui.cc:370
 msgid ""
 "\n"
 "\n"
@@ -50,17 +58,17 @@ msgstr ""
 "\n"
 "Комбинация клавиш: "
 
-#: gtk_ui.cc:640
+#: gtk_ui.cc:638
 msgid "Press To Exit"
 msgstr "Нажмите для выхода"
 
-#: gtk_ui.cc:676
+#: gtk_ui.cc:674
 msgid "I'm sorry %1, I can't do that"
-msgstr ""
+msgstr "Простите, %1, я не могу этого сделать"
 
 #: keyboard.cc:73
 msgid "Command"
-msgstr "Command"
+msgstr "Команда"
 
 #: keyboard.cc:74 keyboard.cc:77 keyboard.cc:90 keyboard.cc:94
 msgid "Control"
@@ -72,7 +80,7 @@ msgstr "Shift"
 
 #: keyboard.cc:76
 msgid "Option"
-msgstr "Option"
+msgstr "Опции"
 
 #: keyboard.cc:91
 msgid "Alt"
@@ -88,51 +96,51 @@ msgstr "Неизвестно"
 
 #: keyboard.cc:551
 msgid "key bindings file not found at \"%2\" or contains errors."
-msgstr ""
+msgstr "Файл привязки клавиш не найден в \"% 2 \" или содержит ошибки."
 
 #: keyboard.cc:602
 msgid "Cannot rename your own keybinding file (%1)"
-msgstr ""
+msgstr "Невозможно переименовать ваш ​​файл биндинга клавиш (%1)"
 
 #: motionfeedback.cc:486
 msgid "motionfeedback: failed to open a temporary file for writing: %1"
-msgstr ""
+msgstr "motionfeedback: не удалось открыть временный файл для записи: %1"
 
 #: motionfeedback.cc:516
 msgid "motionfeedback: could not save image set to %1"
-msgstr ""
+msgstr "motionfeedback: невозможно сохранить установки изображения в %1"
 
 #: motionfeedback.cc:526
 msgid "motionfeedback: caught PixbufError: %1"
-msgstr ""
+msgstr "motionfeedback: PixbufError поймал: %1"
 
 #: motionfeedback.cc:528
 msgid "motionfeedback: unknown exception"
-msgstr ""
+msgstr "motionfeedback: неизвестное исключение"
 
 #: paths_dialog.cc:32
 msgid "Add"
-msgstr ""
+msgstr "Добавить"
 
 #: paths_dialog.cc:33
 msgid "Delete"
-msgstr ""
+msgstr "Удалить"
 
 #: paths_dialog.cc:34
 msgid "Reset to Default"
-msgstr ""
+msgstr "Сброс по умолчанию"
 
 #: paths_dialog.cc:109
 msgid "Add folder to search path"
-msgstr ""
+msgstr "Добавить папку для поиска пути"
 
 #: tearoff.cc:57
 msgid "Click to tear this into its own window"
-msgstr "Щелкните, чтобы превратить эту панель инструментов в плавающее окно"
+msgstr "Щёлкните, чтобы превратить эту панель инструментов в плавающее окно"
 
 #: tearoff.cc:63
 msgid "Click to put this back in the main window"
-msgstr "Щелкните, чтобы превратить это плавающее окно в панель инструментов"
+msgstr "Щёлкните, чтобы превратить это плавающее окно в панель инструментов"
 
 #: textviewer.cc:34
 msgid "Close"
