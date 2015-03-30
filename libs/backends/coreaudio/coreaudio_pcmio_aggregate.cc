@@ -268,11 +268,11 @@ CoreAudioPCM::create_aggregate_device (
 	pluginAOPA.mScope = kAudioObjectPropertyScopeGlobal;
 	pluginAOPA.mElement = kAudioObjectPropertyElementMaster;
 	outDataSize = sizeof(CFStringRef);
-	err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &captureDeviceUID[0]);
+	err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
 	if (err != noErr) {
 		fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for playback-master device error\n");
 		// try playback
-		err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &playbackDeviceUID[0]);
+		err = AudioObjectSetPropertyData(*created_device, &pluginAOPA, 0, NULL, outDataSize, &captureDeviceUID[0]);
 	}
 	if (err != noErr) {
 		fprintf(stderr, "AggregateDevice: AudioObjectSetPropertyData for capture-master device error\n");
