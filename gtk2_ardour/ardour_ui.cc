@@ -2695,7 +2695,7 @@ ARDOUR_UI::save_template ()
 		return;
 	}
 
-    std::string template_path = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Save Session"));
+    std::string template_path = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Save Template"));
 	if (!template_path.empty()) {
 		if (_session->save_template (template_path)) {
 			 WavesMessageDialog ("", string_compose(_("Could not save Session template\n%1"), template_path)).run ();
