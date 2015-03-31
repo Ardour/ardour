@@ -24,17 +24,12 @@
 #include <string.h>
 #include "ardour/chan_count.h"
 
-namespace TrackFormat {
-    const std::string FormatMono = "Mono";
-    const std::string FormatStereo = "Stereo";
-}
-
 class AddTracksDialog : public WavesDialog {
 public:
     
     AddTracksDialog ();
     void setup (unsigned int);
-    unsigned int count();
+    unsigned int get_track_count ();
     ARDOUR::ChanCount input_channels ();
     void on_show ();
 	unsigned int max_tracks_count () const { return _max_tracks_count; }
@@ -50,8 +45,6 @@ private:
     
 	unsigned int _max_tracks_to_add;
 	unsigned int _max_tracks_count; // Just a storage for usecase's limit
-
-    void populate_tracks_format_dropdown();
     
     void on_cancel_button (WavesButton*);
     void on_ok_button (WavesButton*);

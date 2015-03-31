@@ -3737,7 +3737,7 @@ ARDOUR_UI::setup_order_hint ()
 		}
 
 		if (rt->order_key () >= order_hint) {
-			rt->set_order_key (rt->order_key () + _add_tracks_dialog->count());
+			rt->set_order_key (rt->order_key () + _add_tracks_dialog->get_track_count());
 		}
 	}
 }
@@ -3788,10 +3788,10 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
 
  
     _progress_dialog.set_top_label ("Adding tracks...");
-    _progress_dialog.set_num_of_steps (_add_tracks_dialog->count () * 4);
+    _progress_dialog.set_num_of_steps (_add_tracks_dialog->get_track_count () * 4);
     _progress_dialog.show_pd ();
 	
-    session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->count(), "");
+    session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, NULL, _add_tracks_dialog->get_track_count (), "");
 
 	_progress_dialog.hide_pd ();
 }
