@@ -197,6 +197,7 @@ void
 Editor::ensure_all_elements_drawn ()
 {
 	controls_layout.queue_draw ();
+    queue_draw ();
 }
 #endif
 

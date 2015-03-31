@@ -36,7 +36,7 @@ RouteInspector::RouteInspector (Session* sess, const std::string& layout_script_
 	, color_palette_button_home (get_container ("color_palette_button_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
     , info_panel_button (get_waves_button ("info_panel_button"))
-	, info_panel_home (get_container ("info_panel_home"))
+	, info_panel_home (get_widget ("info_panel_home"))
 	, input_info_label (get_label ("input_info_label"))
 	, output_info_label (get_label ("output_info_label"))
 {
@@ -51,7 +51,7 @@ RouteInspector::RouteInspector (Session* sess, boost::shared_ptr<Route> rt, cons
 	, color_palette_button_home (get_container ("color_palette_button_home"))
 	, color_buttons_home (get_container ("color_buttons_home"))
     , info_panel_button (get_waves_button ("info_panel_button"))
-	, info_panel_home (get_container ("info_panel_home"))
+	, info_panel_home (get_widget ("info_panel_home"))
 	, input_info_label (get_label ("input_info_label"))
 	, output_info_label (get_label ("output_info_label"))
 {
@@ -84,7 +84,8 @@ RouteInspector::init ()
 		color_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &RouteInspector::color_button_clicked));
 	}
 
-    EngineStateController::instance()->OutputConfigChanged.connect(_input_output_channels_update, invalidator (*this), boost::bind (&RouteInspector::update_inspector_info_panel, this), gui_context());
+    _session->session_routes_reconnected.connect (_session_connections, invalidator (*this), boost::bind (&RouteInspector::update_inspector_info_panel, this), gui_context());
+    EngineStateController::instance()->EngineRunning.connect(_input_output_channels_update, invalidator (*this), boost::bind (&RouteInspector::update_inspector_info_panel, this), gui_context());
 }
 
 RouteInspector::~RouteInspector ()

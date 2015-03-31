@@ -4,7 +4,7 @@
          selfdestruct="false"
          gainmeterscript="inspector_gain_meter.xml">
   <HBox>
-    <VBox>
+    <VBox width="97">
       <VBox box.fill="true"
             box.expand="true">
         <VBox id="color_palette_home"
@@ -112,8 +112,8 @@
           <EventBox bgnormal="#000000"
                     height="1"/>
         </VBox>
-        <EventBox bgnormal="#000000">
-          <VBox>
+        <VBox box.fill="true"
+              box.expand="true">
             <iconbutton id="info_panel_button"
                         width="97"
                         height="17"
@@ -121,37 +121,37 @@
                         activeicon="inspector_info_open"/>
             <EventBox bgnormal="#000000"
                       height="1"/>
-            <VBox id="info_panel_home"
-                  noshowall="true"
-                  visible="false">
-              <EventBox bgnormal="#4F4F4F"
-                        width="97">
-                <VBox>
-                  <HBox box.padding="4">
-                    <HBox width="7"/>
-                    <Label id="input_info_label"
-                           text="In"
-                           winfont="Arial Bold 9"
-                           macfont="Helvetica Bold 9"/>
-                    <HBox box.fill="true"
-                          box.expand="true"/>
-                  </HBox>
-                  <HBox>
-                    <HBox width="7"/>
-                    <Label id="output_info_label"
-                           text="Out"
-                           winfont="Arial Bold 9"
-                           macfont="Helvetica Bold 9"/>
-                    <HBox box.fill="true"
-                          box.expand="true"/>
-                  </HBox>
-                  <HBox height="5"/>
-                </VBox>
-              </EventBox>
-              <HBox height="1"/>
-            </VBox>
-          </VBox>
-        </EventBox>
+              <ScrolledWindow box.expand="true"
+                              box.fill="true"
+                              bgnormal="#383838">
+                  <VBox id="info_panel_home"
+                        noshowall="true"
+                        visible="false">
+                      <EventBox bgnormal="#4F4F4F">
+                          <VBox>
+                              <HBox height="4"/>
+                              <HBox>
+                                  <HBox width="7"/>
+                                  <Label id="input_info_label"
+                                         text="In"
+                                         winfont="Arial Bold 9"
+                                         macfont="Helvetica Bold 9"/>
+                              </HBox>
+                              <HBox>
+                                  <HBox width="7"/>
+                                  <Label id="output_info_label"
+                                         text="Out"
+                                         winfont="Arial Bold 9"
+                                         macfont="Helvetica Bold 9"/>
+                              </HBox>
+                              <HBox height="5"/>
+                          </VBox>
+                      </EventBox>
+                      <EventBox bgnormal="#000000"
+                                height="1"/>
+                  </VBox>
+              </ScrolledWindow>
+        </VBox>
         <VBox box.pack="end">
           <EventBox height="1"
                     bgnormal="#5D5D5D"/>

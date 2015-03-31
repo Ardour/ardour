@@ -2498,6 +2498,9 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
     }
     
     graph_reordered ();
+    
+    //emit signal
+    session_routes_reconnected ();
 }
 
 
