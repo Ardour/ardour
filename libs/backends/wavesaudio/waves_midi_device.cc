@@ -68,8 +68,6 @@ WavesMidiDevice::~WavesMidiDevice ()
 int
 WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 {
-	DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::open (): %1", name ()));
-
 	if (is_input () ) {
 		// COMMENTED DBG LOGS */ std::cout << "WavesMidiDevice::open (): INPUT" << _pm_input_id << "-[" << name () <<  "]" << std::endl;
 			
@@ -141,9 +139,9 @@ WavesMidiDevice::open (PmTimeProcPtr time_proc, void* time_info)
 	return 0;
 }
 
+void
 WavesMidiDevice::close ()
 {
-	DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ("WavesMidiDevice::close (): %1\n", name ()));
 	WavesMidiEvent *waves_midi_event;
 
 	// save _input_pm_stream and _output_pm_stream to local buf
@@ -151,7 +149,7 @@ WavesMidiDevice::close ()
 	PmStream* output_pm_stream = _output_pm_stream;
 	_input_pm_stream = _output_pm_stream = NULL;
 
-//input
+        // input
 	if (input_pm_stream) {
 		// close stream
 		PmError err = Pm_Close (input_pm_stream);
@@ -173,7 +171,7 @@ WavesMidiDevice::close ()
 		_input_queue = NULL;
 	}
 
-//output	
+        // output	
 	if ( output_pm_stream ) {
 		// close stream
 		PmError err = Pm_Close (output_pm_stream);
