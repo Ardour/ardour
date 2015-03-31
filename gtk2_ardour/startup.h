@@ -119,9 +119,6 @@ class ArdourStartup : public Gtk::Assistant {
 	gint final_page_index;
 
 	void move_along_now ();
-
-        void setup_prerelease_page ();
-
 };
 
 #endif /* __gtk2_ardour_startup_h__ */
