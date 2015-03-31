@@ -1035,8 +1035,8 @@ EngineControl::bufsize_as_string (uint32_t sz)
 	/* Translators: "samples" is always plural here, so no
 	   need for plural+singular forms.
 	 */
-	char buf[32];
-	snprintf (buf, sizeof (buf), _("%u samples"), sz);
+	char buf[64];
+	snprintf (buf, sizeof (buf), "%u %s", sz, P_("sample", "samples", sz));
 	return buf;
 }
 
