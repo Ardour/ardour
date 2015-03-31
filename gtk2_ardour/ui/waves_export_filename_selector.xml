@@ -82,10 +82,10 @@
       <Dropdown style="generic_dropdown"
                 id="date_format_dropdown"
                 width="90"
-                height="20"
-                normalicon="dropdown_90x20"
-                activeicon="dropdown_90x20_active"
-                inactiveicon="dropdown_90x20_inactive">
+                height="23"
+                normalicon="dropdown_90x23"
+                activeicon="dropdown_90x23_active"
+                inactiveicon="dropdown_90x23_inactive">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_dropdown"
@@ -96,10 +96,10 @@
       <Dropdown style="generic_dropdown"
                 id="time_format_dropdown"
                 width="90"
-                height="20"
-                normalicon="dropdown_90x20"
-                activeicon="dropdown_90x20_active"
-                inactiveicon="dropdown_90x20_inactive">
+                height="23"
+                normalicon="dropdown_90x23"
+                activeicon="dropdown_90x23_active"
+                inactiveicon="dropdown_90x23_inactive">
         <HBox>
           <VBox width="10"/>
           <Label style="generic_dropdown"
