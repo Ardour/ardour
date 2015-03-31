@@ -157,7 +157,6 @@ class RouteUI : public virtual AxisView
 
 	void solo_changed(bool, void*);
 	void solo_changed_so_update_mute ();
-	void mute_changed(void*);
 	void listen_changed(void*);
 	virtual void processors_changed (ARDOUR::RouteProcessorChange) {}
 	void route_rec_enable_changed();

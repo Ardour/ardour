@@ -451,11 +451,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	*/
 	processor_box.set_route (rt);
 
-	/* map the current state */
-
-	mute_changed (0);
-	update_solo_display ();
-
 	revert_to_default_display ();
 
 	/* unpack these from the parent and stuff them into our own
@@ -602,7 +597,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	/* now force an update of all the various elements */
 
-	mute_changed (0);
+	update_mute_display ();
 	update_solo_display ();
 	name_changed ();
 	comment_changed (0);

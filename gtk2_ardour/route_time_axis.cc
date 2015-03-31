@@ -156,9 +156,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		set_gui_property ("visible", false);
 	}
 
-	mute_changed (0);
-	update_solo_display ();
-
 	timestretch_rect = 0;
 	no_redraw = false;
 
