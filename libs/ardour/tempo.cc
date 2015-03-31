@@ -27,6 +27,7 @@
 #include "pbd/xml++.h"
 #include "evoral/types.hpp"
 #include "ardour/debug.h"
+#include "ardour/lmath.h"
 #include "ardour/tempo.h"
 
 #include "i18n.h"

@@ -17,6 +17,7 @@
 
 */
 
+#include "ardour/lmath.h"
 #include "selection_memento.h"
 #include "editing.h"
 #include "public_editor.h"

@@ -68,6 +68,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/lmath.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"

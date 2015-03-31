@@ -31,6 +31,7 @@
 #include "gtkmm2ext/rgb_macros.h"
 
 #include "ardour/profile.h"
+#include "ardour/lmath.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/tempo.h"
