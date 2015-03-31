@@ -3042,12 +3042,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			// so we must show SessionDialog
 			if (should_be_new || session_name.empty()) {
 				/* need the dialog to get info from user */
-				std::cout << "#########################################################################################" << std::endl;
-				std::cout << "#########################################################################################" << std::endl;
-				std::cout << "int response = _session_dialog.run();" << std::endl;
 				int response = _session_dialog.run();
-				std::cout << "#########################################################################################" << std::endl;
-				std::cout << "#########################################################################################" << std::endl;
 				switch (response) {
 					case Gtk::RESPONSE_ACCEPT: // existed session was choosen or new session was created
 						break;
