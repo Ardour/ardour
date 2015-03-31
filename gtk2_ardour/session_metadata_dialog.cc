@@ -285,8 +285,8 @@ EAN13MetadataField::update_status ()
 						_("EAN Check digit OK"), sum));
 		} else {
 			status_label->set_markup (string_compose(
-						"<span color=\"#ffa755\">%1: %2 (expected %3)</span>",
-						_("EAN Check digit error"), p[12] - '0', sum));
+						"<span color=\"#ffa755\">%1: %2 (%3 %4)</span>",
+						_("EAN Check digit error"), p[12] - '0', _("expected"), sum));
 		}
 	} else if (len > 0) {
 		status_label->set_markup (string_compose(
