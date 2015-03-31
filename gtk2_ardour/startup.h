@@ -60,8 +60,6 @@ class ArdourStartup : public Gtk::Assistant {
 	bool config_modified;
 	bool new_user;
 
-        static std::string been_here_before_path ();
-
 	void on_apply ();
 	void on_cancel ();
 	bool on_delete_event (GdkEventAny*);

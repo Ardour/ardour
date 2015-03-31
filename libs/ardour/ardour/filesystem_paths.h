@@ -45,6 +45,14 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API std::string user_cache_directory ();
 
+	/**
+	 * @return the path used to store a persistent indication
+	 * that the given version of the program has been used before.
+	 * 
+	 * @param version is the version to check for. If unspecified, 
+	 * it defaults to the current (build-time) version of the program.
+	 */
+	LIBARDOUR_API std::string been_here_before_path (int version = -1);
 
 	/**
 	 * @return the path to the directory that contains the system wide ardour

@@ -272,4 +272,15 @@ ardour_data_search_path ()
 	return search_path;
 }
 
+string
+been_here_before_path (int version)
+{
+	if (version < 0) {
+		version = atoi (PROGRAM_VERSION);
+	}
+
+	return Glib::build_filename (user_config_directory (version), string (".a") + to_string (version, std::dec));
+}
+
+
 } // namespace ARDOUR

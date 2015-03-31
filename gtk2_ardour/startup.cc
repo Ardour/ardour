@@ -115,13 +115,23 @@ ArdourStartup::~ArdourStartup ()
 bool
 ArdourStartup::required ()
 {
-	return !Glib::file_test (been_here_before_path(), Glib::FILE_TEST_EXISTS);
-}
+	/* look for a "been here before" file for this version or earlier
+	 * versions
+	 */
 
-std::string
-ArdourStartup::been_here_before_path ()
-{
-	return Glib::build_filename (user_config_directory (), ".a" PROGRAM_VERSION);
+	const int current_version = atoi (PROGRAM_VERSION);
+	
+	for (int v = current_version; v != 0; --v) {
+		if (Glib::file_test (ARDOUR::been_here_before_path (v), Glib::FILE_TEST_EXISTS)) {
+			if (v != current_version) {
+				/* older version exists, create the current one */
+				ofstream fout (been_here_before_path (current_version).c_str());
+			}
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void
