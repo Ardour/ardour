@@ -34,7 +34,7 @@
         <Button id="ok_button"
                 style="generic_button"
                 box.pack="end"
-                text="ok"/>
+                text="Ok"/>
         <Button id="close_button"
                 style="generic_button"
                 box.pack="end"
