@@ -187,6 +187,12 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	PBD::Signal0<void> Running;
 	PBD::Signal0<void> Stopped;
 
+	/* these two are emitted when a device reset is initiated/finished
+	 */
+    
+	PBD::Signal0<void> DeviceResetStarted;
+	PBD::Signal0<void> DeviceResetFinished;
+
 	static AudioEngine* instance() { return _instance; }
 	static void destroy();
 	void died ();
