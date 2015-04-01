@@ -40,9 +40,13 @@ public:
 	bool     initialize_pa ();
 
 	void     host_api_list (std::vector<std::string>&);
+	void     set_host_api (const std::string& host_api_name);
 	PaHostApiIndex get_host_api_index_from_name (const std::string& name);
 
-	void     discover(const std::string& host_api);
+	PaDeviceIndex get_default_input_device ();
+	PaDeviceIndex get_default_output_device ();
+
+	void     discover();
 	void     device_list (std::map<int, std::string> &devices) const;
 
 	int      available_sample_rates (int device_id, std::vector<float>& sampleRates);
@@ -102,7 +106,8 @@ private:
 
 	std::map<int, paDevice *> _devices;
 
-	std::string _host_api;
+	PaHostApiIndex _host_api_index;
+
 };
 
 } // namespace

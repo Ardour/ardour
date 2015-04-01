@@ -317,7 +317,6 @@ class PortAudioBackend : public AudioBackend {
 		static std::vector<AudioBackend::DeviceStatus> _audio_device_status;
 		static std::vector<AudioBackend::DeviceStatus> _midi_device_status;
 
-		std::string  _target_driver;
 		mutable std::string _audio_device;
 		std::string _midi_driver_option;
 

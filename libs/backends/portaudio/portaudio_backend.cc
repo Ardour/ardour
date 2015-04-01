@@ -112,14 +112,14 @@ PortAudioBackend::enumerate_drivers () const
 int
 PortAudioBackend::set_driver (const std::string& name)
 {
-	_target_driver = name;
+	_pcmio->set_host_api (name);
 	return 0;
 }
 
 std::vector<AudioBackend::DeviceStatus>
 PortAudioBackend::enumerate_devices () const
 {
-	_pcmio->discover(_target_driver);
+	_pcmio->discover();
 	_audio_device_status.clear();
 	std::map<int, std::string> devices;
 	_pcmio->device_list(devices);
