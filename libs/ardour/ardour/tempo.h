@@ -364,6 +364,13 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	TempoSection&       first_tempo();
 	
 	void do_insert (MetricSection* section);
+
+	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute);
+	void add_meter_locked (const Meter&, Timecode::BBT_Time where, bool recompute);
+
+	bool remove_tempo_locked (const TempoSection&);
+	bool remove_meter_locked (const MeterSection&);
+
 };
 
 }; /* namespace ARDOUR */
