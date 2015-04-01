@@ -2569,7 +2569,7 @@ Editor::rename_region ()
     waves_edit_dialog.set_entry_text (rs.front()->region()->name());
 
     // disable Main menu
-    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    MainMenuDisabler m; // HOT FIX. (REWORK IT)
     
     int const ret = waves_edit_dialog.run ();
 

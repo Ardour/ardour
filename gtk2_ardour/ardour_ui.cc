@@ -471,7 +471,7 @@ void
 ARDOUR_UI::device_reset_started ()
 {
 	if (!_audio_engine_reset_menu_disabler) {
-		_audio_engine_reset_menu_disabler = new MainMenuDisabled ();
+		_audio_engine_reset_menu_disabler = new MainMenuDisabler ();
 	}
 	if (!_audio_engine_reset_info_dialog) {
 		_audio_engine_reset_info_dialog = new WavesDialog ("audio_engine_reset_info_dialog.xml"); // HOT FIX. (REWORK IT)
@@ -3756,7 +3756,7 @@ ARDOUR_UI::add_route (Gtk::Window* float_window)
     
 
     // disable Main menu
-    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    MainMenuDisabler m; // HOT FIX. (REWORK IT)
 
     int r = _add_tracks_dialog->run();
    

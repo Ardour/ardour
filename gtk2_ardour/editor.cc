@@ -3367,7 +3367,7 @@ Editor::duplicate_range (bool with_dialog)
 	}
 
     // disable Main menu
-    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    MainMenuDisabler m; // HOT FIX. (REWORK IT)
 
 	if (with_dialog) {
 

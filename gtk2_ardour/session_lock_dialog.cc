@@ -33,6 +33,7 @@
 #include "dbg_msg.h"
 #include "actions.h"
 #include "ardour_ui.h"
+#include "public_editor.h"
 
 using namespace std;
 using namespace Gtk;
@@ -44,6 +45,7 @@ using namespace ARDOUR;
 SessionLockDialog::SessionLockDialog ()
 	: WavesDialog (_("session_lock_dialog.xml"), true, false)
 	, _ok_button (get_waves_button ("ok_button"))
+    , _session_lock_dialog_menu_disabler (0)
 {
 	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
@@ -66,15 +68,9 @@ SessionLockDialog::on_ok (WavesButton*)
 void
 SessionLockDialog::on_show ()
 {
-#ifdef __APPLE__
-    /* The global menu bar continues to be accessible to applications
-     with modal dialogs, which means that we need to desensitize
-     all items in the menu bar. Since those items are really just
-     proxies for actions, that means disabling all actions.
-     */
-    ActionManager::disable_all_actions ();
-#endif
-    
+    if (!_session_lock_dialog_menu_disabler) {
+        _session_lock_dialog_menu_disabler = new MainMenuDisabler ();
+    }
     WavesDialog::on_show ();
     ARDOUR_UI::instance()->on_lock_session ();
 }
@@ -85,10 +81,10 @@ SessionLockDialog::on_hide ()
     ARDOUR_UI::instance()->on_unlock_session ();
     WavesDialog::on_hide ();
     
-#ifdef __APPLE__
-    // enable Main menu on mac
-    ActionManager::pop_action_state ();
-#endif
+    if (_session_lock_dialog_menu_disabler) {
+        delete _session_lock_dialog_menu_disabler;
+        _session_lock_dialog_menu_disabler = 0;
+    }
 }
 
 bool

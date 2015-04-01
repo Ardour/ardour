@@ -65,7 +65,7 @@ void
 Editor::export_audio ()
 {
     // disable Main menu
-    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    MainMenuDisabler m; // HOT FIX. (REWORK IT)
 
 	if (Config->get_output_auto_connect() & AutoConnectPhysical) {
         WavesMessageDialog read_only_session_dialog ("",
@@ -84,7 +84,7 @@ void
 Editor::stem_export ()
 {
     // disable Main menu
-    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    MainMenuDisabler m; // HOT FIX. (REWORK IT)
     
 	WavesStemExportDialog dialog (*this);
 	dialog.set_session (_session);
@@ -132,7 +132,7 @@ Editor::export_region ()
 	boost::shared_ptr<MidiRegion> midi_region = boost::dynamic_pointer_cast<MidiRegion>(r);
 	
     // disable Main menu
-    MainMenuDisabled m; // HOT FIX. (REWORK IT)
+    MainMenuDisabler m; // HOT FIX. (REWORK IT)
 
 	if (audio_region) {
 		

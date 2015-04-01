@@ -43,6 +43,7 @@
 //#include "ardour/utils.h"
 
 class EngineControl;
+class MainMenuDisabler;
 #define MAX_RECENT_SESSION_COUNT 10
 class SessionLockDialog : public WavesDialog {
   public:
@@ -57,6 +58,7 @@ class SessionLockDialog : public WavesDialog {
   private:
 	WavesButton& _ok_button;
 	void on_ok(WavesButton*);
+    MainMenuDisabler *_session_lock_dialog_menu_disabler; // HOT FIX. (REWORK IT)
 };
 
 #endif /* __gtk2_session_lock_dialog_h__ */

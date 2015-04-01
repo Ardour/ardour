@@ -445,20 +445,20 @@ class DisplaySuspender {
 		}
 };
 
-class MainMenuDisabled {
+class MainMenuDisabler {
 public:
-    MainMenuDisabled() {
+    MainMenuDisabler () {
         #ifdef __APPLE__
         /* The global menu bar continues to be accessible to applications
          with modal dialogs on mac, which means that we need to desensitize
          all items in the menu bar. 
          */
-            ActionManager::disable_all_actions (); // HOT FIX. (REWORK IT)
+            ActionManager::disable_active_actions (); // HOT FIX. (REWORK IT)
         #endif
     }
-    ~MainMenuDisabled () {
+    ~MainMenuDisabler () {
         #ifdef __APPLE__
-            ActionManager::pop_action_state (); // HOT FIX. (REWORK IT)
+            ActionManager::enable_active_actions (); // HOT FIX. (REWORK IT)
         #endif
     }
 };
