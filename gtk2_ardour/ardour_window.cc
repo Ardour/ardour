@@ -58,14 +58,15 @@ ArdourWindow::~ArdourWindow ()
 bool
 ArdourWindow::on_key_press_event (GdkEventKey* ev)
 {
-	if (get_modal()) {
-		return Gtk::Window::on_key_press_event (ev);
+	bool handled = Gtk::Window::on_key_press_event (ev);
+
+	if (!handled) {
+		if (!get_modal()) {
+			handled = relay_key_press (ev, this);
+		}
 	}
 
-	if (!relay_key_press (ev, this)) {
-		return Gtk::Window::on_key_press_event (ev);
-	}
-	return true;
+	return handled;
 }
 
 bool
