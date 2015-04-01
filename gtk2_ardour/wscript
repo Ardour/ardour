@@ -397,7 +397,7 @@ def build(bld):
                              'libgtkmm2ext',
                              'libcanvas',
                              ]
-        obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
+        obj.target = bld.env['PROGRAM_EXE_NAME'] + str (bld.env['VERSION']) + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
         obj.linkflags = ['-mwindows', '-Wl,--export-dynamic']
         obj.linkflags += bld.env['LDFLAGS']
@@ -418,7 +418,7 @@ def build(bld):
         else:
             obj = bld (features = 'cxx c cxxprogram')
         obj.source    = gtk2_ardour_sources
-        obj.target = 'ardour-' + str (bld.env['VERSION'])
+        obj.target =  bld.env['PROGRAM_EXE_NAME'] + '-' + str (bld.env['VERSION'])
         obj.includes = ['.']
         obj.ldflags = ['-no-undefined']
 
@@ -505,7 +505,8 @@ def build(bld):
             'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
             'VERSION'        : bld.env['VERSION'],
-            'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + str (bld.env['VERSION'])
+            'EXECUTABLE'     : 'build/gtk2_ardour/' + bld.env['PROGRAM_EXE_NAME'] + '-' + str (bld.env['VERSION']),
+            'PROG_EXE_NAME'  : bld.env['PROGRAM_EXE_NAME']
     }
 
     def set_subst_dict(obj, dict):
@@ -521,7 +522,7 @@ def build(bld):
 
     obj              = bld(features = 'subst')
     obj.source       = 'ardour.sh.in'
-    obj.target       = 'ardour3'
+    obj.target       = bld.env['PROGRAM_EXE_NAME'] + str (bld.env['MAJOR'])
     obj.chmod        = Utils.O755
     obj.dict         = wrapper_subst_dict
     obj.install_path = bld.env['BINDIR']
@@ -530,7 +531,7 @@ def build(bld):
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj              = bld(features = 'subst')
         obj.source       = '../vst/ardourvst.in'
-        obj.target       = 'ardourvst3'
+        obj.target       = bld.env['PROGRAM_EXE_NAME'] + 'vst' + str (bld.env['MAJOR'])
         obj.chmod        = Utils.O755
         obj.dict         = wrapper_subst_dict
         obj.install_path = bld.env['BINDIR']
