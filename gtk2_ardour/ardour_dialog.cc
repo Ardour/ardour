@@ -66,12 +66,7 @@ ArdourDialog::~ArdourDialog ()
 bool
 ArdourDialog::on_focus_in_event (GdkEventFocus *ev)
 {
-	if (Keyboard::some_magic_widget_has_focus()) {
-		Keyboard::magic_widget_drop_focus ();
-	}
-
 	Keyboard::the_keyboard().focus_in_window (ev, this);
-	Keyboard::magic_widget_grab_focus ();
 	return Dialog::on_focus_in_event (ev);
 }
 
@@ -79,7 +74,6 @@ bool
 ArdourDialog::on_focus_out_event (GdkEventFocus *ev)
 {
 	if (!get_modal()) {
-		Keyboard::magic_widget_drop_focus ();
 		Keyboard::the_keyboard().focus_out_window (ev, this);
 	}
 	return Dialog::on_focus_out_event (ev);
@@ -88,16 +82,6 @@ ArdourDialog::on_focus_out_event (GdkEventFocus *ev)
 void
 ArdourDialog::on_unmap ()
 {
-	if (Keyboard::some_magic_widget_has_focus()) {
-		Gtk::Widget* widget = get_focus();
-		if (widget) {
-			Gtk::Window* win = static_cast<Gtk::Window*>(get_focus()->get_toplevel());
-			if (win == Keyboard::get_current_window()) {
-				Keyboard::magic_widget_drop_focus ();
-			}
-		}
-	}
-
 	Keyboard::the_keyboard().leave_window (0, this);
 	Dialog::on_unmap ();
 }
