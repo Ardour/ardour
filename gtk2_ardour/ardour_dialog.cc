@@ -89,9 +89,12 @@ void
 ArdourDialog::on_unmap ()
 {
 	if (Keyboard::some_magic_widget_has_focus()) {
-		Gtk::Window* win = static_cast<Gtk::Window*>(get_focus()->get_toplevel());
-		if (win == Keyboard::get_current_window()) {
-			Keyboard::magic_widget_drop_focus ();
+		Gtk::Widget* widget = get_focus();
+		if (widget) {
+			Gtk::Window* win = static_cast<Gtk::Window*>(get_focus()->get_toplevel());
+			if (win == Keyboard::get_current_window()) {
+				Keyboard::magic_widget_drop_focus ();
+			}
 		}
 	}
 
