@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour 4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-30 03:13+0300\n"
+"POT-Creation-Date: 2015-03-31 20:13-0400\n"
 "PO-Revision-Date: 2015-03-30 05:36+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
@@ -24,6 +24,14 @@ msgstr ""
 #: amp.cc:57 automatable.cc:165
 msgid "Fader"
 msgstr "Фейдер"
+
+#: analyser.cc:117 audioregion.cc:1729
+msgid "Transient Analysis failed for %1."
+msgstr ""
+
+#: analyser.cc:117
+msgid "Audio File Source"
+msgstr ""
 
 #: audio_diskstream.cc:249
 msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
@@ -240,6 +248,10 @@ msgstr ""
 "\n"
 "Этот диалог не будет отображаться снова, но Вы можете заметить небольшую "
 "задержку в этой и будущих операциях переходных обнаружений.\n"
+
+#: audioregion.cc:1729
+msgid "Audio Region"
+msgstr ""
 
 #: audiosource.cc:228
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
@@ -2602,43 +2614,43 @@ msgstr "SrcFileSource: %1"
 msgid "Cannot compile tape track regexp for use (%1)"
 msgstr "Не удается скомпилировать регулярное выражение дорожечной ленты (%1)"
 
-#: tempo.cc:79
+#: tempo.cc:80
 msgid "TempoSection XML node has no \"start\" property"
 msgstr "Узел XML TempoSection не имеет свойств \"start\""
 
-#: tempo.cc:87
+#: tempo.cc:88
 msgid "TempoSection XML node has an illegal \"start\" value"
 msgstr "Узел XML TempoSection имеет недопустимое значение \"start\""
 
-#: tempo.cc:94
+#: tempo.cc:95
 msgid "TempoSection XML node has no \"beats-per-minute\" property"
 msgstr "Узел XML TempoSection не имеет свойств \"beats-per-minute\""
 
-#: tempo.cc:99
+#: tempo.cc:100
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
 msgstr "Узел XML TempoSection имеет недопустимое значение \"beats_per_minute\""
 
-#: tempo.cc:108
+#: tempo.cc:109
 msgid "TempoSection XML node has an illegal \"note-type\" value"
 msgstr "Узел XML TempoSection имеет недопустимое значение \"note-type\""
 
-#: tempo.cc:114
+#: tempo.cc:115
 msgid "TempoSection XML node has no \"movable\" property"
 msgstr "Узел XML TempoSection имеет недопустимые свойства \"movable\""
 
-#: tempo.cc:124
+#: tempo.cc:125
 msgid "TempoSection XML node has an illegal \"bar-offset\" value"
 msgstr "Узел XML TempoSection имеет недопустимые свойства \"bar-offset\""
 
-#: tempo.cc:201
+#: tempo.cc:202
 msgid "MeterSection XML node has no \"start\" property"
 msgstr "Узел XML MeterSection не имеет свойств \"start\""
 
-#: tempo.cc:209
+#: tempo.cc:210
 msgid "MeterSection XML node has an illegal \"start\" value"
 msgstr "Узел XML MeterSection не имеет некорректных значений \"start\""
 
-#: tempo.cc:219
+#: tempo.cc:220
 msgid ""
 "MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
 "property"
@@ -2646,7 +2658,7 @@ msgstr ""
 "Узел XML MeterSection не имеет свойств \"beats-per-bar\" или \"divisions-per-"
 "bar\""
 
-#: tempo.cc:225
+#: tempo.cc:226
 msgid ""
 "MeterSection XML node has an illegal \"beats-per-bar\" or \"divisions-per-bar"
 "\" value"
@@ -2654,19 +2666,19 @@ msgstr ""
 "Узел XML MeterSection не имеет некорректных значений \"beats-per-bar\" или "
 "\"divisions-per-bar"
 
-#: tempo.cc:230
+#: tempo.cc:231
 msgid "MeterSection XML node has no \"note-type\" property"
 msgstr "Узел XML MeterSection не имеет свойств \"note-type\""
 
-#: tempo.cc:235
+#: tempo.cc:236
 msgid "MeterSection XML node has an illegal \"note-type\" value"
 msgstr "Узел XML MeterSection не имеет "
 
-#: tempo.cc:240
+#: tempo.cc:241
 msgid "MeterSection XML node has no \"movable\" property"
 msgstr "Узел XML MeterSection не имеет некорректных значений \"movable\""
 
-#: tempo.cc:387
+#: tempo.cc:388
 msgid ""
 "Meter changes can only be positioned on the first beat of a bar. Moving from "
 "%1 to %2"
@@ -2674,37 +2686,37 @@ msgstr ""
 "Метрические изменения могут быть расположены только на первой доле бара. "
 "Переход от %1 к %2"
 
-#: tempo.cc:649
+#: tempo.cc:650
 msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
 msgstr ""
 "Нет секций теампа, определённых в темп-карте. Не удалось изменить темп @ %1"
 
-#: tempo.cc:679 tempo.cc:695 tempo.cc:711 tempo.cc:727
+#: tempo.cc:680 tempo.cc:696 tempo.cc:712 tempo.cc:728
 msgid "programming error: no tempo section in tempo map!"
 msgstr "Ошибка в программе: нет секции темпа в темп-карте!"
 
-#: tempo.cc:845 tempo.cc:1826
+#: tempo.cc:846 tempo.cc:1827
 msgid "programming error: unhandled MetricSection type"
 msgstr "Ошибка в программе: необработанный MetricSection тип"
 
-#: tempo.cc:1141
+#: tempo.cc:1142
 msgid "tempo map asked for BBT time at frame %1\n"
 msgstr "Темп-карта запросила для BBT-времени в кадре %1\n"
 
-#: tempo.cc:1184
+#: tempo.cc:1185
 msgid "tempo map asked for frame time at bar < 1  (%1)\n"
 msgstr "Темп-карта запросила время кадра в баре < 1 (%1)\n"
 
-#: tempo.cc:1641 tempo.cc:1655
+#: tempo.cc:1642 tempo.cc:1656
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
 "Темп-карта: не удалось установить новое состояние, восстанавливая старое."
 
-#: tempo.cc:1676
+#: tempo.cc:1677
 msgid "Multiple meter definitions found at %1"
 msgstr "Определения мультиизмерений найдено на %1"
 
-#: tempo.cc:1681
+#: tempo.cc:1682
 msgid "Multiple tempo definitions found at %1"
 msgstr "Определения мультитемпа найдено найдено на %1"
 

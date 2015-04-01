@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libardour\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-15 11:50+0100\n"
+"POT-Creation-Date: 2015-03-31 20:13-0400\n"
 "PO-Revision-Date: 2015-03-15 \n"
 "Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
 "Language-Team: \n"
@@ -15,6 +15,14 @@ msgstr ""
 
 #: amp.cc:57 automatable.cc:165
 msgid "Fader"
+msgstr ""
+
+#: analyser.cc:117 audioregion.cc:1729
+msgid "Transient Analysis failed for %1."
+msgstr ""
+
+#: analyser.cc:117
+msgid "Audio File Source"
 msgstr ""
 
 #: audio_diskstream.cc:249
@@ -64,7 +72,7 @@ msgstr "error de programador: %1"
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: canal %1 fuera de rango"
 
-#: audio_diskstream.cc:1935 midi_diskstream.cc:1297
+#: audio_diskstream.cc:1935 midi_diskstream.cc:1274
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 archivo de captura nuevo no inicializado correctamente"
 
@@ -123,10 +131,10 @@ msgstr ""
 msgid "Audio Playlists (unused)"
 msgstr ""
 
-#: audio_playlist_source.cc:171 audiosource.cc:969 midi_playlist_source.cc:146
-#: midi_playlist_source.cc:154 midi_playlist_source.cc:161 midi_source.cc:347
+#: audio_playlist_source.cc:171 audiosource.cc:963 midi_playlist_source.cc:147
+#: midi_playlist_source.cc:155 midi_playlist_source.cc:162 midi_source.cc:356
 #: plugin_insert.cc:641 rb_effect.cc:327 session.cc:2845 session.cc:2878
-#: session.cc:4123 session_handle.cc:87 sndfilesource.cc:154
+#: session.cc:4124 session_handle.cc:87 sndfilesource.cc:154
 msgid "programming error: %1"
 msgstr "error de programación: %1"
 
@@ -220,6 +228,10 @@ msgid ""
 "this and future transient-detection operations.\n"
 msgstr ""
 
+#: audioregion.cc:1729
+msgid "Audio Region"
+msgstr ""
+
 #: audiosource.cc:228
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
 msgstr ""
@@ -228,52 +240,52 @@ msgstr ""
 msgid "AudioSource: cannot stat peakfile \"%1\""
 msgstr ""
 
-#: audiosource.cc:367
+#: audiosource.cc:361
 msgid "Cannot open peakfile @ %1 for reading (%2)"
 msgstr ""
 
-#: audiosource.cc:400
+#: audiosource.cc:394
 msgid "cannot read sample data for unscaled peak computation"
 msgstr ""
 
-#: audiosource.cc:436 audiosource.cc:531
+#: audiosource.cc:430 audiosource.cc:525
 msgid "map failed - could not create file mapping for peakfile %1."
 msgstr ""
 
-#: audiosource.cc:442 audiosource.cc:537
+#: audiosource.cc:436 audiosource.cc:531
 msgid "map failed - could not map peakfile %1."
 msgstr ""
 
-#: audiosource.cc:453 audiosource.cc:548
+#: audiosource.cc:447 audiosource.cc:542
 msgid "unmap failed - could not unmap peakfile %1."
 msgstr ""
 
-#: audiosource.cc:459 audiosource.cc:554
+#: audiosource.cc:453 audiosource.cc:548
 msgid "map failed - could not mmap peakfile %1."
 msgstr ""
 
-#: audiosource.cc:644
+#: audiosource.cc:638
 msgid ""
 "AudioSource[%1]: peak read - cannot read %2 samples at offset %3 of %4 (%5)"
 msgstr ""
 
-#: audiosource.cc:711
+#: audiosource.cc:705
 msgid "%1: could not write read raw data for peak computation (%2)"
 msgstr ""
 
-#: audiosource.cc:748
+#: audiosource.cc:742
 msgid "AudioSource: cannot open peakpath (c) \"%1\" (%2)"
 msgstr ""
 
-#: audiosource.cc:817 audiosource.cc:939
+#: audiosource.cc:811 audiosource.cc:933
 msgid "%1: could not seek in peak file data (%2)"
 msgstr ""
 
-#: audiosource.cc:822 audiosource.cc:948
+#: audiosource.cc:816 audiosource.cc:942
 msgid "%1: could not write peak file data (%2)"
 msgstr ""
 
-#: audiosource.cc:981
+#: audiosource.cc:975
 msgid "could not truncate peakfile %1 to %2 (error: %3)"
 msgstr ""
 
@@ -515,7 +527,7 @@ msgstr ""
 msgid "Rectangular"
 msgstr ""
 
-#: export_formats.cc:52 session.cc:5420 session.cc:5436
+#: export_formats.cc:52 session.cc:5421 session.cc:5437
 msgid "None"
 msgstr ""
 
@@ -572,7 +584,7 @@ msgstr ""
 msgid "an error occured while writing a TOC/CUE file: %1"
 msgstr ""
 
-#: export_handler.cc:717 export_handler.cc:775
+#: export_handler.cc:744 export_handler.cc:802
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr ""
 
@@ -742,23 +754,23 @@ msgstr ""
 msgid "unknown file type for session %1"
 msgstr "tipo de archivo desconocido para la sesión %1"
 
-#: globals.cc:232
+#: globals.cc:234
 msgid "Could not set system open files limit to \"unlimited\""
 msgstr "No se pudo establecer el límite de archivos abiertos a \"unlimited\""
 
-#: globals.cc:234
+#: globals.cc:236
 msgid "Could not set system open files limit to %1"
 msgstr "No se pudo establecer el límite de archivos abiertos a \"unlimited\""
 
-#: globals.cc:238
+#: globals.cc:240
 msgid "Your system is configured to limit %1 to only %2 open files"
 msgstr ""
 
-#: globals.cc:242
+#: globals.cc:244
 msgid "Could not get system open files limit (%1)"
 msgstr "No se pudo obtener el límite de archivos abiertos del sistema (%1) "
 
-#: globals.cc:396
+#: globals.cc:415
 msgid "Loading configuration"
 msgstr "Cargando configuración"
 
@@ -1004,7 +1016,7 @@ msgstr ""
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr ""
 
-#: location.cc:1047 session.cc:1293 session.cc:4918 session_state.cc:1053
+#: location.cc:1047 session.cc:1293 session.cc:4919 session_state.cc:1053
 msgid "session"
 msgstr "sesión"
 
@@ -1077,23 +1089,23 @@ msgstr ""
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr ""
 
-#: midi_diskstream.cc:777
+#: midi_diskstream.cc:754
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 
-#: midi_diskstream.cc:914
+#: midi_diskstream.cc:891
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr ""
 
-#: midi_diskstream.cc:948
+#: midi_diskstream.cc:925
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 
-#: midi_diskstream.cc:1037
+#: midi_diskstream.cc:1014
 msgid "%1: could not create region for complete midi file"
 msgstr ""
 
-#: midi_diskstream.cc:1078
+#: midi_diskstream.cc:1055
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr ""
 
@@ -1125,19 +1137,19 @@ msgstr ""
 msgid "Scene "
 msgstr ""
 
-#: midi_source.cc:124
+#: midi_source.cc:125
 msgid "Missing parameter property on InterpolationStyle"
 msgstr ""
 
-#: midi_source.cc:130
+#: midi_source.cc:131
 msgid "Missing style property on InterpolationStyle"
 msgstr ""
 
-#: midi_source.cc:139
+#: midi_source.cc:140
 msgid "Missing parameter property on AutomationState"
 msgstr ""
 
-#: midi_source.cc:145
+#: midi_source.cc:146
 msgid "Missing state property on AutomationState"
 msgstr ""
 
@@ -1315,7 +1327,7 @@ msgid ""
 "full version"
 msgstr ""
 
-#: plugin.cc:402
+#: plugin.cc:403
 msgid ""
 "Saving plugin settings is not supported in this build of %1. Consider paying "
 "for the full version"
@@ -1755,39 +1767,39 @@ msgstr "Sesión: No se pudo crear la nueva ruta desde plantilla"
 msgid "Adding new tracks/busses failed"
 msgstr ""
 
-#: session.cc:3670
+#: session.cc:3671
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr ""
 
-#: session.cc:3800 session.cc:3873
+#: session.cc:3801 session.cc:3874
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr ""
 
-#: session.cc:4315
+#: session.cc:4316
 msgid "send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4327
+#: session.cc:4328
 msgid "aux send ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4339
+#: session.cc:4340
 msgid "return ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4351
+#: session.cc:4352
 msgid "insert ID %1 appears to be in use already"
 msgstr ""
 
-#: session.cc:4476
+#: session.cc:4477
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr ""
 
-#: session.cc:4485
+#: session.cc:4486
 msgid "Cannot write a range with no data."
 msgstr ""
 
-#: session.cc:4527
+#: session.cc:4528
 msgid "cannot create new file \"%1\" for %2"
 msgstr ""
 
@@ -2245,28 +2257,28 @@ msgid ""
 "control"
 msgstr ""
 
-#: smf_source.cc:340
+#: smf_source.cc:344
 msgid "Unable to read event prefix, corrupt MIDI ring"
 msgstr ""
 
-#: smf_source.cc:353
+#: smf_source.cc:357
 msgid "Event has time and size but no body, corrupt MIDI ring"
 msgstr ""
 
-#: smf_source.cc:359
+#: smf_source.cc:363
 msgid "Event time is before MIDI source position"
 msgstr ""
 
-#: smf_source.cc:405
+#: smf_source.cc:409
 msgid ""
 "Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"
 msgstr ""
 
-#: smf_source.cc:449
+#: smf_source.cc:453
 msgid "Skipping event with unordered frame time %1 < %2"
 msgstr ""
 
-#: smf_source.cc:514
+#: smf_source.cc:518
 msgid "cannot open MIDI file %1 for write"
 msgstr ""
 
@@ -2459,101 +2471,101 @@ msgstr ""
 msgid "Cannot compile tape track regexp for use (%1)"
 msgstr ""
 
-#: tempo.cc:79
+#: tempo.cc:80
 msgid "TempoSection XML node has no \"start\" property"
 msgstr ""
 
-#: tempo.cc:87
+#: tempo.cc:88
 msgid "TempoSection XML node has an illegal \"start\" value"
 msgstr ""
 
-#: tempo.cc:94
+#: tempo.cc:95
 msgid "TempoSection XML node has no \"beats-per-minute\" property"
 msgstr ""
 
-#: tempo.cc:99
+#: tempo.cc:100
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
 msgstr ""
 
-#: tempo.cc:108
+#: tempo.cc:109
 msgid "TempoSection XML node has an illegal \"note-type\" value"
 msgstr ""
 
-#: tempo.cc:114
+#: tempo.cc:115
 msgid "TempoSection XML node has no \"movable\" property"
 msgstr ""
 
-#: tempo.cc:124
+#: tempo.cc:125
 msgid "TempoSection XML node has an illegal \"bar-offset\" value"
 msgstr ""
 
-#: tempo.cc:201
+#: tempo.cc:202
 msgid "MeterSection XML node has no \"start\" property"
 msgstr ""
 
-#: tempo.cc:209
+#: tempo.cc:210
 msgid "MeterSection XML node has an illegal \"start\" value"
 msgstr ""
 
-#: tempo.cc:219
+#: tempo.cc:220
 msgid ""
 "MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
 "property"
 msgstr ""
 
-#: tempo.cc:225
+#: tempo.cc:226
 msgid ""
 "MeterSection XML node has an illegal \"beats-per-bar\" or \"divisions-per-bar"
 "\" value"
 msgstr ""
 
-#: tempo.cc:230
+#: tempo.cc:231
 msgid "MeterSection XML node has no \"note-type\" property"
 msgstr ""
 
-#: tempo.cc:235
+#: tempo.cc:236
 msgid "MeterSection XML node has an illegal \"note-type\" value"
 msgstr ""
 
-#: tempo.cc:240
+#: tempo.cc:241
 msgid "MeterSection XML node has no \"movable\" property"
 msgstr ""
 
-#: tempo.cc:387
+#: tempo.cc:388
 msgid ""
 "Meter changes can only be positioned on the first beat of a bar. Moving from "
 "%1 to %2"
 msgstr ""
 
-#: tempo.cc:649
+#: tempo.cc:650
 msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
 msgstr ""
 
-#: tempo.cc:679 tempo.cc:695 tempo.cc:711 tempo.cc:727
+#: tempo.cc:680 tempo.cc:696 tempo.cc:712 tempo.cc:728
 msgid "programming error: no tempo section in tempo map!"
 msgstr ""
 
-#: tempo.cc:845 tempo.cc:1826
+#: tempo.cc:846 tempo.cc:1827
 msgid "programming error: unhandled MetricSection type"
 msgstr ""
 
-#: tempo.cc:1141
+#: tempo.cc:1142
 msgid "tempo map asked for BBT time at frame %1\n"
 msgstr ""
 
-#: tempo.cc:1184
+#: tempo.cc:1185
 msgid "tempo map asked for frame time at bar < 1  (%1)\n"
 msgstr ""
 
-#: tempo.cc:1641 tempo.cc:1655
+#: tempo.cc:1642 tempo.cc:1656
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
 
-#: tempo.cc:1676
+#: tempo.cc:1677
 msgid "Multiple meter definitions found at %1"
 msgstr ""
 
-#: tempo.cc:1681
+#: tempo.cc:1682
 msgid "Multiple tempo definitions found at %1"
 msgstr ""
 

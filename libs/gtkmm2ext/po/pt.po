@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-04 19:07-0400\n"
+"POT-Creation-Date: 2015-03-31 20:13-0400\n"
 "PO-Revision-Date: 2004-05-17 20:36+0200\n"
 "Last-Translator: Chris Ross <chris.ross@tebibyte.org>\n"
 "Language-Team: Portuguese\n"
@@ -32,22 +32,30 @@ msgstr ""
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: gtk_ui.cc:111
+#: cursors.cc:82
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr ""
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr ""
+
+#: gtk_ui.cc:113
 msgid "Log"
 msgstr ""
 
-#: gtk_ui.cc:368
+#: gtk_ui.cc:370
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
 
-#: gtk_ui.cc:640
+#: gtk_ui.cc:638
 msgid "Press To Exit"
 msgstr ""
 
-#: gtk_ui.cc:676
+#: gtk_ui.cc:674
 msgid "I'm sorry %1, I can't do that"
 msgstr ""
 

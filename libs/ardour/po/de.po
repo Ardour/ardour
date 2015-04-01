@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-25 11:51+0100\n"
+"POT-Creation-Date: 2015-03-31 20:13-0400\n"
 "PO-Revision-Date: 2015-03-18 16:57+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -20,6 +20,14 @@ msgstr ""
 #: amp.cc:57 automatable.cc:165
 msgid "Fader"
 msgstr "Fader"
+
+#: analyser.cc:117 audioregion.cc:1729
+msgid "Transient Analysis failed for %1."
+msgstr ""
+
+#: analyser.cc:117
+msgid "Audio File Source"
+msgstr ""
 
 #: audio_diskstream.cc:249
 msgid "AudioDiskstream: Playlist \"%1\" isn't an audio playlist"
@@ -69,7 +77,7 @@ msgstr "Programmierfehler: %1"
 msgid "AudioDiskstream: channel %1 out of range"
 msgstr "AudioDiskstream: Kanal %1 Bereichsüberschreitung"
 
-#: audio_diskstream.cc:1935 midi_diskstream.cc:1297
+#: audio_diskstream.cc:1935 midi_diskstream.cc:1274
 msgid "%1:%2 new capture file not initialized correctly"
 msgstr "%1:%2 neue Aufnahmedatei nicht korrekt initialisiert"
 
@@ -134,8 +142,8 @@ msgstr "schlecht geformtes XML in importierter Wiedergabeliste"
 msgid "Audio Playlists (unused)"
 msgstr "Audio-Wiedergabelisten (unbenutzt)"
 
-#: audio_playlist_source.cc:171 audiosource.cc:963 midi_playlist_source.cc:146
-#: midi_playlist_source.cc:154 midi_playlist_source.cc:161 midi_source.cc:347
+#: audio_playlist_source.cc:171 audiosource.cc:963 midi_playlist_source.cc:147
+#: midi_playlist_source.cc:155 midi_playlist_source.cc:162 midi_source.cc:356
 #: plugin_insert.cc:641 rb_effect.cc:327 session.cc:2845 session.cc:2878
 #: session.cc:4124 session_handle.cc:87 sndfilesource.cc:154
 msgid "programming error: %1"
@@ -241,6 +249,10 @@ msgstr ""
 "Dieser Dialog wird nicht wieder erscheinen. Jedoch könnten Sie bei dieser "
 "und zukünftigen Operation(en) zur Transienten-Erkennung eine leichte "
 "Verzögerung bemerken.\n"
+
+#: audioregion.cc:1729
+msgid "Audio Region"
+msgstr ""
 
 #: audiosource.cc:228
 msgid "cannot rename peakfile for %1 from %2 to %3 (%4)"
@@ -603,7 +615,7 @@ msgstr "Editor: kann \"%1\" als Export-Datei für CD-Marker nicht öffnen"
 msgid "an error occured while writing a TOC/CUE file: %1"
 msgstr "beim Schreiben einer TOC/CUE Datei trat ein Fehler auf:%1"
 
-#: export_handler.cc:717 export_handler.cc:775
+#: export_handler.cc:744 export_handler.cc:802
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr "Kann %1 nicht zu Latin-1 Kodierung konvertieren"
 
@@ -1143,25 +1155,25 @@ msgstr "MidiDiskstream: Wiedergabeliste \"%1\" ist keine MIDI-Wiedergabeliste"
 msgid "MidiDiskstream %1: there is no existing playlist to make a copy of!"
 msgstr "MidiDiskstream %1: es gibt keine Wiedergabeliste zum Kopieren!"
 
-#: midi_diskstream.cc:777
+#: midi_diskstream.cc:754
 msgid "MidiDiskstream %1: cannot read %2 from playlist at frame %3"
 msgstr ""
 "MidiDiskstream %1: kann %2 nicht von Wiedergabeliste bei Frame %3 lesen"
 
-#: midi_diskstream.cc:914
+#: midi_diskstream.cc:891
 msgid "MidiDiskstream %1: cannot write to disk"
 msgstr "MidiDiskstream %1: kann nicht auf Disk schreiben"
 
-#: midi_diskstream.cc:948
+#: midi_diskstream.cc:925
 msgid "MidiDiskstream \"%1\": cannot flush captured data to disk!"
 msgstr ""
 "MidiDiskstream \"%1\": kann aufgenommene Daten nicht auf Disk schreiben!"
 
-#: midi_diskstream.cc:1037
+#: midi_diskstream.cc:1014
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: konnte Region für die komplette MIDI-Datei nicht erzeugen"
 
-#: midi_diskstream.cc:1078
+#: midi_diskstream.cc:1055
 msgid "MidiDiskstream: could not create region for captured midi!"
 msgstr "MidiDiskstream: konnte Region für aufgenommenes MIDI nicht erzeugen"
 
@@ -1196,19 +1208,19 @@ msgstr "Doppeltes MIDI-Gerät '%1' in '%2' ignoriert"
 msgid "Scene "
 msgstr "Szene"
 
-#: midi_source.cc:124
+#: midi_source.cc:125
 msgid "Missing parameter property on InterpolationStyle"
 msgstr "Fehlende Eigenschaft \"parameter\" bei InterpolationStyle"
 
-#: midi_source.cc:130
+#: midi_source.cc:131
 msgid "Missing style property on InterpolationStyle"
 msgstr "Fehlende Eigenschaft \"style\" bei InterpolationStyle"
 
-#: midi_source.cc:139
+#: midi_source.cc:140
 msgid "Missing parameter property on AutomationState"
 msgstr "Fehlende Eigenschaft \"parameter\" bei AutomationState"
 
-#: midi_source.cc:145
+#: midi_source.cc:146
 msgid "Missing state property on AutomationState"
 msgstr "Fehlende Eigenschaft \"state\" bei AutomationState"
 
@@ -2396,30 +2408,30 @@ msgstr ""
 "Globales Varispeed ist nicht möglich, solange %1 mit JACK Transport "
 "verbunden ist."
 
-#: smf_source.cc:340
+#: smf_source.cc:344
 msgid "Unable to read event prefix, corrupt MIDI ring"
 msgstr "Kann Ereignisprefix nicht lesen, korrupter MIDI-Ringbuffer"
 
-#: smf_source.cc:353
+#: smf_source.cc:357
 msgid "Event has time and size but no body, corrupt MIDI ring"
 msgstr "time/size gelesen, aber nicht buffer, korrupter MIDI-Ringbuffer"
 
-#: smf_source.cc:359
+#: smf_source.cc:363
 msgid "Event time is before MIDI source position"
 msgstr "Event-Zeitpunkt befindet sich vor MIDI Quellposition"
 
-#: smf_source.cc:405
+#: smf_source.cc:409
 msgid ""
 "Skipping event with unordered beat time %1 < %2 (off by %3 beats, %4 ticks)"
 msgstr ""
 "Überspringe Event mit unsortiertem Schlag-Zeitpunkt %1 < %2(Abweichung %3 "
 "Schläge, %4 Ticks)"
 
-#: smf_source.cc:449
+#: smf_source.cc:453
 msgid "Skipping event with unordered frame time %1 < %2"
 msgstr "Überspringe Event mit unsortiertem Frame-Zeitpunkt %1 < %2"
 
-#: smf_source.cc:514
+#: smf_source.cc:518
 msgid "cannot open MIDI file %1 for write"
 msgstr "kann MIDI-Datei %1 nicht zum Schreiben öffnen"
 
@@ -2626,44 +2638,44 @@ msgstr "video_server_dialog.cc:140"
 msgid "Cannot compile tape track regexp for use (%1)"
 msgstr "Kann regulären Ausdruck der Bandspur nicht zum Gebrauch auswerten (%1)"
 
-#: tempo.cc:79
+#: tempo.cc:80
 msgid "TempoSection XML node has no \"start\" property"
 msgstr "TempoSection: XML-Knoten hat keine Eigenschaft \"start\""
 
-#: tempo.cc:87
+#: tempo.cc:88
 msgid "TempoSection XML node has an illegal \"start\" value"
 msgstr "TempoSection: XML-Knoten hat unzulässigen Wert für \"start\""
 
-#: tempo.cc:94
+#: tempo.cc:95
 msgid "TempoSection XML node has no \"beats-per-minute\" property"
 msgstr "TempoSection: XML-Knoten hat keine Eigenschaft \"beats-per-minute\""
 
-#: tempo.cc:99
+#: tempo.cc:100
 msgid "TempoSection XML node has an illegal \"beats_per_minute\" value"
 msgstr ""
 "TempoSection: XML-Knoten hat unzulässigen Wert für \"beats_per_minute\""
 
-#: tempo.cc:108
+#: tempo.cc:109
 msgid "TempoSection XML node has an illegal \"note-type\" value"
 msgstr "TempoSection: XML-Knoten hat unzulässigen Wert für \"note-type\""
 
-#: tempo.cc:114
+#: tempo.cc:115
 msgid "TempoSection XML node has no \"movable\" property"
 msgstr "TempoSection: XML-Knoten hat keine Eigenschaft \"movable\""
 
-#: tempo.cc:124
+#: tempo.cc:125
 msgid "TempoSection XML node has an illegal \"bar-offset\" value"
 msgstr "TempoSection: XML-Knoten hat unzulässigen Wert für \"bar-offset\""
 
-#: tempo.cc:201
+#: tempo.cc:202
 msgid "MeterSection XML node has no \"start\" property"
 msgstr "MeterSection: XML-Knoten hat keine Eigenschaft \"start\""
 
-#: tempo.cc:209
+#: tempo.cc:210
 msgid "MeterSection XML node has an illegal \"start\" value"
 msgstr "MeterSection: XML-Knoten hat unzulässigen Wert für \"start\""
 
-#: tempo.cc:219
+#: tempo.cc:220
 msgid ""
 "MeterSection XML node has no \"beats-per-bar\" or \"divisions-per-bar\" "
 "property"
@@ -2671,7 +2683,7 @@ msgstr ""
 "MeterSection: XML-Knoten hat keine Eigenschaft \"beats-per-bar\" oderr "
 "\"divisions-per-bar\""
 
-#: tempo.cc:225
+#: tempo.cc:226
 msgid ""
 "MeterSection XML node has an illegal \"beats-per-bar\" or \"divisions-per-bar"
 "\" value"
@@ -2679,19 +2691,19 @@ msgstr ""
 "MeterSection: XML-Knoten hat unzulässigen Wert für \"beats-per-bar\" oder "
 "\"divisions-per-bar\""
 
-#: tempo.cc:230
+#: tempo.cc:231
 msgid "MeterSection XML node has no \"note-type\" property"
 msgstr "MeterSection: XML-Knoten hat keine Eigenschaft \"note-type\""
 
-#: tempo.cc:235
+#: tempo.cc:236
 msgid "MeterSection XML node has an illegal \"note-type\" value"
 msgstr "MeterSection: XML-Knoten hat unzulässigen Wert für \"note-type\""
 
-#: tempo.cc:240
+#: tempo.cc:241
 msgid "MeterSection XML node has no \"movable\" property"
 msgstr "MeterSection: XML-Knoten hat keine Eigenschaft \"movable\""
 
-#: tempo.cc:387
+#: tempo.cc:388
 msgid ""
 "Meter changes can only be positioned on the first beat of a bar. Moving from "
 "%1 to %2"
@@ -2699,38 +2711,38 @@ msgstr ""
 "Metrumswechsel können nur am ersten Schlag eines Taktes platziert werden. "
 "Verschiebe von%1 nach %2"
 
-#: tempo.cc:649
+#: tempo.cc:650
 msgid "no tempo sections defined in tempo map - cannot change tempo @ %1"
 msgstr ""
 "in der Tempo Map sind keine Tempo-Abschnitte definiert - kann Tempo @ %1 "
 "nicht ändern"
 
-#: tempo.cc:679 tempo.cc:695 tempo.cc:711 tempo.cc:727
+#: tempo.cc:680 tempo.cc:696 tempo.cc:712 tempo.cc:728
 msgid "programming error: no tempo section in tempo map!"
 msgstr "Programmierfehler: kein Tempo-Abschnitt in der Tempo Map"
 
-#: tempo.cc:845 tempo.cc:1826
+#: tempo.cc:846 tempo.cc:1827
 msgid "programming error: unhandled MetricSection type"
 msgstr "Programmierfehler: unbehandelter MetricSection Typ"
 
-#: tempo.cc:1141
+#: tempo.cc:1142
 msgid "tempo map asked for BBT time at frame %1\n"
 msgstr "Tempo Map fragte nach BBT-Zeit an Frame %1\n"
 
-#: tempo.cc:1184
+#: tempo.cc:1185
 msgid "tempo map asked for frame time at bar < 1  (%1)\n"
 msgstr "Tempo Map fragte nach Frame-Zeit an Takt < 1 %1\n"
 
-#: tempo.cc:1641 tempo.cc:1655
+#: tempo.cc:1642 tempo.cc:1656
 msgid "Tempo map: could not set new state, restoring old one."
 msgstr ""
 "Tempo Map: konnte neuen Status nicht setzen, stelle den alten wieder her."
 
-#: tempo.cc:1676
+#: tempo.cc:1677
 msgid "Multiple meter definitions found at %1"
 msgstr "Mehrere Metrumdefinitionen an %1 gefunden"
 
-#: tempo.cc:1681
+#: tempo.cc:1682
 msgid "Multiple tempo definitions found at %1"
 msgstr "Mehrere Tempodefinitionen an %1 gefunden"
 
