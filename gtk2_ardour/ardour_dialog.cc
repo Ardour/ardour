@@ -64,31 +64,37 @@ ArdourDialog::~ArdourDialog ()
 }
 
 bool
-ArdourDialog::on_key_press_event (GdkEventKey* ev)
+ArdourDialog::on_focus_in_event (GdkEventFocus *ev)
 {
-	if (!relay_key_press (ev, this)) {
-		return Gtk::Window::on_key_press_event(ev);
+	if (Keyboard::some_magic_widget_has_focus()) {
+		Keyboard::magic_widget_drop_focus ();
 	}
-	return true;
+
+	Keyboard::the_keyboard().focus_in_window (ev, this);
+	Keyboard::magic_widget_grab_focus ();
+	return Dialog::on_focus_in_event (ev);
 }
 
 bool
-ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
+ArdourDialog::on_focus_out_event (GdkEventFocus *ev)
 {
-	Keyboard::the_keyboard().enter_window (ev, this);
-	return Dialog::on_enter_notify_event (ev);
-}
-
-bool
-ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().leave_window (ev, this);
-	return Dialog::on_leave_notify_event (ev);
+	if (!get_modal()) {
+		Keyboard::magic_widget_drop_focus ();
+		Keyboard::the_keyboard().focus_out_window (ev, this);
+	}
+	return Dialog::on_focus_out_event (ev);
 }
 
 void
 ArdourDialog::on_unmap ()
 {
+	if (Keyboard::some_magic_widget_has_focus()) {
+		Gtk::Window* win = static_cast<Gtk::Window*>(get_focus()->get_toplevel());
+		if (win == Keyboard::get_current_window()) {
+			Keyboard::magic_widget_drop_focus ();
+		}
+	}
+
 	Keyboard::the_keyboard().leave_window (0, this);
 	Dialog::on_unmap ();
 }
@@ -119,7 +125,7 @@ void
 ArdourDialog::init ()
 {
 	set_border_width (10);
-
+	add_events (Gdk::FOCUS_CHANGE_MASK);
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 
 	Gtk::Window* parent = WM::Manager::instance().transient_parent();

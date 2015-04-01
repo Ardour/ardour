@@ -536,22 +536,6 @@ ExportVideoDialog::on_show ()
 	Dialog::on_show ();
 }
 
-bool
-ExportVideoDialog::on_focus_in_event (GdkEventFocus *ev)
-{
-	Dialog::on_focus_in_event (ev);
-	Gtkmm2ext::Keyboard::magic_widget_grab_focus ();
-	return true;
-}
-
-bool
-ExportVideoDialog::on_focus_out_event (GdkEventFocus *ev)
-{
-	Dialog::on_focus_out_event (ev);
-	Gtkmm2ext::Keyboard::magic_widget_drop_focus ();
-	return true;
-}
-
 void
 ExportVideoDialog::abort_clicked ()
 {

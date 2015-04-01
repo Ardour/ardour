@@ -384,6 +384,29 @@ Keyboard::leave_window (GdkEventCrossing *ev, Gtk::Window* /*win*/)
 	return false;
 }
 
+bool
+Keyboard::focus_in_window (GdkEventFocus *, Gtk::Window* win)
+{
+	current_window = win;
+	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Focusing in window, title = %1\n", win->get_title()));
+	return false;
+}
+
+bool
+Keyboard::focus_out_window (GdkEventFocus * ev, Gtk::Window* win)
+{
+	if (ev) {
+		state.clear ();
+		current_window = 0;
+	}  else {
+		current_window = 0;
+	}
+
+	DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Foucusing out window, title = %1\n", win->get_title()));
+
+	return false;
+}
+
 void
 Keyboard::set_edit_button (guint but)
 {

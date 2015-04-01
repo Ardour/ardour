@@ -42,10 +42,9 @@ class ArdourDialog : public Gtk::Dialog, public ARDOUR::SessionHandlePtr
 	ArdourDialog (Gtk::Window& parent, std::string title, bool modal = false, bool use_separator = false);
 	~ArdourDialog();
 
-	bool on_enter_notify_event (GdkEventCrossing*);
-	bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_focus_in_event (GdkEventFocus*);
+	bool on_focus_out_event (GdkEventFocus*);
         bool on_delete_event (GdkEventAny*);
-        bool on_key_press_event (GdkEventKey*);
 	void on_unmap ();
 	void on_show ();
 

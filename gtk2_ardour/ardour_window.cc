@@ -58,26 +58,48 @@ ArdourWindow::~ArdourWindow ()
 bool
 ArdourWindow::on_key_press_event (GdkEventKey* ev)
 {
-	return relay_key_press (ev, this);
+	if (get_modal()) {
+		return Gtk::Window::on_key_press_event (ev);
+	}
+
+	if (!relay_key_press (ev, this)) {
+		return Gtk::Window::on_key_press_event (ev);
+	}
+	return true;
 }
 
 bool
-ArdourWindow::on_enter_notify_event (GdkEventCrossing *ev)
+ArdourWindow::on_focus_in_event (GdkEventFocus *ev)
 {
-	Keyboard::the_keyboard().enter_window (ev, this);
-	return Window::on_enter_notify_event (ev);
+	if (Keyboard::some_magic_widget_has_focus()) {
+		Keyboard::magic_widget_drop_focus ();
+	}
+
+	Keyboard::the_keyboard().focus_in_window (ev, this);
+	Keyboard::magic_widget_grab_focus ();
+	return Window::on_focus_in_event (ev);
 }
 
 bool
-ArdourWindow::on_leave_notify_event (GdkEventCrossing *ev)
+ArdourWindow::on_focus_out_event (GdkEventFocus *ev)
 {
-	Keyboard::the_keyboard().leave_window (ev, this);
-	return Window::on_leave_notify_event (ev);
+	if (!get_modal()) {
+		Keyboard::magic_widget_drop_focus ();
+		Keyboard::the_keyboard().focus_out_window (ev, this);
+	}
+	return Window::on_focus_out_event (ev);
 }
 
 void
 ArdourWindow::on_unmap ()
 {
+	if (Keyboard::some_magic_widget_has_focus()) {
+		Gtk::Window* win = static_cast<Gtk::Window*>(get_focus()->get_toplevel());
+		if (win == Keyboard::get_current_window()) {
+			Keyboard::magic_widget_drop_focus ();
+		}
+	}
+
 	Keyboard::the_keyboard().leave_window (0, this);
 	Window::on_unmap ();
 }
@@ -92,8 +114,9 @@ void
 ArdourWindow::init ()
 {
 	set_border_width (10);
+	add_events (Gdk::FOCUS_CHANGE_MASK);
 
-        /* ArdourWindows are not dialogs (they have no "OK" or "Close" button) but
+      /* ArdourWindows are not dialogs (they have no "OK" or "Close" button) but
            they should be considered part of the same "window level" as a dialog. This
            works on X11 and Quartz, in that:
            

@@ -184,7 +184,7 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 	if (!ev->is_modifier) {
 		last_keyval = ev->keyval;
 	}
-	return false;
+	return ArdourWindow::on_key_press_event (ev);
 }
 
 bool
