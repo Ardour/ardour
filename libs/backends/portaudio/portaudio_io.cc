@@ -133,28 +133,80 @@ PortAudioIO::device_list (std::map<int, std::string> &devices) const {
 	}
 }
 
-void
-PortAudioIO::discover()
+bool
+PortAudioIO::initialize_pa ()
 {
-	for (std::map<int, paDevice*>::const_iterator i = _devices.begin (); i != _devices.end(); ++i) {
-		delete i->second;
-	}
-	_devices.clear();
-	
 	PaError err = paNoError;
 
 	if (!_initialized) {
 		err = Pa_Initialize();
-	}
-	if (err != paNoError) {
-		return;
+		if (err != paNoError) {
+			return false;
+		}
+		_initialized = true;
 	}
 
-	_initialized = true;
+	return true;
+}
+
+void
+PortAudioIO::host_api_list (std::vector<std::string>& api_list)
+{
+	if (!initialize_pa()) return;
+
+	PaHostApiIndex count = Pa_GetHostApiCount();
+
+	if (count < 0) return;
+
+	for (int i = 0; i < count; ++i) {
+		const PaHostApiInfo* info = Pa_GetHostApiInfo (i);
+		if (info->name != NULL) { // possible?
+			api_list.push_back (info->name);
+		}
+	}
+}
+
+PaHostApiIndex
+PortAudioIO::get_host_api_index_from_name (const std::string& name)
+{
+	if (!initialize_pa()) return -1;
+
+	PaHostApiIndex count = Pa_GetHostApiCount();
+
+	if (count < 0) return -1;
+
+	for (int i = 0; i < count; ++i) {
+		const PaHostApiInfo* info = Pa_GetHostApiInfo (i);
+		if (info->name != NULL) { // possible?
+			if (name == info->name) return i;
+		}
+	}
+	return -1;
+}
+
+void
+PortAudioIO::discover(const std::string& host_api)
+{
+	if (!initialize_pa()) return;
+
+	for (std::map<int, paDevice*>::const_iterator i = _devices.begin (); i != _devices.end(); ++i) {
+		delete i->second;
+	}
+	_devices.clear();
+
+	PaHostApiIndex host_api_index = get_host_api_index_from_name (host_api);
+
+	if (host_api_index < 0) return;
+
+	const PaHostApiInfo* info = Pa_GetHostApiInfo (host_api_index);
+
+	if (info == NULL) return;
+	PaDeviceIndex default_input = info->defaultInputDevice;
+	PaDeviceIndex default_output = info->defaultOutputDevice;
 
 	{
-		const PaDeviceInfo* nfo_i = Pa_GetDeviceInfo(Pa_GetDefaultInputDevice());
-		const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
+		const PaDeviceInfo* nfo_i = Pa_GetDeviceInfo(default_input);
+		const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(default_output);
 		if (nfo_i && nfo_o) {
 			_devices.insert (std::pair<int, paDevice*> (-1,
 						new paDevice("Default",
@@ -171,7 +223,9 @@ PortAudioIO::discover()
 
 	for (int i = 0 ; i < n_devices; ++i) {
 		const PaDeviceInfo* nfo = Pa_GetDeviceInfo(i);
+
 		if (!nfo) continue;
+		if (nfo->hostApi != host_api_index) continue;
 #ifndef NDEBUG
 		printf(" (%d) '%s' in: %d (lat: %.1f .. %.1f) out: %d (lat: %.1f .. %.1f) sr:%.2f\n",
 				i, nfo->name,

@@ -160,6 +160,10 @@ class PortAudioBackend : public AudioBackend {
 		std::string name () const;
 		bool is_realtime () const;
 
+		bool requires_driver_selection() const;
+		std::vector<std::string> enumerate_drivers () const;
+		int set_driver (const std::string&);
+
 		std::vector<DeviceStatus> enumerate_devices () const;
 		std::vector<float> available_sample_rates (const std::string& device) const;
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
@@ -313,6 +317,7 @@ class PortAudioBackend : public AudioBackend {
 		static std::vector<AudioBackend::DeviceStatus> _audio_device_status;
 		static std::vector<AudioBackend::DeviceStatus> _midi_device_status;
 
+		std::string  _target_driver;
 		mutable std::string _audio_device;
 		std::string _midi_driver_option;
 

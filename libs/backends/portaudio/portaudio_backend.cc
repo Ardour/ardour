@@ -89,10 +89,37 @@ PortAudioBackend::is_realtime () const
 	return true;
 }
 
+bool
+PortAudioBackend::requires_driver_selection() const
+{
+	// we could do this but implementation would need changing
+	/*
+	if (enumerate_drivers().size() == 1) {
+		return false;
+	}
+	*/
+	return true;
+}
+
+std::vector<std::string>
+PortAudioBackend::enumerate_drivers () const
+{
+	std::vector<std::string> currently_available;
+	_pcmio->host_api_list (currently_available);
+	return currently_available;
+}
+
+int
+PortAudioBackend::set_driver (const std::string& name)
+{
+	_target_driver = name;
+	return 0;
+}
+
 std::vector<AudioBackend::DeviceStatus>
 PortAudioBackend::enumerate_devices () const
 {
-	_pcmio->discover();
+	_pcmio->discover(_target_driver);
 	_audio_device_status.clear();
 	std::map<int, std::string> devices;
 	_pcmio->device_list(devices);

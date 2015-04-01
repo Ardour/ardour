@@ -37,7 +37,12 @@ public:
 
 	int      state (void) const { return _state; }
 
-	void     discover();
+	bool     initialize_pa ();
+
+	void     host_api_list (std::vector<std::string>&);
+	PaHostApiIndex get_host_api_index_from_name (const std::string& name);
+
+	void     discover(const std::string& host_api);
 	void     device_list (std::map<int, std::string> &devices) const;
 
 	int      available_sample_rates (int device_id, std::vector<float>& sampleRates);
@@ -96,6 +101,8 @@ private:
 	};
 
 	std::map<int, paDevice *> _devices;
+
+	std::string _host_api;
 };
 
 } // namespace
