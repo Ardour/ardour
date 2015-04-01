@@ -306,15 +306,10 @@ PortAudioIO::pcm_setup (
 	const PaDeviceInfo *nfo_out;
 	const PaStreamInfo *nfo_s;
 		
-	if (!_initialized) {
-		err = Pa_Initialize();
-	}
-	if (err != paNoError) {
+	if (!initialize_pa()) {
 		fprintf(stderr, "PortAudio Initialization Failed\n");
 		goto error;
 	}
-	_initialized = true;
-
 
 	if (device_input == -1) {
 		device_input = Pa_GetDefaultInputDevice();
@@ -459,7 +454,6 @@ error:
 	_playback_channels = 0;
 	free (_input_buffer); _input_buffer = NULL;
 	free (_output_buffer); _output_buffer = NULL;
-	Pa_Terminate();
 	return -1;
 }
 
