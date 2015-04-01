@@ -357,8 +357,8 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 			if (_pluginui->non_gtk_gui()) {
 				_pluginui->forward_key_event (event);
 			} else {
-				if (!relay_key_press (event, this)) {
-					return Window::on_key_press_event (event);
+				if (!Window::on_key_press_event (event)) {
+					return relay_key_press (event, this);
 				}
 				return true;
 			}
@@ -379,8 +379,8 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 				*/
 				return relay_key_press (event, &PublicEditor::instance());
 			} else {
-				if (!relay_key_press (event, this)) {
-					return Window::on_key_press_event (event);
+				if (!Window::on_key_press_event (event)) {
+					return relay_key_press (event, this);
 				}
 				return true;
 			}
