@@ -350,7 +350,11 @@ MeterStrip::blink_rec_display (bool onoff)
 std::string
 MeterStrip::state_id() const
 {
-	return string_compose ("mtrs %1", _route->id().to_s());
+	if (_route) {
+		return string_compose ("mtrs %1", _route->id().to_s());
+	} else {
+		return string ();
+	}
 }
 
 void
