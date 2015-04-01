@@ -87,7 +87,9 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 
 RouteUI::~RouteUI()
 {
-	gui_object_state().remove_node(route_state_id());
+	if (_route) {
+		gui_object_state().remove_node (route_state_id());
+	}
 
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
 	route_connections.drop_connections ();
