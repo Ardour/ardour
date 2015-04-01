@@ -576,6 +576,8 @@ Session::destroy ()
 	delete _midi_ports; _midi_ports = 0;
 	delete _locations; _locations = 0;
 
+	delete _tempo_map;
+	
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS

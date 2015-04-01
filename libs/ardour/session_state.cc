@@ -237,6 +237,7 @@ Session::post_engine_init ()
 	try {
 		/* tempo map requires sample rate knowledge */
 
+		delete _tempo_map;
 		_tempo_map = new TempoMap (_current_frame_rate);
 		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 		
