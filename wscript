@@ -128,7 +128,7 @@ clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math', '-fstrength-red
 compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict;
 
 def fetch_git_revision ():
-    cmd = "git describe HEAD"
+    cmd = "git describe HEAD | sed 's/^[A-Za-z]*+//'"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     rev = output[0].decode ('utf-8')
     return rev
