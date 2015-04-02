@@ -446,7 +446,7 @@ SoundFileBox::audition ()
 				afs = boost::dynamic_pointer_cast<AudioFileSource> (
 					SourceFactory::createExternal (DataType::AUDIO, *_session,
 											 path, n,
-											 Source::Flag (0), false));
+											 Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
 				if (afs->sample_rate() != _session->nominal_frame_rate()) {
 					boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, _src_quality));
 					srclist.push_back(sfs);
