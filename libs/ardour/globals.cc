@@ -270,9 +270,20 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 
 		copy_file (old_name, new_name);
 
-		/* can only copy ardour.rc - UI config is not compatible */
+		/* can only copy ardour.rc/config - UI config is not compatible */
 
-		old_name = Glib::build_filename (old_dir, X_("ardour.rc"));
+		/* users who have been using git/nightlies since the last
+		 * release of 3.5 will have $CONFIG/config rather than
+		 * $CONFIG/ardour.rc. Pick up the newer "old" config file,
+		 * to avoid confusion.
+		 */
+		
+		string old_name = Glib::build_filename (old_dir, X_("config"));
+
+		if (!Glib::file_test (old_name, Glib::FILE_TEST_EXISTS)) {
+			old_name = Glib::build_filename (old_dir, X_("ardour.rc"));
+		}
+
 		new_name = Glib::build_filename (new_dir, X_("config"));
 
 		copy_file (old_name, new_name);
