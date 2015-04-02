@@ -105,11 +105,9 @@ ARDOUR::save_as_file_dialog (std::string initial_path, std::string title, bool& 
     //NP: we should find some gentle way to do this
     NSString *nsDefaultPath = [NSString stringWithUTF8String:initial_path.c_str()];
     // Call the Objective-C method using Objective-C syntax
-    BOOL temp_copy_media;
-    NSString *nsPath = [FileDialog class_save_as_file_dialog:nsTitle withArg2:nsDefaultPath withArg3: &temp_copy_media];
+    NSString *nsPath = [FileDialog class_save_as_file_dialog:nsTitle withArg2:nsDefaultPath withArg3: &copy_media];
     
     std::string stdPath = [nsPath UTF8String];
-    copy_media = [temp_copy_media BOOL];
     
     return stdPath;
 }
@@ -237,7 +235,7 @@ ARDOUR::choose_folder_dialog(std::string initial_path, std::string title)
 }
 
 /* On save-as session */
-+ (NSString*) class_save_as_file_dialog:(NSString *)title withArg2:(NSString *)initial_path withArg3:(BOOL *)copy_media
++ (NSString*) class_save_as_file_dialog:(NSString *)title withArg2:(NSString *)initial_path withArg3:(bool *)copy_media
 {
     NSSavePanel* saveDlg = [NSSavePanel savePanel];
     [saveDlg setTitle:title];
