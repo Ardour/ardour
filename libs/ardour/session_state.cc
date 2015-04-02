@@ -4192,7 +4192,8 @@ Session::save_as (SaveAs& saveas)
 						std::string to = Glib::build_filename (v);
 						
 						if (!copy_file (from, to)) {
-							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+							throw Glib::FileError (Glib::FileError::IO_ERROR,
+												   string_compose(_("\ncopying \"%1\" failed !"), from));
 						}
 					}
 					
@@ -4219,7 +4220,8 @@ Session::save_as (SaveAs& saveas)
 						string to = Glib::build_filename (to_dir, (*i).substr (prefix_len));
 						
 						if (!copy_file (from, to)) {
-							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+							throw Glib::FileError (Glib::FileError::IO_ERROR,
+												   string_compose(_("\ncopying \"%1\" failed !"), from));
 						}
 					}
 				}
