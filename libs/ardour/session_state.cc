@@ -1045,17 +1045,31 @@ Session::state (bool full_state)
 			}
 		}
 	}
+	
+	
 
 	if (full_state) {
-		node->add_child_nocopy (_locations->get_state());
+		
+		if (_locations) {
+			node->add_child_nocopy (_locations->get_state());	
+		}
 	} else {
+		Locations loc (*this);
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
-		Locations loc (*this);
 		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange);
 		range->set (max_framepos, 0);
 		loc.add (range);
-		node->add_child_nocopy (loc.get_state());
+		XMLNode& locations_state = loc.get_state();
+		
+		if (ARDOUR::Profile->get_trx() && _locations) {
+			for (Locations::LocationList::const_iterator i = _locations->list ().begin (); i != _locations->list ().end (); ++i) {
+				if ((*i)->is_mark () || (*i)->is_auto_loop ()) {
+					locations_state.add_child_nocopy ((*i)->get_state ());
+				}
+			}
+		}
+		node->add_child_nocopy (locations_state);
 	}
 
 	child = node->add_child ("Bundles");
@@ -1076,12 +1090,12 @@ Session::state (bool full_state)
 		RoutePublicOrderSorter cmp;
 		RouteList public_order (*r);
 		public_order.sort (cmp);
-
-                /* the sort should have put control outs first */
-
-                if (_monitor_out) {
-                        assert (_monitor_out == public_order.front());
-                }
+		
+		/* the sort should have put control outs first */
+		
+		if (_monitor_out) {
+			assert (_monitor_out == public_order.front());
+		}
 
 		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
 			if (!(*i)->is_auditioner()) {
