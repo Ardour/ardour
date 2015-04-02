@@ -3084,7 +3084,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		session_path = _session_dialog.session_folder ();
         
 		if (nsm) {
-		        likely_new = true;
+			likely_new = true;
 		}
 
 		string::size_type suffix = session_name.find (statefile_suffix);
@@ -3102,20 +3102,10 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		
 		if (_session_dialog.use_session_template()) {
 			template_name = _session_dialog.session_template_name();
-			std::cout << "#########################################################################################" << std::endl;
-			std::cout << "#########################################################################################" << std::endl;
-			std::cout << "template_name : " << template_name << std::endl;
-			std::cout << "#########################################################################################" << std::endl;
-			std::cout << "#########################################################################################" << std::endl;
 			_session_is_new = true;
 		}
 		
-		if (session_name[0] == G_DIR_SEPARATOR ||
-#if defined (WIN32)
-			session_name.length() > 2 && session_name[1] == ':' && G_IS_DIR_SEPARATOR (session_name[2]) ||
-#endif
-		    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
-		    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)) {
+		if (Glib::path_is_absolute (session_name)) {
 			
 			/* absolute path or cwd-relative path specified for session name: infer session folder
 			   from what was given.
