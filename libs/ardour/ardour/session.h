@@ -259,9 +259,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
         void notify_remote_id_change ();
         void sync_order_keys ();
 
-	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
-	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
-	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
+	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
+	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
+	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg, bool sort = true);
 
 	static char session_name_is_legal (const std::string&);
 	bool io_name_is_legal (const std::string&);

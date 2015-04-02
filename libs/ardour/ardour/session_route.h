@@ -30,27 +30,29 @@
 namespace ARDOUR {
 
 template<class T> void
-Session::foreach_route (T *obj, void (T::*func)(Route&))
+Session::foreach_route (T *obj, void (T::*func)(Route&), bool sort)
 {
 	boost::shared_ptr<RouteList> r = routes.reader();
 	RouteList public_order (*r);
-	RoutePublicOrderSorter cmp;
-
-	public_order.sort (cmp);
-
+	
+	if (sort) {
+		public_order.sort (RoutePublicOrderSorter());
+	}
+	
 	for (RouteList::iterator i = public_order.begin(); i != public_order.end(); i++) {
 		(obj->*func) (**i);
 	}
 }
 
 template<class T> void
-Session::foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>))
+Session::foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort)
 {
 	boost::shared_ptr<RouteList> r = routes.reader();
 	RouteList public_order (*r);
-	RoutePublicOrderSorter cmp;
 
-	public_order.sort (cmp);
+	if (sort) {
+		public_order.sort (RoutePublicOrderSorter());
+	}
 
 	for (RouteList::iterator i = public_order.begin(); i != public_order.end(); i++) {
 		(obj->*func) (*i);
@@ -58,13 +60,14 @@ Session::foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>))
 }
 
 template<class T, class A> void
-Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1)
+Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1, bool sort)
 {
 	boost::shared_ptr<RouteList> r = routes.reader();
 	RouteList public_order (*r);
-	RoutePublicOrderSorter cmp;
-
-	public_order.sort (cmp);
+	
+	if (sort) {
+		public_order.sort (RoutePublicOrderSorter());
+	}
 
 	for (RouteList::iterator i = public_order.begin(); i != public_order.end(); i++) {
 		(obj->*func) (**i, arg1);
