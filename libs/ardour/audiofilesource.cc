@@ -205,12 +205,12 @@ AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 		/* Nasty band-aid for older sessions that were created before we
 		   used libsndfile for all audio files.
 		*/
-
-
+#ifndef PLATFORM_WINDOWS // there's no old_peak_path() for windows
 		str = old_peak_path (audio_path);
 		if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
 			peak_path = str;
 		}
+#endif
 	}
 
 	return peak_path;
