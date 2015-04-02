@@ -1420,7 +1420,7 @@ ARDOUR_UI::update_disk_space()
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
 	} else {
 		rec_enabled_streams = 0;
-		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams);
+		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams, false);
 
 		framecnt_t frames = opt_frames.get_value_or (0);
 
