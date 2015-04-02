@@ -1101,6 +1101,7 @@ Session::state (bool full_state)
 		XMLNode& locations_state = loc.get_state();
 		
 		if (ARDOUR::Profile->get_trx() && _locations) {
+			// For tracks we need stored the Auto Loop Range and all MIDI markers.
 			for (Locations::LocationList::const_iterator i = _locations->list ().begin (); i != _locations->list ().end (); ++i) {
 				if ((*i)->is_mark () || (*i)->is_auto_loop ()) {
 					locations_state.add_child_nocopy ((*i)->get_state ());
