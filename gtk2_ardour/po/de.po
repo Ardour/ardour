@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-31 20:13-0400\n"
+"POT-Creation-Date: 2015-04-02 21:39+0200\n"
 "PO-Revision-Date: 2015-03-31 16:50+0200\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
@@ -2400,8 +2400,10 @@ msgid "Double"
 msgstr "Verdopple"
 
 #: automation_controller.cc:307
-msgid "Set to %1 beat(s)"
-msgstr "Setze auf %1 beat(s)"
+msgid "Set to %1 beat"
+msgid_plural "Set to %1 beats"
+msgstr[0] "Setze auf %1 Schlag"
+msgstr[1] "Setze auf %1 Schläge"
 
 #: automation_line.cc:286 automation_line.cc:462
 msgid "automation event move"
