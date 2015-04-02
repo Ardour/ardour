@@ -320,6 +320,29 @@ cat >> $NSISFILE << EOF
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
 
+
+Function .onInit
+
+  ReadRegStr \$R0 HKLM \
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" \
+    "UninstallString"
+  StrCmp \$R0 "" done
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+    "${PROGRAM_NAME} is already installed. \$\\n\$\\nClick 'OK' to remove the \
+    previous version or 'Cancel' to cancel this upgrade." \
+    IDOK uninst
+    Abort
+
+  uninst:
+  ClearErrors
+  Exec \$INSTDIR\uninst.exe ;
+
+  done:
+
+FunctionEnd
+
+
 Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   SectionIn RO
   SetOutPath \$INSTDIR
