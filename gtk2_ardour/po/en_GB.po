@@ -7,11 +7,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 3\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-31 20:13-0400\n"
-"PO-Revision-Date: 2011-12-08 15:38+0100\n"
+"POT-Creation-Date: 2015-04-02 18:25+0100\n"
+"PO-Revision-Date: 2015-03-21 14:07+0100\n"
 "Last-Translator: Colin Fletcher <colin.m.fletcher@googlemail.com>\n"
 "Language-Team: UK English <colin.m.fletcher@googlemail.com>\n"
-"Language: \n"
+"Language: English (UK)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -700,7 +700,7 @@ msgstr ""
 
 #: ardour_ui.cc:227
 msgid "Video Export Dialog"
-msgstr ""
+msgstr "Video Export Dialogue"
 
 #: ardour_ui.cc:228
 msgid "Properties"
@@ -1077,7 +1077,7 @@ msgstr ""
 msgid "Rename Session"
 msgstr ""
 
-#: ardour_ui.cc:2470 ardour_ui.cc:2886 ardour_ui.cc:2924
+#: ardour_ui.cc:2470 ardour_ui.cc:2884 ardour_ui.cc:2922
 msgid ""
 "To ensure compatibility with various systems\n"
 "session names may not contain a '%1' character"
@@ -1106,66 +1106,66 @@ msgstr ""
 msgid "-template"
 msgstr ""
 
-#: ardour_ui.cc:2643
+#: ardour_ui.cc:2641
 msgid ""
 "This session\n"
 "%1\n"
 "already exists. Do you want to open it?"
 msgstr ""
 
-#: ardour_ui.cc:2653
+#: ardour_ui.cc:2651
 msgid "Open Existing Session"
 msgstr ""
 
-#: ardour_ui.cc:2914
+#: ardour_ui.cc:2912
 msgid "There is no existing session at \"%1\""
 msgstr ""
 
-#: ardour_ui.cc:3006
+#: ardour_ui.cc:3004
 msgid "Please wait while %1 loads your session"
 msgstr ""
 
-#: ardour_ui.cc:3021
+#: ardour_ui.cc:3019
 msgid "Port Registration Error"
 msgstr ""
 
-#: ardour_ui.cc:3022
+#: ardour_ui.cc:3020
 msgid "Click the Close button to try again."
 msgstr ""
 
-#: ardour_ui.cc:3043
+#: ardour_ui.cc:3041
 msgid "Session \"%1 (snapshot %2)\" did not load successfully"
 msgstr ""
 
-#: ardour_ui.cc:3049
+#: ardour_ui.cc:3047
 msgid "Loading Error"
 msgstr ""
 
-#: ardour_ui.cc:3068
+#: ardour_ui.cc:3066
 msgid ""
 "This session has been opened in read-only mode.\n"
 "\n"
 "You will not be able to record or save."
 msgstr ""
 
-#: ardour_ui.cc:3073
+#: ardour_ui.cc:3071
 msgid "Read-only Session"
 msgstr ""
 
-#: ardour_ui.cc:3139
+#: ardour_ui.cc:3137
 msgid "Could not create session in \"%1\""
 msgstr ""
 
-#: ardour_ui.cc:3288
+#: ardour_ui.cc:3286
 msgid "No files were ready for clean-up"
 msgstr ""
 
-#: ardour_ui.cc:3292 ardour_ui.cc:3302 ardour_ui.cc:3435 ardour_ui.cc:3442
+#: ardour_ui.cc:3290 ardour_ui.cc:3300 ardour_ui.cc:3433 ardour_ui.cc:3440
 #: ardour_ui_ed.cc:103
 msgid "Clean-up"
 msgstr ""
 
-#: ardour_ui.cc:3293
+#: ardour_ui.cc:3291
 msgid ""
 "If this seems suprising, \n"
 "check for any existing snapshots.\n"
@@ -1173,19 +1173,19 @@ msgid ""
 "require some unused files to continue to exist."
 msgstr ""
 
-#: ardour_ui.cc:3352
+#: ardour_ui.cc:3350
 msgid "kilo"
 msgstr ""
 
-#: ardour_ui.cc:3355
+#: ardour_ui.cc:3353
 msgid "mega"
 msgstr ""
 
-#: ardour_ui.cc:3358
+#: ardour_ui.cc:3356
 msgid "giga"
 msgstr ""
 
-#: ardour_ui.cc:3363
+#: ardour_ui.cc:3361
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1195,7 +1195,7 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: ardour_ui.cc:3370
+#: ardour_ui.cc:3368
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1217,90 +1217,90 @@ msgid_plural ""
 msgstr[0] ""
 msgstr[1] ""
 
-#: ardour_ui.cc:3430
+#: ardour_ui.cc:3428
 msgid "Are you sure you want to clean-up?"
 msgstr ""
 
-#: ardour_ui.cc:3437
+#: ardour_ui.cc:3435
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
 "Clean-up will move all unused files to a \"dead\" location."
 msgstr ""
 
-#: ardour_ui.cc:3445
+#: ardour_ui.cc:3443
 msgid "CleanupDialog"
 msgstr ""
 
-#: ardour_ui.cc:3475
+#: ardour_ui.cc:3473
 msgid "Cleaned Files"
 msgstr ""
 
-#: ardour_ui.cc:3492
+#: ardour_ui.cc:3490
 msgid "deleted file"
 msgstr ""
 
-#: ardour_ui.cc:3637
+#: ardour_ui.cc:3635
 msgid "Video-Server was not launched by %1. The request to stop it is ignored."
 msgstr ""
 
-#: ardour_ui.cc:3641
+#: ardour_ui.cc:3639
 msgid "Stop Video-Server"
 msgstr ""
 
-#: ardour_ui.cc:3642
+#: ardour_ui.cc:3640
 msgid "Do you really want to stop the Video Server?"
 msgstr ""
 
-#: ardour_ui.cc:3645
+#: ardour_ui.cc:3643
 msgid "Yes, Stop It"
 msgstr ""
 
-#: ardour_ui.cc:3671
+#: ardour_ui.cc:3669
 msgid "The Video Server is already started."
 msgstr ""
 
-#: ardour_ui.cc:3673
+#: ardour_ui.cc:3671
 msgid ""
 "An external Video Server is configured and can be reached. Not starting a "
 "new instance."
 msgstr ""
 
-#: ardour_ui.cc:3681 ardour_ui.cc:3786
+#: ardour_ui.cc:3679 ardour_ui.cc:3784
 msgid ""
 "Could not connect to the Video Server. Start it or configure its access URL "
 "in Preferences."
 msgstr ""
 
-#: ardour_ui.cc:3711
+#: ardour_ui.cc:3709
 msgid "Specified docroot is not an existing directory."
 msgstr ""
 
-#: ardour_ui.cc:3717 ardour_ui.cc:3723
+#: ardour_ui.cc:3715 ardour_ui.cc:3721
 msgid "Given Video Server is not an executable file."
 msgstr ""
 
-#: ardour_ui.cc:3757
+#: ardour_ui.cc:3755
 msgid "Cannot launch the video-server"
 msgstr ""
 
-#: ardour_ui.cc:3767
+#: ardour_ui.cc:3765
 msgid "Video-server was started but does not respond to requests..."
 msgstr ""
 
-#: ardour_ui.cc:3812 editor_audio_import.cc:641
+#: ardour_ui.cc:3810 editor_audio_import.cc:641
 msgid "could not open %1"
 msgstr ""
 
-#: ardour_ui.cc:3816
+#: ardour_ui.cc:3814
 msgid "no video-file selected"
 msgstr ""
 
-#: ardour_ui.cc:4014
+#: ardour_ui.cc:4012
 msgid "Recording was stopped because your system could not keep up."
 msgstr ""
 
-#: ardour_ui.cc:4043
+#: ardour_ui.cc:4041
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1309,23 +1309,23 @@ msgid ""
 "quickly enough to keep up with recording.\n"
 msgstr ""
 
-#: ardour_ui.cc:4113
+#: ardour_ui.cc:4111
 msgid "Scanning for plugins"
 msgstr ""
 
-#: ardour_ui.cc:4115
+#: ardour_ui.cc:4113
 msgid "Cancel plugin scan"
 msgstr ""
 
-#: ardour_ui.cc:4124
+#: ardour_ui.cc:4122
 msgid "Stop Timeout"
 msgstr ""
 
-#: ardour_ui.cc:4131
+#: ardour_ui.cc:4129
 msgid "Scan Timeout"
 msgstr ""
 
-#: ardour_ui.cc:4174
+#: ardour_ui.cc:4172
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1334,11 +1334,11 @@ msgid ""
 "quickly enough to keep up with playback.\n"
 msgstr ""
 
-#: ardour_ui.cc:4214
+#: ardour_ui.cc:4212
 msgid "Crash Recovery"
 msgstr ""
 
-#: ardour_ui.cc:4215
+#: ardour_ui.cc:4213
 msgid ""
 "This session appears to have been in the\n"
 "middle of recording when %1 or\n"
@@ -1349,42 +1349,42 @@ msgid ""
 "what you would like to do.\n"
 msgstr ""
 
-#: ardour_ui.cc:4227
+#: ardour_ui.cc:4225
 msgid "Ignore crash data"
 msgstr ""
 
-#: ardour_ui.cc:4228
+#: ardour_ui.cc:4226
 msgid "Recover from crash"
 msgstr ""
 
-#: ardour_ui.cc:4248
+#: ardour_ui.cc:4246
 msgid "Sample Rate Mismatch"
 msgstr ""
 
-#: ardour_ui.cc:4249
+#: ardour_ui.cc:4247
 msgid ""
 "This session was created with a sample rate of %1 Hz, but\n"
 "%2 is currently running at %3 Hz.  If you load this session,\n"
 "audio may be played at the wrong sample rate.\n"
 msgstr ""
 
-#: ardour_ui.cc:4258
+#: ardour_ui.cc:4256
 msgid "Do not load session"
 msgstr ""
 
-#: ardour_ui.cc:4259
+#: ardour_ui.cc:4257
 msgid "Load session anyway"
 msgstr ""
 
-#: ardour_ui.cc:4286
+#: ardour_ui.cc:4284
 msgid "Could not disconnect from Audio/MIDI engine"
 msgstr ""
 
-#: ardour_ui.cc:4303 ardour_ui.cc:4306
+#: ardour_ui.cc:4301 ardour_ui.cc:4304
 msgid "Could not reconnect to the Audio/MIDI engine"
 msgstr ""
 
-#: ardour_ui.cc:4590
+#: ardour_ui.cc:4588
 msgid ""
 "%4This is a session from an older version of %3%5\n"
 "\n"
@@ -1962,7 +1962,7 @@ msgid "Punch In"
 msgstr ""
 
 #: ardour_ui_ed.cc:383 mixer_strip.cc:1819 mixer_strip.cc:1843
-#: mixer_strip.cc:2007 route_ui.cc:162 time_info_box.cc:116
+#: mixer_strip.cc:2007 route_ui.cc:164 time_info_box.cc:116
 msgid "In"
 msgstr ""
 
@@ -4123,7 +4123,7 @@ msgstr ""
 
 #: editor_actions.cc:701
 msgid "Show Measure Lines"
-msgstr ""
+msgstr "Show Bar Lines"
 
 #: editor_actions.cc:705
 msgid "Show Logo"
@@ -4788,7 +4788,7 @@ msgid "Rename Range"
 msgstr ""
 
 #: editor_markers.cc:1419 editor_mouse.cc:2137 processor_box.cc:1994
-#: processor_box.cc:2464 route_time_axis.cc:1100 route_ui.cc:1628
+#: processor_box.cc:2464 route_time_axis.cc:1100 route_ui.cc:1630
 msgid "Rename"
 msgstr ""
 
@@ -4923,7 +4923,7 @@ msgstr ""
 msgid "Rename Region"
 msgstr ""
 
-#: editor_ops.cc:2670 processor_box.cc:1992 route_ui.cc:1626
+#: editor_ops.cc:2670 processor_box.cc:1992 route_ui.cc:1628
 msgid "New name:"
 msgstr ""
 
@@ -5080,7 +5080,7 @@ msgid ""
 msgstr ""
 
 #: editor_ops.cc:4843 editor_ops.cc:6838 editor_regions.cc:462
-#: editor_snapshots.cc:159 route_ui.cc:1569
+#: editor_snapshots.cc:159 route_ui.cc:1571
 msgid "No, do nothing."
 msgstr ""
 
@@ -5225,6 +5225,8 @@ msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
 msgstr ""
+"Press OK to continue with this split operation\n"
+"or ask the Ferret dialogue to tune the analysis"
 
 #: editor_ops.cc:6288
 msgid "Press OK to continue with this split operation"
@@ -5267,11 +5269,11 @@ msgstr ""
 msgid "close region gaps"
 msgstr ""
 
-#: editor_ops.cc:6786 route_ui.cc:1543
+#: editor_ops.cc:6786 route_ui.cc:1545
 msgid "That would be bad news ...."
 msgstr ""
 
-#: editor_ops.cc:6791 route_ui.cc:1548
+#: editor_ops.cc:6791 route_ui.cc:1550
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -5285,7 +5287,7 @@ msgstr ""
 msgid "tracks"
 msgstr ""
 
-#: editor_ops.cc:6811 route_ui.cc:1992
+#: editor_ops.cc:6811 route_ui.cc:1994
 msgid "track"
 msgstr ""
 
@@ -5293,7 +5295,7 @@ msgstr ""
 msgid "busses"
 msgstr ""
 
-#: editor_ops.cc:6817 route_ui.cc:1992
+#: editor_ops.cc:6817 route_ui.cc:1994
 msgid "bus"
 msgstr ""
 
@@ -5324,7 +5326,7 @@ msgstr ""
 msgid "Yes, remove them."
 msgstr ""
 
-#: editor_ops.cc:6842 editor_snapshots.cc:160 route_ui.cc:1570
+#: editor_ops.cc:6842 editor_snapshots.cc:160 route_ui.cc:1572
 msgid "Yes, remove it."
 msgstr ""
 
@@ -5427,7 +5429,7 @@ msgid "Region position glued to Bars|Beats time?"
 msgstr ""
 
 #: editor_regions.cc:121 editor_routes.cc:211 gain_meter.cc:793
-#: mixer_strip.cc:2032 meter_strip.cc:359 panner_ui.cc:603
+#: mixer_strip.cc:2032 meter_strip.cc:363 panner_ui.cc:603
 #: route_time_axis.cc:2713 stereo_panner.cc:271 time_axis_view.cc:1190
 msgid "M"
 msgstr ""
@@ -5494,7 +5496,7 @@ msgstr ""
 msgid "Track/Bus visible ?"
 msgstr ""
 
-#: editor_routes.cc:208 mixer_strip.cc:2046 meter_strip.cc:371
+#: editor_routes.cc:208 mixer_strip.cc:2046 meter_strip.cc:375
 #: route_time_axis.cc:105 route_time_axis.cc:2701
 msgid "A"
 msgstr ""
@@ -5504,7 +5506,7 @@ msgid "Track/Bus active ?"
 msgstr ""
 
 #: editor_routes.cc:209 mixer_strip.cc:2033 mixer_strip.cc:2054
-#: meter_strip.cc:379
+#: meter_strip.cc:383
 msgid "I"
 msgstr ""
 
@@ -5525,7 +5527,7 @@ msgstr ""
 msgid "Muted"
 msgstr ""
 
-#: editor_routes.cc:212 mixer_strip.cc:2042 meter_strip.cc:367
+#: editor_routes.cc:212 mixer_strip.cc:2042 meter_strip.cc:371
 #: route_time_axis.cc:2710
 msgid "S"
 msgstr ""
@@ -6298,7 +6300,7 @@ msgstr ""
 msgid "Abs"
 msgstr ""
 
-#: gain_meter.cc:796 mixer_strip.cc:2049 meter_strip.cc:374 panner_ui.cc:606
+#: gain_meter.cc:796 mixer_strip.cc:2049 meter_strip.cc:378 panner_ui.cc:606
 #: route_time_axis.cc:104 route_time_axis.cc:2705
 msgid "P"
 msgstr ""
@@ -7444,7 +7446,7 @@ msgstr ""
 msgid "C"
 msgstr ""
 
-#: mixer_strip.cc:2008 route_ui.cc:168
+#: mixer_strip.cc:2008 route_ui.cc:170
 msgid "Disk"
 msgstr ""
 
@@ -7456,7 +7458,7 @@ msgstr ""
 msgid "PFL"
 msgstr ""
 
-#: mixer_strip.cc:2034 meter_strip.cc:380
+#: mixer_strip.cc:2034 meter_strip.cc:384
 msgid "D"
 msgstr ""
 
@@ -7468,15 +7470,15 @@ msgstr ""
 msgid "Post Fader"
 msgstr ""
 
-#: mixer_strip.cc:2286 meter_strip.cc:847
+#: mixer_strip.cc:2286 meter_strip.cc:851
 msgid "Change all in Group to %1"
 msgstr ""
 
-#: mixer_strip.cc:2288 meter_strip.cc:849
+#: mixer_strip.cc:2288 meter_strip.cc:853
 msgid "Change all to %1"
 msgstr ""
 
-#: mixer_strip.cc:2290 meter_strip.cc:851
+#: mixer_strip.cc:2290 meter_strip.cc:855
 msgid "Change same track-type to %1"
 msgstr ""
 
@@ -7500,23 +7502,23 @@ msgstr ""
 msgid "Reset Peak"
 msgstr ""
 
-#: meter_strip.cc:883
+#: meter_strip.cc:887
 msgid "Variable height"
 msgstr ""
 
-#: meter_strip.cc:884
+#: meter_strip.cc:888
 msgid "Short"
 msgstr ""
 
-#: meter_strip.cc:885
+#: meter_strip.cc:889
 msgid "Tall"
 msgstr ""
 
-#: meter_strip.cc:886
+#: meter_strip.cc:890
 msgid "Grande"
 msgstr ""
 
-#: meter_strip.cc:887
+#: meter_strip.cc:891
 msgid "Venti"
 msgstr ""
 
@@ -8695,7 +8697,7 @@ msgstr ""
 
 #: rc_option_editor.cc:904
 msgid "Show Video Server Startup Dialog"
-msgstr ""
+msgstr "Show Video Server Startup Dialogue"
 
 #: rc_option_editor.cc:905
 msgid "Advanced Setup (remote video server)"
@@ -8736,6 +8738,8 @@ msgid ""
 "<b>When enabled</b> an information window with details is displayed before "
 "the video-export dialog."
 msgstr ""
+"<b>When enabled</b> an information window with details is displayed before "
+"the video-export dialogue."
 
 #: rc_option_editor.cc:939
 msgid ""
@@ -9192,6 +9196,10 @@ msgid ""
 "\n"
 "You can always rename markers by right-clicking on them"
 msgstr ""
+"If enabled, pop up a dialogue when a new marker is created to allow its name "
+"to be set as it is created.\n"
+"\n"
+"You can always rename markers by right-clicking on them"
 
 #: rc_option_editor.cc:1779
 msgid "Auto-scroll editor window when dragging near its edges"
@@ -10088,111 +10096,111 @@ msgstr ""
 msgid "Pre-fade listen (PFL)"
 msgstr ""
 
-#: route_ui.cc:140
+#: route_ui.cc:142
 msgid "Mute this track"
 msgstr ""
 
-#: route_ui.cc:144
+#: route_ui.cc:146
 msgid "Mute other (non-soloed) tracks"
 msgstr ""
 
-#: route_ui.cc:150
+#: route_ui.cc:152
 msgid "Enable recording on this track"
 msgstr ""
 
-#: route_ui.cc:158
+#: route_ui.cc:160
 msgid "make mixer strips show sends to this bus"
 msgstr ""
 
-#: route_ui.cc:163
+#: route_ui.cc:165
 msgid "Monitor input"
 msgstr ""
 
-#: route_ui.cc:169
+#: route_ui.cc:171
 msgid "Monitor playback"
 msgstr ""
 
-#: route_ui.cc:676
+#: route_ui.cc:678
 msgid "Not connected to AudioEngine - cannot engage record"
 msgstr ""
 
-#: route_ui.cc:875
+#: route_ui.cc:877
 msgid "Step Entry"
 msgstr ""
 
-#: route_ui.cc:948
+#: route_ui.cc:950
 msgid "Assign all tracks (prefader)"
 msgstr ""
 
-#: route_ui.cc:952
+#: route_ui.cc:954
 msgid "Assign all tracks and buses (prefader)"
 msgstr ""
 
-#: route_ui.cc:956
+#: route_ui.cc:958
 msgid "Assign all tracks (postfader)"
 msgstr ""
 
-#: route_ui.cc:960
+#: route_ui.cc:962
 msgid "Assign all tracks and buses (postfader)"
 msgstr ""
 
-#: route_ui.cc:964
+#: route_ui.cc:966
 msgid "Assign selected tracks (prefader)"
 msgstr ""
 
-#: route_ui.cc:968
+#: route_ui.cc:970
 msgid "Assign selected tracks and buses (prefader)"
 msgstr ""
 
-#: route_ui.cc:971
+#: route_ui.cc:973
 msgid "Assign selected tracks (postfader)"
 msgstr ""
 
-#: route_ui.cc:975
+#: route_ui.cc:977
 msgid "Assign selected tracks and buses (postfader)"
 msgstr ""
 
-#: route_ui.cc:978
+#: route_ui.cc:980
 msgid "Copy track/bus gains to sends"
 msgstr ""
 
-#: route_ui.cc:979
+#: route_ui.cc:981
 msgid "Set sends gain to -inf"
 msgstr ""
 
-#: route_ui.cc:980
+#: route_ui.cc:982
 msgid "Set sends gain to 0dB"
 msgstr ""
 
-#: route_ui.cc:1300
+#: route_ui.cc:1302
 msgid "Solo Isolate"
 msgstr ""
 
-#: route_ui.cc:1307
+#: route_ui.cc:1309
 msgid "Solo Safe"
 msgstr ""
 
-#: route_ui.cc:1329
+#: route_ui.cc:1331
 msgid "Pre Fader Sends"
 msgstr ""
 
-#: route_ui.cc:1335
+#: route_ui.cc:1337
 msgid "Post Fader Sends"
 msgstr ""
 
-#: route_ui.cc:1341
+#: route_ui.cc:1343
 msgid "Control Outs"
 msgstr ""
 
-#: route_ui.cc:1347
+#: route_ui.cc:1349
 msgid "Main Outs"
 msgstr ""
 
-#: route_ui.cc:1479
+#: route_ui.cc:1481
 msgid "Color Selection"
 msgstr "Colour Selection"
 
-#: route_ui.cc:1564
+#: route_ui.cc:1566
 msgid ""
 "Do you really want to remove track \"%1\" ?\n"
 "\n"
@@ -10201,72 +10209,72 @@ msgid ""
 "(This action cannot be undone, and the session file will be overwritten)"
 msgstr ""
 
-#: route_ui.cc:1566
+#: route_ui.cc:1568
 msgid ""
 "Do you really want to remove bus \"%1\" ?\n"
 "\n"
 "(This action cannot be undone, and the session file will be overwritten)"
 msgstr ""
 
-#: route_ui.cc:1574
+#: route_ui.cc:1576
 msgid "Remove track"
 msgstr ""
 
-#: route_ui.cc:1576
+#: route_ui.cc:1578
 msgid "Remove bus"
 msgstr ""
 
-#: route_ui.cc:1604
+#: route_ui.cc:1606
 msgid ""
 "The use of colons (':') is discouraged in track and bus names.\n"
 "Do you want to use this new name?"
 msgstr ""
 
-#: route_ui.cc:1608
+#: route_ui.cc:1610
 msgid "Use the new name"
 msgstr ""
 
-#: route_ui.cc:1609
+#: route_ui.cc:1611
 msgid "Re-edit the name"
 msgstr ""
 
-#: route_ui.cc:1622
+#: route_ui.cc:1624
 msgid "Rename Track"
 msgstr ""
 
-#: route_ui.cc:1624
+#: route_ui.cc:1626
 msgid "Rename Bus"
 msgstr ""
 
-#: route_ui.cc:1692
+#: route_ui.cc:1694
 msgid ": comment editor"
 msgstr ""
 
-#: route_ui.cc:1858
+#: route_ui.cc:1860
 msgid " latency"
 msgstr ""
 
-#: route_ui.cc:1871
+#: route_ui.cc:1873
 msgid "Cannot create route template directory %1"
 msgstr ""
 
-#: route_ui.cc:1877
+#: route_ui.cc:1879
 msgid "Save As Template"
 msgstr ""
 
-#: route_ui.cc:1878
+#: route_ui.cc:1880
 msgid "Template name:"
 msgstr ""
 
-#: route_ui.cc:1959
+#: route_ui.cc:1961
 msgid "Remote Control ID"
 msgstr ""
 
-#: route_ui.cc:1969
+#: route_ui.cc:1971
 msgid "Remote control ID:"
 msgstr ""
 
-#: route_ui.cc:1983
+#: route_ui.cc:1985
 msgid ""
 "The remote control ID of %1 is: %2\n"
 "\n"
@@ -10274,15 +10282,15 @@ msgid ""
 "The remote control ID of %3 cannot be changed."
 msgstr ""
 
-#: route_ui.cc:1987
+#: route_ui.cc:1989
 msgid "the master bus"
 msgstr ""
 
-#: route_ui.cc:1987
+#: route_ui.cc:1989
 msgid "the monitor bus"
 msgstr ""
 
-#: route_ui.cc:1989
+#: route_ui.cc:1991
 msgid ""
 "The remote control ID of %5 is: %2\n"
 "\n"
@@ -10293,13 +10301,13 @@ msgid ""
 "change this%4"
 msgstr ""
 
-#: route_ui.cc:2046
+#: route_ui.cc:2048
 msgid ""
 "Left-click to invert (phase reverse) channel %1 of this track.  Right-click "
 "to show menu."
 msgstr ""
 
-#: route_ui.cc:2048
+#: route_ui.cc:2050
 msgid "Click to show a menu of channels for inversion (phase reverse)"
 msgstr ""
 
@@ -11152,7 +11160,7 @@ msgstr ""
 
 #: sfdb_ui.cc:700
 msgid "License"
-msgstr ""
+msgstr "Licence"
 
 #: sfdb_ui.cc:718
 msgid "Search Freesound"
@@ -11431,6 +11439,16 @@ msgid ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
+"While recording instruments or vocals, you probably want to listen to the\n"
+"signal as well as record it. This is called \"monitoring\". There are\n"
+"different ways to do this depending on the equipment you have and the\n"
+"configuration of that equipment. The two most common are presented here.\n"
+"Please choose whichever one is right for your setup.\n"
+"\n"
+"<i>(You can change this preference at any time, via the Preferences "
+"dialogue)</i>\n"
+"\n"
+"<i>If you do not understand what this is about, just accept the default.</i>"
 
 #: startup.cc:262
 msgid "Monitoring Choices"
@@ -11463,6 +11481,10 @@ msgid ""
 "\n"
 "<i>If you do not understand what this is about, just accept the default.</i>"
 msgstr ""
+"<i>You can change this preference at any time via the Preferences dialogue.\n"
+"You can also add or remove the monitor section to/from any session.</i>\n"
+"\n"
+"<i>If you do not understand what this is about, just accept the default.</i>"
 
 #: startup.cc:332
 msgid "Monitor Section"
@@ -12012,7 +12034,7 @@ msgstr ""
 
 #: theme_manager.cc:76
 msgid "All floating windows are dialogs"
-msgstr ""
+msgstr "All floating windows are dialogues"
 
 #: theme_manager.cc:77
 msgid "Transient windows follow front window."
@@ -12045,6 +12067,10 @@ msgid ""
 "This may help with some window managers. This requires a restart of %1 to "
 "take effect"
 msgstr ""
+"Mark all floating windows to be type \"Dialogue\" rather than using \"Utility"
+"\" for some.\n"
+"This may help with some window managers. This requires a restart of %1 to "
+"take effect"
 
 #: theme_manager.cc:199
 msgid ""
@@ -12055,7 +12081,7 @@ msgstr ""
 
 #: theme_manager.cc:620
 msgid "Color Palette"
-msgstr ""
+msgstr "Colour Palette"
 
 #: time_axis_view.cc:148
 msgid "Track/Bus name (double click to edit)"
@@ -12217,23 +12243,23 @@ msgstr ""
 
 #: ui_config.cc:219
 msgid "Loading color file %1"
-msgstr ""
+msgstr "Loading colour file %1"
 
 #: ui_config.cc:222
 msgid "cannot read color file \"%1\""
-msgstr ""
+msgstr "cannot read colour file \"%1\""
 
 #: ui_config.cc:227
 msgid "color file \"%1\" not loaded successfully."
-msgstr ""
+msgstr "colour file \"%1\" not loaded successfully."
 
 #: ui_config.cc:233
 msgid "Color file %1 not found"
-msgstr ""
+msgstr "Colour file %1 not found"
 
 #: ui_config.cc:282 ui_config.cc:361
 msgid "Color file %1 not saved"
-msgstr ""
+msgstr "Colour file %1 not saved"
 
 #: ui_config.cc:317
 msgid "Loading user ui configuration file %1"
@@ -12257,7 +12283,7 @@ msgstr ""
 
 #: ui_config.cc:592
 msgid "Color %1 not found"
-msgstr ""
+msgstr "Colour %1 not found"
 
 #: ui_config.cc:662
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
@@ -12533,7 +12559,7 @@ msgstr ""
 
 #: video_server_dialog.cc:61
 msgid "Don't show this dialog again. (Reset in Edit->Preferences)."
-msgstr ""
+msgstr "Don't show this dialogue again. (Reset in Edit->Preferences)."
 
 #: video_server_dialog.cc:97
 msgid ""
@@ -12706,16 +12732,16 @@ msgid "Audio Samplerate:"
 msgstr ""
 
 #: export_video_dialog.cc:222 export_video_dialog.cc:231
-#: export_video_dialog.cc:830 export_video_dialog.cc:833
+#: export_video_dialog.cc:814 export_video_dialog.cc:817
 msgid "(default for format)"
 msgstr ""
 
 #: export_video_dialog.cc:242 export_video_dialog.cc:255
-#: export_video_dialog.cc:837 export_video_dialog.cc:846
+#: export_video_dialog.cc:821 export_video_dialog.cc:830
 msgid "(default)"
 msgstr ""
 
-#: export_video_dialog.cc:256 export_video_dialog.cc:840
+#: export_video_dialog.cc:256 export_video_dialog.cc:824
 msgid "(retain)"
 msgstr ""
 
@@ -12731,53 +12757,53 @@ msgstr ""
 msgid "Selected range"
 msgstr ""
 
-#: export_video_dialog.cc:589
+#: export_video_dialog.cc:573
 msgid "Normalizing audio"
 msgstr "Normalising audio"
 
-#: export_video_dialog.cc:593
+#: export_video_dialog.cc:577
 msgid "Exporting audio"
 msgstr ""
 
-#: export_video_dialog.cc:648
+#: export_video_dialog.cc:632
 msgid "Exporting Audio..."
 msgstr ""
 
-#: export_video_dialog.cc:705
+#: export_video_dialog.cc:689
 msgid ""
 "Export Video: Cannot query duration of video-file, using duration from "
 "timeline instead."
 msgstr ""
 
-#: export_video_dialog.cc:735
+#: export_video_dialog.cc:719
 msgid "Export Video: export-range does not include video."
 msgstr ""
 
-#: export_video_dialog.cc:748
+#: export_video_dialog.cc:732
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
 msgstr ""
 
-#: export_video_dialog.cc:790
+#: export_video_dialog.cc:774
 msgid "Encoding Video..."
 msgstr ""
 
-#: export_video_dialog.cc:810
+#: export_video_dialog.cc:794
 msgid "Export Video: Video input file cannot be read."
 msgstr ""
 
-#: export_video_dialog.cc:916
+#: export_video_dialog.cc:900
 msgid "Encoding Video.. Pass 1/2"
 msgstr ""
 
-#: export_video_dialog.cc:928
+#: export_video_dialog.cc:912
 msgid "Encoding Video.. Pass 2/2"
 msgstr ""
 
-#: export_video_dialog.cc:1031
+#: export_video_dialog.cc:1015
 msgid "Transcoding failed."
 msgstr ""
 
-#: export_video_dialog.cc:1267 export_video_dialog.cc:1287
+#: export_video_dialog.cc:1251 export_video_dialog.cc:1271
 msgid "Save Exported Video File"
 msgstr ""
 
@@ -12787,7 +12813,7 @@ msgstr ""
 
 #: export_video_infobox.cc:34
 msgid "Do Not Show This Dialog Again (Reset in Edit > Preferences > Video)."
-msgstr ""
+msgstr "Do not show this dialogue again (Reset in Edit > Preferences > Video)."
 
 #: export_video_infobox.cc:46
 msgid "<b>Video Export Info</b>"
@@ -12801,6 +12827,9 @@ msgid ""
 "\n"
 "Open Manual in Browser? "
 msgstr ""
+
+#~ msgid "Show Measures"
+#~ msgstr "Show Bar Lines"
 
 #~ msgid "color rgba"
 #~ msgstr "colour rgba"
