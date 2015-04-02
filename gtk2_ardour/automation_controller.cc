@@ -304,7 +304,7 @@ AutomationController::on_button_release(GdkEventButton* ev)
 		}
 		if (is_low) {
 			for (int beats = 1; beats <= 16; ++beats) {
-				items.push_back(MenuElem(string_compose(_("Set to %1 beat(s)"), (int)beats),
+				items.push_back(MenuElem (string_compose(P_("Set to %1 beat", "Set to %1 beats", beats), beats),
 				                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_freq_beats),
 				                                    (double)beats)));
 			}
