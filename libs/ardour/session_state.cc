@@ -4206,7 +4206,8 @@ Session::save_as (SaveAs& saveas)
 						info << "media file copying from " << from << " to " << to << endmsg;
 						
 						if (!copy_file (from, to)) {
-							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+							throw Glib::FileError (Glib::FileError::IO_ERROR,
+												   string_compose(_("\ncopying \"%1\" failed !"), from));
 						}
 					}
 					
@@ -4280,7 +4281,8 @@ Session::save_as (SaveAs& saveas)
 						info << "attempting to copy " << from << " to " << to << endmsg;
 						
 						if (!copy_file (from, to)) {
-							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+							throw Glib::FileError (Glib::FileError::IO_ERROR,
+												   string_compose(_("\ncopying \"%1\" failed !"), from));
 						}
 					}
 				}
