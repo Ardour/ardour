@@ -76,11 +76,10 @@ test -f ${SRCDIR}/$1 || curl -k -L -o ${SRCDIR}/$1 $2
 ################################################################################
 set -e
 
-ARDOURVERSION=$(git describe | sed 's/^[A-Za-z]*+//;s/-g.*$//')
+ARDOURVERSION=${release_version}
 ARDOURDATE=$(date -R)
-BINVERSION=$(git describe | sed 's/^[A-Za-z]*+//;s/-g.*$//;s/\-rc\([^-]*\)-/-rc\1./;s/-/./;s/-.*$//')
-if ! test -f build/gtk2_ardour/ardour-${BINVERSION}.exe; then
-	echo "*** Please compile ardour ${ARDOURVERSION} first."
+if ! test -f build/gtk2_ardour/ardour-${ARDOURVERSION}.exe; then
+	echo "*** Please compile  ardour-${ARDOURVERSION}.exe first."
 	exit 1
 fi
 
