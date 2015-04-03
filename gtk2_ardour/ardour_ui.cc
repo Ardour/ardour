@@ -162,7 +162,7 @@ static bool
 ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
 {
 	MessageDialog msg (string_compose (_("%1 %2.x has discovered configuration files from %1 %3.x.\n\n"
-	                                     "Would you like these files to be copied and used for Ardour 4.x?\n\n"
+	                                     "Would you like these files to be copied and used for %1 4.x?\n\n"
 	                                     "(This will require you to restart %1.)"),
 	                                   PROGRAM_NAME, PROGRAM_VERSION, version), true);
 
