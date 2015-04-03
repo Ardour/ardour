@@ -162,14 +162,19 @@ static bool
 ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
 {
 	MessageDialog msg (string_compose (_("%1 %2.x has discovered configuration files from %1 %3.x.\n\n"
-	                                     "Would you like these files to be copied and used for %1 4.x?\n\n"
+	                                     "Would you like these files to be copied and used for %1 %2.x?\n\n"
 	                                     "(This will require you to restart %1.)"),
-	                                   PROGRAM_NAME, PROGRAM_VERSION, version), true);
+	                                   PROGRAM_NAME, PROGRAM_VERSION, version),
+	                   false, /* no markup */
+	                   Gtk::MESSAGE_INFO,
+	                   Gtk::BUTTONS_YES_NO,
+	                   true /* modal, though it hardly matters since it is the only window */
+		);
 
-	msg.add_button (Gtk::Stock::NO, Gtk::RESPONSE_NO);
+	msg.set_default_response (Gtk::RESPONSE_YES);
 	msg.show_all ();
 
-	return (msg.run() == Gtk::RESPONSE_OK);
+	return (msg.run() == Gtk::RESPONSE_YES);
 }
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
