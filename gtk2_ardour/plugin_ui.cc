@@ -764,7 +764,7 @@ PlugUIBase::update_preset ()
 
 	++_no_load_preset;
 	if (p.uri.empty()) {
-		_preset_combo.set_text ("(none)");
+		_preset_combo.set_text (_("(none)"));
 	} else {
 		_preset_combo.set_text (p.label);
 	}
