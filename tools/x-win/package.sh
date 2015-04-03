@@ -329,14 +329,29 @@ Function .onInit
   StrCmp \$R0 "" done
 
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
-    "${PROGRAM_NAME} is already installed. \$\\n\$\\nClick 'OK' to remove the \
-    previous version or 'Cancel' to cancel this upgrade." \
+    "${PROGRAM_NAME} is already installed. Click 'OK' to remove the previous version or 'Cancel' to cancel this upgrade." \
     IDOK uninst
     Abort
 
   uninst:
-  ClearErrors
-  Exec \$INSTDIR\uninst.exe ;
+    ClearErrors
+    ExecWait '\$R0 _?=\$INSTDIR'
+    IfErrors uninstall_error
+
+    ReadRegStr \$R1 HKLM \
+      "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" \
+      "UninstallString"
+    StrCmp \$R1 "" 0 done
+
+    Delete "\$INSTDIR\\uninstall.exe"
+    RMDir "\$INSTDIR"
+    goto done
+
+  uninstall_error:
+
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Uninstaller did not complete successfully. Continue at your own risk..." \
+      IDOK done
 
   done:
 
