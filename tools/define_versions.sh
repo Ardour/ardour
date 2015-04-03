@@ -20,6 +20,8 @@ if [ "x$rc" != "x" ] ; then
     revcount=$rc${r:+.$r}
 elif [ "x$r" != "x" ] ; then
     revcount=$r
+else
+    revcount=0
 fi
 
 release_version=${major_version}.${minor_version}${revcount:+.$revcount}
