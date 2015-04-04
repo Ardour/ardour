@@ -1008,7 +1008,7 @@ OSC::route_plugin_parameter (int rid, int piid, int par, float val)
 		return -1;
 	}
 
-	if (!pip->parameter_is_input(par)) {
+	if (!pip->parameter_is_input(controlid)) {
 		PBD::error << "OSC: Parameter # " << par <<  " for plugin # " << piid << " on RID '" << rid << "' is not a control input" << endmsg;
 		return -1;
 	}
