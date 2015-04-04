@@ -248,17 +248,26 @@ PortMatrix::setup_scrollbars ()
 {
 	Adjustment* a = _hscroll.get_adjustment ();
 	a->set_lower (0);
-	a->set_upper (_body->full_scroll_width());
 	a->set_page_size (_body->alloc_scroll_width());
 	a->set_step_increment (32);
 	a->set_page_increment (128);
 
+	/* Set the adjustment to zero if the size has changed.*/
+	if (a->get_upper() != _body->full_scroll_width()) {
+		a->set_upper (_body->full_scroll_width());
+		a->set_value (0);
+	}
+
 	a = _vscroll.get_adjustment ();
 	a->set_lower (0);
-	a->set_upper (_body->full_scroll_height());
 	a->set_page_size (_body->alloc_scroll_height());
 	a->set_step_increment (32);
 	a->set_page_increment (128);
+
+	if (a->get_upper() != _body->full_scroll_height()) {
+		a->set_upper (_body->full_scroll_height());
+		a->set_value (0);
+	}
 }
 
 /** Disassociate all of our ports from each other */
