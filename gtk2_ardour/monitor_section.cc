@@ -346,19 +346,19 @@ MonitorSection::MonitorSection (Session* s)
 	l1->set_name (X_("MonitorSectionLabel"));
 	channel_table_header.attach (*l1, 0, 1, 0, 1, EXPAND|FILL);
 
-	l1 = manage (new Label (X_("Mute")));
+	l1 = manage (new Label (_("Mute")));
 	l1->set_name (X_("MonitorSectionLabel"));
 	channel_table_header.attach (*l1, 1, 2, 0, 1, EXPAND|FILL);
 
-	l1 = manage (new Label (X_("Dim")));
+	l1 = manage (new Label (_("Dim")));
 	l1->set_name (X_("MonitorSectionLabel"));
 	channel_table_header.attach (*l1, 2, 3, 0, 1, EXPAND|FILL);
 
-	l1 = manage (new Label (X_("Solo")));
+	l1 = manage (new Label (_("Solo")));
 	l1->set_name (X_("MonitorSectionLabel"));
 	channel_table_header.attach (*l1, 3, 4, 0, 1, EXPAND|FILL);
 
-	l1 = manage (new Label (X_("Inv")));
+	l1 = manage (new Label (_("Inv")));
 	l1->set_name (X_("MonitorSectionLabel"));
 	channel_table_header.attach (*l1, 4, 5, 0, 1, EXPAND|FILL);
 
