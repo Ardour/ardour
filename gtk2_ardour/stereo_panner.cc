@@ -268,7 +268,7 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
 
 	if (state == Mono) {
-		layout->set_text (_("M"));
+		layout->set_text (S_("Panner|M"));
 	} else {
 		if (swidth < 0.0) {
 			layout->set_text (S_("Panner|L"));

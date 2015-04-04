@@ -203,15 +203,15 @@ EditorRoutes::EditorRoutes (Editor* e)
 	Gtk::Label* l;
 
 	ColumnInfo ci[] = {
-		{ 0,  _("Name"),           _("Track/Bus Name") },
-		{ 1, S_("TrackVisible|V"), _("Track/Bus visible ?") },
-		{ 2, S_("TrackActive|A"),  _("Track/Bus active ?") },
-		{ 3, S_("MidiInput|I"),    _("MIDI input enabled") },
-		{ 4, S_("Rec|R"),          _("Record enabled") },
-		{ 5, S_("Mute|M"),         _("Muted") },
-		{ 6, S_("Solo|S"),         _("Soloed") },
-		{ 7, S_("SoloIso|SI"),     _("Solo Isolated") },
-		{ 8, S_("SoloLock|SS"),    _("Solo Safe (Locked)") },
+		{ 0,  _("Name"),        _("Track/Bus Name") },
+		{ 1, S_("Visible|V"),   _("Track/Bus visible ?") },
+		{ 2, S_("Active|A"),    _("Track/Bus active ?") },
+		{ 3, S_("MidiInput|I"), _("MIDI input enabled") },
+		{ 4, S_("Rec|R"),       _("Record enabled") },
+		{ 5, S_("Mute|M"),      _("Muted") },
+		{ 6, S_("Solo|S"),      _("Soloed") },
+		{ 7, S_("SoloIso|SI"),  _("Solo Isolated") },
+		{ 8, S_("SoloLock|SS"), _("Solo Safe (Locked)") },
 		{ -1, 0, 0 }
 	};
 

@@ -1840,24 +1840,24 @@ MixerStrip::meter_point_string (MeterPoint mp)
 	case Narrow:
 		switch (mp) {
 		case MeterInput:
-			return _("In");
+			return S_("Meter|In");
 			break;
 			
 		case MeterPreFader:
-			return _("Pr");
+			return S_("Meter|Pr");
 			break;
 			
 		case MeterPostFader:
-			return _("Po");
+			return S_("Meter|Po");
 			break;
 			
 		case MeterOutput:
-			return _("O");
+			return S_("Meter|O");
 			break;
 			
 		case MeterCustom:
 		default:
-			return _("C");
+			return S_("Meter|C");
 			break;
 		}
 		break;
