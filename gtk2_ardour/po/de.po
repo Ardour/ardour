@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-04-04 15:49+0200\n"
-"PO-Revision-Date: 2015-04-04 18:57+0200\n"
+"PO-Revision-Date: 2015-04-04 19:25+0200\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -745,7 +745,7 @@ msgstr "Über..."
 #: ardour_ui.cc:229 location_ui.cc:1141 session_option_editor.cc:189
 #: session_option_editor.cc:195 session_option_editor.cc:202
 msgid "Locations"
-msgstr "Positionen"
+msgstr "Dateiorte"
 
 #: ardour_ui.cc:230 route_params_ui.cc:59 route_params_ui.cc:630
 msgid "Tracks and Busses"
@@ -6995,11 +6995,11 @@ msgstr "<b>Schleifen/Punchbereiche</b>"
 
 #: location_ui.cc:764
 msgid "<b>Markers (Including CD Index)</b>"
-msgstr "<b>Marker (auch CD Index)</b>"
+msgstr "<b>Marker (auch CD-Index)</b>"
 
 #: location_ui.cc:799
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
-msgstr "<b>Bereiche (auch CD-Track-Bereiche)</b>"
+msgstr "<b>Bereiche (auch CD-Track-Bereichen)</b>"
 
 #: location_ui.cc:1042
 msgid "add range marker"
@@ -11573,7 +11573,7 @@ msgstr "Spurname"
 
 #: session_option_editor.cc:325
 msgid "MIDI region copies are independent"
-msgstr "Kopien von MIDI-Regionen sind unabhängig"
+msgstr "Kopien von MIDI Regionen sind unabhängig"
 
 #: session_option_editor.cc:332
 msgid ""

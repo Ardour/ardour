@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-03-31 20:13-0400\n"
-"PO-Revision-Date: 2015-04-04 18:37+0200\n"
+"PO-Revision-Date: 2015-03-18 16:57+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -1080,7 +1080,7 @@ msgstr "konnte Position nicht aus Projektdatei laden - ignoriert"
 
 #: location_importer.cc:61
 msgid "Locations"
-msgstr "Dateiorte"
+msgstr "Positionen"
 
 #: location_importer.cc:123
 msgid "Location: "
