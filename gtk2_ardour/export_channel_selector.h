@@ -241,7 +241,6 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	void fill_list();
 	void add_track (boost::shared_ptr<ARDOUR::Route> route);
 	void update_config();
-
 	ChannelConfigList configs;
 
 	Gtk::VBox main_layout;
@@ -252,8 +251,9 @@ class TrackExportChannelSelector : public ExportChannelSelector
 		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
 		Gtk::TreeModelColumn<std::string>     label;
 		Gtk::TreeModelColumn<bool>            selected;
+		Gtk::TreeModelColumn<uint32_t>        order_key;
 
-		TrackCols () { add (route); add(label); add(selected); }
+		TrackCols () { add (route); add(label); add(selected); add(order_key); }
 	};
 	TrackCols                    track_cols;
 

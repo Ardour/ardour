@@ -551,18 +551,25 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 
 	// Track list
 	track_list = Gtk::ListStore::create (track_cols);
+	track_list->set_sort_column_id (3, Gtk::SORT_ASCENDING);
 	track_view.set_model (track_list);
 	track_view.set_headers_visible (true);
 
-	track_view.append_column_editable (_("Track"), track_cols.selected);
+	track_view.append_column_editable (_("Export"), track_cols.selected);
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(track_view.get_column_cell_renderer (0));
+	toggle->set_alignment (0.0, 0.5);
+
 	toggle->signal_toggled().connect (sigc::hide (sigc::mem_fun (*this, &TrackExportChannelSelector::update_config)));
 
 	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
 	text_renderer->property_editable() = false;
+	text_renderer->set_alignment (0.0, 0.5);
 
-	Gtk::TreeView::Column* column = track_view.get_column (0);
-	column->pack_start (*text_renderer);
+	Gtk::TreeView::Column* column = Gtk::manage (new Gtk::TreeView::Column);
+	column->set_title (_("Track name"));
+
+	track_view.append_column  (*column);
+	column->pack_start (*text_renderer, false);
 	column->add_attribute (text_renderer->property_text(), track_cols.label);
 
 	fill_list();
@@ -609,6 +616,7 @@ TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route)
 	row[track_cols.selected] = true;
 	row[track_cols.label] = route->name();
 	row[track_cols.route] = route;
+	row[track_cols.order_key] = route->order_key();
 }
 
 void
