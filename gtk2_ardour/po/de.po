@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-04-04 15:49+0200\n"
-"PO-Revision-Date: 2015-04-04 16:01+0200\n"
+"PO-Revision-Date: 2015-04-04 18:57+0200\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <ardour-dev@lists.ardour.org>\n"
 "Language: de\n"
@@ -6995,11 +6995,11 @@ msgstr "<b>Schleifen/Punchbereiche</b>"
 
 #: location_ui.cc:764
 msgid "<b>Markers (Including CD Index)</b>"
-msgstr "<b>Marker (Inclusive CD Index)</b>"
+msgstr "<b>Marker (auch CD Index)</b>"
 
 #: location_ui.cc:799
 msgid "<b>Ranges (Including CD Track Ranges)</b>"
-msgstr "<b>Bereiche (Inclusive CD Track-Bereichen)</b>"
+msgstr "<b>Bereiche (auch CD-Track-Bereiche)</b>"
 
 #: location_ui.cc:1042
 msgid "add range marker"
@@ -11426,7 +11426,7 @@ msgstr "Regionen Fade-Ins/Fade-Outs sind sichtbar"
 #: session_option_editor.cc:160 session_option_editor.cc:173
 #: session_option_editor.cc:187
 msgid "Media"
-msgstr "Dateien"
+msgstr "Medien"
 
 #: session_option_editor.cc:160
 msgid "Audio file format"
@@ -11573,7 +11573,7 @@ msgstr "Spurname"
 
 #: session_option_editor.cc:325
 msgid "MIDI region copies are independent"
-msgstr "Kopien von MIDI Region sind unabhängig"
+msgstr "Kopien von MIDI-Regionen sind unabhängig"
 
 #: session_option_editor.cc:332
 msgid ""
@@ -13559,4 +13559,5 @@ msgstr ""
 "#export nach.\n"
 "\n"
 "Handbuch im Browser öffnen? "
+
 
