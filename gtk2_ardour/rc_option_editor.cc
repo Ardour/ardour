@@ -1523,7 +1523,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	_sync_genlock = new BoolOption (
 		"timecode-source-is-synced",
-		_("Sync lock timecode to clock - Disable drift compensation."),
+		_("Sync-lock timecode to clock (disable drift compensation)"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
 		);
