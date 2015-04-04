@@ -200,7 +200,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(get_pango_context());
 	layout->set_attributes (panner_font_attributes);
 
-	layout->set_text (_("L"));
+	layout->set_text (S_("Panner|L"));
 	layout->get_pixel_size(tw, th);
 	context->move_to (rint(left - tw/2), rint(lr_box_size + step_down - th/2));
 	context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
@@ -217,7 +217,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->stroke();
 
 	/* add text */
-	layout->set_text (_("R"));
+	layout->set_text (S_("Panner|R"));
 	layout->get_pixel_size(tw, th);
 	context->move_to (rint(right - tw/2), rint(lr_box_size + step_down - th/2));
 	context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));

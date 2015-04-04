@@ -100,9 +100,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, parent_canvas (canvas)
 	, no_redraw (false)
 	, button_table (3, 3)
-	, route_group_button (_("G"))
-	, playlist_button (_("P"))
-	, automation_button (_("A"))
+	, route_group_button (S_("RTAV|G"))
+	, playlist_button (S_("RTAV|P"))
+	, automation_button (S_("RTAV|A"))
 	, automation_action_menu (0)
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
@@ -2698,19 +2698,19 @@ RouteTimeAxisView::set_button_names ()
 	if (Config->get_solo_control_is_listen_control()) {
 		switch (Config->get_listen_position()) {
 			case AfterFaderListen:
-				solo_button->set_text (_("A"));
+				solo_button->set_text (S_("AfterFader|A"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
 				break;
 			case PreFaderListen:
-				solo_button->set_text (_("P"));
+				solo_button->set_text (S_("PreFader|P"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
 			break;
 		}
 	} else {
-		solo_button->set_text (_("S"));
+		solo_button->set_text (S_("Solo|S"));
 		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
 	}
-	mute_button->set_text (_("M"));
+	mute_button->set_text (S_("Mute|M"));
 }
 
 Gtk::CheckMenuItem*

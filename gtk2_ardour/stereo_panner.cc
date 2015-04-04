@@ -246,9 +246,9 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 		/* add text */
 		context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
 		if (swidth < 0.0) {
-			layout->set_text (_("R"));
+			layout->set_text (S_("Panner|R"));
 		} else {
-			layout->set_text (_("L"));
+			layout->set_text (S_("Panner|L"));
 		}
 		layout->get_pixel_size(tw, th);
 		context->move_to (rint(left - tw/2), rint(lr_box_size + step_down - th/2));
@@ -271,9 +271,9 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 		layout->set_text (_("M"));
 	} else {
 		if (swidth < 0.0) {
-			layout->set_text (_("L"));
+			layout->set_text (S_("Panner|L"));
 		} else {
-			layout->set_text (_("R"));
+			layout->set_text (S_("Panner|R"));
 		}
 	}
 	layout->get_pixel_size(tw, th);

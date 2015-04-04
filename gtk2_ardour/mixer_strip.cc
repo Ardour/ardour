@@ -2029,9 +2029,9 @@ MixerStrip::set_button_names ()
 		break;
 
 	default:
-		mute_button->set_text (_("M"));
-		monitor_input_button->set_text (_("I"));
-		monitor_disk_button->set_text (_("D"));
+		mute_button->set_text (S_("Mute|M"));
+		monitor_input_button->set_text (S_("MonitorInput|I"));
+		monitor_disk_button->set_text (S_("MonitorDisk|D"));
 
 		if (_route && _route->solo_safe()) {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
@@ -2039,20 +2039,20 @@ MixerStrip::set_button_names ()
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
 		}
 		if (!Config->get_solo_control_is_listen_control()) {
-			solo_button->set_text (_("S"));
+			solo_button->set_text (S_("Solo|S"));
 		} else {
 			switch (Config->get_listen_position()) {
 			case AfterFaderListen:
-				solo_button->set_text (_("A"));
+				solo_button->set_text (S_("AfterFader|A"));
 				break;
 			case PreFaderListen:
-				solo_button->set_text (_("P"));
+				solo_button->set_text (S_("Prefader|P"));
 				break;
 			}
 		}
 
-		solo_isolated_led->set_text (_("I"));
-		solo_safe_led->set_text (_("L"));
+		solo_isolated_led->set_text (S_("SoloIso|I"));
+		solo_safe_led->set_text (S_("SoloLock|L"));
 		break;
 	}
 
