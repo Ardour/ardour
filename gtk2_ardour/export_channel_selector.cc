@@ -551,7 +551,7 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 
 	// Track list
 	track_list = Gtk::ListStore::create (track_cols);
-	track_list->set_sort_column_id (3, Gtk::SORT_ASCENDING);
+	track_list->set_sort_column (track_cols.order_key, Gtk::SORT_ASCENDING);
 	track_view.set_model (track_list);
 	track_view.set_headers_visible (true);
 
