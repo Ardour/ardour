@@ -324,6 +324,7 @@ void
 EngineControl::on_show ()
 {
 	ArdourDialog::on_show ();
+	backend_changed ();
 	device_changed ();
 	ok_button->grab_focus();
 }
