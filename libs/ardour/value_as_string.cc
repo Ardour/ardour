@@ -60,7 +60,7 @@ value_as_string(const Evoral::ParameterDescriptor& desc,
 	}
 	if (desc.print_fmt.empty() && desc.unit == Evoral::ParameterDescriptor::DB) {
 		// TODO: Move proper dB printing from AutomationLine here
-		return std::string(buf) + " dB";
+		return std::string(buf) + _(" dB");
 	}
 	return buf;
 }

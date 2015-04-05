@@ -432,7 +432,7 @@ Amp::GainControl::user_to_internal (double u) const
 std::string
 Amp::GainControl::get_user_string () const
 {
-	char theBuf[32]; sprintf( theBuf, "%3.1f dB", accurate_coefficient_to_dB (get_value()));
+	char theBuf[32]; sprintf( theBuf, _("%3.1f dB"), accurate_coefficient_to_dB (get_value()));
 	return std::string(theBuf);
 }
 
@@ -468,7 +468,7 @@ Amp::value_as_string (boost::shared_ptr<AutomationControl> ac) const
 {
 	if (ac == _gain_control) {
 		char buffer[32];
-		snprintf (buffer, sizeof (buffer), "%.2fdB", ac->internal_to_user (ac->get_value ()));
+		snprintf (buffer, sizeof (buffer), _("%.2fdB"), ac->internal_to_user (ac->get_value ()));
 		return buffer;
 	}
 
