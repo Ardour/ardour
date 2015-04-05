@@ -4700,19 +4700,37 @@ ARDOUR_UI::set_flat_buttons ()
 void
 ARDOUR_UI::audioengine_became_silent ()
 {
-	MessageDialog msg (string_compose (_("This is a free/demo copy of %1. It has just switched to silent mode.\n\n"
-	                                     "You can reset things to get another few minutes of working time,\n"
-	                                     "or you can save your work and quit, or do nothing at all.\n\n"
-	                                     "To avoid this behaviour, please consider paying for a copy of %1\n\n"
-	                                     "or better yet becoming a subscriber. You can pay whatever you want,\n"
-	                                     "and subscriptions start at US$1 per month."),
-	                                   PROGRAM_NAME),
+	MessageDialog msg (string_compose (_("This is a free/demo copy of %1. It has just switched to silent mode."), PROGRAM_NAME),
 	                   true,
 	                   Gtk::MESSAGE_WARNING,
 	                   Gtk::BUTTONS_NONE,
 	                   true);
 
-	msg.add_button (_("Do nothing"), Gtk::RESPONSE_CANCEL);
+	msg.set_title (string_compose (_("%1 is now silent"), PROGRAM_NAME));
+
+	Gtk::Label pay_label (string_compose (_("Please consider paying for a copy of %1 - you can pay whatever you want."), PROGRAM_NAME));
+	Gtk::Label subscribe_label (_("Better yet become a subscriber - subscriptions start at US$1 per month."));
+	Gtk::Button pay_button (_("Pay for a copy (via the web)"));
+	Gtk::Button subscribe_button (_("Become a subscriber (via the web)"));
+	Gtk::HBox pay_button_box;
+	Gtk::HBox subscribe_button_box;
+
+	pay_button_box.pack_start (pay_button, true, false);
+	subscribe_button_box.pack_start (subscribe_button, true, false);
+
+	bool (*openuri)(const char*) = PBD::open_uri; /* this forces selection of the const char* variant of PBD::open_uri(), which we need to avoid ambiguity below */
+	
+	pay_button.signal_clicked().connect (sigc::hide_return (sigc::bind (sigc::ptr_fun (openuri), (const char*) "https://ardour.org/download")));
+	subscribe_button.signal_clicked().connect (sigc::hide_return (sigc::bind (sigc::ptr_fun (openuri), (const char*) "https://community.ardour.org/s/subscribe")));
+	
+	msg.get_vbox()->pack_start (pay_label);
+	msg.get_vbox()->pack_start (pay_button_box);
+	msg.get_vbox()->pack_start (subscribe_label);
+	msg.get_vbox()->pack_start (subscribe_button_box);
+
+	msg.get_vbox()->show_all ();
+	
+	msg.add_button (_("Remain silent"), Gtk::RESPONSE_CANCEL);
 	msg.add_button (_("Save and quit"), Gtk::RESPONSE_NO);
 	msg.add_button (_("Give me more time"), Gtk::RESPONSE_YES);
 	
