@@ -192,7 +192,7 @@ MixerStrip::init ()
 	solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release), false);
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
 
-	solo_safe_led->set_text (_("Lock"));
+	solo_safe_led->set_text (S_("SoloLock|Lock"));
 	solo_isolated_led->set_text (_("Iso"));
 
 	solo_iso_table.set_homogeneous (true);
@@ -2025,7 +2025,7 @@ MixerStrip::set_button_names ()
 			}
 		}
 		solo_isolated_led->set_text (_("Iso"));
-		solo_safe_led->set_text (_("Lock"));
+		solo_safe_led->set_text (S_("SoloLock|Lock"));
 		break;
 
 	default:
