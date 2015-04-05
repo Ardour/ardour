@@ -787,6 +787,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         void check_announcements ();
 
         int do_audio_midi_setup (uint32_t);
+	void audioengine_became_silent ();
 };
 
 #endif /* __ardour_gui_h__ */

@@ -523,6 +523,7 @@ ARDOUR_UI::post_engine ()
 	AudioEngine::instance()->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 	AudioEngine::instance()->BufferSizeChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
 	AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
+	AudioEngine::instance()->BecameSilent.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::audioengine_became_silent, this), gui_context());
 
 	_tooltips.enable();
 
@@ -4694,4 +4695,43 @@ void
 ARDOUR_UI::set_flat_buttons ()
 {
 	CairoWidget::set_flat_buttons( config()->get_flat_buttons() );
+}
+
+void
+ARDOUR_UI::audioengine_became_silent ()
+{
+	MessageDialog msg (string_compose (_("This is a free/demo copy of %1. It has just switched to silent mode.\n\n"
+	                                     "You can reset things to get another few minutes of working time,\n"
+	                                     "or you can save your work and quit, or do nothing at all.\n\n"
+	                                     "To avoid this behaviour, please consider paying for a copy of %1\n\n"
+	                                     "or better yet becoming a subscriber. You can pay whatever you want,\n"
+	                                     "and subscriptions start at US$1 per month."),
+	                                   PROGRAM_NAME),
+	                   true,
+	                   Gtk::MESSAGE_WARNING,
+	                   Gtk::BUTTONS_NONE,
+	                   true);
+
+	msg.add_button (_("Do nothing"), Gtk::RESPONSE_CANCEL);
+	msg.add_button (_("Save and quit"), Gtk::RESPONSE_NO);
+	msg.add_button (_("Give me more time"), Gtk::RESPONSE_YES);
+	
+	int r = msg.run ();
+
+	switch (r) {
+	case Gtk::RESPONSE_YES:
+		AudioEngine::instance()->reset_silence_countdown ();
+		break;
+
+	case Gtk::RESPONSE_NO:
+		/* save and quit */
+		save_state_canfail ("");
+		exit (0);
+		break;
+
+	case Gtk::RESPONSE_CANCEL:
+	default:
+		/* don't reset, save session and exit */
+		break;
+	}
 }
