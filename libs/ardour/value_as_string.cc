@@ -18,6 +18,7 @@
 
 */
 
+#include "i18n.h"
 #include "ardour/value_as_string.h"
 
 namespace ARDOUR {
