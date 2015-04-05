@@ -23,6 +23,7 @@
 #include <exception>
 #include <stdexcept>
 #include <sstream>
+#include <cmath>
 
 #include <glibmm/timer.h>
 #include <glibmm/pattern.h>
@@ -63,6 +64,10 @@ using namespace PBD;
 gint AudioEngine::m_meter_exit;
 AudioEngine* AudioEngine::_instance = 0;
 
+#ifdef SILENCE_AFTER
+#define SILENCE_AFTER_SECONDS 10
+#endif
+
 AudioEngine::AudioEngine ()
 	: session_remove_pending (false)
 	, session_removal_countdown (-1)
@@ -89,9 +94,14 @@ AudioEngine::AudioEngine ()
     , _hw_devicelist_update_thread(0)
     , _hw_devicelist_update_count(0)
     , _stop_hw_devicelist_processing(0)
+#ifdef SILENCE_AFTER_SECONDS
+	, _silence_countdown (0)
+	, _silence_hit_cnt (0)
+#endif
 {
 	g_atomic_int_set (&m_meter_exit, 0);
-    start_hw_event_processing();
+	reset_silence_countdown ();
+	start_hw_event_processing();
 	discover_backends ();
 }
 
@@ -148,6 +158,10 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 
 	SampleRateChanged (nframes); /* EMIT SIGNAL */
 
+#ifdef SILENCE_AFTER_SECONDS
+	_silence_countdown = nframes * SILENCE_AFTER_SECONDS;
+#endif
+	
 	return 0;
 }
 
@@ -349,10 +363,31 @@ AudioEngine::process_callback (pframes_t nframes)
 		last_monitor_check = next_processed_frames;
 	}
 
+#ifdef SILENCE_AFTER_SECONDS
+
+	bool was_silent = (_silence_countdown == 0);
+	
+	if (_silence_countdown >= nframes) {
+		_silence_countdown -= nframes;
+	} else {
+		_silence_countdown = 0;
+	}
+
+	if (!was_silent && _silence_countdown == 0) {
+		_silence_hit_cnt++;
+		BecameSilent (); /* EMIT SIGNAL */
+	}
+
+	if (_silence_countdown == 0 || _session->silent()) {
+		PortManager::silence (nframes);
+	}
+	
+#else	
 	if (_session->silent()) {
 		PortManager::silence (nframes);
 	}
-
+#endif
+	
 	if (session_remove_pending && session_removal_countdown) {
 
 		PortManager::fade_out (session_removal_gain, session_removal_gain_step, nframes);
@@ -375,6 +410,19 @@ AudioEngine::process_callback (pframes_t nframes)
 	return 0;
 }
 
+void
+AudioEngine::reset_silence_countdown ()
+{
+#ifdef SILENCE_AFTER_SECONDS
+	double sr = 48000; /* default in case there is no backend */
+
+	sr = sample_rate();
+
+	_silence_countdown = max (60 * sr, /* 60 seconds */
+	                          sr * (SILENCE_AFTER_SECONDS / pow (2, _silence_hit_cnt)));
+
+#endif
+}
 
 void
 AudioEngine::launch_device_control_app()
@@ -1081,6 +1129,7 @@ AudioEngine::set_sample_rate (float sr)
 	if (!_backend) {
 		return -1;
 	}
+
 	return _backend->set_sample_rate  (sr);
 }
 

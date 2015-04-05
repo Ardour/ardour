@@ -232,6 +232,16 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 
 	LatencyMeasurement measuring_latency () const { return _measuring_latency; }
 
+	/* These two are used only in builds where SILENCE_AFTER_SECONDS was
+	 * set. BecameSilent will be emitted when the audioengine goes silent.
+	 * reset_silence_countdown() can be used to reset the silence
+	 * countdown, whose duration will be reduced to half of its previous
+	 * value.
+	 */
+	
+	PBD::Signal0<void> BecameSilent;
+	void reset_silence_countdown ();
+	
   private:
 	AudioEngine ();
 
@@ -293,6 +303,12 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	BackendMap _backends;
 	AudioBackendInfo* backend_discover (const std::string&);
 	void drop_backend ();
+
+#ifdef SILENCE_AFTER
+	framecnt_t _silence_countdown;
+	uint32_t   _silence_hit_cnt;
+#endif	
+
 };
 	
 } // namespace ARDOUR

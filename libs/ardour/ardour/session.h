@@ -559,7 +559,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
 	bool   transport_rolling() const { return _transport_speed != 0.0f; }
 
-	void set_silent (bool yn);
 	bool silent () { return _silent; }
 
 	TempoMap&       tempo_map()       { return *_tempo_map; }
