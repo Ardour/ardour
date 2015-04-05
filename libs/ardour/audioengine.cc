@@ -65,7 +65,7 @@ gint AudioEngine::m_meter_exit;
 AudioEngine* AudioEngine::_instance = 0;
 
 #ifdef SILENCE_AFTER
-#define SILENCE_AFTER_SECONDS 10
+#define SILENCE_AFTER_SECONDS 600
 #endif
 
 AudioEngine::AudioEngine ()
