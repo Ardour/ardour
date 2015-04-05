@@ -179,16 +179,21 @@ PortExportChannelSelector::ChannelTreeView::ChannelTreeView (uint32_t max_channe
 
 	/* Add column with toggle and text */
 
-	append_column_editable (_("Bus or Track"), route_cols.selected);
+	append_column_editable (_("Export"), route_cols.selected);
 
 	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
 	text_renderer->property_editable() = false;
+	text_renderer->set_alignment (0.0, 0.5);
 
-	Gtk::TreeView::Column* column = get_column (0);
+	Gtk::TreeView::Column* column = Gtk::manage (new Gtk::TreeView::Column);
+	column->set_title (_("Bus or Track"));
 	column->pack_start (*text_renderer);
+	column->set_expand (true);
 	column->add_attribute (text_renderer->property_text(), route_cols.name);
+	append_column  (*column);
 
 	Gtk::CellRendererToggle *toggle = dynamic_cast<Gtk::CellRendererToggle *>(get_column_cell_renderer (0));
+	toggle->set_alignment (0.0, 0.5);
 	toggle->signal_toggled().connect (sigc::mem_fun (*this, &PortExportChannelSelector::ChannelTreeView::update_toggle_selection));
 
 	static_columns = get_columns().size();
@@ -315,6 +320,7 @@ PortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels
 
 		Gtk::CellRendererCombo* combo_renderer = Gtk::manage (new Gtk::CellRendererCombo);
 		combo_renderer->property_text_column() = 2;
+		combo_renderer->property_has_entry() = false;
 		column->pack_start (*combo_renderer);
 
 		append_column (*column);
