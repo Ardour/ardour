@@ -526,8 +526,15 @@ echo ""
 
 JACK_INSTALLED="f"
 
-if ! which jackd > /dev/null;
-then
+if which jackd > /dev/null; then
+	JACK_INSTALLED="t"
+	echo "Jack already present"
+elif which jackdbus > /dev/null; then
+	echo ""
+	echo "jackdbus was found but not jackd. Jack version compatibility check cannot be performed."
+	echo ""
+	JACK_INSTALLED="i"
+else
 	echo ""
 	echo "The program Jack is missing from this system. Jack is a required component of $PGM_NAME."
 	echo ""
@@ -547,9 +554,6 @@ then
 			JACK_INSTALLED="t"
 		fi
 	fi
-else
-	JACK_INSTALLED="t"
-	echo "Jack already present"
 fi
 
 # Check to see if Jack is new enough to operate correctly.
