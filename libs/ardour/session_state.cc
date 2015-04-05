@@ -3624,6 +3624,17 @@ Session::rename (const std::string& new_name)
 
 	string const old_sources_root = _session_dir->sources_root();
 
+	if (!_writable || (_state_of_the_state & CannotSave)) {
+		error << _("Cannot rename read-only session.") << endmsg;
+		return 0; // don't show "messed up" warning
+	}
+        if (record_status() == Recording) {
+		error << _("Cannot rename session while recording") << endmsg;
+		return 0; // don't show "messed up" warning
+	}
+
+	StateProtector stp (this);
+
 	/* Rename:
 
 	 * session directory
