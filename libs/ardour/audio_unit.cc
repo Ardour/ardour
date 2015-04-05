@@ -429,6 +429,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 		p += preset_search_path;
 		preset_search_path = p;
 		preset_search_path_initialized = true;
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Preset Path: %1\n", preset_search_path));
 	}
 
 	init ();
@@ -503,6 +504,7 @@ AUPlugin::discover_factory_presets ()
 
 		string name = CFStringRefToStdString (preset->presetName);
 		factory_preset_map[name] = preset->presetNumber;
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Factory Preset: %1 > %2\n", name, preset->presetNumber));
 	}
 
 	CFRelease (presets);
@@ -1986,6 +1988,8 @@ AUPlugin::do_save_preset (string preset_name)
 
 	user_preset_map[preset_name] = user_preset_path;;
 
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Saving Preset to %1\n", user_preset_path));
+
 	return string ("file:///") + user_preset_path;
 }
 
@@ -2174,6 +2178,7 @@ AUPlugin::find_presets ()
 	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, true);
 
 	if (preset_files.empty()) {
+		DEBUG_TRACE (DEBUG::AudioUnits, "AU No Preset Files found for given plugin.\n");
 		return;
 	}
 
@@ -2194,6 +2199,9 @@ AUPlugin::find_presets ()
 
 		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
 			user_preset_map[preset_name] = path;
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Preset File: %1 > %2\n", preset_name, path));
+		} else {
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU INVALID Preset: %1 > %2\n", preset_name, path));
 		}
 
 	}
@@ -2202,6 +2210,7 @@ AUPlugin::find_presets ()
 
 	for (UserPresetMap::iterator i = user_preset_map.begin(); i != user_preset_map.end(); ++i) {
 		_presets.insert (make_pair (i->second, Plugin::PresetRecord (i->second, i->first)));
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding User Preset: %1 > %2\n", i->first, i->second));
 	}
 
 	/* add factory presets */
@@ -2210,6 +2219,7 @@ AUPlugin::find_presets ()
 		/* XXX: dubious */
 		string const uri = string_compose ("%1", _presets.size ());
 		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, i->second)));
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding Factory Preset: %1 > %2\n", i->first, i->second));
 	}
 }
 
