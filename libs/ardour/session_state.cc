@@ -3638,6 +3638,8 @@ Session::rename (const std::string& new_name)
 	 * already exist ...
 	 */
 
+	vector<space_and_path> new_session_dirs;
+
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		vector<string> v;
 
@@ -3660,10 +3662,15 @@ Session::rename (const std::string& new_name)
 		if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
 			return -1;
 		}
+
+		space_and_path sp;
+		sp.path = newstr;
+		sp.blocks = 0; // not needed
+		new_session_dirs.push_back(sp);
 	}
 
 	/* Session dirs */
-	
+
 	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 		vector<string> v;
 
@@ -3718,6 +3725,8 @@ Session::rename (const std::string& new_name)
 			return 1;
 		}
 	}
+
+	session_dirs = new_session_dirs;
 
 	/* state file */
 	
