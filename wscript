@@ -741,9 +741,9 @@ def configure(conf):
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
         
     if Options.options.freebie:
-        conf.env.append_value ('CFLAGS', '-DNO_PLUGIN_STATE')
-        conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
-        conf.define ('NO_PLUGIN_STATE', 1)
+        conf.env.append_value ('CFLAGS', '-DSILENCE_AFTER')
+        conf.env.append_value ('CXXFLAGS', '-DSILENCE_AFTER')
+        conf.define ('FREEBIE', 1)
 
     if Options.options.trx_build:
         conf.define ('TRX_BUILD', 1)
@@ -1027,7 +1027,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
-    write_config_text('No plugin state',       conf.is_defined('NO_PLUGIN_STATE'))
+    write_config_text('Free/Demo copy',        conf.is_defined('FREEBIE'))
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('CoreAudio/Midi Backend',conf.env['BUILD_CORECRAPPITA'])
