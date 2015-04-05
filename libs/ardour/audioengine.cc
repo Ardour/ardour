@@ -419,7 +419,7 @@ AudioEngine::reset_silence_countdown ()
 	sr = sample_rate();
 
 	_silence_countdown = max (60 * sr, /* 60 seconds */
-	                          sr * (SILENCE_AFTER_SECONDS / pow (2, _silence_hit_cnt)));
+	                          sr * (SILENCE_AFTER_SECONDS / ::pow (2.0, (double) _silence_hit_cnt)));
 
 #endif
 }
