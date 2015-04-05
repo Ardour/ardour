@@ -158,10 +158,10 @@ MonitorSection::MonitorSection (Session* s)
 	solo_boost_display = new ArdourDisplay ();
 	solo_boost_display->set_name("monitor section cut");
 	solo_boost_display->set_size_request(80,20);
-	solo_boost_display->add_controllable_preset("0dB", 0.0);
-	solo_boost_display->add_controllable_preset("3 dB", 3.0);
-	solo_boost_display->add_controllable_preset("6 dB", 6.0);
-	solo_boost_display->add_controllable_preset("10 dB", 10.0);
+	solo_boost_display->add_controllable_preset(_("0 dB"), 0.0);
+	solo_boost_display->add_controllable_preset(_("3 dB"), 3.0);
+	solo_boost_display->add_controllable_preset(_("6 dB"), 6.0);
+	solo_boost_display->add_controllable_preset(_("10 dB"), 10.0);
 
 	HBox* solo_packer = manage (new HBox);
 	solo_packer->set_spacing (6);
@@ -187,11 +187,11 @@ MonitorSection::MonitorSection (Session* s)
 	solo_cut_display = new ArdourDisplay ();
 	solo_cut_display->set_name("monitor section cut");
 	solo_cut_display->set_size_request(80,20);
-	solo_cut_display->add_controllable_preset("0dB", 0.0);
-	solo_cut_display->add_controllable_preset("-6 dB", -6.0);
-	solo_cut_display->add_controllable_preset("-12 dB", -12.0);
-	solo_cut_display->add_controllable_preset("-20 dB", -20.0);
-	solo_cut_display->add_controllable_preset("OFF", -1200.0);
+	solo_cut_display->add_controllable_preset(_("0 dB"), 0.0);
+	solo_cut_display->add_controllable_preset(_("-6 dB"), -6.0);
+	solo_cut_display->add_controllable_preset(_("-12 dB"), -12.0);
+	solo_cut_display->add_controllable_preset(_("-20 dB"), -20.0);
+	solo_cut_display->add_controllable_preset(_("OFF"), -1200.0);
 
 	spin_label = manage (new Label (_("SiP Cut")));
 	spin_packer = manage (new VBox);
@@ -213,11 +213,11 @@ MonitorSection::MonitorSection (Session* s)
 	dim_display = new ArdourDisplay ();
 	dim_display->set_name("monitor section cut");
 	dim_display->set_size_request(80,20);
-	dim_display->add_controllable_preset("0dB", 0.0);
-	dim_display->add_controllable_preset("-3 dB", -3.0);
-	dim_display->add_controllable_preset("-6 dB", -6.0);
-	dim_display->add_controllable_preset("-12 dB", -12.0);
-	dim_display->add_controllable_preset("-20 dB", -20.0);
+	dim_display->add_controllable_preset(_("0 dB"), 0.0);
+	dim_display->add_controllable_preset(_("-3 dB"), -3.0);
+	dim_display->add_controllable_preset(_("-6 dB"), -6.0);
+	dim_display->add_controllable_preset(_("-12 dB"), -12.0);
+	dim_display->add_controllable_preset(_("-20 dB"), -20.0);
 
 	HBox* dim_packer = manage (new HBox);
 	dim_packer->show ();
@@ -313,12 +313,12 @@ MonitorSection::MonitorSection (Session* s)
 	gain_display = new ArdourDisplay ();
 	gain_display->set_name("monitor section cut");
 	gain_display->set_size_request(40,20);
-	gain_display->add_controllable_preset("0dB", 0.0);
-	gain_display->add_controllable_preset("-3 dB", -3.0);
-	gain_display->add_controllable_preset("-6 dB", -6.0);
-	gain_display->add_controllable_preset("-12 dB", -12.0);
-	gain_display->add_controllable_preset("-20 dB", -20.0);
-	gain_display->add_controllable_preset("-30 dB", -30.0);
+	gain_display->add_controllable_preset(_("0 dB"), 0.0);
+	gain_display->add_controllable_preset(_("-3 dB"), -3.0);
+	gain_display->add_controllable_preset(_("-6 dB"), -6.0);
+	gain_display->add_controllable_preset(_("-12 dB"), -12.0);
+	gain_display->add_controllable_preset(_("-20 dB"), -20.0);
+	gain_display->add_controllable_preset(_("-30 dB"), -30.0);
 
 	spin_label = manage (new Label (_("Monitor")));
 	spin_packer = manage (new VBox);
