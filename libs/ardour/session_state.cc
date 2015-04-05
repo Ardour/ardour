@@ -3755,6 +3755,7 @@ Session::rename (const std::string& new_name)
 			string p = fs->path ();
 			boost::replace_all (p, old_sources_root, _session_dir->sources_root());
 			fs->set_path (p);
+			SourceFactory::setup_peakfile(i->second, true);
 		}
 	}
 
