@@ -1856,6 +1856,7 @@ Mixer_UI::setup_track_display ()
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.get_column (0)->set_expand(true);
 	track_display.get_column (1)->set_expand(false);
+	track_display.get_column (0)->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
 	track_display.set_name (X_("EditGroupList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
