@@ -1389,10 +1389,29 @@ EditorRoutes::initial_display ()
 		return;
 	}
 
-	RouteList r (*_session->get_routes());
-		
-	r.sort (EditorOrderRouteSorter ());
-	_editor->add_routes (r);
+	boost::shared_ptr<RouteList> routes = _session->get_routes();
+
+	if (ARDOUR_UI::instance()->session_is_new ()) {
+
+		/* new session: stamp all routes with the right editor order
+		 * key
+		 */
+
+		_editor->add_routes (*(routes.get()));
+
+	} else {
+
+		/* existing session: sort a copy of the route list by
+		 * editor-order and add its contents to the display.
+		 */
+
+		RouteList r (*routes);
+		EditorOrderRouteSorter sorter;
+
+		r.sort (sorter);
+		_editor->add_routes (r);
+
+	}
 }
 
 void
