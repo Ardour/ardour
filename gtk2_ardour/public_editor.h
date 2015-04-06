@@ -204,7 +204,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void remove_location_at_playhead_cursor () = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
-
+	virtual void remove_tracks () = 0;
+	
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
 	/** Import existing media */

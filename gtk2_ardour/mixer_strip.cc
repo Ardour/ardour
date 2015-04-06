@@ -1540,7 +1540,8 @@ MixerStrip::build_route_ops_menu ()
 	}
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), false)));
+	/* gah, this is wrong ... it will operate on the wrong selection */
+	items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 }
 
 gboolean

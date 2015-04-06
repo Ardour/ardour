@@ -6750,6 +6750,23 @@ Editor::toggle_tracks_active ()
 void
 Editor::remove_tracks ()
 {
+	/* this will delete GUI objects that may be the subject of an event
+	   handler in which this method is called. Defer actual deletion to the
+	   next idle callback, when all event handling is finished.
+	*/
+	Glib::signal_idle().connect (sigc::mem_fun (*this, &Editor::idle_remove_tracks));
+}
+
+bool
+Editor::idle_remove_tracks ()
+{
+	_remove_tracks ();
+	return false; /* do not call again */
+}
+
+void
+Editor::_remove_tracks ()
+{
 	TrackSelection& ts (selection->tracks);
 
 	if (ts.empty()) {
@@ -6804,19 +6821,9 @@ edit your ardour.rc file to set the\n\
 		return;
 	}
 
-	// XXX should be using gettext plural forms, maybe?
-	if (ntracks > 1) {
-		trackstr = _("tracks");
-	} else {
-		trackstr = _("track");
-	}
-
-	if (nbusses > 1) {
-		busstr = _("busses");
-	} else {
-		busstr = _("bus");
-	}
-
+	trackstr = P_("track", "tracks", ntracks);
+	busstr = P_("bus", "busses", nbusses);
+	
 	if (ntracks) {
 		if (nbusses) {
 			prompt  = string_compose (_("Do you really want to remove %1 %2 and %3 %4?\n"

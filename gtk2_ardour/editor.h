@@ -261,6 +261,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 
+	void remove_tracks ();
+	
 	/* tempo */
 
 	void set_show_measures (bool yn);
@@ -2134,7 +2136,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void fit_selection ();
 	void set_track_height (Height);
 
-	void remove_tracks ();
+	void _remove_tracks ();
+	bool idle_remove_tracks ();
 	void toggle_tracks_active ();
 
 	bool _have_idled;

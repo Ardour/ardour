@@ -852,12 +852,8 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, true)));
-	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
-	} else {
-		items.push_front (SeparatorElem());
-		items.push_front (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
-	}
+	items.push_front (SeparatorElem());
+	items.push_front (MenuElem (_("Delete"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
 
 void

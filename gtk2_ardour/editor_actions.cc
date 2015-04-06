@@ -401,11 +401,9 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	if (Profile->get_sae()) {
-		act = reg_sens (editor_actions, "remove-track", _("Delete"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
-	} else {
-		act = reg_sens (editor_actions, "remove-track", _("Remove"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
-	}
+	act = reg_sens (editor_actions, "remove-track", _("Remove"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
+	/* not selection sensitive? */
+
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "fit-selection", _("Fit Selection (Vertical)"), sigc::mem_fun(*this, &Editor::fit_selection));
