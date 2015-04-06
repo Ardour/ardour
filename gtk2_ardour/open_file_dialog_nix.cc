@@ -48,7 +48,7 @@ ARDOUR::open_file_dialog (string /*initial_path*/, string /*title*/)
 }
 
 vector<string>
-ARDOUR::open_file_dialog (vector<string> extensions, string initial_path, string title)
+ARDOUR::open_file_dialog (vector<string> extensions, bool /* multiple_selection_allowed */, string /*initial_path*/, string /*title*/)
 {
 	vector<string> ret;
 
