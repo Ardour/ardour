@@ -2347,8 +2347,9 @@ ARDOUR_UI::save_session_as ()
     _progress_dialog.show_pd ();
 	if (_session->save_as (sa)) {
 		/* ERROR MESSAGE */
-		MessageDialog msg (string_compose (_("Save As failed: %1"), sa.failure_message));
-		msg.run ();
+		WavesMessageDialog ("", string_compose (_("Save As failed: %1"), sa.failure_message)).run ();
+	} else {
+		update_recent_session_menuitems ();
 	}
     _progress_dialog.hide ();
 }
