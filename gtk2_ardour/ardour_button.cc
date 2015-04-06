@@ -433,23 +433,23 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	else if (_elements & DinMidi) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
-		const double r = std::min(x, y) * .77;
+		const double r = std::min(x, y) * .75;
 		ArdourCanvas::set_source_rgba (cr, text_color);
 		cairo_set_line_width(cr, 1);
 		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
 		cairo_stroke(cr);
 
 		// pins equally spaced 45deg
-		cairo_arc (cr, x, y * 0.5, r * .17, 0, 2 * M_PI);
+		cairo_arc (cr, x, y * 0.5, r * .15, 0, 2 * M_PI);
 		cairo_fill(cr);
-		cairo_arc (cr, x * 0.5, y, r * .17, 0, 2 * M_PI);
+		cairo_arc (cr, x * 0.5, y, r * .15, 0, 2 * M_PI);
 		cairo_fill(cr);
-		cairo_arc (cr, x * 1.5, y, r * .17, 0, 2 * M_PI);
+		cairo_arc (cr, x * 1.5, y, r * .15, 0, 2 * M_PI);
 		cairo_fill(cr);
 		//  .5 + .5 * .5 * sin(45deg),  1.5 - .5 * .5 * cos(45deg)
-		cairo_arc (cr, x * 0.677, y * .677, r * .18, 0, 2 * M_PI);
+		cairo_arc (cr, x * 0.677, y * .677, r * .15, 0, 2 * M_PI);
 		cairo_fill(cr);
-		cairo_arc (cr, x * 1.323, y * .677, r * .18, 0, 2 * M_PI);
+		cairo_arc (cr, x * 1.323, y * .677, r * .15, 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		// bottom notch
