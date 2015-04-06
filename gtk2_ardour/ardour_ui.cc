@@ -1389,89 +1389,9 @@ ARDOUR_UI::redisplay_recent_sessions ()
 }
 
 void
-ARDOUR_UI::build_session_selector ()
-{
-	session_selector_window = new ArdourDialog (_("Recent Sessions"));
-
-	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
-
-	session_selector_window->add_button ("CANCEL", RESPONSE_CANCEL);
-	session_selector_window->add_button ("OPEN", RESPONSE_ACCEPT);
-	session_selector_window->set_default_response (RESPONSE_ACCEPT);
-	recent_session_model = TreeStore::create (recent_session_columns);
-	recent_session_display.set_model (recent_session_model);
-	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
-	recent_session_display.set_headers_visible (false);
-	recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
-	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ARDOUR_UI::recent_session_row_activated));
-
-	scroller->add (recent_session_display);
-	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	session_selector_window->set_name ("SessionSelectorWindow");
-	session_selector_window->set_size_request (200, 400);
-	session_selector_window->get_vbox()->pack_start (*scroller);
-
-	recent_session_display.show();
-	scroller->show();
-}
-
-void
 ARDOUR_UI::recent_session_row_activated (const TreePath& /*path*/, TreeViewColumn* /*col*/)
 {
 	session_selector_window->response (RESPONSE_ACCEPT);
-}
-
-void
-ARDOUR_UI::open_recent_session ()
-{
-	bool can_return = (_session != 0);
-
-	if (session_selector_window == 0) {
-		build_session_selector ();
-	}
-
-	redisplay_recent_sessions ();
-
-	while (true) {
-
-		ResponseType r = (ResponseType) session_selector_window->run ();
-
-		switch (r) {
-		case RESPONSE_ACCEPT:
-			break;
-		default:
-			if (can_return) {
-				session_selector_window->hide();
-				return;
-			} else {
-				exit (1);
-			}
-		}
-
-		if (recent_session_display.get_selection()->count_selected_rows() == 0) {
-			continue;
-		}
-
-		session_selector_window->hide();
-
-		Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
-
-		if (i == recent_session_model->children().end()) {
-			return;
-		}
-
-		std::string path = (*i)[recent_session_columns.fullpath];
-		std::string state = (*i)[recent_session_columns.visible_name];
-
-		_session_is_new = false;
-
-		if (load_session (path, state) == 0) {
-			break;
-		}
-
-		can_return = false;
-	}
 }
 
 void

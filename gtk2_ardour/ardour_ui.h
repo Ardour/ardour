@@ -596,7 +596,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourDialog*     session_selector_window;
 	Gtk::FileChooserDialog* open_session_selector;
 
-	void build_session_selector();
 	void redisplay_recent_sessions();
 	void recent_session_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 
@@ -634,7 +633,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void set_fps_timeout_connection ();
 
 	void open_session ();
-	void open_recent_session ();
 	void save_template ();
 
 	void edit_metadata ();

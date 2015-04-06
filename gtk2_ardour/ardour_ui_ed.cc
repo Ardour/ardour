@@ -556,9 +556,6 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_action (main_actions, X_("Open"), _("Open"),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
     ActionManager::record_restricted_actions.push_back (act);
     
-	act = ActionManager::register_action (main_actions, X_("Recent"), _("Recent"),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
-    ActionManager::record_restricted_actions.push_back (act);
-    
     /* register act for recent_session_menuitems */
     for(int i=0;i<MAX_RECENT_SESSION_COUNT;++i){
         std::string label=string_compose( ("%1%2"), recent_session_menuitem_id.c_str(),i ) ;
