@@ -602,7 +602,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void   request_sync_source (Slave*);
 	bool   synced_to_engine() const { return config.get_external_sync() && Config->get_sync_source() == Engine; }
-    bool   synced_to_mtc() const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (&_mtc_active); }
+	bool   synced_to_mtc() const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (const_cast<gint*>(&_mtc_active)); }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
