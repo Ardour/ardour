@@ -211,29 +211,31 @@ class TimeAxisView : public virtual AxisView
 
   protected:
 	/* The Standard LHS Controls */
-	Gtk::Container& controls_event_box;
-	Gtk::Container& time_axis_box;
-	Gtk::Label&    name_label;
-	Gtk::Label&    number_label;
-    bool                  _name_editing;
-    uint32_t               height;  /* in canvas units */
-	std::string            controls_base_unselected_name;
-	std::string            controls_base_selected_name;
-	Gtk::Menu*             display_menu; /* The standard LHS Track control popup-menus */
-	TimeAxisView*          parent;
-	ArdourCanvas::Container*   selection_group;
+	Gtk::Container&           controls_event_box;
+	Gtk::Container&           time_axis_box;
+	Gtk::Label&               name_label;
+    Gtk::Entry&               name_entry;
+	Gtk::Label&               number_label;
+	Gtk::Menu*                display_menu; /* The standard LHS Track control popup-menus */
+	TimeAxisView*             parent;
+	ArdourCanvas::Container*  selection_group;
 	ArdourCanvas::Container*  _ghost_group;
-	std::list<GhostRegion*> ghosts;
+	Gtk::Menu*                _size_menu;
+	ArdourCanvas::Container*  _canvas_display;
+	PublicEditor&             _editor;
+	
+    bool                      _name_editing;
+    uint32_t                  height;  /* in canvas units */
+	std::string               controls_base_unselected_name;
+	std::string               controls_base_selected_name;
+	std::list<GhostRegion*>   ghosts;
 	std::list<SelectionRect*> free_selection_rects;
 	std::list<SelectionRect*> used_selection_rects;
-	bool                  _number_is_hidden;
-    bool                  _hidden;
-	bool                   in_destructor;
-	bool                  _ebox_release_can_act;
-	Gtk::Menu*            _size_menu;
-	ArdourCanvas::Container*  _canvas_display;
-	double                _y_position;
-	PublicEditor&         _editor;
+	bool                      _number_is_hidden;
+    bool                      _hidden;
+	bool                      in_destructor;
+	bool                      _ebox_release_can_act;
+	double                    _y_position;
 
     virtual bool can_edit_name() const;
 
@@ -241,7 +243,6 @@ class TimeAxisView : public virtual AxisView
 	bool name_entry_key_press (GdkEventKey *ev);
 	bool name_entry_focus_out (GdkEventFocus *ev);
 
-    Gtk::Entry& name_entry;
     void begin_name_edit ();
     void end_name_edit (int);
 
@@ -295,7 +296,7 @@ class TimeAxisView : public virtual AxisView
 	void build_size_menu ();
 
 private:
- 	Gtk::VBox*            control_parent;
+ 	Gtk::VBox*           _control_parent;
 	int                  _order;
 	uint32_t             _effective_height;
 	double               _resize_drag_start;

@@ -78,32 +78,34 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 							Canvas& /*canvas*/,
 							WavesUI& ui)
 	: AxisView (sess)
-	, _name_editing (false)
-	, height (0)
+	, controls_event_box (ui.root ())
+	, time_axis_box (ui.root ())
+	, name_label (ui.get_label ("name_label"))
+	, name_entry (ui.get_entry ("name_entry"))
+    , number_label (ui.get_label ("number_label"))
 	, display_menu (0)
 	, parent (rent)
 	, selection_group (0)
 	, _ghost_group (0)
-	, _hidden (false)
-    , _number_is_hidden (false)
-	, in_destructor (false)
 	, _size_menu (0)
 	, _canvas_display (0)
-	, _y_position (0)
 	, _editor (ed)
-	, control_parent (0)
+
+	, _name_editing (false)
+	, height (0)
+    , _number_is_hidden (false)
+	, _hidden (false)
+	, in_destructor (false)
+	, _ebox_release_can_act (true)
+	, _y_position (0)
+
+	, _control_parent (0)
 	, _order (0)
 	, _effective_height (0)
 	, _resize_drag_start (-1)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
     , _try_to_change_height (false)
-	, _ebox_release_can_act (true)
-	, controls_event_box (ui.root ())//ui.get_container ("controls_event_box"))
-	, time_axis_box (ui.root ())
-	, name_entry (ui.get_entry ("name_entry"))
-	, name_label (ui.get_label ("name_label"))
-	, number_label (ui.get_label ("number_label"))
 {
 	if (extra_height == 0) {
 		compute_heights ();
@@ -123,11 +125,6 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	_ghost_group->lower_to_bottom();
 	_ghost_group->show();
 
-	//name_label.set_name ("TrackLabel");
-	//name_label.set_alignment (0.0, 0.5);
-	//ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
-
-//	name_entry.set_name ("EditorTrackNameDisplay");
 	name_entry.signal_key_press_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_press), false);
 	name_entry.signal_key_release_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_key_release), false);
 	name_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &TimeAxisView::name_entry_focus_out));
@@ -197,9 +194,9 @@ TimeAxisView::hide ()
 
 	_canvas_display->hide ();
 
-	if (control_parent) {
-		control_parent->remove (time_axis_box);
-		control_parent = 0;
+	if (_control_parent) {
+		_control_parent->remove (time_axis_box);
+		_control_parent = 0;
 	}
 
 	_y_position = -1;
@@ -230,10 +227,10 @@ guint32
 TimeAxisView::show_at (double y, int& nth, VBox *parent)
 {
 	time_axis_box.show ();
-	if (control_parent) {
-		control_parent->reorder_child (time_axis_box, nth);
+	if (_control_parent) {
+		_control_parent->reorder_child (time_axis_box, nth);
 	} else {
-		control_parent = parent;
+		_control_parent = parent;
 		parent->pack_start (time_axis_box, false, false);
 		parent->reorder_child (time_axis_box, nth);
 	}
