@@ -389,6 +389,73 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_line_to(cr, x-o, y+o);
 		cairo_stroke(cr);
 	}
+	else if (_elements & StripWidth) {
+		const double x0 = get_width()  * .2;
+		const double x1 = get_width()  * .8;
+
+		const double y0 = get_height() * .25;
+		const double y1= get_height()  * .75;
+
+		const double ym= get_height()  * .5;
+
+		// arrow
+		const double xa0= get_height()  * .39;
+		const double xa1= get_height()  * .61;
+		const double ya0= get_height()  * .35;
+		const double ya1= get_height()  * .65;
+
+		ArdourCanvas::set_source_rgba (cr, text_color);
+		cairo_set_line_width(cr, 1);
+
+		// left + right
+		cairo_move_to(cr, x0, y0);
+		cairo_line_to(cr, x0, y1);
+		cairo_move_to(cr, x1, y0);
+		cairo_line_to(cr, x1, y1);
+
+		// horiz center line
+		cairo_move_to(cr, x0, ym);
+		cairo_line_to(cr, x1, ym);
+
+		// arrow left
+		cairo_move_to(cr,  x0, ym);
+		cairo_line_to(cr, xa0, ya0);
+		cairo_move_to(cr,  x0, ym);
+		cairo_line_to(cr, xa0, ya1);
+
+		// arrow right
+		cairo_move_to(cr,  x1,  ym);
+		cairo_line_to(cr, xa1, ya0);
+		cairo_move_to(cr,  x1,  ym);
+		cairo_line_to(cr, xa1, ya1);
+		cairo_stroke(cr);
+	}
+	else if (_elements & DinMidi) {
+		const double x = get_width() * .5;
+		const double y = get_height() * .5;
+		const double r = std::min(x, y) * .77;
+		ArdourCanvas::set_source_rgba (cr, text_color);
+		cairo_set_line_width(cr, 1);
+		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+		cairo_stroke(cr);
+
+		// pins equally spaced 45deg
+		cairo_arc (cr, x, y * 0.5, r * .17, 0, 2 * M_PI);
+		cairo_fill(cr);
+		cairo_arc (cr, x * 0.5, y, r * .17, 0, 2 * M_PI);
+		cairo_fill(cr);
+		cairo_arc (cr, x * 1.5, y, r * .17, 0, 2 * M_PI);
+		cairo_fill(cr);
+		//  .5 + .5 * .5 * sin(45deg),  1.5 - .5 * .5 * cos(45deg)
+		cairo_arc (cr, x * 0.677, y * .677, r * .18, 0, 2 * M_PI);
+		cairo_fill(cr);
+		cairo_arc (cr, x * 1.323, y * .677, r * .18, 0, 2 * M_PI);
+		cairo_fill(cr);
+
+		// bottom notch
+		cairo_arc (cr, x, y+r, r * .28, 1.05 * M_PI, 1.95 * M_PI);
+		cairo_stroke(cr);
+	}
 
 	const int text_margin = char_pixel_width();
 	// Text, if any
@@ -627,7 +694,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->width += _diameter + 4;
 	}
 
-	if (_elements & (RecButton | CloseCross)) {
+	if (_elements & (RecButton | CloseCross | StripWidth | DinMidi)) {
 		assert(!(_elements & Text));
 		const int wh = std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
 		req->width += wh;

@@ -43,6 +43,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		RecButton = 0x80, // tentative, see commit message
 		RecTapeMode = 0x100, // tentative
 		CloseCross = 0x200, // tentative
+		StripWidth = 0x400, // tentative
+		DinMidi = 0x800, // tentative
 	};
 
 	static Element default_elements;
