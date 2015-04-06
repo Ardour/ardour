@@ -39,6 +39,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glibmm/fileutils.h>
 
 #include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
@@ -2619,6 +2620,26 @@ ARDOUR_UI::save_template ()
 
     std::string template_path = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Save Template"));
 	if (!template_path.empty()) {
+		bool add_suffix = true;
+		std::string basename = Glib::path_get_basename (template_path);
+		std::string::size_type pos = basename.find_last_of (".");
+	
+		if (pos != std::string::npos) {
+			basename = basename.substr (pos);
+			std::string template_suffix = ARDOUR::template_suffix;
+			boost::to_lower (template_suffix);
+			boost::to_lower (basename);
+			if (basename == template_suffix) {
+				add_suffix = false;
+			}
+		}
+		
+		if (add_suffix) {
+			// add ".template" as in tracks PRD says store to selected FILE
+			// doing not create any directory for it. Mention chosen file as of type .template.
+			template_path += ARDOUR::template_suffix;
+		}
+		
 		if (_session->save_template (template_path)) {
 			 WavesMessageDialog ("", string_compose(_("Could not save Session template\n%1"), template_path)).run ();
 		}

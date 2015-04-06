@@ -379,7 +379,7 @@ SessionDialog::new_session (bool with_template)
 			set_keep_above(true);
 			return;
 		} else {
-			_session_template =  Glib::path_get_dirname (selected_files [0]);
+			_session_template =  selected_files [0];
 		}
 	} else {
 		_session_template.clear ();
