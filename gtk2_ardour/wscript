@@ -567,7 +567,8 @@ def build(bld):
         # so just use it.
         #
         font_names = {
-            'MONOSPACE' : 'Lucida Grande',
+            'MONOSPACE' : 'Monaco',
+            'CLOCKFONT' : 'Lucida Grande',
         }
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
@@ -584,6 +585,7 @@ def build(bld):
         }
         font_names = {
                 'MONOSPACE' : 'ArdourMono',
+                'CLOCKFONT' : 'ArdourMono',
         }
 
     # Set up font substitution dictionary

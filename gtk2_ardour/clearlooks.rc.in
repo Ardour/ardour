@@ -233,9 +233,9 @@ style "small_text"
  	font_name = "@FONT_SMALL@"
 }
 
-style "small_mono_text"
+style "small_clock"
 {
-	font_name = "@MONOSPACE@ @FONT_SMALLER@"
+	font_name = "@CLOCKFONT@ @FONT_SMALLER@"
 }
 
 style "small_italic_text"
@@ -280,9 +280,9 @@ style "big_text"
         font_name = "@FONT_BIG@"
 }
 
-style "bigger_mono_text"
+style "bigger_clock"
 {
-	font_name = "@MONOSPACE@ @FONT_BIGGER@"
+	font_name = "@CLOCKFONT@ @FONT_BIGGER@"
 }
 
 style "larger_text"
@@ -290,9 +290,9 @@ style "larger_text"
  	font_name = "@FONT_LARGE@"
 }
 
-style "monospace massive_text"
+style "massive_clock"
 {
-	font_name = "@MONOSPACE@ bold @FONT_MASSIVE@"
+	font_name = "@CLOCKFONT@ bold @FONT_MASSIVE@"
 }
 
 style "big_bold_text"
@@ -1055,16 +1055,16 @@ widget "*FatalMessage" style:highest "fatal_message"
 widget "*InfoMessage" style:highest "info_message"
 widget "*WarningMessage" style:highest "warning_message"
 
-widget "*big clock" style:highest "monospace massive_text"
-widget "*selection clock" style:highest "small_mono_text"
-widget "*punch clock" style:highest "small_mono_text"
-widget "*transport clock" style:highest "bigger_mono_text"
-widget "*secondary clock" style:highest "bigger_mono_text"
-widget "*transport delta clock" style:highest "bigger_mono_text"
-widget "*secondary delta clock" style:highest "bigger_mono_text"
+widget "*big clock" style:highest "massive_clock"
+widget "*selection clock" style:highest "small_clock"
+widget "*punch clock" style:highest "small_clock"
+widget "*transport clock" style:highest "bigger_clock"
+widget "*secondary clock" style:highest "bigger_clock"
+widget "*transport delta clock" style:highest "bigger_clock"
+widget "*secondary delta clock" style:highest "bigger_clock"
 widget "*silence duration clock" style:highest "medium_text"
 widget "*edit point clock" style:highest "medium_text"
-widget "*nudge clock" style:highest "small_mono_text"
+widget "*nudge clock" style:highest "small_clock"
 widget "*menubar clock" style:highest "medium_text"
 widget "*zoomrange clock" style:highest "medium_text"
 widget "*timecodeoffset clock" style:highest "medium_text"
