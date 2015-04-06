@@ -2400,7 +2400,7 @@ ARDOUR_UI::save_session_as ()
 
     Session::SaveAs sa;
     sa.new_parent_folder = Glib::path_get_dirname (save_as_session_full_file_name);
-    sa.new_name = basename_nosuffix (save_as_session_full_file_name);
+    sa.new_name = Glib::path_get_basename (save_as_session_full_file_name);
 	sa.copy_media = copy_media;
    
     // it should be always so
