@@ -525,17 +525,50 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			VECTORICONSTROKEFILL;
 		}
 
-		cairo_move_to (cr,  x + wh, y);
-		cairo_line_to (cr,  x - wh, y - tri);
-		cairo_line_to (cr,  x - wh, y + tri);
+		if (_icon == BtnStart) {
+			cairo_move_to (cr,  x - wh, y);
+			cairo_line_to (cr,  x + wh, y - tri);
+			cairo_line_to (cr,  x + wh, y + tri);
+		} else {
+			cairo_move_to (cr,  x + wh, y);
+			cairo_line_to (cr,  x - wh, y - tri);
+			cairo_line_to (cr,  x - wh, y + tri);
+		}
+
 		cairo_close_path (cr);
+		VECTORICONSTROKEFILL;
+	}
+	else if ((_elements & VectorIcon) && _icon == BtnLoop) {
+		const double x = get_width() * .5;
+		const double y = get_height() * .5;
+		const double r = std::min(x, y);
+
+		cairo_arc (cr, x, y, r * .6, 0, 2 * M_PI);
+		cairo_arc_negative (cr, x, y, r * .3, 2 * M_PI, 0);
 
 		VECTORICONSTROKEFILL;
+#define ARCARROW(rad, ang) \
+		x + (rad) * sin((ang) * 2.0 * M_PI), y + (rad) * cos((ang) * 2.0 * M_PI)
+
+		cairo_move_to (cr, ARCARROW(r * .30, .72));
+		cairo_line_to (cr, ARCARROW(r * .08, .72));
+		cairo_line_to (cr, ARCARROW(r * .50, .60));
+		cairo_line_to (cr, ARCARROW(r * .73, .72));
+		cairo_line_to (cr, ARCARROW(r * .60, .72));
+
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		cairo_stroke_preserve(cr);
+		cairo_close_path (cr);
+		cairo_set_source_rgba (cr, 1, 1, 1, 1.0);
+		cairo_fill(cr);
+#undef ARCARROW
+
 	}
 	else if (_elements & VectorIcon) {
 		// missing icon
 		assert(0);
 	}
+#undef VECTORICONSTROKEFILL
 
 	const int text_margin = char_pixel_width();
 	// Text, if any

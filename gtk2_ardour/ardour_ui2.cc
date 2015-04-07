@@ -282,8 +282,8 @@ ARDOUR_UI::setup_transport ()
 	stop_button.set_icon (ArdourButton::BtnStop);
 	play_selection_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	play_selection_button.set_icon (ArdourButton::BtnRange);
-
-	auto_loop_button.set_image (get_icon (X_("transport_loop")));
+	auto_loop_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	auto_loop_button.set_icon (ArdourButton::BtnLoop);
 
 	rec_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	rec_button.set_icon (ArdourButton::RecButton);
@@ -364,7 +364,7 @@ ARDOUR_UI::setup_transport ()
 	transport_button_size_group->add_widget (roll_button);
 	transport_button_size_group->add_widget (stop_button);
 
-	goto_start_button.set_size_request (-1, 40);
+	goto_start_button.set_size_request (28, 44);
 
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
