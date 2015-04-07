@@ -1575,8 +1575,13 @@ Editor::set_session (Session *t)
         // if inspector existed
         current_mixer_strip->gain_slider_set_visible (stereo_out_mode_active);
     }
+
+    // For certain reason the slider is not updated when
+	// such a session opened, which does not have instant.xml
+	// Newly created sessions have the same problem
+	update_temporal_zoom_slider (); // HOT FIX. (REWORK IT)
     
-    _set_session_in_progress = false;
+	_set_session_in_progress = false;
 }
 
 void
