@@ -1540,7 +1540,10 @@ MixerStrip::build_route_ops_menu ()
 	}
 
 	items.push_back (SeparatorElem());
-	/* gah, this is wrong ... it will operate on the wrong selection */
+	/* note that this relies on selection being shared across editor and
+	   mixer (or global to the backend, in the future), which is the only
+	   sane thing for users anyway.
+	*/
 	items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 }
 
