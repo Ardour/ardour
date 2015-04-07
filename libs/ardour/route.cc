@@ -83,6 +83,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _signal_latency_at_amp_position (0)
 	, _initial_delay (0)
 	, _roll_delay (0)
+	, _declicked_silent (true)
 	, _flags (flg)
 	, _pending_declick (true)
 	, _meter_point (MeterPostFader)
@@ -465,7 +466,18 @@ Route::process_output_buffers (BufferSet& bufs,
 	   GLOBAL DECLICK (for transport changes etc.)
 	   ----------------------------------------------------------------------------------------- */
 
+	if (_declickable && _declicked_silent && declick <= 0) {
+		bufs.silence (nframes, 0);
+	}
+
 	maybe_declick (bufs, nframes, declick);
+
+	if (declick < 0) {
+		_declicked_silent = true;
+	}
+	else if (declick > 0) {
+		_declicked_silent = false;
+	}
 	_pending_declick = 0;
 
 	/* -------------------------------------------------------------------------------------------

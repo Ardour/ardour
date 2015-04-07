@@ -506,6 +506,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	framecnt_t     _signal_latency_at_amp_position;
 	framecnt_t     _initial_delay;
 	framecnt_t     _roll_delay;
+	bool           _declicked_silent;
 
 	ProcessorList  _processors;
 	mutable Glib::Threads::RWLock   _processor_lock;
