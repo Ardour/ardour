@@ -272,17 +272,25 @@ ARDOUR_UI::setup_transport ()
 
 	stop_button.set_active (true);
 
-	goto_start_button.set_image (get_icon (X_("transport_start")));
-	goto_end_button.set_image (get_icon (X_("transport_end")));
-	roll_button.set_image (get_icon (X_("transport_play")));
-	stop_button.set_image (get_icon (X_("transport_stop")));
-	play_selection_button.set_image (get_icon (X_("transport_range")));
+	goto_start_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	goto_start_button.set_icon (ArdourButton::BtnStart);
+	goto_end_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	goto_end_button.set_icon (ArdourButton::BtnEnd);
+	roll_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	roll_button.set_icon (ArdourButton::BtnPlay);
+	stop_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	stop_button.set_icon (ArdourButton::BtnStop);
+	play_selection_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	play_selection_button.set_icon (ArdourButton::BtnRange);
+
 	auto_loop_button.set_image (get_icon (X_("transport_loop")));
 
 	rec_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	rec_button.set_icon (ArdourButton::RecButton);
 
-	midi_panic_button.set_image (get_icon (X_("midi_panic")));
+	midi_panic_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	midi_panic_button.set_icon (ArdourButton::BtnPanic);
+
 	/* the icon for this has an odd aspect ratio, so fatten up the button */
 	midi_panic_button.set_size_request (25, -1);
 	

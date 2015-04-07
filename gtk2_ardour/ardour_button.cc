@@ -285,6 +285,13 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		}
 	}
 
+#define VECTORICONSTROKEFILL \
+	cairo_set_line_width(cr, 1.5); \
+	cairo_set_source_rgba (cr, 0, 0, 0, 1.0); \
+	cairo_stroke_preserve(cr); \
+	cairo_set_source_rgba (cr, 1, 1, 1, 1.0); \
+	cairo_fill(cr);
+
 	//Pixbuf, if any
 	if (_pixbuf) {
 		double x = rint((get_width() - _pixbuf->get_width()) * .5);
@@ -456,6 +463,78 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		// bottom notch
 		cairo_arc (cr, x, y+r, r * .28, 1.05 * M_PI, 1.95 * M_PI);
 		cairo_stroke(cr);
+	}
+	else if ((_elements & VectorIcon) && _icon == BtnStop) {
+		const int wh = std::min (get_width(), get_height());
+		cairo_rectangle (cr,
+				(get_width() - wh) * .5 + wh * .25,
+				(get_height() - wh) * .5 + wh * .25,
+				wh * .5, wh * .5);
+
+		VECTORICONSTROKEFILL;
+	}
+	else if ((_elements & VectorIcon) && _icon == BtnPlay) {
+		const int wh = std::min (get_width(), get_height()) * .5;
+		const double y = get_height() * .5;
+		const double x = get_width() - wh;
+
+		const float tri = ceil(.577 * wh); // 1/sqrt(3)
+
+		cairo_move_to (cr,  x + wh * .5, y);
+		cairo_line_to (cr,  x - wh * .5, y - tri);
+		cairo_line_to (cr,  x - wh * .5, y + tri);
+		cairo_close_path (cr);
+
+		VECTORICONSTROKEFILL;
+	}
+	else if ((_elements & VectorIcon) && _icon == BtnPanic) {
+		const int wh = std::min (get_width(), get_height()) * .1;
+		const double xc = get_width() * .5;
+		const double yh = get_height();
+		cairo_rectangle (cr,
+				xc - wh, yh *.2,
+				wh * 2,  yh *.4);
+		VECTORICONSTROKEFILL;
+
+		cairo_arc (cr, xc, yh *.75, wh, 0, 2 * M_PI);
+		VECTORICONSTROKEFILL;
+	}
+	else if ((_elements & VectorIcon) && (_icon == BtnStart || _icon == BtnEnd || _icon == BtnRange)) {
+		// small play triangle
+		int wh = std::min (get_width(), get_height());
+		const double y = get_height() * .5;
+		const double x = get_width() - wh * .5;
+		wh *= .18;
+		const float tri = ceil(.577 * wh * 2); // 1/sqrt(3)
+
+		const int ln = std::min (get_width(), get_height()) * .07;
+
+		if (_icon == BtnStart || _icon == BtnRange) {
+			cairo_rectangle (cr,
+					x - wh - ln, y  - tri * 1.7,
+					ln * 2,  tri * 3.4);
+
+			VECTORICONSTROKEFILL;
+		}
+
+		if (_icon == BtnEnd || _icon == BtnRange) {
+			cairo_rectangle (cr,
+					x + wh - ln, y  - tri * 1.7,
+					ln * 2,  tri * 3.4);
+
+			VECTORICONSTROKEFILL;
+		}
+
+		cairo_move_to (cr,  x + wh, y);
+		cairo_line_to (cr,  x - wh, y - tri);
+		cairo_line_to (cr,  x - wh, y + tri);
+		cairo_close_path (cr);
+
+		VECTORICONSTROKEFILL;
+	}
+	else if (_elements & VectorIcon) {
+		// missing icon
+		assert(0);
 	}
 
 	const int text_margin = char_pixel_width();

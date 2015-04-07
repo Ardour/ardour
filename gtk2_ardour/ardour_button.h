@@ -50,6 +50,14 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		CloseCross,
 		StripWidth,
 		DinMidi,
+		BtnStop,
+		BtnPlay,
+		BtnLoop,
+		BtnRange,
+		BtnStart,
+		BtnEnd,
+		BtnPanic,
+		BtnMetronom,
 	};
 
 	static Element default_elements;
