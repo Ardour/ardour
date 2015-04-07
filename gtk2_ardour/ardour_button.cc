@@ -507,7 +507,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		wh *= .18;
 		const float tri = ceil(.577 * wh * 2); // 1/sqrt(3)
 
-		const int ln = std::min (get_width(), get_height()) * .07;
+		const float ln = std::min (get_width(), get_height()) * .07;
 
 		if (_icon == BtnStart || _icon == BtnRange) {
 			cairo_rectangle (cr,
