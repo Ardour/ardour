@@ -324,7 +324,10 @@ void
 EngineControl::on_show ()
 {
 	ArdourDialog::on_show ();
-	backend_changed ();
+	if (!ARDOUR::AudioEngine::instance()->current_backend() || !ARDOUR::AudioEngine::instance()->running()) {
+		// re-check _have_control (jackd running) see #6041
+		backend_changed ();
+	}
 	device_changed ();
 	ok_button->grab_focus();
 }
