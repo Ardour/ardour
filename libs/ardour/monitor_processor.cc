@@ -301,8 +301,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
 
                 if (target_gain != _channels[chn]->current_gain || target_gain != 1.0f) {
 
-                        Amp::apply_gain (*b, nframes, _channels[chn]->current_gain, target_gain);
-                        _channels[chn]->current_gain = target_gain;
+                        _channels[chn]->current_gain = Amp::apply_gain (*b, _session.nominal_frame_rate(), nframes, _channels[chn]->current_gain, target_gain);
                 }
 
                 ++chn;

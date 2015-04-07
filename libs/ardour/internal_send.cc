@@ -194,8 +194,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 		/* target gain has changed */
 
-		Amp::apply_gain (mixbufs, nframes, _current_gain, tgain);
-		_current_gain = tgain;
+		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
 
 	} else if (tgain == 0.0) {
 

@@ -262,8 +262,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 	if (tgain != _current_gain) {
 		/* target gain has changed */
 
-		Amp::apply_gain (bufs, nframes, _current_gain, tgain);
-		_current_gain = tgain;
+		_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
 
 	} else if (tgain == 0.0) {
 
