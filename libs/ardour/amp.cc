@@ -210,51 +210,39 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, ga
 void
 Amp::declick (BufferSet& bufs, framecnt_t nframes, int dir)
 {
-	/* Similar to ::apply_gain() but skips MIDI buffers
-	 * and use cos() Sigmoid decay with fixed initial+target values.
-	 */
-
 	if (nframes == 0 || bufs.count().n_total() == 0) {
 		return;
 	}
 
-	const framecnt_t declick = std::min ((framecnt_t) 128, nframes);
-	gain_t         delta, initial, target;
-	double         fractional_shift = -1.0/(declick-1);
-	double         fractional_pos;
+	const framecnt_t declick = std::min ((framecnt_t) 512, nframes);
+	const double     fractional_shift = 1.0 / declick ;
+	gain_t           delta, initial;
 
 	if (dir < 0) {
 		/* fade out: remove more and more of delta from initial */
 		delta = -1.0;
                 initial = 1.0;
-                target = 0.0;
 	} else {
 		/* fade in: add more and more of delta from initial */
 		delta = 1.0;
                 initial = 0.0;
-                target = 1.0;
 	}
 
 	/* Audio Gain */
-
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 		Sample* const buffer = i->data();
 
-		fractional_pos = 1.0;
+		double fractional_pos = 0.0;
 
 		for (pframes_t nx = 0; nx < declick; ++nx) {
-			buffer[nx] *= (initial + (delta * (0.5 + 0.5 * cos (M_PI * fractional_pos))));
+			buffer[nx] *= initial + (delta * fractional_pos);
 			fractional_pos += fractional_shift;
 		}
 
 		/* now ensure the rest of the buffer has the target value applied, if necessary. */
-
 		if (declick != nframes) {
-
-			if (target == 0.0) {
+			if (dir < 0) {
                                 memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
-			} else if (target != 1.0) {
-				apply_gain_to_buffer (&buffer[declick], nframes - declick, target);
 			}
 		}
 	}
