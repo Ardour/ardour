@@ -880,6 +880,7 @@ def configure(conf):
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+        conf.define ('WINDOWS', 1)
 
     if Options.options.dist_target == 'msvc':
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
@@ -891,6 +892,7 @@ def configure(conf):
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         # MORE STUFF PROBABLY NEEDED HERE
+        conf.define ('WINDOWS', 1)
         
     # Tell everyone that this is a waf build
 

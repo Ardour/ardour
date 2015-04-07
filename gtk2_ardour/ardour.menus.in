@@ -8,7 +8,9 @@
       <separator/>
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
+#ifndef WINDOWS // can't move open files.
       <menuitem action='Rename'/>
+#endif
       <menuitem action='Snapshot'/>
       <menuitem action='SaveTemplate'/>
       <menu name='Metadata' action='Metadata'>

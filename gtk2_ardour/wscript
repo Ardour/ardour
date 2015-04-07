@@ -640,7 +640,7 @@ def build(bld):
         obj.command_is_external = True
         obj.no_inputs = True
         obj.argv = menus_argv
-        obj.dep_vars = ['GTKOSX']
+        obj.dep_vars = ['GTKOSX', 'WINDOWS']
         obj.stdin = program + '.menus.in'
         obj.stdout = program + '.menus'
         bld.install_files (bld.env['CONFDIR'], program + '.menus')
