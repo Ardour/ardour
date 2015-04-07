@@ -41,6 +41,12 @@ ARDOUR::save_file_dialog (string /*initial_path*/, string title)
         return string();
 }
 
+std::string
+ARDOUR::save_file_dialog (std::vector<std::string> /* extensions */, std::string /* initial_path */, std::string /* title */)
+{
+	return string();
+}
+
 string 
 ARDOUR::open_file_dialog (string /*initial_path*/, string /*title*/)
 {

@@ -41,12 +41,63 @@ ARDOUR::save_file_dialog (std::string initial_path, std::string title)
 	ofn.lpstrFile = szFilePathName;  // This will hold the file name
 	ofn.nMaxFile = _MAX_PATH;
 	ofn.lpstrTitle = title.c_str();
-	ofn.Flags = OFN_OVERWRITEPROMPT;
+	ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
 
 	// Check on valid path
 	WIN32_FIND_DATA FindFileData;
 	HANDLE handle = FindFirstFile(initial_path.c_str(), &FindFileData) ;
-        int found = (handle != INVALID_HANDLE_VALUE);
+    int found = (handle != INVALID_HANDLE_VALUE);
+        
+	// if path is valid
+	if (found) {
+		ofn.lpstrInitialDir = initial_path.c_str();
+        } else {
+		initial_path = Glib::get_home_dir();
+		ofn.lpstrInitialDir = initial_path.c_str();
+	}
+        
+	// Run dialog
+    if (GetSaveFileName(&ofn)) {
+		return ofn.lpstrFile;
+	}
+        
+	return string();
+}
+
+std::string
+ARDOUR::save_file_dialog (std::vector<std::string> extensions, std::string initial_path, std::string title)
+{
+	TCHAR szFilePathName[_MAX_PATH] = "";
+	OPENFILENAME ofn = {0};
+        
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.lpstrFile = szFilePathName;  // This will hold the file name
+	ofn.nMaxFile = _MAX_PATH;
+	ofn.lpstrTitle = title.c_str();
+	ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
+
+
+	// Create filter for required file types
+	std::string filter;
+	for (int i = 0; i < extensions.size(); ++i) {
+		filter += "*."+extensions[i]+";";
+	}
+
+	char c_filter[1 + filter.size() + 2];
+	c_filter[0] = 0;
+	strcpy (c_filter + 1, filter.c_str ());
+	c_filter[1 + filter.size() + 1] = '\0';
+	
+	ofn.lpstrFilter = c_filter;
+
+	if (!extensions.empty()) {
+		ofn.lpstrDefExt = extensions[0].c_str ();
+	}
+
+	// Check on valid path
+	WIN32_FIND_DATA FindFileData;
+	HANDLE handle = FindFirstFile(initial_path.c_str(), &FindFileData) ;
+    int found = (handle != INVALID_HANDLE_VALUE);
         
 	// if path is valid
 	if (found) {
@@ -73,13 +124,13 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 	ofn.lpstrFile = szFilePathName;  // This will hold the file name
 	ofn.nMaxFile = _MAX_PATH;
 	ofn.lpstrTitle = title.c_str();
-	ofn.Flags = OFN_PATHMUSTEXIST;
+	ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
 	ofn.lpstrFilter = " \0*.ardour\0";
-
+	ofn.lpstrDefExt = "ardour";
 	// Check on valid path
 	WIN32_FIND_DATA FindFileData;
 	HANDLE handle = FindFirstFile(initial_path.c_str(), &FindFileData) ;
-        int found = (handle != INVALID_HANDLE_VALUE);
+    int found = (handle != INVALID_HANDLE_VALUE);
         
 	// if path is valid
 	if (found) {
@@ -99,13 +150,15 @@ ARDOUR::open_file_dialog (std::string initial_path, std::string title)
 std::vector<std::string>
 ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_selection, std::string initial_path, std::string title)
 {
-	TCHAR szFilePathName[_MAX_PATH] = "";
+	TCHAR szFilePathName[_MAX_PATH*100] = "";
 	OPENFILENAME ofn = {0};
+
 	ofn.lStructSize = sizeof(OPENFILENAME);
 	ofn.lpstrFile = szFilePathName;  // This will hold the file name
-	ofn.nMaxFile = _MAX_PATH;
+	ofn.nMaxFile = sizeof (szFilePathName);
 	ofn.lpstrTitle = title.c_str();
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_EXPLORER;
+	ofn.Flags = OFN_FILEMUSTEXIST | OFN_EXPLORER;
+
 	if (multi_selection) {
 		ofn.Flags |= OFN_ALLOWMULTISELECT;
 	}
@@ -116,18 +169,21 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_select
 		filter += "*."+extensions[i]+";";
 	}
 
-	char c_filter[2+filter.size()+2];
-	c_filter[0] = ' ';
-	c_filter[1] = '\0';
-	strcpy (c_filter+2, filter.c_str ());
-	c_filter[filter.size()+3] = '\0';
+	char c_filter[1 + filter.size() + 2];
+	c_filter[0] = 0;
+	strcpy (c_filter + 1, filter.c_str ());
+	c_filter[1 + filter.size() + 1] = '\0';
 	
 	ofn.lpstrFilter = c_filter;
 		
+	if (!extensions.empty()) {
+		ofn.lpstrDefExt = extensions[0].c_str ();
+	}
+
 	// Check on valid path
 	WIN32_FIND_DATA FindFileData;
 	HANDLE handle = FindFirstFile(initial_path.c_str(), &FindFileData) ;
-        int found = (handle != INVALID_HANDLE_VALUE);
+    int found = (handle != INVALID_HANDLE_VALUE);
         
 	// if path is valid
 	if (found) {
@@ -140,12 +196,9 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_select
 	std::vector<std::string> file_pathes;
         
 	if (GetOpenFileName(&ofn)) {
-
 		std::string directory_path = ofn.lpstrFile;
 		std::string path;
 		char* ptr = ofn.lpstrFile;
-
-		bool many_files = (ofn.lpstrFile [strlen (ofn.lpstrFile) + 1] != 0);
 
 		if (ofn.lpstrFile [strlen (ofn.lpstrFile) + 1] != 0) { // Many files
 			for (char *current_name = ofn.lpstrFile + strlen (ofn.lpstrFile) + 1;
@@ -159,8 +212,6 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_select
 		} else {
 			file_pathes.push_back (ofn.lpstrFile); // single file selected
 		}
-
-		return file_pathes;
 	}
 
 	return file_pathes;
