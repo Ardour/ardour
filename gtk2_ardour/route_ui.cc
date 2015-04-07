@@ -148,7 +148,8 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
-	rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
+	rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	rec_enable_button->set_icon (ArdourButton::RecButton);
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	if (ARDOUR_UI::config()->get_blink_rec_arm()) {
@@ -2121,10 +2122,10 @@ RouteUI::track_mode_changed (void)
 	switch (track()->mode()) {
 		case ARDOUR::NonLayered:
 		case ARDOUR::Normal:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
+			rec_enable_button->set_icon (ArdourButton::RecButton);
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton|ArdourButton::RecTapeMode));
+			rec_enable_button->set_icon (ArdourButton::RecTapeMode);
 			break;
 	}
 	rec_enable_button->queue_draw();

@@ -59,6 +59,7 @@ ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::El
 
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
+	, _icon (ArdourButton::NoIcon)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
@@ -306,7 +307,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_fill (cr);
 	}
 	else // rec-en is exclusive to pixbuf (tape machine mode, rec-en)
-	if ((_elements & (RecButton|RecTapeMode)) == (RecButton|RecTapeMode)) {
+	if ((_elements & VectorIcon) && _icon == RecTapeMode) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(10., std::min(x, y) * .6); // TODO we need a better way to limit max. radius.
@@ -363,7 +364,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		cairo_restore(cr);
 	}
-	else if (_elements & RecButton) {
+	else if ((_elements & VectorIcon) && _icon == RecButton) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(10., std::min(x, y) * .55); // TODO we need a better way to limit max. radius.
@@ -377,7 +378,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_set_line_width(cr, 1);
 		cairo_stroke(cr);
 	}
-	else if (_elements & CloseCross) {
+	else if ((_elements & VectorIcon) && _icon == CloseCross) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double o = .5 + std::min(x, y) * .4;
@@ -389,7 +390,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_line_to(cr, x-o, y+o);
 		cairo_stroke(cr);
 	}
-	else if (_elements & StripWidth) {
+	else if ((_elements & VectorIcon) && _icon == StripWidth) {
 		const double x0 = get_width()  * .2;
 		const double x1 = get_width()  * .8;
 
@@ -430,7 +431,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_line_to(cr, xa1, ya1);
 		cairo_stroke(cr);
 	}
-	else if (_elements & DinMidi) {
+	else if ((_elements & VectorIcon) && _icon == DinMidi) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(x, y) * .75;
@@ -694,7 +695,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->width += _diameter + 4;
 	}
 
-	if (_elements & (RecButton | CloseCross | StripWidth | DinMidi)) {
+	if (_elements & VectorIcon) {
 		assert(!(_elements & Text));
 		const int wh = std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
 		req->width += wh;
@@ -1259,6 +1260,13 @@ void
 ArdourButton::add_elements (Element e)
 {
 	_elements = (ArdourButton::Element) (_elements | e);
+	CairoWidget::set_dirty ();
+}
+
+void
+ArdourButton::set_icon (Icon i)
+{
+	_icon = i;
 	CairoWidget::set_dirty ();
 }
 

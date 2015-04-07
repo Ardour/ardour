@@ -151,10 +151,12 @@ MixerStrip::init ()
 		t += string_compose (_("\n%1-%2-click to toggle the width of all strips."), Keyboard::primary_modifier_name(), Keyboard::tertiary_modifier_name ());
 	}
 	
-	width_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::StripWidth));
+	width_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	width_button.set_icon (ArdourButton::StripWidth);
 	ARDOUR_UI::instance()->set_tip (width_button, t);
 
-	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::CloseCross));
+	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	hide_button.set_icon (ArdourButton::CloseCross);
 	ARDOUR_UI::instance()->set_tip (&hide_button, _("Hide this mixer strip"));
 
 	input_button_box.set_spacing(2);
@@ -518,7 +520,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		if (midi_input_enable_button == 0) {
 			midi_input_enable_button = manage (new ArdourButton);
 			midi_input_enable_button->set_name ("midi input button");
-			midi_input_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::DinMidi));
+			midi_input_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+			midi_input_enable_button->set_icon (ArdourButton::DinMidi);
 			midi_input_enable_button->signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
 			midi_input_enable_button->signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
 			ARDOUR_UI::instance()->set_tip (midi_input_enable_button, _("Enable/Disable MIDI input"));

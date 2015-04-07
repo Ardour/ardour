@@ -40,11 +40,16 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		unused = 0x10,
 		Menu = 0x20,
 		Inactive = 0x40, // no _action is defined AND state is not used
-		RecButton = 0x80, // tentative, see commit message
-		RecTapeMode = 0x100, // tentative
-		CloseCross = 0x200, // tentative
-		StripWidth = 0x400, // tentative
-		DinMidi = 0x800, // tentative
+		VectorIcon = 0x80, // tentative, see commit message
+	};
+
+	enum Icon {
+		NoIcon,
+		RecButton,
+		RecTapeMode,
+		CloseCross,
+		StripWidth,
+		DinMidi,
 	};
 
 	static Element default_elements;
@@ -74,6 +79,9 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Element elements() const { return _elements; }
 	void set_elements (Element);
 	void add_elements (Element);
+
+	Icon icon() const { return _icon; }
+	void set_icon (Icon);
 
 	void set_corner_radius (float);
 
@@ -133,6 +141,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
 	Element                     _elements;
+	Icon                        _icon;
 	Tweaks                      _tweaks;
 	BindingProxy                binding_proxy;
 
