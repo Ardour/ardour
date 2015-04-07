@@ -562,8 +562,54 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_set_source_rgba (cr, 1, 1, 1, 1.0);
 		cairo_fill(cr);
 #undef ARCARROW
-
 	}
+	else if ((_elements & VectorIcon) && _icon == BtnMetronom) {
+		const double x  = get_width() * .5;
+		const double y  = get_height() * .5;
+		const double wh = std::min(x, y);
+		const double h  = wh * .8;
+		const double w  = wh * .5;
+		const double lw = w * .25;
+
+		cairo_rectangle (cr,
+				x - w * .7, y + h * .25,
+				w * 1.4, lw);
+
+		VECTORICONSTROKEFILL;
+
+		cairo_move_to (cr,  x - w,       y + h);
+		cairo_line_to (cr,  x + w,       y + h);
+		cairo_line_to (cr,  x + w * .35, y - h);
+		cairo_line_to (cr,  x - w * .35, y - h);
+		cairo_line_to (cr,  x - w,       y + h);
+
+		cairo_move_to (cr,  x - w + lw,       y + h -lw);
+		cairo_line_to (cr,  x - w * .35 + lw, y - h + lw);
+		cairo_line_to (cr,  x + w * .35 - lw, y - h + lw);
+		cairo_line_to (cr,  x + w - lw,       y + h -lw);
+		cairo_line_to (cr,  x - w + lw,       y + h -lw);
+
+		VECTORICONSTROKEFILL;
+
+		// ddx = .70 w      = .75 * .5 wh              = .375 wh
+		// ddy = .75 h - lw = .75 * .8 wh - wh .5 * .2 = .5 wh
+		// -> angle atan (375 / .5) ~ 36deg
+		const double dx = lw * .2;  // 1 - cos(tan^-1(ang))
+		const double dy = lw * .4;  // 1 - sin(tan^-1(ang))
+		cairo_move_to (cr,  x - w * .3     , y + h * .25 + lw * .5);
+		cairo_line_to (cr,  x - w + dx     , y - h + lw + dy);
+		cairo_line_to (cr,  x - w + lw     , y - h + lw);
+		cairo_line_to (cr,  x - w * .3 + lw, y + h * .25 + lw * .5);
+		cairo_close_path (cr);
+
+		VECTORICONSTROKEFILL;
+
+		cairo_rectangle (cr,
+				x - w * .7, y + h * .25,
+				w * 1.4, lw);
+		cairo_fill(cr);
+	}
+
 	else if (_elements & VectorIcon) {
 		// missing icon
 		assert(0);

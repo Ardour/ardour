@@ -256,7 +256,9 @@ ARDOUR_UI::setup_transport ()
 
 //	auto_input_button.set_text (_("Auto Input"));
 
-	click_button.set_image (get_icon (X_("metronome")));
+	click_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	click_button.set_icon (ArdourButton::BtnMetronom);
+
 	act = ActionManager::get_action ("Transport", "ToggleClick");
 	click_button.set_related_action (act);
 	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
@@ -365,6 +367,7 @@ ARDOUR_UI::setup_transport ()
 	transport_button_size_group->add_widget (stop_button);
 
 	goto_start_button.set_size_request (28, 44);
+	click_button.set_size_request (32, 44);
 
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
