@@ -853,7 +853,7 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, true)));
 	items.push_front (SeparatorElem());
-	items.push_front (MenuElem (_("Delete"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
+	items.push_front (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
 
 void
