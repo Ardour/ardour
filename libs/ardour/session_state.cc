@@ -4011,7 +4011,6 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 			}
 			
 			if (fs->within_session()) {
-				cerr << "skip " << fs->name() << endl;
 				continue;
 			}
 			
@@ -4046,10 +4045,13 @@ Session::bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,
 				break;
 				
 			case DataType::MIDI:
+				/* XXX not implemented yet */
 				break;
 			}
 			
-			cerr << "Move " << old_path << " => " << new_path << endl;
+			if (new_path.empty()) {
+				continue;
+			}
 			
 			if (!copy_file (old_path, new_path)) {
 				cerr << "failed !\n";
@@ -4084,6 +4086,22 @@ Session::save_as_bring_callback (uint32_t,uint32_t,string)
 {
 	/* It would be good if this did something useful vis-a-vis save-as, but the arguments doesn't provide the correct information right now to do this.
 	*/
+}
+
+static string
+make_new_media_path (string old_path, string new_session_folder, string new_session_path)
+{
+	/* typedir is the "midifiles" or "audiofiles" etc. part of the path. */
+
+	string typedir = Glib::path_get_basename (Glib::path_get_dirname (old_path));
+	vector<string> v;
+	v.push_back (new_session_folder); /* full path */
+	v.push_back (interchange_dir_name);
+	v.push_back (new_session_path);   /* just one directory/folder */
+	v.push_back (typedir);
+	v.push_back (Glib::path_get_basename (old_path));
+	
+	return Glib::build_filename (v);
 }
 
 int
@@ -4196,18 +4214,8 @@ Session::save_as (SaveAs& saveas)
 
 					if (saveas.copy_media) {
 						
-						/* typedir is the "midifiles" or "audiofiles" etc. part of the path.
-						 */
-						string typedir = Glib::path_get_basename (Glib::path_get_dirname (from));
-						vector<string> v;
-						v.push_back (to_dir);
-						v.push_back (interchange_dir_name);
-						v.push_back (new_folder);
-						v.push_back (typedir);
-						v.push_back (Glib::path_get_basename (from));
-						
-						std::string to = Glib::build_filename (v);
-						
+						string to = make_new_media_path (from, to_dir, new_folder);
+					
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR,
 												   string_compose(_("\ncopying \"%1\" failed !"), from));
@@ -4232,10 +4240,18 @@ Session::save_as (SaveAs& saveas)
 							break;
 						} 
 					}
-					
+
 					if (do_copy) {
 						string to = Glib::build_filename (to_dir, (*i).substr (prefix_len));
+
+						/* there are some subdirectories in a session tree (eg. analysis/) that are not created
+						 * by default, so make sure we create them before attempting the copy.
+						 */
 						
+						if (g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755)) {
+							throw Glib::FileError (Glib::FileError::IO_ERROR, "cannot create required directory");
+						}
+					
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR,
 												   string_compose(_("\ncopying \"%1\" failed !"), from));
@@ -4268,6 +4284,7 @@ Session::save_as (SaveAs& saveas)
 					throw Glib::FileError (Glib::FileError::FAILED, "copy cancelled");
 				}
 			}
+
 		}
 
 		_path = to_dir;
@@ -4336,6 +4353,20 @@ Session::save_as (SaveAs& saveas)
 			/* ensure that all existing tracks reset their current capture source paths 
 			 */
 			reset_write_sources (true, true);
+
+			/* the copying above was based on actually discovering files, not just iterating over the sources list.
+			   But if we're going to switch to the new (copied) session, we need to change the paths in the sources also.
+			*/
+
+			for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+				boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+				if (!fs) {
+					continue;
+				}
+
+				string newpath = make_new_media_path (fs->path(), to_dir, new_folder);
+				fs->set_path (newpath);
+			}
 		}
 
 	} catch (Glib::FileError& e) {
