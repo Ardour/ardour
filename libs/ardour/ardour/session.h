@@ -553,7 +553,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 
 	void   request_sync_source (Slave*);
-	bool   synced_to_engine() const { return config.get_external_sync() && Config->get_sync_source() == Engine; }
+	bool   synced_to_engine() const { return _slave && config.get_external_sync() && Config->get_sync_source() == Engine; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
