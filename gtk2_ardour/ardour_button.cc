@@ -285,11 +285,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		}
 	}
 
-#define VECTORICONSTROKEFILL \
+#define VECTORICONSTROKEFILL(fillalpha) \
 	cairo_set_line_width(cr, 1.5); \
 	cairo_set_source_rgba (cr, 0, 0, 0, 1.0); \
 	cairo_stroke_preserve(cr); \
-	cairo_set_source_rgba (cr, 1, 1, 1, 1.0); \
+	cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha)); \
 	cairo_fill(cr);
 
 	//Pixbuf, if any
@@ -474,7 +474,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 				(get_height() - wh) * .5 + wh * .25,
 				wh * .5, wh * .5);
 
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(0.8);
 	}
 	else if ((_elements & VectorIcon) && _icon == TransportPlay) {
 		const int wh = std::min (get_width(), get_height()) * .5;
@@ -488,7 +488,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_line_to (cr,  x - wh * .5, y + tri);
 		cairo_close_path (cr);
 
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(0.8);
 	}
 	else if ((_elements & VectorIcon) && _icon == TransportPanic) {
 		const int wh = std::min (get_width(), get_height()) * .1;
@@ -497,10 +497,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_rectangle (cr,
 				xc - wh, yh *.2,
 				wh * 2,  yh *.4);
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(0.8);
 
 		cairo_arc (cr, xc, yh *.75, wh, 0, 2 * M_PI);
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(0.8);
 	}
 	else if ((_elements & VectorIcon) && (_icon == TransportStart || _icon == TransportEnd || _icon == TransportRange)) {
 		// small play triangle
@@ -517,7 +517,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			                 x - wh - ln, y  - tri * 1.7,
 			                 ln * 2,  tri * 3.4);
 
-			VECTORICONSTROKEFILL;
+			VECTORICONSTROKEFILL(1.0);
 		}
 
 		if (_icon == TransportEnd || _icon == TransportRange) {
@@ -525,7 +525,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 			                 x + wh - ln, y  - tri * 1.7,
 			                 ln * 2,  tri * 3.4);
 
-			VECTORICONSTROKEFILL;
+			VECTORICONSTROKEFILL(1.0);
 		}
 
 		if (_icon == TransportStart) {
@@ -539,7 +539,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		}
 
 		cairo_close_path (cr);
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(1.0);
 	}
 	else if ((_elements & VectorIcon) && _icon == TransportLoop) {
 		const double x = get_width() * .5;
@@ -549,13 +549,13 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_arc (cr, x, y, r * .6, 0, 2 * M_PI);
 		cairo_arc_negative (cr, x, y, r * .3, 2 * M_PI, 0);
 
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(1.0);
 #define ARCARROW(rad, ang) \
 		x + (rad) * sin((ang) * 2.0 * M_PI), y + (rad) * cos((ang) * 2.0 * M_PI)
 
 		cairo_move_to (cr, ARCARROW(r * .30, .72));
 		cairo_line_to (cr, ARCARROW(r * .08, .72));
-		cairo_line_to (cr, ARCARROW(r * .50, .60));
+		cairo_line_to (cr, ARCARROW(r * .54, .60));
 		cairo_line_to (cr, ARCARROW(r * .73, .72));
 		cairo_line_to (cr, ARCARROW(r * .60, .72));
 
@@ -578,7 +578,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		                 x - w * .7, y + h * .25,
 		                 w * 1.4, lw);
 
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(1.0);
 
 		cairo_move_to (cr,  x - w,       y + h);
 		cairo_line_to (cr,  x + w,       y + h);
@@ -592,7 +592,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_line_to (cr,  x + w - lw,       y + h -lw);
 		cairo_line_to (cr,  x - w + lw,       y + h -lw);
 
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(1.0);
 
 		// ddx = .70 w      = .75 * .5 wh              = .375 wh
 		// ddy = .75 h - lw = .75 * .8 wh - wh .5 * .2 = .5 wh
@@ -606,7 +606,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_line_to (cr,  x - w * .3 + lw, y + h * .25 + lw * .5);
 		cairo_close_path (cr);
 
-		VECTORICONSTROKEFILL;
+		VECTORICONSTROKEFILL(1.0);
 
 		cairo_rectangle (cr,
 		                 x - w * .7, y + h * .25,
