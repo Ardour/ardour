@@ -32,7 +32,7 @@ using namespace ARDOUR;
 // Debug wrappers
 
 float
-debug_compute_peak (ARDOUR::Sample *buf, pframes_t nsamples, float current)
+debug_compute_peak (const ARDOUR::Sample *buf, pframes_t nsamples, float current)
 {
 	if ( ((intptr_t)buf % 16) != 0) {
 		std::cerr << "compute_peak(): buffer unaligned!" << std::endl;
@@ -52,7 +52,7 @@ debug_apply_gain_to_buffer (ARDOUR::Sample *buf, pframes_t nframes, float gain)
 }
 
 void
-debug_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, pframes_t nframes, float gain)
+debug_mix_buffers_with_gain (ARDOUR::Sample *dst, const ARDOUR::Sample *src, pframes_t nframes, float gain)
 {
 	if ( ((intptr_t)dst & 15) != 0) {
 		std::cerr << "mix_buffers_with_gain(): dst unaligned!" << std::endl;
@@ -67,7 +67,7 @@ debug_mix_buffers_with_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, pframes_t
 }
 
 void
-debug_mix_buffers_no_gain (ARDOUR::Sample *dst, ARDOUR::Sample *src, pframes_t nframes)
+debug_mix_buffers_no_gain (ARDOUR::Sample *dst, const ARDOUR::Sample *src, pframes_t nframes)
 {
 	if ( ((intptr_t)dst & 15) != 0) {
 		std::cerr << "mix_buffers_no_gain(): dst unaligned!" << std::endl;

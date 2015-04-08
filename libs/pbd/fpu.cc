@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifndef  COMPILER_MSVC
+#if !(defined (COMPILER_MSVC) || defined (COMPILER_MINGW))
 #include "libpbd-config.h"
 
 #define _XOPEN_SOURCE 600
@@ -38,10 +38,6 @@ FPU::FPU ()
 	unsigned long cpuflags = 0;
 
 	_flags = Flags (0);
-
-#if defined(__MINGW64__) // Vkamyshniy: under __MINGW64__ the assembler code below is not compiled
-	return;
-#endif
 
 #if !( (defined __x86_64__) || (defined __i386__) ) // !ARCH_X86
 	return;
