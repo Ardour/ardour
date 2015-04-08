@@ -221,7 +221,7 @@ def set_compiler_flags (conf,opt):
         # 
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if ((re.search ("i[0-9]86", cpu) != None) or (re.search ("x86_64", cpu) != None)) and conf.env['build_target'] != 'none':
+    if (re.search ("(i[0-9]86|x86_64|AMD64)", cpu) != None) and conf.env['build_target'] != 'none':
 
 
         #
@@ -229,9 +229,8 @@ def set_compiler_flags (conf,opt):
         # the compile-time presence of the macro _LP64 is used to 
         # distingush 32 and 64 bit assembler
         #
-
-        if (re.search ("(i[0-9]86|x86_64)", cpu) != None):
-            compiler_flags.append ("-DARCH_X86")
+ 
+        compiler_flags.append ("-DARCH_X86")
 
         if platform == 'linux' :
 
@@ -258,6 +257,17 @@ def set_compiler_flags (conf,opt):
 
         if not is_clang and ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
             compiler_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN"])
+            
+        if (conf.env['build_target'] == 'mingw'):
+            if (re.search ("(x86_64|AMD64)", cpu) != None):
+                # on Windows sse is supported by 64 bit platforms only
+                build_host_supports_sse = True
+                
+                # mingw GCC compiler to uses at&t (Unix specific) assembler dialect by default
+                # compiler_flags.append (["--mmnemonic=att", "msyntax=att")
+                
+                compiler_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN", "-masm=att"])
+                
 
     # end of processor-specific section
 
@@ -266,7 +276,7 @@ def set_compiler_flags (conf,opt):
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS")
             conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
-        elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
+        elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64' or (conf.env['build_target'] == 'mingw' and build_host_supports_sse):
             compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
@@ -695,7 +705,7 @@ def configure(conf):
     autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
 
     if Options.options.dist_target == 'mingw':
-        Options.options.fpu_optimization = False
+        Options.options.fpu_optimization = True
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
