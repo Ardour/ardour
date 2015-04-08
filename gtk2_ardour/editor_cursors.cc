@@ -77,11 +77,11 @@ EditorCursor::~EditorCursor ()
 void
 EditorCursor::set_position (framepos_t frame)
 {
-	PositionChanged (frame);
+	if (_current_frame != frame) { PositionChanged (frame); }
 
 	double const new_pos = _editor.sample_to_pixel_unrounded (frame);
 
-	if (new_pos != _track_canvas_item->x ()) {
+	if (rint(new_pos) != rint(_track_canvas_item->x ())) {
 		_track_canvas_item->set_x (new_pos);
 	}
 
