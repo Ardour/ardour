@@ -313,7 +313,9 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
 		cairo_fill (cr);
 	}
-	else // rec-en is exclusive to pixbuf (tape machine mode, rec-en)
+	else /* VectorIcons are exclusive to Pixbuf Icons */
+	/* TODO separate these into dedicated class
+	 * it may also be efficient to render them only once for every size (image-surface) */
 	if ((_elements & VectorIcon) && _icon == RecTapeMode) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
@@ -323,10 +325,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_translate(cr, x, y);
 
 		cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
-		if (active_state() == Gtkmm2ext::ExplicitActive)
+		if (active_state() == Gtkmm2ext::ExplicitActive) {
 			cairo_set_source_rgba (cr, .95, .1, .1, 1.);
-		else
+		} else {
 			cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
+		}
 		cairo_fill_preserve(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, .5);
 		cairo_set_line_width(cr, 1);
@@ -464,7 +467,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_arc (cr, x, y+r, r * .28, 1.05 * M_PI, 1.95 * M_PI);
 		cairo_stroke(cr);
 	}
-	else if ((_elements & VectorIcon) && _icon == BtnStop) {
+	else if ((_elements & VectorIcon) && _icon == TransportStop) {
 		const int wh = std::min (get_width(), get_height());
 		cairo_rectangle (cr,
 				(get_width() - wh) * .5 + wh * .25,
@@ -473,7 +476,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		VECTORICONSTROKEFILL;
 	}
-	else if ((_elements & VectorIcon) && _icon == BtnPlay) {
+	else if ((_elements & VectorIcon) && _icon == TransportPlay) {
 		const int wh = std::min (get_width(), get_height()) * .5;
 		const double y = get_height() * .5;
 		const double x = get_width() - wh;
@@ -487,7 +490,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		VECTORICONSTROKEFILL;
 	}
-	else if ((_elements & VectorIcon) && _icon == BtnPanic) {
+	else if ((_elements & VectorIcon) && _icon == TransportPanic) {
 		const int wh = std::min (get_width(), get_height()) * .1;
 		const double xc = get_width() * .5;
 		const double yh = get_height();
@@ -499,7 +502,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_arc (cr, xc, yh *.75, wh, 0, 2 * M_PI);
 		VECTORICONSTROKEFILL;
 	}
-	else if ((_elements & VectorIcon) && (_icon == BtnStart || _icon == BtnEnd || _icon == BtnRange)) {
+	else if ((_elements & VectorIcon) && (_icon == TransportStart || _icon == TransportEnd || _icon == TransportRange)) {
 		// small play triangle
 		int wh = std::min (get_width(), get_height());
 		const double y = get_height() * .5;
@@ -509,23 +512,23 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		const float ln = std::min (get_width(), get_height()) * .07;
 
-		if (_icon == BtnStart || _icon == BtnRange) {
+		if (_icon == TransportStart || _icon == TransportRange) {
 			cairo_rectangle (cr,
-					x - wh - ln, y  - tri * 1.7,
-					ln * 2,  tri * 3.4);
+			                 x - wh - ln, y  - tri * 1.7,
+			                 ln * 2,  tri * 3.4);
 
 			VECTORICONSTROKEFILL;
 		}
 
-		if (_icon == BtnEnd || _icon == BtnRange) {
+		if (_icon == TransportEnd || _icon == TransportRange) {
 			cairo_rectangle (cr,
-					x + wh - ln, y  - tri * 1.7,
-					ln * 2,  tri * 3.4);
+			                 x + wh - ln, y  - tri * 1.7,
+			                 ln * 2,  tri * 3.4);
 
 			VECTORICONSTROKEFILL;
 		}
 
-		if (_icon == BtnStart) {
+		if (_icon == TransportStart) {
 			cairo_move_to (cr,  x - wh, y);
 			cairo_line_to (cr,  x + wh, y - tri);
 			cairo_line_to (cr,  x + wh, y + tri);
@@ -538,7 +541,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_close_path (cr);
 		VECTORICONSTROKEFILL;
 	}
-	else if ((_elements & VectorIcon) && _icon == BtnLoop) {
+	else if ((_elements & VectorIcon) && _icon == TransportLoop) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(x, y);
@@ -563,7 +566,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_fill(cr);
 #undef ARCARROW
 	}
-	else if ((_elements & VectorIcon) && _icon == BtnMetronom) {
+	else if ((_elements & VectorIcon) && _icon == TransportMetronom) {
 		const double x  = get_width() * .5;
 		const double y  = get_height() * .5;
 		const double wh = std::min(x, y);
@@ -572,8 +575,8 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double lw = w * .25;
 
 		cairo_rectangle (cr,
-				x - w * .7, y + h * .25,
-				w * 1.4, lw);
+		                 x - w * .7, y + h * .25,
+		                 w * 1.4, lw);
 
 		VECTORICONSTROKEFILL;
 
@@ -593,7 +596,8 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		// ddx = .70 w      = .75 * .5 wh              = .375 wh
 		// ddy = .75 h - lw = .75 * .8 wh - wh .5 * .2 = .5 wh
-		// -> angle atan (375 / .5) ~ 36deg
+		// ang = (ddx/ddy):
+		// -> angle = atan (ang) = atan (375 / .5) ~= 36deg
 		const double dx = lw * .2;  // 1 - cos(tan^-1(ang))
 		const double dy = lw * .4;  // 1 - sin(tan^-1(ang))
 		cairo_move_to (cr,  x - w * .3     , y + h * .25 + lw * .5);
@@ -605,11 +609,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		VECTORICONSTROKEFILL;
 
 		cairo_rectangle (cr,
-				x - w * .7, y + h * .25,
-				w * 1.4, lw);
+		                 x - w * .7, y + h * .25,
+		                 w * 1.4, lw);
 		cairo_fill(cr);
 	}
-
 	else if (_elements & VectorIcon) {
 		// missing icon
 		assert(0);

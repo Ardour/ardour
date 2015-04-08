@@ -257,7 +257,7 @@ ARDOUR_UI::setup_transport ()
 //	auto_input_button.set_text (_("Auto Input"));
 
 	click_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	click_button.set_icon (ArdourButton::BtnMetronom);
+	click_button.set_icon (ArdourButton::TransportMetronom);
 
 	act = ActionManager::get_action ("Transport", "ToggleClick");
 	click_button.set_related_action (act);
@@ -275,23 +275,23 @@ ARDOUR_UI::setup_transport ()
 	stop_button.set_active (true);
 
 	goto_start_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	goto_start_button.set_icon (ArdourButton::BtnStart);
+	goto_start_button.set_icon (ArdourButton::TransportStart);
 	goto_end_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	goto_end_button.set_icon (ArdourButton::BtnEnd);
+	goto_end_button.set_icon (ArdourButton::TransportEnd);
 	roll_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	roll_button.set_icon (ArdourButton::BtnPlay);
+	roll_button.set_icon (ArdourButton::TransportPlay);
 	stop_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	stop_button.set_icon (ArdourButton::BtnStop);
+	stop_button.set_icon (ArdourButton::TransportStop);
 	play_selection_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	play_selection_button.set_icon (ArdourButton::BtnRange);
+	play_selection_button.set_icon (ArdourButton::TransportRange);
 	auto_loop_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	auto_loop_button.set_icon (ArdourButton::BtnLoop);
+	auto_loop_button.set_icon (ArdourButton::TransportLoop);
 
 	rec_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	rec_button.set_icon (ArdourButton::RecButton);
 
 	midi_panic_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-	midi_panic_button.set_icon (ArdourButton::BtnPanic);
+	midi_panic_button.set_icon (ArdourButton::TransportPanic);
 
 	/* the icon for this has an odd aspect ratio, so fatten up the button */
 	midi_panic_button.set_size_request (25, -1);
