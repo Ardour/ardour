@@ -18,6 +18,7 @@
 */
 
 #include "waves_audioport.h"
+#include "ardour/runtime_functions.h"
 
 using namespace ARDOUR;
 
@@ -40,14 +41,18 @@ void* WavesAudioPort::get_buffer (pframes_t nframes)
              * Base class WavesDataPort takes is supposed to provide enough consistentcy
              * of the connections.
              */
-            for (memcpy (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes * sizeof (Sample)), ++it;
-				 it != get_connections ().end ();
-				 ++it) {
+
+			// get first buffer data
+			memcpy (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes * sizeof (Sample));
+			++it;
+            
+			// mix the rest
+			for (; it != get_connections ().end (); ++it) {
                 Sample* tgt = buffer ();
                 const Sample* src = ((const WavesAudioPort*)*it)->const_buffer ();
-                for (uint32_t frame = 0; frame < nframes; ++frame, ++tgt, ++src)    {
-                    *tgt += *src;
-                }
+
+				// use otimized function to mix the buffers
+				ARDOUR::mix_buffers_no_gain (tgt, src, nframes);
             }
         }
     }
