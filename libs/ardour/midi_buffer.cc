@@ -44,7 +44,7 @@ MidiBuffer::MidiBuffer(size_t capacity)
 
 MidiBuffer::~MidiBuffer()
 {
-	free(_data);
+	cache_aligned_free(_data);
 }
 
 void
@@ -60,7 +60,7 @@ MidiBuffer::resize(size_t size)
 		return;
 	}
 
-	free (_data);
+	cache_aligned_free (_data);
 
 	cache_aligned_malloc ((void**) &_data, size);
 
