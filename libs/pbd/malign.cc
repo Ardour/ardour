@@ -38,6 +38,15 @@ static const int CPU_CACHE_ALIGN = 16; /* arguably 32 on most arches, but it mat
 int cache_aligned_malloc (void** memptr, size_t size)
 {
 #ifndef HAVE_POSIX_MEMALIGN
+#ifdef PLATFORM_WINDOWS
+	if (((*memptr) = _aligned_malloc (size, CPU_CACHE_ALIGN)) == 0) {
+		fatal << string_compose (_("Memory allocation error: malloc (%1 * %2) failed (%3)"),
+					 CPU_CACHE_ALIGN, size, strerror (errno)) << endmsg;
+		return errno;
+	} else {
+		return 0;
+	}
+#else
 	if (((*memptr) = malloc (size)) == 0) {
 		fatal << string_compose (_("Memory allocation error: malloc (%1 * %2) failed (%3)"),
 					 CPU_CACHE_ALIGN, size, strerror (errno)) << endmsg;
@@ -45,6 +54,7 @@ int cache_aligned_malloc (void** memptr, size_t size)
 	} else {
 		return 0;
 	}
+#endif
 #else
         if (posix_memalign (memptr, CPU_CACHE_ALIGN, size)) {
 		fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
@@ -53,4 +63,13 @@ int cache_aligned_malloc (void** memptr, size_t size)
 
 	return 0;
 #endif	
+}
+
+void cache_aligned_free (void* memptr)
+{
+#ifdef PLATFORM_WINDOWS
+	_aligned_free (memptr);
+#else
+	free (memptr);
+#endif
 }
