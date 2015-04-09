@@ -1211,6 +1211,11 @@ GtkCanvas::hide_tooltip ()
 
 	if (tooltip_window) {
 		tooltip_window->hide ();
+
+		// Delete the tooltip window so it'll get re-created
+		// (i.e. properly re-sized) on the next usage.
+		delete tooltip_window;
+		tooltip_window = NULL;
 	}
 }
 
