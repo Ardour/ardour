@@ -1906,9 +1906,13 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 void
 ARDOUR_UI::toggle_session_auto_loop ()
 {
+	if (!_session) {
+		return;
+	}
+	
 	Location * looploc = _session->locations()->auto_loop_location();
 
-	if (!_session || !looploc) {
+	if (!looploc) {
 		return;
 	}
 
