@@ -1,67 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Dialog title="Session Close"
-        resizeable="false">
+        resizeable="false"
+        CACHEIT="false">
   <style name="generic_control"
-         winfont ="Arial Bold 12"
-         macfont ="Helvetica Bold 12"
-         fgnormal="#BFBFBF"
-         bgnormal="#6C6C6C"
-         fgactive="#BFBFBF"
-         bgactive="#454545"
-         fghover="#CCCCCC"
-         bghover="#898989"/>
+         winfont="Arial Bold 14"
+         macfont="Helvetica Bold 14"
+         fgnormal="#6D6E72"/>
   <style name="generic_button"
          style="generic_control"
-         winfont ="Arial Bold 10"
-         macfont ="Helvetica Bold 10"
+         visible="false"
+         noshowall="true"
+         winfont="Arial Bold 10"
+         macfont="Helvetica Bold 10"
          fgnormal="#6D6E72"
          bgnormal="#CACAC5"
          fgactive="#EDECE8"
          bgactive="#6D6E72"
          fghover="#CCCCCC"
          bghover="#898989"
-         fgdisabled ="#959595"
+         fgdisabled="#959595"
          bordercolor="#6D6E72"
          borderwidth="0 0 0 0"
          width="80"
          height="22"/>         
-    <EventBox bgnormal="#EDECE8">
-        <VBox width="400">
-            <HBox height="20"/>
-            <Label style ="generic_control"
-                   id="top_label"
-                   justify="center"
-                   winfont ="Arial Bold 14"
-                   macfont ="Helvetica Bold 14"
-                   fgnormal="#6D6E72"
-                   text="info-1"/>
-            <Label style ="generic_control"
-                   id="bottom_label"
-                   justify="center"
-                   text="info-2"
-                   winfont ="Arial Bold 12"
-                   macfont ="Helvetica Bold 12"
-                   fgnormal="#6D6E72"/>
-            <HBox height="30"/>
-            <HBox box.expand="true">
-                <VBox width="10"/>
-                <HBox spacing="8"
-                      width="380">
-                    <Button style="generic_button"
-                        id="cancel_button"
-                        text="Cancel"
-                        box.pack="start"/>
-                    <Button style="generic_button"
-                        id="save_button"
-                        text="Save"
-                        box.pack="end"/>
-                    <Button style="generic_button"
-                        id="dont_save_button"
-                        text="Don't Save"
-                        box.pack="end"/>
-                </HBox>
-            </HBox>
-            <HBox height="10"/>
-        </VBox>
-    </EventBox>
+  <EventBox bgnormal="#EDECE8">
+    <VBox borderwidth="10">
+      <HBox height="10"/>
+      <HBox>
+        <HBox box.expand="true" box.fill="true"/>
+        <Label style="generic_control"
+               text="Do you want to save changes to &quot;"
+               vertalignment="top"/>
+        <Label style="generic_control"
+               id="message_label"
+               vertalignment="top"/>
+        <Label style ="generic_control"
+               text="&quot;?\n"
+               vertalignment="top"/>
+        <HBox box.expand="true"
+              box.fill="true"/>
+      </HBox>
+      <Label style ="generic_control"
+             width="380"
+             text="Changes will be lost if you choose &quot;Don't Save&quot;\n"
+             winfont="Arial Bold 12"
+             macfont="Helvetica Bold 12"/>
+      <HBox height="30" width="380"/>
+      <HBox spacing="10">
+        <Button id="cancel_button"
+                style="generic_button"
+                text="Cancel"/>
+        <Button id="ok_button"
+                style="generic_button"
+                box.pack="end"
+                text="Ok"/>
+        <Button id="close_button"
+                style="generic_button"
+                box.pack="end"
+                text="Close"/>
+        <Button id="accept_button"
+                style="generic_button"
+                box.pack="end"
+                text="Accept"/>
+        <Button id="yes_button"
+                style="generic_button"
+                box.pack="end"
+                text="Save"/>
+        <Button id="no_button"
+                style="generic_button"
+                box.pack="end"
+                text="Don't Save"/>
+      </HBox>
+    </VBox>
+  </EventBox>
 </Dialog>

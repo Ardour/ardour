@@ -140,7 +140,6 @@ typedef uint64_t microseconds_t;
 #include "video_server_dialog.h"
 #include "add_video_dialog.h"
 #include "transcode_video_dialog.h"
-#include "session_close_dialog.h"
 
 #include "i18n.h"
 
@@ -1102,23 +1101,14 @@ If you still wish to quit, please use the\n\n\
 int
 ARDOUR_UI::ask_about_saving_session (const vector<string>& actions)
 {
-    SessionCloseDialog session_close_dialog;
-    
-    string prompt;
-    string bottom_prompt;
-    
-    if (_session->snap_name() == _session->name()) {
-		prompt = string_compose(_("Do you want to save changes to \"%1\"?\n"), _session->snap_name());
-        bottom_prompt = _("Changes will be lost if you choose \"Don't Save\"\n");
-        session_close_dialog.set_top_label (prompt);
-        session_close_dialog.set_bottom_label (bottom_prompt);
-	} else {
-		prompt = string_compose(_("The snapshot \"%1\"\nhas not been saved.\n\nAny changes made this time\nwill be lost unless you save it.\n\nWhat do you want to do?"),
-                                _session->snap_name());
-	}
-    
-    int result = session_close_dialog.run();
-    
+  
+    int result = WavesMessageDialog ("session_close_dialog.xml",
+									 _("Session Close"),
+									 _session->snap_name(),
+									 WavesMessageDialog::BUTTON_YES |
+									 WavesMessageDialog::BUTTON_NO |
+									 WavesMessageDialog::BUTTON_CANCEL).run ();
+  
 	switch (result) {
             // button "SAVE" was pressed
 		case WavesDialog::RESPONSE_DEFAULT:
