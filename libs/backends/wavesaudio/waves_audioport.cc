@@ -19,13 +19,20 @@
 
 #include "waves_audioport.h"
 #include "ardour/runtime_functions.h"
+#include "pbd/malign.h"
 
 using namespace ARDOUR;
 
 WavesAudioPort::WavesAudioPort (const std::string& port_name, PortFlags flags)
     : WavesDataPort (port_name, flags)    
 {
-    memset (_buffer, 0, sizeof (_buffer));
+	cache_aligned_malloc ((void**)&_buffer, MAX_BUFFER_SIZE_BYTES);
+    memset (_buffer, 0, MAX_BUFFER_SIZE_BYTES);
+}
+
+WavesAudioPort::~WavesAudioPort ()
+{
+	cache_aligned_free (_buffer);
 }
 
 
