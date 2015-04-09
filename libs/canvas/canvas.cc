@@ -1156,7 +1156,7 @@ GtkCanvas::show_tooltip ()
 		tooltip_label = manage (new Gtk::Label);
 		tooltip_label->show ();
 		tooltip_window->add (*tooltip_label);
-		tooltip_window->set_border_width (6);
+		tooltip_window->set_border_width (1);
 		tooltip_window->set_name ("tooltip");
 	}
 
@@ -1189,7 +1189,8 @@ GtkCanvas::show_tooltip ()
 	 * to get it away from the pointer.
 	 */
 
-	tooltip_window_origin.x += 20;
+	tooltip_window_origin.x += 30;
+	tooltip_window_origin.y += 45;
 
 	/* move the tooltip window into position */
 
