@@ -26,13 +26,13 @@ using namespace ARDOUR;
 WavesAudioPort::WavesAudioPort (const std::string& port_name, PortFlags flags)
     : WavesDataPort (port_name, flags)    
 {
-	cache_aligned_malloc ((void**)&_buffer, MAX_BUFFER_SIZE_BYTES);
+	aligned_malloc ((void**)&_buffer, MAX_BUFFER_SIZE_BYTES, 32 /*32 byte alignment*/);
     memset (_buffer, 0, MAX_BUFFER_SIZE_BYTES);
 }
 
 WavesAudioPort::~WavesAudioPort ()
 {
-	cache_aligned_free (_buffer);
+	aligned_free (_buffer);
 }
 
 

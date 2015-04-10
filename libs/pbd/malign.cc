@@ -47,6 +47,8 @@ int cache_aligned_malloc (void** memptr, size_t size)
 		return 0;
 	}
 #else
+	std::string << string_compose (_("Memory allocation error: malloc (%1 * %2)"),
+					 CPU_CACHE_ALIGN, size) << endmsg;
 	if (((*memptr) = malloc (size)) == 0) {
 		fatal << string_compose (_("Memory allocation error: malloc (%1 * %2) failed (%3)"),
 					 CPU_CACHE_ALIGN, size, strerror (errno)) << endmsg;
@@ -66,6 +68,45 @@ int cache_aligned_malloc (void** memptr, size_t size)
 }
 
 void cache_aligned_free (void* memptr)
+{
+#ifdef PLATFORM_WINDOWS
+	_aligned_free (memptr);
+#else
+	free (memptr);
+#endif
+}
+
+int  aligned_malloc (void** memptr, size_t size, size_t alignment)
+{
+#ifndef HAVE_POSIX_MEMALIGN
+#ifdef PLATFORM_WINDOWS
+	if (((*memptr) = _aligned_malloc (size, alignment)) == 0) {
+		fatal << string_compose (_("Memory allocation error: malloc (%1 * %2) failed (%3)"),
+					 alignment, size, strerror (errno)) << endmsg;
+		return errno;
+	} else {
+		return 0;
+	}
+#else
+	if (((*memptr) = malloc (size)) == 0) {
+		fatal << string_compose (_("Memory allocation error: malloc (%1 * %2) failed (%3)"),
+					 alignment, size, strerror (errno)) << endmsg;
+		return errno;
+	} else {
+		return 0;
+	}
+#endif
+#else
+        if (posix_memalign (memptr, alignment, size)) {
+		fatal << string_compose (_("Memory allocation error: posix_memalign (%1 * %2) failed (%3)"),
+					 alignment, size, strerror (errno)) << endmsg;
+	}
+
+	return 0;
+#endif	
+}
+
+void aligned_free (void* memptr)
 {
 #ifdef PLATFORM_WINDOWS
 	_aligned_free (memptr);
