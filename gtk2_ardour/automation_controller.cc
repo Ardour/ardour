@@ -84,6 +84,7 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 		} else {
 			but->set_name("generic button");
 		}
+		but->set_controllable(ac);
 		but->signal_clicked.connect(
 			sigc::mem_fun(*this, &AutomationController::toggled));
 
