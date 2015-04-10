@@ -27,4 +27,7 @@
 LIBPBD_API int  cache_aligned_malloc (void** memptr, size_t size);
 LIBPBD_API void cache_aligned_free (void* memptr);
 
+LIBPBD_API int  aligned_malloc (void** memptr, size_t size, size_t alignment);
+LIBPBD_API void aligned_free (void* memptr);
+
 #endif /* __pbd_malign_h__ */
