@@ -1113,6 +1113,30 @@ Locations::set_state (const XMLNode& node, int version)
 			}
 		}
 
+		/* We may have some unused locations in the old list. */
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+			LocationList::iterator tmp = i;
+			++tmp;
+
+			LocationList::iterator n = new_locations.begin();
+			bool found = false;
+
+			while (n != new_locations.end ()) {
+				if ((*i)->id() == (*n)->id()) {
+					found = true;
+					break;
+				}
+				++n;
+			}
+
+			if (!found) {
+				delete *i;
+				locations.erase (i);
+			}
+
+			i = tmp;
+		}
+
 		locations = new_locations;
 
 		if (locations.size()) {
