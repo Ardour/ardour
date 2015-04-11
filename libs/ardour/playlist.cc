@@ -2356,7 +2356,6 @@ void
 Playlist::setup_layering_indices (RegionList const & regions)
 {
 	uint64_t j = 0;
-	list<Evoral::Range<framepos_t> > xf;
 
 	for (RegionList::const_iterator k = regions.begin(); k != regions.end(); ++k) {
 		(*k)->set_layering_index (j++);
