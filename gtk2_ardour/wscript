@@ -10,8 +10,6 @@ import time
 from waflib.Task import Task
 from waflib.Tools import winres
 
-I18N_PACKAGE = 'gtk2_ardour3'
-
 # Mandatory variables
 top = '.'
 out = 'build'
@@ -377,6 +375,7 @@ def build_color_scheme(path, prefix):
 def build(bld):
 
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
+    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         # Windows VST support w/wine
@@ -691,17 +690,21 @@ def build(bld):
                             mo)
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
-
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                   'Paul Davis')
+	
 def i18n_pot(bld):
-    autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                       'Paul Davis')
 
 def i18n_po(bld):
-    autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
-
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                      'Paul Davis')
+	
 def i18n_mo(bld):
-    autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                      'Paul Davis')
