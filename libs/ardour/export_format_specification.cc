@@ -170,6 +170,7 @@ ExportFormatSpecification::ExportFormatSpecification (Session & s)
 	, _normalize_target (1.0)
 	, _with_toc (false)
 	, _with_cue (false)
+	, _with_mp4chaps (false)
 	, _soundcloud_upload (false)
 	, _command ("")
 {
@@ -248,6 +249,7 @@ ExportFormatSpecification::get_state ()
 	root->add_property ("id", _id.to_s());
 	root->add_property ("with-cue", _with_cue ? "true" : "false");
 	root->add_property ("with-toc", _with_toc ? "true" : "false");
+	root->add_property ("with-mp4chaps", _with_mp4chaps ? "true" : "false");
 	root->add_property ("command", _command);
 
 	node = root->add_child ("Encoding");
@@ -319,14 +321,19 @@ ExportFormatSpecification::set_state (const XMLNode & root)
 	} else {
 		_with_cue = false;
 	}
-	
+
 	if ((prop = root.property ("with-toc"))) {
 		_with_toc = string_is_affirmative (prop->value());
 	} else {
 		_with_toc = false;
 	}
-	
-	
+
+	if ((prop = root.property ("with-mp4chaps"))) {
+		_with_mp4chaps = string_is_affirmative (prop->value());
+	} else {
+		_with_mp4chaps = false;
+	}
+
 	if ((prop = root.property ("command"))) {
 		_command = prop->value();
 	} else {
@@ -600,6 +607,10 @@ ExportFormatSpecification::description (bool include_name)
 
 	if (_with_cue) {
 		components.push_back ("CUE");
+	}
+
+	if (_with_mp4chaps) {
+		components.push_back ("MP4ch");
 	}
 
 	if (!_command.empty()) {

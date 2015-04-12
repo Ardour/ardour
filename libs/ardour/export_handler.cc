@@ -305,6 +305,10 @@ ExportHandler::finish_timespan ()
 			export_cd_marker_file (current_timespan, fmt, filename, CDMarkerTOC);
 		}
 
+		if (fmt->with_mp4chaps()) {
+			export_cd_marker_file (current_timespan, fmt, filename, MP4Chaps);
+		}
+
 		if (fmt->tag()) {
 			AudiofileTagger::tag_file(filename, *SessionMetadata::Metadata());
 		}
@@ -403,6 +407,11 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 			track_func = &ExportHandler::write_track_info_cue;
 			index_func = &ExportHandler::write_index_info_cue;
 			break;
+		case MP4Chaps:
+			header_func = &ExportHandler::write_mp4ch_header;
+			track_func = &ExportHandler::write_track_info_mp4ch;
+			index_func = &ExportHandler::write_index_info_mp4ch;
+			break;
 		default:
 			return;
 		}
@@ -500,17 +509,19 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 string
 ExportHandler::get_cd_marker_filename(std::string filename, CDMarkerFormat format)
 {
-	/* do not strip file suffix because there may be more than one format, 
+	/* do not strip file suffix because there may be more than one format,
 	   and we do not want the CD marker file from one format to overwrite
 	   another (e.g. foo.wav.cue > foo.aiff.cue)
 	*/
 
 	switch (format) {
-	  case CDMarkerTOC:
+	case CDMarkerTOC:
 		return filename + ".toc";
-	  case CDMarkerCUE:
+	case CDMarkerCUE:
 		return filename + ".cue";
-	  default:
+	case MP4Chaps:
+		return filename + ".chapters.txt";
+	default:
 		return filename + ".marker"; // Should not be reached when actually creating a file
 	}
 }
@@ -587,6 +598,11 @@ ExportHandler::write_toc_header (CDMarkerStatus & status)
 	status.out << "  LANGUAGE 0 {" << endl << "    TITLE " << toc_escape_cdtext (title) << endl ;
 	status.out << "    PERFORMER \"" << toc_escape_cdtext (album_artist) << "\"" << endl;
 	status.out << "  }" << endl << "}" << endl;
+}
+
+void
+ExportHandler::write_mp4ch_header (CDMarkerStatus & status)
+{
 }
 
 void
@@ -693,6 +709,14 @@ ExportHandler::write_track_info_toc (CDMarkerStatus & status)
 	status.out << "START" << buf << endl;
 }
 
+void ExportHandler::write_track_info_mp4ch (CDMarkerStatus & status)
+{
+	gchar buf[18];
+
+	frames_to_chapter_marks_string(buf, status.track_start_frame);
+	status.out << buf << " " << status.marker->name() << endl;
+}
+
 void
 ExportHandler::write_index_info_cue (CDMarkerStatus & status)
 {
@@ -716,6 +740,11 @@ ExportHandler::write_index_info_toc (CDMarkerStatus & status)
 }
 
 void
+ExportHandler::write_index_info_mp4ch (CDMarkerStatus & status)
+{
+}
+
+void
 ExportHandler::frames_to_cd_frames_string (char* buf, framepos_t when)
 {
 	framecnt_t remainder;
@@ -728,6 +757,23 @@ ExportHandler::frames_to_cd_frames_string (char* buf, framepos_t when)
 	remainder -= secs * fr;
 	frames = remainder / (fr / 75);
 	sprintf (buf, " %02d:%02d:%02d", mins, secs, frames);
+}
+
+void
+ExportHandler::frames_to_chapter_marks_string (char* buf, framepos_t when)
+{
+	framecnt_t remainder;
+	framecnt_t fr = session.nominal_frame_rate();
+	int hours, mins, secs, msecs;
+
+	hours = when / (3600 * fr);
+	remainder = when - (hours * 3600 * fr);
+	mins = remainder / (60 * fr);
+	remainder -= mins * 60 * fr;
+	secs = remainder / fr;
+	remainder -= secs * fr;
+	msecs = (remainder * 1000) / fr;
+	sprintf (buf, "%02d:%02d:%02d.%03d", hours, mins, secs, msecs);
 }
 
 std::string

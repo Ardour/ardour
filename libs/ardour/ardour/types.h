@@ -461,7 +461,8 @@ namespace ARDOUR {
 	enum CDMarkerFormat {
 		CDMarkerNone,
 		CDMarkerCUE,
-		CDMarkerTOC
+		CDMarkerTOC,
+		MP4Chaps
 	};
 
 	enum HeaderFormat {

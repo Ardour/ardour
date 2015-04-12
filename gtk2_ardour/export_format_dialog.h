@@ -311,11 +311,13 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	Gtk::CheckButton with_cue;
 	Gtk::CheckButton with_toc;
+	Gtk::CheckButton with_mp4chaps;
 
 	Gtk::VBox cue_toc_vbox;
 
 	void update_with_toc ();
 	void update_with_cue ();
+	void update_with_mp4chaps();
 	void update_command ();
 
 	Gtk::TreeView sample_format_view;
