@@ -185,14 +185,19 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 
 	void write_cue_header (CDMarkerStatus & status);
 	void write_toc_header (CDMarkerStatus & status);
+	void write_mp4ch_header (CDMarkerStatus & status);
 
 	void write_track_info_cue (CDMarkerStatus & status);
 	void write_track_info_toc (CDMarkerStatus & status);
+	void write_track_info_mp4ch (CDMarkerStatus & status);
 
 	void write_index_info_cue (CDMarkerStatus & status);
 	void write_index_info_toc (CDMarkerStatus & status);
+	void write_index_info_mp4ch (CDMarkerStatus & status);
 
 	void frames_to_cd_frames_string (char* buf, framepos_t when);
+	void frames_to_chapter_marks_string (char* buf, framepos_t when);
+
 	std::string toc_escape_cdtext (const std::string&);
 	std::string toc_escape_filename (const std::string&);
 	std::string cue_escape_cdtext (const std::string& txt);

@@ -69,6 +69,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
   with_cue (_("Create CUE file for disk-at-once CD/DVD creation")),
   with_toc (_("Create TOC file for disk-at-once CD/DVD creation")),
+  with_mp4chaps (_("Create chapter mark file for MP4 chapter marks")),
 
   tag_checkbox (_("Tag file with session's metadata"))
 {
@@ -149,10 +150,12 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 
 	with_cue.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_cue));
 	with_toc.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_toc));
+	with_mp4chaps.signal_toggled().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_with_mp4chaps));
 	command_entry.signal_changed().connect (sigc::mem_fun (*this, &ExportFormatDialog::update_command));
 
 	cue_toc_vbox.pack_start (with_cue, false, false);
 	cue_toc_vbox.pack_start (with_toc, false, false);
+	cue_toc_vbox.pack_start (with_mp4chaps, false, false);
 
 	/* Load state before hooking up the rest of the signals */
 
@@ -261,6 +264,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 
 	with_cue.set_active (spec->with_cue());
 	with_toc.set_active (spec->with_toc());
+	with_mp4chaps.set_active (spec->with_mp4chaps());
 
 	for (Gtk::ListStore::Children::iterator it = src_quality_list->children().begin(); it != src_quality_list->children().end(); ++it) {
 		if (it->get_value (src_quality_cols.id) == spec->src_quality()) {
@@ -726,6 +730,11 @@ ExportFormatDialog::update_with_toc ()
 	manager.select_with_toc (with_toc.get_active());
 }
 
+void
+ExportFormatDialog::update_with_mp4chaps ()
+{
+	manager.select_with_mp4chaps (with_mp4chaps.get_active());
+}
 
 void
 ExportFormatDialog::update_command ()
