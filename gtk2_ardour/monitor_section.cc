@@ -1025,6 +1025,8 @@ MonitorSection::solo_blink (bool onoff)
 
 		if (_session->soloing()) {
 			if (_session->solo_isolated()) {
+				rude_iso_button.set_active (onoff);
+			} else {
 				rude_iso_button.set_active (false);
 			}
 		}
