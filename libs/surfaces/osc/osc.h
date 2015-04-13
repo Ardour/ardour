@@ -208,6 +208,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
        } 
 
         PATH_CALLBACK2(locate,i,i);
+        PATH_CALLBACK2(loop_location,i,i);
 	PATH_CALLBACK2(route_mute,i,i);
 	PATH_CALLBACK2(route_solo,i,i);
 	PATH_CALLBACK2(route_recenable,i,i);

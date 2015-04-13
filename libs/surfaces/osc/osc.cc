@@ -344,6 +344,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/add_marker", "", add_marker);
 		REGISTER_CALLBACK (serv, "/ardour/access_action", "s", access_action);
 		REGISTER_CALLBACK (serv, "/ardour/loop_toggle", "", loop_toggle);
+		REGISTER_CALLBACK (serv, "/ardour/loop_location", "ii", loop_location);
 		REGISTER_CALLBACK (serv, "/ardour/goto_start", "", goto_start);
 		REGISTER_CALLBACK (serv, "/ardour/goto_end", "", goto_end);
 		REGISTER_CALLBACK (serv, "/ardour/rewind", "", rewind);

@@ -80,6 +80,20 @@ BasicUI::loop_toggle ()
 }
 
 void
+BasicUI::loop_location (framepos_t start, framepos_t end)
+{
+	Location* tll;
+	if ((tll = session->locations()->auto_loop_location()) == 0) {
+		Location* loc = new Location (*session, start, end, _("Loop"),  Location::IsAutoLoop);
+		session->locations()->add (loc, true);
+		session->set_auto_loop_location (loc);
+	} else {
+		tll->set_hidden (false, this);
+		tll->set (start, end);
+	}
+}
+
+void
 BasicUI::goto_start ()
 {
 	session->goto_start ();
