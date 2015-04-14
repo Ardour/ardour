@@ -48,6 +48,7 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
+#include "opts.h"
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
@@ -342,9 +343,28 @@ EngineControl::on_response (int response_id)
 			push_state_to_backend (true);
 			break;
 		case RESPONSE_OK:
+#ifdef PLATFORM_WINDOWS
+			// For some reason we don't understand, 'hide()'
+			// needs to get called first in Windows
+			hide ();
+
+			// But if there's no session open, this can produce
+			// a long gap when nothing appears to be happening.
+			// Let's show the splash image while we're waiting.
+			if ( !ARDOUR_COMMAND_LINE::no_splash ) {
+				if ( ARDOUR_UI::instance() ) {
+					if ( !ARDOUR_UI::instance()->session_loaded ) {
+						ARDOUR_UI::instance()->show_splash();
+					}
+				}
+			}
+			push_state_to_backend (true);
+			break;
+#else
 			push_state_to_backend (true);
 			hide ();
 			break;
+#endif
 		case RESPONSE_DELETE_EVENT:
 			{
 				GdkEventButton ev;
