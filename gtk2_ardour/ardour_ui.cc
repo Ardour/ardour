@@ -3499,43 +3499,36 @@ ARDOUR_UI::flush_trash ()
 void
 ARDOUR_UI::setup_order_hint (AddRouteDialog::InsertAt place)
 {
-	uint32_t order_hint = 0;
+	uint32_t order_hint = UINT32_MAX;
 
+	if (editor->get_selection().tracks.empty()) {
+		return;
+	}
+	
 	/*
 	  we want the new routes to have their order keys set starting from 
 	  the highest order key in the selection + 1 (if available).
 	*/
-	if (place == AddRouteDialog::MixerSelection) {
-		for (RouteUISelection::iterator s = mixer->selection().routes.begin(); s != mixer->selection().routes.end(); ++s) {
-			if ((*s)->route()->order_key() > order_hint) {
-				order_hint = (*s)->route()->order_key();
-			}
-		}
-
-		if (!mixer->selection().routes.empty()) {
+	
+	if (place == AddRouteDialog::AfterSelection) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.back());
+		if (rtav) {
+			order_hint = rtav->route()->order_key();
 			order_hint++;
-		} else {
-			return;
 		}
-
-	} else if (place == AddRouteDialog::EditorSelection){
-		for (TrackSelection::iterator s = editor->get_selection().tracks.begin(); s != editor->get_selection().tracks.end(); ++s) {
-			RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (*s);
-			if (tav && tav->route() && tav->route()->order_key() > order_hint) {
-				order_hint = tav->route()->order_key();
-			}
+	} else if (place == AddRouteDialog::BeforeSelection) {
+		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView*> (editor->get_selection().tracks.front());
+		if (rtav) {
+			order_hint = rtav->route()->order_key();
 		}
-
-		if (!editor->get_selection().tracks.empty()) {
-			order_hint++;
-		} else {
-			return;
-		}
-
 	} else if (place == AddRouteDialog::First) {
 		order_hint = 0;
 	} else {
-		/** AddRouteDialog::Last
+		/* leave order_hint at UINT32_MAX */
+	}
+
+	if (order_hint == UINT32_MAX) {
+		/** AddRouteDialog::Last or selection with first/last not a RouteTimeAxisView
 		 * not setting an order hint will place new routes last.
 		 */
 		return;

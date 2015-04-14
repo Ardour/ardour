@@ -68,8 +68,8 @@ class AddRouteDialog : public ArdourDialog
 	ARDOUR::TrackMode mode();
 	ARDOUR::RouteGroup* route_group ();
 	enum InsertAt {
-		EditorSelection,
-		MixerSelection,
+		BeforeSelection,
+		AfterSelection,
 		First,
 		Last
 	};

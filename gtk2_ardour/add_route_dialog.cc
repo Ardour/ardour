@@ -81,8 +81,8 @@ AddRouteDialog::AddRouteDialog ()
 	track_bus_combo.set_active (0);
 
 	insert_at_combo.append_text (_("First"));
-	insert_at_combo.append_text (_("After Editor Selection"));
-	insert_at_combo.append_text (_("After Mixer Selection"));
+	insert_at_combo.append_text (_("Before Selection"));
+	insert_at_combo.append_text (_("After Selection"));
 	insert_at_combo.append_text (_("Last"));
 
 	insert_at_combo.set_active (1);
@@ -558,10 +558,10 @@ AddRouteDialog::insert_at ()
 
 	if (str == _("First")) {
 		return First;
-	} else if (str == _("After Editor Selection")) {
-		return EditorSelection;
-	} else if (str == _("After Mixer Selection")){
-		return MixerSelection;
+	} else if (str == _("After Selection")) {
+		return AfterSelection;
+	} else if (str == _("Before Selection")){
+		return BeforeSelection;
 	}
 	return Last;
 }
