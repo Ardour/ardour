@@ -315,24 +315,28 @@
                           tooltip="Play"
                           width="34"
                           height="26"
+                          toggleable="true"
                           normalicon="transport_play"
                           activeicon="transport_play_active"/>
               <iconbutton id="transport_record_button"
                           tooltip="Record"
                           width="34"
                           height="26"
+                          toggleable="true"
                           normalicon="transport_record"
                           activeicon="transport_record_active"/>
               <iconbutton id="transport_stop_button"
                           tooltip="Stop"
                           width="34"
                           height="26"
+				          toggleable="true"
                           normalicon="transport_stop"
                           activeicon="transport_stop_active"/>
               <iconbutton id="transport_loop_button"
                           tooltip="Loop"
                           width="34"
                           height="26"
+                          toggleable="true"
                           normalicon="transport_loop"
                           activeicon="transport_loop_active"/>
               <iconbutton id="lock_session_button"
@@ -686,7 +690,7 @@
                    box.fill="true"
                    box.expand="true"/>
       </VBox>
-      <EventBox bgnormal="#000000" width="3"/>
+      <EventBox bgnormal="#000000" width="2"/>
     </HBox>
   </VBox>
 </Window>

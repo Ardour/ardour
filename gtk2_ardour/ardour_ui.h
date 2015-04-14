@@ -515,14 +515,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();
 
-	ArdourButton roll_button;
-	ArdourButton stop_button;
-	ArdourButton goto_start_button;
-	ArdourButton goto_end_button;
-	ArdourButton auto_loop_button;
-	ArdourButton play_selection_button;
-	ArdourButton rec_button;
-
 	void toggle_external_sync ();
 	void toggle_time_master ();
 	void toggle_video_sync ();
@@ -821,8 +813,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     int missing_file (ARDOUR::Session*s, std::string str, ARDOUR::DataType type);
     int ambiguous_file (std::string file, std::vector<std::string> hits);
 
-    bool transport_button_press (GdkEventButton*, Glib::RefPtr<Gtk::Action>&);
-   
 	bool click_button_clicked (GdkEventButton *);
 
 	Gtk::Adjustment* _dsp_load_adjustment;

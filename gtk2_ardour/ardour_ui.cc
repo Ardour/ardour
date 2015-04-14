@@ -265,29 +265,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	session_loaded = false;
 	ignore_dual_punch = false;
 
-	roll_button.set_controllable (roll_controllable);
-	stop_button.set_controllable (stop_controllable);
-	
-	goto_start_button.set_controllable (goto_start_controllable);
-
-	goto_end_button.set_controllable (goto_end_controllable);
-
-	auto_loop_button.set_controllable (auto_loop_controllable);
-
-	play_selection_button.set_controllable (play_selection_controllable);
-	rec_button.set_controllable (rec_controllable);
-
-	roll_button.set_name ("transport button");
-	stop_button.set_name ("transport button");
-	goto_start_button.set_name ("transport button");
-	goto_end_button.set_name ("transport button");
-	auto_loop_button.set_name ("transport button");
-	play_selection_button.set_name ("transport button");
-	rec_button.set_name ("transport recenable button");
 	midi_panic_button.set_name ("transport button");
 
-	goto_start_button.set_tweaks (ArdourButton::ShowClick);
-	goto_end_button.set_tweaks (ArdourButton::ShowClick);
 	midi_panic_button.set_tweaks (ArdourButton::ShowClick);
 	
 	last_configure_time= 0;
@@ -2078,12 +2057,8 @@ void
 ARDOUR_UI::map_transport_state ()
 {
 	if (!_session) {
-		auto_loop_button.unset_active_state ();
 		editor->get_waves_button ("transport_loop_button").set_active (false);
-		play_selection_button.unset_active_state ();
-		roll_button.unset_active_state ();
 		editor->get_waves_button ("transport_play_button").set_active (false);
-		stop_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		editor->get_waves_button ("transport_stop_button").set_active (true);
 		return;
 	}
@@ -2097,56 +2072,33 @@ ARDOUR_UI::map_transport_state ()
 		/* we're rolling */
 
 		if (_session->get_play_range()) {
-
-			play_selection_button.set_active_state (Gtkmm2ext::ExplicitActive);
-			roll_button.unset_active_state ();
 			editor->get_waves_button ("transport_play_button").set_active (true);
-			auto_loop_button.unset_active_state ();
 			editor->get_waves_button ("transport_loop_button").set_active (false);
 		} else if (_session->get_play_loop ()) {
 
-			auto_loop_button.set_active (true);
 			editor->get_waves_button ("transport_loop_button").set_active (true);
-			play_selection_button.set_active (false);
 			if (Config->get_loop_is_mode()) {
-				roll_button.set_active (true);
 				editor->get_waves_button ("transport_play_button").set_active (true);
 			} else {
-				roll_button.set_active (false);
 				editor->get_waves_button ("transport_play_button").set_active (false);
 			}
 
 		} else {
 
-			roll_button.set_active (true);
 			editor->get_waves_button ("transport_play_button").set_active (true);
-			play_selection_button.set_active (false);
-			auto_loop_button.set_active (false);
 			editor->get_waves_button ("transport_loop_button").set_active (false);
 		}
 
-		if (Config->get_follow_edits()) {
-			/* light up both roll and play-selection if they are joined */
-			roll_button.set_active (true);
-			play_selection_button.set_active (true);
-		}
-
-		stop_button.set_active (false);
 		editor->get_waves_button ("transport_stop_button").set_active (false);
 
 	} else {
 
-		stop_button.set_active (true);
 		editor->get_waves_button ("transport_stop_button").set_active (true);
-		roll_button.set_active (false);
 		editor->get_waves_button ("transport_play_button").set_active (false);
 
-		play_selection_button.set_active (false);
 		if (Config->get_loop_is_mode ()) {
-			auto_loop_button.set_active (_session->get_play_loop());
 			editor->get_waves_button ("transport_loop_button").set_active (_session->get_play_loop());
 		} else {
-			auto_loop_button.set_active (false);
 			editor->get_waves_button ("transport_loop_button").set_active (false);
 		}
 		update_disk_space ();
@@ -2591,17 +2543,13 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 
 	if (r == Session::Enabled || (r == Session::Recording && !h)) {
 		if (onoff) {
-			rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 			editor->get_waves_button ("transport_record_button").set_active (true);
 		} else {
-			rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
 			editor->get_waves_button ("transport_record_button").set_active (false);
 	}
 	} else if (r == Session::Recording && h) {
-		rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		editor->get_waves_button ("transport_record_button").set_active (true);
 	} else {
-		rec_button.unset_active_state ();
 		editor->get_waves_button ("transport_record_button").set_active (false);
 	}
 }
@@ -4455,16 +4403,12 @@ ARDOUR_UI::step_edit_status_change (bool yn)
 {
 	// XXX should really store pre-step edit status of things
 	// we make insensitive
-
+	
 	if (yn) {
-		rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
-		editor->get_waves_button ("transport_record_button").set_active (true);
-		rec_button.set_sensitive (false);
+		editor->get_waves_button ("transport_record_button").set_active_state (Gtkmm2ext::ImplicitActive);
 		editor->get_waves_button ("transport_record_button").set_sensitive (false);
 	} else {
-		rec_button.unset_active_state ();
 		editor->get_waves_button ("transport_record_button").set_active (false);
-		rec_button.set_sensitive (true);
 		editor->get_waves_button ("transport_record_button").set_sensitive (true);
 	}
 }

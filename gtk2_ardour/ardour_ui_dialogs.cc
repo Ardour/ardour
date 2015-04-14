@@ -138,7 +138,7 @@ ARDOUR_UI::set_session (Session *s)
 	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
 
-	rec_button.set_sensitive (true);
+	editor->get_waves_button ("transport_record_button").set_sensitive (true);
 
 	solo_alert_button.set_active (_session->soloing());
 
@@ -301,7 +301,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 
-	rec_button.set_sensitive (false);
+	editor->get_waves_button ("transport_record_button").set_sensitive (false);
 
 	WM::Manager::instance().set_session ((ARDOUR::Session*) 0);
 
