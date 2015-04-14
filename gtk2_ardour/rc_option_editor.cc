@@ -1754,14 +1754,6 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_ui_config, &UIConfiguration::set_update_editor_during_summary_drag)
 			    ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "link-editor-and-mixer-selection",
-		     _("Synchronise editor and mixer selection"),
-		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_link_editor_and_mixer_selection),
-		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_link_editor_and_mixer_selection)
-		     ));
-
 	bo = new BoolOption (
 		     "name-new-markers",
 		     _("Name new markers"),

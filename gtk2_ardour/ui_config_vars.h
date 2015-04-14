@@ -61,7 +61,6 @@ UI_CONFIG_VARIABLE (bool, follow_edits, "follow-edits", false)
 UI_CONFIG_VARIABLE (bool, super_rapid_clock_update, "super-rapid-clock-update", false)
 UI_CONFIG_VARIABLE (bool, autoscroll_editor, "autoscroll-editor", true)
 UI_CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)  // DEPRECATED
-UI_CONFIG_VARIABLE (bool, link_editor_and_mixer_selection, "link-editor-and-mixer-selection", false)
 UI_CONFIG_VARIABLE (float, meter_hold, "meter-hold", 100.0f)
 UI_CONFIG_VARIABLE (ARDOUR::VUMeterStandard, meter_vu_standard, "meter-vu-standard", ARDOUR::MeteringVUstandard)
 UI_CONFIG_VARIABLE (ARDOUR::MeterLineUp, meter_line_up_level, "meter-line-up-level", ARDOUR::MeteringLineUp18)

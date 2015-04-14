@@ -630,7 +630,7 @@ Mixer_UI::sync_treeview_from_order_keys ()
 void
 Mixer_UI::follow_editor_selection ()
 {
-	if (!ARDOUR_UI::config()->get_link_editor_and_mixer_selection() || _following_editor_selection) {
+	if (_following_editor_selection) {
 		return;
 	}
 
