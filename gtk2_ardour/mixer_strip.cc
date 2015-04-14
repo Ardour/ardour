@@ -1543,11 +1543,23 @@ MixerStrip::build_route_ops_menu ()
 	}
 
 	items.push_back (SeparatorElem());
-	/* note that this relies on selection being shared across editor and
-	   mixer (or global to the backend, in the future), which is the only
-	   sane thing for users anyway.
-	*/
-	items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
+
+	if (_route) {
+		/* note that this relies on selection being shared across editor and
+		   mixer (or global to the backend, in the future), which is the only
+		   sane thing for users anyway.
+		*/
+
+		RouteTimeAxisView* rtav = PublicEditor::instance().get_route_view_by_route_id (_route->id());
+		if (rtav) {
+			Selection& selection (PublicEditor::instance().get_selection());
+			if (!selection.selected (rtav)) {
+				selection.set (rtav);
+			}
+			
+			items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
+		}
+	}
 }
 
 gboolean
