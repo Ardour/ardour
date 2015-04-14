@@ -114,7 +114,7 @@ const char * Session::default_trx_track_name_pattern = "Track"; // add track num
 const char * Session::default_ardour_track_name_pattern = "Audio "; // add track number to the pattern (SHOULD NOT IT BE "ARDOUR"!!!!)
 
 // seconds should be added afte the region exceeds end marker
-const uint32_t session_end_shift = 15;
+const uint32_t Session::session_end_shift = 5;
 
 namespace {
     bool compare_roots_by_remote_id (const boost::shared_ptr<Route>& route1, const boost::shared_ptr<Route>& route2)
@@ -234,8 +234,8 @@ Session::Session (AudioEngine &eng,
 	, _post_transport_work (0)
 	,  cumulative_rf_motion (0)
 	, rf_scale (1.0)
-    , _ignore_skips_updates (false)
 	, _locations (new Locations (*this))
+    , _ignore_skips_updates (false)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
@@ -4006,7 +4006,7 @@ Session::maybe_update_session_range (framepos_t a, framepos_t b)
 		return;
 	}
     
-    //calculate session endarker offset in samples
+    //calculate session endmarker offset in samples
     framepos_t session_end_marker_shift_samples = session_end_shift*_nominal_frame_rate;
 
 	if (_session_range_location == 0) {
