@@ -95,11 +95,16 @@ mountpoint (string path)
 }
 
 #elif defined(PLATFORM_WINDOWS)
-
+#include <assert.h>
 string
 mountpoint (string path)
 {
-	// TODO ... if needed
+	/* this function is currently only called from 'old_peak_path()'
+	 * via find_broken_peakfile() - only relevant for loading pre
+	 * libsndfile Ardour 2.0 sessions.
+	 */
+	assert(0);
+	return ""; // TODO ... if needed
 }
 
 #else // !HAVE_GETMNTENT
