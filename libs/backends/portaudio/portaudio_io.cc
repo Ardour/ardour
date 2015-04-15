@@ -78,31 +78,35 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 	sampleRates.clear();
 	const PaDeviceInfo* nfo = Pa_GetDeviceInfo(device_id);
 
-        PaStreamParameters inputParam;
-        PaStreamParameters outputParam;
+	if (nfo) {
+		PaStreamParameters inputParam;
+		PaStreamParameters outputParam;
 
-        inputParam.device = device_id;
-        inputParam.channelCount = nfo->maxInputChannels;
-        inputParam.sampleFormat = paFloat32;
-        inputParam.suggestedLatency = 0;
-        inputParam.hostApiSpecificStreamInfo = 0;
+		inputParam.device = device_id;
+		inputParam.channelCount = nfo->maxInputChannels;
+		inputParam.sampleFormat = paFloat32;
+		inputParam.suggestedLatency = 0;
+		inputParam.hostApiSpecificStreamInfo = 0;
 
-        outputParam.device = device_id;
-        outputParam.channelCount = nfo->maxOutputChannels;
-        outputParam.sampleFormat = paFloat32;
-        outputParam.suggestedLatency = 0;
-        outputParam.hostApiSpecificStreamInfo = 0;
+		outputParam.device = device_id;
+		outputParam.channelCount = nfo->maxOutputChannels;
+		outputParam.sampleFormat = paFloat32;
+		outputParam.suggestedLatency = 0;
+		outputParam.hostApiSpecificStreamInfo = 0;
 
-	for (uint32_t i = 0; i < sizeof(ardourRates)/sizeof(float); ++i) {
-		if (paFormatIsSupported == Pa_IsFormatSupported(
-					nfo->maxInputChannels > 0 ? &inputParam : NULL,
-					nfo->maxOutputChannels > 0 ? &outputParam : NULL,
-					ardourRates[i])) {
-			sampleRates.push_back (ardourRates[i]);
+		for (uint32_t i = 0; i < sizeof(ardourRates)/sizeof(float); ++i) {
+			if (paFormatIsSupported == Pa_IsFormatSupported(
+						nfo->maxInputChannels > 0 ? &inputParam : NULL,
+						nfo->maxOutputChannels > 0 ? &outputParam : NULL,
+						ardourRates[i])) {
+				sampleRates.push_back (ardourRates[i]);
+			}
 		}
 	}
 
 	if (sampleRates.empty()) {
+		// fill in something..
+		sampleRates.push_back (44100.0);
 		sampleRates.push_back (48000.0);
 	}
 
