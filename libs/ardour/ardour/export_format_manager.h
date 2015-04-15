@@ -100,6 +100,7 @@ class LIBARDOUR_API ExportFormatManager : public PBD::ScopedConnectionList
 
 	void select_with_cue (bool);
 	void select_with_toc (bool);
+	void select_with_mp4chaps (bool);
 	void select_upload (bool);
 	void set_command (std::string);
 	void select_src_quality (ExportFormatBase::SRCQuality value);
