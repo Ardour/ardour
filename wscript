@@ -575,7 +575,7 @@ def options(opt):
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
                     help='Specify which backend modules are to be included(jack,alsa,wavesaudio,dummy,coreaudio)')
-    opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
+    opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
