@@ -78,7 +78,7 @@ ARDOUR::save_file_dialog (std::vector<std::string> extensions, std::string initi
 
 	// Create filter for required file types
 	std::string filter;
-	for (int i = 0; i < extensions.size(); ++i) {
+	for (size_t i = 0; i < extensions.size(); ++i) {
 		filter += "*."+extensions[i];
 		if (i < (extensions.size() - 1)) {
 			filter += ';';
@@ -163,7 +163,7 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_select
 
 	// Create filter for required file types
 	std::string filter;
-	for (int i = 0; i < extensions.size(); ++i) {
+	for (size_t i = 0; i < extensions.size(); ++i) {
 		filter += "*."+extensions[i];
 		if (i < (extensions.size() - 1)) {
 			filter += ';';
@@ -195,7 +195,6 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_select
 	if (GetOpenFileName(&ofn)) {
 		std::string directory_path = ofn.lpstrFile;
 		std::string path;
-		char* ptr = ofn.lpstrFile;
 
 		if (ofn.lpstrFile [strlen (ofn.lpstrFile) + 1] != 0) { // Many files
 			for (char *current_name = ofn.lpstrFile + strlen (ofn.lpstrFile) + 1;

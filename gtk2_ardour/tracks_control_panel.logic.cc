@@ -521,9 +521,9 @@ void
 TracksControlPanel::populate_auto_lock_timer_dropdown()
 {
     int time = ARDOUR_UI::config()->get_auto_lock_timer();
-    int size = _auto_lock_timer_dropdown.get_menu ().items ().size ();
-    for (int i = 0; i < size; ++i) {
-        if (_auto_lock_timer_dropdown.get_item_data_u (i) == time) {
+    size_t size = _auto_lock_timer_dropdown.get_menu ().items ().size ();
+    for (size_t i = 0; i < size; ++i) {
+        if (_auto_lock_timer_dropdown.get_item_data_i (i) == time) {
         	_auto_lock_timer_dropdown.set_current_item (i);
             break;
         }
@@ -534,9 +534,9 @@ void
 TracksControlPanel::populate_auto_save_timer_dropdown()
 {
     int time = ARDOUR_UI::config()->get_auto_save_timer();
-    int size = _auto_save_timer_dropdown.get_menu ().items ().size ();
-    for (int i = 0; i < size; ++i) {
-        if (_auto_save_timer_dropdown.get_item_data_u (i) == time) {
+    size_t size = _auto_save_timer_dropdown.get_menu ().items ().size ();
+    for (size_t i = 0; i < size; ++i) {
+        if (_auto_save_timer_dropdown.get_item_data_i (i) == time) {
             _auto_save_timer_dropdown.set_current_item (i);
             break;
         }
@@ -547,9 +547,9 @@ void
 TracksControlPanel::populate_pre_record_buffer_dropdown()
 {
     int time = ARDOUR_UI::config()->get_pre_record_buffer();
-    int size = _pre_record_buffer_dropdown.get_menu ().items ().size ();
-    for (int i = 0; i < size; ++i) {
-        if (_pre_record_buffer_dropdown.get_item_data_u (i) == time) {
+    size_t size = _pre_record_buffer_dropdown.get_menu ().items ().size ();
+    for (size_t i = 0; i < size; ++i) {
+        if (_pre_record_buffer_dropdown.get_item_data_i (i) == time) {
         	_pre_record_buffer_dropdown.set_current_item (i);
             break;
         }
@@ -1043,6 +1043,9 @@ TracksControlPanel::display_hdd_buffering ()
         case Large:
             selected_item = 2;
             break;
+		case Custom:
+		default:
+			break;
     }
     
     _hard_disk_buffering_dropdown.set_current_item (selected_item);
