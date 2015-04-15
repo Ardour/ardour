@@ -603,6 +603,7 @@ ExportHandler::write_toc_header (CDMarkerStatus & status)
 void
 ExportHandler::write_mp4ch_header (CDMarkerStatus & status)
 {
+	status.out << "00:00:00.000 Intro" << endl;
 }
 
 void
