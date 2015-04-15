@@ -55,6 +55,7 @@
 using namespace ARDOUR;
 using namespace std;
 using namespace Glib;
+using namespace ArdourSurface;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 

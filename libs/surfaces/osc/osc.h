@@ -50,6 +50,8 @@ class Route;
    certain types of requests to the OSC UI
 */
 
+namespace ArdourSurface {
+
 struct OSCUIRequest : public BaseUI::BaseRequestObject {
   public:
 	OSCUIRequest () {}
@@ -248,5 +250,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	static OSC* _instance;
 };
+
+} // namespace
 
 #endif // ardour_osc_h

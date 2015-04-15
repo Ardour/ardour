@@ -31,6 +31,7 @@
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Route> r, lo_address a)
 	: _route (r)
