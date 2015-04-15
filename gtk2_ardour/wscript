@@ -277,8 +277,7 @@ gtk2_ardour_sources = [
         'video_server_dialog.cc',
         'utils_videotl.cc',
         'export_video_dialog.cc',
-        'export_video_infobox.cc',
-        'yes_no_dialog.cc'
+        'export_video_infobox.cc'
 ]
 if sys.platform == 'darwin':
     gtk2_ardour_sources.append('open_file_dialog.mm')
