@@ -129,17 +129,18 @@ WavesImportDialog::_get_import_mode() const
 }
 
 const std::string __audiofile_types[] = {
-	"aif", "AIF", "aifc", "AIFC", "aiff", "AIFF", "amb", "AMB", "au", "AU",	"caf", "CAF",
-	"cdr", "CDR", "flac", "FLAC", "htk", "HTK", "iff", "IFF", "mat", "MAT", "oga", "OGA",
-	"ogg", "OGG", "paf", "PAF", "pvf", "PVF", "sf", "SF", "smp", "SMP", "snd", "SND",
-	"maud", "MAUD",	"voc", "VOC", "vwe", "VWE", "w64", "W64", "wav", "WAV",
+	"aif", "aifc", "aiff", "amb", "au", "caf",
+	"cdr", "flac", "htk", "iff", "mat", "oga",
+	"ogg", "paf", "pvf", "sf", "smp", "snd",
+	"maud", "voc", "vwe", "w64", "wav"
 #ifdef HAVE_COREAUDIO
-	"aac", "AAC", "adts", "ADTS",
-	"ac3", "AC3", "amr", "AMR",
-	"mpa", "MPA", "mpeg", "MPEG",
-	"mp1", "MP1", "mp2", "MP2",
-	"mp3", "MP3", "mp4", "MP4",
-	"m4a", "M4A", "sd2", "SD2", 	// libsndfile supports sd2 also, but the resource fork is required to open.
+	,
+	"aac", "adts",
+	"ac3", "amr",
+	"mpa", "mpeg",
+	"mp1", "mp2",
+	"mp3", "mp4",
+	"m4a", "sd2" 	// libsndfile supports sd2 also, but the resource fork is required to open.
 #endif // HAVE_COREAUDIO
 };
 
@@ -148,6 +149,7 @@ WavesImportDialog::run_import ()
 {
 	std::vector<std::string> audiofile_types (__audiofile_types,
 											 __audiofile_types + sizeof (__audiofile_types)/sizeof(__audiofile_types[0]));
+
 	do {
 		_files_to_import = ARDOUR::open_file_dialog (audiofile_types, true, __initial_folder);
 		if (_files_to_import.empty ()) {

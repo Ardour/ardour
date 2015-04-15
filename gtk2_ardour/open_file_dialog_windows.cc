@@ -76,23 +76,21 @@ ARDOUR::save_file_dialog (std::vector<std::string> extensions, std::string initi
 	ofn.lpstrTitle = title.c_str();
 	ofn.Flags = OFN_OVERWRITEPROMPT | OFN_EXPLORER;
 
-
 	// Create filter for required file types
 	std::string filter;
 	for (int i = 0; i < extensions.size(); ++i) {
-		filter += "*."+extensions[i]+";";
+		filter += "*."+extensions[i];
+		if (i < (extensions.size() - 1)) {
+			filter += ';';
+		}
 	}
 
-	char c_filter[1 + filter.size() + 2];
-	c_filter[0] = 0;
-	strcpy (c_filter + 1, filter.c_str ());
-	c_filter[1 + filter.size() + 1] = '\0';
+	char c_filter[filter.size()*2 + 3];
+	strcpy (c_filter, filter.c_str ());
+	strcpy (c_filter + filter.size() + 1, filter.c_str ());
+	c_filter[filter.size()*2 + 2] = '\0';
 	
 	ofn.lpstrFilter = c_filter;
-
-	if (!extensions.empty()) {
-		ofn.lpstrDefExt = extensions[0].c_str ();
-	}
 
 	// Check on valid path
 	WIN32_FIND_DATA FindFileData;
@@ -166,20 +164,19 @@ ARDOUR::open_file_dialog (std::vector<std::string> extensions, bool multi_select
 	// Create filter for required file types
 	std::string filter;
 	for (int i = 0; i < extensions.size(); ++i) {
-		filter += "*."+extensions[i]+";";
+		filter += "*."+extensions[i];
+		if (i < (extensions.size() - 1)) {
+			filter += ';';
+		}
 	}
 
-	char c_filter[1 + filter.size() + 2];
-	c_filter[0] = 0;
-	strcpy (c_filter + 1, filter.c_str ());
-	c_filter[1 + filter.size() + 1] = '\0';
+	char c_filter[filter.size()*2 + 3];
+	strcpy (c_filter, filter.c_str ());
+	strcpy (c_filter + filter.size() + 1, filter.c_str ());
+	c_filter[filter.size()*2 + 2] = '\0';
 	
 	ofn.lpstrFilter = c_filter;
 		
-	if (!extensions.empty()) {
-		ofn.lpstrDefExt = extensions[0].c_str ();
-	}
-
 	// Check on valid path
 	WIN32_FIND_DATA FindFileData;
 	HANDLE handle = FindFirstFile(initial_path.c_str(), &FindFileData) ;
