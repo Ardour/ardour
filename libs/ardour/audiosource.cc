@@ -353,6 +353,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 #else
 	const int bufsize = sysconf(_SC_PAGESIZE);
 #endif
+	framecnt_t read_npeaks = npeaks;
 	framecnt_t zero_fill = 0;
 
 	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));
@@ -373,12 +374,11 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	if (cnt > _length - start) {
 		// cerr << "too close to end @ " << _length << " given " << start << " + " << cnt << " (" << _length - start << ")" << endl;
 		cnt = _length - start;
-		framecnt_t old = npeaks;
-		npeaks = min ((framecnt_t) floor (cnt / samples_per_visual_peak), npeaks);
-		zero_fill = old - npeaks;
+		read_npeaks = min ((framecnt_t) floor (cnt / samples_per_visual_peak), npeaks);
+		zero_fill = npeaks - read_npeaks;
 	}
 
-	// cerr << "actual npeaks = " << npeaks << " zf = " << zero_fill << endl;
+	// cerr << "actual npeaks = " << read_npeaks << " zf = " << zero_fill << endl;
 
 	if (npeaks == cnt) {
 
@@ -405,7 +405,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 	if (scale == 1.0) {
 		off_t first_peak_byte = (start / samples_per_file_peak) * sizeof (PeakData);
-		size_t bytes_to_read = sizeof (PeakData)* npeaks;
+		size_t bytes_to_read = sizeof (PeakData) * read_npeaks;
 		/* open, read, close */
 
 		DEBUG_TRACE (DEBUG::Peaks, "DIRECT PEAKS\n");
@@ -417,7 +417,6 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 		if (_first_run  || (_last_scale != samples_per_visual_peak) || (_last_map_off != map_off) || (_last_raw_map_length  < bytes_to_read)) {
 			peak_cache.reset (new PeakData[npeaks]);
-			boost::scoped_array<PeakData> staging (new PeakData[npeaks]);
 			char* addr;
 #ifdef PLATFORM_WINDOWS
 			HANDLE file_handle = (HANDLE) _get_osfhandle(int(sfd));
@@ -458,7 +457,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			munmap (addr, map_length);
 #endif
 			if (zero_fill) {
-				memset (&peak_cache[npeaks], 0, sizeof (PeakData) * zero_fill);
+				memset (&peak_cache[read_npeaks], 0, sizeof (PeakData) * zero_fill);
 			}
 
 			_first_run = false;
@@ -552,12 +551,12 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			memcpy ((void*)staging.get(), (void*)(addr + map_delta), raw_map_length);
 			munmap (addr, map_length);
 #endif
-			while (nvisual_peaks < npeaks) {
+			while (nvisual_peaks < read_npeaks) {
 
 				xmax = -1.0;
 				xmin = 1.0;
 
-				while ((current_stored_peak <= stored_peak_before_next_visual_peak) && (i < raw_map_length)) {
+				while ((current_stored_peak <= stored_peak_before_next_visual_peak) && (i < chunksize)) {
 
 					xmax = max (xmax, staging[i].max);
 					xmin = min (xmin, staging[i].min);
@@ -573,8 +572,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			}
 
 			if (zero_fill) {
-				cerr << "Zero fill end of peaks (@ " << npeaks << " with " << zero_fill << endl;
-				memset (&peak_cache[npeaks], 0, sizeof (PeakData) * zero_fill);
+				cerr << "Zero fill end of peaks (@ " << read_npeaks << " with " << zero_fill << ")" << endl;
+				memset (&peak_cache[read_npeaks], 0, sizeof (PeakData) * zero_fill);
 			}
 
 			_first_run = false;
@@ -612,7 +611,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		xmin = 1.0;
 		xmax = -1.0;
 
-		while (nvisual_peaks < npeaks) {
+		while (nvisual_peaks < read_npeaks) {
 
 			if (i == frames_read) {
 
@@ -623,7 +622,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
                                         /* hmm, error condition - we've reached the end of the file
                                            without generating all the peak data. cook up a zero-filled
                                            data buffer and then use it. this is simpler than
-                                           adjusting zero_fill and npeaks and then breaking out of
+                                           adjusting zero_fill and read_npeaks and then breaking out of
                                            this loop early
 					*/
 
@@ -664,7 +663,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		}
 
 		if (zero_fill) {
-			memset (&peaks[npeaks], 0, sizeof (PeakData) * zero_fill);
+			memset (&peaks[read_npeaks], 0, sizeof (PeakData) * zero_fill);
 		}
 	}
 
