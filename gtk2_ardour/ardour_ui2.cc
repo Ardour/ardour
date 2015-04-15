@@ -103,15 +103,6 @@ ARDOUR_UI::setup_windows ()
 void
 ARDOUR_UI::setup_tooltips ()
 {
-	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
-	set_tip (follow_edits_button, _("Playhead follows Range Selections and Edits"));
-	set_tip (auto_input_button, _("Be sensible about input monitoring"));
-	set_tip (click_button, _("Enable/Disable audio click"));
-	set_tip (solo_alert_button, _("When active, something is soloed.\nClick to de-solo everything"));
-	set_tip (auditioning_alert_button, _("When active, auditioning is taking place\nClick to stop the audition"));
-	set_tip (feedback_alert_button, _("When active, there is a feedback loop."));
-	set_tip (editor_meter_peak_display, _("Reset Level Meter"));
-
 	synchronize_sync_source_and_video_pullup ();
 
 	editor->setup_tooltips ();
@@ -203,26 +194,12 @@ ARDOUR_UI::setup_transport ()
 
 	auto_return_dropdown.AddMenuElem (Gtk::Menu_Helpers::MenuElem (_("Disable/Enable All Options"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_all_auto_return)));
 
-	follow_edits_button.set_text(_("Follow Edits"));
-
-	click_button.set_image (get_icon (X_("metronome")));
 	act = ActionManager::get_action ("Transport", "ToggleClick");
-	click_button.set_related_action (act);
-	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
-
-	follow_edits_button.set_name ("transport option button");
-	auto_input_button.set_name ("transport option button");
 
 	/* these have to provide a clear indication of active state */
 
-	click_button.set_name ("transport button");
-
 	editor->get_waves_button ("transport_stop_button").set_active (true);
 
-	midi_panic_button.set_image (get_icon (X_("midi_panic")));
-	/* the icon for this has an odd aspect ratio, so fatten up the button */
-	midi_panic_button.set_size_request (25, -1);
-	
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	editor->get_waves_button ("transport_stop_button").set_related_action (act);
 
@@ -245,7 +222,6 @@ ARDOUR_UI::setup_transport ()
     act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
 	
 	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
-	midi_panic_button.set_related_action (act);	
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
 
 	/* clocks, etc. */
@@ -259,24 +235,11 @@ ARDOUR_UI::setup_transport ()
 	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
 
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleFollowEdits"));
-	follow_edits_button.set_related_action (act);
 	act = ActionManager::get_action ("Transport", "ToggleAutoInput");
-	auto_input_button.set_related_action (act);
 
 	/* alerts */
 
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
-
-	solo_alert_button.set_name ("rude solo");
-	solo_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_press), false);
-	auditioning_alert_button.set_name ("rude audition");
-	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
-	feedback_alert_button.set_name ("feedback alert");
-	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
-
-	alert_box.pack_start (solo_alert_button, true, false);
-	alert_box.pack_start (auditioning_alert_button, true, false);
-	alert_box.pack_start (feedback_alert_button, true, false);
 
 	/* all transport buttons should be the same size vertically and
 	 * horizontally 
@@ -302,15 +265,11 @@ ARDOUR_UI::setup_transport ()
 void
 ARDOUR_UI::soloing_changed (bool onoff)
 {
-	if (solo_alert_button.get_active() != onoff) {
-		solo_alert_button.set_active (onoff);
-	}
 }
 
 void
 ARDOUR_UI::_auditioning_changed (bool onoff)
 {
-	auditioning_alert_button.set_active (onoff);
 	set_transport_sensitivity (!onoff);
 }
 
@@ -354,16 +313,6 @@ ARDOUR_UI::solo_blink (bool onoff)
 	if (_session == 0) {
 		return;
 	}
-
-	if (_session->soloing() || _session->listening()) {
-		if (onoff) {
-			solo_alert_button.set_active (true);
-		} else {
-			solo_alert_button.set_active (false);
-		}
-	} else {
-		solo_alert_button.set_active (false);
-	}
 }
 
 void
@@ -398,27 +347,15 @@ ARDOUR_UI::audition_blink (bool onoff)
 
 	if (_session->is_auditioning()) {
 		if (onoff) {
-			auditioning_alert_button.set_active (true);
 		} else {
-			auditioning_alert_button.set_active (false);
 		}
 	} else {
-		auditioning_alert_button.set_active (false);
 	}
 }
 
 void
 ARDOUR_UI::feedback_blink (bool onoff)
 {
-	if (_feedback_exists) {
-		if (onoff) {
-			feedback_alert_button.set_active (true);
-		} else {
-			feedback_alert_button.set_active (false);
-		}
-	} else {
-		feedback_alert_button.set_active (false);
-	}
 }
 
 void

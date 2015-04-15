@@ -192,13 +192,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
-	, follow_edits_button (ArdourButton::led_default_elements)
-	, auto_input_button (ArdourButton::led_default_elements)
-	, auditioning_alert_button (_("audition"))
-	, solo_alert_button (_("solo"))
-	, feedback_alert_button (_("feedback"))
-	, editor_meter(0)
-	, editor_meter_peak_display()
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, theme_manager (X_("theme-manager"), _("Theme Manager"))
 	, key_editor (X_("key-editor"), _("Key Command Editor"))
@@ -265,10 +258,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	session_loaded = false;
 	ignore_dual_punch = false;
 
-	midi_panic_button.set_name ("transport button");
-
-	midi_panic_button.set_tweaks (ArdourButton::ShowClick);
-	
 	last_configure_time= 0;
 	last_peak_grab = 0;
 
@@ -1141,15 +1130,6 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 	// august 2007: actual update frequency: 25Hz (40ms), not 100Hz
 
 	SuperRapidScreenUpdate(); /* EMIT_SIGNAL */
-	if (editor_meter && Config->get_show_editor_meter()) {
-		float mpeak = editor_meter->update_meters();
-		if (mpeak > editor_meter_max_peak) {
-			if (mpeak >= Config->get_meter_peak()) {
-				editor_meter_peak_display.set_name ("meterbridge peakindicator on");
-				editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
-			}
-		}
-	}
 	return TRUE;
 }
 
@@ -4658,11 +4638,6 @@ ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_pat
 void
 ARDOUR_UI::reset_peak_display ()
 {
-	if (!_session || !_session->master_out() || !editor_meter) return;
-	editor_meter->clear_meters();
-	editor_meter_max_peak = -INFINITY;
-	editor_meter_peak_display.set_name ("meterbridge peakindicator");
-	editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
 }
 
 void

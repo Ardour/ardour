@@ -140,8 +140,6 @@ ARDOUR_UI::set_session (Session *s)
 
 	editor->get_waves_button ("transport_record_button").set_sensitive (true);
 
-	solo_alert_button.set_active (_session->soloing());
-
 	setup_session_options ();
 
 	Blink.connect (sigc::mem_fun(*this, &ARDOUR_UI::transport_rec_enable_blink));
@@ -197,44 +195,13 @@ ARDOUR_UI::set_session (Session *s)
     _session->config.set_native_file_data_format  (this->_sample_format);
     _session->config.set_timecode_format(this->_timecode_format);
 
-	if (editor_meter) {
-		meter_box.remove(*editor_meter);
-		delete editor_meter;
-		editor_meter = 0;
-		editor_meter_peak_display.hide();
-	}
-
 	if (_session && 
 	    _session->master_out() && 
 	    _session->master_out()->n_outputs().n(DataType::AUDIO) > 0) {
 
-		if (!ARDOUR::Profile->get_trx()) {
-			editor_meter = new LevelMeterHBox(_session);
-			editor_meter->set_meter (_session->master_out()->shared_peak_meter().get());
-			editor_meter->clear_meters();
-			editor_meter->set_type (_session->master_out()->meter_type());
-			editor_meter->setup_meters (12, 6);
-			editor_meter->show();
-			meter_box.pack_start(*editor_meter);
-		}
-
 		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
 		ArdourMeter::ResetRoutePeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_route_peak_display));
 		ArdourMeter::ResetGroupPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_group_peak_display));
-
-		editor_meter_peak_display.set_name ("meterbridge peakindicator");
-		editor_meter_peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
-		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
-		editor_meter_peak_display.set_size_request(6, -1);
-		editor_meter_peak_display.set_corner_radius(2);
-
-		editor_meter_max_peak = -INFINITY;
-		editor_meter_peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &ARDOUR_UI::editor_meter_peak_button_release), false);
-
-		if (Config->get_show_editor_meter() && !ARDOUR::Profile->get_trx()) {
-			meter_box.show();
-			editor_meter_peak_display.show();
-		}
 	}
     
     update_bit_depth_button ();
@@ -291,13 +258,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	point_zero_something_second_connection.disconnect();
         connection_with_session_config.disconnect();
 	fps_connection.disconnect();
-
-	if (editor_meter) {
-		meter_box.remove(*editor_meter);
-		delete editor_meter;
-		editor_meter = 0;
-		editor_meter_peak_display.hide();
-	}
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
 

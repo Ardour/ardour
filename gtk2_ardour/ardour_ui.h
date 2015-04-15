@@ -531,20 +531,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_auto_return_state (ARDOUR::AutoReturnTarget);
 	void toggle_all_auto_return ();
 	
-	ArdourButton follow_edits_button;
-	ArdourButton auto_input_button;
-	ArdourButton click_button;
-	// NO NEED TO HAVE IT: ArdourButton sync_button;
- 
-	ArdourButton auditioning_alert_button;
-	ArdourButton solo_alert_button;
-	ArdourButton feedback_alert_button;
-
-	Gtk::VBox alert_box;
-	Gtk::VBox meter_box;
-	LevelMeterHBox * editor_meter;
-	float            editor_meter_max_peak;
-	ArdourButton     editor_meter_peak_display;
 	bool             editor_meter_peak_button_release (GdkEventButton*);
 
 	void solo_blink (bool);
@@ -831,7 +817,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void feedback_detected ();
 
-	ArdourButton             midi_panic_button;
 	void                     midi_panic ();
 
 	void successful_graph_sort ();

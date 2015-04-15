@@ -412,13 +412,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ArdourCanvas::WaveView::set_global_gradient_depth (config()->get_waveform_gradient_depth());
 	} else if (p == "show-editor-meter") {
 		bool show = Config->get_show_editor_meter();
-
-		if (editor_meter) {
-			if (show) {
-				meter_box.show();
-				editor_meter_peak_display.show();
-			} 
-		}
 	} else if (p == "output-auto-connect") {
                 update_output_operation_mode_buttons();
 	} else if (p == "waveform-scale") {
