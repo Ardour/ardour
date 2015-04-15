@@ -3,6 +3,11 @@ export LIBRARY_PATH=$WINGTK/inst/lib:$WINA3/inst/lib
 export C_INCLUDE_PATH="$WINGTK/inst/include:$WINA3/inst/include"
 export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH
 
+if [ "$1" != "rebuild" ] ; then
+    logfile=build_log.txt
+else
+    logfile=rebuild_log.txt
+fi
 (
 	if [ "$1" != "rebuild" ] ; then
 		./waf build -v
@@ -11,4 +16,4 @@ export CPLUS_INCLUDE_PATH=$C_INCLUDE_PATH
         echo ./waf configure $2 $3 $4 $5 $6 --program-name="Tracks Live" --prefix="/" --bindir="/" --configdir="/share" --noconfirm --no-lv2 --dist-target=mingw
         if ./waf configure $2 $3 $4 $5 $6 --program-name="Tracks Live" --prefix="/" --bindir="/" --configdir="/share" --noconfirm --no-lv2 --dist-target=mingw ; then ./waf build -v; fi
 	fi
-) 2>&1 | tee $AD/buildlog.txt #"$AD/ardour-build-log.`date +%Y-%m-%d--%H.%M`.txt"
+) 2>&1 | tee $AD/$logfile #"$AD/ardour-build-log.`date +%Y-%m-%d--%H.%M`.txt"
