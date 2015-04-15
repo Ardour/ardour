@@ -520,7 +520,10 @@ ExportHandler::get_cd_marker_filename(std::string filename, CDMarkerFormat forma
 	case CDMarkerCUE:
 		return filename + ".cue";
 	case MP4Chaps:
-		return filename + ".chapters.txt";
+	{
+		unsigned lastdot = filename.find_last_of('.');
+		return filename.substr(0,lastdot) + ".chapters.txt";
+	}
 	default:
 		return filename + ".marker"; // Should not be reached when actually creating a file
 	}
