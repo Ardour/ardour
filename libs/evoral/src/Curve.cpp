@@ -171,7 +171,7 @@ Curve::solve ()
 bool
 Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
-	Glib::Threads::Mutex::Lock lm(_list.lock(), Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm(_list.lock(), Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
 		return false;
@@ -184,7 +184,7 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 void
 Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
 {
-	Glib::Threads::Mutex::Lock lm(_list.lock());
+	Glib::Threads::RWLock::ReaderLock lm(_list.lock());
 	_get_vector (x0, x1, vec, veclen);
 }
 

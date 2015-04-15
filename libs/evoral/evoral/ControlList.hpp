@@ -109,7 +109,7 @@ public:
 
 	EventList::size_type size() const { return _events.size(); }
         double length() const { 		
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return _events.empty() ? 0.0 : _events.back()->when;
 	}
 	bool empty() const { return _events.empty(); }
@@ -184,18 +184,18 @@ public:
 	std::pair<ControlList::iterator,ControlList::iterator> control_points_adjacent (double when);
 
 	template<class T> void apply_to_points (T& obj, void (T::*method)(const ControlList&)) {
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		(obj.*method)(*this);
 	}
 
 	double eval (double where) {
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return unlocked_eval (where);
 	}
 
 	double rt_safe_eval (double where, bool& ok) {
 
-		Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
+		Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
 
 		if ((ok = lm.locked())) {
 			return unlocked_eval (where);
@@ -226,7 +226,7 @@ public:
 	double default_value() const { return _default_value; }
 
 	// FIXME: const violations for Curve
-	Glib::Threads::Mutex& lock()         const { return _lock; }
+	Glib::Threads::RWLock& lock()       const { return _lock; }
 	LookupCache& lookup_cache() const { return _lookup_cache; }
 	SearchCache& search_cache() const { return _search_cache; }
 
@@ -297,7 +297,7 @@ protected:
 	mutable LookupCache   _lookup_cache;
 	mutable SearchCache   _search_cache;
 
-	mutable Glib::Threads::Mutex _lock;
+	mutable Glib::Threads::RWLock _lock;
 
 	Parameter             _parameter;
 	ParameterDescriptor   _desc;
