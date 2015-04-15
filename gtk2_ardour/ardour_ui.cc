@@ -3571,13 +3571,24 @@ ARDOUR_UI::setup_order_hint ()
 			order_hint = tav->route()->order_key();
 		}
 	}
+    
+    
+    /* If no tracks are selected or only master bus is selected do not create a gap in the existing route order keys.*/
+    if (editor->get_selection().tracks.empty ()) {
+        _session->set_order_hint (order_hint);
+        return;
+    } else if (editor->get_selection().tracks.size () == 1) {
+        TimeAxisView* selected_tav = editor->get_selection().tracks.front();
+        RouteTimeAxisView* tav = dynamic_cast<RouteTimeAxisView*> (selected_tav);
+        if (tav && tav->route() && tav->route()->is_master () ) {
+            _session->set_order_hint (order_hint);
+            return;
+        }
+    }
 
-	if (!editor->get_selection().tracks.empty()) {
-		order_hint++;
-	}
-
-	_session->set_order_hint (order_hint);
-
+	order_hint++;
+    _session->set_order_hint (order_hint);
+	
 	/* create a gap in the existing route order keys to accomodate new routes.*/
 
 	boost::shared_ptr <RouteList> rd = _session->get_routes();
