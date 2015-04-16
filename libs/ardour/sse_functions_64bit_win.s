@@ -629,7 +629,7 @@ x86_sse_compute_peak:
 
 	addq $16, %rdi
 
-	subq $4, %rdx #; nframes-=4
+	subq $4, %rcx #; nframes-=4
 
 	decq %rax
 	jnz .LP_SSE
