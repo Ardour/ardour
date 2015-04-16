@@ -367,19 +367,16 @@ WaveView::y_extent (double s, bool /*round_to_lower_edge*/) const
 		 * up a pixel down. and a value of -1.0 (ideally y = _height-1)
 		 * currently is on the bottom separator line :(
 		 * So to make the complete waveform appear centered in
-		 * a region, we translate by +.5 (instead of -.5)
-		 * and waste two pixel of height: -4 (instad of -2)
+		 * a region, we translate by +1.5 (instead of -.5)
+		 * and scale to height - 2.5 (if we scale to height - 2.0
+		 * then the bottom most pixel may bleed into the selection rect
+		 * by 0.5 px)
 		 *
-		 * This needs fixing in canvas/rectangle the intersect
-		 * functions and probably a couple of other places as well...
 		 */
 		Coord pos;
-		if (s < 0) {
-			pos = ceil  ((1.0 - s) * .5 * (_height - 4.0));
-		} else {
-			pos = floor ((1.0 - s) * .5 * (_height - 4.0));
-		}
-		return min (_height - 4.0, (max (0.0, pos)));
+		pos = floor ((1.0 - s) * .5 * (_height - 2.5));
+
+		return min (_height - 2.5, (max (0.0, pos)));
 	}
 }
 
@@ -568,23 +565,22 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	/* ensure single-pixel lines */
 
 	wave_context->set_line_width (1.0);
-	wave_context->translate (0.5, +0.5);
+	wave_context->translate (0.5, +1.5);
 
 	outline_context->set_line_width (1.0);
-	outline_context->translate (0.5, +0.5);
+	outline_context->translate (0.5, +1.5);
 
 	clip_context->set_line_width (1.0);
-	clip_context->translate (0.5, +0.5);
+	clip_context->translate (0.5, +1.5);
 
 	zero_context->set_line_width (1.0);
-	zero_context->translate (0.5, +0.5);
+	zero_context->translate (0.5, +1.5);
 
 	/* the height of the clip-indicator should be at most 7 pixels,
 	 * or 5% of the height of the waveview item.
 	 */
 
 	const double clip_height = min (7.0, ceil (_height * 0.05));
-	bool draw_outline_as_wave = false;
 
 	/* There are 3 possible components to draw at each x-axis position: the
 	   waveform "line", the zero line and an outline/clip indicator.  We
@@ -638,7 +634,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		outline_context->stroke ();
 
 	} else {
-		const double height_2 = (_height - 4.0) * .5;
+		const double height_2 = (_height - 2.5) * .5;
 
 		for (int i = 0; i < n_peaks; ++i) {
 
@@ -671,43 +667,47 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			}
 
 			if (tips[i].spread > 1.0) {
-				draw_outline_as_wave = false;
-				/* lower outline/clip indicator */
+				bool clipped = false;
+				/* outline/clip indicators */
+				if (_global_show_waveform_clipping && tips[i].clip_max) {
+					clip_context->move_to (i, tips[i].top);
+					/* clip-indicating upper terminal line */
+					clip_context->rel_line_to (0, min (clip_height, ceil(tips[i].spread + 0.5)));
+					clipped = true;
+				}
+
 				if (_global_show_waveform_clipping && tips[i].clip_min) {
 					clip_context->move_to (i, tips[i].bot);
 					/* clip-indicating lower terminal line */
-					const double sign = tips[i].bot > height_2 ? -1 : 1;
-					clip_context->rel_line_to (0, sign * min (clip_height, ceil (tips[i].spread + .5)));
-				} else {
-					outline_context->move_to (i, tips[i].bot + 0.5);
-					/* normal lower terminal dot */
-					outline_context->rel_line_to (0, -0.5);
+					clip_context->rel_line_to (0, - min (clip_height, ceil(tips[i].spread + 0.5)));
+					clipped = true;
 				}
-			} else {
-				draw_outline_as_wave = true;
-				if (tips[i].clip_min) {
-					// make sure we draw the clip
-					tips[i].clip_max = true;
-				}
-			}
 
-			/* upper outline/clip indicator */
-			if (_global_show_waveform_clipping && tips[i].clip_max) {
-				clip_context->move_to (i, tips[i].top);
-				/* clip-indicating upper terminal line */
-				const double sign = tips[i].top > height_2 ? -1 : 1;
-				clip_context->rel_line_to (0, sign * min(clip_height, ceil(tips[i].spread + .5)));
-			} else {
-				if (draw_outline_as_wave) {
-					wave_context->move_to (i, tips[i].top + 0.5);
-					/* special case where outline only is drawn.
-					   is this correct? too short by 0.5?
-					*/
-					wave_context->rel_line_to (0, -0.5);
-				} else {
-					outline_context->move_to (i, tips[i].top + 0.5);
+				if (!clipped) {
+					outline_context->move_to (i, tips[i].bot + 1.0);
+					/* normal lower terminal dot */
+					outline_context->rel_line_to (0, -1.0);
+
+					outline_context->move_to (i, tips[i].top - 1.0);
 					/* normal upper terminal dot */
-					outline_context->rel_line_to (0, -0.5);
+					outline_context->rel_line_to (0, 1.0);
+				}
+			} else {
+				bool clipped = false;
+				/* outline/clip indicator */
+				if (_global_show_waveform_clipping && (tips[i].clip_max || tips[i].clip_min)) {
+					clip_context->move_to (i, tips[i].top);
+					/* clip-indicating upper / lower terminal line */
+					clip_context->rel_line_to (0, 1.0);
+					clipped = true;
+				}
+
+				if (!clipped) {
+					wave_context->move_to (i, tips[i].top);
+					/* special case where outline only is drawn.
+					 * we draw a 1px "line", pretending that the span is 1.0
+					*/
+					wave_context->rel_line_to (0, 1.0);
 				}
 			}
 		}
