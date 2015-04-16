@@ -619,15 +619,12 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 			}
 
 			/* clip indicator */
-			bool clipped = false;
+
 			if (_global_show_waveform_clipping && (tips[i].clip_max || tips[i].clip_min)) {
 				clip_context->move_to (i, tips[i].top);
 				/* clip-indicating upper terminal line */
 				clip_context->rel_line_to (0, min (clip_height, ceil(tips[i].spread + .5)));
-				clipped = true;
-			}
-
-			if (!clipped) {
+			} else {
 				outline_context->move_to (i, tips[i].top);
 				/* normal upper terminal dot */
 				outline_context->rel_line_to (0, -1.0);
