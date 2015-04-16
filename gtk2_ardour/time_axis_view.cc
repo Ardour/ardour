@@ -356,13 +356,8 @@ bool
 TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 {
 	if (_resize_drag_start >= 0) {
-		/* (ab)use the DragManager to do autoscrolling - basically we
-		 * are pretending that the drag is taking place over the canvas
-		 * (which perhaps in the glorious future, when track headers
-		 * and the canvas are unified, will actually be true.)
-		*/
 
-		_editor.maybe_autoscroll (false, true, true);
+        /* do not start autoscroll if trackheader resize drag start */
 
 		/* now schedule the actual TAV resize */
                 int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
