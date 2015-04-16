@@ -25,6 +25,8 @@
 #include <sys/time.h>
 #endif
 
+namespace ArdourSurface {
+
 namespace Mackie
 {
 
@@ -96,6 +98,7 @@ private:
 	bool running;
 };
 
-}
+} // Mackie namespace
+} // ArdourSurface namespace
 
 #endif

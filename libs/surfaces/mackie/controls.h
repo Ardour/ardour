@@ -36,15 +36,15 @@ namespace ARDOUR {
 	class AutomationControl;
 }
 
-namespace Mackie
-{
+namespace ArdourSurface {
+
+namespace Mackie {
 
 class Strip;
 class Group;
 class Surface;
 
-class Control
-{
+class Control {
 public:
 	Control (int id, std::string name, Group& group);
 	virtual ~Control() {}
@@ -56,7 +56,7 @@ public:
 	bool in_use () const;
 	void set_in_use (bool);
 	
-	/// Keep track of the timeout so it can be updated with more incoming events
+	// Keep track of the timeout so it can be updated with more incoming events
 	sigc::connection in_use_connection;
 
 	virtual MidiByteArray zero() = 0;
@@ -85,8 +85,9 @@ public:
 	bool _in_use;
 };
 
-std::ostream & operator <<  (std::ostream & os, const Control & control);
-
 }
+}
+
+std::ostream & operator <<  (std::ostream & os, const ArdourSurface::Mackie::Control & control);
 
 #endif /* __mackie_controls_h__ */

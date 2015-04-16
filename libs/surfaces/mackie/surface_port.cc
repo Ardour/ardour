@@ -44,9 +44,10 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace Mackie;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)

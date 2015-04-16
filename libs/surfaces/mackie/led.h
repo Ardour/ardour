@@ -24,6 +24,8 @@
 #include "midi_byte_array.h"
 #include "types.h"
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 class Led : public Control
@@ -52,6 +54,7 @@ public:
 	LedState state;
 };
 
+}
 }
 
 #endif /* __ardour_mackie_control_protocol_led_h__ */

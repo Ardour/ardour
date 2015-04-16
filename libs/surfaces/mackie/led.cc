@@ -21,6 +21,7 @@
 #include "surface.h"
 #include "control_group.h"
 
+using namespace ArdourSurface;
 using namespace Mackie;
 
 const int Led::FaderTouch = 0x70;

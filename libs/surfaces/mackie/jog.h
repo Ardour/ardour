@@ -23,6 +23,7 @@
 #include "controls.h"
 #include "pot.h"
 
+namespace ArdourSurface {
 namespace Mackie {
 
 class Jog : public Pot
@@ -40,6 +41,7 @@ public:
 	static Control* factory (Surface&, int id, const char*, Group&);
 };
 
+}
 }
 
 #endif /* __ardour_mackie_control_protocol_jog_h__ */

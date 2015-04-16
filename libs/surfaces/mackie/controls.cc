@@ -34,8 +34,10 @@
 #include "meter.h"
 
 
-using namespace Mackie;
 using namespace std;
+using namespace ArdourSurface;
+using namespace Mackie;
+
 using ARDOUR::AutomationControl;
 
 void Group::add (Control& control)
@@ -67,20 +69,6 @@ void
 Control::set_in_use (bool in_use)
 {
 	_in_use = in_use;
-}
-
-ostream & Mackie::operator <<  (ostream & os, const Mackie::Control & control)
-{
-	os << typeid (control).name();
-	os << " { ";
-	os << "name: " << control.name();
-	os << ", ";
-	os << "id: " << "0x" << setw(2) << setfill('0') << hex << control.id() << setfill(' ');
-	os << ", ";
-	os << "group: " << control.group().name();
-	os << " }";
-	
-	return os;
 }
 
 void
@@ -122,3 +110,17 @@ Control::stop_touch (bool mark, double when)
 	}
 }
 	
+ostream & operator <<  (ostream & os, const ArdourSurface::Mackie::Control & control)
+{
+	os << typeid (control).name();
+	os << " { ";
+	os << "name: " << control.name();
+	os << ", ";
+	os << "id: " << "0x" << setw(2) << setfill('0') << hex << control.id() << setfill(' ');
+	os << ", ";
+	os << "group: " << control.group().name();
+	os << " }";
+	
+	return os;
+}
+

@@ -42,8 +42,9 @@
 #include "i18n.h"
 
 using namespace std;
-using namespace Mackie;
 using namespace Gtk;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 void*
 MackieControlProtocol::get_gui () const

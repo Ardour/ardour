@@ -23,6 +23,8 @@ namespace ARDOUR {
 	class ChannelCount;
 }
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 class Control;
@@ -145,6 +147,7 @@ private:
 	std::map<Evoral::Parameter,Control*> control_by_parameter;
 };
 
+}
 }
 
 #endif /* __ardour_mackie_control_protocol_strip_h__ */

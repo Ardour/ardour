@@ -28,6 +28,8 @@
 
 class XMLNode;
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 class DeviceProfile
@@ -67,6 +69,7 @@ class DeviceProfile
 	void save ();
 };
 
+}
 }
 
 #endif /* __ardour_mackie_control_protocol_device_profile_h__ */

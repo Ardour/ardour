@@ -28,6 +28,8 @@
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 static ControlProtocol*
 new_mackie_protocol (ControlProtocolDescriptor*, Session* s)

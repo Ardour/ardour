@@ -20,8 +20,8 @@
 
 #include <iostream>
 
-namespace Mackie
-{
+namespace ArdourSurface  {
+namespace Mackie {
 
 enum surface_type_t { 
 	mcu, 
@@ -107,6 +107,7 @@ class Group;
 class Pot;
 class Led;
 
+}
 }
 
 #endif

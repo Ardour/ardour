@@ -24,6 +24,7 @@
 #include "control_group.h"
 #include "mackie_control_protocol.h"
 
+using namespace ArdourSurface;
 using namespace Mackie;
 
 Control*

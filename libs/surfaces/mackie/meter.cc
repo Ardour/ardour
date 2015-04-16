@@ -27,8 +27,9 @@
 #include "surface_port.h"
 #include "control_group.h"
 
-using namespace Mackie;
 using namespace PBD;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 Control*
 Meter::factory (Surface& surface, int id, const char* name, Group& group)

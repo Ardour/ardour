@@ -23,6 +23,8 @@
 #include "controls.h"
 #include "midi_byte_array.h"
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 class SurfacePort;
@@ -46,6 +48,7 @@ public:
 	bool overload_on;
 };
 
-}
+} // Mackie namespace
+} // ArdourSurface namespace
 
 #endif /* __ardour_mackie_control_protocol_meter_h__ */

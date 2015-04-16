@@ -19,14 +19,19 @@
 
 #include "types.h"
 
-namespace Mackie
-{
+namespace ArdourSurface {
+
+namespace Mackie {
+
 LedState on( LedState::on );
 LedState off( LedState::off );
 LedState flashing( LedState::flashing );
 LedState none( LedState::none );
 
-std::ostream & operator << ( std::ostream & os, const ControlState & cs )
+}
+}
+
+std::ostream & operator << ( std::ostream & os, const ArdourSurface::Mackie::ControlState & cs )
 {
 	os << "ControlState { ";
 	os << "pos: " << cs.pos;
@@ -43,6 +48,4 @@ std::ostream & operator << ( std::ostream & os, const ControlState & cs )
 	os << " }";
 
 	return os;
-}
-
 }

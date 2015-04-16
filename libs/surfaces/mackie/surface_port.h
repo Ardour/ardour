@@ -31,12 +31,15 @@ namespace MIDI {
 	class Port;
 }
 
-class MackieControlProtocol;
 
 namespace ARDOUR {
 	class AsyncMIDIPort;
 	class Port;
 }
+
+namespace ArdourSurface {
+
+class MackieControlProtocol;
 
 namespace Mackie
 {
@@ -74,6 +77,7 @@ private:
 
 std::ostream& operator <<  (std::ostream& , const SurfacePort& port);
 
+}
 }
 
 #endif

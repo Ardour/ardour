@@ -20,8 +20,8 @@
 
 #include <stdexcept>
 
-namespace Mackie
-{
+namespace ArdourSurface {
+namespace Mackie {
 
 class MackieControlException : public std::exception
 {
@@ -42,6 +42,7 @@ private:
 	std::string _msg;
 };
 
+}
 }
 
 #endif
