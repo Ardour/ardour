@@ -300,6 +300,7 @@ private:
 	int                  _order;
 	uint32_t             _effective_height;
 	double               _resize_drag_start;
+    double               _absolute_y_position;
 	GdkCursor*           _preresize_cursor;
 	bool                 _have_preresize_cursor;
     bool                 _try_to_change_height;

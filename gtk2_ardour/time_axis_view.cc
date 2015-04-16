@@ -103,6 +103,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess,
 	, _order (0)
 	, _effective_height (0)
 	, _resize_drag_start (-1)
+    , _absolute_y_position (0)
 	, _preresize_cursor (0)
 	, _have_preresize_cursor (false)
     , _try_to_change_height (false)
@@ -339,6 +340,7 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 			
 	if ( event->button == 1 && maybe_set_cursor (event->y) > 0 ) {
 		_resize_drag_start = event->y_root;
+        _absolute_y_position = event->y_root - height;
         control_ebox_resize_started();
 	}
 
@@ -359,11 +361,18 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 
         /* do not start autoscroll if trackheader resize drag start */
 
-		/* now schedule the actual TAV resize */
-                int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
-                _editor.add_to_idle_resize (this, delta);
-                _resize_drag_start = ev->y_root;
+		/* now schedule the actual TAV resize 
+           Stop resize if ev->y_root heigher then trackheader top minus HeightSmall*/
+        
+        if ( _absolute_y_position + preset_height (HeightSmall) - ev->y_root < 0 ) {
+            int32_t const delta = (int32_t) floor (ev->y_root - _resize_drag_start);
+            _editor.add_to_idle_resize (this, delta);
+            _resize_drag_start = ev->y_root;
         } else {
+            set_height (preset_height (HeightSmall));
+            _resize_drag_start = _absolute_y_position + preset_height (HeightSmall);
+        }
+    } else {
 		/* not dragging but ... */
 		maybe_set_cursor (ev->y);
 	}
