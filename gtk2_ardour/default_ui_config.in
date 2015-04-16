@@ -185,7 +185,7 @@
     <Option name="transport punch rect" value="6d2828e5"/>
     <Option name="trim handle locked" value="ea0f0f28"/>
     <Option name="trim handle" value="1900ff44"/>
-    <Option name="verbose canvas cursor" value="ffffffbc"/>
+    <Option name="verbose canvas cursor" value="000000ff"/>
     <Option name="vestigial frame" value="0000000f"/>
     <Option name="video timeline bar" value="303030ff"/>
     <Option name="region base" value="7FA82Bff"/>
