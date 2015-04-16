@@ -414,7 +414,8 @@ def build(bld):
                 u = PLATFORM.uname ()
                 cpu = u[4]
                 if re.search ("(x86_64|AMD64)", cpu) != None:
-                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit_win.s' ]
+                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_avx.cc' ]
+                        obj.source += [ 'sse_functions_64bit_win.s', 'sse_avx_functions_64bit_win.s' ]
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):

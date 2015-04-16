@@ -30,7 +30,8 @@ class LIBPBD_API FPU {
 		HasFlushToZero = 0x1,
 		HasDenormalsAreZero = 0x2,
 		HasSSE = 0x4,
-		HasSSE2 = 0x8
+		HasSSE2 = 0x8,
+		HasAVX = 0x10
 	};
 
   public:
@@ -41,6 +42,7 @@ class LIBPBD_API FPU {
 	bool has_denormals_are_zero () const { return _flags & HasDenormalsAreZero; }
 	bool has_sse () const { return _flags & HasSSE; }
 	bool has_sse2 () const { return _flags & HasSSE2; }
+	bool has_avx () const { return _flags & HasAVX; }
 	
   private:
 	Flags _flags;

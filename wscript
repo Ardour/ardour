@@ -262,12 +262,11 @@ def set_compiler_flags (conf,opt):
             if (re.search ("(x86_64|AMD64)", cpu) != None):
                 # on Windows sse is supported by 64 bit platforms only
                 build_host_supports_sse = True
-                
+
                 # mingw GCC compiler to uses at&t (Unix specific) assembler dialect by default
                 # compiler_flags.append (["--mmnemonic=att", "msyntax=att")
                 
-                compiler_flags.extend (["-msse", "-mfpmath=sse", "-DUSE_XMMINTRIN", "-masm=att"])
-                
+                compiler_flags.extend (["-mavx", "-mvzeroupper", "-DUSE_XMMINTRIN"])  
 
     # end of processor-specific section
 

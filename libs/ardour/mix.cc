@@ -136,6 +136,12 @@ default_mix_buffers_no_gain (ARDOUR::Sample * dst, const ARDOUR::Sample * src, p
 	}
 }
 
+void
+default_copy_vector (ARDOUR::Sample * dst, const ARDOUR::Sample * src, pframes_t nframes)
+{
+	memcpy(dst, src, nframes*sizeof(ARDOUR::Sample));
+}
+
 #if defined (__APPLE__) && defined (BUILD_VECLIB_OPTIMIZATIONS)
 #include <Accelerate/Accelerate.h>
 

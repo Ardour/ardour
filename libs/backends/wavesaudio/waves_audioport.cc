@@ -50,7 +50,8 @@ void* WavesAudioPort::get_buffer (pframes_t nframes)
              */
 
 			// get first buffer data
-			memcpy (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes * sizeof (Sample));
+			// use optimized function to fill the buffer intialy
+			ARDOUR::copy_vector (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes);
 			++it;
             
 			// mix the rest

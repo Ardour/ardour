@@ -155,7 +155,7 @@ def build(bld):
         cpu = u[4]
         if re.search ("(x86_64|AMD64)", cpu) != None:
             obj.defines += [ 'USE_X86_64_ASM' ]
-            obj.defines += ['NO_POSIX_MEMALIGN' ]
+        obj.defines += ['NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
         obj.source += [ 'msvc/fpu.cc' ]
         obj.uselib += ' OLE'

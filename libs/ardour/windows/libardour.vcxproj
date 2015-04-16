@@ -14,6 +14,8 @@
     <None Include="..\run-profiling.sh" />
     <None Include="..\run-session-tests.sh" />
     <None Include="..\run-tests.sh" />
+    <None Include="..\sse_avx_functions_64bit_win.s" />
+    <None Include="..\sse_functions_64bit_win.s" />
     <None Include="..\test-env.sh" />
     <None Include="..\wscript" />
   </ItemGroup>

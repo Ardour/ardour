@@ -20,7 +20,8 @@ using namespace std;
 
 FPU::FPU ()
 {
-	unsigned long cpuflags = 0;
+	unsigned long cpuflags_ECX = 0;
+	unsigned long cpuflags_EDX = 0;
 
 	_flags = (Flags)0;
 
@@ -33,24 +34,26 @@ FPU::FPU ()
 	// no need to use assembler for getting info from register, this function does this for us
 	int cpuInfo[4];
 	__cpuid (cpuInfo, 1);
-	cpuflags = cpuInfo[3];
+	cpuflags_ECX = cpuInfo[2]; // flags from ECX register
+	cpuflags_EDX = cpuInfo[3]; // flags from EDX register
 
-	if (cpuflags & (1<<25)) {
+	if (cpuflags_ECX & (1<<28)) {
+		_flags = Flags (_flags | (HasAVX) );
+	}
+
+	if (cpuflags_EDX & (1<<25)) {
 		_flags = Flags (_flags | (HasSSE|HasFlushToZero) );
 	}
 
-	if (cpuflags & (1<<26)) {
+	if (cpuflags_EDX & (1<<26)) {
 		_flags = Flags (_flags | HasSSE2);
 	}
 
-	if (cpuflags & (1 << 24)) {
-		char** fxbuf = 0;
+	if (cpuflags_EDX & (1 << 24)) {
+		char* fxbuf = 0;
 
 		// allocate alligned buffer
-		fxbuf = (char **) malloc (sizeof (char *));
-		assert (fxbuf);
-		*fxbuf = (char *) malloc (512);
-		assert (*fxbuf);
+		fxbuf = (char*)_aligned_malloc(512, 16);
 
 		// Verify that fxbuf is correctly aligned
 		unsigned long long buf_addr = (unsigned long long)(void*)fxbuf;
@@ -58,25 +61,15 @@ FPU::FPU ()
 			error << _("cannot allocate 16 byte aligned buffer for h/w feature detection") << endmsg;
 		else
 		{
-			memset(*fxbuf, 0, 512); // Initialize the buffer !!! Added by JE - 12-12-2009
+			memset(fxbuf, 0, 512); // Initialize the buffer !!! Added by JE - 12-12-2009
 
 #if defined (COMPILER_MINGW)
 			asm volatile (
 				"fxsave (%0)"
 				:
-				: "r" (*fxbuf)
+				: "r" (fxbuf)
 				: "memory"
 				);
-/*
-			asm( ".intel_syntax noprefix\n" );
-
-			asm volatile (
-				 "mov eax, fxbuf\n"
-				 "fxsave   [eax]\n" 
-			);
-
-			asm( ".att_syntax prefix\n" );
-*/
 
 #elif defined (COMPILER_MSVC)
 			__asm {
@@ -96,8 +89,7 @@ FPU::FPU ()
 				_flags = Flags (_flags | HasDenormalsAreZero);
 			}
 
-			free (*fxbuf);
-			free (fxbuf);
+			_aligned_free (fxbuf);
 		}
 	}
 }
