@@ -549,7 +549,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	*/
 
 	float** ins = (float**)alloca(_plugin->numInputs*sizeof(float*));
-	float** outs = (float**)alloca(_plugin->numInputs*sizeof(float*));
+	float** outs = (float**)alloca(_plugin->numOutputs*sizeof(float*));
 
 	int32_t i;
 
