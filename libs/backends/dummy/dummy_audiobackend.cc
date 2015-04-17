@@ -1621,7 +1621,7 @@ void DummyAudioPort::setup_generator (GeneratorType const g, float const sampler
 #else
 					const double phase = a * exp (b * j) - a;
 #endif
-					_wavetable[i] = (float)sin (2. * M_PI * (phase - floor (phase)));
+					_wavetable[i] = -(float)sin (2. * M_PI * (phase - floor (phase)));
 				}
 				if (_gen_type == SquareSweep) {
 					for (uint32_t i = 0 ; i < _gen_period; ++i) {
