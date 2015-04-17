@@ -76,7 +76,7 @@ fixup_bundle_environment (int, char* [], string & localedir)
 
 #ifdef ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {
-		(*localedir) = "/this/cannot/exist";
+		localedir = "/this/cannot/exist";
 	} else {
 		/* force localedir into the bundle */
 		
@@ -84,7 +84,7 @@ fixup_bundle_environment (int, char* [], string & localedir)
 		lpath.push_back (bundle_dir);
 		lpath.push_back ("Resources");
 		lpath.push_back ("locale");
-		localedir = strdup (Glib::build_filename (lpath).c_str());
+		localedir = Glib::build_filename (lpath).c_str();
 	}
 #endif
 		
