@@ -18,7 +18,7 @@
 */
 
 #include <stdlib.h>
-#inc;ude <string>
+#include <string>
 #include "bundle_env.h"
 #include "i18n.h"
 
