@@ -52,7 +52,7 @@ using namespace std;
 extern void set_language_preference (); // cocoacarbon.mm
 
 void
-fixup_bundle_environment (int, char* [], const char** localedir)
+fixup_bundle_environment (int, char* [], string & localedir)
 {
 	if (!g_getenv ("ARDOUR_BUNDLED")) {
 		return;
@@ -84,7 +84,7 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 		lpath.push_back (bundle_dir);
 		lpath.push_back ("Resources");
 		lpath.push_back ("locale");
-		(*localedir) = strdup (Glib::build_filename (lpath).c_str());
+		localedir = strdup (Glib::build_filename (lpath).c_str());
 	}
 #endif
 		

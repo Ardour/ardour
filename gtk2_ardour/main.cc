@@ -74,7 +74,7 @@ TextReceiver text_receiver ("ardour");
 extern int curvetest (string);
 
 static ARDOUR_UI  *ui = 0;
-static const char* localedir = LOCALEDIR;
+static string localedir (LOCALEDIR);
 
 void
 gui_jack_error ()
@@ -253,7 +253,7 @@ int main (int argc, char *argv[])
 {
 	ARDOUR::check_for_old_configuration_files();
 
-	fixup_bundle_environment (argc, argv, &localedir);
+	fixup_bundle_environment (argc, argv, localedir);
 
 	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
 
@@ -277,7 +277,7 @@ int main (int argc, char *argv[])
 #ifdef ENABLE_NLS
 	cerr << "bind txt domain [" << PACKAGE << "] to " << localedir << endl;
 
-	(void) bindtextdomain (PACKAGE, localedir);
+	(void) bindtextdomain (PACKAGE, localedir.c_str());
 	/* our i18n translations are all in UTF-8, so make sure
 	   that even if the user locale doesn't specify UTF-8,
 	   we use that when handling them.
@@ -330,7 +330,7 @@ int main (int argc, char *argv[])
 		     << endl;
 	}
 
-	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
+	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir.c_str())) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
 		exit (1);
 	}
@@ -346,7 +346,7 @@ int main (int argc, char *argv[])
 #endif
 
 	try {
-		ui = new ARDOUR_UI (&argc, &argv, localedir);
+		ui = new ARDOUR_UI (&argc, &argv, localedir.c_str());
 	} catch (failed_constructor& err) {
 		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
 		exit (1);

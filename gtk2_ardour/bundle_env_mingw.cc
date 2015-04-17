@@ -18,6 +18,7 @@
 */
 
 #include <stdlib.h>
+#inc;ude <string>
 #include "bundle_env.h"
 #include "i18n.h"
 
@@ -84,7 +85,7 @@ get_install_path ()
 
 
 void
-fixup_bundle_environment (int, char* [], const char** localedir)
+fixup_bundle_environment (int, char* [], string & localedir)
 {
 	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true));
 	/* what to do ? */
@@ -103,7 +104,7 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 		Glib::setenv ("GTK_LOCALEDIR", path, true);
 
 		// and return the same path to our caller
-		(*localedir) = strdup (path.c_str());
+		localedir = path;
 	}
 
 	const char *cstr;

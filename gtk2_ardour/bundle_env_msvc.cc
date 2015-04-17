@@ -341,7 +341,7 @@ string clearlooks_la_file;
 }
 
 void
-fixup_bundle_environment (int argc, char* argv[], const char** localedir)
+fixup_bundle_environment (int argc, char* argv[], string & localedir)
 {
 	std::string exec_path = argv[0];
 	std::string dir_path  = Glib::path_get_dirname (exec_path);
@@ -450,7 +450,7 @@ fixup_bundle_environment (int argc, char* argv[], const char** localedir)
 		Glib::setenv ("GTK_LOCALEDIR", path, true);
 
 		// and return the same path to our caller
-		(*localedir) = strdup (path.c_str());
+		localedir = path;
 	}
 
 

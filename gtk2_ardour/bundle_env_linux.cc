@@ -46,7 +46,7 @@ using namespace ARDOUR;
 using namespace std;
 
 void
-fixup_bundle_environment (int /*argc*/, char* argv[], const char** localedir)
+fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 {
 	/* THIS IS FOR LINUX - its just about the only place where its
 	 * acceptable to build paths directly using '/'.
@@ -63,14 +63,14 @@ fixup_bundle_environment (int /*argc*/, char* argv[], const char** localedir)
 
 #ifdef ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {
-		(*localedir) = "/this/cannot/exist";
+		localedir = "/this/cannot/exist";
 	} else {
 		/* force localedir into the bundle */
 		vector<string> lpath;
 		lpath.push_back (dir_path);
 		lpath.push_back ("share");
 		lpath.push_back ("locale");
-		(*localedir) = canonical_path (Glib::build_filename (lpath)).c_str();
+		localedir = canonical_path (Glib::build_filename (lpath)).c_str();
 	}
 #endif
 
