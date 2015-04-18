@@ -216,13 +216,21 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 	return 0;
 }
 
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * btn_scale))
+
 void
 ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
 
-	transport_tearoff_hbox.set_border_width (3);
-	transport_tearoff_hbox.set_spacing (3);
+#ifdef __APPLE__
+	const double btn_scale = 1.0;
+#else
+	const double btn_scale = config()->get_font_scale () / 102400.;
+#endif
+
+	transport_tearoff_hbox.set_border_width (PX_SCALE(3,3));
+	transport_tearoff_hbox.set_spacing (PX_SCALE(3,3));
 
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
@@ -293,9 +301,6 @@ ARDOUR_UI::setup_transport ()
 	midi_panic_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	midi_panic_button.set_icon (ArdourButton::TransportPanic);
 
-	/* the icon for this has an odd aspect ratio, so fatten up the button */
-	midi_panic_button.set_size_request (25, -1);
-	
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
@@ -348,7 +353,7 @@ ARDOUR_UI::setup_transport ()
 	error_alert_button.set_fallthrough_to_parent(true);
 
 	alert_box.set_homogeneous (true);
-	alert_box.set_spacing (2);
+	alert_box.set_spacing (PX_SCALE(2, 2));
 	alert_box.pack_start (solo_alert_button, true, true);
 	alert_box.pack_start (auditioning_alert_button, true, true);
 	alert_box.pack_start (feedback_alert_button, true, true);
@@ -366,8 +371,11 @@ ARDOUR_UI::setup_transport ()
 	transport_button_size_group->add_widget (roll_button);
 	transport_button_size_group->add_widget (stop_button);
 
-	goto_start_button.set_size_request (28, 44);
-	click_button.set_size_request (32, 44);
+	/* the icon for this has an odd aspect ratio, so fatten up the button */
+	midi_panic_button.set_size_request (PX_SCALE(25, 25), -1);
+	goto_start_button.set_size_request (PX_SCALE(28, 28), PX_SCALE(44, 44));
+	click_button.set_size_request (PX_SCALE(32, 32), PX_SCALE(44, 44));
+
 
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
@@ -379,9 +387,9 @@ ARDOUR_UI::setup_transport ()
 	Alignment* a1 = manage (new Alignment);
 	Alignment* a2 = manage (new Alignment);
 
-	tbox1->set_spacing (2);
-	tbox2->set_spacing (2);
-	tbox->set_spacing (2);
+	tbox1->set_spacing (PX_SCALE(2, 2));
+	tbox2->set_spacing (PX_SCALE(2, 2));
+	tbox->set_spacing (PX_SCALE(2, 2));
 
 	if (!Profile->get_trx()) {
 		tbox1->pack_start (midi_panic_button, true, true, 5);
@@ -416,7 +424,7 @@ ARDOUR_UI::setup_transport ()
 	if (!ARDOUR::Profile->get_small_screen() && !ARDOUR::Profile->get_trx()) {
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
-	clock_box->set_spacing (3);
+	clock_box->set_spacing (PX_SCALE(3, 3));
 
 	shuttle_box = manage (new ShuttleControl);
 	shuttle_box->show ();
@@ -424,7 +432,7 @@ ARDOUR_UI::setup_transport ()
 	VBox* transport_vbox = manage (new VBox);
 	transport_vbox->set_name ("TransportBase");
 	transport_vbox->set_border_width (0);
-	transport_vbox->set_spacing (3);
+	transport_vbox->set_spacing (PX_SCALE(3, 3));
 	transport_vbox->pack_start (*tbox, true, true, 0);
 
 	if (!Profile->get_trx()) {
@@ -443,7 +451,7 @@ ARDOUR_UI::setup_transport ()
 
 	VBox* auto_box = manage (new VBox);
 	auto_box->set_homogeneous (true);
-	auto_box->set_spacing (2);
+	auto_box->set_spacing (PX_SCALE(2, 2));
 	auto_box->pack_start (sync_button, true, true);
 	if (!ARDOUR::Profile->get_trx()) {
 		auto_box->pack_start (follow_edits_button, true, true);
@@ -487,6 +495,7 @@ ARDOUR_UI::setup_transport ()
 		transport_tearoff->set_state (*tnode);
 	}
 }
+#undef PX_SCALE
 
 void
 ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
