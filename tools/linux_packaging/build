@@ -513,17 +513,17 @@ echo
 if test x$STRIP = xall ; then
     echo Stripping all libraries
     # Must be writable so that we can strip
-    find $APPLIB/ -name "*.so*" | xargs chmod u+w
+    find $APPLIB/ -name "*.so*" -print0 | xargs -0 chmod u+w
     # and strip ...
-    find $APPLIB/ -name "*.so*" | xargs strip
+    find $APPLIB/ -name "*.so*" -print0 | xargs -0 strip -s
 elif test x$STRIP = xsome ; then
     echo Stripping dependent libraries
     for l in $deplibs ; do
         chmod u+w $APPLIB/$l
-        strip $APPLIB/$l
+        strip -s $APPLIB/$l
     done
 fi
-find $APPLIB/ -name "*.so*" | xargs chmod a+rx
+find $APPLIB/ -name "*.so*" -print0 | xargs -0 chmod a+rx
 
 echo "Copying other stuff to $APPDIR  ..."
 
