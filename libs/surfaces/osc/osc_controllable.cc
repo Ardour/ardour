@@ -30,6 +30,7 @@
 using namespace sigc;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 OSCControllable::OSCControllable (lo_address a, const std::string& p, boost::shared_ptr<Controllable> c)
 	: controllable (c)

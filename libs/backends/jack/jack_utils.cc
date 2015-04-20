@@ -34,7 +34,7 @@
 #include <shlguid.h>   // 'IShellLink'
 #endif
 
-#ifdef HAVE_PORTAUDIO
+#if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
 #include <portaudio.h>
 #endif
 
@@ -373,7 +373,7 @@ ARDOUR::get_jack_coreaudio_device_names (device_map_t& devices)
 void
 ARDOUR::get_jack_portaudio_device_names (device_map_t& devices)
 {
-#ifdef HAVE_PORTAUDIO
+#if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
 	if (Pa_Initialize() != paNoError) {
 		return;
 	}
@@ -892,7 +892,11 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 	ostringstream oss;
 
 	for (vector<string>::const_iterator i = args.begin(); i != args.end();) {
-		oss << *i;
+		if (i->find_first_of(' ') != string::npos) {
+			oss << "\"" << *i << "\"";
+		} else {
+			oss << *i;
+		}
 		if (++i != args.end()) oss << ' ';
 	}
 
@@ -943,11 +947,11 @@ ARDOUR::enumerate_midi_options ()
 		midi_options.push_back (make_pair (_("ALSA (JACK1, 0.124 and later)"), alsa_seq_midi_driver_name));
 		midi_options.push_back (make_pair (_("ALSA (JACK2, 1.9.8 and later)"), alsa_raw_midi_driver_name));
 #endif
-#ifdef HAVE_PORTAUDIO
+#if (defined PLATFORM_WINDOWS && defined HAVE_PORTAUDIO)
 		/* Windows folks: what name makes sense here? Are there other
 		   choices as well ?
 		*/
-		midi_options.push_back (make_pair (_("Multimedia Extension"), winmme_midi_driver_name));
+		midi_options.push_back (make_pair (_("System MIDI (MME)"), winmme_midi_driver_name));
 #endif
 #ifdef __APPLE__
 		midi_options.push_back (make_pair (_("CoreMIDI"), coremidi_midi_driver_name));
@@ -956,11 +960,11 @@ ARDOUR::enumerate_midi_options ()
 
 	vector<string> v;
 
-	v.push_back (get_none_string());
-
 	for (MidiOptions::const_iterator i = midi_options.begin(); i != midi_options.end(); ++i) {
 		v.push_back (i->first);
 	}
+
+	v.push_back (get_none_string());
 
 	return v;
 }

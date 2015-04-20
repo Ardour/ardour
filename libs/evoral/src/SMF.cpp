@@ -287,6 +287,11 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 		}
 		memcpy(*buf, event->midi_buffer, size_t(event_size));
 		*size = event_size;
+		if (((*buf)[0] & 0xF0) == 0x90 && (*buf)[2] == 0) {
+			/* normalize note on with velocity 0 to proper note off */
+			(*buf)[0] = 0x80 | ((*buf)[0] & 0x0F);  /* note off */
+			(*buf)[2] = 0x40;  /* default velocity */
+		}
 
 		if (!midi_event_is_valid(*buf, *size)) {
 			cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;

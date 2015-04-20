@@ -189,7 +189,7 @@ class LIBARDOUR_API ISlaveSessionProxy {
 	virtual framepos_t audible_frame ()             const   { return 0; }
 	virtual framepos_t transport_frame ()           const   { return 0; }
 	virtual pframes_t  frames_since_cycle_start ()  const   { return 0; }
-	virtual pframes_t  sample_time_at_cycle_start() const   { return 0; }
+	virtual framepos_t sample_time_at_cycle_start() const   { return 0; }
 	virtual framepos_t frame_time ()                const   { return 0; }
 
 	virtual void request_locate (framepos_t /*frame*/, bool with_roll = false) {
@@ -212,7 +212,7 @@ class LIBARDOUR_API SlaveSessionProxy : public ISlaveSessionProxy {
 	framepos_t audible_frame ()              const;
 	framepos_t transport_frame ()            const;
 	pframes_t  frames_since_cycle_start ()   const;
-	pframes_t  sample_time_at_cycle_start()  const;
+	framepos_t sample_time_at_cycle_start()  const;
 	framepos_t frame_time ()                 const;
 
 	void request_locate (framepos_t frame, bool with_roll = false);
@@ -388,6 +388,7 @@ public:
 	int            ltc_detect_fps_cnt;
 	int            ltc_detect_fps_max;
 	bool           printed_timecode_warning;
+	bool           sync_lock_broken;
 	Timecode::TimecodeFormat ltc_timecode;
 	Timecode::TimecodeFormat a3e_timecode;
 

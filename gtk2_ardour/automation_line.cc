@@ -105,7 +105,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	terminal_points_can_slide = true;
 	_height = 0;
 
-	group = new ArdourCanvas::Container (&parent);
+	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple(0, 1.5));
 	CANVAS_DEBUG_NAME (group, "region gain envelope group");
 
 	line = new ArdourCanvas::PolyLine (group);
@@ -156,7 +156,7 @@ void
 AutomationLine::update_visibility ()
 {
 	if (_visible & Line) {
-		/* Only show the line there are some points, otherwise we may show an out-of-date line
+		/* Only show the line when there are some points, otherwise we may show an out-of-date line
 		   when automation points have been removed (the line will still follow the shape of the
 		   old points).
 		*/
@@ -289,15 +289,15 @@ AutomationLine::modify_point_y (ControlPoint& cp, double y)
 
 	cp.move_to (x, y, ControlPoint::Full);
 
+	alist->freeze ();
+	sync_model_with_view_point (cp);
+	alist->thaw ();
+
 	reset_line_coords (cp);
 
 	if (line_points.size() > 1) {
 		line->set_steps (line_points, is_stepped());
 	}
-
-	alist->freeze ();
-	sync_model_with_view_point (cp);
-	alist->thaw ();
 
 	update_pending = false;
 
@@ -317,14 +317,17 @@ AutomationLine::reset_line_coords (ControlPoint& cp)
 	}
 }
 
-void
+bool
 AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp)
 {
 	update_pending = true;
 
+	bool moved = false;
 	for (list<ControlPoint*>::iterator i = cp.begin(); i != cp.end(); ++i) {
-		sync_model_with_view_point (**i);
+		moved = sync_model_with_view_point (**i) || moved;
 	}
+
+	return moved;
 }
 
 string
@@ -743,13 +746,13 @@ AutomationLine::end_drag (bool with_push, uint32_t final_index)
 	}
 
 	alist->freeze ();
-	sync_model_with_view_points (_drag_points);
+	bool moved = sync_model_with_view_points (_drag_points);
 
 	if (with_push) {
 		ControlPoint* p;
 		uint32_t i = final_index;
 		while ((p = nth (i)) != 0 && p->can_slide()) {
-			sync_model_with_view_point (*p);
+			moved = sync_model_with_view_point (*p) || moved;
 			++i;
 		}
 	}
@@ -757,6 +760,12 @@ AutomationLine::end_drag (bool with_push, uint32_t final_index)
 	alist->thaw ();
 
 	update_pending = false;
+
+	if (moved) {
+		/* A point has moved as a result of sync (clamped to integer or boolean
+		   value), update line accordingly. */
+		line->set_steps (line_points, is_stepped());
+	}
 
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList>(memento_command_binder (), 0, &alist->get_state()));
@@ -767,7 +776,7 @@ AutomationLine::end_drag (bool with_push, uint32_t final_index)
 	contiguous_points.clear ();
 }
 
-void
+bool
 AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 {
 	/* find out where the visual control point is.
@@ -792,6 +801,17 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 	view_to_model_coord_y (view_y);
 
 	alist->modify (cp.model(), view_x, view_y);
+
+	/* convert back from model to view y for clamping position (for integer/boolean/etc) */
+	model_to_view_coord_y (view_y);
+	const double point_y = _height - (view_y * _height);
+	if (point_y != cp.get_y()) {
+		cp.move_to (cp.get_x(), point_y, ControlPoint::Full);
+		reset_line_coords (cp);
+		return true;
+	}
+
+	return false;
 }
 
 bool
@@ -1178,8 +1198,10 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = 2.0 * y - 1.0;
 	} else {
 		y = y * (double)(alist->get_max_y() - alist->get_min_y()) + alist->get_min_y();
-		if (_desc.toggled || _desc.integer_step) {
+		if (_desc.integer_step) {
 			y = round(y);
+		} else if (_desc.toggled) {
+			y = (y > 0.5) ? 1.0 : 0.0;
 		}
 	}
 }

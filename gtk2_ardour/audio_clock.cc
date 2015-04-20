@@ -31,6 +31,7 @@
 #include "gtkmm2ext/rgb_macros.h"
 
 #include "ardour/profile.h"
+#include "ardour/lmath.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/tempo.h"
@@ -2079,6 +2080,24 @@ AudioClock::frames_from_audioframes_string (const string& str) const
 }
 
 void
+AudioClock::copy_text_to_clipboard () const
+{
+	string val;
+	if (editing) {
+		val = pre_edit_string;
+	} else {
+		val = _layout->get_text ();
+	}
+	const size_t trim = val.find_first_not_of(" ");
+	if (trim == string::npos) {
+		assert(0); // empty clock, can't be right.
+		return;
+	}
+	Glib::RefPtr<Clipboard> cl = Gtk::Clipboard::get();
+	cl->set_text (val.substr(trim));
+}
+
+void
 AudioClock::build_ops_menu ()
 {
 	using namespace Menu_Helpers;
@@ -2098,6 +2117,8 @@ AudioClock::build_ops_menu ()
 		ops_items.push_back (MenuElem (_("Set From Playhead"), sigc::mem_fun(*this, &AudioClock::set_from_playhead)));
 		ops_items.push_back (MenuElem (_("Locate to This Time"), sigc::mem_fun(*this, &AudioClock::locate)));
 	}
+	ops_items.push_back (SeparatorElem());
+	ops_items.push_back (MenuElem (_("Copy to clipboard"), sigc::mem_fun(*this, &AudioClock::copy_text_to_clipboard)));
 }
 
 void

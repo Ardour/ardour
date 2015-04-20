@@ -69,7 +69,7 @@ TransformDialog::Model::Model()
 	}
 
 	static const char* operator_labels[] = {
-		/* no PUSH */ "+", "-", "*", "/", NULL
+		/* no PUSH */ "+", "-", "*", "/", "mod", NULL
 	};
 	for (int o = 0; operator_labels[o]; ++o) {
 		Gtk::TreeModel::Row row = *(operator_list->append());
@@ -179,6 +179,9 @@ set_spinner_for(Gtk::SpinButton&                     spinner,
 		spinner.set_digits(0);
 		break;
 	}
+	spinner.set_value(
+		std::min(spinner.get_adjustment()->get_upper(),
+		         std::max(spinner.get_adjustment()->get_lower(), spinner.get_value())));
 }
 
 void
@@ -239,7 +242,7 @@ TransformDialog::ValueChooser::get(std::list<Operation>& ops)
 		const double max   = std::max(a, b);
 		const double range = max - min;
 
-		// "rand range * min +" (i.e. (rand * range) + min)
+		// "rand range * min +" ((rand * range) + min)
 		ops.push_back(Operation(Operation::PUSH, Value(Value::RANDOM)));
 		ops.push_back(Operation(Operation::PUSH, Value(range)));
 		ops.push_back(Operation(Operation::MULT));
@@ -254,11 +257,13 @@ TransformDialog::ValueChooser::get(std::list<Operation>& ops)
 		const double last  = max_spinner.get_value();
 		const double rise  = last - first;
 
-		// "index rise * n_notes / first +" (i.e. index * rise / n_notes + first)
+		// "index rise * n_notes 1 - / first +" (index * rise / (n_notes - 1) + first)
 		ops.push_back(Operation(Operation::PUSH, Value(Value::INDEX)));
 		ops.push_back(Operation(Operation::PUSH, Value(rise)));
 		ops.push_back(Operation(Operation::MULT));
 		ops.push_back(Operation(Operation::PUSH, Value(Value::N_NOTES)));
+		ops.push_back(Operation(Operation::PUSH, Value(1)));
+		ops.push_back(Operation(Operation::SUB));
 		ops.push_back(Operation(Operation::DIV));
 		ops.push_back(Operation(Operation::PUSH, Value(first)));
 		ops.push_back(Operation(Operation::ADD));

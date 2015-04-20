@@ -412,7 +412,7 @@ StreamView::create_rec_box(framepos_t frame_pos, double width)
 	const double   xend       = xstart + width;
 	const uint32_t fill_color = ARDOUR_UI::config()->color_mod("recording rect", "recording_rect");
 
-	ArdourCanvas::Rectangle* rec_rect = new ArdourCanvas::TimeRectangle(_canvas_group);
+	ArdourCanvas::Rectangle* rec_rect = new ArdourCanvas::Rectangle(_canvas_group);
 	rec_rect->set_x0(xstart);
 	rec_rect->set_y0(0);
 	rec_rect->set_x1(xend);
@@ -540,7 +540,6 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 	}
 }
 
-
 /** Get selectable things within a given range.
  *  @param start Start time in session frames.
  *  @param end End time in session frames.
@@ -548,10 +547,13 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
  *  @param bot Bottom y range, in trackview coordinates (ie 0 is the top of the track view)
  *  @param result Filled in with selectable things.
  */
-
 void
-StreamView::get_selectables (framepos_t start, framepos_t end, double top, double bottom, list<Selectable*>& results)
+StreamView::get_selectables (framepos_t start, framepos_t end, double top, double bottom, list<Selectable*>& results, bool within)
 {
+	if (_trackview.editor().internal_editing()) {
+		return;  // Don't select regions with an internal tool
+	}
+
 	layer_t min_layer = 0;
 	layer_t max_layer = 0;
 
@@ -582,10 +584,17 @@ StreamView::get_selectables (framepos_t start, framepos_t end, double top, doubl
 			layer_t const l = (*i)->region()->layer ();
 			layer_ok = (min_layer <= l && l <= max_layer);
 		}
-
-		if ((*i)->region()->coverage (start, end) != Evoral::OverlapNone && layer_ok) {
-			results.push_back (*i);
+		
+		if (within) {
+			if ((*i)->region()->coverage (start, end) == Evoral::OverlapExternal && layer_ok) {
+				results.push_back (*i);
+			}
+		} else {
+			if ((*i)->region()->coverage (start, end) != Evoral::OverlapNone && layer_ok) {
+				results.push_back (*i);
+			}
 		}
+		
 	}
 }
 

@@ -176,7 +176,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
 	name_label.set_text_ellipsize (Pango::ELLIPSIZE_END);
-	name_label.set_layout_ellisize_width(48 * PANGO_SCALE);
+	name_label.set_layout_ellipsize_width(48 * PANGO_SCALE);
 	name_label.set_size_request(18, 50);
 	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
@@ -186,7 +186,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_name("tracknumber label");
 	number_label.set_angle(-90.0);
-	number_label.set_layout_ellisize_width(18 * PANGO_SCALE);
+	number_label.set_layout_ellipsize_width(18 * PANGO_SCALE);
 	number_label.set_alignment(.5, .5);
 
 	namebx.set_size_request(18, 52);
@@ -350,13 +350,17 @@ MeterStrip::blink_rec_display (bool onoff)
 std::string
 MeterStrip::state_id() const
 {
-	return string_compose ("mtrs %1", _route->id().to_s());
+	if (_route) {
+		return string_compose ("mtrs %1", _route->id().to_s());
+	} else {
+		return string ();
+	}
 }
 
 void
 MeterStrip::set_button_names()
 {
-	mute_button->set_text (_("M"));
+	mute_button->set_text (S_("Mute|M"));
 
 	if (_route && _route->solo_safe()) {
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
@@ -364,20 +368,20 @@ MeterStrip::set_button_names()
 		solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
 	}
 	if (!Config->get_solo_control_is_listen_control()) {
-		solo_button->set_text (_("S"));
+		solo_button->set_text (S_("Solo|S"));
 	} else {
 		switch (Config->get_listen_position()) {
 		case AfterFaderListen:
-			solo_button->set_text (_("A"));
+			solo_button->set_text (S_("AfterFader|A"));
 			break;
 		case PreFaderListen:
-			solo_button->set_text (_("P"));
+			solo_button->set_text (S_("PreFader|P"));
 			break;
 		}
 	}
 
-	monitor_input_button->set_text (_("I"));
-	monitor_disk_button->set_text (_("D"));
+	monitor_input_button->set_text (S_("MonitorInput|I"));
+	monitor_disk_button->set_text (S_("MonitorDisk|D"));
 }
 
 void
@@ -536,13 +540,40 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		// NB numbers are rotated 90deg. on the meterbridge
 		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
+
+	int prev_height, ignored;
+	bool need_relayout = false;
+
+	namebx.get_size_request(ignored, prev_height);
 	namebx.set_size_request(18, nh + tnh);
-	namenumberbx.set_size_request(18, nh + tnh);
-	if (_route) {
-		name_label.set_size_request(18, nh + (_route->is_master() ? tnh : -1));
-		name_label.set_layout_ellisize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
+
+	if (prev_height != nh + tnh) {
+		need_relayout = true;
 	}
+
+	namenumberbx.get_size_request(ignored, prev_height);
+	namenumberbx.set_size_request(18, nh + tnh);
+
+	if (prev_height != nh + tnh) {
+		need_relayout = true;
+	}
+
+	if (_route) {
+		int nlh = nh + (_route->is_master() ? tnh : -1);
+		name_label.get_size_request(ignored, prev_height);
+		name_label.set_size_request(18, nlh);
+		name_label.set_layout_ellipsize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
+		if (prev_height != nlh) {
+			need_relayout = true;
+		}
+	}
+
 	VBox::on_size_allocate(a);
+
+	if (need_relayout) {
+		queue_resize();
+		MetricChanged(); // force re-layout, parent on_scroll(), queue_resize()
+	}
 }
 
 gint

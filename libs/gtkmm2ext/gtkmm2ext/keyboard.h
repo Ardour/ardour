@@ -106,6 +106,8 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 
 	bool leave_window (GdkEventCrossing *ev, Gtk::Window*);
 	bool enter_window (GdkEventCrossing *ev, Gtk::Window*);
+	bool focus_in_window (GdkEventFocus *ev, Gtk::Window*);
+	bool focus_out_window (GdkEventFocus *ev, Gtk::Window*);
 
 	static bool modifier_state_contains (guint state, ModifierMask);
 	static bool modifier_state_equals   (guint state, ModifierMask);
@@ -146,6 +148,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static bool some_magic_widget_has_focus ();
 	static void magic_widget_grab_focus ();
 	static void magic_widget_drop_focus ();
+	static Gtk::Window* get_current_window () { return current_window; };
 
 	static void close_current_dialog ();
 

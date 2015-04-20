@@ -527,7 +527,7 @@ IO::state (bool /*full_state*/)
 	string str;
 	vector<string>::iterator ci;
 	int n;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	Glib::Threads::Mutex::Lock lm (io_lock);
 
 	node->add_property("name", _name);
@@ -588,7 +588,7 @@ IO::set_state (const XMLNode& node, int version)
 
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	/* force use of non-localized representation of decimal point,
 	   since we use it a lot in XML files and so forth.
@@ -644,7 +644,7 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 {
 	const XMLProperty* prop;
 	XMLNodeConstIterator iter;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	/* force use of non-localized representation of decimal point,
 	   since we use it a lot in XML files and so forth.
@@ -1040,7 +1040,8 @@ IO::make_connections_2X (const XMLNode& node, int /*version*/, bool in)
 					if (p != string::npos) {
 						ports[x].replace (p, 4, "/audio_out");
 					}
-					nth(i)->connect (ports[x]);
+					if (NULL != nth(i).get())
+						nth(i)->connect (ports[x]);
 				}
 			}
 
@@ -1082,7 +1083,8 @@ IO::make_connections_2X (const XMLNode& node, int /*version*/, bool in)
 					if (p != string::npos) {
 						ports[x].replace (p, 3, "/audio_in");
 					}
-					nth(i)->connect (ports[x]);
+					if (NULL != nth(i).get())
+						nth(i)->connect (ports[x]);
 				}
 			}
 
@@ -1174,7 +1176,6 @@ IO::parse_gain_string (const string& str, vector<string>& ports)
 {
 	string::size_type pos, opos;
 
-	pos = 0;
 	opos = 0;
 	ports.clear ();
 
@@ -1606,8 +1607,10 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
-			if (nth(i)->connected_to (other->nth(j)->name())) {
-				return true;
+			if ((NULL != nth(i).get()) && (NULL != other->nth(j).get())) {
+				if (nth(i)->connected_to (other->nth(j)->name())) {
+					return true;
+				}
 			}
 		}
 	}

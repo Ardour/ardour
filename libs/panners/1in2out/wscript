@@ -2,12 +2,6 @@
 from waflib.extras import autowaf as autowaf
 import os
 
-# Library version (UNIX style major, minor, micro)
-# major increment <=> incompatible changes
-# minor increment <=> compatible changes (additions)
-# micro increment <=> no interface changes
-LIBARDOUR_PAN1IN2OUT_LIB_VERSION = '1.0.0'
-
 # Mandatory variables
 top = '.'
 out = 'build'
@@ -28,7 +22,6 @@ def build(bld):
     obj.name         = 'libardour_pan1in2out'
     obj.target       = 'pan1in2out'
     obj.use          = 'libardour libardour_cp libpbd'
-    obj.vnum         = LIBARDOUR_PAN1IN2OUT_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'panners')
 
 def shutdown():

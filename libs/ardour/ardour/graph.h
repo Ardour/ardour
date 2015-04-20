@@ -89,7 +89,7 @@ protected:
 	virtual void session_going_away ();
 
 private:
-	volatile bool        _quit_threads;
+	volatile bool        _threads_active;
 
 	void reset_thread_list ();
 	void drop_threads ();
@@ -136,6 +136,10 @@ private:
 	bool _process_noroll;
 	int  _process_retval;
 	bool _process_need_butler;
+
+	// enginer / thread connection
+	PBD::ScopedConnectionList engine_connections;
+	void engine_stopped ();
 };
 
 } // namespace

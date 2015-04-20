@@ -353,9 +353,9 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 {
 	assert (cnt >= 0);
 	
-	int32_t nread;
+	framecnt_t nread;
 	float *ptr;
-	uint32_t real_cnt;
+	framecnt_t real_cnt;
 	framepos_t file_cnt;
 
         if (writable() && !_sndfile) {
@@ -425,7 +425,7 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 	/* stride through the interleaved data */
 
-	for (int32_t n = 0; n < nread; ++n) {
+	for (framecnt_t n = 0; n < nread; ++n) {
 		dst[n] = *ptr;
 		ptr += _info.channels;
 	}
@@ -461,7 +461,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 		return 0;
 	}
 
-	int32_t frame_pos = _length;
+	framepos_t frame_pos = _length;
 
 	if (write_float (data, frame_pos, cnt) != cnt) {
 		return 0;
@@ -470,7 +470,7 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 	update_length (_length + cnt);
 
 	if (_build_peakfiles) {
-		compute_and_write_peaks (data, frame_pos, cnt, false, true);
+		compute_and_write_peaks (data, frame_pos, cnt, true, true);
 	}
 
 	return cnt;
@@ -557,7 +557,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 	update_length (file_pos + cnt);
 
 	if (_build_peakfiles) {
-		compute_and_write_peaks (data, file_pos, cnt, false, true);
+		compute_and_write_peaks (data, file_pos, cnt, true, true);
 	}
 
 	file_pos += cnt;
@@ -638,15 +638,6 @@ SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t
 
 	set_header_timeline_position ();
 
-	if (!_broadcast_info->write_to_file (_sndfile)) {
-		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
-		                           _path, _broadcast_info->get_error())
-		      << endmsg;
-		_flags = Flag (_flags & ~Broadcast);
-		delete _broadcast_info;
-		_broadcast_info = 0;
-	}
-
 	return 0;
 }
 
@@ -656,6 +647,7 @@ SndFileSource::set_header_timeline_position ()
 	if (!(_flags & Broadcast)) {
 		return;
 	}
+	assert (_broadcast_info);
 
 	_broadcast_info->set_time_reference (_timeline_position);
 

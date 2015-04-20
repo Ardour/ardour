@@ -76,7 +76,8 @@ typedef struct _RSSynthChannel {
   float     adsr_amp[128];
   float     phase[128];      // various use, zero'ed on note-on
   int8_t    miditable[128];  // internal, note-on/off velocity
-  int8_t    midimsgs [128];  // internal, note-off + on in same cycle
+  int8_t    midimsgs [128];  // internal, note-off + on in same cycle, sustained-off
+  int8_t    sustain;         // sustain pedal pressed
   ADSRcfg   adsr;
   void      (*synthesize) (struct _RSSynthChannel* sc,
       const uint8_t note, const float vol, const float pc,
@@ -230,10 +231,12 @@ static void process_key (void *synth,
   const int8_t msg = sc->midimsgs[note];
   const float vol = /* master_volume */ 0.1 * fabsf(vel) / 127.0;
   const float phase = sc->phase[note];
-  sc->midimsgs[note] = 0;
+  const int8_t sus = sc->sustain;
+  sc->midimsgs[note] &= ~3;
 
   if (phase == -10 && vel > 0) {
     // new note on
+    sc->midimsgs[note] &= ~4;
     assert(sc->adsr_cnt[note] == 0);
     sc->adsr_amp[note] = 0;
     sc->adsr_cnt[note] = 0;
@@ -243,35 +246,43 @@ static void process_key (void *synth,
   }
   else if (phase >= -1.0 && phase <= 1.0 && vel > 0) {
     // sustain note or re-start note while adsr in progress:
-    if (sc->adsr_cnt[note] > sc->adsr.off[1] || msg == 3) {
+    if (sc->adsr_cnt[note] > sc->adsr.off[1] || msg == 3 || msg == 5 || msg == 7) {
+      sc->midimsgs[note] &= ~4;
       // x-fade to attack
       sc->adsr_amp[note] = adsr_env(sc, note);
       sc->adsr_cnt[note] = 0;
     }
   }
   else if (phase >= -1.0 && phase <= 1.0 && vel < 0) {
+    sc->midimsgs[note] |= 4;
     // note off
-    if (sc->adsr_cnt[note] <= sc->adsr.off[1]) {
+    if (sc->adsr_cnt[note] <= sc->adsr.off[1] && !sus) {
       if (sc->adsr_cnt[note] != sc->adsr.off[1]) {
         // x-fade to release
         sc->adsr_amp[note] = adsr_env(sc, note);
       }
       sc->adsr_cnt[note] = sc->adsr.off[1] + 1;
     }
+    else if (sus && sc->adsr_cnt[note] == sc->adsr.off[1]) {
+      sc->adsr_cnt[note] = sc->adsr.off[1] + 1;
+    }
   }
   else {
+    //printf("FORCE NOTE OFF: %d %d\n", vel, sus);
     /* note-on + off in same cycle */
     sc->miditable[note] = 0;
     sc->adsr_cnt[note] = 0;
     sc->phase[note] = -10;
     return;
   }
+  //printf("NOTE: %d (%d %d %d)\n", sc->adsr_cnt[note], sc->adsr.off[0], sc->adsr.off[1], sc->adsr.off[2]);
 
   // synthesize actual sound
   sc->synthesize(sc, note, vol, rs->freqs[note], n_samples, left, right);
 
   if (sc->adsr_cnt[note] == 0) {
     //printf("Note %d,%d released\n", chn, note);
+    sc->midimsgs[note] = 0;
     sc->miditable[note] = 0;
     sc->adsr_amp[note] = 0;
     sc->phase[note] = -10;
@@ -364,20 +375,16 @@ static void synth_process_midi_event(void *synth, struct rmidi_event_t *ev) {
     case CONTROL_CHANGE:
       if (ev->d.control.param == 0x00 || ev->d.control.param == 0x20) {
         /*  0x00 and 0x20 are used for BANK select */
-        break;
-      } else
-      if (ev->d.control.param == 121) {
+      } else if (ev->d.control.param == 64) {
+        /* damper pedal*/
+        rs->sc[ev->channel].sustain = ev->d.control.value < 64 ? 0: 1;
+      } else if (ev->d.control.param == 121) {
         /* reset all controllers */
-        break;
-      } else
-      if (ev->d.control.param == 120 || ev->d.control.param == 123) {
+      } else if (ev->d.control.param == 120 || ev->d.control.param == 123) {
         /* Midi panic: 120: all sound off, 123: all notes off*/
         synth_reset_channel(&(rs->sc[ev->channel]));
-        break;
-      } else
-      if (ev->d.control.param >= 120) {
+      } else if (ev->d.control.param >= 120) {
         /* params 122-127 are reserved - skip them. */
-        break;
       }
       break;
     default:
@@ -447,6 +454,9 @@ static void synth_parse_midi(void *synth, const uint8_t *data, const size_t size
       ev.type=NOTE_ON;
       ev.d.tone.note=data[1]&0x7f;
       ev.d.tone.velocity=data[2]&0x7f;
+      if (ev.d.tone.velocity == 0) {
+        ev.type=NOTE_OFF;
+      }
       break;
     case 0xB0:
       ev.type=CONTROL_CHANGE;

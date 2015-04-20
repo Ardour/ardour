@@ -93,7 +93,7 @@ class DummyPort {
 		virtual void* get_buffer (pframes_t nframes) = 0;
 		void next_period () { _gen_cycle = false; }
 
-		const LatencyRange& latency_range (bool for_playback) const
+		const LatencyRange latency_range (bool for_playback) const
 		{
 			return for_playback ? _playback_latency_range : _capture_latency_range;
 		}
@@ -156,10 +156,13 @@ class DummyAudioPort : public DummyPort {
 			KronekerDelta,
 			SineSweep,
 			SineSweepSwell,
+			SquareSweep,
+			SquareSweepSwell,
 			Loopback,
 		};
 		void setup_generator (GeneratorType const, float const);
 		void fill_wavetable (const float* d, size_t n_samples) { assert(_wavetable != 0);  memcpy(_wavetable, d, n_samples * sizeof(float)); }
+		void midi_to_wavetable (DummyMidiBuffer const * const src, size_t n_samples);
 
 	private:
 		Sample _buffer[8192];
@@ -289,8 +292,8 @@ class DummyAudioBackend : public AudioBackend {
 		size_t raw_buffer_size (DataType t);
 
 		/* Process time */
-		pframes_t sample_time ();
-		pframes_t sample_time_at_cycle_start ();
+		framepos_t sample_time ();
+		framepos_t sample_time_at_cycle_start ();
 		pframes_t samples_since_cycle_start ();
 
 		int create_process_thread (boost::function<void()> func);
@@ -368,6 +371,7 @@ class DummyAudioBackend : public AudioBackend {
 			MidiNoEvents,
 			MidiGenerator,
 			MidiLoopback,
+			MidiToAudio,
 		};
 
 		std::string _instance_name;
@@ -375,6 +379,7 @@ class DummyAudioBackend : public AudioBackend {
 		static std::vector<AudioBackend::DeviceStatus> _device_status;
 
 		bool  _running;
+		bool  _freewheel;
 		bool  _freewheeling;
 
 		std::string _device;
@@ -394,7 +399,7 @@ class DummyAudioBackend : public AudioBackend {
 		uint32_t _systemic_input_latency;
 		uint32_t _systemic_output_latency;
 
-		uint64_t _processed_samples;
+		framecnt_t _processed_samples;
 
 		pthread_t _main_thread;
 

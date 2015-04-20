@@ -50,12 +50,16 @@ namespace MIDI {
 	class Port;
 }
 
+namespace ArdourSurface {
+
 namespace Mackie {
 	class Surface;
 	class Control;
 	class SurfacePort;
 	class Button;
 }
+
+gboolean ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
 
 /**
 	This handles the plugin duties, and the midi encoding and decoding,
@@ -297,7 +301,7 @@ class MackieControlProtocol
                 MIDI::Port* port;
         };
         friend struct ipMIDIHandler; /* is this necessary */
-        friend gboolean ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
+	friend gboolean ArdourSurface::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
 
 	int create_surfaces ();
 	bool periodic();
@@ -508,5 +512,7 @@ class MackieControlProtocol
 	Mackie::LedState view_press (Mackie::Button&);
 	Mackie::LedState view_release (Mackie::Button&);
 };
+
+} // namespace 
 
 #endif // ardour_mackie_control_protocol_h

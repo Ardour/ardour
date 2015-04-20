@@ -96,18 +96,15 @@ ARDOUR_UI::setup_windows ()
 	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	status_bar_label.set_size_request (300, -1);
 	status_bar_packer->pack_start (*status_bar_event_box, true, true, 6);
-	status_bar_packer->pack_start (error_log_button, false, false);
 
 	status_bar_label.show ();
 	status_bar_event_box->show ();
 	status_bar_packer->show ();
-	error_log_button.show ();
 
-	error_log_button.signal_clicked().connect (mem_fun (*this, &UI::toggle_errors));
 	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
 
 	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
-	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 6);
+	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 2);
 #else
 	top_packer.pack_start (menu_bar_base, false, false);
 #endif
@@ -146,6 +143,7 @@ ARDOUR_UI::setup_tooltips ()
 	set_tip (primary_clock, _("<b>Primary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (secondary_clock, _("<b>Secondary Clock</b> right-click to set display mode. Click to edit, click+drag a digit or mouse-over+scroll wheel to modify.\nText edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: confirm; postfix the edit with '+' or '-' to enter delta times.\n"));
 	set_tip (editor_meter_peak_display, _("Reset All Peak Indicators"));
+	set_tip (error_alert_button, _("Show Error Log and acknowledge warnings"));
 
 	synchronize_sync_source_and_video_pullup ();
 
@@ -175,18 +173,25 @@ ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuff
 	string text;
 
 	UI::display_message (prefix, prefix_len, ptag, mtag, msg);
-#ifdef TOP_MENUBAR
+
+	ArdourLogLevel ll = LogLevelNone;
 
 	if (strcmp (prefix, _("[ERROR]: ")) == 0) {
 		text = "<span color=\"red\" weight=\"bold\">";
+		ll = LogLevelError;
 	} else if (strcmp (prefix, _("[WARNING]: ")) == 0) {
 		text = "<span color=\"yellow\" weight=\"bold\">";
+		ll = LogLevelWarning;
 	} else if (strcmp (prefix, _("[INFO]: ")) == 0) {
 		text = "<span color=\"green\" weight=\"bold\">";
+		ll = LogLevelInfo;
 	} else {
 		text = "<span color=\"white\" weight=\"bold\">???";
 	}
 
+	_log_not_acknowledged = std::max(_log_not_acknowledged, ll);
+
+#ifdef TOP_MENUBAR
 	text += prefix;
 	text += "</span>";
 	text += msg;
@@ -211,13 +216,21 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 	return 0;
 }
 
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * btn_scale))
+
 void
 ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
 
-	transport_tearoff_hbox.set_border_width (3);
-	transport_tearoff_hbox.set_spacing (3);
+#ifdef __APPLE__
+	const double btn_scale = 1.0;
+#else
+	const double btn_scale = config()->get_font_scale () / 102400.;
+#endif
+
+	transport_tearoff_hbox.set_border_width (PX_SCALE(3,3));
+	transport_tearoff_hbox.set_spacing (PX_SCALE(3,3));
 
 	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
 	transport_tearoff->set_name ("TransportBase");
@@ -251,7 +264,9 @@ ARDOUR_UI::setup_transport ()
 
 //	auto_input_button.set_text (_("Auto Input"));
 
-	click_button.set_image (get_icon (X_("metronome")));
+	click_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	click_button.set_icon (ArdourButton::TransportMetronom);
+
 	act = ActionManager::get_action ("Transport", "ToggleClick");
 	click_button.set_related_action (act);
 	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
@@ -267,19 +282,25 @@ ARDOUR_UI::setup_transport ()
 
 	stop_button.set_active (true);
 
-	goto_start_button.set_image (get_icon (X_("transport_start")));
-	goto_end_button.set_image (get_icon (X_("transport_end")));
-	roll_button.set_image (get_icon (X_("transport_play")));
-	stop_button.set_image (get_icon (X_("transport_stop")));
-	play_selection_button.set_image (get_icon (X_("transport_range")));
-	auto_loop_button.set_image (get_icon (X_("transport_loop")));
+	goto_start_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	goto_start_button.set_icon (ArdourButton::TransportStart);
+	goto_end_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	goto_end_button.set_icon (ArdourButton::TransportEnd);
+	roll_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	roll_button.set_icon (ArdourButton::TransportPlay);
+	stop_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	stop_button.set_icon (ArdourButton::TransportStop);
+	play_selection_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	play_selection_button.set_icon (ArdourButton::TransportRange);
+	auto_loop_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	auto_loop_button.set_icon (ArdourButton::TransportLoop);
 
-	rec_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
+	rec_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	rec_button.set_icon (ArdourButton::RecButton);
 
-	midi_panic_button.set_image (get_icon (X_("midi_panic")));
-	/* the icon for this has an odd aspect ratio, so fatten up the button */
-	midi_panic_button.set_size_request (25, -1);
-	
+	midi_panic_button.set_elements ((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	midi_panic_button.set_icon (ArdourButton::TransportPanic);
+
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
@@ -325,9 +346,14 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
 	feedback_alert_button.set_name ("feedback alert");
 	feedback_alert_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::feedback_alert_press), false);
+	error_alert_button.set_name ("error alert");
+	error_alert_button.signal_button_release_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::error_alert_press), false);
+	act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+	error_alert_button.set_related_action(act);
+	error_alert_button.set_fallthrough_to_parent(true);
 
 	alert_box.set_homogeneous (true);
-	alert_box.set_spacing (2);
+	alert_box.set_spacing (PX_SCALE(2, 2));
 	alert_box.pack_start (solo_alert_button, true, true);
 	alert_box.pack_start (auditioning_alert_button, true, true);
 	alert_box.pack_start (feedback_alert_button, true, true);
@@ -345,7 +371,11 @@ ARDOUR_UI::setup_transport ()
 	transport_button_size_group->add_widget (roll_button);
 	transport_button_size_group->add_widget (stop_button);
 
-	goto_start_button.set_size_request (-1, 40);
+	/* the icon for this has an odd aspect ratio, so fatten up the button */
+	midi_panic_button.set_size_request (PX_SCALE(25, 25), -1);
+	goto_start_button.set_size_request (PX_SCALE(28, 28), PX_SCALE(44, 44));
+	click_button.set_size_request (PX_SCALE(32, 32), PX_SCALE(44, 44));
+
 
 	HBox* tbox1 = manage (new HBox);
 	HBox* tbox2 = manage (new HBox);
@@ -357,9 +387,9 @@ ARDOUR_UI::setup_transport ()
 	Alignment* a1 = manage (new Alignment);
 	Alignment* a2 = manage (new Alignment);
 
-	tbox1->set_spacing (2);
-	tbox2->set_spacing (2);
-	tbox->set_spacing (2);
+	tbox1->set_spacing (PX_SCALE(2, 2));
+	tbox2->set_spacing (PX_SCALE(2, 2));
+	tbox->set_spacing (PX_SCALE(2, 2));
 
 	if (!Profile->get_trx()) {
 		tbox1->pack_start (midi_panic_button, true, true, 5);
@@ -394,7 +424,7 @@ ARDOUR_UI::setup_transport ()
 	if (!ARDOUR::Profile->get_small_screen() && !ARDOUR::Profile->get_trx()) {
 		clock_box->pack_start (*secondary_clock, false, false);
 	}
-	clock_box->set_spacing (3);
+	clock_box->set_spacing (PX_SCALE(3, 3));
 
 	shuttle_box = manage (new ShuttleControl);
 	shuttle_box->show ();
@@ -402,7 +432,7 @@ ARDOUR_UI::setup_transport ()
 	VBox* transport_vbox = manage (new VBox);
 	transport_vbox->set_name ("TransportBase");
 	transport_vbox->set_border_width (0);
-	transport_vbox->set_spacing (3);
+	transport_vbox->set_spacing (PX_SCALE(3, 3));
 	transport_vbox->pack_start (*tbox, true, true, 0);
 
 	if (!Profile->get_trx()) {
@@ -421,7 +451,7 @@ ARDOUR_UI::setup_transport ()
 
 	VBox* auto_box = manage (new VBox);
 	auto_box->set_homogeneous (true);
-	auto_box->set_spacing (2);
+	auto_box->set_spacing (PX_SCALE(2, 2));
 	auto_box->pack_start (sync_button, true, true);
 	if (!ARDOUR::Profile->get_trx()) {
 		auto_box->pack_start (follow_edits_button, true, true);
@@ -465,6 +495,7 @@ ARDOUR_UI::setup_transport ()
 		transport_tearoff->set_state (*tnode);
 	}
 }
+#undef PX_SCALE
 
 void
 ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
@@ -534,6 +565,26 @@ bool
 ARDOUR_UI::feedback_alert_press (GdkEventButton *)
 {
 	return true;
+}
+
+bool
+ARDOUR_UI::error_alert_press (GdkEventButton* ev)
+{
+	bool do_toggle = true;
+	if (ev->button == 1) {
+		if (_log_not_acknowledged == LogLevelError) {
+			// just acknowledge the error, don't hide the log if it's already visible
+			RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-log-window"));
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+			if (tact && tact->get_active()) {
+				do_toggle = false;
+			}
+		}
+		_log_not_acknowledged = LogLevelNone;
+		error_blink (false); // immediate acknowledge
+	}
+	// maybe fall through to to button toggle
+	return !do_toggle;
 }
 
 void
@@ -608,6 +659,32 @@ ARDOUR_UI::feedback_blink (bool onoff)
 		feedback_alert_button.set_active (false);
 	}
 }
+
+void
+ARDOUR_UI::error_blink (bool onoff)
+{
+	switch (_log_not_acknowledged) {
+		case LogLevelError:
+			// blink
+			if (onoff) {
+				error_alert_button.set_custom_led_color(0xff0000ff); // bright red
+			} else {
+				error_alert_button.set_custom_led_color(0x880000ff); // dark red
+			}
+			break;
+		case LogLevelWarning:
+			error_alert_button.set_custom_led_color(0xccaa00ff); // yellow
+			break;
+		case LogLevelInfo:
+			error_alert_button.set_custom_led_color(0x88cc00ff); // lime green
+			break;
+		default:
+			error_alert_button.set_custom_led_color(0x333333ff); // gray
+			break;
+	}
+}
+
+
 
 void
 ARDOUR_UI::set_transport_sensitivity (bool yn)

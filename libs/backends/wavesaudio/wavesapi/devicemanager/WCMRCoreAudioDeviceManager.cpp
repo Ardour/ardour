@@ -115,6 +115,7 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
     
     m_CurrentSamplingRate = DEFAULT_SR;
     m_CurrentBufferSize = DEFAULT_BUFFERSIZE;
+    m_DefaultBufferSize = DEFAULT_BUFFERSIZE;
     m_StopRequested = true;
     m_pInputData = NULL;
     
@@ -2231,9 +2232,9 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
     
     //is this an input only device?
     if (m_OutputChannels.empty())
-        AudioCallback (NULL, inNumberFrames, (uint32_t)inTimeStamp->mSampleTime, theStartTime);
+        AudioCallback (NULL, inNumberFrames, (int64_t)inTimeStamp->mSampleTime, theStartTime);
     else if ((!m_OutputChannels.empty()) && (ioData->mBuffers[0].mNumberChannels == m_OutputChannels.size()))
-        AudioCallback ((float *)ioData->mBuffers[0].mData, inNumberFrames, (uint32_t)inTimeStamp->mSampleTime, theStartTime);
+        AudioCallback ((float *)ioData->mBuffers[0].mData, inNumberFrames, (int64_t)inTimeStamp->mSampleTime, theStartTime);
     
     return retVal;
 }
@@ -2254,7 +2255,7 @@ OSStatus WCMRCoreAudioDevice::AudioIOProc(AudioUnitRenderActionFlags *  ioAction
 //! \return true
 //! 
 //**********************************************************************************************
-int WCMRCoreAudioDevice::AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, uint32_t inSampleTime, uint64_t inCycleStartTime)
+int WCMRCoreAudioDevice::AudioCallback (float *pOutputBuffer, unsigned long framesPerBuffer, int64_t inSampleTime, uint64_t inCycleStartTime)
 {
     struct WCMRAudioDeviceManagerClient::AudioCallbackData audioCallbackData =
     {

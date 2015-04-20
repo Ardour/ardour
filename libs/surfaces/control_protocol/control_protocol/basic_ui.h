@@ -49,6 +49,7 @@ class LIBCONTROLCP_API BasicUI {
 	/* transport control */
 
 	void loop_toggle ();
+	void loop_location (framepos_t start, framepos_t end);
 	void access_action ( std::string action_path );
 	static PBD::Signal2<void,std::string,std::string> AccessAction;
 	void goto_start ();

@@ -429,7 +429,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 
 
 		if (!_synth_added && asynth) {
-			int rv = add_processor_by_index(asynth, PreFader, &ps, true);
+			int rv = add_processor (asynth, PreFader, &ps, true);
 			if (rv) {
 				error << _("Failed to load synth for MIDI-Audition.") << endmsg;
 			} else {
@@ -514,7 +514,7 @@ Auditioner::play_audition (framecnt_t nframes)
 
 	if(!_seeking) {
 		/* process audio */
-		this_nframes = min (nframes, length - current_frame);
+		this_nframes = min (nframes, length - current_frame + _import_position);
 
 		if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, need_butler)) != 0) {
 			silence (nframes);
@@ -538,7 +538,7 @@ Auditioner::play_audition (framecnt_t nframes)
 		AuditionProgress(current_frame - _import_position, length); /* emit */
 	}
 
-	if (current_frame >= length) {
+	if (current_frame >= length + _import_position) {
 		_session.cancel_audition ();
 		return 0;
 	} else {

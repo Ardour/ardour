@@ -176,7 +176,7 @@ void
 ControlList::copy_events (const ControlList& other)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		_events.clear ();
 		for (const_iterator i = other.begin(); i != other.end(); ++i) {
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
@@ -214,7 +214,7 @@ void
 ControlList::clear ()
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		_events.clear ();
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
@@ -226,14 +226,14 @@ ControlList::clear ()
 void
 ControlList::x_scale (double factor)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 	_x_scale (factor);
 }
 
 bool
 ControlList::extend_to (double when)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 	if (_events.empty() || _events.back()->when == when) {
 		return false;
 	}
@@ -268,7 +268,7 @@ ControlList::thin (double thinning_factor)
 	bool changed = false;
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		
 		ControlEvent* prevprev = 0;
 		ControlEvent* cur = 0;
@@ -328,7 +328,7 @@ ControlList::thin (double thinning_factor)
 void
 ControlList::fast_simple_add (double when, double value)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 	/* to be used only for loading pre-sorted data from saved state */
 	_events.insert (_events.end(), new ControlEvent (when, value));
 
@@ -338,7 +338,7 @@ ControlList::fast_simple_add (double when, double value)
 void
 ControlList::invalidate_insert_iterator ()
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 	unlocked_invalidate_insert_iterator ();
 }
 
@@ -351,7 +351,7 @@ ControlList::unlocked_invalidate_insert_iterator ()
 void
 ControlList::start_write_pass (double when)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("%1: setup write pass @ %2\n", this, when));
 
@@ -557,7 +557,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 	                             this, value, when, with_guards, _in_write_pass, new_write_pass,
 	                             (most_recent_insert_iterator == _events.end())));
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		ControlEvent cp (when, 0.0f);
 		iterator insertion_point;
 
@@ -672,7 +672,7 @@ void
 ControlList::erase (iterator i)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		if (most_recent_insert_iterator == i) {
 			unlocked_invalidate_insert_iterator ();
 		}
@@ -686,7 +686,7 @@ void
 ControlList::erase (iterator start, iterator end)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		_events.erase (start, end);
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
@@ -699,7 +699,7 @@ void
 ControlList::erase (double when, double value)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		iterator i = begin ();
 		while (i != end() && ((*i)->when != when || (*i)->value != value)) {
@@ -725,7 +725,7 @@ ControlList::erase_range (double start, double endt)
 	bool erased = false;
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		erased = erase_range_internal (start, endt, _events);
 
 		if (erased) {
@@ -764,7 +764,7 @@ void
 ControlList::slide (iterator before, double distance)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		if (before == _events.end()) {
 			return;
@@ -785,7 +785,7 @@ void
 ControlList::shift (double pos, double frames)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		for (iterator i = _events.begin(); i != _events.end(); ++i) {
 			if ((*i)->when >= pos) {
@@ -808,7 +808,7 @@ ControlList::modify (iterator iter, double when, double val)
 	*/
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		(*iter)->when = when;
 		(*iter)->value = val;
@@ -832,7 +832,7 @@ ControlList::modify (iterator iter, double when, double val)
 std::pair<ControlList::iterator,ControlList::iterator>
 ControlList::control_points_adjacent (double xval)
 {
-	Glib::Threads::Mutex::Lock lm (_lock);
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	iterator i;
 	ControlEvent cp (xval, 0.0f);
 	std::pair<iterator,iterator> ret;
@@ -878,7 +878,7 @@ ControlList::thaw ()
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		if (_sort_pending) {
 			_events.sort (event_time_less_than);
@@ -908,7 +908,7 @@ void
 ControlList::truncate_end (double last_coordinate)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		ControlEvent cp (last_coordinate, 0);
 		ControlList::reverse_iterator i;
 		double last_val;
@@ -1011,7 +1011,7 @@ void
 ControlList::truncate_start (double overall_length)
 {
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		iterator i;
 		double first_legal_value;
 		double first_legal_coordinate;
@@ -1276,7 +1276,7 @@ bool
 ControlList::rt_safe_earliest_event (double start, double& x, double& y, bool inclusive) const
 {
 	// FIXME: It would be nice if this was unnecessary..
-	Glib::Threads::Mutex::Lock lm(_lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm(_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
 		return false;
 	}
@@ -1480,7 +1480,7 @@ ControlList::cut_copy_clear (double start, double end, int op)
 	ControlEvent cp (start, 0.0);
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		/* first, determine s & e, two iterators that define the range of points
 		   affected by this operation
@@ -1596,7 +1596,7 @@ ControlList::paste (const ControlList& alist, double pos, float /*times*/)
 	}
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 		iterator where;
 		iterator prev;
 		double end = 0;
@@ -1653,7 +1653,7 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 	typedef list< RangeMove<double> > RangeMoveList;
 
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		/* a copy of the events list before we started moving stuff around */
 		EventList old_events = _events;

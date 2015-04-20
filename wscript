@@ -9,6 +9,24 @@ import sys
 import platform as PLATFORM
 from waflib.Tools import winres
 
+from waflib.Build import BuildContext
+class i18n(BuildContext):
+        cmd = 'i18n'
+        fun = 'i18n'
+
+class i18n_pot(BuildContext):
+        cmd = 'i18n_pot'
+        fun = 'i18n_pot'
+
+class i18n_po(BuildContext):
+        cmd = 'i18n_po'
+        fun = 'i18n_po'
+
+class i18n_mo(BuildContext):
+        cmd = 'i18n_mo'
+        fun = 'i18n_mo'
+
+
 compiler_flags_dictionaries= {
     'gcc' : {
         # Flags required when building a debug build
@@ -106,10 +124,11 @@ compiler_flags_dictionaries['clang'] = clang_dict;
 
 clang_darwin_dict = compiler_flags_dictionaries['clang'].copy();
 clang_darwin_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', ]
+clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math', '-fstrength-reduce' ]
 compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict;
 
 def fetch_git_revision ():
-    cmd = "git describe HEAD"
+    cmd = "git describe HEAD | sed 's/^[A-Za-z]*+//'"
     output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
     rev = output[0].decode ('utf-8')
     return rev
@@ -129,16 +148,16 @@ else:
     rev = fetch_tarball_revision ()
 
 #
-# rev is now of the form MAJOR.MINOR-rev-commit
-# or, if right at the same rev as a release, MAJOR.MINOR
+# rev is now of the form MAJOR.MINOR[-rcX]-rev-commit
+# or, if right at the same rev as a release, MAJOR.MINOR[-rcX]
 #
 
-parts = rev.split ('.')
+parts = rev.split ('.', 1)
 MAJOR = parts[0]
-other = parts[1].split ('-')
+other = parts[1].split('-', 1)
 MINOR = other[0]
 if len(other) > 1:
-    MICRO = other[1]
+    MICRO = other[1].rsplit('-',1)[0].replace('-','.')
 else:
     MICRO = '0'
 
@@ -178,6 +197,7 @@ children = [
         'libs/fst',
         'libs/vfork',
         'libs/ardouralsautil',
+        'cfgtool',
 ]
 
 i18n_children = [
@@ -554,8 +574,8 @@ def options(opt):
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
-                    help='Specify which backend modules are to be included(jack,alsa,wavesaudio,dummy)')
-    opt.add_option('--backtrace', action='store_true', default=True, dest='backtrace',
+                    help='Specify which backend modules are to be included(jack,alsa,wavesaudio,dummy,coreaudio)')
+    opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
                     help='Compile without support for AU Plugins with only CARBON UI (needed for 64bit)')
@@ -579,6 +599,8 @@ def options(opt):
                     help='Compile for use with gprofile')
     opt.add_option('--libjack', type='string', default="auto", dest='libjack_link',
                     help='libjack link mode  [auto|link|weak]')
+    opt.add_option('--no-jack-metadata', action='store_false', default=True, dest='libjack_meta',
+                    help='disable support for jack metadata')
     opt.add_option('--internal-shared-libs', action='store_true', default=True, dest='internal_shared_libs',
                    help='Build internal libs as shared libraries')
     opt.add_option('--internal-static-libs', action='store_false', dest='internal_shared_libs',
@@ -719,9 +741,9 @@ def configure(conf):
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
         
     if Options.options.freebie:
-        conf.env.append_value ('CFLAGS', '-DNO_PLUGIN_STATE')
-        conf.env.append_value ('CXXFLAGS', '-DNO_PLUGIN_STATE')
-        conf.define ('NO_PLUGIN_STATE', 1)
+        conf.env.append_value ('CFLAGS', '-DSILENCE_AFTER')
+        conf.env.append_value ('CXXFLAGS', '-DSILENCE_AFTER')
+        conf.define ('FREEBIE', 1)
 
     if Options.options.trx_build:
         conf.define ('TRX_BUILD', 1)
@@ -729,7 +751,7 @@ def configure(conf):
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir
     else:
-        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'lv2')
+        conf.env['LV2DIR'] = os.path.join(conf.env['LIBDIR'], 'ardour' + str(conf.env['MAJOR']), 'lv2')
 
     conf.env['LV2DIR'] = os.path.normpath(conf.env['LV2DIR'])
 
@@ -779,7 +801,12 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'AudioToolbox', '-framework', 'AudioUnit'])
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Cocoa'])
 
-        if re.search ("^[1-9][0-9]\.", os.uname()[2]) == None and not Options.options.nocarbon:
+        if (
+                # osx up to and including 10.6 (uname 10.X.X)
+                (re.search ("^[1-9][0-9]\.", os.uname()[2]) == None or not re.search ("^10\.", os.uname()[2]) == None)
+                and (Options.options.generic or Options.options.ppc)
+                and not Options.options.nocarbon
+           ):
             conf.env.append_value('CXXFLAGS_AUDIOUNITS', "-DWITH_CARBON")
             conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Carbon'])
         else:
@@ -853,6 +880,7 @@ def configure(conf):
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+        conf.define ('WINDOWS', 1)
 
     if Options.options.dist_target == 'msvc':
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
@@ -864,6 +892,7 @@ def configure(conf):
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         # MORE STUFF PROBABLY NEEDED HERE
+        conf.define ('WINDOWS', 1)
         
     # Tell everyone that this is a waf build
 
@@ -940,6 +969,24 @@ def configure(conf):
     conf.env['BUILD_ALSABACKEND'] = any('alsa' in b for b in backends)
     conf.env['BUILD_DUMMYBACKEND'] = any('dummy' in b for b in backends)
     conf.env['BUILD_WAVESBACKEND'] = any('wavesaudio' in b for b in backends)
+    conf.env['BUILD_CORECRAPPITA'] = any('coreaudio' in b for b in backends)
+
+    if conf.env['BUILD_CORECRAPPITA'] and conf.env['BUILD_WAVESBACKEND']:
+        print("Coreaudio + Waves Backend are mutually exclusive")
+        sys.exit(1)
+
+    if sys.platform != 'darwin' and conf.env['BUILD_CORECRAPPITA']:
+        print("Coreaudio backend is only available for OSX")
+        sys.exit(1)
+
+    if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw' and conf.env['BUILD_WAVESBACKEND']:
+        print("Waves Backend is not for Linux")
+        sys.exit(1)
+
+    if re.search ("linux", sys.platform) == None and conf.env['BUILD_ALSABACKEND']:
+        print("ALSA Backend is only available on Linux")
+        sys.exit(1)
+
 
     set_compiler_flags (conf, Options.options)
 
@@ -982,9 +1029,10 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Architecture flags',    opts.arch)
     write_config_text('Aubio',                 conf.is_defined('HAVE_AUBIO'))
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
-    write_config_text('No plugin state',       conf.is_defined('NO_PLUGIN_STATE'))
+    write_config_text('Free/Demo copy',        conf.is_defined('FREEBIE'))
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
+    write_config_text('CoreAudio/Midi Backend',conf.env['BUILD_CORECRAPPITA'])
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
     write_config_text('Debug Symbols',         conf.is_defined('debug_symbols') or conf.env['DEBUG'])
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
@@ -995,6 +1043,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
     write_config_text('Libjack linking',       conf.env['libjack_link'])
+    write_config_text('Libjack metadata',      not conf.is_defined('NO_JACK_METADATA'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))
@@ -1036,7 +1085,7 @@ def build(bld):
     bld.path.find_dir ('libs/pbd/pbd')
 
     # set up target directories
-    lwrcase_dirname = 'ardour3'
+    lwrcase_dirname = 'ardour' + bld.env['MAJOR']
 
     if bld.is_defined ('TRX_BUILD'):
         lwrcase_dirname = 'trx'
@@ -1069,6 +1118,7 @@ def build(bld):
         bld.add_post_fun(test)
 
 def i18n(bld):
+    print(bld.env)
     bld.recurse (i18n_children)
 
 def i18n_pot(bld):

@@ -117,11 +117,11 @@
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="color 1"/>
-    <ColorAlias name="arrange base" alias="color 2"/>
+    <ColorAlias name="arrange base" alias="color 34"/>
     <ColorAlias name="audio automation track fill" alias="color 70"/>
     <ColorAlias name="audio bus base" alias="color 3"/>
     <ColorAlias name="audio master bus base" alias="color 4"/>
-    <ColorAlias name="audio track base" alias="color 70"/>
+    <ColorAlias name="audio track base" alias="color 77"/>
     <ColorAlias name="automation line" alias="color 6"/>
     <ColorAlias name="automation track outline" alias="color 7"/>
     <ColorAlias name="big clock active: background" alias="color 4"/>
@@ -208,8 +208,8 @@
     <ColorAlias name="gtk_solo" alias="color 91"/>
     <ColorAlias name="gtk_somewhat_bright_indicator" alias="color 89"/>
     <ColorAlias name="gtk_texts" alias="color 50"/>
-    <ColorAlias name="gtk_track_header_inactive" alias="color 84"/>
-    <ColorAlias name="gtk_track_header_selected" alias="color 93"/>
+    <ColorAlias name="gtk_track_header_inactive" alias="color 34"/>
+    <ColorAlias name="gtk_track_header_selected" alias="color 40"/>
     <ColorAlias name="image track" alias="color 31"/>
     <ColorAlias name="inactive crossfade" alias="color 32"/>
     <ColorAlias name="inactive fade handle" alias="color 33"/>
@@ -229,7 +229,7 @@
     <ColorAlias name="marker label" alias="color 4"/>
     <ColorAlias name="marker track" alias="color 31"/>
     <ColorAlias name="measure line bar" alias="color 13"/>
-    <ColorAlias name="measure line beat" alias="color 45"/>
+    <ColorAlias name="measure line beat" alias="color 33"/>
     <ColorAlias name="meter background bottom" alias="color 46"/>
     <ColorAlias name="meter background top" alias="color 34"/>
     <ColorAlias name="meter bar" alias="color 7"/>
@@ -250,7 +250,7 @@
     <ColorAlias name="meterstrip ppm fg" alias="color 31"/>
     <ColorAlias name="meterstrip vu bg" alias="color 32"/>
     <ColorAlias name="meterstrip vu fg" alias="color 4"/>
-    <ColorAlias name="midi automation track fill" alias="color 94"/>
+    <ColorAlias name="midi automation track fill" alias="color 58"/>
     <ColorAlias name="midi bus base" alias="color 4"/>
     <ColorAlias name="midi device: fill" alias="color 25"/>
     <ColorAlias name="midi device: fill active" alias="color 42"/>
@@ -269,10 +269,10 @@
     <ColorAlias name="midi meter color8" alias="color 56"/>
     <ColorAlias name="midi meter color9" alias="color 17"/>
     <ColorAlias name="midi note inactive channel" alias="color 4"/>
-    <ColorAlias name="midi note max" alias="color 52"/>
-    <ColorAlias name="midi note mid" alias="color 57"/>
-    <ColorAlias name="midi note min" alias="color 58"/>
-    <ColorAlias name="midi note selected" alias="color 59"/>
+    <ColorAlias name="midi note max" alias="color 8"/>
+    <ColorAlias name="midi note mid" alias="color 96"/>
+    <ColorAlias name="midi note min" alias="color 103"/>
+    <ColorAlias name="midi note selected" alias="color 40"/>
     <ColorAlias name="midi note selected outline" alias="color 9"/>
     <ColorAlias name="midi note velocity text" alias="color 32"/>
     <ColorAlias name="midi patch change fill" alias="color 60"/>
@@ -337,13 +337,11 @@
     <ColorAlias name="piano roll black outline" alias="color 33"/>
     <ColorAlias name="piano roll white" alias="color 45"/>
     <ColorAlias name="play head" alias="color 9"/>
-    <ColorAlias name="plugin bypass button: fill" alias="color 71"/>
-    <ColorAlias name="plugin bypass button: fill active" alias="color 42"/>
-    <ColorAlias name="plugin bypass button: led active" alias="color 9"/>
+    <ColorAlias name="plugin bypass button: led active" alias="color 8"/>
     <ColorAlias name="processor automation line" alias="color 77"/>
     <ColorAlias name="processor control button: fill" alias="color 29"/>
     <ColorAlias name="processor control button: fill active" alias="color 46"/>
-    <ColorAlias name="processor control button: led active" alias="color 16"/>
+    <ColorAlias name="processor control button: led active" alias="color 62"/>
     <ColorAlias name="processor fader: fill" alias="color 16"/>
     <ColorAlias name="processor fader: fill active" alias="color 78"/>
     <ColorAlias name="processor fader: led active" alias="color 37"/>
@@ -369,7 +367,6 @@
     <ColorAlias name="recording rect" alias="color 86"/>
     <ColorAlias name="recording waveform fill" alias="color 13"/>
     <ColorAlias name="recording waveform outline" alias="color 43"/>
-    <ColorAlias name="time axis view item base" alias="color 94"/>
     <ColorAlias name="region list automatic" alias="color 53"/>
     <ColorAlias name="region list missing source" alias="color 9"/>
     <ColorAlias name="region list whole file" alias="color 1"/>
@@ -438,7 +435,8 @@
     <ColorAlias name="tempo bar" alias="color 46"/>
     <ColorAlias name="tempo marker" alias="color 19"/>
     <ColorAlias name="time axis frame" alias="color 4"/>
-    <ColorAlias name="time stretch fill" alias="color 26"/>
+    <ColorAlias name="time axis view item base" alias="color 94"/>
+    <ColorAlias name="time stretch fill" alias="color 100"/>
     <ColorAlias name="time stretch outline" alias="color 94"/>
     <ColorAlias name="tracknumber label: fill" alias="color 34"/>
     <ColorAlias name="tracknumber label: fill active" alias="color 46"/>
@@ -476,38 +474,40 @@
     <ColorAlias name="zoom button: led active" alias="color 8"/>
   </ColorAliases>
   <Modifiers>
-    <Modifier name="audio bus base" modifier="= alpha:0.4078"/>
-    <Modifier name="audio track base" modifier="= alpha:0.4078"/>
-    <Modifier name="automation track fill" modifier="= alpha:0.326156"/>
+    <Modifier name="audio bus base" modifier="= alpha:0.3"/>
+    <Modifier name="audio track base" modifier="= alpha:0.3"/>
+    <Modifier name="automation track fill" modifier="= alpha:0.3"/>
+    <Modifier name="covered region base" modifier="= alpha:0.7"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.1803"/>
     <Modifier name="dragging region" modifier="= alpha:0.9"/>
-    <Modifier name="editable region" modifier="= alpha:0.1"/>
+    <Modifier name="editable region" modifier="= alpha:0.25"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.7725"/>
     <Modifier name="ghost track base" modifier="= alpha:0.640782"/>
-    <Modifier name="ghost track midi fill" modifier="= alpha:0.228968"/>
+    <Modifier name="ghost track midi fill" modifier="= alpha:0.3"/>
     <Modifier name="inactive crossfade" modifier="= alpha:0.4666"/>
-    <Modifier name="loop rectangle" modifier="= alpha:0.9764"/>
-    <Modifier name="measure line beat" modifier="= alpha:0.4627"/>
+    <Modifier name="loop rectangle" modifier="= alpha:0.5"/>
+    <Modifier name="marker bar" modifier="= alpha:0.5"/>
+    <Modifier name="measure line beat" modifier="= alpha:1.0"/>
     <Modifier name="midi frame base" modifier="= alpha:0.4"/>
-    <Modifier name="midi note" modifier="= alpha:0.686905"/>
+    <Modifier name="midi note" modifier="= alpha:0.8"/>
     <Modifier name="midi note velocity text" modifier="= alpha:0.4666"/>
     <Modifier name="midi patch change fill" modifier="= alpha:0.6274"/>
     <Modifier name="midi sysex fill" modifier="= alpha:0.4666"/>
-    <Modifier name="midi track base" modifier="= alpha:0.3725"/>
+    <Modifier name="midi track base" modifier="= alpha:0.3"/>
     <Modifier name="mono panner position fill" modifier="= alpha:0.8"/>
+    <Modifier name="opaque region base" modifier="= alpha:0.75"/>
     <Modifier name="panner fill" modifier="= alpha:0.7882"/>
-    <Modifier name="piano roll black" modifier="= alpha:0.331098"/>
-    <Modifier name="piano roll white" modifier="= alpha:0.4627"/>
+    <Modifier name="piano roll black" modifier="= alpha:0.2"/>
+    <Modifier name="piano roll white" modifier="= alpha:0.2"/>
     <Modifier name="recording rect" modifier="= alpha:0.25"/>
-    <Modifier name="time axis view item base" modifier="= alpha:0.7"/>
-    <Modifier name="covered region base" modifier="= alpha:0.7"/>
-    <Modifier name="opaque region base" modifier="= alpha:0.7"/>
-    <Modifier name="transparent region base" modifier="= alpha:0.50"/>
     <Modifier name="selected midi note" modifier="= alpha:0.7529"/>
     <Modifier name="selection rect" modifier="= alpha:0.4666"/>
     <Modifier name="silence" modifier="= alpha:0.4784"/>
     <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
     <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
+    <Modifier name="time axis view item base" modifier="= alpha:0.7"/>
+    <Modifier name="transparent region base" modifier="= alpha:0.6"/>
+   <Modifier name="time stretch fill" modifier="= alpha:0.5"/>
     <Modifier name="verbose canvas cursor" modifier="= alpha:0.4666"/>
   </Modifiers>
 </Ardour>

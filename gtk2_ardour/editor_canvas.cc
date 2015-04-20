@@ -71,7 +71,7 @@ Editor::initialize_canvas ()
 	_track_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_track_canvas = _track_canvas_viewport->canvas ();
 
-        _track_canvas->set_background_color (ARDOUR_UI::config()->color ("arrange base"));
+	_track_canvas->set_background_color (ARDOUR_UI::config()->color ("arrange base"));
 
 	/* scroll group for items that should not automatically scroll
 	 *  (e.g verbose cursor). It shares the canvas coordinate space.
@@ -80,7 +80,11 @@ Editor::initialize_canvas ()
 
 	ArdourCanvas::ScrollGroup* hsg; 
 	ArdourCanvas::ScrollGroup* hg;
-	ArdourCanvas::ScrollGroup* vg;
+	ArdourCanvas::ScrollGroup* cg;
+
+	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
+	_track_canvas->add_scroller (*hg);
 
 	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), 
 							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
@@ -88,13 +92,9 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
 	_track_canvas->add_scroller (*hsg);
 
-	v_scroll_group = vg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
-	CANVAS_DEBUG_NAME (v_scroll_group, "canvas v scroll");
-	_track_canvas->add_scroller (*vg);
-
-	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
-	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
-	_track_canvas->add_scroller (*hg);
+	cursor_scroll_group = cg = new ArdourCanvas::ScrollGroup (_track_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	CANVAS_DEBUG_NAME (cursor_scroll_group, "canvas cursor scroll");
+	_track_canvas->add_scroller (*cg);
 
 	_verbose_cursor = new VerboseCursor (this);
 
@@ -123,7 +123,7 @@ Editor::initialize_canvas ()
 	transport_punch_range_rect->hide();
 
 	/*a group to hold time (measure) lines */
-	time_line_group = new ArdourCanvas::Container (hv_scroll_group);
+	time_line_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "time line group");
 
 	_trackview_group = new ArdourCanvas::Container (hv_scroll_group);
@@ -230,7 +230,6 @@ Editor::initialize_canvas ()
 	if (logo_item) {
 		logo_item->lower_to_bottom ();
 	}
-
 
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
@@ -899,22 +898,22 @@ Editor::color_handler()
 	
 	playhead_cursor->set_color (ARDOUR_UI::config()->color ("play head"));
 
-	meter_bar->set_fill_color (ARDOUR_UI::config()->color ("meter bar"));
+	meter_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("meter bar", "marker bar"));
 	meter_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	tempo_bar->set_fill_color (ARDOUR_UI::config()->color ("tempo bar"));
+	tempo_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("tempo bar", "marker bar"));
 	tempo_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	marker_bar->set_fill_color (ARDOUR_UI::config()->color ("marker bar"));
+	marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("marker bar", "marker bar"));
 	marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("cd marker bar"));
+	cd_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("cd marker bar", "marker bar"));
 	cd_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("range marker bar"));
+	range_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("range marker bar", "marker bar"));
 	range_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
-	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->color ("transport marker bar"));
+	transport_marker_bar->set_fill_color (ARDOUR_UI::config()->color_mod ("transport marker bar", "marker bar"));
 	transport_marker_bar->set_outline_color (ARDOUR_UI::config()->color ("marker bar separator"));
 
 	cd_marker_bar_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag bar rect"));
@@ -946,8 +945,9 @@ Editor::color_handler()
 
 	refresh_location_display ();
 
-        /* redraw the whole thing */
-        _track_canvas->queue_draw ();
+	/* redraw the whole thing */
+	_track_canvas->set_background_color (ARDOUR_UI::config()->color ("arrange base"));
+	_track_canvas->queue_draw ();
         
 /*
 	redisplay_tempo (true);
@@ -1012,15 +1012,22 @@ Editor::set_canvas_cursor (Gdk::Cursor* cursor)
 {
 	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
 
-	if (win && cursor) {
-	        win->set_cursor (*cursor);
+	if (win && !_cursors->is_invalid (cursor)) {
+		/* glibmm 2.4 doesn't allow null cursor pointer because it uses
+		   a Gdk::Cursor& as the argument to Gdk::Window::set_cursor().
+		   But a null pointer just means "use parent window cursor",
+		   and so should be allowed. Gtkmm 3.x has fixed this API.
+
+		   For now, drop down and use C API
+		*/
+		gdk_window_set_cursor (win->gobj(), cursor ? cursor->gobj() : 0);
 	}
 }
 
 size_t
 Editor::push_canvas_cursor (Gdk::Cursor* cursor)
 {
-	if (cursor) {
+	if (!_cursors->is_invalid (cursor)) {
 		_cursor_stack.push_back (cursor);
 		set_canvas_cursor (cursor);
 	}
@@ -1095,7 +1102,7 @@ Editor::which_trim_cursor (bool left) const
 Gdk::Cursor*
 Editor::which_mode_cursor () const
 {
-	Gdk::Cursor* mode_cursor = 0;
+	Gdk::Cursor* mode_cursor = MouseCursors::invalid_cursor ();
 
 	switch (mouse_mode) {
 	case MouseRange:
@@ -1161,7 +1168,7 @@ Editor::which_mode_cursor () const
 Gdk::Cursor*
 Editor::which_track_cursor () const
 {
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = MouseCursors::invalid_cursor();
 
 	switch (_join_object_range_state) {
 	case JOIN_OBJECT_RANGE_NONE:
@@ -1332,7 +1339,7 @@ Editor::choose_canvas_cursor_on_entry (ItemType type)
 
 	Gdk::Cursor* cursor = which_canvas_cursor(type);
 
-	if (cursor) {
+	if (!_cursors->is_invalid (cursor)) {
 		// Push a new enter context
 		const EnterContext ctx = { type, CursorContext::create(*this, cursor) };
 		_enter_stack.push_back(ctx);

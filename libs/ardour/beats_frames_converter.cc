@@ -31,9 +31,9 @@ namespace ARDOUR {
  *  taking tempo changes into account.
  */
 framepos_t
-BeatsFramesConverter::to (Evoral::MusicalTime beats) const
+BeatsFramesConverter::to (Evoral::Beats beats) const
 {
-	if (beats < Evoral::MusicalTime()) {
+	if (beats < Evoral::Beats()) {
 		std::cerr << "negative beats passed to BFC: " << beats << std::endl;
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
@@ -45,7 +45,7 @@ BeatsFramesConverter::to (Evoral::MusicalTime beats) const
  *  supplied to the constructor.  Returns the equivalent number of beats,
  *  taking tempo changes into account.
  */
-Evoral::MusicalTime
+Evoral::Beats
 BeatsFramesConverter::from (framepos_t frames) const
 {
 	return _tempo_map.framewalk_to_beats (_origin_b, frames);
@@ -60,7 +60,7 @@ DoubleBeatsFramesConverter::to (double beats) const
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
 	}
-	return _tempo_map.framepos_plus_beats (_origin_b, Evoral::MusicalTime(beats)) - _origin_b;
+	return _tempo_map.framepos_plus_beats (_origin_b, Evoral::Beats(beats)) - _origin_b;
 }
 
 /** As above, but with beats in double instead (for GUI). */

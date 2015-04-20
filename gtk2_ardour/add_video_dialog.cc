@@ -271,6 +271,7 @@ static bool check_video_file_extension(std::string file)
 		".mpg"     , ".MPG"     ,
 		".mpeg"    , ".MPEG"    ,
 		".mts"     , ".MTS"     ,
+		".m2t"     , ".M2T"     ,
 		".mov"     , ".MOV"     ,
 		".mp4"     , ".MP4"     ,
 		".mkv"     , ".MKV"     ,

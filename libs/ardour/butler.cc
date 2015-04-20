@@ -49,6 +49,7 @@ Butler::Butler(Session& s)
 	, audio_dstream_playback_buffer_size(0)
 	, midi_dstream_buffer_size(0)
 	, pool_trash(16)
+	, _xthread (true)
 {
 	g_atomic_int_set(&should_do_transport_work, 0);
 	SessionEvent::pool->set_trash (&pool_trash);
@@ -64,40 +65,17 @@ Butler::~Butler()
 void
 Butler::config_changed (std::string p)
 {
-        if (p == "playback-buffer-seconds") {
-                /* size is in Samples, not bytes */
-                audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
-                _session.adjust_playback_buffering ();
-        } else if (p == "capture-buffer-seconds") {
-                audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
-                _session.adjust_capture_buffering ();
-        }
+	if (p == "playback-buffer-seconds") {
+		/* size is in Samples, not bytes */
+		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
+		_session.adjust_playback_buffering ();
+	} else if (p == "capture-buffer-seconds") {
+		audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
+		_session.adjust_capture_buffering ();
+	} else if (p == "midi-readahead") {
+		MidiDiskstream::set_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * _session.frame_rate()));
+	}
 }
-
-#ifndef PLATFORM_WINDOWS
-int
-Butler::setup_request_pipe ()
-{
-	if (pipe (request_pipe)) {
-		error << string_compose(_("Cannot create transport request signal pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (request_pipe[0], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	if (fcntl (request_pipe[1], F_SETFL, O_NONBLOCK)) {
-		error << string_compose(_("UI: cannot set O_NONBLOCK on butler request pipe (%1)"),
-				strerror (errno)) << endmsg;
-		return -1;
-	}
-	return 0;
-}
-#endif
 
 int
 Butler::start_thread()
@@ -117,10 +95,6 @@ Butler::start_thread()
 	MidiDiskstream::set_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * rate));
 
 	should_run = false;
-
-#ifndef PLATFORM_WINDOWS
-	if (setup_request_pipe() != 0) return -1;
-#endif
 
 	if (pthread_create_and_store ("disk butler", &thread, _thread_work, this)) {
 		error << _("Session: could not create butler thread") << endmsg;
@@ -151,69 +125,6 @@ Butler::_thread_work (void* arg)
 	return ((Butler *) arg)->thread_work ();
 }
 
-bool
-Butler::wait_for_requests ()
-{
-#ifndef PLATFORM_WINDOWS
-	struct pollfd pfd[1];
-
-	pfd[0].fd = request_pipe[0];
-	pfd[0].events = POLLIN|POLLERR|POLLHUP;
-
-	while(true) {
-		if (poll (pfd, 1, -1) < 0) {
-
-			if (errno == EINTR) {
-				continue;
-			}
-
-			error << string_compose (_("poll on butler request pipe failed (%1)"),
-					strerror (errno))
-				<< endmsg;
-			break;
-		}
-
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler awake at @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
-
-		if (pfd[0].revents & ~POLLIN) {
-			error << string_compose (_("Error on butler thread request pipe: fd=%1 err=%2"), pfd[0].fd, pfd[0].revents) << endmsg;
-			break;
-		}
-
-		if (pfd[0].revents & POLLIN) {
-			return true;
-		}
-	}
-	return false;
-#else
-	m_request_sem.wait ();
-	return true;
-#endif
-}
-
-bool
-Butler::dequeue_request (Request::Type& r)
-{
-#ifndef PLATFORM_WINDOWS
-	char req;
-	size_t nread = ::read (request_pipe[0], &req, sizeof (req));
-	if (nread == 1) {
-		r = (Request::Type) req;
-		return true;
-	} else if (nread == 0) {
-		return false;
-	} else if (errno == EAGAIN) {
-		return false;
-	} else {
-		fatal << _("Error reading from butler request pipe") << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-#else
-	r = (Request::Type) m_request_state.get();
-#endif
-	return false;
-}
-
 void *
 Butler::thread_work ()
 {
@@ -227,16 +138,12 @@ Butler::thread_work ()
 
 		if(!disk_work_outstanding) {
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 butler waits for requests @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
-			if (wait_for_requests ()) {
-				Request::Type req;
 
-				/* empty the pipe of all current requests */
-#ifdef PLATFORM_WINDOWS
-				dequeue_request (req);
-#else
-				while (dequeue_request(req)) {
-#endif
-					switch (req) {
+			char msg;
+			/* empty the pipe of all current requests */
+			if (_xthread.receive (msg, true) >= 0) {
+				Request::Type req = (Request::Type) msg;
+				switch (req) {
 
 					case Request::Run:
 						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: butler asked to run @ %2\n", DEBUG_THREAD_SELF, g_get_monotonic_time()));
@@ -256,10 +163,7 @@ Butler::thread_work ()
 
 					default:
 						break;
-					}
-#ifndef PLATFORM_WINDOWS
 				}
-#endif
 			}
 		}
 
@@ -425,13 +329,20 @@ Butler::schedule_transport_work ()
 void
 Butler::queue_request (Request::Type r)
 {
-#ifndef PLATFORM_WINDOWS
 	char c = r;
-	(void) ::write (request_pipe[1], &c, 1);
-#else
-	m_request_state.set (r);
-	m_request_sem.post ();
-#endif
+	if (_xthread.deliver (c) != 1) {
+		/* the x-thread channel is non-blocking
+		 * write may fail, but we really don't want to wait
+		 * under normal circumstances.
+		 *
+		 * a lost "run" requests under normal RT operation
+		 * is mostly harmless.
+		 *
+		 * TODO if ardour is freehweeling, wait & retry.
+		 * ditto for Request::Type Quit
+		 */
+		assert(1); // we're screwd
+	}
 }
 
 void

@@ -27,10 +27,7 @@
 #include "pbd/file_utils.h"
 
 #include "ardour/revision.h"
-#include "ardour/version.h"
 #include "ardour/filesystem_paths.h"
-
-#include "version.h"
 
 #include "about.h"
 #include "configinfo.h"
@@ -48,6 +45,10 @@ using namespace Gdk;
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+#ifndef CODENAME
+#define CODENAME ""
+#endif
 
 #ifdef WITH_PAYMENT_OPTIONS
 
@@ -137,6 +138,7 @@ static const char* authors[] = {
 	N_("André Colomb"),
 	N_("Paul Davis"),
 	N_("Gerard van Dongen"),
+	N_("John Emmas"),
 	N_("Colin Fletcher"),
 	N_("Dave Flick"),
 	N_("Hans Fugal"),
@@ -164,6 +166,7 @@ static const char* authors[] = {
 	N_("Nick Mainsbridge"),
 	N_("Tim Mayberry"),
 	N_("Doug Mclain"),
+	N_("Todd Naugle"),
 	N_("Jack O'Quin"),
 	N_("Nimal Ratnayake"),
 	N_("David Robillard"),
@@ -585,13 +588,13 @@ About::About ()
 	}
 
 	set_translator_credits (t);
-	set_copyright (_("Copyright (C) 1999-2013 Paul Davis\n"));
+	set_copyright (_("Copyright (C) 1999-2015 Paul Davis\n"));
 	set_license (gpl);
 	set_name (X_("Ardour"));
 	set_website (X_("http://ardour.org/"));
 	set_website_label (_("http://ardour.org/"));
-	set_version ((string_compose(_("%1\n(built from revision %2)"),
-				     VERSIONSTRING,
+	set_version ((string_compose(_("%1%2\n(built from revision %3)"),
+				     VERSIONSTRING, CODENAME,
 				     revision)));
 
 	Gtk::Button* config_button = manage (new Button (_("Config")));

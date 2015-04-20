@@ -52,7 +52,7 @@ Polygon::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (!_points.empty ()) {
 			/* close path */
 			Duple p = item_to_window (Duple (_points.front().x, _points.front().y));
-			context->move_to (p.x, p.y);
+			context->line_to (p.x, p.y);
 		}
 
 	}

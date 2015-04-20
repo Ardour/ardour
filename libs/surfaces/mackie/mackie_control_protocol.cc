@@ -71,9 +71,10 @@
 
 using namespace ARDOUR;
 using namespace std;
-using namespace Mackie;
 using namespace PBD;
 using namespace Glib;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 #include "i18n.h"
 
@@ -657,9 +658,9 @@ MackieControlProtocol::set_device (const string& device_name)
 }
 
 gboolean 
-ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
+ArdourSurface::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
 {
-        MackieControlProtocol::ipMIDIHandler* ipm = static_cast<MackieControlProtocol::ipMIDIHandler*>(data);
+	ArdourSurface::MackieControlProtocol::ipMIDIHandler* ipm = static_cast<ArdourSurface::MackieControlProtocol::ipMIDIHandler*>(data);
         return ipm->mcp->midi_input_handler (Glib::IOCondition (condition), ipm->port);
 }
 
@@ -724,15 +725,13 @@ MackieControlProtocol::create_surfaces ()
 				session->engine().make_port_name_non_relative (surface->port().output_port().name())
 				);
 
-			session->BundleAdded (_input_bundle);
-			session->BundleAdded (_output_bundle);
+			session->BundleAddedOrRemoved ();
 
 		} else {
 			_input_bundle.reset ((ARDOUR::Bundle*) 0);
 			_output_bundle.reset ((ARDOUR::Bundle*) 0);
 
-			session->BundleRemoved (_input_bundle);
-			session->BundleRemoved (_output_bundle);
+			session->BundleAddedOrRemoved ();
 		}
 
 		MIDI::Port& input_port (surface->port().input_port());

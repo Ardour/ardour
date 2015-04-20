@@ -108,6 +108,23 @@ PortManager::make_port_name_non_relative (const string& portname) const
 	return str;
 }
 
+std::string
+PortManager::get_pretty_name_by_name(const std::string& portname) const
+{
+	PortEngine::PortHandle ph = _backend->get_port_by_name (portname);
+	if (ph) {
+		std::string value;
+		std::string type;
+		if (0 == _backend->get_port_property (ph,
+					"http://jackaudio.org/metadata/pretty-name",
+					value, type))
+		{
+			return value;
+		}
+	}
+	return "";
+}
+
 bool
 PortManager::port_is_mine (const string& portname) const
 {

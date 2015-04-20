@@ -202,8 +202,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 				}
 			} else if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ((*i)->route_group() == group)
+					if ((*i)->route_group() == group) {
 						selection->remove(*i);
+					}
 				}
 			} else {
 				selection->remove (clicked_axisview);
@@ -215,8 +216,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 				}
 			} else if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ( (*i)->route_group() == group)
+					if ((*i)->route_group() == group) {
 						selection->add(*i);
+					}
 				}
 			} else {
 				selection->add (clicked_axisview);
@@ -234,8 +236,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 			}
 		} else if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group)
+				if ((*i)->route_group() == group) {
 					selection->add(*i);
+				}
 			}
 		} else {
 			selection->add (clicked_axisview);
@@ -253,8 +256,9 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 			}
 		} else if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group)
+				if ((*i)->route_group() == group) {
 					selection->add(*i);
+				}
 			}
 		} else {
 			selection->set (clicked_axisview);
@@ -270,7 +274,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 void
 Editor::set_selected_track (TimeAxisView& view, Selection::Operation op, bool no_remove)
 {
-	begin_reversible_selection_op(_("Set Selected Track"));
+	begin_reversible_selection_op (X_("Set Selected Track"));
 
 	switch (op) {
 	case Selection::Toggle:
@@ -896,7 +900,7 @@ Editor::set_selected_regionview_from_region_list (boost::shared_ptr<Region> regi
 		return;
 	}
 
-	begin_reversible_selection_op (_("set selected regions"));
+	begin_reversible_selection_op (X_("set selected regions"));
 
 	switch (op) {
 	case Selection::Toggle:
@@ -939,7 +943,7 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 		return true;
 	}
 
-	begin_reversible_selection_op (_("set selected regions"));
+	begin_reversible_selection_op (X_("set selected regions"));
 
 	selection->set (rv);
 
@@ -1352,7 +1356,7 @@ Editor::select_all_in_track (Selection::Operation op)
 		return;
 	}
 
-	begin_reversible_selection_op(_("Select All in Track"));
+	begin_reversible_selection_op (X_("Select All in Track"));
 
 	clicked_routeview->get_selectables (0, max_framepos, 0, DBL_MAX, touched);
 
@@ -1416,7 +1420,7 @@ Editor::select_all_objects (Selection::Operation op)
 	}
 
 
-	begin_reversible_selection_op (_("select all"));
+	begin_reversible_selection_op (X_("select all"));
 	switch (op) {
 	case Selection::Add:
 		selection->add (touched);
@@ -1443,7 +1447,7 @@ Editor::invert_selection_in_track ()
 		return;
 	}
 
-	begin_reversible_selection_op(_("Invert Selection in Track"));
+	begin_reversible_selection_op (X_("Invert Selection in Track"));
 	clicked_routeview->get_inverted_selectables (*selection, touched);
 	selection->set (touched);
 	commit_reversible_selection_op ();
@@ -1471,7 +1475,7 @@ Editor::invert_selection ()
 		(*iter)->get_inverted_selectables (*selection, touched);
 	}
 
-	begin_reversible_selection_op(_("Invert Selection"));
+	begin_reversible_selection_op (X_("Invert Selection"));
 	selection->set (touched);
 	commit_reversible_selection_op ();
 }
@@ -1514,7 +1518,7 @@ Editor::select_all_within (framepos_t start, framepos_t end, double top, double 
 		}
 	}
 
-	begin_reversible_selection_op (_("select all within"));
+	begin_reversible_selection_op (X_("select all within"));
 	switch (op) {
 	case Selection::Add:
 		selection->add (found);
@@ -1541,6 +1545,12 @@ Editor::set_selection_from_region ()
 	}
 
 	selection->set (selection->regions.start(), selection->regions.end_frame());
+	
+	//we must now select tracks, because otherwise set_selection_from_region would appear to do nothing
+	//perhaps too drastic; perhaps the user really only wants the region's track selected
+	//but I can't think of any use-case for that (why wouldn't you just select the region?)
+	select_all_tracks();	
+	
 	if (!Profile->get_sae()) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
@@ -1572,7 +1582,7 @@ Editor::set_selection_from_loop()
 void
 Editor::set_selection_from_range (Location& loc)
 {
-	begin_reversible_selection_op (_("set selection from range"));
+	begin_reversible_selection_op (X_("set selection from range"));
 	selection->set (loc.start(), loc.end());
 	commit_reversible_selection_op ();
 
@@ -1612,7 +1622,7 @@ Editor::select_all_selectables_using_time_selection ()
 		(*iter)->get_selectables (start, end - 1, 0, DBL_MAX, touched);
 	}
 
-	begin_reversible_selection_op (_("select all from range"));
+	begin_reversible_selection_op (X_("select all from range"));
 	selection->set (touched);
 	commit_reversible_selection_op ();
 }
@@ -1643,7 +1653,7 @@ Editor::select_all_selectables_using_punch()
 		}
 		(*iter)->get_selectables (location->start(), location->end() - 1, 0, DBL_MAX, touched);
 	}
-	begin_reversible_selection_op (_("select all from punch"));
+	begin_reversible_selection_op (X_("select all from punch"));
 	selection->set (touched);
 	commit_reversible_selection_op ();
 
@@ -1674,7 +1684,7 @@ Editor::select_all_selectables_using_loop()
 		}
 		(*iter)->get_selectables (location->start(), location->end() - 1, 0, DBL_MAX, touched);
 	}
-	begin_reversible_selection_op (_("select all from loop"));
+	begin_reversible_selection_op (X_("select all from loop"));
 	selection->set (touched);
 	commit_reversible_selection_op ();
 
@@ -1710,9 +1720,9 @@ Editor::select_all_selectables_using_cursor (EditorCursor *cursor, bool after)
 	}
 
 	if (after) {
-		begin_reversible_selection_op (_("select all after cursor"));
+		begin_reversible_selection_op (X_("select all after cursor"));
 	} else {
-		begin_reversible_selection_op (_("select all before cursor"));
+		begin_reversible_selection_op (X_("select all before cursor"));
 	}
 
 	TrackViewList* ts;
@@ -1741,10 +1751,10 @@ Editor::select_all_selectables_using_edit (bool after)
 	list<Selectable *> touched;
 
 	if (after) {
-		start = get_preferred_edit_position();
+		start = get_preferred_edit_position(false, true);
 		end = _session->current_end_frame();
 	} else {
-		if ((end = get_preferred_edit_position()) > 1) {
+		if ((end = get_preferred_edit_position(false, true)) > 1) {
 			start = 0;
 			end -= 1;
 		} else {
@@ -1761,9 +1771,9 @@ Editor::select_all_selectables_using_edit (bool after)
 	}
 
 	if (after) {
-		begin_reversible_selection_op (_("select all after edit"));
+		begin_reversible_selection_op (X_("select all after edit"));
 	} else {
-		begin_reversible_selection_op (_("select all before edit"));
+		begin_reversible_selection_op (X_("select all before edit"));
 	}
 
 	TrackViewList* ts;
@@ -1785,7 +1795,7 @@ Editor::select_all_selectables_using_edit (bool after)
 }
 
 void
-Editor::select_all_selectables_between (bool /*within*/)
+Editor::select_all_selectables_between (bool within)
 {
 	framepos_t start;
 	framepos_t end;
@@ -1815,10 +1825,10 @@ Editor::select_all_selectables_between (bool /*within*/)
 		if ((*iter)->hidden()) {
 			continue;
 		}
-		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched);
+		(*iter)->get_selectables (start, end, 0, DBL_MAX, touched, within);
 	}
 
-	begin_reversible_selection_op(_("Select all Selectables Between"));
+	begin_reversible_selection_op (X_("Select all Selectables Between"));
 	selection->set (touched);
 	commit_reversible_selection_op ();
 }
@@ -1837,7 +1847,7 @@ Editor::select_range_between ()
 		return;
 	}
 
-	begin_reversible_selection_op(_("Select Range Between"));
+	begin_reversible_selection_op (X_("Select Range Between"));
 	set_mouse_mode (MouseRange);
 	selection->set (start, end);
 	commit_reversible_selection_op ();
@@ -1947,7 +1957,7 @@ Editor::get_edit_op_range (framepos_t& start, framepos_t& end) const
 void
 Editor::deselect_all ()
 {
-	begin_reversible_selection_op(_("Clear Selection"));
+	begin_reversible_selection_op (X_("Deselect All"));
 	selection->clear ();
 	commit_reversible_selection_op ();
 }
@@ -1955,7 +1965,7 @@ Editor::deselect_all ()
 long
 Editor::select_range (framepos_t s, framepos_t e)
 {
-	begin_reversible_selection_op(_("Select Range"));
+	begin_reversible_selection_op (X_("Select Range"));
 	selection->add (clicked_axisview);
 	selection->time.clear ();
 	long ret = selection->set (s, e);

@@ -64,7 +64,7 @@ AudioAnalyser::initialize_plugin (AnalysisPluginKey key, float sr)
 
 	PluginLoader* loader (PluginLoader::getInstance());
 
-	plugin = loader->loadPlugin (key, sr, PluginLoader::ADAPT_ALL);
+	plugin = loader->loadPlugin (key, sr, PluginLoader::ADAPT_ALL_SAFE);
 
 	if (!plugin) {
 		error << string_compose (_("VAMP Plugin \"%1\" could not be loaded"), key) << endmsg;
@@ -75,8 +75,8 @@ AudioAnalyser::initialize_plugin (AnalysisPluginKey key, float sr)
 	   something that makes for efficient disk i/o
 	*/
 
-	bufsize = 65536;
-	stepsize = bufsize;
+	bufsize = 1024;
+	stepsize = 512;
 
 	if (plugin->getMinChannelCount() > 1) {
 		delete plugin;

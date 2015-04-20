@@ -57,13 +57,6 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-static string poor_mans_glob (string path)
-{
-	string copy = path;
-	replace_all (copy, "~", Glib::get_home_dir());
-	return copy;
-}
-
 SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)
 	: ArdourDialog (_("Session Setup"), true, true)
 	, new_only (require_new)
@@ -76,9 +69,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _existing_session_chooser_used (false)
 {
-#ifndef PLATFORM_WINDOWS
-	set_keep_above (true);
-#endif
 	set_position (WIN_POS_CENTER);
 	get_vbox()->set_spacing (6);
 

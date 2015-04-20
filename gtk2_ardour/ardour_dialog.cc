@@ -40,7 +40,7 @@ ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
         , _splash_pushed (false)
 {
 	init ();
-	set_position (Gtk::WIN_POS_MOUSE);
+	set_position (Gtk::WIN_POS_CENTER);
 }
 
 ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
@@ -64,26 +64,19 @@ ArdourDialog::~ArdourDialog ()
 }
 
 bool
-ArdourDialog::on_key_press_event (GdkEventKey* ev)
+ArdourDialog::on_focus_in_event (GdkEventFocus *ev)
 {
-	if (!relay_key_press (ev, this)) {
-		return Gtk::Window::on_key_press_event(ev);
+	Keyboard::the_keyboard().focus_in_window (ev, this);
+	return Dialog::on_focus_in_event (ev);
+}
+
+bool
+ArdourDialog::on_focus_out_event (GdkEventFocus *ev)
+{
+	if (!get_modal()) {
+		Keyboard::the_keyboard().focus_out_window (ev, this);
 	}
-	return true;
-}
-
-bool
-ArdourDialog::on_enter_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().enter_window (ev, this);
-	return Dialog::on_enter_notify_event (ev);
-}
-
-bool
-ArdourDialog::on_leave_notify_event (GdkEventCrossing *ev)
-{
-	Keyboard::the_keyboard().leave_window (ev, this);
-	return Dialog::on_leave_notify_event (ev);
+	return Dialog::on_focus_out_event (ev);
 }
 
 void
@@ -119,7 +112,7 @@ void
 ArdourDialog::init ()
 {
 	set_border_width (10);
-
+	add_events (Gdk::FOCUS_CHANGE_MASK);
 	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 
 	Gtk::Window* parent = WM::Manager::instance().transient_parent();

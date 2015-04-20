@@ -115,10 +115,20 @@ JPFUN(0, int,            acquire_real_time_scheduling, (jack_native_thread_t t, 
 JPFUN(0, int,            drop_real_time_scheduling, (jack_native_thread_t t), (t), 0)
 JPFUN(0, int,            client_stop_thread, (jack_client_t* c, jack_native_thread_t t), (c,t), 0)
 JPFUN(0, int,            client_kill_thread, (jack_client_t* c, jack_native_thread_t t), (c,t), 0)
+#ifndef WIN32
+JVFUN(0,                 set_thread_creator, (jack_thread_creator_t c), (c),)
+#endif
 JPFUN(1, int,            client_create_thread, \
 		(jack_client_t* c, jack_native_thread_t *t, int p, int r, void *(*f)(void*), void *a), (c,t,p,r,f,a), 0)
 
-#if 0
+#ifndef NO_JACK_METADATA
+/* <jack/uuid.h>  - TODO*/
+
+/* <jack/jack.h> */
+JPFUN(0, char *,         get_uuid_for_client_name, (jack_client_t* c, const char* n), (c,n), NULL)
+JPFUN(0, char *,         get_client_name_by_uuid, (jack_client_t* c, const char* u), (c,u), NULL)
+JPFUN(0, jack_uuid_t,    port_uuid, (const jack_port_t *p), (p), 0)
+
 /* <jack/metadata.h> */
 JPFUN(0, int,            set_property, (jack_client_t* c, jack_uuid_t s, const char* k, const char* v, const char* t), (c,s,k,v,t), -1)
 JXFUN(0, int,            get_property, (jack_uuid_t s, const char* k, char** v, char** t), (s,k,v,t), if (v) *v=NULL; if (t) *t=NULL; return -1;)
@@ -128,7 +138,7 @@ JXFUN(0, int,            get_all_properties, (jack_description_t** d), (d), if (
 JPFUN(0, int,            remove_property, (jack_client_t* c, jack_uuid_t s, const char* k), (c,s,k), -1)
 JPFUN(0, int,            remove_properties, (jack_client_t* c, jack_uuid_t s), (c,s), -1)
 JPFUN(0, int,            remove_all_properties, (jack_client_t* c), (c), -1)
-		(jack_client_t* c, jack_native_thread_t *t, int p, int r, void *(*f)(void*), void *a), (c,t,p,r,f,a), 0)
+JPFUN(0, int,            set_property_change_callback, (jack_client_t *c, JackPropertyChangeCallback s, void *a), (c,s,a), -1)
 #endif
 
 #endif // end USE_WEAK_JACK

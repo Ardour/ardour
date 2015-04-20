@@ -68,6 +68,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
+#include "ardour/lmath.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
@@ -80,7 +81,6 @@
 
 #include "control_protocol/control_protocol.h"
 
-#include "actions.h"
 #include "actions.h"
 #include "analysis_window.h"
 #include "audio_clock.h"
@@ -251,6 +251,7 @@ pane_size_watcher (Paned* pane)
 Editor::Editor ()
 	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 
+	, _mouse_changed_selection (false)
 	  /* time display buttons */
 	, minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))
@@ -403,7 +404,7 @@ Editor::Editor ()
 	location_loop_color = ARDOUR_UI::config()->color ("location loop");
 	location_punch_color = ARDOUR_UI::config()->color ("location punch");
 
-	zoom_focus = ZoomFocusLeft;
+	zoom_focus = ZoomFocusPlayhead;
 	_edit_point = EditAtMouse;
 	_visible_track_count = -1;
 
@@ -680,7 +681,6 @@ Editor::Editor ()
 	_snap_mode = SnapOff;
 	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
-        pre_internal_mouse_mode = MouseObject;
         pre_internal_snap_type = _snap_type;
         pre_internal_snap_mode = _snap_mode;
         internal_snap_type = _snap_type;
@@ -1860,9 +1860,9 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Set Loop from Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), false)));
-	edit_items.push_back (MenuElem (_("Set Punch from Range"), sigc::mem_fun(*this, &Editor::set_punch_from_selection)));
-	edit_items.push_back (MenuElem (_("Set Session Start/End from Range"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection)));
+	edit_items.push_back (MenuElem (_("Set Loop from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), false)));
+	edit_items.push_back (MenuElem (_("Set Punch from Selection"), sigc::mem_fun(*this, &Editor::set_punch_from_selection)));
+	edit_items.push_back (MenuElem (_("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Add Range Markers"), sigc::mem_fun (*this, &Editor::add_location_from_selection)));
@@ -1879,7 +1879,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Bounce Range to Region List With Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, true)));
 	edit_items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_selection)));
 	if (ARDOUR_UI::instance()->video_timeline->get_duration() > 0) {
-		edit_items.push_back (MenuElem (_("Export Video Range..."), sigc::bind (sigc::mem_fun(*this, &Editor::export_video), true)));
+		edit_items.push_back (MenuElem (_("Export Video Range..."), sigc::bind (sigc::mem_fun(*(ARDOUR_UI::instance()), &ARDOUR_UI::export_video), true)));
 	}
 }
 
@@ -2038,6 +2038,12 @@ Editor::set_snap_to (SnapType st)
 {
 	unsigned int snap_ind = (unsigned int)st;
 
+	if (internal_editing()) {
+		internal_snap_type = st;
+	} else {
+		pre_internal_snap_type = st;
+	}
+
 	_snap_type = st;
 
 	if (snap_ind > snap_type_strings.size() - 1) {
@@ -2093,6 +2099,8 @@ Editor::set_snap_to (SnapType st)
 		/* relax */
 		break;
 	}
+
+	redisplay_tempo (false);
 
 	SnapChanged (); /* EMIT SIGNAL */
 }
@@ -2314,37 +2322,16 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	if ((prop = node.property ("show-measures"))) {
 		bool yn = string_is_affirmative (prop->value());
 		_show_measures = yn;
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
 	}
 
 	if ((prop = node.property ("follow-playhead"))) {
 		bool yn = string_is_affirmative (prop->value());
 		set_follow_playhead (yn);
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			if (tact->get_active() != yn) {
-				tact->set_active (yn);
-			}
-		}
 	}
 
 	if ((prop = node.property ("stationary-playhead"))) {
 		bool yn = string_is_affirmative (prop->value());
 		set_stationary_playhead (yn);
-		RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
-		if (act) {
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			if (tact->get_active() != yn) {
-				tact->set_active (yn);
-			}
-		}
 	}
 
 	if ((prop = node.property ("region-list-sort-type"))) {
@@ -2418,6 +2405,42 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 	} else {
 		nudge_clock->set_mode (AudioClock::Timecode);
 		nudge_clock->set (_session->frame_rate() * 5, true);
+	}
+
+	{
+		/* apply state
+		 * Not all properties may have been in XML, but
+		 * those that are linked to a private variable may need changing
+		 */
+		RefPtr<Action> act;
+		bool yn;
+
+		act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
+		if (act) {
+			yn = _show_measures;
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			/* do it twice to force the change */
+			tact->set_active (!yn);
+			tact->set_active (yn);
+		}
+
+		act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
+		yn = _follow_playhead;
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
+		}
+
+		act = ActionManager::get_action (X_("Editor"), X_("toggle-stationary-playhead"));
+		yn = _stationary_playhead;
+		if (act) {
+			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+			if (tact->get_active() != yn) {
+				tact->set_active (yn);
+			}
+		}
 	}
 
 	return 0;
@@ -3184,14 +3207,14 @@ Editor::build_snap_type_menu ()
 void
 Editor::setup_tooltips ()
 {
-	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Object mode)"));
-	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Object Mode (select/move Objects)"));
-	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split Regions)"));
-	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Grab/Select Objects"));
-	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw/Edit Gain/Notes/Automation"));
-	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch/Shrink Regions and MIDI Notes"));
-	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Listen to Specific Regions"));
-	ARDOUR_UI::instance()->set_tip (mouse_content_button, _("Edit Contents (notes and automation)"));
+	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Grab mode)"));
+	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Grab Mode (select/move objects)"));
+	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split regions)"));
+	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select time ranges)"));
+	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
+	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
+	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Audition Mode (listen to regions)"));
+	ARDOUR_UI::instance()->set_tip (mouse_content_button, _("Internal Edit Mode (edit notes and gain curves inside regions)"));
 	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
 	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
@@ -3319,7 +3342,12 @@ Editor::begin_selection_op_history ()
 {
 	selection_op_cmd_depth = 0;
 	selection_op_history_it = 0;
-	selection_op_history.clear();
+
+	while(!selection_op_history.empty()) {
+		delete selection_op_history.front();
+		selection_op_history.pop_front();
+	}
+
 	selection_undo_action->set_sensitive (false);
 	selection_redo_action->set_sensitive (false);
 	selection_op_history.push_front (&_selection_memento->get_state ());
@@ -3342,20 +3370,31 @@ Editor::commit_reversible_selection_op ()
 		if (selection_op_cmd_depth == 1) {
 
 			if (selection_op_history_it > 0 && selection_op_history_it < selection_op_history.size()) {
+				/**
+				    The user has undone some selection ops and then made a new one,
+				    making anything earlier in the list invalid.
+				*/
+				
 				list<XMLNode *>::iterator it = selection_op_history.begin();
-				advance (it, selection_op_history_it);
-				selection_op_history.erase (selection_op_history.begin(), it);
+				list<XMLNode *>::iterator e_it = it;
+				advance (e_it, selection_op_history_it);
+				
+				for ( ; it != e_it; ++it) {
+					delete *it;
+				}
+				selection_op_history.erase (selection_op_history.begin(), e_it);
 			}
+
 			selection_op_history.push_front (&_selection_memento->get_state ());
 			selection_op_history_it = 0;
+
+			selection_undo_action->set_sensitive (true);
+			selection_redo_action->set_sensitive (false);
 		}
 
 		if (selection_op_cmd_depth > 0) {
 			selection_op_cmd_depth--;
 		}
-
-		selection_undo_action->set_sensitive (true);
-		selection_redo_action->set_sensitive (false);
 	}
 }
 
@@ -3371,7 +3410,6 @@ Editor::undo_selection_op ()
 				selection_redo_action->set_sensitive (true);
 			}
 			++n;
-
 		}
 		/* is there an earlier entry? */
 		if ((selection_op_history_it + 1) >= selection_op_history.size()) {
@@ -3394,7 +3432,6 @@ Editor::redo_selection_op ()
 				selection_undo_action->set_sensitive (true);
 			}
 			++n;
-
 		}
 
 		if (selection_op_history_it == 0) {
@@ -3422,11 +3459,24 @@ Editor::begin_reversible_command (GQuark q)
 }
 
 void
+Editor::abort_reversible_command ()
+{
+	if (_session) {
+		while(!before.empty()) {
+			delete before.front();
+			before.pop_front();
+		}
+		_session->abort_reversible_command ();
+	}
+}
+
+void
 Editor::commit_reversible_command ()
 {
 	if (_session) {
 		if (before.size() == 1) {
 			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
+			redo_action->set_sensitive(false);
 			undo_action->set_sensitive(true);
 			begin_selection_op_history ();
 		}
@@ -3653,7 +3703,7 @@ Editor::build_track_count_menu ()
 		visible_tracks_selector.AddMenuElem (MenuElem (X_("24"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 24)));
 		visible_tracks_selector.AddMenuElem (MenuElem (X_("32"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32)));
 		visible_tracks_selector.AddMenuElem (MenuElem (X_("64"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 64)));
-		visible_tracks_selector.AddMenuElem (MenuElem (_("Selected"), sigc::mem_fun(*this, &Editor::fit_selected_tracks)));
+		visible_tracks_selector.AddMenuElem (MenuElem (_("Selection"), sigc::mem_fun(*this, &Editor::fit_selection)));
 		visible_tracks_selector.AddMenuElem (MenuElem (_("All"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0)));
 	} else {
 		visible_tracks_selector.AddMenuElem (MenuElem (_("Fit 1 track"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 1)));
@@ -3665,7 +3715,7 @@ Editor::build_track_count_menu ()
 		visible_tracks_selector.AddMenuElem (MenuElem (_("Fit 32 tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 32)));
 		visible_tracks_selector.AddMenuElem (MenuElem (_("Fit 48 tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 48)));
 		visible_tracks_selector.AddMenuElem (MenuElem (_("Fit All tracks"), sigc::bind (sigc::mem_fun(*this, &Editor::set_visible_track_count), 0)));
-		visible_tracks_selector.AddMenuElem (MenuElem (_("Fit Selected tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks)));
+		visible_tracks_selector.AddMenuElem (MenuElem (_("Fit Selection"), sigc::mem_fun(*this, &Editor::fit_selection)));
 
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to 10 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 10)));
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to 100 ms"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 100)));
@@ -3735,7 +3785,7 @@ Editor::set_visible_track_count (int32_t n)
 	}
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		(*i)->set_height (h);
+		(*i)->set_height (h, TimeAxisView::HeightPerLane);
 	}
 	
 	if (str != visible_tracks_selector.get_text()) {
@@ -4001,90 +4051,56 @@ Editor::get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t durat
 	return offset;
 }
 
-Evoral::MusicalTime
+unsigned
+Editor::get_grid_beat_divisions(framepos_t position)
+{
+	switch (_snap_type) {
+	case SnapToBeatDiv128: return 128;
+	case SnapToBeatDiv64:  return 64;
+	case SnapToBeatDiv32:  return 32;
+	case SnapToBeatDiv28:  return 28;
+	case SnapToBeatDiv24:  return 24;
+	case SnapToBeatDiv20:  return 20;
+	case SnapToBeatDiv16:  return 16;
+	case SnapToBeatDiv14:  return 14;
+	case SnapToBeatDiv12:  return 12;
+	case SnapToBeatDiv10:  return 10;
+	case SnapToBeatDiv8:   return 8;
+	case SnapToBeatDiv7:   return 7;
+	case SnapToBeatDiv6:   return 6;
+	case SnapToBeatDiv5:   return 5;
+	case SnapToBeatDiv4:   return 4;
+	case SnapToBeatDiv3:   return 3;
+	case SnapToBeatDiv2:   return 2;
+	default:               return 0;
+	}
+	return 0;
+}
+
+Evoral::Beats
 Editor::get_grid_type_as_beats (bool& success, framepos_t position)
 {
 	success = true;
 
+	const unsigned divisions = get_grid_beat_divisions(position);
+	if (divisions) {
+		return Evoral::Beats(1.0 / (double)get_grid_beat_divisions(position));
+	}
+
 	switch (_snap_type) {
 	case SnapToBeat:
-		return Evoral::MusicalTime(1.0);
-		break;
-
-	case SnapToBeatDiv128:
-		return Evoral::MusicalTime(1.0/128.0);
-		break;
-	case SnapToBeatDiv64:
-		return Evoral::MusicalTime(1.0/64.0);
-		break;
-	case SnapToBeatDiv32:
-		return Evoral::MusicalTime(1.0/32.0);
-		break;
-	case SnapToBeatDiv28:
-		return Evoral::MusicalTime(1.0/28.0);
-		break;
-	case SnapToBeatDiv24:
-		return Evoral::MusicalTime(1.0/24.0);
-		break;
-	case SnapToBeatDiv20:
-		return Evoral::MusicalTime(1.0/20.0);
-		break;
-	case SnapToBeatDiv16:
-		return Evoral::MusicalTime(1.0/16.0);
-		break;
-	case SnapToBeatDiv14:
-		return Evoral::MusicalTime(1.0/14.0);
-		break;
-	case SnapToBeatDiv12:
-		return Evoral::MusicalTime(1.0/12.0);
-		break;
-	case SnapToBeatDiv10:
-		return Evoral::MusicalTime(1.0/10.0);
-		break;
-	case SnapToBeatDiv8:
-		return Evoral::MusicalTime(1.0/8.0);
-		break;
-	case SnapToBeatDiv7:
-		return Evoral::MusicalTime(1.0/7.0);
-		break;
-	case SnapToBeatDiv6:
-		return Evoral::MusicalTime(1.0/6.0);
-		break;
-	case SnapToBeatDiv5:
-		return Evoral::MusicalTime(1.0/5.0);
-		break;
-	case SnapToBeatDiv4:
-		return Evoral::MusicalTime(1.0/4.0);
-		break;
-	case SnapToBeatDiv3:
-		return Evoral::MusicalTime(1.0/3.0);
-		break;
-	case SnapToBeatDiv2:
-		return Evoral::MusicalTime(1.0/2.0);
-		break;
-
+		return Evoral::Beats(1.0);
 	case SnapToBar:
 		if (_session) {
-			return Evoral::MusicalTime(_session->tempo_map().meter_at (position).divisions_per_bar());
+			return Evoral::Beats(_session->tempo_map().meter_at (position).divisions_per_bar());
 		}
 		break;
-
-	case SnapToCDFrame:
-	case SnapToTimecodeFrame:
-	case SnapToTimecodeSeconds:
-	case SnapToTimecodeMinutes:
-	case SnapToSeconds:
-	case SnapToMinutes:
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
 	default:
 		success = false;
 		break;
 	}
 
-	return Evoral::MusicalTime();
+	return Evoral::Beats();
 }
 
 framecnt_t
@@ -4461,6 +4477,7 @@ Editor::use_visual_state (VisualState& vs)
 		*ARDOUR_UI::instance()->gui_object_state = *vs.gui_state;
 		
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {	
+			(*i)->clear_property_cache();
 			(*i)->reset_visual_state ();
 		}
 	}
@@ -4638,7 +4655,7 @@ Editor::sort_track_selection (TrackViewList& sel)
 }
 
 framepos_t
-Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_menu)
+Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_menu, bool from_outside_canvas)
 {
 	bool ignored;
 	framepos_t where = 0;
@@ -4647,8 +4664,10 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 	if(Profile->get_mixbus())
 		if (ep == EditAtSelectedMarker)
 			ep=EditAtPlayhead;
-		
-	if (from_context_menu && (ep == EditAtMouse)) {
+
+	if (from_outside_canvas && (ep == EditAtMouse)) {
+		ep = EditAtPlayhead;
+	} else if (from_context_menu && (ep == EditAtMouse)) {
 		return  canvas_event_sample (&context_click_event, 0, 0);
 	}
 
@@ -4663,7 +4682,13 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 
 	switch (ep) {
 	case EditAtPlayhead:
-		where = _session->audible_frame();
+		if (_dragging_playhead) {
+			if (!mouse_frame (where, ignored)) {
+				/* XXX not right but what can we do ? */
+				return 0;
+			}
+		} else
+			where = _session->audible_frame();
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
 		break;
 
@@ -4918,17 +4943,17 @@ Editor::get_regions_from_selection_and_entered ()
 }
 
 void
-Editor::get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const
+Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const
 {
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		RouteTimeAxisView* tatv;
+		RouteTimeAxisView* rtav;
 		
-		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
+		if ((rtav = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 			boost::shared_ptr<Playlist> pl;
 			std::vector<boost::shared_ptr<Region> > results;
 			boost::shared_ptr<Track> tr;
 			
-			if ((tr = tatv->track()) == 0) {
+			if ((tr = rtav->track()) == 0) {
 				/* bus */
 				continue;
 			}
@@ -4936,14 +4961,29 @@ Editor::get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) co
 			if ((pl = (tr->playlist())) != 0) {
 				boost::shared_ptr<Region> r = pl->region_by_id (id);
 				if (r) {
-					RegionView* marv = tatv->view()->find_view (r);
-					if (marv) {
-						regions.push_back (marv);
+					RegionView* rv = rtav->view()->find_view (r);
+					if (rv) {
+						regions.push_back (rv);
 					}
 				}
 			}
 		}
 	}
+}
+
+void
+Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection) const
+{
+
+	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		MidiTimeAxisView* mtav;
+
+		if ((mtav = dynamic_cast<MidiTimeAxisView*> (*i)) != 0) {
+
+			mtav->get_per_region_note_selection (selection);
+		}
+	}
+	
 }
 
 void
@@ -5121,6 +5161,19 @@ Editor::region_view_added (RegionView * rv)
 			break;
 		}
 	}
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
+	if (mrv) {
+		list<pair<PBD::ID const, list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rnote;
+		for (rnote = selection->pending_midi_note_selection.begin(); rnote != selection->pending_midi_note_selection.end(); ++rnote) {
+			if (rv->region()->id () == (*rnote).first) {
+				mrv->select_notes ((*rnote).second);
+				selection->pending_midi_note_selection.erase(rnote);
+				break;
+			}
+		}
+	}
+
 	_summary->set_background_dirty ();
 }
 
@@ -5184,6 +5237,8 @@ Editor::add_routes (RouteList& routes)
 
 	RouteTimeAxisView *rtv;
 	list<RouteTimeAxisView*> new_views;
+	TrackViewList new_selection;
+	bool from_scratch = (track_views.size() == 0);
 
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
 		boost::shared_ptr<Route> route = (*x);
@@ -5206,6 +5261,7 @@ Editor::add_routes (RouteList& routes)
 
 		new_views.push_back (rtv);
 		track_views.push_back (rtv);
+		new_selection.push_back (rtv);
 
 		rtv->effective_gain_display ();
 
@@ -5216,6 +5272,12 @@ Editor::add_routes (RouteList& routes)
 	if (new_views.size() > 0) {
 		_routes->routes_added (new_views);
 		_summary->routes_added (new_views);
+	}
+
+	if (!from_scratch) {
+		selection->tracks.clear();
+		selection->add (new_selection);
+		begin_selection_op_history();
 	}
 
 	if (show_editor_mixer_when_tracks_arrive) {

@@ -149,6 +149,7 @@ TimeInfoBox::TimeInfoBox ()
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
+	Region::RegionPropertyChanged.connect (region_property_connections, invalidator (*this), boost::bind (&TimeInfoBox::region_property_change, this, _1, _2), gui_context());
 	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), boost::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
 }
 
@@ -165,6 +166,33 @@ TimeInfoBox::~TimeInfoBox ()
 void
 TimeInfoBox::track_mouse_mode ()
 {
+	selection_changed ();
+}
+
+void
+TimeInfoBox::region_property_change (boost::shared_ptr<ARDOUR::Region> /* r */, const PBD::PropertyChange& what_changed)
+{
+	Selection& selection (Editor::instance().get_selection());
+
+	if (selection.regions.empty()) {
+		return;
+	}
+
+	PBD::PropertyChange our_interests;
+
+	our_interests.add (ARDOUR::Properties::position);
+	our_interests.add (ARDOUR::Properties::length);
+	our_interests.add (ARDOUR::Properties::start);
+
+	if (!what_changed.contains (our_interests)) {
+		return;
+	}
+
+	/* TODO: check if RegionSelection includes the given region.
+	 * This is not straight foward because RegionSelection is done by
+	 * RegionView (not Region itself).
+	 */
+
 	selection_changed ();
 }
 

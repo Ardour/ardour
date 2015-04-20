@@ -53,7 +53,7 @@ int alloc_allowed ()
 
 Graph::Graph (Session & session)
         : SessionHandleRef (session)
-        , _quit_threads (false)
+        , _threads_active (false)
 	, _execution_sem ("graph_execution", 0)
 	, _callback_start_sem ("graph_start", 0)
 	, _callback_done_sem ("graph_done", 0)
@@ -71,8 +71,12 @@ Graph::Graph (Session & session)
         _current_chain = 0;
         _pending_chain = 0;
         _setup_chain   = 1;
-        _quit_threads = false;
         _graph_empty = true;
+
+
+	ARDOUR::AudioEngine::instance()->Running.connect_same_thread (engine_connections, boost::bind (&Graph::reset_thread_list, this));
+	ARDOUR::AudioEngine::instance()->Stopped.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
+	ARDOUR::AudioEngine::instance()->Halted.connect_same_thread (engine_connections, boost::bind (&Graph::engine_stopped, this));
 
         reset_thread_list ();
 
@@ -80,6 +84,14 @@ Graph::Graph (Session & session)
 	graph = this;
 	pbd_alloc_allowed = &::alloc_allowed;
 #endif
+}
+
+void
+Graph::engine_stopped ()
+{
+	if (AudioEngine::instance()->process_thread_count() != 0) {
+		drop_threads ();
+	}
 }
 
 /** Set up threads for running the graph */
@@ -114,6 +126,7 @@ Graph::reset_thread_list ()
 			throw failed_constructor ();
 		}
         }
+        _threads_active = true;
 }
 
 void
@@ -132,7 +145,7 @@ Graph::session_going_away()
 void
 Graph::drop_threads ()
 {
-        _quit_threads = true;
+        _threads_active = false;
 
         uint32_t thread_count = AudioEngine::instance()->process_thread_count ();
 
@@ -145,8 +158,6 @@ Graph::drop_threads ()
 	AudioEngine::instance()->join_process_threads ();
 
 	_execution_tokens = 0;
-
-        _quit_threads = false;
 }
 
 void
@@ -243,7 +254,7 @@ Graph::restart_cycle()
         /* Block until the a process callback triggers us */
         _callback_start_sem.wait();
 
-        if (_quit_threads) {
+        if (!_threads_active) {
                 return;
         }
 
@@ -368,7 +379,7 @@ Graph::run_one()
                 pthread_mutex_unlock (&_trigger_mutex);
                 DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_name()));
                 _execution_sem.wait ();
-                if (_quit_threads) {
+                if (!_threads_active) {
                         return true;
                 }
                 DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 is awake\n", pthread_name()));
@@ -421,13 +432,13 @@ Graph::main_thread()
 	
 	DEBUG_TRACE(DEBUG::ProcessThreads, "main thread is awake\n");
 
-        if (_quit_threads) {
+        if (!_threads_active) {
                 return;
         }
 
 	prep ();
 
-        if (_graph_empty && !_quit_threads) {
+        if (_graph_empty && _threads_active) {
                 _callback_done_sem.signal ();
                 DEBUG_TRACE(DEBUG::ProcessThreads, "main thread sees graph done, goes back to sleep\n");
                 goto again;
@@ -474,6 +485,8 @@ Graph::dump (int chain)
 int
 Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool& need_butler)
 {
+	if (!_threads_active) return 0;
+
         _process_nframes = nframes;
         _process_start_frame = start_frame;
         _process_end_frame = end_frame;
@@ -498,6 +511,8 @@ int
 Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+
+	if (!_threads_active) return 0;
 
         _process_nframes = nframes;
         _process_start_frame = start_frame;
@@ -525,6 +540,8 @@ Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end
                        bool non_rt_pending, int declick)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+
+	if (!_threads_active) return 0;
 
         _process_nframes = nframes;
         _process_start_frame = start_frame;

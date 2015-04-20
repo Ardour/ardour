@@ -47,6 +47,7 @@
 #include "i18n.h"
 #include "keyboard.h"
 #include "audio_region_view.h"
+#include "automation_region_view.h"
 #include "midi_region_view.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -107,6 +108,7 @@ DragManager::abort ()
 	}
 
 	_drags.clear ();
+	_editor->abort_reversible_command();
 
 	_ending = false;
 }
@@ -180,7 +182,7 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 	bool r = false;
 
 	/* calling this implies that we expect the event to have canvas
-	 * coordinates 
+	 * coordinates
 	 *
 	 * Can we guarantee that this is true?
 	 */
@@ -218,6 +220,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _pointer_frame_offset (0)
 	, _trackview_only (trackview_only)
 	, _move_threshold_passed (false)
+	, _starting_point_passed (false)
+	, _initially_vertical (false)
 	, _was_double_click (false)
 	, _raw_grab_frame (0)
 	, _grab_frame (0)
@@ -232,11 +236,13 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 	_item->ungrab ();
 	_item = new_item;
 
-	if (cursor == 0) {
-		_item->grab ();
+	if (!_cursor_ctx) {
+		_cursor_ctx = CursorContext::create (*_editor, cursor);
 	} else {
-		_item->grab ();
+		_cursor_ctx->change (cursor);
 	}
+
+	_item->grab ();
 }
 
 void
@@ -269,12 +275,11 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 
 	_last_pointer_y = _grab_y;
 
-	if (cursor == 0) {
-		_item->grab ();
-	} else {
+	_item->grab ();
+
+	if (!_editor->cursors()->is_invalid (cursor)) {
 		/* CAIROCANVAS need a variant here that passes *cursor */
-		_item->grab ();
-		_cursor_ctx = CursorContext::create(*_editor, cursor);
+		_cursor_ctx = CursorContext::create (*_editor, cursor);
 	}
 
 	if (_editor->session() && _editor->session()->transport_rolling()) {
@@ -341,7 +346,7 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 double
 Drag::current_pointer_x() const
 {
-        return _drags->current_pointer_x ();
+	return _drags->current_pointer_x ();
 }
 
 double
@@ -350,7 +355,7 @@ Drag::current_pointer_y () const
 	if (!_trackview_only) {
 		return _drags->current_pointer_y ();
 	}
-	
+
 	return _drags->current_pointer_y () - _editor->get_trackview_group()->canvas_origin().y;
 }
 
@@ -368,7 +373,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 
 	bool const old_move_threshold_passed = _move_threshold_passed;
 
-	if (!from_autoscroll && !_move_threshold_passed) {
+	if (!_move_threshold_passed) {
 
 		bool const xp = (::llabs (_drags->current_pointer_frame () - _raw_grab_frame) >= threshold.first);
 		bool const yp = (::fabs ((current_pointer_y () - _grab_y)) >= threshold.second);
@@ -379,13 +384,33 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 	if (active (_editor->mouse_mode) && _move_threshold_passed) {
 
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
+
+			if (old_move_threshold_passed != _move_threshold_passed) {
+
+				/* just changed */
+
+				if (fabs (current_pointer_y() - _grab_y) > fabs (current_pointer_x() - _grab_x)) {
+					_initially_vertical = true;
+				} else {
+					_initially_vertical = false;
+				}
+			}
+
 			if (!from_autoscroll) {
 				_editor->maybe_autoscroll (true, allow_vertical_autoscroll (), false);
 			}
 
 			if (!_editor->autoscroll_active() || from_autoscroll) {
-				motion (event, _move_threshold_passed != old_move_threshold_passed);
-				
+
+
+				bool first_move = (_move_threshold_passed != old_move_threshold_passed) || from_autoscroll;
+
+				motion (event, first_move && !_starting_point_passed);
+
+				if (first_move && !_starting_point_passed) {
+					_starting_point_passed = true;
+				}
+
 				_last_pointer_x = _drags->current_pointer_x ();
 				_last_pointer_y = current_pointer_y ();
 				_last_pointer_frame = adjusted_current_frame (event);
@@ -451,17 +476,18 @@ Drag::add_midi_region (MidiTimeAxisView* view)
 }
 
 struct EditorOrderTimeAxisViewSorter {
-    bool operator() (TimeAxisView* a, TimeAxisView* b) {
-	    RouteTimeAxisView* ra = dynamic_cast<RouteTimeAxisView*> (a);
-	    RouteTimeAxisView* rb = dynamic_cast<RouteTimeAxisView*> (b);
-	    assert (ra && rb);
-	    return ra->route()->order_key () < rb->route()->order_key ();
-    }
+	bool operator() (TimeAxisView* a, TimeAxisView* b) {
+		RouteTimeAxisView* ra = dynamic_cast<RouteTimeAxisView*> (a);
+		RouteTimeAxisView* rb = dynamic_cast<RouteTimeAxisView*> (b);
+		assert (ra && rb);
+		return ra->route()->order_key () < rb->route()->order_key ();
+	}
 };
 
 RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v)
-	: Drag (e, i),
-	  _primary (p)
+	: Drag (e, i)
+	, _primary (p)
+	, _ntracks (0)
 {
 	_editor->visible_order_range (&_visible_y_low, &_visible_y_high);
 
@@ -474,7 +500,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		_time_axis_views.push_back (*i);
-		
+
 		TimeAxisView::Children children_list = (*i)->get_child_list ();
 		for (TimeAxisView::Children::iterator j = children_list.begin(); j != children_list.end(); ++j) {
 			_time_axis_views.push_back (j->get());
@@ -516,7 +542,7 @@ RegionDrag::find_time_axis_view (TimeAxisView* t) const
 		++i;
 	}
 
-	if (i == N) {
+	if (_time_axis_views[i] != t) {
 		return -1;
 	}
 
@@ -529,6 +555,10 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	, _total_x_delta (0)
 	, _last_pointer_time_axis_view (0)
 	, _last_pointer_layer (0)
+	, _single_axis (false)
+	, _ndropzone (0)
+	, _pdropzone (0)
+	, _ddropzone (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMotionDrag\n");
 }
@@ -538,11 +568,16 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
+	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+		_single_axis = true;
+	}
+
 	show_verbose_cursor_time (_last_frame_position);
 
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (current_pointer_y ());
 	if (tv.first) {
 		_last_pointer_time_axis_view = find_time_axis_view (tv.first);
+		assert(_last_pointer_time_axis_view >= 0);
 		_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
 	}
 }
@@ -609,18 +644,76 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	return dx;
 }
 
-bool
-RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
+int
+RegionDrag::apply_track_delta (const int start, const int delta, const int skip, const bool distance_only) const
 {
+	if (delta == 0) {
+		return start;
+	}
+
+	const int tavsize  = _time_axis_views.size();
+	const int dt = delta > 0 ? +1 : -1;
+	int current  = start;
+	int target   = start + delta - skip;
+
+	assert (current < 0 || current >= tavsize || !_time_axis_views[current]->hidden());
+	assert (skip == 0 || (skip < 0 && delta < 0) || (skip > 0 && delta > 0));
+
+	while (current >= 0 && current != target) {
+		current += dt;
+		if (current < 0 && dt < 0) {
+			break;
+		}
+		if (current >= tavsize && dt > 0) {
+			break;
+		}
+		if (current < 0 || current >= tavsize) {
+			continue;
+		}
+
+		RouteTimeAxisView const * rtav = dynamic_cast<RouteTimeAxisView const *> (_time_axis_views[current]);
+		if (_time_axis_views[current]->hidden() || !rtav || !rtav->is_track()) {
+			target += dt;
+		}
+
+		if (distance_only && current == start + delta) {
+			break;
+		}
+	}
+	return target;
+}
+
+bool
+RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer, int skip_invisible) const
+{
+	if (_y_constrained) {
+		return false;
+	}
+
+	const int tavsize  = _time_axis_views.size();
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-		int const n = i->time_axis_view + delta_track;
-		if (n < 0 || n >= int (_time_axis_views.size())) {
-			/* off the top or bottom track */
+		int n = apply_track_delta (i->time_axis_view, delta_track, skip_invisible);
+		assert (n < 0 || n >= tavsize || !_time_axis_views[n]->hidden());
+
+		if (i->time_axis_view < 0 || i->time_axis_view >= tavsize) {
+			/* already in the drop zone */
+			if (delta_track >= 0) {
+				/* downward motion - OK if others are still not in the dropzone */
+				continue;
+			}
+
+		}
+
+		if (n < 0) {
+			/* off the top */
 			return false;
+		} else if (n >= tavsize) {
+			/* downward motion into drop zone. That's fine. */
+			continue;
 		}
 
 		RouteTimeAxisView const * to = dynamic_cast<RouteTimeAxisView const *> (_time_axis_views[n]);
-		if (to == 0 || !to->is_track() || to->track()->data_type() != i->view->region()->data_type()) {
+		if (to == 0 || to->hidden() || !to->is_track() || to->track()->data_type() != i->view->region()->data_type()) {
 			/* not a track, or the wrong type */
 			return false;
 		}
@@ -642,21 +735,57 @@ RegionMotionDrag::y_movement_allowed (int delta_track, double delta_layer) const
 	return true;
 }
 
+struct DraggingViewSorter {
+	bool operator() (const DraggingView& a, const DraggingView& b) {
+		return a.time_axis_view < b.time_axis_view;
+	}
+};
+
 void
 RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 {
 	double delta_layer = 0;
 	int delta_time_axis_view = 0;
+	int current_pointer_time_axis_view = -1;
 
 	assert (!_views.empty ());
+
+	if (first_move) {
+		if (_single_axis) {
+			if (initially_vertical()) {
+				_y_constrained = false;
+				_x_constrained = true;
+			} else {
+				_y_constrained = true;
+				_x_constrained = false;
+			}
+		}
+	}
 
 	/* Note: time axis views in this method are often expressed as an index into the _time_axis_views vector */
 
 	/* Find the TimeAxisView that the pointer is now over */
-	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (current_pointer_y ());
+	const double cur_y = current_pointer_y ();
+	pair<TimeAxisView*, double> const r = _editor->trackview_by_y_position (cur_y);
 	TimeAxisView* tv = r.first;
 
+	if (!tv && cur_y < 0) {
+		/* above trackview area, autoscroll hasn't moved us since last time, nothing to do */
+		return;
+	}
+
+	/* find drop-zone y-position */
+	Coord last_track_bottom_edge;
+	last_track_bottom_edge = 0;
+	for (std::vector<TimeAxisView*>::reverse_iterator t = _time_axis_views.rbegin(); t != _time_axis_views.rend(); ++t) {
+		if (!(*t)->hidden()) {
+			last_track_bottom_edge = (*t)->canvas_display()->canvas_origin ().y + (*t)->effective_height();
+			break;
+		}
+	}
+
 	if (tv && tv->view()) {
+		/* the mouse is over a track */
 		double layer = r.second;
 
 		if (first_move && tv->view()->layer_display() == Stacked) {
@@ -664,25 +793,143 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		/* Here's the current pointer position in terms of time axis view and layer */
-		int const current_pointer_time_axis_view = find_time_axis_view (tv);
+		current_pointer_time_axis_view = find_time_axis_view (tv);
+		assert(current_pointer_time_axis_view >= 0);
+
 		double const current_pointer_layer = tv->layer_display() == Overlaid ? 0 : layer;
-		
+
 		/* Work out the change in y */
 
-		delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+		if (!rtv || !rtv->is_track()) {
+			/* ignore busses early on. we can't move any regions on them */
+		} else if (_last_pointer_time_axis_view < 0) {
+			/* Was in the drop-zone, now over a track.
+			 * Hence it must be an upward move (from the bottom)
+			 *
+			 * track_index is still -1, so delta must be set to
+			 * move up the correct number of tracks from the bottom.
+			 *
+			 * This is necessary because steps may be skipped if
+			 * the bottom-most track is not a valid target and/or
+			 * if there are hidden tracks at the bottom.
+			 * Hence the initial offset (_ddropzone) as well as the
+			 * last valid pointer position (_pdropzone) need to be
+			 * taken into account.
+			 */
+			delta_time_axis_view = current_pointer_time_axis_view - _time_axis_views.size () + _ddropzone - _pdropzone;
+		} else {
+			delta_time_axis_view = current_pointer_time_axis_view - _last_pointer_time_axis_view;
+		}
+
+		/* TODO needs adjustment per DraggingView,
+		 *
+		 * e.g. select one region on the top-layer of a track
+		 * and one region which is at the bottom-layer of another track
+		 * drag both.
+		 *
+		 * Indicated drop-zones and layering is wrong.
+		 * and may infer additional layers on the target-track
+		 * (depending how many layers the original track had).
+		 *
+		 * Or select two regions (different layers) on a same track,
+		 * move across a non-layer track.. -> layering info is lost.
+		 * on drop either of the regions may be on top.
+		 *
+		 * Proposed solution: screw it :) well,
+		 *   don't use delta_layer, use an absolute value
+		 *   1) remember DraggingView's layer  as float 0..1  [current layer / all layers of source]
+		 *   2) calculate current mouse pos, y-pos inside track divided by height of mouse-over track.
+		 *   3) iterate over all DraggingView, find the one that is over the track with most layers
+		 *   4) proportionally scale layer to layers available on target
+		 */
 		delta_layer = current_pointer_layer - _last_pointer_layer;
-	} 
-	
+
+	}
+	/* for automation lanes, there is a TimeAxisView but no ->view()
+	 * if (!tv) -> dropzone 
+	 */
+	else if (!tv && cur_y >= 0 && _last_pointer_time_axis_view >= 0) {
+		/* Moving into the drop-zone.. */
+		delta_time_axis_view = _time_axis_views.size () - _last_pointer_time_axis_view;
+		/* delta_time_axis_view may not be sufficient to move into the DZ
+		 * the mouse may enter it, but it may not be a valid move due to
+		 * constraints.
+		 *
+		 * -> remember the delta needed to move into the dropzone
+		 */
+		_ddropzone = delta_time_axis_view;
+		/* ..but subtract hidden tracks (or routes) at the bottom.
+		 * we silently move mover them
+		 */
+		_ddropzone -= apply_track_delta(_last_pointer_time_axis_view, delta_time_axis_view, 0, true)
+			      - _time_axis_views.size();
+	}
+	else if (!tv && cur_y >= 0 && _last_pointer_time_axis_view < 0) {
+		/* move around inside the zone.
+		 * This allows to move further down until all regions are in the zone.
+		 */
+		const double ptr_y = cur_y + _editor->get_trackview_group()->canvas_origin().y;
+		assert(ptr_y >= last_track_bottom_edge);
+		assert(_ddropzone > 0);
+
+		/* calculate mouse position in 'tracks' below last track. */
+		const double dzi_h = TimeAxisView::preset_height (HeightNormal);
+		uint32_t dzpos = _ddropzone + floor((1 + ptr_y - last_track_bottom_edge) / dzi_h);
+
+		if (dzpos > _pdropzone && _ndropzone < _ntracks) {
+			// move further down
+			delta_time_axis_view =  dzpos - _pdropzone;
+		} else if (dzpos < _pdropzone && _ndropzone > 0) {
+			// move up inside the DZ
+			delta_time_axis_view =  dzpos - _pdropzone;
+		}
+	}
+
 	/* Work out the change in x */
 	framepos_t pending_region_position;
 	double const x_delta = compute_x_delta (event, &pending_region_position);
 	_last_frame_position = pending_region_position;
 
+	/* calculate hidden tracks in current y-axis delta */
+	int delta_skip = 0;
+	if (_last_pointer_time_axis_view < 0 && _pdropzone > 0) {
+		/* The mouse is more than one track below the dropzone.
+		 * distance calculation is not needed (and would not work, either
+		 * because the dropzone is "packed").
+		 *
+		 * Except when [partially] moving regions out of dropzone in a large step.
+		 * (the mouse may or may not remain in the DZ)
+		 * Hidden tracks at the bottom of the TAV need to be skipped.
+		 *
+		 * This also handles the case if the mouse entered the DZ
+		 * in a large step (exessive delta), either due to fast-movement,
+		 * autoscroll, laggy UI. _ddropzone copensates for that (see "move into dz" above)
+		 */
+		if (delta_time_axis_view < 0 && (int)_ddropzone - delta_time_axis_view >= (int)_pdropzone) {
+			const int dt = delta_time_axis_view + (int)_pdropzone - (int)_ddropzone;
+			assert(dt <= 0);
+			delta_skip = apply_track_delta(_time_axis_views.size(), dt, 0, true)
+				-_time_axis_views.size() - dt;
+		}
+	}
+	else if (_last_pointer_time_axis_view < 0) {
+		/* Moving out of the zone. Check for hidden tracks at the bottom. */
+		delta_skip = apply_track_delta(_time_axis_views.size(), delta_time_axis_view, 0, true)
+			     -_time_axis_views.size() - delta_time_axis_view;
+	} else {
+		/* calculate hidden tracks that are skipped by the pointer movement */
+		delta_skip = apply_track_delta(_last_pointer_time_axis_view, delta_time_axis_view, 0, true)
+			     - _last_pointer_time_axis_view
+		             - delta_time_axis_view;
+	}
+
 	/* Verify change in y */
-	if (!y_movement_allowed (delta_time_axis_view, delta_layer)) {
+	if (!y_movement_allowed (delta_time_axis_view, delta_layer, delta_skip)) {
 		/* this y movement is not allowed, so do no y movement this time */
 		delta_time_axis_view = 0;
 		delta_layer = 0;
+		delta_skip = 0;
 	}
 
 	if (x_delta == 0 && (tv && tv->view() && delta_time_axis_view == 0) && delta_layer == 0 && !first_move) {
@@ -692,30 +939,64 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
-	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
+	typedef map<boost::shared_ptr<Playlist>, double> PlaylistDropzoneMap;
+	PlaylistDropzoneMap playlist_dropzone_map;
+	_ndropzone = 0; // number of elements currently in the dropzone
+
+	if (first_move) {
+		/* sort views by time_axis.
+		 * This retains track order in the dropzone, regardless
+		 * of actual selection order
+		 */
+		_views.sort (DraggingViewSorter());
+
+		/* count number of distinct tracks of all regions
+		 * being dragged, used for dropzone.
+		 */
+		int prev_track = -1;
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+			if (i->time_axis_view != prev_track) {
+				prev_track = i->time_axis_view;
+				++_ntracks;
+			}
+		}
+#ifndef NDEBUG
+		int spread =
+			_views.back().time_axis_view -
+			_views.front().time_axis_view;
+
+		spread -= apply_track_delta (_views.front().time_axis_view, spread, 0, true)
+		          -  _views.back().time_axis_view;
+
+		printf("Dragging region(s) from %d different track(s), max dist: %d\n", _ntracks, spread);
+#endif
+	}
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
 		RegionView* rv = i->view;
+		double y_delta;
+
+		y_delta = 0;
 
 		if (rv->region()->locked() || rv->region()->video_locked()) {
 			continue;
 		}
 
 		if (first_move) {
-			rv->drag_start (); 
+			rv->drag_start ();
 
 			/* reparent the regionview into a group above all
 			 * others
 			 */
-			
+
 			ArdourCanvas::Item* rvg = rv->get_canvas_group();
-                        Duple rv_canvas_offset = rvg->parent()->canvas_origin ();
-                        Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
-                        rv->get_canvas_group()->reparent (_editor->_drag_motion_group);
+			Duple rv_canvas_offset = rvg->parent()->canvas_origin ();
+			Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
+			rv->get_canvas_group()->reparent (_editor->_drag_motion_group);
 			/* move the item so that it continues to appear at the
 			   same location now that its parent has changed.
-			*/
+			   */
 			rvg->move (rv_canvas_offset - dmg_canvas_offset);
 		}
 
@@ -729,19 +1010,53 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			this_delta_layer = - i->layer;
 		}
 
-		if (tv) {
+		int this_delta_time_axis_view = apply_track_delta(i->time_axis_view, delta_time_axis_view, delta_skip) - i->time_axis_view;
 
-			int track_index;
-			
-			if (i->time_axis_view >= 0) {
-				track_index = i->time_axis_view + delta_time_axis_view;
-			} else {
-				track_index = _time_axis_views.size() - 1 + delta_time_axis_view;
+		int track_index = i->time_axis_view + this_delta_time_axis_view;
+		assert(track_index >= 0);
+
+		if (track_index < 0 || track_index >= (int) _time_axis_views.size()) {
+			/* Track is in the Dropzone */
+
+			i->time_axis_view = track_index;
+			assert(i->time_axis_view >= (int) _time_axis_views.size());
+			if (cur_y >= 0) {
+
+				double yposition = 0;
+				PlaylistDropzoneMap::iterator pdz = playlist_dropzone_map.find (i->view->region()->playlist());
+				rv->set_height (TimeAxisView::preset_height (HeightNormal));
+				++_ndropzone;
+
+				/* store index of each new playlist as a negative count, starting at -1 */
+
+				if (pdz == playlist_dropzone_map.end()) {
+					/* compute where this new track (which doesn't exist yet) will live
+					   on the y-axis.
+					*/
+					yposition = last_track_bottom_edge; /* where to place the top edge of the regionview */
+
+					/* How high is this region view ? */
+
+					boost::optional<ArdourCanvas::Rect> obbox = rv->get_canvas_group()->bounding_box ();
+					ArdourCanvas::Rect bbox;
+
+					if (obbox) {
+						bbox = obbox.get ();
+					}
+
+					last_track_bottom_edge += bbox.height();
+
+					playlist_dropzone_map.insert (make_pair (i->view->region()->playlist(), yposition));
+
+				} else {
+					yposition = pdz->second;
+				}
+
+				/* values are zero or negative, hence the use of min() */
+				y_delta = yposition - rv->get_canvas_group()->canvas_origin().y;
 			}
-			 
-			if (track_index < 0 || track_index >= (int) _time_axis_views.size()) {
-				continue;
-			}
+
+		} else {
 
 			/* The TimeAxisView that this region is now over */
 			TimeAxisView* current_tv = _time_axis_views[track_index];
@@ -750,15 +1065,15 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			if (current_tv->view()->layer_display() == Stacked) {
 				current_tv->view()->set_layer_display (Expanded);
 			}
-		
+
 			/* We're only allowed to go -ve in layer on Expanded views */
 			if (current_tv->view()->layer_display() != Expanded && (i->layer + this_delta_layer) < 0) {
 				this_delta_layer = - i->layer;
 			}
-		
+
 			/* Set height */
 			rv->set_height (current_tv->view()->child_height ());
-		
+
 			/* Update show/hidden status as the region view may have come from a hidden track,
 			   or have moved to one.
 			*/
@@ -779,7 +1094,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 				/* Get the y coordinate of the top of the track that this region is now over */
 				track_origin = current_tv->canvas_display()->item_to_canvas (track_origin);
-				
+
 				/* And adjust for the layer that it should be on */
 				StreamView* cv = current_tv->view ();
 				switch (cv->layer_display ()) {
@@ -798,31 +1113,15 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 				 * equivalent coordinate space as the trackview
 				 * we are now dragging over.
 				 */
-				
-				/* Now move the region view */
-				rv->move (x_delta, track_origin.y - rv->get_canvas_group()->canvas_origin().y);
-			}
-		} else {
 
-			/* Only move the region into the empty dropzone at the bottom if the pointer
-			 * is down there.
-			 */
+				y_delta = track_origin.y - rv->get_canvas_group()->canvas_origin().y;
 
-			if (current_pointer_y() >= 0) {
-				
-				Coord last_track_bottom_edge;
-				if (!_time_axis_views.empty()) {
-					TimeAxisView* last = _time_axis_views.back();
-					last_track_bottom_edge = last->canvas_display()->canvas_origin ().y + last->effective_height();
-				} else {
-					last_track_bottom_edge = 0;
-				}
-
-				rv->move (x_delta, last_track_bottom_edge - rv->get_canvas_group()->canvas_origin().y);
-				i->time_axis_view = -1;
 			}
 		}
-		
+
+		/* Now move the region view */
+		rv->move (x_delta, y_delta);
+
 	} /* foreach region */
 
 	_total_x_delta += x_delta;
@@ -831,7 +1130,66 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_time (_last_frame_position);
 	}
 
-	_last_pointer_time_axis_view += delta_time_axis_view;
+	/* keep track of pointer movement */
+	if (tv) {
+		/* the pointer is currently over a time axis view */
+
+		if (_last_pointer_time_axis_view < 0) {
+			/* last motion event was not over a time axis view
+			 * or last y-movement out of the dropzone was not valid
+			 */
+			int dtz = 0;
+			if (delta_time_axis_view < 0) {
+				/* in the drop zone, moving up */
+
+				/* _pdropzone is the last known pointer y-axis position inside the DZ.
+				 * We do not use negative _last_pointer_time_axis_view because
+				 * the dropzone is "packed" (the actual track offset is ignored)
+				 *
+				 * As opposed to the actual number 
+				 * of elements in the dropzone (_ndropzone)
+				 * _pdropzone is not constrained. This is necessary
+				 * to allow moving multiple regions with y-distance
+				 * into the DZ.
+				 *
+				 * There can be 0 elements in the dropzone,
+				 * even though the drag-pointer is inside the DZ.
+				 *
+				 * example:
+				 * [ Audio-track, Midi-track, Audio-track, DZ ]
+				 * move regions from both audio tracks at the same time into the
+				 * DZ by grabbing the region in the bottom track.
+				 */
+				assert(current_pointer_time_axis_view >= 0);
+				dtz = std::min((int)_pdropzone, (int)_ddropzone - delta_time_axis_view);
+				_pdropzone -= dtz;
+			}
+
+			/* only move out of the zone if the movement is OK */
+			if (_pdropzone == 0 && delta_time_axis_view != 0) {
+				assert(delta_time_axis_view < 0);
+				_last_pointer_time_axis_view = current_pointer_time_axis_view;
+				/* if all logic and maths are correct, there is no need to assign the 'current' pointer.
+				 * the current position can be calculated as follows:
+				 */
+				// a well placed oofus attack can still throw this off.
+				// likley auto-scroll related, printf() debugging may tell, commented out for now.
+				//assert (current_pointer_time_axis_view == _time_axis_views.size() - dtz + _ddropzone + delta_time_axis_view);
+			}
+		} else {
+			/* last motion event was also over a time axis view */
+			_last_pointer_time_axis_view += delta_time_axis_view;
+			assert(_last_pointer_time_axis_view >= 0);
+		}
+
+	} else {
+
+		/* the pointer is not over a time axis view */
+		assert ((delta_time_axis_view > 0) || (((int)_pdropzone) >= (delta_skip - delta_time_axis_view)));
+		_pdropzone += delta_time_axis_view - delta_skip;
+		_last_pointer_time_axis_view = -1; // <0 : we're in the zone, value does not matter.
+	}
+
 	_last_pointer_layer += delta_layer;
 }
 
@@ -859,6 +1217,11 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			const boost::shared_ptr<const Region> original = rv->region();
 			boost::shared_ptr<Region> region_copy = RegionFactory::create (original, true);
 			region_copy->set_position (original->position());
+			/* need to set this so that the drop zone code can work. This doesn't
+			   actually put the region into the playlist, but just sets a weak pointer
+			   to it.
+			*/
+			region_copy->set_playlist (original->playlist());
 
 			RegionView* nrv;
 			if (arv) {
@@ -927,15 +1290,15 @@ void
 RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 {
 	RegionMotionDrag::finished (ev, movement_occurred);
-	
+
 	if (!movement_occurred) {
-		
+
 		/* just a click */
 
 		if (was_double_click() && !_views.empty()) {
 			DraggingView dv = _views.front();
 			dv.view->show_region_editor ();
-			
+
 		}
 
 		return;
@@ -958,11 +1321,11 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 		i->view->get_canvas_group()->show ();
 	}
-	
+
 	bool const changed_position = (_last_frame_position != _primary->region()->position());
 	bool const changed_tracks = (_time_axis_views[_views.front().time_axis_view] != &_views.front().view->get_time_axis_view());
 	framecnt_t const drag_delta = _primary->region()->position() - _last_frame_position;
-	
+
 	if (_copy) {
 
 		finished_copy (
@@ -986,15 +1349,19 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 
 RouteTimeAxisView*
 RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, TimeAxisView* original)
-{			
+{
 	/* Add a new track of the correct type, and return the RouteTimeAxisView that is created to display the
 	   new track.
 	 */
-			
+
 	try {
 		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
 			list<boost::shared_ptr<AudioTrack> > audio_tracks;
-			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), region->n_channels(), ARDOUR::Normal, 0, 1, region->name());
+			uint32_t output_chan = region->n_channels();
+			if ((Config->get_output_auto_connect() & AutoConnectMaster) && _editor->session()->master_out()) {
+				output_chan =  _editor->session()->master_out()->n_inputs().n_audio();
+			}
+			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), output_chan, ARDOUR::Normal, 0, 1, region->name());
 			RouteTimeAxisView* rtav = _editor->axis_view_from_route (audio_tracks.front());
 			if (rtav) {
 				rtav->set_height (original->current_height());
@@ -1009,7 +1376,7 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 				rtav->set_height (original->current_height());
 			}
 			return rtav;
-		}						
+		}
 	} catch (...) {
 		error << _("Could not create new track after region placed in the drop zone") << endmsg;
 		return 0;
@@ -1021,7 +1388,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 {
 	RegionSelection new_views;
 	PlaylistSet modified_playlists;
-	RouteTimeAxisView* new_time_axis_view = 0;	
+	RouteTimeAxisView* new_time_axis_view = 0;
 
 	if (_brushing) {
 		/* all changes were made during motion event handlers */
@@ -1033,6 +1400,9 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		_editor->commit_reversible_command ();
 		return;
 	}
+
+	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
+	PlaylistMapping playlist_mapping;
 
 	/* insert the regions into their new playlists */
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
@@ -1050,23 +1420,33 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 		} else {
 			where = i->view->region()->position();
 		}
-		
-		if (i->time_axis_view < 0) {
-			if (!new_time_axis_view) {
+
+		if (i->time_axis_view < 0 || i->time_axis_view >= (int)_time_axis_views.size()) {
+			/* dragged to drop zone */
+
+			PlaylistMapping::iterator pm;
+
+			if ((pm = playlist_mapping.find (i->view->region()->playlist())) == playlist_mapping.end()) {
+				/* first region from this original playlist: create a new track */
 				new_time_axis_view = create_destination_time_axis (i->view->region(), i->initial_time_axis_view);
+				playlist_mapping.insert (make_pair (i->view->region()->playlist(), new_time_axis_view));
+				dest_rtv = new_time_axis_view;
+			} else {
+				/* we already created a new track for regions from this playlist, use it */
+				dest_rtv = pm->second;
 			}
-			dest_rtv = new_time_axis_view;
 		} else {
+			/* destination time axis view is the one we dragged to */
 			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
-		}		
-		
+		}
+
 		if (dest_rtv != 0) {
 			RegionView* new_view = insert_region_into_playlist (i->view->region(), dest_rtv, i->layer, where, modified_playlists);
 			if (new_view != 0) {
 				new_views.push_back (new_view);
 			}
 		}
-	
+
 		/* Delete the copy of the view that was used for dragging. Need to play safe with the iterator
 		   since deletion will automagically remove it from _views, thus invalidating i as an iterator.
 		 */
@@ -1110,6 +1490,9 @@ RegionMoveDrag::finished_no_copy (
 		return;
 	}
 
+	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
+	PlaylistMapping playlist_mapping;
+
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = i->view;
@@ -1119,20 +1502,31 @@ RegionMoveDrag::finished_no_copy (
 			++i;
 			continue;
 		}
-		
-		if (i->time_axis_view < 0) {
-			if (!new_time_axis_view) {
-				new_time_axis_view = create_destination_time_axis (rv->region(), i->initial_time_axis_view);
+
+		if (i->time_axis_view < 0 || i->time_axis_view >= (int)_time_axis_views.size()) {
+			/* dragged to drop zone */
+
+			PlaylistMapping::iterator pm;
+
+			if ((pm = playlist_mapping.find (i->view->region()->playlist())) == playlist_mapping.end()) {
+				/* first region from this original playlist: create a new track */
+				new_time_axis_view = create_destination_time_axis (i->view->region(), i->initial_time_axis_view);
+				playlist_mapping.insert (make_pair (i->view->region()->playlist(), new_time_axis_view));
+				dest_rtv = new_time_axis_view;
+			} else {
+				/* we already created a new track for regions from this playlist, use it */
+				dest_rtv = pm->second;
 			}
-			dest_rtv = new_time_axis_view;
+
 		} else {
+			/* destination time axis view is the one we dragged to */
 			dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[i->time_axis_view]);
 		}
-			
+
 		assert (dest_rtv);
 
 		double const dest_layer = i->layer;
-		
+
 		views_to_update.insert (dest_rtv);
 
 		framepos_t where;
@@ -1368,8 +1762,11 @@ RegionMoveDrag::aborted (bool movement_occurred)
 {
 	if (_copy) {
 
-		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
+		for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end();) {
+			list<DraggingView>::const_iterator next = i;
+			++next;
 			delete i->view;
+			i = next;
 		}
 
 		_views.clear ();
@@ -1392,7 +1789,7 @@ RegionMotionDrag::aborted (bool)
 			}
 		}
 	}
-	
+
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 		RegionView* rv = i->view;
 		TimeAxisView* tv = &(rv->get_time_axis_view ());
@@ -1410,8 +1807,8 @@ RegionMotionDrag::aborted (bool)
  *  @param c true to make copies of the regions being moved, otherwise false.
  */
 RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b, bool c)
-	: RegionMotionDrag (e, i, p, v, b),
-	  _copy (c)
+	: RegionMotionDrag (e, i, p, v, b)
+	, _copy (c)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMoveDrag\n");
 
@@ -1452,7 +1849,10 @@ RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, Rout
 void
 RegionInsertDrag::finished (GdkEvent *, bool)
 {
-	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[_views.front().time_axis_view]);
+	int pos = _views.front().time_axis_view;
+	assert(pos >= 0 && pos < (int)_time_axis_views.size());
+
+	RouteTimeAxisView* dest_rtv = dynamic_cast<RouteTimeAxisView*> (_time_axis_views[pos]);
 
 	_primary->get_canvas_group()->reparent (dest_rtv->view()->canvas_item());
 	_primary->get_canvas_group()->set_y_position (0);
@@ -1491,9 +1891,9 @@ RegionSpliceDrag::RegionSpliceDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 }
 
 struct RegionSelectionByPosition {
-    bool operator() (RegionView*a, RegionView* b) {
-	    return a->region()->position () < b->region()->position();
-    }
+	bool operator() (RegionView*a, RegionView* b) {
+		return a->region()->position () < b->region()->position();
+	}
 };
 
 void
@@ -1625,7 +2025,7 @@ RegionRippleDrag::remove_unselected_from_views(framecnt_t amount, bool move_regi
 {
 
 	for (std::list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ) {
-		// we added all the regions after the selection 
+		// we added all the regions after the selection
 
 		std::list<DraggingView>::iterator to_erase = i++;
 		if (!_editor->selection->regions.contains (to_erase->view)) {
@@ -1658,9 +2058,9 @@ RegionRippleDrag::remove_unselected_from_views(framecnt_t amount, bool move_regi
 }
 
 bool
-RegionRippleDrag::y_movement_allowed (int delta_track, double delta_layer) const
+RegionRippleDrag::y_movement_allowed (int delta_track, double delta_layer, int skip_invisible) const
 {
-	if (RegionMotionDrag::y_movement_allowed (delta_track, delta_layer)) {
+	if (RegionMotionDrag::y_movement_allowed (delta_track, delta_layer, skip_invisible)) {
 		if (delta_track) {
 			return allow_moves_across_tracks;
 		} else {
@@ -1752,7 +2152,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 
 		framecnt_t adjust = 0;
 		if (prev_tav && tv != prev_tav) {
-			// dragged onto a different track 
+			// dragged onto a different track
 			// remove the unselected regions from _views, restore them to their original positions
 			// and add the regions after the drop point on the new playlist to _views instead.
 			// undo the effect of rippling the previous playlist, and include the effect of removing
@@ -1764,9 +2164,9 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 			prev_amount = 0;
 
 			// move just the selected regions
-			RegionMoveDrag::motion(event, first_move); 
+			RegionMoveDrag::motion(event, first_move);
 
-			// ensure that the ripple operation on the new playlist inserts selection_length time 
+			// ensure that the ripple operation on the new playlist inserts selection_length time
 			adjust = selection_length;
 			// ripple the new current playlist
 			tv->playlist()->ripple (where, amount+adjust, exclude);
@@ -1776,7 +2176,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 
 		} else {
 			// motion on same track
-			RegionMoveDrag::motion(event, first_move); 
+			RegionMoveDrag::motion(event, first_move);
 		}
 		prev_tav = tv;
 
@@ -1785,7 +2185,7 @@ RegionRippleDrag::motion (GdkEvent* event, bool first_move)
 	} else {
 		// selection encompasses multiple tracks - just drag
 		// cross-track drags are forbidden
-		RegionMoveDrag::motion(event, first_move); 
+		RegionMoveDrag::motion(event, first_move);
 	}
 
 	if (!_x_constrained) {
@@ -1799,21 +2199,21 @@ void
 RegionRippleDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		
+
 		/* just a click */
 
 		if (was_double_click() && !_views.empty()) {
 			DraggingView dv = _views.front();
 			dv.view->show_region_editor ();
-			
+
 		}
 
 		return;
 	}
 
 	_editor->begin_reversible_command(_("Ripple drag"));
-	
-	// remove the regions being rippled from the dragging view, updating them to 
+
+	// remove the regions being rippled from the dragging view, updating them to
 	// their new positions
 	remove_unselected_from_views (prev_amount, true);
 
@@ -1962,6 +2362,8 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	*/
 	region->note_selected (cnote, cnote->selected ());
 
+	_editor->begin_reversible_command (_("resize notes"));
+
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
 		MidiRegionSelection::iterator next;
 		next = r;
@@ -2000,6 +2402,8 @@ NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
 			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
 		}
 	}
+
+	_editor->commit_reversible_command ();
 }
 
 void
@@ -2456,7 +2860,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 					_views.begin()->view->region()->length());
 			}
 		}
-	
+
 		if (!_editor->selection->selected (_primary)) {
 			_primary->thaw_after_trim ();
 		} else {
@@ -2464,7 +2868,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			set<boost::shared_ptr<Playlist> > diffed_playlists;
 
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
-                                i->view->thaw_after_trim ();
+				i->view->thaw_after_trim ();
 				i->view->enable_display (true);
 
 				/* Trimming one region may affect others on the playlist, so we need
@@ -2578,19 +2982,19 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 
 		// create a dummy marker for visual representation of moving the
-		// section, because whether its a copy or not, we're going to 
+		// section, because whether its a copy or not, we're going to
 		// leave or lose the original marker (leave if its a copy; lose if its
 		// not, because we'll remove it from the map).
-		
+
 		MeterSection section (_marker->meter());
 
 		if (!section.movable()) {
 			return;
 		}
-		
+
 		char name[64];
 		snprintf (name, sizeof(name), "%g/%g", _marker->meter().divisions_per_bar(), _marker->meter().note_divisor ());
-		
+
 		_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
@@ -2598,7 +3002,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			name,
 			*new MeterSection (_marker->meter())
 		);
-		
+
 		/* use the new marker for the grab */
 		swap_grab (&_marker->the_item(), 0, GDK_CURRENT_TIME);
 
@@ -2637,7 +3041,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	TempoMap& map (_editor->session()->tempo_map());
 	map.bbt_time (last_pointer_frame(), when);
-	
+
 	if (_copy == true) {
 		_editor->begin_reversible_command (_("copy meter mark"));
 		XMLNode &before = map.get_state();
@@ -2650,7 +3054,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->begin_reversible_command (_("move meter mark"));
 
 		/* we removed it before, so add it back now */
-		
+
 		map.add_meter (_marker->meter(), when);
 		XMLNode &after = map.get_state();
 		_editor->session()->add_command(new MementoCommand<TempoMap>(map, before_state, &after));
@@ -2710,10 +3114,10 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 
 		// create a dummy marker for visual representation of moving the
-		// section, because whether its a copy or not, we're going to 
+		// section, because whether its a copy or not, we're going to
 		// leave or lose the original marker (leave if its a copy; lose if its
 		// not, because we'll remove it from the map).
-		
+
 		// create a dummy marker for visual representation of moving the copy.
 		// The actual copying is not done before we reach the finish callback.
 
@@ -2869,7 +3273,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 
 
 		if (AudioEngine::instance()->connected()) {
-			
+
 			/* do this only if we're the engine is connected
 			 * because otherwise this request will never be
 			 * serviced and we'll busy wait forever. likewise,
@@ -2959,15 +3363,13 @@ void
 FadeInDrag::motion (GdkEvent* event, bool)
 {
 	framecnt_t fade_length;
-
 	framepos_t const pos = adjusted_current_frame (event);
-
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos < (region->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	} else if (pos > region->last_frame()) {
-		fade_length = region->length();
+	} else if (pos > region->position() + region->length() - region->fade_out()->back()->when) {
+		fade_length = region->length() - region->fade_out()->back()->when - 1;
 	} else {
 		fade_length = pos - region->position();
 	}
@@ -2997,12 +3399,12 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	framepos_t const pos = adjusted_current_frame (event);
 
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos < (region->position() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
-	} else if (pos > region->last_frame()) {
-		fade_length = region->length();
+	} else if (pos >= region->position() + region->length() - region->fade_out()->back()->when) {
+		fade_length = region->length() - region->fade_out()->back()->when - 1;
 	} else {
 		fade_length = pos - region->position();
 	}
@@ -3076,15 +3478,13 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 
 	framepos_t const pos = adjusted_current_frame (event);
 
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos > (region->last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
-	}
-	else if (pos < region->position()) {
-		fade_length = region->length();
-	}
-	else {
+	} else if (pos <= region->position() + region->fade_in()->back()->when) {
+		fade_length = region->length() - region->fade_in()->back()->when - 1;
+	} else {
 		fade_length = region->last_frame() - pos;
 	}
 
@@ -3113,15 +3513,13 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	framepos_t const pos = adjusted_current_frame (event);
 
-	boost::shared_ptr<Region> region = _primary->region ();
+	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos > (region->last_frame() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
-	}
-	else if (pos < region->position()) {
-		fade_length = region->length();
-	}
-	else {
+	} else if (pos <= region->position() + region->fade_in()->back()->when) {
+		fade_length = region->length() - region->fade_in()->back()->when - 1;
+	} else {
 		fade_length = region->last_frame() - pos;
 	}
 
@@ -3255,7 +3653,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		break;
 	}
 
-	/* Set up copies for us to manipulate during the drag 
+	/* Set up copies for us to manipulate during the drag
 	 */
 
 	for (MarkerSelection::iterator i = _editor->selection->markers.begin(); i != _editor->selection->markers.end(); ++i) {
@@ -3285,7 +3683,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				(*x).move_both = true;
 			}
 		}
-			
+
 	}
 }
 
@@ -3324,7 +3722,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		if (find (x->markers.begin(), x->markers.end(), _marker) != x->markers.end()) {
 
 			/* this marker is represented by this
-			 * CopiedLocationMarkerInfo 
+			 * CopiedLocationMarkerInfo
 			 */
 
 			if ((real_location = _editor->find_location_from_marker (_marker, is_start)) == 0) {
@@ -3372,8 +3770,6 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 		copy_location = x->location;
 
-		/* call this to find out if its the start or end */
-
 		if ((real_location = _editor->find_location_from_marker (x->markers.front(), is_start)) == 0) {
 			continue;
 		}
@@ -3389,12 +3785,12 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			copy_location->set_start (copy_location->start() + f_delta);
 
 		} else {
-			
+
 			framepos_t new_start = copy_location->start() + f_delta;
 			framepos_t new_end = copy_location->end() + f_delta;
-			
+
 			if (is_start) { // start-of-range marker
-				
+
 				if (move_both || (*x).move_both) {
 					copy_location->set_start (new_start);
 					copy_location->set_end (new_end);
@@ -3422,14 +3818,14 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		}
 
 		update_item (copy_location);
-		
+
 		/* now lookup the actual GUI items used to display this
 		 * location and move them to wherever the copy of the location
 		 * is now. This means that the logic in ARDOUR::Location is
-		 * still enforced, even though we are not (yet) modifying 
+		 * still enforced, even though we are not (yet) modifying
 		 * the real Location itself.
 		 */
-		
+
 		Editor::LocationMarkers* lm = _editor->find_location_markers (real_location);
 
 		if (lm) {
@@ -3447,7 +3843,7 @@ void
 MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		
+
 		if (was_double_click()) {
 			_editor->rename_marker (_marker);
 			return;
@@ -3514,9 +3910,27 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MarkerDrag::aborted (bool)
+MarkerDrag::aborted (bool movement_occured)
 {
-	/* XXX: TODO */
+	if (!movement_occured) {
+		return;
+	}
+
+	for (CopiedLocationInfo::iterator x = _copied_locations.begin(); x != _copied_locations.end(); ++x) {
+
+		/* move all markers to their original location */
+
+
+		for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
+
+			bool is_start;
+			Location * location = _editor->find_location_from_marker (*m, is_start);
+
+			if (location) {
+				(*m)->set_position (is_start ? location->start() : location->end());
+			}
+		}
+	}
 }
 
 void
@@ -3844,7 +4258,7 @@ void
 RubberbandSelectDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
-	show_verbose_cursor_time (adjusted_current_frame (event));
+	show_verbose_cursor_time (adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid()));
 }
 
 void
@@ -3855,11 +4269,13 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	double y1;
 	double y2;
 
-	framepos_t const pf = adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ());
+	framepos_t const pf = adjusted_current_frame (event, ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid());
 
 	framepos_t grab = grab_frame ();
 	if (ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ()) {
 		_editor->snap_to_with_modifier (grab, event);
+	} else {
+		grab = raw_grab_frame ();
 	}
 
 	/* base start and end on initial click position */
@@ -3895,7 +4311,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 			} else {
 				x2 = max (x1 + min_dimension, x2);
 			}
-		} 
+		}
 
 		if (y2 < y1) {
 			y2 = min (y1 - min_dimension, y2);
@@ -3905,7 +4321,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 
 		/* translate rect into item space and set */
 
-                ArdourCanvas::Rect r (x1, y1, x2, y2);
+		ArdourCanvas::Rect r (x1, y1, x2, y2);
 
 		/* this drag is a _trackview_only == true drag, so the y1 and
 		 * y2 (computed using current_pointer_y() and grab_y()) will be
@@ -3930,18 +4346,25 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 {
 	framepos_t x1;
 	framepos_t x2;
-	
-	if (grab_frame() < last_pointer_frame()) {
-		x1 = grab_frame ();
-		x2 = last_pointer_frame ();
+	framepos_t grab = grab_frame ();
+	framepos_t lpf = last_pointer_frame ();
+
+	if (!ARDOUR_UI::config()->get_rubberbanding_snaps_to_grid ()) {
+		grab = raw_grab_frame ();
+		lpf = _editor->pixel_to_sample_from_event (last_pointer_x());
+	}
+
+	if (grab < lpf) {
+		x1 = grab;
+		x2 = lpf;
 	} else {
-		x2 = grab_frame ();
-		x1 = last_pointer_frame ();
+		x2 = grab;
+		x1 = lpf;
 	}
 
 	double y1;
 	double y2;
-	
+
 	if (current_pointer_y() < grab_y()) {
 		y1 = current_pointer_y();
 		y2 = grab_y();
@@ -3975,14 +4398,14 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 				add_midi_region (mtv);
 				do_deselect = false;
 			}
-		} 
+		}
 
 		/* do not deselect if Primary or Tertiary (toggle-select or
 		 * extend-select are pressed.
 		 */
 
-		if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier) && 
-		    !Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier) && 
+		if (!Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier) &&
+		    !Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier) &&
 		    do_deselect) {
 			deselect_things ();
 		}
@@ -4112,11 +4535,10 @@ SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i)
 	, _operation (o)
 	, _add (false)
-	, _original_pointer_time_axis (-1)
 	, _time_selection_at_start (!_editor->get_selection().time.empty())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
-	
+
 	if (_time_selection_at_start) {
 		start_at_start = _editor->get_selection().time.start();
 		end_at_start = _editor->get_selection().time.end_frame();
@@ -4130,7 +4552,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		return;
 	}
 
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = MouseCursors::invalid_cursor();
 
 	switch (_operation) {
 	case CreateSelection:
@@ -4171,8 +4593,6 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	} else {
 		show_verbose_cursor_time (adjusted_current_frame (event));
 	}
-
-	_original_pointer_time_axis = _editor->trackview_by_y_position (current_pointer_y ()).first->order ();
 }
 
 void
@@ -4245,7 +4665,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				_editor->set_selected_track_as_side_effect (Selection::Add);
 				_editor->clicked_selection = _editor->selection->add (start, end);
 				_add = false;
-				
+
 			} else {
 
 				/* new selection */
@@ -4257,15 +4677,15 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				_editor->clicked_selection = _editor->selection->set (start, end);
 			}
 		}
-		
-		//if user is selecting a range on an automation track, bail out here before we get to the grouped stuff, 
-		// because the grouped stuff will start working on tracks (routeTAVs), and end up removing this 
+
+		//if user is selecting a range on an automation track, bail out here before we get to the grouped stuff,
+		// because the grouped stuff will start working on tracks (routeTAVs), and end up removing this
 		AutomationTimeAxisView *atest = dynamic_cast<AutomationTimeAxisView *>(_editor->clicked_axisview);
 		if (atest) {
 			_editor->selection->add (atest);
-			break; 
+			break;
 		}
-		
+
 		/* select all tracks within the rectangle that we've marked out so far */
 		TrackViewList new_selection;
 		TrackViewList& all_tracks (_editor->track_views);
@@ -4336,7 +4756,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 		break;
-		
+
 	case SelectionMove:
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
@@ -4357,7 +4777,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 	if (start != end) {
 		switch (_operation) {
-		case SelectionMove:	
+		case SelectionMove:
 			if (_time_selection_at_start) {
 				_editor->selection->move_time (distance);
 			}
@@ -4379,7 +4799,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	Session* s = _editor->session();
 
-	_editor->begin_reversible_selection_op (_("Change Time Selection"));
+	_editor->begin_reversible_selection_op (X_("Change Time Selection"));
 	if (movement_occurred) {
 		motion (event, false);
 		/* XXX this is not object-oriented programming at all. ick */
@@ -4427,7 +4847,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
 			_editor->selection->set (_editor->clicked_axisview);
 		}
-			
+
 		if (s && s->get_play_range () && s->transport_rolling()) {
 			s->request_stop (false, false);
 		}
@@ -4452,13 +4872,22 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RangeMarkerBarDrag\n");
 
-	_drag_rect = new ArdourCanvas::Rectangle (_editor->time_line_group, 
+	_drag_rect = new ArdourCanvas::Rectangle (_editor->time_line_group,
 						  ArdourCanvas::Rect (0.0, 0.0, 0.0,
 								      physical_screen_height (_editor->get_window())));
 	_drag_rect->hide ();
 
 	_drag_rect->set_fill_color (ARDOUR_UI::config()->color ("range drag rect"));
 	_drag_rect->set_outline_color (ARDOUR_UI::config()->color ("range drag rect"));
+}
+
+RangeMarkerBarDrag::~RangeMarkerBarDrag()
+{
+	/* normal canvas items will be cleaned up when their parent group is deleted. But
+	   this item is created as the child of a long-lived parent group, and so we
+	   need to explicitly delete it.
+	*/
+	delete _drag_rect;
 }
 
 void
@@ -4468,7 +4897,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 		return;
 	}
 
-	Gdk::Cursor* cursor = 0;
+	Gdk::Cursor* cursor = MouseCursors::invalid_cursor();
 
 	if (!_editor->temp_location) {
 		_editor->temp_location = new Location (*_editor->session());
@@ -4632,7 +5061,6 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			 * nothing */
 
 		} else { /* operation == CreateRangeMarker || CreateSkipMarker */
-			
 
 			framepos_t start;
 			framepos_t end;
@@ -4668,9 +5096,11 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-RangeMarkerBarDrag::aborted (bool)
+RangeMarkerBarDrag::aborted (bool movement_occured)
 {
-	/* XXX: TODO */
+	if (movement_occured) {
+		_drag_rect->hide ();
+	}
 }
 
 void
@@ -4718,6 +5148,9 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 			} else {
 				_region->unique_select (_primary);
 			}
+
+			_editor->begin_reversible_selection_op(X_("Select Note Press"));
+			_editor->commit_reversible_selection_op();
 		}
 	}
 }
@@ -4786,7 +5219,7 @@ NoteDrag::motion (GdkEvent *, bool)
 
 		char buf[12];
 		uint8_t new_note = min (max (_primary->note()->note() + note_delta, 0), 127);
-		
+
 		snprintf (buf, sizeof (buf), "%s (%d)", Evoral::midi_note_name (new_note).c_str(),
 		          (int) floor ((double)new_note));
 
@@ -4799,14 +5232,17 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 {
 	if (!moved) {
 		/* no motion - select note */
-		
+
 		if (_editor->current_mouse_mode() == Editing::MouseObject ||
 		    _editor->current_mouse_mode() == Editing::MouseDraw) {
-			
+
+			bool changed = false;
+
 			if (_was_selected) {
 				bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 				if (add) {
 					_region->note_deselected (_primary);
+					changed = true;
 				}
 			} else {
 				bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
@@ -4814,11 +5250,18 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 
 				if (!extend && !add && _region->selection_size() > 1) {
 					_region->unique_select (_primary);
+					changed = true;
 				} else if (extend) {
 					_region->note_selected (_primary, true, true);
+					changed = true;
 				} else {
 					/* it was added during button press */
 				}
+			}
+
+			if (changed) {
+				_editor->begin_reversible_selection_op(X_("Select Note Release"));
+				_editor->commit_reversible_selection_op();
 			}
 		}
 	} else {
@@ -4836,24 +5279,36 @@ NoteDrag::aborted (bool)
 AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, list<AudioRange> const & r)
 	: Drag (editor, atv->base_item ())
 	, _ranges (r)
+	, _y_origin (atv->y_position())
 	, _nothing_to_drag (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
-	y_origin = atv->y_position();
 	setup (atv->lines ());
 }
 
-/** Make an AutomationRangeDrag for region gain lines */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AudioRegionView* rv, list<AudioRange> const & r)
+/** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
+AutomationRangeDrag::AutomationRangeDrag (Editor* editor, RegionView* rv, list<AudioRange> const & r)
 	: Drag (editor, rv->get_canvas_group ())
 	, _ranges (r)
+	, _y_origin (rv->get_time_axis_view().y_position())
 	, _nothing_to_drag (false)
+	, _integral (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 
 	list<boost::shared_ptr<AutomationLine> > lines;
-	lines.push_back (rv->get_gain_line ());
-	y_origin = rv->get_time_axis_view().y_position();
+
+	AudioRegionView*      audio_view;
+	AutomationRegionView* automation_view;
+	if ((audio_view = dynamic_cast<AudioRegionView*>(rv))) {
+		lines.push_back (audio_view->get_gain_line ());
+	} else if ((automation_view = dynamic_cast<AutomationRegionView*>(rv))) {
+		lines.push_back (automation_view->line ());
+		_integral = true;
+	} else {
+		error << _("Automation range drag created for invalid region type") << endmsg;
+	}
+
 	setup (lines);
 }
 
@@ -4898,7 +5353,14 @@ AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lin
 double
 AutomationRangeDrag::y_fraction (boost::shared_ptr<AutomationLine> line, double global_y) const
 {
-	return 1.0 - ((global_y - y_origin) / line->height());
+	return 1.0 - ((global_y - _y_origin) / line->height());
+}
+
+double
+AutomationRangeDrag::value (boost::shared_ptr<AutomationList> list, double x) const
+{
+	const double v = list->eval(x);
+	return _integral ? rint(v) : v;
 }
 
 void
@@ -4949,8 +5411,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, the_list->eval (p));
-				the_list->editor_add (q, the_list->eval (q));
+				the_list->editor_add (p, value (the_list, p));
+				the_list->editor_add (q, value (the_list, q));
 			}
 
 			/* same thing for the end */
@@ -4975,8 +5437,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, the_list->eval (p));
-				the_list->editor_add (q, the_list->eval (q));
+				the_list->editor_add (p, value (the_list, p));
+				the_list->editor_add (q, value (the_list, q));
 			}
 		}
 
@@ -5164,7 +5626,7 @@ MidiVerticalSelectDrag::select_things (int button_state, framepos_t /*x1*/, fram
 
 	y1 = max (0.0, y1 - y);
 	y2 = max (0.0, y2 - y);
-	
+
 	_region_view->update_vertical_drag_selection (
 		y1,
 		y2,
@@ -5191,10 +5653,10 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 		/* We just want to select things at the end of the drag, not during it */
 		return;
 	}
-	
+
 	Selection::Operation op = ArdourKeyboard::selection_type (button_state);
 
-	_editor->begin_reversible_selection_op (_("rubberband selection"));
+	_editor->begin_reversible_selection_op (X_("rubberband selection"));
 
 	_editor->select_all_within (x1, x2 - 1, y1, y2, _editor->track_views, op, false);
 
@@ -5204,12 +5666,15 @@ EditorRubberbandSelectDrag::select_things (int button_state, framepos_t x1, fram
 void
 EditorRubberbandSelectDrag::deselect_things ()
 {
-	if (!getenv("ARDOUR_SAE")) {
-		_editor->selection->clear_tracks();
-	}
+	_editor->begin_reversible_selection_op (X_("Clear Selection (rubberband)"));
+
+	_editor->selection->clear_tracks();
 	_editor->selection->clear_regions();
 	_editor->selection->clear_points ();
 	_editor->selection->clear_lines ();
+	_editor->selection->clear_midi_notes ();
+
+	_editor->commit_reversible_selection_op();
 }
 
 NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
@@ -5229,9 +5694,9 @@ framecnt_t
 NoteCreateDrag::grid_frames (framepos_t t) const
 {
 	bool success;
-	Evoral::MusicalTime grid_beats = _editor->get_grid_type_as_beats (success, t);
+	Evoral::Beats grid_beats = _editor->get_grid_type_as_beats (success, t);
 	if (!success) {
-		grid_beats = Evoral::MusicalTime(1);
+		grid_beats = Evoral::Beats(1);
 	}
 
 	return _region_view->region_beats_to_region_frames (grid_beats);
@@ -5241,7 +5706,7 @@ void
 NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-						 
+
 	_drag_rect = new ArdourCanvas::Rectangle (_region_view->get_canvas_group ());
 
 	framepos_t pf = _drags->current_pointer_frame ();
@@ -5283,18 +5748,18 @@ NoteCreateDrag::finished (GdkEvent*, bool had_movement)
 	if (!had_movement) {
 		return;
 	}
-	
+
 	framepos_t const start = min (_note[0], _note[1]);
 	framecnt_t length = (framecnt_t) fabs ((double)(_note[0] - _note[1]));
 
 	framecnt_t const g = grid_frames (start);
-	Evoral::MusicalTime const one_tick = Evoral::MusicalTime::ticks(1);
-	
+	Evoral::Beats const one_tick = Evoral::Beats::ticks(1);
+
 	if (_editor->snap_mode() == SnapNormal && length < g) {
 		length = g;
 	}
 
-	Evoral::MusicalTime length_beats = max (
+	Evoral::Beats length_beats = max (
 		one_tick, _region_view->region_frames_to_region_beats (length) - one_tick);
 
 	_region_view->create_note_at (start, _drag_rect->y0(), length_beats, false);
@@ -5311,7 +5776,7 @@ NoteCreateDrag::y_to_region (double y) const
 void
 NoteCreateDrag::aborted (bool)
 {
-	
+
 }
 
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
@@ -5378,9 +5843,9 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 	}
 
 	new_length = ar->verify_xfade_bounds (len + _editor->pixel_to_sample (distance), start);
-	
+
 	_editor->begin_reversible_command ("xfade trim");
-	ar->playlist()->clear_owned_changes ();	
+	ar->playlist()->clear_owned_changes ();
 
 	if (start) {
 		ar->set_fade_in_length (new_length);
@@ -5404,9 +5869,9 @@ void
 CrossfadeEdgeDrag::aborted (bool)
 {
 	if (start) {
-		arv->redraw_start_xfade ();
+		// arv->redraw_start_xfade ();
 	} else {
-		arv->redraw_end_xfade ();
+		// arv->redraw_end_xfade ();
 	}
 }
 
@@ -5438,7 +5903,7 @@ RegionCutDrag::finished (GdkEvent*, bool)
 	_editor->get_track_canvas()->canvas()->re_enter();
 
 	framepos_t pos = _drags->current_pointer_frame();
-	
+
 	line->hide ();
 
 	RegionSelection rs = _editor->get_regions_from_selection_and_mouse (pos);

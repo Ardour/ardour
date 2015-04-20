@@ -53,11 +53,12 @@
 
 using namespace std;
 using namespace PBD;
-using namespace Mackie;
 using ARDOUR::Route;
 using ARDOUR::Panner;
 using ARDOUR::Pannable;
 using ARDOUR::AutomationControl;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 

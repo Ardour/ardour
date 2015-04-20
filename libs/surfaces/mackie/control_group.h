@@ -3,6 +3,7 @@
 
 #include <vector>
 
+namespace ArdourSurface {
 namespace Mackie {
 
 class Control;
@@ -37,6 +38,7 @@ private:
 	std::string _name;
 };
 
+}
 }
 
 #endif

@@ -53,6 +53,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   private:
     Gtk::Notebook notebook;
 
+    Gtk::Label engine_status;
+
     /* core fields used by all backends */
 
     Gtk::Table basic_packer;
@@ -117,6 +119,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     uint32_t ignore_changes;
     uint32_t _desired_sample_rate;
     bool     started_at_least_once;
+    bool     queue_device_changed;
 
     void driver_changed ();
     void backend_changed ();
@@ -245,8 +248,11 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     void engine_running ();
     void engine_stopped ();
+    void device_list_changed ();
+
     PBD::ScopedConnection running_connection;
-    PBD::ScopedConnection stopped_connection;
+    PBD::ScopedConnectionList stopped_connection;
+    PBD::ScopedConnection devicelist_connection;
 
     void connect_disconnect_click ();
     void calibrate_audio_latency ();

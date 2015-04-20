@@ -27,6 +27,7 @@
 #include <gtkmm/table.h>
 
 #include "pbd/compose.h"
+#include "pbd/ffs.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -343,10 +344,10 @@ MidiChannelSelectorWindow::MidiChannelSelectorWindow (boost::shared_ptr<MidiTrac
 	playback_mask_changed ();
 	capture_mask_changed ();
 
-	track->PlaybackChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::playback_mask_changed, this), gui_context());
-	track->PlaybackChannelModeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::playback_mode_changed, this), gui_context());
-	track->CaptureChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::capture_mask_changed, this), gui_context());
-	track->CaptureChannelModeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::capture_mode_changed, this), gui_context());
+	track->playback_filter().ChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::playback_mask_changed, this), gui_context());
+	track->playback_filter().ChannelModeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::playback_mode_changed, this), gui_context());
+	track->capture_filter().ChannelMaskChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::capture_mask_changed, this), gui_context());
+	track->capture_filter().ChannelModeChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&MidiChannelSelectorWindow::capture_mode_changed, this), gui_context());
 }
 
 MidiChannelSelectorWindow::~MidiChannelSelectorWindow()

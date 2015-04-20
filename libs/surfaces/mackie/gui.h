@@ -16,7 +16,6 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/box.h>
 #include <gtkmm/spinbutton.h>
@@ -30,11 +29,13 @@ namespace Gtk {
 	class CellRendererCombo;
 }
 
-class MackieControlProtocol;
-
 #include "button.h"
 
 #include "i18n.h"
+
+namespace ArdourSurface {
+
+class MackieControlProtocol;
 
 class MackieControlProtocolGUI : public Gtk::Notebook
 {
@@ -109,4 +110,6 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 
     void discover_clicked ();
 };
+
+}
 

@@ -60,7 +60,8 @@ PatchChange::PatchChange(MidiRegionView&                   region,
 		height,
 		ARDOUR_UI::config()->color ("midi patch change outline"),
 		ARDOUR_UI::config()->color_mod ("midi patch change fill", "midi patch change fill"),
-		ArdourCanvas::Duple (x, y));
+		ArdourCanvas::Duple (x, y),
+		true);
 	
 	CANVAS_DEBUG_NAME (_flag, text);
 
@@ -164,7 +165,7 @@ PatchChange::event_handler (GdkEvent* ev)
 
 	switch (ev->type) {
 	case GDK_BUTTON_PRESS:
-		if (e->current_mouse_mode() == Editing::MouseObject) {
+		if (e->current_mouse_mode() == Editing::MouseContent) {
 
 			if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
 

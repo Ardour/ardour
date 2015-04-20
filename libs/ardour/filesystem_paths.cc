@@ -19,8 +19,9 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/convert.h"
+#include "pbd/error.h"
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
@@ -41,12 +42,26 @@ namespace ARDOUR {
 
 using std::string;
 
-std::string
-user_config_directory ()
+static std::string
+user_config_directory_name (int version = -1)
 {
-	static std::string p;
+	if (version < 0) {
+		version = atoi (X_(PROGRAM_VERSION));
+	}
 
-	if (!p.empty()) return p;
+	const string config_dir_name = string_compose ("%1%2", X_(PROGRAM_NAME), version);
+
+#if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
+	return config_dir_name;
+#else
+	return downcase (config_dir_name);
+#endif
+}	
+
+std::string
+user_config_directory (int version)
+{
+	std::string p;
 
 #ifdef __APPLE__
 
@@ -79,18 +94,23 @@ user_config_directory ()
 	}
 #endif // end not __APPLE__
 
-	p = Glib::build_filename (p, user_config_dir_name);
+	p = Glib::build_filename (p, user_config_directory_name (version));
 
-	if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
-		if (g_mkdir_with_parents (p.c_str(), 0755)) {
-			error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
-						   p) << endmsg;
+	if (version < 0) {
+		/* Only create the user config dir if the version was negative,
+		   meaning "for the current version.
+		*/
+		if (!Glib::file_test (p, Glib::FILE_TEST_EXISTS)) {
+			if (g_mkdir_with_parents (p.c_str(), 0755)) {
+				error << string_compose (_("Cannot create Configuration directory %1 - cannot run"),
+				                         p) << endmsg;
+				exit (1);
+			}
+			} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
+			error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
+			                         p) << endmsg;
 			exit (1);
 		}
-	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
-		error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
-					   p) << endmsg;
-		exit (1);
 	}
 
 	return p;
@@ -134,7 +154,7 @@ user_cache_directory ()
 	}
 #endif // end not __APPLE__
 
-	p = Glib::build_filename (p, user_config_dir_name);
+	p = Glib::build_filename (p, user_config_directory_name ());
 
 #ifdef PLATFORM_WINDOWS
 	 /* On Windows Glib::get_user_data_dir is the folder to use for local
@@ -251,5 +271,16 @@ ardour_data_search_path ()
 
 	return search_path;
 }
+
+string
+been_here_before_path (int version)
+{
+	if (version < 0) {
+		version = atoi (PROGRAM_VERSION);
+	}
+
+	return Glib::build_filename (user_config_directory (version), string (".a") + to_string (version, std::dec));
+}
+
 
 } // namespace ARDOUR

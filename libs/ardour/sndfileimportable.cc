@@ -1,7 +1,28 @@
-#include "ardour/sndfileimportable.h"
+/*
+    Copyright (C) 2000,2015 Paul Davis
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+*/
+
 #include <sndfile.h>
 #include <iostream>
 #include <cstring>
+
+#include "pbd/error.h"
+#include "ardour/sndfileimportable.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -15,10 +36,32 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 		return 0;
 	}
 
+	/* see http://tracker.ardour.org/view.php?id=6208
+	 * 0xffffffff 0xfffc5680
+	 * seems to be a bug in Presonus Capture (which generated the file)
+	 *
+	 * still since framepos_t is a signed int, ignore files that could
+	 * lead to negative timestamps for now.
+	 */
+
+	if (binfo->time_reference_high & 0x80000000) {
+		char tmp[64];
+		snprintf(tmp, sizeof(tmp), "%x%08x", binfo->time_reference_high, binfo->time_reference_low);
+		PBD::warning << "Invalid Timestamp " << tmp << endmsg;
+		exists = false;
+		return 0;
+	}
+
 	exists = true;
-	int64_t ret = (uint32_t) binfo->time_reference_high;
+	/* libsndfile reads eactly 4 bytes for high and low, but
+	 * uses "unsigned int" which may or may not be 32 bit little
+	 * endian.
+	 */
+	int64_t ret = (uint32_t) (binfo->time_reference_high & 0x7fffffff);
 	ret <<= 32;
-	ret |= (uint32_t) binfo->time_reference_low;
+	ret |= (uint32_t) (binfo->time_reference_low & 0xffffffff);
+
+	assert(ret >= 0);
 	return ret;
 }
 

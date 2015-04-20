@@ -29,6 +29,7 @@
 
 #include "cursor_context.h"
 #include "editor_items.h"
+#include "mouse_cursors.h"
 
 namespace ARDOUR {
 	class Location;
@@ -58,8 +59,8 @@ public:
 
 	void abort ();
 	void add (Drag *);
-	void set (Drag *, GdkEvent *, Gdk::Cursor* c = 0);
-	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void set (Drag *, GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
+	void start_grab (GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 
@@ -177,6 +178,10 @@ public:
 		return true;
 	}
 
+	bool initially_vertical() const {
+		return _initially_vertical;
+	}
+	
 	/** Set up the _pointer_frame_offset */
 	virtual void setup_pointer_frame_offset () {
 		_pointer_frame_offset = 0;
@@ -233,6 +238,8 @@ protected:
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
+	bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
+	bool _initially_vertical; ///< true if after move threshold is passed we appear to be moving vertically; undefined before that
         bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true
@@ -285,9 +292,11 @@ protected:
 	/** a list of the non-hidden TimeAxisViews sorted by editor order key */
 	std::vector<TimeAxisView*> _time_axis_views;
 	int find_time_axis_view (TimeAxisView *) const;
+	int apply_track_delta (const int start, const int delta, const int skip, const bool distance_only = false) const;
 
 	int _visible_y_low;
 	int _visible_y_high;
+	uint32_t _ntracks;
 
 	friend class DraggingView;
 
@@ -319,13 +328,19 @@ public:
 protected:
 
 	double compute_x_delta (GdkEvent const *, ARDOUR::framepos_t *);
-	virtual bool y_movement_allowed (int, double) const;
+	virtual bool y_movement_allowed (int, double, int skip_invisible = 0) const;
 
 	bool _brushing;
 	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
+	bool _single_axis;
+
+private:
+	uint32_t _ndropzone;
+	uint32_t _pdropzone;
+	uint32_t _ddropzone;
 };
 
 
@@ -428,7 +443,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 protected:
-	bool y_movement_allowed (int delta_track, double delta_layer) const;
+	bool y_movement_allowed (int delta_track, double delta_layer, int skip_invisible = 0) const;
 
 private:
 	TimeAxisView *prev_tav;		// where regions were most recently dragged from
@@ -974,7 +989,6 @@ public:
 private:
 	Operation _operation;
 	bool _add;
-	int _original_pointer_time_axis;
 	std::list<TimeAxisView*> _added_time_axes;
 	bool _time_selection_at_start;
         framepos_t start_at_start;
@@ -993,7 +1007,8 @@ public:
 	};
 
 	RangeMarkerBarDrag (Editor *, ArdourCanvas::Item *, Operation);
-
+	~RangeMarkerBarDrag ();
+	
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
@@ -1041,7 +1056,7 @@ class AutomationRangeDrag : public Drag
 {
 public:
 	AutomationRangeDrag (Editor *, AutomationTimeAxisView *, std::list<ARDOUR::AudioRange> const &);
-	AutomationRangeDrag (Editor *, AudioRegionView *, std::list<ARDOUR::AudioRange> const &);
+	AutomationRangeDrag (Editor *, RegionView *, std::list<ARDOUR::AudioRange> const &);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -1054,7 +1069,8 @@ public:
 
 private:
 	void setup (std::list<boost::shared_ptr<AutomationLine> > const &);
-        double y_fraction (boost::shared_ptr<AutomationLine>, double global_y_position) const;
+	double y_fraction (boost::shared_ptr<AutomationLine>, double global_y_position) const;
+	double value (boost::shared_ptr<ARDOUR::AutomationList> list, double x) const;
 
 	std::list<ARDOUR::AudioRange> _ranges;
 
@@ -1068,8 +1084,9 @@ private:
 	};
 
 	std::list<Line> _lines;
-        double y_origin;
-	bool _nothing_to_drag;
+	double          _y_origin;
+	bool            _nothing_to_drag;
+	bool            _integral;
 };
 
 /** Drag of one edge of an xfade

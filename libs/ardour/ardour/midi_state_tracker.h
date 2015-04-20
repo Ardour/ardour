@@ -46,7 +46,7 @@ public:
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, framepos_t time);
 	void resolve_notes (Evoral::EventSink<framepos_t>& buffer, framepos_t time);
-	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Evoral::MusicalTime time);
+	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Evoral::Beats time);
 	void dump (std::ostream&);
 	void reset ();
 	bool empty() const { return _on == 0; }

@@ -8,9 +8,11 @@
       <separator/>
       <menuitem action='Save'/>
       <menuitem action='SaveAs'/>
+#ifndef WINDOWS // can't move open files.
       <menuitem action='Rename'/>
       <menuitem action='SnapshotStay'/>
       <menuitem action='SnapshotSwitch'/>
+#endif
       <menuitem action='SaveTemplate'/>
       <menu name='Metadata' action='Metadata'>
         <menuitem action='EditMetadata'/>
@@ -30,8 +32,8 @@
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
-      <menuitem action='bring-into-session'/>
       <menu name='Cleanup' action='Cleanup'>
+		<menuitem action='bring-into-session'/>
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
@@ -52,26 +54,22 @@
     <menu name='Transport' action='Transport'>
       <menuitem action='ToggleRoll'/>
       <menu action="PlayMenu">
-        <menuitem action='main-menu-play-selected-regions'/>
-        <menuitem action='play-edit-range'/>
         <menuitem action='PlaySelection'/>
         <menuitem action='PlayPreroll'/>
+        <menuitem action='ToggleRollMaybe'/>
         <menuitem action='play-from-edit-point-and-return'/>
         <menuitem action='Loop'/>
       </menu>
       <menuitem action='record-roll'/>
-      <menuitem action='Record'/>
-      <menuitem action='ToggleRollMaybe'/>
       <menuitem action='ToggleRollForgetCapture'/>
+      <menuitem action='Record'/>
+#if 0
       <menuitem action='toggle-skip-playback'/>
-      <menu action="SetLoopMenu">
-        <menuitem action='set-loop-from-edit-range'/>
-        <menuitem action='set-loop-from-region'/>
-      </menu>
-      <menu action="SetPunchMenu">
-        <menuitem action='set-punch-from-edit-range'/>
-        <menuitem action='set-punch-from-region'/>
-      </menu>
+#endif
+
+      <separator/>
+      <menuitem action='set-loop-from-edit-range'/>
+      <menuitem action='set-punch-from-edit-range'/>
 
       <separator/>
       <menuitem action='Forward'/>
@@ -187,10 +185,8 @@
       <menuitem action='editor-delete'/>
       <menuitem action='editor-crop'/>
       <menuitem action='split-region'/>
-      <menuitem action='split-region-at-transients'/>
       <menu action="SeparateMenu">
         <menuitem action='separate-under-region'/>
-        <menuitem action='editor-separate'/>
         <menuitem action='separate-from-loop'/>
         <menuitem action='separate-from-punch'/>
         <separator/>
@@ -216,6 +212,49 @@
         <menuitem action='cycle-edit-point'/>
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
+      <menu name='SnapMode' action='SnapMode'>
+        <menuitem action='snap-off'/>
+        <menuitem action='snap-normal'/>
+        <menuitem action='snap-magnetic'/>
+        <separator/>
+        <menuitem action='cycle-snap-mode'/>
+        <menuitem action='next-snap-choice'/>
+        <menuitem action='prev-snap-choice'/>
+        <menuitem action='next-snap-choice-music-only'/>
+        <menuitem action='prev-snap-choice-music-only'/>
+      </menu>
+      <menu name='SnapTo' action='SnapTo'>
+        <menuitem action='snap-to-cd-frame'/>
+        <menuitem action='snap-to-timecode-frame'/>
+        <menuitem action='snap-to-timecode-seconds'/>
+        <menuitem action='snap-to-timecode-minutes'/>
+        <menuitem action='snap-to-seconds'/>
+        <menuitem action='snap-to-minutes'/>
+        <menuitem action='snap-to-onetwentyeighths'/>
+        <menuitem action='snap-to-sixtyfourths'/>
+        <menuitem action='snap-to-thirtyseconds'/>
+        <menuitem action='snap-to-twentyeighths'/>
+        <menuitem action='snap-to-twentyfourths'/>
+        <menuitem action='snap-to-twentieths'/>
+        <menuitem action='snap-to-asixteenthbeat'/>
+        <menuitem action='snap-to-fourteenths'/>
+        <menuitem action='snap-to-twelfths'/>
+        <menuitem action='snap-to-tenths'/>
+        <menuitem action='snap-to-eighths'/>
+        <menuitem action='snap-to-sevenths'/>
+        <menuitem action='snap-to-sixths'/>
+        <menuitem action='snap-to-fifths'/>
+        <menuitem action='snap-to-quarters'/>
+        <menuitem action='snap-to-thirds'/>
+        <menuitem action='snap-to-halves'/>
+        <menuitem action='snap-to-beat'/>
+        <menuitem action='snap-to-bar'/>
+        <menuitem action='snap-to-mark'/>
+        <menuitem action='snap-to-region-start'/>
+        <menuitem action='snap-to-region-end'/>
+        <menuitem action='snap-to-region-sync'/>
+        <menuitem action='snap-to-region-boundary'/>
+      </menu>
       <separator/>
       <menu action="TempoMenu">
         <menuitem action='set-tempo-from-region'/>
@@ -234,12 +273,12 @@
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
+      <menuitem action='analyze-region'/>
       <menu action='RegionMenuEdit'>
          <menuitem action='combine-regions'/>
          <menuitem action='uncombine-regions'/>
-         <menuitem action='analyze-region'/>
          <menuitem action='pitch-shift-region'/>
-         <menuitem action='split-region'/>
+         <menuitem action='split-region-at-transients'/>
          <menuitem action='split-multichannel-region'/>
          <menuitem action='close-region-gaps'/>
          <menuitem action='place-transient' />
@@ -328,7 +367,7 @@
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
       <menu action='TrackHeightMenu'>
-        <menuitem action='fit-tracks'/>
+        <menuitem action='fit-selection'/>
         <menuitem action='track-height-largest'/>
         <menuitem action='track-height-larger'/>
         <menuitem action='track-height-large'/>
@@ -369,7 +408,7 @@
         <menuitem action='temporal-zoom-out'/>
         <menuitem action='zoom-to-session'/>
         <menuitem action='zoom-to-selection'/>
-        <menuitem action='zoom-to-selection-both-axes'/>
+        <menuitem action='fit-selection'/>
         <menuitem action='toggle-zoom'/>
         <menuitem action='expand-tracks'/>
         <menuitem action='shrink-tracks'/>
@@ -383,57 +422,16 @@
         <menuitem action='zoom-focus-edit'/>
         <menuitem action='cycle-zoom-focus'/>
       </menu>
-      <menu name='SnapMode' action='SnapMode'>
-        <menuitem action='snap-off'/>
-        <menuitem action='snap-normal'/>
-        <menuitem action='snap-magnetic'/>
-        <separator/>
-        <menuitem action='cycle-snap-mode'/>
-        <menuitem action='next-snap-choice'/>
-        <menuitem action='prev-snap-choice'/>
-        <menuitem action='next-snap-choice-music-only'/>
-        <menuitem action='prev-snap-choice-music-only'/>
-      </menu>
-      <menu name='SnapTo' action='SnapTo'>
-        <menuitem action='snap-to-cd-frame'/>
-        <menuitem action='snap-to-timecode-frame'/>
-        <menuitem action='snap-to-timecode-seconds'/>
-        <menuitem action='snap-to-timecode-minutes'/>
-        <menuitem action='snap-to-seconds'/>
-        <menuitem action='snap-to-minutes'/>
-        <menuitem action='snap-to-onetwentyeighths'/>
-        <menuitem action='snap-to-sixtyfourths'/>
-        <menuitem action='snap-to-thirtyseconds'/>
-        <menuitem action='snap-to-twentyeighths'/>
-        <menuitem action='snap-to-twentyfourths'/>
-        <menuitem action='snap-to-twentieths'/>
-        <menuitem action='snap-to-asixteenthbeat'/>
-        <menuitem action='snap-to-fourteenths'/>
-        <menuitem action='snap-to-twelfths'/>
-        <menuitem action='snap-to-tenths'/>
-        <menuitem action='snap-to-eighths'/>
-        <menuitem action='snap-to-sevenths'/>
-        <menuitem action='snap-to-sixths'/>
-        <menuitem action='snap-to-fifths'/>
-        <menuitem action='snap-to-quarters'/>
-        <menuitem action='snap-to-thirds'/>
-        <menuitem action='snap-to-halves'/>
-        <menuitem action='snap-to-beat'/>
-        <menuitem action='snap-to-bar'/>
-        <menuitem action='snap-to-mark'/>
-        <menuitem action='snap-to-region-start'/>
-        <menuitem action='snap-to-region-end'/>
-        <menuitem action='snap-to-region-sync'/>
-        <menuitem action='snap-to-region-boundary'/>
-      </menu>
 
       <menu action="RulerMenu">
         <menuitem action="toggle-minsec-ruler"/>
+        <menuitem action="toggle-timecode-ruler"/>
         <menuitem action="toggle-samples-ruler"/>
         <menuitem action="toggle-bbt-ruler"/>
         <separator/>
         <menuitem action="toggle-meter-ruler"/>
         <menuitem action="toggle-tempo-ruler"/>
+        <menuitem action="toggle-range-ruler"/>
         <menuitem action="toggle-loop-punch-ruler"/>
         <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
@@ -492,9 +490,6 @@
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
-
-      <separator/>
-      <menuitem action='show-ui-prefs'/>
 
     </menu>
     <menu action = 'WindowMenu'>

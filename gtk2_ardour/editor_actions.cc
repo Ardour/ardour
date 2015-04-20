@@ -154,7 +154,7 @@ Editor::register_actions ()
 	/* We don't bother registering "unlock" because it would be insensitive
 	   when required. Editor::unlock() must be invoked directly.
 	*/
-	ActionManager::register_action (editor_actions, "lock", _("Lock"), sigc::mem_fun (*this, &Editor::lock));
+	ActionManager::register_action (editor_actions, "lock", S_("Session|Lock"), sigc::mem_fun (*this, &Editor::lock));
 
 	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
@@ -262,7 +262,6 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "temporal-zoom-in", _("Zoom In"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_step), false));
 	reg_sens (editor_actions, "zoom-to-session", _("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session));
 	reg_sens (editor_actions, "zoom-to-selection", _("Zoom to Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), false));
-	reg_sens (editor_actions, "zoom-to-selection-both-axes", _("Zoom to Selection (Width and Height)"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), true));
 	reg_sens (editor_actions, "toggle-zoom", _("Toggle Zoom State"), sigc::mem_fun(*this, &Editor::swap_visual_state));
 
 	reg_sens (editor_actions, "expand-tracks", _("Expand Track Height"), sigc::bind (sigc::mem_fun (*this, &Editor::tav_zoom_step), false));
@@ -295,9 +294,9 @@ Editor::register_actions ()
 
 	toggle_reg_sens (editor_actions, "toggle-skip-playback", _("Use Skip Ranges"), sigc::mem_fun(*this, &Editor::toggle_skip_playback));
 
-	reg_sens (editor_actions, "set-loop-from-edit-range", _("Set Loop from Edit Range"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_edit_range), false));
-	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Edit Range"), sigc::mem_fun(*this, &Editor::set_punch_from_edit_range));
-	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Edit Range"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
+	reg_sens (editor_actions, "set-loop-from-edit-range", _("Set Loop from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), false));
+	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Selection"), sigc::mem_fun(*this, &Editor::set_punch_from_selection));
+	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
 
 	/* this is a duplicated action so that the main menu can use a different label */
 	reg_sens (editor_actions, "main-menu-play-selected-regions", _("Play Selected Regions"), sigc::mem_fun (*this, &Editor::play_selected_region));
@@ -402,15 +401,12 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	if (Profile->get_sae()) {
-		act = reg_sens (editor_actions, "remove-track", _("Delete"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
-	} else {
-		act = reg_sens (editor_actions, "remove-track", _("Remove"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
-	}
+	act = reg_sens (editor_actions, "remove-track", _("Remove"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
+	/* not selection sensitive? */
+
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	act = reg_sens (editor_actions, "fit-tracks", _("Fit Selected Tracks"), sigc::mem_fun(*this, &Editor::fit_selected_tracks));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	act = reg_sens (editor_actions, "fit-selection", _("Fit Selection (Vertical)"), sigc::mem_fun(*this, &Editor::fit_selection));
 
 	act = reg_sens (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));
@@ -502,7 +498,7 @@ Editor::register_actions ()
 //	ActionManager::register_action (editor_actions, "set-edit-splice", _("Splice"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Splice));
 	ActionManager::register_action (editor_actions, "set-edit-ripple", _("Ripple"), bind (mem_fun (*this, &Editor::set_edit_mode), Ripple));
 	ActionManager::register_action (editor_actions, "set-edit-slide", _("Slide"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Slide));
-	ActionManager::register_action (editor_actions, "set-edit-lock", _("Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
+	ActionManager::register_action (editor_actions, "set-edit-lock", S_("EditMode|Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
 	ActionManager::register_action (editor_actions, "cycle-edit-mode", _("Cycle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
 
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap to"));
@@ -700,7 +696,7 @@ Editor::register_actions ()
 
 	ActionManager::register_toggle_action (editor_actions, X_("ToggleGroupTabs"), _("Show Group Tabs"), sigc::mem_fun (*this, &Editor::set_group_tabs));
 
-	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measures"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
+	ActionManager::register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measure Lines"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
 
 	/* if there is a logo in the editor canvas, its always visible at startup */
 
@@ -1921,8 +1917,8 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "play-selected-regions", _("Play"), sigc::mem_fun(*this, &Editor::play_selected_region));
 
-	reg_sens (_region_actions, "bounce-regions-unprocessed", _("Bounce (with processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), true)));
-	reg_sens (_region_actions, "bounce-regions-processed", _("Bounce (without processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), false)));
+	reg_sens (_region_actions, "bounce-regions-processed", _("Bounce (with processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), true)));
+	reg_sens (_region_actions, "bounce-regions-unprocessed", _("Bounce (without processing)"), (sigc::bind (sigc::mem_fun (*this, &Editor::bounce_region_selection), false)));
 	reg_sens (_region_actions, "combine-regions", _("Combine"), sigc::mem_fun (*this, &Editor::combine_regions));
 	reg_sens (_region_actions, "uncombine-regions", _("Uncombine"), sigc::mem_fun (*this, &Editor::uncombine_regions));
 
@@ -1989,7 +1985,7 @@ Editor::register_region_actions ()
 
 	reg_sens (_region_actions, "set-region-sync-position", _("Set Sync Position"), sigc::mem_fun (*this, &Editor::set_region_sync_position));
 	reg_sens (_region_actions, "place-transient", _("Place Transient"), sigc::mem_fun (*this, &Editor::place_transient));
-	reg_sens (_region_actions, "split-region", _("Split"), sigc::mem_fun (*this, &Editor::split_region));
+	reg_sens (_region_actions, "split-region", _("Split/Separate"), sigc::mem_fun (*this, &Editor::split_region));
 	reg_sens (_region_actions, "trim-front", _("Trim Start at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_front));
 	reg_sens (_region_actions, "trim-back", _("Trim End at Edit Point"), sigc::mem_fun (*this, &Editor::trim_region_back));
 

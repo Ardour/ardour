@@ -69,7 +69,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	~AutomationTimeAxisView();
 
-	virtual void set_height (uint32_t);
+	virtual void set_height (uint32_t, TrackHeightMode m = OnlySelf);
 	void set_samples_per_pixel (double);
 	std::string name() const { return _name; }
 
@@ -84,7 +84,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	std::list<boost::shared_ptr<AutomationLine> > lines () const;
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);
+	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	void show_timestretch (framepos_t /*start*/, framepos_t /*end*/, int /*layers*/, int /*layer*/) {}

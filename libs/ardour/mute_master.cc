@@ -31,6 +31,9 @@
 using namespace ARDOUR;
 using namespace std;
 
+const MuteMaster::MutePoint MuteMaster::AllPoints = MuteMaster::MutePoint(
+	PreFader|PostFader|Listen|Main);
+
 MuteMaster::MuteMaster (Session& s, const std::string&)
 	: SessionHandleRef (s)
 	, _mute_point (MutePoint (0))

@@ -100,9 +100,9 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, parent_canvas (canvas)
 	, no_redraw (false)
 	, button_table (3, 3)
-	, route_group_button (_("G"))
-	, playlist_button (_("P"))
-	, automation_button (_("A"))
+	, route_group_button (S_("RTAV|G"))
+	, playlist_button (S_("RTAV|P"))
+	, automation_button (S_("RTAV|A"))
 	, automation_action_menu (0)
 	, plugins_submenu_item (0)
 	, route_group_menu (0)
@@ -155,9 +155,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	} else {
 		set_gui_property ("visible", false);
 	}
-
-	mute_changed (0);
-	update_solo_display ();
 
 	timestretch_rect = 0;
 	no_redraw = false;
@@ -323,6 +320,8 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 RouteTimeAxisView::~RouteTimeAxisView ()
 {
+	cleanup_gui_properties ();
+	
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 		delete *i;
 	}
@@ -336,6 +335,7 @@ RouteTimeAxisView::~RouteTimeAxisView ()
 	_automation_tracks.clear ();
 
 	delete route_group_menu;
+	CatchDeletion (this);
 }
 
 void
@@ -789,7 +789,7 @@ RouteTimeAxisView::build_display_menu ()
 			i->set_active (normal == 0 && tape == 0 && non_layered != 0);
 			i->set_inconsistent (non_layered != 0 && (normal != 0 || tape != 0));
 
-			items.push_back (MenuElem (_("Mode"), *mode_menu));
+			items.push_back (MenuElem (_("Record Mode"), *mode_menu));
 		}
 
 
@@ -852,12 +852,8 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, true)));
-	if (!Profile->get_sae()) {
-		items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
-	} else {
-		items.push_front (SeparatorElem());
-		items.push_front (MenuElem (_("Delete"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), true)));
-	}
+	items.push_front (SeparatorElem());
+	items.push_front (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
 
 void
@@ -915,7 +911,7 @@ RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layer
 
 	if (timestretch_rect == 0) {
 		timestretch_rect = new ArdourCanvas::Rectangle (canvas_display ());
-		timestretch_rect->set_fill_color (ARDOUR_UI::config()->color ("time stretch fill"));
+		timestretch_rect->set_fill_color (ArdourCanvas::HSV (ARDOUR_UI::config()->color ("time stretch fill")).mod (ARDOUR_UI::config()->modifier ("time stretch fill")).color());
 		timestretch_rect->set_outline_color (ARDOUR_UI::config()->color ("time stretch outline"));
 	}
 
@@ -960,7 +956,7 @@ RouteTimeAxisView::show_selection (TimeSelection& ts)
 }
 
 void
-RouteTimeAxisView::set_height (uint32_t h)
+RouteTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
 	int gmlen = h - 9;
 	bool height_changed = (height == 0) || (h != height);
@@ -971,7 +967,7 @@ RouteTimeAxisView::set_height (uint32_t h)
 	}
 	gm.get_level_meter().setup_meters (gmlen, meter_width);
 
-	TimeAxisView::set_height (h);
+	TimeAxisView::set_height (h, m);
 
 	if (_view) {
 		_view->set_height ((double) current_height());
@@ -1293,14 +1289,21 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 	if (Keyboard::modifier_state_equals (ev->state, (Keyboard::TertiaryModifier|Keyboard::PrimaryModifier))) {
 
 		/* special case: select/deselect all tracks */
+
+		_editor.begin_reversible_selection_op (X_("Selection Click"));
+
 		if (_editor.get_selection().selected (this)) {
 			_editor.get_selection().clear_tracks ();
 		} else {
 			_editor.select_all_tracks ();
 		}
 
+		_editor.commit_reversible_selection_op ();
+
 		return;
 	}
+
+	_editor.begin_reversible_selection_op (X_("Selection Click"));
 
 	switch (ArdourKeyboard::selection_type (ev->state)) {
 	case Selection::Toggle:
@@ -1319,6 +1322,8 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 		_editor.get_selection().add (this);
 		break;
 	}
+
+	_editor.commit_reversible_selection_op ();
 }
 
 void
@@ -1341,7 +1346,7 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
  * @param results List to add things to.
  */
 void
-RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results)
+RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
 	double speed = 1.0;
 
@@ -1353,14 +1358,14 @@ RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top
 	framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
 
 	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
-		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
 	}
 
 	/* pick up visible automation tracks */
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
-			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results);
+			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
 		}
 	}
 }
@@ -2689,19 +2694,19 @@ RouteTimeAxisView::set_button_names ()
 	if (Config->get_solo_control_is_listen_control()) {
 		switch (Config->get_listen_position()) {
 			case AfterFaderListen:
-				solo_button->set_text (_("A"));
+				solo_button->set_text (S_("AfterFader|A"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("After-fade listen (AFL)"));
 				break;
 			case PreFaderListen:
-				solo_button->set_text (_("P"));
+				solo_button->set_text (S_("PreFader|P"));
 				ARDOUR_UI::instance()->set_tip (*solo_button, _("Pre-fade listen (PFL)"));
 			break;
 		}
 	} else {
-		solo_button->set_text (_("S"));
+		solo_button->set_text (S_("Solo|S"));
 		ARDOUR_UI::instance()->set_tip (*solo_button, _("Solo"));
 	}
-	mute_button->set_text (_("M"));
+	mute_button->set_text (S_("Mute|M"));
 }
 
 Gtk::CheckMenuItem*

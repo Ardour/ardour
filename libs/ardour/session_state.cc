@@ -232,6 +232,7 @@ Session::post_engine_init ()
 	try {
 		/* tempo map requires sample rate knowledge */
 
+		delete _tempo_map;
 		_tempo_map = new TempoMap (_current_frame_rate);
 		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 		
@@ -693,7 +694,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		}
 	}
 
-	SaveSession (); /* EMIT SIGNAL */
+	SessionSaveUnderway (); /* EMIT SIGNAL */
 
 	tree.set_root (&get_state());
 
@@ -877,7 +878,7 @@ Session::load_state (string snapshot_name)
 int
 Session::load_options (const XMLNode& node)
 {
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	config.set_variables (node);
 	return 0;
 }
@@ -1376,7 +1377,11 @@ Session::load_routes (const XMLNode& node, int version)
 		new_routes.push_back (route);
 	}
 
+	BootMessage (_("Tracks/busses loaded;  Adding to Session"));
+
 	add_routes (new_routes, false, false, false);
+
+	BootMessage (_("Finished adding tracks/busses"));
 
 	return 0;
 }
@@ -2080,7 +2085,7 @@ Session::refresh_disk_space ()
 			_total_free_4k_blocks_uncertain = true;
 		}
 	}
-#elif defined (COMPILER_MSVC)
+#elif defined PLATFORM_WINDOWS
 	vector<string> scanned_volumes;
 	vector<string>::iterator j;
 	vector<space_and_path>::iterator i;
@@ -2442,6 +2447,17 @@ Session::begin_reversible_command (GQuark q)
 	}
 
 	_current_trans_quarks.push_front (q);
+}
+
+void
+Session::abort_reversible_command ()
+{
+	if (_current_trans != 0) {
+		_current_trans->clear();
+		delete _current_trans;
+		_current_trans = 0;
+		_current_trans_quarks.clear();
+	}
 }
 
 void
@@ -3621,6 +3637,17 @@ Session::rename (const std::string& new_name, bool after_copy)
 
 	string const old_sources_root = _session_dir->sources_root();
 
+	if (!_writable || (_state_of_the_state & CannotSave)) {
+		error << _("Cannot rename read-only session.") << endmsg;
+		return 0; // don't show "messed up" warning
+	}
+        if (record_status() == Recording) {
+		error << _("Cannot rename session while recording") << endmsg;
+		return 0; // don't show "messed up" warning
+	}
+
+	StateProtector stp (this);
+
 	/* Rename:
 
 	 * session directory
@@ -3636,6 +3663,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 	 */
 
 	if (!after_copy) {
+
 		for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 			
 			if (first) {
@@ -3671,6 +3699,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 	first = false;
 	
 	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+
 		vector<string> v;
 
 		oldstr = (*i).path;
@@ -3702,7 +3731,8 @@ Session::rename (const std::string& new_name, bool after_copy)
 		/* Reset path in "session dirs" */
 		
 		(*i).path = newstr;
-
+		(*i).blocks = 0;
+		
 		/* reset primary SessionDirectory object */
 		
 		if (first) {
@@ -3717,7 +3747,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 		string new_interchange_dir;
 
 		/* use newstr here because we renamed the path that used to be oldstr to newstr above */		
-
+		
 		v.push_back (newstr); 
 		v.push_back (interchange_dir_name);
 		v.push_back (Glib::path_get_basename (oldstr));
@@ -3750,7 +3780,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 	cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
 	if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-		error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
+		error << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 		return 1;
 	}
 
@@ -3764,7 +3794,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 		cerr << "Rename " << oldstr << " => " << newstr << endl;		
 		
 		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
+			error << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
 	}
@@ -3773,6 +3803,18 @@ Session::rename (const std::string& new_name, bool after_copy)
 		/* remove old name from recent sessions */
 		remove_recent_sessions (_path);
 		_path = new_path;
+
+		/* update file source paths */
+		
+		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+			if (fs) {
+				string p = fs->path ();
+				boost::replace_all (p, old_sources_root, _session_dir->sources_root());
+				fs->set_path (p);
+				SourceFactory::setup_peakfile(i->second, true);
+			}
+		}
 	}
 
 	_current_snapshot_name = new_name;

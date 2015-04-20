@@ -59,6 +59,7 @@ struct DeviceInfo
 	std::vector<int> m_AvailableSampleRates;
 	unsigned int m_MaxInputChannels;
 	unsigned int m_MaxOutputChannels;
+	unsigned int m_DefaultBufferSize;
 
     DeviceInfo():
     m_DeviceId(-1), m_DeviceName("Unknown"), m_MaxInputChannels(0), m_MaxOutputChannels(0)
@@ -125,8 +126,8 @@ class WCMRAudioDeviceManagerClient
         const float *acdInputBuffer;
         float *acdOutputBuffer;
         size_t acdFrames;
-        uint32_t acdSampleTime;
-        uint64_t acdCycleStartTimeNanos;
+        int64_t acdSampleTime;
+        int64_t acdCycleStartTimeNanos;
     };
 
 	virtual void AudioDeviceManagerNotification (NotificationReason WCUNUSEDPARAM(reason), void *WCUNUSEDPARAM(pParam)) {}
@@ -198,6 +199,7 @@ protected:
 	std::vector<std::string> m_OutputChannels; ///< List of output channel names.
 	std::vector<int> m_SamplingRates; ///< List of available sampling rates.
 	std::vector<int> m_BufferSizes; ///< List of available buffer sizes.
+	int m_DefaultBufferSize; ///soundcard preferred buffer size
 	
 	int m_CurrentSamplingRate; ///< Currently selected sampling rate.
 	int m_CurrentBufferSize; ///< Currently selected buffer size.

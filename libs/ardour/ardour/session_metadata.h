@@ -52,6 +52,7 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	uint32_t year () const;
 
 	std::string grouping () const;
+	std::string barcode () const;
 	std::string title () const;
 	std::string subtitle () const;
 
@@ -93,6 +94,7 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	void set_year (uint32_t);
 
 	void set_grouping (const std::string &);
+	void set_barcode (const std::string &);
 	void set_title (const std::string &);
 	void set_subtitle (const std::string &);
 

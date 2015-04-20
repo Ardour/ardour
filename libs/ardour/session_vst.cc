@@ -32,6 +32,8 @@
 #include <fst.h>
 #endif
 
+#include "pbd/debug.h"
+
 #include "i18n.h"
 
 #define DEBUG_CALLBACKS
@@ -79,19 +81,11 @@ intptr_t Session::vst_callback (
 	if (effect && effect->user) {
 		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
-#ifdef PLATFORM_WINDOWS
-		SHOW_CALLBACK ("am callback 0x%p, opcode = %d, plugin = \"%s\" ", pthread_self().p, opcode, plug->name());
-#else
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %d, plugin = \"%s\" ", (int) pthread_self(), opcode, plug->name());
-#endif
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d, plugin = \"%s\" ", (void*) DEBUG_THREAD_SELF, opcode, plug->name());
 	} else {
 		plug = 0;
 		session = 0;
-#ifdef PLATFORM_WINDOWS
-		SHOW_CALLBACK ("am callback 0x%p, opcode = %d", pthread_self().p, opcode);
-#else
-		SHOW_CALLBACK ("am callback 0x%x, opcode = %d", (int) pthread_self(), opcode);
-#endif
+		SHOW_CALLBACK ("am callback 0x%p, opcode = %d", (void*) DEBUG_THREAD_SELF, opcode);
 	}
 
 	switch(opcode){

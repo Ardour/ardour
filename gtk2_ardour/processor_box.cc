@@ -634,11 +634,7 @@ ProcessorEntry::Control::control_changed ()
 	} else {
 
 		_adjustment.set_value (c->internal_to_interface(c->get_value ()));
-		
-		stringstream s;
-		s.precision (1);
-		s.setf (ios::fixed, ios::floatfield);
-		s << c->internal_to_user (c->get_value ());
+		set_tooltip ();
 	}
 	
 	_ignore_ui_adjustment = false;
@@ -1148,6 +1144,8 @@ ProcessorBox::show_processor_menu (int arg)
 				gtk_menu_item_set_submenu (controls_menu_item->gobj(), 0);
 				controls_menu_item->set_sensitive (false);
 			}
+		} else {
+			controls_menu_item->set_sensitive (false);
 		}
 	}
 
@@ -1162,6 +1160,8 @@ ProcessorBox::show_processor_menu (int arg)
 				gtk_menu_item_set_submenu (send_menu_item->gobj(), 0);
 				send_menu_item->set_sensitive (false);
 			}
+		} else {
+			send_menu_item->set_sensitive (false);
 		}
 	}
 
@@ -1309,7 +1309,9 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 		if (_session->engine().connected()) {
 			/* XXX giving an error message here is hard, because we may be in the midst of a button press */
 
-			if (!one_processor_can_be_edited ()) return true;
+			if (!one_processor_can_be_edited ()) {
+				return true;
+			}
 
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
 				generic_edit_processor (processor);
@@ -1717,14 +1719,25 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 	if (!send && !plugin_insert && !ext)
 		e->set_selectable(false);
 
+	bool mark_send_visible = false;
+	if (send && _parent_strip) {
+		/* show controls of new sends by default */
+		GUIObjectState& st = _parent_strip->gui_object_state ();
+		XMLNode* strip = st.get_or_add_node (_parent_strip->state_id ());
+		assert (strip);
+		/* check if state exists, if not it must be a new send */
+		if (!st.get_node(strip, e->state_id())) {
+			mark_send_visible = true;
+		}
+	}
+
 	/* Set up this entry's state from the GUIObjectState */
 	XMLNode* proc = entry_gui_object_state (e);
 	if (proc) {
 		e->set_control_state (proc);
 	}
-	
-	if (boost::dynamic_pointer_cast<Send> (processor)) {
-		/* Always show send controls */
+
+	if (mark_send_visible) {
 		e->show_all_controls ();
 	}
 

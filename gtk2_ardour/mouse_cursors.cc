@@ -27,6 +27,8 @@
 
 using namespace ARDOUR_UI_UTILS;
 
+Gdk::Cursor* MouseCursors::_invalid = 0;
+
 MouseCursors::MouseCursors ()
 	: cross_hair (0)
 	, scissors (0)
@@ -211,4 +213,13 @@ MouseCursors::set_cursor_set (const std::string& name)
 	midi_resize = new Cursor (SIZING);
 	midi_erase = new Cursor (DRAPED_BOX);
 	up_down = new Cursor (SB_V_DOUBLE_ARROW);
+}
+
+void
+MouseCursors::create_invalid()
+{
+	char pix[4] = { 0, 0, 0, 0 };
+	Glib::RefPtr<Gdk::Bitmap> bits = Gdk::Bitmap::create (pix, 2, 2);
+	Gdk::Color c;
+	_invalid = new Gdk::Cursor (bits, bits, c, c, 0, 0);
 }

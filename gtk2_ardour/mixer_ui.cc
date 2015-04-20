@@ -201,7 +201,7 @@ Mixer_UI::Mixer_UI ()
 #else
 	global_hpacker.pack_start (out_packer, false, false, 12);
 #endif
-	list_hpane.pack1(list_vpacker, true, true);
+	list_hpane.pack1(list_vpacker, false, false);
 	list_hpane.pack2(global_hpacker, true, false);
 
 	rhs_pane1.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
@@ -473,6 +473,17 @@ Mixer_UI::reset_remote_control_ids ()
 	uint32_t invisible_key = UINT32_MAX;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+
+		/* skip two special values */
+		
+		if (rid == Route::MasterBusRemoteControlID) {
+			rid++;
+		}
+		
+		if (rid == Route::MonitorBusRemoteControlID) {
+			rid++;
+		}
+
 		boost::shared_ptr<Route> route = (*ri)[track_columns.route];
 		bool visible = (*ri)[track_columns.visible];
 
@@ -619,7 +630,7 @@ Mixer_UI::sync_treeview_from_order_keys ()
 void
 Mixer_UI::follow_editor_selection ()
 {
-	if (!ARDOUR_UI::config()->get_link_editor_and_mixer_selection() || _following_editor_selection) {
+	if (_following_editor_selection) {
 		return;
 	}
 
@@ -1290,6 +1301,14 @@ Mixer_UI::route_groups_changed ()
 
 	group_model->clear ();
 
+#if 0
+	/* this is currently not used,
+	 * Mixer_UI::group_display_button_press() has a case for it,
+	 * and a commented edit_route_group() but that's n/a since 2011.
+	 *
+	 * This code is left as reminder that
+	 * row[group_columns.group] = 0 has special meaning.
+	 */
 	{
 		TreeModel::Row row;
 		row = *(group_model->append());
@@ -1297,6 +1316,7 @@ Mixer_UI::route_groups_changed ()
 		row[group_columns.text] = (_("-all-"));
 		row[group_columns.group] = 0;
 	}
+#endif
 
 	_session->foreach_route_group (sigc::mem_fun (*this, &Mixer_UI::add_route_group));
 
@@ -1836,6 +1856,7 @@ Mixer_UI::setup_track_display ()
 	track_display.get_column (1)->set_data (X_("colnum"), GUINT_TO_POINTER(1));
 	track_display.get_column (0)->set_expand(true);
 	track_display.get_column (1)->set_expand(false);
+	track_display.get_column (0)->set_sizing (Gtk::TREE_VIEW_COLUMN_FIXED);
 	track_display.set_name (X_("EditGroupList"));
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);

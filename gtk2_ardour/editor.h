@@ -232,7 +232,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	}
 
         double sample_to_pixel (framepos_t sample) const {
-		return sample / samples_per_pixel;
+	        return round (sample / (double) samples_per_pixel);
 	}
 
 	double sample_to_pixel_unrounded (framepos_t sample) const {
@@ -242,6 +242,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
+	bool get_selection_extents ( framepos_t &start, framepos_t &end );  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 	void track_mixer_selection ();
 
@@ -260,6 +261,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 
+	void remove_tracks ();
+	
 	/* tempo */
 
 	void set_show_measures (bool yn);
@@ -315,7 +318,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next);
 	framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration);
-	Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position);
+	unsigned get_grid_beat_divisions(framepos_t position);
+	Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position);
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
@@ -361,8 +365,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void scroll_tracks_down_line ();
 	void scroll_tracks_up_line ();
-        bool scroll_up_one_track ();
-        bool scroll_down_one_track ();
+        bool scroll_up_one_track (bool skip_child_views = false);
+        bool scroll_down_one_track (bool skip_child_views = false);
 
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
@@ -380,7 +384,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void reset_zoom (framecnt_t);
 	void reposition_and_zoom (framepos_t, double);
 
-	framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool use_context_click = false);
+	framepos_t get_preferred_edit_position (bool ignore_playhead = false,
+	                                        bool use_context_click = false,
+	                                        bool from_outside_canvas = false);
 
 	bool update_mouse_speed ();
 	bool decelerate_mouse_speed ();
@@ -417,7 +423,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
         void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
 
-	void get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const;
+	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
+	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const;
 
 	void center_screen (framepos_t);
 
@@ -447,6 +454,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void redo_selection_op ();
 	void begin_reversible_command (std::string cmd_name);
 	void begin_reversible_command (GQuark);
+	void abort_reversible_command ();
 	void commit_reversible_command ();
 
 	DragManager* drags () const {
@@ -495,15 +503,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		_stepping_axis_view = v;
 	}
 
- 	ArdourCanvas::Container* get_trackview_group () const { return _trackview_group; }
-        ArdourCanvas::Container* get_noscroll_group () const { return no_scroll_group; }
-        ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
-        ArdourCanvas::ScrollGroup* get_vscroll_group () const { return v_scroll_group; }
-        ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
+	ArdourCanvas::Container* get_trackview_group () const { return _trackview_group; }
+	ArdourCanvas::Container* get_noscroll_group () const { return no_scroll_group; }
+	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
+	ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
+	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
 
-        ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
+	ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
-        void override_visible_track_count ();
+	void override_visible_track_count ();
 
 	/* Ruler metrics methods */
 
@@ -570,7 +578,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_samples_per_pixel (framecnt_t);
 
 	Editing::MouseMode mouse_mode;
-	Editing::MouseMode pre_internal_mouse_mode;
 	Editing::SnapType  pre_internal_snap_type;
 	Editing::SnapMode  pre_internal_snap_mode;
 	Editing::SnapType  internal_snap_type;
@@ -673,6 +680,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
 	void mouse_add_new_range (framepos_t);
+	void mouse_add_new_loop (framepos_t);
+	void mouse_add_new_punch (framepos_t);
 	bool choose_new_marker_name(std::string &name);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
@@ -703,6 +712,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	
 	void button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type);
 	bool button_release_can_deselect;
+	bool _mouse_changed_selection;
 
 	void catch_vanishing_regionview (RegionView *);
 
@@ -810,15 +820,15 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
 	*/
-        ArdourCanvas::ScrollGroup* hv_scroll_group;
-
-	/* The group containing all other groups that are scrolled vertically ONLY
-	*/
-        ArdourCanvas::ScrollGroup* v_scroll_group;
+	ArdourCanvas::ScrollGroup* hv_scroll_group;
 
 	/* The group containing all other groups that are scrolled horizontally ONLY
 	*/
-        ArdourCanvas::ScrollGroup* h_scroll_group;
+	ArdourCanvas::ScrollGroup* h_scroll_group;
+
+	/* Scroll group for cursors, scrolled horizontally, above everything else
+	*/
+	ArdourCanvas::ScrollGroup* cursor_scroll_group;
 
 	/* The group containing all trackviews. */
 	ArdourCanvas::Container* no_scroll_group;
@@ -988,7 +998,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_ruler_video (bool onoff) {ruler_video_action->set_active(onoff);}
 	int videotl_bar_height; /* in units of timebar_height; default: 4 */
 	int get_videotl_bar_height () const { return videotl_bar_height; }
-	void export_video (bool range = false);
 	void toggle_region_video_lock ();
 
 	friend class EditorCursor;
@@ -1172,7 +1181,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
-	void cut_copy_points (Editing::CutCopyOp, Evoral::MusicalTime earliest=Evoral::MusicalTime(), bool midi=false);
+	void cut_copy_points (Editing::CutCopyOp, Evoral::Beats earliest=Evoral::Beats(), bool midi=false);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 	void cut_copy_midi (Editing::CutCopyOp);
@@ -1425,9 +1434,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void set_session_extents_from_selection ();
 
-	void set_loop_from_edit_range (bool play);
 	void set_loop_from_region (bool play);
-	void set_punch_from_edit_range ();
 
 	void set_loop_range (framepos_t start, framepos_t end, std::string cmd);
 	void set_punch_range (framepos_t start, framepos_t end, std::string cmd);
@@ -2126,10 +2133,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	RhythmFerret* rhythm_ferret;
 
 	void fit_tracks (TrackViewList &);
-	void fit_selected_tracks ();
+	void fit_selection ();
 	void set_track_height (Height);
 
-	void remove_tracks ();
+	void _remove_tracks ();
+	bool idle_remove_tracks ();
 	void toggle_tracks_active ();
 
 	bool _have_idled;

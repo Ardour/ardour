@@ -7,6 +7,7 @@
 #
 #####################################
 
+MAJOR_VERSION="%REPLACE_MAJOR_VERSION%"
 
 PGM_NAME="%REPLACE_PGM%"
 PGM_VENDOR="%REPLACE_VENDOR%"
@@ -160,14 +161,14 @@ then
 	fi
 
 	# delete the bin link if it is linked to this version
-	if [ -e "${USER_BIN_DIR}/${PGM_NAME}3" ]; 
+	if [ -e "${USER_BIN_DIR}/${PGM_NAME}${MAJOR_VERSION}" ]; 
 	then
-		BIN_LINK_TARGET=$(readlink "${USER_BIN_DIR}/${PGM_NAME}3")
+		BIN_LINK_TARGET=$(readlink "${USER_BIN_DIR}/${PGM_NAME}${MAJOR_VERSION}")
 		BIN_LINK_TARGET_DIR=$(dirname "${BIN_LINK_TARGET}")
 
 		if [ "${BIN_LINK_TARGET_DIR}" = "${PGM_PATH}/bin" ];
 		then
-			${SUPER} rm -f "${USER_BIN_DIR}/${PGM_NAME}3"
+			${SUPER} rm -f "${USER_BIN_DIR}/${PGM_NAME}${MAJOR_VERSION}"
 		fi
 	fi
 	

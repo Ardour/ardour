@@ -91,7 +91,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TargetFolder)\..\lib\ardour3\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\ardour3\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TargetFolder)\..\lib\$(LibardourFolder)\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\$(LibardourFolder)\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -173,7 +173,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TargetFolder)\..\lib\ardour3\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TargetFolder)\..\lib\$(LibardourFolder)\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -255,7 +255,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\surfaces\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).lib&quot; &quot;$(GenericWin32LibraryFolder)\$(TargetName).lib&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

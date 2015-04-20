@@ -25,6 +25,13 @@
     the value of the variable.
 *****************************************************/
 
+/*****************************************************
+    DO dump the config using cfgtool to system_config
+    after modifying this file.
+
+    ./waf && build/cfgtool/cfgtool system_config
+*****************************************************/
+
 /* IO connection */
 
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
@@ -50,7 +57,7 @@ CONFIG_VARIABLE (int32_t, inter_scene_gap_msecs, "inter-scene-gap-msecs", 1)
 
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
-CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
+CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", false)
 CONFIG_VARIABLE (bool, timecode_source_2997, "timecode-source-2997", false)
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", Engine)
 CONFIG_VARIABLE (std::string, ltc_source_port, "ltc-source-port", "system:capture_1")
@@ -67,7 +74,8 @@ CONFIG_VARIABLE (RemoteModel, remote_model, "remote-model", MixerOrdered)
 
 /* disk operations */
 
-CONFIG_VARIABLE (uint32_t, minimum_disk_io_bytes,  "minimum-disk-io-bytes", 1024 * 256)
+CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes,  "minimum-disk-read-bytes", ARDOUR::Diskstream::default_disk_read_chunk_frames() * sizeof (ARDOUR::Sample))
+CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes,  "minimum-disk-write-bytes", ARDOUR::Diskstream::default_disk_write_chunk_frames() * sizeof (ARDOUR::Sample))
 CONFIG_VARIABLE (float, midi_readahead,  "midi-readahead", 1.0)
 CONFIG_VARIABLE (float, audio_capture_buffer_seconds, "capture-buffer-seconds", 5.0)
 CONFIG_VARIABLE (float, audio_playback_buffer_seconds, "playback-buffer-seconds", 5.0)
@@ -90,7 +98,7 @@ CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "regio
 
 /* monitoring, mute, solo etc */
 
-CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", true)
+CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", false)
 CONFIG_VARIABLE (bool, mute_affects_post_fader, "mute-affects-post-fader", true)
 CONFIG_VARIABLE (bool, mute_affects_control_outs, "mute-affects-control-outs", true)
 CONFIG_VARIABLE (bool, mute_affects_main_outs, "mute-affects-main-outs", true)

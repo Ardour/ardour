@@ -124,8 +124,8 @@ RouteProcessorSelection::remove (RouteUI* r)
 
 	RouteUISelection::iterator i;
 	if ((i = find (routes.begin(), routes.end(), r)) != routes.end()) {
-		routes.erase (i);
 		(*i)->set_selected (false);
+		routes.erase (i);
 		if (!_no_route_change_signal) {
 			RoutesChanged ();
 		}

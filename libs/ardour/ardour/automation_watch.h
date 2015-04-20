@@ -48,6 +48,7 @@ class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::Ses
 
     static AutomationWatch* _instance;
     Glib::Threads::Thread*  _thread;
+    framepos_t              _last_time;
     bool                    _run_thread;
     AutomationWatches        automation_watches;
     Glib::Threads::Mutex     automation_watch_lock;

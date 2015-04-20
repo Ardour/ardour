@@ -38,8 +38,8 @@ class LIBARDOUR_API MidiOperator {
 	virtual ~MidiOperator() {}
 
 	virtual Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>,
-	                             Evoral::MusicalTime,
-	                             std::vector<Evoral::Sequence<Evoral::MusicalTime>::Notes>&) = 0;
+	                             Evoral::Beats,
+	                             std::vector<Evoral::Sequence<Evoral::Beats>::Notes>&) = 0;
 	virtual std::string name() const = 0;
 };
 

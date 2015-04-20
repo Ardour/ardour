@@ -106,6 +106,12 @@ Transform::Operation::eval(Context& ctx) const
 		}
 		value /= rhs.to_double();
 		break;
+	case MOD:
+		if (rhs.to_double() == 0.0) {
+			return;  // Program will fail safely
+		}
+		value = fmod(value, rhs.to_double());
+		break;
 	default: break;
 	}
 
@@ -115,7 +121,7 @@ Transform::Operation::eval(Context& ctx) const
 
 Command*
 Transform::operator()(boost::shared_ptr<MidiModel> model,
-                      Evoral::MusicalTime          position,
+                      Evoral::Beats                position,
                       std::vector<Notes>&          seqs)
 {
 	typedef MidiModel::NoteDiffCommand Command;

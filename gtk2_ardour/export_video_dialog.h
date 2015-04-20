@@ -41,19 +41,28 @@
 class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 {
   public:
-	ExportVideoDialog (ARDOUR::Session*, TimeSelection &tme, bool range = false);
+	ExportVideoDialog ();
 	~ExportVideoDialog ();
 
 	std::string get_exported_filename () { return outfn_path_entry.get_text(); }
 
+	void apply_state(TimeSelection &tme, bool range);
+
+	XMLNode& get_state ();
+	void set_state (const XMLNode &);
+
   private:
-	TimeSelection &export_range;
+	TimeSelection export_range;
 
 	void on_show ();
 	void abort_clicked ();
 	void launch_export ();
 	void encode_pass (int);
 	void change_file_extension (std::string);
+	void width_value_changed ();
+	void height_value_changed ();
+
+	void set_original_file_information ();
 
 	void open_outfn_dialog ();
 	void open_invid_dialog ();
@@ -63,10 +72,10 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	void aspect_checkbox_toggled ();
 	void fps_checkbox_toggled ();
 
-	bool aborted;
-	bool twopass;
-	bool firstpass;
-	bool normalize;
+	bool _aborted;
+	bool _twopass;
+	bool _firstpass;
+	bool _normalize;
 
 	void finished ();
 	void update_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
@@ -74,10 +83,14 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	boost::shared_ptr<ARDOUR::ExportStatus> status;
 	sigc::connection audio_progress_connection;
 	gint audio_progress_display ();
-	float previous_progress;
+	float _previous_progress;
 
-	TranscodeFfmpeg *transcoder;
-	std::string insnd;
+	TranscodeFfmpeg *_transcoder;
+	std::string _insnd;
+
+	float _video_source_aspect_ratio;
+	bool _suspend_signals;
+	bool _suspend_dirty;
 
 	Gtk::Label        outfn_path_label;
 	Gtk::Entry        outfn_path_entry;
@@ -103,6 +116,7 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	Gtk::ComboBoxText preset_combo;
 
 	Gtk::CheckButton  scale_checkbox;
+	Gtk::CheckButton  scale_aspect;
 	Gtk::Adjustment   width_adjustment;
 	Gtk::SpinButton   width_spinner;
 	Gtk::Adjustment   height_adjustment;

@@ -64,6 +64,22 @@ Event<Timestamp>::Event(EventType type, Timestamp time, uint32_t size, uint8_t* 
 }
 
 template<typename Timestamp>
+Event<Timestamp>::Event(EventType      type,
+                        Timestamp      time,
+                        uint32_t       size,
+                        const uint8_t* buf)
+	: _type(type)
+	, _original_time(time)
+	, _nominal_time(time)
+	, _size(size)
+	, _buf((uint8_t*)malloc(size))
+	, _id(-1)
+	, _owns_buf(true)
+{
+	memcpy(_buf, buf, _size);
+}
+
+template<typename Timestamp>
 Event<Timestamp>::Event(const Event& copy, bool owns_buf)
 	: _type(copy._type)
 	, _original_time(copy._original_time)
@@ -155,7 +171,7 @@ Event<Timestamp>::set_original_time (Timestamp t)
 	
 #endif // EVORAL_EVENT_ALLOC
 
-template class Event<Evoral::MusicalTime>;
+template class Event<Evoral::Beats>;
 template class Event<double>;
 template class Event<int64_t>;
 

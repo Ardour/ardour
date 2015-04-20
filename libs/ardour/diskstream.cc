@@ -53,12 +53,8 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-/* XXX This goes uninitialized when there is no ~/.config/ardour3 directory.
- * I can't figure out why, so this will do for now (just stole the
- * default from configuration_vars.h).  0 is not a good value for
- * allocating buffer sizes..
- */
-ARDOUR::framecnt_t Diskstream::disk_io_chunk_frames = 1024 * 256 / sizeof (Sample);
+ARDOUR::framecnt_t Diskstream::disk_read_chunk_frames = default_disk_read_chunk_frames ();
+ARDOUR::framecnt_t Diskstream::disk_write_chunk_frames = default_disk_write_chunk_frames ();
 
 PBD::Signal0<void>                Diskstream::DiskOverrun;
 PBD::Signal0<void>                Diskstream::DiskUnderrun;
@@ -462,7 +458,7 @@ Diskstream::get_state ()
 {
 	XMLNode* node = new XMLNode ("Diskstream");
         char buf[64];
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	node->add_property ("flags", enum_2_string (_flags));
 	node->add_property ("playlist", _playlist->name());
@@ -771,4 +767,16 @@ void
 Diskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
+}
+
+framecnt_t
+Diskstream::default_disk_read_chunk_frames()
+{
+	return 65536;
+}	
+
+framecnt_t
+Diskstream::default_disk_write_chunk_frames ()
+{
+	return 65536;
 }

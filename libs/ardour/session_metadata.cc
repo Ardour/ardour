@@ -77,7 +77,7 @@ SessionMetadata::SessionMetadata ()
 	//map.insert (Property ("lyrics", ""));
 	//map.insert (Property ("media", ""));
 	//map.insert (Property ("label", ""));
-	//map.insert (Property ("barcode", ""));
+	map.insert (Property ("barcode", ""));
 	//map.insert (Property ("encoded_by", ""));
 	//map.insert (Property ("catalog_number", ""));
 
@@ -122,8 +122,8 @@ SessionMetadata::get_value (const string & name) const
 	if (it == map.end()) {
 		it = user_map.find (name);
 		if (it == user_map.end()) {
-			// Should not be reached!
-			std::cerr << "Programming error in SessionMetadata::get_value" << std::endl;
+			// Should not be reached, except if loading metadata from a newer version with a new type
+			std::cerr << "Programming error in SessionMetadata::get_value (" << name << ")" << std::endl;
 			return "";
 		}
 	}
@@ -144,8 +144,8 @@ SessionMetadata::set_value (const string & name, const string & value)
 	if (it == map.end()) {
 		it = user_map.find (name);
 		if (it == user_map.end()) {
-			// Should not be reached!
-			std::cerr << "Programming error in SessionMetadata::set_value" << std::endl;
+			// Should not be reached, except if loading metadata from a newer version with a new type
+			std::cerr << "Programming error in SessionMetadata::set_value (" << name << ")" << std::endl;
 			return;
 		}
 	}
@@ -250,6 +250,12 @@ string
 SessionMetadata::grouping () const
 {
 	return get_value("grouping");
+}
+
+string
+SessionMetadata::barcode () const
+{
+	return get_value("barcode");
 }
 
 string
@@ -452,6 +458,12 @@ void
 SessionMetadata::set_grouping (const string & v)
 {
 	set_value ("grouping", v);
+}
+
+void
+SessionMetadata::set_barcode (const string & v)
+{
+	set_value ("barcode", v);
 }
 
 void

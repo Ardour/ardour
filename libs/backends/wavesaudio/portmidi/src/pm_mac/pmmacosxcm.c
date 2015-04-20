@@ -866,10 +866,14 @@ char* cm_get_full_endpoint_name(MIDIEndpointRef endpoint)
     }
 #endif    
     /* copy the string into our buffer */
-    newName = (char *) malloc(CFStringGetLength(fullName) + 1);
-    CFStringGetCString(fullName, newName, CFStringGetLength(fullName) + 1,
-                       defaultEncoding);
-
+    if (fullName) {
+        newName = (char *) malloc(CFStringGetLength(fullName) + 1);
+        CFStringGetCString(fullName, newName, CFStringGetLength(fullName) + 1,
+                           defaultEncoding);
+    } else {
+        newName = NULL;
+    }
+    
     /* clean up */
 #ifdef OLDCODE
     if (endpointName) CFRelease(endpointName);
@@ -972,8 +976,12 @@ PmError pm_macosxcm_init(void)
             pm_default_input_device_id = pm_descriptor_index;
         
         /* Register this device with PortMidi */
-        pm_add_device("CoreMIDI", cm_get_full_endpoint_name(endpoint),
-                      TRUE, (void *) (long) endpoint, &pm_macosx_in_dictionary);
+        char* full_endpoint_name = cm_get_full_endpoint_name(endpoint);
+        if (full_endpoint_name != NULL) {
+            pm_add_device("CoreMIDI", full_endpoint_name,
+                          TRUE, (void *) (long) endpoint, &pm_macosx_in_dictionary);
+
+        }
     }
 
     /* Iterate over the MIDI output devices */
@@ -988,9 +996,12 @@ PmError pm_macosxcm_init(void)
             pm_default_output_device_id = pm_descriptor_index;
 
         /* Register this device with PortMidi */
-        pm_add_device("CoreMIDI", cm_get_full_endpoint_name(endpoint),
-                      FALSE, (void *) (long) endpoint,
-                      &pm_macosx_out_dictionary);
+        char* full_endpoint_name = cm_get_full_endpoint_name(endpoint);
+        if (full_endpoint_name != NULL) {
+            pm_add_device("CoreMIDI", full_endpoint_name,
+                          FALSE, (void *) (long) endpoint,
+                          &pm_macosx_out_dictionary);
+        }
     }
     return pmNoError;
     

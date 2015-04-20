@@ -33,6 +33,7 @@
 #include "pbd/stateful_diff_command.h"
 
 #include "ardour/midi_model.h"
+#include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
 #include "ardour/midi_track.h"
@@ -123,6 +124,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
@@ -169,6 +171,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 	_note_group->raise_to_top();
@@ -220,6 +223,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other)
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	init (false);
 }
@@ -250,6 +254,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, boost::shared_ptr<M
 	, _last_event_y (0)
 	, _grabbed_keyboard (false)
 	, _entered (false)
+	, _mouse_changed_selection (false)
 {
 	init (true);
 }
@@ -294,7 +299,7 @@ MidiRegionView::init (bool wfd)
 
 	group->raise_to_top();
 
-	midi_view()->midi_track()->PlaybackChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
+	midi_view()->midi_track()->playback_filter().ChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
 								       boost::bind (&MidiRegionView::midi_channel_mode_changed, this),
 								       gui_context ());
 
@@ -386,7 +391,6 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 
 	case GDK_BUTTON_RELEASE:
 		r = button_release (&ev->button);
-		_note_player.reset();
 		return r;
 
 	case GDK_MOTION_NOTIFY:
@@ -502,6 +506,7 @@ MidiRegionView::button_press (GdkEventButton* ev)
 	}
 
 	_pressed_button = ev->button;
+	_mouse_changed_selection = false;
 
 	return true;
 }
@@ -532,12 +537,14 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		case MouseRange:
 			/* no motion occured - simple click */
 			clear_selection ();
+			_mouse_changed_selection = true;
 			break;
 
 		case MouseContent:
 		case MouseTimeFX:
 			{
 				clear_selection();
+				_mouse_changed_selection = true;
 
 				if (Keyboard::is_insert_note_event(ev)) {
 
@@ -547,12 +554,12 @@ MidiRegionView::button_release (GdkEventButton* ev)
 					event_y = ev->y;
 					group->canvas_to_item (event_x, event_y);
 
-					Evoral::MusicalTime beats = get_grid_beats(editor.pixel_to_sample(event_x));
+					Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x));
 
 					/* Shorten the length by 1 tick so that we can add a new note at the next
 					   grid snap without it overlapping this one.
 					*/
-					beats -= Evoral::MusicalTime::tick();
+					beats -= Evoral::Beats::tick();
 
 					create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 				}
@@ -561,12 +568,12 @@ MidiRegionView::button_release (GdkEventButton* ev)
 			}
 		case MouseDraw:
 			{
-				Evoral::MusicalTime beats = get_grid_beats(editor.pixel_to_sample(event_x));
+				Evoral::Beats beats = get_grid_beats(editor.pixel_to_sample(event_x));
 
 				/* Shorten the length by 1 tick so that we can add a new note at the next
 				   grid snap without it overlapping this one.
 				*/
-				beats -= Evoral::MusicalTime::tick();
+				beats -= Evoral::Beats::tick();
 				
 				create_note_at (editor.pixel_to_sample (event_x), event_y, beats, true);
 
@@ -589,6 +596,11 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 	default:
 		break;
+	}
+
+	if (_mouse_changed_selection) {
+		trackview.editor().begin_reversible_selection_op (X_("Mouse Selection Change"));
+		trackview.editor().commit_reversible_selection_op ();
 	}
 
 	return false;
@@ -643,6 +655,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 					clear_selection ();
+					_mouse_changed_selection = true;
 				}
 				_mouse_state = SelectRectDragging;
 				return true;
@@ -732,7 +745,7 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		bool shorter = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
 		bool fine = Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
 
-		change_note_lengths (fine, shorter, Evoral::MusicalTime(), start, end);
+		change_note_lengths (fine, shorter, Evoral::Beats(), start, end);
 
 		return true;
 
@@ -745,27 +758,19 @@ MidiRegionView::key_press (GdkEventKey* ev)
 		delete_selection();
 		return true;
 
-	} else if (ev->keyval == GDK_Tab) {
+	} else if (ev->keyval == GDK_Tab || ev->keyval == GDK_ISO_Left_Tab) {
+
+		trackview.editor().begin_reversible_selection_op (X_("Select Adjacent Note"));
 
 		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
 			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		} else {
 			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
 		}
+
+		trackview.editor().commit_reversible_selection_op();
+
 		return true;
-
-	} else if (ev->keyval == GDK_ISO_Left_Tab) {
-
-		/* Shift-TAB generates ISO Left Tab, for some reason */
-
-		if (Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier)) {
-			goto_previous_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
-		} else {
-			goto_next_note (Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier));
-		}
-		return true;
-
-
 
 	} else if (ev->keyval == GDK_Up) {
 
@@ -915,7 +920,7 @@ MidiRegionView::show_list_editor ()
  * \param snap_t true to snap t to the grid, otherwise false.
  */
 void
-MidiRegionView::create_note_at (framepos_t t, double y, Evoral::MusicalTime length, bool snap_t)
+MidiRegionView::create_note_at (framepos_t t, double y, Evoral::Beats length, bool snap_t)
 {
 	if (length < 2 * DBL_EPSILON) {
 		return;
@@ -946,9 +951,12 @@ MidiRegionView::create_note_at (framepos_t t, double y, Evoral::MusicalTime leng
 
 	view->update_note_range(new_note->note());
 
-	MidiModel::NoteDiffCommand* cmd = _model->new_note_diff_command(_("add note"));
-	cmd->add (new_note);
-	_model->apply_command(*trackview.session(), cmd);
+	start_note_diff_command(_("add note"));
+
+	clear_selection ();
+	note_diff_add_note (new_note, true, false);
+
+	apply_diff();
 
 	play_midi_note (new_note);
 }
@@ -982,8 +990,8 @@ MidiRegionView::display_model(boost::shared_ptr<MidiModel> model)
 
 	content_connection.disconnect ();
 	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiRegionView::redisplay_model, this), gui_context());
-
-	clear_events ();
+	/* Don't signal as nobody else needs to know until selection has been altered. */
+	clear_events (false);
 
 	if (_enable_display) {
 		redisplay_model();
@@ -994,6 +1002,7 @@ void
 MidiRegionView::start_note_diff_command (string name)
 {
 	if (!_note_diff_command) {
+		trackview.editor().begin_reversible_command (name);
 		_note_diff_command = _model->new_note_diff_command (name);
 	}
 }
@@ -1033,7 +1042,7 @@ MidiRegionView::note_diff_add_change (NoteBase* ev,
 void
 MidiRegionView::note_diff_add_change (NoteBase* ev,
                                       MidiModel::NoteDiffCommand::Property property,
-                                      Evoral::MusicalTime val)
+                                      Evoral::Beats val)
 {
 	if (_note_diff_command) {
 		_note_diff_command->change (ev->note(), property, val);
@@ -1044,6 +1053,7 @@ void
 MidiRegionView::apply_diff (bool as_subcommand)
 {
 	bool add_or_remove;
+	bool commit = false;
 
 	if (!_note_diff_command) {
 		return;
@@ -1056,20 +1066,26 @@ MidiRegionView::apply_diff (bool as_subcommand)
 		}
 	}
 
+	midi_view()->midi_track()->midi_playlist()->region_edited(
+		_region, _note_diff_command);
+
 	if (as_subcommand) {
 		_model->apply_command_as_subcommand (*trackview.session(), _note_diff_command);
 	} else {
 		_model->apply_command (*trackview.session(), _note_diff_command);
+		commit = true;
 	}
 
 	_note_diff_command = 0;
-	midi_view()->midi_track()->playlist_modified();
 
 	if (add_or_remove) {
 		_marked_for_selection.clear();
 	}
 
 	_marked_for_velocity.clear();
+	if (commit) {
+		trackview.editor().commit_reversible_command ();
+	}
 }
 
 void
@@ -1100,8 +1116,23 @@ MidiRegionView::find_canvas_note (boost::shared_ptr<NoteType> note)
 	return 0;
 }
 
+/** This version finds any canvas note matching the supplied note. */
+NoteBase*
+MidiRegionView::find_canvas_note (NoteType note)
+{
+	Events::iterator it;
+
+	for (it = _events.begin(); it != _events.end(); ++it) {
+		if (*((*it)->note()) == note) {
+			return *it;
+		}
+	}
+
+	return 0;
+}
+
 void
-MidiRegionView::get_events (Events& e, Evoral::Sequence<Evoral::MusicalTime>::NoteOperator op, uint8_t val, int chan_mask)
+MidiRegionView::get_events (Events& e, Evoral::Sequence<Evoral::Beats>::NoteOperator op, uint8_t val, int chan_mask)
 {
 	MidiModel::Notes notes;
 	_model->get_notes (notes, op, val, chan_mask);
@@ -1170,7 +1201,14 @@ MidiRegionView::redisplay_model()
 
 			} else {
 
-				add_note (note, visible);
+				cne = add_note (note, visible);
+			}
+
+			set<boost::shared_ptr<NoteType> >::iterator it;
+			for (it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
+				if (*(*it) == *note) {
+					add_to_selection (cne);
+				}
 			}
 
 		} else {
@@ -1181,7 +1219,6 @@ MidiRegionView::redisplay_model()
 			}
 		}
 	}
-
 
 	/* remove note items that are no longer valid */
 
@@ -1213,6 +1250,7 @@ MidiRegionView::redisplay_model()
 
 	_marked_for_selection.clear ();
 	_marked_for_velocity.clear ();
+	_pending_note_selection.clear ();
 
 	/* we may have caused _events to contain things out of order (e.g. if a note
 	   moved earlier or later). we don't generally need them in time order, but
@@ -1259,8 +1297,8 @@ MidiRegionView::display_sysexes()
 	if (!ARDOUR_UI::config()->get_never_display_periodic_midi()) {
 
 		for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
-			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::MusicalTime> > mev = 
-				boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
+			const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev = 
+				boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::Beats> > (*i);
 			
 			if (mev) {
 				if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
@@ -1292,10 +1330,10 @@ MidiRegionView::display_sysexes()
 
 	for (MidiModel::SysExes::const_iterator i = _model->sysexes().begin(); i != _model->sysexes().end(); ++i) {
 
-		const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::MusicalTime> > mev = 
-			boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::MusicalTime> > (*i);
+		const boost::shared_ptr<const Evoral::MIDIEvent<Evoral::Beats> > mev = 
+			boost::static_pointer_cast<const Evoral::MIDIEvent<Evoral::Beats> > (*i);
 
-		Evoral::MusicalTime time = (*i)->time();
+		Evoral::Beats time = (*i)->time();
 
 		if (mev) {
 			if (mev->is_spp() || mev->is_mtc_quarter() || mev->is_mtc_full()) {
@@ -1460,6 +1498,21 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 			const double y0 = 1. + floor (midi_stream_view()->note_to_y(note->note()));
 			const double y1 = y0 + std::max(1., floor(midi_stream_view()->note_height()) - 1.);
 
+			if (y0 < 0 || y1 >= _height) {
+				/* During DnD, the region uses the 'old/current'
+				 * midi_stream_view()'s range and its position/height calculation.
+				 *
+				 * Ideally DnD would decouple the midi_stream_view() for the
+				 * region(s) being dragged and set it to the target's range
+				 * (or in case of the drop-zone, FullRange).
+				 * but I don't see how this can be done without major rework.
+				 *
+				 * For now, just prevent visual bleeding of events in case
+				 * the target-track is smaller.
+				 */
+				event->hide();
+				continue;
+			}
 			cnote->set_y0 (y0);
 			cnote->set_y1 (y1);
 
@@ -1529,7 +1582,7 @@ MidiRegionView::end_write()
 /** Resolve an active MIDI note (while recording).
  */
 void
-MidiRegionView::resolve_note(uint8_t note, Evoral::MusicalTime end_time)
+MidiRegionView::resolve_note(uint8_t note, Evoral::Beats end_time)
 {
 	if (midi_view()->note_mode() != Sustained) {
 		return;
@@ -1608,21 +1661,25 @@ MidiRegionView::start_playing_midi_chord (vector<boost::shared_ptr<NoteType> > n
 		return;
 	}
 
-	_note_player = boost::shared_ptr<NotePlayer>(new NotePlayer(route_ui->midi_track()));
+	NotePlayer* player = new NotePlayer (route_ui->midi_track());
 
 	for (vector<boost::shared_ptr<NoteType> >::iterator n = notes.begin(); n != notes.end(); ++n) {
-		_note_player->add (*n);
+		player->add (*n);
 	}
 
-	_note_player->on ();
+	player->play ();
 }
 
 
 bool
 MidiRegionView::note_in_region_range (const boost::shared_ptr<NoteType> note, bool& visible) const
 {
+	/* This is imprecise due to all the conversion conversion involved, so only
+	   hide notes if they seem to start more than one tick before the start. */
+	const framecnt_t tick_frames       = Evoral::Beats::tick().to_ticks(trackview.session()->frame_rate());
 	const framepos_t note_start_frames = source_beats_to_region_frames (note->time());
-	bool outside = (note_start_frames  < 0) || (note_start_frames > _region->last_frame());
+	const bool       outside           = ((note_start_frames <= -tick_frames) ||
+	                                      (note_start_frames >= _region->length()));
 
 	visible = (note->note() >= midi_stream_view()->lowest_note()) &&
 		(note->note() <= midi_stream_view()->highest_note());
@@ -1712,6 +1769,13 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
 	const double diamond_size = std::max(1., floor(midi_stream_view()->note_height()) - 2.);
 	const double y = 1.5 + floor(midi_stream_view()->note_to_y(note->note())) + diamond_size * .5;
 
+	// see DnD note in MidiRegionView::apply_note_range() above
+	if (y <= 0 || y >= _height) {
+		ev->hide();
+	} else {
+		ev->show();
+	}
+
 	ev->set_position (ArdourCanvas::Duple (x, y));
 	ev->set_height (diamond_size);
 
@@ -1735,7 +1799,7 @@ MidiRegionView::update_hit (Hit* ev, bool update_ghost_regions)
  * notes, and resolve_note should be called when the corresponding note off
  * event arrives, to properly display the note.
  */
-void
+NoteBase*
 MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 {
 	NoteBase* event = 0;
@@ -1793,11 +1857,12 @@ MidiRegionView::add_note(const boost::shared_ptr<NoteType> note, bool visible)
 	MidiStreamView* const view = mtv->midi_view();
 
 	view->update_note_range (note->note());
+	return event;
 }
 
 void
 MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
-                               Evoral::MusicalTime pos, Evoral::MusicalTime len)
+                               Evoral::Beats pos, Evoral::Beats len)
 {
 	boost::shared_ptr<NoteType> new_note (new NoteType (channel, pos, len, number, velocity));
 
@@ -1816,17 +1881,19 @@ MidiRegionView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity
 	view->update_note_range(new_note->note());
 
 	_marked_for_selection.clear ();
-	clear_selection ();
 
 	start_note_diff_command (_("step add"));
+
+	clear_selection ();
 	note_diff_add_note (new_note, true, false);
+
 	apply_diff();
 
 	// last_step_edit_note = new_note;
 }
 
 void
-MidiRegionView::step_sustain (Evoral::MusicalTime beats)
+MidiRegionView::step_sustain (Evoral::Beats beats)
 {
 	change_note_lengths (false, false, beats, false, true);
 }
@@ -1879,13 +1946,13 @@ MidiRegionView::patch_change_to_patch_key (MidiModel::PatchChangePtr p)
 
 /// Return true iff @p pc applies to the given time on the given channel.
 static bool
-patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, Evoral::MusicalTime time, uint8_t channel)
+patch_applies (const ARDOUR::MidiModel::constPatchChangePtr pc, Evoral::Beats time, uint8_t channel)
 {
 	return pc->time() <= time && pc->channel() == channel;
 }
 	
 void 
-MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
+MidiRegionView::get_patch_key_at (Evoral::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const
 {
 	// The earliest event not before time
 	MidiModel::PatchChanges::iterator i = _model->patch_change_lower_bound (time);
@@ -1909,7 +1976,9 @@ MidiRegionView::get_patch_key_at (Evoral::MusicalTime time, uint8_t channel, MID
 void
 MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPrimaryKey& new_patch)
 {
-	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("alter patch change"));
+	string name = _("alter patch change");
+	trackview.editor().begin_reversible_command (name);
+	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
 	if (pc.patch()->program() != new_patch.program()) {
 		c->change_program (pc.patch (), new_patch.program());
@@ -1921,15 +1990,18 @@ MidiRegionView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPri
 	}
 
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
 }
 
 void
-MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evoral::PatchChange<Evoral::MusicalTime> & new_change)
+MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evoral::PatchChange<Evoral::Beats> & new_change)
 {
-	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("alter patch change"));
+	string name = _("alter patch change");
+	trackview.editor().begin_reversible_command (name);
+	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 
 	if (old_change->time() != new_change.time()) {
 		c->change_time (old_change, new_change.time());
@@ -1948,6 +2020,7 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 	}
 
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -1959,13 +2032,15 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
  *  MidiTimeAxisView::get_channel_for_add())
  */
 void
-MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::MusicalTime> const & patch)
+MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Beats> const & patch)
 {
 	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	string name = _("add patch change");
 
-	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("add patch change"));
+	trackview.editor().begin_reversible_command (name);
+	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (name);
 	c->add (MidiModel::PatchChangePtr (
-		        new Evoral::PatchChange<Evoral::MusicalTime> (
+		        new Evoral::PatchChange<Evoral::Beats> (
 			        absolute_frames_to_source_beats (_region->position() + t),
 				mtv->get_channel_for_add(), patch.program(), patch.bank()
 				)
@@ -1973,17 +2048,20 @@ MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Musi
 		);
 
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
 }
 
 void
-MidiRegionView::move_patch_change (PatchChange& pc, Evoral::MusicalTime t)
+MidiRegionView::move_patch_change (PatchChange& pc, Evoral::Beats t)
 {
+	trackview.editor().begin_reversible_command (_("move patch change"));
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("move patch change"));
 	c->change_time (pc.patch (), t);
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -1992,9 +2070,11 @@ MidiRegionView::move_patch_change (PatchChange& pc, Evoral::MusicalTime t)
 void
 MidiRegionView::delete_patch_change (PatchChange* pc)
 {
+	trackview.editor().begin_reversible_command (_("delete patch change"));
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("delete patch change"));
 	c->remove (pc->patch ());
 	_model->apply_command (*trackview.session(), c);
+	trackview.editor().commit_reversible_command ();
 
 	_patch_changes.clear ();
 	display_patch_changes ();
@@ -2143,6 +2223,24 @@ MidiRegionView::invert_selection ()
 	}
 }
 
+/** Used for selection undo/redo.
+    The requested notes most likely won't exist in the view until the next model redisplay.
+*/
+void
+MidiRegionView::select_notes (list<boost::shared_ptr<NoteType> > notes)
+{
+	NoteBase* cne;
+	list<boost::shared_ptr<NoteType> >::iterator n;
+
+	for (n = notes.begin(); n != notes.end(); ++n) {
+		if ((cne = find_canvas_note(*(*n))) != 0) {
+			add_to_selection (cne);
+		} else {
+			_pending_note_selection.insert(*n);
+		}
+	}
+}
+
 void
 MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend)
 {
@@ -2259,8 +2357,8 @@ MidiRegionView::note_selected (NoteBase* ev, bool add, bool extend)
 	} else {
 		/* find end of latest note selected, select all between that and the start of "ev" */
 
-		Evoral::MusicalTime earliest = Evoral::MaxMusicalTime;
-		Evoral::MusicalTime latest   = Evoral::MusicalTime();
+		Evoral::Beats earliest = Evoral::MaxBeats;
+		Evoral::Beats latest   = Evoral::Beats();
 
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			if ((*i)->note()->end_time() > latest) {
@@ -2418,7 +2516,7 @@ MidiRegionView::move_selection(double dx, double dy, double cumulative_dy)
 {
 	typedef vector<boost::shared_ptr<NoteType> > PossibleChord;
 	PossibleChord to_play;
-	Evoral::MusicalTime earliest = Evoral::MaxMusicalTime;
+	Evoral::Beats earliest = Evoral::MaxBeats;
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		if ((*i)->note()->time() < earliest) {
@@ -2491,7 +2589,7 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
 	for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
 		
 		framepos_t new_frames = source_beats_to_absolute_frames ((*i)->note()->time()) + dt;
-		Evoral::MusicalTime new_time = absolute_frames_to_source_beats (new_frames);
+		Evoral::Beats new_time = absolute_frames_to_source_beats (new_frames);
 
 		if (new_time < 0) {
 			continue;
@@ -2554,7 +2652,7 @@ MidiRegionView::get_end_position_pixels()
 }
 
 framepos_t
-MidiRegionView::source_beats_to_absolute_frames(Evoral::MusicalTime beats) const
+MidiRegionView::source_beats_to_absolute_frames(Evoral::Beats beats) const
 {
 	/* the time converter will return the frame corresponding to `beats'
 	   relative to the start of the source. The start of the source
@@ -2564,7 +2662,7 @@ MidiRegionView::source_beats_to_absolute_frames(Evoral::MusicalTime beats) const
 	return  source_start +  _source_relative_time_converter.to (beats);
 }
 
-Evoral::MusicalTime
+Evoral::Beats
 MidiRegionView::absolute_frames_to_source_beats(framepos_t frames) const
 {
 	/* the `frames' argument needs to be converted into a frame count
@@ -2576,12 +2674,12 @@ MidiRegionView::absolute_frames_to_source_beats(framepos_t frames) const
 }
 
 framepos_t
-MidiRegionView::region_beats_to_region_frames(Evoral::MusicalTime beats) const
+MidiRegionView::region_beats_to_region_frames(Evoral::Beats beats) const
 {
 	return _region_relative_time_converter.to(beats);
 }
 
-Evoral::MusicalTime
+Evoral::Beats
 MidiRegionView::region_frames_to_region_beats(framepos_t frames) const
 {
 	return _region_relative_time_converter.from(frames);
@@ -2678,9 +2776,9 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!cursor_set) {
-			const double        snapped_x = snap_pixel_to_sample (current_x);
-			Evoral::MusicalTime beats     = region_frames_to_region_beats (snapped_x);
-			Evoral::MusicalTime len       = Evoral::MusicalTime();
+			const double  snapped_x = snap_pixel_to_sample (current_x);
+			Evoral::Beats beats     = region_frames_to_region_beats (snapped_x);
+			Evoral::Beats len       = Evoral::Beats();
 
 			if (at_front) {
 				if (beats < canvas_note->note()->end_time()) {
@@ -2692,6 +2790,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 					len = beats - canvas_note->note()->time();
 				}
 			}
+
+			len = std::max(Evoral::Beats(1 / 512.0), len);
 
 			char buf[16];
 			snprintf (buf, sizeof (buf), "%.3g beats", len.to_double());
@@ -2710,7 +2810,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 void
 MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative)
 {
-	start_note_diff_command (_("resize notes"));
+	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		Note*  canvas_note = (*i)->note;
@@ -2747,12 +2847,12 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		current_x = snap_pixel_to_sample (current_x) + _region->start ();
 
 		/* and then to beats */
-		const Evoral::MusicalTime x_beats = region_frames_to_region_beats (current_x);
+		const Evoral::Beats x_beats = region_frames_to_region_beats (current_x);
 
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats);
 
-			Evoral::MusicalTime len = canvas_note->note()->time() - x_beats;
+			Evoral::Beats len = canvas_note->note()->time() - x_beats;
 			len += canvas_note->note()->length();
 
 			if (!!len) {
@@ -2761,12 +2861,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!at_front) {
-			const Evoral::MusicalTime len = x_beats - canvas_note->note()->time();
-
-			if (!!len) {
-				/* XXX convert to beats */
-				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
-			}
+			const Evoral::Beats len = std::max(Evoral::Beats(1 / 512.0),
+			                                   x_beats - canvas_note->note()->time());
+			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 		}
 
 		delete resize_rect;
@@ -2774,7 +2871,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 	}
 
 	_resize_data.clear();
-	apply_diff();
+	apply_diff(true);
 }
 
 void
@@ -2821,12 +2918,12 @@ MidiRegionView::change_note_note (NoteBase* event, int8_t note, bool relative)
 }
 
 void
-MidiRegionView::trim_note (NoteBase* event, Evoral::MusicalTime front_delta, Evoral::MusicalTime end_delta)
+MidiRegionView::trim_note (NoteBase* event, Evoral::Beats front_delta, Evoral::Beats end_delta)
 {
 	bool change_start = false;
 	bool change_length = false;
-	Evoral::MusicalTime new_start;
-	Evoral::MusicalTime new_length;
+	Evoral::Beats new_start;
+	Evoral::Beats new_length;
 
 	/* NOTE: the semantics of the two delta arguments are slightly subtle:
 
@@ -2841,7 +2938,7 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::MusicalTime front_delta, Evo
 		if (front_delta < 0) {
 
 			if (event->note()->time() < -front_delta) {
-				new_start = Evoral::MusicalTime();
+				new_start = Evoral::Beats();
 			} else {
 				new_start = event->note()->time() + front_delta; // moves earlier
 			}
@@ -2856,7 +2953,7 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::MusicalTime front_delta, Evo
 
 		} else {
 
-			Evoral::MusicalTime new_pos = event->note()->time() + front_delta;
+			Evoral::Beats new_pos = event->note()->time() + front_delta;
 
 			if (new_pos < event->note()->end_time()) {
 				new_start = event->note()->time() + front_delta;
@@ -2915,14 +3012,14 @@ MidiRegionView::change_note_channel (NoteBase* event, int8_t chn, bool relative)
 }
 
 void
-MidiRegionView::change_note_time (NoteBase* event, Evoral::MusicalTime delta, bool relative)
+MidiRegionView::change_note_time (NoteBase* event, Evoral::Beats delta, bool relative)
 {
-	Evoral::MusicalTime new_time;
+	Evoral::Beats new_time;
 
 	if (relative) {
 		if (delta < 0.0) {
 			if (event->note()->time() < -delta) {
-				new_time = Evoral::MusicalTime();
+				new_time = Evoral::Beats();
 			} else {
 				new_time = event->note()->time() + delta;
 			}
@@ -2937,7 +3034,7 @@ MidiRegionView::change_note_time (NoteBase* event, Evoral::MusicalTime delta, bo
 }
 
 void
-MidiRegionView::change_note_length (NoteBase* event, Evoral::MusicalTime t)
+MidiRegionView::change_note_length (NoteBase* event, Evoral::Beats t)
 {
 	note_diff_add_change (event, MidiModel::NoteDiffCommand::Length, t);
 }
@@ -3049,11 +3146,11 @@ MidiRegionView::transpose (bool up, bool fine, bool allow_smush)
 }
 
 void
-MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTime delta, bool start, bool end)
+MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::Beats delta, bool start, bool end)
 {
 	if (!delta) {
 		if (fine) {
-			delta = Evoral::MusicalTime(1.0/128.0);
+			delta = Evoral::Beats(1.0/128.0);
 		} else {
 			/* grab the current grid distance */
 			delta = get_grid_beats(_region->position());
@@ -3073,8 +3170,8 @@ MidiRegionView::change_note_lengths (bool fine, bool shorter, Evoral::MusicalTim
 		/* note the negation of the delta for start */
 
 		trim_note (*i,
-		           (start ? -delta : Evoral::MusicalTime()),
-		           (end   ? delta  : Evoral::MusicalTime()));
+		           (start ? -delta : Evoral::Beats()),
+		           (end   ? delta  : Evoral::Beats()));
 		i = next;
 	}
 
@@ -3094,13 +3191,13 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 	   into a vector and sort before using the first one.
 	*/
 
-	const framepos_t    ref_point = source_beats_to_absolute_frames ((*(_selection.begin()))->note()->time());
-	Evoral::MusicalTime delta;
+	const framepos_t ref_point = source_beats_to_absolute_frames ((*(_selection.begin()))->note()->time());
+	Evoral::Beats    delta;
 
 	if (!fine) {
 
 		/* non-fine, move by 1 bar regardless of snap */
-		delta = Evoral::MusicalTime(trackview.session()->tempo_map().meter_at(ref_point).divisions_per_bar());
+		delta = Evoral::Beats(trackview.session()->tempo_map().meter_at(ref_point).divisions_per_bar());
 
 	} else if (trackview.editor().snap_mode() == Editing::SnapOff) {
 
@@ -3258,7 +3355,8 @@ MidiRegionView::get_fill_color() const
 	                              "midi frame base");
 	if (_selected) {
 		return ARDOUR_UI::config()->color_mod ("selected region base", mod_name);
-	} else if (high_enough_for_name || !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
+	} else if ((!ARDOUR_UI::config()->get_show_name_highlight() || high_enough_for_name) &&
+	           !ARDOUR_UI::config()->get_color_regions_using_track_color()) {
 		return ARDOUR_UI::config()->color_mod ("midi frame base", mod_name);
 	}
 	return ARDOUR_UI::config()->color_mod (fill_color, mod_name);
@@ -3351,10 +3449,12 @@ MidiRegionView::selection_as_cut_buffer () const
 bool
 MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContext& ctx)
 {
+	bool commit = false;
 	// Paste notes, if available
 	MidiNoteSelection::const_iterator m = selection.midi_notes.get_nth(ctx.counts.n_notes());
 	if (m != selection.midi_notes.end()) {
 		ctx.counts.increase_n_notes();
+		if (!(*m)->empty()) { commit = true; }
 		paste_internal(pos, ctx.count, ctx.times, **m);
 	}
 
@@ -3362,9 +3462,14 @@ MidiRegionView::paste (framepos_t pos, const ::Selection& selection, PasteContex
 	typedef RouteTimeAxisView::AutomationTracks ATracks;
 	const ATracks& atracks = midi_view()->automation_tracks();
 	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
-		a->second->paste(pos, selection, ctx);
+		if (a->second->paste(pos, selection, ctx)) {
+			commit = true;
+		}
 	}
 
+	if (commit) {
+		trackview.editor().commit_reversible_command ();
+	}
 	return true;
 }
 
@@ -3378,14 +3483,14 @@ MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float time
 
 	start_note_diff_command (_("paste"));
 
-	const Evoral::MusicalTime snap_beats    = get_grid_beats(pos);
-	const Evoral::MusicalTime first_time    = (*mcb.notes().begin())->time();
-	const Evoral::MusicalTime last_time     = (*mcb.notes().rbegin())->end_time();
-	const Evoral::MusicalTime duration      = last_time - first_time;
-	const Evoral::MusicalTime snap_duration = duration.snap_to(snap_beats);
-	const Evoral::MusicalTime paste_offset  = snap_duration * paste_count;
-	const Evoral::MusicalTime pos_beats     = absolute_frames_to_source_beats(pos) + paste_offset;
-	Evoral::MusicalTime       end_point     = Evoral::MusicalTime();
+	const Evoral::Beats snap_beats    = get_grid_beats(pos);
+	const Evoral::Beats first_time    = (*mcb.notes().begin())->time();
+	const Evoral::Beats last_time     = (*mcb.notes().rbegin())->end_time();
+	const Evoral::Beats duration      = last_time - first_time;
+	const Evoral::Beats snap_duration = duration.snap_to(snap_beats);
+	const Evoral::Beats paste_offset  = snap_duration * paste_count;
+	const Evoral::Beats pos_beats     = absolute_frames_to_source_beats(pos) + paste_offset;
+	Evoral::Beats       end_point     = Evoral::Beats();
 
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
@@ -3559,9 +3664,9 @@ MidiRegionView::update_ghost_note (double x, double y)
 	framepos_t const f = snap_frame_to_grid_underneath (unsnapped_frame, grid_frames);
 
 	/* calculate time in beats relative to start of source */
-	const Evoral::MusicalTime length = get_grid_beats(unsnapped_frame);
-	const Evoral::MusicalTime time   = std::max(
-		Evoral::MusicalTime(),
+	const Evoral::Beats length = get_grid_beats(unsnapped_frame);
+	const Evoral::Beats time   = std::max(
+		Evoral::Beats(),
 		absolute_frames_to_source_beats (f + _region->position ()));
 
 	_ghost_note->note()->set_time (time);
@@ -3630,9 +3735,9 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, doub
 	uint16_t chn_mask = mtv->midi_track()->get_playback_channel_mask();
 
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-		get_events (e, Evoral::Sequence<Evoral::MusicalTime>::PitchGreaterThanOrEqual, (uint8_t) floor (note), chn_mask);
+		get_events (e, Evoral::Sequence<Evoral::Beats>::PitchGreaterThanOrEqual, (uint8_t) floor (note), chn_mask);
 	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		get_events (e, Evoral::Sequence<Evoral::MusicalTime>::PitchLessThanOrEqual, (uint8_t) floor (note), chn_mask);
+		get_events (e, Evoral::Sequence<Evoral::Beats>::PitchLessThanOrEqual, (uint8_t) floor (note), chn_mask);
 	} else {
 		return;
 	}
@@ -3677,7 +3782,7 @@ MidiRegionView::enable_display (bool yn)
 }
 
 void
-MidiRegionView::show_step_edit_cursor (Evoral::MusicalTime pos)
+MidiRegionView::show_step_edit_cursor (Evoral::Beats pos)
 {
 	if (_step_edit_cursor == 0) {
 		ArdourCanvas::Item* const group = get_canvas_group();
@@ -3694,7 +3799,7 @@ MidiRegionView::show_step_edit_cursor (Evoral::MusicalTime pos)
 }
 
 void
-MidiRegionView::move_step_edit_cursor (Evoral::MusicalTime pos)
+MidiRegionView::move_step_edit_cursor (Evoral::Beats pos)
 {
 	_step_edit_cursor_position = pos;
 
@@ -3714,7 +3819,7 @@ MidiRegionView::hide_step_edit_cursor ()
 }
 
 void
-MidiRegionView::set_step_edit_cursor_width (Evoral::MusicalTime beats)
+MidiRegionView::set_step_edit_cursor_width (Evoral::Beats beats)
 {
 	_step_edit_cursor_width = beats;
 
@@ -3758,12 +3863,12 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 		}
 
 		/* convert from session frames to source beats */
-		Evoral::MusicalTime const time_beats = _source_relative_time_converter.from(
+		Evoral::Beats const time_beats = _source_relative_time_converter.from(
 			ev.time() - src->timeline_position() + _region->start());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
 			boost::shared_ptr<NoteType> note (
-				new NoteType (ev.channel(), time_beats, Evoral::MusicalTime(), ev.note(), ev.velocity()));
+				new NoteType (ev.channel(), time_beats, Evoral::Beats(), ev.note(), ev.velocity()));
 
 			add_note (note, true);
 
@@ -3916,7 +4021,7 @@ MidiRegionView::snap_frame_to_grid_underneath (framepos_t p, framecnt_t& grid_fr
 {
 	PublicEditor& editor = trackview.editor ();
 	
-	const Evoral::MusicalTime grid_beats = get_grid_beats(p);
+	const Evoral::Beats grid_beats = get_grid_beats(p);
 
 	grid_frames = region_beats_to_region_frames (grid_beats);
 
@@ -3944,12 +4049,6 @@ MidiRegionView::selection_cleared (MidiRegionView* rv)
 	clear_selection (false);
 }
 
-void
-MidiRegionView::note_button_release ()
-{
-	_note_player.reset();
-}
-
 ChannelMode
 MidiRegionView::get_channel_mode () const
 {
@@ -3965,14 +4064,14 @@ MidiRegionView::get_selected_channels () const
 }
 
 
-Evoral::MusicalTime
+Evoral::Beats
 MidiRegionView::get_grid_beats(framepos_t pos) const
 {
-	PublicEditor&       editor  = trackview.editor();
-	bool                success = false;
-	Evoral::MusicalTime beats   = editor.get_grid_type_as_beats(success, pos);
+	PublicEditor& editor  = trackview.editor();
+	bool          success = false;
+	Evoral::Beats beats   = editor.get_grid_type_as_beats(success, pos);
 	if (!success) {
-		beats = Evoral::MusicalTime(1);
+		beats = Evoral::Beats(1);
 	}
 	return beats;
 }

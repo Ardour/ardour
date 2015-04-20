@@ -55,7 +55,7 @@ AddRouteDialog::AddRouteDialog ()
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
 	, configuration_label (_("Configuration:"))
-	, mode_label (_("Track mode:"))
+	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
 {
 	set_name ("AddRouteDialog");
@@ -79,6 +79,13 @@ AddRouteDialog::AddRouteDialog ()
 	track_bus_combo.append_text (_("Audio+MIDI Tracks"));
 	track_bus_combo.append_text (_("Busses"));
 	track_bus_combo.set_active (0);
+
+	insert_at_combo.append_text (_("First"));
+	insert_at_combo.append_text (_("Before Selection"));
+	insert_at_combo.append_text (_("After Selection"));
+	insert_at_combo.append_text (_("Last"));
+
+	insert_at_combo.set_active (1);
 
 	VBox* vbox = manage (new VBox);
 	Gtk::Label* l;
@@ -151,6 +158,12 @@ AddRouteDialog::AddRouteDialog ()
 	table2->attach (route_group_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 	++n;
 
+	/* New route will be inserted at.. */
+	l = manage (new Label (_("Insert:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
+	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	table2->attach (insert_at_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	++n;
+
 	options_box->pack_start (*table2, false, true);
 	vbox->pack_start (*options_box, false, true);
 
@@ -170,6 +183,8 @@ AddRouteDialog::AddRouteDialog ()
 
 	add_button (Stock::CANCEL, RESPONSE_CANCEL);
 	add_button (Stock::ADD, RESPONSE_ACCEPT);
+	set_response_sensitive (RESPONSE_ACCEPT, true);
+	set_default_response (RESPONSE_ACCEPT);
 
 	track_type_chosen ();
 }
@@ -188,18 +203,16 @@ AddRouteDialog::channel_combo_changed ()
 AddRouteDialog::TypeWanted
 AddRouteDialog::type_wanted() const
 {
-	switch (track_bus_combo.get_active_row_number ()) {
-	case 0:
-		return AudioTrack;
-	case 1:
+	std::string str = track_bus_combo.get_active_text();
+	if (str == _("Busses")) {
+		return AudioBus;
+	} else if (str == _("MIDI Tracks")){
 		return MidiTrack;
-	case 2:
+	} else if (str == _("Audio+MIDI Tracks")) {
 		return MixedTrack;
-	default:
-		break;
+	} else {
+		return AudioTrack;
 	}
-
-	return AudioBus;
 }
 
 void
@@ -536,6 +549,21 @@ AddRouteDialog::group_changed ()
 			route_group_combo.set_active (3);
 		}
 	}
+}
+
+AddRouteDialog::InsertAt
+AddRouteDialog::insert_at ()
+{
+	std::string str = insert_at_combo.get_active_text();
+
+	if (str == _("First")) {
+		return First;
+	} else if (str == _("After Selection")) {
+		return AfterSelection;
+	} else if (str == _("Before Selection")){
+		return BeforeSelection;
+	}
+	return Last;
 }
 
 bool

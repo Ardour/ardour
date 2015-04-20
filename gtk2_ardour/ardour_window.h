@@ -44,8 +44,8 @@ class ArdourWindow : public Gtk::Window, public ARDOUR::SessionHandlePtr, public
 	ArdourWindow (Gtk::Window& parent, std::string title);
 	~ArdourWindow();
 
-	bool on_enter_notify_event (GdkEventCrossing*);
-	bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_focus_in_event (GdkEventFocus*);
+	bool on_focus_out_event (GdkEventFocus*);
         bool on_delete_event (GdkEventAny *);
         bool on_key_press_event (GdkEventKey*);
 	void on_unmap ();

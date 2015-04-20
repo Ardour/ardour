@@ -96,7 +96,7 @@ AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> lis
 				_parameter,
 				&_source_relative_time_converter));
 	_line->set_colors();
-	_line->set_height ((uint32_t)rint(trackview.current_height() - NAME_HIGHLIGHT_SIZE));
+	_line->set_height ((uint32_t)rint(trackview.current_height() - 2.5 - NAME_HIGHLIGHT_SIZE));
 	_line->set_visibility (AutomationLine::VisibleAspects (AutomationLine::Line|AutomationLine::ControlPoints));
 	_line->set_maximum_time (_region->length());
 	_line->set_offset (_region->start ());
@@ -132,30 +132,10 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 	PublicEditor& e = trackview.editor ();
 
-	if (!trackview.editor().internal_editing()) {
-		// not in internal edit mode, so just act like a normal region
-		return RegionView::canvas_group_event (ev);
-	}
-
-	if (ev->type == GDK_BUTTON_PRESS && e.current_mouse_mode() == Editing::MouseContent) {
-
-		/* XXX: icky dcast to Editor */
-		e.drags()->set (new EditorRubberbandSelectDrag (dynamic_cast<Editor*> (&e), group), ev);
-		e.drags()->start_grab (ev);
-		return true;
-
-	} else if (ev->type == GDK_MOTION_NOTIFY && e.drags()->active()) {
-		/* we probably shouldn't have to handle this here, but... */
-		e.drags()->motion_handler(ev, false);
-		return true;
-
-	} else if (ev->type == GDK_BUTTON_RELEASE && e.current_mouse_mode() == Editing::MouseDraw) {
-		if (e.drags()->end_grab (ev)) {
-			return true;
-		} else if (e.current_mouse_mode() != Editing::MouseDraw &&
-		           e.current_mouse_mode() != Editing::MouseContent) {
-			return RegionView::canvas_group_event (ev);
-		}
+	if (trackview.editor().internal_editing() &&
+	    ev->type == GDK_BUTTON_RELEASE &&
+	    e.current_mouse_mode() == Editing::MouseDraw &&
+	    !e.drags()->active()) {
 
 		double x = ev->button.x;
 		double y = ev->button.y;
@@ -255,7 +235,7 @@ AutomationRegionView::set_height (double h)
 	RegionView::set_height(h);
 
 	if (_line) {
-		_line->set_height ((uint32_t)rint(h - NAME_HIGHLIGHT_SIZE));
+		_line->set_height ((uint32_t)rint(h - 2.5 - NAME_HIGHLIGHT_SIZE));
 	}
 }
 

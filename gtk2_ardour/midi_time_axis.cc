@@ -144,7 +144,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	*/
 	RouteTimeAxisView::set_route (rt);
 
-	_view->apply_color (_color, StreamView::RegionColor);
+	_view->apply_color (gdk_color_to_rgba (color()), StreamView::RegionColor);
 
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -243,18 +243,22 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		_view->RegionViewAdded.connect (
 			sigc::mem_fun(*this, &MidiTimeAxisView::region_view_added));
 
-		midi_track()->PlaybackChannelModeChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
-								  gui_context());
-		midi_track()->PlaybackChannelMaskChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
-								  gui_context());
-		midi_track()->CaptureChannelModeChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
-								  gui_context());
-		midi_track()->CaptureChannelMaskChanged.connect (*this, invalidator (*this),
-								  boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
-								  gui_context());
+		midi_track()->playback_filter().ChannelModeChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+			gui_context());
+		midi_track()->playback_filter().ChannelMaskChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::playback_channel_mode_changed, this),
+			gui_context());
+		midi_track()->capture_filter().ChannelModeChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+			gui_context());
+		midi_track()->capture_filter().ChannelMaskChanged.connect (
+			*this, invalidator (*this),
+			boost::bind (&MidiTimeAxisView::capture_channel_mode_changed, this),
+			gui_context());
 
 		playback_channel_mode_changed ();
 		capture_channel_mode_changed ();
@@ -315,14 +319,11 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	channel_selector_button->set_name ("route button");
 	ARDOUR_UI::instance()->set_tip (channel_selector_button, _("Click to edit channel settings"));
 	
-	/* fixed sized labels to prevent silly nonsense (though obviously,
-	 * they cause their own too)
-	 */
-	set_size_request_to_display_given_text(_playback_channel_status, "Play: somemo", 2, 2); // TODO use _("Play: all/some")
-	set_size_request_to_display_given_text(_capture_channel_status, "Rec: somemo", 2, 2); // TODO use _("Rec: all/some")
-
-	_channel_status_box.pack_start (_playback_channel_status, false, false);
-	_channel_status_box.pack_start (_capture_channel_status, false, false);
+	// Insert expanding space labels to get full width justification
+	_channel_status_box.pack_start (_playback_channel_status, false, false, 2);
+	_channel_status_box.pack_start (*Gtk::manage(new Gtk::Label(" ")), true, true);
+	_channel_status_box.pack_start (_capture_channel_status, false, false, 2);
+	_channel_status_box.pack_start (*Gtk::manage(new Gtk::Label(" ")), true, true);
 	_channel_status_box.pack_end (*channel_selector_button, false, false);
 	_channel_status_box.show_all ();
 
@@ -440,7 +441,11 @@ MidiTimeAxisView::model_changed(const std::string& model)
 		_midnam_custom_device_mode_selector.hide();
 	}
 
-	_route->instrument_info().set_external_instrument (model, device_modes.front());
+	if (device_modes.size() > 0) {
+		_route->instrument_info().set_external_instrument (model, device_modes.front());
+	} else {
+		_route->instrument_info().set_external_instrument (model, "");
+	}
 
 	// Rebuild controller menu
 	_controller_menu_map.clear ();
@@ -466,7 +471,7 @@ MidiTimeAxisView::midi_view()
 }
 
 void
-MidiTimeAxisView::set_height (uint32_t h)
+MidiTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
 	if (h >= MIDI_CONTROLS_BOX_MIN_HEIGHT) {
 		_midi_controls_box.show ();
@@ -495,7 +500,7 @@ MidiTimeAxisView::set_height (uint32_t h)
 	   which needs to know if we have just shown or hidden a scroomer /
 	   piano roll.
 	*/
-	RouteTimeAxisView::set_height (h);
+	RouteTimeAxisView::set_height (h, m);
 }
 
 void
@@ -1308,6 +1313,8 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 {
 	uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op (X_("Set Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
@@ -1317,6 +1324,8 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
 }
 
 void
@@ -1324,6 +1333,8 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op (X_("Add Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
@@ -1333,6 +1344,8 @@ MidiTimeAxisView::add_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
 }
 
 void
@@ -1340,6 +1353,8 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op (X_("Extend Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::extend_note_selection_region_view),
@@ -1349,6 +1364,8 @@ MidiTimeAxisView::extend_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::extend_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
 }
 
 void
@@ -1356,6 +1373,8 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 {
 	const uint16_t chn_mask = midi_track()->get_playback_channel_mask();
 
+	_editor.begin_reversible_selection_op (X_("Toggle Note Selection"));
+
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection_region_view),
@@ -1365,6 +1384,15 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_note_selection_region_view),
 			            note, chn_mask));
 	}
+
+	_editor.commit_reversible_selection_op();
+}
+
+void
+MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >& selection)
+{
+	_view->foreach_regionview (
+		sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::get_per_region_note_selection_region_view), sigc::ref(selection)));
 }
 
 void
@@ -1389,6 +1417,24 @@ void
 MidiTimeAxisView::toggle_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask)
 {
 	dynamic_cast<MidiRegionView*>(rv)->toggle_matching_notes (note, chn_mask);
+}
+
+void
+MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection)
+{
+	Evoral::Sequence<Evoral::Beats>::Notes selected;
+	dynamic_cast<MidiRegionView*>(rv)->selection_as_notelist (selected, false);
+
+	std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > notes;
+
+	Evoral::Sequence<Evoral::Beats>::Notes::iterator sel_it;
+	for (sel_it = selected.begin(); sel_it != selected.end(); ++sel_it) {
+		notes.insert (*sel_it);
+	}
+
+	if (!notes.empty()) {
+		selection.push_back (make_pair ((rv)->region()->id(), notes));
+	}
 }
 
 void

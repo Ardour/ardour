@@ -59,10 +59,10 @@ public:
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
-	static void apply_gain (BufferSet& bufs, framecnt_t nframes, gain_t initial, gain_t target);
+	static gain_t apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target);
 	static void apply_simple_gain(BufferSet& bufs, framecnt_t nframes, gain_t target);
 
-	static void apply_gain (AudioBuffer& buf, framecnt_t nframes, gain_t initial, gain_t target);
+	static gain_t apply_gain (AudioBuffer& buf, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target);
 	static void apply_simple_gain(AudioBuffer& buf, framecnt_t nframes, gain_t target);
 
 	static void declick (BufferSet& bufs, framecnt_t nframes, int dir);
@@ -111,6 +111,7 @@ private:
 	bool   _apply_gain;
 	bool   _apply_gain_automation;
 	float  _current_gain;
+	framepos_t _current_automation_frame;
 
 	boost::shared_ptr<GainControl> _gain_control;
 

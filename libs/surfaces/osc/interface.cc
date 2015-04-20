@@ -22,6 +22,7 @@
 #include "osc.h"
 
 using namespace ARDOUR;
+using namespace ArdourSurface;
 
 static ControlProtocol*
 new_osc_protocol (ControlProtocolDescriptor* /*descriptor*/, Session* s)

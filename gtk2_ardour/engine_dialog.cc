@@ -43,10 +43,12 @@
 #include "ardour/mididm.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/types.h"
+#include "ardour/profile.h"
 
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
+#include "opts.h"
 #include "ardour_ui.h"
 #include "engine_dialog.h"
 #include "gui_thread.h"
@@ -67,6 +69,7 @@ static const char* results_markup = X_("<span weight=\"bold\" size=\"larger\">%1
 
 EngineControl::EngineControl ()
 	: ArdourDialog (_("Audio/MIDI Setup"))
+	, engine_status ("")
 	, basic_packer (9, 4)
 	, input_latency_adjustment (0, 0, 99999, 1)
 	, input_latency (input_latency_adjustment)
@@ -91,9 +94,10 @@ EngineControl::EngineControl ()
 	, ignore_changes (0)
 	, _desired_sample_rate (0)
 	, started_at_least_once (false)
+	, queue_device_changed (false)
 {
 	using namespace Notebook_Helpers;
-	vector<string> strings;
+	vector<string> backend_names;
 	Label* label;
 	AttachOptions xopt = AttachOptions (FILL|EXPAND);
 	int row;
@@ -111,11 +115,10 @@ EngineControl::EngineControl ()
 	}
 
 	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
-		strings.push_back ((*b)->name);
+		backend_names.push_back ((*b)->name);
 	}
 
-	set_popdown_strings (backend_combo, strings);
-	backend_combo.set_active_text (strings.front());
+	set_popdown_strings (backend_combo, backend_names);
 	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
 
 	/* setup basic packing characteristics for the table used on the main
@@ -247,6 +250,9 @@ EngineControl::EngineControl ()
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (notebook);
 
+	get_action_area()->pack_start (engine_status);
+	engine_status.show();
+
 	/* need a special function to print "all available channels" when the
 	 * channel counts hit zero.
 	 */
@@ -262,9 +268,9 @@ EngineControl::EngineControl ()
 	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
 	manage_control_app_sensitivity ();
 
-	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
+	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
 	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
+	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	/* Pick up any existing audio setup configuration, if appropriate */
 
@@ -273,16 +279,27 @@ EngineControl::EngineControl ()
 	ARDOUR::AudioEngine::instance()->Running.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_running, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Stopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
 	ARDOUR::AudioEngine::instance()->Halted.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::engine_stopped, this), gui_context());
+	ARDOUR::AudioEngine::instance()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::device_list_changed, this), gui_context());
 
-	if (audio_setup)
-	{
+	if (audio_setup) {
 		set_state (*audio_setup);
 	}
-	{
+
+	if (backend_combo.get_active_text().empty()) {
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+		backend_combo.set_active_text (backend_names.front());
+	}
+
+	backend_changed ();
+
+	/* in case the setting the backend failed, e.g. stale config, from set_state(), try again */
+	if (0 == ARDOUR::AudioEngine::instance()->current_backend()) {
+		backend_combo.set_active_text (backend_names.back());
 		/* ignore: don't save state */
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 		backend_changed ();
 	}
+
 
 	/* Connect to signals */
 
@@ -298,12 +315,21 @@ EngineControl::EngineControl ()
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 
 	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
+
+	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
+	connect_disconnect_button.set_no_show_all();
+
 }
 
 void
 EngineControl::on_show ()
 {
 	ArdourDialog::on_show ();
+	if (!ARDOUR::AudioEngine::instance()->current_backend() || !ARDOUR::AudioEngine::instance()->running()) {
+		// re-check _have_control (jackd running) see #6041
+		backend_changed ();
+	}
+	device_changed ();
 	ok_button->grab_focus();
 }
 
@@ -317,9 +343,28 @@ EngineControl::on_response (int response_id)
 			push_state_to_backend (true);
 			break;
 		case RESPONSE_OK:
+#ifdef PLATFORM_WINDOWS
+			// For some reason we don't understand, 'hide()'
+			// needs to get called first in Windows
+			hide ();
+
+			// But if there's no session open, this can produce
+			// a long gap when nothing appears to be happening.
+			// Let's show the splash image while we're waiting.
+			if ( !ARDOUR_COMMAND_LINE::no_splash ) {
+				if ( ARDOUR_UI::instance() ) {
+					if ( !ARDOUR_UI::instance()->session_loaded ) {
+						ARDOUR_UI::instance()->show_splash();
+					}
+				}
+			}
+			push_state_to_backend (true);
+			break;
+#else
 			push_state_to_backend (true);
 			hide ();
 			break;
+#endif
 		case RESPONSE_DELETE_EVENT:
 			{
 				GdkEventButton ev;
@@ -364,15 +409,6 @@ EngineControl::build_notebook ()
 
 	basic_vbox.pack_start (basic_hbox, false, false);
 
-	if (_have_control) {
-		Gtk::HBox* hpacker = manage (new HBox);
-		hpacker->set_border_width (12);
-		hpacker->pack_start (control_app_button, false, false);
-		hpacker->show ();
-		control_app_button.show();
-		basic_vbox.pack_start (*hpacker);
-	}
-
 	{
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 		basic_vbox.show_all ();
@@ -416,6 +452,10 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (buffer_size_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
 	buffer_size_duration_label.set_alignment (0.0); /* left-align */
 	basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, SHRINK, (AttachOptions) 0);
+
+	/* button spans 2 rows */
+
+	basic_packer.attach (control_app_button, 3, 4, row-1, row+1, xopt, xopt);
 	row++;
 
 	input_channels.set_name ("InputChannels");
@@ -424,22 +464,26 @@ EngineControl::build_full_control_notebook ()
 	input_channels.set_wrap (false);
 	output_channels.set_editable (true);
 
-	label = manage (left_aligned_label (_("Input Channels:")));
-	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
-	++row;
-
+	if (!ARDOUR::Profile->get_mixbus()) {
+		label = manage (left_aligned_label (_("Input Channels:")));
+		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+		basic_packer.attach (input_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+		++row;
+	}
+	
 	output_channels.set_name ("OutputChannels");
 	output_channels.set_flags (Gtk::CAN_FOCUS);
 	output_channels.set_digits (0);
 	output_channels.set_wrap (false);
 	output_channels.set_editable (true);
 
-	label = manage (left_aligned_label (_("Output Channels:")));
-	basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
-	basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
-	++row;
-
+	if (!ARDOUR::Profile->get_mixbus()) {
+		label = manage (left_aligned_label (_("Output Channels:")));
+		basic_packer.attach (*label, 0, 1, row, row+1, xopt, (AttachOptions) 0);
+		basic_packer.attach (output_channels, 1, 2, row, row+1, xopt, (AttachOptions) 0);
+		++row;
+	}
+	
 	input_latency.set_name ("InputLatency");
 	input_latency.set_flags (Gtk::CAN_FOCUS);
 	input_latency.set_digits (0);
@@ -470,7 +514,7 @@ EngineControl::build_full_control_notebook ()
 	basic_packer.attach (lm_button_audio, 3, 4, row-1, row+1, xopt, xopt);
 	++row;
 
-	label = manage (left_aligned_label (_("MIDI System")));
+	label = manage (left_aligned_label (_("MIDI System:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (midi_option_combo, 1, 2, row, row + 1, SHRINK, (AttachOptions) 0);
 	basic_packer.attach (midi_devices_button, 3, 4, row, row+1, xopt, xopt);
@@ -510,8 +554,6 @@ EngineControl::build_no_control_notebook ()
 		basic_packer.attach (buffer_size_duration_label, 2, 3, row, row+1, xopt, (AttachOptions) 0);
 		row++;
 	}
-
-	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
 
 	basic_packer.attach (connect_disconnect_button, 0, 2, row, row+1, FILL, AttachOptions (0));
 	row++;
@@ -701,6 +743,7 @@ EngineControl::backend_changed ()
 
 	if (!(backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, "ardour", ""))) {
 		/* eh? setting the backend failed... how ? */
+		/* A: stale config contains a backend that does not exist in current build */
 		return;
 	}
 
@@ -758,6 +801,8 @@ EngineControl::backend_changed ()
 		}
 	}
 
+	connect_disconnect_button.hide();
+
 	midi_option_changed();
 
 	started_at_least_once = false;
@@ -770,6 +815,10 @@ EngineControl::backend_changed ()
 bool
 EngineControl::print_channel_count (Gtk::SpinButton* sb)
 {
+	if (ARDOUR::Profile->get_mixbus()) {
+		return true;
+	}
+	
 	uint32_t cnt = (uint32_t) sb->get_value();
 	if (cnt == 0) {
 		sb->set_text (_("all available channels"));
@@ -811,15 +860,22 @@ EngineControl::list_devices ()
 		update_sensitivity ();
 
 		{
-			string current_device;
-			current_device = backend->device_name ();
+			string current_device, found_device;
+			current_device = device_combo.get_active_text ();
 			if (current_device == "") {
-				// device might not have been set yet
-				current_device = device_combo.get_active_text ();
-				if (current_device == "")
-					// device has never been set, make sure it's not blank
-					current_device = available_devices.front ();
+				current_device = backend->device_name ();
 			}
+
+			// Make sure that the active text is still relevant for this
+			// device (it might only be relevant to the previous device!!)
+			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
+				if (*i == current_device)
+					found_device = current_device;
+			}
+			if (found_device == "")
+				// device has never been set (or was not relevant
+				// for this backend) Let's make sure it's not blank
+				current_device = available_devices.front ();
 
 			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			set_popdown_strings (device_combo, available_devices);
@@ -851,6 +907,13 @@ EngineControl::list_devices ()
 		} else {
 			ok_button->set_sensitive (true);
 			apply_button->set_sensitive (true);
+			if (backend->can_change_sample_rate_when_running() && sample_rate_combo.get_children().size() > 0) {
+				sample_rate_combo.set_sensitive (true);
+			}
+			if (backend->can_change_buffer_size_when_running() && buffer_size_combo.get_children().size() > 0) {
+				buffer_size_combo.set_sensitive (true);
+			}
+
 		}
 	}
 }
@@ -877,6 +940,18 @@ EngineControl::device_changed ()
 	assert (backend);
 	string device_name = device_combo.get_active_text ();
 	vector<string> s;
+
+	if (device_name != backend->device_name()) {
+		/* we set the backend-device to query various device related intormation.
+		 * This has the side effect that backend->device_name() will match
+		 * the device_name and  'change_device' will never be true.
+		 * so work around this by setting...
+		 */
+		queue_device_changed = true;
+	}
+	
+	//the device name must be set FIRST so ASIO can populate buffersizes and the control panel button
+	backend->set_device_name(device_name);
 
 	{
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
@@ -955,7 +1030,11 @@ EngineControl::device_changed ()
 			buffer_size_combo.set_sensitive (true);
 			set_popdown_strings (buffer_size_combo, s);
 
-			buffer_size_combo.set_active_text (bufsize_as_string (backend->default_buffer_size()));
+			uint32_t period = backend->buffer_size();
+			if (0 == period) {
+				period = backend->default_buffer_size(device_name);
+			}
+			set_active_text_if_present (buffer_size_combo, bufsize_as_string (period));
 			show_buffer_duration ();
 		} else {
 			buffer_size_combo.set_sensitive (false);
@@ -980,8 +1059,8 @@ EngineControl::bufsize_as_string (uint32_t sz)
 	/* Translators: "samples" is always plural here, so no
 	   need for plural+singular forms.
 	 */
-	char buf[32];
-	snprintf (buf, sizeof (buf), _("%u samples"), sz);
+	char buf[64];
+	snprintf (buf, sizeof (buf), "%u %s", sz, P_("sample", "samples", sz));
 	return buf;
 }
 
@@ -993,9 +1072,6 @@ EngineControl::sample_rate_changed ()
 	 */
 
 	show_buffer_duration ();
-	if (!ignore_changes) {
-		save_state ();
-	}
 
 }
 
@@ -1003,9 +1079,6 @@ void
 EngineControl::buffer_size_changed ()
 {
 	show_buffer_duration ();
-	if (!ignore_changes) {
-		save_state ();
-	}
 }
 
 void
@@ -1020,15 +1093,25 @@ EngineControl::show_buffer_duration ()
 	uint32_t samples = atoi (bs_text); /* will ignore trailing text */
 	uint32_t rate = get_rate();
 
-	/* Translators: "msecs" is ALWAYS plural here, so we do not
-	   need singular form as well.
-	 */
 	/* Developers: note the hard-coding of a double buffered model
 	   in the (2 * samples) computation of latency. we always start
 	   the audiobackend in this configuration.
 	 */
+	/* note to jack1 developers: ardour also always starts the engine
+	 * in async mode (no jack2 --sync option) which adds an extra cycle
+	 * of latency with jack2 (and *3 would be correct)
+	 * The value can also be wrong if jackd is started externally..
+	 *
+	 * At the time of writing the ALSA backend always uses double-buffering *2,
+	 * The Dummy backend *1, and who knows what ASIO really does :)
+	 *
+	 * So just display the period size, that's also what
+	 * ARDOUR_UI::update_sample_rate() does for the status bar.
+	 * (the statusbar calls AudioEngine::instance()->usecs_per_cycle()
+	 * but still, that's the buffer period, not [round-trip] latency)
+	 */
 	char buf[32];
-	snprintf (buf, sizeof (buf), _("(%.1f msecs)"), (2 * samples) / (rate/1000.0));
+	snprintf (buf, sizeof (buf), _("(%.1f ms)"), (samples / (rate/1000.0f)));
 	buffer_size_duration_label.set_text (buf);
 }
 
@@ -1069,18 +1152,11 @@ EngineControl::midi_option_changed ()
 	} else {
 		midi_devices_button.set_sensitive (true);
 	}
-
-	if (!ignore_changes) {
-		save_state ();
-	}
 }
 
 void
 EngineControl::parameter_changed ()
 {
-	if (!ignore_changes) {
-		save_state ();
-	}
 }
 
 EngineControl::State
@@ -1179,7 +1255,7 @@ EngineControl::maybe_display_saved_state ()
 		if (!_desired_sample_rate) {
 			sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 		}
-		buffer_size_combo.set_active_text (bufsize_as_string (state->buffer_size));
+		set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
 		/* call this explicitly because we're ignoring changes to
 		   the controls at this point.
 		 */
@@ -1392,16 +1468,15 @@ EngineControl::set_state (const XMLNode& root)
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
 		if ((*i)->active) {
-			ignore_changes++;
+			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			backend_combo.set_active_text ((*i)->backend);
 			driver_combo.set_active_text ((*i)->driver);
 			device_combo.set_active_text ((*i)->device);
 			sample_rate_combo.set_active_text (rate_as_string ((*i)->sample_rate));
-			buffer_size_combo.set_active_text (bufsize_as_string ((*i)->buffer_size));
+			set_active_text_if_present (buffer_size_combo, bufsize_as_string ((*i)->buffer_size));
 			input_latency.set_value ((*i)->input_latency);
 			output_latency.set_value ((*i)->output_latency);
 			midi_option_combo.set_active_text ((*i)->midi_option);
-			ignore_changes--;
 			break;
 		}
 	}
@@ -1443,7 +1518,7 @@ EngineControl::push_state_to_backend (bool start)
 				}
 			}
 
-			if (get_device_name() != backend->device_name()) {
+			if (queue_device_changed || get_device_name() != backend->device_name()) {
 				change_device = true;
 			}
 
@@ -1511,6 +1586,8 @@ EngineControl::push_state_to_backend (bool start)
 			change_bufsize = true;
 		}
 	}
+
+	queue_device_changed = false;
 
 	if (!_have_control) {
 
@@ -1670,6 +1747,8 @@ EngineControl::post_push ()
 	if (!state) {
 		state = save_state ();
 		assert (state);
+	} else {
+		store_state(state);
 	}
 
 	/* all off */
@@ -1714,6 +1793,8 @@ EngineControl::get_buffer_size () const
 	uint32_t samples;
 
 	if (sscanf (txt.c_str(), "%d", &samples) != 1) {
+		fprintf(stderr, "Find a trout and repeatedly slap the nearest C++ who throws exceptions without catching them.\n");
+		fprintf(stderr, "Ardour will likely crash now, giving you time to get the trout.\n");
 		throw exception ();
 	}
 
@@ -1729,12 +1810,22 @@ EngineControl::get_midi_option () const
 uint32_t
 EngineControl::get_input_channels() const
 {
+	if (ARDOUR::Profile->get_mixbus()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		if (!backend) return 0;
+		return backend->input_channels();
+	}
 	return (uint32_t) input_channels_adjustment.get_value();
 }
 
 uint32_t
 EngineControl::get_output_channels() const
 {
+	if (ARDOUR::Profile->get_mixbus()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		if (!backend) return 0;
+		return backend->input_channels();
+	}
 	return (uint32_t) output_channels_adjustment.get_value();
 }
 
@@ -1926,14 +2017,14 @@ EngineControl::check_audio_latency_measurement ()
 		solid = false;
 	}
 
+	lm_results.set_markup (string_compose (results_markup, buf));
+
 	if (solid) {
 		have_lm_results = true;
 		end_latency_detection ();
 		lm_use_button.set_sensitive (true);
 		return false;
 	}
-
-	lm_results.set_markup (string_compose (results_markup, buf));
 
 	return true;
 }
@@ -1986,6 +2077,7 @@ EngineControl::check_midi_latency_measurement ()
 		have_lm_results = true;
 		end_latency_detection ();
 		lm_use_button.set_sensitive (true);
+		lm_results.set_markup (string_compose (results_markup, buf));
 		return false;
 	} else if (mididm->processed () > 400) {
 		have_lm_results = false;
@@ -2094,15 +2186,17 @@ EngineControl::engine_running ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
-	buffer_size_combo.set_active_text (bufsize_as_string (backend->buffer_size()));
+	set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size()));
 	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
 
 	buffer_size_combo.set_sensitive (true);
 	sample_rate_combo.set_sensitive (true);
 
 	connect_disconnect_button.set_label (string_compose (_("Disconnect from %1"), backend->name()));
+	connect_disconnect_button.show();
 
 	started_at_least_once = true;
+	engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Active")));
 }
 
 void
@@ -2113,9 +2207,19 @@ EngineControl::engine_stopped ()
 
 	buffer_size_combo.set_sensitive (false);
 	connect_disconnect_button.set_label (string_compose (_("Connect to %1"), backend->name()));
+	connect_disconnect_button.show();
 
 	sample_rate_combo.set_sensitive (true);
 	buffer_size_combo.set_sensitive (true);
+	engine_status.set_markup(string_compose ("<span foreground=\"red\">%1</span>", _("Inactive")));
+}
+
+void
+EngineControl::device_list_changed ()
+{
+	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1); // ??
+	list_devices ();
+	midi_option_changed();
 }
 
 void

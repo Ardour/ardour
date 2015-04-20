@@ -27,11 +27,16 @@
 namespace ARDOUR {
 
 	/**
-	 * @return the path to the directory used to store user specific ardour
-	 * configuration files.
-	 * @post user_config_directory() exists
+	 * @return the path to the directory used to store user specific 
+	 * configuration files for the given @param version of the program.
+	 * If @param version is negative, the build-time string PROGRAM_VERSION
+	 * will be used to determine the version number.
+	 *
+	 * @post user_config_directory() exists IF version was negative.
+	 *
+	 * 
 	 */
-	LIBARDOUR_API std::string user_config_directory ();
+        LIBARDOUR_API std::string user_config_directory (int version = -1);
 
 	/**
 	 * @return the path to the directory used to store user specific
@@ -40,6 +45,14 @@ namespace ARDOUR {
 	 */
 	LIBARDOUR_API std::string user_cache_directory ();
 
+	/**
+	 * @return the path used to store a persistent indication
+	 * that the given version of the program has been used before.
+	 * 
+	 * @param version is the version to check for. If unspecified, 
+	 * it defaults to the current (build-time) version of the program.
+	 */
+	LIBARDOUR_API std::string been_here_before_path (int version = -1);
 
 	/**
 	 * @return the path to the directory that contains the system wide ardour

@@ -464,6 +464,10 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\evoral\Beats.hpp"
+				>
+			</File>
+			<File
 				RelativePath="..\evoral\ControlList.hpp"
 				>
 			</File>

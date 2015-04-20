@@ -97,8 +97,8 @@ class JACKAudioBackend : public AudioBackend {
 
     float dsp_load() const;
 
-    pframes_t sample_time ();
-    pframes_t sample_time_at_cycle_start ();
+    framepos_t sample_time ();
+    framepos_t sample_time_at_cycle_start ();
     pframes_t samples_since_cycle_start ();
 
     size_t raw_buffer_size (DataType t);
@@ -129,6 +129,7 @@ class JACKAudioBackend : public AudioBackend {
     int         set_port_name (PortHandle, const std::string&);
     std::string get_port_name (PortHandle) const;
     PortHandle  get_port_by_name (const std::string&) const;
+    int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
 
     int get_ports (const std::string& port_name_pattern, DataType type, PortFlags flags, std::vector<std::string>&) const;
 

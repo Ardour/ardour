@@ -29,6 +29,8 @@
 
 class XMLNode;
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 struct GlobalButtonInfo {
@@ -108,8 +110,9 @@ class DeviceInfo
 };
 
 
-}
+} // Mackie namespace
+} // ArdourSurface namespace
 
-std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di);
+std::ostream& operator<< (std::ostream& os, const ArdourSurface::Mackie::DeviceInfo& di);
 
 #endif /* __ardour_mackie_control_protocol_device_info_h__ */

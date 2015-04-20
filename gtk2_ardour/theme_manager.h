@@ -59,6 +59,7 @@ class ThemeManager : public Gtk::VBox
         void on_waveform_gradient_depth_change ();
         void on_timeline_item_gradient_depth_change ();
 	void on_all_dialogs_toggled ();
+	void on_transients_follow_front_toggled ();
 	void on_icon_set_changed ();
 
   private:
@@ -90,6 +91,7 @@ class ThemeManager : public Gtk::VBox
         Gtk::HScale timeline_item_gradient_depth;
         Gtk::Label timeline_item_gradient_depth_label;
 	Gtk::CheckButton all_dialogs;
+	Gtk::CheckButton transients_follow_front;
 	Gtk::CheckButton gradient_waveforms;
 	Gtk::Label icon_set_label;
 	Gtk::ComboBoxText icon_set_dropdown;
@@ -168,6 +170,7 @@ class ThemeManager : public Gtk::VBox
 	void modifier_edited (Gtk::Range*, std::string);
 	
 	void colors_changed ();
+	void set_ui_to_state ();
 };
 
 #endif /* __ardour_gtk_color_manager_h__ */

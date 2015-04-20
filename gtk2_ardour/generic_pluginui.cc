@@ -83,8 +83,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
-	latency_button.add (latency_label);
-	latency_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
+	latency_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
 	set_latency_label ();
 
 	smaller_hbox->pack_start (latency_button, false, false, 10);
@@ -730,7 +729,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 		automation_state_changed (control_ui);
 
-		mcontrol->Changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::ui_parameter_changed, this, control_ui), gui_context());
 		mcontrol->alist()->automation_state_changed.connect (control_connections, invalidator (*this), boost::bind (&GenericPluginUI::automation_state_changed, this, control_ui), gui_context());
 
 		input_controls.push_back (control_ui);

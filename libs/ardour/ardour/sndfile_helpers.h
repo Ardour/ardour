@@ -23,6 +23,8 @@
 #include <string>
 #include <stdint.h>
 
+#include "ardour/types.h"
+
 // Use this define when initializing arrarys for use in sndfile_*_format()
 #define SNDFILE_STR_LENGTH 32
 

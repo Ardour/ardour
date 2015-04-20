@@ -74,6 +74,7 @@ ThemeManager::ThemeManager()
 	, timeline_item_gradient_depth (0, 1.0, 0.05)
 	, timeline_item_gradient_depth_label (_("Timeline item gradient depth"))
 	, all_dialogs (_("All floating windows are dialogs"))
+	, transients_follow_front (_("Transient windows follow front window."))
 	, icon_set_label (_("Icon Set"))
 	, palette_viewport (*palette_scroller.get_hadjustment(), *palette_scroller.get_vadjustment())
 	, palette_group (0)
@@ -111,10 +112,13 @@ ThemeManager::ThemeManager()
 	theme_selection_hbox.pack_start (light_button);
 
 	set_homogeneous (false);
+#if 0 // disable light/dark theme choice. until the 'light theme gets some attention.
 	pack_start (theme_selection_hbox, PACK_SHRINK);
+#endif
 	pack_start (reset_button, PACK_SHRINK);
 #ifndef __APPLE__
 	pack_start (all_dialogs, PACK_SHRINK);
+	pack_start (transients_follow_front, PACK_SHRINK);
 #endif
 	pack_start (flat_buttons, PACK_SHRINK);
 	pack_start (blink_rec_button, PACK_SHRINK);
@@ -170,10 +174,7 @@ ThemeManager::ThemeManager()
 	color_dialog.get_colorsel()->set_has_opacity_control (true);
 	color_dialog.get_colorsel()->set_has_palette (true);
 	
-	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
-	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
-	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
-	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
+	set_ui_to_state();
 
 	color_dialog.get_ok_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_ACCEPT));
 	color_dialog.get_cancel_button()->signal_clicked().connect (sigc::bind (sigc::mem_fun (color_dialog, &Gtk::Dialog::response), RESPONSE_CANCEL));
@@ -187,12 +188,16 @@ ThemeManager::ThemeManager()
 	waveform_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_waveform_gradient_depth_change));
 	timeline_item_gradient_depth.signal_value_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_timeline_item_gradient_depth_change));
 	all_dialogs.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_all_dialogs_toggled));
+	transients_follow_front.signal_toggled().connect (sigc::mem_fun (*this, &ThemeManager::on_transients_follow_front_toggled));
 	icon_set_dropdown.signal_changed().connect (sigc::mem_fun (*this, &ThemeManager::on_icon_set_changed));
 
 	Gtkmm2ext::UI::instance()->set_tip (all_dialogs, 
 					    string_compose (_("Mark all floating windows to be type \"Dialog\" rather than using \"Utility\" for some.\n"
 							      "This may help with some window managers. This requires a restart of %1 to take effect"),
 							    PROGRAM_NAME));
+	Gtkmm2ext::UI::instance()->set_tip (transients_follow_front, 
+					    string_compose (_("Make transient windows follow the front window when toggling between the editor and mixer.\n"
+							      "This requires a restart of %1 to take effect"), PROGRAM_NAME));
 
 	set_size_request (-1, 400);
 	/* no need to call setup_palette() here, it will be done when its size is allocated */
@@ -290,12 +295,20 @@ void
 ThemeManager::on_show_clip_toggled ()
 {
 	ARDOUR_UI::config()->set_show_waveform_clipping (show_clipping_button.get_active());
+	// "show-waveform-clipping" was a session config key
+	ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
 }
 
 void
 ThemeManager::on_all_dialogs_toggled ()
 {
 	ARDOUR_UI::config()->set_all_floating_windows_are_dialogs (all_dialogs.get_active());
+}
+
+void
+ThemeManager::on_transients_follow_front_toggled ()
+{
+	ARDOUR_UI::config()->set_transients_follow_front (transients_follow_front.get_active());
 }
 
 void
@@ -343,10 +356,38 @@ ThemeManager::on_light_theme_button_toggled()
 }
 
 void
+ThemeManager::set_ui_to_state()
+{
+	/* there is no way these values can change individually
+	 * by themselves (w/o user-interaction)
+	 * hence a common combined update function suffices
+	 */
+
+	if (ARDOUR_UI::config()->get_color_file() == "light") {
+		light_button.set_active(true);
+	} else {
+		dark_button.set_active(true);
+	}
+
+	/* there is no need to block signal handlers, here,
+	 * all elements check if the value has changed and ignore NOOPs 
+	 */
+	all_dialogs.set_active (ARDOUR_UI::config()->get_all_floating_windows_are_dialogs());
+	transients_follow_front.set_active (ARDOUR_UI::config()->get_transients_follow_front());
+	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
+	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
+	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
+	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
+	waveform_gradient_depth.set_value(ARDOUR_UI::config()->get_waveform_gradient_depth());
+	timeline_item_gradient_depth.set_value(ARDOUR_UI::config()->get_timeline_item_gradient_depth());
+}
+
+void
 ThemeManager::reset_canvas_colors()
 {
 	ARDOUR_UI::config()->load_defaults();
 	ARDOUR_UI::config()->save_state ();
+	set_ui_to_state();
 }
 
 ArdourCanvas::Container*

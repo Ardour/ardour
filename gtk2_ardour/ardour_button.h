@@ -40,9 +40,24 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		unused = 0x10,
 		Menu = 0x20,
 		Inactive = 0x40, // no _action is defined AND state is not used
-		RecButton = 0x80, // tentative, see commit message
-		RecTapeMode = 0x100, // tentative
-		CloseCross = 0x200, // tentative
+		VectorIcon = 0x80, // tentative, see commit message
+	};
+
+	enum Icon {
+		NoIcon,
+		RecButton,
+		RecTapeMode,
+		CloseCross,
+		StripWidth,
+		DinMidi,
+		TransportStop,
+		TransportPlay,
+		TransportLoop,
+		TransportRange,
+		TransportStart,
+		TransportEnd,
+		TransportPanic,
+		TransportMetronom,
 	};
 
 	static Element default_elements;
@@ -65,11 +80,16 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_active_state (Gtkmm2ext::ActiveState);
 	void set_visual_state (Gtkmm2ext::VisualState);
 
+	void set_custom_led_color (const uint32_t c, const bool useit = true);
+
 	void set_act_on_release (bool onRelease) { _act_on_release = onRelease; }
 
 	Element elements() const { return _elements; }
 	void set_elements (Element);
 	void add_elements (Element);
+
+	Icon icon() const { return _icon; }
+	void set_icon (Icon);
 
 	void set_corner_radius (float);
 
@@ -82,7 +102,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_led_left (bool yn);
 	void set_distinct_led_click (bool yn);
 
-	void set_layout_ellisize_width (int w);
+	void set_layout_ellipsize_width (int w);
 	void set_layout_font (const Pango::FontDescription&);
 	void set_text_ellipsize (Pango::EllipsizeMode);
 	
@@ -129,6 +149,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
 	Element                     _elements;
+	Icon                        _icon;
 	Tweaks                      _tweaks;
 	BindingProxy                binding_proxy;
 
@@ -154,6 +175,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 
 	uint32_t led_active_color;
 	uint32_t led_inactive_color;
+	uint32_t led_custom_color;
+	bool     use_custom_led_color;
 
 	cairo_pattern_t* convex_pattern;
 	cairo_pattern_t* concave_pattern;

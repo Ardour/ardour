@@ -91,7 +91,9 @@
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
+#include "ardour/tempo.h"
 #include "ardour/track.h"
+#include "ardour/user_bundle.h"
 #include "ardour/utils.h"
 
 #include "midi++/port.h"
@@ -209,6 +211,7 @@ Session::Session (AudioEngine &eng,
 	,  cumulative_rf_motion (0)
 	, rf_scale (1.0)
 	, _locations (new Locations (*this))
+	, _ignore_skips_updates (false)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
@@ -264,7 +267,7 @@ Session::Session (AudioEngine &eng,
 	, _step_editors (0)
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
-	, _order_hint (0)
+	, _order_hint (-1)
 	, ignore_route_processor_changes (false)
 	, _scene_changer (0)
 	, _midi_ports (0)
@@ -441,6 +444,10 @@ Session::immediately_post_engine ()
 		return -1;
 	}
 
+	/* TODO, connect in different thread. (PortRegisteredOrUnregistered may be in RT context)
+	 * can we do that? */
+	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
+
 	return 0;
 }
 
@@ -570,6 +577,8 @@ Session::destroy ()
 	delete _midi_ports; _midi_ports = 0;
 	delete _locations; _locations = 0;
 
+	delete _tempo_map;
+	
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -684,6 +693,19 @@ Session::setup_click_state (const XMLNode* node)
 void
 Session::setup_bundles ()
 {
+
+	{
+		RCUWriter<BundleList> writer (_bundles);
+		boost::shared_ptr<BundleList> b = writer.get_copy ();
+		for (BundleList::iterator i = b->begin(); i != b->end();) {
+			if (boost::dynamic_pointer_cast<UserBundle>(*i)) {
+				++i;
+				continue;
+			}
+			i = b->erase(i);
+		}
+	}
+
 	vector<string> inputs[DataType::num_types];
 	vector<string> outputs[DataType::num_types];
 	for (uint32_t i = 0; i < DataType::num_types; ++i) {
@@ -703,13 +725,18 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < outputs[DataType::AUDIO].size(); ++np) {
 		char buf[32];
-		snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
+		std::string pn = _engine.get_pretty_name_by_name (outputs[DataType::AUDIO][np]);
+		if (!pn.empty()) {
+			snprintf (buf, sizeof (buf), _("out %s"), pn.substr(0,12).c_str());
+		} else {
+			snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
+		}
 
 		boost::shared_ptr<Bundle> c (new Bundle (buf, true));
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, outputs[DataType::AUDIO][np]);
 
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
 	/* stereo output bundles */
@@ -724,7 +751,7 @@ Session::setup_bundles ()
 			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, outputs[DataType::AUDIO][np + 1]);
 
-			add_bundle (c);
+			add_bundle (c, false);
 		}
 	}
 
@@ -732,13 +759,18 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < inputs[DataType::AUDIO].size(); ++np) {
 		char buf[32];
-		snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
+		std::string pn = _engine.get_pretty_name_by_name (inputs[DataType::AUDIO][np]);
+		if (!pn.empty()) {
+			snprintf (buf, sizeof (buf), _("in %s"), pn.substr(0,12).c_str());
+		} else {
+			snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
+		}
 
 		boost::shared_ptr<Bundle> c (new Bundle (buf, false));
 		c->add_channel (_("mono"), DataType::AUDIO);
 		c->set_port (0, inputs[DataType::AUDIO][np]);
 
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
 	/* stereo input bundles */
@@ -754,7 +786,7 @@ Session::setup_bundles ()
 			c->add_channel (_("R"), DataType::AUDIO);
 			c->set_port (1, inputs[DataType::AUDIO][np + 1]);
 
-			add_bundle (c);
+			add_bundle (c, false);
 		}
 	}
 
@@ -762,26 +794,36 @@ Session::setup_bundles ()
 
 	for (uint32_t np = 0; np < inputs[DataType::MIDI].size(); ++np) {
 		string n = inputs[DataType::MIDI][np];
-		boost::erase_first (n, X_("alsa_pcm:"));
-
+		std::string pn = _engine.get_pretty_name_by_name (n);
+		if (!pn.empty()) {
+			n = pn;
+		} else {
+			boost::erase_first (n, X_("alsa_pcm:"));
+		}
 		boost::shared_ptr<Bundle> c (new Bundle (n, false));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, inputs[DataType::MIDI][np]);
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
 	/* MIDI output bundles */
 
 	for (uint32_t np = 0; np < outputs[DataType::MIDI].size(); ++np) {
 		string n = outputs[DataType::MIDI][np];
-		boost::erase_first (n, X_("alsa_pcm:"));
-
+		std::string pn = _engine.get_pretty_name_by_name (n);
+		if (!pn.empty()) {
+			n = pn;
+		} else {
+			boost::erase_first (n, X_("alsa_pcm:"));
+		}
 		boost::shared_ptr<Bundle> c (new Bundle (n, true));
 		c->add_channel ("", DataType::MIDI);
 		c->set_port (0, outputs[DataType::MIDI][np]);
-		add_bundle (c);
+		add_bundle (c, false);
 	}
 
+	// we trust the backend to only calls us if there's a change
+	BundleAddedOrRemoved (); /* EMIT SIGNAL */
 }
 
 void
@@ -1205,6 +1247,7 @@ Session::auto_loop_changed (Location* location)
 	}
 
 	last_loopend = location->end();
+	set_dirty ();
 }
 
 void
@@ -1310,32 +1353,40 @@ Session::set_auto_loop_location (Location* location)
 }
 
 void
-Session::update_skips (Location* loc, bool consolidate)
+Session::update_loop (Location*)
 {
-        Locations::LocationList skips;
-
-        if (consolidate) {
-
-                skips = consolidate_skips (loc);
-
-        } else {
-                Locations::LocationList all_locations = _locations->list ();
-                
-                for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ++l) {
-                        if ((*l)->is_skip ()) {
-                                skips.push_back (*l);
-                        }
-                }
-        }
-
-        sync_locations_to_skips (skips);
+	set_dirty ();
 }
 
-Locations::LocationList
+void
+Session::update_marks (Location*)
+{
+	set_dirty ();
+}
+
+void
+Session::update_skips (Location* loc, bool consolidate)
+{
+    if (_ignore_skips_updates) {
+        return;
+    }
+    
+	Locations::LocationList skips;
+
+        if (consolidate) {
+	        PBD::Unwinder<bool> uw (_ignore_skips_updates, true);
+	        consolidate_skips (loc);
+        }
+
+	sync_locations_to_skips ();
+        
+	set_dirty ();
+}
+
+void
 Session::consolidate_skips (Location* loc)
 {
         Locations::LocationList all_locations = _locations->list ();
-        Locations::LocationList skips;
 
         for (Locations::LocationList::iterator l = all_locations.begin(); l != all_locations.end(); ) {
 
@@ -1366,34 +1417,39 @@ Session::consolidate_skips (Location* loc)
                         break;
 
                 case Evoral::OverlapNone:
-                        skips.push_back (*l);
                         ++l;
                         break;
                 }
         }
-
-        /* add the new one, which now covers the maximal appropriate range based on overlaps with existing skips */
-
-        skips.push_back (loc);
-
-        return skips;
 }
 
 void
-Session::sync_locations_to_skips (const Locations::LocationList& locations)
+Session::sync_locations_to_skips ()
 {
-	clear_events (SessionEvent::Skip);
+	/* This happens asynchronously (in the audioengine thread). After the clear is done, we will call
+	 * Session::_sync_locations_to_skips() from the audioengine thread.
+	 */
+	clear_events (SessionEvent::Skip, boost::bind (&Session::_sync_locations_to_skips, this));
+}
 
-	for (Locations::LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
-                
+void
+Session::_sync_locations_to_skips ()
+{
+	/* called as a callback after existing Skip events have been cleared from a realtime audioengine thread */
+
+	Locations::LocationList const & locs (_locations->list());
+
+	for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
+		
 		Location* location = *i;
-                
-		if (location->is_skipping()) {
+		
+		if (location->is_skip() && location->is_skipping()) {
 			SessionEvent* ev = new SessionEvent (SessionEvent::Skip, SessionEvent::Add, location->start(), location->end(), 1.0);
 			queue_event (ev);
 		}
 	}
 }
+
 
 void
 Session::location_added (Location *location)
@@ -1416,10 +1472,10 @@ Session::location_added (Location *location)
         if (location->is_skip()) {
                 /* listen for per-location signals that require us to update skip-locate events */
 
-                location->StartChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->EndChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->Changed.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, true));
-                location->FlagsChanged.connect_same_thread (skip_connections, boost::bind (&Session::update_skips, this, location, false));
+                location->StartChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->EndChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->Changed.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, true));
+                location->FlagsChanged.connect_same_thread (skip_update_connections, boost::bind (&Session::update_skips, this, location, false));
 
                 update_skips (location, true);
         }
@@ -1431,7 +1487,8 @@ void
 Session::location_removed (Location *location)
 {
         if (location->is_auto_loop()) {
-                set_auto_loop_location (0);
+	        set_auto_loop_location (0);
+	        set_track_loop (false);
         }
         
         if (location->is_auto_punch()) {
@@ -2500,9 +2557,9 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
         ChanCount existing_outputs;
 	uint32_t order = next_control_id();
 
-	if (_order_hint != 0) {
+	if (_order_hint > -1) {
 		order = _order_hint;
-		_order_hint = 0;
+		_order_hint = -1;
 	}
 
         count_existing_track_channels (existing_inputs, existing_outputs);
@@ -2968,6 +3025,7 @@ Session::route_solo_changed (bool self_solo_change, void* /*src*/, boost::weak_p
 
 	for (RouteList::iterator i = uninvolved.begin(); i != uninvolved.end(); ++i) {
 		DEBUG_TRACE (DEBUG::Solo, string_compose ("mute change for %1, which neither feeds or is fed by %2\n", (*i)->name(), route->name()));
+		(*i)->act_on_mute ();
 		(*i)->mute_changed (this);
 	}
 
@@ -3622,8 +3680,19 @@ Session::new_audio_source_path_for_embedded (const std::string& path)
 	return newpath;
 }
 
+/** Return true if there are no audio file sources that use @param name as 
+ * the filename component of their path. 
+ *
+ * Return false otherwise.
+ *
+ * This method MUST ONLY be used to check in-session, mono files since it 
+ * hard-codes the channel of the audio file source we are looking for as zero.
+ * 
+ * If/when Ardour supports native files in non-mono formats, the logic here
+ * will need to be revisited.
+ */
 bool
-Session::audio_source_name_is_unique (const string& name, uint32_t chan)
+Session::audio_source_name_is_unique (const string& name)
 {
 	std::vector<string> sdirs = source_search_path (DataType::AUDIO);
 	vector<space_and_path>::iterator i;
@@ -3656,7 +3725,7 @@ Session::audio_source_name_is_unique (const string& name, uint32_t chan)
 		
 		string possible_path = Glib::build_filename (spath, name);
 
-		if (audio_source_by_path_and_channel (possible_path, chan)) {
+		if (audio_source_by_path_and_channel (possible_path, 0)) {
 			existing++;
 			break;
 		}
@@ -3724,7 +3793,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 
 		possible_name = format_audio_source_name (legalized, nchan, chan, destructive, take_required, cnt, some_related_source_name_exists);
 		
-		if (audio_source_name_is_unique (possible_name, chan)) {
+		if (audio_source_name_is_unique (possible_name)) {
 			break;
 		}
 		
@@ -4071,7 +4140,7 @@ Session::available_capture_duration ()
 }
 
 void
-Session::add_bundle (boost::shared_ptr<Bundle> bundle)
+Session::add_bundle (boost::shared_ptr<Bundle> bundle, bool emit_signal)
 {
 	{
 		RCUWriter<BundleList> writer (_bundles);
@@ -4079,7 +4148,9 @@ Session::add_bundle (boost::shared_ptr<Bundle> bundle)
 		b->push_back (bundle);
 	}
 
-	BundleAdded (bundle); /* EMIT SIGNAL */
+	if (emit_signal) {
+		BundleAddedOrRemoved (); /* EMIT SIGNAL */
+	}
 
 	set_dirty();
 }
@@ -4101,7 +4172,7 @@ Session::remove_bundle (boost::shared_ptr<Bundle> bundle)
 	}
 
 	if (removed) {
-		 BundleRemoved (bundle); /* EMIT SIGNAL */
+		 BundleAddedOrRemoved (); /* EMIT SIGNAL */
 	}
 
 	set_dirty();
@@ -4485,8 +4556,13 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 
 	for (vector<boost::shared_ptr<Source> >::iterator src = srcs.begin(); src != srcs.end(); ++src) {
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(*src);
-		if (afs)
+		boost::shared_ptr<MidiSource> ms;
+		if (afs) {
 			afs->prepare_for_peakfile_writes ();
+		} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
+			Source::Lock lock(ms->mutex());
+			ms->mark_streaming_write_started(lock);
+		}
 	}
 
 	while (to_do && !itt.cancel) {
@@ -4519,11 +4595,12 @@ Session::write_one_track (Track& track, framepos_t start, framepos_t end,
 				}
 			} else if ((ms = boost::dynamic_pointer_cast<MidiSource>(*src))) {
 				Source::Lock lock(ms->mutex());
-				ms->mark_streaming_write_started(lock);
 
 				const MidiBuffer& buf = buffers.get_midi(0);
 				for (MidiBuffer::const_iterator i = buf.begin(); i != buf.end(); ++i) {
-					ms->append_event_frames(lock, *i, ms->timeline_position());
+					Evoral::Event<framepos_t> ev = *i;
+					ev.set_time(ev.time() - position);
+					ms->append_event_frames(lock, ev, ms->timeline_position());
 				}
 			}
 		}

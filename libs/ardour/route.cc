@@ -772,6 +772,11 @@ Route::set_solo (bool yn, void *src)
 		return;
 	}
 
+	if (is_master() || is_monitor() || is_auditioner()) {
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 ignore solo change (master, monitor or auditioner)\n", name()));
+		return;
+	}
+
 	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_solo()) {
 		_route_group->foreach_route (boost::bind (&Route::set_solo, _1, yn, _route_group));
 		return;
@@ -1217,8 +1222,18 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		if (processor->set_state (node, version)) {
 			return false;
 		}
+		
+		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
+		if (i != children.end()) {
+			if ((prop = (*i)->property (X_("active"))) != 0) {
+				if ( string_is_affirmative (prop->value()) && !_session.get_disable_all_loaded_plugins() )
+					processor->activate();
+				else
+					processor->deactivate();
+			}
+		}
 
-		return (add_processor (processor, placement) == 0);
+		return (add_processor (processor, placement, 0, false) == 0);
 	}
 
 	catch (failed_constructor &err) {
@@ -2324,6 +2339,7 @@ Route::set_state (const XMLNode& node, int version)
 int
 Route::set_state_2X (const XMLNode& node, int version)
 {
+	LocaleGuard lg (X_("C"));
 	XMLNodeList nlist;
 	XMLNodeConstIterator niter;
 	XMLNode *child;

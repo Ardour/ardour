@@ -4,11 +4,6 @@ import os
 import sys
 import re
 
-# Library version (UNIX style major, minor, micro)
-# major increment <=> incompatible changes
-# minor increment <=> compatible changes (additions)
-# micro increment <=> no interface changes
-WAVESAUDIOBACKEND_VERSION = '0.0.1'
 I18N_PACKAGE = 'wavesaudio-backend'
 
 # Mandatory variables
@@ -88,15 +83,15 @@ def build(bld):
            'portmidi/src/pm_common'
             ]
 
-    obj.cxxflags = [ '-fPIC' ]
-    obj.cflags   = [ '-fPIC', '-fms-extensions' ]
     obj.name     = 'waves_audiobackend'
     obj.target   = 'waves_audiobackend'
     obj.use      = 'libardour libpbd'
     if bld.env['build_target'] == 'mingw':
         obj.uselib   = ['PORTAUDIO']
-    if (bld.env['build_target'] != 'mingw'):
-        obj.vnum     = WAVESAUDIOBACKEND_VERSION
+        obj.cxxflags = [ '-fPIC' ]
+        obj.cflags   = [ '-fPIC', '-fms-extensions' ]
+    else:
+        obj.cflags   = ['-fms-extensions' ]
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
 
     if bld.env['build_target']== 'mingw':

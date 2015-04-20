@@ -48,6 +48,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"
+#include "ardour/midi_track.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
@@ -134,6 +135,7 @@ MidiDiskstream::init ()
 	_capture_buf = new MidiRingBuffer<framepos_t>(size);
 
 	_n_channels = ChanCount(DataType::MIDI, 1);
+	interpolation.add_channel_to (0,0);
 }
 
 MidiDiskstream::~MidiDiskstream ()
@@ -401,11 +403,10 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 	}
 
 	if (nominally_recording || rec_nframes) {
-
-		// Pump entire port buffer into the ring buffer (FIXME: split cycles?)
-		MidiBuffer& buf = sp->get_midi_buffer(nframes);
-		ChannelMode mode = AllChannels; // _track->get_capture_channel_mode ();
-		uint32_t mask = 0xffff; // _track->get_capture_channel_mask ();
+		// Pump entire port buffer into the ring buffer (TODO: split cycles?)
+		MidiBuffer&        buf    = sp->get_midi_buffer(nframes);
+		MidiTrack*         mt     = dynamic_cast<MidiTrack*>(_track);
+		MidiChannelFilter* filter = mt ? &mt->capture_filter() : NULL;
 
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
 			Evoral::MIDIEvent<MidiBuffer::TimeType> ev(*i, false);
@@ -439,31 +440,12 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 			const framecnt_t loop_offset = _num_captured_loops * loop_length;
 			const framepos_t event_time = transport_frame + loop_offset - _accumulated_capture_offset + ev.time();
 			if (event_time < 0 || event_time < first_recordable_frame) {
+				/* Event out of range, skip */
 				continue;
 			}
-			switch (mode) {
-			case AllChannels:
-				_capture_buf->write(event_time,
-						    ev.type(), ev.size(), ev.buffer());
-				break;
-			case FilterChannels:
-				if (ev.is_channel_event()) {
-					if ((1<<ev.channel()) & mask) {
-						_capture_buf->write(event_time,
-								    ev.type(), ev.size(), ev.buffer());
-					}
-				} else {
-					_capture_buf->write(event_time,
-							    ev.type(), ev.size(), ev.buffer());
-				}
-				break;
-			case ForceChannel:
-				if (ev.is_channel_event()) {
-					ev.set_channel (PBD::ffs(mask) - 1);
-				}
-				_capture_buf->write(event_time,
-						    ev.type(), ev.size(), ev.buffer());
-				break;
+
+			if (!filter || !filter->filter(ev.buffer(), ev.size())) {
+				_capture_buf->write(event_time, ev.type(), ev.size(), ev.buffer());
 			}
 		}
 		g_atomic_int_add(const_cast<gint*>(&_frames_pending_write), nframes);
@@ -515,24 +497,35 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 
 		playback_distance = nframes;
 
+	} else if (_actual_speed != 1.0f && _target_speed > 0) {
+
+		interpolation.set_speed (_target_speed);
+
+		playback_distance = interpolation.distance  (nframes);
+
 	} else {
-
-		/* XXX: should be doing varispeed stuff here, similar to the code in AudioDiskstream::process */
-
 		playback_distance = nframes;
-
 	}
 
 	if (need_disk_signal) {
 		/* copy the diskstream data to all output buffers */
 		
 		MidiBuffer& mbuf (bufs.get_midi (0));
-		get_playback (mbuf, nframes);
-		
+		get_playback (mbuf, playback_distance);
+
 		/* leave the audio count alone */
 		ChanCount cnt (DataType::MIDI, 1);
 		cnt.set (DataType::AUDIO, bufs.count().n_audio());
 		bufs.set_count (cnt);
+
+		/* vari-speed */
+		if (_target_speed > 0 && _actual_speed != 1.0f) {
+			MidiBuffer& mbuf (bufs.get_midi (0));
+			for (MidiBuffer::iterator i = mbuf.begin(); i != mbuf.end(); ++i) {
+				MidiBuffer::TimeType *tme = i.timeptr();
+				*tme = (*tme) * nframes / playback_distance;
+			}
+		}
 	}
 
 	return 0;
@@ -543,7 +536,10 @@ MidiDiskstream::calculate_playback_distance (pframes_t nframes)
 {
 	frameoffset_t playback_distance = nframes;
 
-	/* XXX: should be doing varispeed stuff once it's implemented in ::process() above */
+	if (!record_enabled() && _actual_speed != 1.0f && _actual_speed > 0.f) {
+		interpolation.set_speed (_target_speed);
+		playback_distance = interpolation.distance (nframes, false);
+	}
 
 	if (_actual_speed < 0.0) {
 		return -playback_distance;
@@ -556,6 +552,10 @@ bool
 MidiDiskstream::commit (framecnt_t playback_distance)
 {
 	bool need_butler = false;
+
+	if (!_io || !_io->active()) {
+		return false;
+	}
 
 	if (_actual_speed < 0.0) {
 		playback_sample -= playback_distance;
@@ -584,10 +584,33 @@ MidiDiskstream::commit (framecnt_t playback_distance)
 	 * need the butler is done correctly.
 	 */
 	
+	/* furthermore..
+	 *
+	 * Doing heavy GUI operations[1] can stall also the butler.
+	 * The RT-thread meanwhile will happily continue and
+	 * ‘frames_read’ (from buffer to output) will become larger
+	 * than ‘frames_written’ (from disk to buffer).
+	 *
+	 * The disk-stream is now behind..
+	 *
+	 * In those cases the butler needs to be summed to refill the buffer (done now)
+	 * AND we need to skip (frames_read - frames_written). ie remove old events
+	 * before playback_sample from the rinbuffer.
+	 *
+	 * [1] one way to do so is described at #6170.
+	 * For me just popping up the context-menu on a MIDI-track header
+	 * of a track with a large (think beethoven :) midi-region also did the
+	 * trick. The playhead stalls for 2 or 3 sec, until the context-menu shows.
+	 *
+	 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
+	 * and can stall
+	 */
 	if (frames_read <= frames_written) {
 		if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 			need_butler = true;
 		}
+	} else {
+		need_butler = true;
 	}
 
 
@@ -620,7 +643,7 @@ MidiDiskstream::overwrite_existing_buffers ()
 	   having the old data or knowing what change caused the overwrite. */
 	midi_playlist()->resolve_note_trackers (*_playback_buf, overwrite_frame);
 
-	read (overwrite_frame, disk_io_chunk_frames, false);
+	read (overwrite_frame, disk_read_chunk_frames, false);
 	file_frame = overwrite_frame; // it was adjusted by ::read()
 	overwrite_queued = false;
 	_pending_overwrite = false;
@@ -687,6 +710,9 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 	framecnt_t loop_length = 0;
 	Location*  loc         = 0;
 
+	MidiTrack*         mt     = dynamic_cast<MidiTrack*>(_track);
+	MidiChannelFilter* filter = mt ? &mt->playback_filter() : NULL;
+
 	if (!reversed) {
 
 		loc = loop_location;
@@ -723,7 +749,7 @@ MidiDiskstream::read (framepos_t& start, framecnt_t dur, bool reversed)
 
 		this_read = min(dur,this_read);
 
-		if (midi_playlist()->read (*_playback_buf, start, this_read) != this_read) {
+		if (midi_playlist()->read (*_playback_buf, start, this_read, 0, filter) != this_read) {
 			error << string_compose(
 					_("MidiDiskstream %1: cannot read %2 from playlist at frame %3"),
 					id(), this_read, start) << endmsg;
@@ -790,16 +816,17 @@ MidiDiskstream::do_refill ()
 
 	uint32_t frames_read = g_atomic_int_get(&_frames_read_from_ringbuffer);
 	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
-	if ((frames_written - frames_read) >= midi_readahead) {
+	if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
 		return 0;
 	}
 
-	framecnt_t to_read = midi_readahead - (frames_written - frames_read);
+	framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
 
 	//cout << "MDS read for midi_readahead " << to_read << "  rb_contains: "
 	//	<< frames_written - frames_read << endl;
 
-	to_read = (framecnt_t) min ((framecnt_t) to_read, (framecnt_t) (max_framepos - file_frame));
+	to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
+	to_read = min (to_read, (framecnt_t) write_space);
 
 	if (read (file_frame, to_read, reversed)) {
 		ret = -1;
@@ -810,12 +837,12 @@ MidiDiskstream::do_refill ()
 
 /** Flush pending data to disk.
  *
- * Important note: this function will write *AT MOST* disk_io_chunk_frames
+ * Important note: this function will write *AT MOST* disk_write_chunk_frames
  * of data to disk. it will never write more than that.  If it writes that
  * much and there is more than that waiting to be written, it will return 1,
  * otherwise 0 on success or -1 on failure.
  *
- * If there is less than disk_io_chunk_frames to be written, no data will be
+ * If there is less than disk_write_chunk_frames to be written, no data will be
  * written at all unless @a force_flush is true.
  */
 int
@@ -832,7 +859,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 	if (total == 0 || 
 	    _capture_buf->read_space() == 0 || 
-	    (!force_flush && (total < disk_io_chunk_frames) && was_recording)) {
+	    (!force_flush && (total < disk_write_chunk_frames) && was_recording)) {
 		goto out;
 	}
 
@@ -847,7 +874,7 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 	   let the caller know too.
 	   */
 
-	if (total >= 2 * disk_io_chunk_frames || ((force_flush || !was_recording) && total > disk_io_chunk_frames)) {
+	if (total >= 2 * disk_write_chunk_frames || ((force_flush || !was_recording) && total > disk_write_chunk_frames)) {
 		ret = 1;
 	}
 
@@ -855,10 +882,10 @@ MidiDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		/* push out everything we have, right now */
 		to_write = max_framecnt;
 	} else {
-		to_write = disk_io_chunk_frames;
+		to_write = disk_write_chunk_frames;
 	}
 
-	if (record_enabled() && ((total > disk_io_chunk_frames) || force_flush)) {
+	if (record_enabled() && ((total > disk_write_chunk_frames) || force_flush)) {
 		Source::Lock lm(_write_source->mutex());
 		if (_write_source->midi_write (lm, *_capture_buf, get_capture_start_frame (0), to_write) != to_write) {
 			error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
@@ -940,14 +967,14 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 			/* set length in beats to entire capture length */
 
 			BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
-			const Evoral::MusicalTime total_capture_beats = converter.from (total_capture);
+			const Evoral::Beats total_capture_beats = converter.from (total_capture);
 			_write_source->set_length_beats (total_capture_beats);
 
 			/* flush to disk: this step differs from the audio path,
 			   where all the data is already on disk.
 			*/
 
-			_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Evoral::MusicalTime>::ResolveStuckNotes, total_capture_beats);
+			_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Evoral::Beats>::ResolveStuckNotes, total_capture_beats);
 
 			/* we will want to be able to keep (over)writing the source
 			   but we don't want it to be removable. this also differs
@@ -1165,7 +1192,7 @@ MidiDiskstream::get_state ()
 {
 	XMLNode& node (Diskstream::get_state());
 	char buf[64];
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	if (_write_source && _session.get_record_enabled()) {
 
@@ -1199,7 +1226,7 @@ MidiDiskstream::set_state (const XMLNode& node, int version)
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
 	XMLNode* capture_pending_node = 0;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	/* prevent write sources from being created */
 
@@ -1409,6 +1436,8 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			_playback_buf->resolve_tracker (dst, 0);
 		}
 
+		_playback_buf->skip_to (effective_start);
+
 		if (loc->end() >= effective_start && loc->end() < effective_start + nframes) {
 			/* end of loop is within the range we are reading, so
 			   split the read in two, and lie about the location
@@ -1440,6 +1469,7 @@ MidiDiskstream::get_playback (MidiBuffer& dst, framecnt_t nframes)
 			events_read = _playback_buf->read (dst, effective_start, effective_start + nframes);
 		}
 	} else {
+		_playback_buf->skip_to (playback_sample);
 		events_read = _playback_buf->read (dst, playback_sample, playback_sample + nframes);
 	}
 
@@ -1500,6 +1530,19 @@ MidiDiskstream::reset_tracker ()
 		mp->reset_note_trackers ();
 	}
 }
+
+void
+MidiDiskstream::resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t time)
+{
+	_playback_buf->resolve_tracker(buffer, time);
+
+	boost::shared_ptr<MidiPlaylist> mp (midi_playlist());
+
+	if (mp) {
+		mp->reset_note_trackers ();
+	}
+}
+
 
 boost::shared_ptr<MidiPlaylist>
 MidiDiskstream::midi_playlist ()

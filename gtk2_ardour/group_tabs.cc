@@ -395,6 +395,26 @@ GroupTabs::new_from_soloed ()
 	run_new_group_dialog (soloed);
 }
 
+PBD::PropertyList
+GroupTabs::default_properties () const
+{
+	PBD::PropertyList plist;
+
+	plist.add (Properties::route_active, true);
+	plist.add (Properties::active, true);
+	plist.add (Properties::gain, true);
+	plist.add (Properties::relative, true);
+	plist.add (Properties::color, true);
+	plist.add (Properties::monitoring, true);
+	plist.add (Properties::select, true);
+	plist.add (Properties::mute, true);
+	plist.add (Properties::solo, true);
+	plist.add (Properties::gain, true);
+	plist.add (Properties::recenable, true);
+
+	return plist;
+}
+
 void
 GroupTabs::run_new_group_dialog (RouteList const & rl)
 {

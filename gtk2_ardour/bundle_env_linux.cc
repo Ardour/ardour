@@ -46,7 +46,7 @@ using namespace ARDOUR;
 using namespace std;
 
 void
-fixup_bundle_environment (int /*argc*/, char* argv[], const char** localedir)
+fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 {
 	/* THIS IS FOR LINUX - its just about the only place where its
 	 * acceptable to build paths directly using '/'.
@@ -60,18 +60,17 @@ fixup_bundle_environment (int /*argc*/, char* argv[], const char** localedir)
 
 	std::string path;
 	std::string dir_path = Glib::path_get_dirname (Glib::path_get_dirname (argv[0]));
-	std::string userconfigdir = user_config_directory();
 
 #ifdef ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {
-		(*localedir) = "/this/cannot/exist";
+		localedir = "/this/cannot/exist";
 	} else {
 		/* force localedir into the bundle */
 		vector<string> lpath;
 		lpath.push_back (dir_path);
 		lpath.push_back ("share");
 		lpath.push_back ("locale");
-		(*localedir) = canonical_path (Glib::build_filename (lpath)).c_str();
+		localedir = canonical_path (Glib::build_filename (lpath)).c_str();
 	}
 #endif
 
@@ -104,39 +103,6 @@ fixup_bundle_environment (int /*argc*/, char* argv[], const char** localedir)
 		g_setenv ("FONTCONFIG_PATH", "/etc/fonts", 1);
 	} else {
 		error << _("No fontconfig file found on your system. Things may looked very odd or ugly") << endmsg;
-	}
-
-	/* write a pango.rc file and tell pango to use it. we'd love
-	   to put this into the Ardour.app bundle and leave it there,
-	   but the user may not have write permission. so ...
-
-	   we also have to make sure that the user ardour directory
-	   actually exists ...
-	*/
-
-	if (g_mkdir_with_parents (userconfigdir.c_str(), 0755) < 0) {
-		error << string_compose (_("cannot create user %3 folder %1 (%2)"), userconfigdir, strerror (errno), PROGRAM_NAME)
-		      << endmsg;
-	} else {
-		
-		path = Glib::build_filename (userconfigdir, "pango.rc");
-		std::ofstream pangorc (path.c_str());
-		if (!pangorc) {
-			error << string_compose (_("cannot open pango.rc file %1") , path) << endmsg;
-		} else {
-			pangorc << "[Pango]\nModuleFiles="
-				<< Glib::build_filename (userconfigdir, "pango.modules")
-				<< endl;
-			pangorc.close ();
-		}
-		
-		g_setenv ("PANGO_RC_FILE", path.c_str(), 1);
-		
-		/* similar for GDK pixbuf loaders, but there's no RC file required
-		   to specify where it lives.
-		*/
-		
-		g_setenv ("GDK_PIXBUF_MODULE_FILE", Glib::build_filename (userconfigdir, "gdk-pixbuf.loaders").c_str(), 1);
 	}
 
         /* this doesn't do much but setting it should prevent various parts of the GTK/GNU stack

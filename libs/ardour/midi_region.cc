@@ -53,17 +53,14 @@ using namespace PBD;
 
 namespace ARDOUR {
 	namespace Properties {
-		PBD::PropertyDescriptor<void*>                midi_data;
-		PBD::PropertyDescriptor<Evoral::MusicalTime>  start_beats;
-		PBD::PropertyDescriptor<Evoral::MusicalTime>  length_beats;
+		PBD::PropertyDescriptor<Evoral::Beats> start_beats;
+		PBD::PropertyDescriptor<Evoral::Beats> length_beats;
 	}
 }
 
 void
 MidiRegion::make_property_quarks ()
 {
-	Properties::midi_data.property_id = g_quark_from_static_string (X_("midi-data"));
-	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for midi-data = %1\n", Properties::midi_data.property_id));
 	Properties::start_beats.property_id = g_quark_from_static_string (X_("start-beats"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for start-beats = %1\n", Properties::start_beats.property_id));
 	Properties::length_beats.property_id = g_quark_from_static_string (X_("length-beats"));
@@ -80,7 +77,7 @@ MidiRegion::register_properties ()
 /* Basic MidiRegion constructor (many channels) */
 MidiRegion::MidiRegion (const SourceList& srcs)
 	: Region (srcs)
-	, _start_beats (Properties::start_beats, Evoral::MusicalTime())
+	, _start_beats (Properties::start_beats, Evoral::Beats())
 	, _length_beats (Properties::length_beats, midi_source(0)->length_beats())
 {
 	register_properties ();
@@ -94,7 +91,7 @@ MidiRegion::MidiRegion (const SourceList& srcs)
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 	: Region (other)
 	, _start_beats (Properties::start_beats, other->_start_beats)
-	, _length_beats (Properties::length_beats, Evoral::MusicalTime())
+	, _length_beats (Properties::length_beats, Evoral::Beats())
 {
 	update_length_beats ();
 	register_properties ();
@@ -107,11 +104,11 @@ MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other)
 /** Create a new MidiRegion that is part of an existing one */
 MidiRegion::MidiRegion (boost::shared_ptr<const MidiRegion> other, frameoffset_t offset)
 	: Region (other, offset)
-	, _start_beats (Properties::start_beats, Evoral::MusicalTime())
-	, _length_beats (Properties::length_beats, Evoral::MusicalTime())
+	, _start_beats (Properties::start_beats, Evoral::Beats())
+	, _length_beats (Properties::length_beats, Evoral::Beats())
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
-	Evoral::MusicalTime const offset_beats = bfc.from (offset);
+	Evoral::Beats const offset_beats = bfc.from (offset);
 
 	_start_beats  = other->_start_beats.val() + offset_beats;
 	_length_beats = other->_length_beats.val() - offset_beats;
@@ -147,8 +144,8 @@ boost::shared_ptr<MidiRegion>
 MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 {
 	BeatsFramesConverter bfc (_session.tempo_map(), _position);
-	Evoral::MusicalTime const bbegin = bfc.from (_start);
-	Evoral::MusicalTime const bend = bfc.from (_start + _length);
+	Evoral::Beats const bbegin = bfc.from (_start);
+	Evoral::Beats const bend = bfc.from (_start + _length);
 
 	{
 		/* Lock our source since we'll be reading from it.  write_to() will
@@ -223,7 +220,7 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 	/* zero length regions don't exist - so if _length_beats is zero, this object
 	   is under construction.
 	*/
-	if (_length_beats.val() == Evoral::MusicalTime()) {
+	if (_length_beats.val() == Evoral::Beats()) {
 		/* leave _length_beats alone, and change _length to reflect the state of things
 		   at the new position (tempo map may dictate a different number of frames
 		*/
@@ -233,9 +230,15 @@ MidiRegion::set_position_internal (framepos_t pos, bool allow_bbt_recompute)
 }
 
 framecnt_t
-MidiRegion::read_at (Evoral::EventSink<framepos_t>& out, framepos_t position, framecnt_t dur, uint32_t chan_n, NoteMode mode, MidiStateTracker* tracker) const
+MidiRegion::read_at (Evoral::EventSink<framepos_t>& out,
+                     framepos_t                     position,
+                     framecnt_t                     dur,
+                     uint32_t                       chan_n,
+                     NoteMode                       mode,
+                     MidiStateTracker*              tracker,
+                     MidiChannelFilter*             filter) const
 {
-	return _read_at (_sources, out, position, dur, chan_n, mode, tracker);
+	return _read_at (_sources, out, position, dur, chan_n, mode, tracker, filter);
 }
 
 framecnt_t
@@ -245,11 +248,17 @@ MidiRegion::master_read_at (MidiRingBuffer<framepos_t>& out, framepos_t position
 }
 
 framecnt_t
-MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>& dst, framepos_t position, framecnt_t dur, uint32_t chan_n,
-		      NoteMode mode, MidiStateTracker* tracker) const
+MidiRegion::_read_at (const SourceList&              /*srcs*/,
+                      Evoral::EventSink<framepos_t>& dst,
+                      framepos_t                     position,
+                      framecnt_t                     dur,
+                      uint32_t                       chan_n,
+                      NoteMode                       mode,
+                      MidiStateTracker*              tracker,
+                      MidiChannelFilter*             filter) const
 {
 	frameoffset_t internal_offset = 0;
-	framecnt_t to_read         = 0;
+	framecnt_t    to_read         = 0;
 
 	/* precondition: caller has verified that we cover the desired section */
 
@@ -299,6 +308,7 @@ MidiRegion::_read_at (const SourceList& /*srcs*/, Evoral::EventSink<framepos_t>&
 			_start + internal_offset, // where to start reading in the source
 			to_read, // read duration in frames
 			tracker,
+			filter,
 			_filtered_parameters
 		    ) != to_read) {
 		return 0; /* "read nothing" */
@@ -408,24 +418,6 @@ MidiRegion::model_changed ()
 	midi_source()->AutomationStateChanged.connect_same_thread (
 		_model_connection, boost::bind (&MidiRegion::model_automation_state_changed, this, _1)
 		);
-
-	model()->ContentsChanged.connect_same_thread (
-	        _model_contents_connection, boost::bind (&MidiRegion::model_contents_changed, this));
-}
-
-void
-MidiRegion::model_contents_changed ()
-{
-	{
-		/* Invalidate source iterator to force reading new contents even if the
-		   calls to read() progress linearly.  Try-lock only to avoid deadlock
-		   when called while writing with the source already locked. */
-		Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
-		if (lm.locked()) {
-			midi_source(0)->invalidate (lm);
-		}
-	}
-	send_change (PropertyChange (Properties::midi_data));
 }
 
 void
@@ -448,6 +440,7 @@ MidiRegion::model_automation_state_changed (Evoral::Parameter const & p)
 	*/
 	Glib::Threads::Mutex::Lock lm (midi_source(0)->mutex(), Glib::Threads::TRY_LOCK);
 	if (lm.locked()) {
+		/* TODO: This is too aggressive, we need more fine-grained invalidation. */
 		midi_source(0)->invalidate (lm);
 	}
 }
@@ -462,7 +455,7 @@ MidiRegion::fix_negative_start ()
 
 	model()->insert_silence_at_start (c.from (-_start));
 	_start = 0;
-	_start_beats = Evoral::MusicalTime();
+	_start_beats = Evoral::Beats();
 }
 
 /** Transpose the notes in this region by a given number of semitones */

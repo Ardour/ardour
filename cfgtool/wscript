@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('misc')
+    conf.load('compiler_cxx')
+    autowaf.configure(conf)
+
+def build(bld):
+    if bld.env['build_target'] == 'mingw':
+	    return;
+
+    obj = bld (features = 'cxx c cxxprogram')
+    obj.source       = 'cfgtool.cc'
+    obj.target       = 'cfgtool'
+    obj.use          = [ 'libpbd', 'libardour', ]
+    obj.use          = [ 'libpbd', 'libardour', ]
+    obj.install_path = None

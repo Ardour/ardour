@@ -120,6 +120,38 @@ class NumberMetadataField : public MetadataField {
 	guint width;
 };
 
+/// MetadataField that accepts EAN-13 data only
+class EAN13MetadataField : public MetadataField {
+  private:
+	typedef std::string (ARDOUR::SessionMetadata::*Getter) () const;
+	typedef void (ARDOUR::SessionMetadata::*Setter) (std::string const &);
+  public:
+	EAN13MetadataField (Getter getter, Setter setter, std::string const & field_name, guint width = 13);
+	MetadataPtr copy ();
+
+	void save_data (ARDOUR::SessionMetadata & data) const;
+	void load_data (ARDOUR::SessionMetadata const & data);
+
+	Gtk::Widget & name_widget ();
+	Gtk::Widget & value_widget ();
+	Gtk::Widget & edit_widget ();
+
+	Gtk::Label* status_label;
+	void update_status ();
+  private:
+	void update_value ();
+        std::string numeric_string (std::string const & str) const;
+
+	Getter getter;
+	Setter setter;
+
+	Gtk::Label* label;
+	Gtk::Label* value_label;
+	Gtk::Entry* entry;
+
+	guint width;
+};
+
 /// Interface for MetadataFields
 class SessionMetadataSet : public ARDOUR::SessionHandlePtr {
   public:

@@ -230,12 +230,7 @@ Canvas::item_changed (Item* item, boost::optional<Rect> pre_change_bounding_box)
 Duple
 Canvas::window_to_canvas (Duple const & d) const
 {
-	/* Find the scroll group that covers d (a window coordinate). Scroll groups are only allowed
-	 * as children of the root group, so we just scan its first level
-	 * children and see what we can find.
-	 */
-
-	std::list<Item*> const& root_children (_root.items());
+	ScrollGroup* best_group = 0;
 	ScrollGroup* sg = 0;
 
 	/* if the coordinates are negative, clamp to zero and find the item
@@ -251,14 +246,33 @@ Canvas::window_to_canvas (Duple const & d) const
 		in_window.y = 0;
 	}
 
-	for (std::list<Item*>::const_iterator i = root_children.begin(); i != root_children.end(); ++i) {
-		if (((sg = dynamic_cast<ScrollGroup*>(*i)) != 0) && sg->covers_window (in_window)) {
-			break;
+	for (list<ScrollGroup*>::const_iterator s = scrollers.begin(); s != scrollers.end(); ++s) {
+
+		if ((*s)->covers_window (in_window)) {
+			sg = *s;
+
+			/* XXX January 22nd 2015: leaving this in place for now
+			 * but I think it fixes a bug that really should be
+			 * fixed in a different way (and will be) by my next
+			 * commit. But it may still be relevant. 
+			 */
+
+			/* If scroll groups overlap, choose the one with the highest sensitivity,
+			   that is, choose an HV scroll group over an H or V
+			   only group. 
+			*/
+			if (!best_group || sg->sensitivity() > best_group->sensitivity()) {
+				best_group = sg;
+				if (sg->sensitivity() == (ScrollGroup::ScrollsVertically | ScrollGroup::ScrollsHorizontally)) {
+					/* Can't do any better than this. */
+					break;
+				}
+			}
 		}
 	}
 
-	if (sg) {
-		return d.translate (sg->scroll_offset());
+	if (best_group) {
+		return d.translate (best_group->scroll_offset());
 	}
 
 	return d;
@@ -281,7 +295,6 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 			break;
 		}
 	}
-	
 
 	if (sg) {
 		wd = d.translate (-sg->scroll_offset());
@@ -369,6 +382,7 @@ GtkCanvas::GtkCanvas ()
 	, _new_current_item (0)
 	, _grabbed_item (0)
 	, _focused_item (0)
+	, _single_exposure (1)
 	, current_tooltip_item (0)
 	, tooltip_window (0)
 {
@@ -773,9 +787,22 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
         draw_context->fill ();
         
         /* render canvas */
-        
-        render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
+		if ( _single_exposure ) {
+	
+			render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
+		} else {
+			GdkRectangle* rects;
+			gint nrects;
+			
+			gdk_region_get_rectangles (ev->region, &rects, &nrects);
+			for (gint n = 0; n < nrects; ++n) {
+				draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
+				render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
+			}
+			g_free (rects);
+		}
+		
 #ifdef USE_CAIRO_IMAGE_SURFACE
 	/* now blit our private surface back to the GDK one */
 
@@ -1129,7 +1156,7 @@ GtkCanvas::show_tooltip ()
 		tooltip_label = manage (new Gtk::Label);
 		tooltip_label->show ();
 		tooltip_window->add (*tooltip_label);
-		tooltip_window->set_border_width (6);
+		tooltip_window->set_border_width (1);
 		tooltip_window->set_name ("tooltip");
 	}
 
@@ -1162,7 +1189,8 @@ GtkCanvas::show_tooltip ()
 	 * to get it away from the pointer.
 	 */
 
-	tooltip_window_origin.x += 20;
+	tooltip_window_origin.x += 30;
+	tooltip_window_origin.y += 45;
 
 	/* move the tooltip window into position */
 
@@ -1184,6 +1212,11 @@ GtkCanvas::hide_tooltip ()
 
 	if (tooltip_window) {
 		tooltip_window->hide ();
+
+		// Delete the tooltip window so it'll get re-created
+		// (i.e. properly re-sized) on the next usage.
+		delete tooltip_window;
+		tooltip_window = NULL;
 	}
 }
 

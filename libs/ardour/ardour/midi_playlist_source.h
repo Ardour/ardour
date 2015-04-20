@@ -45,7 +45,7 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Evoral::MusicalTime>& ev);
+	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
 	void append_event_frames(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
 	void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
 	void destroy_model(const Glib::Threads::Mutex::Lock& lock);
@@ -65,7 +65,8 @@ protected:
 	                          framepos_t                     position,
 	                          framepos_t                     start,
 	                          framecnt_t                     cnt,
-	                          MidiStateTracker*              tracker) const;
+	                          MidiStateTracker*              tracker,
+	                          MidiChannelFilter*             filter) const;
 
 	framecnt_t write_unlocked (const Lock&                 lock,
 	                           MidiRingBuffer<framepos_t>& dst,

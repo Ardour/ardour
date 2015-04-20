@@ -19,6 +19,8 @@
 #ifndef __ardour_midi_time_axis_h__
 #define __ardour_midi_time_axis_h__
 
+#include <list>
+
 #include <gtkmm/table.h>
 #include <gtkmm/button.h>
 #include <gtkmm/box.h>
@@ -27,8 +29,7 @@
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/checkmenuitem.h>
 
-#include <gtkmm2ext/selector.h>
-#include <list>
+#include "gtkmm2ext/selector.h"
 
 #include "ardour/types.h"
 #include "ardour/region.h"
@@ -55,6 +56,10 @@ namespace ARDOUR {
 	class MidiPlaylist;
 }
 
+namespace Evoral {
+	template<typename Time> class Note;
+}
+
 class PublicEditor;
 class MidiStreamView;
 class MidiScroomer;
@@ -65,7 +70,7 @@ class MidiChannelSelectorWindow;
 
 class MidiTimeAxisView : public RouteTimeAxisView
 {
-	public:
+public:
 	MidiTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~MidiTimeAxisView ();
 
@@ -73,7 +78,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	MidiStreamView* midi_view();
 
-	void set_height (uint32_t);
+	void set_height (uint32_t, TrackHeightMode m = OnlySelf);
 
 	boost::shared_ptr<ARDOUR::MidiRegion> add_region (ARDOUR::framepos_t, ARDOUR::framecnt_t, bool);
 
@@ -100,11 +105,13 @@ class MidiTimeAxisView : public RouteTimeAxisView
 
 	uint8_t get_channel_for_add () const;
 
-	protected:
+	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&);
+
+protected:
 	void start_step_editing ();
 	void stop_step_editing ();
 
-	private:
+private:
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
 	void model_changed(const std::string& model);
@@ -165,6 +172,7 @@ class MidiTimeAxisView : public RouteTimeAxisView
 	void add_note_selection_region_view (RegionView* rv, uint8_t note, uint16_t chn_mask);
 	void extend_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
 	void toggle_note_selection_region_view (RegionView*, uint8_t note, uint16_t chn_mask);
+	void get_per_region_note_selection_region_view (RegionView*, std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&);
 
 	void ensure_step_editor ();
 

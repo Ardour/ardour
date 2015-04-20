@@ -35,9 +35,11 @@
 
 #include "i18n.h"
 
-using namespace Mackie;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourSurface;
+using namespace Mackie;
+
 using std::string;
 using std::vector;
 

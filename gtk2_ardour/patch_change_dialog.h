@@ -43,13 +43,13 @@ public:
 	PatchChangeDialog (
 		const ARDOUR::BeatsFramesConverter *,
 		ARDOUR::Session *,
-		Evoral::PatchChange<Evoral::MusicalTime> const &,
+		Evoral::PatchChange<Evoral::Beats> const &,
 		ARDOUR::InstrumentInfo&,
 		const Gtk::BuiltinStockID &,
 		bool allow_delete = false
 		);
 
-	Evoral::PatchChange<Evoral::MusicalTime> patch () const;
+	Evoral::PatchChange<Evoral::Beats> patch () const;
 
 private:
 	void fill_bank_combo ();

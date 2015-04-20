@@ -23,6 +23,7 @@
 #include <exception>
 #include <stdexcept>
 #include <sstream>
+#include <cmath>
 
 #include <glibmm/timer.h>
 #include <glibmm/pattern.h>
@@ -63,6 +64,10 @@ using namespace PBD;
 gint AudioEngine::m_meter_exit;
 AudioEngine* AudioEngine::_instance = 0;
 
+#ifdef SILENCE_AFTER
+#define SILENCE_AFTER_SECONDS 600
+#endif
+
 AudioEngine::AudioEngine ()
 	: session_remove_pending (false)
 	, session_removal_countdown (-1)
@@ -89,9 +94,14 @@ AudioEngine::AudioEngine ()
     , _hw_devicelist_update_thread(0)
     , _hw_devicelist_update_count(0)
     , _stop_hw_devicelist_processing(0)
+#ifdef SILENCE_AFTER_SECONDS
+	, _silence_countdown (0)
+	, _silence_hit_cnt (0)
+#endif
 {
 	g_atomic_int_set (&m_meter_exit, 0);
-    start_hw_event_processing();
+	reset_silence_countdown ();
+	start_hw_event_processing();
 	discover_backends ();
 }
 
@@ -148,6 +158,10 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 
 	SampleRateChanged (nframes); /* EMIT SIGNAL */
 
+#ifdef SILENCE_AFTER_SECONDS
+	_silence_countdown = nframes * SILENCE_AFTER_SECONDS;
+#endif
+	
 	return 0;
 }
 
@@ -333,10 +347,12 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (_freewheeling) {
+		PortManager::cycle_end (nframes);
 		return 0;
 	}
 
 	if (!_running) {
+		PortManager::cycle_end (nframes);
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
@@ -347,10 +363,31 @@ AudioEngine::process_callback (pframes_t nframes)
 		last_monitor_check = next_processed_frames;
 	}
 
+#ifdef SILENCE_AFTER_SECONDS
+
+	bool was_silent = (_silence_countdown == 0);
+	
+	if (_silence_countdown >= nframes) {
+		_silence_countdown -= nframes;
+	} else {
+		_silence_countdown = 0;
+	}
+
+	if (!was_silent && _silence_countdown == 0) {
+		_silence_hit_cnt++;
+		BecameSilent (); /* EMIT SIGNAL */
+	}
+
+	if (_silence_countdown == 0 || _session->silent()) {
+		PortManager::silence (nframes);
+	}
+	
+#else	
 	if (_session->silent()) {
 		PortManager::silence (nframes);
 	}
-
+#endif
+	
 	if (session_remove_pending && session_removal_countdown) {
 
 		PortManager::fade_out (session_removal_gain, session_removal_gain_step, nframes);
@@ -373,6 +410,29 @@ AudioEngine::process_callback (pframes_t nframes)
 	return 0;
 }
 
+void
+AudioEngine::reset_silence_countdown ()
+{
+#ifdef SILENCE_AFTER_SECONDS
+	double sr = 48000; /* default in case there is no backend */
+
+	sr = sample_rate();
+
+	_silence_countdown = max (60 * sr, /* 60 seconds */
+	                          sr * (SILENCE_AFTER_SECONDS / ::pow (2.0, (double) _silence_hit_cnt)));
+
+#endif
+}
+
+void
+AudioEngine::launch_device_control_app()
+{
+	if (_state_lock.trylock () ) {
+		_backend->launch_control_app ();
+		_state_lock.unlock ();
+	}
+}
+
 
 void
 AudioEngine::request_backend_reset()
@@ -382,57 +442,60 @@ AudioEngine::request_backend_reset()
     _hw_reset_condition.signal ();
 }
 
+int
+AudioEngine::backend_reset_requested()
+{
+	return g_atomic_int_get (&_hw_reset_request_count);
+}
 
 void
 AudioEngine::do_reset_backend()
 {
-    SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
+	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
     
-    Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
     
-    while (!_stop_hw_reset_processing) {
+	while (!_stop_hw_reset_processing) {
         
-        if (_hw_reset_request_count && _backend) {
-
+		if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
+	        
 			_reset_request_lock.unlock();
-            
+	        
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
-
-            g_atomic_int_dec_and_test (&_hw_reset_request_count);
-
-			std::cout << "AudioEngine::RESET::Reset request processing" << std::endl;
-
-            // backup the device name
-            std::string name = _backend->device_name ();
-            
+			g_atomic_int_dec_and_test (&_hw_reset_request_count);
+	        
+			std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
+			DeviceResetStarted(); // notify about device reset to be started
+	        
+			// backup the device name
+			std::string name = _backend->device_name ();
+	        
 			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
 			stop();
-
+	        
 			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
 			if ( 0 == _backend->reset_device () ) {
-				
+		        
 				std::cout << "AudioEngine::RESET::Starting engine..." << std::endl;
 				start ();
-
+		        
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
 			} else {
 				DeviceError();
 			}
-            
+			
 			std::cout << "AudioEngine::RESET::Done." << std::endl;
 
-            _reset_request_lock.lock();
+			_reset_request_lock.lock();
             
-        } else {
+		} else {
             
-            _hw_reset_condition.wait (_reset_request_lock);
+			_hw_reset_condition.wait (_reset_request_lock);
             
-        }
-    }
+		}
+	}
 }
-
-
 void
 AudioEngine::request_device_list_update()
 {
@@ -738,7 +801,7 @@ void
 AudioEngine::drop_backend ()
 {
 	if (_backend) {
-		_backend->stop ();
+		stop(false);
 		_backend->drop_device ();
 		_backend.reset ();
 		_running = false;
@@ -979,7 +1042,7 @@ AudioEngine::raw_buffer_size (DataType t)
 	return _backend->raw_buffer_size (t);
 }
 
-pframes_t
+framepos_t
 AudioEngine::sample_time ()
 {
 	if (!_backend) {
@@ -988,7 +1051,7 @@ AudioEngine::sample_time ()
 	return _backend->sample_time ();
 }
 
-pframes_t
+framepos_t
 AudioEngine::sample_time_at_cycle_start ()
 {
 	if (!_backend) {
@@ -1066,6 +1129,7 @@ AudioEngine::set_sample_rate (float sr)
 	if (!_backend) {
 		return -1;
 	}
+
 	return _backend->set_sample_rate  (sr);
 }
 
@@ -1134,10 +1198,10 @@ AudioEngine::thread_init_callback (void* arg)
 
 	pthread_set_name (X_("audioengine"));
 
+	SessionEvent::create_per_thread_pool (X_("AudioEngine"), 512);
+
 	PBD::notify_gui_about_thread_creation ("gui", pthread_self(), X_("AudioEngine"), 4096);
 	PBD::notify_gui_about_thread_creation ("midiui", pthread_self(), X_("AudioEngine"), 128);
-
-	SessionEvent::create_per_thread_pool (X_("AudioEngine"), 512);
 
 	AsyncMIDIPort::set_process_thread (pthread_self());
 

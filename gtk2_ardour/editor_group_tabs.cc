@@ -177,19 +177,6 @@ EditorGroupTabs::add_menu_items (Gtk::Menu* m, RouteGroup* g)
 	}
 }
 
-PBD::PropertyList
-EditorGroupTabs::default_properties () const
-{
-	PBD::PropertyList plist;
-
-	plist.add (Properties::active, true);
-	plist.add (Properties::mute, true);
-	plist.add (Properties::solo, true);
-	plist.add (Properties::recenable, true);
-
-	return plist;
-}
-
 RouteList
 EditorGroupTabs::selected_routes () const
 {

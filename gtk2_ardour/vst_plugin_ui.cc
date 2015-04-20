@@ -60,12 +60,12 @@ VSTPluginUI::~VSTPluginUI ()
 }
 
 void
-VSTPluginUI::preset_selected ()
+VSTPluginUI::preset_selected (ARDOUR::Plugin::PresetRecord preset)
 {
 #ifdef GDK_WINDOWING_X11
 	_socket.grab_focus ();
 #endif
-	PlugUIBase::preset_selected ();
+	PlugUIBase::preset_selected (preset);
 }
 
 int

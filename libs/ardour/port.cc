@@ -83,6 +83,26 @@ Port::~Port ()
 	drop ();
 }
 
+
+std::string
+Port::pretty_name(bool fallback_to_name) const
+{
+	if (_port_handle) {
+		std::string value;
+		std::string type;
+		if (0 == port_engine.get_port_property (_port_handle,
+					"http://jackaudio.org/metadata/pretty-name",
+					value, type))
+		{
+			return value;
+		}
+	}
+	if (fallback_to_name) {
+		return name ();
+	}
+	return "";
+}
+
 void
 Port::drop ()
 {

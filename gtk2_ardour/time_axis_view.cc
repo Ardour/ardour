@@ -568,8 +568,16 @@ TimeAxisView::set_height_enum (Height h, bool apply_to_selection)
 }
 
 void
-TimeAxisView::set_height (uint32_t h)
+TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
+	uint32_t lanes = 0;
+	if (m == TotalHeight) {
+		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+			if ( !(*i)->hidden()) ++lanes;
+		}
+	}
+	h /= (lanes + 1);
+
 	if (h < preset_height (HeightSmall)) {
 		h = preset_height (HeightSmall);
 	}
@@ -588,6 +596,12 @@ TimeAxisView::set_height (uint32_t h)
 	if (selection_group->visible ()) {
 		/* resize the selection rect */
 		show_selection (_editor.get_selection().time);
+	}
+
+	if (m != OnlySelf) {
+		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+			(*i)->set_height(h, OnlySelf);
+		}
 	}
 
 	_editor.override_visible_track_count ();
@@ -1028,7 +1042,7 @@ TimeAxisView::get_selection_rect (uint32_t id)
 
 		rect = new SelectionRect;
 
-		rect->rect = new ArdourCanvas::TimeRectangle (selection_group);
+		rect->rect = new ArdourCanvas::Rectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
 		rect->rect->set_outline (false);
 		rect->rect->set_fill_color (ARDOUR_UI::config()->color_mod ("selection rect", "selection rect"));
@@ -1088,7 +1102,7 @@ TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
  *  @param result Filled in with selectable things.
  */
 void
-TimeAxisView::get_selectables (framepos_t /*start*/, framepos_t /*end*/, double /*top*/, double /*bot*/, list<Selectable*>& /*result*/)
+TimeAxisView::get_selectables (framepos_t /*start*/, framepos_t /*end*/, double /*top*/, double /*bot*/, list<Selectable*>& /*result*/, bool /*within*/)
 {
 	return;
 }
@@ -1173,7 +1187,7 @@ TimeAxisView::compute_heights ()
 
 	window.add (one_row_table);
 	test_button->set_name ("mute button");
-	test_button->set_text (_("M"));
+	test_button->set_text (S_("Mute|M"));
 	test_button->set_tweaks (ArdourButton::TrackHeader);
 
 	one_row_table.set_border_width (border_width);

@@ -18,7 +18,7 @@ scanner_app_src = [
     ]
 
 # needed for code used from libardour
-I18N_PACKAGE = 'ardour3'
+I18N_PACKAGE = 'ardour'
 
 def options(opt):
     autowaf.set_options(opt)
@@ -68,21 +68,23 @@ def build(bld):
         obj.use = [ 'libpbd' ]
     else:
         obj = bld (features = 'cxx c cxxprogram')
-        if bld.is_defined('WINDOWS_VST_SUPPORT'):
-            obj.source = ( 'scanner.cc', 'vstwin.c' )
-            obj.uselib = ['GIOMM', 'DL', 'GDI32']
-        else:
-            obj.source = ( 'scanner.cc' )
-            obj.uselib = ['GIOMM', 'DL']
+        obj.source = ( 'scanner.cc' )
         obj.target = 'ardour-vst-scanner'
-        obj.use = [ 'libpbd' ]
+        if bld.is_defined('WINDOWS_VST_SUPPORT'):
+            bld (features = 'c', name='vstwin', source='vstwin.c', uselib = 'GIOMM', includes  = [ '../pbd/', '../ardour/', '.' ])
+            obj.uselib = ['GIOMM', 'DL', 'GDI32']
+            obj.linkflags = ['-mwindows']
+            obj.use = [ 'libpbd', 'vstwin' ]
+        else:
+            obj.uselib = ['GIOMM', 'DL']
+            obj.use = [ 'libpbd' ]
 
     obj.includes  = [ '../pbd/', '../ardour/', '.' ]
     obj.defines = [
         '_POSIX_SOURCE',
         'USE_WS_PREFIX',
         'VST_SCANNER_APP',
-        'PACKAGE="' + I18N_PACKAGE + '"',
+        'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
         'LIBARDOUR="' + bld.env['lwrcase_dirname'] + '"',
         ]
     obj.install_path = os.path.join(bld.env['LIBDIR'])

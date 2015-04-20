@@ -37,10 +37,11 @@
  * mackie_control_protocol.cc 
  */
 
-using namespace Mackie;
+using std::string;
 using namespace ARDOUR;
 using namespace PBD;
-using std::string;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 LedState
 MackieControlProtocol::shift_press (Button &)

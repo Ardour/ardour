@@ -23,6 +23,7 @@
 #include "surface.h"
 #include "control_group.h"
 
+using namespace ArdourSurface;
 using namespace Mackie;
 
 Control*

@@ -54,14 +54,12 @@ public:
 	void set_descriptor(const Evoral::Parameter&           param,
 	                    const Evoral::ParameterDescriptor& desc);
 
-	URIMap& uri_map() { return _uri_map; }
-
 private:
 	typedef std::map<Evoral::Parameter, Evoral::ParameterDescriptor> Descriptors;
 
-	EventTypeMap(URIMap& uri_map) : _uri_map(uri_map) {}
+	EventTypeMap(URIMap* uri_map) : _uri_map(uri_map) {}
 
-	URIMap&     _uri_map;
+	URIMap*     _uri_map;
 	Descriptors _descriptors;
 
 	static EventTypeMap* event_type_map;

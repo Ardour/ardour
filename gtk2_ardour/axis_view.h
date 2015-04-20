@@ -70,11 +70,18 @@ class AxisView : public virtual Selectable, public PBD::ScopedConnectionList, pu
 		property_hashtable.emplace(property_name, s.str());
 		gui_object_state().set_property<T> (state_id(), property_name, value);
 	}
+    
+	void cleanup_gui_properties () {
+		/* remove related property node from the GUI state */
+		gui_object_state().remove_node (state_id());
+		property_hashtable.clear ();
+	}
 
 	bool marked_for_display () const;
 	virtual bool set_marked_for_display (bool);
 
 	static GUIObjectState& gui_object_state();
+	void clear_property_cache() { property_hashtable.clear(); }
 	
   protected:
 

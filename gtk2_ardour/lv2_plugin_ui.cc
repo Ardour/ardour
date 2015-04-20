@@ -282,7 +282,24 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_lv2->enable_ui_emission();
 	}
 
-	const LilvUI* ui = (const LilvUI*)_lv2->c_ui();
+	const LilvUI*   ui     = (const LilvUI*)_lv2->c_ui();
+	const LilvNode* bundle = lilv_ui_get_bundle_uri(ui);
+	const LilvNode* binary = lilv_ui_get_binary_uri(ui);
+#ifdef HAVE_LILV_0_21_3
+	char* ui_bundle_path = lilv_file_uri_parse(lilv_node_as_uri(bundle), NULL);
+	char* ui_binary_path = lilv_file_uri_parse(lilv_node_as_uri(binary), NULL);
+#else
+	char* ui_bundle_path = strdup(lilv_uri_to_path(lilv_node_as_uri(bundle)));
+	char* ui_binary_path = strdup(lilv_uri_to_path(lilv_node_as_uri(binary)));
+#endif
+	if (!ui_bundle_path || !ui_binary_path) {
+		error << _("failed to get path for UI bindle or binary") << endmsg;
+		free(ui_bundle_path);
+		free(ui_binary_path);
+		free(features);
+		return;
+	}
+
 	_inst = suil_instance_new(
 		ui_host,
 		this,
@@ -290,10 +307,12 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_lv2->uri(),
 		lilv_node_as_uri(lilv_ui_get_uri(ui)),
 		lilv_node_as_uri((const LilvNode*)_lv2->c_ui_type()),
-		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_bundle_uri(ui))),
-		lilv_uri_to_path(lilv_node_as_uri(lilv_ui_get_binary_uri(ui))),
+		ui_bundle_path,
+		ui_binary_path,
 		features);
 
+	free(ui_bundle_path);
+	free(ui_binary_path);
 	free(features);
 
 #define GET_WIDGET(inst) suil_instance_get_widget((SuilInstance*)inst);
@@ -322,6 +341,8 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 				container->add(*Gtk::manage(Glib::wrap(c_widget)));
 			}
 			container->show_all();
+			gtk_widget_set_can_focus(c_widget, true);
+			gtk_widget_grab_focus(c_widget);
 		} else {
 			_external_ui_ptr = (struct lv2_external_ui*)GET_WIDGET(_inst);
 		}
@@ -346,6 +367,15 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	if (_lv2->has_message_output()) {
 		_message_update_connection = Timers::super_rapid_connect (
 			sigc::mem_fun(*this, &LV2PluginUI::update_timeout));
+	}
+}
+
+void
+LV2PluginUI::grab_focus()
+{
+	if (_inst && !_lv2->is_external_ui()) {
+		GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
+		gtk_widget_grab_focus(c_widget);
 	}
 }
 

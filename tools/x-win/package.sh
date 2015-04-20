@@ -2,7 +2,12 @@
 
 # we assume this script is <ardour-src>/tools/x-win/package.sh
 pushd "`/usr/bin/dirname \"$0\"`" > /dev/null; this_script_dir="`pwd`"; popd > /dev/null
+cd $this_script_dir
+
+. ../define_versions.sh
+
 cd $this_script_dir/../..
+
 test -f gtk2_ardour/wscript || exit 1
 
 # Defaults (overridden by environment)
@@ -23,11 +28,12 @@ while [ $# -gt 0 ] ; do
 done
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
+# registry keys based on this are used there
 PROGRAM_NAME=Ardour
 PRODUCT_NAME=ardour
-PROGRAM_VERSION=3
+PROGRAM_VERSION=${major_version}
 
-LOWERCASE_DIRNAME=ardour3 # see wscript 'lwrcase_dirname' used for lib/ardour3 and share/ardour3
+LOWERCASE_DIRNAME=ardour${major_version}
 STATEFILE_SUFFIX=ardour # see filename_extensions.cc
 
 if test -n "$MIXBUS"; then
@@ -41,6 +47,8 @@ PRODUCT_EXE=${PRODUCT_NAME}.exe
 PRODUCT_ICON=${PRODUCT_NAME}.ico
 
 ###############################################################################
+
+echo "Packaging $PRODUCT_ID"
 
 if test "$XARCH" = "x86_64" -o "$XARCH" = "amd64"; then
 	echo "Target: 64bit Windows (x86_64)"
@@ -68,13 +76,15 @@ test -f ${SRCDIR}/$1 || curl -k -L -o ${SRCDIR}/$1 $2
 ################################################################################
 set -e
 
-ARDOURVERSION=$(git describe | sed 's/-g.*$//')
+ARDOURVERSION=${release_version}
 ARDOURDATE=$(date -R)
-BINVERSION=$(git describe | sed 's/-g.*$//' | sed 's/-/./')
-if ! test -f build/gtk2_ardour/ardour-${BINVERSION}.exe; then
-	echo "*** Please compile ardour ${ARDOURVERSION} first."
+if ! test -f build/gtk2_ardour/ardour-${ARDOURVERSION}.exe; then
+	echo "*** Please compile  ardour-${ARDOURVERSION}.exe first."
 	exit 1
 fi
+
+echo " === bundle to $DESTDIR"
+
 ./waf install
 
 ################################################################################
@@ -95,6 +105,7 @@ mkdir -p $ALIBDIR/surfaces
 mkdir -p $ALIBDIR/backends
 mkdir -p $ALIBDIR/panners
 mkdir -p $ALIBDIR/vamp
+mkdir -p $ALIBDIR/suil
 
 cp build/libs/gtkmm2ext/gtkmm2ext-*.dll $DESTDIR/bin/
 cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
@@ -121,8 +132,14 @@ cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 
 cp -r build/libs/LV2 $ALIBDIR/
 cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvampplugins.dll
+cp $PREFIX/lib/suil-*/*.dll $ALIBDIR/suil/ || true
 
-mv $ALIBDIR/surfaces/ardourcp-*.dll $DESTDIR/bin/
+# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
+if test -d $PREFIX/lib/lv2/lv2core.lv2 ; then
+	cp -R $PREFIX/lib/lv2/lv2core.lv2 $ALIBDIR/LV2/
+fi
+
+mv $ALIBDIR/surfaces/ardourcp*.dll $DESTDIR/bin/
 
 # TODO use -static-libgcc -static-libstdc++ -- but for .exe files only
 if update-alternatives --query ${XPREFIX}-gcc | grep Value: | grep -q win32; then
@@ -141,6 +158,7 @@ if test -f /usr/${XPREFIX}/lib/libwinpthread-1.dll; then
 fi
 
 cp -r $PREFIX/share/${LOWERCASE_DIRNAME} $DESTDIR/share/
+cp -r $PREFIX/share/locale $DESTDIR/share/
 cp -r $PREFIX/etc/${LOWERCASE_DIRNAME}/* $DESTDIR/share/${LOWERCASE_DIRNAME}/
 
 cp COPYING $DESTDIR/share/
@@ -151,9 +169,12 @@ cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
 cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 
 # clean build-dir after depoyment
+echo " === bundle completed, cleaning up"
 ./waf uninstall
 echo " === complete"
 du -sh $DESTDIR
+
+( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt
 
 ################################################################################
 ### get video tools
@@ -200,6 +221,31 @@ EOF
 else
 	OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}-${WARCH}-Setup.exe"
 	VERSIONINFO="Optimized Version."
+fi
+
+################################################################################
+### Mixbus plugins, etc
+if test -n "$MIXBUS"; then
+
+	mkdir -p $ALIBDIR/LV2
+	METERS_VERSION=$(curl -s -S http://gareus.org/x42/win/x42-meters.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/win/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
+		"${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
+	unzip -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
+
+	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/win/setBfree.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/win/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip \
+		"${SRCDIR}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
+	unzip -d "$ALIBDIR/LV2/" "${SRCDIR}/setBfree-lv2-${WARCH}-${SETBFREE_VERSION}.zip"
+
+	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/win/x42-midifilter.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/win/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip \
+		"${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	unzip -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+
 fi
 
 ################################################################################
@@ -272,6 +318,44 @@ cat >> $NSISFILE << EOF
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
+
+
+Function .onInit
+
+  ReadRegStr \$R0 HKLM \
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" \
+    "UninstallString"
+  StrCmp \$R0 "" done
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+    "${PROGRAM_NAME} is already installed. Click 'OK' to remove the previous version or 'Cancel' to cancel this upgrade." \
+    IDOK uninst
+    Abort
+
+  uninst:
+    ClearErrors
+    ExecWait '\$R0 _?=\$INSTDIR'
+    IfErrors uninstall_error
+
+    ReadRegStr \$R1 HKLM \
+      "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" \
+      "UninstallString"
+    StrCmp \$R1 "" 0 done
+
+    Delete "\$INSTDIR\\uninstall.exe"
+    RMDir "\$INSTDIR"
+    goto done
+
+  uninstall_error:
+
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Uninstaller did not complete successfully. Continue at your own risk..." \
+      IDOK done
+
+  done:
+
+FunctionEnd
+
 
 Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   SectionIn RO
@@ -355,10 +439,6 @@ Section "Uninstall"
   SetShellVarContext all
   DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}"
   DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}"
-# XXX XXX XXX
-# TODO: remove the following line before release. But for now, clean up old version agnnstic registry
-  DeleteRegKey HKLM "Software\\${PROGRAM_NAME}"
-# XXX XXX XXX
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"
@@ -384,4 +464,4 @@ echo " === Building Windows Installer (lzma compression takes ages)"
 fi
 time makensis -V2 $NSISFILE
 rm -rf $DESTDIR
-ls -lh "$OUTFILE"
+ls -lgGh "$OUTFILE"

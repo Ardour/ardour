@@ -3,6 +3,8 @@
 
 #include "controls.h"
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 class Fader : public Control
@@ -26,6 +28,7 @@ class Fader : public Control
 	float position;
 };
 
+}
 }
 
 #endif

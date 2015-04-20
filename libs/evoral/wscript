@@ -71,9 +71,10 @@ def build(bld):
     libsmf.name         = 'libsmf'
     libsmf.target       = 'smf'
     libsmf.uselib       = 'GLIB'
-    libsmf.cxxflags     = [ '-fPIC' ]
-    libsmf.cflags       = [ '-fPIC' ]
     libsmf.install_path = bld.env['LIBDIR']
+    if bld.env['build_target'] != 'mingw':
+        libsmf.cxxflags     = [ '-fPIC' ]
+        libsmf.cflags       = [ '-fPIC' ]
 
     lib_source = '''
             src/Control.cpp
@@ -137,6 +138,7 @@ def build(bld):
                 test/SequenceTest.cpp
                 test/SMFTest.cpp
                 test/RangeTest.cpp
+                test/CurveTest.cpp
                 test/testrunner.cpp
         '''
         obj.includes     = ['.', './src']

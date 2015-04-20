@@ -40,6 +40,7 @@ MidiPort::MidiPort (const std::string& name, PortFlags flags)
 	, _resolve_required (false)
 	, _input_active (true)
 	, _always_parse (false)
+	, _trace_on (false)
 {
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
 }
@@ -62,7 +63,7 @@ MidiPort::cycle_start (pframes_t nframes)
 		port_engine.midi_clear (port_engine.get_buffer (_port_handle, nframes));
 	}
 
-	if (_always_parse) {
+	if (_always_parse || (receives_input() && _trace_on)) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
 
 		/* dump incoming MIDI to parser */
@@ -116,6 +117,10 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				if (buf[0] == 0xfe) {
 					/* throw away active sensing */
 					continue;
+				} else if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
+					/* normalize note on with velocity 0 to proper note off */
+					buf[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
+					buf[2] = 0x40;  /* default velocity */
 				}
 				
 				/* check that the event is in the acceptable time range */
@@ -203,9 +208,25 @@ MidiPort::flush_buffers (pframes_t nframes)
 			port_buffer = port_engine.get_buffer (_port_handle, nframes);
 		}
 
+
 		for (MidiBuffer::iterator i = _buffer->begin(); i != _buffer->end(); ++i) {
 
 			const Evoral::MIDIEvent<MidiBuffer::TimeType> ev (*i, false);
+
+
+			if (sends_output() && _trace_on) {
+				uint8_t const * const buf = ev.buffer();
+				const framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();				
+
+				_self_parser.set_timestamp (now + ev.time());
+				
+				uint32_t limit = ev.size();
+				
+				for (size_t n = 0; n < limit; ++n) {
+					_self_parser.scanner (buf[n]);
+				}
+			}
+
 
 			// event times are in frames, relative to cycle start
 
@@ -286,4 +307,10 @@ void
 MidiPort::set_always_parse (bool yn)
 {
 	_always_parse = yn;
+}
+
+void
+MidiPort::set_trace_on (bool yn)
+{
+	_trace_on = yn;
 }

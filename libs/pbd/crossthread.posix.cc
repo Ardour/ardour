@@ -1,3 +1,5 @@
+#include <poll.h>
+
 CrossThreadChannel::CrossThreadChannel (bool non_blocking)
         : receive_channel (0)
 {
@@ -61,8 +63,37 @@ CrossThreadChannel::deliver (char msg)
         return ::write (fds[1], &msg, 1);
 }
 
-int 
-CrossThreadChannel::receive (char& msg)
+bool
+CrossThreadChannel::poll_for_request()
 {
+	struct pollfd pfd[1];
+	pfd[0].fd = fds[0];
+	pfd[0].events = POLLIN|POLLERR|POLLHUP;
+	while(true) {
+		if (poll (pfd, 1, -1) < 0) {
+			if (errno == EINTR) {
+				continue;
+			}
+			break;
+		}
+		if (pfd[0].revents & ~POLLIN) {
+			break;
+		}
+
+		if (pfd[0].revents & POLLIN) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int 
+CrossThreadChannel::receive (char& msg, bool wait)
+{
+	if (wait) {
+		if (!poll_for_request ()) {
+			return -1;
+		}
+	}
         return ::read (fds[0], &msg, 1);
 }

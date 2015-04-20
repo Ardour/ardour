@@ -154,7 +154,7 @@ NumberMetadataField::load_data (ARDOUR::SessionMetadata const & data)
 void
 NumberMetadataField::update_value ()
 {
-	// Accpt only numbers
+	// Accept only numbers that will fit into a uint32_t
 	uint32_t number = str_to_uint (entry->get_text());
 	_value = uint_to_str (number);
 	entry->set_text (_value);
@@ -215,6 +215,126 @@ NumberMetadataField::str_to_uint (string const & str) const
 	return result;
 }
 
+
+
+/* EAN13MetadataField */
+
+EAN13MetadataField::EAN13MetadataField (Getter getter, Setter setter, string const & field_name, guint width) :
+  MetadataField (field_name),
+  getter (getter),
+  setter (setter),
+  width (width)
+{
+	entry = 0;
+	label = 0;
+	value_label = 0;
+	status_label = Gtk::manage (new Gtk::Label (""));
+}
+
+MetadataPtr
+EAN13MetadataField::copy ()
+{
+	return MetadataPtr (new EAN13MetadataField (getter, setter, _name, width));
+}
+
+void
+EAN13MetadataField::save_data (ARDOUR::SessionMetadata & data) const
+{
+	CALL_MEMBER_FN (data, setter) (_value);
+}
+
+void
+EAN13MetadataField::load_data (ARDOUR::SessionMetadata const & data)
+{
+	_value = CALL_MEMBER_FN (data, getter) ();
+	if (entry) {
+		entry->set_text (_value);
+	}
+	update_status ();
+}
+
+void
+EAN13MetadataField::update_value ()
+{
+	// Accept only numeric characters
+	_value = numeric_string (entry->get_text());
+	entry->set_text (_value);
+	update_status ();
+}
+
+void
+EAN13MetadataField::update_status ()
+{
+	int len = _value.length ();
+	if (len == 13) {
+		// calculate EAN-13 modulo 10 check digit
+		int sum = 0;
+		const char *p = _value.c_str();
+		for (int i =0; i < 12; i++) {
+			char c = p[i] - '0';
+			if (i % 2) {
+				sum += c;
+			} else {
+				sum += c * 3;
+			}
+		}
+		sum %= 10;
+		if (sum == p[12] - '0') {
+			status_label->set_markup (string_compose(
+						"<span color=\"green\">%1: %2</span>",
+						_("EAN Check digit OK"), sum));
+		} else {
+			status_label->set_markup (string_compose(
+						"<span color=\"#ffa755\">%1: %2 (%3 %4)</span>",
+						_("EAN Check digit error"), p[12] - '0', _("expected"), sum));
+		}
+	} else if (len > 0) {
+		status_label->set_markup (string_compose(
+					"<span color=\"#ffa755\">%1: %2 (&lt;13)</span>",
+					_("EAN Length error"), len));
+	} else {
+		status_label->set_text("");
+	}
+}
+
+Gtk::Widget &
+EAN13MetadataField::name_widget ()
+{
+	label = Gtk::manage (new Gtk::Label(_name + ':'));
+	label->set_alignment (1, 0.5);
+	return *label;
+}
+
+Gtk::Widget &
+EAN13MetadataField::value_widget ()
+{
+	value_label = Gtk::manage (new Gtk::Label(_value));
+	return *value_label;
+}
+
+Gtk::Widget &
+EAN13MetadataField::edit_widget ()
+{
+	entry = Gtk::manage (new Gtk::Entry());
+
+	entry->set_text (_value);
+	entry->set_width_chars (width);
+	entry->set_max_length (13);
+	entry->signal_changed().connect (sigc::mem_fun(*this, &EAN13MetadataField::update_value));
+
+	return *entry;
+}
+
+string
+EAN13MetadataField::numeric_string (string const & str) const
+{
+	string tmp (str);
+	string::size_type i;
+	while ((i = tmp.find_first_not_of("1234567890")) != string::npos) {
+		tmp.erase (i, 1);
+	}
+	return tmp;
+}
 
 /* SessionMetadataSet */
 
@@ -609,6 +729,14 @@ SessionMetadataDialog<DataSet>::init_album_data ()
 
 	ptr = MetadataPtr (new TextMetadataField (&ARDOUR::SessionMetadata::isrc, &ARDOUR::SessionMetadata::set_isrc, _("ISRC")));
 	data_set->add_data_field (ptr);
+
+	ptr = MetadataPtr (new EAN13MetadataField (&ARDOUR::SessionMetadata::barcode, &ARDOUR::SessionMetadata::set_barcode, _("EAN barcode")));
+	data_set->add_data_field (ptr);
+
+	// EAN13MetadataField is the only kind of MetadataField which has a status label.
+	EAN13MetadataField &emf = (EAN13MetadataField &) *ptr;
+	((Gtk::VBox &) data_set->get_widget()).pack_end (*emf.status_label);
+	emf.update_status ();
 }
 
 template <typename DataSet>

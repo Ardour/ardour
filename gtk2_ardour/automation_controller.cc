@@ -84,6 +84,7 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 		} else {
 			but->set_name("generic button");
 		}
+		but->set_controllable(ac);
 		but->signal_clicked.connect(
 			sigc::mem_fun(*this, &AutomationController::toggled));
 
@@ -303,10 +304,10 @@ AutomationController::on_button_release(GdkEventButton* ev)
 			                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
 		}
 		if (is_low) {
-			for (double beats = 1.0; beats <= 16; ++beats) {
-				items.push_back(MenuElem(string_compose(_("Set to %1 beat(s)"), (int)beats),
+			for (int beats = 1; beats <= 16; ++beats) {
+				items.push_back(MenuElem (string_compose(P_("Set to %1 beat", "Set to %1 beats", beats), beats),
 				                         sigc::bind(sigc::mem_fun(*this, &AutomationController::set_freq_beats),
-				                                    beats)));
+				                                    (double)beats)));
 			}
 		}
 		menu->popup(1, ev->time);

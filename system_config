@@ -1,40 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Ardour>
-  <MIDI-port tag="@MIDITAG@" device="ardour" type="@MIDITYPE@" mode="duplex"/>
   <Config>
-    <Option name="minimum-disk-io-bytes" value="262144"/>
-    <Option name="track-buffer-seconds" value="5.000000"/>
-    <Option name="mute-affects-pre-fader" value="1"/>
+    <Option name="auto-connect-standard-busses" value="1"/>
+    <Option name="output-auto-connect" value="2"/>
+    <Option name="input-auto-connect" value="1"/>
+    <Option name="trace-midi-input" value="0"/>
+    <Option name="trace-midi-output" value="0"/>
+    <Option name="send-mtc" value="0"/>
+    <Option name="send-mmc" value="1"/>
+    <Option name="send-midi-clock" value="0"/>
+    <Option name="mmc-control" value="1"/>
+    <Option name="midi-feedback" value="0"/>
+    <Option name="mmc-receive-device-id" value="127"/>
+    <Option name="mmc-send-device-id" value="0"/>
+    <Option name="initial-program-change" value="-1"/>
+    <Option name="display-first-midi-bank-as-zero" value="0"/>
+    <Option name="inter-scene-gap-msecs" value="1"/>
+    <Option name="mtc-qf-speed-tolerance" value="5"/>
+    <Option name="timecode-sync-frame-rate" value="1"/>
+    <Option name="timecode-source-is-synced" value="0"/>
+    <Option name="timecode-source-2997" value="0"/>
+    <Option name="sync-source" value="0"/>
+    <Option name="ltc-source-port" value="system:capture_1"/>
+    <Option name="send-ltc" value="0"/>
+    <Option name="ltc-send-continuously" value="1"/>
+    <Option name="ltc-output-port" value=""/>
+    <Option name="ltc-output-volume" value="0.125893"/>
+    <Option name="feedback-interval-ms" value="100"/>
+    <Option name="use-tranzport" value="0"/>
+    <Option name="remote-model" value="1"/>
+    <Option name="minimum-disk-read-bytes" value="262144"/>
+    <Option name="minimum-disk-write-bytes" value="262144"/>
+    <Option name="midi-readahead" value="1"/>
+    <Option name="capture-buffer-seconds" value="5"/>
+    <Option name="playback-buffer-seconds" value="5"/>
+    <Option name="midi-track-buffer-seconds" value="1"/>
+    <Option name="disk-choice-space-threshold" value="57600000"/>
+    <Option name="auto-analyse-audio" value="0"/>
+    <Option name="osc-port" value="3819"/>
+    <Option name="use-osc" value="0"/>
+    <Option name="automation-follows-regions" value="1"/>
+    <Option name="region-boundaries-from-selected-tracks" value="1"/>
+    <Option name="region-boundaries-from-onscreen_tracks" value="1"/>
+    <Option name="default-fade-shape" value="0"/>
+    <Option name="region-selection-after-split" value="0"/>
+    <Option name="mute-affects-pre-fader" value="0"/>
     <Option name="mute-affects-post-fader" value="1"/>
     <Option name="mute-affects-control-outs" value="1"/>
     <Option name="mute-affects-main-outs" value="1"/>
-    <Option name="monitoring-model" value="ExternalMonitoring"/>
-    <Option name="solo-latch" value="1"/>
-    <Option name="mtc-port" value="mtc"/>
-    <Option name="mmc-port" value="mmc"/>
-    <Option name="midi-port" value="control"/>
-    <Option name="jack-time-master" value="1"/>
-    <Option name="trace-midi-input" value="0"/>
-    <Option name="trace-midi-output" value="0"/>
+    <Option name="monitoring-model" value="2"/>
+    <Option name="listen-position" value="0"/>
+    <Option name="pfl-position" value="1"/>
+    <Option name="afl-position" value="1"/>
+    <Option name="use-monitor-bus" value="0"/>
+    <Option name="solo-control-is-listen-control" value="0"/>
+    <Option name="exclusive-solo" value="0"/>
+    <Option name="latched-record-enable" value="0"/>
+    <Option name="all-safe" value="0"/>
+    <Option name="show-solo-mutes" value="1"/>
+    <Option name="solo-mute-override" value="0"/>
+    <Option name="tape-machine-mode" value="0"/>
+    <Option name="solo-mute-gain" value="0"/>
+    <Option name="monitor-bus-preferred-bundle" value=""/>
+    <Option name="quieten-at-speed" value="1"/>
+    <Option name="link-send-and-route-panner" value="1"/>
+    <Option name="midi-audition-synth-uri" value="https://community.ardour.org/node/7596"/>
+    <Option name="clicking" value="0"/>
+    <Option name="click-sound" value=""/>
+    <Option name="click-emphasis-sound" value=""/>
+    <Option name="click-gain" value="1"/>
+    <Option name="skip-playback" value="1"/>
     <Option name="plugins-stop-with-transport" value="0"/>
-    <Option name="no-sw-monitoring" value="0"/>
     <Option name="stop-recording-on-xrun" value="0"/>
     <Option name="create-xrun-marker" value="1"/>
     <Option name="stop-at-session-end" value="0"/>
-    <Option name="timecode-source-is-synced" value="1"/>
-    <Option name="auditioner-left-out" value="default"/>
-    <Option name="auditioner-right-out" value="default"/>
-    <Option name="quieten-at-speed" value="1.000000"/>
-    <Option name="use-vst" value="1"/>
-    <Option name="use-tranzport" value="1"/>
-    <Option name="disk-choice-space-threshold" value="57600000"/>
+    <Option name="seamless-loop" value="0"/>
+    <Option name="loop-is-mode" value="0"/>
+    <Option name="preroll" value="0"/>
+    <Option name="postroll" value="0"/>
+    <Option name="rf-speed" value="2"/>
+    <Option name="shuttle-speed-factor" value="1"/>
+    <Option name="shuttle-speed-threshold" value="5"/>
+    <Option name="shuttle-behaviour" value="0"/>
+    <Option name="shuttle-units" value="0"/>
+    <Option name="locate-while-waiting-for-sync" value="0"/>
+    <Option name="disable-disarm-during-roll" value="0"/>
+    <Option name="meter-falloff" value="13.3"/>
+    <Option name="auditioner-output-left" value="default"/>
+    <Option name="auditioner-output-right" value="default"/>
+    <Option name="replicate-missing-region-channels" value="0"/>
+    <Option name="hiding-groups-deactivates-groups" value="1"/>
+    <Option name="verify-remove-last-capture" value="1"/>
+    <Option name="save-history" value="1"/>
+    <Option name="save-history-depth" value="20"/>
+    <Option name="history-depth" value="20"/>
+    <Option name="use-overlap-equivalency" value="0"/>
     <Option name="periodic-safety-backups" value="1"/>
     <Option name="periodic-safety-backup-interval" value="120"/>
-    <Option name="timecode-format" value="timecode_30"/>
-    <Option name="seamless-loop" value="1"/>
+    <Option name="automation-interval-msecs" value="30"/>
+    <Option name="default-session-parent-dir" value="~"/>
+    <Option name="allow-special-bus-removal" value="0"/>
+    <Option name="processor-usage" value="-1"/>
+    <Option name="max-gain" value="2"/>
+    <Option name="max-recent-sessions" value="10"/>
+    <Option name="automation-thinning-factor" value="20"/>
+    <Option name="range-location-minimum" value="128"/>
+    <Option name="edit-mode" value="0"/>
+    <Option name="new-plugins-active" value="1"/>
+    <Option name="use-plugin-own-gui" value="1"/>
+    <Option name="use-windows-vst" value="1"/>
+    <Option name="use-lxvst" value="1"/>
+    <Option name="discover-vst-on-start" value="0"/>
+    <Option name="vst-scan-timeout" value="600"/>
+    <Option name="discover-audio-units" value="0"/>
+    <Option name="plugin-path-vst" value="@default@"/>
+    <Option name="plugin-path-lxvst" value="@default@"/>
+    <Option name="denormal-protection" value="0"/>
+    <Option name="denormal-model" value="3"/>
+    <Option name="osx-pingback-url" value="http://community.ardour.org/pingback/osx/"/>
+    <Option name="tutorial-manual-url" value="http://ardour.org/flossmanual"/>
+    <Option name="reference-manual-url" value="http://manual.ardour.org/"/>
+    <Option name="video-advanced-setup" value="0"/>
+    <Option name="video-server-url" value="http://localhost:1554"/>
+    <Option name="video-server-docroot" value="/"/>
+    <Option name="show-video-export-info" value="1"/>
+    <Option name="show-video-server-dialog" value="0"/>
   </Config>
-  <extra>
-    <Keyboard edit-button="3" edit-modifier="4" delete-button="3" delete-modifier="1" snap-modifier="32"/>
-  </extra>
+  <Metadata/>
+  <ControlProtocols/>
 </Ardour>
-

@@ -16,6 +16,7 @@ TestNeedingSession::setUp ()
 {
 	const string session_name("test_session");
 	std::string new_session_dir = Glib::build_filename (new_test_output_dir(), session_name);
+	create_and_start_dummy_backend ();
 	_session = load_session (new_session_dir, "test_session");
 }
 
@@ -23,8 +24,6 @@ void
 TestNeedingSession::tearDown ()
 {
 	delete _session;
-	AudioEngine::instance()->remove_session ();
-	AudioEngine::instance()->stop ();
-	AudioEngine::destroy ();
+	stop_and_destroy_backend ();
 	_session = 0;
 }

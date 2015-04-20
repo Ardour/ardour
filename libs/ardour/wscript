@@ -10,9 +10,7 @@ import sys
 # default state file version for this build
 CURRENT_SESSION_FILE_VERSION = 3001
 
-# Variables for 'waf dist'
-APPNAME = 'libardour3'
-I18N_PACKAGE = 'ardour3'
+I18N_PACKAGE = 'ardour'
 
 # Mandatory variables
 top = '.'
@@ -111,6 +109,7 @@ libardour_sources = [
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',
+        'midi_channel_filter.cc',
         'midi_clock_slave.cc',
         'midi_diskstream.cc',
         'midi_model.cc',
@@ -134,6 +133,7 @@ libardour_sources = [
         'mididm.cc',
         'mtdm.cc',
         'mute_master.cc',
+        'note_fixer.cc',
         'onset_detector.cc',
         'operations.cc',
         'pan_controllable.cc',
@@ -217,7 +217,6 @@ libardour_sources = [
         'unknown_processor.cc',
         'user_bundle.cc',
         'utils.cc',
-        'version.cc',
         'vumeterdsp.cc',
         'worker.cc'
 ]
@@ -243,11 +242,6 @@ def configure(conf):
     conf.load('compiler_cxx')
     conf.load('gas')
     # we don't use hard-coded micro versions with ardour, so hard code it to zero
-    autowaf.build_version_files(
-        path_prefix + 'ardour/version.h',
-        path_prefix + 'version.cc',
-        'libardour3', conf.env['MAJOR'], conf.env['MINOR'], 0,
-        'LIBARDOUR_API', 'ardour/libardour_visibility.h')
     autowaf.configure(conf)
     autowaf.check_pkg(conf, 'aubio', uselib_store='AUBIO',
                       atleast_version='0.3.2')
@@ -284,6 +278,8 @@ def configure(conf):
                           atleast_version='0.16.0', mandatory=False)
         autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV_0_19_2',
                           atleast_version='0.19.2', mandatory=False)
+        autowaf.check_pkg(conf, 'lilv-0', uselib_store='LILV_0_21_3',
+                          atleast_version='0.21.3', mandatory=False)
         autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL',
                           atleast_version='0.6.0', mandatory=False)
         conf.define ('LV2_SUPPORT', 1)
@@ -367,7 +363,7 @@ def build(bld):
     obj.vnum         = LIBARDOUR_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [
-        'PACKAGE="' + I18N_PACKAGE + '"',
+        'PACKAGE="' + I18N_PACKAGE + str(bld.env['MAJOR']) + '"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -390,7 +386,7 @@ def build(bld):
         obj.includes += [ '../fst' ]
         obj.defines += [ 'WINDOWS_VST_SUPPORT' ]
         if bld.env['build_target'] == 'mingw':
-            obj.source += [ '../fst/vstwin.c']
+            obj.use += [ 'vstwin' ]
             obj.uselib += ['GDI32']
 
     if bld.is_defined('LXVST_SUPPORT'):
@@ -418,7 +414,7 @@ def build(bld):
         mo_files = bld.path.ant_glob('po/*.mo')
         for mo in mo_files:
             lang = os.path.basename(mo.srcpath()).replace('.mo', '')
-            bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + '.mo'),
+            bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + str(bld.env['MAJOR']) + '.mo'),
                            mo)
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
@@ -427,7 +423,7 @@ def build(bld):
         testcommon              = bld(features = 'cxx')
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
         testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
-                                   'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc']
+                                   'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc', 'test/test_ui.cc']
         testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
         testcommon.use          = ['libpbd','libmidipp','libevoral',
@@ -437,7 +433,7 @@ def build(bld):
         else:
             testcommon.use.extend(['libltc', 'librubberband'])
         testcommon.defines      = [
-            'PACKAGE="libardour3test"',
+            'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'test"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -516,7 +512,7 @@ def build(bld):
         session_load_tester.target    = 'load-session'
         session_load_tester.install_path = ''
         session_load_tester.defines      = [
-            'PACKAGE="libardour3profile"',
+            'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'profile"',
             'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
             'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
             'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -548,7 +544,7 @@ def build(bld):
             profilingobj.target    = p
             profilingobj.install_path = ''
             profilingobj.defines      = [
-                'PACKAGE="libardour3profile"',
+                'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'profile"',
                 'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
                 'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
                 'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -579,7 +575,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     # not sure about install path
     testobj.install_path = bld.env['LIBDIR']
     testobj.defines      = [
-        'PACKAGE="libardour3test"',
+        'PACKAGE="libardour' + str(bld.env['MAJOR']) + 'test"',
         'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
         'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
         'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
@@ -589,17 +585,17 @@ def shutdown():
     autowaf.shutdown()
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
+    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_pot(bld):
-    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
+    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_po(bld):
-    autowaf.build_i18n_po(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
+    autowaf.build_i18n_po(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_mo(bld):
-    autowaf.build_i18n_mo(bld, top, 'libs/ardour', I18N_PACKAGE, libardour_sources,
+    autowaf.build_i18n_mo(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')

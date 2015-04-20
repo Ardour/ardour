@@ -51,6 +51,7 @@ namespace ARDOUR {
 	extern LIBARDOUR_API PBD::Signal3<void,std::string,std::string,bool> PluginScanMessage;
 	extern LIBARDOUR_API PBD::Signal1<void,int> PluginScanTimeout;
 	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
+	extern LIBARDOUR_API PBD::Signal3<bool,std::string,std::string,int> CopyConfigurationFiles;
 
 	/**
 	 * @param with_vst true to enable VST Support
@@ -81,6 +82,14 @@ namespace ARDOUR {
 
 	LIBARDOUR_API void setup_fpu ();
 	LIBARDOUR_API std::vector<SyncSource> get_available_sync_options();
+
+	/* the @param ui_handler will be called if there are old configuration
+	 * files to be copied. It should (probably) ask the user about the
+	 * action, and return true or false depending on whether or not the
+	 * copy should take place.
+	 */
+	LIBARDOUR_API void check_for_old_configuration_files ();
+	LIBARDOUR_API int handle_old_configuration_files (boost::function<bool (std::string const&, std::string const&, int)> ui_handler);
 }
 
 #endif /* __ardour_ardour_h__ */

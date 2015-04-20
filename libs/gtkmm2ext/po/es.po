@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-09-04 19:07-0400\n"
+"POT-Creation-Date: 2015-03-31 20:13-0400\n"
 "PO-Revision-Date: 2013-02-09 16:21+0100\n"
 "Last-Translator: Pablo Fernández <pablo.fbus@gmail.com>\n"
 "Language-Team: Spanish\n"
@@ -31,11 +31,19 @@ msgstr "Operar controlador ahora"
 msgid "button cannot watch state of non-existing Controllable\n"
 msgstr ""
 
-#: gtk_ui.cc:111
+#: cursors.cc:82
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr ""
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr ""
+
+#: gtk_ui.cc:113
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:368
+#: gtk_ui.cc:370
 msgid ""
 "\n"
 "\n"
@@ -45,11 +53,11 @@ msgstr ""
 "\n"
 "Atajo: "
 
-#: gtk_ui.cc:640
+#: gtk_ui.cc:638
 msgid "Press To Exit"
 msgstr "Pulse para salir"
 
-#: gtk_ui.cc:676
+#: gtk_ui.cc:674
 msgid "I'm sorry %1, I can't do that"
 msgstr "Lo siento %1, no puedo hacer eso"
 

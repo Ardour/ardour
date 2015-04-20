@@ -184,7 +184,7 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 	if (!ev->is_modifier) {
 		last_keyval = ev->keyval;
 	}
-	return false;
+	return ArdourWindow::on_key_press_event (ev);
 }
 
 bool
@@ -203,11 +203,14 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 			goto out;
 		}
 
+		GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & ev->state);
+
 		Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (ev->keyval);
+		Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator (mod);
 
 		bool result = AccelMap::change_entry (path,
 						      last_keyval,
-						      ModifierType (Keyboard::RelevantModifierKeyMask & ev->state),
+						      Gdk::ModifierType(mod),
 						      true);
 
 		if (result) {
@@ -310,4 +313,7 @@ void
 KeyEditor::reset ()
 {
 	Keyboard::the_keyboard().reset_bindings ();
+	populate ();
+	view.get_selection()->unselect_all ();
+	populate ();
 }

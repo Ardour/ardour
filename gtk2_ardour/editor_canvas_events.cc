@@ -24,6 +24,8 @@
 
 #include "pbd/stacktrace.h"
 
+#include "ardour/audio_track.h"
+#include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
@@ -176,19 +178,25 @@ Editor::canvas_scroll_event (GdkEventScroll *event, bool from_canvas)
 }
 
 bool
-Editor::track_canvas_button_press_event (GdkEventButton */*event*/)
+Editor::track_canvas_button_press_event (GdkEventButton *event)
 {
-	selection->clear ();
 	_track_canvas->grab_focus();
+	if (!Keyboard::is_context_menu_event (event)) {
+		begin_reversible_selection_op (X_("Clear Selection Click (track canvas)"));
+		selection->clear ();
+		commit_reversible_selection_op();
+        }
 	return false;
 }
 
 bool
 Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
-	if (_drags->active ()) {
-		_drags->end_grab ((GdkEvent*) event);
-	}
+	if (!Keyboard::is_context_menu_event (event)) {
+                if (_drags->active ()) {
+                        _drags->end_grab ((GdkEvent*) event);
+                }
+        }
 	return false;
 }
 
@@ -1029,12 +1037,29 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 
 		switch (event->scroll.direction) {
 		case GDK_SCROLL_UP:
-			temporal_zoom_step (false);
+
+			if (Profile->get_mixbus()) {
+				//for mouse-wheel zoom, force zoom-focus to mouse
+				Editing::ZoomFocus temp_focus = zoom_focus;
+				zoom_focus = Editing::ZoomFocusMouse;
+				temporal_zoom_step (false);
+				zoom_focus = temp_focus;
+			} else {
+				temporal_zoom_step (false);
+			}
 			handled = true;
 			break;
 			
 		case GDK_SCROLL_DOWN:
-			temporal_zoom_step (true);
+			if (Profile->get_mixbus()) {
+				//for mouse-wheel zoom, force zoom-focus to mouse
+				Editing::ZoomFocus temp_focus = zoom_focus;
+				zoom_focus = Editing::ZoomFocusMouse;
+				temporal_zoom_step (true);
+				zoom_focus = temp_focus;
+			} else {
+				temporal_zoom_step (true);
+			}
 			handled = true;
 			break;
 			
@@ -1105,8 +1130,10 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 	switch (event->type) {
 	case GDK_BUTTON_RELEASE:
 		if (event->button.button == 1) {
+			begin_reversible_selection_op (X_("Nowhere Click"));
 			selection->clear_objects ();
 			selection->clear_tracks ();
+			commit_reversible_selection_op ();
 		}
 		break;
 
@@ -1182,6 +1209,18 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 		region = _regions->get_dragged_region ();
 		
 		if (region) {
+
+			if (tv.first == 0
+			    && (
+			        boost::dynamic_pointer_cast<AudioRegion> (region) != 0 ||
+			        boost::dynamic_pointer_cast<MidiRegion> (region) != 0
+			       )
+			   )
+			{
+				/* drop to drop-zone */
+				context->drag_status (context->get_suggested_action(), time);
+				return true;
+			}
 			
 			if ((boost::dynamic_pointer_cast<AudioRegion> (region) != 0 &&
 			     dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
@@ -1226,9 +1265,6 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 		      const SelectionData& /*data*/,
 		      guint /*info*/, guint /*time*/)
 {
-	boost::shared_ptr<Region> region;
-	boost::shared_ptr<Region> region_copy;
-	RouteTimeAxisView* rtav;
 	GdkEvent event;
 	double px;
 	double py;
@@ -1238,39 +1274,47 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
-
 	framepos_t const pos = window_event_sample (&event, &px, &py);
 
+	boost::shared_ptr<Region> region = _regions->get_dragged_region ();
+	if (!region) { return; }
+
+	RouteTimeAxisView* rtav = 0;
 	std::pair<TimeAxisView*, int> const tv = trackview_by_y_position (py, false);
 
 	if (tv.first != 0) {
-
 		rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
-		
-		if (rtav != 0 && rtav->is_track ()) {
-
-			boost::shared_ptr<Region> region = _regions->get_dragged_region ();
-			
-			if (region) {
-
-				region_copy = RegionFactory::create (region, true);
-	
-
-				if ((boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 &&
-				    dynamic_cast<AudioTimeAxisView*> (tv.first) != 0) ||
-				    (boost::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 &&
-				     dynamic_cast<MidiTimeAxisView*> (tv.first) != 0)) {
-
-					/* audio to audio 
-					   OR 
-					   midi to midi
-					*/
-
-
-					_drags->set (new RegionInsertDrag (this, region_copy, rtav, pos), &event);
-					_drags->end_grab (0);
+	} else {
+		try {
+			if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
+				uint32_t output_chan = region->n_channels();
+				if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
+					output_chan =  session()->master_out()->n_inputs().n_audio();
 				}
+				list<boost::shared_ptr<AudioTrack> > audio_tracks;
+				audio_tracks = session()->new_audio_track (region->n_channels(), output_chan, ARDOUR::Normal, 0, 1, region->name());
+				rtav = axis_view_from_route (audio_tracks.front());
+			} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
+				ChanCount one_midi_port (DataType::MIDI, 1);
+				list<boost::shared_ptr<MidiTrack> > midi_tracks;
+				midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port, boost::shared_ptr<ARDOUR::PluginInfo>(), ARDOUR::Normal, 0, 1, region->name());
+				rtav = axis_view_from_route (midi_tracks.front());
+			} else {
+				return;
 			}
+		} catch (...) {
+			error << _("Could not create new track after region placed in the drop zone") << endmsg;
+			return;
+		}
+	}
+
+	if (rtav != 0 && rtav->is_track ()) {
+		boost::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+
+		if ((boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && dynamic_cast<AudioTimeAxisView*> (rtav) != 0) ||
+		    (boost::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 && dynamic_cast<MidiTimeAxisView*> (rtav) != 0)) {
+			_drags->set (new RegionInsertDrag (this, region_copy, rtav, pos), &event);
+			_drags->end_grab (0);
 		}
 	}
 }

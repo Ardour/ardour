@@ -203,15 +203,15 @@ EditorRoutes::EditorRoutes (Editor* e)
 	Gtk::Label* l;
 
 	ColumnInfo ci[] = {
-		{ 0, _("Name"), _("Track/Bus Name") },
-		{ 1, _("V"), _("Track/Bus visible ?") },
-		{ 2, _("A"), _("Track/Bus active ?") },
-		{ 3, _("I"), _("MIDI input enabled") },
-		{ 4, _("R"), _("Record enabled") },
-		{ 5, _("M"), _("Muted") },
-		{ 6, _("S"), _("Soloed") },
-		{ 7, _("SI"), _("Solo Isolated") },
-		{ 8, _("SS"), _("Solo Safe (Locked)") },
+		{ 0,  _("Name"),        _("Track/Bus Name") },
+		{ 1, S_("Visible|V"),   _("Track/Bus visible ?") },
+		{ 2, S_("Active|A"),    _("Track/Bus active ?") },
+		{ 3, S_("MidiInput|I"), _("MIDI input enabled") },
+		{ 4, S_("Rec|R"),       _("Record enabled") },
+		{ 5, S_("Mute|M"),      _("Muted") },
+		{ 6, S_("Solo|S"),      _("Soloed") },
+		{ 7, S_("SoloIso|SI"),  _("Solo Isolated") },
+		{ 8, S_("SoloLock|SS"), _("Solo Safe (Locked)") },
 		{ -1, 0, 0 }
 	};
 
@@ -516,7 +516,7 @@ EditorRoutes::redisplay_real ()
 		}
 
 		bool visible = tv->marked_for_display ();
-
+		
 		/* show or hide the TimeAxisView */
 		if (visible) {
 			position += tv->show_at (position, n, &_editor->edit_controls_vbox);
@@ -636,7 +636,6 @@ void
 EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 {
 	PBD::Unwinder<bool> at (_adding_routes, true);
-
 	bool from_scratch = (_model->children().size() == 0);
 	Gtk::TreeModel::Children::iterator insert_iter = _model->children().end();
 
@@ -647,10 +646,6 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 			insert_iter = it;
 			break;
 		}
-	}
-
-	if(!from_scratch) {
-		_editor->selection->tracks.clear();
 	}
 
 	DisplaySuspender ds;
@@ -684,10 +679,6 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 		row[_columns.solo_isolate_state] = (*x)->route()->solo_isolated();
 		row[_columns.solo_safe_state] = (*x)->route()->solo_safe();
 		row[_columns.name_editable] = true;
-
-		if (!from_scratch) {
-			_editor->selection->add(*x);
-		}
 
 		boost::weak_ptr<Route> wr ((*x)->route());
 
@@ -725,8 +716,9 @@ EditorRoutes::routes_added (list<RouteTimeAxisView*> routes)
 	_display.set_model (_model);
 
 	/* now update route order keys from the treeview/track display order */
-
-	sync_order_keys_from_treeview ();
+	if (!from_scratch) {
+		sync_order_keys_from_treeview ();
+	}
 }
 
 void
@@ -879,9 +871,18 @@ EditorRoutes::reset_remote_control_ids ()
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 
+		/* skip two special values */
+		
+		if (rid == Route::MasterBusRemoteControlID) {
+			rid++;
+		}
+		
+		if (rid == Route::MonitorBusRemoteControlID) {
+			rid++;
+		}
+
 		boost::shared_ptr<Route> route = (*ri)[_columns.route];
 		bool visible = (*ri)[_columns.visible];
-
 
 		if (!route->is_master() && !route->is_monitor()) {
 
@@ -1325,6 +1326,8 @@ EditorRoutes::button_press (GdkEventButton* ev)
 void
 EditorRoutes::selection_changed ()
 {
+	_editor->begin_reversible_selection_op (X_("Select Track from Route List"));
+
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
 		TreeIter iter;
@@ -1349,6 +1352,8 @@ EditorRoutes::selection_changed ()
 	} else {
 		_editor->get_selection().clear_tracks ();
 	}
+
+	_editor->commit_reversible_selection_op ();
 }
 
 bool
@@ -1389,29 +1394,10 @@ EditorRoutes::initial_display ()
 		return;
 	}
 
-	boost::shared_ptr<RouteList> routes = _session->get_routes();
-
-	if (ARDOUR_UI::instance()->session_is_new ()) {
-
-		/* new session: stamp all routes with the right editor order
-		 * key
-		 */
-
-		_editor->add_routes (*(routes.get()));
-
-	} else {
-
-		/* existing session: sort a copy of the route list by
-		 * editor-order and add its contents to the display.
-		 */
-
-		RouteList r (*routes);
-		EditorOrderRouteSorter sorter;
-
-		r.sort (sorter);
-		_editor->add_routes (r);
-
-	}
+	RouteList r (*_session->get_routes());
+		
+	r.sort (EditorOrderRouteSorter ());
+	_editor->add_routes (r);
 }
 
 void

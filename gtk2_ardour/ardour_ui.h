@@ -73,6 +73,7 @@
 #include "ardour_window.h"
 #include "editing.h"
 #include "engine_dialog.h"
+#include "export_video_dialog.h"
 #include "meterbridge.h"
 #include "ui_config.h"
 #include "enums.h"
@@ -150,6 +151,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void launch_manual ();
 	void launch_reference ();
 	void launch_tracker ();
+	void launch_subscribe ();
 	void launch_cheat_sheet ();
 	void launch_website ();
 	void launch_website_dev ();
@@ -158,7 +160,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void show_about ();
 	void hide_about ();
 
-	void idle_load (const std::string& path);
+	void load_from_application_api (const std::string& path);
 	void finish();
 
 	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
@@ -247,6 +249,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool start_video_server (Gtk::Window* float_window, bool popup_msg);
 	void stop_video_server (bool ask_confirm=false);
 	void flush_videotimeline_cache (bool localcacheonly=false);
+	void export_video (bool range = false);
 
 	void session_add_audio_track (
 		int input_channels,
@@ -350,6 +353,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	int  ask_about_saving_session (const std::vector<std::string>& actions);
 
+	void save_session_at_its_request (std::string);
 	/* periodic safety backup, to be precise */
 	gint autosave_session();
 	void update_autosave();
@@ -458,6 +462,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	ArdourButton auditioning_alert_button;
 	ArdourButton solo_alert_button;
 	ArdourButton feedback_alert_button;
+	ArdourButton error_alert_button;
 
 	Gtk::VBox alert_box;
 	Gtk::VBox meter_box;
@@ -473,6 +478,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void sync_blink (bool);
 	void audition_blink (bool);
 	void feedback_blink (bool);
+	void error_blink (bool);
 	
 	void set_flat_buttons();
 
@@ -483,6 +489,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool solo_alert_press (GdkEventButton* ev);
 	bool audition_alert_press (GdkEventButton* ev);
 	bool feedback_alert_press (GdkEventButton *);
+	bool error_alert_press (GdkEventButton *);
 
 	void big_clock_value_changed ();
 	void primary_clock_value_changed ();
@@ -612,7 +619,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
 	void rename_session ();
-	void setup_order_hint ();
+	void setup_order_hint (AddRouteDialog::InsertAt);
 
 	int         create_mixer ();
 	int         create_editor ();
@@ -629,6 +636,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::Proxy<LocationUIWindow> location_ui;
         WM::Proxy<RouteParams_UI> route_params;
         WM::Proxy<EngineControl> audio_midi_setup;
+        WM::Proxy<ExportVideoDialog> export_video_dialog;
 
         /* Windows/Dialogs that require a creator method */
 
@@ -733,7 +741,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 			const char *msg);
 	Gtk::Label status_bar_label;
         bool status_bar_button_press (GdkEventButton*);
-	Gtk::ToggleButton error_log_button;
 
 	void loading_message (const std::string& msg);
 
@@ -771,12 +778,22 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void successful_graph_sort ();
 	bool _feedback_exists;
 
+	enum ArdourLogLevel {
+		LogLevelNone = 0,
+		LogLevelInfo,
+		LogLevelWarning,
+		LogLevelError
+	};
+
+	ArdourLogLevel _log_not_acknowledged;
+
 	void resize_text_widgets ();
 
         std::string _announce_string;
         void check_announcements ();
 
         int do_audio_midi_setup (uint32_t);
+	void audioengine_became_silent ();
 };
 
 #endif /* __ardour_gui_h__ */

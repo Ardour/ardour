@@ -170,7 +170,11 @@ snd_pcm_sframes_t Alsa_pcmi::pcm_wait (void)
 		}
 		for (i = 0; i < n2; i++) _poll_fd [i].events |= POLLERR;
 
-		r = poll (_poll_fd, n2, 1000);
+		timespec timeout;
+		timeout.tv_sec = 1;
+		timeout.tv_nsec = 0;
+		r = ppoll (_poll_fd, n2, &timeout, NULL);
+
 		if (r < 0)
 		{
 			if (errno == EINTR) return 0;

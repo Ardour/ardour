@@ -63,6 +63,23 @@ Arrow::setup ()
 	CANVAS_DEBUG_NAME (_line, "arrow line");
 }
 
+void
+Arrow::compute_bounding_box () const
+{
+	/* Compute our bounding box manually rather than using the default
+	   container algorithm, since having the bounding box with origin other
+	   than zero causes strange problems for mysterious reasons. */
+
+	const double outline_pad = 0.5 + (_line->outline_width() / 2.0);
+	const double head_width  = std::max(_heads[0].width, _heads[1].width);
+
+	_bounding_box = Rect(0,
+	                     0,
+	                     _line->x1() + (head_width / 2.0) + outline_pad,
+	                     _line->y1());
+
+	_bounding_box_dirty = false;
+}
 
 /** Set whether to show an arrow head at one end or other
  *  of the line.
@@ -156,6 +173,7 @@ Arrow::set_outline_width (Distance width)
 	if (_heads[1].polygon) {
 		_heads[1].polygon->set_outline_width (width);
 	}
+	_bounding_box_dirty = true;
 }
 
 /** Set the x position of our line.
@@ -171,7 +189,7 @@ Arrow::set_x (Coord x)
 			_heads[i].polygon->set_x_position (x - _heads[i].width / 2);
 		}
 	}
-		
+	_bounding_box_dirty = true;
 }
 
 /** Set the y position of end 0 of our line.
@@ -184,6 +202,7 @@ Arrow::set_y0 (Coord y0)
 	if (_heads[0].polygon) {
 		_heads[0].polygon->set_y_position (y0);
 	}
+	_bounding_box_dirty = true;
 }
 
 /** Set the y position of end 1 of our line.
@@ -196,6 +215,7 @@ Arrow::set_y1 (Coord y1)
 	if (_heads[1].polygon) {
 		_heads[1].polygon->set_y_position (y1 - _heads[1].height);
 	}
+	_bounding_box_dirty = true;
 }
 
 /** @return x position of our line in pixels (in our coordinate system) */

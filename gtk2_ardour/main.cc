@@ -37,7 +37,6 @@
 #endif
 
 #include "ardour/revision.h"
-#include "ardour/version.h"
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
 #include "ardour/session_utils.h"
@@ -48,7 +47,6 @@
 #include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
-#include "version.h"
 #include "ardour_ui.h"
 #include "opts.h"
 #include "enums.h"
@@ -76,7 +74,7 @@ TextReceiver text_receiver ("ardour");
 extern int curvetest (string);
 
 static ARDOUR_UI  *ui = 0;
-static const char* localedir = LOCALEDIR;
+static string localedir (LOCALEDIR);
 
 void
 gui_jack_error ()
@@ -121,7 +119,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 	} else {
 
 		/* engine has already run, so this is a mid-session backend death */
-			
+
 		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_secondary_text (string_compose (_("%2 exited unexpectedly, and without notifying %1."),
 							 PROGRAM_NAME, AudioEngine::instance()->current_backend_name()));
@@ -134,8 +132,7 @@ Click OK to exit %1."), PROGRAM_NAME, AudioEngine::instance()->current_backend_n
 static void
 sigpipe_handler (int /*signal*/)
 {
-	/* XXX fix this so that we do this again after a reconnect to the backend
-	 */
+	/* XXX fix this so that we do this again after a reconnect to the backend */
 
 	static bool done_the_backend_thing = false;
 
@@ -147,170 +144,39 @@ sigpipe_handler (int /*signal*/)
 }
 #endif
 
-
 #if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
-static bool IsAConsolePort (HANDLE handle)
+
+static FILE* pStdOut = 0;
+static FILE* pStdErr = 0;
+static BOOL  bConsole;
+static HANDLE hStdOut;
+
+static bool
+IsAConsolePort (HANDLE handle)
 {
 	DWORD mode;
 	return (GetConsoleMode(handle, &mode) != 0);
 }
-#endif
 
-
-#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
-/*
- *  Release build with MSVC uses ardour_main()
- */
-int ardour_main (int argc, char *argv[])
-
-#elif (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
-
-// prototype for function in windows_vst_plugin_ui.cc
-extern int windows_vst_gui_init (int* argc, char** argv[]);
-
-/* this is called from the entry point of a wine-compiled
-   executable that is linked against gtk2_ardour built
-   as a shared library.
-*/
-extern "C" {
-
-int ardour_main (int argc, char *argv[])
-
-#else
-int main (int argc, char *argv[])
-#endif
+static void
+console_madness_begin ()
 {
-	fixup_bundle_environment (argc, argv, &localedir);
+	bConsole = AttachConsole(ATTACH_PARENT_PROCESS);
+	hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
-
-	if (!Glib::thread_supported()) {
-		Glib::thread_init();
-	}
-
-#ifdef ENABLE_NLS
-	gtk_set_locale ();
-#endif
-
-#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
 	/* re-attach to the console so we can see 'printf()' output etc.
 	 * for MSVC see  gtk2_ardour/msvc/winmain.cc
 	 */
-	FILE  *pStdOut = 0, *pStdErr = 0;
-	BOOL  bConsole = AttachConsole(ATTACH_PARENT_PROCESS);
-	HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
 
 	if ((bConsole) && (IsAConsolePort(hStdOut))) {
 		pStdOut = freopen( "CONOUT$", "w", stdout );
 		pStdErr = freopen( "CONOUT$", "w", stderr );
 	}
-#endif
+}
 
-#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
-	/* this does some magic that is needed to make GTK and X11 client interact properly.
-	 * the platform dependent code is in windows_vst_plugin_ui.cc
-	 */
-	windows_vst_gui_init (&argc, &argv);
-#endif
-
-#ifdef ENABLE_NLS
-	cerr << "bind txt domain [" << PACKAGE << "] to " << localedir << endl;
-
-	(void) bindtextdomain (PACKAGE, localedir);
-	/* our i18n translations are all in UTF-8, so make sure
-	   that even if the user locale doesn't specify UTF-8,
-	   we use that when handling them.
-	*/
-	(void) bind_textdomain_codeset (PACKAGE,"UTF-8");
-#endif
-
-	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
-
-	// catch error message system signals ();
-
-	text_receiver.listen_to (error);
-	text_receiver.listen_to (info);
-	text_receiver.listen_to (fatal);
-	text_receiver.listen_to (warning);
-
-#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-	if (g_getenv ("BOOST_DEBUG")) {
-		boost_debug_shared_ptr_show_live_debugging (true);
-	}
-#endif
-
-	if (parse_opts (argc, argv)) {
-#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
-        // Since we don't ordinarily have access to stdout and stderr with
-        // an MSVC app, let the user know we encountered a parsing error.
-        Gtk::Main app(&argc, &argv); // Calls 'gtk_init()'
-
-        Gtk::MessageDialog dlgReportParseError (_("\n   Ardour could not understand your command line      "),
-                                                      false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
-        dlgReportParseError.set_title (_("An error was encountered while launching Ardour"));
-		dlgReportParseError.run ();
-#endif
-		exit (1);
-	}
-
-	cout << PROGRAM_NAME
-	     << VERSIONSTRING
-	     << _(" (built using ")
-	     << revision
-#ifdef __GNUC__
-	     << _(" and GCC version ") << __VERSION__
-#endif
-	     << ')'
-	     << endl;
-
-	if (just_version) {
-		exit (0);
-	}
-
-	if (no_splash) {
-		cerr << _("Copyright (C) 1999-2012 Paul Davis") << endl
-		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
-		     << endl
-		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
-		     <<	_("not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.") << endl
-		     << _("This is free software, and you are welcome to redistribute it ") << endl
-		     << _("under certain conditions; see the source for copying conditions.")
-		     << endl;
-	}
-
-	/* some GUI objects need this */
-
-	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir)) {
-		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
-		exit (1);
-	}
-
-	if (curvetest_file) {
-		return curvetest (curvetest_file);
-	}
-
-#ifndef PLATFORM_WINDOWS
-	if (::signal (SIGPIPE, sigpipe_handler)) {
-		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
-	}
-#endif
-
-	try {
-		ui = new ARDOUR_UI (&argc, &argv, localedir);
-	} catch (failed_constructor& err) {
-		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
-		exit (1);
-	}
-
-	ui->run (text_receiver);
-	Gtkmm2ext::Application::instance()->cleanup();
-	delete ui;
-	ui = 0;
-
-	ARDOUR::cleanup ();
-	pthread_cancel_all ();
-
-#if (!defined COMPILER_MSVC && defined PLATFORM_WINDOWS)
+static void
+console_madness_end ()
+{
 	if (pStdOut) {
 		fclose (pStdOut);
 	}
@@ -335,7 +201,166 @@ int main (int argc, char *argv[])
 
 		FreeConsole();
 	}
+}
+
+static void command_line_parse_error (int *argc, char** argv[]) {}
+
+#elif (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+
+// these are not used here. for MSVC see  gtk2_ardour/msvc/winmain.cc
+static void console_madness_begin () {}
+static void console_madness_end () {}
+
+static void command_line_parse_error (int *argc, char** argv[]) {
+	// Since we don't ordinarily have access to stdout and stderr with
+	// an MSVC app, let the user know we encountered a parsing error.
+	Gtk::Main app(argc, argv); // Calls 'gtk_init()'
+
+	Gtk::MessageDialog dlgReportParseError (string_compose (_("\n   %1 could not understand your command line      "), PROGRAM_NAME),
+			false, MESSAGE_ERROR, BUTTONS_CLOSE, true);
+	dlgReportParseError.set_title (string_compose (_("An error was encountered while launching %1"), PROGRAM_NAME));
+	dlgReportParseError.run ();
+}
+
+#else
+static void console_madness_begin () {}
+static void console_madness_end () {}
+static void command_line_parse_error (int *argc, char** argv[]) {}
 #endif
+
+#if (defined(COMPILER_MSVC) && defined(NDEBUG) && !defined(RDC_BUILD))
+/*
+ *  Release build with MSVC uses ardour_main()
+ */
+int ardour_main (int argc, char *argv[])
+
+#elif (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+
+// prototype for function in windows_vst_plugin_ui.cc
+extern int windows_vst_gui_init (int* argc, char** argv[]);
+
+/* this is called from the entry point of a wine-compiled
+   executable that is linked against gtk2_ardour built
+   as a shared library.
+*/
+extern "C" {
+
+int ardour_main (int argc, char *argv[])
+
+#else
+int main (int argc, char *argv[])
+#endif
+{
+	ARDOUR::check_for_old_configuration_files();
+
+	fixup_bundle_environment (argc, argv, localedir);
+
+	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
+
+	if (!Glib::thread_supported()) {
+		Glib::thread_init();
+	}
+
+#ifdef ENABLE_NLS
+	gtk_set_locale ();
+#endif
+
+	console_madness_begin();
+
+#if (defined WINDOWS_VST_SUPPORT && !defined PLATFORM_WINDOWS)
+	/* this does some magic that is needed to make GTK and X11 client interact properly.
+	 * the platform dependent code is in windows_vst_plugin_ui.cc
+	 */
+	windows_vst_gui_init (&argc, &argv);
+#endif
+
+#ifdef ENABLE_NLS
+	cerr << "bind txt domain [" << PACKAGE << "] to " << localedir << endl;
+
+	(void) bindtextdomain (PACKAGE, localedir.c_str());
+	/* our i18n translations are all in UTF-8, so make sure
+	   that even if the user locale doesn't specify UTF-8,
+	   we use that when handling them.
+	*/
+	(void) bind_textdomain_codeset (PACKAGE,"UTF-8");
+#endif
+
+	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
+
+	// catch error message system signals ();
+
+	text_receiver.listen_to (error);
+	text_receiver.listen_to (info);
+	text_receiver.listen_to (fatal);
+	text_receiver.listen_to (warning);
+
+#ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
+	if (g_getenv ("BOOST_DEBUG")) {
+		boost_debug_shared_ptr_show_live_debugging (true);
+	}
+#endif
+
+	if (parse_opts (argc, argv)) {
+		command_line_parse_error (&argc, &argv);
+		exit (1);
+	}
+
+	cout << PROGRAM_NAME
+	     << VERSIONSTRING
+	     << _(" (built using ")
+	     << revision
+#ifdef __GNUC__
+	     << _(" and GCC version ") << __VERSION__
+#endif
+	     << ')'
+	     << endl;
+
+	if (just_version) {
+		exit (0);
+	}
+
+	if (no_splash) {
+		cerr << _("Copyright (C) 1999-2015 Paul Davis") << endl
+		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
+		     << endl
+		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
+		     <<	_("not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.") << endl
+		     << _("This is free software, and you are welcome to redistribute it ") << endl
+		     << _("under certain conditions; see the source for copying conditions.")
+		     << endl;
+	}
+
+	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir.c_str())) {
+		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
+		exit (1);
+	}
+
+	if (curvetest_file) {
+		return curvetest (curvetest_file);
+	}
+
+#ifndef PLATFORM_WINDOWS
+	if (::signal (SIGPIPE, sigpipe_handler)) {
+		cerr << _("Cannot xinstall SIGPIPE error handler") << endl;
+	}
+#endif
+
+	try {
+		ui = new ARDOUR_UI (&argc, &argv, localedir.c_str());
+	} catch (failed_constructor& err) {
+		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
+		exit (1);
+	}
+
+	ui->run (text_receiver);
+	Gtkmm2ext::Application::instance()->cleanup();
+	delete ui;
+	ui = 0;
+
+	ARDOUR::cleanup ();
+	pthread_cancel_all ();
+
+	console_madness_end ();
 
 	return 0;
 }

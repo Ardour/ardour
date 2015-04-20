@@ -186,6 +186,9 @@ public:
 
 	bool get_mouse_position (Duple& winpos) const;
 
+	void set_single_exposure (bool s) { _single_exposure = s; }
+	bool single_exposure () { return _single_exposure; }
+
 	void re_enter ();
 
 	void start_tooltip_timeout (Item*);
@@ -225,6 +228,8 @@ private:
 	Item * _grabbed_item;
         /** the item that currently has key focus or 0 */
 	Item * _focused_item;
+	
+	bool _single_exposure;
 
 	sigc::connection tooltip_timeout_connection;
 	Item* current_tooltip_item;

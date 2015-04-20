@@ -54,7 +54,7 @@ XMLNode&
 SessionConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	root = new XMLNode ("Ardour");
 	root->add_child_nocopy (get_variables ());
@@ -67,7 +67,7 @@ XMLNode&
 SessionConfiguration::get_variables ()
 {
 	XMLNode* node;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	node = new XMLNode ("Config");
 
@@ -159,7 +159,7 @@ SessionConfiguration::load_state ()
 
 		XMLNode* node;
 		if (((node = find_named_node (root, X_("Config"))) != 0)) {
-			LocaleGuard lg (X_("POSIX"));
+			LocaleGuard lg (X_("C"));
 			set_variables(*node);
 			info << _("Loaded custom session defaults.") << endmsg;
 		} else {

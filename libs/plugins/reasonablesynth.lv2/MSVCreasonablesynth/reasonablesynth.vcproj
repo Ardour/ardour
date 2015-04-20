@@ -91,7 +91,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TargetFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Debug32TargetFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Debug32TargetFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TargetFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Debug32TargetFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Debug32TargetFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Debug32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -173,7 +173,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TargetFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Release32TargetFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Release32TargetFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;"
+				CommandLine="copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TargetFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).dll&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Release32TargetFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\$(TargetName).ttl.in&quot; &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Release32TargetFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;copy /Y &quot;..\manifest.ttl&quot; &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\manifest.ttl&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -255,7 +255,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="mkdir &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\LV2&quot; 2&gt; NUL&#x0D;&#x0A;mkdir &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2&quot; 2&gt; NUL&#x0D;&#x0A;mkdir &quot;$(Debug32TestSuiteFolder)\..\lib\ardour3\LV2&quot; 2&gt; NUL&#x0D;&#x0A;mkdir &quot;$(Debug32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2&quot; 2&gt; NUL&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\ardour3\LV2\reasonablesynth.lv2\$(TargetName).dll-RDC&quot;&#x0D;&#x0A;"
+				CommandLine="mkdir &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2&quot; 2&gt; NUL&#x0D;&#x0A;mkdir &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2&quot; 2&gt; NUL&#x0D;&#x0A;mkdir &quot;$(Debug32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2&quot; 2&gt; NUL&#x0D;&#x0A;mkdir &quot;$(Debug32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2&quot; 2&gt; NUL&#x0D;&#x0A;copy /Y &quot;$(OutDir)\$(TargetName).dll&quot; &quot;$(Release32TestSuiteFolder)\..\lib\$(LibardourFolder)\LV2\reasonablesynth.lv2\$(TargetName).dll-RDC&quot;&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

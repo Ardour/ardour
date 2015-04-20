@@ -128,9 +128,7 @@ AudioDiskstream::~AudioDiskstream ()
 void
 AudioDiskstream::allocate_working_buffers()
 {
-	assert(disk_io_frames() > 0);
-
-	_working_buffers_size = disk_io_frames();
+	_working_buffers_size = max (disk_write_chunk_frames, disk_read_chunk_frames);
 	_mixdown_buffer       = new Sample[_working_buffers_size];
 	_gain_buffer          = new gain_t[_working_buffers_size];
 }
@@ -227,7 +225,7 @@ AudioDiskstream::get_input_sources ()
 
 		connections.clear ();
 
-		if (_io->nth (n)->get_connections (connections) == 0) {
+		if ((_io->nth (n).get()) && (_io->nth (n)->get_connections (connections) == 0)) {
 			if (!(*chan)->source.name.empty()) {
 				// _source->disable_metering ();
 			}
@@ -786,10 +784,10 @@ AudioDiskstream::commit (framecnt_t playback_distance)
 		}
 	} else {
 		if (_io && _io->active()) {
-			need_butler = ((framecnt_t) c->front()->playback_buf->write_space() >= disk_io_chunk_frames)
-				|| ((framecnt_t) c->front()->capture_buf->read_space() >= disk_io_chunk_frames);
+			need_butler = ((framecnt_t) c->front()->playback_buf->write_space() >= disk_read_chunk_frames)
+				|| ((framecnt_t) c->front()->capture_buf->read_space() >= disk_write_chunk_frames);
 		} else {
-			need_butler = ((framecnt_t) c->front()->capture_buf->read_space() >= disk_io_chunk_frames);
+			need_butler = ((framecnt_t) c->front()->capture_buf->read_space() >= disk_write_chunk_frames);
 		}
 	}
 
@@ -997,6 +995,7 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		if (loc && start >= loop_end) {
 			start = loop_start + ((start - loop_start) % loop_length);
 		}
+
 	}
 
 	if (reversed) {
@@ -1056,8 +1055,8 @@ AudioDiskstream::read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 int
 AudioDiskstream::do_refill_with_alloc ()
 {
-	Sample* mix_buf  = new Sample[disk_io_chunk_frames];
-	float*  gain_buf = new float[disk_io_chunk_frames];
+	Sample* mix_buf  = new Sample[disk_read_chunk_frames];
+	float*  gain_buf = new float[disk_read_chunk_frames];
 
 	int ret = _do_refill(mix_buf, gain_buf);
 
@@ -1108,22 +1107,22 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 	   for us to be called again, ASAP.
 	*/
 
-	if (total_space >= (_slaved ? 3 : 2) * disk_io_chunk_frames) {
+	if (total_space >= (_slaved ? 3 : 2) * disk_read_chunk_frames) {
 		ret = 1;
 	}
 
 	/* if we're running close to normal speed and there isn't enough
-	   space to do disk_io_chunk_frames of I/O, then don't bother.
+	   space to do disk_read_chunk_frames of I/O, then don't bother.
 
 	   at higher speeds, just do it because the sync between butler
 	   and audio thread may not be good enough.
 
-	   Note: it is a design assumption that disk_io_chunk_frames is smaller
+	   Note: it is a design assumption that disk_read_chunk_frames is smaller
 	   than the playback buffer size, so this check should never trip when
 	   the playback buffer is empty.
 	*/
 
-	if ((total_space < disk_io_chunk_frames) && fabs (_actual_speed) < 2.0f) {
+	if ((total_space < disk_read_chunk_frames) && fabs (_actual_speed) < 2.0f) {
 		return 0;
 	}
 
@@ -1136,9 +1135,9 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		return 0;
 	}
 
-	/* never do more than disk_io_chunk_frames worth of disk input per call (limit doesn't apply for memset) */
+	/* never do more than disk_read_chunk_frames worth of disk input per call (limit doesn't apply for memset) */
 
-	total_space = min (disk_io_chunk_frames, total_space);
+	total_space = min (disk_read_chunk_frames, total_space);
 
 	if (reversed) {
 
@@ -1215,14 +1214,14 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		chan->playback_buf->get_write_vector (&vector);
 
-		if ((framecnt_t) vector.len[0] > disk_io_chunk_frames) {
+		if ((framecnt_t) vector.len[0] > disk_read_chunk_frames) {
 
 			/* we're not going to fill the first chunk, so certainly do not bother with the
 			   other part. it won't be connected with the part we do fill, as in:
 
 			   .... => writable space
 			   ++++ => readable space
-			   ^^^^ => 1 x disk_io_chunk_frames that would be filled
+			   ^^^^ => 1 x disk_read_chunk_frames that would be filled
 
 			   |......|+++++++++++++|...............................|
 			   buf1                buf0
@@ -1247,7 +1246,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 		len2 = vector.len[1];
 
 		to_read = min (ts, len1);
-		to_read = min (to_read, disk_io_chunk_frames);
+		to_read = min (to_read, disk_read_chunk_frames);
 
 		assert (to_read >= 0);
 
@@ -1266,7 +1265,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 		if (to_read) {
 
-			/* we read all of vector.len[0], but it wasn't an entire disk_io_chunk_frames of data,
+			/* we read all of vector.len[0], but it wasn't an entire disk_read_chunk_frames of data,
 			   so read some or all of vector.len[1] as well.
 			*/
 
@@ -1294,12 +1293,12 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer)
 
 /** Flush pending data to disk.
  *
- * Important note: this function will write *AT MOST* disk_io_chunk_frames
+ * Important note: this function will write *AT MOST* disk_write_chunk_frames
  * of data to disk. it will never write more than that.  If it writes that
  * much and there is more than that waiting to be written, it will return 1,
  * otherwise 0 on success or -1 on failure.
  *
- * If there is less than disk_io_chunk_frames to be written, no data will be
+ * If there is less than disk_write_chunk_frames to be written, no data will be
  * written at all unless @a force_flush is true.
  */
 int
@@ -1323,7 +1322,7 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 
 		total = vector.len[0] + vector.len[1];
 
-		if (total == 0 || (total < disk_io_chunk_frames && !force_flush && was_recording)) {
+		if (total == 0 || (total < disk_write_chunk_frames && !force_flush && was_recording)) {
 			goto out;
 		}
 
@@ -1338,11 +1337,11 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		   let the caller know too.
 		*/
 
-		if (total >= 2 * disk_io_chunk_frames || ((force_flush || !was_recording) && total > disk_io_chunk_frames)) {
+		if (total >= 2 * disk_write_chunk_frames || ((force_flush || !was_recording) && total > disk_write_chunk_frames)) {
 			ret = 1;
 		}
 
-		to_write = min (disk_io_chunk_frames, (framecnt_t) vector.len[0]);
+		to_write = min (disk_write_chunk_frames, (framecnt_t) vector.len[0]);
 
 		// check the transition buffer when recording destructive
 		// important that we get this after the capture buf
@@ -1402,14 +1401,14 @@ AudioDiskstream::do_flush (RunContext /*context*/, bool force_flush)
 		(*chan)->capture_buf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
 
-		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < disk_io_chunk_frames) && !destructive()) {
+		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < disk_write_chunk_frames) && !destructive()) {
 
 			/* we wrote all of vector.len[0] but it wasn't an entire
-			   disk_io_chunk_frames of data, so arrange for some part
+			   disk_write_chunk_frames of data, so arrange for some part
 			   of vector.len[1] to be flushed to disk as well.
 			*/
 
-			to_write = min ((framecnt_t)(disk_io_chunk_frames - to_write), (framecnt_t) vector.len[1]);
+			to_write = min ((framecnt_t)(disk_write_chunk_frames - to_write), (framecnt_t) vector.len[1]);
 
                         DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 additional write of %2\n", name(), to_write));
 
@@ -1805,7 +1804,7 @@ AudioDiskstream::get_state ()
 {
 	XMLNode& node (Diskstream::get_state());
 	char buf[64] = "";
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	snprintf (buf, sizeof(buf), "%u", (unsigned int) c->size());
@@ -1847,7 +1846,7 @@ AudioDiskstream::set_state (const XMLNode& node, int version)
 	XMLNodeIterator niter;
 	uint32_t nchans = 1;
 	XMLNode* capture_pending_node = 0;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	/* prevent write sources from being created */
 
@@ -2446,6 +2445,24 @@ AudioDiskstream::ChannelInfo::resize_capture (framecnt_t capture_bufsize)
 
 AudioDiskstream::ChannelInfo::~ChannelInfo ()
 {
+	if (write_source) {
+		if (write_source->removable()) {
+			/* this is a "stub" write source which exists in the
+			   Session source list, but is removable. We must emit
+			   a drop references call because it should not
+			   continue to exist. If we do not do this, then the
+			   Session retains a reference to it, it is not
+			   deleted, and later attempts to create a new source
+			   file will use wierd naming because it already 
+			   exists.
+
+			   XXX longer term TO-DO: do not add to session source
+			   list until we write to the source.
+			*/
+			write_source->drop_references ();
+		}
+	}
+
 	write_source.reset ();
 
 	delete [] speed_buffer;

@@ -25,5 +25,6 @@
 #include "pbd/libpbd_visibility.h"
 
 LIBPBD_API int replace_all (std::string& str, const std::string& target, const std::string& replacement);
+LIBPBD_API std::string poor_mans_glob (std::string path);
 
 #endif // __pbd_replace_all_h__

@@ -43,7 +43,7 @@
  */
 
 class LIBPBD_API CrossThreadChannel { 
-  public:
+public:
 	/** if @a non_blocking is true, the channel will not cause blocking
 	 * when used in an event loop based on poll/select or the glib main
 	 * loop.
@@ -62,13 +62,16 @@ class LIBPBD_API CrossThreadChannel {
 	 * because there is no way to know which byte value will be used
 	 * for ::wakeup()
 	 */
-     int deliver (char msg);
+	int deliver (char msg);
 
 	/** if using ::deliver() to wakeup the listening thread, then
 	 * the listener should call ::receive() to fetch the message
 	 * type from the channel.
+	 *
+	 * wait = true only make sense for non_blocking channels,
+	 * it polls for data to become available.
 	 */
-     int receive (char& msg);
+	int receive (char& msg, bool wait = false);
 
 	/** empty the channel of all requests.
 	 * Typically this is done as soon as input 
@@ -79,15 +82,17 @@ class LIBPBD_API CrossThreadChannel {
 	 */
 	void drain ();
 
-    void set_receive_handler (sigc::slot<bool,Glib::IOCondition> s);
-    void attach (Glib::RefPtr<Glib::MainContext>);
+	void set_receive_handler (sigc::slot<bool,Glib::IOCondition> s);
+	void attach (Glib::RefPtr<Glib::MainContext>);
 
 private:
 	friend gboolean cross_thread_channel_call_receive_slot (GIOChannel*, GIOCondition condition, void *data);
 
 	GIOChannel* receive_channel;
-    GSource*    receive_source;
-    sigc::slot<bool,Glib::IOCondition> receive_slot;
+	GSource*    receive_source;
+	sigc::slot<bool,Glib::IOCondition> receive_slot;
+
+	bool poll_for_request();
 
 #ifndef PLATFORM_WINDOWS
 	int fds[2]; // current implementation uses a pipe/fifo

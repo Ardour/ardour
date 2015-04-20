@@ -25,6 +25,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
+#include "ardour/lmath.h"
 #include "ardour/ticker.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"

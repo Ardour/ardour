@@ -171,7 +171,7 @@ XMLNode&
 RCConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	root = new XMLNode("Ardour");
 
@@ -192,7 +192,7 @@ XMLNode&
 RCConfiguration::get_variables ()
 {
 	XMLNode* node;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	node = new XMLNode ("Config");
 
@@ -235,7 +235,8 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 		}
 	}
 
-	Diskstream::set_disk_io_chunk_frames (minimum_disk_io_bytes.get() / sizeof (Sample));
+	Diskstream::set_disk_read_chunk_frames (minimum_disk_read_bytes.get() / sizeof (Sample));
+	Diskstream::set_disk_write_chunk_frames (minimum_disk_write_bytes.get() / sizeof (Sample));
 
 	return 0;
 }
@@ -270,3 +271,4 @@ RCConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 }
+

@@ -68,6 +68,13 @@ public:
 	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
 };
 
+class BufferSet;
+
+class LIBARDOUR_API CubicMidiInterpolation : public Interpolation {
+public:
+	framecnt_t distance (framecnt_t nframes, bool roll = true);
+};
+
 } // namespace ARDOUR
 
 #endif

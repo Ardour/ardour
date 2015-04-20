@@ -168,7 +168,7 @@ MidiStateTracker::resolve_notes (Evoral::EventSink<framepos_t> &dst, framepos_t 
 }
 
 void
-MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, Evoral::MusicalTime time)
+MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, Evoral::Beats time)
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MS-resolve notes @ %2 on = %3\n", this, time, _on));
 
@@ -181,7 +181,7 @@ MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, 
 	for (int channel = 0; channel < 16; ++channel) {
 		for (int note = 0; note < 128; ++note) {
 			while (_active_notes[note + 128 * channel]) {
-				Evoral::MIDIEvent<Evoral::MusicalTime> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
+				Evoral::MIDIEvent<Evoral::Beats> ev ((MIDI_CMD_NOTE_OFF|channel), time, 3, 0, true);
 				ev.set_type (MIDI_CMD_NOTE_OFF);
 				ev.set_channel (channel);
 				ev.set_note (note);
@@ -191,7 +191,7 @@ MidiStateTracker::resolve_notes (MidiSource& src, const MidiSource::Lock& lock, 
 										       this, (int) note, (int) channel, time));
 				_active_notes[note + 128 * channel]--;
 				/* don't stack events up at the same time */
-				time += Evoral::MusicalTime::tick();
+				time += Evoral::Beats::tick();
 			}
 		}
 	}

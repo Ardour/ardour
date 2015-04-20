@@ -27,10 +27,10 @@ namespace ARDOUR {
 	class Session;
 }
 
-class MidiCutBuffer : public ARDOUR::AutomatableSequence<Evoral::MusicalTime>
+class MidiCutBuffer : public ARDOUR::AutomatableSequence<Evoral::Beats>
 {
   public:
-	typedef Evoral::MusicalTime TimeType;
+	typedef Evoral::Beats TimeType;
 
 	MidiCutBuffer (ARDOUR::Session*);
 	~MidiCutBuffer();

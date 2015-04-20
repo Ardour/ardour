@@ -170,20 +170,6 @@ MixerGroupTabs::routes_for_tab (Tab const * t) const
 	return routes;
 }
 
-PropertyList
-MixerGroupTabs::default_properties () const
-{
-	PropertyList plist;
-
-	plist.add (Properties::active, true);
-	plist.add (Properties::mute, true);
-	plist.add (Properties::solo, true);
-	plist.add (Properties::gain, true);
-	plist.add (Properties::recenable, true);
-
-	return plist;
-}
-
 RouteList
 MixerGroupTabs::selected_routes () const
 {

@@ -29,6 +29,7 @@
 
 #include <algorithm>
 
+using namespace ArdourSurface;
 using namespace Mackie;
 
 JogWheel::JogWheel (MackieControlProtocol & mcp)

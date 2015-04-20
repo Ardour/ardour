@@ -69,13 +69,10 @@ void
 BigClockWindow::on_realize ()
 {
 	ArdourWindow::on_realize ();
-	/* (try to) ensure that resizing is possible.
-	 */
-	get_window()->set_decorations (Gdk::DECOR_BORDER|Gdk::DECOR_RESIZEH);
+	/* (try to) ensure that resizing is possible and the window can be moved (and closed) */
+	get_window()->set_decorations (Gdk::DECOR_BORDER | Gdk::DECOR_RESIZEH | Gdk::DECOR_TITLE | Gdk::DECOR_MENU);
 
-	/* try to force a fixed aspect ratio so that we don't distort the font
-	 */
-
+	/* try to force a fixed aspect ratio so that we don't distort the font */
 	float aspect = default_size.width/(float)default_size.height;
 	Gdk::Geometry geom;
 

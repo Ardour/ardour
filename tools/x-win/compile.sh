@@ -25,9 +25,9 @@ fi
 
 if test -z "${ARDOURCFG}"; then
 	if test -f ${PREFIX}/include/pa_asio.h; then
-		ARDOURCFG="--windows-vst --with-backends=jack,dummy,wavesaudio"
+		ARDOURCFG="--windows-vst --with-backends=jack,dummy,wavesaudio --no-jack-metadata"
 	else
-		ARDOURCFG="--windows-vst --with-backends=jack,dummy"
+		ARDOURCFG="--windows-vst --with-backends=jack,dummy --no-jack-metadata"
 	fi
 fi
 
@@ -72,3 +72,10 @@ LDFLAGS="-L${PREFIX}/lib" ./waf configure \
 	$ARDOURCFG \
 	--prefix=${PREFIX}
 ./waf ${CONCURRENCY}
+
+if [ "$(id -u)" = "0" ]; then
+	apt-get -qq -y install gettext
+fi
+echo " === build complete, creating translations"
+./waf i18n
+echo " === done"

@@ -21,6 +21,7 @@
 #include "surface.h"
 #include "control_group.h"
 
+using namespace ArdourSurface;
 using namespace Mackie;
 
 const int Jog::ID = 0x3c;

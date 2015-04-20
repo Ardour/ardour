@@ -768,7 +768,7 @@ AudioRegion::get_basic_state ()
 {
 	XMLNode& node (Region::state ());
 	char buf[64];
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	snprintf (buf, sizeof (buf), "%u", (uint32_t) _sources.size());
 	node.add_property ("channels", buf);
@@ -781,7 +781,7 @@ AudioRegion::state ()
 {
 	XMLNode& node (get_basic_state());
 	XMLNode *child;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	child = node.add_child ("Envelope");
 
@@ -838,7 +838,7 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 {
 	const XMLNodeList& nlist = node.children();
 	const XMLProperty *prop;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	boost::shared_ptr<Playlist> the_playlist (_playlist.lock());
 
 	suspend_property_changes ();
@@ -925,12 +925,12 @@ AudioRegion::_set_state (const XMLNode& node, int version, PropertyChange& what_
 				}
 			}
 	
-		} else if (child->name() == "InverseFadeIn") {
+		} else if ( (child->name() == "InverseFadeIn") || (child->name() == "InvFadeIn")  ) {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
 				_inverse_fade_in->set_state (*grandchild, version);
 			}
-		} else if (child->name() == "InverseFadeOut") {
+		} else if ( (child->name() == "InverseFadeOut") || (child->name() == "InvFadeOut") ) {
 			XMLNode* grandchild = child->child ("AutomationList");
 			if (grandchild) {
 				_inverse_fade_out->set_state (*grandchild, version);
@@ -1696,31 +1696,38 @@ in this and future transient-detection operations.\n\
 		}
 	}
 
-	TransientDetector t (pl->session().frame_rate());
 	bool existing_results = !results.empty();
 
-	_transients.clear ();
-	_valid_transients = false;
+	try {
 
-	for (uint32_t i = 0; i < n_channels(); ++i) {
+		TransientDetector t (pl->session().frame_rate());
 
-		AnalysisFeatureList these_results;
+		_transients.clear ();
+		_valid_transients = false;
 
-		t.reset ();
+		for (uint32_t i = 0; i < n_channels(); ++i) {
 
-		if (t.run ("", this, i, these_results)) {
-			return -1;
+			AnalysisFeatureList these_results;
+
+			t.reset ();
+
+			if (t.run ("", this, i, these_results)) {
+				return -1;
+			}
+
+			/* translate all transients to give absolute position */
+
+			for (AnalysisFeatureList::iterator i = these_results.begin(); i != these_results.end(); ++i) {
+				(*i) += _position;
+			}
+
+			/* merge */
+
+			_transients.insert (_transients.end(), these_results.begin(), these_results.end());
 		}
-
-		/* translate all transients to give absolute position */
-
-		for (AnalysisFeatureList::iterator i = these_results.begin(); i != these_results.end(); ++i) {
-			(*i) += _position;
-		}
-
-		/* merge */
-
-		_transients.insert (_transients.end(), these_results.begin(), these_results.end());
+	} catch (...) {
+		error << string_compose(_("Transient Analysis failed for %1."), _("Audio Region")) << endmsg;
+		return -1;
 	}
 
 	if (!results.empty()) {

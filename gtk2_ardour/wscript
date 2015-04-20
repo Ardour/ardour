@@ -10,8 +10,6 @@ import time
 from waflib.Task import Task
 from waflib.Tools import winres
 
-I18N_PACKAGE = 'gtk2_ardour3'
-
 # Mandatory variables
 top = '.'
 out = 'build'
@@ -239,7 +237,6 @@ gtk2_ardour_sources = [
         'ui_config.cc',
         'utils.cc',
         'verbose_cursor.cc',
-        'version.cc',
         'visibility_group.cc',
         'volume_controller.cc',
         'window_manager.cc',
@@ -258,18 +255,26 @@ gtk2_ardour_sources = [
         'video_tool_paths.cc'
 ]
 
+def enoify (major, minor):
+    if major == 3:
+        return "\\n\\\"E-No\\\""
+    elif major == 4:
+        if minor == 0:
+            return "\\n\\\"No Pussyfooting\\\""
+        elif minor == 1:
+            return "\\n\\\"Here Come the Warm Jets\\\""
+        elif minor == 2:
+            return "\\n\\\"Taking Tiger Mountain\\\""
+        elif minor == 3:
+            return "\\n\\\"Lady June's Linguistic Leprosy\\\""
+    return "\\\"\\\""
+
 def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
     conf.load('misc')
     conf.load('compiler_cxx')
-    # we don't use hard-coded micro versions with ardour, so hard code it to zero
-    autowaf.build_version_files(
-        path_prefix + 'version.h',
-        path_prefix + 'version.cc',
-        'gtk2_ardour', conf.env['MAJOR'], conf.env['MINOR'], 0,
-        '', '')
     autowaf.configure(conf)
 
     # TODO: Insert a sanity check for on OS X to ensure CoreAudio is present
@@ -292,7 +297,8 @@ def configure(conf):
 
     bak = conf.env['define_key']
     conf.define('VERSIONSTRING', str (conf.env['VERSION']))
-    conf.env['define_key'] = ['VERSIONSTRING']
+    conf.define('CODENAME', enoify(int(conf.env['MAJOR']), int(conf.env['MINOR'])))
+    conf.env['define_key'] = ['VERSIONSTRING', 'CODENAME' ]
     conf.write_config_header('gtk2ardour-version.h')
     conf.env['define_key'] = bak;
 
@@ -369,16 +375,14 @@ def build_color_scheme(path, prefix):
 def build(bld):
 
     VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
+    I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
         # Windows VST support w/wine
         # If we require VST support we build a stub main() and the FST library
         # here using winegcc, and link it to the GTK front-end library
         obj = bld (features = 'cxx c cxxprogram wine')
-        obj.source = (
-            '../libs/fst/vstwin.c',
-            '../vst/winmain.c',
-            )
+        obj.source = ( '../libs/fst/vstwin.c', '../vst/winmain.c' )
         #
         # XXX do we really need to explicitly link to all of these for the wine executable?
         #
@@ -390,7 +394,7 @@ def build(bld):
                              'libmidipp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
-                             'libcanvas'
+                             'libcanvas',
                              ]
         obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
@@ -516,7 +520,7 @@ def build(bld):
 
     obj              = bld(features = 'subst')
     obj.source       = 'ardour.sh.in'
-    obj.target       = 'ardour3'
+    obj.target       = 'ardour' + str (bld.env['MAJOR'])
     obj.chmod        = Utils.O755
     obj.dict         = wrapper_subst_dict
     obj.install_path = bld.env['BINDIR']
@@ -525,7 +529,7 @@ def build(bld):
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj              = bld(features = 'subst')
         obj.source       = '../vst/ardourvst.in'
-        obj.target       = 'ardourvst3'
+        obj.target       = 'ardourvst' + str (bld.env['MAJOR'])
         obj.chmod        = Utils.O755
         obj.dict         = wrapper_subst_dict
         obj.install_path = bld.env['BINDIR']
@@ -562,7 +566,8 @@ def build(bld):
         # so just use it.
         #
         font_names = {
-            'MONOSPACE' : 'Lucida Grande',
+            'MONOSPACE' : 'Monaco',
+            'CLOCKFONT' : 'Lucida Grande',
         }
     else: # Linux/X11 fonts
         basefont = '' # unspecified - use system defaults
@@ -579,6 +584,7 @@ def build(bld):
         }
         font_names = {
                 'MONOSPACE' : 'ArdourMono',
+                'CLOCKFONT' : 'ArdourMono',
         }
 
     # Set up font substitution dictionary
@@ -633,7 +639,7 @@ def build(bld):
         obj.command_is_external = True
         obj.no_inputs = True
         obj.argv = menus_argv
-        obj.dep_vars = ['GTKOSX']
+        obj.dep_vars = ['GTKOSX', 'WINDOWS']
         obj.stdin = program + '.menus.in'
         obj.stdout = program + '.menus'
         bld.install_files (bld.env['CONFDIR'], program + '.menus')
@@ -673,7 +679,7 @@ def build(bld):
     bld.install_files(bld.env['CONFDIR'], 'dark.colors')
 
     # Default export stuff
-    bld.install_files(os.path.join(bld.env['CONFDIR'],' export'), bld.path.ant_glob('export/*.format'))
+    bld.install_files(os.path.join(bld.env['CONFDIR'], 'export'), bld.path.ant_glob('export/*.format'))
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):
@@ -684,17 +690,21 @@ def build(bld):
                             mo)
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
-
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                   'Paul Davis')
+	
 def i18n_pot(bld):
-    autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                       'Paul Davis')
 
 def i18n_po(bld):
-    autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
-
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                      'Paul Davis')
+	
 def i18n_mo(bld):
-    autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-                       'Paul Davis')
+	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+	autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+	                      'Paul Davis')

@@ -180,7 +180,7 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	}
 
 	if (_send_mode) {
-		b = ARDOUR_UI::config()->color ("send strip base");
+		b = ARDOUR_UI::config()->color ("send bg");
 		// b = rgba_from_style("SendStripBase",
 		// UINT_RGBA_R(b), UINT_RGBA_G(b), UINT_RGBA_B(b), 255,
 		// "fg");
@@ -246,9 +246,9 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 		/* add text */
 		context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
 		if (swidth < 0.0) {
-			layout->set_text (_("R"));
+			layout->set_text (S_("Panner|R"));
 		} else {
-			layout->set_text (_("L"));
+			layout->set_text (S_("Panner|L"));
 		}
 		layout->get_pixel_size(tw, th);
 		context->move_to (rint(left - tw/2), rint(lr_box_size + step_down - th/2));
@@ -268,12 +268,12 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	context->set_source_rgba (UINT_RGBA_R_FLT(t), UINT_RGBA_G_FLT(t), UINT_RGBA_B_FLT(t), UINT_RGBA_A_FLT(t));
 
 	if (state == Mono) {
-		layout->set_text (_("M"));
+		layout->set_text (S_("Panner|M"));
 	} else {
 		if (swidth < 0.0) {
-			layout->set_text (_("L"));
+			layout->set_text (S_("Panner|L"));
 		} else {
-			layout->set_text (_("R"));
+			layout->set_text (S_("Panner|R"));
 		}
 	}
 	layout->get_pixel_size(tw, th);

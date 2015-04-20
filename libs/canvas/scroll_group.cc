@@ -52,7 +52,10 @@ ScrollGroup::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 		return;
 	}
 
-	Rect self (_position.x, _position.y, _position.x + r.get().width(), _position.y + r.get().height());
+	Rect self (_position.x + r.get().x0,
+	           _position.y + r.get().y0,
+	           _position.x + r.get().x1,
+	           _position.y + r.get().y1);
 
 	self.x1 = min (_position.x + _canvas->width(), self.x1);
 	self.y1 = min (_position.y + _canvas->height(), self.y1);
@@ -81,13 +84,18 @@ ScrollGroup::scroll_to (Duple const& d)
 bool
 ScrollGroup::covers_canvas (Duple const& d) const
 {
-	boost::optional<Rect> r = bounding_box ();
+        boost::optional<Rect> r = bounding_box ();
 
 	if (!r) {
 		return false;
 	}
 
-	return r->contains (d);
+        /* Bounding box is in item coordinates, but we need
+           to consider the position of the bounding box
+           within the canvas.
+        */
+        
+	return r->translate (position()).contains (d);
 }
 
 bool
@@ -99,7 +107,10 @@ ScrollGroup::covers_window (Duple const& d) const
 		return false;
 	}
 
-	Rect w = r->translate (-_scroll_offset);
-
-	return w.contains (d);
+        /* Bounding box is in item coordinates, but we need
+           to consider the position of the bounding box
+           within the canvas. 
+        */
+        
+	return r->translate (position()).contains (d);
 }

@@ -45,6 +45,6 @@ IdentityConverter<A,B>::from(B b) const
 
 template class IdentityConverter<double, framepos_t>;
 template class TimeConverter<double, framepos_t>;
-template class TimeConverter<Evoral::MusicalTime, framepos_t>;
+template class TimeConverter<Evoral::Beats, framepos_t>;
 
 } // namespace Evoral

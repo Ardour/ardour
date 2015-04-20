@@ -37,15 +37,15 @@ class TempoMap;
  *  them to the opposite unit, taking tempo changes into account.
  */
 class LIBARDOUR_API BeatsFramesConverter
-	: public Evoral::TimeConverter<Evoral::MusicalTime,framepos_t> {
+	: public Evoral::TimeConverter<Evoral::Beats,framepos_t> {
 public:
 	BeatsFramesConverter (TempoMap& tempo_map, framepos_t origin)
-		: Evoral::TimeConverter<Evoral::MusicalTime, framepos_t> (origin)
+		: Evoral::TimeConverter<Evoral::Beats, framepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
 
-	framepos_t          to (Evoral::MusicalTime beats) const;
-	Evoral::MusicalTime from (framepos_t frames) const;
+	framepos_t    to (Evoral::Beats beats) const;
+	Evoral::Beats from (framepos_t frames) const;
 
 private:
 	TempoMap& _tempo_map;

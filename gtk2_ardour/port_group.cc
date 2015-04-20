@@ -610,7 +610,12 @@ PortGroupList::make_bundle_from_ports (std::vector<std::string> const & p, ARDOU
 	}
 
 	for (uint32_t j = 0; j < p.size(); ++j) {
-		b->add_channel (p[j].substr (pre.length()), type);
+		std::string n = p[j].substr (pre.length());
+		std::string pn = AudioEngine::instance()->get_pretty_name_by_name (p[j]);
+		if (!pn.empty()) {
+			n = pn;
+		}
+		b->add_channel (n, type);
 		b->set_port (j, p[j]);
 	}
 

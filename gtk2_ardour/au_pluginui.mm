@@ -153,8 +153,15 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 
 	smaller_hbox->set_spacing (6);
 	smaller_hbox->pack_start (preset_label, false, false, 4);
+	smaller_hbox->pack_start (_preset_modified, false, false);
 	smaller_hbox->pack_start (_preset_combo, false, false);
+	smaller_hbox->pack_start (add_button, false, false);
+#if 0
+	/* Ardour does not currently allow to overwrite existing presets
+	 * see save_property_list() in audio_unit.cc
+	 */
 	smaller_hbox->pack_start (save_button, false, false);
+#endif
 #if 0
 	/* one day these might be useful with an AU plugin, but not yet */
 	smaller_hbox->pack_start (automation_mode_label, false, false);
@@ -190,7 +197,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	cocoa_parent = 0;
 	cocoa_window = 0;
 
-#ifdef WITH_CARBBON
+#ifdef WITH_CARBON
 	_activating_from_app = false;
 	_notify = 0;
 	au_view = 0;
@@ -210,7 +217,10 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 		create_cocoa_view ();
 	}
 
+	low_box.add_events(Gdk::VISIBILITY_NOTIFY_MASK);
+
 	low_box.signal_realize().connect (mem_fun (this, &AUPluginUI::lower_box_realized));
+	low_box.signal_visibility_notify_event ().connect (mem_fun (this, &AUPluginUI::lower_box_visibility_notify));
 }
 
 AUPluginUI::~AUPluginUI ()
@@ -496,7 +506,7 @@ AUPluginUI::create_carbon_view ()
 						  kWindowNoShadowAttribute|
 						  kWindowNoTitleBarAttribute);
 
-	if ((err = CreateNewWindow(kDocumentWindowClass, attr, &r, &carbon_window)) != noErr) {
+	if ((err = CreateNewWindow(kUtilityWindowClass, attr, &r, &carbon_window)) != noErr) {
 		error << string_compose (_("AUPluginUI: cannot create carbon window (err: %1)"), err) << endmsg;
 	        CloseComponent (editView);
 		return -1;
@@ -626,6 +636,7 @@ AUPluginUI::parent_carbon_window ()
 	_notify = [ [NotificationObject alloc] initWithPluginUI:this andCocoaParent:cocoa_parent andTopLevelParent:win ]; 
 
 	[win addChildWindow:cocoa_parent ordered:NSWindowAbove];
+	[win setAutodisplay:1]; // turn of GTK stuff for this window
 
 	return 0;
 #else
@@ -678,6 +689,13 @@ AUPluginUI::parent_cocoa_window ()
 }
 
 void
+AUPluginUI::grab_focus()
+{
+	if (au_view) {
+		[au_view becomeFirstResponder];
+	}
+}
+void
 AUPluginUI::forward_key_event (GdkEventKey* ev)
 {
 	NSEvent* nsevent = gdk_quartz_event_get_nsevent ((GdkEvent*)ev);
@@ -720,6 +738,19 @@ AUPluginUI::lower_box_realized ()
 	} else if (carbon_window) {
 		parent_carbon_window ();
 	}
+}
+
+bool
+AUPluginUI::lower_box_visibility_notify (GdkEventVisibility* ev)
+{
+#ifdef WITH_CARBON
+	if (carbon_window  && ev->state != GDK_VISIBILITY_UNOBSCURED) {
+		ShowWindow (carbon_window);
+		ActivateWindow (carbon_window, TRUE);
+		return true;
+	}
+#endif
+	return false;
 }
 
 void

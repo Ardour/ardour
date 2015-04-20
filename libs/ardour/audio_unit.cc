@@ -74,6 +74,75 @@ static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
 FILE * AUPluginInfo::_crashlog_fd = NULL;
 
+
+static void au_blacklist (std::string id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	FILE * blacklist_fd = NULL;
+	if (! (blacklist_fd = fopen(fn.c_str(), "a"))) {
+		PBD::error << "Cannot append to AU blacklist for '"<< id <<"'\n";
+		return;
+	}
+	assert(id.find("\n") == string::npos);
+	fprintf(blacklist_fd, "%s\n", id.c_str());
+	::fclose(blacklist_fd);
+}
+
+static void au_unblacklist (std::string id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		PBD::warning << "Expected Blacklist file does not exist.\n";
+		return;
+	}
+
+	std::string bl;
+	std::ifstream ifs(fn.c_str());
+	bl.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+	::g_unlink(fn.c_str());
+
+	assert(id.find("\n") == string::npos);
+
+	id += "\n"; // add separator
+	const size_t rpl = bl.find(id);
+	if (rpl != string::npos) {
+		bl.replace(rpl, id.size(), "");
+	}
+	if (bl.empty()) {
+		return;
+	}
+
+	FILE * blacklist_fd = NULL;
+	if (! (blacklist_fd = fopen(fn.c_str(), "w"))) {
+		PBD::error << "Cannot open AU blacklist.\n";
+		return;
+	}
+	fprintf(blacklist_fd, "%s", bl.c_str());
+	::fclose(blacklist_fd);
+}
+
+static bool is_blacklisted (std::string id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+	std::string bl;
+	std::ifstream ifs(fn.c_str());
+	bl.assign ((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
+
+	assert(id.find("\n") == string::npos);
+
+	id += "\n"; // add separator
+	const size_t rpl = bl.find(id);
+	if (rpl != string::npos) {
+		return true;
+	}
+	return false;
+}
+
+
+
 static OSStatus
 _render_callback(void *userData,
 		 AudioUnitRenderActionFlags *ioActionFlags,
@@ -360,6 +429,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 		p += preset_search_path;
 		preset_search_path = p;
 		preset_search_path_initialized = true;
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Preset Path: %1\n", preset_search_path));
 	}
 
 	init ();
@@ -434,6 +504,7 @@ AUPlugin::discover_factory_presets ()
 
 		string name = CFStringRefToStdString (preset->presetName);
 		factory_preset_map[name] = preset->presetNumber;
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Factory Preset: %1 > %2\n", name, preset->presetNumber));
 	}
 
 	CFRelease (presets);
@@ -443,6 +514,7 @@ void
 AUPlugin::init ()
 {
 	OSErr err;
+	CFStringRef itemName;
 
 	/* these keep track of *configured* channel set up,
 	   not potential set ups.
@@ -450,6 +522,20 @@ AUPlugin::init ()
 
 	input_channels = -1;
 	output_channels = -1;
+	{
+		CAComponentDescription temp;
+		GetComponentInfo (comp.get()->Comp(), &temp, NULL, NULL, NULL);
+		CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
+		CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
+		CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
+		itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
+				compTypeString, compManufacturerString, compSubTypeString);
+		if (compTypeString != NULL) CFRelease(compTypeString);
+		if (compSubTypeString != NULL) CFRelease(compSubTypeString);
+		if (compManufacturerString != NULL) CFRelease(compManufacturerString);
+	}
+
+	au_blacklist(CFStringRefToStdString(itemName));
 
 	try {
 		DEBUG_TRACE (DEBUG::AudioUnits, "opening AudioUnit\n");
@@ -515,6 +601,9 @@ AUPlugin::init ()
 	discover_factory_presets ();
 
 	// Plugin::setup_controls ();
+
+	au_unblacklist(CFStringRefToStdString(itemName));
+	if (itemName != NULL) CFRelease(itemName);
 }
 
 void
@@ -532,7 +621,7 @@ AUPlugin::discover_parameters ()
 
 	for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
 
-		AUParamInfo param_info (unit->AU(), false, false, scopes[i]);
+		AUParamInfo param_info (unit->AU(), false, /* include read only */ true, scopes[i]);
 
 		for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
 
@@ -612,7 +701,7 @@ AUPlugin::discover_parameters ()
 			d.toggled = (info.unit == kAudioUnitParameterUnit_Boolean) ||
 				(d.integer_step && ((d.upper - d.lower) == 1.0));
 			d.sr_dependent = (info.unit == kAudioUnitParameterUnit_SampleFrames);
-			d.automatable = !d.toggled &&
+			d.automatable = /* !d.toggled && -- ardour can automate toggles, can AU ? */
 				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
 				(info.flags & kAudioUnitParameterFlag_IsWritable);
 
@@ -977,11 +1066,11 @@ AUPlugin::input_streams() const
 {
 	ChanCount c;
 
-	c.set (DataType::AUDIO, 1);
-	c.set (DataType::MIDI, 0);
 
 	if (input_channels < 0) {
-		warning << string_compose (_("AUPlugin: %1 input_streams() called without any format set!"), name()) << endmsg;
+		// force PluginIoReConfigure -- see also commit msg e38eb06
+		c.set (DataType::AUDIO, 0);
+		c.set (DataType::MIDI, 0);
 	} else {
 		c.set (DataType::AUDIO, input_channels);
 		c.set (DataType::MIDI, _has_midi_input ? 1 : 0);
@@ -996,11 +1085,10 @@ AUPlugin::output_streams() const
 {
 	ChanCount c;
 
-	c.set (DataType::AUDIO, 1);
-	c.set (DataType::MIDI, 0);
-
 	if (output_channels < 0) {
-		warning << string_compose (_("AUPlugin: %1 output_streams() called without any format set!"), name()) << endmsg;
+		// force PluginIoReConfigure - see also commit msg e38eb06
+		c.set (DataType::AUDIO, 0);
+		c.set (DataType::MIDI, 0);
 	} else {
 		c.set (DataType::AUDIO, output_channels);
 		c.set (DataType::MIDI, _has_midi_output ? 1 : 0);
@@ -1037,7 +1125,11 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	//configurations in most cases. so first lets see
 	//if there's a configuration that keeps out==in
 
-	audio_out = audio_in;
+	if (in.n_midi() > 0 && audio_in == 0) {
+		audio_out = 2; // prefer stereo version if available.
+	} else {
+		audio_out = audio_in;
+	}
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
@@ -1663,27 +1755,42 @@ AUPlugin::parameter_is_audio (uint32_t) const
 }
 
 bool
-AUPlugin::parameter_is_control (uint32_t) const
+AUPlugin::parameter_is_control (uint32_t param) const
 {
-	return true;
-}
-
-bool
-AUPlugin::parameter_is_input (uint32_t) const
-{
+	assert(param < descriptors.size());
+	if (descriptors[param].automatable) {
+		/* corrently ardour expects all controls to be automatable
+		 * IOW ardour GUI elements mandate an Evoral::Parameter
+		 * for all input+control ports.
+		 */
+		return true;
+	}
 	return false;
 }
 
 bool
-AUPlugin::parameter_is_output (uint32_t) const
+AUPlugin::parameter_is_input (uint32_t param) const
 {
-	return false;
+	/* AU params that are both readable and writeable,
+	 * are listed in kAudioUnitScope_Global
+	 */
+	return (descriptors[param].scope == kAudioUnitScope_Input || descriptors[param].scope == kAudioUnitScope_Global);
+}
+
+bool
+AUPlugin::parameter_is_output (uint32_t param) const
+{
+	assert(param < descriptors.size());
+	// TODO check if ardour properly handles ports
+	// that report is_input + is_output == true
+	// -> add || descriptors[param].scope == kAudioUnitScope_Global
+	return (descriptors[param].scope == kAudioUnitScope_Output);
 }
 
 void
 AUPlugin::add_state (XMLNode* root) const
 {
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	CFDataRef xmlData;
 	CFPropertyListRef propertyList;
 
@@ -1722,7 +1829,7 @@ AUPlugin::set_state(const XMLNode& node, int version)
 {
 	int ret = -1;
 	CFPropertyListRef propertyList;
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to AUPlugin::set_state") << endmsg;
@@ -1878,6 +1985,10 @@ AUPlugin::do_save_preset (string preset_name)
 	}
 
 	CFRelease(propertyList);
+
+	user_preset_map[preset_name] = user_preset_path;;
+
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Saving Preset to %1\n", user_preset_path));
 
 	return string ("file:///") + user_preset_path;
 }
@@ -2067,6 +2178,7 @@ AUPlugin::find_presets ()
 	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter, this, true, true, true);
 
 	if (preset_files.empty()) {
+		DEBUG_TRACE (DEBUG::AudioUnits, "AU No Preset Files found for given plugin.\n");
 		return;
 	}
 
@@ -2087,6 +2199,9 @@ AUPlugin::find_presets ()
 
 		if (check_and_get_preset_name (get_comp()->Comp(), path, preset_name)) {
 			user_preset_map[preset_name] = path;
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Preset File: %1 > %2\n", preset_name, path));
+		} else {
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU INVALID Preset: %1 > %2\n", preset_name, path));
 		}
 
 	}
@@ -2095,6 +2210,7 @@ AUPlugin::find_presets ()
 
 	for (UserPresetMap::iterator i = user_preset_map.begin(); i != user_preset_map.end(); ++i) {
 		_presets.insert (make_pair (i->second, Plugin::PresetRecord (i->second, i->first)));
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding User Preset: %1 > %2\n", i->first, i->second));
 	}
 
 	/* add factory presets */
@@ -2103,6 +2219,7 @@ AUPlugin::find_presets ()
 		/* XXX: dubious */
 		string const uri = string_compose ("%1", _presets.size ());
 		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, i->second)));
+		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding Factory Preset: %1 > %2\n", i->first, i->second));
 	}
 }
 
@@ -2294,12 +2411,14 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 	while (comp != NULL) {
 		CAComponentDescription temp;
 		GetComponentInfo (comp, &temp, NULL, NULL, NULL);
+		CFStringRef itemName = NULL;
 
 		{
+			if (itemName != NULL) CFRelease(itemName);
 			CFStringRef compTypeString = UTCreateStringForOSType(temp.componentType);
 			CFStringRef compSubTypeString = UTCreateStringForOSType(temp.componentSubType);
 			CFStringRef compManufacturerString = UTCreateStringForOSType(temp.componentManufacturer);
-			CFStringRef itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
+			itemName = CFStringCreateWithFormat(kCFAllocatorDefault, NULL, CFSTR("%@ - %@ - %@"),
 					compTypeString, compManufacturerString, compSubTypeString);
 			au_crashlog(string_compose("Scanning ID: %1", CFStringRefToStdString(itemName)));
 			if (compTypeString != NULL)
@@ -2308,6 +2427,12 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 				CFRelease(compSubTypeString);
 			if (compManufacturerString != NULL)
 				CFRelease(compManufacturerString);
+		}
+
+		if (is_blacklisted(CFStringRefToStdString(itemName))) {
+			info << string_compose (_("Skipped blacklisted AU plugin %1 "), CFStringRefToStdString(itemName)) << endmsg;
+			comp = FindNextComponent (comp, &desc);
+			continue;
 		}
 
 		AUPluginInfoPtr info (new AUPluginInfo
@@ -2326,6 +2451,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 		case kAudioUnitType_Panner:
 		case kAudioUnitType_OfflineEffect:
 		case kAudioUnitType_FormatConverter:
+			comp = FindNextComponent (comp, &desc);
 			continue;
 
 		case kAudioUnitType_Output:
@@ -2351,6 +2477,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			break;
 		}
 
+		au_blacklist(CFStringRefToStdString(itemName));
 		AUPluginInfo::get_names (temp, info->name, info->creator);
 		ARDOUR::PluginScanMessage(_("AU"), info->name, false);
 		au_crashlog(string_compose("Plugin: %1", info->name));
@@ -2406,8 +2533,10 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			error << string_compose (_("Cannot get I/O configuration info for AU %1"), info->name) << endmsg;
 		}
 
+		au_unblacklist(CFStringRefToStdString(itemName));
 		au_crashlog("Success.");
 		comp = FindNextComponent (comp, &desc);
+		if (itemName != NULL) CFRelease(itemName); itemName = NULL;
 	}
 	au_crashlog(string_compose("End AU discovery for Type: %1", (int)desc.componentType));
 }

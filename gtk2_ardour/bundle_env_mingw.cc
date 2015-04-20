@@ -18,6 +18,7 @@
 */
 
 #include <stdlib.h>
+#include <string>
 #include "bundle_env.h"
 #include "i18n.h"
 
@@ -84,7 +85,7 @@ get_install_path ()
 
 
 void
-fixup_bundle_environment (int, char* [], const char** localedir)
+fixup_bundle_environment (int, char* [], string & localedir)
 {
 	EnvironmentalProtectionAgency::set_global_epa (new EnvironmentalProtectionAgency (true));
 	/* what to do ? */
@@ -95,8 +96,17 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 	// Unset GTK_RC_FILES so that only ardour specific files are loaded
 	Glib::unsetenv ("GTK_RC_FILES");
 
-
 	std::string path;
+
+	if (ARDOUR::translations_are_enabled ()) {
+		path = windows_search_path().to_string();
+		path += "\\locale";
+		Glib::setenv ("GTK_LOCALEDIR", path, true);
+
+		// and return the same path to our caller
+		localedir = path;
+	}
+
 	const char *cstr;
 	cstr = getenv ("VAMP_PATH");
 	if (cstr) {
@@ -111,6 +121,8 @@ fixup_bundle_environment (int, char* [], const char** localedir)
 	path += G_SEARCHPATH_SEPARATOR;
 	path += "%COMMONPROGRAMFILES%\\Vamp Plugins";
 	Glib::setenv ("VAMP_PATH", path, true);
+
+	Glib::setenv ("SUIL_MODULE_DIR", Glib::build_filename(ardour_dll_directory(), "suil"), true);
 }
 
 static __cdecl void

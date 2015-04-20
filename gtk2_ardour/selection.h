@@ -223,6 +223,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	PBD::Signal0<void> ClearMidiNoteSelection;
 
+	std::list<std::pair<PBD::ID const, std::list<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > pending_midi_note_selection;
+
   private:
 	PublicEditor const * editor;
 	uint32_t next_time_id;

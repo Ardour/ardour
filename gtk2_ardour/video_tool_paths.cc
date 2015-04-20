@@ -115,11 +115,11 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 		xjadeo_exe = xjadeo_file_path;
 	}
 #ifdef __APPLE__
-	else if (Glib::file_test(X_("/Applications/Xjadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
-		xjadeo_exe = X_("/Applications/Xjadeo.app/Contents/MacOS/xjremote");
+	else if (Glib::file_test(X_("/Applications/Xjadeo.app/Contents/MacOS/xjadeo"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
+		xjadeo_exe = X_("/Applications/Xjadeo.app/Contents/MacOS/xjadeo");
 	}
-	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/xjremote"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
-		xjadeo_exe = X_("/Applications/Jadeo.app/Contents/MacOS/xjremote");
+	else if (Glib::file_test(X_("/Applications/Jadeo.app/Contents/MacOS/Jadeo-bin"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
+		xjadeo_exe = X_("/Applications/Jadeo.app/Contents/MacOS/Jadeo-bin");
 	}
 #endif
 #ifdef PLATFORM_WINDOWS

@@ -110,12 +110,13 @@ WavesMidiDeviceManager::stop ()
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::stop ():" << std::endl;
 
-    if ( _active == false )
+    if ( _active == false ) {
         return 0;
+	}
     
     stream (false);
 
-    _close_devices ();
+    _delete_devices ();
     _active = false;
 
     if (Pm_Terminate () != pmNoError) {
@@ -201,18 +202,13 @@ WavesMidiDeviceManager::_create_devices ()
         }
 
         WavesMidiDevice *device = _get_device (pm_device_info->name);
-        if (device) {
-            device->validate ();
-        }
-        else
-        {
+        if (!device) {
             device = new WavesMidiDevice (pm_device_info->name);
             _devices.push_back (device);
-        }
-
-        if (device->open (__get_time_ms, (void*)&_audiobackend)) {
-            std::cerr << "WavesMidiDeviceManager::_create_devices (): [" << device->name () << "]->open () failed!" << std::endl;
-        }
+			if (device->open (__get_time_ms, (void*)&_audiobackend)) {
+				std::cerr << "WavesMidiDeviceManager::_create_devices (): [" << device->name () << "]->open () failed!" << std::endl;
+			}
+		}
     }
 
     return 0;
@@ -226,17 +222,9 @@ WavesMidiDeviceManager::_delete_devices ()
     while (!_devices.empty ()) {
         WavesMidiDevice * device = _devices.back ();
         _devices.pop_back ();
+		device->close ();
         delete device;
     }
     return 0;
 }
 
-
-void
-WavesMidiDeviceManager::_close_devices ()
-{
-    // COMMENTED DBG LOGS */ std::cout << "WavesMidiDeviceManager::_delete_devices ():" << std::endl;
-    for (size_t i = 0; i < _devices.size (); i++) {
-        _devices[i]->close ();
-    }
-}

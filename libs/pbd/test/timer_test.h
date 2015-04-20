@@ -106,7 +106,7 @@ private:
 	{ return rapid2_timer_usecs () / 1000; }
 
 	static guint64 test_length_ms ()
-	{ return 10 * 1000; }
+	{ return 2 * 1000; }
 
 	std::string m_current_test_name;
 

@@ -674,6 +674,38 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
 }
 
 void
+Editor::mouse_add_new_loop (framepos_t where)
+{
+	if (!_session) {
+		return;
+	}
+
+	/* Make this marker 1/8th of the visible area of the session so that
+	   it's reasonably easy to manipulate after creation.
+	*/
+
+	framepos_t const end = where + current_page_samples() / 8;
+
+	set_loop_range (where, end,  _("set loop range"));
+}
+
+void
+Editor::mouse_add_new_punch (framepos_t where)
+{
+	if (!_session) {
+		return;
+	}
+
+	/* Make this marker 1/8th of the visible area of the session so that
+	   it's reasonably easy to manipulate after creation.
+	*/
+
+	framepos_t const end = where + current_page_samples() / 8;
+
+	set_punch_range (where, end,  _("set punch range"));
+}
+
+void
 Editor::mouse_add_new_range (framepos_t where)
 {
 	if (!_session) {

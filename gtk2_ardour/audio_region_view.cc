@@ -1052,6 +1052,8 @@ AudioRegionView::update_envelope_visibility ()
 
 	if (ARDOUR_UI::config()->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
+		gain_line->canvas_group().raise_to_top ();
+
 	} else {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(0));
 	}
@@ -1140,7 +1142,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	wave->set_samples_per_pixel (samples_per_pixel);
 	wave->set_show_zero_line (true);
 	wave->set_clip_level (ARDOUR_UI::config()->get_waveform_clip_level ());
-
+	wave->set_start_shift (1.0);
+	
 	wave->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_wave_view_event), wave, this));
 	
 	switch (ARDOUR_UI::config()->get_waveform_shape()) {

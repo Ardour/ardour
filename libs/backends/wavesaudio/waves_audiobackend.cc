@@ -80,7 +80,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             break;
         case WCMRAudioDeviceManagerClient::AudioCallback:
             if (parameter) {
-                AudioCallbackData* audio_callback_data = (AudioCallbackData*)parameter;
+                const AudioCallbackData* audio_callback_data = (AudioCallbackData*)parameter;
                 _audio_device_callback (
                     audio_callback_data->acdInputBuffer,
                     audio_callback_data->acdOutputBuffer,
@@ -221,6 +221,23 @@ float WavesAudioBackend::default_sample_rate () const
     return AudioBackend::default_sample_rate (); 
 }
 
+uint32_t 
+WavesAudioBackend::default_buffer_size (const std::string& device_name) const
+{
+#ifdef __APPLE__
+	return AudioBackend::default_buffer_size (device_name);
+#else
+    DeviceInfo devInfo;
+    WTErr err = _audio_device_manager.GetDeviceInfoByName(device_name, devInfo);
+
+    if (err != eNoErr) {
+        std::cerr << "WavesAudioBackend::default_buffer_size (): Failed to get buffer size for device [" << device_name << "]" << std::endl;
+        return AudioBackend::default_buffer_size (device_name);
+    }
+	
+	return devInfo.m_DefaultBufferSize; 
+#endif
+}
 
 std::vector<uint32_t> 
 WavesAudioBackend::available_buffer_sizes (const std::string& device_name) const
@@ -714,7 +731,7 @@ void
 WavesAudioBackend::_audio_device_callback (const float* input_buffer, 
                                            float* output_buffer, 
                                            unsigned long nframes,
-                                           pframes_t sample_time,
+                                           framepos_t sample_time,
                                            uint64_t cycle_start_time_nanos)
 {
     uint64_t dsp_start_time_nanos = __get_time_nanos();
@@ -776,11 +793,10 @@ WavesAudioBackend::stop ()
 		}
 	}
 
-    _midi_device_manager.stop ();
-
+	_midi_device_manager.stop ();
     _unregister_system_audio_ports ();
     _unregister_system_midi_ports ();
-
+	
     return retVal;
 }
 
@@ -971,7 +987,7 @@ WavesAudioBackend::raw_buffer_size (DataType data_type)
 }
 
 
-pframes_t
+framepos_t
 WavesAudioBackend::sample_time ()
 {
     // WARNING: This is approximate calculation. Implementation of accurate calculation is pending.
@@ -998,7 +1014,7 @@ WavesAudioBackend::__get_time_nanos ()
 }
 
 
-pframes_t
+framepos_t
 WavesAudioBackend::sample_time_at_cycle_start ()
 {
     // COMMENTED FREQUENT DBG LOGS */ std::cout << "WavesAudioBackend::sample_time_at_cycle_start (): " << _sample_time_at_cycle_start << std::endl;

@@ -348,6 +348,64 @@ ARDOUR_UI_UTILS::emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 	return forward_key_press(&ev);
 }
 
+static string
+show_gdk_event_state (int state)
+{
+	string s;
+	if (state & GDK_SHIFT_MASK) {
+		s += "+SHIFT";
+	}
+	if (state & GDK_LOCK_MASK) {
+		s += "+LOCK";
+	}
+	if (state & GDK_CONTROL_MASK) {
+		s += "+CONTROL";
+	}
+	if (state & GDK_MOD1_MASK) {
+		s += "+MOD1";
+	}
+	if (state & GDK_MOD2_MASK) {
+		s += "+MOD2";
+	}
+	if (state & GDK_MOD3_MASK) {
+		s += "+MOD3";
+	}
+	if (state & GDK_MOD4_MASK) {
+		s += "+MOD4";
+	}
+	if (state & GDK_MOD5_MASK) {
+		s += "+MOD5";
+	}
+	if (state & GDK_BUTTON1_MASK) {
+		s += "+BUTTON1";
+	}
+	if (state & GDK_BUTTON2_MASK) {
+		s += "+BUTTON2";
+	}
+	if (state & GDK_BUTTON3_MASK) {
+		s += "+BUTTON3";
+	}
+	if (state & GDK_BUTTON4_MASK) {
+		s += "+BUTTON4";
+	}
+	if (state & GDK_BUTTON5_MASK) {
+		s += "+BUTTON5";
+	}
+	if (state & GDK_SUPER_MASK) {
+		s += "+SUPER";
+	}
+	if (state & GDK_HYPER_MASK) {
+		s += "+HYPER";
+	}
+	if (state & GDK_META_MASK) {
+		s += "+META";
+	}
+	if (state & GDK_RELEASE_MASK) {
+		s += "+RELEASE";
+	}
+
+	return s;
+}
 bool
 ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
 {
@@ -357,6 +415,9 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 	bool allow_activating = true;
 	/* consider all relevant modifiers but not LOCK or SHIFT */
 	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
+        GdkModifierType modifier = GdkModifierType (ev->state);
+        modifier = GdkModifierType (modifier & gtk_accelerator_get_default_mod_mask());
+        Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator(modifier);
 
 	if (focus) {
 		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
@@ -380,7 +441,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
         DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 allow_activation ? %6\n",
                                                           win,
                                                           ev->keyval,
-                                                          ev->state,
+							  show_gdk_event_state (ev->state),
                                                           special_handling_of_unmodified_accelerators,
                                                           Keyboard::some_magic_widget_has_focus(),
                                                           allow_activating,
@@ -420,6 +481,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 
 	if (!special_handling_of_unmodified_accelerators) {
 
+
 		/* XXX note that for a brief moment, the conditional above
 		 * included "|| (ev->state & mask)" so as to enforce the
 		 * implication of special_handling_of_UNMODIFIED_accelerators.
@@ -447,29 +509,9 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tactivate (was %1 now %2) without special hanlding of unmodified accels\n",
 									  ev->keyval, fakekey));
 
-			GdkModifierType mod = GdkModifierType (ev->state);
-
-			mod = GdkModifierType (mod & gtk_accelerator_get_default_mod_mask());
-#ifdef GTKOSX
-			/* GTK on OS X is currently (February 2012) setting both
-			   the Meta and Mod2 bits in the event modifier state if 
-			   the Command key is down.
-
-			   gtk_accel_groups_activate() does not invoke any of the logic
-			   that gtk_window_activate_key() will that sorts out that stupid
-			   state of affairs, and as a result it fails to find a match
-			   for the key event and the current set of accelerators.
-
-			   to fix this, if the meta bit is set, remove the mod2 bit
-			   from the modifier. this assumes that our bindings use Primary
-			   which will have set the meta bit in the accelerator entry.
-			*/
-			if (mod & GDK_META_MASK) {
-				mod = GdkModifierType (mod & ~GDK_MOD2_MASK);
-			}
-#endif
-
-			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, mod)) {
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tmodified modifier was %1\n", show_gdk_event_state (modifier)));
+			
+			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, modifier)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
 				return true;
 			}
@@ -486,8 +528,8 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 
 		if (allow_activating) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
-			if (gtk_window_activate_key (win, ev)) {
-				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+                        if (gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier)) {
+                                DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
 			}
 		} else {
@@ -506,7 +548,7 @@ ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEv
 	if (!gtk_window_propagate_key_event (win, ev)) {
                 DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
 		if (allow_activating) {
-			return gtk_window_activate_key (win, ev);
+			return gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier);
 		} else {
 			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
 		}

@@ -138,7 +138,7 @@ ARDOUR_UI::install_actions ()
 					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
 	act->set_sensitive (false);
 	act = ActionManager::register_action (main_actions, X_("ExportVideo"), _("Export To Video File"),
-			hide_return (sigc::bind (sigc::mem_fun(*editor, &PublicEditor::export_video), false)));
+			hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::export_video), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("SnapshotStay"), _("Snapshot (& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
@@ -271,7 +271,7 @@ if (Profile->get_mixbus())
 	act = ActionManager::register_action (transport_actions, X_("Loop"), _("Play Loop Range"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (transport_actions, X_("PlaySelection"), _("Play Selected Range"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_selection));
+	act = ActionManager::register_action (transport_actions, X_("PlaySelection"), _("Play Selection"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 	act = ActionManager::register_action (transport_actions, X_("PlayPreroll"), _("Play Selection w/Preroll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_preroll));
@@ -518,7 +518,9 @@ ARDOUR_UI::build_menu_bar ()
 #endif
 		disk_space = true;
 	}
-	
+
+	hbox->pack_end (error_alert_button, false, false, 2);
+
 	hbox->pack_end (wall_clock_label, false, false, 2);
 	hbox->pack_end (disk_space_label, false, false, 4);
 	hbox->pack_end (cpu_load_label, false, false, 4);
@@ -527,12 +529,14 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
 
-	menu_hbox.pack_end (*ev, false, false, 6);
+	menu_hbox.pack_end (*ev, false, false, 2);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
+#ifndef GTKOSX
 	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), wall_clock);
+#endif
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
 	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);

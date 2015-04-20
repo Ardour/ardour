@@ -41,12 +41,12 @@ using namespace Gtkmm2ext;
 
 /** @param tc If non-0, a time converter for this patch change.  If 0, time control will be desensitized */
 PatchChangeDialog::PatchChangeDialog (
-	const ARDOUR::BeatsFramesConverter*              tc,
-	ARDOUR::Session*                                 session,
-	Evoral::PatchChange<Evoral::MusicalTime> const & patch,
-	ARDOUR::InstrumentInfo&                          info,
-	const Gtk::BuiltinStockID&                       ok,
-	bool                                             allow_delete)
+	const ARDOUR::BeatsFramesConverter*        tc,
+	ARDOUR::Session*                           session,
+	Evoral::PatchChange<Evoral::Beats> const & patch,
+	ARDOUR::InstrumentInfo&                    info,
+	const Gtk::BuiltinStockID&                 ok,
+	bool                                       allow_delete)
 	: ArdourDialog (_("Patch Change"), true)
 	, _time_converter (tc)
 	, _info (info)
@@ -139,16 +139,16 @@ PatchChangeDialog::instrument_info_changed ()
 	fill_patch_combo ();
 }
 
-Evoral::PatchChange<Evoral::MusicalTime>
+Evoral::PatchChange<Evoral::Beats>
 PatchChangeDialog::patch () const
 {
-	Evoral::MusicalTime t = Evoral::MusicalTime();
+	Evoral::Beats t = Evoral::Beats();
 
 	if (_time_converter) {
 		t = _time_converter->from (_time.current_time ());
 	}
 
-	return Evoral::PatchChange<Evoral::MusicalTime> (
+	return Evoral::PatchChange<Evoral::Beats> (
 		t,
 		_channel.get_value_as_int() - 1,
 		_program.get_value_as_int() - 1,

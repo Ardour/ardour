@@ -214,10 +214,6 @@ Editor::mouse_mode_object_range_toggled()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	if (tact->get_active()) {
-		m = MouseObject;  //Smart mode turned to ON, force editing to Object mode
-	}
-
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
@@ -335,37 +331,59 @@ Editor::internal_editing() const
 void
 Editor::update_time_selection_display ()
 {
-	if (smart_mode_action->get_active()) {
-		/* not sure what to do here */
-		if (mouse_mode == MouseObject) {
-		} else {
-		}
-	} else {
-		switch (mouse_mode) {
-		case MouseRange:
-			selection->clear_objects ();
-			selection->ClearMidiNoteSelection();  //signal
-			break;
-		case MouseObject:
-			selection->clear_objects ();
-			selection->clear_time ();
-			selection->clear_tracks ();
-			selection->ClearMidiNoteSelection();  //signal
-			break;
-		case MouseContent:
-		case MouseDraw:
-			//if we go into internal editing, clear everything in the outside world
-			selection->clear_objects ();
-			selection->clear_time ();
-			selection->clear_tracks ();
-			break;
-		default:
-			//clear everything
-			selection->clear_objects ();
-			selection->clear_time ();
-			selection->clear_tracks ();
-			break;
-		}
+	switch (mouse_mode) {
+	case MouseRange:
+		selection->clear_objects ();
+		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
+		break;
+	case MouseObject:
+		selection->clear_time ();
+		selection->clear_tracks ();
+		selection->ClearMidiNoteSelection ();  /* EMIT SIGNAL */
+		break;
+	case MouseDraw:
+		/* Clear regions, but not time or tracks, since that
+		 would destroy the range selection rectangle, which we need to stick
+		 around for AutomationRangeDrag. */
+		selection->clear_regions ();
+		selection->clear_playlists ();
+		break;
+	case MouseContent:
+		/* This handles internal edit.
+		   Clear everything except points and notes. 
+		*/
+		selection->clear_regions();
+		selection->clear_lines();
+		selection->clear_playlists ();
+
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
+
+	case MouseTimeFX:
+		/* We probably want to keep region selection */
+		selection->clear_points ();
+		selection->clear_lines();
+		selection->clear_playlists ();
+
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
+
+	case MouseAudition:
+		/*Don't lose lines or points if no action in this mode */
+		selection->clear_regions ();
+		selection->clear_playlists ();
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
+
+	default:
+		/*Clear everything */
+		selection->clear_objects();
+		selection->clear_time ();
+		selection->clear_tracks ();
+		break;
 	}
 }
 
@@ -448,11 +466,15 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
+	if (press) {
+		_mouse_changed_selection = false;
+	}
+
 	switch (item_type) {
 	case RegionItem:
 		if (press) {
 			if (eff_mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
+				_mouse_changed_selection = set_selected_regionview_from_click (press, op);
 			} else {
 				/* don't change the selection unless the
 				   clicked track is not currently selected. if
@@ -465,7 +487,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 			}
 		} else {
 			if (eff_mouse_mode != MouseRange) {
-				set_selected_regionview_from_click (press, op);
+				_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
 			}
 		}
 		break;
@@ -483,7 +505,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case StartCrossFadeItem:
 	case EndCrossFadeItem:
 		if (get_smart_mode() || eff_mouse_mode != MouseRange) {
-			set_selected_regionview_from_click (press, op);
+			_mouse_changed_selection |= set_selected_regionview_from_click (press, op);
 		} else if (event->type == GDK_BUTTON_PRESS) {
 			set_selected_track_as_side_effect (op);
 		}
@@ -492,7 +514,7 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	case ControlPointItem:
 		set_selected_track_as_side_effect (op);
 		if (eff_mouse_mode != MouseRange) {
-			set_selected_control_point_from_click (press, op);
+			_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
 		}
 		break;
 
@@ -501,6 +523,10 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		if (event->button.button == 3) {
 			selection->clear_tracks ();
 			set_selected_track_as_side_effect (op);
+
+			/* We won't get a release.*/
+			begin_reversible_selection_op (X_("Button 3 Menu Select"));
+			commit_reversible_selection_op ();
 		}
 		break;
 
@@ -510,6 +536,12 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	default:
 		break;
+	}
+
+	if ((!press) && _mouse_changed_selection) {
+		begin_reversible_selection_op (X_("Button Selection"));
+		commit_reversible_selection_op ();
+		_mouse_changed_selection = false;
 	}
 }
 
@@ -735,15 +767,21 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case StreamItem:
-			if (dynamic_cast<MidiTimeAxisView*> (clicked_axisview)) {
-				_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
-				return true;
-			}
+			//in the past, we created a new midi region here, but perhaps that is best left to the Draw mode
 			break;
 
 		case AutomationTrackItem:
 			/* rubberband drag to select automation points */
 			_drags->set (new EditorRubberbandSelectDrag (this, item), event);
+			return true;
+			break;
+
+		case RegionItem:
+			if (dynamic_cast<AutomationRegionView*>(clicked_regionview)) {
+				/* rubberband drag to select automation points */
+				_drags->set (new EditorRubberbandSelectDrag (this, item), event);
+				return true;
+			}
 			break;
 
 		default:
@@ -915,12 +953,13 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case SelectionItem:
 		{
-			AudioRegionView* arv = dynamic_cast<AudioRegionView *> (clicked_regionview);
-			if (arv) {
-				_drags->set (new AutomationRangeDrag (this, arv, selection->time), event, _cursors->up_down);
+			if (dynamic_cast<AudioRegionView*>(clicked_regionview) ||
+			    dynamic_cast<AutomationRegionView*>(clicked_regionview)) {
+				_drags->set (new AutomationRangeDrag (this, clicked_regionview, selection->time),
+				             event, _cursors->up_down);
 			} else {
 				double const y = event->button.y;
-				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y);
+				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y, false);
 				if (tvp.first) {
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
 					if ( atv) {
@@ -1149,20 +1188,24 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 	}
 
-	/* see if we're finishing a drag */
+        bool were_dragging = false;
 
-	bool were_dragging = false;
-	if (_drags->active ()) {
-		bool const r = _drags->end_grab (event);
-		if (r) {
-			/* grab dragged, so do nothing else */
-			return true;
-		}
+	if (!Keyboard::is_context_menu_event (&event->button)) {
 
-		were_dragging = true;
-	}
+                /* see if we're finishing a drag */
+                
+                if (_drags->active ()) {
+                        bool const r = _drags->end_grab (event);
+                        if (r) {
+                                /* grab dragged, so do nothing else */
+                                return true;
+                        }
+                        
+                        were_dragging = true;
+                }
 
-	update_region_layering_order_editor ();
+                update_region_layering_order_editor ();
+        }
 
 	/* edit events get handled here */
 
@@ -1453,7 +1496,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				default:
 					break;
 				}
-			} else {
+			} else if (_session) {
 				/* make sure we stop */
 				_session->request_transport_speed (0.0);
 			}
@@ -1465,10 +1508,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 
                 /* do any (de)selection operations that should occur on button release */
-
-		begin_reversible_selection_op (_("Button Select"));
-                button_selection (item, event, item_type);
-		commit_reversible_selection_op ();
+		button_selection (item, event, item_type);
 
 		return true;
 		break;
@@ -1885,7 +1925,6 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 	}
 
 	ControlPointDialog d (p);
-	ensure_float (d);
 
 	if (d.run () != RESPONSE_ACCEPT) {
 		return;
@@ -1905,7 +1944,6 @@ Editor::edit_notes (MidiRegionView* mrv)
 
 	EditNoteDialog* d = new EditNoteDialog (mrv, s);
 	d->show_all ();
-	ensure_float (*d);
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &Editor::note_edit_done), d));
 }

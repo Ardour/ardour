@@ -49,6 +49,8 @@
 #include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
+#include <glibmm/fileutils.h>
+#include <glibmm/miscutils.h>
 
 #include "pbd/whitespace.h"
 #include "pbd/file_utils.h"
@@ -276,7 +278,7 @@ PluginManager::clear_vst_cache ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -286,7 +288,7 @@ PluginManager::clear_vst_cache ()
 #ifdef LXVST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -297,7 +299,7 @@ PluginManager::clear_vst_cache ()
 	{
 		string personal = get_personal_vst_info_cache_dir();
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\.fsi$");
+		find_files_matching_regex (fsi_files, personal, "\\.fsi$", /* user cache is flat, no recursion */ false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -311,7 +313,7 @@ PluginManager::clear_vst_blacklist ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsb$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsb$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -321,7 +323,7 @@ PluginManager::clear_vst_blacklist ()
 #ifdef LXVST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsb$");
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsb$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -333,10 +335,33 @@ PluginManager::clear_vst_blacklist ()
 		string personal = get_personal_vst_blacklist_dir();
 
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\.fsb$");
+		find_files_matching_regex (fsi_files, personal, "\\.fsb$", /* flat user cache */ false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
+	}
+#endif
+}
+
+void
+PluginManager::clear_au_cache ()
+{
+#ifdef AUDIOUNIT_SUPPORT
+	// AUPluginInfo::au_cache_path ()
+	string fn = Glib::build_filename (ARDOUR::user_config_directory(), "au_cache");
+	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		::g_unlink(fn.c_str());
+	}
+#endif
+}
+
+void
+PluginManager::clear_au_blacklist ()
+{
+#ifdef AUDIOUNIT_SUPPORT
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory(), "au_blacklist.txt");
+	if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		::g_unlink(fn.c_str());
 	}
 #endif
 }
@@ -618,12 +643,24 @@ PluginManager::au_refresh (bool cache_only)
 		return;
 	}
 	delete _au_plugin_info;
+	_au_plugin_info = AUPluginInfo::discover();
 
 	// disable automatic scan in case we crash
 	Config->set_discover_audio_units (false);
 	Config->save_state();
 
-	_au_plugin_info = AUPluginInfo::discover();
+	/* note: AU require a CAComponentDescription pointer provided by the OS.
+	 * Ardour only caches port and i/o config. It can't just 'scan' without
+	 * 'discovering' (like we do for VST).
+	 *
+	 * So in case discovery fails, we assume the worst: the Description
+	 * is broken (malicious plugins) and even a simple 'scan' would always
+	 * crash ardour on startup. Hence we disable Auto-Scan on start.
+	 *
+	 * If the crash happens at any later time (description is available),
+	 * Ardour will blacklist the plugin in question -- unless
+	 * the crash happens during realtime-run.
+	 */
 
 	// successful scan re-enabled automatic discovery
 	Config->set_discover_audio_units (true);
@@ -662,7 +699,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
 
-	find_files_matching_filter (plugin_objects, Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true);
+	find_files_matching_filter (plugin_objects, Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("VST"), *x, !cache_only && !cancelled());
@@ -781,7 +818,7 @@ PluginManager::lxvst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering linuxVST plugins along %1\n", path));
 
-	find_files_matching_filter (plugin_objects, Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true);
+	find_files_matching_filter (plugin_objects, Config->get_plugin_path_lxvst(), lxvst_filter, 0, false, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("LXVST"), *x, !cache_only && !cancelled());

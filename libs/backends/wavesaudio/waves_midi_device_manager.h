@@ -46,8 +46,6 @@ public:
 private:
 
     int _create_devices ();
-    void _close_devices ();
-
     int _delete_devices ();
     static void __portmidi_callback (PtTimestamp timestamp, void * userData);
     void _portmidi_callback (PtTimestamp timestamp);

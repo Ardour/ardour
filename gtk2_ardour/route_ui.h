@@ -157,7 +157,6 @@ class RouteUI : public virtual AxisView
 
 	void solo_changed(bool, void*);
 	void solo_changed_so_update_mute ();
-	void mute_changed(void*);
 	void listen_changed(void*);
 	virtual void processors_changed (ARDOUR::RouteProcessorChange) {}
 	void route_rec_enable_changed();
@@ -187,9 +186,6 @@ class RouteUI : public virtual AxisView
 	void init_mute_menu(ARDOUR::MuteMaster::MutePoint, Gtk::CheckMenuItem*);
 
 	int  set_color_from_route ();
-
-	void remove_this_route (bool apply_to_selection = false);
-	static gint idle_remove_this_route (RouteUI *);
 
 	void route_rename();
 

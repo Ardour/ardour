@@ -914,7 +914,7 @@ LV2Plugin::add_state(XMLNode* root) const
 
 	XMLNode*    child;
 	char        buf[16];
-	LocaleGuard lg(X_("POSIX"));
+	LocaleGuard lg(X_("C"));
 
 	for (uint32_t i = 0; i < parameter_count(); ++i) {
 		if (parameter_is_input(i) && parameter_is_control(i)) {
@@ -1074,11 +1074,13 @@ ARDOUR::lv2plugin_get_port_value(const char* port_symbol,
 std::string
 LV2Plugin::do_save_preset(string name)
 {
+	LilvNode*    plug_name = lilv_plugin_get_name(_impl->plugin);
+	const string prefix    = legalize_for_uri(lilv_node_as_string(plug_name));
 	const string base_name = legalize_for_uri(name);
 	const string file_name = base_name + ".ttl";
 	const string bundle    = Glib::build_filename(
 		Glib::get_home_dir(),
-		Glib::build_filename(".lv2", base_name + ".lv2"));
+		Glib::build_filename(".lv2", prefix + "_" + base_name + ".lv2"));
 
 	LilvState* state = lilv_state_new_from_instance(
 		_impl->plugin,
@@ -1110,7 +1112,7 @@ LV2Plugin::do_save_preset(string name)
 	std::string uri = Glib::filename_to_uri(Glib::build_filename(bundle, file_name));
 	LilvNode *node_bundle = lilv_new_uri(_world.world, Glib::filename_to_uri(Glib::build_filename(bundle, "/")).c_str());
 	LilvNode *node_preset = lilv_new_uri(_world.world, uri.c_str());
-#ifdef HAVE_LILV_0_19_2
+#ifdef HAVE_LILV_0_21_3
 	lilv_world_unload_resource(_world.world, node_preset);
 	lilv_world_unload_bundle(_world.world, node_bundle);
 #endif
@@ -1118,20 +1120,41 @@ LV2Plugin::do_save_preset(string name)
 	lilv_world_load_resource(_world.world, node_preset);
 	lilv_node_free(node_bundle);
 	lilv_node_free(node_preset);
+	lilv_node_free(plug_name);
 	return uri;
 }
 
 void
 LV2Plugin::do_remove_preset(string name)
 {
-	string preset_file = Glib::build_filename(
-		Glib::get_home_dir(),
-		Glib::build_filename(
-			Glib::build_filename(".lv2", "presets"),
-			name + ".ttl"
-		)
-	);
-	::g_unlink(preset_file.c_str());
+#ifdef HAVE_LILV_0_21_3
+	/* Look up preset record by label (FIXME: ick, label as ID) */
+	const PresetRecord* r = preset_by_label(name);
+	if (!r) {
+		return;
+	}
+
+	/* Load a LilvState for the preset. */
+	LilvWorld* world = _world.world;
+	LilvNode*  pset  = lilv_new_uri(world, r->uri.c_str());
+	LilvState* state = lilv_state_new_from_world(world, _uri_map.urid_map(), pset);
+	if (!state) {
+		lilv_node_free(pset);
+		return;
+	}
+
+	/* Delete it from the file system.  This will remove the preset file and the entry
+	   from the manifest.  If this results in an empty manifest (i.e. the
+	   preset is the only thing in the bundle), then the bundle is removed. */
+	lilv_state_delete(world, state);
+
+	lilv_state_free(state);
+	lilv_node_free(pset);
+#endif
+	/* Without lilv_state_delete(), we could delete the preset file, but this
+	   would leave a broken bundle/manifest around, so the preset would still
+	   be visible, but broken.  Naively deleting a bundle is too dangerous, so
+	   we simply do not support preset deletion with older Lilv */
 }
 
 bool
@@ -1529,7 +1552,7 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 	const char*          sym;
 	const char*          value;
 	uint32_t             port_id;
-	LocaleGuard          lg(X_("POSIX"));
+	LocaleGuard          lg(X_("C"));
 
 	if (node.name() != state_node_name()) {
 		error << _("Bad node sent to LV2Plugin::set_state") << endmsg;
@@ -2012,7 +2035,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				LV2_Evbuf*            buf  = _ev_buffers[msg.index];
 				LV2_Evbuf_Iterator    i    = lv2_evbuf_end(buf);
 				const LV2_Atom* const atom = (const LV2_Atom*)&body[0];
-				if (!lv2_evbuf_write(&i, nframes, 0, atom->type, atom->size,
+				if (!lv2_evbuf_write(&i, nframes - 1, 0, atom->type, atom->size,
 				                (const uint8_t*)(atom + 1))) {
 					error << "Failed to write data to LV2 event buffer\n";
 				}
@@ -2287,8 +2310,6 @@ LV2World::LV2World()
 	: world(lilv_world_new())
 	, _bundle_checked(false)
 {
-	lilv_world_load_all(world);
-
 	atom_AtomPort      = lilv_new_uri(world, LV2_ATOM__AtomPort);
 	atom_Chunk         = lilv_new_uri(world, LV2_ATOM__Chunk);
 	atom_Sequence      = lilv_new_uri(world, LV2_ATOM__Sequence);
@@ -2392,6 +2413,7 @@ LV2World::load_bundled_plugins(bool verbose)
 			lilv_node_free(node);
 		}
 
+		lilv_world_load_all(world);
 		_bundle_checked = true;
 	}
 }

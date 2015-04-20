@@ -93,6 +93,8 @@ class WavesMidiPort;
 
     virtual std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
 
+    virtual uint32_t default_buffer_size (const std::string& device) const;
+
     virtual uint32_t available_input_channel_count (const std::string& device) const;
 
     virtual uint32_t available_output_channel_count (const std::string& device) const;
@@ -195,9 +197,9 @@ class WavesMidiPort;
 
     virtual size_t raw_buffer_size (DataType data_type);
     
-    virtual pframes_t sample_time ();
+    virtual framepos_t sample_time ();
 
-    virtual pframes_t sample_time_at_cycle_start ();
+    virtual framepos_t sample_time_at_cycle_start ();
 
     virtual pframes_t samples_since_cycle_start ();
 
@@ -345,7 +347,7 @@ class WavesMidiPort;
     void _audio_device_callback (const float* input_audio_buffer, 
                                  float* output_buffer, 
                                  unsigned long nframes,
-                                 pframes_t sample_time,
+                                 framepos_t sample_time,
                                  uint64_t cycle_start_time_nanos);
 
     void _changed_midi_devices ();
@@ -389,7 +391,7 @@ class WavesMidiPort;
 	static uint64_t __performance_counter_frequency;
 #endif
 	uint64_t _cycle_start_time_nanos;
-    pframes_t _sample_time_at_cycle_start;
+    framepos_t _sample_time_at_cycle_start;
 
     bool _freewheeling;
     bool _freewheel_thread_active;

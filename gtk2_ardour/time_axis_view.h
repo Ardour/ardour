@@ -142,7 +142,13 @@ class TimeAxisView : public virtual AxisView
 	virtual void entered () {}
 	virtual void exited () {}
 
-	virtual void set_height (uint32_t h);
+	enum TrackHeightMode {
+		OnlySelf,
+		TotalHeight,
+		HeightPerLane
+	};
+
+	virtual void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
 	void set_height_enum (Height, bool apply_to_selection = false);
 	void reset_height();
 
@@ -187,7 +193,7 @@ class TimeAxisView : public virtual AxisView
 
 	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
+	virtual void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&, bool within = false);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 
 	void add_ghost (RegionView*);

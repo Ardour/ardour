@@ -155,9 +155,9 @@ protected:
 	/* XXX */
 	static Gdk::Color get_a_bundle_colour (int x) {
 		if ((x % 2) == 0) {
-			return Gdk::Color ("#547027");
+			return Gdk::Color ("#555555");
 		} else {
-			return Gdk::Color ("#3552a6");
+			return Gdk::Color ("#666666");
 		}
 	}
 

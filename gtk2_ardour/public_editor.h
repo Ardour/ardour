@@ -34,6 +34,7 @@
 #include <gtkmm/actiongroup.h>
 #include <sigc++/signal.h>
 
+#include "evoral/Note.hpp"
 #include "evoral/types.hpp"
 
 #include "pbd/statefuldestructible.h"
@@ -203,7 +204,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void remove_location_at_playhead_cursor () = 0;
 	virtual void set_show_measures (bool yn) = 0;
 	virtual bool show_measures () const = 0;
-
+	virtual void remove_tracks () = 0;
+	
 	virtual Editing::MouseMode effective_mouse_mode () const = 0;
 
 	/** Import existing media */
@@ -268,8 +270,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
         virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
-        virtual bool scroll_down_one_track () = 0;
-        virtual bool scroll_up_one_track () = 0;
+        virtual bool scroll_down_one_track (bool skip_child_views = false) = 0;
+        virtual bool scroll_up_one_track (bool skip_child_views = false) = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (framepos_t frame) = 0;
@@ -280,7 +282,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void restore_editing_space () = 0;
 	virtual void update_tearoff_visibility () = 0;
 	virtual void reattach_all_tearoffs () = 0;
-	virtual framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool from_context_menu = false) = 0;
+	virtual framepos_t get_preferred_edit_position (bool ignore_playhead = false, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (framepos_t, RegionSelection&) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
@@ -289,7 +291,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next) = 0;
 	virtual framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration) = 0;
-	virtual Evoral::MusicalTime get_grid_type_as_beats (bool& success, framepos_t position) = 0;
+	virtual unsigned get_grid_beat_divisions(framepos_t position) = 0;
+	virtual Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position) = 0;
 	virtual void edit_notes (MidiRegionView*) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
@@ -301,7 +304,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual int  get_videotl_bar_height () const = 0;
 	virtual void set_video_timeline_height (const int h) = 0;
 	virtual void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true) = 0;
-	virtual void export_video (bool range = false) = 0;
 
 	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
 
@@ -367,8 +369,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	virtual ArdourCanvas::Container* get_trackview_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
-	virtual ArdourCanvas::ScrollGroup* get_vscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;
+	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
 
         virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
@@ -390,8 +392,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void stop_canvas_autoscroll () = 0;
         virtual bool autoscroll_active() const = 0;
 
+	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
+	virtual void commit_reversible_selection_op () = 0;
 	virtual void begin_reversible_command (std::string cmd_name) = 0;
 	virtual void begin_reversible_command (GQuark) = 0;
+	virtual void abort_reversible_command () = 0;
 	virtual void commit_reversible_command () = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
@@ -411,7 +416,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
-	virtual void get_regionviews_by_id (PBD::ID const & id, RegionSelection & regions) const = 0;
+	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
+	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

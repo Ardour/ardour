@@ -84,13 +84,13 @@ public:
 	void set_button_names ();
 
 	void set_samples_per_pixel (double);
- 	void set_height (uint32_t h);
+ 	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
 	void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&);
+	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
 	void set_layer_display (LayerDisplay d, bool apply_to_selection = false);
 	LayerDisplay layer_display () const;

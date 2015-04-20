@@ -17,6 +17,7 @@
 
 */
 
+#include "ardour/lmath.h"
 #include "selection_memento.h"
 #include "editing.h"
 #include "public_editor.h"
@@ -62,8 +63,6 @@ SelectionMemento::set_state (const XMLNode& node, int /*version*/) {
 	if ((prop = node.property ("mouse-mode"))) {
 		Editing::MouseMode m = Editing::str2mousemode(prop->value());
 		editor.set_mouse_mode (m, true);
-	} else {
-		editor.set_mouse_mode (Editing::MouseObject, true);
 	}
 
 	if ((prop = node.property ("zoom"))) {

@@ -1098,10 +1098,27 @@ public:
 #endif // any VST
 
 #ifdef AUDIOUNIT_SUPPORT
+		ss.str("");
+		ss << "<b>" << _("Audio Unit") << "</b>";
+		l = manage (left_aligned_label (ss.str()));
+		l->set_use_markup (true);
+		t->attach (*manage (new Label ("")), 0, 3, n, n+1, FILL | EXPAND); ++n;
+		t->attach (*l, 0, 2, n, n+1, FILL | EXPAND); ++n;
+
 		t->attach (_discover_au_on_start, 0, 2, n, n+1); ++n;
 		_discover_au_on_start.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::discover_au_on_start_toggled));
 		Gtkmm2ext::UI::instance()->set_tip (_discover_au_on_start,
 					    _("<b>When enabled</b> Audio Unit Plugins are discovered on application start. When disabled AU plugins will only be available after triggering a 'Scan' manually. The first successful scan will enable AU auto-scan, Any crash during plugin discovery will disable it."));
+
+		++n;
+		b = manage (new Button (_("Clear AU Cache")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_au_cache_clicked));
+		t->attach (*b, 0, 1, n, n+1, FILL);
+
+		b = manage (new Button (_("Clear AU Blacklist")));
+		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::clear_au_blacklist_clicked));
+		t->attach (*b, 1, 2, n, n+1, FILL);
+		++n;
 #endif
 
 		_box->pack_start (*t,true,true);
@@ -1169,6 +1186,15 @@ private:
 	void clear_vst_blacklist_clicked () {
 		PluginManager::instance().clear_vst_blacklist();
 	}
+
+	void clear_au_cache_clicked () {
+		PluginManager::instance().clear_au_cache();
+	}
+
+	void clear_au_blacklist_clicked () {
+		PluginManager::instance().clear_au_blacklist();
+	}
+
 
 	void edit_vst_path_clicked () {
 		Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
@@ -1393,17 +1419,6 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Transport"), tsf);
 
 	tsf = new BoolOption (
-		     "stop-recording-on-xrun",
-		     _("Stop recording when an xrun occurs"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
-		     );
-	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
-					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
-							    PROGRAM_NAME));
-	add_option (_("Transport"), tsf);
-
-	tsf = new BoolOption (
 		     "loop-is-mode",
 		     _("Play loop is a transport mode"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_loop_is_mode),
@@ -1414,6 +1429,17 @@ RCOptionEditor::RCOptionEditor ()
 					       "<b>When disabled</b> the loop button starts playing the loop, but stop then cancels loop playback")));
 	add_option (_("Transport"), tsf);
 	
+	tsf = new BoolOption (
+		     "stop-recording-on-xrun",
+		     _("Stop recording when an xrun occurs"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_stop_recording_on_xrun),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_stop_recording_on_xrun)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (tsf->tip_widget(), 
+					    string_compose (_("<b>When enabled</b> %1 will stop recording if an over- or underrun is detected by the audio engine"),
+							    PROGRAM_NAME));
+	add_option (_("Transport"), tsf);
+
 	tsf = new BoolOption (
 		     "create-xrun-marker",
 		     _("Create markers where xruns occur"),
@@ -1477,7 +1503,6 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
 		);
 
-	populate_sync_options ();
 	add_option (_("Transport"), _sync_source);
 
 	_sync_framerate = new BoolOption (
@@ -1498,13 +1523,21 @@ RCOptionEditor::RCOptionEditor ()
 
 	_sync_genlock = new BoolOption (
 		"timecode-source-is-synced",
-		_("External timecode is sync locked"),
+		_("Sync-lock timecode to clock (disable drift compensation)"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
 		);
 	Gtkmm2ext::UI::instance()->set_tip 
-		(_sync_genlock->tip_widget(), 
-		 _("<b>When enabled</b> indicates that the selected external timecode source shares sync (Black &amp; Burst, Wordclock, etc) with the audio interface."));
+		(_sync_genlock->tip_widget(),
+		 string_compose (_("<b>When enabled</b> %1 will never varispeed when slaved to external timecode. "
+				   "Sync Lock indicates that the selected external timecode source shares clock-sync "
+				   "(Black &amp; Burst, Wordclock, etc) with the audio interface. "
+				   "This option disables drift compensation. The transport speed is fixed at 1.0. "
+				   "Vari-speed LTC will be ignored and cause drift."
+				   "\n\n"
+				   "<b>When disabled</b> %1 will compensate for potential drift, regardless if the "
+				   "timecode sources shares clock sync."
+				  ), PROGRAM_NAME));
 
 
 	add_option (_("Transport"), _sync_genlock);
@@ -1540,6 +1573,8 @@ RCOptionEditor::RCOptionEditor ()
 	physical_inputs.push_back (_("None"));
 	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
 	_ltc_port->set_popdown_strings (physical_inputs);
+
+	populate_sync_options ();
 
 	add_option (_("Transport"), _ltc_port);
 
@@ -1719,14 +1754,6 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_ui_config, &UIConfiguration::set_update_editor_during_summary_drag)
 			    ));
 
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "link-editor-and-mixer-selection",
-		     _("Synchronise editor and mixer selection"),
-		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_link_editor_and_mixer_selection),
-		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_link_editor_and_mixer_selection)
-		     ));
-
 	bo = new BoolOption (
 		     "name-new-markers",
 		     _("Name new markers"),
@@ -1851,20 +1878,34 @@ RCOptionEditor::RCOptionEditor ()
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_denormal_model)
 		);
 
+	int dmsize = 1;
 	dm->add (DenormalNone, _("no processor handling"));
 
 	FPU fpu;
 
 	if (fpu.has_flush_to_zero()) {
+		++dmsize;
 		dm->add (DenormalFTZ, _("use FlushToZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
+		_rc_config->set_denormal_model(DenormalNone);
 	}
 
 	if (fpu.has_denormals_are_zero()) {
+		++dmsize;
 		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
 	}
 
 	if (fpu.has_flush_to_zero() && fpu.has_denormals_are_zero()) {
+		++dmsize;
 		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
+	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
+		_rc_config->set_denormal_model(DenormalNone);
+	}
+
+	if (dmsize == 1) {
+		dm->set_sensitive(false);
 	}
 
 	add_option (_("Audio"), dm);
@@ -2033,6 +2074,16 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 	add_option (_("MIDI"),
+		    new SpinOption<float> (
+			    "midi-readahead",
+			    _("MIDI read-ahead time (seconds)"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_readahead),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_readahead),
+			    0.1, 10, 0.1, 1,
+			    "", 1.0, 1
+			    ));
+
+	add_option (_("MIDI"),
 		    new BoolOption (
 			    "send-midi-clock",
 			    _("Send MIDI Clock"),
@@ -2159,7 +2210,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* USER INTERACTION */
 
-	if (getenv ("ARDOUR_BUNDLED")) {
+	if (
+#ifdef PLATFORM_WINDOWS
+			true
+#else
+			getenv ("ARDOUR_BUNDLED")
+#endif
+	   )
+	{
 		add_option (_("User interaction"), 
 			    new BoolOption (
 				    "enable-translation",
@@ -2208,6 +2266,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_widget_prelight)
 		     ));
 
+#ifdef TOOLTIPS_GOT_FIXED
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "use-tooltips",
@@ -2215,11 +2274,12 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_use_tooltips),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_use_tooltips)
 		     ));
+#endif
 
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "show-name-highlight",
-		     _("Use name highlight bars in region displays"),
+		     _("Use name highlight bars in region displays (requires a restart)"),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_name_highlight),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_name_highlight)
 		     ));
@@ -2440,5 +2500,13 @@ RCOptionEditor::populate_sync_options ()
 
 	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
 		_sync_source->add (*i, sync_source_to_string (*i));
+	}
+
+	if (sync_opts.empty()) {
+		_sync_source->set_sensitive(false);
+	} else {
+		if (std::find(sync_opts.begin(), sync_opts.end(), _rc_config->get_sync_source()) == sync_opts.end()) {
+			_rc_config->set_sync_source(sync_opts.front());
+		}
 	}
 }

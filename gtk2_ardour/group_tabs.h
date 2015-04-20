@@ -91,7 +91,7 @@ private:
 	virtual double extent () const = 0;
 
 	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
-	virtual PBD::PropertyList default_properties () const = 0;
+	virtual PBD::PropertyList default_properties () const;
 	virtual ARDOUR::RouteList selected_routes () const = 0;
 	virtual void sync_order_keys () = 0;
 

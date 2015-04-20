@@ -38,7 +38,6 @@
 #include "audio_clock.h"
 
 namespace ARDOUR {
-	class LocationStack;
 	class Location;
 }
 
@@ -58,6 +57,7 @@ class LocationEditRow  : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void set_number (int);
 	void focus_name();
         void set_clock_group (ClockGroup&);
+        void unset_clock_group () { _clock_group = 0; }
 
 	sigc::signal<void,ARDOUR::Location*> remove_requested;
 	sigc::signal<void> redraw_ranges;
@@ -162,7 +162,6 @@ class LocationUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	XMLNode & get_state () const;
 
   private:
-	ARDOUR::LocationStack* locations;
 	/** set to the location that has just been created with the LocationUI `add' button
 	    (if Config->get_name_new_markers() is true); if it is non-0, the name entry of
 	    the location is given the focus by location_added().

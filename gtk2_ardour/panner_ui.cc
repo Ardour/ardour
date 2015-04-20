@@ -600,16 +600,16 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case ARDOUR::Off:
-		sstr = (shrt ? "M" : _("M"));
+		sstr = (shrt ? "M" : S_("Manual|M"));
 		break;
 	case Play:
-		sstr = (shrt ? "P" : _("P"));
+		sstr = (shrt ? "P" : S_("Play|P"));
 		break;
 	case Touch:
-		sstr = (shrt ? "T" : _("T"));
+		sstr = (shrt ? "T" : S_("Touch|T"));
 		break;
 	case Write:
-		sstr = (shrt ? "W" : _("W"));
+		sstr = (shrt ? "W" : S_("Write|W"));
 		break;
 	}
 

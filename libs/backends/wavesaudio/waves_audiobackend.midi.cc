@@ -27,11 +27,11 @@ using namespace ARDOUR;
 
 #ifdef __APPLE__
 
-const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("None") ("CoreMIDI");
+const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("CoreMIDI") ("None");
 
 #elif PLATFORM_WINDOWS
 
-const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("None") ("Multimedia Extensions");
+const std::vector<std::string> WavesAudioBackend::__available_midi_options = boost::assign::list_of ("System MIDI (MME)") ("None");
 
 #endif
 
@@ -48,11 +48,11 @@ int
 WavesAudioBackend::set_midi_option (const std::string& option)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::set_midi_option ( " << option << " )" << std::endl;
-    if (option == __available_midi_options[0]) {
+    if (option == __available_midi_options[1]) {
         _use_midi = false;
         // COMMENTED DBG LOGS */ std::cout << "\tNO MIDI system used)" << std::endl;
     }
-    else if (option == __available_midi_options[1]) {
+    else if (option == __available_midi_options[0]) {
         _use_midi = true;
         // COMMENTED DBG LOGS */ std::cout << "\tNO MIDI system used)" << std::endl;
     }
@@ -69,7 +69,7 @@ std::string
 WavesAudioBackend::midi_option () const
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::midi_option ():" << std::endl;
-    return * (__available_midi_options.begin () + (_use_midi?1:0));
+    return * (__available_midi_options.begin () + (_use_midi?0:1));
 }
 
 
@@ -170,6 +170,7 @@ WavesAudioBackend::_changed_midi_devices ()
         return;
     }
 
+	_unregister_system_midi_ports ();
     _midi_device_manager.stop ();
 
     if (_midi_device_manager.start () != 0) {
@@ -317,8 +318,7 @@ WavesAudioBackend::_read_midi_data_from_devices ()
             
             if (timestamp_st < 0) {
                 timestamp_st = 0;
-            }
-            else if (timestamp_st >= (int32_t)_buffer_size) {
+            } else if (timestamp_st >= (int32_t)_buffer_size) {
                 timestamp_st = _buffer_size - 1;
             }
             waves_midi_event->set_timestamp (timestamp_st);

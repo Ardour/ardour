@@ -7,6 +7,8 @@
 #include <deque>
 #include <queue>
 
+namespace ArdourSurface { 
+
 class MackieControlProtocol;
 
 namespace Mackie
@@ -29,6 +31,7 @@ private:
 	Mode _mode;
 };
 
+}
 }
 
 #endif

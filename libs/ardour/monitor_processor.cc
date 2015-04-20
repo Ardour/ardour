@@ -224,7 +224,7 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 XMLNode&
 MonitorProcessor::state (bool full)
 {
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
         XMLNode& node (Processor::state (full));
         char buf[64];
 
@@ -301,8 +301,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
 
                 if (target_gain != _channels[chn]->current_gain || target_gain != 1.0f) {
 
-                        Amp::apply_gain (*b, nframes, _channels[chn]->current_gain, target_gain);
-                        _channels[chn]->current_gain = target_gain;
+                        _channels[chn]->current_gain = Amp::apply_gain (*b, _session.nominal_frame_rate(), nframes, _channels[chn]->current_gain, target_gain);
                 }
 
                 ++chn;

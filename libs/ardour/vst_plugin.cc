@@ -158,7 +158,7 @@ VSTPlugin::set_chunk (gchar const * data, bool single)
 void
 VSTPlugin::add_state (XMLNode* root) const
 {
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
@@ -195,7 +195,7 @@ VSTPlugin::add_state (XMLNode* root) const
 int
 VSTPlugin::set_state (const XMLNode& node, int version)
 {
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	int ret = -1;
 
 	if (node.name() != state_node_name()) {
@@ -549,7 +549,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	*/
 
 	float** ins = (float**)alloca(_plugin->numInputs*sizeof(float*));
-	float** outs = (float**)alloca(_plugin->numInputs*sizeof(float*));
+	float** outs = (float**)alloca(_plugin->numOutputs*sizeof(float*));
 
 	int32_t i;
 

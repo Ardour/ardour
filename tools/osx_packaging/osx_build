@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # script for pulling together a MacOSX app bundle.
 
 GTKSTACK_ROOT=$HOME/gtk/inst
@@ -15,6 +17,7 @@ mkdir -p "$CACHEDIR"
 SAE=
 MIXBUS=
 WITH_HARVID=1
+WITH_HARRISON_LV2=
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -96,7 +99,7 @@ fi
 
 # setup directory structure
 
-APPDIR=${APPNAME}.app
+APPDIR=${APPNAME}${major_version}.app
 APPROOT=$APPDIR/Contents
 Frameworks=$APPROOT/lib
 Resources=$APPROOT/Resources
@@ -160,7 +163,8 @@ mkdir -p $PatchFiles
 # maybe set variables
 env=""
 if test x$SAE != x ; then
-    appname="Ardour3/SAE"
+    appname="Ardour${major_version}-SAE"
+    EXECUTABLE=${appname}
     env="$env<key>ARDOUR_SAE</key><string>true</string>"
     #
     # current default for SAE version is German keyboard layout without a keypad
@@ -168,7 +172,8 @@ if test x$SAE != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>de-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui_sae.conf</string>"
 elif test x$MIXBUS != x ; then
-    appname="Ardour3/Mixbus"
+    appname="Mixbus"
+    EXECUTABLE=${appname}${major_version}
     env="$env<key>ARDOUR_MIXBUS</key><string>true</string>"
     #
     # current default for MIXBUS version is US keyboard layout without a keypad
@@ -176,7 +181,8 @@ elif test x$MIXBUS != x ; then
     env="$env<key>ARDOUR_KEYBOARD_LAYOUT</key><string>us-nokeypad</string>"
     env="$env<key>ARDOUR_UI_CONF</key><string>ardour3_ui.conf</string>"
 else
-    appname="Ardour3"
+    appname="Ardour${major_version}"
+    EXECUTABLE=${appname}
 fi
 
 #
@@ -189,10 +195,13 @@ env="$env<key>DYLIB_FALLBACK_LIBRARY_PATH</key><string>/usr/local/lib:/opt/lib</
 
 env="<key>LSEnvironment</key><dict>$env<key>ARDOUR_BUNDLED</key><string>true</string></dict>"
 
+
 # edit plist
 sed -e "s?@ENV@?$env?g" \
     -e "s?@VERSION@?$release_version?g" \
-    -e "s?@INFOSTRING@?$info_string?g" < Info.plist.in > Info.plist
+    -e "s?@INFOSTRING@?$info_string?g" \
+    -e "s?@IDSUFFIX@?$EXECUTABLE?g" \
+    -e "s?@EXECUTABLE@?$EXECUTABLE?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
     -e "s?@ENV@?$env?g" \
@@ -210,14 +219,14 @@ rm -f Resources/InfoPlist.strings
 
 #
 # if we build a bundle without jack, then
-# make the Ardour3 executable a helper
+# make the Ardour executable a helper
 # script that checks to see if JACK is
 # installed.
 #
 
-cp startup_script $APPROOT/MacOS/Ardour3
-chmod 775 $APPROOT/MacOS/Ardour3
-MAIN_EXECUTABLE=Ardour3.bin
+cp startup_script $APPROOT/MacOS/$EXECUTABLE
+chmod 775 $APPROOT/MacOS/$EXECUTABLE
+MAIN_EXECUTABLE=Ardour.bin  ## used in startup_script
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
@@ -227,9 +236,11 @@ if test x$SAE != x ; then
 elif test x$MIXBUS != x ; then
     cp  Mixbus.icns $Resources/appIcon.icns
 else
-    cp  Ardour3.icns $Resources/appIcon.icns
+    cp  Ardour.icns $Resources/appIcon.icns
 fi
 cp  typeArdour.icns $Resources/
+
+set +e # things below are not error-free (optional files etc) :(
 
 # copy locale files
 if test x$WITH_NLS != x ; then
@@ -293,23 +304,7 @@ fi
 # 
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
-echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.8.0/modules/*.so $Frameworks/modules
-echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Frameworks/modules
-# charset alias file
 cp -R $GTKSTACK_ROOT/lib/charset.alias $Resources
-
-# generate new Pango module file
-cat > pangorc <<EOF 
-[Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.8.0/modules
-EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/modules/?@executable_path/../lib/modules/?" > $Resources/pango.modules
-rm pangorc
-
-# generate a new GDK pixbufs loaders file
-gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/?@executable_path/../lib/modules/?" > $Resources/gdk-pixbuf.loaders
 
 # We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Frameworks/gtkengines
@@ -347,7 +342,7 @@ cp $BUILD_ROOT/libs/surfaces/control_protocol/libardourcp*.dylib $Frameworks
 cp $BUILD_ROOT/libs/panners/*/lib*.dylib $Panners
 
 # Backends
-for backend in jack wavesaudio dummy; do
+for backend in jack wavesaudio dummy coreaudio; do
     cp $BUILD_ROOT/libs/backends/$backend/lib*.dylib $Backends
 done
 
@@ -417,7 +412,7 @@ while [ true ] ; do
 		strip -u -r -arch all $file &>/dev/null
 	fi
 
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.'`
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
 	# echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
@@ -467,6 +462,14 @@ done
 
 # install bundled LV2s to <app>/Contents/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
+
+# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
+if test -d $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
+	cp -R $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 $Frameworks/LV2/
+elif test -d $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
+	cp -R $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 $Frameworks/LV2/
+fi
+
 
 # now fix up the executables
 echo "Fixing up executable dependency names ..."
@@ -536,7 +539,7 @@ rm -rf $PRODUCT_PKG_DIR
 mkdir $PRODUCT_PKG_DIR
 
 DMGWINBOTTOM=440
-DMGBACKGROUND=dmgbg.png
+DMGBACKGROUND=dmgbg
 
 if [ x$SAE != x ] ; then
 	
@@ -554,15 +557,22 @@ elif [ x$MIXBUS != x ] ; then
 
     echo "Creating Mixbus packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
-    cp MixBus_Install_QuickStart.pdf "$PRODUCT_PKG_DIR/Mixbus Install & Quick Start Guide.pdf"
-		DMGWINBOTTOM=580
-		YPOS=$[ $DMGWINBOTTOM - 300 ]
-		MIXBUSPOS="set position of item \"MixBus_Install_QuickStart.pdf\" of container window to {90, ${YPOS}}"
+    DMGBACKGROUND=dmgbgMB
 else 
 
     echo "Creating $APPNAME packaging directory"
     mv $APPDIR $PRODUCT_PKG_DIR/
 
+fi
+
+if test x$WITH_HARRISON_LV2 != x ; then
+	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
+		OSX_ARCH=osx64
+	else 
+		OSX_ARCH=osx32
+	fi
+	curl -s http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_lv2s.zip \
+		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
 fi
 
 if test x$WITH_HARVID != x ; then
@@ -592,8 +602,51 @@ if test x$WITH_HARVID != x ; then
 	YPOS=$[ $DMGWINBOTTOM - 300 ]
 	XJADEOPOS="set position of item \"Jadeo.app\" of container window to {310, ${YPOS}}"
 
-	DMGBACKGROUND=dmgbgxj.png
+	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
+
+###################################################################
+### Mixbus plugins, etc
+if test -n "$MIXBUS"; then
+	echo "bundling x42 plugins"
+	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
+		OSX_ARCH=x86_64
+	else
+		OSX_ARCH=i386
+	fi
+
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
+
+	METERS_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-meters.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/osx/x42-meters-lv2-osx-${METERS_VERSION}.zip \
+		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
+
+	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/osx/setBfree.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \
+		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
+
+	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-midifilter.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
+		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
+
+	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
+		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
+		mv ${file}.thin ${file}
+	done
+
+fi
+################################################################################
+
+( cd $PRODUCT_PKG_DIR ; find . ) > file_list.txt
 
 echo "Building DMG ..."
 
@@ -607,8 +660,6 @@ else
 fi
 VOLNAME=$APPNAME-$release_version
 
-# TODO use mktemp
-export TMPDIR=`pwd`
 MNTPATH=`mktemp -d -t ardourimg`
 TMPDMG=`mktemp -t ardour`
 ICNSTMP=`mktemp -t ardouricon`
@@ -623,14 +674,16 @@ mkdir -p "$MNTPATH"
 
 TMPDMG="${TMPDMG}.dmg"
 
+trap "rm -rf $MNTPATH $TMPDMG ${TMPDMG}.dmg $ICNSTMP" EXIT
+
 hdiutil create -megabytes $DMGMEGABYTES "$TMPDMG"
 DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
 newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
-mount -t hfs "${DiskDevice}" "${MNTPATH}"
+mount -t hfs -o nobrowse "${DiskDevice}" "${MNTPATH}"
 
 cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
 mkdir "${MNTPATH}/.background"
-cp -vi ${DMGBACKGROUND} "${MNTPATH}/.background/dmgbg.png"
+cp -vi ${DMGBACKGROUND}.png "${MNTPATH}/.background/dmgbg.png"
 
 echo "setting DMG background ..."
 
@@ -673,16 +726,14 @@ EOF
 chmod -Rf go-w "${MNTPATH}"
 sync
 
+set -e
 echo "compressing Image ..."
 
-# Umount the image
-umount "${DiskDevice}"
-hdiutil eject "${DiskDevice}"
+# Umount the image ('eject' above may already have done that)
+umount "${DiskDevice}" || true
+hdiutil eject "${DiskDevice}" || true
 # Create a read-only version, use zlib compression
 hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
-# Delete the temporary files
-rm "$TMPDMG"
-rm -rf "$MNTPATH"
 
 echo "setting file icon ..."
 
@@ -693,6 +744,7 @@ Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
 SetFile -a C "$UC_DMG"
 
 rm ${ICNSTMP}.icns ${ICNSTMP}.rsrc
+rm -rf ${PRODUCT_PKG_DIR}
 
 echo
 echo "packaging suceeded."

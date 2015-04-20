@@ -47,8 +47,10 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _pcmi (0)
 	, _run (false)
 	, _active (false)
+	, _freewheel (false)
 	, _freewheeling (false)
 	, _measure_latency (false)
+	, _last_process_start (0)
 	, _audio_device("")
 	, _midi_driver_option(_("None"))
 	, _device_reservation(0)
@@ -229,7 +231,7 @@ AlsaAudioBackend::can_change_sample_rate_when_running () const
 bool
 AlsaAudioBackend::can_change_buffer_size_when_running () const
 {
-	return false;
+	return false; // why not? :)
 }
 
 int
@@ -252,6 +254,9 @@ int
 AlsaAudioBackend::set_buffer_size (uint32_t bs)
 {
 	if (bs <= 0 || bs >= _max_buffer_size) {
+		return -1;
+	}
+	if (_run) {
 		return -1;
 	}
 	_samples_per_period = bs;
@@ -408,9 +413,9 @@ std::vector<std::string>
 AlsaAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
-		_midi_options.push_back (_("None"));
 		_midi_options.push_back (_("ALSA raw devices"));
 		_midi_options.push_back (_("ALSA sequencer"));
+		_midi_options.push_back (_("None"));
 	}
 	return _midi_options;
 }
@@ -498,6 +503,12 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		_system_midi_out.clear();
 		_ports.clear();
 	}
+
+	/* reset internal state */
+	_dsp_load = 0;
+	_freewheeling = false;
+	_freewheel = false;
+	_last_process_start = 0;
 
 	release_device();
 
@@ -657,11 +668,7 @@ AlsaAudioBackend::stop ()
 int
 AlsaAudioBackend::freewheel (bool onoff)
 {
-	if (onoff == _freewheeling) {
-		return 0;
-	}
 	_freewheeling = onoff;
-	engine.freewheel_callback (onoff);
 	return 0;
 }
 
@@ -684,13 +691,13 @@ AlsaAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-pframes_t
+framepos_t
 AlsaAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-pframes_t
+framepos_t
 AlsaAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;
@@ -699,7 +706,15 @@ AlsaAudioBackend::sample_time_at_cycle_start ()
 pframes_t
 AlsaAudioBackend::samples_since_cycle_start ()
 {
-	return 0;
+	if (!_active || !_run || _freewheeling || _freewheel) {
+		return 0;
+	}
+	if (_last_process_start == 0) {
+		return 0;
+	}
+
+	const int64_t elapsed_time_us = g_get_monotonic_time() - _last_process_start;
+	return std::max((pframes_t)0, (pframes_t)rint(1e-6 * elapsed_time_us * _samplerate));
 }
 
 
@@ -942,7 +957,7 @@ AlsaAudioBackend::register_system_audio_ports()
 	const int a_out = _n_outputs > 0 ? _n_outputs : 2;
 
 	/* audio ports */
-	lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
@@ -952,7 +967,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back(static_cast<AlsaPort*>(p));
 	}
 
-	lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -1013,7 +1028,7 @@ AlsaAudioBackend::register_system_midi_ports()
 					delete mout;
 				}
 				LatencyRange lr;
-				lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : nfo->systemic_output_latency);
+				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
 				set_latency_range (p, false, lr);
 				static_cast<AlsaMidiPort*>(p)->set_n_periods(2);
 				_system_midi_out.push_back(static_cast<AlsaPort*>(p));
@@ -1051,7 +1066,7 @@ AlsaAudioBackend::register_system_midi_ports()
 					continue;
 				}
 				LatencyRange lr;
-				lr.min = lr.max = _samples_per_period + (_measure_latency ? 0 : nfo->systemic_input_latency);
+				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
 				_system_midi_in.push_back(static_cast<AlsaPort*>(p));
 				_rmidi_in.push_back (midin);
@@ -1230,9 +1245,11 @@ AlsaAudioBackend::midi_event_put (
 	assert (buffer && port_buffer);
 	AlsaMidiBuffer& dst = * static_cast<AlsaMidiBuffer*>(port_buffer);
 	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
+#ifndef NDEBUG
+		// nevermind, ::get_buffer() sorts events
 		fprintf (stderr, "AlsaMidiBuffer: it's too late for this event. %d > %d\n",
 				(pframes_t)dst.back ()->timestamp (), timestamp);
-		return -1;
+#endif
 	}
 	dst.push_back (boost::shared_ptr<AlsaMidiEvent>(new AlsaMidiEvent (timestamp, buffer, size)));
 	return 0;
@@ -1294,14 +1311,28 @@ AlsaAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playb
 LatencyRange
 AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playback)
 {
+	LatencyRange r;
 	if (!valid_port (port)) {
 		PBD::error << _("AlsaPort::get_latency_range (): invalid port.") << endmsg;
-		LatencyRange r;
 		r.min = 0;
 		r.max = 0;
 		return r;
 	}
-	return static_cast<AlsaPort*>(port)->latency_range (for_playback);
+	AlsaPort *p = static_cast<AlsaPort*>(port);
+	assert(p);
+
+	r = p->latency_range (for_playback);
+	if (p->is_physical() && p->is_terminal()) {
+		if (p->is_input() && for_playback) {
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+		if (p->is_output() && !for_playback) {
+			r.min += _samples_per_period;
+			r.max += _samples_per_period;
+		}
+	}
+	return r;
 }
 
 /* Discovering physical ports */
@@ -1410,18 +1441,33 @@ AlsaAudioBackend::main_process_thread ()
 	while (_run) {
 		long nr;
 		bool xrun = false;
-		if (!_freewheeling) {
+
+		if (_freewheeling != _freewheel) {
+			_freewheel = _freewheeling;
+			engine.freewheel_callback (_freewheel);
+		}
+
+		if (!_freewheel) {
 			nr = _pcmi->pcm_wait ();
 
 			if (_pcmi->state () > 0) {
 				++no_proc_errors;
 				xrun = true;
 			}
-			if (_pcmi->state () < 0 || no_proc_errors > bailout) {
+			if (_pcmi->state () < 0) {
 				PBD::error << _("AlsaAudioBackend: I/O error. Audio Process Terminated.") << endmsg;
 				break;
 			}
-			while (nr >= (long)_samples_per_period) {
+			if (no_proc_errors > bailout) {
+				PBD::error
+					<< string_compose (
+							_("AlsaAudioBackend: Audio Process Terminated after %1 consecutive x-runs."),
+							no_proc_errors)
+					<< endmsg;
+				break;
+			}
+
+			while (nr >= (long)_samples_per_period && _freewheeling == _freewheel) {
 				uint32_t i = 0;
 				clock1 = g_get_monotonic_time();
 				no_proc_errors = 0;
@@ -1453,6 +1499,8 @@ AlsaAudioBackend::main_process_thread ()
 					memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 				}
 
+				/* call engine process callback */
+				_last_process_start = g_get_monotonic_time();
 				if (engine.process_callback (_samples_per_period)) {
 					_pcmi->pcm_stop ();
 					_active = false;
@@ -1497,7 +1545,7 @@ AlsaAudioBackend::main_process_thread ()
 			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {
 				engine.Xrun ();
 #if 0
-				fprintf(stderr, "ALSA x-run read: %.1f ms, write: %.1f ms\n",
+				fprintf(stderr, "ALSA x-run read: %.2f ms, write: %.2f ms\n",
 						_pcmi->capt_xrun() * 1000.0, _pcmi->play_xrun() * 1000.0);
 #endif
 			}
@@ -1527,6 +1575,7 @@ AlsaAudioBackend::main_process_thread ()
 				rm->sync_time (clock1);
 			}
 
+			_last_process_start = 0;
 			if (engine.process_callback (_samples_per_period)) {
 				_pcmi->pcm_stop ();
 				_active = false;

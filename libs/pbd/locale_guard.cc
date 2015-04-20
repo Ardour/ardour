@@ -25,24 +25,30 @@
 
 using namespace PBD;
 
-LocaleGuard::LocaleGuard (const char* str)
-{
-	old = setlocale (LC_NUMERIC, NULL);
+// try to avoid calling setlocale() recursively.  this is not thread-safe.
+std::string PBD::LocaleGuard::current;
 
-        if (old) {
-                old = strdup (old);
-                if (strcmp (old, str)) {
-                        setlocale (LC_NUMERIC, str);
-                }
-        }
+LocaleGuard::LocaleGuard (const char* str)
+	: old(0)
+{
+	if (current != str) {
+		old = strdup (setlocale (LC_NUMERIC, NULL));
+		if (strcmp (old, str)) {
+			if (setlocale (LC_NUMERIC, str)) {
+				current = str;
+			}
+		}
+	}
 }
 
 LocaleGuard::~LocaleGuard ()
 {
-	setlocale (LC_NUMERIC, old);
+	if (old) {
+		if (setlocale (LC_NUMERIC, old)) {
+			current = old;
+		}
 
-        if (old) {
-                free (const_cast<char*>(old));
-        }
+		free (old);
+	}
 }
 

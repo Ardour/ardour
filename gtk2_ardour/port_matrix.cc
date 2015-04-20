@@ -152,8 +152,7 @@ PortMatrix::init ()
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
 
 	/* and also bundles */
-	_session->BundleAdded.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
-	_session->BundleRemoved.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
+	_session->BundleAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
 
 	/* and also ports */
 	_session->engine().PortRegisteredOrUnregistered.connect (_session_connections, invalidator (*this), boost::bind (&PortMatrix::setup_global_ports, this), gui_context());
@@ -249,17 +248,26 @@ PortMatrix::setup_scrollbars ()
 {
 	Adjustment* a = _hscroll.get_adjustment ();
 	a->set_lower (0);
-	a->set_upper (_body->full_scroll_width());
 	a->set_page_size (_body->alloc_scroll_width());
 	a->set_step_increment (32);
 	a->set_page_increment (128);
 
+	/* Set the adjustment to zero if the size has changed.*/
+	if (a->get_upper() != _body->full_scroll_width()) {
+		a->set_upper (_body->full_scroll_width());
+		a->set_value (0);
+	}
+
 	a = _vscroll.get_adjustment ();
 	a->set_lower (0);
-	a->set_upper (_body->full_scroll_height());
 	a->set_page_size (_body->alloc_scroll_height());
 	a->set_step_increment (32);
 	a->set_page_increment (128);
+
+	if (a->get_upper() != _body->full_scroll_height()) {
+		a->set_upper (_body->full_scroll_height());
+		a->set_value (0);
+	}
 }
 
 /** Disassociate all of our ports from each other */

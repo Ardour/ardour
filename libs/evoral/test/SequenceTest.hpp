@@ -113,7 +113,7 @@ class SequenceTest : public CppUnit::TestFixture
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
-	typedef MusicalTime Time;
+	typedef Beats Time;
 	typedef std::vector< boost::shared_ptr< Note<Time> > > Notes;
 
 	void setUp () {
@@ -125,7 +125,7 @@ public:
 		for (int i = 0; i < 12; i++) {
 			test_notes.push_back(
 				boost::shared_ptr<Note<Time> >(
-					new Note<Time>(0, MusicalTime(i * 100), MusicalTime(100), 64 + i, 64)));
+					new Note<Time>(0, Beats(i * 100), Beats(100), 64 + i, 64)));
 		}
 	}
 

@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2000 Paul Davis
+  Copyright (C) 2000 Paul Davis
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -70,18 +70,18 @@ struct _AEffect;
 typedef struct _AEffect AEffect;
 
 namespace MIDI {
-	class Port;
-	class MachineControl;
-	class Parser;
+class Port;
+class MachineControl;
+class Parser;
 }
 
 namespace PBD {
-	class Controllable;
-	class ControllableDescriptor;
+class Controllable;
+class ControllableDescriptor;
 }
 
 namespace Evoral {
-	class Curve;
+class Curve;
 }
 
 namespace ARDOUR {
@@ -160,7 +160,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	virtual ~Session ();
 
-        static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
+	static int get_info_from_path (const std::string& xmlpath, float& sample_rate, SampleFormat& data_format);
 
 	std::string path() const { return _path; }
 	std::string name() const { return _name; }
@@ -193,12 +193,12 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string peak_path (std::string) const;
 
 	std::string peak_path_from_audio_path (std::string) const;
-	bool audio_source_name_is_unique (const std::string& name, uint32_t chan);
+	bool audio_source_name_is_unique (const std::string& name);
 	std::string format_audio_source_name (const std::string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists);
 	std::string new_audio_source_path_for_embedded (const std::string& existing_path);
 	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
 	std::string new_midi_source_path (const std::string&);
-        RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
+	RouteList new_route_from_template (uint32_t how_many, const std::string& template_path, const std::string& name);
 	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, uint32_t channels);
 
 	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);
@@ -243,13 +243,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
 	};
 
-	void set_order_hint (uint32_t order_hint) {_order_hint = order_hint;};
-        void notify_remote_id_change ();
-        void sync_order_keys ();
+	void set_order_hint (int32_t order_hint) {_order_hint = order_hint;};
+	void notify_remote_id_change ();
+	void sync_order_keys ();
 
-	template<class T> void foreach_route (T *obj, void (T::*func)(Route&));
-	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>));
-	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg);
+	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
+	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
+	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg, bool sort = true);
 
 	static char session_name_is_legal (const std::string&);
 	bool io_name_is_legal (const std::string&);
@@ -257,7 +257,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Route> route_by_id (PBD::ID);
 	boost::shared_ptr<Route> route_by_remote_id (uint32_t id);
 	boost::shared_ptr<Track> track_by_diskstream_id (PBD::ID);
-        void routes_using_input_from (const std::string& str, RouteList& rl);
+	void routes_using_input_from (const std::string& str, RouteList& rl);
 
 	bool route_name_unique (std::string) const;
 	bool route_name_internal (std::string) const;
@@ -301,7 +301,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 *  - change in the play range (from the process thread)
 	 *  - start (from the process thread)
 	 *  - engine halted
-	*/
+	 */
 	PBD::Signal0<void> TransportStateChange;
 
 	PBD::Signal1<void,framepos_t> PositionChanged; /* sent after any non-sequential motion */
@@ -343,8 +343,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void goto_start ();
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
-        void request_transport_speed (double speed, bool as_default = false);
-        void request_transport_speed_nonzero (double, bool as_default = false);
+	void request_transport_speed (double speed, bool as_default = false);
+	void request_transport_speed_nonzero (double, bool as_default = false);
 	void request_overwrite_buffer (Track *);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
@@ -434,7 +434,21 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal1<void,std::string> StateSaved;
 	PBD::Signal0<void> StateReady;
-	PBD::Signal0<void> SaveSession;
+
+	/* emitted when session needs to be saved due to some internal
+	 * event or condition (i.e. not in response to a user request).
+	 *
+	 * Only one object should
+	 * connect to this signal and take responsibility.
+	 *
+	 * Argument is the snapshot name to use when saving.
+	 */
+	PBD::Signal1<void,std::string> SaveSessionRequested; 
+
+	/* emitted during a session save to allow other entities to add state, via
+	 * extra XML, to the session state 
+	 */
+	PBD::Signal0<void> SessionSaveUnderway;
 
 	std::vector<std::string> possible_states() const;
 	static std::vector<std::string> possible_states (std::string path);
@@ -460,20 +474,20 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
 
 	class StateProtector {
-		public:
-			StateProtector (Session* s) : _session (s) {
-				g_atomic_int_inc (&s->_suspend_save);
-			}
-			~StateProtector () {
-				if (g_atomic_int_dec_and_test (&_session->_suspend_save)) {
-					while (_session->_save_queued) {
-						_session->_save_queued = false;
-						_session->save_state ("");
-					}
+	                                        public:
+		StateProtector (Session* s) : _session (s) {
+			g_atomic_int_inc (&s->_suspend_save);
+		}
+		~StateProtector () {
+			if (g_atomic_int_dec_and_test (&_session->_suspend_save)) {
+				while (_session->_save_queued) {
+					_session->_save_queued = false;
+					_session->save_state ("");
 				}
 			}
-		private:
-			Session * _session;
+		}
+	                                        private:
+		Session * _session;
 	};
 
 	void add_route_group (RouteGroup *);
@@ -556,7 +570,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void timecode_time_subframes (framepos_t when, Timecode::Time&);
 
 	void timecode_duration (framecnt_t, Timecode::Time&) const;
-        void timecode_duration_string (char *, size_t len, framecnt_t) const;
+	void timecode_duration_string (char *, size_t len, framecnt_t) const;
 
 	framecnt_t convert_to_frames (AnyTime const & position);
 	framecnt_t any_duration_to_frames (framepos_t position, AnyTime const & duration);
@@ -565,13 +579,12 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static PBD::Signal1<void, framepos_t> EndTimeChanged;
 
 	void   request_sync_source (Slave*);
-	bool   synced_to_engine() const { return config.get_external_sync() && Config->get_sync_source() == Engine; }
+	bool   synced_to_engine() const { return _slave && config.get_external_sync() && Config->get_sync_source() == Engine; }
 
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
 	bool   transport_rolling() const { return _transport_speed != 0.0f; }
 
-	void set_silent (bool yn);
 	bool silent () { return _silent; }
 
 	TempoMap&       tempo_map()       { return *_tempo_map; }
@@ -610,10 +623,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	int remove_last_capture ();
 
-        /** handlers should return 0 for "everything OK", and any other value for
+	/** handlers should return 0 for "everything OK", and any other value for
 	 * "cannot setup audioengine".
 	 */
-        static PBD::Signal1<int,uint32_t> AudioEngineSetupRequired;
+	static PBD::Signal1<int,uint32_t> AudioEngineSetupRequired;
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
@@ -627,7 +640,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static PBD::Signal2<int, framecnt_t, framecnt_t> AskAboutSampleRateMismatch;
 
 	/** handlers should return !0 for use pending state, 0 for ignore it.
-	*/
+	 */
 	static PBD::Signal0<int> AskAboutPendingState;
 
 	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
@@ -659,9 +672,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* flattening stuff */
 
 	boost::shared_ptr<Region> write_one_track (Track&, framepos_t start, framepos_t end,
-						   bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
-						   boost::shared_ptr<Processor> endpoint,
-							 bool include_endpoint, bool for_export, bool for_freeze);
+	                                           bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
+	                                           boost::shared_ptr<Processor> endpoint,
+	                                           bool include_endpoint, bool for_export, bool for_freeze);
 	int freeze_all (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
@@ -680,7 +693,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_record_enabled (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_solo_isolated (boost::shared_ptr<RouteList>, bool, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
 	void set_monitoring (boost::shared_ptr<RouteList>, MonitorChoice, SessionEvent::RTeventCallback after = rt_cleanup, bool group_override = false);
-        void set_exclusive_input_active (boost::shared_ptr<RouteList> rt, bool onoff, bool flip_others=false);
+	void set_exclusive_input_active (boost::shared_ptr<RouteList> rt, bool onoff, bool flip_others=false);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
@@ -728,12 +741,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* I/O bundles */
 
-	void add_bundle (boost::shared_ptr<Bundle>);
+	void add_bundle (boost::shared_ptr<Bundle>, bool emit_signal = true);
 	void remove_bundle (boost::shared_ptr<Bundle>);
 	boost::shared_ptr<Bundle> bundle_by_name (std::string) const;
 
-	PBD::Signal1<void,boost::shared_ptr<Bundle> > BundleAdded;
-	PBD::Signal1<void,boost::shared_ptr<Bundle> > BundleRemoved;
+	PBD::Signal0<void> BundleAddedOrRemoved;
 
 	void midi_panic ();
 
@@ -759,6 +771,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void begin_reversible_command (const std::string& cmd_name);
 	void begin_reversible_command (GQuark);
+	void abort_reversible_command ();
 	void commit_reversible_command (Command* cmd = 0);
 
 	void add_command (Command *const cmd) {
@@ -878,13 +891,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	};
 
 	SlaveState slave_state() const { return _slave_state; }
-        Slave* slave() const { return _slave; }
+	Slave* slave() const { return _slave; }
 
 	boost::shared_ptr<SessionPlaylists> playlists;
 
 	void send_mmc_locate (framepos_t);
-        void queue_full_time_code () { _send_timecode_update = true; }
-        void queue_song_position_pointer () { /* currently does nothing */ }
+	void queue_full_time_code () { _send_timecode_update = true; }
+	void queue_song_position_pointer () { /* currently does nothing */ }
 
 	bool step_editing() const { return (_step_editors > 0); }
 
@@ -923,15 +936,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/** Emitted when the session wants Ardour to quit */
 	static PBD::Signal0<void> Quit;
 
-        /** Emitted when Ardour is asked to load a session in an older session
+	/** Emitted when Ardour is asked to load a session in an older session
 	 * format, and makes a backup copy.
 	 */
-        static PBD::Signal2<void,std::string,std::string> VersionMismatch;
+	static PBD::Signal2<void,std::string,std::string> VersionMismatch;
 
 	SceneChanger* scene_changer() const { return _scene_changer; }
 
-        boost::shared_ptr<Port> ltc_input_port() const;
-        boost::shared_ptr<Port> ltc_output_port() const;
+	boost::shared_ptr<Port> ltc_input_port() const;
+	boost::shared_ptr<Port> ltc_output_port() const;
 
 	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
 	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
@@ -958,7 +971,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_frame_rate (framecnt_t nframes);
-        void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
+	void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
 
   protected:
 	friend class Route;
@@ -1004,6 +1017,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	double                  _transport_speed;
 	double                  _default_transport_speed;
 	double                  _last_transport_speed;
+	double                  _signalled_varispeed;
 	double                  _target_transport_speed;
 	CubicInterpolation       interpolation;
 
@@ -1095,8 +1109,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int  silent_process_routes (pframes_t, bool& need_butler);
 
 	/** @return 1 if there is a pending declick fade-in,
-	           -1 if there is a pending declick fade-out,
-		    0 if there is no pending declick.
+	    -1 if there is a pending declick fade-out,
+	    0 if there is no pending declick.
 	*/
 	int get_transport_declick_required () {
 		if (transport_sub_state & PendingDeclickIn) {
@@ -1171,17 +1185,17 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (
-				PostTransportInputChange|
-				PostTransportSpeed|
-				PostTransportReverse|
-				PostTransportCurveRealloc|
-				PostTransportAudition|
-				PostTransportLocate|
-				PostTransportStop|
-				PostTransportClearSubstate);
+			PostTransportInputChange|
+			PostTransportSpeed|
+			PostTransportReverse|
+			PostTransportCurveRealloc|
+			PostTransportAudition|
+			PostTransportLocate|
+			PostTransportStop|
+			PostTransportClearSubstate);
 
 	gint _post_transport_work; /* accessed only atomic ops */
-        PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<gint*>(&_post_transport_work)); }
+	PostTransportWork post_transport_work() const        { return (PostTransportWork) g_atomic_int_get (const_cast<gint*>(&_post_transport_work)); }
 	void set_post_transport_work (PostTransportWork ptw) { g_atomic_int_set (&_post_transport_work, (gint) ptw); }
 	void add_post_transport_work (PostTransportWork ptw);
 
@@ -1195,15 +1209,20 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void reset_rf_scale (framecnt_t frames_moved);
 
 	Locations*       _locations;
-	void              location_added (Location*);
-	void              location_removed (Location*);
-        void              locations_changed ();
-        void             _locations_changed (const Locations::LocationList&);
+	void location_added (Location*);
+	void location_removed (Location*);
+	void locations_changed ();
+	void _locations_changed (const Locations::LocationList&);
 
-        void              update_skips (Location*, bool consolidate);
-        Locations::LocationList consolidate_skips (Location*);
-	void              sync_locations_to_skips (const Locations::LocationList&);
-        PBD::ScopedConnectionList skip_connections;
+	void update_skips (Location*, bool consolidate);
+	void update_marks (Location* loc);
+	void update_loop (Location* loc);
+	void consolidate_skips (Location*);
+	void sync_locations_to_skips ();
+	void _sync_locations_to_skips ();
+    
+	PBD::ScopedConnectionList skip_update_connections;
+	bool _ignore_skips_updates;
 
 	PBD::ScopedConnectionList punch_connections;
 	void             auto_punch_start_changed (Location *);
@@ -1214,10 +1233,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void             auto_loop_changed (Location *);
 	void             auto_loop_declick_range (Location *, framepos_t &, framepos_t &);
 
-        int  ensure_engine (uint32_t desired_sample_rate);
+	int  ensure_engine (uint32_t desired_sample_rate);
 	void pre_engine_init (std::string path);
 	int  post_engine_init ();
-        int  immediately_post_engine ();
+	int  immediately_post_engine ();
 	void remove_empty_sounds ();
 
 	void setup_midi_control ();
@@ -1352,7 +1371,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
 	void force_locate (framepos_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);
-        void set_transport_speed (double speed, framepos_t destination_frame, bool abort = false, bool clear_state = false, bool as_default = false);
+	void set_transport_speed (double speed, framepos_t destination_frame, bool abort = false, bool clear_state = false, bool as_default = false);
 	void stop_transport (bool abort = false, bool clear_state = false);
 	void start_transport ();
 	void realtime_stop (bool abort, bool clear_state);
@@ -1365,13 +1384,14 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void post_transport ();
 	void engine_halted ();
 	void xrun_recovery ();
+	void set_track_loop (bool);
+	
+	/* These are synchronous and so can only be called from within the process
+	 * cycle
+	 */
 
-    /* These are synchronous and so can only be called from within the process
-     * cycle
-     */
-
-    int  send_full_time_code (framepos_t, pframes_t nframes);
-    void send_song_position_pointer (framepos_t);
+	int  send_full_time_code (framepos_t, pframes_t nframes);
+	void send_song_position_pointer (framepos_t);
 
 	TempoMap    *_tempo_map;
 	void          tempo_map_changed (const PBD::PropertyChange&);
@@ -1390,8 +1410,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	SerializedRCUManager<RouteList>  routes;
 
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save);
-        void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
-        bool _adding_routes_in_progress;
+	void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
+	bool _adding_routes_in_progress;
 	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
@@ -1545,7 +1565,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 */
 	std::list<GQuark> _current_trans_quarks;
 
-        int  backend_sync_callback (TransportState, framepos_t);
+	int  backend_sync_callback (TransportState, framepos_t);
 
 	void process_rtop (SessionEvent*);
 
@@ -1636,7 +1656,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* realtime "apply to set of routes" operations */
 	template<typename T> SessionEvent*
 		get_rt_event (boost::shared_ptr<RouteList> rl, T targ, SessionEvent::RTeventCallback after, bool group_override,
-			      void (Session::*method) (boost::shared_ptr<RouteList>, T, bool)) {
+		              void (Session::*method) (boost::shared_ptr<RouteList>, T, bool)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (method, this, rl, targ, group_override);
 		ev->rt_return = after;
@@ -1684,16 +1704,16 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	GraphEdges _current_route_graph;
 
 	uint32_t next_control_id () const;
-	uint32_t _order_hint;
+	int32_t _order_hint;
 	bool ignore_route_processor_changes;
 
 	MidiClockTicker* midi_clock;
 
-        boost::shared_ptr<IO>   _ltc_input;
-        boost::shared_ptr<IO>   _ltc_output;
+	boost::shared_ptr<IO>   _ltc_input;
+	boost::shared_ptr<IO>   _ltc_output;
 
-        void reconnect_ltc_input ();
-        void reconnect_ltc_output ();
+	void reconnect_ltc_input ();
+	void reconnect_ltc_output ();
 
 	/* Scene Changing */
 	SceneChanger* _scene_changer;

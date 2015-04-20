@@ -170,6 +170,7 @@ fi
 
 echo "Clean up"
 rm -rf ${PACKAGE}
+rm -f stage2.run
 
 echo ""
 echo "Done"

@@ -55,10 +55,11 @@
 #include "jog.h"
 #include "meter.h"
 
-using namespace Mackie;
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace ArdourSurface;
+using namespace Mackie;
 
 #ifndef timeradd /// only avail with __USE_BSD
 #define timeradd(a,b,result)                         \

@@ -98,8 +98,8 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>grave|next EP w/marker
 
 @trans|Transport/ToggleRoll|space|toggle roll
-@epp|Editor/play-edit-range|<@SECONDARY@>space|play edit range
-@epp|Editor/play-from-edit-point-and-return|<@LEVEL4@>space|play from EP \& return
+@epp|Editor/PlaySelection|<@SECONDARY@>space|play edit range
+@epp|Editor/play-from-edit-point-and-return|<@PRIMARY@><@TERTIARY@>space|play from EP \& return
 @trans|Transport/ToggleRollMaybe|<@PRIMARY@><@SECONDARY@>space|stop (keep loop/range play)
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
@@ -119,36 +119,39 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
 
 @ranges|Editor/set-loop-from-edit-range|bracketright|set loop range from edit range
-@ranges|Region/set-loop-from-region|<@SECONDARY@>bracketright|set loop range from region(s)
 
 @ranges|Editor/set-punch-from-edit-range|bracketleft|set punch range from edit range
-@ranges|Region/set-punch-from-region|<@SECONDARY@>bracketleft|set punch range from region(s)
 
-@rop|Region/boost-region-gain|asciicircum|increase region gain
-@rop|Region/cut-region-gain|ampersand|reduce region gain
+
+;; Alt+number row:  region operations
+@rop|Region/toggle-region-mute|<@SECONDARY@>1|mute/unmute
+@rop|Region/naturalize-region|<@SECONDARY@>2|move to original position
+@rop|Region/normalize-region|<@SECONDARY@>3|normalize
+@rop|Region/reverse-region|<@SECONDARY@>4|reverse
+@rop|Region/quantize-region|<@SECONDARY@>5|quantize MIDI notes \linebreak[4] in selected region(s)
+@rop|Region/boost-region-gain|<@SECONDARY@>6|increase region gain
+@rop|Region/cut-region-gain|<@SECONDARY@>7|reduce region gain
+@rop|Region/pitch-shift-region|<@SECONDARY@>8|transpose
 
 ;; letters
 ;; TOP ROW
 
 @sess|Common/Quit|<@PRIMARY@>q|quit
-@rop|Region/quantize-region|<@SECONDARY@>q|quantize MIDI notes \linebreak[4] in selected region(s)
 @movp|Editor/jump-forward-to-mark|w|to next mark
 @movp|Editor/jump-backward-to-mark|q|to previous mark
 
 ;; note that ctrl-w is special and consumed by the keyboard snooper
 
 @select|Editor/select-all-before-edit-cursor|<@PRIMARY@>e|select all before EP
-@rop|Region/export-region|<@PRIMARY@><@LEVEL4@>e|export selected region(s)
-@sess|Main/ExportSession|<@LEVEL4@>e|export session
+@rop|Region/export-region|<@PRIMARY@><@SECONDARY@>e|export selected region(s)
+@sess|Main/ExportAudio|<@SECONDARY@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|<@TERTIARY@>e|toggle editor window mixer
-@wvis|Common/goto-editor|<@WINDOW@>e|toggle editor window
+@wvis|Common/goto-editor|<@SECONDARY@>e|toggle editor window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
-@rop|Region/reverse-region|<@SECONDARY@>r|reverse
 @trans|Transport/Record|<@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|t|timefx mode
-@rop|Region/pitch-shift-region|<@SECONDARY@>t|transpose
 @eep|Editor/select-all-tracks|<@PRIMARY@>t|select all tracks
 @mmode|MouseMode/set-mouse-mode-object-range|y|link object/range tools
 @edit|Editor/alternate-redo|<@PRIMARY@>y|redo
@@ -162,15 +165,12 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-content|e|content mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
-@wvis|Window/toggle-session-options-editor|<@WINDOW@>o|toggle preferences dialog
-@rop|Region/naturalize-region|<@SECONDARY@>o|move to original position
+@wvis|Window/toggle-session-options-editor|<@SECONDARY@>o|toggle preferences dialog
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
-@wvis|Window/toggle-rc-options-editor|<@PRIMARY@><@TERTIARY@>p|toggle preferences dialog
-@wvis|Window/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
-@wvis|Window/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
+@wvis|Window/toggle-rc-options-editor|<@SECONDARY@>p|toggle preferences dialog
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
-@select|Editor/select-all-after-playhead|<@TERTIARY@><@PRIMARY@>p|all after playhead
+@select|Editor/select-all-after-playhead|<@PRIMARY@><@TERTIARY@>p|all after playhead
 
 ;; MIDDLE ROW
 
@@ -178,31 +178,30 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-objects|<@PRIMARY@>a|select all objects
 @aep|Region/align-regions-end|<@SECONDARY@>a|align end(s)
 @aep|Region/align-regions-sync|<@TERTIARY@>a|align sync points
-@aep|Region/align-regions-start|<@PRIMARY@><@LEVEL4@>a|align start(s)
-@aep|Region/align-regions-start-relative|<@LEVEL4@>a|align start(s) relative
+@aep|Region/align-regions-start|<@PRIMARY@><@SECONDARY@>a|align start(s)
+@aep|Region/align-regions-start-relative|<@PRIMARY@><@TERTIARY@>a|align start(s) relative
 @rop|Region/split-region|s|split
 @sess|Common/Save|<@PRIMARY@>s|save session
 @sess|Main/Snapshot|<@PRIMARY@><@TERTIARY@>s|snapshot session
 @trans|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
-@-group|Editor/editor-separate|<@PRIMARY@><@SECONDARY@>s|some text
 @mmode|MouseMode/set-mouse-mode-draw|d|note-draw mode
 @rop|Region/duplicate-region|<@SECONDARY@>d|duplicate region (once)
 @rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
-@vis|Editor/fit-tracks|f|fit tracks vertically
+@vis|Editor/fit-selection|f|fit selection vertically
 @trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
+@wvis|Region/show-rhythm-ferret|<@SECONDARY@>f|show rhythm ferret window 
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
-@wvis|Common/ToggleMaximalMixer|F12|maximise mixer space
-@wvis|Region/show-rhythm-ferret|<@WINDOW@>f|show rhythm ferret window 
+@wvis|Common/ToggleMaximalMixer|<@PRIMARY@><@TERTIARY@>f|maximise mixer space
 @mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Region/play-selected-regions|h|play selected region(s)
 @eep|Region/trim-front|j|trim front
 @eep|Region/trim-back|k|trim back
-@wvis|Window/toggle-key-editor|<@WINDOW@>k|toggle key bindings editor
+@wvis|Window/toggle-key-editor|<@SECONDARY@>k|toggle key bindings editor
 @trans|Transport/Loop|l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|<@PRIMARY@>l|select all in loop range
-@wvis|Window/toggle-locations|<@WINDOW@>l| toggle locations dialog
+@wvis|Window/toggle-locations|<@SECONDARY@>l| toggle locations dialog
 
 ;; BOTTOM ROW
 
@@ -211,20 +210,20 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/undo|<@PRIMARY@>z|undo
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
-@edit|Editor/editor-cut|<@PRIMARY@>x|cut
-;@-group|Editor/crop|c|some text
 @mmode|MouseMode/set-mouse-mode-cut|c|cut mode
+@edit|Editor/editor-cut|<@PRIMARY@>x|cut
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
+@-group|Editor/crop|<@SECONDARY@>c|some text
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
-@wvis|Window/toggle-big-clock|<@WINDOW@>b|toggle big clock
-@rop|Region/normalize-region|n|normalize
+@wvis|Window/toggle-big-clock|<@SECONDARY@>b|toggle big clock
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
+@wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>n|toggle global audio patchbay
 @sess|Main/New|<@PRIMARY@>n|open a new session
-@rop|Region/toggle-region-mute|<@PRIMARY@>m|mute/unmute
-@wvis|Common/toggle-editor-mixer|<@WINDOW@>m|rotate editor \& mixer window
+@wvis|Common/toggle-editor-mixer|<@SECONDARY@>m|rotate editor \& mixer window
+@wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 
 ;; arrow keys, navigation etc.
 
@@ -239,20 +238,20 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>downarrow|move selected tracks down
 
 @movp|Editor/playhead-to-previous-region-boundary|leftarrow|to previous region edge
-@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>leftarrow|to previous edge \linebreak[4] (ignoring selection)
+;@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>leftarrow|to previous edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>leftarrow|to previous region sync
 @movp|Editor/tab-to-transient-backwards|<@PRIMARY@>leftarrow|to previous transient
 @movp|Editor/nudge-playhead-backward|<@SECONDARY@>leftarrow|nudge backward
-@movp|Editor/playhead-backward-to-grid|<@TERTIARY@><@LEVEL4@>leftarrow|to previous grid point
+@movp|Editor/playhead-backward-to-grid|<@SECONDARY@><@TERTIARY@>leftarrow|to previous grid point
 @trans|Transport/Rewind|<@TERTIARY@>leftarrow|rewind
 @markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>leftarrow|move to prev region edge
 
 @movp|Editor/playhead-to-next-region-boundary|rightarrow|to next region edge
-@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>rightarrow|to next region edge \linebreak[4] (ignoring selection)
+;@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>rightarrow|to next region edge \linebreak[4] (ignoring selection)
 @movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>rightarrow|to next region sync
 @movp|Editor/tab-to-transient-forwards|<@PRIMARY@>rightarrow|to next transient
 @movp|Editor/nudge-playhead-forward|<@SECONDARY@>rightarrow|nudge forwards
-@movp|Editor/playhead-forward-to-grid|<@TERTIARY@><@LEVEL4@>rightarrow|to next grid point
+@movp|Editor/playhead-forward-to-grid|<@SECONDARY@><@TERTIARY@>rightarrow|to next grid point
 @trans|Transport/Forward|<@TERTIARY@>rightarrow|fast forward
 @markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>rightarrow|move to next region edge
 

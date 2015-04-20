@@ -52,7 +52,7 @@ protected:
 private:
 
 	bool configure_handler (GdkEventConfigure *);
-	void preset_selected ();
+	void preset_selected (ARDOUR::Plugin::PresetRecord preset);
 };
 
 #endif

@@ -87,9 +87,13 @@ RouteUI::RouteUI (ARDOUR::Session* sess)
 
 RouteUI::~RouteUI()
 {
+	if (_route) {
+		gui_object_state().remove_node (route_state_id());
+	}
+
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
 	route_connections.drop_connections ();
-
+    
 	delete solo_menu;
 	delete mute_menu;
 	delete sends_menu;
@@ -144,7 +148,8 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
-	rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
+	rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	rec_enable_button->set_icon (ArdourButton::RecButton);
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 
 	if (ARDOUR_UI::config()->get_blink_rec_arm()) {
@@ -242,7 +247,7 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	solo_button->set_controllable (_route->solo_control());
 
 	_route->active_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::route_active_changed, this), gui_context());
-	_route->mute_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::mute_changed, this, _1), gui_context());
+	_route->mute_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::update_mute_display, this), gui_context());
 
 	_route->comment_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::comment_changed, this, _1), gui_context());
 
@@ -474,7 +479,7 @@ RouteUI::edit_output_configuration ()
 		output_selector->present ();
 	}
 
-	output_selector->set_keep_above (true);
+	//output_selector->set_keep_above (true);
 }
 
 void
@@ -490,7 +495,7 @@ RouteUI::edit_input_configuration ()
 		input_selector->present ();
 	}
 
-	input_selector->set_keep_above (true);
+	//input_selector->set_keep_above (true);
 }
 
 bool
@@ -676,15 +681,15 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		return false;
 	}
 
-        if (is_midi_track()) {
+	if (is_midi_track()) {
 
-                /* rec-enable button exits from step editing */
+		/* rec-enable button exits from step editing */
 
-                if (midi_track()->step_editing()) {
+		if (midi_track()->step_editing()) {
 			midi_track()->set_step_editing (false);
 			return false;
-                }
-        }
+		}
+	}
 
 	if (is_track() && rec_enable_button) {
 
@@ -856,79 +861,79 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 void
 RouteUI::build_record_menu ()
 {
-        if (record_menu) {
-                return;
-        }
+	if (record_menu) {
+		return;
+	}
 
-        /* no rec-button context menu for non-MIDI tracks
-         */
+	/* no rec-button context menu for non-MIDI tracks
+	 */
 
-        if (is_midi_track()) {
-                record_menu = new Menu;
-                record_menu->set_name ("ArdourContextMenu");
+	if (is_midi_track()) {
+		record_menu = new Menu;
+		record_menu->set_name ("ArdourContextMenu");
 
-                using namespace Menu_Helpers;
-                MenuList& items = record_menu->items();
+		using namespace Menu_Helpers;
+		MenuList& items = record_menu->items();
 
-                items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
-                step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+		items.push_back (CheckMenuElem (_("Step Entry"), sigc::mem_fun (*this, &RouteUI::toggle_step_edit)));
+		step_edit_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
 
-                if (_route->record_enabled()) {
-                        step_edit_item->set_sensitive (false);
-                }
+		if (_route->record_enabled()) {
+			step_edit_item->set_sensitive (false);
+		}
 
-                step_edit_item->set_active (midi_track()->step_editing());
-        }
+		step_edit_item->set_active (midi_track()->step_editing());
+	}
 }
 
 void
 RouteUI::toggle_step_edit ()
 {
-        if (!is_midi_track() || _route->record_enabled()) {
-                return;
-        }
+	if (!is_midi_track() || _route->record_enabled()) {
+		return;
+	}
 
-        midi_track()->set_step_editing (step_edit_item->get_active());
+	midi_track()->set_step_editing (step_edit_item->get_active());
 }
 
 void
 RouteUI::step_edit_changed (bool yn)
 {
-        if (yn) {
-                if (rec_enable_button) {
-                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
-                }
+	if (yn) {
+		if (rec_enable_button) {
+			rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		}
 
-                start_step_editing ();
+		start_step_editing ();
 
-                if (step_edit_item) {
-                        step_edit_item->set_active (true);
-                }
+		if (step_edit_item) {
+			step_edit_item->set_active (true);
+		}
 
-        } else {
+	} else {
 
-                if (rec_enable_button) {
-                        rec_enable_button->unset_active_state ();
-                }
+		if (rec_enable_button) {
+			rec_enable_button->unset_active_state ();
+		}
 
-                stop_step_editing ();
+		stop_step_editing ();
 
-                if (step_edit_item) {
-                        step_edit_item->set_active (false);
-                }
-        }
+		if (step_edit_item) {
+			step_edit_item->set_active (false);
+		}
+	}
 }
 
 bool
 RouteUI::rec_enable_release (GdkEventButton* ev)
 {
-        if (Keyboard::is_context_menu_event (ev)) {
-                build_record_menu ();
-                if (record_menu) {
-                        record_menu->popup (1, ev->time);
-                }
-                return false;
-        }
+	if (Keyboard::is_context_menu_event (ev)) {
+		build_record_menu ();
+		if (record_menu) {
+			record_menu->popup (1, ev->time);
+		}
+		return false;
+	}
 
 	return false;
 }
@@ -1180,12 +1185,6 @@ RouteUI::update_solo_display ()
 
 void
 RouteUI::solo_changed_so_update_mute ()
-{
-	update_mute_display ();
-}
-
-void
-RouteUI::mute_changed(void* /*src*/)
 {
 	update_mute_display ();
 }
@@ -1534,66 +1533,6 @@ RouteUI::set_color_from_route ()
 	_color.set_blue (b);
 
 	return 0;
-}
-
-void
-RouteUI::remove_this_route (bool apply_to_selection)
-{
-	if (apply_to_selection) {
-		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteUI::remove_this_route, _1, false));
-	} else {
-		if ((route()->is_master() || route()->is_monitor()) &&
-		    !Config->get_allow_special_bus_removal()) {
-			MessageDialog msg (_("That would be bad news ...."),
-					   false,
-					   Gtk::MESSAGE_INFO,
-                                   Gtk::BUTTONS_OK);
-			msg.set_secondary_text (string_compose (_(
-"Removing the master or monitor bus is such a bad idea\n\
-that %1 is not going to allow it.\n\
-\n\
-If you really want to do this sort of thing\n\
-edit your ardour.rc file to set the\n\
-\"allow-special-bus-removal\" option to be \"yes\""), PROGRAM_NAME));
-
-			msg.present ();
-			msg.run ();
-			return;
-		}
-
-		vector<string> choices;
-		string prompt;
-
-		if (is_track()) {
-			prompt  = string_compose (_("Do you really want to remove track \"%1\" ?\n\nYou may also lose the playlist used by this track.\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
-		} else {
-			prompt  = string_compose (_("Do you really want to remove bus \"%1\" ?\n\n(This action cannot be undone, and the session file will be overwritten)"), _route->name());
-		}
-
-		choices.push_back (_("No, do nothing."));
-		choices.push_back (_("Yes, remove it."));
-
-		string title;
-		if (is_track()) {
-			title = _("Remove track");
-		} else {
-			title = _("Remove bus");
-		}
-
-		Choice prompter (title, prompt, choices);
-
-		if (prompter.run () == 1) {
-			Glib::signal_idle().connect (sigc::bind (sigc::ptr_fun (&RouteUI::idle_remove_this_route), this));
-		}
-	}
-}
-
-gint
-RouteUI::idle_remove_this_route (RouteUI *rui)
-{
-	DisplaySuspender ds;
-	rui->_session->remove_route (rui->route());
-	return false;
 }
 
 /** @return true if this name should be used for the route, otherwise false */
@@ -2183,10 +2122,10 @@ RouteUI::track_mode_changed (void)
 	switch (track()->mode()) {
 		case ARDOUR::NonLayered:
 		case ARDOUR::Normal:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton));
+			rec_enable_button->set_icon (ArdourButton::RecButton);
 			break;
 		case ARDOUR::Destructive:
-			rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::RecButton|ArdourButton::RecTapeMode));
+			rec_enable_button->set_icon (ArdourButton::RecTapeMode);
 			break;
 	}
 	rec_enable_button->queue_draw();

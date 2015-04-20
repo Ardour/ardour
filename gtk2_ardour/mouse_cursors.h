@@ -73,11 +73,23 @@ public:
 	Gdk::Cursor* expand_left_right;
 	Gdk::Cursor* expand_up_down;
 
+	/* This cursor is not intended to be used directly, it just 
+	   serves as an out-of-bounds value when we need to indicate
+	   "no cursor". NULL/0 doesn't work for this, because it
+	   is actually a valid value for a Gdk::Cursor - it indicates
+	   "use the parent window's cursor"
+	*/
+	
+	static bool is_invalid (Gdk::Cursor* c) { if (!_invalid) { create_invalid(); } return c == _invalid; }
+	static Gdk::Cursor* invalid_cursor() { if (!_invalid) { create_invalid(); } return _invalid; }
+
     private:
 	std::string _cursor_set;
 	void drop_all ();
 
 	Gdk::Cursor* make_cursor (const char* name, int hotspot_x = 0, int hotspot_y = 0);
+	static Gdk::Cursor* _invalid;
+	static void create_invalid ();
 };
 
 #endif /* __gtk2_ardour_mouse_cursors__ */

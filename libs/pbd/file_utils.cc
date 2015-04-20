@@ -225,7 +225,8 @@ regexp_filter (const string& str, void *arg)
 void
 find_files_matching_regex (vector<string>& result,
                            const Searchpath& paths,
-                           const std::string& regexp)
+                           const std::string& regexp,
+                           bool recurse)
 {
 	int err;
 	char msg[256];
@@ -250,7 +251,7 @@ find_files_matching_regex (vector<string>& result,
 
 	find_files_matching_filter (result, paths,
 	                            regexp_filter, &compiled_pattern,
-	                            true, true, false);
+	                            true, true, recurse);
 
 	regfree (&compiled_pattern);
 }
@@ -282,8 +283,8 @@ copy_file(const std::string & from_path, const std::string & to_path)
 {
 	if (!Glib::file_test (from_path, Glib::FILE_TEST_EXISTS)) return false;
 
-	PBD::ScopedFileDescriptor fd_from (::open (from_path.c_str(), O_RDONLY));
-	PBD::ScopedFileDescriptor fd_to (::open (to_path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
+	PBD::ScopedFileDescriptor fd_from (g_open (from_path.c_str(), O_RDONLY, 0444));
+	PBD::ScopedFileDescriptor fd_to (g_open (to_path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 
 	char buf[4096]; // BUFSIZ  ??
 	ssize_t nread;
@@ -379,7 +380,7 @@ path_is_within (std::string const & haystack, std::string needle)
 		}
 
 		needle = Glib::path_get_dirname (needle);
-		if (needle == "." || needle == "/") {
+		if (needle == "." || needle == "/" || Glib::path_skip_root(needle).empty()) {
 			break;
 		}
 	}
@@ -481,6 +482,17 @@ tmp_writable_directory (const char* domain, const string& prefix)
 		if (Glib::file_test (new_test_dir, Glib::FILE_TEST_EXISTS)) continue;
 	} while (g_mkdir_with_parents (new_test_dir.c_str(), 0755) != 0);
 	return new_test_dir;
+}
+
+int
+toggle_file_existence (string const & path)
+{
+	if (Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+		return g_unlink (path.c_str());
+	} 
+
+	PBD::ScopedFileDescriptor fd = g_open (path.c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666);
+	return !((int) fd >= 0);
 }
 
 } // namespace PBD

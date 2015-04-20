@@ -21,6 +21,9 @@ namespace ARDOUR {
 }
 
 class MidiByteArray;
+
+namespace ArdourSurface {
+
 class MackieControlProtocol;
 
 namespace Mackie
@@ -174,6 +177,7 @@ public:
 	void master_gain_changed ();
 };
 
+}
 }
 
 #endif

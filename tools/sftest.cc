@@ -13,6 +13,8 @@
 #include <string.h>
 #include <getopt.h>
 #include <fcntl.h>
+#include <signal.h>
+#include <float.h>
 
 #include <glibmm/miscutils.h>
 
@@ -21,6 +23,13 @@ using namespace std;
 SF_INFO format_info;
 float* data = 0;
 bool with_sync = false;
+bool keep_writing = true;
+
+void
+signal_handler (int)
+{
+	keep_writing = false;
+}
 
 int
 write_one (SNDFILE* sf, uint32_t nframes)
@@ -39,7 +48,13 @@ write_one (SNDFILE* sf, uint32_t nframes)
 void
 usage ()
 {
-	cout << "sftest [ -f HEADER-FORMAT ] [ -F DATA-FORMAT ] [ -r SAMPLERATE ] [ -n NFILES ] [ -b BLOCKSIZE ] [ -s ]" << endl;
+	cout << "sftest [ -f HEADER-FORMAT ] [ -F DATA-FORMAT ] [ -r SAMPLERATE ] [ -n NFILES ] [ -b BLOCKSIZE ] [ -s ]";
+
+#ifdef __APPLE__
+	cout << " [ -D ]";
+#endif
+	cout << endl;
+
 	cout << "\tHEADER-FORMAT is one of:" << endl
 	     << "\t\tWAV" << endl
 	     << "\t\tCAF" << endl
@@ -56,14 +71,24 @@ main (int argc, char* argv[])
 {
 	vector<SNDFILE*> sndfiles;
 	uint32_t sample_size;
-	char optstring[] = "f:r:F:n:c:b:sD";
-	int channels, samplerate;
+	char optstring[] = "f:r:F:n:c:b:sd:qS:"
+#ifdef __APPLE__
+		"D"
+#endif
+		;
+	int channels = 1;
+	int samplerate = 48000;
 	char const *suffix = ".wav";
 	char const *header_format = "wav";
 	char const *data_format = "float";
+	size_t filesize = 10 * 1048576;
 	uint32_t block_size = 64 * 1024;
 	uint32_t nfiles = 100;
+	string dirname = "/tmp";
+	bool quiet = false;
+#ifdef __APPLE__
         bool direct = false;
+#endif
 	const struct option longopts[] = {
 		{ "header-format", 1, 0, 'f' },
 		{ "data-format", 1, 0, 'F' },
@@ -72,7 +97,12 @@ main (int argc, char* argv[])
 		{ "blocksize", 1, 0, 'b' },
 		{ "channels", 1, 0, 'c' },
 		{ "sync", 0, 0, 's' },
+		{ "dirname", 1, 0, 'd' },
+		{ "quiet", 0, 0, 'q' },
+		{ "filesize", 1, 0, 'S' },
+#ifdef __APPLE__
 		{ "direct", 0, 0, 'D' },
+#endif
 		{ 0, 0, 0, 0 }
 	};
 
@@ -110,9 +140,20 @@ main (int argc, char* argv[])
 		case 's':
 			with_sync = true;
 			break;
+		case 'S':
+			filesize = atoi (optarg);
+			break;
+#ifdef __APPLE__
                 case 'D':
                         direct = true;
                         break;
+#endif
+		case 'd':
+			dirname = optarg;
+			break;
+		case 'q':
+			quiet = true;
+			break;
 		default:
 			usage ();
 			return 0;
@@ -161,8 +202,11 @@ main (int argc, char* argv[])
 		return 0;
 	}
 	
-	char tmpdirname[] = "sftest-XXXXXX";
-	g_mkdtemp (tmpdirname);
+	string tmpdirname = Glib::build_filename (dirname, "sftest");
+	if (g_mkdir_with_parents (tmpdirname.c_str(), 0755)) {
+		cerr << "Cannot create output directory\n";
+		return 1;
+	}
 
 	for (uint32_t n = 0; n < nfiles; ++n) {
 		SNDFILE* sf;
@@ -202,13 +246,26 @@ main (int argc, char* argv[])
 		sndfiles.push_back (sf);
 	}
 
-	cout << nfiles << " files are in " << tmpdirname << " all used " << (direct ? "without" : "with") << " OS buffer cache" << endl;
-	cout << "Format is " << suffix << ' ' << channels << " channel" << (channels > 1 ? "s" : "") << " written in chunks of " << block_size << " frames, synced ? " << (with_sync ? "yes" : "no") << endl;
-		
+	if (!quiet) {
+		cout << nfiles << " files are in " << tmpdirname;
+#ifdef __APPLE__
+		cout << " all used " << (direct ? "without" : "with") << " OS buffer cache";
+#endif
+		cout << endl;
+		cout << "Format is " << suffix << ' ' << channels << " channel" << (channels > 1 ? "s" : "") << " written in chunks of " << block_size << " frames, synced ? " << (with_sync ? "yes" : "no") << endl;
+	}
+	
 	data = new float[block_size*channels];
 	uint64_t written = 0;
-	
-	while (true) {
+
+	signal (SIGINT, signal_handler);
+	signal (SIGSTOP, signal_handler);
+
+
+	double max_bandwidth = 0;
+	double min_bandwidth = DBL_MAX;
+
+	while (keep_writing && written < filesize) {
 		gint64 before;
 		before = g_get_monotonic_time();
 		for (vector<SNDFILE*>::iterator s = sndfiles.begin(); s != sndfiles.end(); ++s) {
@@ -224,10 +281,26 @@ main (int argc, char* argv[])
 		const double data_rate = sndfiles.size() * channels * sample_size * samplerate;
 		stringstream ds;
 		ds << setprecision (1) << data_minutes;
+
+		max_bandwidth = max (max_bandwidth, bandwidth);
+		min_bandwidth = min (min_bandwidth, bandwidth);
 		
-		cout << "BW @ " << written << " frames (" << ds.str() << " minutes) = " << (bandwidth/1048576.0) <<  " MB/sec " << bandwidth / data_rate << " x faster than necessary " << endl;
+		if (!quiet) {
+			cout << "BW @ " << written << " frames (" << ds.str() << " minutes) = " << (bandwidth/1048576.0) <<  " MB/sec " << bandwidth / data_rate << " x faster than necessary " << endl;
+		}
 	}
 
+	cout << "Max bandwidth = " << max_bandwidth / 1048576.0 << " MB/sec" << endl;
+	cout << "Min bandwidth = " << min_bandwidth / 1048576.0 << " MB/sec" << endl;
+
+	if (!quiet) {
+		cout << "Closing files ...\n";
+		for (vector<SNDFILE*>::iterator s = sndfiles.begin(); s != sndfiles.end(); ++s) {
+		sf_close (*s);
+		}
+		cout << "Done.\n";
+	}
+	
 	return 0;
 }
 

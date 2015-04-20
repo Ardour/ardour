@@ -75,7 +75,7 @@ SequenceTest::iteratorSeekTest ()
 	}
 
 	bool on = true;
-	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::MusicalTime(600)); i != seq->end(); ++i) {
+	for (Sequence<Time>::const_iterator i = seq->begin(Evoral::Beats(600)); i != seq->end(); ++i) {
 		if (on) {
 			CPPUNIT_ASSERT(((const MIDIEvent<Time>&)*i).is_note_on());
 			CPPUNIT_ASSERT_EQUAL(i->time(), Time((num_notes + 6) * 100));

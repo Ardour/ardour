@@ -89,7 +89,7 @@ class AlsaPort {
 
 		virtual void* get_buffer (pframes_t nframes) = 0;
 
-		const LatencyRange& latency_range (bool for_playback) const
+		const LatencyRange latency_range (bool for_playback) const
 		{
 			return for_playback ? _playback_latency_range : _capture_latency_range;
 		}
@@ -223,8 +223,8 @@ class AlsaAudioBackend : public AudioBackend {
 		size_t raw_buffer_size (DataType t);
 
 		/* Process time */
-		pframes_t sample_time ();
-		pframes_t sample_time_at_cycle_start ();
+		framepos_t sample_time ();
+		framepos_t sample_time_at_cycle_start ();
 		pframes_t samples_since_cycle_start ();
 
 		int create_process_thread (boost::function<void()> func);
@@ -301,8 +301,11 @@ class AlsaAudioBackend : public AudioBackend {
 
 		bool  _run; /* keep going or stop, ardour thread */
 		bool  _active; /* is running, process thread */
+		bool  _freewheel;
 		bool  _freewheeling;
 		bool  _measure_latency;
+
+		uint64_t _last_process_start;
 
 		static std::vector<std::string> _midi_options;
 		static std::vector<AudioBackend::DeviceStatus> _audio_device_status;
@@ -348,7 +351,7 @@ class AlsaAudioBackend : public AudioBackend {
 
 		/* processing */
 		float  _dsp_load;
-		uint64_t _processed_samples;
+		framecnt_t _processed_samples;
 		pthread_t _main_thread;
 
 		/* process threads */

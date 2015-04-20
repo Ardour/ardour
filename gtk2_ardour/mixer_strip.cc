@@ -151,10 +151,12 @@ MixerStrip::init ()
 		t += string_compose (_("\n%1-%2-click to toggle the width of all strips."), Keyboard::primary_modifier_name(), Keyboard::tertiary_modifier_name ());
 	}
 	
-	width_button.set_image (::get_icon("strip_width"));
+	width_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	width_button.set_icon (ArdourButton::StripWidth);
 	ARDOUR_UI::instance()->set_tip (width_button, t);
 
-	hide_button.set_image(::get_icon("hide"));
+	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	hide_button.set_icon (ArdourButton::CloseCross);
 	ARDOUR_UI::instance()->set_tip (&hide_button, _("Hide this mixer strip"));
 
 	input_button_box.set_spacing(2);
@@ -192,7 +194,7 @@ MixerStrip::init ()
 	solo_safe_led->signal_button_release_event().connect (sigc::mem_fun (*this, &RouteUI::solo_safe_button_release), false);
 	UI::instance()->set_tip (solo_safe_led, _("Lock Solo Status"), "");
 
-	solo_safe_led->set_text (_("Lock"));
+	solo_safe_led->set_text (S_("SoloLock|Lock"));
 	solo_isolated_led->set_text (_("Iso"));
 
 	solo_iso_table.set_homogeneous (true);
@@ -316,9 +318,14 @@ MixerStrip::init ()
 
 	input_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::input_press), false);
 	input_button.signal_button_release_event().connect (sigc::mem_fun(*this, &MixerStrip::input_release), false);
+	input_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::input_button_resized));
+
+	input_button.set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+	output_button.set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 
 	output_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::output_press), false);
 	output_button.signal_button_release_event().connect (sigc::mem_fun(*this, &MixerStrip::output_release), false);
+	output_button.signal_size_allocate().connect (sigc::mem_fun (*this, &MixerStrip::output_button_resized));
 
 	number_label.signal_button_press_event().connect (sigc::mem_fun(*this, &MixerStrip::number_button_button_press), false);
 
@@ -367,7 +374,7 @@ MixerStrip::init ()
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 
 	parameter_changed (X_("mixer-element-visibility"));
-
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
 	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
@@ -446,11 +453,6 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	*/
 	processor_box.set_route (rt);
 
-	/* map the current state */
-
-	mute_changed (0);
-	update_solo_display ();
-
 	revert_to_default_display ();
 
 	/* unpack these from the parent and stuff them into our own
@@ -518,7 +520,8 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 		if (midi_input_enable_button == 0) {
 			midi_input_enable_button = manage (new ArdourButton);
 			midi_input_enable_button->set_name ("midi input button");
-			midi_input_enable_button->set_image (::get_icon (X_("midi_socket_small")));
+			midi_input_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+			midi_input_enable_button->set_icon (ArdourButton::DinMidi);
 			midi_input_enable_button->signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
 			midi_input_enable_button->signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
 			ARDOUR_UI::instance()->set_tip (midi_input_enable_button, _("Enable/Disable MIDI input"));
@@ -597,7 +600,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	/* now force an update of all the various elements */
 
-	mute_changed (0);
+	update_mute_display ();
 	update_solo_display ();
 	name_changed ();
 	comment_changed (0);
@@ -760,7 +763,7 @@ gint
 MixerStrip::output_release (GdkEventButton *ev)
 {
 	switch (ev->button) {
-	case 1:
+	case 3:
 		edit_output_configuration ();
 		break;
 	}
@@ -781,10 +784,10 @@ MixerStrip::output_press (GdkEventButton *ev)
 	MenuList& citems = output_menu.items();
 	switch (ev->button) {
 
-	case 1:
+	case 3:
 		return false;  //wait for the mouse-up to pop the dialog
 
-	case 3:
+	case 1:
 	{
 		output_menu.set_name ("ArdourContextMenu");
 		citems.clear ();
@@ -792,15 +795,6 @@ MixerStrip::output_press (GdkEventButton *ev)
 
 		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_output)));
 
-		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-			citems.push_back (
-				MenuElem (
-					string_compose ("Add %1 port", (*i).to_i18n_string()),
-					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
-					)
-				);
-		}
-		
 		citems.push_back (SeparatorElem());
 		uint32_t const n_with_separator = citems.size ();
 
@@ -834,6 +828,20 @@ MixerStrip::output_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
+		citems.push_back (SeparatorElem());
+
+		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			citems.push_back (
+				MenuElem (
+					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
+					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_output_port), *i)
+					)
+				);
+		}
+		
+		citems.push_back (SeparatorElem());
+		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_output_configuration)));
+
 		output_menu.popup (1, ev->time);
 		break;
 	}
@@ -849,7 +857,7 @@ MixerStrip::input_release (GdkEventButton *ev)
 {
 	switch (ev->button) {
 
-	case 1:
+	case 3:
 		edit_input_configuration ();
 		break;
 	default:
@@ -881,21 +889,12 @@ MixerStrip::input_press (GdkEventButton *ev)
 
 	switch (ev->button) {
 
-	case 1:
+	case 3:
 		return false;  //don't handle the mouse-down here.  wait for mouse-up to pop the menu
 
-	case 3:
+	case 1:
 	{
 		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::disconnect_input)));
-
-		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-			citems.push_back (
-				MenuElem (
-					string_compose ("Add %1 port", (*i).to_i18n_string()),
-					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_input_port), *i)
-					)
-				);
-		}
 
 		citems.push_back (SeparatorElem());
 		uint32_t const n_with_separator = citems.size ();
@@ -932,7 +931,21 @@ MixerStrip::input_press (GdkEventButton *ev)
 			citems.pop_back ();
 		}
 
+		citems.push_back (SeparatorElem());
+		for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
+			citems.push_back (
+				MenuElem (
+					string_compose (_("Add %1 port"), (*i).to_i18n_string()),
+					sigc::bind (sigc::mem_fun (*this, &MixerStrip::add_input_port), *i)
+					)
+				);
+		}
+
+		citems.push_back (SeparatorElem());
+		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(static_cast<RouteUI*>(this)), &RouteUI::edit_input_configuration)));
+
 		input_menu.popup (1, ev->time);
+
 		break;
 	}
 	default:
@@ -1138,7 +1151,6 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	uint32_t other_connection_count = 0;
 
 	ostringstream label;
-	string label_string;
 
 	bool have_label = false;
 	bool each_io_has_one_connection = true;
@@ -1151,6 +1163,11 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 	ostringstream tooltip;
 	char * tooltip_cstr;
+	
+	//to avoid confusion, the button caption should only show connections that match the datatype of the track
+	DataType dt = DataType::AUDIO;
+	if ( boost::dynamic_pointer_cast<MidiTrack>(route) != 0 )
+		dt = DataType::MIDI;
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
@@ -1167,6 +1184,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		} else {
 			port = route->output()->nth (io_index);
 		}
+		
+		//ignore any port connections that don't match our DataType
+		if (port->type() != dt)
+			continue;  
 
 		port_connections.clear ();
 		port->get_connections(port_connections);
@@ -1174,12 +1195,20 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 
 		if (!port_connections.empty()) {
 			for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
+				string pn = "";
 				string& connection_name (*i);
 
+				if (connection_name.find("system:") == 0) {
+					pn = AudioEngine::instance()->get_pretty_name_by_name (connection_name);
+				}
+
 				if (io_connection_count == 0) {
-					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1)) << " -> " << Glib::Markup::escape_text(connection_name);
+					tooltip << endl << Glib::Markup::escape_text(port->name().substr(port->name().find("/") + 1))
+						<< " -> "
+						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn );
 				} else {
-					tooltip << ", " << Glib::Markup::escape_text(connection_name);
+					tooltip << ", "
+						<< Glib::Markup::escape_text( pn.empty() ? connection_name : pn );
 				}
 
 				if (connection_name.find("ardour:") == 0) {
@@ -1194,6 +1223,32 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 					if (connection_name.find(ardour_track_name) == 0) {
 						++ardour_connection_count;
 					}
+				} else if (!pn.empty()) {
+					if (system_ports.empty()) {
+						system_ports += pn;
+					} else {
+						system_ports += "/" + pn;
+					}
+					if (connection_name.find("system:") == 0) {
+						++system_connection_count;
+					}
+				} else if (connection_name.find("system:midi_") == 0) {
+					if (for_input) {
+						// "system:midi_capture_123" -> "123"
+						system_port = "M " + connection_name.substr(20);
+					} else {
+						// "system:midi_playback_123" -> "123"
+						system_port = "M " + connection_name.substr(21);
+					}
+
+					if (system_ports.empty()) {
+						system_ports += system_port;
+					} else {
+						system_ports += "/" + system_port;
+					}
+
+					++system_connection_count;
+
 				} else if (connection_name.find("system:") == 0) {
 					if (for_input) {
 						// "system:capture_123" -> "123"
@@ -1277,19 +1332,10 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		}
 	}
 
-	switch (width) {
-	case Wide:
-		label_string = label.str().substr(0, 7);
-		break;
-	case Narrow:
-		label_string = label.str().substr(0, 3);
-		break;
-  	}
-
 	if (for_input) {
-		input_button.set_text (label_string);
+		input_button.set_text (label.str());
 	} else {
-		output_button.set_text (label_string);
+		output_button.set_text (label.str());
 	}
 }
 
@@ -1497,7 +1543,23 @@ MixerStrip::build_route_ops_menu ()
 	}
 
 	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), sigc::bind (sigc::mem_fun(*this, &RouteUI::remove_this_route), false)));
+
+	if (_route) {
+		/* note that this relies on selection being shared across editor and
+		   mixer (or global to the backend, in the future), which is the only
+		   sane thing for users anyway.
+		*/
+
+		RouteTimeAxisView* rtav = PublicEditor::instance().get_route_view_by_route_id (_route->id());
+		if (rtav) {
+			Selection& selection (PublicEditor::instance().get_selection());
+			if (!selection.selected (rtav)) {
+				selection.set (rtav);
+			}
+			
+			items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
+		}
+	}
 }
 
 gboolean
@@ -1607,9 +1669,21 @@ MixerStrip::name_changed ()
 }
 
 void
+MixerStrip::input_button_resized (Gtk::Allocation& alloc)
+{
+	input_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
+}
+
+void
+MixerStrip::output_button_resized (Gtk::Allocation& alloc)
+{
+	output_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
+}
+
+void
 MixerStrip::name_button_resized (Gtk::Allocation& alloc)
 {
-	name_button.set_layout_ellisize_width (alloc.get_width() * PANGO_SCALE);
+	name_button.set_layout_ellipsize_width (alloc.get_width() * PANGO_SCALE);
 }
 
 bool
@@ -1785,24 +1859,24 @@ MixerStrip::meter_point_string (MeterPoint mp)
 	case Narrow:
 		switch (mp) {
 		case MeterInput:
-			return _("In");
+			return S_("Meter|In");
 			break;
 			
 		case MeterPreFader:
-			return _("Pr");
+			return S_("Meter|Pr");
 			break;
 			
 		case MeterPostFader:
-			return _("Po");
+			return S_("Meter|Po");
 			break;
 			
 		case MeterOutput:
-			return _("O");
+			return S_("Meter|O");
 			break;
 			
 		case MeterCustom:
 		default:
-			return _("C");
+			return S_("Meter|C");
 			break;
 		}
 		break;
@@ -1970,13 +2044,13 @@ MixerStrip::set_button_names ()
 			}
 		}
 		solo_isolated_led->set_text (_("Iso"));
-		solo_safe_led->set_text (_("Lock"));
+		solo_safe_led->set_text (S_("SoloLock|Lock"));
 		break;
 
 	default:
-		mute_button->set_text (_("M"));
-		monitor_input_button->set_text (_("I"));
-		monitor_disk_button->set_text (_("D"));
+		mute_button->set_text (S_("Mute|M"));
+		monitor_input_button->set_text (S_("MonitorInput|I"));
+		monitor_disk_button->set_text (S_("MonitorDisk|D"));
 
 		if (_route && _route->solo_safe()) {
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() | Gtkmm2ext::Insensitive));
@@ -1984,20 +2058,20 @@ MixerStrip::set_button_names ()
 			solo_button->set_visual_state (Gtkmm2ext::VisualState (solo_button->visual_state() & ~Gtkmm2ext::Insensitive));
 		}
 		if (!Config->get_solo_control_is_listen_control()) {
-			solo_button->set_text (_("S"));
+			solo_button->set_text (S_("Solo|S"));
 		} else {
 			switch (Config->get_listen_position()) {
 			case AfterFaderListen:
-				solo_button->set_text (_("A"));
+				solo_button->set_text (S_("AfterFader|A"));
 				break;
 			case PreFaderListen:
-				solo_button->set_text (_("P"));
+				solo_button->set_text (S_("Prefader|P"));
 				break;
 			}
 		}
 
-		solo_isolated_led->set_text (_("I"));
-		solo_safe_led->set_text (_("L"));
+		solo_isolated_led->set_text (S_("SoloIso|I"));
+		solo_safe_led->set_text (S_("SoloLock|L"));
 		break;
 	}
 

@@ -20,11 +20,13 @@
 #ifndef __gtk2_ardour_bundle_env_h__
 #define __gtk2_ardour_bundle_env_h__
 
+#include <string>
+
 /** This function must do whatever is necessary to create the right runtime
  * environment for the GTK2 version of ardour, on a per-platform basis. 
  */
 
-void fixup_bundle_environment (int, char* [], const char** localedir);
+void fixup_bundle_environment (int, char* [], std::string & localedir);
 
 /** Load any fonts required by the GTK2 version of ardour, on a per-platform
  * basis.

@@ -231,14 +231,16 @@ Item::window_to_item (ArdourCanvas::Duple const & d) const
 }
 
 ArdourCanvas::Rect
-Item::item_to_window (ArdourCanvas::Rect const & r) const
+Item::item_to_window (ArdourCanvas::Rect const & r, bool rounded) const
 {
 	Rect ret = item_to_canvas (r).translate (-scroll_offset());
 
-	ret.x0 = round (ret.x0);
-	ret.x1 = round (ret.x1);
-	ret.y0 = round (ret.y0);
-	ret.y1 = round (ret.y1);
+	if (rounded) {
+		ret.x0 = round (ret.x0);
+		ret.x1 = round (ret.x1);
+		ret.y0 = round (ret.y0);
+		ret.y1 = round (ret.y1);
+	}
 
 	return ret;
 }
@@ -766,7 +768,7 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 			continue;
 		}
 		
-		Rect item = (*i)->item_to_window (item_bbox.get());
+		Rect item = (*i)->item_to_window (item_bbox.get(), false);
 		boost::optional<Rect> d = item.intersection (area);
 		
 		if (d) {

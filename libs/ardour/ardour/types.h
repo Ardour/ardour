@@ -456,6 +456,8 @@ namespace ARDOUR {
 		FormatInt16
 	};
 
+	int format_data_width (ARDOUR::SampleFormat);
+
 	enum CDMarkerFormat {
 		CDMarkerNone,
 		CDMarkerCUE,

@@ -325,7 +325,7 @@ PixFader::render (cairo_t *cr, cairo_rectangle_t* area)
 		Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 		cairo_set_source_rgba (cr, 0.505, 0.517, 0.525, 0.4);
 		cairo_fill (cr);
-	} else if (_hovering) {
+	} else if (_hovering && CairoWidget::widget_prelight()) {
 		Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.1);
 		cairo_fill (cr);

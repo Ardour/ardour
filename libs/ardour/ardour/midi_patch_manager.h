@@ -126,10 +126,11 @@ public:
 
 	std::list<std::string> custom_device_mode_names_by_model(std::string model_name) {
 		if (model_name != "") {
-			return master_device_by_model(model_name)->custom_device_mode_names();
-		} else {
-			return std::list<std::string>();
+			if (master_device_by_model(model_name)) {
+				return master_device_by_model(model_name)->custom_device_mode_names();
+			}
 		}
+		return std::list<std::string>();
 	}
 
 	const MasterDeviceNames::Models& all_models() const { return _all_models; }

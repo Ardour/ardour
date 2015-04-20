@@ -64,6 +64,8 @@ WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pM
 	}
 	_m_inputBuffer = new float[__m_NumInputChannels * m_BufferSizes.back()];
 	_m_outputBuffer = new float[__m_NumOutputChannels * m_BufferSizes.back()];
+	m_DefaultBufferSize = m_BufferSizes.back();
+	m_CurrentBufferSize = m_BufferSizes.back();
 }
 
 
@@ -191,7 +193,6 @@ void WCMRNativeAudioNoneDevice::_SilenceThread()
 	float* theInpBuffers = _m_inputBuffer;
 #endif
 
-    uint32_t currentSampleTime = 0;    
 	const size_t buffer_size = CurrentBufferSize();
     const uint64_t cyclePeriodNanos = (1000000000.0 * buffer_size) / CurrentSamplingRate();
 
@@ -213,7 +214,7 @@ void WCMRNativeAudioNoneDevice::_SilenceThread()
 
 		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::AudioCallback, (void *)&audioCallbackData);
 		
-        currentSampleTime += buffer_size;
+        audioCallbackData.acdSampleTime += buffer_size;
 		
 		int64_t timeToSleepUsecs = ((int64_t)cycleEndTimeNanos - (int64_t)__get_time_nanos())/1000;
 		

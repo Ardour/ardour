@@ -75,6 +75,8 @@ UI::UI (string namestr, int *argc, char ***argv)
 {
 	theMain = new Main (argc, argv);
 
+	pthread_set_name ("gui");
+	
 	_active = false;
 
 	if (!theGtkUI) {
@@ -578,10 +580,6 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 			cerr << prefix << str << endl;
 		} else {
 			display_message (prefix, prefix_len, ptag, mtag, str);
-			
-			if (!errors->is_visible() && chn != Transmitter::Info) {
-				show_errors ();
-			}
 		}
 	}
 

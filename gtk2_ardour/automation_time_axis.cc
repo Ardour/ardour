@@ -91,12 +91,26 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	, _automatable (a)
 	, _parameter (p)
 	, _base_rect (new ArdourCanvas::Rectangle (_canvas_display))
-	, _name (nom)
 	, _view (show_regions ? new AutomationStreamView (*this) : 0)
 	, auto_button (X_("")) /* force addition of a label */
 	, _show_regions (show_regions)
 {
+	//concatenate plugin name and param name into the tooltip
+	string tipname = nomparent;
+	if (!tipname.empty()) {
+		tipname += ": ";
+	}
+	tipname += nom;
+	ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
 
+	//plugin name and param name appear on 2 separate lines in the track header
+	tipname = nomparent;
+	if (!tipname.empty()) {
+		tipname += "\n";
+	}
+	tipname += nom;
+	_name = tipname;
+	
 	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, r->name()));
 	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, r->name()));
@@ -135,7 +149,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		_base_rect->lower_to_bottom();
 	}
 
-	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::CloseCross));
+	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	hide_button.set_icon (ArdourButton::CloseCross);
 	hide_button.set_tweaks(ArdourButton::TrackHeader);
 
 	auto_button.set_name ("route button");
@@ -169,13 +184,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	name_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
 	name_label.set_name (X_("TrackParameterName"));
 	name_label.set_ellipsize (Pango::ELLIPSIZE_END);
-
-	string tipname = nomparent;
-	if (!tipname.empty()) {
-		tipname += ": ";
-	}
-	tipname += _name;
-	ARDOUR_UI::instance()->set_tip(controls_ebox, tipname);
 
 	/* add the buttons */
 	controls_table.set_border_width (1);
@@ -278,6 +286,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
 {
+	cleanup_gui_properties ();
 	delete _view;
 }
 
@@ -447,18 +456,18 @@ AutomationTimeAxisView::clear_clicked ()
 }
 
 void
-AutomationTimeAxisView::set_height (uint32_t h)
+AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
 	bool const changed = (height != (uint32_t) h) || first_call_to_set_height;
 	uint32_t const normal = preset_height (HeightNormal);
 	bool const changed_between_small_and_normal = ( (height < normal && h >= normal) || (height >= normal || h < normal) );
 
-	TimeAxisView::set_height (h);
+	TimeAxisView::set_height (h, m);
 
 	_base_rect->set_y1 (h);
 
 	if (_line) {
-		_line->set_height(h);
+		_line->set_height(h - 2.5);
 	}
 
 	if (_view) {
@@ -471,7 +480,10 @@ AutomationTimeAxisView::set_height (uint32_t h)
 		first_call_to_set_height = false;
 
 		if (h >= preset_height (HeightNormal)) {
-			auto_button.show();
+			if (!(_parameter.type() >= MidiCCAutomation &&
+			      _parameter.type() <= MidiChannelPressureAutomation)) {
+				auto_button.show();
+			}
 			name_label.show();
 			hide_button.show();
 
@@ -560,7 +572,10 @@ AutomationTimeAxisView::build_display_menu ()
 			(AutoState) Touch)));
 	auto_touch_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 
-	items.push_back (MenuElem (_("State"), *auto_state_menu));
+	if (!(_parameter.type() >= MidiCCAutomation &&
+	      _parameter.type() <= MidiChannelPressureAutomation)) {
+		items.push_back (MenuElem (_("State"), *auto_state_menu));
+	}
 
 	/* mode menu */
 
@@ -693,7 +708,7 @@ AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float t
 }
 
 void
-AutomationTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results)
+AutomationTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool /*within*/)
 {
 	if (!_line && !_view) {
 		return;

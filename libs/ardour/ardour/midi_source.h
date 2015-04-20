@@ -34,6 +34,7 @@
 
 namespace ARDOUR {
 
+class MidiChannelFilter;
 class MidiStateTracker;
 class MidiModel;
 
@@ -43,7 +44,7 @@ template<typename T> class MidiRingBuffer;
 class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_shared_from_this<MidiSource>
 {
   public:
-	typedef Evoral::MusicalTime TimeType;
+	typedef Evoral::Beats TimeType;
 
 	MidiSource (Session& session, std::string name, Source::Flag flags = Source::Flag(0));
 	MidiSource (Session& session, const XMLNode&);
@@ -59,8 +60,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	int write_to (const Lock&                   lock,
 	              boost::shared_ptr<MidiSource> newsrc,
-	              Evoral::MusicalTime           begin = Evoral::MinMusicalTime,
-	              Evoral::MusicalTime           end   = Evoral::MaxMusicalTime);
+	              Evoral::Beats                 begin = Evoral::MinBeats,
+	              Evoral::Beats                 end   = Evoral::MaxBeats);
 
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio frames (even if the source has tempo time).
@@ -77,6 +78,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                              framepos_t                         start,
 	                              framecnt_t                         cnt,
 	                              MidiStateTracker*                  tracker,
+	                              MidiChannelFilter*                 filter,
 	                              const std::set<Evoral::Parameter>& filtered) const;
 
 	/** Write data from a MidiRingBuffer to this source.
@@ -93,8 +95,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 *
 	 * Caller must ensure that the event is later than the last written event.
 	 */
-	virtual void append_event_beats(const Lock&                               lock,
-	                                const Evoral::Event<Evoral::MusicalTime>& ev) = 0;
+	virtual void append_event_beats(const Lock&                         lock,
+	                                const Evoral::Event<Evoral::Beats>& ev) = 0;
 
 	/** Append a single event with a timestamp in frames.
 	 *
@@ -132,9 +134,9 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * etc.
 	 */
 	virtual void mark_midi_streaming_write_completed (
-		const Lock&                                            lock,
-		Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption stuck_option,
-		Evoral::MusicalTime                                    when = Evoral::MusicalTime());
+		const Lock&                                      lock,
+		Evoral::Sequence<Evoral::Beats>::StuckNoteOption stuck_option,
+		Evoral::Beats                                    when = Evoral::Beats());
 
 	virtual void session_saved();
 
@@ -154,8 +156,12 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	virtual void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false) = 0;
 	virtual void destroy_model(const Glib::Threads::Mutex::Lock& lock) = 0;
 
-	/** Reset cached information (like iterators) when things have changed. */
-	void invalidate(const Glib::Threads::Mutex::Lock& lock);
+	/** Reset cached information (like iterators) when things have changed.
+	 * @param lock Source lock, which must be held by caller.
+	 * @param notes If non-NULL, currently active notes are added to this set.
+	 */
+	void invalidate(const Glib::Threads::Mutex::Lock&                       lock,
+	                std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes=NULL);
 
 	void set_note_mode(const Glib::Threads::Mutex::Lock& lock, NoteMode mode);
 
@@ -188,7 +194,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                                  framepos_t                     position,
 	                                  framepos_t                     start,
 	                                  framecnt_t                     cnt,
-	                                  MidiStateTracker*              tracker) const = 0;
+	                                  MidiStateTracker*              tracker,
+	                                  MidiChannelFilter*             filter) const = 0;
 
 	/** Write data to this source from a MidiRingBuffer.
 	 *  @param source Buffer to read from.
@@ -205,11 +212,11 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 
-	mutable Evoral::Sequence<Evoral::MusicalTime>::const_iterator _model_iter;
-	mutable bool                                                  _model_iter_valid;
+	mutable Evoral::Sequence<Evoral::Beats>::const_iterator _model_iter;
+	mutable bool                                            _model_iter_valid;
 
-	mutable Evoral::MusicalTime _length_beats;
-	mutable framepos_t          _last_read_end;
+	mutable Evoral::Beats _length_beats;
+	mutable framepos_t    _last_read_end;
 
 	/** The total duration of the current capture. */
 	framepos_t _capture_length;

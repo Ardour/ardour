@@ -73,6 +73,9 @@ public:
 	static void set_flat_buttons (bool yn);
 	static bool flat_buttons() { return _flat_buttons; }
 
+	static void set_widget_prelight (bool yn);
+	static bool widget_prelight() { return _widget_prelight; }
+
 	static void set_source_rgb_a( cairo_t* cr, Gdk::Color, float a=1.0 );
 
 	/* set_focus_handler() will cause all button-press events on any
@@ -112,6 +115,7 @@ protected:
 	bool                   _need_bg;
 
 	static bool	_flat_buttons;
+	static bool	_widget_prelight;
 	bool		_grabbed;
 
 	static sigc::slot<void> focus_handler;

@@ -237,8 +237,8 @@ Panner2d::label_signals ()
 			break;
 
 		case 2:
-			signals[0]->set_text (_("L"));
-			signals[1]->set_text (_("R"));
+			signals[0]->set_text (S_("Panner|L"));
+			signals[1]->set_text (S_("Panner|R"));
 			break;
 
 		default:
@@ -429,7 +429,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	double r, g, b, a;
 	if (_send_mode) {
-		ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("send strip base"), r, g, b, a);
+		ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("send bg"), r, g, b, a);
 	}
 	if (!panner_shell->bypassed()) {
 		cairo_set_source_rgba (cr, r, g, b, 1.0);

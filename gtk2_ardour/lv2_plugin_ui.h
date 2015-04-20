@@ -60,6 +60,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	bool stop_updating(GdkEventAny*);
 
 	int package (Gtk::Window&);
+	void grab_focus ();
 
   private:
 

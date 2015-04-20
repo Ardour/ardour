@@ -38,10 +38,11 @@
 #include "evoral/EventSink.hpp"
 
 #include "ardour/debug.h"
-#include "ardour/midi_model.h"
-#include "ardour/midi_state_tracker.h"
-#include "ardour/midi_source.h"
 #include "ardour/file_source.h"
+#include "ardour/midi_channel_filter.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_source.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/source_factory.h"
@@ -177,10 +178,10 @@ MidiSource::update_length (framecnt_t)
 }
 
 void
-MidiSource::invalidate (const Lock& lock)
+MidiSource::invalidate (const Lock& lock, std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr>* notes)
 {
 	_model_iter_valid = false;
-	_model_iter.invalidate();
+	_model_iter.invalidate(notes);
 }
 
 framecnt_t
@@ -190,6 +191,7 @@ MidiSource::midi_read (const Lock&                        lm,
                        framepos_t                         start,
                        framecnt_t                         cnt,
                        MidiStateTracker*                  tracker,
+                       MidiChannelFilter*                 filter,
                        const std::set<Evoral::Parameter>& filtered) const
 {
 	BeatsFramesConverter converter(_session.tempo_map(), source_start);
@@ -200,11 +202,16 @@ MidiSource::midi_read (const Lock&                        lm,
 
 	if (_model) {
 		// Find appropriate model iterator
-		Evoral::Sequence<Evoral::MusicalTime>::const_iterator& i = _model_iter;
-		if (_last_read_end == 0 || start != _last_read_end || !_model_iter_valid) {
+		Evoral::Sequence<Evoral::Beats>::const_iterator& i = _model_iter;
+		const bool linear_read = _last_read_end != 0 && start == _last_read_end;
+		if (!linear_read || !_model_iter_valid) {
 			// Cached iterator is invalid, search for the first event past start
-			i                 = _model->begin(converter.from(start), false, filtered);
+			i = _model->begin(converter.from(start), false, filtered,
+			                  linear_read ? &_model->active_notes() : NULL);
 			_model_iter_valid = true;
+			if (!linear_read) {
+				_model->active_notes().clear();
+			}
 		}
 
 		_last_read_end = start + cnt;
@@ -213,6 +220,13 @@ MidiSource::midi_read (const Lock&                        lm,
 		for (; i != _model->end(); ++i) {
 			const framecnt_t time_frames = converter.to(i->time());
 			if (time_frames < start + cnt) {
+				if (filter && filter->filter(i->buffer(), i->size())) {
+					DEBUG_TRACE (DEBUG::MidiSourceIO,
+					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
+					                             _name, time_frames + source_start, i->event_type(), i->size()));
+					continue;
+				}
+
 				// Offset by source start to convert event time to session time
 				dst.write (time_frames + source_start, i->event_type(), i->size(), i->buffer());
 
@@ -232,7 +246,7 @@ MidiSource::midi_read (const Lock&                        lm,
 		}
 		return cnt;
 	} else {
-		return read_unlocked (lm, dst, source_start, start, cnt, tracker);
+		return read_unlocked (lm, dst, source_start, start, cnt, tracker, filter);
 	}
 }
 
@@ -297,9 +311,9 @@ MidiSource::mark_streaming_write_started (const Lock& lock)
 }
 
 void
-MidiSource::mark_midi_streaming_write_completed (const Lock&                                            lock,
-                                                 Evoral::Sequence<Evoral::MusicalTime>::StuckNoteOption option,
-                                                 Evoral::MusicalTime                                    end)
+MidiSource::mark_midi_streaming_write_completed (const Lock&                                      lock,
+                                                 Evoral::Sequence<Evoral::Beats>::StuckNoteOption option,
+                                                 Evoral::Beats                                    end)
 {
 	if (_model) {
 		_model->end_write (option, end);
@@ -320,11 +334,11 @@ MidiSource::mark_midi_streaming_write_completed (const Lock&                    
 void
 MidiSource::mark_streaming_write_completed (const Lock& lock)
 {
-	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Evoral::MusicalTime>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Evoral::Beats>::DeleteStuckNotes);
 }
 
 int
-MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::MusicalTime begin, Evoral::MusicalTime end)
+MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::Beats begin, Evoral::Beats end)
 {
 	Lock newsrc_lock (newsrc->mutex ());
 
@@ -333,7 +347,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 	newsrc->copy_automation_state_from (this);
 
 	if (_model) {
-		if (begin == Evoral::MinMusicalTime && end == Evoral::MaxMusicalTime) {
+		if (begin == Evoral::MinBeats && end == Evoral::MaxBeats) {
 			_model->write_to (newsrc, newsrc_lock);
 		} else {
 			_model->write_section_to (newsrc, newsrc_lock, begin, end);
@@ -347,7 +361,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 
 	/* force a reload of the model if the range is partial */
 
-	if (begin != Evoral::MinMusicalTime || end != Evoral::MaxMusicalTime) {
+	if (begin != Evoral::MinBeats || end != Evoral::MaxBeats) {
 		newsrc->load_model (newsrc_lock, true);
 	} else {
 		newsrc->set_model (newsrc_lock, _model);

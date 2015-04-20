@@ -2,19 +2,6 @@
 from waflib.extras import autowaf as autowaf
 import os
 
-# Version of this package (even if built as a child)
-LIBSURFACES_VERSION = '4.1.0'
-
-# Library version (UNIX style major, minor, micro)
-# major increment <=> incompatible changes
-# minor increment <=> compatible changes (additions)
-# micro increment <=> no interface changes
-LIBSURFACES_LIB_VERSION = '4.1.0'
-
-# Variables for 'waf dist'
-APPNAME = 'libsurfaces'
-VERSION = LIBSURFACES_VERSION
-
 # Mandatory variables
 top = '.'
 out = 'build'
@@ -40,7 +27,6 @@ def build(bld):
     obj.name         = 'libgeneric_midi'
     obj.target       = 'generic_midi'
     obj.use          = 'libardour libardourcp'
-    obj.vnum         = LIBSURFACES_LIB_VERSION
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():

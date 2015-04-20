@@ -22,6 +22,8 @@
 
 #include "controls.h"
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 class Pot : public Control
@@ -47,6 +49,7 @@ public:
 
 };
 
+}
 }
 
 #endif /* __ardour_mackie_control_protocol_pot_h__ */

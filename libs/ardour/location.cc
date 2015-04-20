@@ -220,7 +220,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 		return 0;
-	} else {
+	} else if (!force) {
                 /* range locations must exceed a minimum duration */
                 if (_end - s < Config->get_range_location_minimum()) {
                         return -1;
@@ -251,7 +251,7 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 
 /** Set end position.
  *  @param s New end.
- *  @param force true to force setting, even if the given new start is after the current end.
+ *  @param force true to force setting, even if the given new end is before the current start.
  *  @param allow_bbt_recompute True to recompute BBT end time from the new given end time.
  */
 int
@@ -288,7 +288,7 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 		return 0;
-        } else {
+        } else if (!force) {
                 /* range locations must exceed a minimum duration */
                 if (e - _start < Config->get_range_location_minimum()) {
                         return -1;
@@ -1111,6 +1111,30 @@ Locations::set_state (const XMLNode& node, int version)
 			catch (failed_constructor& err) {
 				error << _("could not load location from session file - ignored") << endmsg;
 			}
+		}
+
+		/* We may have some unused locations in the old list. */
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+			LocationList::iterator tmp = i;
+			++tmp;
+
+			LocationList::iterator n = new_locations.begin();
+			bool found = false;
+
+			while (n != new_locations.end ()) {
+				if ((*i)->id() == (*n)->id()) {
+					found = true;
+					break;
+				}
+				++n;
+			}
+
+			if (!found) {
+				delete *i;
+				locations.erase (i);
+			}
+
+			i = tmp;
 		}
 
 		locations = new_locations;

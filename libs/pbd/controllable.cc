@@ -107,7 +107,7 @@ XMLNode&
 Controllable::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	char buf[64];
 
 	node->add_property (X_("name"), _name); // not reloaded from XML state, just there to look at
@@ -128,7 +128,7 @@ Controllable::get_state ()
 int
 Controllable::set_state (const XMLNode& node, int /*version*/)
 {
-	LocaleGuard lg (X_("POSIX"));
+	LocaleGuard lg (X_("C"));
 	const XMLProperty* prop;
 
 	Stateful::save_extra_xml (node);

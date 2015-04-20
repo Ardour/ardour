@@ -60,13 +60,6 @@ using namespace ARDOUR_UI_UTILS;
 
 ArdourStartup* ArdourStartup::the_startup = 0;
 
-static string poor_mans_glob (string path)
-{
-	string copy = path;
-	replace_all (copy, "~", Glib::get_home_dir());
-	return copy;
-}
-
 ArdourStartup::ArdourStartup ()
 	: _response (RESPONSE_OK)
 	, config_modified (false)
@@ -80,7 +73,6 @@ ArdourStartup::ArdourStartup ()
 	, monitoring_page_index (-1)
 	, final_page_index (-1)
 {
-	set_keep_above (true);
 	set_position (WIN_POS_CENTER);
 	set_border_width (12);
 	
@@ -107,10 +99,6 @@ ArdourStartup::ArdourStartup ()
 		set_default_icon_list (window_icons);
 	}
 	
-#ifdef __APPLE__
-	setup_prerelease_page ();
-#endif
-	
 	setup_new_user_page ();
 	setup_first_time_config_page ();
 	setup_monitoring_choice_page ();
@@ -127,47 +115,23 @@ ArdourStartup::~ArdourStartup ()
 bool
 ArdourStartup::required ()
 {
-	return !Glib::file_test (been_here_before_path(), Glib::FILE_TEST_EXISTS);
-}
+	/* look for a "been here before" file for this version or earlier
+	 * versions
+	 */
 
-std::string
-ArdourStartup::been_here_before_path ()
-{
-	// XXXX use more specific version so we can catch upgrades
-	return Glib::build_filename (user_config_directory (), ".a3");
-}
-
-void
-ArdourStartup::setup_prerelease_page ()
-{
-	VBox* vbox = manage (new VBox);
-	Label* label = manage (new Label);
-	label->set_markup (string_compose (_("<b>Welcome to this BETA release of Ardour %1</b>\n\n\
-Ardour %1 has been released for Linux but because of the lack of testers,\n\
-it is still at the beta stage on OS X. So, a few guidelines:\n\
-\n\
-1) Please do <b>NOT</b> use this software with the expectation that it is stable or reliable\n\
-   though it may be so, depending on your workflow.\n\
-2) <b>Please do NOT use the forums at ardour.org to report issues</b>.\n\
-3) Please <b>DO</b> use the bugtracker at http://tracker.ardour.org/ to report issues\n\
-   making sure to note the product version number as %1-beta.\n\
-4) Please <b>DO</b> use the ardour-users mailing list to discuss ideas and pass on comments.\n\
-5) Please <b>DO</b> join us on IRC for real time discussions about ardour3. You\n\
-   can get there directly from Ardour via the Help->Chat menu option.\n\
-\n\
-Full information on all the above can be found on the support page at\n\
-\n\
-                http://ardour.org/support\n\
-"), VERSIONSTRING));
-
-	vbox->set_border_width (12);
-	vbox->pack_start (*label, false, false, 12);
-	vbox->show_all ();
+	const int current_version = atoi (PROGRAM_VERSION);
 	
-	append_page (*vbox);
-	set_page_type (*vbox, ASSISTANT_PAGE_CONTENT);
-	set_page_title (*vbox, _("This is a BETA RELEASE"));
-	set_page_complete (*vbox, true);
+	for (int v = current_version; v != 0; --v) {
+		if (Glib::file_test (ARDOUR::been_here_before_path (v), Glib::FILE_TEST_EXISTS)) {
+			if (v != current_version) {
+				/* older version exists, create the current one */
+				ofstream fout (been_here_before_path (current_version).c_str());
+			}
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void
@@ -406,6 +370,14 @@ ArdourStartup::on_delete_event (GdkEventAny*)
 void
 ArdourStartup::on_apply ()
 {
+	/* file-chooser button does not emit 'current_folder_changed' signal
+	 * when a folder from the dropdown or the sidebar is chosen.
+	 * -> explicitly poll for the dir as suggested by the gtk documentation.
+	 */
+	if (default_dir_chooser && default_dir_chooser->get_filename() != Config->get_default_session_parent_dir ()) {
+		config_modified = true;
+	}
+
 	if (config_modified) {
 
 		if (default_dir_chooser) {
@@ -442,6 +414,3 @@ ArdourStartup::move_along_now ()
 {
 	on_apply ();
 }
-
-
-		

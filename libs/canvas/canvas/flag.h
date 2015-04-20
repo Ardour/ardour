@@ -32,8 +32,8 @@ class Rectangle;
 class LIBCANVAS_API Flag : public Container
 {
 public:
-	Flag (Canvas *, Distance, Color, Color, Duple);
-	Flag (Item*, Distance, Color, Color, Duple);
+	Flag (Canvas *, Distance, Color, Color, Duple, bool invert=false);
+	Flag (Item*, Distance, Color, Color, Duple, bool invert=false);
 
 	void set_text (std::string const &);
 	void set_height (Distance);
@@ -50,6 +50,7 @@ private:
 	Text* _text;
 	Line* _line;
 	Rectangle* _rectangle;
+	bool _invert;
 };
 	
 }

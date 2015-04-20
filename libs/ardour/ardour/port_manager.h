@@ -79,6 +79,7 @@ class LIBARDOUR_API PortManager
     void                    port_renamed (const std::string&, const std::string&);
     std::string             make_port_name_relative (const std::string& name) const;
     std::string             make_port_name_non_relative (const std::string& name) const;
+    std::string             get_pretty_name_by_name (const std::string& portname) const;
     bool                    port_is_mine (const std::string& fullname) const;
 
     /* other Port management */

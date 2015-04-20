@@ -154,7 +154,7 @@ VideoUtils::get_file_extension (const std::string infile)
 std::string
 VideoUtils::video_dest_file (const std::string dir, const std::string infile)
 {
-	return dir + "a3_" + strip_file_extension(Glib::path_get_basename(infile)) + ".avi";
+	return Glib::build_filename(dir, strip_file_extension(Glib::path_get_basename(infile)) + ".avi");
 }
 
 std::string

@@ -14,6 +14,8 @@ ARDOURSTACK_ROOT=$HOME/a3/inst
 # the waf build tree to use when copying built/generated files
 BUILD_ROOT=../../build
 
+. ../define_versions.sh
+
 # where harvid and xjadeo binaries are cached
 if test -z "$CACHEDIR" -o ! -d "$CACHEDIR"; then
 	CACHEDIR=`pwd`
@@ -110,12 +112,14 @@ case `uname -m` in
 	i[3456789]86|x86|i86pc)
 		echo "Architecture is x86"
 		ARCH='x86'
+		WARCH='i386'
 		ARCH_BITS='32-bit'
 		MULTIARCH='i386-linux-gnu'
 		;;
 	x86_64|amd64|AMD64)
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
+		WARCH='x86_64'
 		ARCH_BITS='64-bit'
 		MULTIARCH='x86_64-linux-gnu'
 		;;
@@ -231,8 +235,8 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 
 # create startup helper script
 
-sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour3
-rm $ENVIRONMENT && chmod 775 $APPBIN/ardour3
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/' < ardour.sh.in > $APPBIN/ardour${major_version}
+rm $ENVIRONMENT && chmod 775 $APPBIN/ardour${major_version}
 MAIN_EXECUTABLE=ardour-${release_version}
 
 echo "Copying ardour executable ...."
@@ -308,22 +312,6 @@ fi
 # 
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
-echo "Copying all Pango modules ..."
-cp -R $GTKSTACK_ROOT/lib/pango/1.8.0/modules/*.so $Modules
-echo "Copying all GDK Pixbuf loaders ..."
-cp -R $GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/loaders/*.so $Loaders
-
-# Generate a pango module file using the actual Pango that we're going to bundle
-
-cat > pangorc <<EOF 
-[Pango]
-ModulesPath=$GTKSTACK_ROOT/lib/pango/1.8.0/modules
-EOF
-env PANGO_RC_FILE=pangorc $GTKSTACK_ROOT/bin/pango-querymodules | sed "s?$GTKSTACK_ROOT/lib/pango/1.8.0/?@ROOTDIR@/?" > $Etc/pango.modules.in
-rm pangorc
-
-# Ditto for gdk-pixbuf loaders
-gdk-pixbuf-query-loaders | sed "s?$GTKSTACK_ROOT/lib/gdk-pixbuf-2.0/2.10.0/?@ROOTDIR@/?" > $Etc/gdk-pixbuf.loaders.in
 
 # We rely on clearlooks, so include a version from our own build tree
 # this one is special - we will set GTK_PATH to $Libraries/gtkengines
@@ -451,6 +439,9 @@ while [ true ] ; do
 		done
 		depCheckedList[$checkIdx]=$file
 		checkIdx=$(($checkIdx + 1))
+
+		# ignore suil/qt wrappers - the plugin will pull in QT4.
+		if echo $file | grep -qs 'libsuil_.*qt4' ; then continue; fi
 		
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
@@ -522,17 +513,17 @@ echo
 if test x$STRIP = xall ; then
     echo Stripping all libraries
     # Must be writable so that we can strip
-    find $APPLIB/ -name "*.so*" | xargs chmod u+w
+    find $APPLIB/ -name "*.so*" -print0 | xargs -0 chmod u+w
     # and strip ...
-    find $APPLIB/ -name "*.so*" | xargs strip
+    find $APPLIB/ -name "*.so*" -print0 | xargs -0 strip -s
 elif test x$STRIP = xsome ; then
     echo Stripping dependent libraries
     for l in $deplibs ; do
         chmod u+w $APPLIB/$l
-        strip $APPLIB/$l
+        strip -s $APPLIB/$l
     done
 fi
-find $APPLIB/ -name "*.so*" | xargs chmod a+rx
+find $APPLIB/ -name "*.so*" -print0 | xargs -0 chmod a+rx
 
 echo "Copying other stuff to $APPDIR  ..."
 
@@ -566,10 +557,45 @@ fi
 # install bundled LV2s to <app>/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
 
+# lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
+if test -d $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
+	cp -R $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 $APPLIB/LV2/
+elif test -d $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
+	cp -R $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 $APPLIB/LV2/
+fi
+
 # go through and recursively remove any .svn dirs in the bundle
 for svndir in `find $APPDIR -name .svn -type d`; do
 	rm -rf $svndir
 done
+
+
+################################################################################
+### Mixbus plugins, etc
+if test -n "$MIXBUS"; then
+
+	mkdir -p $APPLIB/LV2
+	METERS_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-meters.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/linux/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
+		"${SRCDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${SRCDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+
+	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/linux/setBfree.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/linux/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip \
+		"${SRCDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${SRCDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
+
+	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-midifilter.latest.txt)
+	rsync -a -q --partial \
+		rsync://gareus.org/x42/linux/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip \
+		"${SRCDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${SRCDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
+
+fi
+################################################################################
+
 
 if test x$WITH_HARVID != x ; then
 	cd $APPBIN
@@ -598,8 +624,15 @@ fi
 #
 # Add the uninstaller
 #
-sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
+sed -e "s/%REPLACE_PGM%/${APPNAME}/" -e "s/%REPLACE_VENDOR%/${VENDOR}/" -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/" -e "s/%REPLACE_VERSION%/${release_version}/" -e "s/%REPLACE_TYPE%/${BUILDTYPE}/" < uninstall.sh.in > $APPBIN/${APP_VER_NAME}.uninstall.sh
 chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
+
+#
+# Add the stage2.run script
+#
+sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/" < stage2.run.in > stage2.run
+chmod a+x stage2.run
+
 
 #Sanity Check file
 if [ -e $BUILD_ROOT/tools/sanity_check/sanityCheck ]; then
@@ -616,6 +649,8 @@ tar -cjf $APPDIR.tar.bz2 $APPDIR
 
 echo "Calculating bundle size"
 du -sb $APPDIR/  | awk '{print $1}' > $APPDIR.size
+
+( cd $APPDIR ; find . ) > file_list.txt
 
 rm -rf $APPDIR/
 

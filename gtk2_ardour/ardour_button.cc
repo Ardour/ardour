@@ -59,6 +59,7 @@ ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::El
 
 ArdourButton::ArdourButton (Element e)
 	: _elements (e)
+	, _icon (ArdourButton::NoIcon)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
@@ -77,6 +78,8 @@ ArdourButton::ArdourButton (Element e)
 	, text_inactive_color(0)
 	, led_active_color(0)
 	, led_inactive_color(0)
+	, led_custom_color (0)
+	, use_custom_led_color (false)
 	, convex_pattern (0)
 	, concave_pattern (0)
 	, led_inset_pattern (0)
@@ -113,6 +116,8 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, text_inactive_color(0)
 	, led_active_color(0)
 	, led_inactive_color(0)
+	, led_custom_color (0)
+	, use_custom_led_color (false)
 	, convex_pattern (0)
 	, concave_pattern (0)
 	, led_inset_pattern (0)
@@ -194,6 +199,13 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	uint32_t text_color;
 	uint32_t led_color;
 
+#ifdef __APPLE__
+	const double dpiscale = 1.0;
+#else
+	const double dpiscale = ARDOUR_UI::config()->get_font_scale () / 102400.;
+#endif
+	const double corner_radius = std::max(2.0, _corner_radius * dpiscale);
+
 	if (_update_colors) {
 		set_colors ();
 	}
@@ -207,6 +219,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	} else {
 		text_color = text_inactive_color;
 		led_color = led_inactive_color;
+	}
+
+	if (use_custom_led_color) {
+		led_color = led_custom_color;
 	}
 
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
@@ -230,14 +246,14 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	// draw edge (filling a rect underneath, rather than stroking a border on top, allows the corners to be lighter-weight.
 	if ((_elements & (Body|Edge)) == (Body|Edge)) {
-		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius + 1.5);
+		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5);
 		cairo_set_source_rgba (cr, 0, 0, 0, 1);
 		cairo_fill(cr);
 	}
 
 	// background fill
 	if ((_elements & Body)==Body) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			ArdourCanvas::set_source_rgba (cr, fill_inactive_color);
 			cairo_fill (cr);
@@ -256,7 +272,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if ((_elements & Body)==Body) {
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			cairo_set_line_width (cr, 2.0);
-			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, _corner_radius-0.5);
+			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, corner_radius-0.5);
 			ArdourCanvas::set_source_rgba (cr, fill_active_color);
 			cairo_stroke (cr);
 		}
@@ -264,17 +280,24 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	//show the "convex" or "concave" gradient
 	if (!_flat_buttons) {
-		if ( active_state() == Gtkmm2ext::ExplicitActive && !((_elements & Indicator)==Indicator) ) {
+		if ( active_state() == Gtkmm2ext::ExplicitActive && ( !((_elements & Indicator)==Indicator) || use_custom_led_color) ) {
 			//concave
 			cairo_set_source (cr, concave_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 			cairo_fill (cr);
 		} else {
 			cairo_set_source (cr, convex_pattern);
-			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
+			Gtkmm2ext::rounded_rectangle (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 			cairo_fill (cr);
 		}
 	}
+
+#define VECTORICONSTROKEFILL(fillalpha) \
+	cairo_set_line_width(cr, 1.5); \
+	cairo_set_source_rgba (cr, 0, 0, 0, 1.0); \
+	cairo_stroke_preserve(cr); \
+	cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha)); \
+	cairo_fill(cr);
 
 	//Pixbuf, if any
 	if (_pixbuf) {
@@ -297,8 +320,10 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		gdk_cairo_set_source_pixbuf (cr, _pixbuf->gobj(), x, y);
 		cairo_fill (cr);
 	}
-	else // rec-en is exclusive to pixbuf (tape machine mode, rec-en)
-	if ((_elements & (RecButton|RecTapeMode)) == (RecButton|RecTapeMode)) {
+	else /* VectorIcons are exclusive to Pixbuf Icons */
+	/* TODO separate these into dedicated class
+	 * it may also be efficient to render them only once for every size (image-surface) */
+	if ((_elements & VectorIcon) && _icon == RecTapeMode) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(10., std::min(x, y) * .6); // TODO we need a better way to limit max. radius.
@@ -307,10 +332,11 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_translate(cr, x, y);
 
 		cairo_arc (cr, 0, 0, r, 0, 2 * M_PI);
-		if (active_state() == Gtkmm2ext::ExplicitActive)
+		if (active_state() == Gtkmm2ext::ExplicitActive) {
 			cairo_set_source_rgba (cr, .95, .1, .1, 1.);
-		else
+		} else {
 			cairo_set_source_rgba (cr, .95, .44, .44, 1.); // #f46f6f
+		}
 		cairo_fill_preserve(cr);
 		cairo_set_source_rgba (cr, .0, .0, .0, .5);
 		cairo_set_line_width(cr, 1);
@@ -355,7 +381,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		cairo_restore(cr);
 	}
-	else if (_elements & RecButton) {
+	else if ((_elements & VectorIcon) && _icon == RecButton) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double r = std::min(10., std::min(x, y) * .55); // TODO we need a better way to limit max. radius.
@@ -369,7 +395,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_set_line_width(cr, 1);
 		cairo_stroke(cr);
 	}
-	else if (_elements & CloseCross) {
+	else if ((_elements & VectorIcon) && _icon == CloseCross) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
 		const double o = .5 + std::min(x, y) * .4;
@@ -381,6 +407,224 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_line_to(cr, x-o, y+o);
 		cairo_stroke(cr);
 	}
+	else if ((_elements & VectorIcon) && _icon == StripWidth) {
+		const double x0 = get_width()  * .2;
+		const double x1 = get_width()  * .8;
+
+		const double y0 = get_height() * .25;
+		const double y1= get_height()  * .75;
+
+		const double ym= get_height()  * .5;
+
+		// arrow
+		const double xa0= get_height()  * .39;
+		const double xa1= get_height()  * .61;
+		const double ya0= get_height()  * .35;
+		const double ya1= get_height()  * .65;
+
+		ArdourCanvas::set_source_rgba (cr, text_color);
+		cairo_set_line_width(cr, 1);
+
+		// left + right
+		cairo_move_to(cr, x0, y0);
+		cairo_line_to(cr, x0, y1);
+		cairo_move_to(cr, x1, y0);
+		cairo_line_to(cr, x1, y1);
+
+		// horiz center line
+		cairo_move_to(cr, x0, ym);
+		cairo_line_to(cr, x1, ym);
+
+		// arrow left
+		cairo_move_to(cr,  x0, ym);
+		cairo_line_to(cr, xa0, ya0);
+		cairo_move_to(cr,  x0, ym);
+		cairo_line_to(cr, xa0, ya1);
+
+		// arrow right
+		cairo_move_to(cr,  x1,  ym);
+		cairo_line_to(cr, xa1, ya0);
+		cairo_move_to(cr,  x1,  ym);
+		cairo_line_to(cr, xa1, ya1);
+		cairo_stroke(cr);
+	}
+	else if ((_elements & VectorIcon) && _icon == DinMidi) {
+		const double x = get_width() * .5;
+		const double y = get_height() * .5;
+		const double r = std::min(x, y) * .75;
+		ArdourCanvas::set_source_rgba (cr, text_color);
+		cairo_set_line_width(cr, 1);
+		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+		cairo_stroke(cr);
+
+		// pins equally spaced 45deg
+		cairo_arc (cr, x, y * 0.5, r * .15, 0, 2 * M_PI);
+		cairo_fill(cr);
+		cairo_arc (cr, x * 0.5, y, r * .15, 0, 2 * M_PI);
+		cairo_fill(cr);
+		cairo_arc (cr, x * 1.5, y, r * .15, 0, 2 * M_PI);
+		cairo_fill(cr);
+		//  .5 + .5 * .5 * sin(45deg),  1.5 - .5 * .5 * cos(45deg)
+		cairo_arc (cr, x * 0.677, y * .677, r * .15, 0, 2 * M_PI);
+		cairo_fill(cr);
+		cairo_arc (cr, x * 1.323, y * .677, r * .15, 0, 2 * M_PI);
+		cairo_fill(cr);
+
+		// bottom notch
+		cairo_arc (cr, x, y+r, r * .28, 1.05 * M_PI, 1.95 * M_PI);
+		cairo_stroke(cr);
+	}
+	else if ((_elements & VectorIcon) && _icon == TransportStop) {
+		const int wh = std::min (get_width(), get_height());
+		cairo_rectangle (cr,
+				(get_width() - wh) * .5 + wh * .25,
+				(get_height() - wh) * .5 + wh * .25,
+				wh * .5, wh * .5);
+
+		VECTORICONSTROKEFILL(0.8);
+	}
+	else if ((_elements & VectorIcon) && _icon == TransportPlay) {
+		const int wh = std::min (get_width(), get_height()) * .5;
+		const double y = get_height() * .5;
+		const double x = get_width() - wh;
+
+		const float tri = ceil(.577 * wh); // 1/sqrt(3)
+
+		cairo_move_to (cr,  x + wh * .5, y);
+		cairo_line_to (cr,  x - wh * .5, y - tri);
+		cairo_line_to (cr,  x - wh * .5, y + tri);
+		cairo_close_path (cr);
+
+		VECTORICONSTROKEFILL(0.8);
+	}
+	else if ((_elements & VectorIcon) && _icon == TransportPanic) {
+		const int wh = std::min (get_width(), get_height()) * .1;
+		const double xc = get_width() * .5;
+		const double yh = get_height();
+		cairo_rectangle (cr,
+				xc - wh, yh *.2,
+				wh * 2,  yh *.4);
+		VECTORICONSTROKEFILL(0.8);
+
+		cairo_arc (cr, xc, yh *.75, wh, 0, 2 * M_PI);
+		VECTORICONSTROKEFILL(0.8);
+	}
+	else if ((_elements & VectorIcon) && (_icon == TransportStart || _icon == TransportEnd || _icon == TransportRange)) {
+		// small play triangle
+		int wh = std::min (get_width(), get_height());
+		const double y = get_height() * .5;
+		const double x = get_width() - wh * .5;
+		wh *= .18;
+		const float tri = ceil(.577 * wh * 2); // 1/sqrt(3)
+
+		const float ln = std::min (get_width(), get_height()) * .07;
+
+		if (_icon == TransportStart || _icon == TransportRange) {
+			cairo_rectangle (cr,
+			                 x - wh - ln, y  - tri * 1.7,
+			                 ln * 2,  tri * 3.4);
+
+			VECTORICONSTROKEFILL(1.0);
+		}
+
+		if (_icon == TransportEnd || _icon == TransportRange) {
+			cairo_rectangle (cr,
+			                 x + wh - ln, y  - tri * 1.7,
+			                 ln * 2,  tri * 3.4);
+
+			VECTORICONSTROKEFILL(1.0);
+		}
+
+		if (_icon == TransportStart) {
+			cairo_move_to (cr,  x - wh, y);
+			cairo_line_to (cr,  x + wh, y - tri);
+			cairo_line_to (cr,  x + wh, y + tri);
+		} else {
+			cairo_move_to (cr,  x + wh, y);
+			cairo_line_to (cr,  x - wh, y - tri);
+			cairo_line_to (cr,  x - wh, y + tri);
+		}
+
+		cairo_close_path (cr);
+		VECTORICONSTROKEFILL(1.0);
+	}
+	else if ((_elements & VectorIcon) && _icon == TransportLoop) {
+		const double x = get_width() * .5;
+		const double y = get_height() * .5;
+		const double r = std::min(x, y);
+
+		cairo_arc (cr, x, y, r * .6, 0, 2 * M_PI);
+		cairo_arc_negative (cr, x, y, r * .3, 2 * M_PI, 0);
+
+		VECTORICONSTROKEFILL(1.0);
+#define ARCARROW(rad, ang) \
+		x + (rad) * sin((ang) * 2.0 * M_PI), y + (rad) * cos((ang) * 2.0 * M_PI)
+
+		cairo_move_to (cr, ARCARROW(r * .30, .72));
+		cairo_line_to (cr, ARCARROW(r * .08, .72));
+		cairo_line_to (cr, ARCARROW(r * .54, .60));
+		cairo_line_to (cr, ARCARROW(r * .73, .72));
+		cairo_line_to (cr, ARCARROW(r * .60, .72));
+
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		cairo_stroke_preserve(cr);
+		cairo_close_path (cr);
+		cairo_set_source_rgba (cr, 1, 1, 1, 1.0);
+		cairo_fill(cr);
+#undef ARCARROW
+	}
+	else if ((_elements & VectorIcon) && _icon == TransportMetronom) {
+		const double x  = get_width() * .5;
+		const double y  = get_height() * .5;
+		const double wh = std::min(x, y);
+		const double h  = wh * .8;
+		const double w  = wh * .5;
+		const double lw = w * .25;
+
+		cairo_rectangle (cr,
+		                 x - w * .7, y + h * .25,
+		                 w * 1.4, lw);
+
+		VECTORICONSTROKEFILL(1.0);
+
+		cairo_move_to (cr,  x - w,       y + h);
+		cairo_line_to (cr,  x + w,       y + h);
+		cairo_line_to (cr,  x + w * .35, y - h);
+		cairo_line_to (cr,  x - w * .35, y - h);
+		cairo_line_to (cr,  x - w,       y + h);
+
+		cairo_move_to (cr,  x - w + lw,       y + h -lw);
+		cairo_line_to (cr,  x - w * .35 + lw, y - h + lw);
+		cairo_line_to (cr,  x + w * .35 - lw, y - h + lw);
+		cairo_line_to (cr,  x + w - lw,       y + h -lw);
+		cairo_line_to (cr,  x - w + lw,       y + h -lw);
+
+		VECTORICONSTROKEFILL(1.0);
+
+		// ddx = .70 w      = .75 * .5 wh              = .375 wh
+		// ddy = .75 h - lw = .75 * .8 wh - wh .5 * .2 = .5 wh
+		// ang = (ddx/ddy):
+		// -> angle = atan (ang) = atan (375 / .5) ~= 36deg
+		const double dx = lw * .2;  // 1 - cos(tan^-1(ang))
+		const double dy = lw * .4;  // 1 - sin(tan^-1(ang))
+		cairo_move_to (cr,  x - w * .3     , y + h * .25 + lw * .5);
+		cairo_line_to (cr,  x - w + dx     , y - h + lw + dy);
+		cairo_line_to (cr,  x - w + lw     , y - h + lw);
+		cairo_line_to (cr,  x - w * .3 + lw, y + h * .25 + lw * .5);
+		cairo_close_path (cr);
+
+		VECTORICONSTROKEFILL(1.0);
+
+		cairo_rectangle (cr,
+		                 x - w * .7, y + h * .25,
+		                 w * 1.4, lw);
+		cairo_fill(cr);
+	}
+	else if (_elements & VectorIcon) {
+		// missing icon
+		assert(0);
+	}
+#undef VECTORICONSTROKEFILL
 
 	const int text_margin = char_pixel_width();
 	// Text, if any
@@ -500,12 +744,12 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		//black ring
 		cairo_set_source_rgb (cr, 0, 0, 0);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 1, 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * dpiscale, 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		//led color
 		ArdourCanvas::set_source_rgba (cr, led_color);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 3, 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * dpiscale, 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		cairo_restore (cr);
@@ -513,7 +757,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
-		rounded_function (cr, 0, 0, get_width(), get_height(), _corner_radius);
+		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius);
 		uint32_t ins_color = ARDOUR_UI::config()->color ("gtk_background");
 		ArdourCanvas::set_source_rgb_a (cr, ins_color, 0.6);
 		cairo_fill (cr);
@@ -523,7 +767,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if (ARDOUR_UI::config()->get_widget_prelight()
 			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
-			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
+			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 			cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.2);
 			cairo_fill (cr);
 		}
@@ -531,7 +775,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 	//user is currently pressing the button. dark outline helps to indicate this
 	if (_grabbed && !(_elements & (Inactive|Menu))) {
-		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, _corner_radius);
+		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 		cairo_set_line_width(cr, 2);
 		cairo_set_source_rgba (cr, 0.1, 0.1, 0.1, .5);
 		cairo_stroke (cr);
@@ -541,7 +785,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if (visual_state() & Gtkmm2ext::Selected) {
 		cairo_set_line_width(cr, 1);
 		cairo_set_source_rgba (cr, 1, 0, 0, 0.8);
-		rounded_function (cr, 0.5, 0.5, get_width() - 1, get_height() - 1, _corner_radius);
+		rounded_function (cr, 0.5, 0.5, get_width() - 1, get_height() - 1, corner_radius);
 		cairo_stroke (cr);
 	}
 
@@ -551,7 +795,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	//   (the editor is always the first receiver for KeyDown).
 	//   It's needed for eg. the engine-dialog at startup or after closing a sesion.
 	if (_focused) {
-		rounded_function (cr, 1.5, 1.5, get_width() - 3, get_height() - 3, _corner_radius);
+		rounded_function (cr, 1.5, 1.5, get_width() - 3, get_height() - 3, corner_radius);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.8);
 		double dashes = 1;
 		cairo_set_dash (cr, &dashes, 1, 0);
@@ -587,7 +831,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		const float newdia = rint (ARDOUR_UI::config()->get_font_scale () / 9600.0); // 11px with 100% font-scaling
+		const float newdia = rint (char_pixel_height());
 		if (_diameter != newdia) {
 			_pattern_height = 0;
 			_diameter = newdia;
@@ -619,7 +863,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 		req->width += _diameter + 4;
 	}
 
-	if (_elements & (RecButton | CloseCross)) {
+	if (_elements & VectorIcon) {
 		assert(!(_elements & Text));
 		const int wh = std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
 		req->width += wh;
@@ -785,7 +1029,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 {
 	focus_handler ();
 
-	if ((_elements & Indicator) && _led_rect && _distinct_led_click) {
+	if (ev->button == 1 && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
 			return true;
@@ -799,7 +1043,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 	_grabbed = true;
 	CairoWidget::set_dirty ();
 
-	if (!_act_on_release) {
+	if (ev->button == 1 && !_act_on_release) {
 		if (_action) {
 			_action->activate ();
 			return true;
@@ -815,7 +1059,7 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 bool
 ArdourButton::on_button_release_event (GdkEventButton *ev)
 {
-	if (_hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
+	if (ev->button == 1 && _hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
 			signal_led_clicked(); /* EMIT SIGNAL */
@@ -826,7 +1070,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	_grabbed = false;
 	CairoWidget::set_dirty ();
 
-	if (_hovering) {
+	if (ev->button == 1 && _hovering) {
 		signal_clicked ();
 		if (_act_on_release) {
 			if (_action) {
@@ -1085,7 +1329,7 @@ ArdourButton::action_sensitivity_changed ()
 }
 
 void
-ArdourButton::set_layout_ellisize_width (int w)
+ArdourButton::set_layout_ellipsize_width (int w)
 {
 	if (_layout_ellipsize_width == w) {
 		return;
@@ -1094,8 +1338,11 @@ ArdourButton::set_layout_ellisize_width (int w)
 	if (!_layout) {
 		return;
 	}
-	if (_layout_ellipsize_width > 0) {
-	_layout->set_width (_layout_ellipsize_width);
+	if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
+		_layout->set_width (_layout_ellipsize_width - 3 * PANGO_SCALE);
+	}
+	if (is_realized ()) {
+		queue_resize ();
 	}
 }
 
@@ -1110,8 +1357,8 @@ ArdourButton::set_text_ellipsize (Pango::EllipsizeMode e)
 		return;
 	}
 	_layout->set_ellipsize(_ellipsis);
-	if (_layout_ellipsize_width > 0) {
-		_layout->set_width (_layout_ellipsize_width);
+	if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
+		_layout->set_width (_layout_ellipsize_width - 3 * PANGO_SCALE);
 	}
 	if (is_realized ()) {
 		queue_resize ();
@@ -1125,8 +1372,8 @@ ArdourButton::ensure_layout ()
 		ensure_style ();
 		_layout = Pango::Layout::create (get_pango_context());
 		_layout->set_ellipsize(_ellipsis);
-		if (_layout_ellipsize_width > 0) {
-			_layout->set_width (_layout_ellipsize_width);
+		if (_layout_ellipsize_width > 3 * PANGO_SCALE) {
+			_layout->set_width (_layout_ellipsize_width - 3* PANGO_SCALE);
 		}
 	}
 }
@@ -1181,5 +1428,24 @@ void
 ArdourButton::add_elements (Element e)
 {
 	_elements = (ArdourButton::Element) (_elements | e);
+	CairoWidget::set_dirty ();
+}
+
+void
+ArdourButton::set_icon (Icon i)
+{
+	_icon = i;
+	CairoWidget::set_dirty ();
+}
+
+void
+ArdourButton::set_custom_led_color (uint32_t c, bool useit)
+{
+	if (led_custom_color == c && use_custom_led_color == useit) {
+		return;
+	}
+
+	led_custom_color = c;
+	use_custom_led_color = useit;
 	CairoWidget::set_dirty ();
 }

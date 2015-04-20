@@ -108,7 +108,7 @@ Note<Time>::operator=(const Note<Time>& other)
 	return *this;
 }
 
-template class Note<Evoral::MusicalTime>;
+template class Note<Evoral::Beats>;
 
 } // namespace Evoral
 

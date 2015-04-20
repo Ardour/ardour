@@ -23,8 +23,15 @@
 #include <vector>
 #include <list>
 
+#include <boost/utility.hpp>
+
 #include "ardour/ardour.h"
+#include "ardour/midi_model.h"
+#include "ardour/midi_state_tracker.h"
+#include "ardour/note_fixer.h"
 #include "ardour/playlist.h"
+#include "evoral/Beats.hpp"
+#include "evoral/Note.hpp"
 #include "evoral/Parameter.hpp"
 
 namespace Evoral {
@@ -34,10 +41,11 @@ template<typename Time> class EventSink;
 namespace ARDOUR
 {
 
-class Session;
+class BeatsFramesConverter;
+class MidiChannelFilter;
 class MidiRegion;
+class Session;
 class Source;
-class MidiStateTracker;
 
 template<typename T> class MidiRingBuffer;
 
@@ -47,13 +55,31 @@ public:
 	MidiPlaylist (Session&, const XMLNode&, bool hidden = false);
 	MidiPlaylist (Session&, std::string name, bool hidden = false);
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, std::string name, bool hidden = false);
-	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other, framepos_t start, framecnt_t cnt,
-	              std::string name, bool hidden = false);
+
+	/** This constructor does NOT notify others (session) */
+	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
+	              framepos_t                            start,
+	              framecnt_t                            cnt,
+	              std::string                           name,
+	              bool                                  hidden = false);
 
 	~MidiPlaylist ();
 
+	/** Read a range from the playlist into an event sink.
+	 *
+	 * @param buf Destination for events.
+	 * @param start First frame of read range.
+	 * @param cnt Number of frames in read range.
+	 * @param chan_n Must be 0 (this is the audio-style "channel", where each
+	 * channel is backed by a separate region, not MIDI channels, which all
+	 * exist in the same region and are not handled here).
+	 * @return The number of frames read (time, not an event count).
+	 */
 	framecnt_t read (Evoral::EventSink<framepos_t>& buf,
-			 framepos_t start, framecnt_t cnt, uint32_t chan_n = 0);
+	                 framepos_t                     start,
+	                 framecnt_t                     cnt,
+	                 uint32_t                       chan_n = 0,
+	                 MidiChannelFilter*             filter = NULL);
 
 	int set_state (const XMLNode&, int version);
 
@@ -62,6 +88,15 @@ public:
 	void set_note_mode (NoteMode m) { _note_mode = m; }
 
 	std::set<Evoral::Parameter> contained_automation();
+
+	/** Handle a region edit during read.
+	 *
+	 * This must be called before the command is applied to the model.  Events
+	 * are injected into the playlist output to compensate for edits to active
+	 * notes and maintain coherent output and tracker state.
+	 */
+	void region_edited(boost::shared_ptr<Region>         region,
+	                   const MidiModel::NoteDiffCommand* cmd);
 
 	/** Clear all note trackers. */
 	void reset_note_trackers ();
@@ -74,19 +109,24 @@ public:
 	void resolve_note_trackers (Evoral::EventSink<framepos_t>& dst, framepos_t time);
 
 protected:
-
 	void remove_dependents (boost::shared_ptr<Region> region);
 
 private:
+	typedef Evoral::Note<Evoral::Beats> Note;
+	typedef Evoral::Event<framepos_t>   Event;
+
+	struct RegionTracker : public boost::noncopyable {
+		MidiStateTracker tracker;  ///< Active note tracker
+		NoteFixer        fixer;    ///< Edit compensation
+	};
+
+	typedef std::map< Region*, boost::shared_ptr<RegionTracker> > NoteTrackers;
+
 	void dump () const;
 
-	bool region_changed (const PBD::PropertyChange&, boost::shared_ptr<Region>);
-
-	NoteMode _note_mode;
-
-	typedef std::map<Region*,MidiStateTracker*> NoteTrackers;
 	NoteTrackers _note_trackers;
-
+	NoteMode     _note_mode;
+	framepos_t   _read_end;
 };
 
 } /* namespace ARDOUR */

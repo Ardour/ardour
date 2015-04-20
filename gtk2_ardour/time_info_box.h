@@ -69,6 +69,7 @@ class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
     void watch_punch (ARDOUR::Location*);
     PBD::ScopedConnectionList punch_connections;
     PBD::ScopedConnectionList editor_connections;
+    PBD::ScopedConnectionList region_property_connections;
 
     ArdourButton punch_in_button;
     ArdourButton punch_out_button;
@@ -80,6 +81,7 @@ class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
 
     bool clock_button_release_event (GdkEventButton* ev, AudioClock* src);
     void track_mouse_mode ();
+    void region_property_change (boost::shared_ptr<ARDOUR::Region> r, const PBD::PropertyChange& what_changed);
 };
 
 

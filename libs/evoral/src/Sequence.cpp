@@ -72,7 +72,11 @@ Sequence<Time>::const_iterator::const_iterator()
 
 /** @param force_discrete true to force ControlLists to use discrete evaluation, otherwise false to get them to use their configured mode */
 template<typename Time>
-Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t, bool force_discrete, std::set<Evoral::Parameter> const & filtered)
+Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&              seq,
+                                               Time                               t,
+                                               bool                               force_discrete,
+                                               const std::set<Evoral::Parameter>& filtered,
+                                               const std::set<WeakNotePtr>*       active_notes)
 	: _seq(&seq)
 	, _active_patch_change_message (0)
 	, _type(NIL)
@@ -90,6 +94,17 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 	}
 
 	_lock = seq.read_lock();
+
+	// Add currently active notes, if given
+	if (active_notes) {
+		for (typename std::set<WeakNotePtr>::const_iterator i = active_notes->begin();
+		     i != active_notes->end(); ++i) {
+			NotePtr note = i->lock();
+			if (note && note->time() <= t && note->end_time() > t) {
+				_active_notes.push(note);
+			}
+		}
+	}
 
 	// Find first note which begins at or after t
 	_note_iter = seq.note_lower_bound(t);
@@ -193,15 +208,13 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>& seq, Time t
 }
 
 template<typename Time>
-Sequence<Time>::const_iterator::~const_iterator()
-{
-}
-
-template<typename Time>
 void
-Sequence<Time>::const_iterator::invalidate()
+Sequence<Time>::const_iterator::invalidate(std::set< boost::weak_ptr< Note<Time> > >* notes)
 {
 	while (!_active_notes.empty()) {
+		if (notes) {
+			notes->insert(_active_notes.top());
+		}
 		_active_notes.pop();
 	}
 	_type = NIL;
@@ -278,7 +291,7 @@ Sequence<Time>::const_iterator::set_event()
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
 		assert(!_active_notes.empty());
 		*_event = _active_notes.top()->off_event();
-		_active_notes.pop();
+		// We don't pop the active note until we increment past it
 		break;
 	case SYSEX:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
@@ -338,6 +351,7 @@ Sequence<Time>::const_iterator::operator++()
 		++_note_iter;
 		break;
 	case NOTE_OFF:
+		_active_notes.pop();
 		break;
 	case CONTROL:
 		// Increment current controller iterator
@@ -624,39 +638,33 @@ Sequence<Time>::end_write (StuckNoteOption option, Time when)
 
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 : end_write (%2 notes) delete stuck option %3 @ %4\n", this, _notes.size(), option, when));
 
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	if (!_percussive) {
-	#endif
-		for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
-			typename Notes::iterator next = n;
-			++next;
+	for (typename Notes::iterator n = _notes.begin(); n != _notes.end() ;) {
+		typename Notes::iterator next = n;
+		++next;
 
-			if (!(*n)->length()) {
-				switch (option) {
-				case Relax:
-					break;
-				case DeleteStuckNotes:
-					cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
-					_notes.erase(n);
-					break;
-				case ResolveStuckNotes:
-					if (when <= (*n)->time()) {
-						cerr << "WARNING: Stuck note resolution - end time @ "
-						     << when << " is before note on: " << (**n) << endl;
-						_notes.erase (*n);
-					} else {
-						(*n)->set_length (when - (*n)->time());
-						cerr << "WARNING: resolved note-on with no note-off to generate " << (**n) << endl;
-					}
-					break;
+		if (!(*n)->length()) {
+			switch (option) {
+			case Relax:
+				break;
+			case DeleteStuckNotes:
+				cerr << "WARNING: Stuck note lost: " << (*n)->note() << endl;
+				_notes.erase(n);
+				break;
+			case ResolveStuckNotes:
+				if (when <= (*n)->time()) {
+					cerr << "WARNING: Stuck note resolution - end time @ "
+					     << when << " is before note on: " << (**n) << endl;
+					_notes.erase (*n);
+				} else {
+					(*n)->set_length (when - (*n)->time());
+					cerr << "WARNING: resolved note-on with no note-off to generate " << (**n) << endl;
 				}
+				break;
 			}
-
-			n = next;
 		}
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
+
+		n = next;
 	}
-	#endif
 
 	for (int i = 0; i < 16; ++i) {
 		_write_notes[i].clear();
@@ -892,15 +900,13 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 		return;
 	}
 
-	if (ev.is_note_on()) {
-		NotePtr note(new Note<Time>(ev.channel(), ev.time(), Time(), ev.note(), ev.velocity()));
-		append_note_on_unlocked (note, evid);
-	} else if (ev.is_note_off()) {
-		NotePtr note(new Note<Time>(ev.channel(), ev.time(), Time(), ev.note(), ev.velocity()));
+	if (ev.is_note_on() && ev.velocity() > 0) {
+		append_note_on_unlocked (ev, evid);
+	} else if (ev.is_note_off() || (ev.is_note_on() && ev.velocity() == 0)) {
 		/* XXX note: event ID is discarded because we merge the on+off events into
 		   a single note object
 		*/
-		append_note_off_unlocked (note);
+		append_note_off_unlocked (ev);
 	} else if (ev.is_sysex()) {
 		append_sysex_unlocked(ev, evid);
 	} else if (ev.is_cc() && (ev.cc_number() == MIDI_CTL_MSB_BANK || ev.cc_number() == MIDI_CTL_LSB_BANK)) {
@@ -944,75 +950,54 @@ Sequence<Time>::append(const Event<Time>& event, event_id_t evid)
 
 template<typename Time>
 void
-Sequence<Time>::append_note_on_unlocked (NotePtr note, event_id_t evid)
+Sequence<Time>::append_note_on_unlocked (const MIDIEvent<Time>& ev, event_id_t evid)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 on @ %4 v=%5\n", this,
-	                                              (int) note->channel(), (int) note->note(),
-	                                              note->time(), (int) note->velocity()));
+	                                              (int)ev.channel(), (int)ev.note(),
+	                                              ev.time(), (int)ev.velocity()));
 	assert(_writing);
 
-	if (note->note() > 127) {
-		error << string_compose (_("illegal note number (%1) used in Note on event - event will be ignored"), (int)  note->note()) << endmsg;
+	if (ev.note() > 127) {
+		error << string_compose (_("invalid note on number (%1) ignored"), (int) ev.note()) << endmsg;
 		return;
-	}
-	if (note->channel() >= 16) {
-		error << string_compose (_("illegal channel number (%1) used in Note on event - event will be ignored"), (int) note->channel()) << endmsg;
+	} else if (ev.channel() >= 16) {
+		error << string_compose (_("invalid note on channel (%1) ignored"), (int) ev.channel()) << endmsg;
+		return;
+	} else if (ev.velocity() == 0) {
+		// Note on with velocity 0 handled as note off by caller
+		error << string_compose (_("invalid note on velocity (%1) ignored"), (int) ev.velocity()) << endmsg;
 		return;
 	}
 
-	if (note->id() < 0) {
-		note->set_id (evid);
-	}
-
-	if (note->velocity() == 0) {
-		append_note_off_unlocked (note);
-		return;
-	}
+	NotePtr note(new Note<Time>(ev.channel(), ev.time(), Time(), ev.note(), ev.velocity()));
+	note->set_id (evid);
 
 	add_note_unlocked (note);
 
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	if (!_percussive) {
-	#endif
-
-		DEBUG_TRACE (DEBUG::Sequence, string_compose ("Sustained: Appending active note on %1 channel %2\n",
-		                                              (unsigned)(uint8_t)note->note(), note->channel()));
-		_write_notes[note->channel()].insert (note);
-
-	#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	} else {
-		DEBUG_TRACE(DEBUG::Sequence, "Percussive: NOT appending active note on\n");
-	}
-	#endif
+	DEBUG_TRACE (DEBUG::Sequence, string_compose ("Appending active note on %1 channel %2\n",
+	                                              (unsigned)(uint8_t)note->note(), note->channel()));
+	_write_notes[note->channel()].insert (note);
 
 }
 
 template<typename Time>
 void
-Sequence<Time>::append_note_off_unlocked (NotePtr note)
+Sequence<Time>::append_note_off_unlocked (const MIDIEvent<Time>& ev)
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 c=%2 note %3 OFF @ %4 v=%5\n",
-	                                              this, (int)note->channel(),
-	                                              (int)note->note(), note->time(), (int)note->velocity()));
+	                                              this, (int)ev.channel(),
+	                                              (int)ev.note(), ev.time(), (int)ev.velocity()));
 	assert(_writing);
 
-	if (note->note() > 127) {
-		error << string_compose (_("illegal note number (%1) used in Note off event - event will be ignored"), (int) note->note()) << endmsg;
+	if (ev.note() > 127) {
+		error << string_compose (_("invalid note off number (%1) ignored"), (int) ev.note()) << endmsg;
 		return;
-	}
-	if (note->channel() >= 16) {
-		error << string_compose (_("illegal channel number (%1) used in Note off event - event will be ignored"), (int) note->channel()) << endmsg;
+	} else if (ev.channel() >= 16) {
+		error << string_compose (_("invalid note off channel (%1) ignored"), (int) ev.channel()) << endmsg;
 		return;
 	}
 
 	_edited = true;
-
-#ifdef PERCUSSIVE_IGNORE_NOTE_OFFS
-	if (_percussive) {
-		DEBUG_TRACE(DEBUG::Sequence, "Sequence Ignoring note off (percussive mode)\n");
-		return;
-	}
-#endif
 
 	bool resolved = false;
 
@@ -1024,19 +1009,19 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 
 	/* XXX use _overlap_pitch_resolution to determine FIFO/LIFO ... */
 
-	for (typename WriteNotes::iterator n = _write_notes[note->channel()].begin(); n != _write_notes[note->channel()].end(); ) {
+	for (typename WriteNotes::iterator n = _write_notes[ev.channel()].begin(); n != _write_notes[ev.channel()].end(); ) {
 
 		typename WriteNotes::iterator tmp = n;
 		++tmp;
 
 		NotePtr nn = *n;
-		if (note->note() == nn->note() && nn->channel() == note->channel()) {
-			assert(note->time() >= nn->time());
+		if (ev.note() == nn->note() && nn->channel() == ev.channel()) {
+			assert(ev.time() >= nn->time());
 
-			nn->set_length (note->time() - nn->time());
-			nn->set_off_velocity (note->velocity());
+			nn->set_length (ev.time() - nn->time());
+			nn->set_off_velocity (ev.velocity());
 
-			_write_notes[note->channel()].erase(n);
+			_write_notes[ev.channel()].erase(n);
 			DEBUG_TRACE (DEBUG::Sequence, string_compose ("resolved note @ %2 length: %1\n", nn->length(), nn->time()));
 			resolved = true;
 			break;
@@ -1046,8 +1031,8 @@ Sequence<Time>::append_note_off_unlocked (NotePtr note)
 	}
 
 	if (!resolved) {
-		cerr << this << " spurious note off chan " << (int)note->channel()
-		     << ", note " << (int)note->note() << " @ " << note->time() << endl;
+		cerr << this << " spurious note off chan " << (int)ev.channel()
+		     << ", note " << (int)ev.note() << " @ " << ev.time() << endl;
 	}
 }
 
@@ -1404,6 +1389,6 @@ Sequence<Time>::dump (ostream& str) const
 	str << "--- dump\n";
 }
 
-template class Sequence<Evoral::MusicalTime>;
+template class Sequence<Evoral::Beats>;
 
 } // namespace Evoral

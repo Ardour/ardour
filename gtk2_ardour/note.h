@@ -32,7 +32,7 @@ namespace ArdourCanvas {
 class Note : public NoteBase
 {
 public:
-	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
+	typedef Evoral::Note<Evoral::Beats> NoteType;
 
 	Note (MidiRegionView&                   region,
 	      ArdourCanvas::Item*               parent,

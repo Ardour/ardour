@@ -74,7 +74,7 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	bool setup_required () const;
 
 	ProcessThread* main_thread() const { return _main_thread; }
-    
+
 	/* START BACKEND PROXY API 
 	 *
 	 * See audio_backend.h for full documentation and semantics. These wrappers
@@ -94,8 +94,8 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	pframes_t      samples_per_cycle () const;
 	int            usecs_per_cycle () const;
 	size_t         raw_buffer_size (DataType t);
-	pframes_t      sample_time ();
-	pframes_t      sample_time_at_cycle_start ();
+	framepos_t     sample_time ();
+	framepos_t     sample_time_at_cycle_start ();
 	pframes_t      samples_since_cycle_start ();
 	bool           get_sync_offset (pframes_t& offset) const;
 
@@ -104,8 +104,10 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	bool           in_process_thread ();
 	uint32_t       process_thread_count ();
 
+	int            backend_reset_requested();
 	void           request_backend_reset();
 	void           request_device_list_update();
+	void           launch_device_control_app();
 
 	bool           is_realtime() const;
 	bool           connected() const;
@@ -185,6 +187,12 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	PBD::Signal0<void> Running;
 	PBD::Signal0<void> Stopped;
 
+	/* these two are emitted when a device reset is initiated/finished
+	 */
+    
+	PBD::Signal0<void> DeviceResetStarted;
+	PBD::Signal0<void> DeviceResetFinished;
+
 	static AudioEngine* instance() { return _instance; }
 	static void destroy();
 	void died ();
@@ -224,6 +232,16 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 
 	LatencyMeasurement measuring_latency () const { return _measuring_latency; }
 
+	/* These two are used only in builds where SILENCE_AFTER_SECONDS was
+	 * set. BecameSilent will be emitted when the audioengine goes silent.
+	 * reset_silence_countdown() can be used to reset the silence
+	 * countdown, whose duration will be reduced to half of its previous
+	 * value.
+	 */
+	
+	PBD::Signal0<void> BecameSilent;
+	void reset_silence_countdown ();
+	
   private:
 	AudioEngine ();
 
@@ -285,6 +303,12 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	BackendMap _backends;
 	AudioBackendInfo* backend_discover (const std::string&);
 	void drop_backend ();
+
+#ifdef SILENCE_AFTER
+	framecnt_t _silence_countdown;
+	uint32_t   _silence_hit_cnt;
+#endif	
+
 };
 	
 } // namespace ARDOUR

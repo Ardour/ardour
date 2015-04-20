@@ -111,16 +111,7 @@ public:
 
 	boost::shared_ptr<Region> region;
 
-	SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false)
-		: type (t)
-		, action (a)
-		, action_frame (when)
-		, target_frame (where)
-		, speed (spd)
-		, yes_or_no (yn)
-		, second_yes_or_no (yn2)
-		, third_yes_or_no (yn3)
-		, event_loop (0) {}
+	SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false);
 
 	void set_ptr (void* p) {
 		ptr = p;
@@ -146,6 +137,8 @@ public:
 	static void create_per_thread_pool (const std::string& n, uint32_t nitems);
 	static void init_event_pool ();
 
+	CrossThreadPool* event_pool() const { return own_pool; }
+	
 private:
 	static PerThreadPool* pool;
 	CrossThreadPool* own_pool;
@@ -161,6 +154,7 @@ public:
 
 	virtual void queue_event (SessionEvent *ev) = 0;
 	void clear_events (SessionEvent::Type type);
+	void clear_events (SessionEvent::Type type, boost::function<void (void)> after);
 
 protected:
 	RingBuffer<SessionEvent*> pending_events;

@@ -333,6 +333,7 @@ PluginUIWindow::create_lv2_editor(boost::shared_ptr<PluginInsert> insert)
 		_pluginui = lpu;
 		add (*lpu);
 		lpu->package (*this);
+		_pluginui->KeyboardFocused.connect (sigc::mem_fun (*this, &PluginUIWindow::keyboard_focused));
 	}
 
 	return true;
@@ -352,10 +353,11 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 {
 	if (_keyboard_focused) {
 		if (_pluginui) {
+			_pluginui->grab_focus();
 			if (_pluginui->non_gtk_gui()) {
 				_pluginui->forward_key_event (event);
 			} else {
-				return relay_key_press (event, this);
+					return relay_key_press (event, this);
 			}
 		}
 		return true;
@@ -365,6 +367,7 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 		*/
 
 		if (_pluginui) {
+			_pluginui->grab_focus();
 			if (_pluginui->non_gtk_gui()) {
 				/* pass editor window as the window for the event
 				   to be handled in, not this one, because there are
@@ -423,7 +426,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, eqgui (0)
 {
 	_preset_modified.set_size_request (16, -1);
-	_preset_combo.signal_changed().connect(sigc::mem_fun(*this, &PlugUIBase::preset_selected));
+	_preset_combo.set_text("(default)");
 	ARDOUR_UI::instance()->set_tip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
 	ARDOUR_UI::instance()->set_tip (add_button, _("Save a new preset"));
 	ARDOUR_UI::instance()->set_tip (save_button, _("Save the current preset"));
@@ -434,14 +437,14 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	update_preset_list ();
 	update_preset ();
 
-	add_button.set_name ("PluginAddButton");
-	add_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
+	add_button.set_name ("generic button");
+	add_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::add_plugin_setting));
 
-	save_button.set_name ("PluginSaveButton");
-	save_button.signal_clicked().connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
+	save_button.set_name ("generic button");
+	save_button.signal_clicked.connect(sigc::mem_fun(*this, &PlugUIBase::save_plugin_setting));
 
-	delete_button.set_name ("PluginDeleteButton");
-	delete_button.signal_clicked().connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
+	delete_button.set_name ("generic button");
+	delete_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
@@ -506,7 +509,7 @@ PlugUIBase::set_latency_label ()
 		t = string_compose (_("latency (%1 ms)"), (float) l / ((float) sr / 1000.0f));
 	}
 
-	latency_label.set_text (t);
+	latency_button.set_text (t);
 }
 
 void
@@ -542,20 +545,13 @@ PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
 }
 
 void
-PlugUIBase::preset_selected ()
+PlugUIBase::preset_selected (Plugin::PresetRecord preset)
 {
 	if (_no_load_preset) {
 		return;
 	}
-
-	if (_preset_combo.get_active_text().length() > 0) {
-		const Plugin::PresetRecord* pr = plugin->preset_by_label (_preset_combo.get_active_text());
-		if (pr) {
-			plugin->load_preset (*pr);
-		} else {
-			warning << string_compose(_("Plugin preset %1 not found"),
-						  _preset_combo.get_active_text()) << endmsg;
-		}
+	if (!preset.label.empty()) {
+		plugin->load_preset (preset);
 	} else {
 		// blank selected = no preset
 		plugin->clear_preset();
@@ -564,6 +560,19 @@ PlugUIBase::preset_selected ()
 
 #ifdef NO_PLUGIN_STATE
 static bool seen_saving_message = false;
+
+static void show_no_plugin_message()
+{
+	info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
+			PROGRAM_NAME)
+	     << endmsg;
+	info << _("To get full access to updates without this limitation\n"
+	          "consider becoming a subscriber for a low cost every month.")
+	     << endmsg;
+	info << X_("https://community.ardour.org/s/subscribe")
+	     << endmsg;
+	ARDOUR_UI::instance()->popup_error(_("Plugin presets are not supported in this build, see the Log window for more information."));
+}
 #endif
 
 void
@@ -590,10 +599,8 @@ PlugUIBase::add_plugin_setting ()
 	}
 #else 
 	if (!seen_saving_message) {
-		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a full version"),
-					PROGRAM_NAME)
-		     << endmsg;
 		seen_saving_message = true;
+		show_no_plugin_message();
 	}
 #endif
 }
@@ -602,7 +609,7 @@ void
 PlugUIBase::save_plugin_setting ()
 {
 #ifndef NO_PLUGIN_STATE
-	string const name = _preset_combo.get_active_text ();
+	string const name = _preset_combo.get_text ();
 	plugin->remove_preset (name);
 	Plugin::PresetRecord const r = plugin->save_preset (name);
 	if (!r.uri.empty ()) {
@@ -610,10 +617,8 @@ PlugUIBase::save_plugin_setting ()
 	}
 #else 
 	if (!seen_saving_message) {
-		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
 		seen_saving_message = true;
+		show_no_plugin_message();
 	}
 #endif
 }
@@ -622,13 +627,11 @@ void
 PlugUIBase::delete_plugin_setting ()
 {
 #ifndef NO_PLUGIN_STATE
-	plugin->remove_preset (_preset_combo.get_active_text ());
+	plugin->remove_preset (_preset_combo.get_text ());
 #else
 	if (!seen_saving_message) {
-		info << string_compose (_("Plugin presets are not supported in this build of %1. Consider paying for a newer version"),
-					PROGRAM_NAME)
-		     << endmsg;
 		seen_saving_message = true;
+		show_no_plugin_message();
 	}
 #endif
 }
@@ -733,18 +736,23 @@ PlugUIBase::toggle_plugin_analysis()
 void
 PlugUIBase::update_preset_list ()
 {
-	vector<string> preset_labels;
+	using namespace Menu_Helpers;
+
 	vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets();
 
 	++_no_load_preset;
 
+	// Add a menu entry for each preset
+	_preset_combo.clear_items();
 	for (vector<ARDOUR::Plugin::PresetRecord>::const_iterator i = presets.begin(); i != presets.end(); ++i) {
-		preset_labels.push_back (i->label);
+		_preset_combo.AddMenuElem(
+			MenuElem(i->label, sigc::bind(sigc::mem_fun(*this, &PlugUIBase::preset_selected), *i)));
 	}
 
-	preset_labels.push_back("");
-
-	set_popdown_strings (_preset_combo, preset_labels);
+	// Add an empty entry for un-setting current preset (see preset_selected)
+	Plugin::PresetRecord no_preset;
+	_preset_combo.AddMenuElem(
+		MenuElem("", sigc::bind(sigc::mem_fun(*this, &PlugUIBase::preset_selected), no_preset)));
 
 	--_no_load_preset;
 }
@@ -755,7 +763,11 @@ PlugUIBase::update_preset ()
 	Plugin::PresetRecord p = plugin->last_preset();
 
 	++_no_load_preset;
-	_preset_combo.set_active_text (p.label);
+	if (p.uri.empty()) {
+		_preset_combo.set_text (_("(none)"));
+	} else {
+		_preset_combo.set_text (p.label);
+	}
 	--_no_load_preset;
 
 	save_button.set_sensitive (!p.uri.empty() && p.user);

@@ -620,7 +620,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	if ((prop = xml_change->property ("old")) != 0) {
 		istringstream old_str (prop->value());
 		if (change.property == StartTime || change.property == Length) {
-			Evoral::MusicalTime old_time;
+			Evoral::Beats old_time;
 			old_str >> old_time;
 			change.old_value = old_time;
 		} else {
@@ -636,7 +636,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	if ((prop = xml_change->property ("new")) != 0) {
 		istringstream new_str (prop->value());
 		if (change.property == StartTime || change.property == Length) {
-			Evoral::MusicalTime new_time;
+			Evoral::Beats new_time;
 			new_str >> new_time;
 			change.new_value = Variant(new_time);
 		} else {
@@ -1236,14 +1236,15 @@ MidiModel::PatchChangePtr
 MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 {
 	XMLProperty* prop;
+	XMLProperty* prop_id;
 	Evoral::event_id_t id = 0;
-	Evoral::MusicalTime time = Evoral::MusicalTime();
+	Evoral::Beats time = Evoral::Beats();
 	int channel = 0;
 	int program = 0;
 	int bank = 0;
 	
-	if ((prop = n->property ("id")) != 0) {
-		istringstream s (prop->value());
+	if ((prop_id = n->property ("id")) != 0) {
+		istringstream s (prop_id->value());
 		s >> id;
 	}
 
@@ -1268,7 +1269,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 	}
 
 	PatchChangePtr p (new Evoral::PatchChange<TimeType> (time, channel, program, bank));
-	assert(id);
+	assert(prop_id);
 	p->set_id (id);
 	return p;
 }
@@ -1476,8 +1477,8 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 bool
 MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
                              const Glib::Threads::Mutex::Lock& source_lock,
-                             Evoral::MusicalTime               begin_time,
-                             Evoral::MusicalTime               end_time)
+                             Evoral::Beats                     begin_time,
+                             Evoral::Beats                     end_time)
 {
 	ReadLock lock(read_lock());
 	MidiStateTracker mst;
@@ -1489,12 +1490,12 @@ MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
 	source->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
-		const Evoral::Event<Evoral::MusicalTime>& ev (*i);
+		const Evoral::Event<Evoral::Beats>& ev (*i);
 
 		if (ev.time() >= begin_time && ev.time() < end_time) {
 
-			const Evoral::MIDIEvent<Evoral::MusicalTime>* mev =
-				static_cast<const Evoral::MIDIEvent<Evoral::MusicalTime>* > (&ev);
+			const Evoral::MIDIEvent<Evoral::Beats>* mev =
+				static_cast<const Evoral::MIDIEvent<Evoral::Beats>* > (&ev);
 
 			if (!mev) {
 				continue;
@@ -1611,25 +1612,19 @@ MidiModel::find_sysex (gint sysex_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
+	boost::shared_ptr<MidiSource> ms          = _midi_source.lock();
+	Glib::Threads::Mutex::Lock*   source_lock = 0;
 
-	Glib::Threads::Mutex::Lock* source_lock = new Glib::Threads::Mutex::Lock (ms->mutex());
-	ms->invalidate(*source_lock); // Release cached iterator's read lock on model
+	if (ms) {
+		/* Take source lock and invalidate iterator to release its lock on model.
+		   Add currently active notes to _active_notes so we can restore them
+		   if playback resumes at the same point after the edit. */
+		source_lock = new Glib::Threads::Mutex::Lock(ms->mutex());
+		ms->invalidate(*source_lock,
+		               ms->session().transport_rolling() ? &_active_notes : NULL);
+	}
+
 	return WriteLock(new WriteLockImpl(source_lock, _lock, _control_lock));
-}
-
-/** Lock just the model, the source lock must already be held.
- * This should only be called from libardour/evoral places
- */
-MidiModel::WriteLock
-MidiModel::write_lock()
-{
-	boost::shared_ptr<MidiSource> ms = _midi_source.lock ();
-	assert (ms);
-
-	assert (!ms->mutex().trylock ());
-	return WriteLock(new WriteLockImpl(0, _lock, _control_lock));
 }
 
 int
@@ -2026,7 +2021,7 @@ MidiModel::transpose (TimeType from, TimeType to, int semitones)
 void
 MidiModel::control_list_marked_dirty ()
 {
-	AutomatableSequence<Evoral::MusicalTime>::control_list_marked_dirty ();
+	AutomatableSequence<Evoral::Beats>::control_list_marked_dirty ();
 	
 	ContentsChanged (); /* EMIT SIGNAL */
 }

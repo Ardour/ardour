@@ -96,7 +96,7 @@ process_file ("gtk2_ardour/default_ui_config");
 
 my $command=join(' ',@ARGV);
 if ($command eq -buildall) {
-	process_file ("MSVCardour3/MSVCMixbus3.vsprops");
+	process_file ("MSVCardour3/MSVCArdour3.vsprops");
 	process_file ("MSVCMixbus3/MSVCMixbus3.vsprops");
 	process_file ("MSVCvst_scan/vst_scan.rc");
 	process_file ("icons/win32/msvc_resources.rc");

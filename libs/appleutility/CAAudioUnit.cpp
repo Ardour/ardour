@@ -305,8 +305,8 @@ bool		CAAudioUnit::CanDo (	int 				inChannelsIn,
 		// is expected to deal with same channel valance in and out
 	if (result) 
 	{
-		if (Comp().Desc().IsEffect() && (inChannelsIn == inChannelsOut)
-			|| Comp().Desc().IsOffline() && (inChannelsIn == inChannelsOut))
+		if ((Comp().Desc().IsEffect() && (inChannelsIn == inChannelsOut))
+			|| (Comp().Desc().IsOffline() && (inChannelsIn == inChannelsOut)))
 		{
 			return true;
 		}
@@ -347,6 +347,41 @@ int    CAAudioUnit::GetChannelInfo (AUChannelInfo** chaninfo, UInt32& cnt)
 		if (Comp().Desc().IsEffect()) 
 		{
 			return 1;
+		}
+		else if (Comp().Desc().IsGenerator() || Comp().Desc().IsMusicDevice()) {
+			// directly query Bus Formats
+			// Note that that these may refer to different subBusses
+			// (eg. Kick, Snare,.. on a Drummachine)
+			// eventually the Bus-Name for each configuration should be exposed
+			// for the User to select..
+
+			UInt32 elCountIn, elCountOut;
+
+			if (GetElementCount (kAudioUnitScope_Input, elCountIn)) return -1;
+			if (GetElementCount (kAudioUnitScope_Output, elCountOut)) return -1;
+
+			cnt = std::max(elCountIn, elCountOut);
+
+			*chaninfo = (AUChannelInfo*) malloc (sizeof (AUChannelInfo) * cnt);
+
+			for (unsigned int i = 0; i < elCountIn; ++i) {
+				UInt32 numChans;
+				if (NumberChannels (kAudioUnitScope_Input, i, numChans)) return -1;
+				(*chaninfo)[i].inChannels = numChans;
+			}
+			for (unsigned int i = elCountIn; i < cnt; ++i) {
+				(*chaninfo)[i].inChannels = 0;
+			}
+
+			for (unsigned int i = 0; i < elCountOut; ++i) {
+				UInt32 numChans;
+				if (NumberChannels (kAudioUnitScope_Output, i, numChans)) return -1;
+				(*chaninfo)[i].outChannels = numChans;
+			}
+			for (unsigned int i = elCountOut; i < cnt; ++i) {
+				(*chaninfo)[i].outChannels = 0;
+			}
+			return 0;
 		}
 		else 
 		{

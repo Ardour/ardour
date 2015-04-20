@@ -23,6 +23,8 @@
 #include "controls.h"
 #include "led.h"
 
+namespace ArdourSurface {
+
 namespace Mackie {
 
 class Surface;
@@ -162,6 +164,7 @@ private:
 	Led _led;
 };
 
-}
+} // Mackie namespace
+} // ArdourSurface namespace
 
 #endif

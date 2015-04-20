@@ -276,9 +276,9 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	*/
 
 	framepos_t framepos_plus_bbt (framepos_t pos, Timecode::BBT_Time b) const;
-	framepos_t framepos_plus_beats (framepos_t, Evoral::MusicalTime) const;
-	framepos_t framepos_minus_beats (framepos_t, Evoral::MusicalTime) const;
-	Evoral::MusicalTime framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
+	framepos_t framepos_plus_beats (framepos_t, Evoral::Beats) const;
+	framepos_t framepos_minus_beats (framepos_t, Evoral::Beats) const;
+	Evoral::Beats framewalk_to_beats (framepos_t pos, framecnt_t distance) const;
 
 	static const Tempo& default_tempo() { return _default_tempo; }
 	static const Meter& default_meter() { return _default_meter; }
@@ -364,6 +364,13 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	TempoSection&       first_tempo();
 	
 	void do_insert (MetricSection* section);
+
+	void add_tempo_locked (const Tempo&, Timecode::BBT_Time where, bool recompute);
+	void add_meter_locked (const Meter&, Timecode::BBT_Time where, bool recompute);
+
+	bool remove_tempo_locked (const TempoSection&);
+	bool remove_meter_locked (const MeterSection&);
+
 };
 
 }; /* namespace ARDOUR */

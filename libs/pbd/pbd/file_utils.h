@@ -117,7 +117,8 @@ find_file (const Searchpath& search_path,
 LIBPBD_API void
 find_files_matching_regex (std::vector<std::string>& results,
                            const Searchpath& paths,
-                           const std::string& regexp);
+                           const std::string& regexp,
+                           bool recurse = false);
 
 /**
  * Find paths in a Searchpath that match a supplied filter(functor)
@@ -247,6 +248,13 @@ LIBPBD_API void remove_directory (const std::string& dir);
  * @return new temporary directory
  */
 LIBPBD_API std::string tmp_writable_directory (const char* domain, const std::string& prefix);
+
+/** If @param path exists, unlink it. If it doesn't exist, create it.
+ *
+ * @return zero if required action was successful, non-zero otherwise.
+ */
+
+LIBPBD_API int toggle_file_existence (std::string const &);
 
 } // namespace PBD
 

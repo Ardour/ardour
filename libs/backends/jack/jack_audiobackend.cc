@@ -660,14 +660,14 @@ JACKAudioBackend::get_sync_offset (pframes_t& offset) const
 	return false;
 }
 
-pframes_t
+framepos_t
 JACKAudioBackend::sample_time ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
 	return jack_frame_time (_priv_jack);
 }
 
-pframes_t
+framepos_t
 JACKAudioBackend::sample_time_at_cycle_start ()
 {
 	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
@@ -833,19 +833,20 @@ JACKAudioBackend::create_process_thread (boost::function<void()> f)
 int
 JACKAudioBackend::join_process_threads ()
 {
-        GET_PRIVATE_JACK_POINTER_RET (_priv_jack, -1);
-
 	int ret = 0;
 
 	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
 	     i != _jack_threads.end(); i++) {
 
 #if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined(PLATFORM_WINDOWS)
-		if (jack_client_stop_thread (_priv_jack, *i) != 0) {
+		// jack_client is not used by JACK2's implementation
+		// also jack_client_close() leaves threads active
+		if (jack_client_stop_thread (NULL, *i) != 0)
 #else
 		void* status;
-		if (pthread_join (*i, &status) != 0) {
+		if (pthread_join (*i, &status) != 0)
 #endif
+		{
 			error << "AudioEngine: cannot stop process thread" << endmsg;
 			ret += -1;
 		}

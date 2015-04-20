@@ -506,6 +506,7 @@ public:
 	 *  @param page Page step for the spin button.
 	 *  @param unit Unit name.
 	 *  @param scale Scaling factor (such that for a value x in the spinbutton, x * scale is written to the config)
+	 *  @param digits Number of decimal digits to show.
 	 */
 	SpinOption (
 		std::string const & i,
@@ -517,7 +518,8 @@ public:
 		T step,
 		T page,
 		std::string const & unit = "",
-		float scale = 1
+		float scale = 1,
+		unsigned digits = 0
 		)
 		: Option (i, n),
 		  _get (g),
@@ -530,6 +532,7 @@ public:
 		_spin = Gtk::manage (new Gtk::SpinButton);
 		_spin->set_range (min, max);
 		_spin->set_increments (step, page);
+		_spin->set_digits(digits);
 
 		_box = Gtk::manage (new Gtk::HBox);
 		_box->pack_start (*_spin, true, true);
@@ -621,7 +624,7 @@ public:
         Gtk::Widget& tip_widget() { return _file_chooser; }
 
 private:
-	void file_set ();
+	void selection_changed ();
 	void current_folder_set ();
 	
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value

@@ -70,6 +70,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_bbt_reference (framepos_t);
         void set_is_duration (bool);
 
+	void copy_text_to_clipboard () const;
+
 	std::string name() const { return _name; }
 
 	framepos_t current_time (framepos_t position = 0) const;

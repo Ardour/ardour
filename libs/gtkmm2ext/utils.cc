@@ -19,6 +19,7 @@
 */
 
 #include <map>
+#include <algorithm>
 
 #include <gtk/gtkpaned.h>
 #include <gtk/gtk.h>
@@ -306,6 +307,39 @@ Gtkmm2ext::set_popdown_strings (Gtk::ComboBoxText& cr, const vector<string>& str
 	}
 }
 
+void
+Gtkmm2ext::get_popdown_strings (Gtk::ComboBoxText& cr, std::vector<std::string>& strings)
+{
+	strings.clear ();
+	Glib::RefPtr<const Gtk::TreeModel> m = cr.get_model();
+	if (!m) {
+		return;
+	}
+	for(Gtk::TreeModel::iterator i = m->children().begin(); i != m->children().end(); ++i) {
+		Glib::ustring txt;
+		(*i)->get_value(0, txt);
+		strings.push_back (txt);
+	}
+}
+
+bool
+Gtkmm2ext::contains_value (Gtk::ComboBoxText& cr, const std::string text)
+{
+	std::vector<std::string> s;
+	get_popdown_strings (cr, s);
+	return (std::find (s.begin(), s.end(), text) != s.end());
+}
+
+bool
+Gtkmm2ext::set_active_text_if_present (Gtk::ComboBoxText& cr, const std::string text)
+{
+	if (contains_value(cr, text)) {
+		cr.set_active_text (text);
+		return true;
+	}
+	return false;
+}
+
 GdkWindow*
 Gtkmm2ext::get_paned_handle (Gtk::Paned& paned)
 {
@@ -335,6 +369,30 @@ Gtkmm2ext::detach_menu (Gtk::Menu& menu)
 			menu.detach ();
 		}
 	}
+}
+
+bool
+Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator (GdkModifierType& mod)
+{
+#ifdef GTKOSX
+	/* GTK on OS X is currently (February 2012) setting both
+	   the Meta and Mod2 bits in the event modifier state if
+	   the Command key is down.
+
+	   gtk_accel_groups_activate() does not invoke any of the logic
+	   that gtk_window_activate_key() will that sorts out that stupid
+	   state of affairs, and as a result it fails to find a match
+	   for the key event and the current set of accelerators.
+
+	   to fix this, if the meta bit is set, remove the mod2 bit
+	   from the modifier. this assumes that our bindings use Primary
+	   which will have set the meta bit in the accelerator entry.
+	*/
+	if (mod & GDK_META_MASK) {
+		mod = GdkModifierType (mod & ~GDK_MOD2_MASK);
+	}
+#endif
+	return true;
 }
 
 bool

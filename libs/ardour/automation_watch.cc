@@ -44,6 +44,7 @@ AutomationWatch::instance ()
 
 AutomationWatch::AutomationWatch ()
 	: _thread (0)
+	, _last_time (0)
 	, _run_thread (false)
 {
 	
@@ -121,12 +122,25 @@ AutomationWatch::timer ()
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 
 		framepos_t time = _session->audible_frame ();
-
-		for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
-			if ((*aw)->alist()->automation_write()) {
-				(*aw)->list()->add (time, (*aw)->user_double(), true);
+		if (time > _last_time) {  //we only write automation in the forward direction; this fixes automation-recording in a loop
+			for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
+				if ((*aw)->alist()->automation_write()) {
+					(*aw)->list()->add (time, (*aw)->user_double(), true);
+				}
+			}
+		} else {  //transport stopped or reversed.  stop the automation pass and start a new one (for bonus points, someday store the previous pass in an undo record)
+			for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
+				DEBUG_TRACE (DEBUG::Automation, string_compose ("%1: transport in rewind, speed %2, in write pass ? %3 writing ? %4\n", 
+										(*aw)->name(), _session->transport_speed(), _session->transport_rolling(),
+										(*aw)->alist()->automation_write()));
+				(*aw)->list()->set_in_write_pass (false);
+				if ( (*aw)->alist()->automation_write() ) {
+					(*aw)->list()->set_in_write_pass (true);
+				}
 			}
 		}
+		
+		_last_time = time;
 	}
 
 	return TRUE;
@@ -170,6 +184,8 @@ AutomationWatch::transport_state_change ()
 	}
 
 	bool rolling = _session->transport_rolling();
+	
+	_last_time = _session->audible_frame ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);

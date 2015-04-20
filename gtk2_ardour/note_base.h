@@ -54,7 +54,7 @@ namespace ArdourCanvas {
 class NoteBase : public sigc::trackable
 {
   public:
-	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
+	typedef Evoral::Note<Evoral::Beats> NoteType;
 
 	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
 	virtual ~NoteBase ();
@@ -104,7 +104,9 @@ class NoteBase : public sigc::trackable
 	MidiRegionView& region_view() const { return _region; }
 
 	inline static uint32_t meter_style_fill_color(uint8_t vel, bool selected) {
-		if (vel < 64) {
+		if (selected) {
+			return ARDOUR_UI::config()->color_mod ("midi note selected", "midi note");
+		} else if (vel < 64) {
 			return UINT_INTERPOLATE(
 				ARDOUR_UI::config()->color_mod ("midi note min", "midi note"),
 				ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
@@ -112,7 +114,7 @@ class NoteBase : public sigc::trackable
 		} else {
 			return UINT_INTERPOLATE(
 				ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
-				ARDOUR_UI::config()->color_mod ("midi note max", " midi note"),
+				ARDOUR_UI::config()->color_mod ("midi note max", "midi note"),
 				((vel-64) / (double)63.0));
 		}
 	}

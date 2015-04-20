@@ -45,7 +45,7 @@ namespace ARDOUR {
 class MidiListEditor : public ArdourWindow
 {
   public:
-	typedef Evoral::Note<Evoral::MusicalTime> NoteType;
+	typedef Evoral::Note<Evoral::Beats> NoteType;
 
 	MidiListEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>,
 		       boost::shared_ptr<ARDOUR::MidiTrack>);
