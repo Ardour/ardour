@@ -705,8 +705,12 @@ MixerStrip::set_width_enum (Width w, void* owner)
 					panners.astate_string(_route->panner()->automation_state()));
 		}
 
-
-		set_size_request (max (110 * scale, gpm.get_gm_width() + 5 * scale), -1);
+		{
+			// panners expect an even number of horiz. pixels
+			int width = rint(max (110 * scale, gpm.get_gm_width() + 10 * scale)) + 1;
+			width &= ~1;
+			set_size_request (width, -1);
+		}
 		break;
 
 	case Narrow:
@@ -728,7 +732,12 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 
-		set_size_request (max (60 * scale, gpm.get_gm_width() + 10 * scale), -1);
+		{
+			// panners expect an even number of horiz. pixels
+			int width = rint(max (60 * scale, gpm.get_gm_width() + 10 * scale)) + 1;
+			width &= ~1;
+			set_size_request (width, -1);
+		}
 		break;
 	}
 

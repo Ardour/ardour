@@ -53,11 +53,6 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
-static const int pos_box_size = 8;
-static const int lr_box_size = 15;
-static const int step_down = 10;
-static const int top_step = 2;
-
 StereoPanner::ColorScheme StereoPanner::colors[3];
 bool StereoPanner::have_colors = false;
 
@@ -150,12 +145,18 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	const double pos = position_control->get_value (); /* 0..1 */
 	const double swidth = width_control->get_value (); /* -1..+1 */
 	const double fswidth = fabs (swidth);
-	const double corner_radius = 5.0;
 	uint32_t o, f, t, b, r;
 	State state;
 
 	width = get_width();
 	height = get_height ();
+
+	const double scale = ARDOUR_UI::config()->get_font_scale() / 102400.;
+	const int step_down = rint(height / 3.5);
+	const double corner_radius = 5.0 * scale;
+	const int lr_box_size = height - 2 * step_down;
+	const int pos_box_size = (int)(rint(step_down * .8)) | 1;
+	const int top_step = step_down - pos_box_size;
 
 	if (swidth == 0.0) {
 		state = Mono;
@@ -412,6 +413,7 @@ StereoPanner::on_button_press_event (GdkEventButton* ev)
 			double pos = position_control->get_value (); /* 0..1 */
 			double swidth = width_control->get_value (); /* -1..+1 */
 			double fswidth = fabs (swidth);
+			const int lr_box_size = get_height() - 2 * rint(get_height() / 3.5);
 			int usable_width = get_width() - lr_box_size;
 			double center = (lr_box_size/2.0) + (usable_width * pos);
 			int left = lrint (center - (fswidth * usable_width / 2.0)); // center of leftmost box
@@ -529,6 +531,7 @@ StereoPanner::on_motion_notify_event (GdkEventMotion* ev)
 		return false;
 	}
 
+	const int lr_box_size = get_height() - 2 * rint(get_height() / 3.5);
 	int usable_width = get_width() - lr_box_size;
 	double delta = (ev->x - last_drag_x) / (double) usable_width;
 	double current_width = width_control->get_value ();
