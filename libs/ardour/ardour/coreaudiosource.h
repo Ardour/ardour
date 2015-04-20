@@ -48,6 +48,7 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 	static int get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg);
 
   protected:
+	void close ();
 	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
 	framecnt_t write_unlocked (Sample *, framecnt_t) { return 0; }
 

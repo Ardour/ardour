@@ -52,6 +52,7 @@ public:
 	bool clamped_at_unity() const { return false; }
 
 protected:
+	void close ();
 	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
 	framecnt_t write_unlocked (Sample */*dst*/, framecnt_t /*cnt*/) { return 0; }
 

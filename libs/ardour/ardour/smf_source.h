@@ -72,6 +72,7 @@ public:
 	void prevent_deletion ();
 
   protected:
+	void close ();
 	void set_path (const std::string& newpath);
 	void flush_midi (const Lock& lock);
 

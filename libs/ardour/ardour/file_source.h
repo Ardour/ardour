@@ -89,9 +89,9 @@ public:
 	 */
 	int rename (const std::string& name);
 
-	virtual void release_descriptor () {}
+	virtual void close () = 0;
 
-protected:
+  protected:
 	FileSource (Session& session, DataType type,
 	            const std::string& path,
 	            const std::string& origin,

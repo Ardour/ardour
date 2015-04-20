@@ -544,6 +544,7 @@ FileSource::set_within_session_from_path (const std::string& path)
 void
 FileSource::set_path (const std::string& newpath)
 {
+	close ();
         _path = newpath;
 	set_within_session_from_path (newpath);
 	if (_within_session) {

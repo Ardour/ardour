@@ -40,6 +40,7 @@ public:
 	bool clamped_at_unity() const { return false; }
 
 protected:
+	void close() {}
 	friend class SourceFactory;
 
 	SilentFileSource (Session& s, const XMLNode& x, framecnt_t len, float srate)

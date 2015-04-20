@@ -202,6 +202,12 @@ SMFSource::open_for_write ()
 	return 0;
 }
 
+void
+SMFSource::close ()
+{
+	/* nothing to do: file descriptor is never kept open */
+}
+
 /** All stamps in audio frames */
 framecnt_t
 SMFSource::read_unlocked (const Lock&                    lock,

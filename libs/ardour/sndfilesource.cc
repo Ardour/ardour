@@ -180,7 +180,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 			throw failed_constructor();
 		}
 	} else {
-		/* normal mode: do not open the file here - do that in write_unlocked() as needed
+		/* normal mode: do not open the file here - do that in {read,write}_unlocked() as needed
 		 */
 	}
 }
@@ -228,6 +228,15 @@ SndFileSource::init_sndfile ()
 	}
 
 	AudioFileSource::HeaderPositionOffsetChanged.connect_same_thread (header_position_connection, boost::bind (&SndFileSource::handle_header_position_change, this));
+}
+
+void
+SndFileSource::close ()
+{
+	if (_sndfile) {
+		sf_close (_sndfile);
+		_sndfile = 0;
+	}
 }
 
 int
@@ -334,10 +343,7 @@ SndFileSource::open ()
 
 SndFileSource::~SndFileSource ()
 {
-	if (_sndfile) {
-		sf_close (_sndfile);
-		_sndfile = 0;
-	}
+	close ();
 	delete _broadcast_info;
 	delete [] xfade_buf;
 }
@@ -364,10 +370,10 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
                 return cnt;
         }
 
-	if (_sndfile == 0) {
-		error << string_compose (_("could not allocate file %1 for reading."), _path) << endmsg;
+        if (const_cast<SndFileSource*>(this)->open()) {
+		error << string_compose (_("could not open file %1 for reading."), _path) << endmsg;
 		return 0;
-	}
+        }
 
 	if (start > _length) {
 

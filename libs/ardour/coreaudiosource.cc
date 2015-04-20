@@ -104,6 +104,12 @@ CoreAudioSource::~CoreAudioSource ()
 {
 }
 
+void
+CoreAudioSource::close ()
+{
+	af.Close ();
+}
+
 int
 CoreAudioSource::safe_read (Sample* dst, framepos_t start, framecnt_t cnt, AudioBufferList& abl) const
 {

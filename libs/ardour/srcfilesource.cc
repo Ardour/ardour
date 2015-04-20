@@ -84,6 +84,15 @@ SrcFileSource::~SrcFileSource ()
 	delete [] _src_buffer;
 }
 
+void
+SrcFileSource::close ()
+{
+	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (_source);
+	if (fs) {
+		fs->close ();
+	}
+}
+
 framecnt_t
 SrcFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const
 {
