@@ -58,8 +58,6 @@ public:
 	int  create(const std::string& path, int track=1, uint16_t ppqn=19200) THROW_FILE_ERROR;
 	void close() THROW_FILE_ERROR;
 
-	const std::string& file_path() const { return _file_path; };
-
 	void seek_to_start() const;
 	int  seek_to_track(int track);
 
@@ -71,17 +69,13 @@ public:
 
 	void begin_write();
 	void append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, event_id_t note_id);
-	void end_write() THROW_FILE_ERROR;
+	void end_write(std::string const &) THROW_FILE_ERROR;
 
 	void flush() {};
 
 	double round_to_file_precision (double val) const;
 
-protected:
-	void set_path (const std::string& p);
-
 private:
-	std::string  _file_path;
 	smf_t*       _smf;
 	smf_track_t* _smf_track;
 	bool         _empty; ///< true iff file contains(non-empty) events

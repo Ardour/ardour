@@ -546,7 +546,7 @@ SMFSource::mark_midi_streaming_write_completed (const Lock& lm, Evoral::Sequence
 		_model->set_edited(false);
 	}
 
-	Evoral::SMF::end_write ();
+	Evoral::SMF::end_write (_path);
 
 	/* data in the file now, not removable */
 
@@ -726,7 +726,7 @@ SMFSource::flush_midi (const Lock& lock)
 
 	ensure_disk_file (lock);
 
-	Evoral::SMF::end_write ();
+	Evoral::SMF::end_write (_path);
 	/* data in the file means its no longer removable */
 	mark_nonremovable ();
 
@@ -737,7 +737,6 @@ void
 SMFSource::set_path (const string& p)
 {
 	FileSource::set_path (p);
-	SMF::set_path (_path);
 }
 
 /** Ensure that this source has some file on disk, even if it's just a SMF header */

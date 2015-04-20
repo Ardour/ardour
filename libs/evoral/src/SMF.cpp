@@ -108,9 +108,7 @@ SMF::open(const std::string& path, int track) THROW_FILE_ERROR
 		smf_delete(_smf);
 	}
 
-	_file_path = path;
-
-	FILE* f = fopen(_file_path.c_str(), "r");
+	FILE* f = fopen(path.c_str(), "r");
 	if (f == 0) {
 		return -1;
 	} else if ((_smf = smf_load(f)) == 0) {
@@ -151,8 +149,6 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 		smf_delete(_smf);
 	}
 
-	_file_path = path;
-
 	_smf = smf_new();
 
 	if (_smf == NULL) {
@@ -180,7 +176,7 @@ SMF::create(const std::string& path, int track, uint16_t ppqn) THROW_FILE_ERROR
 	{
 		/* put a stub file on disk */
 
-		FILE* f = fopen (_file_path.c_str(), "w+");
+		FILE* f = fopen (path.c_str(), "w+");
 		if (f == 0) {
 			return -1;
 		}
@@ -401,17 +397,17 @@ SMF::begin_write()
 }
 
 void
-SMF::end_write() THROW_FILE_ERROR
+SMF::end_write(string const & path) THROW_FILE_ERROR
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
-	FILE* f = fopen (_file_path.c_str(), "w+");
+	FILE* f = fopen (path.c_str(), "w+");
 	if (f == 0) {
-		throw FileError (_file_path);
+		throw FileError (path);
 	}
 
 	if (smf_save(_smf, f) != 0) {
 		fclose(f);
-		throw FileError (_file_path);
+		throw FileError (path);
 	}
 
 	fclose(f);
@@ -423,12 +419,6 @@ SMF::round_to_file_precision (double val) const
 	double div = ppqn();
 
 	return round (val * div) / div;
-}
-
-void
-SMF::set_path (const std::string& p)
-{
-	_file_path = p;
 }
 
 } // namespace Evoral

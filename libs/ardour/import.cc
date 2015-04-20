@@ -417,14 +417,14 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 					break;
 				}
 			} else {
-				info << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, source->file_path()) << endmsg;
+				info << string_compose (_("Track %1 of %2 contained no usable MIDI data"), i, source->num_tracks()) << endmsg;
 			}
 
 			++s; // next source
 		}
 
-	} catch (...) {
-		error << string_compose (_("MIDI file %1 was not readable (no reason available)"), source->file_path()) << endmsg;
+	} catch (exception& e) {
+		error << string_compose (_("MIDI file could not be written (best guess: %1)"), e.what()) << endmsg;
 	}
 
 	if (buf) {
