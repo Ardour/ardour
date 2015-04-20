@@ -128,6 +128,7 @@ typedef uint64_t microseconds_t;
 #include "rc_option_editor.h"
 #include "route_time_axis.h"
 #include "route_params_ui.h"
+#include "save_as_dialog.h"
 #include "session_dialog.h"
 #include "session_metadata_dialog.h"
 #include "session_option_editor.h"
@@ -2393,21 +2394,31 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 
-	ArdourDialog save_as_dialog (_("Save As"), true);
+	SaveAsDialog sad;
+
+	switch (sad.run()) {
+	case Gtk::RESPONSE_OK:
+		break;
+	default:
+		return;
+	}
+	
+	ArdourDialog progress_dialog(_("Save As"), true);
 	Gtk::Label label;
 	Gtk::ProgressBar progress_bar;
 
-	save_as_dialog.get_vbox()->pack_start (label);
-	save_as_dialog.get_vbox()->pack_start (progress_bar);
+	progress_dialog.get_vbox()->pack_start (label);
+	progress_dialog.get_vbox()->pack_start (progress_bar);
 	label.show ();
 	progress_bar.show ();
 	
 	Session::SaveAs sa;
-	sa.new_parent_folder = "/tmp";
-	sa.new_name = "foobar";
-	sa.switch_to = true;
-	sa.copy_media = true;
-	sa.copy_external = false;
+
+	sa.new_parent_folder = sad.new_parent_folder ();
+	sa.new_name = sad.new_name ();
+	sa.switch_to = sad.switch_to();
+	sa.copy_media = sad.copy_media();
+	sa.copy_external = sad.copy_external();
 
 	/* this signal will be emitted from within this, the calling thread,
 	 * after every file is copied. It provides information on percentage
@@ -2418,9 +2429,9 @@ ARDOUR_UI::save_session_as ()
 	ScopedConnection c;
 
 	sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3, &label, &progress_bar));
-
-	save_as_dialog.show_all ();
-	save_as_dialog.present ();
+	
+	progress_dialog.show_all ();
+	progress_dialog.present ();
 	
 	if (_session->save_as (sa)) {
 		/* ERROR MESSAGE */
