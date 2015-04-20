@@ -14,7 +14,7 @@
          fgdisabled ="#959595"
          bordercolor="#7E7E7E"/>
   <style name="recent_session_button"
-        fgnormal="#ffffff"
+         fgnormal="#ffffff"
          bgnormal="#424242"
          fgactive="#ffffff"
          bgactive="#101010"
@@ -117,10 +117,11 @@
               </VBox>
             </EventBox>
           </VBox>
-          <VBox spacing="1">
+          <VBox>
             <Button style="generic_control"
                     id="open_selected_button"
                     text="Open Selected"
+                    state="insensitive"
                     fgnormal="#ffffff"
                     bgnormal="#303030"
                     fgactive="#000000"
@@ -129,63 +130,128 @@
                     borderwidth="0 0 0 1"
                     width="195"
                     height="40"/>
-            <EventBox bgnormal="#303030"
-                      box.fill="true"
-                      box.expand="true">
-              <VBox>
-                <Label style="generic_control"
-                       text="Recent Sessions"
-                       winfont ="Arial Bold 11"
-                       macfont ="Helvetica Bold 11"
-                       box.fill="true"
-                       box.expand="true"/>
-                <HBox box.padding="2">
-                  <VBox spacing="1" box.padding="5">
-                    <Button style="recent_session_button"
-                            id="recent_session_button_0"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_1"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_2"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_3"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_4"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_5"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_6"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_7"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_8"
-                            width="186"
-                            height="19"/>
-                    <Button style="recent_session_button"
-                            id="recent_session_button_9"
-                            width="186"
-                            height="19"/>
+            <HBox spacing="1"
+                  box.fill="true"
+                  box.expand="true">
+              <VBox spacing="1">
+                <EventBox bgnormal="#303030"
+                          box.fill="true"
+                          box.expand="true">
+                  <VBox>
+                    <Label style="generic_control"
+                           text="Recent Sessions"
+                           winfont ="Arial Bold 11"
+                           macfont ="Helvetica Bold 11"
+                           box.fill="true"
+                           box.expand="true"/>
+                    <HBox box.padding="2">
+                      <VBox spacing="1" box.padding="5">
+                        <Button style="recent_session_button"
+                                id="recent_session_button_0"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_1"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_2"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_3"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_4"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_5"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_6"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_7"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_8"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_session_button_9"
+                                width="186"
+                                height="19"/>
+                      </VBox>
+                    </HBox>
+                    <HBox height="3"/>
                   </VBox>
-                </HBox>
-                <HBox height="3"/>
+                </EventBox>
               </VBox>
-            </EventBox>
+              <VBox spacing="1">
+                <EventBox bgnormal="#303030"
+                          box.fill="true"
+                          box.expand="true">
+                  <VBox>
+                    <Label style="generic_control"
+                           text="Recent Templates"
+                           winfont ="Arial Bold 11"
+                           macfont ="Helvetica Bold 11"
+                           box.fill="true"
+                           box.expand="true"/>
+                    <HBox box.padding="2">
+                      <VBox spacing="1" box.padding="5">
+                        <Button style="recent_session_button"
+                                id="recent_template_button_0"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_1"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_2"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_3"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_4"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_5"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_6"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_7"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_8"
+                                width="186"
+                                height="19"/>
+                        <Button style="recent_session_button"
+                                id="recent_template_button_9"
+                                width="186"
+                                height="19"/>
+                      </VBox>
+                    </HBox>
+                    <HBox height="3"/>
+                  </VBox>
+                </EventBox>
+              </VBox>
+            </HBox>
           </VBox>
         </HBox>
         <Button style="generic_control"

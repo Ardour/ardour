@@ -319,7 +319,7 @@ Session::Session (AudioEngine &eng,
 			destroy ();
 			throw failed_constructor ();
 		}
-        
+		        
 		/* if a mix template was provided, then ::create() will
 		 * have copied it into the session and we need to load it
 		 * so that we have the state ready for ::set_state()
@@ -331,8 +331,11 @@ Session::Session (AudioEngine &eng,
 		 * of a template.
 		 */
 
-		if (!mix_template.empty() && load_state (_current_snapshot_name)) {
-			throw failed_constructor ();
+		if (!mix_template.empty()) { 
+			if (load_state (_current_snapshot_name)) {
+				throw failed_constructor ();
+			}
+			store_recent_templates (mix_template);
 		}
 
 		/* load default session properties - if any */

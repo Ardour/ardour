@@ -53,6 +53,7 @@ class TracksControlPanel;
 
 class EngineControl;
 #define MAX_RECENT_SESSION_COUNT 10
+#define MAX_RECENT_TEMPLATE_COUNT 10
 class SessionDialog : public WavesDialog {
   public:
     SessionDialog (WM::Proxy<TracksControlPanel>& system_configuration_dialog,
@@ -72,6 +73,7 @@ class SessionDialog : public WavesDialog {
 	WavesButton& _open_saved_session_button;
 	WavesButton& _system_configuration_button;
 	WavesButton* _recent_session_button[MAX_RECENT_SESSION_COUNT];
+	WavesButton* _recent_template_button[MAX_RECENT_TEMPLATE_COUNT];
 	Gtk::Label& _session_details_label_1;
    	Gtk::Label& _session_details_label_2;
    	Gtk::Label& _session_details_label_3;

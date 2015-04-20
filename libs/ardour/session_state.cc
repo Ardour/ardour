@@ -2028,7 +2028,6 @@ Session::XMLSourceFactory (const XMLNode& node)
 int
 Session::save_template (string template_name)
 {
-
 	if ((_state_of_the_state & CannotSave) || template_name.empty ()) {
 		return -1;
 	}
@@ -2101,6 +2100,8 @@ Session::save_template (string template_name)
 		}
 		copy_files (plugins_dir(), template_plugin_state_path);
 	}
+
+	store_recent_templates (template_file_path);
 	return 0;
 }
 

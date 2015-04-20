@@ -75,12 +75,26 @@ SessionDialog::SessionDialog (WM::Proxy<TracksControlPanel>& system_configuratio
     _recent_session_button[8] = &get_waves_button ("recent_session_button_8");
     _recent_session_button[9] = &get_waves_button ("recent_session_button_9");
     
+    _recent_template_button[0] = &get_waves_button ("recent_template_button_0");
+    _recent_template_button[1] = &get_waves_button ("recent_template_button_1");
+    _recent_template_button[2] = &get_waves_button ("recent_template_button_2");
+    _recent_template_button[3] = &get_waves_button ("recent_template_button_3");
+    _recent_template_button[4] = &get_waves_button ("recent_template_button_4");
+    _recent_template_button[5] = &get_waves_button ("recent_template_button_5");
+    _recent_template_button[6] = &get_waves_button ("recent_template_button_6");
+    _recent_template_button[7] = &get_waves_button ("recent_template_button_7");
+    _recent_template_button[8] = &get_waves_button ("recent_template_button_8");
+    _recent_template_button[9] = &get_waves_button ("recent_template_button_9");
+
     for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
-        _recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session ));
+        _recent_session_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_object ));
         _recent_session_button[i]->signal_double_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_session_double_click ));
     }
 
-    _open_selected_button.set_sensitive (false);
+    for (size_t i = 0; i < MAX_RECENT_TEMPLATE_COUNT; i++) {
+        _recent_template_button[i]->signal_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_object ));
+        _recent_template_button[i]->signal_double_clicked.connect (sigc::mem_fun (*this, &SessionDialog::on_recent_template_double_click ));
+    }
 }
 
 SessionDialog::~SessionDialog()

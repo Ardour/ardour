@@ -62,12 +62,14 @@ using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
 
+#if (0) // let's keep it for a time per possible need in future.
 static string poor_mans_glob (string path)
 {
 	string copy = path;
 	replace_all (copy, "~", Glib::get_home_dir());
 	return copy;
 }
+#endif
 
 void SessionDialog::set_engine_state_controller (EngineStateController* _engine_state_controller)
 {
@@ -85,7 +87,8 @@ void SessionDialog::redisplay ()
     }
     
     redisplay_system_configuration ();
-    redisplay_recent_sessions();
+    redisplay_recent_sessions ();
+	redisplay_recent_templates ();
 }
 
 void
@@ -128,11 +131,6 @@ SessionDialog::session_folder ()
 }
 
 void
-SessionDialog::session_selected ()
-{
-}
-
-void
 SessionDialog::on_new_session (WavesButton*)
 {
 	new_session (false);
@@ -141,6 +139,14 @@ SessionDialog::on_new_session (WavesButton*)
 void
 SessionDialog::on_new_session_with_template (WavesButton*)
 {
+	std::vector<std::string> template_types = boost::assign::list_of (ARDOUR::template_suffix + 1); //WOW!!!!
+	std::vector<std::string> selected_files = ARDOUR::open_file_dialog(template_types, false, Config->get_default_session_parent_dir(), _("Select Template"));
+	if (selected_files.empty ()) {
+		set_keep_above(true);
+		return;
+	} else {
+		_session_template_full_name =  selected_files [0];
+	}
 	new_session (true);
 }
 
@@ -184,17 +190,13 @@ SessionDialog::redisplay_recent_sessions ()
 	}
 
 	std::vector<std::string> session_directories;
-	RecentSessionsSorter cmp;
 
 	ARDOUR::RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 
-	if (rs.empty()) {
+	if (rs.empty ()) {
 		return 0;
 	}
-
-	// sort them alphabetically
-	// sort (rs.begin(), rs.end(), cmp);
 
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 		session_directories.push_back ((*i).second);
@@ -231,10 +233,10 @@ SessionDialog::redisplay_recent_sessions ()
 
 		states = Session::possible_states (dirname);
 
-                if (states.empty()) {
-                        /* no state file? */
-                        continue;
-                }
+        if (states.empty()) {
+                /* no state file? */
+                continue;
+        }
 
 		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
 
@@ -250,6 +252,53 @@ SessionDialog::redisplay_recent_sessions ()
 	}
 
 	return session_snapshot_count;
+}
+
+int
+SessionDialog::redisplay_recent_templates ()
+{
+	for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
+        _recent_template_button[i]->set_active_state (Gtkmm2ext::Off);
+        _recent_template_button[i]->set_sensitive (false);
+	}
+
+	std::deque<std::string> rt;
+	ARDOUR::read_recent_templates (rt);
+
+	if (rt.empty ()) {
+		return 0;
+	}
+
+	int session_template_count = 0;
+	for (std::deque<std::string>::const_iterator i = rt.begin(); i != rt.end(); ++i) {
+
+		/* check whether template still exists and it's a regular file*/
+		if (!Glib::file_test((*i).c_str(), Glib::FILE_TEST_IS_REGULAR)) {
+			/* such regular file doesn't exist */
+			continue;
+		}
+
+		/* now get available states for this session */
+		_recent_template_full_name[session_template_count ] = *i;
+		std::string basename = Glib::path_get_basename (*i);
+		std::string::size_type pos = basename.find_last_of (".");
+		if (pos != std::string::npos) {
+			std::string filetype = basename.substr (pos);
+			std::string template_suffix = ARDOUR::template_suffix;
+			boost::to_lower (template_suffix);
+			boost::to_lower (filetype);
+			if (filetype == template_suffix) {
+				basename = basename.substr (0, pos);
+			}
+		}
+		_recent_template_button[session_template_count ]->set_text (basename);
+		_recent_template_button[session_template_count ]->set_sensitive (true);
+
+		ARDOUR_UI::instance()->set_tip (*_recent_template_button[session_template_count ], *i);
+		++session_template_count;
+	}
+
+	return ++session_template_count;
 }
 
 bool
@@ -270,50 +319,69 @@ SessionDialog::on_quit (WavesButton*)
 void
 SessionDialog::on_open_selected (WavesButton*)
 {
-	hide();
-	response (Gtk::RESPONSE_ACCEPT);
+	switch (_selection_type) {
+		case RecentSession:
+			hide();
+			response (Gtk::RESPONSE_ACCEPT);
+			break;
+		case RecentTemplate:
+			new_session (true);
+			break;
+		default:
+			break;
+	} 
 }
 
 void
 SessionDialog::on_open_saved_session (WavesButton*)
 {
 	set_keep_above(false);
-        string temp_session_full_file_name = ARDOUR::open_file_dialog(Config->get_default_session_parent_dir(), _("Select Saved Session"));
-        set_keep_above(true);
+    string temp_session_full_file_name = ARDOUR::open_file_dialog(Config->get_default_session_parent_dir(), _("Select Saved Session"));
+    set_keep_above(true);
         
-        if(!temp_session_full_file_name.empty()) {
-                _selected_session_full_name = temp_session_full_file_name;
-                for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
-                    _recent_session_button[i]->set_active_state (Gtkmm2ext::Off);
-                }
-                _selection_type = SavedSession;
-                hide ();
-                response (Gtk::RESPONSE_ACCEPT);
-        } 
+    if(!temp_session_full_file_name.empty()) {
+            _selected_session_full_name = temp_session_full_file_name;
+            for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
+                _recent_session_button[i]->set_active_state (Gtkmm2ext::Off);
+            }
+            _selection_type = SavedSession;
+            hide ();
+            response (Gtk::RESPONSE_ACCEPT);
+    } 
         
 	return;
 }
 
 void
-SessionDialog::on_recent_session (WavesButton* clicked_button)
+SessionDialog::on_recent_object (WavesButton* clicked_button)
 {
 	if (clicked_button->get_active()) {
         return;
     }
 	else {
         _selected_session_full_name = "";
+		_session_template_full_name = "";
         _selection_type = Nothing;
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
 			if (_recent_session_button[i] == clicked_button) {
 				_selected_session_full_name = _recent_session_full_name[i];
                 _recent_session_button[i]->set_active_state(Gtkmm2ext::ExplicitActive);
+                _selection_type = RecentSession;
 			} else {
                 _recent_session_button[i]->set_active_state(Gtkmm2ext::Off);
-                _selection_type = RecentSession;
+            }
+		}
+		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
+			if (_recent_template_button[i] == clicked_button) {
+				_session_template_full_name = _recent_template_full_name[i];
+                _recent_template_button[i]->set_active_state(Gtkmm2ext::ExplicitActive);
+                _selection_type = RecentTemplate;
+			} else {
+                _recent_template_button[i]->set_active_state(Gtkmm2ext::Off);
             }
 		}
     }
-	_open_selected_button.set_sensitive (_selection_type == RecentSession);
+	_open_selected_button.set_sensitive ((_selection_type == RecentSession) || (_selection_type == RecentTemplate));
 }
 
 void
@@ -324,6 +392,11 @@ SessionDialog::on_recent_session_double_click (WavesButton* button)
 	// the job is just to respond with ok
 	hide();
 	response (Gtk::RESPONSE_ACCEPT);
+}
+
+void
+SessionDialog::on_recent_template_double_click (WavesButton* button)
+{
 }
 
 void
@@ -372,17 +445,8 @@ void
 SessionDialog::new_session (bool with_template)
 {
     set_keep_above(false);
-	if (with_template) {
-		std::vector<std::string> template_types = boost::assign::list_of (ARDOUR::template_suffix + 1); //WOW!!!!
-		std::vector<std::string> selected_files = ARDOUR::open_file_dialog(template_types, false, Config->get_default_session_parent_dir(), _("Select Template"));
-		if (selected_files.empty ()) {
-			set_keep_above(true);
-			return;
-		} else {
-			_session_template =  selected_files [0];
-		}
-	} else {
-		_session_template.clear ();
+	if (!with_template) {
+		_session_template_full_name.clear ();
 	}
 
     std::string temp_session_full_file_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
