@@ -258,6 +258,8 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		width = thin_meter_width;
 	}
 
+	width = rint (width * ARDOUR_UI::config()->get_font_scale() / 102400.);
+
 	while (meters.size() < nmeters) {
 		meters.push_back (MeterInfo());
 	}

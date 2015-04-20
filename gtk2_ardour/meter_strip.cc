@@ -59,6 +59,8 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
 PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * scale))
+
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
 	, RouteUI(0)
@@ -68,15 +70,18 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	_tick_bar = 0;
 	_metricmode = -1;
 	metric_type = MeterPeak;
-	mtr_vbox.set_spacing(2);
-	nfo_vbox.set_spacing(2);
-	peakbx.set_size_request(-1, 14);
-	namebx.set_size_request(18, 52);
-	spacer.set_size_request(-1,0);
+
+	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
+
+	mtr_vbox.set_spacing (PX_SCALE(2, 2));
+	nfo_vbox.set_spacing (PX_SCALE(2, 2));
+	peakbx.set_size_request (-1, PX_SCALE(14, 14));
+	namebx.set_size_request (PX_SCALE(16, 18), PX_SCALE(32, 52));
+	spacer.set_size_request (-1,0);
 
 	set_metric_mode(metricmode, mt);
 
-	meter_metric_area.set_size_request(25, 10);
+	meter_metric_area.set_size_request (PX_SCALE(25, 25), 10);
 	meter_metric_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &MeterStrip::meter_metrics_expose));
 	RedrawMetrics.connect (sigc::mem_fun(*this, &MeterStrip::redraw_metrics));
@@ -88,7 +93,7 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	mtr_vbox.pack_start (spacer, false, false);
 	mtr_container.add(mtr_vbox);
 
-	mtr_hsep.set_size_request(-1,1);
+	mtr_hsep.set_size_request (-1, 1);
 	mtr_hsep.set_name("BlackSeparator");
 
 	nfo_vbox.pack_start (mtr_hsep, false, false);
@@ -119,8 +124,10 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, _route(rt)
 	, peak_display()
 {
-	mtr_vbox.set_spacing(2);
-	nfo_vbox.set_spacing(2);
+	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
+
+	mtr_vbox.set_spacing (PX_SCALE(2, 2));
+	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	SessionHandlePtr::set_session (sess);
 	RouteUI::init ();
 	RouteUI::set_route (rt);
@@ -130,6 +137,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	_metricmode = -1;
 	metric_type = MeterPeak;
 
+	// note: level_meter->setup_meters() does the scaling
 	int meter_width = 6;
 	if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 12;
@@ -157,27 +165,27 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	ARDOUR_UI::instance()->set_tip (peak_display, _("Reset Peak"));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
-	peak_display.set_size_request(12, 8);
-	peak_display.set_corner_radius(2);
+	peak_display.set_size_request(PX_SCALE(12, 12), PX_SCALE(8, 8));
+	peak_display.set_corner_radius(2); // ardour-button scales this
 
 	peak_align.set(0.5, 1.0, 1.0, 0.8);
 	peak_align.add(peak_display);
-	peakbx.pack_start(peak_align, true, true, 3);
-	peakbx.set_size_request(-1, 14);
+	peakbx.pack_start(peak_align, true, true, 2);
+	peakbx.set_size_request(-1, PX_SCALE(14, 14));
 
 	// add track-name & -number label
 	number_label.set_text("-");
-	number_label.set_size_request(18, 18);
+	number_label.set_size_request(PX_SCALE(18, 18), PX_SCALE(18, 18));
 
 	name_changed();
 
-	name_label.set_corner_radius(2);
+	name_label.set_corner_radius(2); // ardour button scales radius
 	name_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	name_label.set_name("meterbridge label");
 	name_label.set_angle(-90.0);
 	name_label.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	name_label.set_layout_ellipsize_width(48 * PANGO_SCALE);
-	name_label.set_size_request(18, 50);
+	name_label.set_size_request(PX_SCALE(18, 18), PX_SCALE(50, 50));
 	name_label.set_alignment(-1.0, .5);
 	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
 	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
@@ -189,7 +197,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	number_label.set_layout_ellipsize_width(18 * PANGO_SCALE);
 	number_label.set_alignment(.5, .5);
 
-	namebx.set_size_request(18, 52);
+	namebx.set_size_request(PX_SCALE(18, 18), PX_SCALE(52, 52));
 	namebx.pack_start(namenumberbx, true, false, 0);
 	namenumberbx.pack_start(name_label, true, false, 0);
 	namenumberbx.pack_start(number_label, false, false, 0);
@@ -207,25 +215,25 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	btnbox.pack_start(solobox, false, false, 1);
 
 	rec_enable_button->set_corner_radius(2);
-	rec_enable_button->set_size_request(18, 18);
+	rec_enable_button->set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 
 	mute_button->set_corner_radius(2);
-	mute_button->set_size_request(18, 18);
+	mute_button->set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 
 	solo_button->set_corner_radius(2);
-	solo_button->set_size_request(18, 18);
+	solo_button->set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 
 	monitor_input_button->set_corner_radius(2);
-	monitor_input_button->set_size_request(18, 18);
+	monitor_input_button->set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 
 	monitor_disk_button->set_corner_radius(2);
-	monitor_disk_button->set_size_request(18, 18);
+	monitor_disk_button->set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 
-	mutebox.set_size_request(18, 18);
-	solobox.set_size_request(18, 18);
-	recbox.set_size_request(18, 18);
-	mon_in_box.set_size_request(18, 18);
-	mon_disk_box.set_size_request(18, 18);
+	mutebox.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
+	solobox.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
+	recbox.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
+	mon_in_box.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
+	mon_disk_box.set_size_request (PX_SCALE(18, 18), PX_SCALE(18, 18));
 	spacer.set_size_request(-1,0);
 
 	update_button_box();
@@ -284,8 +292,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 
 	meter_configuration_changed (_route->shared_peak_meter()->input_streams ());
 
-	meter_ticks1_area.set_size_request(3,-1);
-	meter_ticks2_area.set_size_request(3,-1);
+	meter_ticks1_area.set_size_request(PX_SCALE(3, 3), -1);
+	meter_ticks2_area.set_size_request(PX_SCALE(3, 3), -1);
 	meter_ticks1_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks1_expose));
 	meter_ticks2_area.signal_expose_event().connect (sigc::mem_fun(*this, &MeterStrip::meter_ticks2_expose));
 
@@ -509,6 +517,8 @@ MeterStrip::on_size_request (Gtk::Requisition* r)
 void
 MeterStrip::on_size_allocate (Gtk::Allocation& a)
 {
+	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
+
 	const int wh = a.get_height();
 	int nh;
 	int mh = 0;
@@ -541,18 +551,21 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
 
+	nh *= scale;
+	tnh *= scale;
+
 	int prev_height, ignored;
 	bool need_relayout = false;
 
-	namebx.get_size_request(ignored, prev_height);
-	namebx.set_size_request(18, nh + tnh);
+	namebx.get_size_request (ignored, prev_height);
+	namebx.set_size_request (PX_SCALE(18, 18), nh + tnh);
 
 	if (prev_height != nh + tnh) {
 		need_relayout = true;
 	}
 
-	namenumberbx.get_size_request(ignored, prev_height);
-	namenumberbx.set_size_request(18, nh + tnh);
+	namenumberbx.get_size_request (ignored, prev_height);
+	namenumberbx.set_size_request (PX_SCALE(18, 18), nh + tnh);
 
 	if (prev_height != nh + tnh) {
 		need_relayout = true;
@@ -561,8 +574,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 	if (_route) {
 		int nlh = nh + (_route->is_master() ? tnh : -1);
 		name_label.get_size_request(ignored, prev_height);
-		name_label.set_size_request(18, nlh);
-		name_label.set_layout_ellipsize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE);
+		name_label.set_size_request (PX_SCALE(18, 18), nlh);
+		name_label.set_layout_ellipsize_width ((nh - 4 + (_route->is_master() ? tnh : 0)) * PANGO_SCALE); // XXX
 		if (prev_height != nlh) {
 			need_relayout = true;
 		}
@@ -713,35 +726,38 @@ MeterStrip::redraw_metrics ()
 void
 MeterStrip::update_button_box ()
 {
+	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
+
 	if (!_session) return;
 	int height = 0;
 	if (_session->config.get_show_mute_on_meterbridge()) {
-		height += 20;
+		height += PX_SCALE(18, 18) + PX_SCALE(2, 2);
 		mutebox.show();
 	} else {
 		mutebox.hide();
 	}
 	if (_session->config.get_show_solo_on_meterbridge()) {
-		height += 20;
+		height += PX_SCALE(18, 18) + PX_SCALE(2, 2);
 		solobox.show();
 	} else {
 		solobox.hide();
 	}
 	if (_session->config.get_show_rec_on_meterbridge()) {
-		height += 20;
+		height += PX_SCALE(18, 18) + PX_SCALE(2, 2);
 		recbox.show();
 	} else {
 		recbox.hide();
 	}
 	if (_session->config.get_show_monitor_on_meterbridge()) {
-		height += 20 + 20;
+		height += PX_SCALE(18, 18) + PX_SCALE(2, 2);
+		height += PX_SCALE(18, 18) + PX_SCALE(2, 2);
 		mon_in_box.show();
 		mon_disk_box.show();
 	} else {
 		mon_in_box.hide();
 		mon_disk_box.hide();
 	}
-	btnbox.set_size_request(18, height);
+	btnbox.set_size_request(PX_SCALE(18, 18), height);
 	check_resize();
 }
 
@@ -791,6 +807,8 @@ MeterStrip::name_changed () {
 	if (!_route) {
 		return;
 	}
+	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
+
 	name_label.set_text(_route->name ());
 	if (_session && _session->config.get_track_name_number()) {
 		const int64_t track_number = _route->track_number ();
@@ -803,7 +821,7 @@ MeterStrip::name_changed () {
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		// NB numbers are rotated 90deg. on the meterbridge -> use height
-		number_label.set_size_request(18, tnh);
+		number_label.set_size_request(PX_SCALE(18, 18), tnh * scale);
 	} else {
 		number_label.hide();
 	}

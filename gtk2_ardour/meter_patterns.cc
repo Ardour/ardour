@@ -289,23 +289,28 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 
 	float box_l=0;
 	float box_w=0;
+	const double scale = ARDOUR_UI::config()->get_font_scale() / 102400.;
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * scale))
 	if (tickleft) {
 		if (w.get_name().substr(0, 3) == "Bar") {
-			box_l = width-2; box_w = 2;
+			box_w = PX_SCALE(2, 2);
+			box_l = width - box_w;
 		} else if (w.get_name().substr(0, 4) == "Mark") {
-			box_l = width-2; box_w = 2;
+			box_w = PX_SCALE(2, 2);
+			box_l = width - box_w;
 			background = false;
 		}
 	} else if (tickright) {
 		if (w.get_name().substr(0, 3) == "Bar") {
-			box_l = 0; box_w = 2;
+			box_l = 0; box_w = PX_SCALE(2, 2);
 		} else if (w.get_name().substr(0, 4) == "Mark") {
-			box_l = 0; box_w = 2;
+			box_l = 0; box_w = PX_SCALE(2, 2);
 			background = false;
 		}
 	} else {
-		box_l = 0; box_w = 3;
+		box_l = 0; box_w = width;
 	}
+#undef PX_SCALE
 
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
@@ -557,7 +562,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 				pos = height - (gint) floor (height * fraction);
 				pos = max (pos, 1);
 				cairo_move_to(cr, 0, pos + .5);
-				cairo_line_to(cr, 3, pos + .5);
+				cairo_line_to(cr, width, pos + .5);
 				cairo_stroke (cr);
 				break;
 			case DataType::MIDI:
@@ -565,7 +570,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 				pos = 1 + height - (gint) floor (height * fraction);
 				pos = min (pos, height);
 				cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-				cairo_arc(cr, 1.5, pos + .5, 1.0, 0, 2 * M_PI);
+				cairo_arc(cr, width * .5, pos + .5, 1.0, 0, 2 * M_PI);
 				cairo_fill(cr);
 				break;
 			}
@@ -611,22 +616,27 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	Pango::FontDescription font;
 
 	font = Pango::FontDescription (ARDOUR_UI::config()->get_SmallMonospaceFont());
-	double fixfontsize = 81920.0 / (double) ARDOUR_UI::config()->get_font_scale();
+#ifdef __APPLE__
+	const double fixfontsize = 1.125;
+#else
+	// counter-act global font-scaling.
+	const double fixfontsize = std::min(1.0, 1.0 / sqrt((double) ARDOUR_UI::config()->get_font_scale() / 102400.));
+#endif
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
-	font.set_size (9.0 * PANGO_SCALE * fixfontsize);
+	font.set_size (8.0 * fixfontsize * PANGO_SCALE);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	audio_font_attributes.change (*font_attr);
 	delete font_attr;
 
 	font.set_weight (Pango::WEIGHT_ULTRALIGHT);
 	font.set_stretch (Pango::STRETCH_ULTRA_CONDENSED);
-	font.set_size (8.0 * PANGO_SCALE * fixfontsize);
+	font.set_size (7.0 * fixfontsize * PANGO_SCALE);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	midi_font_attributes.change (*font_attr);
 	delete font_attr;
 
-	font.set_size (6.0 * PANGO_SCALE * fixfontsize);
+	font.set_size (6.0 * fixfontsize * PANGO_SCALE);
 	font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 	unit_font_attributes.change (*font_attr);
 	delete font_attr;
@@ -878,20 +888,11 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 						cairo_stroke (cr);
 					}
 					break;
-
 				case DataType::MIDI:
 					align_center = false; // don't bleed into legend
 					fraction = (j->first) / 127.0;
 					pos = 1 + height - (gint) lrintf (height * fraction);
 					pos = min (pos, height);
-					cairo_set_source_rgb (cr, c.get_red_p(), c.get_green_p(), c.get_blue_p());
-					if (tickleft) {
-						cairo_arc(cr, width - 2.0, pos + .5, 1.0, 0, 2 * M_PI);
-						cairo_fill(cr);
-					} else if (tickright) {
-						cairo_arc(cr, 3, pos + .5, 1.0, 0, 2 * M_PI);
-						cairo_fill(cr);
-					}
 					break;
 			}
 

@@ -684,6 +684,8 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	set_button_names ();
 
+	const double scale = std::max(1.0, ARDOUR_UI::config()->get_font_scale() / 102400.);
+
 	switch (w) {
 	case Wide:
 
@@ -704,7 +706,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 		}
 
 
-		set_size_request (max (110, gpm.get_gm_width()+5), -1);
+		set_size_request (max (110 * scale, gpm.get_gm_width() + 5 * scale), -1);
 		break;
 
 	case Narrow:
@@ -726,7 +728,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
 
-		set_size_request (max (60, gpm.get_gm_width() + 10), -1);
+		set_size_request (max (60 * scale, gpm.get_gm_width() + 10 * scale), -1);
 		break;
 	}
 
