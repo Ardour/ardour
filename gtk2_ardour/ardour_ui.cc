@@ -817,7 +817,13 @@ ARDOUR_UI::starting ()
 	if ((nsm_url = g_getenv ("NSM_URL")) != 0) {
 		nsm = new NSM_Client;
 		if (!nsm->init (nsm_url)) {
-			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour3");
+			/* TODO this needs fixing!
+			 * waf's obj.target for distro versions: eg ardour4, ardourvst4
+			 * Ardour4, Mixbus3 for bundled versions + full path on OSX & windows
+			 * argv[0] does not apply since we need the wrapper-script (not the binary itself)
+			 * No idea how to address all these.
+			 */
+			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour4");
 
 			unsigned int i = 0;
 			// wait for announce reply from nsm server
