@@ -23,28 +23,9 @@
 #include <string>
 #include "waves_dialog.h"
 
-//#include <gdkmm/pixbuf.h>
-//#include <gtkmm/label.h>
-//#include <gtkmm/drawingarea.h>
-//#include <gtkmm/expander.h>
-//#include <gtkmm/box.h>
-//#include <gtkmm/radiobutton.h>
-//#include <gtkmm/filechooserbutton.h>
-//#include <gtkmm/scrolledwindow.h>
-//#include <gtkmm/treeview.h>
-//#include <gtkmm/treestore.h>
-//#include <gtkmm/checkbutton.h>
-//#include <gtkmm/table.h>
-//#include <gtkmm/frame.h>
-//#include <gtkmm/spinbutton.h>
-//#include <gtkmm/liststore.h>
-//#include <gtkmm/combobox.h>
-
-//#include "ardour/utils.h"
-
 class EngineControl;
 class MainMenuDisabler;
-#define MAX_RECENT_SESSION_COUNT 10
+
 class SessionLockDialog : public WavesDialog {
   public:
 
