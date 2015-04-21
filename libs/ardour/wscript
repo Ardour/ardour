@@ -409,11 +409,11 @@ def build(bld):
         elif bld.env['build_target'] == 'x86_64':
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
         elif bld.env['build_target'] == 'mingw':
-                import platform as PLATFORM
-                u = PLATFORM.uname ()
-                cpu = u[4]
-                if re.search ("(x86_64|AMD64)", cpu) != None:
-                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit_win.s' ]
+	        # usability of the 64 bit windows assembler depends on the compiler target,
+	        # not the build host, which in turn can only be inferred from the name
+	        # of the compiler. 
+	        if re.search ('/x86_64/', str(conf.env['CC'])):
+		        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit_win.s' ]
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):
