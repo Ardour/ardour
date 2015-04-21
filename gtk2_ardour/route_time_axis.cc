@@ -228,9 +228,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 RouteTimeAxisView::~RouteTimeAxisView ()
 {
-    // must be handled before CatchDeletion (this)
-    cleanup_gui_properties ();
-    
 	CatchDeletion (this);
 
 	for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {

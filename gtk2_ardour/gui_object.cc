@@ -71,46 +71,6 @@ GUIObjectState::get_or_add_node (const string& id)
 	return get_or_add_node (&_state, id);
 }
 
-/** Remove property from the node with provided id.
- *  If there is no properties except the node id - remove the node.
- *  @param id property of Object node to look for.
- *  @param prop_name name of the Object property to remove.
- *  @return value of true if property is found, or false if not.
- */
-
-bool
-GUIObjectState::remove_property (const std::string& id, const std::string& prop_name)
-{
-    XMLNode* child = get_node (&_state, id);
-    
-    if (!child) {
-        return false;
-    }
-    
-    XMLProperty* p = child->property (prop_name );
-    if (!p) {
-        return false;
-    }
-    
-    child->remove_property (prop_name );
-    
-    if (child->children().empty() && child->properties().size() == 1 && child->property (X_("id")) ) {
-        remove_node (id);
-    }
-    
-    return true;
-}
-
-/** Remove node with provided id.
- *  @param id property of Object node to look for.
-*/
-
-void
-GUIObjectState::remove_node (const std::string& id)
-{
-    _state.remove_nodes_and_delete(X_("id"), id );
-}
-
 /** Get a string from our state.
  *  @param id property of Object node to look for.
  *  @param prop_name name of the Object property to return.
