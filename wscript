@@ -425,8 +425,14 @@ int main() { return 0; }''',
         if sys.platform == 'darwin':
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
             conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
-        elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64' or (conf.env['build_target'] == 'mingw' and build_host_supports_sse):
-            compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+        elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
+	        compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+        elif conf.env['build_target'] == 'mingw':
+	        # usability of the 64 bit windows assembler depends on the compiler target,
+	        # not the build host, which in turn can only be inferred from the name
+	        # of the compiler. 
+	        if re.search ('/^x86_64/', str(conf.env['CC'])):
+		        compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
