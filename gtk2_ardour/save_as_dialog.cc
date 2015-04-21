@@ -31,32 +31,67 @@ using namespace ARDOUR;
 
 SaveAsDialog::SaveAsDialog ()
 	: ArdourDialog (_("Save As"))
+	, switch_to_button (_("Switch to newly-saved version"))
+	, copy_media_button (_("Copy media to new session"))
+	, copy_external_button (_("Copy external media into new session"))
 {
 	VBox* vbox = get_vbox();
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::OK, RESPONSE_OK);
+	vbox->set_spacing (6);
 	
-	vbox->pack_start (new_name_entry, false, false);
-	vbox->pack_start (new_parent_folder_selector, false, false);
+	HBox* hbox;
+	Label* label;
+
+	hbox = manage (new HBox);
+	hbox->set_spacing (6);
+	label = manage (new Label (_("Save as session name")));
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (new_name_entry, true, true);
+	vbox->pack_start (*hbox, false, false);
+
+	hbox = manage (new HBox);
+	hbox->set_spacing (6);
+	label = manage (new Label (_("Parent directory/folder")));
+	hbox->pack_start (*label, false, false);
+	hbox->pack_start (new_parent_folder_selector, true, true);
+	vbox->pack_start (*hbox, false, false);
+
 	vbox->pack_start (switch_to_button, false, false);
 	vbox->pack_start (copy_media_button, false, false);
 	vbox->pack_start (copy_external_button, false, false);
 
 	switch_to_button.set_active (true);
+	copy_media_button.set_active (true);
+	
 	vbox->show_all ();
+
+	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	add_button (Stock::OK, RESPONSE_OK);
+
+	new_parent_folder_selector.set_action (FILE_CHOOSER_ACTION_SELECT_FOLDER);
+	new_parent_folder_selector.set_current_folder (Glib::get_home_dir());
+	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));
+	set_response_sensitive (RESPONSE_OK, false);
+}
+
+void
+SaveAsDialog::name_entry_changed ()
+{
+	if (!new_name_entry.get_text().empty()) {
+		set_response_sensitive (RESPONSE_OK);
+	}
 }
 
 string
 SaveAsDialog::new_parent_folder () const
 {
-	return string();
+	return new_parent_folder_selector.get_current_folder ();
 }
 
 string
 SaveAsDialog::new_name () const
 {
-	return string ();
+	return new_name_entry.get_text ();
 }
 
 bool

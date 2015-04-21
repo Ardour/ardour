@@ -45,6 +45,7 @@ private:
 	Gtk::FileChooserButton new_parent_folder_selector;
 	Gtk::Entry new_name_entry;
 
+	void name_entry_changed ();
 };
 
 #endif /* __ardour_gtk_tempo_dialog_h__ */
