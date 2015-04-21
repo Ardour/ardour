@@ -23,8 +23,11 @@
 #include <cstring> // for memset
 #include <cstdlib>
 #include <stdint.h>
-#include <intrin.h>
 #include <assert.h>
+
+#ifdef PLATFORM_WINDOWS
+#include <intrin.h>
+#endif
 
 #include "pbd/fpu.h"
 #include "pbd/error.h"
