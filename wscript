@@ -72,7 +72,7 @@ compiler_flags_dictionaries= {
         # Flag to turn on C99 compliance by itself 
         'c99': '-std=c99',
 	# Flag to enable AT&T assembler syntax
-	'attasm': 'asm=att',
+	'attasm': '-masm=att',
     },
     'msvc' : {
         'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
