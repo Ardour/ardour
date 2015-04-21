@@ -827,7 +827,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		const float newdia = rint (char_pixel_height());
+		const float newdia = rint (11. * ARDOUR_UI::config()->get_font_scale () / 102400.);
 		if (_diameter != newdia) {
 			_pattern_height = 0;
 			_diameter = newdia;
