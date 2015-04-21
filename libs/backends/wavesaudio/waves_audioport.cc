@@ -18,13 +18,21 @@
 */
 
 #include "waves_audioport.h"
+#include "ardour/runtime_functions.h"
+#include "pbd/malign.h"
 
 using namespace ARDOUR;
 
 WavesAudioPort::WavesAudioPort (const std::string& port_name, PortFlags flags)
     : WavesDataPort (port_name, flags)    
 {
-    memset (_buffer, 0, sizeof (_buffer));
+	aligned_malloc ((void**)&_buffer, MAX_BUFFER_SIZE_BYTES, 32 /*32 byte alignment*/);
+    memset (_buffer, 0, MAX_BUFFER_SIZE_BYTES);
+}
+
+WavesAudioPort::~WavesAudioPort ()
+{
+	aligned_free (_buffer);
 }
 
 
@@ -40,14 +48,19 @@ void* WavesAudioPort::get_buffer (pframes_t nframes)
              * Base class WavesDataPort takes is supposed to provide enough consistentcy
              * of the connections.
              */
-            for (memcpy (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes * sizeof (Sample)), ++it;
-				 it != get_connections ().end ();
-				 ++it) {
+
+			// get first buffer data
+			// use optimized function to fill the buffer intialy
+			ARDOUR::copy_vector (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes);
+			++it;
+            
+			// mix the rest
+			for (; it != get_connections ().end (); ++it) {
                 Sample* tgt = buffer ();
                 const Sample* src = ((const WavesAudioPort*)*it)->const_buffer ();
-                for (uint32_t frame = 0; frame < nframes; ++frame, ++tgt, ++src)    {
-                    *tgt += *src;
-                }
+
+				// use otimized function to mix the buffers
+				ARDOUR::mix_buffers_no_gain (tgt, src, nframes);
             }
         }
     }

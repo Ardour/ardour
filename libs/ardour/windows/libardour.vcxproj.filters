@@ -33,6 +33,8 @@
     <None Include="..\wscript">
       <Filter>scripts</Filter>
     </None>
+    <None Include="..\sse_functions_64bit_win.s" />
+    <None Include="..\sse_avx_functions_64bit_win.s" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ardour\vestige\aeffectx.h">

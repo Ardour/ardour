@@ -48,7 +48,6 @@ libpbd_sources = [
     'ffs.cc',
     'file_manager.cc',
     'file_utils.cc',
-    'fpu.cc',
     'glib_semaphore.cc',
     'id.cc',
     'locale_guard.cc',
@@ -150,8 +149,18 @@ def build(bld):
     if bld.env['build_target'] == 'x86_64':
         obj.defines += [ 'USE_X86_64_ASM' ]
     if bld.env['build_target'] == 'mingw':
+        import re
+        import platform as PLATFORM
+        u = PLATFORM.uname ()
+        cpu = u[4]
+        if re.search ("(x86_64|AMD64)", cpu) != None:
+            obj.defines += [ 'USE_X86_64_ASM' ]
+        obj.defines += ['NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
+        obj.source += [ 'msvc/fpu.cc' ]
         obj.uselib += ' OLE'
+    else:
+        obj.source += [ 'fpu.cc' ]
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests

@@ -43,7 +43,7 @@ AudioBuffer::AudioBuffer(size_t capacity)
 AudioBuffer::~AudioBuffer()
 {
 	if (_owns_data)
-		free(_data);
+		cache_aligned_free(_data);
 }
 
 void
@@ -60,7 +60,7 @@ AudioBuffer::resize (size_t size)
 		return;
 	}
 
-	free (_data);
+	cache_aligned_free (_data);
 
 	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * size);
 

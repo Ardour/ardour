@@ -5202,6 +5202,12 @@ Editor::add_routes (RouteList& routes)
 	connect_routes_and_update_global_rec_button (routes);
 }
 
+namespace {
+    bool tv_not_selected (TimeAxisView *tv) {
+        return !tv->get_selected ();
+    }
+}
+
 void
 Editor::timeaxisview_deleted (TimeAxisView *tv)
 {
@@ -5245,19 +5251,20 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 
 	if (current_mixer_strip && current_mixer_strip->route() == route) {
 
-		TimeAxisView* next_tv;
-
-		if (track_views.empty()) {
-			next_tv = 0;
-		} else if (i == track_views.end()) {
-			next_tv = track_views.front();
-		} else {
-			next_tv = (*i);
+        // find first non selected track
+        TimeAxisView* first_non_selected_tv = 0;
+        
+        if (!track_views.empty() ) {
+            
+            i = std::find_if (track_views.begin(), track_views.end(), tv_not_selected);
+            
+            if (i != track_views.end() ) {
+                first_non_selected_tv = (*i);
+            }
 		}
-
-
-		if (next_tv ) {
-			set_selected_mixer_strip (*next_tv);
+        
+        if (first_non_selected_tv ) {
+			set_selected_mixer_strip (*first_non_selected_tv);
 		} else {
 			/* make the editor mixer strip go away setting the
 			 * button to inactive (which also unticks the menu option)
