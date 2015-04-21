@@ -416,7 +416,7 @@ int main() { return 0; }''',
                 # mingw GCC compiler to uses at&t (Unix specific) assembler dialect by default
                 # compiler_flags.append (["--mmnemonic=att", "msyntax=att")
                 
-                compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'], flags_dicts['attasm'] ])
+                compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'], flags_dict['attasm'] ])
                 
     # end of processor-specific section
 
