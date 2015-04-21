@@ -59,7 +59,10 @@ FPU::FPU ()
 
 #else	
 
-#ifndef USE_X86_64_ASM /* *nix; 32 bit version */
+#ifndef _LP64 /* *nix; 32 bit version. This odd macro constant is required because we need something that identifies this as a 32 bit
+                 build on Linux and on OS X. Anything that serves this purpose will do, but this is the best thing we've identified
+                 so far.
+              */
 	
 	asm volatile (
 		"mov $1, %%eax\n"
