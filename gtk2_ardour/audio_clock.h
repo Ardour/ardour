@@ -98,10 +98,22 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
   protected:
 	void render (cairo_t*, cairo_rectangle_t*);
+	bool get_is_duration () const { return is_duration; } ;
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;
 
+	bool on_button_press_event (GdkEventButton *ev);
+	bool on_button_release_event(GdkEventButton *ev);
+	bool is_lower_layout_click(int y) const {
+		return y > upper_height + separator_height;
+	}
+	bool is_right_layout_click(int x) const {
+		return x > x_leading_padding + get_left_rect_width() + separator_height;
+	}
+	double get_left_rect_width() const {
+	       return round (((get_width() - separator_height) * mode_based_info_ratio) + 0.5);
+	}
   private:
 	Mode             _mode;
 	std::string      _name;
@@ -187,8 +199,6 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool on_key_press_event (GdkEventKey *);
 	bool on_key_release_event (GdkEventKey *);
 	bool on_scroll_event (GdkEventScroll *ev);
-	bool on_button_press_event (GdkEventButton *ev);
-	bool on_button_release_event(GdkEventButton *ev);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 	void on_size_request (Gtk::Requisition* req);
 	bool on_motion_notify_event (GdkEventMotion *ev);

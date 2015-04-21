@@ -4661,9 +4661,9 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 	framepos_t where = 0;
 	EditPoint ep = _edit_point;
 
-	if(Profile->get_mixbus())
+	if (Profile->get_mixbus())
 		if (ep == EditAtSelectedMarker)
-			ep=EditAtPlayhead;
+			ep = EditAtPlayhead;
 
 	if (from_outside_canvas && (ep == EditAtMouse)) {
 		ep = EditAtPlayhead;
@@ -4687,8 +4687,9 @@ Editor::get_preferred_edit_position (bool ignore_playhead, bool from_context_men
 				/* XXX not right but what can we do ? */
 				return 0;
 			}
-		} else
+		} else {
 			where = _session->audible_frame();
+		}
                 DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
 		break;
 

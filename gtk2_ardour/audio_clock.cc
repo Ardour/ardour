@@ -334,7 +334,7 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 
 		if (mode_based_info_ratio != 1.0) {
 
-			double left_rect_width = round (((get_width() - separator_height) * mode_based_info_ratio) + 0.5);
+			double left_rect_width = get_left_rect_width();
 
 			if (_need_bg) {
 				if (corner_radius) {

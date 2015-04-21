@@ -636,21 +636,14 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (framepos_t where, bool is_cd, bool is_xrun)
+Editor::mouse_add_new_marker (framepos_t where, bool is_cd)
 {
-	string markername, markerprefix;
+	string markername;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
 
-	if (is_xrun) {
-		markerprefix = "xrun";
-		flags = Location::IsMark;
-	} else {
-		markerprefix = "mark";
-	}
-
 	if (_session) {
-		_session->locations()->next_available_name(markername, markerprefix);
-		if (!is_xrun && !choose_new_marker_name(markername)) {
+		_session->locations()->next_available_name(markername, _("mark"));
+		if (!choose_new_marker_name(markername)) {
 			return;
 		}
 		Location *location = new Location (*_session, where, where, markername, (Location::Flags) flags);

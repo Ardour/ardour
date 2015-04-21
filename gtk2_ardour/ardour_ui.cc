@@ -184,8 +184,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, ui_config (new UIConfiguration)
 	, gui_object_state (new GUIObjectState)
 
-	, primary_clock (new MainClock (X_("primary"), false, X_("transport"), true, true, true, false, true))
-	, secondary_clock (new MainClock (X_("secondary"), false, X_("secondary"), true, true, false, false, true))
+	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
+	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
 	  
 	  /* big clock */
 
@@ -2354,7 +2354,7 @@ ARDOUR_UI::update_clocks ()
 	if (!_session) return;
 
 	if (editor && !editor->dragging_playhead()) {
-		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position()); /* EMIT_SIGNAL */
+		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position (true)); /* EMIT_SIGNAL */
 	}
 }
 
@@ -4080,7 +4080,10 @@ ARDOUR_UI::keyboard_settings () const
 void
 ARDOUR_UI::create_xrun_marker (framepos_t where)
 {
-	editor->mouse_add_new_marker (where, false, true);
+	if (_session) {
+		Location *location = new Location (*_session, where, where, _("xrun"), Location::IsMark);
+		_session->locations()->add (location);
+	}
 }
 
 void
@@ -4402,13 +4405,13 @@ void
 ARDOUR_UI::update_transport_clocks (framepos_t pos)
 {
 	if (ui_config->get_primary_clock_delta_edit_cursor()) {
-		primary_clock->set (pos, false, editor->get_preferred_edit_position());
+		primary_clock->set (pos, false, editor->get_preferred_edit_position (true));
 	} else {
 		primary_clock->set (pos);
 	}
 
 	if (ui_config->get_secondary_clock_delta_edit_cursor()) {
-		secondary_clock->set (pos, false, editor->get_preferred_edit_position());
+		secondary_clock->set (pos, false, editor->get_preferred_edit_position (true));
 	} else {
 		secondary_clock->set (pos);
 	}

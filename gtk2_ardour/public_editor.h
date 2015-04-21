@@ -286,7 +286,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (framepos_t, RegionSelection&) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
-	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false, bool is_xrun=false) = 0;
+	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next) = 0;
@@ -418,6 +418,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
 	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const = 0;
+
+	virtual void mouse_add_new_tempo_event (framepos_t where) = 0;
+	virtual void mouse_add_new_meter_event (framepos_t where) = 0;
+	virtual void edit_tempo_section (ARDOUR::TempoSection*) = 0;
+	virtual void edit_meter_section (ARDOUR::MeterSection*) = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

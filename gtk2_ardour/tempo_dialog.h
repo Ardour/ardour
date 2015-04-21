@@ -53,11 +53,13 @@ private:
 	bool bpm_button_release (GdkEventButton* );
 	bool entry_key_release (GdkEventKey* );
 	void pulse_change ();
-	void tap_tempo ();
+	bool tap_tempo_button_press (GdkEventButton* );
+	bool tap_tempo_focus_out (GdkEventFocus* );
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
 
+	bool tapped;      // whether the tap-tempo button has been clicked
 	gint64 last_tap;
 	double average_interval;
 
