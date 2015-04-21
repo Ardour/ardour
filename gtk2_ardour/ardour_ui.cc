@@ -97,6 +97,7 @@
 typedef uint64_t microseconds_t;
 
 #include "about.h"
+#include "editing.h"
 #include "actions.h"
 #include "add_route_dialog.h"
 #include "ambiguous_file_dialog.h"
@@ -152,6 +153,7 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
+using namespace Editing;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
@@ -2354,7 +2356,7 @@ ARDOUR_UI::update_clocks ()
 	if (!_session) return;
 
 	if (editor && !editor->dragging_playhead()) {
-		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position (true)); /* EMIT_SIGNAL */
+		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)); /* EMIT_SIGNAL */
 	}
 }
 
@@ -4405,13 +4407,13 @@ void
 ARDOUR_UI::update_transport_clocks (framepos_t pos)
 {
 	if (ui_config->get_primary_clock_delta_edit_cursor()) {
-		primary_clock->set (pos, false, editor->get_preferred_edit_position (true));
+		primary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
 	} else {
 		primary_clock->set (pos);
 	}
 
 	if (ui_config->get_secondary_clock_delta_edit_cursor()) {
-		secondary_clock->set (pos, false, editor->get_preferred_edit_position (true));
+		secondary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
 	} else {
 		secondary_clock->set (pos);
 	}

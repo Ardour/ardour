@@ -300,6 +300,8 @@ TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 		tapped = true;
 	}
 	last_tap = now;
+
+	return true;
 }
 
 bool

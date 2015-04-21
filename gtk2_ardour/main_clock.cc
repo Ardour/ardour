@@ -73,7 +73,7 @@ MainClock::absolute_time () const
 {
 	if (get_is_duration ()) {
 		// delta to edit cursor
-		return current_time () + PublicEditor::instance().get_preferred_edit_position (true);
+		return current_time () + PublicEditor::instance().get_preferred_edit_position (Editing::EDIT_IGNORE_PHEAD);
 	} else {
 		return current_time ();
 	}
