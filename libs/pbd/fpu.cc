@@ -16,7 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#if !(defined (COMPILER_MSVC) || defined (COMPILER_MINGW))
+
 #include "libpbd-config.h"
 
 #define _XOPEN_SOURCE 600
@@ -43,7 +43,24 @@ FPU::FPU ()
 	return;
 #else
 
-#ifndef _LP64 //USE_X86_64_ASM
+#ifdef PLATFORM_WINDOWS
+
+#ifndef USE_X86_64_ASM
+	/* no 32 bit version of assembler for windows */
+	return;
+#else
+	// Get CPU flags using Microsoft function
+	// It works for both 64 and 32 bit systems
+	// no need to use assembler for getting info from register, this function does this for us
+	int cpuInfo[4];
+	__cpuid (cpuInfo, 1);
+	cpuflags = cpuInfo[3];
+#endif
+
+#else	
+
+#ifndef USE_X86_64_ASM /* *nix; 32 bit version */
+	
 	asm volatile (
 		"mov $1, %%eax\n"
 		"pushl %%ebx\n"
@@ -55,7 +72,7 @@ FPU::FPU ()
 		: "%eax", "%ecx", "%edx"
 		);
 	
-#else
+#else /* *nix; 64 bit version */
 	
 	/* asm notes: although we explicitly save&restore rbx, we must tell
 	   gcc that ebx,rbx is clobbered so that it doesn't try to use it as an intermediate
@@ -75,6 +92,7 @@ FPU::FPU ()
 		);
 
 #endif /* USE_X86_64_ASM */
+#endif /* PLATFORM_WINDOWS */
 
 	if (cpuflags & (1<<25)) {
 		_flags = Flags (_flags | (HasSSE|HasFlushToZero));
@@ -112,12 +130,19 @@ FPU::FPU ()
 		
 		memset (*fxbuf, 0, 512);
 		
+#ifdef COMPILER_MSVC
+		__asm {
+			mov eax, fxbuf
+		        fxsave   [eax]
+	       };
+#else
 		asm volatile (
 			"fxsave (%0)"
 			:
 			: "r" (*fxbuf)
 			: "memory"
 			);
+#endif
 		
 		uint32_t mxcsr_mask = *((uint32_t*) &((*fxbuf)[28]));
 		
@@ -140,7 +165,3 @@ FPU::FPU ()
 FPU::~FPU ()
 {
 }
-
-#else  // COMPILER_MSVC
-	const char* pbd_fpu = "pbd/msvc/fpu.cc takes precedence over this file";
-#endif // COMPILER_MSVC

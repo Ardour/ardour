@@ -48,6 +48,7 @@ libpbd_sources = [
     'error.cc',
     'ffs.cc',
     'file_utils.cc',
+    'fpu.cc',
     'glib_semaphore.cc',
     'id.cc',
     'locale_guard.cc',
@@ -152,10 +153,7 @@ def build(bld):
             obj.defines += [ 'USE_X86_64_ASM' ]
             obj.defines += ['NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
-        obj.source += [ 'msvc/fpu.cc' ]
         obj.uselib += ' OLE'
-    else:
-        obj.source += [ 'fpu.cc' ]
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         # Unit tests
