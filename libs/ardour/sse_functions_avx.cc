@@ -28,7 +28,7 @@ x86_sse_avx_find_peaks(const ARDOUR::Sample* buf, ARDOUR::pframes_t nframes, flo
 {
 	__m256 current_max, current_min, work;
 
-	// Load max and min values into all four slots of the XMM registers
+	// Load max and min values into all eight slots of the YMM registers
 	current_min = _mm256_set1_ps(*min);
 	current_max = _mm256_set1_ps(*max);
 
@@ -49,8 +49,8 @@ x86_sse_avx_find_peaks(const ARDOUR::Sample* buf, ARDOUR::pframes_t nframes, flo
 		// load each 64 bytes into cash before processing
         while (nframes >= 16) {
 #if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)                                   
-				_mm_prefetch(((char*)buf+64), _mm_hint(0) );  // A total guess! Assumed to be eqivalent to
-#else                                              // the line below but waiting to be tested !!
+				_mm_prefetch(((char*)buf+64), _mm_hint(0) );
+#else    
                 __builtin_prefetch(buf+64,0,0);
 #endif
                 work = _mm256_load_ps(buf);
@@ -112,9 +112,8 @@ x86_sse_avx_find_peaks(const ARDOUR::Sample* buf, ARDOUR::pframes_t nframes, flo
 
 	*max = current_max[0];
 
-	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non AVX instructions
+	// zero upper 128 bit of 256 bit ymm register to avoid penalties using non-AVX instructions
 	_mm256_zeroupper ();
 }
-
 
 
