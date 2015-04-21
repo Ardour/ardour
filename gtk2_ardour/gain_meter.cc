@@ -63,7 +63,6 @@ using namespace std;
 using Gtkmm2ext::Keyboard;
 using namespace ArdourMeter;
 
-
 static void
 reset_cursor_to_default (Gtk::Entry* widget)
 {
@@ -101,6 +100,9 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_menu = 0;
 	next_release_selects = false;
 	_width = Wide;
+
+	fader_length = rint (fader_length * ARDOUR_UI::config()->get_font_scale() / 102400.);
+	fader_girth = rint (fader_girth * ARDOUR_UI::config()->get_font_scale() / 102400.);
 
 	if (horizontal) {
 		gain_slider = manage (new HSliderController (&gain_adjustment, boost::shared_ptr<PBD::Controllable>(), fader_length, fader_girth));
@@ -934,6 +936,8 @@ GainMeterBase::redraw_metrics()
 	meter_ticks2_area.queue_draw ();
 }
 
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * scale))
+
 GainMeter::GainMeter (Session* s, int fader_length)
 	: GainMeterBase (s, false, fader_length, 24)
 	, gain_display_box(true, 0)
@@ -949,8 +953,10 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	}
 	gain_display_box.pack_start (peak_display, true, true);
 
+	const double scale = ARDOUR_UI::config()->get_font_scale() / 102400.;
+
 	meter_metric_area.set_name ("AudioTrackMetrics");
-	meter_metric_area.set_size_request(24, -1);
+	meter_metric_area.set_size_request(PX_SCALE(24, 24), -1);
 
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
@@ -961,8 +967,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
-	gain_automation_state_button.set_size_request(15, 15);
-	gain_automation_style_button.set_size_request(15, 15);
+	gain_automation_state_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
+	gain_automation_style_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
 
 	fader_vbox = manage (new Gtk::VBox());
 	fader_vbox->set_spacing (0);
@@ -973,7 +979,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 
 	hbox.pack_start (fader_alignment, true, true);
 
-	set_spacing (2);
+	set_spacing (PX_SCALE(2, 2));
 
 	pack_start (gain_display_box, Gtk::PACK_SHRINK);
 	pack_start (hbox, Gtk::PACK_SHRINK);
@@ -984,8 +990,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_metric_area.signal_expose_event().connect (
 		sigc::mem_fun(*this, &GainMeter::meter_metrics_expose));
 
-	meter_ticks1_area.set_size_request(3,-1);
-	meter_ticks2_area.set_size_request(3,-1);
+	meter_ticks1_area.set_size_request (PX_SCALE(3, 3), -1);
+	meter_ticks2_area.set_size_request (PX_SCALE(3, 3), -1);
 
 	meter_ticks1_area.signal_expose_event().connect (
 			sigc::mem_fun(*this, &GainMeter::meter_ticks1_expose));
@@ -997,6 +1003,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_hbox.pack_start (meter_ticks2_area, false, false);
 	meter_hbox.pack_start (meter_metric_area, false, false);
 }
+#undef PX_SCALE
 
 GainMeter::~GainMeter () { }
 

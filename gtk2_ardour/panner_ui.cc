@@ -43,8 +43,6 @@ using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-const int PannerUI::pan_bar_height = 35;
-
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
 	, _current_nins (-1)
@@ -242,6 +240,8 @@ PannerUI::setup_pan ()
 		return;
 	}
 
+	const double scale = std::max(1.0, ARDOUR_UI::config()->get_font_scale() / 102400.);
+
 	if (_current_uri == "http://ardour.org/plugin/panner_2in2out#ui")
 	{
 		delete big_window;
@@ -250,7 +250,7 @@ PannerUI::setup_pan ()
 		boost::shared_ptr<Pannable> pannable = _panner->pannable();
 
 		_stereo_panner = new StereoPanner (_panshell);
-		_stereo_panner->set_size_request (-1, pan_bar_height);
+		_stereo_panner->set_size_request (-1, 5 * ceil(7. * scale));
 		_stereo_panner->set_send_drawing_mode (_send_mode);
 		pan_vbox.pack_start (*_stereo_panner, false, false);
 
@@ -286,7 +286,7 @@ PannerUI::setup_pan ()
 
 		_mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 
-		_mono_panner->set_size_request (-1, pan_bar_height);
+		_mono_panner->set_size_request (-1, 5 * ceil(7. * scale));
 		_mono_panner->set_send_drawing_mode (_send_mode);
 
 		update_pan_sensitive ();
@@ -295,7 +295,7 @@ PannerUI::setup_pan ()
 	else if (_current_uri == "http://ardour.org/plugin/panner_vbap#ui")
 	{
 		if (!twod_panner) {
-			twod_panner = new Panner2d (_panshell, 61);
+			twod_panner = new Panner2d (_panshell, 61 * scale);
 			twod_panner->set_name ("MixerPanZone");
 			twod_panner->show ();
 			twod_panner->signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event), false);
@@ -306,7 +306,7 @@ PannerUI::setup_pan ()
 		if (big_window) {
 			big_window->reset (nins);
 		}
-		twod_panner->set_size_request (-1, 61);
+		twod_panner->set_size_request (-1, 61 * scale);
 		twod_panner->set_send_drawing_mode (_send_mode);
 
 		/* and finally, add it to the panner frame */

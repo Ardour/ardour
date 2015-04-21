@@ -52,11 +52,6 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
-static const int pos_box_size = 9;
-static const int lr_box_size = 15;
-static const int step_down = 10;
-static const int top_step = 2;
-
 MonoPanner::ColorScheme MonoPanner::colors;
 bool MonoPanner::have_colors = false;
 
@@ -136,10 +131,16 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	int width, height;
 	double pos = position_control->get_value (); /* 0..1 */
 	uint32_t o, f, t, b, pf, po;
-	const double corner_radius = 5;
 
 	width = get_width();
 	height = get_height ();
+
+	const double scale = ARDOUR_UI::config()->get_font_scale() / 102400.;
+	const int step_down = rint(height / 3.5);
+	const int lr_box_size = height - 2 * step_down;
+	const int pos_box_size = (int)(rint(step_down * .8)) | 1;
+	const int top_step = step_down - pos_box_size;
+	const double corner_radius = 5 * scale;
 
 	o = colors.outline;
 	f = colors.fill;
@@ -165,7 +166,6 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->rectangle (0, 0, width, height);
 	context->fill ();
 
-
 	double usable_width = width - pos_box_size;
 
 	/* compute the centers of the L/R boxes based on the current stereo width */
@@ -173,8 +173,8 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 		usable_width -= 1.0;
 	}
 	const double half_lr_box = lr_box_size/2.0;
-	const double left = 4 + half_lr_box; // center of left box
-	const double right = width - 4 - half_lr_box; // center of right box
+	const double left = pos_box_size * .5 + half_lr_box; // center of left box
+	const double right = width - pos_box_size * .5 - half_lr_box; // center of right box
 
 	/* center line */
 	context->set_source_rgba (UINT_RGBA_R_FLT(o), UINT_RGBA_G_FLT(o), UINT_RGBA_B_FLT(o), UINT_RGBA_A_FLT(o));
@@ -255,8 +255,8 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->set_line_width (2.0);
 	context->move_to (spos + (pos_box_size/2.0), top_step); /* top right */
 	context->rel_line_to (0.0, pos_box_size); /* lower right */
-	context->rel_line_to (-pos_box_size/2.0, 4.0); /* bottom point */
-	context->rel_line_to (-pos_box_size/2.0, -4.0); /* lower left */
+	context->rel_line_to (-pos_box_size/2.0, 4.0 * scale); /* bottom point */
+	context->rel_line_to (-pos_box_size/2.0, -4.0 * scale); /* lower left */
 	context->rel_line_to (0.0, -pos_box_size); /* upper left */
 	context->close_path ();
 
@@ -268,8 +268,8 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 
 	/* marker line */
 	context->set_line_width (1.0);
-	context->move_to (spos, pos_box_size + 5);
-	context->rel_line_to (0, half_lr_box+step_down);
+	context->move_to (spos, 1 + top_step + pos_box_size + 4.0 * scale);
+	context->line_to (spos, half_lr_box + step_down + lr_box_size - 1);
 	context->set_source_rgba (UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
 	context->stroke ();
 

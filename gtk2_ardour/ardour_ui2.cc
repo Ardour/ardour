@@ -223,11 +223,7 @@ ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
 
-#ifdef __APPLE__
-	const double btn_scale = 1.0;
-#else
 	const double btn_scale = config()->get_font_scale () / 102400.;
-#endif
 
 	transport_tearoff_hbox.set_border_width (PX_SCALE(3,3));
 	transport_tearoff_hbox.set_spacing (PX_SCALE(3,3));

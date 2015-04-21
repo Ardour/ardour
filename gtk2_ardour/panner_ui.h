@@ -100,8 +100,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	std::string _current_uri;
 	bool _send_mode;
 
-	static const int pan_bar_height;
-
 	Panner2d*       twod_panner; ///< 2D panner, or 0
 	Panner2dWindow* big_window;
 

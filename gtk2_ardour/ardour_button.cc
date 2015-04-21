@@ -199,11 +199,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	uint32_t text_color;
 	uint32_t led_color;
 
-#ifdef __APPLE__
-	const double dpiscale = 1.0;
-#else
 	const double dpiscale = ARDOUR_UI::config()->get_font_scale () / 102400.;
-#endif
 	const double corner_radius = std::max(2.0, _corner_radius * dpiscale);
 
 	if (_update_colors) {
@@ -326,7 +322,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	if ((_elements & VectorIcon) && _icon == RecTapeMode) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
-		const double r = std::min(10., std::min(x, y) * .6); // TODO we need a better way to limit max. radius.
+		const double r = std::min(x, y) * .6;
 		const double slit = .11 * M_PI;
 		cairo_save(cr);
 		cairo_translate(cr, x, y);
@@ -384,7 +380,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	else if ((_elements & VectorIcon) && _icon == RecButton) {
 		const double x = get_width() * .5;
 		const double y = get_height() * .5;
-		const double r = std::min(10., std::min(x, y) * .55); // TODO we need a better way to limit max. radius.
+		const double r = std::min(x, y) * .55;
 		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
 		if (active_state() == Gtkmm2ext::ExplicitActive)
 			cairo_set_source_rgba (cr, .95, .1, .1, 1.);
@@ -831,7 +827,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		const float newdia = rint (char_pixel_height());
+		const float newdia = rint (11. * ARDOUR_UI::config()->get_font_scale () / 102400.);
 		if (_diameter != newdia) {
 			_pattern_height = 0;
 			_diameter = newdia;
