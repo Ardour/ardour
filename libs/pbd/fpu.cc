@@ -23,6 +23,7 @@
 #include <cstring> // for memset
 #include <cstdlib>
 #include <stdint.h>
+#include <intrin.h>
 #include <assert.h>
 
 #include "pbd/fpu.h"
