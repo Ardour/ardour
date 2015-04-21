@@ -408,8 +408,7 @@ def build(bld):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
         elif bld.env['build_target'] == 'x86_64':
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
-        
-        if bld.env['build_target'] == 'mingw':
+        elif bld.env['build_target'] == 'mingw':
                 import platform as PLATFORM
                 u = PLATFORM.uname ()
                 cpu = u[4]
