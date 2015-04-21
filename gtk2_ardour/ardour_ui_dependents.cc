@@ -61,6 +61,9 @@ ARDOUR_UI::we_have_dependents ()
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
+	std::cerr << "Mixer page = " << editor->tabs().append_page (*mixer, _("Mixer")) << std::endl;
+	editor->tabs().set_tab_detachable (*mixer);
+	
 	/* all actions are defined */
 
 	ActionManager::enable_accelerators ();
@@ -101,3 +104,28 @@ ARDOUR_UI::exit_on_main_window_close (GdkEventAny * /*ev*/)
 #endif
 }
 
+Gtk::Notebook*
+ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
+				 GtkWidget* w,
+				 gint x,
+				 gint y,
+				 gpointer)
+{
+	using namespace std;
+	
+	if (w == GTK_WIDGET(mixer->gobj())) {
+		/* Mixer */
+
+		cerr << "Call use own window\n";
+		
+		Gtk::Notebook* nb = mixer->use_own_window ();
+		Gtk::Window* win = (Gtk::Window*) nb->get_toplevel ();
+		
+		win->move (x, y);
+		win->present ();
+
+		return nb;
+	}
+
+	return 0;
+}

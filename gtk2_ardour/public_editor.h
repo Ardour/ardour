@@ -32,6 +32,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/window.h>
 #include <gtkmm/actiongroup.h>
+#include <gtkmm/notebook.h>
 #include <sigc++/signal.h>
 
 #include "evoral/Note.hpp"
@@ -441,7 +442,11 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;
 
+	Gtk::Notebook& tabs() { return _tabs; }
+	
   protected:
+	Gtk::Notebook _tabs;
+
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;

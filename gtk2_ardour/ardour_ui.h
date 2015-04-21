@@ -320,6 +320,15 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void hide_application ();
 
+	Gtk::Notebook& tabs();
+	
+	/* called from a static C function */
+
+	Gtk::Notebook* tab_window_root_drop (GtkNotebook* src,
+					     GtkWidget* w,
+					     gint x,
+					     gint y,
+					     gpointer user_data);
   protected:
 	friend class PublicEditor;
 
@@ -340,7 +349,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_session_options_window ();
 
   private:
-	PublicEditor*        editor;
 	Mixer_UI*            mixer;
 	NSM_Client*          nsm;
 	bool                _was_dirty;
@@ -619,15 +627,19 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void setup_order_hint (AddRouteDialog::InsertAt);
 
 	int         create_mixer ();
+	PublicEditor     *editor;
 	int         create_editor ();
 
 	Meterbridge  *meterbridge;
 	int         create_meterbridge ();
+
+        RCOptionEditor* rc_option_editor;
+	Gtk::HBox rc_option_editor_placeholder;
+
         /* Dialogs that can be created via new<T> */
 
         WM::Proxy<SpeakerDialog> speaker_config_window;
         WM::Proxy<KeyEditor> key_editor;
-        WM::Proxy<RCOptionEditor> rc_option_editor;
         WM::Proxy<AddRouteDialog> add_route_dialog;
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
@@ -797,6 +809,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	DuplicateRouteDialog* duplicate_routes_dialog;
 
 	void grab_focus_after_dialog ();
+
+	void tabs_switch (GtkNotebookPage*, guint page_number);
 };
 
 #endif /* __ardour_gui_h__ */

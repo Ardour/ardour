@@ -470,25 +470,19 @@ OptionEditorPage::OptionEditorPage (Gtk::Notebook& n, std::string const & t)
  *  @param t Title for the dialog.
  */
 OptionEditor::OptionEditor (PBD::Configuration* c, std::string const & t)
-	: ArdourWindow (t), _config (c)
+	: _config (c)
 {
 	using namespace Notebook_Helpers;
 
-	set_default_size (300, 300);
-	// set_wmclass (X_("ardour_preferences"), PROGRAM_NAME);
-
-	set_name ("Preferences");
-	add_events (Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
-
 	set_border_width (4);
 
-	add (_notebook);
+	pack_start (_notebook, true, true);
 
 	_notebook.set_show_tabs (true);
 	_notebook.set_show_border (true);
 	_notebook.set_name ("OptionsNotebook");
 
-	show_all_children();
+	show_all ();
 
 	/* Watch out for changes to parameters */
 	_config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&OptionEditor::parameter_changed, this, _1), gui_context());

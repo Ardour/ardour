@@ -668,8 +668,11 @@ Editor::Editor ()
 
 	status_bar_hpacker.show ();
 
+	_tabs.append_page (global_hpacker, _("Editor"));
+	_tabs.show ();
+	
 	vpacker.pack_end (status_bar_hpacker, false, false);
-	vpacker.pack_end (global_hpacker, true, true);
+	vpacker.pack_end (_tabs, true, true);
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -852,13 +855,9 @@ Editor::add_toplevel_menu (Container& cont)
 void
 Editor::add_transport_frame (Container& cont)
 {
-	if(ARDOUR::Profile->get_mixbus()) {
-		global_vpacker.pack_start (cont, false, false);
-		global_vpacker.reorder_child (cont, 0);
-		cont.show_all ();
-	} else {
-		vpacker.pack_start (cont, false, false);
-	}
+	global_vpacker.pack_start (cont, false, false);
+	global_vpacker.reorder_child (cont, 0);
+	cont.show_all ();
 }
 
 bool

@@ -66,6 +66,22 @@ using namespace Gtk;
 using namespace Glib;
 using namespace ARDOUR_UI_UTILS;
 
+
+static GtkNotebook*
+tab_window_root_drop (GtkNotebook* src,
+		      GtkWidget* w,
+		      gint x,
+		      gint y,
+		      gpointer user_data)
+{
+	Gtk::Notebook* nb = ARDOUR_UI::instance()->tab_window_root_drop (src, w, x, y, user_data);
+	if (nb) {
+		return nb->gobj();
+	} else {
+		return 0;
+	}
+}
+
 int
 ARDOUR_UI::setup_windows ()
 {
@@ -112,6 +128,15 @@ ARDOUR_UI::setup_windows ()
 	editor->add_toplevel_menu (top_packer);
 
 	editor->add_transport_frame (transport_frame);
+	editor->tabs().append_page (rc_option_editor_placeholder, _("Preferences"));
+
+	editor->tabs().signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
+
+	/* It would be nice if Gtkmm had wrapped this rather than just
+	 * deprecating the old set_window_creation_hook() method, but oh well...
+	 */
+	g_signal_connect (editor->tabs().gobj(), "create-window",
+			  (GCallback) ::tab_window_root_drop, this);
 
 	setup_transport();
 
@@ -120,6 +145,18 @@ ARDOUR_UI::setup_windows ()
 	setup_tooltips ();
 
 	return 0;
+}
+
+void
+ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page_number)
+{
+	if (page_number == 2) {
+		if (!rc_option_editor) {
+			rc_option_editor = new RCOptionEditor;
+			rc_option_editor_placeholder.pack_start (*rc_option_editor, true, true);
+			rc_option_editor_placeholder.show_all ();
+		}
+	}
 }
 
 void
@@ -696,11 +733,7 @@ ARDOUR_UI::restore_editing_space ()
 void
 ARDOUR_UI::show_ui_prefs ()
 {
-	RefPtr<Action> act = ActionManager::get_action (X_("Window"), X_("toggle-rc-options-editor"));
-	assert (act);
-
-	act->activate();
-
+	tabs().set_current_page (2);
 	rc_option_editor->set_current_page (_("GUI"));
 }
 
@@ -713,11 +746,7 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 		return false;
 	}
 
-	RefPtr<Action> act = ActionManager::get_action (X_("Window"), X_("toggle-rc-options-editor"));
-	assert (act);
-
-	act->activate();
-
+	tabs().set_current_page (2);
 	rc_option_editor->set_current_page (_("Misc"));
 	return true;
 }

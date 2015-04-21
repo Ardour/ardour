@@ -76,7 +76,7 @@ using namespace ARDOUR_UI_UTILS;
 class ClickOptions : public OptionEditorBox
 {
 public:
-	ClickOptions (RCConfiguration* c, Gtk::Window* p)
+	ClickOptions (RCConfiguration* c)
 		: _rc_config (c)
 		, _click_browse_button (_("Browse..."))
 		, _click_emphasis_browse_button (_("Browse..."))
@@ -1343,9 +1343,8 @@ private:
 class ControlSurfacesOptions : public OptionEditorBox
 {
 public:
-	ControlSurfacesOptions (Gtk::Window& parent)
-		: _parent (parent)
-		, _ignore_view_change (0)
+	ControlSurfacesOptions ()
+		: _ignore_view_change (0)
 	{
 		_store = ListStore::create (_model);
 		_view.set_model (_store);
@@ -1496,7 +1495,8 @@ private:
 		 * or re-initializing a surface.
 		 * tear_down_gui() hides an deletes the Window if it exists.
 		 */
-		ArdourWindow* win = new ArdourWindow (_parent, title.get_string());
+		ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
+		win->set_title ("Control Protocol Options");
 		win->add (*box);
 		box->show ();
 		win->present ();
@@ -1532,7 +1532,6 @@ private:
 	Glib::RefPtr<ListStore> _store;
 	ControlSurfacesModelColumns _model;
 	TreeView _view;
-        Gtk::Window& _parent;
         PBD::ScopedConnection protocol_status_connection;
         uint32_t _ignore_view_change;
 	Gtk::Button* edit_button;
@@ -1800,7 +1799,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Click")));
 
-	add_option (_("Misc"), new ClickOptions (_rc_config, this));
+	add_option (_("Misc"), new ClickOptions (_rc_config));
 
 	add_option (_("Misc"),
 	     new FaderOption (
@@ -2710,7 +2709,7 @@ if (!Profile->get_mixbus()) {
 
 	/* Control Surfaces */
 
-	add_option (_("Control Surfaces"), new ControlSurfacesOptions (*this));
+	add_option (_("Control Surfaces"), new ControlSurfacesOptions);
 
 	ComboOption<RemoteModel>* rm = new ComboOption<RemoteModel> (
 		"remote-model",

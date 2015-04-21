@@ -45,7 +45,6 @@
       <menuitem action='toggle-session-options-editor'/>
 #ifdef GTKOSX      
       <menuitem action='toggle-about'/>
-      <menuitem action='toggle-rc-options-editor'/>
 #endif
       <separator/>
       <menuitem action='lock'/>
@@ -276,10 +275,6 @@
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
-#ifndef GTKOSX
-      <separator/>
-      <menuitem action='toggle-rc-options-editor'/>
-#endif
     </menu>         
 
     <menu name='RegionMenu' action='RegionMenu'>

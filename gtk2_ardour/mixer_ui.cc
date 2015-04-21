@@ -28,6 +28,7 @@
 #include <gtkmm/accelmap.h>
 
 #include "pbd/convert.h"
+#include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
 #include <glibmm/threads.h>
@@ -36,6 +37,7 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/tearoff.h>
 #include <gtkmm2ext/window_title.h>
+#include <gtkmm2ext/doi.h>
 
 #include "ardour/amp.h"
 #include "ardour/debug.h"
@@ -87,8 +89,7 @@ Mixer_UI::instance ()
 }
 
 Mixer_UI::Mixer_UI ()
-	: Window (Gtk::WINDOW_TOPLEVEL)
-	, VisibilityTracker (*((Gtk::Window*) this))
+	: _parent_window (0)
 	, _visible (false)
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)
@@ -103,13 +104,10 @@ Mixer_UI::Mixer_UI ()
 	, _maximised (false)
 	, _show_mixer_list (true)
 {
-	/* allow this window to become the key focus window */
-	set_flags (CAN_FOCUS);
-
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this), gui_context());
 
 	scroller.set_can_default (true);
-	set_default (scroller);
+	// set_default (scroller);
 
 	scroller_base.set_flags (Gtk::CAN_FOCUS);
 	scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -239,26 +237,21 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
 							 static_cast<Gtk::Paned*> (&list_hpane)));
 
-	global_vpacker.pack_start (list_hpane, true, true);
+	pack_start (list_hpane, true, true);
 
-	add (global_vpacker);
 	set_name ("MixerWindow");
 
 	update_title ();
 
-	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
-
-	signal_delete_event().connect (sigc::mem_fun (*this, &Mixer_UI::hide_window));
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-
-	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
 
 	route_group_display_button_box->show();
 	route_group_add_button->show();
 	route_group_remove_button->show();
 
+	show ();
+
 	global_hpacker.show();
-	global_vpacker.show();
 	scroller.show();
 	scroller_base.show();
 	scroller_hpacker.show();
@@ -310,14 +303,63 @@ Mixer_UI::track_editor_selection ()
 void
 Mixer_UI::ensure_float (Window& win)
 {
-	win.set_transient_for (*this);
+	if (_parent_window) {
+		win.set_transient_for (*_parent_window);
+	}
+}
+
+Gtk::Notebook*
+Mixer_UI::use_own_window ()
+{
+	/* This is called after a drop of a tab onto the root window. Its
+	 * responsibility is to return the notebook that this Mixer_UI should
+	 * be packed into before the drop handling is completed. It is not
+	 * responsible for actually taking care of this packing
+	 */
+
+	if (_parent_window) {
+		return 0;
+	}
+
+	create_own_window ();
+
+	return (Gtk::Notebook*) _parent_window->get_child();
+}
+
+void
+Mixer_UI::create_own_window ()
+{
+	if (_parent_window) {
+		return;
+	}
+
+	_parent_window = new Window (Gtk::WINDOW_TOPLEVEL);
+	Notebook* notebook = manage (new Notebook);
+
+	notebook->set_show_tabs (false);
+	notebook->show_all ();
+
+	_parent_window->add (*notebook);
+
+	/* allow parent window to become the key focus window */
+	_parent_window->set_flags (CAN_FOCUS);
+
+	/* handle window manager close/delete event sensibly */
+	_parent_window->signal_delete_event().connect (sigc::mem_fun (*this, &Mixer_UI::hide_window));
+
+	set_window_pos_and_size ();
+	update_title ();
 }
 
 void
 Mixer_UI::show_window ()
 {
-	present ();
-	if (!_visible) {
+	if (_parent_window) {
+		_parent_window->present ();
+	}
+
+	if (!_visible) { /* was hidden, update status */
+
 		set_window_pos_and_size ();
 
 		/* show/hide group tabs as required */
@@ -337,19 +379,43 @@ Mixer_UI::show_window ()
 		}
 	}
 
+	if (!_parent_window) {
+		/* not in its own window, just switch main tabs to show mixer */
+		int pagenum = ARDOUR_UI::instance()->tabs().page_num (*this);
+		ARDOUR_UI::instance()->tabs().set_current_page (pagenum);
+	}
+
 	/* force focus into main area */
 	scroller_base.grab_focus ();
-
 	_visible = true;
 }
 
 bool
 Mixer_UI::hide_window (GdkEventAny *ev)
 {
-	get_window_pos_and_size ();
+	if (_parent_window) {
+		/* unpack Mixer_UI from parent, put it back in the main tabbed
+		 * notebook
+		 */
+
+		get_window_pos_and_size ();
+
+		get_parent()->remove (*this);
+		ARDOUR_UI::instance()->tabs().insert_page (*this, _("Mixer"), 1);
+		ARDOUR_UI::instance()->tabs().set_tab_detachable (*this);
+		ARDOUR_UI::instance()->tabs().set_current_page (0);
+
+		show_all ();
+
+		delete_when_idle (_parent_window);
+		_parent_window = 0;
+	}
+
+	ARDOUR_UI::instance()->tabs().set_current_page (0);
 
 	_visible = false;
-	return just_hide_it(ev, static_cast<Gtk::Window *>(this));
+
+	return true;
 }
 
 
@@ -1479,15 +1545,15 @@ Mixer_UI::show_mixer_list (bool yn)
 {
 	if (yn) {
 		list_vpacker.show ();
-		
-		//if user wants to show the pane, we should make sure that it is wide enough to be visible 
+
+		//if user wants to show the pane, we should make sure that it is wide enough to be visible
 		int width = list_hpane.get_position();
 		if (width < 40)
 			list_hpane.set_position(40);
 	} else {
 		list_vpacker.hide ();
 	}
-	
+
 	_show_mixer_list = yn;
 }
 
@@ -1616,7 +1682,7 @@ Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 	using namespace Menu_Helpers;
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route (this);
+		// ARDOUR_UI::instance()->add_route (this);
 		return true;
 	}
 
@@ -1636,15 +1702,19 @@ Mixer_UI::set_strip_width (Width w, bool save)
 void
 Mixer_UI::set_window_pos_and_size ()
 {
-	resize (m_width, m_height);
-	move (m_root_x, m_root_y);
+	if (_parent_window) {
+		_parent_window->resize (m_width, m_height);
+		_parent_window->move (m_root_x, m_root_y);
+	}
 }
 
 void
 Mixer_UI::get_window_pos_and_size ()
 {
-	get_position(m_root_x, m_root_y);
-	get_size(m_width, m_height);
+	if (_parent_window) {
+		_parent_window->get_position(m_root_x, m_root_y);
+		_parent_window->get_size(m_width, m_height);
+	}
 }
 
 struct PluginStateSorter {
@@ -1681,6 +1751,16 @@ Mixer_UI::set_state (const XMLNode& node)
 	m_root_y = 1;
 
 	if ((geometry = find_named_node (node, "geometry")) != 0) {
+
+		/* if there's a geometry node, we have our own window */
+
+		create_own_window ();
+		Gtk::Notebook* notebook = (Gtk::Notebook*) _parent_window->get_child();
+		Gtk::Widget* parent = get_parent();
+		if (parent) {
+			((Gtk::Container*)parent)->remove (*this);
+		}
+		notebook->append_page (*this, _("Mixer"));
 
 		XMLProperty* prop;
 
@@ -1735,8 +1815,7 @@ Mixer_UI::set_state (const XMLNode& node)
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 		bool fs = tact && tact->get_active();
 		if (yn ^ fs) {
-			ActionManager::do_action ("Common",
-					"ToggleMaximalMixer");
+			ActionManager::do_action ("Common", "ToggleMaximalMixer");
 		}
 	}
 
@@ -1771,7 +1850,6 @@ Mixer_UI::set_state (const XMLNode& node)
 		favorite_order.sort (cmp);
 		sync_treeview_from_favorite_order ();
 	}
-
 	return 0;
 }
 
@@ -1780,8 +1858,8 @@ Mixer_UI::get_state (void)
 {
 	XMLNode* node = new XMLNode ("Mixer");
 
-	if (is_realized()) {
-		Glib::RefPtr<Gdk::Window> win = get_window();
+	if (_parent_window && _parent_window->is_realized() ) {
+		Glib::RefPtr<Gdk::Window> win = _parent_window->get_window();
 
 		get_window_pos_and_size ();
 
@@ -1928,30 +2006,25 @@ Mixer_UI::scroll_right ()
 bool
 Mixer_UI::on_key_press_event (GdkEventKey* ev)
 {
-        /* focus widget gets first shot, then bindings, otherwise
-           forward to main window
-        */
-
-	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
-		return true;
-	}
-
 	KeyboardKey k (ev->state, ev->keyval);
 
 	if (bindings.activate (k, Bindings::Press)) {
 		return true;
 	}
 
-        return forward_key_press (ev);
+	if (_parent_window) {
+		/* send it to the main window, since our own bindings didn't
+		 * handle it
+		 */
+		return forward_key_press (ev);
+	}
+
+	return false;
 }
 
 bool
 Mixer_UI::on_key_release_event (GdkEventKey* ev)
 {
-	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
-		return true;
-	}
-
 	KeyboardKey k (ev->state, ev->keyval);
 
 	if (bindings.activate (k, Bindings::Release)) {
@@ -2091,7 +2164,7 @@ Mixer_UI::setup_track_display ()
 void
 Mixer_UI::new_track_or_bus ()
 {
-	ARDOUR_UI::instance()->add_route (this);
+	// ARDOUR_UI::instance()->add_route (this);
 }
 
 
@@ -2111,16 +2184,20 @@ Mixer_UI::update_title ()
 			n = "*" + n;
 		}
 
-		WindowTitle title (n);
-		title += S_("Window|Mixer");
-		title += Glib::get_application_name ();
-		set_title (title.get_string());
+		if (own_window()) {
+			WindowTitle title (n);
+			title += S_("Window|Mixer");
+			title += Glib::get_application_name ();
+			own_window()->set_title (title.get_string());
+		}
 
 	} else {
 
-		WindowTitle title (S_("Window|Mixer"));
-		title += Glib::get_application_name ();
-		set_title (title.get_string());
+		if (own_window()) {
+			WindowTitle title (S_("Window|Mixer"));
+			title += Glib::get_application_name ();
+			own_window()->set_title (title.get_string());
+		}
 	}
 }
 
@@ -2194,9 +2271,12 @@ Mixer_UI::maximise_mixer_space ()
 		return;
 	}
 
-	fullscreen ();
+	Gtk::Window* win = (Gtk::Window*) get_toplevel();
 
-	_maximised = true;
+	if (win) {
+		win->fullscreen ();
+		_maximised = true;
+	}
 }
 
 void
@@ -2206,9 +2286,12 @@ Mixer_UI::restore_mixer_space ()
 		return;
 	}
 
-	unfullscreen();
+	Gtk::Window* win = (Gtk::Window*) get_toplevel();
 
-	_maximised = false;
+	if (win) {
+		win->unfullscreen();
+		_maximised = false;
+	}
 }
 
 void

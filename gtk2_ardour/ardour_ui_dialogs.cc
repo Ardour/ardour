@@ -366,11 +366,13 @@ ARDOUR_UI::goto_mixer_window ()
 	}
 
 	mixer->show_window ();
-	mixer->present ();
+
+	// mixer->present ();
 	/* mixer should now be on top */
-	if (UIConfiguration::instance().get_transients_follow_front()) {
-		WM::Manager::instance().set_transient_for (mixer);
-	}
+	//if (UIConfiguration::instance().get_transients_follow_front()) {
+	// WM::Manager::instance().set_transient_for (mixer);
+	//}
+
 	_mixer_on_top = true;
 }
 
@@ -401,7 +403,7 @@ ARDOUR_UI::toggle_mixer_window ()
 	if (show) {
 		goto_mixer_window ();
 	} else {
-		mixer->hide ();
+		mixer->hide_window ((GdkEventAny*)0);
 	}
 }
 
@@ -549,7 +551,7 @@ ARDOUR_UI::main_window_state_event_handler (GdkEventWindowState* ev, bool window
 		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
 			if (big_clock_window) {
-				big_clock_window->set_transient_for (*mixer);
+				// big_clock_window->set_transient_for (*mixer);
 			}
 		}
 	}
