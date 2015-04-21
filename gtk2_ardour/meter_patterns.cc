@@ -620,7 +620,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	const double fixfontsize = 1.125;
 #else
 	// counter-act global font-scaling.
-	const double fixfontsize = std::min(1.0, 1.0 / sqrt((double) ARDOUR_UI::config()->get_font_scale() / 102400.));
+	const double fixfontsize = std::min(1.0, 0.9 / sqrt((double) ARDOUR_UI::config()->get_font_scale() / 102400.));
 #endif
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
