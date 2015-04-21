@@ -29,7 +29,12 @@ def build(bld):
     obj.name     = 'coreaudio_backend'
     obj.target   = 'coreaudio_backend'
     obj.use      = 'libardour libpbd'
-    obj.framework = [ 'CoreAudio', 'AudioToolbox', 'CoreServices', 'CoreMidi' ]
+    obj.framework = [ 'CoreAudio', 'AudioToolbox', 'CoreServices' ]
+    if bld.env['build_target'] not in [ 'lion' ]:
+        obj.framework += [ 'CoreMidi' ]
+    else:
+        obj.framework += [ 'CoreMIDI' ]
+
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'
