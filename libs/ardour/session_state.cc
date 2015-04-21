@@ -4262,12 +4262,15 @@ Session::save_as (SaveAs& saveas)
 
 			for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
 				boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+
 				if (!fs) {
 					continue;
 				}
 
-				string newpath = make_new_media_path (fs->path(), to_dir, new_folder);
-				fs->set_path (newpath);
+				if (fs->within_session()) {
+					string newpath = make_new_media_path (fs->path(), to_dir, new_folder);
+					fs->set_path (newpath);
+				}
 			}
 		}
 
