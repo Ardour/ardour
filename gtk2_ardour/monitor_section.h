@@ -28,6 +28,7 @@
 #include "axis_view.h"
 #include "level_meter.h"
 #include "route_ui.h"
+#include "monitor_selector.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -85,6 +86,18 @@ class MonitorSection : public RouteUI
 	ArdourDisplay*  solo_boost_display;
 	ArdourDisplay*  solo_cut_display;
 
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
+	Gtk::Menu output_menu;
+	MonitorSelectorWindow *_output_selector;
+	ArdourButton* output_button;
+
+	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
+	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
+	void output_button_resized (Gtk::Allocation&);
+	void update_output_display ();
+	void disconnect_output ();
+	void edit_output_configuration ();
+
 	void populate_buttons ();
 	void map_state ();
 
@@ -107,6 +120,8 @@ class MonitorSection : public RouteUI
 	void dim_level_changed ();
 	void solo_boost_changed ();
 	void gain_value_changed ();
+	gint output_press (GdkEventButton *);
+	gint output_release (GdkEventButton *);
 
 	ArdourButton solo_in_place_button;
 	ArdourButton afl_button;
@@ -138,8 +153,10 @@ class MonitorSection : public RouteUI
 
 	PBD::ScopedConnection config_connection;
 	PBD::ScopedConnectionList control_connections;
+	PBD::ScopedConnection _output_changed_connection;
 
 	bool _inhibit_solo_model_update;
 
 	void assign_controllables ();
+	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 };

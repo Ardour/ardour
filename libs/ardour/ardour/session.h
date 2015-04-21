@@ -702,6 +702,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* monitor/master out */
 
 	void add_monitor_section ();
+	void reset_monitor_section ();
 	void remove_monitor_section ();
 
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }

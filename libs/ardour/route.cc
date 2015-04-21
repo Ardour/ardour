@@ -3096,6 +3096,11 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 		*/
 		need_to_queue_solo_change = false;
 		configure_processors (0);
+
+		if (is_master()) {
+			_session.reset_monitor_section();
+		}
+
 		io_changed (); /* EMIT SIGNAL */
 	}
 

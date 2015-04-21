@@ -1061,6 +1061,121 @@ Session::add_monitor_section ()
 }
 
 void
+Session::reset_monitor_section ()
+{
+	/* Process lock should be held by the caller.*/
+
+	if (!_monitor_out) {
+		return;
+	}
+
+	uint32_t limit = _master_out->n_outputs().n_audio();
+
+	/* connect the inputs to the master bus outputs. this
+	 * represents a separate data feed from the internal sends from
+	 * each route. as of jan 2011, it allows the monitor section to
+	 * conditionally ignore either the internal sends or the normal
+	 * input feed, but we should really find a better way to do
+	 * this, i think.
+	 */
+
+	_master_out->output()->disconnect (this);
+	_monitor_out->output()->disconnect (this);
+
+	_monitor_out->input()->ensure_io (_master_out->output()->n_ports(), false, this);
+	_monitor_out->output()->ensure_io (_master_out->output()->n_ports(), false, this);
+
+	for (uint32_t n = 0; n < limit; ++n) {
+		boost::shared_ptr<AudioPort> p = _monitor_out->input()->ports().nth_audio_port (n);
+		boost::shared_ptr<AudioPort> o = _master_out->output()->ports().nth_audio_port (n);
+
+		if (o) {
+			string connect_to = o->name();
+			if (_monitor_out->input()->connect (p, connect_to, this)) {
+				error << string_compose (_("cannot connect control input %1 to %2"), n, connect_to)
+				      << endmsg;
+				break;
+			}
+		}
+	}
+
+	/* connect monitor section to physical outs
+	 */
+
+	if (Config->get_auto_connect_standard_busses()) {
+
+		if (!Config->get_monitor_bus_preferred_bundle().empty()) {
+
+			boost::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
+
+			if (b) {
+				_monitor_out->output()->connect_ports_to_bundle (b, true, this);
+			} else {
+				warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
+							   Config->get_monitor_bus_preferred_bundle())
+					<< endmsg;
+			}
+
+		} else {
+
+			/* Monitor bus is audio only */
+
+			vector<string> outputs[DataType::num_types];
+
+			for (uint32_t i = 0; i < DataType::num_types; ++i) {
+				_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+			}
+
+			uint32_t mod = outputs[DataType::AUDIO].size();
+			uint32_t limit = _monitor_out->n_outputs().get (DataType::AUDIO);
+
+			if (mod != 0) {
+
+				for (uint32_t n = 0; n < limit; ++n) {
+
+					boost::shared_ptr<Port> p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
+					string connect_to;
+					if (outputs[DataType::AUDIO].size() > (n % mod)) {
+						connect_to = outputs[DataType::AUDIO][n % mod];
+					}
+
+					if (!connect_to.empty()) {
+						if (_monitor_out->output()->connect (p, connect_to, this)) {
+							error << string_compose (
+								_("cannot connect control output %1 to %2"),
+								n, connect_to)
+							      << endmsg;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/* Connect tracks to monitor section. Note that in an
+	   existing session, the internal sends will already exist, but we want the
+	   routes to notice that they connect to the control out specifically.
+	*/
+
+
+	boost::shared_ptr<RouteList> rls = routes.reader ();
+
+	PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+
+	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
+
+		if ((*x)->is_monitor()) {
+			/* relax */
+		} else if ((*x)->is_master()) {
+			/* relax */
+		} else {
+			(*x)->enable_monitor_send ();
+		}
+	}
+}
+
+void
 Session::hookup_io ()
 {
 	/* stop graph reordering notifications from
