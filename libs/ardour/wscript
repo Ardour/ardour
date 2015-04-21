@@ -412,7 +412,7 @@ def build(bld):
 	        # usability of the 64 bit windows assembler depends on the compiler target,
 	        # not the build host, which in turn can only be inferred from the name
 	        # of the compiler. 
-	        if re.search ('/x86_64/', str(conf.env['CC'])):
+	        if re.search ('/x86_64/', str(bld.env['CC'])):
 		        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit_win.s' ]
 
     # i18n
