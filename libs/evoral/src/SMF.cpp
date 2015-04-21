@@ -400,6 +400,11 @@ void
 SMF::end_write(string const & path) THROW_FILE_ERROR
 {
 	Glib::Threads::Mutex::Lock lm (_smf_lock);
+
+	if (!_smf) {
+		return;
+	}
+
 	FILE* f = fopen (path.c_str(), "w+");
 	if (f == 0) {
 		throw FileError (path);
