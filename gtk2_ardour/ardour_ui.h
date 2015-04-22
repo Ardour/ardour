@@ -102,6 +102,7 @@ class Mixer_UI;
 class PublicEditor;
 class RCOptionEditor;
 class RouteParams_UI;
+class SaveAsDialog;
 class SessionDialog;
 class SessionOptionEditor;
 class ShuttleControl;
@@ -617,6 +618,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	guint32  last_key_press_time;
 
 	void snapshot_session (bool switch_to_it);
+
+	SaveAsDialog* save_as_dialog;
+
 	bool save_as_progress_update (float fraction, int64_t cnt, int64_t total, Gtk::Label* label, Gtk::ProgressBar* bar);
 	void save_session_as ();
 	void rename_session ();

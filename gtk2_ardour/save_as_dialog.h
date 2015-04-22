@@ -37,7 +37,9 @@ public:
 	bool switch_to () const;
 	bool copy_media () const;
 	bool copy_external () const;
-		
+
+	void clear_name ();
+	
 private:
 	Gtk::CheckButton switch_to_button;
 	Gtk::CheckButton copy_media_button;

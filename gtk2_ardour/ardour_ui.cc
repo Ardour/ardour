@@ -240,7 +240,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
-
+	, save_as_dialog (0)
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
 	, _log_not_acknowledged (LogLevelNone)
@@ -2403,9 +2403,17 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 
-	SaveAsDialog sad;
+	if (!save_as_dialog) {
+		save_as_dialog = new SaveAsDialog;
+	} else {
+		save_as_dialog->clear_name ();
+	}
 
-	switch (sad.run()) {
+	int response = save_as_dialog->run ();
+
+	save_as_dialog->hide ();
+	
+	switch (response) {
 	case Gtk::RESPONSE_OK:
 		break;
 	default:
@@ -2421,13 +2429,13 @@ ARDOUR_UI::save_session_as ()
 	label.show ();
 	progress_bar.show ();
 	
-	Session::SaveAs sa;
+ 	Session::SaveAs sa;
 
-	sa.new_parent_folder = sad.new_parent_folder ();
-	sa.new_name = sad.new_name ();
-	sa.switch_to = sad.switch_to();
-	sa.copy_media = sad.copy_media();
-	sa.copy_external = sad.copy_external();
+	sa.new_parent_folder = save_as_dialog->new_parent_folder ();
+	sa.new_name = save_as_dialog->new_name ();
+	sa.switch_to = save_as_dialog->switch_to();
+	sa.copy_media = save_as_dialog->copy_media();
+	sa.copy_external = save_as_dialog->copy_external();
 
 	/* this signal will be emitted from within this, the calling thread,
 	 * after every file is copied. It provides information on percentage

@@ -111,3 +111,10 @@ SaveAsDialog::copy_external () const
 {
 	return copy_external_button.get_active ();
 }
+
+void
+SaveAsDialog::clear_name ()
+{
+	new_name_entry.set_text ("");
+	set_response_sensitive (RESPONSE_OK, false);
+}
