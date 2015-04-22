@@ -210,11 +210,7 @@ private:
 
 	class PortIcon : public Gtk::DrawingArea {
 	public:
-		PortIcon(bool input) {
-			_input = input;
-			_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-			set_size_request (-1, 2);
-		}
+		PortIcon(bool input);
 		void set_ports(ARDOUR::ChanCount const ports) { _ports = ports; }
 	private:
 		bool on_expose_event (GdkEventExpose *);

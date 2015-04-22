@@ -734,7 +734,8 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 			_plugin_insert->input_streams().n_audio() < _plugin_insert->natural_input_streams().n_audio()
 		 )
 	{
-		_routing_icon.set_size_request (-1, 7);
+		const double scale = max(1.0, ARDOUR_UI::config()->get_font_scale () / 102400.);
+		_routing_icon.set_size_request (-1, rint(7.0 * scale));
 		_routing_icon.set_visible(true);
 		_input_icon.show();
 	} else {
@@ -756,6 +757,12 @@ PluginInsertProcessorEntry::hide_things ()
 	plugin_insert_splitting_changed ();
 }
 
+ProcessorEntry::PortIcon::PortIcon(bool input) {
+	_input = input;
+	_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
+	const double scale = max(1.0, ARDOUR_UI::config()->get_font_scale () / 102400.);
+	set_size_request (-1, rint(2 * scale));
+}
 
 bool
 ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
@@ -775,6 +782,7 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
+	const double dx = rint(max(2.0, 2. * ARDOUR_UI::config()->get_font_scale () / 102400.));
 	if (_ports.n_total() > 1) {
 		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
 			if (i < _ports.n_midi()) {
@@ -789,7 +797,7 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 						UINT_RGBA_B_FLT(audio_port_color));
 			}
 			const float x = rintf(width * (.2f + .6f * i / (_ports.n_total() - 1.f)));
-			cairo_rectangle (cr, x-1, 0, 3, height);
+			cairo_rectangle (cr, x-dx * .5, 0, 1+dx, height);
 			cairo_fill(cr);
 		}
 	} else if (_ports.n_total() == 1) {
@@ -805,7 +813,7 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 					UINT_RGBA_B_FLT(audio_port_color));
 		}
 		const float x = rintf(width * .5);
-		cairo_rectangle (cr, x-1, 0, 3, height);
+		cairo_rectangle (cr, x-dx * .5, 0, 1+dx, height);
 		cairo_fill(cr);
 		cairo_stroke(cr);
 	}
@@ -822,7 +830,8 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_line_width (cr, 1.0);
+	const double scale = max(1.0, ARDOUR_UI::config()->get_font_scale () / 102400.);
+	cairo_set_line_width (cr, scale);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
 	Gtk::Allocation a = get_allocation();
