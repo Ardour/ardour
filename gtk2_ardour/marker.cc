@@ -77,6 +77,9 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 {
 
 	const double MH = marker_height - 1;
+	const double M3 = std::max(1.f, rintf(3.f * ARDOUR_UI::ui_scale));
+	const double M6 = std::max(2.f, rintf(6.f * ARDOUR_UI::ui_scale));
+
 	/* Shapes we use:
 	 *
 	 * Mark:
@@ -153,9 +156,9 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 		points = new ArdourCanvas::Points ();
 
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, MH * .4));
-		points->push_back (ArdourCanvas::Duple (3.0, MH));
+		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M6, MH * .4));
+		points->push_back (ArdourCanvas::Duple ( M3, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, MH * .4));
 		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
 
@@ -166,12 +169,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	case Tempo:
 	case Meter:
 		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (3.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, MH * .6));
-		points->push_back (ArdourCanvas::Duple (6.0, MH));
+		points->push_back (ArdourCanvas::Duple ( M3, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M6, MH * .6));
+		points->push_back (ArdourCanvas::Duple ( M6, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, MH * .6));
-		points->push_back (ArdourCanvas::Duple (3.0, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M3, 0.0));
 
 		_shift = 3;
 		_label_offset = 8.0;
@@ -180,10 +183,10 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	case SessionStart:
 	case RangeStart:
 		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.5, MH * .5));
-		points->push_back (ArdourCanvas::Duple (0.0, MH));
-		points->push_back (ArdourCanvas::Duple (0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (M6 + .5, MH * .5));
+		points->push_back (ArdourCanvas::Duple (    0.0, MH));
+		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
 
 		_shift = 0;
 		_label_offset = 8.0;
@@ -192,12 +195,12 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	case SessionEnd:
 	case RangeEnd:
 		points = new ArdourCanvas::Points ();
-		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
-		points->push_back (ArdourCanvas::Duple (6.0, MH));
+		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M6, MH));
 		points->push_back (ArdourCanvas::Duple (0.0, MH * .5));
-		points->push_back (ArdourCanvas::Duple (6.0, 0.0));
+		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
 
-		_shift = 6.0;
+		_shift = M6;
 		_label_offset = 0.0;
 		break;
 
@@ -400,8 +403,10 @@ Marker::setup_name_display ()
 		limit = _right_label_limit;
 	}
 
+	const float padding =  std::max(2.f, rintf(2.f * ARDOUR_UI::ui_scale));
+
 	/* Work out how wide the name can be */
-	int name_width = min ((double) pixel_width (_name, name_font) + 2, limit);
+	int name_width = min ((double) pixel_width (_name, name_font) + padding, limit);
 
 	if (name_width == 0) {
 		_name_item->hide ();
@@ -417,19 +422,19 @@ Marker::setup_name_display ()
 		
 		if (label_on_left ()) {
 			/* adjust right edge of background to fit text */
-			_name_background->set_x0 (_name_item->position().x - 2);
+			_name_background->set_x0 (_name_item->position().x - padding);
 			_name_background->set_x1 (_name_item->position().x + name_width + _shift);
 		} else {
 			/* right edge remains at zero (group-relative). Add
 			 * arbitrary 2 pixels of extra padding at the end
 			 */
-			_name_background->set_x1 (_name_item->position().x + name_width + 2.0);
+			_name_background->set_x1 (_name_item->position().x + name_width + padding);
 		}
 	}
 
 	_name_background->set_y0 (0);
 	/* unfortunate hard coding - this has to * match the marker bars height */
-	_name_background->set_y1 (marker_height + 1.0); 
+	_name_background->set_y1 (marker_height + 1.0);
 }
 
 void
