@@ -808,6 +808,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\monitor_selector.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\mono_panner.cc"
 				>
 			</File>
@@ -1025,6 +1029,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\ruler_dialog.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\save_as_dialog.cc"
 				>
 			</File>
 			<File
@@ -1774,6 +1782,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\monitor_selector.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\mono_panner.h"
 				>
 			</File>
@@ -2027,6 +2039,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\ruler_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\save_as_dialog.h"
 				>
 			</File>
 			<File
