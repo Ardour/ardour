@@ -414,8 +414,20 @@ def build(bld):
                 u = PLATFORM.uname ()
                 cpu = u[4]
                 if re.search ("(x86_64|AMD64)", cpu) != None:
-                        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_avx.cc' ]
+                        obj.source += [ 'sse_functions_xmm.cc' ]
                         obj.source += [ 'sse_functions_64bit_win.s', 'sse_avx_functions_64bit_win.s' ]
+                        
+                        # as long as we want to use AVX intrinsics in this file,
+                        # compile it with -mavx flag - append avx flag to the existing
+                        avx_cxxflags = list(bld.env['CXXFLAGS'])
+                        avx_cxxflags.append ('-mavx')
+                        
+                        bld(features = 'cxx',
+                            source   = 'sse_functions_avx.cc', 
+                            cxxflags = avx_cxxflags,
+                            target   = 'sse_avx_functions')
+                        
+                        obj.use += ['sse_avx_functions']
 
     # i18n
     if bld.is_defined('ENABLE_NLS'):

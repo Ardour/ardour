@@ -266,7 +266,7 @@ def set_compiler_flags (conf,opt):
                 # mingw GCC compiler to uses at&t (Unix specific) assembler dialect by default
                 # compiler_flags.append (["--mmnemonic=att", "msyntax=att")
                 
-                compiler_flags.extend (["-mavx", "-mvzeroupper", "-DUSE_XMMINTRIN"])  
+                compiler_flags.extend (["-DUSE_XMMINTRIN"])  
 
     # end of processor-specific section
 
