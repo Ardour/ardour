@@ -151,9 +151,8 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	width = get_width();
 	height = get_height ();
 
-	const double scale = ARDOUR_UI::config()->get_font_scale() / 102400.;
 	const int step_down = rint(height / 3.5);
-	const double corner_radius = 5.0 * scale;
+	const double corner_radius = 5.0 * ARDOUR_UI::ui_scale;
 	const int lr_box_size = height - 2 * step_down;
 	const int pos_box_size = (int)(rint(step_down * .8)) | 1;
 	const int top_step = step_down - pos_box_size;

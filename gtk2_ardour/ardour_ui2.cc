@@ -216,14 +216,12 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 	return 0;
 }
 
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * btn_scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
 
 void
 ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
-
-	const double btn_scale = config()->get_font_scale () / 102400.;
 
 	transport_tearoff_hbox.set_border_width (PX_SCALE(3,3));
 	transport_tearoff_hbox.set_spacing (PX_SCALE(3,3));

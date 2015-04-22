@@ -199,8 +199,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 	uint32_t text_color;
 	uint32_t led_color;
 
-	const double dpiscale = ARDOUR_UI::config()->get_font_scale () / 102400.;
-	const double corner_radius = std::max(2.0, _corner_radius * dpiscale);
+	const float corner_radius = std::max(2.f, _corner_radius * ARDOUR_UI::ui_scale);
 
 	if (_update_colors) {
 		set_colors ();
@@ -740,12 +739,12 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 
 		//black ring
 		cairo_set_source_rgb (cr, 0, 0, 0);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * dpiscale, 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * ARDOUR_UI::ui_scale, 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		//led color
 		ArdourCanvas::set_source_rgba (cr, led_color);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * dpiscale, 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * ARDOUR_UI::ui_scale, 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		cairo_restore (cr);
@@ -827,7 +826,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		const float newdia = rint (11. * ARDOUR_UI::config()->get_font_scale () / 102400.);
+		const float newdia = rintf (11.f * ARDOUR_UI::ui_scale);
 		if (_diameter != newdia) {
 			_pattern_height = 0;
 			_diameter = newdia;

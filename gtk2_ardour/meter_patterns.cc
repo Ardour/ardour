@@ -289,8 +289,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 
 	float box_l=0;
 	float box_w=0;
-	const double scale = ARDOUR_UI::config()->get_font_scale() / 102400.;
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
 	if (tickleft) {
 		if (w.get_name().substr(0, 3) == "Bar") {
 			box_w = PX_SCALE(2, 2);
@@ -620,7 +619,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	const double fixfontsize = 1.125;
 #else
 	// counter-act global font-scaling.
-	const double fixfontsize = std::min(1.0, 0.9 / sqrt((double) ARDOUR_UI::config()->get_font_scale() / 102400.));
+	const double fixfontsize = std::min(1.0, 0.9 / sqrtf(ARDOUR_UI::ui_scale));
 #endif
 
 	font.set_weight (Pango::WEIGHT_NORMAL);

@@ -82,7 +82,7 @@ Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::midi_scroomer_size_group = Glib::RefP
 void
 TimeAxisView::setup_sizes()
 {
-	name_width_px = ceil (100. * ARDOUR_UI::config()->get_font_scale() / 102400.);
+	name_width_px = ceilf (100.f * ARDOUR_UI::ui_scale);
 }
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)

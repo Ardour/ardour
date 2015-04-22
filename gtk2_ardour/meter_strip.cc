@@ -59,7 +59,7 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
 PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
@@ -70,8 +70,6 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	_tick_bar = 0;
 	_metricmode = -1;
 	metric_type = MeterPeak;
-
-	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
 
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
@@ -124,8 +122,6 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	, _route(rt)
 	, peak_display()
 {
-	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
-
 	mtr_vbox.set_spacing (PX_SCALE(2, 2));
 	nfo_vbox.set_spacing (PX_SCALE(2, 2));
 	SessionHandlePtr::set_session (sess);
@@ -517,8 +513,6 @@ MeterStrip::on_size_request (Gtk::Requisition* r)
 void
 MeterStrip::on_size_allocate (Gtk::Allocation& a)
 {
-	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
-
 	const int wh = a.get_height();
 	int nh;
 	int mh = 0;
@@ -551,8 +545,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
 
-	nh *= scale;
-	tnh *= scale;
+	nh *= ARDOUR_UI::ui_scale;
+	tnh *= ARDOUR_UI::ui_scale;
 
 	int prev_height, ignored;
 	bool need_relayout = false;
@@ -726,8 +720,6 @@ MeterStrip::redraw_metrics ()
 void
 MeterStrip::update_button_box ()
 {
-	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
-
 	if (!_session) return;
 	int height = 0;
 	if (_session->config.get_show_mute_on_meterbridge()) {
@@ -807,8 +799,6 @@ MeterStrip::name_changed () {
 	if (!_route) {
 		return;
 	}
-	const double scale = (double) ARDOUR_UI::config()->get_font_scale() / 102400.;
-
 	name_label.set_text(_route->name ());
 	if (_session && _session->config.get_track_name_number()) {
 		const int64_t track_number = _route->track_number ();
@@ -821,7 +811,7 @@ MeterStrip::name_changed () {
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		// NB numbers are rotated 90deg. on the meterbridge -> use height
-		number_label.set_size_request(PX_SCALE(18, 18), tnh * scale);
+		number_label.set_size_request(PX_SCALE(18, 18), tnh * ARDOUR_UI::ui_scale);
 	} else {
 		number_label.hide();
 	}

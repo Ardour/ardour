@@ -493,7 +493,7 @@ ProcessorEntry::toggle_panner_link ()
 ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable>(), 0, max(13.0, rint(13. * ARDOUR_UI::config()->get_font_scale () / 102400.)))
+	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable>(), 0, max(13.f, rintf(13.f * ARDOUR_UI::ui_scale)))
 	, _slider_persistant_tooltip (&_slider)
 	, _button (ArdourButton::led_default_elements)
 	, _ignore_ui_adjustment (false)
@@ -734,8 +734,7 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 			_plugin_insert->input_streams().n_audio() < _plugin_insert->natural_input_streams().n_audio()
 		 )
 	{
-		const double scale = max(1.0, ARDOUR_UI::config()->get_font_scale () / 102400.);
-		_routing_icon.set_size_request (-1, rint(7.0 * scale));
+		_routing_icon.set_size_request (-1, std::max (7.f, rintf(7.f * ARDOUR_UI::ui_scale)));
 		_routing_icon.set_visible(true);
 		_input_icon.show();
 	} else {
@@ -760,8 +759,7 @@ PluginInsertProcessorEntry::hide_things ()
 ProcessorEntry::PortIcon::PortIcon(bool input) {
 	_input = input;
 	_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-	const double scale = max(1.0, ARDOUR_UI::config()->get_font_scale () / 102400.);
-	set_size_request (-1, rint(2 * scale));
+	set_size_request (-1, std::max (2.f, rintf(2.f * ARDOUR_UI::ui_scale)));
 }
 
 bool
@@ -782,7 +780,7 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
-	const double dx = rint(max(2.0, 2. * ARDOUR_UI::config()->get_font_scale () / 102400.));
+	const double dx = rint(max(2., 2. * ARDOUR_UI::ui_scale));
 	if (_ports.n_total() > 1) {
 		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
 			if (i < _ports.n_midi()) {
@@ -830,8 +828,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	const double scale = max(1.0, ARDOUR_UI::config()->get_font_scale () / 102400.);
-	cairo_set_line_width (cr, scale);
+	cairo_set_line_width (cr, max (1.f, ARDOUR_UI::ui_scale));
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
 	Gtk::Allocation a = get_allocation();
