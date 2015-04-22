@@ -99,7 +99,7 @@
 	int redisplay_recent_templates ();
     bool info_scroller_update ();
 	void update_recent_session_buttons ();
-    void new_session (bool with_template);
+    void new_session ();
 
 // connections
     PBD::ScopedConnectionList _system_config_update;

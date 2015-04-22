@@ -133,7 +133,8 @@ SessionDialog::session_folder ()
 void
 SessionDialog::on_new_session (WavesButton*)
 {
-	new_session (false);
+	_session_template_full_name.clear ();
+	new_session ();
 }
 
 void
@@ -143,11 +144,10 @@ SessionDialog::on_new_session_with_template (WavesButton*)
 	std::vector<std::string> selected_files = ARDOUR::open_file_dialog(template_types, false, Config->get_default_session_parent_dir(), _("Select Template"));
 	if (selected_files.empty ()) {
 		set_keep_above(true);
-		return;
 	} else {
 		_session_template_full_name =  selected_files [0];
+		new_session ();
 	}
-	new_session (true);
 }
 
 void
@@ -325,7 +325,7 @@ SessionDialog::on_open_selected (WavesButton*)
 			response (Gtk::RESPONSE_ACCEPT);
 			break;
 		case RecentTemplate:
-			new_session (true);
+			new_session ();
 			break;
 		default:
 			break;
@@ -359,8 +359,8 @@ SessionDialog::on_recent_object (WavesButton* clicked_button)
         return;
     }
 	else {
-        _selected_session_full_name = "";
-		_session_template_full_name = "";
+        _selected_session_full_name.clear ();
+		_session_template_full_name.clear ();
         _selection_type = Nothing;
 		for (size_t i = 0; i < MAX_RECENT_SESSION_COUNT; i++) {
 			if (_recent_session_button[i] == clicked_button) {
@@ -397,6 +397,9 @@ SessionDialog::on_recent_session_double_click (WavesButton* button)
 void
 SessionDialog::on_recent_template_double_click (WavesButton* button)
 {
+	/* First click would set the _selected_template_full_name.
+	*/
+	new_session ();
 }
 
 void
@@ -442,12 +445,9 @@ SessionDialog::set_session_info (bool require_new,
 }
 
 void
-SessionDialog::new_session (bool with_template)
+SessionDialog::new_session ()
 {
     set_keep_above(false);
-	if (!with_template) {
-		_session_template_full_name.clear ();
-	}
 
     std::string temp_session_full_file_name = ARDOUR::save_file_dialog(Config->get_default_session_parent_dir(),_("Create New Session"));
     set_keep_above(true);
