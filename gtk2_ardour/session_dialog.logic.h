@@ -61,12 +61,6 @@
         NewSession
     } _selection_type;
 
-	struct RecentSessionsSorter {
-	    bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
-		    return ARDOUR::cmp_nocase (a.first, b.first) == -1;
-	    }
-	};
-
 // attributes & control data
 	bool _new_only;
     std::string _provided_session_name;

@@ -298,7 +298,7 @@ SessionDialog::redisplay_recent_templates ()
 		++session_template_count;
 	}
 
-	return ++session_template_count;
+	return session_template_count;
 }
 
 bool
