@@ -55,6 +55,8 @@ using namespace std;
 
 Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
 
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
+
 MonitorSection::MonitorSection (Session* s)
 	: AxisView (s)
 	, RouteUI (s)
@@ -156,12 +158,12 @@ MonitorSection::MonitorSection (Session* s)
 
 	solo_boost_control = new ArdourKnob ();
 	solo_boost_control->set_name("monitor knob");
-	solo_boost_control->set_size_request(40,40);
+	solo_boost_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
 	ARDOUR_UI::instance()->tooltips().set_tip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
 
 	solo_boost_display = new ArdourDisplay ();
 	solo_boost_display->set_name("monitor section cut");
-	solo_boost_display->set_size_request(80,20);
+	solo_boost_display->set_size_request (PX_SCALE(80), PX_SCALE(20));
 	solo_boost_display->add_controllable_preset(_("0 dB"), 0.0);
 	solo_boost_display->add_controllable_preset(_("3 dB"), 3.0);
 	solo_boost_display->add_controllable_preset(_("6 dB"), 6.0);
@@ -185,12 +187,12 @@ MonitorSection::MonitorSection (Session* s)
 
 	solo_cut_control = new ArdourKnob ();
 	solo_cut_control->set_name ("monitor knob");
-	solo_cut_control->set_size_request (40,40);
+	solo_cut_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
 	ARDOUR_UI::instance()->tooltips().set_tip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
 
 	solo_cut_display = new ArdourDisplay ();
 	solo_cut_display->set_name("monitor section cut");
-	solo_cut_display->set_size_request(80,20);
+	solo_cut_display->set_size_request (PX_SCALE(80), PX_SCALE(20));
 	solo_cut_display->add_controllable_preset(_("0 dB"), 0.0);
 	solo_cut_display->add_controllable_preset(_("-6 dB"), -6.0);
 	solo_cut_display->add_controllable_preset(_("-12 dB"), -12.0);
@@ -211,12 +213,12 @@ MonitorSection::MonitorSection (Session* s)
 
 	dim_control = new ArdourKnob ();
 	dim_control->set_name ("monitor knob");
-	dim_control->set_size_request (40,40);
+	dim_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
 	ARDOUR_UI::instance()->tooltips().set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
 
 	dim_display = new ArdourDisplay ();
 	dim_display->set_name("monitor section cut");
-	dim_display->set_size_request(80,20);
+	dim_display->set_size_request (PX_SCALE(80), PX_SCALE(20));
 	dim_display->add_controllable_preset(_("0 dB"), 0.0);
 	dim_display->add_controllable_preset(_("-3 dB"), -3.0);
 	dim_display->add_controllable_preset(_("-6 dB"), -6.0);
@@ -276,7 +278,7 @@ MonitorSection::MonitorSection (Session* s)
 	cut_all_button.set_text (_("Mute"));
 	cut_all_button.set_name ("monitor section cut");
 	cut_all_button.set_name (X_("monitor section cut"));
-	cut_all_button.set_size_request (-1,50);
+	cut_all_button.set_size_request (-1, PX_SCALE(50));
 	cut_all_button.show ();
 
 	act = ActionManager::get_action (X_("Monitor"), X_("monitor-cut-all"));
@@ -312,11 +314,11 @@ MonitorSection::MonitorSection (Session* s)
 
 	gain_control = new ArdourKnob ();
 	gain_control->set_name("monitor knob");
-	gain_control->set_size_request(80,80);
+	gain_control->set_size_request (PX_SCALE(80), PX_SCALE(80));
 
 	gain_display = new ArdourDisplay ();
 	gain_display->set_name("monitor section cut");
-	gain_display->set_size_request(40,20);
+	gain_display->set_size_request (PX_SCALE(40), PX_SCALE(20));
 	gain_display->add_controllable_preset(_("0 dB"), 0.0);
 	gain_display->add_controllable_preset(_("-3 dB"), -3.0);
 	gain_display->add_controllable_preset(_("-6 dB"), -6.0);
@@ -348,7 +350,7 @@ MonitorSection::MonitorSection (Session* s)
 	lower_packer.pack_start (*spin_packer, true, true);
 
 	channel_table_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	channel_table_scroller.set_size_request (-1, 150);
+	channel_table_scroller.set_size_request (-1, PX_SCALE(150));
 	channel_table_scroller.set_shadow_type (Gtk::SHADOW_NONE);
 	channel_table_scroller.show ();
 	channel_table_scroller.add (channel_table_viewport);
