@@ -185,26 +185,19 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
 	, ui_config (new UIConfiguration)
+	, session_loaded (false)
 	, gui_object_state (new GUIObjectState)
-
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
 	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
-	  
-	  /* big clock */
-
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 	, video_timeline(0)
-
-	  /* start of private members */
+	, ignore_dual_punch (false)
 	, editor (0)
 	, mixer (0)
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
 	, first_time_engine_run (true)
-
-	  /* transport */
-
 	, roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll))
 	, stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop))
 	, goto_start_controllable (new TransportControllable ("transport goto start", *this, TransportControllable::GotoStart))
@@ -212,19 +205,21 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
 	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
 	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
-
 	, auto_return_button (ArdourButton::led_default_elements)
 	, follow_edits_button (ArdourButton::led_default_elements)
 	, auto_input_button (ArdourButton::led_default_elements)
-
 	, auditioning_alert_button (_("Audition"))
 	, solo_alert_button (_("Solo"))
 	, feedback_alert_button (_("Feedback"))
 	, error_alert_button ( ArdourButton::just_led_default_elements )
-
 	, editor_meter(0)
 	, editor_meter_peak_display()
-
+	, open_session_selector (0)
+	, _numpad_locate_happening (false)
+	, _session_is_new (false)
+	, last_key_press_time (0)
+	, save_as_dialog (0)
+	, meterbridge (0)
 	, speaker_config_window (X_("speaker-config"), _("Speaker Configuration"))
 	, key_editor (X_("key-editor"), _("Key Bindings"))
 	, rc_option_editor (X_("rc-options-editor"), _("Preferences"))
@@ -240,12 +235,17 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, big_clock_window (X_("big-clock"), _("Big Clock"), boost::bind (&ARDOUR_UI::create_big_clock_window, this))
 	, audio_port_matrix (X_("audio-connection-manager"), _("Audio Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::AUDIO))
 	, midi_port_matrix (X_("midi-connection-manager"), _("MIDI Connections"), boost::bind (&ARDOUR_UI::create_global_port_matrix, this, ARDOUR::DataType::MIDI))
-	, save_as_dialog (0)
+	, video_server_process (0)
+	, splash (0)
+	, have_configure_timeout (false)
+	, last_configure_time (0)
+	, last_peak_grab (0)
+	, have_disk_speed_dialog_displayed (false)
 	, _status_bar_visibility (X_("status-bar"))
 	, _feedback_exists (false)
 	, _log_not_acknowledged (LogLevelNone)
 {
-	Gtkmm2ext::init(localedir);
+	Gtkmm2ext::init (localedir);
 
 	if (ARDOUR::handle_old_configuration_files (boost::bind (ask_about_configuration_copy, _1, _2, _3))) {
 		MessageDialog msg (string_compose (_("Your configuration files were copied. You can now restart %1."), PROGRAM_NAME), true);
@@ -253,12 +253,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		/* configuration was modified, exit immediately */
 		_exit (0);
 	}
-
 	
-	splash = 0;
-
-	_numpad_locate_happening = false;
-
 	if (theArdourUI == 0) {
 		theArdourUI = this;
 	}
@@ -266,20 +261,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	ui_config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	ui_config->map_parameters (pc);
-
-	editor = 0;
-	mixer = 0;
-	meterbridge = 0;
-	editor = 0;
-	_session_is_new = false;
-	session_selector_window = 0;
-	last_key_press_time = 0;
-	video_server_process = 0;
-	open_session_selector = 0;
-	have_configure_timeout = false;
-	have_disk_speed_dialog_displayed = false;
-	session_loaded = false;
-	ignore_dual_punch = false;
 
 	roll_button.set_controllable (roll_controllable);
 	stop_button.set_controllable (stop_controllable);
@@ -297,9 +278,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	play_selection_button.set_name ("transport button");
 	rec_button.set_name ("transport recenable button");
 	midi_panic_button.set_name ("transport button");
-
-	last_configure_time= 0;
-	last_peak_grab = 0;
 
 	ARDOUR::Diskstream::DiskOverrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_overrun_handler, this), gui_context());
 	ARDOUR::Diskstream::DiskUnderrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
