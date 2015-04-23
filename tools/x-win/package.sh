@@ -323,8 +323,8 @@ cat >> $NSISFILE << EOF
 Function .onInit
 
   ReadRegStr \$R0 HKLM \
-    "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\$WARCH" \
-    "Install_Dir"
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" \
+    "UninstallString"
   StrCmp \$R0 "" done
 
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
@@ -338,7 +338,7 @@ Function .onInit
     IfErrors uninstall_error
 
     ReadRegStr \$R1 HKLM \
-      "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" \
+      "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" \
       "UninstallString"
     StrCmp \$R1 "" 0 done
 
@@ -366,10 +366,10 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   File /nonfatal debug.bat
   File /nonfatal /r gdb
   WriteRegStr HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\$WARCH" "Install_Dir" "\$INSTDIR"
-  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "DisplayName" "${PROGRAM_NAME}${PROGRAM_VERSION}"
-  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
-  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "NoModify" 1
-  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" "NoRepair" 1
+  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "DisplayName" "${PROGRAM_NAME}${PROGRAM_VERSION}"
+  WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
+  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "NoModify" 1
+  WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
   \${registerExtension} "\$INSTDIR\\bin\\${STATEFILE_SUFFIX}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
@@ -437,8 +437,8 @@ cat >> $NSISFILE << EOF
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 Section "Uninstall"
   SetShellVarContext all
+  DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}"
   DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}"
-  DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\$WARCH"
   DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}"
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
