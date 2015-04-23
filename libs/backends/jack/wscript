@@ -44,7 +44,7 @@ def configure(conf):
                    okmsg = 'ok',
                    errmsg = 'not found (or broken). JACK metadata API will not be used',
                    define_name = 'HAVE_JACK_METADATA',
-                   linkflags=['-ljack'])
+                   uselib = 'JACK')
     
 def build(bld):
     obj = bld(features = 'c cxx cxxshlib')
