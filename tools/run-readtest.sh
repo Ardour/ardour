@@ -7,6 +7,7 @@ nocache=
 interleave=
 needfiles=1
 write_blocksize=262144
+args=
 
 if uname -a | grep --silent arwin ; then
     ddmega=m
@@ -19,7 +20,9 @@ while [ $# -gt 1 ] ; do
 	-d) dir=$2; shift; shift ;;
 	-f) filesize=$2; shift; shift ;;
 	-n) numfiles=$2; shift; shift ;;
-	-N) nocache="-s"; shift;;
+	-M) args="$args -M"; shift ;;
+	-D) args="$args -D"; shift ;;
+	-R) args="$args -R"; shift ;;
         *) break ;;
     esac
 done
@@ -82,5 +85,5 @@ for bs in $@ ; do
     fi
     
     echo "# Blocksize $bs"
-    ./readtest $nocache -b $bs -q $dir/testfile_%d
+    ./readtest $args -b $bs -q $dir/testfile_%d
 done

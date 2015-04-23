@@ -1,5 +1,9 @@
 /* gcc -o readtest readtest.c `pkg-config --cflags --libs glib-2.0` -lm */
 
+#ifndef _WIN32
+#  define HAVE_MMAP
+#endif
+
 #include <stdlib.h>
 #include <errno.h>
 #include <stdio.h>
@@ -10,35 +14,42 @@
 #include <fcntl.h>
 #include <math.h>
 
+#ifdef HAVE_MMAP
+#  include <sys/stat.h>
+#  include <sys/mman.h>
+#endif
+
 #include <glib.h>
 
 char* data = 0;
 
-int
-read_one (int fd, ssize_t sz)
-{
-	return 0;
-}
-
 void
 usage ()
 {
-	fprintf (stderr, "readtest [ -b BLOCKSIZE ] [-l FILELIMIT] [ -D ] filename-template\n");
+	fprintf (stderr, "readtest [ -b BLOCKSIZE ] [-l FILELIMIT] [ -D ] [ -R ] [ -M ] filename-template\n");
 }
 
 int
 main (int argc, char* argv[])
 {
 	int* files;
-	char optstring[] = "b:Dl:q";
+	char optstring[] = "b:DRMl:q";
 	uint32_t block_size = 64 * 1024 * 4;
 	int max_files = -1;
 #ifdef __APPLE__
 	int direct = 0;
+	int noreadahead = 0;
+#endif
+#ifdef HAVE_MMAP
+	int use_mmap = 0;
+	void  **addr;
+	size_t *flen;
 #endif
 	const struct option longopts[] = {
 		{ "blocksize", 1, 0, 'b' },
 		{ "direct", 0, 0, 'D' },
+		{ "mmap", 0, 0, 'M' },
+		{ "noreadahead", 0, 0, 'R' },
 		{ "limit", 1, 0, 'l' },
 		{ 0, 0, 0, 0 }
 	};
@@ -66,6 +77,16 @@ main (int argc, char* argv[])
 		case 'D':
 #ifdef __APPLE__
 			direct = 1;
+#endif
+			break;
+		case 'M':
+#ifdef HAVE_MMAP
+			use_mmap = 1;
+#endif
+			break;
+		case 'R':
+#ifdef __APPLE__
+			noreadahead = 1;
 #endif
 			break;
 		case 'q':
@@ -111,6 +132,15 @@ main (int argc, char* argv[])
 	
 	nfiles = n;
 	files = (int *) malloc (sizeof (int) * nfiles);
+#ifdef HAVE_MMAP
+	if (use_mmap) {
+		if (!quiet) {
+			printf ("# Using mmap().\n");
+		}
+		addr = malloc (sizeof (void*) * nfiles);
+		flen = (size_t*) malloc (sizeof (size_t) * nfiles);
+	}
+#endif
 
 	for (n = 0; n < nfiles; ++n) {
 
@@ -134,9 +164,35 @@ main (int argc, char* argv[])
 				fprintf (stderr, "Cannot set F_NOCACHE on file #%d\n", n);
 			}
 		}
+
+		if (noreadahead) {
+			if (fcntl (fd, F_RDAHEAD, 0) == -1) {
+				fprintf (stderr, "Cannot set F_READAHED on file #%d\n", n);
+			}
+		}
 #endif
 
 		files[n] = fd;
+
+#ifdef HAVE_MMAP
+		if (use_mmap) {
+			struct stat s;
+			if (fstat (fd, & s)) {
+				fprintf (stderr, "Could not stat fd #%d @ %s\n", n, path);
+				return 1;
+			}
+			if (s.st_size < block_size) {
+				fprintf (stderr, "file is shorter than blocksize #%d @ %s\n", n, path);
+				return 1;
+			}
+			flen[n] = s.st_size;
+			addr[n] = mmap (0, s.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+			if (addr[n] == MAP_FAILED) {
+				fprintf (stderr, "Could not mmap file #%d @ %s (%s)\n", n, path, strerror (errno));
+				return 1;
+			}
+		}
+#endif
 	}
 
 	data = (char*) malloc (sizeof (char) * block_size);
@@ -151,10 +207,22 @@ main (int argc, char* argv[])
 		gint64 before;
 		before = g_get_monotonic_time();
 
-		for (n = 0; n < nfiles; ++n) {
-
-			if (read (files[n], (char*) data, block_size) != block_size) {
-				goto out;
+#ifdef HAVE_MMAP
+		if (use_mmap) {
+			for (n = 0; n < nfiles; ++n) {
+				if (_read + n + block_size > flen[n]) {
+					goto out;
+				}
+				memmove(data, &addr[n][_read], block_size);
+			}
+		}
+		else
+#endif
+		{
+			for (n = 0; n < nfiles; ++n) {
+				if (read (files[n], (char*) data, block_size) != block_size) {
+					goto out;
+				}
 			}
 		}
 
@@ -191,6 +259,7 @@ out:
 		printf ("# Min: %.4f MB/sec Avg: %.4f MB/sec  || Max: %.3f sec \n", min_throughput, bandwidth, max_elapsed/1000000.0);
 		printf ("# Max Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * bandwidth / (4 * 48000.)));
 		printf ("# Sus Track count: %d @ 48000SPS\n", (int) floor(1048576.0 * min_throughput / (4 * 48000.)));
+		printf ("# seeks: %llu: bytes: %llu total_time: %f\n", cnt * nfiles, (nfiles * _read), total_time/1000000.0);
 		printf ("%d %.4f %.4f %.4f %.5f\n", block_size, min_throughput, bandwidth, max_elapsed/1000000.0, stddev/1000000.0);
 	}
 
