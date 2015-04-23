@@ -214,7 +214,7 @@ if ! grep " using ./waf configure" build/config.log | grep -q -- "--optimize"; t
 	cp -r ${SRCDIR}/gdb_$WARCH $DESTDIR/gdb
 	cat > $DESTDIR/debug.bat << EOF
 cd bin
-START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\${PRODUCT_NAME}-debug.log" ${PRODUCT_EXE}
+START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\${PRODUCT_NAME}-debug.log" -iex "target exec ${PRODUCT_EXE}" -iex "run"
 EOF
 	OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}-dbg-${WARCH}-Setup.exe"
 	VERSIONINFO="Debug Version."
