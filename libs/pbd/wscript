@@ -4,6 +4,7 @@ from waflib import Options
 from waflib import TaskGen
 import os
 import sys
+import re
 
 # Version of this package (even if built as a child)
 MAJOR = '4'
