@@ -254,8 +254,11 @@ NSISFILE=$DESTDIR/a3.nsis
 
 if test "$WARCH" = "w64"; then
 	PGF=PROGRAMFILES64
+	SFX=
 else
 	PGF=PROGRAMFILES
+	# TODO we should only add this for 32bit on 64bit windows!
+	SFX=" (x86)"
 fi
 
 if test -n "$QUICKZIP" ; then
@@ -391,25 +394,25 @@ fi
 cat >> $NSISFILE << EOF
 Section "Start Menu Shortcuts" SecMenu
   SetShellVarContext all
-  CreateDirectory "\$SMPROGRAMS\\${PRODUCT_ID}"
-  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
+  CreateDirectory "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}"
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
 EOF
 
 if test -f "$DESTDIR/debug.bat"; then
 	cat >> $NSISFILE << EOF
-  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\${PROGRAM_NAME}${PROGRAM_VERSION} GDB.lnk" "\$INSTDIR\\debug.bat" "" "\$INSTDIR\\share\\ardour_bug.ico" 0
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\${PROGRAM_NAME}${PROGRAM_VERSION} GDB.lnk" "\$INSTDIR\\debug.bat" "" "\$INSTDIR\\share\\ardour_bug.ico" 0
 EOF
 fi
 
 if test -z "$NOVIDEOTOOLS"; then
 	cat >> $NSISFILE << EOF
   IfFileExists "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0 +2
-  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\Video Monitor.lnk" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" "" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\Video Monitor.lnk" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" "" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0
 EOF
 fi
 
 cat >> $NSISFILE << EOF
-  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}\\Uninstall.lnk" "\$INSTDIR\\uninstall.exe" "" "\$INSTDIR\\uninstall.exe" 0
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\Uninstall.lnk" "\$INSTDIR\\uninstall.exe" "" "\$INSTDIR\\uninstall.exe" 0
 SectionEnd
 LangString DESC_SecMainProg \${LANG_ENGLISH} "${PROGRAM_NAME} ${ARDOURVERSION}\$\\r\$\\n${VERSIONINFO}\$\\r\$\\n${ARDOURDATE}"
 EOF
@@ -449,8 +452,8 @@ Section "Uninstall"
   Delete "\$INSTDIR\\uninstall.exe"
   Delete "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk"
   RMDir "\$INSTDIR"
-  Delete "\$SMPROGRAMS\\${PRODUCT_ID}\\*.*"
-  RMDir "\$SMPROGRAMS\\${PRODUCT_ID}"
+  Delete "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\*.*"
+  RMDir "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}"
   \${unregisterExtension} ".${STATEFILE_SUFFIX}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
