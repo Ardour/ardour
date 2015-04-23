@@ -37,10 +37,15 @@ def configure(conf):
     else:
         conf.env['libjack_link'] = "link"
 
-    if not Options.options.libjack_meta:
-        conf.define ('NO_JACK_METADATA', 1)
-
-
+    # Check that metadata API is available and working
+    conf.check_cxx(fragment = "#include <jack/jack.h>\n#include <jack/metadata.h>\nint main(void) { jack_port_uuid(NULL); return 0; }\n",
+                   mandatory = False,
+                   msg = 'Checking for JACK metadata API',
+                   okmsg = 'ok',
+                   errmsg = 'not found (or broken). JACK metadata API will not be used',
+                   define_name = 'HAVE_JACK_METADATA',
+                   linkflags=['-ljack'])
+    
 def build(bld):
     obj = bld(features = 'c cxx cxxshlib')
     obj.source = [ 
@@ -63,6 +68,10 @@ def build(bld):
     if bld.env['build_target'] != 'mingw':
         obj.cxxflags = [ '-fPIC' ]
         obj.cflags   = [ '-fPIC' ]
+
+    if bld.is_defined ('HAVE_JACK_METADATA'):
+	obj.cxxflags += [ '-DHAVE_JACK_METADATA' ]
+	obj.cflags += [ '-DHAVE_JACK_METADATA' ]
 
     if (bld.env['build_target'] == 'mingw'):
         obj.uselib   = [ 'PORTAUDIO' ]

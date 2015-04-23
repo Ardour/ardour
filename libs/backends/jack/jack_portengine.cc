@@ -118,7 +118,7 @@ JACKAudioBackend::get_port_name (PortHandle port) const
 int
 JACKAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
-#ifndef NO_JACK_METADATA // really everyone ought to have this by now.
+#ifdef HAVE_JACK_METADATA // really everyone ought to have this by now.
 	int rv = -1;
 	char *cvalue = NULL;
 	char *ctype = NULL;

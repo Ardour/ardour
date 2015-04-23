@@ -615,8 +615,6 @@ def options(opt):
                     help='Compile for use with gprofile')
     opt.add_option('--libjack', type='string', default="auto", dest='libjack_link',
                     help='libjack link mode  [auto|link|weak]')
-    opt.add_option('--no-jack-metadata', action='store_false', default=True, dest='libjack_meta',
-                    help='disable support for jack metadata')
     opt.add_option('--internal-shared-libs', action='store_true', default=True, dest='internal_shared_libs',
                    help='Build internal libs as shared libraries')
     opt.add_option('--internal-static-libs', action='store_false', dest='internal_shared_libs',
@@ -1059,7 +1057,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
     write_config_text('Libjack linking',       conf.env['libjack_link'])
-    write_config_text('Libjack metadata',      not conf.is_defined('NO_JACK_METADATA'))
+    write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
     write_config_text('LV2 UI embedding',      conf.is_defined('HAVE_SUIL'))
     write_config_text('LV2 support',           conf.is_defined('LV2_SUPPORT'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))

@@ -155,7 +155,7 @@ int have_libjack(void);
 
 #define jack_client_open                    WJACK_client_client_openXXX
 
-#ifndef NO_JACK_METADATA
+#ifdef HAVE_JACK_METADATA
 /* <jack/metadata.h> */
 #define jack_get_uuid_for_client_name       WJACK_get_uuid_for_client_name
 #define jack_get_client_name_by_uuid        WJACK_get_client_name_by_uuid
@@ -181,7 +181,7 @@ int have_libjack(void);
 #include <jack/session.h>
 #include <jack/thread.h>
 
-#ifndef NO_JACK_METADATA
+#ifdef HAVE_JACK_METADATA
 #include <jack/metadata.h>
 #endif
 
