@@ -121,7 +121,7 @@ JVFUN(0,                 set_thread_creator, (jack_thread_creator_t c), (c),)
 JPFUN(1, int,            client_create_thread, \
 		(jack_client_t* c, jack_native_thread_t *t, int p, int r, void *(*f)(void*), void *a), (c,t,p,r,f,a), 0)
 
-#ifndef NO_JACK_METADATA
+#ifdef HAVE_JACK_METADATA
 /* <jack/uuid.h>  - TODO*/
 
 /* <jack/jack.h> */
