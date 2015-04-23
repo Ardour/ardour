@@ -323,8 +323,8 @@ cat >> $NSISFILE << EOF
 Function .onInit
 
   ReadRegStr \$R0 HKLM \
-    "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}" \
-    "UninstallString"
+    "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\$WARCH" \
+    "Install_Dir"
   StrCmp \$R0 "" done
 
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
@@ -438,6 +438,7 @@ cat >> $NSISFILE << EOF
 Section "Uninstall"
   SetShellVarContext all
   DeleteRegKey HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}"
+  DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}\\$WARCH"
   DeleteRegKey HKLM "Software\\${PROGRAM_NAME}\\v${PROGRAM_VERSION}"
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
