@@ -25,9 +25,9 @@ fi
 
 if test -z "${ARDOURCFG}"; then
 	if test -f ${PREFIX}/include/pa_asio.h; then
-		ARDOURCFG="--windows-vst --with-backends=jack,dummy,wavesaudio --no-jack-metadata"
+		ARDOURCFG="--windows-vst --with-backends=jack,dummy,wavesaudio"
 	else
-		ARDOURCFG="--windows-vst --with-backends=jack,dummy --no-jack-metadata"
+		ARDOURCFG="--windows-vst --with-backends=jack,dummy"
 	fi
 fi
 
