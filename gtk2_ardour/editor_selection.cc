@@ -1545,11 +1545,21 @@ Editor::set_selection_from_region ()
 	}
 
 	selection->set (selection->regions.start(), selection->regions.end_frame());
+
+	/* find all the tracks that have selected regions */
+
+	set<TimeAxisView*> tracks;
 	
-	//we must now select tracks, because otherwise set_selection_from_region would appear to do nothing
-	//perhaps too drastic; perhaps the user really only wants the region's track selected
-	//but I can't think of any use-case for that (why wouldn't you just select the region?)
-	select_all_tracks();	
+	for (RegionSelection::const_iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+		tracks.insert (&(*r)->get_time_axis_view());
+	}
+
+	TrackViewList tvl;
+	tvl.insert (tvl.end(), tracks.begin(), tracks.end());
+
+	/* and select them */
+	
+	selection->set (tvl);
 	
 	if (!Profile->get_sae()) {
 		set_mouse_mode (Editing::MouseRange, false);
