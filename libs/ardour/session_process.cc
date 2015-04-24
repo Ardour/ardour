@@ -373,6 +373,8 @@ Session::process_with_events (pframes_t nframes)
 			send_midi_time_code_for_cycle (_transport_frame, end_frame, nframes);
 		}
 
+		ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
+
 		framepos_t stop_limit = compute_stop_limit ();
 
 		if (maybe_stop (stop_limit)) {
