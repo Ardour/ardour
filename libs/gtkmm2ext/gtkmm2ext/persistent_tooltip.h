@@ -32,7 +32,7 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 {
 public:
-	PersistentTooltip (Gtk::Widget *);
+	PersistentTooltip (Gtk::Widget *, int margin_y = 0);
 	virtual ~PersistentTooltip ();
 	
 	void set_tip (std::string);
@@ -62,6 +62,7 @@ private:
 	sigc::connection _timeout;
 	/** The tip text */
 	std::string _tip;
+	int _margin_y;
 };
 
 }

@@ -28,11 +28,12 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 /** @param target The widget to provide the tooltip for */
-PersistentTooltip::PersistentTooltip (Gtk::Widget* target)
+PersistentTooltip::PersistentTooltip (Gtk::Widget* target, int margin_y)
 	: _target (target)
 	, _window (0)
 	, _label (0)
 	, _maybe_dragging (false)
+	, _margin_y (margin_y)
 {
 	target->signal_enter_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::enter), false);
 	target->signal_leave_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::leave), false);
@@ -138,7 +139,7 @@ PersistentTooltip::show ()
 		int rx, ry, sw;
 		sw= gdk_screen_width();
 		_target->get_window()->get_origin (rx, ry);
-		_window->move (rx, ry + _target->get_height());
+		_window->move (rx, ry + _target->get_height() + _margin_y);
 		_window->present ();
 
 		/* the window needs to be realized first
