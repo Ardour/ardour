@@ -1544,8 +1544,6 @@ Editor::set_selection_from_region ()
 		return;
 	}
 
-	selection->set (selection->regions.start(), selection->regions.end_frame());
-
 	/* find all the tracks that have selected regions */
 
 	set<TimeAxisView*> tracks;
@@ -1557,7 +1555,11 @@ Editor::set_selection_from_region ()
 	TrackViewList tvl;
 	tvl.insert (tvl.end(), tracks.begin(), tracks.end());
 
-	/* and select them */
+	/* select range (this will clear the region selection) */
+
+	selection->set (selection->regions.start(), selection->regions.end_frame());
+
+	/* and select the tracks */
 	
 	selection->set (tvl);
 	
