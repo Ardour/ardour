@@ -256,8 +256,9 @@ MixerStrip::init ()
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
+	// TODO implement ArdourKnob::on_size_request properly
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
-	trim_control.set_size_request (PX_SCALE(20), PX_SCALE(20));
+	trim_control.set_size_request (PX_SCALE(19), PX_SCALE(19));
 #undef PX_SCALE
 	trim_control.set_tooltip_prefix ("Trim: ");
 	trim_control.set_name ("trim knob");
