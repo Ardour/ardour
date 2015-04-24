@@ -34,17 +34,17 @@
 
 using namespace ARDOUR;
 using namespace PBD;
-using std::min;
 
-Amp::Amp (Session& s)
+Amp::Amp (Session& s, std::string type)
 	: Processor(s, "Amp")
 	, _apply_gain(true)
 	, _apply_gain_automation(false)
 	, _current_gain(GAIN_COEFF_UNITY)
 	, _current_automation_frame (INT64_MAX)
 	, _gain_automation_buffer(0)
+	, _type(type)
 {
-	Evoral::Parameter p (GainAutomation);
+	Evoral::Parameter p (_type == "trim" ? TrimAutomation : GainAutomation);
 	boost::shared_ptr<AutomationList> gl (new AutomationList (p));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (X_("gaincontrol"), s, this, p, gl));
 	_gain_control->set_flags (Controllable::GainLike);
@@ -351,7 +351,7 @@ XMLNode&
 Amp::state (bool full_state)
 {
 	XMLNode& node (Processor::state (full_state));
-	node.add_property("type", "amp");
+	node.add_property("type", _type);
         node.add_child_nocopy (_gain_control->get_state());
 
 	return node;
@@ -374,20 +374,28 @@ Amp::set_state (const XMLNode& node, int version)
 void
 Amp::GainControl::set_value (double val)
 {
-	AutomationControl::set_value (min (val, (double) Config->get_max_gain()));
+	AutomationControl::set_value (std::max (std::min (val, (double)_desc.upper), (double)_desc.lower));
 	_amp->session().set_dirty ();
 }
 
 double
 Amp::GainControl::internal_to_interface (double v) const
 {
-	return gain_to_slider_position (v);
+	if (_desc.type == GainAutomation) {
+		return gain_to_slider_position (v);
+	} else {
+		return (accurate_coefficient_to_dB (v) - lower_db) / range_db;
+	}
 }
 
 double
 Amp::GainControl::interface_to_internal (double v) const
 {
-	return slider_position_to_gain (v);
+	if (_desc.type == GainAutomation) {
+		return slider_position_to_gain (v);
+	} else {
+		return dB_to_coefficient (lower_db + v * range_db);
+	}
 }
 
 double

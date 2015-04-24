@@ -19,6 +19,7 @@
 #ifndef __ardour_amp_h__
 #define __ardour_amp_h__
 
+#include "ardour/dB.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/chan_count.h"
@@ -35,7 +36,7 @@ class IO;
  */
 class LIBARDOUR_API Amp : public Processor {
 public:
-	Amp(Session& s);
+	Amp(Session& s, std::string type = "amp");
 
 	std::string display_name() const;
 
@@ -83,6 +84,9 @@ public:
 			, _amp (a) {
 			set_flags (Controllable::Flag (flags() | Controllable::GainLike));
 			alist()->reset_default (1.0);
+
+			lower_db = accurate_coefficient_to_dB (_desc.lower);
+			range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 		}
 
 		void set_value (double val);
@@ -94,6 +98,8 @@ public:
 		std::string get_user_string () const;
 
 		Amp* _amp;
+		double lower_db;
+		double range_db;
 	};
 
 	boost::shared_ptr<GainControl> gain_control() {
@@ -117,6 +123,7 @@ private:
 
 	/** Buffer that we should use for gain automation */
 	gain_t* _gain_automation_buffer;
+	std::string _type;
 };
 
 
