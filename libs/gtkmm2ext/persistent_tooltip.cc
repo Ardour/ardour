@@ -65,8 +65,8 @@ PersistentTooltip::timeout ()
 bool
 PersistentTooltip::leave (GdkEventCrossing *)
 {
-	_timeout.disconnect ();
 	if (!dragging ()) {
+		_timeout.disconnect ();
 		hide ();
 	}
 
@@ -110,6 +110,9 @@ PersistentTooltip::hide ()
 void
 PersistentTooltip::show ()
 {
+	if (_tip.empty()) {
+		return;
+	}
 	if (!_window) {
 		_window = new Window (WINDOW_POPUP);
 		_window->set_name (X_("ContrastingPopup"));
