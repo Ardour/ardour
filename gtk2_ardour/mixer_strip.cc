@@ -260,7 +260,7 @@ MixerStrip::init ()
 #define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
 	trim_control.set_size_request (PX_SCALE(19), PX_SCALE(19));
 #undef PX_SCALE
-	trim_control.set_tooltip_prefix ("Trim: ");
+	trim_control.set_tooltip_prefix (_("Trim: "));
 	trim_control.set_name ("trim knob");
 	trim_control.set_no_show_all (true);
 	input_button_box.pack_start (trim_control, false, false);
