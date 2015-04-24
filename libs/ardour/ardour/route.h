@@ -188,6 +188,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	/* Processors */
 
 	boost::shared_ptr<Amp> amp() const  { return _amp; }
+	boost::shared_ptr<Amp> trim() const { return _trim; }
 	PeakMeter&       peak_meter()       { return *_meter.get(); }
 	const PeakMeter& peak_meter() const { return *_meter.get(); }
 	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
@@ -567,6 +568,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	virtual void maybe_declick (BufferSet&, framecnt_t, int);
 
 	boost::shared_ptr<Amp>       _amp;
+	boost::shared_ptr<Amp>       _trim;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _delayline;
 

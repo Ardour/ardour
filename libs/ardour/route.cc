@@ -37,6 +37,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/audio_track.h"
 #include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/buffer.h"
@@ -156,6 +157,17 @@ Route::init ()
 
 	_amp.reset (new Amp (_session));
 	add_processor (_amp, PostFader);
+
+	/* and input trim */
+	_trim.reset (new Amp (_session, "trim"));
+	_trim->set_display_to_user (false);
+
+	if (dynamic_cast<AudioTrack*>(this)) {
+		/* we can't do this in the AudioTrack's constructor
+		 * because _trim does not exit then
+		 */
+		_trim->activate();
+	}
 
 	/* create standard processors: meter, main outs, monitor out;
 	   they will be added to _processors by setup_invisible_processors ()
@@ -1664,7 +1676,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 			/* these can never be removed */
 
-			if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline) {
+			if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline || processor == _trim) {
 				++i;
 				continue;
 			}
@@ -2634,6 +2646,9 @@ Route::set_processor_state (const XMLNode& node)
 		if (prop->value() == "amp") {
 			_amp->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_amp);
+		} else if (prop->value() == "trim") {
+			_trim->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_trim);
 		} else if (prop->value() == "meter") {
 			_meter->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_meter);
@@ -4233,6 +4248,10 @@ Route::setup_invisible_processors ()
 		new_processors.push_front (_intreturn);
 	}
 
+	if (_trim && _trim->active()) {
+		assert (!_trim->display_to_user ());
+		new_processors.push_front (_trim);
+	}
 	/* EXPORT PROCESSOR */
 
 	if (_capturing_processor) {
