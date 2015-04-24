@@ -48,6 +48,11 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = Config->get_max_gain();
 		normal = 1.0f;
 		break;
+	case TrimAutomation:
+		upper  = 10; // +20dB
+		lower  = .1; // -20dB
+		normal = 1.0f;
+		break;
 	case PanAzimuthAutomation:
 		normal = 0.5f; // there really is no _normal but this works for stereo, sort of
 		upper  = 1.0f;
@@ -116,7 +121,7 @@ ParameterDescriptor::update_steps()
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
-	} else if (type == GainAutomation) {
+	} else if (type == GainAutomation || type == TrimAutomation) {
 		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
 		   like "slider position", so we convert from "slider position" to gain
 		   to have the correct unit here. */

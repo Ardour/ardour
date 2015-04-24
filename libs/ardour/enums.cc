@@ -135,6 +135,7 @@ setup_enum_writer ()
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 
 	REGISTER_ENUM (GainAutomation);
+	REGISTER_ENUM (TrimAutomation);
 	REGISTER_ENUM (PanAzimuthAutomation);
 	REGISTER_ENUM (PanElevationAutomation);
 	REGISTER_ENUM (PanWidthAutomation);
