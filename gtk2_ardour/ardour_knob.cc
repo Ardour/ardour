@@ -99,9 +99,9 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	bool flat = _flat_buttons;
 	
 	if ( arc ) {
-		center_radius = scale*0.30;
+		center_radius = scale*0.33;
 
-		float inner_progress_radius = scale*0.30;
+		float inner_progress_radius = scale*0.38;
 		float outer_progress_radius = scale*0.48;
 		float progress_width = (outer_progress_radius-inner_progress_radius);
 		float progress_radius = inner_progress_radius + progress_width/2.0;
@@ -147,8 +147,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 			cairo_fill (cr);
 			cairo_pattern_destroy (shade_pattern);
 		}
-		
-		//black border
+#if 0 //black border
 		cairo_set_source_rgb (cr, 0, 0, 0 );
 		cairo_set_line_width (cr, border_width);
 		cairo_move_to (cr, (outer_progress_radius * start_angle_x), (outer_progress_radius * start_angle_y));
@@ -159,6 +158,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_stroke (cr);
 		cairo_arc (cr, 0, 0, outer_progress_radius, start_angle, end_angle);
 		cairo_stroke (cr);
+#endif
 	}
 	
 	if (!flat) {
