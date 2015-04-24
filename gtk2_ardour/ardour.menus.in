@@ -174,7 +174,6 @@
         <menuitem action='select-all-within-cursors'/>
         <menuitem action='select-all-in-punch-range'/>
         <menuitem action='select-all-in-loop-range'/>
-        <menuitem action='select-all-in-'/>
         <separator/>
         <menuitem action='move-range-start-to-previous-region-boundary'/>
         <menuitem action='move-range-start-to-next-region-boundary'/>
