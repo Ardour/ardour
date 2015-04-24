@@ -382,7 +382,9 @@ ArdourKnob::controllable_changed ()
 	_val = c->get_interface();  //% of knob travel
 	_val = min( max(0.0f, _val), 1.0f);  //range check
 
-	ARDOUR_UI::instance()->set_tip (*this, _tooltip_prefix + c->get_user_string());
+	if (!_tooltip_prefix.empty()) {
+		ARDOUR_UI::instance()->set_tip (*this, _tooltip_prefix + c->get_user_string());
+	}
 	set_dirty();
 }
 
