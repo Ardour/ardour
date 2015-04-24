@@ -247,11 +247,6 @@ inline int64_t abs(int64_t val) throw()
 	extern bool operator == (const Type& lhs, const Type& rhs);
 #endif
 
-// round().... Unlike Linux, Windows doesn't seem to support the
-// concept of a system-wide (or programmable) rounding direction.
-// Fortunately, 'round to nearest' seems to be the default action
-// under Linux, so let's copy that until we find out otherwise.
-#define rint(value)  round(value)
 #if !defined(LIBPBD_API) || defined(PBD_IS_IN_WIN_STATIC_LIB)
 extern  double round(double x);
 

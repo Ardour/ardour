@@ -56,6 +56,18 @@
 		return intgr ;
 	}
 
+	__inline double
+	rint (double flt)
+	{	long long int intgr;
+
+		_asm
+		{	fld flt
+			fistp intgr
+			} ;
+
+		return (double) intgr ;
+	}
+
 	__inline long int
 	lrintf (float flt)
 	{	int intgr;
@@ -66,6 +78,18 @@
 			} ;
 
 		return intgr ;
+	}
+
+	__inline float
+	rintf (float flt)
+	{	int intgr;
+
+		_asm
+		{	fld flt
+			fistp intgr
+			} ;
+
+		return (float) intgr ;
 	}
 
 	__inline long long int 

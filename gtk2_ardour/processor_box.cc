@@ -21,10 +21,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#ifdef COMPILER_MSVC
-#define rintf(x) round((x) + 0.5)
-#endif
-
 #include <cmath>
 #include <iostream>
 #include <set>
