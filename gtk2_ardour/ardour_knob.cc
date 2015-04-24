@@ -57,6 +57,7 @@ ArdourKnob::Element ArdourKnob::default_elements = ArdourKnob::Element (ArdourKn
 ArdourKnob::ArdourKnob (Element e)
 	: _elements (e)
 	, _hovering (false)
+	, _tooltip (this)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
 }
@@ -239,7 +240,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	cairo_stroke (cr);
 
 	//highlight if grabbed or if mouse is hovering over me
-	if ( _grabbed || (_hovering && ARDOUR_UI::config()->get_widget_prelight() ) ) {
+	if (_tooltip.dragging() || (_hovering && ARDOUR_UI::config()->get_widget_prelight() ) ) {
 		cairo_set_source_rgba (cr, 1,1,1, 0.12 );
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
@@ -251,9 +252,16 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 void
 ArdourKnob::on_size_request (Gtk::Requisition* req)
 {
-	CairoWidget::on_size_request (req);
-	
-	//perhaps render the knob base into a cached image here?
+	// see ardour-button VectorIcon size, use font scaling as default
+	CairoWidget::on_size_request (req); // allow to override
+
+	// we're square
+	if (req->width < req->height) {
+		req->width = req->height;
+	}
+	if (req->height < req->width) {
+		req->height = req->width;
+	}
 }
 
 bool
@@ -321,7 +329,7 @@ bool
 ArdourKnob::on_button_press_event (GdkEventButton *ev)
 {
 	_grabbed_y = ev->y;
-	_grabbed = true;
+	_tooltip.start_drag();
 	
 	set_active_state (Gtkmm2ext::ExplicitActive);
 
@@ -342,7 +350,8 @@ ArdourKnob::on_button_release_event (GdkEventButton *ev)
         return true;
 	}
 
-	_grabbed = false;
+	//_tooltip.target_stop_drag ();
+	_tooltip.stop_drag();
 	unset_active_state ();
 
 	return false;
@@ -383,7 +392,7 @@ ArdourKnob::controllable_changed ()
 	_val = min( max(0.0f, _val), 1.0f);  //range check
 
 	if (!_tooltip_prefix.empty()) {
-		ARDOUR_UI::instance()->set_tip (*this, _tooltip_prefix + c->get_user_string());
+		_tooltip.set_tip (_tooltip_prefix + c->get_user_string());
 	}
 	set_dirty();
 }
@@ -460,4 +469,29 @@ void
 ArdourKnob::add_elements (Element e)
 {
 	_elements = (ArdourKnob::Element) (_elements | e);
+}
+
+
+KnobPersistentTooltip::KnobPersistentTooltip (Gtk::Widget* w)
+	: PersistentTooltip (w)
+	, _dragging (false)
+{
+}
+
+void
+KnobPersistentTooltip::start_drag ()
+{
+	_dragging = true;
+}
+
+void
+KnobPersistentTooltip::stop_drag ()
+{
+	_dragging = false;
+}
+
+bool
+KnobPersistentTooltip::dragging () const
+{
+	return _dragging;
 }

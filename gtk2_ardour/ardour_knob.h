@@ -28,6 +28,21 @@
 #include "gtkmm2ext/binding_proxy.h"
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/cairo_widget.h"
+#include "gtkmm2ext/persistent_tooltip.h"
+
+class KnobPersistentTooltip : public Gtkmm2ext::PersistentTooltip
+{
+public:
+	KnobPersistentTooltip (Gtk::Widget* w);
+
+	void start_drag ();
+	void stop_drag ();
+	bool dragging () const;
+
+private:
+	bool _dragging;
+};
+
 
 class ArdourKnob : public CairoWidget , public Gtkmm2ext::Activatable
 {
@@ -95,6 +110,7 @@ public:
 	void action_tooltip_changed ();
 
 	std::string _tooltip_prefix;
+	KnobPersistentTooltip _tooltip;
 };
 
 #endif /* __gtk2_ardour_ardour_knob_h__ */
