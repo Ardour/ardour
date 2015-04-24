@@ -163,12 +163,16 @@
         <menuitem action='select-all-tracks'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
-        <menuitem action='select-all-after-edit-cursor'/>
+	<menuitem action='select-loop-range'/>
+	<menuitem action='select-punch-range'/>
+	<menuitem action='select-from-regions'/>
+	<menuitem action='select-all-after-edit-cursor'/>
         <menuitem action='select-all-before-edit-cursor'/>
         <menuitem action='select-all-between-cursors'/>
         <menuitem action='select-all-within-cursors'/>
         <menuitem action='select-all-in-punch-range'/>
         <menuitem action='select-all-in-loop-range'/>
+        <menuitem action='select-all-in-'/>
         <separator/>
         <menuitem action='move-range-start-to-previous-region-boundary'/>
         <menuitem action='move-range-start-to-next-region-boundary'/>

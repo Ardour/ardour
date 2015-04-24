@@ -1916,6 +1916,7 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Set Range to Loop Range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop)));
 	select_items.push_back (MenuElem (_("Set Range to Punch Range"), sigc::mem_fun(*this, &Editor::set_selection_from_punch)));
+	select_items.push_back (MenuElem (_("Set Range to Selected Regions"), sigc::mem_fun(*this, &Editor::set_selection_from_region)));
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true)));
 	select_items.push_back (MenuElem (_("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false)));

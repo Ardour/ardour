@@ -196,6 +196,10 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
 	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
 
+	reg_sens (editor_actions, "select-loop-range", _("Set Range in Loop Range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop));
+	reg_sens (editor_actions, "select-punch-range", _("Set Range to Punch Range"), sigc::mem_fun(*this, &Editor::set_selection_from_punch));
+	reg_sens (editor_actions, "select-from-regions", _("Set Range to Selected Regions"), sigc::mem_fun(*this, &Editor::set_selection_from_region));
+
 	reg_sens (editor_actions, "select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
 	reg_sens (editor_actions, "alternate-select-all-after-edit-cursor", _("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true));
 	reg_sens (editor_actions, "select-all-before-edit-cursor", _("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false));
