@@ -32,7 +32,7 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 {
   public:
-	PersistentTooltip (Gtk::Widget *, bool draggable = false);
+	PersistentTooltip (Gtk::Widget *, bool draggable = false, int margin_y = 0);
 	virtual ~PersistentTooltip ();
 	
 	void set_tip (std::string);
@@ -70,6 +70,7 @@ class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 	std::string _tip;
 	Pango::FontDescription _font;
 	bool _align_to_center;
+	int _margin_y;
 };
 
 }

@@ -30,13 +30,14 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 /** @param target The widget to provide the tooltip for */
-PersistentTooltip::PersistentTooltip (Gtk::Widget* target, bool draggable)
+PersistentTooltip::PersistentTooltip (Gtk::Widget* target, bool  draggable, int margin_y)
 	: _target (target)
 	, _window (0)
 	, _label (0)
 	, _draggable (draggable)
 	, _maybe_dragging (false)
 	, _align_to_center (true)
+	, _margin_y (margin_y)
 {
 	target->signal_enter_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::enter), false);
 	target->signal_leave_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::leave), false);
@@ -157,7 +158,7 @@ PersistentTooltip::show ()
 			   the screen, so don't show it in the usual place.
 			*/
 			rx = sw - _window->get_width();
-			_window->move (rx, ry + _target->get_height());
+			_window->move (rx, ry + _target->get_height() + _margin_y);
 		} else {
 			if (_align_to_center) {
 				_window->move (rx + (_target->get_width () - _window->get_width ()) / 2, ry + _target->get_height());
