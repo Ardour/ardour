@@ -4,7 +4,6 @@ from waflib import Options
 from waflib import TaskGen
 import os
 import sys
-import re
 
 # Version of this package (even if built as a child)
 MAJOR = '4'
@@ -146,9 +145,6 @@ def build(bld):
     if bld.env['build_target'] == 'x86_64':
         obj.defines += [ 'USE_X86_64_ASM' ]
     if bld.env['build_target'] == 'mingw':
-        if re.search ('/^x86_64/', str(bld.env['CC'])):
-            obj.defines += [ 'USE_X86_64_ASM' ]
-            obj.defines += ['NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
         obj.uselib += ' OLE'
 

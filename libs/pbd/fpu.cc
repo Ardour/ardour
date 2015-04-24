@@ -49,17 +49,12 @@ FPU::FPU ()
 
 #ifdef PLATFORM_WINDOWS
 
-#ifndef USE_X86_64_ASM
-	/* no 32 bit version of assembler for windows */
-	return;
-#else
 	// Get CPU flags using Microsoft function
 	// It works for both 64 and 32 bit systems
 	// no need to use assembler for getting info from register, this function does this for us
 	int cpuInfo[4];
 	__cpuid (cpuInfo, 1);
 	cpuflags = cpuInfo[3];
-#endif
 
 #else	
 
@@ -98,7 +93,7 @@ FPU::FPU ()
 		: "%rax", "%rbx", "%rcx", "%rdx"
 		);
 
-#endif /* USE_X86_64_ASM */
+#endif /* _LP64 */
 #endif /* PLATFORM_WINDOWS */
 
 	if (cpuflags & (1<<25)) {
@@ -122,12 +117,20 @@ FPU::FPU ()
 		   31 for the MXCSR_MASK value. If bit 6 is set, DAZ is
 		   supported, otherwise, it isn't.
 		*/
-		
+
 #ifndef HAVE_POSIX_MEMALIGN
+#  ifdef PLATFORM_WINDOWS
+		fxbuf = (char **) _aligned_malloc (sizeof (char *), 16);
+		assert (fxbuf);
+		*fxbuf = (char *) _aligned_malloc (512, 16);
+		assert (*fxbuf);
+#  else
+#  warning using default malloc for aligned memory
 		fxbuf = (char **) malloc (sizeof (char *));
 		assert (fxbuf);
 		*fxbuf = (char *) malloc (512);
 		assert (*fxbuf);
+#  endif
 #else
 		(void) posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
 		assert (fxbuf);
@@ -163,8 +166,13 @@ FPU::FPU ()
 			_flags = Flags (_flags | HasDenormalsAreZero);
 		} 
 		
+#if !defined HAVE_POSIX_MEMALIGN && defined PLATFORM_WINDOWS
+		_aligned_free (*fxbuf);
+		_aligned_free (fxbuf);
+#else
 		free (*fxbuf);
 		free (fxbuf);
+#endif
 	}
 #endif
 }			
