@@ -377,10 +377,12 @@ ArdourKnob::set_controllable (boost::shared_ptr<Controllable> c)
 void
 ArdourKnob::controllable_changed ()
 {
-	_val = binding_proxy.get_controllable()->get_interface();  //% of knob travel
+	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 
+	_val = c->get_interface();  //% of knob travel
 	_val = min( max(0.0f, _val), 1.0f);  //range check
 
+	ARDOUR_UI::instance()->set_tip (*this, _tooltip_prefix + c->get_user_string());
 	set_dirty();
 }
 

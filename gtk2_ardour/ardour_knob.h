@@ -53,6 +53,8 @@ public:
 	void add_elements (Element);
 	static Element default_elements;
 
+	void set_tooltip_prefix (std::string pfx) { _tooltip_prefix = pfx; }
+
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
  	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
 
@@ -91,6 +93,8 @@ public:
 	void action_sensitivity_changed ();
 	void action_visibility_changed ();
 	void action_tooltip_changed ();
+
+	std::string _tooltip_prefix;
 };
 
 #endif /* __gtk2_ardour_ardour_knob_h__ */
