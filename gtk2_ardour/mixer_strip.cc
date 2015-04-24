@@ -34,6 +34,7 @@
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/bindable_button.h>
 
+#include "ardour/amp.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
 #include "ardour/internal_send.h"
@@ -254,6 +255,14 @@ MixerStrip::init ()
 
 	_comment_button.set_name (X_("mixer strip button"));
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
+
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
+	trim_control.set_size_request (PX_SCALE(20), PX_SCALE(20));
+#undef PX_SCALE
+	trim_control.set_tooltip_prefix ("Trim: ");
+	trim_control.set_name ("trim knob");
+	trim_control.set_no_show_all (true);
+	input_button_box.pack_start (trim_control, false, false);
 
 	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (0);
@@ -514,6 +523,15 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	} else {
 		monitor_input_button->hide();
 		monitor_disk_button->hide ();
+	}
+
+	if (route()->trim() && route()->trim()->active()) {
+		trim_control.show ();
+		trim_control.set_controllable (route()->trim()->gain_control());
+	} else {
+		trim_control.hide ();
+		boost::shared_ptr<Controllable> none;
+		trim_control.set_controllable (none);
 	}
 
 	if (is_midi_track()) {

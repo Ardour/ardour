@@ -47,6 +47,7 @@
 
 #include "pbd/fastlog.h"
 
+#include "ardour_knob.h"
 #include "route_ui.h"
 #include "gain_meter.h"
 #include "panner_ui.h"
@@ -201,6 +202,8 @@ class MixerStrip : public RouteUI, public Gtk::EventBox
 	ArdourButton   name_button;
 
 	ArdourButton   _comment_button;
+
+	ArdourKnob     trim_control;
 
 	void setup_comment_button ();
 
