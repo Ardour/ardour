@@ -168,6 +168,10 @@ Route::init ()
 		 */
 		_trim->activate();
 	}
+	else if (!dynamic_cast<Track*>(this) && ! (is_master() || is_monitor() || is_auditioner())) {
+		/* rebular bus */
+		_trim->activate();
+	}
 
 	/* create standard processors: meter, main outs, monitor out;
 	   they will be added to _processors by setup_invisible_processors ()
