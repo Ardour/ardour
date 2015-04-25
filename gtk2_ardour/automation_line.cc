@@ -376,10 +376,19 @@ AutomationLine::fraction_to_string (double fraction) const
 {
 	if (_uses_gain_mapping) {
 		char buf[32];
-		if (fraction == 0.0) {
-			snprintf (buf, sizeof (buf), "-inf");
+		if (_desc.type == GainAutomation) {
+			if (fraction == 0.0) {
+				snprintf (buf, sizeof (buf), "-inf");
+			} else {
+				snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, _desc.upper)));
+			}
 		} else {
-			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain())));
+			float coeff = _desc.lower + fraction * (_desc.upper - _desc.lower);
+			if (coeff == 0.0) {
+				snprintf (buf, sizeof (buf), "-inf");
+			} else {
+				snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (coeff));
+			}
 		}
 		return buf;
 	} else {
@@ -1186,12 +1195,22 @@ AutomationLine::view_to_model_coord (double& x, double& y) const
 void
 AutomationLine::view_to_model_coord_y (double& y) const
 {
-	/* TODO: This should be more generic (use ParameterDescriptor) */
-	if (alist->parameter().type() == GainAutomation ||
-	    alist->parameter().type() == EnvelopeAutomation) {
-		y = slider_position_to_gain_with_max (y, Config->get_max_gain());
+	/* TODO: This should be more generic (use ParameterDescriptor)
+	 * or better yet:  Controllable -> set_interface();
+	 */
+	if (   alist->parameter().type() == GainAutomation
+	    || alist->parameter().type() == EnvelopeAutomation
+	    || (_desc.unit == ParameterDescriptor::DB && _desc.lower == 0.)) {
+		y = slider_position_to_gain_with_max (y, _desc.upper);
+		y = max ((double)_desc.lower, y);
+		y = min ((double)_desc.upper, y);
+	} else if (alist->parameter().type() == TrimAutomation
+	           || (_desc.unit == ParameterDescriptor::DB && _desc.lower > 0 && _desc.upper > _desc.lower)) {
+		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
+		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 		y = max (0.0, y);
-		y = min (2.0, y);
+		y = min (1.0, y);
+		y = dB_to_coefficient (lower_db + y * range_db);
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
 	           alist->parameter().type() == PanElevationAutomation) {
 		y = 1.0 - y;
@@ -1211,9 +1230,15 @@ void
 AutomationLine::model_to_view_coord_y (double& y) const
 {
 	/* TODO: This should be more generic (use ParameterDescriptor) */
-	if (alist->parameter().type() == GainAutomation ||
-	    alist->parameter().type() == EnvelopeAutomation) {
+	if (   alist->parameter().type() == GainAutomation
+	    || alist->parameter().type() == EnvelopeAutomation
+	    || (_desc.unit == ParameterDescriptor::DB && _desc.lower == 0.)) {
 		y = gain_to_slider_position_with_max (y, Config->get_max_gain());
+	} else if (alist->parameter().type() == TrimAutomation
+	           || (_desc.unit == ParameterDescriptor::DB && _desc.lower > 0 && _desc.upper > _desc.lower)) {
+		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
+		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
+		y = (accurate_coefficient_to_dB (y) - lower_db) / range_db;
 	} else if (alist->parameter().type() == PanAzimuthAutomation ||
 	           alist->parameter().type() == PanElevationAutomation) {
 		y = 1.0 - y;
