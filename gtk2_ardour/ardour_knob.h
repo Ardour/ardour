@@ -101,6 +101,7 @@ public:
 	BindingProxy                binding_proxy;
 
 	bool _hovering;
+	float _grabbed_x;
 	float _grabbed_y;
 
 	float _val; // current value [0..1]

@@ -57,6 +57,7 @@ ArdourKnob::Element ArdourKnob::default_elements = ArdourKnob::Element (ArdourKn
 ArdourKnob::ArdourKnob (Element e, bool arc_to_zero)
 	: _elements (e)
 	, _hovering (false)
+	, _grabbed_x (0)
 	, _grabbed_y (0)
 	, _val (0)
 	, _zero (0)
@@ -320,18 +321,19 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 	}
 
 	//calculate the travel of the mouse
-	int y_delta = 0;
+	int delta = 0;
 	if (ev->state & Gdk::BUTTON1_MASK) {
-		y_delta = _grabbed_y - ev->y;
+		delta = (_grabbed_y - ev->y) - (_grabbed_x - ev->x);
+		_grabbed_x = ev->x;
 		_grabbed_y = ev->y;
-		if (y_delta == 0) return TRUE;
+		if (delta == 0) return TRUE;
 	}
 
 	//step the value of the controllable
 	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 	if (c) {
 		float val = c->get_interface();
-		val += y_delta * scale;
+		val += delta * scale;
 		c->set_interface(val);
 	}
 
@@ -341,6 +343,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 bool
 ArdourKnob::on_button_press_event (GdkEventButton *ev)
 {
+	_grabbed_x = ev->x;
 	_grabbed_y = ev->y;
 	_tooltip.start_drag();
 	
@@ -356,7 +359,7 @@ ArdourKnob::on_button_press_event (GdkEventButton *ev)
 bool
 ArdourKnob::on_button_release_event (GdkEventButton *ev)
 {
-	if ( (_grabbed_y == ev->y) && Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {  //no move, shift-click sets to default
+	if ( (_grabbed_y == ev->y && _grabbed_x == ev->x) && Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {  //no move, shift-click sets to default
 		boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 		if (!c) return false;
 		c->set_value (c->normal());
