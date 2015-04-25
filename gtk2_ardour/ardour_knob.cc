@@ -54,9 +54,13 @@ using namespace std;
 
 ArdourKnob::Element ArdourKnob::default_elements = ArdourKnob::Element (ArdourKnob::Arc);
 
-ArdourKnob::ArdourKnob (Element e)
+ArdourKnob::ArdourKnob (Element e, bool arc_to_zero)
 	: _elements (e)
 	, _hovering (false)
+	, _grabbed_y (0)
+	, _val (0)
+	, _zero (0)
+	, _arc_to_zero (arc_to_zero)
 	, _tooltip (this)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
@@ -77,9 +81,11 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	const float scale = min(width, height);
 	const float pointer_thickness = 3.0 * (scale/80);  //(if the knob is 80 pixels wide, we want a 3-pix line on it)
 	
-	float start_angle = ((180 - 65) * G_PI) / 180;
-	float end_angle = ((360 + 65) * G_PI) / 180;
-	float value_angle = start_angle + (_val * (end_angle - start_angle));
+	const float start_angle = ((180 - 65) * G_PI) / 180;
+	const float end_angle = ((360 + 65) * G_PI) / 180;
+
+	const float value_angle = start_angle + (_val * (end_angle - start_angle));
+	const float zero_angle = start_angle + (_zero * (end_angle - start_angle));
 	
 	float value_x = cos (value_angle);
 	float value_y = sin (value_angle);
@@ -107,11 +113,6 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		float progress_width = (outer_progress_radius-inner_progress_radius);
 		float progress_radius = inner_progress_radius + progress_width/2.0;
 		
-		float start_angle_x = cos (start_angle);
-		float start_angle_y = sin (start_angle);
-		float end_angle_x = cos (end_angle);
-		float end_angle_y = sin (end_angle);
-
 		//dark arc background
 		cairo_set_source_rgb (cr, 0.3, 0.3, 0.3 );
 		cairo_set_line_width (cr, progress_width);
@@ -127,14 +128,20 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		ArdourCanvas::color_to_rgba( arc_end_color, red_end, green_end, blue_end, unused );
 
 		//vary the arc color over the travel of the knob
-		float r = (1.0-_val) * red_end + _val * red_start;
-		float g = (1.0-_val) * green_end + _val * green_start;
-		float b = (1.0-_val) * blue_end + _val * blue_start;
+		float intensity = fabs (_val - _zero) / std::max(_zero, (1.f - _zero));
+		const float intensity_inv = 1.0 - intensity;
+		float r = intensity_inv * red_end   + intensity * red_start;
+		float g = intensity_inv * green_end + intensity * green_start;
+		float b = intensity_inv * blue_end  + intensity * blue_start;
 
 		//draw the arc
 		cairo_set_source_rgb (cr, r,g,b);
 		cairo_set_line_width (cr, progress_width);
-		cairo_arc (cr, 0, 0, progress_radius, start_angle, value_angle);
+		if (zero_angle > value_angle) {
+			cairo_arc (cr, 0, 0, progress_radius, value_angle, zero_angle);
+		} else {
+			cairo_arc (cr, 0, 0, progress_radius, zero_angle, value_angle);
+		}
 		cairo_stroke (cr);
 
 		//shade the arc
@@ -148,7 +155,13 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 			cairo_fill (cr);
 			cairo_pattern_destroy (shade_pattern);
 		}
+
 #if 0 //black border
+		const float start_angle_x = cos (start_angle);
+		const float start_angle_y = sin (start_angle);
+		const float end_angle_x = cos (end_angle);
+		const float end_angle_y = sin (end_angle);
+
 		cairo_set_source_rgb (cr, 0, 0, 0 );
 		cairo_set_line_width (cr, border_width);
 		cairo_move_to (cr, (outer_progress_radius * start_angle_x), (outer_progress_radius * start_angle_y));
@@ -379,6 +392,12 @@ ArdourKnob::set_controllable (boost::shared_ptr<Controllable> c)
 	binding_proxy.set_controllable (c);
 
 	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourKnob::controllable_changed, this), gui_context());
+
+	if (_arc_to_zero) {
+		_zero = c->internal_to_interface(c->normal());
+	} else {
+		_zero = 0;
+	}
 
 	controllable_changed();
 }
