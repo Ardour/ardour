@@ -61,6 +61,7 @@ ArdourKnob::ArdourKnob (Element e, bool arc_to_zero)
 	, _grabbed_y (0)
 	, _val (0)
 	, _zero (0)
+	, _dead_zone_delta (0)
 	, _arc_to_zero (arc_to_zero)
 	, _tooltip (this)
 {
@@ -129,7 +130,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		ArdourCanvas::color_to_rgba( arc_end_color, red_end, green_end, blue_end, unused );
 
 		//vary the arc color over the travel of the knob
-		float intensity = fabs (_val - _zero) / std::max(_zero, (1.f - _zero));
+		float intensity = fabsf (_val - _zero) / std::max(_zero, (1.f - _zero));
 		const float intensity_inv = 1.0 - intensity;
 		float r = intensity_inv * red_end   + intensity * red_start;
 		float g = intensity_inv * green_end + intensity * green_start;
@@ -297,7 +298,7 @@ ArdourKnob::on_scroll_event (GdkEventScroll* ev)
 		float val = c->get_interface();
 	
 		if ( ev->direction == GDK_SCROLL_UP )
-			val += scale;  
+			val += scale;
 		else
 			val -= scale;			
 
@@ -308,10 +309,22 @@ ArdourKnob::on_scroll_event (GdkEventScroll* ev)
 }
 
 bool
-ArdourKnob::on_motion_notify_event (GdkEventMotion *ev) 
+ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 {
-	//scale the adjustment based on keyboard modifiers
-	float scale = 0.0025;
+	if (!(ev->state & Gdk::BUTTON1_MASK)) {
+		return true;
+	}
+
+	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
+	if (!c) {
+		return true;
+	}
+
+
+	//scale the adjustment based on keyboard modifiers & GUI size
+	const float ui_scale = max (1.f, ARDOUR_UI::ui_scale);
+	float scale = 0.0025 * ui_scale;
+
 	if (ev->state & Keyboard::GainFineScaleModifier) {
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			scale *= 0.01;
@@ -321,21 +334,43 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 	}
 
 	//calculate the travel of the mouse
-	int delta = 0;
-	if (ev->state & Gdk::BUTTON1_MASK) {
-		delta = (_grabbed_y - ev->y) - (_grabbed_x - ev->x);
-		_grabbed_x = ev->x;
-		_grabbed_y = ev->y;
-		if (delta == 0) return TRUE;
+	int delta = (_grabbed_y - ev->y) - (_grabbed_x - ev->x);
+	if (delta == 0) {
+		return true;
 	}
 
-	//step the value of the controllable
-	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
-	if (c) {
-		float val = c->get_interface();
-		val += delta * scale;
-		c->set_interface(val);
+	_grabbed_x = ev->x;
+	_grabbed_y = ev->y;
+	float val = c->get_interface();
+
+	const float px_deadzone = 42.f * ui_scale;
+
+	if ((val - _zero) * (val - _zero + delta * scale) < 0) {
+		/* zero transition */
+		const int tozero = (_zero - val) * scale;
+		int remain = delta - tozero;
+		if (abs (remain) > px_deadzone) {
+			/* slow down zero transitions */
+			remain += (remain > 0) ? px_deadzone * -.5 : px_deadzone * .5;
+			delta = tozero + remain;
+			_dead_zone_delta = 0;
+		} else {
+			c->set_interface(_zero);
+			val = _zero;
+			_dead_zone_delta = remain / px_deadzone;
+			return true;
+		}
 	}
+
+	if (fabsf (rintf((val - _zero) / scale) + _dead_zone_delta) < 1) {
+		c->set_interface(_zero);
+		_dead_zone_delta += delta / px_deadzone;
+		return true;
+	}
+
+	_dead_zone_delta = 0;
+	val += delta * scale;
+	c->set_interface(val);
 
 	return true;
 }
@@ -345,32 +380,52 @@ ArdourKnob::on_button_press_event (GdkEventButton *ev)
 {
 	_grabbed_x = ev->x;
 	_grabbed_y = ev->y;
-	_tooltip.start_drag();
-	
-	set_active_state (Gtkmm2ext::ExplicitActive);
+	_dead_zone_delta = 0;
+
+	if (ev->type != GDK_BUTTON_PRESS) {
+		if (_grabbed) {
+			remove_modal_grab();
+			gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		}
+		return true;
+	}
 
 	if (binding_proxy.button_press_handler (ev)) {
 		return true;
 	}
 
-	return false;
+	if (ev->button != 1 && ev->button != 2) {
+		return false;
+	}
+	
+	set_active_state (Gtkmm2ext::ExplicitActive);
+	_tooltip.start_drag();
+	add_modal_grab();
+	_grabbed = true;
+	gdk_pointer_grab(ev->window,false,
+			GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
+			NULL,NULL,ev->time);
+	return true;
 }
 
 bool
 ArdourKnob::on_button_release_event (GdkEventButton *ev)
 {
+	_tooltip.stop_drag();
+	_grabbed = false;
+	remove_modal_grab();
+	gdk_pointer_ungrab (GDK_CURRENT_TIME);
+
 	if ( (_grabbed_y == ev->y && _grabbed_x == ev->x) && Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {  //no move, shift-click sets to default
 		boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 		if (!c) return false;
 		c->set_value (c->normal());
-        return true;
+		return true;
 	}
 
-	//_tooltip.target_stop_drag ();
-	_tooltip.stop_drag();
 	unset_active_state ();
 
-	return false;
+	return true;
 }
 
 void
@@ -504,14 +559,12 @@ void
 KnobPersistentTooltip::start_drag ()
 {
 	_dragging = true;
-	explicit_show();
 }
 
 void
 KnobPersistentTooltip::stop_drag ()
 {
 	_dragging = false;
-	//explicit_hide();
 }
 
 bool

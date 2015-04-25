@@ -106,6 +106,7 @@ public:
 
 	float _val; // current value [0..1]
 	float _zero; // default value, arc
+	float _dead_zone_delta;
 	bool _arc_to_zero; // if false, arc starts left-edge
 
 	void action_sensitivity_changed ();
