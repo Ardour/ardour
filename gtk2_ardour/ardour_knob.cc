@@ -37,6 +37,7 @@
 #include "ardour_knob.h"
 #include "ardour_ui.h"
 #include "global_signals.h"
+#include "timers.h"
 
 #include "canvas/colors.h"
 #include "canvas/utils.h"
@@ -66,6 +67,9 @@ ArdourKnob::ArdourKnob (Element e, Flags flags)
 	, _tooltip (this)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
+
+	// watch automation :(
+	Timers::rapid_connect (sigc::mem_fun (*this, &ArdourKnob::controllable_changed));
 }
 
 ArdourKnob::~ArdourKnob()
@@ -451,7 +455,7 @@ ArdourKnob::on_size_allocate (Allocation& alloc)
 void
 ArdourKnob::set_controllable (boost::shared_ptr<Controllable> c)
 {
-    watch_connection.disconnect ();  //stop watching the old controllable
+	watch_connection.disconnect ();  //stop watching the old controllable
 
 	if (!c) return;
 
@@ -468,10 +472,16 @@ void
 ArdourKnob::controllable_changed ()
 {
 	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
+	if (!c) return;
 
-	_val = c->get_interface();  //% of knob travel
-	_val = min( max(0.0f, _val), 1.0f);  //range check
+	float val = c->get_interface();
+	val = min( max(0.0f, val), 1.0f); // clamp
 
+	if (val == _val) {
+		return;
+	}
+
+	_val = val;
 	if (!_tooltip_prefix.empty()) {
 		_tooltip.set_tip (_tooltip_prefix + c->get_user_string());
 	}
