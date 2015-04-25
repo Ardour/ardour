@@ -497,8 +497,8 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double xc = get_width() * .5;
 		const double yh = get_height();
 		cairo_rectangle (cr,
-				xc - wh, yh *.2,
-				wh * 2,  yh *.4);
+				xc - wh, yh *.19,
+				wh * 2,  yh *.41);
 		VECTORICONSTROKEFILL(0.8);
 
 		cairo_arc (cr, xc, yh *.75, wh, 0, 2 * M_PI);
@@ -548,18 +548,18 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double y = get_height() * .5;
 		const double r = std::min(x, y);
 
-		cairo_arc (cr, x, y, r * .6, 0, 2 * M_PI);
-		cairo_arc_negative (cr, x, y, r * .3, 2 * M_PI, 0);
+		cairo_arc          (cr, x, y, r * .62, 0, 2 * M_PI);
+		cairo_arc_negative (cr, x, y, r * .35, 2 * M_PI, 0);
 
 		VECTORICONSTROKEFILL(1.0);
 #define ARCARROW(rad, ang) \
 		x + (rad) * sin((ang) * 2.0 * M_PI), y + (rad) * cos((ang) * 2.0 * M_PI)
 
-		cairo_move_to (cr, ARCARROW(r * .30, .72));
-		cairo_line_to (cr, ARCARROW(r * .08, .72));
-		cairo_line_to (cr, ARCARROW(r * .54, .60));
-		cairo_line_to (cr, ARCARROW(r * .73, .72));
-		cairo_line_to (cr, ARCARROW(r * .60, .72));
+		cairo_move_to (cr, ARCARROW(r * .35, .72));
+		cairo_line_to (cr, ARCARROW(r * .15, .72));
+		cairo_line_to (cr, ARCARROW(r * .56, .60));
+		cairo_line_to (cr, ARCARROW(r * .75, .72));
+		cairo_line_to (cr, ARCARROW(r * .62, .72));
 
 		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 		cairo_stroke_preserve(cr);
@@ -572,9 +572,9 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double x  = get_width() * .5;
 		const double y  = get_height() * .5;
 		const double wh = std::min(x, y);
-		const double h  = wh * .8;
-		const double w  = wh * .5;
-		const double lw = w * .25;
+		const double h  = wh * .85;
+		const double w  = wh * .55;
+		const double lw = w  * .34;
 
 		cairo_rectangle (cr,
 		                 x - w * .7, y + h * .25,
