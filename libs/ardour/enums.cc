@@ -187,6 +187,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterIEC2BBC);
 	REGISTER_ENUM (MeterIEC2EBU);
 	REGISTER_ENUM (MeterVU);
+	REGISTER_ENUM (MeterPeak0dB);
 	REGISTER (_MeterType);
 
 	REGISTER_ENUM (Normal);

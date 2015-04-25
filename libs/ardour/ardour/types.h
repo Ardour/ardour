@@ -180,18 +180,19 @@ namespace ARDOUR {
 	};
 
 	enum MeterType {
-		MeterMaxSignal = 0x001,
-		MeterMaxPeak   = 0x002,
-		MeterPeak      = 0x004,
-		MeterKrms      = 0x008,
-		MeterK20       = 0x010,
-		MeterK14       = 0x020,
-		MeterIEC1DIN   = 0x040,
-		MeterIEC1NOR   = 0x080,
-		MeterIEC2BBC   = 0x100,
-		MeterIEC2EBU   = 0x200,
-		MeterVU        = 0x400,
-		MeterK12       = 0x800
+		MeterMaxSignal = 0x0001,
+		MeterMaxPeak   = 0x0002,
+		MeterPeak      = 0x0004,
+		MeterKrms      = 0x0008,
+		MeterK20       = 0x0010,
+		MeterK14       = 0x0020,
+		MeterIEC1DIN   = 0x0040,
+		MeterIEC1NOR   = 0x0080,
+		MeterIEC2BBC   = 0x0100,
+		MeterIEC2EBU   = 0x0200,
+		MeterVU        = 0x0400,
+		MeterK12       = 0x0800,
+		MeterPeak0dB   = 0x1000
 	};
 
 	enum TrackMode {

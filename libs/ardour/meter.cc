@@ -385,6 +385,7 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 			}
 			break;
 		case MeterPeak:
+		case MeterPeak0dB:
 			return peak_power(n);
 		case MeterMaxSignal:
 			if (n < _max_peak_signal.size()) {
