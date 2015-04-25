@@ -119,6 +119,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
 
 	if (alist->parameter().type() == GainAutomation ||
+	    alist->parameter().type() == TrimAutomation ||
 	    alist->parameter().type() == EnvelopeAutomation ||
 	    desc.unit == ParameterDescriptor::DB) {
 		set_uses_gain_mapping (true);

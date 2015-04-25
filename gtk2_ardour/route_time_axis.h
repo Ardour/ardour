@@ -239,12 +239,14 @@ protected:
 	void color_handler ();
 	void region_view_added (RegionView*);
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
+	void create_trim_automation_child (const Evoral::Parameter &, bool);
 	void create_mute_automation_child (const Evoral::Parameter &, bool);
 	void setup_processor_menu_and_curves ();
 	void route_color_changed ();
         bool can_edit_name() const;
 
 	boost::shared_ptr<AutomationTimeAxisView> gain_track;
+	boost::shared_ptr<AutomationTimeAxisView> trim_track;
 	boost::shared_ptr<AutomationTimeAxisView> mute_track;
 
 	StreamView*           _view;
@@ -306,6 +308,7 @@ protected:
 
 protected:
 	void update_gain_track_visibility ();
+	void update_trim_track_visibility ();
 	void update_mute_track_visibility ();
 	void update_pan_track_visibility ();
 
@@ -316,6 +319,7 @@ protected:
 	void ensure_pan_views (bool show = true);
 
 	Gtk::CheckMenuItem* gain_automation_item;
+	Gtk::CheckMenuItem* trim_automation_item;
 	Gtk::CheckMenuItem* mute_automation_item;
 	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
 	Gtk::CheckMenuItem* pan_automation_item;

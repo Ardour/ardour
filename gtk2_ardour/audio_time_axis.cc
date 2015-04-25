@@ -106,6 +106,10 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		create_automation_child (GainAutomation, false);
 	}
 
+	if (automation_child (TrimAutomation) == 0) {
+		create_automation_child (TrimAutomation, false);
+	}
+
 	/* if set_state above didn't create a mute automation child, we need to make one */
 	if (automation_child (MuteAutomation) == 0) {
 		create_automation_child (MuteAutomation, false);
@@ -198,6 +202,10 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 	if (param.type() == GainAutomation) {
 
 		create_gain_automation_child (param, show);
+
+	} else if (param.type() == TrimAutomation) {
+
+		create_trim_automation_child (param, show);
 
 	} else if (param.type() == PanWidthAutomation ||
                    param.type() == PanElevationAutomation ||

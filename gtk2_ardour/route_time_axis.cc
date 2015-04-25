@@ -112,6 +112,7 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
 	, gain_automation_item(NULL)
+	, trim_automation_item(NULL)
 	, mute_automation_item(NULL)
 	, pan_automation_item(NULL)
 {
@@ -520,6 +521,15 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 		                                  (gain_track && string_is_affirmative (gain_track->gui_property ("visible"))));
 
 		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+	}
+
+	if (trim_track) {
+		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &RouteTimeAxisView::update_trim_track_visibility)));
+		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		trim_automation_item->set_active ((!for_selection || _editor.get_selection().tracks.size() == 1) &&
+		                                  (trim_track && string_is_affirmative (trim_track->gui_property ("visible"))));
+
+		_main_automation_menu_map[Evoral::Parameter(TrimAutomation)] = trim_automation_item;
 	}
 
 	if (mute_track) {
@@ -1897,6 +1907,22 @@ RouteTimeAxisView::update_gain_track_visibility ()
 }
 
 void
+RouteTimeAxisView::update_trim_track_visibility ()
+{
+	bool const showit = trim_automation_item->get_active();
+
+	if (showit != string_is_affirmative (trim_track->gui_property ("visible"))) {
+		trim_track->set_marked_for_display (showit);
+
+		/* now trigger a redisplay */
+
+		if (!no_redraw) {
+			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
+		}
+	}
+}
+
+void
 RouteTimeAxisView::update_mute_track_visibility ()
 {
 	bool const showit = mute_automation_item->get_active();
@@ -2747,6 +2773,30 @@ RouteTimeAxisView::create_gain_automation_child (const Evoral::Parameter& param,
 	}
 
 	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
+}
+
+void
+RouteTimeAxisView::create_trim_automation_child (const Evoral::Parameter& param, bool show)
+{
+	boost::shared_ptr<AutomationControl> c = _route->trim()->gain_control();
+	if (!c || ! _route->trim()->active()) {
+		error << "Route has no trim automation, unable to add automation track view." << endmsg;
+		return;
+	}
+
+	trim_track.reset (new AutomationTimeAxisView (_session,
+						      _route, _route->trim(), c, param,
+						      _editor,
+						      *this,
+						      false,
+						      parent_canvas,
+						      _route->trim()->describe_parameter(param)));
+
+	if (_view) {
+		_view->foreach_regionview (sigc::mem_fun (*trim_track.get(), &TimeAxisView::add_ghost));
+	}
+
+	add_automation_child (Evoral::Parameter(TrimAutomation), trim_track, show);
 }
 
 void
