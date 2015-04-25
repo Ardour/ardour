@@ -465,7 +465,7 @@
     <ColorAlias name="trim handle" alias="color 18"/>
     <ColorAlias name="trim handle locked" alias="color 86"/>
     <ColorAlias name="trim knob" alias="color 60"/>
-    <ColorAlias name="trim knob: arc end" alias="color 30"/>
+    <ColorAlias name="trim knob: arc end" alias="color 82"/>
     <ColorAlias name="trim knob: arc start" alias="color 16"/>
     <ColorAlias name="verbose canvas cursor" alias="color 32"/>
     <ColorAlias name="vestigial frame" alias="color 4"/>
