@@ -504,12 +504,14 @@ void
 KnobPersistentTooltip::start_drag ()
 {
 	_dragging = true;
+	explicit_show();
 }
 
 void
 KnobPersistentTooltip::stop_drag ()
 {
 	_dragging = false;
+	//explicit_hide();
 }
 
 bool
