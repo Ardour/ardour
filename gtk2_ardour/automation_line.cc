@@ -376,19 +376,16 @@ AutomationLine::fraction_to_string (double fraction) const
 {
 	if (_uses_gain_mapping) {
 		char buf[32];
-		if (_desc.type == GainAutomation) {
+		if (_desc.type == GainAutomation || _desc.type == EnvelopeAutomation || _desc.lower == 0) {
 			if (fraction == 0.0) {
 				snprintf (buf, sizeof (buf), "-inf");
 			} else {
 				snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, _desc.upper)));
 			}
 		} else {
-			float coeff = _desc.lower + fraction * (_desc.upper - _desc.lower);
-			if (coeff == 0.0) {
-				snprintf (buf, sizeof (buf), "-inf");
-			} else {
-				snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (coeff));
-			}
+			const double lower_db = accurate_coefficient_to_dB (_desc.lower);
+			const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
+			snprintf (buf, sizeof (buf), "%.1f", lower_db + fraction * range_db);
 		}
 		return buf;
 	} else {
