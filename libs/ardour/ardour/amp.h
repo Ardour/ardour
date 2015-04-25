@@ -60,8 +60,8 @@ public:
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
-	static gain_t apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target);
-	static void apply_simple_gain(BufferSet& bufs, framecnt_t nframes, gain_t target);
+	static gain_t apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target, bool midi_amp = true);
+	static void apply_simple_gain(BufferSet& bufs, framecnt_t nframes, gain_t target, bool midi_amp = true);
 
 	static gain_t apply_gain (AudioBuffer& buf, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target);
 	static void apply_simple_gain(AudioBuffer& buf, framecnt_t nframes, gain_t target);
@@ -124,6 +124,7 @@ private:
 	/** Buffer that we should use for gain automation */
 	gain_t* _gain_automation_buffer;
 	std::string _type;
+	bool _midi_amp;
 };
 
 
