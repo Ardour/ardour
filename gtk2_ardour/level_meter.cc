@@ -377,9 +377,9 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					c[7] = c[8] = c[9] = c[6];
 					break;
 				case MeterPeak0dB:
-					 stp[1] = 115.0 * log_meter0dB(-10);
-					 stp[2] = 115.0 * log_meter0dB(-3);
-					 stp[3] = 115.0 * log_meter0dB(0);
+					 stp[1] =  89.125; // 115.0 * log_meter0dB(-9);
+					 stp[2] = 106.375; // 115.0 * log_meter0dB(-3);
+					 stp[3] = 115.0;   // 115.0 * log_meter0dB(0);
 					switch (ARDOUR_UI::config()->get_meter_line_up_level()) {
 					case MeteringLineUp24:
 						stp[0] = 115.0 * log_meter0dB(-24);
@@ -396,7 +396,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					}
 					break;
 				default: // PEAK, RMS
-					stp[1] = 77.5;  // 115 * log_meter(-10)
+					stp[1] = 77.5;  // 115 * log_meter(-9)
 					stp[2] = 92.5;  // 115 * log_meter(-3)
 					stp[3] = 100.0; // 115 * log_meter(0)
 					switch (ARDOUR_UI::config()->get_meter_line_up_level()) {
