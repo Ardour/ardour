@@ -2780,7 +2780,6 @@ RouteTimeAxisView::create_trim_automation_child (const Evoral::Parameter& param,
 {
 	boost::shared_ptr<AutomationControl> c = _route->trim()->gain_control();
 	if (!c || ! _route->trim()->active()) {
-		error << "Route has no trim automation, unable to add automation track view." << endmsg;
 		return;
 	}
 
