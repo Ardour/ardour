@@ -211,7 +211,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	/* Dim */
 
-	dim_control = new ArdourKnob ();
+	dim_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	dim_control->set_name ("monitor knob");
 	dim_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
 	ARDOUR_UI::instance()->tooltips().set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
@@ -312,7 +312,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	/* Gain */
 
-	gain_control = new ArdourKnob ();
+	gain_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	gain_control->set_name("monitor knob");
 	gain_control->set_size_request (PX_SCALE(80), PX_SCALE(80));
 
