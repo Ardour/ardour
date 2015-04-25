@@ -370,6 +370,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/ardour/routes/recenable", "ii", route_recenable);
 		REGISTER_CALLBACK (serv, "/ardour/routes/gainabs", "if", route_set_gain_abs);
 		REGISTER_CALLBACK (serv, "/ardour/routes/gaindB", "if", route_set_gain_dB);
+		REGISTER_CALLBACK (serv, "/ardour/routes/trimabs", "if", route_set_trim_abs);
+		REGISTER_CALLBACK (serv, "/ardour/routes/trimdB", "if", route_set_trim_dB);
 		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_position", "if", route_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/ardour/routes/pan_stereo_width", "if", route_set_pan_stereo_width);
 		REGISTER_CALLBACK (serv, "/ardour/routes/plugin/parameter", "iiif", route_plugin_parameter);
@@ -862,16 +864,30 @@ OSC::route_set_gain_abs (int rid, float level)
 int
 OSC::route_set_gain_dB (int rid, float dB)
 {
+	return route_set_gain_abs (rid, dB_to_coefficient (dB));
+}
+
+
+int
+OSC::route_set_trim_abs (int rid, float level)
+{
 	if (!session) return -1;
 
 	boost::shared_ptr<Route> r = session->route_by_remote_id (rid);
 
 	if (r) {
-		r->set_gain (dB_to_coefficient (dB), this);
+		r->set_trim (level, this);
 	}
 
 	return 0;
 }
+
+int
+OSC::route_set_trim_dB (int rid, float dB)
+{
+	return route_set_trim_abs(rid, dB_to_coefficient (dB));
+}
+
 
 int
 OSC::route_set_pan_stereo_position (int rid, float pos)
