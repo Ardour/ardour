@@ -54,15 +54,15 @@ using namespace std;
 
 ArdourKnob::Element ArdourKnob::default_elements = ArdourKnob::Element (ArdourKnob::Arc);
 
-ArdourKnob::ArdourKnob (Element e, bool arc_to_zero)
+ArdourKnob::ArdourKnob (Element e, Flags flags)
 	: _elements (e)
 	, _hovering (false)
 	, _grabbed_x (0)
 	, _grabbed_y (0)
 	, _val (0)
-	, _zero (0)
+	, _normal (0)
 	, _dead_zone_delta (0)
-	, _arc_to_zero (arc_to_zero)
+	, _flags (flags)
 	, _tooltip (this)
 {
 	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ArdourKnob::color_handler));
@@ -86,8 +86,13 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 	const float start_angle = ((180 - 65) * G_PI) / 180;
 	const float end_angle = ((360 + 65) * G_PI) / 180;
 
+	float zero = 0;
+	if (_flags & ArcToZero) {
+		zero = _normal;
+	}
+
 	const float value_angle = start_angle + (_val * (end_angle - start_angle));
-	const float zero_angle = start_angle + (_zero * (end_angle - start_angle));
+	const float zero_angle = start_angle + (zero * (end_angle - start_angle));
 	
 	float value_x = cos (value_angle);
 	float value_y = sin (value_angle);
@@ -130,7 +135,7 @@ ArdourKnob::render (cairo_t* cr, cairo_rectangle_t *)
 		ArdourCanvas::color_to_rgba( arc_end_color, red_end, green_end, blue_end, unused );
 
 		//vary the arc color over the travel of the knob
-		float intensity = fabsf (_val - _zero) / std::max(_zero, (1.f - _zero));
+		float intensity = fabsf (_val - zero) / std::max(zero, (1.f - zero));
 		const float intensity_inv = 1.0 - intensity;
 		float r = intensity_inv * red_end   + intensity * red_start;
 		float g = intensity_inv * green_end + intensity * green_start;
@@ -323,7 +328,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 
 	//scale the adjustment based on keyboard modifiers & GUI size
 	const float ui_scale = max (1.f, ARDOUR_UI::ui_scale);
-	float scale = 0.0025 * ui_scale;
+	float scale = 0.0025 / ui_scale;
 
 	if (ev->state & Keyboard::GainFineScaleModifier) {
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
@@ -343,32 +348,35 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 	_grabbed_y = ev->y;
 	float val = c->get_interface();
 
-	const float px_deadzone = 42.f * ui_scale;
+	if (_flags & Detent) {
+		const float px_deadzone = 42.f * ui_scale;
 
-	if ((val - _zero) * (val - _zero + delta * scale) < 0) {
-		/* zero transition */
-		const int tozero = (_zero - val) * scale;
-		int remain = delta - tozero;
-		if (abs (remain) > px_deadzone) {
-			/* slow down zero transitions */
-			remain += (remain > 0) ? px_deadzone * -.5 : px_deadzone * .5;
-			delta = tozero + remain;
-			_dead_zone_delta = 0;
-		} else {
-			c->set_interface(_zero);
-			val = _zero;
-			_dead_zone_delta = remain / px_deadzone;
+		if ((val - _normal) * (val - _normal + delta * scale) < 0) {
+			/* detent */
+			const int tozero = (_normal - val) * scale;
+			int remain = delta - tozero;
+			if (abs (remain) > px_deadzone) {
+				/* slow down passing the default value */
+				remain += (remain > 0) ? px_deadzone * -.5 : px_deadzone * .5;
+				delta = tozero + remain;
+				_dead_zone_delta = 0;
+			} else {
+				c->set_interface(_normal);
+				val = _normal;
+				_dead_zone_delta = remain / px_deadzone;
+				return true;
+			}
+		}
+
+		if (fabsf (rintf((val - _normal) / scale) + _dead_zone_delta) < 1) {
+			c->set_interface(_normal);
+			_dead_zone_delta += delta / px_deadzone;
 			return true;
 		}
+
+		_dead_zone_delta = 0;
 	}
 
-	if (fabsf (rintf((val - _zero) / scale) + _dead_zone_delta) < 1) {
-		c->set_interface(_zero);
-		_dead_zone_delta += delta / px_deadzone;
-		return true;
-	}
-
-	_dead_zone_delta = 0;
 	val += delta * scale;
 	c->set_interface(val);
 
@@ -451,11 +459,7 @@ ArdourKnob::set_controllable (boost::shared_ptr<Controllable> c)
 
 	c->Changed.connect (watch_connection, invalidator(*this), boost::bind (&ArdourKnob::controllable_changed, this), gui_context());
 
-	if (_arc_to_zero) {
-		_zero = c->internal_to_interface(c->normal());
-	} else {
-		_zero = 0;
-	}
+	_normal = c->internal_to_interface(c->normal());
 
 	controllable_changed();
 }

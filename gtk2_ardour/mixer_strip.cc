@@ -97,7 +97,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
-	, trim_control (ArdourKnob::default_elements, true)
+	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
 {
 	init ();
@@ -127,7 +127,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt
 	, meter_point_button (_("pre"))
 	, midi_input_enable_button (0)
 	, _comment_button (_("Comments"))
-	, trim_control (ArdourKnob::default_elements, true)
+	, trim_control (ArdourKnob::default_elements, ArdourKnob::Flags (ArdourKnob::Detent | ArdourKnob::ArcToZero))
 	, _visibility (X_("mixer-element-visibility"))
 {
 	init ();

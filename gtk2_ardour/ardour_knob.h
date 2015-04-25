@@ -57,7 +57,13 @@ public:
 		unused5 = 0x20,
 	};
 
-	ArdourKnob (Element e = default_elements, bool arc_to_zero = false);
+	enum Flags {
+		NoFlags = 0,
+		Detent = 0x1,
+		ArcToZero = 0x2,
+	};
+
+	ArdourKnob (Element e = default_elements, Flags flags = NoFlags);
 	virtual ~ArdourKnob ();
 
 	void set_active_state (Gtkmm2ext::ActiveState);
@@ -105,9 +111,10 @@ public:
 	float _grabbed_y;
 
 	float _val; // current value [0..1]
-	float _zero; // default value, arc
+	float _normal; // default value, arc
 	float _dead_zone_delta;
-	bool _arc_to_zero; // if false, arc starts left-edge
+	
+	Flags _flags;
 
 	void action_sensitivity_changed ();
 	void action_visibility_changed ();
