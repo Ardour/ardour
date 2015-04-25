@@ -361,7 +361,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 				delta = tozero + remain;
 				_dead_zone_delta = 0;
 			} else {
-				c->set_interface(_normal);
+				c->set_value (c->normal());
 				val = _normal;
 				_dead_zone_delta = remain / px_deadzone;
 				return true;
@@ -369,7 +369,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 		}
 
 		if (fabsf (rintf((val - _normal) / scale) + _dead_zone_delta) < 1) {
-			c->set_interface(_normal);
+			c->set_value (c->normal());
 			_dead_zone_delta += delta / px_deadzone;
 			return true;
 		}
