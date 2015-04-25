@@ -142,6 +142,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void set_gain (gain_t val, void *src);
 	void inc_gain (gain_t delta, void *src);
 
+	void set_trim (gain_t val, void *src);
+	void inc_trim (gain_t delta, void *src);
+
 	void set_mute_points (MuteMaster::MutePoint);
 	MuteMaster::MutePoint mute_points () const;
 

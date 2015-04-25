@@ -423,6 +423,19 @@ Route::set_gain (gain_t val, void *src)
 }
 
 void
+Route::inc_trim (gain_t fraction, void *src)
+{
+	_trim->inc_gain (fraction, src);
+}
+
+void
+Route::set_trim (gain_t val, void * /* src */)
+{
+	// TODO route group, see set_gain()
+	_trim->set_gain (val, 0);
+}
+
+void
 Route::maybe_declick (BufferSet&, framecnt_t, int)
 {
 	/* this is the "bus" implementation and they never declick.
