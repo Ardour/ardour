@@ -163,6 +163,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 
 	if (param == Evoral::Parameter(GainAutomation)) {
 		return _("Fader");
+	} else if (param.type() == TrimAutomation) {
+		return _("Trim");
 	} else if (param.type() == MuteAutomation) {
 		return _("Mute");
 	} else if (param.type() == MidiCCAutomation) {
@@ -440,6 +442,13 @@ Automatable::control_factory(const Evoral::Parameter& param)
 			control = new Amp::GainControl(X_("gaincontrol"), _a_session, amp, param);
 		} else {
 			warning << "GainAutomation for non-Amp" << endl;
+		}
+	} else if (param.type() == TrimAutomation) {
+		Amp* amp = dynamic_cast<Amp*>(this);
+		if (amp) {
+			control = new Amp::GainControl(X_("trimcontrol"), _a_session, amp, param);
+		} else {
+			warning << "TrimAutomation for non-Amp" << endl;
 		}
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);

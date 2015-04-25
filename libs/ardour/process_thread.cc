@@ -169,6 +169,17 @@ ProcessThread::gain_automation_buffer()
 }
 
 gain_t*
+ProcessThread::trim_automation_buffer()
+{
+        ThreadBuffers* tb = _private_thread_buffers.get();
+        assert (tb);
+
+        gain_t *g =  tb->trim_automation_buffer;
+        assert (g);
+        return g;
+}
+
+gain_t*
 ProcessThread::send_gain_automation_buffer()
 {
         ThreadBuffers* tb = _private_thread_buffers.get();

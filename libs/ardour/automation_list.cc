@@ -139,6 +139,7 @@ AutomationList::create_curve_if_necessary()
 {
 	switch (_parameter.type()) {
 	case GainAutomation:
+	case TrimAutomation:
 	case PanAzimuthAutomation:
 	case PanElevationAutomation:
 	case PanWidthAutomation:

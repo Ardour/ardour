@@ -4811,6 +4811,12 @@ Session::gain_automation_buffer() const
 }
 
 gain_t*
+Session::trim_automation_buffer() const
+{
+	return ProcessThread::trim_automation_buffer ();
+}
+
+gain_t*
 Session::send_gain_automation_buffer() const
 {
 	return ProcessThread::send_gain_automation_buffer ();

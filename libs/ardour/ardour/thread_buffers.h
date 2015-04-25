@@ -42,6 +42,7 @@ public:
 	BufferSet* route_buffers;
 	BufferSet* mix_buffers;
 	gain_t*    gain_automation_buffer;
+	gain_t*    trim_automation_buffer;
 	gain_t*    send_gain_automation_buffer;
 	pan_t**    pan_automation_buffer;
 	uint32_t   npan_buffers;

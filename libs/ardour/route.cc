@@ -82,6 +82,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _active (true)
 	, _signal_latency (0)
 	, _signal_latency_at_amp_position (0)
+	, _signal_latency_at_trim_position (0)
 	, _initial_delay (0)
 	, _roll_delay (0)
 	, _flags (flg)
@@ -360,7 +361,6 @@ Route::ensure_track_or_route_name(string name, Session &session)
 	return newname;
 }
 
-
 void
 Route::inc_gain (gain_t fraction, void *src)
 {
@@ -474,8 +474,15 @@ Route::process_output_buffers (BufferSet& bufs,
 				start_frame + _signal_latency_at_amp_position,
 				end_frame + _signal_latency_at_amp_position,
 				nframes);
+
+		_trim->set_gain_automation_buffer (_session.trim_automation_buffer ());
+		_trim->setup_gain_automation (
+				start_frame + _signal_latency_at_trim_position,
+				end_frame + _signal_latency_at_trim_position,
+				nframes);
 	} else {
 		_amp->apply_gain_automation (false);
+		_trim->apply_gain_automation (false);
 	}
 
 	/* Tell main outs what to do about monitoring.  We do this so that
@@ -609,6 +616,10 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 	framecnt_t latency = bounce_get_latency(_amp, false, for_export, for_freeze);
 	_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 	_amp->setup_gain_automation (start - latency, start - latency + nframes, nframes);
+
+	/* trim is always at the top, for bounce no latency compensation is needed */
+	_trim->set_gain_automation_buffer (_session.trim_automation_buffer ());
+	_trim->setup_gain_automation (start, start + nframes, nframes);
 
 	latency = 0;
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -1509,7 +1520,7 @@ Route::clear_processors (Placement p)
 				seen_amp = true;
 			}
 
-			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs || (*i) == _delayline) {
+			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs || (*i) == _delayline || (*i) == _trim) {
 
 				/* you can't remove these */
 
@@ -1576,7 +1587,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 	/* these can never be removed */
 
-	if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline) {
+	if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline || processor == _trim) {
 		return 0;
 	}
 
@@ -3209,6 +3220,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	}
 
 	_amp->apply_gain_automation (false);
+	_trim->apply_gain_automation (false);
 	passthru (bufs, start_frame, end_frame, nframes, 0);
 
 	return 0;
@@ -3391,6 +3403,8 @@ Route::update_signal_latency ()
 	framecnt_t l = _output->user_latency();
 	framecnt_t lamp = 0;
 	bool before_amp = true;
+	framecnt_t ltrim = 0;
+	bool before_trim = true;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
@@ -3399,14 +3413,23 @@ Route::update_signal_latency ()
 		if ((*i) == _amp) {
 			before_amp = false;
 		}
+		if ((*i) == _trim) {
+			before_amp = false;
+		}
 		if (before_amp) {
+			lamp = l;
+		}
+		if (before_trim) {
 			lamp = l;
 		}
 	}
 
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l));
 
+	// TODO: (lamp - _signal_latency) to sync to output (read-ahed),  currently _roll_delay shifts this around
 	_signal_latency_at_amp_position = lamp;
+	_signal_latency_at_trim_position = ltrim;
+
 	if (_signal_latency != l) {
 		_signal_latency = l;
 		signal_latency_changed (); /* EMIT SIGNAL */
@@ -3608,6 +3631,18 @@ Route::shift (framepos_t pos, framecnt_t frames)
 		XMLNode &after = gc->alist()->get_state ();
 		_session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
 	}
+
+	/* gain automation */
+	{
+		boost::shared_ptr<AutomationControl> gc = _trim->gain_control();
+
+		XMLNode &before = gc->alist()->get_state ();
+		gc->alist()->shift (pos, frames);
+		XMLNode &after = gc->alist()->get_state ();
+		_session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
+	}
+
+	// TODO mute automation ??
 
 	/* pan automation */
 	if (_pannable) {

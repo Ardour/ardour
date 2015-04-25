@@ -130,6 +130,8 @@ EventTypeMap::from_symbol(const string& str) const
 
 	if (str == "gain") {
 		p_type = GainAutomation;
+	} else if (str == "trim") {
+		p_type = TrimAutomation;
 	} else if (str == "solo") {
 		p_type = SoloAutomation;
 	} else if (str == "mute") {
@@ -207,6 +209,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 
 	if (t == GainAutomation) {
 		return "gain";
+	} else if (t == TrimAutomation) {
+                return "trim";
 	} else if (t == PanAzimuthAutomation) {
                 return "pan-azimuth";
 	} else if (t == PanElevationAutomation) {

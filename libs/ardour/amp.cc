@@ -46,7 +46,7 @@ Amp::Amp (Session& s, std::string type)
 {
 	Evoral::Parameter p (_type == "trim" ? TrimAutomation : GainAutomation);
 	boost::shared_ptr<AutomationList> gl (new AutomationList (p));
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl (X_("gaincontrol"), s, this, p, gl));
+	_gain_control = boost::shared_ptr<GainControl> (new GainControl ((_type == "trim") ? X_("trimcontrol") : X_("gaincontrol"), s, this, p, gl));
 	_gain_control->set_flags (Controllable::GainLike);
 
 	add_control(_gain_control);
