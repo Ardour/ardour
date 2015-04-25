@@ -90,7 +90,19 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			gain_t* gab = _gain_automation_buffer;
 			assert (gab);
 
-			// TODO automated midi gain
+			if (_midi_amp) {
+				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
+					MidiBuffer& mb (*i);
+					for (MidiBuffer::iterator m = mb.begin(); m != mb.end(); ++m) {
+						Evoral::MIDIEvent<MidiBuffer::TimeType> ev = *m;
+						if (ev.is_note_on()) {
+							assert(ev.time() >= 0 && ev.time() < nframes);
+							ev.scale_velocity (gab[ev.time()]);
+						}
+					}
+				}
+			}
+
 
 			const float a = 62.78 / _session.nominal_frame_rate(); // 10 Hz LPF
 			float lpf = _current_gain;
