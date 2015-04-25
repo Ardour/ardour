@@ -150,6 +150,8 @@ LevelMeterBase::update_meters ()
 				const float peak = _meter->meter_level (n, meter_type);
 				if (meter_type == MeterPeak) {
 					(*i).meter->set (log_meter (peak));
+				} else if (meter_type == MeterPeak0dB) {
+					(*i).meter->set (log_meter0dB (peak));
 				} else if (meter_type == MeterIEC1NOR) {
 					(*i).meter->set (meter_deflect_nordic (peak + meter_lineup(0)));
 				} else if (meter_type == MeterIEC1DIN) {
@@ -373,6 +375,25 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[3] = 115.0 * meter_deflect_vu(-18); // +2
 					c[0] = c[2] = c[3] = c[4] = c[5] = c[1];
 					c[7] = c[8] = c[9] = c[6];
+					break;
+				case MeterPeak0dB:
+					 stp[1] = 115.0 * log_meter0dB(-10);
+					 stp[2] = 115.0 * log_meter0dB(-3);
+					 stp[3] = 115.0 * log_meter0dB(0);
+					switch (ARDOUR_UI::config()->get_meter_line_up_level()) {
+					case MeteringLineUp24:
+						stp[0] = 115.0 * log_meter0dB(-24);
+						break;
+					case MeteringLineUp20:
+						stp[0] = 115.0 * log_meter0dB(-20);
+						break;
+					default:
+					case MeteringLineUp18:
+						stp[0] = 115.0 * log_meter0dB(-18);
+						break;
+					case MeteringLineUp15:
+						stp[0] = 115.0 * log_meter0dB(-15);
+					}
 					break;
 				default: // PEAK, RMS
 					stp[1] = 77.5;  // 115 * log_meter(-10)

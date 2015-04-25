@@ -842,6 +842,7 @@ MeterStrip::popup_level_meter_menu (GdkEventButton* ev)
 
 	_suspend_menu_callbacks = true;
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak), MeterPeak);
+	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterPeak0dB), MeterPeak0dB);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterKrms),  MeterKrms);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC1DIN), MeterIEC1DIN);
 	add_level_meter_type_item (items, group, ArdourMeter::meter_type_string(MeterIEC1NOR), MeterIEC1NOR);

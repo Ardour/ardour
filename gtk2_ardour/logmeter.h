@@ -76,6 +76,31 @@ log_meter (float db)
 }
 
 static inline float
+log_meter0dB (float db)
+{
+         gfloat def = 0.0f; /* Meter deflection %age */
+
+         if (db < -70.0f) {
+                 def = 0.0f;
+         } else if (db < -60.0f) {
+                 def = (db + 70.0f) * 0.25f;
+         } else if (db < -50.0f) {
+                 def = (db + 60.0f) * 0.5f + 2.5f;
+         } else if (db < -40.0f) {
+                 def = (db + 50.0f) * 0.75f + 7.5f;
+         } else if (db < -30.0f) {
+                 def = (db + 40.0f) * 1.5f + 15.0f;
+         } else if (db < -20.0f) {
+                 def = (db + 30.0f) * 2.0f + 30.0f;
+         } else if (db < 0.0f) {
+                 def = (db + 20.0f) * 2.5f + 50.0f;
+         } else {
+		 def = 100.0f;
+	 }
+	return def/100.0f;
+}
+
+static inline float
 meter_deflect_ppm (float db)
 {
 	if (db < -30) {

@@ -81,6 +81,9 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 		case MeterPeak:
 			return _("Peak");
 			break;
+		case MeterPeak0dB:
+			return _("Peak 0dB");
+			break;
 		case MeterKrms:
 			return _("RMS + Peak");
 			break;
@@ -109,6 +112,7 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 			return _("VU");
 			break;
 		default:
+			assert(0);
 			return _("???");
 			break;
 	}
@@ -132,6 +136,17 @@ static inline float mtr_col_and_fract(
 		case MeterKrms:
 		case MeterPeak:
 			fraction = log_meter (val);
+			if (val >= 0 || val == -9) {
+				cairo_set_source_rgb (cr,
+						UINT_RGBA_R_FLT(peakcolor),
+						UINT_RGBA_G_FLT(peakcolor),
+						UINT_RGBA_B_FLT(peakcolor));
+			} else {
+				cairo_set_source_rgb (cr, c->get_red_p(), c->get_green_p(), c->get_blue_p());
+			}
+			break;
+		case MeterPeak0dB:
+			fraction = log_meter0dB (val);
 			if (val >= 0 || val == -9) {
 				cairo_set_source_rgb (cr,
 						UINT_RGBA_R_FLT(peakcolor),
@@ -491,6 +506,14 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					break;
 
 				default:
+					points.insert (std::pair<float,float>(  0, 1.0));
+					points.insert (std::pair<float,float>(  1, 0.5));
+					points.insert (std::pair<float,float>(  2, 0.5));
+					points.insert (std::pair<float,float>(  3, 1.0));
+					points.insert (std::pair<float,float>(  4, 0.5));
+					points.insert (std::pair<float,float>(  5, 0.5));
+					// no break
+				case MeterPeak0dB:
 					points.insert (std::pair<float,float>(-60, 0.5));
 					points.insert (std::pair<float,float>(-50, 1.0));
 					points.insert (std::pair<float,float>(-40, 1.0));
@@ -523,13 +546,6 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>( -3, 1.0));
 					points.insert (std::pair<float,float>( -2, 0.5));
 					points.insert (std::pair<float,float>( -1, 0.5));
-
-					points.insert (std::pair<float,float>(  0, 1.0));
-					points.insert (std::pair<float,float>(  1, 0.5));
-					points.insert (std::pair<float,float>(  2, 0.5));
-					points.insert (std::pair<float,float>(  3, 1.0));
-					points.insert (std::pair<float,float>(  4, 0.5));
-					points.insert (std::pair<float,float>(  5, 0.5));
 					break;
 			}
 			break;
@@ -678,6 +694,9 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 		switch (*i) {
 		case DataType::AUDIO:
 			layout->set_attributes (audio_font_attributes);
+			if (type == MeterPeak0dB) {
+				overlay_midi = 4;
+			}
 			switch (type) {
 				case MeterK12:
 					overlay_midi = 0;
@@ -725,6 +744,9 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				default:
 				case MeterPeak:
 				case MeterKrms:
+					points.insert (std::pair<float,string>(  3.0f, "+3"));
+					// no break
+				case MeterPeak0dB:
 					points.insert (std::pair<float,string>(-50.0f, "-50"));
 					points.insert (std::pair<float,string>(-40.0f, "-40"));
 					points.insert (std::pair<float,string>(-30.0f, "-30"));
@@ -742,7 +764,6 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>( -5.0f, "-5"));
 					points.insert (std::pair<float,string>( -3.0f, "-3"));
 					points.insert (std::pair<float,string>(  0.0f, "+0"));
-					points.insert (std::pair<float,string>(  3.0f, "+3"));
 					break;
 
 				case MeterIEC2EBU:
@@ -832,6 +853,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 				points.insert (std::pair<float,string>( 96,  "96"));
 				points.insert (std::pair<float,string>(100, "100"));
 				points.insert (std::pair<float,string>(112, "112"));
+				points.insert (std::pair<float,string>(127, "127"));
 			} else {
 				switch (overlay_midi) {
 					case 1:
@@ -859,6 +881,13 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 						points.insert (std::pair<float,string>( 72, "72"));
 						points.insert (std::pair<float,string>(112, "112"));
 						points.insert (std::pair<float,string>(127, "127"));
+					case 4:
+						/* labels that don't overlay with 0dBFS*/
+						points.insert (std::pair<float,string>(  0, "0"));
+						points.insert (std::pair<float,string>( 16, "16"));
+						points.insert (std::pair<float,string>( 48, "48"));
+						points.insert (std::pair<float,string>( 84, "84"));
+						points.insert (std::pair<float,string>(100, "100"));
 					default:
 						break;
 				}
@@ -947,6 +976,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 						break;
 					default:
 					case MeterPeak:
+					case MeterPeak0dB:
 					case MeterKrms:
 						layout->set_text("dBFS");
 						break;
