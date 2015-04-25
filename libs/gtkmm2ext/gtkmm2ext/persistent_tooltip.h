@@ -39,6 +39,9 @@ public:
 
 	virtual bool dragging () const;
 
+	void explicit_show ();
+	void explicit_hide ();
+
 private:
 	bool timeout ();
 	void show ();
