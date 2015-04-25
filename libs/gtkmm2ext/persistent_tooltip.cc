@@ -63,20 +63,6 @@ PersistentTooltip::timeout ()
 	return false;
 }
 
-void
-PersistentTooltip::explicit_show ()
-{
-	_timeout.disconnect ();
-	show ();
-}
-
-void
-PersistentTooltip::explicit_hide ()
-{
-	_timeout.disconnect ();
-	hide ();
-}
-
 bool
 PersistentTooltip::leave (GdkEventCrossing *)
 {
