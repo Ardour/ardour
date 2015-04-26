@@ -312,7 +312,7 @@ MonitorProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /
 
                 /* chn is now the number of channels, use as a scaling factor when mixing
                  */
-                gain_t scale = 1.0/chn;
+                gain_t scale = 1.f / (float)chn;
                 BufferSet::audio_iterator b = bufs.audio_begin();
                 AudioBuffer& ab (*b);
                 Sample* buf = ab.data();
