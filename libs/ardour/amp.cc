@@ -35,6 +35,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+// used for low-pass filter denormal protection
+#define GAIN_COEFF_TINY (1e-10) // -200dB
+
 Amp::Amp (Session& s, std::string type)
 	: Processor(s, "Amp")
 	, _apply_gain(true)
@@ -104,8 +107,8 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			}
 
 
-			const float a = 62.78 / _session.nominal_frame_rate(); // 10 Hz LPF
-			float lpf = _current_gain;
+			const double a = 62.78 / _session.nominal_frame_rate(); // 10 Hz LPF; see Amp::apply_gain for details
+			double lpf = _current_gain;
 
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 				Sample* const sp = i->data();
@@ -116,8 +119,8 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 				}
 			}
 
-			if (lpf < 1e-10) {
-				_current_gain = 0;
+			if (fabs (lpf) < GAIN_COEFF_TINY) {
+				_current_gain = GAIN_COEFF_ZERO;
 			} else {
 				_current_gain = lpf;
 			}
@@ -207,11 +210,11 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, ga
 	/* Low pass filter coefficient: 1.0 - e^(-2.0 * π * f / 48000) f in Hz.
 	 * for f << SR,  approx a ~= 6.2 * f / SR;
 	 */
-	const float a = 62.78 / sample_rate; // 10 Hz LPF
+	const double a = 62.78 / sample_rate; // 10 Hz LPF
 
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 		Sample* const buffer = i->data();
-		float lpf = initial;
+		double lpf = initial;
 
 		for (pframes_t nx = 0; nx < nframes; ++nx) {
 			buffer[nx] *= lpf;
@@ -221,9 +224,8 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, ga
 			rv = lpf;
 		}
 	}
-	// 1e-10 ~ 200dB, prevent denormals.
-	if (rv < 1e-10) return 0;
-	if (fabsf(rv - 1.0) < 1e-10) return 1.0;
+	if (fabsf (rv - target) < GAIN_COEFF_TINY) return target;
+	if (fabsf (rv) < GAIN_COEFF_TINY) return GAIN_COEFF_ZERO;
 	return rv;
 }
 
@@ -287,23 +289,23 @@ Amp::apply_gain (AudioBuffer& buf, framecnt_t sample_rate, framecnt_t nframes, g
 	}
 
         Sample* const buffer = buf.data();
-	const float a = 62.78 / sample_rate; // 10 Hz LPF, see [other] Amp::apply_gain() above,
+	const double a = 62.78 / sample_rate; // 10 Hz LPF, see  [other] Amp::apply_gain() above,
 
-	float lpf = initial;
+	double lpf = initial;
         for (pframes_t nx = 0; nx < nframes; ++nx) {
                 buffer[nx] *= lpf;
 		lpf += a * (target - lpf);
         }
 
-	if (lpf < 1e-10) return 0; // TODO use GAIN_COEFF_TINY or _DENORMAL
-	if (fabsf(lpf - GAIN_COEFF_UNITY) < 1e-10) return GAIN_COEFF_UNITY;
+	if (fabs (lpf - target) < GAIN_COEFF_TINY) return target;
+	if (fabs (lpf) < GAIN_COEFF_TINY) return GAIN_COEFF_ZERO;
 	return lpf;
 }
 
 void
 Amp::apply_simple_gain (BufferSet& bufs, framecnt_t nframes, gain_t target, bool midi_amp)
 {
-	if (target < GAIN_COEFF_SMALL) {
+	if (fabsf (target) < GAIN_COEFF_SMALL) {
 
 		if (midi_amp) {
 			/* don't Trim midi velocity -- only relevant for Midi on Audio tracks */
@@ -348,7 +350,7 @@ Amp::apply_simple_gain (BufferSet& bufs, framecnt_t nframes, gain_t target, bool
 void
 Amp::apply_simple_gain (AudioBuffer& buf, framecnt_t nframes, gain_t target)
 {
-	if (target < GAIN_COEFF_SMALL) {
+	if (fabsf (target) < GAIN_COEFF_SMALL) {
                 memset (buf.data(), 0, sizeof (Sample) * nframes);
 	} else if (target != GAIN_COEFF_UNITY) {
                 apply_gain_to_buffer (buf.data(), nframes, target);
@@ -360,7 +362,8 @@ Amp::inc_gain (gain_t factor, void *src)
 {
 	float desired_gain = _gain_control->user_double();
 
-	if (desired_gain < GAIN_COEFF_SMALL) {
+	if (fabsf (desired_gain) < GAIN_COEFF_SMALL) {
+		// really?! what's the idea here?
 		set_gain (0.000001f + (0.000001f * factor), src);
 	} else {
 		set_gain (desired_gain + (desired_gain * factor), src);
