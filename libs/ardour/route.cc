@@ -3359,7 +3359,7 @@ Route::set_meter_point (MeterPoint p, bool force)
 		return;
 	}
 
-	if (force) {
+	if (force || !AudioEngine::instance()->running()) {
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		_pending_meter_point = p;
