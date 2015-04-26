@@ -88,6 +88,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _flags (flg)
 	, _pending_declick (true)
 	, _meter_point (MeterPostFader)
+	, _pending_meter_point (MeterPostFader)
 	, _meter_type (MeterPeak)
 	, _self_solo (false)
 	, _soloed_by_others_upstream (0)
@@ -463,6 +464,8 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
+		// can this actually happen? functions calling process_output_buffers()
+		// already take a reader-lock.
 		bufs.silence (nframes, 0);
 		return;
 	}
@@ -1952,9 +1955,57 @@ Route::all_visible_processors_active (bool state)
 	_session.set_dirty ();
 }
 
+bool
+Route::processors_reorder_needs_configure (const ProcessorList& new_order)
+{
+	/* check if re-order requires re-configuration of any processors
+	 * -> compare channel configuration for all processors
+	 */
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	ChanCount c = input_streams ();
+
+	for (ProcessorList::const_iterator j = new_order.begin(); j != new_order.end(); ++j) {
+		bool found = false;
+		if (c != (*j)->input_streams()) {
+			return true;
+		}
+		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			if (*i == *j) {
+				found = true;
+				if ((*i)->input_streams() != c) {
+					return true;
+				}
+				c = (*i)->output_streams();
+				break;
+			}
+		}
+		if (!found) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int
 Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err)
 {
+#if 0  // TODO
+	if (processors_reorder_needs_configure (new_order)) {
+		printf("REORDER NEEDS CONFIGURE\n");
+		// tough luck, use existing code belog
+	} else {
+		printf("COULD DO IT CLICKLESS\n");
+		/* TODO: take a reader-lock, prepare the new order when done
+		 * atomically set it as pending state..
+		 * and do the  _processors.insert() in the RT-thread
+		 * configure_processors_unlocked() is NOT needed,
+		 * only setup_invisible_processors() needs to be called.
+		 *
+		 * see also apply_meter_change_rt()
+		 */
+	}
+#endif
+
 	/* "new_order" is an ordered list of processors to be positioned according to "placement".
 	   NOTE: all processors in "new_order" MUST be marked as display_to_user(). There maybe additional
 	   processors in the current actual processor list that are hidden. Any visible processors
@@ -3285,77 +3336,114 @@ Route::flush_processors ()
 	}
 }
 
+#ifdef __clang__
+__attribute__((annotate("realtime")))
+#endif
+void
+Route::apply_meter_change_rt ()
+{
+	if (_pending_meter_point != _meter_point) {
+		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		if (pwl.locked()) {
+			/* meters always have buffers for 'processor_max_streams'
+			 * they can be re-positioned without re-allocation */
+			set_meter_point_unlocked();
+		}
+	}
+}
+
 void
 Route::set_meter_point (MeterPoint p, bool force)
 {
-	if (_meter_point == p && !force) {
+	if (_pending_meter_point == p && !force) {
 		return;
 	}
 
-	bool meter_was_visible_to_user = _meter->display_to_user ();
-
-	{
+	if (force) {
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+		_pending_meter_point = p;
+		set_meter_point_unlocked();
+	} else {
+		_pending_meter_point = p;
+	}
+}
 
-		maybe_note_meter_position ();
 
-		_meter_point = p;
+#ifdef __clang__
+__attribute__((annotate("realtime")))
+#endif
+void
+Route::set_meter_point_unlocked ()
+{
+#ifndef NDEBUG
+	/* Caller must hold process and processor write lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+	Glib::Threads::RWLock::WriterLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	assert (!lm.locked ());
+#endif
 
-		if (_meter_point != MeterCustom) {
+	_meter_point = _pending_meter_point;;
 
-			_meter->set_display_to_user (false);
+	bool meter_was_visible_to_user = _meter->display_to_user ();
 
-			setup_invisible_processors ();
+	maybe_note_meter_position ();
 
-		} else {
+	if (_meter_point != MeterCustom) {
 
-			_meter->set_display_to_user (true);
+		_meter->set_display_to_user (false);
 
-			/* If we have a previous position for the custom meter, try to put it there */
-			if (_custom_meter_position_noted) {
-				boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
-				
-				if (after) {
-					ProcessorList::iterator i = find (_processors.begin(), _processors.end(), after);
-					if (i != _processors.end ()) {
-						_processors.remove (_meter);
-						_processors.insert (i, _meter);
-					}
-				} else if (_last_custom_meter_was_at_end) {
+		setup_invisible_processors ();
+
+	} else {
+
+		_meter->set_display_to_user (true);
+
+		/* If we have a previous position for the custom meter, try to put it there */
+		if (_custom_meter_position_noted) {
+			boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
+			
+			if (after) {
+				ProcessorList::iterator i = find (_processors.begin(), _processors.end(), after);
+				if (i != _processors.end ()) {
 					_processors.remove (_meter);
-					_processors.push_back (_meter);
+					_processors.insert (i, _meter);
 				}
+			} else if (_last_custom_meter_was_at_end) {
+				_processors.remove (_meter);
+				_processors.push_back (_meter);
 			}
 		}
-
-		/* Set up the meter for its new position */
-
-		ProcessorList::iterator loc = find (_processors.begin(), _processors.end(), _meter);
-		
-		ChanCount m_in;
-		
-		if (loc == _processors.begin()) {
-			m_in = _input->n_ports();
-		} else {
-			ProcessorList::iterator before = loc;
-			--before;
-			m_in = (*before)->output_streams ();
-		}
-		
-		_meter->reflect_inputs (m_in);
-		
-		/* we do not need to reconfigure the processors, because the meter
-		   (a) is always ready to handle processor_max_streams
-		   (b) is always an N-in/N-out processor, and thus moving
-		   it doesn't require any changes to the other processors.
-		*/
 	}
 
+	/* Set up the meter for its new position */
+
+	ProcessorList::iterator loc = find (_processors.begin(), _processors.end(), _meter);
+	
+	ChanCount m_in;
+	
+	if (loc == _processors.begin()) {
+		m_in = _input->n_ports();
+	} else {
+		ProcessorList::iterator before = loc;
+		--before;
+		m_in = (*before)->output_streams ();
+	}
+
+	_meter->reflect_inputs (m_in);
+
+	/* we do not need to reconfigure the processors, because the meter
+	   (a) is always ready to handle processor_max_streams
+	   (b) is always an N-in/N-out processor, and thus moving
+	   it doesn't require any changes to the other processors.
+	*/
+
+	/* these should really be done after releasing the lock
+	 * but all those signals are subscribed to with gui_thread()
+	 * so we're safe.
+	 */
 	meter_change (); /* EMIT SIGNAL */
-
 	bool const meter_visibly_changed = (_meter->display_to_user() != meter_was_visible_to_user);
-
 	processors_changed (RouteProcessorChange (RouteProcessorChange::MeterPointChange, meter_visibly_changed)); /* EMIT SIGNAL */
 }
 
@@ -4152,6 +4240,9 @@ Route::set_public_port_latencies (framecnt_t value, bool playback) const
 /** Put the invisible processors in the right place in _processors.
  *  Must be called with a writer lock on _processor_lock held.
  */
+#ifdef __clang__
+__attribute__((annotate("realtime")))
+#endif
 void
 Route::setup_invisible_processors ()
 {
@@ -4165,7 +4256,10 @@ Route::setup_invisible_processors ()
 		return;
 	}
 
-	/* we'll build this new list here and then use it */
+	/* we'll build this new list here and then use it
+	 *
+	 * TODO put the ProcessorList is on the stack for RT-safety. 
+	 */
 
 	ProcessorList new_processors;
 

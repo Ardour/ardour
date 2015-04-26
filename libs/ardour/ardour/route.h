@@ -182,7 +182,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool denormal_protection() const;
 
 	void         set_meter_point (MeterPoint, bool force = false);
-	MeterPoint   meter_point() const { return _meter_point; }
+	void         apply_meter_change_rt ();
+	MeterPoint   meter_point() const { return _pending_meter_point; }
 	void         meter ();
 
 	void         set_meter_type (MeterType t) { _meter_type = t; }
@@ -259,6 +260,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	int add_processors (const ProcessorList&, boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
 	boost::shared_ptr<Processor> before_processor_for_placement (Placement);
 	boost::shared_ptr<Processor> before_processor_for_index (int);
+	bool processors_reorder_needs_configure (const ProcessorList& new_order);
 	int remove_processor (boost::shared_ptr<Processor>, ProcessorStreams* err = 0, bool need_process_lock = true);
 	int remove_processors (const ProcessorList&, ProcessorStreams* err = 0);
 	int reorder_processors (const ProcessorList& new_order, ProcessorStreams* err = 0);
@@ -523,6 +525,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	Flag           _flags;
 	int            _pending_declick;
 	MeterPoint     _meter_point;
+	MeterPoint     _pending_meter_point;
 	MeterType      _meter_type;
 	boost::dynamic_bitset<> _phase_invert;
 	bool           _self_solo;
@@ -598,6 +601,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool _initial_io_setup;
 
 	int configure_processors_unlocked (ProcessorStreams*);
+	void set_meter_point_unlocked ();
+
 	std::list<std::pair<ChanCount, ChanCount> > try_configure_processors (ChanCount, ProcessorStreams *);
 	std::list<std::pair<ChanCount, ChanCount> > try_configure_processors_unlocked (ChanCount, ProcessorStreams *);
 
