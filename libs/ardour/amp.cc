@@ -107,7 +107,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			}
 
 
-			const double a = 62.78 / _session.nominal_frame_rate(); // 10 Hz LPF; see Amp::apply_gain for details
+			const double a = 156.825 / _session.nominal_frame_rate(); // 25 Hz LPF; see Amp::apply_gain for details
 			double lpf = _current_gain;
 
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
@@ -210,7 +210,7 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, ga
 	/* Low pass filter coefficient: 1.0 - e^(-2.0 * π * f / 48000) f in Hz.
 	 * for f << SR,  approx a ~= 6.2 * f / SR;
 	 */
-	const double a = 62.78 / sample_rate; // 10 Hz LPF
+	const double a = 156.825 / sample_rate; // 25 Hz LPF
 
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 		Sample* const buffer = i->data();
@@ -289,7 +289,7 @@ Amp::apply_gain (AudioBuffer& buf, framecnt_t sample_rate, framecnt_t nframes, g
 	}
 
         Sample* const buffer = buf.data();
-	const double a = 62.78 / sample_rate; // 10 Hz LPF, see  [other] Amp::apply_gain() above,
+	const double a = 156.825 / sample_rate; // 25 Hz LPF, see [other] Amp::apply_gain() above for details
 
 	double lpf = initial;
         for (pframes_t nx = 0; nx < nframes; ++nx) {
