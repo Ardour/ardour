@@ -3077,6 +3077,10 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		c = r->gain_control ();
 		break;
 
+	case ControllableDescriptor::Trim:
+		c = r->trim()->gain_control ();
+		break;
+
 	case ControllableDescriptor::Solo:
                 c = r->solo_control();
 		break;

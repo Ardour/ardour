@@ -72,6 +72,9 @@ ControllableDescriptor::set (const std::string& str)
 	if (path[1] == "gain") {
 		_subtype = Gain;
 
+	} else if (path[1] == "trim") {
+		_subtype = Trim;
+
 	} else if (path[1] == "solo") {
 		_subtype = Solo;
 

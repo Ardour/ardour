@@ -36,6 +36,7 @@ public:
 
     enum SubType {
 	    Gain,
+	    Trim,
 	    Solo,
 	    Mute,
 	    Recenable,
