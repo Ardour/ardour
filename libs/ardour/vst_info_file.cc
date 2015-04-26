@@ -351,7 +351,7 @@ vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
 static bool
 vstfx_blacklist_stat (const char *dllpath, int personal)
 {
-	if (strstr (dllpath, ".so" ) == 0 && strstr(dllpath, ".dll") == 0) {
+	if (strstr (dllpath, ".so" ) == 0 && strcasestr(dllpath, ".dll") == 0) {
 		return true;
 	}
 	string const path = vstfx_blacklist_path (dllpath, personal);
@@ -435,7 +435,7 @@ vstfx_remove_infofile (const char *dllpath)
 static char *
 vstfx_infofile_stat (const char *dllpath, struct stat* statbuf, int personal)
 {
-	if (strstr (dllpath, ".so" ) == 0 && strstr(dllpath, ".dll") == 0) {
+	if (strstr (dllpath, ".so" ) == 0 && strcasestr(dllpath, ".dll") == 0) {
 		return 0;
 	}
 
@@ -494,7 +494,7 @@ vstfx_infofile_for_read (const char* dllpath)
 static FILE *
 vstfx_infofile_create (const char* dllpath, int personal)
 {
-	if (strstr (dllpath, ".so" ) == 0 && strstr(dllpath, ".dll") == 0) {
+	if (strstr (dllpath, ".so" ) == 0 && strcasestr(dllpath, ".dll") == 0) {
 		return 0;
 	}
 
