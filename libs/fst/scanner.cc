@@ -75,7 +75,7 @@ int main (int argc, char **argv) {
 	char *dllpath = NULL;
 	if (argc == 3 && !strcmp("-f", argv[1])) {
 		dllpath = argv[2];
-		if (strstr (dllpath, ".so" ) || strcasestr(dllpath, ".dll")) {
+		if (strstr (dllpath, ".so" ) || strstr(dllpath, ".dll")) {
 			vstfx_remove_infofile(dllpath);
 			vstfx_un_blacklist(dllpath);
 		}
@@ -105,7 +105,7 @@ int main (int argc, char **argv) {
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-	else if (strcasestr (dllpath, ".dll")) {
+	else if (strstr (dllpath, ".dll")) {
 		infos = vstfx_get_info_fst(dllpath);
 	}
 #endif

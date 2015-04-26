@@ -686,7 +686,8 @@ PluginManager::windows_vst_refresh (bool cache_only)
 static bool windows_vst_filter (const string& str, void * /*arg*/)
 {
 	/* Not a dotfile, has a prefix before a period, suffix is "dll" */
-	return str[0] != '.' && str.length() > 4 && strings_equal_ignore_case (".dll", str.substr(str.length() - 4));
+
+	return str[0] != '.' && (str.length() > 4 && str.find (".dll") == (str.length() - 4));
 }
 
 int
