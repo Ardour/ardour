@@ -112,7 +112,7 @@ def signal(f, n, v):
 
     print("\t\tGlib::Threads::Mutex::Lock lm (_mutex);", file=f)
     print("\t\t/* Tell our connection objects that we are going away, so they don't try to call us */", file=f)
-    print("\t\tfor (%sSlots::iterator i = _slots.begin(); i != _slots.end(); ++i) {" % typename, file=f)
+    print("\t\tfor (%sSlots::const_iterator i = _slots.begin(); i != _slots.end(); ++i) {" % typename, file=f)
 
     print("\t\t\ti->first->signal_going_away ();", file=f)
     print("\t\t}", file=f)
@@ -240,7 +240,7 @@ def signal(f, n, v):
     print("", file=f)
     if not v:
         print("\t\tstd::list<R> r;", file=f)
-    print("\t\tfor (%sSlots::iterator i = s.begin(); i != s.end(); ++i) {" % typename, file=f)
+    print("\t\tfor (%sSlots::const_iterator i = s.begin(); i != s.end(); ++i) {" % typename, file=f)
     print("""
 			/* We may have just called a slot, and this may have resulted in
 			   disconnection of other slots from us.  The list copy means that

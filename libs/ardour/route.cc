@@ -570,7 +570,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	framecnt_t latency = 0;
 
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		if (meter_already_run && boost::dynamic_pointer_cast<PeakMeter> (*i)) {
 			/* don't ::run() the meter, otherwise it will have its previous peak corrupted */
@@ -4137,7 +4137,7 @@ Route::set_processor_positions ()
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	bool had_amp = false;
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_pre_fader (!had_amp);
 		if (boost::dynamic_pointer_cast<Amp> (*i)) {
 			had_amp = true;
