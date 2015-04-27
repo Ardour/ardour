@@ -98,7 +98,7 @@ PBD::Signal1<void,MasterBusUI*> MasterBusUI::CatchDeletion;
 MasterBusUI::MasterBusUI (Session* sess, PublicEditor& ed)
 	: WavesUI ("master_ui.xml", *this)
 	, _max_peak (minus_infinity())
-	, _peak_treshold (xml_property(*xml_tree()->root(), "peaktreshold", -144.4)) // Think about having it in config
+	, _peak_treshold (xml_property(*xml_tree()->root(), "peaktreshold", Config->get_numeric_peak_min_treshold() ))
 	, _level_meter_home (get_box ("level_meter_home"))
 	, _level_meter (sess)
 	, _peak_display_button (get_waves_button ("peak_display_button"))

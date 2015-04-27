@@ -924,7 +924,7 @@ GainMeter::update_meters()
 
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
-		if (mpeak <= -200.0f) {
+		if (mpeak <= Config->get_numeric_peak_min_treshold()) {
 			peak_display_button.set_text (_("-inf"));
 		} else {
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
