@@ -170,7 +170,7 @@ Route::init ()
 		 */
 		_trim->activate();
 	}
-	else if (!dynamic_cast<Track*>(this) && ! (is_master() || is_monitor() || is_auditioner())) {
+	else if (!dynamic_cast<Track*>(this) && ! ( is_monitor() || is_auditioner() )) {
 		/* regular bus */
 		_trim->activate();
 	}
