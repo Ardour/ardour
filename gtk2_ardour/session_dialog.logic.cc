@@ -141,7 +141,7 @@ void
 SessionDialog::on_new_session_with_template (WavesButton*)
 {
 	std::vector<std::string> template_types = boost::assign::list_of (ARDOUR::template_suffix + 1); //WOW!!!!
-	std::vector<std::string> selected_files = ARDOUR::open_file_dialog(template_types, false, Config->get_default_session_parent_dir(), _("Select Template"));
+	std::vector<std::string> selected_files = ARDOUR::open_file_dialog(template_types, false, g_get_user_special_dir (G_USER_DIRECTORY_DOCUMENTS), _("Select Template"));
 	if (selected_files.empty ()) {
 		set_keep_above(true);
 	} else {

@@ -2542,7 +2542,8 @@ ARDOUR_UI::save_template ()
 	}
 
     std::string template_path = ARDOUR::save_file_dialog(boost::assign::list_of (ARDOUR::template_suffix + 1),
-														 Config->get_default_session_parent_dir(),_("Save Template"));
+														 g_get_user_special_dir (G_USER_DIRECTORY_DOCUMENTS),
+														 _("Save Template"));
 	if (!template_path.empty()) {
 		bool add_suffix = true;
 		std::string basename = Glib::path_get_basename (template_path);
