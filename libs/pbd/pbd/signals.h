@@ -39,7 +39,9 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/event_loop.h"
 
+#ifndef NDEBUG
 #define DEBUG_PBD_SIGNAL_CONNECTIONS
+#endif
 
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 #include "pbd/stacktrace.h"
@@ -53,7 +55,11 @@ class LIBPBD_API Connection;
 class LIBPBD_API SignalBase
 {
 public:
-	SignalBase () : _debug_connection (false) {}
+	SignalBase ()
+#ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
+	: _debug_connection (false)
+#endif
+	{}
 	virtual ~SignalBase () {}
 	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
