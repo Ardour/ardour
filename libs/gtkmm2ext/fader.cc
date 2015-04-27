@@ -306,23 +306,38 @@ Fader::on_scroll_event (GdkEventScroll* ev)
 		return false;
 	}
 
-	bool ret = false;
+    int step_factor = 1;
 
 	switch (ev->direction) {
 	case GDK_SCROLL_RIGHT:
 	case GDK_SCROLL_UP:
-		adjustment.set_value (adjustment.get_value() + (adjustment.get_step_increment() ));
-		ret = true;
+#ifdef __APPLE__
+        if ( ev->state & GDK_SHIFT_MASK ) {
+            step_factor = -1;
+        } else {
+            step_factor = 1;
+        }
+#else
+        step_factor = 1;
+#endif
 		break;
 	case GDK_SCROLL_LEFT:
 	case GDK_SCROLL_DOWN:
-		adjustment.set_value (adjustment.get_value() - (adjustment.get_step_increment() ));
-		ret = true;
+#ifdef __APPLE__
+        if ( ev->state & GDK_SHIFT_MASK ) {
+            step_factor = 1;
+        } else {
+            step_factor = -1;
+        }
+#else
+        step_factor = -1;
+#endif
 		break;
 	default:
-		break;
+		return false;
 	}
-	return ret;
+    adjustment.set_value (adjustment.get_value() + step_factor * (adjustment.get_step_increment() ));
+	return true;
 }
 
 bool
