@@ -1441,6 +1441,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_punch_from_selection ();
 	void set_punch_from_region ();
 
+	void set_session_start_from_playhead ();
+	void set_session_end_from_playhead ();
 	void set_session_extents_from_selection ();
 
 	void set_loop_from_region (bool play);

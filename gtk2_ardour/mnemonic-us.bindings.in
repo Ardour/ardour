@@ -106,8 +106,7 @@ This mode provides many different operations on both regions and control points,
 
 @trans|Editor/add-location-from-playhead|nabla|add marker
 @trans|Editor/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
-;@trans|Transport/GotoStart|Return|to start marker
-@movp|Transport/alternate-GotoStart|KP_Return|to edit point
+@movp|Transport/alternate-GotoStart|Return|to start marker
 
 @trans|Editor/editor-fade-range|slash|fade range selection
 @rop|Region/set-fade-in-length|<@PRIMARY@>slash|set fade in length

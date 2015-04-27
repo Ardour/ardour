@@ -2115,6 +2115,54 @@ Editor::add_location_mark (framepos_t where)
 }
 
 void
+Editor::set_session_start_from_playhead ()
+{
+	if (!_session)
+		return;
+	
+	Location* loc;
+	if ((loc = _session->locations()->session_range_location()) == 0) {  //should never happen
+		_session->set_session_extents ( _session->audible_frame(), _session->audible_frame() );
+	} else {
+		XMLNode &before = loc->get_state();
+
+		_session->set_session_extents ( _session->audible_frame(), loc->end() );
+
+		XMLNode &after = loc->get_state();
+
+		begin_reversible_command (_("Set session start"));
+		
+		_session->add_command (new MementoCommand<Location>(*loc, &before, &after));
+
+		commit_reversible_command ();
+	}
+}
+
+void
+Editor::set_session_end_from_playhead ()
+{
+	if (!_session)
+		return;
+	
+	Location* loc;
+	if ((loc = _session->locations()->session_range_location()) == 0) {  //should never happen
+		_session->set_session_extents ( _session->audible_frame(), _session->audible_frame() );
+	} else {
+		XMLNode &before = loc->get_state();
+
+		_session->set_session_extents ( loc->start(), _session->audible_frame() );
+
+		XMLNode &after = loc->get_state();
+
+		begin_reversible_command (_("Set session start"));
+
+		_session->add_command (new MementoCommand<Location>(*loc, &before, &after));
+
+		commit_reversible_command ();
+	}
+}
+
+void
 Editor::add_location_from_playhead_cursor ()
 {
 	add_location_mark (_session->audible_frame());
@@ -6038,8 +6086,6 @@ Editor::set_session_extents_from_selection ()
 	if (!get_selection_extents ( start, end))
 		return;
 
-	begin_reversible_command (_("set session start/end from selection"));
-
 	Location* loc;
 	if ((loc = _session->locations()->session_range_location()) == 0) {
 		_session->set_session_extents ( start, end );  // this will create a new session range;  no need for UNDO
@@ -6049,6 +6095,8 @@ Editor::set_session_extents_from_selection ()
 		_session->set_session_extents ( start, end );
 
 		XMLNode &after = loc->get_state();
+
+		begin_reversible_command (_("set session start/end from selection"));
 
 		_session->add_command (new MementoCommand<Location>(*loc, &before, &after));
 

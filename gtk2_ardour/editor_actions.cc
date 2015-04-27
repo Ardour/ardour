@@ -248,6 +248,9 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
 	reg_sens (editor_actions, "alternate-jump-backward-to-mark", _("Jump to Previous Mark"), sigc::mem_fun(*this, &Editor::jump_backward_to_mark));
 
+	reg_sens (editor_actions, "set-session-start-from-playhead", _("Set Session Start from Playhead"), sigc::mem_fun(*this, &Editor::set_session_start_from_playhead));
+	reg_sens (editor_actions, "set-session-end-from-playhead", _("Set Session End from Playhead"), sigc::mem_fun(*this, &Editor::set_session_end_from_playhead));
+
 	reg_sens (editor_actions, "add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 	reg_sens (editor_actions, "alternate-add-location-from-playhead", _("Add Mark from Playhead"), sigc::mem_fun(*this, &Editor::add_location_from_playhead_cursor));
 
