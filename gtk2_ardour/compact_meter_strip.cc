@@ -48,6 +48,7 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 	, _serial_number (0)
 	, _meter_width (xml_property (*xml_tree ()->root (), "meterwidth", 1))
 	, _thin_meter_width (xml_property (*xml_tree ()->root (), "thinmeterwidth", 1))
+    , _tooltip (this)
 {
 	set_attributes (*this, *xml_tree ()->root (), XMLNodeMap ());
 
@@ -86,6 +87,17 @@ CompactMeterStrip::CompactMeterStrip (Session* sess, boost::shared_ptr<ARDOUR::R
 	}
     
     signal_button_press_event().connect(sigc::mem_fun(*this, &CompactMeterStrip::on_eventbox_button_press) );
+    
+    
+    std::string str_font_description;
+#if defined (PLATFORM_WINDOWS)
+	str_font_description = xml_property (*xml_tree ()->root (), "tooltip_winfont", "Arial Bold 20");
+#elif defined (__APPLE__)
+	str_font_description = xml_property (*xml_tree ()->root (), "tooltip_macfont", "Helvetica Bold 20");
+#endif
+    
+    _tooltip.set_font (Pango::FontDescription(str_font_description));
+    _tooltip.set_center_alignment (false);
 }
 
 bool
@@ -130,9 +142,7 @@ void
 CompactMeterStrip::update_tooltip ()
 {
     string record_status = _route->record_enabled() ? "Record Enabled" : "Record Disabled";
-    
-    stringstream ss;
-    this->set_tooltip_text (string_compose ("Track %1\n%2\n%3", _serial_number, _route->name (), record_status));
+    _tooltip.set_tip (string_compose ("%1\n%2\n%3", _serial_number, _route->name (), record_status));
 }
 
 void

@@ -2,12 +2,16 @@
 
 <CompactMeterStrip bgnormal="#353535"
                    meterwidth="10"
-                   thinmeterwidth="4">
-  <VBox spacing="6">
+                   thinmeterwidth="4"
+                   tooltip_winfont="Arial Bold 20"
+                   tooltip_macfont="Helvetica Bold 20">
+  <VBox>
     <EventBox bgnormal="#303030">
     <Hbox id="level_meter_home"
           height="51"/>
     </EventBox>
+    <EventBox height="6"
+              bgnormal="#353535"/>
     <EventBox id="record_indicator"
               bgnormal="#000000"
               bgactive="#FF0000"

@@ -20,6 +20,7 @@
 #define __tracks_compact_meter_strip__
 
 #include "waves_ui.h"
+#include "gtkmm2ext/persistent_tooltip.h"
 #include "level_meter.h"
 #include "ardour/ardour.h"
 
@@ -37,6 +38,7 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 	size_t get_serial_number () { 	return _serial_number; }
 	void set_serial_number ( size_t serial_number ) { _serial_number = serial_number; }
     void update_tooltip ();
+    void set_persistant_tooltip_font (Pango::FontDescription font);
     
 	void fast_update ();
 	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
@@ -54,7 +56,8 @@ class CompactMeterStrip : public Gtk::EventBox, public WavesUI
 	PBD::ScopedConnectionList _route_connections;
 	int _meter_width;
 	int _thin_meter_width;
-	size_t _serial_number; 
+	size_t _serial_number;
+    Gtkmm2ext::PersistentTooltip _tooltip;
 	void meter_configuration_changed (ARDOUR::ChanCount);
 	void update_rec_display ();
     void route_property_changed(const PBD::PropertyChange& what_changed);

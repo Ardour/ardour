@@ -176,7 +176,6 @@ CompactMeterbridge::add_strips (RouteList& routes)
 		}
 
 		CompactMeterStrip* strip = new CompactMeterStrip (_session, route);
-		strip->set_tooltip_text (route->name ()); //just for dbg purposes
 		_strips [route] = strip;
 		strip->show();
 	}
