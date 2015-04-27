@@ -351,9 +351,15 @@ vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
 static bool
 vstfx_blacklist_stat (const char *dllpath, int personal)
 {
-	if (strstr (dllpath, ".so" ) == 0 && strstr(dllpath, ".dll") == 0) {
+	const size_t slen = strlen (dllpath);
+	if (
+			(slen <= 3 || g_ascii_strcasecmp (&dllpath[slen-3], ".so"))
+			&&
+			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".dll"))
+	   ) {
 		return true;
 	}
+
 	string const path = vstfx_blacklist_path (dllpath, personal);
 
 	if (Glib::file_test (path, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
@@ -435,7 +441,12 @@ vstfx_remove_infofile (const char *dllpath)
 static char *
 vstfx_infofile_stat (const char *dllpath, struct stat* statbuf, int personal)
 {
-	if (strstr (dllpath, ".so" ) == 0 && strstr(dllpath, ".dll") == 0) {
+	const size_t slen = strlen (dllpath);
+	if (
+			(slen <= 3 || g_ascii_strcasecmp (&dllpath[slen-3], ".so"))
+			&&
+			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".dll"))
+	   ) {
 		return 0;
 	}
 
@@ -494,8 +505,13 @@ vstfx_infofile_for_read (const char* dllpath)
 static FILE *
 vstfx_infofile_create (const char* dllpath, int personal)
 {
-	if (strstr (dllpath, ".so" ) == 0 && strstr(dllpath, ".dll") == 0) {
-		return 0;
+	const size_t slen = strlen (dllpath);
+	if (
+			(slen <= 3 || g_ascii_strcasecmp (&dllpath[slen-3], ".so"))
+			&&
+			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".dll"))
+	   ) {
+		return NULL;
 	}
 
 	string const path = vstfx_infofile_path (dllpath, personal);

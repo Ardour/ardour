@@ -3,6 +3,8 @@
 #include <string.h>
 #include <vector>
 
+#include <glib.h>
+
 #include "pbd/pbd.h"
 #include "pbd/transmitter.h"
 #include "pbd/receiver.h"
@@ -75,7 +77,12 @@ int main (int argc, char **argv) {
 	char *dllpath = NULL;
 	if (argc == 3 && !strcmp("-f", argv[1])) {
 		dllpath = argv[2];
-		if (strstr (dllpath, ".so" ) || strstr(dllpath, ".dll")) {
+		const size_t slen = strlen (dllpath);
+		if (
+				(slen > 3 && 0 == g_ascii_strcasecmp (&dllpath[slen-3], ".so"))
+				||
+				(slen > 4 && 0 == g_ascii_strcasecmp (&dllpath[slen-4], ".dll"))
+		   ) {
 			vstfx_remove_infofile(dllpath);
 			vstfx_un_blacklist(dllpath);
 		}
@@ -97,15 +104,16 @@ int main (int argc, char **argv) {
 
 	std::vector<VSTInfo *> *infos = 0;
 
+	const size_t slen = strlen (dllpath);
 	if (0) { }
 #ifdef LXVST_SUPPORT
-	else if (strstr (dllpath, ".so")) {
+	else if (slen > 3 && 0 == g_ascii_strcasecmp (&dllpath[slen-3], ".so")) {
 		infos = vstfx_get_info_lx(dllpath);
 	}
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-	else if (strstr (dllpath, ".dll")) {
+	else if (slen > 4 && 0 == g_ascii_strcasecmp (&dllpath[slen-4], ".dll")) {
 		infos = vstfx_get_info_fst(dllpath);
 	}
 #endif
