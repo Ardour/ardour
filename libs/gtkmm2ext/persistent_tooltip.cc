@@ -30,12 +30,13 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 /** @param target The widget to provide the tooltip for */
-PersistentTooltip::PersistentTooltip (Gtk::Widget* target, int margin_y)
+PersistentTooltip::PersistentTooltip (Gtk::Widget* target, bool draggable)
 	: _target (target)
 	, _window (0)
 	, _label (0)
+	, _draggable (draggable)
 	, _maybe_dragging (false)
-	, _margin_y (margin_y)
+	, _align_to_center (true)
 {
 	target->signal_enter_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::enter), false);
 	target->signal_leave_notify_event().connect (sigc::mem_fun (*this, &PersistentTooltip::leave), false);
@@ -99,7 +100,7 @@ PersistentTooltip::release (GdkEventButton* ev)
 bool
 PersistentTooltip::dragging () const
 {
-	return _maybe_dragging;
+	return _maybe_dragging && _draggable;
 }
 
 void
@@ -124,6 +125,7 @@ PersistentTooltip::show ()
 		_window->set_decorated (false);
 
 		_label = manage (new Label);
+		_label->modify_font (_font);
 		_label->set_use_markup (true);
 
 		_window->set_border_width (6);
@@ -140,7 +142,7 @@ PersistentTooltip::show ()
 
 	if (!_window->is_visible ()) {
 		int rx, ry;
-		int sw = gdk_screen_width();
+		int sw = gdk_screen_width ();
 
 		_target->get_window()->get_origin (rx, ry);
 		
@@ -151,10 +153,17 @@ PersistentTooltip::show ()
 		_window->present ();
 
 		if (sw < rx + _window->get_width()) {
+			/* right edge of window would be off the right edge of
+			   the screen, so don't show it in the usual place.
+			*/
 			rx = sw - _window->get_width();
 			_window->move (rx, ry + _target->get_height());
 		} else {
-			_window->move (rx + (_target->get_width () - _window->get_width ()) / 2, ry + _target->get_height());
+			if (_align_to_center) {
+				_window->move (rx + (_target->get_width () - _window->get_width ()) / 2, ry + _target->get_height());
+			} else {
+				_window->move (rx, ry + _target->get_height());
+			}
 		}
 	}
 }
@@ -167,4 +176,20 @@ PersistentTooltip::set_tip (string t)
 	if (_label) {
 		_label->set_markup (t);
 	}
+}
+
+void
+PersistentTooltip::set_font (Pango::FontDescription font)
+{
+	_font = font;
+
+	if (_label) {
+		_label->modify_font (_font);
+	}
+}
+
+void
+PersistentTooltip::set_center_alignment (bool align_to_center)
+{
+	_align_to_center = align_to_center;
 }
