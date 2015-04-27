@@ -32,11 +32,13 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API PersistentTooltip : public sigc::trackable
 {
 public:
-	PersistentTooltip (Gtk::Widget *);
+	PersistentTooltip (Gtk::Widget *, bool draggable = false);
 	virtual ~PersistentTooltip ();
 	
 	void set_tip (std::string);
-
+    void set_font (Pango::FontDescription font);
+    void set_center_alignment (bool align_to_center);
+   
 	virtual bool dragging () const;
 
 private:
@@ -54,6 +56,11 @@ private:
 	Gtk::Window* _window;
 	/** Our label */
 	Gtk::Label* _label;
+    
+    
+    /** allow to drag
+     */
+    bool _draggable;
 	/** true if we are `dragging', in the sense that button 1
 	    is being held over _target.
 	*/
@@ -62,6 +69,8 @@ private:
 	sigc::connection _timeout;
 	/** The tip text */
 	std::string _tip;
+    Pango::FontDescription _font;
+    bool _align_to_center;
 };
 
 }
