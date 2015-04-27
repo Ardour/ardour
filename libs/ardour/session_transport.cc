@@ -1826,6 +1826,12 @@ Session::route_processors_changed (RouteProcessorChange c)
 	}
 
 	if (c.type == RouteProcessorChange::MeterPointChange) {
+		set_dirty ();
+		return;
+	}
+
+	if (c.type == RouteProcessorChange::RealTimeChange) {
+		set_dirty ();
 		return;
 	}
 

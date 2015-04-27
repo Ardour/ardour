@@ -3407,7 +3407,7 @@ Route::apply_processor_changes_rt ()
 		}
 	}
 	if (changed) {
-		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange)); /* EMIT SIGNAL */
 		set_processor_positions ();
 	}
 }

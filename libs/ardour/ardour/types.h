@@ -557,7 +557,8 @@ namespace ARDOUR {
 	struct RouteProcessorChange {
 		enum Type {
 			GeneralChange = 0x0,
-			MeterPointChange = 0x1
+			MeterPointChange = 0x1,
+			RealTimeChange = 0x2
 		};
 
 		RouteProcessorChange () : type (GeneralChange), meter_visibly_changed (true)
