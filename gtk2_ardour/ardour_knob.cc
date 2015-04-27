@@ -366,7 +366,6 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 				_dead_zone_delta = 0;
 			} else {
 				c->set_value (c->normal());
-				val = _normal;
 				_dead_zone_delta = remain / px_deadzone;
 				return true;
 			}
