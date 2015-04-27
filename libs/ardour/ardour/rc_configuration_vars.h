@@ -171,6 +171,7 @@ CONFIG_VARIABLE (VUMeterStandard, meter_vu_standard, "meter-vu-standard", Meteri
 CONFIG_VARIABLE (MeterLineUp, meter_line_up_level, "meter-line-up-level", MeteringLineUp18)
 CONFIG_VARIABLE (MeterLineUp, meter_line_up_din, "meter-line-up-din", MeteringLineUp15)
 CONFIG_VARIABLE (float, meter_peak, "meter-peak", 0.0f)
+CONFIG_VARIABLE (float, meter_peak_2, "meter_peak_2", -6.0f)
 CONFIG_VARIABLE (float, numeric_peak_min_treshold, "numeric-peak-min-treshold", -144.4f)
 CONFIG_VARIABLE (bool, meter_style_led, "meter-style-led", true)
 CONFIG_VARIABLE (bool, show_editor_meter, "show-editor-meter", true)

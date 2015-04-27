@@ -123,6 +123,9 @@ class GainMeter : virtual public sigc::trackable, ARDOUR::SessionHandlePtr, publ
     Gtk::Entry&            gain_display_entry;
 	WavesButton&           gain_display_button;
 	WavesButton&           peak_display_button;
+    Gdk::Color             _peak_level_1_color;
+    Gdk::Color             _peak_level_2_color;
+    Gdk::Color             _peak_level_3_color;
 	Gtk::Box&              level_meter_home;
 	LevelMeterHBox         level_meter;
 

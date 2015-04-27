@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GainSlider meterwidth="7"
-            thinmeterwidth="3">
+            thinmeterwidth="3"
+            peak_level_1_color="#FE0E0E"
+            peak_level_2_color="#FEFE0E"
+            peak_level_3_color="#262626">
   <Adjustment id="gain_adjustment"
           minvalue="0"
           maxvalue="1"/>

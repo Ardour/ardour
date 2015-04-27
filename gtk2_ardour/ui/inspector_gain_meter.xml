@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <GainSlider meterwidth="6"
-            thinmeterwidth="6">
+            thinmeterwidth="6"
+            peak_level_1_color="#FE0E0E"
+            peak_level_2_color="#FEFE0E"
+            peak_level_3_color="#262626">
   <Adjustment id="gain_adjustment"
               minvalue="0"
               maxvalue="1"
@@ -16,9 +19,9 @@
             winfont="Arial Bold 12"
             macfont="Helvetica Bold 12"
             bgnormal="#262626"
-            bgactive="#FE0E0E"
-            fgnormal="#afafaf"
-            fgactive="#afafaf"
+            bgactive="#262626"
+            fgnormal="#AFAFAF"
+            fgactive="#AFAFAF"
             bghover="#C47474"
             bordercolor="#FFFFFF33"
             borderwidth="0 0 0 0"/>

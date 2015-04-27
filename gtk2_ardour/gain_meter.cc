@@ -24,6 +24,7 @@
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
 #include "ardour/utils.h"
+#include "ardour/rc_configuration.h"
 
 #include <pangomm.h>
 #include <gtkmm/style.h>
@@ -72,6 +73,9 @@ GainMeter::GainMeter (Session* s, const std::string& layout_script_file)
 	, gain_display_entry (get_entry ("gain_display_entry"))
 	, gain_display_button (get_waves_button ("gain_display_button"))
 	, peak_display_button (get_waves_button ("peak_display_button"))
+    , _peak_level_1_color (Gdk::Color(xml_property (*xml_tree ()->root (), "peak_level_1_color", "#ff0000")))
+    , _peak_level_2_color (Gdk::Color(xml_property (*xml_tree ()->root (), "peak_level_2_color", "#ffff00")))
+    , _peak_level_3_color (Gdk::Color(xml_property (*xml_tree ()->root (), "peak_level_3_color", "#262626")))
 	, level_meter_home (get_box ("level_meter_home"))
 	, level_meter (_session)
     , _data_type (DataType::AUDIO)
@@ -339,7 +343,8 @@ GainMeter::reset_peak_display ()
 	level_meter.clear_meters();
 	max_peak = -INFINITY;
 	peak_display_button.set_text (_("-inf"));
-	peak_display_button.set_active_state(Gtkmm2ext::Off);
+    peak_display_button.modify_bg(Gtk::STATE_NORMAL, _peak_level_3_color);
+    peak_display_button.modify_bg(Gtk::STATE_ACTIVE, _peak_level_3_color);
 }
 
 void
@@ -916,6 +921,12 @@ GainMeter::_astyle_string (AutoStyle style, bool shrt)
 	}
 }
 
+namespace {
+    float round_to_tenths (float value) {
+        return (float)((int)(value*10))/10;
+    }
+}
+
 void
 GainMeter::update_meters()
 {
@@ -926,14 +937,25 @@ GainMeter::update_meters()
 		max_peak = mpeak;
 		if (mpeak <= Config->get_numeric_peak_min_treshold()) {
 			peak_display_button.set_text (_("-inf"));
+            peak_display_button.modify_bg(Gtk::STATE_NORMAL, _peak_level_3_color);
+            peak_display_button.modify_bg(Gtk::STATE_ACTIVE, _peak_level_3_color);
 		} else {
+            mpeak = round_to_tenths (mpeak);
+            
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
 			peak_display_button.set_text (buf);
+            Gdk::Color color;
+            if (mpeak <= Config->get_meter_peak_2()) {
+                color = _peak_level_3_color;
+            } else if (mpeak < Config->get_meter_peak()) {
+                color = _peak_level_2_color;
+            } else {
+                color = _peak_level_1_color;
+            }
+            
+            peak_display_button.modify_bg(Gtk::STATE_NORMAL, color);
+            peak_display_button.modify_bg(Gtk::STATE_ACTIVE, color);
 		}
-	}
-	if (mpeak >= Config->get_meter_peak()) {
-		//peak_display_button.set_name ("MixerStripPeakDisplayPeak");
-		peak_display_button.set_active_state(Gtkmm2ext::ExplicitActive);
 	}
 }
 
