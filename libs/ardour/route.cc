@@ -26,6 +26,7 @@
 #include <cassert>
 #include <algorithm>
 
+#include <glibmm.h>
 #include <boost/algorithm/string.hpp>
 
 #include "pbd/xml++.h"
@@ -85,6 +86,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _signal_latency_at_trim_position (0)
 	, _initial_delay (0)
 	, _roll_delay (0)
+	, _pending_process_reorder (0)
 	, _flags (flg)
 	, _pending_declick (true)
 	, _meter_point (MeterPostFader)
@@ -1986,103 +1988,144 @@ Route::processors_reorder_needs_configure (const ProcessorList& new_order)
 	return false;
 }
 
+#ifdef __clang__
+__attribute__((annotate("realtime")))
+#endif
+void
+Route::apply_processor_order (const ProcessorList& new_order)
+{
+	/* need to hold processor_lock; either read or write lock
+	 * and the engine process_lock.
+	 * Due to r/w lock ambiguity we can only assert the latter
+	 */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
+
+	/* "new_order" is an ordered list of processors to be positioned according to "placement".
+	 * NOTE: all processors in "new_order" MUST be marked as display_to_user(). There maybe additional
+	 * processors in the current actual processor list that are hidden. Any visible processors
+	 *  in the current list but not in "new_order" will be assumed to be deleted.
+	 */
+
+	/* "as_it_will_be" and "_processors" are lists of shared pointers.
+	 * actual memory usage is small, but insert/erase is not actually rt-safe :(
+	 * (note though that  ::processors_reorder_needs_configure() ensured that
+	 * this function will only ever be called from the rt-thread if no processor were removed)
+	 *
+	 * either way, I can't proove it, but an x-run due to re-order here is less likley
+	 * than an x-run-less 'ardour-silent cycle' both of which effectively "click".
+	 */
+
+	ProcessorList as_it_will_be;
+	ProcessorList::iterator oiter;
+	ProcessorList::const_iterator niter;
+
+	oiter = _processors.begin();
+	niter = new_order.begin();
+
+	while (niter !=  new_order.end()) {
+
+		/* if the next processor in the old list is invisible (i.e. should not be in the new order)
+		   then append it to the temp list.
+
+		   Otherwise, see if the next processor in the old list is in the new list. if not,
+		   its been deleted. If its there, append it to the temp list.
+		   */
+
+		if (oiter == _processors.end()) {
+
+			/* no more elements in the old list, so just stick the rest of
+			   the new order onto the temp list.
+			   */
+
+			as_it_will_be.insert (as_it_will_be.end(), niter, new_order.end());
+			while (niter != new_order.end()) {
+				++niter;
+			}
+			break;
+
+		} else {
+
+			if (!(*oiter)->display_to_user()) {
+
+				as_it_will_be.push_back (*oiter);
+
+			} else {
+
+				/* visible processor: check that its in the new order */
+
+				if (find (new_order.begin(), new_order.end(), (*oiter)) == new_order.end()) {
+					/* deleted: do nothing, shared_ptr<> will clean up */
+				} else {
+					/* ignore this one, and add the next item from the new order instead */
+					as_it_will_be.push_back (*niter);
+					++niter;
+				}
+			}
+
+			/* now remove from old order - its taken care of no matter what */
+			oiter = _processors.erase (oiter);
+		}
+
+	}
+	_processors.insert (oiter, as_it_will_be.begin(), as_it_will_be.end());
+
+	/* If the meter is in a custom position, find it and make a rough note of its position */
+	maybe_note_meter_position ();
+}
+
 int
 Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err)
 {
-#if 0  // TODO
-	if (processors_reorder_needs_configure (new_order)) {
-		printf("REORDER NEEDS CONFIGURE\n");
-		// tough luck, use existing code belog
-	} else {
-		printf("COULD DO IT CLICKLESS\n");
-		/* TODO: take a reader-lock, prepare the new order when done
-		 * atomically set it as pending state..
-		 * and do the  _processors.insert() in the RT-thread
-		 * configure_processors_unlocked() is NOT needed,
-		 * only setup_invisible_processors() needs to be called.
-		 *
-		 * see also apply_meter_change_rt()
-		 */
+	// it a change is already queued, wait for it
+	// (unless engine is stopped. apply immediately and proceed
+	while (g_atomic_int_get (&_pending_process_reorder)) {
+		if (!AudioEngine::instance()->running()) {
+			DEBUG_TRACE (DEBUG::Processors, "offline apply queued processor re-order.\n");
+			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+
+			apply_processor_order(_pending_processor_order);
+			setup_invisible_processors ();
+
+			g_atomic_int_set (&_pending_process_reorder, 0);
+
+			processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+			set_processor_positions ();
+		} else {
+			// TODO rather use a semaphore or something.
+			// but since ::reorder_processors() is called
+			// from the GUI thread, this is fine..
+			Glib::usleep(500);
+		}
 	}
-#endif
 
-	/* "new_order" is an ordered list of processors to be positioned according to "placement".
-	   NOTE: all processors in "new_order" MUST be marked as display_to_user(). There maybe additional
-	   processors in the current actual processor list that are hidden. Any visible processors
-	   in the current list but not in "new_order" will be assumed to be deleted.
-	*/
+	if (processors_reorder_needs_configure (new_order) || !AudioEngine::instance()->running()) {
 
-	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 		ProcessorState pstate (this);
 
-		ProcessorList::iterator oiter;
-		ProcessorList::const_iterator niter;
-		ProcessorList as_it_will_be;
-
-		oiter = _processors.begin();
-		niter = new_order.begin();
-
-		while (niter !=  new_order.end()) {
-
-			/* if the next processor in the old list is invisible (i.e. should not be in the new order)
-			   then append it to the temp list.
-
-			   Otherwise, see if the next processor in the old list is in the new list. if not,
-			   its been deleted. If its there, append it to the temp list.
-			*/
-
-			if (oiter == _processors.end()) {
-
-				/* no more elements in the old list, so just stick the rest of
-				   the new order onto the temp list.
-				*/
-
-				as_it_will_be.insert (as_it_will_be.end(), niter, new_order.end());
-				while (niter != new_order.end()) {
-					++niter;
-				}
-				break;
-
-			} else {
-
-				if (!(*oiter)->display_to_user()) {
-
-					as_it_will_be.push_back (*oiter);
-
-				} else {
-
-					/* visible processor: check that its in the new order */
-
-					if (find (new_order.begin(), new_order.end(), (*oiter)) == new_order.end()) {
-						/* deleted: do nothing, shared_ptr<> will clean up */
-					} else {
-						/* ignore this one, and add the next item from the new order instead */
-						as_it_will_be.push_back (*niter);
-						++niter;
-					}
-				}
-
-				/* now remove from old order - its taken care of no matter what */
-				oiter = _processors.erase (oiter);
-			}
-
-		}
-
-		_processors.insert (oiter, as_it_will_be.begin(), as_it_will_be.end());
-
-		/* If the meter is in a custom position, find it and make a rough note of its position */
-		maybe_note_meter_position ();
+		apply_processor_order (new_order);
 
 		if (configure_processors_unlocked (err)) {
 			pstate.restore ();
 			return -1;
 		}
-	}
 
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-	set_processor_positions ();
+		lm.release();
+		lx.release();
+
+		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		set_processor_positions ();
+
+	} else {
+		DEBUG_TRACE (DEBUG::Processors, "Queue clickless processor re-order.\n");
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+
+		// _pending_processor_order is protected by _processor_lock
+		_pending_processor_order = new_order;
+		g_atomic_int_set (&_pending_process_reorder, 1);
+	}
 
 	return 0;
 }
@@ -2845,7 +2888,7 @@ Route::set_processor_state (const XMLNode& node)
 	}
 
 	reset_instrument_info ();
-	processors_changed (RouteProcessorChange ());
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
 }
 
@@ -3340,7 +3383,7 @@ Route::flush_processors ()
 __attribute__((annotate("realtime")))
 #endif
 void
-Route::apply_meter_change_rt ()
+Route::apply_processor_changes_rt ()
 {
 	if (_pending_meter_point != _meter_point) {
 		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
@@ -3349,6 +3392,23 @@ Route::apply_meter_change_rt ()
 			 * they can be re-positioned without re-allocation */
 			set_meter_point_unlocked();
 		}
+	}
+
+	bool changed = false;
+
+	if (g_atomic_int_get (&_pending_process_reorder)) {
+		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		if (pwl.locked()) {
+			apply_processor_order (_pending_processor_order);
+			setup_invisible_processors ();
+
+			changed = true;
+			g_atomic_int_set (&_pending_process_reorder, 0);
+		}
+	}
+	if (changed) {
+		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		set_processor_positions ();
 	}
 }
 
@@ -3383,7 +3443,7 @@ Route::set_meter_point_unlocked ()
 	assert (!lm.locked ());
 #endif
 
-	_meter_point = _pending_meter_point;;
+	_meter_point = _pending_meter_point;
 
 	bool meter_was_visible_to_user = _meter->display_to_user ();
 

@@ -182,7 +182,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool denormal_protection() const;
 
 	void         set_meter_point (MeterPoint, bool force = false);
-	void         apply_meter_change_rt ();
+	void         apply_processor_changes_rt ();
 	MeterPoint   meter_point() const { return _pending_meter_point; }
 	void         meter ();
 
@@ -522,6 +522,9 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	boost::shared_ptr<MonitorProcessor> _monitor_control;
 	boost::shared_ptr<Pannable> _pannable;
 
+	ProcessorList  _pending_processor_order;
+	gint           _pending_process_reorder; // atomic
+
 	Flag           _flags;
 	int            _pending_declick;
 	MeterPoint     _meter_point;
@@ -602,6 +605,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	int configure_processors_unlocked (ProcessorStreams*);
 	void set_meter_point_unlocked ();
+	void apply_processor_order (const ProcessorList& new_order);
 
 	std::list<std::pair<ChanCount, ChanCount> > try_configure_processors (ChanCount, ProcessorStreams *);
 	std::list<std::pair<ChanCount, ChanCount> > try_configure_processors_unlocked (ChanCount, ProcessorStreams *);

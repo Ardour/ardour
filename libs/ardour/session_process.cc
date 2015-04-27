@@ -82,8 +82,8 @@ Session::process (pframes_t nframes)
 	 * callig it hold a _processor_lock reader-lock
 	 */
 	boost::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->apply_meter_change_rt();
+	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->apply_processor_changes_rt();
 	}
 
 	_engine.main_thread()->drop_buffers ();
