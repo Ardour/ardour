@@ -164,7 +164,8 @@ class Marker : public sigc::trackable
 	virtual void use_color ();
 	virtual void reposition ();
 	virtual void setup_name_display ();
-	virtual void setup_line ();
+	virtual void _setup_line ();
+	void setup_line () { _setup_line (); }
 	
 	static const double _marker_height;
 
@@ -189,7 +190,6 @@ class RangeMarker : public Marker
 	void setup_name_display ();
 	void use_color ();
 	void reposition ();
-	void setup_line ();
 	void canvas_height_set (double);
 
     protected:
@@ -201,6 +201,7 @@ class RangeMarker : public Marker
     PBD::ScopedConnection parameter_connection;
 
     void bounds_changed ();
+	void _setup_line ();
     void _set_position (framepos_t, framepos_t);
     void parameter_changed (const std::string&);
 };

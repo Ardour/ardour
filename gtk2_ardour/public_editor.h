@@ -325,6 +325,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 
 	sigc::signal<void> ZoomChanged;
+	sigc::signal<void> RulerVisibilityChanged;
 	sigc::signal<void> Realized;
 	sigc::signal<void,framepos_t> UpdateAllTransportClocks;
 

@@ -251,9 +251,9 @@ RangeMarker::_set_position (framepos_t start, framepos_t end)
 }        
 
 void
-RangeMarker::setup_line ()
+RangeMarker::_setup_line ()
 {
-        Marker::setup_line ();
+        Marker::_setup_line ();
 
         if (!_end_line) {
 		_end_line = new ArdourCanvas::Line (editor.get_hscroll_group());
@@ -394,6 +394,8 @@ Marker::Marker (ARDOUR::Location* l, PublicEditor& ed, ArdourCanvas::Container& 
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 	
 	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
+
+	editor.RulerVisibilityChanged.connect (sigc::mem_fun (*this, &Marker::setup_line));
 
 	if (handle_events) {
                 /* events will be handled by the group, make sure it can be used to lookup this object.
@@ -584,7 +586,7 @@ Marker::pick_basic_color (ArdourCanvas::Color c)
 }
 
 void
-Marker::setup_line ()
+Marker::_setup_line ()
 {
         if (_start_line == 0) {
                 _start_line = new ArdourCanvas::Line (editor.get_hscroll_group());
