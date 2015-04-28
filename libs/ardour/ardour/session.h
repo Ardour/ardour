@@ -1267,6 +1267,21 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void *do_work();
 
+	/* Signal Forwarding */
+	void emit_route_signals () const;
+	void emit_thread_run ();
+	static void *emit_thread (void *);
+	void emit_thread_start ();
+	void emit_thread_terminate ();
+
+	pthread_t       _rt_emit_thread;
+	bool            _rt_thread_active;
+
+	pthread_mutex_t _rt_emit_mutex;
+	pthread_cond_t  _rt_emit_cond;
+	bool            _rt_emit_pending;
+
+
 	/* SessionEventManager interface */
 
 	void process_event (SessionEvent*);

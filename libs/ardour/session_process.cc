@@ -75,7 +75,7 @@ Session::process (pframes_t nframes)
 
 	(this->*process_function) (nframes);
 
-	/* realtime-safe meter-position changes
+	/* realtime-safe meter-position and processor-order changes
 	 *
 	 * ideally this would be done in
 	 * Route::process_output_buffers() but various functions
@@ -83,7 +83,19 @@ Session::process (pframes_t nframes)
 	 */
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->apply_processor_changes_rt();
+		if ((*i)->apply_processor_changes_rt()) {
+			_rt_emit_pending = true;
+		}
+	}
+	if (_rt_emit_pending) {
+		if (!_rt_thread_active) {
+			emit_route_signals ();
+		}
+		if (pthread_mutex_trylock (&_rt_emit_mutex) == 0) {
+			pthread_cond_signal (&_rt_emit_cond);
+			pthread_mutex_unlock (&_rt_emit_mutex);
+			_rt_emit_pending = false;
+		}
 	}
 
 	_engine.main_thread()->drop_buffers ();
@@ -1225,4 +1237,77 @@ Session::compute_stop_limit () const
 	}
 
 	return current_end_frame ();
+}
+
+
+
+/* dedicated thread for signal emission.
+ *
+ * while sending cross-thread signals from the process thread
+ * is fine in general, PBD::Signal's use of boost::function and
+ * boost:bind can produce a vast overhead which is not
+ * acceptable for low latency.
+ *
+ * This works around the issue by moving the boost overhead
+ * out of the RT thread. The overall load is probably higher but
+ * the realtime thread remains unaffected.
+ */
+
+void
+Session::emit_route_signals () const
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	for (RouteList::const_iterator ci = r->begin(); ci != r->end(); ++ci) {
+		(*ci)->emit_pending_signals ();
+	}
+}
+
+void
+Session::emit_thread_start ()
+{
+	if (_rt_thread_active) {
+		return;
+	}
+	_rt_thread_active = true;
+
+	if (pthread_create (&_rt_emit_thread, NULL, emit_thread, this)) {
+		_rt_thread_active = false;
+	}
+}
+
+void
+Session::emit_thread_terminate ()
+{
+	if (!_rt_thread_active) {
+		return;
+	}
+	_rt_thread_active = false;
+
+	if (pthread_mutex_lock (&_rt_emit_mutex) == 0) {
+		pthread_cond_signal (&_rt_emit_cond);
+		pthread_mutex_unlock (&_rt_emit_mutex);
+	}
+
+	void *status;
+	pthread_join (_rt_emit_thread, &status);
+}
+
+void *
+Session::emit_thread (void *arg)
+{
+	Session *s = static_cast<Session *>(arg);
+	s->emit_thread_run ();
+	pthread_exit (0);
+	return 0;
+}
+
+void
+Session::emit_thread_run ()
+{
+	pthread_mutex_lock (&_rt_emit_mutex);
+	while (_rt_thread_active) {
+		emit_route_signals();
+		pthread_cond_wait (&_rt_emit_cond, &_rt_emit_mutex);
+	}
+	pthread_mutex_unlock (&_rt_emit_mutex);
 }

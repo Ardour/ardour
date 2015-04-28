@@ -72,6 +72,7 @@ public:
 	*/
 
 	void reflect_inputs (const ChanCount& in);
+	void emit_configuration_changed ();
 
 	/** Compute peaks */
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, bool);

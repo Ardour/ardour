@@ -209,7 +209,12 @@ PeakMeter::reflect_inputs (const ChanCount& in)
 	current_meters = in;
 	reset_max();
 
-	ConfigurationChanged (in, in); /* EMIT SIGNAL */
+	// ConfigurationChanged() postponed
+}
+
+void
+PeakMeter::emit_configuration_changed () {
+	ConfigurationChanged (current_meters, current_meters); /* EMIT SIGNAL */
 }
 
 void

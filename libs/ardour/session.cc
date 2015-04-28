@@ -212,6 +212,8 @@ Session::Session (AudioEngine &eng,
 	, rf_scale (1.0)
 	, _locations (new Locations (*this))
 	, _ignore_skips_updates (false)
+	, _rt_thread_active (false)
+	, _rt_emit_pending (false)
 	, step_speed (0)
 	, outbound_mtc_timecode_frame (0)
 	, next_quarter_frame_to_send (-1)
@@ -274,6 +276,9 @@ Session::Session (AudioEngine &eng,
 	, _mmc (0)
 {
 	uint32_t sr = 0;
+
+	pthread_mutex_init (&_rt_emit_mutex, 0);
+	pthread_cond_init (&_rt_emit_cond, 0);
 
 	pre_engine_init (fullpath);
 	
@@ -352,6 +357,8 @@ Session::Session (AudioEngine &eng,
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
 
 	_is_new = false;
+
+	emit_thread_start ();
 
 	/* hook us up to the engine since we are now completely constructed */
 
@@ -569,6 +576,11 @@ Session::destroy ()
 
 	/* not strictly necessary, but doing it here allows the shared_ptr debugging to work */
 	playlists.reset ();
+
+	emit_thread_terminate ();
+
+	pthread_cond_destroy (&_rt_emit_cond);
+	pthread_mutex_destroy (&_rt_emit_mutex);
 
 	delete _scene_changer; _scene_changer = 0;
 	delete midi_control_ui; midi_control_ui = 0;
