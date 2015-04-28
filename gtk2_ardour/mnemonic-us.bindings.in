@@ -92,6 +92,7 @@ This mode provides many different operations on both regions and control points,
 
 @vis|Editor/temporal-zoom-in|equal|zoom in
 @vis|Editor/temporal-zoom-out|minus|zoom out
+@vis|Editor/zoom-to-session|<@TERTIARY@>underscore|zoom to session
 @eep|Editor/edit-cursor-to-previous-region-sync|apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|semicolon|EP to next region sync
 @eep|Editor/cycle-edit-point|grave|next EP w/o marker
