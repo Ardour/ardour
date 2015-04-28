@@ -205,6 +205,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	if (!tm.locked()) {
 		/* return having done nothing */
+		Xrun();
 		_processed_frames = next_processed_frames;
 		return 0;
 	}
