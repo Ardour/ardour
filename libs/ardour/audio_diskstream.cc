@@ -74,6 +74,10 @@ AudioDiskstream::AudioDiskstream (Session &sess, const string &name, Diskstream:
 	in_set_state = true;
 	use_new_playlist ();
 	in_set_state = false;
+
+	if (flag & Destructive) {
+		use_destructive_playlist ();
+	}
 }
 
 AudioDiskstream::AudioDiskstream (Session& sess, const XMLNode& node)
@@ -331,10 +335,13 @@ AudioDiskstream::setup_destructive_playlist ()
 	PropertyList plist;
 	plist.add (Properties::name, _name.val());
 	plist.add (Properties::start, 0);
-	plist.add (Properties::length, max_framepos - (max_framepos - srcs.front()->natural_position()));
+	plist.add (Properties::length, max_framepos - srcs.front()->natural_position());
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist));
 	_playlist->add_region (region, srcs.front()->natural_position());
+
+	/* apply region properties and update write sources */
+	use_destructive_playlist();
 }
 
 void
@@ -346,7 +353,14 @@ AudioDiskstream::use_destructive_playlist ()
 	   with the (presumed single, full-extent) region.
 	*/
 
-	boost::shared_ptr<Region> rp = _playlist->find_next_region (_session.current_start_frame(), Start, 1);
+	boost::shared_ptr<Region> rp;
+	{
+		const RegionList& rl (_playlist->region_list().rlist());
+		if (rl.size() > 0) {
+			assert((rl.size() == 1));
+			rp = rl.front();
+		}
+	}
 
 	if (!rp) {
 		reset_write_sources (false, true);
@@ -2324,6 +2338,13 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 		return false;
 	}
 
+	/* if no regions are present: easy */
+
+	if (_playlist->n_regions() == 0) {
+		requires_bounce = false;
+		return true;
+	}
+
 	/* is there only one region ? */
 
 	if (_playlist->n_regions() != 1) {
@@ -2331,7 +2352,14 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 		return false;
 	}
 
-	boost::shared_ptr<Region> first = _playlist->find_next_region (_session.current_start_frame(), Start, 1);
+	boost::shared_ptr<Region> first;
+	{
+		const RegionList& rl (_playlist->region_list().rlist());
+		assert((rl.size() == 1));
+		first = rl.front();
+
+	}
+
 	if (!first) {
 		requires_bounce = false;
 		return true;
@@ -2340,10 +2368,22 @@ AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 	/* do the source(s) for the region cover the session start position ? */
 
 	if (first->position() != _session.current_start_frame()) {
+		// what is the idea here?  why start() ??
 		if (first->start() > _session.current_start_frame()) {
 			requires_bounce = true;
 			return false;
 		}
+	}
+
+	/* currently RouteTimeAxisView::set_track_mode does not
+	 * implement bounce. Existing regions cannot be converted.
+	 *
+	 * so let's make sure this region is already set up
+	 * as tape-track (spanning the complete range)
+	 */
+	if (first->length() != max_framepos - first->position()) {
+		requires_bounce = true;
+		return false;
 	}
 
 	/* is the source used by only 1 playlist ? */
