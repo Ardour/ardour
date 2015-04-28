@@ -690,6 +690,12 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 	Timecode::BBT_Time bbt;
 	Timecode::Time timecode;
 
+	if (pos < 0) {
+		error << string_compose (_("EditorRegions::format_position: negative timecode position: %1"), pos) << endmsg;
+		snprintf (buf, bufsize, "invalid");
+		return;
+	}
+
 	switch (ARDOUR_UI::instance()->secondary_clock->mode ()) {
 	case AudioClock::BBT:
 		_session->tempo_map().bbt_time (pos, bbt);
@@ -816,10 +822,12 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
 		row[_columns.end] = "";
 	} else if (used > 1) {
 		row[_columns.end] = _("Mult.");
-	} else {
+	} else if (region->last_frame() >= region->first_frame()) {
 		char buf[16];
 		format_position (region->last_frame(), buf, sizeof (buf));
 		row[_columns.end] = buf;
+	} else {
+		row[_columns.end] = "empty";
 	}
 }
 
