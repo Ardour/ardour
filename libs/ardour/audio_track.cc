@@ -187,14 +187,14 @@ AudioTrack::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty *prop;
 
-	if (Track::set_state (node, version)) {
-		return -1;
-	}
-
 	if ((prop = node.property (X_("mode"))) != 0) {
 		_mode = TrackMode (string_2_enum (prop->value(), _mode));
 	} else {
 		_mode = Normal;
+	}
+
+	if (Track::set_state (node, version)) {
+		return -1;
 	}
 
 	pending_state = const_cast<XMLNode*> (&node);
