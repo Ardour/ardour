@@ -82,12 +82,23 @@ void
 TapeAudioRegionView::update (uint32_t /*n*/)
 {
 	/* check that all waves are build and ready */
-
 	if (!tmp_waves.empty()) {
 		return;
 	}
 
 	ENSURE_GUI_THREAD (*this, &TapeAudioRegionView::update, n);
 	// CAIROCANVAS
-	// waves[n]->rebuild ();
+
+	/* this is a quick hack to draw something (abuse gain_changed to force
+	 * an image-cache invalidation.
+	 *
+	 * TODO: ArdourCanvas::WaveView needs an API to look up the specific channel "n"
+	 * and a special case to not only invalidate the cache but re-expose the
+	 * waveform. e.g.
+	 *
+	 * waves[m]->rebuild();  // where 'm' corresponds to channel 'n'.
+	 */
+	for (uint32_t i = 0; i < waves.size(); ++i) {
+		waves[i]->gain_changed ();
+	}
 }
