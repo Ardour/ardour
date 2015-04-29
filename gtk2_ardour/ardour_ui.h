@@ -797,6 +797,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void resize_text_widgets ();
 
+	bool xrun_button_release (GdkEventButton* ev);
+
         std::string _announce_string;
         void check_announcements ();
 

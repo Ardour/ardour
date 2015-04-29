@@ -1345,7 +1345,7 @@ ARDOUR_UI::update_format ()
 }
 
 void
-ARDOUR_UI::update_cpu_load ()
+ARDOUR_UI::update_xrun_count ()
 {
 	char buf[64];
 
@@ -1364,10 +1364,11 @@ ARDOUR_UI::update_cpu_load ()
 		snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">?</span>"), X_("yellow"));
 	}
 	xrun_label.set_markup (buf);
+	set_tip (xrun_label, _("Audio dropouts. Shift+click to reset"));
 }
 
 void
-ARDOUR_UI::update_xrun_count ()
+ARDOUR_UI::update_cpu_load ()
 {
 	char buf[64];
 

@@ -542,13 +542,14 @@ ARDOUR_UI::build_menu_bar ()
 #endif
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
 	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
-	_status_bar_visibility.add (&xrun_label,            X_("XRun"),      _("X-run"), true);
+	_status_bar_visibility.add (&xrun_label,            X_("XRun"),      _("X-run"), false);
 	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
+	ev->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
 }
 
 void
@@ -674,4 +675,18 @@ ARDOUR_UI::focus_on_clock ()
 		editor->present ();
 		primary_clock->focus ();
 	}
+}
+
+bool
+ARDOUR_UI::xrun_button_release (GdkEventButton* ev)
+{
+	if (ev->button != 1 || !Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
+		return false;
+	}
+
+	if (_session) {
+		_session->reset_xrun_count ();
+		update_xrun_count ();
+	}
+	return true;
 }
