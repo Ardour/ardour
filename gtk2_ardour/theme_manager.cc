@@ -24,6 +24,8 @@
 
 #include "fix_carbon.h"
 
+#include <glib/gstdio.h>
+
 #include <gtkmm/stock.h>
 #include <gtkmm/settings.h>
 
@@ -385,6 +387,19 @@ ThemeManager::set_ui_to_state()
 void
 ThemeManager::reset_canvas_colors()
 {
+	string cfile;
+	string basename;
+
+	basename = "my-";
+	basename += ARDOUR_UI::config()->get_color_file();
+	basename += ".colors";
+
+	if (find_file (ardour_config_search_path(), basename, cfile)) {
+		string backup = cfile + string (X_(".old"));
+		g_rename (cfile.c_str(), backup.c_str());
+		/* don't really care if it fails */
+	}
+
 	ARDOUR_UI::config()->load_defaults();
 	ARDOUR_UI::config()->save_state ();
 	set_ui_to_state();
