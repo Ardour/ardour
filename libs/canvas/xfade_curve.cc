@@ -36,7 +36,7 @@ XFadeCurve::XFadeCurve (Canvas* c)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (false)
+	, show_background_fade (true)
 {
 }
 
@@ -46,7 +46,7 @@ XFadeCurve::XFadeCurve (Canvas* c, XFadePosition pos)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (false)
+	, show_background_fade (true)
 {
 }
 
@@ -56,7 +56,7 @@ XFadeCurve::XFadeCurve (Item* parent)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (false)
+	, show_background_fade (true)
 {
 }
 
@@ -66,7 +66,7 @@ XFadeCurve::XFadeCurve (Item* parent, XFadePosition pos)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (false)
+	, show_background_fade (true)
 {
 }
 
