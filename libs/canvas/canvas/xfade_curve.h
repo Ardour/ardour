@@ -80,7 +80,7 @@ private:
 	Color _outline_color;
 	Color _fill_color;
 
-    bool show_background_fade;
+	bool show_background_fade;
     
 	void interpolate ();
 };
