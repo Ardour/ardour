@@ -100,8 +100,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	next_release_selects = false;
 	_width = Wide;
 
-	fader_length = rint (fader_length * ARDOUR_UI::ui_scale);
-	fader_girth = rint (fader_girth * ARDOUR_UI::ui_scale);
+	fader_length = rint (fader_length * ARDOUR_UI::config()->get_ui_scale());
+	fader_girth = rint (fader_girth * ARDOUR_UI::config()->get_ui_scale());
 
 	if (horizontal) {
 		gain_slider = manage (new HSliderController (&gain_adjustment, boost::shared_ptr<PBD::Controllable>(), fader_length, fader_girth));
@@ -935,7 +935,7 @@ GainMeterBase::redraw_metrics()
 	meter_ticks2_area.queue_draw ();
 }
 
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::config()->get_ui_scale()))
 
 GainMeter::GainMeter (Session* s, int fader_length)
 	: GainMeterBase (s, false, fader_length, 24)

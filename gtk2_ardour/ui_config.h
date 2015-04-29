@@ -80,10 +80,12 @@ class UIConfiguration : public PBD::Stateful
 
 	void reset_dpi ();
 	void set_pango_fontsize ();
+
+	float get_ui_scale ();
 		
 	static sigc::signal<void>  DPIReset;
 
-        sigc::signal<void,std::string> ParameterChanged;
+	sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);
 
 	void parameter_changed (std::string);

@@ -260,7 +260,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		width = thin_meter_width;
 	}
 
-	width = rint (width * ARDOUR_UI::ui_scale);
+	width = rint (width * ARDOUR_UI::config()->get_ui_scale());
 
 	if (   meters.size() > 0
 	    && nmeters == visible_meter_count

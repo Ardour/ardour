@@ -240,7 +240,7 @@ PannerUI::setup_pan ()
 		return;
 	}
 
-	const float scale = std::max (1.f, ARDOUR_UI::ui_scale);
+	const float scale = std::max (1.f, ARDOUR_UI::config()->get_ui_scale());
 
 	if (_current_uri == "http://ardour.org/plugin/panner_2in2out#ui")
 	{
