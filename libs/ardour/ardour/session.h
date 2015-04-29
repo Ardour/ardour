@@ -590,6 +590,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	TempoMap&       tempo_map()       { return *_tempo_map; }
 	const TempoMap& tempo_map() const { return *_tempo_map; }
 
+	unsigned int    get_xrun_count () const {return _xrun_count; }
+	void            reset_xrun_count () {_xrun_count = 0; }
+
 	/* region info  */
 
 	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>) const;
@@ -1038,6 +1041,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool                    _writable;
 	bool                    _was_seamless;
 	bool                    _under_nsm_control;
+	unsigned int            _xrun_count;
 
 	void initialize_latencies ();
 	void set_worst_io_latencies ();

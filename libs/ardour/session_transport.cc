@@ -1806,6 +1806,8 @@ Session::engine_halted ()
 void
 Session::xrun_recovery ()
 {
+	++_xrun_count;
+
 	Xrun (_transport_frame); /* EMIT SIGNAL */
 
 	if (Config->get_stop_recording_on_xrun() && actively_recording()) {

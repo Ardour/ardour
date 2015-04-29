@@ -172,6 +172,7 @@ Session::Session (AudioEngine &eng,
 	, _writable (false)
 	, _was_seamless (Config->get_seamless_loop ())
 	, _under_nsm_control (false)
+	, _xrun_count (0)
 	, delta_accumulator_cnt (0)
 	, average_slave_delta (1800) // !!! why 1800 ???
 	, average_dir (0)
