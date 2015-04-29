@@ -923,7 +923,7 @@ GainMeter::_astyle_string (AutoStyle style, bool shrt)
 
 namespace {
     float round_to_tenths (float value) {
-        return (float)((int)(value*10))/10;
+        return round(value*10)/10.0f;
     }
 }
 
@@ -931,7 +931,7 @@ void
 GainMeter::update_meters()
 {
 	char buf[32];
-	float mpeak = level_meter.update_meters();
+	float mpeak = round_to_tenths (level_meter.update_meters());
 
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
@@ -940,12 +940,12 @@ GainMeter::update_meters()
             peak_display_button.modify_bg(Gtk::STATE_NORMAL, _peak_level_3_color);
             peak_display_button.modify_bg(Gtk::STATE_ACTIVE, _peak_level_3_color);
 		} else {
-            mpeak = round_to_tenths (mpeak);
+            mpeak = (mpeak == 0.0f) ? 0.0f : mpeak;
             
 			snprintf (buf, sizeof(buf), "%.1f", mpeak);
 			peak_display_button.set_text (buf);
             Gdk::Color color;
-            if (mpeak <= Config->get_meter_peak_2()) {
+            if (mpeak < Config->get_meter_peak_2()) {
                 color = _peak_level_3_color;
             } else if (mpeak < Config->get_meter_peak()) {
                 color = _peak_level_2_color;
