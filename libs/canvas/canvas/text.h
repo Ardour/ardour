@@ -65,7 +65,6 @@ private:
         mutable bool           _need_redraw;
         mutable double         _width_correction;
         double                 _clamped_width;
-        double                 _width_correction;
         
         void _redraw (Cairo::RefPtr<Cairo::Context>) const;
         void _redraw (Glib::RefPtr<Pango::Context>) const;
