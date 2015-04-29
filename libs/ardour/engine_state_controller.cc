@@ -61,7 +61,6 @@ EngineStateController::instance()
 EngineStateController::EngineStateController()
 : _current_state()
 , _last_used_real_device("")
-, _have_control(false)
 
 {
     AudioEngine::instance ()->Running.connect_same_thread (running_connection, boost::bind (&EngineStateController::_on_engine_running, this) );
