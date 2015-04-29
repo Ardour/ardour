@@ -2375,7 +2375,8 @@ AUPluginInfo::au_start_crashlog ()
 	assert(!_crashlog_fd);
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("Creating AU Log: %1\n", fn));
 	if (!(_crashlog_fd = fopen(fn.c_str(), "w"))) {
-		PBD::error << "Cannot create AU error-log\n";
+		PBD::error << "Cannot create AU error-log" << fn << "\n";
+		cerr << "Cannot create AU error-log" << fn << "\n";
 	}
 }
 
@@ -2395,9 +2396,12 @@ AUPluginInfo::au_remove_crashlog ()
 void
 AUPluginInfo::au_crashlog (std::string msg)
 {
-	assert(_crashlog_fd);
-	fprintf(_crashlog_fd, "AU: %s\n", msg.c_str());
-	::fflush(_crashlog_fd);
+	if (!_crashlog_fd) {
+		fprintf(stderr, "AU: %s\n", msg.c_str());
+	} else {
+		fprintf(_crashlog_fd, "AU: %s\n", msg.c_str());
+		::fflush(_crashlog_fd);
+	}
 }
 
 void
