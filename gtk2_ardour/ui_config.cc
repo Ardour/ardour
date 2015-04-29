@@ -180,6 +180,12 @@ UIConfiguration::set_pango_fontsize ()
 	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
 }
 
+float
+UIConfiguration::get_ui_scale ()
+{
+	return get_font_scale () / 102400.;
+}
+
 void
 UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 {

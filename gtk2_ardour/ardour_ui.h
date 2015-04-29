@@ -186,7 +186,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
 	static UIConfiguration *config () { return theArdourUI->ui_config; }
-	static float ui_scale;
 	
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }

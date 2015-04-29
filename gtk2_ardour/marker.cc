@@ -77,8 +77,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 {
 
 	const double MH = marker_height - 1;
-	const double M3 = std::max(1.f, rintf(3.f * ARDOUR_UI::ui_scale));
-	const double M6 = std::max(2.f, rintf(6.f * ARDOUR_UI::ui_scale));
+	const double M3 = std::max(1.f, rintf(3.f * ARDOUR_UI::config()->get_ui_scale()));
+	const double M6 = std::max(2.f, rintf(6.f * ARDOUR_UI::config()->get_ui_scale()));
 
 	/* Shapes we use:
 	 *
@@ -403,7 +403,7 @@ ArdourMarker::setup_name_display ()
 		limit = _right_label_limit;
 	}
 
-	const float padding =  std::max(2.f, rintf(2.f * ARDOUR_UI::ui_scale));
+	const float padding =  std::max(2.f, rintf(2.f * ARDOUR_UI::config()->get_ui_scale()));
 
 	/* Work out how wide the name can be */
 	int name_width = min ((double) pixel_width (_name, name_font) + padding, limit);

@@ -55,7 +55,7 @@ using namespace std;
 
 Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
 
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::config()->get_ui_scale()))
 
 MonitorSection::MonitorSection (Session* s)
 	: AxisView (s)

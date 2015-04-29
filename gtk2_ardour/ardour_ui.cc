@@ -166,8 +166,6 @@ ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
 sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
 
-float ARDOUR_UI::ui_scale = 1.0;
-
 static bool
 ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
 {

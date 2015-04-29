@@ -138,7 +138,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	const int lr_box_size = height - 2 * step_down;
 	const int pos_box_size = (int)(rint(step_down * .8)) | 1;
 	const int top_step = step_down - pos_box_size;
-	const double corner_radius = 5 * ARDOUR_UI::ui_scale;
+	const double corner_radius = 5 * ARDOUR_UI::config()->get_ui_scale();
 
 	o = colors.outline;
 	f = colors.fill;
@@ -253,8 +253,8 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->set_line_width (2.0);
 	context->move_to (spos + (pos_box_size/2.0), top_step); /* top right */
 	context->rel_line_to (0.0, pos_box_size); /* lower right */
-	context->rel_line_to (-pos_box_size/2.0, 4.0 * ARDOUR_UI::ui_scale); /* bottom point */
-	context->rel_line_to (-pos_box_size/2.0, -4.0 * ARDOUR_UI::ui_scale); /* lower left */
+	context->rel_line_to (-pos_box_size/2.0, 4.0 * ARDOUR_UI::config()->get_ui_scale()); /* bottom point */
+	context->rel_line_to (-pos_box_size/2.0, -4.0 * ARDOUR_UI::config()->get_ui_scale()); /* lower left */
 	context->rel_line_to (0.0, -pos_box_size); /* upper left */
 	context->close_path ();
 
@@ -266,7 +266,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 
 	/* marker line */
 	context->set_line_width (1.0);
-	context->move_to (spos, 1 + top_step + pos_box_size + 4.0 * ARDOUR_UI::ui_scale);
+	context->move_to (spos, 1 + top_step + pos_box_size + 4.0 * ARDOUR_UI::config()->get_ui_scale());
 	context->line_to (spos, half_lr_box + step_down + lr_box_size - 1);
 	context->set_source_rgba (UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
 	context->stroke ();
