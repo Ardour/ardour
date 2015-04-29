@@ -1045,7 +1045,7 @@ WaveView::set_shape (Shape s)
 void
 WaveView::set_amplitude_above_axis (double a)
 {
-	if (abs (_amplitude_above_axis - a) > 0.01) {
+	if (fabs (_amplitude_above_axis - a) > 0.01) {
 		begin_visual_change ();
 		invalidate_image_cache ();
 		_amplitude_above_axis = a;
