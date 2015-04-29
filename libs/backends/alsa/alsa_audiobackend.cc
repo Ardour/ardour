@@ -1433,7 +1433,7 @@ AlsaAudioBackend::main_process_thread ()
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
 	const int bailout = 2 * _samplerate / _samples_per_period;
-	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
+	const int64_t nominal_time = 1e6 * _samples_per_period / _samplerate;
 
 	manager.registration_callback();
 	manager.graph_order_callback();
@@ -1539,7 +1539,14 @@ AlsaAudioBackend::main_process_thread ()
 				/* calculate DSP load */
 				clock2 = g_get_monotonic_time();
 				const int64_t elapsed_time = clock2 - clock1;
-				_dsp_load = elapsed_time / (float) nomial_time;
+				// low pass filter
+				const float load = elapsed_time / (float) nominal_time;
+				if (load > _dsp_load) {
+					_dsp_load = load;
+				} else {
+					const float a = .1 * _samples_per_period / _samplerate;
+					_dsp_load = _dsp_load + a * (load - _dsp_load) + 1e-12;
+				}
 			}
 
 			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {

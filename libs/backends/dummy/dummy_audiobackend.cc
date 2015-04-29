@@ -1224,7 +1224,7 @@ DummyAudioBackend::main_process_thread ()
 		}
 
 		if (!_freewheel) {
-			const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
+			const int64_t nominal_time = 1e6 * _samples_per_period / _samplerate;
 			clock2 = _x_get_monotonic_usec();
 #ifdef PLATFORM_WINDOWS
 			bool win_timers_ok = true;
@@ -1234,7 +1234,7 @@ DummyAudioBackend::main_process_thread ()
 			 * (4 * nominal cycle time) and simply ignore cases where the
 			 * execution switches cores.
 			 */
-			if (clock1 < 0 || clock2 < 0 || (clock1 > clock2) || (clock2 - clock1) > 4 * nomial_time) {
+			if (clock1 < 0 || clock2 < 0 || (clock1 > clock2) || (clock2 - clock1) > 4 * nominal_time) {
 				clock2 = clock1 = 0;
 				win_timers_ok = false;
 			}
@@ -1244,11 +1244,17 @@ DummyAudioBackend::main_process_thread ()
 			if (win_timers_ok)
 #endif
 			{ // low pass filter
-				_dsp_load = _dsp_load + .05 * ((elapsed_time / (float) nomial_time) - _dsp_load) + 1e-12;
+				const float load = elapsed_time / (float) nominal_time;
+				if (load > _dsp_load) {
+					_dsp_load = load;
+				} else {
+					const float a = .1 * _samples_per_period / _samplerate;
+					_dsp_load = _dsp_load + a * (load - _dsp_load) + 1e-12;
+				}
 			}
 
-			if (elapsed_time < nomial_time) {
-				Glib::usleep (nomial_time - elapsed_time);
+			if (elapsed_time < nominal_time) {
+				Glib::usleep (nominal_time - elapsed_time);
 			} else {
 				Glib::usleep (100); // don't hog cpu
 			}

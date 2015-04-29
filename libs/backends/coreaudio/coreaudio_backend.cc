@@ -1584,7 +1584,14 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* calc DSP load. */
 	clock2 = g_get_monotonic_time();
 	const int64_t elapsed_time = clock2 - clock1;
-	_dsp_load = elapsed_time / nominal_time;
+	// low pass filter
+	const float load = elapsed_time / (float) nominal_time;
+	if (load > _dsp_load) {
+		_dsp_load = load;
+	} else {
+		const float a = .1 * _samples_per_period / _samplerate;
+		_dsp_load = _dsp_load + a * (load - _dsp_load) + 1e-12;
+	}
 
 	pthread_mutex_unlock (&_process_callback_mutex);
 	return 0;
