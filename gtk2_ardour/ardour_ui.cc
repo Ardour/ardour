@@ -434,8 +434,12 @@ ARDOUR_UI::engine_running ()
 		first_time_engine_run = false;
 	} 
 	
+	if (_session) {
+		_session->reset_xrun_count ();
+	}
 	update_disk_space ();
 	update_cpu_load ();
+	update_xrun_count ();
 	update_sample_rate (AudioEngine::instance()->sample_rate());
 	update_timecode_format ();
 }
@@ -1179,6 +1183,7 @@ void
 ARDOUR_UI::every_second ()
 {
 	update_cpu_load ();
+	update_xrun_count ();
 	update_buffer_load ();
 	update_disk_space ();
 	update_timecode_format ();
@@ -1341,6 +1346,28 @@ ARDOUR_UI::update_format ()
 
 void
 ARDOUR_UI::update_cpu_load ()
+{
+	char buf[64];
+
+	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
+	   should also be changed.
+	*/
+
+	if (_session) {
+		const unsigned int x = _session->get_xrun_count ();
+		if (x > 9999) {
+			snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">&gt;10K</span>"), X_("red"));
+		} else {
+			snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">%u</span>"), x > 0 ? X_("red") : X_("green"), x);
+		}
+	} else {
+		snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">?</span>"), X_("yellow"));
+	}
+	xrun_label.set_markup (buf);
+}
+
+void
+ARDOUR_UI::update_xrun_count ()
 {
 	char buf[64];
 
