@@ -24,6 +24,7 @@
 #include <pangomm/layout.h>
 
 #include "pbd/compose.h"
+#include "pbd/controllable.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -35,7 +36,7 @@
 #include "canvas/colors.h"
 
 #include "ardour_button.h"
-#include "ardour_ui.h"
+#include "tooltips.h"
 #include "ui_config.h"
 
 #include "i18n.h"
@@ -47,6 +48,7 @@ using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
+using namespace ARDOUR_UI_UTILS;
 using std::max;
 using std::min;
 using namespace std;
@@ -1109,7 +1111,7 @@ void
 ArdourButton::action_tooltip_changed ()
 {
 	string str = _action->property_tooltip().get_value();
-	ARDOUR_UI::instance()->set_tip (*this, str);
+	set_tooltip (*this, str);
 }
 
 void
