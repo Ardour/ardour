@@ -330,7 +330,7 @@ ArdourKnob::on_motion_notify_event (GdkEventMotion *ev)
 
 
 	//scale the adjustment based on keyboard modifiers & GUI size
-	const float ui_scale = max (1.f, ARDOUR_UI::ui_scale);
+	const float ui_scale = max (1.f, ARDOUR_UI::config()->get_ui_scale());
 	float scale = 0.0025 / ui_scale;
 
 	if (ev->state & Keyboard::GainFineScaleModifier) {

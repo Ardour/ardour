@@ -414,7 +414,7 @@ Editor::Editor ()
 
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
-	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::ui_scale));
+	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::config()->get_ui_scale()));
 	TimeAxisView::setup_sizes ();
 	ArdourMarker::setup_sizes (timebar_height);
 

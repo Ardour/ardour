@@ -58,7 +58,7 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
 PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::config()->get_ui_scale()))
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
@@ -544,8 +544,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
 
-	nh *= ARDOUR_UI::ui_scale;
-	tnh *= ARDOUR_UI::ui_scale;
+	nh *= ARDOUR_UI::config()->get_ui_scale();
+	tnh *= ARDOUR_UI::config()->get_ui_scale();
 
 	int prev_height, ignored;
 	bool need_relayout = false;
@@ -810,7 +810,7 @@ MeterStrip::name_changed () {
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		// NB numbers are rotated 90deg. on the meterbridge -> use height
-		number_label.set_size_request(PX_SCALE(18, 18), tnh * ARDOUR_UI::ui_scale);
+		number_label.set_size_request(PX_SCALE(18, 18), tnh * ARDOUR_UI::config()->get_ui_scale());
 	} else {
 		number_label.hide();
 	}

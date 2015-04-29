@@ -216,7 +216,7 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 	return 0;
 }
 
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::config()->get_ui_scale()))
 
 void
 ARDOUR_UI::setup_transport ()

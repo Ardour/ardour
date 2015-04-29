@@ -257,7 +257,7 @@ MixerStrip::init ()
 	_comment_button.signal_clicked.connect (sigc::mem_fun (*this, &RouteUI::toggle_comment_editor));
 
 	// TODO implement ArdourKnob::on_size_request properly
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::config()->get_ui_scale()))
 	trim_control.set_size_request (PX_SCALE(19), PX_SCALE(19));
 #undef PX_SCALE
 	trim_control.set_tooltip_prefix (_("Trim: "));
@@ -703,7 +703,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 
 	set_button_names ();
 
-	const float scale = std::max(1.f, ARDOUR_UI::ui_scale);
+	const float scale = std::max(1.f, ARDOUR_UI::config()->get_ui_scale());
 
 	switch (w) {
 	case Wide:
