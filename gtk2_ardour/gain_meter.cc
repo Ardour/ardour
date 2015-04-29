@@ -935,7 +935,7 @@ GainMeter::update_meters()
 
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
-		if (mpeak <= Config->get_numeric_peak_min_treshold()) {
+		if (mpeak < Config->get_numeric_peak_min_treshold()) {
 			peak_display_button.set_text (_("-inf"));
             peak_display_button.modify_bg(Gtk::STATE_NORMAL, _peak_level_3_color);
             peak_display_button.modify_bg(Gtk::STATE_ACTIVE, _peak_level_3_color);
