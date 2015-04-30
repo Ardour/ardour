@@ -30,6 +30,7 @@
 
 #include "time_axis_view.h"
 #include "editor.h"
+#include "gui_thread.h"
 
 #include "i18n.h"
 
@@ -45,6 +46,8 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 	assert(l->parameter().type() == EnvelopeAutomation);
 
 	_time_converter->set_origin_b (r.region()->position() - r.region()->start());
+
+	r.region()->PropertyChanged.connect (_region_changed_connection, invalidator (*this), boost::bind (&AudioRegionGainLine::region_changed, this, _1), gui_context());
 
 	group->raise_to_top ();
 	group->set_y_position (2);
@@ -96,3 +99,15 @@ AudioRegionGainLine::end_drag (bool with_push, uint32_t final_index)
 	AutomationLine::end_drag (with_push, final_index);
 }
 
+void
+AudioRegionGainLine::region_changed (const PropertyChange& what_changed)
+{
+	PropertyChange interesting_stuff;
+
+	interesting_stuff.add (ARDOUR::Properties::start);
+	interesting_stuff.add (ARDOUR::Properties::position);
+
+	if (what_changed.contains (interesting_stuff)) {
+		_time_converter->set_origin_b (rv.region()->position() - rv.region()->start());
+	}
+}
