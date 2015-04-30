@@ -141,10 +141,11 @@ FPU::FPU ()
 		memset (*fxbuf, 0, 512);
 		
 #ifdef COMPILER_MSVC
+		char *buf = *fxbuf;
 		__asm {
-			mov eax, fxbuf
-		        fxsave   [eax]
-	       };
+			mov eax, buf
+			fxsave   [eax]
+		};
 #else
 		asm volatile (
 			"fxsave (%0)"
