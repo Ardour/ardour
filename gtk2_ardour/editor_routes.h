@@ -38,11 +38,12 @@ public:
 	void move_selected_tracks (bool);
 	void show_track_in_display (TimeAxisView &);
 
-	bool _redisplay_on_resume;
 
 	void suspend_redisplay () {
-		_redisplay_on_resume = false;
-		_no_redisplay = true;
+		if (!_no_redisplay) {
+			_no_redisplay = true;
+			_redisplay_on_resume = false;
+		}
 	}
 
 	void resume_redisplay () {
@@ -160,6 +161,7 @@ private:
 	bool _no_redisplay;
 	bool _adding_routes;
 	bool _route_deletion_in_progress;
+	bool _redisplay_on_resume;
 	volatile gint _redisplay_active;
 	volatile gint _queue_tv_update;
 

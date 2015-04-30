@@ -72,13 +72,13 @@ EditorRoutes::EditorRoutes (Editor* e)
 	, _no_redisplay (false)
 	, _adding_routes (false)
 	, _route_deletion_in_progress (false)
+	, _redisplay_on_resume (false)
 	, _redisplay_active (0)
 	, _queue_tv_update (0)
 	, _menu (0)
 	, old_focus (0)
 	, selection_countdown (0)
 	, name_editable (0)
-	, _redisplay_on_resume (false)
 {
 	static const int column_width = 22;
 
