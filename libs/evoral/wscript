@@ -71,7 +71,7 @@ def build(bld):
     libsmf.name         = 'libsmf'
     libsmf.target       = 'smf'
     libsmf.uselib       = 'GLIB'
-    libsmf.install_path = bld.env['LIBDIR']
+    libsmf.install_path = None
     if bld.env['build_target'] != 'mingw':
         libsmf.cxxflags     = [ '-fPIC' ]
         libsmf.cflags       = [ '-fPIC' ]
