@@ -671,6 +671,7 @@ SystemExec::terminate ()
 	wait();
 	if (thread_active) pthread_join(thread_id_tt, NULL);
 	thread_active = false;
+	assert(pid == 0);
 	::pthread_mutex_unlock(&write_lock);
 }
 
