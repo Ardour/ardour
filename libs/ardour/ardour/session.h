@@ -183,6 +183,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	static PBD::Signal1<void,std::string> Dialog;
 
+	PBD::Signal0<void> BatchUpdateStart;
+	PBD::Signal0<void> BatchUpdateEnd;
+
 	int ensure_subdirs ();
 
 	std::string automation_dir () const;  ///< Automation data
@@ -1272,7 +1275,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void *do_work();
 
 	/* Signal Forwarding */
-	void emit_route_signals () const;
+	void emit_route_signals ();
 	void emit_thread_run ();
 	static void *emit_thread (void *);
 	void emit_thread_start ();

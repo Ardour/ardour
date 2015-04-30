@@ -1254,12 +1254,15 @@ Session::compute_stop_limit () const
  */
 
 void
-Session::emit_route_signals () const
+Session::emit_route_signals ()
 {
+	// TODO use RAII to allow using these signals in other places
+	BatchUpdateStart(); /* EMIT SIGNAL */
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::const_iterator ci = r->begin(); ci != r->end(); ++ci) {
 		(*ci)->emit_pending_signals ();
 	}
+	BatchUpdateEnd(); /* EMIT SIGNAL */
 }
 
 void
