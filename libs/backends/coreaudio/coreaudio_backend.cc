@@ -554,7 +554,7 @@ CoreAudioBackend::freewheel (bool onoff)
 float
 CoreAudioBackend::dsp_load () const
 {
-	return 100.f * _dsp_load;
+	return std::min(100.f, 100.f * _dsp_load);
 }
 
 size_t
@@ -1589,7 +1589,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	if (load > _dsp_load) {
 		_dsp_load = load;
 	} else {
-		const float a = .1 * _samples_per_period / _samplerate;
+		const float a = .2 * _samples_per_period / _samplerate;
 		_dsp_load = _dsp_load + a * (load - _dsp_load) + 1e-12;
 	}
 
