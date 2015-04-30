@@ -38,13 +38,18 @@ public:
 	void move_selected_tracks (bool);
 	void show_track_in_display (TimeAxisView &);
 
+	bool _redisplay_on_resume;
+
 	void suspend_redisplay () {
+		_redisplay_on_resume = false;
 		_no_redisplay = true;
 	}
 
 	void resume_redisplay () {
 		_no_redisplay = false;
-		redisplay ();
+		if (_redisplay_on_resume) {
+			redisplay ();
+		}
 	}
 
 	void redisplay ();

@@ -77,7 +77,8 @@ EditorRoutes::EditorRoutes (Editor* e)
 	, _menu (0)
 	, old_focus (0)
 	, selection_countdown (0)
-		, name_editable (0)
+	, name_editable (0)
+	, _redisplay_on_resume (false)
 {
 	static const int column_width = 22;
 
@@ -360,6 +361,13 @@ EditorRoutes::set_session (Session* s)
 	if (_session) {
 		_session->SoloChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::solo_changed_so_update_mute, this), gui_context());
 		_session->RecordStateChanged.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::update_rec_display, this), gui_context());
+
+		/* TODO: check if these needs to be tied in with DisplaySuspender
+		 * Given that the UI is single-threaded and DisplaySuspender is only used
+		 * in loops in the UI thread all should be fine.
+		 */
+		_session->BatchUpdateStart.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::suspend_redisplay, this), gui_context());
+		_session->BatchUpdateEnd.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::resume_redisplay, this), gui_context());
 	}
 }
 
@@ -549,7 +557,12 @@ EditorRoutes::redisplay_real ()
 void
 EditorRoutes::redisplay ()
 {
-	if (_no_redisplay || !_session || _session->deletion_in_progress()) {
+	if (!_session || _session->deletion_in_progress()) {
+		return;
+	}
+
+	if (_no_redisplay) {
+		_redisplay_on_resume = true;
 		return;
 	}
 
