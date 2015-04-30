@@ -77,7 +77,7 @@ AudioStreamView::set_amplitude_above_axis (gdouble app)
 {
 	RegionViewList::iterator i;
 
-    if ( abs(_amplitude_above_axis - app) > 0.01 ) {
+    if ( fabs(_amplitude_above_axis - app) > 0.01 ) {
         
         if (app < 1.0) {
             _amplitude_above_axis = 1.0;

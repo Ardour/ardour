@@ -578,7 +578,7 @@ GainMeter::get_relative_gain_factor (gain_t val, const RouteList& routes)
     if (factor > 0.0f) { // get max factor for selected tracks
         
         // we are already on top
-        if (abs(usable_gain - Amp::max_gain_coefficient) < Amp::min_gain_coefficient_gap) {
+        if (fabs(usable_gain - Amp::max_gain_coefficient) < Amp::min_gain_coefficient_gap) {
             return 0.0f;
         }
         
@@ -586,7 +586,7 @@ GainMeter::get_relative_gain_factor (gain_t val, const RouteList& routes)
             gain_t g = (*i)->amp()->gain();
             
             // we are close anough to count this route's on max
-            if (abs(g - Amp::max_gain_coefficient) < Amp::min_gain_coefficient_gap ) {
+            if (fabs(g - Amp::max_gain_coefficient) < Amp::min_gain_coefficient_gap ) {
                 continue;
             }
             
@@ -645,7 +645,7 @@ GainMeter::effective_gain_display ()
 		break;
 	}
 
-	if (abs(gain_adjustment.get_value() - value) > 0.0000000001) {
+    if (fabs(gain_adjustment.get_value() - value) > 0.0000000001) {
 		ignore_toggle = true;
 		gain_adjustment.set_value (value);
 		ignore_toggle = false;

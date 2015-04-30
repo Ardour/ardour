@@ -6578,13 +6578,13 @@ Editor::waveform_zoom_changed()
         AudioStreamView* audio_view = dynamic_cast<AudioStreamView*>((*i)->view() );
         if (audio_view) {
             
-            if ( abs(amlitude_multiplier - audio_view->get_amplitude_above_axis() ) > 0.01 ) {
+            if ( fabs(amlitude_multiplier - audio_view->get_amplitude_above_axis() ) > 0.01 ) {
                 audio_view->set_amplitude_above_axis(amlitude_multiplier);
             }
         }
     }
     
-    if ( abs(new_adjustment_value - _session->config.get_wave_amlitude_zoom () ) > 0.01 ) {
+    if ( fabs(new_adjustment_value - _session->config.get_wave_amlitude_zoom () ) > 0.01 ) {
         _session->config.set_wave_amlitude_zoom (new_adjustment_value);
     }
 }

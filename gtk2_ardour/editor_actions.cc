@@ -1827,7 +1827,7 @@ Editor::parameter_changed (std::string p)
         if (_session) {
             double amlitude_zoom = _session->config.get_wave_amlitude_zoom ();
             double adjust = _waves_zoom_adjustment.get_value();
-            if ( abs(amlitude_zoom - adjust ) > 0.01 ) {
+            if ( fabs(amlitude_zoom - adjust ) > 0.01 ) {
                 _waves_zoom_adjustment.set_value(amlitude_zoom);
             }
             
