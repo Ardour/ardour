@@ -5232,6 +5232,7 @@ void
 Editor::resume_route_redisplay ()
 {
 	if (_routes) {
+		_routes->redisplay(); // queue redisplay
 		_routes->resume_redisplay();
 	}
 }
