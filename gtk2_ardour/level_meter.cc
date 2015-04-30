@@ -51,6 +51,8 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	, thin_meter_width(2)
 	, max_peak (minus_infinity())
 	, meter_type (MeterPeak)
+	, visible_meter_type (MeterType(0))
+	, visible_meter_count (0)
 	, color_changed (false)
 {
 	set_session (s);
@@ -236,9 +238,9 @@ LevelMeterBase::hide_all_meters ()
 void
 LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 {
-	hide_all_meters ();
 
  	if (!_meter) {
+		hide_all_meters ();
  		return; /* do it later or never */
  	}
 
@@ -251,6 +253,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	guint16 width;
 
 	if (nmeters == 0) {
+		hide_all_meters ();
 		return;
 	}
 
@@ -262,6 +265,27 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 
 	width = rint (width * ARDOUR_UI::ui_scale);
 
+	if (   meters.size() > 0
+	    && nmeters == visible_meter_count
+	    && meters[0].width == width
+	    && meters[0].length == len
+	    && !color_changed
+	    && meter_type == visible_meter_type) {
+		return;
+	}
+
+#if 0
+	printf("Meter redraw: %s %s %s %s %s %s\n",
+			(meters.size() > 0) ? "yes" : "no",
+			(meters.size() > 0 &&  meters[0].width == width) ? "yes" : "no",
+			(meters.size() > 0 &&  meters[0].length == len) ? "yes" : "no",
+			(nmeters == visible_meter_count) ? "yes" : "no",
+			(meter_type == visible_meter_type) ? "yes" : "no",
+			!color_changed ? "yes" : "no"
+			);
+#endif
+
+	hide_all_meters ();
 	while (meters.size() < nmeters) {
 		meters.push_back (MeterInfo());
 	}
@@ -443,6 +467,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 	//show();
 	color_changed = false;
 	visible_meter_type = meter_type;
+	visible_meter_count = nmeters;
 }
 
 void
