@@ -43,7 +43,7 @@ FPU::FPU ()
 
 	_flags = Flags (0);
 
-#if !( (defined __x86_64__) || (defined __i386__) ) // !ARCH_X86
+#if !( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // !ARCH_X86
 	return;
 #else
 
