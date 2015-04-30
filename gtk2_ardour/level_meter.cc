@@ -80,7 +80,7 @@ LevelMeterBase::set_meter (PeakMeter* meter)
 	_meter_type_connection.disconnect();
 
 	_meter = meter;
-	color_changed = true;
+	color_changed = true; // force update
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (_configuration_connection, parent_invalidator, boost::bind (&LevelMeterBase::configuration_changed, this, _1, _2), gui_context());
@@ -211,7 +211,6 @@ LevelMeterBase::parameter_changed (string p)
 void
 LevelMeterBase::configuration_changed (ChanCount /*in*/, ChanCount /*out*/)
 {
-	color_changed = true;
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 }
 
@@ -219,7 +218,6 @@ void
 LevelMeterBase::meter_type_changed (MeterType t)
 {
 	meter_type = t;
-	color_changed = true;
 	setup_meters (meter_length, regular_meter_width, thin_meter_width);
 	MeterTypeChanged(t);
 }
