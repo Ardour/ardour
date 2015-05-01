@@ -1174,7 +1174,7 @@ DummyAudioBackend::main_process_thread ()
 	manager.graph_order_callback();
 
 	int64_t clock1, clock2;
-	clock1 = _x_get_monotonic_usec();
+	clock1 = -1;
 	while (_running) {
 
 		if (_freewheeling != _freewheel) {
@@ -1226,8 +1226,8 @@ DummyAudioBackend::main_process_thread ()
 		if (!_freewheel) {
 			const int64_t nominal_time = 1e6 * _samples_per_period / _samplerate;
 			clock2 = _x_get_monotonic_usec();
-#ifdef PLATFORM_WINDOWS
-			bool win_timers_ok = true;
+			bool timers_ok = true;
+
 			/* querying the performance counter can fail occasionally (-1).
 			 * Also on some multi-core systems, timers are CPU specific and not
 			 * synchronized. We assume they differ more than a few milliseconds
@@ -1235,14 +1235,14 @@ DummyAudioBackend::main_process_thread ()
 			 * execution switches cores.
 			 */
 			if (clock1 < 0 || clock2 < 0 || (clock1 > clock2) || (clock2 - clock1) > 4 * nominal_time) {
-				clock2 = clock1 = 0;
-				win_timers_ok = false;
+				clock1 = 0;
+				clock2 = nominal_time;
+				timers_ok = false;
 			}
-#endif
+
 			const int64_t elapsed_time = clock2 - clock1;
-#ifdef PLATFORM_WINDOWS
-			if (win_timers_ok)
-#endif
+
+			if (timers_ok)
 			{ // low pass filter
 				const float load = elapsed_time / (float) nominal_time;
 				if (load > _dsp_load) {
@@ -1263,7 +1263,7 @@ DummyAudioBackend::main_process_thread ()
 			Glib::usleep (100); // don't hog cpu
 		}
 
-		/* beginning of netx cycle */
+		/* beginning of next cycle */
 		clock1 = _x_get_monotonic_usec();
 
 		bool connections_changed = false;
