@@ -111,7 +111,6 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _in_configure_processors (false)
 	, _initial_io_setup (false)
 	, _custom_meter_position_noted (false)
-	, _last_custom_meter_was_at_end (false)
 {
 	if (is_master()) {
 		_meter_type = MeterK20;
@@ -2237,8 +2236,6 @@ Route::state(bool full_state)
 			after->id().print (buf, sizeof (buf));
 			node->add_property (X_("processor-after-last-custom-meter"), buf);
 		}
-
-		node->add_property (X_("last-custom-meter-was-at-end"), _last_custom_meter_was_at_end ? "yes" : "no");
 	}
 
 	return *node;
@@ -2429,10 +2426,6 @@ Route::set_state (const XMLNode& node, int version)
 			_processor_after_last_custom_meter = *i;
 			_custom_meter_position_noted = true;
 		}
-	}
-
-	if ((prop = node.property (X_("last-custom-meter-was-at-end"))) != 0) {
-		_last_custom_meter_was_at_end = string_is_affirmative (prop->value ());
 	}
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter){
@@ -3482,7 +3475,9 @@ Route::set_meter_point_unlocked ()
 
 	bool meter_was_visible_to_user = _meter->display_to_user ();
 
-	maybe_note_meter_position ();
+	if (!_custom_meter_position_noted) {
+		maybe_note_meter_position ();
+	}
 
 	if (_meter_point != MeterCustom) {
 
@@ -3491,23 +3486,20 @@ Route::set_meter_point_unlocked ()
 		setup_invisible_processors ();
 
 	} else {
-
 		_meter->set_display_to_user (true);
 
 		/* If we have a previous position for the custom meter, try to put it there */
-		if (_custom_meter_position_noted) {
-			boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
-			
-			if (after) {
-				ProcessorList::iterator i = find (_processors.begin(), _processors.end(), after);
-				if (i != _processors.end ()) {
-					_processors.remove (_meter);
-					_processors.insert (i, _meter);
-				}
-			} else if (_last_custom_meter_was_at_end) {
+		boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
+		if (after) {
+			ProcessorList::iterator i = find (_processors.begin(), _processors.end(), after);
+			if (i != _processors.end ()) {
 				_processors.remove (_meter);
-				_processors.push_back (_meter);
+				_processors.insert (i, _meter);
 			}
+		} else {// at end, right before the mains_out/panner
+			_processors.remove (_meter);
+			ProcessorList::iterator main = _processors.end();
+			_processors.insert (--main, _meter);
 		}
 	}
 
@@ -4537,18 +4529,32 @@ Route::maybe_note_meter_position ()
 	}
 	
 	_custom_meter_position_noted = true;
+	/* custom meter points range from after trim to before panner/main_outs
+	 * this is a limitation by the current processor UI
+	 */
+	bool seen_trim = false;
+	_processor_after_last_custom_meter.reset();
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((*i) == _trim) {
+			seen_trim = true;
+		}
+		if ((*i) == _main_outs) {
+			_processor_after_last_custom_meter = *i;
+			break;
+		}
 		if (boost::dynamic_pointer_cast<PeakMeter> (*i)) {
-			ProcessorList::iterator j = i;
-			++j;
-			if (j != _processors.end ()) {
-				_processor_after_last_custom_meter = *j;
-				_last_custom_meter_was_at_end = false;
+			if (!seen_trim) {
+				_processor_after_last_custom_meter = _trim;
 			} else {
-				_last_custom_meter_was_at_end = true;
+				ProcessorList::iterator j = i;
+				++j;
+				assert(j != _processors.end ()); // main_outs should be before
+				_processor_after_last_custom_meter = *j;
 			}
+			break;
 		}
 	}
+	assert(_processor_after_last_custom_meter.lock());
 }
 
 boost::shared_ptr<Processor>
