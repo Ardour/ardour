@@ -71,8 +71,8 @@ compiler_flags_dictionaries= {
         'ultra-strict' : ['-Wredundant-decls', '-Wstrict-prototypes', '-Wmissing-prototypes'],
         # Flag to turn on C99 compliance by itself 
         'c99': '-std=c99',
-	# Flag to enable AT&T assembler syntax
-	'attasm': '-masm=att',
+        # Flag to enable AT&T assembler syntax
+        'attasm': '-masm=att',
     },
     'msvc' : {
         'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
