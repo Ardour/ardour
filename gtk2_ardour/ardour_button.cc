@@ -449,7 +449,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		const double r = std::min(x, y) * .75;
 		ArdourCanvas::set_source_rgba (cr, text_color);
 		cairo_set_line_width(cr, 1);
-		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
+		cairo_arc (cr, x, y, r, .57 * M_PI, 2.43 * M_PI);
 		cairo_stroke(cr);
 
 		// pins equally spaced 45deg
@@ -466,7 +466,7 @@ ArdourButton::render (cairo_t* cr, cairo_rectangle_t *)
 		cairo_fill(cr);
 
 		// bottom notch
-		cairo_arc (cr, x, y+r, r * .28, 1.05 * M_PI, 1.95 * M_PI);
+		cairo_arc (cr, x, y+r, r * .26, 1.05 * M_PI, 1.95 * M_PI);
 		cairo_stroke(cr);
 	}
 	else if ((_elements & VectorIcon) && _icon == TransportStop) {
