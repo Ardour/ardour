@@ -16,6 +16,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#if !defined USE_CAIRO_IMAGE_SURFACE && !defined NDEBUG
+#define OPTIONAL_CAIRO_IMAGE_SURFACE
+#endif
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -65,7 +68,17 @@ CairoWidget::on_button_press_event (GdkEventButton*)
 bool
 CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	Cairo::RefPtr<Cairo::Context> cr;
+	if (getenv("ARDOUR_IMAGE_SURFACE")) {
+		if (!image_surface) {
+			image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+		}
+		cr = Cairo::Context::create (image_surface);
+	} else {
+		cr = get_window()->create_cairo_context ();
+	}
+#elif defined USE_CAIRO_IMAGE_SURFACE
 
 	if (!image_surface) {
 		image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
@@ -95,7 +108,10 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 
 	render (cr->cobj(), &expose_area);
 
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	if (getenv("ARDOUR_IMAGE_SURFACE")) {
+#endif
+#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
 	image_surface->flush();
 	/* now blit our private surface back to the GDK one */
 
@@ -106,6 +122,9 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 	cairo_context->set_source (image_surface, 0, 0);
 	cairo_context->set_operator (Cairo::OPERATOR_SOURCE);
 	cairo_context->paint ();
+#endif
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	}
 #endif
 
 	return true;
@@ -130,8 +149,14 @@ CairoWidget::on_size_allocate (Gtk::Allocation& alloc)
 {
 	Gtk::EventBox::on_size_allocate (alloc);
 
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	if (getenv("ARDOUR_IMAGE_SURFACE")) {
+#endif
+#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
 	image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, alloc.get_width(), alloc.get_height());
+#endif
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	}
 #endif
 
 	set_dirty ();

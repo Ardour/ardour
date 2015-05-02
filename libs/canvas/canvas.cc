@@ -18,6 +18,10 @@
 
 */
 
+#if !defined USE_CAIRO_IMAGE_SURFACE && !defined NDEBUG
+#define OPTIONAL_CAIRO_IMAGE_SURFACE
+#endif
+
 /** @file  canvas/canvas.cc
  *  @brief Implementation of the main canvas classes.
  */
@@ -754,11 +758,17 @@ void
 GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 {
 	EventBox::on_size_allocate (a);
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	if (getenv("ARDOUR_IMAGE_SURFACE")) {
+#endif
+#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
 	/* allocate an image surface as large as the canvas itself */
 
 	canvas_image.clear ();
 	canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, a.get_width(), a.get_height());
+#endif
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	}
 #endif
 }
 
@@ -769,7 +779,19 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 bool
 GtkCanvas::on_expose_event (GdkEventExpose* ev)
 {
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	Cairo::RefPtr<Cairo::Context> draw_context;
+	Cairo::RefPtr<Cairo::Context> window_context;
+	if (getenv("ARDOUR_IMAGE_SURFACE")) {
+		if (!canvas_image) {
+			canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+		}
+		draw_context = Cairo::Context::create (canvas_image);
+		window_context = get_window()->create_cairo_context ();
+	} else {
+		draw_context = get_window()->create_cairo_context ();
+	}
+#elif defined USE_CAIRO_IMAGE_SURFACE
 	if (!canvas_image) {
 		canvas_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
 	}
@@ -803,7 +825,10 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 			g_free (rects);
 		}
 		
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	if (getenv("ARDOUR_IMAGE_SURFACE")) {
+#endif
+#if defined USE_CAIRO_IMAGE_SURFACE || defined OPTIONAL_CAIRO_IMAGE_SURFACE
 	/* now blit our private surface back to the GDK one */
 
 	window_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
@@ -811,6 +836,9 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	window_context->set_source (canvas_image, 0, 0);
 	window_context->set_operator (Cairo::OPERATOR_SOURCE);
 	window_context->paint ();
+#endif
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	}
 #endif
 
 	return true;
