@@ -281,7 +281,7 @@ ControlProtocol::route_get_peak_input_power (uint32_t table_index, uint32_t whic
 		return 0.0f;
 	}
 
-	return r->peak_meter().peak_power (which_input);
+	return r->peak_meter().meter_level (which_input, MeterPeak);
 }
 
 

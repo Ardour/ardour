@@ -61,7 +61,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-gint AudioEngine::m_meter_exit;
 AudioEngine* AudioEngine::_instance = 0;
 
 #ifdef SILENCE_AFTER
@@ -99,7 +98,6 @@ AudioEngine::AudioEngine ()
 	, _silence_hit_cnt (0)
 #endif
 {
-	g_atomic_int_set (&m_meter_exit, 0);
 	reset_silence_countdown ();
 	start_hw_event_processing();
 	discover_backends ();
@@ -108,7 +106,6 @@ AudioEngine::AudioEngine ()
 AudioEngine::~AudioEngine ()
 {
 	_in_destructor = true;
-	stop_metering_thread ();
 	stop_hw_event_processing();
 	drop_backend ();
 	for (BackendMap::const_iterator i = _backends.begin(); i != _backends.end(); ++i) {
@@ -571,40 +568,6 @@ AudioEngine::stop_hw_event_processing()
 }
 
 
-
-void
-AudioEngine::stop_metering_thread ()
-{
-	if (m_meter_thread) {
-		g_atomic_int_set (&m_meter_exit, 1);
-		m_meter_thread->join ();
-		m_meter_thread = 0;
-	}
-}
-
-void
-AudioEngine::start_metering_thread ()
-{
-	if (m_meter_thread == 0) {
-		g_atomic_int_set (&m_meter_exit, 0);
-		m_meter_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::meter_thread, this));
-	}
-}
-
-void
-AudioEngine::meter_thread ()
-{
-	pthread_set_name (X_("meter"));
-
-	while (true) {
-		Glib::usleep (10000); /* 1/100th sec interval */
-		if (g_atomic_int_get(&m_meter_exit)) {
-			break;
-		}
-		Metering::Meter ();
-	}
-}
-
 void
 AudioEngine::set_session (Session *s)
 {
@@ -664,11 +627,8 @@ AudioEngine::reconnect_session_routes (bool reconnect_inputs, bool reconnect_out
 void
 AudioEngine::died ()
 {
-        /* called from a signal handler for SIGPIPE */
-
-	stop_metering_thread ();
-
-    _running = false;
+	/* called from a signal handler for SIGPIPE */
+	_running = false;
 }
 
 int
@@ -877,8 +837,6 @@ AudioEngine::start (bool for_latency)
 
 	}
 	
-	start_metering_thread ();
-	
 	if (!for_latency) {
 		Running(); /* EMIT SIGNAL */
 	}
@@ -911,7 +869,6 @@ AudioEngine::stop (bool for_latency)
 	_latency_output_port = 0;
 	_latency_input_port = 0;
 	_started_for_latency = false;
-	stop_metering_thread ();
 	
 	Port::PortDrop ();
 
@@ -1252,7 +1209,6 @@ AudioEngine::halted_callback (const char* why)
 		return;
 	}
 
-    stop_metering_thread ();
 	_running = false;
 
 	Port::PortDrop (); /* EMIT SIGNAL */

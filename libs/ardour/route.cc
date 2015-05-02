@@ -206,8 +206,6 @@ Route::init ()
 
 	/* now that we have _meter, its safe to connect to this */
 
-	Metering::Meter.connect_same_thread (*this, (boost::bind (&Route::meter, this)));
-
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		configure_processors (0);
@@ -1915,7 +1913,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 
 	if (_meter) {
-		_meter->reset_max_channels (processor_max_streams);
+		_meter->set_max_channels (processor_max_streams);
 	}
 
 	/* make sure we have sufficient scratch buffers to cope with the new processor
@@ -4018,28 +4016,6 @@ Route::set_active (bool yn, void* src)
 		_output->set_active (yn);
 		active_changed (); // EMIT SIGNAL
 		_session.set_dirty ();
-	}
-}
-
-void
-Route::meter ()
-{
-	Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
-
-	assert (_meter);
-
-	_meter->meter ();
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-
-		boost::shared_ptr<Send> s;
-		boost::shared_ptr<Return> r;
-
-		if ((s = boost::dynamic_pointer_cast<Send> (*i)) != 0) {
-			s->meter()->meter();
-		} else if ((r = boost::dynamic_pointer_cast<Return> (*i)) != 0) {
-			r->meter()->meter ();
-		}
 	}
 }
 

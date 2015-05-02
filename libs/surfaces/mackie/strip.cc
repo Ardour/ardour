@@ -719,7 +719,7 @@ void
 Strip::update_meter ()
 {
 	if (_meter && _transport_is_rolling && _metering_active) {
-		float dB = const_cast<PeakMeter&> (_route->peak_meter()).peak_power (0);
+		float dB = const_cast<PeakMeter&> (_route->peak_meter()).meter_level (0, MeterPeak);
 		_meter->send_update (*_surface, dB);
 	}
 }

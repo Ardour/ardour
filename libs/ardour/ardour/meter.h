@@ -36,16 +36,6 @@ class BufferSet;
 class ChanCount;
 class Session;
 
-class LIBARDOUR_API Metering {
-  public:
-	static void               update_meters ();
-	static PBD::Signal0<void> Meter;
-
-  private:
-	/* this object is not meant to be instantiated */
-	Metering();
-};
-
 /** Meters peaks on the input and stores them for access.
  */
 class LIBARDOUR_API PeakMeter : public Processor {
@@ -53,7 +43,6 @@ public:
         PeakMeter(Session& s, const std::string& name);
         ~PeakMeter();
 
-	void meter();
 	void reset ();
 	void reset_max ();
 
@@ -64,7 +53,7 @@ public:
 	   number of streams in the route, no matter where we put it.
 	*/
 
-	void reset_max_channels (const ChanCount&);
+	void set_max_channels (const ChanCount&);
 
 	/* tell the meter than no matter how many channels it can handle,
 	   `in' is the number it is actually going be handling from
@@ -82,14 +71,6 @@ public:
 
 	ChanCount input_streams () const { return current_meters; }
 	ChanCount output_streams () const { return current_meters; }
-
-	float peak_power (uint32_t n) {
-		if (n < _visible_peak_power.size()) {
-			return _visible_peak_power[n];
-		} else {
-			return minus_infinity();
-		}
-	}
 
 	float meter_level (uint32_t n, MeterType type);
 
@@ -109,10 +90,13 @@ private:
 	 */
 	ChanCount current_meters;
 
-	std::vector<float> _peak_signal;
-	std::vector<float> _visible_peak_power;
-	std::vector<float> _max_peak_signal;
-	std::vector<float> _max_peak_power;
+	bool               _reset_dpm;
+	bool               _reset_max;
+
+	uint32_t           _bufcnt;
+	std::vector<float> _peak_buffer; // internal, integrate
+	std::vector<float> _peak_power;  // includes accurate falloff, hence dB
+	std::vector<float> _max_peak_signal; // dB calculation is done on demand
 
 	std::vector<Kmeterdsp *> _kmeter;
 	std::vector<Iec1ppmdsp *> _iec1meter;

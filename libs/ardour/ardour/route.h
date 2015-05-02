@@ -185,7 +185,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool         apply_processor_changes_rt ();
 	void         emit_pending_signals ();
 	MeterPoint   meter_point() const { return _pending_meter_point; }
-	void         meter ();
 
 	void         set_meter_type (MeterType t) { _meter_type = t; }
 	MeterType    meter_type() const { return _meter_type; }

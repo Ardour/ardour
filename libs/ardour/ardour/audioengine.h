@@ -293,12 +293,6 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	void do_reset_backend();
 	void do_devicelist_update();
 
-	void meter_thread ();
-	void start_metering_thread ();
-	void stop_metering_thread ();
-
-	static gint      m_meter_exit;
-
 	typedef std::map<std::string,AudioBackendInfo*> BackendMap;
 	BackendMap _backends;
 	AudioBackendInfo* backend_discover (const std::string&);
