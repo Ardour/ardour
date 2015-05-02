@@ -20,6 +20,7 @@
 #ifndef __ardour_dB_h__
 #define __ardour_dB_h__
 
+#include <limits>
 #include "pbd/fastlog.h"
 
 #define GAIN_COEFF_ZERO 0.f
@@ -35,6 +36,7 @@ static inline float fast_coefficient_to_dB (float coeff) {
 }
 
 static inline float accurate_coefficient_to_dB (float coeff) {
+	if (coeff < 1e-15) return  -std::numeric_limits<float>::infinity();
 	return 20.0f * log10f (coeff);
 }
 
