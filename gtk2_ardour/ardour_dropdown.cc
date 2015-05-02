@@ -63,9 +63,68 @@ ArdourDropdown::~ArdourDropdown ()
 }
 
 bool
-ArdourDropdown::on_button_press_event (GdkEventButton*)
+ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 {
-	_menu.popup (1, gtk_get_current_event_time());	
+	if (ev->type == GDK_BUTTON_PRESS) {
+		_menu.popup (1, gtk_get_current_event_time());
+	}
+	return true;
+}
+
+bool
+ArdourDropdown::on_scroll_event (GdkEventScroll* ev)
+{
+	using namespace Menu_Helpers;
+
+	const MenuItem * current_active = _menu.get_active();
+	const MenuList& items = _menu.items ();
+	int c = 0;
+
+	if (!current_active) {
+		return true;
+	}
+
+	/* work around another gtkmm API clusterfuck
+	 * const MenuItem* get_active () const
+	 * void set_active (guint index)
+	 *
+	 * also MenuList.activate_item does not actually
+	 * set it as active in the menu.
+	 *
+	 */
+
+	switch (ev->direction) {
+		case GDK_SCROLL_UP:
+
+			for (MenuList::const_reverse_iterator i = items.rbegin(); i != items.rend(); ++i, ++c) {
+				if ( &(*i) != current_active) {
+					continue;
+				}
+				if (++i != items.rend()) {
+					c = items.size() - 2 - c;
+					assert(c >= 0);
+					_menu.set_active(c);
+					_menu.activate_item(*i);
+				}
+				break;
+			}
+			break;
+		case GDK_SCROLL_DOWN:
+			for (MenuList::const_iterator i = items.begin(); i != items.end(); ++i, ++c) {
+				if ( &(*i) != current_active) {
+					continue;
+				}
+				if (++i != items.end()) {
+					assert(c + 1 < items.size());
+					_menu.set_active(c + 1);
+					_menu.activate_item(*i);
+				}
+				break;
+			}
+			break;
+		default:
+			break;
+	}
 	return true;
 }
 
