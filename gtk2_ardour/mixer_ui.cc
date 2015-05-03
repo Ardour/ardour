@@ -1236,12 +1236,14 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 	int celly;
 
 	if (!group_display.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
-		return false;
+		_group_tabs->get_menu(0)->popup (1, ev->time);
+		return true;
 	}
 
 	TreeIter iter = group_model->get_iter (path);
 	if (!iter) {
-		return false;
+		_group_tabs->get_menu(0)->popup (1, ev->time);
+		return true;
 	}
 
 	RouteGroup* group = (*iter)[group_columns.group];
