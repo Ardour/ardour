@@ -96,7 +96,7 @@ WavesAudioBackend::get_ports (const std::string& port_name_pattern, DataType typ
     for (size_t i = 0; i < _ports.size (); ++i) {
         WavesDataPort* port = _ports[i];
         
-        if ((port->type () == type) && (port->flags () & flags)) {
+        if ((port->type () == type) && flags == (port->flags () & flags)) {
             port_names.push_back (port->name ());
             found_ports++;
         }

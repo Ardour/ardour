@@ -868,7 +868,7 @@ AlsaAudioBackend::get_ports (
 	}
 	for (size_t i = 0; i < _ports.size (); ++i) {
 		AlsaPort* port = _ports[i];
-		if ((port->type () == type) && (port->flags () & flags)) {
+		if ((port->type () == type) && flags == (port->flags () & flags)) {
 			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
 				port_names.push_back (port->name ());
 				++rv;
