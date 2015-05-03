@@ -212,6 +212,16 @@ PatchChange::event_handler (GdkEvent* ev)
 		}
 		break;
 
+	case GDK_KEY_RELEASE:
+		switch (ev->key.keyval) {
+		case GDK_BackSpace:
+		case GDK_Delete:
+			_region.delete_patch_change (this);
+		default:
+			break;
+		}
+		break;
+
 	case GDK_SCROLL:
 		if (ev->scroll.direction == GDK_SCROLL_UP) {
 			_region.step_patch(
