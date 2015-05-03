@@ -149,7 +149,7 @@ class LIBARDOUR_API PortManager
 
     void fade_out (gain_t, gain_t, pframes_t);
     void silence (pframes_t nframes);
-    void silence_physical (pframes_t nframes);
+    void silence_outputs (pframes_t nframes);
     void check_monitoring ();
     /** Signal the start of an audio cycle.
      * This MUST be called before any reading/writing for this cycle.

@@ -210,7 +210,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		 * before the process_callback. it may even be 
 		 * jack/alsa only). but better safe than sorry.
 		 */
-		PortManager::silence_physical (nframes);
+		PortManager::silence_outputs (nframes);
 		return 0;
 	}
 

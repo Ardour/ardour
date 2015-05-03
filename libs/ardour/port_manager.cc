@@ -639,10 +639,10 @@ PortManager::silence (pframes_t nframes)
 }
 
 void
-PortManager::silence_physical (pframes_t nframes)
+PortManager::silence_outputs (pframes_t nframes)
 {
 	std::vector<std::string> port_names;
-	if (get_ports("", DataType::AUDIO, IsInput, port_names)) {
+	if (get_ports("", DataType::AUDIO, IsOutput, port_names)) {
 		for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
 			if (!port_is_mine(*p)) {
 				continue;
@@ -659,7 +659,7 @@ PortManager::silence_physical (pframes_t nframes)
 		}
 	}
 
-	if (get_ports("", DataType::MIDI, IsInput, port_names)) {
+	if (get_ports("", DataType::MIDI, IsOutput, port_names)) {
 		for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
 			if (!port_is_mine(*p)) {
 				continue;
