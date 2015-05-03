@@ -205,7 +205,12 @@ AudioEngine::process_callback (pframes_t nframes)
 		if (_session) {
 			Xrun();
 		}
-		_processed_frames = next_processed_frames;
+		/* really only JACK requires this
+		 * (other backends clear the output buffers
+		 * before the process_callback. it may even be 
+		 * jack/alsa only). but better safe than sorry.
+		 */
+		PortManager::silence_physical (nframes);
 		return 0;
 	}
 
