@@ -676,7 +676,10 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 			/* primary-click: toggle selection state of strip */
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				_selection.remove (strip);
-			} 
+			} else if (_selection.routes.size() > 1) {
+				/* de-select others */
+				_selection.set (strip);
+			}
 		} else {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				_selection.add (strip);
