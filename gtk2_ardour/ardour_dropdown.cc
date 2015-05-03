@@ -115,7 +115,7 @@ ArdourDropdown::on_scroll_event (GdkEventScroll* ev)
 					continue;
 				}
 				if (++i != items.end()) {
-					assert(c + 1 < items.size());
+					assert(c + 1 < (int) items.size());
 					_menu.set_active(c + 1);
 					_menu.activate_item(*i);
 				}
