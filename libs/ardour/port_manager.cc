@@ -639,6 +639,45 @@ PortManager::silence (pframes_t nframes)
 }
 
 void
+PortManager::silence_physical (pframes_t nframes)
+{
+	std::vector<std::string> port_names;
+	if (get_ports("", DataType::AUDIO, IsInput, port_names)) {
+		for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
+			if (!port_is_mine(*p)) {
+				continue;
+			}
+			PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
+			if (!ph) {
+				continue;
+			}
+			void *buf = _backend->get_buffer(ph, nframes);
+			if (!buf) {
+				continue;
+			}
+			memset (buf, 0, sizeof(float) * nframes);
+		}
+	}
+
+	if (get_ports("", DataType::MIDI, IsInput, port_names)) {
+		for (std::vector<std::string>::iterator p = port_names.begin(); p != port_names.end(); ++p) {
+			if (!port_is_mine(*p)) {
+				continue;
+			}
+			PortEngine::PortHandle ph = _backend->get_port_by_name (*p);
+			if (!ph) {
+				continue;
+			}
+			void *buf = _backend->get_buffer(ph, nframes);
+			if (!buf) {
+				continue;
+			}
+			_backend->midi_clear (buf);
+		}
+	}
+}
+
+void
 PortManager::check_monitoring ()
 {
 	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
