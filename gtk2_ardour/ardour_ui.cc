@@ -803,13 +803,16 @@ ARDOUR_UI::starting ()
 	if ((nsm_url = g_getenv ("NSM_URL")) != 0) {
 		nsm = new NSM_Client;
 		if (!nsm->init (nsm_url)) {
-			/* TODO this needs fixing!
+			/* the ardour executable may have different names:
+			 *
 			 * waf's obj.target for distro versions: eg ardour4, ardourvst4
 			 * Ardour4, Mixbus3 for bundled versions + full path on OSX & windows
 			 * argv[0] does not apply since we need the wrapper-script (not the binary itself)
-			 * No idea how to address all these.
+			 *
+			 * The wrapper startup script should set the environment variable 'ARDOUR_SELF'
 			 */
-			nsm->announce (PROGRAM_NAME, ":dirty:", "ardour4");
+			const char *process_name = g_getenv ("ARDOUR_SELF");
+			nsm->announce (PROGRAM_NAME, ":dirty:", process_name ? process_name : "ardour4");
 
 			unsigned int i = 0;
 			// wait for announce reply from nsm server
