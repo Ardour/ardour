@@ -61,6 +61,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void deactivate ();
 	void flush ();
 
+	bool reset_parameters_to_default ();
+	bool can_reset_all_parameters ();
+
 	int set_block_size (pframes_t nframes);
 
 	ChanCount output_streams() const;

@@ -601,6 +601,69 @@ PluginInsert::default_parameter_value (const Evoral::Parameter& param)
 	return _plugins[0]->default_value (param.id());
 }
 
+
+bool
+PluginInsert::can_reset_all_parameters ()
+{
+	bool all = true;
+	uint32_t params = 0;
+	for (uint32_t par = 0; par < _plugins[0]->parameter_count(); ++par) {
+		bool ok=false;
+		const uint32_t cid = _plugins[0]->nth_parameter (par, ok);
+
+		if (!ok || !_plugins[0]->parameter_is_input(cid)) {
+			continue;
+		}
+
+		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter(PluginAutomation, 0, cid));
+		if (!ac) {
+			continue;
+		}
+
+		++params;
+		if (ac->automation_state() & Play) {
+			all = false;
+			break;
+		}
+	}
+	return all && (params > 0);
+}
+
+bool
+PluginInsert::reset_parameters_to_default ()
+{
+	bool all = true;
+
+	for (uint32_t par = 0; par < _plugins[0]->parameter_count(); ++par) {
+		bool ok=false;
+		const uint32_t cid = _plugins[0]->nth_parameter (par, ok);
+
+		if (!ok || !_plugins[0]->parameter_is_input(cid)) {
+			continue;
+		}
+
+		const float dflt = _plugins[0]->default_value (cid);
+		const float curr = _plugins[0]->get_parameter (cid);
+
+		if (dflt == curr) {
+			continue;
+		}
+
+		boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter(PluginAutomation, 0, cid));
+		if (!ac) {
+			continue;
+		}
+
+		if (ac->automation_state() & Play) {
+			all = false;
+			continue;
+		}
+
+		ac->set_value (dflt);
+	}
+	return all;
+}
+
 boost::shared_ptr<Plugin>
 PluginInsert::plugin_factory (boost::shared_ptr<Plugin> other)
 {
