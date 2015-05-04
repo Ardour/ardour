@@ -39,7 +39,8 @@ VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> insert, boost:
 	box->set_spacing (6);
 	box->set_border_width (6);
 	box->pack_end (focus_button, false, false);
-	box->pack_end (bypass_button, false, false, 10);
+	box->pack_end (bypass_button, false, false, 4);
+	box->pack_end (reset_button, false, false, 4);
 	box->pack_end (delete_button, false, false);
 	box->pack_end (save_button, false, false);
 	box->pack_end (add_button, false, false);

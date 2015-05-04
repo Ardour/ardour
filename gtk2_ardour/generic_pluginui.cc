@@ -86,13 +86,14 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	latency_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::latency_button_clicked));
 	set_latency_label ();
 
-	smaller_hbox->pack_start (latency_button, false, false, 10);
+	smaller_hbox->pack_start (latency_button, false, false, 4);
 	smaller_hbox->pack_start (_preset_combo, false, false);
 	smaller_hbox->pack_start (_preset_modified, false, false);
 	smaller_hbox->pack_start (add_button, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (delete_button, false, false);
-	smaller_hbox->pack_start (bypass_button, false, true);
+	smaller_hbox->pack_start (reset_button, false, false, 4);
+	smaller_hbox->pack_start (bypass_button, false, true, 4);
 	
 	automation_manual_all_button.set_text(_("Manual"));
 	automation_manual_all_button.set_name (X_("generic button"));
