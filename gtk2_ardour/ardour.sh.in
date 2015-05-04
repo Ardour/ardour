@@ -48,6 +48,12 @@ export ARDOUR_CONFIG_PATH=@CONFDIR@
 export ARDOUR_DLL_PATH=@LIBDIR@
 
 #
+# NSM needs a path to this script
+#
+
+export ARDOUR_SELF="$0"
+
+#
 # VAMP has its own lookup path
 # 
 

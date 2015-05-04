@@ -36,6 +36,10 @@ fi
 
 export ARDOUR_BUNDLED=true
 
+# NSM needs a path to this script
+export ARDOUR_SELF="$0"
+
+
 # this is edited by the build script to include relevant environment variables
 
 %ENV%
