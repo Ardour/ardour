@@ -278,6 +278,7 @@ Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState 
 	if (c && (s != c->automation_state())) {
 		c->set_automation_state (s);
 		_a_session.set_dirty ();
+		AutomationStateChanged(); /* Emit signal */
 	}
 }
 
