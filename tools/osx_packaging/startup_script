@@ -19,6 +19,8 @@ end tell'
    exit 1
 fi
 
+export ARDOUR_SELF="$0"
+
 # this needs to be set so that we can restore the environment when we want to find JACK (or similar)
 export PREBUNDLE_ENV="$(env)"
 

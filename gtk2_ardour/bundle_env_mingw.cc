@@ -123,6 +123,15 @@ fixup_bundle_environment (int, char* [], string & localedir)
 	Glib::setenv ("VAMP_PATH", path, true);
 
 	Glib::setenv ("SUIL_MODULE_DIR", Glib::build_filename(ardour_dll_directory(), "suil"), true);
+
+	/* XXX this should really be PRODUCT_EXE see tools/x-win/package.sh
+	 * ardour on windows does not have a startup wrapper script.
+	 *
+	 * then again, there's probably nobody using NSM on windows.
+	 * because neither nsmd nor the GUI is currently available for windows.
+	 * furthermore it'll be even less common for derived products.
+	 */
+	Glib::setenv ("ARDOUR_SELF", Glib::build_filename(ardour_dll_directory(), "ardour.exe"), true);
 }
 
 static __cdecl void
