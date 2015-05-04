@@ -261,6 +261,8 @@ PortManager::get_ports (DataType type, PortList& pl)
 int
 PortManager::get_ports (const string& port_name_pattern, DataType type, PortFlags flags, vector<string>& s)
 {
+	s.clear();
+
 	if (!_backend) {
 		return 0;
 	}
