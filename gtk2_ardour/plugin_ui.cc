@@ -418,6 +418,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, add_button (_("Add"))
 	, save_button (_("Save"))
 	, delete_button (_("Delete"))
+	, reset_button (_("Reset"))
 	, bypass_button (ArdourButton::led_default_elements)
 	, description_expander (_("Description"))
 	, plugin_analysis_expander (_("Plugin analysis"))
@@ -431,6 +432,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	ARDOUR_UI::instance()->set_tip (add_button, _("Save a new preset"));
 	ARDOUR_UI::instance()->set_tip (save_button, _("Save the current preset"));
 	ARDOUR_UI::instance()->set_tip (delete_button, _("Delete the current preset"));
+	ARDOUR_UI::instance()->set_tip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
 	ARDOUR_UI::instance()->set_tip (bypass_button, _("Disable signal processing by the plugin"));
 	_no_load_preset = 0;
 
@@ -445,6 +447,10 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	delete_button.set_name ("generic button");
 	delete_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::delete_plugin_setting));
+
+	reset_button.set_name ("generic button");
+	reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PlugUIBase::reset_plugin_parameters));
+
 
 	insert->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(insert)), gui_context());
 
@@ -479,6 +485,10 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	plugin->PresetRemoved.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::update_preset, this), gui_context ());
 	plugin->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::parameter_changed, this, _1, _2), gui_context ());
+
+	insert->AutomationStateChanged.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::automation_state_changed, this), gui_context());
+
+	automation_state_changed();
 }
 
 PlugUIBase::~PlugUIBase()
@@ -634,6 +644,18 @@ PlugUIBase::delete_plugin_setting ()
 		show_no_plugin_message();
 	}
 #endif
+}
+
+void
+PlugUIBase::automation_state_changed ()
+{
+	reset_button.set_sensitive (insert->can_reset_all_parameters());
+}
+
+void
+PlugUIBase::reset_plugin_parameters ()
+{
+	insert->reset_parameters_to_default ();
 }
 
 bool

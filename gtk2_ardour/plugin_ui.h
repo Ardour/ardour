@@ -125,6 +125,8 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	ArdourButton save_button;
 	/** a button to delete the current preset (if it is a user one) */
 	ArdourButton delete_button;
+	/** a button to delete the reset the plugin params */
+	ArdourButton reset_button;
 	/** a button to bypass the plugin */
 	ArdourButton bypass_button;
 	/** a button to acquire keyboard focus */
@@ -160,12 +162,14 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	void add_plugin_setting ();
 	void save_plugin_setting ();
 	void delete_plugin_setting ();
+	void reset_plugin_parameters ();
 	bool focus_toggled(GdkEventButton*);
 	bool bypass_button_release(GdkEventButton*);
 	void toggle_description ();
 	void toggle_plugin_analysis ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
+	void automation_state_changed ();
 	virtual void parameter_changed (uint32_t, float);
 	void preset_added_or_removed ();
 	void update_preset_modified ();
