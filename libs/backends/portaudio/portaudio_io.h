@@ -75,7 +75,13 @@ public:
 	int      get_capture_channel (uint32_t chn, float *input, uint32_t n_samples);
 	int      set_playback_channel (uint32_t chn, const float *input, uint32_t n_samples);
 
-private:
+private: // Methods
+
+	void clear_device_list ();
+	void add_default_device ();
+	void add_devices ();
+
+private: // Data
 	int  _state;
 	bool _initialized;
 
@@ -90,7 +96,6 @@ private:
 	double _cur_sample_rate;
 	uint32_t _cur_input_latency;
 	uint32_t _cur_output_latency;
-
 
 	struct paDevice {
 		std::string name;

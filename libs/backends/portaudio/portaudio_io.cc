@@ -211,29 +211,36 @@ PortAudioIO::get_default_output_device ()
 }
 
 void
-PortAudioIO::discover()
+PortAudioIO::clear_device_list ()
 {
-	if (!initialize_pa()) return;
-
 	for (std::map<int, paDevice*>::const_iterator i = _devices.begin (); i != _devices.end(); ++i) {
 		delete i->second;
 	}
 	_devices.clear();
+}
 
+void
+PortAudioIO::add_default_device ()
+{
 	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
 	if (info == NULL) return;
 
-	{
-		const PaDeviceInfo* nfo_i = Pa_GetDeviceInfo(get_default_input_device());
-		const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(get_default_output_device());
-		if (nfo_i && nfo_o) {
-			_devices.insert (std::pair<int, paDevice*> (-1,
-						new paDevice("Default",
-							nfo_i->maxInputChannels,
-							nfo_o->maxOutputChannels
-							)));
-		}
+	const PaDeviceInfo* nfo_i = Pa_GetDeviceInfo(get_default_input_device());
+	const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(get_default_output_device());
+	if (nfo_i && nfo_o) {
+		_devices.insert (std::pair<int, paDevice*> (-1,
+					new paDevice("Default",
+						nfo_i->maxInputChannels,
+						nfo_o->maxOutputChannels
+						)));
 	}
+}
+
+void
+PortAudioIO::add_devices ()
+{
+	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
+	if (info == NULL) return;
 
 	int n_devices = Pa_GetDeviceCount();
 #ifndef NDEBUG
@@ -259,12 +266,23 @@ PortAudioIO::discover()
 		if ( nfo->maxInputChannels == 0 && nfo->maxOutputChannels == 0) {
 			continue;
 		}
+
 		_devices.insert (std::pair<int, paDevice*> (i, new paDevice(
 						nfo->name,
 						nfo->maxInputChannels,
 						nfo->maxOutputChannels
 						)));
 	}
+}
+
+void
+PortAudioIO::discover()
+{
+	if (!initialize_pa()) return;
+
+	clear_device_list ();
+	add_default_device ();
+	add_devices ();
 }
 
 void
