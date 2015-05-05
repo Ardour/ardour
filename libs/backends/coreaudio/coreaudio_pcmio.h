@@ -48,12 +48,16 @@ public:
 
 	void     discover();
 	void     device_list (std::map<size_t, std::string> &devices) const { devices = _devices;}
+	void     input_device_list (std::map<size_t, std::string> &devices) const { devices = _input_devices;}
+	void     output_device_list (std::map<size_t, std::string> &devices) const { devices = _output_devices;}
+	void     duplex_device_list (std::map<size_t, std::string> &devices) const { devices = _duplex_devices;}
 
 	int      available_sample_rates (uint32_t device_id, std::vector<float>& sampleRates);
 	int      available_buffer_sizes (uint32_t device_id, std::vector<uint32_t>& sampleRates);
 	uint32_t available_channels (uint32_t device_id, bool input);
 	float    current_sample_rate (uint32_t device_id, bool input = false);
 	uint32_t get_latency (uint32_t device_id, bool input);
+	uint32_t get_latency (bool input);
 
 	std::string cached_port_name (uint32_t portnum, bool input) const;
 
@@ -186,6 +190,9 @@ private:
 
 	// TODO proper device info struct
 	std::map<size_t, std::string> _devices;
+	std::map<size_t, std::string> _input_devices;
+	std::map<size_t, std::string> _output_devices;
+	std::map<size_t, std::string> _duplex_devices;
 	uint32_t * _device_ins;
 	uint32_t * _device_outs;
 	std::vector<std::string> _input_names;

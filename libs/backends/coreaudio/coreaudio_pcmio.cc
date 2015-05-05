@@ -480,6 +480,15 @@ CoreAudioPCM::get_latency(uint32_t device_id, bool input)
 }
 
 uint32_t
+CoreAudioPCM::get_latency(bool input)
+{
+	if (_active_device_id == 0) {
+		return 0;
+	}
+	return get_latency (_active_device_id, input);
+}
+
+uint32_t
 CoreAudioPCM::current_buffer_size_id(AudioDeviceID id) {
 	UInt32 buffer_size;
 	UInt32 size = sizeof(UInt32);
@@ -629,6 +638,15 @@ CoreAudioPCM::discover()
 			if (outputChannelCount > 0 || inputChannelCount > 0) {
 				_devices.insert (std::pair<size_t, std::string> (idx, dn));
 			}
+			if (inputChannelCount > 0) {
+				_input_devices.insert (std::pair<size_t, std::string> (idx, dn));
+			}
+			if (outputChannelCount > 0) {
+				_output_devices.insert (std::pair<size_t, std::string> (idx, dn));
+			}
+			if (outputChannelCount > 0 && inputChannelCount > 0) {
+				_duplex_devices.insert (std::pair<size_t, std::string> (idx, dn));
+			}
 		}
 	}
 	pthread_mutex_unlock (&_discovery_lock);
@@ -695,6 +713,7 @@ CoreAudioPCM::pcm_stop ()
 	}
 	if (_aggregate_plugin_id) {
 		destroy_aggregate_device();
+		discover();
 	}
 
 	AudioUnitUninitialize(_auhal);
@@ -811,7 +830,7 @@ CoreAudioPCM::pcm_start (
 	err = AudioUnitInitialize(_auhal);
 	if (err != noErr) { errorMsg="AudioUnitInitialize"; goto error; }
 
-	// explicitly change samplerate of the device
+	// explicitly change samplerate of the devices, TODO allow separate rates with aggregates
 	if (set_device_sample_rate(device_id_in, sample_rate, true)) {
 		errorMsg="Failed to set SampleRate, Capture Device"; goto error;
 	}

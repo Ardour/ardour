@@ -38,7 +38,9 @@ using namespace ARDOUR;
 static std::string s_instance_name;
 size_t CoreAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> CoreAudioBackend::_midi_options;
-std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_duplex_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_input_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> CoreAudioBackend::_output_audio_device_status;
 
 
 /* static class instance access */
@@ -90,7 +92,8 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _reinit_thread_callback (false)
 	, _measure_latency (false)
 	, _last_process_start (0)
-	, _audio_device("")
+	, _input_audio_device("")
+	, _output_audio_device("")
 	, _midi_driver_option(_("None"))
 	, _samplerate (48000)
 	, _samples_per_period (1024)
@@ -142,30 +145,67 @@ CoreAudioBackend::is_realtime () const
 std::vector<AudioBackend::DeviceStatus>
 CoreAudioBackend::enumerate_devices () const
 {
-	_audio_device_status.clear();
+	_duplex_audio_device_status.clear();
 	std::map<size_t, std::string> devices;
-	_pcmio->device_list(devices);
+	_pcmio->duplex_device_list(devices);
 
 	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_audio_device == "") _audio_device = i->second;
-		_audio_device_status.push_back (DeviceStatus (i->second, true));
+		if (_input_audio_device == "") _input_audio_device = i->second;
+		if (_output_audio_device == "") _output_audio_device = i->second;
+		_duplex_audio_device_status.push_back (DeviceStatus (i->second, true));
 	}
-	return _audio_device_status;
+	return _duplex_audio_device_status;
+}
+
+std::vector<AudioBackend::DeviceStatus>
+CoreAudioBackend::enumerate_input_devices () const
+{
+	_input_audio_device_status.clear();
+	std::map<size_t, std::string> devices;
+	_pcmio->input_device_list(devices);
+
+	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (_input_audio_device == "") _input_audio_device = i->second;
+		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
+	}
+	return _input_audio_device_status;
+}
+
+
+std::vector<AudioBackend::DeviceStatus>
+CoreAudioBackend::enumerate_output_devices () const
+{
+	_output_audio_device_status.clear();
+	std::map<size_t, std::string> devices;
+	_pcmio->output_device_list(devices);
+
+	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (_output_audio_device == "") _output_audio_device = i->second;
+		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
+	}
+	return _output_audio_device_status;
 }
 
 std::vector<float>
 CoreAudioBackend::available_sample_rates (const std::string&) const
 {
 	std::vector<float> sr;
-	_pcmio->available_sample_rates(name_to_id(_audio_device), sr);
+	std::vector<float> sr_in;
+	std::vector<float> sr_out;
+
+	_pcmio->available_sample_rates(name_to_id(_input_audio_device), sr_in);
+	_pcmio->available_sample_rates(name_to_id(_output_audio_device), sr_out);
+
+	// TODO allow to use different SR per device, tweak aggregate
+	std::set_intersection(sr_in.begin(), sr_in.end(), sr_out.begin(), sr_out.end(), std::back_inserter(sr));
 	return sr;
 }
 
 std::vector<uint32_t>
-CoreAudioBackend::available_buffer_sizes (const std::string&) const
+CoreAudioBackend::available_buffer_sizes (const std::string& device) const
 {
 	std::vector<uint32_t> bs;
-	_pcmio->available_buffer_sizes(name_to_id(_audio_device), bs);
+	_pcmio->available_buffer_sizes(name_to_id(device), bs);
 	return bs;
 }
 
@@ -196,8 +236,27 @@ CoreAudioBackend::can_change_buffer_size_when_running () const
 int
 CoreAudioBackend::set_device_name (const std::string& d)
 {
-	_audio_device = d;
-	const float sr = _pcmio->current_sample_rate(name_to_id(_audio_device));
+	int rv = 0;
+	rv |= set_input_device_name (d);
+	rv |= set_output_device_name (d);
+	return rv;
+}
+
+int
+CoreAudioBackend::set_input_device_name (const std::string& d)
+{
+	_input_audio_device = d;
+	const float sr = _pcmio->current_sample_rate(name_to_id(_input_audio_device));
+	if (sr > 0) { set_sample_rate(sr); }
+	return 0;
+}
+
+int
+CoreAudioBackend::set_output_device_name (const std::string& d)
+{
+	_output_audio_device = d;
+	// TODO check SR.
+	const float sr = _pcmio->current_sample_rate(name_to_id(_output_audio_device));
 	if (sr > 0) { set_sample_rate(sr); }
 	return 0;
 }
@@ -205,8 +264,10 @@ CoreAudioBackend::set_device_name (const std::string& d)
 int
 CoreAudioBackend::set_sample_rate (float sr)
 {
-	if (sr <= 0) { return -1; }
-	// TODO check if it's in the list of valid SR
+	std::vector<float> srs = available_sample_rates (/* really ignored */_input_audio_device);
+	if (std::find(srs.begin(), srs.end(), sr) == srs.end()) {
+		return -1;
+	}
 	_samplerate = sr;
 	engine.sample_rate_change (sr);
 	return 0;
@@ -263,7 +324,19 @@ CoreAudioBackend::set_systemic_output_latency (uint32_t sl)
 std::string
 CoreAudioBackend::device_name () const
 {
-	return _audio_device;
+	return "";
+}
+
+std::string
+CoreAudioBackend::input_device_name () const
+{
+	return _input_audio_device;
+}
+
+std::string
+CoreAudioBackend::output_device_name () const
+{
+	return _output_audio_device;
 }
 
 float
@@ -339,7 +412,7 @@ CoreAudioBackend::midi_option () const
 void
 CoreAudioBackend::launch_control_app ()
 {
-    _pcmio->launch_control_app(name_to_id(_audio_device));
+    _pcmio->launch_control_app(name_to_id(_input_audio_device));
 }
 
 /* State Control */
@@ -380,8 +453,8 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_ports.clear();
 	}
 
-	uint32_t device1 = name_to_id(_audio_device); // usually input, but in an aggregate, 1st defines the clock
-	uint32_t device2 = name_to_id(_audio_device); // usually output
+	uint32_t device1 = name_to_id(_input_audio_device);
+	uint32_t device2 = name_to_id(_output_audio_device);
 
 	assert(_active_ca == false);
 	assert(_active_fw == false);
@@ -395,6 +468,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	_pcmio->set_sample_rate_callback (sample_rate_callback_ptr, this);
 
 	_pcmio->pcm_start (device1, device2, _samplerate, _samples_per_period, process_callback_ptr, this);
+	printf("STATE: %d\n", _pcmio->state ());
 
 	switch (_pcmio->state ()) {
 		case 0: /* OK */ break;
@@ -867,8 +941,8 @@ CoreAudioBackend::register_system_audio_ports()
 	const uint32_t a_ins = _n_inputs;
 	const uint32_t a_out = _n_outputs;
 
-	const uint32_t coreaudio_reported_input_latency = _pcmio->get_latency(name_to_id(_audio_device), true);
-	const uint32_t coreaudio_reported_output_latency = _pcmio->get_latency(name_to_id(_audio_device), false);
+	const uint32_t coreaudio_reported_input_latency = _pcmio->get_latency(name_to_id(_input_audio_device), true);
+	const uint32_t coreaudio_reported_output_latency = _pcmio->get_latency(name_to_id(_output_audio_device), false);
 
 #ifndef NDEBUG
 	printf("COREAUDIO LATENCY: i:%d, o:%d\n",
