@@ -619,8 +619,14 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 		tickright = true;
 	}
 
+#ifdef NO_OVERSAMPLE
 	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width, height);
 	cairo_t* cr = cairo_create (surface);
+#else
+	cairo_surface_t* surface = cairo_image_surface_create (CAIRO_FORMAT_RGB24, width*2, height*2);
+	cairo_t* cr = cairo_create (surface);
+	cairo_scale(cr, 2.0, 2.0);
+#endif
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create(w.get_pango_context());
 
 	Pango::AttrList audio_font_attributes;
@@ -632,7 +638,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 
 	font = Pango::FontDescription (ARDOUR_UI::config()->get_SmallMonospaceFont());
 #ifdef __APPLE__
-	const double fixfontsize = 1.125;
+	const double fixfontsize = 1.0;
 #else
 	// counter-act global font-scaling.
 	const double fixfontsize = std::min(1.0, 0.9 / sqrtf(ARDOUR_UI::ui_scale));
@@ -1086,12 +1092,19 @@ ArdourMeter::meter_expose_metrics (GdkEventExpose *ev, MeterType type, std::vect
 	}
 
 	cairo_move_to (cr, 0, 0);
-	cairo_set_source (cr, pattern);
 
 	gint width, height;
 	win->get_size (width, height);
-
+#ifdef NO_OVERSAMPLE
+	cairo_set_source (cr, pattern);
 	cairo_rectangle (cr, 0, 0, width, height);
+#else
+	cairo_scale(cr, 0.5, 0.5);
+	cairo_set_antialias(cr, CAIRO_ANTIALIAS_BEST);
+	cairo_set_source (cr, pattern);
+	cairo_rectangle (cr, 0, 0, width * 2., height * 2.);
+#endif
+
 	cairo_fill (cr);
 
 	cairo_destroy (cr);
