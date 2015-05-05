@@ -485,7 +485,6 @@ DirectoryOption::DirectoryOption (string const & i, string const & n, sigc::slot
 {
 	_file_chooser.set_action (Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER);
 	_file_chooser.signal_selection_changed().connect (sigc::mem_fun (*this, &DirectoryOption::selection_changed));
-	_file_chooser.signal_current_folder_changed().connect (sigc::mem_fun (*this, &DirectoryOption::current_folder_set));
 }
 
 
@@ -508,10 +507,4 @@ void
 DirectoryOption::selection_changed ()
 {
 	_set (poor_mans_glob(_file_chooser.get_filename ()));
-}
-
-void
-DirectoryOption::current_folder_set ()
-{
-	_set (poor_mans_glob(_file_chooser.get_current_folder ()));
 }

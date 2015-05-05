@@ -625,7 +625,6 @@ public:
 
 private:
 	void selection_changed ();
-	void current_folder_set ();
 	
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value

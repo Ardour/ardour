@@ -85,7 +85,7 @@ SaveAsDialog::name_entry_changed ()
 string
 SaveAsDialog::new_parent_folder () const
 {
-	return new_parent_folder_selector.get_current_folder ();
+	return new_parent_folder_selector.get_filename ();
 }
 
 string
