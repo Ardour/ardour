@@ -309,6 +309,9 @@ EngineControl::EngineControl ()
 	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
 	midi_option_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::midi_option_changed));
 
+	input_device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::input_device_changed));
+	output_device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::output_device_changed));
+
 	input_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
@@ -330,6 +333,8 @@ EngineControl::on_show ()
 		backend_changed ();
 	}
 	device_changed ();
+	input_device_changed ();
+	output_device_changed ();
 	ok_button->grab_focus();
 }
 
@@ -436,10 +441,26 @@ EngineControl::build_full_control_notebook ()
 		row++;
 	}
 
-	label = manage (left_aligned_label (_("Device:")));
-	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
-	basic_packer.attach (device_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
-	row++;
+	if (backend->use_separate_input_and_output_devices()) {
+		label = manage (left_aligned_label (_("Input Device:")));
+		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+		basic_packer.attach (input_device_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
+		row++;
+		label = manage (left_aligned_label (_("Output Device:")));
+		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+		basic_packer.attach (output_device_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
+		row++;
+		// reset so it isn't used in state comparisons
+		device_combo.set_active_text ("");
+	} else {
+		label = manage (left_aligned_label (_("Device:")));
+		basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
+		basic_packer.attach (device_combo, 1, 2, row, row + 1, xopt, (AttachOptions) 0);
+		row++;
+		// reset these so they don't get used in state comparisons
+		input_device_combo.set_active_text ("");
+		output_device_combo.set_active_text ("");
+	}
 
 	label = manage (left_aligned_label (_("Sample rate:")));
 	basic_packer.attach (*label, 0, 1, row, row + 1, xopt, (AttachOptions) 0);
@@ -830,14 +851,11 @@ EngineControl::print_channel_count (Gtk::SpinButton* sb)
 	return true;
 }
 
-void
-EngineControl::list_devices ()
+// @return true if there are devices available
+bool
+EngineControl::set_device_popdown_strings ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-	assert (backend);
-
-	/* now fill out devices, mark sample rates, buffer sizes insensitive */
-
 	vector<ARDOUR::AudioBackend::DeviceStatus> all_devices = backend->enumerate_devices ();
 
 	/* NOTE: Ardour currently does not display the "available" field of the
@@ -855,8 +873,8 @@ EngineControl::list_devices ()
 		available_devices.push_back (i->name);
 	}
 
-	if (!available_devices.empty()) {
 
+	if (!available_devices.empty()) {
 		update_sensitivity ();
 
 		{
@@ -884,7 +902,124 @@ EngineControl::list_devices ()
 		}
 
 		device_changed ();
+		return true;
+	}
+	return false;
+}
 
+// @return true if there are input devices available
+bool
+EngineControl::set_input_device_popdown_strings ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	vector<ARDOUR::AudioBackend::DeviceStatus> all_devices = backend->enumerate_input_devices ();
+
+	vector<string> available_devices;
+
+	for (vector<ARDOUR::AudioBackend::DeviceStatus>::const_iterator i = all_devices.begin(); i != all_devices.end(); ++i) {
+		available_devices.push_back (i->name);
+	}
+
+	if (!available_devices.empty()) {
+		update_sensitivity ();
+
+		{
+			string current_device, found_device;
+			current_device = input_device_combo.get_active_text ();
+			if (current_device == "") {
+				current_device = backend->input_device_name ();
+			}
+
+			// Make sure that the active text is still relevant for this
+			// device (it might only be relevant to the previous device!!)
+			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
+				if (*i == current_device)
+					found_device = current_device;
+			}
+			if (found_device == "")
+				// device has never been set (or was not relevant
+				// for this backend) Let's make sure it's not blank
+				current_device = available_devices.front ();
+
+			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+			set_popdown_strings (input_device_combo, available_devices);
+
+			input_device_combo.set_active_text (current_device);
+		}
+
+		input_device_changed ();
+		return true;
+	}
+
+	return false;
+}
+
+// @return true if there are output devices available
+bool
+EngineControl::set_output_device_popdown_strings ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	vector<ARDOUR::AudioBackend::DeviceStatus> all_devices = backend->enumerate_output_devices ();
+
+	vector<string> available_devices;
+
+	for (vector<ARDOUR::AudioBackend::DeviceStatus>::const_iterator i = all_devices.begin(); i != all_devices.end(); ++i) {
+		available_devices.push_back (i->name);
+	}
+
+	if (!available_devices.empty()) {
+		update_sensitivity ();
+
+		{
+			string current_device, found_device;
+			current_device = output_device_combo.get_active_text ();
+			if (current_device == "") {
+				current_device = backend->output_device_name ();
+			}
+
+			// Make sure that the active text is still relevant for this
+			// device (it might only be relevant to the previous device!!)
+			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
+				if (*i == current_device)
+					found_device = current_device;
+			}
+			if (found_device == "")
+				// device has never been set (or was not relevant
+				// for this backend) Let's make sure it's not blank
+				current_device = available_devices.front ();
+
+			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+			set_popdown_strings (output_device_combo, available_devices);
+
+			output_device_combo.set_active_text (current_device);
+		}
+
+		output_device_changed ();
+		return true;
+	}
+
+	return false;
+}
+
+void
+EngineControl::list_devices ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	assert (backend);
+
+	/* now fill out devices, mark sample rates, buffer sizes insensitive */
+
+	bool devices_available = false;
+
+	if (backend->use_separate_input_and_output_devices ()) {
+		bool input_devices_available = set_input_device_popdown_strings ();
+		bool output_devices_available = set_output_device_popdown_strings ();
+		devices_available = input_devices_available || output_devices_available;
+	} else {
+		devices_available = set_device_popdown_strings ();
+	}
+
+	if (devices_available) {
 		input_latency.set_sensitive (true);
 		output_latency.set_sensitive (true);
 		input_channels.set_sensitive (true);
@@ -895,6 +1030,8 @@ EngineControl::list_devices ()
 
 	} else {
 		device_combo.clear();
+		input_device_combo.clear();
+		output_device_combo.clear();
 		sample_rate_combo.set_sensitive (false);
 		buffer_size_combo.set_sensitive (false);
 		input_latency.set_sensitive (false);
@@ -933,13 +1070,98 @@ EngineControl::driver_changed ()
 }
 
 void
+EngineControl::set_samplerate_popdown_strings (const std::string& device_name)
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	string desired;
+	vector<float> sr;
+	vector<string> s;
+
+	if (_have_control) {
+		sr = backend->available_sample_rates (device_name);
+	} else {
+
+		sr.push_back (8000.0f);
+		sr.push_back (16000.0f);
+		sr.push_back (32000.0f);
+		sr.push_back (44100.0f);
+		sr.push_back (48000.0f);
+		sr.push_back (88200.0f);
+		sr.push_back (96000.0f);
+		sr.push_back (192000.0f);
+		sr.push_back (384000.0f);
+	}
+
+	for (vector<float>::const_iterator x = sr.begin(); x != sr.end(); ++x) {
+		s.push_back (rate_as_string (*x));
+		if (*x == _desired_sample_rate) {
+			desired = s.back();
+		}
+	}
+
+	if (!s.empty()) {
+		sample_rate_combo.set_sensitive (true);
+		set_popdown_strings (sample_rate_combo, s);
+
+		if (desired.empty()) {
+			sample_rate_combo.set_active_text (rate_as_string (backend->default_sample_rate()));
+		} else {
+			sample_rate_combo.set_active_text (desired);
+		}
+
+	} else {
+		sample_rate_combo.set_sensitive (false);
+	}
+}
+
+void
+EngineControl::set_buffersize_popdown_strings (const std::string& device_name)
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	vector<uint32_t> bs;
+	vector<string> s;
+
+	if (_have_control) {
+		bs = backend->available_buffer_sizes (device_name);
+	} else if (backend->can_change_buffer_size_when_running()) {
+		bs.push_back (8);
+		bs.push_back (16);
+		bs.push_back (32);
+		bs.push_back (64);
+		bs.push_back (128);
+		bs.push_back (256);
+		bs.push_back (512);
+		bs.push_back (1024);
+		bs.push_back (2048);
+		bs.push_back (4096);
+		bs.push_back (8192);
+	}
+	s.clear ();
+	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
+		s.push_back (bufsize_as_string (*x));
+	}
+
+	if (!s.empty()) {
+		buffer_size_combo.set_sensitive (true);
+		set_popdown_strings (buffer_size_combo, s);
+
+		uint32_t period = backend->buffer_size();
+		if (0 == period) {
+			period = backend->default_buffer_size(device_name);
+		}
+		set_active_text_if_present (buffer_size_combo, bufsize_as_string (period));
+		show_buffer_duration ();
+	} else {
+		buffer_size_combo.set_sensitive (false);
+	}
+}
+
+void
 EngineControl::device_changed ()
 {
-
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 	string device_name = device_combo.get_active_text ();
-	vector<string> s;
 
 	if (device_name != backend->device_name()) {
 		/* we set the backend-device to query various device related intormation.
@@ -960,86 +1182,70 @@ EngineControl::device_changed ()
 		   recursive call to this method.
 		 */
 
-		/* sample rates */
+		set_samplerate_popdown_strings (device_name);
+		set_buffersize_popdown_strings (device_name);
+		/* XXX theoretically need to set min + max channel counts here
+		*/
 
-		string desired;
+		manage_control_app_sensitivity ();
+	}
 
-		vector<float> sr;
+	/* pick up any saved state for this device */
 
-		if (_have_control) {
-			sr = backend->available_sample_rates (device_name);
-		} else {
+	if (!ignore_changes) {
+		maybe_display_saved_state ();
+	}
+}
 
-			sr.push_back (8000.0f);
-			sr.push_back (16000.0f);
-			sr.push_back (32000.0f);
-			sr.push_back (44100.0f);
-			sr.push_back (48000.0f);
-			sr.push_back (88200.0f);
-			sr.push_back (96000.0f);
-			sr.push_back (192000.0f);
-			sr.push_back (384000.0f);
-		}
+void
+EngineControl::input_device_changed ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	assert (backend);
+	string input_device_name = input_device_combo.get_active_text ();
 
-		for (vector<float>::const_iterator x = sr.begin(); x != sr.end(); ++x) {
-			s.push_back (rate_as_string (*x));
-			if (*x == _desired_sample_rate) {
-				desired = s.back();
-			}
-		}
+	if (input_device_name != backend->input_device_name()) {
+		queue_device_changed = true;
+	}
 
-		if (!s.empty()) {
-			sample_rate_combo.set_sensitive (true);
-			set_popdown_strings (sample_rate_combo, s);
+	backend->set_input_device_name(input_device_name);
 
-			if (desired.empty()) {
-				sample_rate_combo.set_active_text (rate_as_string (backend->default_sample_rate()));
-			} else {
-				sample_rate_combo.set_active_text (desired);
-			}
+	{
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 
-		} else {
-			sample_rate_combo.set_sensitive (false);
-		}
+		set_samplerate_popdown_strings (input_device_name);
+		set_buffersize_popdown_strings (input_device_name);
+		/* XXX theoretically need to set min + max channel counts here
+		*/
 
-		/* buffer sizes */
+		manage_control_app_sensitivity ();
+	}
 
-		vector<uint32_t> bs;
+	/* pick up any saved state for this device */
 
-		if (_have_control) {
-			bs = backend->available_buffer_sizes (device_name);
-		} else if (backend->can_change_buffer_size_when_running()) {
-			bs.push_back (8);
-			bs.push_back (16);
-			bs.push_back (32);
-			bs.push_back (64);
-			bs.push_back (128);
-			bs.push_back (256);
-			bs.push_back (512);
-			bs.push_back (1024);
-			bs.push_back (2048);
-			bs.push_back (4096);
-			bs.push_back (8192);
-		}
-		s.clear ();
-		for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
-			s.push_back (bufsize_as_string (*x));
-		}
+	if (!ignore_changes) {
+		maybe_display_saved_state ();
+	}
+}
 
-		if (!s.empty()) {
-			buffer_size_combo.set_sensitive (true);
-			set_popdown_strings (buffer_size_combo, s);
+void
+EngineControl::output_device_changed ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	assert (backend);
+	string output_device_name = output_device_combo.get_active_text ();
 
-			uint32_t period = backend->buffer_size();
-			if (0 == period) {
-				period = backend->default_buffer_size(device_name);
-			}
-			set_active_text_if_present (buffer_size_combo, bufsize_as_string (period));
-			show_buffer_duration ();
-		} else {
-			buffer_size_combo.set_sensitive (false);
-		}
+	if (output_device_name != backend->output_device_name()) {
+		queue_device_changed = true;
+	}
 
+	backend->set_output_device_name(output_device_name);
+
+	{
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+
+		set_samplerate_popdown_strings (output_device_name);
+		set_buffersize_popdown_strings (output_device_name);
 		/* XXX theoretically need to set min + max channel counts here
 		*/
 
@@ -1176,20 +1382,56 @@ EngineControl::get_matching_state (
 }
 
 EngineControl::State
+EngineControl::get_matching_state (
+		const string& backend,
+		const string& driver,
+		const string& input_device,
+		const string& output_device)
+{
+	for (StateList::iterator i = states.begin(); i != states.end(); ++i) {
+		if ((*i)->backend == backend &&
+				(!_have_control || ((*i)->driver == driver && ((*i)->input_device == input_device) && (*i)->output_device == output_device)))
+		{
+			return (*i);
+		}
+	}
+	return State();
+}
+
+EngineControl::State
 EngineControl::get_saved_state_for_currently_displayed_backend_and_device ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 
 	if (backend) {
-		return get_matching_state (backend_combo.get_active_text(),
-				(backend->requires_driver_selection() ? (std::string) driver_combo.get_active_text() : string()),
-				device_combo.get_active_text());
+		if (backend->use_separate_input_and_output_devices ()) {
+			return get_matching_state (backend_combo.get_active_text(),
+					(backend->requires_driver_selection() ? (std::string) driver_combo.get_active_text() : string()),
+					input_device_combo.get_active_text(),
+					output_device_combo.get_active_text());
+		} else {
+			return get_matching_state (backend_combo.get_active_text(),
+					(backend->requires_driver_selection() ? (std::string) driver_combo.get_active_text() : string()),
+					device_combo.get_active_text());
+		}
 	}
-
 
 	return get_matching_state (backend_combo.get_active_text(),
 			string(),
 			device_combo.get_active_text());
+}
+
+bool EngineControl::equivalent_states (const EngineControl::State& state1,
+                                       const EngineControl::State& state2)
+{
+	if (state1->backend == state2->backend &&
+			state1->driver == state2->driver &&
+			state1->device == state2->device &&
+			state1->input_device == state2->input_device &&
+			state1->output_device == state2->output_device) {
+		return true;
+	}
+	return false;
 }
 
 EngineControl::State
@@ -1210,9 +1452,7 @@ EngineControl::save_state ()
 	}
 
 	for (StateList::iterator i = states.begin(); i != states.end();) {
-		if ((*i)->backend == state->backend &&
-				(*i)->driver == state->driver &&
-				(*i)->device == state->device) {
+		if (equivalent_states (*i, state)) {
 			i =  states.erase(i);
 		} else {
 			++i;
@@ -1230,6 +1470,8 @@ EngineControl::store_state (State state)
 	state->backend = get_backend ();
 	state->driver = get_driver ();
 	state->device = get_device_name ();
+	state->input_device = get_input_device_name ();
+	state->output_device = get_output_device_name ();
 	state->sample_rate = get_rate ();
 	state->buffer_size = get_buffer_size ();
 	state->input_latency = get_input_latency ();
@@ -1286,6 +1528,8 @@ EngineControl::get_state ()
 			node->add_property ("backend", (*i)->backend);
 			node->add_property ("driver", (*i)->driver);
 			node->add_property ("device", (*i)->device);
+			node->add_property ("input-device", (*i)->input_device);
+			node->add_property ("output-device", (*i)->output_device);
 			node->add_property ("sample-rate", (*i)->sample_rate);
 			node->add_property ("buffer-size", (*i)->buffer_size);
 			node->add_property ("input-latency", (*i)->input_latency);
@@ -1323,6 +1567,8 @@ EngineControl::set_state (const XMLNode& root)
 	XMLNode* child;
 	XMLNode* grandchild;
 	XMLProperty* prop = NULL;
+
+	fprintf (stderr, "EngineControl::set_state\n");
 
 	if (root.name() != "AudioMIDISetup") {
 		return;
@@ -1365,6 +1611,16 @@ EngineControl::set_state (const XMLNode& root)
 				continue;
 			}
 			state->device = prop->value ();
+
+			if ((prop = grandchild->property ("input-device")) == 0) {
+				continue;
+			}
+			state->input_device = prop->value ();
+
+			if ((prop = grandchild->property ("output-device")) == 0) {
+				continue;
+			}
+			state->output_device = prop->value ();
 
 			if ((prop = grandchild->property ("sample-rate")) == 0) {
 				continue;
@@ -1472,6 +1728,10 @@ EngineControl::set_state (const XMLNode& root)
 			backend_combo.set_active_text ((*i)->backend);
 			driver_combo.set_active_text ((*i)->driver);
 			device_combo.set_active_text ((*i)->device);
+			fprintf (stderr, "setting input device to: %s ", (*i)->input_device.c_str());
+			input_device_combo.set_active_text ((*i)->input_device);
+			fprintf (stderr, "setting output device to: %s ", (*i)->output_device.c_str());
+			output_device_combo.set_active_text ((*i)->output_device);
 			sample_rate_combo.set_active_text (rate_as_string ((*i)->sample_rate));
 			set_active_text_if_present (buffer_size_combo, bufsize_as_string ((*i)->buffer_size));
 			input_latency.set_value ((*i)->input_latency);
@@ -1518,7 +1778,20 @@ EngineControl::push_state_to_backend (bool start)
 				}
 			}
 
-			if (queue_device_changed || get_device_name() != backend->device_name()) {
+			if (backend->use_separate_input_and_output_devices()) {
+				if (get_input_device_name() != backend->input_device_name()) {
+					change_device = true;
+				}
+				if (get_output_device_name() != backend->output_device_name()) {
+					change_device = true;
+				}
+			} else {
+				if (get_device_name() != backend->device_name()) {
+					change_device = true;
+				}
+			}
+
+			if (queue_device_changed) {
 				change_device = true;
 			}
 
@@ -1668,9 +1941,20 @@ EngineControl::push_state_to_backend (bool start)
 		error << string_compose (_("Cannot set driver to %1"), get_driver()) << endmsg;
 		return -1;
 	}
-	if (change_device && backend->set_device_name (get_device_name())) {
-		error << string_compose (_("Cannot set device name to %1"), get_device_name()) << endmsg;
-		return -1;
+	if (backend->use_separate_input_and_output_devices()) {
+		if (change_device && backend->set_input_device_name (get_input_device_name())) {
+			error << string_compose (_("Cannot set input device name to %1"), get_input_device_name()) << endmsg;
+			return -1;
+		}
+		if (change_device && backend->set_output_device_name (get_output_device_name())) {
+			error << string_compose (_("Cannot set output device name to %1"), get_output_device_name()) << endmsg;
+			return -1;
+		}
+	} else {
+		if (change_device && backend->set_device_name (get_device_name())) {
+			error << string_compose (_("Cannot set device name to %1"), get_device_name()) << endmsg;
+			return -1;
+		}
 	}
 	if (change_rate && backend->set_sample_rate (get_rate())) {
 		error << string_compose (_("Cannot set sample rate to %1"), get_rate()) << endmsg;
@@ -1863,6 +2147,18 @@ EngineControl::get_device_name () const
 	return device_combo.get_active_text ();
 }
 
+string
+EngineControl::get_input_device_name () const
+{
+	return input_device_combo.get_active_text ();
+}
+
+string
+EngineControl::get_output_device_name () const
+{
+	return output_device_combo.get_active_text ();
+}
+
 void
 EngineControl::control_app_button_clicked ()
 {
@@ -1898,6 +2194,8 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 {
 	_desired_sample_rate = sr;
 	device_changed ();
+	input_device_changed ();
+	output_device_changed ();
 }
 
 void

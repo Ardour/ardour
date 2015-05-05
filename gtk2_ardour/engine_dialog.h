@@ -64,6 +64,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::ComboBoxText backend_combo;
     Gtk::ComboBoxText driver_combo;
     Gtk::ComboBoxText device_combo;
+    Gtk::ComboBoxText input_device_combo;
+    Gtk::ComboBoxText output_device_combo;
     Gtk::ComboBoxText sample_rate_combo;
     Gtk::ComboBoxText midi_option_combo;
     Gtk::ComboBoxText buffer_size_combo;
@@ -141,11 +143,20 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     uint32_t get_input_latency() const;
     uint32_t get_output_latency() const;
     std::string get_device_name() const;
+    std::string get_input_device_name() const;
+    std::string get_output_device_name() const;
     std::string get_driver() const;
     std::string get_backend() const;
     std::string get_midi_option () const;
 
     void device_changed ();
+    void input_device_changed ();
+    void output_device_changed ();
+    bool set_device_popdown_strings ();
+    bool set_input_device_popdown_strings ();
+    bool set_output_device_popdown_strings ();
+    void set_samplerate_popdown_strings (const std::string& dev_name);
+    void set_buffersize_popdown_strings (const std::string& dev_name);
     void list_devices ();
     void show_buffer_duration ();
 
@@ -182,6 +193,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	std::string backend;
 	std::string driver;
 	std::string device;
+	std::string input_device;
+	std::string output_device;
 	float sample_rate;
 	uint32_t buffer_size;
 	uint32_t input_latency;
@@ -211,10 +224,15 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     State get_matching_state (const std::string& backend,
 			       const std::string& driver,
 			       const std::string& device);
+    State get_matching_state (const std::string& backend,
+			       const std::string& driver,
+			       const std::string& input_device,
+			       const std::string& output_device);
     State get_saved_state_for_currently_displayed_backend_and_device ();
     void maybe_display_saved_state ();
     State save_state ();
     void store_state (State);
+    bool equivalent_states (const State&, const State&);
 
     bool  _have_control;
 
