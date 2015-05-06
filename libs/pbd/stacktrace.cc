@@ -20,9 +20,17 @@
 #include "libpbd-config.h"
 
 #include "pbd/stacktrace.h"
+#include "pbd/compose.h"
+#include "pbd/pthread_utils.h"
+
 #include <cstdio>
 #include <iostream>
 #include <string>
+
+#ifdef PLATFORM_WINDOWS
+#include <Windows.h>
+#include <DbgHelp.h>
+#endif
 
 void
 PBD::trace_twb ()
@@ -101,6 +109,56 @@ PBD::stacktrace (std::ostream& out, int levels)
 	} else {
 		out << "no stacktrace available!" << std::endl;
 	}
+}
+
+#elif defined (PLATFORM_WINDOWS)
+
+std::string 
+PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
+{
+	return std::string();
+}
+
+void
+PBD::stacktrace( std::ostream& out, int)
+{
+#ifdef DEBUG
+	const size_t levels = 62; // does not support more then 62 levels of stacktrace
+	unsigned int   i;
+	void         * stack[ levels ];
+	unsigned short frames;
+	SYMBOL_INFO  * symbol;
+	HANDLE         process;
+
+	process = GetCurrentProcess();
+	out << "+++++Backtrace process: " <<  pthread_self() << std::endl;
+
+	SymInitialize( process, NULL, TRUE );
+
+	frames               = CaptureStackBackTrace( 0, levels, stack, NULL );
+
+	out << "+++++Backtrace frames: " <<  frames << std::endl;
+
+	symbol               = ( SYMBOL_INFO * )calloc( sizeof( SYMBOL_INFO ) + 256 * sizeof( char ), 1 );
+	symbol->MaxNameLen   = 255;
+	symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
+
+	for( i = 0; i < frames; i++ )
+	{
+		SymFromAddr( process, ( DWORD64 )( stack[ i ] ), 0, symbol );
+		out << string_compose( "%1: %2 - %3\n", frames - i - 1, symbol->Name, symbol->Address );
+	}
+
+	out.flush();
+
+	free( symbol );
+#endif
+}
+
+void
+c_stacktrace ()
+{
+	PBD::stacktrace (std::cout);
 }
 
 #else
