@@ -41,6 +41,7 @@ gtkmm2ext_sources = [
         'debug.cc',
         'dndtreeview.cc',
         'emscale.cc',
+	'fader.cc',
         'fastmeter.cc',
         'focus_entry.cc',
         'grouped_buttons.cc',
@@ -99,7 +100,7 @@ def build(bld):
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
     obj.uselib       = 'GTKMM GTK GTKOSX OSX GDK'
-    obj.use          = [ 'libpbd' ]
+    obj.use          = [ 'libpbd', 'libardour' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [
