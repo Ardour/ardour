@@ -1,0 +1,224 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		4397596719CADB4300740098 /* arc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = arc.h; path = ../../canvas/arc.h; sourceTree = "<group>"; };
+		4397596819CADB4300740098 /* arrow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = arrow.h; path = ../../canvas/arrow.h; sourceTree = "<group>"; };
+		4397596919CADB4300740098 /* canvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = canvas.h; path = ../../canvas/canvas.h; sourceTree = "<group>"; };
+		4397596A19CADB4300740098 /* circle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = circle.h; path = ../../canvas/circle.h; sourceTree = "<group>"; };
+		4397596B19CADB4300740098 /* container.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = container.h; path = ../../canvas/container.h; sourceTree = "<group>"; };
+		4397596C19CADB4300740098 /* curve.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = curve.h; path = ../../canvas/curve.h; sourceTree = "<group>"; };
+		4397596D19CADB4300740098 /* debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = debug.h; path = ../../canvas/debug.h; sourceTree = "<group>"; };
+		4397596E19CADB4300740098 /* fill.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fill.h; path = ../../canvas/fill.h; sourceTree = "<group>"; };
+		4397596F19CADB4300740098 /* flag.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = flag.h; path = ../../canvas/flag.h; sourceTree = "<group>"; };
+		4397597019CADB4300740098 /* fwd.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = fwd.h; path = ../../canvas/fwd.h; sourceTree = "<group>"; };
+		4397597119CADB4300740098 /* image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = image.h; path = ../../canvas/image.h; sourceTree = "<group>"; };
+		4397597219CADB4300740098 /* interpolated_curve.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = interpolated_curve.h; path = ../../canvas/interpolated_curve.h; sourceTree = "<group>"; };
+		4397597319CADB4300740098 /* item.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = item.h; path = ../../canvas/item.h; sourceTree = "<group>"; };
+		4397597419CADB4300740098 /* line_set.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = line_set.h; path = ../../canvas/line_set.h; sourceTree = "<group>"; };
+		4397597519CADB4300740098 /* line.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = line.h; path = ../../canvas/line.h; sourceTree = "<group>"; };
+		4397597619CADB4300740098 /* lookup_table.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = lookup_table.h; path = ../../canvas/lookup_table.h; sourceTree = "<group>"; };
+		4397597719CADB4300740098 /* outline.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = outline.h; path = ../../canvas/outline.h; sourceTree = "<group>"; };
+		4397597819CADB4300740098 /* pixbuf.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = pixbuf.h; path = ../../canvas/pixbuf.h; sourceTree = "<group>"; };
+		4397597919CADB4300740098 /* poly_item.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = poly_item.h; path = ../../canvas/poly_item.h; sourceTree = "<group>"; };
+		4397597A19CADB4300740098 /* poly_line.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = poly_line.h; path = ../../canvas/poly_line.h; sourceTree = "<group>"; };
+		4397597B19CADB4300740098 /* polygon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = polygon.h; path = ../../canvas/polygon.h; sourceTree = "<group>"; };
+		4397597C19CADB4300740098 /* rectangle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = rectangle.h; path = ../../canvas/rectangle.h; sourceTree = "<group>"; };
+		4397597D19CADB4300740098 /* root_group.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = root_group.h; path = ../../canvas/root_group.h; sourceTree = "<group>"; };
+		4397597E19CADB4300740098 /* ruler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ruler.h; path = ../../canvas/ruler.h; sourceTree = "<group>"; };
+		4397597F19CADB4300740098 /* scroll_group.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = scroll_group.h; path = ../../canvas/scroll_group.h; sourceTree = "<group>"; };
+		4397598019CADB4300740098 /* stateful_image.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = stateful_image.h; path = ../../canvas/stateful_image.h; sourceTree = "<group>"; };
+		4397598119CADB4300740098 /* text.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = text.h; path = ../../canvas/text.h; sourceTree = "<group>"; };
+		4397598219CADB4300740098 /* tracking_text.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = tracking_text.h; path = ../../canvas/tracking_text.h; sourceTree = "<group>"; };
+		4397598319CADB4300740098 /* types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = types.h; path = ../../canvas/types.h; sourceTree = "<group>"; };
+		4397598419CADB4300740098 /* utils.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = utils.h; path = ../../canvas/utils.h; sourceTree = "<group>"; };
+		4397598519CADB4300740098 /* version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = version.h; path = ../../canvas/version.h; sourceTree = "<group>"; };
+		4397598619CADB4300740098 /* visibility.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = visibility.h; path = ../../canvas/visibility.h; sourceTree = "<group>"; };
+		4397598719CADB4300740098 /* wave_view.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = wave_view.h; path = ../../canvas/wave_view.h; sourceTree = "<group>"; };
+		4397598819CADB4300740098 /* widget.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = widget.h; path = ../../canvas/widget.h; sourceTree = "<group>"; };
+		4397598919CADB4300740098 /* xfade_curve.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xfade_curve.h; path = ../../canvas/xfade_curve.h; sourceTree = "<group>"; };
+		4397598A19CADB4300740098 /* xml_ui.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = xml_ui.h; path = ../../canvas/xml_ui.h; sourceTree = "<group>"; };
+		43A0170F19D56040007D3CE8 /* arc.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = arc.cc; path = ../../arc.cc; sourceTree = "<group>"; };
+		43A0171019D56040007D3CE8 /* arrow.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = arrow.cc; path = ../../arrow.cc; sourceTree = "<group>"; };
+		43A0171119D56040007D3CE8 /* canvas.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = canvas.cc; path = ../../canvas.cc; sourceTree = "<group>"; };
+		43A0171219D56040007D3CE8 /* circle.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = circle.cc; path = ../../circle.cc; sourceTree = "<group>"; };
+		43A0171319D56040007D3CE8 /* container.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = container.cc; path = ../../container.cc; sourceTree = "<group>"; };
+		43A0171419D56040007D3CE8 /* curve.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = curve.cc; path = ../../curve.cc; sourceTree = "<group>"; };
+		43A0171519D56040007D3CE8 /* debug.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = debug.cc; path = ../../debug.cc; sourceTree = "<group>"; };
+		43A0171619D56040007D3CE8 /* fill.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = fill.cc; path = ../../fill.cc; sourceTree = "<group>"; };
+		43A0171719D56040007D3CE8 /* flag.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = flag.cc; path = ../../flag.cc; sourceTree = "<group>"; };
+		43A0171819D56040007D3CE8 /* image.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = image.cc; path = ../../image.cc; sourceTree = "<group>"; };
+		43A0171919D56040007D3CE8 /* item.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = item.cc; path = ../../item.cc; sourceTree = "<group>"; };
+		43A0171A19D56040007D3CE8 /* line_set.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = line_set.cc; path = ../../line_set.cc; sourceTree = "<group>"; };
+		43A0171B19D56040007D3CE8 /* line.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = line.cc; path = ../../line.cc; sourceTree = "<group>"; };
+		43A0171C19D56040007D3CE8 /* lookup_table.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = lookup_table.cc; path = ../../lookup_table.cc; sourceTree = "<group>"; };
+		43A0171D19D56040007D3CE8 /* outline.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = outline.cc; path = ../../outline.cc; sourceTree = "<group>"; };
+		43A0171E19D56040007D3CE8 /* pixbuf.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = pixbuf.cc; path = ../../pixbuf.cc; sourceTree = "<group>"; };
+		43A0171F19D56040007D3CE8 /* poly_item.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = poly_item.cc; path = ../../poly_item.cc; sourceTree = "<group>"; };
+		43A0172019D56040007D3CE8 /* poly_line.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = poly_line.cc; path = ../../poly_line.cc; sourceTree = "<group>"; };
+		43A0172119D56040007D3CE8 /* polygon.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = polygon.cc; path = ../../polygon.cc; sourceTree = "<group>"; };
+		43A0172219D56040007D3CE8 /* rectangle.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = rectangle.cc; path = ../../rectangle.cc; sourceTree = "<group>"; };
+		43A0172319D56040007D3CE8 /* root_group.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = root_group.cc; path = ../../root_group.cc; sourceTree = "<group>"; };
+		43A0172419D56040007D3CE8 /* ruler.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ruler.cc; path = ../../ruler.cc; sourceTree = "<group>"; };
+		43A0172519D56040007D3CE8 /* scroll_group.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = scroll_group.cc; path = ../../scroll_group.cc; sourceTree = "<group>"; };
+		43A0172619D56040007D3CE8 /* stateful_image.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = stateful_image.cc; path = ../../stateful_image.cc; sourceTree = "<group>"; };
+		43A0172719D56040007D3CE8 /* text.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = text.cc; path = ../../text.cc; sourceTree = "<group>"; };
+		43A0172819D56040007D3CE8 /* tracking_text.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = tracking_text.cc; path = ../../tracking_text.cc; sourceTree = "<group>"; };
+		43A0172919D56040007D3CE8 /* types.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = types.cc; path = ../../types.cc; sourceTree = "<group>"; };
+		43A0172A19D56040007D3CE8 /* utils.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cc; path = ../../utils.cc; sourceTree = "<group>"; };
+		43A0172B19D56040007D3CE8 /* version.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = version.cc; path = ../../version.cc; sourceTree = "<group>"; };
+		43A0172C19D56040007D3CE8 /* wave_view.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = wave_view.cc; path = ../../wave_view.cc; sourceTree = "<group>"; };
+		43A0172D19D56040007D3CE8 /* widget.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = widget.cc; path = ../../widget.cc; sourceTree = "<group>"; };
+		43A0172E19D56040007D3CE8 /* xfade_curve.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = xfade_curve.cc; path = ../../xfade_curve.cc; sourceTree = "<group>"; };
+		43A0172F19D56040007D3CE8 /* xml_ui.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = xml_ui.cc; path = ../../xml_ui.cc; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		4397594919CADAFC00740098 = {
+			isa = PBXGroup;
+			children = (
+				4397595719CADB1200740098 /* headers */,
+				4397595619CADB0600740098 /* source */,
+			);
+			sourceTree = "<group>";
+		};
+		4397595619CADB0600740098 /* source */ = {
+			isa = PBXGroup;
+			children = (
+				43A0170F19D56040007D3CE8 /* arc.cc */,
+				43A0171019D56040007D3CE8 /* arrow.cc */,
+				43A0171119D56040007D3CE8 /* canvas.cc */,
+				43A0171219D56040007D3CE8 /* circle.cc */,
+				43A0171319D56040007D3CE8 /* container.cc */,
+				43A0171419D56040007D3CE8 /* curve.cc */,
+				43A0171519D56040007D3CE8 /* debug.cc */,
+				43A0171619D56040007D3CE8 /* fill.cc */,
+				43A0171719D56040007D3CE8 /* flag.cc */,
+				43A0171819D56040007D3CE8 /* image.cc */,
+				43A0171919D56040007D3CE8 /* item.cc */,
+				43A0171A19D56040007D3CE8 /* line_set.cc */,
+				43A0171B19D56040007D3CE8 /* line.cc */,
+				43A0171C19D56040007D3CE8 /* lookup_table.cc */,
+				43A0171D19D56040007D3CE8 /* outline.cc */,
+				43A0171E19D56040007D3CE8 /* pixbuf.cc */,
+				43A0171F19D56040007D3CE8 /* poly_item.cc */,
+				43A0172019D56040007D3CE8 /* poly_line.cc */,
+				43A0172119D56040007D3CE8 /* polygon.cc */,
+				43A0172219D56040007D3CE8 /* rectangle.cc */,
+				43A0172319D56040007D3CE8 /* root_group.cc */,
+				43A0172419D56040007D3CE8 /* ruler.cc */,
+				43A0172519D56040007D3CE8 /* scroll_group.cc */,
+				43A0172619D56040007D3CE8 /* stateful_image.cc */,
+				43A0172719D56040007D3CE8 /* text.cc */,
+				43A0172819D56040007D3CE8 /* tracking_text.cc */,
+				43A0172919D56040007D3CE8 /* types.cc */,
+				43A0172A19D56040007D3CE8 /* utils.cc */,
+				43A0172B19D56040007D3CE8 /* version.cc */,
+				43A0172C19D56040007D3CE8 /* wave_view.cc */,
+				43A0172D19D56040007D3CE8 /* widget.cc */,
+				43A0172E19D56040007D3CE8 /* xfade_curve.cc */,
+				43A0172F19D56040007D3CE8 /* xml_ui.cc */,
+			);
+			name = source;
+			sourceTree = "<group>";
+		};
+		4397595719CADB1200740098 /* headers */ = {
+			isa = PBXGroup;
+			children = (
+				4397596719CADB4300740098 /* arc.h */,
+				4397596819CADB4300740098 /* arrow.h */,
+				4397596919CADB4300740098 /* canvas.h */,
+				4397596A19CADB4300740098 /* circle.h */,
+				4397596B19CADB4300740098 /* container.h */,
+				4397596C19CADB4300740098 /* curve.h */,
+				4397596D19CADB4300740098 /* debug.h */,
+				4397596E19CADB4300740098 /* fill.h */,
+				4397596F19CADB4300740098 /* flag.h */,
+				4397597019CADB4300740098 /* fwd.h */,
+				4397597119CADB4300740098 /* image.h */,
+				4397597219CADB4300740098 /* interpolated_curve.h */,
+				4397597319CADB4300740098 /* item.h */,
+				4397597419CADB4300740098 /* line_set.h */,
+				4397597519CADB4300740098 /* line.h */,
+				4397597619CADB4300740098 /* lookup_table.h */,
+				4397597719CADB4300740098 /* outline.h */,
+				4397597819CADB4300740098 /* pixbuf.h */,
+				4397597919CADB4300740098 /* poly_item.h */,
+				4397597A19CADB4300740098 /* poly_line.h */,
+				4397597B19CADB4300740098 /* polygon.h */,
+				4397597C19CADB4300740098 /* rectangle.h */,
+				4397597D19CADB4300740098 /* root_group.h */,
+				4397597E19CADB4300740098 /* ruler.h */,
+				4397597F19CADB4300740098 /* scroll_group.h */,
+				4397598019CADB4300740098 /* stateful_image.h */,
+				4397598119CADB4300740098 /* text.h */,
+				4397598219CADB4300740098 /* tracking_text.h */,
+				4397598319CADB4300740098 /* types.h */,
+				4397598419CADB4300740098 /* utils.h */,
+				4397598519CADB4300740098 /* version.h */,
+				4397598619CADB4300740098 /* visibility.h */,
+				4397598719CADB4300740098 /* wave_view.h */,
+				4397598819CADB4300740098 /* widget.h */,
+				4397598919CADB4300740098 /* xfade_curve.h */,
+				4397598A19CADB4300740098 /* xml_ui.h */,
+			);
+			name = headers;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		4397594A19CADAFC00740098 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+			};
+			buildConfigurationList = 4397594D19CADAFC00740098 /* Build configuration list for PBXProject "canvas" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 4397594919CADAFC00740098;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		4397594E19CADAFC00740098 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		4397594F19CADAFC00740098 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		4397594D19CADAFC00740098 /* Build configuration list for PBXProject "canvas" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4397594E19CADAFC00740098 /* Debug */,
+				4397594F19CADAFC00740098 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4397594A19CADAFC00740098 /* Project object */;
+}
