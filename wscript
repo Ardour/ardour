@@ -1109,7 +1109,9 @@ def build(bld):
     lwrcase_dirname = 'ardour' + bld.env['MAJOR']
 
     if bld.is_tracks_build():
-        lwrcase_dirname = 'trx'
+	bld.env.append_value ('CXXFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
+	bld.env.append_value ('CFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
+	lwrcase_dirname = 'trx'
         
     # configuration files go here
     bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
