@@ -557,7 +557,8 @@ int main() { return 0; }''',
 
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
-
+    conf.env['PROGRAM_NAME'] = Options.options.program_name
+    
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
         conf.env.append_value('CXXFLAGS', debug_flags)
