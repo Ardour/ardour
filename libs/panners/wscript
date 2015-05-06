@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
+from waflib import Options
 import os
 
 # Mandatory variables
 top = '.'
 out = 'build'
 
-panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
 
 def options(opt):
+    
     autowaf.set_options(opt)
 
 def sub_config_and_use(conf, name, has_objects = True):
@@ -23,5 +24,9 @@ def configure(conf):
         sub_config_and_use(conf, i)
 
 def build(bld):
+    if Options.options.program_name == 'TracksLive':
+        panners = [ '1in2out', 'vbap', 'stereobalance' ]
+    else:
+        panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
     for i in panners:
         bld.recurse(i)
