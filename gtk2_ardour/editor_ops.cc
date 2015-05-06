@@ -7541,15 +7541,10 @@ Editor::lock ()
 		lock_dialog->get_vbox()->show_all ();
 		lock_dialog->set_size_request (200, 200);
 	}
+
+	delete _main_menu_disabler;
+	_main_menu_disabler = new MainMenuDisabler;
 	
-#ifdef __APPLE__
-	/* The global menu bar continues to be accessible to applications
-	   with modal dialogs, which means that we need to desensitize
-	   all items in the menu bar. Since those items are really just
-	   proxies for actions, that means disabling all actions.
-	*/
-	ActionManager::disable_all_actions ();
-#endif
 	lock_dialog->present ();
 }
 
@@ -7558,9 +7553,7 @@ Editor::unlock ()
 {
 	lock_dialog->hide ();
 	
-#ifdef __APPLE__
-	ActionManager::pop_action_state ();
-#endif	
+	delete _main_menu_disabler;
 
 	if (ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
 		start_lock_event_timing ();

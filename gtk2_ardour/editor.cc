@@ -300,6 +300,7 @@ Editor::Editor ()
 	, _following_mixer_selection (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
+	, _main_menu_disabler (0)
 {
 	constructed = false;
 
