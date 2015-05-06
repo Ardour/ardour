@@ -42,7 +42,6 @@ gtkmm2ext_sources = [
         'dndtreeview.cc',
         'emscale.cc',
 	'fader.cc',
-        'fastmeter.cc',
         'focus_entry.cc',
         'grouped_buttons.cc',
         'gtk_ui.cc',
@@ -86,12 +85,18 @@ def configure(conf):
 
 
 def build(bld):
+    sources = gtkmm2ext_sources
+    if bld.env['PROGRAM_NAME'] == 'TracksLive':
+	sources += [ 'waves_fastmeter.cc' ]
+    else:
+	sources += [ 'fastmeter.cc' ]
+		
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=gtkmm2ext_sources)
+        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)
         # defines for this library
         obj.defines      = [ 'LIBGTKMM2EXT_DLL_EXPORTS', 'ABSTRACT_UI_EXPORTS' ]
     else:
-        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=gtkmm2ext_sources)
+        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=sources)
         obj.cxxflags     = [ '-fPIC' ]
         obj.defines      = [ ]
 
