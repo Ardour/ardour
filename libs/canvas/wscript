@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+vxu#!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 from waflib import TaskGen
@@ -80,7 +80,8 @@ def build(bld):
         obj = bld.stlib(features = 'cxx cxxstlib', source=canvas_sources)
         obj.cxxflags     = [ '-fPIC' ]
         obj.cflags       = [ '-fPIC' ]
-
+        obj.defines      = [ ]
+        
     obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST'
