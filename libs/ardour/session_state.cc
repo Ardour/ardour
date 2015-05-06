@@ -3670,29 +3670,25 @@ Session::rename (const std::string& new_name, bool after_copy)
 
 		for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 			
-			if (first) {
-				/* primary session directory */
-				newstr = _path;
-				first = false;
-			} else {
-				oldstr = (*i).path;
-				
-				/* this is a stupid hack because Glib::path_get_dirname() is
-				 * lexical-only, and so passing it /a/b/c/ gives a different
-				 * result than passing it /a/b/c ...
-				 */
-				
-				if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
-					oldstr = oldstr.substr (0, oldstr.length() - 1);
-				}
-
-				string base = Glib::path_get_dirname (oldstr);
-				string p = Glib::path_get_basename (oldstr);
-				
-				newstr = Glib::build_filename (base, legal_name);
+			oldstr = (*i).path;
+			
+			/* this is a stupid hack because Glib::path_get_dirname() is
+			 * lexical-only, and so passing it /a/b/c/ gives a different
+			 * result than passing it /a/b/c ...
+			 */
+			
+			if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
+				oldstr = oldstr.substr (0, oldstr.length() - 1);
 			}
 			
+			string base = Glib::path_get_dirname (oldstr);
+			
+			newstr = Glib::build_filename (base, legal_name);
+
+			cerr << "Looking for " << newstr << endl;
+			
 			if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
+				cerr << " exists\n";
 				return -1;
 			}
 		}
@@ -3727,6 +3723,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 		if (!after_copy) {
 			cerr << "Rename " << oldstr << " => " << newstr << endl;		
 			if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+				cerr << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 				error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 				return 1;
 			}
@@ -3768,6 +3765,10 @@ Session::rename (const std::string& new_name, bool after_copy)
 		cerr << "Rename " << old_interchange_dir << " => " << new_interchange_dir << endl;
 		
 		if (::g_rename (old_interchange_dir.c_str(), new_interchange_dir.c_str()) != 0) {
+			cerr << string_compose (_("renaming %s as %2 failed (%3)"),
+			                         old_interchange_dir, new_interchange_dir,
+						 g_strerror (errno))
+			      << endl;
 			error << string_compose (_("renaming %s as %2 failed (%3)"),
 						 old_interchange_dir, new_interchange_dir,
 						 g_strerror (errno))
@@ -3784,6 +3785,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 	cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
 	if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+		cerr << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 		error << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 		return 1;
 	}
@@ -3798,6 +3800,7 @@ Session::rename (const std::string& new_name, bool after_copy)
 		cerr << "Rename " << oldstr << " => " << newstr << endl;		
 		
 		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			cerr << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
 			error << string_compose (_("renaming %1 as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
 			return 1;
 		}
