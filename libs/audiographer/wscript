@@ -70,7 +70,7 @@ def build(bld):
         # macros for this shared library
         audiographer.defines      = [ 'LIBAUDIOGRAPHER_DLL_EXPORTS=1' ]
     else:
-        audiographer              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
+        audiographer              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=audiographer_sources)
         audiographer.cxxflags     = [ '-fPIC' ]
         audiographer.cflags       = [ '-fPIC' ]
         audiographer.defines      = []
