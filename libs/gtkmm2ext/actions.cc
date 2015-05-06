@@ -139,11 +139,11 @@ ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
 }
 
 struct SortActionsByLabel {
-    bool operator() (Glib::RefPtr<Gtk::Action> a, Glib::RefPtr<Gtk::Action> b) {
-	    ustring astr = a->get_accel_path();
-	    ustring bstr = b->get_accel_path();
-	    return astr < bstr;
-    }
+	bool operator() (Glib::RefPtr<Gtk::Action> a, Glib::RefPtr<Gtk::Action> b) {
+		ustring astr = a->get_accel_path();
+		ustring bstr = b->get_accel_path();
+		return astr < bstr;
+	}
 };
 
 void
@@ -289,71 +289,63 @@ struct ActionState {
 
 typedef std::vector<ActionState> ActionStates;
 
-static std::stack<boost::shared_ptr<ActionStates> > state_stack;
+static ActionStates action_states_to_restore;
+static bool actions_disabled = false;
 
-static boost::shared_ptr<ActionStates>
-get_action_state ()
+void
+ActionManager::save_action_states ()
 {
-	boost::shared_ptr<ActionStates> state = boost::shared_ptr<ActionStates>(new ActionStates);
-	
 	/* the C++ API for functions used here appears to be broken in
 	   gtkmm2.6, so we fall back to the C level.
 	*/
-
 	GList* list = gtk_ui_manager_get_action_groups (ActionManager::ui_manager->gobj());
 	GList* node;
 	GList* acts;
 
 	for (node = list; node; node = g_list_next (node)) {
-
+        
 		GtkActionGroup* group = (GtkActionGroup*) node->data;
-
-		/* first pass: collect them all */
-
-		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
-		action_list the_acts;
-
+        
 		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
 			GtkAction* action = (GtkAction*) acts->data;
-
-			state->push_back (ActionState (action, gtk_action_get_sensitive (action)));
+			action_states_to_restore.push_back (ActionState (action, gtk_action_get_sensitive (action)));
 		}
 	}
-	
-	return state;
 }
 
 void
-ActionManager::push_action_state ()
+ActionManager::enable_active_actions ()
 {
-	state_stack.push (get_action_state());
+	if (!actions_disabled) {
+		return ;
+	}
+
+	for (ActionStates::iterator i = action_states_to_restore.begin(); i != action_states_to_restore.end(); ++i) {
+		if ((*i).action && (*i).sensitive) {
+			gtk_action_set_sensitive ((*i).action, true);
+		}
+	}
+
+	action_states_to_restore.clear ();
+	actions_disabled = false;
 }
 
 void
-ActionManager::pop_action_state ()
+ActionManager::disable_active_actions ()
 {
-	if (state_stack.empty()) {
-		warning << string_compose (_("programming error: %1"), X_("ActionManager::pop_action_state called with empty stack")) << endmsg;
-		return;
+	if (actions_disabled == true ) {
+		return ;
 	}
-
-	boost::shared_ptr<ActionStates> as = state_stack.top ();
-	state_stack.pop ();
+	// save all action's states to action_states_to_restore
+	save_action_states ();
 	
-	for (ActionStates::iterator i = as->begin(); i != as->end(); ++i) {
-		gtk_action_set_sensitive ((*i).action, (*i).sensitive);
+	// set all action's states disabled
+	for (ActionStates::iterator i = action_states_to_restore.begin(); i != action_states_to_restore.end(); ++i) {
+		if ((*i).sensitive) {
+			gtk_action_set_sensitive ((*i).action, false);
+		}
 	}
-}
-
-void
-ActionManager::disable_all_actions ()
-{
-	push_action_state ();
-	boost::shared_ptr<ActionStates> as = state_stack.top ();
-	
-	for (ActionStates::iterator i = as->begin(); i != as->end(); ++i) {
-		gtk_action_set_sensitive ((*i).action, false);
-	}
+	actions_disabled = true;
 }
 
 void
@@ -464,8 +456,24 @@ ActionManager::get_action_from_name (const char* name)
 void
 ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 {
-	for (vector<RefPtr<Action> >::iterator i = actions.begin(); i != actions.end(); ++i) {
-		(*i)->set_sensitive (state);
+	// if actions weren't disabled
+	if (!actions_disabled) {
+		for (vector<RefPtr<Action> >::iterator i = actions.begin(); i != actions.end(); ++i) {
+			(*i)->set_sensitive (state);
+		}
+	}
+	else {
+		// actions were disabled
+		// so we should just set necessary action's states in action_states_to_restore
+		for (vector<RefPtr<Action> >::iterator i = actions.begin(); i != actions.end(); ++i) {
+			// go through action_states_to_restore and set state of actions
+			for (ActionStates::iterator j = action_states_to_restore.begin(); j != action_states_to_restore.end(); ++j) {
+				// all actions should have their individual name, so we can use it for comparison
+				if (gtk_action_get_name ((*j).action) == (*i)->get_name ()) {
+					(*j).sensitive = state;
+				}
+			}
+		}
 	}
 }
 
@@ -503,10 +511,10 @@ ActionManager::set_toggleaction_state (string n, bool s)
 
 	const char* action_name = last_slash + 1;
 
-        RefPtr<Action> act = get_action (group_name, action_name);
+	RefPtr<Action> act = get_action (group_name, action_name);
 	if (act) {
-	        RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-       		tact->set_active (s);
+		RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
+		tact->set_active (s);
 	} else {
 		error << string_compose (_("Unknown action name: %1"),  name) << endmsg;
 	}
