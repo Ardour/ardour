@@ -111,13 +111,13 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 		pixheight = len;
 		pixwidth = dimen;
 		fgpattern = request_vertical_meter(pixwidth, pixheight, _clr, _stp, _styleflags);
-		bgpattern = request_vertical_background (pixwidth, pixheight, _bgc);
+		bgpattern = request_vertical_background (pixwidth, pixheight, _bgc, false);
 
 	} else {
 		pixheight = dimen;
 		pixwidth = len;
 		fgpattern = request_horizontal_meter(pixwidth, pixheight, _clr, _stp, _styleflags);
-		bgpattern = request_horizontal_background (pixwidth, pixheight, _bgc);
+		bgpattern = request_horizontal_background (pixwidth, pixheight, _bgc, false);
 	}
 
 	pixrect.width = pixwidth;
@@ -522,7 +522,7 @@ FastMeter::vertical_size_allocate (Gtk::Allocation &alloc)
 
 	if (pixheight != h) {
 		fgpattern = request_vertical_meter (request_width, h, _clr, _stp, _styleflags);
-		bgpattern = request_vertical_background (request_width, h, highlight ? _bgh : _bgc);
+		bgpattern = request_vertical_background (request_width, h, highlight ? _bgh : _bgc, false);
 		pixheight = h;
 		pixwidth  = request_width;
 	}
@@ -547,7 +547,7 @@ FastMeter::horizontal_size_allocate (Gtk::Allocation &alloc)
 
 	if (pixwidth != w) {
 		fgpattern = request_horizontal_meter (w, request_height, _clr, _stp, _styleflags);
-		bgpattern = request_horizontal_background (w, request_height, highlight ? _bgh : _bgc);
+		bgpattern = request_horizontal_background (w, request_height, highlight ? _bgh : _bgc, false);
 		pixwidth = w;
 		pixheight  = request_height;
 	}
@@ -650,9 +650,6 @@ void
 FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
 {
 	gint right_of_meter;
-	GdkRectangle intersection;
-	GdkRectangle background;
-	GdkRectangle eventarea;
 
 	//cairo_set_source_rgb (cr, 0, 0, 0); // black
 	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -664,28 +661,6 @@ FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
 	 */
 
 	pixrect.width = right_of_meter;
-
-	background.x = 1 + right_of_meter;
-	background.y = 1;
-	background.width = pixwidth - right_of_meter;
-	background.height = pixheight;
-
-	eventarea.x = area->x;
-	eventarea.y = area->y;
-	eventarea.width = area->width;
-	eventarea.height = area->height;
-
-	// if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
-	//	cairo_set_source (cr, bgpattern->cobj());
-	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
-	//	cairo_fill (cr);
-	// }
-
-	// if (gdk_rectangle_intersect (&pixrect, &eventarea, &intersection)) {
-	//	cairo_set_source (cr, fgpattern->cobj());
-	//	cairo_rectangle (cr, intersection.x, intersection.y, intersection.width, intersection.height);
-	//	cairo_fill (cr);
-	// }
 
 	// draw peak bar
 
@@ -918,9 +893,9 @@ FastMeter::set_highlight (bool onoff)
 	}
 	highlight = onoff;
 	if (orientation == Vertical) {
-		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc);
+		bgpattern = request_vertical_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, false);
 	} else {
-		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc);
+		bgpattern = request_horizontal_background (pixwidth + 2, pixheight + 2, highlight ? _bgh : _bgc, false);
 	}
 	queue_draw ();
 }
