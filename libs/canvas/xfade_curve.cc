@@ -30,13 +30,19 @@ using namespace ArdourCanvas;
 using std::min;
 using std::max;
 
+#ifdef USE_TRACKS_CODE_FEATURES
+static const bool show_bg_fades = false;
+#else
+static const bool show_bg_fades = true;
+#endif
+	
 XFadeCurve::XFadeCurve (Canvas* c)
 	: Item (c)
 	, points_per_segment (32)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (true)
+	, show_background_fade (show_bg_fades)
 {
 }
 
@@ -46,7 +52,7 @@ XFadeCurve::XFadeCurve (Canvas* c, XFadePosition pos)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (true)
+	, show_background_fade (show_bg_fades)
 {
 }
 
@@ -56,7 +62,7 @@ XFadeCurve::XFadeCurve (Item* parent)
 	, _xfadeposition (Start)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (true)
+	, show_background_fade (show_bg_fades)
 {
 }
 
@@ -66,7 +72,7 @@ XFadeCurve::XFadeCurve (Item* parent, XFadePosition pos)
 	, _xfadeposition (pos)
 	, _outline_color (0x000000ff)
 	, _fill_color (0x22448880)
-	, show_background_fade (true)
+	, show_background_fade (show_bg_fades)
 {
 }
 
