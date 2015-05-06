@@ -40,6 +40,8 @@
 #include "pbd/statefuldestructible.h"
 
 #include "canvas/fwd.h"
+
+#include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "editing.h"
@@ -457,6 +459,21 @@ class DisplaySuspender {
 				PublicEditor::instance().resume_route_redisplay ();
 			}
 		}
+};
+
+class MainMenuDisabler {
+public:
+	MainMenuDisabler () {
+		/* The global menu bar continues to be accessible to applications
+		   with modal dialogs on mac, which means that we need to desensitize
+		   all items in the menu bar. 
+		*/
+		ActionManager::disable_active_actions ();
+	}
+	
+	~MainMenuDisabler () {
+		ActionManager::enable_active_actions ();
+	}
 };
 
 #endif // __gtk_ardour_public_editor_h__

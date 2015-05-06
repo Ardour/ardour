@@ -2239,6 +2239,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void bring_all_sources_into_session ();
 
 	QuantizeDialog* quantize_dialog;
+	MainMenuDisabler* _main_menu_disabler;
 	
 	friend class Drag;
 	friend class RegionDrag;
