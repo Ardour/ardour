@@ -563,7 +563,7 @@ ArdourKnob::add_elements (Element e)
 
 
 KnobPersistentTooltip::KnobPersistentTooltip (Gtk::Widget* w)
-	: PersistentTooltip (w, 3)
+	: PersistentTooltip (w)
 	, _dragging (false)
 {
 }
