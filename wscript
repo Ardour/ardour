@@ -8,8 +8,9 @@ import subprocess
 import sys
 import platform as PLATFORM
 from waflib.Tools import winres
-
+from waflib.Build import Context
 from waflib.Build import BuildContext
+
 class i18n(BuildContext):
         cmd = 'i18n'
         fun = 'i18n'
@@ -29,7 +30,7 @@ class i18n_mo(BuildContext):
 def is_tracks_build(self, *k, **kw):
 	return self.env['PROGRAM_NAME'] == 'Tracks Live'
 
-BuildContext.is_tracks_build = is_tracks_build
+Context.Context.is_tracks_build = is_tracks_build
 
 compiler_flags_dictionaries= {
     'gcc' : {
@@ -594,8 +595,6 @@ def options(opt):
     autowaf.set_options(opt, debug_by_default=True)
     opt.add_option('--program-name', type='string', action='store', default='Ardour', dest='program_name',
                     help='The user-visible name of the program being built')
-    opt.add_option ('--trx', action='store_true', default=False, dest='trx_build',
-                    help='Whether to build for TRX')
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='jack', dest='with_backends',
@@ -767,9 +766,6 @@ def configure(conf):
         conf.env.append_value ('CFLAGS', '-DSILENCE_AFTER')
         conf.env.append_value ('CXXFLAGS', '-DSILENCE_AFTER')
         conf.define ('FREEBIE', 1)
-
-    if Options.options.trx_build:
-        conf.define ('TRX_BUILD', 1)
 
     if Options.options.lv2dir:
         conf.env['LV2DIR'] = Options.options.lv2dir
@@ -1112,9 +1108,9 @@ def build(bld):
     # set up target directories
     lwrcase_dirname = 'ardour' + bld.env['MAJOR']
 
-    if bld.is_defined ('TRX_BUILD'):
+    if bld.is_tracks_build():
         lwrcase_dirname = 'trx'
-
+        
     # configuration files go here
     bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
     # data files loaded at run time go here
