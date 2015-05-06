@@ -26,6 +26,10 @@ class i18n_mo(BuildContext):
         cmd = 'i18n_mo'
         fun = 'i18n_mo'
 
+def is_tracks_build(self, *k, **kw):
+	return self.env['PROGRAM_NAME'] == 'Tracks Live'
+
+BuildContext.is_tracks_build = is_tracks_build
 
 compiler_flags_dictionaries= {
     'gcc' : {
@@ -557,6 +561,7 @@ int main() { return 0; }''',
 
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
+
     conf.env['PROGRAM_NAME'] = Options.options.program_name
     
     if opt.debug:
@@ -576,6 +581,9 @@ int main() { return 0; }''',
     conf.env.append_value('CXXFLAGS', cxx_flags)
     conf.env.append_value('LINKFLAGS', linker_flags)
 
+def is_tracks_build (conf):
+	return conf.env['PROGRAM_NAME'] == 'Tracks Live'
+    
 #----------------------------------------------------------------
 
 # Waf stages

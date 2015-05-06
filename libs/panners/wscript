@@ -20,7 +20,7 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
 
-    if conf.env['PROGRAM_NAME'] == 'TracksLive':
+    if bld.is_tracks_build():
         panners = [ '1in2out', 'vbap', 'stereobalance' ]
     else:
         panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
@@ -29,7 +29,7 @@ def configure(conf):
         sub_config_and_use(conf, i)
 
 def build(bld):
-    if bld.env['PROGRAM_NAME'] == 'TracksLive':
+    if bld.is_tracks_build():
         panners = [ '1in2out', 'vbap', 'stereobalance' ]
     else:
         panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
