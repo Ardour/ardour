@@ -20,7 +20,7 @@ def configure(conf):
     autowaf.set_recursive()
     autowaf.configure(conf)
 
-    if bld.is_tracks_build():
+    if conf.is_tracks_build():
         panners = [ '1in2out', 'vbap', 'stereobalance' ]
     else:
         panners = [ '2in2out', '1in2out', 'vbap', 'stereobalance' ]
