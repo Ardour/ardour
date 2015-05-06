@@ -65,6 +65,99 @@ CairoWidget::on_button_press_event (GdkEventButton*)
 	return false;
 }
 
+
+#ifdef USE_TRACKS_CODE_FEATURES
+
+/* This is Tracks version of this method.
+
+   The use of get_visible_window() in this method is an abuse of the GDK/GTK
+   semantics. It can and may break on different GDK backends, and uses a
+   side-effect/unintended behaviour in GDK/GTK to try to accomplish something
+   which should be done differently. I (Paul) have confirmed this with the GTK
+   development team.
+
+   For this reason, this code is not acceptable for ordinary merging into the Ardour libraries.
+
+   Ardour Developers: you are not obligated to maintain the internals of this
+   implementation in the face of build-time environment changes (e.g. -D
+   defines etc).
+*/
+
+bool
+CairoWidget::on_expose_event (GdkEventExpose *ev)
+{
+	cairo_rectangle_t expose_area;
+	expose_area.width = ev->area.width;
+	expose_area.height = ev->area.height;
+
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
+	Cairo::RefPtr<Cairo::Context> cr;
+	if (get_visible_window ()) {
+		expose_area.x = 0;
+		expose_area.y = 0;
+		if (!_image_surface) {
+			_image_surface = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, get_width(), get_height());
+		}
+		cr = Cairo::Context::create (_image_surface);
+	} else {
+		expose_area.x = ev->area.x;
+		expose_area.y = ev->area.y;
+		cr = get_window()->create_cairo_context ();
+	}
+#else
+	expose_area.x = ev->area.x;
+	expose_area.y = ev->area.y;
+	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context ();
+#endif
+
+	cr->rectangle (expose_area.x, expose_area.y, expose_area.width, expose_area.height);
+	cr->clip ();
+
+	/* paint expose area the color of the parent window bg
+	*/
+
+    if (get_visible_window ()) {
+        Gdk::Color bg (get_parent_bg());
+		cr->rectangle (expose_area.x, expose_area.y, expose_area.width, expose_area.height);
+        cr->set_source_rgb (bg.get_red_p(), bg.get_green_p(), bg.get_blue_p());
+        cr->fill ();
+    }
+
+	render (cr->cobj(), &expose_area);
+
+#ifdef USE_CAIRO_IMAGE_SURFACE_FOR_CAIRO_WIDGET
+	if(get_visible_window ()) {
+		_image_surface->flush();
+		/* now blit our private surface back to the GDK one */
+
+		Cairo::RefPtr<Cairo::Context> cairo_context = get_window()->create_cairo_context ();
+
+		cairo_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		cairo_context->clip ();
+		cairo_context->set_source (_image_surface, ev->area.x, ev->area.y);
+		cairo_context->set_operator (Cairo::OPERATOR_OVER);
+		cairo_context->paint ();
+	}
+#endif
+	
+	Gtk::Widget* child = get_child ();
+	
+	if (child) {
+		propagate_expose (*child, ev);
+	}
+
+	return true;
+}
+
+#else
+
+/* Ardour mainline: not using Tracks code features.
+
+   Tracks Developers: please do not modify this version of
+   ::on_expose_event(). The version used by Tracks is before the preceding
+   #else and contains hacks required for the Tracks GUI to work.
+*/
+
 bool
 CairoWidget::on_expose_event (GdkEventExpose *ev)
 {
@@ -126,9 +219,11 @@ CairoWidget::on_expose_event (GdkEventExpose *ev)
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
 	}
 #endif
-
+	
 	return true;
 }
+
+#endif
 
 /** Marks the widget as dirty, so that render () will be called on
  *  the next GTK expose event.
