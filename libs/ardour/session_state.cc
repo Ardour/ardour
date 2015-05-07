@@ -3631,7 +3631,7 @@ Session::solo_cut_control() const
 }
 
 int
-Session::rename (const std::string& new_name, bool after_copy)
+Session::rename (const std::string& new_name)
 {
 	string legal_name = legalize_for_path (new_name);
 	string new_path;
@@ -3666,37 +3666,34 @@ Session::rename (const std::string& new_name, bool after_copy)
 	 * already exist ...
 	 */
 
-	if (!after_copy) {
-
-		for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
-			
-			oldstr = (*i).path;
-			
-			/* this is a stupid hack because Glib::path_get_dirname() is
-			 * lexical-only, and so passing it /a/b/c/ gives a different
-			 * result than passing it /a/b/c ...
-			 */
-			
-			if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
-				oldstr = oldstr.substr (0, oldstr.length() - 1);
-			}
-			
-			string base = Glib::path_get_dirname (oldstr);
-			
-			newstr = Glib::build_filename (base, legal_name);
-
-			cerr << "Looking for " << newstr << endl;
-			
-			if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
-				cerr << " exists\n";
-				return -1;
-			}
+	for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+		
+		oldstr = (*i).path;
+		
+		/* this is a stupid hack because Glib::path_get_dirname() is
+		 * lexical-only, and so passing it /a/b/c/ gives a different
+		 * result than passing it /a/b/c ...
+		 */
+		
+		if (oldstr[oldstr.length()-1] == G_DIR_SEPARATOR) {
+			oldstr = oldstr.substr (0, oldstr.length() - 1);
+		}
+		
+		string base = Glib::path_get_dirname (oldstr);
+		
+		newstr = Glib::build_filename (base, legal_name);
+		
+		cerr << "Looking for " << newstr << endl;
+		
+		if (Glib::file_test (newstr, Glib::FILE_TEST_EXISTS)) {
+			cerr << " exists\n";
+			return -1;
 		}
 	}
 
 	/* Session dirs */
 
-	first = false;
+	first = true;
 	
 	for (vector<space_and_path>::iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
 
@@ -3713,20 +3710,16 @@ Session::rename (const std::string& new_name, bool after_copy)
 			oldstr = oldstr.substr (0, oldstr.length() - 1);
 		}
 
-		if (first) {
-			newstr = _path;
-		} else {
-			string base = Glib::path_get_dirname (oldstr);
-			newstr = Glib::build_filename (base, legal_name);
-		}
+		string base = Glib::path_get_dirname (oldstr);
+		newstr = Glib::build_filename (base, legal_name);
 
-		if (!after_copy) {
-			cerr << "Rename " << oldstr << " => " << newstr << endl;		
-			if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
-				cerr << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
-				error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
-				return 1;
-			}
+		cerr << "for " << oldstr << " new dir = " << newstr << endl;
+		
+		cerr << "Rename " << oldstr << " => " << newstr << endl;		
+		if (::g_rename (oldstr.c_str(), newstr.c_str()) != 0) {
+			cerr << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endl;
+			error << string_compose (_("renaming %s as %2 failed (%3)"), oldstr, newstr, g_strerror (errno)) << endmsg;
+			return 1;
 		}
 
 		/* Reset path in "session dirs" */
@@ -3747,7 +3740,9 @@ Session::rename (const std::string& new_name, bool after_copy)
 		string old_interchange_dir;
 		string new_interchange_dir;
 
-		/* use newstr here because we renamed the path that used to be oldstr to newstr above */		
+		/* use newstr here because we renamed the path
+		 * (folder/directory) that used to be oldstr to newstr above 
+		 */	
 		
 		v.push_back (newstr); 
 		v.push_back (interchange_dir_name);
@@ -3779,8 +3774,8 @@ Session::rename (const std::string& new_name, bool after_copy)
 
 	/* state file */
 	
-	oldstr = Glib::build_filename (new_path, _current_snapshot_name) + statefile_suffix;
-	newstr= Glib::build_filename (new_path, legal_name) + statefile_suffix;
+	oldstr = Glib::build_filename (new_path, _current_snapshot_name + statefile_suffix);
+	newstr= Glib::build_filename (new_path, legal_name + statefile_suffix);
 	
 	cerr << "Rename " << oldstr << " => " << newstr << endl;		
 
@@ -3806,27 +3801,25 @@ Session::rename (const std::string& new_name, bool after_copy)
 		}
 	}
 
-	if (!after_copy) {
-		/* remove old name from recent sessions */
-		remove_recent_sessions (_path);
-		_path = new_path;
-
-		/* update file source paths */
-		
-		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
-			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
-			if (fs) {
-				string p = fs->path ();
-				boost::replace_all (p, old_sources_root, _session_dir->sources_root());
-				fs->set_path (p);
-				SourceFactory::setup_peakfile(i->second, true);
-			}
+	/* remove old name from recent sessions */
+	remove_recent_sessions (_path);
+	_path = new_path;
+	
+	/* update file source paths */
+	
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+		if (fs) {
+			string p = fs->path ();
+			boost::replace_all (p, old_sources_root, _session_dir->sources_root());
+			fs->set_path (p);
+			SourceFactory::setup_peakfile(i->second, true);
 		}
 	}
 
 	_current_snapshot_name = new_name;
 	_name = new_name;
-
+	
 	set_dirty ();
 
 	/* save state again to get everything just right */
