@@ -2948,6 +2948,13 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		should_be_new = false;
         
 		full_session_name = session_name = _session_dialog.session_name (likely_new);
+        
+        /* Check if already created session exists and the path is valid */
+        if (!likely_new && !Glib::file_test (full_session_name, Glib::FileTest (G_FILE_TEST_EXISTS))) {
+            run_message_dialog ("File " + full_session_name + " does not exist");
+            continue;
+        }
+        
 		session_path = _session_dialog.session_folder ();
         
 		if (nsm) {
