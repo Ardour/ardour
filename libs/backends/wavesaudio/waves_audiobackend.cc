@@ -53,7 +53,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestResync" << std::endl;
             break;
         case WCMRAudioDeviceManagerClient::SamplingRateChanged:
-            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::SamplingRateChanged: " << *(int*)parameter << std::endl;
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::SamplingRateChanged: " << *(float*)parameter << std::endl;
 			_sample_rate_change(*(float*)parameter);
             break;
         case WCMRAudioDeviceManagerClient::Dropout:

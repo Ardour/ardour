@@ -1006,7 +1006,7 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
             bool found = false;
             for(int i = 0; gAllSampleRates[i] > 0; i++)
             {
-                if (gAllSampleRates[i] - actualSamplingRate < 0.01) {
+                if (fabs(gAllSampleRates[i] - actualSamplingRate) < 0.01) {
                     found = true;
                 }
             }
