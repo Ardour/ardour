@@ -4189,6 +4189,40 @@ Session::save_as (SaveAs& saveas)
 
 		}
 
+		/* copy optional folders, if any */
+
+		string old = plugins_dir ();
+		if (Glib::file_test (old, Glib::FILE_TEST_EXISTS)) {
+			string newdir = Glib::build_filename (to_dir, Glib::path_get_basename (old));
+			copy_files (old, newdir);
+		}
+
+		old = externals_dir ();
+		if (Glib::file_test (old, Glib::FILE_TEST_EXISTS)) {
+			string newdir = Glib::build_filename (to_dir, Glib::path_get_basename (old));
+			copy_files (old, newdir);
+		}
+
+		old = automation_dir ();
+		if (Glib::file_test (old, Glib::FILE_TEST_EXISTS)) {
+			string newdir = Glib::build_filename (to_dir, Glib::path_get_basename (old));
+			copy_files (old, newdir);
+		}
+
+		if (saveas.copy_media) {
+
+			/* only needed if we are copying media, since the
+			 * analysis data refers to media data
+			 */
+
+			old = analysis_dir ();
+			if (Glib::file_test (old, Glib::FILE_TEST_EXISTS)) {
+				string newdir = Glib::build_filename (to_dir, "analysis");
+				copy_files (old, newdir);
+			}
+		}
+			
+		
 		_path = to_dir;
 		_current_snapshot_name = saveas.new_name;
 		_name = saveas.new_name;
