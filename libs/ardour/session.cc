@@ -2491,6 +2491,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 
 			new_routes.push_back (track);
 			ret.push_back (track);
+
+			RouteAddedOrRemoved (true); /* EMIT SIGNAL */
 		}
 
 		catch (failed_constructor &err) {
