@@ -2028,6 +2028,8 @@ Session::save_template (string template_name)
 		template_file_path = Glib::build_filename (template_dir_path, template_name + template_suffix);
 	}
 
+	SessionSaveUnderway (); /* EMIT SIGNAL */
+	
 	XMLTree tree;
 
 	tree.set_root (&get_template());
