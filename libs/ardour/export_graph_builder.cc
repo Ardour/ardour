@@ -1,20 +1,20 @@
 /*
-    Copyright (C) 2008-2012 Paul Davis 
-    Author: Sakari Bergen
+  Copyright (C) 2008-2012 Paul Davis 
+  Author: Sakari Bergen
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -53,8 +53,8 @@ using std::string;
 namespace ARDOUR {
 
 ExportGraphBuilder::ExportGraphBuilder (Session const & session)
-  : session (session)
-  , thread_pool (hardware_concurrency())
+	: session (session)
+	, thread_pool (hardware_concurrency())
 {
 	process_buffer_frames = session.engine().samples_per_cycle();
 }
@@ -115,12 +115,12 @@ ExportGraphBuilder::reset ()
 void
 ExportGraphBuilder::cleanup (bool remove_out_files/*=false*/)
 {
-    ChannelConfigList::iterator iter = channel_configs.begin();
+	ChannelConfigList::iterator iter = channel_configs.begin();
     
-    while (iter != channel_configs.end() ) {
-        iter->remove_children(remove_out_files);
-        iter = channel_configs.erase(iter);
-    }
+	while (iter != channel_configs.end() ) {
+		iter->remove_children(remove_out_files);
+		iter = channel_configs.erase(iter);
+	}
 }
     
 void
@@ -225,28 +225,28 @@ ExportGraphBuilder::Encoder::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 {
-    if (delete_out_file ) {
+	if (delete_out_file ) {
         
-        if (float_writer) {
-            float_writer->close ();
-        }
+		if (float_writer) {
+			float_writer->close ();
+		}
     
-        if (int_writer) {
-            int_writer->close ();
-        }
+		if (int_writer) {
+			int_writer->close ();
+		}
         
-        if (short_writer) {
-            short_writer->close ();
-        }
+		if (short_writer) {
+			short_writer->close ();
+		}
 
-        if (std::remove(writer_filename.c_str() ) != 0) {
-            std::cout << "Encoder::destroy_writer () : Error removing file: " << strerror(errno) << std::endl;
-        }
-    }
+		if (std::remove(writer_filename.c_str() ) != 0) {
+			std::cout << "Encoder::destroy_writer () : Error removing file: " << strerror(errno) << std::endl;
+		}
+	}
     
-    float_writer.reset ();
-    int_writer.reset ();
-    short_writer.reset ();
+	float_writer.reset ();
+	int_writer.reset ();
+	short_writer.reset ();
 }
 
 bool
@@ -288,7 +288,7 @@ ExportGraphBuilder::Encoder::copy_files (std::string orig_path)
 /* SFC */
 
 ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &, FileSpec const & new_config, framecnt_t max_frames)
-  : data_width(0)
+	: data_width(0)
 {
 	config = new_config;
 	data_width = sndfile_data_width (Encoder::get_real_format (config));
@@ -347,15 +347,15 @@ ExportGraphBuilder::SFC::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::SFC::remove_children (bool remove_out_files)
 {
-    boost::ptr_list<Encoder>::iterator iter = children.begin ();
+	boost::ptr_list<Encoder>::iterator iter = children.begin ();
     
-    while (iter != children.end() ) {
+	while (iter != children.end() ) {
         
-        if (remove_out_files) {
-            iter->destroy_writer(remove_out_files);
-        }
-        iter = children.erase (iter);
-    }
+		if (remove_out_files) {
+			iter->destroy_writer(remove_out_files);
+		}
+		iter = children.erase (iter);
+	}
 }
     
 bool
@@ -367,7 +367,7 @@ ExportGraphBuilder::SFC::operator== (FileSpec const & other_config) const
 /* Normalizer */
 
 ExportGraphBuilder::Normalizer::Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t /*max_frames*/)
-  : parent (parent)
+	: parent (parent)
 {
 	std::string tmpfile_path = parent.session.session_directory().export_path();
 	tmpfile_path = Glib::build_filename(tmpfile_path, "XXXXXX");
@@ -420,19 +420,19 @@ ExportGraphBuilder::Normalizer::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::Normalizer::remove_children (bool remove_out_files)
 {
-    boost::ptr_list<SFC>::iterator iter = children.begin ();
+	boost::ptr_list<SFC>::iterator iter = children.begin ();
     
-    while (iter != children.end() ) {
-        iter->remove_children (remove_out_files);
-        iter = children.erase (iter);
-    }
+	while (iter != children.end() ) {
+		iter->remove_children (remove_out_files);
+		iter = children.erase (iter);
+	}
 }
     
 bool
 ExportGraphBuilder::Normalizer::operator== (FileSpec const & other_config) const
 {
 	return config.format->normalize() == other_config.format->normalize() &&
-	       config.format->normalize_target() == other_config.format->normalize_target();
+		config.format->normalize_target() == other_config.format->normalize_target();
 }
 
 unsigned
@@ -461,7 +461,7 @@ ExportGraphBuilder::Normalizer::start_post_processing()
 /* SRC */
 
 ExportGraphBuilder::SRC::SRC (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
-  : parent (parent)
+	: parent (parent)
 {
 	config = new_config;
 	converter.reset (new SampleRateConverter (new_config.channel_config->get_n_chans()));
@@ -491,21 +491,21 @@ ExportGraphBuilder::SRC::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::SRC::remove_children (bool remove_out_files)
 {
-    boost::ptr_list<SFC>::iterator sfc_iter = children.begin();
+	boost::ptr_list<SFC>::iterator sfc_iter = children.begin();
     
-    while (sfc_iter != children.end() ) {
-        converter->remove_output (sfc_iter->sink() );
-        sfc_iter->remove_children (remove_out_files);
-        sfc_iter = children.erase (sfc_iter);
-    }
+	while (sfc_iter != children.end() ) {
+		converter->remove_output (sfc_iter->sink() );
+		sfc_iter->remove_children (remove_out_files);
+		sfc_iter = children.erase (sfc_iter);
+	}
     
-    boost::ptr_list<Normalizer>::iterator norm_iter = normalized_children.begin();
+	boost::ptr_list<Normalizer>::iterator norm_iter = normalized_children.begin();
     
-    while (norm_iter != normalized_children.end() ) {
-        converter->remove_output (norm_iter->sink() );
-        norm_iter->remove_children (remove_out_files);
-        norm_iter = normalized_children.erase (norm_iter);
-    }
+	while (norm_iter != normalized_children.end() ) {
+		converter->remove_output (norm_iter->sink() );
+		norm_iter->remove_children (remove_out_files);
+		norm_iter = normalized_children.erase (norm_iter);
+	}
 
 }
 
@@ -532,7 +532,7 @@ ExportGraphBuilder::SRC::operator== (FileSpec const & other_config) const
 
 /* SilenceHandler */
 ExportGraphBuilder::SilenceHandler::SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames)
-  : parent (parent)
+	: parent (parent)
 {
 	config = new_config;
 	max_frames_in = max_frames;
@@ -574,13 +574,13 @@ ExportGraphBuilder::SilenceHandler::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::SilenceHandler::remove_children (bool remove_out_files)
 {
-    boost::ptr_list<SRC>::iterator iter = children.begin();
+	boost::ptr_list<SRC>::iterator iter = children.begin();
     
-    while (iter != children.end() ) {
-        silence_trimmer->remove_output (iter->sink() );
-        iter->remove_children (remove_out_files);
-        iter = children.erase (iter);
-    }
+	while (iter != children.end() ) {
+		silence_trimmer->remove_output (iter->sink() );
+		iter->remove_children (remove_out_files);
+		iter = children.erase (iter);
+	}
 }
 
 bool
@@ -589,15 +589,15 @@ ExportGraphBuilder::SilenceHandler::operator== (FileSpec const & other_config) c
 	ExportFormatSpecification & format = *config.format;
 	ExportFormatSpecification & other_format = *other_config.format;
 	return (format.trim_beginning() == other_format.trim_beginning()) &&
-	       (format.trim_end() == other_format.trim_end()) &&
-	       (format.silence_beginning_time() == other_format.silence_beginning_time()) &&
-	       (format.silence_end_time() == other_format.silence_end_time());
+		(format.trim_end() == other_format.trim_end()) &&
+		(format.silence_beginning_time() == other_format.silence_beginning_time()) &&
+		(format.silence_end_time() == other_format.silence_end_time());
 }
 
 /* ChannelConfig */
 
 ExportGraphBuilder::ChannelConfig::ChannelConfig (ExportGraphBuilder & parent, FileSpec const & new_config, ChannelMap & channel_map)
-  : parent (parent)
+	: parent (parent)
 {
 	typedef ExportChannelConfiguration::ChannelList ChannelList;
 
@@ -651,14 +651,14 @@ ExportGraphBuilder::ChannelConfig::add_child (FileSpec const & new_config)
 void
 ExportGraphBuilder::ChannelConfig::remove_children (bool remove_out_files)
 {
-    boost::ptr_list<SilenceHandler>::iterator iter = children.begin();
+	boost::ptr_list<SilenceHandler>::iterator iter = children.begin();
     
-    while(iter != children.end() ) {
+	while(iter != children.end() ) {
         
-        chunker->remove_output (iter->sink ());
-        iter->remove_children (remove_out_files);
-        iter = children.erase(iter);
-    }
+		chunker->remove_output (iter->sink ());
+		iter->remove_children (remove_out_files);
+		iter = children.erase(iter);
+	}
 }
 
 bool
