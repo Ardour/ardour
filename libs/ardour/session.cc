@@ -78,6 +78,7 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/process_thread.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region.h"

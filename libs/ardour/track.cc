@@ -930,6 +930,65 @@ Track::adjust_capture_buffering ()
         }
 }
 
+#ifdef USE_TRACKS_CODE_FEATURES
+
+/* This is the Tracks version of Track::monitoring_state(). 
+ *
+ * Ardour developers: try to flag or fix issues if parts of the libardour API 
+ * change in ways that invalidate this
+ */
+
+MonitorState
+Track::monitoring_state () const
+{
+	/* Explicit requests */
+	
+	if (_monitoring & MonitorInput) {
+		return MonitoringInput;
+	}
+		
+	if (_monitoring & MonitorDisk) {
+		return MonitoringDisk;
+	}
+
+	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
+	   I don't think it's ever going to be too pretty too look at.
+	*/
+	
+	// GZ: NOT USED IN TRACKS
+	//bool const auto_input = _session.config.get_auto_input ();
+	//bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
+	//bool const tape_machine_mode = Config->get_tape_machine_mode ();
+	
+	bool const roll = _session.transport_rolling ();
+	bool const track_rec = _diskstream->record_enabled ();
+	bool session_rec = _session.actively_recording ();
+	
+	if (track_rec) {
+
+		if (!session_rec && roll) {
+			return MonitoringDisk;
+		} else {
+			return MonitoringInput;
+		}
+
+	} else {
+
+		if (roll) {
+			return MonitoringDisk;
+		}
+	}
+
+	return MonitoringSilence;
+}
+
+#else
+
+/* This is the Ardour/Mixbus version of Track::monitoring_state(). 
+ *
+ * Tracks developers: do NOT modify this method under any circumstances.
+ */
+
 MonitorState
 Track::monitoring_state () const
 {
@@ -994,6 +1053,8 @@ Track::monitoring_state () const
 	abort(); /* NOTREACHED */
 	return MonitoringSilence;
 }
+
+#endif
 
 void
 Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
