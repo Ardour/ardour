@@ -26,6 +26,7 @@
 
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
+#include "pbd/replace_all.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/control_protocol_manager.h"
