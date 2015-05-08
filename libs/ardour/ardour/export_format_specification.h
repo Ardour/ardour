@@ -115,46 +115,41 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 	Type type () const { return _type; }
 	
-    FormatId format_id () const
-    {
-        if (!format_ids.empty() )
-            return *format_ids.begin();
-        else
-            return FormatId(0);
-    }
-    
-	Endianness endianness () const
-    {
-        if (!endiannesses.empty() )
-            return *endiannesses.begin();
-        else
-            return Endianness(0);
-    }
-    
-	SampleFormat sample_format () const
-    {
-        if (!sample_formats.empty() )
-            return *sample_formats.begin();
-        else
-            return SampleFormat(0);
-    }
-    
-	SampleRate sample_rate () const
-    {
-        if (!sample_rates.empty() )
-            return *sample_rates.begin();
-        else
-            return SampleRate(0);
-        
-    }
-    
-	Quality quality () const
-    {
-        if (!qualities.empty() )
-            return *qualities.begin();
-        else
-            return Quality(0);
-    }
+	FormatId format_id () const {
+		if (!format_ids.empty() )
+			return *format_ids.begin();
+		else
+			return FormatId(0);
+	}
+	
+	Endianness endianness () const {
+		if (!endiannesses.empty() )
+			return *endiannesses.begin();
+		else
+			return Endianness(0);
+	}
+	
+	SampleFormat sample_format () const {
+		if (!sample_formats.empty() )
+			return *sample_formats.begin();
+		else
+			return SampleFormat(0);
+	}
+	
+	SampleRate sample_rate () const {
+		if (!sample_rates.empty() )
+			return *sample_rates.begin();
+		else
+			return SampleRate(0);
+		
+	}
+	
+	Quality quality () const {
+		if (!qualities.empty() )
+			return *qualities.begin();
+		else
+			return Quality(0);
+	}
 
 	DitherType dither_type () const { return _dither_type; }
 	SRCQuality src_quality () const { return _src_quality; }
