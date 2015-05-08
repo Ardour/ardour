@@ -269,6 +269,7 @@ Session::Session (AudioEngine &eng,
 	, first_file_header_format_reset (true)
 	, have_looped (false)
 	, _have_rec_enabled_track (false)
+    , _have_rec_disabled_track (true)
 	, _step_editors (0)
 	, _suspend_timecode_transmission (0)
 	,  _speakers (new Speakers)
@@ -4977,6 +4978,12 @@ Session::have_rec_enabled_track () const
 	return g_atomic_int_get (const_cast<gint*>(&_have_rec_enabled_track)) == 1;
 }
 
+bool
+Session::have_rec_disabled_track () const
+{
+    return g_atomic_int_get (const_cast<gint*>(&_have_rec_disabled_track)) == 1;
+}
+
 /** Update the state of our rec-enabled tracks flag */
 void
 Session::update_have_rec_enabled_track ()
@@ -5000,6 +5007,20 @@ Session::update_have_rec_enabled_track ()
 	if (g_atomic_int_get (&_have_rec_enabled_track) != old) {
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
+
+    
+    i = rl->begin();
+	while (i != rl->end ()) {
+        
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && !tr->record_enabled ()) {
+			break;
+		}
+        
+		++i;
+	}
+    
+    g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
 }
 
 void
