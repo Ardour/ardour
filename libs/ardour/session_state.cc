@@ -490,7 +490,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 	_writable = exists_and_writable (_path);
 
 	if (!session_template.empty()) {
-		std::string in_path = session_template_dir_to_file (session_template);
+		std::string in_path = (ARDOUR::Profile->get_trx () ? session_template : session_template_dir_to_file (session_template));
 
 		ifstream in(in_path.c_str());
 
@@ -2022,24 +2022,31 @@ Session::save_template (string template_name)
 		template_dir_path = template_name;
 	}
 
-	if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
-		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
-				template_dir_path) << endmsg;
-		return -1;
-	}
-	
-	if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
-		error << string_compose(_("Could not create directory for Session template\"%1\" (%2)"),
-				template_dir_path, g_strerror (errno)) << endmsg;
-		return -1;
+	if (!ARDOUR::Profile->get_trx()) {
+		if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
+			warning << string_compose(_("Template \"%1\" already exists - new version not created"),
+									  template_dir_path) << endmsg;
+			return -1;
+		}
+		
+		if (g_mkdir_with_parents (template_dir_path.c_str(), 0755) != 0) {
+			error << string_compose(_("Could not create directory for Session template\"%1\" (%2)"),
+									template_dir_path, g_strerror (errno)) << endmsg;
+			return -1;
+		}
 	}
 
 	/* file to write */
 	std::string template_file_path;
-	if (absolute_path) {
-		template_file_path = Glib::build_filename (template_dir_path, Glib::path_get_basename (template_dir_path) + template_suffix);
+	
+	if (ARDOUR::Profile->get_trx()) {
+		template_file_path = template_name;
 	} else {
-		template_file_path = Glib::build_filename (template_dir_path, template_name + template_suffix);
+		if (absolute_path) {
+			template_file_path = Glib::build_filename (template_dir_path, Glib::path_get_basename (template_dir_path) + template_suffix);
+		} else {
+			template_file_path = Glib::build_filename (template_dir_path, template_name + template_suffix);
+		}
 	}
 
 	SessionSaveUnderway (); /* EMIT SIGNAL */
