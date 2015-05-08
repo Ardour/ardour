@@ -487,11 +487,14 @@ GainMeter::show_gain ()
 {
 	char buf[32];
 
-	float v = gain_adjustment.get_value();
+	double v = gain_adjustment.get_value();
 
 	switch (_data_type) {
 	case DataType::AUDIO:
-		if (v == 0.0) {
+		if (v < 0.0003199) {
+            // is possible when moving fader only
+            // adjustment value 0.0003199 ~ -120 Db gain
+            // this is the lowest value after which we should display -inf
 			strcpy (buf, _("-inf"));
 		} else {
 			snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (v, Config->get_max_gain())));
