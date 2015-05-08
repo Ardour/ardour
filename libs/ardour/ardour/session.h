@@ -148,6 +148,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		Recording = 2
 	};
 
+    static const char * default_trx_track_name_pattern;
+    static const char * default_ardour_track_name_pattern;
+    
 	/* a new session might have non-empty mix_template, an existing session should always have an empty one.
 	   the bus profile can be null if no master out bus is required.
 	*/
