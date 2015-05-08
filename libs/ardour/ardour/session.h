@@ -299,7 +299,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* Record status signals */
 
-	PBD::Signal0<void> RecordStateChanged;
+	PBD::Signal0<void> RecordStateChanged; /* signals changes in recording state (i.e. are we recording) */
+	/* XXX may 2015: paul says: it isn't clear to me that this has semantics that cannot be inferrred
+	   from the previous signal and session state.
+	*/
+	PBD::Signal0<void> RecordArmStateChanged; /* signals changes in recording arming */
 
 	/* Transport mechanism signals */
 
