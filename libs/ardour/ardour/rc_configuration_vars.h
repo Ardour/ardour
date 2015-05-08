@@ -35,6 +35,9 @@
 /* IO connection */
 
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
+/* this variable is used to indicate output mode in Waves Tracks: 
+   "Multi Out" == AutoConnectPhysical and "Stereo Out" == AutoConnectMaster 
+*/
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectMaster)
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectPhysical)
 
@@ -141,7 +144,11 @@ CONFIG_VARIABLE (bool, stop_recording_on_xrun, "stop-recording-on-xrun", false)
 CONFIG_VARIABLE (bool, create_xrun_marker, "create-xrun-marker", true)
 CONFIG_VARIABLE (bool, stop_at_session_end, "stop-at-session-end", false)
 CONFIG_VARIABLE (bool, seamless_loop, "seamless-loop", false)
+#ifdef USE_TRACKS_CODE_FEATURES
+CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", true)
+#else
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
+#endif
 CONFIG_VARIABLE (framecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (framecnt_t, postroll, "postroll", 0)
 CONFIG_VARIABLE (float, rf_speed, "rf-speed", 2.0f)
@@ -155,7 +162,11 @@ CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll",
 
 /* metering */
 
+#ifdef USE_TRACKS_CODE_FEATURES
+CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 60.0f)
+#else
 CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 13.3f)
+#endif
 
 /* miscellany */
 
@@ -171,7 +182,13 @@ CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false
 CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 CONFIG_VARIABLE (float, automation_interval_msecs, "automation-interval-msecs", 30)
-CONFIG_VARIABLE (std::string, default_session_parent_dir, "default-session-parent-dir", "~")
+#ifdef __APPLE__
+CONFIG_VARIABLE_SPECIAL (std::string, default_session_parent_dir, "default-session-parent-dir", "~/Music", poor_mans_glob)
+#elif defined (PLATFORM_WINDOWS)
+CONFIG_VARIABLE_SPECIAL (std::string, default_session_parent_dir, "default-session-parent-dir", "~\\Documents", poor_mans_glob)
+#else
+CONFIG_VARIABLE_SPECIAL (std::string, default_session_parent_dir, "default-session-parent-dir", "~", poor_mans_glob)
+#endif
 CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", false)
 CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
 CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
