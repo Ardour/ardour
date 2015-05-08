@@ -658,7 +658,7 @@ Session::remove_state (string snapshot_name)
 
 /** @param snapshot_name Name to save under, without .ardour / .pending prefix */
 int
-Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot)
+Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot, bool template_only)
 {
 	XMLTree tree;
 	std::string xml_path(_session_dir->root_path());
@@ -696,7 +696,11 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	SessionSaveUnderway (); /* EMIT SIGNAL */
 
-	tree.set_root (&get_state());
+	if (template_only) {
+		tree.set_root (&get_template());
+	} else {
+		tree.set_root (&get_state());
+	}
 
 	if (snapshot_name.empty()) {
 		snapshot_name = _current_snapshot_name;
@@ -4209,16 +4213,19 @@ Session::save_as (SaveAs& saveas)
 			copy_files (old, newdir);
 		}
 
-		if (saveas.copy_media) {
-
-			/* only needed if we are copying media, since the
-			 * analysis data refers to media data
-			 */
-
-			old = analysis_dir ();
-			if (Glib::file_test (old, Glib::FILE_TEST_EXISTS)) {
-				string newdir = Glib::build_filename (to_dir, "analysis");
-				copy_files (old, newdir);
+		if (saveas.include_media) {
+		
+			if (saveas.copy_media) {
+				
+				/* only needed if we are copying media, since the
+				 * analysis data refers to media data
+				 */
+				
+				old = analysis_dir ();
+				if (Glib::file_test (old, Glib::FILE_TEST_EXISTS)) {
+					string newdir = Glib::build_filename (to_dir, "analysis");
+					copy_files (old, newdir);
+				}
 			}
 		}
 			
@@ -4227,7 +4234,7 @@ Session::save_as (SaveAs& saveas)
 		_current_snapshot_name = saveas.new_name;
 		_name = saveas.new_name;
 
-		if (!saveas.copy_media) {
+		if (saveas.include_media && !saveas.copy_media) {
 
 			/* reset search paths of the new session (which we're pretending to be right now) to
 			   include the original session search path, so we can still find all audio.
@@ -4246,7 +4253,7 @@ Session::save_as (SaveAs& saveas)
 		
 		bool was_dirty = dirty ();
 
-		save_state ("", false, false);
+		save_state ("", false, false, !saveas.include_media);
 		save_default_options ();
 		
 		if (saveas.copy_media && saveas.copy_external) {
@@ -4255,6 +4262,8 @@ Session::save_as (SaveAs& saveas)
 			}
 		}
 
+		saveas.final_session_folder_name = _path;
+		
 		if (!saveas.switch_to) {
 
 			/* switch back to the way things were */

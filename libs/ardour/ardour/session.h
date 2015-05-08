@@ -400,8 +400,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		std::string new_parent_folder;  /* parent folder where new session folder will be created */
 		std::string new_name;           /* name of newly saved session */
 		bool        switch_to;     /* true if we should be working on newly saved session after save-as; false otherwise */
+		bool        include_media; /* true if the newly saved session should contain references to media */
 		bool        copy_media;    /* true if media files (audio, media, etc) should be copied into newly saved session; false otherwise */
 		bool        copy_external; /* true if external media should be consolidated into the newly saved session; false otherwise */
+
+		std::string final_session_folder_name; /* filled in by * Session::save_as(), provides full path to newly saved session */
 		
 		/* emitted as we make progress. 3 arguments passed to signal
 		 * handler:
@@ -422,7 +425,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	};
 
 	int save_as (SaveAs&);
-	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false);
+	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false, bool template_only = false);
 	int restore_state (std::string snapshot_name);
 	int save_template (std::string template_name);
 	int save_history (std::string snapshot_name = "");
