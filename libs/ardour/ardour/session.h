@@ -177,7 +177,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_deletion_in_progress ();
 	void clear_deletion_in_progress ();
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
+	bool routes_deletion_in_progress() const { return _route_deletion_in_progress; }
+
 	PBD::Signal0<void> DirtyChanged;
+
+	PBD::Signal1<void, bool> RouteAddedOrRemoved;
 
 	const SessionDirectory& session_directory () const { return *(_session_dir.get()); }
 
@@ -540,9 +544,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		RouteGroup* route_group = 0, uint32_t how_many = 1, std::string name_template = ""
 		);
 
-	void   remove_route (boost::shared_ptr<Route>);
-	void   resort_routes ();
-	void   resort_routes_using (boost::shared_ptr<RouteList>);
+	void remove_routes (boost::shared_ptr<RouteList>);
+	void remove_route (boost::shared_ptr<Route>);
+
+	void resort_routes ();
+	void resort_routes_using (boost::shared_ptr<RouteList>);
 
 	AudioEngine & engine() { return _engine; }
 	AudioEngine const & engine () const { return _engine; }
@@ -1443,6 +1449,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save);
 	void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
 	bool _adding_routes_in_progress;
+	bool _route_deletion_in_progress;
+
 	uint32_t destructive_index;
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);

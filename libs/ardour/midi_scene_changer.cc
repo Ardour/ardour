@@ -281,7 +281,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 			bank = input_port->channel (channel)->bank();
 		}
         
-		jump_to (input_port->channel (channel)->bank(), program);
+		jump_to (bank, program);
 		return;
 	}
 

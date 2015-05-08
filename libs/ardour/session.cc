@@ -244,6 +244,7 @@ Session::Session (AudioEngine &eng,
 	, _all_route_group (new RouteGroup (*this, "all"))
 	, routes (new RouteList)
 	, _adding_routes_in_progress (false)
+	, _route_deletion_in_progress (false)
 	, destructive_index (0)
 	, _track_number_decimals(1)
 	, solo_update_disabled (false)
@@ -2948,102 +2949,128 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 	graph_reordered ();
 }
 
+
 void
-Session::remove_route (boost::shared_ptr<Route> route)
+Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 {
-	if (route == _master_out) {
-		return;
-	}
-
-	route->set_solo (false, this);
-
-	{
+	{ // RCU Writer scope
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> rs = writer.get_copy ();
-
-		rs->remove (route);
-
-		/* deleting the master out seems like a dumb
-		   idea, but its more of a UI policy issue
-		   than our concern.
-		*/
-
-		if (route == _master_out) {
-			_master_out = boost::shared_ptr<Route> ();
-		}
-
-		if (route == _monitor_out) {
-			_monitor_out.reset ();
-		}
-
-		/* writer goes out of scope, forces route list update */
-	}
-
-	update_route_solo_state ();
-
-	// We need to disconnect the route's inputs and outputs
-
-	route->input()->disconnect (0);
-	route->output()->disconnect (0);
-
-	/* if the route had internal sends sending to it, remove them */
-	if (route->internal_return()) {
-
-		boost::shared_ptr<RouteList> r = routes.reader ();
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			boost::shared_ptr<Send> s = (*i)->internal_send_for (route);
-			if (s) {
-				(*i)->remove_processor (s);
+        
+        
+		for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+            
+			if (*iter == _master_out) {
+				continue;
 			}
+            
+			(*iter)->set_solo (false, this);
+            
+			rs->remove (*iter);
+            
+			/* deleting the master out seems like a dumb
+			   idea, but its more of a UI policy issue
+			   than our concern.
+			*/
+            
+			if (*iter == _master_out) {
+				_master_out = boost::shared_ptr<Route> ();
+			}
+            
+			if (*iter == _monitor_out) {
+				_monitor_out.reset ();
+			}
+
+			update_route_solo_state ();
+            
+			// We need to disconnect the route's inputs and outputs
+            
+			(*iter)->input()->disconnect (0);
+			(*iter)->output()->disconnect (0);
+            
+			/* if the route had internal sends sending to it, remove them */
+			if ((*iter)->internal_return()) {
+                
+				boost::shared_ptr<RouteList> r = routes.reader ();
+				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+					boost::shared_ptr<Send> s = (*i)->internal_send_for (*iter);
+					if (s) {
+						(*i)->remove_processor (s);
+					}
+				}
+			}
+            
+			/* if the monitoring section had a pointer to this route, remove it */
+			if (_monitor_out && !(*iter)->is_master() && !(*iter)->is_monitor()) {
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+				PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
+				(*iter)->remove_aux_or_listen (_monitor_out);
+			}
+            
+			boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (*iter);
+			if (mt && mt->step_editing()) {
+				if (_step_editors > 0) {
+					_step_editors--;
+				}
+			}
+
+			RouteAddedOrRemoved (false); /* EMIT SIGNAL */
 		}
-	}
+    
+		/* writer goes out of scope, forces route list update */
 
-	/* if the monitoring section had a pointer to this route, remove it */
-	if (_monitor_out && !route->is_master() && !route->is_monitor()) {
-		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-		PBD::Unwinder<bool> uw (ignore_route_processor_changes, true);
-		route->remove_aux_or_listen (_monitor_out);
-	}
-
-	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (route);
-	if (mt && mt->step_editing()) {
-		if (_step_editors > 0) {
-			_step_editors--;
-		}
-	}
-
+	} // end of RCU Writer scope
+    
 	update_latency_compensation ();
 	set_dirty();
-
+    
 	/* Re-sort routes to remove the graph's current references to the one that is
 	 * going away, then flush old references out of the graph.
+	 * Wave Tracks: reconnect routes
 	 */
 
-	resort_routes ();
+	if (ARDOUR::Profile->get_trx () ) {
+		reconnect_existing_routes(true, false);
+	} else {
+		resort_routes ();
+	}
+    
 	if (_process_graph) {
 		_process_graph->clear_other_chain ();
 	}
-
+    
 	/* get rid of it from the dead wood collection in the route list manager */
-
 	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
-
+    
 	routes.flush ();
+    
+	/* try to cause everyone to drop their references
+	 * and unregister ports from the backend
+	 */
+	PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
 
-	/* try to cause everyone to drop their references */
-
-	route->drop_references ();
-
+	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+		(*iter)->drop_references ();
+	}
+    
 	Route::RemoteControlIDChange(); /* EMIT SIGNAL */
-
+    
 	/* save the new state of the world */
-
+    
 	if (save_state (_current_snapshot_name)) {
 		save_history (_current_snapshot_name);
 	}
+
 	reassign_track_numbers();
-    
 	update_route_record_state ();
+}
+
+void
+Session::remove_route (boost::shared_ptr<Route> route)
+{
+	boost::shared_ptr<RouteList> rl (new RouteList);
+	rl->push_back (route);
+	remove_routes (rl);
 }
 
 void
