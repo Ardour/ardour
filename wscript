@@ -714,6 +714,7 @@ def configure(conf):
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
     conf.env['MINOR'] = MINOR
+    conf.env['MICRO'] = MICRO
     conf.line_just = 52
     autowaf.set_recursive()
     autowaf.configure(conf)
@@ -981,9 +982,15 @@ def configure(conf):
         autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
 
     backends = opts.with_backends.split(',')
+
     if not backends:
         print("Must configure and build at least one backend")
         sys.exit(1)
+
+    if conf.is_tracks_build():
+        # For Tracks, override backends on OS X or Windows    
+        if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
+            backends = [ 'wavesaudio' ]
 
     conf.env['BACKENDS'] = backends
     conf.env['BUILD_JACKBACKEND'] = any('jack' in b for b in backends)
@@ -1007,7 +1014,6 @@ def configure(conf):
     if re.search ("linux", sys.platform) == None and conf.env['BUILD_ALSABACKEND']:
         print("ALSA Backend is only available on Linux")
         sys.exit(1)
-
 
     set_compiler_flags (conf, Options.options)
 
