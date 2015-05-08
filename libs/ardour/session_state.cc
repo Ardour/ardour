@@ -2065,8 +2065,6 @@ Session::save_template (string template_name)
 		copy_files (plugins_dir(), template_plugin_state_path);
 	}
 
-	copy_recurse (plugins_dir(), template_plugin_state_path);
-
 	return 0;
 }
 
