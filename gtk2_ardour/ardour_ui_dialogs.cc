@@ -158,6 +158,8 @@ ARDOUR_UI::set_session (Session *s)
 
     _session->MTCSyncStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_mtc_indicator_active, this, _1), gui_context());
     
+    _session->LTCSyncStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_ltc_indicator_active, this, _1), gui_context());
+    
 	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
 	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
 	_session->AuditionActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::auditioning_changed, this, _1), gui_context());
@@ -165,7 +167,7 @@ ARDOUR_UI::set_session (Session *s)
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
     
-    _session->MTCInputPortChanged.connect(_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_timecode_source_dropdown_items, this), gui_context ());
+    _session->MtcOrLtcInputPortChanged.connect(_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_timecode_source_dropdown_items, this), gui_context ());
     
     /* Clocks are on by default after we are connected to a session, so show that here.
 	*/

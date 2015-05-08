@@ -356,6 +356,8 @@ public:
 	Timecode::TimecodeFormat apparent_timecode_format() const;
 	std::string approximate_current_position() const;
 	std::string approximate_current_delta() const;
+    
+    PBD::Signal1<void, bool> ActiveChanged;
 
   private:
 	void parse_ltc(const pframes_t, const Sample* const, const framecnt_t);

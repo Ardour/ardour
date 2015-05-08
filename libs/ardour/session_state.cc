@@ -3651,7 +3651,7 @@ Session::config_changed (std::string p, bool ours)
 		Evoral::ControlList::set_thinning_factor (Config->get_automation_thinning_factor());
 	} else if (p == "ltc-source-port") {
 		reconnect_ltc_input ();
-	} else if (p == "ltc-sink-port") {
+    } else if (p == "ltc-output-port") {
 		reconnect_ltc_output ();
 	} else if (p == "timecode-generator-offset") {
 		ltc_tx_parse_offset();

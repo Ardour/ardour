@@ -50,7 +50,8 @@ private:
 	BoolOption* _sync_framerate;
 	BoolOption* _sync_genlock;
 	BoolOption* _sync_source_2997;
-	ComboStringOption* _ltc_port;
+    ComboStringOption* _mtc_source_port;
+	ComboStringOption* _ltc_source_port;
 	HSliderOption* _ltc_volume_slider;
 	Gtk::Adjustment* _ltc_volume_adjustment;
 	BoolOption* _ltc_send_continuously;

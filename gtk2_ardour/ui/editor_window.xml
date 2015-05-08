@@ -178,6 +178,18 @@
                           y="4"
                           visible="false"
                           noshowall="true"/>
+                    <icon id="ltc_idle_icon"
+                          source="ltc_idle"
+                          x="3"
+                          y="4"
+                          visible="false"
+                          noshowall="true"/>
+                    <icon id="ltc_sync_icon"
+                          source="ltc_sync"
+                          x="3"
+                          y="4"
+                          visible="false"
+                          noshowall="true"/>
                 </Layout>
                 <icon source="infobar_center"
                       box.fill="true"

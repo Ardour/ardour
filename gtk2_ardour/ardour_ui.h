@@ -274,6 +274,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
     void update_timecode_source_dropdown_items ();
     void set_mtc_indicator_active (bool set_active);
     void hide_mtc_indicator ();
+    void set_ltc_indicator_active (bool set_active);
+    void hide_ltc_indicator ();
     
     void update_bit_depth_button ();
     void update_sample_rate_dropdown ();
@@ -809,6 +811,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         
     Gtk::Image* _mtc_idle_icon;
     Gtk::Image* _mtc_sync_icon;
+    
+    Gtk::Image* _ltc_idle_icon;
+    Gtk::Image* _ltc_sync_icon;
 
 	/** A ProcessThread so that we have some thread-local buffers for use by
 	 *  PluginEqGui::impulse_analysis ().

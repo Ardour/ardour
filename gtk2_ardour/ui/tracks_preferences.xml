@@ -103,6 +103,21 @@
     			  borderwidth="0 0 1 1"
                   x="0"
                   y="0"/>
+        <EventBox bgnormal="#373737"
+                  width="107"
+                  height="0"/>
+        <Button id="sync_settings_tab_button"
+                  width="110"
+                  height="65"
+                  text="Sync"
+                  style="generic_control"
+                  fgnormal="#909090"
+                  bgnormal="#303030"
+                  fgactive="#000000"
+                  bgactive="#dcdcdc"
+                  borderwidth="0 0 1 1"
+                  x="0"
+                  y="0"/>
       <EventBox bgnormal="#373737"
                 width="107"
                 height="0"/>
@@ -204,40 +219,6 @@
           </VBox>
         </HBox>
       </ScrolledWindow>
-      
-      <Layout bgnormal="#373737"
-          x="21"
-          y="290"
-          width="291"
-          height="19">
-          <Label style="generic_control"
-          text="MTC Input"
-          fgnormal="#c1c1c1"
-          winfont ="Arial Bold 12"
-          macfont ="Helvetica Bold 12"
-          x="7" y="3"/>
-      </Layout>
-      
-      <Dropdown style="generic_dropdown"
-                id="mtc_in"
-                text="MTC IN"
-                x="21"
-                y="320"
-                width="291"
-                height="20"
-                normalicon="preference_mtc_dropdown"
-                activeicon="preference_mtc_dropdown_active"
-                _prelighticon="preference_mtc_dropdown_prelight"
-                inactiveicon="preference_mtc_dropdown_inactive">
-          <HBox>
-              <VBox width="10"/>
-              <Label style="generic_control"
-                     horzalignment="start"
-                     width="291"/>
-          </HBox>
-          <DropdownMenu style="generic_dropdown_menu"/>
-      </Dropdown>
-      
     </Layout>
     <Layout id="audio_settings_tab"
             bgnormal="#303030"
@@ -1039,5 +1020,224 @@
                       height="557">-->
       <!--</ScrolledWindow>-->
     </EventBox>
+    
+    <Layout id="sync_settings_tab"
+             bgnormal="#303030"
+             x="113"
+             y="1"
+             width="505"
+             height="557"
+             visible="false">
+        <Layout bgnormal="#373737"
+                 x="21"
+                 y="20"
+                 width="291"
+                 height="19">
+            <Label style="generic_control"
+                     text="Sync Input"
+                     fgnormal="#c1c1c1"
+                     winfont ="Arial Bold 12"
+                     macfont ="Helvetica Bold 12"
+                     x="7" y="3"/>
+        </Layout>
+        <Dropdown style="generic_dropdown"
+                   id="sync_tool_dropdown"
+                   x="21"
+                   y="40"
+                   width="291"
+                   height="20"
+                   normalicon="preference_mtc_dropdown"
+                   activeicon="preference_mtc_dropdown_active"
+                   _prelighticon="preference_mtc_dropdown_prelight"
+                   inactiveicon="preference_mtc_dropdown_inactive">
+            <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                          horzalignment="start"
+                          width="291"/>
+            </HBox>
+            <DropdownMenu style="generic_dropdown_menu">
+                <Dropdownitem title="MTC"
+                                 style="generic_dropdown_item"
+                                data="0"/>
+                <Dropdownitem title="LTC"
+                                 style="generic_dropdown_item"
+                                 data="1"/>
+            </DropdownMenu>
+        </Dropdown>
+        
+        <Layout bgnormal="#373737"
+                  id="sync_input_port_layout"
+                  x="21"
+                  y="60"
+                  width="291"
+                  height="19">
+            <Label style="generic_control"
+                     text="Sync Port"
+                     fgnormal="#c1c1c1"
+                     winfont ="Arial Bold 12"
+                     macfont ="Helvetica Bold 12"
+                     x="7" y="3"/>
+        </Layout>
+        <Dropdown style="generic_dropdown"
+                   id="mtc_in"
+                   text="MTC IN"
+                   x="21"
+                   y="80"
+                   width="291"
+                   height="20"
+                   normalicon="preference_mtc_dropdown"
+                   activeicon="preference_mtc_dropdown_active"
+                   _prelighticon="preference_mtc_dropdown_prelight"
+                   inactiveicon="preference_mtc_dropdown_inactive"
+                   maxmenuheight="128">
+            <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                          horzalignment="start"
+                          width="291"/>
+            </HBox>
+            <DropdownMenu style="generic_dropdown_menu"/>
+        </Dropdown>
+        <Dropdown style="generic_dropdown"
+                   id="ltc_in"
+                   text="LTC IN"
+                   x="21"
+                   y="80"
+                   width="291"
+                   height="20"
+                   normalicon="preference_mtc_dropdown"
+                   activeicon="preference_mtc_dropdown_active"
+                   _prelighticon="preference_mtc_dropdown_prelight"
+                   inactiveicon="preference_mtc_dropdown_inactive"
+                   maxmenuheight="128"
+                   visible="false">
+            <HBox>
+                <VBox width="10"/>
+                <Label style="generic_control"
+                          horzalignment="start"
+                          width="291"/>
+            </HBox>
+            <DropdownMenu style="generic_dropdown_menu"/>
+        </Dropdown>
+        <!--UI part for LTC generator-->
+        <VBox id="enable_ltc_generator_vbox"
+                x="21"
+                y="220">
+             <Layout bgnormal="#373737"
+                       x="21"
+                       y="220"
+                       width="291"
+                       height="19">
+                   <Label style="generic_control"
+                             text="LTC Generator"
+                             fgnormal="#c1c1c1"
+                             winfont ="Arial Bold 12"
+                             macfont ="Helvetica Bold 12"
+                             x="7" y="3"/>
+             </Layout>
+        
+            <HBox ui.os.windows="false"
+                    x="21" y="240">
+                 <Iconbutton id="enable_ltc_generator_button"
+                                width="20"
+                                height="20"
+                                normalicon="waves_check_box"
+                                activeicon="waves_check_box_active"
+                                toggleable="true"/>
+                 <Label style="generic_control"
+                           text="Enable LTC generator"
+                           x="17" y="3"/>
+            </HBox>
+        </VBox>
+        
+        <HBox ui.os.windows="false"
+               id="ltc_send_continuously_hbox"
+                x="21" y="260">
+            <Iconbutton id="ltc_send_continuously_button"
+                          width="20"
+                          height="20"
+                          normalicon="waves_check_box"
+                          activeicon="waves_check_box_active"
+                          toggleable="true"/>
+            <Label style="generic_control"
+                     text="Send LTC while stopped"
+                     x="17" y="3"/>
+        </HBox>
+        <VBox id="ltc_output_port_vbox"
+                x="21"
+                y="280">
+              <Layout bgnormal="#373737"
+                        x="21"
+                        y="280"
+                        width="291"
+                        height="19">
+                    <Label style="generic_control"
+                               text="LTC Output"
+                               fgnormal="#c1c1c1"
+                               winfont ="Arial Bold 12"
+                               macfont ="Helvetica Bold 12"
+                               x="7" y="3"/>
+              </Layout>
+              <Dropdown style="generic_dropdown"
+                          id="ltc_out"
+                          text="LTC OUT"
+                          x="21"
+                          y="300"
+                          width="291"
+                          height="20"
+                          normalicon="preference_mtc_dropdown"
+                          activeicon="preference_mtc_dropdown_active"
+                          _prelighticon="preference_mtc_dropdown_prelight"
+                          inactiveicon="preference_mtc_dropdown_inactive"
+                          maxmenuheight="128"
+                          visible="true">
+               <HBox>
+                    <VBox width="10"/>
+                    <Label style="generic_control"
+                               horzalignment="start"
+                               width="291"/>
+               </HBox>
+               <DropdownMenu style="generic_dropdown_menu"/>
+               </Dropdown>
+        </VBox>
+        <VBox id="ltc_generator_level_vbox"
+                x="21"
+                y="320">
+              <Layout bgnormal="#373737"
+                         x="21"
+                         y="320"
+                         width="291"
+                         height="19">
+                     <Label style="generic_control"
+                                text="LTC Output level"
+                                fgnormal="#c1c1c1"
+                                winfont ="Arial Bold 12"
+                                macfont ="Helvetica Bold 12"
+                                x="7" y="3"/>
+              </Layout>
+              <HBox  x="21" y="340">
+                    <Adjustment id="ltc_generator_level_adjustment"
+                                    minvalue="-50"
+                                    maxvalue="0"
+                                    initialvalue="-50"
+                                    step="0.1"
+                                    pageincrement="1"/>
+                    <Fader adjustment="ltc_generator_level_adjustment"
+                              facesource="waveform_zoom_fader_face"
+                              handlesource="zoom_fader_handle"
+                              activehandlesource="zoom_fader_handle_active"
+                              minposx="6"
+                              minposy="9"
+                              maxposx="66"
+                              maxposy="9"/>
+                    <VBox width="25"/>
+                    <Label id="ltc_generator_level_label"
+                               style="generic_control"
+                               width="25"
+                               height="20"/>
+              </HBox>
+        </VBox>
+    </Layout> <!--end of sync_settings_tab-->
   </Layout>
 </Dialog>

@@ -82,6 +82,50 @@ namespace {
     };
     
     typedef std::vector<MidiDeviceDescriptor> MidiDeviceDescriptorVec;
+    
+    void dropdown_element_data_cleaner (void* data)
+    {
+        free (data);
+    }
+    
+    // These functions are used for ltc generator
+    // transform db to ltc-output-volume
+    double db_to_volume (double db)
+    {
+        return pow (10, db / 20);
+    }
+    // ltc-output-volume to db
+    double volume_to_db (double volume)
+    {
+        return 20 * log10 (volume);
+    }
+    
+    
+    ARDOUR::SyncSource
+    SyncSourceTracks_to_SyncSource (int el_number)
+    {
+        switch (el_number) {
+            case TracksControlPanel::MTC:
+                return ARDOUR::MTC;
+            case TracksControlPanel::LTC:
+                return ARDOUR::LTC;
+            default:
+                fatal << "Wrong argument in converting from SyncSourceTracks to ARDOUR::SyncSource" << endmsg;
+        }
+    }
+    
+    TracksControlPanel::SyncSourceTracks
+    SyncSource_to_SyncSourceTracks (ARDOUR::SyncSource sync_source)
+    {
+        switch (sync_source) {
+            case ARDOUR::MTC:
+                return TracksControlPanel::MTC;
+            case ARDOUR::LTC:
+                return TracksControlPanel::LTC;
+            default:
+                fatal << "Wrong argument in converting from ARDOUR::SyncSource to TracksControlPanel::SyncSourceTracks" << endmsg;
+        }
+    }
 }
 
 void
@@ -94,6 +138,7 @@ TracksControlPanel::init ()
 	_midi_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
 	_session_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
 	_general_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
+    _sync_settings_tab_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_a_settings_tab_button_clicked));
     
     _all_inputs_on_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_on_button));
     _all_inputs_off_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_all_inputs_off_button));
@@ -104,6 +149,9 @@ TracksControlPanel::init ()
     _stereo_out_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_stereo_out));
     
     _browse_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_browse_button));    
+    
+    _enable_ltc_generator_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_enable_ltc_generator_button));
+    _ltc_send_continuously_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_ltc_send_continuously_button));
     
 	EngineStateController::instance ()->EngineRunning.connect (running_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_running, this), gui_context());
 	EngineStateController::instance ()->EngineStopped.connect (stopped_connection, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::engine_stopped, this), gui_context());
@@ -118,7 +166,7 @@ TracksControlPanel::init ()
     EngineStateController::instance()->MIDIInputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_input_configuration_changed, this), gui_context());
     EngineStateController::instance()->MIDIOutputConfigChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_midi_output_configuration_changed, this), gui_context());
     EngineStateController::instance()->MTCInputChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_mtc_input_changed, this, _1), gui_context());
-    EngineStateController::instance()->DeviceError.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_error, this), gui_context());
+    EngineStateController::instance()->DeviceError.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_device_error, this), gui_context ());
 
     /* Global configuration parameters update */
     Config->ParameterChanged.connect (update_connections, MISSING_INVALIDATOR, boost::bind (&TracksControlPanel::on_parameter_changed, this, _1), gui_context());
@@ -127,23 +175,28 @@ TracksControlPanel::init ()
     _device_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_device_dropdown_item_clicked));
 	_sample_rate_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_sample_rate_dropdown_item_clicked));
 	_buffer_size_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_buffer_size_dropdown_item_clicked));
-    _mtc_in_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_mtc_input_chosen));
+    _mtc_in_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_mtc_in_dropdown_changed));
+    _ltc_in_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_ltc_in_dropdown_changed));
+    _sync_tool_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_sync_tool_dropdown_changed));
+     _ltc_out_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_ltc_out_dropdown_changed));
+
     
     /* Session configuration parameters update */
 	_file_type_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_file_type_dropdown_item_clicked));
     _bit_depth_dropdown.selected_item_changed.connect (sigc::mem_fun(*this, &TracksControlPanel::on_bit_depth_dropdown_item_clicked));
     _frame_rate_dropdown.selected_item_changed.connect (sigc::mem_fun (*this, &TracksControlPanel::on_frame_rate_item_clicked));
 
-    _name_tracks_after_driver.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
-    _reset_tracks_name_to_default.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
+    _name_tracks_after_driver.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_name_tracks_after_driver));
+    _reset_tracks_name_to_default.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_reset_tracks_name_to_default));
 
-    _control_panel_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_control_panel_button));
-    _color_adjustment.signal_value_changed().connect (mem_fun (*this, &TracksControlPanel::color_adjustment_changed));
+    _control_panel_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_control_panel_button));
+    _color_adjustment.signal_value_changed ().connect (mem_fun (*this, &TracksControlPanel::color_adjustment_changed));
+    _ltc_generator_level_adjustment.signal_value_changed ().connect (mem_fun (*this, &TracksControlPanel::ltc_generator_level_adjustment_changed));
 
-    _yes_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_yes_button));
-    _no_button.signal_clicked.connect(sigc::mem_fun (*this, &TracksControlPanel::on_no_button));
-    _yes_button.set_visible(false);
-    _no_button.set_visible(false);
+    _yes_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_yes_button));
+    _no_button.signal_clicked.connect (sigc::mem_fun (*this, &TracksControlPanel::on_no_button));
+    _yes_button.set_visible (false);
+    _no_button.set_visible (false);
     
 	populate_engine_dropdown ();
 	populate_device_dropdown ();
@@ -160,19 +213,19 @@ TracksControlPanel::init ()
     display_waveform_color_fader ();
     
     // Init session Settings
-    populate_bit_depth_dropdown();
-    populate_frame_rate_dropdown();
-    populate_auto_lock_timer_dropdown();
-    populate_auto_save_timer_dropdown();
-    populate_pre_record_buffer_dropdown();
+    populate_bit_depth_dropdown ();
+    populate_frame_rate_dropdown ();
+    populate_auto_lock_timer_dropdown ();
+    populate_auto_save_timer_dropdown ();
+    populate_pre_record_buffer_dropdown ();
     
     show_buffer_duration ();
-	_audio_settings_tab_button.set_active(true);
+	_audio_settings_tab_button.set_active (true);
 
 	display_general_preferences ();
 }
 
-DeviceConnectionControl& TracksControlPanel::add_device_capture_control(std::string port_name, bool active, uint16_t capture_number, std::string track_name)
+DeviceConnectionControl& TracksControlPanel::add_device_capture_control (std::string port_name, bool active, uint16_t capture_number, std::string track_name)
 {
     std::string device_capture_name("");
     std::string pattern(audio_capture_name_prefix);
@@ -206,7 +259,7 @@ DeviceConnectionControl& TracksControlPanel::add_device_playback_control(std::st
 	return playback_control;
 }
 
-MidiDeviceConnectionControl& TracksControlPanel::add_midi_device_control(const std::string& midi_device_name,
+MidiDeviceConnectionControl& TracksControlPanel::add_midi_device_control (const std::string& midi_device_name,
                                                                          const std::string& capture_name, bool capture_active,
                                                                          const std::string& playback_name, bool playback_active)
 {
@@ -644,7 +697,7 @@ TracksControlPanel::populate_engine_dropdown()
 }
 
 void
-TracksControlPanel::populate_device_dropdown()
+TracksControlPanel::populate_device_dropdown ()
 {
     std::vector<AudioBackend::DeviceStatus> all_devices;
 	EngineStateController::instance()->enumerate_devices (all_devices);
@@ -729,41 +782,31 @@ TracksControlPanel::populate_buffer_size_dropdown()
 }
 
 void
-TracksControlPanel::populate_mtc_in_dropdown()
+TracksControlPanel::populate_mtc_in_dropdown ()
 {
     std::vector<EngineStateController::MidiPortState> midi_states;
     static const char* midi_port_name_prefix = "system_midi:";
     const char* midi_type_suffix;
-    bool have_first = false;
     
-    EngineStateController::instance()->get_physical_midi_input_states(midi_states);
-    midi_type_suffix = X_(" capture");
+    EngineStateController::instance ()->get_physical_midi_input_states (midi_states);
+    midi_type_suffix = X_ (" capture");
     
     _mtc_in_dropdown.clear_items ();
     
-    Gtk::MenuItem& off_item = _mtc_in_dropdown.add_menu_item ("Off", 0);
+    _mtc_in_dropdown.add_menu_item ("Off", strdup (""), dropdown_element_data_cleaner);
     
     std::vector<EngineStateController::MidiPortState>::const_iterator state_iter;
-    for (state_iter = midi_states.begin(); state_iter != midi_states.end(); ++state_iter) {
+    for (state_iter = midi_states.begin (); state_iter != midi_states.end (); ++state_iter) {
         
         // strip the device name from input port name
         std::string device_name;
-        ARDOUR::remove_pattern_from_string(state_iter->name, midi_port_name_prefix, device_name);
-        ARDOUR::remove_pattern_from_string(device_name, midi_type_suffix, device_name);
+        ARDOUR::remove_pattern_from_string (state_iter->name, midi_port_name_prefix, device_name);
+        ARDOUR::remove_pattern_from_string (device_name, midi_type_suffix, device_name);
         
-        if (state_iter->active) {
-            Gtk::MenuItem& new_item = _mtc_in_dropdown.add_menu_item (device_name, strdup(state_iter->name.c_str()) );
-            
-            if (!have_first && state_iter->mtc_in) {
-                _mtc_in_dropdown.set_text (new_item.get_label() );
-                have_first = true;
-            }
-        }
+        _mtc_in_dropdown.add_menu_item (device_name, strdup (state_iter->name.c_str()),dropdown_element_data_cleaner);
     }
     
-    if (!have_first) {
-        _mtc_in_dropdown.set_text (off_item.get_label() );
-    }
+    display_mtc_in_source ();
 }
 
 void
@@ -778,7 +821,7 @@ TracksControlPanel::populate_output_mode()
 
 
 void
-TracksControlPanel::populate_input_channels()
+TracksControlPanel::populate_input_channels ()
 {
     cleanup_input_channels_list();
     
@@ -795,16 +838,15 @@ TracksControlPanel::populate_input_channels()
         std::string track_name;
 
         if (input_iter->active) {
-            
-            std::string port_name("");
-            std::string pattern(audio_capture_name_prefix);
-            ARDOUR::remove_pattern_from_string(input_iter->name, pattern, port_name);
+            std::string port_name ("");
+            std::string pattern (audio_capture_name_prefix);
+            ARDOUR::remove_pattern_from_string (input_iter->name, pattern, port_name);
             
             number = number_count++;
             
-            if (Config->get_tracks_auto_naming() & UseDefaultNames) {
+            if (Config->get_tracks_auto_naming () & UseDefaultNames) {
                 track_name = string_compose ("%1 %2", Session::default_trx_track_name_pattern, number);
-            } else if (Config->get_tracks_auto_naming() & NameAfterDriver) {
+            } else if (Config->get_tracks_auto_naming () & NameAfterDriver) {
                 track_name = port_name;
             }
         }
@@ -812,8 +854,31 @@ TracksControlPanel::populate_input_channels()
         add_device_capture_control (input_iter->name, input_iter->active, number, track_name);
     }
     
-    _all_inputs_on_button.set_sensitive(!input_states.empty() );
-    _all_inputs_off_button.set_sensitive(!input_states.empty() );
+    _all_inputs_on_button.set_sensitive (!input_states.empty () );
+    _all_inputs_off_button.set_sensitive (!input_states.empty () );
+    
+    // if list of audio-in ports was changed, list of ltc-in ports must be also changed
+    populate_ltc_in_dropdown ();
+}
+
+
+void
+TracksControlPanel::populate_ltc_in_dropdown ()
+{
+    _ltc_in_dropdown.clear_items ();
+    std::vector<EngineStateController::PortState> input_states;
+    EngineStateController::instance ()->get_physical_audio_input_states (input_states);
+    
+    std::vector<EngineStateController::PortState>::const_iterator input_iter;
+    
+    for (input_iter = input_states.begin(); input_iter != input_states.end (); ++input_iter ) {
+        std::string port_name ("");
+        std::string pattern (audio_capture_name_prefix);
+        ARDOUR::remove_pattern_from_string (input_iter->name, pattern, port_name);
+        _ltc_in_dropdown.add_menu_item (port_name, strdup (input_iter->name.c_str ()), dropdown_element_data_cleaner );
+    }
+    
+    display_ltc_in_source ();
 }
 
 
@@ -824,12 +889,12 @@ TracksControlPanel::populate_output_channels()
         
     // process captures (outputs)
     std::vector<EngineStateController::PortState> output_states;
-    EngineStateController::instance()->get_physical_audio_output_states(output_states);
+    EngineStateController::instance ()->get_physical_audio_output_states (output_states);
     
     std::vector<EngineStateController::PortState>::const_iterator output_iter;
     
     uint16_t number_count = 1;
-    for (output_iter = output_states.begin(); output_iter != output_states.end(); ++output_iter ) {
+    for (output_iter = output_states.begin (); output_iter != output_states.end(); ++output_iter ) {
         
         uint16_t number = DeviceConnectionControl::NoNumber;
         
@@ -840,14 +905,37 @@ TracksControlPanel::populate_output_channels()
         add_device_playback_control (output_iter->name, output_iter->active, number);
     }
     
-    bool stereo_out_disabled = (Config->get_output_auto_connect() & AutoConnectPhysical);
-    _all_outputs_on_button.set_sensitive(!output_states.empty() && stereo_out_disabled );
-    _all_outputs_off_button.set_sensitive(!output_states.empty() && stereo_out_disabled );
+    bool stereo_out_disabled = (Config->get_output_auto_connect () & AutoConnectPhysical);
+    _all_outputs_on_button.set_sensitive(!output_states.empty () && stereo_out_disabled );
+    _all_outputs_off_button.set_sensitive(!output_states.empty () && stereo_out_disabled );
+    
+    // if the list of audio-out ports was changed, the list of ltc-out ports must be also changed
+    populate_ltc_out_dropdown ();
 }
 
 
 void
-TracksControlPanel::populate_midi_ports()
+TracksControlPanel::populate_ltc_out_dropdown ()
+{
+    _ltc_out_dropdown.clear_items ();
+    std::vector<EngineStateController::PortState> output_states;
+    EngineStateController::instance ()->get_physical_audio_output_states (output_states);
+    
+    std::vector<EngineStateController::PortState>::const_iterator output_iter;
+    
+    for (output_iter = output_states.begin(); output_iter != output_states.end (); ++output_iter ) {
+        std::string port_name ("");
+        std::string pattern (audio_playback_name_prefix);
+        ARDOUR::remove_pattern_from_string (output_iter->name, pattern, port_name);
+        _ltc_out_dropdown.add_menu_item (port_name, strdup (output_iter->name.c_str ()), dropdown_element_data_cleaner);
+    }
+    
+    display_ltc_output_port ();
+}
+
+
+void
+TracksControlPanel::populate_midi_ports ()
 {
     cleanup_midi_device_list();
     
@@ -897,7 +985,7 @@ TracksControlPanel::populate_midi_ports()
     // now add midi device controls
     MidiDeviceDescriptorVec::iterator iter;
     for (iter = midi_device_descriptors.begin(); iter != midi_device_descriptors.end(); ++iter ) {
-        add_midi_device_control(iter->name, iter->capture_name, iter->capture_active,
+        add_midi_device_control (iter->name, iter->capture_name, iter->capture_active,
                                             iter->playback_name, iter->playback_active);
     }
 }
@@ -1098,6 +1186,130 @@ TracksControlPanel::display_denormal_protection ()
 	_dc_bias_against_denormals_button.set_active_state (Config->get_denormal_protection () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
 }
 
+void
+TracksControlPanel::display_current_sync_tool ()
+{
+    ARDOUR::SyncSource sync_tool_type = Config->get_sync_source ();
+    
+    _mtc_in_dropdown.set_visible (sync_tool_type == ARDOUR::MTC);
+    _ltc_in_dropdown.set_visible (sync_tool_type == ARDOUR::LTC
+                                  && !EngineStateController::instance ()->get_ltc_source_port ().empty ());
+    _sync_input_port_layout.set_visible (_mtc_in_dropdown.get_visible () || _ltc_in_dropdown.get_visible ());
+    
+    _sync_tool_dropdown.set_current_item (SyncSource_to_SyncSourceTracks (sync_tool_type));
+}
+
+void
+TracksControlPanel::display_mtc_in_source ()
+{
+    std::string mtc_in_source = EngineStateController::instance ()->get_mtc_source_port ();
+
+    int size = _mtc_in_dropdown.get_menu ().items ().size ();
+    for (int i = 0; i < size; ++i) {
+        char* full_name_of_mtc_input_port = (char*) _mtc_in_dropdown.get_item_data_pv (i);
+        if (full_name_of_mtc_input_port && full_name_of_mtc_input_port == mtc_in_source ) {
+            _mtc_in_dropdown.set_current_item (i);
+            return ;
+        }
+    }
+}
+
+void
+TracksControlPanel::display_ltc_in_source ()
+{
+    std::string ltc_in_source = EngineStateController::instance ()->get_ltc_source_port ();
+    
+    if (Config->get_sync_source () == ARDOUR::LTC) {
+        if (ltc_in_source.empty ()) {
+            _ltc_in_dropdown.set_visible (false);
+            _sync_input_port_layout.set_visible (false);
+            return ;
+        } else {
+            _ltc_in_dropdown.set_visible (true);
+            _sync_input_port_layout.set_visible (true);
+        }
+    }
+    
+    int size = _ltc_in_dropdown.get_menu ().items ().size ();
+    for (int i = 0; i < size; ++i) {
+        char* full_name_of_ltc_input_port = (char*) _ltc_in_dropdown.get_item_data_pv (i);
+        if (full_name_of_ltc_input_port && full_name_of_ltc_input_port == ltc_in_source ) {
+            _ltc_in_dropdown.set_current_item (i);
+            return ;
+        }
+    }
+}
+
+void
+TracksControlPanel::display_ltc_output_port ()
+{
+    // get the list of audio output
+    std::vector<EngineStateController::PortState> output_states;
+    EngineStateController::instance ()->get_physical_audio_output_states (output_states);
+    
+    if (output_states.empty ()) {
+        // no output audio port
+        ltc_output_settings_set_visible (false);
+        return ;
+    } else {
+        ltc_output_settings_set_visible (true);
+    }
+    
+    std::string ltc_output_port = EngineStateController::instance ()->get_ltc_output_port ();
+    
+    int size = _ltc_out_dropdown.get_menu ().items ().size ();
+    for (int i = 0; i < size; ++i) {
+        char* full_name_of_ltc_output_port = (char*) _ltc_out_dropdown.get_item_data_pv (i);
+        if (full_name_of_ltc_output_port && full_name_of_ltc_output_port == ltc_output_port ) {
+            _ltc_out_dropdown.set_current_item (i);
+            return ;
+        }
+    }
+}
+
+void
+TracksControlPanel::display_enable_ltc_generator ()
+{
+    _enable_ltc_generator_button.set_active_state (Config->get_send_ltc () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+
+    // if generator is enabled - show its settings
+    ltc_generator_settings_set_visible (Config->get_send_ltc ());
+}
+
+void
+TracksControlPanel::display_ltc_send_continuously ()
+{
+    _ltc_send_continuously_button.set_active_state (Config->get_ltc_send_continuously () ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off);
+}
+
+void
+TracksControlPanel::display_ltc_generator_level_fader ()
+{
+    double generator_level_in_db = volume_to_db (Config->get_ltc_output_volume ());
+    _ltc_generator_level_adjustment.set_value (generator_level_in_db);
+
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision (1) << generator_level_in_db;
+    _ltc_generator_level_label.set_text (ss.str ());
+}
+
+
+void
+TracksControlPanel::ltc_output_settings_set_visible (bool visible)
+{
+    _enable_ltc_generator_vbox.set_visible (visible);
+    _ltc_output_port_vbox.set_visible (visible);
+    // show generator settings only if it's enabled
+    ltc_generator_settings_set_visible (visible && Config->get_send_ltc ());
+}
+
+void
+TracksControlPanel::ltc_generator_settings_set_visible (bool visible)
+{
+    _ltc_send_continuously_hbox.set_visible (visible);
+    _ltc_generator_level_vbox.set_visible (visible);
+}
+
 
 void
 TracksControlPanel::display_general_preferences ()
@@ -1115,6 +1327,10 @@ TracksControlPanel::display_general_preferences ()
 	display_history_depth ();
 	display_saved_history_depth ();
 	display_denormal_protection ();
+    display_current_sync_tool ();
+    display_enable_ltc_generator ();
+    display_ltc_send_continuously ();
+    display_ltc_generator_level_fader ();
 }
 
 #define RGB_TO_UINT(r,g,b) ((((guint)(r))<<16)|(((guint)(g))<<8)|((guint)(b)))
@@ -1202,7 +1418,7 @@ TracksControlPanel::save_general_preferences ()
 		dbg_msg ("TracksControlPanel::general_preferences ():\nUnexpected meter fall off time!");
 		break;
 	}
-
+    
 	Config->set_mmc_control (_obey_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
 	Config->set_send_mmc (_send_mmc_commands_button.active_state () == Gtkmm2ext::ExplicitActive);
 	Config->set_only_copy_imported_files (_copy_imported_files_button.active_state () ==  Gtkmm2ext::ExplicitActive);
@@ -1232,8 +1448,8 @@ void TracksControlPanel::on_engine_dropdown_item_clicked (WavesDropdown*, int)
     
 	if ( EngineStateController::instance()->set_new_backend_as_current (backend_name) )
 	{
-		_have_control = EngineStateController::instance()->is_setup_required ();
-        populate_device_dropdown();
+		_have_control = EngineStateController::instance ()->is_setup_required ();
+        populate_device_dropdown ();
         return;
 	}
     
@@ -1274,15 +1490,17 @@ void
 TracksControlPanel::device_changed ()
 {
 	if (_ignore_changes) {
-		return;
+		return ;
 	}
     
     std::string device_name = _device_dropdown.get_text ();
-    if (EngineStateController::instance()->set_new_device_as_current(device_name) )
+    if (EngineStateController::instance()->set_new_device_as_current (device_name) )
     {
-        populate_buffer_size_dropdown();
-        populate_sample_rate_dropdown();
-        return;
+        populate_buffer_size_dropdown ();
+        populate_sample_rate_dropdown ();
+        // disable LTC generator in case of device change
+        set_ltc_generator_status (false);
+        return ;
     }
     
     {
@@ -1295,6 +1513,7 @@ TracksControlPanel::device_changed ()
     WavesMessageDialog (PROGRAM_NAME, _("Error activating selected device.")).run();
     set_keep_above (true);
 }
+
 
 void
 TracksControlPanel::on_all_inputs_on_button(WavesButton*)
@@ -1398,6 +1617,13 @@ TracksControlPanel::on_frame_rate_item_clicked (WavesDropdown*, int)
     std::string s = _frame_rate_dropdown.get_text();
     Timecode::TimecodeFormat timecode_format = string_to_TimecodeFormat(s);
     
+    // HOT FIX
+    // in case of fps change
+    // set Internal mode
+    if (_session) {
+        _session->config.set_external_sync (false);
+    }
+    
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
     ardour_ui->set_timecode_format(timecode_format);    
 }
@@ -1435,7 +1661,7 @@ TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
 	}
 
 	framecnt_t new_sample_rate = get_sample_rate ();
-    if ( EngineStateController::instance()->set_new_sample_rate_in_controller(new_sample_rate) ) {
+    if ( EngineStateController::instance()->set_new_sample_rate_in_controller (new_sample_rate) ) {
 		EngineStateController::instance()->push_current_state_to_backend (false);
     
 	} else {
@@ -1446,24 +1672,130 @@ TracksControlPanel::on_sample_rate_dropdown_item_clicked (WavesDropdown*, int)
 		std::string sample_rate_str = ARDOUR_UI_UTILS::rate_as_string (EngineStateController::instance()->get_current_sample_rate() );
 		WavesMessageDialog msg("", _("Sample rate set to the value which is not supported"));
 		msg.run();
-		_sample_rate_dropdown.set_text(sample_rate_str);
+		_sample_rate_dropdown.set_text (sample_rate_str);
 	}
 
-	show_buffer_duration();
+	show_buffer_duration ();
 }
 
 void
-TracksControlPanel::on_mtc_input_chosen (WavesDropdown* dropdown, int el_number)
+TracksControlPanel::on_mtc_in_dropdown_changed (WavesDropdown* dropdown, int el_number)
 {
-    char* full_name_of_chosen_port = (char*)dropdown->get_item_data_pv(el_number);
+    mtc_in_dropdown_change (el_number);
+}
+
+void
+TracksControlPanel::mtc_in_dropdown_change (int el_number)
+{
+    char* full_name_of_chosen_port = (char*)_mtc_in_dropdown.get_item_data_pv (el_number);
+
+    if (full_name_of_chosen_port) {
+        if (full_name_of_chosen_port == EngineStateController::instance ()->get_mtc_source_port ()) {
+            return ;
+        }
+        
+        EngineStateController::instance ()->set_mtc_source_port (full_name_of_chosen_port);
+    } else {
+        EngineStateController::instance ()->set_mtc_source_port ("");
+    }
+}
+
+void
+TracksControlPanel::on_ltc_in_dropdown_changed (WavesDropdown* dropdown, int el_number)
+{
+    ltc_in_dropdown_change (el_number);
+}
+
+void
+TracksControlPanel::ltc_in_dropdown_change (int el_number)
+{
+    char* full_name_of_chosen_port = (char*)_ltc_in_dropdown.get_item_data_pv (el_number);
+ 
+    if (full_name_of_chosen_port) {
+        if (full_name_of_chosen_port == EngineStateController::instance ()->get_ltc_source_port ()) {
+            return ;
+        }
+    
+        EngineStateController::instance ()->set_ltc_source_port (full_name_of_chosen_port);
+    } else {
+        EngineStateController::instance ()->set_ltc_source_port ("");
+    }
+}
+
+void
+TracksControlPanel::on_ltc_out_dropdown_changed (WavesDropdown* dropdown, int el_number)
+{
+    char* full_name_of_chosen_port = (char*)_ltc_out_dropdown.get_item_data_pv (el_number);
     
     if (full_name_of_chosen_port) {
-        EngineStateController::instance()->set_mtc_input((char*) full_name_of_chosen_port);
+        if (full_name_of_chosen_port == EngineStateController::instance ()->get_ltc_output_port ()) {
+            return ;
+        }
+        EngineStateController::instance ()->set_ltc_output_port (full_name_of_chosen_port);
     } else {
-        EngineStateController::instance()->set_mtc_input("");
+        EngineStateController::instance ()->set_ltc_output_port ("");
     }
-
 }
+
+void
+TracksControlPanel::on_sync_tool_dropdown_changed (WavesDropdown* dropdown, int el_number)
+{
+    ARDOUR::SyncSource sync_tool = SyncSourceTracks_to_SyncSource (el_number);
+    if (sync_tool != Config->get_sync_source ()) {
+        
+        if (_session) {
+            // set Internal mode in case of sync tool change
+            _session->config.set_external_sync (false);
+        }
+        
+        Config->set_sync_source (sync_tool);
+    
+        switch (el_number) {
+    
+            case (TracksControlPanel::MTC):
+                EngineStateController::instance()-> set_ltc_source_port ("");
+                mtc_in_dropdown_change (0);
+                break;
+            
+            case (TracksControlPanel::LTC):
+                EngineStateController::instance()-> set_mtc_source_port ("");
+                ltc_in_dropdown_change (0);
+                break;
+            
+            default:
+                return ;
+        }
+    }
+}
+
+
+void
+TracksControlPanel::on_enable_ltc_generator_button (WavesButton*)
+{
+    set_ltc_generator_status (_enable_ltc_generator_button.active_state () == Gtkmm2ext::ExplicitActive);
+}
+
+void
+TracksControlPanel::set_ltc_generator_status (bool status)
+{
+   Config->set_send_ltc (status);
+}
+
+
+void
+TracksControlPanel::on_ltc_send_continuously_button (WavesButton*)
+{
+    Config->set_ltc_send_continuously (_ltc_send_continuously_button.active_state () == Gtkmm2ext::ExplicitActive);
+}
+
+
+void
+TracksControlPanel::ltc_generator_level_adjustment_changed ()
+{
+    double generator_level_in_db = _ltc_generator_level_adjustment.get_value (); // -50..0
+    Config->set_ltc_output_volume (db_to_volume (generator_level_in_db));
+}
+
 
 void
 TracksControlPanel::engine_running ()
@@ -1496,6 +1828,10 @@ TracksControlPanel::on_a_settings_tab_button_clicked (WavesButton* clicked_butto
 	visible = (&_general_settings_tab_button == clicked_button);
 	_general_settings_tab.set_visible (visible);
 	_general_settings_tab_button.set_active(visible);
+    
+    visible = (&_sync_settings_tab_button == clicked_button);
+    _sync_settings_tab.set_visible (visible);
+    _sync_settings_tab_button.set_active(visible);
 }
 
 void
@@ -1518,6 +1854,11 @@ TracksControlPanel::show_and_open_tab (int tab_id)
 	visible = (tab_id == PreferencesTab);
 	_general_settings_tab.set_visible (visible);
 	_general_settings_tab_button.set_active(visible);
+    
+    visible = (tab_id == SyncTab);
+    _sync_settings_tab.set_visible (visible);
+    _sync_settings_tab_button.set_active(visible);
+
 }
 
 void
@@ -1595,7 +1936,8 @@ TracksControlPanel::save_pre_record_buffer()
     ARDOUR_UI::config()->set_pre_record_buffer(time);
 }
 
-void TracksControlPanel::update_session_config ()
+void
+TracksControlPanel::update_session_config ()
 {
     ARDOUR_UI* ardour_ui = ARDOUR_UI::instance();
     
@@ -1689,37 +2031,42 @@ TracksControlPanel::on_key_press_event (GdkEventKey* ev)
 	return WavesDialog::on_key_press_event (ev);
 }
 
-void TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
+void
+TracksControlPanel::on_capture_active_changed(DeviceConnectionControl* capture_control, bool active)
 {
     const char * id_name = (char*)capture_control->get_data(DeviceConnectionControl::id_name);
     EngineStateController::instance()->set_physical_audio_input_state(id_name, active);
 }
 
-void TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
+void
+TracksControlPanel::on_playback_active_changed(DeviceConnectionControl* playback_control, bool active)
 {
     const char * id_name = (char*)playback_control->get_data(DeviceConnectionControl::id_name);
     EngineStateController::instance()->set_physical_audio_output_state(id_name, active);
 }
 
-void TracksControlPanel::on_midi_capture_active_changed(MidiDeviceConnectionControl* control, bool active)
+void
+TracksControlPanel::on_midi_capture_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
     const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::capture_id_name);
     EngineStateController::instance()->set_physical_midi_input_state(id_name, active);
 }
 
-void TracksControlPanel::on_midi_playback_active_changed(MidiDeviceConnectionControl* control, bool active)
+void
+TracksControlPanel::on_midi_playback_active_changed(MidiDeviceConnectionControl* control, bool active)
 {
     const char * id_name = (char*)control->get_data(MidiDeviceConnectionControl::playback_id_name);
     EngineStateController::instance()->set_physical_midi_output_state(id_name, active);
 }
 
 
-void TracksControlPanel::on_port_registration_update()
+void
+TracksControlPanel::on_port_registration_update ()
 {
-    populate_input_channels();
-    populate_output_channels();
-    populate_midi_ports();
-    populate_mtc_in_dropdown();
+    populate_input_channels ();
+    populate_output_channels ();
+    populate_midi_ports ();
+    populate_mtc_in_dropdown ();
 }
 
 void
@@ -1782,6 +2129,18 @@ TracksControlPanel::on_parameter_changed (const std::string& parameter_name)
 		display_saved_history_depth ();
 	} else if (parameter_name == "waveform fill") {
         display_waveform_color_fader ();
+    } else if (parameter_name == "ltc-source-port") {
+        display_ltc_in_source ();
+    } else if (parameter_name == "sync-source") {
+        display_current_sync_tool ();
+    } else if (parameter_name == "ltc-output-port") {
+        display_ltc_output_port ();
+    } else if (parameter_name == "send-ltc") {
+        display_enable_ltc_generator ();
+    } else if (parameter_name == "ltc-send-continuously") {
+        display_ltc_send_continuously ();
+    } else if (parameter_name == "ltc-output-volume") {
+        display_ltc_generator_level_fader ();
     }
 }
 
@@ -1879,7 +2238,7 @@ TracksControlPanel::on_midi_input_configuration_changed ()
         }
     }
     
-    populate_mtc_in_dropdown();
+    populate_mtc_in_dropdown ();
 }
 
 void
@@ -1908,7 +2267,7 @@ TracksControlPanel::on_midi_output_configuration_changed ()
 void
 TracksControlPanel::on_mtc_input_changed (const std::string&)
 {
-    // add actions here
+    display_mtc_in_source ();
 }
 
 std::string

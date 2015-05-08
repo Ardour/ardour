@@ -320,6 +320,7 @@
 		95D9E37F1A8D1B6600A0DA46 /* waves_ambiguous_file_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D9E37D1A8D1B6600A0DA46 /* waves_ambiguous_file_dialog.cc */; };
 		95D9E3801A8D1B6600A0DA46 /* waves_missing_file_dialog.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95D9E37E1A8D1B6600A0DA46 /* waves_missing_file_dialog.cc */; };
 		95E2A7AB1A8F652F0080BD79 /* waves_radio_item.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95E2A7AA1A8F652F0080BD79 /* waves_radio_item.xml */; };
+		95E5E9461AE946510000E2CE /* waves_tooltip.cc in Sources */ = {isa = PBXBuildFile; fileRef = 95E5E9451AE946510000E2CE /* waves_tooltip.cc */; };
 		95F9DFD71A35A8BD0007E953 /* waves_message_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD61A35A8BD0007E953 /* waves_message_dialog.xml */; };
 		95F9DFE01A35F3310007E953 /* waves_clean_up_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */; };
 		95F9DFE11A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml in Resources */ = {isa = PBXBuildFile; fileRef = 95F9DFD91A35F3310007E953 /* waves_connect_to_backend_error_dialog.xml */; };
@@ -1238,6 +1239,8 @@
 		95D9E37D1A8D1B6600A0DA46 /* waves_ambiguous_file_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_ambiguous_file_dialog.cc; path = ../waves_ambiguous_file_dialog.cc; sourceTree = "<group>"; };
 		95D9E37E1A8D1B6600A0DA46 /* waves_missing_file_dialog.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_missing_file_dialog.cc; path = ../waves_missing_file_dialog.cc; sourceTree = "<group>"; };
 		95E2A7AA1A8F652F0080BD79 /* waves_radio_item.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_radio_item.xml; sourceTree = "<group>"; };
+		95E5E9411AE9462B0000E2CE /* waves_tooltip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = waves_tooltip.h; path = ../waves_tooltip.h; sourceTree = "<group>"; };
+		95E5E9451AE946510000E2CE /* waves_tooltip.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = waves_tooltip.cc; path = ../waves_tooltip.cc; sourceTree = "<group>"; };
 		95ED5FF61A95F285006D39E4 /* route_inspector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = route_inspector.h; path = ../route_inspector.h; sourceTree = "<group>"; };
 		95F9DFD61A35A8BD0007E953 /* waves_message_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_message_dialog.xml; sourceTree = "<group>"; };
 		95F9DFD81A35F3310007E953 /* waves_clean_up_dialog.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = waves_clean_up_dialog.xml; sourceTree = "<group>"; };
@@ -1333,6 +1336,7 @@
 		43279040194EFF38003C9FEA /* source */ = {
 			isa = PBXGroup;
 			children = (
+				95E5E9451AE946510000E2CE /* waves_tooltip.cc */,
 				95D9E37D1A8D1B6600A0DA46 /* waves_ambiguous_file_dialog.cc */,
 				95D9E37E1A8D1B6600A0DA46 /* waves_missing_file_dialog.cc */,
 				95D5D1361A8A514300407F98 /* waves_numeric_edit_dialog.cc */,
@@ -2027,6 +2031,7 @@
 		43279480194F00CB003C9FEA /* headers */ = {
 			isa = PBXGroup;
 			children = (
+				95E5E9411AE9462B0000E2CE /* waves_tooltip.h */,
 				95ED5FF61A95F285006D39E4 /* route_inspector.h */,
 				95D9E37B1A8D1B5200A0DA46 /* waves_ambiguous_file_dialog.h */,
 				95D9E37C1A8D1B5200A0DA46 /* waves_missing_file_dialog.h */,
@@ -2822,6 +2827,7 @@
 				95D796131A7BB9E000120A4F /* waves_export_format_selector.cc in Sources */,
 				95D796111A7BB9E000120A4F /* waves_export_file_notebook.cc in Sources */,
 				CE294C7A19CAD54500D12768 /* soundcloud_export_selector.cc in Sources */,
+				95E5E9461AE946510000E2CE /* waves_tooltip.cc in Sources */,
 				CE294C7B19CAD54500D12768 /* waves_dropdown.cc in Sources */,
 				CE294C7C19CAD54500D12768 /* waves_grid.cc in Sources */,
 				CE294C7D19CAD54500D12768 /* waves_zoom_control.cc in Sources */,

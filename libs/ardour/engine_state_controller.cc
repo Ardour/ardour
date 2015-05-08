@@ -598,6 +598,86 @@ EngineStateController::_validate_current_device_state()
 }
 
 
+void
+EngineStateController::_update_ltc_source_port ()
+{
+    // this method is called if the list of ports is changed
+    
+    // check that ltc-in port from Config still exists
+    if (_audio_input_port_exists (get_ltc_source_port ())) {
+        // audio port, that was saved in Config, exists
+        return ;
+    }
+
+    //otherwise set first available audio port
+    if (!_current_state->input_channel_states.empty ()) {
+        set_ltc_source_port (_current_state->input_channel_states.front ().name);
+        return ;
+    }
+    
+    // no available audio-in ports
+    set_ltc_source_port ("");
+}
+
+void
+EngineStateController::_update_ltc_output_port ()
+{
+    // this method is called if the list of ports is changed
+    
+    // check that ltc-out port from Config still exists
+    if (_audio_output_port_exists (get_ltc_output_port ())) {
+        // audio port, that was saved in Config, exists
+        return ;
+    }
+
+    PortStateList* output_states;
+    if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        output_states = &_current_state->stereo_out_channel_states;
+    } else {
+        output_states = &_current_state->multi_out_channel_states;
+    }
+    
+    //otherwise set first available audio port
+    if (!output_states->empty ()) {
+        set_ltc_output_port (output_states->front ().name);
+        return ;
+    }
+    
+    // no available audio-out ports
+    set_ltc_output_port ("");
+}
+        
+
+bool
+EngineStateController::_audio_input_port_exists (const std::string& port_name)
+{
+    PortStateList::const_iterator iter = _current_state->input_channel_states.begin ();
+    for (; iter != _current_state->input_channel_states.end (); ++iter ) {
+        if (iter->name == port_name)
+            return true;
+    }
+    return false;
+}
+
+bool
+EngineStateController::_audio_output_port_exists (const std::string& port_name)
+{
+    PortStateList* output_states;
+    if (Config->get_output_auto_connect() & AutoConnectMaster) {
+        output_states = &_current_state->stereo_out_channel_states;
+    } else {
+        output_states = &_current_state->multi_out_channel_states;
+    }
+    
+    PortStateList::const_iterator iter = output_states->begin();
+    for (; iter != output_states->end (); ++iter ) {
+        if (iter->name == port_name)
+            return true;
+    }
+    return false;
+}
+
+
 const std::string&
 EngineStateController::get_current_backend_name() const
 {
@@ -787,7 +867,6 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
     // device is not supported by current backend
     return false;
 }
-
 
 
 bool
@@ -1200,7 +1279,7 @@ EngineStateController::set_all_midi_scene_outputs_disconnected()
 
 
 void
-EngineStateController::set_mtc_input(const std::string& port_name)
+EngineStateController::set_mtc_source_port (const std::string& port_name)
 {
     MidiPortStateList::iterator iter = _midi_inputs.begin();
     for (; iter != _midi_inputs.end(); ++iter) {
@@ -1215,7 +1294,11 @@ EngineStateController::set_mtc_input(const std::string& port_name)
         }
     }
     
-    MTCInputChanged(port_name);
+    if (_session && port_name.empty ()) {
+        _session->reconnect_mtc_ports ();
+    }
+    
+    MTCInputChanged (port_name);
 }
 
 
@@ -1336,6 +1419,10 @@ EngineStateController::_on_session_loaded ()
     _session->reconnect_mtc_ports ();
     _session->reconnect_mmc_ports (true);
     _session->reconnect_mmc_ports (false);
+    
+    // This is done during session construction
+    // _session->reconnect_ltc_input ();
+    // _session->reconnect_ltc_output ();
 	
     framecnt_t desired_sample_rate = _session->nominal_frame_rate ();
     if ( desired_sample_rate > 0 && set_new_sample_rate_in_controller(desired_sample_rate) )
@@ -1677,9 +1764,15 @@ EngineStateController::_on_ports_registration_update ()
         
         _session->reconnect_mmc_ports (true);
         _session->reconnect_mmc_ports (false);
+        
+        _session->reconnect_ltc_input ();
+        _session->reconnect_ltc_output ();
     }
     
-    PortRegistrationChanged(); // emit a signal
+    _update_ltc_source_port ();
+    _update_ltc_output_port ();
+    
+    PortRegistrationChanged (); // emit a signal
 }
 
 
@@ -1703,6 +1796,15 @@ EngineStateController::push_current_state_to_backend(bool start)
     if (state_changed) {
 
         if (was_running) {
+            
+            if (_current_state->device_name != backend->device_name()) {
+                // device has been changed
+                // the list of ports has been changed too
+                // current ltc_source_port and ltc_output_port aren't available
+                set_ltc_source_port ("");
+                set_ltc_output_port ("");
+            }
+            
             if (AudioEngine::instance()->stop () ) {
                 return false;
             }
@@ -1764,3 +1866,42 @@ EngineStateController::push_current_state_to_backend(bool start)
     
     return true;
 }
+
+
+std::string
+EngineStateController::get_mtc_source_port ()
+{
+    MidiPortStateList::const_iterator state_iter = _midi_inputs.begin();
+    for (; state_iter != _midi_inputs.end(); ++state_iter) {
+        if (state_iter->available && state_iter->mtc_in) {
+            return (state_iter->name);
+        }
+    }
+    
+    return "";
+}
+
+void
+EngineStateController::set_ltc_source_port (const std::string& port)
+{
+    Config->set_ltc_source_port (port);
+}
+
+std::string
+EngineStateController::get_ltc_source_port ()
+{
+    return Config->get_ltc_source_port ();
+}
+
+void
+EngineStateController::set_ltc_output_port (const std::string& port)
+{
+    Config->set_ltc_output_port (port);
+}
+
+std::string
+EngineStateController::get_ltc_output_port ()
+{
+    return Config->get_ltc_output_port ();
+}
+

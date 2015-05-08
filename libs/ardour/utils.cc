@@ -466,8 +466,12 @@ ARDOUR::string_to_sync_source (string str)
 	if (str == _("JACK")) {
 		return Engine;
 	}
-
-	fatal << string_compose (_("programming error: unknown sync source string \"%1\""), str) << endmsg;
+    
+    if (str == _("LTC")) {
+        return LTC;
+    }
+    
+    fatal << string_compose (_("programming error: unknown sync source string \"%1\""), str) << endmsg;
 	/*NOTREACHED*/
 	return Engine;
 }

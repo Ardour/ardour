@@ -48,6 +48,10 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	Gtk::VBox& _device_capture_list;
 	Gtk::VBox& _device_playback_list;
 	Gtk::VBox& _midi_device_list;
+    Gtk::VBox& _enable_ltc_generator_vbox;
+    Gtk::VBox& _ltc_output_port_vbox;
+    Gtk::VBox& _ltc_generator_level_vbox;
+    Gtk::HBox& _ltc_send_continuously_hbox;
     WavesButton& _all_inputs_on_button;
     WavesButton& _all_inputs_off_button;
     WavesButton& _all_outputs_on_button;
@@ -56,10 +60,12 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	Gtk::Container& _midi_settings_tab;
 	Gtk::Container& _session_settings_tab;
 	Gtk::Container& _general_settings_tab;
+    Gtk::Container& _sync_settings_tab;
 	WavesButton& _audio_settings_tab_button;
 	WavesButton& _midi_settings_tab_button;
 	WavesButton& _session_settings_tab_button;
 	WavesButton& _general_settings_tab_button;
+    WavesButton& _sync_settings_tab_button;
 	WavesButton& _multi_out_button;
 	WavesButton& _stereo_out_button;
 	WavesButton& _ok_button;
@@ -71,11 +77,14 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
     WavesButton& _name_tracks_after_driver;
     WavesButton& _reset_tracks_name_to_default;
     Gtk::Adjustment& _color_adjustment;
+    Gtk::Adjustment& _ltc_generator_level_adjustment;
     Gtk::Container& _color_box;
 	WavesButton& _obey_mmc_commands_button;
 	WavesButton& _send_mmc_commands_button;
 	WavesButton& _dc_bias_against_denormals_button;
 	WavesButton& _copy_imported_files_button;
+    WavesButton& _enable_ltc_generator_button;
+    WavesButton& _ltc_send_continuously_button;
 	Gtk::SpinButton& _inbound_mmc_device_spinbutton;
 	Gtk::SpinButton& _outbound_mmc_device_spinbutton;
 	Gtk::SpinButton& _limit_undo_history_spinbutton;
@@ -84,7 +93,6 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesDropdown& _device_dropdown;
 	WavesDropdown& _sample_rate_dropdown;
 	WavesDropdown& _buffer_size_dropdown;
-    WavesDropdown& _mtc_in_dropdown;
 	WavesDropdown& _file_type_dropdown;
 	WavesDropdown& _bit_depth_dropdown;
 	WavesDropdown& _frame_rate_dropdown;
@@ -95,10 +103,16 @@ class TracksControlPanel : public WavesDialog, public PBD::ScopedConnectionList 
 	WavesDropdown& _peak_hold_time_dropdown;
 	WavesDropdown& _dpm_fall_off_dropdown;
 	WavesDropdown& _hard_disk_buffering_dropdown;
-
+    WavesDropdown& _sync_tool_dropdown;
+    WavesDropdown& _mtc_in_dropdown;
+    WavesDropdown& _ltc_in_dropdown;
+    WavesDropdown& _ltc_out_dropdown;
+    
     Gtk::Label& _latency_label;
     Gtk::Label& _default_open_path;
-
+    Gtk::Label& _ltc_generator_level_label;
+    
+    Gtk::Layout& _sync_input_port_layout;
     
 #include "tracks_control_panel.logic.h"
 };

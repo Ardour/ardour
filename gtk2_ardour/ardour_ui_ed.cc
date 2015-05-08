@@ -77,6 +77,7 @@ using namespace Glib;
 
  //recent session menuitem id
 static const std::string recent_session_menuitem_id="recent-session-";
+
 int
 ARDOUR_UI::create_editor ()
 {
@@ -96,6 +97,8 @@ ARDOUR_UI::create_editor ()
                 _timecode_source_dropdown = &editor->get_waves_dropdown("timecode_selector_dropdown");
                 _mtc_idle_icon = &editor->get_image("mtc_idle_icon");
                 _mtc_sync_icon = &editor->get_image("mtc_sync_icon");
+                _ltc_idle_icon = &editor->get_image("ltc_idle_icon");
+                _ltc_sync_icon = &editor->get_image("ltc_sync_icon");
         
                 _tracks_button = &editor->get_waves_button("tracks_button");
 	}
@@ -149,6 +152,7 @@ ARDOUR_UI::populate_display_format_dropdown ()
     _display_format_dropdown->set_text( format );
 }
 
+
 void
 ARDOUR_UI::populate_timecode_source_dropdown ()
 {
@@ -158,61 +162,80 @@ ARDOUR_UI::populate_timecode_source_dropdown ()
     timecode_source.clear();
     timecode_source.push_back("Internal");
     timecode_source.push_back("MTC");
-    
-    // GZ: Is Not available in current Waves TracksLive version
-    //timecode_source.push_back("LTC");
+    timecode_source.push_back("LTC");
         
     for(int i = 0; i < timecode_source.size(); ++i)
     {
         _timecode_source_dropdown->add_menu_item (timecode_source[i], &timecode_source[i]);
     }
     
-    if( !_session )
-        return;
-    
-    bool use_external_timecode_source = _session->config.get_external_sync ();
-    
-    if (use_external_timecode_source)
-    {
-        if ( Config->get_sync_source() == MTC )
-            _timecode_source_dropdown->set_text (timecode_source[1]);//"MTC"
-        
-        // GZ: LTC is not available in current version of Waves TracksLive
-        /*
-        else
-            _timecode_source_dropdown->set_text (timecode_source[2]);//"LTC"
-         */
-        
-    } else {
-        _timecode_source_dropdown->set_text (timecode_source[0]);//Internal
-    }
-    
-    update_timecode_source_dropdown_items();
+    update_timecode_source_dropdown_items ();
 }
 
+
 void
-ARDOUR_UI::update_timecode_source_dropdown_items()
+ARDOUR_UI::update_timecode_source_dropdown_items ()
 {
+    
     if (!_session) {
         return;
     }
     
+    // update visibility of dropdowm items
     Gtk::MenuItem* mtc_item = _timecode_source_dropdown->get_item ("MTC");
-    
     if (mtc_item) {
-        if (_session->mtc_input_port()->connected() ) {
-            mtc_item->set_sensitive(true);
+        if (_session->mtc_input_port ()->connected () && Config->get_sync_source () == MTC ) {
+            mtc_item->set_visible (true);
         } else {
-            mtc_item->set_sensitive(false);
+            mtc_item->set_visible (false);
         }
     }
+   
+    Gtk::MenuItem* ltc_item = _timecode_source_dropdown->get_item ("LTC");
+    if (ltc_item) {
+        if (_session->ltc_input_port ()->connected () && Config->get_sync_source () == LTC ) {
+            ltc_item->set_visible (true);
+        } else {
+            ltc_item->set_visible (false);
+        }
+    }
+    
+    // set appropriate dropdown item
+    bool use_external_timecode_source = _session->config.get_external_sync ();
+    
+    if (use_external_timecode_source)
+    {
+        // set appropriate indicator
+        switch (Config->get_sync_source()) {
+            case (MTC):
+                set_mtc_indicator_active (_session->synced_to_mtc() );
+                _timecode_source_dropdown->set_current_item (1);
+                break;
+            case (LTC):
+                set_ltc_indicator_active (_session->synced_to_ltc() );
+                _timecode_source_dropdown->set_current_item (2);
+                break;
+            default:
+                fatal << "ARDOUR_UI::update_timecode_source_dropdown_items - unsupported sync tool was used " << endmsg;
+        }
+        
+    } else {
+        // Internal timecode source is used - hide MTC and LTC indicator
+        hide_mtc_indicator ();
+        hide_ltc_indicator ();
+        _timecode_source_dropdown->set_current_item (0); //Internal
+    }
 }
+
 
 void
 ARDOUR_UI::set_mtc_indicator_active (bool set_active)
 {
-    _mtc_sync_icon->set_visible (set_active);
-    _mtc_idle_icon->set_visible (!set_active);
+    // we should show just if MTC sync tool was chosen
+    if (_session->config.get_external_sync () && Config->get_sync_source() == MTC) {
+        _mtc_sync_icon->set_visible (set_active);
+        _mtc_idle_icon->set_visible (!set_active);
+    }
 }
 
 void
@@ -221,6 +244,24 @@ ARDOUR_UI::hide_mtc_indicator ()
     _mtc_sync_icon->set_visible (false);
     _mtc_idle_icon->set_visible (false);
 }
+
+void
+ARDOUR_UI::set_ltc_indicator_active (bool set_active)
+{
+    // we should show just if LTC sync tool was chosen
+    if (_session->config.get_external_sync () && Config->get_sync_source() == LTC) {
+        _ltc_sync_icon->set_visible (set_active);
+        _ltc_idle_icon->set_visible (!set_active);
+    }
+}
+
+void
+ARDOUR_UI::hide_ltc_indicator ()
+{
+    _ltc_sync_icon->set_visible (false);
+    _ltc_idle_icon->set_visible (false);
+}
+
 
 void
 ARDOUR_UI::on_time_info_box_mode_changed ()
@@ -296,15 +337,11 @@ ARDOUR_UI::on_timecode_source_dropdown_item_clicked (WavesDropdown* dropdown, in
         _session->config.set_external_sync (false);
     } else if ( timecode_source == "MTC" )
     {
-        Config->set_sync_source (MTC);
+        _session->config.set_external_sync (true);
+    } else if ( timecode_source == "LTC" )
+    {
         _session->config.set_external_sync (true);
     }
-    // GZ: LTC is not available in current version of Waves TracksLive
-    /* else if ( timecode_source == "LTC" )
-    {
-        Config->set_sync_source (LTC);
-        _session->config.set_external_sync (true);        
-    } */
 }
 
 void

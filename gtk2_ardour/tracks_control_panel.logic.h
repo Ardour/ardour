@@ -24,9 +24,15 @@
         AudioSystemSettingsTab,
         MIDISystemSettingsTab,
         SessionSettingsTab,
-        PreferencesTab
+        PreferencesTab,
+        SyncTab
     };
     void show_and_open_tab (int);
+
+    enum SyncSourceTracks { // as we use these values in XML let's define them explicitely for easy reading.
+        MTC = 0,
+        LTC = 1
+    };
 
   private:
 
@@ -84,18 +90,30 @@
 	void buffer_size_changed ();
 	void on_buffer_size_dropdown_item_clicked (WavesDropdown*, int);
 	void on_sample_rate_dropdown_item_clicked (WavesDropdown*, int);
-    void on_mtc_input_chosen (WavesDropdown*, int);
     void engine_running ();
     void engine_stopped ();
 	void on_file_type_dropdown_item_clicked (WavesDropdown*, int);
     void on_bit_depth_dropdown_item_clicked (WavesDropdown*, int);
     void on_frame_rate_item_clicked (WavesDropdown*, int);
 
-	void populate_engine_dropdown ();
+    void on_mtc_in_dropdown_changed (WavesDropdown*, int);
+    void mtc_in_dropdown_change (int);
+    void on_ltc_in_dropdown_changed (WavesDropdown*, int);
+    void ltc_in_dropdown_change (int);
+    void on_sync_tool_dropdown_changed (WavesDropdown*, int);
+    void on_ltc_out_dropdown_changed (WavesDropdown*, int);
+    void on_ltc_send_continuously_button (WavesButton*);
+    void set_ltc_generator_status (bool);
+    void on_enable_ltc_generator_button (WavesButton*);
+    void ltc_generator_level_adjustment_changed ();
+
+    void populate_engine_dropdown ();
 	void populate_device_dropdown ();
 	void populate_sample_rate_dropdown ();
 	void populate_buffer_size_dropdown ();
     void populate_mtc_in_dropdown ();
+    void populate_ltc_in_dropdown ();
+    void populate_ltc_out_dropdown ();
 	void populate_output_mode ();
     void populate_input_channels();
     void populate_output_channels();
@@ -129,6 +147,14 @@
     void reject ();
 
 	// Merged ARDOUR's preferences
+    void display_current_sync_tool ();
+    void display_ltc_in_source ();
+    void display_mtc_in_source ();
+    void display_ltc_output_port ();
+    void display_enable_ltc_generator ();
+    void display_ltc_send_continuously ();
+    void display_ltc_generator_level_fader ();
+
 	void display_waveform_shape ();
 	void display_meter_hold ();
 	void display_meter_falloff ();
@@ -143,6 +169,9 @@
 	void display_denormal_protection ();
 	void display_general_preferences ();
 	void save_general_preferences ();
+
+    void ltc_output_settings_set_visible (bool);
+    void ltc_generator_settings_set_visible (bool);
 
     void cleanup_input_channels_list();
     void cleanup_output_channels_list();

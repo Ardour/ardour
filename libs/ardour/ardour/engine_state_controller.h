@@ -262,6 +262,7 @@ public:
      */
     bool                get_physical_audio_output_state(const std::string& port_name);
     
+
     /** Get vector of all enabled MIDI input port names.
      *
      * @param[out] channel_states - vector of enabled inputs
@@ -272,6 +273,34 @@ public:
      * @param[out] channel_states - vector of enabled outputs
      */
     void                get_physical_midi_output_states (std::vector<MidiPortState>& channel_states);
+
+    /** Get name of mtc source port
+     *
+     * return name of mtc source port
+     */
+    std::string          get_mtc_source_port ();
+
+    /** Set ltc source port
+     *
+     * @param[in] port - name of ltc source port
+     */
+    void                set_ltc_source_port (const std::string& port);
+    /** Get name of ltc source port
+     *
+     * return name of ltc source port
+     */
+    std::string          get_ltc_source_port ();
+    
+    /** Set ltc output port
+     *
+     * @param[in] port - name of ltc output port
+     */
+    void                set_ltc_output_port (const std::string&);
+    /** Get name of ltc output port
+     *
+     * return name of ltc output port
+     */
+    std::string         get_ltc_output_port ();
     
     /** Set state of the specified MIDI input port.
      *
@@ -324,7 +353,7 @@ public:
      * @note There is a sense to choose MIDI TimeCode input only because
      * our MIDI TimeCode is propagated to all midi output ports.
      */
-    void                set_mtc_input(const std::string&);
+    void                set_mtc_source_port (const std::string&);
     
     /** Check if AudioEngine setup is required
      * @return true if setup is required, otherwise - false
@@ -542,8 +571,27 @@ private:
     /** make sure that current device parameters are supported and fit session requirements
      * @return true if current state is valid and all parameters are supported, otherwise - false
      */
-    bool _validate_current_device_state();
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	bool _validate_current_device_state();
+
+    /** change ltc source port in case of the input ports list change
+     */
+    void _update_ltc_source_port ();
+    /** change ltc source port in case of the output ports list change
+     */
+    void _update_ltc_output_port ();
+    
+    /** check that port is still existed in the list of input ports
+     @param[in] port - port name
+     @return true if current port is existed, otherwise - false
+     */
+    bool _audio_input_port_exists (const std::string& port);
+    /** check that port is still existed in the list of output ports
+     @param[in] port - port name
+     @return true if current port is existed, otherwise - false
+     */
+    bool _audio_output_port_exists (const std::string& port);
+
+
 
     ////////////////////////////////////////
     // callbacks

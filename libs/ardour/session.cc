@@ -201,6 +201,7 @@ Session::Session (AudioEngine &eng,
 	, have_first_delta_accumulator (false)
 	, _slave_state (Stopped)
     , _mtc_active (false)
+    , _ltc_active (false)
 	, post_export_sync (false)
 	, post_export_position (0)
 	, _exporting (false)
@@ -2564,17 +2565,20 @@ Session::reconnect_mtc_ports()
         std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
         
         for (; state_iter != midi_port_states.end(); ++state_iter) {
-            if (state_iter->active && state_iter->available && state_iter->mtc_in) {
+            if (state_iter->available && state_iter->mtc_in) {
                 mtc_in_ptr->connect (state_iter->name);
             }
         }
         
-        if (!_midi_ports->mtc_input_port()->connected() &&
-            config.get_external_sync () ) {
+        if (!_midi_ports->mtc_input_port ()->connected () &&
+          config.get_external_sync () &&
+          (Config->get_sync_source () == MTC) ) {
             config.set_external_sync (false);
         }
-        
-        MTCInputPortChanged(); //emit signal
+        if ( ARDOUR::Profile->get_trx () ) {
+            // Tracks need this signal to update timecode_source_dropdown
+            MtcOrLtcInputPortChanged (); //emit signal
+        }
     }
 }
 
@@ -6153,9 +6157,7 @@ Session::ltc_output_port () const
 void
 Session::reconnect_ltc_input ()
 {
-    // GZ: Waves Tracks - ltc is disabled for this version
 	if (_ltc_input) {
-#if 0
 		string src = Config->get_ltc_source_port();
 
 		_ltc_input->disconnect (this);
@@ -6163,24 +6165,25 @@ Session::reconnect_ltc_input ()
 		if (src != _("None") && !src.empty())  {
 			_ltc_input->nth (0)->connect (src);
 		}
-#endif
+        if ( ARDOUR::Profile->get_trx () ) {
+            // Tracks need this signal to update timecode_source_dropdown
+            MtcOrLtcInputPortChanged (); //emit signal
+        }
 	}
 }
 
 void
 Session::reconnect_ltc_output ()
 {
-    // GZ: Waves Tracks - ltc is disabled for this version
 	if (_ltc_output) {
-#if 0
-		string src = Config->get_ltc_sink_port();
+
+		string src = Config->get_ltc_output_port();
 
 		_ltc_output->disconnect (this);
 
 		if (src != _("None") && !src.empty())  {
 			_ltc_output->nth (0)->connect (src);
 		}
-#endif
 	}
 }
 

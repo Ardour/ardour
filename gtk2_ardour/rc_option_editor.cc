@@ -1601,10 +1601,10 @@ RCOptionEditor::RCOptionEditor ()
 			 ));
 
 	add_option (_("Transport"), _sync_source_2997);
-
+    
 	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Reader")));
 
-	_ltc_port = new ComboStringOption (
+	_ltc_source_port = new ComboStringOption (
 		"ltc-source-port",
 		_("LTC incoming port"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_source_port),
@@ -1614,9 +1614,9 @@ RCOptionEditor::RCOptionEditor ()
 	vector<string> physical_inputs;
 	physical_inputs.push_back (_("None"));
 	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
-	_ltc_port->set_popdown_strings (physical_inputs);
+	_ltc_source_port->set_popdown_strings (physical_inputs);
 
-	add_option (_("Transport"), _ltc_port);
+	add_option (_("Transport"), _ltc_source_port);
 
 	// TODO; rather disable this button than not compile it..
 	add_option (_("Transport"), new OptionEditorHeading (S_("LTC Generator")));
