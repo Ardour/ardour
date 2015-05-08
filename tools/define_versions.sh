@@ -12,8 +12,26 @@ GIT_REV_REGEXP='([0-9][0-9]*)\.([0-9][0-9]*)\-?(rc[0-9]*)?-?([0-9][0-9]*)?(-g([a
 
 major_version=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\1/"`
 minor_version=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\2/"`
+
+# Tracks tags with "MAJOR.MINOR.MICRO"
+# Ardour doesn't use this
+
+micro_version=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\3/"`
+
+#
+# RC e.g. 8.1-rc3 (optional)
+# Tracks does not use -rcN based tagging
+#
 rc=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\3/"`
+
+#
+# revision count since tag
+#
 r=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\4/"`
+
+#
+# git short sha1 commit ID
+#
 commit=`cut -d'"' -f2 < ../../libs/ardour/revision.cc | sed $EXTENDED_RE -e 1d -e "s/$GIT_REV_REGEXP/\6/"`
 
 if [ "x$rc" != "x" ] ; then
