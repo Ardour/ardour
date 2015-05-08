@@ -5093,19 +5093,21 @@ Session::update_route_record_state ()
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 
-    
-    i = rl->begin();
-	while (i != rl->end ()) {
-        
+	for (i = rl->begin(); i != rl->end (); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && !tr->record_enabled ()) {
 			break;
 		}
-        
-		++i;
 	}
     
-    g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
+	g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
+
+	bool record_arm_state_changed = (old != g_atomic_int_get (&_have_rec_enabled_track) );
+    
+	if (record_status() == Recording && record_arm_state_changed ) {
+		RecordArmStateChanged ();
+	}
+	
 }
 
 void
