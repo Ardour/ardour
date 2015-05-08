@@ -39,6 +39,7 @@ using namespace PBD;
 namespace {
 
 	const char * const recent_file_name = "recent";
+	const char * const recent_templates_file_name = "recent_templates";
 
 } // anonymous
 
@@ -85,6 +86,38 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 }
 
 int
+ARDOUR::read_recent_templates (std::deque<std::string>& rt)
+{
+	std::string path = Glib::build_filename (user_config_directory(), recent_templates_file_name);
+
+	ifstream recent (path.c_str());
+
+	if (!recent) {
+		if (errno != ENOENT) {
+			error << string_compose (_("cannot open recent template file %1 (%2)"), path, strerror (errno)) << endmsg;
+			return -1;
+		} else {
+			return 1;
+		}
+	}
+
+	while (true) {
+
+		std::string session_template_full_name;
+
+		getline(recent, session_template_full_name);
+
+		if (!recent.good()) {
+			break;
+		}
+
+		rt.push_back (session_template_full_name);
+	}
+
+	return 0;
+}
+
+int
 ARDOUR::write_recent_sessions (RecentSessions& rs)
 {
 	std::string path = Glib::build_filename (user_config_directory(), recent_file_name);
@@ -97,6 +130,24 @@ ARDOUR::write_recent_sessions (RecentSessions& rs)
 
 	for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 		recent << (*i).first << '\n' << (*i).second << endl;
+	}
+
+	return 0;
+}
+
+int
+ARDOUR::write_recent_templates (std::deque<std::string>& rt)
+{
+	std::string path = Glib::build_filename (user_config_directory(), recent_templates_file_name);
+
+	std::ofstream recent (path.c_str());
+
+	if (!recent) {
+		return -1;
+	}
+
+	for (std::deque<std::string>::const_iterator i = rt.begin(); i != rt.end(); ++i) {
+		recent << (*i) << std::endl;
 	}
 
 	return 0;
@@ -127,6 +178,28 @@ ARDOUR::store_recent_sessions (string name, string path)
 	}
 
 	return ARDOUR::write_recent_sessions (rs);
+}
+
+int
+ARDOUR::store_recent_templates (const std::string& session_template_full_name)
+{
+	std::deque<std::string> rt;
+
+	if (ARDOUR::read_recent_templates (rt) < 0) {
+		return -1;
+	}
+
+	rt.erase(remove (rt.begin(), rt.end(), session_template_full_name), rt.end());
+
+	rt.push_front (session_template_full_name);
+
+	uint32_t max_recent_templates = Config->get_max_recent_templates ();
+
+	if (rt.size() > max_recent_templates) {
+		rt.erase( rt.begin() + max_recent_templates, rt.end ());
+	}
+
+	return ARDOUR::write_recent_templates (rt);
 }
 
 int

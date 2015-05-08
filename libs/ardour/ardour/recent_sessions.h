@@ -30,8 +30,11 @@ namespace ARDOUR {
 	typedef std::deque<std::pair<std::string,std::string> > RecentSessions;
 
 	LIBARDOUR_API int read_recent_sessions (RecentSessions& rs);
+	LIBARDOUR_API int read_recent_templates (std::deque<std::string>& rt);
 	LIBARDOUR_API int store_recent_sessions (std::string name, std::string path);
+	LIBARDOUR_API int store_recent_templates (const std::string& session_template_full_name);
 	LIBARDOUR_API int write_recent_sessions (RecentSessions& rs);
+	LIBARDOUR_API int write_recent_templates (std::deque<std::string>& rt);
 	LIBARDOUR_API int remove_recent_sessions (const std::string& path);
 }; // namespace ARDOUR
 
