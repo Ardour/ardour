@@ -118,7 +118,7 @@ ExportHandler::ExportHandler (Session & session)
 
 ExportHandler::~ExportHandler ()
 {
-    graph_builder->cleanup (export_status->aborted () );
+	graph_builder->cleanup (export_status->aborted () );
 }
 
 /** Add an export to the `to-do' list */

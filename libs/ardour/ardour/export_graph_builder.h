@@ -68,7 +68,7 @@ class LIBARDOUR_API ExportGraphBuilder
 	unsigned get_normalize_cycle_count() const;
 
 	void reset ();
-    void cleanup (bool remove_out_files = false);
+	void cleanup (bool remove_out_files = false);
 	void set_current_timespan (boost::shared_ptr<ExportTimespan> span);
 	void add_config (FileSpec const & config);
 
@@ -77,16 +77,16 @@ class LIBARDOUR_API ExportGraphBuilder
 	void add_split_config (FileSpec const & config);
     
 	class Encoder {
-	  public:
+            public:
 		template <typename T> boost::shared_ptr<AudioGrapher::Sink<T> > init (FileSpec const & new_config);
 		void add_child (FileSpec const & new_config);
-        void remove_children ();
-        void destroy_writer (bool delete_out_file);
+		void remove_children ();
+		void destroy_writer (bool delete_out_file);
 		bool operator== (FileSpec const & other_config) const;
 
 		static int get_real_format (FileSpec const & config);
 
-	  private:
+	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<Sample> > FloatWriterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<int> >    IntWriterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SndfileWriter<short> >  ShortWriterPtr;
@@ -98,7 +98,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		std::list<ExportFilenamePtr> filenames;
 		PBD::ScopedConnection  copy_files_connection;
 
-        std::string writer_filename;
+		std::string writer_filename;
         
 		// Only one of these should be available at a time
 		FloatWriterPtr float_writer;
@@ -108,15 +108,15 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	// sample format converter
 	class SFC {
-	  public:
+            public:
 		// This constructor so that this can be constructed like a Normalizer
 		SFC (ExportGraphBuilder &, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
-        void remove_children (bool remove_out_files);
+		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
-	  private:
+	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<Sample> > FloatConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<int> >   IntConverterPtr;
 		typedef boost::shared_ptr<AudioGrapher::SampleFormatConverter<short> > ShortConverterPtr;
@@ -132,11 +132,11 @@ class LIBARDOUR_API ExportGraphBuilder
 	};
 
 	class Normalizer {
-	  public:
+	                                        public:
 		Normalizer (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
-        void remove_children (bool remove_out_files);
+		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
 		unsigned get_normalize_cycle_count() const;
@@ -144,7 +144,7 @@ class LIBARDOUR_API ExportGraphBuilder
 		/// Returns true when finished
 		bool process ();
 
-	  private:
+	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::PeakReader> PeakReaderPtr;
 		typedef boost::shared_ptr<AudioGrapher::Normalizer> NormalizerPtr;
 		typedef boost::shared_ptr<AudioGrapher::TmpFile<Sample> > TmpFilePtr;
@@ -170,15 +170,15 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	// sample rate converter
 	class SRC {
-	  public:
+            public:
 		SRC (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
-        void remove_children (bool remove_out_files);
+		void remove_children (bool remove_out_files);
         
 		bool operator== (FileSpec const & other_config) const;
 
-	  private:
+	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::SampleRateConverter> SRConverterPtr;
 
 		template<typename T>
@@ -194,14 +194,14 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	// Silence trimmer + adder
 	class SilenceHandler {
-	  public:
+	    public:
 		SilenceHandler (ExportGraphBuilder & parent, FileSpec const & new_config, framecnt_t max_frames);
 		FloatSinkPtr sink ();
 		void add_child (FileSpec const & new_config);
-        void remove_children (bool remove_out_files);
+		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
-	  private:
+	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::SilenceTrimmer<Sample> > SilenceTrimmerPtr;
 
 		ExportGraphBuilder & parent;
@@ -213,13 +213,13 @@ class LIBARDOUR_API ExportGraphBuilder
 
 	// channel configuration
 	class ChannelConfig {
-	  public:
+	    public:
 		ChannelConfig (ExportGraphBuilder & parent, FileSpec const & new_config, ChannelMap & channel_map);
 		void add_child (FileSpec const & new_config);
-        void remove_children (bool remove_out_files);
+		void remove_children (bool remove_out_files);
 		bool operator== (FileSpec const & other_config) const;
 
-	  private:
+	                                        private:
 		typedef boost::shared_ptr<AudioGrapher::Interleaver<Sample> > InterleaverPtr;
 		typedef boost::shared_ptr<AudioGrapher::Chunker<Sample> > ChunkerPtr;
 
