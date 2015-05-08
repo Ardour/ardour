@@ -35,6 +35,7 @@ public:
 	std::string new_name () const;
 	
 	bool switch_to () const;
+	bool include_media () const;
 	bool copy_media () const;
 	bool copy_external () const;
 
@@ -44,10 +45,12 @@ private:
 	Gtk::CheckButton switch_to_button;
 	Gtk::CheckButton copy_media_button;
 	Gtk::CheckButton copy_external_button;
+	Gtk::CheckButton no_include_media_button;
 	Gtk::FileChooserButton new_parent_folder_selector;
 	Gtk::Entry new_name_entry;
 
 	void name_entry_changed ();
+	void no_include_toggled ();
 };
 
 #endif /* __ardour_gtk_tempo_dialog_h__ */

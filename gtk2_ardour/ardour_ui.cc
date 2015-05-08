@@ -2445,7 +2445,8 @@ ARDOUR_UI::save_session_as ()
 	sa.switch_to = save_as_dialog->switch_to();
 	sa.copy_media = save_as_dialog->copy_media();
 	sa.copy_external = save_as_dialog->copy_external();
-
+	sa.include_media = save_as_dialog->include_media ();
+	
 	/* this signal will be emitted from within this, the calling thread,
 	 * after every file is copied. It provides information on percentage
 	 * complete (in terms of total data to copy), the number of files
@@ -2463,6 +2464,11 @@ ARDOUR_UI::save_session_as ()
 		/* ERROR MESSAGE */
 		MessageDialog msg (string_compose (_("Save As failed: %1"), sa.failure_message));
 		msg.run ();
+	}
+
+	if (!sa.include_media) {
+		unload_session (false);
+		load_session (sa.final_session_folder_name, sa.new_name);
 	}
 }
 
