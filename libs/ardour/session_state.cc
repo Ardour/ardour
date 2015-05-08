@@ -1985,26 +1985,28 @@ Session::XMLSourceFactory (const XMLNode& node)
 int
 Session::save_template (string template_name)
 {
-	XMLTree tree;
-
-	if (_state_of_the_state & CannotSave) {
+	if ((_state_of_the_state & CannotSave) || template_name.empty ()) {
 		return -1;
 	}
 
-	std::string user_template_dir(user_template_directory());
+	bool absolute_path = Glib::path_is_absolute (template_name);
 
-	if (g_mkdir_with_parents (user_template_dir.c_str(), 0755) != 0) {
-		error << string_compose(_("Could not create templates directory \"%1\" (%2)"),
-				user_template_dir, g_strerror (errno)) << endmsg;
-		return -1;
-	}
-
-	tree.set_root (&get_template());
-
-	std::string template_dir_path(user_template_dir);
-	
 	/* directory to put the template in */
-	template_dir_path = Glib::build_filename (template_dir_path, template_name);
+	std::string template_dir_path;
+
+	if (!absolute_path) {
+		std::string user_template_dir(user_template_directory());
+
+		if (g_mkdir_with_parents (user_template_dir.c_str(), 0755) != 0) {
+			error << string_compose(_("Could not create templates directory \"%1\" (%2)"),
+					user_template_dir, g_strerror (errno)) << endmsg;
+			return -1;
+		}
+
+		template_dir_path = Glib::build_filename (user_template_dir, template_name);
+	} else {
+		template_dir_path = template_name;
+	}
 
 	if (Glib::file_test (template_dir_path, Glib::FILE_TEST_EXISTS)) {
 		warning << string_compose(_("Template \"%1\" already exists - new version not created"),
@@ -2019,9 +2021,16 @@ Session::save_template (string template_name)
 	}
 
 	/* file to write */
-	std::string template_file_path(template_dir_path);
-	template_file_path = Glib::build_filename (template_file_path, template_name + template_suffix);
+	std::string template_file_path;
+	if (absolute_path) {
+		template_file_path = Glib::build_filename (template_dir_path, Glib::path_get_basename (template_dir_path) + template_suffix);
+	} else {
+		template_file_path = Glib::build_filename (template_dir_path, template_name + template_suffix);
+	}
 
+	XMLTree tree;
+
+	tree.set_root (&get_template());
 	if (!tree.write (template_file_path)) {
 		error << _("template not saved") << endmsg;
 		return -1;
@@ -2029,8 +2038,7 @@ Session::save_template (string template_name)
 
 	/* copy plugin state directory */
 
-	std::string template_plugin_state_path(template_dir_path);
-	template_plugin_state_path = Glib::build_filename (template_plugin_state_path, X_("plugins"));
+	std::string template_plugin_state_path (Glib::build_filename (template_dir_path, X_("plugins")));
 
 	if (g_mkdir_with_parents (template_plugin_state_path.c_str(), 0755) != 0) {
 		error << string_compose(_("Could not create directory for Session template plugin state\"%1\" (%2)"),
