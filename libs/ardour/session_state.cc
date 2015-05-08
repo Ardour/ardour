@@ -100,6 +100,7 @@
 #include "ardour/playlist_source.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
+#include "ardour/profile.h"
 #include "ardour/proxy_controllable.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/region_factory.h"
@@ -2071,6 +2072,8 @@ Session::save_template (string template_name)
 		}
 		copy_files (plugins_dir(), template_plugin_state_path);
 	}
+
+	store_recent_templates (template_file_path);
 
 	return 0;
 }

@@ -306,8 +306,11 @@ Session::Session (AudioEngine &eng,
 		 * of a template.
 		 */
 
-		if (!mix_template.empty() && load_state (_current_snapshot_name)) {
-			throw failed_constructor ();
+		if (!mix_template.empty()) { 
+			if (load_state (_current_snapshot_name)) {
+				throw failed_constructor ();
+			}
+			store_recent_templates (mix_template);
 		}
 
 		/* load default session properties - if any */
