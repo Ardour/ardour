@@ -2375,6 +2375,8 @@ Session::reconnect_existing_routes (bool withLock, bool reconnect_master, bool r
          */
 }
 
+#ifdef USE_TRACKS_CODE_FEATURES
+
 void
 Session::reconnect_midi_scene_ports(bool inputs)
 {
@@ -2409,6 +2411,7 @@ Session::reconnect_midi_scene_ports(bool inputs)
 	}
 }
 
+#endif
 
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "Audio".
