@@ -73,7 +73,11 @@ class LIBARDOUR_API AudioRegion : public Region
 	bool speed_mismatch (float) const;
 
 	boost::shared_ptr<AudioSource> audio_source (uint32_t n=0) const;
-
+    
+    // if several audio files associated with a region,
+    // information about file with MAX channel count will be provided
+    uint32_t get_related_audio_file_channel_count () const;
+    
 	void   set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }
 
