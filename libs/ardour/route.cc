@@ -834,6 +834,10 @@ Route::set_solo (bool yn, void *src)
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
 
+	/* XXX TRACKS DEVELOPERS: THIS LOGIC SUGGESTS THAT YOU ARE NOT AWARE OF
+	   Config->get_solo_mute_overrride().
+	*/
+
 	if (yn && Profile->get_trx()) {
 		set_mute (false, src);
 	}
