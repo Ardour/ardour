@@ -833,6 +833,10 @@ Route::set_solo (bool yn, void *src)
 		solo_changed (true, src); /* EMIT SIGNAL */
 		_solo_control->Changed (); /* EMIT SIGNAL */
 	}
+
+	if (yn && Profile->get_trx()) {
+		set_mute (false, src);
+	}
 }
 
 void
