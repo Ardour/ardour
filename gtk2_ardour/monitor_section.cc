@@ -1333,7 +1333,7 @@ MonitorSection::output_button_resized (Gtk::Allocation& alloc)
 void
 MonitorSection::update_output_display ()
 {
-	if (!_route || !_monitor) {
+	if (!_route || !_monitor || _session->deletion_in_progress()) {
 		return;
 	}
 
