@@ -112,7 +112,7 @@ class CStyleChecker:
 		self.indent_re = re.compile ("^\s*")
 		self.last_line_indent = ""
 		self.last_line_indent_curly = False
-                self.re_checks = \                                                                                                                              
+                self.re_checks = \
                         [ ( re.compile ("^ "),          "leading space as indentation instead of tab - use tabs to indent, spaces to align" )                   
                         , ( re.compile ("{[^\s]"),      "missing space after open brace" )                                                                      
                         , ( re.compile ("[^\s]}"),      "missing space before close brace" )                                                                    
