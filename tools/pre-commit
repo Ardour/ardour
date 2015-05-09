@@ -1,0 +1,67 @@
+#!/bin/sh
+#
+# Called by "git commit" with no arguments.  The hook should
+# exit with non-zero status after issuing an appropriate message if
+# it wants to stop the commit.
+#
+# To enable this hook, copy this file into ~/.git/hooks and make it executable
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+	against=HEAD
+else
+	# Initial commit: diff against an empty tree object
+	against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+files=`git diff-index --name-only --cached $against`
+
+cfiles=""
+
+for f in $files ; do
+    if test `echo $f | egrep -c "\.([ch]|cc)$"` -gt 0 ; then
+	cfiles="$cfiles $f"
+    fi
+done
+
+# Redirect output to stderr.
+exec 1>&2
+
+#-------------------------------------------------------------------------------
+# Check the copyright notice of all files to be commited.
+
+user=`git config --global user.email`
+year=`date +"%Y"`
+
+missing_copyright_year=""
+for f in $cfiles ; do
+	if test ! -f $f ; then
+		# If file does not exist, it was probably part of a rename or something.
+		echo > /dev/null
+	elif test `head -5 $f | grep -c -i copyright` -eq 0 ; then
+	    missing_copyright="$missing_copyright $f"
+	fi
+done
+
+if test -n "$missing_copyright" ; then
+	echo "Missing the copyright notice of the following files:"
+	for f in $missing_copyright ; do
+		echo "    $f"
+		done
+	echo "Commit aborted."
+	exit 1
+fi
+
+#-------------------------------------------------------------------------------
+# Check the formatting of all C/C++ files.
+
+if test -n "$cfiles" ; then
+	tools/cstyle.py $cfiles
+	if test $? -ne 0 ; then
+		echo
+		echo "Commit aborted. Fix the above error before trying again."
+		exit 1
+	fi
+fi
+
+exit 0
