@@ -41,6 +41,9 @@ CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-buss
 CONFIG_VARIABLE (AutoConnectOption, output_auto_connect, "output-auto-connect", AutoConnectMaster)
 CONFIG_VARIABLE (AutoConnectOption, input_auto_connect, "input-auto-connect", AutoConnectPhysical)
 
+/* Naming */
+CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming", UseDefaultNames)
+
 /* MIDI and MIDI related */
 
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
