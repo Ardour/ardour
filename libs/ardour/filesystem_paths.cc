@@ -53,7 +53,7 @@ user_config_directory_name (int version = -1)
 	/* Tracks does not use versioned configuration folders, which may or
 	   may not be problematic in the future.
 	*/
-	const string config_dir_name = X_(PROGRAM_NAME)
+	const string config_dir_name = X_(PROGRAM_NAME);
 #else		
 	const string config_dir_name = string_compose ("%1%2", X_(PROGRAM_NAME), version);
 
