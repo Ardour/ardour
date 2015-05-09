@@ -67,6 +67,9 @@
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
 #include "ardour/directory_names.h"
+#ifdef USE_TRACKS_CODE_FEATURES
+#include "ardour/engine_state_controller.h"
+#endif
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/midiport_manager.h"
