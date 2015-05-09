@@ -331,13 +331,17 @@ def build(bld):
     # micro increment <=> no interface changes
     LIBARDOUR_LIB_VERSION = "3.0.0"
 
+    sources = libardour_sources
+    if bld.is_tracks_build():
+        sources += [ 'engine_state_controller.cc' ]
+    
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
-        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=libardour_sources)
+        obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)
         # macros for this shared library
         obj.defines      = [ 'LIBARDOUR_DLL_EXPORTS=1' ]
     else:
-        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=libardour_sources)
+        obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=sources)
         obj.cxxflags     = [ '-fPIC' ]
         obj.cflags       = [ '-fPIC' ]
         obj.defines      = []
