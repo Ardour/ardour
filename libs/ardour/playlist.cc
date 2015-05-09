@@ -2333,7 +2333,10 @@ struct RelayerSort {
 void
 Playlist::set_layer (boost::shared_ptr<Region> region, double new_layer)
 {
-	/* Remove the layer we are setting from our region list, and sort it */
+	/* Remove the layer we are setting from our region list, and sort it
+	*  using the layer indeces.
+	*/
+
 	RegionList copy = regions.rlist();
 	copy.remove (region);
 	copy.sort (RelayerSort ());
@@ -2361,6 +2364,12 @@ Playlist::setup_layering_indices (RegionList const & regions)
 		(*k)->set_layering_index (j++);
 	}
 }
+
+struct LaterHigherSort {
+	bool operator () (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return a->position() < b->position();
+	}
+};
 
 /** Take the layering indices of each of our regions, compute the layers
  *  that they should be on, and write the layers back to the regions.
@@ -2396,9 +2405,16 @@ Playlist::relayer ()
 	vector<vector<RegionList> > layers;
 	layers.push_back (vector<RegionList> (divisions));
 
-	/* Sort our regions into layering index order */
+	/* Sort our regions into layering index order (for manual layering) or position order (for later is higher)*/
 	RegionList copy = regions.rlist();
-	copy.sort (RelayerSort ());
+	switch (Config->get_layer_model()) {
+		case LaterHigher:
+			copy.sort (LaterHigherSort ());
+			break;
+		case Manual:
+			copy.sort (RelayerSort ());
+			break;
+	}
 
 	DEBUG_TRACE (DEBUG::Layering, "relayer() using:\n");
 	for (RegionList::iterator i = copy.begin(); i != copy.end(); ++i) {

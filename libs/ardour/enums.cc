@@ -74,6 +74,7 @@ setup_enum_writer ()
 	AFLPosition _AFLPosition;
 	RemoteModel _RemoteModel;
 	DenormalModel _DenormalModel;
+	LayerModel _LayerModel;
 	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
 	SampleFormat _SampleFormat;
@@ -298,7 +299,11 @@ setup_enum_writer ()
 	*/
 	enum_writer.add_to_hack_table ("EditorOrdered", "MixerOrdered");
 
-        REGISTER_ENUM (InsertMergeReject);
+	REGISTER_ENUM (LaterHigher);
+	REGISTER_ENUM (Manual);
+	REGISTER (_LayerModel);
+
+	REGISTER_ENUM (InsertMergeReject);
         REGISTER_ENUM (InsertMergeRelax);
         REGISTER_ENUM (InsertMergeReplace);
         REGISTER_ENUM (InsertMergeTruncateExisting);
@@ -801,6 +806,19 @@ std::istream& operator>>(std::istream& o, ListenPosition& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const ListenPosition& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+std::istream& operator>>(std::istream& o, LayerModel& var)
+{
+	std::string s;
+	o >> s;
+	var = (LayerModel) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const LayerModel& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;

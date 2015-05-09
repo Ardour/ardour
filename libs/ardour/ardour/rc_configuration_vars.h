@@ -90,6 +90,7 @@ CONFIG_VARIABLE (bool, use_osc, "use-osc", false)
 
 /* editing related */
 
+CONFIG_VARIABLE (LayerModel, layer_model, "layer-model", Manual)
 CONFIG_VARIABLE (bool, automation_follows_regions, "automation-follows-regions", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_selected_tracks, "region-boundaries-from-selected-tracks", true)
 CONFIG_VARIABLE (bool, region_boundaries_from_onscreen_tracks, "region-boundaries-from-onscreen_tracks", true)

@@ -441,6 +441,11 @@ namespace ARDOUR {
 		MixerOrdered
 	};
 
+	enum LayerModel {
+		LaterHigher,
+		Manual
+	};
+
 	enum ListenPosition {
 		AfterFaderListen,
 		PreFaderListen
@@ -633,6 +638,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RemoteModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::InsertMergePolicy& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
@@ -652,6 +658,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RemoteModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::LayerModel& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::InsertMergePolicy& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);

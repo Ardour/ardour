@@ -1678,6 +1678,17 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), bco);
 
+	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
+		"layer-model",
+		_("Layering model"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_layer_model),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_layer_model)
+		);
+
+	lm->add (LaterHigher, _("later is higher"));
+	lm->add (Manual, _("manual layering"));
+	add_option (_("Editor"), lm);
+
 	add_option (_("Editor"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",

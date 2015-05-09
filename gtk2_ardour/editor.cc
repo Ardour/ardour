@@ -1796,10 +1796,18 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::sha
 		_popup_region_menu_item->set_label (menu_item_name);
 	}
 
+	/* No latering allowed in later is higher layering model */
+	RefPtr<Action> act = ActionManager::get_action (X_("EditorMenu"), X_("RegionMenuLayering"));
+	if (act && Config->get_layer_model() == LaterHigher) {
+		act->set_sensitive (false);
+	} else if (act) {
+		act->set_sensitive (true);
+	}
+
 	const framepos_t position = get_preferred_edit_position (EDIT_IGNORE_NONE, true);
 
 	edit_items.push_back (*_popup_region_menu_item);
-	if (track->playlist()->count_regions_at (position) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
+	if (Config->get_layer_model() == Manual && track->playlist()->count_regions_at (position) > 1 && (layering_order_editor == 0 || !layering_order_editor->is_visible ())) {
 		edit_items.push_back (*manage (_region_actions->get_action ("choose-top-region-context-menu")->create_menu_item ()));
 	}
 	edit_items.push_back (SeparatorElem());
