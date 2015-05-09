@@ -507,10 +507,12 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 				out << in.rdbuf();
                                 _is_new = false;
 
-				/* Copy plugin state files from template to new session */
-				std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
-				copy_recurse (template_plugins, plugins_dir ());
-				
+                                if (!ARDOUR::Profile->get_trx()) {
+	                                /* Copy plugin state files from template to new session */
+	                                std::string template_plugins = Glib::build_filename (session_template, X_("plugins"));
+	                                copy_recurse (template_plugins, plugins_dir ());
+                                }
+                                
 				return 0;
 
 			} else {
@@ -538,8 +540,9 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		RouteList rl;
                 ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
-		if (bus_profile->master_out_channels) {
-			boost::shared_ptr<Route> r (new Route (*this, _("Master"), Route::MasterOut, DataType::AUDIO));
+                // Waves Tracks: always create master bus for Tracks
+                if (ARDOUR::Profile->get_trx() || bus_profile->master_out_channels) {
+	                boost::shared_ptr<Route> r (new Route (*this, _("Master"), Route::MasterOut, DataType::AUDIO));
                         if (r->init ()) {
                                 return -1;
                         }
@@ -563,16 +566,20 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 			add_routes (rl, false, false, false);
 		}
 
-                /* this allows the user to override settings with an environment variable.
-                 */
-
-                if (no_auto_connect()) {
-                        bus_profile->input_ac = AutoConnectOption (0);
-                        bus_profile->output_ac = AutoConnectOption (0);
-                }
-
-                Config->set_input_auto_connect (bus_profile->input_ac);
-                Config->set_output_auto_connect (bus_profile->output_ac);
+		// Waves Tracks: Skip this. Always use autoconnection for Tracks
+		if (!ARDOUR::Profile->get_trx()) {
+			
+			/* this allows the user to override settings with an environment variable.
+			 */
+			
+			if (no_auto_connect()) {
+				bus_profile->input_ac = AutoConnectOption (0);
+				bus_profile->output_ac = AutoConnectOption (0);
+			}
+			
+			Config->set_input_auto_connect (bus_profile->input_ac);
+			Config->set_output_auto_connect (bus_profile->output_ac);
+		}
         }
 
 	if (Config->get_use_monitor_bus() && bus_profile) {
