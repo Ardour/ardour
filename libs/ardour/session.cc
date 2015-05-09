@@ -853,7 +853,13 @@ Session::auto_connect_master_bus ()
 	if (!_master_out || !Config->get_auto_connect_standard_busses() || _monitor_out) {
 		return;
 	}
-		
+	
+	// Waves Tracks: Do not connect master bas for Tracks if AutoConnectMaster option is not set
+	// In this case it means "Multi Out" output mode
+	if (ARDOUR::Profile->get_trx() && !(Config->get_output_auto_connect() & AutoConnectMaster) ) {
+		return;
+	}
+
 	/* if requested auto-connect the outputs to the first N physical ports.
 	 */
 	
