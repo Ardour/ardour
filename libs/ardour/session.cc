@@ -46,6 +46,7 @@
 #include "pbd/search_path.h"
 #include "pbd/stacktrace.h"
 #include "pbd/stl_delete.h"
+#include "pbd/replace_all.h"
 #include "pbd/unwind.h"
 
 #include "ardour/amp.h"
@@ -404,7 +405,8 @@ Session::Session (AudioEngine &eng,
 				string track_name = "";
 				for (std::vector<string>::size_type i = 0; i < inputs.size(); ++i) {
 					string track_name;
-					remove_pattern_from_string(inputs[i], "system:capture:", track_name);
+					track_name = inputs[i];
+					replace_all (track_name, "system:capture", "");
 					
 					list<boost::shared_ptr<AudioTrack> > single_track = new_audio_track (1, 1, Normal, 0, 1, track_name);
 					tracks.insert(tracks.begin(), single_track.front());
@@ -2650,6 +2652,74 @@ Session::reconnect_midi_scene_ports(bool inputs)
             }
         }
     }
+}
+
+void
+Session::reconnect_mtc_ports()
+{
+#if 0
+	boost::shared_ptr<MidiPort> mtc_in_ptr = _midi_ports->mtc_input_port();
+
+	if (mtc_in_ptr) {
+		mtc_in_ptr->disconnect_all ();
+        
+		std::vector<EngineStateController::MidiPortState> midi_port_states;
+		EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
+        
+		std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+        
+		for (; state_iter != midi_port_states.end(); ++state_iter) {
+			if (state_iter->available && state_iter->mtc_in) {
+				mtc_in_ptr->connect (state_iter->name);
+			}
+		}
+        
+		if (!_midi_ports->mtc_input_port ()->connected () &&
+		    config.get_external_sync () &&
+		    (Config->get_sync_source () == MTC) ) {
+			config.set_external_sync (false);
+		}
+		if ( ARDOUR::Profile->get_trx () ) {
+			// Tracks need this signal to update timecode_source_dropdown
+			MtcOrLtcInputPortChanged (); //emit signal
+		}
+	}
+#endif
+}
+
+void
+Session::reconnect_mmc_ports(bool inputs)
+{
+	if (inputs ) { // get all enabled midi input ports
+        
+		boost::shared_ptr<MidiPort> mmc_in_ptr = _midi_ports->mmc_in();
+		if (mmc_in_ptr) {
+			mmc_in_ptr->disconnect_all ();
+			std::vector<std::string> enabled_midi_inputs;
+			EngineStateController::instance()->get_physical_midi_inputs (enabled_midi_inputs);
+            
+			std::vector<std::string>::iterator port_iter = enabled_midi_inputs.begin();
+            
+			for (; port_iter != enabled_midi_inputs.end(); ++port_iter) {
+				mmc_in_ptr->connect (*port_iter);
+			}
+
+		}
+	} else { // get all enabled midi output ports
+        
+		boost::shared_ptr<MidiPort> mmc_out_ptr = _midi_ports->mmc_out();
+		if (mmc_out_ptr ) {
+			mmc_out_ptr->disconnect_all ();
+			std::vector<std::string> enabled_midi_outputs;
+			EngineStateController::instance()->get_physical_midi_outputs (enabled_midi_outputs);
+            
+			std::vector<std::string>::iterator port_iter = enabled_midi_outputs.begin();
+            
+			for (; port_iter != enabled_midi_outputs.end(); ++port_iter) {
+				mmc_out_ptr->connect (*port_iter);
+			}
+		}
+	}
 }
 
 #endif
