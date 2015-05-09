@@ -96,6 +96,7 @@ setup_enum_writer ()
 	AutoState _AutoState;
 	AutoStyle _AutoStyle;
 	AutoConnectOption _AutoConnectOption;
+	TracksAutoNamingRule _TracksAutoNamingRule;
 	Session::StateOfTheState _Session_StateOfTheState;
 	Route::Flag _Route_Flag;
 	Source::Flag _Source_Flag;
@@ -319,6 +320,10 @@ setup_enum_writer ()
 	REGISTER_ENUM (AutoConnectMaster);
 	REGISTER_BITS (_AutoConnectOption);
 
+	REGISTER_ENUM (UseDefaultNames);
+	REGISTER_ENUM (NameAfterDriver);
+	REGISTER_BITS (_TracksAutoNamingRule);
+    
 	REGISTER_ENUM (FormatFloat);
 	REGISTER_ENUM (FormatInt24);
 	REGISTER_ENUM (FormatInt16);
@@ -687,6 +692,7 @@ std::ostream& operator<<(std::ostream& o, const SampleFormat& var)
 	std::string s = enum_2_string (var);
 	return o << s;
 }
+
 std::istream& operator>>(std::istream& o, AutoConnectOption& var)
 {
 	std::string s;
@@ -696,6 +702,20 @@ std::istream& operator>>(std::istream& o, AutoConnectOption& var)
 }
 
 std::ostream& operator<<(std::ostream& o, const AutoConnectOption& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
+
+std::istream& operator>>(std::istream& o, TracksAutoNamingRule& var)
+{
+	std::string s;
+	o >> s;
+	var = (TracksAutoNamingRule) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const TracksAutoNamingRule& var)
 {
 	std::string s = enum_2_string (var);
 	return o << s;
