@@ -49,6 +49,12 @@ user_config_directory_name (int version = -1)
 		version = atoi (X_(PROGRAM_VERSION));
 	}
 
+#ifdef USE_TRACKS_CODE_FEATURES
+	/* Tracks does not use versioned configuration folders, which may or
+	   may not be problematic in the future.
+	*/
+	const string config_dir_name = X_(PROGRAM_NAME)
+#else		
 	const string config_dir_name = string_compose ("%1%2", X_(PROGRAM_NAME), version);
 
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
@@ -56,6 +62,7 @@ user_config_directory_name (int version = -1)
 #else
 	return downcase (config_dir_name);
 #endif
+#endif	
 }	
 
 std::string
