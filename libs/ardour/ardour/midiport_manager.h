@@ -60,6 +60,9 @@ class LIBARDOUR_API MidiPortManager {
     MIDI::Port* scene_input_port () const { return _scene_input_port; }
     MIDI::Port* scene_output_port () const { return _scene_output_port; }
     
+    boost::shared_ptr<MidiPort> mmc_in() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_in); }
+    boost::shared_ptr<MidiPort> mmc_out() const { return boost::dynamic_pointer_cast<MidiPort>(_mmc_out); }
+
     boost::shared_ptr<MidiPort> scene_in() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_in); }
     boost::shared_ptr<MidiPort> scene_out() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_out); }
 
