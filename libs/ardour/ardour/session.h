@@ -305,6 +305,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	*/
 	PBD::Signal0<void> RecordArmStateChanged; /* signals changes in recording arming */
 
+	/* Emited when session is loaded */
+	PBD::Signal0<void> SessionLoaded;
+
 	/* Transport mechanism signals */
 
 	/** Emitted on the following changes in transport state:
@@ -1266,6 +1269,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int  post_engine_init ();
 	int  immediately_post_engine ();
 	void remove_empty_sounds ();
+	
+	void session_loaded ();
 
 	void setup_midi_control ();
 	int  midi_read (MIDI::Port *);
