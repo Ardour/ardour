@@ -63,19 +63,19 @@ EngineStateController::EngineStateController()
 	, _last_used_real_device("")
 
 {
-	AudioEngine::instance ()->Running.connect_same_thread (running_connection, boost::bind (&EngineStateController::_on_engine_running, this) );
-	AudioEngine::instance ()->Stopped.connect_same_thread (stopped_connection, boost::bind (&EngineStateController::_on_engine_stopped, this) );
-	AudioEngine::instance ()->Halted.connect_same_thread (stopped_connection, boost::bind (&EngineStateController::_on_engine_stopped, this) );
+	AudioEngine::instance ()->Running.connect_same_thread (running_connection, boost::bind (&EngineStateController::_on_engine_running, this));
+	AudioEngine::instance ()->Stopped.connect_same_thread (stopped_connection, boost::bind (&EngineStateController::_on_engine_stopped, this));
+	AudioEngine::instance ()->Halted.connect_same_thread (stopped_connection, boost::bind (&EngineStateController::_on_engine_stopped, this));
     
 	/* Subscribe for udpates from AudioEngine */
-	AudioEngine::instance ()->PortRegisteredOrUnregistered.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_ports_registration_update, this) );
-	AudioEngine::instance()->SampleRateChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1) );
-	AudioEngine::instance()->BufferSizeChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_buffer_size_change, this, _1) );
-	AudioEngine::instance()->DeviceListChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_list_change, this) );
-	AudioEngine::instance()->DeviceError.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_error, this) );
+	AudioEngine::instance ()->PortRegisteredOrUnregistered.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_ports_registration_update, this));
+	AudioEngine::instance()->SampleRateChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_sample_rate_change, this, _1));
+	AudioEngine::instance()->BufferSizeChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_buffer_size_change, this, _1));
+	AudioEngine::instance()->DeviceListChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_list_change, this));
+	AudioEngine::instance()->DeviceError.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_device_error, this));
     
 	/* Global configuration parameters update */
-	Config->ParameterChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_parameter_changed, this, _1) );
+	Config->ParameterChanged.connect_same_thread (update_connections, boost::bind (&EngineStateController::_on_parameter_changed, this, _1));
     
 	_deserialize_and_load_engine_states();
 	_deserialize_and_load_midi_port_states();
@@ -95,7 +95,7 @@ void
 EngineStateController::set_session(Session* session)
 {
 	_session = session;
-	_session->SessionLoaded.connect_same_thread (session_connections, boost::bind (&EngineStateController::_on_session_loaded, this) );
+	_session->SessionLoaded.connect_same_thread (session_connections, boost::bind (&EngineStateController::_on_session_loaded, this));
 }
 
 
@@ -123,7 +123,7 @@ EngineStateController::serialize_audio_midi_settings()
 void
 EngineStateController::save_audio_midi_settings()
 {
-	Config->add_extra_xml (serialize_audio_midi_settings() );
+	Config->add_extra_xml (serialize_audio_midi_settings());
 	Config->save_state ();
 }
 
@@ -196,7 +196,7 @@ EngineStateController::_deserialize_and_load_engine_states()
 					if (input_state_node->name() != "input") {
 						continue;
 					}
-					PortState input_state (input_state_node->name() );
+					PortState input_state (input_state_node->name());
                         
 					if ((prop = input_state_node->property ("name")) == 0) {
 						continue;
@@ -224,7 +224,7 @@ EngineStateController::_deserialize_and_load_engine_states()
 					if (multi_out_state_node->name() != "output") {
 						continue;
 					}
-					PortState multi_out_state (multi_out_state_node->name() );
+					PortState multi_out_state (multi_out_state_node->name());
                         
 					if ((prop = multi_out_state_node->property ("name")) == 0) {
 						continue;
@@ -251,7 +251,7 @@ EngineStateController::_deserialize_and_load_engine_states()
 					if (stereo_out_state_node->name() != "output") {
 						continue;
 					}
-					PortState stereo_out_state (stereo_out_state_node->name() );
+					PortState stereo_out_state (stereo_out_state_node->name());
                         
 					if ((prop = stereo_out_state_node->property ("name")) == 0) {
 						continue;
@@ -307,7 +307,7 @@ EngineStateController::_deserialize_and_load_midi_port_states()
 				if (input_state_node->name() != "input") {
 					continue;
 				}
-				MidiPortState input_state (input_state_node->name() );
+				MidiPortState input_state (input_state_node->name());
                 
 				if ((prop = input_state_node->property ("name")) == 0) {
 					continue;
@@ -346,7 +346,7 @@ EngineStateController::_deserialize_and_load_midi_port_states()
 				if (output_state_node->name() != "output") {
 					continue;
 				}
-				MidiPortState output_state (output_state_node->name() );
+				MidiPortState output_state (output_state_node->name());
                 
 				if ((prop = output_state_node->property ("name")) == 0) {
 					continue;
@@ -490,7 +490,7 @@ EngineStateController::_apply_state(const StatePtr& state)
 {
 	bool applied = false;
     
-	if (set_new_backend_as_current(state->backend_name) ) {
+	if (set_new_backend_as_current(state->backend_name)) {
 		applied = set_new_device_as_current(state->device_name);
 	}
     
@@ -504,7 +504,7 @@ EngineStateController::_do_initial_engine_setup()
 	bool state_applied = false;
     
 	// if we have no saved state load default values
-	if (!_states.empty() ) {
+	if (!_states.empty()) {
         
 		// look for last active state first
 		StateList::const_iterator state_iter = _states.begin();
@@ -529,9 +529,9 @@ EngineStateController::_do_initial_engine_setup()
 	if (!state_applied ){
 		std::vector<const AudioBackendInfo*> backends = AudioEngine::instance()->available_backends();
         
-		if (!backends.empty() ) {
+		if (!backends.empty()) {
             
-			if (!set_new_backend_as_current(backends.front()->name ) ) {
+			if (!set_new_backend_as_current(backends.front()->name )) {
 				std::cerr << "\tfailed to set backend [" << backends.front()->name << "]\n";
 			}
 		}
@@ -550,16 +550,16 @@ EngineStateController::_validate_current_device_state()
 	// validate sample rate
 	std::vector<float> sample_rates = backend->available_sample_rates (_current_state->device_name);
     
-	if (sample_rates.empty() ) {
+	if (sample_rates.empty()) {
 		return false;
 	}
 
 	// check if session desired sample rate (if it's set) could be used with this device
 	if (_session != 0) {
         
-		if ( !set_new_sample_rate_in_controller (_session->nominal_frame_rate ()) ) {
-			if ( !set_new_sample_rate_in_controller (backend->default_sample_rate() ) ) {
-				if (!set_new_sample_rate_in_controller (sample_rates.front() ) ) {
+		if ( !set_new_sample_rate_in_controller (_session->nominal_frame_rate ())) {
+			if ( !set_new_sample_rate_in_controller (backend->default_sample_rate()) ) {
+				if (!set_new_sample_rate_in_controller (sample_rates.front()) ) {
 					return false;
 				}
 			}
@@ -567,9 +567,9 @@ EngineStateController::_validate_current_device_state()
     
 	} else {
 		// check if current sample rate is supported because we have no session desired sample rate value
-		if ( !set_new_sample_rate_in_controller (_current_state->sample_rate) ) {
-			if ( !set_new_sample_rate_in_controller (backend->default_sample_rate() ) ) {
-				if (!set_new_sample_rate_in_controller (sample_rates.front() ) ) {
+		if ( !set_new_sample_rate_in_controller (_current_state->sample_rate)) {
+			if ( !set_new_sample_rate_in_controller (backend->default_sample_rate()) ) {
+				if (!set_new_sample_rate_in_controller (sample_rates.front()) ) {
 					return false;
 				}
 			}
@@ -581,13 +581,13 @@ EngineStateController::_validate_current_device_state()
 	// check if buffer size is supported
 	std::vector<pframes_t>::iterator bs_iter = std::find (buffer_sizes.begin(), buffer_sizes.end(), _current_state->buffer_size);
 	// if current is not found switch to default if is supported
-	if (bs_iter == buffer_sizes.end() ) {
-		bs_iter = std::find (buffer_sizes.begin(), buffer_sizes.end(), backend->default_buffer_size () );
+	if (bs_iter == buffer_sizes.end()) {
+		bs_iter = std::find (buffer_sizes.begin(), buffer_sizes.end(), backend->default_buffer_size ());
 	
-		if (bs_iter != buffer_sizes.end() ) {
+		if (bs_iter != buffer_sizes.end()) {
 			_current_state->buffer_size = backend->default_buffer_size ();
 		} else {
-			if (!buffer_sizes.empty() ) {
+			if (!buffer_sizes.empty()) {
 				_current_state->buffer_size = buffer_sizes.front();
 			}
 		}
@@ -681,7 +681,7 @@ EngineStateController::available_buffer_sizes_for_current_device(std::vector<pfr
 bool
 EngineStateController::set_new_backend_as_current(const std::string& backend_name)
 {
-	if (backend_name == AudioEngine::instance()->current_backend_name () ) {
+	if (backend_name == AudioEngine::instance()->current_backend_name ()) {
 		return true;
 	}
     
@@ -693,15 +693,15 @@ EngineStateController::set_new_backend_as_current(const std::string& backend_nam
 		}
         
 		StateList::iterator found_state_iter = find_if (_states.begin(), _states.end(),
-		                                                State::StatePredicate(backend_name, "None") );
+		                                                State::StatePredicate(backend_name, "None"));
         
-		if (found_state_iter != _states.end() ) {
+		if (found_state_iter != _states.end()) {
 			// we found a record for new engine with None device - switch to it
 			_current_state = *found_state_iter;
 			_validate_current_device_state();
 		} else {
 			// create new record for this engine with default device
-			_current_state = boost::shared_ptr<State>(new State() );
+			_current_state = boost::shared_ptr<State>(new State());
 			_current_state->backend_name = backend_name;
 			_current_state->device_name = "None";
 			_validate_current_device_state();
@@ -731,24 +731,24 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
     
 	// validate the device
 	std::vector<AudioBackend::DeviceStatus>::iterator device_iter;
-	device_iter = std::find_if (device_vector.begin(), device_vector.end(), DevicePredicate(device_name) );
+	device_iter = std::find_if (device_vector.begin(), device_vector.end(), DevicePredicate(device_name));
     
 	// device is available
-	if (device_iter != device_vector.end() ) {
+	if (device_iter != device_vector.end()) {
         
 		boost::shared_ptr<State> previous_state (_current_state);
         
 		// look through state list and find the record for this device and current engine
 		StateList::iterator found_state_iter = find_if (_states.begin(), _states.end(),
-		                                                State::StatePredicate(backend->name(), device_name) );
+		                                                State::StatePredicate(backend->name(), device_name));
         
-		if (found_state_iter != _states.end() )
+		if (found_state_iter != _states.end())
 		{
 			// we found a record for current engine and provided device name - switch to it
             
 			_current_state = *found_state_iter;
             
-			if (!_validate_current_device_state() ) {
+			if (!_validate_current_device_state()) {
 				_current_state = previous_state;
 				return false;
 			}
@@ -756,12 +756,12 @@ EngineStateController::set_new_device_as_current(const std::string& device_name)
 		} else {
        
 			// the record is not found, create new one
-			_current_state = boost::shared_ptr<State>(new State() );
+			_current_state = boost::shared_ptr<State>(new State());
             
 			_current_state->backend_name = backend->name();
 			_current_state->device_name = device_name;
             
-			if (!_validate_current_device_state() ) {
+			if (!_validate_current_device_state()) {
 				_current_state = previous_state;
 				return false;
 			}
@@ -799,7 +799,7 @@ EngineStateController::set_new_sample_rate_in_controller(framecnt_t sample_rate)
 	std::vector<float> sample_rates = backend->available_sample_rates (_current_state->device_name);
 	std::vector<float>::iterator iter = std::find (sample_rates.begin(), sample_rates.end(), (float)sample_rate);
     
-	if (iter != sample_rates.end() ) {
+	if (iter != sample_rates.end()) {
 		_current_state->sample_rate = sample_rate;
 		return true;
 	}
@@ -817,7 +817,7 @@ EngineStateController::set_new_buffer_size_in_controller(pframes_t buffer_size)
 	std::vector<uint32_t> buffer_sizes = backend->available_buffer_sizes (_current_state->device_name);
 	std::vector<uint32_t>::iterator iter = std::find (buffer_sizes.begin(), buffer_sizes.end(), buffer_size);
 
-	if (iter != buffer_sizes.end() ) {
+	if (iter != buffer_sizes.end()) {
 		_current_state->buffer_size = buffer_size;
 		return true;
 	}
@@ -937,7 +937,7 @@ EngineStateController::set_physical_audio_input_state(const std::string& port_na
 {
 	PortStateList &input_states = _current_state->input_channel_states;
 	PortStateList::iterator found_state_iter;
-	found_state_iter = std::find(input_states.begin(), input_states.end(), PortState(port_name) );
+	found_state_iter = std::find(input_states.begin(), input_states.end(), PortState(port_name));
     
 	if (found_state_iter != input_states.end() && found_state_iter->active != state ) {
 		found_state_iter->active = state;
@@ -959,7 +959,7 @@ EngineStateController::set_physical_audio_output_state(const std::string& port_n
 	}
     
 	PortStateList::iterator target_state_iter;
-	target_state_iter = std::find(output_states->begin(), output_states->end(), PortState(port_name) );
+	target_state_iter = std::find(output_states->begin(), output_states->end(), PortState(port_name));
     
 	if (target_state_iter != output_states->end() && target_state_iter->active != state ) {
 		target_state_iter->active = state;
@@ -971,7 +971,7 @@ EngineStateController::set_physical_audio_output_state(const std::string& port_n
 			PortStateList::iterator next_state_iter(target_state_iter);
             
 			// loopback
-			if (++next_state_iter == output_states->end() ) {
+			if (++next_state_iter == output_states->end()) {
 				next_state_iter = output_states->begin();
 			}
             
@@ -990,7 +990,7 @@ EngineStateController::set_physical_audio_output_state(const std::string& port_n
 				} else {
 					// if current was deactivated but the next is active
 					if (next_state_iter->active) {
-						if (++next_state_iter == output_states->end() ) {
+						if (++next_state_iter == output_states->end()) {
 							next_state_iter = output_states->begin();
 						}
 						next_state_iter->active = true;
@@ -1005,7 +1005,7 @@ EngineStateController::set_physical_audio_output_state(const std::string& port_n
 				// now deactivate the rest
 				while (++next_state_iter != target_state_iter) {
                     
-					if (next_state_iter == output_states->end() ) {
+					if (next_state_iter == output_states->end()) {
 						next_state_iter = output_states->begin();
 						// we jumped, so additional check is required
 						if (next_state_iter == target_state_iter) {
@@ -1032,9 +1032,9 @@ EngineStateController::get_physical_audio_input_state(const std::string& port_na
     
 	PortStateList &input_states = _current_state->input_channel_states;
 	PortStateList::iterator found_state_iter;
-	found_state_iter = std::find(input_states.begin(), input_states.end(), PortState(port_name) );
+	found_state_iter = std::find(input_states.begin(), input_states.end(), PortState(port_name));
     
-	if (found_state_iter != input_states.end() ) {
+	if (found_state_iter != input_states.end()) {
 		state = found_state_iter->active;
 	}
     
@@ -1055,9 +1055,9 @@ EngineStateController::get_physical_audio_output_state(const std::string& port_n
 	}
     
 	PortStateList::iterator found_state_iter;
-	found_state_iter = std::find(output_states->begin(), output_states->end(), PortState(port_name) );
+	found_state_iter = std::find(output_states->begin(), output_states->end(), PortState(port_name));
     
-	if (found_state_iter != output_states->end() ) {
+	if (found_state_iter != output_states->end()) {
 		state = found_state_iter->active;
 	}
 
@@ -1069,7 +1069,7 @@ void
 EngineStateController::set_physical_midi_input_state(const std::string& port_name, bool state) {
     
 	MidiPortStateList::iterator found_state_iter;
-	found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name) );
+	found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name));
     
 	if (found_state_iter != _midi_inputs.end() && found_state_iter->available && found_state_iter->active != state ) {
 		found_state_iter->active = state;
@@ -1091,7 +1091,7 @@ void
 EngineStateController::set_physical_midi_output_state(const std::string& port_name, bool state) {
     
 	MidiPortStateList::iterator found_state_iter;
-	found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name) );
+	found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name));
     
 	if (found_state_iter != _midi_outputs.end() && found_state_iter->available && found_state_iter->active != state ) {
 		found_state_iter->active = state;
@@ -1111,7 +1111,7 @@ EngineStateController::get_physical_midi_input_state(const std::string& port_nam
 	bool state = false;
     
 	MidiPortStateList::iterator found_state_iter;
-	found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name) );
+	found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name));
     
 	if (found_state_iter != _midi_inputs.end() && found_state_iter->available) {
 		state = found_state_iter->active;
@@ -1128,7 +1128,7 @@ EngineStateController::get_physical_midi_output_state(const std::string& port_na
 	bool state = false;
     
 	MidiPortStateList::iterator found_state_iter;
-	found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name) );
+	found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name));
     
 	if (found_state_iter != _midi_outputs.end() && found_state_iter->available) {
 		state = found_state_iter->active;
@@ -1143,7 +1143,7 @@ void
 EngineStateController::set_physical_midi_scene_in_connection_state(const std::string& port_name, bool state) {
     
 	MidiPortStateList::iterator found_state_iter;
-	found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name) );
+	found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), MidiPortState(port_name));
     
 	if (found_state_iter != _midi_inputs.end() && found_state_iter->available && found_state_iter->active ) {
 		found_state_iter->scene_connected = state;
@@ -1160,7 +1160,7 @@ void
 EngineStateController::set_physical_midi_scenen_out_connection_state(const std::string& port_name, bool state) {
    
 	MidiPortStateList::iterator found_state_iter;
-	found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name) );
+	found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), MidiPortState(port_name));
     
 	if (found_state_iter != _midi_outputs.end() && found_state_iter->available && found_state_iter->active ) {
 		found_state_iter->scene_connected = state;
@@ -1338,7 +1338,7 @@ EngineStateController::_on_session_loaded ()
 	_session->reconnect_mmc_ports (false);
 	
 	framecnt_t desired_sample_rate = _session->nominal_frame_rate ();
-	if ( desired_sample_rate > 0 && set_new_sample_rate_in_controller(desired_sample_rate) )
+	if ( desired_sample_rate > 0 && set_new_sample_rate_in_controller(desired_sample_rate))
 	{
 		push_current_state_to_backend(false);
 		SampleRateChanged(); // emit a signal
@@ -1353,12 +1353,12 @@ EngineStateController::_on_sample_rate_change(framecnt_t new_sample_rate)
         
 		// if sample rate has been changed
 		framecnt_t sample_rate_to_set = new_sample_rate;
-		if (AudioEngine::instance()->session() ) {
+		if (AudioEngine::instance()->session()) {
 			// and we have current session we should restore it back to the one tracks uses
 			sample_rate_to_set = AudioEngine::instance()->session()->frame_rate ();
 		}
         
-		if ( !set_new_sample_rate_in_controller (sample_rate_to_set) ) {
+		if ( !set_new_sample_rate_in_controller (sample_rate_to_set)) {
 			// if sample rate can't be set
 			// switch to NONE device
 			set_new_device_as_current ("None");
@@ -1393,24 +1393,24 @@ EngineStateController::_on_device_list_change()
 	std::vector<AudioBackend::DeviceStatus> device_vector = backend->enumerate_devices();
     
 	// find out out if current device is still available if it's not None
-	if (_current_state->device_name != "None")
-	{
+	if (_current_state->device_name != "None") {
+
 		std::vector<AudioBackend::DeviceStatus>::iterator device_iter;
-		device_iter = std::find_if (device_vector.begin(), device_vector.end(), DevicePredicate(_current_state->device_name) );
+		device_iter = std::find_if (device_vector.begin(), device_vector.end(), DevicePredicate(_current_state->device_name));
         
 		// if current device is not available any more - switch to None device
-		if (device_iter == device_vector.end() ) {
+		if (device_iter == device_vector.end()) {
             
 			StateList::iterator found_state_iter = find_if (_states.begin(), _states.end(),
-			                                                State::StatePredicate(_current_state->backend_name, "None") );
+			                                                State::StatePredicate(_current_state->backend_name, "None"));
             
-			if (found_state_iter != _states.end() ) {
+			if (found_state_iter != _states.end()) {
 				// found the record - switch to it
 				_current_state = *found_state_iter;
 				_validate_current_device_state();
 			} else {
 				// create new record for this engine with default device
-				_current_state = boost::shared_ptr<State>(new State() );
+				_current_state = boost::shared_ptr<State>(new State());
 				_current_state->backend_name = backend->name();
 				_current_state->device_name = "None";
 				_validate_current_device_state();
@@ -1424,19 +1424,19 @@ EngineStateController::_on_device_list_change()
 		// if the device which was active before is available now - switch to it
         
 		std::vector<AudioBackend::DeviceStatus>::iterator device_iter;
-		device_iter = std::find_if (device_vector.begin(), device_vector.end(), DevicePredicate(_last_used_real_device) );
+		device_iter = std::find_if (device_vector.begin(), device_vector.end(), DevicePredicate(_last_used_real_device));
         
-		if (device_iter != device_vector.end() ) {
+		if (device_iter != device_vector.end()) {
 			StateList::iterator found_state_iter = find_if (_states.begin(), _states.end(),
 			                                                State::StatePredicate(_current_state->backend_name,
-			                                                                      _last_used_real_device) );
+			                                                                      _last_used_real_device));
             
-			if (found_state_iter != _states.end() ) {
+			if (found_state_iter != _states.end()) {
                 
 				boost::shared_ptr<State> previous_state (_current_state);
 				_current_state = *found_state_iter;
                 
-				if (_validate_current_device_state() ) {
+				if (_validate_current_device_state()) {
 					push_current_state_to_backend(false);
 				} else {
 					// cannot use this device right now
@@ -1471,7 +1471,7 @@ EngineStateController::_update_device_channels_state()
 		state.active = true;
 		PortStateList::const_iterator found_state_iter = std::find(input_states.begin(), input_states.end(), state);
         
-		if (found_state_iter != input_states.end() ) {
+		if (found_state_iter != input_states.end()) {
 			new_input_states.push_back(*found_state_iter);
 		} else {
 			new_input_states.push_back(state);
@@ -1493,7 +1493,7 @@ EngineStateController::_update_device_channels_state()
 		state.active = true;
 		PortStateList::const_iterator found_state_iter = std::find(output_multi_states.begin(), output_multi_states.end(), state);
         
-		if (found_state_iter != output_multi_states.end() ) {
+		if (found_state_iter != output_multi_states.end()) {
 			new_output_states.push_back(*found_state_iter);
 		} else {
 			new_output_states.push_back(state);
@@ -1513,7 +1513,7 @@ EngineStateController::_update_device_channels_state()
 		state.active = true;
 		PortStateList::const_iterator found_state_iter = std::find(output_stereo_states.begin(), output_stereo_states.end(), state);
         
-		if (found_state_iter != output_stereo_states.end() ) {
+		if (found_state_iter != output_stereo_states.end()) {
 			new_output_states.push_back(*found_state_iter);
 		} else {
 			new_output_states.push_back(state);
@@ -1552,7 +1552,7 @@ EngineStateController::_update_device_channels_state()
 		state.available = true;
 		MidiPortStateList::iterator found_state_iter = std::find(_midi_inputs.begin(), _midi_inputs.end(), state);
         
-		if (found_state_iter != _midi_inputs.end() ) {
+		if (found_state_iter != _midi_inputs.end()) {
 			found_state_iter->available = true;
 		} else {
 			_midi_inputs.push_back(state);
@@ -1571,7 +1571,7 @@ EngineStateController::_update_device_channels_state()
 		state.available = true;
 		MidiPortStateList::iterator found_state_iter = std::find(_midi_outputs.begin(), _midi_outputs.end(), state);
         
-		if (found_state_iter != _midi_outputs.end() ) {
+		if (found_state_iter != _midi_outputs.end()) {
 			found_state_iter->available = true;
 		} else {
 			_midi_outputs.push_back(state);
@@ -1595,9 +1595,9 @@ EngineStateController::_refresh_stereo_out_channel_states()
 	uint32_t pending_active_channels = 2;
 	PortStateList::iterator iter = output_states.begin();
 	// if found active
-	if (active_iter != output_states.end() ) {
+	if (active_iter != output_states.end()) {
 		iter = active_iter;
-		if (++iter == output_states.end() ) {
+		if (++iter == output_states.end()) {
 			iter = output_states.begin();
 		}
             
@@ -1693,25 +1693,26 @@ EngineStateController::push_current_state_to_backend(bool start)
 	}
     
 	// check if anything changed
-	bool state_changed = (_current_state->device_name != backend->device_name() ) ||
-		(_current_state->sample_rate != backend->sample_rate() ) ||
-		(_current_state->buffer_size != backend->buffer_size() );
+	bool state_changed = (_current_state->device_name != backend->device_name()) ||
+		(_current_state->sample_rate != backend->sample_rate()) ||
+		(_current_state->buffer_size != backend->buffer_size());
     
 	bool was_running = AudioEngine::instance()->running();
     
-	Glib::Threads::RecMutex::Lock sl (AudioEngine::instance()->state_lock() );
+	Glib::Threads::RecMutex::Lock sl (AudioEngine::instance()->state_lock());
 	if (state_changed) {
 
 		if (was_running) {
-			if (AudioEngine::instance()->stop () ) {
+			if (AudioEngine::instance()->stop ()) {
 				return false;
 			}
 		}
 
 		int result = 0;
+
 		{
 			std::cout << "EngineStateController::Setting device: " << _current_state->device_name << std::endl;
-			if ((_current_state->device_name != backend->device_name()) && (result = backend->set_device_name (_current_state->device_name)) ) {
+			if ((_current_state->device_name != backend->device_name()) && (result = backend->set_device_name (_current_state->device_name))) {
 				error << string_compose (_("Cannot set device name to %1"), get_current_device_name()) << endmsg;
 			}
         
@@ -1734,23 +1735,22 @@ EngineStateController::push_current_state_to_backend(bool start)
 			}
 		}
         
-		if (result) // error during device setup
-		{
+		if (result) { // error during device setup
 			//switch to None device and notify about the issue
 			set_new_device_as_current ("None");
 			DeviceListChanged(false);
 			DeviceError();
 		}
 
-		if (AudioEngine::instance()->backend_reset_requested() ) {
+		if (AudioEngine::instance()->backend_reset_requested()) {
 			// device asked for reset, do not start engine now
 			// free sate lock and let Engine reset the device as it's required
 			return true;
 		}
 	}
     
-	if(start || (was_running && state_changed) ) {
-		if (AudioEngine::instance()->start () && !AudioEngine::instance()->is_reset_requested() ) {
+	if (start || (was_running && state_changed)) {
+		if (AudioEngine::instance()->start () && !AudioEngine::instance()->is_reset_requested()) {
 			//switch to None device and notify about the issue
 			set_new_device_as_current ("None");
 			AudioEngine::instance()->start ();
