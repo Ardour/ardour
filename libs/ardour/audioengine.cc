@@ -623,9 +623,11 @@ AudioEngine::remove_session ()
 void
 AudioEngine::reconnect_session_routes (bool reconnect_inputs, bool reconnect_outputs)
 {
-    if (_session) {
-        _session->reconnect_existing_routes(true, true, reconnect_inputs, reconnect_outputs);
-    }
+#ifdef USE_TRACKS_CODE_FEATURES
+	if (_session) {
+		_session->reconnect_existing_routes(true, true, reconnect_inputs, reconnect_outputs);
+	}
+#endif	
 }
 
 

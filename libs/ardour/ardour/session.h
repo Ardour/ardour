@@ -720,6 +720,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	PBD::Signal0<void> SoloChanged;
 	PBD::Signal0<void> IsolatedChanged;
 
+	PBD::Signal0<void> session_routes_reconnected;
+
 	/* monitor/master out */
 
 	void add_monitor_section ();
@@ -1453,6 +1455,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void add_routes (RouteList&, bool input_auto_connect, bool output_auto_connect, bool save);
 	void add_routes_inner (RouteList&, bool input_auto_connect, bool output_auto_connect);
 	bool _adding_routes_in_progress;
+	bool _reconnecting_routes_in_progress;
 	bool _route_deletion_in_progress;
 
 	uint32_t destructive_index;
