@@ -26,6 +26,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/port_manager.h"
+#include "ardour/profile.h"
 
 #include "i18n.h"
 
