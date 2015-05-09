@@ -51,10 +51,7 @@ PortAudioIO::~PortAudioIO ()
 		Pa_Terminate();
 	}
 
-	for (std::map<int, paDevice*>::const_iterator i = _devices.begin (); i != _devices.end(); ++i) {
-		delete i->second;
-	}
-	_devices.clear();
+	clear_device_lists ();
 
 	free (_input_buffer); _input_buffer = NULL;
 	free (_output_buffer); _output_buffer = NULL;
@@ -126,10 +123,22 @@ PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& buffer
 }
 
 void
-PortAudioIO::device_list (std::map<int, std::string> &devices) const {
-	devices.clear();
-	for (std::map<int, paDevice*>::const_iterator i = _devices.begin (); i != _devices.end(); ++i) {
-		devices.insert (std::pair<int, std::string> (i->first, Glib::locale_to_utf8(i->second->name)));
+PortAudioIO::input_device_list(std::map<int, std::string> &devices) const
+{
+	for (std::map<int, paDevice*>::const_iterator i = _input_devices.begin ();
+	     i != _input_devices.end ();
+	     ++i) {
+		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
+	}
+}
+
+void
+PortAudioIO::output_device_list(std::map<int, std::string> &devices) const
+{
+	for (std::map<int, paDevice*>::const_iterator i = _output_devices.begin ();
+	     i != _output_devices.end ();
+	     ++i) {
+		devices.insert (std::pair<int, std::string>(i->first, Glib::locale_to_utf8(i->second->name)));
 	}
 }
 
@@ -211,16 +220,21 @@ PortAudioIO::get_default_output_device ()
 }
 
 void
-PortAudioIO::clear_device_list ()
+PortAudioIO::clear_device_lists ()
 {
-	for (std::map<int, paDevice*>::const_iterator i = _devices.begin (); i != _devices.end(); ++i) {
+	for (std::map<int, paDevice*>::const_iterator i = _input_devices.begin (); i != _input_devices.end(); ++i) {
 		delete i->second;
 	}
-	_devices.clear();
+	_input_devices.clear();
+
+	for (std::map<int, paDevice*>::const_iterator i = _output_devices.begin (); i != _output_devices.end(); ++i) {
+		delete i->second;
+	}
+	_output_devices.clear();
 }
 
 void
-PortAudioIO::add_default_device ()
+PortAudioIO::add_default_devices ()
 {
 	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
 	if (info == NULL) return;
@@ -228,7 +242,12 @@ PortAudioIO::add_default_device ()
 	const PaDeviceInfo* nfo_i = Pa_GetDeviceInfo(get_default_input_device());
 	const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(get_default_output_device());
 	if (nfo_i && nfo_o) {
-		_devices.insert (std::pair<int, paDevice*> (-1,
+		_input_devices.insert (std::pair<int, paDevice*> (-1,
+					new paDevice("Default",
+						nfo_i->maxInputChannels,
+						nfo_o->maxOutputChannels
+						)));
+		_output_devices.insert (std::pair<int, paDevice*> (-1,
 					new paDevice("Default",
 						nfo_i->maxInputChannels,
 						nfo_o->maxOutputChannels
@@ -267,11 +286,20 @@ PortAudioIO::add_devices ()
 			continue;
 		}
 
-		_devices.insert (std::pair<int, paDevice*> (i, new paDevice(
-						nfo->name,
-						nfo->maxInputChannels,
-						nfo->maxOutputChannels
-						)));
+		if (nfo->maxInputChannels > 0) {
+			_input_devices.insert (std::pair<int, paDevice*> (i, new paDevice(
+							nfo->name,
+							nfo->maxInputChannels,
+							nfo->maxOutputChannels
+							)));
+		}
+		if (nfo->maxOutputChannels > 0) {
+			_output_devices.insert (std::pair<int, paDevice*> (i, new paDevice(
+							nfo->name,
+							nfo->maxInputChannels,
+							nfo->maxOutputChannels
+							)));
+		}
 	}
 }
 
@@ -280,8 +308,8 @@ PortAudioIO::discover()
 {
 	if (!initialize_pa()) return;
 
-	clear_device_list ();
-	add_default_device ();
+	clear_device_lists ();
+	add_default_devices ();
 	add_devices ();
 }
 

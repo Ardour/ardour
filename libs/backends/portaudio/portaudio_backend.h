@@ -164,7 +164,11 @@ class PortAudioBackend : public AudioBackend {
 		std::vector<std::string> enumerate_drivers () const;
 		int set_driver (const std::string&);
 
+		bool use_separate_input_and_output_devices () const;
 		std::vector<DeviceStatus> enumerate_devices () const;
+		std::vector<DeviceStatus> enumerate_input_devices () const;
+		std::vector<DeviceStatus> enumerate_output_devices () const;
+
 		std::vector<float> available_sample_rates (const std::string& device) const;
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
 		uint32_t available_input_channel_count (const std::string& device) const;
@@ -174,6 +178,8 @@ class PortAudioBackend : public AudioBackend {
 		bool can_change_buffer_size_when_running () const;
 
 		int set_device_name (const std::string&);
+		int set_input_device_name (const std::string&);
+		int set_output_device_name (const std::string&);
 		int set_sample_rate (float);
 		int set_buffer_size (uint32_t);
 		int set_interleaved (bool yn);
@@ -188,6 +194,8 @@ class PortAudioBackend : public AudioBackend {
 
 		/* Retrieving parameters */
 		std::string  device_name () const;
+		std::string  input_device_name () const;
+		std::string  output_device_name () const;
 		float        sample_rate () const;
 		uint32_t     buffer_size () const;
 		bool         interleaved () const;
@@ -314,10 +322,12 @@ class PortAudioBackend : public AudioBackend {
 		uint64_t _last_process_start;
 
 		static std::vector<std::string> _midi_options;
-		static std::vector<AudioBackend::DeviceStatus> _audio_device_status;
+		static std::vector<AudioBackend::DeviceStatus> _input_audio_device_status;
+		static std::vector<AudioBackend::DeviceStatus> _output_audio_device_status;
 		static std::vector<AudioBackend::DeviceStatus> _midi_device_status;
 
-		mutable std::string _audio_device;
+		mutable std::string _input_audio_device;
+		mutable std::string _output_audio_device;
 		std::string _midi_driver_option;
 
 		/* audio settings */

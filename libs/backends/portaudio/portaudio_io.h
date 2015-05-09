@@ -47,7 +47,8 @@ public:
 	PaDeviceIndex get_default_output_device ();
 
 	void     discover();
-	void     device_list (std::map<int, std::string> &devices) const;
+	void     input_device_list (std::map<int, std::string> &devices) const;
+	void     output_device_list (std::map<int, std::string> &devices) const;
 
 	int      available_sample_rates (int device_id, std::vector<float>& sampleRates);
 	int      available_buffer_sizes (int device_id, std::vector<uint32_t>& sampleRates);
@@ -77,8 +78,8 @@ public:
 
 private: // Methods
 
-	void clear_device_list ();
-	void add_default_device ();
+	void clear_device_lists ();
+	void add_default_devices ();
 	void add_devices ();
 
 private: // Data
@@ -109,7 +110,8 @@ private: // Data
 		{}
 	};
 
-	std::map<int, paDevice *> _devices;
+	std::map<int, paDevice *> _input_devices;
+	std::map<int, paDevice *> _output_devices;
 
 	PaHostApiIndex _host_api_index;
 

@@ -41,7 +41,8 @@ using namespace ARDOUR;
 static std::string s_instance_name;
 size_t PortAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> PortAudioBackend::_midi_options;
-std::vector<AudioBackend::DeviceStatus> PortAudioBackend::_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> PortAudioBackend::_input_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> PortAudioBackend::_output_audio_device_status;
 
 PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
@@ -51,7 +52,8 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _freewheel (false)
 	, _measure_latency (false)
 	, _last_process_start (0)
-	, _audio_device("")
+	, _input_audio_device("")
+	, _output_audio_device("")
 	, _midi_driver_option(_("None"))
 	, _samplerate (48000)
 	, _samples_per_period (1024)
@@ -116,26 +118,53 @@ PortAudioBackend::set_driver (const std::string& name)
 	return 0;
 }
 
+bool
+PortAudioBackend::use_separate_input_and_output_devices () const
+{
+	return true;
+}
+
 std::vector<AudioBackend::DeviceStatus>
 PortAudioBackend::enumerate_devices () const
 {
-	_pcmio->discover();
-	_audio_device_status.clear();
-	std::map<int, std::string> devices;
-	_pcmio->device_list(devices);
+	return std::vector<AudioBackend::DeviceStatus>();
+}
 
-	for (std::map<int, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_audio_device == "") _audio_device = i->second;
-		_audio_device_status.push_back (DeviceStatus (i->second, true));
+std::vector<AudioBackend::DeviceStatus>
+PortAudioBackend::enumerate_input_devices () const
+{
+	_pcmio->discover();
+	_input_audio_device_status.clear();
+	std::map<int, std::string> input_devices;
+	_pcmio->input_device_list(input_devices);
+
+	for (std::map<int, std::string>::const_iterator i = input_devices.begin (); i != input_devices.end(); ++i) {
+		if (_input_audio_device == "") _input_audio_device = i->second;
+		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
 	}
-	return _audio_device_status;
+	return _input_audio_device_status;
+}
+
+std::vector<AudioBackend::DeviceStatus>
+PortAudioBackend::enumerate_output_devices () const
+{
+	_pcmio->discover();
+	_output_audio_device_status.clear();
+	std::map<int, std::string> output_devices;
+	_pcmio->output_device_list(output_devices);
+
+	for (std::map<int, std::string>::const_iterator i = output_devices.begin (); i != output_devices.end(); ++i) {
+		if (_output_audio_device == "") _output_audio_device = i->second;
+		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
+	}
+	return _output_audio_device_status;
 }
 
 std::vector<float>
 PortAudioBackend::available_sample_rates (const std::string&) const
 {
 	std::vector<float> sr;
-	_pcmio->available_sample_rates(name_to_id(_audio_device), sr);
+	_pcmio->available_sample_rates(name_to_id(_input_audio_device), sr);
 	return sr;
 }
 
@@ -143,7 +172,7 @@ std::vector<uint32_t>
 PortAudioBackend::available_buffer_sizes (const std::string&) const
 {
 	std::vector<uint32_t> bs;
-	_pcmio->available_buffer_sizes(name_to_id(_audio_device), bs);
+	_pcmio->available_buffer_sizes(name_to_id(_input_audio_device), bs);
 	return bs;
 }
 
@@ -174,7 +203,20 @@ PortAudioBackend::can_change_buffer_size_when_running () const
 int
 PortAudioBackend::set_device_name (const std::string& d)
 {
-	_audio_device = d;
+	return 0;
+}
+
+int
+PortAudioBackend::set_input_device_name (const std::string& d)
+{
+	_input_audio_device = d;
+	return 0;
+}
+
+int
+PortAudioBackend::set_output_device_name (const std::string& d)
+{
+	_output_audio_device = d;
 	return 0;
 }
 
@@ -238,7 +280,19 @@ PortAudioBackend::set_systemic_output_latency (uint32_t sl)
 std::string
 PortAudioBackend::device_name () const
 {
-	return _audio_device;
+	return "Unused";
+}
+
+std::string
+PortAudioBackend::input_device_name () const
+{
+	return _input_audio_device;
+}
+
+std::string
+PortAudioBackend::output_device_name () const
+{
+	return _output_audio_device;
 }
 
 float
@@ -349,7 +403,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_freewheel = false;
 	_last_process_start = 0;
 
-	_pcmio->pcm_setup (name_to_id(_audio_device), name_to_id(_audio_device), _samplerate, _samples_per_period);
+	_pcmio->pcm_setup (name_to_id(_input_audio_device), name_to_id(_output_audio_device), _samplerate, _samples_per_period);
 
 	switch (_pcmio->state ()) {
 		case 0: /* OK */ break;
@@ -515,7 +569,8 @@ int
 PortAudioBackend::name_to_id(std::string device_name) const {
 	uint32_t device_id = UINT32_MAX;
 	std::map<int, std::string> devices;
-	_pcmio->device_list(devices);
+	_pcmio->input_device_list(devices);
+	_pcmio->output_device_list(devices);
 
 	for (std::map<int, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (i->second == device_name) {
