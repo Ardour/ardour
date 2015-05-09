@@ -143,6 +143,16 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
 	DeviceStatus (const std::string& s, bool avail) : name (s), available (avail) {}
     };
 
+    /** An optional alternate interface for backends to provide a facility to
+     * select separate input and output devices.
+     *
+     * If a backend returns true then enumerate_input_devices() and
+     * enumerate_output_devices() will be used instead of enumerate_devices()
+     * to enumerate devices. Similarly set_input/output_device_name() should
+     * be used to set devices instead of set_device_name().
+     */
+    virtual bool use_separate_input_and_output_devices () const { return false; }
+
     /** Returns a collection of DeviceStatuses identifying devices discovered
      * by this backend since the start of the process.
      *
@@ -151,6 +161,26 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * invalid at any time.
      */
     virtual std::vector<DeviceStatus> enumerate_devices () const = 0;
+
+    /** Returns a collection of DeviceStatuses identifying input devices
+     * discovered by this backend since the start of the process.
+     *
+     * Any of the names in each DeviceStatus may be used to identify a
+     * device in other calls to the backend, though any of them may become
+     * invalid at any time.
+     */
+    virtual std::vector<DeviceStatus> enumerate_input_devices () const
+    { return std::vector<DeviceStatus>(); }
+
+    /** Returns a collection of DeviceStatuses identifying output devices
+     * discovered by this backend since the start of the process.
+     *
+     * Any of the names in each DeviceStatus may be used to identify a
+     * device in other calls to the backend, though any of them may become
+     * invalid at any time.
+     */
+    virtual std::vector<DeviceStatus> enumerate_output_devices () const
+    { return std::vector<DeviceStatus>(); }
 
     /** Returns a collection of float identifying sample rates that are
      * potentially usable with the hardware identified by @param device.
@@ -231,6 +261,21 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     /** Set the name of the device to be used
      */
     virtual int set_device_name (const std::string&) = 0;
+
+    /** Set the name of the input device to be used if using separate
+     * input/output devices.
+     *
+     * @see use_separate_input_and_output_devices()
+     */
+    virtual int set_input_device_name (const std::string&) { return 0;}
+
+    /** Set the name of the output device to be used if using separate
+     * input/output devices.
+     *
+     * @see use_separate_input_and_output_devices()
+     */
+    virtual int set_output_device_name (const std::string&) { return 0;}
+
     /** Deinitialize and destroy current device
      */
 	virtual int drop_device() {return 0;};
@@ -283,6 +328,8 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     /* Retrieving parameters */
 
     virtual std::string  device_name () const = 0;
+    virtual std::string  input_device_name () const { return std::string(); }
+    virtual std::string  output_device_name () const { return std::string(); }
     virtual float        sample_rate () const = 0;
     virtual uint32_t     buffer_size () const = 0;
     virtual bool         interleaved () const = 0;
