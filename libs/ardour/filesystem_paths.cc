@@ -49,17 +49,25 @@ user_config_directory_name (int version = -1)
 		version = atoi (X_(PROGRAM_VERSION));
 	}
 
+	/* ARDOUR::Profile may not be available when this is
+	   called, so rely on build-time detection of the 
+	   product name etc.
+	*/
+	
 #ifdef USE_TRACKS_CODE_FEATURES
 	/* Tracks does not use versioned configuration folders, which may or
 	   may not be problematic in the future.
 	*/
-	const string config_dir_name = X_(PROGRAM_NAME);
+	return X_(PROGRAM_NAME);
+
 #else		
 	const string config_dir_name = string_compose ("%1%2", X_(PROGRAM_NAME), version);
 
 #if defined (__APPLE__) || defined (PLATFORM_WINDOWS)
+	/* Use mixed-case folder name on OS X and Windows */
 	return config_dir_name;
 #else
+	/* use lower case folder name on Linux */
 	return downcase (config_dir_name);
 #endif
 #endif	
