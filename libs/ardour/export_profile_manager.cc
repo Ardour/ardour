@@ -43,6 +43,7 @@
 #include "ardour/export_failed.h"
 #include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
+#include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/broadcast_info.h"
