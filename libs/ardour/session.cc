@@ -1537,9 +1537,21 @@ Session::set_auto_loop_location (Location* location)
 	location->StartChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
 	location->EndChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
 	location->Changed.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
+	location->FlagsChanged.connect_same_thread (loop_connections, boost::bind (&Session::auto_loop_changed, this, location));
 
 	location->set_auto_loop (true, this);
 
+	if (Config->get_loop_is_mode() && play_loop && Config->get_seamless_loop()) {
+		// set all tracks to use internal looping
+		boost::shared_ptr<RouteList> rl = routes.reader ();
+		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			if (tr && !tr->hidden()) {
+				tr->set_loop (location);
+			}
+		}
+	}
+    
 	/* take care of our stuff first */
 
 	auto_loop_changed (location);
