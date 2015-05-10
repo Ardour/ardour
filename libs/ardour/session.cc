@@ -2684,7 +2684,7 @@ Session::reconnect_mtc_ports()
 			MtcOrLtcInputPortChanged (); //emit signal
 		}
 	}
-#endifs
+#endif
 }
 
 void
