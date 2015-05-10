@@ -62,7 +62,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
     
-        bool operator==(const Location& other);
+	bool operator==(const Location& other);
 
 	bool locked() const { return _locked; }
 	void lock ();
@@ -86,8 +86,8 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
 	void set_is_range_marker (bool yn, void* src);
-        void set_skip (bool yn);
-        void set_skipping (bool yn);
+	void set_skip (bool yn);
+	void set_skipping (bool yn);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }
@@ -105,31 +105,31 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	boost::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
 	void set_scene_change (boost::shared_ptr<SceneChange>);
 
-        /* these are static signals for objects that want to listen to all
-           locations at once.
-        */
+	/* these are static signals for objects that want to listen to all
+	   locations at once.
+	*/
 
 	static PBD::Signal1<void,Location*> name_changed;
 	static PBD::Signal1<void,Location*> end_changed;
 	static PBD::Signal1<void,Location*> start_changed;
 	static PBD::Signal1<void,Location*> flags_changed;
-        static PBD::Signal1<void,Location*> lock_changed;
+	static PBD::Signal1<void,Location*> lock_changed;
 	static PBD::Signal1<void,Location*> position_lock_style_changed;
 
 	/* this is sent only when both start and end change at the same time */
 	static PBD::Signal1<void,Location*> changed;
 
-        /* these are member signals for objects that care only about
-           changes to this object 
-        */
+	/* these are member signals for objects that care only about
+	   changes to this object 
+	*/
 
-    PBD::Signal0<void> Changed;
-    void set_block_change_notifications (bool yn) {_block_change_notifications = yn;}
+	PBD::Signal0<void> Changed;
+	void set_block_change_notifications (bool yn) {_block_change_notifications = yn;}
     
 	PBD::Signal0<void> NameChanged;
 	PBD::Signal0<void> EndChanged;
 	PBD::Signal0<void> StartChanged;
-    PBD::Signal0<void> FlagsChanged;
+	PBD::Signal0<void> FlagsChanged;
 	PBD::Signal0<void> LockChanged;
 	PBD::Signal0<void> PositionLockStyleChanged;
         
@@ -158,7 +158,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	PositionLockStyle  _position_lock_style;
 	boost::shared_ptr<SceneChange> _scene_change;
     
-    bool _block_change_notifications; // required for group operations
+	bool _block_change_notifications; // required for group operations
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
@@ -197,7 +197,7 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 
 	Location* mark_at (framepos_t, framecnt_t slop = 0) const;
 
-        framepos_t first_mark_before (framepos_t, bool include_special_ranges = false);
+	framepos_t first_mark_before (framepos_t, bool include_special_ranges = false);
 	framepos_t first_mark_after (framepos_t, bool include_special_ranges = false);
 
 	void marks_either_side (framepos_t const, framepos_t &, framepos_t &) const;
@@ -206,23 +206,23 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
     
 	PBD::Signal1<void,Location*> current_changed;
 
-        /* Objects that care about individual addition and removal of Locations should connect to added/removed.
-           If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
-        */
+	/* Objects that care about individual addition and removal of Locations should connect to added/removed.
+	   If an object additionally cares about potential mass clearance of Locations, they should connect to changed.
+	*/
 
 	PBD::Signal1<void,Location*> added;
 	PBD::Signal1<void,Location*> removed;
 	PBD::Signal0<void> changed; /* emitted when any action that could have added/removed more than 1 location actually removed 1 or more */
 
 	template<class T> void apply (T& obj, void (T::*method)(const LocationList&)) const {
-                /* We don't want to hold the lock while the given method runs, so take a copy
-                   of the list and pass that instead.
-                */
-                Locations::LocationList copy;
-                {
-                        Glib::Threads::Mutex::Lock lm (lock);
-                        copy = locations;
-                }
+		/* We don't want to hold the lock while the given method runs, so take a copy
+		   of the list and pass that instead.
+		*/
+		Locations::LocationList copy;
+		{
+			Glib::Threads::Mutex::Lock lm (lock);
+			copy = locations;
+		}
 		(obj.*method)(copy);
 	}
 
