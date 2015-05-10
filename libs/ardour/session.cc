@@ -1576,10 +1576,10 @@ Session::update_marks (Location*)
 void
 Session::update_skips (Location* loc, bool consolidate)
 {
-    if (_ignore_skips_updates) {
-        return;
-    }
-    
+	if (_ignore_skips_updates) {
+		return;
+	}
+	
 	Locations::LocationList skips;
 
         if (consolidate) {
