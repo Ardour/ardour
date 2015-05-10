@@ -58,7 +58,7 @@ Location::Location (Session& s)
 	, _flags (Flags (0))
 	, _locked (false)
 	, _position_lock_style (AudioTime)
-    , _block_change_notifications (false)
+	, _block_change_notifications (false)
 {
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -73,7 +73,7 @@ Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, 
 	, _flags (bits)
 	, _locked (false)
 	, _position_lock_style (s.config.get_glue_new_markers_to_bars_and_beats() ? MusicTime : AudioTime)
-    , _block_change_notifications (false)
+	, _block_change_notifications (false)
 
 {
 	recompute_bbt_from_frames ();
@@ -92,7 +92,7 @@ Location::Location (const Location& other)
 	, _bbt_end (other._bbt_end)
 	, _flags (other._flags)
 	, _position_lock_style (other._position_lock_style)
-    , _block_change_notifications (false)
+	, _block_change_notifications (false)
 
 {
 	/* copy is not locked even if original was */
@@ -171,10 +171,10 @@ Location::operator= (const Location& other)
 void
 Location::set_name (const std::string& str)
 { 
-        _name = str; 
+	_name = str; 
 
-        name_changed (this); /* EMIT SIGNAL */
-        NameChanged  (); /* EMIT SIGNAL */
+	name_changed (this); /* EMIT SIGNAL */
+	NameChanged  (); /* EMIT SIGNAL */
 }
 
 /** Set start position.
@@ -226,11 +226,11 @@ Location::set_start (framepos_t s, bool force, bool allow_bbt_recompute)
 
 		return 0;
 	} else if (!force) {
-                /* range locations must exceed a minimum duration */
-                if (_end - s < Config->get_range_location_minimum()) {
-                        return -1;
-                }
-        }
+		/* range locations must exceed a minimum duration */
+		if (_end - s < Config->get_range_location_minimum()) {
+			return -1;
+		}
+	}
 
 	if (s != _start) {
 
@@ -293,11 +293,11 @@ Location::set_end (framepos_t e, bool force, bool allow_bbt_recompute)
 		assert (_end >= 0);
 
 		return 0;
-        } else if (!force) {
-                /* range locations must exceed a minimum duration */
-                if (e - _start < Config->get_range_location_minimum()) {
-                        return -1;
-                }
+	} else if (!force) {
+		/* range locations must exceed a minimum duration */
+		if (e - _start < Config->get_range_location_minimum()) {
+			return -1;
+		}
 	}
 
 	if (e != _end) {
@@ -334,8 +334,8 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 		return -1;
 	}
 
-        bool start_change = false;
-        bool end_change = false;
+	bool start_change = false;
+	bool end_change = false;
 
 	if (is_mark()) {
 
@@ -347,8 +347,8 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 				recompute_bbt_from_frames ();
 			}
 
-                        start_change = true;
-                        end_change = true;
+			start_change = true;
+			end_change = true;
 		}
 
 		assert (_start >= 0);
@@ -356,67 +356,67 @@ Location::set (framepos_t s, framepos_t e, bool allow_bbt_recompute)
 
 	} else {
 
-                /* range locations must exceed a minimum duration */
-                if (e - s < Config->get_range_location_minimum()) {
-                        return -1;
-                }
+		/* range locations must exceed a minimum duration */
+		if (e - s < Config->get_range_location_minimum()) {
+			return -1;
+		}
                 
-                if (s != _start) {
+		if (s != _start) {
 
-                        framepos_t const old = _start;
-                        _start = s;
+			framepos_t const old = _start;
+			_start = s;
 
-                        if (allow_bbt_recompute) {
-                                recompute_bbt_from_frames ();
-                        }
+			if (allow_bbt_recompute) {
+				recompute_bbt_from_frames ();
+			}
 
-                        start_change = true;
+			start_change = true;
                         
-                        if (is_session_range ()) {
-                                Session::StartTimeChanged (old); /* EMIT SIGNAL */
-                                AudioFileSource::set_header_position_offset (s);
-                        }
-                }
+			if (is_session_range ()) {
+				Session::StartTimeChanged (old); /* EMIT SIGNAL */
+				AudioFileSource::set_header_position_offset (s);
+			}
+		}
                         
                  
-                if (e != _end) {
+		if (e != _end) {
                         
-                        framepos_t const old = _end;
-                        _end = e;
+			framepos_t const old = _end;
+			_end = e;
 
-                        if (allow_bbt_recompute) {
-                                recompute_bbt_from_frames ();
-                        }
+			if (allow_bbt_recompute) {
+				recompute_bbt_from_frames ();
+			}
                         
-                        end_change = true;
+			end_change = true;
 
-                        if (is_session_range()) {
-                                Session::EndTimeChanged (old); /* EMIT SIGNAL */
-                        }
-                }
+			if (is_session_range()) {
+				Session::EndTimeChanged (old); /* EMIT SIGNAL */
+			}
+		}
 
-                assert (_end >= 0);
-        }
+		assert (_end >= 0);
+	}
 
-        if (start_change) {
-                start_changed(this); /* EMIT SIGNAL */
-                StartChanged(); /* EMIT SIGNAL */
-        }
+	if (start_change) {
+		start_changed(this); /* EMIT SIGNAL */
+		StartChanged(); /* EMIT SIGNAL */
+	}
 
-        if (end_change) {
-                end_changed(this); /* EMIT SIGNAL */
-                EndChanged(); /* EMIT SIGNAL */
-        }
+	if (end_change) {
+		end_changed(this); /* EMIT SIGNAL */
+		EndChanged(); /* EMIT SIGNAL */
+	}
 
-        if (start_change && end_change) {
-                changed (this);
+	if (start_change && end_change) {
+		changed (this);
             
-            if (!_block_change_notifications) {
-                Changed ();
-            }
-        }
+		if (!_block_change_notifications) {
+			Changed ();
+		}
+	}
 
-        return 0;
+	return 0;
 }
 
 int
@@ -435,11 +435,11 @@ Location::move_to (framepos_t pos)
 		_end = _start + length();
 		recompute_bbt_from_frames ();
 
-        changed (this); /* EMIT SIGNAL */
+		changed (this); /* EMIT SIGNAL */
         
-        if (!_block_change_notifications) {
-            Changed (); /* EMIT SIGNAL */
-        }
+		if (!_block_change_notifications) {
+			Changed (); /* EMIT SIGNAL */
+		}
 	}
 
 	assert (_start >= 0);
@@ -452,8 +452,8 @@ void
 Location::set_hidden (bool yn, void*)
 {
 	if (set_flag_internal (yn, IsHidden)) {
-		 flags_changed (this); /* EMIT SIGNAL */
-                 FlagsChanged ();
+		flags_changed (this); /* EMIT SIGNAL */
+		FlagsChanged ();
 	}
 }
 
@@ -469,40 +469,40 @@ Location::set_cd (bool yn, void*)
 	}
 
 	if (set_flag_internal (yn, IsCDMarker)) {
-		 flags_changed (this); /* EMIT SIGNAL */
-                 FlagsChanged ();
+		flags_changed (this); /* EMIT SIGNAL */
+		FlagsChanged ();
 	}
 }
 
 void
 Location::set_is_range_marker (bool yn, void*)
 {
-       if (set_flag_internal (yn, IsRangeMarker)) {
-               flags_changed (this);
-                FlagsChanged (); /* EMIT SIGNAL */
-       }
+	if (set_flag_internal (yn, IsRangeMarker)) {
+		flags_changed (this);
+		FlagsChanged (); /* EMIT SIGNAL */
+	}
 }
 
 void
 Location::set_skip (bool yn)
 {
-        if (is_range_marker() && length() > 0) {
-                if (set_flag_internal (yn, IsSkip)) {
-                        flags_changed (this);
-                        FlagsChanged ();
-                }
-        }
+	if (is_range_marker() && length() > 0) {
+		if (set_flag_internal (yn, IsSkip)) {
+			flags_changed (this);
+			FlagsChanged ();
+		}
+	}
 }
 
 void
 Location::set_skipping (bool yn)
 {
-        if (is_range_marker() && is_skip() && length() > 0) {
-                if (set_flag_internal (yn, IsSkipping)) {
-                        flags_changed (this);
-                        FlagsChanged ();
-                }
-        }
+	if (is_range_marker() && is_skip() && length() > 0) {
+		if (set_flag_internal (yn, IsSkipping)) {
+			flags_changed (this);
+			FlagsChanged ();
+		}
+	}
 }
 
 void
@@ -513,8 +513,8 @@ Location::set_auto_punch (bool yn, void*)
 	}
 
 	if (set_flag_internal (yn, IsAutoPunch)) {
-		 flags_changed (this); /* EMIT SIGNAL */
-		 FlagsChanged (); /* EMIT SIGNAL */
+		flags_changed (this); /* EMIT SIGNAL */
+		FlagsChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -526,8 +526,8 @@ Location::set_auto_loop (bool yn, void*)
 	}
 
 	if (set_flag_internal (yn, IsAutoLoop)) {
-		 flags_changed (this); /* EMIT SIGNAL */
-		 FlagsChanged (); /* EMIT SIGNAL */
+		flags_changed (this); /* EMIT SIGNAL */
+		FlagsChanged (); /* EMIT SIGNAL */
 	}
 }
 
@@ -636,22 +636,22 @@ Location::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-		/* can't use set_start() here, because _end
-		   may make the value of _start illegal.
-		*/
+	/* can't use set_start() here, because _end
+	   may make the value of _start illegal.
+	*/
 
 	sscanf (prop->value().c_str(), "%" PRId64, &_start);
 
 	if ((prop = node.property ("end")) == 0) {
-		  error << _("XML node for Location has no end information") << endmsg;
-		  return -1;
+		error << _("XML node for Location has no end information") << endmsg;
+		return -1;
 	}
 
 	sscanf (prop->value().c_str(), "%" PRId64, &_end);
 
 	if ((prop = node.property ("flags")) == 0) {
-		  error << _("XML node for Location has no flags information") << endmsg;
-		  return -1;
+		error << _("XML node for Location has no flags information") << endmsg;
+		return -1;
 	}
 
 	_flags = Flags (string_2_enum (prop->value(), _flags));
@@ -664,26 +664,26 @@ Location::set_state (const XMLNode& node, int version)
 
 	for (cd_iter = cd_list.begin(); cd_iter != cd_list.end(); ++cd_iter) {
 
-		  cd_node = *cd_iter;
+		cd_node = *cd_iter;
 
-		  if (cd_node->name() != "CD-Info") {
-			  continue;
-		  }
+		if (cd_node->name() != "CD-Info") {
+			continue;
+		}
 
-		  if ((prop = cd_node->property ("name")) != 0) {
-			  cd_name = prop->value();
-		  } else {
-			  throw failed_constructor ();
-		  }
+		if ((prop = cd_node->property ("name")) != 0) {
+			cd_name = prop->value();
+		} else {
+			throw failed_constructor ();
+		}
 
-		  if ((prop = cd_node->property ("value")) != 0) {
-			  cd_value = prop->value();
-		  } else {
-			  throw failed_constructor ();
-		  }
+		if ((prop = cd_node->property ("value")) != 0) {
+			cd_value = prop->value();
+		} else {
+			throw failed_constructor ();
+		}
 
 
-		  cd_info[cd_name] = cd_value;
+		cd_info[cd_name] = cd_value;
 	}
 
 	if ((prop = node.property ("position-lock-style")) != 0) {
@@ -698,11 +698,11 @@ Location::set_state (const XMLNode& node, int version)
 
 	recompute_bbt_from_frames ();
 
-    changed (this); /* EMIT SIGNAL */
+	changed (this); /* EMIT SIGNAL */
     
-    if (!_block_change_notifications) {
-        Changed (); /* EMIT SIGNAL */
-    }
+	if (!_block_change_notifications) {
+		Changed (); /* EMIT SIGNAL */
+	}
 
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -802,7 +802,7 @@ Locations::set_current (Location *loc, bool want_lock)
 	}
 
 	if (ret == 0) {
-		 current_changed (current_location); /* EMIT SIGNAL */
+		current_changed (current_location); /* EMIT SIGNAL */
 	}
 	return ret;
 }
@@ -814,51 +814,51 @@ Locations::next_available_name(string& result,string base)
 	string::size_type l;
 	int suffix;
 	char buf[32];
-        std::map<uint32_t,bool> taken;
-        uint32_t n;
+	std::map<uint32_t,bool> taken;
+	uint32_t n;
 
 	result = base;
-        l = base.length();
+	l = base.length();
 
-        if (!base.empty()) {
+	if (!base.empty()) {
                 
-                /* find all existing names that match "base", and store
-                   the numeric part of them (if any) in the map "taken"
-                */
+		/* find all existing names that match "base", and store
+		   the numeric part of them (if any) in the map "taken"
+		*/
 
-                for (i = locations.begin(); i != locations.end(); ++i) {
+		for (i = locations.begin(); i != locations.end(); ++i) {
 
-                        const string& temp ((*i)->name());
+			const string& temp ((*i)->name());
                         
-                        if (!temp.find (base,0)) {
+			if (!temp.find (base,0)) {
 
-                                if ((suffix = atoi (temp.substr(l,3))) != 0) {
-                                        taken.insert (make_pair (suffix,true));
-                                }
-                        }
-                }
-        }
+				if ((suffix = atoi (temp.substr(l,3))) != 0) {
+					taken.insert (make_pair (suffix,true));
+				}
+			}
+		}
+	}
 
-        /* Now search for an un-used suffix to add to "base". This
-           will find "holes" in the numbering sequence when a location
-           was deleted.
+	/* Now search for an un-used suffix to add to "base". This
+	   will find "holes" in the numbering sequence when a location
+	   was deleted.
 
-           This must start at 1, both for human-numbering reasons
-           and also because the call to atoi() above would return 
-           zero if there is no recognizable numeric suffix, causing
-           "base 0" not to be inserted into the "taken" map.
-        */
+	   This must start at 1, both for human-numbering reasons
+	   and also because the call to atoi() above would return 
+	   zero if there is no recognizable numeric suffix, causing
+	   "base 0" not to be inserted into the "taken" map.
+	*/
 
-        n = 1; 
+	n = 1; 
 
-        while (n < UINT32_MAX) {
-                if (taken.find (n) == taken.end()) {
-                        snprintf (buf, sizeof(buf), "%d", n);
-                        result += buf;
-                        return 1;
-                }
-                ++n;
-        }
+	while (n < UINT32_MAX) {
+		if (taken.find (n) == taken.end()) {
+			snprintf (buf, sizeof(buf), "%d", n);
+			result += buf;
+			return 1;
+		}
+		++n;
+	}
                 
 	return 0;
 }
@@ -959,7 +959,7 @@ Locations::clear_ranges ()
 		current_location = 0;
 	}
 
-        changed ();
+	changed ();
 	current_changed (0); /* EMIT SIGNAL */
 }
 
@@ -980,7 +980,7 @@ Locations::add (Location *loc, bool make_current)
 	added (loc); /* EMIT SIGNAL */
 
 	if (make_current) {
-		 current_changed (current_location); /* EMIT SIGNAL */
+		current_changed (current_location); /* EMIT SIGNAL */
 	}
 
 	if (loc->is_session_range()) {
@@ -1022,7 +1022,7 @@ Locations::remove (Location *loc)
 		removed (loc); /* EMIT SIGNAL */
                 
 		if (was_current) {
-			 current_changed (0); /* EMIT SIGNAL */
+			current_changed (0); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -1084,10 +1084,10 @@ Locations::set_state (const XMLNode& node, int version)
 					/* we can re-use an old Location object */
 					loc = *i;
                     
-                    // changed locations will be updated by Locations::changed signal
-                    loc->set_block_change_notifications (true);
+					// changed locations will be updated by Locations::changed signal
+					loc->set_block_change_notifications (true);
 					loc->set_state (**niter, version);
-                    loc->set_block_change_notifications (false);
+					loc->set_block_change_notifications (false);
 				} else {
 					loc = new Location (_session, **niter);
 				}
@@ -1174,16 +1174,16 @@ typedef std::pair<framepos_t,Location*> LocationPair;
 
 struct LocationStartEarlierComparison
 {
-    bool operator() (LocationPair a, LocationPair b) {
-	    return a.first < b.first;
-    }
+	bool operator() (LocationPair a, LocationPair b) {
+		return a.first < b.first;
+	}
 };
 
 struct LocationStartLaterComparison
 {
-    bool operator() (LocationPair a, LocationPair b) {
-	    return a.first > b.first;
-    }
+	bool operator() (LocationPair a, LocationPair b) {
+		return a.first > b.first;
+	}
 };
 
 framepos_t
@@ -1392,7 +1392,7 @@ Locations::auto_punch_location () const
 			return const_cast<Location*> (*i);
 		}
 	}
-       return 0;
+	return 0;
 }
 
 uint32_t
@@ -1411,12 +1411,12 @@ Locations::num_range_markers () const
 Location *
 Locations::get_location_by_id(PBD::ID id)
 {
-    LocationList::iterator it;
-    for (it  = locations.begin(); it != locations.end(); ++it)
-        if (id == (*it)->id())
-            return *it;
+	LocationList::iterator it;
+	for (it  = locations.begin(); it != locations.end(); ++it)
+		if (id == (*it)->id())
+			return *it;
 
-    return 0;
+	return 0;
 }
 
 void
