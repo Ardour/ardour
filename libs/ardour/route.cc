@@ -113,7 +113,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _initial_io_setup (false)
 	, _custom_meter_position_noted (false)
 {
-	if (is_master()) {
+	if (!Profile->get_trx() && is_master()) {
 		_meter_type = MeterK20;
 	}
 	processor_max_streams.reset();
