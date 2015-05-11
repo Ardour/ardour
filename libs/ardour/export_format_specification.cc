@@ -591,6 +591,9 @@ ExportFormatSpecification::description (bool include_name)
 	case SR_96:
 		components.push_back ("96 kHz");
 		break;
+	case SR_176_4:
+		components.push_back ("176.4 kHz");
+		break;
 	case SR_192:
 		components.push_back ("192 kHz");
 		break;
