@@ -102,6 +102,7 @@ class LIBARDOUR_API ExportFormatBase {
 		SR_48 = 48000,
 		SR_88_2 = 88200,
 		SR_96 = 96000,
+		SR_176_4 = 176400,
 		SR_192 = 192000
 	};
 
