@@ -293,6 +293,10 @@ Session::Session (AudioEngine &eng,
 	pre_engine_init (fullpath);
 	
 	if (_is_new) {
+
+#ifdef USE_TRACKS_CODE_FEATURES		
+		sr = EngineStateController::instance()->get_current_sample_rate();
+#endif
 		if (ensure_engine (sr)) {
 			destroy ();
 			throw failed_constructor ();
