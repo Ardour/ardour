@@ -117,7 +117,10 @@ find_session (string str, string& path, string& snapshot, bool& isnew)
 
 			suffix = snapshot.find (statefile_suffix);
 
-			if (suffix == string::npos) {
+			const string::size_type start_pos_of_extension = snapshot.size () - strlen (statefile_suffix);
+			// we should check the start of extension position
+			// because files '*.ardour.bak' are possible
+			if (suffix != start_pos_of_extension) {
 				error << string_compose (_("%1 is not a snapshot file"), str) << endmsg;
 				return -1;
 			}
