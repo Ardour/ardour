@@ -5997,6 +5997,12 @@ Session::next_control_id () const
 		subtract++;
 	}
 
+	/* the same about masterbus in Waves Tracks */
+
+	if (Profile->get_trx() && _master_out) {
+		subtract++;
+	}
+
 	return nroutes() - subtract;
 }
 
