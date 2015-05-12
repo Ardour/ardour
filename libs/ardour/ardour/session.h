@@ -1471,7 +1471,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void route_processors_changed (RouteProcessorChange);
 
-	bool find_route_name (std::string const &, uint32_t& id, char* name, size_t name_len, bool);
+	bool find_route_name (std::string const &, uint32_t& id, std::string& name, bool);
 	void count_existing_track_channels (ChanCount& in, ChanCount& out);
 	void auto_connect_route (boost::shared_ptr<Route> route, ChanCount& existing_inputs, ChanCount& existing_outputs,
 	                         bool with_lock, bool connect_inputs = true,

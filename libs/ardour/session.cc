@@ -2163,16 +2163,16 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
  *  and \a id do not reflect a free route name.
  */
 bool
-Session::find_route_name (string const & base, uint32_t& id, char* name, size_t name_len, bool definitely_add_number)
+Session::find_route_name (string const & base, uint32_t& id, string& name, bool definitely_add_number)
 {
 	if (!definitely_add_number && route_by_name (base) == 0) {
 		/* juse use the base */
-		snprintf (name, name_len, "%s", base.c_str());
+		name = base;
 		return true;
 	}
 
 	do {
-		snprintf (name, name_len, "%s %" PRIu32, base.c_str(), id);
+		name = string_compose ("%1 %2", base, id);
 
 		if (route_by_name (name) == 0) {
 			return true;
@@ -2211,7 +2211,7 @@ list<boost::shared_ptr<MidiTrack> >
 Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost::shared_ptr<PluginInfo> instrument, 
 			 TrackMode mode, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
-	char track_name[1024];
+	string track_name;
 	uint32_t track_id = 0;
 	string port;
 	RouteList new_routes;
@@ -2220,7 +2220,7 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("MIDI");
 
 	while (how_many) {
-		if (!find_route_name (name_template.empty() ? _("MIDI") : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
+		if (!find_route_name (name_template.empty() ? _("MIDI") : name_template, ++track_id, track_name, use_number)) {
 			error << "cannot find name for new midi track" << endmsg;
 			goto failed;
 		}
@@ -2747,7 +2747,7 @@ list< boost::shared_ptr<AudioTrack> >
 Session::new_audio_track (int input_channels, int output_channels, TrackMode mode, RouteGroup* route_group, 
 			  uint32_t how_many, string name_template)
 {
-	char track_name[1024];
+	string track_name;
 	uint32_t track_id = 0;
 	string port;
 	RouteList new_routes;
@@ -2765,7 +2765,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	
 	while (how_many) {
 
-		if (!find_route_name (name_template.empty() ? _(name_pattern.c_str()) : name_template, ++track_id, track_name, sizeof(track_name), use_number)) {
+		if (!find_route_name (name_template.empty() ? _(name_pattern.c_str()) : name_template, ++track_id, track_name, use_number)) {
 			error << "cannot find name for new audio track" << endmsg;
 			goto failed;
 		}
@@ -2868,7 +2868,7 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 RouteList
 Session::new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, string name_template)
 {
-	char bus_name[32];
+	string bus_name;
 	uint32_t bus_id = 0;
 	string port;
 	RouteList ret;
@@ -2876,7 +2876,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("Bus");
 	
 	while (how_many) {
-		if (!find_route_name (name_template.empty () ? _("Bus") : name_template, ++bus_id, bus_name, sizeof(bus_name), use_number)) {
+		if (!find_route_name (name_template.empty () ? _("Bus") : name_template, ++bus_id, bus_name, use_number)) {
 			error << "cannot find name for new audio bus" << endmsg;
 			goto failure;
 		}
@@ -2982,7 +2982,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 		node_copy.remove_property_recursively (X_("id"));
 
 		try {
-			char name[32];
+			string name;
 
 			if (!name_base.empty()) {
 
@@ -2991,7 +2991,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				 * numbered, via the final parameter.
 				 */
 
-				if (!find_route_name (name_base.c_str(), ++number, name, sizeof(name), (being_added > 1))) {
+				if (!find_route_name (name_base.c_str(), ++number, name, (being_added > 1))) {
 					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
 					/*NOTREACHDE*/
 				}
@@ -3001,7 +3001,7 @@ Session::new_route_from_template (uint32_t how_many, const std::string& template
 				string const route_name  = node_copy.property(X_("name"))->value ();
 			
 				/* generate a new name by adding a number to the end of the template name */
-				if (!find_route_name (route_name.c_str(), ++number, name, sizeof(name), true)) {
+				if (!find_route_name (route_name.c_str(), ++number, name, true)) {
 					fatal << _("Session: UINT_MAX routes? impossible!") << endmsg;
 					abort(); /*NOTREACHED*/
 				}
