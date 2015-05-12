@@ -213,6 +213,7 @@ MTC_Slave::reset (bool with_position)
 	window_end = 0;
 	transport_direction = 1;
 	current_delta = 0;
+	ActiveChanged(false);
 }
 
 void
@@ -468,6 +469,7 @@ MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now
 				first_mtc_timestamp = now;
 				init_mtc_dll(mtc_frame, qtr);
 				mtc_frame_dll = mtc_frame;
+				ActiveChanged (true); // emit signal
 			}
 			current.guard1++;
 			current.position = mtc_frame;
@@ -626,6 +628,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		session.request_transport_speed (0);
 		engine_dll_initstate = 0;
 		queue_reset (false);
+        ActiveChanged (false);
 		DEBUG_TRACE (DEBUG::MTC, "MTC not seen for 2 frames - reset pending\n");
 		return false;
 	}

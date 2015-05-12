@@ -184,6 +184,7 @@ Session::Session (AudioEngine &eng,
 	, average_dir (0)
 	, have_first_delta_accumulator (false)
 	, _slave_state (Stopped)
+    , _mtc_active (false)
 	, post_export_sync (false)
 	, post_export_position (0)
 	, _exporting (false)
@@ -2671,36 +2672,37 @@ Session::reconnect_midi_scene_ports(bool inputs)
 }
 
 void
-Session::reconnect_mtc_ports()
+Session::reconnect_mtc_ports ()
 {
-#if 0
 	boost::shared_ptr<MidiPort> mtc_in_ptr = _midi_ports->mtc_input_port();
 
-	if (mtc_in_ptr) {
-		mtc_in_ptr->disconnect_all ();
-        
-		std::vector<EngineStateController::MidiPortState> midi_port_states;
-		EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
-        
-		std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-        
-		for (; state_iter != midi_port_states.end(); ++state_iter) {
-			if (state_iter->available && state_iter->mtc_in) {
-				mtc_in_ptr->connect (state_iter->name);
-			}
-		}
-        
-		if (!_midi_ports->mtc_input_port ()->connected () &&
-		    config.get_external_sync () &&
-		    (Config->get_sync_source () == MTC) ) {
-			config.set_external_sync (false);
-		}
-		if ( ARDOUR::Profile->get_trx () ) {
-			// Tracks need this signal to update timecode_source_dropdown
-			MtcOrLtcInputPortChanged (); //emit signal
+	if (!mtc_in_ptr) {
+		return;
+	}
+
+	mtc_in_ptr->disconnect_all ();
+	
+	std::vector<EngineStateController::MidiPortState> midi_port_states;
+	EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
+	
+	std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
+	
+	for (; state_iter != midi_port_states.end(); ++state_iter) {
+		if (state_iter->available && state_iter->mtc_in) {
+			mtc_in_ptr->connect (state_iter->name);
 		}
 	}
-#endif
+	
+	if (!_midi_ports->mtc_input_port ()->connected () &&
+	    config.get_external_sync () &&
+	    (Config->get_sync_source () == MTC) ) {
+		config.set_external_sync (false);
+	}
+	
+	if ( ARDOUR::Profile->get_trx () ) {
+		// Tracks need this signal to update timecode_source_dropdown
+		MtcOrLtcInputPortChanged (); //emit signal
+	}
 }
 
 void
