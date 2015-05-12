@@ -35,6 +35,7 @@
 #include "ardour/meter.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/processor.h"
+#include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
@@ -62,7 +63,7 @@ AudioTrack::create_diskstream ()
 {
 	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (AudioDiskstream::Recordable);
 
-	if (_mode == Destructive) {
+	if (_mode == Destructive && !Profile->get_trx()) {
 		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);
 	} else if (_mode == NonLayered){
 		dflags = AudioDiskstream::Flag(dflags | AudioDiskstream::NonLayered);
@@ -77,7 +78,11 @@ AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	Track::set_diskstream (ds);
 
 	_diskstream->set_track (this);
-	_diskstream->set_destructive (_mode == Destructive);
+	if (Profile->get_trx()) {
+		_diskstream->set_destructive (false);
+	} else {
+		_diskstream->set_destructive (_mode == Destructive);
+	}
 	_diskstream->set_non_layered (_mode == NonLayered);
 
 	if (audio_diskstream()->deprecated_io_node) {
@@ -106,7 +111,7 @@ AudioTrack::set_mode (TrackMode m)
 {
 	if (m != _mode) {
 
-		if (_diskstream->set_destructive (m == Destructive)) {
+		if (!Profile->get_trx() && _diskstream->set_destructive (m == Destructive)) {
 			return -1;
 		}
 
@@ -129,8 +134,15 @@ AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
 		return true;
 
 	case Destructive:
+		if (Profile->get_trx()) {
+			return false;
+		} else {
+			return _diskstream->can_become_destructive (bounce_required);
+		}
+		break;
+
 	default:
-		return _diskstream->can_become_destructive (bounce_required);
+		return false;
 	}
 }
 
@@ -191,6 +203,14 @@ AudioTrack::set_state (const XMLNode& node, int version)
 		_mode = TrackMode (string_2_enum (prop->value(), _mode));
 	} else {
 		_mode = Normal;
+	}
+
+	if (Profile->get_trx() && _mode == Destructive) {
+		/* Tracks does not support destructive tracks and trying to
+		   handle it as a normal track would be wrong.
+		*/
+		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
+		return -1;
 	}
 
 	if (Track::set_state (node, version)) {

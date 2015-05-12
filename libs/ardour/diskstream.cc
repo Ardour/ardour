@@ -42,6 +42,7 @@
 #include "ardour/diskstream.h"
 #include "ardour/io.h"
 #include "ardour/pannable.h"
+#include "ardour/profile.h"
 #include "ardour/playlist.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -498,6 +499,11 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
 
+	if (Profile->get_trx() && (_flags & Destructive)) {
+		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
+		return -1;
+	}
+	
         if ((prop = node.property (X_("capture-alignment"))) != 0) {
                 set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
         } else {
