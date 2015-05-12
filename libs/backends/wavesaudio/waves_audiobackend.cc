@@ -738,11 +738,6 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
     // COMMENTED FREQUENT DBG LOGS */ std::cout << "WavesAudioBackend::_audio_device_callback ():" << _device->DeviceName () << std::endl;
     _sample_time_at_cycle_start = sample_time;
     _cycle_start_time_nanos = cycle_start_time_nanos;
-    
-    /* There is the possibility that the thread this runs in may change from
-     *  callback to callback, so do it every time.
-     */
-    _main_thread = pthread_self ();
 
     if (_buffer_size != nframes) {
         // COMMENTED DBG LOGS */ std::cout << "\tAudioEngine::thread_init_callback() buffer size and nframes are not equal: " << _buffer_size << "!=" << nframes << std::endl;
@@ -755,18 +750,24 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
     if (_call_thread_init_callback) {
         _call_thread_init_callback = false;
         // COMMENTED DBG LOGS */ std::cout << "\tAudioEngine::thread_init_callback() invoked for " << std::hex << pthread_self() << std::dec << " !" << std::endl;
+        
+        /* There is the possibility that the thread this runs in may change from
+         *  callback to callback, so do it every time.
+         */
+        _main_thread = pthread_self ();
+        
         AudioEngine::thread_init_callback (this);
     }
 
     if ( !engine.thread_initialised_for_audio_processing () ) {
 	    std::cerr << "\tWavesAudioBackend::_audio_device_callback (): It's an attempt to call process callback from the thread which didn't initialize it " << std::endl;
 	    
-	    if (process_id != pthread_self() ) {
-		    std::cerr << "Process thread ID has changed. Expected thread: " << process_id << " current thread: " << pthread_self() << std::dec << " !" << std::endl;
-		    process_id = pthread_self();
-	    }
-	    
 	    AudioEngine::thread_init_callback (this);
+    }
+    
+    if (_main_thread != pthread_self() ) {
+        std::cerr << "Process thread ID has changed. Expected thread: " << process_id << " current thread: " << pthread_self() << std::dec << " !" << std::endl;
+        _main_thread = pthread_self();
     }
 
     engine.process_callback (nframes);
