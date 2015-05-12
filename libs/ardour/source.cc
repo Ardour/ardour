@@ -35,6 +35,7 @@
 #include "pbd/enumwriter.h"
 
 #include "ardour/debug.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/transient_detector.h"
@@ -144,6 +145,11 @@ Source::set_state (const XMLNode& node, int version)
 		_flags = Flag (_flags | Destructive);
 	}
 
+	if (Profile->get_trx() && (_flags & Destructive)) {
+		error << string_compose (_("%1: this session uses destructive tracks, which are not supported"), PROGRAM_NAME) << endmsg;
+		return -1;
+	}
+	
 	if (version < 3000) {
 		/* a source with an XML node must necessarily already exist,
 		   and therefore cannot be removable/writable etc. etc.; 2.X

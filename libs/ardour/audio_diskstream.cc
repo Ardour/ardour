@@ -46,6 +46,7 @@
 #include "ardour/debug.h"
 #include "ardour/io.h"
 #include "ardour/playlist_factory.h"
+#include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
@@ -2362,6 +2363,10 @@ AudioDiskstream::set_destructive (bool yn)
 bool
 AudioDiskstream::can_become_destructive (bool& requires_bounce) const
 {
+	if (Profile->get_trx()) {
+		return false;
+	}
+	
 	if (!_playlist) {
 		requires_bounce = false;
 		return false;

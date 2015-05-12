@@ -34,6 +34,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/profile.h"
 #include "ardour/region_factory.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
@@ -327,7 +328,11 @@ Auditioner::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	Track::set_diskstream (ds);
 
 	_diskstream->set_track (this);
-	_diskstream->set_destructive (_mode == Destructive);
+	if (Profile->get_trx()) {
+		_diskstream->set_destructive (false);
+	} else {
+		_diskstream->set_destructive (_mode == Destructive);
+	}
 	_diskstream->set_non_layered (_mode == NonLayered);
 	_diskstream->set_record_enabled (false);
 	_diskstream->request_input_monitoring (false);
