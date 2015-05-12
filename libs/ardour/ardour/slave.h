@@ -273,6 +273,8 @@ class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
         std::string approximate_current_position() const;
 	std::string approximate_current_delta() const;
 
+	PBD::Signal1<void, bool> ActiveChanged;
+    
   private:
 	Session&    session;
 	MidiPort*   port;

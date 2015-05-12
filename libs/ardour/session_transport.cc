@@ -1543,6 +1543,13 @@ Session::reset_rf_scale (framecnt_t motion)
 }
 
 void
+Session::mtc_status_changed (bool yn)
+{
+	g_atomic_int_set (&_mtc_active, yn);
+	MTCSyncStateChanged( yn );
+}
+
+void
 Session::use_sync_source (Slave* new_slave)
 {
 	/* Runs in process() context */
@@ -1553,6 +1560,18 @@ Session::use_sync_source (Slave* new_slave)
 
 	delete _slave;
 	_slave = new_slave;
+
+	MTC_Slave* mtc_slave = dynamic_cast<MTC_Slave*>(_slave);
+	if (mtc_slave) {
+		mtc_slave->ActiveChanged.connect_same_thread (mtc_status_connection, boost::bind (&Session::mtc_status_changed, this, _1));
+		MTCSyncStateChanged(mtc_slave->locked() );
+	} else {
+		if (g_atomic_int_get (&_mtc_active) ){
+			g_atomic_int_set (&_mtc_active, 0);
+			MTCSyncStateChanged( false );
+		}
+		mtc_status_connection.disconnect ();
+	}
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", _slave));
 	

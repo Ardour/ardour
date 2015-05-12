@@ -297,6 +297,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	PBD::Signal0<void> IOConnectionsComplete;
 
+	/* Timecode status signals */
+	PBD::Signal1<void, bool> MTCSyncStateChanged;
+	
 	/* Record status signals */
 
 	PBD::Signal0<void> RecordStateChanged; /* signals changes in recording state (i.e. are we recording) */
@@ -343,6 +346,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/* Step Editing status changed */
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
+	/* Timecode state signals */
+	PBD::Signal0<void> MtcOrLtcInputPortChanged;
+	
 	void queue_event (SessionEvent*);
 
 	void request_roll_at_and_return (framepos_t start, framepos_t return_to);
@@ -600,7 +606,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void   request_sync_source (Slave*);
 	bool   synced_to_engine() const { return _slave && config.get_external_sync() && Config->get_sync_source() == Engine; }
-
+	bool   synced_to_mtc () const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (const_cast<gint*>(&_mtc_active)); }
+	
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
 	bool   transport_rolling() const { return _transport_speed != 0.0f; }
@@ -1070,6 +1077,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool                    _under_nsm_control;
 	unsigned int            _xrun_count;
 
+	void mtc_status_changed (bool);
+	PBD::ScopedConnection mtc_status_connection;
+	
 	void initialize_latencies ();
 	void set_worst_io_latencies ();
 	void set_worst_playback_latency ();
@@ -1107,6 +1117,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool have_first_delta_accumulator;
 
 	SlaveState _slave_state;
+	gint _mtc_active;
 	framepos_t slave_wait_end;
 
 	void reset_slave_state ();
