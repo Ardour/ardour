@@ -209,7 +209,7 @@ class CStyleChecker:
 			if check_re.search (line):
 				self.error (msg)
 
-		if re.search ("[a-zA-Z0-9][<>!=^/&\|]{1,2}[a-zA-Z0-9]", line):
+		if re.search ("[a-zA-Z0-9_][<>!=^/&\|]{1,2}[a-zA-Z0-9_]", line):
                         # ignore #include <foo.h> and C++ templates with indirection/pointer/reference operators
 			if not re.search (".*#include.*[a-zA-Z0-9]/[a-zA-Z]", line) and not re.search ("[a-zA-Z0-9_]>[&\*]", line):
 				self.error ("missing space around operator")
