@@ -54,7 +54,13 @@ Butler::Butler(Session& s)
 	g_atomic_int_set(&should_do_transport_work, 0);
 	SessionEvent::pool->set_trash (&pool_trash);
 
-        Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
+	/* catch future changes to parameters */
+	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Butler::config_changed, this, _1));
+
+	/* use any current ones that we care about */
+	boost::function<void (std::string)> ff (boost::bind (&Butler::config_changed, this, _1));
+	Config->map_parameters (ff);
+	
 }
 
 Butler::~Butler()
@@ -66,12 +72,27 @@ void
 Butler::config_changed (std::string p)
 {
 	if (p == "playback-buffer-seconds") {
-		/* size is in Samples, not bytes */
-		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
 		_session.adjust_playback_buffering ();
+		if (Config->get_buffering_preset() == Custom) {
+			/* size is in Samples, not bytes */
+			audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
+			_session.adjust_playback_buffering ();
+		} else {
+			std::cerr << "Skip explicit buffer seconds, preset in use\n";
+		}
 	} else if (p == "capture-buffer-seconds") {
+		if (Config->get_buffering_preset() == Custom) {
+			audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
+			_session.adjust_capture_buffering ();
+		} else {
+			std::cerr << "Skip explicit buffer seconds, preset in use\n";
+		}
+	} else if (p == "buffering-preset") {
+		Diskstream::set_buffering_parameters (Config->get_buffering_preset());
 		audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
+		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
 		_session.adjust_capture_buffering ();
+		_session.adjust_playback_buffering ();
 	} else if (p == "midi-readahead") {
 		MidiDiskstream::set_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * _session.frame_rate()));
 	}
