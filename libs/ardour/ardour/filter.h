@@ -43,7 +43,7 @@ class LIBARDOUR_API Filter {
   protected:
 	Filter (ARDOUR::Session& s) : session(s) {}
 
-	int make_new_sources (boost::shared_ptr<ARDOUR::Region>, ARDOUR::SourceList&, std::string suffix = "");
+	int make_new_sources (boost::shared_ptr<ARDOUR::Region>, ARDOUR::SourceList&, std::string suffix = "", bool use_session_sample_rate = true);
 	int finish (boost::shared_ptr<ARDOUR::Region>, ARDOUR::SourceList&, std::string region_name = "");
 
 	ARDOUR::Session& session;

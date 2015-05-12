@@ -39,7 +39,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 int
-Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, string suffix)
+Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, std::string suffix, bool use_session_sample_rate)
 {
 	vector<string> names = region->master_source_names();
 	assert (region->n_channels() <= names.size());
@@ -70,11 +70,24 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 		}
 
 		try {
+			framecnt_t sample_rate;
+			if (use_session_sample_rate) {
+				sample_rate = session.frame_rate();
+			} else {
+				boost::shared_ptr<AudioRegion> aregion = boost::dynamic_pointer_cast<AudioRegion>(region);
+				
+				if (aregion) {
+					sample_rate = aregion->audio_source()->sample_rate();
+				} else {
+					return -1;
+				}
+			}
+			
 			nsrcs.push_back (boost::dynamic_pointer_cast<Source> (
-				SourceFactory::createWritable (region->data_type(), session,
-							       path, false, session.frame_rate())));
+				                 SourceFactory::createWritable (region->data_type(), session,
+				                                                path, false, sample_rate)));
 		}
-
+		
 		catch (failed_constructor& err) {
 			error << string_compose (_("filter: error creating new file %1 (%2)"), path, strerror (errno)) << endmsg;
 			return -1;
