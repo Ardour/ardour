@@ -68,7 +68,6 @@ using namespace PBD;
 Glib::Threads::Mutex AudioSource::_level_buffer_lock;
 vector<boost::shared_array<Sample> > AudioSource::_mixdown_buffers;
 vector<boost::shared_array<gain_t> > AudioSource::_gain_buffers;
-size_t AudioSource::_working_buffers_size = 0;
 bool AudioSource::_build_missing_peakfiles = false;
 
 /** true if we want peakfiles (e.g. if we are displaying a GUI) */

@@ -109,8 +109,6 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	static bool _build_missing_peakfiles;
 	static bool _build_peakfiles;
 
-	static size_t _working_buffers_size;
-
 	/* these collections of working buffers for supporting
 	   playlist's reading from potentially nested/recursive
 	   sources assume SINGLE THREADED reads by the butler
