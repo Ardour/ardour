@@ -116,26 +116,27 @@ class CStyleChecker:
                         [ ( re.compile ("^ "),          "leading space as indentation instead of tab - use tabs to indent, spaces to align" )
                           , ( re.compile ("{[^\s]"),      "missing space after open brace" )
                           , ( re.compile ("[^\s]}"),      "missing space before close brace" )
-                          , ( re.compile ("[ \t]+$"),     "contains trailing whitespace" )
-                          
+                          , ( re.compile ("^[ \t]+$"),     "empty line contains whitespace" )
+                          , ( re.compile ("[^\s][ \t]+$"),     "contains trailing whitespace" )
+
                           , ( re.compile (",[^\s\n]"),            "missing space after comma" )
                           , ( re.compile (";[a-zA-Z0-9]"),        "missing space after semi-colon" )
                           , ( re.compile ("=[^\s\"'=]"),          "missing space after assignment" )
                           
-                          # Open and close parenthesis.                                                                                                           
-                          , ( re.compile ("[^\s\(\[\*&']\("),             "missing space before open parenthesis" )
-                          , ( re.compile ("\)(-[^>]|[^,'\s\n\)\]-])"),    "missing space after close parenthesis" )
+                          # Open and close parenthesis.
+                          , ( re.compile ("[^_\s\(\[\*&']\("),             "missing space before open parenthesis" )
+                          , ( re.compile ("\)(-[^>]|[^;,'\s\n\)\]-])"),    "missing space after close parenthesis" )
                           , ( re.compile ("\( [^;]"),                     "space after open parenthesis" )
                           , ( re.compile ("[^;] \)"),                     "space before close parenthesis" )
-                          
+
                           # Open and close square brace.
                           , ( re.compile ("\[ "),                                 "space after open square brace" )
                           , ( re.compile (" \]"),                                 "space before close square brace" )
-                          
+
                           # Space around operators.
                           , ( re.compile ("[^\s][\*/%+-][=][^\s]"),               "missing space around opassign" )
                           , ( re.compile ("[^\s][<>!=^/][=]{1,2}[^\s]"),  "missing space around comparison" )
-                          
+
                           # Parens around single argument to return.
                           , ( re.compile ("\s+return\s+\([a-zA-Z0-9_]+\)\s+;"),   "parens around return value" )
                         ]                                                                                                                                       
