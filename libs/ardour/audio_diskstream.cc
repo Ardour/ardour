@@ -63,7 +63,6 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-size_t  AudioDiskstream::_working_buffers_size = 0;
 Sample* AudioDiskstream::_mixdown_buffer       = 0;
 gain_t* AudioDiskstream::_gain_buffer          = 0;
 
@@ -134,9 +133,13 @@ AudioDiskstream::~AudioDiskstream ()
 void
 AudioDiskstream::allocate_working_buffers()
 {
-	_working_buffers_size = max (disk_write_chunk_frames, disk_read_chunk_frames);
-	_mixdown_buffer       = new Sample[_working_buffers_size];
-	_gain_buffer          = new gain_t[_working_buffers_size];
+	/* with varifill buffer refilling, we compute the read size in bytes (to optimize
+	   for disk i/o bandwidth) and then convert back into samples. These buffers
+	   need to reflect the maximum size we could use, which is 4MB reads, or 2M samples
+	   using 16 bit samples.
+	*/
+	_mixdown_buffer       = new Sample[2*1048576];
+	_gain_buffer          = new gain_t[2*1048576];
 }
 
 void
@@ -144,7 +147,6 @@ AudioDiskstream::free_working_buffers()
 {
 	delete [] _mixdown_buffer;
 	delete [] _gain_buffer;
-	_working_buffers_size = 0;
 	_mixdown_buffer       = 0;
 	_gain_buffer          = 0;
 }

@@ -249,7 +249,6 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 	static void allocate_working_buffers();
 	static void free_working_buffers();
 
-	static size_t  _working_buffers_size;
 	static Sample* _mixdown_buffer;
 	static gain_t* _gain_buffer;
 
