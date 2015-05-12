@@ -1924,7 +1924,8 @@ Session::set_frame_rate (framecnt_t frames_per_second)
 	sync_time_vars();
 
 	clear_clicks ();
-
+	reset_write_sources (false);
+	
 	// XXX we need some equivalent to this, somehow
 	// SndFileSource::setup_standard_crossfades (frames_per_second);
 
@@ -5012,12 +5013,12 @@ void
 Session::reset_native_file_format ()
 {
 	boost::shared_ptr<RouteList> rl = routes.reader ();
+
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
 			/* don't save state as we do this, there's no point
 			 */
-
 			_state_of_the_state = StateOfTheState (_state_of_the_state|InCleanup);
 			tr->reset_write_sources (false);
 			_state_of_the_state = StateOfTheState (_state_of_the_state & ~InCleanup);
