@@ -76,6 +76,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 	}
 
 	if ((aret = time_fx (audio, fraction, false)) != 0) {
+		commit_reversible_command ();
 		return aret;
 	}
 
