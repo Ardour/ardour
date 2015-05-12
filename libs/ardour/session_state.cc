@@ -364,6 +364,8 @@ Session::post_engine_init ()
 			trk->seek (_transport_frame, true);
 		}
 	}
+
+	return 0;
 }
 
 void
