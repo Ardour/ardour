@@ -56,7 +56,7 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 
 	/* create new sources */
 
-	if (make_new_sources (region, nsrcs)) {
+	if (make_new_sources (region, nsrcs, "", false)) {
 		goto out;
 	}
 
