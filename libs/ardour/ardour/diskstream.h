@@ -147,6 +147,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	static framecnt_t default_disk_read_chunk_frames ();
 	static framecnt_t default_disk_write_chunk_frames ();
 
+	static void set_buffering_parameters (BufferingPreset bp);
+
 	/* Stateful */
 	virtual XMLNode& get_state(void);
 	virtual int      set_state(const XMLNode&, int version);
@@ -345,6 +347,12 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	XMLNode* deprecated_io_node;
 
 	void route_going_away ();
+
+	static bool get_buffering_presets (BufferingPreset bp,
+	                                   framecnt_t& read_chunk_size,
+	                                   framecnt_t& read_buffer_size,
+	                                   framecnt_t& write_chunk_size,
+	                                   framecnt_t& write_buffer_size);
 };
 
 }; /* namespace ARDOUR */

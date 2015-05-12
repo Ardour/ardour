@@ -805,3 +805,63 @@ Diskstream::default_disk_write_chunk_frames ()
 {
 	return 65536;
 }
+
+void
+Diskstream::set_buffering_parameters (BufferingPreset bp)
+{
+	framecnt_t read_chunk_size;
+	framecnt_t read_buffer_size;
+	framecnt_t write_chunk_size;
+	framecnt_t write_buffer_size;
+
+	if (!get_buffering_presets (bp, read_chunk_size, read_buffer_size, write_chunk_size, write_buffer_size)) {
+		return;
+	}
+	
+	disk_read_chunk_frames = read_chunk_size;
+	disk_write_chunk_frames = write_chunk_size;
+	Config->set_audio_capture_buffer_seconds (write_buffer_size);
+	Config->set_audio_playback_buffer_seconds (read_buffer_size);
+
+	cerr << "Set buffering params to " << disk_read_chunk_frames << '|' << disk_write_chunk_frames << '|'
+	     << Config->get_audio_playback_buffer_seconds() << '|'
+	     << Config->get_audio_capture_buffer_seconds ()
+	     << endl;
+}
+
+bool
+Diskstream::get_buffering_presets (BufferingPreset bp,
+                                   framecnt_t& read_chunk_size,
+                                   framecnt_t& read_buffer_size,
+                                   framecnt_t& write_chunk_size,
+                                   framecnt_t& write_buffer_size)
+{
+	switch (bp) {
+	case Small:
+		read_chunk_size = 65536;  /* samples */
+		write_chunk_size = 65536; /* samples */
+		read_buffer_size = 5;  /* seconds */
+		write_buffer_size = 5; /* seconds */
+		break;
+
+	case Medium:
+		read_chunk_size = 262144;  /* samples */
+		write_chunk_size = 131072; /* samples */
+		read_buffer_size = 10;  /* seconds */
+		write_buffer_size = 10; /* seconds */
+		break;
+
+	case Large:
+		read_chunk_size = 524288; /* samples */
+		write_chunk_size = 131072; /* samples */
+		read_buffer_size = 20; /* seconds */
+		write_buffer_size = 20; /* seconds */
+		break;
+
+	default:
+		return false;
+	}
+
+	return true;
+}
+
