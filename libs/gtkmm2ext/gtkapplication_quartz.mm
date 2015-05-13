@@ -573,7 +573,9 @@ idle_call_activate (gpointer data)
 - (void) activate:(id) sender
 {
 	UNUSED_PARAMETER(sender);
-	g_idle_add (idle_call_activate, gtk_menu_item);
+    // Hot Fix. Increase Priority.
+	g_idle_add_full (G_PRIORITY_HIGH_IDLE, idle_call_activate, gtk_menu_item, NULL);
+//    g_idle_add (idle_call_activate, gtk_menu_item);
 }
 @end
 
