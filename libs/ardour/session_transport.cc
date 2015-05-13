@@ -505,17 +505,47 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 		return false;
 	}
 
+	if (Profile->get_trx() && transport_rolling() ) {
+		// We're playing, so do nothing.
+		// Next stop will put us where we need to be.
+		return false;
+	}
+	
 	/* Note that the order of checking each AutoReturnTarget flag defines
 	   the priority each flag.
+
+	   Ardour/Mixbus: Last Locate
+	                  Range Selection
+	                  Loop Range
+	                  Region Selection
+
+	   Tracks:        Range Selection
+                          Loop Range
+                          Region Selection
+                          Last Locate
 	*/
 	
+#ifndef USE_TRACKS_CODE_FEATURES
 	if (autoreturn & LastLocate) {
 		jump_to = _last_roll_location;
 	}
 	
 	if (jump_to < 0 && (autoreturn & RangeSelectionStart)) {
+#else
+	if (autoreturn & RangeSelectionStart) {
+#endif
 		if (!_range_selection.empty()) {
 			jump_to = _range_selection.from;
+		} else {
+			if (Profile->get_trx()) {
+				if (transport_rolling ()) {
+					/* Range selection no longer exists, but we're playing,
+					   so do nothing. Next stop will put us where
+					   we need to be.
+					*/
+					return false;
+				}
+			}
 		}
 	}
 	
@@ -527,6 +557,11 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 			
 			if (location) {
 				jump_to = location->start();
+
+				if (Config->get_seamless_loop()) {
+					/* need to get track buffers reloaded */
+					set_track_loop (true);
+				}
 			} 
 		}
 	}
@@ -537,6 +572,12 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 		}
 	} 
 
+#ifdef USE_TRACKS_CODE_FEATURES
+	if (jump_to < 0 && (autoreturn & LastLocate)) {
+		jump_to = _last_roll_location;
+	}
+#endif
+	
 	return jump_to >= 0;
 }
 
