@@ -16,10 +16,15 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
+#include "pbd/debug.h"
+#include "pbd/compose.h"
+
 #include "memory.h"
 #include "waves_midi_event.h"
 
 using namespace ARDOUR;
+using namespace PBD;
 
 WavesMidiEvent::WavesMidiEvent (PmTimestamp timestamp)
     : _size (0)
@@ -37,13 +42,27 @@ WavesMidiEvent::WavesMidiEvent (PmTimestamp timestamp, const uint8_t* data, size
     , _data (data && datalen ? new uint8_t[ (datalen < sizeof (PmMessage)) ? sizeof (PmMessage) : datalen] : NULL)
     , _state (data && datalen ? COMPLETE : BROKEN) 
 {
-    // COMMENTED DBG LOGS */ std::cout  << "WavesMidiEvent::WavesMidiEvent (const WavesMidiEvent& source) : Size=" << _size << "---" << datalen << std::endl;
-    if (_state == COMPLETE) {
-        // COMMENTED DBG LOGS */ std::cout  << "\t\t\t Allocated Size=" << ((datalen < sizeof (PmMessage)) ? sizeof (PmMessage) : datalen) << std::endl;
-        memcpy (_data, data, datalen);
-    }
-}
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "WavesMidiEvent::WavesMidiEvent (const WavesMidiEvent& source) : Size=%1---%2\n", _size, datalen));
+        if (_state == COMPLETE) {
+                DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "\t\t\t Allocated Size=%1\n", ((datalen < sizeof (PmMessage)) ? sizeof (PmMessage) : datalen)));
+                memcpy (_data, data, datalen);
 
+#ifndef NDEBUG
+                if (DEBUG::WavesMIDI & PBD::debug_bits) {
+                        DEBUG_STR_DECL(a);
+                        for (size_t i=0; i < datalen; ++i) {
+                                DEBUG_STR_APPEND(a,std::hex);
+                                DEBUG_STR_APPEND(a,"0x");
+                                DEBUG_STR_APPEND(a,(int)data[i]);
+                                DEBUG_STR_APPEND(a,' ');
+                        }
+                        DEBUG_STR_APPEND(a,'\n');
+                        DEBUG_TRACE (DEBUG::WavesMIDI, DEBUG_STR(a).str());
+	}
+#endif
+
+        }
+}
 
 WavesMidiEvent::WavesMidiEvent (const WavesMidiEvent& source)
     : _size (source.size ())
@@ -51,11 +70,25 @@ WavesMidiEvent::WavesMidiEvent (const WavesMidiEvent& source)
     , _data ((source.size () && source.const_data ()) ? new uint8_t[ (source.size () < sizeof (PmMessage)) ? sizeof (PmMessage) : source.size ()] : NULL)
     , _state (source.state () ) 
 {
-    // COMMENTED DBG LOGS */ std::cout  << "WavesMidiEvent::WavesMidiEvent (const WavesMidiEvent& source) : Size=" << _size << "---" << source.size () << std::endl;
-    // COMMENTED DBG LOGS */ std::cout  << "\t\t\t Allocated Size=" << ((source.size () < sizeof (PmMessage)) ? sizeof (PmMessage) : source.size ()) << std::endl;
-    if (_data && source.const_data ()) {
-        memcpy (_data, source.const_data (), source.size ());
-    }
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "WavesMidiEvent::WavesMidiEvent (const WavesMidiEvent& source) : Size=%1---%2\n", _size, source.size ()));
+        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "\t\t\t Allocated Size=%1\n", ((source.size () < sizeof (PmMessage)) ? sizeof (PmMessage) : source.size ())));
+        if (_data && source.const_data ()) {
+                memcpy (_data, source.const_data (), source.size ());
+
+#ifndef NDEBUG
+                if (DEBUG::WavesMIDI & PBD::debug_bits) {
+                        DEBUG_STR_DECL(a);
+                        for (size_t i=0; i < source.size(); ++i) {
+                                DEBUG_STR_APPEND(a,std::hex);
+                                DEBUG_STR_APPEND(a,"0x");
+                                DEBUG_STR_APPEND(a,(int)source.const_data()[i]);
+                                DEBUG_STR_APPEND(a,' ');
+                        }
+                        DEBUG_STR_APPEND(a,'\n');
+                        DEBUG_TRACE (DEBUG::WavesMIDI, DEBUG_STR(a).str());
+                }
+#endif
+        }
 }
 
 
@@ -67,73 +100,77 @@ WavesMidiEvent::~WavesMidiEvent ()
 
 WavesMidiEvent *WavesMidiEvent::append_data (const PmEvent &midi_event)
 {
-    switch ( _state ) {
+        switch ( _state ) {
         case INCOMPLETE: 
-            break;
-        default:
-            // COMMENTED DBG LOGS */ std::cout << "WavesMidiEvent::append_data (): NO case INCOMPLETE" << std::endl;
-            _state = BROKEN;
-            return NULL;
-    }
-
-    size_t message_size = _midi_message_size (midi_event.message);
-    uint8_t message_status = Pm_MessageStatus (midi_event.message);
-
-    if (_data == NULL) { // This is a first event to add
-        bool sysex = (message_status == SYSEX);
-        _data = new unsigned char [sysex ? PM_DEFAULT_SYSEX_BUFFER_SIZE : sizeof (PmMessage)];
-        if (!sysex)
-        {
-            // COMMENTED DBG LOGS */ std::cout << "WavesMidiEvent::append_data (): SHORT MSG" << std::endl;
-            * (PmMessage*)_data = 0; 
-            switch (message_size) {
-                case 1:
-                case 3:
-                    _size = message_size;
-                    // COMMENTED DBG LOGS */ std::cout << "WavesMidiEvent::append_data (): size = " << _size << std::endl;
                 break;
-                default:
-                    // COMMENTED DBG LOGS */ std::cout << "WavesMidiEvent::append_data (): WRONG MESSAGE SIZE (" << message_size << ") in the message: ";
-                    // COMMENTED DBG LOGS */ std::cout << std::hex << (int) ((unsigned char*)&midi_event)[0] << " " << (int) ((unsigned char*)&midi_event)[1] << " " << (int) ((unsigned char*)&midi_event)[2] << " " << (int) ((unsigned char*)&midi_event)[3] << std::dec << std::endl;
-                    _state = BROKEN;
+        default:
+                DEBUG_TRACE (DEBUG::WavesMIDI, "WavesMidiEvent::append_data (): NO case INCOMPLETE\n");
+                _state = BROKEN;
                 return NULL;
-            }
-            // COMMENTED DBG LOGS */ std::cout << "\t size = " << _size << std::endl;
-            memcpy (_data, &midi_event.message, _size);
-            // COMMENTED DBG LOGS */ std::cout << "\t\t size = " << _size << std::endl;
-            _state = COMPLETE;
-            // COMMENTED DBG LOGS */ std::cout << "\t\t\t size = " << _size << std::endl;
-            return NULL;
         }
-    }
-
-    // Now let's parse to sysex msg
-    if (message_status >= REAL_TIME_FIRST) { // Nested Real Time MIDI event
-        WavesMidiEvent *waves_midi_message = new WavesMidiEvent (midi_event.timestamp);
-        waves_midi_message->append_data (midi_event);
-        return waves_midi_message;
-    }
-
-    if (message_status >= STATUS_FIRST && (message_status != EOX) && _size) { // Certainly it's a broken SYSEX case
-        WavesMidiEvent *waves_midi_message = new WavesMidiEvent (midi_event.timestamp);
-        waves_midi_message->append_data (midi_event);
-        return waves_midi_message;
-    }
-
-    const uint8_t* source_data ((uint8_t*)&midi_event.message);
-    
-    for (size_t i = 0; i < sizeof (midi_event.message); ++i) {
-        _data[_size] = source_data[i];
-        _size++;
         
-        if (source_data[i] == EOX) { // Ended SYSEX message
-            _state = COMPLETE;
-            return NULL;
+        size_t message_size = _midi_message_size (midi_event.message);
+        uint8_t message_status = Pm_MessageStatus (midi_event.message);
+        
+        if (_data == NULL) { // This is a first event to add
+                bool sysex = (message_status == SYSEX);
+                _data = new unsigned char [sysex ? PM_DEFAULT_SYSEX_BUFFER_SIZE : sizeof (PmMessage)];
+                if (!sysex)
+                {
+                        DEBUG_TRACE (DEBUG::WavesMIDI, "WavesMidiEvent::append_data (): SHORT MSG\n");
+                        * (PmMessage*)_data = 0; 
+                        switch (message_size) {
+                        case 1:
+                        case 2:
+                        case 3:
+                                _size = message_size;
+                                DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "WavesMidiEvent::append_data (): size = %1\n", _size));
+                                break;
+                         default:
+                                DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "WavesMidiEvent::append_data (): WRONG MESSAGE SIZE (%1 not %2) %3 [%4 %5 %6 %7] %8\n", 
+                                                                                message_size,
+                                                                                std::hex,
+                                                                                (int) ((unsigned char*)&midi_event)[0],
+                                                                                (int) ((unsigned char*)&midi_event)[1],
+                                                                                (int) ((unsigned char*)&midi_event)[2],
+                                                                                (int) ((unsigned char*)&midi_event)[3],
+                                                                                std::dec));
+                                _state = BROKEN;
+                                return NULL;
+                        }
+                        memcpy (_data, &midi_event.message, _size);
+                        _state = COMPLETE;
+                        DEBUG_TRACE (DEBUG::WavesMIDI, string_compose ( "\t\t\t size = %1\n", _size));
+                        return NULL;
+                }
         }
-    }
-    return NULL;
-}
+        
+        // Now let's parse to sysex msg
+        if (message_status >= REAL_TIME_FIRST) { // Nested Real Time MIDI event
+                WavesMidiEvent *waves_midi_message = new WavesMidiEvent (midi_event.timestamp);
+                waves_midi_message->append_data (midi_event);
+                return waves_midi_message;
+        }
+        
+        if (message_status >= STATUS_FIRST && (message_status != EOX) && _size) { // Certainly it's a broken SYSEX case
+                WavesMidiEvent *waves_midi_message = new WavesMidiEvent (midi_event.timestamp);
+                waves_midi_message->append_data (midi_event);
+                return waves_midi_message;
+        }
 
+        const uint8_t* source_data ((uint8_t*)&midi_event.message);
+        
+        for (size_t i = 0; i < sizeof (midi_event.message); ++i) {
+                _data[_size] = source_data[i];
+                _size++;
+                
+                if (source_data[i] == EOX) { // Ended SYSEX message
+                        _state = COMPLETE;
+                        return NULL;
+                }
+        }
+        return NULL;
+}
 
 size_t WavesMidiEvent::_midi_message_size (PmMessage midi_message)
 {

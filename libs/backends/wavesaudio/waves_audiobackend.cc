@@ -99,8 +99,8 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
 }
 
 
-WavesAudioBackend::WavesAudioBackend (AudioEngine& e)
-    : AudioBackend (e, __backend_info)
+WavesAudioBackend::WavesAudioBackend (AudioEngine& e, AudioBackendInfo& info)
+    : AudioBackend (e, info)
     , _audio_device_manager (this)
     , _midi_device_manager (*this)
     , _device (NULL)
@@ -420,7 +420,11 @@ WavesAudioBackend::set_sample_rate (float sample_rate)
         return -1;
     }
 
-	_sample_rate_change(sample_rate);
+    // if call to set sample rate is successful
+    // but device sample rate differs from the value we tried to set
+    // this means we are driven by device for buffer size
+    sample_rate = _device->CurrentSamplingRate ();
+    _sample_rate_change(sample_rate);
        
     if (device_needs_restart) {
         // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;
@@ -498,8 +502,6 @@ int
 WavesAudioBackend::reset_device ()
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_reset_device ():" << std::endl;
-
-    WTErr retVal = eNoErr;
 
     if (!_device) {
         std::cerr << "WavesAudioBackend::set_buffer_size (): No device is set!" << std::endl;
@@ -829,11 +831,23 @@ WavesAudioBackend::freewheel (bool start_stop)
             }
             _call_thread_init_callback = true;
             _freewheel_thread ();
-            engine.freewheel_callback (start_stop);
+            
+            while (!engine.freewheeling()) {
+                sleep(0);
+            }
+            
+            // freewheel thread was not activated successfully
+            if (_freewheel_thread_active == false) {
+                engine.freewheel_callback(false);
+            }
         }
         else {
             _freewheel_thread_active = false; // stop _freewheel_thread ()
-            engine.freewheel_callback (start_stop);
+            
+            while (engine.freewheeling()) {
+                sleep(0);
+            }
+            
             _call_thread_init_callback = true;
             WTErr retval = _device->SetStreaming (true);
             if (retval != eNoErr) {
@@ -873,6 +887,10 @@ WavesAudioBackend::_freewheel_thread ()
         _freewheel_thread_active = true;
         if ((pthread_create (&thread_id, &attributes, __start_process_thread, thread_data))) {
             _freewheel_thread_active = false;
+            
+            // release invoking thread
+            engine.freewheel_callback(true);
+            
             std::cerr << "WavesAudioBackend::freewheel_thread (): pthread_create () failed!" << std::endl;
             return;
         }
@@ -880,6 +898,9 @@ WavesAudioBackend::_freewheel_thread ()
         // COMMENTED DBG LOGS */ std::cout << "\t. . . _freewheel_thread () complete." << std::endl;
         return;
     }
+    
+    // notify angine that freewheeling is started
+    engine.freewheel_callback(true);
     
     if (_call_thread_init_callback) {
         _call_thread_init_callback = false;
@@ -889,6 +910,10 @@ WavesAudioBackend::_freewheel_thread ()
     while (_freewheel_thread_active) {
         engine.process_callback (_buffer_size);
     }
+    
+    // notify angine that freewheeling is stopped
+    engine.freewheel_callback(false);
+    
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::_freewheel_thread (): FINISHED" << std::endl;
     return;
 }
@@ -1238,7 +1263,7 @@ WavesAudioBackend::__waves_backend_factory (AudioEngine& e)
 {
     // COMMENTED DBG LOGS */ std::cout << "WavesAudioBackend::__waves_backend_factory ():" << std::endl;
     if (!__instance) {
-            __instance.reset (new WavesAudioBackend (e));
+            __instance.reset (new WavesAudioBackend (e, *(descriptor())));
     }
     return __instance;
 }
@@ -1260,7 +1285,6 @@ WavesAudioBackend::__instantiate (const std::string& arg1, const std::string& ar
 	LARGE_INTEGER Frequency;
 	QueryPerformanceFrequency(&Frequency);
 	__performance_counter_frequency = Frequency.QuadPart;
-	std::cout << "__performance_counter_frequency:" << __performance_counter_frequency << std::endl;
 
 #endif
     return 0;

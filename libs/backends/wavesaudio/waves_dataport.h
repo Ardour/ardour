@@ -106,6 +106,7 @@ private:
     std::vector<WavesDataPort*> _connections;
 
     void _connect (WavesDataPort* port, bool api_call);
+    void _disconnect_all ();
     void _disconnect (WavesDataPort* port, bool api_call);
 };
 

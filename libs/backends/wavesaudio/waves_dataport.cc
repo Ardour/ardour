@@ -67,7 +67,7 @@ int WavesDataPort::connect (WavesDataPort *port)
     }
 
     if (is_connected (port)) {
-        std::cerr << "WavesDataPort::connect (): the ports are already connected!" << std::endl;
+        // std::cerr << "WavesDataPort::connect (): the ports are already connected!" << std::endl;
         return -1;
     }
 
@@ -115,8 +115,7 @@ void WavesDataPort::_disconnect (WavesDataPort *port, bool api_call)
         port->_disconnect (this, false);
     }
 
-	if (is_input() && _connections.empty())
-	{
+	if (is_input() && _connections.empty())	{
 		_wipe_buffer();
 	}
 }
@@ -124,12 +123,20 @@ void WavesDataPort::_disconnect (WavesDataPort *port, bool api_call)
 
 void WavesDataPort::disconnect_all ()
 {
+    _disconnect_all ();
+    
+	if (is_input())	{
+		_wipe_buffer();
+	}
+}
+
+void WavesDataPort::_disconnect_all ()
+{
     while (!_connections.empty ()) {
         _connections.back ()->_disconnect (this, false);
         _connections.pop_back ();
     }
 }
-
 
 bool WavesDataPort::is_physically_connected () const
 {
