@@ -145,6 +145,7 @@ def build(bld):
     if bld.env['build_target'] == 'x86_64':
         obj.defines += [ 'USE_X86_64_ASM' ]
     if bld.env['build_target'] == 'mingw':
+        obj.defines += [ 'NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
         obj.uselib += ' OLE'
 

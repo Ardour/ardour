@@ -417,8 +417,12 @@ def build(bld):
 	        # not the build host, which in turn can only be inferred from the name
 	        # of the compiler. 
 	        if re.search ('/^x86_64/', str(bld.env['CC'])):
-		        obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit_win.s' ]
-
+		        obj.source += [ 'sse_functions_xmm.cc',
+		                        'sse_functions_avx.cc',
+		                        'sse_functions_64bit_win.s',
+		                        'sse_avx_functions_64bit_win.s',
+	                              ]
+        
     # i18n
     if bld.is_defined('ENABLE_NLS'):
         mo_files = bld.path.ant_glob('po/*.mo')

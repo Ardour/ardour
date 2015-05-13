@@ -417,12 +417,12 @@ int main() { return 0; }''',
             if (re.search ("(x86_64|AMD64)", cpu) != None):
                 # on Windows sse is supported by 64 bit platforms only
                 build_host_supports_sse = True
-                
+
                 # mingw GCC compiler to uses at&t (Unix specific) assembler dialect by default
                 # compiler_flags.append (["--mmnemonic=att", "msyntax=att")
                 
                 compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'], flags_dict['attasm'] ])
-                
+
     # end of processor-specific section
 
     # optimization section

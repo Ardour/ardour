@@ -131,6 +131,7 @@ find_peaks_t            ARDOUR::find_peaks = 0;
 apply_gain_to_buffer_t  ARDOUR::apply_gain_to_buffer = 0;
 mix_buffers_with_gain_t ARDOUR::mix_buffers_with_gain = 0;
 mix_buffers_no_gain_t   ARDOUR::mix_buffers_no_gain = 0;
+copy_vector_t			ARDOUR::copy_vector = 0;
 
 PBD::Signal1<void,std::string> ARDOUR::BootMessage;
 PBD::Signal3<void,std::string,std::string,bool> ARDOUR::PluginScanMessage;
@@ -160,7 +161,21 @@ setup_hardware_optimization (bool try_optimization)
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 
-		if (fpu.has_sse()) {
+		if (fpu.has_avx()) {
+
+			info << "Using AVX optimized routines" << endmsg;
+
+			// AVX SET
+			compute_peak          = x86_sse_avx_compute_peak;
+			find_peaks            = x86_sse_avx_find_peaks;
+			apply_gain_to_buffer  = x86_sse_avx_apply_gain_to_buffer;
+			mix_buffers_with_gain = x86_sse_avx_mix_buffers_with_gain;
+			mix_buffers_no_gain   = x86_sse_avx_mix_buffers_no_gain;
+			copy_vector           = x86_sse_avx_copy_vector;
+
+			generic_mix_functions = false;
+
+		} else if (fpu.has_sse()) {
 
 			info << "Using SSE optimized routines" << endmsg;
 
@@ -170,6 +185,7 @@ setup_hardware_optimization (bool try_optimization)
 			apply_gain_to_buffer  = x86_sse_apply_gain_to_buffer;
 			mix_buffers_with_gain = x86_sse_mix_buffers_with_gain;
 			mix_buffers_no_gain   = x86_sse_mix_buffers_no_gain;
+			copy_vector           = default_copy_vector;
 
 			generic_mix_functions = false;
 
@@ -187,6 +203,7 @@ setup_hardware_optimization (bool try_optimization)
 			apply_gain_to_buffer   = veclib_apply_gain_to_buffer;
 			mix_buffers_with_gain  = veclib_mix_buffers_with_gain;
 			mix_buffers_no_gain    = veclib_mix_buffers_no_gain;
+			copy_vector            = default_copy_vector;
 
 			generic_mix_functions = false;
 
@@ -206,6 +223,7 @@ setup_hardware_optimization (bool try_optimization)
 		apply_gain_to_buffer  = default_apply_gain_to_buffer;
 		mix_buffers_with_gain = default_mix_buffers_with_gain;
 		mix_buffers_no_gain   = default_mix_buffers_no_gain;
+		copy_vector           = default_copy_vector;
 
 		info << "No H/W specific optimizations in use" << endmsg;
 	}

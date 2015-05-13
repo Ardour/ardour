@@ -35,20 +35,24 @@ void* WavesAudioPort::get_buffer (pframes_t nframes)
         std::vector<WavesDataPort*>::const_iterator it = get_connections ().begin ();
         
         if (it != get_connections ().end ()) {
-            /* In fact, the static casting to (const WavesAudioPort*) is not that safe.
-             * However, mixing the buffers is assumed in the time critical conditions.
-             * Base class WavesDataPort takes is supposed to provide enough consistentcy
-             * of the connections.
-             */
-            for (memcpy (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes * sizeof (Sample)), ++it;
-				 it != get_connections ().end ();
-				 ++it) {
-                Sample* tgt = buffer ();
-                const Sample* src = ((const WavesAudioPort*)*it)->const_buffer ();
-                for (uint32_t frame = 0; frame < nframes; ++frame, ++tgt, ++src)    {
-                    *tgt += *src;
-                }
-            }
+	        /* In fact, the static casting to (const WavesAudioPort*) is not that safe.
+	         * However, mixing the buffers is assumed in the time critical conditions.
+	         * Base class WavesDataPort takes is supposed to provide enough consistentcy
+	         * of the connections.
+	         */
+	        // get first buffer data
+	        // use optimized function to fill the buffer intialy
+	        ARDOUR::copy_vector (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes);
+	        ++it;
+	        
+	        // mix the rest
+	        for (; it != get_connections ().end (); ++it) {
+		        Sample* tgt = buffer ();
+		        const Sample* src = ((const WavesAudioPort*)*it)->const_buffer ();
+		        for (uint32_t frame = 0; frame < nframes; ++frame, ++tgt, ++src)    {
+			        *tgt += *src;
+		        }
+	        }
         }
     }
     return _buffer;
