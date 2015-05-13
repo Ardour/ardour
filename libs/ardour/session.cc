@@ -3946,7 +3946,7 @@ Session::maybe_update_session_range (framepos_t a, framepos_t b)
 
 	if (_session_range_location == 0) {
 
-		add_session_range_location (a, b);
+		set_session_range_location (a, b);
 
 	} else {
 
@@ -5589,7 +5589,7 @@ Session::current_end_frame () const
 }
 
 void
-Session::add_session_range_location (framepos_t start, framepos_t end)
+Session::set_session_range_location (framepos_t start, framepos_t end)
 {
 	_session_range_location = new Location (*this, start, end, _("session"), Location::IsSessionRange);
 	_locations->add (_session_range_location);
