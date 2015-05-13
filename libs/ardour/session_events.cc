@@ -45,7 +45,7 @@ SessionEvent::init_event_pool ()
 bool
 SessionEvent::has_per_thread_pool ()
 {
-    return pool->has_per_thread_pool ();
+	return pool->has_per_thread_pool ();
 }
 
 void

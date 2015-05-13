@@ -181,11 +181,11 @@ PerThreadPool::create_per_thread_pool (string n, unsigned long isize, unsigned l
 bool
 PerThreadPool::has_per_thread_pool ()
 {
-    CrossThreadPool* p = _key.get();
-    if (p) {
-        return true;
-    }
-    return false;
+	CrossThreadPool* p = _key.get();
+	if (p) {
+		return true;
+	}
+	return false;
 }
 
 
