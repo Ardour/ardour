@@ -139,6 +139,13 @@ const framecnt_t Session::bounce_chunk_size = 65536;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
+// seconds should be added afte the region exceeds end marker
+#ifdef USE_TRACKS_CODE_FEATURES
+const uint32_t Session::session_end_shift = 5;
+#else
+const uint32_t Session::session_end_shift = 0;
+#endif
+
 /** @param snapshot_name Snapshot name, without .ardour suffix */
 Session::Session (AudioEngine &eng,
                   const string& fullpath,
@@ -3944,9 +3951,11 @@ Session::maybe_update_session_range (framepos_t a, framepos_t b)
 		return;
 	}
 
+	framepos_t session_end_marker_shift_samples = session_end_shift * _nominal_frame_rate;
+
 	if (_session_range_location == 0) {
 
-		set_session_range_location (a, b);
+		set_session_range_location (a, b + session_end_marker_shift_samples);
 
 	} else {
 
