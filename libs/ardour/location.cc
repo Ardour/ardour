@@ -824,8 +824,12 @@ Locations::next_available_name(string& result,string base)
 			const string& temp ((*i)->name());
                         
 			if (!temp.find (base,0)) {
-
-				if ((suffix = atoi (temp.substr(l,3))) != 0) {
+				/* grab what comes after the "base" as if it was
+				   a number, and assuming that works OK,
+				   store it in "taken" so that we know it
+				   has been used.
+				*/
+                                if ((suffix = atoi (temp.substr(l))) != 0) {
 					taken.insert (make_pair (suffix,true));
 				}
 			}
