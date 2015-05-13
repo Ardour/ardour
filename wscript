@@ -78,6 +78,10 @@ compiler_flags_dictionaries= {
         'c99': '-std=c99',
         # Flag to enable AT&T assembler syntax
         'attasm': '-masm=att',
+        # Flags to make AVX instructions/intrinsics available
+        'avx': '-mavx',
+        # Flags to generate position independent code, when needed to build a shared object
+        'pic': '-fPIC',
     },
     'msvc' : {
         'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
@@ -105,6 +109,9 @@ compiler_flags_dictionaries= {
         'cxx-strict' : '',
         'strict' : '',
         'c99': '/TP',
+        'attasm': '',
+        'avx': '',
+        'pic': '',
     },
 }
 
@@ -296,8 +303,12 @@ int main() { return 0; }''',
         else:
             compiler_name = 'gcc'
 
-    flags_dict = compiler_flags_dictionaries[compiler_name]
-            
+    flags_dict = compiler_flags_dictionaries[compiler_name] 
+    # Save the compiler flags because we need them at build time
+    # when we need to add compiler specific flags in certain
+    # libraries
+    conf.env['compiler_flags_dict'] = flags_dict;
+    
     autowaf.set_basic_compiler_flags (conf,flags_dict)
     
     if conf.options.asan:
