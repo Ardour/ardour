@@ -43,6 +43,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/slave.h"
 #include "ardour/ticker.h"
@@ -129,6 +130,19 @@ Session::mmc_record_pause (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 {
+	if (Profile->get_trx()) {
+
+		/* In Tracks Live, there is no concept of punch, so we just
+		   treat RecordStrobe like RecordPause. This violates the MMC
+		   specification.
+		*/
+		
+		if (Config->get_mmc_control()) {
+			maybe_enable_record();
+		}
+		return;
+	}
+
 	if (!Config->get_mmc_control() || (_step_editors > 0)) {
 		return;
 	}
