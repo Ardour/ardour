@@ -342,8 +342,8 @@ def build(bld):
         obj.defines      = [ 'LIBARDOUR_DLL_EXPORTS=1' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=sources)
-        obj.cxxflags     = [ '-fPIC' ]
-        obj.cflags       = [ '-fPIC' ]
+        obj.cxxflags     = [  bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = []
 
     obj.export_includes = ['.']
@@ -407,21 +407,38 @@ def build(bld):
     if bld.is_defined('AUDIOUNIT_SUPPORT'):
         obj.source += [ 'audio_unit.cc' ]
 
+    avx_sources = []
+
     if Options.options.fpu_optimization:
         if (bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686'):
-            obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s' ]
+            obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s', ]
+            avx_sources = [ 'sse_functions_avx_linux.cc' ]
         elif bld.env['build_target'] == 'x86_64':
-            obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s' ]
+            obj.source += [ 'sse_functions_xmm.cc', 'sse_functions_64bit.s', ]
+            avx_sources = [ 'sse_functions_avx_linux.cc' ]
         elif bld.env['build_target'] == 'mingw':
 	        # usability of the 64 bit windows assembler depends on the compiler target,
 	        # not the build host, which in turn can only be inferred from the name
 	        # of the compiler. 
 	        if re.search ('/^x86_64/', str(bld.env['CC'])):
-		        obj.source += [ 'sse_functions_xmm.cc',
-		                        'sse_functions_avx.cc',
-		                        'sse_functions_64bit_win.s',
-		                        'sse_avx_functions_64bit_win.s',
-	                              ]
+		        obj.source += [ 'sse_functions_xmm.cc' ]
+                        obj.source += [ 'sse_functions_64bit_win.s',  'sse_avx_functions_64bit_win.s' ]
+                        avx_sources = [ 'sse_functions_avx.cc' ]
+        
+        if avx_sources:
+            # as long as we want to use AVX intrinsics in this file,
+            # compile it with -mavx flag - append avx flag to the existing
+            avx_cxxflags = list(bld.env['CXXFLAGS'])
+            avx_cxxflags.append (bld.env['compiler_flags_dict']['avx'])
+            avx_cxxflags.append (bld.env['compiler_flags_dict']['pic'])
+            bld(features = 'cxx',
+                source   = avx_sources,
+                cxxflags = avx_cxxflags,
+                includes = [ '.' ],
+                use = [ 'libtimecode', 'libpbd', 'libevoral', ],
+                target   = 'sse_avx_functions')
+            
+            obj.use += ['sse_avx_functions' ]
         
     # i18n
     if bld.is_defined('ENABLE_NLS'):
