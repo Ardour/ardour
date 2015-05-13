@@ -361,13 +361,14 @@ WTErr WCMRAudioDevice::ResetDevice ()
 	WTErr err = SetStreaming(false);
 	
 	if (err == eNoErr)
-		SetActive(false);
+		err = SetActive(false);
 
 	if (err == eNoErr && wasActive)
-		SetActive(true);
+		err = SetActive(true);
 
-	if (err == eNoErr && wasStreaming)
-		SetStreaming(true);
+    if (err == eNoErr && wasStreaming) {
+        err = SetStreaming(true);
+    }
 
 	return err;
 }

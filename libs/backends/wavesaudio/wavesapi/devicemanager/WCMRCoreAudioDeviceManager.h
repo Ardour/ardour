@@ -138,6 +138,7 @@ protected:
 #endif //WV_USE_TONE_GEN
 	
 	WTErr UpdateDeviceInfo ();
+    WTErr UpdateDeviceId ();
 	WTErr UpdateDeviceName();
 	WTErr UpdateDeviceInputs();
 	WTErr UpdateDeviceOutputs();

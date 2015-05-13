@@ -248,6 +248,9 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInfo ()
     
     WTErr retVal = eNoErr;  
     
+    // Some devices change the ID during restart
+    WTErr errId = UpdateDeviceId();
+    
     // Update all devices parts regardless of errors
     WTErr errName = UpdateDeviceName();
     WTErr errIn =   UpdateDeviceInputs();
@@ -258,13 +261,77 @@ WTErr WCMRCoreAudioDevice::UpdateDeviceInfo ()
     errSR = UpdateDeviceSampleRates();
     errBS = UpdateDeviceBufferSizes();
 
-    if(errName != eNoErr || errIn != eNoErr || errOut != eNoErr || errSR != eNoErr || errBS != eNoErr)
+    if(errId != eNoErr || errName != eNoErr || errIn != eNoErr || errOut != eNoErr || errSR != eNoErr || errBS != eNoErr)
     {
         retVal = eCoreAudioFailed;
     }
     
     return retVal;  
 }
+
+
+WTErr WCMRCoreAudioDevice::UpdateDeviceId()
+{
+    //Get device count...
+    UInt32 propSize = 0;
+    WTErr retVal = eNoErr;
+    OSStatus osErr = AudioHardwareGetPropertyInfo (kAudioHardwarePropertyDevices, &propSize, NULL);
+    ASSERT_ERROR(osErr, "AudioHardwareGetProperty 1");
+    if (WUIsError(osErr))
+        throw osErr;
+    
+    size_t numDevices = propSize / sizeof (AudioDeviceID);
+    AudioDeviceID* deviceIDs = new AudioDeviceID[numDevices];
+    
+    //retrieve the device IDs
+    propSize = numDevices * sizeof (AudioDeviceID);
+    osErr = AudioHardwareGetProperty (kAudioHardwarePropertyDevices, &propSize, deviceIDs);
+    ASSERT_ERROR(osErr, "Error while getting audio devices: AudioHardwareGetProperty 2");
+    if (WUIsError(osErr))
+        throw osErr;
+    
+    //now add the ones that are not there...
+    for (size_t deviceIndex = 0; deviceIndex < numDevices; deviceIndex++)
+    {
+        DeviceInfo* pDevInfo = 0;
+        
+        //Get device name and create new DeviceInfo entry
+        //Get property name size.
+        osErr = AudioDeviceGetPropertyInfo(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, NULL);
+        if (osErr == kAudioHardwareNoError)
+        {
+            //Get property: name.
+            char* deviceName = new char[propSize];
+            osErr = AudioDeviceGetProperty(deviceIDs[deviceIndex], 0, 0, kAudioDevicePropertyDeviceName, &propSize, deviceName);
+            if (osErr == kAudioHardwareNoError)
+            {
+                if ( (m_DeviceName == deviceName) &&
+                     (m_DeviceID != deviceIDs[deviceIndex]) ) {
+                    
+                    m_DeviceID = deviceIDs[deviceIndex];
+                    
+                    m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Current device has changed it's id.");
+                }
+            }
+            else
+            {
+                retVal = eCoreAudioFailed;
+                DEBUG_MSG("Failed to get device name. Device ID: " << m_DeviceID);
+            }
+            
+            delete [] deviceName;
+        }
+        else
+        {
+            retVal = eCoreAudioFailed;
+            DEBUG_MSG("Failed to get device name prop Info. Device ID: " << m_DeviceID);
+        }
+    }
+    
+    delete [] deviceIDs;
+	return retVal;
+}
+
 
 //**********************************************************************************************
 // WCMRCoreAudioDevice::UpdateDeviceName 
@@ -881,8 +948,6 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
     propSize = sizeof (Float64);
     err = AudioDeviceSetProperty(m_DeviceID, NULL, 0, 0, kAudioDevicePropertyNominalSampleRate, propSize, &newNominalRate);
     
-    m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Changed the Sampling Rate.");
-    
     if (err != kAudioHardwareNoError)
     {
         retVal = eCoreAudioFailed;
@@ -926,6 +991,8 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
         // If sample rate actually changed
         if (tryAgain != 0)
         {
+            m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Changed the Sampling Rate.");
+            
             // Update member with new rate
             m_CurrentSamplingRate = newRate;
             
@@ -936,12 +1003,28 @@ WTErr WCMRCoreAudioDevice::SetAndCheckCurrentSamplingRate (int newRate)
         // If sample rate did not change after time out
         else
         {
-            // Update member with last read value
-            m_CurrentSamplingRate = static_cast<int>(actualSamplingRate);
+            // Check if current device sample rate is supported
+            bool found = false;
+            for(int i = 0; gAllSampleRates[i] > 0; i++)
+            {
+                if (fabs(gAllSampleRates[i] - actualSamplingRate) < 0.01) {
+                    found = true;
+                }
+            }
             
-            char debugMsg[128];
-            snprintf (debugMsg, sizeof(debugMsg), "Unable to change SR, even after waiting for %d milliseconds", actualWait * PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
-            m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)debugMsg);
+            if (found) {
+                // Update member with last read value
+                m_CurrentSamplingRate = static_cast<int>(actualSamplingRate);
+                
+                char debugMsg[128];
+                snprintf (debugMsg, sizeof(debugMsg), "Unable to change SR, even after waiting for %d milliseconds", actualWait * PROPERTY_CHANGE_SLEEP_TIME_MILLISECONDS);
+                m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)debugMsg);
+                
+                float sample_rate_update = actualSamplingRate;
+                m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::SamplingRateChanged, (void *)&sample_rate_update);
+            } else {
+                retVal = eGenericErr;
+            }
         }
     }
     
@@ -1731,7 +1814,6 @@ WTErr WCMRCoreAudioDevice::TearDownAUHAL()
 }
 
 
-
 //**********************************************************************************************
 // WCMRCoreAudioDevice::SetActive 
 //
@@ -1799,7 +1881,6 @@ WTErr WCMRCoreAudioDevice::SetActive (bool newState)
         m_IgnoreThisDrop = true;
 
         UpdateDeviceInfo();
-
     }
     
     m_IsActive = newState;
@@ -1909,6 +1990,9 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
         m_IOProcThreadPort = 0;
         m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Starting AUHAL.");
         
+		// Prepare for streaming - tell Engine to do the initialization for process callback
+		m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
+
         if (m_UseMultithreading)
         {
             //set thread constraints...
@@ -1924,6 +2008,7 @@ WTErr WCMRCoreAudioDevice::SetStreaming (bool newState)
         if(err)
         {
             DEBUG_MSG( "Failed to start AudioUnit, err " << err );
+            m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceDebugInfo, (void *)"Failed to start AudioUnit.");
             retVal = eGenericErr;
             goto Exit;
         }
@@ -2554,7 +2639,7 @@ WTErr WCMRCoreAudioDeviceManager::getDeviceAvailableSampleRates(DeviceID deviceI
     
     return retVal;
 }
-    
+
     
 WTErr WCMRCoreAudioDeviceManager::getDeviceMaxInputChannels(DeviceID deviceId, unsigned int& inputChannels)
 {
@@ -2874,6 +2959,15 @@ WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
         if (eNoErr != deviceLookUpErr)
         {
             NotifyClient (WCMRAudioDeviceManagerClient::IODeviceDisconnected);
+            return err;
+        }
+        
+        WCMRCoreAudioDevice* current_device = dynamic_cast<WCMRCoreAudioDevice*>(m_CurrentDevice);
+        
+        if ( current_device &&
+            (current_device->DeviceID() != devInfo.m_DeviceId ) )
+        {
+            NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
             return err;
         }
     }

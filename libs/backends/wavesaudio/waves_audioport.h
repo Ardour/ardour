@@ -35,7 +35,7 @@ public:
 
     WavesAudioPort (const std::string& port_name, PortFlags flags);
 
-    virtual ~WavesAudioPort () { };
+    virtual ~WavesAudioPort ();
 
     virtual DataType type () const {    return DataType::AUDIO; };
 
@@ -49,7 +49,7 @@ protected:
 
 private:
 
-    Sample _buffer[MAX_BUFFER_SIZE_SAMPLES];
+    Sample *_buffer;
 };
 
 } // namespace
