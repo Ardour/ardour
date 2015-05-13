@@ -27,23 +27,23 @@
 
 extern "C" {
 /* SSE functions */
-	LIBARDOUR_API float x86_sse_compute_peak         (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float current);
-	LIBARDOUR_API void  x86_sse_apply_gain_to_buffer (ARDOUR::Sample * buf, ARDOUR::pframes_t nframes, float gain);
-	LIBARDOUR_API void  x86_sse_mix_buffers_with_gain(ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes, float gain);
-	LIBARDOUR_API void  x86_sse_mix_buffers_no_gain  (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
+	LIBARDOUR_API float x86_sse_compute_peak         (const float * buf, uint32_t nsamples, float current);
+	LIBARDOUR_API void  x86_sse_apply_gain_to_buffer (float * buf, uint32_t nframes, float gain);
+	LIBARDOUR_API void  x86_sse_mix_buffers_with_gain(float * dst, const float * src, uint32_t nframes, float gain);
+	LIBARDOUR_API void  x86_sse_mix_buffers_no_gain  (float * dst, const float * src, uint32_t nframes);
 }
 
 extern "C" {
 /* AVX functions */
-	LIBARDOUR_API float x86_sse_avx_compute_peak         (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float current);
-	LIBARDOUR_API void  x86_sse_avx_apply_gain_to_buffer (ARDOUR::Sample * buf, ARDOUR::pframes_t nframes, float gain);
-	LIBARDOUR_API void  x86_sse_avx_mix_buffers_with_gain(ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes, float gain);
-	LIBARDOUR_API void  x86_sse_avx_mix_buffers_no_gain  (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
-	LIBARDOUR_API void  x86_sse_avx_copy_vector          (ARDOUR::Sample * dst, const ARDOUR::Sample * src, ARDOUR::pframes_t nframes);
+	LIBARDOUR_API float x86_sse_avx_compute_peak         (const float * buf, uint32_t nsamples, float current);
+	LIBARDOUR_API void  x86_sse_avx_apply_gain_to_buffer (float * buf, uint32_t nframes, float gain);
+	LIBARDOUR_API void  x86_sse_avx_mix_buffers_with_gain(float * dst, const float * src, uint32_t nframes, float gain);
+	LIBARDOUR_API void  x86_sse_avx_mix_buffers_no_gain  (float * dst, const float * src, uint32_t nframes);
+	LIBARDOUR_API void  x86_sse_avx_copy_vector          (float * dst, const float * src, uint32_t nframes);
 }
 
-LIBARDOUR_API void  x86_sse_find_peaks               (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float *min, float *max);
-LIBARDOUR_API void  x86_sse_avx_find_peaks               (const ARDOUR::Sample * buf, ARDOUR::pframes_t nsamples, float *min, float *max);
+LIBARDOUR_API void  x86_sse_find_peaks                 (const float * buf, uint32_t nsamples, float *min, float *max);
+LIBARDOUR_API void  x86_sse_avx_find_peaks             (const float * buf, uint32_t nsamples, float *min, float *max);
 
 /* debug wrappers for SSE functions */
 

@@ -20,11 +20,11 @@
 
 #include <xmmintrin.h>
 #include <immintrin.h>
-#include "ardour/types.h"
+#include <stdint.h>
 
 
 void
-x86_sse_avx_find_peaks(const ARDOUR::Sample* buf, ARDOUR::pframes_t nframes, float *min, float *max)
+x86_sse_avx_find_peaks(const float* buf, uint32_t nframes, float *min, float *max)
 {
 	__m256 current_max, current_min, work;
 
