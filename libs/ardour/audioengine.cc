@@ -455,7 +455,7 @@ AudioEngine::backend_reset_requested()
 void
 AudioEngine::do_reset_backend()
 {
-	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 512);
+	SessionEvent::create_per_thread_pool (X_("Backend reset processing thread"), 1024);
     
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
     
