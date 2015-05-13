@@ -494,6 +494,12 @@ x86_sse_avx_compute_peak:
 	cmp	$0, %rdx
 	je	.CP_END
 
+	#; create the "abs" mask in %xmm3
+	#; if will be used to discard sign bit
+	pushq   $2147483647
+	movss	(%rsp), %xmm3
+	addq    $8, %rsp
+
 	#; Check for alignment 
 	movq %rcx, %r8 #; buf => %rdx
 	andq $28, %r8 #; mask bits 1 & 2
@@ -507,6 +513,7 @@ x86_sse_avx_compute_peak:
 
 	#; Load next value from the buffer
 	movss (%rcx), %xmm1
+	andps %xmm3, %xmm1	#; mask out sign bit
 	maxss %xmm1, %xmm0
 
 	#; increment buffer, decrement counter
@@ -535,9 +542,14 @@ x86_sse_avx_compute_peak:
 	vshufps $0x00, %ymm0, %ymm0, %ymm0 #; spread single float value to the all 128 bits of xmm0 register
 	vperm2f128 $0x00, %ymm0, %ymm0, %ymm0 #; extend the first 128 bits of ymm0 register to higher 128 bits
 
+	#; broadcast sign mask to the whole ymm3 register
+	vshufps $0x00, %ymm3, %ymm3, %ymm3 #; spread single float value to the all 128 bits of xmm3 register
+	vperm2f128 $0x00, %ymm3, %ymm3, %ymm3 #; extend the first 128 bits of ymm3 register to higher 128 bits
+
 .LP_AVX:
 
 	vmovaps (%rcx), %ymm1
+	vandps %ymm3, %ymm1, %ymm1	#; mask out sign bit
 	vmaxps %ymm1, %ymm0, %ymm0
 
 	addq $32, %rcx #; buf+=8
@@ -569,6 +581,7 @@ x86_sse_avx_compute_peak:
 .POST_START:
 
 	movss (%rcx), %xmm1
+	andps %xmm3, %xmm1	#; mask out sign bit
 	maxss %xmm1, %xmm0
 	
 	addq $4, %rcx 	#; buf++;
