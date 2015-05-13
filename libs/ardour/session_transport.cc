@@ -537,14 +537,12 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 		if (!_range_selection.empty()) {
 			jump_to = _range_selection.from;
 		} else {
-			if (Profile->get_trx()) {
-				if (transport_rolling ()) {
-					/* Range selection no longer exists, but we're playing,
-					   so do nothing. Next stop will put us where
-					   we need to be.
-					*/
-					return false;
-				}
+			if (transport_rolling ()) {
+				/* Range selection no longer exists, but we're playing,
+				   so do nothing. Next stop will put us where
+				   we need to be.
+				*/
+				return false;
 			}
 		}
 	}
