@@ -1758,7 +1758,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	/** temporary list of Diskstreams used only during load of 2.X sessions */
 	std::list<boost::shared_ptr<Diskstream> > _diskstreams_2X;
 
-	void add_session_range_location (framepos_t, framepos_t);
+	void set_session_range_location (framepos_t, framepos_t);
 
 	void setup_midi_machine_control ();
 

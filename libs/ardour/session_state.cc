@@ -572,7 +572,21 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 	}
 
-	/* set initial start + end point */
+	if (Profile->get_trx()) {
+	
+		/* set initial start + end point : ARDOUR::Session::session_end_shift long.
+		   Remember that this is a brand new session. Sessions
+		   loaded from saved state will get this range from the saved state.
+		*/
+		
+		set_session_range_location (0, 0);
+		
+		/* Initial loop location, from absolute zero, length 10 seconds  */
+		
+		Location* loc = new Location (*this, 0, 10.0 * _engine.sample_rate(), _("Loop"),  Location::IsAutoLoop);
+		_locations->add (loc, true);
+		set_auto_loop_location (loc);
+	}
 
 	_state_of_the_state = Clean;
 
