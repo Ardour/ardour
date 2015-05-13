@@ -1453,6 +1453,11 @@ MidiModel::sync_to_source (const Glib::Threads::Mutex::Lock& source_lock)
 		return false;
 	}
 
+	/* Invalidate and store active notes, which will be picked up by the iterator
+	   on the next roll if time progresses linearly. */
+	ms->invalidate(source_lock,
+	               ms->session().transport_rolling() ? &_active_notes : NULL);
+
 	ms->mark_streaming_midi_write_started (source_lock, note_mode());
 
 	for (Evoral::Sequence<TimeType>::const_iterator i = begin(TimeType(), true); i != end(); ++i) {
