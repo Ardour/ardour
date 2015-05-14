@@ -82,6 +82,8 @@ compiler_flags_dictionaries= {
         'avx': '-mavx',
         # Flags to generate position independent code, when needed to build a shared object
         'pic': '-fPIC',
+        # Flags required to compile C code with anonymous unions (only part of C11)
+        'c-anonymous-union': '-fms-extensions',
     },
     'msvc' : {
         'debuggable' : ['/DDEBUG', '/Od', '/Zi', '/MDd', '/Gd', '/EHsc'],
@@ -112,6 +114,7 @@ compiler_flags_dictionaries= {
         'attasm': '',
         'avx': '',
         'pic': '',
+        'c-anonymous-union': '',
     },
 }
 
