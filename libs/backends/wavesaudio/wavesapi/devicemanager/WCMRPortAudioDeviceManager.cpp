@@ -1044,8 +1044,7 @@ void WCMRPortAudioDevice::resetDevice (bool callerIsWaiting /*=false*/ )
 		// Resume streaming if the device was streaming before
 		if(wasStreaming && m_lastErr == eNoErr && m_ConnectionStatus == DeviceAvailable)
 		{
-			// Notify the Application to prepare for the stream start
-			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::DeviceStartsStreaming);
+			// start streaming
 			startStreaming();
 		}
 	} else {
@@ -1077,7 +1076,6 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 		case kAsioResyncRequest:
 			m_ResyncRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResyncRequest" << std::endl;
-			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
 			break;
 
 		case kAsioLatenciesChanged:
@@ -1099,8 +1097,8 @@ long WCMRPortAudioDevice::ASIOMessageHook (long selector, long WCUNUSEDPARAM(val
 			break;
 
 		case kAsioResetRequest:
-			m_ResetRequested++;
 			std::cout << "\t\t\tWCMRPortAudioDevice::ASIOMessageHook -- kAsioResetRequest" << std::endl;
+			m_ResetRequested++;
 			m_pMyManager->NotifyClient (WCMRAudioDeviceManagerClient::RequestReset);
 			break;
 

@@ -49,18 +49,18 @@ void* WavesAudioPort::get_buffer (pframes_t nframes)
              * of the connections.
              */
 
-			// get first buffer data
-			// use optimized function to fill the buffer intialy
-			ARDOUR::copy_vector (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes);
-			++it;
+             // get first buffer data
+             // use optimized function to fill the buffer intialy
+             ARDOUR::copy_vector (_buffer, ((const WavesAudioPort*)*it)->const_buffer (), nframes);
+             ++it;
             
-			// mix the rest
-			for (; it != get_connections ().end (); ++it) {
-                Sample* tgt = buffer ();
-                const Sample* src = ((const WavesAudioPort*)*it)->const_buffer ();
+             // mix the rest
+             for (; it != get_connections ().end (); ++it) {
+                 Sample* tgt = buffer ();
+                 const Sample* src = ((const WavesAudioPort*)*it)->const_buffer ();
 
-				// use otimized function to mix the buffers
-				ARDOUR::mix_buffers_no_gain (tgt, src, nframes);
+                 // use otimized function to mix the buffers
+                 ARDOUR::mix_buffers_no_gain (tgt, src, nframes);
             }
         }
     }

@@ -35,7 +35,7 @@ WavesDataPort::WavesDataPort (const std::string& inport_name, PortFlags inflags)
 
 WavesDataPort::~WavesDataPort ()
 {
-    disconnect_all ();
+    _disconnect_all ();
 }
 
 
