@@ -93,8 +93,6 @@ class WavesMidiPort;
 
     virtual std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
 
-    virtual uint32_t default_buffer_size (const std::string& device) const;
-
     virtual uint32_t available_input_channel_count (const std::string& device) const;
 
     virtual uint32_t available_output_channel_count (const std::string& device) const;
