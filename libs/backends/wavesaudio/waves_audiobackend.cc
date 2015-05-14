@@ -42,8 +42,8 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceDebugInfo -- " << (char*)parameter << std::endl;
             break;
         case WCMRAudioDeviceManagerClient::BufferSizeChanged:
-            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::BufferSizeChanged: " << *(uint32_t*)parameter << std::endl;
-			_buffer_size_change(*(uint32_t*)parameter);
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::BufferSizeChanged: " << *(int*)parameter << std::endl;
+			_buffer_size_change(*(int*)parameter);
             break;
         case WCMRAudioDeviceManagerClient::RequestReset:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::RequestReset" << std::endl;
@@ -54,7 +54,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             break;
         case WCMRAudioDeviceManagerClient::SamplingRateChanged:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::SamplingRateChanged: " << *(float*)parameter << std::endl;
-			set_sample_rate(*(float*)parameter);
+			_sample_rate_change(*(float*)parameter);
             break;
         case WCMRAudioDeviceManagerClient::Dropout:
             std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::Dropout: " << std::endl;
@@ -77,7 +77,7 @@ void WavesAudioBackend::AudioDeviceManagerNotification (NotificationReason reaso
             engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::IODeviceDisconnected:
-            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::DeviceListChanged" << std::endl;
+            std::cout << "-------------------------------  WCMRAudioDeviceManagerClient::IODeviceDisconnected" << std::endl;
             engine.request_device_list_update();
             break;
         case WCMRAudioDeviceManagerClient::AudioCallback:
@@ -411,7 +411,6 @@ WavesAudioBackend::set_sample_rate (float sample_rate)
        
     if (device_needs_restart) {
         // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;
-        _call_thread_init_callback = true;
         retVal  = _device->SetStreaming (true);
         if (retVal != eNoErr) {
             std::cerr << "WavesAudioBackend::set_sample_rate (): [" << _device->DeviceName () << "]->SetStreaming (true) failed (" << retVal << ") !" << std::endl;
@@ -460,7 +459,6 @@ WavesAudioBackend::set_buffer_size (uint32_t buffer_size)
     
     if (device_needs_restart) {
         // COMMENTED DBG LOGS */ std::cout << "\t\t[" << _device->DeviceName() << "]->SetStreaming (true);"<< std::endl;
-        _call_thread_init_callback = true;
         retVal  = _device->SetStreaming (true);
         if (retVal != eNoErr) {
             std::cerr << "WavesAudioBackend::set_buffer_size (): [" << _device->DeviceName () << "]->SetStreaming (true) failed (" << retVal << ") !" << std::endl;
@@ -694,7 +692,6 @@ WavesAudioBackend::_start (bool for_latency_measurement)
 
     manager.registration_callback ();
 
-    _call_thread_init_callback = true;
     WTErr retVal  = _device->SetStreaming (true);
     if (retVal != eNoErr) {
         std::cerr << "WavesAudioBackend::_start (): [" << _device->DeviceName () << "]->SetStreaming () failed!" << std::endl;

@@ -39,7 +39,7 @@ static const int gAllBufferSizes[] =
 ///< The default SR.
 static const int DEFAULT_SR = 44100;
 ///< The default buffer size.
-static const int DEFAULT_BUFFERSIZE = 128;
+static const int DEFAULT_BUFFERSIZE = 1024;
 
 static const int NONE_DEVICE_ID = -1;
 
@@ -2946,7 +2946,6 @@ WTErr WCMRCoreAudioDeviceManager::updateDeviceListImpl()
     if (eNoErr != err)
     {
         std::cout << "API::PortAudioDeviceManager::updateDeviceListImpl: Device list update error: "<< err << std::endl;
-        return err;
     }
     
     if (m_CurrentDevice)

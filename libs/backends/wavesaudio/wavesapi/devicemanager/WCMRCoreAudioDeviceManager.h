@@ -168,8 +168,7 @@ protected:
 	static OSStatus StaticPropertyChangeProc (AudioDeviceID inDevice, UInt32 inChannel, Boolean isInput,
 	AudioDevicePropertyID inPropertyID, void *inClientData);
 	void PropertyChangeProc (AudioDevicePropertyID inPropertyID);
-    
-    void resetAudioDevice();
+
 private:
 
 };
