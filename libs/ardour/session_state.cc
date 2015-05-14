@@ -2789,6 +2789,16 @@ Session::cleanup_sources (CleanupReport& rep)
 					
 					RegionFactory::remove_regions_using_source (i->second);
 					sources.erase (i);
+					
+					// also remove source from all_sources
+					
+					for (set<string>::iterator j = all_sources.begin(); j != all_sources.end(); ++j) {
+						spath = Glib::path_get_basename (*j);
+						if ( spath == i->second->name () ) {
+							all_sources.erase (j);
+							break;
+						}
+					}
 				}
 			}
 		}
