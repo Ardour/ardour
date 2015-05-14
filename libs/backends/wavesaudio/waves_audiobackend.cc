@@ -223,23 +223,6 @@ float WavesAudioBackend::default_sample_rate () const
     return AudioBackend::default_sample_rate (); 
 }
 
-uint32_t 
-WavesAudioBackend::default_buffer_size (const std::string& device_name) const
-{
-#ifdef __APPLE__
-	return AudioBackend::default_buffer_size (device_name);
-#else
-    DeviceInfo devInfo;
-    WTErr err = _audio_device_manager.GetDeviceInfoByName(device_name, devInfo);
-
-    if (err != eNoErr) {
-        std::cerr << "WavesAudioBackend::default_buffer_size (): Failed to get buffer size for device [" << device_name << "]" << std::endl;
-        return AudioBackend::default_buffer_size (device_name);
-    }
-	
-	return devInfo.m_DefaultBufferSize; 
-#endif
-}
 
 std::vector<uint32_t> 
 WavesAudioBackend::available_buffer_sizes (const std::string& device_name) const
