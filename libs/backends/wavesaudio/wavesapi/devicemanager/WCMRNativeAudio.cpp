@@ -64,7 +64,6 @@ WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pM
 	}
 	_m_inputBuffer = new float[__m_NumInputChannels * m_BufferSizes.back()];
 	_m_outputBuffer = new float[__m_NumOutputChannels * m_BufferSizes.back()];
-	m_DefaultBufferSize = m_BufferSizes.back();
 	m_CurrentBufferSize = m_BufferSizes.back();
 }
 

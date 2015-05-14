@@ -118,7 +118,6 @@ WCMRPortAudioDevice::WCMRPortAudioDevice (WCMRPortAudioDeviceManager *pManager, 
 	m_PortAudioStream = NULL;
 	m_CurrentSamplingRate = DEFAULT_SR;
 	m_CurrentBufferSize = DEFAULT_BUFFERSIZE;
-	m_DefaultBufferSize = DEFAULT_BUFFERSIZE;
 	m_StopRequested = true;
 	m_pInputData = NULL;
 
@@ -362,7 +361,6 @@ void WCMRPortAudioDevice::updateDeviceInfo (bool callerIsWaiting/*=false*/)
 	{
 		std::cout << "API::Device " << m_DeviceName << " Buffers: " << minSize << " " << maxSize << " " << preferredSize << std::endl;
 			
-		m_DefaultBufferSize = preferredSize;
 		m_BufferSizes.push_back (preferredSize);
 		useDefaultBuffers = false;
 	}
