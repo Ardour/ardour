@@ -88,10 +88,10 @@ def build(bld):
     obj.use      = 'libardour libpbd'
     if bld.env['build_target'] == 'mingw':
         obj.uselib   = ['PORTAUDIO']
-        obj.cxxflags = [ '-fPIC' ]
-        obj.cflags   = [ '-fPIC', '-fms-extensions' ]
+        obj.cxxflags = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['pic'], bld.env['compiler_flags_dict']['c-anonymous-union'] ]
     else:
-        obj.cflags   = ['-fms-extensions' ]
+        obj.cflags   = [ bld.env['compiler_flags_dict']['c-anonymous-union'] ]
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
 
     if bld.env['build_target']== 'mingw':
