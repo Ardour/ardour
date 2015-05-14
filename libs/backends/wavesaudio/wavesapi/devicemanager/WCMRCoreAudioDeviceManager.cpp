@@ -115,7 +115,6 @@ WCMRCoreAudioDevice::WCMRCoreAudioDevice (WCMRCoreAudioDeviceManager *pManager, 
     
     m_CurrentSamplingRate = DEFAULT_SR;
     m_CurrentBufferSize = DEFAULT_BUFFERSIZE;
-    m_DefaultBufferSize = DEFAULT_BUFFERSIZE;
     m_StopRequested = true;
     m_pInputData = NULL;
     
