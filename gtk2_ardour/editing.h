@@ -28,6 +28,7 @@
 
 #define SNAPTYPE(a) /*empty*/
 #define SNAPMODE(a) /*empty*/
+#define SNAPDELTA(a) /*empty*/
 #define REGIONLISTSORTTYPE(a) /*empty*/
 #define MOUSEMODE(a) /*empty*/
 #define MIDIEDITMODE(a) /*empty*/
@@ -70,6 +71,19 @@ SnapMode str2snapmode(const std::string &);
 
 #undef SNAPMODE
 #define SNAPMODE(a) /*empty*/
+
+// SNAPDELTA
+#undef SNAPDELTA
+#define SNAPDELTA(a) a,
+enum SnapDelta {
+	#include "editing_syms.h"
+};
+extern const char *snapdeltastrs[];
+inline const char* enum2str(SnapDelta m) {return snapdeltastrs[m];}
+SnapDelta str2snapdelta(const std::string &);
+
+#undef SNAPDELTA
+#define SNAPDELTA(a) /*empty*/
 
 // REGIONLISTSORTTYPE
 #undef REGIONLISTSORTTYPE

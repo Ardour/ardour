@@ -223,8 +223,8 @@ public:
 	 */
 	void begin_resizing(bool at_front);
 
-	void update_resizing (NoteBase*, bool, double, bool);
-	void commit_resizing (NoteBase*, bool, double, bool);
+	void update_resizing (NoteBase*, bool, double, bool, double);
+	void commit_resizing (NoteBase*, bool, double, bool, double);
 	void abort_resizing ();
 
 	/** Change the channel of the selection.
@@ -268,6 +268,7 @@ public:
 	}
 	/** Convert a timestamp in frames to beats (both relative to region position) */
 	Evoral::Beats region_frames_to_region_beats(framepos_t) const;
+	double region_frames_to_region_beats_double(framepos_t) const;
 
 	/** Convert a timestamp in beats measured from source start into absolute frames */
 	framepos_t source_beats_to_absolute_frames(Evoral::Beats beats) const;
@@ -284,6 +285,10 @@ public:
 
 	ARDOUR::BeatsFramesConverter const & source_relative_time_converter () const {
 		return _source_relative_time_converter;
+	}
+
+	ARDOUR::DoubleBeatsFramesConverter const & region_relative_time_converter_double () const {
+		return _region_relative_time_converter_double;
 	}
 
 	void goto_previous_note (bool add_to_selection);
@@ -400,6 +405,7 @@ private:
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
 	ARDOUR::BeatsFramesConverter _source_relative_time_converter;
+	ARDOUR::DoubleBeatsFramesConverter _region_relative_time_converter_double;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;

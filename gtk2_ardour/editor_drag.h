@@ -213,7 +213,7 @@ protected:
 		return _last_pointer_y;
 	}
 
-	double last_pointer_frame () const {
+	ARDOUR::framepos_t last_pointer_frame () const {
 		return _last_pointer_frame;
 	}
 
@@ -341,6 +341,7 @@ private:
 	uint32_t _ndropzone;
 	uint32_t _pdropzone;
 	uint32_t _ddropzone;
+	int32_t _snap_delta; ///< delta between the initial position and next snap point
 };
 
 
@@ -503,6 +504,7 @@ private:
 	MidiRegionView*     region;
 	bool                relative;
 	bool                at_front;
+	double              _snap_delta;
 };
 
 /** Drags to move MIDI notes */
@@ -527,6 +529,7 @@ class NoteDrag : public Drag
 	double _cumulative_dy;
 	bool _was_selected;
 	double _note_height;
+	int32_t _snap_delta;
 };
 
 class NoteCreateDrag : public Drag
@@ -646,6 +649,7 @@ private:
 	
 	bool _preserve_fade_anchor;
 	bool _jump_position_when_done;
+	int32_t _snap_delta;
 };
 
 /** Meter marker drag */
@@ -728,6 +732,7 @@ private:
         EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
+	int32_t _snap_delta;
 };
 
 /** Region fade-in drag */
@@ -746,6 +751,8 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
+private:
+	int32_t _snap_delta;
 };
 
 /** Region fade-out drag */
@@ -764,6 +771,8 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
+private:
+	int32_t _snap_delta;
 };
 
 /** Marker drag */
@@ -827,6 +836,7 @@ private:
 	double _cumulative_y_drag;
         bool     _pushing;
         uint32_t _final_index;
+	int32_t _snap_delta;
 	static double _zero_gain_fraction;
 };
 
@@ -951,6 +961,8 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
+private:
+	int32_t _snap_delta;
 };
 
 /** Scrub drag in audition mode */

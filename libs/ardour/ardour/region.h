@@ -139,7 +139,7 @@ class LIBARDOUR_API Region
 	/* first_frame() is an alias; last_frame() just hides some math */
 
 	framepos_t first_frame () const { return _position; }
-	framepos_t last_frame ()  const { return _position + _length - 1; }
+	framepos_t last_frame ()  const { return _position + _length; }
 
 	/** Return the earliest possible value of _position given the
 	 *  value of _start within the region's sources
@@ -151,7 +151,7 @@ class LIBARDOUR_API Region
 	framepos_t latest_possible_frame () const;
 
 	Evoral::Range<framepos_t> last_range () const {
-		return Evoral::Range<framepos_t> (_last_position, _last_position + _last_length - 1);
+		return Evoral::Range<framepos_t> (_last_position, _last_position + _last_length);
 	}
 	
 	Evoral::Range<framepos_t> range () const {

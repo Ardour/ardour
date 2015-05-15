@@ -162,9 +162,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void prev_snap_choice_music_only ();
 	void prev_snap_choice_music_and_time ();
 	void set_snap_to (Editing::SnapType);
+	void set_snap_delta (Editing::SnapDelta);
 	void set_snap_mode (Editing::SnapMode);
 	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
 
+	Editing::SnapDelta  snap_delta () const;
 	Editing::SnapMode  snap_mode () const;
 	Editing::SnapType  snap_type () const;
 
@@ -1471,6 +1473,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
 	Editing::SnapType _snap_type;
+	Editing::SnapDelta _snap_delta;
 	Editing::SnapMode _snap_mode;
 
 	/// Snap threshold in pixels
@@ -1751,19 +1754,25 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	ArdourDropdown snap_type_selector;
 	void build_snap_type_menu ();
 
+	ArdourDropdown snap_delta_selector;
 	ArdourDropdown snap_mode_selector;
+	void build_snap_delta_menu ();
 	void build_snap_mode_menu ();
 	Gtk::HBox         snap_box;
 
 	std::vector<std::string> snap_type_strings;
+	std::vector<std::string> snap_delta_strings;
 	std::vector<std::string> snap_mode_strings;
 
 	void snap_type_selection_done (Editing::SnapType);
+	void snap_delta_selection_done (Editing::SnapDelta);
 	void snap_mode_selection_done (Editing::SnapMode);
+	void snap_delta_chosen (Editing::SnapDelta);
 	void snap_mode_chosen (Editing::SnapMode);
 	void snap_type_chosen (Editing::SnapType);
 
 	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
+	Glib::RefPtr<Gtk::RadioAction> snap_delta_action (Editing::SnapDelta);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
 	//zoom focus meu stuff

@@ -129,7 +129,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void set_snap_to (Editing::SnapType t) = 0;
 
 	virtual Editing::SnapType snap_type () const = 0;
+	virtual Editing::SnapDelta snap_delta () const = 0;
 	virtual Editing::SnapMode snap_mode () const = 0;
+
+	virtual void set_snap_delta (Editing::SnapDelta m) = 0;
 
 	/** Set the snap mode.
 	 * @param m Snap mode (defined in editing_syms.h)
