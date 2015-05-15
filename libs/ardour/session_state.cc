@@ -2339,25 +2339,25 @@ Session::get_best_session_directory_for_new_audio ()
 string
 Session::automation_dir () const
 {
-	return Glib::build_filename (_path, "automation");
+	return Glib::build_filename (_path, automation_dir_name);
 }
 
 string
 Session::analysis_dir () const
 {
-	return Glib::build_filename (_path, "analysis");
+	return Glib::build_filename (_path, analysis_dir_name);
 }
 
 string
 Session::plugins_dir () const
 {
-	return Glib::build_filename (_path, "plugins");
+	return Glib::build_filename (_path, plugins_dir_name);
 }
 
 string
 Session::externals_dir () const
 {
-	return Glib::build_filename (_path, "externals");
+	return Glib::build_filename (_path, externals_dir_name);
 }
 
 int
