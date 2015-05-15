@@ -5971,7 +5971,7 @@ RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item, framepos_t po
 	, line (new EditorCursor (*e))
 {
 	line->set_position (pos);
-	line->how ();
+	line->show ();
 }
 
 RegionCutDrag::~RegionCutDrag ()
