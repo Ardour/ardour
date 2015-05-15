@@ -42,6 +42,10 @@ namespace ARDOUR {
 	LIBARDOUR_API extern const char* const ladspa_dir_name;
 	LIBARDOUR_API extern const char* const panner_dir_name;
 	LIBARDOUR_API extern const char* const backend_dir_name;
+	LIBARDOUR_API extern const char* const automation_dir_name;
+	LIBARDOUR_API extern const char* const analysis_dir_name;
+	LIBARDOUR_API extern const char* const plugins_dir_name;
+	LIBARDOUR_API extern const char* const externals_dir_name;
 
 };
 
