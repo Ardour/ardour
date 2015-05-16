@@ -217,7 +217,7 @@ protected:
 		return _last_pointer_frame;
 	}
 
-	framecnt_t snap_delta () const {
+	ARDOUR::frameoffset_t snap_delta () const {
 		return _snap_delta;
 	}
 
@@ -259,7 +259,7 @@ private:
 	/* difference between some key position's snapped and unsnapped
 	 *  framepos. used for relative snap.
 	 */
-	framecnt_t _snap_delta;
+	ARDOUR::frameoffset_t _snap_delta;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 };
 

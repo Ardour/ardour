@@ -254,11 +254,23 @@ public:
 	 */
 	double snap_to_pixel(double x);
 
+	/** Snap a region relative pixel coordinate to pixel units explicitly (no magnetic snap).
+	 * @param x a pixel coordinate relative to region start
+	 * @return the explicitly snapped pixel coordinate relative to region start
+	 */
+	double snap_to_pixel_no_magnets (double x);
+
 	/** Snap a region relative pixel coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
 	 * @return the snapped framepos_t coordinate relative to region start
 	 */
 	framepos_t snap_pixel_to_sample(double x);
+
+	/** Explicitly snap a region relative pixel coordinate to frame units (no magnetic snap).
+	 * @param x a pixel coordinate relative to region start
+	 * @return the explicitly snapped framepos_t coordinate relative to region start
+	 */
+	framepos_t snap_pixel_to_sample_no_magnets (double x);
 
 	/** Convert a timestamp in beats into frames (both relative to region position) */
 	framepos_t region_beats_to_region_frames(Evoral::Beats beats) const;

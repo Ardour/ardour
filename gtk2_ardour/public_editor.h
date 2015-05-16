@@ -148,6 +148,10 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void snap_to (framepos_t&       first,
 	                      ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
 	                      bool              for_mark  = false) = 0;
+	/** Snap a value according to the current snap setting. */
+	virtual void snap_to_no_magnets (framepos_t&       first,
+	                      ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
+	                      bool              for_mark  = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.

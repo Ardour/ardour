@@ -366,7 +366,7 @@ Drag::setup_snap_delta (framepos_t pos)
 {
 	if (_editor->snap_delta () == SnapRelative) {
 		framepos_t temp = pos;
-		_editor->snap_to (temp);
+		_editor->snap_to_no_magnets (temp);
 		_snap_delta = temp - pos;
 	}
 }
@@ -2358,7 +2358,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	if (_editor->snap_delta () == SnapRelative) {
 		double temp;
-		temp = region->snap_to_pixel(cnote->x0 ());
+		temp = region->snap_to_pixel_no_magnets (cnote->x0 ());
 		_snap_delta = temp - cnote->x0 ();
 	}
 

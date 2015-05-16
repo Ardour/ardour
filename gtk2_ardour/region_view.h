@@ -122,6 +122,7 @@ class RegionView : public TimeAxisViewItem
 	};
 
 	ARDOUR::frameoffset_t snap_frame_to_frame (ARDOUR::frameoffset_t) const;
+	ARDOUR::frameoffset_t snap_frame_to_frame_no_magnets (ARDOUR::frameoffset_t) const;
 	
   protected:
 

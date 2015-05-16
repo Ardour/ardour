@@ -2633,6 +2633,16 @@ MidiRegionView::snap_pixel_to_sample(double x)
 	return snap_frame_to_frame (editor.pixel_to_sample (x));
 }
 
+/** @param x Pixel relative to the region position explicitly (no magnetic snap)
+ *  @return Snapped frame relative to the region position.
+ */
+framepos_t
+MidiRegionView::snap_pixel_to_sample_no_magnets (double x)
+{
+	PublicEditor& editor (trackview.editor());
+	return snap_frame_to_frame_no_magnets (editor.pixel_to_sample (x));
+}
+
 /** @param x Pixel relative to the region position.
  *  @return Snapped pixel relative to the region position.
  */
@@ -2640,6 +2650,15 @@ double
 MidiRegionView::snap_to_pixel(double x)
 {
 	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample(x));
+}
+
+/** @param x Pixel relative to the region position.
+ *  @return Explicitly snapped pixel relative to the region position (no magnetic snap).
+ */
+double
+MidiRegionView::snap_to_pixel_no_magnets (double x)
+{
+	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample_no_magnets(x));
 }
 
 double
@@ -2691,7 +2710,7 @@ MidiRegionView::region_frames_to_region_beats(framepos_t frames) const
 }
 
 double
-MidiRegionView::region_frames_to_region_beats_double(framepos_t frames) const
+MidiRegionView::region_frames_to_region_beats_double (framepos_t frames) const
 {
 	return _region_relative_time_converter_double.from(frames);
 }
@@ -2794,9 +2813,9 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			int sign = 1;
 			/* negative beat offsets aren't allowed */
 			if (delta_samps > 0) {
-				delta_beats = _region_relative_time_converter_double.from(delta_samps);
+				delta_beats = region_frames_to_region_beats_double (delta_samps);
 			} else if (delta_samps < 0) {
-				delta_beats = _region_relative_time_converter_double.from( - delta_samps);
+				delta_beats = region_frames_to_region_beats_double ( - delta_samps);
 				sign = -1;
 			}
 
@@ -2869,9 +2888,9 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		double delta_beats;
 		int sign = 1;
 		if (delta_samps > 0) {
-			delta_beats = _region_relative_time_converter_double.from(delta_samps);
+			delta_beats = region_frames_to_region_beats_double (delta_samps);
 		} else if (delta_samps < 0) {
-			delta_beats = _region_relative_time_converter_double.from( - delta_samps);
+			delta_beats = region_frames_to_region_beats_double ( - delta_samps);
 			sign = -1;
 		}
 

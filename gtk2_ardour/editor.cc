@@ -2654,6 +2654,16 @@ Editor::snap_to (framepos_t& start, RoundMode direction, bool for_mark)
 }
 
 void
+Editor::snap_to_no_magnets (framepos_t& start, RoundMode direction, bool for_mark)
+{
+	if (!_session || _snap_mode == SnapOff) {
+		return;
+	}
+
+	snap_to_internal (start, direction, for_mark, true);
+}
+
+void
 Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool /*for_mark*/)
 {
 	const framepos_t one_timecode_second = (framepos_t)(rint(_session->timecode_frames_per_second()) * _session->frames_per_timecode_frame());
@@ -2720,7 +2730,7 @@ Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool 
 }
 
 void
-Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark)
+Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark, bool no_magnets)
 {
 	const framepos_t one_second = _session->frame_rate();
 	const framepos_t one_minute = _session->frame_rate() * 60;
@@ -2889,6 +2899,10 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark)
 		return;
 
 	case SnapMagnetic:
+
+		if (no_magnets) {
+			return;
+		}
 
 		if (presnap > start) {
 			if (presnap > (start + pixel_to_sample(snap_threshold))) {

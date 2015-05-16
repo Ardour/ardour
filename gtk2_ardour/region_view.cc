@@ -962,3 +962,29 @@ RegionView::snap_frame_to_frame (frameoffset_t x) const
 	/* back to region relative */
 	return frame - _region->position();
 }
+
+/** Snap a frame offset within our region using the current snap settings.
+ *  @param x Frame offset from this region's position.
+ *  @return Snapped frame offset from this region's position.
+ */
+frameoffset_t
+RegionView::snap_frame_to_frame_no_magnets (frameoffset_t x) const
+{
+	PublicEditor& editor = trackview.editor();
+
+	/* x is region relative, convert it to global absolute frames */
+	framepos_t const session_frame = x + _region->position();
+
+	/* try a snap in either direction */
+	framepos_t frame = session_frame;
+	editor.snap_to_no_magnets (frame, RoundNearest);
+
+	/* if we went off the beginning of the region, snap forwards */
+	if (frame < _region->position ()) {
+		frame = session_frame;
+		editor.snap_to_no_magnets (frame, RoundUpAlways);
+	}
+
+	/* back to region relative */
+	return frame - _region->position();
+}
