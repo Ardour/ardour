@@ -217,8 +217,15 @@ protected:
 		return _last_pointer_frame;
 	}
 
+	framecnt_t snap_delta () const {
+		return _snap_delta;
+	}
+
 	double current_pointer_x () const;
 	double current_pointer_y () const;
+
+	/* sets snap delta from unsnapped pos */
+	void setup_snap_delta (framepos_t pos);
 
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
 
@@ -248,6 +255,11 @@ private:
 	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
 	ARDOUR::framepos_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
 	ARDOUR::framepos_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
+
+	/* difference between some key position's snapped and unsnapped
+	 *  framepos. used for relative snap.
+	 */
+	framecnt_t _snap_delta;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 };
 
@@ -341,7 +353,6 @@ private:
 	uint32_t _ndropzone;
 	uint32_t _pdropzone;
 	uint32_t _ddropzone;
-	int32_t _snap_delta; ///< delta between the initial position and next snap point
 };
 
 
@@ -529,7 +540,6 @@ class NoteDrag : public Drag
 	double _cumulative_dy;
 	bool _was_selected;
 	double _note_height;
-	int32_t _snap_delta;
 };
 
 class NoteCreateDrag : public Drag
@@ -649,7 +659,6 @@ private:
 	
 	bool _preserve_fade_anchor;
 	bool _jump_position_when_done;
-	int32_t _snap_delta;
 };
 
 /** Meter marker drag */
@@ -732,7 +741,6 @@ private:
         EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
-	int32_t _snap_delta;
 };
 
 /** Region fade-in drag */
@@ -751,8 +759,6 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
-private:
-	int32_t _snap_delta;
 };
 
 /** Region fade-out drag */
@@ -771,8 +777,6 @@ public:
 	}
 
 	void setup_pointer_frame_offset ();
-private:
-	int32_t _snap_delta;
 };
 
 /** Marker drag */
@@ -836,7 +840,6 @@ private:
 	double _cumulative_y_drag;
         bool     _pushing;
         uint32_t _final_index;
-	int32_t _snap_delta;
 	static double _zero_gain_fraction;
 };
 
@@ -961,8 +964,6 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
-private:
-	int32_t _snap_delta;
 };
 
 /** Scrub drag in audition mode */
