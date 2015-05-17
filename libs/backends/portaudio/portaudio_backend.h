@@ -33,6 +33,8 @@
 #include "ardour/types.h"
 
 #include "portaudio_io.h"
+#include "winmmemidi_io.h"
+#include "cycle_timer.h"
 
 namespace ARDOUR {
 
@@ -312,6 +314,7 @@ class PortAudioBackend : public AudioBackend {
 	private:
 		std::string _instance_name;
 		PortAudioIO *_pcmio;
+		WinMMEMidiIO *_midiio;
 
 		bool  _run; /* keep going or stop, ardour thread */
 		bool  _active; /* is running, process thread */
@@ -319,7 +322,12 @@ class PortAudioBackend : public AudioBackend {
 		bool  _freewheeling;
 		bool  _measure_latency;
 
-		uint64_t _last_process_start;
+		uint64_t m_cycle_count;
+		uint64_t m_total_deviation_us;
+		uint64_t m_max_deviation_us;
+
+		CycleTimer m_cycle_timer;
+		uint64_t m_last_cycle_start;
 
 		static std::vector<std::string> _midi_options;
 		static std::vector<AudioBackend::DeviceStatus> _input_audio_device_status;
@@ -365,6 +373,7 @@ class PortAudioBackend : public AudioBackend {
 		/* port engine */
 		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 		int register_system_audio_ports ();
+		int register_system_midi_ports ();
 		void unregister_ports (bool system_only = false);
 
 		std::vector<PamPort *> _ports;

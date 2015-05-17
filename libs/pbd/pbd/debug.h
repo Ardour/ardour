@@ -56,6 +56,11 @@ namespace PBD {
 		LIBPBD_API extern DebugBits Configuration;
 		LIBPBD_API extern DebugBits FileUtils;
 
+		LIBPBD_API extern DebugBits BackendMIDI;
+		LIBPBD_API extern DebugBits BackendAudio;
+		LIBPBD_API extern DebugBits BackendTiming;
+		LIBPBD_API extern DebugBits BackendThreads;
+
 		/* See notes in ../debug.cc on why these are defined here */
 
                 LIBPBD_API extern DebugBits WavesMIDI;

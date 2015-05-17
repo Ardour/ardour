@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2015 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2015 Tim Mayberry <mojofunk@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,10 @@
 #include <assert.h>
 #include <glibmm.h>
 #include "portaudio_io.h"
+
+#include "pbd/compose.h"
+
+#include "debug.h"
 
 #define INTERLEAVED_INPUT
 #define INTERLEAVED_OUTPUT
@@ -69,9 +74,9 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 	if (device_id == -1) {
 		device_id = get_default_input_device ();
 	}
-#ifndef NDEBUG
-	printf("PortAudio: Querying Samplerates for device %d\n", device_id);
-#endif
+
+	DEBUG_AUDIO (
+	    string_compose ("Querying Samplerates for device %1\n", device_id));
 
 	sampleRates.clear();
 	const PaDeviceInfo* nfo = Pa_GetDeviceInfo(device_id);
@@ -181,7 +186,7 @@ PortAudioIO::set_host_api (const std::string& host_api_name)
 	_host_api_index = get_host_api_index_from_name (host_api_name);
 
 	if (_host_api_index < 0) {
-		fprintf(stderr, "Error setting host API\n");
+		DEBUG_AUDIO ("Error setting host API\n");
 	}
 }
 
@@ -192,7 +197,10 @@ PortAudioIO::get_host_api_index_from_name (const std::string& name)
 
 	PaHostApiIndex count = Pa_GetHostApiCount();
 
-	if (count < 0) return -1;
+	if (count < 0) {
+		DEBUG_AUDIO ("Host API count < 0\n");
+		return -1;
+	}
 
 	for (int i = 0; i < count; ++i) {
 		const PaHostApiInfo* info = Pa_GetHostApiInfo (i);
@@ -200,6 +208,8 @@ PortAudioIO::get_host_api_index_from_name (const std::string& name)
 			if (name == info->name) return i;
 		}
 	}
+	DEBUG_AUDIO (string_compose ("Unable to get host API from name: %1\n", name));
+
 	return -1;
 }
 
@@ -262,26 +272,28 @@ PortAudioIO::add_devices ()
 	if (info == NULL) return;
 
 	int n_devices = Pa_GetDeviceCount();
-#ifndef NDEBUG
-	printf("PortAudio %d devices found:\n", n_devices);
-#endif
+
+	DEBUG_AUDIO (string_compose ("PortAudio found %1 devices\n", n_devices));
 
 	for (int i = 0 ; i < n_devices; ++i) {
 		const PaDeviceInfo* nfo = Pa_GetDeviceInfo(i);
 
 		if (!nfo) continue;
 		if (nfo->hostApi != _host_api_index) continue;
-#ifndef NDEBUG
-		printf(" (%d) '%s' '%s' in: %d (lat: %.1f .. %.1f) out: %d (lat: %.1f .. %.1f) sr:%.2f\n",
-				i, info->name, nfo->name,
-				nfo->maxInputChannels,
-				nfo->defaultLowInputLatency * 1e3,
-				nfo->defaultHighInputLatency * 1e3,
-				nfo->maxOutputChannels,
-				nfo->defaultLowOutputLatency * 1e3,
-				nfo->defaultHighOutputLatency * 1e3,
-				nfo->defaultSampleRate);
-#endif
+
+		DEBUG_AUDIO (string_compose (" (%1) '%2' '%3' in: %4 (lat: %5 .. %6) out: %7 "
+		                             "(lat: %8 .. %9) sr:%10\n",
+		                             i,
+		                             info->name,
+		                             nfo->name,
+		                             nfo->maxInputChannels,
+		                             nfo->defaultLowInputLatency * 1e3,
+		                             nfo->defaultHighInputLatency * 1e3,
+		                             nfo->maxOutputChannels,
+		                             nfo->defaultLowOutputLatency * 1e3,
+		                             nfo->defaultHighOutputLatency * 1e3,
+		                             nfo->defaultSampleRate));
+
 		if ( nfo->maxInputChannels == 0 && nfo->maxOutputChannels == 0) {
 			continue;
 		}
@@ -364,15 +376,13 @@ PortAudioIO::pcm_setup (
 {
 	_state = -2;
 
-	// TODO error reporting sans fprintf()
-
 	PaError err = paNoError;
 	const PaDeviceInfo *nfo_in;
 	const PaDeviceInfo *nfo_out;
 	const PaStreamInfo *nfo_s;
 		
 	if (!initialize_pa()) {
-		fprintf(stderr, "PortAudio Initialization Failed\n");
+		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
 		goto error;
 	}
 
@@ -389,15 +399,14 @@ PortAudioIO::pcm_setup (
 	_cur_input_latency = 0;
 	_cur_output_latency = 0;
 
-#ifndef NDEBUG
-	printf("PortAudio Device IDs: i:%d o:%d\n", device_input, device_output);
-#endif
+	DEBUG_AUDIO (string_compose (
+	    "PortAudio Device IDs: i:%1 o:%2\n", device_input, device_output));
 
 	nfo_in = Pa_GetDeviceInfo(device_input);
 	nfo_out = Pa_GetDeviceInfo(device_output);
 
 	if (!nfo_in && ! nfo_out) {
-		fprintf(stderr, "PortAudio Cannot Query Device Info\n");
+		DEBUG_AUDIO ("PortAudio Cannot Query Device Info\n");
 		goto error;
 	}
 
@@ -409,29 +418,29 @@ PortAudioIO::pcm_setup (
 	}
 
 	if(_capture_channels == 0 && _playback_channels == 0) {
-		fprintf(stderr, "PortAudio no Input and no output channels.\n");
+		DEBUG_AUDIO ("PortAudio no input or output channels.\n");
 		goto error;
 	}
-
 
 #ifdef __APPLE__
 	// pa_mac_core_blocking.c pa_stable_v19_20140130
 	// BUG: ringbuffer alloc requires power-of-two chn count.
 	if ((_capture_channels & (_capture_channels - 1)) != 0) {
-		printf("Adjusted capture channes to power of two (portaudio rb bug)\n");
+		DEBUG_AUDIO (
+		    "Adjusted capture channels to power of two (portaudio rb bug)\n");
 		_capture_channels = lower_power_of_two (_capture_channels);
 	}
 
 	if ((_playback_channels & (_playback_channels - 1)) != 0) {
-		printf("Adjusted capture channes to power of two (portaudio rb bug)\n");
+		DEBUG_AUDIO (
+		    "Adjusted capture channels to power of two (portaudio rb bug)\n");
 		_playback_channels = lower_power_of_two (_playback_channels);
 	}
 #endif
-	
-#ifndef NDEBUG
-	printf("PortAudio Channels: in:%d out:%d\n",
-			_capture_channels, _playback_channels);
-#endif
+
+	DEBUG_AUDIO (string_compose ("PortAudio Channels: in:%1 out:%2\n",
+	                             _capture_channels,
+	                             _playback_channels));
 
 	PaStreamParameters inputParam;
 	PaStreamParameters outputParam;
@@ -471,13 +480,13 @@ PortAudioIO::pcm_setup (
 			NULL, NULL);
 
 	if (err != paNoError) {
-		fprintf(stderr, "PortAudio failed to start stream.\n");
+		DEBUG_AUDIO ("PortAudio failed to start stream.\n");
 		goto error;
 	}
 
 	nfo_s = Pa_GetStreamInfo (_stream);
 	if (!nfo_s) {
-		fprintf(stderr, "PortAudio failed to query stream information.\n");
+		DEBUG_AUDIO ("PortAudio failed to query stream information.\n");
 		pcm_stop();
 		goto error;
 	}
@@ -486,18 +495,22 @@ PortAudioIO::pcm_setup (
 	_cur_input_latency = nfo_s->inputLatency * _cur_sample_rate;
 	_cur_output_latency = nfo_s->outputLatency * _cur_sample_rate;
 
-#ifndef NDEBUG
-	printf("PA Sample Rate  %.1f SPS\n", _cur_sample_rate);
-	printf("PA Input Latency  %.1fms  %d spl\n", 1e3 * nfo_s->inputLatency, _cur_input_latency);
-	printf("PA Output Latency %.1fms  %d spl\n", 1e3 * nfo_s->outputLatency, _cur_output_latency);
-#endif
+	DEBUG_AUDIO (string_compose ("PA Sample Rate %1 SPS\n", _cur_sample_rate));
+
+	DEBUG_AUDIO (string_compose ("PA Input Latency %1ms, %2 spl\n",
+	                             1e3 * nfo_s->inputLatency,
+	                             _cur_input_latency));
+
+	DEBUG_AUDIO (string_compose ("PA Output Latency %1ms, %2 spl\n",
+	                             1e3 * nfo_s->outputLatency,
+	                             _cur_output_latency));
 
 	_state = 0;
 
 	if (_capture_channels > 0) {
 		_input_buffer = (float*) malloc (samples_per_period * _capture_channels * sizeof(float));
 		if (!_input_buffer) {
-			fprintf(stderr, "PortAudio failed to allocate input buffer.\n");
+			DEBUG_AUDIO ("PortAudio failed to allocate input buffer.\n");
 			pcm_stop();
 			goto error;
 		}
@@ -506,7 +519,7 @@ PortAudioIO::pcm_setup (
 	if (_playback_channels > 0) {
 		_output_buffer = (float*) calloc (samples_per_period * _playback_channels, sizeof(float));
 		if (!_output_buffer) {
-			fprintf(stderr, "PortAudio failed to allocate output buffer.\n");
+			DEBUG_AUDIO ("PortAudio failed to allocate output buffer.\n");
 			pcm_stop();
 			goto error;
 		}

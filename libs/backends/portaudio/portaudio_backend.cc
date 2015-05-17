@@ -36,7 +36,16 @@
 #include "ardour/port_manager.h"
 #include "i18n.h"
 
+#include "win_utils.h"
+#include "debug.h"
+
 using namespace ARDOUR;
+
+namespace {
+
+const char * const winmme_driver_name = X_("WinMME");
+
+}
 
 static std::string s_instance_name;
 size_t PortAudioBackend::_max_buffer_size = 8192;
@@ -51,7 +60,9 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _active (false)
 	, _freewheel (false)
 	, _measure_latency (false)
-	, _last_process_start (0)
+	, m_cycle_count(0)
+	, m_total_deviation_us(0)
+	, m_max_deviation_us(0)
 	, _input_audio_device("")
 	, _output_audio_device("")
 	, _midi_driver_option(_("None"))
@@ -69,11 +80,13 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	pthread_mutex_init (&_port_callback_mutex, 0);
 
 	_pcmio = new PortAudioIO ();
+	_midiio = new WinMMEMidiIO ();
 }
 
 PortAudioBackend::~PortAudioBackend ()
 {
 	delete _pcmio; _pcmio = 0;
+	delete _midiio; _midiio = 0;
 	pthread_mutex_destroy (&_port_callback_mutex);
 }
 
@@ -343,7 +356,7 @@ std::vector<std::string>
 PortAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
-		//_midi_options.push_back (_("PortMidi"));
+		_midi_options.push_back (winmme_driver_name);
 		_midi_options.push_back (_("None"));
 	}
 	return _midi_options;
@@ -352,9 +365,10 @@ PortAudioBackend::enumerate_midi_options () const
 int
 PortAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != _("None") /* && opt != _("PortMidi")*/) {
+	if (opt != _("None") && opt != winmme_driver_name) {
 		return -1;
 	}
+	DEBUG_MIDI (string_compose ("Setting midi option to %1\n", opt));
 	_midi_driver_option = opt;
 	return 0;
 }
@@ -401,7 +415,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_dsp_load = 0;
 	_freewheeling = false;
 	_freewheel = false;
-	_last_process_start = 0;
 
 	_pcmio->pcm_setup (name_to_id(_input_audio_device), name_to_id(_output_audio_device), _samplerate, _samples_per_period);
 
@@ -441,10 +454,28 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag = false;
 
-	// TODO MIDI
+	if (_midi_driver_option == winmme_driver_name) {
+		_midiio->set_enabled(true);
+		//_midiio->set_port_changed_callback(midi_port_change, this);
+		_midiio->start(); // triggers port discovery, callback coremidi_rediscover()
+	}
+
+	m_cycle_timer.set_samplerate(_samplerate);
+	m_cycle_timer.set_samples_per_cycle(_samples_per_period);
+
+	DEBUG_MIDI ("Registering MIDI ports\n");
+
+	if (register_system_midi_ports () != 0) {
+		PBD::error << _ ("PortAudioBackend: failed to register system midi ports.")
+		           << endmsg;
+		_run = false;
+		return -1;
+	}
+
+	DEBUG_AUDIO ("Registering Audio ports\n");
 
 	if (register_system_audio_ports()) {
-		PBD::error << _("PortAudioBackend: failed to register system ports.") << endmsg;
+		PBD::error << _("PortAudioBackend: failed to register system audio ports.") << endmsg;
 		_run = false;
 		return -1;
 	}
@@ -557,12 +588,11 @@ PortAudioBackend::samples_since_cycle_start ()
 	if (!_active || !_run || _freewheeling || _freewheel) {
 		return 0;
 	}
-	if (_last_process_start == 0) {
+	if (!m_cycle_timer.valid()) {
 		return 0;
 	}
 
-	const int64_t elapsed_time_us = g_get_monotonic_time() - _last_process_start;
-	return std::max((pframes_t)0, (pframes_t)rint(1e-6 * elapsed_time_us * _samplerate));
+	return m_cycle_timer.samples_since_cycle_start (utils::get_microseconds());
 }
 
 int
@@ -846,6 +876,52 @@ PortAudioBackend::register_system_audio_ports()
 	return 0;
 }
 
+int
+PortAudioBackend::register_system_midi_ports()
+{
+	if (_midi_driver_option == _("None")) {
+		DEBUG_MIDI ("No MIDI backend selected, not system midi ports available\n");
+		return 0;
+	}
+
+	LatencyRange lr;
+	lr.min = lr.max = _samples_per_period;
+
+	const std::vector<WinMMEMidiInputDevice*> inputs = _midiio->get_inputs();
+
+	for (std::vector<WinMMEMidiInputDevice*>::const_iterator i = inputs.begin ();
+	     i != inputs.end ();
+	     ++i) {
+		std::string port_name = "system_midi:" + (*i)->name() + " capture";
+		PortHandle p =
+		    add_port (port_name,
+		              DataType::MIDI,
+		              static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+		if (!p) return -1;
+		set_latency_range (p, false, lr);
+		_system_midi_in.push_back (static_cast<PortMidiPort*>(p));
+		DEBUG_MIDI (string_compose ("Registered MIDI input port: %1\n", port_name));
+	}
+
+	const std::vector<WinMMEMidiOutputDevice*> outputs = _midiio->get_outputs();
+
+	for (std::vector<WinMMEMidiOutputDevice*>::const_iterator i = outputs.begin ();
+	     i != outputs.end ();
+	     ++i) {
+		std::string port_name = "system_midi:" + (*i)->name() + " playback";
+		PortHandle p =
+		    add_port (port_name,
+		              DataType::MIDI,
+		              static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
+		if (!p) return -1;
+		set_latency_range (p, false, lr);
+		static_cast<PortMidiPort*>(p)->set_n_periods(2);
+		_system_midi_out.push_back (static_cast<PortMidiPort*>(p));
+		DEBUG_MIDI (string_compose ("Registered MIDI output port: %1\n", port_name));
+	}
+	return 0;
+}
+
 void
 PortAudioBackend::unregister_ports (bool system_only)
 {
@@ -1015,11 +1091,10 @@ PortAudioBackend::midi_event_put (
 	if (!buffer || !port_buffer) return -1;
 	PortMidiBuffer& dst = * static_cast<PortMidiBuffer*>(port_buffer);
 	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
-#ifndef NDEBUG
 		// nevermind, ::get_buffer() sorts events
-		fprintf (stderr, "PortMidiBuffer: unordered event: %d > %d\n",
-				(pframes_t)dst.back ()->timestamp (), timestamp);
-#endif
+		DEBUG_MIDI (string_compose ("PortMidiBuffer: unordered event: %1 > %2\n",
+		                            (pframes_t)dst.back ()->timestamp (),
+		                            timestamp));
 	}
 	dst.push_back (boost::shared_ptr<PortMidiEvent>(new PortMidiEvent (timestamp, buffer, size)));
 	return 0;
@@ -1200,7 +1275,10 @@ PortAudioBackend::main_process_thread ()
 	_processed_samples = 0;
 
 	uint64_t clock1, clock2;
+	int64_t min_elapsed_us = 1000000;
+	int64_t max_elapsed_us = 0;
 	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
+	// const int64_t nomial_time = m_cycle_timer.get_length_us();
 
 	manager.registration_callback();
 	manager.graph_order_callback();
@@ -1224,9 +1302,7 @@ PortAudioBackend::main_process_thread ()
 				case 0: // OK
 					break;
 				case 1:
-#ifndef NDEBUG
-					printf("PortAudio: Xrun\n");
-#endif
+					DEBUG_AUDIO ("PortAudio: Xrun\n");
 					engine.Xrun ();
 					break;
 				default:
@@ -1235,7 +1311,7 @@ PortAudioBackend::main_process_thread ()
 			}
 
 			uint32_t i = 0;
-			clock1 = g_get_monotonic_time();
+			clock1 = utils::get_microseconds ();
 
 			/* get audio */
 			i = 0;
@@ -1248,6 +1324,26 @@ PortAudioBackend::main_process_thread ()
 			for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
 				PortMidiBuffer* mbuf = static_cast<PortMidiBuffer*>((*it)->get_buffer(0));
 				mbuf->clear();
+				uint64_t timestamp;
+				pframes_t sample_offset;
+				uint8_t data[256];
+				size_t size = sizeof(data);
+				while (_midiio->dequeue_input_event (i,
+				                                     m_cycle_timer.get_start (),
+				                                     m_cycle_timer.get_next_start (),
+				                                     timestamp,
+				                                     data,
+				                                     size)) {
+					sample_offset = m_cycle_timer.samples_since_cycle_start (timestamp);
+					midi_event_put (mbuf, sample_offset, data, size);
+					DEBUG_MIDI (string_compose ("Dequeuing incoming MIDI data for device: %1 "
+					                            "sample_offset: %2 timestamp: %3, size: %4\n",
+					                            _midiio->get_inputs ()[i]->name (),
+					                            sample_offset,
+					                            timestamp,
+					                            size));
+					size = sizeof(data);
+				}
 			}
 
 			/* clear output buffers */
@@ -1255,25 +1351,61 @@ PortAudioBackend::main_process_thread ()
 				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 			}
 
+			m_last_cycle_start = m_cycle_timer.get_start ();
+			m_cycle_timer.reset_start(utils::get_microseconds());
+			m_cycle_count++;
+
+			uint64_t cycle_diff_us = (m_cycle_timer.get_start () - m_last_cycle_start);
+			int64_t deviation_us = (cycle_diff_us - m_cycle_timer.get_length_us());
+			m_total_deviation_us += std::abs(deviation_us);
+			m_max_deviation_us =
+			    std::max (m_max_deviation_us, (uint64_t)std::abs (deviation_us));
+
+			if ((m_cycle_count % 1000) == 0) {
+				uint64_t mean_deviation_us = m_total_deviation_us / m_cycle_count;
+				DEBUG_TIMING (
+				    string_compose ("Mean avg cycle deviation: %1(ms), max %2(ms)\n",
+				                    mean_deviation_us * 1e-3,
+				                    m_max_deviation_us * 1e-3));
+			}
+
+			if (std::abs(deviation_us) > m_cycle_timer.get_length_us()) {
+				DEBUG_TIMING (string_compose (
+				    "time between process(ms): %1, Est(ms): %2, Dev(ms): %3\n",
+				    cycle_diff_us * 1e-3,
+				    m_cycle_timer.get_length_us () * 1e-3,
+				    deviation_us * 1e-3));
+			}
+
 			/* call engine process callback */
-			_last_process_start = g_get_monotonic_time();
 			if (engine.process_callback (_samples_per_period)) {
 				_pcmio->pcm_stop ();
 				_active = false;
 				return 0;
 			}
-#if 0
 			/* mixdown midi */
 			for (std::vector<PamPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-				static_cast<PortBackendMidiPort*>(*it)->next_period();
+				static_cast<PortMidiPort*>(*it)->next_period();
 			}
-
 			/* queue outgoing midi */
 			i = 0;
 			for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
-				// TODO
+				const PortMidiBuffer* src = static_cast<const PortMidiPort*>(*it)->const_buffer();
+
+				for (PortMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
+					uint64_t timestamp =
+					    m_cycle_timer.timestamp_from_sample_offset ((*mit)->timestamp ());
+					DEBUG_MIDI (
+					    string_compose ("Queuing outgoing MIDI data for device: "
+					                    "%1 sample_offset: %2 timestamp: %3, size: %4\n",
+					                    _midiio->get_outputs ()[i]->name (),
+					                    (*mit)->timestamp (),
+					                    timestamp,
+					                    (*mit)->size ()));
+					_midiio->enqueue_output_event (
+					    i, timestamp, (*mit)->data (), (*mit)->size ());
+				}
 			}
-#endif
 
 			/* write back audio */
 			i = 0;
@@ -1284,9 +1416,18 @@ PortAudioBackend::main_process_thread ()
 			_processed_samples += _samples_per_period;
 
 			/* calculate DSP load */
-			clock2 = g_get_monotonic_time();
+			clock2 = utils::get_microseconds ();
 			const int64_t elapsed_time = clock2 - clock1;
 			_dsp_load = elapsed_time / (float) nomial_time;
+
+			max_elapsed_us = std::max (elapsed_time, max_elapsed_us);
+			min_elapsed_us = std::min (elapsed_time, min_elapsed_us);
+			if ((m_cycle_count % 1000) == 0) {
+				DEBUG_TIMING (
+				    string_compose ("Elapsed process time(usecs) max: %1, min: %2\n",
+				                    max_elapsed_us,
+				                    min_elapsed_us));
+			}
 
 		} else {
 			// Freewheelin'
@@ -1296,11 +1437,10 @@ PortAudioBackend::main_process_thread ()
 				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 			}
 
-			clock1 = g_get_monotonic_time();
+			clock1 = utils::get_microseconds ();
 
 			// TODO clear midi or stop midi recv when entering fwheelin'
 
-			_last_process_start = 0;
 			if (engine.process_callback (_samples_per_period)) {
 				_pcmio->pcm_stop ();
 				_active = false;

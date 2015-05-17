@@ -63,6 +63,11 @@ DebugBits PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
    from dynamically loaded code, for use in command line parsing, is way above the pay grade
    of this debug tracing scheme.
 */
+DebugBits PBD::DEBUG::BackendMIDI = PBD::new_debug_bit ("BackendMIDI");
+DebugBits PBD::DEBUG::BackendAudio = PBD::new_debug_bit ("BackendAudio");
+DebugBits PBD::DEBUG::BackendTiming = PBD::new_debug_bit ("BackendTiming");
+DebugBits PBD::DEBUG::BackendThreads = PBD::new_debug_bit ("BackendThreads");
+
 
 DebugBits PBD::DEBUG::WavesMIDI = PBD::new_debug_bit ("WavesMIDI");
 DebugBits PBD::DEBUG::WavesAudio = PBD::new_debug_bit ("WavesAudio");

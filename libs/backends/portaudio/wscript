@@ -22,7 +22,11 @@ def build(bld):
     obj = bld(features = 'cxx cxxshlib')
     obj.source = [ 'portaudio_backend.cc',
                    'portaudio_io.cc',
-#                  'portmidi_io.cc'
+                   'winmmemidi_io.cc',
+                   'winmmemidi_input_device.cc',
+                   'winmmemidi_output_device.cc',
+                   'win_utils.cc',
+                   'midi_util.cc'
                  ]
     obj.includes = ['.']
     obj.name     = 'portaudio_backend'
