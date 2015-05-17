@@ -352,7 +352,7 @@ namespace ARDOUR {
 		Slide,
 		Splice,
 		Ripple,
-		Lock
+		Constrained
 	};
 
 	enum RegionSelectionAfterSplit {

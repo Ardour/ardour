@@ -122,6 +122,12 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	 */
 	static ModifierMask snap_modifier () { return ModifierMask (snap_mod); }
 
+	static void set_snap_delta_modifier (guint);
+
+	/** @return Modifier mask to temporarily toggle between relative and absolute grid setting;
+	 */
+	static ModifierMask snap_delta_modifier () { return ModifierMask (snap_delta_mod); }
+
 	static guint edit_button() { return edit_but; }
 	static void set_edit_button (guint);
 	static guint edit_modifier() { return edit_mod; }
@@ -186,6 +192,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static guint     insert_note_but;
 	static guint     insert_note_mod;
 	static guint     snap_mod;
+	static guint     snap_delta_mod;
 	static guint     button2_modifiers;
 	static Gtk::Window* current_window;
 	static std::string user_keybindings_path;

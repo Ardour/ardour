@@ -195,7 +195,7 @@ static const gchar *_edit_mode_strings[] = {
 	N_("Slide"),
 	N_("Splice"),
 	N_("Ripple"),
-	N_("Lock"),
+	N_("Constrained"),
 	0
 };
 
@@ -3171,7 +3171,7 @@ Editor::build_edit_mode_menu ()
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Slide], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Slide)));
 //	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Splice], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Splice)));
 	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Ripple], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode) Ripple)));
-	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Lock], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Lock)));
+	edit_mode_selector.AddMenuElem (MenuElem ( edit_mode_strings[(int)Constrained], sigc::bind (sigc::mem_fun(*this, &Editor::edit_mode_selection_done), (EditMode)  Constrained)));
 
 	set_size_request_to_display_given_text (edit_mode_selector, edit_mode_strings, COMBO_TRIANGLE_WIDTH, 2);
 }
@@ -3617,16 +3617,16 @@ Editor::cycle_edit_mode ()
 	switch (Config->get_edit_mode()) {
 	case Slide:
 		if (Profile->get_sae()) {
-			Config->set_edit_mode (Lock);
+			Config->set_edit_mode (Constrained);
 		} else {
 			Config->set_edit_mode (Ripple);
 		}
 		break;
 	case Splice:
 	case Ripple:
-		Config->set_edit_mode (Lock);
+		Config->set_edit_mode (Constrained);
 		break;
-	case Lock:
+	case Constrained:
 		Config->set_edit_mode (Slide);
 		break;
 	}

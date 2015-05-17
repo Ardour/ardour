@@ -339,7 +339,7 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 frameoffset_t
 Drag::snap_delta (GdkEvent const * event) const
 {
-	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::snap_delta_modifier())) {
 		return 0;
 	} else {
 		return _snap_delta;
@@ -401,17 +401,22 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				/* just changed */
 
 				if (fabs (current_pointer_y() - _grab_y) > fabs (current_pointer_x() - _grab_x)) {
-					if (event->motion.state & Gdk::BUTTON2_MASK) {
+					if ((event->motion.state & Gdk::BUTTON2_MASK) || Config->get_edit_mode() == Constrained) {
 						_x_constrained = true;
 						_y_constrained = false;
 					}
 					_initially_vertical = true;
 				} else {
-					if (event->motion.state & Gdk::BUTTON2_MASK) {
+					if ((event->motion.state & Gdk::BUTTON2_MASK) || Config->get_edit_mode() == Constrained) {
 						_x_constrained = false;
 						_y_constrained = true;
 					}
 					_initially_vertical = false;
+				}
+
+				if ((event->motion.state & Gdk::BUTTON2_MASK) && Config->get_edit_mode() == Constrained) {
+					_x_constrained = false;
+					_y_constrained = false;
 				}
 			}
 
@@ -630,9 +635,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	}
 
 	double dx = 0;
-
-	/* in locked edit mode, reverse the usual meaning of _x_constrained */
-	bool const x_move_allowed = Config->get_edit_mode() == Lock ? _x_constrained : !_x_constrained;
+	bool x_move_allowed = !_x_constrained;
 
 	if ((*pending_region_position != _last_frame_position) && x_move_allowed) {
 
@@ -1305,14 +1308,6 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 		}
 
 		return;
-	}
-
-	/* reverse this here so that we have the correct logic to finalize
-	   the drag.
-	*/
-
-	if (Config->get_edit_mode() == Lock) {
-		_x_constrained = !_x_constrained;
 	}
 
 	assert (!_views.empty ());
