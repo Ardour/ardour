@@ -345,8 +345,6 @@ protected:
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
-	bool _single_axis;
-
 private:
 	uint32_t _ndropzone;
 	uint32_t _pdropzone;
@@ -656,7 +654,6 @@ private:
 	Operation _operation;
 	
 	bool _preserve_fade_anchor;
-	bool _jump_position_when_done;
 };
 
 /** Meter marker drag */
