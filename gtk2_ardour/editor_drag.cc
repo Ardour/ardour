@@ -340,9 +340,9 @@ frameoffset_t
 Drag::snap_delta (GdkEvent const * event) const
 {
 	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
-		return _snap_delta;
-	} else {
 		return 0;
+	} else {
+		return _snap_delta;
 	}
 }
 
