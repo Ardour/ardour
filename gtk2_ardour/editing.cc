@@ -29,7 +29,6 @@ using namespace std;
 // This involves some cpp magic. --taybin
 
 #define SNAPTYPE(a) /*empty*/
-#define SNAPDELTA(a) /*empty*/
 #define SNAPMODE(a) /*empty*/
 #define REGIONLISTSORTTYPE(a) /*empty*/
 #define MOUSEMODE(a) /*empty*/
@@ -57,27 +56,6 @@ const char *snaptypestrs[] = {
 };
 #undef SNAPTYPE
 #define SNAPTYPE(a) /*empty*/
-
-
-// SNAPDELTA
-#undef SNAPDELTA
-#define SNAPDELTA(s) if (!strcmp(type, #s)) {return s;}
-SnapDelta
-str2snapdelta (const string & str) {
-	const char* type = str.c_str();
-	#include "editing_syms.h"
-	return SnapAbsolute;
-}
-
-#undef SNAPDELTA
-#define SNAPDELTA(s) N_(#s),
-const char *snapdeltastrs[] = {
-	#include "editing_syms.h"
-	0
-};
-#undef SNAPDELTA
-#define SNAPDELTA(a) /*empty*/
-
 
 // SNAPMODE
 #undef SNAPMODE

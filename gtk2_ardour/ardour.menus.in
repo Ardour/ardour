@@ -222,9 +222,6 @@
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
       <menu name='SnapMode' action='SnapMode'>
-        <menuitem action='snap-absolute'/>
-        <menuitem action='snap-relative'/>
-	<separator/>
         <menuitem action='snap-off'/>
         <menuitem action='snap-normal'/>
         <menuitem action='snap-magnetic'/>

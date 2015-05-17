@@ -43,7 +43,6 @@ setup_gtk_ardour_enums ()
 	LayerDisplay layer_display;
 	RegionListSortType region_list_sort_type;
 	SnapType snap_type;
-	SnapDelta snap_delta;
 	SnapMode snap_mode;
 	ZoomFocus zoom_focus;
 	ItemType item_type;
@@ -90,10 +89,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ByStartInFile);
 	REGISTER_ENUM (ByTimestamp);
 	REGISTER (region_list_sort_type);
-
-	REGISTER_ENUM (SnapAbsolute);
-	REGISTER_ENUM (SnapRelative);
-	REGISTER (snap_delta);
 
 	REGISTER_ENUM (SnapToCDFrame);
 	REGISTER_ENUM (SnapToTimecodeFrame);

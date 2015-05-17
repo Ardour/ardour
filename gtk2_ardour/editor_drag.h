@@ -217,9 +217,7 @@ protected:
 		return _last_pointer_frame;
 	}
 
-	ARDOUR::frameoffset_t snap_delta () const {
-		return _snap_delta;
-	}
+	ARDOUR::frameoffset_t snap_delta (GdkEvent const *) const;
 
 	double current_pointer_x () const;
 	double current_pointer_y () const;
@@ -531,7 +529,7 @@ class NoteDrag : public Drag
 
   private:
 
-	ARDOUR::frameoffset_t total_dx () const;
+	ARDOUR::frameoffset_t total_dx (GdkEvent const *) const;
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;

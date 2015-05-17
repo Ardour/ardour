@@ -512,13 +512,9 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "set-edit-lock", S_("EditMode|Lock"), sigc::bind (sigc::mem_fun (*this, &Editor::set_edit_mode), Lock));
 	ActionManager::register_action (editor_actions, "cycle-edit-mode", _("Cycle Edit Mode"), sigc::mem_fun (*this, &Editor::cycle_edit_mode));
 
-	ActionManager::register_action (editor_actions, X_("SnapDelta"), _("Snap Delta"));
-	RadioAction::Group snap_delta_group;
-	ActionManager::register_radio_action (editor_actions, snap_delta_group, X_("snap-absolute"), _("Absolute"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_delta_chosen), Editing::SnapAbsolute)));
-	ActionManager::register_radio_action (editor_actions, snap_delta_group, X_("snap-relative"), _("Relative"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_delta_chosen), Editing::SnapRelative)));
-
 	ActionManager::register_action (editor_actions, X_("SnapTo"), _("Snap to"));
 	ActionManager::register_action (editor_actions, X_("SnapMode"), _("Snap Mode"));
+
 	RadioAction::Group snap_mode_group;
 	ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-off"), _("No Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapOff)));
 	ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-normal"), _("Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapNormal)));
@@ -1468,36 +1464,6 @@ Editor::snap_type_chosen (SnapType type)
 }
 
 RefPtr<RadioAction>
-Editor::snap_delta_action (SnapDelta delta)
-{
-	const char* action = 0;
-	RefPtr<Action> act;
-
-	switch (delta) {
-	case Editing::SnapAbsolute:
-		action = X_("snap-absolute");
-		break;
-	case Editing::SnapRelative:
-		action = X_("snap-relative");
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "Editor: impossible snap delta type", (int) delta) << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	act = ActionManager::get_action (X_("Editor"), action);
-
-	if (act) {
-		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
-		return ract;
-
-	} else  {
-		error << string_compose (_("programming error: %1: %2"), "Editor::snap_delta_chosen could not find action to match mode.", action) << endmsg;
-		return RefPtr<RadioAction> ();
-	}
-}
-
-RefPtr<RadioAction>
 Editor::snap_mode_action (SnapMode mode)
 {
 	const char* action = 0;
@@ -1543,21 +1509,6 @@ Editor::cycle_snap_mode ()
 	case SnapMagnetic:
 		set_snap_mode (SnapOff);
 		break;
-	}
-}
-
-void
-Editor::snap_delta_chosen (SnapDelta rel)
-{
-	/* this is driven by a toggle on a radio group, and so is invoked twice,
-	   once for the item that became inactive and once for the one that became
-	   active.
-	*/
-
-	RefPtr<RadioAction> ract = snap_delta_action (rel);
-
-	if (ract && ract->get_active()) {
-		set_snap_delta (rel);
 	}
 }
 

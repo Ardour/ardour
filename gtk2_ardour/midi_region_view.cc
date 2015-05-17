@@ -2896,8 +2896,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 
 		/* Convert that to a frame within the source */
 		framepos_t current_fr = snap_pixel_to_sample (current_x) + _region->start ();
-		double one_frame =  region_frames_to_region_beats_double (current_fr) - region_frames_to_region_beats_double (current_fr - 1);
-		cerr << "commit one frame in beats : " << one_frame << endl;
+
 		/* and then to beats */
 		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr);
 		if (at_front && x_beats < canvas_note->note()->end_time()) {
@@ -2913,7 +2912,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 
 		if (!at_front) {
 			const Evoral::Beats len = std::max(Evoral::Beats(1 / 512.0),
-			                                   x_beats - canvas_note->note()->time() - (sign * delta_beats) - one_frame);
+			                                   x_beats - canvas_note->note()->time() - (sign * delta_beats));
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 		}
 

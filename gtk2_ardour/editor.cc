@@ -177,12 +177,6 @@ static const gchar *_snap_type_strings[] = {
 	0
 };
 
-static const gchar *_snap_delta_strings[] = {
-	N_("Absolute"),
-	N_("Relative"),
-	0
-};
-
 static const gchar *_snap_mode_strings[] = {
 	N_("No Grid"),
 	N_("Grid"),
@@ -335,7 +329,6 @@ Editor::Editor ()
 	tempo_lines = 0;
 
 	snap_type_strings =  I18N (_snap_type_strings);
-	snap_delta_strings =  I18N (_snap_delta_strings);
 	snap_mode_strings =  I18N (_snap_mode_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_mode_strings = I18N (_edit_mode_strings);
@@ -348,7 +341,6 @@ Editor::Editor ()
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
 	build_track_count_menu();
-	build_snap_delta_menu();
 	build_snap_mode_menu();
 	build_snap_type_menu();
 	build_edit_point_menu();
@@ -686,8 +678,6 @@ Editor::Editor ()
 	set_visible_track_count (_visible_track_count);
 	_snap_type = SnapToBeat;
 	set_snap_to (_snap_type);
-	_snap_delta = SnapAbsolute;
-	set_snap_delta (_snap_delta);
 	_snap_mode = SnapOff;
 	set_snap_mode (_snap_mode);
 	set_mouse_mode (MouseObject, true);
@@ -2046,12 +2036,6 @@ Editor::snap_type() const
 	return _snap_type;
 }
 
-SnapDelta
-Editor::snap_delta() const
-{
-	return _snap_delta;
-}
-
 SnapMode
 Editor::snap_mode() const
 {
@@ -2128,20 +2112,6 @@ Editor::set_snap_to (SnapType st)
 	redisplay_tempo (false);
 
 	SnapChanged (); /* EMIT SIGNAL */
-}
-
-void
-Editor::set_snap_delta (SnapDelta delta)
-{
-	string str = snap_delta_strings[(int)delta];
-
-	_snap_delta = delta;
-
-	if (str != snap_delta_selector.get_text ()) {
-		snap_delta_selector.set_text (str);
-	}
-
-	instant_save ();
 }
 
 void
@@ -2301,10 +2271,6 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("snap-to"))) {
 		snap_type_selection_done ((SnapType) string_2_enum (prop->value(), _snap_type));
-	}
-
-	if ((prop = node.property ("snap-delta"))) {
-		snap_delta_selection_done((SnapDelta) string_2_enum (prop->value(), _snap_delta));
 	}
 
 	if ((prop = node.property ("snap-mode"))) {
@@ -2532,7 +2498,6 @@ Editor::get_state ()
 	snprintf (buf, sizeof(buf), "%" PRId64, samples_per_pixel);
 	node->add_property ("zoom", buf);
 	node->add_property ("snap-to", enum_2_string (_snap_type));
-	node->add_property ("snap-delta", enum_2_string (_snap_delta));
 	node->add_property ("snap-mode", enum_2_string (_snap_mode));
 	node->add_property ("internal-snap-to", enum_2_string (internal_snap_type));
 	node->add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
@@ -2956,7 +2921,6 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (visible_tracks_selector);
 
 	mouse_mode_size_group->add_widget (snap_type_selector);
-	mouse_mode_size_group->add_widget (snap_delta_selector);
 	mouse_mode_size_group->add_widget (snap_mode_selector);
 
 	mouse_mode_size_group->add_widget (edit_point_selector);
@@ -3109,12 +3073,10 @@ Editor::setup_toolbar ()
 
 	snap_type_selector.set_name ("mouse mode button");
 
-	snap_delta_selector.set_name ("mouse mode button");
 	snap_mode_selector.set_name ("mouse mode button");
 
 	edit_point_selector.set_name ("mouse mode button");
 
-	snap_box.pack_start (snap_delta_selector, false, false);
 	snap_box.pack_start (snap_mode_selector, false, false);
 	snap_box.pack_start (snap_type_selector, false, false);
 	snap_box.pack_start (edit_point_selector, false, false);
@@ -3215,17 +3177,6 @@ Editor::build_edit_mode_menu ()
 }
 
 void
-Editor::build_snap_delta_menu ()
-{
-	using namespace Menu_Helpers;
-
-	snap_delta_selector.AddMenuElem (MenuElem ( snap_delta_strings[(int)SnapAbsolute], sigc::bind (sigc::mem_fun(*this, &Editor::snap_delta_selection_done), (SnapDelta) SnapAbsolute)));
-	snap_delta_selector.AddMenuElem (MenuElem ( snap_delta_strings[(int)SnapRelative], sigc::bind (sigc::mem_fun(*this, &Editor::snap_delta_selection_done), (SnapDelta) SnapRelative)));
-
-	set_size_request_to_display_given_text (snap_delta_selector, snap_delta_strings, COMBO_TRIANGLE_WIDTH, 2);
-}
-
-void
 Editor::build_snap_mode_menu ()
 {
 	using namespace Menu_Helpers;
@@ -3300,7 +3251,6 @@ Editor::setup_tooltips ()
 	ARDOUR_UI::instance()->set_tip (tav_shrink_button, _("Shrink Tracks"));
 	ARDOUR_UI::instance()->set_tip (visible_tracks_selector, _("Number of visible tracks"));
 	ARDOUR_UI::instance()->set_tip (snap_type_selector, _("Snap/Grid Units"));
-	ARDOUR_UI::instance()->set_tip (snap_delta_selector, _("Relative Snap Mode"));
 	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
 	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
 	ARDOUR_UI::instance()->set_tip (edit_mode_selector, _("Edit Mode"));
@@ -3694,16 +3644,6 @@ Editor::snap_type_selection_done (SnapType snaptype)
 	RefPtr<RadioAction> ract = snap_type_action (snaptype);
 	if (ract) {
 		ract->set_active ();
-	}
-}
-
-void
-Editor::snap_delta_selection_done (SnapDelta delta)
-{
-	RefPtr<RadioAction> ract = snap_delta_action (delta);
-
-	if (ract) {
-		ract->set_active (true);
 	}
 }
 
