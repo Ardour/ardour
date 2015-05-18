@@ -475,7 +475,7 @@ Keyboard::set_snap_modifier (guint mod)
 
 void
 Keyboard::set_snap_delta_modifier (guint mod)
-{cerr << "setting snap delta mod" << endl;
+{
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~snap_delta_mod);
 	snap_delta_mod = mod;
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | snap_delta_mod);
