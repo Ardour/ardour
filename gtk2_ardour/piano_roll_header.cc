@@ -467,7 +467,7 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 
 		int note = _view.y_to_note(ev->y);
 
-		if (editor().current_mouse_mode() == Editing::MouseRange) {
+		if ( false /*editor().current_mouse_mode() == Editing::MouseRange*/ ) {   //ToDo:  fix this.  this mode is buggy, and of questionable utility anyway
 			
 			/* select note range */
 
@@ -544,7 +544,7 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 {
 	int note = _view.y_to_note(ev->y);
 
-	if (editor().current_mouse_mode() == Editing::MouseRange) {
+	if (false /*editor().current_mouse_mode() == Editing::MouseRange*/ ) {  //Todo:  this mode is buggy, and of questionable utility anyway
 
 		if (Keyboard::no_modifiers_active (ev->state)) {
 			AddNoteSelection (note); // EMIT SIGNAL
