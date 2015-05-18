@@ -45,6 +45,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
+#include "ardour/meter.h"
 #include "ardour/panner_shell.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/pannable.h"
@@ -116,6 +117,9 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	_button.signal_led_clicked.connect (sigc::mem_fun (*this, &ProcessorEntry::led_clicked));
 	_button.set_text (name (_width));
 
+	if (boost::dynamic_pointer_cast<PeakMeter> (_processor)) {
+		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
+	}
 	if (_processor) {
 
 		_vbox.pack_start (_routing_icon);
