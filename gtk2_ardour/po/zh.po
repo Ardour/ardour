@@ -1905,19 +1905,19 @@ msgid "Forward (Fast)"
 msgstr "倒带(快速)"
 
 #: ardour_ui_ed.cc:306
-msgid "Goto Zero"
+msgid "Go to Zero"
 msgstr "转到零点"
 
 #: ardour_ui_ed.cc:309 ardour_ui_ed.cc:312
-msgid "Goto Start"
+msgid "Go to Start"
 msgstr "转到起始位置"
 
 #: ardour_ui_ed.cc:315
-msgid "Goto End"
+msgid "Go to End"
 msgstr "转到末尾位置"
 
 #: ardour_ui_ed.cc:318
-msgid "Goto Wall Clock"
+msgid "Go to Wall Clock"
 msgstr "转到确切的本地时间"
 
 #: ardour_ui_ed.cc:323 ardour_ui_ed.cc:326
@@ -3543,7 +3543,7 @@ msgid "Save View %1"
 msgstr "保存视图 %1"
 
 #: editor_actions.cc:232
-msgid "Goto View %1"
+msgid "Go to View %1"
 msgstr "跳转到视图 %1"
 
 #: editor_actions.cc:238

@@ -2133,19 +2133,19 @@ msgid "Forward (Fast)"
 msgstr "Перемотать вперёд (быстро)"
 
 #: ardour_ui_ed.cc:306
-msgid "Goto Zero"
+msgid "Go to Zero"
 msgstr "К нулевой отметке"
 
 #: ardour_ui_ed.cc:309 ardour_ui_ed.cc:312
-msgid "Goto Start"
+msgid "Go to Start"
 msgstr "К началу"
 
 #: ardour_ui_ed.cc:315
-msgid "Goto End"
+msgid "Go to End"
 msgstr "В конец"
 
 #: ardour_ui_ed.cc:318
-msgid "Goto Wall Clock"
+msgid "Go to Wall Clock"
 msgstr "К  текущему времени"
 
 #: ardour_ui_ed.cc:323 ardour_ui_ed.cc:326
@@ -3792,7 +3792,7 @@ msgid "Save View %1"
 msgstr "Сохранить вид %1"
 
 #: editor_actions.cc:232
-msgid "Goto View %1"
+msgid "Go to View %1"
 msgstr "Перейти к виду %1"
 
 #: editor_actions.cc:238

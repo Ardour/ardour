@@ -2086,19 +2086,19 @@ msgid "Forward (Fast)"
 msgstr "Přetočit vpřed (rychle)"
 
 #: ardour_ui_ed.cc:306
-msgid "Goto Zero"
+msgid "Go to Zero"
 msgstr "Skočit k bodu nula"
 
 #: ardour_ui_ed.cc:309 ardour_ui_ed.cc:312
-msgid "Goto Start"
+msgid "Go to Start"
 msgstr "Skočit na začátek"
 
 #: ardour_ui_ed.cc:315
-msgid "Goto End"
+msgid "Go to End"
 msgstr "Skočit na konec"
 
 #: ardour_ui_ed.cc:318
-msgid "Goto Wall Clock"
+msgid "Go to Wall Clock"
 msgstr "Skočit na přesný místní čas"
 
 #: ardour_ui_ed.cc:323 ardour_ui_ed.cc:326
@@ -3741,7 +3741,7 @@ msgid "Save View %1"
 msgstr "Uložit pohled %1"
 
 #: editor_actions.cc:232
-msgid "Goto View %1"
+msgid "Go to View %1"
 msgstr "Vyvolat pohled %1"
 
 #: editor_actions.cc:238
@@ -15256,7 +15256,7 @@ msgstr ""
 #~ msgid "Key Mouse"
 #~ msgstr "Myš s tlačítky"
 
-#~ msgid "goto"
+#~ msgid "go to"
 #~ msgstr "Jít na"
 
 #~ msgid "Center Active Marker"
@@ -16104,67 +16104,67 @@ msgstr ""
 #~ msgid "Save View 2"
 #~ msgstr "Uložit pohled 2"
 
-#~ msgid "Goto View 2"
+#~ msgid "Go to View 2"
 #~ msgstr "Vyvolat pohled 2"
 
 #~ msgid "Save View 3"
 #~ msgstr "Uložit pohled 3"
 
-#~ msgid "Goto View 3"
+#~ msgid "Go to View 3"
 #~ msgstr "Vyvolat pohled 3"
 
 #~ msgid "Save View 4"
 #~ msgstr "Uložit pohled 4"
 
-#~ msgid "Goto View 4"
+#~ msgid "Go to View 4"
 #~ msgstr "Vyvolat pohled 4"
 
 #~ msgid "Save View 5"
 #~ msgstr "Uložit pohled 5"
 
-#~ msgid "Goto View 5"
+#~ msgid "Go to View 5"
 #~ msgstr "Vyvolat pohled 5"
 
 #~ msgid "Save View 6"
 #~ msgstr "Uložit pohled 6"
 
-#~ msgid "Goto View 6"
+#~ msgid "Go to View 6"
 #~ msgstr "Vyvolat pohled 6"
 
 #~ msgid "Save View 7"
 #~ msgstr "Uložit pohled 7"
 
-#~ msgid "Goto View 7"
+#~ msgid "Go to View 7"
 #~ msgstr "Vyvolat pohled 7"
 
 #~ msgid "Save View 8"
 #~ msgstr "Uložit pohled 8"
 
-#~ msgid "Goto View 8"
+#~ msgid "Go to View 8"
 #~ msgstr "Vyvolat pohled 8"
 
 #~ msgid "Save View 9"
 #~ msgstr "Uložit pohled 9"
 
-#~ msgid "Goto View 9"
+#~ msgid "Go to View 9"
 #~ msgstr "Vyvolat pohled 9"
 
 #~ msgid "Save View 10"
 #~ msgstr "Uložit pohled 10"
 
-#~ msgid "Goto View 10"
+#~ msgid "Go to View 10"
 #~ msgstr "Vyvolat pohled 10"
 
 #~ msgid "Save View 11"
 #~ msgstr "Uložit pohled 11"
 
-#~ msgid "Goto View 11"
+#~ msgid "Go to View 11"
 #~ msgstr "Vyvolat pohled 11"
 
 #~ msgid "Save View 12"
 #~ msgstr "Uložit pohled 12"
 
-#~ msgid "Goto View 12"
+#~ msgid "Go to View 12"
 #~ msgstr "Vyvolat pohled 12"
 
 #~ msgid "Locate to Mark 2"

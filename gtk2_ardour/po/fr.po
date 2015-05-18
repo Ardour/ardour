@@ -2079,19 +2079,19 @@ msgid "Forward (Fast)"
 msgstr "Avancer (rapide)"
 
 #: ardour_ui_ed.cc:306
-msgid "Goto Zero"
+msgid "Go to Zero"
 msgstr "Aller à zéro"
 
 #: ardour_ui_ed.cc:309 ardour_ui_ed.cc:312
-msgid "Goto Start"
+msgid "Go to Start"
 msgstr "Aller au début"
 
 #: ardour_ui_ed.cc:315
-msgid "Goto End"
+msgid "Go to End"
 msgstr "Aller à la fin"
 
 #: ardour_ui_ed.cc:318
-msgid "Goto Wall Clock"
+msgid "Go to Wall Clock"
 msgstr "Aller à la toute fin"
 
 #: ardour_ui_ed.cc:323 ardour_ui_ed.cc:326
@@ -3755,7 +3755,7 @@ msgid "Save View %1"
 msgstr "Sauvegarder la vue %1"
 
 #: editor_actions.cc:232
-msgid "Goto View %1"
+msgid "Go to View %1"
 msgstr "Charger la vue %1"
 
 #: editor_actions.cc:238

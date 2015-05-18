@@ -1976,19 +1976,19 @@ msgid "Forward (Fast)"
 msgstr "Spol fort framover"
 
 #: ardour_ui_ed.cc:306
-msgid "Goto Zero"
+msgid "Go to Zero"
 msgstr "Gå til null"
 
 #: ardour_ui_ed.cc:309 ardour_ui_ed.cc:312
-msgid "Goto Start"
+msgid "Go to Start"
 msgstr "Gå til starten"
 
 #: ardour_ui_ed.cc:315
-msgid "Goto End"
+msgid "Go to End"
 msgstr "Gå til slutten"
 
 #: ardour_ui_ed.cc:318
-msgid "Goto Wall Clock"
+msgid "Go to Wall Clock"
 msgstr "Gå til Veggur"
 
 #: ardour_ui_ed.cc:323 ardour_ui_ed.cc:326
@@ -3623,7 +3623,7 @@ msgid "Save View %1"
 msgstr "Lagra vising %1"
 
 #: editor_actions.cc:232
-msgid "Goto View %1"
+msgid "Go to View %1"
 msgstr "Gå til vising %1"
 
 #: editor_actions.cc:238

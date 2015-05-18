@@ -233,7 +233,7 @@ Editor::register_actions ()
 
 	for (int i = 1; i <= 12; ++i) {
 		string const a = string_compose (X_("goto-visual-state-%1"), i);
-		string const n = string_compose (_("Goto View %1"), i);
+		string const n = string_compose (_("Go to View %1"), i);
 		reg_sens (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::cancel_visual_state_op), i - 1));
 	}
 
