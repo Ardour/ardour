@@ -425,8 +425,8 @@ ARDOUR::string_to_edit_mode (string str)
 		return Slide;
 	} else if (str == _("Ripple")) {
 		return Ripple;
-	} else if (str == _("Constrained")) {
-		return Constrained;
+	} else if (str == _("Lock")) {
+		return Lock;
 	}
 	fatal << string_compose (_("programming error: unknown edit mode string \"%1\""), str) << endmsg;
 	abort(); /*NOTREACHED*/
@@ -440,8 +440,8 @@ ARDOUR::edit_mode_to_string (EditMode mode)
 	case Slide:
 		return _("Slide");
 
-	case Constrained:
-		return _("Constrained");
+	case Lock:
+		return _("Lock");
 
 	case Ripple:
 		return _("Ripple");

@@ -6960,7 +6960,7 @@ Editor::insert_time (
 {
 	bool commit = false;
 
-	if (Config->get_edit_mode() == Constrained) {
+	if (Config->get_edit_mode() == Lock) {
 		return;
 	}
 
@@ -7133,8 +7133,8 @@ Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 {
 	bool commit = false;
 	
-	if (Config->get_edit_mode() == Constrained) {
-		error << (_("Cannot insert or delete time when in Constrained edit.")) << endmsg;
+	if (Config->get_edit_mode() == Lock) {
+		error << (_("Cannot insert or delete time when in Lock edit.")) << endmsg;
 		return;
 	}
 

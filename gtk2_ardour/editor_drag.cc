@@ -401,21 +401,25 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				/* just changed */
 
 				if (fabs (current_pointer_y() - _grab_y) > fabs (current_pointer_x() - _grab_x)) {
-					if ((event->motion.state & Gdk::BUTTON2_MASK) || Config->get_edit_mode() == Constrained) {
+					if ((event->motion.state & Gdk::BUTTON2_MASK) && Config->get_edit_mode() != Lock) {
 						_x_constrained = true;
 						_y_constrained = false;
 					}
 					_initially_vertical = true;
 				} else {
-					if ((event->motion.state & Gdk::BUTTON2_MASK) || Config->get_edit_mode() == Constrained) {
+					if ((event->motion.state & Gdk::BUTTON2_MASK) && Config->get_edit_mode() != Lock) {
 						_x_constrained = false;
 						_y_constrained = true;
 					}
 					_initially_vertical = false;
 				}
 
-				if ((event->motion.state & Gdk::BUTTON2_MASK) && Config->get_edit_mode() == Constrained) {
-					_x_constrained = false;
+				if (Config->get_edit_mode() == Lock) {
+					if (event->button.state & Gdk::BUTTON2_MASK) {
+						_x_constrained = false;
+					} else {
+						_x_constrained = true;
+					}
 					_y_constrained = false;
 				}
 			}
@@ -635,7 +639,8 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	}
 
 	double dx = 0;
-	bool x_move_allowed = !_x_constrained;
+
+	bool const x_move_allowed = !_x_constrained;
 
 	if ((*pending_region_position != _last_frame_position) && x_move_allowed) {
 
@@ -2389,7 +2394,7 @@ NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		if (mrv) {
 			double sd = 0.0;
-			if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::snap_delta_modifier())) {
 				sd = _snap_delta;
 			}
 			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd);
@@ -2406,7 +2411,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 		assert (nb);
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		double sd = 0.0;
-		if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
+		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::snap_delta_modifier())) {
 			sd = _snap_delta;
 		}
 		if (mrv) {

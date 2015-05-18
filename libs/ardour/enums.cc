@@ -242,7 +242,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (Slide);
 	REGISTER_ENUM (Splice);
 	REGISTER_ENUM (Ripple); // XXX do the old enum values have to stay in order?
-	REGISTER_ENUM (Constrained);
+	REGISTER_ENUM (Lock);
 	REGISTER (_EditMode);
 	/*
 	 * Splice mode is undefined, undocumented, and basically fubar'ed
