@@ -699,7 +699,7 @@ IO::connecting_became_legal ()
 
 	connection_legal_c.disconnect ();
 
-    // it's not required for TracksLive, as long as TracksLive's session does all the cennections when it's being loaded
+    // it's not required for TracksLive, as long as TracksLive's session does all the connections when it's being loaded
     if (!Profile->get_trx() ) {
         ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
     }
