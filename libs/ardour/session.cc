@@ -139,7 +139,7 @@ const framecnt_t Session::bounce_chunk_size = 65536;
 static void clean_up_session_event (SessionEvent* ev) { delete ev; }
 const SessionEvent::RTeventCallback Session::rt_cleanup (clean_up_session_event);
 
-// seconds should be added afte the region exceeds end marker
+// seconds should be added after the region exceeds end marker
 #ifdef USE_TRACKS_CODE_FEATURES
 const uint32_t Session::session_end_shift = 5;
 #else
