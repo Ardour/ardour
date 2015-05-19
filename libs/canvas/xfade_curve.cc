@@ -170,23 +170,29 @@ XFadeCurve::get_path(Rect const & area, Cairo::RefPtr<Cairo::Context> context, C
 
 		/* find left and right-most sample */
 		Points::size_type left = 0;
-		Points::size_type right = c.n_samples;
+		Points::size_type right = c.n_samples - 1;
 
+		// we should really really do a binary search rather than iterate
 		for (Points::size_type idx = 0; idx < c.n_samples - 1; ++idx) {
 			left = idx;
 			window_space = item_to_window (Duple (c.samples[idx].x, 0.0), false);
 			if (window_space.x >= area.x0) break;
 		}
-		for (Points::size_type idx = c.n_samples; idx > left + 1; --idx) {
+		for (Points::size_type idx = c.n_samples; idx >= left;) {
+			--idx;
 			window_space = item_to_window (Duple (c.samples[idx].x, 0.0), false);
 			if (window_space.x <= area.x1) break;
 			right = idx;
 		}
 
+		assert(left < right);
+		assert(left < c.n_samples);
+		assert(right < c.n_samples);
+
 		/* draw line between samples */
 		window_space = item_to_window (Duple (c.samples[left].x, c.samples[left].y), false);
 		context->move_to (window_space.x, window_space.y);
-		for (uint32_t idx = left + 1; idx < right; ++idx) {
+		for (uint32_t idx = left + 1; idx <= right; ++idx) {
 			window_space = item_to_window (Duple (c.samples[idx].x, c.samples[idx].y), false);
 			context->line_to (window_space.x, window_space.y);
 		}
