@@ -296,11 +296,10 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 	Locations* locations (_session.locations ());
 	Location* loc;
 	bool new_mark = false;
-	framecnt_t slop = (framecnt_t) floor ((Config->get_inter_scene_gap_msecs() / 1000.0) * _session.frame_rate());
 
 	/* check for marker at current location */
 
-	loc = locations->mark_at (time, slop);
+	loc = locations->mark_at (time, Config->get_inter_scene_gap_frames());
 
 	if (!loc) {
 		/* create a new marker at the desired position */
