@@ -60,6 +60,8 @@ guint Keyboard::insert_note_but = 1;
 guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
 guint Keyboard::snap_mod = GDK_MOD3_MASK;
 guint Keyboard::snap_delta_mod = 0;
+guint Keyboard::trim_contents_mod = 0;
+guint Keyboard::trim_overlap_mod = 0;
 
 #ifdef GTKOSX
 
@@ -182,6 +184,10 @@ Keyboard::get_state (void)
 	node->add_property ("snap-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", snap_delta_mod);
 	node->add_property ("snap-delta-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", trim_contents_mod);
+	node->add_property ("trim-contents-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", trim_overlap_mod);
+	node->add_property ("trim-overlap-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", insert_note_but);
 	node->add_property ("insert-note-button", buf);
 	snprintf (buf, sizeof (buf), "%d", insert_note_mod);
@@ -217,6 +223,14 @@ Keyboard::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("snap-delta-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &snap_delta_mod);
+	}
+
+	if ((prop = node.property ("trim-contents-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &trim_contents_mod);
+	}
+
+	if ((prop = node.property ("trim-overlap-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &trim_overlap_mod);
 	}
 
 	if ((prop = node.property ("insert-note-button")) != 0) {
@@ -479,6 +493,22 @@ Keyboard::set_snap_delta_modifier (guint mod)
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~snap_delta_mod);
 	snap_delta_mod = mod;
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | snap_delta_mod);
+}
+
+void
+Keyboard::set_trim_contents_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_contents_mod);
+	trim_contents_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_contents_mod);
+}
+
+void
+Keyboard::set_trim_overlap_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_overlap_mod);
+	trim_overlap_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_overlap_mod);
 }
 
 bool

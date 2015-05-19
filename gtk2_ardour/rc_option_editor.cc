@@ -319,24 +319,56 @@ public:
 			}
 		}
 
-		Table* t = manage (new Table (4, 5));
+		Table* t = manage (new Table (5, 11));
 		t->set_spacings (4);
 
-		Label* l = manage (left_aligned_label (_("Edit using:")));
+		int row = 0;
+		int col = 0;
+
+		Label* l = manage (left_aligned_label (_("Select Keyboard layout:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 0, 1, FILL | EXPAND, FILL);
-		t->attach (_edit_modifier_combo, 1, 2, 0, 1, FILL | EXPAND, FILL);
+		vector<string> strs;
+
+		for (map<string,string>::iterator bf = Keyboard::binding_files.begin(); bf != Keyboard::binding_files.end(); ++bf) {
+			strs.push_back (bf->first);
+		}
+
+		set_popdown_strings (_keyboard_layout_selector, strs);
+		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
+		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_keyboard_layout_selector, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 0;
+
+		l = manage (left_aligned_label (_("When Clicking:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		l = manage (left_aligned_label (_("Edit using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_edit_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 3, 4, 0, 1, FILL | EXPAND, FILL);
-		t->attach (_edit_button_spin, 4, 5, 0, 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_edit_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
 
 		_edit_button_spin.set_name ("OptionsEntry");
 		_edit_button_adjustment.set_value (Keyboard::edit_button());
 		_edit_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_button_changed));
+
+		++row;
+		col = 1;
 
 		set_popdown_strings (_delete_modifier_combo, dumb);
 		_delete_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_modifier_chosen));
@@ -351,19 +383,21 @@ public:
 		l = manage (left_aligned_label (_("Delete using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 1, 2, FILL | EXPAND, FILL);
-		t->attach (_delete_modifier_combo, 1, 2, 1, 2, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_delete_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 3, 4, 1, 2, FILL | EXPAND, FILL);
-		t->attach (_delete_button_spin, 4, 5, 1, 2, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_delete_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
 
 		_delete_button_spin.set_name ("OptionsEntry");
 		_delete_button_adjustment.set_value (Keyboard::delete_button());
 		_delete_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_button_changed));
 
+		++row;
+		col = 1;
 
 		set_popdown_strings (_insert_note_modifier_combo, dumb);
 		_insert_note_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_modifier_chosen));
@@ -378,18 +412,79 @@ public:
 		l = manage (left_aligned_label (_("Insert note using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 2, 3, FILL | EXPAND, FILL);
-		t->attach (_insert_note_modifier_combo, 1, 2, 2, 3, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_insert_note_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 3, 4, 2, 3, FILL | EXPAND, FILL);
-		t->attach (_insert_note_button_spin, 4, 5, 2, 3, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_insert_note_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
 
 		_insert_note_button_spin.set_name ("OptionsEntry");
 		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
 		_insert_note_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_button_changed));
+
+		++row;
+
+		l = manage (left_aligned_label (_("When Beginning a Drag:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* copy modifier */
+		set_popdown_strings (_copy_modifier_combo, dumb);
+		_copy_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::copy_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
+				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Copy items using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_copy_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+
+		l = manage (left_aligned_label (_("When Beginning a Trim:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* trim_contents */
+		set_popdown_strings (_trim_contents_combo, dumb);
+		_trim_contents_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_contents_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::trim_contents_modifier ()) {
+				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Trim contents using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_trim_contents_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+
+		l = manage (left_aligned_label (_("While Dragging:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
 
 		/* ignore snap */
 		set_popdown_strings (_snap_modifier_combo, dumb);
@@ -405,8 +500,11 @@ public:
 		l = manage (left_aligned_label (_("Ignore snap using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 3, 4, FILL | EXPAND, FILL);
-		t->attach (_snap_modifier_combo, 1, 2, 3, 4, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_snap_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
 
 		/* snap delta */
 		set_popdown_strings (_snap_delta_combo, dumb);
@@ -422,24 +520,37 @@ public:
 		l = manage (left_aligned_label (_("Snap to absolute using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 4, 5, FILL | EXPAND, FILL);
-		t->attach (_snap_delta_combo, 1, 2, 4, 5, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_snap_delta_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
-		vector<string> strs;
+		++row;
 
-		for (map<string,string>::iterator bf = Keyboard::binding_files.begin(); bf != Keyboard::binding_files.end(); ++bf) {
-			strs.push_back (bf->first);
+		l = manage (left_aligned_label (_("While Trimming:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* trim_overlap */
+		set_popdown_strings (_trim_overlap_combo, dumb);
+		_trim_overlap_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_overlap_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::trim_overlap_modifier ()) {
+				_trim_overlap_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
 		}
 
-		set_popdown_strings (_keyboard_layout_selector, strs);
-		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
-		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
-
-		l = manage (left_aligned_label (_("Keyboard layout:")));
+		l = manage (left_aligned_label (_("Resize overlaped regions using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 5, 6, FILL | EXPAND, FILL);
-		t->attach (_keyboard_layout_selector, 1, 2, 5, 6, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_trim_overlap_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		++row;
 
 		_box->pack_start (*t, false, false);
 	}
@@ -495,6 +606,18 @@ private:
 		}
 	}
 
+	void copy_modifier_chosen ()
+	{
+		string const txt = _copy_modifier_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_copy_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
 	void insert_note_modifier_chosen ()
 	{
 		string const txt = _insert_note_modifier_combo.get_active_text();
@@ -531,6 +654,30 @@ private:
 		}
 	}
 
+	void trim_contents_modifier_chosen ()
+	{
+		string const txt = _trim_contents_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_trim_contents_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void trim_overlap_modifier_chosen ()
+	{
+		string const txt = _trim_overlap_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_trim_overlap_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
 	void delete_button_changed ()
 	{
 		Keyboard::set_delete_button (_delete_button_spin.get_value_as_int());
@@ -549,9 +696,12 @@ private:
 	ComboBoxText _keyboard_layout_selector;
 	ComboBoxText _edit_modifier_combo;
 	ComboBoxText _delete_modifier_combo;
+	ComboBoxText _copy_modifier_combo;
 	ComboBoxText _insert_note_modifier_combo;
 	ComboBoxText _snap_modifier_combo;
 	ComboBoxText _snap_delta_combo;
+	ComboBoxText _trim_contents_combo;
+	ComboBoxText _trim_overlap_combo;
 	Adjustment _delete_button_adjustment;
 	SpinButton _delete_button_spin;
 	Adjustment _edit_button_adjustment;

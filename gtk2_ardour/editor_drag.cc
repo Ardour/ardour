@@ -2614,7 +2614,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	framepos_t const pf = adjusted_current_frame (event);
 	setup_snap_delta (region_start);
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_contents_modifier ())) {
 		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
 		Drag::start_grab (event, _editor->cursors()->trimmer);
@@ -2720,7 +2720,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	bool non_overlap_trim = false;
 
-	if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier))) {
+	if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_overlap_modifier ())) {
 		non_overlap_trim = true;
 	}
 
