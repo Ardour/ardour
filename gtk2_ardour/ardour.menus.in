@@ -209,6 +209,7 @@
         <menuitem action='align-regions-sync-relative'/>
       </menu>
       <menu action="FadeMenu">
+        <menuitem action='editor-fade-range'/>
         <menuitem action='set-fade-in-length'/>
         <menuitem action='toggle-region-fade-in'/>
         <menuitem action='set-fade-out-length'/>
