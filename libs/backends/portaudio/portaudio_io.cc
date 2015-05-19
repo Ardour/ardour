@@ -63,7 +63,7 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 {
 	static const float ardourRates[] = { 8000.0, 22050.0, 24000.0, 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0};
 
-	assert(_initialized);
+	if (!initialize_pa()) return -1;
 
 	// TODO use  separate int device_input, int device_output ?!
 	if (device_id == -1) {
