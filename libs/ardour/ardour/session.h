@@ -567,6 +567,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	AudioEngine & engine() { return _engine; }
 	AudioEngine const & engine () const { return _engine; }
 
+	static std::string default_track_name_pattern (DataType);
+	
 	/* Time */
 
 	framepos_t transport_frame () const {return _transport_frame; }
