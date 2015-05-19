@@ -547,7 +547,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 		}
 	}
 	
-	if (jump_to < 0 && (autoreturn & Loop)) {
+	if (jump_to < 0 && (autoreturn & Loop) && get_play_loop()) {
 		/* don't try to handle loop play when synced to JACK */
 		
 		if (!synced_to_engine()) {
