@@ -2232,6 +2232,25 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 	}
 }
 
+string
+Session::default_track_name_pattern (DataType t)
+{
+	switch (t) {
+	case DataType::AUDIO:
+		if (Profile->get_trx()) {
+			return _("Track ");
+		} else {
+			return _("Audio ");
+		}
+		break;
+
+	case DataType::MIDI:
+		return _("MIDI ");
+	}
+
+	return "";
+}
+
 /** Caller must not hold process lock
  *  @param name_template string to use for the start of the name, or "" to use "MIDI".
  *  @param instrument plugin info for the instrument to insert pre-fader, if any
@@ -2246,7 +2265,8 @@ Session::new_midi_track (const ChanCount& input, const ChanCount& output, boost:
 	RouteList new_routes;
 	list<boost::shared_ptr<MidiTrack> > ret;
 
-	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _("MIDI");
+	const string name_pattern = default_track_name_pattern (DataType::MIDI);
+	bool const use_number = (how_many != 1) || name_template.empty () || (name_template == name_pattern);
 
 	while (how_many) {
 		if (!find_route_name (name_template.empty() ? _("MIDI") : name_template, ++track_id, track_name, use_number)) {
@@ -2783,15 +2803,8 @@ Session::new_audio_track (int input_channels, int output_channels, TrackMode mod
 	RouteList new_routes;
 	list<boost::shared_ptr<AudioTrack> > ret;
 
-	string name_pattern;
-
-	if (Profile->get_trx() ) {
-		name_pattern = "Track ";
-	} else {
-		name_pattern = "Audio ";
-	}
-    
-	bool const use_number = (how_many != 1) || name_template.empty () || name_template == _(name_pattern.c_str() );
+	const string name_pattern = default_track_name_pattern (DataType::AUDIO);
+	bool const use_number = (how_many != 1) || name_template.empty () || (name_template == name_pattern);
 	
 	while (how_many) {
 
