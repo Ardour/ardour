@@ -2987,7 +2987,7 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::Beats front_delta, Evoral::B
 	   if negative - move the end of the note earlier in time (shortening it)
 	*/
 
-	if (!!front_delta) {
+	if (front_delta) {
 		if (front_delta < 0) {
 
 			if (event->note()->time() < -front_delta) {
