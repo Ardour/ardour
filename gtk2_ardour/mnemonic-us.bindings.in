@@ -182,7 +182,7 @@ This mode provides many different operations on both regions and control points,
 @aep|Region/align-regions-start-relative|<@PRIMARY@><@TERTIARY@>a|align start(s) relative
 @rop|Region/split-region|s|split
 @sess|Common/Save|<@PRIMARY@>s|save session
-@sess|Main/Snapshot|<@PRIMARY@><@TERTIARY@>s|snapshot session
+@sess|Main/SnapshotStay|<@PRIMARY@><@TERTIARY@>s|snapshot session
 @trans|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
 @mmode|MouseMode/set-mouse-mode-draw|d|note-draw mode
 @rop|Region/duplicate-region|<@SECONDARY@>d|duplicate region (once)
