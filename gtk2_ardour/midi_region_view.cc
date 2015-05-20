@@ -2908,7 +2908,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			Evoral::Beats len = canvas_note->note()->time() - x_beats + (sign * snap_delta_beats);
 			len += canvas_note->note()->length();
 
-			if (!!len) {
+			if (len) {
 				note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 			}
 		}
@@ -3019,7 +3019,7 @@ MidiRegionView::trim_note (NoteBase* event, Evoral::Beats front_delta, Evoral::B
 
 	}
 
-	if (!!end_delta) {
+	if (end_delta) {
 		bool can_change = true;
 		if (end_delta < 0) {
 			if (event->note()->length() < -end_delta) {
