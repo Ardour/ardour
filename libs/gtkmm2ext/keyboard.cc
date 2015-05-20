@@ -58,8 +58,6 @@ guint Keyboard::delete_but = 3;
 guint Keyboard::delete_mod = GDK_SHIFT_MASK;
 guint Keyboard::insert_note_but = 1;
 guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
-guint Keyboard::snap_mod = GDK_MOD3_MASK;
-guint Keyboard::snap_delta_mod = 0;
 
 #ifdef GTKOSX
 
@@ -78,6 +76,9 @@ const char* Keyboard::level4_modifier_name() { return _("Option"); }
 const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
+guint Keyboard::snap_mod = GDK_MOD3_MASK|Keyboard::Level4Modifier; // XXX this is probably completely wrong
+guint Keyboard::snap_delta_mod = GDK_MOD3_MASK;
+
 #else
 
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
@@ -95,6 +96,9 @@ const char* Keyboard::level4_modifier_name() { return _("Meta"); }
 const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
+guint Keyboard::snap_mod = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
+guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier;
+
 #endif
 
 guint Keyboard::GainFineScaleModifier = Keyboard::PrimaryModifier;
@@ -103,14 +107,6 @@ guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
 guint Keyboard::ScrollZoomVerticalModifier = Keyboard::SecondaryModifier;
 guint Keyboard::ScrollZoomHorizontalModifier = Keyboard::PrimaryModifier;
 guint Keyboard::ScrollHorizontalModifier = Keyboard::TertiaryModifier;
-
-guint Keyboard::trim_contents_mod = Keyboard::PrimaryModifier;
-guint Keyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
-guint Keyboard::trim_anchored_mod = Keyboard::TertiaryModifier;
-guint Keyboard::trim_jump_mod = Keyboard::TertiaryModifier;
-guint Keyboard::fine_adjust_mod = Keyboard::SecondaryModifier;
-guint Keyboard::push_points_mod = Keyboard::PrimaryModifier;
-guint Keyboard::note_size_relative_mod = Keyboard::PrimaryModifier;
 
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
@@ -177,6 +173,8 @@ Keyboard::get_state (void)
 	XMLNode* node = new XMLNode ("Keyboard");
 	char buf[32];
 
+	snprintf (buf, sizeof (buf), "%d", CopyModifier);
+	node->add_property ("copy-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", edit_but);
 	node->add_property ("edit-button", buf);
 	snprintf (buf, sizeof (buf), "%d", edit_mod);
@@ -189,20 +187,6 @@ Keyboard::get_state (void)
 	node->add_property ("snap-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", snap_delta_mod);
 	node->add_property ("snap-delta-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", trim_contents_mod);
-	node->add_property ("trim-contents-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", trim_overlap_mod);
-	node->add_property ("trim-overlap-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", trim_anchored_mod);
-	node->add_property ("trim-anchored-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", trim_jump_mod);
-	node->add_property ("trim-jump-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", fine_adjust_mod);
-	node->add_property ("fine-adjust-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", push_points_mod);
-	node->add_property ("push-points-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", note_size_relative_mod);
-	node->add_property ("note-size-relative-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", insert_note_but);
 	node->add_property ("insert-note-button", buf);
 	snprintf (buf, sizeof (buf), "%d", insert_note_mod);
@@ -215,6 +199,10 @@ int
 Keyboard::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
+
+	if ((prop = node.property ("copy-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &CopyModifier);
+	}
 
 	if ((prop = node.property ("edit-button")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &edit_but);
@@ -238,34 +226,6 @@ Keyboard::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("snap-delta-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &snap_delta_mod);
-	}
-
-	if ((prop = node.property ("trim-contents-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &trim_contents_mod);
-	}
-
-	if ((prop = node.property ("trim-overlap-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &trim_overlap_mod);
-	}
-
-	if ((prop = node.property ("trim-anchored-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &trim_anchored_mod);
-	}
-
-	if ((prop = node.property ("trim-jump-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &trim_jump_mod);
-	}
-
-	if ((prop = node.property ("fine-adjust-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &fine_adjust_mod);
-	}
-
-	if ((prop = node.property ("push-points-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &push_points_mod);
-	}
-
-	if ((prop = node.property ("note-size-relative-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &note_size_relative_mod);
 	}
 
 	if ((prop = node.property ("insert-note-button")) != 0) {
@@ -528,62 +488,6 @@ Keyboard::set_snap_delta_modifier (guint mod)
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~snap_delta_mod);
 	snap_delta_mod = mod;
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | snap_delta_mod);
-}
-
-void
-Keyboard::set_trim_contents_modifier (guint mod)
-{
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_contents_mod);
-	trim_contents_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_contents_mod);
-}
-
-void
-Keyboard::set_trim_overlap_modifier (guint mod)
-{
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_overlap_mod);
-	trim_overlap_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_overlap_mod);
-}
-
-void
-Keyboard::set_trim_anchored_modifier (guint mod)
-{
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_anchored_mod);
-	trim_anchored_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_anchored_mod);
-}
-
-void
-Keyboard::set_trim_jump_modifier (guint mod)
-{
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_jump_mod);
-	trim_jump_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_jump_mod);
-}
-
-void
-Keyboard::set_fine_adjust_modifier (guint mod)
-{
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~fine_adjust_mod);
-	fine_adjust_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | fine_adjust_mod);
-}
-
-void
-Keyboard::set_push_points_modifier (guint mod)
-{
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~push_points_mod);
-	push_points_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | push_points_mod);
-}
-
-void
-Keyboard::set_note_size_relative_modifier (guint mod)
-{
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~note_size_relative_mod);
-	note_size_relative_mod = mod;
-	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | note_size_relative_mod);
 }
 
 bool

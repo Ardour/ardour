@@ -126,41 +126,6 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	 */
 	static ModifierMask snap_delta_modifier () { return ModifierMask (snap_delta_mod); }
 
-	static void set_trim_contents_modifier (guint);
-	/** @return Modifier mask to move contents rather than region bounds during trim;
-	 */
-	static ModifierMask trim_contents_modifier () { return ModifierMask (trim_contents_mod); }
-
-	static void set_trim_overlap_modifier (guint);
-	/** @return Modifier mask to remove region overlaps during trim;
-	 */
-	static ModifierMask trim_overlap_modifier () { return ModifierMask (trim_overlap_mod); }
-
-	static void set_trim_anchored_modifier (guint);
-	/** @return Modifier mask to use anchored trim;
-	 */
-	static ModifierMask trim_anchored_modifier () { return ModifierMask (trim_anchored_mod); }
-
-	static void set_fine_adjust_modifier (guint);
-	/** @return Modifier mask to fine adjust (control points only atm);
-	 */
-	static ModifierMask fine_adjust_modifier () { return ModifierMask (fine_adjust_mod); }
-
-	static void set_push_points_modifier (guint);
-	/** @return Modifier mask to push proceeding points;
-	 */
-	static ModifierMask push_points_modifier () { return ModifierMask (push_points_mod); }
-
-	static void set_note_size_relative_modifier (guint);
-	/** @return Modifier mask to resize notes relatively;
-	 */
-	static ModifierMask note_size_relative_modifier () { return ModifierMask (note_size_relative_mod); }
-
-	static void set_trim_jump_modifier (guint);
-	/** @return Modifier mask to jump position after trim;
-	 */
-	static ModifierMask trim_jump_modifier () { return ModifierMask (trim_jump_mod); }
-
 	static guint edit_button() { return edit_but; }
 	static void set_edit_button (guint);
 	static guint edit_modifier() { return edit_mod; }
@@ -226,13 +191,6 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static guint     insert_note_mod;
 	static guint     snap_mod;
 	static guint     snap_delta_mod;
-	static guint     trim_contents_mod;
-	static guint     trim_overlap_mod;
-	static guint     trim_anchored_mod;
-	static guint     fine_adjust_mod;
-	static guint     push_points_mod;
-	static guint     note_size_relative_mod;
-	static guint     trim_jump_mod;
 	static guint     button2_modifiers;
 	static Gtk::Window* current_window;
 	static std::string user_keybindings_path;

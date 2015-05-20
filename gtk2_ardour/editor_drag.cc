@@ -2352,7 +2352,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	_item->grab ();
 
-	if (event->motion.state & Keyboard::note_size_relative_modifier ()) {
+	if (event->motion.state & ArdourKeyboard::note_size_relative_modifier ()) {
 		relative = false;
 	} else {
 		relative = true;
@@ -2615,7 +2615,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	framepos_t const pf = adjusted_current_frame (event);
 	setup_snap_delta (region_start);
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_contents_modifier ())) {
+	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_contents_modifier ())) {
 		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
 		Drag::start_grab (event, _editor->cursors()->trimmer);
@@ -2624,7 +2624,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (pf < (region_start + region_length/2)) {
 			/* closer to front */
 			_operation = StartTrim;
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_anchored_modifier ())) {
+			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
 				Drag::start_grab (event, _editor->cursors()->anchored_left_side_trim);
 			} else {
 				Drag::start_grab (event, _editor->cursors()->left_side_trim);
@@ -2632,17 +2632,18 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		} else {
 			/* closer to end */
 			_operation = EndTrim;
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_anchored_modifier ())) {
+			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
 				Drag::start_grab (event, _editor->cursors()->anchored_right_side_trim);
 			} else {
 				Drag::start_grab (event, _editor->cursors()->right_side_trim);
 			}
 		}
 	}
-
+	/* jump trim disabled for now
 	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_jump_modifier ())) {
 		_jump_position_when_done = true;
 	}
+	*/
 
 	switch (_operation) {
 	case StartTrim:
@@ -2725,7 +2726,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	bool non_overlap_trim = false;
 
-	if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_overlap_modifier ())) {
+	if (event && Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_overlap_modifier ())) {
 		non_overlap_trim = true;
 	}
 
@@ -3735,7 +3736,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	framepos_t const newframe = adjusted_current_frame (event);
 	framepos_t next = newframe;
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::push_points_modifier ())) {
+	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::push_points_modifier ())) {
 		move_both = true;
 	}
 
@@ -4002,7 +4003,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
-	_pushing = Keyboard::modifier_state_contains (event->button.state, Keyboard::push_points_modifier ());
+	_pushing = Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::push_points_modifier ());
 
 	if (!_point->can_slide ()) {
 		_x_constrained = true;
@@ -4015,7 +4016,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & Keyboard::fine_adjust_modifier ()) {
+	if (event->button.state & ArdourKeyboard::fine_adjust_modifier ()) {
 		dx *= 0.1;
 		dy *= 0.1;
 	}
@@ -4154,7 +4155,7 @@ LineDrag::motion (GdkEvent* event, bool)
 {
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & Keyboard::fine_adjust_modifier ()) {
+	if (event->button.state & ArdourKeyboard::fine_adjust_modifier ()) {
 		dy *= 0.1;
 	}
 

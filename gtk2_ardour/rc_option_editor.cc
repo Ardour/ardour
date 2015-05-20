@@ -277,14 +277,15 @@ static const struct {
 #else
 	{ "Key|Shift", GDK_SHIFT_MASK },
 	{ "Control", GDK_CONTROL_MASK },
-	{ "Alt (Mod1)", GDK_MOD1_MASK },
+	{ "Alt", GDK_MOD1_MASK },
 	{ "Control-Shift", GDK_CONTROL_MASK|GDK_SHIFT_MASK },
 	{ "Control-Alt", GDK_CONTROL_MASK|GDK_MOD1_MASK },
 	{ "Shift-Alt", GDK_SHIFT_MASK|GDK_MOD1_MASK },
 	{ "Control-Shift-Alt", GDK_CONTROL_MASK|GDK_SHIFT_MASK|GDK_MOD1_MASK },
+	{ "Alt-Windows", GDK_MOD1_MASK|GDK_MOD4_MASK },
 	{ "Mod2", GDK_MOD2_MASK },
 	{ "Mod3", GDK_MOD3_MASK },
-	{ "Mod4", GDK_MOD4_MASK },
+	{ "Windows", GDK_MOD4_MASK },
 	{ "Mod5", GDK_MOD5_MASK },
 #endif
 	{ 0, 0 }
@@ -465,7 +466,7 @@ public:
 		_trim_contents_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_contents_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::trim_contents_modifier ()) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_contents_modifier ()) {
 				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
@@ -485,7 +486,7 @@ public:
 		_trim_anchored_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_anchored_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::trim_anchored_modifier ()) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
 				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
@@ -499,9 +500,9 @@ public:
 		t->attach (_trim_anchored_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
-				col = 1;
+		col = 1;
 
-		/* jump trim */
+		/* jump trim disabled for now
 		set_popdown_strings (_trim_jump_combo, dumb);
 		_trim_jump_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_jump_modifier_chosen));
 
@@ -521,13 +522,14 @@ public:
 
 		++row;
 		col = 1;
+		*/
 
 		/* note resize relative */
 		set_popdown_strings (_note_size_relative_combo, dumb);
 		_note_size_relative_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::note_size_relative_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::note_size_relative_modifier ()) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
 				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
@@ -600,7 +602,7 @@ public:
 		_trim_overlap_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_overlap_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::trim_overlap_modifier ()) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_overlap_modifier ()) {
 				_trim_overlap_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
@@ -626,7 +628,7 @@ public:
 		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::fine_adjust_modifier ()) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::fine_adjust_modifier ()) {
 				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
@@ -646,7 +648,7 @@ public:
 		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
 
 		for (int x = 0; modifiers[x].name; ++x) {
-			if (modifiers[x].modifier == (guint) Keyboard::push_points_modifier ()) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
 				_push_points_combo.set_active_text (S_(modifiers[x].name));
 				break;
 			}
@@ -657,8 +659,6 @@ public:
 
 		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
-
-		++row;
 
 		_box->pack_start (*t, false, false);
 	}
@@ -768,7 +768,7 @@ private:
 
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
-				Keyboard::set_trim_contents_modifier (modifiers[i].modifier);
+				ArdourKeyboard::set_trim_contents_modifier (modifiers[i].modifier);
 				break;
 			}
 		}
@@ -780,7 +780,7 @@ private:
 
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
-				Keyboard::set_trim_overlap_modifier (modifiers[i].modifier);
+				ArdourKeyboard::set_trim_overlap_modifier (modifiers[i].modifier);
 				break;
 			}
 		}
@@ -792,19 +792,7 @@ private:
 
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
-				Keyboard::set_trim_anchored_modifier (modifiers[i].modifier);
-				break;
-			}
-		}
-	}
-
-	void trim_jump_modifier_chosen ()
-	{
-		string const txt = _trim_jump_combo.get_active_text();
-
-		for (int i = 0; modifiers[i].name; ++i) {
-			if (txt == _(modifiers[i].name)) {
-				Keyboard::set_trim_jump_modifier (modifiers[i].modifier);
+				ArdourKeyboard::set_trim_anchored_modifier (modifiers[i].modifier);
 				break;
 			}
 		}
@@ -816,7 +804,7 @@ private:
 
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
-				Keyboard::set_fine_adjust_modifier (modifiers[i].modifier);
+				ArdourKeyboard::set_fine_adjust_modifier (modifiers[i].modifier);
 				break;
 			}
 		}
@@ -828,7 +816,7 @@ private:
 
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
-				Keyboard::set_push_points_modifier (modifiers[i].modifier);
+				ArdourKeyboard::set_push_points_modifier (modifiers[i].modifier);
 				break;
 			}
 		}
@@ -840,7 +828,7 @@ private:
 
 		for (int i = 0; modifiers[i].name; ++i) {
 			if (txt == _(modifiers[i].name)) {
-				Keyboard::set_note_size_relative_modifier (modifiers[i].modifier);
+				ArdourKeyboard::set_note_size_relative_modifier (modifiers[i].modifier);
 				break;
 			}
 		}

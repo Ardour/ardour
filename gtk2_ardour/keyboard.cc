@@ -48,6 +48,13 @@ accel_map_changed (GtkAccelMap* /*map*/,
 	me->ui.setup_tooltips ();
 }
 
+guint ArdourKeyboard::trim_contents_mod = Keyboard::PrimaryModifier;
+guint ArdourKeyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
+guint ArdourKeyboard::trim_anchored_mod = Keyboard::TertiaryModifier;
+guint ArdourKeyboard::fine_adjust_mod = Keyboard::SecondaryModifier;
+guint ArdourKeyboard::push_points_mod = Keyboard::PrimaryModifier;
+guint ArdourKeyboard::note_size_relative_mod = Keyboard::PrimaryModifier;
+
 void
 ArdourKeyboard::setup_keybindings ()
 {
@@ -172,6 +179,108 @@ ArdourKeyboard::setup_keybindings ()
 
 	GtkAccelMap* accelmap = gtk_accel_map_get();
 	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, this);
+}
+
+XMLNode&
+ArdourKeyboard::get_state (void)
+{
+	XMLNode* node = &Keyboard::get_state ();
+	char buf[32];
+
+	snprintf (buf, sizeof (buf), "%d", trim_contents_mod);
+	node->add_property ("trim-contents-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", trim_overlap_mod);
+	node->add_property ("trim-overlap-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", trim_anchored_mod);
+	node->add_property ("trim-anchored-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", fine_adjust_mod);
+	node->add_property ("fine-adjust-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", push_points_mod);
+	node->add_property ("push-points-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", note_size_relative_mod);
+	node->add_property ("note-size-relative-modifier", buf);
+
+	return *node;
+}
+
+int
+ArdourKeyboard::set_state (const XMLNode& node, int version)
+{
+	const XMLProperty* prop;
+
+	if ((prop = node.property ("trim-contents-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &trim_contents_mod);
+	}
+
+	if ((prop = node.property ("trim-overlap-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &trim_overlap_mod);
+	}
+
+	if ((prop = node.property ("trim-anchored-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &trim_anchored_mod);
+	}
+
+	if ((prop = node.property ("fine-adjust-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &fine_adjust_mod);
+	}
+
+	if ((prop = node.property ("push-points-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &push_points_mod);
+	}
+
+	if ((prop = node.property ("note-size-relative-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &note_size_relative_mod);
+	}
+
+	return Keyboard::set_state (node, version);
+}
+
+void
+ArdourKeyboard::set_trim_contents_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_contents_mod);
+	trim_contents_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_contents_mod);
+}
+
+void
+ArdourKeyboard::set_trim_overlap_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_overlap_mod);
+	trim_overlap_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_overlap_mod);
+}
+
+void
+ArdourKeyboard::set_trim_anchored_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~trim_anchored_mod);
+	trim_anchored_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | trim_anchored_mod);
+}
+
+void
+ArdourKeyboard::set_fine_adjust_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~fine_adjust_mod);
+	fine_adjust_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | fine_adjust_mod);
+}
+
+void
+ArdourKeyboard::set_push_points_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~push_points_mod);
+	push_points_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | push_points_mod);
+}
+
+void
+ArdourKeyboard::set_note_size_relative_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~note_size_relative_mod);
+	note_size_relative_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | note_size_relative_mod);
 }
 
 Selection::Operation

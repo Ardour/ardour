@@ -32,11 +32,51 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
   public:
 	ArdourKeyboard(ARDOUR_UI& ardour_ui) : ui(ardour_ui) {}
 
+	XMLNode& get_state (void);
+	int set_state (const XMLNode&, int version);
+
 	void setup_keybindings ();
 
 	static Selection::Operation selection_type (guint state);
 
 	ARDOUR_UI& ui;
+
+	static void set_trim_contents_modifier (guint);
+	/** @return Modifier mask to move contents rather than region bounds during trim;
+	 */
+	static ModifierMask trim_contents_modifier () { return ModifierMask (trim_contents_mod); }
+
+	static void set_trim_overlap_modifier (guint);
+	/** @return Modifier mask to remove region overlaps during trim;
+	 */
+	static ModifierMask trim_overlap_modifier () { return ModifierMask (trim_overlap_mod); }
+
+	static void set_trim_anchored_modifier (guint);
+	/** @return Modifier mask to use anchored trim;
+	 */
+	static ModifierMask trim_anchored_modifier () { return ModifierMask (trim_anchored_mod); }
+
+	static void set_fine_adjust_modifier (guint);
+	/** @return Modifier mask to fine adjust (control points only atm);
+	 */
+	static ModifierMask fine_adjust_modifier () { return ModifierMask (fine_adjust_mod); }
+
+	static void set_push_points_modifier (guint);
+	/** @return Modifier mask to push proceeding points;
+	 */
+	static ModifierMask push_points_modifier () { return ModifierMask (push_points_mod); }
+
+	static void set_note_size_relative_modifier (guint);
+	/** @return Modifier mask to resize notes relatively;
+	 */
+	static ModifierMask note_size_relative_modifier () { return ModifierMask (note_size_relative_mod); }
+private:
+	static guint     trim_contents_mod;
+	static guint     trim_overlap_mod;
+	static guint     trim_anchored_mod;
+	static guint     fine_adjust_mod;
+	static guint     push_points_mod;
+	static guint     note_size_relative_mod;
 };
 
 #endif /* __ardour_keyboard_h__ */
