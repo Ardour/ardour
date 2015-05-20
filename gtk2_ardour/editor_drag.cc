@@ -2352,7 +2352,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	_item->grab ();
 
-	if (event->motion.state & Keyboard::PrimaryModifier) {
+	if (event->motion.state & Keyboard::note_size_relative_modifier ()) {
 		relative = false;
 	} else {
 		relative = true;
@@ -2592,6 +2592,7 @@ VideoTimeLineDrag::aborted (bool)
 TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v)
 	, _preserve_fade_anchor (preserve_fade_anchor)
+	, _jump_position_when_done (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TrimDrag\n");
 }
@@ -2623,7 +2624,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (pf < (region_start + region_length/2)) {
 			/* closer to front */
 			_operation = StartTrim;
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_anchored_modifier ())) {
 				Drag::start_grab (event, _editor->cursors()->anchored_left_side_trim);
 			} else {
 				Drag::start_grab (event, _editor->cursors()->left_side_trim);
@@ -2631,12 +2632,16 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		} else {
 			/* closer to end */
 			_operation = EndTrim;
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_anchored_modifier ())) {
 				Drag::start_grab (event, _editor->cursors()->anchored_right_side_trim);
 			} else {
 				Drag::start_grab (event, _editor->cursors()->right_side_trim);
 			}
 		}
+	}
+
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_jump_modifier ())) {
+		_jump_position_when_done = true;
 	}
 
 	switch (_operation) {
@@ -2838,6 +2843,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						ar->set_fade_in_active(true);
 					}
 				}
+				if (_jump_position_when_done) {
+					i->view->region()->set_position (i->initial_position);
+				}
 			}
 		} else if (_operation == EndTrim) {
 			for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
@@ -2849,6 +2857,9 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 						ar->set_fade_out_length(i->anchored_fade_length);
 						ar->set_fade_out_active(true);
 					}
+				}
+				if (_jump_position_when_done) {
+					i->view->region()->set_position (i->initial_end - i->view->region()->length());
 				}
 			}
 		}
@@ -3724,7 +3735,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	framepos_t const newframe = adjusted_current_frame (event);
 	framepos_t next = newframe;
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::push_points_modifier ())) {
 		move_both = true;
 	}
 
@@ -3991,7 +4002,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
-	_pushing = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
+	_pushing = Keyboard::modifier_state_contains (event->button.state, Keyboard::push_points_modifier ());
 
 	if (!_point->can_slide ()) {
 		_x_constrained = true;
@@ -4004,7 +4015,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & Keyboard::SecondaryModifier) {
+	if (event->button.state & Keyboard::fine_adjust_modifier ()) {
 		dx *= 0.1;
 		dy *= 0.1;
 	}
@@ -4059,7 +4070,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 
 		/* just a click */
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::PrimaryModifier | Keyboard::TertiaryModifier))) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
 			_editor->reset_point_selection ();
 		}
 
@@ -4143,7 +4154,7 @@ LineDrag::motion (GdkEvent* event, bool)
 {
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & Keyboard::SecondaryModifier) {
+	if (event->button.state & Keyboard::fine_adjust_modifier ()) {
 		dy *= 0.1;
 	}
 
@@ -4935,7 +4946,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	case CreateTransportMarker:
 	case CreateCDMarker:
 
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
 			_copy = true;
 		} else {
 			_copy = false;

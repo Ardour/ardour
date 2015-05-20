@@ -478,6 +478,69 @@ public:
 		t->attach (_trim_contents_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
+		col = 1;
+
+		/* anchored trim */
+		set_popdown_strings (_trim_anchored_combo, dumb);
+		_trim_anchored_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_anchored_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::trim_anchored_modifier ()) {
+				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Anchored trim using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		++col;
+		t->attach (_trim_anchored_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+				col = 1;
+
+		/* jump trim */
+		set_popdown_strings (_trim_jump_combo, dumb);
+		_trim_jump_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_jump_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::trim_jump_modifier ()) {
+				_trim_jump_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Jump after trim using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		++col;
+		t->attach (_trim_jump_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* note resize relative */
+		set_popdown_strings (_note_size_relative_combo, dumb);
+		_note_size_relative_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::note_size_relative_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::note_size_relative_modifier ()) {
+				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Resize notes relatively using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		++col;
+		t->attach (_note_size_relative_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
 
 		l = manage (left_aligned_label (_("While Dragging:")));
 		l->set_name ("OptionEditorHeading");
@@ -550,6 +613,51 @@ public:
 		t->attach (_trim_overlap_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		++row;
+
+		l = manage (left_aligned_label (_("While Dragging Control Points:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* fine adjust */
+		set_popdown_strings (_fine_adjust_combo, dumb);
+		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::fine_adjust_modifier ()) {
+				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Fine adjust using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* push points */
+		set_popdown_strings (_push_points_combo, dumb);
+		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::push_points_modifier ()) {
+				_push_points_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Push points using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
 		++row;
 
 		_box->pack_start (*t, false, false);
@@ -678,6 +786,66 @@ private:
 		}
 	}
 
+	void trim_anchored_modifier_chosen ()
+	{
+		string const txt = _trim_anchored_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_trim_anchored_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void trim_jump_modifier_chosen ()
+	{
+		string const txt = _trim_jump_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_trim_jump_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void fine_adjust_modifier_chosen ()
+	{
+		string const txt = _fine_adjust_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_fine_adjust_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void push_points_modifier_chosen ()
+	{
+		string const txt = _push_points_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_push_points_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void note_size_relative_modifier_chosen ()
+	{
+		string const txt = _note_size_relative_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_note_size_relative_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
 	void delete_button_changed ()
 	{
 		Keyboard::set_delete_button (_delete_button_spin.get_value_as_int());
@@ -702,6 +870,11 @@ private:
 	ComboBoxText _snap_delta_combo;
 	ComboBoxText _trim_contents_combo;
 	ComboBoxText _trim_overlap_combo;
+	ComboBoxText _trim_anchored_combo;
+	ComboBoxText _trim_jump_combo;
+	ComboBoxText _fine_adjust_combo;
+	ComboBoxText _push_points_combo;
+	ComboBoxText _note_size_relative_combo;
 	Adjustment _delete_button_adjustment;
 	SpinButton _delete_button_spin;
 	Adjustment _edit_button_adjustment;

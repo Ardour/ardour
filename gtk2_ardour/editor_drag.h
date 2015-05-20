@@ -654,6 +654,7 @@ private:
 	Operation _operation;
 	
 	bool _preserve_fade_anchor;
+	bool _jump_position_when_done;
 };
 
 /** Meter marker drag */
