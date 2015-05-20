@@ -777,7 +777,7 @@ MidiListEditor::redisplay_model ()
 			bbt.beats = dur.get_beats ();
 			bbt.ticks = dur.get_ticks ();
 			
-			int len_ticks = (*i)->length().to_ticks();
+			uint64_t len_ticks = (*i)->length().to_ticks();
 			std::map<int,string>::iterator x = note_length_map.find (len_ticks);
 
 			if (x != note_length_map.end()) {
