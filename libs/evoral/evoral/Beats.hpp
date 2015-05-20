@@ -191,6 +191,8 @@ public:
 
 	bool operator!() const { return _time == 0; }
 
+	operator bool() const { return _time != 0; }
+	
 	static Beats min()  { return Beats(DBL_MIN); }
 	static Beats max()  { return Beats(DBL_MAX); }
 	static Beats tick() { return Beats(1.0 / PPQN); }
