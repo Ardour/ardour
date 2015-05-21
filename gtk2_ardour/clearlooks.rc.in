@@ -235,7 +235,7 @@ style "small_text"
 
 style "small_clock"
 {
-	font_name = "@CLOCKFONT@ @FONT_SMALLER@"
+	font_name = "@CLOCKFONT@ @FONT_NORMAL@"
 }
 
 style "small_italic_text"
