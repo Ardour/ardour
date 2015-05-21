@@ -2597,7 +2597,7 @@ Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, RoundM
 		return;
 	}
 
-	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::snap_modifier())) {
+	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		if (_snap_mode == SnapOff) {
 			snap_to_internal (start, direction, for_mark);
 		}

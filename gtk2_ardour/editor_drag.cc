@@ -339,11 +339,11 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 frameoffset_t
 Drag::snap_delta (GdkEvent const * event) const
 {
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::snap_delta_modifier())) {
+	if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 		return 0;
-	} else {
-		return _snap_delta;
 	}
+
+	return _snap_delta;
 }
 
 double
@@ -2394,7 +2394,7 @@ NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		if (mrv) {
 			double sd = 0.0;
-			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::snap_delta_modifier())) {
+			if (!ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 				sd = _snap_delta;
 			}
 			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd);
@@ -2411,7 +2411,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 		assert (nb);
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		double sd = 0.0;
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::snap_delta_modifier())) {
+		if (!ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			sd = _snap_delta;
 		}
 		if (mrv) {
@@ -2726,7 +2726,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	bool non_overlap_trim = false;
 
-	if (event && Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_overlap_modifier ())) {
+	if (event && Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::trim_overlap_modifier ())) {
 		non_overlap_trim = true;
 	}
 
@@ -3736,7 +3736,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	framepos_t const newframe = adjusted_current_frame (event);
 	framepos_t next = newframe;
 
-	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::push_points_modifier ())) {
+	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::push_points_modifier ())) {
 		move_both = true;
 	}
 
@@ -4003,7 +4003,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
-	_pushing = Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::push_points_modifier ());
+	_pushing = Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::push_points_modifier ());
 
 	if (!_point->can_slide ()) {
 		_x_constrained = true;

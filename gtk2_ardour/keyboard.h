@@ -41,6 +41,9 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 
 	ARDOUR_UI& ui;
 
+	static bool indicates_snap (guint state);
+	static bool indicates_snap_delta (guint state);
+
 	static void set_trim_contents_modifier (guint);
 	/** @return Modifier mask to move contents rather than region bounds during trim;
 	 */
