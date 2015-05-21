@@ -2747,7 +2747,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
  * @param snap_delta snap offset of the primary note in pixels. used in SnapRelative SnapDelta mode.
  */
 void
-MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta)
+MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, guint key_state)
 {
 	bool cursor_set = false;
 
@@ -2780,10 +2780,18 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (at_front) {
-			resize_rect->set_x0 (snap_to_pixel(current_x) - snap_delta);
+			if (ArdourKeyboard::indicates_snap (key_state)) {
+				resize_rect->set_x0 (current_x - snap_delta);
+			} else {
+				resize_rect->set_x0 (snap_to_pixel(current_x) - snap_delta);
+			}
 			resize_rect->set_x1 (canvas_note->x1());
 		} else {
-			resize_rect->set_x1 (snap_to_pixel(current_x) - snap_delta);
+			if (ArdourKeyboard::indicates_snap (key_state)) {
+				resize_rect->set_x1 (current_x - snap_delta);
+			} else {
+				resize_rect->set_x1 (snap_to_pixel(current_x) - snap_delta);
+			}
 			resize_rect->set_x0 (canvas_note->x0());
 		}
 
@@ -2832,9 +2840,12 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
  *  Parameters the same as for \a update_resizing().
  */
 void
-MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta)
+MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, guint key_state)
 {
+	bool snap_keys = ArdourKeyboard::indicates_snap (key_state);
+
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
+
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
 		Note*  canvas_note = (*i)->note;
 		ArdourCanvas::Rectangle*  resize_rect = (*i)->resize_rect;
@@ -2865,25 +2876,31 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		if (current_x > trackview.editor().sample_to_pixel(_region->length())) {
 			current_x = trackview.editor().sample_to_pixel(_region->length());
 		}
-		framepos_t delta_samps = trackview.editor().pixel_to_sample (snap_delta);
-		double delta_beats;
+		framepos_t snap_delta_samps = trackview.editor().pixel_to_sample (snap_delta);
+		double snap_delta_beats;
 		int sign = 1;
-		if (delta_samps > 0) {
-			delta_beats = region_frames_to_region_beats_double (delta_samps);
-		} else if (delta_samps < 0) {
-			delta_beats = region_frames_to_region_beats_double ( - delta_samps);
+		if (snap_delta_samps > 0) {
+			snap_delta_beats = region_frames_to_region_beats_double (snap_delta_samps);
+		} else if (snap_delta_samps < 0) {
+			snap_delta_beats = region_frames_to_region_beats_double ( - snap_delta_samps);
 			sign = -1;
 		}
 
 		/* Convert that to a frame within the source */
-		framepos_t current_fr = snap_pixel_to_sample (current_x) + _region->start ();
+		framepos_t current_fr;
+
+		if (snap_keys) {
+			current_fr = trackview.editor().pixel_to_sample (current_x) + _region->start ();
+		} else {
+			current_fr = snap_pixel_to_sample (current_x) + _region->start ();
+		}
 
 		/* and then to beats */
 		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr);
-		if (at_front && x_beats < canvas_note->note()->end_time()) {
-			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * delta_beats));
 
-			Evoral::Beats len = canvas_note->note()->time() - x_beats + (sign * delta_beats);
+		if (at_front && x_beats < canvas_note->note()->end_time()) {
+			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, x_beats - (sign * snap_delta_beats));
+			Evoral::Beats len = canvas_note->note()->time() - x_beats + (sign * snap_delta_beats);
 			len += canvas_note->note()->length();
 
 			if (!!len) {
@@ -2892,8 +2909,8 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!at_front) {
-			const Evoral::Beats len = std::max(Evoral::Beats(1 / 512.0),
-			                                   x_beats - canvas_note->note()->time() - (sign * delta_beats));
+			Evoral::Beats len = std::max(Evoral::Beats(1 / 512.0),
+						     x_beats - canvas_note->note()->time() - (sign * snap_delta_beats));
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::Length, len);
 		}
 

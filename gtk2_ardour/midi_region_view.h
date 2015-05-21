@@ -223,8 +223,8 @@ public:
 	 */
 	void begin_resizing(bool at_front);
 
-	void update_resizing (NoteBase*, bool, double, bool, double);
-	void commit_resizing (NoteBase*, bool, double, bool, double);
+	void update_resizing (NoteBase*, bool, double, bool, double, guint);
+	void commit_resizing (NoteBase*, bool, double, bool, double, guint);
 	void abort_resizing ();
 
 	/** Change the channel of the selection.
