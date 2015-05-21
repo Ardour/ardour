@@ -5196,7 +5196,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 
 /** @return Current total drag x change in frames */
 frameoffset_t
-NoteDrag::total_dx (GdkEvent const * event) const
+NoteDrag::total_dx (guint const state) const
 {
 	/* dx in frames */
 	frameoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
@@ -5205,7 +5205,7 @@ NoteDrag::total_dx (GdkEvent const * event) const
 	frameoffset_t const n = _region->source_beats_to_absolute_frames (_primary->note()->time ());
 
 	/* new time of the primary note in session frames */
-	frameoffset_t st = n + dx + snap_delta (event->button.state);
+	frameoffset_t st = n + dx + snap_delta (state);
 
 	framepos_t const rp = _region->region()->position ();
 
@@ -5213,7 +5213,7 @@ NoteDrag::total_dx (GdkEvent const * event) const
 	st = max (st, rp);
 
 	/* snap and return corresponding delta */
-	return _region->snap_frame_to_frame (st - rp) + rp - n - snap_delta (event->button.state);
+	return _region->snap_frame_to_frame (st - rp) + rp - n - snap_delta (state);
 }
 
 /** @return Current total drag y change in note number */
@@ -5235,7 +5235,7 @@ void
 NoteDrag::motion (GdkEvent * event, bool)
 {
 	/* Total change in x and y since the start of the drag */
-	frameoffset_t const dx = total_dx (event);
+	frameoffset_t const dx = total_dx (event->button.state);
 	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
@@ -5304,7 +5304,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		_region->note_dropped (_primary, total_dx (ev), total_dy());
+		_region->note_dropped (_primary, total_dx (ev->button.state), total_dy());
 	}
 }
 
