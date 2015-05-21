@@ -217,7 +217,7 @@ protected:
 		return _last_pointer_frame;
 	}
 
-	ARDOUR::frameoffset_t snap_delta (GdkEvent const *) const;
+	ARDOUR::frameoffset_t snap_delta (guint const) const;
 
 	double current_pointer_x () const;
 	double current_pointer_y () const;
