@@ -55,7 +55,7 @@ using Gtkmm2ext::Keyboard;
 
 sigc::signal<void> AudioClock::ModeChanged;
 vector<AudioClock*> AudioClock::clocks;
-const double AudioClock::info_font_scale_factor = 0.60;
+const double AudioClock::info_font_scale_factor = 0.68;
 const double AudioClock::separator_height = 0.0;
 const double AudioClock::x_leading_padding = 6.0;
 
@@ -470,7 +470,10 @@ AudioClock::set_clock_dimensions (Gtk::Requisition& req)
 	tmp->set_font_description (font);
 
 	/* this string is the longest thing we will ever display */
-	tmp->set_text (" 88:88:88,888");
+	if (_mode == MinSec)
+		tmp->set_text (" 88:88:88,888 ");
+	else
+		tmp->set_text (" 88:88:88,88 ");
 	tmp->get_pixel_size (req.width, req.height);
 
 	layout_height = req.height;
@@ -2154,6 +2157,9 @@ AudioClock::set_mode (Mode m)
 	insert_map.clear();
 
 	_layout->set_text ("");
+
+	Gtk::Requisition req;
+	set_clock_dimensions (req);
 
 	if (_left_layout) {
 
