@@ -366,7 +366,7 @@ void
 Drag::setup_snap_delta (framepos_t pos)
 {
 	framepos_t temp = pos;
-	_editor->snap_to_no_magnets (temp);
+	_editor->snap_to (temp, ARDOUR::RoundNearest, false, true);
 	_snap_delta = temp - pos;
 }
 
@@ -2347,7 +2347,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	region = &cnote->region_view();
 
 	double temp;
-	temp = region->snap_to_pixel_no_magnets (cnote->x0 ());
+	temp = region->snap_to_pixel (cnote->x0 (), true);
 	_snap_delta = temp - cnote->x0 ();
 
 	_item->grab ();

@@ -2627,38 +2627,19 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
  *  @return Snapped frame relative to the region position.
  */
 framepos_t
-MidiRegionView::snap_pixel_to_sample(double x)
+MidiRegionView::snap_pixel_to_sample(double x, bool explicitly)
 {
 	PublicEditor& editor (trackview.editor());
-	return snap_frame_to_frame (editor.pixel_to_sample (x));
-}
-
-/** @param x Pixel relative to the region position explicitly (no magnetic snap)
- *  @return Snapped frame relative to the region position.
- */
-framepos_t
-MidiRegionView::snap_pixel_to_sample_no_magnets (double x)
-{
-	PublicEditor& editor (trackview.editor());
-	return snap_frame_to_frame_no_magnets (editor.pixel_to_sample (x));
+	return snap_frame_to_frame (editor.pixel_to_sample (x), explicitly);
 }
 
 /** @param x Pixel relative to the region position.
  *  @return Snapped pixel relative to the region position.
  */
 double
-MidiRegionView::snap_to_pixel(double x)
+MidiRegionView::snap_to_pixel(double x, bool explicitly)
 {
-	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample(x));
-}
-
-/** @param x Pixel relative to the region position.
- *  @return Explicitly snapped pixel relative to the region position (no magnetic snap).
- */
-double
-MidiRegionView::snap_to_pixel_no_magnets (double x)
-{
-	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample_no_magnets(x));
+	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample(x, explicitly));
 }
 
 double
