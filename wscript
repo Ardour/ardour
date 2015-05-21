@@ -179,8 +179,10 @@ else:
     MICRO = '0'
 
 V = MAJOR + '.' + MINOR + '.' + MICRO
-VERSION = V
-PROGRAM_VERSION = MAJOR
+# Ensure that these are not unicode, which
+# can cause odd problems elsewhere
+VERSION = V.encode ('ascii', 'ignore')
+PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore')
 
 # Mandatory variables
 top = '.'
