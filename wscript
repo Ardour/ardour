@@ -375,14 +375,14 @@ int main() { return 0; }''',
         compiler_flags.append ('-U__STRICT_ANSI__')
 
     if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite' ]:
-        conf.check_cxx(cxxflags=["-std=c++11"])
-        cxx_flags.append('-std=c++11')
+        # conf.check_cxx(cxxflags=["-std=c++11"])
+        # cxx_flags.append('-std=c++11')
         if platform == "darwin":
-            cxx_flags.append('--stdlib=libstdc++')
+            # cxx_flags.append('--stdlib=libstdc++')
             # Mavericks and later changed the syntax to be used when including Carbon headers,
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
-            linker_flags.append('--stdlib=libstdc++')
+            # linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
 
