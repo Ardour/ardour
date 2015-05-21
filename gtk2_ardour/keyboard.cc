@@ -239,22 +239,20 @@ bool
 ArdourKeyboard::indicates_snap (guint state)
 {
 	bool contains_s = Keyboard::modifier_state_contains (state, Keyboard::snap_modifier());
-	bool equals_s = Keyboard::modifier_state_equals (state, Keyboard::snap_modifier());
 	bool contains_d = Keyboard::modifier_state_contains (state, Keyboard::snap_delta_modifier());
 	bool equals_d = Keyboard::modifier_state_equals (state, Keyboard::snap_delta_modifier());
 
-	return  (equals_s || (contains_s && ((contains_d && !equals_d) || !contains_d)));
+	return  (contains_s && ((contains_d && !equals_d) || !contains_d));
 }
 
 bool
 ArdourKeyboard::indicates_snap_delta (guint state)
 {
 	bool contains_d = Keyboard::modifier_state_contains (state, Keyboard::snap_delta_modifier());
-	bool equals_d = Keyboard::modifier_state_equals (state, Keyboard::snap_delta_modifier());
 	bool contains_s = Keyboard::modifier_state_contains (state, Keyboard::snap_modifier());
 	bool equals_s = Keyboard::modifier_state_equals (state, Keyboard::snap_modifier());
 
-	return (equals_d || (contains_d && ((contains_s && !equals_s) || !contains_s)));
+	return (contains_d && ((contains_s && !equals_s) || !contains_s));
 }
 
 void
