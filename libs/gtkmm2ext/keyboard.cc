@@ -76,8 +76,8 @@ const char* Keyboard::level4_modifier_name() { return _("Option"); }
 const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
-guint Keyboard::snap_mod = GDK_MOD3_MASK|Keyboard::Level4Modifier; // XXX this is probably completely wrong
-guint Keyboard::snap_delta_mod = GDK_MOD3_MASK;
+guint Keyboard::snap_mod = Keyboard::Level4Modifier|Keyboard::TertiaryModifier; // XXX this is probably completely wrong
+guint Keyboard::snap_delta_mod = Keyboard::Level4Modifier;
 
 #else
 
