@@ -2394,10 +2394,28 @@ NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		if (mrv) {
 			double sd = 0.0;
-			if (!ArdourKeyboard::indicates_snap_delta (event->button.state)) {
+			bool snap = true;
+			bool apply_snap_delta = !ArdourKeyboard::indicates_snap_delta (event->button.state);
+
+			if (ArdourKeyboard::indicates_snap (event->button.state)) {
+				if (_editor->snap_mode () != SnapOff) {
+					snap = false;
+				}
+			} else {
+				if (_editor->snap_mode () == SnapOff) {
+					snap = false;
+					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
+					if (!apply_snap_delta) {
+						snap = true;
+					}
+				}
+			}
+
+			if (apply_snap_delta) {
 				sd = _snap_delta;
 			}
-			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, event->button.state);
+
+			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
 		}
 	}
 }
@@ -2411,11 +2429,26 @@ NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 		assert (nb);
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		double sd = 0.0;
-		if (!ArdourKeyboard::indicates_snap_delta (event->button.state)) {
-			sd = _snap_delta;
-		}
+		bool snap = true;
+		bool apply_snap_delta = !ArdourKeyboard::indicates_snap_delta (event->button.state);
 		if (mrv) {
-			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, event->button.state);
+			if (ArdourKeyboard::indicates_snap (event->button.state)) {
+				if (_editor->snap_mode () != SnapOff) {
+					snap = false;
+				}
+			} else {
+				if (_editor->snap_mode () == SnapOff) {
+					snap = false;
+					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
+					if (!apply_snap_delta) {
+						snap = true;
+					}
+				}
+			}
+			if (apply_snap_delta) {
+				sd = _snap_delta;
+			}
+			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
 		}
 	}
 
@@ -5196,7 +5229,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 
 /** @return Current total drag x change in frames */
 frameoffset_t
-NoteDrag::total_dx (guint const state) const
+NoteDrag::total_dx (const guint state) const
 {
 	/* dx in frames */
 	frameoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
@@ -5212,13 +5245,25 @@ NoteDrag::total_dx (guint const state) const
 	/* prevent the note being dragged earlier than the region's position */
 	st = max (st, rp);
 
-	/* snap and return corresponding delta */
+	/* possibly snap and return corresponding delta */
+
+	bool snap = true;
 
 	if (ArdourKeyboard::indicates_snap (state)) {
-		return (st - rp) + rp - n - snap_delta (state);
+		if (_editor->snap_mode () != SnapOff) {
+			snap = false;
+		}
+	} else {
+		if (_editor->snap_mode () == SnapOff) {
+			snap = false;
+			/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
+			if (ArdourKeyboard::indicates_snap_delta (state)) {
+				snap = true;
+			}
+		}
 	}
 
-	return _region->snap_frame_to_frame (st - rp) + rp - n - snap_delta (state);
+	return _region->snap_frame_to_frame (st - rp, snap) + rp - n - snap_delta (state);
 }
 
 /** @return Current total drag y change in note number */

@@ -2604,18 +2604,21 @@ Editor::snap_to_with_modifier (framepos_t& start, GdkEvent const * event, RoundM
 	} else {
 		if (_snap_mode != SnapOff) {
 			snap_to_internal (start, direction, for_mark);
+		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
+			/* SnapOff, but we pressed the snap_delta modifier */
+			snap_to_internal (start, direction, for_mark);
 		}
 	}
 }
 
 void
-Editor::snap_to (framepos_t& start, RoundMode direction, bool for_mark, bool explicitly)
+Editor::snap_to (framepos_t& start, RoundMode direction, bool for_mark, bool ensure_snap)
 {
-	if (!_session || _snap_mode == SnapOff) {
+	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
 		return;
 	}
 
-	snap_to_internal (start, direction, for_mark, explicitly);
+	snap_to_internal (start, direction, for_mark, ensure_snap);
 }
 
 void
@@ -2685,7 +2688,7 @@ Editor::timecode_snap_to_internal (framepos_t& start, RoundMode direction, bool 
 }
 
 void
-Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark, bool explicitly)
+Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark, bool ensure_snap)
 {
 	const framepos_t one_second = _session->frame_rate();
 	const framepos_t one_minute = _session->frame_rate() * 60;
@@ -2855,7 +2858,7 @@ Editor::snap_to_internal (framepos_t& start, RoundMode direction, bool for_mark,
 
 	case SnapMagnetic:
 
-		if (explicitly) {
+		if (ensure_snap) {
 			return;
 		}
 

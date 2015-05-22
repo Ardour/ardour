@@ -141,11 +141,14 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	 */
 	virtual void set_snap_threshold (double t) = 0;
 
-	/** Snap a value according to the current snap setting. */
+	/**
+	 * Snap a value according to the current snap setting.
+	 * ensure_snap overrides SnapOff and magnetic snap
+	 */
 	virtual void snap_to (framepos_t&       first,
 	                      ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
 	                      bool              for_mark  = false,
-			      bool              explicitly = false) = 0;
+			      bool              ensure_snap = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.

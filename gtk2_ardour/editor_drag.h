@@ -527,7 +527,7 @@ class NoteDrag : public Drag
 
   private:
 
-	ARDOUR::frameoffset_t total_dx (guint const) const;
+	ARDOUR::frameoffset_t total_dx (const guint) const;
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;

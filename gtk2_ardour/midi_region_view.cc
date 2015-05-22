@@ -2624,22 +2624,25 @@ MidiRegionView::note_dropped(NoteBase *, frameoffset_t dt, int8_t dnote)
 }
 
 /** @param x Pixel relative to the region position.
+ *  @param ensure_snap defaults to false. true = snap always, ignoring snap mode and magnetic snap.
+ *  Used for inverting the snap logic with key modifiers and snap delta calculation.
  *  @return Snapped frame relative to the region position.
  */
 framepos_t
-MidiRegionView::snap_pixel_to_sample(double x, bool explicitly)
+MidiRegionView::snap_pixel_to_sample(double x, bool ensure_snap)
 {
 	PublicEditor& editor (trackview.editor());
-	return snap_frame_to_frame (editor.pixel_to_sample (x), explicitly);
+	return snap_frame_to_frame (editor.pixel_to_sample (x), ensure_snap);
 }
 
 /** @param x Pixel relative to the region position.
+ *  @param ensure_snap defaults to false. true = ignore magnetic snap and snap mode (used for snap delta calculation).
  *  @return Snapped pixel relative to the region position.
  */
 double
-MidiRegionView::snap_to_pixel(double x, bool explicitly)
+MidiRegionView::snap_to_pixel(double x, bool ensure_snap)
 {
-	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample(x, explicitly));
+	return (double) trackview.editor().sample_to_pixel(snap_pixel_to_sample(x, ensure_snap));
 }
 
 double
@@ -2747,7 +2750,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
  * @param snap_delta snap offset of the primary note in pixels. used in SnapRelative SnapDelta mode.
  */
 void
-MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, guint key_state)
+MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
 	bool cursor_set = false;
 
@@ -2780,17 +2783,17 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (at_front) {
-			if (ArdourKeyboard::indicates_snap (key_state)) {
-				resize_rect->set_x0 (current_x - snap_delta);
+			if (with_snap) {
+				resize_rect->set_x0 (snap_to_pixel(current_x, true) - snap_delta);
 			} else {
-				resize_rect->set_x0 (snap_to_pixel(current_x) - snap_delta);
+				resize_rect->set_x0 (current_x - snap_delta);
 			}
 			resize_rect->set_x1 (canvas_note->x1());
 		} else {
-			if (ArdourKeyboard::indicates_snap (key_state)) {
-				resize_rect->set_x1 (current_x - snap_delta);
+			if (with_snap) {
+				resize_rect->set_x1 (snap_to_pixel(current_x, true) - snap_delta);
 			} else {
-				resize_rect->set_x1 (snap_to_pixel(current_x) - snap_delta);
+				resize_rect->set_x1 (current_x - snap_delta);
 			}
 			resize_rect->set_x0 (canvas_note->x0());
 		}
@@ -2808,7 +2811,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				sign = -1;
 			}
 
-			const double  snapped_x = snap_pixel_to_sample (current_x);
+			const double  snapped_x = (with_snap ? snap_pixel_to_sample (current_x, true) : trackview.editor ().pixel_to_sample (current_x));
 			Evoral::Beats beats     = region_frames_to_region_beats (snapped_x);
 			Evoral::Beats len       = Evoral::Beats();
 
@@ -2840,10 +2843,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
  *  Parameters the same as for \a update_resizing().
  */
 void
-MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, guint key_state)
+MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
 {
-	bool snap_keys = ArdourKeyboard::indicates_snap (key_state);
-
 	_note_diff_command = _model->new_note_diff_command (_("resize notes"));
 
 	for (std::vector<NoteResizeData *>::iterator i = _resize_data.begin(); i != _resize_data.end(); ++i) {
@@ -2887,13 +2888,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* Convert that to a frame within the source */
-		framepos_t current_fr;
-
-		if (snap_keys) {
-			current_fr = trackview.editor().pixel_to_sample (current_x) + _region->start ();
-		} else {
-			current_fr = snap_pixel_to_sample (current_x) + _region->start ();
-		}
+		const framepos_t current_fr = snap_pixel_to_sample (current_x, with_snap) + _region->start ();
 
 		/* and then to beats */
 		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr);

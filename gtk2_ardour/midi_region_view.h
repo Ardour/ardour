@@ -223,8 +223,8 @@ public:
 	 */
 	void begin_resizing(bool at_front);
 
-	void update_resizing (NoteBase*, bool, double, bool, double, guint);
-	void commit_resizing (NoteBase*, bool, double, bool, double, guint);
+	void update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap);
+	void commit_resizing (NoteBase* primary, bool at_front, double delat_x, bool relative, double snap_delta, bool with_snap);
 	void abort_resizing ();
 
 	/** Change the channel of the selection.
@@ -250,17 +250,18 @@ public:
 
 	/** Snap a region relative pixel coordinate to pixel units.
 	 * @param x a pixel coordinate relative to region start
-	 * @param explicitly do not use magnetic snap (required for snap delta calculation)
+	 * @param ensure_snap do not use magnetic snap (required for snap delta calculation)
 	 * @return the snapped pixel coordinate relative to region start
 	 */
-	double snap_to_pixel(double x, bool explicitly = false);
+	double snap_to_pixel(double x, bool ensure_snap = false);
 
 	/** Snap a region relative pixel coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
-	 * @param explicitly do not use magnetic snap (required for snap delta calculation)
+	 * @param ensure_snap ignore SnapOff and magnetic snap.
+	 * Required for inverting snap logic with modifier keys and snap delta calculation.
 	 * @return the snapped framepos_t coordinate relative to region start
 	 */
-	framepos_t snap_pixel_to_sample(double x, bool explicitly = false);
+	framepos_t snap_pixel_to_sample(double x, bool ensure_snap = false);
 
 	/** Convert a timestamp in beats into frames (both relative to region position) */
 	framepos_t region_beats_to_region_frames(Evoral::Beats beats) const;

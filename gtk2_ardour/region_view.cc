@@ -939,10 +939,12 @@ RegionView::move_contents (frameoffset_t distance)
 
 /** Snap a frame offset within our region using the current snap settings.
  *  @param x Frame offset from this region's position.
+ *  @param ensure_snap whether to ignore snap_mode (in the case of SnapOff) and magnetic snap.
+ *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
  *  @return Snapped frame offset from this region's position.
  */
 frameoffset_t
-RegionView::snap_frame_to_frame (frameoffset_t x, bool explicitly) const
+RegionView::snap_frame_to_frame (frameoffset_t x, bool ensure_snap) const
 {
 	PublicEditor& editor = trackview.editor();
 
@@ -951,12 +953,12 @@ RegionView::snap_frame_to_frame (frameoffset_t x, bool explicitly) const
 
 	/* try a snap in either direction */
 	framepos_t frame = session_frame;
-	editor.snap_to (frame, RoundNearest, false, explicitly);
+	editor.snap_to (frame, RoundNearest, false, ensure_snap);
 
 	/* if we went off the beginning of the region, snap forwards */
 	if (frame < _region->position ()) {
 		frame = session_frame;
-		editor.snap_to (frame, RoundUpAlways, false, explicitly);
+		editor.snap_to (frame, RoundUpAlways, false, ensure_snap);
 	}
 
 	/* back to region relative */
