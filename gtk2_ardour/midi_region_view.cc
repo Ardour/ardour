@@ -2748,6 +2748,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
  * amount of the drag.  In non-relative mode, all selected notes are set to have the same start or end point
  * as the \a primary note.
  * @param snap_delta snap offset of the primary note in pixels. used in SnapRelative SnapDelta mode.
+ * @param with_snap true if snap is to be used to determine the position, false if no snap is to be used.
  */
 void
 MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap)
