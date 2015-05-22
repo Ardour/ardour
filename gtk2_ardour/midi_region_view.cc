@@ -2800,15 +2800,16 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		if (!cursor_set) {
-			/* snap delta is in pixels (sigh) */
-			framepos_t delta_samps = trackview.editor().pixel_to_sample (snap_delta);
-			double delta_beats;
+			/* Convert snap delta from pixels to beats. */
+			framepos_t snap_delta_samps = trackview.editor().pixel_to_sample (snap_delta);
+			double snap_delta_beats;
 			int sign = 1;
+
 			/* negative beat offsets aren't allowed */
-			if (delta_samps > 0) {
-				delta_beats = region_frames_to_region_beats_double (delta_samps);
-			} else if (delta_samps < 0) {
-				delta_beats = region_frames_to_region_beats_double ( - delta_samps);
+			if (snap_delta_samps > 0) {
+				snap_delta_beats = region_frames_to_region_beats_double (snap_delta_samps);
+			} else if (snap_delta_samps < 0) {
+				snap_delta_beats = region_frames_to_region_beats_double ( - snap_delta_samps);
 				sign = -1;
 			}
 
@@ -2818,12 +2819,12 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 
 			if (at_front) {
 				if (beats < canvas_note->note()->end_time()) {
-					len = canvas_note->note()->time() - beats + (sign * delta_beats);
+					len = canvas_note->note()->time() - beats + (sign * snap_delta_beats);
 					len += canvas_note->note()->length();
 				}
 			} else {
 				if (beats >= canvas_note->note()->time()) {
-					len = beats - canvas_note->note()->time() - (sign * delta_beats);
+					len = beats - canvas_note->note()->time() - (sign * snap_delta_beats);
 				}
 			}
 
@@ -2878,9 +2879,12 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		if (current_x > trackview.editor().sample_to_pixel(_region->length())) {
 			current_x = trackview.editor().sample_to_pixel(_region->length());
 		}
+
+		/* Convert snap delta from pixels to beats with sign. */
 		framepos_t snap_delta_samps = trackview.editor().pixel_to_sample (snap_delta);
 		double snap_delta_beats;
 		int sign = 1;
+
 		if (snap_delta_samps > 0) {
 			snap_delta_beats = region_frames_to_region_beats_double (snap_delta_samps);
 		} else if (snap_delta_samps < 0) {
@@ -2888,7 +2892,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 			sign = -1;
 		}
 
-		/* Convert that to a frame within the source */
+		/* Convert the new x position to a frame within the source */
 		const framepos_t current_fr = snap_pixel_to_sample (current_x, with_snap) + _region->start ();
 
 		/* and then to beats */

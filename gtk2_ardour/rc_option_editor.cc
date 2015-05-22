@@ -453,6 +453,26 @@ public:
 		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
 		t->attach (_copy_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
+				++row;
+		col = 1;
+
+		/* constraint modifier */
+		set_popdown_strings (_constraint_modifier_combo, dumb);
+		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::constraint_modifier ()) {
+				_constraint_modifier_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Constrain drag using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_constraint_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
 		++row;
 
 		l = manage (left_aligned_label (_("When Beginning a Trim:")));
@@ -763,6 +783,18 @@ private:
 		}
 	}
 
+	void constraint_modifier_chosen ()
+	{
+		string const txt = _constraint_modifier_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_constraint_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
 	void trim_contents_modifier_chosen ()
 	{
 		string const txt = _trim_contents_combo.get_active_text();
@@ -857,6 +889,7 @@ private:
 	ComboBoxText _insert_note_modifier_combo;
 	ComboBoxText _snap_modifier_combo;
 	ComboBoxText _snap_delta_combo;
+	ComboBoxText _constraint_modifier_combo;
 	ComboBoxText _trim_contents_combo;
 	ComboBoxText _trim_overlap_combo;
 	ComboBoxText _trim_anchored_combo;

@@ -44,6 +44,11 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 	static bool indicates_snap (guint state);
 	static bool indicates_snap_delta (guint state);
 
+	static void set_constraint_modifier (guint);
+	/** @return Modifier mask to constrain drags in a particular direction;
+	 */
+	static ModifierMask constraint_modifier () { return ModifierMask (constraint_mod); }
+
 	static void set_trim_contents_modifier (guint);
 	/** @return Modifier mask to move contents rather than region bounds during trim;
 	 */
@@ -74,6 +79,7 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 	 */
 	static ModifierMask note_size_relative_modifier () { return ModifierMask (note_size_relative_mod); }
 private:
+	static guint     constraint_mod;
 	static guint     trim_contents_mod;
 	static guint     trim_overlap_mod;
 	static guint     trim_anchored_mod;

@@ -48,6 +48,7 @@ accel_map_changed (GtkAccelMap* /*map*/,
 	me->ui.setup_tooltips ();
 }
 
+guint ArdourKeyboard::constraint_mod = Keyboard::SecondaryModifier;
 guint ArdourKeyboard::trim_contents_mod = Keyboard::PrimaryModifier;
 guint ArdourKeyboard::trim_overlap_mod = Keyboard::TertiaryModifier;
 guint ArdourKeyboard::trim_anchored_mod = Keyboard::TertiaryModifier;
@@ -187,6 +188,8 @@ ArdourKeyboard::get_state (void)
 	XMLNode* node = &Keyboard::get_state ();
 	char buf[32];
 
+	snprintf (buf, sizeof (buf), "%d", constraint_mod);
+	node->add_property ("constraint-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", trim_contents_mod);
 	node->add_property ("trim-contents-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", trim_overlap_mod);
@@ -207,6 +210,10 @@ int
 ArdourKeyboard::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
+
+	if ((prop = node.property ("constraint-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &constraint_mod);
+	}
 
 	if ((prop = node.property ("trim-contents-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &trim_contents_mod);
@@ -253,6 +260,14 @@ ArdourKeyboard::indicates_snap_delta (guint state)
 	const bool equals_s = Keyboard::modifier_state_equals (state, Keyboard::snap_modifier());
 
 	return (contains_d && ((contains_s && !equals_s) || !contains_s));
+}
+
+void
+ArdourKeyboard::set_constraint_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~constraint_mod);
+	constraint_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | constraint_mod);
 }
 
 void

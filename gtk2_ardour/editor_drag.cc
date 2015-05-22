@@ -249,7 +249,6 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 void
 Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 {
-	// if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
 
 	/* we set up x/y dragging constraints on first move */
 	_x_constrained = false;
@@ -401,20 +400,31 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				/* just changed */
 
 				if (fabs (current_pointer_y() - _grab_y) > fabs (current_pointer_x() - _grab_x)) {
-					if ((event->motion.state & Gdk::BUTTON2_MASK) && Config->get_edit_mode() != Lock) {
-						_x_constrained = true;
-						_y_constrained = false;
-					}
 					_initially_vertical = true;
 				} else {
-					if ((event->motion.state & Gdk::BUTTON2_MASK) && Config->get_edit_mode() != Lock) {
-						_x_constrained = false;
-						_y_constrained = true;
-					}
 					_initially_vertical = false;
 				}
-
-				if (Config->get_edit_mode() == Lock) {
+				if (Config->get_edit_mode() != Lock) {
+					if (event->motion.state & Gdk::BUTTON2_MASK) {
+						// if dragging with button2, the motion is x constrained, with constraint modifier it is y constrained
+						if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+							_x_constrained = false;
+							_y_constrained = true;
+						} else {
+							_x_constrained = true;
+							_y_constrained = false;
+						}
+					} else if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+						// if dragging normally, the motion is constrained to the first direction of movement.
+						if (_initially_vertical) {
+							_x_constrained = true;
+							_y_constrained = false;
+						} else {
+							_x_constrained = false;
+							_y_constrained = true;
+						}
+					}
+				} else {
 					if (event->button.state & Gdk::BUTTON2_MASK) {
 						_x_constrained = false;
 					} else {
