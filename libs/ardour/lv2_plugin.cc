@@ -1082,6 +1082,18 @@ LV2Plugin::do_save_preset(string name)
 		Glib::get_home_dir(),
 		Glib::build_filename(".lv2", prefix + "_" + base_name + ".lv2"));
 
+#ifdef HAVE_LILV_0_21_3
+	/* delete reference to old preset (if any) */
+	const PresetRecord* r = preset_by_label(name);
+	if (r) {
+		LilvNode*  pset  = lilv_new_uri (_world.world, r->uri.c_str());
+		if (pset) {
+			lilv_world_unload_resource (_world.world, pset);
+			lilv_node_free(pset);
+		}
+	}
+#endif
+
 	LilvState* state = lilv_state_new_from_instance(
 		_impl->plugin,
 		_impl->instance,
