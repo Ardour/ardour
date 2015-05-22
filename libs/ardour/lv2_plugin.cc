@@ -1143,6 +1143,9 @@ LV2Plugin::do_remove_preset(string name)
 		return;
 	}
 
+	/* Unload preset from world. */
+	lilv_world_unload_resource(world, pset);
+
 	/* Delete it from the file system.  This will remove the preset file and the entry
 	   from the manifest.  If this results in an empty manifest (i.e. the
 	   preset is the only thing in the bundle), then the bundle is removed. */
