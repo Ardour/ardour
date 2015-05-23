@@ -122,7 +122,12 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static ModifierMask snap_modifier () { return ModifierMask (snap_mod); }
 
 	static void set_snap_delta_modifier (guint);
-	/** @return Modifier mask to temporarily toggle between relative and absolute grid setting;
+	/** @return Modifier mask to temporarily toggle between relative and absolute grid setting.
+	 *  Absolute grid is for aligning objects with the grid lines.
+	 *  Relative grid is for maintaining an initial position relative to the grid lines.
+	 *  With this modifier:
+	 *  - magnetic or normal grid should snap absolutely to the grid lines
+	 *  - no grid should become absolute grid.
 	 */
 	static ModifierMask snap_delta_modifier () { return ModifierMask (snap_delta_mod); }
 
