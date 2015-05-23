@@ -404,6 +404,11 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 				} else {
 					_initially_vertical = false;
 				}
+				/** check constraints for this drag.
+				 *  Note that the current convention is to use "contains" for 
+				 *  key modifiers during motion and "equals" when initiating a drag.
+				 *  In this case we haven't moved yet, so "equals" applies here.
+				 */
 				if (Config->get_edit_mode() != Lock) {
 					if (event->motion.state & Gdk::BUTTON2_MASK) {
 						// if dragging with button2, the motion is x constrained, with constraint modifier it is y constrained
