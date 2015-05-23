@@ -96,8 +96,8 @@ const char* Keyboard::level4_modifier_name() { return _("Meta"); }
 const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
-guint Keyboard::snap_mod = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
-guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier;
+guint Keyboard::snap_mod = Keyboard::SecondaryModifier;
+guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
 
 #endif
 
