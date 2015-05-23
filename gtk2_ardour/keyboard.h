@@ -41,7 +41,14 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 
 	ARDOUR_UI& ui;
 
+	/** @param state The button state from a GdkEvent.
+	 *  @return true if the modifier state indicates snap modifier
+	 */
 	static bool indicates_snap (guint state);
+
+	/** @param state The button state from a GdkEvent.
+	 *  @return true if the modifier state indicates snap delta
+	 */
 	static bool indicates_snap_delta (guint state);
 
 	static void set_constraint_modifier (guint);
