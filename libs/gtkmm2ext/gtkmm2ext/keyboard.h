@@ -115,12 +115,21 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static bool no_modifiers_active (guint state);
 
 	static void set_snap_modifier (guint);
-
 	/** @return Modifier mask to temporarily toggle grid setting; with this modifier
 	 *  - magnetic or normal grid should become no grid and
 	 *  - no grid should become normal grid
 	 */
 	static ModifierMask snap_modifier () { return ModifierMask (snap_mod); }
+
+	static void set_snap_delta_modifier (guint);
+	/** @return Modifier mask to temporarily toggle between relative and absolute grid setting.
+	 *  Absolute grid is for aligning objects with the grid lines.
+	 *  Relative grid is for maintaining an initial position relative to the grid lines.
+	 *  With this modifier:
+	 *  - magnetic or normal grid should snap absolutely to the grid lines
+	 *  - no grid should become absolute grid.
+	 */
+	static ModifierMask snap_delta_modifier () { return ModifierMask (snap_delta_mod); }
 
 	static guint edit_button() { return edit_but; }
 	static void set_edit_button (guint);
@@ -186,6 +195,7 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static guint     insert_note_but;
 	static guint     insert_note_mod;
 	static guint     snap_mod;
+	static guint     snap_delta_mod;
 	static guint     button2_modifiers;
 	static Gtk::Window* current_window;
 	static std::string user_keybindings_path;

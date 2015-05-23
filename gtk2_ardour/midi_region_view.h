@@ -223,8 +223,8 @@ public:
 	 */
 	void begin_resizing(bool at_front);
 
-	void update_resizing (NoteBase*, bool, double, bool);
-	void commit_resizing (NoteBase*, bool, double, bool);
+	void update_resizing (NoteBase* primary, bool at_front, double delta_x, bool relative, double snap_delta, bool with_snap);
+	void commit_resizing (NoteBase* primary, bool at_front, double delat_x, bool relative, double snap_delta, bool with_snap);
 	void abort_resizing ();
 
 	/** Change the channel of the selection.
@@ -250,15 +250,18 @@ public:
 
 	/** Snap a region relative pixel coordinate to pixel units.
 	 * @param x a pixel coordinate relative to region start
+	 * @param ensure_snap do not use magnetic snap (required for snap delta calculation)
 	 * @return the snapped pixel coordinate relative to region start
 	 */
-	double snap_to_pixel(double x);
+	double snap_to_pixel(double x, bool ensure_snap = false);
 
 	/** Snap a region relative pixel coordinate to frame units.
 	 * @param x a pixel coordinate relative to region start
+	 * @param ensure_snap ignore SnapOff and magnetic snap.
+	 * Required for inverting snap logic with modifier keys and snap delta calculation.
 	 * @return the snapped framepos_t coordinate relative to region start
 	 */
-	framepos_t snap_pixel_to_sample(double x);
+	framepos_t snap_pixel_to_sample(double x, bool ensure_snap = false);
 
 	/** Convert a timestamp in beats into frames (both relative to region position) */
 	framepos_t region_beats_to_region_frames(Evoral::Beats beats) const;
@@ -268,6 +271,7 @@ public:
 	}
 	/** Convert a timestamp in frames to beats (both relative to region position) */
 	Evoral::Beats region_frames_to_region_beats(framepos_t) const;
+	double region_frames_to_region_beats_double(framepos_t) const;
 
 	/** Convert a timestamp in beats measured from source start into absolute frames */
 	framepos_t source_beats_to_absolute_frames(Evoral::Beats beats) const;
@@ -284,6 +288,10 @@ public:
 
 	ARDOUR::BeatsFramesConverter const & source_relative_time_converter () const {
 		return _source_relative_time_converter;
+	}
+
+	ARDOUR::DoubleBeatsFramesConverter const & region_relative_time_converter_double () const {
+		return _region_relative_time_converter_double;
 	}
 
 	void goto_previous_note (bool add_to_selection);
@@ -400,6 +408,7 @@ private:
 
 	ARDOUR::BeatsFramesConverter _region_relative_time_converter;
 	ARDOUR::BeatsFramesConverter _source_relative_time_converter;
+	ARDOUR::DoubleBeatsFramesConverter _region_relative_time_converter_double;
 
 	boost::shared_ptr<ARDOUR::MidiModel> _model;
 	Events                               _events;

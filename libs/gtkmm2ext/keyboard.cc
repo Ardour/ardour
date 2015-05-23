@@ -58,7 +58,6 @@ guint Keyboard::delete_but = 3;
 guint Keyboard::delete_mod = GDK_SHIFT_MASK;
 guint Keyboard::insert_note_but = 1;
 guint Keyboard::insert_note_mod = GDK_CONTROL_MASK;
-guint Keyboard::snap_mod = GDK_MOD3_MASK;
 
 #ifdef GTKOSX
 
@@ -77,6 +76,9 @@ const char* Keyboard::level4_modifier_name() { return _("Option"); }
 const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
+guint Keyboard::snap_mod = Keyboard::Level4Modifier|Keyboard::TertiaryModifier; // XXX this is probably completely wrong
+guint Keyboard::snap_delta_mod = Keyboard::Level4Modifier;
+
 #else
 
 guint Keyboard::PrimaryModifier = GDK_CONTROL_MASK; // Control
@@ -94,6 +96,9 @@ const char* Keyboard::level4_modifier_name() { return _("Meta"); }
 const char* Keyboard::copy_modifier_name() { return _("Control"); }
 const char* Keyboard::rangeselect_modifier_name() { return S_("Key|Shift"); }
 
+guint Keyboard::snap_mod = Keyboard::SecondaryModifier|Keyboard::Level4Modifier;
+guint Keyboard::snap_delta_mod = Keyboard::SecondaryModifier;
+
 #endif
 
 guint Keyboard::GainFineScaleModifier = Keyboard::PrimaryModifier;
@@ -102,7 +107,6 @@ guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
 guint Keyboard::ScrollZoomVerticalModifier = Keyboard::SecondaryModifier;
 guint Keyboard::ScrollZoomHorizontalModifier = Keyboard::PrimaryModifier;
 guint Keyboard::ScrollHorizontalModifier = Keyboard::TertiaryModifier;
-
 
 Keyboard*    Keyboard::_the_keyboard = 0;
 Gtk::Window* Keyboard::current_window = 0;
@@ -169,6 +173,8 @@ Keyboard::get_state (void)
 	XMLNode* node = new XMLNode ("Keyboard");
 	char buf[32];
 
+	snprintf (buf, sizeof (buf), "%d", CopyModifier);
+	node->add_property ("copy-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", edit_but);
 	node->add_property ("edit-button", buf);
 	snprintf (buf, sizeof (buf), "%d", edit_mod);
@@ -179,6 +185,8 @@ Keyboard::get_state (void)
 	node->add_property ("delete-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", snap_mod);
 	node->add_property ("snap-modifier", buf);
+	snprintf (buf, sizeof (buf), "%d", snap_delta_mod);
+	node->add_property ("snap-delta-modifier", buf);
 	snprintf (buf, sizeof (buf), "%d", insert_note_but);
 	node->add_property ("insert-note-button", buf);
 	snprintf (buf, sizeof (buf), "%d", insert_note_mod);
@@ -191,6 +199,10 @@ int
 Keyboard::set_state (const XMLNode& node, int /*version*/)
 {
 	const XMLProperty* prop;
+
+	if ((prop = node.property ("copy-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &CopyModifier);
+	}
 
 	if ((prop = node.property ("edit-button")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &edit_but);
@@ -210,6 +222,10 @@ Keyboard::set_state (const XMLNode& node, int /*version*/)
 
 	if ((prop = node.property ("snap-modifier")) != 0) {
 		sscanf (prop->value().c_str(), "%d", &snap_mod);
+	}
+
+	if ((prop = node.property ("snap-delta-modifier")) != 0) {
+		sscanf (prop->value().c_str(), "%d", &snap_delta_mod);
 	}
 
 	if ((prop = node.property ("insert-note-button")) != 0) {
@@ -464,6 +480,14 @@ Keyboard::set_snap_modifier (guint mod)
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~snap_mod);
 	snap_mod = mod;
 	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | snap_mod);
+}
+
+void
+Keyboard::set_snap_delta_modifier (guint mod)
+{
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask & ~snap_delta_mod);
+	snap_delta_mod = mod;
+	RelevantModifierKeyMask = GdkModifierType (RelevantModifierKeyMask | snap_delta_mod);
 }
 
 bool

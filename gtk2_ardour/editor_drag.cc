@@ -218,6 +218,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	: _editor (e)
 	, _item (i)
 	, _pointer_frame_offset (0)
+	, _x_constrained (false)
+	, _y_constrained (false)
 	, _trackview_only (trackview_only)
 	, _move_threshold_passed (false)
 	, _starting_point_passed (false)
@@ -226,6 +228,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	, _raw_grab_frame (0)
 	, _grab_frame (0)
 	, _last_pointer_frame (0)
+	, _snap_delta (0)
 {
 
 }
@@ -248,22 +251,11 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 void
 Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 {
-	// if dragging with button2, the motion is x constrained, with Alt-button2 it is y constrained
 
-	if (Keyboard::is_button2_event (&event->button)) {
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::SecondaryModifier)) {
-			_y_constrained = true;
-			_x_constrained = false;
-		} else {
-			_y_constrained = false;
-			_x_constrained = true;
-		}
-	} else {
-		_x_constrained = false;
-		_y_constrained = false;
-	}
+	/* we set up x/y dragging constraints on first move */
 
 	_raw_grab_frame = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
+
 	setup_pointer_frame_offset ();
 	_grab_frame = adjusted_frame (_raw_grab_frame, event);
 	_last_pointer_frame = _grab_frame;
@@ -343,6 +335,16 @@ Drag::adjusted_current_frame (GdkEvent const * event, bool snap) const
 	return adjusted_frame (_drags->current_pointer_frame (), event, snap);
 }
 
+frameoffset_t
+Drag::snap_delta (guint state) const
+{
+	if (ArdourKeyboard::indicates_snap_delta (state)) {
+		return 0;
+	}
+
+	return _snap_delta;
+}
+
 double
 Drag::current_pointer_x() const
 {
@@ -357,6 +359,14 @@ Drag::current_pointer_y () const
 	}
 
 	return _drags->current_pointer_y () - _editor->get_trackview_group()->canvas_origin().y;
+}
+
+void
+Drag::setup_snap_delta (framepos_t pos)
+{
+	framepos_t temp = pos;
+	_editor->snap_to (temp, ARDOUR::RoundNearest, false, true);
+	_snap_delta = temp - pos;
 }
 
 bool
@@ -393,6 +403,39 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 					_initially_vertical = true;
 				} else {
 					_initially_vertical = false;
+				}
+				/** check constraints for this drag.
+				 *  Note that the current convention is to use "contains" for 
+				 *  key modifiers during motion and "equals" when initiating a drag.
+				 *  In this case we haven't moved yet, so "equals" applies here.
+				 */
+				if (Config->get_edit_mode() != Lock) {
+					if (event->motion.state & Gdk::BUTTON2_MASK) {
+						// if dragging with button2, the motion is x constrained, with constraint modifier it is y constrained
+						if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+							_x_constrained = false;
+							_y_constrained = true;
+						} else {
+							_x_constrained = true;
+							_y_constrained = false;
+						}
+					} else if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::constraint_modifier ())) {
+						// if dragging normally, the motion is constrained to the first direction of movement.
+						if (_initially_vertical) {
+							_x_constrained = true;
+							_y_constrained = false;
+						} else {
+							_x_constrained = false;
+							_y_constrained = true;
+						}
+					}
+				} else {
+					if (event->button.state & Gdk::BUTTON2_MASK) {
+						_x_constrained = false;
+					} else {
+						_x_constrained = true;
+					}
+					_y_constrained = false;
 				}
 			}
 
@@ -555,7 +598,6 @@ RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView
 	, _total_x_delta (0)
 	, _last_pointer_time_axis_view (0)
 	, _last_pointer_layer (0)
-	, _single_axis (false)
 	, _ndropzone (0)
 	, _pdropzone (0)
 	, _ddropzone (0)
@@ -567,10 +609,7 @@ void
 RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-
-	if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
-		_single_axis = true;
-	}
+	setup_snap_delta (_last_frame_position);
 
 	show_verbose_cursor_time (_last_frame_position);
 
@@ -588,7 +627,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	/* compute the amount of pointer motion in frames, and where
 	   the region would be if we moved it by that much.
 	*/
-	*pending_region_position = adjusted_current_frame (event);
+	*pending_region_position = adjusted_frame (_drags->current_pointer_frame () + snap_delta (event->button.state), event, true);
 
 	framepos_t sync_frame;
 	framecnt_t sync_offset;
@@ -600,11 +639,11 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 	 */
 	if (sync_dir >= 0 || (sync_dir < 0 && *pending_region_position >= sync_offset)) {
 
-		sync_frame = *pending_region_position + (sync_dir*sync_offset);
+		sync_frame = *pending_region_position + (sync_dir * sync_offset);
 
 		_editor->snap_to_with_modifier (sync_frame, event);
 
-		*pending_region_position = _primary->region()->adjust_to_sync (sync_frame);
+		*pending_region_position = _primary->region()->adjust_to_sync (sync_frame) - snap_delta (event->button.state);
 
 	} else {
 		*pending_region_position = _last_frame_position;
@@ -616,8 +655,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, framepos_t* pending_r
 
 	double dx = 0;
 
-	/* in locked edit mode, reverse the usual meaning of _x_constrained */
-	bool const x_move_allowed = Config->get_edit_mode() == Lock ? _x_constrained : !_x_constrained;
+	bool const x_move_allowed = !_x_constrained;
 
 	if ((*pending_region_position != _last_frame_position) && x_move_allowed) {
 
@@ -749,18 +787,6 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 	int current_pointer_time_axis_view = -1;
 
 	assert (!_views.empty ());
-
-	if (first_move) {
-		if (_single_axis) {
-			if (initially_vertical()) {
-				_y_constrained = false;
-				_x_constrained = true;
-			} else {
-				_y_constrained = true;
-				_x_constrained = false;
-			}
-		}
-	}
 
 	/* Note: time axis views in this method are often expressed as an index into the _time_axis_views vector */
 
@@ -1302,14 +1328,6 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 		}
 
 		return;
-	}
-
-	/* reverse this here so that we have the correct logic to finalize
-	   the drag.
-	*/
-
-	if (Config->get_edit_mode() == Lock) {
-		_x_constrained = !_x_constrained;
 	}
 
 	assert (!_views.empty ());
@@ -2318,6 +2336,7 @@ RegionCreateDrag::aborted (bool)
 NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, region (0)
+	, _snap_delta (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteResizeDrag\n");
 }
@@ -2342,9 +2361,13 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	region = &cnote->region_view();
 
+	double temp;
+	temp = region->snap_to_pixel (cnote->x0 (), true);
+	_snap_delta = temp - cnote->x0 ();
+
 	_item->grab ();
 
-	if (event->motion.state & Keyboard::PrimaryModifier) {
+	if (event->motion.state & ArdourKeyboard::note_size_relative_modifier ()) {
 		relative = false;
 	} else {
 		relative = true;
@@ -2377,7 +2400,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 }
 
 void
-NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
+NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
@@ -2385,21 +2408,62 @@ NoteResizeDrag::motion (GdkEvent* /*event*/, bool /*first_move*/)
 		assert (nb);
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		if (mrv) {
-			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+			double sd = 0.0;
+			bool snap = true;
+			bool apply_snap_delta = !ArdourKeyboard::indicates_snap_delta (event->button.state);
+
+			if (ArdourKeyboard::indicates_snap (event->button.state)) {
+				if (_editor->snap_mode () != SnapOff) {
+					snap = false;
+				}
+			} else {
+				if (_editor->snap_mode () == SnapOff) {
+					snap = false;
+					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
+					if (!apply_snap_delta) {
+						snap = true;
+					}
+				}
+			}
+
+			if (apply_snap_delta) {
+				sd = _snap_delta;
+			}
+
+			mrv->update_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
 		}
 	}
 }
 
 void
-NoteResizeDrag::finished (GdkEvent*, bool /*movement_occurred*/)
+NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+		double sd = 0.0;
+		bool snap = true;
+		bool apply_snap_delta = !ArdourKeyboard::indicates_snap_delta (event->button.state);
 		if (mrv) {
-			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative);
+			if (ArdourKeyboard::indicates_snap (event->button.state)) {
+				if (_editor->snap_mode () != SnapOff) {
+					snap = false;
+				}
+			} else {
+				if (_editor->snap_mode () == SnapOff) {
+					snap = false;
+					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
+					if (!apply_snap_delta) {
+						snap = true;
+					}
+				}
+			}
+			if (apply_snap_delta) {
+				sd = _snap_delta;
+			}
+			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
 		}
 	}
 
@@ -2597,8 +2661,9 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	framecnt_t const region_length = (framecnt_t) (_primary->region()->length() / speed);
 
 	framepos_t const pf = adjusted_current_frame (event);
+	setup_snap_delta (region_start);
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_contents_modifier ())) {
 		/* Move the contents of the region around without changing the region bounds */
 		_operation = ContentsTrim;
 		Drag::start_grab (event, _editor->cursors()->trimmer);
@@ -2607,8 +2672,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		if (pf < (region_start + region_length/2)) {
 			/* closer to front */
 			_operation = StartTrim;
-
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
 				Drag::start_grab (event, _editor->cursors()->anchored_left_side_trim);
 			} else {
 				Drag::start_grab (event, _editor->cursors()->left_side_trim);
@@ -2616,17 +2680,18 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		} else {
 			/* closer to end */
 			_operation = EndTrim;
-			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+			if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
 				Drag::start_grab (event, _editor->cursors()->anchored_right_side_trim);
 			} else {
 				Drag::start_grab (event, _editor->cursors()->right_side_trim);
 			}
 		}
 	}
-
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+	/* jump trim disabled for now
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::trim_jump_modifier ())) {
 		_jump_position_when_done = true;
 	}
+	*/
 
 	switch (_operation) {
 	case StartTrim:
@@ -2636,7 +2701,7 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		}
 		break;
 	case EndTrim:
-		show_verbose_cursor_time (region_end);
+		show_verbose_cursor_duration (region_start, region_end);
 		break;
 	case ContentsTrim:
 		show_verbose_cursor_time (pf);
@@ -2662,8 +2727,8 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	if (tv && tv->is_track()) {
 		speed = tv->track()->speed();
 	}
-
-	framecnt_t dt = adjusted_current_frame (event) - raw_grab_frame () + _pointer_frame_offset;
+	framecnt_t adj_frame = adjusted_frame (_drags->current_pointer_frame () + snap_delta (event->button.state), event, true);
+	framecnt_t dt = adj_frame - raw_grab_frame () + _pointer_frame_offset - snap_delta (event->button.state);
 
 	if (first_move) {
 
@@ -2709,7 +2774,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	bool non_overlap_trim = false;
 
-	if (event && Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+	if (event && Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::trim_overlap_modifier ())) {
 		non_overlap_trim = true;
 	}
 
@@ -2795,14 +2860,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		show_verbose_cursor_time ((framepos_t) (rv->region()->position() / speed));
 		break;
 	case EndTrim:
-		show_verbose_cursor_time ((framepos_t) (rv->region()->last_frame() / speed));
+		show_verbose_cursor_duration ((framepos_t)  rv->region()->position() / speed, (framepos_t) rv->region()->last_frame() / speed);
 		break;
 	case ContentsTrim:
 		// show_verbose_cursor_time (frame_delta);
 		break;
 	}
 }
-
 
 void
 TrimDrag::finished (GdkEvent* event, bool movement_occurred)
@@ -3247,10 +3311,11 @@ void
 CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
+	setup_snap_delta (_editor->playhead_cursor->current_frame ());
 
 	_grab_zoom = _editor->samples_per_pixel;
 
-	framepos_t where = _editor->canvas_event_sample (event);
+	framepos_t where = _editor->canvas_event_sample (event) + snap_delta (event->button.state);
 
 	_editor->snap_to_with_modifier (where, event);
 
@@ -3288,15 +3353,16 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 	}
 
-	fake_locate (where);
+	fake_locate (where - snap_delta (event->button.state));
 }
 
 void
 CursorDrag::motion (GdkEvent* event, bool)
 {
-	framepos_t const adjusted_frame = adjusted_current_frame (event);
-	if (adjusted_frame != last_pointer_frame()) {
-		fake_locate (adjusted_frame);
+	framepos_t where = _editor->canvas_event_sample (event) + snap_delta (event->button.state);
+	_editor->snap_to_with_modifier (where, event);
+	if (where != last_pointer_frame()) {
+		fake_locate (where - snap_delta (event->button.state));
 	}
 }
 
@@ -3347,6 +3413,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
+	setup_snap_delta (r->position ());
 
 	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
 }
@@ -3363,7 +3430,11 @@ void
 FadeInDrag::motion (GdkEvent* event, bool)
 {
 	framecnt_t fade_length;
-	framepos_t const pos = adjusted_current_frame (event);
+
+	framepos_t pos = _editor->canvas_event_sample (event) + snap_delta (event->button.state);
+	_editor->snap_to_with_modifier (pos, event);
+	pos -= snap_delta (event->button.state);
+
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos < (region->position() + 64)) {
@@ -3396,8 +3467,9 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	framecnt_t fade_length;
-
-	framepos_t const pos = adjusted_current_frame (event);
+	framepos_t pos = _editor->canvas_event_sample (event) + snap_delta (event->button.state);
+	_editor->snap_to_with_modifier (pos, event);
+	pos -= snap_delta (event->button.state);
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
@@ -3459,6 +3531,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
 	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
+	setup_snap_delta (r->last_frame ());
 
 	show_verbose_cursor_duration (r->last_frame() - r->fade_out()->back()->when, r->last_frame());
 }
@@ -3476,7 +3549,9 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 {
 	framecnt_t fade_length;
 
-	framepos_t const pos = adjusted_current_frame (event);
+	framepos_t pos = _editor->canvas_event_sample (event) + snap_delta (event->button.state);
+	_editor->snap_to_with_modifier (pos, event);
+	pos -= snap_delta (event->button.state);
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
@@ -3511,7 +3586,9 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	framecnt_t fade_length;
 
-	framepos_t const pos = adjusted_current_frame (event);
+	framepos_t pos = _editor->canvas_event_sample (event) + snap_delta (event->button.state);
+	_editor->snap_to_with_modifier (pos, event);
+	pos -= snap_delta (event->button.state);
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
@@ -3707,7 +3784,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	framepos_t const newframe = adjusted_current_frame (event);
 	framepos_t next = newframe;
 
-	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+	if (Keyboard::modifier_state_contains (event->button.state, ArdourKeyboard::push_points_modifier ())) {
 		move_both = true;
 	}
 
@@ -3965,13 +4042,16 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	_fixed_grab_x = _point->get_x();
 	_fixed_grab_y = _point->get_y();
 
+	framepos_t pos = _editor->pixel_to_sample (_fixed_grab_x);
+	setup_snap_delta (pos);
+
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
 
 	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
 
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
-	_pushing = Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier);
+	_pushing = Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::push_points_modifier ());
 
 	if (!_point->can_slide ()) {
 		_x_constrained = true;
@@ -3984,7 +4064,7 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & Keyboard::SecondaryModifier) {
+	if (event->button.state & ArdourKeyboard::fine_adjust_modifier ()) {
 		dx *= 0.1;
 		dy *= 0.1;
 	}
@@ -4017,12 +4097,13 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cy = max (0.0, cy);
 	cy = min ((double) _point->line().height(), cy);
 
-	framepos_t cx_frames = _editor->pixel_to_sample (cx);
+	framepos_t cx_frames = _editor->pixel_to_sample (cx) + snap_delta (event->button.state);
 
 	if (!_x_constrained) {
 		_editor->snap_to_with_modifier (cx_frames, event);
 	}
 
+	cx_frames -= snap_delta (event->button.state);
 	cx_frames = min (cx_frames, _point->line().maximum_time());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
@@ -4038,8 +4119,7 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 
 		/* just a click */
-
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
 			_editor->reset_point_selection ();
 		}
 
@@ -4070,9 +4150,9 @@ ControlPointDrag::active (Editing::MouseMode m)
 }
 
 LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i),
-	  _line (0),
-	  _cumulative_y_drag (0)
+	: Drag (e, i)
+	, _line (0)
+	, _cumulative_y_drag (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LineDrag\n");
 }
@@ -4123,7 +4203,7 @@ LineDrag::motion (GdkEvent* event, bool)
 {
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & Keyboard::SecondaryModifier) {
+	if (event->button.state & ArdourKeyboard::fine_adjust_modifier ()) {
 		dy *= 0.1;
 	}
 
@@ -4432,7 +4512,12 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	show_verbose_cursor_time (adjusted_current_frame (event));
+	_editor->get_selection().add (_primary);
+
+	framepos_t where = _primary->region()->position();
+	setup_snap_delta (where);
+
+	show_verbose_cursor_duration (where, adjusted_current_frame (event), 0);
 }
 
 void
@@ -4444,14 +4529,15 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (grab_y());
 	int layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
 	int layers = tv.first->layer_display() == Overlaid ? 1 : cv->layers();
-
-	framepos_t const pf = adjusted_current_frame (event);
+	framepos_t pf = _editor->canvas_event_sample (event) + snap_delta (event->button.state);
+	_editor->snap_to_with_modifier (pf, event);
+	pf -= snap_delta (event->button.state);
 
 	if (pf > rv->region()->position()) {
 		rv->get_time_axis_view().show_timestretch (rv->region()->position(), pf, layers, layer);
 	}
 
-	show_verbose_cursor_time (pf);
+	show_verbose_cursor_duration (_primary->region()->position(), pf, 0);
 }
 
 void
@@ -4909,7 +4995,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 	case CreateTransportMarker:
 	case CreateCDMarker:
 
-		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::TertiaryModifier)) {
+		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
 			_copy = true;
 		} else {
 			_copy = false;
@@ -5130,6 +5216,7 @@ void
 NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 {
 	Drag::start_grab (event);
+	setup_snap_delta (_region->source_beats_to_absolute_frames (_primary->note()->time ()));
 
 	if (!(_was_selected = _primary->selected())) {
 
@@ -5157,7 +5244,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor *)
 
 /** @return Current total drag x change in frames */
 frameoffset_t
-NoteDrag::total_dx () const
+NoteDrag::total_dx (const guint state) const
 {
 	/* dx in frames */
 	frameoffset_t const dx = _editor->pixel_to_sample (_drags->current_pointer_x() - grab_x());
@@ -5166,15 +5253,32 @@ NoteDrag::total_dx () const
 	frameoffset_t const n = _region->source_beats_to_absolute_frames (_primary->note()->time ());
 
 	/* new time of the primary note in session frames */
-	frameoffset_t st = n + dx;
+	frameoffset_t st = n + dx + snap_delta (state);
 
 	framepos_t const rp = _region->region()->position ();
 
 	/* prevent the note being dragged earlier than the region's position */
 	st = max (st, rp);
 
-	/* snap and return corresponding delta */
-	return _region->snap_frame_to_frame (st - rp) + rp - n;
+	/* possibly snap and return corresponding delta */
+
+	bool snap = true;
+
+	if (ArdourKeyboard::indicates_snap (state)) {
+		if (_editor->snap_mode () != SnapOff) {
+			snap = false;
+		}
+	} else {
+		if (_editor->snap_mode () == SnapOff) {
+			snap = false;
+			/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
+			if (ArdourKeyboard::indicates_snap_delta (state)) {
+				snap = true;
+			}
+		}
+	}
+
+	return _region->snap_frame_to_frame (st - rp, snap) + rp - n - snap_delta (state);
 }
 
 /** @return Current total drag y change in note number */
@@ -5193,10 +5297,10 @@ NoteDrag::total_dy () const
 }
 
 void
-NoteDrag::motion (GdkEvent *, bool)
+NoteDrag::motion (GdkEvent * event, bool)
 {
 	/* Total change in x and y since the start of the drag */
-	frameoffset_t const dx = total_dx ();
+	frameoffset_t const dx = total_dx (event->button.state);
 	int8_t const dy = total_dy ();
 
 	/* Now work out what we have to do to the note canvas items to set this new drag delta */
@@ -5265,7 +5369,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		_region->note_dropped (_primary, total_dx(), total_dy());
+		_region->note_dropped (_primary, total_dx (ev->button.state), total_dy());
 	}
 }
 

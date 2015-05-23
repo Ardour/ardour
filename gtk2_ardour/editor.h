@@ -436,7 +436,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void snap_to (framepos_t&       first,
 	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	              bool              for_mark  = false);
+	              bool              for_mark  = false,
+		      bool              ensure_snap = false);
 
 	void snap_to_with_modifier (framepos_t&       first,
 	                            GdkEvent const *  ev,
@@ -2131,7 +2132,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void snap_to_internal (framepos_t&       first,
 	                       ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
-	                       bool              for_mark  = false);
+	                       bool              for_mark  = false,
+			       bool              ensure_snap = false);
 
 	void timecode_snap_to_internal (framepos_t&       first,
 	                                ARDOUR::RoundMode direction = ARDOUR::RoundNearest,

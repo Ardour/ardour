@@ -213,12 +213,17 @@ protected:
 		return _last_pointer_y;
 	}
 
-	double last_pointer_frame () const {
+	ARDOUR::framepos_t last_pointer_frame () const {
 		return _last_pointer_frame;
 	}
 
+	ARDOUR::frameoffset_t snap_delta (guint const) const;
+
 	double current_pointer_x () const;
 	double current_pointer_y () const;
+
+	/* sets snap delta from unsnapped pos */
+	void setup_snap_delta (framepos_t pos);
 
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*);
 
@@ -248,6 +253,11 @@ private:
 	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
 	ARDOUR::framepos_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
 	ARDOUR::framepos_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
+
+	/* difference between some key position's snapped and unsnapped
+	 *  framepos. used for relative snap.
+	 */
+	ARDOUR::frameoffset_t _snap_delta;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 };
 
@@ -335,8 +345,6 @@ protected:
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
-	bool _single_axis;
-
 private:
 	uint32_t _ndropzone;
 	uint32_t _pdropzone;
@@ -503,6 +511,7 @@ private:
 	MidiRegionView*     region;
 	bool                relative;
 	bool                at_front;
+	double              _snap_delta;
 };
 
 /** Drags to move MIDI notes */
@@ -518,7 +527,7 @@ class NoteDrag : public Drag
 
   private:
 
-	ARDOUR::frameoffset_t total_dx () const;
+	ARDOUR::frameoffset_t total_dx (const guint) const;
 	int8_t total_dy () const;
 
 	MidiRegionView* _region;
@@ -541,7 +550,7 @@ public:
 	void aborted (bool);
 
 	bool active (Editing::MouseMode mode) {
-		return mode == Editing::MouseDraw;
+		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
 	}
 
 	bool y_movement_matters () const {

@@ -86,7 +86,7 @@ Event<Timestamp>::Event(const Event& copy, bool owns_buf)
 	, _nominal_time(copy._nominal_time)
 	, _size(copy._size)
 	, _buf(copy._buf)
-	, _id(copy.id())
+	, _id (next_event_id ())
 	, _owns_buf(owns_buf)
 {
 	if (owns_buf) {
@@ -110,7 +110,7 @@ template<typename Timestamp>
 const Event<Timestamp>&
 Event<Timestamp>::operator=(const Event& copy)
 {
-	_id = copy.id(); // XXX is this right? do we want ID copy semantics?
+	_id = next_event_id ();
 	_type = copy._type;
 	_original_time = copy._original_time;
 	_nominal_time = copy._nominal_time;

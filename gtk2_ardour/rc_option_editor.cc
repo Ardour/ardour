@@ -271,20 +271,22 @@ static const struct {
 	{ "Option", GDK_MOD1_MASK },
 	{ "Command-Shift", GDK_META_MASK|GDK_SHIFT_MASK },
 	{ "Command-Option", GDK_MOD1_MASK|GDK_META_MASK },
-	{ "Shift-Option", GDK_SHIFT_MASK|GDK_MOD1_MASK },
+	{ "Option-Shift", GDK_MOD1_MASK|GDK_SHIFT_MASK },
+	{ "Control-Shift", GDK_CONTROL_MASK|GDK_SHIFT_MASK },
 	{ "Shift-Command-Option", GDK_MOD5_MASK|GDK_SHIFT_MASK|GDK_META_MASK },
 
 #else
 	{ "Key|Shift", GDK_SHIFT_MASK },
 	{ "Control", GDK_CONTROL_MASK },
-	{ "Alt (Mod1)", GDK_MOD1_MASK },
+	{ "Alt", GDK_MOD1_MASK },
 	{ "Control-Shift", GDK_CONTROL_MASK|GDK_SHIFT_MASK },
 	{ "Control-Alt", GDK_CONTROL_MASK|GDK_MOD1_MASK },
 	{ "Shift-Alt", GDK_SHIFT_MASK|GDK_MOD1_MASK },
 	{ "Control-Shift-Alt", GDK_CONTROL_MASK|GDK_SHIFT_MASK|GDK_MOD1_MASK },
+	{ "Alt-Windows", GDK_MOD1_MASK|GDK_MOD4_MASK },
 	{ "Mod2", GDK_MOD2_MASK },
 	{ "Mod3", GDK_MOD3_MASK },
-	{ "Mod4", GDK_MOD4_MASK },
+	{ "Windows", GDK_MOD4_MASK },
 	{ "Mod5", GDK_MOD5_MASK },
 #endif
 	{ 0, 0 }
@@ -319,24 +321,56 @@ public:
 			}
 		}
 
-		Table* t = manage (new Table (4, 4));
+		Table* t = manage (new Table (5, 11));
 		t->set_spacings (4);
 
-		Label* l = manage (left_aligned_label (_("Edit using:")));
+		int row = 0;
+		int col = 0;
+
+		Label* l = manage (left_aligned_label (_("Select Keyboard layout:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 0, 1, FILL | EXPAND, FILL);
-		t->attach (_edit_modifier_combo, 1, 2, 0, 1, FILL | EXPAND, FILL);
+		vector<string> strs;
+
+		for (map<string,string>::iterator bf = Keyboard::binding_files.begin(); bf != Keyboard::binding_files.end(); ++bf) {
+			strs.push_back (bf->first);
+		}
+
+		set_popdown_strings (_keyboard_layout_selector, strs);
+		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
+		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_keyboard_layout_selector, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 0;
+
+		l = manage (left_aligned_label (_("When Clicking:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, col, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		l = manage (left_aligned_label (_("Edit using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_edit_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 3, 4, 0, 1, FILL | EXPAND, FILL);
-		t->attach (_edit_button_spin, 4, 5, 0, 1, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_edit_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
 
 		_edit_button_spin.set_name ("OptionsEntry");
 		_edit_button_adjustment.set_value (Keyboard::edit_button());
 		_edit_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::edit_button_changed));
+
+		++row;
+		col = 1;
 
 		set_popdown_strings (_delete_modifier_combo, dumb);
 		_delete_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_modifier_chosen));
@@ -351,19 +385,21 @@ public:
 		l = manage (left_aligned_label (_("Delete using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 1, 2, FILL | EXPAND, FILL);
-		t->attach (_delete_modifier_combo, 1, 2, 1, 2, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_delete_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 3, 4, 1, 2, FILL | EXPAND, FILL);
-		t->attach (_delete_button_spin, 4, 5, 1, 2, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_delete_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
 
 		_delete_button_spin.set_name ("OptionsEntry");
 		_delete_button_adjustment.set_value (Keyboard::delete_button());
 		_delete_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::delete_button_changed));
 
+		++row;
+		col = 1;
 
 		set_popdown_strings (_insert_note_modifier_combo, dumb);
 		_insert_note_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_modifier_chosen));
@@ -378,20 +414,165 @@ public:
 		l = manage (left_aligned_label (_("Insert note using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 2, 3, FILL | EXPAND, FILL);
-		t->attach (_insert_note_modifier_combo, 1, 2, 2, 3, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_insert_note_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		l = manage (new Label (_("+ button")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 3, 4, 2, 3, FILL | EXPAND, FILL);
-		t->attach (_insert_note_button_spin, 4, 5, 2, 3, FILL | EXPAND, FILL);
+		t->attach (*l, col + 3, col + 4, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_insert_note_button_spin, col + 4, col + 5, row, row + 1, FILL | EXPAND, FILL);
 
 		_insert_note_button_spin.set_name ("OptionsEntry");
 		_insert_note_button_adjustment.set_value (Keyboard::insert_note_button());
 		_insert_note_button_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::insert_note_button_changed));
 
+		++row;
 
+		l = manage (left_aligned_label (_("When Beginning a Drag:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* copy modifier */
+		set_popdown_strings (_copy_modifier_combo, dumb);
+		_copy_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::copy_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::CopyModifier) {
+				_copy_modifier_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Copy items using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_copy_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+				++row;
+		col = 1;
+
+		/* constraint modifier */
+		set_popdown_strings (_constraint_modifier_combo, dumb);
+		_constraint_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::constraint_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::constraint_modifier ()) {
+				_constraint_modifier_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Constrain drag using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_constraint_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+
+		l = manage (left_aligned_label (_("When Beginning a Trim:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* trim_contents */
+		set_popdown_strings (_trim_contents_combo, dumb);
+		_trim_contents_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_contents_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_contents_modifier ()) {
+				_trim_contents_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Trim contents using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_trim_contents_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* anchored trim */
+		set_popdown_strings (_trim_anchored_combo, dumb);
+		_trim_anchored_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_anchored_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_anchored_modifier ()) {
+				_trim_anchored_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Anchored trim using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		++col;
+		t->attach (_trim_anchored_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* jump trim disabled for now
+		set_popdown_strings (_trim_jump_combo, dumb);
+		_trim_jump_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_jump_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::trim_jump_modifier ()) {
+				_trim_jump_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Jump after trim using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		++col;
+		t->attach (_trim_jump_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+		*/
+
+		/* note resize relative */
+		set_popdown_strings (_note_size_relative_combo, dumb);
+		_note_size_relative_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::note_size_relative_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::note_size_relative_modifier ()) {
+				_note_size_relative_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Resize notes relatively using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		++col;
+		t->attach (_note_size_relative_combo, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+
+		l = manage (left_aligned_label (_("While Dragging:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* ignore snap */
 		set_popdown_strings (_snap_modifier_combo, dumb);
 		_snap_modifier_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_modifier_chosen));
 
@@ -405,24 +586,100 @@ public:
 		l = manage (left_aligned_label (_("Ignore snap using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 3, 4, FILL | EXPAND, FILL);
-		t->attach (_snap_modifier_combo, 1, 2, 3, 4, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_snap_modifier_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
-		vector<string> strs;
+		++row;
+		col = 1;
 
-		for (map<string,string>::iterator bf = Keyboard::binding_files.begin(); bf != Keyboard::binding_files.end(); ++bf) {
-			strs.push_back (bf->first);
+		/* snap delta */
+		set_popdown_strings (_snap_delta_combo, dumb);
+		_snap_delta_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::snap_delta_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) Keyboard::snap_delta_modifier ()) {
+				_snap_delta_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
 		}
 
-		set_popdown_strings (_keyboard_layout_selector, strs);
-		_keyboard_layout_selector.set_active_text (Keyboard::current_binding_name());
-		_keyboard_layout_selector.signal_changed().connect (sigc::mem_fun (*this, &KeyboardOptions::bindings_changed));
-
-		l = manage (left_aligned_label (_("Keyboard layout:")));
+		l = manage (left_aligned_label (_("Snap to absolute using:")));
 		l->set_name ("OptionsLabel");
 
-		t->attach (*l, 0, 1, 4, 5, FILL | EXPAND, FILL);
-		t->attach (_keyboard_layout_selector, 1, 2, 4, 5, FILL | EXPAND, FILL);
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_snap_delta_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+
+		l = manage (left_aligned_label (_("While Trimming:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* trim_overlap */
+		set_popdown_strings (_trim_overlap_combo, dumb);
+		_trim_overlap_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::trim_overlap_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::trim_overlap_modifier ()) {
+				_trim_overlap_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Resize overlaped regions using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_trim_overlap_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+
+		l = manage (left_aligned_label (_("While Dragging Control Points:")));
+		l->set_name ("OptionEditorHeading");
+		t->attach (*l, 0, 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* fine adjust */
+		set_popdown_strings (_fine_adjust_combo, dumb);
+		_fine_adjust_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::fine_adjust_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::fine_adjust_modifier ()) {
+				_fine_adjust_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Fine adjust using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_fine_adjust_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
+
+		++row;
+		col = 1;
+
+		/* push points */
+		set_popdown_strings (_push_points_combo, dumb);
+		_push_points_combo.signal_changed().connect (sigc::mem_fun(*this, &KeyboardOptions::push_points_modifier_chosen));
+
+		for (int x = 0; modifiers[x].name; ++x) {
+			if (modifiers[x].modifier == (guint) ArdourKeyboard::push_points_modifier ()) {
+				_push_points_combo.set_active_text (S_(modifiers[x].name));
+				break;
+			}
+		}
+
+		l = manage (left_aligned_label (_("Push points using:")));
+		l->set_name ("OptionsLabel");
+
+		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
+		t->attach (_push_points_combo, col + 1, col + 2, row, row + 1, FILL | EXPAND, FILL);
 
 		_box->pack_start (*t, false, false);
 	}
@@ -478,6 +735,18 @@ private:
 		}
 	}
 
+	void copy_modifier_chosen ()
+	{
+		string const txt = _copy_modifier_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_copy_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
 	void insert_note_modifier_chosen ()
 	{
 		string const txt = _insert_note_modifier_combo.get_active_text();
@@ -502,6 +771,102 @@ private:
 		}
 	}
 
+	void snap_delta_modifier_chosen ()
+	{
+		string const txt = _snap_delta_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				Keyboard::set_snap_delta_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void constraint_modifier_chosen ()
+	{
+		string const txt = _constraint_modifier_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_constraint_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void trim_contents_modifier_chosen ()
+	{
+		string const txt = _trim_contents_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_trim_contents_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void trim_overlap_modifier_chosen ()
+	{
+		string const txt = _trim_overlap_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_trim_overlap_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void trim_anchored_modifier_chosen ()
+	{
+		string const txt = _trim_anchored_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_trim_anchored_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void fine_adjust_modifier_chosen ()
+	{
+		string const txt = _fine_adjust_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_fine_adjust_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void push_points_modifier_chosen ()
+	{
+		string const txt = _push_points_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_push_points_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
+	void note_size_relative_modifier_chosen ()
+	{
+		string const txt = _note_size_relative_combo.get_active_text();
+
+		for (int i = 0; modifiers[i].name; ++i) {
+			if (txt == _(modifiers[i].name)) {
+				ArdourKeyboard::set_note_size_relative_modifier (modifiers[i].modifier);
+				break;
+			}
+		}
+	}
+
 	void delete_button_changed ()
 	{
 		Keyboard::set_delete_button (_delete_button_spin.get_value_as_int());
@@ -520,8 +885,18 @@ private:
 	ComboBoxText _keyboard_layout_selector;
 	ComboBoxText _edit_modifier_combo;
 	ComboBoxText _delete_modifier_combo;
+	ComboBoxText _copy_modifier_combo;
 	ComboBoxText _insert_note_modifier_combo;
 	ComboBoxText _snap_modifier_combo;
+	ComboBoxText _snap_delta_combo;
+	ComboBoxText _constraint_modifier_combo;
+	ComboBoxText _trim_contents_combo;
+	ComboBoxText _trim_overlap_combo;
+	ComboBoxText _trim_anchored_combo;
+	ComboBoxText _trim_jump_combo;
+	ComboBoxText _fine_adjust_combo;
+	ComboBoxText _push_points_combo;
+	ComboBoxText _note_size_relative_combo;
 	Adjustment _delete_button_adjustment;
 	SpinButton _delete_button_spin;
 	Adjustment _edit_button_adjustment;
