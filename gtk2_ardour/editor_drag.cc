@@ -218,6 +218,8 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, bool trackview_only)
 	: _editor (e)
 	, _item (i)
 	, _pointer_frame_offset (0)
+	, _x_constrained (false)
+	, _y_constrained (false)
 	, _trackview_only (trackview_only)
 	, _move_threshold_passed (false)
 	, _starting_point_passed (false)
@@ -251,8 +253,6 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 {
 
 	/* we set up x/y dragging constraints on first move */
-	_x_constrained = false;
-	_y_constrained = false;
 
 	_raw_grab_frame = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
 
