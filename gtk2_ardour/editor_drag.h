@@ -550,7 +550,7 @@ public:
 	void aborted (bool);
 
 	bool active (Editing::MouseMode mode) {
-		return mode == Editing::MouseDraw;
+		return mode == Editing::MouseDraw || mode == Editing::MouseContent;
 	}
 
 	bool y_movement_matters () const {
