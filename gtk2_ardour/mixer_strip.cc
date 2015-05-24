@@ -154,11 +154,9 @@ MixerStrip::init ()
 		t += string_compose (_("\n%1-%2-click to toggle the width of all strips."), Keyboard::primary_modifier_name(), Keyboard::tertiary_modifier_name ());
 	}
 	
-	width_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	width_button.set_icon (ArdourButton::StripWidth);
 	ARDOUR_UI::instance()->set_tip (width_button, t);
 
-	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	hide_button.set_icon (ArdourButton::CloseCross);
 	ARDOUR_UI::instance()->set_tip (&hide_button, _("Hide this mixer strip"));
 

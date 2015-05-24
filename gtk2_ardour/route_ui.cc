@@ -148,7 +148,6 @@ RouteUI::init ()
 
 	rec_enable_button = manage (new ArdourButton);
 	rec_enable_button->set_name ("record enable button");
-	rec_enable_button->set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	rec_enable_button->set_icon (ArdourButton::RecButton);
 	UI::instance()->set_tip (rec_enable_button, _("Enable recording on this track"), "");
 

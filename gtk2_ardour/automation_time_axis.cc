@@ -149,7 +149,6 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		_base_rect->lower_to_bottom();
 	}
 
-	hide_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
 	hide_button.set_icon (ArdourButton::CloseCross);
 	hide_button.set_tweaks(ArdourButton::TrackHeader);
 
