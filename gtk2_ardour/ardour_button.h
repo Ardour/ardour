@@ -58,6 +58,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		TransportEnd,
 		TransportPanic,
 		TransportMetronom,
+		NudgeLeft,
+		NudgeRight,
 	};
 
 	static Element default_elements;

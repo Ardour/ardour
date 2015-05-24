@@ -218,6 +218,15 @@ render_vector_icon (cairo_t *cr,
 	cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha)); \
 	cairo_fill(cr);
 
+#define VECTORICONSTROKEOUTLINE() \
+	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND); \
+	cairo_set_line_width(cr, 3.0); \
+	cairo_set_source_rgba (cr, 0, 0, 0, 1.0); \
+	cairo_stroke_preserve(cr); \
+	ArdourCanvas::set_source_rgba (cr, fg_color); \
+	cairo_set_line_width(cr, 1.5);  \
+	cairo_stroke(cr);
+
 
 	/* TODO separate these into dedicated class
 	 * it may also be efficient to render them only once for every size (image-surface) */
@@ -542,6 +551,38 @@ render_vector_icon (cairo_t *cr,
 				x - w * .7, y + h * .25,
 				w * 1.4, lw);
 		cairo_fill(cr);
+	}
+	break;
+	case ArdourButton::NudgeLeft:
+	{
+		const double x = width * .5;
+		const double y = height * .5;
+		const double wh = std::min (x, y);
+
+		const double tri_x = .3 * wh;
+		const double tri_y = .6 * wh;
+
+		cairo_move_to (cr, x + tri_x, y - tri_y);
+		cairo_line_to (cr, x - tri_x, y);
+		cairo_line_to (cr, x + tri_x, y + tri_y);
+		VECTORICONSTROKEOUTLINE();
+	}
+	break;
+	case ArdourButton::NudgeRight:
+	{
+
+		const double x = width * .5;
+		const double y = height * .5;
+		const double wh = std::min (x, y);
+
+		const double tri_x = .3 * wh;
+		const double tri_y = .6 * wh;
+
+		cairo_move_to (cr, x - tri_x, y - tri_y);
+		cairo_line_to (cr, x + tri_x, y);
+		cairo_line_to (cr, x - tri_x, y + tri_y);
+		VECTORICONSTROKEOUTLINE();
+
 	}
 	break;
 	default:
