@@ -23,6 +23,7 @@ I18N_PACKAGE = 'gtkmm2ext3'
 gtkmm2ext_sources = [
         'actions.cc',
         'application.cc',
+        'ardour_icon.cc',
         'auto_spin.cc',
         'barcontroller.cc',
         'binding_proxy.cc',
