@@ -23,6 +23,9 @@ namespace Gtkmm2ext { namespace ArdourIcon {
 		TransportMetronom,
 		NudgeLeft,
 		NudgeRight,
+		ZoomIn,
+		ZoomOut,
+		ZoomFull,
 	};
 
 	bool render (cairo_t *cr,
