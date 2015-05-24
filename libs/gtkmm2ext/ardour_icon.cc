@@ -486,6 +486,74 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		}
 	}
 	break;
+	case TimeAxisShrink:
+	{
+		const double x = width * .5;
+		const double y = height * .5;
+		const double wh = std::min (x, y) * .66;
+		const double ar = std::min (x, y) * .15;
+		const double tri = .7 * (wh - ar);
+
+		cairo_rectangle (cr, x - wh, y - ar, 2 * wh, 2 * ar);
+		VECTORICONSTROKEFILL(.75);
+
+		cairo_set_line_width(cr, 1.0);
+
+		cairo_move_to (cr, x,       y - ar - 0.5);
+		cairo_line_to (cr, x - tri, y - wh + 0.5);
+		cairo_line_to (cr, x + tri, y - wh + 0.5);
+		cairo_close_path (cr);
+
+		cairo_set_source_rgba (cr, 1, 1, 1, .75);
+		cairo_stroke_preserve(cr);
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		cairo_fill(cr);
+
+		cairo_move_to (cr, x,       y + ar + 0.5);
+		cairo_line_to (cr, x - tri, y + wh - 0.5);
+		cairo_line_to (cr, x + tri, y + wh - 0.5);
+		cairo_close_path (cr);
+
+		cairo_set_source_rgba (cr, 1, 1, 1, .75);
+		cairo_stroke_preserve(cr);
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		cairo_fill(cr);
+	}
+	break;
+	case TimeAxisExpand:
+	{
+		const double x = width * .5;
+		const double y = height * .5;
+		const double wh = std::min (x, y) * .66;
+		const double ar = std::min (x, y) * .15;
+		const double tri = .7 * (wh - ar);
+
+		cairo_rectangle (cr, x - wh, y - wh, 2 * wh, 2 * wh);
+		VECTORICONSTROKEFILL(.75);
+
+		cairo_set_line_width(cr, 1.0);
+
+		cairo_move_to (cr, x,       y - wh + 0.5);
+		cairo_line_to (cr, x - tri, y - ar - 0.5);
+		cairo_line_to (cr, x + tri, y - ar - 0.5);
+		cairo_close_path (cr);
+
+		cairo_set_source_rgba (cr, 1, 1, 1, .5);
+		cairo_stroke_preserve(cr);
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		cairo_fill(cr);
+
+		cairo_move_to (cr, x      , y + wh - 0.5);
+		cairo_line_to (cr, x - tri, y + ar + 0.5);
+		cairo_line_to (cr, x + tri, y + ar + 0.5);
+		cairo_close_path (cr);
+
+		cairo_set_source_rgba (cr, 1, 1, 1, .5);
+		cairo_stroke_preserve(cr);
+		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		cairo_fill(cr);
+	}
+	break;
 	default:
 		return false;
 	} // end switch (icon)

@@ -26,6 +26,8 @@ namespace Gtkmm2ext { namespace ArdourIcon {
 		ZoomIn,
 		ZoomOut,
 		ZoomFull,
+		TimeAxisShrink,
+		TimeAxisExpand,
 	};
 
 	bool render (cairo_t *cr,
