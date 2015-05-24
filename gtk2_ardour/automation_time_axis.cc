@@ -149,7 +149,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		_base_rect->lower_to_bottom();
 	}
 
-	hide_button.set_icon (ArdourButton::CloseCross);
+	hide_button.set_icon (ArdourIcon::CloseCross);
 	hide_button.set_tweaks(ArdourButton::TrackHeader);
 
 	auto_button.set_name ("route button");

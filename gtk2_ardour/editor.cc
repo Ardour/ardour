@@ -695,10 +695,10 @@ Editor::Editor ()
 	/* nudge stuff */
 
 	nudge_forward_button.set_name ("nudge button");
-	nudge_forward_button.set_icon(ArdourButton::NudgeRight);
+	nudge_forward_button.set_icon(ArdourIcon::NudgeRight);
 
 	nudge_backward_button.set_name ("nudge button");
-	nudge_backward_button.set_icon(ArdourButton::NudgeLeft);
+	nudge_backward_button.set_icon(ArdourIcon::NudgeLeft);
 
 	fade_context_menu.set_name ("ArdourContextMenu");
 

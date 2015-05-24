@@ -258,7 +258,7 @@ ARDOUR_UI::setup_transport ()
 
 //	auto_input_button.set_text (_("Auto Input"));
 
-	click_button.set_icon (ArdourButton::TransportMetronom);
+	click_button.set_icon (ArdourIcon::TransportMetronom);
 
 	act = ActionManager::get_action ("Transport", "ToggleClick");
 	click_button.set_related_action (act);
@@ -275,14 +275,14 @@ ARDOUR_UI::setup_transport ()
 
 	stop_button.set_active (true);
 
-	goto_start_button.set_icon (ArdourButton::TransportStart);
-	goto_end_button.set_icon (ArdourButton::TransportEnd);
-	roll_button.set_icon (ArdourButton::TransportPlay);
-	stop_button.set_icon (ArdourButton::TransportStop);
-	play_selection_button.set_icon (ArdourButton::TransportRange);
-	auto_loop_button.set_icon (ArdourButton::TransportLoop);
-	rec_button.set_icon (ArdourButton::RecButton);
-	midi_panic_button.set_icon (ArdourButton::TransportPanic);
+	goto_start_button.set_icon (ArdourIcon::TransportStart);
+	goto_end_button.set_icon (ArdourIcon::TransportEnd);
+	roll_button.set_icon (ArdourIcon::TransportPlay);
+	stop_button.set_icon (ArdourIcon::TransportStop);
+	play_selection_button.set_icon (ArdourIcon::TransportRange);
+	auto_loop_button.set_icon (ArdourIcon::TransportLoop);
+	rec_button.set_icon (ArdourIcon::RecButton);
+	midi_panic_button.set_icon (ArdourIcon::TransportPanic);
 
 	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
 	stop_button.set_related_action (act);

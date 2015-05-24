@@ -25,6 +25,7 @@
 #include <gtkmm/action.h>
 
 #include "pbd/signals.h"
+#include "gtkmm2ext/ardour_icon.h"
 #include "gtkmm2ext/binding_proxy.h"
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/cairo_widget.h"
@@ -41,25 +42,6 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 		Menu = 0x20,
 		Inactive = 0x40, // no _action is defined AND state is not used
 		VectorIcon = 0x80, // tentative, see commit message
-	};
-
-	enum Icon {
-		NoIcon,
-		RecButton,
-		RecTapeMode,
-		CloseCross,
-		StripWidth,
-		DinMidi,
-		TransportStop,
-		TransportPlay,
-		TransportLoop,
-		TransportRange,
-		TransportStart,
-		TransportEnd,
-		TransportPanic,
-		TransportMetronom,
-		NudgeLeft,
-		NudgeRight,
 	};
 
 	static Element default_elements;
@@ -90,8 +72,8 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void set_elements (Element);
 	void add_elements (Element);
 
-	Icon icon() const { return _icon; }
-	void set_icon (Icon);
+	Gtkmm2ext::ArdourIcon::Icon icon() const { return _icon; }
+	void set_icon (Gtkmm2ext::ArdourIcon::Icon);
 
 	void set_corner_radius (float);
 
@@ -151,7 +133,7 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	Glib::RefPtr<Gdk::Pixbuf>   _pixbuf;
 	std::string                 _text;
 	Element                     _elements;
-	Icon                        _icon;
+	Gtkmm2ext::ArdourIcon::Icon _icon;
 	Tweaks                      _tweaks;
 	BindingProxy                binding_proxy;
 
