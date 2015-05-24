@@ -22,6 +22,8 @@
 #include <algorithm> // std:min
 #include "gtkmm2ext/ardour_icon.h"
 
+using namespace Gtkmm2ext::ArdourIcon;
+
 // from libs/canvas/utils.cc and  canvas/types.h: typedef uint32_t Color;
 static void ardour_canvas_set_source_rgba (cairo_t *cr, uint32_t color)
 {
@@ -59,7 +61,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 
 	switch (icon) {
 
-	case Gtkmm2ext::ArdourIcon::RecTapeMode:
+	case RecTapeMode:
 	{
 		const double x = width * .5;
 		const double y = height * .5;
@@ -119,7 +121,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_restore(cr);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::RecButton:
+	case RecButton:
 	{
 		const double x = width * .5;
 		const double y = height * .5;
@@ -135,7 +137,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_stroke(cr);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::CloseCross:
+	case CloseCross:
 	{
 		const double x = width * .5;
 		const double y = height * .5;
@@ -149,7 +151,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_stroke(cr);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::StripWidth:
+	case StripWidth:
 	{
 		const double x0 = width  * .2;
 		const double x1 = width  * .8;
@@ -192,7 +194,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_stroke(cr);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::DinMidi:
+	case DinMidi:
 	{
 		const double x = width * .5;
 		const double y = height * .5;
@@ -220,7 +222,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_stroke(cr);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::TransportStop:
+	case TransportStop:
 	{
 		const int wh = std::min (width, height);
 		cairo_rectangle (cr,
@@ -231,7 +233,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		VECTORICONSTROKEFILL(0.8);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::TransportPlay:
+	case TransportPlay:
 	{
 		const int wh = std::min (width, height) * .5;
 		const double y = height * .5;
@@ -247,7 +249,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		VECTORICONSTROKEFILL(0.8);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::TransportPanic:
+	case TransportPanic:
 	{
 		const int wh = std::min (width, height) * .1;
 		const double xc = width * .5;
@@ -261,9 +263,9 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		VECTORICONSTROKEFILL(0.8);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::TransportStart:
-	case Gtkmm2ext::ArdourIcon::TransportEnd:
-	case Gtkmm2ext::ArdourIcon::TransportRange:
+	case TransportStart:
+	case TransportEnd:
+	case TransportRange:
 	{
 		// small play triangle
 		int wh = std::min (width, height);
@@ -274,7 +276,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 
 		const float ln = std::min (width, height) * .07;
 
-		if (icon == Gtkmm2ext::ArdourIcon::TransportStart || icon == Gtkmm2ext::ArdourIcon::TransportRange) {
+		if (icon == TransportStart || icon == TransportRange) {
 			cairo_rectangle (cr,
 					x - wh - ln, y  - tri * 1.7,
 					ln * 2,  tri * 3.4);
@@ -282,7 +284,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 			VECTORICONSTROKEFILL(1.0);
 		}
 
-		if (icon == Gtkmm2ext::ArdourIcon::TransportEnd || icon == Gtkmm2ext::ArdourIcon::TransportRange) {
+		if (icon == TransportEnd || icon == TransportRange) {
 			cairo_rectangle (cr,
 					x + wh - ln, y  - tri * 1.7,
 					ln * 2,  tri * 3.4);
@@ -290,7 +292,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 			VECTORICONSTROKEFILL(1.0);
 		}
 
-		if (icon == Gtkmm2ext::ArdourIcon::TransportStart) {
+		if (icon == TransportStart) {
 			cairo_move_to (cr,  x - wh, y);
 			cairo_line_to (cr,  x + wh, y - tri);
 			cairo_line_to (cr,  x + wh, y + tri);
@@ -304,7 +306,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		VECTORICONSTROKEFILL(1.0);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::TransportLoop:
+	case TransportLoop:
 	{
 		const double x = width * .5;
 		const double y = height * .5;
@@ -331,7 +333,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 #undef ARCARROW
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::TransportMetronom:
+	case TransportMetronom:
 	{
 		const double x  = width * .5;
 		const double y  = height * .5;
@@ -380,7 +382,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_fill(cr);
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::NudgeLeft:
+	case NudgeLeft:
 	{
 		const double x = width * .5;
 		const double y = height * .5;
@@ -395,7 +397,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		VECTORICONSTROKEOUTLINE();
 	}
 	break;
-	case Gtkmm2ext::ArdourIcon::NudgeRight:
+	case NudgeRight:
 	{
 
 		const double x = width * .5;
