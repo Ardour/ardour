@@ -18,15 +18,14 @@
 
 */
 
-#include <math.h> // For M_PI
-#include <algorithm>
+#include <math.h> // M_PI
+#include <algorithm> // std:min
 #include "gtkmm2ext/ardour_icon.h"
 
-// "canvas/types.h" Color == uint32_t
-// from libs/canvas/utils.cc
+// from libs/canvas/utils.cc and  canvas/types.h: typedef uint32_t Color;
 static void ardour_canvas_set_source_rgba (cairo_t *cr, uint32_t color)
 {
-	cairo_set_source_rgba ( cr,
+	cairo_set_source_rgba (cr,
 			((color >> 24) & 0xff) / 255.0,
 			((color >> 16) & 0xff) / 255.0,
 			((color >>  8) & 0xff) / 255.0,
@@ -58,9 +57,6 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 	cairo_set_line_width(cr, 1.5);  \
 	cairo_stroke(cr);
 
-
-	/* TODO separate these into dedicated class
-	 * it may also be efficient to render them only once for every size (image-surface) */
 	switch (icon) {
 
 	case Gtkmm2ext::ArdourIcon::RecTapeMode:
@@ -424,5 +420,3 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 #undef VECTORICONSTROKEOUTLINE
 	return true;
 }
-
-
