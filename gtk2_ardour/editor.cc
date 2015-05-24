@@ -2986,17 +2986,17 @@ Editor::setup_toolbar ()
 	zoom_preset_selector.set_size_request (42, -1);
 
 	zoom_in_button.set_name ("zoom button");
-	zoom_in_button.set_image(::get_icon ("zoom_in"));
+	zoom_in_button.set_icon (ArdourIcon::ZoomIn);
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-in"));
 	zoom_in_button.set_related_action (act);
 
 	zoom_out_button.set_name ("zoom button");
-	zoom_out_button.set_image(::get_icon ("zoom_out"));
+	zoom_out_button.set_icon (ArdourIcon::ZoomOut);
 	act = ActionManager::get_action (X_("Editor"), X_("temporal-zoom-out"));
 	zoom_out_button.set_related_action (act);
 
 	zoom_out_full_button.set_name ("zoom button");
-	zoom_out_full_button.set_image(::get_icon ("zoom_full"));
+	zoom_out_full_button.set_icon (ArdourIcon::ZoomFull);
 	act = ActionManager::get_action (X_("Editor"), X_("zoom-to-session"));
 	zoom_out_full_button.set_related_action (act);
 
