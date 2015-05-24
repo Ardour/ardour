@@ -3024,12 +3024,12 @@ Editor::setup_toolbar ()
 	}
 
 	tav_expand_button.set_name ("zoom button");
-	tav_expand_button.set_image(::get_icon ("tav_exp"));
+	tav_expand_button.set_icon (ArdourIcon::TimeAxisExpand);
 	act = ActionManager::get_action (X_("Editor"), X_("expand-tracks"));
 	tav_expand_button.set_related_action (act);
 
 	tav_shrink_button.set_name ("zoom button");
-	tav_shrink_button.set_image(::get_icon ("tav_shrink"));
+	tav_shrink_button.set_icon (ArdourIcon::TimeAxisShrink);
 	act = ActionManager::get_action (X_("Editor"), X_("shrink-tracks"));
 	tav_shrink_button.set_related_action (act);
 
