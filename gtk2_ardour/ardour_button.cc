@@ -1521,6 +1521,7 @@ void
 ArdourButton::set_icon (Icon i)
 {
 	_icon = i;
+	_elements = (ArdourButton::Element) ((_elements | ArdourButton::VectorIcon) & ~ArdourButton::Text);
 	CairoWidget::set_dirty ();
 }
 
