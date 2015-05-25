@@ -28,6 +28,13 @@ namespace Gtkmm2ext { namespace ArdourIcon {
 		ZoomFull,
 		TimeAxisShrink,
 		TimeAxisExpand,
+		ToolGrab,
+		ToolRange,
+		ToolCut,
+		ToolStretch,
+		ToolAudition,
+		ToolDraw,
+		ToolContent,
 	};
 
 	bool render (cairo_t *cr,
