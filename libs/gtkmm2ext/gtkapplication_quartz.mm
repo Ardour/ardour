@@ -573,9 +573,12 @@ idle_call_activate (gpointer data)
 - (void) activate:(id) sender
 {
 	UNUSED_PARAMETER(sender);
-    // Hot Fix. Increase Priority.
+#ifdef USE_TRACKS_CODE_FEATURES
+	// Hot Fix. Increase Priority.
 	g_idle_add_full (G_PRIORITY_HIGH_IDLE, idle_call_activate, gtk_menu_item, NULL);
-//    g_idle_add (idle_call_activate, gtk_menu_item);
+#else
+	g_idle_add (idle_call_activate, gtk_menu_item);
+#endif
 }
 @end
 
