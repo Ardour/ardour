@@ -461,38 +461,38 @@ Editor::register_actions ()
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	mouse_move_button.set_related_action (act);
-	mouse_move_button.set_image (::get_icon("tool_object"));
+	mouse_move_button.set_icon (Gtkmm2ext::ArdourIcon::ToolGrab);
 	mouse_move_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));	
 	mouse_select_button.set_related_action (act);
-	mouse_select_button.set_image (::get_icon("tool_range"));
+	mouse_select_button.set_icon (Gtkmm2ext::ArdourIcon::ToolRange);
 	mouse_select_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));	
 	mouse_draw_button.set_related_action (act);
-	mouse_draw_button.set_image (::get_icon("midi_tool_pencil"));
+	mouse_draw_button.set_icon (Gtkmm2ext::ArdourIcon::ToolDraw);
 	mouse_draw_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));	
 	mouse_audition_button.set_related_action (act);
-	mouse_audition_button.set_image (::get_icon("tool_audition"));
+	mouse_audition_button.set_icon (Gtkmm2ext::ArdourIcon::ToolAudition);
 	mouse_audition_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));	
 	mouse_timefx_button.set_related_action (act);
-	mouse_timefx_button.set_image (::get_icon("tool_stretch"));
+	mouse_timefx_button.set_icon (Gtkmm2ext::ArdourIcon::ToolStretch);
 	mouse_timefx_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Content Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));	
 	mouse_content_button.set_related_action (act);
-	mouse_content_button.set_image (::get_icon("tool_content"));
+	mouse_content_button.set_icon (Gtkmm2ext::ArdourIcon::ToolContent);
 	mouse_content_button.set_name ("mouse mode button");
 
 	if(!Profile->get_mixbus()) {
 		act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
 		mouse_cut_button.set_related_action (act);
-		mouse_cut_button.set_image (::get_icon("tool_cut"));
+		mouse_cut_button.set_icon (Gtkmm2ext::ArdourIcon::ToolCut);
 		mouse_cut_button.set_name ("mouse mode button");
 	}
 	
