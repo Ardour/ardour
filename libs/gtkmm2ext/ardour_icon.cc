@@ -25,12 +25,22 @@
 using namespace Gtkmm2ext::ArdourIcon;
 
 // from libs/canvas/utils.cc and  canvas/types.h: typedef uint32_t Color;
-static void ardour_canvas_set_source_rgba (cairo_t *cr, uint32_t color)
+static void ardour_icon_set_source_rgba (cairo_t *cr, uint32_t color)
 {
 	cairo_set_source_rgba (cr,
 			((color >> 24) & 0xff) / 255.0,
 			((color >> 16) & 0xff) / 255.0,
 			((color >>  8) & 0xff) / 255.0,
+			((color >>  0) & 0xff) / 255.0
+			);
+}
+
+static void ardour_icon_set_source_inv_rgba (cairo_t *cr, uint32_t color)
+{
+	cairo_set_source_rgba (cr,
+			1.0 - ((color >> 24) & 0xff) / 255.0,
+			1.0 - ((color >> 16) & 0xff) / 255.0,
+			1.0 - ((color >>  8) & 0xff) / 255.0,
 			((color >>  0) & 0xff) / 255.0
 			);
 }
@@ -50,13 +60,13 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 	cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha)); \
 	cairo_fill(cr);
 
-#define VECTORICONSTROKEOUTLINE() \
+#define VECTORICONSTROKEOUTLINE(LW, color) \
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND); \
-	cairo_set_line_width(cr, 3.0); \
-	cairo_set_source_rgba (cr, 0, 0, 0, 1.0); \
+	cairo_set_line_width(cr, (LW) + 1.5); \
+	ardour_icon_set_source_inv_rgba (cr, color); \
 	cairo_stroke_preserve(cr); \
-	ardour_canvas_set_source_rgba (cr, fg_color); \
-	cairo_set_line_width(cr, 1.5);  \
+	ardour_icon_set_source_rgba (cr, color); \
+	cairo_set_line_width(cr, (LW));  \
 	cairo_stroke(cr);
 
 	switch (icon) {
@@ -142,7 +152,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		const double x = width * .5;
 		const double y = height * .5;
 		const double o = .5 + std::min(x, y) * .4;
-		ardour_canvas_set_source_rgba (cr, fg_color);
+		ardour_icon_set_source_rgba (cr, fg_color);
 		cairo_set_line_width(cr, 1);
 		cairo_move_to(cr, x-o, y-o);
 		cairo_line_to(cr, x+o, y+o);
@@ -167,7 +177,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		const double ya0= height  * .35;
 		const double ya1= height  * .65;
 
-		ardour_canvas_set_source_rgba (cr, fg_color);
+		ardour_icon_set_source_rgba (cr, fg_color);
 		cairo_set_line_width(cr, 1);
 
 		// left + right
@@ -199,7 +209,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		const double x = width * .5;
 		const double y = height * .5;
 		const double r = std::min(x, y) * .75;
-		ardour_canvas_set_source_rgba (cr, fg_color);
+		ardour_icon_set_source_rgba (cr, fg_color);
 		cairo_set_line_width(cr, 1);
 		cairo_arc (cr, x, y, r, .57 * M_PI, 2.43 * M_PI);
 		cairo_stroke(cr);
@@ -394,7 +404,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_move_to (cr, x + tri_x, y - tri_y);
 		cairo_line_to (cr, x - tri_x, y);
 		cairo_line_to (cr, x + tri_x, y + tri_y);
-		VECTORICONSTROKEOUTLINE();
+		VECTORICONSTROKEOUTLINE(1.5, fg_color);
 	}
 	break;
 	case NudgeRight:
@@ -410,7 +420,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_move_to (cr, x - tri_x, y - tri_y);
 		cairo_line_to (cr, x + tri_x, y);
 		cairo_line_to (cr, x - tri_x, y + tri_y);
-		VECTORICONSTROKEOUTLINE();
+		VECTORICONSTROKEOUTLINE(1.5, fg_color);
 
 	}
 	break;
@@ -435,7 +445,7 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 #undef LINE45DEG
 
 		// lens
-		ardour_canvas_set_source_rgba (cr, fg_color);
+		ardour_icon_set_source_rgba (cr, fg_color);
 		cairo_arc (cr, x, y, r, 0, 2 * M_PI);
 		cairo_fill_preserve (cr);
 
@@ -450,13 +460,14 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 
 		// outline
 		cairo_set_line_width (cr, 1.5);
+		//ardour_icon_set_source_inv_rgba (cr, fg_color); // alpha
 		cairo_set_source_rgba (cr, .0, .0, .0, .8);
 		cairo_stroke (cr);
 
 		// add "+", "-" or "[]"
 		cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 		cairo_set_line_width (cr, 1.5);
-		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+		ardour_icon_set_source_inv_rgba (cr, fg_color);
 
 		if (icon == ZoomIn || icon == ZoomOut) {
 			cairo_move_to (cr, x - wh, y);
@@ -552,6 +563,109 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 		cairo_stroke_preserve(cr);
 		cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
 		cairo_fill(cr);
+	}
+	break;
+	case ToolRange:
+	{
+		const double x  = width * .5;
+		const double y  = height * .5;
+		const double wh = std::min (x, y) * .6;
+		const double lw = wh / 6.0; // line width (1px with 20x20 button)
+		const double ar = wh * .5; // arrow
+		const double ym = rint (y - wh * .1) + .5; // slightly to the top, on a px
+
+		const double x0 = x - wh;
+		const double x1 = x + wh;
+
+		cairo_rectangle (cr,
+				x - wh - lw,
+				y - wh,
+				lw,  2 * wh);
+
+		VECTORICONSTROKEFILL(1.0);
+
+		cairo_rectangle (cr,
+				x + wh,
+				y - wh,
+				lw,  2 * wh);
+
+		VECTORICONSTROKEFILL(1.0);
+
+		cairo_save (cr);
+
+		// don't draw outline inside the boxes
+		cairo_rectangle (cr, x0, y - wh,
+				2 * wh, 2 * wh);
+		cairo_clip (cr);
+
+		// arrow
+		cairo_move_to (cr, x0 + ar, ym - ar);
+		cairo_line_to (cr, x0, ym);
+		cairo_line_to (cr, x0 + ar, ym + ar);
+
+		cairo_move_to (cr, x1 - ar, ym - ar);
+		cairo_line_to (cr, x1, ym);
+		cairo_line_to (cr, x1 - ar, ym + ar);
+
+		cairo_move_to (cr, x0, ym);
+		cairo_line_to (cr, x1, ym);
+		VECTORICONSTROKEOUTLINE(lw, 0xffffffff);
+
+		cairo_restore (cr);
+	}
+	break;
+	case ToolGrab:
+	{
+		const double x  = width * .5;
+		const double y  = height * .5;
+		const double em = std::min (x, y) * .15; // 3px at 20x20
+
+		// 6x8em hand, with 'em' wide index finger.
+#define EM_POINT(X,Y) \
+		x + (X) * em, y + (Y) * em
+
+		// wrist
+		cairo_move_to (cr, EM_POINT( 2.0,  4.0));
+		cairo_line_to (cr, EM_POINT(-1.5,  4.0));
+		cairo_line_to (cr, EM_POINT(-2.5,  2.0));
+		// thumb
+		cairo_line_to (cr, EM_POINT(-3.0,  1.0));
+
+		// index finger
+		cairo_line_to (cr, EM_POINT(-2.0,  0.0));
+		cairo_line_to (cr, EM_POINT(-2.1, -4.0));
+		cairo_line_to (cr, EM_POINT(-1.5, -4.5));
+		cairo_line_to (cr, EM_POINT(-1.1, -4.0));
+		cairo_line_to (cr, EM_POINT(-1.0,  0.1));
+
+		// middle finger knuckle
+		cairo_line_to (cr, EM_POINT(-0.8,  0.0));
+		cairo_line_to (cr, EM_POINT( 0.3, -0.4));
+		cairo_line_to (cr, EM_POINT( 0.4, -0.6));
+		cairo_line_to (cr, EM_POINT( 0.5, -0.4));
+		cairo_line_to (cr, EM_POINT( 0.5,  0.1));
+
+		// ring finger knuckle
+		cairo_line_to (cr, EM_POINT( 1.0,  0.2));
+		cairo_line_to (cr, EM_POINT( 1.4, -0.3));
+		cairo_line_to (cr, EM_POINT( 1.5, -0.5));
+		cairo_line_to (cr, EM_POINT( 1.6, -0.3));
+		cairo_line_to (cr, EM_POINT( 1.6,  0.3));
+
+		// pinky
+		cairo_line_to (cr, EM_POINT( 2.0,  0.5));
+		cairo_line_to (cr, EM_POINT( 2.5,  0.1));
+		cairo_line_to (cr, EM_POINT( 2.6,  0.0));
+		cairo_line_to (cr, EM_POINT( 2.7,  0.1));
+		cairo_line_to (cr, EM_POINT( 3.0,  1.0));
+
+		// wrist
+		cairo_line_to (cr, EM_POINT( 3.0,  1.5));
+		cairo_line_to (cr, EM_POINT( 2.0,  4.0));
+
+		cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+		VECTORICONSTROKEFILL(1.0);
 	}
 	break;
 	default:
