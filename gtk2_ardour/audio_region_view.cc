@@ -1049,10 +1049,12 @@ AudioRegionView::update_envelope_visibility ()
 		return;
 	}
 
-	if (ARDOUR_UI::config()->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
+	if (ARDOUR_UI::config()->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseContent ) {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
 		gain_line->canvas_group().raise_to_top ();
-
+	} else if (trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
+		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::Line));
+		gain_line->canvas_group().raise_to_top ();
 	} else {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(0));
 	}
@@ -1349,9 +1351,9 @@ AudioRegionView::exited ()
 	trackview.editor().set_current_trimmable (boost::shared_ptr<Trimmable>());
 	trackview.editor().set_current_movable (boost::shared_ptr<Movable>());
 
-	if (gain_line) {
-		gain_line->remove_visibility (AutomationLine::ControlPoints);
-	}
+//	if (gain_line) {
+//		gain_line->remove_visibility (AutomationLine::ControlPoints);
+//	}
 
 	if (fade_in_handle)       { fade_in_handle->hide(); }
 	if (fade_out_handle)      { fade_out_handle->hide(); }

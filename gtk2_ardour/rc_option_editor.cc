@@ -2085,7 +2085,7 @@ RCOptionEditor::RCOptionEditor ()
 		     "show-region-gain-envelopes",
 		     _("Show gain envelopes in audio regions"),
 		     _("in all modes"),
-		     _("only in region gain mode"),
+		     _("only in Draw and Internal Edit modes"),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::get_show_region_gain),
 		     sigc::mem_fun (*_ui_config, &UIConfiguration::set_show_region_gain)
 		     ));
