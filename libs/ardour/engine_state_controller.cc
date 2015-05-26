@@ -582,10 +582,10 @@ EngineStateController::_validate_current_device_state ()
 	std::vector<pframes_t>::iterator bs_iter = std::find (buffer_sizes.begin (), buffer_sizes.end (), _current_state->buffer_size);
 	// if current is not found switch to default if is supported
 	if (bs_iter == buffer_sizes.end ()) {
-		bs_iter = std::find (buffer_sizes.begin (), buffer_sizes.end (), backend->default_buffer_size ());
+		bs_iter = std::find (buffer_sizes.begin (), buffer_sizes.end (), backend->default_buffer_size (_current_state->device_name));
 	
 		if (bs_iter != buffer_sizes.end ()) {
-			_current_state->buffer_size = backend->default_buffer_size ();
+			_current_state->buffer_size = backend->default_buffer_size (_current_state->device_name);
 		} else {
 			if (!buffer_sizes.empty ()) {
 				_current_state->buffer_size = buffer_sizes.front ();
@@ -745,7 +745,7 @@ EngineStateController::get_default_buffer_size () const
 {
 	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance ()->current_backend ();
 	assert (backend);
-	return backend->default_buffer_size ();
+	return backend->default_buffer_size (_current_state->device_name);
 }
 
 
