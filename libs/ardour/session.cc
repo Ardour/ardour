@@ -191,7 +191,8 @@ Session::Session (AudioEngine &eng,
 	, average_dir (0)
 	, have_first_delta_accumulator (false)
 	, _slave_state (Stopped)
-    , _mtc_active (false)
+	, _mtc_active (false)
+	, _ltc_active (false)
 	, post_export_sync (false)
 	, post_export_position (0)
 	, _exporting (false)
@@ -6132,6 +6133,11 @@ Session::reconnect_ltc_input ()
 		if (src != _("None") && !src.empty())  {
 			_ltc_input->nth (0)->connect (src);
 		}
+
+		if ( ARDOUR::Profile->get_trx () ) {
+			// Tracks need this signal to update timecode_source_dropdown
+			MtcOrLtcInputPortChanged (); //emit signal
+		}
 	}
 }
 
@@ -6140,15 +6146,13 @@ Session::reconnect_ltc_output ()
 {
 	if (_ltc_output) {
 
-#if 0
-		string src = Config->get_ltc_sink_port();
+		string src = Config->get_ltc_output_port();
 
 		_ltc_output->disconnect (this);
 
 		if (src != _("None") && !src.empty())  {
 			_ltc_output->nth (0)->connect (src);
 		}
-#endif
 	}
 }
 

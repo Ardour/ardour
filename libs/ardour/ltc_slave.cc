@@ -26,6 +26,7 @@
 #include "pbd/pthread_utils.h"
 
 #include "ardour/debug.h"
+#include "ardour/profile.h"
 #include "ardour/slave.h"
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
@@ -151,6 +152,8 @@ LTC_Slave::reset()
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
 	sync_lock_broken = false;
+
+	ActiveChanged (false); /* EMIT SIGNAL */
 }
 
 void
@@ -443,8 +446,10 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	if (last_timestamp == 0) {
 		engine_dll_initstate = 0;
 		if (delayedlocked < 10) ++delayedlocked;
-	}
-	else if (engine_dll_initstate != transport_direction && ltc_speed != 0) {
+	} else if (engine_dll_initstate != transport_direction && ltc_speed != 0) {
+
+		ActiveChanged (true); /* EMIT SIGNAL */
+
 		engine_dll_initstate = transport_direction;
 		init_engine_dll(last_ltc_frame + rint(ltc_speed * double(2 * nframes + now - last_timestamp)),
 				session.engine().samples_per_cycle());
@@ -488,6 +493,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		reset();
 		speed = 0;
 		pos = session.transport_frame();
+		ActiveChanged (false); /* EMIT SIGNAL */
 		return true;
 	}
 

@@ -300,7 +300,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* Timecode status signals */
 	PBD::Signal1<void, bool> MTCSyncStateChanged;
-	
+	PBD::Signal1<void, bool> LTCSyncStateChanged;	
+
 	/* Record status signals */
 
 	PBD::Signal0<void> RecordStateChanged; /* signals changes in recording state (i.e. are we recording) */
@@ -610,6 +611,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void   request_sync_source (Slave*);
 	bool   synced_to_engine() const { return _slave && config.get_external_sync() && Config->get_sync_source() == Engine; }
 	bool   synced_to_mtc () const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (const_cast<gint*>(&_mtc_active)); }
+	bool   synced_to_ltc () const { return config.get_external_sync() && Config->get_sync_source() == LTC && g_atomic_int_get (const_cast<gint*>(&_ltc_active)); }
 	
 	double transport_speed() const { return _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0f; }
@@ -1017,6 +1019,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void reconnect_mtc_ports ();
 	void reconnect_mmc_ports (bool);
 
+	void reconnect_ltc_input ();
+	void reconnect_ltc_output ();
+	
   protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -1090,6 +1095,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void mtc_status_changed (bool);
 	PBD::ScopedConnection mtc_status_connection;
+	void ltc_status_changed (bool);
+	PBD::ScopedConnection ltc_status_connection;
 	
 	void initialize_latencies ();
 	void set_worst_io_latencies ();
@@ -1129,6 +1136,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	SlaveState _slave_state;
 	gint _mtc_active;
+	gint _ltc_active;
 	framepos_t slave_wait_end;
 
 	void reset_slave_state ();
@@ -1795,9 +1803,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<IO>   _ltc_input;
 	boost::shared_ptr<IO>   _ltc_output;
-
-	void reconnect_ltc_input ();
-	void reconnect_ltc_output ();
 
 	/* Scene Changing */
 	SceneChanger* _scene_changer;
