@@ -19,6 +19,7 @@
 */
 
 #include <math.h> // M_PI
+#include <assert.h>
 #include <algorithm> // std:min
 #include "gtkmm2ext/ardour_icon.h"
 
@@ -137,17 +138,19 @@ static void icon_tool_range (cairo_t *cr, const int width, const int height)
 	const double x  = width * .5;
 	const double y  = height * .5;
 	const double wh = std::min (x, y) * .55;
-	const double lw = ceil (wh / 6.0); // line width
+	const double lw = rint (wh / 6.0); // line width
 	const double ar = wh * .6; // arrow
-	const double ym = rint (y - wh * .1) + .5; // arrow-horizontal; slightly to the top, on a px
 
+	const double bw = rint (wh);
+	const double y0 = ceil (y);
+	const double ym = rint (y0 - wh * .1) + .5; // arrow-horizontal; slightly to the top, on a px
 	const double x0 = rint(x - wh); // left arrow tip
 	const double x1 = rint(x + wh); // right arrow tip
 
 	// left and right box
-	cairo_rectangle (cr, x0 - lw, y - wh, 2 * lw,  2 * wh);
+	cairo_rectangle (cr, x0 - lw, y0 - bw, 2 * lw,  2 * bw);
 	VECTORICONSTROKEFILL(1.0);
-	cairo_rectangle (cr, x1 - lw, y - wh, 2 * lw,  2 * wh);
+	cairo_rectangle (cr, x1 - lw, y0 - bw, 2 * lw,  2 * bw);
 	VECTORICONSTROKEFILL(1.0);
 
 	// arrows
@@ -165,9 +168,9 @@ static void icon_tool_range (cairo_t *cr, const int width, const int height)
 	VECTORICONSTROKEOUTLINE(lw, 0xffffffff);
 
 	cairo_set_source_rgba (cr, 1, 1, 1, 1.0);
-	cairo_rectangle (cr, x0 - lw, y - wh, 2 * lw,  2 * wh);
+	cairo_rectangle (cr, x0 - lw, y0 - wh, 2 * lw,  2 * wh);
 	cairo_fill (cr);
-	cairo_rectangle (cr, x1 - lw, y - wh, 2 * lw,  2 * wh);
+	cairo_rectangle (cr, x1 - lw, y0 - wh, 2 * lw,  2 * wh);
 	cairo_fill (cr);
 }
 
@@ -267,11 +270,13 @@ static void icon_tool_stretch (cairo_t *cr, const int width, const int height)
 	const double y  = height * .5;
 	const double wh = std::min (x, y) * .55;
 
-	const double lw = wh / 6.0;
-	const double x0 = x + lw + 0.5;
+	const double y0 = ceil (y);
+	const double bw = rint (wh);
+	const double lw = rint (wh / 3.0) / 2.0;
+	const double x0 = rint (x + lw) + .5;
 
 	// box indication region
-	cairo_rectangle (cr, x - wh, y - wh, lw + wh,  2 * wh);
+	cairo_rectangle (cr, x0 - lw - bw - .5, y0 - bw, lw + bw, 2 * bw);
 	VECTORICONSTROKEFILL (0.75);
 
 	cairo_set_line_width (cr, 1.0);
@@ -415,7 +420,7 @@ static void icon_tool_draw (cairo_t *cr, const int width, const int height)
 	cairo_line_to (cr, EM_POINT(-6.0, 5.66));
 	cairo_line_to (cr, EM_POINT(-4.1, 4.9));
 	cairo_close_path (cr);
-	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+	cairo_set_source_rgba (cr, 0, 0, 0, 0.7);
 	cairo_set_line_width (cr, em);
 	cairo_stroke_preserve (cr);
 	cairo_fill (cr);
@@ -962,6 +967,8 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 {
 	bool rv = true;
 	cairo_save (cr);
+
+	assert (width > 5 && height > 5);
 
 	switch (icon) {
 		case TransportStop:
