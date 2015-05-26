@@ -103,11 +103,7 @@ MackieControlProtocol::left_press (Button &)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank left with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, sorted.size()));
 
-	if (_current_initial_bank > strip_cnt) {
-		switch_banks (_current_initial_bank - strip_cnt);
-	} else {
-		switch_banks (0);
-	}
+		switch_banks ((_current_initial_bank - 1) / strip_cnt * strip_cnt);
 
 	return on;
 }
@@ -124,12 +120,19 @@ MackieControlProtocol::right_press (Button &)
 	Sorted sorted = get_sorted_routes();
 	uint32_t strip_cnt = n_strips();
 	uint32_t route_cnt = sorted.size();
+	uint32_t max_bank = route_cnt / strip_cnt * strip_cnt;
+
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("bank right with current initial = %1 nstrips = %2 tracks/busses = %3\n",
 							   _current_initial_bank, strip_cnt, route_cnt));
 
-	uint32_t new_initial = std::min (_current_initial_bank + strip_cnt, route_cnt - 1);
-	switch_banks (new_initial);
+	if (_current_initial_bank < max_bank) {
+		uint32_t new_initial = (_current_initial_bank / strip_cnt * strip_cnt) + strip_cnt;
+
+		switch_banks (new_initial);
+	} else {
+		switch_banks (max_bank);
+	}
 
 	return on;
 }
