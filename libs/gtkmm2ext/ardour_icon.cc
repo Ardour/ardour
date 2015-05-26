@@ -141,17 +141,19 @@ static void icon_tool_range (cairo_t *cr, const int width, const int height)
 	const double lw = rint (wh / 6.0); // line width
 	const double ar = wh * .6; // arrow
 
-	const double bw = rint (wh);
+	const double bw = ceil (wh) - .5;
 	const double y0 = ceil (y);
 	const double ym = rint (y0 - wh * .1) + .5; // arrow-horizontal; slightly to the top, on a px
-	const double x0 = rint(x - wh); // left arrow tip
-	const double x1 = rint(x + wh); // right arrow tip
+	const double x0 = rint (x) - bw; // left arrow tip
+	const double x1 = rint (x) + bw; // right arrow tip
 
 	// left and right box
-	cairo_rectangle (cr, x0 - lw, y0 - bw, 2 * lw,  2 * bw);
-	VECTORICONSTROKEFILL(1.0);
-	cairo_rectangle (cr, x1 - lw, y0 - bw, 2 * lw,  2 * bw);
-	VECTORICONSTROKEFILL(1.0);
+	cairo_move_to (cr, x0, y0 - bw);
+	cairo_line_to (cr, x0, y0 + bw);
+	VECTORICONSTROKEOUTLINE(lw, 0xffffffff);
+	cairo_move_to (cr, x1, y0 - bw);
+	cairo_line_to (cr, x1, y0 + bw);
+	VECTORICONSTROKEOUTLINE(lw, 0xffffffff);
 
 	// arrows
 	cairo_move_to (cr, x0 + ar, ym - ar);
@@ -168,10 +170,17 @@ static void icon_tool_range (cairo_t *cr, const int width, const int height)
 	VECTORICONSTROKEOUTLINE(lw, 0xffffffff);
 
 	cairo_set_source_rgba (cr, 1, 1, 1, 1.0);
-	cairo_rectangle (cr, x0 - lw, y0 - wh, 2 * lw,  2 * wh);
-	cairo_fill (cr);
-	cairo_rectangle (cr, x1 - lw, y0 - wh, 2 * lw,  2 * wh);
-	cairo_fill (cr);
+	cairo_set_line_width (cr, lw);
+
+	cairo_move_to (cr, x0, y0 - bw);
+	cairo_line_to (cr, x0, y0 + bw);
+	cairo_stroke (cr);
+
+	cairo_move_to (cr, x1, y0 - bw);
+	cairo_line_to (cr, x1, y0 + bw);
+	cairo_stroke (cr);
+
+
 }
 
 /** Grab/Object tool - 6x8em "hand", with 'em' wide index finger. */
