@@ -237,19 +237,21 @@ struct LIBARDOUR_API SafeTime {
 
 class LIBARDOUR_API TimecodeSlave : public Slave {
   public:
-    TimecodeSlave () {}
-
-    virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
-
-    /* this is intended to be used by a UI and polled from a timeout. it should
-       return a string describing the current position of the TC source. it
-       should NOT do any computation, but should use a cached value
-       of the TC source position.
-    */
-    virtual std::string approximate_current_position() const = 0;
-
-    framepos_t        timecode_offset;
-    bool              timecode_negative_offset;
+	TimecodeSlave () {}
+	
+	virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
+	
+	/* this is intended to be used by a UI and polled from a timeout. it should
+	   return a string describing the current position of the TC source. it
+	   should NOT do any computation, but should use a cached value
+	   of the TC source position.
+	*/
+	virtual std::string approximate_current_position() const = 0;
+	
+	framepos_t        timecode_offset;
+	bool              timecode_negative_offset;
+	
+	PBD::Signal1<void, bool> ActiveChanged;
 };
 
 class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
@@ -273,8 +275,6 @@ class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
         std::string approximate_current_position() const;
 	std::string approximate_current_delta() const;
 
-	PBD::Signal1<void, bool> ActiveChanged;
-    
   private:
 	Session&    session;
 	MidiPort*   port;

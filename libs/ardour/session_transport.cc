@@ -1619,6 +1619,13 @@ Session::mtc_status_changed (bool yn)
 }
 
 void
+Session::ltc_status_changed (bool yn)
+{
+	g_atomic_int_set (&_ltc_active, yn);
+	LTCSyncStateChanged( yn );
+}
+
+void
 Session::use_sync_source (Slave* new_slave)
 {
 	/* Runs in process() context */
@@ -1640,6 +1647,18 @@ Session::use_sync_source (Slave* new_slave)
 			MTCSyncStateChanged( false );
 		}
 		mtc_status_connection.disconnect ();
+	}
+
+	LTC_Slave* ltc_slave = dynamic_cast<LTC_Slave*> (_slave);
+	if (ltc_slave) {
+		ltc_slave->ActiveChanged.connect_same_thread (ltc_status_connection, boost::bind (&Session::ltc_status_changed, this, _1));
+		LTCSyncStateChanged (ltc_slave->locked() );
+	} else {
+		if (g_atomic_int_get (&_ltc_active) ){
+			g_atomic_int_set (&_ltc_active, 0);
+			LTCSyncStateChanged( false );
+		}
+		ltc_status_connection.disconnect ();
 	}
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", _slave));
