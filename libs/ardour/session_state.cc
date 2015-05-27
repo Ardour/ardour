@@ -4453,6 +4453,7 @@ Session::save_as (SaveAs& saveas)
 			if (internal_file_cnt) {
 				for (vector<string>::iterator s = old_search_path[DataType::AUDIO].begin(); s != old_search_path[DataType::AUDIO].end(); ++s) {
 					ensure_search_path_includes (*s, DataType::AUDIO);
+					cerr << "be sure to include " << *s << "  for audio" << endl;
 				}
 
 				/* we do not do this for MIDI because we copy
