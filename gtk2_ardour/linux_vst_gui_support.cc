@@ -348,11 +348,18 @@ void* gui_event_loop (void* ptr)
 		/*Look at the XEvent queue - if there are any XEvents we need to handle them,
 		including passing them to all the plugin (eventProcs) we are currently managing*/
 		
+		bool may_sleep = true;
+
 		if(LXVST_XDisplay)
 		{
 			/*See if there are any events in the queue*/
 		
 			int num_events = XPending(LXVST_XDisplay);
+
+			if (num_events > 0) {
+				// keep dispatching events as fast as possible
+				may_sleep = false;
+			}
 			
 			/*process them if there are any*/
 		
@@ -463,6 +470,10 @@ again:
 			pthread_mutex_unlock (&plugin_mutex);
 
 			clock1 = g_get_monotonic_time();
+		}
+
+		if (may_sleep && elapsed_time_ms + 1 < LXVST_sched_timer_interval) {
+			Glib::usleep(1000 * (LXVST_sched_timer_interval - elapsed_time_ms - 1));
 		}
 	}
 
