@@ -270,6 +270,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour_icon.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\auto_spin.cc"
 				>
 			</File>
@@ -461,6 +465,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\application.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\ardour_icon.h"
 				>
 			</File>
 			<File
