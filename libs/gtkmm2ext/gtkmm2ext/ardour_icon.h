@@ -37,11 +37,11 @@ namespace Gtkmm2ext { namespace ArdourIcon {
 		ToolContent,
 	};
 
-	bool render (cairo_t *cr,
-	             const enum Icon icon,
-	             const int width, const int height,
-	             const Gtkmm2ext::ActiveState state,
-	             const uint32_t fg_color);
+	LIBGTKMM2EXT_API bool render (cairo_t *cr,
+	                              const enum Icon icon,
+	                              const int width, const int height,
+	                              const Gtkmm2ext::ActiveState state,
+	                              const uint32_t fg_color);
 }; };
 
 #endif
