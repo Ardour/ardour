@@ -4101,9 +4101,8 @@ Session::save_as (SaveAs& saveas)
 	}
 
 	try {
-		/* copy all media files. Find each location in
-		 * session_dirs, and copy files from there to
-		 * target.
+		/* copy all relevant files. Find each location in session_dirs,
+		 * and copy files from there to target.
 		 */
 		
 		for (vector<space_and_path>::const_iterator sd = session_dirs.begin(); sd != session_dirs.end(); ++sd) {
@@ -4134,10 +4133,12 @@ Session::save_as (SaveAs& saveas)
 					
 					/* media file */
 
-					if (saveas.copy_media) {
+					if (saveas.include_media && saveas.copy_media) {
 						
 						string to = make_new_media_path (*i, to_dir, new_folder);
 
+						info << "media file copying from " << from << " to " << to << endmsg;
+						
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
 						}
@@ -4165,9 +4166,13 @@ Session::save_as (SaveAs& saveas)
 					if (do_copy) {
 						string to = Glib::build_filename (to_dir, (*i).substr (prefix_len));
 						
+						info << "attempting to make directory/folder " << to << endmsg;
+
 						if (g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR, "cannot create required directory");
 						}
+
+						info << "attempting to copy " << from << " to " << to << endmsg;
 						
 						if (!copy_file (from, to)) {
 							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
@@ -4253,6 +4258,7 @@ Session::save_as (SaveAs& saveas)
 			if (internal_file_cnt) {
 				for (vector<string>::iterator s = old_search_path[DataType::AUDIO].begin(); s != old_search_path[DataType::AUDIO].end(); ++s) {
 					ensure_search_path_includes (*s, DataType::AUDIO);
+					cerr << "be sure to include " << *s << "  for audio" << endl;
 				}
 
 				for (vector<string>::iterator s = old_search_path[DataType::MIDI].begin(); s != old_search_path[DataType::MIDI].end(); ++s) {
