@@ -259,6 +259,7 @@ class TimeAxisView : public virtual AxisView
 	bool name_entry_focus_out (GdkEventFocus *ev);
 
 	Gtk::Entry* name_entry;
+	bool ending_name_edit;
 	void begin_name_edit ();
 	void end_name_edit (int);
 

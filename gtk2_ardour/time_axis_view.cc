@@ -27,6 +27,7 @@
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"
+#include "pbd/unwind.h"
 
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
@@ -102,6 +103,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	, _y_position (0)
 	, _editor (ed)
 	, name_entry (0)
+	, ending_name_edit (false)
 	, control_parent (0)
 	, _order (0)
 	, _effective_height (0)
@@ -696,6 +698,15 @@ TimeAxisView::end_name_edit (int response)
 	if (!name_entry) {
 		return;
 	}
+
+	if (ending_name_edit) {
+		/* already doing this, and focus out or other event has caused 
+		   us to re-enter this code.
+		*/
+		return;
+	}
+	
+	PBD::Unwinder<bool> uw (ending_name_edit, true);
 	
 	bool edit_next = false;
 	bool edit_prev = false;
