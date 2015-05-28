@@ -4119,6 +4119,15 @@ Session::save_as (SaveAs& saveas)
 			
 			find_files_matching_filter (files, (*sd).path, accept_all_files, 0, false, true, true);
 			
+			/* add dir separator to protect against collisions with
+			 * track names (e.g. track named "audiofiles" or
+			 * "analysis".
+			 */
+
+			static const std::string audiofile_dir_string = string (sound_dir_name) + G_DIR_SEPARATOR;
+			static const std::string midifile_dir_string = string (midi_dir_name) + G_DIR_SEPARATOR;
+			static const std::string analysis_dir_string = analysis_dir() + G_DIR_SEPARATOR;
+
 			/* copy all the files. Handling is different for media files
 			   than others because of the *silly* subtree we have below the interchange
 			   folder. That really was a bad idea, but I'm not fixing it as part of
@@ -4128,10 +4137,10 @@ Session::save_as (SaveAs& saveas)
 			for (vector<string>::iterator i = files.begin(); i != files.end(); ++i) {
 
 				std::string from = *i;
-				
-				if ((*i).find (interchange_dir_name) != string::npos) {
+
+				if ((*i).find (audiofile_dir_string) != string::npos) {
 					
-					/* media file */
+					/* audio file: only copy if asked */
 
 					if (saveas.include_media && saveas.copy_media) {
 						
@@ -4147,6 +4156,38 @@ Session::save_as (SaveAs& saveas)
 					/* we found media files inside the session folder */
 					
 					internal_file_cnt++;
+
+				} else if ((*i).find (midifile_dir_string) != string::npos) {
+
+					/* midi file: always copy unless
+					 * creating an empty new session
+					 */
+
+					if (saveas.include_media) {
+					
+						string to = make_new_media_path (*i, to_dir, new_folder);
+						
+						info << "media file copying from " << from << " to " << to << endmsg;
+						
+						if (!copy_file (from, to)) {
+							throw Glib::FileError (Glib::FileError::IO_ERROR, "copy failed");
+						}
+					}
+
+					/* we found media files inside the session folder */
+						
+					internal_file_cnt++;
+					
+				} else if ((*i).find (analysis_dir_string) != string::npos) {
+
+					/*  make sure analysis dir exists in
+					 *  new session folder, but we're not
+					 *  copying analysis files here, see
+					 *  below 
+					 */
+					
+					(void) g_mkdir_with_parents (analysis_dir().c_str(), 775);
+					continue;
 					
 				} else {
 					
@@ -4161,6 +4202,13 @@ Session::save_as (SaveAs& saveas)
 							do_copy = false;
 							break;
 						} 
+					}
+
+					if (!saveas.copy_media && (*i).find (peakfile_suffix) != string::npos) {
+						/* don't copy peakfiles if
+						 * we're not copying media
+						 */
+						do_copy = false;
 					}
 					
 					if (do_copy) {
@@ -4192,13 +4240,22 @@ Session::save_as (SaveAs& saveas)
 				
 				double fraction = (double) copied / total_bytes;
 				
-				/* tell someone "X percent, file M of N"; M is one-based */
-				
-				boost::optional<bool> res = saveas.Progress (fraction, cnt, all);
 				bool keep_going = true;
 
-				if (res) {
-					keep_going = *res;
+				if (saveas.copy_media) {
+
+					/* no need or expectation of this if
+					 * media is not being copied, because
+					 * it will be fast(ish).
+					 */
+					
+					/* tell someone "X percent, file M of N"; M is one-based */
+					
+					boost::optional<bool> res = saveas.Progress (fraction, cnt, all);
+					
+					if (res) {
+						keep_going = *res;
+					}
 				}
 
 				if (!keep_going) {
@@ -4231,7 +4288,20 @@ Session::save_as (SaveAs& saveas)
 		if (saveas.include_media) {
 		
 			if (saveas.copy_media) {
-				
+#ifndef PLATFORM_WINDOWS
+				/* There are problems with analysis files on
+				 * Windows, because they used a colon in their
+				 * names as late as 4.0. Colons are not legal
+				 * under Windows even if NTFS allows them.
+				 *
+				 * This is a tricky problem to solve so for
+				 * just don't copy these files. They will be
+				 * regenerated as-needed anyway, subject to the 
+				 * existing issue that the filenames will be
+				 * rejected by Windows, which is a separate
+				 * problem (though related).
+				 */
+
 				/* only needed if we are copying media, since the
 				 * analysis data refers to media data
 				 */
@@ -4241,6 +4311,7 @@ Session::save_as (SaveAs& saveas)
 					string newdir = Glib::build_filename (to_dir, "analysis");
 					copy_files (old, newdir);
 				}
+#endif /* PLATFORM_WINDOWS */				
 			}
 		}
 			
@@ -4258,12 +4329,12 @@ Session::save_as (SaveAs& saveas)
 			if (internal_file_cnt) {
 				for (vector<string>::iterator s = old_search_path[DataType::AUDIO].begin(); s != old_search_path[DataType::AUDIO].end(); ++s) {
 					ensure_search_path_includes (*s, DataType::AUDIO);
-					cerr << "be sure to include " << *s << "  for audio" << endl;
 				}
 
-				for (vector<string>::iterator s = old_search_path[DataType::MIDI].begin(); s != old_search_path[DataType::MIDI].end(); ++s) {
-					ensure_search_path_includes (*s, DataType::MIDI);
-				}
+				/* we do not do this for MIDI because we copy
+				   all MIDI files if saveas.include_media is
+				   true
+				*/
 			}
 		}
 		
