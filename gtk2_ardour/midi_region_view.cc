@@ -2802,7 +2802,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 		if (!cursor_set) {
 			/* Convert snap delta from pixels to beats. */
 			framepos_t snap_delta_samps = trackview.editor().pixel_to_sample (snap_delta);
-			double snap_delta_beats;
+			double snap_delta_beats = 0.0;
 			int sign = 1;
 
 			/* negative beat offsets aren't allowed */
@@ -2882,7 +2882,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 
 		/* Convert snap delta from pixels to beats with sign. */
 		framepos_t snap_delta_samps = trackview.editor().pixel_to_sample (snap_delta);
-		double snap_delta_beats;
+		double snap_delta_beats = 0.0;
 		int sign = 1;
 
 		if (snap_delta_samps > 0) {
