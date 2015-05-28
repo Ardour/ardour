@@ -21,6 +21,8 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <cairo/cairo.h>
+
 #include <boost/algorithm/string.hpp>    
 
 #include <gtkmm/liststore.h>
@@ -2644,6 +2646,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* INTERFACE */
 
+#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
 	BoolOption* bgo = new BoolOption (
 		"buggy-gradients",
 		_("Possibly improve slow graphical performance"),
@@ -2653,7 +2656,8 @@ RCOptionEditor::RCOptionEditor ()
 
 	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("This requires restarting %1 before having an effect"), PROGRAM_NAME));
 	add_option (S_("Preferences|GUI"), bgo);
-
+#endif
+	
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "widget-prelight",

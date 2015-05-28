@@ -23,6 +23,8 @@
 #include <cstdlib>
 #include <cstdio> /* for snprintf, grrr */
 
+#include <cairo/cairo.h>
+
 #include <glibmm/miscutils.h>
 #include <glib/gstdio.h>
 
@@ -150,10 +152,11 @@ UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 int
 UIConfiguration::pre_gui_init ()
 {
+#ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
 	if (get_buggy_gradients()) {
 		g_setenv ("FORCE_BUGGY_GRADIENTS", "1", 1);
 	}
-
+#endif
 	return 0;
 }
 
