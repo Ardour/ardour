@@ -66,6 +66,7 @@
 #include "ardour/control_protocol_manager.h"
 #include "ardour/data_type.h"
 #include "ardour/debug.h"
+#include "ardour/directory_names.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/graph.h"
 #include "ardour/midiport_manager.h"
@@ -3745,6 +3746,41 @@ Session::count_sources_by_origin (const string& path)
 string
 Session::peak_path (string base) const
 {
+	if (Glib::path_is_absolute (base)) {
+
+		/* rip the session dir from the audiofile source */
+
+		string session_path;
+		string interchange_dir_string = string (interchange_dir_name) + G_DIR_SEPARATOR;
+		bool in_another_session = true;
+		
+		if (base.find (interchange_dir_string) != string::npos) {
+		
+			session_path = Glib::path_get_dirname (base); /* now ends in audiofiles */
+			session_path = Glib::path_get_dirname (session_path); /* now ends in session name */
+			session_path = Glib::path_get_dirname (session_path); /* now ends in interchange */
+			session_path = Glib::path_get_dirname (session_path); /* now has session path */
+
+			/* see if it is within our session */
+
+			for (vector<space_and_path>::const_iterator i = session_dirs.begin(); i != session_dirs.end(); ++i) {
+				if (i->path == session_path) {
+					in_another_session = false;
+					break;
+				}
+			}
+		} else {
+			in_another_session = false;
+		}
+		
+
+		if (in_another_session) {
+			SessionDirectory sd (session_path);
+			return Glib::build_filename (sd.peak_path(), Glib::path_get_basename (base) + peakfile_suffix);
+		}
+	}
+
+	base = Glib::path_get_basename (base);
 	return Glib::build_filename (_session_dir->peak_path(), base + peakfile_suffix);
 }
 

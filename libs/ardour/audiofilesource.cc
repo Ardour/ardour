@@ -168,10 +168,21 @@ AudioFileSource::peak_path (string audio_path)
 {
 	string base;
 
-	base = PBD::basename_nosuffix (audio_path);
+	string::size_type suffix = audio_path.find_last_of ('.');
+
+	if (suffix != string::npos) {
+		base = audio_path.substr (0, suffix);
+	} else {
+		warning << string_compose (_("Odd audio file path: %1"), audio_path) << endmsg;
+		base = audio_path;
+	}
+
 	base += '%';
 	base += (char) ('A' + _channel);
 
+	/* pass in the name/path of the source, with no audio file type suffix
+	 */
+	
 	return _session.peak_path (base);
 }
 
