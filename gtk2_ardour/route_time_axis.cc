@@ -1613,6 +1613,7 @@ RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteConte
 	const framecnt_t                  duration = extent.second - extent.first;
 	pos += _editor.get_paste_offset(pos, ctx.count, duration);
 
+	pl->clear_changes ();
 	pl->clear_owned_changes ();
 	if (Config->get_edit_mode() == Ripple) {
 		std::pair<framepos_t, framepos_t> extent = (*p)->get_extent_with_endspace();
