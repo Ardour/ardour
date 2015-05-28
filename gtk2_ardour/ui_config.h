@@ -48,6 +48,7 @@ class UIConfiguration : public PBD::Stateful
 	int load_state ();
 	int save_state ();
 	int load_defaults ();
+	int load_color_theme (bool allow_own=true);
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state (void);
@@ -79,6 +80,16 @@ class UIConfiguration : public PBD::Stateful
 	void map_parameters (boost::function<void (std::string)>&);
 
 	void parameter_changed (std::string);
+
+	/** called before initializing any part of the GUI. Sets up
+	 *  any runtime environment required to make the GUI work
+	 *  in specific ways.
+	 */
+	int pre_gui_init ();
+
+	/** called after the GUI toolkit has been initialized. 
+	 */
+	UIConfiguration* post_gui_init ();
 	
 #undef UI_CONFIG_VARIABLE
 #define UI_CONFIG_VARIABLE(Type,var,name,value) \
@@ -118,7 +129,6 @@ class UIConfiguration : public PBD::Stateful
 	void load_modifiers (XMLNode const &);
 	void reset_gtk_theme ();
 	void colors_changed ();
-	int load_color_theme (bool allow_own=true);
 
 	uint32_t block_save;
 };

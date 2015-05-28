@@ -140,7 +140,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	UIConfiguration*     ui_config;
 
     public:
-        ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
+	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfiguration*);
 	~ARDOUR_UI();
 
 	bool run_startup (bool should_be_new, std::string load_template);

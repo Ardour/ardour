@@ -181,10 +181,10 @@ ask_about_configuration_copy (string const & old_dir, string const & new_dir, in
 	return (msg.run() == Gtk::RESPONSE_YES);
 }
 
-ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
+ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfiguration* uic)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
-	, ui_config (new UIConfiguration)
+	, ui_config (uic->post_gui_init ())
 	, session_loaded (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))

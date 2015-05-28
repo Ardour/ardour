@@ -78,10 +78,6 @@ UIConfiguration::UIConfiguration ()
 	ARDOUR_UI_UTILS::ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
-
-	/* force GTK theme setting, so that loading an RC file will work */
-	
-	load_color_theme ();
 }
 
 UIConfiguration::~UIConfiguration ()
@@ -152,6 +148,23 @@ UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 }
 
 int
+UIConfiguration::pre_gui_init ()
+{
+	if (get_buggy_gradients()) {
+		g_setenv ("FORCE_BUGGY_GRADIENTS", "1", 1);
+	}
+
+	return 0;
+}
+
+UIConfiguration*
+UIConfiguration::post_gui_init ()
+{
+	load_color_theme ();
+	return this;
+}
+
+int
 UIConfiguration::load_defaults ()
 {
         std::string rcfile;
@@ -177,13 +190,14 @@ UIConfiguration::load_defaults ()
 		warning << string_compose (_("Could not find default UI configuration file %1"), default_ui_config_file_name) << endmsg;
 	}
 
+
 	if (ret == 0) {
 		/* reload color theme */
 		load_color_theme (false);
 		ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
 	}
 
-	return 0;
+	return ret;
 }
 
 int
