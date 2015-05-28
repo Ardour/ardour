@@ -63,7 +63,11 @@ CONFIG_VARIABLE (int32_t, inter_scene_gap_frames, "inter-scene-gap-frames", 1)
 
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
+#ifdef USE_TRACKS_CODE_FEATURES
+CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
+#else
 CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", false)
+#endif
 CONFIG_VARIABLE (bool, timecode_source_2997, "timecode-source-2997", false)
 #ifdef USE_TRACKS_CODE_FEATURES
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", MTC)
@@ -110,7 +114,11 @@ CONFIG_VARIABLE (RegionSelectionAfterSplit, region_selection_after_split, "regio
 
 /* monitoring, mute, solo etc */
 
+#ifdef USE_TRACKS_CODE_FEATURES
+CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", true)
+#else
 CONFIG_VARIABLE (bool, mute_affects_pre_fader, "mute-affects-pre-fader", false)
+#endif
 CONFIG_VARIABLE (bool, mute_affects_post_fader, "mute-affects-post-fader", true)
 CONFIG_VARIABLE (bool, mute_affects_control_outs, "mute-affects-control-outs", true)
 CONFIG_VARIABLE (bool, mute_affects_main_outs, "mute-affects-main-outs", true)
