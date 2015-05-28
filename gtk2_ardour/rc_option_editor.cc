@@ -2644,6 +2644,16 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* INTERFACE */
 
+	BoolOption* bgo = new BoolOption (
+		"buggy-gradients",
+		_("Possibly improve slow graphical performance"),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_buggy_gradients),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_buggy_gradients)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("This requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (S_("Preferences|GUI"), bgo);
+
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "widget-prelight",
