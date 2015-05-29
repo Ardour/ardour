@@ -151,6 +151,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool muted () const;
 	void set_mute (bool yn, void* src);
 	
+	bool muted_by_others() const;
+
 	/* controls use set_solo() to modify this route's solo state
 	 */
 
