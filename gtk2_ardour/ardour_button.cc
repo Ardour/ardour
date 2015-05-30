@@ -562,7 +562,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 
 	if (_elements & VectorIcon) {
 		assert(!(_elements & Text));
-		const int wh = std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.));
+		const int wh = std::max (6., std::max (rint (TRACKHEADERBTNW * char_avg_pixel_width()), ceil (char_pixel_height() * BASELINESTRETCH + 1.)));
 		req->width += wh;
 		req->height = std::max(req->height, wh);
 	}
