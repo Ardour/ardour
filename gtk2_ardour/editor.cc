@@ -5688,24 +5688,14 @@ Editor::super_rapid_screen_update ()
 
 		} else {
 
-			/* don't do continuous scroll till the new position is in the rightmost quarter of the
-			   editor canvas
-			*/
-#if 0
-			// FIXME DO SOMETHING THAT WORKS HERE - this is 2.X code
-			double target = ((double)frame - (double)current_page_samples()/2.0) / samples_per_pixel;
+			framepos_t const frame = playhead_cursor->current_frame ();
+			double target = ((double)frame - (double)current_page_samples()/3.0);
 			if (target <= 0.0) {
 				target = 0.0;
 			}
-			if (fabs(target - current) < current_page_samples() / samples_per_pixel) {
-				target = (target * 0.15) + (current * 0.85);
-			} else {
-				/* relax */
-			}
+			reset_x_origin (target);
 
-			current = target;
-			set_horizontal_position (current);
-#endif
+
 		}
 
 	}
