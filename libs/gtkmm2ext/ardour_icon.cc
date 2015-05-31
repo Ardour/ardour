@@ -977,7 +977,9 @@ Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
 	bool rv = true;
 	cairo_save (cr);
 
-	assert (width > 5 && height > 5);
+	if (width < 6 || height < 6) {
+		return false;
+	}
 
 	switch (icon) {
 		case TransportStop:
