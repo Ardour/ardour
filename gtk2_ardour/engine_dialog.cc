@@ -1161,29 +1161,51 @@ EngineControl::device_changed ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
-	string device_name = device_combo.get_active_text ();
 
-	if (device_name != backend->device_name()) {
-		/* we set the backend-device to query various device related intormation.
-		 * This has the side effect that backend->device_name() will match
-		 * the device_name and  'change_device' will never be true.
-		 * so work around this by setting...
-		 */
-		queue_device_changed = true;
+	string device_name_in;
+	string device_name_out; // only used if backend support separate I/O devices
+
+	if (backend->use_separate_input_and_output_devices()) {
+		device_name_in  = get_input_device_name ();
+		device_name_out = get_output_device_name ();
+	} else {
+		device_name_in = get_device_name ();
+	}
+
+	/* we set the backend-device to query various device related intormation.
+	 * This has the side effect that backend->device_name() will match
+	 * the device_name and  'change_device' will never be true.
+	 * so work around this by setting...
+	 */
+	if (backend->use_separate_input_and_output_devices()) {
+		if (device_name_in != backend->input_device_name() || device_name_out != backend->output_device_name ()) {
+			queue_device_changed = true;
+		}
+	} else {
+		if (device_name_in != backend->device_name()) {
+			queue_device_changed = true;
+		}
 	}
 	
 	//the device name must be set FIRST so ASIO can populate buffersizes and the control panel button
-	backend->set_device_name(device_name);
+	if (backend->use_separate_input_and_output_devices()) {
+		backend->set_input_device_name (device_name_in);
+		backend->set_output_device_name (device_name_out);
+	} else {
+		backend->set_device_name(device_name_in);
+	}
 
 	{
-		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-
 		/* don't allow programmatic change to combos to cause a
 		   recursive call to this method.
 		 */
+		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 
-		set_samplerate_popdown_strings (device_name);
-		set_buffersize_popdown_strings (device_name);
+		/* backends that support separate devices, need to ignore
+		 * the device-name - and use the devies set above
+		 */
+		set_samplerate_popdown_strings (device_name_in);
+		set_buffersize_popdown_strings (device_name_in);
 		/* XXX theoretically need to set min + max channel counts here
 		*/
 
@@ -1204,7 +1226,7 @@ EngineControl::input_device_changed ()
 	assert (backend);
 	string input_device_name = input_device_combo.get_active_text ();
 
-	if (input_device_name != backend->input_device_name()) {
+	if (!ignore_changes && input_device_name != backend->input_device_name()) {
 		queue_device_changed = true;
 	}
 
@@ -1235,7 +1257,7 @@ EngineControl::output_device_changed ()
 	assert (backend);
 	string output_device_name = output_device_combo.get_active_text ();
 
-	if (output_device_name != backend->output_device_name()) {
+	if (!ignore_changes && output_device_name != backend->output_device_name()) {
 		queue_device_changed = true;
 	}
 
