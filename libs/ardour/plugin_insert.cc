@@ -1189,7 +1189,7 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 			boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(
 					control(Evoral::Parameter(PluginAutomation, 0, port_id), true));
 
-			if (c) {
+			if (c && c->alist()) {
 				if (!child->children().empty()) {
 					c->alist()->set_state (*child->children().front(), version);
 
