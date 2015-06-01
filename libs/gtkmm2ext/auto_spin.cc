@@ -74,6 +74,10 @@ AutoSpin::button_press (GdkEventButton *ev)
 
 	stop_spinning (0);
 
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS ) {
+		return true;
+	}
+
 	if (ev->state & Keyboard::TertiaryModifier) {
 		/* use page shift */
 
