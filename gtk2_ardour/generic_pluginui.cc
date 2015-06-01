@@ -696,7 +696,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		Adjustment* adj = control_ui->controller->adjustment();
 
 		if (desc.integer_step) {
-			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", desc.enumeration);
+			control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", true);
 			Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 			if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
 				control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
