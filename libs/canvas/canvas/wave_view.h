@@ -45,7 +45,142 @@ class WaveViewTest;
 	
 namespace ArdourCanvas {
 
-class LIBCANVAS_API WaveView : public Item
+struct LIBCANVAS_API WaveViewThreadRequest
+{
+  public:
+        enum RequestType {
+	        Quit,
+	        Cancel,
+	        Draw
+        };
+        
+	WaveViewThreadRequest  () : stop (0) {}
+	
+	bool should_stop () const { return (bool) g_atomic_int_get (&stop); }
+	void cancel() { g_atomic_int_set (&stop, 1); }
+	
+	RequestType type;
+	framepos_t start;
+	framepos_t end;
+	double     width;
+	double     height;
+	double     samples_per_pixel;
+	uint16_t   channel;
+	double     region_amplitude;
+	Color      fill_color;
+	boost::weak_ptr<const ARDOUR::Region> region;
+
+	/* resulting image, after request has been satisfied */
+	
+	Cairo::RefPtr<Cairo::ImageSurface> image;
+	
+  private:
+	gint stop; /* intended for atomic access */
+};
+
+class LIBCANVAS_API WaveView;
+
+class LIBCANVAS_API WaveViewCache
+{
+  public:
+	WaveViewCache();
+	~WaveViewCache();
+	
+	struct Entry {
+
+		/* these properties define the cache entry as unique.
+
+		   If an image is in use by a WaveView and any of these
+		   properties are modified on the WaveView, the image can no
+		   longer be used (or may no longer be usable for start/end
+		   parameters). It will remain in the cache until flushed for
+		   some reason (typically the cache is full).
+		*/
+
+		int channel;
+		Coord height;
+		float amplitude;
+		Color fill_color;
+		double samples_per_pixel;
+		framepos_t start;
+		framepos_t end;
+
+		/* the actual image referred to by the cache entry */
+
+		Cairo::RefPtr<Cairo::ImageSurface> image;
+
+		/* last time the cache entry was used */
+		uint64_t timestamp;
+		
+		Entry (int chan, Coord hght, float amp, Color fcl, double spp, framepos_t strt, framepos_t ed,
+		       Cairo::RefPtr<Cairo::ImageSurface> img) 
+			: channel (chan)
+			, height (hght)
+			, amplitude (amp)
+			, fill_color (fcl)
+			, samples_per_pixel (spp)
+			, start (strt)
+			, end (ed)
+			, image (img) {}
+	};
+
+	uint64_t image_cache_threshold () const { return _image_cache_threshold; }
+	void set_image_cache_threshold (uint64_t);
+	
+	void add (boost::shared_ptr<ARDOUR::AudioSource>, boost::shared_ptr<Entry>);
+	void use (boost::shared_ptr<ARDOUR::AudioSource>, boost::shared_ptr<Entry>);
+	
+        void consolidate_image_cache (boost::shared_ptr<ARDOUR::AudioSource>,
+                                      int channel,
+                                      Coord height,
+                                      float amplitude,
+                                      Color fill_color,
+                                      double samples_per_pixel);
+
+        boost::shared_ptr<Entry> lookup_image (boost::shared_ptr<ARDOUR::AudioSource>,
+                                               framepos_t start, framepos_t end,
+                                               int _channel,
+                                               Coord height,
+                                               float amplitude,
+                                               Color fill_color,
+                                               double samples_per_pixel);
+
+  private:
+        /* an unsorted, unindexd collection of cache entries associated with
+           a particular AudioSource. All cache Entries in the collection
+           share the AudioSource in common, but represent different parameter
+           settings (e.g. height, color, samples per pixel etc.)
+        */
+        typedef std::vector<boost::shared_ptr<Entry> > CacheLine;
+        /* Indexed, non-sortable structure used to lookup images associated
+         * with a particular AudioSource
+         */
+        typedef std::map <boost::shared_ptr<ARDOUR::AudioSource>,CacheLine> ImageCache;
+        ImageCache cache_map;
+
+        /* Linear, sortable structure used when we need to do a timestamp-based
+         * flush of entries from the cache.
+         */
+        typedef std::pair<boost::shared_ptr<ARDOUR::AudioSource>,boost::shared_ptr<Entry> > ListEntry;
+        typedef std::vector<ListEntry> CacheList;
+        CacheList cache_list;
+ 
+        struct SortByTimestamp {
+	        bool operator() (const WaveViewCache::ListEntry& a, const WaveViewCache::ListEntry& b) {
+		        return a.second->timestamp < b.second->timestamp;
+	        }
+        };
+        friend struct SortByTimestamp;
+        
+        uint64_t image_cache_size;
+        uint64_t _image_cache_threshold;
+
+        uint64_t compute_image_cache_size ();
+        void cache_flush ();
+        bool cache_full ();
+};
+
+class LIBCANVAS_API WaveView : public Item, public sigc::trackable
 {
 public:
 
@@ -54,42 +189,30 @@ public:
 		Rectified
         };
 
-	struct CacheEntry {
-		int channel;
-		Coord height;
-		float amplitude;
-		Color fill_color;
-		framepos_t start;
-		framepos_t end;
-		Cairo::RefPtr<Cairo::ImageSurface> image;
+        std::string debug_name() const;
 
-	CacheEntry(int chan, Coord hght, float amp, Color fcl, framepos_t strt, framepos_t ed, Cairo::RefPtr<Cairo::ImageSurface> img)  :
-		
-		channel (chan), height (hght), amplitude (amp), fill_color (fcl), 
-			start (strt), end (ed), image (img) {} 
-	};
+        /* final ImageSurface rendered with colours */
 
-	/* final ImageSurface rendered with colours */
 	Cairo::RefPtr<Cairo::ImageSurface> _image;
+	PBD::Signal0<void> ImageReady;
 	
-    /* Displays a single channel of waveform data for the given Region.
+	/* Displays a single channel of waveform data for the given Region.
 
-       x = 0 in the waveview corresponds to the first waveform datum taken
-       from region->start() samples into the source data.
-
-       x = N in the waveview corresponds to the (N * spp)'th sample 
-       measured from region->start() into the source data.
-
-       when drawing, we will map the zeroth-pixel of the waveview
-       into a window. 
-
-       The waveview itself contains a set of pre-rendered Cairo::ImageSurfaces
-       that cache sections of the display. This is filled on-demand and
-       never cleared until something explicitly marks the cache invalid
-       (such as a change in samples_per_pixel, the log scaling, rectified or
-       other view parameters).
-    */
-
+	   x = 0 in the waveview corresponds to the first waveform datum taken
+	   from region->start() samples into the source data.
+	   
+	   x = N in the waveview corresponds to the (N * spp)'th sample 
+	   measured from region->start() into the source data.
+	   
+	   when drawing, we will map the zeroth-pixel of the waveview
+	   into a window. 
+	   
+	   The waveview itself contains a set of pre-rendered Cairo::ImageSurfaces
+	   that cache sections of the display. This is filled on-demand and
+	   never cleared until something explicitly marks the cache invalid
+	   (such as a change in samples_per_pixel, the log scaling, rectified or
+	   other view parameters).
+	*/
 
 	WaveView (Canvas *, boost::shared_ptr<ARDOUR::AudioRegion>);
 	WaveView (Item*, boost::shared_ptr<ARDOUR::AudioRegion>);
@@ -147,6 +270,9 @@ public:
 	static void set_clip_level (double dB);
 	static PBD::Signal0<void> ClipLevelChanged;
 
+	static void start_drawing_thread ();
+	static void stop_drawing_thread ();
+
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
 		return _foo_void;
@@ -154,17 +280,16 @@ public:
 	void*& property_gain_function () {
 		return _foo_void;
 	}
-private:
+  private:
 	void* _foo_void;
 
 #endif
 
+  private:
         friend class ::WaveViewTest;
+        friend class WaveViewThreadClient;
 
-	static std::map <boost::shared_ptr<ARDOUR::AudioSource>, std::vector <CacheEntry> > _image_cache;
-	void consolidate_image_cache () const;
-	void invalidate_source (boost::weak_ptr<ARDOUR::AudioSource>);
-	void invalidate_image_cache ();
+        void invalidate_image_cache ();
 
 	boost::shared_ptr<ARDOUR::AudioRegion> _region;
 	int    _channel;
@@ -188,8 +313,32 @@ private:
 	 */
 	ARDOUR::frameoffset_t _region_start;
 
+	/** Under almost conditions, this is going to return _region->length(),
+	 * but if _region_start has been reset, then we need
+	 * to use this modified computation.
+	 */
+	ARDOUR::framecnt_t region_length() const;
+	/** Under almost conditions, this is going to return _region->start() +
+	 * _region->length(), but if _region_start has been reset, then we need
+	 * to use this modified computation.
+	 */
+	ARDOUR::framepos_t region_end() const;
+
+	/** If true, calls to get_image() will render a missing wave image
+	   in the calling thread. Generally set to false, but true after a
+	   call to set_height().
+	*/
+	mutable bool get_image_in_thread;
+
+	/** Set to true by render(). Used so that we know if the wave view
+	 * has actually been displayed on screen. ::set_height() when this
+	 * is true does not use get_image_in_thread, because it implies
+	 * that the height is being set BEFORE the waveview is drawn.
+	 */
+	mutable bool rendered;
+	
         PBD::ScopedConnectionList invalidation_connection;
-	PBD::ScopedConnection _source_invalidated_connection;
+        PBD::ScopedConnection     image_ready_connection;
 
         static double _global_gradient_depth;
         static bool   _global_logscaled;
@@ -202,11 +351,37 @@ private:
         void handle_visual_property_change ();
         void handle_clip_level_change ();
 
-	void get_image (Cairo::RefPtr<Cairo::ImageSurface>& image, framepos_t start, framepos_t end, double& image_offset) const;
-
+        boost::shared_ptr<WaveViewCache::Entry> get_image (framepos_t start, framepos_t end) const;
+        boost::shared_ptr<WaveViewCache::Entry> get_image_from_cache (framepos_t start, framepos_t end) const;
+	
         ArdourCanvas::Coord y_extent (double, bool) const;
+        void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks, boost::shared_ptr<WaveViewThreadRequest>) const;
 	void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
-	void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
+	
+        void cancel_my_render_request () const;
+
+        void queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, framepos_t start, framepos_t end) const;
+        void generate_image (boost::shared_ptr<WaveViewThreadRequest>, bool in_render_thread) const;
+        boost::shared_ptr<WaveViewCache::Entry> cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) const;
+        
+        void image_ready ();
+        
+        mutable boost::shared_ptr<WaveViewCache::Entry> _current_image;
+        
+	mutable boost::shared_ptr<WaveViewThreadRequest> current_request;
+	void send_request (boost::shared_ptr<WaveViewThreadRequest>) const;
+	bool idle_send_request (boost::shared_ptr<WaveViewThreadRequest>) const;
+	
+	static WaveViewCache* images;
+
+	static void drawing_thread ();
+
+        static gint drawing_thread_should_quit;
+        static Glib::Threads::Mutex request_queue_lock;
+        static Glib::Threads::Cond request_cond;
+        static Glib::Threads::Thread* _drawing_thread;
+        typedef std::set<WaveView const *> DrawingRequestQueue;
+        static DrawingRequestQueue request_queue;
 };
 
 }
