@@ -738,8 +738,6 @@ WaveView::get_image (framepos_t start, framepos_t end) const
 
 			if (current_request->start <= start && current_request->end >= end) {
 				
-				cerr << "grabbing new image from request for " << debug_name() << endl;
-
 				ret.reset (new WaveViewCache::Entry (current_request->channel,
 				                                     current_request->height,
 				                                     current_request->region_amplitude,
@@ -750,9 +748,6 @@ WaveView::get_image (framepos_t start, framepos_t end) const
 				                                     current_request->image));
 	
 				cache_request_result (current_request);
-				
-			} else {
-				cerr << debug_name() << " ignoring stale request\n";
 			}
 
 			/* drop our handle on the current request */
@@ -843,8 +838,6 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 {
 	if (!req->should_stop()) {
 
-		cerr << name << " Generating image in " << (in_render_thread ? " RENDER " : " GUI ") << "thread\n";
-
 		/* sample position is canonical here, and we want to generate
 		 * an image that spans about twice the canvas width
 		 */
@@ -916,7 +909,11 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 {
 	assert (_samples_per_pixel != 0);
 
-	rendered = true; /* comments in header file */
+	if (!rendered) {
+		/* first image generation should happen in RENDER thread */
+		get_image_in_thread = false;
+		rendered = true; /* comments in header file */
+	}
 	
 	if (!_region) {
 		return;
@@ -1022,13 +1019,10 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 			/* image not currently available. A redraw will be scheduled
 			   when it is ready.
 			*/
-			cerr << debug_name() << " nothing to draw with\n";
 			return;
 		}
 	}
 
-	cerr << name << " image ? " << _current_image << endl;
-	
 	/* fix up offset: returned value is the first sample of the returned image */
 
 	image_offset = (_current_image->start - _region_start) / _samples_per_pixel;
@@ -1379,7 +1373,6 @@ WaveView::drawing_thread ()
 		boost::shared_ptr<WaveViewThreadRequest> req = requestor->current_request;
 
 		if (!req) {
-			cerr << requestor->debug_name() << " no current request\n";
 			continue;
 		}
 
