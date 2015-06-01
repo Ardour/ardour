@@ -97,9 +97,6 @@ class LIBARDOUR_API PluginInsert : public Processor
 		double get_value (void) const;
 		XMLNode& get_state();
 
-		double internal_to_interface (double) const;
-		double interface_to_internal (double) const;
-
 	private:
 		PluginInsert* _plugin;
 	};

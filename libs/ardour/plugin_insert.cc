@@ -1296,38 +1296,6 @@ PluginInsert::PluginControl::set_value (double user_val)
 	AutomationControl::set_value (user_val);
 }
 
-double
-PluginInsert::PluginControl::internal_to_interface (double val) const
-{
-	val = Controllable::internal_to_interface(val);
-	
-	if (_desc.logarithmic) {
-		if (val > 0) {
-			val = pow (val, 1/1.5);
-		} else {
-			val = 0;
-		}
-	}
-
-	return val;
-}
-
-double
-PluginInsert::PluginControl::interface_to_internal (double val) const
-{
-	if (_desc.logarithmic) {
-		if (val <= 0) {
-			val = 0;
-		} else {
-			val = pow (val, 1.5);
-		}
-	}
-
-	val = Controllable::interface_to_internal(val);
-	
-	return val;
-}
-
 XMLNode&
 PluginInsert::PluginControl::get_state ()
 {

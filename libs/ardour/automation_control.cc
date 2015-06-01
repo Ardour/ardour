@@ -139,3 +139,49 @@ AutomationControl::stop_touch(bool mark, double when)
 		}
 	}
 }
+
+double
+AutomationControl::internal_to_interface (double val) const
+{
+	if (_desc.integer_step) {
+		// both upper and lower are inclusive.
+		val =  (val - lower()) / (1 + upper() - lower());
+	} else {
+		val =  (val - lower()) / (upper() - lower());
+	}
+
+	if (_desc.logarithmic) {
+		if (val > 0) {
+			val = pow (val, 1/1.5);
+		} else {
+			val = 0;
+		}
+	}
+
+	return val;
+}
+
+double
+AutomationControl::interface_to_internal (double val) const
+{
+	if (_desc.logarithmic) {
+		if (val <= 0) {
+			val = 0;
+		} else {
+			val = pow (val, 1.5);
+		}
+	}
+
+	if (_desc.integer_step) {
+		val =  lower() + val * (1 + upper() - lower());
+	} else {
+		val =  lower() + val * (upper() - lower());
+	}
+
+	if (val < lower()) val = lower();
+	if (val > upper()) val = upper();
+
+	return val;
+}
+
+

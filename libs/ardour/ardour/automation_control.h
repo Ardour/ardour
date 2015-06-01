@@ -89,6 +89,9 @@ public:
 	double normal()  const { return _desc.normal; }
 	bool   toggled() const { return _desc.toggled; }
 
+	double internal_to_interface (double i) const;
+	double interface_to_internal (double i) const;
+
 	const ParameterDescriptor& desc() const { return _desc; }
 
 	const ARDOUR::Session& session() const { return _session; }
