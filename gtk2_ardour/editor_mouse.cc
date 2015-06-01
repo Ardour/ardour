@@ -1659,6 +1659,14 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	case SelectionItem:
 		break;
 
+	case WaveItem:
+	{
+		if (entered_regionview) {
+			entered_regionview->entered();
+		}
+	}
+	break;
+
 	default:
 		break;
 	}

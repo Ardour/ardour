@@ -1049,10 +1049,10 @@ AudioRegionView::update_envelope_visibility ()
 		return;
 	}
 
-	if (ARDOUR_UI::config()->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseContent ) {
+	if (trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseContent ) {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
 		gain_line->canvas_group().raise_to_top ();
-	} else if (trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
+	} else if (ARDOUR_UI::config()->get_show_region_gain() || trackview.editor().current_mouse_mode() == Editing::MouseRange ) {
 		gain_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::Line));
 		gain_line->canvas_group().raise_to_top ();
 	} else {
@@ -1342,6 +1342,13 @@ AudioRegionView::entered ()
 				fade_out_trim_handle->hide ();
 			}
 		}
+	} else {  //this happens when we switch tools; if we switch away from Grab mode,  hide all the fade handles
+		if (fade_in_handle)       { fade_in_handle->hide(); }
+		if (fade_out_handle)      { fade_out_handle->hide(); }
+		if (fade_in_trim_handle)  { fade_in_trim_handle->hide(); }
+		if (fade_out_trim_handle) { fade_out_trim_handle->hide(); }
+		if (start_xfade_rect)     { start_xfade_rect->set_outline (false); }
+		if (end_xfade_rect)       { end_xfade_rect->set_outline (false); }
 	}
 }
 
