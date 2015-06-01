@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 1999 Paul Barton-Davis 
+    Copyright (C) 1999 Paul Barton-Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,12 +34,12 @@ const unsigned int AutoSpin::initial_timer_interval = 500;   /* msecs */
 const unsigned int AutoSpin::timer_interval = 20;            /* msecs */
 const unsigned int AutoSpin::climb_timer_calls = 5;    /* between climbing */
 
-AutoSpin::AutoSpin (Gtk::Adjustment &adjr, gfloat cr, bool round_to_steps_yn) 
+AutoSpin::AutoSpin (Gtk::Adjustment &adjr, gfloat cr, bool round_to_steps_yn)
 	: adjustment (adjr),
 	  climb_rate (cr)
 
 {
-	initial = adjustment.get_value();
+	initial = adjustment.get_value ();
 	left_is_decrement = true;
 	wrap = false;
 	have_timer = false;
@@ -53,7 +53,7 @@ AutoSpin::stop_timer ()
 {
 	if (have_timer) {
 		g_source_remove (timeout_tag);
-		have_timer = false;	
+		have_timer = false;
 	}
 }
 
@@ -89,51 +89,51 @@ AutoSpin::button_press (GdkEventButton *ev)
 	/* XXX should figure out which button is left/right */
 
 	switch (ev->button) {
-	case 1:
-		if (control) {
-			set_value (left_is_decrement ? lower : upper);
-			return TRUE;
-		} else {
-			if (left_is_decrement) {
-				with_decrement = true;
+		case 1:
+			if (control) {
+				set_value (left_is_decrement ? lower : upper);
+				return TRUE;
 			} else {
-				with_decrement = false;
+				if (left_is_decrement) {
+					with_decrement = true;
+				} else {
+					with_decrement = false;
+				}
 			}
-		}
-		break;
+			break;
 
-	case 2:
-		if (!control) {
-			set_value (initial);
-		}
-		return TRUE;
-		break;
-
-	case 3:
-		if (control) {
-			set_value (left_is_decrement ? upper : lower);
+		case 2:
+			if (!control) {
+				set_value (initial);
+			}
 			return TRUE;
-		}
-		break;
+			break;
 
-	case 4:
-		if (!control) {
-			adjust_value (shifted ? page_increment : step_increment);
-		} else {
-			set_value (upper);
-		}
-		return TRUE;
-		break;
+		case 3:
+			if (control) {
+				set_value (left_is_decrement ? upper : lower);
+				return TRUE;
+			}
+			break;
 
-	case 5:
-		if (!control) {
-			adjust_value (shifted ? -page_increment : -step_increment);
-		} else {
-			set_value (lower);
-		}
-		return TRUE;
-		break;
-	} 
+		case 4:
+			if (!control) {
+				adjust_value (shifted ? page_increment : step_increment);
+			} else {
+				set_value (upper);
+			}
+			return TRUE;
+			break;
+
+		case 5:
+			if (!control) {
+				adjust_value (shifted ? -page_increment : -step_increment);
+			} else {
+				set_value (lower);
+			}
+			return TRUE;
+			break;
+	}
 
 	start_spinning (with_decrement, shifted);
 	return TRUE;
@@ -144,17 +144,17 @@ AutoSpin::start_spinning (bool decrement, bool page)
 {
 	timer_increment = page ? page_increment : step_increment;
 
-	if (decrement) { 
+	if (decrement) {
 		timer_increment = -timer_increment;
 	}
 
 	adjust_value (timer_increment);
-	
+
 	have_timer = true;
 	timer_calls = 0;
 	timeout_tag = g_timeout_add (initial_timer_interval,
-				       AutoSpin::_timer,
-				       this);
+			AutoSpin::_timer,
+			this);
 }
 
 gint
@@ -178,7 +178,7 @@ AutoSpin::adjust_value (gfloat increment)
 	gfloat val;
 	bool done = false;
 
-	val = adjustment.get_value();
+	val = adjustment.get_value ();
 
 	val += increment;
 
@@ -198,7 +198,7 @@ AutoSpin::adjust_value (gfloat increment)
 		}
 	}
 
-	set_value(val);
+	set_value (val);
 	return done;
 }
 
@@ -215,22 +215,22 @@ AutoSpin::timer ()
 		/* we're in the initial call, which happened
 		   after initial_timer_interval msecs. Now
 		   request a much more frequent update.
-		*/
-		
+		   */
+
 		timeout_tag = g_timeout_add (timer_interval,
-					       _timer,
-					       this);
+				_timer,
+				this);
 		have_timer = true;
 		need_timer = false;
 
 		/* cancel this initial timeout */
-		
+
 		retval = FALSE;
 
-	} else { 
+	} else {
 		/* this is the regular "fast" call after each
-		   timer_interval msecs. 
-		*/
+		   timer_interval msecs.
+		   */
 
 		if (timer_calls < climb_timer_calls) {
 			timer_calls++;
@@ -251,19 +251,19 @@ AutoSpin::timer ()
 	}
 
 	return retval;
-}	
+}
 
 void
 AutoSpin::set_bounds (gfloat init, gfloat up, gfloat down, bool with_reset)
 {
-	adjustment.set_upper(up);
-	adjustment.set_lower(down);
+	adjustment.set_upper (up);
+	adjustment.set_lower (down);
 
 	initial = init;
-	
+
 	adjustment.changed ();
-	
+
 	if (with_reset) {
 		adjustment.set_value (init);
 	}
-} 
+}
