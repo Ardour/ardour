@@ -426,15 +426,16 @@ AudioRegion::read_peaks (PeakData *buf, framecnt_t npeaks, framecnt_t offset, fr
 
 	if (audio_source(chan_n)->read_peaks (buf, npeaks, offset, cnt, frames_per_pixel)) {
 		return 0;
-	} else {
-		if (_scale_amplitude != 1.0f) {
-			for (framecnt_t n = 0; n < npeaks; ++n) {
-				buf[n].max *= _scale_amplitude;
-				buf[n].min *= _scale_amplitude;
-			}
+	} 
+
+	if (_scale_amplitude != 1.0f) {
+		for (framecnt_t n = 0; n < npeaks; ++n) {
+			buf[n].max *= _scale_amplitude;
+			buf[n].min *= _scale_amplitude;
 		}
-		return cnt;
 	}
+
+	return npeaks;
 }
 
 /** @param buf Buffer to write data to (existing data will be overwritten).
