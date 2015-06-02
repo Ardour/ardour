@@ -3677,7 +3677,10 @@ Session::rename (const std::string& new_name)
 	 */
 
 	/* Windows requires that we close all files before attempting the
-	 * rename 
+	 * rename. This works on other platforms, but isn't necessary there.
+	 * Leave it in place for all platforms though, since it may help
+	 * catch issues that could arise if the way Source files work ever
+	 * change (since most developers are not using Windows).
 	 */
 
 	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
