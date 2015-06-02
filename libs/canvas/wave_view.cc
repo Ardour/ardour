@@ -850,7 +850,6 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		
 		framepos_t sample_start = max (_region_start, (center - image_samples));
 		framepos_t sample_end = min (center + image_samples, region_end());
-		
 		const int n_peaks = llrintf ((sample_end - sample_start)/ (req->samples_per_pixel));
 		
 		boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
@@ -860,27 +859,29 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		   the Region itself.
 		*/
 	                             
-		_region->read_peaks (peaks.get(), n_peaks,
-		                     sample_start, sample_end - sample_start,
-		                     req->channel,
-		                     req->samples_per_pixel);
+		framecnt_t peaks_read = _region->read_peaks (peaks.get(), n_peaks,
+		                                             sample_start, sample_end - sample_start,
+		                                             req->channel,
+		                                             req->samples_per_pixel);
 		
-    
 		// apply waveform amplitude zoom multiplier
 
-		for (int i = 0; i < n_peaks; ++i) {
-			peaks[i].max *= _amplitude_above_axis;
-			peaks[i].min *= _amplitude_above_axis;
-		}
-		
 		req->image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->height);
-		
 		/* make sure we record the sample positions that were actually used */
-		
 		req->start = sample_start;
 		req->end = sample_end;
 		
-		draw_image (req->image, peaks.get(), n_peaks, req);
+		if (peaks_read > 0) {
+
+			for (framecnt_t i = 0; i < peaks_read; ++i) {
+				peaks[i].max *= _amplitude_above_axis;
+				peaks[i].min *= _amplitude_above_axis;
+			}
+
+			draw_image (req->image, peaks.get(), n_peaks, req);
+		} else {
+			draw_absent_image (req->image, peaks.get(), n_peaks);
+		}
 	}
 	
 	if (in_render_thread && !req->should_stop()) {
