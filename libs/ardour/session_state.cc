@@ -3676,6 +3676,17 @@ Session::rename (const std::string& new_name)
 	 * Backup files are left unchanged and not renamed.
 	 */
 
+	/* Windows requires that we close all files before attempting the
+	 * rename 
+	 */
+
+	for (SourceMap::const_iterator i = sources.begin(); i != sources.end(); ++i) {
+		boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (i->second);
+		if (fs) {
+			fs->close ();
+		}
+	}
+	
 	/* pass one: not 100% safe check that the new directory names don't
 	 * already exist ...
 	 */
