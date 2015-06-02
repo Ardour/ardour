@@ -112,9 +112,11 @@ class CStyleChecker:
 		self.indent_re = re.compile ("^\s*")
 		self.last_line_indent = ""
 		self.last_line_indent_curly = False
-		self.re_checks = \
+		self.error_checks = \
                         [ ( re.compile ("^ "),          "leading space as indentation instead of tab - use tabs to indent, spaces to align" )
-                          , ( re.compile ("{[^\s]"),      "missing space after open brace" )
+                        ]                                                                                                                                       
+		self.warning_checks = \
+                        [   ( re.compile ("{[^\s]"),      "missing space after open brace" )
                           , ( re.compile ("[^\s]}"),      "missing space before close brace" )
                           , ( re.compile ("^[ \t]+$"),     "empty line contains whitespace" )
                           , ( re.compile ("[^\s][ \t]+$"),     "contains trailing whitespace" )
@@ -141,6 +143,7 @@ class CStyleChecker:
                           , ( re.compile ("\s+return\s+\([a-zA-Z0-9_]+\)\s+;"),   "parens around return value" )
                         ]                                                                                                                                       
 
+                
 
 	def get_error_count (self):
 		"""
@@ -204,11 +207,17 @@ class CStyleChecker:
 		else:
 			self.last_line_indent_curly = False
 
-		# Now all the regex checks.
-		for (check_re, msg) in self.re_checks:
+		# Now all the stylistic warnings regex checks.
+		for (check_re, msg) in self.warning_checks:
+			if check_re.search (line):
+				self.warning (msg)
+
+                # Now all the stylistic error regex checks.
+		for (check_re, msg) in self.error_checks:
 			if check_re.search (line):
 				self.error (msg)
 
+                                
 		if re.search ("[a-zA-Z0-9_][<>!=^/&\|]{1,2}[a-zA-Z0-9_]", line):
                         # ignore #include <foo.h> and C++ templates with indirection/pointer/reference operators
 			if not re.search (".*#include.*[a-zA-Z0-9]/[a-zA-Z]", line) and not re.search ("[a-zA-Z0-9_]>[&\*]*\s", line):
@@ -221,11 +230,19 @@ class CStyleChecker:
 		"""
 		Print an error message and increment the error count.
 		"""
-		print ("%s (%d) : %s" % (self.filename, self.line_num, msg))
+		print ("%s (%d) : STYLE ERROR %s" % (self.filename, self.line_num, msg))
 		if self.debug:
 			print ("'" + self.orig_line + "'")
 		self.error_count += 1
 
+	def warning (self, msg):
+		"""
+		Print a warning message and increment the error count.
+		"""
+		print ("%s (%d) : STYLE WARNING %s" % (self.filename, self.line_num, msg))
+		if self.debug:
+			print ("'" + self.orig_line + "'")
+                
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
 if len (sys.argv) < 1:
