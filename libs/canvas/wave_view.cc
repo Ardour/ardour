@@ -1305,7 +1305,7 @@ WaveView::send_request (boost::shared_ptr<WaveViewThreadRequest> req) const
 
 	start_drawing_thread ();
 
-	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (this, &WaveView::idle_send_request), req));
+	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &WaveView::idle_send_request), req));
 }
 
 bool
