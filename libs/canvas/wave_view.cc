@@ -873,7 +873,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		
 		if (peaks_read > 0) {
 
-			for (framecnt_t i = 0; i < peaks_read; ++i) {
+			for (framecnt_t i = 0; i < n_peaks; ++i) {
 				peaks[i].max *= _amplitude_above_axis;
 				peaks[i].min *= _amplitude_above_axis;
 			}
