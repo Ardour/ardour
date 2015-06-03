@@ -553,7 +553,7 @@ EngineControl::build_no_control_notebook ()
 	vector<string> strings;
 	AttachOptions xopt = AttachOptions (FILL|EXPAND);
 	int row = 1; // row zero == backend combo
-	const string msg = string_compose (_("The %1 audio backend was configured and started externally.\nThis limits your control over it."), backend->name());
+	const string msg = string_compose (_("%1 is already running. %2 will connect to it and use the existing settings."), backend->name(), PROGRAM_NAME);
 
 	label = manage (new Label);
 	label->set_markup (string_compose ("<span weight=\"bold\" foreground=\"red\">%1</span>", msg));
