@@ -376,6 +376,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		cnt = _length - start;
 		read_npeaks = min ((framecnt_t) floor (cnt / samples_per_visual_peak), npeaks);
 		zero_fill = npeaks - read_npeaks;
+		expected_peaks = (cnt / (double) samples_per_file_peak);
+		scale = npeaks/expected_peaks;
 	}
 
 	// cerr << "actual npeaks = " << read_npeaks << " zf = " << zero_fill << endl;
