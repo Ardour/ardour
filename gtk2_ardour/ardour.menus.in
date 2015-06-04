@@ -54,9 +54,6 @@
     <menu name='Transport' action='Transport'>
       <menuitem action='ToggleRoll'/>
       <menu action="PlayMenu">
-#if 0
-        <menuitem action='toggle-stationary-playhead'/>
-#endif
         <menuitem action='PlaySelection'/>
         <menuitem action='PlayPreroll'/>
         <menuitem action='ToggleRollMaybe'/>
@@ -149,6 +146,7 @@
       <menuitem action='ToggleAutoReturn'/>
       <menuitem action='ToggleClick'/>
       <menuitem action='toggle-follow-playhead'/>
+      <menuitem action='toggle-stationary-playhead'/>
       <menuitem action='ToggleFollowEdits'/>
       <menuitem action='panic'/>
      <separator/>

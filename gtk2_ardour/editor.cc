@@ -5688,13 +5688,14 @@ Editor::super_rapid_screen_update ()
 
 		} else {
 
-			framepos_t const frame = playhead_cursor->current_frame ();
-			double target = ((double)frame - (double)current_page_samples()/3.0);
-			if (target <= 0.0) {
-				target = 0.0;
+			if (!_dragging_playhead && _follow_playhead && _session->requested_return_frame() < 0 && !pending_visual_change.being_handled) {
+				framepos_t const frame = playhead_cursor->current_frame ();
+				double target = ((double)frame - (double)current_page_samples()/3.0);
+				if (target <= 0.0) {
+					target = 0.0;
+				}
+				reset_x_origin (target);
 			}
-			reset_x_origin (target);
-
 
 		}
 
