@@ -87,6 +87,7 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _start_shift (0.0)
 	, _region_start (region->start())
 	, get_image_in_thread (false)
+	, always_get_image_in_thread (false)
 	, rendered (false)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
@@ -114,6 +115,7 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _region_amplitude (region->scale_amplitude ())
 	, _region_start (region->start())
 	, get_image_in_thread (false)
+	, always_get_image_in_thread (false)
 	, rendered (false)
 {
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
@@ -137,6 +139,12 @@ void
 WaveView::image_ready ()
 {
 	redraw ();
+}
+
+void
+WaveView::set_always_get_image_in_thread (bool yn)
+{
+	always_get_image_in_thread = yn;
 }
 
 void
@@ -714,9 +722,11 @@ WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) co
 }
 
 boost::shared_ptr<WaveViewCache::Entry>
-WaveView::get_image (framepos_t start, framepos_t end) const
+WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 {
 	boost::shared_ptr<WaveViewCache::Entry> ret;
+
+	full_image = true;
 	
 	/* this is called from a ::render() call, when we need an image to
 	   draw with.
@@ -759,13 +769,13 @@ WaveView::get_image (framepos_t start, framepos_t end) const
 
 		/* no current image draw request, so look in the cache */
 		
-		ret = get_image_from_cache (start, end);
+		ret = get_image_from_cache (start, end, full_image);
 
 	}
 
-	if (!ret) {
+	if (!ret || !full_image) {
 
-		if (get_image_in_thread) {
+		if (get_image_in_thread || always_get_image_in_thread) {
 
 			boost::shared_ptr<WaveViewThreadRequest> req (new WaveViewThreadRequest);
 
@@ -799,19 +809,18 @@ WaveView::get_image (framepos_t start, framepos_t end) const
 		}
 	}
 
-	
 	return ret;
 }
 
 boost::shared_ptr<WaveViewCache::Entry>
-WaveView::get_image_from_cache (framepos_t start, framepos_t end) const
+WaveView::get_image_from_cache (framepos_t start, framepos_t end, bool& full) const
 {
 	if (!images) {
 		return boost::shared_ptr<WaveViewCache::Entry>();
 	}
 
 	return images->lookup_image (_region->audio_source (_channel), start, end, _channel,
-	                             _height, _region_amplitude, _fill_color, _samples_per_pixel);
+	                             _height, _region_amplitude, _fill_color, _samples_per_pixel, full);
 }
 
 void
@@ -996,7 +1005,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	// cerr << debug_name() << " will need image spanning " << sample_start << " .. " << sample_end << " region spans " << _region_start << " .. " << region_end() << endl;
 
 	double image_offset;
-
+	boost::shared_ptr<WaveViewCache::Entry> image_to_draw;
+	
 	if (_current_image) {
 
 		/* check it covers the right sample range */
@@ -1007,26 +1017,37 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		} else {
 			/* timestamp our continuing use of this image/cache entry */
 			images->use (_region->audio_source (_channel), _current_image);
+			image_to_draw = _current_image;
 		}
 	}
 
-	if (!_current_image) {
+	if (!image_to_draw) {
 
 		/* look it up */
-		
-		_current_image = get_image (sample_start, sample_end);
 
-		if (!_current_image) {
+		bool full_image;
+		image_to_draw = get_image (sample_start, sample_end, full_image);
+		
+		if (!image_to_draw) {
 			/* image not currently available. A redraw will be scheduled
 			   when it is ready.
 			*/
 			return;
 		}
+
+		if (full_image) {
+			/* found an image that covers our entire sample range,
+			 * so keep a reference to it.
+			 */
+			_current_image = image_to_draw;
+		}
 	}
 
-	/* fix up offset: returned value is the first sample of the returned image */
+	/* compute the first pixel of the image that should be used when we
+	 * render the specified range. 
+	 */
 
-	image_offset = (_current_image->start - _region_start) / _samples_per_pixel;
+	image_offset = (image_to_draw->start - _region_start) / _samples_per_pixel;
 	
 	// cerr << "Offset into image to place at zero: " << image_offset << endl;
 
@@ -1040,7 +1061,20 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		//image_offset += _start_shift;
 	}
 	
-	context->rectangle (draw_start, draw.y0, draw_end - draw_start, draw.height());
+	/* the image may only be a best-effort ... it may not span the entire
+	 * range requested, though it is guaranteed to cover the start. So
+	 * determine how many pixels we can actually draw.
+	 */
+
+	double draw_width;
+	
+	if (image_to_draw != _current_image) {
+		draw_width = min ((double) image_to_draw->image->get_width() - image_offset, (draw_end - draw_start));
+	} else {
+		draw_width = draw_end - draw_start;
+	}
+
+	context->rectangle (draw_start, draw.y0, draw_width, draw.height());
 
 	/* round image origin position to an exact pixel in device space to
 	 * avoid blurring
@@ -1053,7 +1087,13 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	y = round (y);
 	context->device_to_user (x, y);
 
-	context->set_source (_current_image->image, x, y);
+	/* the coordinates specify where in "user coordinates" (i.e. what we
+	 * generally call "canvas coordinates" in this code) the image origin
+	 * will appear. So specifying (10,10) will put the upper left corner of
+	 * the image at (10,10) in user space.
+	 */
+	
+	context->set_source (image_to_draw->image, x, y);
 	context->fill ();
 
 }
@@ -1419,7 +1459,8 @@ WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
                              Coord height,
                              float amplitude,
                              Color fill_color,
-                             double samples_per_pixel)
+                             double samples_per_pixel,
+                             bool& full_coverage)
 {
 	ImageCache::iterator x;
 	
@@ -1429,7 +1470,9 @@ WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
 	}
 
 	CacheLine& caches = x->second;
-
+	boost::shared_ptr<Entry> best_partial;
+	framecnt_t max_coverage = 0;
+	
 	/* Find a suitable ImageSurface, if it exists.
 	*/
 
@@ -1448,8 +1491,27 @@ WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
 		if (end <= e->end && start >= e->start) {
 			/* found an image that covers the range we need */
 			use (src, e);
+			full_coverage = true;
 			return e;
 		}
+
+		if (start >= e->start) {
+			/* found an image that covers the start, but not the
+			 * end. See if it is longer than any other similar
+			 * partial image that we've found so far.
+			 */
+
+			if ((e->end - e->start) > max_coverage) {
+				best_partial = e;
+				max_coverage = e->end - e->start;
+			}
+		}
+	}
+
+	if (best_partial) {
+		use (src, best_partial);
+		full_coverage = false;
+		return best_partial;
 	}
 
 	return boost::shared_ptr<Entry> ();
