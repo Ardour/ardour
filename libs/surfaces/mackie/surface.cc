@@ -492,7 +492,13 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 		*/
 		ticks = 1;
 	}
-	float delta = sign * (ticks / (float) 0x3f);
+
+	float delta = 0;
+	if (mcp().modifier_state() == MackieControlProtocol::MODIFIER_CONTROL) {
+		delta = sign * (ticks / (float) 0xff);
+	} else {
+		delta = sign * (ticks / (float) 0x3f);
+	}
 	
 	if (!pot) {
 		if (ev->controller_number == Jog::ID && _jog_wheel) {
