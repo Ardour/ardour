@@ -143,7 +143,8 @@ class LIBCANVAS_API WaveViewCache
                                                Coord height,
                                                float amplitude,
                                                Color fill_color,
-                                               double samples_per_pixel);
+                                               double samples_per_pixel,
+                                               bool& full_image);
 
   private:
         /* an unsorted, unindexd collection of cache entries associated with
@@ -250,6 +251,8 @@ public:
         double gradient_depth() const { return _gradient_depth; }
         void set_shape (Shape);
 
+        void set_always_get_image_in_thread (bool yn);
+        
         /* currently missing because we don't need them (yet):
 	   set_shape_independent();
 	   set_logscaled_independent()
@@ -330,6 +333,12 @@ public:
 	*/
 	mutable bool get_image_in_thread;
 
+	/** If true, calls to get_image() will render a missing wave image
+	   in the calling thread. Set true for waveviews we expect to 
+	   keep updating (e.g. while recording)
+	*/
+	bool always_get_image_in_thread;
+	
 	/** Set to true by render(). Used so that we know if the wave view
 	 * has actually been displayed on screen. ::set_height() when this
 	 * is true does not use get_image_in_thread, because it implies
@@ -351,8 +360,8 @@ public:
         void handle_visual_property_change ();
         void handle_clip_level_change ();
 
-        boost::shared_ptr<WaveViewCache::Entry> get_image (framepos_t start, framepos_t end) const;
-        boost::shared_ptr<WaveViewCache::Entry> get_image_from_cache (framepos_t start, framepos_t end) const;
+        boost::shared_ptr<WaveViewCache::Entry> get_image (framepos_t start, framepos_t end, bool& full_image) const;
+        boost::shared_ptr<WaveViewCache::Entry> get_image_from_cache (framepos_t start, framepos_t end, bool& full_image) const;
 	
         ArdourCanvas::Coord y_extent (double, bool) const;
         void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks, boost::shared_ptr<WaveViewThreadRequest>) const;
