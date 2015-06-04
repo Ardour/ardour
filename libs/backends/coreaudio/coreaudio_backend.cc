@@ -164,6 +164,7 @@ CoreAudioBackend::enumerate_input_devices () const
 	std::map<size_t, std::string> devices;
 	_pcmio->input_device_list(devices);
 
+	_input_audio_device_status.push_back (DeviceStatus (_("None"), true));
 	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (_input_audio_device == "") _input_audio_device = i->second;
 		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
@@ -179,6 +180,7 @@ CoreAudioBackend::enumerate_output_devices () const
 	std::map<size_t, std::string> devices;
 	_pcmio->output_device_list(devices);
 
+	_output_audio_device_status.push_back (DeviceStatus (_("None"), true));
 	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (_output_audio_device == "") _output_audio_device = i->second;
 		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
@@ -193,12 +195,23 @@ CoreAudioBackend::available_sample_rates (const std::string&) const
 	std::vector<float> sr_in;
 	std::vector<float> sr_out;
 
-	_pcmio->available_sample_rates(name_to_id(_input_audio_device), sr_in);
-	_pcmio->available_sample_rates(name_to_id(_output_audio_device), sr_out);
-
-	// TODO allow to use different SR per device, tweak aggregate
-	std::set_intersection(sr_in.begin(), sr_in.end(), sr_out.begin(), sr_out.end(), std::back_inserter(sr));
-	return sr;
+	const uint32_t inp = name_to_id(_input_audio_device);
+	const uint32_t out = name_to_id(_output_audio_device);
+	if (inp == UINT32_MAX && out == UINT32_MAX) {
+		return sr;
+	} else if (inp == UINT32_MAX) {
+		_pcmio->available_sample_rates(out, sr_out);
+		return sr_out;
+	} else if (out == UINT32_MAX) {
+		_pcmio->available_sample_rates(inp, sr_in);
+		return sr_in;
+	} else {
+		_pcmio->available_sample_rates(inp, sr_in);
+		_pcmio->available_sample_rates(out, sr_out);
+		// TODO allow to use different SR per device, tweak aggregate
+		std::set_intersection(sr_in.begin(), sr_in.end(), sr_out.begin(), sr_out.end(), std::back_inserter(sr));
+		return sr;
+	}
 }
 
 std::vector<uint32_t>

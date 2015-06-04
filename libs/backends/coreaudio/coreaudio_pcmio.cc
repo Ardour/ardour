@@ -571,6 +571,9 @@ CoreAudioPCM::set_device_sample_rate_id (AudioDeviceID id, float rate, bool inpu
 int
 CoreAudioPCM::set_device_sample_rate (uint32_t device_id, float rate, bool input)
 {
+	if (device_id >= _n_devices) {
+		return 0;
+	}
 	return set_device_sample_rate_id(_device_ids[device_id], rate, input);
 }
 
@@ -793,9 +796,8 @@ CoreAudioPCM::pcm_start (
 	std::string errorMsg;
 	_state = -2;
 
-	// TODO add "none' device to force half-duplex
-
-	if (device_id_out >= _n_devices || device_id_in >= _n_devices) {
+	// "None" = UINT32_MAX
+	if (device_id_out >= _n_devices && device_id_in >= _n_devices) {
 		return -1;
 	}
 
@@ -809,8 +811,8 @@ CoreAudioPCM::pcm_start (
 	_capture_channels = 0;
 	_playback_channels = 0;
 
-	const uint32_t chn_in = _device_ins[device_id_in] + ((device_id_out != device_id_in) ? _device_ins[device_id_out] : 0);
-	const uint32_t chn_out = _device_outs[device_id_out] + ((device_id_out != device_id_in) ? _device_outs[device_id_in] : 0);
+	const uint32_t chn_in = (device_id_in < _n_devices ? _device_ins[device_id_in] : 0) + ((device_id_out != device_id_in && device_id_out < _n_devices) ? _device_ins[device_id_out] : 0);
+	const uint32_t chn_out =(device_id_out < _n_devices ? _device_outs[device_id_out] : 0) + ((device_id_out != device_id_in && device_id_in < _n_devices) ? _device_outs[device_id_in] : 0);
 
 	assert (chn_in > 0 || chn_out > 0);
 
@@ -839,15 +841,15 @@ CoreAudioPCM::pcm_start (
 	}
 
 	// explicitly request device buffer size
-	if (set_device_buffer_size_id(_device_ids[device_id_in], samples_per_period)) {
+	if (device_id_in < _n_devices && set_device_buffer_size_id(_device_ids[device_id_in], samples_per_period)) {
 		errorMsg="kAudioDevicePropertyBufferFrameSize, Input"; goto error;
 	}
-	if (set_device_buffer_size_id(_device_ids[device_id_out], samples_per_period)) {
+	if (device_id_out < _n_devices && set_device_buffer_size_id(_device_ids[device_id_out], samples_per_period)) {
 		errorMsg="kAudioDevicePropertyBufferFrameSize, Output"; goto error;
 	}
 
 	// create aggregate device..
-	if (_device_ids[device_id_in] != _device_ids[device_id_out]) {
+	if (device_id_in < _n_devices && device_id_out < _n_devices && _device_ids[device_id_in] != _device_ids[device_id_out]) {
 		if (0 == create_aggregate_device(_device_ids[device_id_in], _device_ids[device_id_out], sample_rate, &_aggregate_device_id)) {
 			device_id = _aggregate_device_id;
 		} else {
@@ -855,12 +857,15 @@ CoreAudioPCM::pcm_start (
 			_aggregate_plugin_id = 0;
 			errorMsg="Cannot create Aggregate Device"; goto error;
 		}
-	} else {
+	} else if (device_id_out < _n_devices) {
 		device_id = _device_ids[device_id_out];
+	} else {
+		assert (device_id_in < _n_devices);
+		device_id = _device_ids[device_id_in];
 	}
 
 	if (device_id_out != device_id_in) {
-		assert(_aggregate_device_id > 0);
+		assert(_aggregate_device_id > 0 || device_id_in >= _n_devices || device_id_out >= _n_devices);
 	}
 
 	// enableIO to progress further
