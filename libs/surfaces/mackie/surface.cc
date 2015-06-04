@@ -94,8 +94,9 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	}
 
 	/* only the first Surface object has global controls */
-
-	if (_number == 0) {
+	/* lets use master_position instead */
+	uint32_t mp = _mcp.device_info().master_position();
+	if (_number == mp) {
 		DEBUG_TRACE (DEBUG::MackieControl, "Surface is first. Might have global controls.\n");
 		if (_mcp.device_info().has_global_controls()) {
 			init_controls ();

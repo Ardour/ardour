@@ -46,6 +46,7 @@ std::map<std::string,DeviceInfo> DeviceInfo::device_info;
 DeviceInfo::DeviceInfo()
 	: _strip_cnt (8)
 	, _extenders (0)
+	, _master_position (0)
 	, _has_two_character_display (true)
 	, _has_master_fader (true)
 	, _has_timecode_display (true)
@@ -241,6 +242,14 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		}
 	}
 
+	if ((child = node.child ("MasterPosition")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			if ((_master_position = atoi (prop->value().c_str())) == 0) {
+				_master_position = 0;
+			}
+		}
+	}
+
 	if ((child = node.child ("TwoCharacterDisplay")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
 			_has_two_character_display = string_is_affirmative (prop->value());
@@ -387,6 +396,12 @@ DeviceInfo::extenders() const
 	return _extenders;
 }
 
+uint32_t
+DeviceInfo::master_position() const
+{
+	return _master_position;
+}
+
 bool
 DeviceInfo::has_master_fader() const
 {
@@ -510,6 +525,7 @@ std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di)
 	os << di.name() << ' ' 
 	   << di.strip_cnt() << ' '
 	   << di.extenders() << ' '
+	   << di.master_position() << ' '
 		;
 	return os;
 }
