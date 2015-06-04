@@ -5,7 +5,7 @@
   <Buttons>
     <Button name="Ctrl" plain="Transport/TogglePunchIn"/>
     <Button name="Option" plain="Transport/TogglePunchOut"/>
-    <Button name="Snapshot" plain="Editor/set-punch-from-edit-range"/>
+    <Button name="Write" plain="Editor/set-punch-from-edit-range"/>
     <Button name="Eq" plain="Editor/jump-backward-to-mark"/>
     <Button name="Plugin" plain="Editor/jump-forward-to-mark"/>
     <Button name="Track" plain="Editor/add-location-from-playhead"/>
@@ -16,25 +16,25 @@
     <Button name="Play" plain="Transport/ToggleRoll"/>
     <Button name="Read" plain="Transport/ToggleAutoPlay"/>
     <Button name="Save" plain="Transport/ToggleAutoReturn"/>
-    <Button name="ChannelLeft" plain="Editor/select-prev-route"/>
-    <Button name="ChannelRight" plain="Editor/select-next-route"/>
-    <Button name="FrmRight" plain="Editor/playhead-to-previous-region-boundary"/>
-    <Button name="PunchOut" plain="Editor/playhead-to-next-region-boundary"/>
-    <Button name="CursorLeft" plain="Editor/nudge-playhead-backward"/>
-    <Button name="CursorRight" plain="Editor/nudge-playhead-forward"/>
-    <Button name="CursorDown" plain="Editor/remove-last-capture"/>
-    <Button name="CursorUp" plain="Transport/Loop"/>
-    <Button name="PunchIn" plain="Transport/ToggleClick"/>
-    <Button name="Edit" plain="Common/toggle-mixer-on-top"/>
+    <Button name="Channel Left" plain="Editor/select-prev-route"/>
+    <Button name="Channel Right" plain="Editor/select-next-route"/>
+    <Button name="Nudge" plain="Editor/playhead-to-previous-region-boundary"/>
+    <Button name="Replace" plain="Editor/playhead-to-next-region-boundary"/>
+    <Button name="Cursor Left" plain="Editor/nudge-playhead-backward"/>
+    <Button name="Cursor Right" plain="Editor/nudge-playhead-forward"/>
+    <Button name="Cursor Down" plain="Editor/remove-last-capture"/>
+    <Button name="Cursor Up" plain="Transport/Loop"/>
+    <Button name="Drop" plain="Transport/ToggleClick"/>
+    <Button name="View" plain="Common/toggle-mixer-on-top"/>
     <Button name="Flip" plain="Editor/show-editor-mixer"/>
-    <Button name="F9" plain="Editor/goto-visual-state-1"/>
-    <Button name="F10" plain="Editor/goto-visual-state-2"/>
-    <Button name="F11" plain="Editor/goto-visual-state-3"/>
-    <Button name="F12" plain="Editor/goto-visual-state-4"/>
-    <Button name="F13" plain="Editor/goto-visual-state-5"/>
-    <Button name="F14" plain="Editor/goto-visual-state-6"/>
-    <Button name="F15" plain="Editor/goto-visual-state-7"/>
-    <Button name="F16" plain="Editor/goto-visual-state-8"/>
+    <Button name="Midi Tracks" plain="Editor/goto-visual-state-1"/>
+    <Button name="Inputs" plain="Editor/goto-visual-state-2"/>
+    <Button name="Audio Tracks" plain="Editor/goto-visual-state-3"/>
+    <Button name="Audio Instruments" plain="Editor/goto-visual-state-4"/>
+    <Button name="Aux" plain="Editor/goto-visual-state-5"/>
+    <Button name="Busses" plain="Editor/goto-visual-state-6"/>
+    <Button name="Outputs" plain="Editor/goto-visual-state-7"/>
+    <Button name="User" plain="Editor/goto-visual-state-8"/>
     <Button name="F1" plain="Editor/save-visual-state-1"/>
     <Button name="F2" plain="Editor/save-visual-state-2"/>
     <Button name="F3" plain="Editor/save-visual-state-3"/>

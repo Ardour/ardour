@@ -327,10 +327,6 @@ class MackieControlProtocol
 	void pull_route_range (DownButtonList&, ARDOUR::RouteList&);
 
 	/* implemented button handlers */
-	Mackie::LedState frm_left_press(Mackie::Button &);
-	Mackie::LedState frm_left_release(Mackie::Button &);
-	Mackie::LedState frm_right_press(Mackie::Button &);
-	Mackie::LedState frm_right_release(Mackie::Button &);
 	Mackie::LedState stop_press(Mackie::Button &);
 	Mackie::LedState stop_release(Mackie::Button &);
 	Mackie::LedState play_press(Mackie::Button &);
@@ -339,14 +335,6 @@ class MackieControlProtocol
 	Mackie::LedState record_release(Mackie::Button &);
 	Mackie::LedState loop_press(Mackie::Button &);
 	Mackie::LedState loop_release(Mackie::Button &);
-	Mackie::LedState punch_in_press(Mackie::Button &);
-	Mackie::LedState punch_in_release(Mackie::Button &);
-	Mackie::LedState punch_out_press(Mackie::Button &);
-	Mackie::LedState punch_out_release(Mackie::Button &);
-	Mackie::LedState home_press(Mackie::Button &);
-	Mackie::LedState home_release(Mackie::Button &);
-	Mackie::LedState end_press(Mackie::Button &);
-	Mackie::LedState end_release(Mackie::Button &);
 	Mackie::LedState rewind_press(Mackie::Button & button);
 	Mackie::LedState rewind_release(Mackie::Button & button);
 	Mackie::LedState ffwd_press(Mackie::Button & button);
@@ -383,8 +371,6 @@ class MackieControlProtocol
 	Mackie::LedState scrub_release(Mackie::Button &);
 	Mackie::LedState undo_press (Mackie::Button &);
 	Mackie::LedState undo_release (Mackie::Button &);
-	Mackie::LedState redo_press (Mackie::Button &);
-	Mackie::LedState redo_release (Mackie::Button &);
 	Mackie::LedState shift_press (Mackie::Button &);
 	Mackie::LedState shift_release (Mackie::Button &);
 	Mackie::LedState option_press (Mackie::Button &);
@@ -394,10 +380,6 @@ class MackieControlProtocol
 	Mackie::LedState cmd_alt_press (Mackie::Button &);
 	Mackie::LedState cmd_alt_release (Mackie::Button &);
 
-	Mackie::LedState io_press (Mackie::Button &);
-	Mackie::LedState io_release (Mackie::Button &);
-	Mackie::LedState sends_press (Mackie::Button &);
-	Mackie::LedState sends_release (Mackie::Button &);
 	Mackie::LedState pan_press (Mackie::Button &);
 	Mackie::LedState pan_release (Mackie::Button &);
 	Mackie::LedState plugin_press (Mackie::Button &);
@@ -408,8 +390,6 @@ class MackieControlProtocol
 	Mackie::LedState dyn_release (Mackie::Button &);
 	Mackie::LedState flip_press (Mackie::Button &);
 	Mackie::LedState flip_release (Mackie::Button &);
-	Mackie::LedState edit_press (Mackie::Button &);
-	Mackie::LedState edit_release (Mackie::Button &);
 	Mackie::LedState name_value_press (Mackie::Button &);
 	Mackie::LedState name_value_release (Mackie::Button &);
 	Mackie::LedState F1_press (Mackie::Button &);
@@ -428,34 +408,12 @@ class MackieControlProtocol
 	Mackie::LedState F7_release (Mackie::Button &);
 	Mackie::LedState F8_press (Mackie::Button &);
 	Mackie::LedState F8_release (Mackie::Button &);
-	Mackie::LedState F9_press (Mackie::Button &);
-	Mackie::LedState F9_release (Mackie::Button &);
-	Mackie::LedState F10_press (Mackie::Button &);
-	Mackie::LedState F10_release (Mackie::Button &);
-	Mackie::LedState F11_press (Mackie::Button &);
-	Mackie::LedState F11_release (Mackie::Button &);
-	Mackie::LedState F12_press (Mackie::Button &);
-	Mackie::LedState F12_release (Mackie::Button &);
-	Mackie::LedState F13_press (Mackie::Button &);
-	Mackie::LedState F13_release (Mackie::Button &);
-	Mackie::LedState F14_press (Mackie::Button &);
-	Mackie::LedState F14_release (Mackie::Button &);
-	Mackie::LedState F15_press (Mackie::Button &);
-	Mackie::LedState F15_release (Mackie::Button &);
-	Mackie::LedState F16_press (Mackie::Button &);
-	Mackie::LedState F16_release (Mackie::Button &);
-	Mackie::LedState on_press (Mackie::Button &);
-	Mackie::LedState on_release (Mackie::Button &);
-	Mackie::LedState rec_ready_press (Mackie::Button &);
-	Mackie::LedState rec_ready_release (Mackie::Button &);
 	Mackie::LedState touch_press (Mackie::Button &);
 	Mackie::LedState touch_release (Mackie::Button &);
 	Mackie::LedState enter_press (Mackie::Button &);
 	Mackie::LedState enter_release (Mackie::Button &);
 	Mackie::LedState cancel_press (Mackie::Button &);
 	Mackie::LedState cancel_release (Mackie::Button &);
-	Mackie::LedState mixer_press (Mackie::Button &);
-	Mackie::LedState mixer_release (Mackie::Button &);
 	Mackie::LedState user_a_press (Mackie::Button &);
 	Mackie::LedState user_a_release (Mackie::Button &);
 	Mackie::LedState user_b_press (Mackie::Button &);
@@ -465,14 +423,10 @@ class MackieControlProtocol
 	Mackie::LedState master_fader_touch_press (Mackie::Button &);
 	Mackie::LedState master_fader_touch_release (Mackie::Button &);
 
-	Mackie::LedState snapshot_press (Mackie::Button&);
-	Mackie::LedState snapshot_release (Mackie::Button&);
 	Mackie::LedState read_press (Mackie::Button&);
 	Mackie::LedState read_release (Mackie::Button&);
 	Mackie::LedState write_press (Mackie::Button&);
 	Mackie::LedState write_release (Mackie::Button&);
-	Mackie::LedState fdrgroup_press (Mackie::Button&);
-	Mackie::LedState fdrgroup_release (Mackie::Button&);
 	Mackie::LedState clearsolo_press (Mackie::Button&);
 	Mackie::LedState clearsolo_release (Mackie::Button&);
 	Mackie::LedState track_press (Mackie::Button&);
