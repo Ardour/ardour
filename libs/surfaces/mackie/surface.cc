@@ -914,7 +914,7 @@ Surface::update_view_mode_display ()
 		break;
 	case MackieControlProtocol::Sends:
 		show_two_char_display ("Sn");
-		id = Button::Sends;
+		id = Button::Send;
 		break;
 	case MackieControlProtocol::Plugins:
 		show_two_char_display ("Pl");
