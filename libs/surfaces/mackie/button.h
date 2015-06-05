@@ -70,10 +70,6 @@ public:
 		Busses,
 		Outputs,
 		User,
-		Shift,
-		Option,
-		Ctrl,
-		CmdAlt,
 		Read,
 		Write,
 		Trim,
@@ -106,6 +102,13 @@ public:
 		UserB,
 
 		FinalGlobalButton,
+
+		/* Global buttons that users should not redefine */
+
+		Shift,
+		Option,
+		Ctrl,
+		CmdAlt,
 
 		/* Strip buttons */
 		
