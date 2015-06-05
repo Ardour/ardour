@@ -541,12 +541,18 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
   : ExportChannelSelector(session, manager)
   , region_contents_button(source_group, _("Export region contents"))
   , track_output_button(source_group, _("Export track output"))
+  , select_tracks_button (_("Select all tracks"))
+  , select_busses_button (_("Select all busses"))
+  , select_none_button (_("Deselect all"))
 {
 	pack_start(main_layout);
 
 	// Options
 	options_box.pack_start(region_contents_button);
 	options_box.pack_start(track_output_button);
+	options_box.pack_start (select_tracks_button);
+	options_box.pack_start (select_busses_button);
+	options_box.pack_start (select_none_button);
 	main_layout.pack_start(options_box, false, false);
 
 	// Track scroller
@@ -578,6 +584,10 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	column->pack_start (*text_renderer, false);
 	column->add_attribute (text_renderer->property_text(), track_cols.label);
 
+	select_tracks_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks));
+	select_busses_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses));
+	select_none_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_none));
+
 	fill_list();
 
 	show_all_children ();
@@ -588,6 +598,41 @@ TrackExportChannelSelector::sync_with_manager ()
 {
 	// TODO implement properly
 	update_config();
+}
+
+void
+TrackExportChannelSelector::select_tracks ()
+{
+	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
+		Gtk::TreeModel::Row row = *it;
+		boost::shared_ptr<Route> route = row[track_cols.route];
+		if (boost::dynamic_pointer_cast<Track> (route)) {
+			// it's a track
+			row[track_cols.selected] = true;
+		}
+	}
+}
+
+void
+TrackExportChannelSelector::select_busses ()
+{
+	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
+		Gtk::TreeModel::Row row = *it;
+		boost::shared_ptr<Route> route = row[track_cols.route];
+		if (!boost::dynamic_pointer_cast<Track> (route)) {
+			// it's not a track, must be a bus
+			row[track_cols.selected] = true;
+		}
+	}
+}
+
+void
+TrackExportChannelSelector::select_none ()
+{
+	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
+		Gtk::TreeModel::Row row = *it;
+		row[track_cols.selected] = false;
+	}
 }
 
 void

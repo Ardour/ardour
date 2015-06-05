@@ -266,6 +266,12 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	Gtk::RadioButton::Group      source_group;
 	Gtk::RadioButton             region_contents_button;
 	Gtk::RadioButton             track_output_button;
+	Gtk::Button                  select_tracks_button;
+	Gtk::Button                  select_busses_button;
+	Gtk::Button                  select_none_button;
+	void select_tracks ();
+	void select_busses ();
+	void select_none ();
 };
 
 #endif /* __export_channel_selector_h__ */
