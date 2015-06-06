@@ -647,12 +647,21 @@ TrackExportChannelSelector::fill_list()
 			if ((*it)->is_master () || (*it)->is_monitor ()) {
 				continue;
 			}
+			if (!(*it)->active ()) {
+				// don't include inactive busses
+				continue;
+			}
+
 			// not monitor or master bus
 			add_track (*it);
 		}
 	}
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (boost::dynamic_pointer_cast<AudioTrack>(*it)) {
+			if (!(*it)->active ()) {
+				// don't include inactive tracks
+				continue;
+			}
 			add_track (*it);
 		}
 	}
