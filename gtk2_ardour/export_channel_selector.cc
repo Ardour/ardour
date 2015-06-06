@@ -154,7 +154,7 @@ PortExportChannelSelector::RouteCols::Channel &
 PortExportChannelSelector::RouteCols::get_channel (uint32_t channel)
 {
 	if (channel > n_channels) {
-		std::cout << "Invalid channel cout for get_channel!" << std::endl;
+		std::cout << "Invalid channel count for get_channel!" << std::endl;
 	}
 
 	std::list<Channel>::iterator it = channels.begin();
