@@ -1715,6 +1715,12 @@ CoreAudioBackend::buffer_size_callback ()
 void
 CoreAudioBackend::sample_rate_callback ()
 {
+	if (_preinit) {
+#ifndef NDEBUG
+		printf("Samplerate change during initialization.\n");
+#endif
+		return;
+	}
 	_pcmio->set_error_callback (NULL, NULL);
 	_pcmio->set_sample_rate_callback (NULL, NULL);
 	_pcmio->set_xrun_callback (NULL, NULL);
