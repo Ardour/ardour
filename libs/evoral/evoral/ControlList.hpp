@@ -124,7 +124,7 @@ public:
 	void slide (iterator before, double distance);
 	void shift (double before, double distance);
 
-	virtual void add (double when, double value, bool with_guards=true, bool with_default=true);
+	virtual void add (double when, double value, bool with_guards=true, bool with_initial=true);
 	virtual void editor_add (double when, double value);
 	
 	void fast_simple_add (double when, double value);

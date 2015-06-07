@@ -58,6 +58,7 @@ class LIBGTKMM2EXT_API PixFader : public CairoWidget
 	void on_size_allocate (Gtk::Allocation& alloc);
 
 	void render (cairo_t *, cairo_rectangle_t*);
+	bool on_grab_broken_event (GdkEventGrabBroken*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);

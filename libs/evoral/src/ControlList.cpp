@@ -399,7 +399,7 @@ ControlList::add_guard_point (double when)
 	most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
 	double eval_value = unlocked_eval (insert_position);
-	
+
 	if (most_recent_insert_iterator == _events.end()) {
 		
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at end, adding eval-value there %2\n", this, eval_value));
@@ -407,7 +407,7 @@ ControlList::add_guard_point (double when)
 		/* leave insert iterator at the end */
 		
 	} else if ((*most_recent_insert_iterator)->when == when) {
-		
+
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert iterator at existing point, setting eval-value there %2\n", this, eval_value));
 		
 		/* most_recent_insert_iterator points to a control event
@@ -415,15 +415,15 @@ ControlList::add_guard_point (double when)
 		   nothing to do.
 		   
 		   ... except ... 
-		   
+
 		   advance most_recent_insert_iterator so that the "real"
 		   insert occurs in the right place, since it 
 		   points to the control event just inserted.
 		*/
-		
+
 		++most_recent_insert_iterator;
 	} else {
-		
+
 		/* insert a new control event at the right spot
 		 */
 		
@@ -431,7 +431,7 @@ ControlList::add_guard_point (double when)
 								 this, eval_value, (*most_recent_insert_iterator)->when));
 		
 		most_recent_insert_iterator = _events.insert (most_recent_insert_iterator, new ControlEvent (when, eval_value));
-		
+
 		/* advance most_recent_insert_iterator so that the "real"
 		 * insert occurs in the right place, since it 
 		 * points to the control event just inserted.
@@ -546,7 +546,7 @@ ControlList::erase_from_iterator_to (iterator iter, double when)
 }
 
 void
-ControlList::add (double when, double value, bool with_guards, bool with_default)
+ControlList::add (double when, double value, bool with_guards, bool with_initial)
 {
 	/* this is for making changes from some kind of user interface or
 	   control surface (GUI, MIDI, OSC etc)
@@ -561,12 +561,12 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 		ControlEvent cp (when, 0.0f);
 		iterator insertion_point;
 
-		if (_events.empty() && with_default) {
+		if (_events.empty() && with_initial) {
 			
 			/* empty: add an "anchor" point if the point we're adding past time 0 */
 
 			if (when >= 1) {
-				_events.insert (_events.end(), new ControlEvent (0, _default_value));
+				_events.insert (_events.end(), new ControlEvent (0, value));
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
 			}
 		}
@@ -628,10 +628,19 @@ ControlList::add (double when, double value, bool with_guards, bool with_default
 			if ((*most_recent_insert_iterator)->value != value) {
 				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 reset existing point to new value %2\n", this, value));
 
-				/* only one point allowed per time point, so just
-				 * reset the value here.
+				/* only one point allowed per time point, so add a guard point
+				 * before it if needed then reset the value of the point.
 				 */
-				
+
+				if ((when > 0) && most_recent_insert_iterator != _events.begin ()) {
+					--most_recent_insert_iterator;
+					double last_when =  (*most_recent_insert_iterator)->when;
+					++most_recent_insert_iterator;
+					if (when - last_when > 64) {
+						add_guard_point (when - 64);
+					}
+				}
+
 				(*most_recent_insert_iterator)->value = value;
 
 				/* if we modified the final value, then its as

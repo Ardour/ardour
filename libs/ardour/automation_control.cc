@@ -116,6 +116,8 @@ AutomationControl::start_touch(double when)
 	if (!_list) return;
 	if (!touching()) {
 		if (alist()->automation_state() == Touch) {
+			/* subtle. aligns the user value with the playback */
+			set_value (get_value ());
 			alist()->start_touch (when);
 			if (!_desc.toggled) {
 				AutomationWatch::instance().add_automation_watch (shared_from_this());
