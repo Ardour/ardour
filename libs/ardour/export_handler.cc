@@ -599,7 +599,7 @@ ExportHandler::write_toc_header (CDMarkerStatus & status)
 	status.out << "CD_DA" << endl;
 	status.out << "CD_TEXT {" << endl << "  LANGUAGE_MAP {" << endl << "    0 : EN" << endl << "  }" << endl;
 	status.out << "  LANGUAGE 0 {" << endl << "    TITLE " << toc_escape_cdtext (title) << endl ;
-	status.out << "    PERFORMER \"" << toc_escape_cdtext (album_artist) << "\"" << endl;
+	status.out << "    PERFORMER " << toc_escape_cdtext (album_artist) << endl;
 	status.out << "  }" << endl << "}" << endl;
 }
 
