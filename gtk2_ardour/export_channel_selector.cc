@@ -673,7 +673,7 @@ TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route)
 	Gtk::TreeModel::iterator iter = track_list->append();
 	Gtk::TreeModel::Row row = *iter;
 
-	row[track_cols.selected] = true;
+	row[track_cols.selected] = false;
 	row[track_cols.label] = route->name();
 	row[track_cols.route] = route;
 	row[track_cols.order_key] = route->order_key();
