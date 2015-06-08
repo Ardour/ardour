@@ -611,6 +611,7 @@ TrackExportChannelSelector::select_tracks ()
 			row[track_cols.selected] = true;
 		}
 	}
+	update_config();
 }
 
 void
@@ -624,6 +625,7 @@ TrackExportChannelSelector::select_busses ()
 			row[track_cols.selected] = true;
 		}
 	}
+	update_config();
 }
 
 void
@@ -633,6 +635,7 @@ TrackExportChannelSelector::select_none ()
 		Gtk::TreeModel::Row row = *it;
 		row[track_cols.selected] = false;
 	}
+	update_config();
 }
 
 void
