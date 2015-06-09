@@ -32,7 +32,7 @@ CoreAudioPCM::destroy_aggregate_device ()
 	property_address.mSelector = kAudioPlugInDestroyAggregateDevice;
 	property_address.mScope = kAudioObjectPropertyScopeGlobal;
 	property_address.mElement = kAudioObjectPropertyElementMaster;
-	UInt32 outDataSize;
+	UInt32 outDataSize = 0;
 
 	err = AudioObjectGetPropertyDataSize(_aggregate_plugin_id, &property_address, 0, NULL, &outDataSize);
 	if (err != noErr) {
@@ -223,7 +223,7 @@ CoreAudioPCM::create_aggregate_device (
 	pluginAOPA.mSelector = kAudioPlugInCreateAggregateDevice;
 	pluginAOPA.mScope = kAudioObjectPropertyScopeGlobal;
 	pluginAOPA.mElement = kAudioObjectPropertyElementMaster;
-	UInt32 outDataSize;
+	UInt32 outDataSize = 0;
 
 	err = AudioObjectGetPropertyDataSize(_aggregate_plugin_id, &pluginAOPA, 0, NULL, &outDataSize);
 	if (err != noErr) {
