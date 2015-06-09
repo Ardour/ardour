@@ -277,19 +277,11 @@ OSC::stop ()
 	BaseUI::quit ();
 
 	if (_osc_server) {
-		int fd = lo_server_get_socket_fd(_osc_server);
-		if (fd >=0) {
-			close(fd);
-		}
 		lo_server_free (_osc_server);
 		_osc_server = 0;
 	}
 
 	if (_osc_unix_server) {
-		int fd = lo_server_get_socket_fd(_osc_unix_server);
-		if (fd >=0) {
-			close(fd);
-		}
 		lo_server_free (_osc_unix_server);
 		_osc_unix_server = 0;
 	}
