@@ -183,10 +183,12 @@ CoreAudioPCM::create_aggregate_device (
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceNameKey), AggregateDeviceNameRef);
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceUIDKey), AggregateDeviceUIDRef);
 
+#ifndef NDEBUG
 	// hide from list
 	int value = 1;
 	CFNumberRef AggregateDeviceNumberRef = CFNumberCreate(NULL, kCFNumberIntType, &value);
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceIsPrivateKey), AggregateDeviceNumberRef);
+#endif
 
 	//-------------------------------------------------
 	// Create a CFMutableArray for our sub-device list
@@ -226,14 +228,16 @@ CoreAudioPCM::create_aggregate_device (
 	UInt32 outDataSize = 0;
 
 	err = AudioObjectGetPropertyDataSize(_aggregate_plugin_id, &pluginAOPA, 0, NULL, &outDataSize);
+#ifdef WE_DONT_CARE_ABOUT_SOME_ODD_MAVERICKS_I386_ODDITITY
 	if (err != noErr) {
-		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyDataSize error\n");
+		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyDataSize error %d\n", err);
 		goto error;
 	}
+#endif
 
 	err = AudioObjectGetPropertyData(_aggregate_plugin_id, &pluginAOPA, sizeof(aggDeviceDict), &aggDeviceDict, &outDataSize, created_device);
 	if (err != noErr) {
-		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyData error\n");
+		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyData error %d\n", err);
 		goto error;
 	}
 
