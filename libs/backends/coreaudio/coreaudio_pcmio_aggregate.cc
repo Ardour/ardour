@@ -237,7 +237,7 @@ CoreAudioPCM::create_aggregate_device (
 
 	err = AudioObjectGetPropertyData(_aggregate_plugin_id, &pluginAOPA, sizeof(aggDeviceDict), &aggDeviceDict, &outDataSize, created_device);
 	if (err != noErr) {
-		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyData error %d\n", err);
+		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyData error %d\n", (int) err);
 		goto error;
 	}
 
@@ -337,8 +337,10 @@ CoreAudioPCM::create_aggregate_device (
 	// Clean up
 	//----------
 
+#ifndef NDEBUG
 	// release the private AD key
 	CFRelease(AggregateDeviceNumberRef);
+#endif
 
 	// release the CF objects we have created - we don't need them any more
 	CFRelease(aggDeviceDict);
