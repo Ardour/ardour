@@ -356,16 +356,20 @@ VideoTimeLine::update_video_timeline()
 	vtl_start -= visible_video_frames * vtl_dist;
 	visible_video_frames *=3;
 
-	if (vtl_start < video_offset ) {
-		visible_video_frames += ceil((double)vtl_start/vtl_dist);
+	/* don't request frames that are too far to the right */
+	if (vtl_start < video_offset) {
+		visible_video_frames = std::max((double)0.0, (double)visible_video_frames + ceil((double)(vtl_start - video_offset)/vtl_dist));
 		vtl_start = video_offset;
 	}
 
-	/* apply video-file constraints */
+	/* apply video-file constraints
+	 * (first frame in video is at video_start_offset) */
 	if (vtl_start > video_start_offset + video_duration + video_offset ) {
 		visible_video_frames = 0;
 	}
-	/* TODO optimize: compute rather than iterate */
+	/* trim end.
+	 * end = position on timeline (video-offset)  minus  video-file's first frame position
+	 * TODO optimize: compute rather than iterate */
 	while (visible_video_frames > 0 && vtl_start + (visible_video_frames-1) * vtl_dist >= video_start_offset + video_duration + video_offset) {
 		--visible_video_frames;
 	}
