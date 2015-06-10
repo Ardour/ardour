@@ -2785,14 +2785,14 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 
 		if (at_front) {
 			if (with_snap) {
-				resize_rect->set_x0 (snap_to_pixel(current_x, true) - snap_delta);
+				resize_rect->set_x0 (snap_to_pixel(current_x) - snap_delta);
 			} else {
 				resize_rect->set_x0 (current_x - snap_delta);
 			}
 			resize_rect->set_x1 (canvas_note->x1());
 		} else {
 			if (with_snap) {
-				resize_rect->set_x1 (snap_to_pixel(current_x, true) - snap_delta);
+				resize_rect->set_x1 (snap_to_pixel(current_x) - snap_delta);
 			} else {
 				resize_rect->set_x1 (current_x - snap_delta);
 			}
@@ -2813,7 +2813,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 				sign = -1;
 			}
 
-			const double  snapped_x = (with_snap ? snap_pixel_to_sample (current_x, true) : trackview.editor ().pixel_to_sample (current_x));
+			const double  snapped_x = (with_snap ? snap_pixel_to_sample (current_x) : trackview.editor ().pixel_to_sample (current_x));
 			Evoral::Beats beats     = region_frames_to_region_beats (snapped_x);
 			Evoral::Beats len       = Evoral::Beats();
 
@@ -2895,7 +2895,7 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		/* Convert the new x position to a frame within the source */
 		framepos_t current_fr;
 		if (with_snap) {
-			current_fr = snap_pixel_to_sample (current_x, with_snap) + _region->start ();
+			current_fr = snap_pixel_to_sample (current_x) + _region->start ();
 		} else {
 			current_fr = trackview.editor().pixel_to_sample (current_x) + _region->start ();
 		}

@@ -5280,7 +5280,7 @@ NoteDrag::total_dx (const guint state) const
 
 	frameoffset_t ret;
 	if (snap) {
-		ret =  _region->snap_frame_to_frame (st - rp, snap) + rp - n - snap_delta (state);
+		ret =  _region->snap_frame_to_frame (st - rp) + rp - n - snap_delta (state);
 	} else {
 		ret = st - n - snap_delta (state);
 	}
