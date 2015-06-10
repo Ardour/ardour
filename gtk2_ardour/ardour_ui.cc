@@ -2103,7 +2103,6 @@ ARDOUR_UI::get_smart_mode() const
 void
 ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
-
 	if (!_session) {
 		return;
 	}
@@ -2288,6 +2287,9 @@ ARDOUR_UI::toggle_record_enable (uint32_t rid)
 void
 ARDOUR_UI::map_transport_state ()
 {
+	CALLGRIND_STOP_INSTRUMENTATION;
+	cerr << "transport state changed\n";
+
 	if (!_session) {
 		auto_loop_button.unset_active_state ();
 		play_selection_button.unset_active_state ();
@@ -2429,14 +2431,6 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 	
-	ArdourDialog progress_dialog(_("Save As"), true);
-	Gtk::Label label;
-	Gtk::ProgressBar progress_bar;
-
-	progress_dialog.get_vbox()->pack_start (label);
-	progress_dialog.get_vbox()->pack_start (progress_bar);
-	label.show ();
-	progress_bar.show ();
 	
  	Session::SaveAs sa;
 
@@ -2446,19 +2440,38 @@ ARDOUR_UI::save_session_as ()
 	sa.copy_media = save_as_dialog->copy_media();
 	sa.copy_external = save_as_dialog->copy_external();
 	sa.include_media = save_as_dialog->include_media ();
-	
-	/* this signal will be emitted from within this, the calling thread,
-	 * after every file is copied. It provides information on percentage
-	 * complete (in terms of total data to copy), the number of files
-	 * copied so far, and the total number to copy.
-	 */
 
-	ScopedConnection c;
-
-	sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3, &label, &progress_bar));
+	/* Only bother with a progress dialog if we're going to copy
+	   media into the save-as target. Without that choice, this
+	   will be very fast because we're only talking about a few kB's to
+	   perhaps a couple of MB's of data.
+	*/
 	
-	progress_dialog.show_all ();
-	progress_dialog.present ();
+	ArdourDialog progress_dialog (_("Save As"), true);
+
+	if (sa.include_media && sa.copy_media) {
+		
+		Gtk::Label label;
+		Gtk::ProgressBar progress_bar;
+		
+		progress_dialog.get_vbox()->pack_start (label);
+		progress_dialog.get_vbox()->pack_start (progress_bar);
+		label.show ();
+		progress_bar.show ();
+
+		/* this signal will be emitted from within this, the calling thread,
+		 * after every file is copied. It provides information on percentage
+		 * complete (in terms of total data to copy), the number of files
+		 * copied so far, and the total number to copy.
+		 */
+		
+		ScopedConnection c;
+		
+		sa.Progress.connect_same_thread (c, boost::bind (&ARDOUR_UI::save_as_progress_update, this, _1, _2, _3, &label, &progress_bar));
+		
+		progress_dialog.show_all ();
+		progress_dialog.present ();
+	}
 	
 	if (_session->save_as (sa)) {
 		/* ERROR MESSAGE */
