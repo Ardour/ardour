@@ -2893,7 +2893,12 @@ MidiRegionView::commit_resizing (NoteBase* primary, bool at_front, double delta_
 		}
 
 		/* Convert the new x position to a frame within the source */
-		const framepos_t current_fr = snap_pixel_to_sample (current_x, with_snap) + _region->start ();
+		framepos_t current_fr;
+		if (with_snap) {
+			current_fr = snap_pixel_to_sample (current_x, with_snap) + _region->start ();
+		} else {
+			current_fr = trackview.editor().pixel_to_sample (current_x) + _region->start ();
+		}
 
 		/* and then to beats */
 		const Evoral::Beats x_beats = region_frames_to_region_beats (current_fr);

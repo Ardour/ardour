@@ -339,10 +339,10 @@ frameoffset_t
 Drag::snap_delta (guint state) const
 {
 	if (ArdourKeyboard::indicates_snap_delta (state)) {
-		return 0;
+		return _snap_delta;
 	}
 
-	return _snap_delta;
+	return 0;
 }
 
 double
@@ -2410,7 +2410,7 @@ NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 		if (mrv) {
 			double sd = 0.0;
 			bool snap = true;
-			bool apply_snap_delta = !ArdourKeyboard::indicates_snap_delta (event->button.state);
+			bool apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 
 			if (ArdourKeyboard::indicates_snap (event->button.state)) {
 				if (_editor->snap_mode () != SnapOff) {
@@ -2420,7 +2420,7 @@ NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 				if (_editor->snap_mode () == SnapOff) {
 					snap = false;
 					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
-					if (!apply_snap_delta) {
+					if (apply_snap_delta) {
 						snap = true;
 					}
 				}
@@ -2445,7 +2445,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
 		double sd = 0.0;
 		bool snap = true;
-		bool apply_snap_delta = !ArdourKeyboard::indicates_snap_delta (event->button.state);
+		bool apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 		if (mrv) {
 			if (ArdourKeyboard::indicates_snap (event->button.state)) {
 				if (_editor->snap_mode () != SnapOff) {
@@ -2455,7 +2455,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 				if (_editor->snap_mode () == SnapOff) {
 					snap = false;
 					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
-					if (!apply_snap_delta) {
+					if (apply_snap_delta) {
 						snap = true;
 					}
 				}
@@ -5278,7 +5278,13 @@ NoteDrag::total_dx (const guint state) const
 		}
 	}
 
-	return _region->snap_frame_to_frame (st - rp, snap) + rp - n - snap_delta (state);
+	frameoffset_t ret;
+	if (snap) {
+		ret =  _region->snap_frame_to_frame (st - rp, snap) + rp - n - snap_delta (state);
+	} else {
+		ret = st - n - snap_delta (state);
+	}
+	return ret;
 }
 
 /** @return Current total drag y change in note number */
