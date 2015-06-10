@@ -38,10 +38,11 @@
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 
-#include "canvas/wave_view.h"
-#include "canvas/utils.h"
 #include "canvas/canvas.h"
 #include "canvas/colors.h"
+#include "canvas/debug.h"
+#include "canvas/utils.h"
+#include "canvas/wave_view.h"
 
 #include <gdkmm/general.h>
 
@@ -49,6 +50,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace PBD;
 using namespace ArdourCanvas;
 
 double WaveView::_global_gradient_depth = 0.6;
@@ -732,6 +734,9 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 	   draw with.
 	*/
 
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 needs image from %2 .. %3\n", name, start, end));
+	
+	
 	{
 		Glib::Threads::Mutex::Lock lmq (request_queue_lock);
 
@@ -758,6 +763,8 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 				                                     current_request->image));
 	
 				cache_request_result (current_request);
+				DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: got image from completed request, spans %2..%3\n",
+				                                              name, current_request->start, current_request->end));
 			}
 
 			/* drop our handle on the current request */
@@ -770,13 +777,19 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 		/* no current image draw request, so look in the cache */
 		
 		ret = get_image_from_cache (start, end, full_image);
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: lookup from cache gave %2 (full %3)\n",
+		                                              name, ret, full_image));
 
 	}
 
+	
+	
 	if (!ret || !full_image) {
 
-		if (get_image_in_thread || always_get_image_in_thread) {
+		if ((rendered && get_image_in_thread) || always_get_image_in_thread) {
 
+			DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: generating image in caller thread\n", name));
+			
 			boost::shared_ptr<WaveViewThreadRequest> req (new WaveViewThreadRequest);
 
 			req->type = WaveViewThreadRequest::Draw;
@@ -807,6 +820,12 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 		} else {
 			queue_get_image (_region, start, end);
 		}
+	}
+
+	if (ret) {
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 got an image from %2 .. %3 (full ? %4)\n", name, ret->start, ret->end, full_image));
+	} else {
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 no useful image available\n", name));
 	}
 
 	return ret;
@@ -918,12 +937,6 @@ void
 WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	assert (_samples_per_pixel != 0);
-
-	if (!rendered) {
-		/* first image generation should happen in RENDER thread */
-		get_image_in_thread = false;
-		rendered = true; /* comments in header file */
-	}
 	
 	if (!_region) {
 		return;
@@ -949,6 +962,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	
 	Rect self = item_to_window (Rect (0.0, 0.0, region_length() / _samples_per_pixel, _height));
 
+	// cerr << name << " RENDER " << area << " self = " << self << endl;
+	
 	/* Now lets get the intersection with the area we've been asked to draw */
 
 	boost::optional<Rect> d = self.intersection (area);
@@ -983,7 +998,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	const framepos_t image_end = window_to_image (self.x0, draw_end);
 	
 	// cerr << "Image/WV space: " << image_start << " .. " << image_end << endl;
-
+	
 	/* sample coordinates - note, these are not subject to rounding error 
 	 *
 	 * "sample_start = N" means "the first sample we need to represent is N
@@ -992,7 +1007,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	 
 	framepos_t sample_start = _region_start + (image_start * _samples_per_pixel);
 	framepos_t sample_end   = _region_start + (image_end * _samples_per_pixel);
-
+	
 	// cerr << "Sample space: " << sample_start << " .. " << sample_end << " @ " << _samples_per_pixel << " rs = " << _region_start << endl;
 
 	/* sample_start and sample_end are bounded by the region
@@ -1004,7 +1019,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	
 	// cerr << debug_name() << " will need image spanning " << sample_start << " .. " << sample_end << " region spans " << _region_start << " .. " << region_end() << endl;
 
-	double image_offset;
+	double image_origin_in_self_coordinates;
 	boost::shared_ptr<WaveViewCache::Entry> image_to_draw;
 	
 	if (_current_image) {
@@ -1027,6 +1042,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 		bool full_image;
 		image_to_draw = get_image (sample_start, sample_end, full_image);
+
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 image to draw = %2 (full? %3)\n", name, image_to_draw, full_image));
 		
 		if (!image_to_draw) {
 			/* image not currently available. A redraw will be scheduled
@@ -1047,10 +1064,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	 * render the specified range. 
 	 */
 
-	image_offset = (image_to_draw->start - _region_start) / _samples_per_pixel;
+	image_origin_in_self_coordinates = (image_to_draw->start - _region_start) / _samples_per_pixel;
 	
-	// cerr << "Offset into image to place at zero: " << image_offset << endl;
-
 	if (_start_shift && (sample_start == _region_start) && (self.x0 == draw.x0)) {
 		/* we are going to draw the first pixel for this region, but 
 		   we may not want this to overlap a border around the
@@ -1058,7 +1073,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		*/
 		//cerr << name.substr (23) << " ss = " << sample_start << " rs = " << _region_start << " sf = " << _start_shift << " ds = " << draw_start << " self = " << self << " draw = " << draw << endl;
 		//draw_start += _start_shift;
-		//image_offset += _start_shift;
+		//image_origin_in_self_coordinates += _start_shift;
 	}
 	
 	/* the image may only be a best-effort ... it may not span the entire
@@ -1069,9 +1084,25 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	double draw_width;
 	
 	if (image_to_draw != _current_image) {
-		draw_width = min ((double) image_to_draw->image->get_width() - image_offset, (draw_end - draw_start));
+
+		/* the image is guaranteed to start at or before
+		 * draw_start. But if it starts before draw_start, that reduces
+		 * the maximum available width we can render with.
+		 *
+		 * so .. clamp the draw width to the smaller of what we need to
+		 * draw or the available width of the image.
+		 */
+
+		draw_width = min ((double) image_to_draw->image->get_width() - (draw_start - image_to_draw->start),
+		                  (draw_end - draw_start));
+
+
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 draw just %2 of %3 (iwidth %4 off %5 img @ %6 rs @ %7)\n", name, draw_width, (draw_end - draw_start),
+		                                              image_to_draw->image->get_width(), image_origin_in_self_coordinates,
+		                                              image_to_draw->start, _region_start));
 	} else {
 		draw_width = draw_end - draw_start;
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("use current image, span entire render width %1..%2\n", draw_start, draw_end));
 	}
 
 	context->rectangle (draw_start, draw.y0, draw_width, draw.height());
@@ -1080,7 +1111,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	 * avoid blurring
 	 */
 
-	double x  = self.x0 + image_offset;
+	double x  = self.x0 + image_origin_in_self_coordinates;
 	double y  = self.y0;
 	context->user_to_device (x, y);
 	x = round (x);
@@ -1096,6 +1127,11 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	context->set_source (image_to_draw->image, x, y);
 	context->fill ();
 
+	/* image obtained, some of it painted to display: we are rendered.
+	   Future calls to get_image_in_thread are now meaningful.
+	*/
+
+	rendered = true;
 }
 
 void
@@ -1490,6 +1526,8 @@ WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
 
 		if (end <= e->end && start >= e->start) {
 			/* found an image that covers the range we need */
+			DEBUG_TRACE (DEBUG::WaveView, string_compose ("found image spanning %1..%2 covers %3..%4\n",
+			                                              e->start, e->end, start, end));
 			use (src, e);
 			full_coverage = true;
 			return e;
@@ -1509,6 +1547,8 @@ WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
 	}
 
 	if (best_partial) {
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("found PARTIAL image spanning %1..%2 partially covers %3..%4\n",
+		                                              best_partial->start, best_partial->end, start, end));
 		use (src, best_partial);
 		full_coverage = false;
 		return best_partial;
