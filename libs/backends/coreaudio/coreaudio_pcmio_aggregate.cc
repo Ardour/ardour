@@ -183,12 +183,10 @@ CoreAudioPCM::create_aggregate_device (
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceNameKey), AggregateDeviceNameRef);
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceUIDKey), AggregateDeviceUIDRef);
 
-#ifndef NDEBUG
 	// hide from list
 	int value = 1;
 	CFNumberRef AggregateDeviceNumberRef = CFNumberCreate(NULL, kCFNumberIntType, &value);
 	CFDictionaryAddValue(aggDeviceDict, CFSTR(kAudioAggregateDeviceIsPrivateKey), AggregateDeviceNumberRef);
-#endif
 
 	//-------------------------------------------------
 	// Create a CFMutableArray for our sub-device list
@@ -337,10 +335,8 @@ CoreAudioPCM::create_aggregate_device (
 	// Clean up
 	//----------
 
-#ifndef NDEBUG
 	// release the private AD key
 	CFRelease(AggregateDeviceNumberRef);
-#endif
 
 	// release the CF objects we have created - we don't need them any more
 	CFRelease(aggDeviceDict);
