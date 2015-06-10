@@ -228,16 +228,16 @@ CoreAudioPCM::create_aggregate_device (
 	UInt32 outDataSize = 0;
 
 	err = AudioObjectGetPropertyDataSize(_aggregate_plugin_id, &pluginAOPA, 0, NULL, &outDataSize);
-#ifdef WE_DONT_CARE_ABOUT_SOME_ODD_MAVERICKS_I386_ODDITITY
 	if (err != noErr) {
-		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyDataSize error %d\n", err);
+		char *rv = (char*)&err;
+		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyDataSize error '%c%c%c%c' 0x%08x\n", rv[0], rv[1], rv[2], rv[3], err);
 		goto error;
 	}
-#endif
 
 	err = AudioObjectGetPropertyData(_aggregate_plugin_id, &pluginAOPA, sizeof(aggDeviceDict), &aggDeviceDict, &outDataSize, created_device);
 	if (err != noErr) {
-		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyData error %d\n", (int) err);
+		char *rv = (char*)&err;
+		fprintf(stderr, "AggregateDevice: AudioObjectGetPropertyData error '%c%c%c%c' 0x%08x\n", rv[0], rv[1], rv[2], rv[3], err);
 		goto error;
 	}
 
