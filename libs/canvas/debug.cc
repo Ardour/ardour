@@ -29,6 +29,7 @@ uint64_t PBD::DEBUG::CanvasItemsDirtied = PBD::new_debug_bit ("canvasitemsdirtie
 uint64_t PBD::DEBUG::CanvasEvents = PBD::new_debug_bit ("canvasevents");
 uint64_t PBD::DEBUG::CanvasRender = PBD::new_debug_bit ("canvasrender");
 uint64_t PBD::DEBUG::CanvasEnterLeave = PBD::new_debug_bit ("canvasenterleave");
+uint64_t PBD::DEBUG::WaveView = PBD::new_debug_bit ("waveview");
 
 struct timeval ArdourCanvas::epoch;
 map<string, struct timeval> ArdourCanvas::last_time;
