@@ -95,7 +95,7 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 
-	ImageReady.connect (image_ready_connection, MISSING_INVALIDATOR, boost::bind (&WaveView::image_ready, this), gui_context());
+	ImageReady.connect (image_ready_connection, invalidator (*this), boost::bind (&WaveView::image_ready, this), gui_context());
 }
 
 WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
@@ -123,7 +123,7 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 
-	ImageReady.connect (image_ready_connection, MISSING_INVALIDATOR, boost::bind (&WaveView::image_ready, this), gui_context());
+	ImageReady.connect (image_ready_connection, invalidator (*this), boost::bind (&WaveView::image_ready, this), gui_context());
 }
 
 WaveView::~WaveView ()
