@@ -1346,10 +1346,10 @@ Session::auto_loop_changed (Location* location)
 	framepos_t dcp;
 	framecnt_t dcl;
 	auto_loop_declick_range (location, dcp, dcl);
-	replace_event (SessionEvent::AutoLoopDeclick, dcp, dcl);
 
 	if (transport_rolling() && play_loop) {
 
+		replace_event (SessionEvent::AutoLoopDeclick, dcp, dcl);
 
 		// if (_transport_frame > location->end()) {
 
@@ -1373,6 +1373,9 @@ Session::auto_loop_changed (Location* location)
 			}
 
 		}
+	} else {
+		clear_events (SessionEvent::AutoLoopDeclick);
+		clear_events (SessionEvent::AutoLoop);
 	}
 
 	last_loopend = location->end();
