@@ -87,6 +87,7 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _amplitude_above_axis (1.0)
 	, _region_amplitude (region->scale_amplitude ())
 	, _start_shift (0.0)
+	, idle_queued (false)
 	, _region_start (region->start())
 	, get_image_in_thread (false)
 	, always_get_image_in_thread (false)
@@ -115,6 +116,8 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _gradient_depth_independent (false)
 	, _amplitude_above_axis (1.0)
 	, _region_amplitude (region->scale_amplitude ())
+	, _start_shift (0.0)
+	, idle_queued (false)
 	, _region_start (region->start())
 	, get_image_in_thread (false)
 	, always_get_image_in_thread (false)
@@ -1342,7 +1345,6 @@ WaveView::set_start_shift (double pixels)
 	_start_shift = pixels;
 	end_visual_change ();
 }
-	
 
 void
 WaveView::cancel_my_render_request () const
@@ -1381,20 +1383,27 @@ WaveView::send_request (boost::shared_ptr<WaveViewThreadRequest> req) const
 
 	start_drawing_thread ();
 
-	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &WaveView::idle_send_request), req));
+	/* this is always called from the GUI thread (there is only one), and
+	 * the same thread runs the idle callback chain. thus we do not need
+	 * any locks to protect idle_queued - it is only ever set or read in
+	 * the unitary GUI thread.
+	 */
+	
+	if (!idle_queued) {
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &WaveView::idle_send_request), req));
+		idle_queued = true;
+	}
 }
 
 bool
 WaveView::idle_send_request (boost::shared_ptr<WaveViewThreadRequest> req) const
 {
-	{
-		Glib::Threads::Mutex::Lock lm (request_queue_lock);
-		/* swap requests (protected by lock) */
-		current_request = req;
-		request_queue.insert (this);
-	}
-
-	request_cond.signal (); /* wake thread */
+	Glib::Threads::Mutex::Lock lm (request_queue_lock);
+	/* swap requests (protected by lock) */
+	current_request = req;
+	request_queue.insert (this);
+	request_cond.signal (); /* wake thread - must be done while holding lock */
+	idle_queued = false;
 	
 	return false; /* do not call from idle again */
 }

@@ -310,6 +310,7 @@ public:
         double _amplitude_above_axis;
 	float  _region_amplitude;
 	double _start_shift;
+	mutable bool idle_queued;
 	
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
