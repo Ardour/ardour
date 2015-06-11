@@ -713,7 +713,7 @@ AudioSource::build_peaks_from_scratch ()
 		/* hold lock while building peaks */
 
 		Glib::Threads::Mutex::Lock lp (_lock);
-
+		
 		if (prepare_for_peakfile_writes ()) {
 			goto out;
 		}
@@ -790,7 +790,9 @@ AudioSource::done_with_peakfile_writes (bool done)
 	_peakfile_fd = -1;
 }
 
-/** @param first_frame Offset from the source start of the first frame to process */
+/** @param first_frame Offset from the source start of the first frame to
+ * process. _lock MUST be held by caller.
+*/
 int
 AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 				      bool force, bool intermediate_peaks_ready)
