@@ -2287,9 +2287,6 @@ ARDOUR_UI::toggle_record_enable (uint32_t rid)
 void
 ARDOUR_UI::map_transport_state ()
 {
-	CALLGRIND_STOP_INSTRUMENTATION;
-	cerr << "transport state changed\n";
-
 	if (!_session) {
 		auto_loop_button.unset_active_state ();
 		play_selection_button.unset_active_state ();
