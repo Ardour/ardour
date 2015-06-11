@@ -861,8 +861,46 @@ WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, frame
 	req->fill_color = _fill_color;
 	req->region_amplitude = _region_amplitude;
 
-	send_request (req);
+	if (current_request) {
+		/* this will stop rendering in progress (which might otherwise
+		   be long lived) for any current request.
+		*/
+		current_request->cancel ();
+	}
+
+	start_drawing_thread ();
+
+	/* swap requests (protected by lock) */
+
+	{
+		Glib::Threads::Mutex::Lock lm (request_queue_lock);
+		current_request = req;
+	}
+
+	/* this is always called from the GUI thread (there is only one), and
+	 * the same thread runs the idle callback chain. thus we do not need
+	 * any locks to protect idle_queued - it is only ever set or read in
+	 * the unitary GUI thread.
+	 */
+	
+	if (!idle_queued) {
+		Glib::signal_idle().connect (sigc::mem_fun (*this, &WaveView::idle_send_request));
+		idle_queued = true;
+	}
 }
+
+bool
+WaveView::idle_send_request () const
+{
+	Glib::Threads::Mutex::Lock lm (request_queue_lock);
+
+	request_queue.insert (this);
+	request_cond.signal (); /* wake thread - must be done while holding lock */
+	idle_queued = false;
+	
+	return false; /* do not call from idle again */
+}
+
 
 void
 WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_render_thread) const
@@ -1369,43 +1407,6 @@ WaveView::cancel_my_render_request () const
 	
 	request_queue.erase (this);
 	current_request.reset ();
-}
-
-void
-WaveView::send_request (boost::shared_ptr<WaveViewThreadRequest> req) const
-{	
-	if (req->type == WaveViewThreadRequest::Draw && current_request) {
-		/* this will stop rendering in progress (which might otherwise
-		   be long lived) for any current request.
-		*/
-		current_request->cancel ();
-	}
-
-	start_drawing_thread ();
-
-	/* this is always called from the GUI thread (there is only one), and
-	 * the same thread runs the idle callback chain. thus we do not need
-	 * any locks to protect idle_queued - it is only ever set or read in
-	 * the unitary GUI thread.
-	 */
-	
-	if (!idle_queued) {
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &WaveView::idle_send_request), req));
-		idle_queued = true;
-	}
-}
-
-bool
-WaveView::idle_send_request (boost::shared_ptr<WaveViewThreadRequest> req) const
-{
-	Glib::Threads::Mutex::Lock lm (request_queue_lock);
-	/* swap requests (protected by lock) */
-	current_request = req;
-	request_queue.insert (this);
-	request_cond.signal (); /* wake thread - must be done while holding lock */
-	idle_queued = false;
-	
-	return false; /* do not call from idle again */
 }
 
 /*-------------------------------------------------*/

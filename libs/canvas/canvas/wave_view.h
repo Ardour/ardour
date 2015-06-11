@@ -379,8 +379,7 @@ public:
         mutable boost::shared_ptr<WaveViewCache::Entry> _current_image;
         
 	mutable boost::shared_ptr<WaveViewThreadRequest> current_request;
-	void send_request (boost::shared_ptr<WaveViewThreadRequest>) const;
-	bool idle_send_request (boost::shared_ptr<WaveViewThreadRequest>) const;
+	bool idle_send_request () const;
 	
 	static WaveViewCache* images;
 
