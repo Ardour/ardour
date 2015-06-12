@@ -24,12 +24,12 @@
 
 using namespace std;
 
-uint64_t PBD::DEBUG::CanvasItems = PBD::new_debug_bit ("canvasitems");
-uint64_t PBD::DEBUG::CanvasItemsDirtied = PBD::new_debug_bit ("canvasitemsdirtied");
-uint64_t PBD::DEBUG::CanvasEvents = PBD::new_debug_bit ("canvasevents");
-uint64_t PBD::DEBUG::CanvasRender = PBD::new_debug_bit ("canvasrender");
-uint64_t PBD::DEBUG::CanvasEnterLeave = PBD::new_debug_bit ("canvasenterleave");
-uint64_t PBD::DEBUG::WaveView = PBD::new_debug_bit ("waveview");
+PBD::DebugBits PBD::DEBUG::CanvasItems = PBD::new_debug_bit ("canvasitems");
+PBD::DebugBits PBD::DEBUG::CanvasItemsDirtied = PBD::new_debug_bit ("canvasitemsdirtied");
+PBD::DebugBits PBD::DEBUG::CanvasEvents = PBD::new_debug_bit ("canvasevents");
+PBD::DebugBits PBD::DEBUG::CanvasRender = PBD::new_debug_bit ("canvasrender");
+PBD::DebugBits PBD::DEBUG::CanvasEnterLeave = PBD::new_debug_bit ("canvasenterleave");
+PBD::DebugBits PBD::DEBUG::WaveView = PBD::new_debug_bit ("waveview");
 
 struct timeval ArdourCanvas::epoch;
 map<string, struct timeval> ArdourCanvas::last_time;

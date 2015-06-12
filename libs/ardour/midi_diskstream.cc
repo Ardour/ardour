@@ -414,7 +414,7 @@ MidiDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t 
 				break;
 			}
 #ifndef NDEBUG
-			if (DEBUG::MidiIO & PBD::debug_bits) {
+			if (DEBUG_ENABLED(DEBUG::MidiIO)) {
 				const uint8_t* __data = ev.buffer();
 				DEBUG_STR_DECL(a);
 				DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev.time(), transport_frame, ev.size()));

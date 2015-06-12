@@ -163,7 +163,7 @@ MidiBuffer::push_back(TimeType time, size_t size, const uint8_t* data)
 	const size_t stamp_size = sizeof(TimeType);
 
 #ifndef NDEBUG
-	if (DEBUG::MidiIO & PBD::debug_bits) {
+	if (DEBUG_ENABLED(DEBUG::MidiIO)) {
 		DEBUG_STR_DECL(a);
 		DEBUG_STR_APPEND(a, string_compose ("midibuffer %1 push event @ %2 sz %3 ", this, time, size));
 		for (size_t i=0; i < size; ++i) {

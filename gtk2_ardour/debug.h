@@ -26,10 +26,10 @@
 
 namespace PBD {
 	namespace DEBUG {
-                extern uint64_t Drags;
-                extern uint64_t CutNPaste;
-                extern uint64_t Accelerators;
-                extern uint64_t GUITiming;
+                extern DebugBits Drags;
+                extern DebugBits CutNPaste;
+                extern DebugBits Accelerators;
+                extern DebugBits GUITiming;
 	}
 }
 

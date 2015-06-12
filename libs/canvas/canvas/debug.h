@@ -28,12 +28,12 @@
 
 namespace PBD {
 	namespace DEBUG {
-		LIBCANVAS_API extern uint64_t CanvasItems;
-		LIBCANVAS_API extern uint64_t CanvasItemsDirtied;
-		LIBCANVAS_API extern uint64_t CanvasEvents;
-		LIBCANVAS_API extern uint64_t CanvasRender;
-		LIBCANVAS_API extern uint64_t CanvasEnterLeave;
-		LIBCANVAS_API extern uint64_t WaveView;
+		LIBCANVAS_API extern DebugBits CanvasItems;
+		LIBCANVAS_API extern DebugBits CanvasItemsDirtied;
+		LIBCANVAS_API extern DebugBits CanvasEvents;
+		LIBCANVAS_API extern DebugBits CanvasRender;
+		LIBCANVAS_API extern DebugBits CanvasEnterLeave;
+		LIBCANVAS_API extern DebugBits WaveView;
 	}
 }
 

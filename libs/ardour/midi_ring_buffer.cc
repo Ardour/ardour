@@ -103,7 +103,7 @@ MidiRingBuffer<T>::read(MidiBuffer& dst, framepos_t start, framepos_t end, frame
 		bool success = read_contents (ev_size, write_loc);
 
 #ifndef NDEBUG
-		if (DEBUG::MidiDiskstreamIO && PBD::debug_bits) {
+		if (DEBUG_ENABLED (DEBUG::MidiDiskstreamIO)) {
 			DEBUG_STR_DECL(a);
 			DEBUG_STR_APPEND(a, string_compose ("wrote MidiEvent to Buffer (time=%1, start=%2 offset=%3)", ev_time, start, offset));
 			for (size_t i=0; i < ev_size; ++i) {

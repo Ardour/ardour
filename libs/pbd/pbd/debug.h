@@ -20,6 +20,7 @@
 #ifndef __libpbd_debug_h__
 #define __libpbd_debug_h__
 
+#include <bitset>
 #include <stdint.h>
 
 #include <sstream>
@@ -29,10 +30,12 @@
 
 namespace PBD {
 
-	LIBPBD_API extern uint64_t debug_bits;
-	LIBPBD_API uint64_t new_debug_bit (const char* name);
+	typedef std::bitset<64> DebugBits;
+
+	LIBPBD_API extern DebugBits debug_bits;
+	LIBPBD_API DebugBits new_debug_bit (const char* name);
 	LIBPBD_API void debug_print (const char* prefix, std::string str);
-	LIBPBD_API void set_debug_bits (uint64_t bits);
+	LIBPBD_API void set_debug_bits (DebugBits bits);
 	LIBPBD_API int parse_debug_options (const char* str);
 	LIBPBD_API void list_debug_options ();
 
@@ -40,32 +43,32 @@ namespace PBD {
 
 		/* this namespace is so that we can write DEBUG::bit_name */
                 
-		LIBPBD_API extern uint64_t Stateful;
-		LIBPBD_API extern uint64_t Properties;
-		LIBPBD_API extern uint64_t FileManager;
-		LIBPBD_API extern uint64_t Pool;
-		LIBPBD_API extern uint64_t EventLoop;
-		LIBPBD_API extern uint64_t AbstractUI;
-		LIBPBD_API extern uint64_t Configuration;
-		extern uint64_t FileUtils;
+		LIBPBD_API extern DebugBits Stateful;
+		LIBPBD_API extern DebugBits Properties;
+		LIBPBD_API extern DebugBits FileManager;
+		LIBPBD_API extern DebugBits Pool;
+		LIBPBD_API extern DebugBits EventLoop;
+		LIBPBD_API extern DebugBits AbstractUI;
+		LIBPBD_API extern DebugBits Configuration;
+		LIBPBD_API extern DebugBits FileUtils;
 	}
 }
 
 #ifndef NDEBUG
-#define DEBUG_TRACE(bits,str) if ((bits) & PBD::debug_bits) { PBD::debug_print (# bits, str); }
+#define DEBUG_TRACE(bits,str) if (((bits) & PBD::debug_bits).any()) { PBD::debug_print (# bits, str); }
 #define DEBUG_STR_DECL(id) std::stringstream __debug_str ## id;
 #define DEBUG_STR(id) __debug_str ## id
 #define DEBUG_STR_APPEND(id,s) __debug_str ## id << s;
-#define DEBUG_ENABLED(bits) ((bits) & PBD::debug_bits)
+#define DEBUG_ENABLED(bits) (((bits) & PBD::debug_bits).any())
 #ifdef PTW32_VERSION
 #define DEBUG_THREAD_SELF pthread_self().p
 #else
 #define DEBUG_THREAD_SELF pthread_self()
 #endif
 
-#define DEBUG_TIMING_START(bits,td) if ((bits) & PBD::debug_bits) { td.start_timing (); }
-#define DEBUG_TIMING_ADD_ELAPSED(bits,td) if ((bits) & PBD::debug_bits) { td.add_elapsed (); }
-#define DEBUG_TIMING_RESET(bits,td) if ((bits) & PBD::debug_bits) { td.reset (); }
+#define DEBUG_TIMING_START(bits,td) if (DEBUG_ENABLED (bits)) { td.start_timing (); }
+#define DEBUG_TIMING_ADD_ELAPSED(bits,td) if (DEBUG_ENABLED (bits)) { td.add_elapsed (); }
+#define DEBUG_TIMING_RESET(bits,td) if (DEBUG_ENABLED (bits)) { td.reset (); }
 
 #else
 #define DEBUG_TRACE(bits,fmt,...) /*empty*/

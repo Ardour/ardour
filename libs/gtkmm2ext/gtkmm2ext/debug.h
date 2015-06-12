@@ -20,14 +20,16 @@
 #ifndef __libgtkmm2ext_debug_h__
 #define __libgtkmm2ext_debug_h__
 
-#include "gtkmm2ext/visibility.h"
-
 #include <stdint.h>
 
-namespace Gtkmm2ext {
+#include "pbd/debug.h"
+
+#include "gtkmm2ext/visibility.h"
+
+namespace PBD {
 	namespace DEBUG {
-                LIBGTKMM2EXT_API extern uint64_t Keyboard;
-                LIBGTKMM2EXT_API extern uint64_t Bindings;
+                LIBGTKMM2EXT_API extern DebugBits Keyboard;
+                LIBGTKMM2EXT_API extern DebugBits Bindings;
 	}
 }
 

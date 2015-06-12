@@ -42,7 +42,7 @@ class LIBARDOUR_API CycleTimer {
   public:
 	CycleTimer(const std::string& name) {
 #ifndef NDEBUG
-		if (PBD::debug_bits & PBD::DEBUG::CycleTimers) {
+		if (DEBUG_ENABLED (PBD::DEBUG::CycleTimers)) {
 			_name = name;
 			if (cycles_per_usec == 0) {
 				cycles_per_usec = get_mhz ();
@@ -56,7 +56,7 @@ class LIBARDOUR_API CycleTimer {
 
 	~CycleTimer() {
 #ifndef NDEBUG
-		if (PBD::debug_bits & PBD::DEBUG::CycleTimers) {
+		if (DEBUG_ENABLED (PBD::DEBUG::CycleTimers)) {
 			_exit = get_cycles();
 			std::cerr << _name << ": " << (float) (_exit - _entry) / cycles_per_usec << " (" <<  _entry << ", " << _exit << ')' << std::endl;
 		}

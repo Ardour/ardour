@@ -31,9 +31,11 @@
 #include "i18n.h"
 
 using namespace std;
-static uint64_t _debug_bit = 1;
+using PBD::DebugBits;
 
-typedef std::map<const char*,uint64_t> DebugMap;
+static uint64_t _debug_bit = 0;
+
+typedef std::map<const char*,DebugBits> DebugMap;
 
 namespace PBD {
 	DebugMap & _debug_bit_map()
@@ -43,24 +45,23 @@ namespace PBD {
 	}
 }
 
-uint64_t PBD::DEBUG::Stateful = PBD::new_debug_bit ("stateful");
-uint64_t PBD::DEBUG::Properties = PBD::new_debug_bit ("properties");
-uint64_t PBD::DEBUG::FileManager = PBD::new_debug_bit ("filemanager");
-uint64_t PBD::DEBUG::Pool = PBD::new_debug_bit ("pool");
-uint64_t PBD::DEBUG::EventLoop = PBD::new_debug_bit ("eventloop");
-uint64_t PBD::DEBUG::AbstractUI = PBD::new_debug_bit ("abstractui");
-uint64_t PBD::DEBUG::FileUtils = PBD::new_debug_bit ("fileutils");
-uint64_t PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
+DebugBits PBD::DEBUG::Stateful = PBD::new_debug_bit ("stateful");
+DebugBits PBD::DEBUG::Properties = PBD::new_debug_bit ("properties");
+DebugBits PBD::DEBUG::FileManager = PBD::new_debug_bit ("filemanager");
+DebugBits PBD::DEBUG::Pool = PBD::new_debug_bit ("pool");
+DebugBits PBD::DEBUG::EventLoop = PBD::new_debug_bit ("eventloop");
+DebugBits PBD::DEBUG::AbstractUI = PBD::new_debug_bit ("abstractui");
+DebugBits PBD::DEBUG::FileUtils = PBD::new_debug_bit ("fileutils");
+DebugBits PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
 
-uint64_t PBD::debug_bits = 0x0;
+DebugBits PBD::debug_bits;
 
-uint64_t
+DebugBits
 PBD::new_debug_bit (const char* name)
 {
-        uint64_t ret;
-        _debug_bit_map().insert (make_pair (name, _debug_bit));
-        ret = _debug_bit;
-        _debug_bit <<= 1;
+        DebugBits ret;
+        ret.set (_debug_bit++, 1);
+        _debug_bit_map().insert (make_pair (name, ret));
         return ret;
 }
 
@@ -70,12 +71,6 @@ PBD::debug_print (const char* prefix, string str)
 	cerr << prefix << ": " << str;
 }
 
-void
-PBD::set_debug_bits (uint64_t bits)
-{
-	debug_bits = bits;
-}
-
 int
 PBD::parse_debug_options (const char* str)
 {
@@ -83,7 +78,7 @@ PBD::parse_debug_options (const char* str)
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep (",");
 	tokenizer tokens (in_str, sep);
-	uint64_t bits = 0;
+	DebugBits bits;
 
 	for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter) {
 		if (*tok_iter == "list") {
@@ -92,20 +87,22 @@ PBD::parse_debug_options (const char* str)
 		}
 
 		if (*tok_iter == "all") {
-			PBD::set_debug_bits (~0ULL);
+			debug_bits.set (); /* sets all bits */
 			return 0;
 		}
 
-		for (map<const char*,uint64_t>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
+		for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
 			const char* cstr = (*tok_iter).c_str();
 
                         if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
-                                bits |= i->second;
+	                        bits |= i->second;
+	                        cerr << i->first << " set ... debug bits now set to " << bits << " using " << i->second << endl;
                         }
                 }
 	}
 	
-	PBD::set_debug_bits (bits);
+	debug_bits = bits;
+	
 	return 0;
 }
 
@@ -117,7 +114,7 @@ PBD::list_debug_options ()
 
 	vector<string> options;
 
-	for (map<const char*,uint64_t>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
+	for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
 		options.push_back (i->first);
         }
 

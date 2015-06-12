@@ -25,7 +25,7 @@
 
 using namespace std;
 
-uint64_t PBD::DEBUG::Drags = PBD::new_debug_bit ("drags");
-uint64_t PBD::DEBUG::CutNPaste = PBD::new_debug_bit ("cutnpaste");
-uint64_t PBD::DEBUG::Accelerators = PBD::new_debug_bit ("accelerators");
-uint64_t PBD::DEBUG::GUITiming = PBD::new_debug_bit ("guitiming");
+PBD::DebugBits PBD::DEBUG::Drags = PBD::new_debug_bit ("drags");
+PBD::DebugBits PBD::DEBUG::CutNPaste = PBD::new_debug_bit ("cutnpaste");
+PBD::DebugBits PBD::DEBUG::Accelerators = PBD::new_debug_bit ("accelerators");
+PBD::DebugBits PBD::DEBUG::GUITiming = PBD::new_debug_bit ("guitiming");

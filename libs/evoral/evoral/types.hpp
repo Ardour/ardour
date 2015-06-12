@@ -27,6 +27,8 @@
 #include <limits>
 #include <list>
 
+#include "pbd/debug.h"
+
 #include "evoral/Beats.hpp"
 #include "evoral/visibility.h"
 
@@ -46,9 +48,9 @@ typedef uint32_t EventType;
 
 namespace PBD {
 	namespace DEBUG {
-		LIBEVORAL_API extern uint64_t Sequence;
-		LIBEVORAL_API extern uint64_t Note;
-		LIBEVORAL_API extern uint64_t ControlList;
+		LIBEVORAL_API extern DebugBits Sequence;
+		LIBEVORAL_API extern DebugBits Note;
+		LIBEVORAL_API extern DebugBits ControlList;
 	}
 }
 

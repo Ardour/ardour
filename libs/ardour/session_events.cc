@@ -74,11 +74,6 @@ SessionEvent::operator new (size_t)
 	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("%1 Allocating SessionEvent from %2 ev @ %3 pool size %4 free %5 used %6\n", pthread_name(), p->name(), ev,
 	                                                   p->total(), p->available(), p->used()));
 	                                                   
-#ifndef NDEBUG
-	if (DEBUG::SessionEvents & PBD::debug_bits) {
-		// stacktrace (cerr, 40);
-	}
-#endif
 	ev->own_pool = p;
 	return ev;
 }
@@ -93,12 +88,6 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 		             "%1 Deleting SessionEvent @ %2 type %3 action %4 ev thread pool = %5 ev pool = %6 size %7 free %8 used %9\n",
 		             pthread_name(), ev, enum_2_string (ev->type), enum_2_string (ev->action), p->name(), ev->own_pool->name(), ev->own_pool->total(), ev->own_pool->available(), ev->own_pool->used()
 		             ));
-
-#ifndef NDEBUG
-	if (DEBUG::SessionEvents & PBD::debug_bits) {
-		// stacktrace (cerr, 40);
-	}
-#endif
 
 	if (p && p == ev->own_pool) {
 		p->release (ptr);

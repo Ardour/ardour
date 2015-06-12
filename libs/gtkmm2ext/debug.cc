@@ -20,5 +20,5 @@
 #include "gtkmm2ext/debug.h"
 #include "pbd/debug.h"
 
-uint64_t Gtkmm2ext::DEBUG::Keyboard = PBD::new_debug_bit ("keyboard");
-uint64_t Gtkmm2ext::DEBUG::Bindings = PBD::new_debug_bit ("bindings");
+PBD::DebugBits PBD::DEBUG::Keyboard = PBD::new_debug_bit ("keyboard");
+PBD::DebugBits PBD::DEBUG::Bindings = PBD::new_debug_bit ("bindings");
