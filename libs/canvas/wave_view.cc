@@ -363,23 +363,6 @@ struct ImageSet {
 
 #ifndef NO_SPECTRUM
 
-static float hue2rgb(const float p, const float q, float t) {
-	if (t < 0.f) t += 1.f;
-	if (t > 1.f) t -= 1.f;
-	if (t < 1.f/6.f) return p + (q - p) * 6.f * t;
-	if (t < 1.f/2.f) return q;
-	if (t < 2.f/3.f) return p + (q - p) * (2.f/3.f - t) * 6.f;
-	return p;
-}
-
-static void hsl2rgb(float c[3], const float hue, const float sat, const float lum) {
-	const float cq = lum < 0.5 ? lum * (1 + sat) : lum + sat - lum * sat;
-	const float cp = 2.f * lum - cq;
-	c[0] = hue2rgb (cp, cq, hue + 1.f/3.f);
-	c[1] = hue2rgb (cp, cq, hue);
-	c[2] = hue2rgb (cp, cq, hue - 1.f/3.f);
-}
-
 void
 WaveView::draw_spectrum (Cairo::RefPtr<Cairo::ImageSurface>& image, int width, boost::shared_ptr<WaveViewThreadRequest> req) const
 {
@@ -418,12 +401,11 @@ WaveView::draw_spectrum (Cairo::RefPtr<Cairo::ImageSurface>& image, int width, b
 			if (level < -range) continue;
 
 			const float pk = level > 0.0 ? 1.0 : (range + level) / range;
-
-			float clr[3];
-			hsl2rgb (clr, .70 - .72 * pk, .9, .3 + pk * .4);
-
 			const double yy = i * ypb;
-			context->set_source_rgba (clr[0], clr[1], clr[2], .3 + pk * .2);
+
+			// center "0dB" peak around red, hue "0"
+			Color c = hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4);
+			set_source_rgba (context, c);
 			context->rectangle (x0 - .5, yy - .5, x1 - x0, 1);
 			context->fill ();
 		}
