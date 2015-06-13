@@ -17,6 +17,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#ifndef NO_SPECTRUM
+#include <fftw3.h>
+#endif
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -368,6 +371,9 @@ public:
         void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks, boost::shared_ptr<WaveViewThreadRequest>) const;
 	void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
 	
+#ifndef NO_SPECTRUM
+        void draw_spectrum (Cairo::RefPtr<Cairo::ImageSurface>&, int width, boost::shared_ptr<WaveViewThreadRequest>) const;
+#endif
         void cancel_my_render_request () const;
 
         void queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, framepos_t start, framepos_t end) const;
@@ -391,6 +397,29 @@ public:
         static Glib::Threads::Thread* _drawing_thread;
         typedef std::set<WaveView const *> DrawingRequestQueue;
         static DrawingRequestQueue request_queue;
+
+#ifndef NO_SPECTRUM
+	// spectrum, TODO subclass or otherwise use a proper API, extend Shape, maybe.
+	static Glib::Threads::Mutex fft_planner_lock;
+	static float *hann_window;
+
+	void fft_init (uint32_t window_size, double rate);
+	void fft_free ();
+	void fft_reset ();
+	void fft_run (ARDOUR::Sample const * const data, const uint32_t n_samples) const;
+
+	float fft_power_at_bin (const uint32_t, const float norm) const;
+
+	uint32_t _fft_window_size;
+	uint32_t _fft_data_size;
+	double   _fft_freq_per_bin;
+
+	mutable float *_fft_data_in;
+	mutable float *_fft_data_out;
+	mutable float *_fft_power;
+
+	fftwf_plan _fftplan;
+#endif
 };
 
 }

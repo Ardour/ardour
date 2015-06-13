@@ -32,6 +32,10 @@
 #include "pbd/signals.h"
 #include "pbd/stacktrace.h"
 
+#ifndef NO_SPECTRUM
+#include "pbd/fastlog.h"
+#endif
+
 #include "ardour/types.h"
 #include "ardour/dB.h"
 #include "ardour/lmath.h"
@@ -69,6 +73,13 @@ WaveView::DrawingRequestQueue WaveView::request_queue;
 PBD::Signal0<void> WaveView::VisualPropertiesChanged;
 PBD::Signal0<void> WaveView::ClipLevelChanged;
 
+
+#ifndef NO_SPECTRUM
+Glib::Threads::Mutex WaveView::fft_planner_lock;
+float* WaveView::hann_window = 0;
+#define FFTBLOCKSIZE 4192
+#endif
+
 WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	: Item (c)
 	, _region (region)
@@ -97,6 +108,9 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 
 	ImageReady.connect (image_ready_connection, invalidator (*this), boost::bind (&WaveView::image_ready, this), gui_context());
+#ifndef NO_SPECTRUM
+	fft_init (FFTBLOCKSIZE, 48000 /* TODO get SR from region/session */);
+#endif
 }
 
 WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
@@ -127,11 +141,17 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 
 	ImageReady.connect (image_ready_connection, invalidator (*this), boost::bind (&WaveView::image_ready, this), gui_context());
+#ifndef NO_SPECTRUM
+	fft_init (FFTBLOCKSIZE, 48000 /* TODO get SR from region/session */);
+#endif
 }
 
 WaveView::~WaveView ()
 {
 	invalidate_image_cache ();
+#ifndef NO_SPECTRUM
+	fft_free ();
+#endif
 }
 
 string
@@ -340,6 +360,84 @@ struct ImageSet {
 	ImageSet() :
 		wave (0), outline (0), clip (0), zero (0) {}
 };
+
+#ifndef NO_SPECTRUM
+
+static float hue2rgb(const float p, const float q, float t) {
+	if (t < 0.f) t += 1.f;
+	if (t > 1.f) t -= 1.f;
+	if (t < 1.f/6.f) return p + (q - p) * 6.f * t;
+	if (t < 1.f/2.f) return q;
+	if (t < 2.f/3.f) return p + (q - p) * (2.f/3.f - t) * 6.f;
+	return p;
+}
+
+static void hsl2rgb(float c[3], const float hue, const float sat, const float lum) {
+	const float cq = lum < 0.5 ? lum * (1 + sat) : lum + sat - lum * sat;
+	const float cp = 2.f * lum - cq;
+	c[0] = hue2rgb (cp, cq, hue + 1.f/3.f);
+	c[1] = hue2rgb (cp, cq, hue);
+	c[2] = hue2rgb (cp, cq, hue - 1.f/3.f);
+}
+
+void
+WaveView::draw_spectrum (Cairo::RefPtr<Cairo::ImageSurface>& image, int width, boost::shared_ptr<WaveViewThreadRequest> req) const
+{
+	const framepos_t sample_end   = req->end;
+	const framepos_t sample_start = req->start;
+	const int chn                 = req->channel;
+
+	framecnt_t remain = sample_end - sample_start;
+	framepos_t pos = req->start;
+
+	const double pixels_per_block = width * _fft_window_size / (double)remain;
+	const double ypb = req->height / _fft_data_size;
+	double x0 = 0;
+
+	Cairo::RefPtr<Cairo::Context> context = Cairo::Context::create (image);
+	context->set_line_width (1.0);
+
+	while (remain > 0) {
+		Sample buf[FFTBLOCKSIZE];
+		const framecnt_t k = std::min ((framecnt_t)_fft_window_size, remain);
+
+		_region->read (buf, pos, k, chn);
+
+		fft_run (buf, k);
+
+		// TODO limit width at the end.
+		double x1 = x0 + pixels_per_block;
+
+		const float gain = 0.0; // dB
+		const float range = 60; // dB
+
+		// TODO refine plot, plot per y-pixel, not per bin,...
+		// this is utterly inefficient, but good enough to validate fft for now
+		for (uint32_t i = 1; i < _fft_data_size - 1; ++i) {
+			const float level = gain + fft_power_at_bin (i, i);
+			if (level < -range) continue;
+
+			const float pk = level > 0.0 ? 1.0 : (range + level) / range;
+
+			float clr[3];
+			hsl2rgb (clr, .70 - .72 * pk, .9, .3 + pk * .4);
+
+			const double yy = i * ypb;
+			context->set_source_rgba (clr[0], clr[1], clr[2], .3 + pk * .2);
+			context->rectangle (x0 - .5, yy - .5, x1 - x0, 1);
+			context->fill ();
+		}
+
+		remain -= k;
+		pos += k;
+		x0 += pixels_per_block;
+
+		if (req->should_stop()) {
+			return;
+		}
+	}
+}
+#endif
 
 void
 WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peaks, int n_peaks, boost::shared_ptr<WaveViewThreadRequest> req) const
@@ -921,6 +1019,12 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		framepos_t sample_end = min (center + image_samples, region_end());
 		const int n_peaks = llrintf ((sample_end - sample_start)/ (req->samples_per_pixel));
 		
+#ifndef NO_SPECTRUM
+		req->image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->height);
+		req->start = sample_start;
+		req->end = sample_end;
+		draw_spectrum (req->image, n_peaks, req);
+#else
 		boost::scoped_array<ARDOUR::PeakData> peaks (new PeakData[n_peaks]);
 
 		/* Note that Region::read_peaks() takes a start position based on an
@@ -951,6 +1055,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		} else {
 			draw_absent_image (req->image, peaks.get(), n_peaks);
 		}
+#endif
 	}
 	
 	if (in_render_thread && !req->should_stop()) {
@@ -1751,3 +1856,100 @@ WaveViewCache::set_image_cache_threshold (uint64_t sz)
 	_image_cache_threshold = sz;
 	cache_flush ();
 }
+
+
+
+#ifndef NO_SPECTRUM
+
+static float * generate_hann_window (const uint32_t window_size) {
+	float *hw  = (float *) malloc(sizeof(float) * window_size);
+	double sum = 0.0;
+
+	for (uint32_t i = 0; i < window_size; ++i) {
+		hw[i] = 0.5f - (0.5f * (float) cos (2.0f * M_PI * (float)i / (float)(window_size)));
+		sum += hw[i];
+	}
+	const double isum = 2.0 / sum;
+	for (uint32_t i = 0; i < window_size; ++i) {
+		hw[i] *= isum;
+	}
+	return hw;
+}
+
+void
+WaveView::fft_init (uint32_t window_size, double rate)
+{
+	Glib::Threads::Mutex::Lock lk (fft_planner_lock);
+
+	_fft_window_size = window_size;
+	_fft_data_size   = window_size / 2;
+	_fft_freq_per_bin = rate / _fft_data_size / 2.f;
+
+	_fft_data_in  = (float *) fftwf_malloc (sizeof(float) * _fft_window_size);
+	_fft_data_out = (float *) fftwf_malloc (sizeof(float) * _fft_window_size);
+	_fft_power    = (float *) malloc (sizeof(float) * _fft_data_size);
+
+	fft_reset ();
+
+	_fftplan = fftwf_plan_r2r_1d (_fft_window_size, _fft_data_in, _fft_data_out, FFTW_R2HC, FFTW_MEASURE);
+
+	if (!hann_window) {
+		hann_window = generate_hann_window (window_size);
+	}
+}
+
+void
+WaveView::fft_free ()
+{
+	fftwf_destroy_plan (_fftplan);
+	fftwf_free (_fft_data_in);
+	fftwf_free (_fft_data_out);
+	free (_fft_power);
+}
+
+void
+WaveView::fft_reset ()
+{
+	for (uint32_t i = 0; i < _fft_data_size; ++i) {
+		_fft_power[i] = 0;
+	}
+	for (uint32_t i = 0; i < _fft_window_size; ++i) {
+		_fft_data_out[i] = 0;
+	}
+}
+
+void
+WaveView::fft_run (ARDOUR::Sample const * const data, const uint32_t n_samples) const
+{
+	uint32_t i;
+	assert(n_samples <= _fft_window_size);
+
+	// for now, no partial processing
+	for (i = 0; i < n_samples; ++i) {
+		_fft_data_in[i] = data[i] * hann_window[i];
+	}
+	for (; i < _fft_window_size; ++i) {
+		_fft_data_in[i] = 0;
+	}
+
+	fftwf_execute (_fftplan);
+
+	_fft_power[0] = _fft_data_out[0] * _fft_data_out[0];
+
+#define FRe (_fft_data_out[i])
+#define FIm (_fft_data_out[_fft_window_size - i])
+	for (i = 1; i < _fft_data_size - 1; ++i) {
+		_fft_power[i] = (FRe * FRe) + (FIm * FIm);
+		//_fft_phase[i] = atan2f (FIm, FRe);
+	}
+#undef FRe
+#undef FIm
+}
+
+float
+WaveView::fft_power_at_bin (const uint32_t b, const float norm) const {
+	const float a = _fft_power[b] * norm;
+	return a > 1e-12 ? 10.0 * fast_log10(a) : -INFINITY;
+}
+
+#endif
