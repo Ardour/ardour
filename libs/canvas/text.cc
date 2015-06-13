@@ -119,7 +119,9 @@ Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
                 int width = 0;
                 int height = 0;
                 Glib::RefPtr<Pango::Layout> test_layout = foo.create_pango_layout ("H");
-                test_layout->set_font_description (*_font_description);
+		if (_font_description) {
+			test_layout->set_font_description (*_font_description);
+		}
                 test_layout->get_pixel_size (width, height);
                 
                 _width_correction = width*1.5;
