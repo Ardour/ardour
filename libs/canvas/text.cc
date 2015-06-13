@@ -107,25 +107,25 @@ void
 Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
 {
 #ifdef __APPLE__
-        if (_width_correction < 0.0) {
-                // Pango returns incorrect text width on some OS X
-                // So we have to make a correction
-                // To determine the correct indent take the largest symbol for which the width is correct
-                // and make the calculation
-                Gtk::Window win;
-                Gtk::Label foo;
-                win.add (foo);
-                
-                int width = 0;
-                int height = 0;
-                Glib::RefPtr<Pango::Layout> test_layout = foo.create_pango_layout ("H");
+	if (_width_correction < 0.0) {
+		// Pango returns incorrect text width on some OS X
+		// So we have to make a correction
+		// To determine the correct indent take the largest symbol for which the width is correct
+		// and make the calculation
+		Gtk::Window win;
+		Gtk::Label foo;
+		win.add (foo);
+
+		int width = 0;
+		int height = 0;
+		Glib::RefPtr<Pango::Layout> test_layout = foo.create_pango_layout ("H");
 		if (_font_description) {
 			test_layout->set_font_description (*_font_description);
 		}
-                test_layout->get_pixel_size (width, height);
-                
-                _width_correction = width*1.5;
-        }
+		test_layout->get_pixel_size (width, height);
+
+		_width_correction = width*1.5;
+	}
 #else
         /* don't bother with a conditional here */
         _width_correction = 0.0;
