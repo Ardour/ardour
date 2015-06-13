@@ -101,6 +101,7 @@ protected:
 	ARDOUR::Session& _session;
 
 	const ParameterDescriptor _desc;
+	XMLNode* _before; //used for undo of touch start/stop pairs.
 };
 
 
