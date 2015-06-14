@@ -39,7 +39,9 @@ using namespace ARDOUR;
 static std::string s_instance_name;
 size_t AlsaAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> AlsaAudioBackend::_midi_options;
-std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_input_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_output_audio_device_status;
+std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_duplex_audio_device_status;
 std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_midi_device_status;
 
 AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
@@ -51,7 +53,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _freewheeling (false)
 	, _measure_latency (false)
 	, _last_process_start (0)
-	, _audio_device("")
+	, _input_audio_device("")
+	, _output_audio_device("")
 	, _midi_driver_option(_("None"))
 	, _device_reservation(0)
 	, _samplerate (48000)
@@ -91,14 +94,43 @@ AlsaAudioBackend::is_realtime () const
 std::vector<AudioBackend::DeviceStatus>
 AlsaAudioBackend::enumerate_devices () const
 {
-	_audio_device_status.clear();
+	_duplex_audio_device_status.clear();
 	std::map<std::string, std::string> devices;
 	get_alsa_audio_device_names(devices);
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (_audio_device == "") _audio_device = i->first;
-		_audio_device_status.push_back (DeviceStatus (i->first, true));
+		if (_input_audio_device == "") _input_audio_device = i->first;
+		if (_output_audio_device == "") _output_audio_device = i->first;
+		_duplex_audio_device_status.push_back (DeviceStatus (i->first, true));
 	}
-	return _audio_device_status;
+	return _duplex_audio_device_status;
+}
+
+std::vector<AudioBackend::DeviceStatus>
+AlsaAudioBackend::enumerate_input_devices () const
+{
+	_input_audio_device_status.clear();
+	std::map<std::string, std::string> devices;
+	get_alsa_audio_device_names(devices, HalfDuplexIn);
+	_input_audio_device_status.push_back (DeviceStatus (_("None"), true));
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (_input_audio_device == "") _input_audio_device = i->first;
+		_input_audio_device_status.push_back (DeviceStatus (i->first, true));
+	}
+	return _input_audio_device_status;
+}
+
+std::vector<AudioBackend::DeviceStatus>
+AlsaAudioBackend::enumerate_output_devices () const
+{
+	_output_audio_device_status.clear();
+	std::map<std::string, std::string> devices;
+	get_alsa_audio_device_names(devices, HalfDuplexOut);
+	_output_audio_device_status.push_back (DeviceStatus (_("None"), true));
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (_output_audio_device == "") _output_audio_device = i->first;
+		_output_audio_device_status.push_back (DeviceStatus (i->first, true));
+	}
+	return _output_audio_device_status;
 }
 
 void
@@ -235,10 +267,26 @@ AlsaAudioBackend::can_change_buffer_size_when_running () const
 }
 
 int
+AlsaAudioBackend::set_input_device_name (const std::string& d)
+{
+	_input_audio_device = d;
+	return 0;
+}
+
+int
+AlsaAudioBackend::set_output_device_name (const std::string& d)
+{
+	_output_audio_device = d;
+	return 0;
+}
+
+int
 AlsaAudioBackend::set_device_name (const std::string& d)
 {
-	_audio_device = d;
-	return 0;
+	int rv = 0;
+	rv |= set_input_device_name (d);
+	rv |= set_output_device_name (d);
+	return rv;
 }
 
 int
@@ -321,7 +369,25 @@ AlsaAudioBackend::set_systemic_midi_output_latency (std::string const device, ui
 std::string
 AlsaAudioBackend::device_name () const
 {
-	return _audio_device;
+	if (_input_audio_device != _("None")) {
+		return _input_audio_device;
+	}
+	if (_output_audio_device != _("None")) {
+		return _output_audio_device;
+	}
+	return "";
+}
+
+std::string
+AlsaAudioBackend::input_device_name () const
+{
+	return _input_audio_device;
+}
+
+std::string
+AlsaAudioBackend::output_device_name () const
+{
+	return _output_audio_device;
 }
 
 float
@@ -516,18 +582,52 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	assert(_rmidi_out.size() == 0);
 	assert(_pcmi == 0);
 
+	int duplex = 0;
+	std::string audio_device;
 	std::string alsa_device;
 	std::map<std::string, std::string> devices;
-	get_alsa_audio_device_names(devices);
+
+	if (_input_audio_device == _("None") && _output_audio_device == _("None")) {
+		PBD::error << _("AlsaAudioBackend: At least one of input or output device needs to be set.");
+		return -1;
+	}
+
+	if (_input_audio_device != _output_audio_device) {
+		if (_input_audio_device != _("None") && _output_audio_device != _("None")) {
+			PBD::error << _("AlsaAudioBackend: Cannot use two different devices.");
+			return -1;
+		}
+		if (_input_audio_device != _("None")) {
+			get_alsa_audio_device_names(devices, HalfDuplexIn);
+			audio_device = _input_audio_device;
+			duplex = 1;
+		} else {
+			get_alsa_audio_device_names(devices, HalfDuplexOut);
+			audio_device = _output_audio_device;
+			duplex = 2;
+		}
+	} else {
+		get_alsa_audio_device_names(devices);
+		audio_device = _input_audio_device;
+		duplex = 3;
+	}
+
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
-		if (i->first == _audio_device) {
+		if (i->first == audio_device) {
 			alsa_device = i->second;
 			break;
 		}
 	}
+	if (alsa_device == "") {
+		PBD::error << _("AlsaAudioBackend: Cannot find configured device. Is it still connected?");
+		return -1;
+	}
 
 	acquire_device(alsa_device.c_str());
-	_pcmi = new Alsa_pcmi (alsa_device.c_str(), alsa_device.c_str(), 0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
+	_pcmi = new Alsa_pcmi (
+			(duplex & 2) ? alsa_device.c_str() : NULL,
+			(duplex & 1) ? alsa_device.c_str() : NULL,
+			0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
 	switch (_pcmi->state ()) {
 		case 0: /* OK */ break;
 		case -1: PBD::error << _("AlsaAudioBackend: failed to open device.") << endmsg; break;
