@@ -7030,12 +7030,11 @@ Editor::insert_time (
 
 			Locations::LocationList::const_iterator tmp;
 
-			bool const was_locked = (*i)->locked ();
-			if (locked_markers_too) {
-				(*i)->unlock ();
-			}
-
 			if ((*i)->position_lock_style() == AudioTime || glued_markers_too) {
+				bool const was_locked = (*i)->locked ();
+				if (locked_markers_too) {
+					(*i)->unlock ();
+				}
 
 				if ((*i)->start() >= pos) {
 					// move end first, in case we're moving by more than the length of the range
@@ -7046,10 +7045,9 @@ Editor::insert_time (
 					moved = true;
 				}
 
-			}
-
-			if (was_locked) {
-				(*i)->lock ();
+				if (was_locked) {
+					(*i)->lock ();
+				}
 			}
 		}
 
