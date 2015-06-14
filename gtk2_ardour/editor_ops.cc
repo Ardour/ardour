@@ -7073,43 +7073,7 @@ Editor::do_cut_time ()
 	}
 
 	framepos_t pos = get_preferred_edit_position (EDIT_IGNORE_MOUSE);
-	ArdourDialog d (*this, _("Cut Time"));
-	VButtonBox button_box;
-	VBox option_box;
-
-	CheckButton glue_button (_("Move Glued Regions"));  glue_button.set_active();
-	CheckButton marker_button (_("Move Markers"));  marker_button.set_active();
-	CheckButton tempo_button (_("Move Tempo & Meters"));  tempo_button.set_active();
-	AudioClock clock ("cutTimeClock", true, "", true, false, true, false);
-	HBox clock_box;
-
-	clock.set (0);
-	clock.set_session (_session);
-	clock.set_bbt_reference (pos);
-
-	clock_box.pack_start (clock, false, true);
-
-	option_box.set_spacing (6);
-	option_box.pack_start (button_box, false, false);
-	option_box.pack_start (glue_button, false, false);
-	option_box.pack_start (marker_button, false, false);
-	option_box.pack_start (tempo_button, false, false);
-
-	d.get_vbox()->set_border_width (12);
-	d.get_vbox()->pack_start (clock_box, false, false);
-	d.get_vbox()->pack_start (option_box, false, false);
-	
-	option_box.show ();
-	button_box.show ();
-	glue_button.show ();
-	clock.show_all();
-	clock_box.show ();
-	marker_button.show ();
-	tempo_button.show ();
-
-	d.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
-	d.show ();
+	InsertTimeDialog d (*this, true);
 
 	int response = d.run ();
 
@@ -7117,13 +7081,20 @@ Editor::do_cut_time ()
 		return;
 	}
 	
-	framecnt_t distance = clock.current_duration (pos);
+	framecnt_t distance = d.distance();
 
 	if (distance == 0) {
 		return;
 	}
 
-	cut_time (pos, distance, SplitIntersected, glue_button.get_active(), marker_button.get_active(), tempo_button.get_active());
+	cut_time (
+		pos,
+		distance,
+		SplitIntersected,
+		d.move_glued(),
+		d.move_markers(),
+		d.move_tempos()
+	);
 }
 
 void
