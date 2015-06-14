@@ -7038,10 +7038,11 @@ Editor::insert_time (
 			if ((*i)->position_lock_style() == AudioTime || glued_markers_too) {
 
 				if ((*i)->start() >= pos) {
-					(*i)->set_start ((*i)->start() + frames);
+					// move end first, in case we're moving by more than the length of the range
 					if (!(*i)->is_mark()) {
 						(*i)->set_end ((*i)->end() + frames);
 					}
+					(*i)->set_start ((*i)->start() + frames);
 					moved = true;
 				}
 
