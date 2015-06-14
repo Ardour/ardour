@@ -953,8 +953,8 @@ AlsaAudioBackend::register_system_audio_ports()
 {
 	LatencyRange lr;
 
-	const int a_ins = _n_inputs > 0 ? _n_inputs : 2;
-	const int a_out = _n_outputs > 0 ? _n_outputs : 2;
+	const int a_ins = _n_inputs;
+	const int a_out = _n_outputs;
 
 	/* audio ports */
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);

@@ -270,6 +270,9 @@ int Alsa_pcmi::play_init (snd_pcm_uframes_t len)
 	const snd_pcm_channel_area_t   *a;
 	int                            err;
 
+	if (!_play_handle) {
+		return 0;
+	}
 	if ((err = snd_pcm_mmap_begin (_play_handle, &a, &_play_offs, &len)) < 0)
 	{
 		if (_debug & DEBUG_DATA) fprintf (stderr, "Alsa_pcmi: snd_pcm_mmap_begin(play): %s.\n", snd_strerror (err));
@@ -290,6 +293,10 @@ int Alsa_pcmi::capt_init (snd_pcm_uframes_t len)
 	unsigned int                  i;
 	const snd_pcm_channel_area_t  *a;
 	int                           err;
+
+	if (!_capt_handle) {
+		return 0;
+	}
 
 	if ((err = snd_pcm_mmap_begin (_capt_handle, &a, &_capt_offs, &len)) < 0)
 	{
@@ -326,12 +333,14 @@ void Alsa_pcmi::capt_chan  (int chan, float *dst, int len, int step)
 
 int Alsa_pcmi::play_done (int len)
 {
+	if (!_play_handle) return 0;
 	return snd_pcm_mmap_commit (_play_handle, _play_offs, len);
 }
 
 
 int Alsa_pcmi::capt_done (int len)
 {
+	if (!_capt_handle) return 0;
 	return snd_pcm_mmap_commit (_capt_handle, _capt_offs, len);
 }
 
@@ -394,7 +403,7 @@ void Alsa_pcmi::initialise (const char *play_name, const char *capt_name, const 
 		}
 	}
 
-	if (! _play_handle || ! _capt_handle) return;
+	if (! _play_handle && ! _capt_handle) return;
 
 	if (ctrl_name)
 	{
