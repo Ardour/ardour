@@ -23,8 +23,13 @@
 #include <string>
 #include <map>
 namespace ARDOUR {
+	enum AlsaDuplex {
+		HalfDuplexIn  = 1,
+		HalfDuplexOut = 2,
+		FullDuplex    = 3,
+	};
 
-	void get_alsa_audio_device_names (std::map<std::string, std::string>& devices);
+	void get_alsa_audio_device_names (std::map<std::string, std::string>& devices, AlsaDuplex duplex = FullDuplex);
 	void get_alsa_rawmidi_device_names (std::map<std::string, std::string>& devices);
 	void get_alsa_sequencer_names (std::map<std::string, std::string>& devices);
 	int card_to_num(const char* device_name);

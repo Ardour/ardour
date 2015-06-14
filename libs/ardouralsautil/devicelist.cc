@@ -24,7 +24,7 @@
 using namespace std;
 
 void
-ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices)
+ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices, AlsaDuplex duplex)
 {
 	snd_ctl_t *handle;
 	snd_ctl_card_info_t *info;
@@ -34,6 +34,8 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 	string devname;
 	int cardnum = -1;
 	int device = -1;
+
+	assert (duplex > 0);
 
 	while (snd_card_next (&cardnum) >= 0 && cardnum >= 0) {
 
@@ -63,7 +65,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 				snd_pcm_info_set_subdevice (pcminfo, 0);
 				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_CAPTURE);
 
-				if (snd_ctl_pcm_info (handle, pcminfo) < 0) {
+				if (snd_ctl_pcm_info (handle, pcminfo) < 0 && (duplex & HalfDuplexIn)) {
 					continue;
 				}
 
@@ -71,7 +73,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 				snd_pcm_info_set_subdevice (pcminfo, 0);
 				snd_pcm_info_set_stream (pcminfo, SND_PCM_STREAM_PLAYBACK);
 
-				if (snd_ctl_pcm_info (handle, pcminfo) < 0) {
+				if (snd_ctl_pcm_info (handle, pcminfo) < 0 && (duplex & HalfDuplexOut)) {
 					continue;
 				}
 				devname += ',';
