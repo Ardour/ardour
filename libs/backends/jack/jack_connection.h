@@ -29,11 +29,16 @@ class JackConnection {
 
     static bool in_control() { return _in_control; }
 
+    uint32_t probed_buffer_size () const { assert (!connected ()); return _probed_buffer_size; }
+    uint32_t probed_sample_rate () const { assert (!connected ()); return _probed_sample_rate; }
+
   private:
     jack_client_t* volatile _jack;
     std::string _client_name;
     std::string session_uuid;
     static bool _in_control;
+    uint32_t _probed_buffer_size; // when not in control
+    uint32_t _probed_sample_rate; // when not in control
 };
 
 } // namespace 

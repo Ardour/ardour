@@ -56,6 +56,8 @@ JackConnection::JackConnection (const std::string& arg1, const std::string& arg2
 	: _jack (0)
 	, _client_name (arg1)
 	, session_uuid (arg2)
+	, _probed_buffer_size (0)
+	, _probed_sample_rate (0)
 {
 	/* See if the server is already up 
 	 */
@@ -77,6 +79,8 @@ JackConnection::JackConnection (const std::string& arg1, const std::string& arg2
 	jack_client_t* c = jack_client_open ("ardourprobe", JackNoStartServer, &status);
 
 	if (status == 0) {
+		_probed_buffer_size = jack_get_buffer_size(c);
+		_probed_sample_rate = jack_get_sample_rate(c);
 		jack_client_close (c);
 		_in_control = false;
 	} else {

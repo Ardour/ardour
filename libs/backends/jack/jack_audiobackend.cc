@@ -362,7 +362,7 @@ JACKAudioBackend::sample_rate () const
 		if (available()) {
 			return _current_sample_rate;
 		} else {
-			return 0;
+			return _jack_connection->probed_sample_rate ();
 		}
 	}
 	return _target_sample_rate;
@@ -375,7 +375,7 @@ JACKAudioBackend::buffer_size () const
 		if (available()) {
 			return _current_buffer_size;
 		} else {
-			return 0;
+			return _jack_connection->probed_buffer_size ();
 		}
 	}
 	return _target_buffer_size;
