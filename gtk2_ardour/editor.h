@@ -1263,7 +1263,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void insert_time (framepos_t, framecnt_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
 
 	void do_cut_time ();
-	void cut_time (framepos_t pos, framecnt_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too, bool tempo_too);
+	void cut_time (framepos_t pos, framecnt_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too,
+			bool glued_markers_too, bool locked_markers_too, bool tempo_too);
 
 	void tab_to_transient (bool forward);
 

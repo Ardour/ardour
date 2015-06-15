@@ -7093,13 +7093,15 @@ Editor::do_cut_time ()
 		SplitIntersected,
 		d.move_glued(),
 		d.move_markers(),
+		d.move_glued_markers(),
+		d.move_locked_markers(),
 		d.move_tempos()
 	);
 }
 
 void
 Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt, 
-		     bool ignore_music_glue, bool markers_too, bool tempo_too)
+		     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
 {
 	bool commit = false;
 	
@@ -7147,36 +7149,54 @@ Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 		Locations::LocationList copy (_session->locations()->list());
 
 		for (Locations::LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
-			
-			if (!(*i)->is_mark()) {  //range;  have to handle both start and end
+			if ((*i)->position_lock_style() == AudioTime || glued_markers_too) {
+
+				bool const was_locked = (*i)->locked ();
+				if (locked_markers_too) {
+					(*i)->unlock ();
+				}
+
+				if (!(*i)->is_mark()) {  // it's a range;  have to handle both start and end
 					if ((*i)->end() >= pos
 					&& (*i)->end() < pos+frames
 					&& (*i)->start() >= pos
-					&& (*i)->end() < pos+frames) {  //range is completely enclosed;  kill it
+					&& (*i)->end() < pos+frames) {  // range is completely enclosed;  kill it
 						moved = true;
 						loc_kill_list.push_back(*i);
-					} else {  //ony start or end is included, try to do the right thing
-						if ((*i)->end() >= pos && (*i)->end() < pos+frames) {
-							(*i)->set_end (pos);  //bring the end to the cut
-							moved = true;
-						} else if ((*i)->end() >= pos) {
-							(*i)->set_end ((*i)->end()-frames); //slip the end marker back
-							moved = true;
-						}
+					} else {  // only start or end is included, try to do the right thing
+						// move start before moving end, to avoid trying to move the end to before the start
+						// if we're removing more time than the length of the range
 						if ((*i)->start() >= pos && (*i)->start() < pos+frames) {
-							(*i)->set_start (pos);  //bring the start marker to the beginning of the cut
+							// start is within cut
+							(*i)->set_start (pos);  // bring the start marker to the beginning of the cut
 							moved = true;
-						} else if ((*i)->start() >= pos) {
-							(*i)->set_start ((*i)->start() -frames); //slip the end marker back
+						} else if ((*i)->start() >= pos+frames) {
+							// start (and thus entire range) lies beyond end of cut
+							(*i)->set_start ((*i)->start() - frames); // slip the start marker back
 							moved = true;
 						}
+						if ((*i)->end() >= pos && (*i)->end() < pos+frames) {
+							// end is inside cut
+							(*i)->set_end (pos);  // bring the end to the cut
+							moved = true;
+						} else if ((*i)->end() >= pos+frames) {
+							// end is beyond end of cut
+							(*i)->set_end ((*i)->end() - frames); // slip the end marker back
+							moved = true;
+						}
+
 					}
-			} else if ((*i)->start() >= pos && (*i)->start() < pos+frames ) {
-				loc_kill_list.push_back(*i);
-				moved = true;
-			} else if ((*i)->start() >= pos) {
-				(*i)->set_start ((*i)->start() -frames);
-				moved = true;
+				} else if ((*i)->start() >= pos && (*i)->start() < pos+frames ) {
+					loc_kill_list.push_back(*i);
+					moved = true;
+				} else if ((*i)->start() >= pos) {
+					(*i)->set_start ((*i)->start() -frames);
+					moved = true;
+				}
+
+				if (was_locked) {
+					(*i)->lock ();
+				}
 			}
 		}
 
