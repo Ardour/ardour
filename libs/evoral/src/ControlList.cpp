@@ -452,7 +452,7 @@ ControlList::in_write_pass () const
 }
 
 void
-ControlList::editor_add (double when, double value)
+ControlList::editor_add (double when, double value, bool with_guard)
 {
 	/* this is for making changes from a graphical line editor
 	*/
@@ -464,8 +464,8 @@ ControlList::editor_add (double when, double value)
 		 */
 
 		if (when >= 1) {
-			_events.insert (_events.end(), new ControlEvent (0, _default_value));
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
+			_events.insert (_events.end(), new ControlEvent (0, value));
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
 		}
 	}
 
@@ -473,6 +473,9 @@ ControlList::editor_add (double when, double value)
 	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
 	_events.insert (i, new ControlEvent (when, value));
+	if (with_guard) {
+		add_guard_point (when);
+	}
 
 	mark_dirty ();
 
@@ -491,9 +494,9 @@ ControlList::maybe_add_insert_guard (double when)
 			   new control point so that our insert will happen correctly. */
 			most_recent_insert_iterator = _events.insert (
 				most_recent_insert_iterator,
-				new ControlEvent (when + 1, (*most_recent_insert_iterator)->value));
+				new ControlEvent (when + 64, (*most_recent_insert_iterator)->value));
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added insert guard point @ %2 = %3\n",
-			                                                 this, when+1,
+			                                                 this, when + 64,
 			                                                 (*most_recent_insert_iterator)->value));
 		}
 	}
@@ -632,15 +635,6 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 				 * before it if needed then reset the value of the point.
 				 */
 
-				if ((when > 0) && most_recent_insert_iterator != _events.begin ()) {
-					--most_recent_insert_iterator;
-					double last_when =  (*most_recent_insert_iterator)->when;
-					++most_recent_insert_iterator;
-					if (when - last_when > 64) {
-						add_guard_point (when - 64);
-					}
-				}
-
 				(*most_recent_insert_iterator)->value = value;
 
 				/* if we modified the final value, then its as
@@ -658,10 +652,35 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 
 		} else {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert new point at %2 at iterator at %3\n", this, when, (*most_recent_insert_iterator)->when));
-			
-			const bool done = maybe_insert_straight_line (when, value);
+			bool done = false;
+			/* check for possible straight line here until maybe_insert_straight_line () handles the insert iterator properly*/
+			if (most_recent_insert_iterator != _events.begin ()) {
+				bool have_point2 = false;
+				--most_recent_insert_iterator;
+				const bool have_point1 = (*most_recent_insert_iterator)->value == value;
+
+				if (most_recent_insert_iterator != _events.begin ()) {
+					--most_recent_insert_iterator;
+					have_point2 = (*most_recent_insert_iterator)->value == value;
+					++most_recent_insert_iterator;
+				}
+
+				if (have_point1 && have_point2) {
+					(*most_recent_insert_iterator)->when = when;
+					done = true;
+				} else {
+					++most_recent_insert_iterator;
+				}
+			}
+			//done = maybe_insert_straight_line (when, value) || done;
+			/* if the transport is stopped, add guard points (?) */
+			if (!done && !_in_write_pass && when > 64) {
+				add_guard_point (when - 64);
+				maybe_add_insert_guard (when);
+			}
+
 			if (with_guards) {
-				maybe_add_insert_guard(when);
+				maybe_add_insert_guard (when);
 			}
 
 			if (!done) {

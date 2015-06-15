@@ -5521,8 +5521,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, value (the_list, p));
-				the_list->editor_add (q, value (the_list, q));
+				the_list->editor_add (p, value (the_list, p), false);
+				the_list->editor_add (q, value (the_list, q), false);
 			}
 
 			/* same thing for the end */
@@ -5547,8 +5547,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, value (the_list, p));
-				the_list->editor_add (q, value (the_list, q));
+				the_list->editor_add (p, value (the_list, p), false);
+				the_list->editor_add (q, value (the_list, q), false);
 			}
 		}
 

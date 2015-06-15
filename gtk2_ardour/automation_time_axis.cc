@@ -644,10 +644,10 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 	_editor.begin_reversible_command (_("add automation event"));
 	XMLNode& before = list->get_state();
 
-	list->add (when, y, with_guard_points);
+	list->editor_add (when, y, with_guard_points);
 
 	XMLNode& after = list->get_state();
-	_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list, &before, &after));
+	_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
 	_editor.commit_reversible_command ();
 	_session->set_dirty ();
 }
