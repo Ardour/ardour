@@ -147,10 +147,20 @@ Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
 	_width = w + _width_correction;
 	_height = h;
 
+#ifdef __APPLE__
+	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width * 2, _height * 2);
+#else
 	_image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
-
+#endif
+	
 	Cairo::RefPtr<Cairo::Context> img_context = Cairo::Context::create (_image);
 
+#ifdef __APPLE__
+	/* Below, the rendering scaling is set to support retina display
+	 */
+	img_context->scale (2, 2);
+#endif
+	
 	/* and draw, in the appropriate color of course */
 
 	if (_outline) {
@@ -193,8 +203,18 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	Rect intersection (i.get());
 
 	context->rectangle (intersection.x0, intersection.y0, intersection.width(), intersection.height());
+#ifdef __APPLE__
+	/* Below, the rendering scaling is set to support retina display
+	 */
+	Cairo::Matrix original_matrix = context->get_matrix();
+	context->scale (0.5, 0.5);
+	context->set_source (_image, self.x0 * 2, self.y0 * 2);
+	context->fill ();
+	context->set_matrix (original_matrix);
+#else
 	context->set_source (_image, self.x0, self.y0);
 	context->fill ();
+#endif
 }
 
 void
