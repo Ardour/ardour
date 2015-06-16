@@ -70,6 +70,7 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 	void flush_playback (framepos_t, framepos_t);
 
 	void set_record_enabled (bool yn);
+	void set_record_safe (bool yn);
 	
 	void reset_tracker ();
 	void resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t time);

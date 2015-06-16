@@ -1143,7 +1143,7 @@ MidiDiskstream::finish_capture ()
 void
 MidiDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0 || record_safe ()) {
 		return;
 	}
 
@@ -1162,10 +1162,32 @@ MidiDiskstream::set_record_enabled (bool yn)
 	}
 }
 
+void
+MidiDiskstream::set_record_safe (bool yn)
+{
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0) { // REQUIRES REVIEW
+		return;
+	}
+	
+	/* yes, i know that this not proof against race conditions, but its
+	 good enough. i think.
+	 */
+	
+	if (record_safe () != yn) {
+		if (yn) {
+			engage_record_safe ();
+		} else {
+			disengage_record_safe ();
+		}
+		
+		RecordSafeChanged (); /* EMIT SIGNAL */
+	}
+}
+
 bool
 MidiDiskstream::prep_record_enable ()
 {
-	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_midi() == 0 || record_safe ()) { // REQUIRES REVIEW "|| record_safe ()"
 		return false;
 	}
 

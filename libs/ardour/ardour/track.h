@@ -107,7 +107,9 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	boost::shared_ptr<AutomationControl> rec_enable_control() { return _rec_enable_control; }
 
 	bool record_enabled() const;
+	bool record_safe () const;
 	void set_record_enabled (bool yn, void *src);
+	void set_record_safe (bool yn, void *src);
 	void prep_record_enabled (bool yn, void *src);
 
 	bool using_diskstream_id (PBD::ID) const;
@@ -165,6 +167,7 @@ class LIBARDOUR_API Track : public Route, public PublicDiskstream
 	/* Emitted when our diskstream is set to use a different playlist */
 	PBD::Signal0<void> PlaylistChanged;
 	PBD::Signal0<void> RecordEnableChanged;
+	PBD::Signal0<void> RecordSafeChanged;
 	PBD::Signal0<void> SpeedChanged;
 	PBD::Signal0<void> AlignmentStyleChanged;
 
@@ -227,6 +230,7 @@ private:
 	
 	void diskstream_playlist_changed ();
 	void diskstream_record_enable_changed ();
+	void diskstream_record_safe_changed ();
 	void diskstream_speed_changed ();
 	void diskstream_alignment_style_changed ();
 	void parameter_changed (std::string const & p);

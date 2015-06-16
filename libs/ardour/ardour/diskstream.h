@@ -104,7 +104,9 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	void       set_roll_delay (framecnt_t);
 
 	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
+	bool         record_safe () const { return g_atomic_int_get (&_record_safe); }
 	virtual void set_record_enabled (bool yn) = 0;
+	virtual void set_record_safe (bool yn) = 0;
 
 	bool destructive() const { return _flags & Destructive; }
 	virtual int set_destructive (bool /*yn*/) { return -1; }
@@ -176,6 +178,7 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	}
 
 	PBD::Signal0<void>            RecordEnableChanged;
+	PBD::Signal0<void>            RecordSafeChanged;
 	PBD::Signal0<void>            SpeedChanged;
 	PBD::Signal0<void>            ReverseChanged;
 	/* Emitted when this diskstream is set to use a different playlist */
@@ -263,6 +266,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	void engage_record_enable ();
 	void disengage_record_enable ();
+	void engage_record_safe ();
+	void disengage_record_safe ();
 
         virtual bool prep_record_enable () = 0;
         virtual bool prep_record_disable () = 0;
@@ -286,7 +291,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 
 	boost::shared_ptr<Playlist> _playlist;
 
-	mutable gint _record_enabled;
+	gint         _record_enabled;
+	gint         _record_safe;
 	double       _visible_speed;
 	double       _actual_speed;
 	/* items needed for speed change logic */

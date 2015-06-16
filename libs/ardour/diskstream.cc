@@ -64,6 +64,7 @@ Diskstream::Diskstream (Session &sess, const string &name, Flag flag)
         , i_am_the_modifier (0)
         , _track (0)
         , _record_enabled (0)
+	    , _record_safe (0)
         , _visible_speed (1.0f)
         , _actual_speed (1.0f)
         , _buffer_reallocation_required (false)
@@ -102,6 +103,7 @@ Diskstream::Diskstream (Session& sess, const XMLNode& /*node*/)
         , i_am_the_modifier (0)
         , _track (0)
         , _record_enabled (0)
+	    , _record_safe (0)
         , _visible_speed (1.0f)
         , _actual_speed (1.0f)
         , _buffer_reallocation_required (false)
@@ -468,6 +470,7 @@ Diskstream::get_state ()
 	snprintf (buf, sizeof(buf), "%f", _visible_speed);
 	node->add_property ("speed", buf);
         node->add_property ("capture-alignment", enum_2_string (_alignment_choice));
+	node->add_property ("record-safe", _record_safe ? "yes" : "no");
 
 	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
@@ -516,8 +519,12 @@ Diskstream::set_state (const XMLNode& node, int /*version*/)
 			non_realtime_set_speed ();
 		}
 	}
+	
+	if ((prop = node.property ("record-safe")) != 0) {
+	    _record_safe = PBD::string_is_affirmative (prop->value()) ? 1 : 0;
+	}
 
-        return 0;
+	return 0;
 }
 
 void
@@ -767,6 +774,18 @@ void
 Diskstream::disengage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 0);
+}
+
+void
+Diskstream::engage_record_safe ()
+{
+	g_atomic_int_set (&_record_safe, 1);
+}
+
+void
+Diskstream::disengage_record_safe ()
+{
+	g_atomic_int_set (&_record_safe, 0);
 }
 
 framecnt_t

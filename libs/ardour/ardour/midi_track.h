@@ -51,6 +51,7 @@ public:
 	boost::shared_ptr<Diskstream> create_diskstream ();
 	void set_diskstream (boost::shared_ptr<Diskstream>);
 	void set_record_enabled (bool yn, void *src);
+	void set_record_safe (bool yn, void *src);
 
 	DataType data_type () const {
 		return DataType::MIDI;

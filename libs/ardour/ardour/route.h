@@ -129,6 +129,8 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 
 	virtual void set_record_enabled (bool /*yn*/, void * /*src*/) {}
 	virtual bool record_enabled() const { return false; }
+	virtual void set_record_safe (bool yn, void *src) {}
+	virtual bool record_safe () const {return false; }
 	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}

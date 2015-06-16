@@ -73,6 +73,7 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 	}
 
 	void set_record_enabled (bool yn);
+	void set_record_safe (bool yn);
 	int set_destructive (bool yn);
 	int set_non_layered (bool yn);
 	bool can_become_destructive (bool& requires_bounce) const;

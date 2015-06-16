@@ -112,6 +112,16 @@ MidiTrack::set_record_enabled (bool yn, void *src)
 }
 
 void
+MidiTrack::set_record_safe (bool yn, void *src)
+{
+	if (_step_editing) { /* REQUIRES REVIEW */
+		return;
+	}
+	
+	Track::set_record_safe (yn, src);
+}
+
+void
 MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	/* We have to do this here, as Track::set_diskstream will cause a buffer refill,

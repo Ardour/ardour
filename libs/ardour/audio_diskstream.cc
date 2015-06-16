@@ -1736,7 +1736,7 @@ AudioDiskstream::finish_capture (boost::shared_ptr<ChannelList> c)
 void
 AudioDiskstream::set_record_enabled (bool yn)
 {
-	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0 || record_safe ()) {
 		return;
 	}
 
@@ -1761,10 +1761,39 @@ AudioDiskstream::set_record_enabled (bool yn)
 	}
 }
 
+void
+AudioDiskstream::set_record_safe (bool yn)
+{
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0) {
+		return;
+	}
+	
+	/* can't rec-safe in destructive mode if transport is before start ???? 
+	 REQUIRES REVIEW */
+	
+	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
+		return;
+	}
+	
+	/* yes, i know that this not proof against race conditions, but its
+	 good enough. i think.
+	 */
+	
+	if (record_safe () != yn) {
+		if (yn) {
+			engage_record_safe ();
+		} else {
+			disengage_record_safe ();
+		}
+	    
+		RecordSafeChanged (); /* EMIT SIGNAL */
+	}
+}
+
 bool
 AudioDiskstream::prep_record_enable ()
 {
-	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0) {
+	if (!recordable() || !_session.record_enabling_legal() || _io->n_ports().n_audio() == 0 || record_safe ()) { // REQUIRES REVIEW "|| record_safe ()"
 		return false;
 	}
 

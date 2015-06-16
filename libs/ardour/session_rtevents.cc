@@ -197,7 +197,7 @@ Session::set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, SessionEv
 	 */
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_auditioner()) {
+		if ((*i)->is_auditioner() || (*i)->record_safe ()) {
 			continue;
 		}
 
@@ -215,7 +215,7 @@ void
 Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_auditioner()) {
+		if ((*i)->is_auditioner() || (*i)->record_safe ()) {
 			continue;
 		}
 
@@ -226,6 +226,32 @@ Session::rt_set_record_enabled (boost::shared_ptr<RouteList> rl, bool yn, bool g
 		}
 	}
 
+	set_dirty ();
+}
+
+
+void
+Session::set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeventCallback after, bool group_override)
+{
+	set_record_enabled (rl, false, after, group_override);
+	queue_event (get_rt_event (rl, yn, after, group_override, &Session::rt_set_record_safe));
+}
+
+void
+Session::rt_set_record_safe (boost::shared_ptr<RouteList> rl, bool yn, bool group_override)
+{
+	for (RouteList::iterator i = rl->begin (); i != rl->end (); ++i) {
+		if ((*i)->is_auditioner ()) { // REQUIRES REVIEW Can audiotioner be in Record Safe mode?
+			continue;
+		}
+	    
+		boost::shared_ptr<Track> t;
+	    
+		if ((t = boost::dynamic_pointer_cast<Track>(*i)) != 0) {
+			t->set_record_safe (yn, (group_override ? (void*) t->route_group () : (void *) this));
+		}
+	}
+	
 	set_dirty ();
 }
 

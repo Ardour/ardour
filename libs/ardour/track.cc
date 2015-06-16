@@ -232,6 +232,10 @@ Track::can_record()
 void
 Track::prep_record_enabled (bool yn, void *src)
 {
+	if (yn && record_safe ()) {
+	    return;
+	}
+	
 	if (!_session.writable()) {
 		return;
 	}
@@ -272,6 +276,10 @@ Track::prep_record_enabled (bool yn, void *src)
 void
 Track::set_record_enabled (bool yn, void *src)
 {
+	if (_diskstream->record_safe ()) {
+	    return;
+	}
+	
 	if (!_session.writable()) {
 		return;
 	}
@@ -288,6 +296,31 @@ Track::set_record_enabled (bool yn, void *src)
 	_diskstream->set_record_enabled (yn);
 
 	_rec_enable_control->Changed ();
+}
+
+bool
+Track::record_safe () const
+{
+	return _diskstream && _diskstream->record_safe ();
+}
+
+void
+Track::set_record_safe (bool yn, void *src)
+{
+	if (!_session.writable()) { /* REQUIRES REVIEW */
+		return;
+	}
+	
+	if (_freeze_record.state == Frozen) { /* REQUIRES REVIEW */
+		return;
+	}
+	
+	if (_route_group && src != _route_group && _route_group->is_active() && _route_group->is_recenable()) {
+		_route_group->apply (&Track::set_record_safe, yn, _route_group);
+		return;
+	}
+	
+	_diskstream->set_record_safe (yn);
 }
 
 void
@@ -558,6 +591,7 @@ Track::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	ds->PlaylistChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_playlist_changed, this));
 	diskstream_playlist_changed ();
 	ds->RecordEnableChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_record_enable_changed, this));
+	ds->RecordSafeChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_record_safe_changed, this));
 	ds->SpeedChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_speed_changed, this));
 	ds->AlignmentStyleChanged.connect_same_thread (*this, boost::bind (&Track::diskstream_alignment_style_changed, this));
 }
@@ -572,6 +606,12 @@ void
 Track::diskstream_record_enable_changed ()
 {
 	RecordEnableChanged (); /* EMIT SIGNAL */
+}
+
+void
+Track::diskstream_record_safe_changed ()
+{
+	RecordSafeChanged (); /* EMIT SIGNAL */
 }
 
 void
