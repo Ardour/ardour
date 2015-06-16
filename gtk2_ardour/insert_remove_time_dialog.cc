@@ -31,7 +31,13 @@ using namespace Editing;
 InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	: ArdourDialog (remove ? _("Remove Time") : _("Insert Time"))
 	, _editor (e)
-	, _clock ("insertTimeClock", true, "", true, false, true, false)
+	, _clock ("insertTimeClock", true, "",
+			true,   // editable
+			false,  // follows_playhead
+			true,   // duration
+			false,  // with_info
+			true    // accept_on_focus_out
+		)
 {
 	set_session (_editor.session ());
 
