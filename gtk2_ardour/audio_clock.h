@@ -50,7 +50,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	};
 
 	AudioClock (const std::string& clock_name, bool is_transient, const std::string& widget_name,
-                    bool editable, bool follows_playhead, bool duration = false, bool with_info = false);
+	            bool editable, bool follows_playhead, bool duration = false, bool with_info = false,
+	            bool accept_on_focus_out = false);
 	~AudioClock ();
 
 	Mode mode() const { return _mode; }
@@ -122,6 +123,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool              editable;
 	/** true if this clock follows the playhead, meaning that certain operations are redundant */
 	bool             _follows_playhead;
+	bool             _accept_on_focus_out;
 	bool             _off;
 	int              em_width;
 	bool             _edit_by_click_field;

@@ -65,13 +65,15 @@ const double AudioClock::x_leading_padding = 6.0;
 #define TXTSPAN "<span font-family=\"Sans\" foreground=\"white\">"
 
 AudioClock::AudioClock (const string& clock_name, bool transient, const string& widget_name,
-			bool allow_edit, bool follows_playhead, bool duration, bool with_info)
+			bool allow_edit, bool follows_playhead, bool duration, bool with_info,
+			bool accept_on_focus_out)
 	: ops_menu (0)
 	, _name (clock_name)
 	, is_transient (transient)
 	, is_duration (duration)
 	, editable (allow_edit)
 	, _follows_playhead (follows_playhead)
+	, _accept_on_focus_out (accept_on_focus_out)
 	, _off (false)
 	, em_width (0)
 	, _edit_by_click_field (false)
@@ -1688,7 +1690,7 @@ AudioClock::on_focus_out_event (GdkEventFocus* ev)
 	bool ret = CairoWidget::on_focus_out_event (ev);
 
 	if (editing) {
-		end_edit (false);
+		end_edit (_accept_on_focus_out);
 	}
 
 	return ret;
