@@ -116,8 +116,16 @@ AutomationControl::set_automation_style (AutoStyle as)
 void
 AutomationControl::start_touch(double when)
 {
-	if (!_list) return;
+	if (!_list) {
+		return;
+	}
+
 	if (!touching()) {
+
+		if (alist()->automation_state() == Write) {
+			_before = &alist ()->get_state ();
+		}
+
 		if (alist()->automation_state() == Touch) {
 			/* subtle. aligns the user value with the playback */
 			set_value (get_value ());
@@ -137,13 +145,20 @@ AutomationControl::stop_touch(bool mark, double when)
 	if (!_list) return;
 	if (touching()) {
 		set_touching (false);
+
+		if (alist()->automation_state() == Write) {
+			_session.begin_reversible_command (string_compose (_("write %1 automation"), name ()));
+			_session.add_command (new MementoCommand<AutomationList> (*alist ().get (), _before, &alist ()->get_state ()));
+			_session.commit_reversible_command ();
+		}
+
 		if (alist()->automation_state() == Touch) {
 			alist()->stop_touch (mark, when);
 			if (!_desc.toggled) {
 				AutomationWatch::instance().remove_automation_watch (shared_from_this());
 			}
 
-			_session.begin_reversible_command (_("record automation controller"));
+			_session.begin_reversible_command (string_compose (_("touch %1 automation"), name ()));
 			_session.add_command (new MementoCommand<AutomationList> (*alist ().get (), _before, &alist ()->get_state ()));
 			_session.commit_reversible_command ();
 		}
