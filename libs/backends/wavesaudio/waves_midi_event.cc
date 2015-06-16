@@ -48,7 +48,7 @@ WavesMidiEvent::WavesMidiEvent (PmTimestamp timestamp, const uint8_t* data, size
                 memcpy (_data, data, datalen);
 
 #ifndef NDEBUG
-                if (DEBUG::WavesMIDI & PBD::debug_bits) {
+                if (DEBUG_ENABLED (DEBUG::WavesMIDI)) {
                         DEBUG_STR_DECL(a);
                         for (size_t i=0; i < datalen; ++i) {
                                 DEBUG_STR_APPEND(a,std::hex);
@@ -76,7 +76,7 @@ WavesMidiEvent::WavesMidiEvent (const WavesMidiEvent& source)
                 memcpy (_data, source.const_data (), source.size ());
 
 #ifndef NDEBUG
-                if (DEBUG::WavesMIDI & PBD::debug_bits) {
+                if (DEBUG_ENABLED (DEBUG::WavesMIDI)) {
                         DEBUG_STR_DECL(a);
                         for (size_t i=0; i < source.size(); ++i) {
                                 DEBUG_STR_APPEND(a,std::hex);
