@@ -21,15 +21,15 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/alignment.h>
-#include "insert_time_dialog.h"
+#include "insert_remove_time_dialog.h"
 #include "audio_clock.h"
 #include "i18n.h"
 
 using namespace Gtk;
 using namespace Editing;
 
-InsertTimeDialog::InsertTimeDialog (PublicEditor& e, bool cut)
-	: ArdourDialog (cut ? _("Cut time") : _("Insert Time"))
+InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
+	: ArdourDialog (remove ? _("Remove Time") : _("Insert Time"))
 	, _editor (e)
 	, _clock ("insertTimeClock", true, "", true, false, true, false)
 {
@@ -43,7 +43,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e, bool cut)
 	Table* table = manage (new Table (2, 2));
 	table->set_spacings (4);
 
-	Label* time_label = manage (new Label (cut ? _("Time to cut") : _("Time to insert:")));
+	Label* time_label = manage (new Label (remove ? _("Time to remove") : _("Time to insert:")));
 	time_label->set_alignment (1, 0.5);
 	table->attach (*time_label, 0, 1, 0, 1, FILL | EXPAND);
 	_clock.set (0);
@@ -51,7 +51,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e, bool cut)
 	_clock.set_bbt_reference (pos);
 	table->attach (_clock, 1, 2, 0, 1);
 
-	if (!cut) {
+	if (!remove) {
 		Label* intersected_label = manage (new Label (_("Intersected regions should:")));
 		intersected_label->set_alignment (1, 0.5);
 		table->attach (*intersected_label, 0, 1, 1, 2, FILL | EXPAND);
@@ -71,7 +71,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e, bool cut)
 	get_vbox()->pack_start (_move_glued);
 	_move_markers.set_label (_("Move markers"));
 	get_vbox()->pack_start (_move_markers);
-	_move_markers.signal_toggled().connect (sigc::mem_fun (*this, &InsertTimeDialog::move_markers_toggled));
+	_move_markers.signal_toggled().connect (sigc::mem_fun (*this, &InsertRemoveTimeDialog::move_markers_toggled));
 	_move_glued_markers.set_label (_("Move glued markers"));
 	Alignment* indent = manage (new Alignment);
 	indent->set_padding (0, 0, 12, 0);
@@ -90,14 +90,14 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e, bool cut)
 	get_vbox()->pack_start (*tempo_box);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (cut ? _("Cut time") : _("Insert time"), Gtk::RESPONSE_OK);
+	add_button (remove ? _("Cut time") : _("Insert time"), Gtk::RESPONSE_OK);
 	show_all ();
 
 	move_markers_toggled ();
 }
 
 InsertTimeOption
-InsertTimeDialog::intersected_region_action ()
+InsertRemoveTimeDialog::intersected_region_action ()
 {
 	/* only setting this to keep GCC quiet */
 	InsertTimeOption opt = LeaveIntersected;
@@ -118,49 +118,49 @@ InsertTimeDialog::intersected_region_action ()
 }
 
 bool
-InsertTimeDialog::all_playlists () const
+InsertRemoveTimeDialog::all_playlists () const
 {
 	return _all_playlists.get_active ();
 }
 
 bool
-InsertTimeDialog::move_glued () const
+InsertRemoveTimeDialog::move_glued () const
 {
 	return _move_glued.get_active ();
 }
 
 bool
-InsertTimeDialog::move_tempos () const
+InsertRemoveTimeDialog::move_tempos () const
 {
 	return _move_tempos.get_active ();
 }
 
 bool
-InsertTimeDialog::move_markers () const
+InsertRemoveTimeDialog::move_markers () const
 {
 	return _move_markers.get_active ();
 }
 
 bool
-InsertTimeDialog::move_glued_markers () const
+InsertRemoveTimeDialog::move_glued_markers () const
 {
 	return _move_glued_markers.get_active ();
 }
 
 bool
-InsertTimeDialog::move_locked_markers () const
+InsertRemoveTimeDialog::move_locked_markers () const
 {
 	return _move_locked_markers.get_active ();
 }
 
 framepos_t
-InsertTimeDialog::distance () const
+InsertRemoveTimeDialog::distance () const
 {
 	return _clock.current_duration (_editor.get_preferred_edit_position ());
 }
 
 void
-InsertTimeDialog::move_markers_toggled ()
+InsertRemoveTimeDialog::move_markers_toggled ()
 {
 	_move_glued_markers.set_sensitive (_move_markers.get_active ());
 	_move_locked_markers.set_sensitive (_move_markers.get_active ());

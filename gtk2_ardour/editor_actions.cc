@@ -405,7 +405,7 @@ Editor::register_actions ()
 
 	act = reg_sens (editor_actions, "insert-time", _("Insert Time"), (sigc::mem_fun(*this, &Editor::do_insert_time)));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
-	act = ActionManager::register_action (editor_actions, "cut-time", _("Cut Time"), (mem_fun(*this, &Editor::do_cut_time)));
+	act = ActionManager::register_action (editor_actions, "remove-time", _("Remove Time"), (mem_fun(*this, &Editor::do_remove_time)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 

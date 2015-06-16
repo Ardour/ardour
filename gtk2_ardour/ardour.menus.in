@@ -375,7 +375,7 @@
       <menuitem action='track-mute-toggle'/>
       <separator/>
       <menuitem action='insert-time'/>
-      <menuitem action='cut-time'/>
+      <menuitem action='remove-time'/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
       <menu action='TrackHeightMenu'>

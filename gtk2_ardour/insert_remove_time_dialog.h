@@ -22,10 +22,10 @@
 #include "editing.h"
 #include "audio_clock.h"
 
-class InsertTimeDialog : public ArdourDialog
+class InsertRemoveTimeDialog : public ArdourDialog
 {
 public:
-	InsertTimeDialog (PublicEditor &, bool cut = false);
+	InsertRemoveTimeDialog (PublicEditor &, bool remove = false);
 
 	Editing::InsertTimeOption intersected_region_action ();
 	bool all_playlists () const;

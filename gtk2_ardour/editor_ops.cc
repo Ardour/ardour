@@ -76,7 +76,7 @@
 #include "editor_regions.h"
 #include "editor_routes.h"
 #include "gui_thread.h"
-#include "insert_time_dialog.h"
+#include "insert_remove_time_dialog.h"
 #include "interthread_progress_window.h"
 #include "item_counts.h"
 #include "keyboard.h"
@@ -6926,7 +6926,7 @@ Editor::do_insert_time ()
 		return;
 	}
 
-	InsertTimeDialog d (*this);
+	InsertRemoveTimeDialog d (*this);
 	int response = d.run ();
 
 	if (response != RESPONSE_OK) {
@@ -7065,15 +7065,16 @@ Editor::insert_time (
 		commit_reversible_command ();
 	}
 }
+
 void
-Editor::do_cut_time ()
+Editor::do_remove_time ()
 {
 	if (selection->tracks.empty()) {
 		return;
 	}
 
 	framepos_t pos = get_preferred_edit_position (EDIT_IGNORE_MOUSE);
-	InsertTimeDialog d (*this, true);
+	InsertRemoveTimeDialog d (*this, true);
 
 	int response = d.run ();
 
@@ -7087,7 +7088,7 @@ Editor::do_cut_time ()
 		return;
 	}
 
-	cut_time (
+	remove_time (
 		pos,
 		distance,
 		SplitIntersected,
@@ -7100,7 +7101,7 @@ Editor::do_cut_time ()
 }
 
 void
-Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt, 
+Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt, 
 		     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
 {
 	bool commit = false;
