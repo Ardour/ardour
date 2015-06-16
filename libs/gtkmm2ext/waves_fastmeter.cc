@@ -569,9 +569,6 @@ void
 FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 {
 	gint top_of_meter;
-	GdkRectangle intersection;
-	GdkRectangle background;
-	GdkRectangle eventarea;
 
 	//cairo_set_source_rgb (cr, 0, 0, 0); // black
 	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
