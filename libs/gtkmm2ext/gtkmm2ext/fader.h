@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2006 Paul Davis 
+  Copyright (C) 2006 Paul Davis 
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -37,17 +37,17 @@ namespace Gtkmm2ext {
 class LIBGTKMM2EXT_API Fader : public CairoWidget
 {
   public:
-        Fader (Gtk::Adjustment& adjustment, 
-			   const Glib::RefPtr<Gdk::Pixbuf>& face_pixbuf,
-			   const Glib::RefPtr<Gdk::Pixbuf>& active_face_pixbuf,
-			   const Glib::RefPtr<Gdk::Pixbuf>& underlay_pixbuf,
-			   const Glib::RefPtr<Gdk::Pixbuf>& handle_pixbuf,
-			   const Glib::RefPtr<Gdk::Pixbuf>& active_handle_pixbuf,
-			   int min_pos_x, 
-			   int min_pos_y,
-			   int max_pos_x,
-			   int max_pos_y,
-			   bool read_only);
+	Fader (Gtk::Adjustment& adjustment, 
+	       const Glib::RefPtr<Gdk::Pixbuf>& face_pixbuf,
+	       const Glib::RefPtr<Gdk::Pixbuf>& active_face_pixbuf,
+	       const Glib::RefPtr<Gdk::Pixbuf>& underlay_pixbuf,
+	       const Glib::RefPtr<Gdk::Pixbuf>& handle_pixbuf,
+	       const Glib::RefPtr<Gdk::Pixbuf>& active_handle_pixbuf,
+	       int min_pos_x, 
+	       int min_pos_y,
+	       int max_pos_x,
+	       int max_pos_y,
+	       bool read_only);
 
 	virtual ~Fader ();
 
@@ -74,22 +74,18 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	BindingProxy binding_proxy;
 
   private:
-
-    const Glib::RefPtr<Gdk::Pixbuf> _face_pixbuf;
+	const Glib::RefPtr<Gdk::Pixbuf> _face_pixbuf;
 	const Glib::RefPtr<Gdk::Pixbuf> _active_face_pixbuf;
 	const Glib::RefPtr<Gdk::Pixbuf> _underlay_pixbuf;
-    const Glib::RefPtr<Gdk::Pixbuf> _handle_pixbuf;
-    const Glib::RefPtr<Gdk::Pixbuf> _active_handle_pixbuf;
+	const Glib::RefPtr<Gdk::Pixbuf> _handle_pixbuf;
+	const Glib::RefPtr<Gdk::Pixbuf> _active_handle_pixbuf;
 	int _min_pos_x;
 	int _min_pos_y;
 	int _max_pos_x;
 	int _max_pos_y;
-
 	bool _hovering;
-
 	GdkWindow* _grab_window;
 	Gdk::Cursor *_touch_cursor;
-
 	double _grab_start_mouse_x;
 	double _grab_start_mouse_y;
 	double _grab_start_handle_x;
@@ -98,7 +94,6 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	double _last_drawn_y;
 	bool _dragging;
 	float _default_value;
-	int _unity_loc;
 	bool _read_only;
 
 	void adjustment_changed ();
@@ -108,4 +103,4 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 
 } /* namespace */
 
- #endif /* __gtkmm2ext_fader_h__ */
+#endif /* __gtkmm2ext_fader_h__ */
