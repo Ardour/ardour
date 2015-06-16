@@ -28,8 +28,8 @@
 using namespace Gtk;
 using namespace Editing;
 
-InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
-	: ArdourDialog (_("Insert Time"))
+InsertTimeDialog::InsertTimeDialog (PublicEditor& e, bool cut)
+	: ArdourDialog (cut ? _("Cut time") : _("Insert Time"))
 	, _editor (e)
 	, _clock ("insertTimeClock", true, "", true, false, true, false)
 {
@@ -43,7 +43,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	Table* table = manage (new Table (2, 2));
 	table->set_spacings (4);
 
-	Label* time_label = manage (new Label (_("Time to insert:")));
+	Label* time_label = manage (new Label (cut ? _("Time to cut") : _("Time to insert:")));
 	time_label->set_alignment (1, 0.5);
 	table->attach (*time_label, 0, 1, 0, 1, FILL | EXPAND);
 	_clock.set (0);
@@ -51,18 +51,20 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	_clock.set_bbt_reference (pos);
 	table->attach (_clock, 1, 2, 0, 1);
 
-	Label* intersected_label = manage (new Label (_("Intersected regions should:")));
-	intersected_label->set_alignment (1, 0.5);
-	table->attach (*intersected_label, 0, 1, 1, 2, FILL | EXPAND);
-	_intersected_combo.append_text (_("stay in position"));
-	_intersected_combo.append_text (_("move"));
-	_intersected_combo.append_text (_("be split"));
-	_intersected_combo.set_active (0);
-	table->attach (_intersected_combo, 1, 2, 1, 2);
+	if (!cut) {
+		Label* intersected_label = manage (new Label (_("Intersected regions should:")));
+		intersected_label->set_alignment (1, 0.5);
+		table->attach (*intersected_label, 0, 1, 1, 2, FILL | EXPAND);
+		_intersected_combo.append_text (_("stay in position"));
+		_intersected_combo.append_text (_("move"));
+		_intersected_combo.append_text (_("be split"));
+		_intersected_combo.set_active (0);
+		table->attach (_intersected_combo, 1, 2, 1, 2);
+	}
 
 	get_vbox()->pack_start (*table);
 
-	_all_playlists.set_label (_("Insert time on all the track's playlists"));
+	_all_playlists.set_label (_("Apply to all the track's playlists"));
 	get_vbox()->pack_start (_all_playlists);
 
 	_move_glued.set_label (_("Move glued regions"));
@@ -88,7 +90,7 @@ InsertTimeDialog::InsertTimeDialog (PublicEditor& e)
 	get_vbox()->pack_start (*tempo_box);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (_("Insert time"), Gtk::RESPONSE_OK);
+	add_button (cut ? _("Cut time") : _("Insert time"), Gtk::RESPONSE_OK);
 	show_all ();
 
 	move_markers_toggled ();

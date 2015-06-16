@@ -25,7 +25,7 @@
 class InsertTimeDialog : public ArdourDialog
 {
 public:
-	InsertTimeDialog (PublicEditor &);
+	InsertTimeDialog (PublicEditor &, bool cut = false);
 
 	Editing::InsertTimeOption intersected_region_action ();
 	bool all_playlists () const;
