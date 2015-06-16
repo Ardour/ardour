@@ -94,7 +94,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	uint32_t n = 0;
 
 	const float falloff_dB = Config->get_meter_falloff() * nframes / _session.nominal_frame_rate();
-	const int zoh = _session.nominal_frame_rate() * .021;
+	const uint32_t zoh = _session.nominal_frame_rate() * .021;
 	_bufcnt += nframes;
 
 	// Meter MIDI in to the first n_midi peaks
