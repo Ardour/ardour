@@ -1509,8 +1509,9 @@ boost::shared_ptr<MidiRegion>
 MidiTimeAxisView::add_region (framepos_t pos, framecnt_t length, bool commit)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
-
-	real_editor->begin_reversible_command (Operations::create_region);
+	if (commit) {
+		real_editor->begin_reversible_command (Operations::create_region);
+	}
 	playlist()->clear_changes ();
 
 	real_editor->snap_to (pos, RoundNearest);

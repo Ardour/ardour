@@ -466,7 +466,6 @@ AutomationLine::string_to_fraction (string const & s) const
 void
 AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
-	trackview.editor().begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
@@ -492,7 +491,6 @@ AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 void
 AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
-	trackview.editor().begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0));
 
@@ -512,7 +510,6 @@ AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 void
 AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
 {
-	trackview.editor().begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), state, 0));
 

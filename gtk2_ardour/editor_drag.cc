@@ -3479,7 +3479,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 		fade_length = pos - region->position();
 	}
 
-	_editor->begin_reversible_command (_("change fade in length"));
+	bool in_command = false;
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
@@ -3495,11 +3495,17 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region()->set_fade_in_length (fade_length);
 		tmp->audio_region()->set_fade_in_active (true);
 
+		if (!in_command) {
+			_editor->begin_reversible_command (_("change fade in length"));
+			in_command = true;
+		}
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
-	_editor->commit_reversible_command ();
+	if (in_command) {
+		_editor->commit_reversible_command ();
+	}
 }
 
 void
@@ -3598,7 +3604,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 		fade_length = region->last_frame() - pos;
 	}
 
-	_editor->begin_reversible_command (_("change fade out length"));
+	bool in_command = false;
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
@@ -3614,11 +3620,17 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region()->set_fade_out_length (fade_length);
 		tmp->audio_region()->set_fade_out_active (true);
 
+		if (!in_command) {
+			_editor->begin_reversible_command (_("change fade out length"));
+			in_command = false;
+		}
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
-	_editor->commit_reversible_command ();
+	if (in_command) {
+		_editor->commit_reversible_command ();
+	}
 }
 
 void
@@ -3952,8 +3964,8 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->_dragging_edit_point = false;
 
-	_editor->begin_reversible_command ( _("move marker") );
 	XMLNode &before = _editor->session()->locations()->get_state();
+	bool in_command = false;
 
 	MarkerSelection::iterator i;
 	CopiedLocationInfo::iterator x;
@@ -3968,9 +3980,12 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (location) {
 
 			if (location->locked()) {
-				return;
+				continue;
 			}
-
+			if (!in_command) {
+				_editor->begin_reversible_command ( _("move marker") );
+				in_command = true;
+			}
 			if (location->is_mark()) {
 				location->set_start (((*x).location)->start());
 			} else {
@@ -3979,9 +3994,11 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	XMLNode &after = _editor->session()->locations()->get_state();
-	_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
-	_editor->commit_reversible_command ();
+	if (in_command) {
+		XMLNode &after = _editor->session()->locations()->get_state();
+		_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
+		_editor->commit_reversible_command ();
+	}
 }
 
 void
@@ -4044,7 +4061,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	setup_snap_delta (pos);
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
-
+	_editor->begin_reversible_command (_("automation event move"));
 	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
 
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
@@ -4190,7 +4207,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	_fixed_grab_y = cy;
 
 	double fraction = 1.0 - (cy / _line->height());
-
+	_editor->begin_reversible_command (_("automation range move"));
 	_line->start_drag_line (before, after, fraction);
 
 	show_verbose_cursor_text (_line->get_verbose_cursor_string (fraction));
@@ -5583,7 +5600,7 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	if (_nothing_to_drag) {
 		return;
 	}
-
+	_editor->begin_reversible_command (_("automation range move"));
 	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 		i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
 	}
