@@ -619,6 +619,11 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		assert(_last_pointer_time_axis_view >= 0);
 		_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
 	}
+
+	if (_brushing) {
+		/* cross track dragging seems broken here. disabled for now. */
+		_y_constrained = true;
+	}
 }
 
 double
@@ -1223,13 +1228,13 @@ void
 RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (_copy && first_move) {
-
-		if (_x_constrained) {
+		if (_x_constrained && !_brushing) {
 			_editor->begin_reversible_command (Operations::fixed_time_region_copy);
-		} else {
+		} else if (!_brushing) {
 			_editor->begin_reversible_command (Operations::region_copy);
+		} else if (_brushing) {
+			_editor->begin_reversible_command (Operations::drag_region_brush);
 		}
-
 		/* duplicate the regionview(s) and region(s) */
 
 		list<DraggingView> new_regionviews;
@@ -1287,14 +1292,14 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 	} else if (!_copy && first_move) {
-
-		if (_x_constrained) {
+		if (_x_constrained && !_brushing) {
 			_editor->begin_reversible_command (_("fixed time region drag"));
-		} else {
+		} else if (!_brushing) {
 			_editor->begin_reversible_command (Operations::region_drag);
+		} else if (_brushing) {
+			_editor->begin_reversible_command (Operations::drag_region_brush);
 		}
 	}
-
 	RegionMotionDrag::motion (event, first_move);
 }
 
@@ -1502,12 +1507,6 @@ RegionMoveDrag::finished_no_copy (
 	set<RouteTimeAxisView*> views_to_update;
 	RouteTimeAxisView* new_time_axis_view = 0;
 
-	if (_brushing) {
-		/* all changes were made during motion event handlers */
-		_editor->commit_reversible_command ();
-		return;
-	}
-
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
@@ -1621,7 +1620,6 @@ RegionMoveDrag::finished_no_copy (
 			}
 
 			rv->region()->set_position (where);
-
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
@@ -1670,7 +1668,7 @@ RegionMoveDrag::finished_no_copy (
 
 	/* write commands for the accumulated diffs for all our modified playlists */
 	add_stateful_diff_commands_for_playlists (modified_playlists);
-
+	/* applies to _brushing */
 	_editor->commit_reversible_command ();
 
 	/* We have futzed with the layering of canvas items on our streamviews.

@@ -766,6 +766,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 			break;
 
+		case AutomationLineItem:
+			_drags->set (new LineDrag (this, item), event);
+			return true;
+			break;
+
 		case StreamItem:
 			//in the past, we created a new midi region here, but perhaps that is best left to the Draw mode
 			break;
@@ -2200,7 +2205,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, framepos_t pos)
 
 	// playlist is frozen, so we have to update manually XXX this is disgusting
 
-	playlist->RegionAdded (new_region); /* EMIT SIGNAL */
+	//playlist->RegionAdded (new_region); /* EMIT SIGNAL */
 }
 
 gint
@@ -2262,8 +2267,6 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 	}
 
 	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), true, false));
-
-	begin_reversible_command (Operations::drag_region_brush);
 }
 
 /** Start a grab where a time range is selected, track(s) are selected, and the
@@ -2303,7 +2306,6 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	/* A selection grab currently creates two undo/redo operations, one for
 	   creating the new region and another for moving it.
 	*/
-
 	begin_reversible_command (Operations::selection_grab);
 
 	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
@@ -2316,6 +2318,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	if (latest_regionviews.empty()) {
 		/* something went wrong */
+		abort_reversible_command ();
 		return;
 	}
 

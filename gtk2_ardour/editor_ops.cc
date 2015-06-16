@@ -336,9 +336,9 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 		return;
 	}
 
-	begin_reversible_command (_("alter selection"));
+	begin_reversible_selection_op (_("alter selection"));
 	selection->set_preserving_all_ranges (start, end);
-	commit_reversible_command ();
+	commit_reversible_selection_op ();
 }
 
 bool
@@ -2172,10 +2172,7 @@ void
 Editor::remove_location_at_playhead_cursor ()
 {
 	if (_session) {
-
 		//set up for undo
-		begin_reversible_command (_("remove marker"));
-		
 		XMLNode &before = _session->locations()->get_state();
 		bool removed = false;
 
@@ -2191,6 +2188,7 @@ Editor::remove_location_at_playhead_cursor ()
 		
 		//store undo
 		if (removed) {
+			begin_reversible_command (_("remove marker"));
 			XMLNode &after = _session->locations()->get_state();
 			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
 			
@@ -2238,8 +2236,6 @@ Editor::add_location_from_region ()
 		return;
 	}
 
-	begin_reversible_command (_("add marker"));
-	
 	XMLNode &before = _session->locations()->get_state();
 
 	string markername;
@@ -2256,6 +2252,7 @@ Editor::add_location_from_region ()
 		return;
 	}
 
+	begin_reversible_command (_("add marker"));
 	// single range spanning all selected
 	Location *location = new Location (*_session, selection->regions.start(), selection->regions.end_frame(), markername, Location::IsRangeMarker);
 	_session->locations()->add (location, true);
@@ -3302,6 +3299,7 @@ void
 Editor::region_fill_track ()
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
+	bool commit = false;
 
 	if (!_session || rs.empty()) {
 		return;
@@ -3318,21 +3316,27 @@ Editor::region_fill_track ()
 		boost::shared_ptr<Playlist> pl = region->playlist();
 
 		if (end <= region->last_frame()) {
-			return;
+			goto out;
 		}
 
 		double times = (double) (end - region->last_frame()) / (double) region->length();
 
 		if (times == 0) {
-			return;
+			goto out;
 		}
 
 		pl->clear_changes ();
 		pl->add_region (RegionFactory::create (region, true), region->last_frame(), times);
 		_session->add_command (new StatefulDiffCommand (pl));
+		commit = true;
 	}
 
-	commit_reversible_command ();
+out:
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -3362,6 +3366,7 @@ Editor::region_fill_selection ()
 
 	framepos_t selection_length = end - start;
 	float times = (float)selection_length / region->length();
+	bool commit = false;
 
 	begin_reversible_command (Operations::fill_selection);
 
@@ -3376,9 +3381,14 @@ Editor::region_fill_selection ()
 		playlist->clear_changes ();
 		playlist->add_region (RegionFactory::create (region, true), start, times);
 		_session->add_command (new StatefulDiffCommand (playlist));
+		commit = true;
 	}
 
-	commit_reversible_command ();
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -3730,7 +3740,7 @@ void
 Editor::trim_to_region(bool forward)
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
-
+	bool commit = false;
 	begin_reversible_command (_("trim to region"));
 
 	boost::shared_ptr<Region> next_region;
@@ -3746,7 +3756,7 @@ Editor::trim_to_region(bool forward)
 		AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&arv->get_time_axis_view());
 
 		if (!atav) {
-			return;
+			continue;
 		}
 
 		float speed = 1.0;
@@ -3786,9 +3796,14 @@ Editor::trim_to_region(bool forward)
 		}
 
 		_session->add_command(new StatefulDiffCommand (region));
+		commit = true;
 	}
 
-	commit_reversible_command ();
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -3927,7 +3942,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		boost::shared_ptr<Playlist> playlist;
 
 		if ((playlist = rtv->playlist()) == 0) {
-			return;
+			continue;
 		}
 
 		InterThreadInfo itt;
@@ -5281,6 +5296,7 @@ void
 Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress)
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
+	bool commit = false;
 
 	if (rs.empty()) {
 		return;
@@ -5331,7 +5347,6 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 					}
 
 				}
-
 				/* We might have removed regions, which alters other regions' layering_index,
 				   so we need to do a recursive diff here.
 				*/
@@ -5340,8 +5355,9 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 				_session->add_commands (cmds);
 				
 				_session->add_command(new StatefulDiffCommand (playlist));
+				commit = true;
 			} else {
-				return;
+				goto out;
 			}
 
 			if (progress) {
@@ -5352,8 +5368,12 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 		r = tmp;
 		++n;
 	}
-
-	commit_reversible_command ();
+out:
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -5643,6 +5663,7 @@ Editor::set_fade_length (bool in)
 	framepos_t pos = get_preferred_edit_position();
 	framepos_t len;
 	char const * cmd;
+	bool commit = false;
 
 	if (pos > rv->region()->last_frame() || pos < rv->region()->first_frame()) {
 		/* edit point is outside the relevant region */
@@ -5671,7 +5692,7 @@ Editor::set_fade_length (bool in)
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AutomationList> alist;
@@ -5690,12 +5711,16 @@ Editor::set_fade_length (bool in)
 			tmp->audio_region()->set_fade_out_length (len);
 			tmp->audio_region()->set_fade_out_active (true);
 		}
-
 		XMLNode &after = alist->get_state();
 		_session->add_command(new MementoCommand<AutomationList>(*alist, &before, &after));
+		commit = true;
 	}
 
-	commit_reversible_command ();
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -5706,14 +5731,14 @@ Editor::set_fade_in_shape (FadeShape shape)
 	if (rs.empty()) {
 		return;
 	}
-
+	bool commit = false;
 	begin_reversible_command (_("set fade in shape"));
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
@@ -5723,10 +5748,14 @@ Editor::set_fade_in_shape (FadeShape shape)
 
 		XMLNode &after = alist->get_state();
 		_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
+		commit = true;
 	}
 
-	commit_reversible_command ();
-
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -5737,14 +5766,14 @@ Editor::set_fade_out_shape (FadeShape shape)
 	if (rs.empty()) {
 		return;
 	}
-
+	bool commit = false;
 	begin_reversible_command (_("set fade out shape"));
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_out();
@@ -5754,9 +5783,14 @@ Editor::set_fade_out_shape (FadeShape shape)
 
 		XMLNode &after = alist->get_state();
 		_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
+		commit = true;
 	}
 
-	commit_reversible_command ();
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -5767,14 +5801,14 @@ Editor::set_fade_in_active (bool yn)
 	if (rs.empty()) {
 		return;
 	}
-
+	bool commit = false;
 	begin_reversible_command (_("set fade in active"));
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 
@@ -5783,9 +5817,14 @@ Editor::set_fade_in_active (bool yn)
 		ar->clear_changes ();
 		ar->set_fade_in_active (yn);
 		_session->add_command (new StatefulDiffCommand (ar));
+		commit = true;
 	}
 
-	commit_reversible_command ();
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -5796,14 +5835,14 @@ Editor::set_fade_out_active (bool yn)
 	if (rs.empty()) {
 		return;
 	}
-
+	bool commit = false;
 	begin_reversible_command (_("set fade out active"));
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
@@ -5811,9 +5850,14 @@ Editor::set_fade_out_active (bool yn)
 		ar->clear_changes ();
 		ar->set_fade_out_active (yn);
 		_session->add_command(new StatefulDiffCommand (ar));
+		commit = true;
 	}
 
-	commit_reversible_command ();
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
+	}
 }
 
 void
@@ -5849,11 +5893,15 @@ Editor::toggle_region_fades (int dir)
 	}
 
 	/* XXX should this undo-able? */
+	bool commit = false;
+	begin_reversible_command (_("toggle fade active"));
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		if ((ar = boost::dynamic_pointer_cast<AudioRegion>((*i)->region())) == 0) {
 			continue;
 		}
+		ar->clear_changes ();
+
 		if (dir == 1 || dir == 0) {
 			ar->set_fade_in_active (!yn);
 		}
@@ -5861,6 +5909,14 @@ Editor::toggle_region_fades (int dir)
 		if (dir == -1 || dir == 0) {
 			ar->set_fade_out_active (!yn);
 		}
+		_session->add_command(new StatefulDiffCommand (ar));
+		commit = true;
+	}
+
+	if (commit) {
+		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
 	}
 }
 
@@ -6958,12 +7014,11 @@ Editor::insert_time (
 	bool all_playlists, bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too
 	)
 {
-	bool commit = false;
 
 	if (Config->get_edit_mode() == Lock) {
 		return;
 	}
-
+	bool commit = false;
 	begin_reversible_command (_("insert time"));
 
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
@@ -7016,7 +7071,6 @@ Editor::insert_time (
 		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
 		if (rtav) {
 			rtav->route ()->shift (pos, frames);
-			commit = true;
 		}
 	}
 
@@ -7055,6 +7109,7 @@ Editor::insert_time (
 		if (moved) {
 			XMLNode& after (_session->locations()->get_state());
 			_session->add_command (new MementoCommand<Locations>(*_session->locations(), &before, &after));
+			commit = true;
 		}
 	}
 
@@ -7064,6 +7119,8 @@ Editor::insert_time (
 
 	if (commit) {
 		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
 	}
 }
 void
@@ -7131,13 +7188,11 @@ void
 Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt, 
 		     bool ignore_music_glue, bool markers_too, bool tempo_too)
 {
-	bool commit = false;
-	
 	if (Config->get_edit_mode() == Lock) {
 		error << (_("Cannot insert or delete time when in Lock edit.")) << endmsg;
 		return;
 	}
-
+	bool commit = false;
 	begin_reversible_command (_("cut time"));
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
@@ -7164,7 +7219,6 @@ Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
 		if (rtav) {
 			rtav->route ()->shift (pos, -frames);
-			commit = true;
 		}
 	}
 
@@ -7233,6 +7287,8 @@ Editor::cut_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 	
 	if (commit) {
 		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
 	}
 }
 
