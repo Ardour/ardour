@@ -384,8 +384,6 @@ Session::Session (AudioEngine &eng,
 	StartTimeChanged.connect_same_thread (*this, boost::bind (&Session::start_time_changed, this, _1));
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
 
-	_is_new = false;
-
 	emit_thread_start ();
 
 	/* hook us up to the engine since we are now completely constructed */
