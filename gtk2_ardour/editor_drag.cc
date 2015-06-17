@@ -4091,11 +4091,6 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	// positive side of zero
 	double const zero_gain_y = (1.0 - _zero_gain_fraction) * _point->line().height() - .01;
 
-	// make sure we hit zero when passing through
-	if ((cy < zero_gain_y && (cy - dy) > zero_gain_y) || (cy > zero_gain_y && (cy - dy) < zero_gain_y)) {
-		cy = zero_gain_y;
-	}
-
 	if (_x_constrained) {
 		cx = _fixed_grab_x;
 	}
@@ -4105,6 +4100,11 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	_cumulative_x_drag = cx - _fixed_grab_x;
 	_cumulative_y_drag = cy - _fixed_grab_y;
+
+	// make sure we hit zero when passing through
+	if ((cy < zero_gain_y && (cy - dy) > zero_gain_y) || (cy > zero_gain_y && (cy - dy) < zero_gain_y)) {
+		cy = zero_gain_y;
+	}
 
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
