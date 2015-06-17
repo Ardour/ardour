@@ -142,8 +142,18 @@ Session::pre_engine_init (string fullpath)
 	_path = canonical_path(fullpath);
 
 	/* is it new ? */
-
-	_is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+    if (Profile->get_trx() ) {
+        // Waves TracksLive has a usecase of session replacement with a new one.
+        // We should check session state file (<session_name>.ardour) existance
+        // to determine if the session is new or not
+        string full_session_name = Glib::build_filename( fullpath, _name );
+        full_session_name += statefile_suffix;
+        
+        _is_new = !Glib::file_test (full_session_name, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+    } else {
+        _is_new = !Glib::file_test (_path, Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR));
+    }
+    
 
 	/* finish initialization that can't be done in a normal C++ constructor
 	   definition.
