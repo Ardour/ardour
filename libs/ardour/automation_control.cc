@@ -88,6 +88,8 @@ AutomationControl::set_automation_state (AutoState as)
 		}
 
 		if (as == Write) {
+			/* get state for undo */
+			_before = &alist ()->get_state ();
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		} else if (as == Touch) {
 			if (!touching()) {
@@ -121,10 +123,6 @@ AutomationControl::start_touch(double when)
 	}
 
 	if (!touching()) {
-
-		if (alist()->automation_state() == Write) {
-			_before = &alist ()->get_state ();
-		}
 
 		if (alist()->automation_state() == Touch) {
 			/* subtle. aligns the user value with the playback */
