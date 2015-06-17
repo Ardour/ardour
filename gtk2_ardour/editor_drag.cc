@@ -4035,7 +4035,6 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i),
 	  _cumulative_x_drag (0),
 	  _cumulative_y_drag (0)
-	, _first_move (true)
 {
 	if (_zero_gain_fraction < 0.0) {
 		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain());
@@ -4072,7 +4071,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 }
 
 void
-ControlPointDrag::motion (GdkEvent* event, bool)
+ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 {
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	double dy = current_pointer_y() - last_pointer_y();
@@ -4121,10 +4120,9 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	float const fraction = 1.0 - (cy / _point->line().height());
 
-	if (_first_move) {
+	if (first_motion) {
 		_editor->begin_reversible_command (_("automation event move"));
 		_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
-		_first_move = false;
 	}
 
 	_point->line().drag_motion (_editor->sample_to_pixel_unrounded (cx_frames), fraction, false, _pushing, _final_index);
@@ -4144,9 +4142,6 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 		motion (event, false);
-	}
-
-	if (!_first_move) {
 		_point->line().end_drag (_pushing, _final_index);
 		_editor->commit_reversible_command ();
 	}
@@ -4174,6 +4169,8 @@ LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, _line (0)
 	, _cumulative_y_drag (0)
+	, _before (0)
+	, _after (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LineDrag\n");
 }
@@ -4197,10 +4194,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	framecnt_t const frame_within_region = (framecnt_t) floor (cx * _editor->samples_per_pixel);
 
-	uint32_t before;
-	uint32_t after;
-
-	if (!_line->control_points_adjacent (frame_within_region, before, after)) {
+	if (!_line->control_points_adjacent (frame_within_region, _before, _after)) {
 		/* no adjacent points */
 		return;
 	}
@@ -4213,14 +4207,12 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	_fixed_grab_y = cy;
 
 	double fraction = 1.0 - (cy / _line->height());
-	_editor->begin_reversible_command (_("automation range move"));
-	_line->start_drag_line (before, after, fraction);
 
 	show_verbose_cursor_text (_line->get_verbose_cursor_string (fraction));
 }
 
 void
-LineDrag::motion (GdkEvent* event, bool)
+LineDrag::motion (GdkEvent* event, bool first_move)
 {
 	double dy = current_pointer_y() - last_pointer_y();
 
@@ -4238,6 +4230,11 @@ LineDrag::motion (GdkEvent* event, bool)
 	double const fraction = 1.0 - (cy / _line->height());
 	uint32_t ignored;
 
+	if (first_move) {
+		_editor->begin_reversible_command (_("automation range move"));
+		_line->start_drag_line (_before, _after, fraction);
+	}
+
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	_line->drag_motion (0, fraction, true, false, ignored);
 
@@ -4250,6 +4247,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 	if (movement_occured) {
 		motion (event, false);
 		_line->end_drag (false, 0);
+		_editor->commit_reversible_command ();
 	} else {
 		/* add a new control point on the line */
 
@@ -4262,8 +4260,6 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 			atv->add_automation_event (event, where, event->button.y, false);
 		}
 	}
-
-	_editor->commit_reversible_command ();
 }
 
 void
