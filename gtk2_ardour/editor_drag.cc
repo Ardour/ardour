@@ -4035,6 +4035,7 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i),
 	  _cumulative_x_drag (0),
 	  _cumulative_y_drag (0)
+	, _first_move (true)
 {
 	if (_zero_gain_fraction < 0.0) {
 		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain());
@@ -4061,9 +4062,6 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	setup_snap_delta (pos);
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
-	_editor->begin_reversible_command (_("automation event move"));
-	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
-
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
 	_pushing = Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::push_points_modifier ());
@@ -4123,6 +4121,12 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	float const fraction = 1.0 - (cy / _point->line().height());
 
+	if (_first_move) {
+		_editor->begin_reversible_command (_("automation event move"));
+		_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
+		_first_move = false;
+	}
+
 	_point->line().drag_motion (_editor->sample_to_pixel_unrounded (cx_frames), fraction, false, _pushing, _final_index);
 
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
@@ -4142,8 +4146,10 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 	}
 
-	_point->line().end_drag (_pushing, _final_index);
-	_editor->commit_reversible_command ();
+	if (!_first_move) {
+		_point->line().end_drag (_pushing, _final_index);
+		_editor->commit_reversible_command ();
+	}
 }
 
 void

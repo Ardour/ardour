@@ -512,7 +512,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		break;
 
 	case ControlPointItem:
-		set_selected_track_as_side_effect (op);
+		/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
+
 		if (eff_mouse_mode != MouseRange) {
 			_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
 		}
