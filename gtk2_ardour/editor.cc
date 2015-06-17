@@ -3121,11 +3121,7 @@ Editor::setup_toolbar ()
 
 	if (!ARDOUR::Profile->get_trx()) {
 		hbox->pack_start (snap_box, false, false);
-		if ( !Profile->get_small_screen() || Profile->get_mixbus() ) {
-			hbox->pack_start (*nudge_box, false, false);
-		} else {
-			ARDOUR_UI::instance()->editor_transport_box().pack_start (*nudge_box, false, false);
-		}
+		hbox->pack_start (*nudge_box, false, false);
 	}
 	hbox->pack_start (panic_box, false, false);
 

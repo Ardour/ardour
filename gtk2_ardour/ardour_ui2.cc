@@ -454,10 +454,6 @@ ARDOUR_UI::setup_transport ()
 		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
 	}
 
-        if (ARDOUR::Profile->get_small_screen()) {
-                transport_tearoff_hbox.pack_start (_editor_transport_box, false, false);
-        }
-
 	if (!ARDOUR::Profile->get_trx()) {
 		transport_tearoff_hbox.pack_start (alert_box, false, false);
 		transport_tearoff_hbox.pack_start (meter_box, false, false);
