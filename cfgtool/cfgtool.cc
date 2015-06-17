@@ -37,6 +37,9 @@ int main (int argc, char **argv) {
 	cfg->remove_nodes_and_delete ("name", "updates-url");
 	cfg->remove_nodes_and_delete ("name", "freesound-download-dir"); // user specific
 
+	XMLNode* meta = state.child ("Metadata");
+	meta->remove_nodes ("user_name");
+
 	XMLTree tree;
 	tree.set_root (&state);
 
