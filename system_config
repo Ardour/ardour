@@ -39,6 +39,7 @@
     <Option name="auto-analyse-audio" value="0"/>
     <Option name="osc-port" value="3819"/>
     <Option name="use-osc" value="0"/>
+    <Option name="layer-model" value="1"/>
     <Option name="automation-follows-regions" value="1"/>
     <Option name="region-boundaries-from-selected-tracks" value="1"/>
     <Option name="region-boundaries-from-onscreen_tracks" value="1"/>
