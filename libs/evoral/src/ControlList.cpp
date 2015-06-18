@@ -469,13 +469,18 @@ ControlList::editor_add (double when, double value, bool with_guard)
 		}
 	}
 
+	insert_position = when;
+	if (with_guard) {
+		if (when > 64) {
+			add_guard_point (when - 64);
+		}
+		maybe_add_insert_guard (when);
+	}
+
 	ControlEvent cp (when, 0.0f);
 	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
 	_events.insert (i, new ControlEvent (when, value));
-	if (with_guard) {
-		add_guard_point (when);
-	}
 
 	mark_dirty ();
 
