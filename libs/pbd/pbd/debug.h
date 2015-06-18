@@ -30,7 +30,7 @@
 
 namespace PBD {
 
-	typedef std::bitset<64> DebugBits;
+	typedef std::bitset<128> DebugBits;
 
 	LIBPBD_API extern DebugBits debug_bits;
 	LIBPBD_API DebugBits new_debug_bit (const char* name);
