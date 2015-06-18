@@ -4260,8 +4260,6 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 
 		AutomationTimeAxisView* atv;
 
-		_line->end_drag (false, 0);
-
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
 			framepos_t where = _editor->window_event_sample (event, 0, 0);
 			atv->add_automation_event (event, where, event->button.y, false);
