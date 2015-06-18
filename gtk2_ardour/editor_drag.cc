@@ -2334,6 +2334,8 @@ RegionCreateDrag::aborted (bool)
 NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, region (0)
+	, relative (false)
+	, at_front (true)
 	, _snap_delta (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteResizeDrag\n");
@@ -2370,37 +2372,36 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	} else {
 		relative = true;
 	}
-
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
-
 	if (ms.size() > 1) {
 		/* has to be relative, may make no sense otherwise */
 		relative = true;
 	}
-
 	/* select this note; if it is already selected, preserve the existing selection,
 	   otherwise make this note the only one selected.
 	*/
 	region->note_selected (cnote, cnote->selected ());
-
-	_editor->begin_reversible_command (_("resize notes"));
-
-	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
-		MidiRegionSelection::iterator next;
-		next = r;
-		++next;
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
-		if (mrv) {
-			mrv->begin_resizing (at_front);
-		}
-		r = next;
-	}
 }
 
 void
-NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
+NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	if (first_move) {
+		_editor->begin_reversible_command (_("resize notes"));
+
+		for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
+			MidiRegionSelection::iterator next;
+			next = r;
+			++next;
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+			if (mrv) {
+				mrv->begin_resizing (at_front);
+			}
+			r = next;
+		}
+	}
+
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
@@ -2434,8 +2435,12 @@ NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 }
 
 void
-NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
+NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 {
+	if (!movement_occurred) {
+		return;
+	}
+
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
@@ -2458,9 +2463,11 @@ NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 					}
 				}
 			}
+
 			if (apply_snap_delta) {
 				sd = _snap_delta;
 			}
+
 			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
 		}
 	}
@@ -5602,17 +5609,20 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	if (_nothing_to_drag) {
 		return;
 	}
-	_editor->begin_reversible_command (_("automation range move"));
-	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
-	}
 }
 
 void
-AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
+AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 {
 	if (_nothing_to_drag) {
 		return;
+	}
+
+	if (first_move) {
+		_editor->begin_reversible_command (_("automation range move"));
+		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+			i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
+		}
 	}
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
@@ -5625,9 +5635,9 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 }
 
 void
-AutomationRangeDrag::finished (GdkEvent* event, bool)
+AutomationRangeDrag::finished (GdkEvent* event, bool motion_occurred)
 {
-	if (_nothing_to_drag) {
+	if (_nothing_to_drag || !motion_occurred) {
 		return;
 	}
 

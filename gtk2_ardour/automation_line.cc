@@ -675,6 +675,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
 			(*ccp)->compute_x_bounds (trackview.editor());
 		}
+		_drag_had_movement = true;
 	}	
 
 	/* OK, now on to the stuff related to *this* motion event. First, for
@@ -735,7 +736,6 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	_drag_distance += dx;
 	_drag_x += dx;
 	_last_drag_fraction = fraction;
-	_drag_had_movement = true;
 	did_push = with_push;
 
 	return pair<double, float> (_drag_x + dx, _last_drag_fraction + dy);
