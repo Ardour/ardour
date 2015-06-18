@@ -1251,7 +1251,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 		trackview.session()->add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
 	}
 
-	audio_region()->envelope()->add (fx, y, with_guard_points);
+	audio_region()->envelope()->editor_add (fx, y, with_guard_points);
 
 	XMLNode &after = audio_region()->envelope()->get_state();
 	trackview.session()->add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
