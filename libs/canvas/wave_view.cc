@@ -399,7 +399,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	   has been scaled by scale_amplitude() already.
 	*/
 
-	const double clip_level = _clip_level * req->amplitude;
+	const double clip_level = _clip_level * _region_amplitude;
 
 	if (_shape == WaveView::Rectified) {
 
