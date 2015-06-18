@@ -656,7 +656,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\insert_time_dialog.cc"
+				RelativePath="..\gtk2_ardour\insert_remove_time_dialog.cc"
 				>
 			</File>
 			<File
@@ -1614,7 +1614,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\insert_time_dialog.h"
+				RelativePath="..\gtk2_ardour\insert_remove_time_dialog.h"
 				>
 			</File>
 			<File
