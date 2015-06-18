@@ -54,6 +54,7 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { binding_proxy.set_controllable (c); }
 	void set_default_value (float);
 	void set_touch_cursor (const Glib::RefPtr<Gdk::Pixbuf>& touch_cursor);
+	void get_image_scales (double &x_scale, double &y_scale);
 
   protected:
 	void get_handle_position (double& x, double& y);
@@ -74,6 +75,7 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	BindingProxy binding_proxy;
 
   private:
+
 	const Glib::RefPtr<Gdk::Pixbuf> _face_pixbuf;
 	const Glib::RefPtr<Gdk::Pixbuf> _active_face_pixbuf;
 	const Glib::RefPtr<Gdk::Pixbuf> _underlay_pixbuf;
@@ -83,9 +85,12 @@ class LIBGTKMM2EXT_API Fader : public CairoWidget
 	int _min_pos_y;
 	int _max_pos_x;
 	int _max_pos_y;
+
 	bool _hovering;
+
 	GdkWindow* _grab_window;
 	Gdk::Cursor *_touch_cursor;
+
 	double _grab_start_mouse_x;
 	double _grab_start_mouse_y;
 	double _grab_start_handle_x;

@@ -156,6 +156,28 @@ Fader::~Fader ()
 }
 
 void
+Fader::get_image_scales (double &x_scale, double &y_scale)
+{
+	int pbwidth = _face_pixbuf->get_width ();
+	int pbheight = _face_pixbuf->get_height ();
+	int width = get_width ();
+	int height = get_height ();
+	
+	if ((width != pbwidth) || (height != pbheight)) {
+		x_scale = double (width) / double (pbwidth);
+		if (x_scale == 0.0) {
+			x_scale = 1.0;
+		}
+		y_scale = double (height) / double (pbheight);
+		if (y_scale == 0.0) {
+			y_scale = 1.0;
+		}
+	} else {
+		x_scale = y_scale = 1.0;
+	}
+}
+
+void
 Fader::set_touch_cursor (const Glib::RefPtr<Gdk::Pixbuf>& touch_cursor)
 {
 	_touch_cursor = new Gdk::Cursor (Gdk::Display::get_default(), touch_cursor, 12, 12);
@@ -164,39 +186,41 @@ Fader::set_touch_cursor (const Glib::RefPtr<Gdk::Pixbuf>& touch_cursor)
 void
 Fader::render (cairo_t* cr, cairo_rectangle_t*)
 {
+	
+	double xscale = 1.0;
+	double yscale = 1.0;
+	
+	get_image_scales (xscale, yscale);
+	
+	cairo_matrix_t matrix;
+	cairo_get_matrix (cr, &matrix);
+	cairo_matrix_scale (&matrix, xscale, yscale);
+	cairo_set_matrix (cr, &matrix);
+	
 	get_handle_position (_last_drawn_x, _last_drawn_y);
 
 	if (_underlay_pixbuf != 0) {
-		cairo_rectangle (cr, 0, 0, get_width(), get_height());
 		gdk_cairo_set_source_pixbuf (cr,
 		                             _underlay_pixbuf->gobj(),
-		                             _last_drawn_x - (int)(_underlay_pixbuf->get_width()/2.0 + 0.5),
-		                             _last_drawn_y - (int)(_underlay_pixbuf->get_height()/2.0 + 0.5));
-		cairo_fill (cr);
+		                             (_last_drawn_x - (int)((_underlay_pixbuf->get_width() * xscale) / 2.0 + 0.5)) / xscale,
+		                             (_last_drawn_y - (int)((_underlay_pixbuf->get_height() * yscale) / 2.0 + 0.5)) / yscale);
+		cairo_paint (cr);
 	}
 
-	cairo_rectangle (cr, 0, 0, get_width(), get_height());
-	gdk_cairo_set_source_pixbuf (cr, 
+	gdk_cairo_set_source_pixbuf (cr,
 	                             ((get_state () == Gtk::STATE_ACTIVE) && (_active_face_pixbuf != 0)) ? 
 	                             _active_face_pixbuf->gobj() : 
 	                             _face_pixbuf->gobj(),
 	                             0,
 	                             0);
-	cairo_fill (cr);
+	cairo_paint (cr);
 
-	cairo_rectangle (cr, 0, 0, get_width(), get_height());
-	if (_dragging) {
-		gdk_cairo_set_source_pixbuf (cr,
-		                             _active_handle_pixbuf->gobj(),
-		                             _last_drawn_x - (int)(_active_handle_pixbuf->get_width()/2.0 + 0.5),
-		                             _last_drawn_y - (int)(_active_handle_pixbuf->get_height()/2.0 + 0.5));
-	} else {
-		gdk_cairo_set_source_pixbuf (cr,
-		                             _handle_pixbuf->gobj(),
-		                             _last_drawn_x - (int)(_handle_pixbuf->get_width()/2.0 + 0.5),
-		                             _last_drawn_y - (int)(_handle_pixbuf->get_height()/2.0 + 0.5));
-	}
-	cairo_fill (cr);
+	const Glib::RefPtr<Gdk::Pixbuf> handle_pixbuf (_dragging ? _active_handle_pixbuf : _handle_pixbuf);
+	gdk_cairo_set_source_pixbuf (cr,
+	                             handle_pixbuf->gobj(),
+	                             (_last_drawn_x - (int)((handle_pixbuf->get_width() * xscale) / 2.0 + 0.5)) / xscale,
+	                             (_last_drawn_y - (int)((handle_pixbuf->get_height() * yscale) / 2.0 + 0.5)) / yscale);
+	cairo_paint (cr);
 }
 
 void
@@ -238,8 +262,13 @@ Fader::on_button_press_event (GdkEventButton* ev)
 	_grab_start_mouse_y = ev->y;
 	get_handle_position (_grab_start_handle_x, _grab_start_handle_y);
 
-	double hw = _handle_pixbuf->get_width();
-	double hh = _handle_pixbuf->get_height();
+	double xscale = 1.0;
+	double yscale = 1.0;
+	
+	get_image_scales (xscale, yscale);
+	
+	double hw = _handle_pixbuf->get_width() * xscale;
+	double hh = _handle_pixbuf->get_height() * yscale;
 
 	if ((ev->x < (_grab_start_handle_x - hw/2)) || (ev->x > (_grab_start_handle_x + hw/2)) || (ev->y < (_grab_start_handle_y - hh/2)) || (ev->y > (_grab_start_handle_y + hh/2))) {
 		return false;
