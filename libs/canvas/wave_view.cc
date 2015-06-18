@@ -399,7 +399,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	   has been scaled by scale_amplitude() already.
 	*/
 
-	const double clip_level = _clip_level * _region_amplitude;
+	const double clip_level = _clip_level * req->amplitude;
 
 	if (_shape == WaveView::Rectified) {
 
@@ -737,6 +737,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 boost::shared_ptr<WaveViewCache::Entry>
 WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) const
 {
+	
 	boost::shared_ptr<WaveViewCache::Entry> ret (new WaveViewCache::Entry (req->channel,
 	                                                                       req->height,
 	                                                                       req->amplitude,
@@ -983,6 +984,12 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		
 		if (peaks_read > 0) {
 
+			/* region amplitude will have been used to generate the
+			 * peak values already, but not the visual-only
+			 * amplitude_above_axis. So apply that here before
+			 * rendering.
+			 */
+			
 			if (_amplitude_above_axis != 1.0) {
 				for (framecnt_t i = 0; i < n_peaks; ++i) {
 					peaks[i].max *= _amplitude_above_axis;
