@@ -252,41 +252,66 @@ WaveView::invalidate_image_cache ()
 	_current_image.reset ();
 }
 
-Coord
-WaveView::y_extent (double s, bool /*round_to_lower_edge*/) const
+void
+WaveView::compute_tips (PeakData const & peak, WaveView::LineTips& tips) const
 {
-	/* it is important that this returns an integral value, so that we
-	 * can ensure correct single pixel behaviour.
-	 *
-	 * we need (_height - max(wave_line_width))
-	 * wave_line_width == 1 IFF top==bottom (1 sample per pixel or flat line)
-	 * wave_line_width == 2 otherwise
-	 * then round away from the zero line, towards peak
-	 */
-	if (_shape == Rectified) {
-		// we only ever have 1 point and align to the bottom (not center)
-		return floor ((1.0 - s) * (_height - 2.0));
-	} else {
-		/* currently canvas rectangle is off-by-one and we
-		 * cannot draw a pixel at 0 (-.5 .. +.5) without it being
-		 * clipped. A value 1.0 (ideally one point at y=0) ends
-		 * up a pixel down. and a value of -1.0 (ideally y = _height-1)
-		 * currently is on the bottom separator line :(
-		 * So to make the complete waveform appear centered in
-		 * a region, we translate by +.5 (instead of -.5)
-		 * and waste two pixel of height: -4 (instad of -2)
-		 *
-		 * This needs fixing in canvas/rectangle the intersect
-		 * functions and probably a couple of other places as well...
+	const double effective_height  = _height;
+
+	/* remember: canvas (and cairo) coordinate space puts the origin at the upper left. 
+	   
+	   So, a sample value of 1.0 (0dbFS) will be computed as:
+
+	         (1.0 - 1.0) * 0.5 * effective_height
+
+	   which evaluates to 0, or the top of the image.
+
+	   A sample value of -1.0 will be computed as
+
+	        (1.0 + 1.0) * 0.5 * effective height
+
+           which evaluates to effective height, or the bottom of the image.
+	*/
+
+	const double pmax = (1.0 - peak.max) * 0.5 * effective_height;
+	const double pmin = (1.0 - peak.min) * 0.5 * effective_height;
+
+	/* remember that the bottom of the image (pmin) has larger y-coordinates
+	   than the top (pmax).
+	*/
+
+	double spread = (pmin - pmax) * 0.5;
+
+	/* find the nearest pixel to the nominal center. */
+	const double center = round (pmin - spread);
+
+	if (spread < 1.0) {
+		/* minimum distance between line ends is 1 pixel, and we want it "centered" on a pixel,
+		   as per cairo single-pixel line issues.
+
+		   NOTE: the caller will not draw a line between these two points if the spread is
+		   less than 2 pixels. So only the tips.top value matters, which is where we will
+		   draw a single pixel as part of the outline.
 		 */
-		Coord pos;
-		if (s < 0) {
-			pos = ceil  ((1.0 - s) * .5 * (_height - 4.0));
-		} else {
-			pos = floor ((1.0 - s) * .5 * (_height - 4.0));
-		}
-		return min (_height - 4.0, (max (0.0, pos)));
+		tips.top = center;
+		tips.bot = center + 1.0;
+	} else {
+		/* round spread above and below center to an integer number of pixels */
+		spread = round (spread);
+		/* top and bottom are located equally either side of the center */
+		tips.top = center - spread;
+		tips.bot = center + spread;
 	}
+	
+	tips.top = min (effective_height, max (0.0, tips.top));
+	tips.bot = min (effective_height, max (0.0, tips.bot));
+}
+	
+
+Coord
+WaveView::y_extent (double s) const
+{
+	assert (_shape == Rectified);
+	return floor ((1.0 - s) * _height);
 }
 
 void
@@ -320,16 +345,6 @@ WaveView::draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData
 	context->mask (stripe, 0, 0);
 	context->fill ();
 }
-
-struct LineTips {
-	double top;
-	double bot;
-	double spread;
-	bool clip_max;
-	bool clip_min;
-
-	LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
-};
 
 struct ImageSet {
 	Cairo::RefPtr<Cairo::ImageSurface> wave;
@@ -387,8 +402,8 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 				tips[i].bot = height() - 1.0;
 				const double p = alt_log_meter (fast_coefficient_to_dB (max (fabs (_peaks[i].max), fabs (_peaks[i].min))));
-				tips[i].top = y_extent (p, false);
-				tips[i].spread = p * (_height - 1.0);
+				tips[i].top = y_extent (p);
+				tips[i].spread = p * _height;
 
 				if (_peaks[i].max >= clip_level) {
 					tips[i].clip_max = true;
@@ -404,8 +419,8 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 				tips[i].bot = height() - 1.0;
 				const double p = max(fabs (_peaks[i].max), fabs (_peaks[i].min));
-				tips[i].top = y_extent (p, false);
-				tips[i].spread = p * (_height - 2.0);
+				tips[i].top = y_extent (p);
+				tips[i].spread = p * _height;
 				if (p >= clip_level) {
 					tips[i].clip_max = true;
 				}
@@ -417,34 +432,34 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 
 		if (_logscaled) {
 			for (int i = 0; i < n_peaks; ++i) {
-				double top = _peaks[i].max;
-				double bot = _peaks[i].min;
+				PeakData p;
+				p.max = _peaks[i].max;
+				p.min = _peaks[i].min;
 
 				if (_peaks[i].max >= clip_level) {
-						tips[i].clip_max = true;
+					tips[i].clip_max = true;
 				}
 				if (-(_peaks[i].min) >= clip_level) {
 					tips[i].clip_min = true;
 				}
 
-				if (top > 0.0) {
-					top = alt_log_meter (fast_coefficient_to_dB (top));
-				} else if (top < 0.0) {
-					top =-alt_log_meter (fast_coefficient_to_dB (-top));
+				if (p.max > 0.0) {
+					p.max = alt_log_meter (fast_coefficient_to_dB (p.max));
+				} else if (p.max < 0.0) {
+					p.max =-alt_log_meter (fast_coefficient_to_dB (-p.max));
 				} else {
-					top = 0.0;
+					p.max = 0.0;
 				}
 
-				if (bot > 0.0) {
-					bot = alt_log_meter (fast_coefficient_to_dB (bot));
-				} else if (bot < 0.0) {
-					bot = -alt_log_meter (fast_coefficient_to_dB (-bot));
+				if (p.min > 0.0) {
+					p.min = alt_log_meter (fast_coefficient_to_dB (p.min));
+				} else if (p.min < 0.0) {
+					p.min = -alt_log_meter (fast_coefficient_to_dB (-p.min));
 				} else {
-					bot = 0.0;
+					p.min = 0.0;
 				}
-
-				tips[i].top = y_extent (top, false);
-				tips[i].bot = y_extent (bot, true);
+				
+				compute_tips (p, tips[i]);
 				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
@@ -457,8 +472,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 					tips[i].clip_min = true;
 				}
 
-				tips[i].top = y_extent (_peaks[i].max, false);
-				tips[i].bot = y_extent (_peaks[i].min, true);
+				compute_tips (_peaks[i], tips[i]);
 				tips[i].spread = tips[i].bot - tips[i].top;
 			}
 
@@ -479,16 +493,16 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 	/* ensure single-pixel lines */
 
 	wave_context->set_line_width (1.0);
-	wave_context->translate (0.5, +1.5);
+	wave_context->translate (0.5, 0.5);
 
 	outline_context->set_line_width (1.0);
-	outline_context->translate (0.5, +1.5);
+	outline_context->translate (0.5, 0.5);
 
 	clip_context->set_line_width (1.0);
-	clip_context->translate (0.5, +1.5);
+	clip_context->translate (0.5, 0.5);
 
 	zero_context->set_line_width (1.0);
-	zero_context->translate (0.5, +1.5);
+	zero_context->translate (0.5, 0.5);
 
 	/* the height of the clip-indicator should be at most 7 pixels,
 	 * or 5% of the height of the waveview item.
@@ -550,7 +564,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		outline_context->stroke ();
 
 	} else {
-		const double height_2 = (_height - 2.5) * .5;
+		const double height_2 = _height * .5;
 
 		for (int i = 0; i < n_peaks; ++i) {
 
@@ -560,6 +574,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				wave_context->move_to (i, tips[i].top);
 				wave_context->line_to (i, tips[i].bot);
 			}
+			
 			/* draw square waves and other discontiguous points clearly */
 			if (i > 0) {
 				if (tips[i-1].top + 2 < tips[i].top) {
@@ -575,7 +590,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				}
 			}
 
-			/* zero line */
+			/* zero line, show only if there is enough spread */
 
 			if (tips[i].spread >= 5.0 && show_zero_line()) {
 				zero_context->move_to (i, floor(height_2));
@@ -600,12 +615,12 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				}
 
 				if (!clipped) {
-					outline_context->move_to (i, tips[i].bot + 1.0);
-					/* normal lower terminal dot */
+					outline_context->move_to (i, tips[i].bot);
+					/* normal lower terminal dot; line moves up */
 					outline_context->rel_line_to (0, -1.0);
 
-					outline_context->move_to (i, tips[i].top - 1.0);
-					/* normal upper terminal dot */
+					outline_context->move_to (i, tips[i].top);
+					/* normal upper terminal dot, line moves down */
 					outline_context->rel_line_to (0, 1.0);
 				}
 			} else {

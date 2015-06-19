@@ -364,7 +364,19 @@ public:
         boost::shared_ptr<WaveViewCache::Entry> get_image (framepos_t start, framepos_t end, bool& full_image) const;
         boost::shared_ptr<WaveViewCache::Entry> get_image_from_cache (framepos_t start, framepos_t end, bool& full_image) const;
 	
-        ArdourCanvas::Coord y_extent (double, bool) const;
+        struct LineTips {
+	        double top;
+	        double bot;
+	        double spread;
+	        bool clip_max;
+	        bool clip_min;
+	        
+	        LineTips() : top (0.0), bot (0.0), clip_max (false), clip_min (false) {}
+        };
+
+        ArdourCanvas::Coord y_extent (double) const;
+        void compute_tips (ARDOUR::PeakData const & peak, LineTips& tips) const;
+
         void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks, boost::shared_ptr<WaveViewThreadRequest>) const;
 	void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
 	
