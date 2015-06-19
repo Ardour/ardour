@@ -819,7 +819,7 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 			req->width = _canvas->visible_area().width();
 			req->height = _height;
 			req->fill_color = _fill_color;
-			req->amplitude = _region_amplitude;
+			req->amplitude = _region_amplitude * _amplitude_above_axis;
 
 			/* draw image in this (the GUI thread) */
 			
@@ -857,7 +857,7 @@ WaveView::get_image_from_cache (framepos_t start, framepos_t end, bool& full) co
 	}
 
 	return images->lookup_image (_region->audio_source (_channel), start, end, _channel,
-	                             _height, _region_amplitude, _fill_color, _samples_per_pixel, full);
+	                             _height, _region_amplitude * _amplitude_above_axis, _fill_color, _samples_per_pixel, full);
 }
 
 void
