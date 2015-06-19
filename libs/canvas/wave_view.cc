@@ -1637,8 +1637,11 @@ WaveViewCache::consolidate_image_cache (boost::shared_ptr<ARDOUR::AudioSource> s
 			
 			if (e2->start >= e1->start && e2->end <= e1->end) {
 				/* c2 is fully contained by c1, so delete it */
-				c2 = caches.erase (c2);
-				continue;
+				caches.erase (c2);
+
+				/* and re-start the whole iteration */
+				nxt = caches.begin ();
+				break;
 			}
 
 			c2 = nxt2;
