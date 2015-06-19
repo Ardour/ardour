@@ -209,24 +209,12 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	
 	if (ARDOUR_UI::config()->get_show_name_highlight() && (visibility & ShowNameHighlight)) {
 
-		double width;
-		double start = 1.0;
-
-		if (visibility & FullWidthNameHighlight) {
-			width = trackview.editor().sample_to_pixel(item_duration);
-		} else {
-			width = trackview.editor().sample_to_pixel(item_duration) - 2.0;
-		}
-
-		name_highlight = new ArdourCanvas::Rectangle (group, 
-							      ArdourCanvas::Rect (start, 
-										  trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE, 
-										  width - 2.0,
-										  trackview.current_height() - 1.0));
+		/* rectangle size will be set in ::manage_name_highlight() */
+		name_highlight = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
                 name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
-		name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255));
+                name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255)); // this should use a theme color
 
 	} else {
 		name_highlight = 0;
@@ -575,7 +563,7 @@ TimeAxisViewItem::set_height (double height)
 
 	if (frame) {
 		
-		frame->set_y0 (1.0);
+		frame->set_y0 (0.0);
 		frame->set_y1 (height);
 
 		if (frame_handle_start) {
@@ -589,7 +577,7 @@ TimeAxisViewItem::set_height (double height)
 	}
 
 	if (vestigial_frame) {
-		vestigial_frame->set_y0 (1.0);
+		vestigial_frame->set_y0 (0.0);
 		vestigial_frame->set_y1 (height);
 	}
 
@@ -618,7 +606,8 @@ TimeAxisViewItem::manage_name_highlight ()
 	if (name_highlight && wide_enough_for_name && high_enough_for_name) {
 
 		name_highlight->show();
-		name_highlight->set (ArdourCanvas::Rect (1.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width, (double) _height - 1.0));
+		// name_highlight->set_x_position (1.0);
+		name_highlight->set (ArdourCanvas::Rect (0.0, (double) _height - NAME_HIGHLIGHT_SIZE,  _width - 2.0, _height));
 			
 	} else {
 		name_highlight->hide();

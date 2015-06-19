@@ -477,19 +477,23 @@ AudioRegionView::set_height (gdouble height)
 
 	uint32_t wcnt = waves.size();
 
-	for (uint32_t n = 0; n < wcnt; ++n) {
+	if (wcnt > 0) {
+
 		gdouble ht;
-
-		if (height < NAME_HIGHLIGHT_THRESH) {
-			ht = ((height - 2 * wcnt) / (double) wcnt);
+		
+		if (!ARDOUR_UI::config()->get_show_name_highlight() || (height < NAME_HIGHLIGHT_THRESH)) {
+			ht = height / (double) wcnt;
 		} else {
-			ht = (((height - 2 * wcnt) - NAME_HIGHLIGHT_SIZE) / (double) wcnt);
+			ht = (height - NAME_HIGHLIGHT_SIZE) / (double) wcnt;
 		}
-
-		gdouble yoff = n * (ht + 1);
-
-		waves[n]->set_height (ht);
-		waves[n]->set_y_position (yoff + 2);
+		
+		for (uint32_t n = 0; n < wcnt; ++n) {
+			
+			gdouble yoff = floor (ht * n);
+			
+			waves[n]->set_height (ht);
+			waves[n]->set_y_position (yoff);
+		}
 	}
 
 	if (gain_line) {
@@ -1126,12 +1130,18 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
+	/* reduce waveview height by 2.0 to account for our frame */
+	
 	if (trackview.current_height() < NAME_HIGHLIGHT_THRESH) {
-		ht = ((trackview.current_height()) / (double) nchans);
+		ht = ((trackview.current_height() - 2.0) / (double) nchans);
 	} else {
-		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE) / (double) nchans);
+		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE - 2.0) / (double) nchans);
 	}
 
+	/* first waveview starts at 1.0, not 0.0 since that will overlap the
+	 * frame 
+	 */
+	
 	gdouble yoff = which * ht;
 
 	WaveView *wave = new WaveView (group, audio_region ());
