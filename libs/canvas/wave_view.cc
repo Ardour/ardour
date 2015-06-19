@@ -703,7 +703,7 @@ WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) co
 {
 	boost::shared_ptr<WaveViewCache::Entry> ret (new WaveViewCache::Entry (req->channel,
 	                                                                       req->height,
-	                                                                       req->region_amplitude,
+	                                                                       req->amplitude,
 	                                                                       req->fill_color,
 	                                                                       req->samples_per_pixel,
 	                                                                       req->start,
@@ -720,7 +720,7 @@ WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) co
 	 */
 	
 	images->consolidate_image_cache (_region->audio_source (_channel),
-	                                 _channel, _height, _region_amplitude,
+	                                 _channel, _height, _region_amplitude * _amplitude_above_axis,
 	                                 _fill_color, _samples_per_pixel);
 
 	return ret;
@@ -758,7 +758,7 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 				
 				ret.reset (new WaveViewCache::Entry (current_request->channel,
 				                                     current_request->height,
-				                                     current_request->region_amplitude,
+				                                     current_request->amplitude,
 				                                     current_request->fill_color,
 				                                     current_request->samples_per_pixel,
 				                                     current_request->start,
@@ -804,7 +804,7 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 			req->width = _canvas->visible_area().width();
 			req->height = _height;
 			req->fill_color = _fill_color;
-			req->region_amplitude = _region_amplitude;
+			req->amplitude = _region_amplitude;
 
 			/* draw image in this (the GUI thread) */
 			
@@ -859,7 +859,7 @@ WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, frame
 	req->width = _canvas->visible_area().width();
 	req->height = _height;
 	req->fill_color = _fill_color;
-	req->region_amplitude = _region_amplitude;
+	req->amplitude = _region_amplitude * _amplitude_above_axis;
 
 	if (current_request) {
 		/* this will stop rendering in progress (which might otherwise
@@ -933,8 +933,6 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		                                             req->channel,
 		                                             req->samples_per_pixel);
 		
-		// apply waveform amplitude zoom multiplier
-
 		req->image = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, n_peaks, req->height);
 		/* make sure we record the sample positions that were actually used */
 		req->start = sample_start;
@@ -942,9 +940,11 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		
 		if (peaks_read > 0) {
 
-			for (framecnt_t i = 0; i < n_peaks; ++i) {
-				peaks[i].max *= _amplitude_above_axis;
-				peaks[i].min *= _amplitude_above_axis;
+			if (_amplitude_above_axis != 1.0) {
+				for (framecnt_t i = 0; i < n_peaks; ++i) {
+					peaks[i].max *= _amplitude_above_axis;
+					peaks[i].min *= _amplitude_above_axis;
+				}
 			}
 
 			draw_image (req->image, peaks.get(), n_peaks, req);
@@ -1233,6 +1233,7 @@ WaveView::gain_changed ()
 	begin_visual_change ();
 	invalidate_image_cache ();
 	_region_amplitude = _region->scale_amplitude ();
+	get_image_in_thread = true;
 	end_visual_change ();
 }
 
@@ -1287,6 +1288,7 @@ WaveView::set_amplitude_above_axis (double a)
 		begin_visual_change ();
 		invalidate_image_cache ();
 		_amplitude_above_axis = a;
+		get_image_in_thread = true;
 		end_visual_change ();
 	}
 }

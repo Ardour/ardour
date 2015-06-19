@@ -66,7 +66,7 @@ struct LIBCANVAS_API WaveViewThreadRequest
 	double     height;
 	double     samples_per_pixel;
 	uint16_t   channel;
-	double     region_amplitude;
+	double     amplitude;
 	Color      fill_color;
 	boost::weak_ptr<const ARDOUR::Region> region;
 
