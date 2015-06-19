@@ -96,7 +96,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	get_vbox()->pack_start (*tempo_box);
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (remove ? _("Cut time") : _("Insert time"), Gtk::RESPONSE_OK);
+	add_button (remove ? _("Remove time") : _("Insert time"), Gtk::RESPONSE_OK);
 	show_all ();
 
 	move_markers_toggled ();
