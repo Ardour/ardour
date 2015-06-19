@@ -56,7 +56,7 @@ struct LIBCANVAS_API WaveViewThreadRequest
         
 	WaveViewThreadRequest  () : stop (0) {}
 	
-	bool should_stop () const { return (bool) g_atomic_int_get (&stop); }
+	bool should_stop () const { return (bool) g_atomic_int_get (const_cast<gint*>(&stop)); }
 	void cancel() { g_atomic_int_set (&stop, 1); }
 	
 	RequestType type;
