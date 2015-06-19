@@ -735,8 +735,8 @@ WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) co
 	 */
 	
 	images->consolidate_image_cache (_region->audio_source (_channel),
-	                                 _channel, _height, _region_amplitude * _amplitude_above_axis,
-	                                 _fill_color, _samples_per_pixel);
+	                                 req->channel, req->height, req->amplitude,
+	                                 req->fill_color, req->samples_per_pixel);
 
 	return ret;
 }
