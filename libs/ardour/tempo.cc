@@ -1737,11 +1737,13 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			if (prev != metrics.end()) {
 				if (dynamic_cast<MeterSection*>(*prev) && dynamic_cast<MeterSection*>(*i)) {
 					if ((*prev)->start() == (*i)->start()) {
+						cerr << string_compose (_("Multiple meter definitions found at %1"), (*prev)->start()) << endmsg;
 						error << string_compose (_("Multiple meter definitions found at %1"), (*prev)->start()) << endmsg;
 						return -1;
 					}
 				} else if (dynamic_cast<TempoSection*>(*prev) && dynamic_cast<TempoSection*>(*i)) {
 					if ((*prev)->start() == (*i)->start()) {
+						cerr << string_compose (_("Multiple tempo definitions found at %1"), (*prev)->start()) << endmsg;
 						error << string_compose (_("Multiple tempo definitions found at %1"), (*prev)->start()) << endmsg;
 						return -1;
 					}
