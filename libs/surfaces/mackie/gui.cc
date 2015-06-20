@@ -242,6 +242,15 @@ MackieControlProtocolGUI::build_available_action_menu ()
 
 	available_action_model->clear ();
 
+	/* Because there are button bindings built in that are not
+	in the key binding map, there needs to be a way to undo
+	a profile edit. */
+	TreeIter rowp;
+	TreeModel::Row parent;
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[available_action_columns.name] = _("Remove Binding");
+
 	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
 
 		TreeModel::Row row;
@@ -451,6 +460,11 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 void 
 MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib::ustring &text, TreeModelColumnBase col)
 {
+	// Remove Binding is not in the action map but still valid
+	bool remove (false);
+	if ( text == "Remove Binding") {
+		remove = true;
+	}
 	Gtk::TreePath path(sPath);
 	Gtk::TreeModel::iterator row = function_key_model->get_iter(path);
 
@@ -459,17 +473,23 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 		std::map<std::string,std::string>::iterator i = action_map.find (text);
 		
 		if (i == action_map.end()) {
-			return;
+			if (!remove) {
+				return;
+			}
 		}
-
 		Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (i->second.c_str());
 
-		if (act) {
+		if (act || remove) {
 			/* update visible text, using string supplied by
 			   available action model so that it matches and is found
 			   within the model.
 			*/
-			(*row).set_value (col.index(), text);
+			if (remove) {
+				Glib::ustring dot = "\u2022";
+				(*row).set_value (col.index(), dot);
+			} else {
+				(*row).set_value (col.index(), text);
+			}
 
 			/* update the current DeviceProfile, using the full
 			 * path
@@ -497,7 +517,12 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 				modifier = 0;
 			}
 
-			_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, i->second);
+			if (remove) {
+				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, "");
+			} else {
+				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, i->second);
+			}
+
 		} else {
 			std::cerr << "no such action\n";
 		}
