@@ -948,7 +948,8 @@ AutomationLine::set_selected_points (PointSelection const & points)
 	set_colors ();
 }
 
-void AutomationLine::set_colors ()
+void
+AutomationLine::set_colors ()
 {
 	set_line_color (ARDOUR_UI::config()->color ("automation line"));
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {

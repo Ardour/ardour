@@ -26,6 +26,7 @@
 #include <boost/weak_ptr.hpp>
 
 #include "ardour/location.h"
+#include "point_selection.h"
 #include "editing.h"
 #include "streamview.h"
 
@@ -61,6 +62,7 @@ class AudioStreamView : public StreamView
 	std::pair<std::list<AudioRegionView*>, std::list<AudioRegionView*> > hide_xfades_with (boost::shared_ptr<ARDOUR::AudioRegion> ar);
 
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
+	void set_selected_points (PointSelection&);
 
   private:
 	void setup_rec_box ();

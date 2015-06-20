@@ -446,7 +446,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	if (((mouse_mode != MouseObject) &&
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
-	     (mouse_mode != MouseDraw)) ||
+	     (mouse_mode != MouseDraw) &&
+	     (mouse_mode != MouseContent || item_type == RegionItem)) ||
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
 		return;
 	}
@@ -761,6 +762,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 			}
 			return true;
+
+		case GainLineItem:
+			_drags->set (new LineDrag (this, item), event);
+			return true;
+			break;
 
 		case ControlPointItem:
 			_drags->set (new ControlPointDrag (this, item), event);
