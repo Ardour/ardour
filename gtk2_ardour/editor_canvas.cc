@@ -1223,7 +1223,7 @@ Editor::which_canvas_cursor(ItemType type) const
 			cursor = _cursors->fader;
 			break;
 		case GainLineItem:
-			cursor = which_track_cursor ();
+			cursor = _cursors->cross_hair;
 			break;
 		case AutomationLineItem:
 			cursor = _cursors->cross_hair;
