@@ -694,7 +694,7 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, Automation
 	} else {
 		type = AutomationLineItem;
 	}
-
+	clicked_axisview = &al->trackview;
 	return typed_event (item, event, type);
 }
 
