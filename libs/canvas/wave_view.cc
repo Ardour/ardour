@@ -92,7 +92,11 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _start_shift (0.0)
 	, _region_start (region->start())
 	, get_image_in_thread (false)
+#ifdef USE_TRACKS_CODE_FEATURES
+	, always_get_image_in_thread (true)
+#else	  
 	, always_get_image_in_thread (false)
+#endif	  
 	, rendered (false)
 {
 	if (!images) {
@@ -125,7 +129,11 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _start_shift (0.0)
 	, _region_start (region->start())
 	, get_image_in_thread (false)
+#ifdef USE_TRACKS_CODE_FEATURES
+	, always_get_image_in_thread (true)
+#else	  
 	, always_get_image_in_thread (false)
+#endif
 	, rendered (false)
 {
 	if (!images) {
