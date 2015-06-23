@@ -2710,7 +2710,7 @@ RCOptionEditor::RCOptionEditor ()
 	sics->scale().set_digits (0);
 	Gtkmm2ext::UI::instance()->set_tip
 		(sics->tip_widget(),
-		 _("Larger values lead to using more memory to store images of waveforms, which can improve graphical performance."));
+		 _("Increasing the cache size uses more memory to store waveform images, which can improve graphical performance."));
 	add_option (S_("Preferences|GUI"), sics);
 	
 	/* Lock GUI timeout */
