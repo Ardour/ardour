@@ -29,6 +29,7 @@
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
+#include "pbd/statefulidpredicates.h"
 
 #include "ardour/location.h"
 #include "ardour/midi_scene_change.h"
@@ -610,6 +611,8 @@ Location::set_state (const XMLNode& node, int version)
 	}
 
 	if (!set_id (node)) {
+		// Old versions did not write ids for locations: make a new one.
+		reset_id();
 		warning << _("XML node for Location has no ID information") << endmsg;
 	}
 
@@ -1056,21 +1059,20 @@ Locations::set_state (const XMLNode& node, int version)
 
 			try {
 
+				Location* loc = 0;
 				XMLProperty const * prop_id = (*niter)->property ("id");
-				assert (prop_id);
-				PBD::ID id (prop_id->value ());
+				if (prop_id) {
+					LocationList::const_iterator i = std::find_if(
+						locations.begin(), locations.end(),
+						PBD::StatefulIdEquals(prop_id->value()));
 
-				LocationList::const_iterator i = locations.begin();
-				while (i != locations.end () && (*i)->id() != id) {
-					++i;
+					if (i != locations.end()) {
+						/* we can re-use an old Location object */
+						loc = *i;
+						loc->set_state (**niter, version);
+					}
 				}
-
-				Location* loc;
-				if (i != locations.end()) {
-					/* we can re-use an old Location object */
-					loc = *i;
-					loc->set_state (**niter, version);
-				} else {
+				if (!loc) {
 					loc = new Location (_session, **niter);
 				}
 
