@@ -625,7 +625,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 					clipped = true;
 				}
 
-				if (!clipped) {
+				if (!clipped && tips[i].spread > 2.0) {
+					/* only draw the outline if the spread
+					   implies 3 or more pixels (so that we see 1
+					   white pixel in the middle).
+					*/
 					outline_context->move_to (i, tips[i].bot);
 					/* normal lower terminal dot; line moves up */
 					outline_context->rel_line_to (0, -1.0);
@@ -645,10 +649,15 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				}
 
 				if (!clipped) {
+					/* special case where only 1 pixel of
+					 * the waveform line is drawn (and
+					 * nothing else).
+					 *
+					 * we draw a 1px "line", pretending
+					 * that the span is 1.0 (whether it is
+					 * zero or 1.0)
+					 */
 					wave_context->move_to (i, tips[i].top);
-					/* special case where outline only is drawn.
-					 * we draw a 1px "line", pretending that the span is 1.0
-					*/
 					wave_context->rel_line_to (0, 1.0);
 				}
 			}
