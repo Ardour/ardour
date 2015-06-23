@@ -164,7 +164,6 @@ class LIBCANVAS_API WaveViewCache
          */
         typedef std::pair<boost::shared_ptr<ARDOUR::AudioSource>,boost::shared_ptr<Entry> > ListEntry;
         typedef std::vector<ListEntry> CacheList;
-        CacheList cache_list;
  
         struct SortByTimestamp {
 	        bool operator() (const WaveViewCache::ListEntry& a, const WaveViewCache::ListEntry& b) {

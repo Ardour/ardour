@@ -1704,7 +1704,6 @@ WaveViewCache::add (boost::shared_ptr<ARDOUR::AudioSource> src, boost::shared_pt
 	ce->timestamp = g_get_monotonic_time ();
 
 	cache_map[src].push_back (ce);
-	cache_list.push_back (make_pair (src, ce));
 }
 
 uint64_t
@@ -1730,10 +1729,18 @@ WaveViewCache::cache_full()
 void
 WaveViewCache::cache_flush ()
 {
-	SortByTimestamp sorter;
+	/* Build a sortable list of all cache entries */
+	
+	CacheList cache_list;
 
+	for (ImageCache::const_iterator cm = cache_map.begin(); cm != cache_map.end(); ++cm) {
+		for (CacheLine::const_iterator cl = cm->second.begin(); cl != cm->second.end(); ++cl) {
+			cache_list.push_back (make_pair (cm->first, *cl));
+		}
+	}
+	
 	/* sort list in LRU order */
-
+	SortByTimestamp sorter;
 	sort (cache_list.begin(), cache_list.end(), sorter);
 
 	while (image_cache_size > _image_cache_threshold && !cache_map.empty() && !cache_list.empty()) {
