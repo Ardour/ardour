@@ -2697,6 +2697,22 @@ RCOptionEditor::RCOptionEditor ()
 			    sigc::mem_fun (*_ui_config, &UIConfiguration::set_super_rapid_clock_update)
 			    ));
 
+
+	/* Image cache size */
+
+	Gtk::Adjustment *ics = manage (new Gtk::Adjustment(0, 1, 1024, 10)); /* 1 MB to 1GB in steps of 10MB */
+	HSliderOption *sics = new HSliderOption("waveform-cache-size",
+						_("Waveform image cache size (megabytes)"),
+						ics,
+						sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::get_waveform_cache_size),
+						sigc::mem_fun (*ARDOUR_UI::config(), &UIConfiguration::set_waveform_cache_size)
+			);
+	sics->scale().set_digits (0);
+	Gtkmm2ext::UI::instance()->set_tip
+		(sics->tip_widget(),
+		 _("Larger values lead to using more memory to store images of waveforms, which can improve graphical performance."));
+	add_option (S_("Preferences|GUI"), sics);
+	
 	/* Lock GUI timeout */
 
 	Gtk::Adjustment *lts = manage (new Gtk::Adjustment(0, 0, 1000, 1, 10));

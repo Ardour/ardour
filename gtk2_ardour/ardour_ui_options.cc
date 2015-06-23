@@ -425,6 +425,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
 	} else if (p == "font-scale") {
 		ui_scale = config()->get_font_scale () / 102400.;
+	} else if (p == "waveform-cache-size") {
+		/* GUI option has units of megabytes; image cache uses units of bytes */
+		ArdourCanvas::WaveView::set_image_cache_size (ARDOUR_UI::config()->get_waveform_cache_size() * 1048576);
 	}
 }
 

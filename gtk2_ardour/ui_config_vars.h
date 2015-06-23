@@ -72,3 +72,4 @@ UI_CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.09339
 UI_CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)
 UI_CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 UI_CONFIG_VARIABLE (bool, buggy_gradients, "buggy-gradients", false)
+UI_CONFIG_VARIABLE (uint64_t, waveform_cache_size, "waveform-cache-size", 100) /* units of megagbytes */
