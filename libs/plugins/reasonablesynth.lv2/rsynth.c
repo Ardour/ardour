@@ -229,7 +229,7 @@ static void process_key (void *synth,
   RSSynthChannel* sc = &rs->sc[chn];
   const int8_t vel = sc->miditable[note];
   const int8_t msg = sc->midimsgs[note];
-  const float vol = /* master_volume */ 0.1 * fabsf(vel) / 127.0;
+  const float vol = /* master_volume */ 0.1f * abs(vel) / 127.f;
   const float phase = sc->phase[note];
   const int8_t sus = sc->sustain;
   sc->midimsgs[note] &= ~3;
