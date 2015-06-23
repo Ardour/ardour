@@ -93,6 +93,10 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, always_get_image_in_thread (false)
 	, rendered (false)
 {
+	if (!images) {
+		images = new WaveViewCache;
+	}
+
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 
@@ -123,6 +127,10 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, always_get_image_in_thread (false)
 	, rendered (false)
 {
+	if (!images) {
+		images = new WaveViewCache;
+	}
+
 	VisualPropertiesChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_visual_property_change, this));
 	ClipLevelChanged.connect_same_thread (invalidation_connection, boost::bind (&WaveView::handle_clip_level_change, this));
 
@@ -724,10 +732,6 @@ WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) co
 	                                                                       req->start,
 	                                                                       req->end,
 	                                                                       req->image));
-	if (!images) {
-		images = new WaveViewCache;
-	}
-
 	images->add (_region->audio_source (_channel), ret);
 	
 	/* consolidate cache first (removes fully-contained
@@ -1426,6 +1430,16 @@ WaveView::cancel_my_render_request () const
 	current_request.reset ();
 }
 
+void
+WaveView::set_image_cache_size (uint64_t sz)
+{
+	if (!images) {
+		images = new WaveViewCache;
+	}
+
+	images->set_image_cache_threshold (sz);
+}
+
 /*-------------------------------------------------*/
 
 void
@@ -1735,6 +1749,8 @@ WaveViewCache::cache_flush ()
 			for (CacheLine::iterator c = cl.begin(); c != cl.end(); ++c) {
 				
 				if (*c == le.second) {
+
+					DEBUG_TRACE (DEBUG::WaveView, string_compose ("Removing cache line entry for %1\n", x->first->name()));
 					
 					/* Remove this entry from this cache line */
 					cl.erase (c);
@@ -1756,6 +1772,7 @@ WaveViewCache::cache_flush ()
 			} else {
 				image_cache_size = 0;
 			}
+			DEBUG_TRACE (DEBUG::WaveView, string_compose ("cache shrunk to %1\n", image_cache_size));
 		}
       
 		/* Remove from the linear list, even if we didn't find it in
@@ -1768,6 +1785,7 @@ WaveViewCache::cache_flush ()
 void
 WaveViewCache::set_image_cache_threshold (uint64_t sz)
 {
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("new image cache size \n", sz));
 	_image_cache_threshold = sz;
 	cache_flush ();
 }

@@ -276,6 +276,8 @@ public:
 	static void start_drawing_thread ();
 	static void stop_drawing_thread ();
 
+	static void set_image_cache_size (uint64_t);
+	
 #ifdef CANVAS_COMPATIBILITY	
 	void*& property_gain_src () {
 		return _foo_void;
