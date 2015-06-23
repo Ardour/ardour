@@ -761,14 +761,13 @@ VideoTimeLine::find_xjadeo () {
 			{
 				if (v_major >= 1) v_ok = true;
 				else if (v_major == 0 && v_minor >= 8) v_ok = true;
-				else if (v_major == 0 && v_minor >= 7 && v_micro >= 7) v_ok = true;
 			}
 		}
 		if (!v_ok) {
 			_xjadeo_bin = X_("");
 			warning << _(
 					"Video-monitor 'xjadeo' is too old. "
-					"Please install xjadeo version 0.7.7 or later. http://xjadeo.sf.net/"
+					"Please install xjadeo version 0.8.0 or later. http://xjadeo.sf.net/"
 					) << endmsg;
 		}
 	}

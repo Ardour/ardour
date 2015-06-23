@@ -470,7 +470,7 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 	if (bitrate < 10)  bitrate = 10;
 	if (bitrate > 1000) bitrate = 1000;
 
-	argp=(char**) calloc(16,sizeof(char*));
+	argp=(char**) calloc(15,sizeof(char*));
 	argp[0] = strdup(ffmpeg_exe.c_str());
 	argp[1] = strdup("-i");
 	argp[2] = strdup(infile.c_str());
@@ -482,16 +482,15 @@ TranscodeFfmpeg::transcode (std::string outfile, const int outw, const int outh,
 	argp[8] = strdup("-vcodec");
 	argp[9] = strdup("mpeg4");
 	argp[10] = strdup("-an");
-	argp[11] = strdup("-intra");
-	argp[12] = strdup("-g");
-	argp[13] = strdup("1");
-	argp[14] = strdup(outfile.c_str());
-	argp[15] = (char *)0;
+	argp[11] = strdup("-keyint_min");
+	argp[12] = strdup("10");
+	argp[13] = strdup(outfile.c_str());
+	argp[14] = (char *)0;
 	/* Note: these are free()d in ~SystemExec */
 #if 1 /* DEBUG */
 	if (debug_enable) { /* tentative debug mode */
 	printf("TRANSCODE VIDEO:\n");
-	for (int i=0; i< 15; ++i) {
+	for (int i=0; i< 14; ++i) {
 	  printf("%s ", argp[i]);
 	}
 	printf("\n");
