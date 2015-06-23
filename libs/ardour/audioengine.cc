@@ -468,25 +468,28 @@ AudioEngine::do_reset_backend()
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
 			g_atomic_int_dec_and_test (&_hw_reset_request_count);
 	        
-			std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
-			DeviceResetStarted(); // notify about device reset to be started
-	        
-			// backup the device name
-			std::string name = _backend->device_name ();
-	        
-			std::cout << "AudioEngine::RESET::Stoping engine..." << std::endl;
-			stop();
-	        
-			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
-			if ( 0 == _backend->reset_device () ) {
-		        
-				std::cout << "AudioEngine::RESET::Starting engine..." << std::endl;
-				start ();
-		        
+            std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
+                        DeviceResetStarted(); // notify about device reset to be started
+            
+                        // backup the device name
+                        std::string name = _backend->device_name ();
+
+            std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
+			if ( ( 0 == stop () ) &&
+                 ( 0 == _backend->reset_device () ) &&
+                 ( 0 == start () ) ) {
+				
+				std::cout << "AudioEngine::RESET::Engine started..." << std::endl;
+				
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
-			} else {
-				DeviceError();
+                DeviceResetFinished(); // notify about device reset finish
+            
+            } else {
+            
+                DeviceResetFinished(); // notify about device reset finish
+				// we've got an error
+                DeviceError();
 			}
 			
 			std::cout << "AudioEngine::RESET::Done." << std::endl;
@@ -521,6 +524,8 @@ AudioEngine::do_devicelist_update()
         if (_hw_devicelist_update_count) {
 
             _devicelist_update_lock.unlock();
+            
+            Glib::Threads::RecMutex::Lock pl (_state_lock);
             
             g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
             DeviceListChanged (); /* EMIT SIGNAL */
@@ -857,8 +862,6 @@ AudioEngine::stop (bool for_latency)
 	if (!_backend) {
 		return 0;
 	}
-
-	Glib::Threads::Mutex::Lock lm (_process_lock);
 
 	if (_backend->stop ()) {
 		return -1;
