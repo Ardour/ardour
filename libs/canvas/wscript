@@ -84,7 +84,7 @@ def build(bld):
     obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST'
-    obj.use          = [ 'libpbd', 'libevoral', 'libardour', 'libgtkmm2ext' ]
+    obj.use          = [ 'libpbd', 'libevoral', 'libardour', 'libgtkmm2ext', 'libevoral' ]
     obj.name         = 'libcanvas'
     obj.target       = 'canvas'
     obj.vnum         = CANVAS_LIB_VERSION

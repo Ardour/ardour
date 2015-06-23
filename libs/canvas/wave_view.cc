@@ -37,12 +37,15 @@
 #include "ardour/lmath.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
+#include "ardour/session.h"
 
 #include "canvas/canvas.h"
 #include "canvas/colors.h"
 #include "canvas/debug.h"
 #include "canvas/utils.h"
 #include "canvas/wave_view.h"
+
+#include "evoral/Range.hpp"
 
 #include <gdkmm/general.h>
 
@@ -87,7 +90,6 @@ WaveView::WaveView (Canvas* c, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _amplitude_above_axis (1.0)
 	, _region_amplitude (region->scale_amplitude ())
 	, _start_shift (0.0)
-	, idle_queued (false)
 	, _region_start (region->start())
 	, get_image_in_thread (false)
 	, always_get_image_in_thread (false)
@@ -121,7 +123,6 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 	, _amplitude_above_axis (1.0)
 	, _region_amplitude (region->scale_amplitude ())
 	, _start_shift (0.0)
-	, idle_queued (false)
 	, _region_start (region->start())
 	, get_image_in_thread (false)
 	, always_get_image_in_thread (false)
@@ -151,6 +152,7 @@ WaveView::debug_name() const
 void
 WaveView::image_ready ()
 {
+        DEBUG_TRACE (DEBUG::WaveView, string_compose ("queue draw for %1 at %2 (vis = %3 bbox = %4 CR %5)\n", this, g_get_monotonic_time(), visible(), _bounding_box, current_request));
 	redraw ();
 }
 
@@ -256,6 +258,7 @@ WaveView::set_clip_level (double dB)
 void
 WaveView::invalidate_image_cache ()
 {
+        DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 invalidates image cache and cancels current request\n", this));
 	cancel_my_render_request ();
 	_current_image.reset ();
 }
@@ -766,6 +769,10 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 		 * have an image there. if so, use it (and put it in the cache
 		 * while we're here.
 		 */
+
+                DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 CR %2 stop? %3 image %4\n", this, current_request, 
+                                                              (current_request ? current_request->should_stop() : false), 
+                                                              (current_request ? current_request->image : 0)));
 		
 		if (current_request && !current_request->should_stop() && current_request->image) {
 
@@ -809,7 +816,7 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 	if (!ret || !full_image) {
 
 		if ((rendered && get_image_in_thread) || always_get_image_in_thread) {
-
+                        
 			DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: generating image in caller thread\n", name));
 			
 			boost::shared_ptr<WaveViewThreadRequest> req (new WaveViewThreadRequest);
@@ -820,10 +827,10 @@ WaveView::get_image (framepos_t start, framepos_t end, bool& full_image) const
 			req->samples_per_pixel = _samples_per_pixel;
 			req->region = _region; /* weak ptr, to avoid storing a reference in the request queue */
 			req->channel = _channel;
-			req->width = _canvas->visible_area().width();
 			req->height = _height;
 			req->fill_color = _fill_color;
 			req->amplitude = _region_amplitude * _amplitude_above_axis;
+                        req->width = desired_image_width ();
 
 			/* draw image in this (the GUI thread) */
 			
@@ -864,6 +871,26 @@ WaveView::get_image_from_cache (framepos_t start, framepos_t end, bool& full) co
 	                             _height, _region_amplitude * _amplitude_above_axis, _fill_color, _samples_per_pixel, full);
 }
 
+framecnt_t
+WaveView::desired_image_width () const
+{
+        /* compute how wide the image should be, in samples. 
+         *
+         * We want at least 1 canvas width's worth, but if that 
+         * represents less than 1/10th of a second, use 1/10th of
+         * a second instead.
+         */
+        
+        framecnt_t canvas_width_samples = _canvas->visible_area().width() * _samples_per_pixel;
+        const framecnt_t one_tenth_of_second = _region->session().frame_rate() / 10;
+
+        if (canvas_width_samples > one_tenth_of_second) {
+                return  canvas_width_samples;
+        } 
+
+        return one_tenth_of_second;
+}
+
 void
 WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, framepos_t start, framepos_t end) const
 {
@@ -875,10 +902,10 @@ WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, frame
 	req->samples_per_pixel = _samples_per_pixel;
 	req->region = _region; /* weak ptr, to avoid storing a reference in the request queue */
 	req->channel = _channel;
-	req->width = _canvas->visible_area().width();
 	req->height = _height;
 	req->fill_color = _fill_color;
 	req->amplitude = _region_amplitude * _amplitude_above_axis;
+        req->width = desired_image_width ();
 
 	if (current_request) {
 		/* this will stop rendering in progress (which might otherwise
@@ -894,32 +921,17 @@ WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, frame
 	{
 		Glib::Threads::Mutex::Lock lm (request_queue_lock);
 		current_request = req;
-	}
 
-	/* this is always called from the GUI thread (there is only one), and
-	 * the same thread runs the idle callback chain. thus we do not need
-	 * any locks to protect idle_queued - it is only ever set or read in
-	 * the unitary GUI thread.
-	 */
-	
-	if (!idle_queued) {
-		Glib::signal_idle().connect (sigc::mem_fun (*this, &WaveView::idle_send_request));
-		idle_queued = true;
+                DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has current request %2\n", this, req));
+
+                if (request_queue.insert (this).second) {
+                        /* this waveview was not already in the request queue, make sure we wake
+                           the rendering thread in case it is asleep.
+                        */
+                        request_cond.signal ();
+                }
 	}
 }
-
-bool
-WaveView::idle_send_request () const
-{
-	Glib::Threads::Mutex::Lock lm (request_queue_lock);
-
-	request_queue.insert (this);
-	request_cond.signal (); /* wake thread - must be done while holding lock */
-	idle_queued = false;
-	
-	return false; /* do not call from idle again */
-}
-
 
 void
 WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_render_thread) const
@@ -927,11 +939,13 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 	if (!req->should_stop()) {
 
 		/* sample position is canonical here, and we want to generate
-		 * an image that spans about twice the canvas width
+		 * an image that spans about 3x the canvas width. We get to that 
+                 * width by using an image sample count of the screen width added
+                 * on each side of the desired image center.
 		 */
 		
 		const framepos_t center = req->start + ((req->end - req->start) / 2);
-		const framecnt_t image_samples = req->width * req->samples_per_pixel; /* one canvas width */
+		const framecnt_t image_samples = req->width;
 		
 		/* we can request data from anywhere in the Source, between 0 and its length
 		 */
@@ -973,6 +987,7 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 	}
 	
 	if (in_render_thread && !req->should_stop()) {
+                DEBUG_TRACE (DEBUG::WaveView, string_compose ("done with request for %1 at %2 CR %3 req %4 range %5 .. %6\n", this, g_get_monotonic_time(), current_request, req, req->start, req->end));
 		const_cast<WaveView*>(this)->ImageReady (); /* emit signal */
 	}
 	
@@ -1001,6 +1016,8 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	if (!_region) {
 		return;
 	}
+
+        DEBUG_TRACE (DEBUG::WaveView, string_compose ("render %1 at %2\n", this, g_get_monotonic_time()));
 
 	/* a WaveView is intimately connected to an AudioRegion. It will
 	 * display the waveform within the region, anywhere from the start of
@@ -1428,6 +1445,8 @@ WaveView::cancel_my_render_request () const
 	
 	request_queue.erase (this);
 	current_request.reset ();
+        DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 now has no request %2\n", this));
+
 }
 
 void
@@ -1487,6 +1506,8 @@ WaveView::drawing_thread ()
 		
 		requestor = *(request_queue.begin());
 		request_queue.erase (request_queue.begin());
+
+                DEBUG_TRACE (DEBUG::WaveView, string_compose ("start request for %1 at %2\n", requestor, g_get_monotonic_time()));
 
 		boost::shared_ptr<WaveViewThreadRequest> req = requestor->current_request;
 
@@ -1565,25 +1586,25 @@ WaveViewCache::lookup_image (boost::shared_ptr<ARDOUR::AudioSource> src,
 			continue;
 		}
 
-		if (end <= e->end && start >= e->start) {
-			/* found an image that covers the range we need */
+                switch (Evoral::coverage (start, end, e->start, e->end)) {
+                case Evoral::OverlapExternal:  /* required range is inside image range */
 			DEBUG_TRACE (DEBUG::WaveView, string_compose ("found image spanning %1..%2 covers %3..%4\n",
 			                                              e->start, e->end, start, end));
 			use (src, e);
-			full_coverage = true;
-			return e;
-		}
+                        full_coverage = true;
+                        return e;
 
-		if (start >= e->start) {
-			/* found an image that covers the start, but not the
-			 * end. See if it is longer than any other similar
-			 * partial image that we've found so far.
-			 */
+                case Evoral::OverlapStart: /* required range start is covered by image range */
+                        if ((e->end - start) > max_coverage) {
+                                best_partial = e;
+                                max_coverage = e->end - start;
+                        }
+                        break;
 
-			if ((e->end - e->start) > max_coverage) {
-				best_partial = e;
-				max_coverage = e->end - e->start;
-			}
+                case Evoral::OverlapNone:
+                case Evoral::OverlapEnd:
+                case Evoral::OverlapInternal:
+                        break;
 		}
 	}
 

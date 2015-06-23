@@ -311,7 +311,6 @@ public:
         double _amplitude_above_axis;
 	float  _region_amplitude;
 	double _start_shift;
-	mutable bool idle_queued;
 	
 	/** The `start' value to use for the region; we can't use the region's
 	 *  value as the crossfade editor needs to alter it.
@@ -378,6 +377,8 @@ public:
         ArdourCanvas::Coord y_extent (double) const;
         void compute_tips (ARDOUR::PeakData const & peak, LineTips& tips) const;
 
+        ARDOUR::framecnt_t desired_image_width () const;
+
         void draw_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int n_peaks, boost::shared_ptr<WaveViewThreadRequest>) const;
 	void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int) const;
 	
@@ -392,7 +393,6 @@ public:
         mutable boost::shared_ptr<WaveViewCache::Entry> _current_image;
         
 	mutable boost::shared_ptr<WaveViewThreadRequest> current_request;
-	bool idle_send_request () const;
 	
 	static WaveViewCache* images;
 
