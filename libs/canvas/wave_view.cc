@@ -1722,45 +1722,45 @@ WaveViewCache::cache_flush ()
 
 	sort (cache_list.begin(), cache_list.end(), sorter);
 
-	while (image_cache_size > _image_cache_threshold) {
+	while (image_cache_size > _image_cache_threshold && !cache_map.empty() && !cache_list.empty()) {
 
 		ListEntry& le (cache_list.front());
 
 		ImageCache::iterator x;
 		
-		if ((x = cache_map.find (le.first)) == cache_map.end ()) {
-			/* wierd ... no entry for this AudioSource */
-			continue;
-		}
+		if ((x = cache_map.find (le.first)) != cache_map.end ()) {
 		
-		CacheLine& cl  = x->second;
-
-		for (CacheLine::iterator c = cl.begin(); c != cl.end(); ++c) {
-
-			if (*c == le.second) {
-
-				/* Remove this entry from this cache line */
-				cl.erase (c);
-
-				if (cl.empty()) {
-					/* remove cache line from main cache: no more entries */
-					cache_map.erase (x);
+			CacheLine& cl  = x->second;
+			
+			for (CacheLine::iterator c = cl.begin(); c != cl.end(); ++c) {
+				
+				if (*c == le.second) {
+					
+					/* Remove this entry from this cache line */
+					cl.erase (c);
+					
+					if (cl.empty()) {
+						/* remove cache line from main cache: no more entries */
+						cache_map.erase (x);
+					}
+					
+					break;
 				}
-
-				break;
+			}
+			
+			Cairo::RefPtr<Cairo::ImageSurface> img (le.second->image);
+			uint64_t size = img->get_height() * img->get_width() * 4; /* 4 = bytes per FORMAT_ARGB32 pixel */
+			
+			if (image_cache_size > size) {
+				image_cache_size -= size;
+			} else {
+				image_cache_size = 0;
 			}
 		}
-		
-		Cairo::RefPtr<Cairo::ImageSurface> img (le.second->image);
-		uint64_t size = img->get_height() * img->get_width() * 4; /* 4 = bytes per FORMAT_ARGB32 pixel */
-
-		if (image_cache_size > size) {
-			image_cache_size -= size;
-		} else {
-			image_cache_size = 0;
-		}
       
-		/* Remove from the linear list */
+		/* Remove from the linear list, even if we didn't find it in
+		 * the actual cache_mao
+		 */
 		cache_list.erase (cache_list.begin());
 	}
 }
