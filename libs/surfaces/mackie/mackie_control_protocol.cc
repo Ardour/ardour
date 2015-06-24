@@ -827,6 +827,10 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 	const XMLProperty* prop;
 	uint32_t bank = 0;
 
+	if (ControlProtocol::set_state (node, version)) {
+		return -1;
+	}
+	
 	if ((prop = node.property (X_("ipmidi-base"))) != 0) {
 		set_ipmidi_base (atoi (prop->value()));
 	}

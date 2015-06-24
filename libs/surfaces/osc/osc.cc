@@ -1090,25 +1090,14 @@ OSC::route_plugin_parameter_print (int rid, int piid, int par)
 XMLNode&
 OSC::get_state ()
 {
-	XMLNode& node (ControlProtocol::get_state());
-
-	node.add_property (X_("feedback"), _send_route_changes ? "1" : "0");
-	return node;
+	return ControlProtocol::get_state();
 }
 
 int
-OSC::set_state (const XMLNode& node, int /*version*/)
+OSC::set_state (const XMLNode& node, int version)
 {
-	const XMLProperty* prop = node.property (X_("feedback"));
-
-	if (prop) {
-		if (PBD::string_is_affirmative (prop->value())) {
-			_send_route_changes = true;
-		} else {
-			_send_route_changes = false;
-		}
-	} else {
-		/* leave it alone */
+	if (ControlProtocol::set_state (node, version)) {
+		return -1;
 	}
 
 	return 0;

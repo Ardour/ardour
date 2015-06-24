@@ -140,7 +140,12 @@ class MackieControlProtocol
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
-  
+
+	/* Note: because Mackie control is inherently a duplex protocol,
+	   we do not implement get/set_feedback() since this aspect of
+	   support for the protocol is not optional.
+	*/
+	
 	static bool probe();
 	
         Glib::Threads::Mutex surfaces_lock;

@@ -464,7 +464,6 @@ GenericMidiControlProtocol::get_state ()
 	XMLNode& node (ControlProtocol::get_state());
 	char buf[32];
 
-	node.add_property (X_("feedback"), do_feedback ? "1" : "0");
 	snprintf (buf, sizeof (buf), "%" PRIu64, _feedback_interval);
 	node.add_property (X_("feedback_interval"), buf);
 	snprintf (buf, sizeof (buf), "%d", _threshold);
@@ -501,10 +500,8 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	XMLNodeConstIterator niter;
 	const XMLProperty* prop;
 
-	if ((prop = node.property ("feedback")) != 0) {
-		do_feedback = (bool) atoi (prop->value().c_str());
-	} else {
-		do_feedback = false;
+	if (ControlProtocol::set_state (node, version)) {
+		return -1;
 	}
 
 	if ((prop = node.property ("feedback_interval")) != 0) {

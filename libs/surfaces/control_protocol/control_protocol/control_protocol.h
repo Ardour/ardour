@@ -135,6 +135,8 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	virtual void  tear_down_gui() { }
 
         XMLNode& get_state ();
+        int set_state (XMLNode const &, int version);
+        
         static const std::string state_node_name;
 
   protected:
