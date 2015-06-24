@@ -1270,7 +1270,7 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 	// << c->front()->playback_buf->bufsize() * bits_per_sample / 8 << " bps = " << bits_per_sample << endl;
 	// cerr << name () << " read samples = " << samples_to_read << " out of total space " << total_space << " in buffer of " << c->front()->playback_buf->bufsize() << " samples\n";
 
-	uint64_t before = g_get_monotonic_time ();
+	// uint64_t before = g_get_monotonic_time ();
 	// uint64_t elapsed;
 	
 	for (chan_n = 0, i = c->begin(); i != c->end(); ++i, ++chan_n) {
