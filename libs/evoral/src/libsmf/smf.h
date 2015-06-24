@@ -394,7 +394,7 @@ int smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32
 
 /* Routines for loading SMF files. */
 smf_t *smf_load(FILE *) WARN_UNUSED_RESULT;
-smf_t *smf_load_from_memory(const void *buffer, const size_t buffer_length) WARN_UNUSED_RESULT;
+smf_t *smf_load_from_memory(void *buffer, const size_t buffer_length) WARN_UNUSED_RESULT;
 
 /* Routine for writing SMF files. */
 int smf_save(smf_t *smf, FILE *file) WARN_UNUSED_RESULT;

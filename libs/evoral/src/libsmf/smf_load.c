@@ -873,14 +873,14 @@ load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, FILE* stre
  * \return SMF or NULL, if loading failed.
   */
 smf_t *
-smf_load_from_memory(const void *buffer, const size_t buffer_length)
+smf_load_from_memory(void *buffer, const size_t buffer_length)
 {
 	int i;
 	int ret;
 
 	smf_t *smf = smf_new();
 
-	smf->file_buffer = (void *)buffer;
+	smf->file_buffer = (void *) buffer;
 	smf->file_buffer_length = buffer_length;
 	smf->next_chunk_offset = 0;
 
