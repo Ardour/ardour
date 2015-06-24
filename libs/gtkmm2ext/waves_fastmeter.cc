@@ -569,9 +569,8 @@ void
 FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 {
 	gint top_of_meter;
-	GdkRectangle intersection;
-	GdkRectangle background;
-	GdkRectangle eventarea;
+	// GdkRectangle background;
+	// GdkRectangle eventarea;
 
 	//cairo_set_source_rgb (cr, 0, 0, 0); // black
 	//rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
@@ -585,15 +584,15 @@ FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 	pixrect.height = top_of_meter;
 	pixrect.y = pixheight - top_of_meter;
 
-	background.x = 0;
-	background.y = 0;
-	background.width = pixrect.width;
-	background.height = pixheight - top_of_meter;
+	// background.x = 0;
+	// background.y = 0;
+	// background.width = pixrect.width;
+	// background.height = pixheight - top_of_meter;
 
-	eventarea.x = area->x;
-	eventarea.y = area->y;
-	eventarea.width = area->width;
-	eventarea.height = area->height;
+	// eventarea.x = area->x;
+	// eventarea.y = area->y;
+	// eventarea.width = area->width;
+	// eventarea.height = area->height;
 
 	// Switching to CAIRO we would like to draw on the container's bkg.
 	// if (gdk_rectangle_intersect (&background, &eventarea, &intersection)) {
