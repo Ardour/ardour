@@ -103,8 +103,8 @@ class LIBARDOUR_API Diskstream : public SessionObject, public PublicDiskstream
 	framecnt_t roll_delay() const { return _roll_delay; }
 	void       set_roll_delay (framecnt_t);
 
-	bool         record_enabled() const { return g_atomic_int_get (&_record_enabled); }
-	bool         record_safe () const { return g_atomic_int_get (&_record_safe); }
+	bool         record_enabled() const { return g_atomic_int_get (const_cast<gint*>(&_record_enabled)); }
+	bool         record_safe () const { return g_atomic_int_get (const_cast<gint*>(&_record_safe)); }
 	virtual void set_record_enabled (bool yn) = 0;
 	virtual void set_record_safe (bool yn) = 0;
 
