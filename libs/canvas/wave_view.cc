@@ -575,7 +575,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 		outline_context->stroke ();
 
 	} else {
-		const double height_2 = _height * .5;
+		const int height_zero = floor( _height * .5);
 
 		for (int i = 0; i < n_peaks; ++i) {
 
@@ -601,10 +601,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 				}
 			}
 
-			/* zero line, show only if there is enough spread */
+			/* zero line, show only if there is enough spread 
+			or the waveform line does not cross zero line */
 
-			if (tips[i].spread >= 5.0 && show_zero_line()) {
-				zero_context->move_to (i, floor(height_2));
+			if (show_zero_line() && ((tips[i].spread >= 5.0) || (tips[i].top > height_zero ) || (tips[i].bot < height_zero)) ) {
+				zero_context->move_to (i, height_zero);
 				zero_context->rel_line_to (1.0, 0);
 			}
 
