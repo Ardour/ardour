@@ -41,7 +41,7 @@ public:
 
 	gint get() const
 	{
-		return g_atomic_int_get (&m_value);
+		return g_atomic_int_get (const_cast<gint*>(&m_value));
 	}
 
 	void set (gint new_value)
@@ -90,7 +90,7 @@ public:
 private:
 
 	// Has to be mutable when using the apple version of gcc.
-	mutable volatile gint             m_value;
+	gint m_value;
 
 };
 
