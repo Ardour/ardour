@@ -111,7 +111,6 @@ Meterbridge::Meterbridge ()
 	assert(max_height % 16 == 0);
 	set_geometry_hints(*((Gtk::Window*) this), geom, Gdk::HINT_MIN_SIZE | Gdk::HINT_MAX_SIZE | Gdk::HINT_RESIZE_INC);
 
-	set_keep_above (true);
 	set_border_width (0);
 
 	metrics_vpacker_left.pack_start (metrics_left, true, true);
@@ -439,6 +438,7 @@ Meterbridge::set_session (Session* s)
 
 	if (_visible) {
 		show_window();
+		present ();
 		ActionManager::check_toggleaction ("<Actions>/Common/toggle-meterbridge");
 	}
 	start_updating ();
