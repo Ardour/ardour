@@ -422,12 +422,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "waveform-cache-size") {
 		/* GUI option has units of megabytes; image cache uses units of bytes */
 		ArdourCanvas::WaveView::set_image_cache_size (ARDOUR_UI::config()->get_waveform_cache_size() * 1048576);
-	} else if (p == "auto-return-target-list") {
-		AutoReturnTarget art = Config->get_auto_return_target_list ();
-		auto_return_loop->set_active ((bool) (art & Loop));
-		auto_return_range_selection->set_active ((bool) (art & RangeSelectionStart));
-		auto_return_region_selection->set_active ((bool) (art & RegionSelectionStart));
-		auto_return_last_locate->set_active ((bool) (art & LastLocate));
 	}
 }
 
