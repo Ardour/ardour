@@ -1903,7 +1903,7 @@ TempoMap::insert_time (framepos_t where, framecnt_t amount)
 	PropertyChanged (PropertyChange ());
 }
 bool
-TempoMap::cut_time (framepos_t where, framecnt_t amount)
+TempoMap::remove_time (framepos_t where, framecnt_t amount)
 {
 	bool moved = false;
 
