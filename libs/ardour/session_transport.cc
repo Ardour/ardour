@@ -494,6 +494,7 @@ Session::non_realtime_locate ()
 	clear_clicks ();
 }
 
+#ifdef USE_TRACKS_CODE_FEATURES
 bool
 Session::select_playhead_priority_target (framepos_t& jump_to)
 {
@@ -525,15 +526,7 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
                           Last Locate
 	*/
 	
-#ifndef USE_TRACKS_CODE_FEATURES
-	if (autoreturn & LastLocate) {
-		jump_to = _last_roll_location;
-	}
-	
-	if (jump_to < 0 && (autoreturn & RangeSelectionStart)) {
-#else
 	if (autoreturn & RangeSelectionStart) {
-#endif
 		if (!_range_selection.empty()) {
 			jump_to = _range_selection.from;
 		} else {
@@ -570,14 +563,26 @@ Session::select_playhead_priority_target (framepos_t& jump_to)
 		}
 	} 
 
-#ifdef USE_TRACKS_CODE_FEATURES
 	if (jump_to < 0 && (autoreturn & LastLocate)) {
 		jump_to = _last_roll_location;
 	}
-#endif
 	
 	return jump_to >= 0;
 }
+#else
+
+bool
+Session::select_playhead_priority_target (framepos_t& jump_to)
+{
+	if (!config.get_auto_return()) {
+		return false;
+	}
+
+	jump_to = _last_roll_location;
+	return jump_to >= 0;
+}
+
+#endif
 
 void
 Session::follow_playhead_priority ()
