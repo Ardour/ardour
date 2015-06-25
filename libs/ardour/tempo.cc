@@ -1911,6 +1911,8 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
 	
 	TempoSection* last_tempo = NULL;
 	MeterSection* last_meter = NULL;
+	bool tempo_after = false; // is there a tempo marker at the first sample after the removed range?
+	bool meter_after = false; // is there a meter marker likewise?
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
 		for (Metrics::iterator i = metrics.begin(); i != metrics.end(); ++i) {
@@ -1924,18 +1926,24 @@ TempoMap::remove_time (framepos_t where, framecnt_t amount)
 					last_meter = lm;
 			}
 			else if ((*i)->frame() >= where) {
+				// TODO: make sure that moved tempo/meter markers are rounded to beat/bar boundaries
 				(*i)->set_frame ((*i)->frame() - amount);
+				if ((*i)->frame() == where) {
+					// marker was immediately after end of range
+					tempo_after = dynamic_cast<TempoSection*> (*i);
+					meter_after = dynamic_cast<MeterSection*> (*i);
+				}
 				moved = true;
 			}
 		}
 
 		//find the last TEMPO and METER metric (if any) and move it to the cut point so future stuff is correct
-		if (last_tempo) {
+		if (last_tempo && !tempo_after) {
 			metric_kill_list.remove(last_tempo);
 			last_tempo->set_frame(where);
 			moved = true;
 		}
-		if (last_meter) {
+		if (last_meter && !meter_after) {
 			metric_kill_list.remove(last_meter);
 			last_meter->set_frame(where);
 			moved = true;
