@@ -7215,7 +7215,7 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 	if (tempo_too) {
 		XMLNode& before (_session->tempo_map().get_state());
 
-		if (_session->tempo_map().cut_time (pos, frames) ) {
+		if (_session->tempo_map().remove_time (pos, frames) ) {
 			XMLNode& after (_session->tempo_map().get_state());
 			_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 			commit = true;

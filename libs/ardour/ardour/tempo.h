@@ -323,7 +323,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void change_initial_tempo (double bpm, double note_type);
 
 	void insert_time (framepos_t, framecnt_t);
-	bool cut_time (framepos_t where, framecnt_t amount);  //returns true if anything was moved
+	bool remove_time (framepos_t where, framecnt_t amount);  //returns true if anything was moved
 	
 	int n_tempos () const;
 	int n_meters () const;
