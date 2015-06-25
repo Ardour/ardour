@@ -402,6 +402,10 @@ ARDOUR_UI::toggle_meterbridge ()
 
 	if (tact->get_active()) {
 		meterbridge->show_window ();
+		meterbridge->present ();
+		if (editor) {
+			meterbridge->set_transient_for (*editor);
+		}
 	} else {
 		meterbridge->hide_window (NULL);
 	}
