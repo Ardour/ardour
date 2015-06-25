@@ -152,7 +152,7 @@ WaveView::debug_name() const
 void
 WaveView::image_ready ()
 {
-        DEBUG_TRACE (DEBUG::WaveView, string_compose ("queue draw for %1 at %2 (vis = %3 bbox = %4 CR %5)\n", this, g_get_monotonic_time(), visible(), _bounding_box, current_request));
+        DEBUG_TRACE (DEBUG::WaveView, string_compose ("queue draw for %1 at %2 (vis = %3 CR %4)\n", this, g_get_monotonic_time(), visible(), current_request));
 	redraw ();
 }
 
