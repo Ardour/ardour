@@ -5182,16 +5182,22 @@ Editor::quantize_regions (const RegionSelection& rs)
 		return;
 	}
 
-	QuantizeDialog* qd = new QuantizeDialog (*this);
+	if (!quantize_dialog) {
+		quantize_dialog = new QuantizeDialog (*this);
+	}
 
-	qd->present ();
-	const int r = qd->run ();
-	qd->hide ();
+	quantize_dialog->present ();
+	const int r = quantize_dialog->run ();
+	quantize_dialog->hide ();
 
 	if (r == Gtk::RESPONSE_OK) {
-		Quantize quant (qd->snap_start(), qd->snap_end(),
-				qd->start_grid_size(), qd->end_grid_size(),
-				qd->strength(), qd->swing(), qd->threshold());
+		Quantize quant (quantize_dialog->snap_start(),
+		                quantize_dialog->snap_end(),
+				quantize_dialog->start_grid_size(),
+		                quantize_dialog->end_grid_size(),
+				quantize_dialog->strength(),
+		                quantize_dialog->swing(),
+		                quantize_dialog->threshold());
 
 		apply_midi_note_edit_op (quant, rs);
 	}

@@ -119,6 +119,7 @@ class NoteBase;
 class PlaylistSelector;
 class PluginSelector;
 class ProgressReporter;
+class QuantizeDialog;
 class RhythmFerret;
 class RulerDialog;
 class Selection;
@@ -2237,6 +2238,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, std::string name);
 	void bring_all_sources_into_session ();
 
+	QuantizeDialog* quantize_dialog;
+	
 	friend class Drag;
 	friend class RegionDrag;
 	friend class RegionMoveDrag;

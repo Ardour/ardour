@@ -115,6 +115,7 @@
 #include "note_base.h"
 #include "playlist_selector.h"
 #include "public_editor.h"
+#include "quantize_dialog.h"
 #include "region_layering_order_editor.h"
 #include "rgb_macros.h"
 #include "rhythm_ferret.h"
@@ -300,6 +301,7 @@ Editor::Editor ()
 	, _following_mixer_selection (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
+	, quantize_dialog (0)
 {
 	constructed = false;
 
@@ -809,6 +811,7 @@ Editor::~Editor()
 	delete _track_canvas_viewport;
 	delete _drags;
 	delete nudge_clock;
+	delete quantize_dialog;
 }
 
 XMLNode*
