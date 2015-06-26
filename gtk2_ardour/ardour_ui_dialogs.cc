@@ -376,13 +376,13 @@ ARDOUR_UI::goto_mixer_window ()
 void
 ARDOUR_UI::toggle_mixer_window ()
 {
-	if (!editor || !mixer) {
+	if (!editor || !mixer || !meterbridge) {
 		/* can this really happen?
 		 * keyboard shortcut during session close, maybe?
 		 */
 #ifndef NDEBUG
 		 /* one way to find out: */
-		printf("ARDOUR_UI::toggle_mixer_window: Editor: %p Mixer: %p\n", editor, mixer);
+		printf("ARDOUR_UI::toggle_mixer_window: Editor: %p Mixer: %p MB: %p\n", editor, mixer, meterbridge);
 		PBD::stacktrace (std::cerr, 20);
 		assert (0);
 #endif
@@ -395,11 +395,13 @@ ARDOUR_UI::toggle_mixer_window ()
 	if (mixer->not_visible ()) {
 		show = true;
 	}
-	else if (!editor->not_visible () && ARDOUR_UI_UTILS::windows_overlap (editor, mixer)) {
+	else if (   (!editor->not_visible () && ARDOUR_UI_UTILS::windows_overlap (editor, mixer))
+	         || (!meterbridge->not_visible () && ARDOUR_UI_UTILS::windows_overlap (meterbridge, mixer))
+			) {
 		obscuring = true;
 	}
 
-	if (obscuring && editor->property_has_toplevel_focus()) {
+	if (obscuring && (editor->property_has_toplevel_focus() || meterbridge->property_has_toplevel_focus())) {
 		show = true;
 	}
 
@@ -413,13 +415,13 @@ ARDOUR_UI::toggle_mixer_window ()
 void
 ARDOUR_UI::toggle_meterbridge ()
 {
-	if (!editor || !meterbridge) {
+	if (!editor || !mixer || !meterbridge) {
 		/* can this really happen?
 		 * keyboard shortcut during session close, maybe?
 		 */
 #ifndef NDEBUG
 		 /* one way to find out: */
-		printf("ARDOUR_UI::toggle_meterbridge: Editor: %p MB: %p\n", editor, meterbridge);
+		printf("ARDOUR_UI::toggle_mixer_window: Editor: %p Mixer: %p MB: %p\n", editor, mixer, meterbridge);
 		PBD::stacktrace (std::cerr, 20);
 		assert (0);
 #endif
@@ -432,11 +434,13 @@ ARDOUR_UI::toggle_meterbridge ()
 	if (meterbridge->not_visible ()) {
 		show = true;
 	}
-	else if (!editor->not_visible() && ARDOUR_UI_UTILS::windows_overlap (editor, meterbridge)) {
+	else if (   (!editor->not_visible() && ARDOUR_UI_UTILS::windows_overlap (editor, meterbridge))
+	         || (!mixer->not_visible () && ARDOUR_UI_UTILS::windows_overlap (meterbridge, mixer))
+			) {
 		obscuring = true;
 	}
 
-	if (obscuring && editor->property_has_toplevel_focus()) {
+	if (obscuring && (editor->property_has_toplevel_focus() || mixer->property_has_toplevel_focus())) {
 		show = true;
 	}
 
