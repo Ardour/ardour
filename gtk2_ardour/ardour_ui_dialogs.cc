@@ -395,32 +395,8 @@ ARDOUR_UI::toggle_mixer_window ()
 	if (mixer->not_visible ()) {
 		show = true;
 	}
-	else if (editor->get_screen() == mixer->get_screen()) {
-		gint ex, ey, ew, eh;
-		gint mx, my, mw, mh;
-
-		editor->get_position (ex, ey);
-		editor->get_size (ew, eh);
-		mixer->get_position (mx, my);
-		mixer->get_size (mw, mh);
-
-		GdkRectangle e;
-		GdkRectangle m;
-		GdkRectangle r;
-
-		e.x = ex;
-		e.y = ey;
-		e.width = ew;
-		e.height = eh;
-
-		m.x = mx;
-		m.y = my;
-		m.width = mw;
-		m.height = mh;
-
-		if (gdk_rectangle_intersect (&e, &m, &r)) {
-			obscuring = true;
-		}
+	else if (!editor->not_visible () && ARDOUR_UI_UTILS::windows_overlap (editor, mixer)) {
+		obscuring = true;
 	}
 
 	if (obscuring && editor->property_has_toplevel_focus()) {
@@ -456,32 +432,8 @@ ARDOUR_UI::toggle_meterbridge ()
 	if (meterbridge->not_visible ()) {
 		show = true;
 	}
-	else if (editor->get_screen() == meterbridge->get_screen()) {
-		gint ex, ey, ew, eh;
-		gint mx, my, mw, mh;
-
-		editor->get_position (ex, ey);
-		editor->get_size (ew, eh);
-		meterbridge->get_position (mx, my);
-		meterbridge->get_size (mw, mh);
-
-		GdkRectangle e;
-		GdkRectangle m;
-		GdkRectangle r;
-
-		e.x = ex;
-		e.y = ey;
-		e.width = ew;
-		e.height = eh;
-
-		m.x = mx;
-		m.y = my;
-		m.width = mw;
-		m.height = mh;
-
-		if (gdk_rectangle_intersect (&e, &m, &r)) {
-			obscuring = true;
-		}
+	else if (!editor->not_visible() && ARDOUR_UI_UTILS::windows_overlap (editor, meterbridge)) {
+		obscuring = true;
 	}
 
 	if (obscuring && editor->property_has_toplevel_focus()) {
@@ -501,79 +453,37 @@ void
 ARDOUR_UI::toggle_editor_mixer ()
 {
 	bool obscuring = false;
-	/* currently, if windows are on different
-	   screens then we do nothing; but in the
-	   future we may want to bring the window 
-	   to the front or something, so I'm leaving this 
-	   variable for future use
-	*/
-        bool same_screen = true; 
-	
-        if (editor && mixer) {
 
-		/* remeber: Screen != Monitor (Screen is a separately rendered
-		 * continuous geometry that make include 1 or more monitors.
-		 */
-		
-                if (editor->get_screen() != mixer->get_screen() && (mixer->get_screen() != 0) && (editor->get_screen() != 0)) {
-                        // different screens, so don't do anything
-                        same_screen = false;
-                } else {
-                        // they are on the same screen, see if they are obscuring each other
+	if (editor && mixer) {
+		if (ARDOUR_UI_UTILS::windows_overlap (editor, mixer)) {
+			obscuring = true;
+		}
+	}
 
-                        gint ex, ey, ew, eh;
-                        gint mx, my, mw, mh;
-
-                        editor->get_position (ex, ey);
-                        editor->get_size (ew, eh);
-
-                        mixer->get_position (mx, my);
-                        mixer->get_size (mw, mh);
-
-                        GdkRectangle e;
-                        GdkRectangle m;
-                        GdkRectangle r;
-
-                        e.x = ex;
-                        e.y = ey;
-                        e.width = ew;
-                        e.height = eh;
-
-                        m.x = mx;
-                        m.y = my;
-                        m.width = mw;
-                        m.height = mh;
-
-        		if (gdk_rectangle_intersect (&e, &m, &r)) {
-                                obscuring = true;
-                        }
-                }
-        }
-
-        if (mixer && !mixer->not_visible() && mixer->property_has_toplevel_focus()) {
-                if (obscuring && same_screen) {
-                        goto_editor_window();
-                }
-        } else if (editor && !editor->not_visible() && editor->property_has_toplevel_focus()) {
-                if (obscuring && same_screen) {
-                        goto_mixer_window();
-                }
-        } else if (mixer && mixer->not_visible()) {
-                if (obscuring && same_screen) {
-                        goto_mixer_window ();
-                }
-        } else if (editor && editor->not_visible()) {
-                if (obscuring && same_screen) {
-                        goto_editor_window ();
-                }
-        } else if (obscuring && same_screen) {
-                //it's unclear what to do here, so just do the opposite of what we did last time  (old behavior)
-                if (_mixer_on_top) {
+	if (mixer && !mixer->not_visible() && mixer->property_has_toplevel_focus()) {
+		if (obscuring) {
+			goto_editor_window();
+		}
+	} else if (editor && !editor->not_visible() && editor->property_has_toplevel_focus()) {
+		if (obscuring) {
+			goto_mixer_window();
+		}
+	} else if (mixer && mixer->not_visible()) {
+		if (obscuring) {
+			goto_mixer_window ();
+		}
+	} else if (editor && editor->not_visible()) {
+		if (obscuring) {
+			goto_editor_window ();
+		}
+	} else if (obscuring) {
+		//it's unclear what to do here, so just do the opposite of what we did last time  (old behavior)
+		if (_mixer_on_top) {
 			goto_editor_window ();
 		} else {
 			goto_mixer_window ();
 		}
-        }
+	}
 }
 
 void
