@@ -921,3 +921,40 @@ ARDOUR_UI_UTILS::rate_as_string (float r)
 	}
 	return buf;
 }
+
+bool
+ARDOUR_UI_UTILS::windows_overlap (Gtk::Window *a, Gtk::Window *b)
+{
+
+	if (!a || !b) {
+		return false;
+	}
+	if (a->get_screen() == b->get_screen()) {
+		gint ex, ey, ew, eh;
+		gint mx, my, mw, mh;
+
+		a->get_position (ex, ey);
+		a->get_size (ew, eh);
+		b->get_position (mx, my);
+		b->get_size (mw, mh);
+
+		GdkRectangle e;
+		GdkRectangle m;
+		GdkRectangle r;
+
+		e.x = ex;
+		e.y = ey;
+		e.width = ew;
+		e.height = eh;
+
+		m.x = mx;
+		m.y = my;
+		m.width = mw;
+		m.height = mh;
+
+		if (gdk_rectangle_intersect (&e, &m, &r)) {
+			return true;
+		}
+	}
+	return false;
+}
