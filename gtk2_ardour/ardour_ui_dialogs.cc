@@ -393,19 +393,61 @@ ARDOUR_UI::toggle_mixer_window ()
 void
 ARDOUR_UI::toggle_meterbridge ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-meterbridge"));
-	if (!act) {
+	if (!editor || !meterbridge) {
+		/* can this really happen?
+		 * keyboard shortcut during session close, maybe?
+		 */
+#ifndef NDEBUG
+		 /* one way to find out: */
+		printf("ARDOUR_UI::toggle_meterbridge: Editor: %p MB: %p\n", editor, meterbridge);
+		PBD::stacktrace (std::cerr, 20);
+		assert (0);
+#endif
 		return;
 	}
 
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	bool show = false;
+	bool obscuring = false;
 
-	if (tact->get_active()) {
+	if (meterbridge->not_visible ()) {
+		show = true;
+	}
+	else if (editor->get_screen() == meterbridge->get_screen()) {
+		gint ex, ey, ew, eh;
+		gint mx, my, mw, mh;
+
+		editor->get_position (ex, ey);
+		editor->get_size (ew, eh);
+		meterbridge->get_position (mx, my);
+		meterbridge->get_size (mw, mh);
+
+		GdkRectangle e;
+		GdkRectangle m;
+		GdkRectangle r;
+
+		e.x = ex;
+		e.y = ey;
+		e.width = ew;
+		e.height = eh;
+
+		m.x = mx;
+		m.y = my;
+		m.width = mw;
+		m.height = mh;
+
+		if (gdk_rectangle_intersect (&e, &m, &r)) {
+			obscuring = true;
+		}
+	}
+
+	if (obscuring && editor->property_has_toplevel_focus()) {
+		show = true;
+	}
+
+	if (show) {
 		meterbridge->show_window ();
 		meterbridge->present ();
-		if (editor) {
-			meterbridge->set_transient_for (*editor);
-		}
+		meterbridge->raise ();
 	} else {
 		meterbridge->hide_window (NULL);
 	}

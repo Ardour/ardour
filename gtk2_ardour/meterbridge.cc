@@ -439,7 +439,6 @@ Meterbridge::set_session (Session* s)
 	if (_visible) {
 		show_window();
 		present ();
-		ActionManager::check_toggleaction ("<Actions>/Common/toggle-meterbridge");
 	}
 	start_updating ();
 }
