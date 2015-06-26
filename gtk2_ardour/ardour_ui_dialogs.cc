@@ -376,18 +376,10 @@ ARDOUR_UI::goto_mixer_window ()
 void
 ARDOUR_UI::toggle_mixer_window ()
 {
-	if (!editor || !mixer || !meterbridge) {
-		/* can this really happen?
-		 * keyboard shortcut during session close, maybe?
-		 */
-#ifndef NDEBUG
-		 /* one way to find out: */
-		printf("ARDOUR_UI::toggle_mixer_window: Editor: %p Mixer: %p MB: %p\n", editor, mixer, meterbridge);
-		PBD::stacktrace (std::cerr, 20);
-		assert (0);
-#endif
-		return;
-	}
+	/* thse windows are created in ARDOUR_UI::setup_windows()
+	 * it should be impossible to get here with any of them being NULL
+	 */
+	assert (editor && mixer && meterbridge);
 
 	bool show = false;
 	bool obscuring = false;
@@ -415,18 +407,7 @@ ARDOUR_UI::toggle_mixer_window ()
 void
 ARDOUR_UI::toggle_meterbridge ()
 {
-	if (!editor || !mixer || !meterbridge) {
-		/* can this really happen?
-		 * keyboard shortcut during session close, maybe?
-		 */
-#ifndef NDEBUG
-		 /* one way to find out: */
-		printf("ARDOUR_UI::toggle_mixer_window: Editor: %p Mixer: %p MB: %p\n", editor, mixer, meterbridge);
-		PBD::stacktrace (std::cerr, 20);
-		assert (0);
-#endif
-		return;
-	}
+	assert (editor && mixer && meterbridge);
 
 	bool show = false;
 	bool obscuring = false;
