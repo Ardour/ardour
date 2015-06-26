@@ -376,14 +376,58 @@ ARDOUR_UI::goto_mixer_window ()
 void
 ARDOUR_UI::toggle_mixer_window ()
 {
-	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Common"), X_("toggle-mixer"));
-	if (!act) {
+	if (!editor || !mixer) {
+		/* can this really happen?
+		 * keyboard shortcut during session close, maybe?
+		 */
+#ifndef NDEBUG
+		 /* one way to find out: */
+		printf("ARDOUR_UI::toggle_mixer_window: Editor: %p Mixer: %p\n", editor, mixer);
+		PBD::stacktrace (std::cerr, 20);
+		assert (0);
+#endif
 		return;
 	}
 
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
+	bool show = false;
+	bool obscuring = false;
 
-	if (tact->get_active()) {
+	if (mixer->not_visible ()) {
+		show = true;
+	}
+	else if (editor->get_screen() == mixer->get_screen()) {
+		gint ex, ey, ew, eh;
+		gint mx, my, mw, mh;
+
+		editor->get_position (ex, ey);
+		editor->get_size (ew, eh);
+		mixer->get_position (mx, my);
+		mixer->get_size (mw, mh);
+
+		GdkRectangle e;
+		GdkRectangle m;
+		GdkRectangle r;
+
+		e.x = ex;
+		e.y = ey;
+		e.width = ew;
+		e.height = eh;
+
+		m.x = mx;
+		m.y = my;
+		m.width = mw;
+		m.height = mh;
+
+		if (gdk_rectangle_intersect (&e, &m, &r)) {
+			obscuring = true;
+		}
+	}
+
+	if (obscuring && editor->property_has_toplevel_focus()) {
+		show = true;
+	}
+
+	if (show) {
 		goto_mixer_window ();
 	} else {
 		mixer->hide ();
