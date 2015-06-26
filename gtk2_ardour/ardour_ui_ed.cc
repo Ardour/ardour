@@ -204,7 +204,7 @@ if (Profile->get_mixbus())
 
 	ActionManager::register_toggle_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
 	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
-	ActionManager::register_toggle_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
+	ActionManager::register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	ActionManager::register_action (common_actions, X_("reattach-all-tearoffs"), _("Reattach All Tearoffs"), sigc::mem_fun (*this, &ARDOUR_UI::reattach_all_tearoffs));
 

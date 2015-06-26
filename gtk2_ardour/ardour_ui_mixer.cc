@@ -65,7 +65,6 @@ ARDOUR_UI::create_meterbridge ()
 	}
 
 	meterbridge->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
-	meterbridge->signal_unmap().connect (sigc::bind (sigc::ptr_fun (&ActionManager::uncheck_toggleaction), X_("<Actions>/Common/toggle-meterbridge")));
 
 	return 0;
 }
