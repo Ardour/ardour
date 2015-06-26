@@ -132,6 +132,8 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/boost-region-gain|<@SECONDARY@>6|increase region gain
 @rop|Region/cut-region-gain|<@SECONDARY@>7|reduce region gain
 @rop|Region/pitch-shift-region|<@SECONDARY@>8|transpose
+@rop|Region/lower-region|<@SECONDARY@>9|lower region layer
+@rop|Region/raise-region|<@SECONDARY@>0|raise region layer
 
 ;; letters
 ;; TOP ROW
