@@ -52,6 +52,63 @@ Quantize::~Quantize ()
 {
 }
 
+static double
+swing_position (double pos, double grid, double swing, double offset)
+{
+	/* beats start out numbered at zero.
+	 *
+	 * every other position on the start-quantize-grid is
+	 * optionally swung, meaning that its position is moved
+	 * somewhere between its natural position and 2/3 of
+	 * the way to the next start-quantize-grid position.
+	 *
+	 * so, if the _start grid is 0.5, the beat at 0 isn't
+	 * swung, but something at 0.5 is, the beat at 1 isn't
+	 * swung, but something at 1.5 is.
+	 *
+	 * if the start grid is 1.0, the beat at 0 isn't swung,
+	 * but the beat at 1.0 is. the beat at 2.0 isn't swung,
+	 * but the beat at 3.0 is. and so on.
+	 * 
+	 * so the criterion for a position being swung is
+	 * whether or not ((possible_grid_position / grid) % 2) != 0
+	 */
+
+	const bool swing_quantize_grid_position = pos > 0.0 && fmod ((pos/grid), 2.0) != 0;
+	const bool swing_previous_grid_position = pos > grid && fmod ((pos-grid)/grid, 2.0) != 0;
+
+	/* one of these will not be subject to swing */
+
+	double swung_pos = pos;
+	double swung_previous_grid_position;
+
+	if (pos > grid) {
+		swung_previous_grid_position = pos - grid;
+	} else {
+		swung_previous_grid_position = 0.0;
+	}
+
+	if (swing_previous_grid_position) {
+		swung_previous_grid_position = swung_previous_grid_position + (2.0/3.0 * swing * grid);
+	}
+
+	if (swing_quantize_grid_position) {
+		swung_pos = swung_pos + (2.0/3.0 * swing * grid);
+	}
+
+	/* now correct for start-of-model offset */
+
+	pos += offset;
+				
+	if (fabs (pos - swung_pos) > fabs (pos - swung_previous_grid_position)) {
+		pos = swung_previous_grid_position;
+	} else {
+		pos = swung_pos;
+	}
+
+	return pos;
+}
+
 Command*
 Quantize::operator () (boost::shared_ptr<MidiModel> model,
                        Evoral::Beats position,
@@ -66,47 +123,38 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 	const double round_pos = round(position.to_double() / _start_grid) * _start_grid;
 	const double offset    = round_pos - position.to_double();
 
-	bool even;
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand (model, "quantize");
 
 	for (std::vector<Evoral::Sequence<Evoral::Beats>::Notes>::iterator s = seqs.begin(); s != seqs.end(); ++s) {
 
-		even = false;
-;
-		/* TODO 'swing' probably requires a 2nd iteration:
-		 * first quantize notes to the grid, then apply beat shift
-		 */
 		for (Evoral::Sequence<MidiModel::TimeType>::Notes::iterator i = (*s).begin(); i != (*s).end(); ++i) {
 
-			double new_start = round (((*i)->time().to_double() - offset) / _start_grid) * _start_grid + offset;
-			double new_end = round (((*i)->end_time().to_double() - offset) / _end_grid) * _end_grid + offset;
+			/* compute new start + end points WITHOUT the offset
+			 * caused by the start of the model (see above).
+			 * 
+			 * these versions of new_start and new_end are
+			 * guaranteed to precisely align with the quantize grid(s).
+			 */
+			
+			double new_start = round (((*i)->time().to_double() - offset) / _start_grid) * _start_grid;
+			double new_end = round (((*i)->end_time().to_double() - offset) / _end_grid) * _end_grid;
 
-			if (_swing > 0.0 && even) {
+			if (_swing) {
 
-				double next_grid = new_start + _start_grid;
+				new_start = swing_position (new_start, _start_grid, _swing, offset);
+				new_end = swing_position (new_end, _end_grid, _swing, offset);
+				
+			} else {
 
-				/* find a spot 2/3 (* swing factor) of the way between the grid point
-				   we would put this note at, and the nominal position of the next note.
-				*/
+				/* now correct for start-of-model offset */
 
-				new_start = new_start + (2.0/3.0 * _swing * (next_grid - new_start));
-				new_end = new_end + (2.0/3.0 * _swing * (next_grid - new_start));
-
-			} else if (_swing < 0.0 && even) {
-
-				double prev_grid = new_start - _start_grid;
-
-				/* find a spot 2/3 (* swing factor) of the way between the grid point
-				   we would put this note at, and the nominal position of the previous note.
-				*/
-
-				new_start = new_start - (2.0/3.0 * _swing * (new_start - prev_grid));
-				new_end = new_end - (2.0/3.0 * _swing * (new_start - prev_grid));
-
+				new_start += offset;
+				new_end += offset;
 			}
-
+			
 			double delta = new_start - (*i)->time().to_double();
 
+			
 			if (fabs (delta) >= _threshold) {
 				if (_snap_start) {
 					delta *= _strength;
@@ -128,8 +176,6 @@ Quantize::operator () (boost::shared_ptr<MidiModel> model,
 					cmd->change ((*i), MidiModel::NoteDiffCommand::Length, new_dur);
 				}
 			}
-
-			even = !even;
 		}
 	}
 
