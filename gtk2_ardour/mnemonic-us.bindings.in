@@ -215,12 +215,13 @@ This mode provides many different operations on both regions and control points,
 @mmode|MouseMode/set-mouse-mode-cut|c|cut mode
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
-@-group|Editor/crop|<@SECONDARY@>c|some text
+@wvis|Window/toggle-big-clock|<@SECONDARY@>c|toggle big clock
+@-group|Editor/crop<@PRIMARY@><@TERTIARY@>c|crop
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
+@wvis|Common/toggle-meterbridge|<@SECONDARY@>b|show meter bridge
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
-@wvis|Window/toggle-big-clock|<@SECONDARY@>b|toggle big clock
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>n|toggle global audio patchbay
 @sess|Main/New|<@PRIMARY@>n|open a new session
