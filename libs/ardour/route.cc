@@ -4159,7 +4159,7 @@ Route::set_processor_positions ()
 	bool had_amp = false;
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_pre_fader (!had_amp);
-		if (boost::dynamic_pointer_cast<Amp> (*i)) {
+		if (*i == _amp) {
 			had_amp = true;
 		}
 	}
@@ -4354,7 +4354,7 @@ Route::setup_invisible_processors ()
 	/* find the amp */
 
 	ProcessorList::iterator amp = new_processors.begin ();
-	while (amp != new_processors.end() && boost::dynamic_pointer_cast<Amp> (*amp) == 0) {
+	while (amp != new_processors.end() && *amp != _amp) {
 		++amp;
 	}
 
