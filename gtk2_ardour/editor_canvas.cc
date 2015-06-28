@@ -1188,6 +1188,19 @@ Editor::which_canvas_cursor(ItemType type) const
 {
 	Gdk::Cursor* cursor = which_mode_cursor ();
 
+	if (mouse_mode == MouseRange) {
+		switch (type) {
+		case StartSelectionTrimItem:
+			cursor = _cursors->left_side_trim;
+			break;
+		case EndSelectionTrimItem:
+			cursor = _cursors->right_side_trim;
+			break;
+		default:
+			break;
+		}
+	}
+	
 	if ((mouse_mode == MouseObject || get_smart_mode ()) ||
 	    mouse_mode == MouseContent) {
 
