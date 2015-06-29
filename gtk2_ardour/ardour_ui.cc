@@ -28,6 +28,8 @@
 #include <cerrno>
 #include <fstream>
 
+#include <stdarg.h>
+
 #ifndef PLATFORM_WINDOWS
 #include <sys/resource.h>
 #endif
@@ -55,6 +57,8 @@
 #include "pbd/file_utils.h"
 #include "pbd/localtime_r.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/replace_all.h"
+#include "pbd/xml++.h"
 
 #include "gtkmm2ext/application.h"
 #include "gtkmm2ext/bindings.h"
@@ -181,6 +185,36 @@ ask_about_configuration_copy (string const & old_dir, string const & new_dir, in
 	return (msg.run() == Gtk::RESPONSE_YES);
 }
 
+static void
+libxml_generic_error_func (void* /* parsing_context*/,
+                   const char* msg,
+                   ...)
+{
+	va_list ap;
+	char buf[2048];
+
+	va_start (ap, msg);
+	vsnprintf (buf, sizeof (buf), msg, ap);
+	error << buf << endmsg;
+	va_end (ap);
+}
+
+static void
+libxml_structured_error_func (void* /* parsing_context*/,
+                              xmlErrorPtr err)
+{
+	string msg = err->message;
+
+	replace_all (msg, "\n", "");
+
+	error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
+	if (err->int2) {
+		error << ':' << err->int2;
+	}
+	error << endmsg;
+}
+
+
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfiguration* uic)
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
@@ -259,6 +293,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 		theArdourUI = this;
 	}
 
+	/* stop libxml from spewing to stdout/stderr */
+
+	xmlSetGenericErrorFunc (this, libxml_generic_error_func);
+	xmlSetStructuredErrorFunc (this, libxml_structured_error_func);
+	
 	ui_config->ParameterChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::parameter_changed));
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	ui_config->map_parameters (pc);
