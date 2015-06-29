@@ -145,10 +145,11 @@ CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
 CONFIG_VARIABLE (framecnt_t, preroll, "preroll", 0)
 CONFIG_VARIABLE (framecnt_t, postroll, "postroll", 0)
 CONFIG_VARIABLE (float, rf_speed, "rf-speed", 2.0f)
-CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f)
-CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f)
+CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
+CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
 CONFIG_VARIABLE (ShuttleBehaviour, shuttle_behaviour, "shuttle-behaviour", Sprung)
 CONFIG_VARIABLE (ShuttleUnits, shuttle_units, "shuttle-units", Percentage)
+CONFIG_VARIABLE (float, shuttle_max_speed, "shuttle-max-speed", 8.0f)
 CONFIG_VARIABLE (bool, locate_while_waiting_for_sync, "locate-while-waiting-for-sync", false)
 CONFIG_VARIABLE (bool, disable_disarm_during_roll, "disable-disarm-during-roll", false)
 
