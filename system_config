@@ -84,6 +84,7 @@
     <Option name="shuttle-speed-threshold" value="5"/>
     <Option name="shuttle-behaviour" value="0"/>
     <Option name="shuttle-units" value="0"/>
+    <Option name="shuttle-max-speed" value="8"/>
     <Option name="locate-while-waiting-for-sync" value="0"/>
     <Option name="disable-disarm-during-roll" value="0"/>
     <Option name="meter-falloff" value="13.3"/>
@@ -119,7 +120,7 @@
     <Option name="denormal-protection" value="0"/>
     <Option name="denormal-model" value="3"/>
     <Option name="osx-pingback-url" value="http://community.ardour.org/pingback/osx/"/>
-    <Option name="tutorial-manual-url" value="http://ardour.org/flossmanual"/>
+    <Option name="tutorial-manual-url" value="http://ardour.org/tutorial"/>
     <Option name="reference-manual-url" value="http://manual.ardour.org/"/>
     <Option name="video-advanced-setup" value="0"/>
     <Option name="video-server-url" value="http://localhost:1554"/>
