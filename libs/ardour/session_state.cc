@@ -398,14 +398,7 @@ Session::session_loaded ()
 	/* Now, finally, we can fill the playback buffers */
 	
 	BootMessage (_("Filling playback buffers"));
-	
-	boost::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (*r);
-		if (trk && !trk->hidden()) {
-			trk->seek (_transport_frame, true);
-		}
-	}
+	force_locate (_transport_frame, false);
 }
 
 string
