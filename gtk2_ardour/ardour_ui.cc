@@ -3209,6 +3209,9 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash (msg);
 		msg.present ();
+
+		dump_errors (cerr);
+		
 		(void) msg.run ();
 		msg.hide ();
 
