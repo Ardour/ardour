@@ -1148,10 +1148,6 @@ AudioDiskstream::_do_refill (Sample* mixdown_buffer, float* gain_buffer, framecn
 
 	if (fill_level) {
 		if (fill_level < total_space) {
-			cerr << name() << " adjust total space of " << total_space << " to leave " << fill_level << " to still refill\n";
-			if (fill_level < 0) {
-				PBD::stacktrace (cerr, 20);
-			}
 			total_space -= fill_level;
 		} else {
 			/* we can't do anything with it */
