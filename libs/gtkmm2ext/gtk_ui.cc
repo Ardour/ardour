@@ -482,8 +482,40 @@ UI::do_request (UIRequest* req)
   ======================================================================*/
 
 void
+UI::dump_errors (std::ostream& ostr)
+{
+	Glib::Threads::Mutex::Lock lm (error_lock);
+	ostr << endl << X_("Errors/Messages:") << endl;
+	for (list<string>::const_iterator i = error_stack.begin(); i != error_stack.end(); ++i) {
+		ostr << *i << endl;
+	}
+	ostr << endl;
+}
+
+void
 UI::receive (Transmitter::Channel chn, const char *str)
 {
+	{
+		Glib::Threads::Mutex::Lock lm (error_lock);
+		switch (chn) {
+		case Transmitter::Fatal:
+			error_stack.push_back (string (X_("FATAL: ")) + str);
+			break;
+		case Transmitter::Error:
+			error_stack.push_back (string (X_("ERROR: ")) + str);
+			break;
+		case Transmitter::Warning:
+			error_stack.push_back (string (X_("WARNING: ")) + str);
+			break;
+		case Transmitter::Info:
+			error_stack.push_back (string (X_("INFO: ")) + str);
+			break;
+		case Transmitter::Throw:
+			error_stack.push_back (string (X_("THROW: ")) + str);
+			break;
+		}
+	}
+
 	if (caller_is_ui_thread()) {
 		process_error_message (chn, str);
 	} else {

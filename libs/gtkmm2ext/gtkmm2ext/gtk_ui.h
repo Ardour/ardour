@@ -138,6 +138,7 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 	void flush_pending ();
 	void toggle_errors ();
 	void show_errors ();
+	void dump_errors (std::ostream&);
 	void touch_display (Touchable *);
 	void set_tip (Gtk::Widget &w, const gchar *tip);
 	void set_tip (Gtk::Widget &w, const std::string &tip);
@@ -166,7 +167,7 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 	sigc::signal<void> theme_changed;
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
-
+	
   protected:
 	virtual void handle_fatal (const char *);
 	virtual void display_message (const char *prefix, gint prefix_len,
@@ -194,6 +195,9 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 	static void signal_pipe_callback (void *, gint, GdkInputCondition);
 	void process_error_message (Transmitter::Channel, const char *);
 	void do_quit ();
+
+	Glib::Threads::Mutex   error_lock;
+	std::list<std::string> error_stack;
 
 	void color_selection_done (bool status);
 	bool color_selection_deleted (GdkEventAny *);
