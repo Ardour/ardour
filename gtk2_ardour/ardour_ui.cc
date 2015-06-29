@@ -214,6 +214,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	, error_alert_button ( ArdourButton::just_led_default_elements )
 	, editor_meter(0)
 	, editor_meter_peak_display()
+	, session_selector_window (0)
 	, open_session_selector (0)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)
