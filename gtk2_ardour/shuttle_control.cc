@@ -73,6 +73,15 @@ ShuttleControl::ShuttleControl ()
 	set_size_request (85, 20);
 	set_name (X_("ShuttleControl"));
 
+	shuttle_max_speed = Config->get_shuttle_max_speed();
+
+	if      (shuttle_max_speed >= 8.f) { shuttle_max_speed = 8.0f; }
+	else if (shuttle_max_speed >= 6.f) { shuttle_max_speed = 6.0f; }
+	else if (shuttle_max_speed >= 4.f) { shuttle_max_speed = 4.0f; }
+	else if (shuttle_max_speed >= 3.f) { shuttle_max_speed = 3.0f; }
+	else if (shuttle_max_speed >= 2.f) { shuttle_max_speed = 2.0f; }
+	else                               { shuttle_max_speed = 1.5f; }
+
 	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context());
 
 	/* gtkmm 2.4: the C++ wrapper doesn't work */
@@ -240,6 +249,7 @@ ShuttleControl::show_shuttle_context_menu ()
 void
 ShuttleControl::set_shuttle_max_speed (float speed)
 {
+	Config->set_shuttle_max_speed (speed);
 	shuttle_max_speed = speed;
 	last_speed_displayed = -99999999;
 }
