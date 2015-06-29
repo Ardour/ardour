@@ -606,7 +606,7 @@ AudioDiskstream::process (BufferSet& bufs, framepos_t transport_frame, pframes_t
 
 		/* no varispeed playback if we're recording, because the output .... TBD */
 
-		if (rec_nframes == 0 && _actual_speed != 1.0f) {
+		if (rec_nframes == 0 && _actual_speed != 1.0) {
 			necessary_samples = (framecnt_t) ceil ((nframes * fabs (_actual_speed))) + 2;
 		} else {
 			necessary_samples = nframes;
@@ -2127,7 +2127,7 @@ AudioDiskstream::allocate_temporary_buffers ()
 	   when slaving to MTC, Timecode etc.
 	*/
 
-	double const sp = max (fabsf (_actual_speed), 1.2f);
+	double const sp = max (fabs (_actual_speed), 1.2);
 	framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * sp) + 2;
 
 	if (required_wrap_size > wrap_buffer_size) {
