@@ -213,9 +213,9 @@ AudioDiskstream::non_realtime_locate (framepos_t location)
 	/* now refill channel buffers */
 
 	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((framepos_t) (location * (double) speed()));
+		seek ((framepos_t) (location * (double) speed()), true);
 	} else {
-		seek (location);
+		seek (location, true);
 	}
 }
 
