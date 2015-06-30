@@ -104,6 +104,14 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _dsp_load (0)
 	, _processed_samples (0)
 	, _port_change_flag (false)
+#ifdef USE_MIDI_PARSER
+	, _event(0)
+	, _first_time(true)
+	, _unbuffered_bytes(0)
+	, _total_bytes(0)
+	, _expected_bytes(0)
+	, _status_byte(0)
+#endif
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
@@ -1559,6 +1567,100 @@ CoreAudioBackend::freewheel_thread ()
 	return 0;
 }
 
+#ifdef USE_MIDI_PARSER
+bool
+CoreAudioBackend::midi_process_byte (const uint8_t byte)
+{
+	if (byte >= 0xf8) {
+		// Realtime
+		if (byte == 0xfd) {
+			// undefined
+			return false;
+		}
+		midi_prepare_byte_event (byte);
+		return true;
+	}
+	if (byte == 0xf7) {
+		// Sysex end
+		if (_status_byte == 0xf0) {
+			midi_record_byte (byte);
+			return midi_prepare_buffered_event ();
+		}
+    _total_bytes = 0;
+    _unbuffered_bytes = 0;
+		_expected_bytes = 0;
+		_status_byte = 0;
+		return false;
+	}
+	if (byte >= 0x80) {
+		// Non-realtime status byte
+		if (_total_bytes) {
+			_total_bytes = 0;
+			_unbuffered_bytes = 0;
+		}
+		_status_byte = byte;
+		switch (byte & 0xf0) {
+			case 0x80:
+			case 0x90:
+			case 0xa0:
+			case 0xb0:
+			case 0xe0:
+				// Note On, Note Off, Aftertouch, Control Change, Pitch Wheel
+				_expected_bytes = 3;
+				break;
+			case 0xc0:
+			case 0xd0:
+				// Program Change, Channel Pressure
+				_expected_bytes = 2;
+				break;
+			case 0xf0:
+				switch (byte) {
+					case 0xf0:
+						// Sysex
+						_expected_bytes = 0;
+						break;
+					case 0xf1:
+					case 0xf3:
+						// MTC Quarter Frame, Song Select
+						_expected_bytes = 2;
+						break;
+					case 0xf2:
+						// Song Position
+						_expected_bytes = 3;
+						break;
+					case 0xf4:
+					case 0xf5:
+						// Undefined
+						_expected_bytes = 0;
+						_status_byte = 0;
+						return false;
+					case 0xf6:
+						// Tune Request
+						midi_prepare_byte_event(byte);
+						_expected_bytes = 0;
+						_status_byte = 0;
+						return true;
+				}
+		}
+		midi_record_byte(byte);
+		return false;
+	}
+	// Data byte
+	if (! _status_byte) {
+		// Data bytes without a status will be discarded.
+		_total_bytes++;
+		_unbuffered_bytes++;
+		return false;
+	}
+	if (! _total_bytes) {
+		midi_record_byte(_status_byte);
+	}
+	midi_record_byte(byte);
+	return (_total_bytes == _expected_bytes) ? midi_prepare_buffered_event() : false;
+}
+#endif
+
+
 int
 CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t host_time)
 {
@@ -1614,7 +1716,22 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
 			pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
 			assert (time < n_samples);
+#ifndef USE_MIDI_PARSER
 			midi_event_put((void*)mbuf, time, data, size);
+#else
+			for (size_t mb = 0; mb < size; ++mb) {
+				if (_first_time && !(data[mb] & 0x80)) {
+					// expect a status byte at the beginning or every Packet
+					assert (0);
+					continue;
+				}
+				_first_time = false;
+
+				if (midi_process_byte (data[mb])) {
+					midi_event_put ((void*)mbuf, time, _parser_buffer, _event._size);
+				}
+			}
+#endif
 			size = sizeof(data);
 		}
 	}
