@@ -449,55 +449,55 @@ class CoreAudioBackend : public AudioBackend {
 
 #ifdef USE_MIDI_PARSER
 
-	bool midi_process_byte (const uint8_t);
+		bool midi_process_byte (const uint8_t);
 
-	void midi_record_byte(uint8_t byte) {
-		if (_total_bytes < sizeof(_parser_buffer)) {
-			_parser_buffer[_total_bytes] = byte;
-		} else {
-			++_unbuffered_bytes;
+		void midi_record_byte (uint8_t byte) {
+			if (_total_bytes < sizeof (_parser_buffer)) {
+				_parser_buffer[_total_bytes] = byte;
+			} else {
+				++_unbuffered_bytes;
+			}
+			++_total_bytes;
 		}
-		++_total_bytes;
-	}
 
-	void midi_prepare_byte_event(const uint8_t byte) {
-		_parser_buffer[0] = byte;
-		_event.prepare(1);
-	}
-
-	bool midi_prepare_buffered_event() {
-		const bool result = _unbuffered_bytes == 0;
-		if (result) {
-			_event.prepare(_total_bytes);
+		void midi_prepare_byte_event (const uint8_t byte) {
+			_parser_buffer[0] = byte;
+			_event.prepare(1);
 		}
-		_total_bytes = 0;
-		_unbuffered_bytes = 0;
-		if (_status_byte >= 0xf0) {
-			_expected_bytes = 0;
-			_status_byte = 0;
+
+		bool midi_prepare_buffered_event () {
+			const bool result = _unbuffered_bytes == 0;
+			if (result) {
+				_event.prepare (_total_bytes);
+			}
+			_total_bytes = 0;
+			_unbuffered_bytes = 0;
+			if (_status_byte >= 0xf0) {
+				_expected_bytes = 0;
+				_status_byte = 0;
+			}
+			return result;
 		}
-		return result;
-	}
 
-	struct ParserEvent {
-		size_t _size;
-		bool _pending;
-		ParserEvent (const size_t size)
-			: _size(size)
-			, _pending(false) {}
+		struct ParserEvent {
+			size_t _size;
+			bool _pending;
+			ParserEvent (const size_t size)
+				: _size(size)
+				  , _pending(false) {}
 
-		void prepare(const size_t size) {
-			_size = size;
-			_pending = true;
-		}
-	} _event;
+			void prepare (const size_t size) {
+				_size = size;
+				_pending = true;
+			}
+		} _event;
 
-	bool    _first_time;
-	size_t  _unbuffered_bytes;
-	size_t  _total_bytes;
-	size_t  _expected_bytes;
-	uint8_t _status_byte;
-	uint8_t _parser_buffer[1024];
+		bool    _first_time;
+		size_t  _unbuffered_bytes;
+		size_t  _total_bytes;
+		size_t  _expected_bytes;
+		uint8_t _status_byte;
+		uint8_t _parser_buffer[1024];
 #endif
 
 }; // class CoreAudioBackend

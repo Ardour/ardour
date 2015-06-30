@@ -1586,8 +1586,8 @@ CoreAudioBackend::midi_process_byte (const uint8_t byte)
 			midi_record_byte (byte);
 			return midi_prepare_buffered_event ();
 		}
-    _total_bytes = 0;
-    _unbuffered_bytes = 0;
+		_total_bytes = 0;
+		_unbuffered_bytes = 0;
 		_expected_bytes = 0;
 		_status_byte = 0;
 		return false;
@@ -1636,13 +1636,13 @@ CoreAudioBackend::midi_process_byte (const uint8_t byte)
 						return false;
 					case 0xf6:
 						// Tune Request
-						midi_prepare_byte_event(byte);
+						midi_prepare_byte_event (byte);
 						_expected_bytes = 0;
 						_status_byte = 0;
 						return true;
 				}
 		}
-		midi_record_byte(byte);
+		midi_record_byte (byte);
 		return false;
 	}
 	// Data byte
@@ -1653,7 +1653,7 @@ CoreAudioBackend::midi_process_byte (const uint8_t byte)
 		return false;
 	}
 	if (! _total_bytes) {
-		midi_record_byte(_status_byte);
+		midi_record_byte (_status_byte);
 	}
 	midi_record_byte(byte);
 	return (_total_bytes == _expected_bytes) ? midi_prepare_buffered_event() : false;
