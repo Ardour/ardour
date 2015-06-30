@@ -35,7 +35,9 @@
 //**********************************************************************************************
 WCMRNativeAudioNoneDevice::WCMRNativeAudioNoneDevice (WCMRAudioDeviceManager *pManager)
 	: WCMRNativeAudioDevice (pManager, false /*useMultiThreading*/)
+#ifndef PTW32_VERSION
 	, m_SilenceThread(0)
+#endif
 #if defined (PLATFORM_WINDOWS)
     , _waitableTimerForUsleep (CreateWaitableTimer(NULL, TRUE, NULL))
 #endif
