@@ -28,8 +28,8 @@
 #include <string>
 
 #ifdef PLATFORM_WINDOWS
-#include <Windows.h>
-#include <DbgHelp.h>
+#include <windows.h>
+#include <dbghelp.h>
 #endif
 
 void
