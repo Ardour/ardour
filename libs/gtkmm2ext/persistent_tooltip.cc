@@ -64,7 +64,7 @@ bool
 PersistentTooltip::timeout ()
 {
 	show ();
-	return true;
+	return false;
 }
 
 bool
