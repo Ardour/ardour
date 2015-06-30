@@ -749,7 +749,7 @@ WavesAudioBackend::_audio_device_callback (const float* input_buffer,
 	    AudioEngine::thread_init_callback (this);
     }
     
-    if (pthread_equal (_main_thread, pthread_self()) != 0) {
+    if (pthread_equal (_main_thread, pthread_self()) == 0) {
 #ifdef PTW32_VERSION
             std::cerr << "Process thread ID has changed. Expected thread: " << _main_thread.p <<  " current thread: " << pthread_self().p << std::dec << " !" << std::endl;
 #else
