@@ -151,7 +151,6 @@ PersistentTooltip::show ()
 		 * for _window->get_width() to be correct.
 		 */
 
-		_window->present ();
 
 		if (sw < rx + _window->get_width()) {
 			/* right edge of window would be off the right edge of
@@ -166,6 +165,9 @@ PersistentTooltip::show ()
 				_window->move (rx, ry + _target->get_height());
 			}
 		}
+
+		_window->present ();
+
 	}
 }
 
