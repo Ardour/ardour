@@ -119,7 +119,7 @@ PannerInterface::set_send_drawing_mode(bool onoff) {
 }
 
 PannerPersistentTooltip::PannerPersistentTooltip (Gtk::Widget* w)
-	: PersistentTooltip (w)
+	: PersistentTooltip (w, true)
 	, _dragging (false)
 {
 
