@@ -445,8 +445,6 @@ class CoreAudioBackend : public AudioBackend {
 			return NULL;
 		}
 
-#define USE_MIDI_PARSER
-
 #ifdef USE_MIDI_PARSER
 
 		bool midi_process_byte (const uint8_t);
@@ -462,13 +460,13 @@ class CoreAudioBackend : public AudioBackend {
 
 		void midi_prepare_byte_event (const uint8_t byte) {
 			_parser_buffer[0] = byte;
-			_event.prepare(1);
+			_parser_bytes = 1;
 		}
 
 		bool midi_prepare_buffered_event () {
 			const bool result = _unbuffered_bytes == 0;
 			if (result) {
-				_event.prepare (_total_bytes);
+				_parser_bytes = _total_bytes;
 			}
 			_total_bytes = 0;
 			_unbuffered_bytes = 0;
@@ -479,25 +477,12 @@ class CoreAudioBackend : public AudioBackend {
 			return result;
 		}
 
-		struct ParserEvent {
-			size_t _size;
-			bool _pending;
-			ParserEvent (const size_t size)
-				: _size(size)
-				  , _pending(false) {}
-
-			void prepare (const size_t size) {
-				_size = size;
-				_pending = true;
-			}
-		} _event;
-
-		bool    _first_time;
 		size_t  _unbuffered_bytes;
 		size_t  _total_bytes;
 		size_t  _expected_bytes;
 		uint8_t _status_byte;
-		uint8_t _parser_buffer[1024];
+		uint8_t _parser_buffer[128];
+		uint8_t _parser_bytes;
 #endif
 
 }; // class CoreAudioBackend

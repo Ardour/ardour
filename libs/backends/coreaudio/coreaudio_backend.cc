@@ -17,6 +17,21 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+
+/* use an additional midi message parser
+ *
+ * coreaudio does packetize midi. every packet includes a timestamp.
+ * With any real midi-device with a phyical layer
+ * 1 packet = 1 event (no concurrent events are possible on a cable)
+ *
+ * Howver, some USB-midi keyboards manage to send concurrent events
+ * which end up in the same packet (eg. 6 byte message: 2 note-on).
+ *
+ * An additional parser is needed to separate them
+ */
+#define USE_MIDI_PARSER
+
+
 #include <regex.h>
 #include <sys/mman.h>
 #include <sys/time.h>
@@ -105,12 +120,11 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _processed_samples (0)
 	, _port_change_flag (false)
 #ifdef USE_MIDI_PARSER
-	, _event(0)
-	, _first_time(true)
 	, _unbuffered_bytes(0)
 	, _total_bytes(0)
 	, _expected_bytes(0)
 	, _status_byte(0)
+	, _parser_bytes(0)
 #endif
 {
 	_instance_name = s_instance_name;
@@ -1719,16 +1733,23 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 #ifndef USE_MIDI_PARSER
 			midi_event_put((void*)mbuf, time, data, size);
 #else
+			assert (size < 128);// coremidi limit per packet
+			bool first_time = true; // this would need to be rememberd per port.
 			for (size_t mb = 0; mb < size; ++mb) {
-				if (_first_time && !(data[mb] & 0x80)) {
-					// expect a status byte at the beginning or every Packet
-					assert (0);
+				if (first_time && !(data[mb] & 0x80)) {
+					/* expect a status byte at the beginning or every Packet.
+					 *
+					 * This parser drops messages spanning multiple packets
+					 * (sysex > 127 bytes).
+					 * see also libs/backends/alsa/alsa_rawmidi.cc
+					 * which implements a complete parser per port without this limit.
+					 */
 					continue;
 				}
-				_first_time = false;
+				first_time = false;
 
 				if (midi_process_byte (data[mb])) {
-					midi_event_put ((void*)mbuf, time, _parser_buffer, _event._size);
+					midi_event_put ((void*)mbuf, time, _parser_buffer, _parser_bytes);
 				}
 			}
 #endif
