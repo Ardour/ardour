@@ -589,7 +589,7 @@ if test -n "$MIXBUS"; then
 
 	METERS_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-meters.latest.txt)
 	rsync -a -q --partial \
-		rsync://gareus.org/x42/linux/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
+		rsync://gareus.org/x42/linux/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip \
 		"${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
 	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
 
