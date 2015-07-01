@@ -574,24 +574,28 @@ done
 ### Mixbus plugins, etc
 if test -n "$MIXBUS"; then
 
+	# -> Ben
+	#curl -s http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_lv2s.zip \
+	#	| tar -C "$APPLIB/LV2/" -xf -
+
 	mkdir -p $APPLIB/LV2
 	METERS_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-meters.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
-		"${SRCDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
-	unzip -d "$APPLIB/LV2/" "${SRCDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+		"${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
 
 	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/linux/setBfree.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip \
-		"${SRCDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
-	unzip -d "$APPLIB/LV2/" "${SRCDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
+		"${CACHEDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
 
 	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-midifilter.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip \
-		"${SRCDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
-	unzip -d "$APPLIB/LV2/" "${SRCDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
+		"${CACHEDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
 
 fi
 ################################################################################
