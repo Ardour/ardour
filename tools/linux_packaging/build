@@ -113,6 +113,7 @@ case `uname -m` in
 		echo "Architecture is x86"
 		ARCH='x86'
 		WARCH='i386'
+		HARCH='linux32'
 		ARCH_BITS='32-bit'
 		MULTIARCH='i386-linux-gnu'
 		;;
@@ -120,6 +121,7 @@ case `uname -m` in
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
 		WARCH='x86_64'
+		HARCH='linux64'
 		ARCH_BITS='64-bit'
 		MULTIARCH='x86_64-linux-gnu'
 		;;
@@ -574,11 +576,17 @@ done
 ### Mixbus plugins, etc
 if test -n "$MIXBUS"; then
 
-	# -> Ben
-	#curl -s http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_lv2s.zip \
-	#	| tar -C "$APPLIB/LV2/" -xf -
-
 	mkdir -p $APPLIB/LV2
+	mkdir -p $APPLIB/ladspa/strip/
+
+	# TODO find a good way to cache those locally
+	curl -s -S -o "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
+		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_lv2s.zip 
+	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_lv2s.${HARCH}.zip"
+
+	curl -s -S -o $APPLIB/ladspa/strip/harrison_channelstrip.so \
+		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_channelstrip.so
+
 	METERS_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-meters.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
