@@ -24,28 +24,71 @@
 
 using namespace ARDOUR;
 
+#ifndef NDEBUG
+static int _debug_mode = 0;
+#endif
+
 static void notifyProc (const MIDINotification *message, void *refCon) {
 	CoreMidiIo *self = static_cast<CoreMidiIo*>(refCon);
 	self->notify_proc(message);
 }
 
+#ifndef NDEBUG
+static void print_packet (const MIDIPacket *p) {
+	fprintf (stderr, "CoreMIDI: Packet %d bytes [ ", p->length);
+	for (int bb = 0; bb < p->length; ++bb) {
+		fprintf (stderr, "%02x ", ((uint8_t*)p->data)[bb]);
+	}
+	fprintf (stderr, "]\n");
+}
+
+static void dump_packet_list (const UInt32 numPackets, MIDIPacket const *p) {
+	for (UInt32 i = 0; i < numPackets; ++i) {
+		print_packet (p);
+		p = MIDIPacketNext (p);
+	}
+}
+#endif
+
 static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *srcRef) {
 	CoreMidiIo *self = static_cast<CoreMidiIo*> (procRef);
 	if (!self || !self->enabled()) {
 		// skip while freewheeling
+#ifndef NDEBUG
+		if (_debug_mode & 2) {
+			fprintf (stderr, "Ignored Midi Packet while freewheeling:\n");
+			dump_packet_list (list->numPackets, &list->packet[0]);
+		}
+#endif
 		return;
 	}
 	RingBuffer<uint8_t> * rb  = static_cast<RingBuffer < uint8_t > *> (srcRef);
-	if (!rb) return;
+	if (!rb) {
+#ifndef NDEBUG
+		if (_debug_mode & 4) {
+			fprintf (stderr, "Ignored Midi Packet - no ringbuffer:\n");
+			dump_packet_list (list->numPackets, &list->packet[0]);
+		}
+#endif
+		return;
+	}
 	MIDIPacket const *p = &list->packet[0];
 	for (UInt32 i = 0; i < list->numPackets; ++i) {
 		uint32_t len = ((p->length + 3)&~3) + sizeof(MIDITimeStamp) + sizeof(UInt16);
-		if (rb->write_space() < sizeof(uint32_t) + len) {
-			fprintf(stderr, "CoreMIDI: dropped MIDI event\n");
-			continue;
+#ifndef NDEBUG
+		if (_debug_mode & 1) {
+			print_packet (p);
 		}
-		rb->write ((uint8_t*)&len, sizeof(uint32_t));
-		rb->write ((uint8_t*)p, len);
+#endif
+		if (rb->write_space() > sizeof(uint32_t) + len) {
+			rb->write ((uint8_t*)&len, sizeof(uint32_t));
+			rb->write ((uint8_t*)p, len);
+		}
+#ifndef NDEBUG
+		else {
+			fprintf (stderr, "CoreMIDI: dropped MIDI event\n");
+		}
+#endif
 		p = MIDIPacketNext (p);
 	}
 }
@@ -88,6 +131,11 @@ CoreMidiIo::CoreMidiIo()
 	, _changed_arg (0)
 {
 	pthread_mutex_init (&_discovery_lock, 0);
+
+#ifndef NDEBUG
+	const char *p = getenv ("COREMIDIDEBUG");
+	if (p && *p) _debug_mode = atoi (p);
+#endif
 }
 
 CoreMidiIo::~CoreMidiIo()
