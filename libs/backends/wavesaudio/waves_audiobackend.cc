@@ -23,6 +23,13 @@
 
 #include "ardour/runtime_functions.h"
 
+#ifdef COMPILER_MSVC
+#include <windows.h>
+#define sleep(X) Sleep((X) * 1000)
+// JE - Perhaps we should be using Glib::usleep() here, rather than sleep()??  But
+// that would make the Waves backend dependent on Glib (which is isn't, currently).
+#endif
+
 using namespace ARDOUR;
 
 #if defined __MINGW64__ || defined __MINGW32__
