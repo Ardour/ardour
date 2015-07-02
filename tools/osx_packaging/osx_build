@@ -669,7 +669,7 @@ if test -n "$MIXBUS"; then
 		-o "${CACHEDIR}/harrison_channelstrip.${OSX_ARCH}.so" \
 		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_channelstrip.so
 
-	cp "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
+	cp "${CACHEDIR}/harrison_channelstrip.${OSX_ARCH}.so" \
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/harrison_channelstrip.so"
 fi
 ################################################################################
