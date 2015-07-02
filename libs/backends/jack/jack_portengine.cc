@@ -106,7 +106,16 @@ JACKAudioBackend::when_connected_to_jack ()
 int
 JACKAudioBackend::set_port_name (PortHandle port, const std::string& name)
 {
+#if HAVE_JACK_PORT_RENAME
+	jack_client_t* client = _jack_connection->jack();
+	if (client) {
+		return jack_port_rename (client, (jack_port_t*) port, name.c_str());
+	} else {
+		return -1;
+	}
+#else
 	return jack_port_set_name ((jack_port_t*) port, name.c_str());
+#endif
 }
 
 string
