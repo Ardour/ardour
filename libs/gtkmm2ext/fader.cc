@@ -381,8 +381,8 @@ Fader::on_motion_notify_event (GdkEventMotion* ev)
 		
 		double const fract = sqrt((ev_pos_x - _min_pos_x) * (ev_pos_x - _min_pos_x) +
 		                          (ev_pos_y - _min_pos_y) * (ev_pos_y - _min_pos_y)) /
-			sqrt((_max_pos_x - _min_pos_x) * (_max_pos_x - _min_pos_x) +
-			     (_max_pos_y - _min_pos_y) * (_max_pos_y - _min_pos_y));
+			sqrt((double)((_max_pos_x - _min_pos_x) * (_max_pos_x - _min_pos_x) +
+			              (_max_pos_y - _min_pos_y) * (_max_pos_y - _min_pos_y)));
 		
 		adjustment.set_value (adjustment.get_lower() + (adjustment.get_upper() - adjustment.get_lower()) * fract);
 	}
