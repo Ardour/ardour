@@ -2888,6 +2888,8 @@ Session::cleanup_sources (CleanupReport& rep)
 					   in the region list.
 					*/
 					
+					std::string fpath = i->second->name ();
+
 					RegionFactory::remove_regions_using_source (i->second);
 					sources.erase (i);
 					
@@ -2895,7 +2897,7 @@ Session::cleanup_sources (CleanupReport& rep)
 					
 					for (set<string>::iterator j = all_sources.begin(); j != all_sources.end(); ++j) {
 						spath = Glib::path_get_basename (*j);
-						if ( spath == i->second->name () ) {
+						if ( spath == fpath ) {
 							all_sources.erase (j);
 							break;
 						}
