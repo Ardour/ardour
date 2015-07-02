@@ -342,6 +342,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\fader.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\fastmeter.cc"
 				>
 			</File>
@@ -545,6 +549,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\emscale.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\fader.h"
 				>
 			</File>
 			<File
