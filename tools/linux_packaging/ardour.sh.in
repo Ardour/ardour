@@ -46,9 +46,9 @@ export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
-	exec gdb $INSTALL_DIR/bin/ardour-%VER%
+	exec gdb $INSTALL_DIR/bin/%EXENAME%-%VER%
 else
-	exec $INSTALL_DIR/bin/ardour-%VER% $ARGS
+	exec $INSTALL_DIR/bin/%EXENAME%-%VER% $ARGS
 fi
 
 
