@@ -582,35 +582,37 @@ if test -n "$MIXBUS"; then
 	mkdir -p $APPLIB/LV2
 	mkdir -p $APPLIB/ladspa/strip/
 
-	# TODO find a good way to cache those locally
-	curl -s -S \
+	curl -s -S -# \
 		-z "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
 		-o "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
 		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_lv2s.zip 
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_lv2s.${HARCH}.zip"
 
-	curl -s -S \
-		-z $APPLIB/ladspa/strip/harrison_channelstrip.so \
-		-o $APPLIB/ladspa/strip/harrison_channelstrip.so \
+	curl -s -S -# \
+		-z "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
+		-o "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
 		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_channelstrip.so
+
+	cp "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
+		$APPLIB/ladspa/strip/harrison_channelstrip.so
 
 	METERS_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-meters.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip \
 		"${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
-	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip"
 
 	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/linux/setBfree.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip \
 		"${CACHEDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
-	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/setBfree-lv2-linux-${WARCH}-${SETBFREE_VERSION}.zip"
 
 	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-midifilter.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip \
 		"${CACHEDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
-	unzip -d "$APPLIB/LV2/" "${CACHEDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/x42-midifilter-lv2-linux-${WARCH}-${MIDIFILTER_VERSION}.zip"
 
 fi
 ################################################################################
