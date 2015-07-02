@@ -239,12 +239,11 @@ echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
 
 # create startup helper script
 
-sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/;s/%EXENAME%/${EXENAME}/' < ardour.sh.in > $APPBIN/${EXENAME}${major_version}
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/;s/%EXENAME%/'"${EXENAME}"'/' < ardour.sh.in > $APPBIN/${EXENAME}${major_version}
 rm $ENVIRONMENT && chmod 775 $APPBIN/${EXENAME}${major_version}
-MAIN_EXECUTABLE=ardour-${release_version}
 
 echo "Copying ardour executable ...."
-cp -v $BUILD_ROOT/gtk2_ardour/$MAIN_EXECUTABLE $APPBIN/${EXENAME}-${major_version}
+cp -v $BUILD_ROOT/gtk2_ardour/ardour-${release_version} $APPBIN/${EXENAME}-${major_version}
 if test x$STRIP = xall ; then
 	strip $APPBIN/${EXENAME}-${major_version}
 fi
@@ -428,7 +427,7 @@ deplibs=
 while [ true ] ; do 
 	missing=false
 	filelist=`find $APPLIB/ -type f`
-	filelist="$APPBIN/$MAIN_EXECUTABLE $filelist"
+	filelist="$APPBIN/${EXENAME}-${major_version} $filelist"
 
 	for file in $filelist  ; do 
 		if ! file $file | grep -qs ELF ; then
