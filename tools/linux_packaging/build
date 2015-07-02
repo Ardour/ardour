@@ -642,7 +642,7 @@ chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 #
 # Add the stage2.run script
 #
-sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/;s/%REPLACE_PGM%/${APPNAME};s/%REPLACE_VENDOR%/${VENDOR}" < stage2.run.in > stage2.run
+sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/;s/%REPLACE_PGM%/${APPNAME}/;s/%REPLACE_VENDOR%/${VENDOR}/" < stage2.run.in > stage2.run
 chmod a+x stage2.run
 
 
