@@ -1179,6 +1179,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	uint32_t ardour_connection_count = 0;
 	uint32_t system_connection_count = 0;
 	uint32_t other_connection_count = 0;
+	uint32_t typed_connection_count = 0;
 
 	ostringstream label;
 
@@ -1196,8 +1197,12 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	
 	//to avoid confusion, the button caption should only show connections that match the datatype of the track
 	DataType dt = DataType::AUDIO;
-	if ( boost::dynamic_pointer_cast<MidiTrack>(route) != 0 )
+	if ( boost::dynamic_pointer_cast<MidiTrack>(route) != 0 ) {
 		dt = DataType::MIDI;
+		// avoid further confusion with Midi-tracks that have a synth.
+		// Audio-ports may be connected, but button says "Disconnected"
+		tooltip << _("MIDI ");
+	}
 
 	if (for_input) {
 		io_count = route->n_inputs().n_total();
@@ -1215,12 +1220,17 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 			port = route->output()->nth (io_index);
 		}
 		
-		//ignore any port connections that don't match our DataType
-		if (port->type() != dt)
-			continue;  
-
 		port_connections.clear ();
 		port->get_connections(port_connections);
+
+		//ignore any port connections that don't match our DataType
+		if (port->type() != dt) {
+			if (!port_connections.empty()) {
+				++typed_connection_count;
+			}
+			continue;
+		}
+
 		io_connection_count = 0;
 
 		if (!port_connections.empty()) {
@@ -1359,6 +1369,9 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 		} else {
 			// Odd configuration
 			label << "*" << total_connection_count << "*";
+		}
+		if (typed_connection_count > 0) {
+			label << "\u2295"; // circled plus
 		}
 	}
 
