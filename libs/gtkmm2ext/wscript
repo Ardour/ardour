@@ -41,7 +41,6 @@ gtkmm2ext_sources = [
         'debug.cc',
         'dndtreeview.cc',
         'emscale.cc',
-	'fader.cc',
         'focus_entry.cc',
         'grouped_buttons.cc',
         'gtk_ui.cc',
@@ -87,10 +86,10 @@ def configure(conf):
 def build(bld):
     sources = gtkmm2ext_sources
     if bld.is_tracks_build():
-	sources += [ 'waves_fastmeter.cc' ]
+        sources += [ 'waves_fastmeter.cc', 'fader.cc' ]
     else:
-	sources += [ 'fastmeter.cc' ]
-		
+        sources += [ 'fastmeter.cc' ]
+
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)
         # defines for this library
