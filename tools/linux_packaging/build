@@ -22,6 +22,8 @@ if test -z "$CACHEDIR" -o ! -d "$CACHEDIR"; then
 fi
 
 MIXBUS=
+WITH_HARRISON_LV2=
+WITH_X42_LV2=
 WITH_LADSPA=0
 WITH_HARVID=
 STRIP=all
@@ -52,6 +54,8 @@ while [ $# -gt 0 ] ; do
 
 	--mixbus)
 		MIXBUS=1; 
+		WITH_HARRISON_LV2=1 ;
+		WITH_X42_LV2=1 ;
 		WITH_NLS=1 ; 
 		WITH_LADSPA=; 
 		STRIP=all
@@ -575,27 +579,31 @@ done
 
 ################################################################################
 ### Mixbus plugins, etc
-if test -n "$MIXBUS"; then
-
-	echo "Adding Mixbus LADSPA and LV2s"
-
+if test x$WITH_HARRISON_LV2 != x ; then
+	echo "Adding Harrison LV2s"
 	mkdir -p $APPLIB/LV2
-	mkdir -p $APPLIB/ladspa/strip/
 
-	curl -s -S -# \
+	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
 		-o "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
 		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_lv2s.zip 
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_lv2s.${HARCH}.zip"
+fi
 
-	curl -s -S -# \
+if test -n "$MIXBUS"; then
+	echo "Adding Mixbus Channelstrip"
+
+	mkdir -p $APPLIB/ladspa/strip/
+	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
 		-o "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
 		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_channelstrip.so
 
 	cp "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
 		$APPLIB/ladspa/strip/harrison_channelstrip.so
+fi
 
+if test x$WITH_X42_LV2 != x ; then
 	METERS_VERSION=$(curl -s -S http://gareus.org/x42/linux/x42-meters.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/linux/x42-meters-lv2-linux-${WARCH}-${METERS_VERSION}.zip \

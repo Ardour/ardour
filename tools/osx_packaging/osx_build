@@ -18,6 +18,7 @@ SAE=
 MIXBUS=
 WITH_HARVID=1
 WITH_HARRISON_LV2=
+WITH_X42_LV2=
 WITH_LADSPA=1
 STRIP=1
 PRINT_SYSDEPS=
@@ -39,11 +40,13 @@ while [ $# -gt 0 ] ; do
 	       APPNAME=Ardour ;
 	       shift ;;
 	--mixbus) MIXBUS=1; 
+	          WITH_HARRISON_LV2=1 ;
+	          WITH_X42_LV2=1 ;
 	          WITH_NLS=1 ; 
                   SAE= ; 
                   WITH_LADSPA=; 
                   STRIP= ; 
-		  PRODUCT_PKG_DIR=MixBus;
+		  PRODUCT_PKG_DIR=Mixbus;
 		  APPNAME=Mixbus ;
                   shift ;;
 	--public) WITH_NLS= ; 
@@ -571,8 +574,14 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	else 
 		OSX_ARCH=osx32
 	fi
-	curl -s http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_lv2s.zip \
-		| bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf -
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/harrison_lv2s.${OSX_ARCH}.zip" \
+		-o "${CACHEDIR}/harrison_lv2s.${OSX_ARCH}.zip" \
+		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_lv2s.zip
+
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"${CACHEDIR}/harrison_lv2s.${OSX_ARCH}.zip"
 fi
 
 if test x$WITH_HARVID != x ; then
@@ -605,9 +614,9 @@ if test x$WITH_HARVID != x ; then
 	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
 
-###################################################################
+################################################################################
 ### Mixbus plugins, etc
-if test -n "$MIXBUS"; then
+if test x$WITH_X42_LV2 != x ; then
 	echo "bundling x42 plugins"
 	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
 		OSX_ARCH=x86_64
@@ -642,7 +651,26 @@ if test -n "$MIXBUS"; then
 		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
 		mv ${file}.thin ${file}
 	done
+fi
 
+if test -n "$MIXBUS"; then
+	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
+		OSX_ARCH=osx64
+	else
+		OSX_ARCH=osx32
+	fi
+
+	echo "deploying harrison tools for $OSX_ARCH"
+
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip"
+
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/harrison_channelstrip.${OSX_ARCH}.so" \
+		-o "${CACHEDIR}/harrison_channelstrip.${OSX_ARCH}.so" \
+		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_channelstrip.so
+
+	cp "${CACHEDIR}/harrison_channelstrip.${HARCH}.so" \
+		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/harrison_channelstrip.so"
 fi
 ################################################################################
 

@@ -36,13 +36,21 @@ PROGRAM_VERSION=${major_version}
 LOWERCASE_DIRNAME=ardour${major_version}
 STATEFILE_SUFFIX=ardour # see filename_extensions.cc
 
+BIT_SUFFIX=""
+
 if test -n "$MIXBUS"; then
-	PROGRAM_NAME=Mixbus
-	PRODUCT_NAME=mixbus
+	if test "$XARCH" = "x86_64"; then
+		PROGRAM_NAME=Mixbus
+		PRODUCT_NAME=mixbus
+	else
+		PROGRAM_NAME=Mixbus
+		PRODUCT_NAME=mixbus
+		BIT_SUFFIX="(x86)"
+	fi
 fi
 
 # derived variables
-PRODUCT_ID=${PROGRAM_NAME}${PROGRAM_VERSION}
+PRODUCT_ID=${PROGRAM_NAME}${PROGRAM_VERSION}${BIT_SUFFIX}
 PRODUCT_EXE=${PRODUCT_NAME}.exe
 PRODUCT_ICON=${PRODUCT_NAME}.ico
 
@@ -225,9 +233,11 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
-if test -n "$MIXBUS"; then
-
+if test -n "$MIXBUS"; then # TODO use separate variable
 	mkdir -p $ALIBDIR/LV2
+
+	echo "Adding x42 Plugins"
+
 	METERS_VERSION=$(curl -s -S http://gareus.org/x42/win/x42-meters.latest.txt)
 	rsync -a -q --partial \
 		rsync://gareus.org/x42/win/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
@@ -245,7 +255,31 @@ if test -n "$MIXBUS"; then
 		rsync://gareus.org/x42/win/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip \
 		"${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
 	unzip -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-midifilter-lv2-${WARCH}-${MIDIFILTER_VERSION}.zip"
+fi
 
+if test -n "$MIXBUS"; then # TODO use separate variable
+	mkdir -p $ALIBDIR/LV2
+
+	echo "Including Harrison LV2s"
+
+	curl -s -S --fail -# \
+		-z "${SRCDIR}/harrison_lv2s.${WARCH}.zip" \
+		-o "${SRCDIR}/harrison_lv2s.${WARCH}.zip" \
+		http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_lv2s.zip
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCDIR}/harrison_lv2s.${WARCH}.zip"
+fi
+
+if test -n "$MIXBUS"; then
+	echo "Deploying Harrison Mixbus Channelstrip"
+
+	mkdir -p $ALIBDIR/ladspa/strip
+	curl -s -S --fail -# \
+		-z "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
+		-o "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
+		http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_channelstrip.dll
+
+	cp "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
+		"$ALIBDIR/ladspa/strip/rrison_channelstrip.dll"
 fi
 
 ################################################################################
@@ -290,10 +324,10 @@ if test -n "$MIXBUS"; then
 
 # TODO: proper welcome/finish text.
 	cat >> $NSISFILE << EOF
-!define MUI_FINISHPAGE_TITLE "Welcome to Mixbus"
-!define MUI_FINISHPAGE_TEXT "Thank you for choosing Harrison Mixbus."
-!define MUI_FINISHPAGE_LINK "Harrison Consoles Website"
-!define MUI_FINISHPAGE_LINK_LOCATION "http://harrisonconsoles.com"
+!define MUI_FINISHPAGE_TITLE "Welcome to Harrison Mixbus"
+!define MUI_FINISHPAGE_TEXT "Thanks for your purchase of Mixbus!\$\\r\$\\nYou will find the Mixbus application in the Start Menu (or the All Apps panel for Windows 8) \$\\r\$\\nClick the link below to view the Mixbus manual, and learn ways to get involved with the Mixbus community."
+!define MUI_FINISHPAGE_LINK "Mixbus Manual"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://www.harrisonconsoles.com/mixbus/mixbus3-live-manual"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 EOF
 
