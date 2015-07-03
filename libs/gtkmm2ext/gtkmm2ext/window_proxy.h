@@ -18,6 +18,7 @@
 */
 
 #ifndef __gtkmm2ext_window_proxy_h__
+#define __gtkmm2ext_window_proxy_h__
 
 #include <string>
 #include <gdkmm/event.h>
@@ -40,6 +41,7 @@ class VisibilityTracker;
 class LIBGTKMM2EXT_API WindowProxy : public virtual sigc::trackable
 {
   public:
+	WindowProxy ();
 	WindowProxy (const std::string& name, const std::string& menu_name);
 	WindowProxy (const std::string& name, const std::string& menu_name, const XMLNode&);
 	virtual ~WindowProxy();
@@ -51,6 +53,7 @@ class LIBGTKMM2EXT_API WindowProxy : public virtual sigc::trackable
 	void maybe_show ();
     
 	bool visible() const { return _visible; }
+	bool not_visible() const { return !_visible; }
 	const std::string& name() const { return _name; }
 	const std::string& menu_name() const { return _menu_name; }
     
@@ -65,7 +68,7 @@ class LIBGTKMM2EXT_API WindowProxy : public virtual sigc::trackable
     
 	virtual void toggle ();
     
-	virtual void set_state (const XMLNode&);
+	virtual int set_state (const XMLNode&);
 	virtual XMLNode& get_state () const;
     
 	operator bool() const { return _window != 0; }
