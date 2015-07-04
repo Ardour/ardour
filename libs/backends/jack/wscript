@@ -41,6 +41,8 @@ def configure(conf):
     conf.check_cxx(fragment = "#include <jack/jack.h>\n#include <jack/metadata.h>\nint main(void) { jack_port_uuid(NULL); return 0; }\n",
                    mandatory = False,
                    msg = 'Checking for JACK metadata API',
+                   execute = False,
+                   features = ['cxx'],
                    okmsg = 'ok',
                    errmsg = 'not found (or broken). JACK metadata API will not be used',
                    define_name = 'HAVE_JACK_METADATA',
@@ -49,6 +51,8 @@ def configure(conf):
     # Check to see if jack_port_rename() is available and working
     conf.check_cxx(fragment = "#include <jack/jack.h>\nint main(void) { jack_client_t* c; jack_port_t* p; jack_port_rename (c, p, \"foo\"); return 0; }\n",
                    mandatory = False,
+                   execute = False,
+                   features = ['cxx'],
                    msg = 'Checking for jack_port_rename()',
                    okmsg = 'ok',
                    errmsg = 'not found (or broken). jack_port_rename() will not be used, and jack_port_set_name() will be used instead',
