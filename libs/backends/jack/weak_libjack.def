@@ -36,6 +36,7 @@ JCFUN(1, jack_nframes_t, get_buffer_size, 0)
 JPFUN(1, jack_nframes_t, frames_since_cycle_start, (const jack_client_t *c), (c), 0)
 JPFUN(1, jack_nframes_t, frame_time, (const jack_client_t *c), (c), 0)
 JPFUN(1, jack_nframes_t, last_frame_time, (const jack_client_t *c), (c), 0)
+JPFUN(1, jack_time_t,    get_time, (void), (), 0)
 JCFUN(1, float,          cpu_load, 0)
 JCFUN(1, int,            is_realtime, 0)
 
@@ -53,6 +54,7 @@ JPFUN(1, int,            port_ensure_monitor, (jack_port_t *p, int o), (p,o), 0)
 JPFUN(1, int,            port_monitoring_input, (jack_port_t *p), (p), 0)
 
 JPFUN(1, const char*,    port_name, (const jack_port_t *p), (p), NULL)
+JPFUN(1, const char*,    port_short_name, (const jack_port_t *p), (p), NULL)
 JPFUN(1, int,            port_flags, (const jack_port_t *p), (p), 0)
 JPFUN(1, const char**,   get_ports,(jack_client_t *c, const char *p, const char *t, unsigned long f), (c,p,t,f), NULL)
 JPFUN(1, int,            port_name_size, (void), (), 0)
@@ -67,6 +69,7 @@ JPFUN(1, const char **,  port_get_connections, (const jack_port_t *p), (p), 0)
 JPFUN(1, const char **,  port_get_all_connections, (const jack_client_t *c, const jack_port_t *p), (c,p), 0)
 JPFUN(1, int,            port_set_name, (jack_port_t *p, const char *n), (p,n), -1)
 JXFUN(0, int,            port_rename, (jack_client_t *c, jack_port_t *p, const char *n), (c,p,n), return jack_port_set_name (p,n);)
+JPFUN(1, int,            port_get_aliases, (const jack_port_t *port, char* const aliases[2]), (port,aliases),1)
 JPFUN(1, int,            port_disconnect, (jack_client_t *c, jack_port_t *p), (c,p), 0)
 JPFUN(1, int,            connect, (jack_client_t *c, const char *s, const char *d), (c,s,d), -1)
 JPFUN(1, int,            disconnect, (jack_client_t *c, const char *s, const char *d), (c,s,d), -1)
@@ -141,5 +144,10 @@ JPFUN(0, int,            remove_properties, (jack_client_t* c, jack_uuid_t s), (
 JPFUN(0, int,            remove_all_properties, (jack_client_t* c), (c), -1)
 JPFUN(0, int,            set_property_change_callback, (jack_client_t *c, JackPropertyChangeCallback s, void *a), (c,s,a), -1)
 #endif
+
+/* <jack/statistics.h> */
+JCFUN(1, float,          get_max_delayed_usecs, 0.0)
+JCFUN(1, float,          get_xrun_delayed_usecs, 0.0)
+JVFUN(0,                 reset_max_delayed_usecs, (jack_client_t *c), (c),)
 
 #endif // end USE_WEAK_JACK
