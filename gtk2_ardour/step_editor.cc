@@ -226,6 +226,9 @@ StepEditor::step_edit_sustain (Evoral::Beats beats)
 void
 StepEditor::move_step_edit_beat_pos (Evoral::Beats beats)
 {
+	if (!step_edit_region_view) {
+		return;
+	}
 	if (beats > 0.0) {
 		step_edit_beat_pos = min (step_edit_beat_pos + beats,
 		                          step_edit_region_view->region_frames_to_region_beats (step_edit_region->length()));
@@ -356,8 +359,10 @@ StepEditor::step_edit_toggle_chord ()
 {
 	if (_step_edit_within_chord) {
 		_step_edit_within_chord = false;
-		step_edit_beat_pos += _step_edit_chord_duration;
-		step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+		if (step_edit_region_view) {
+			step_edit_beat_pos += _step_edit_chord_duration;
+			step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+		}
 	} else {
 		_step_edit_triplet_countdown = 0;
 		_step_edit_within_chord = true;
@@ -375,7 +380,7 @@ StepEditor::step_edit_rest (Evoral::Beats beats)
 		success = true;
 	}
 
-	if (success) {
+	if (success && step_edit_region_view) {
 		step_edit_beat_pos += beats;
 		step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 	}
@@ -385,7 +390,9 @@ void
 StepEditor::step_edit_beat_sync ()
 {
 	step_edit_beat_pos = step_edit_beat_pos.round_up_to_beat();
-	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+	if (step_edit_region_view) {
+		step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
+	}
 }
 
 void
