@@ -838,7 +838,7 @@ JACKAudioBackend::join_process_threads ()
 	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
 	     i != _jack_threads.end(); i++) {
 
-#if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined(PLATFORM_WINDOWS)
+#if defined(USING_JACK2_EXPANSION_OF_JACK_API)
 		// jack_client is not used by JACK2's implementation
 		// also jack_client_close() leaves threads active
 		if (jack_client_stop_thread (NULL, *i) != 0)
