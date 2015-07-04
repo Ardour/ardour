@@ -838,7 +838,7 @@ JACKAudioBackend::join_process_threads ()
 	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
 	     i != _jack_threads.end(); i++) {
 
-#if defined(USING_JACK2_EXPANSION_OF_JACK_API)
+#if defined(USING_JACK2_EXPANSION_OF_JACK_API) || defined __jack_systemdeps_h__
 		// jack_client is not used by JACK2's implementation
 		// also jack_client_close() leaves threads active
 		if (jack_client_stop_thread (NULL, *i) != 0)
@@ -860,7 +860,7 @@ JACKAudioBackend::join_process_threads ()
 bool
 JACKAudioBackend::in_process_thread ()
 {
-#if (defined COMPILER_MINGW && !defined PTW32_VERSION)
+#if (defined COMPILER_MINGW && !defined PTW32_VERSION) || defined __jack_systemdeps_h__
 	if (_main_thread == GetCurrentThread()) {
 		return true;
 	}
@@ -873,7 +873,7 @@ JACKAudioBackend::in_process_thread ()
 	for (std::vector<jack_native_thread_t>::const_iterator i = _jack_threads.begin ();
 	     i != _jack_threads.end(); i++) {
 
-#if (defined COMPILER_MINGW && !defined PTW32_VERSION)
+#if (defined COMPILER_MINGW && !defined PTW32_VERSION) || defined __jack_systemdeps_h__
 		if (*i == GetCurrentThread()) {
 			return true;
 		}
@@ -917,7 +917,7 @@ JACKAudioBackend::process_thread ()
         /* JACK doesn't do this for us when we use the wait API
          */
 
-#if (defined COMPILER_MINGW && !defined PTW32_VERSION)
+#if (defined COMPILER_MINGW && !defined PTW32_VERSION) || defined __jack_systemdeps_h__
 	_main_thread = GetCurrentThread();
 #else
 	_main_thread = pthread_self ();
