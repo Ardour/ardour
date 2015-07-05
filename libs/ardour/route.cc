@@ -113,15 +113,22 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _initial_io_setup (false)
 	, _custom_meter_position_noted (false)
 {
-	if (!Profile->get_trx() && is_master()) {
-		_meter_type = MeterK20;
-	}
 	processor_max_streams.reset();
 }
 
 int
 Route::init ()
 {
+	/* set default meter type */
+	if (is_master()) {
+		_meter_type = Config->get_meter_type_master ();
+	}
+	else if (dynamic_cast<Track*>(this)) {
+		_meter_type = Config->get_meter_type_track ();
+	} else {
+		_meter_type = Config->get_meter_type_bus ();
+	}
+
 	/* add standard controls */
 
 	_solo_control.reset (new SoloControllable (X_("solo"), shared_from_this ()));
