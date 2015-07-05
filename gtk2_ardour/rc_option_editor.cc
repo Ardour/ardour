@@ -50,6 +50,7 @@
 #include "ardour_window.h"
 #include "ardour_dialog.h"
 #include "gui_thread.h"
+#include "meter_patterns.h"
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "utils.h"
@@ -2963,6 +2964,54 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (*_ui_config, &UIConfiguration::get_meter_peak),
 			sigc::mem_fun (*_ui_config, &UIConfiguration::set_meter_peak)
 			);
+
+
+	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
+		"meter-type-master",
+		_("Default Meter Type for Master Bus"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_master),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_master)
+		);
+	mtm->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtm->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
+	mtm->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
+	mtm->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
+	mtm->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
+	mtm->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
+	mtm->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
+	mtm->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
+
+	add_option (S_("Preferences|Metering"), mtm);
+
+
+	ComboOption<MeterType>* mtb = new ComboOption<MeterType> (
+		"meter-type-bus",
+		_("Default Meter Type for Busses"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_bus),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
+		);
+	mtb->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtb->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
+	mtb->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
+	mtb->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
+	mtb->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
+	mtb->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
+	mtb->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
+	mtb->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
+
+	add_option (S_("Preferences|Metering"), mtb);
+
+	ComboOption<MeterType>* mtt = new ComboOption<MeterType> (
+		"meter-type-track",
+		_("Default Meter Type for Tracks"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_track),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_track)
+		);
+	mtt->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
+
+	add_option (S_("Preferences|Metering"), mtt);
+
 
 	Gtkmm2ext::UI::instance()->set_tip
 		(mpks->tip_widget(),
