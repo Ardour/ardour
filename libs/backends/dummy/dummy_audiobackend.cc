@@ -1737,7 +1737,7 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			{
 				const float vols = 2.f / (float)_gen_perio2;
 				for (pframes_t i = 0; i < n_samples; ++i) {
-					const float g = fabsf (_gen_count2 * vols - 1.0);
+					const float g = fabsf (_gen_count2 * vols - 1.f);
 					_buffer[i] = g * _wavetable[_gen_offset];
 					_gen_offset = (_gen_offset + 1) % _gen_period;
 					_gen_count2 = (_gen_count2 + 1) % _gen_perio2;
