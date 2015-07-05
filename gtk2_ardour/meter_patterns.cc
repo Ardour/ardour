@@ -79,10 +79,10 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 {
 	switch (mt) {
 		case MeterPeak:
-			return _("Peak");
+			return _("Peak (+6dBFS)");
 			break;
 		case MeterPeak0dB:
-			return _("Peak 0dB");
+			return _("Peak (0dBFS)");
 			break;
 		case MeterKrms:
 			return _("RMS + Peak");
@@ -100,13 +100,13 @@ ArdourMeter::meter_type_string (ARDOUR::MeterType mt)
 			return _("IEC2/EBU");
 			break;
 		case MeterK20:
-			return _("K20");
+			return _("K20/RMS");
 			break;
 		case MeterK14:
-			return _("K14");
+			return _("K14/RMS");
 			break;
 		case MeterK12:
-			return _("K12");
+			return _("K12/RMS");
 			break;
 		case MeterVU:
 			return _("VU");
