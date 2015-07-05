@@ -28,7 +28,7 @@ class i18n_mo(BuildContext):
         fun = 'i18n_mo'
 
 def is_tracks_build(self, *k, **kw):
-	return self.env['PROGRAM_NAME'] == 'Tracks Live'
+        return self.env['PROGRAM_NAME'] == 'Tracks Live'
 
 Context.Context.is_tracks_build = is_tracks_build
 
@@ -447,13 +447,13 @@ int main() { return 0; }''',
             compiler_flags.append("-DBUILD_VECLIB_OPTIMIZATIONS");
             conf.env.append_value('LINKFLAGS_OSX', ['-framework', 'Accelerate'])
         elif conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
-	        compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+                compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         elif conf.env['build_target'] == 'mingw':
-	        # usability of the 64 bit windows assembler depends on the compiler target,
-	        # not the build host, which in turn can only be inferred from the name
-	        # of the compiler. 
-	        if re.search ('/^x86_64/', str(conf.env['CC'])):
-		        compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
+                # usability of the 64 bit windows assembler depends on the compiler target,
+                # not the build host, which in turn can only be inferred from the name
+                # of the compiler. 
+                if re.search ('/^x86_64/', str(conf.env['CC'])):
+                        compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
 
@@ -599,7 +599,7 @@ int main() { return 0; }''',
     conf.env.append_value('LINKFLAGS', linker_flags)
 
 def is_tracks_build (conf):
-	return conf.env['PROGRAM_NAME'] == 'Tracks Live'
+        return conf.env['PROGRAM_NAME'] == 'Tracks Live'
     
 #----------------------------------------------------------------
 
@@ -1131,9 +1131,9 @@ def build(bld):
     lwrcase_dirname = 'ardour' + bld.env['MAJOR']
 
     if bld.is_tracks_build():
-	bld.env.append_value ('CXXFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
-	bld.env.append_value ('CFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
-	lwrcase_dirname = 'trx'
+        bld.env.append_value ('CXXFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
+        bld.env.append_value ('CFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
+        lwrcase_dirname = 'trx'
         
     # configuration files go here
     bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)

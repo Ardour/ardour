@@ -14,7 +14,7 @@ def configure(conf):
 
 def build(bld):
     if bld.env['build_target'] == 'mingw':
-	    return;
+            return;
 
     obj = bld (features = 'cxx c cxxprogram')
     obj.source       = 'cfgtool.cc'

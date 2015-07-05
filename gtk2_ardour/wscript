@@ -200,7 +200,7 @@ gtk2_ardour_sources = [
         'route_time_axis.cc',
         'route_ui.cc',
         'ruler_dialog.cc',
-	'save_as_dialog.cc',
+        'save_as_dialog.cc',
         'search_path_option.cc',
         'selection.cc',
         'selection_memento.cc',
@@ -692,21 +692,21 @@ def build(bld):
                             mo)
 
 def i18n(bld):
-	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-	autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-	                   'Paul Davis')
-	
+        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+        autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                           'Paul Davis')
+        
 def i18n_pot(bld):
-	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-	autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-	                       'Paul Davis')
+        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+        autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                               'Paul Davis')
 
 def i18n_po(bld):
-	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-	autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-	                      'Paul Davis')
-	
+        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+        autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                              'Paul Davis')
+        
 def i18n_mo(bld):
-	I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-	autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
-	                      'Paul Davis')
+        I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
+        autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+                              'Paul Davis')
