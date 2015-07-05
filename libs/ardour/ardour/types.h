@@ -670,6 +670,7 @@ std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::RegionSelectionAfterSplit& sf);
 std::istream& operator>>(std::istream& o, ARDOUR::BufferingPreset& var);
 std::istream& operator>>(std::istream& o, ARDOUR::AutoReturnTarget& sf);
+std::istream& operator>>(std::istream& o, ARDOUR::MeterType& sf);
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
@@ -693,6 +694,7 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::RegionSelectionAfterSplit& sf);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::BufferingPreset& var);
 std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoReturnTarget& sf);
+std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterType& sf);
 
 /* because these operators work on types which can be used when making
    a UI_CONFIG_VARIABLE (in gtk2_ardour) we need them to be exported.

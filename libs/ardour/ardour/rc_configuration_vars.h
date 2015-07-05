@@ -185,9 +185,14 @@ CONFIG_VARIABLE (AutoReturnTarget, auto_return_target_list, "auto-return-target-
 
 #ifdef USE_TRACKS_CODE_FEATURES
 CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 60.0f)
+CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterPeak)
 #else
 CONFIG_VARIABLE (float, meter_falloff, "meter-falloff", 13.3f)
+CONFIG_VARIABLE (MeterType, meter_type_master, "meter-type-master", MeterK20)
 #endif
+CONFIG_VARIABLE (MeterType, meter_type_track, "meter-type-track", MeterPeak)
+CONFIG_VARIABLE (MeterType, meter_type_bus, "meter-type-bus", MeterPeak)
+
 
 /* miscellany */
 

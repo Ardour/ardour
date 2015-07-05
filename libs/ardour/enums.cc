@@ -1047,4 +1047,16 @@ std::ostream& operator<<(std::ostream& o, const AutoReturnTarget& var)
 	return o << s;
 }
 
-	
+std::istream& operator>>(std::istream& o, MeterType& var)
+{
+	std::string s;
+	o >> s;
+	var = (MeterType) string_2_enum (s, var);
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, const MeterType& var)
+{
+	std::string s = enum_2_string (var);
+	return o << s;
+}
