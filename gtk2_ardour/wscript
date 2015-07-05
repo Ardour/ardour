@@ -505,7 +505,7 @@ def build(bld):
             'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
             'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
             'LIBS'           : 'build/libs',
-            'VERSION'        : bld.env['VERSION'],
+            'VERSION'        : str (bld.env['VERSION']),
             'EXECUTABLE'     : 'build/gtk2_ardour/ardour-' + str (bld.env['VERSION'])
     }
 
