@@ -180,9 +180,11 @@ else:
 
 V = MAJOR + '.' + MINOR + '.' + MICRO
 # Ensure that these are not unicode, which
-# can cause odd problems elsewhere
-VERSION = V.encode ('ascii', 'ignore')
-PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore')
+# can cause odd problems elsewhere. Note that
+# in python3, encode and decode do not return
+# strings, so we have to force the type.
+VERSION = str (V.encode ('ascii', 'ignore'))
+PROGRAM_VERSION = str (MAJOR.encode ('ascii', 'ignore'))
 
 # Mandatory variables
 top = '.'
