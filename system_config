@@ -4,6 +4,7 @@
     <Option name="auto-connect-standard-busses" value="1"/>
     <Option name="output-auto-connect" value="2"/>
     <Option name="input-auto-connect" value="1"/>
+    <Option name="tracks-auto-naming" value="1"/>
     <Option name="trace-midi-input" value="0"/>
     <Option name="trace-midi-output" value="0"/>
     <Option name="send-mtc" value="0"/>
@@ -15,7 +16,7 @@
     <Option name="mmc-send-device-id" value="0"/>
     <Option name="initial-program-change" value="-1"/>
     <Option name="display-first-midi-bank-as-zero" value="0"/>
-    <Option name="inter-scene-gap-msecs" value="1"/>
+    <Option name="inter-scene-gap-frames" value="1"/>
     <Option name="mtc-qf-speed-tolerance" value="5"/>
     <Option name="timecode-sync-frame-rate" value="1"/>
     <Option name="timecode-source-is-synced" value="0"/>
@@ -32,6 +33,7 @@
     <Option name="minimum-disk-read-bytes" value="262144"/>
     <Option name="minimum-disk-write-bytes" value="262144"/>
     <Option name="midi-readahead" value="1"/>
+    <Option name="buffering-preset" value="1"/>
     <Option name="capture-buffer-seconds" value="5"/>
     <Option name="playback-buffer-seconds" value="5"/>
     <Option name="midi-track-buffer-seconds" value="1"/>
@@ -87,7 +89,11 @@
     <Option name="shuttle-max-speed" value="8"/>
     <Option name="locate-while-waiting-for-sync" value="0"/>
     <Option name="disable-disarm-during-roll" value="0"/>
+    <Option name="auto-return-target-list" value="15"/>
     <Option name="meter-falloff" value="13.3"/>
+    <Option name="meter-type-master" value="16"/>
+    <Option name="meter-type-track" value="4"/>
+    <Option name="meter-type-bus" value="4"/>
     <Option name="auditioner-output-left" value="default"/>
     <Option name="auditioner-output-right" value="default"/>
     <Option name="replicate-missing-region-channels" value="0"/>
@@ -105,6 +111,7 @@
     <Option name="processor-usage" value="-1"/>
     <Option name="max-gain" value="2"/>
     <Option name="max-recent-sessions" value="10"/>
+    <Option name="max-recent-templates" value="10"/>
     <Option name="automation-thinning-factor" value="20"/>
     <Option name="range-location-minimum" value="128"/>
     <Option name="edit-mode" value="0"/>
@@ -127,7 +134,6 @@
     <Option name="video-server-docroot" value="/"/>
     <Option name="show-video-export-info" value="1"/>
     <Option name="show-video-server-dialog" value="0"/>
-    <Option name="auto-return-target-list" value="RangeSelectionStart,Loop,RegionSelectionStart"/>
   </Config>
   <Metadata/>
   <ControlProtocols/>
