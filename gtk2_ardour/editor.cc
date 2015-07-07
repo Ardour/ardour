@@ -5694,7 +5694,12 @@ Editor::super_rapid_screen_update ()
 				if (target <= 0.0) {
 					target = 0.0;
 				}
-				reset_x_origin (target);
+				// compare to EditorCursor::set_position()
+				double const old_pos = sample_to_pixel_unrounded (leftmost_frame);
+				double const new_pos = sample_to_pixel_unrounded (target);
+				if (rint (new_pos) != rint (old_pos)) {
+					reset_x_origin (pixel_to_sample (floor (new_pos)));
+				}
 			}
 
 		}
