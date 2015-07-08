@@ -142,7 +142,7 @@ Tabbable::show_window ()
 		   this Tabbable.
 		*/
 		if (_parent_notebook) {
-			_parent_notebook->set_current_page (_notebook_position);
+			_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
 		}
 	}
 }
