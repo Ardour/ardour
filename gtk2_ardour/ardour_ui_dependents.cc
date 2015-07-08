@@ -114,25 +114,21 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 	using namespace std;
 	Gtk::Notebook* nb = 0;
 	Gtk::Window* win = 0;
-	
-	if (w == GTK_WIDGET(mixer->contents().gobj())) {
-		/* Mixer */
+	Gtkmm2ext::Tabbable* tabbable = 0;
 
-		cerr << "Call use own window, mixer\n";
-		
-		nb = mixer->tab_root_drop ();
-		win = mixer->own_window ();
 
-	} else if (w == GTK_WIDGET(editor->contents().gobj())) {
-
-		/* Editor */
-
-		cerr << "Call use own window, editor\n";
-		
-		nb = editor->tab_root_drop ();
-		win = editor->own_window ();
-
+	if (w == GTK_WIDGET(editor->contents().gobj())) {
+		tabbable = editor;
+	} else if (w == GTK_WIDGET(mixer->contents().gobj())) {
+		tabbable = mixer;
+	} else if (w == GTK_WIDGET(rc_option_editor->contents().gobj())) {
+		tabbable = rc_option_editor;
+	} else {
+		return 0;
 	}
+
+	nb = tabbable->tab_root_drop ();
+	win = tabbable->own_window ();
 
 	if (nb) {
 		win->move (x, y);
