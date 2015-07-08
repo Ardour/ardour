@@ -103,6 +103,10 @@ Tabbable::get (bool create)
 Gtk::Notebook*
 Tabbable::tab_root_drop ()
 {
+	Gtk::Allocation alloc;
+
+	alloc = _contents.get_parent()->get_allocation();
+	
 	(void) use_own_window ();
 	
 	/* This is called after a drop of a tab onto the root window. Its
@@ -111,7 +115,8 @@ Tabbable::tab_root_drop ()
 	 * completed. It is not responsible for actually taking care of this
 	 * packing.
 	 */
-	
+
+	_window->set_default_size (alloc.get_width(), alloc.get_height());
 	_window->show_all ();
 	_window->present ();
 
@@ -148,8 +153,6 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 
 	if (_window == toplevel) {
 
-		std::cerr << " delete event for own window\n";
-		
 		/* unpack Tabbable from parent, put it back in the main tabbed
 		 * notebook
 		 */
@@ -164,10 +167,9 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 		
 		if (_parent_notebook) {
 
-			std::cerr << "repack into parent notebook\n";
-			
 			_parent_notebook->insert_page (_contents, _tab_title, _notebook_position);
 			_parent_notebook->set_tab_detachable (_contents);
+			_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
 		}
 
 		/* don't let anything else handle this */
