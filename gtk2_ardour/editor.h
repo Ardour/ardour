@@ -2099,9 +2099,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void toggle_gain_envelope_active ();
 	void reset_region_gain_envelopes ();
 
-	bool on_key_press_event (GdkEventKey*);
-	bool on_key_release_event (GdkEventKey*);
-
 	void session_state_saved (std::string);
 
 	Glib::RefPtr<Gtk::Action>              undo_action;

@@ -120,7 +120,7 @@ ARDOUR_UI::setup_windows ()
 	top_packer.pack_start (menu_bar_base, false, false);
 #endif
 
-	main_vpacker.pack_start (top_packer);
+	main_vpacker.pack_start (top_packer, false, false);
 
 	/* now add the transport frame to the top of main window */
 	

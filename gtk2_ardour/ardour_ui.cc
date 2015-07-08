@@ -114,6 +114,7 @@ typedef uint64_t microseconds_t;
 #include "binding_owners.h"
 #include "bundle_manager.h"
 #include "duplicate_routes_dialog.h"
+#include "debug.h"
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
 #include "export_video_infobox.h"
@@ -5087,12 +5088,18 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	}
 	
 	Gtkmm2ext::WindowTitle title (Glib::get_application_name());
-	title += name;
+
+	if (!name.empty()) {
+		title += name;
+	}
+
 	window.set_title (title.get_string());
 	window.set_wmclass (string_compose (X_("%1_%1"), downcase (PROGRAM_NAME), downcase (name)), PROGRAM_NAME);
 
 	window.set_flags (CAN_FOCUS);
 	window.add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+
+	window.add_accel_group (ActionManager::ui_manager->get_accel_group());
 
 	window.signal_configure_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::configure_handler));
 	window.signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbed_window_state_event_handler), owner));
@@ -5101,69 +5108,207 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 }
 
 bool
-ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* window)
+ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 {
-	switch (ev->type) {
-	case GDK_KEY_PRESS:
-		return key_press_handler (ev, window);
-	default:
-		break;
+	Gtkmm2ext::Bindings* bindings = 0;
+	Gtk::Window* window = 0;
+
+	/* until we get ardour bindings working, we are not handling key
+	 * releases yet.
+	 */
+	
+	if (ev->type != GDK_KEY_PRESS) {
+		return false;
+	}
+	
+	if (event_window == &_main_window) {
+
+		window = event_window;
+		
+		/* find current tab contents */
+
+		Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page());
+
+		/* see if it uses the ardour binding system */
+
+		HasBindings* bindable;
+		
+		if ((bindable = dynamic_cast<HasBindings*> (w)) != 0) {
+			KeyboardKey k (ev->state, ev->keyval);
+			bindings = &bindable->bindings();
+		}
+
+	} else if (window != 0) {
+
+		window = event_window;
+		
+		/* see if window uses ardour binding system */
+		
+		
+	} else {
+
+		window = &_main_window;
+		
+		/* no window supplied, try our own bindings */
+
+		bindings = &_global_bindings;
 	}
 
-	return key_release_handler (ev, window);
+	return key_press_focus_accelerator_handler (*window, ev, bindings);
 }
 			
 bool
-ARDOUR_UI::key_press_handler (GdkEventKey* ev, Gtk::Window* event_window)
+ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings* bindings)
 {
-	if (event_window == &_main_window) {
-		/* find current tab contents */
+	GtkWindow* win = window.gobj();
+	GtkWidget* focus = gtk_window_get_focus (win);
+	bool special_handling_of_unmodified_accelerators = false;
+	bool allow_activating = true;
+	/* consider all relevant modifiers but not LOCK or SHIFT */
+	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
+        GdkModifierType modifier = GdkModifierType (ev->state);
+        modifier = GdkModifierType (modifier & gtk_accelerator_get_default_mod_mask());
+        Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator(modifier);
 
-		Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page());
+	if (focus) {
+		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
+			special_handling_of_unmodified_accelerators = true;
+		}
+	}
 
-		/* see if it uses the ardour binding system */
+#ifdef GTKOSX
+        /* at one time this appeared to be necessary. As of July 2012, it does not
+           appear to be. if it ever is necessar, figure out if it should apply
+           to all platforms.
+        */
+#if 0 
+	if (Keyboard::some_magic_widget_has_focus ()) {
+                allow_activating = false;
+	}
+#endif
+#endif
 
-		HasBindings* bindable;
-		
-		if ((bindable = dynamic_cast<HasBindings*> (w)) != 0) {
-			KeyboardKey k (ev->state, ev->keyval);
-			return bindable->bindings().activate (k, Bindings::Press);
+
+        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 allow_activation ? %6\n",
+                                                          win,
+                                                          ev->keyval,
+							  show_gdk_event_state (ev->state),
+                                                          special_handling_of_unmodified_accelerators,
+                                                          Keyboard::some_magic_widget_has_focus(),
+                                                          allow_activating,
+							  focus,
+                                                          (focus ? gtk_widget_get_name (focus) : "no focus widget")));
+
+	/* This exists to allow us to override the way GTK handles
+	   key events. The normal sequence is:
+
+	   a) event is delivered to a GtkWindow
+	   b) accelerators/mnemonics are activated
+	   c) if (b) didn't handle the event, propagate to
+	       the focus widget and/or focus chain
+
+	   The problem with this is that if the accelerators include
+	   keys without modifiers, such as the space bar or the
+	   letter "e", then pressing the key while typing into
+	   a text entry widget results in the accelerator being
+	   activated, instead of the desired letter appearing
+	   in the text entry.
+
+	   There is no good way of fixing this, but this
+	   represents a compromise. The idea is that
+	   key events involving modifiers (not Shift)
+	   get routed into the activation pathway first, then
+	   get propagated to the focus widget if necessary.
+
+	   If the key event doesn't involve modifiers,
+	   we deliver to the focus widget first, thus allowing
+	   it to get "normal text" without interference
+	   from acceleration.
+
+	   Of course, this can also be problematic: if there
+	   is a widget with focus, then it will swallow
+	   all "normal text" accelerators.
+	*/
+
+	if (!special_handling_of_unmodified_accelerators) {
+
+
+		/* XXX note that for a brief moment, the conditional above
+		 * included "|| (ev->state & mask)" so as to enforce the
+		 * implication of special_handling_of_UNMODIFIED_accelerators.
+		 * however, this forces any key that GTK doesn't allow and that
+		 * we have an alternative (see next comment) for to be
+		 * automatically sent through the accel groups activation
+		 * pathway, which prevents individual widgets & canvas items
+		 * from ever seeing it if is used by a key binding.
+		 * 
+		 * specifically, this hid Ctrl-down-arrow from MIDI region
+		 * views because it is also bound to an action.
+		 *
+		 * until we have a robust, clean binding system, this
+		 * quirk will have to remain in place.
+		 */
+
+		/* pretend that certain key events that GTK does not allow
+		   to be used as accelerators are actually something that
+		   it does allow. but only where there are no modifiers.
+		*/
+
+		uint32_t fakekey = ev->keyval;
+
+		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tactivate (was %1 now %2) without special hanlding of unmodified accels\n",
+									  ev->keyval, fakekey));
+
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tmodified modifier was %1\n", show_gdk_event_state (modifier)));
+			
+			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, modifier)) {
+				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
+				return true;
+			}
+		}
+	}
+
+	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
+
+		/* no special handling or there are modifiers in effect: accelerate first */
+
+                DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
+		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tevent send-event:%1 time:%2 length:%3 name %7 string:%4 hardware_keycode:%5 group:%6\n",
+								  ev->send_event, ev->time, ev->length, ev->string, ev->hardware_keycode, ev->group, gdk_keyval_name (ev->keyval)));
+
+		if (allow_activating) {
+			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
+                        if (gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier)) {
+                                DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+				return true;
+			}
 		} else {
-			/* no bindings in current tab, use baroque GTK mechanism */
-			return key_press_focus_accelerator_handler (_main_window, ev);
+			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
+		}
+
+                DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
+
+		return gtk_window_propagate_key_event (win, ev);
+	}
+
+	/* no modifiers, propagate first */
+
+        DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate, then activate\n");
+
+	if (!gtk_window_propagate_key_event (win, ev)) {
+                DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
+		if (allow_activating) {
+			return gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier);
+		} else {
+			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
 		}
 
 	} else {
-		/* no window supplied, try our own bindings */
-		KeyboardKey k (ev->state, ev->keyval);
-		return _global_bindings.activate (k, Bindings::Press);
+                DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
+		return true;
 	}
-}
 
-bool
-ARDOUR_UI::key_release_handler (GdkEventKey* ev, Gtk::Window* event_window)
-{
-	if (event_window == &_main_window) {
-		/* find current tab contents */
-
-		Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page());
-
-		/* see if it uses the ardour binding system */
-
-		HasBindings* bindable;
-		
-		if ((bindable = dynamic_cast<HasBindings*> (w)) != 0) {
-			KeyboardKey k (ev->state, ev->keyval);
-			return bindable->bindings().activate (k, Bindings::Release);
-		} else {
-			/* no bindings in current tab, use baroque GTK mechanism */
-			return key_press_focus_accelerator_handler (_main_window, ev);
-		}
-
-	} else {
-		/* no window supplied, try our own bindings */
-		KeyboardKey k (ev->state, ev->keyval);
-		return _global_bindings.activate (k, Bindings::Release);
->>>>>>> first compilable version of tabbable design.
-	}
+        DEBUG_TRACE (DEBUG::Accelerators, "\tnot handled\n");
+	return true;
 }

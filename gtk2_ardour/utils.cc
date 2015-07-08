@@ -297,12 +297,7 @@ ARDOUR_UI_UTILS::gdk_color_to_rgba (Gdk::Color const& c)
 bool
 ARDOUR_UI_UTILS::relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 {
-	switch (ev->type) {
-	case GDK_KEY_PRESS:
-		return ARDOUR_UI::instance()->key_press_handler (ev, win);
-	default:
-		return ARDOUR_UI::instance()->key_release_handler (ev, win);
-	}
+	return ARDOUR_UI::instance()->key_event_handler (ev, win);
 }
 
 bool
@@ -334,8 +329,8 @@ ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
 	return relay_key_press(&ev);
 }
 
-static string
-show_gdk_event_state (int state)
+string
+ARDOUR_UI_UTILS::show_gdk_event_state (int state)
 {
 	string s;
 	if (state & GDK_SHIFT_MASK) {
@@ -391,161 +386,6 @@ show_gdk_event_state (int state)
 	}
 
 	return s;
-}
-bool
-ARDOUR_UI_UTILS::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev)
-{
-	GtkWindow* win = window.gobj();
-	GtkWidget* focus = gtk_window_get_focus (win);
-	bool special_handling_of_unmodified_accelerators = false;
-	bool allow_activating = true;
-	/* consider all relevant modifiers but not LOCK or SHIFT */
-	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
-        GdkModifierType modifier = GdkModifierType (ev->state);
-        modifier = GdkModifierType (modifier & gtk_accelerator_get_default_mod_mask());
-        Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator(modifier);
-
-	if (focus) {
-		if (GTK_IS_ENTRY(focus) || Keyboard::some_magic_widget_has_focus()) {
-			special_handling_of_unmodified_accelerators = true;
-		}
-	}
-
-#ifdef GTKOSX
-        /* at one time this appeared to be necessary. As of July 2012, it does not
-           appear to be. if it ever is necessar, figure out if it should apply
-           to all platforms.
-        */
-#if 0
-	if (Keyboard::some_magic_widget_has_focus ()) {
-                allow_activating = false;
-	}
-#endif
-#endif
-
-
-        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 allow_activation ? %6\n",
-                                                          win,
-                                                          ev->keyval,
-							  show_gdk_event_state (ev->state),
-                                                          special_handling_of_unmodified_accelerators,
-                                                          Keyboard::some_magic_widget_has_focus(),
-                                                          allow_activating,
-							  focus,
-                                                          (focus ? gtk_widget_get_name (focus) : "no focus widget")));
-
-	/* This exists to allow us to override the way GTK handles
-	   key events. The normal sequence is:
-
-	   a) event is delivered to a GtkWindow
-	   b) accelerators/mnemonics are activated
-	   c) if (b) didn't handle the event, propagate to
-	       the focus widget and/or focus chain
-
-	   The problem with this is that if the accelerators include
-	   keys without modifiers, such as the space bar or the
-	   letter "e", then pressing the key while typing into
-	   a text entry widget results in the accelerator being
-	   activated, instead of the desired letter appearing
-	   in the text entry.
-
-	   There is no good way of fixing this, but this
-	   represents a compromise. The idea is that
-	   key events involving modifiers (not Shift)
-	   get routed into the activation pathway first, then
-	   get propagated to the focus widget if necessary.
-
-	   If the key event doesn't involve modifiers,
-	   we deliver to the focus widget first, thus allowing
-	   it to get "normal text" without interference
-	   from acceleration.
-
-	   Of course, this can also be problematic: if there
-	   is a widget with focus, then it will swallow
-	   all "normal text" accelerators.
-	*/
-
-	if (!special_handling_of_unmodified_accelerators) {
-
-
-		/* XXX note that for a brief moment, the conditional above
-		 * included "|| (ev->state & mask)" so as to enforce the
-		 * implication of special_handling_of_UNMODIFIED_accelerators.
-		 * however, this forces any key that GTK doesn't allow and that
-		 * we have an alternative (see next comment) for to be
-		 * automatically sent through the accel groups activation
-		 * pathway, which prevents individual widgets & canvas items
-		 * from ever seeing it if is used by a key binding.
-		 *
-		 * specifically, this hid Ctrl-down-arrow from MIDI region
-		 * views because it is also bound to an action.
-		 *
-		 * until we have a robust, clean binding system, this
-		 * quirk will have to remain in place.
-		 */
-
-		/* pretend that certain key events that GTK does not allow
-		   to be used as accelerators are actually something that
-		   it does allow. but only where there are no modifiers.
-		*/
-
-		uint32_t fakekey = ev->keyval;
-
-		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tactivate (was %1 now %2) without special hanlding of unmodified accels\n",
-									  ev->keyval, fakekey));
-
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tmodified modifier was %1\n", show_gdk_event_state (modifier)));
-
-			if (allow_activating && gtk_accel_groups_activate(G_OBJECT(win), fakekey, modifier)) {
-				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
-				return true;
-			}
-		}
-	}
-
-	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
-
-		/* no special handling or there are modifiers in effect: accelerate first */
-
-                DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
-		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tevent send-event:%1 time:%2 length:%3 name %7 string:%4 hardware_keycode:%5 group:%6\n",
-								  ev->send_event, ev->time, ev->length, ev->string, ev->hardware_keycode, ev->group, gdk_keyval_name (ev->keyval)));
-
-		if (allow_activating) {
-			DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
-                        if (gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier)) {
-                                DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-				return true;
-			}
-		} else {
-			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
-		}
-
-                DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
-
-		return gtk_window_propagate_key_event (win, ev);
-	}
-
-	/* no modifiers, propagate first */
-
-        DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate, then activate\n");
-
-	if (!gtk_window_propagate_key_event (win, ev)) {
-                DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
-		if (allow_activating) {
-			return gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier);
-		} else {
-			DEBUG_TRACE (DEBUG::Accelerators, "\tactivation skipped\n");
-		}
-
-	} else {
-                DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
-		return true;
-	}
-
-        DEBUG_TRACE (DEBUG::Accelerators, "\tnot handled\n");
-	return true;
 }
 
 Glib::RefPtr<Gdk::Pixbuf>

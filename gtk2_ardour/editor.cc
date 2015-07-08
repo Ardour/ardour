@@ -4286,20 +4286,6 @@ Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t /*sz*/)
 	atv.clear_playlist ();
 }
 
-bool
-Editor::on_key_press_event (GdkEventKey* ev)
-{
-	return key_press_focus_accelerator_handler (*current_toplevel(), ev);
-}
-
-bool
-Editor::on_key_release_event (GdkEventKey* ev)
-{
-	return false;
-	// return Gtk::Window::on_key_release_event (ev);
-	// return key_press_focus_accelerator_handler (*this, ev);
-}
-
 double
 Editor::get_y_origin () const
 {
@@ -5957,7 +5943,6 @@ Editor::use_own_window ()
 
 	if (win && new_window) {
 		win->set_name ("EditorWindow");
-		win->add_accel_group (ActionManager::ui_manager->get_accel_group());
 
 		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Editor"), this);
 

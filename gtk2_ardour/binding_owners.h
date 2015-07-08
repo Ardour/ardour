@@ -28,7 +28,7 @@ class HasBindings {
   public:
 	HasBindings (Gtkmm2ext::Bindings& b) : _bindings (b) {}
 
-	Gtkmm2ext::Bindings bindings() const { return _bindings; }
+	Gtkmm2ext::Bindings& bindings() const { return _bindings; }
 
   protected:
 	Gtkmm2ext::Bindings& _bindings;
