@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <glibmm.h>
 #include "portaudio_io.h"
 
 #define INTERLEAVED_INPUT
@@ -128,7 +129,7 @@ void
 PortAudioIO::device_list (std::map<int, std::string> &devices) const {
 	devices.clear();
 	for (std::map<int, paDevice*>::const_iterator i = _devices.begin (); i != _devices.end(); ++i) {
-		devices.insert (std::pair<int, std::string> (i->first, i->second->name));
+		devices.insert (std::pair<int, std::string> (i->first, Glib::locale_to_utf8(i->second->name)));
 	}
 }
 
