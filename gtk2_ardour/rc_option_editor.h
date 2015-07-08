@@ -41,6 +41,8 @@ public:
 
 	void populate_sync_options ();
 
+	Gtk::Window* use_own_window ();
+	
 private:
 	void parameter_changed (std::string const &);
 	void ltc_generator_volume_changed ();
