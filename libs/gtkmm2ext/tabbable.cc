@@ -47,6 +47,7 @@ Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title, int posi
 {
 	notebook.insert_page (_contents, tab_title, position, false);
 	notebook.set_tab_detachable (_contents);
+	notebook.set_tab_reorderable (_contents);
 
 	_parent_notebook = &notebook;
 	_tab_title = tab_title;
@@ -169,6 +170,7 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 
 			_parent_notebook->insert_page (_contents, _tab_title, _notebook_position);
 			_parent_notebook->set_tab_detachable (_contents);
+			_parent_notebook->set_tab_reorderable (_contents);
 			_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
 		}
 
