@@ -48,6 +48,7 @@
 #include "pbd/error.h"
 #include "pbd/basename.h"
 #include "pbd/compose.h"
+#include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
@@ -110,6 +111,7 @@ typedef uint64_t microseconds_t;
 #include "audio_clock.h"
 #include "audio_region_view.h"
 #include "big_clock_window.h"
+#include "binding_owners.h"
 #include "bundle_manager.h"
 #include "duplicate_routes_dialog.h"
 #include "engine_dialog.h"
@@ -224,8 +226,12 @@ libxml_structured_error_func (void* /* parsing_context*/,
 
 
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
+<<<<<<< HEAD
 
 	: Gtkmm2ext::UI (PROGRAM_NAME, X_("gui"), argcp, argvp)
+=======
+	: Gtkmm2ext::UI (PROGRAM_NAME, argcp, argvp)
+>>>>>>> first compilable version of tabbable design.
 	, session_loaded (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
@@ -256,13 +262,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, error_alert_button ( ArdourButton::just_led_default_elements )
 	, editor_meter(0)
 	, editor_meter_peak_display()
-	, _numpad_locate_happening (false)
-	, _session_is_new (false)
-	, last_key_press_time (0)
-	, save_as_dialog (0)
-	, meterbridge (0)
-	, rc_option_editor (0)
-	, open_session_selector (0)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)
 	, last_key_press_time (0)
@@ -414,20 +413,24 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	const XMLNode* ui_xml = Config->extra_xml (X_("UI"));
 
 	if (ui_xml) {
-		key_editor.set_state (*ui_xml);
-		// rc_option_editor.set_state (*ui_xml);
-		session_option_editor.set_state (*ui_xml);
-		speaker_config_window.set_state (*ui_xml);
-		about.set_state (*ui_xml);
-		add_route_dialog.set_state (*ui_xml);
-		add_video_dialog.set_state (*ui_xml);
-		route_params.set_state (*ui_xml);
-		bundle_manager.set_state (*ui_xml);
-		location_ui.set_state (*ui_xml);
-		big_clock_window.set_state (*ui_xml);
-		audio_port_matrix.set_state (*ui_xml);
-		midi_port_matrix.set_state (*ui_xml);
-		export_video_dialog.set_state (*ui_xml);
+		key_editor.set_state (*ui_xml, 0);
+		session_option_editor.set_state (*ui_xml, 0);
+		speaker_config_window.set_state (*ui_xml, 0);
+		about.set_state (*ui_xml, 0);
+		add_route_dialog.set_state (*ui_xml, 0);
+		add_video_dialog.set_state (*ui_xml, 0);
+		route_params.set_state (*ui_xml, 0);
+		bundle_manager.set_state (*ui_xml, 0);
+		location_ui.set_state (*ui_xml, 0);
+		big_clock_window.set_state (*ui_xml, 0);
+		audio_port_matrix.set_state (*ui_xml, 0);
+		midi_port_matrix.set_state (*ui_xml, 0);
+		export_video_dialog.set_state (*ui_xml, 0);
+
+		/* tabbables */
+		// rc_option_editor->set_state (*ui_xml, 0);
+		// editor->set_state (*ui_xml, 0);
+		// mixer->set_state (*ui_xml, 0);
 	}
 
 	WM::Manager::instance().register_window (&key_editor);
@@ -540,7 +543,7 @@ was not fast enough. Try to restart\n\
 the audio backend and save the session."), PROGRAM_NAME);
 	}
 
-	MessageDialog msg (*editor, msgstr);
+	MessageDialog msg (_main_window, msgstr);
 	pop_back_splash (msg);
 	msg.run ();
 
@@ -1104,7 +1107,6 @@ ARDOUR_UI::check_memory_locking ()
 
 				pop_back_splash (msg);
 
-				editor->ensure_float (msg);
 				msg.run ();
 
 				if (cb.get_active()) {
@@ -1150,7 +1152,7 @@ ARDOUR_UI::finish()
 				/* use the default name */
 				if (save_state_canfail ("")) {
 					/* failed - don't quit */
-					MessageDialog msg (*editor,
+					MessageDialog msg (_main_window,
 							   string_compose (_("\
 %1 was unable to save your session.\n\n\
 If you still wish to quit, please use the\n\n\
@@ -1765,7 +1767,7 @@ ARDOUR_UI::session_add_mixed_track (const ChanCount& input, const ChanCount& out
 	}
 
 	catch (...) {
-		MessageDialog msg (*editor,
+		MessageDialog msg (_main_window,
 				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
@@ -1826,7 +1828,7 @@ ARDOUR_UI::session_add_audio_route (
 	}
 
 	catch (...) {
-		MessageDialog msg (*editor,
+		MessageDialog msg (_main_window,
 				   string_compose (_("There are insufficient ports available\n\
 to create a new track or bus.\n\
 You should save %1, exit and\n\
@@ -1972,7 +1974,7 @@ ARDOUR_UI::transport_record (bool roll)
 		switch (_session->record_status()) {
 		case Session::Disabled:
 			if (_session->ntracks() == 0) {
-				MessageDialog msg (*editor, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
+				MessageDialog msg (_main_window, _("Please create one or more tracks before trying to record.\nYou can do this with the \"Add Track or Bus\" option in the Session menu."));
 				msg.run ();
 				return;
 			}
@@ -3522,7 +3524,7 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 	removed = rep.paths.size();
 
 	if (removed == 0) {
-		MessageDialog msgd (*editor,
+		MessageDialog msgd (_main_window,
 				    _("No files were ready for clean-up"),
 				    true,
 				    Gtk::MESSAGE_INFO,
@@ -4344,7 +4346,7 @@ void
 ARDOUR_UI::halt_on_xrun_message ()
 {
         cerr << "HALT on xrun\n";
-	MessageDialog msg (*editor, _("Recording was stopped because your system could not keep up."));
+        MessageDialog msg (_main_window, _("Recording was stopped because your system could not keep up."));
 	msg.run ();
 }
 
@@ -4373,7 +4375,7 @@ ARDOUR_UI::disk_overrun_handler ()
 
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
-		MessageDialog* msg = new MessageDialog (*editor, string_compose (_("\
+		MessageDialog* msg = new MessageDialog (_main_window, string_compose (_("\
 The disk system on your computer\n\
 was not able to keep up with %1.\n\
 \n\
@@ -4508,7 +4510,7 @@ ARDOUR_UI::disk_underrun_handler ()
 	if (!have_disk_speed_dialog_displayed) {
 		have_disk_speed_dialog_displayed = true;
 		MessageDialog* msg = new MessageDialog (
-			*editor, string_compose (_("The disk system on your computer\n\
+			_main_window, string_compose (_("The disk system on your computer\n\
 was not able to keep up with %1.\n\
 \n\
 Specifically, it failed to read data from disk\n\
@@ -4532,12 +4534,7 @@ ARDOUR_UI::session_dialog (std::string msg)
 
 	MessageDialog* d;
 
-	if (editor) {
-		d = new MessageDialog (*editor, msg, false, MESSAGE_INFO, BUTTONS_OK, true);
-	} else {
-		d = new MessageDialog (msg, false, MESSAGE_INFO, BUTTONS_OK, true);
-	}
-
+	d = new MessageDialog (msg, false, MESSAGE_INFO, BUTTONS_OK, true);
 	d->show_all ();
 	d->run ();
 	delete d;
@@ -5063,15 +5060,110 @@ ARDOUR_UI::hide_application ()
 }
 
 void
-ARDOUR_UI::cancel_solo ()
+ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void* owner)
 {
-	if (_session) {
-		if (_session->soloing()) {
-			_session->set_solo (_session->get_routes(), false);
-		} else if (_session->listening()) {
-			_session->set_listen (_session->get_routes(), false);
+	/* icons, titles, WM stuff */
+
+	static list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
+
+	if (window_icons.empty()) {
+		Glib::RefPtr<Gdk::Pixbuf> icon;
+		if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
+			window_icons.push_back (icon);
+		}
+		if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
+			window_icons.push_back (icon);
+		}
+		if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
+			window_icons.push_back (icon);
+		}
+		if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
+			window_icons.push_back (icon);
+		}
+	}
+
+	if (!window_icons.empty()) {
+		window.set_default_icon_list (window_icons);
+	}
+	
+	Gtkmm2ext::WindowTitle title (Glib::get_application_name());
+	title += name;
+	window.set_title (title.get_string());
+	window.set_wmclass (string_compose (X_("%1_%1"), downcase (PROGRAM_NAME), downcase (name)), PROGRAM_NAME);
+
+	window.set_flags (CAN_FOCUS);
+	window.add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+
+	window.signal_configure_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::configure_handler));
+	window.signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::tabbed_window_state_event_handler), owner));
+	window.signal_key_press_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
+	window.signal_key_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_event_handler), &window), false);
+}
+
+bool
+ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* window)
+{
+	switch (ev->type) {
+	case GDK_KEY_PRESS:
+		return key_press_handler (ev, window);
+	default:
+		break;
+	}
+
+	return key_release_handler (ev, window);
+}
+			
+bool
+ARDOUR_UI::key_press_handler (GdkEventKey* ev, Gtk::Window* event_window)
+{
+	if (event_window == &_main_window) {
+		/* find current tab contents */
+
+		Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page());
+
+		/* see if it uses the ardour binding system */
+
+		HasBindings* bindable;
+		
+		if ((bindable = dynamic_cast<HasBindings*> (w)) != 0) {
+			KeyboardKey k (ev->state, ev->keyval);
+			return bindable->bindings().activate (k, Bindings::Press);
+		} else {
+			/* no bindings in current tab, use baroque GTK mechanism */
+			return key_press_focus_accelerator_handler (_main_window, ev);
 		}
 
-		_session->clear_all_solo_state (_session->get_routes()); // safeguard, ideally this won't do anything, check the log-window
+	} else {
+		/* no window supplied, try our own bindings */
+		KeyboardKey k (ev->state, ev->keyval);
+		return _global_bindings.activate (k, Bindings::Press);
+	}
+}
+
+bool
+ARDOUR_UI::key_release_handler (GdkEventKey* ev, Gtk::Window* event_window)
+{
+	if (event_window == &_main_window) {
+		/* find current tab contents */
+
+		Gtk::Widget* w = _tabs.get_nth_page (_tabs.get_current_page());
+
+		/* see if it uses the ardour binding system */
+
+		HasBindings* bindable;
+		
+		if ((bindable = dynamic_cast<HasBindings*> (w)) != 0) {
+			KeyboardKey k (ev->state, ev->keyval);
+			return bindable->bindings().activate (k, Bindings::Release);
+		} else {
+			/* no bindings in current tab, use baroque GTK mechanism */
+			return key_press_focus_accelerator_handler (_main_window, ev);
+		}
+
+	} else {
+		/* no window supplied, try our own bindings */
+		KeyboardKey k (ev->state, ev->keyval);
+		return _global_bindings.activate (k, Bindings::Release);
+>>>>>>> first compilable version of tabbable design.
 	}
 }

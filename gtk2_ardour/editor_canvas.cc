@@ -500,7 +500,13 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 void
 Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 {
-	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
+	Gtk::Window* toplevel = dynamic_cast<Gtk::Window*>(contents().get_toplevel());
+
+	if (!toplevel) {
+		return;
+	}
+	
+	if (!UIConfiguration::instance()->get_autoscroll_editor () || autoscroll_active ()) {
 		return;
 	}
 
@@ -557,7 +563,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 	int x, y;
 	Gdk::ModifierType mask;
 
-	get_window()->get_pointer (x, y, mask);
+	toplevel->get_window()->get_pointer (x, y, mask);
 
 	if ((allow_horiz && ((x < scrolling_boundary.x0 && leftmost_frame > 0) || x >= scrolling_boundary.x1)) ||
 	    (allow_vert && ((y < scrolling_boundary.y0 && vertical_adjustment.get_value() > 0)|| y >= scrolling_boundary.y1))) {
@@ -578,8 +584,13 @@ Editor::autoscroll_canvas ()
 	Gdk::ModifierType mask;
 	frameoffset_t dx = 0;
 	bool no_stop = false;
+	Gtk::Window* toplevel = dynamic_cast<Gtk::Window*>(contents().get_toplevel());
 
-	get_window()->get_pointer (x, y, mask);
+	if (!toplevel) {
+		return false;
+	}
+
+	toplevel->get_window()->get_pointer (x, y, mask);
 
 	VisualChange vc;
 	bool vertical_motion = false;
@@ -682,7 +693,7 @@ Editor::autoscroll_canvas ()
 		int cx;
 		int cy;
 
-		translate_coordinates (*_track_canvas, x, y, cx, cy);
+		toplevel->translate_coordinates (*_track_canvas, x, y, cx, cy);
 
 		/* clamp x and y to remain within the autoscroll boundary,
 		 * which is defined in window coordinates
@@ -733,8 +744,8 @@ Editor::autoscroll_canvas ()
 			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
 		}
 		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
-
-		translate_coordinates (*_track_canvas_viewport, x, y, cx, cy);
+		
+		toplevel->translate_coordinates (*_track_canvas_viewport, x, y, cx, cy);
 
 		ArdourCanvas::Duple d = _track_canvas->window_to_canvas (ArdourCanvas::Duple (cx, cy));
 		ev.x = d.x;

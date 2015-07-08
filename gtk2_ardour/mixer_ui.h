@@ -42,13 +42,13 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
 
-<<<<<<< HEAD
+
 #include "gtkmm2ext/visibility_tracker.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/treeutils.h"
 
-=======
->>>>>>> the basics of tabbed
+#include "gtkmm2ext/tabbable.h"
+
 #include "enums.h"
 #include "mixer_actor.h"
 
@@ -62,7 +62,6 @@ class PluginSelector;
 class MixerGroupTabs;
 class MonitorSection;
 
-<<<<<<< HEAD
 class PluginTreeStore : public Gtk::TreeStore
 {
 public:
@@ -76,20 +75,15 @@ protected:
 	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
 };
 
-class Mixer_UI : public Gtk::Window, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor, public Gtkmm2ext::VisibilityTracker
-=======
-class Mixer_UI : public Gtk::VBox, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor
->>>>>>> the basics of tabbed
+class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public MixerActor, public Gtkmm2ext::VisibilityTracker
 {
   public:
 	static Mixer_UI* instance();
 	~Mixer_UI();
 
-	Gtk::Window* own_window() const { return _parent_window; }
-	Gtk::Notebook* use_own_window();
+	Gtk::Window* use_own_window ();
+	void show_window ();
 
-	bool visible() const { return _visible; }
-	
 	void set_session (ARDOUR::Session *);
 	void track_editor_selection ();
 
@@ -101,21 +95,17 @@ class Mixer_UI : public Gtk::VBox, public PBD::ScopedConnectionList, public ARDO
 	void unselect_strip_in_display (MixerStrip*);
 	void select_strip_in_display (MixerStrip*);
 
-	XMLNode& get_state (void);
-	int set_state (const XMLNode& );
+	XMLNode& get_state ();
+	int set_state (const XMLNode&, int /* version */);
 
 	void show_mixer_list (bool yn);
 	void show_monitor_section (bool);
-	
-	void show_window ();
-	bool hide_window (GdkEventAny *ev);
+
 	void show_strip (MixerStrip *);
 	void hide_strip (MixerStrip *);
 
 	void maximise_mixer_space();
 	void restore_mixer_space();
-
-	void ensure_float (Gtk::Window&);
 
         MonitorSection* monitor_section() const { return _monitor_section; }
 
@@ -124,23 +114,22 @@ class Mixer_UI : public Gtk::VBox, public PBD::ScopedConnectionList, public ARDO
 
 	void select_none ();
 
+	bool window_not_visible () const;
+
   protected:
 	void set_route_targets_for_operation ();
 
   private:
 	Mixer_UI ();
-	static Mixer_UI* _instance;
-
-	Gtk::Window*                            _parent_window;
-	bool					_visible;
-
-	Gtk::HBox				global_hpacker;
-	Gtk::VBox				global_vpacker;
-	Gtk::ScrolledWindow		scroller;
-	Gtk::EventBox			scroller_base;
-	Gtk::HBox				scroller_hpacker;
-	Gtk::VBox				mixer_scroller_vpacker;
-	Gtk::VBox				list_vpacker;
+	static Mixer_UI*     _instance;
+	Gtk::VBox            _content;
+	Gtk::HBox             global_hpacker;
+	Gtk::VBox             global_vpacker;
+	Gtk::ScrolledWindow   scroller;
+	Gtk::EventBox         scroller_base;
+	Gtk::HBox             scroller_hpacker;
+	Gtk::VBox             mixer_scroller_vpacker;
+	Gtk::VBox             list_vpacker;
 	Gtk::Label				group_display_button_label;
 	Gtk::Button				group_display_button;
 	Gtk::ScrolledWindow		track_display_scroller;
@@ -373,7 +362,7 @@ class Mixer_UI : public Gtk::VBox, public PBD::ScopedConnectionList, public ARDO
 
 =======
 	void create_own_window ();
-	
+
 >>>>>>> the basics of tabbed
 	/// true if we are in fullscreen mode
 	bool _maximised;
@@ -383,5 +372,3 @@ class Mixer_UI : public Gtk::VBox, public PBD::ScopedConnectionList, public ARDO
 };
 
 #endif /* __ardour_mixer_ui_h__ */
-
-

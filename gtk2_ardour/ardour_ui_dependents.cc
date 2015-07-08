@@ -61,8 +61,8 @@ ARDOUR_UI::we_have_dependents ()
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
-	std::cerr << "Mixer page = " << editor->tabs().append_page (*mixer, _("Mixer")) << std::endl;
-	editor->tabs().set_tab_detachable (*mixer);
+	editor->add_to_notebook (_tabs, _("Editor"), 1);
+	mixer->add_to_notebook (_tabs, _("Mixer"), 1);
 	
 	/* all actions are defined */
 
@@ -104,7 +104,7 @@ ARDOUR_UI::exit_on_main_window_close (GdkEventAny * /*ev*/)
 #endif
 }
 
-Gtk::Notebook*
+GtkNotebook*
 ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 				 GtkWidget* w,
 				 gint x,
@@ -112,20 +112,34 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 				 gpointer)
 {
 	using namespace std;
+	Gtk::Notebook* nb = 0;
+	Gtk::Window* win = 0;
 	
-	if (w == GTK_WIDGET(mixer->gobj())) {
+	if (w == GTK_WIDGET(mixer->contents().gobj())) {
 		/* Mixer */
 
-		cerr << "Call use own window\n";
+		cerr << "Call use own window, mixer\n";
 		
-		Gtk::Notebook* nb = mixer->use_own_window ();
-		Gtk::Window* win = (Gtk::Window*) nb->get_toplevel ();
-		
-		win->move (x, y);
-		win->present ();
+		nb = mixer->tab_root_drop ();
+		win = mixer->own_window ();
 
-		return nb;
+	} else if (w == GTK_WIDGET(editor->contents().gobj())) {
+
+		/* Editor */
+
+		cerr << "Call use own window, editor\n";
+		
+		nb = editor->tab_root_drop ();
+		win = editor->own_window ();
+
 	}
 
-	return 0;
+	if (nb) {
+		win->move (x, y);
+		win->show_all ();
+		win->present ();
+		return nb->gobj();
+	}
+	
+	return 0; /* what was that? */
 }

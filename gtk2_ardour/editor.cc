@@ -252,10 +252,86 @@ pane_size_watcher (Paned* pane)
 }
 
 Editor::Editor ()
-	: _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
-
+	: PublicEditor (global_hpacker)
+	, editor_mixer_strip_width (Wide)
+	, constructed (false)
+	, _playlist_selector (0)
+	, no_save_visual (false)
+	, leftmost_frame (0)
+	, samples_per_pixel (2048)
+	, zoom_focus (ZoomFocusPlayhead)
+	, mouse_mode (MouseObject)
+	, pre_internal_snap_type (SnapToBeat)
+	, pre_internal_snap_mode (SnapOff)
+	, internal_snap_type (SnapToBeat)
+	, internal_snap_mode (SnapOff)
+	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
+	, _notebook_shrunk (false)
+	, location_marker_color (0)
+	, location_range_color (0)
+	, location_loop_color (0)
+	, location_punch_color (0)
+	, location_cd_marker_color (0)
+	, entered_marker (0)
+	, _show_marker_lines (false)
+	, clicked_axisview (0)
+	, clicked_routeview (0)
+	, clicked_regionview (0)
+	, clicked_selection (0)
+	, clicked_control_point (0)
+	, button_release_can_deselect (true)
 	, _mouse_changed_selection (false)
-	  /* time display buttons */
+	, region_edit_menu_split_item (0)
+	, region_edit_menu_split_multichannel_item (0)
+	, track_region_edit_playlist_menu (0)
+	, track_edit_playlist_submenu (0)
+	, track_selection_edit_playlist_submenu (0)
+	, _popup_region_menu_item (0)
+	, global_vpacker (key_bindings)
+	, _track_canvas (0)
+	, _track_canvas_viewport (0)
+	, within_track_canvas (false)
+	, _verbose_cursor (0)
+	, logo_item (0)
+	, tempo_group (0)
+	, meter_group (0)
+	, marker_group (0)
+	, range_marker_group (0)
+	, transport_marker_group (0)
+	, cd_marker_group (0)
+	, _time_markers_group (0)
+	, hv_scroll_group (0)
+	, h_scroll_group (0)
+	, cursor_scroll_group (0)
+	, no_scroll_group (0)
+	, _trackview_group (0)
+	, _drag_motion_group (0)
+	, _canvas_drop_zone (0)
+	, no_ruler_shown_update (false)
+	,  ruler_grabbed_widget (0)
+	, ruler_dialog (0)
+	, minsec_mark_interval (0)
+	, minsec_mark_modulo (0)
+	, minsec_nmarks (0)
+	, timecode_mark_modulo (0)
+	, timecode_nmarks (0)
+	, _samples_ruler_interval (0)
+	, bbt_bars (0)
+	, bbt_nmarks (0)
+	, bbt_bar_helper_on (0)
+	, bbt_accent_modulo (0)
+	, timecode_ruler (0)
+	, bbt_ruler (0)
+	, samples_ruler (0)
+	, minsec_ruler (0)
+	, visible_timebars (0)
+	, editor_ruler_menu (0)
+	, tempo_bar (0)
+	, meter_bar (0)
+	, marker_bar (0)
+	, range_marker_bar (0)
+	, transport_marker_bar (0)
+	, cd_marker_bar (0)
 	, minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))
 	, timecode_label (_("Timecode"))
@@ -267,72 +343,138 @@ Editor::Editor ()
 	, transport_mark_label (_("Loop/Punch Ranges"))
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
+	, videotl_group (0)
+	, playhead_cursor (0)
 	, edit_packer (4, 4, true)
-
-	  /* the values here don't matter: layout widgets
-	     reset them as needed.
-	  */
-
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
-
 	, controls_layout (unused_adjustment, vertical_adjustment)
-
-	  /* tool bar related */
-
-	, toolbar_selection_clock_table (2,3)
+	, _scroll_callbacks (0)
+	, _visible_canvas_width (0)
+	, _visible_canvas_height (0)
+	, _full_canvas_height (0)
+	, edit_controls_left_menu (0)
+	, edit_controls_right_menu (0)
+	, last_update_frame (0)
+	, cut_buffer_start (0)
+	, cut_buffer_length (0)
+	, button_bindings (0)
+	, last_paste_pos (0)
+	, paste_count (0)
+	, sfbrowser (0)
+	, current_interthread_info (0)
+	, analysis_window (0)
+	, select_new_marker (false)
+	, last_scrub_x (0)
+	, scrubbing_direction (0)
+	, scrub_reversals (0)
+	, scrub_reverse_distance (0)
+	, have_pending_keyboard_selection (false)
+	, pending_keyboard_selection_start (0)
+	, _snap_type (SnapToBeat)
+	, _snap_mode (SnapOff)
+	, snap_threshold (5.0)
+	, ignore_gui_changes (false)
+	, _drags (new DragManager (this))
+	, lock_dialog (0)
+	, last_event_time { 0, 0 }
+	, _dragging_playhead (false)
+	, _dragging_edit_point (false)
+	, _show_measures (true)
+	, _follow_playhead (true)
+	, _stationary_playhead (false)
+	, _maximised (false)
+	, tempo_lines (0)
+	, global_rect_group (0)
+	, time_line_group (0)
+	, tempo_or_meter_marker_menu (0)
+	, marker_menu (0)
+	, range_marker_menu (0)
+	, transport_marker_menu (0)
+	, new_transport_marker_menu (0)
+	, cd_marker_menu (0)
+	, marker_menu_item (0)
+	, bbt_beat_subdivision (4)
+	, _visible_track_count (-1)
+	,  toolbar_selection_clock_table (2,3)
 	, _mouse_mode_tearoff (0)
-	, automation_mode_button (_("mode"))
+	,  automation_mode_button (_("mode"))
 	, _zoom_tearoff (0)
 	, _tools_tearoff (0)
-
-	, _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
+	,  _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
+	, selection (new Selection (this))
+	, cut_buffer (new Selection (this))
+	, _selection_memento (new SelectionMemento())
+	, _all_region_actions_sensitized (false)
+	, _ignore_region_action (false)
+	, _last_region_menu_was_main (false)
+	, _ignore_follow_edits (false)
+	, cd_marker_bar_drag_rect (0)
+	, range_bar_drag_rect (0)
+	, transport_bar_drag_rect (0)
+	, transport_bar_range_rect (0)
+	, transport_bar_preroll_rect (0)
+	, transport_bar_postroll_rect (0)
+	, transport_loop_range_rect (0)
+	, transport_punch_range_rect (0)
+	, transport_punchin_line (0)
+	, transport_punchout_line (0)
+	, transport_preroll_rect (0)
+	, transport_postroll_rect (0)
+	, temp_location (0)
+	, rubberband_rect (0)
+	, _route_groups (0)
+	, _routes (0)
+	, _regions (0)
+	, _snapshots (0)
+	, _locations (0)
+	, autoscroll_horizontal_allowed (false)
+	, autoscroll_vertical_allowed (false)
+	, autoscroll_cnt (0)
+	, autoscroll_widget (0)
+	, show_gain_after_trim (false)
 	, selection_op_cmd_depth (0)
 	, selection_op_history_it (0)
-
-	  /* nudge */
-
-	, nudge_clock (new AudioClock (X_("nudge"), false, X_("nudge"), true, false, true))
-	, meters_running(false)
+	, current_timefx (0)
+	, current_mixer_strip (0)
+	, show_editor_mixer_when_tracks_arrive (false)
+	,  nudge_clock (new AudioClock (X_("nudge"), false, X_("nudge"), true, false, true))
+	, current_stepping_trackview (0)
+	, last_track_height_step_timestamp (0)
+	, entered_track (0)
+	, entered_regionview (0)
+	, clear_entered_track (false)
+	, _edit_point (EditAtMouse)
+	, meters_running (false)
+	, rhythm_ferret (0)
+	, _have_idled (false)
+	, resize_idle_id (-1)
+	, _pending_resize_amount (0)
+	, _pending_resize_view (0)
 	, _pending_locate_request (false)
 	, _pending_initial_locate (false)
+	, _summary (0)
+	, _group_tabs (0)
+	, _last_motion_y (0)
+	, layering_order_editor (0)
 	, _last_cut_copy_source_track (0)
-
 	, _region_selection_change_updates_region_list (true)
+	, _cursors (0)
 	, _following_mixer_selection (false)
 	, _control_point_toggled_on_press (false)
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
 {
-	constructed = false;
-
 	/* we are a singleton */
 
 	PublicEditor::_instance = this;
 
 	_have_idled = false;
 
-	selection = new Selection (this);
-	cut_buffer = new Selection (this);
-	_selection_memento = new SelectionMemento ();
 	selection_op_history.clear();
 	before.clear();
-
-	clicked_regionview = 0;
-	clicked_axisview = 0;
-	clicked_routeview = 0;
-	clicked_selection = 0;
-	clicked_control_point = 0;
-	last_update_frame = 0;
-	last_paste_pos = 0;
-	paste_count = 0;
-	_drags = new DragManager (this);
-	lock_dialog = 0;
-	ruler_dialog = 0;
-	current_mixer_strip = 0;
-	tempo_lines = 0;
 
 	snap_type_strings =  I18N (_snap_type_strings);
 	snap_mode_strings =  I18N (_snap_mode_strings);
@@ -351,77 +493,16 @@ Editor::Editor ()
 	build_snap_type_menu();
 	build_edit_point_menu();
 
-	snap_threshold = 5.0;
-	bbt_beat_subdivision = 4;
-	_visible_canvas_width = 0;
-	_visible_canvas_height = 0;
-	autoscroll_horizontal_allowed = false;
-	autoscroll_vertical_allowed = false;
-	logo_item = 0;
+	location_marker_color = ARDOUR_UI::config()->color ("location marker");
+	location_range_color = ARDOUR_UI::config()->color ("location range");
+	location_cd_marker_color = ARDOUR_UI::config()->color ("location cd marker");
+	location_loop_color = ARDOUR_UI::config()->color ("location loop");
+	location_punch_color = ARDOUR_UI::config()->color ("location punch");
 
-	analysis_window = 0;
+	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::ui_scale));
 
-	current_interthread_info = 0;
-	_show_measures = true;
-	_maximised = false;
-	show_gain_after_trim = false;
-
-	have_pending_keyboard_selection = false;
-	_follow_playhead = true;
-        _stationary_playhead = false;
-	editor_ruler_menu = 0;
-	no_ruler_shown_update = false;
-	marker_menu = 0;
-	range_marker_menu = 0;
-	marker_menu_item = 0;
-	tempo_or_meter_marker_menu = 0;
-	transport_marker_menu = 0;
-	new_transport_marker_menu = 0;
-	editor_mixer_strip_width = Wide;
-	show_editor_mixer_when_tracks_arrive = false;
-	region_edit_menu_split_multichannel_item = 0;
-	region_edit_menu_split_item = 0;
-	temp_location = 0;
-	leftmost_frame = 0;
-	mouse_mode = MouseObject;
-	current_stepping_trackview = 0;
-	entered_track = 0;
-	entered_regionview = 0;
-	entered_marker = 0;
-	clear_entered_track = false;
-	current_timefx = 0;
-	playhead_cursor = 0;
-	button_release_can_deselect = true;
-	_dragging_playhead = false;
-	_dragging_edit_point = false;
-	select_new_marker = false;
-	rhythm_ferret = 0;
-	layering_order_editor = 0;
-	no_save_visual = false;
-	resize_idle_id = -1;
-	within_track_canvas = false;
-
-	scrubbing_direction = 0;
-
-	sfbrowser = 0;
-
-	location_marker_color = UIConfiguration::instance().color ("location marker");
-	location_range_color = UIConfiguration::instance().color ("location range");
-	location_cd_marker_color = UIConfiguration::instance().color ("location cd marker");
-	location_loop_color = UIConfiguration::instance().color ("location loop");
-	location_punch_color = UIConfiguration::instance().color ("location punch");
-
-	zoom_focus = ZoomFocusPlayhead;
-	_edit_point = EditAtMouse;
-	_visible_track_count = -1;
-
-	samples_per_pixel = 2048; /* too early to use reset_zoom () */
-
-	timebar_height = std::max(12., ceil (15. * UIConfiguration::instance().get_ui_scale()));
 	TimeAxisView::setup_sizes ();
 	ArdourMarker::setup_sizes (timebar_height);
-
-	_scroll_callbacks = 0;
 
 	bbt_label.set_name ("EditorRulerLabel");
 	bbt_label.set_size_request (-1, (int)timebar_height);
@@ -660,19 +741,7 @@ Editor::Editor ()
 
 	global_vpacker.pack_start (top_hbox, false, false);
 	global_vpacker.pack_start (*hbox, true, true);
-
 	global_hpacker.pack_start (global_vpacker, true, true);
-
-	set_name ("EditorWindow");
-	add_accel_group (ActionManager::ui_manager->get_accel_group());
-
-	status_bar_hpacker.show ();
-
-	_tabs.append_page (global_hpacker, _("Editor"));
-	_tabs.show ();
-	
-	vpacker.pack_end (status_bar_hpacker, false, false);
-	vpacker.pack_end (_tabs, true, true);
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -683,19 +752,6 @@ Editor::Editor ()
 	// load_bindings ();
 
 	setup_toolbar ();
-
-	set_zoom_focus (zoom_focus);
-	set_visible_track_count (_visible_track_count);
-	_snap_type = SnapToBeat;
-	set_snap_to (_snap_type);
-	_snap_mode = SnapOff;
-	set_snap_mode (_snap_mode);
-	set_mouse_mode (MouseObject, true);
-        pre_internal_snap_type = _snap_type;
-        pre_internal_snap_mode = _snap_mode;
-        internal_snap_type = _snap_type;
-        internal_snap_mode = _snap_mode;
-	set_edit_point_preference (EditAtMouse, true);
 
 	_playlist_selector = new PlaylistSelector();
 	_playlist_selector->signal_delete_event().connect (sigc::bind (sigc::ptr_fun (just_hide_it), static_cast<Window *> (_playlist_selector)));
@@ -711,39 +767,6 @@ Editor::Editor ()
 	nudge_backward_button.set_icon(ArdourIcon::NudgeLeft);
 
 	fade_context_menu.set_name ("ArdourContextMenu");
-
-	/* icons, titles, WM stuff */
-
-	list<Glib::RefPtr<Gdk::Pixbuf> > window_icons;
-	Glib::RefPtr<Gdk::Pixbuf> icon;
-
-	if ((icon = ::get_icon ("ardour_icon_16px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if ((icon = ::get_icon ("ardour_icon_22px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if ((icon = ::get_icon ("ardour_icon_32px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if ((icon = ::get_icon ("ardour_icon_48px")) != 0) {
-		window_icons.push_back (icon);
-	}
-	if (!window_icons.empty()) {
-		// set_icon_list (window_icons);
-		set_default_icon_list (window_icons);
-	}
-
-	WindowTitle title(Glib::get_application_name());
-	title += _("Editor");
-	set_title (title.get_string());
-	set_wmclass (X_("ardour_editor"), PROGRAM_NAME);
-
-	add (vpacker);
-	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
-
-	signal_configure_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::configure_handler));
-	signal_delete_event().connect (sigc::mem_fun (*ARDOUR_UI::instance(), &ARDOUR_UI::exit_on_main_window_close));
 
 	Gtkmm2ext::Keyboard::the_keyboard().ZoomVerticalModifierReleased.connect (sigc::mem_fun (*this, &Editor::zoom_vertical_modifier_released));
 
@@ -845,21 +868,6 @@ Editor::button_settings () const
 	return node;
 }
 
-void
-Editor::add_toplevel_menu (Container& cont)
-{
-	vpacker.pack_start (cont, false, false);
-	cont.show_all ();
-}
-
-void
-Editor::add_transport_frame (Container& cont)
-{
-	global_vpacker.pack_start (cont, false, false);
-	global_vpacker.reorder_child (cont, 0);
-	cont.show_all ();
-}
-
 bool
 Editor::get_smart_mode () const
 {
@@ -927,44 +935,6 @@ Editor::set_entered_track (TimeAxisView* tav)
 	if (entered_track) {
 		entered_track->entered ();
 	}
-}
-
-void
-Editor::show_window ()
-{
-	if (!is_visible ()) {
-		DisplaySuspender ds;
-		show_all ();
-
-		/* XXX: this is a bit unfortunate; it would probably
-		   be nicer if we could just call show () above rather
-		   than needing the show_all ()
-		*/
-
-		/* re-hide stuff if necessary */
-		editor_list_button_toggled ();
-		parameter_changed ("show-summary");
-		parameter_changed ("show-group-tabs");
-		parameter_changed ("show-zoom-tools");
-
-		/* now reset all audio_time_axis heights, because widgets might need
-		   to be re-hidden
-		*/
-
-		TimeAxisView *tv;
-
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-			tv = (static_cast<TimeAxisView*>(*i));
-			tv->reset_height ();
-		}
-
-		if (current_mixer_strip) {
-			current_mixer_strip->hide_things ();
-			current_mixer_strip->parameter_changed ("mixer-element-visibility");
-		}
-	}
-
-	present ();
 }
 
 void
@@ -1159,14 +1129,11 @@ Editor::access_action (std::string action_group, std::string action_item)
 void
 Editor::on_realize ()
 {
-	Window::on_realize ();
 	Realized ();
 
 	if (UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		start_lock_event_timing ();
 	}
-
-	signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
 }
 
 void
@@ -1186,7 +1153,9 @@ Editor::generic_event_handler (GdkEvent* ev)
 	case GDK_MOTION_NOTIFY:
 	case GDK_KEY_PRESS:
 	case GDK_KEY_RELEASE:
-		gettimeofday (&last_event_time, 0);
+		if (contents().is_mapped()) {
+			gettimeofday (&last_event_time, 0);
+		}
 		break;
 
 	case GDK_LEAVE_NOTIFY:
@@ -1283,8 +1252,12 @@ Editor::center_screen_internal (framepos_t frame, float page)
 void
 Editor::update_title ()
 {
-	ENSURE_GUI_THREAD (*this, &Editor::update_title)
+	ENSURE_GUI_THREAD (*this, &Editor::update_title);
 
+	if (!own_window()) {
+		return;
+	}
+		
 	if (_session) {
 		bool dirty = _session->dirty();
 
@@ -1302,7 +1275,7 @@ Editor::update_title ()
 
 		WindowTitle title(session_name);
 		title += Glib::get_application_name();
-		set_title (title.get_string());
+		own_window()->set_title (title.get_string());
 	} else {
 		/* ::session_going_away() will have taken care of it */
 	}
@@ -2203,55 +2176,14 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 }
 
 int
-Editor::set_state (const XMLNode& node, int /*version*/)
+Editor::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
-	XMLNode* geometry;
-	int x, y;
-	Gdk::Geometry g;
 
 	set_id (node);
 
-	g.base_width = default_width;
-	g.base_height = default_height;
-	x = 1;
-	y = 1;
-
-	if ((geometry = find_named_node (node, "geometry")) != 0) {
-
-		XMLProperty* prop;
-
-		if ((prop = geometry->property("x_size")) == 0) {
-			prop = geometry->property ("x-size");
-		}
-		if (prop) {
-			g.base_width = atoi(prop->value());
-		}
-		if ((prop = geometry->property("y_size")) == 0) {
-			prop = geometry->property ("y-size");
-		}
-		if (prop) {
-			g.base_height = atoi(prop->value());
-		}
-
-		if ((prop = geometry->property ("x_pos")) == 0) {
-			prop = geometry->property ("x-pos");
-		}
-		if (prop) {
-			x = atoi (prop->value());
-
-		}
-		if ((prop = geometry->property ("y_pos")) == 0) {
-			prop = geometry->property ("y-pos");
-		}
-		if (prop) {
-			y = atoi (prop->value());
-		}
-	}
-
-	set_default_size (g.base_width, g.base_height);
-	move (x, y);
-
+	Tabbable::set_state (node, version);
+	
 	if (_session && (prop = node.property ("playhead"))) {
 		framepos_t pos;
 		sscanf (prop->value().c_str(), "%" PRIi64, &pos);
@@ -2475,99 +2407,82 @@ Editor::set_state (const XMLNode& node, int /*version*/)
 XMLNode&
 Editor::get_state ()
 {
-	XMLNode* node = new XMLNode ("Editor");
+	XMLNode& node (Tabbable::get_state());
 	char buf[32];
 
 	id().print (buf, sizeof (buf));
-	node->add_property ("id", buf);
+	node.add_property ("id", buf);
 
-	if (is_realized()) {
-		Glib::RefPtr<Gdk::Window> win = get_window();
+#if 0
+	// need to save this somehow 
+	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
+	geometry->add_property("edit-horizontal-pane-pos", string(buf));
+	geometry->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
+	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
+	geometry->add_property("edit-vertical-pane-pos", string(buf));
+#endif
+	
+	maybe_add_mixer_strip_width (node);
 
-		int x, y, width, height;
-		win->get_root_origin(x, y);
-		win->get_size(width, height);
-
-		XMLNode* geometry = new XMLNode ("geometry");
-
-		snprintf(buf, sizeof(buf), "%d", width);
-		geometry->add_property("x-size", string(buf));
-		snprintf(buf, sizeof(buf), "%d", height);
-		geometry->add_property("y-size", string(buf));
-		snprintf(buf, sizeof(buf), "%d", x);
-		geometry->add_property("x-pos", string(buf));
-		snprintf(buf, sizeof(buf), "%d", y);
-		geometry->add_property("y-pos", string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
-		geometry->add_property("edit-horizontal-pane-pos", string(buf));
-		geometry->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
-		geometry->add_property("edit-vertical-pane-pos", string(buf));
-
-		node->add_child_nocopy (*geometry);
-	}
-
-	maybe_add_mixer_strip_width (*node);
-
-	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
+	node.add_property ("zoom-focus", enum_2_string (zoom_focus));
 
 	snprintf (buf, sizeof(buf), "%" PRId64, samples_per_pixel);
-	node->add_property ("zoom", buf);
-	node->add_property ("snap-to", enum_2_string (_snap_type));
-	node->add_property ("snap-mode", enum_2_string (_snap_mode));
-	node->add_property ("internal-snap-to", enum_2_string (internal_snap_type));
-	node->add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
-	node->add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
-	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
-	node->add_property ("edit-point", enum_2_string (_edit_point));
+	node.add_property ("zoom", buf);
+	node.add_property ("snap-to", enum_2_string (_snap_type));
+	node.add_property ("snap-mode", enum_2_string (_snap_mode));
+	node.add_property ("internal-snap-to", enum_2_string (internal_snap_type));
+	node.add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
+	node.add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
+	node.add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
+	node.add_property ("edit-point", enum_2_string (_edit_point));
 	snprintf (buf, sizeof(buf), "%d", _visible_track_count);
-	node->add_property ("visible-track-count", buf);
+	node.add_property ("visible-track-count", buf);
 
 	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame ());
-	node->add_property ("playhead", buf);
+	node.add_property ("playhead", buf);
 	snprintf (buf, sizeof (buf), "%" PRIi64, leftmost_frame);
-	node->add_property ("left-frame", buf);
+	node.add_property ("left-frame", buf);
 	snprintf (buf, sizeof (buf), "%f", vertical_adjustment.get_value ());
-	node->add_property ("y-origin", buf);
+	node.add_property ("y-origin", buf);
 
-	node->add_property ("show-measures", _show_measures ? "yes" : "no");
-	node->add_property ("maximised", _maximised ? "yes" : "no");
-	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
-	node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
-	node->add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
-	node->add_property ("mouse-mode", enum2str(mouse_mode));
-	node->add_property ("join-object-range", smart_mode_action->get_active () ? "yes" : "no");
+	node.add_property ("show-measures", _show_measures ? "yes" : "no");
+	node.add_property ("maximised", _maximised ? "yes" : "no");
+	node.add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
+	node.add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
+	node.add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
+	node.add_property ("mouse-mode", enum2str(mouse_mode));
+	node.add_property ("join-object-range", smart_mode_action->get_active () ? "yes" : "no");
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		node->add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
+		node.add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
 	}
 
 	act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		node->add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
+		node.add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
 	}
 
 	snprintf (buf, sizeof (buf), "%d", _the_notebook.get_current_page ());
-	node->add_property (X_("editor-list-page"), buf);
+	node.add_property (X_("editor-list-page"), buf);
 
         if (button_bindings) {
                 XMLNode* bb = new XMLNode (X_("Buttons"));
                 button_bindings->save (*bb);
-                node->add_child_nocopy (*bb);
+                node.add_child_nocopy (*bb);
         }
 
-	node->add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
+	node.add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
 
-	node->add_child_nocopy (selection->get_state ());
-	node->add_child_nocopy (_regions->get_state ());
+	node.add_child_nocopy (selection->get_state ());
+	node.add_child_nocopy (_regions->get_state ());
 
 	snprintf (buf, sizeof (buf), "%" PRId64, nudge_clock->current_duration());
-	node->add_property ("nudge-clock-value", buf);
+	node.add_property ("nudge-clock-value", buf);
 
-	return *node;
+	return node;
 }
 
 /** if @param trackview_relative_offset is true, @param y y is an offset into the trackview area, in pixel units
@@ -3835,7 +3750,7 @@ bool
 Editor::edit_controls_button_release (GdkEventButton* ev)
 {
 	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route (this);
+		ARDOUR_UI::instance()->add_route (current_toplevel());
 	} else if (ev->button == 1) {
 		selection->clear_tracks ();
 	}
@@ -3893,12 +3808,6 @@ Editor::cycle_zoom_focus ()
 		set_zoom_focus (ZoomFocusLeft);
 		break;
 	}
-}
-
-void
-Editor::ensure_float (Window& win)
-{
-	win.set_transient_for (*this);
 }
 
 void
@@ -4292,7 +4201,7 @@ Editor::maximise_editing_space ()
 		return;
 	}
 
-	fullscreen ();
+	current_toplevel()->fullscreen ();
 
 	_maximised = true;
 }
@@ -4304,7 +4213,7 @@ Editor::restore_editing_space ()
 		return;
 	}
 
-	unfullscreen();
+	current_toplevel()->unfullscreen();
 
 	_maximised = false;
 }
@@ -4377,13 +4286,14 @@ Editor::mapped_clear_playlist (RouteTimeAxisView& atv, uint32_t /*sz*/)
 bool
 Editor::on_key_press_event (GdkEventKey* ev)
 {
-	return key_press_focus_accelerator_handler (*this, ev);
+	return key_press_focus_accelerator_handler (*current_toplevel(), ev);
 }
 
 bool
 Editor::on_key_release_event (GdkEventKey* ev)
 {
-	return Gtk::Window::on_key_release_event (ev);
+	return false;
+	// return Gtk::Window::on_key_release_event (ev);
 	// return key_press_focus_accelerator_handler (*this, ev);
 }
 
@@ -5091,7 +5001,7 @@ Editor::first_idle ()
 	if (track_views.size() > 1) {
 		Timers::TimerSuspender t;
 		dialog = new MessageDialog (
-			*this,
+			*current_toplevel(),
 			string_compose (_("Please wait while %1 loads visual data."), PROGRAM_NAME),
 			true
 			);
@@ -5664,7 +5574,7 @@ Editor::super_rapid_screen_update ()
 	/* METERING / MIXER STRIPS */
 
 	/* update track meters, if required */
-	if (is_mapped() && meters_running) {
+	if (contents().is_mapped() && meters_running) {
 		RouteTimeAxisView* rtv;
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
@@ -5794,12 +5704,15 @@ Editor::session_going_away ()
 
 	stop_step_editing ();
 
-	/* get rid of any existing editor mixer strip */
-
-	WindowTitle title(Glib::get_application_name());
-	title += _("Editor");
-
-	set_title (title.get_string());
+	if (own_window()) {
+	
+		/* get rid of any existing editor mixer strip */
+		
+		WindowTitle title(Glib::get_application_name());
+		title += _("Editor");
+		
+		own_window()->set_title (title.get_string());
+	}
 
 	SessionHandlePtr::session_going_away ();
 }
@@ -6030,4 +5943,56 @@ Editor::ui_parameter_changed (string parameter)
 			playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
 		}
 	}
+}
+
+Gtk::Window*
+Editor::use_own_window ()
+{
+	bool new_window = !own_window();
+	
+	Gtk::Window* win = Tabbable::use_own_window ();
+
+	if (win && new_window) {
+		win->set_name ("EditorWindow");
+		win->add_accel_group (ActionManager::ui_manager->get_accel_group());
+
+		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Editor"), this);
+
+		// win->signal_realize().connect (*this, &Editor::on_realize);
+		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
+		
+		update_title ();
+	}
+
+	DisplaySuspender ds;
+	contents().show_all ();
+	
+	/* XXX: this is a bit unfortunate; it would probably
+	   be nicer if we could just call show () above rather
+	   than needing the show_all ()
+	*/
+	
+	/* re-hide stuff if necessary */
+	editor_list_button_toggled ();
+	parameter_changed ("show-summary");
+	parameter_changed ("show-group-tabs");
+	parameter_changed ("show-zoom-tools");
+	
+	/* now reset all audio_time_axis heights, because widgets might need
+	   to be re-hidden
+	*/
+	
+	TimeAxisView *tv;
+	
+	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		tv = (static_cast<TimeAxisView*>(*i));
+		tv->reset_height ();
+	}
+	
+	if (current_mixer_strip) {
+		current_mixer_strip->hide_things ();
+		current_mixer_strip->parameter_changed ("mixer-element-visibility");
+	}
+	
+	return win;
 }

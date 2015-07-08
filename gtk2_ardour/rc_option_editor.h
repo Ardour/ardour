@@ -20,6 +20,8 @@
 #ifndef __gtk_ardour_rc_option_editor_h__
 #define __gtk_ardour_rc_option_editor_h__
 
+#include "gtkmm2ext/tabbable.h"
+
 #include "option_editor.h"
 #include "visibility_group.h"
 
@@ -32,7 +34,7 @@
  */
 
 /** Editor for options which are obtained from and written back to one of the .rc files. */
-class RCOptionEditor : public OptionEditor
+class RCOptionEditor : public OptionEditor, public Gtkmm2ext::Tabbable
 {
 public:
 	RCOptionEditor ();

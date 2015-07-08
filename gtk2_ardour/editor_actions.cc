@@ -2062,11 +2062,8 @@ Editor::register_region_actions ()
 		sigc::bind (sigc::mem_fun (*this, &Editor::align_regions_relative), ARDOUR::SyncPoint)
 		);
 
-	Glib::RefPtr<Action> a = reg_sens (_region_actions, "choose-top-region", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), false));
-	a->set_accel_group (get_accel_group ());
-
-	a = reg_sens (_region_actions, "choose-top-region-context-menu", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), true));
-	a->set_accel_group (get_accel_group ());
+	reg_sens (_region_actions, "choose-top-region", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), false));
+	reg_sens (_region_actions, "choose-top-region-context-menu", _("Choose Top..."), sigc::bind (sigc::mem_fun (*this, &Editor::change_region_layering_order), true));
 
 	_all_region_actions_sensitized = true;
 

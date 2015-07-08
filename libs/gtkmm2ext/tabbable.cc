@@ -28,8 +28,9 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 using std::string;
 
-Tabbable::Tabbable (Widget& w)
-	: _contents (w)
+Tabbable::Tabbable (Widget& w, const string& name)
+	: WindowProxy (name)
+	, _contents (w)
 {
 }
 
@@ -78,15 +79,43 @@ Tabbable::get (bool create)
 	if (!create) {
 		return 0;
 	}
+
+	/* From here on, we're creating the window 
+	 */
 	
 	if ((_window = new Window (WINDOW_TOPLEVEL)) == 0) {
 		return 0;
 	}
 
-	/* allow parent window to become the key focus window */
-	_window->set_flags (CAN_FOCUS);
+	_window->add (_own_notebook);
+	_own_notebook.show ();
+	_own_notebook.set_show_tabs (false);
 
+	/* do other window-related setup */
+
+	setup ();
+
+	/* window should be ready for derived classes to do something with it */
+	
 	return _window;
+}
+
+Gtk::Notebook*
+Tabbable::tab_root_drop ()
+{
+	(void) use_own_window ();
+	
+	/* This is called after a drop of a tab onto the root window. Its
+	 * responsibility is to return the notebook that this Tabbable's
+	 * contents should be packed into before the drop handling is
+	 * completed. It is not responsible for actually taking care of this
+	 * packing.
+	 */
+	
+	_window->show_all ();
+	_window->present ();
+
+	return &_own_notebook;
 }
 
 void
@@ -119,6 +148,8 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 
 	if (_window == toplevel) {
 
+		std::cerr << " delete event for own window\n";
+		
 		/* unpack Tabbable from parent, put it back in the main tabbed
 		 * notebook
 		 */
@@ -132,12 +163,12 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 		_window->hide ();
 		
 		if (_parent_notebook) {
+
+			std::cerr << "repack into parent notebook\n";
 			
 			_parent_notebook->insert_page (_contents, _tab_title, _notebook_position);
 			_parent_notebook->set_tab_detachable (_contents);
 		}
-
-		show_all ();
 
 		/* don't let anything else handle this */
 		
@@ -162,4 +193,18 @@ Tabbable::is_tabbed () const
 	}
 	
 	return false;
+}
+
+void
+Tabbable::show_tab ()
+{
+	if (!window_visible() && _parent_notebook) {
+		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+	}
+}
+
+Gtk::Window*
+Tabbable::current_toplevel () const
+{
+	return dynamic_cast<Gtk::Window*> (contents().get_toplevel());
 }

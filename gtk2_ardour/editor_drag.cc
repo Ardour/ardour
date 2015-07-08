@@ -3767,7 +3767,7 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	assert (_marker);
 
 	_points.push_back (ArdourCanvas::Duple (0, 0));
-	_points.push_back (ArdourCanvas::Duple (0, physical_screen_height (_editor->get_window())));
+	_points.push_back (ArdourCanvas::Duple (0, physical_screen_height (_editor->current_toplevel()->get_window())));
 }
 
 MarkerDrag::~MarkerDrag ()
@@ -5139,7 +5139,7 @@ RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operat
 
 	_drag_rect = new ArdourCanvas::Rectangle (_editor->time_line_group,
 						  ArdourCanvas::Rect (0.0, 0.0, 0.0,
-								      physical_screen_height (_editor->get_window())));
+						                      physical_screen_height (_editor->current_toplevel()->get_window())));
 	_drag_rect->hide ();
 
 	_drag_rect->set_fill_color (UIConfiguration::instance().color ("range drag rect"));

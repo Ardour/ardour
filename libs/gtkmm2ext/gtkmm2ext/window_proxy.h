@@ -25,7 +25,7 @@
 #include <glibmm/refptr.h>
 #include <sigc++/trackable.h>
 
-class XMLNode;
+#include "pbd/statefuldestructible.h"
 
 #include "gtkmm2ext/visibility.h"
 
@@ -38,10 +38,10 @@ namespace Gtkmm2ext {
 
 class VisibilityTracker;
 
-class LIBGTKMM2EXT_API WindowProxy : public virtual sigc::trackable
+class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public virtual sigc::trackable
 {
   public:
-	WindowProxy ();
+	WindowProxy (const std::string& name);
 	WindowProxy (const std::string& name, const std::string& menu_name);
 	WindowProxy (const std::string& name, const std::string& menu_name, const XMLNode&);
 	virtual ~WindowProxy();
@@ -68,8 +68,8 @@ class LIBGTKMM2EXT_API WindowProxy : public virtual sigc::trackable
     
 	virtual void toggle ();
     
-	virtual int set_state (const XMLNode&);
-	virtual XMLNode& get_state () const;
+	virtual int set_state (const XMLNode&, int version);
+	virtual XMLNode& get_state ();
     
 	operator bool() const { return _window != 0; }
     

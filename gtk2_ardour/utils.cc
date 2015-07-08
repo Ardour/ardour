@@ -297,39 +297,28 @@ ARDOUR_UI_UTILS::gdk_color_to_rgba (Gdk::Color const& c)
 bool
 ARDOUR_UI_UTILS::relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 {
-
-	if (!key_press_focus_accelerator_handler (*win, ev)) {
-		if (!PublicEditor::_instance) {
-			/* early key press in pre-main-window-dialogs, no editor yet */
-			return false;
-		}
-		PublicEditor& ed (PublicEditor::instance());
-		return ed.on_key_press_event(ev);
-	} else {
-		return true;
+	switch (ev->type) {
+	case GDK_KEY_PRESS:
+		return ARDOUR_UI::instance()->key_press_handler (ev, win);
+	default:
+		return ARDOUR_UI::instance()->key_release_handler (ev, win);
 	}
 }
 
 bool
-ARDOUR_UI_UTILS::forward_key_press (GdkEventKey* ev)
+ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
 {
-	return PublicEditor::instance().on_key_press_event(ev);
-}
-
-bool
-ARDOUR_UI_UTILS::emulate_key_event (Gtk::Widget* w, unsigned int keyval)
-{
-	GdkDisplay  *display = gtk_widget_get_display (GTK_WIDGET(w->gobj()));
+	GdkDisplay  *display = gtk_widget_get_display (GTK_WIDGET(ARDOUR_UI::instance()->main_window().gobj()));
 	GdkKeymap   *keymap  = gdk_keymap_get_for_display (display);
 	GdkKeymapKey *keymapkey = NULL;
 	gint n_keys;
-
+	
 	if (!gdk_keymap_get_entries_for_keyval(keymap, keyval, &keymapkey, &n_keys)) return false;
 	if (n_keys !=1) { g_free(keymapkey); return false;}
 
 	GdkEventKey ev;
 	ev.type = GDK_KEY_PRESS;
-	ev.window = gtk_widget_get_window(GTK_WIDGET(w->gobj()));
+	ev.window = ARDOUR_UI::instance()->main_window().get_window()->gobj();
 	ev.send_event = FALSE;
 	ev.time = 0;
 	ev.state = 0;
@@ -340,9 +329,9 @@ ARDOUR_UI_UTILS::emulate_key_event (Gtk::Widget* w, unsigned int keyval)
 	ev.group = keymapkey[0].group;
 	g_free(keymapkey);
 
-	forward_key_press(&ev);
+	relay_key_press(&ev);
 	ev.type = GDK_KEY_RELEASE;
-	return forward_key_press(&ev);
+	return relay_key_press(&ev);
 }
 
 static string

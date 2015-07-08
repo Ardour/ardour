@@ -57,11 +57,13 @@ gtkmm2ext_sources = [
         'selector.cc',
         'slider_controller.cc',
         'stateful_button.cc',
+        'tabbable.cc',
         'tearoff.cc',
         'textviewer.cc',
         'treeutils.cc',
         'utils.cc',
         'visibility_tracker.cc',
+        'window_proxy.cc'
         'window_title.cc'
 ]
 

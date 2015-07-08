@@ -334,11 +334,18 @@ ARDOUR_UI::goto_editor_window ()
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 
+	if (!editor->window_visible()) {
+		/* goto tab */
+		editor->show_tab ();
+		return;
+	}
+	
 	editor->show_window ();
 	editor->present ();
-	/* mixer should now be on top */
-	if (UIConfiguration::instance().get_transients_follow_front()) {
-		WM::Manager::instance().set_transient_for (editor);
+
+	/* editor should now be on top */
+	if (UIConfiguration::instance()->get_transients_follow_front()) {
+		WM::Manager::instance().set_transient_for (editor->own_window());
 	}
 	_mixer_on_top = false;
 }
@@ -348,9 +355,9 @@ ARDOUR_UI::goto_mixer_window ()
 {
 	Glib::RefPtr<Gdk::Window> win;
 	Glib::RefPtr<Gdk::Screen> screen;
-
-	if (editor) {
-		win = editor->get_window ();
+	
+	if (editor && editor->own_window()) {
+		win = editor->own_window ()->get_window();
 	}
 
 	if (win) {
@@ -387,23 +394,28 @@ ARDOUR_UI::toggle_mixer_window ()
 	bool show = false;
 	bool obscuring = false;
 
-	if (mixer->not_visible ()) {
-		show = true;
-	}
-	else if (   (!editor->not_visible () && ARDOUR_UI_UTILS::windows_overlap (editor, mixer))
-	         || (!meterbridge->not_visible () && ARDOUR_UI_UTILS::windows_overlap (meterbridge, mixer))
-			) {
-		obscuring = true;
+	if (!mixer->window_visible()  || editor->window_visible()) {
+		return;
 	}
 
-	if (obscuring && (editor->property_has_toplevel_focus() || meterbridge->property_has_toplevel_focus())) {
+	
+	
+	if (!mixer->window_visible ()) {
+		show = true;
+	} else if (   (!editor->not_visible () && ARDOUR_UI_UTILS::windows_overlap (editor->own_window(), mixer->own_window()))
+	              || (!meterbridge->not_visible () && ARDOUR_UI_UTILS::windows_overlap (meterbridge, mixer->own_window()))
+		) {
+		obscuring = true;
+	}
+	
+	if (obscuring && (editor->own_window()->property_has_toplevel_focus() || meterbridge->property_has_toplevel_focus())) {
 		show = true;
 	}
 
 	if (show) {
 		goto_mixer_window ();
 	} else {
-		mixer->hide_window ((GdkEventAny*)0);
+		mixer->own_window()->hide ();
 	}
 }
 
@@ -417,14 +429,12 @@ ARDOUR_UI::toggle_meterbridge ()
 
 	if (meterbridge->not_visible ()) {
 		show = true;
-	}
-	else if (   (!editor->not_visible() && ARDOUR_UI_UTILS::windows_overlap (editor, meterbridge))
-	         || (!mixer->not_visible () && ARDOUR_UI_UTILS::windows_overlap (meterbridge, mixer))
-			) {
+	} else if ((editor->window_visible() && ARDOUR_UI_UTILS::windows_overlap (editor->own_window(), meterbridge)) ||
+	           (mixer->window_visible () && ARDOUR_UI_UTILS::windows_overlap (mixer->own_window(), meterbridge))) {
 		obscuring = true;
 	}
 
-	if (obscuring && (editor->property_has_toplevel_focus() || mixer->property_has_toplevel_focus())) {
+	if (obscuring && (editor->own_window()->property_has_toplevel_focus() || (mixer->own_window() && mixer->own_window()->property_has_toplevel_focus()))) {
 		show = true;
 	}
 
@@ -442,25 +452,29 @@ ARDOUR_UI::toggle_editor_mixer ()
 {
 	bool obscuring = false;
 
-	if (editor && mixer) {
-		if (ARDOUR_UI_UTILS::windows_overlap (editor, mixer)) {
+	if (!mixer->window_visible() || !editor->window_visible()) {
+		return;
+	}
+	
+	if (editor && mixer && mixer->own_window()) {
+		if (ARDOUR_UI_UTILS::windows_overlap (editor->own_window(), mixer->own_window())) {
 			obscuring = true;
 		}
 	}
 
-	if (mixer && !mixer->not_visible() && mixer->property_has_toplevel_focus()) {
+	if (mixer && !mixer->not_visible() && mixer->own_window() && mixer->own_window()->property_has_toplevel_focus()) {
 		if (obscuring) {
 			goto_editor_window();
 		}
-	} else if (editor && !editor->not_visible() && editor->property_has_toplevel_focus()) {
+	} else if (editor && editor->window_visible() && editor->own_window()->property_has_toplevel_focus()) {
 		if (obscuring) {
 			goto_mixer_window();
 		}
-	} else if (mixer && mixer->not_visible()) {
+	} else if (mixer) {
 		if (obscuring) {
 			goto_mixer_window ();
 		}
-	} else if (editor && editor->not_visible()) {
+	} else if (editor) {
 		if (obscuring) {
 			goto_editor_window ();
 		}
@@ -535,23 +549,23 @@ ARDOUR_UI::handle_locations_change (Location *)
 }
 
 bool
-ARDOUR_UI::main_window_state_event_handler (GdkEventWindowState* ev, bool window_was_editor)
+ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* object)
 {
-	if (window_was_editor) {
+	if (object == editor) {
 
 		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
 			if (big_clock_window) {
-				big_clock_window->set_transient_for (*editor);
+				big_clock_window->set_transient_for (*editor->own_window());
 			}
 		}
 
-	} else {
+	} else if (object == mixer) {
 
 		if ((ev->changed_mask & GDK_WINDOW_STATE_FULLSCREEN) &&
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
 			if (big_clock_window) {
-				// big_clock_window->set_transient_for (*mixer);
+				big_clock_window->set_transient_for (*mixer->own_window());
 			}
 		}
 	}

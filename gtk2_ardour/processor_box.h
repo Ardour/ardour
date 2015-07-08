@@ -78,31 +78,31 @@ class ProcessorBox;
 class ProcessorWindowProxy : public WM::ProxyBase
 {
   public:
-    ProcessorWindowProxy (std::string const &, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
-    ~ProcessorWindowProxy();
-
-    Gtk::Window* get (bool create = false);
-
-    boost::weak_ptr<ARDOUR::Processor> processor () const {
-	    return _processor;
-    }
-
-    ARDOUR::SessionHandlePtr* session_handle();
-    void toggle();
-    void set_custom_ui_mode(bool use_custom) { want_custom = use_custom; }
-
-    void set_state (const XMLNode&);
-    XMLNode& get_state () const;
-
+	ProcessorWindowProxy (std::string const &, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
+	~ProcessorWindowProxy();
+	
+	Gtk::Window* get (bool create = false);
+	
+	boost::weak_ptr<ARDOUR::Processor> processor () const {
+		return _processor;
+	}
+	
+	ARDOUR::SessionHandlePtr* session_handle();
+	void toggle();
+	void set_custom_ui_mode(bool use_custom) { want_custom = use_custom; }
+	
+	int set_state (const XMLNode&, int);
+	XMLNode& get_state ();
+	
   private:
-    ProcessorBox* _processor_box;
-    boost::weak_ptr<ARDOUR::Processor> _processor;
-    bool is_custom;
-    bool want_custom;
-    bool _valid;
-
-    void processor_going_away ();
-    PBD::ScopedConnection going_away_connection;
+	ProcessorBox* _processor_box;
+	boost::weak_ptr<ARDOUR::Processor> _processor;
+	bool is_custom;
+	bool want_custom;
+	bool _valid;
+	
+	void processor_going_away ();
+	PBD::ScopedConnection going_away_connection;
 };
 
 class ProcessorEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable

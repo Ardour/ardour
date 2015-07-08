@@ -374,7 +374,7 @@ PluginUIWindow::on_key_press_event (GdkEventKey* event)
 				   no widgets in this window that we want to have
 				   key focus.
 				*/
-				return relay_key_press (event, &PublicEditor::instance());
+				return relay_key_press (event, 0);
 			} else {
 				return relay_key_press (event, this);
 			}

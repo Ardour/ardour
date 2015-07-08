@@ -222,7 +222,7 @@ RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 	}
 
 	if (!handled) {
-		handled = key_press_focus_accelerator_handler (editor, ev);
+		handled = relay_key_press (ev, 0);
 	}
 
 	if (!handled) {

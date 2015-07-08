@@ -256,7 +256,7 @@ Meterbridge::on_key_press_event (GdkEventKey* ev)
 	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
 		return true;
 	}
-	return forward_key_press (ev);
+	return relay_key_press (ev);
 }
 
 bool

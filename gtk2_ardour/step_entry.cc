@@ -504,7 +504,7 @@ StepEntry::on_key_press_event (GdkEventKey* ev)
                 }
 	}
 
-        return forward_key_press (ev);
+        return relay_key_press (ev);
 }
 
 bool

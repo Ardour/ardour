@@ -78,7 +78,7 @@ Editor::show_editor_mixer (bool yn)
 	show_editor_mixer_when_tracks_arrive = false;
 
 	if (yn) {
-		Glib::RefPtr<Gdk::Window> win = get_window ();
+		Glib::RefPtr<Gdk::Window> win = current_toplevel()->get_window ();
 		Glib::RefPtr<Gdk::Screen> screen;
 
 		if (win) {

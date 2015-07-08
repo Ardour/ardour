@@ -43,6 +43,7 @@
 #include "canvas/fwd.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "editing.h"
@@ -105,9 +106,9 @@ using ARDOUR::framecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, public Gtkmm2ext::VisibilityTracker {
+class PublicEditor : public Gtkmm2ext::Tabbable {
   public:
-	PublicEditor ();
+	PublicEditor (Gtk::Widget& content);
 	virtual ~PublicEditor ();
 
 	/** @return Singleton PublicEditor instance */
@@ -232,8 +233,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual void export_range () = 0;
 
 	virtual void register_actions () = 0;
-	virtual void add_transport_frame (Gtk::Container&) = 0;
-	virtual void add_toplevel_menu (Gtk::Container&) = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
 	virtual framecnt_t get_current_zoom () const = 0;
@@ -267,8 +266,6 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	/** @return true if the playhead is currently being dragged, otherwise false */
 	virtual bool dragging_playhead () const = 0;
-	virtual void ensure_float (Gtk::Window&) = 0;
-	virtual void show_window () = 0;
 	virtual framepos_t leftmost_sample() const = 0;
 	virtual framecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
@@ -442,11 +439,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;
 
-	Gtk::Notebook& tabs() { return _tabs; }
-	
   protected:
-	Gtk::Notebook _tabs;
-
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;

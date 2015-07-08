@@ -32,8 +32,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-WindowProxy::WindowProxy ()
-	: _window (0)
+WindowProxy::WindowProxy (const std::string& name)
+	: _name (name)
+	, _window (0)
 	, _visible (false)
 	, _x_off (-1)
 	, _y_off (-1)
@@ -67,7 +68,7 @@ WindowProxy::WindowProxy (const std::string& name, const std::string& menu_name,
 	, _height (-1) 
 	, vistracker (0)
 {
-	set_state (node);
+	set_state (node, 0);
 }
 
 WindowProxy::~WindowProxy ()
@@ -77,7 +78,7 @@ WindowProxy::~WindowProxy ()
 }
 
 int
-WindowProxy::set_state (const XMLNode& node)
+WindowProxy::set_state (const XMLNode& node, int /* version */)
 {
 	XMLNodeList children = node.children ();
 
@@ -171,7 +172,7 @@ WindowProxy::toggle()
 }
 
 XMLNode&
-WindowProxy::get_state () const
+WindowProxy::get_state ()
 {
 	XMLNode* node = new XMLNode (X_("Window"));
 	char buf[32];	

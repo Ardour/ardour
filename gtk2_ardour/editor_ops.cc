@@ -2782,7 +2782,7 @@ Editor::rename_region ()
 		return;
 	}
 
-	ArdourDialog d (*this, _("Rename Region"), true, false);
+	ArdourDialog d (*current_toplevel(), _("Rename Region"), true, false);
 	Entry entry;
 	Label label (_("New name:"));
 	HBox hbox;
@@ -7597,7 +7597,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	double first_y_pos = DBL_MAX;
 
 	if (h < TimeAxisView::preset_height (HeightSmall)) {
-		MessageDialog msg (*this, _("There are too many tracks to fit in the current window"));
+		MessageDialog msg (*current_toplevel(), _("There are too many tracks to fit in the current window"));
 		/* too small to be displayed */
 		return;
 	}

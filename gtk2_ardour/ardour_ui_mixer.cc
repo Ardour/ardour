@@ -47,7 +47,6 @@ ARDOUR_UI::create_mixer ()
 		return -1;
 	}
 
-	mixer->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
         mixer->signal_event().connect (sigc::bind (sigc::ptr_fun (&Gtkmm2ext::Keyboard::catch_user_event_for_pre_dialog_focus), mixer));
 
 	return 0;
@@ -65,8 +64,6 @@ ARDOUR_UI::create_meterbridge ()
 	catch (failed_constructor& err) {
 		return -1;
 	}
-
-	meterbridge->signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::main_window_state_event_handler), false));
 
 	return 0;
 }

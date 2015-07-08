@@ -27,7 +27,7 @@
 
 #include "i18n.h"
 
-FloatingTextEntry::FloatingTextEntry (const std::string& initial_contents)
+FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents)
 	: Gtk::Window (Gtk::WINDOW_POPUP)
         , entry_changed (false)
 {
@@ -44,7 +44,10 @@ FloatingTextEntry::FloatingTextEntry (const std::string& initial_contents)
 	entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
 	entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press));
 	entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press));
-	PublicEditor::instance ().signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
+
+	if (parent) {
+		parent->signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
+	}
 
 	add (entry);
 }

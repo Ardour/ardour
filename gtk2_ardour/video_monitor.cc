@@ -255,9 +255,7 @@ VideoMonitor::is_started ()
 void
 VideoMonitor::forward_keyevent (unsigned int keyval)
 {
-	Editor* ed = dynamic_cast<Editor*>(&PublicEditor::instance());
-	if (!ed) return;
-	emulate_key_event(ed, keyval);
+	emulate_key_event (keyval);
 }
 
 void

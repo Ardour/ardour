@@ -74,12 +74,7 @@ tab_window_root_drop (GtkNotebook* src,
 		      gint y,
 		      gpointer user_data)
 {
-	Gtk::Notebook* nb = ARDOUR_UI::instance()->tab_window_root_drop (src, w, x, y, user_data);
-	if (nb) {
-		return nb->gobj();
-	} else {
-		return 0;
-	}
+	return ARDOUR_UI::instance()->tab_window_root_drop (src, w, x, y, user_data);
 }
 
 int
@@ -125,24 +120,39 @@ ARDOUR_UI::setup_windows ()
 	top_packer.pack_start (menu_bar_base, false, false);
 #endif
 
-	editor->add_toplevel_menu (top_packer);
+	main_vpacker.pack_start (top_packer);
 
-	editor->add_transport_frame (transport_frame);
-	editor->tabs().append_page (rc_option_editor_placeholder, _("Preferences"));
+	/* now add the transport frame to the top of main window */
+	
+	main_vpacker.pack_start (transport_frame, false, false);
+	main_vpacker.pack_start (_tabs, true, true);
 
-	editor->tabs().signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
+#ifdef TOP_MENUBAR
+	main_vpacker.pack_start (status_bar_hpacker, false, false);
+#endif
+
+	setup_transport();
+	build_menu_bar ();
+	setup_tooltips ();
+
+	/* pack the main vpacker into the main window and show everything
+	 */
+	
+	_main_window.add (main_vpacker);
+	transport_frame.show_all ();
+	_main_window.show_all ();
+
+	setup_toplevel_window (_main_window, "", this);
+	
+	rc_option_editor = new RCOptionEditor;
+	rc_option_editor->add_to_notebook (_tabs, _("Preferences"), 2);
+	
+	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 
 	/* It would be nice if Gtkmm had wrapped this rather than just
 	 * deprecating the old set_window_creation_hook() method, but oh well...
 	 */
-	g_signal_connect (editor->tabs().gobj(), "create-window",
-			  (GCallback) ::tab_window_root_drop, this);
-
-	setup_transport();
-
-	build_menu_bar ();
-
-	setup_tooltips ();
+	g_signal_connect (_tabs.gobj(), "create-window", (GCallback) ::tab_window_root_drop, this);
 
 	return 0;
 }
@@ -517,7 +527,6 @@ ARDOUR_UI::setup_transport ()
 void
 ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
 {
-//	editor->ensure_float (transport_tearoff->tearoff_window());
 	b->remove (*w);
 }
 

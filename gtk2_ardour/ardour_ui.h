@@ -53,10 +53,12 @@
 #include <gtkmm/menubar.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/adjustment.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/stateful_button.h>
-#include <gtkmm2ext/bindable_button.h>
+
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/stateful_button.h"
+#include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/bindings.h"
 
 #include "ardour/ardour.h"
 #include "ardour/types.h"
@@ -321,14 +323,23 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void hide_application ();
 
 	Gtk::Notebook& tabs();
+	Gtk::Window& main_window () { return _main_window; }
+
+	void setup_toplevel_window (Gtk::Window&, const std::string& name, void* owner);
 	
 	/* called from a static C function */
 
-	Gtk::Notebook* tab_window_root_drop (GtkNotebook* src,
-					     GtkWidget* w,
-					     gint x,
-					     gint y,
-					     gpointer user_data);
+	GtkNotebook* tab_window_root_drop (GtkNotebook* src,
+	                                   GtkWidget* w,
+	                                   gint x,
+	                                   gint y,
+	                                   gpointer user_data);
+
+	bool tabbed_window_state_event_handler (GdkEventWindowState*, void* object);
+
+	bool key_press_handler (GdkEventKey*, Gtk::Window* event_window);
+	bool key_release_handler (GdkEventKey*, Gtk::Window* event_window);
+
   protected:
 	friend class PublicEditor;
 
@@ -349,13 +360,21 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_session_options_window ();
 
   private:
-	Mixer_UI*            mixer;
-	NSM_Client*          nsm;
-	bool                _was_dirty;
-        bool                _mixer_on_top;
-        bool                _initial_verbose_plugin_scan;
-        bool first_time_engine_run;
+	Gtk::Window   _main_window;
+	Gtk::VBox      main_vpacker;
+	Gtk::HBox      status_bar_hpacker;
+	Gtk::Notebook _tabs;
+	PublicEditor*  editor;
+	Mixer_UI*      mixer;
+	Gtk::Tooltips _tooltips;
+	NSM_Client*    nsm;
+	bool          _was_dirty;
+        bool          _mixer_on_top;
+        bool          _initial_verbose_plugin_scan;
+	bool           first_time_engine_run;
 
+	Gtkmm2ext::Bindings _global_bindings;
+	
 	void goto_editor_window ();
 	void goto_mixer_window ();
 	void toggle_mixer_window ();
@@ -396,8 +415,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void         update_clocks ();
 	void         start_clocking ();
 	void         stop_clocking ();
-
-	bool main_window_state_event_handler (GdkEventWindowState*, bool window_was_editor);
 
 	void update_transport_clocks (framepos_t pos);
 	void record_state_changed ();
@@ -627,17 +644,16 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void setup_order_hint (AddRouteDialog::InsertAt);
 
 	int         create_mixer ();
-	PublicEditor     *editor;
 	int         create_editor ();
 
 	Meterbridge  *meterbridge;
 	int         create_meterbridge ();
 
-        RCOptionEditor* rc_option_editor;
-	Gtk::HBox rc_option_editor_placeholder;
-
         /* Dialogs that can be created via new<T> */
 
+        RCOptionEditor* rc_option_editor;
+	Gtk::HBox rc_option_editor_placeholder;
+	
         WM::Proxy<SpeakerDialog> speaker_config_window;
         WM::Proxy<KeyEditor> key_editor;
         WM::Proxy<AddRouteDialog> add_route_dialog;
@@ -811,6 +827,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void grab_focus_after_dialog ();
 
 	void tabs_switch (GtkNotebookPage*, guint page_number);
+	bool key_event_handler (GdkEventKey*, Gtk::Window* window);
 };
 
 #endif /* __ardour_gui_h__ */

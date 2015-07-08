@@ -36,11 +36,14 @@ class VisibilityTracker;
 
 class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
   public:
-	Tabbable (Gtk::Widget&);
+	Tabbable (Gtk::Widget&, const std::string&);
 	~Tabbable ();
 
 	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title, int position);
-
+	void show_tab ();
+	
+	Gtk::Widget& contents() const { return _contents; }
+	
 	Gtk::Window* get (bool create = false);
 	Gtk::Window* own_window () { return get (false); } 
 	Gtk::Notebook* tabbed_parent ();
@@ -52,12 +55,17 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	virtual void show_window ();
 
 	bool window_visible ();
+
+	Gtk::Window* current_toplevel () const;
+
+	Gtk::Notebook* tab_root_drop ();
 	
   protected:
 	bool delete_event_handler (GdkEventAny *ev);
 	
   private:
 	Gtk::Widget&   _contents;
+	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
 	std::string    _tab_title;
 	int            _notebook_position;

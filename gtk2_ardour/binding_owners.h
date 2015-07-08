@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2015 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,26 +17,27 @@
 
 */
 
-#include "public_editor.h"
+#ifndef __gtk_ardour_binding_owners_h__
+#define __gtk_ardour_binding_owners_h__
 
-#include "i18n.h"
+#include <gtkmm/box.h>
 
-PublicEditor* PublicEditor::_instance = 0;
+#include "gtkmm2ext/bindings.h"
 
-const int PublicEditor::window_border_width = 12;
-const int PublicEditor::container_border_width = 12;
-const int PublicEditor::vertical_spacing = 6;
-const int PublicEditor::horizontal_spacing = 6;
+class HasBindings {
+  public:
+	HasBindings (Gtkmm2ext::Bindings& b) : _bindings (b) {}
 
-sigc::signal<void> PublicEditor::DropDownKeys;
+	Gtkmm2ext::Bindings bindings() const { return _bindings; }
 
-PublicEditor::PublicEditor (Gtk::Widget& content)
-	: Tabbable (content, _("Editor"))
-	, _suspend_route_redisplay_counter (0)
+  protected:
+	Gtkmm2ext::Bindings& _bindings;
+};
+
+class VBoxWithBindings : public Gtk::VBox, public HasBindings
 {
-}
+  public:
+	VBoxWithBindings (Gtkmm2ext::Bindings& b) : HasBindings (b) {}
+};
 
-PublicEditor::~PublicEditor()
-{
-}
-
+#endif /* __gtk_ardour_binding_owners_h__ */

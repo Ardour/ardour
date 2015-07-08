@@ -89,8 +89,7 @@ Mixer_UI::instance ()
 }
 
 Mixer_UI::Mixer_UI ()
-	: _parent_window (0)
-	, _visible (false)
+	: Tabbable (_content, _("Mixer"))
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)
 	, track_menu (0)
@@ -237,19 +236,16 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.signal_size_allocate().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::pane_allocation_handler),
 							 static_cast<Gtk::Paned*> (&list_hpane)));
 
-	pack_start (list_hpane, true, true);
-
-	set_name ("MixerWindow");
+	_content.pack_start (list_hpane, true, true);
 
 	update_title ();
-
-	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
 	route_group_display_button_box->show();
 	route_group_add_button->show();
 	route_group_remove_button->show();
 
-	show ();
+	_content.show ();
+	_content.set_name ("MixerWindow");
 
 	global_hpacker.show();
 	scroller.show();
@@ -297,15 +293,6 @@ void
 Mixer_UI::track_editor_selection ()
 {
 	PublicEditor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &Mixer_UI::follow_editor_selection));
-}
-
-
-void
-Mixer_UI::ensure_float (Window& win)
-{
-	if (_parent_window) {
-		win.set_transient_for (*_parent_window);
-	}
 }
 
 Gtk::Notebook*
@@ -417,7 +404,6 @@ Mixer_UI::hide_window (GdkEventAny *ev)
 
 	return true;
 }
-
 
 void
 Mixer_UI::add_strips (RouteList& routes)
@@ -871,7 +857,7 @@ Mixer_UI::set_session (Session* sess)
 	refill_favorite_plugins();
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
-	set_state (*node);
+	set_state (*node, 0);
 
 	update_title ();
 
@@ -1022,11 +1008,36 @@ Mixer_UI::stop_updating ()
 void
 Mixer_UI::fast_update_strips ()
 {
-	if (is_mapped () && _session) {
+	if (_content.is_mapped () && _session) {
 		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->fast_update ();
 		}
 	}
+}
+
+void
+Mixer_UI::show_window ()
+{
+	Tabbable::show_window ();
+		
+	/* show/hide group tabs as required */
+	parameter_changed ("show-group-tabs");
+	
+	/* now reset each strips width so the right widgets are shown */
+	MixerStrip* ms;
+	
+	TreeModel::Children rows = track_model->children();
+	TreeModel::Children::iterator ri;
+	
+	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+		ms = (*ri)[track_columns.strip];
+		ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
+		/* Fix visibility of mixer strip stuff */
+		ms->parameter_changed (X_("mixer-element-visibility"));
+	}
+
+	/* force focus into main area */
+	scroller_base.grab_focus ();
 }
 
 void
@@ -1699,23 +1710,6 @@ Mixer_UI::set_strip_width (Width w, bool save)
 	}
 }
 
-void
-Mixer_UI::set_window_pos_and_size ()
-{
-	if (_parent_window) {
-		_parent_window->resize (m_width, m_height);
-		_parent_window->move (m_root_x, m_root_y);
-	}
-}
-
-void
-Mixer_UI::get_window_pos_and_size ()
-{
-	if (_parent_window) {
-		_parent_window->get_position(m_root_x, m_root_y);
-		_parent_window->get_size(m_width, m_height);
-	}
-}
 
 struct PluginStateSorter {
 public:
@@ -1740,7 +1734,7 @@ private:
 };
 
 int
-Mixer_UI::set_state (const XMLNode& node)
+Mixer_UI::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
 	XMLNode* geometry;
@@ -1791,8 +1785,6 @@ Mixer_UI::set_state (const XMLNode& node)
 			m_root_y = atoi (prop->value());
 		}
 	}
-
-	set_window_pos_and_size ();
 
 	if ((prop = node.property ("narrow-strips"))) {
 		if (string_is_affirmative (prop->value())) {
@@ -1854,7 +1846,7 @@ Mixer_UI::set_state (const XMLNode& node)
 }
 
 XMLNode&
-Mixer_UI::get_state (void)
+Mixer_UI::get_state ()
 {
 	XMLNode* node = new XMLNode ("Mixer");
 
@@ -1891,11 +1883,8 @@ Mixer_UI::get_state (void)
 	}
 
 	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
-
 	node->add_property ("show-mixer", _visible ? "yes" : "no");
-
 	node->add_property ("show-mixer-list", _show_mixer_list ? "yes" : "no");
-
 	node->add_property ("maximised", _maximised ? "yes" : "no");
 
 	store_current_favorite_order ();
@@ -2171,6 +2160,10 @@ Mixer_UI::new_track_or_bus ()
 void
 Mixer_UI::update_title ()
 {
+	if (!own_window()) {
+		return;
+	}
+	
 	if (_session) {
 		string n;
 
@@ -2207,7 +2200,7 @@ Mixer_UI::strip_by_x (int x)
 	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
 		int x1, x2, y;
 
-		(*i)->translate_coordinates (*this, 0, 0, x1, y);
+		(*i)->translate_coordinates (_content, 0, 0, x1, y);
 		x2 = x1 + (*i)->get_width();
 
 		if (x >= x1 && x <= x2) {
@@ -2267,7 +2260,7 @@ Mixer_UI::toggle_midi_input_active (bool flip_others)
 void
 Mixer_UI::maximise_mixer_space ()
 {
-	if (_maximised) {
+	if (!own_window()) {
 		return;
 	}
 
@@ -2277,12 +2270,15 @@ Mixer_UI::maximise_mixer_space ()
 		win->fullscreen ();
 		_maximised = true;
 	}
+
+	_window->fullscreen ();
+	_maximised = true;
 }
 
 void
 Mixer_UI::restore_mixer_space ()
 {
-	if (!_maximised) {
+	if (!own_window()) {
 		return;
 	}
 
@@ -2292,6 +2288,9 @@ Mixer_UI::restore_mixer_space ()
 		win->unfullscreen();
 		_maximised = false;
 	}
+
+	own_window()->unfullscreen();
+	_maximised = false;
 }
 
 void

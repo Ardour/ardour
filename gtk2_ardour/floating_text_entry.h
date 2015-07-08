@@ -26,7 +26,7 @@
 class FloatingTextEntry : public Gtk::Window
 {
   public:
-        FloatingTextEntry (const std::string& initial_contents);
+	FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents);
 
         sigc::signal1<void,std::string> use_text;
 
