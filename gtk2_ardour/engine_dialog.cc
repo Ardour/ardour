@@ -1537,6 +1537,8 @@ EngineControl::maybe_display_saved_state ()
 XMLNode&
 EngineControl::get_state ()
 {
+	LocaleGuard lg (X_("C"));
+
 	XMLNode* root = new XMLNode ("AudioMIDISetup");
 	std::string path;
 
