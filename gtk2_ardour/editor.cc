@@ -378,7 +378,7 @@ Editor::Editor ()
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
 	, lock_dialog (0)
-	, last_event_time { 0, 0 }
+	  /* , last_event_time { 0, 0 } */ /* this initialization style requires C++11 */
 	, _dragging_playhead (false)
 	, _dragging_edit_point (false)
 	, _show_measures (true)
@@ -472,6 +472,9 @@ Editor::Editor ()
 	PublicEditor::_instance = this;
 
 	_have_idled = false;
+
+	last_event_time.tv_sec = 0;
+	last_event_time.tv_usec = 0;
 
 	selection_op_history.clear();
 	before.clear();
