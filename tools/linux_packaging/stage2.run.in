@@ -351,7 +351,7 @@ LIB_ERROR="F"
 LD_PATH=`pwd`/${BUNDLE_DIR}/lib
 
 # check the main App
-LDD_RESULT=$(LD_LIBRARY_PATH=${LD_PATH} ldd ${BUNDLE_DIR}/bin/${PGM_NAME_LOWER}-* 2>&1 > /dev/null)
+LDD_RESULT=$(LD_LIBRARY_PATH=${LD_PATH} ldd ${BUNDLE_DIR}/bin/${PGM_NAME_LOWER}-* 2>&1 > /dev/null | grep -v "no version information")
 
 if [ -n "$LDD_RESULT" ];
 then
@@ -364,7 +364,7 @@ LIB_FILES=$(find ${BUNDLE_DIR}/lib -name "*.so")
 
 for path in $LIB_FILES
 do
-	LDD_RESULT=$(LD_LIBRARY_PATH=${LD_PATH} ldd $path 2>&1 > /dev/null)
+	LDD_RESULT=$(LD_LIBRARY_PATH=${LD_PATH} ldd $path 2>&1 > /dev/null | grep -v "no version information")
 	if [ -n "$LDD_RESULT" ];
 	then
 		echo "$LDD_RESULT"
