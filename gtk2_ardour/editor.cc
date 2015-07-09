@@ -1336,8 +1336,6 @@ Editor::set_session (Session *t)
 	   the selected Marker; this needs the LocationMarker list to be available.
 	*/
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
-
-	cerr << "Editor - found state node " << node << endl;
 	set_state (*node, Stateful::loading_state_version);
 
 	/* catch up with the playhead */
