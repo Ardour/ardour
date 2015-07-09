@@ -825,6 +825,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void grab_focus_after_dialog ();
 
 	void tabs_switch (GtkNotebookPage*, guint page_number);
+	void tabs_page_added (Gtk::Widget*, guint page_number);
+	void tabs_page_removed (Gtk::Widget*, guint page_number);
 	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
 };
 

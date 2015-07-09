@@ -149,6 +149,8 @@ ARDOUR_UI::setup_windows ()
 	rc_option_editor->contents().show_all ();
 	
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
+	_tabs.signal_page_removed().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_removed));
+	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));
 
 	/* It would be nice if Gtkmm had wrapped this rather than just
 	 * deprecating the old set_window_creation_hook() method, but oh well...
@@ -156,6 +158,26 @@ ARDOUR_UI::setup_windows ()
 	g_signal_connect (_tabs.gobj(), "create-window", (GCallback) ::tab_window_root_drop, this);
 
 	return 0;
+}
+
+void
+ARDOUR_UI::tabs_page_removed (Gtk::Widget*, guint)
+{
+	if (_tabs.get_n_pages() == 1) {
+		_tabs.set_show_tabs (false);
+	} else {
+		_tabs.set_show_tabs (true);
+	}
+}
+
+void
+ARDOUR_UI::tabs_page_added (Gtk::Widget*, guint)
+{
+	if (_tabs.get_n_pages() == 1) {
+		_tabs.set_show_tabs (false);
+	} else {
+		_tabs.set_show_tabs (true);
+	}
 }
 
 void
