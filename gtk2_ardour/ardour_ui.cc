@@ -4298,6 +4298,30 @@ ARDOUR_UI::mixer_settings () const
 }
 
 XMLNode*
+ARDOUR_UI::main_window_settings () const
+{
+	XMLNode* node = 0;
+
+	if (_session) {
+		node = _session->instant_xml(X_("Main"));
+	} else {
+		node = Config->instant_xml(X_("Main"));
+	}
+
+	if (!node) {
+		if (getenv("ARDOUR_INSTANT_XML_PATH")) {
+			node = Config->instant_xml(getenv("ARDOUR_INSTANT_XML_PATH"));
+		}
+	}
+
+	if (!node) {
+		node = new XMLNode (X_("Main"));
+	}
+
+	return node;
+}
+
+XMLNode*
 ARDOUR_UI::editor_settings () const
 {
 	XMLNode* node = 0;

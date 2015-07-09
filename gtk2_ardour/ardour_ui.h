@@ -220,6 +220,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	static void close_all_dialogs () { CloseAllDialogs(); }
         static sigc::signal<void> CloseAllDialogs;
 
+	XMLNode* main_window_settings() const;
 	XMLNode* editor_settings() const;
 	XMLNode* mixer_settings () const;
 	XMLNode* keyboard_settings () const;

@@ -142,8 +142,46 @@ ARDOUR_UI::setup_windows ()
 	
 	_main_window.add (main_vpacker);
 	transport_frame.show_all ();
-	_main_window.show_all ();
 
+	const XMLNode* mnode = main_window_settings ();
+
+	if (mnode) {
+		const XMLProperty* prop;
+		gint x = -1;
+		gint y = -1;
+		gint w = -1;
+		gint h = -1;
+
+		if ((prop = mnode->property (X_("x"))) != 0) {
+			x = atoi (prop->value());
+		}
+
+		if ((prop = mnode->property (X_("y"))) != 0) {
+			y = atoi (prop->value());
+		} 
+
+		if ((prop = mnode->property (X_("w"))) != 0) {
+			w = atoi (prop->value());
+		} 
+		
+		if ((prop = mnode->property (X_("h"))) != 0) {
+			h = atoi (prop->value());
+		}
+
+		if (x >= 0 && y >= 0 && w >= 0 && h >= 0) {
+			_main_window.set_position (Gtk::WIN_POS_NONE);
+		}
+		
+		if (x >= 0 && y >= 0) {
+			_main_window.move (x, y);
+		}
+		
+		if (w > 0 && h > 0) {
+			_main_window.set_default_size (w, h);
+		}
+	}
+	
+	_main_window.show_all ();
 	setup_toplevel_window (_main_window, "", this);
 	
 	rc_option_editor = new RCOptionEditor;

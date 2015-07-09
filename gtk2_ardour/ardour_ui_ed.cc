@@ -637,6 +637,18 @@ ARDOUR_UI::save_ardour_state ()
 	XMLNode* window_node = new XMLNode (X_("UI"));
 	window_node->add_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
 
+	/* main window */
+
+	gint mx, my, mw, mh;
+	_main_window.get_position (mx, my);
+	_main_window.get_size (mw, mh);
+
+	XMLNode main_window_node (X_("Main"));
+	main_window_node.add_property (X_("x"), PBD::to_string (mx, std::dec));
+	main_window_node.add_property (X_("y"), PBD::to_string (my, std::dec));
+	main_window_node.add_property (X_("w"), PBD::to_string (mw, std::dec));
+	main_window_node.add_property (X_("h"), PBD::to_string (mh, std::dec));
+
 	/* Windows */
 
 	WM::Manager::instance().add_state (*window_node);
@@ -677,6 +689,7 @@ ARDOUR_UI::save_ardour_state ()
 	UIConfiguration::instance().save_state ();
 
 	if (_session) {
+		_session->add_instant_xml (main_window_node);
 		_session->add_instant_xml (enode);
 		_session->add_instant_xml (mnode);
 		_session->add_instant_xml (bnode);
@@ -684,6 +697,7 @@ ARDOUR_UI::save_ardour_state ()
 			_session->add_instant_xml (location_ui->ui().get_state ());
 		}
 	} else {
+		Config->add_instant_xml (main_window_node);
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
 		Config->add_instant_xml (bnode);
