@@ -46,8 +46,7 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	
 	Gtk::Window* get (bool create = false);
 	Gtk::Window* own_window () { return get (false); } 
-	Gtk::Notebook* tabbed_parent ();
-	virtual Gtk::Window* use_own_window ();
+	virtual Gtk::Window* use_own_window (bool and_pack_it);
 
 	bool has_own_window () const;
 	bool is_tabbed () const;
@@ -59,6 +58,11 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	Gtk::Window* current_toplevel () const;
 
 	Gtk::Notebook* tab_root_drop ();
+
+	int set_state (const XMLNode&, int version);
+	XMLNode& get_state ();
+	
+	static std::string xml_node_name();
 	
   protected:
 	bool delete_event_handler (GdkEventAny *ev);

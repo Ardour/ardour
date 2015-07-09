@@ -81,7 +81,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	static Mixer_UI* instance();
 	~Mixer_UI();
 
-	Gtk::Window* use_own_window ();
+	Gtk::Window* use_own_window (bool and_fill_it);
 	void show_window ();
 
 	void set_session (ARDOUR::Session *);

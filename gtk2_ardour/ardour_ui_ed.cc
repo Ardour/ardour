@@ -665,16 +665,16 @@ ARDOUR_UI::save_ardour_state ()
 
 	window_node->add_child_nocopy (*tearoff_node);
 
+	XMLNode& enode (editor->get_state());
+	XMLNode& mnode (mixer->get_state());
+	XMLNode& bnode (meterbridge->get_state());
+
 	Config->add_extra_xml (*window_node);
 	Config->add_extra_xml (audio_midi_setup->get_state());
 
 	Config->save_state();
 
 	UIConfiguration::instance().save_state ();
-
-	XMLNode& enode (static_cast<Stateful*>(editor)->get_state());
-	XMLNode& mnode (mixer->get_state());
-	XMLNode& bnode (meterbridge->get_state());
 
 	if (_session) {
 		_session->add_instant_xml (enode);
@@ -686,6 +686,7 @@ ARDOUR_UI::save_ardour_state ()
 	} else {
 		Config->add_instant_xml (enode);
 		Config->add_instant_xml (mnode);
+		Config->add_instant_xml (bnode);
 		if (location_ui) {
 			Config->add_instant_xml (location_ui->ui().get_state ());
 		}

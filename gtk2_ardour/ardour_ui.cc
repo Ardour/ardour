@@ -427,15 +427,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		audio_port_matrix.set_state (*ui_xml, 0);
 		midi_port_matrix.set_state (*ui_xml, 0);
 		export_video_dialog.set_state (*ui_xml, 0);
-
-		/* tabbables */
-		// rc_option_editor->set_state (*ui_xml, 0);
-		// editor->set_state (*ui_xml, 0);
-		// mixer->set_state (*ui_xml, 0);
 	}
 
+	/* Separate windows */
+	
 	WM::Manager::instance().register_window (&key_editor);
-	// WM::Manager::instance().register_window (&rc_option_editor);
 	WM::Manager::instance().register_window (&session_option_editor);
 	WM::Manager::instance().register_window (&speaker_config_window);
 	WM::Manager::instance().register_window (&about);

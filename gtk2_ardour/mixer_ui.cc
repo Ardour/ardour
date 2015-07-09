@@ -295,50 +295,26 @@ Mixer_UI::track_editor_selection ()
 	PublicEditor::instance().get_selection().TracksChanged.connect (sigc::mem_fun (*this, &Mixer_UI::follow_editor_selection));
 }
 
-Gtk::Notebook*
-Mixer_UI::use_own_window ()
+void
+Gtk::Window*
+Mixer_UI::use_own_window (bool and_fill_it)
 {
-	/* This is called after a drop of a tab onto the root window. Its
-	 * responsibility is to return the notebook that this Mixer_UI should
-	 * be packed into before the drop handling is completed. It is not
-	 * responsible for actually taking care of this packing
-	 */
+	bool new_window = !own_window();
 
-	if (_parent_window) {
-		return 0;
+	Gtk::Window* win = Tabbable::use_own_window (and_fill_it);
+
+
+	if (win && new_window) {
+		win->set_name ("MixerWindow");
+		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Mixer"), this);
+		win->signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_scroll_event), false);
+		win->set_data ("ardour-bindings", bindings);
+		update_title ();
 	}
 
-	create_own_window ();
-
-	return (Gtk::Notebook*) _parent_window->get_child();
+	return win;
 }
 
-void
-Mixer_UI::create_own_window ()
-{
-	if (_parent_window) {
-		return;
-	}
-
-	_parent_window = new Window (Gtk::WINDOW_TOPLEVEL);
-	Notebook* notebook = manage (new Notebook);
-
-	notebook->set_show_tabs (false);
-	notebook->show_all ();
-
-	_parent_window->add (*notebook);
-
-	/* allow parent window to become the key focus window */
-	_parent_window->set_flags (CAN_FOCUS);
-
-	/* handle window manager close/delete event sensibly */
-	_parent_window->signal_delete_event().connect (sigc::mem_fun (*this, &Mixer_UI::hide_window));
-
-	set_window_pos_and_size ();
-	update_title ();
-}
-
-void
 Mixer_UI::show_window ()
 {
 	if (_parent_window) {
@@ -1019,16 +995,16 @@ void
 Mixer_UI::show_window ()
 {
 	Tabbable::show_window ();
-		
+
 	/* show/hide group tabs as required */
 	parameter_changed ("show-group-tabs");
-	
+
 	/* now reset each strips width so the right widgets are shown */
 	MixerStrip* ms;
-	
+
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator ri;
-	
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		ms = (*ri)[track_columns.strip];
 		ms->set_width_enum (ms->get_width_enum (), ms->width_owner());
@@ -1848,62 +1824,23 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 XMLNode&
 Mixer_UI::get_state ()
 {
-	XMLNode* node = new XMLNode ("Mixer");
+	XMLNode* node = new XMLNode (X_("Mixer"));
+	char buf[128];
 
-	if (_parent_window && _parent_window->is_realized() ) {
-		Glib::RefPtr<Gdk::Window> win = _parent_window->get_window();
+	node->add_child_nocopy (Tabbable::get_state());
 
-		get_window_pos_and_size ();
-
-		XMLNode* geometry = new XMLNode ("geometry");
-		char buf[32];
-		snprintf(buf, sizeof(buf), "%d", m_width);
-		geometry->add_property(X_("x_size"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", m_height);
-		geometry->add_property(X_("y_size"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", m_root_x);
-		geometry->add_property(X_("x_pos"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", m_root_y);
-		geometry->add_property(X_("y_pos"), string(buf));
-
-		// written only for compatibility, they are not used.
-		snprintf(buf, sizeof(buf), "%d", 0);
-		geometry->add_property(X_("x_off"), string(buf));
-		snprintf(buf, sizeof(buf), "%d", 0);
-		geometry->add_property(X_("y_off"), string(buf));
-
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane1)->gobj()));
-		geometry->add_property(X_("mixer_rhs_pane1_pos"), string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&rhs_pane2)->gobj()));
-		geometry->add_property(X_("mixer_rhs_pane2_pos"), string(buf));
-		snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&list_hpane)->gobj()));
-		geometry->add_property(X_("mixer_list_hpane_pos"), string(buf));
-
-		node->add_child_nocopy (*geometry);
-	}
+	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Paned*>(&rhs_pane1)->gobj())));
+	node->add_property(X_("mixer_rhs_pane1_pos"), string(buf));
+	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (const_cast<GtkPaned*>(static_cast<const Paned*>(&list_hpane)->gobj())));
+	node->add_property(X_("mixer_list_hpane_pos"), string(buf));
 
 	node->add_property ("narrow-strips", _strip_width == Narrow ? "yes" : "no");
 	node->add_property ("show-mixer", _visible ? "yes" : "no");
 	node->add_property ("show-mixer-list", _show_mixer_list ? "yes" : "no");
 	node->add_property ("maximised", _maximised ? "yes" : "no");
 
-	store_current_favorite_order ();
-	XMLNode* plugin_order = new XMLNode ("PluginOrder");
-	int cnt = 0;
-	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i, ++cnt) {
-			XMLNode* p = new XMLNode ("PluginInfo");
-			p->add_property ("sort", cnt);
-			p->add_property ("unique-id", (*i)->unique_id);
-			if (favorite_ui_state.find ((*i)->unique_id) != favorite_ui_state.end ()) {
-				p->add_property ("expanded", favorite_ui_state[(*i)->unique_id]);
-			}
-			plugin_order->add_child_nocopy (*p);
-		;
-	}
-	node->add_child_nocopy (*plugin_order);
 	return *node;
 }
-
 
 void
 Mixer_UI::pane_allocation_handler (Allocation&, Gtk::Paned* which)
@@ -2163,7 +2100,7 @@ Mixer_UI::update_title ()
 	if (!own_window()) {
 		return;
 	}
-	
+
 	if (_session) {
 		string n;
 

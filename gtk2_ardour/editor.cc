@@ -1336,6 +1336,8 @@ Editor::set_session (Session *t)
 	   the selected Marker; this needs the LocationMarker list to be available.
 	*/
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
+
+	cerr << "Editor - found state node " << node << endl;
 	set_state (*node, Stateful::loading_state_version);
 
 	/* catch up with the playhead */
@@ -2182,7 +2184,6 @@ int
 Editor::set_state (const XMLNode& node, int version)
 {
 	const XMLProperty* prop;
-
 	set_id (node);
 
 	Tabbable::set_state (node, version);
@@ -2410,82 +2411,81 @@ Editor::set_state (const XMLNode& node, int version)
 XMLNode&
 Editor::get_state ()
 {
-	XMLNode& node (Tabbable::get_state());
+	XMLNode* node = new XMLNode (X_("Editor"));
 	char buf[32];
 
 	id().print (buf, sizeof (buf));
-	node.add_property ("id", buf);
+	node->add_property ("id", buf);
 
-#if 0
-	// need to save this somehow 
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
-	geometry->add_property("edit-horizontal-pane-pos", string(buf));
-	geometry->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
-	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
-	geometry->add_property("edit-vertical-pane-pos", string(buf));
-#endif
+	node->add_child_nocopy (Tabbable::get_state());
 	
-	maybe_add_mixer_strip_width (node);
+	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&edit_pane)->gobj()));
+	node->add_property("edit-horizontal-pane-pos", string(buf));
+	node->add_property("notebook-shrunk", _notebook_shrunk ? "1" : "0");
+	snprintf(buf,sizeof(buf), "%d",gtk_paned_get_position (static_cast<Paned*>(&editor_summary_pane)->gobj()));
+	node->add_property("edit-vertical-pane-pos", string(buf));
+	
+	maybe_add_mixer_strip_width (*node);
 
-	node.add_property ("zoom-focus", enum_2_string (zoom_focus));
+	node->add_property ("zoom-focus", enum_2_string (zoom_focus));
 
 	snprintf (buf, sizeof(buf), "%" PRId64, samples_per_pixel);
-	node.add_property ("zoom", buf);
-	node.add_property ("snap-to", enum_2_string (_snap_type));
-	node.add_property ("snap-mode", enum_2_string (_snap_mode));
-	node.add_property ("internal-snap-to", enum_2_string (internal_snap_type));
-	node.add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
-	node.add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
-	node.add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
-	node.add_property ("edit-point", enum_2_string (_edit_point));
+	node->add_property ("zoom", buf);
+	node->add_property ("snap-to", enum_2_string (_snap_type));
+	node->add_property ("snap-mode", enum_2_string (_snap_mode));
+	node->add_property ("internal-snap-to", enum_2_string (internal_snap_type));
+	node->add_property ("internal-snap-mode", enum_2_string (internal_snap_mode));
+	node->add_property ("pre-internal-snap-to", enum_2_string (pre_internal_snap_type));
+	node->add_property ("pre-internal-snap-mode", enum_2_string (pre_internal_snap_mode));
+	node->add_property ("edit-point", enum_2_string (_edit_point));
 	snprintf (buf, sizeof(buf), "%d", _visible_track_count);
-	node.add_property ("visible-track-count", buf);
+	node->add_property ("visible-track-count", buf);
 
 	snprintf (buf, sizeof (buf), "%" PRIi64, playhead_cursor->current_frame ());
-	node.add_property ("playhead", buf);
+	node->add_property ("playhead", buf);
 	snprintf (buf, sizeof (buf), "%" PRIi64, leftmost_frame);
-	node.add_property ("left-frame", buf);
+	node->add_property ("left-frame", buf);
 	snprintf (buf, sizeof (buf), "%f", vertical_adjustment.get_value ());
-	node.add_property ("y-origin", buf);
+	node->add_property ("y-origin", buf);
 
-	node.add_property ("show-measures", _show_measures ? "yes" : "no");
-	node.add_property ("maximised", _maximised ? "yes" : "no");
-	node.add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
-	node.add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
-	node.add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
-	node.add_property ("mouse-mode", enum2str(mouse_mode));
-	node.add_property ("join-object-range", smart_mode_action->get_active () ? "yes" : "no");
+	node->add_property ("show-measures", _show_measures ? "yes" : "no");
+	node->add_property ("maximised", _maximised ? "yes" : "no");
+	node->add_property ("follow-playhead", _follow_playhead ? "yes" : "no");
+	node->add_property ("stationary-playhead", _stationary_playhead ? "yes" : "no");
+	node->add_property ("region-list-sort-type", enum_2_string (_regions->sort_type ()));
+	node->add_property ("mouse-mode", enum2str(mouse_mode));
+	node->add_property ("join-object-range", smart_mode_action->get_active () ? "yes" : "no");
 
 	Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		node.add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
+		node->add_property (X_("show-editor-mixer"), tact->get_active() ? "yes" : "no");
 	}
 
 	act = ActionManager::get_action (X_("Editor"), X_("show-editor-list"));
 	if (act) {
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-		node.add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
+		node->add_property (X_("show-editor-list"), tact->get_active() ? "yes" : "no");
 	}
 
 	snprintf (buf, sizeof (buf), "%d", _the_notebook.get_current_page ());
-	node.add_property (X_("editor-list-page"), buf);
+	node->add_property (X_("editor-list-page"), buf);
 
         if (button_bindings) {
                 XMLNode* bb = new XMLNode (X_("Buttons"));
                 button_bindings->save (*bb);
-                node.add_child_nocopy (*bb);
+                node->add_child_nocopy (*bb);
         }
 
-	node.add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
+	node->add_property (X_("show-marker-lines"), _show_marker_lines ? "yes" : "no");
 
-	node.add_child_nocopy (selection->get_state ());
-	node.add_child_nocopy (_regions->get_state ());
+	node->add_child_nocopy (selection->get_state ());
+	node->add_child_nocopy (_regions->get_state ());
 
 	snprintf (buf, sizeof (buf), "%" PRId64, nudge_clock->current_duration());
-	node.add_property ("nudge-clock-value", buf);
+	node->add_property ("nudge-clock-value", buf);
 
-	return node;
+	return *node;
 }
 
 /** if @param trackview_relative_offset is true, @param y y is an offset into the trackview area, in pixel units
@@ -5935,11 +5935,11 @@ Editor::ui_parameter_changed (string parameter)
 }
 
 Gtk::Window*
-Editor::use_own_window ()
+Editor::use_own_window (bool and_fill_it)
 {
 	bool new_window = !own_window();
 	
-	Gtk::Window* win = Tabbable::use_own_window ();
+	Gtk::Window* win = Tabbable::use_own_window (and_fill_it);
 
 	if (win && new_window) {
 		win->set_name ("EditorWindow");

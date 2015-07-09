@@ -144,7 +144,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void             set_session (ARDOUR::Session *);
 	ARDOUR::Session* session() const { return _session; }
 
-	Gtk::Window* use_own_window ();
+	Gtk::Window* use_own_window (bool and_fill_it);
 	
 	void             first_idle ();
 	virtual bool     have_idled () const { return _have_idled; }

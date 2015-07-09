@@ -115,15 +115,12 @@ Manager::add_state (XMLNode& root) const
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		/* don't save state for temporary proxy windows
 		 */
+
 		if (dynamic_cast<ProxyTemporary*> (*i)) {
 			continue;
 		}
-		if (dynamic_cast<ProcessorWindowProxy*> (*i)) {
-			ProcessorWindowProxy *pi = dynamic_cast<ProcessorWindowProxy*> (*i);
-			root.add_child_nocopy (pi->get_state());
-		} else {
-			root.add_child_nocopy ((*i)->get_state());
-		}
+
+		root.add_child_nocopy ((*i)->get_state());
 	}
 }
 

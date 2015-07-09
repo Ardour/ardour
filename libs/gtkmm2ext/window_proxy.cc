@@ -171,10 +171,16 @@ WindowProxy::toggle()
 	}
 }
 
+std::string
+WindowProxy::xml_node_name()
+{
+	return X_("Window");
+}
+
 XMLNode&
 WindowProxy::get_state ()
 {
-	XMLNode* node = new XMLNode (X_("Window"));
+	XMLNode* node = new XMLNode (xml_node_name());
 	char buf[32];	
 
 	node->add_property (X_("name"), _name);

@@ -24,6 +24,8 @@
 #include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
+#include "i18n.h"
+
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using std::string;
@@ -55,9 +57,20 @@ Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title, int posi
 }
 
 Window*
-Tabbable::use_own_window ()
+Tabbable::use_own_window (bool and_pack_it)
 {
-	return get (true);
+	Gtk::Window* win = get (true);
+
+	if (and_pack_it) {
+		Gtk::Container* parent = _contents.get_parent();
+		if (parent) {
+			parent->remove (_contents);
+		}
+		_own_notebook.append_page (_contents, _tab_title);
+	}
+
+	return win;
+
 }
 
 bool
@@ -108,7 +121,7 @@ Tabbable::tab_root_drop ()
 
 	alloc = _contents.get_parent()->get_allocation();
 	
-	(void) use_own_window ();
+	(void) use_own_window (false);
 	
 	/* This is called after a drop of a tab onto the root window. Its
 	 * responsibility is to return the notebook that this Tabbable's
@@ -211,4 +224,34 @@ Gtk::Window*
 Tabbable::current_toplevel () const
 {
 	return dynamic_cast<Gtk::Window*> (contents().get_toplevel());
+}
+
+string
+Tabbable::xml_node_name()
+{
+	return WindowProxy::xml_node_name();
+}
+
+XMLNode&
+Tabbable::get_state()
+{
+	XMLNode& node (WindowProxy::get_state());
+
+	return node;
+}
+
+int
+Tabbable::set_state (const XMLNode& node, int version)
+{
+	int ret;
+
+	if ((ret = WindowProxy::set_state (node, version)) == 0) {
+		if (_visible) {
+			if (use_own_window (true) == 0) {
+				ret = -1;
+			}
+		}
+	}
+
+	return ret;
 }

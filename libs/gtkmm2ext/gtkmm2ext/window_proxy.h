@@ -73,6 +73,8 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
     
 	operator bool() const { return _window != 0; }
     
+	static std::string xml_node_name();
+
   protected:
 	std::string  _name;
 	std::string  _menu_name;
