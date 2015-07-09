@@ -396,6 +396,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void update_autosave();
 	sigc::connection _autosave_connection;
 
+	void session_dirty_changed ();
+	void update_title ();
+	
 	void map_transport_state ();
 	int32_t do_engine_start ();
 

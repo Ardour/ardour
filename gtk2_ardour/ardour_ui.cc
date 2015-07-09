@@ -801,10 +801,15 @@ ARDOUR_UI::autosave_session ()
 }
 
 void
+ARDOUR_UI::session_dirty_changed ()
+{
+	update_autosave ();
+	update_title ();
+}
+
+void
 ARDOUR_UI::update_autosave ()
 {
-	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_autosave)
-
 	if (_session && _session->dirty()) {
 		if (_autosave_connection.connected()) {
 			_autosave_connection.disconnect();

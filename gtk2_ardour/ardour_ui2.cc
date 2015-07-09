@@ -32,10 +32,12 @@
 #include "pbd/error.h"
 #include "pbd/basename.h"
 #include "pbd/fastlog.h"
-#include <gtkmm2ext/cairocell.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/tearoff.h>
+
+#include "gtkmm2ext/cairocell.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/tearoff.h"
+#include "gtkmm2ext/window_title.h"
 
 #include "ardour/profile.h"
 #include "ardour/session.h"
@@ -795,4 +797,29 @@ ARDOUR_UI::toggle_follow_edits ()
 	UIConfiguration::instance().set_follow_edits (tact->get_active ());
 }
 
+void
+ARDOUR_UI::update_title ()
+{
+	if (_session) {
+		bool dirty = _session->dirty();
 
+		string session_name;
+
+		if (_session->snap_name() != _session->name()) {
+			session_name = _session->snap_name();
+		} else {
+			session_name = _session->name();
+		}
+
+		if (dirty) {
+			session_name = "*" + session_name;
+		}
+
+		WindowTitle title (session_name);
+		title += Glib::get_application_name();
+		_main_window.set_title (title.get_string());
+	} else {
+		WindowTitle title (Glib::get_application_name());
+		_main_window.set_title (title.get_string());
+	}
+}

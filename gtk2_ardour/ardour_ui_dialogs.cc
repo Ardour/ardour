@@ -153,7 +153,7 @@ ARDOUR_UI::set_session (Session *s)
 	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
 	_session->StepEditStatusChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
-	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_autosave, this), gui_context());
+	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
 
 	_session->Xrun.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::xrun_handler, this, _1), gui_context());
 	_session->SoloActive.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::soloing_changed, this, _1), gui_context());
@@ -237,6 +237,8 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter_peak_display.show();
 		}
 	}
+
+	update_title ();
 }
 
 int
@@ -315,7 +317,8 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	session_loaded = false;
 
 	update_buffer_load ();
-
+	update_title ();
+	
 	return 0;
 }
 
