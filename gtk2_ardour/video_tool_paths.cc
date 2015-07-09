@@ -27,6 +27,7 @@
 #endif
 
 #include "pbd/file_utils.h"
+#include "pbd/error.h"
 #include "video_tool_paths.h"
 #include "i18n.h"
 
@@ -111,8 +112,10 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 		xjadeo_exe = getenv("XJREMOTE");
 	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjremote"), xjadeo_file_path)) {
 		xjadeo_exe = xjadeo_file_path;
+		info << "xjadeo from XJREMOTE: " << xjadeo_exe << endmsg;
 	} else if (find_file (Searchpath(Glib::getenv("PATH")), X_("xjadeo"), xjadeo_file_path)) {
 		xjadeo_exe = xjadeo_file_path;
+		info << "xjadeo from PATH: " << xjadeo_exe << endmsg;
 	}
 #ifdef __APPLE__
 	else if (Glib::file_test(X_("/Applications/Xjadeo.app/Contents/MacOS/xjadeo"), Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_EXECUTABLE)) {
@@ -126,17 +129,21 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 	else if ( windows_install_dir("Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video", reg))
 	{
 		xjadeo_exe = std::string(g_build_filename(reg.c_str(), "xjadeo", "xjadeo.exe", NULL));
+		info << "xjadeo.exe from reg: " << "Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\video" << ": " << xjadeo_exe << endmsg;
 	}
 	else if ( windows_install_dir("Software\\RSS\\xjadeo", reg))
 	{
 		xjadeo_exe = std::string(g_build_filename(reg.c_str(), "xjadeo.exe", NULL));
+		info << "xjadeo.exe from reg: Software\\RSS\\xjadeo: " << xjadeo_exe << endmsg;
 	}
 	else if (program_files && Glib::file_test(g_build_filename(program_files, "xjadeo", "xjadeo.exe", NULL), Glib::FILE_TEST_EXISTS))
 	{
 		xjadeo_exe = std::string(g_build_filename(program_files, "xjadeo", "xjadeo.exe", NULL));
+		info << "xjadeo.exe from CSIDL_PROGRAM_FILES: " << xjadeo_exe << endmsg;
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjadeo.exe"), Glib::FILE_TEST_EXISTS)) {
 		xjadeo_exe = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
+		info << "xjadeo.exe from C:\\Program Files\\xjadeo\\ :" << xjadeo_exe << endmsg;
 	}
 #endif
 	else  {
