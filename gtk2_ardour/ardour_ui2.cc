@@ -145,7 +145,7 @@ ARDOUR_UI::setup_windows ()
 	setup_toplevel_window (_main_window, "", this);
 	
 	rc_option_editor = new RCOptionEditor;
-	rc_option_editor->add_to_notebook (_tabs, _("Preferences"), 2);
+	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
 	rc_option_editor->contents().show_all ();
 	
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));

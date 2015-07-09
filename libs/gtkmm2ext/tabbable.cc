@@ -22,6 +22,7 @@
 #include <gtkmm/window.h>
 
 #include "gtkmm2ext/tabbable.h"
+#include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "i18n.h"
@@ -45,15 +46,22 @@ Tabbable::~Tabbable ()
 }
 
 void
-Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title, int position)
+Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title)
 {
-	notebook.insert_page (_contents, tab_title, position, false);
+	notebook.append_page (_contents, tab_title, false);
+	Gtk::Widget* tab_label = notebook.get_tab_label (_contents);
+
+	if (tab_label) {
+		Gtkmm2ext::UI::instance()->set_tip (*tab_label,
+		                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+		                                                      "To put the window back, click on its \"close\" button"), tab_title));
+	}
+	
 	notebook.set_tab_detachable (_contents);
 	notebook.set_tab_reorderable (_contents);
 
 	_parent_notebook = &notebook;
 	_tab_title = tab_title;
-	_notebook_position = position;
 }
 
 Window*
@@ -181,7 +189,7 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 		
 		if (_parent_notebook) {
 
-			_parent_notebook->insert_page (_contents, _tab_title, _notebook_position);
+			_parent_notebook->append_page (_contents, _tab_title);
 			_parent_notebook->set_tab_detachable (_contents);
 			_parent_notebook->set_tab_reorderable (_contents);
 			_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));

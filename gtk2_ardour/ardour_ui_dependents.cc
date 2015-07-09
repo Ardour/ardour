@@ -61,8 +61,8 @@ ARDOUR_UI::we_have_dependents ()
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
-	editor->add_to_notebook (_tabs, _("Editor"), 1);
-	mixer->add_to_notebook (_tabs, _("Mixer"), 1);
+	editor->add_to_notebook (_tabs, _("Editor"));
+	mixer->add_to_notebook (_tabs, _("Mixer"));
 	
 	/* all actions are defined */
 
