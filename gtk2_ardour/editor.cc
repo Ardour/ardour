@@ -287,7 +287,6 @@ Editor::Editor ()
 	, track_edit_playlist_submenu (0)
 	, track_selection_edit_playlist_submenu (0)
 	, _popup_region_menu_item (0)
-	, global_vpacker (key_bindings)
 	, _track_canvas (0)
 	, _track_canvas_viewport (0)
 	, within_track_canvas (false)
@@ -475,6 +474,8 @@ Editor::Editor ()
 
 	last_event_time.tv_sec = 0;
 	last_event_time.tv_usec = 0;
+
+	global_hpacker.set_data ("ardour-bindings", &key_bindings);
 
 	selection_op_history.clear();
 	before.clear();
@@ -5946,6 +5947,7 @@ Editor::use_own_window (bool and_fill_it)
 
 		// win->signal_realize().connect (*this, &Editor::on_realize);
 		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
+		win->set_data ("ardour-bindings", &key_bindings);
 		
 		update_title ();
 	}

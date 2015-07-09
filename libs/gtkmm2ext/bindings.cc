@@ -227,6 +227,24 @@ Bindings::~Bindings()
 {
 }
 
+bool
+Bindings::empty_keys() const
+{
+	return press_bindings.empty() && release_bindings.empty();
+}
+
+bool
+Bindings::empty_mouse () const
+{
+	return button_press_bindings.empty() && button_release_bindings.empty();
+}
+
+bool
+Bindings::empty() const
+{
+	return empty_keys() && empty_mouse ();
+}
+
 void
 Bindings::set_action_map (ActionMap& am)
 {
@@ -253,7 +271,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
         if (k == kbm->end()) {
                 /* no entry for this key in the state map */
-                return false;
+	        return false;
         }
 
         /* lets do it ... */
@@ -281,7 +299,6 @@ Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what)
         if (k == kbm->end()) {
                 pair<KeyboardKey,RefPtr<Action> > newpair (kb, what);
                 kbm->insert (newpair);
-                // cerr << "Bindings added " << kb.key() << " w/ " << kb.state() << " => " << what->get_name() << endl;
         } else {
                 k->second = what;
         }
@@ -605,3 +622,8 @@ ActionMap::register_toggle_action (const char* path,
         actions.insert (_ActionMap::value_type (fullpath, act));
         return act;
 }
+
+std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey& k) {
+	return out << "Key " << k.key() << " state " << k.state();
+}
+

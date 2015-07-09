@@ -105,6 +105,8 @@ Mixer_UI::Mixer_UI ()
 {
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this), gui_context());
 
+	_content.set_data ("ardour-bindings", &bindings);
+	
 	scroller.set_can_default (true);
 	// set_default (scroller);
 
@@ -1927,39 +1929,6 @@ Mixer_UI::scroll_right ()
 	Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
 	/* stupid GTK: can't rely on clamping across versions */
 	scroller.get_hscrollbar()->set_value (min (adj->get_upper(), adj->get_value() + adj->get_step_increment()));
-}
-
-bool
-Mixer_UI::on_key_press_event (GdkEventKey* ev)
-{
-	KeyboardKey k (ev->state, ev->keyval);
-
-	if (bindings.activate (k, Bindings::Press)) {
-		return true;
-	}
-
-	if (_parent_window) {
-		/* send it to the main window, since our own bindings didn't
-		 * handle it
-		 */
-		return forward_key_press (ev);
-	}
-
-	return false;
-}
-
-bool
-Mixer_UI::on_key_release_event (GdkEventKey* ev)
-{
-	KeyboardKey k (ev->state, ev->keyval);
-
-	if (bindings.activate (k, Bindings::Release)) {
-		return true;
-	}
-
-        /* don't forward releases */
-
-        return true;
 }
 
 bool

@@ -54,7 +54,6 @@
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_dropdown.h"
-#include "binding_owners.h"
 #include "public_editor.h"
 #include "editing.h"
 #include "enums.h"
@@ -780,8 +779,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void add_routes (ARDOUR::RouteList&);
 	void timeaxisview_deleted (TimeAxisView *);
 
-	Gtk::HBox           global_hpacker;
-	VBoxWithBindings    global_vpacker;
+	Gtk::HBox global_hpacker;
+	Gtk::VBox global_vpacker;
 
 	/* Cursor stuff.  Do not use directly, use via CursorContext. */
 	friend class CursorContext;

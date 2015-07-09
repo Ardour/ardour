@@ -153,8 +153,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void set_window_pos_and_size ();
 	void get_window_pos_and_size ();
 
-	bool on_key_press_event (GdkEventKey*);
-	bool on_key_release_event (GdkEventKey*);
 	bool on_scroll_event (GdkEventScroll*);
 
 	void pane_allocation_handler (Gtk::Allocation&, Gtk::Paned*);

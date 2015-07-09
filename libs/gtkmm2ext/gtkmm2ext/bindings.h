@@ -98,6 +98,10 @@ class LIBGTKMM2EXT_API Bindings {
         Bindings();
         ~Bindings ();
 
+        bool empty() const;
+        bool empty_keys () const;
+        bool empty_mouse () const;
+        
         void add (KeyboardKey, Operation, Glib::RefPtr<Gtk::Action>);
         void remove (KeyboardKey, Operation);
         bool activate (KeyboardKey, Operation);
@@ -133,5 +137,7 @@ class LIBGTKMM2EXT_API Bindings {
 };
 
 } // namespace
+
+std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey& k);
 
 #endif /* __libgtkmm2ext_bindings_h__ */
