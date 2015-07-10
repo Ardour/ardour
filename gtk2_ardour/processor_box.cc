@@ -2155,9 +2155,10 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
 				*/
-
 				p.reset (new PluginInsert (*_session));
-                                p->set_state (**niter, Stateful::current_state_version);
+				PBD::ID id = p->id();
+				p->set_state (**niter, Stateful::current_state_version);
+				boost::dynamic_pointer_cast<PluginInsert>(p)->update_id (id);
 			}
 
 			copies.push_back (p);

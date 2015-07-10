@@ -1146,6 +1146,15 @@ PluginInsert::set_state(const XMLNode& node, int version)
 }
 
 void
+PluginInsert::update_id (PBD::ID id)
+{
+	set_id (id.to_s());
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		(*i)->set_insert_id (id);
+	}
+}
+
+void
 PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
