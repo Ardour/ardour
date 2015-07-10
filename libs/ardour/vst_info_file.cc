@@ -55,12 +55,6 @@
 #define MAX_STRING_LEN 256
 #define PLUGIN_SCAN_TIMEOUT (Config->get_vst_scan_timeout()) // in deciseconds
 
-
-/* CACHE FILE PATHS */
-#define EXT_BLACKLIST ".fsb"
-#define EXT_ERRORFILE ".err"
-#define EXT_INFOFILE  ".fsi"
-
 #ifdef PLATFORM_WINDOWS
 #define PFX_DOTFILE   ""
 #else
@@ -118,21 +112,21 @@ vstfx_blacklist_path (const char* dllpath, int personal)
 	}
 
 	stringstream s;
-	s << PFX_DOTFILE << Glib::path_get_basename (dllpath) << EXT_BLACKLIST;
+	s << PFX_DOTFILE << Glib::path_get_basename (dllpath) << VST_EXT_BLACKLIST;
 	return Glib::build_filename (dir, s.str ());
 }
 
 static string
 vstfx_infofile_path (const char* dllpath, int personal)
 {
-	return vstfx_cache_file(dllpath, personal, EXT_INFOFILE);
+	return vstfx_cache_file(dllpath, personal, VST_EXT_INFOFILE);
 }
 
 #ifndef VST_SCANNER_APP
 static string
 vstfx_errorfile_path (const char* dllpath, int personal)
 {
-	return vstfx_cache_file(dllpath, personal, EXT_ERRORFILE);
+	return vstfx_cache_file(dllpath, personal, VST_EXT_ERRORFILE);
 }
 #endif
 

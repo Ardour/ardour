@@ -25,6 +25,16 @@
 #include "ardour/vst_types.h"
 #include <vector>
 
+/* Cache File extensions */
+# if ( defined(__x86_64__) || defined(_M_X64) )
+#  define VST_EXT_BLACKLIST ".fsb64"
+#else
+#  define VST_EXT_BLACKLIST ".fsb"
+#endif
+
+#define VST_EXT_ERRORFILE ".err"
+#define VST_EXT_INFOFILE  ".fsi"
+
 #ifndef VST_SCANNER_APP
 namespace ARDOUR {
 #endif

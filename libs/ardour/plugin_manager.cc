@@ -313,7 +313,7 @@ PluginManager::clear_vst_blacklist ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsb$", true);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\." VST_EXT_BLACKLIST "$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -323,7 +323,7 @@ PluginManager::clear_vst_blacklist ()
 #ifdef LXVST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsb$", true);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\." VST_EXT_BLACKLIST "$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -335,7 +335,7 @@ PluginManager::clear_vst_blacklist ()
 		string personal = get_personal_vst_blacklist_dir();
 
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\.fsb$", /* flat user cache */ false);
+		find_files_matching_regex (fsi_files, personal, "\\." VST_EXT_BLACKLIST "$", /* flat user cache */ false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
