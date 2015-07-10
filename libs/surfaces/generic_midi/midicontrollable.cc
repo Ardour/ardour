@@ -470,11 +470,15 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
         DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Feedback: %1 %2\n", control_description(), current_uri()));
 
 	*buf++ = (0xF0 & control_type) | (0xF & control_channel);
-	
+	int ev_size = 3;
 	switch (control_type) {
 	case MIDI::pitchbend:
 		*buf++ = int (gm) & 127;
 		*buf++ = (int (gm) >> 7) & 127;
+		break;
+	case MIDI::program:
+		*buf++ = control_additional; /* program number */
+		ev_size = 2;
 		break;
 	default:
 		*buf++ = control_additional; /* controller number */
@@ -484,7 +488,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI out: Type %1 Channel %2 Bytes %3 %4\n", (int) control_type, (int) control_channel , (int) *(buf - 2), (int) *(buf - 1)));
 
 	last_value = gm;
-	bufsize -= 3;
+	bufsize -= ev_size;
 
 	return buf;
 }
