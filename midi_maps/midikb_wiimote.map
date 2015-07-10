@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="WiiMote via midikb">
+
+<!-- OvenWerks June 27 2015 -->
+<!-- This tries to do what the old WiiMote setup in Ardour did -->
+<!-- B + A -->
+<Binding channel="1" note="16" action="Transport/ToggleRollForgetCapture"/>
+<!-- B + left -->
+<Binding channel="1" note="17" action="Editor/playhead-to-previous-region-boundary"/>
+<!-- B + right -->
+<Binding channel="1" note="18" action="Editor/playhead-to-next-region-boundary"/>
+<!-- B + up -->
+<Binding channel="1" note="19" action="Editor/jump-forward-to-mark"/>
+<!-- B + down -->
+<Binding channel="1" note="20" action="Editor/jump-backward-to-mark"/>
+<!-- B + home -->
+<Binding channel="1" note="21" action="Editor/add-location-from-playhead"/>
+<!-- B + minus -->
+<Binding channel="1" note="22" action="Transport/GotoStart"/>
+<!-- B + plus -->
+<Binding channel="1" note="23" action="Transport/GotoEnd"/>
+<!-- B + one  Not used add as you wish -->
+<!--Binding channel="1" note="24" action=""/-->
+<!-- B + Two -->
+<Binding channel="1" note="25" function="rec-disable"/>
+
+<!-- A -->
+<Binding channel="1" note="32" action="Transport/ToggleRoll"/>
+<!-- left -->
+<Binding channel="1" note="33" action="Editor/nudge-playhead-backward"/>
+<!-- right -->
+<Binding channel="1" note="34" action="Editor/nudge-playhead-forward"/>
+<!-- up -->
+<Binding channel="1" note="35" action="Editor/select-prev-route"/>
+<!-- down -->
+<Binding channel="1" note="36" action="Editor/select-next-route"/>
+<!-- home -->
+<Binding channel="1" note="37" action="Editor/playhead-to-edit"/>
+<!-- minus -->
+<Binding channel="1" note="38" action="Editor/temporal-zoom-out"/>
+<!-- plus -->
+<Binding channel="1" note="39" action="Editor/temporal-zoom-in"/>
+<!-- one -->
+<Binding channel="1" note="40" action="Editor/track-record-enable-toggle"/>
+<!-- Two -->
+<Binding channel="1" note="41" function="rec-enable"/>
+
+
+
+
+</ArdourMIDIBindings>

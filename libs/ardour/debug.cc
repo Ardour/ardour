@@ -65,5 +65,6 @@ PBD::DebugBits PBD::DEBUG::Ports = PBD::new_debug_bit ("Ports");
 PBD::DebugBits PBD::DEBUG::AudioEngine = PBD::new_debug_bit ("AudioEngine");
 PBD::DebugBits PBD::DEBUG::Soundcloud = PBD::new_debug_bit ("Soundcloud");
 PBD::DebugBits PBD::DEBUG::Butler = PBD::new_debug_bit ("Butler");
+PBD::DebugBits PBD::DEBUG::GenericMidi = PBD::new_debug_bit ("genericmidi");
 
 
