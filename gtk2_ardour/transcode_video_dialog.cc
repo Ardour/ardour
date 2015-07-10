@@ -122,11 +122,14 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		aspect_checkbox.set_sensitive(false);
 		bitrate_checkbox.set_sensitive(false);
 	} else {
-		ffok = true;
 		w = transcoder->get_width();
 		h = transcoder->get_height();
 		as = transcoder->get_audio();
 		m_aspect = transcoder->get_aspect();
+
+		if (w > 0 && h > 0 && transcoder->get_fps() > 0 && transcoder->get_duration() > 0) {
+			ffok = true;
+		}
 
 		Table* t = manage (new Table (4, 2));
 		t->set_spacings (4);
@@ -178,17 +181,40 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	options_box->pack_start (*l, false, true, 4);
 
 	video_combo.set_name ("PaddedButton");
-	video_combo.append_text(_("Reference From Current Location (Previously Transcoded Files Only)"));
-	if (ffok)  {
+
+	if (ffok) {
+		video_combo.append_text(_("Reference From Current Location (Previously Transcoded Files Only)"));
 		video_combo.append_text(_("Import/Transcode Video to Session"));
 		video_combo.set_active(1);
-	} else {
+		if (as.size() > 0) {
+			video_combo.append_text(_("Do Not Import Video (Audio Import Only)"));
+			audio_combo.set_sensitive(true);
+		} else {
+			audio_combo.set_sensitive(false);
+		}
+		video_combo.set_sensitive(true);
+		transcode_button.set_sensitive(true);
+		path_entry.set_sensitive (true);
+		browse_button.set_sensitive (true);
+	} else if (as.size() > 0) {
+		video_combo.append_text(_("Do Not Import Video (Audio Import Only)"));
 		video_combo.set_active(0);
+		path_entry.set_text ("");
+
+		video_combo.set_sensitive(false);
+		audio_combo.set_sensitive(true);
+		transcode_button.set_sensitive(true);
+		path_entry.set_sensitive (false);
+		browse_button.set_sensitive (false);
+	} else {
+		video_combo.append_text(_("Do Not Import Video"));
+		video_combo.set_active(0);
+		path_entry.set_text ("");
 		video_combo.set_sensitive(false);
 		audio_combo.set_sensitive(false);
-	}
-	if (as.size() > 0) {
-		video_combo.append_text(_("Do Not Import Video (Audio Import Only)"));
+		transcode_button.set_sensitive(false);
+		path_entry.set_sensitive (false);
+		browse_button.set_sensitive (false);
 	}
 
 	options_box->pack_start (video_combo, false, false, 4);
