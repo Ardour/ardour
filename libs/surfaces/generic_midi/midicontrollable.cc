@@ -373,9 +373,13 @@ MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 		controllable->set_value (midi_to_control (pb));
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI pitchbend %1 value %2  %3\n", (int) control_channel, (float) midi_to_control (pb), current_uri() ));
 	} else {
-		float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
-		controllable->set_value (new_value);
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI pitchbend %1 value %2  %3\n", (int) control_channel, (float) new_value, current_uri()));
+		if (pb > 8065.0f) {
+			controllable->set_value (1);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi pitchbend %1 value 1  %2\n", (int) control_channel, current_uri()));
+		} else {
+			controllable->set_value (0);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi pitchbend %1 value 0  %2\n", (int) control_channel, current_uri()));
+		}
 	}
 
 	last_value = control_to_midi (controllable->get_value ());
