@@ -19,11 +19,14 @@
 #include <cstring>
 
 #include "midi++/port.h"
+#include "pbd/compose.h"
+#include "ardour/debug.h"
 
 #include "midiaction.h"
 #include "generic_midi_control_protocol.h"
 
 using namespace MIDI;
+using namespace PBD;
 
 MIDIAction::MIDIAction (MIDI::Parser& p)
 	: MIDIInvokable (p)
@@ -44,6 +47,7 @@ MIDIAction::init (GenericMidiControlProtocol& ui, const std::string& invokable_n
 void
 MIDIAction::execute ()
 {
+        DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Action: '%1'\n", _invokable_name));
         _ui->access_action (_invokable_name);
 }
 

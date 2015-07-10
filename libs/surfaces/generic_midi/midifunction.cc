@@ -23,7 +23,12 @@
 #include "midifunction.h"
 #include "generic_midi_control_protocol.h"
 
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
+
 using namespace MIDI;
+using namespace PBD;
 
 MIDIFunction::MIDIFunction (MIDI::Parser& p)
 	: MIDIInvokable (p)
@@ -94,10 +99,12 @@ MIDIFunction::execute ()
 	switch (_function) {
 	case NextBank:
 		_ui->next_bank();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: next_bank\n");
 		break;
 
 	case PrevBank:
 		_ui->prev_bank();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: prev_bank\n");
 		break;
 
 	case SetBank:
@@ -105,39 +112,48 @@ MIDIFunction::execute ()
 			uint32_t bank;
 			sscanf (_argument.c_str(), "%d", &bank);
 			_ui->set_current_bank (bank);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Function: set_current_bank = %1\n", (int) bank));
 		}
 		break;
 
 	case TransportStop:
 		_ui->transport_stop ();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: transport_stop\n");
 		break;
 
 	case TransportRoll:
 		_ui->transport_play ();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: transport_play\n");
 		break;
 
 	case TransportStart:
 		_ui->goto_start ();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: goto_start\n");
 		break;
 
 	case TransportZero:
 		// need this in BasicUI
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: goto_zero-not implemented\n");
 		break;
 
 	case TransportEnd:
 		_ui->goto_end ();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: goto_end\n");
 		break;
 
 	case TransportLoopToggle:
 		_ui->loop_toggle ();
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: loop_toggle\n");
 		break;
 
 	case TransportRecordEnable:
 		_ui->set_record_enable (true);
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: set_record_enable = true\n");
 		break;
 
 	case TransportRecordDisable:
 		_ui->set_record_enable (false);
+		DEBUG_TRACE (DEBUG::GenericMidi, "Function: set_record_enable = false\n");
 		break;
 
 	case Select:
@@ -145,6 +161,7 @@ MIDIFunction::execute ()
 			uint32_t rid;
 			sscanf (_argument.c_str(), "%d", &rid);
 			_ui->SetRouteSelection (rid);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Function: SetRouteSelection = %1\n", rid));
 		}
 		break;
 	case TrackSetMute:
@@ -165,6 +182,7 @@ MIDIFunction::execute ()
 XMLNode&
 MIDIFunction::get_state ()
 {
+
 	XMLNode* node = new XMLNode ("MIDIFunction");
 	return *node;
 }

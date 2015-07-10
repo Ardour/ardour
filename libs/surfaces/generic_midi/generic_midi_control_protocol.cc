@@ -30,6 +30,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/xml++.h"
+#include "pbd/compose.h"
 
 #include "midi++/port.h"
 
@@ -40,6 +41,7 @@
 #include "ardour/midi_ui.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/debug.h"
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"
@@ -174,6 +176,7 @@ GenericMidiControlProtocol::reload_maps ()
 void
 GenericMidiControlProtocol::drop_all ()
 {
+	DEBUG_TRACE (DEBUG::GenericMidi, "Drop all bindings\n");
 	Glib::Threads::Mutex::Lock lm (pending_lock);
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 
@@ -201,6 +204,7 @@ GenericMidiControlProtocol::drop_all ()
 void
 GenericMidiControlProtocol::drop_bindings ()
 {
+	DEBUG_TRACE (DEBUG::GenericMidi, "Drop bindings, leave learned\n");
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
@@ -453,7 +457,7 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		// Update the MIDI Controllable based on the the pos param
 		// Here is where a table lookup for user mappings could go; for now we'll just wing it...
 		mc->bind_midi(channel, MIDI::controller, value);
-
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Create binding: Channel: %1 Controller: %2 Value: %3 \n", channel, MIDI::controller, value));
 		controllables.push_back (mc);
 	}
 }
@@ -597,6 +601,7 @@ GenericMidiControlProtocol::get_feedback () const
 int
 GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 {
+	DEBUG_TRACE (DEBUG::GenericMidi, "Load bindings: Reading midi map\n");
 	XMLTree state_tree;
 
 	if (!state_tree.read (xmlpath.c_str())) {
@@ -632,6 +637,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 
 	drop_all ();
 
+	DEBUG_TRACE (DEBUG::GenericMidi, "Loading bindings\n");
 	for (citer = children.begin(); citer != children.end(); ++citer) {
 		
 		if ((*citer)->name() == "DeviceInfo") {

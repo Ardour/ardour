@@ -26,6 +26,7 @@
 #include "pbd/controllable_descriptor.h"
 #include "pbd/xml++.h"
 #include "pbd/stacktrace.h"
+#include "pbd/compose.h"
 
 #include "midi++/types.h" // Added by JE - 06-01-2009. All instances of 'byte' changed to 'MIDI::byte' (for clarification)
 #include "midi++/port.h"
@@ -35,6 +36,7 @@
 #include "ardour/automation_control.h"
 #include "ardour/midi_ui.h"
 #include "ardour/utils.h"
+#include "ardour/debug.h"
 
 #include "midicontrollable.h"
 #include "generic_midi_control_protocol.h"
@@ -268,10 +270,13 @@ MIDIControllable::midi_sense_note (Parser &, EventTwoBytes *msg, bool /*is_on*/)
 	if (!controllable->is_toggle()) {
 		if (control_additional == msg->note_number) {
 			controllable->set_value (midi_to_control (msg->velocity));
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Note %1 value %2  %3\n", (int) msg->note_number, (float) midi_to_control (msg->velocity), current_uri() ));
 		}
 	} else {
 		if (control_additional == msg->note_number) {
-			controllable->set_value (controllable->get_value() > 0.5f ? 0.0f : 1.0f);
+			float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
+			controllable->set_value (new_value);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Note %1 Value %2  %3\n", (int) msg->note_number, (float) new_value, current_uri()));
 		}
 	}
 
@@ -317,13 +322,16 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			if (in_sync || _surface->motorised ()) {
 				controllable->set_value (midi_to_control (new_value));
 			}
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
 
 			last_controllable_value = new_value;
 		} else {
 			if (msg->value > 64.0f) {
 				controllable->set_value (1);
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
 			} else {
 				controllable->set_value (0);
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
 			}
 		}
 
@@ -342,8 +350,11 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 
 	if (!controllable->is_toggle()) {
 		controllable->set_value (midi_to_control (msg));
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) midi_to_control (msg), current_uri() ));
 	} else if (msg == control_additional) {
-		controllable->set_value (controllable->get_value() > 0.5f ? 0.0f : 1.0f);
+		float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
+		controllable->set_value (new_value);
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
 	}
 
 	last_value = (MIDI::byte) (controllable->get_value() * 127.0); // to prevent feedback fights
@@ -360,8 +371,11 @@ MIDIControllable::midi_sense_pitchbend (Parser &, pitchbend_t pb)
 
 	if (!controllable->is_toggle()) {
 		controllable->set_value (midi_to_control (pb));
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI pitchbend %1 value %2  %3\n", (int) control_channel, (float) midi_to_control (pb), current_uri() ));
 	} else {
-		controllable->set_value (controllable->get_value() > 0.5f ? 0.0f : 1.0f);
+		float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
+		controllable->set_value (new_value);
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI pitchbend %1 value %2  %3\n", (int) control_channel, (float) new_value, current_uri()));
 	}
 
 	last_value = control_to_midi (controllable->get_value ());
@@ -437,6 +451,7 @@ MIDIControllable::bind_midi (channel_t chn, eventType ev, MIDI::byte additional)
 	default:
 		break;
 	}
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Controlable: bind_midi: %1 on Channel %2 value %3 \n", _control_description, chn_i + 1, (int) additional));
 }
 
 MIDI::byte*
@@ -452,6 +467,8 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 		return buf;
 	}
 
+        DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Feedback: %1 %2\n", control_description(), current_uri()));
+
 	*buf++ = (0xF0 & control_type) | (0xF & control_channel);
 	
 	switch (control_type) {
@@ -464,6 +481,7 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 		*buf++ = gm;
 		break;
 	}
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI out: Type %1 Channel %2 Bytes %3 %4\n", (int) control_type, (int) control_channel , (int) *(buf - 2), (int) *(buf - 1)));
 
 	last_value = gm;
 	bufsize -= 3;
