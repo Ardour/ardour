@@ -397,8 +397,7 @@ AddVideoDialog::file_selection_changed ()
 	if (chooser.get_filename().size() > 0) {
 		std::string path = chooser.get_filename();
 		bool ok =
-				check_video_file_extension(path)
-				&&  Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_REGULAR | Glib::FILE_TEST_IS_SYMLINK)
+				Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_REGULAR | Glib::FILE_TEST_IS_SYMLINK)
 				&& !Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR);
 		set_action_ok(ok);
 		if (ok) {
@@ -417,8 +416,7 @@ AddVideoDialog::file_activated ()
 		std::string path = chooser.get_filename();
 		// TODO check docroot -> set import options
 		bool ok =
-				check_video_file_extension(path)
-				&&  Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_REGULAR | Glib::FILE_TEST_IS_SYMLINK)
+				Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_REGULAR | Glib::FILE_TEST_IS_SYMLINK)
 				&& !Glib::file_test(path.c_str(), Glib::FILE_TEST_IS_DIR);
 		if (ok) {
 			Gtk::Dialog::response(RESPONSE_ACCEPT);
