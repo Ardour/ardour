@@ -288,6 +288,7 @@ static bool check_video_file_extension(std::string file)
 		".webm"    , ".WEBM"    ,
 		".wmv"     , ".WMV"     ,
 		".ts"      , ".TS"      ,
+		".mxf"     , ".MXF"     ,
 	};
 
 	for (size_t n = 0; n < sizeof(suffixes)/sizeof(suffixes[0]); ++n) {
