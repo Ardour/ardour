@@ -945,7 +945,7 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 
 
 void
-Mixer_UI::set_all_audio_visibility (int tracks, bool yn)
+Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
 {
 	TreeModel::Children rows = track_model->children();
 	TreeModel::Children::iterator i;
@@ -966,6 +966,7 @@ Mixer_UI::set_all_audio_visibility (int tracks, bool yn)
 			}
 			
 			boost::shared_ptr<AudioTrack> at = strip->audio_track();
+			boost::shared_ptr<MidiTrack> mt = strip->midi_track();
 			
 			switch (tracks) {
 			case 0:
@@ -979,7 +980,13 @@ Mixer_UI::set_all_audio_visibility (int tracks, bool yn)
 				break;
 				
 			case 2:
-				if (!at) { /* bus */
+				if (!at && !mt) { /* bus */
+					(*i)[track_columns.visible] = yn;
+				}
+				break;
+
+			case 3:
+				if (mt) { /* midi-track */
 					(*i)[track_columns.visible] = yn;
 				}
 				break;
@@ -1005,24 +1012,36 @@ Mixer_UI::show_all_routes ()
 void
 Mixer_UI::show_all_audiobus ()
 {
-	set_all_audio_visibility (2, true);
+	set_all_audio_midi_visibility (2, true);
 }
 void
 Mixer_UI::hide_all_audiobus ()
 {
-	set_all_audio_visibility (2, false);
+	set_all_audio_midi_visibility (2, false);
 }
 
 void
 Mixer_UI::show_all_audiotracks()
 {
-	set_all_audio_visibility (1, true);
+	set_all_audio_midi_visibility (1, true);
 }
 void
 Mixer_UI::hide_all_audiotracks ()
 {
-	set_all_audio_visibility (1, false);
+	set_all_audio_midi_visibility (1, false);
 }
+
+void
+Mixer_UI::show_all_miditracks()
+{
+	set_all_audio_midi_visibility (3, true);
+}
+void
+Mixer_UI::hide_all_miditracks ()
+{
+	set_all_audio_midi_visibility (3, false);
+}
+
 
 void
 Mixer_UI::track_list_reorder (const TreeModel::Path&, const TreeModel::iterator&, int* /*new_order*/)
@@ -1196,6 +1215,8 @@ Mixer_UI::build_track_menu ()
 	items.push_back (MenuElem (_("Hide All Audio Tracks"), sigc::mem_fun(*this, &Mixer_UI::hide_all_audiotracks)));
 	items.push_back (MenuElem (_("Show All Audio Busses"), sigc::mem_fun(*this, &Mixer_UI::show_all_audiobus)));
 	items.push_back (MenuElem (_("Hide All Audio Busses"), sigc::mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
+	items.push_back (MenuElem (_("Show All Midi Tracks"), sigc::mem_fun (*this, &Mixer_UI::show_all_miditracks)));
+	items.push_back (MenuElem (_("Hide All Midi Tracks"), sigc::mem_fun (*this, &Mixer_UI::hide_all_miditracks)));
 
 }
 
