@@ -1515,6 +1515,7 @@ public:
 		, _display_plugin_scan_progress (_("Always Display Plugin Scan Progress"))
 		, _discover_vst_on_start (_("Scan for [new] VST Plugins on Application Start"))
 		, _discover_au_on_start (_("Scan for AudioUnit Plugins on Application Start"))
+		, _verbose_plugin_scan (_("Verbose Plugin Scan"))
 		, _timeout_adjustment (0, 0, 3000, 50, 50)
 		, _timeout_slider (_timeout_adjustment)
 	{
@@ -1587,6 +1588,12 @@ public:
 		b = manage (new Button (_("Edit")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_vst_path_clicked));
 		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
+
+		// currently verbose logging is only implemented for Windows VST.
+		t->attach (_verbose_plugin_scan, 0, 2, n, n+1); ++n;
+		_verbose_plugin_scan.signal_toggled().connect (sigc::mem_fun (*this, &PluginOptions::verbose_plugin_scan_toggled));
+		Gtkmm2ext::UI::instance()->set_tip (_verbose_plugin_scan,
+					    _("<b>When enabled</b> additional information for every plugin is added to the Log Window."));
 #endif
 #endif // any VST
 
@@ -1634,6 +1641,10 @@ public:
 			bool const x = _rc_config->get_discover_audio_units();
 			_discover_au_on_start.set_active (x);
 		}
+		else if (p == "verbose-plugin-scan") {
+			bool const x = _rc_config->get_verbose_plugin_scan();
+			_verbose_plugin_scan.set_active (x);
+		}
 	}
 
 	void set_state_from_config () {
@@ -1641,6 +1652,7 @@ public:
 		parameter_changed ("discover-vst-on-start");
 		parameter_changed ("vst-scan-timeout");
 		parameter_changed ("discover-audio-units");
+		parameter_changed ("verbose-plugin-scan");
 	}
 
 private:
@@ -1649,6 +1661,7 @@ private:
 	CheckButton _display_plugin_scan_progress;
 	CheckButton _discover_vst_on_start;
 	CheckButton _discover_au_on_start;
+	CheckButton _verbose_plugin_scan;
 	Adjustment _timeout_adjustment;
 	HScale _timeout_slider;
 
@@ -1665,6 +1678,11 @@ private:
 	void discover_au_on_start_toggled () {
 		bool const x = _discover_au_on_start.get_active();
 		_rc_config->set_discover_audio_units(x);
+	}
+
+	void verbose_plugin_scan_toggled () {
+		bool const x = _verbose_plugin_scan.get_active();
+		_rc_config->set_verbose_plugin_scan(x);
 	}
 
 	void timeout_changed () {
