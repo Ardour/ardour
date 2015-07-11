@@ -25,6 +25,7 @@
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
+#include <glibmm.h>
 #else
 #include <sys/utsname.h>
 #endif
@@ -145,8 +146,9 @@ _pingback (void *arg)
 	HKEY key;
 	DWORD size = PATH_MAX;
 	char tmp[PATH_MAX+1];
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\CentralProcessor", 0, KEY_READ, &key))
-	    && (ERROR_SUCCESS == RegQueryValueExA (key, "0", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\CentralProcessor\\0", 0, KEY_READ, &key))
+	    && (ERROR_SUCCESS == RegQueryValueExA (key, "Identifier", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			// or "ProcessorNameString"
 		 )
 	{
 		string s = Glib::locale_to_utf8 (tmp);
@@ -167,7 +169,7 @@ _pingback (void *arg)
 # endif
 
 #ifndef NDEBUG
-	cerr << "Pingback: " << url << endl;
+	std::cerr << "Pingback: " << url << std::endl;
 #endif
 
 #endif /* PLATFORM_WINDOWS */
