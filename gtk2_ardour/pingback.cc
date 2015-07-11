@@ -139,14 +139,28 @@ _pingback (void *arg)
 	free (query);
 #else
 	// this is hilarious: https://msdn.microsoft.com/en-us/library/windows/desktop/ms724429%28v=vs.85%29.aspx
-	url += "r=&";
-
 	HKEY key;
 	DWORD size = PATH_MAX;
 	char tmp[PATH_MAX+1];
+
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &key))
+	    && (ERROR_SUCCESS == RegQueryValueExA (key, "ProductName", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+			// or "BuildLab" instead of "ProductName"
+		 )
+	{
+		string s = Glib::locale_to_utf8 (tmp);
+		char* query = curl_easy_escape (c, s.c_str(), strlen (s.c_str()));
+		s = string_compose ("r=%1", query);
+		url += s;
+		url += '&';
+		free (query);
+	} else {
+		url += "r=&";
+	}
+
 	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\CentralProcessor\\0", 0, KEY_READ, &key))
 	    && (ERROR_SUCCESS == RegQueryValueExA (key, "Identifier", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			// or "ProcessorNameString"
+			// or "ProcessorNameString" instead of "Identifier"
 		 )
 	{
 		string s = Glib::locale_to_utf8 (tmp);
