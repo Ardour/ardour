@@ -794,6 +794,8 @@ ARDOUR_UI::check_announcements ()
 
 #ifdef __APPLE__
 	_annc_filename = PROGRAM_NAME "_announcements_osx_";
+#elif defined PLATFORM_WINDOWS
+	_annc_filename = PROGRAM_NAME "_announcements_windows_";
 #else
 	_annc_filename = PROGRAM_NAME "_announcements_linux_";
 #endif
