@@ -696,13 +696,21 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 	vector<string>::iterator x;
 	int ret = 0;
 
-	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("detecting Windows VST plugins along %1\n", path));
+	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering Windows VST plugins along %1\n", path));
+
+	if (Config->verbose_plugin_scan()) {
+		info << string_compose (_("--- Windows VST plugins Scan: %1"), path) << endmsg;
+	}
 
 	find_files_matching_filter (plugin_objects, Config->get_plugin_path_vst(), windows_vst_filter, 0, false, true, true);
 
 	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
 		ARDOUR::PluginScanMessage(_("VST"), *x, !cache_only && !cancelled());
 		windows_vst_discover (*x, cache_only || cancelled());
+	}
+
+	if (Config->verbose_plugin_scan()) {
+		info << _("--- Windows VST plugins Scan Done") << endmsg;
 	}
 
 	return ret;
@@ -713,12 +721,22 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("windows_vst_discover '%1'\n", path));
 
+	if (Config->verbose_plugin_scan()) {
+		info << string_compose (_(" *  %1 %2"), path, (cache_only ? _(" (cache only)") : "")) << endmsg;
+	}
+
 	_cancel_timeout = false;
 	vector<VSTInfo*> * finfos = vstfx_get_info_fst (const_cast<char *> (path.c_str()),
 			cache_only ? VST_SCAN_CACHE_ONLY : VST_SCAN_USE_APP);
 
+	// TODO  get extended error messae from vstfx_get_info_fst() e.g  blacklisted, 32/64bit compat,
+	// .err file scanner output etc.
+
 	if (finfos->empty()) {
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Windows VST information from '%1'\n", path));
+		if (Config->verbose_plugin_scan()) {
+			info << _(" -> Cannot get Windows VST information, plugin ignored.") << endmsg;
+		}
 		return -1;
 	}
 
@@ -728,7 +746,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		char buf[32];
 
 		if (!finfo->canProcessReplacing) {
-			warning << string_compose (_("VST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
+			warning << string_compose (_("VST plugin %1 does not support processReplacing, and cannot be used in %2 at this time"),
 							 finfo->name, PROGRAM_NAME)
 				<< endl;
 			continue;
@@ -762,8 +780,8 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 
 		if (!_windows_vst_plugin_info->empty()) {
 			for (PluginInfoList::iterator i =_windows_vst_plugin_info->begin(); i != _windows_vst_plugin_info->end(); ++i) {
-				if ((info->type == (*i)->type)&&(info->unique_id == (*i)->unique_id)) {
-					warning << "Ignoring duplicate Windows VST plugin " << info->name << "\n";
+				if ((info->type == (*i)->type) && (info->unique_id == (*i)->unique_id)) {
+					warning << string_compose (_("Ignoring duplicate Windows VST plugin \"%1\""), info->name) << endmsg;
 					duplicate = true;
 					break;
 				}
@@ -774,6 +792,9 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Windows VST plugin ID '%1'\n", info->unique_id));
 			_windows_vst_plugin_info->push_back (info);
 			discovered++;
+			if (Config->verbose_plugin_scan()) {
+				info << string_compose (_(" -> OK. (VST Plugin \"%1\" added)."), info->name) << endmsg; 
+			}
 		}
 	}
 
