@@ -73,6 +73,34 @@ struct ping_call {
 	    : version (v), announce_path (a) {}
 };
 
+#ifdef PLATFORM_WINDOWS
+static bool
+_query_registry (const char *regkey, const char *regval, std::string &rv) {
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ, &key))
+	    && (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+		 )
+	{
+		rv = Glib::locale_to_utf8 (tmp);
+		return true;
+	}
+
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, regkey, 0, KEY_READ | KEY_WOW64_32KEY, &key))
+	    && (ERROR_SUCCESS == RegQueryValueExA (key, regval, 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+		 )
+	{
+		rv = Glib::locale_to_utf8 (tmp);
+		return true;
+	}
+
+	return false;
+}
+#endif
+
+
 static void*
 _pingback (void *arg)
 {
@@ -138,51 +166,32 @@ _pingback (void *arg)
 	url += s;
 	free (query);
 #else
-	// this is hilarious: https://msdn.microsoft.com/en-us/library/windows/desktop/ms724429%28v=vs.85%29.aspx
-	HKEY key;
-	DWORD size = PATH_MAX;
-	char tmp[PATH_MAX+1];
-
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", 0, KEY_READ, &key))
-	    && (ERROR_SUCCESS == RegQueryValueExA (key, "ProductName", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			// or "BuildLab" instead of "ProductName"
-		 )
-	{
-		string s = Glib::locale_to_utf8 (tmp);
-		char* query = curl_easy_escape (c, s.c_str(), strlen (s.c_str()));
-		s = string_compose ("r=%1", query);
-		url += s;
+	std::string val;
+	if (_query_registry("SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", val)) {
+		char* query = curl_easy_escape (c, val.c_str(), strlen (val.c_str()));
+		url += "r=";
+		url += query;
 		url += '&';
 		free (query);
 	} else {
 		url += "r=&";
 	}
 
-	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\CentralProcessor\\0", 0, KEY_READ, &key))
-	    && (ERROR_SUCCESS == RegQueryValueExA (key, "Identifier", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			// or "ProcessorNameString" instead of "Identifier"
-		 )
-	{
-		string s = Glib::locale_to_utf8 (tmp);
-		char* query = curl_easy_escape (c, s.c_str(), strlen (s.c_str()));
-		s = string_compose ("m=%1", query);
-		url += s;
+	if (_query_registry("Hardware\\Description\\System\\CentralProcessor\\0", "Identifier", val)) {
+		char* query = curl_easy_escape (c, val.c_str(), strlen (val.c_str()));
+		url += "m=";
+		url += query;
 		url += '&';
 		free (query);
 	} else {
 		url += "m=&";
 	}
 
-	url += "r=&";
 # if ( defined(__x86_64__) || defined(_M_X64) )
 	url += "s=Windows64";
 # else
 	url += "s=Windows32";
 # endif
-
-#ifndef NDEBUG
-	std::cerr << "Pingback: " << url << std::endl;
-#endif
 
 #endif /* PLATFORM_WINDOWS */
 
