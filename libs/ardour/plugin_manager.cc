@@ -698,7 +698,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Discovering Windows VST plugins along %1\n", path));
 
-	if (Config->verbose_plugin_scan()) {
+	if (Config->get_verbose_plugin_scan()) {
 		info << string_compose (_("--- Windows VST plugins Scan: %1"), path) << endmsg;
 	}
 
@@ -709,7 +709,7 @@ PluginManager::windows_vst_discover_from_path (string path, bool cache_only)
 		windows_vst_discover (*x, cache_only || cancelled());
 	}
 
-	if (Config->verbose_plugin_scan()) {
+	if (Config->get_verbose_plugin_scan()) {
 		info << _("--- Windows VST plugins Scan Done") << endmsg;
 	}
 
@@ -721,7 +721,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, string_compose ("windows_vst_discover '%1'\n", path));
 
-	if (Config->verbose_plugin_scan()) {
+	if (Config->get_verbose_plugin_scan()) {
 		info << string_compose (_(" *  %1 %2"), path, (cache_only ? _(" (cache only)") : "")) << endmsg;
 	}
 
@@ -734,7 +734,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 
 	if (finfos->empty()) {
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Cannot get Windows VST information from '%1'\n", path));
-		if (Config->verbose_plugin_scan()) {
+		if (Config->get_verbose_plugin_scan()) {
 			info << _(" -> Cannot get Windows VST information, plugin ignored.") << endmsg;
 		}
 		return -1;
@@ -792,8 +792,8 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 			DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Windows VST plugin ID '%1'\n", info->unique_id));
 			_windows_vst_plugin_info->push_back (info);
 			discovered++;
-			if (Config->verbose_plugin_scan()) {
-				info << string_compose (_(" -> OK. (VST Plugin \"%1\" added)."), info->name) << endmsg; 
+			if (Config->get_verbose_plugin_scan()) {
+				PBD::info << string_compose (_(" -> OK. (VST Plugin \"%1\" added)."), info->name) << endmsg; 
 			}
 		}
 	}
