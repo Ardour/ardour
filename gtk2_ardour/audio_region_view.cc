@@ -92,7 +92,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 	, trim_fade_in_drag_active(false)
 	, trim_fade_out_drag_active(false)
 {
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &AudioRegionView::parameter_changed));
 }
 
 AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
@@ -113,7 +113,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 	, trim_fade_in_drag_active(false)
 	, trim_fade_out_drag_active(false)
 {
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &AudioRegionView::parameter_changed));
 }
 
 AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_ptr<AudioRegion> other_region)
@@ -134,7 +134,7 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 {
 	init (true);
 
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&AudioRegionView::parameter_changed, this, _1), gui_context());
+	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &AudioRegionView::parameter_changed));
 }
 
 void
