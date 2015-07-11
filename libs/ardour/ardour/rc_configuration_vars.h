@@ -252,6 +252,7 @@ CONFIG_VARIABLE (DenormalModel, denormal_model, "denormal-model", DenormalFTZDAZ
 
 CONFIG_VARIABLE (std::string, osx_pingback_url, "osx-pingback-url", "http://community.ardour.org/pingback/osx/")
 CONFIG_VARIABLE (std::string, linux_pingback_url, "linux-pingback-url", "http://community.ardour.org/pingback/linux/")
+CONFIG_VARIABLE (std::string, windows_pingback_url, "windows-pingback-url", "http://community.ardour.org/pingback/windows/")
 CONFIG_VARIABLE (std::string, tutorial_manual_url, "tutorial-manual-url", "http://ardour.org/tutorial")
 CONFIG_VARIABLE (std::string, reference_manual_url, "reference-manual-url", "http://manual.ardour.org/")
 CONFIG_VARIABLE (std::string, updates_url, "updates-url", "http://ardour.org/whatsnew.html")
