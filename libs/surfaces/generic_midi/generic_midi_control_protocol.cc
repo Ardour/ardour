@@ -564,7 +564,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 						} else {
 							warning << string_compose (
 								_("Generic MIDI control: controllable %1 not found in session (ignored)"),
-								id) << endmsg;
+								id.to_s()) << endmsg;
 						}
 					}
 				}
