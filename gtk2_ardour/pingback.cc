@@ -23,7 +23,9 @@
 #include <fstream>
 #include <cstring>
 
-#ifndef PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#else
 #include <sys/utsname.h>
 #endif
 
