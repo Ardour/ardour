@@ -116,7 +116,7 @@ _pingback (void *arg)
 		return 0;
 	}
 
-	string uts = string_compose ("%1 %2 %3 %4", utb.sysname, utb.release, utb.version, utb.machine);
+	//string uts = string_compose ("%1 %2 %3 %4", utb.sysname, utb.release, utb.version, utb.machine);
 	string s;
 	char* query;
 
@@ -138,11 +138,36 @@ _pingback (void *arg)
 	free (query);
 #else
 	// this is hilarious: https://msdn.microsoft.com/en-us/library/windows/desktop/ms724429%28v=vs.85%29.aspx
+	url += "r=&";
+
+	HKEY key;
+	DWORD size = PATH_MAX;
+	char tmp[PATH_MAX+1];
+	if (   (ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Hardware\\Description\\System\\CentralProcessor", 0, KEY_READ, &key))
+	    && (ERROR_SUCCESS == RegQueryValueExA (key, "0", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
+		 )
+	{
+		string s = Glib::locale_to_utf8 (tmp);
+		char* query = curl_easy_escape (c, s.c_str(), strlen (s.c_str()));
+		s = string_compose ("m=%1", query);
+		url += s;
+		url += '&';
+		free (query);
+	} else {
+		url += "m=&";
+	}
+
+	url += "r=&";
 # if ( defined(__x86_64__) || defined(_M_X64) )
-	url += "a=64";
+	url += "s=Windows64";
 # else
-	url += "a=32";
+	url += "s=Windows32";
 # endif
+
+#ifndef NDEBUG
+	cerr << "Pingback: " << url << endl;
+#endif
+
 #endif /* PLATFORM_WINDOWS */
 
 	curl_easy_setopt (c, CURLOPT_URL, url.c_str());
