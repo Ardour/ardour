@@ -12,6 +12,8 @@ $group_key;
 $group_number = 0;
 %group_names;
 %group_text;
+%group_files;
+%group_handles;
 %group_bindings;
 %modifier_map;
 %group_numbering;
@@ -21,6 +23,7 @@ $platform = linux;
 $winkey = 'Win';
 $make_cheatsheet = 1;
 $make_accelmap = 0;
+$ardour_bindings = 0;
 $merge_from = "";
 $html = 0;
 
@@ -28,6 +31,7 @@ GetOptions ("platform=s" => \$platform,
 	    "winkey=s" => \$winkey,
 	    "cheatsheet" => \$make_cheatsheet,
 	    "accelmap" => \$make_accelmap,
+	    "ardourbindings" => \$ardour_bindings,
 	    "merge=s" => \$merge_from,
             "html" => \$html);
 
@@ -185,7 +189,7 @@ if ($merge_from) {
     close (BINDINGS);
 }
 
-if ($make_accelmap && !$merge_from) {
+if ($make_accelmap && !$merge_from && !$ardour_bindings) {
     print ";; this accelmap was produced by tools/fmt-bindings\n";
 }
 
@@ -214,7 +218,14 @@ while (<>) {
 
 	s/^%//;
 	chop;
-	($group_key,$group_name) = split (/\s+/, $_, 2);
+	($group_key,$group_file,$group_name) = split (/\s+/, $_, 3);
+	if ($make_accelmap && $ardour_bindings) {
+	    if (!exists ($group_handles{$group_file})) {
+		print "Try to open ", $group_file . ".bindings\n";
+		open $group_handles{$group_file}, ">", $group_file . ".bindings" or die "Cannot open bindings file " . $group_file . ".bindings: $!"
+	    }
+	    $group_files{$group_key} = $group_handles{$group_file}
+	}
 	$group_number++;
 	$group_text = "";
 	$in_group_def = 1;
@@ -240,6 +251,9 @@ while (<>) {
 	chop;
 	($key,$action,$binding,$text) = split (/\|/, $_, 4);
 
+	$gkey = $key;
+	$gkey =~ s/^-//;
+	    
 	# substitute bindings
 
 	$gtk_binding = $binding;
@@ -266,10 +280,24 @@ while (<>) {
 	} else {
 	    # include this in the accelmap
 	    if (!$merge_from && $make_accelmap) {
-		foreach $k (keys %gtk_modifier_map) {
-		    $gtk_binding =~ s/\@$k\@/$gtk_modifier_map{$k}/;
+		if (!$ardour_bindings) {
+		    foreach $k (keys %gtk_modifier_map) {
+			$gtk_binding =~ s/\@$k\@/$gtk_modifier_map{$k}/;
+		    }
+		    print "(gtk_accel_path \"<Actions>/$action\" \"$gtk_binding\")\n";
+		} else {
+		    $b = $binding;
+		    $b =~ s/<@//g;
+		    $b =~ s/@>//g;
+		    $b =~ s/PRIMARY/Primary-/;
+		    $b =~ s/SECONDARY/Secondary-/;
+		    $b =~ s/TERTIARY/Tertiary-/;
+		    $b =~ s/LEVEL4/Level4-/;
+		    
+		    if (exists ($group_files{$gkey})) {
+			print { $group_files{$gkey}  } "<Binding key=\"" . $b . "\" action=\"" . $action . "\"/>\n";
+		    }
 		}
-		print "(gtk_accel_path \"<Actions>/$action\" \"$gtk_binding\")\n";
 	    }
 	}
 
@@ -285,6 +313,10 @@ while (<>) {
     }
 
     next;
+}
+
+foreach my $key (keys %group_handles) {
+    close $group_handles{$key} or die "Group file $group_files{$key} not closed!"
 }
 
 if ($make_accelmap || !$make_cheatsheet) {
