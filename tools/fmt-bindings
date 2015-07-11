@@ -35,20 +35,12 @@ GetOptions ("platform=s" => \$platform,
 	    "merge=s" => \$merge_from,
             "html" => \$html);
 
-#
-# The use of a separate @WINDOW@ meta-modifier was a mistake and needs to be removed from the bindings.in file.
-# There is no separate key/modifier we can use for this, so inevitably it will be the same modifier as one of
-# the other meta-modifiers. This means, for example, that @WINDOW@-b could be same as @SECONDARY@-b with no
-# warnings given. One of the bindings will work, one won't.
-#
-
 if ($platform eq "darwin") {
 
     $gtk_modifier_map{'PRIMARY'} = 'Primary'; # GTK supports Primary to allow platform-independent binding to the "primary" modifier, which on OS X is Command
     $gtk_modifier_map{'SECONDARY'} = 'Control';
     $gtk_modifier_map{'TERTIARY'} = 'Shift';
     $gtk_modifier_map{'LEVEL4'} = 'Mod1'; 
-    $gtk_modifier_map{'WINDOW'} = 'Control';
 
     # cs_modifier_map == "Cheat Sheet Modifier Map"
     # Used to control what gets shown in the
@@ -58,7 +50,6 @@ if ($platform eq "darwin") {
     $cs_modifier_map{'SECONDARY'} = 'Control';
     $cs_modifier_map{'TERTIARY'} = 'Shift';
     $cs_modifier_map{'LEVEL4'} = 'Opt';
-    $cs_modifier_map{'WINDOW'} = 'Control';
 
     # used to display what gets shown in the
     # cheat sheet for mouse bindings. Differs
@@ -69,7 +60,6 @@ if ($platform eq "darwin") {
     $mouse_modifier_map{'SECONDARY'} = 'Ctrl';
     $mouse_modifier_map{'TERTIARY'} = 'Shift';
     $mouse_modifier_map{'LEVEL4'} = 'Opt';
-    $mouse_modifier_map{'WINDOW'} = 'Ctrl';
 
 } else {
 
@@ -77,7 +67,6 @@ if ($platform eq "darwin") {
     $gtk_modifier_map{'SECONDARY'} = 'Alt';
     $gtk_modifier_map{'TERTIARY'} = 'Shift';
     $gtk_modifier_map{'LEVEL4'} = $winkey;  # something like "Mod4><Super" 
-    $gtk_modifier_map{'WINDOW'} = 'Alt';
 
     # cs_modifier_map == "Cheat Sheet Modifier Map"
     # Used to control what gets shown in the
@@ -87,7 +76,6 @@ if ($platform eq "darwin") {
     $cs_modifier_map{'SECONDARY'} = 'Alt';
     $cs_modifier_map{'TERTIARY'} = 'Shift';
     $cs_modifier_map{'LEVEL4'} = 'Win';
-    $cs_modifier_map{'WINDOW'} = 'Alt';
 
     # used to display what gets shown in the
     # cheat sheet for mouse bindings. Differs
@@ -98,7 +86,6 @@ if ($platform eq "darwin") {
     $mouse_modifier_map{'SECONDARY'} = 'Alt';
     $mouse_modifier_map{'TERTIARY'} = 'Shift';
     $mouse_modifier_map{'LEVEL4'} = 'Win';
-    $mouse_modifier_map{'WINDOW'} = 'Alt';
 }
 
 %keycodes = ();

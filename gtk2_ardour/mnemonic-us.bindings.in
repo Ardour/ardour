@@ -7,8 +7,15 @@
 ; FORMAT:
 ; $text -> defines cheatsheet title as "text", which may contain LaTeX markup
 ;
-; %group text -> defines a binding group called "group" which will have the title "text" on the cheatsheet. 
-;                may be followed by zero or more lines of descriptive text, which may contain LaTeX markup
+; %group file text -> defines a binding group called "group" which will have the title "text" on the cheatsheet. 
+;                may be followed by zero or more lines of descriptive text,
+;                which may contain LaTeX markup. When generating native ardour
+;                bindings, the definition for a binding in group "group" will
+;                be placed in "<file>.bindings". The "file" field is otherwise
+;                ignored.
+;
+;                If the group name starts with "-", the binding will not appear
+;                on the cheetsheet.
 ;
 ; @group|action|binding|description -> defines an action+binding with description, as a member of a binding group
 ;                                       if group starts with '-' it will not be printed in the cheatsheet.
@@ -21,32 +28,32 @@ $ARDOUR Shortcuts \linebreak Mnemonic US-Keypad
 
 ;; GROUP DEFINITIONS
 
-%trans Transport \& Recording Control
+%trans global Transport \& Recording Control
 
-%sess Session \& File Handling
+%sess global Session \& File Handling
 
-%edit Basic Editing
+%edit editor Basic Editing
 
-%vis Changing What's Visible
+%vis editor Changing What's Visible
 
-%wvis Window Visibility
+%wvis global Window Visibility
 
-%eep Editing with Edit Point
+%eep editor Editing with Edit Point
 Most edit functions operate on a single "Edit Point". The edit point can be any of: playhead (default), the mouse or an active marker. The choice of Edit Point (by default) also sets the Zoom Focus.
 
-%aep Aligning with the Edit Point
+%aep editor Aligning with the Edit Point
 Align operations move regions so that their start/end/sync point is at the edit point. "Relative" operations
 just align the first region and moves other selected regions to maintain relative positioning.
 
-%epp Edit Point Playback
+%epp editor Edit Point Playback
 
-%movp Moving the Playhead
+%movp global Moving the Playhead
 A left click in the rulers positions the playhead unless Ardour is recording. You can use {\tt KP$\_$n} to move the 
 playhead to the n-th marker.
 
-%rop Region Operations
+%rop editor Region Operations
 
-%edit Edit Range
+%edit editor Edit Range
 There are only a few functions that refer to an "Edit Range". The current edit range is defined using combinations of the possible edit points: Playhead, Marker or Mouse.\par
 \begin{tabular}{lll}
 {\bf Edit Point} & {\bf Active Mark?} & {\bf Edit Range} \\
@@ -60,31 +67,31 @@ Marker & no & {\it No edit range defined} \\
 Marker & yes & from Active Marker to Mouse
 \end{tabular}
 
-%select Selecting
+%select editor Selecting
 
-%ranges Defining Loop, Punch Range and Tempo Changes
+%ranges editor Defining Loop, Punch Range and Tempo Changes
 
-%markers Markers \& Locations
+%markers editor Markers \& Locations
 The "move" commands all move the active marker(s). Jump to the first 9 markers using
 the keypad digits 1-9 (requires numlock).
 
-%mmode Mouse Modes
+%mmode editor Mouse Modes
 
-%mouse Mouse Usage
+%mouse editor Mouse Usage
 Right click on most objects and controls displays a context menu
 Shift+Right click deletes most objects. 
 OS X users without a 3 button mouse can use {\tt Option+Ctrl+Left} to simulate "Middle" for some purposes.
 Use F1 to step through mouse modes.
 
-%mobject Mouse Object Mode
+%mobject editor Mouse Object Mode
 This mode provides many different operations on both regions and control points, partially depending on where you click/drag with the mouse. The "body" of a region is the area where the waveform is displayed.
 
-%mzoom Mouse Zoom Mode
-%mops Mouse Ops on Solo/Mute/Rec-enable
-%mopsolo Mouse Ops on Solo Buttons only
-%mopsfader Mouse Ops on Faders \& Plugin Controls
+%mzoom editor Mouse Zoom Mode
+%mops editor Mouse Ops on Solo/Mute/Rec-enable
+%mopsolo editor Mouse Ops on Solo Buttons only
+%mopsfader editor Mouse Ops on Faders \& Plugin Controls
 
-%midi MIDI specific commands
+%midi editor MIDI specific commands
 
 ;; END GROUP DEFINITIONS
 
@@ -171,8 +178,8 @@ This mode provides many different operations on both regions and control points,
 @wvis|Window/toggle-session-options-editor|<@SECONDARY@>o|toggle preferences dialog
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
-@wvis|Window/toggle-audio-connection-manager|<@WINDOW@>p|toggle global audio patchbay
-@wvis|Window/toggle-midi-connection-manager|<@WINDOW@><@TERTIARY@>p|toggle global midi patchbay
+@wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>p|toggle global audio patchbay
+@wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>p|toggle global midi patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
 @select|Editor/select-all-after-playhead|<@PRIMARY@><@TERTIARY@>p|all after playhead
 
@@ -218,11 +225,11 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
 @wvis|Window/toggle-big-clock|<@SECONDARY@>c|toggle big clock
-@-group|Editor/crop<@PRIMARY@><@TERTIARY@>c|crop
+@-edit|Editor/crop<@PRIMARY@><@TERTIARY@>c|crop
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @edit|Editor/ToggleJadeo|<@SECONDARY@>v|video window
-@-group|Editor/brush-at-mouse|<@PRIMARY@>b|some text
+@-edit|Editor/brush-at-mouse|<@PRIMARY@>b|some text
 @wvis|Common/toggle-meterbridge|<@SECONDARY@>b|show meter bridge
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
@@ -273,22 +280,22 @@ This mode provides many different operations on both regions and control points,
 ;; keypad
 
 @rop|Region/nudge-backward|KP_Subtract|nudge backward
-@-group|Editor/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
+@-edit|Editor/nudge-next-backward|<@PRIMARY@>KP_Subtract|some text
 
 @movp|Editor/alternate-jump-forward-to-mark|<@PRIMARY@>KP_Right|to next mark
 @movp|Editor/alternate-jump-backward-to-mark|<@PRIMARY@>KP_Left|to previous mark
 
 @rop|Region/nudge-forward|KP_Add|nudge forward
-@-group|Editor/nudge-next-forward|<@PRIMARY@>KP_Add|some text
+@-edit|Editor/nudge-next-forward|<@PRIMARY@>KP_Add|some text
 
-@-group|Editor/start-range|comma|some text
-@-group|Editor/finish-range|period|some text
-@-group|Editor/alt-start-range|<@PRIMARY@>KP_Down|set the start of the range selection
-@-group|Editor/alt-finish-range|<@PRIMARY@>KP_Up|set the end of the range selection
-@-group|Editor/start-punch-range|<@PRIMARY@>comma|set the start of the Punch range
-@-group|Editor/finish-punch-range|<@PRIMARY@>period|set the end of the Punch range
-@-group|Editor/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
-@-group|Editor/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
+@-edit|Editor/start-range|comma|some text
+@-edit|Editor/finish-range|period|some text
+@-edit|Editor/alt-start-range|<@PRIMARY@>KP_Down|set the start of the range selection
+@-edit|Editor/alt-finish-range|<@PRIMARY@>KP_Up|set the end of the range selection
+@-edit|Editor/start-punch-range|<@PRIMARY@>comma|set the start of the Punch range
+@-edit|Editor/finish-punch-range|<@PRIMARY@>period|set the end of the Punch range
+@-edit|Editor/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
+@-edit|Editor/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
 @markers|Editor/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
 @markers|Editor/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
@@ -298,47 +305,47 @@ This mode provides many different operations on both regions and control points,
 @movp|Transport/alternate-numpad-decimal|KP_Separator|(some keybd layouts have separator instead of decimal)
 
 @movp|Transport/numpad-0|KP_0|some text
-@-group|Transport/numpad-1|KP_1|some text
-@-group|Transport/numpad-2|KP_2|some text
-@-group|Transport/numpad-3|KP_3|some text
-@-group|Transport/numpad-4|KP_4|some text
-@-group|Transport/numpad-5|KP_5|some text
-@-group|Transport/numpad-6|KP_6|some text
-@-group|Transport/numpad-7|KP_7|some text
-@-group|Transport/numpad-8|KP_8|some text
-@-group|Transport/numpad-9|KP_9|some text
+@-global|Transport/numpad-1|KP_1|some text
+@-global|Transport/numpad-2|KP_2|some text
+@-global|Transport/numpad-3|KP_3|some text
+@-global|Transport/numpad-4|KP_4|some text
+@-global|Transport/numpad-5|KP_5|some text
+@-global|Transport/numpad-6|KP_6|some text
+@-global|Transport/numpad-7|KP_7|some text
+@-global|Transport/numpad-8|KP_8|some text
+@-global|Transport/numpad-9|KP_9|some text
 
 ;; F-N keys
 
-@-group|Editor/edit-cursor-to-range-start|F1|some text
-@-group|Editor/edit-cursor-to-range-end|F2|some text
-@-group|Editor/pitch-shift-region|F5|some text
+@-edit|Editor/edit-cursor-to-range-start|F1|some text
+@-edit|Editor/edit-cursor-to-range-end|F2|some text
+@-edit|Editor/pitch-shift-region|F5|some text
 
-@-group|Editor/save-visual-state-1|<@PRIMARY@>F1|some text
-@-group|Editor/save-visual-state-2|<@PRIMARY@>F2|some text
-@-group|Editor/save-visual-state-3|<@PRIMARY@>F3|some text
-@-group|Editor/save-visual-state-4|<@PRIMARY@>F4|some text
-@-group|Editor/save-visual-state-5|<@PRIMARY@>F5|some text
-@-group|Editor/save-visual-state-6|<@PRIMARY@>F6|some text
-@-group|Editor/save-visual-state-7|<@PRIMARY@>F7|some text
-@-group|Editor/save-visual-state-8|<@PRIMARY@>F8|some text
-@-group|Editor/save-visual-state-9|<@PRIMARY@>F9|some text
-@-group|Editor/save-visual-state-10|<@PRIMARY@>F10|some text
-@-group|Editor/save-visual-state-11|<@PRIMARY@>F11|some text
-@-group|Editor/save-visual-state-12|<@PRIMARY@>F12|some text
+@-edit|Editor/save-visual-state-1|<@PRIMARY@>F1|some text
+@-edit|Editor/save-visual-state-2|<@PRIMARY@>F2|some text
+@-edit|Editor/save-visual-state-3|<@PRIMARY@>F3|some text
+@-edit|Editor/save-visual-state-4|<@PRIMARY@>F4|some text
+@-edit|Editor/save-visual-state-5|<@PRIMARY@>F5|some text
+@-edit|Editor/save-visual-state-6|<@PRIMARY@>F6|some text
+@-edit|Editor/save-visual-state-7|<@PRIMARY@>F7|some text
+@-edit|Editor/save-visual-state-8|<@PRIMARY@>F8|some text
+@-edit|Editor/save-visual-state-9|<@PRIMARY@>F9|some text
+@-edit|Editor/save-visual-state-10|<@PRIMARY@>F10|some text
+@-edit|Editor/save-visual-state-11|<@PRIMARY@>F11|some text
+@-edit|Editor/save-visual-state-12|<@PRIMARY@>F12|some text
 
-@-group|Editor/goto-visual-state-1|F1|some text
-@-group|Editor/goto-visual-state-2|F2|some text
-@-group|Editor/goto-visual-state-3|F3|some text
-@-group|Editor/goto-visual-state-4|F4|some text
-@-group|Editor/goto-visual-state-5|F5|some text
-@-group|Editor/goto-visual-state-6|F6|some text
-@-group|Editor/goto-visual-state-7|F7|some text
-@-group|Editor/goto-visual-state-8|F8|some text
-@-group|Editor/goto-visual-state-9|F9|some text
-@-group|Editor/goto-visual-state-10|F10|some text
-@-group|Editor/goto-visual-state-11|F11|some text
-@-group|Editor/goto-visual-state-12|F12|some text
+@-edit|Editor/goto-visual-state-1|F1|some text
+@-edit|Editor/goto-visual-state-2|F2|some text
+@-edit|Editor/goto-visual-state-3|F3|some text
+@-edit|Editor/goto-visual-state-4|F4|some text
+@-edit|Editor/goto-visual-state-5|F5|some text
+@-edit|Editor/goto-visual-state-6|F6|some text
+@-edit|Editor/goto-visual-state-7|F7|some text
+@-edit|Editor/goto-visual-state-8|F8|some text
+@-edit|Editor/goto-visual-state-9|F9|some text
+@-edit|Editor/goto-visual-state-10|F10|some text
+@-edit|Editor/goto-visual-state-11|F11|some text
+@-edit|Editor/goto-visual-state-12|F12|some text
 
 
 ;; numbers
