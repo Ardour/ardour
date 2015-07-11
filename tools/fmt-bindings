@@ -208,8 +208,7 @@ while (<>) {
 	($group_key,$group_file,$group_name) = split (/\s+/, $_, 3);
 	if ($make_accelmap && $ardour_bindings) {
 	    if (!exists ($group_handles{$group_file})) {
-		print "Try to open ", $group_file . ".bindings\n";
-		open $group_handles{$group_file}, ">", $group_file . ".bindings" or die "Cannot open bindings file " . $group_file . ".bindings: $!"
+		open $group_handles{$group_file}, ">", "gtk2_ardour/" . $group_file . ".bindings" or die "Cannot open bindings file " . $group_file . ".bindings: $!"
 	    }
 	    $group_files{$group_key} = $group_handles{$group_file}
 	}
