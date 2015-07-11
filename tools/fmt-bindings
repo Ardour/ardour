@@ -208,7 +208,9 @@ while (<>) {
 	($group_key,$group_file,$group_name) = split (/\s+/, $_, 3);
 	if ($make_accelmap && $ardour_bindings) {
 	    if (!exists ($group_handles{$group_file})) {
-		open $group_handles{$group_file}, ">", "gtk2_ardour/" . $group_file . ".bindings" or die "Cannot open bindings file " . $group_file . ".bindings: $!"
+		
+		open $group_handles{$group_file}, ">", "gtk2_ardour/" . $group_file . ".bindings" or die "Cannot open bindings file " . $group_file . ".bindings: $!";
+		print { $group_handles{$group_file} } "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n <Bindings name=\"ardour-", $group_file , "\">\n <Press>\n";
 	    }
 	    $group_files{$group_key} = $group_handles{$group_file}
 	}
@@ -281,7 +283,7 @@ while (<>) {
 		    $b =~ s/LEVEL4/Level4-/;
 		    
 		    if (exists ($group_files{$gkey})) {
-			print { $group_files{$gkey}  } "<Binding key=\"" . $b . "\" action=\"" . $action . "\"/>\n";
+			print { $group_files{$gkey}  } "  <Binding key=\"" . $b . "\" action=\"" . $action . "\"/>\n";
 		    }
 		}
 	    }
@@ -302,6 +304,7 @@ while (<>) {
 }
 
 foreach my $key (keys %group_handles) {
+    print { $group_handles{$key} } " </Press>\n <Release>\n </Release>\n</Bindings>\n";
     close $group_handles{$key} or die "Group file $group_files{$key} not closed!"
 }
 
