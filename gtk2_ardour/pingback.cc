@@ -75,16 +75,9 @@ struct ping_call {
 static void*
 _pingback (void *arg)
 {
-#ifndef PLATFORM_WINDOWS
 	ping_call* cm = static_cast<ping_call*> (arg);
 	CURL* c;
-	struct utsname utb;
 	string return_str;
-
-	if (uname (&utb)) {
-		return 0;
-	}
-
 	//initialize curl
 
 	curl_global_init (CURL_GLOBAL_NOTHING);
@@ -99,14 +92,29 @@ _pingback (void *arg)
 
 #ifdef __APPLE__
 	url = Config->get_osx_pingback_url ();
+#elif defined PLATFORM_WINDOWS
+	url = Config->get_windows_pingback_url ();
 #else
 	url = Config->get_linux_pingback_url ();
 #endif
+
+	if (url.compare (0, 4, "http") != 0) {
+		delete cm;
+		return 0;
+	}
 
 	char* v = curl_easy_escape (c, cm->version.c_str(), cm->version.length());
 	url += v;
 	url += '?';
 	free (v);
+
+#ifndef PLATFORM_WINDOWS
+	struct utsname utb;
+
+	if (uname (&utb)) {
+		delete cm;
+		return 0;
+	}
 
 	string uts = string_compose ("%1 %2 %3 %4", utb.sysname, utb.release, utb.version, utb.machine);
 	string s;
@@ -128,6 +136,14 @@ _pingback (void *arg)
 	s = string_compose ("m=%1", query);
 	url += s;
 	free (query);
+#else
+	// this is hilarious: https://msdn.microsoft.com/en-us/library/windows/desktop/ms724429%28v=vs.85%29.aspx
+# if ( defined(__x86_64__) || defined(_M_X64) )
+	url += "a=64";
+# else
+	url += "a=32";
+# endif
+#endif /* PLATFORM_WINDOWS */
 
 	curl_easy_setopt (c, CURLOPT_URL, url.c_str());
 
@@ -163,9 +179,6 @@ _pingback (void *arg)
 
 	curl_easy_cleanup (c);
 	delete cm;
-
-#endif /* PLATFORM_WINDOWS */
-
 	return 0;
 }
 
