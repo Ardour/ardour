@@ -178,6 +178,11 @@ _pingback (void *arg)
 	}
 
 	if (_query_registry("Hardware\\Description\\System\\CentralProcessor\\0", "Identifier", val)) {
+		// remove "Family X Model YY Stepping Z" tail
+		size_t cut = val.find (" Family ");
+		if (string::npos != cut) {
+			val = val.substr (0, cut);
+		}
 		char* query = curl_easy_escape (c, val.c_str(), strlen (val.c_str()));
 		url += "m=";
 		url += query;
