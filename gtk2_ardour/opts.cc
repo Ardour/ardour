@@ -74,7 +74,7 @@ print_help (const char *execname)
 #endif
 	     << _("  -E, --save <file>           Load the specified session, save it to <file> and then quit\n")
 	     << _("  -C, --curvetest filename    Curve algorithm debugger\n")
-	     << _("  -k, --keybindings filename  Name of key bindings to load (default is ~/.ardour3/ardour.bindings)\n")
+	     << _("  -k, --keybindings filename  Name of key bindings to load\n")
 		;
 	return 1;
 
