@@ -1215,7 +1215,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 
 		}
 
-		if (activation_allowed && !_session.get_disable_all_loaded_plugins()) {
+		if (activation_allowed && (!_session.get_disable_all_loaded_plugins () || !processor->display_to_user ())) {
 			processor->activate ();
 		}
 
@@ -1295,7 +1295,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
 		if (i != children.end()) {
 			if ((prop = (*i)->property (X_("active"))) != 0) {
-				if ( string_is_affirmative (prop->value()) && !_session.get_disable_all_loaded_plugins() )
+				if ( string_is_affirmative (prop->value()) && (!_session.get_disable_all_loaded_plugins () || !processor->display_to_user () ) )
 					processor->activate();
 				else
 					processor->deactivate();
@@ -4502,6 +4502,12 @@ Route::setup_invisible_processors ()
 	}
 
 	_processors = new_processors;
+
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if (!(*i)->display_to_user () && !(*i)->active ()) {
+			(*i)->activate ();
+		}
+	}
 
 	DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: setup_invisible_processors\n", _name));
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
