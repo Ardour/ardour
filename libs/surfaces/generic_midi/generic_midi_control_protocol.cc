@@ -534,6 +534,16 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		pending_controllables.clear ();
 	}
 
+	// midi map has to be loaded first so learned binding can go on top
+	if ((prop = node.property ("binding")) != 0) {
+		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
+			if (prop->value() == (*x).name) {
+				load_bindings ((*x).path);
+				break;
+			}
+		}
+	}
+
 	/* Load up specific bindings from the
 	 * <Controls><MidiControllable>...</MidiControllable><Controls> section
 	 */
@@ -552,6 +562,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 					if ((prop = (*niter)->property ("id")) != 0) {
 						
 						ID id = prop->value ();
+						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id));
 						Controllable* c = Controllable::by_id (id);
 						
 						if (c) {
@@ -568,15 +579,6 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 						}
 					}
 				}
-			}
-		}
-	}
-
-	if ((prop = node.property ("binding")) != 0) {
-		for (list<MapInfo>::iterator x = map_info.begin(); x != map_info.end(); ++x) {
-			if (prop->value() == (*x).name) {
-				load_bindings ((*x).path);
-				break;
 			}
 		}
 	}
