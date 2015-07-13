@@ -97,6 +97,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _soloed_by_others_upstream (0)
 	, _soloed_by_others_downstream (0)
 	, _solo_isolated (0)
+	, _solo_isolated_by_upstream (0)
 	, _denormal_protection (false)
 	, _recordable (true)
 	, _silent (false)
@@ -952,6 +953,28 @@ Route::set_mute_master_solo ()
 }
 
 void
+Route::mod_solo_isolated_by_upstream (bool yn, void* src)
+{
+	bool old = solo_isolated ();
+
+	if (!yn) {
+		if (_solo_isolated_by_upstream >= 1) {
+			_solo_isolated_by_upstream--;
+		} else {
+			_solo_isolated_by_upstream = 0;
+		}
+	} else {
+		_solo_isolated_by_upstream++;
+	}
+
+	if (solo_isolated() != old) {
+		/* solo isolated status changed */
+		_mute_master->set_solo_ignore (yn);
+		solo_isolated_changed (src);
+	}
+}
+
+void
 Route::set_solo_isolated (bool yn, void *src)
 {
 	if (is_master() || is_monitor() || is_auditioner()) {
@@ -962,25 +985,6 @@ Route::set_solo_isolated (bool yn, void *src)
 		_route_group->foreach_route (boost::bind (&Route::set_solo_isolated, _1, yn, _route_group));
 		return;
 	}
-
-	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
-
-	boost::shared_ptr<RouteList> routes = _session.get_routes ();
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-
-		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
-			continue;
-		}
-
-		bool sends_only;
-		bool does_feed = direct_feeds_according_to_graph (*i, &sends_only); // we will recurse anyway, so don't use ::feeds()
-
-		if (does_feed && !sends_only) {
-			(*i)->set_solo_isolated (yn, (*i)->route_group());
-		}
-	}
-
-	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
 
 	bool changed = false;
 
@@ -1000,15 +1004,37 @@ Route::set_solo_isolated (bool yn, void *src)
 		}
 	}
 
-	if (changed) {
-		solo_isolated_changed (src);
+	
+	if (!changed) {
+		return;
 	}
+	
+	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
+
+	boost::shared_ptr<RouteList> routes = _session.get_routes ();
+	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+		
+		if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+			continue;
+		}
+		
+		bool sends_only;
+		bool does_feed = feeds (*i, &sends_only);
+		
+		if (does_feed && !sends_only) {
+			(*i)->mod_solo_isolated_by_upstream (yn, src);
+		}
+	}
+	
+	/* XXX should we back-propagate as well? (April 2010: myself and chris goddard think not) */
+
+	solo_isolated_changed (src);
 }
 
 bool
 Route::solo_isolated () const
 {
-	return _solo_isolated > 0;
+	return (_solo_isolated > 0) || (_solo_isolated_by_upstream > 0);
 }
 
 void
