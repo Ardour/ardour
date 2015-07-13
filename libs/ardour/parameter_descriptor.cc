@@ -149,7 +149,7 @@ ParameterDescriptor::update_steps()
 			step      = step      / logf(30.0f);
 			largestep = largestep / logf(30.0f);
 		} else if (integer_step) {
-			smallstep = std::max(1.0, rint(smallstep));
+			smallstep = 1.0;
 			step      = std::max(1.0, rint(step));
 			largestep = std::max(1.0, rint(largestep));
 		}
