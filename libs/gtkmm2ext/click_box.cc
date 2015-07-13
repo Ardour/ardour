@@ -63,6 +63,13 @@ ClickBox::button_press_handler (GdkEventButton* ev)
 }
 
 bool
+ClickBox::on_scroll_event (GdkEventScroll* ev)
+{
+	AutoSpin::scroll_event (ev);
+	return true;
+}
+
+bool
 ClickBox::button_release_handler (GdkEventButton* ev)
 {
 	switch (ev->button) {

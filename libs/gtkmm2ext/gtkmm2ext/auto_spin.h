@@ -47,6 +47,7 @@ class LIBGTKMM2EXT_API AutoSpin
 	gint button_press (GdkEventButton *);
 	gint stop_spinning (GdkEventButton *ignored_but_here_for_clicked);
 	void start_spinning (bool decrementing, bool use_page);
+	gint scroll_event (GdkEventScroll *);
 
   private:
 	Gtk::Adjustment &adjustment;

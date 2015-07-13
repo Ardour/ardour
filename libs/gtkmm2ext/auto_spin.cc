@@ -143,6 +143,29 @@ AutoSpin::button_press (GdkEventButton *ev)
 	return TRUE;
 }
 
+gint
+AutoSpin::scroll_event (GdkEventScroll *ev)
+{
+	stop_spinning (0);
+
+	gfloat increment = step_increment;
+
+	if (ev->state & Keyboard::TertiaryModifier) {
+		increment = page_increment;
+	}
+
+	switch (ev->direction) {
+		case GDK_SCROLL_DOWN:
+		case GDK_SCROLL_LEFT:
+			adjust_value (-increment);
+			break;
+		case GDK_SCROLL_RIGHT:
+		case GDK_SCROLL_UP:
+			adjust_value (increment);
+			break;
+	}
+}
+
 void
 AutoSpin::start_spinning (bool decrement, bool page)
 {

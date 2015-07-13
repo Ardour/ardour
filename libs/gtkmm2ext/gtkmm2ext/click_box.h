@@ -57,6 +57,7 @@ class LIBGTKMM2EXT_API ClickBox : public Gtk::DrawingArea, public AutoSpin
 	void style_changed (const Glib::RefPtr<Gtk::Style> &);
 	bool button_press_handler (GdkEventButton *);
 	bool button_release_handler (GdkEventButton *);
+	bool on_scroll_event (GdkEventScroll*);
 
 	sigc::slot<bool, char *, Gtk::Adjustment &> _printer;
 };
