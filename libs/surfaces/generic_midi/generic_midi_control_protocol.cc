@@ -562,7 +562,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 					if ((prop = (*niter)->property ("id")) != 0) {
 						
 						ID id = prop->value ();
-						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id));
+						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Relearned binding for session: Control ID: %1\n", id.to_s()));
 						Controllable* c = Controllable::by_id (id);
 						
 						if (c) {
