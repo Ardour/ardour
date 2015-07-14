@@ -626,23 +626,23 @@ if test x$WITH_X42_LV2 != x ; then
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	METERS_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-meters.latest.txt)
+	METERS_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/x42-meters.latest.txt)
 	rsync -a -q --partial \
-		rsync://gareus.org/x42/osx/x42-meters-lv2-osx-${METERS_VERSION}.zip \
+		rsync://x42-plugins.com/x42/osx/x42-meters-lv2-osx-${METERS_VERSION}.zip \
 		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 		"$CACHEDIR/x42-meters-lv2-osx-${METERS_VERSION}.zip"
 
-	SETBFREE_VERSION=$(curl -s -S http://gareus.org/x42/osx/setBfree.latest.txt)
+	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/setBfree.latest.txt)
 	rsync -a -q --partial \
-		rsync://gareus.org/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \
+		rsync://x42-plugins.com/x42/osx/setBfree-lv2-osx-${SETBFREE_VERSION}.zip \
 		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 		"$CACHEDIR/setBfree-lv2-osx-${SETBFREE_VERSION}.zip"
 
-	MIDIFILTER_VERSION=$(curl -s -S http://gareus.org/x42/osx/x42-midifilter.latest.txt)
+	MIDIFILTER_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/x42-midifilter.latest.txt)
 	rsync -a -q --partial \
-		rsync://gareus.org/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
+		rsync://x42-plugins.com/x42/osx/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip \
 		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
