@@ -832,6 +832,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void tabs_page_added (Gtk::Widget*, guint page_number);
 	void tabs_page_removed (Gtk::Widget*, guint page_number);
 	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
+	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);
+	
 };
 
 #endif /* __ardour_gui_h__ */

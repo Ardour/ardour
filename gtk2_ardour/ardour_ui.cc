@@ -2066,7 +2066,6 @@ ARDOUR_UI::get_smart_mode() const
 void
 ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 {
-	PBD::stacktrace (cerr, 30);
 	if (!_session) {
 		return;
 	}
@@ -5189,7 +5188,8 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 	bool special_handling_of_unmodified_accelerators = false;
 	/* consider all relevant modifiers but not LOCK or SHIFT */
 	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
-        GdkModifierType modifier = GdkModifierType (ev->state);
+
+	GdkModifierType modifier = GdkModifierType (ev->state);
         modifier = GdkModifierType (modifier & gtk_accelerator_get_default_mod_mask());
         Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator(modifier);
 
@@ -5248,46 +5248,9 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 	   all "normal text" accelerators.
 	*/
 
-	if (!special_handling_of_unmodified_accelerators && !bindings) {
-
-		/* XXX note that for a brief moment, the conditional above
-		 * included "|| (ev->state & mask)" so as to enforce the
-		 * implication of special_handling_of_UNMODIFIED_accelerators.
-		 * however, this forces any key that GTK doesn't allow and that
-		 * we have an alternative (see next comment) for to be
-		 * automatically sent through the accel groups activation
-		 * pathway, which prevents individual widgets & canvas items
-		 * from ever seeing it if is used by a key binding.
-		 * 
-		 * specifically, this hid Ctrl-down-arrow from MIDI region
-		 * views because it is also bound to an action.
-		 *
-		 * until we have a robust, clean binding system, this
-		 * quirk will have to remain in place.
-		 */
-
-		/* pretend that certain key events that GTK does not allow
-		   to be used as accelerators are actually something that
-		   it does allow. but only where there are no modifiers.
-		*/
-
-		uint32_t fakekey = ev->keyval;
-
-		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tactivate (was %1 now %2) without special hanlding of unmodified accels\n",
-									  ev->keyval, fakekey));
-
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tmodified modifier was %1\n", show_gdk_event_state (modifier)));
-
-			if (gtk_accel_groups_activate(G_OBJECT(win), fakekey, modifier)) {
-				DEBUG_TRACE (DEBUG::Accelerators, "\taccel group activated by fakekey\n");
-				return true;
-			}
-		}
-	}
-
+		
 	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
-
+		
 		/* no special handling or there are modifiers in effect: accelerate first */
 
                 DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
@@ -5305,17 +5268,14 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 				return true;
 			}
-
-		} else {
-
-			DEBUG_TRACE (DEBUG::Accelerators, "\tusing GTK accelerators for this window\n");
-
-			if (gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier)) {
-				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-				return true;
-			}
 		}
 
+		if (try_gtk_accel_binding (win, ev, !special_handling_of_unmodified_accelerators, modifier)) {
+			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+			return true;
+		}
+
+		
                 DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
                 
                 if (gtk_window_propagate_key_event (win, ev)) {
@@ -5329,30 +5289,29 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		
 		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate, then activate\n");
 		
-		if (!gtk_window_propagate_key_event (win, ev)) {
-			DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
-			
-			if (bindings) {
-				
-				DEBUG_TRACE (DEBUG::Accelerators, "\tusing Ardour bindings for this window\n");
-				KeyboardKey k (ev->state, ev->keyval);
-				
-				if (bindings->activate (k, Bindings::Press)) {
-					DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-					return true;
-				}
-				
-			} else {
-				
-				DEBUG_TRACE (DEBUG::Accelerators, "\tusing GTK accelerators for this window\n");
-				
-				if (gtk_accel_groups_activate (G_OBJECT(win), ev->keyval, modifier)) {
-					DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-					return true;
-				}
-			}
-		} else {
+		if (gtk_window_propagate_key_event (win, ev)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\thandled by propagate\n");
+			return true;
+		}
+
+		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
+		
+		if (bindings) {
+			
+			DEBUG_TRACE (DEBUG::Accelerators, "\tusing Ardour bindings for this window\n");
+			KeyboardKey k (ev->state, ev->keyval);
+			
+			if (bindings->activate (k, Bindings::Press)) {
+				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
+				return true;
+			}
+			
+		} 
+		
+		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try GTK bindings\n");
+		
+		if (try_gtk_accel_binding (win, ev, !special_handling_of_unmodified_accelerators, modifier)) {
+			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 			return true;
 		}
 	}
@@ -5365,7 +5324,33 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 		return true;
 	}
-	
-        DEBUG_TRACE (DEBUG::Accelerators, "\tnot handled\n");
+
+	DEBUG_TRACE (DEBUG::Accelerators, "\tnot handled\n");
 	return true;
+}
+
+bool
+ARDOUR_UI::try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier)
+{
+	uint32_t fakekey = ev->keyval;
+
+	if (translate) {
+		
+		/* pretend that certain key events that GTK does not allow
+		   to be used as accelerators are actually something that
+		   it does allow. but only where there are no modifiers.
+		*/
+
+		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tactivate (was %1 now %2) without special hanlding of unmodified accels, modifier was %3\n",
+			                                                  ev->keyval, fakekey, show_gdk_event_state (modifier)));
+		}
+	}
+			
+	if (gtk_accel_groups_activate (G_OBJECT(win), fakekey, modifier)) {
+		DEBUG_TRACE (DEBUG::Accelerators, "\tGTK accel group activated\n");
+		return true;
+	}
+
+	return false;
 }
