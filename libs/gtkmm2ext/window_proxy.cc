@@ -97,8 +97,6 @@ WindowProxy::set_state (const XMLNode& node, int /* version */)
 
 		XMLProperty* prop;
 
-		std::cerr << " PB setting state\n";
-		
 		if ((prop = (*i)->property (X_("visible"))) != 0) {
 			_visible = PBD::string_is_affirmative (prop->value ());
 		}
