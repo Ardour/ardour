@@ -2920,12 +2920,10 @@ RCOptionEditor::RCOptionEditor ()
 	mfo->add (METER_FALLOFF_OFF,      _("off"));
 	mfo->add (METER_FALLOFF_SLOWEST,  _("slowest [6.6dB/sec]"));
 	mfo->add (METER_FALLOFF_SLOW,     _("slow [8.6dB/sec] (BBC PPM, EBU PPM)"));
-	mfo->add (METER_FALLOFF_SLOWISH,  _("slowish [12.0dB/sec] (DIN)"));
-	mfo->add (METER_FALLOFF_MODERATE, _("moderate [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
-	mfo->add (METER_FALLOFF_MEDIUM,   _("medium [20dB/sec]"));
-	mfo->add (METER_FALLOFF_FAST,     _("fast [32dB/sec]"));
-	mfo->add (METER_FALLOFF_FASTER,   _("faster [46dB/sec]"));
-	mfo->add (METER_FALLOFF_FASTEST,  _("fastest [70dB/sec]"));
+	mfo->add (METER_FALLOFF_SLOWISH,  _("moderate [12.0dB/sec] (DIN)"));
+	mfo->add (METER_FALLOFF_MODERATE, _("medium [13.3dB/sec] (EBU Digi PPM, IRT Digi PPM)"));
+	mfo->add (METER_FALLOFF_MEDIUM,   _("fast [20dB/sec]"));
+	mfo->add (METER_FALLOFF_FAST,     _("very fast [32dB/sec]"));
 
 	add_option (S_("Preferences|Metering"), mfo);
 
