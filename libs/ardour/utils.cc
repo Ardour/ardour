@@ -553,14 +553,8 @@ ARDOUR::meter_falloff_from_float (float val)
 	else if (val <= METER_FALLOFF_MEDIUM) {
 		return MeterFalloffMedium;
 	}
-	else if (val <= METER_FALLOFF_FAST) {
-		return MeterFalloffFast;
-	}
-	else if (val <= METER_FALLOFF_FASTER) {
-		return MeterFalloffFaster;
-	}
 	else {
-		return MeterFalloffFastest;
+		return MeterFalloffFast;
 	}
 }
 
