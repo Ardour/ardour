@@ -525,11 +525,8 @@ ARDOUR::meter_falloff_to_float (MeterFalloff falloff)
 	case MeterFalloffModerate:
 		return METER_FALLOFF_MODERATE;
 	case MeterFalloffFast:
-		return METER_FALLOFF_FAST;
-	case MeterFalloffFaster:
-		return METER_FALLOFF_FASTER;
+	case MeterFalloffFaster:  // backwards compat enum MeterFalloff
 	case MeterFalloffFastest:
-		return METER_FALLOFF_FASTEST;
 	default:
 		return METER_FALLOFF_FAST;
 	}

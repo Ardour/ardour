@@ -161,8 +161,6 @@ LIBARDOUR_API double slider_position_to_gain_with_max (double g, double max_gain
 #define METER_FALLOFF_MODERATE  13.3f // EBU-PPM, IRT PPM-   20dB / 1.5 sec
 #define METER_FALLOFF_MEDIUM    20.0f
 #define METER_FALLOFF_FAST      32.0f
-#define METER_FALLOFF_FASTER    46.0f
-#define METER_FALLOFF_FASTEST   70.0f
 
 LIBARDOUR_API float meter_falloff_to_float (ARDOUR::MeterFalloff);
 LIBARDOUR_API ARDOUR::MeterFalloff meter_falloff_from_float (float);
