@@ -40,7 +40,7 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	~Tabbable ();
 
 	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title);
-	void show_tab ();
+	void make_visible ();
 	
 	Gtk::Widget& contents() const { return _contents; }
 	
@@ -72,6 +72,8 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
 	std::string    _tab_title;
+
+	void show_tab ();
 };
 
 }

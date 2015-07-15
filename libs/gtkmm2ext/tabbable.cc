@@ -263,3 +263,13 @@ Tabbable::set_state (const XMLNode& node, int version)
 
 	return ret;
 }
+
+void
+Tabbable::make_visible ()
+{
+	if (current_toplevel() == _window) {
+		_window->present ();
+	} else {
+		show_tab ();
+	}
+}
