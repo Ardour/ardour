@@ -60,6 +60,13 @@ PortInsert::~PortInsert ()
 }
 
 void
+PortInsert::set_pre_fader (bool p)
+{
+	Processor::set_pre_fader (p);
+	_out->set_pre_fader (p);
+}
+
+void
 PortInsert::start_latency_detection ()
 {
 	delete _mtdm;

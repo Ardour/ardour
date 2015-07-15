@@ -64,6 +64,8 @@ class LIBARDOUR_API PortInsert : public IOProcessor
 	void activate ();
 	void deactivate ();
 
+	void set_pre_fader (bool);
+
 	uint32_t bit_slot() const { return _bitslot; }
 
 	void start_latency_detection ();
