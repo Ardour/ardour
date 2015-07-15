@@ -275,6 +275,7 @@
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
+      <menuitem action='show-application-preferences'/>
     </menu>         
 
     <menu name='RegionMenu' action='RegionMenu'>
@@ -510,9 +511,9 @@
     <menu action = 'WindowMenu'>
       <menuitem action='toggle-audio-midi-setup'/>
       <separator/>
-      <menuitem action='toggle-mixer'/>
+      <menuitem action='show-editor'/>
+      <menuitem action='show-mixer'/>
       <menuitem action='toggle-meterbridge'/>
-      <menuitem action='toggle-editor-mixer'/>
       <separator/>
       <menuitem action='toggle-inspector'/>
       <menuitem action='toggle-locations'/>

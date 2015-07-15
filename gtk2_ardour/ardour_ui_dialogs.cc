@@ -330,97 +330,38 @@ _hide_splash (gpointer arg)
 }
 
 void
-ARDOUR_UI::goto_editor_window ()
+ARDOUR_UI::show_application_preferences ()
 {
 	if (splash && splash->is_visible()) {
 		// in 2 seconds, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 
-	if (!editor->window_visible()) {
-		/* goto tab */
-		editor->show_tab ();
-		return;
-	}
-	
-	editor->show_window ();
-	editor->present ();
-
-	/* editor should now be on top */
-	if (UIConfiguration::instance()->get_transients_follow_front()) {
-		WM::Manager::instance().set_transient_for (editor->own_window());
-	}
-	_mixer_on_top = false;
+	rc_option_editor->make_visible ();
 }
 
 void
-ARDOUR_UI::goto_mixer_window ()
+ARDOUR_UI::show_editor ()
 {
-	Glib::RefPtr<Gdk::Window> win;
-	Glib::RefPtr<Gdk::Screen> screen;
-	
-	if (editor && editor->own_window()) {
-		win = editor->own_window ()->get_window();
+	if (splash && splash->is_visible()) {
+		// in 2 seconds, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 
-	if (win) {
-		screen = win->get_screen();
-	} else {
-		screen = Gdk::Screen::get_default();
-	}
-
-	if (g_getenv ("ARDOUR_LOVES_STUPID_TINY_SCREENS") == 0 && screen && screen->get_height() < 700) {
-		Gtk::MessageDialog msg (_("This screen is not tall enough to display the mixer window"));
-		msg.run ();
-		return;
-	}
-
-	mixer->show_window ();
-
-	// mixer->present ();
-	/* mixer should now be on top */
-	//if (UIConfiguration::instance().get_transients_follow_front()) {
-	// WM::Manager::instance().set_transient_for (mixer);
-	//}
-
-	_mixer_on_top = true;
+	editor->make_visible ();
 }
 
 void
-ARDOUR_UI::toggle_mixer_window ()
+ARDOUR_UI::show_mixer ()
 {
-	/* thse windows are created in ARDOUR_UI::setup_windows()
-	 * it should be impossible to get here with any of them being NULL
-	 */
-	assert (editor && mixer && meterbridge);
-
-	bool show = false;
-	bool obscuring = false;
-
-	if (!mixer->window_visible()  || editor->window_visible()) {
-		return;
+	if (splash && splash->is_visible()) {
+		// in 2 seconds, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 
-	
-	
-	if (!mixer->window_visible ()) {
-		show = true;
-	} else if (   (!editor->not_visible () && ARDOUR_UI_UTILS::windows_overlap (editor->own_window(), mixer->own_window()))
-	              || (!meterbridge->not_visible () && ARDOUR_UI_UTILS::windows_overlap (meterbridge, mixer->own_window()))
-		) {
-		obscuring = true;
-	}
-	
-	if (obscuring && (editor->own_window()->property_has_toplevel_focus() || meterbridge->property_has_toplevel_focus())) {
-		show = true;
-	}
-
-	if (show) {
-		goto_mixer_window ();
-	} else {
-		mixer->own_window()->hide ();
-	}
+	mixer->make_visible ();
 }
+
 
 void
 ARDOUR_UI::toggle_meterbridge ()
@@ -447,47 +388,6 @@ ARDOUR_UI::toggle_meterbridge ()
 		meterbridge->raise ();
 	} else {
 		meterbridge->hide_window (NULL);
-	}
-}
-
-void
-ARDOUR_UI::toggle_editor_mixer ()
-{
-	bool obscuring = false;
-
-	if (!mixer->window_visible() || !editor->window_visible()) {
-		return;
-	}
-	
-	if (editor && mixer && mixer->own_window()) {
-		if (ARDOUR_UI_UTILS::windows_overlap (editor->own_window(), mixer->own_window())) {
-			obscuring = true;
-		}
-	}
-
-	if (mixer && !mixer->not_visible() && mixer->own_window() && mixer->own_window()->property_has_toplevel_focus()) {
-		if (obscuring) {
-			goto_editor_window();
-		}
-	} else if (editor && editor->window_visible() && editor->own_window()->property_has_toplevel_focus()) {
-		if (obscuring) {
-			goto_mixer_window();
-		}
-	} else if (mixer) {
-		if (obscuring) {
-			goto_mixer_window ();
-		}
-	} else if (editor) {
-		if (obscuring) {
-			goto_editor_window ();
-		}
-	} else if (obscuring) {
-		//it's unclear what to do here, so just do the opposite of what we did last time  (old behavior)
-		if (_mixer_on_top) {
-			goto_editor_window ();
-		} else {
-			goto_mixer_window ();
-		}
 	}
 }
 

@@ -374,11 +374,10 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtkmm2ext::Bindings _global_bindings;
 	
-	void goto_editor_window ();
-	void goto_mixer_window ();
-	void toggle_mixer_window ();
+	void show_editor ();
+	void show_mixer ();
+	void show_application_preferences ();
 	void toggle_meterbridge ();
-        void toggle_editor_mixer ();
 
 	int  setup_windows ();
 	void setup_transport ();

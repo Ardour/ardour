@@ -153,7 +153,6 @@ class ProxyWithConstructor: public ProxyBase
 
                                         private:
 	boost::function<T*()>	creator;
->>>>>>> first compilable version of tabbable design.
 };
 
 template<typename T>

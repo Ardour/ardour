@@ -157,7 +157,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/ExportAudio|<@SECONDARY@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|<@TERTIARY@>e|toggle editor window mixer
-@wvis|Common/goto-editor|<@SECONDARY@>e|toggle editor window
+@wvis|Common/goto-editor|<@SECONDARY@>e|show editor tab/window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
 @trans|Transport/Record|<@TERTIARY@>r|engage record

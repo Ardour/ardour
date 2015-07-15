@@ -215,6 +215,9 @@ ARDOUR_UI::install_actions ()
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 	ActionManager::register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
+	ActionManager::register_action (common_actions, X_("show-editor"), _("Show Editor"), sigc::mem_fun (*this, &ARDOUR_UI::show_editor));
+	ActionManager::register_action (common_actions, X_("show-mixer"), _("Show Mixer"), sigc::mem_fun (*this, &ARDOUR_UI::show_mixer));
+	ActionManager::register_action (common_actions, X_("show-application-preferences"), _("Preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_application_preferences));
 
 	/* windows visibility actions */
 
@@ -232,8 +235,6 @@ ARDOUR_UI::install_actions ()
 if (Profile->get_mixbus())
 	ActionManager::register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 
-	ActionManager::register_action (common_actions, X_("toggle-mixer"), S_("Window|Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_mixer_window));
-	ActionManager::register_action (common_actions, X_("toggle-editor-mixer"), _("Toggle Editor+Mixer"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_editor_mixer));
 	ActionManager::register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	ActionManager::register_action (common_actions, X_("reattach-all-tearoffs"), _("Reattach All Tearoffs"), sigc::mem_fun (*this, &ARDOUR_UI::reattach_all_tearoffs));
