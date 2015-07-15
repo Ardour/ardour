@@ -562,7 +562,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	        speed = 1.0;
 	}
 
-	if (speed != 0 && delayedlocked == 0 && fabsf(speed) != 1.0) {
+	if (speed != 0 && delayedlocked == 0 && fabs(speed) != 1.0) {
 		sync_lock_broken = true;
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed not locked %1 %2\n", speed, ltc_speed));
 	}
