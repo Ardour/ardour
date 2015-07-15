@@ -33,7 +33,11 @@
 #endif
 
 #define VST_EXT_ERRORFILE ".err"
+# if ( defined(__x86_64__) || defined(_M_X64) )
+#define VST_EXT_INFOFILE  ".fsi64"
+#else
 #define VST_EXT_INFOFILE  ".fsi"
+#endif
 
 #ifndef VST_SCANNER_APP
 namespace ARDOUR {
