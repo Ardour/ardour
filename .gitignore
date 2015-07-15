@@ -60,7 +60,6 @@ tags
 # /gtk2_ardour/
 /gtk2_ardour/ardour.sh
 /gtk2_ardour/ardev_common.sh
-/gtk2_ardour/*.bindings
 /gtk2_ardour/*.rc
 
 # /libs/ardour/
