@@ -1425,9 +1425,14 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 				/* disable isolate for all routes */
 				DisplaySuspender ds;
 				_session->set_solo_isolated (_session->get_routes(), false, Session::rt_cleanup, true);
+			} else {
+				/* enable isolate for all routes */
+				DisplaySuspender ds;
+				_session->set_solo_isolated (_session->get_routes(), true, Session::rt_cleanup, true);
 			}
 
 		} else {
+
 			if (model == view) {
 
 				/* flip just this route */
