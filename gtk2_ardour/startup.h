@@ -63,6 +63,7 @@ class ArdourStartup : public Gtk::Assistant {
 	void on_apply ();
 	void on_cancel ();
 	bool on_delete_event (GdkEventAny*);
+	void discover_plugins ();
 
 	static ArdourStartup *the_startup;
 
@@ -101,7 +102,7 @@ class ArdourStartup : public Gtk::Assistant {
 	/* final page */
 
 	void setup_final_page ();
-	Gtk::Label final_page;
+	Gtk::Button plugin_disco_button;
 
 	/* always there */
 

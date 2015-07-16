@@ -37,11 +37,12 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/filename_extensions.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/template_utils.h"
-#include "ardour/filename_extensions.h"
 
 #include "ardour_ui.h"
 #include "startup.h"
@@ -343,13 +344,30 @@ void
 ArdourStartup::setup_final_page ()
 {
 	string msg = string_compose (_("%1 is ready for use"), PROGRAM_NAME);
-	
-	final_page.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", msg));
-	final_page.show ();
-	final_page_index = append_page (final_page);
-	set_page_complete (final_page, true);
-	set_page_header_image (final_page, icon_pixbuf);
-	set_page_type (final_page, ASSISTANT_PAGE_CONFIRM);
+
+	plugin_disco_button.signal_clicked().connect (sigc::mem_fun(*this, &ArdourStartup::discover_plugins));
+	plugin_disco_button.set_label (_("Scan for Plugins"));
+	plugin_disco_button.show ();
+
+	Gtk::Label* final_label = manage (new Label);
+	final_label->set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", msg));
+	final_label->show ();
+
+	VBox* vbox = manage (new VBox);
+	vbox->pack_start (*final_label, true, true);
+	vbox->pack_start (plugin_disco_button, true, false);
+	vbox->show ();
+
+	final_page_index = append_page (*vbox);
+	set_page_complete (*vbox, true);
+	set_page_header_image (*vbox, icon_pixbuf);
+	set_page_type (*vbox, ASSISTANT_PAGE_CONFIRM);
+}
+
+void
+ArdourStartup::discover_plugins () {
+	plugin_disco_button.set_sensitive (false);
+	PluginManager::instance().refresh();
 }
 
 void

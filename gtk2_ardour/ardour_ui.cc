@@ -231,6 +231,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	, nsm (0)
 	, _was_dirty (false)
 	, _mixer_on_top (false)
+	, _initial_verbose_plugin_scan (false)
 	, first_time_engine_run (true)
 	, roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll))
 	, stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop))
@@ -917,10 +918,12 @@ ARDOUR_UI::starting ()
 	} else  {
 		
 		if (brand_new_user) {
+			_initial_verbose_plugin_scan = true;
 			ArdourStartup s;
 			s.present ();
 			main().run();
 			s.hide ();
+			_initial_verbose_plugin_scan = false;
 			switch (s.response ()) {
 			case Gtk::RESPONSE_OK:
 				break;
@@ -4253,7 +4256,7 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 	}
 
 	const bool cancelled = PluginManager::instance().cancelled();
-	if (type != X_("closeme") && !ui_config->get_show_plugin_scan_window()) {
+	if (type != X_("closeme") && (!ui_config->get_show_plugin_scan_window()) && !_initial_verbose_plugin_scan) {
 		if (cancelled && scan_dlg->is_mapped()) {
 			scan_dlg->hide();
 			gui_idle_handler();
