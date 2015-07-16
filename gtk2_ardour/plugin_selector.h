@@ -121,7 +121,6 @@ class PluginSelector : public ArdourDialog
 	void row_activated(Gtk::TreeModel::Path path, Gtk::TreeViewColumn* col);
 	void btn_add_clicked();
 	void btn_remove_clicked();
-	void btn_update_clicked();
 	void added_list_selection_changed();
 	void added_row_clicked(GdkEventButton* event);
 	void display_selection_changed();

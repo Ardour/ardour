@@ -131,8 +131,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	btn_remove = manage(new Gtk::Button(Stock::REMOVE));
 	btn_remove->set_sensitive (false);
 	ARDOUR_UI::instance()->set_tip(*btn_remove, _("Remove a plugin from the effect list"));
-	Gtk::Button *btn_update = manage(new Gtk::Button(Stock::REFRESH));
-	ARDOUR_UI::instance()->set_tip(*btn_update, _("Update available plugins"));
 
 	btn_add->set_name("PluginSelectorButton");
 	btn_remove->set_name("PluginSelectorButton");
@@ -163,8 +161,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	table->attach (*filter_box, 0, 7, 5, 6, FILL|EXPAND, FILL, 5, 5);
 
 	table->attach(*btn_add, 1, 2, 6, 7, FILL, FILL, 5, 5);
-	table->attach(*btn_remove, 3, 4, 6, 7, FILL, FILL, 5, 5);
-	table->attach(*btn_update, 5, 6, 6, 7, FILL, FILL, 5, 5);
+	table->attach(*btn_remove, 5, 6, 6, 7, FILL, FILL, 5, 5);
 
 	table->attach(ascroller, 0, 7, 8, 10);
 
@@ -183,7 +180,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::display_selection_changed));
 	plugin_display.grab_focus();
 
-	btn_update->signal_clicked().connect (sigc::mem_fun(*this, &PluginSelector::btn_update_clicked));
 	btn_add->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_add_clicked));
 	btn_remove->signal_clicked().connect(sigc::mem_fun(*this, &PluginSelector::btn_remove_clicked));
 	added_list.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &PluginSelector::added_list_selection_changed));
@@ -444,12 +440,6 @@ PluginSelector::btn_remove_clicked()
 	if (amodel->children().empty()) {
 		set_response_sensitive (RESPONSE_APPLY, false);
 	}
-}
-
-void
-PluginSelector::btn_update_clicked()
-{
-	manager.refresh ();
 }
 
 void
