@@ -242,20 +242,32 @@ PluginManager::refresh (bool cache_only)
 #endif
 #ifdef WINDOWS_VST_SUPPORT
 	if (Config->get_use_windows_vst()) {
-		BootMessage (_("Scanning Windows VST Plugins"));
+		if (cache_only) {
+			BootMessage (_("Scanning Windows VST Plugins"));
+		} else {
+			BootMessage (_("Discovering Windows VST Plugins"));
+		}
 		windows_vst_refresh (cache_only);
 	}
 #endif // WINDOWS_VST_SUPPORT
 
 #ifdef LXVST_SUPPORT
 	if(Config->get_use_lxvst()) {
-		BootMessage (_("Scanning Linux VST Plugins"));
+		if (cache_only) {
+			BootMessage (_("Scanning Linux VST Plugins"));
+		} else {
+			BootMessage (_("Discovering Linux VST Plugins"));
+		}
 		lxvst_refresh(cache_only);
 	}
 #endif //Native linuxVST SUPPORT
 
 #ifdef AUDIOUNIT_SUPPORT
-	BootMessage (_("Scanning AU Plugins"));
+	if (cache_only) {
+		BootMessage (_("Scanning AU Plugins"));
+	} else {
+		BootMessage (_("Discovering AU Plugins"));
+	}
 	au_refresh (cache_only);
 #endif
 
