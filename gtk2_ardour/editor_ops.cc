@@ -7421,9 +7421,9 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 	if (tempo_too) {
 		XMLNode& before (_session->tempo_map().get_state());
 
-		if (_session->tempo_map().cut_time (pos, frames) ) {
+		if (_session->tempo_map().remove_time (pos, frames) ) {
 			if (!in_command) {
-				begin_reversible_command (_("cut time"));
+				begin_reversible_command (_("remove time"));
 				in_command = true;
 			}
 			XMLNode& after (_session->tempo_map().get_state());
