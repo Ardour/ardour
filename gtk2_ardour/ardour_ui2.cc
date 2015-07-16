@@ -107,15 +107,13 @@ ARDOUR_UI::setup_windows ()
 	status_bar_event_box->add (status_bar_label);
 	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	status_bar_label.set_size_request (300, -1);
-	status_bar_packer->pack_start (*status_bar_event_box, true, true, 6);
 
 	status_bar_label.show ();
 	status_bar_event_box->show ();
-	status_bar_packer->show ();
 
 	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
 
-	status_bar_hpacker.pack_start (*status_bar_packer, true, true);
+	status_bar_hpacker.pack_start (*status_bar_event_box, true, true, 6);
 	status_bar_hpacker.pack_start (menu_bar_base, false, false, 2);
 #else
 	top_packer.pack_start (menu_bar_base, false, false);
