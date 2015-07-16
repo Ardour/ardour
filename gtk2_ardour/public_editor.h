@@ -362,15 +362,6 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	static const int vertical_spacing;
 	static const int horizontal_spacing;
 
-#ifdef TOP_MENUBAR
-	/*
-	 * This is needed for OS X primarily
-	 * but also any other OS that uses a single
-	 * top menubar instead of per window menus
-	 */
-	virtual Gtk::HBox& get_status_bar_packer() = 0;
-#endif
-
 	virtual ArdourCanvas::Container* get_trackview_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;

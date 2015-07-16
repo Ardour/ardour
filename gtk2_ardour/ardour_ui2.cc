@@ -102,7 +102,6 @@ ARDOUR_UI::setup_windows ()
 	we_have_dependents ();
 
 #ifdef TOP_MENUBAR
-	HBox* status_bar_packer = manage (new HBox);
 	EventBox* status_bar_event_box = manage (new EventBox);
 
 	status_bar_event_box->add (status_bar_label);
@@ -116,8 +115,8 @@ ARDOUR_UI::setup_windows ()
 
 	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
 
-	editor->get_status_bar_packer().pack_start (*status_bar_packer, true, true);
-	editor->get_status_bar_packer().pack_start (menu_bar_base, false, false, 2);
+	status_bar_hpacker.pack_start (*status_bar_packer, true, true);
+	status_bar_hpacker.pack_start (menu_bar_base, false, false, 2);
 #else
 	top_packer.pack_start (menu_bar_base, false, false);
 #endif
