@@ -164,6 +164,7 @@ AutoSpin::scroll_event (GdkEventScroll *ev)
 			adjust_value (increment);
 			break;
 	}
+	return TRUE;
 }
 
 void
