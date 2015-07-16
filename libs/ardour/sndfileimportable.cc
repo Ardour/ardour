@@ -24,6 +24,9 @@
 #include "pbd/error.h"
 #include "ardour/sndfileimportable.h"
 
+#include <fcntl.h>
+#include <glib/gstdio.h>
+
 using namespace ARDOUR;
 using namespace std;
 
@@ -67,8 +70,12 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 
 SndFileImportableSource::SndFileImportableSource (const string& path)
 {
+	int fd;
+	if ((-1) == (fd = g_open (path.c_str(), O_RDONLY, 0664)))
+		throw failed_constructor();
+
 	memset(&sf_info, 0 , sizeof(sf_info));
-	in.reset( sf_open(path.c_str(), SFM_READ, &sf_info), sf_close);
+	in.reset( sf_open_fd(fd, SFM_READ, &sf_info, true), sf_close);
 	if (!in) throw failed_constructor();
 
 	SF_BROADCAST_INFO binfo;

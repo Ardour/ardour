@@ -28,6 +28,8 @@
 
 #include <sys/stat.h>
 
+#include <glib/gstdio.h>
+
 #ifdef PLATFORM_WINDOWS
 #include <glibmm/convert.h>
 #endif
@@ -38,6 +40,8 @@
 #include "ardour/sndfile_helpers.h"
 #include "ardour/utils.h"
 #include "ardour/session.h"
+
+#include <fcntl.h>
 
 #include "i18n.h"
 
@@ -921,11 +925,17 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
 	SNDFILE *sf;
 	SF_INFO sf_info;
 	BroadcastInfo binfo;
+	char errbuf[1024];
+	int  fd;
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
 
-	if ((sf = sf_open (const_cast<char*>(path.c_str()), SFM_READ, &sf_info)) == 0) {
-		char errbuf[256];
+	if ((-1) == (fd = g_open (path.c_str(), O_RDONLY, 0664))) {
+		sprintf (errbuf, "SndFileSource::get_soundfile_info - cannot open file \"%s\"", path.c_str()); 
+		return false;
+	}
+
+	if ((sf = sf_open_fd (fd, SFM_READ, &sf_info, true)) == 0) { 
 		error_msg = sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		return false;
 	}
