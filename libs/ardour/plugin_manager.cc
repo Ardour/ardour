@@ -645,6 +645,7 @@ PluginManager::au_refresh (bool cache_only)
 	delete _au_plugin_info;
 	_au_plugin_info = AUPluginInfo::discover();
 
+	bool discover_at_start = Config->get_discover_audio_units ();
 	// disable automatic scan in case we crash
 	Config->set_discover_audio_units (false);
 	Config->save_state();
@@ -663,7 +664,7 @@ PluginManager::au_refresh (bool cache_only)
 	 */
 
 	// successful scan re-enabled automatic discovery
-	Config->set_discover_audio_units (true);
+	Config->set_discover_audio_units (discover_at_start);
 	Config->save_state();
 }
 
