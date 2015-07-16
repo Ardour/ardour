@@ -204,7 +204,7 @@ AutomationController::toggled ()
 				_controllable->set_automation_state(Write);
 			}
 			if (_controllable->list()) {
-				_controllable->list()->set_in_write_pass(true, false, _controllable->session().audible_frame());
+				_controllable->list()->set_in_write_pass(true, true, _controllable->session().audible_frame());
 			}
 		}
 		const bool was_active = _controllable->get_value() >= 0.5;

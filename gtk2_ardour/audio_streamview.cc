@@ -41,6 +41,7 @@
 #include "tape_region_view.h"
 #include "audio_time_axis.h"
 #include "region_selection.h"
+#include "region_gain_line.h"
 #include "selection.h"
 #include "public_editor.h"
 #include "ardour_ui.h"
@@ -468,6 +469,17 @@ AudioStreamView::color_handler ()
 			canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("audio master bus base"));
 		} else {
 			canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("audio bus base", "audio bus base"));
+		}
+	}
+}
+
+void
+AudioStreamView::set_selected_points (PointSelection& points)
+{
+	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
+		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
+		if (arv && arv->get_gain_line ()) {
+			arv->get_gain_line ()->set_selected_points (points);
 		}
 	}
 }

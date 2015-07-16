@@ -336,9 +336,9 @@ Editor::move_range_selection_start_or_end_to_region_boundary (bool move_end, boo
 		return;
 	}
 
-	begin_reversible_command (_("alter selection"));
+	begin_reversible_selection_op (_("alter selection"));
 	selection->set_preserving_all_ranges (start, end);
-	commit_reversible_command ();
+	commit_reversible_selection_op ();
 }
 
 bool
@@ -400,8 +400,7 @@ Editor::nudge_forward (bool next, bool force_playhead)
 	} else if (!force_playhead && !selection->markers.empty()) {
 
 		bool is_start;
-
-		begin_reversible_command (_("nudge location forward"));
+		bool in_command = false;
 
 		for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
 
@@ -432,13 +431,18 @@ Editor::nudge_forward (bool next, bool force_playhead)
 						loc->set_end (max_framepos);
 					}
 				}
+				if (!in_command) {
+					begin_reversible_command (_("nudge location forward"));
+					in_command = true;
+				}
 				XMLNode& after (loc->get_state());
 				_session->add_command (new MementoCommand<Location>(*loc, &before, &after));
 			}
 		}
 
-		commit_reversible_command ();
-
+		if (in_command) {
+			commit_reversible_command ();
+		}
 	} else {
 		distance = get_nudge_distance (playhead_cursor->current_frame (), next_distance);
 		_session->request_locate (playhead_cursor->current_frame () + distance);
@@ -485,8 +489,7 @@ Editor::nudge_backward (bool next, bool force_playhead)
 	} else if (!force_playhead && !selection->markers.empty()) {
 
 		bool is_start;
-
-		begin_reversible_command (_("nudge location forward"));
+		bool in_command = false;
 
 		for (MarkerSelection::iterator i = selection->markers.begin(); i != selection->markers.end(); ++i) {
 
@@ -519,13 +522,17 @@ Editor::nudge_backward (bool next, bool force_playhead)
 						loc->set_end (loc->length());
 					}
 				}
-
+				if (!in_command) {
+					begin_reversible_command (_("nudge location forward"));
+					in_command = true;
+				}
 				XMLNode& after (loc->get_state());
 				_session->add_command (new MementoCommand<Location>(*loc, &before, &after));
 			}
 		}
-
-		commit_reversible_command ();
+		if (in_command) {
+			commit_reversible_command ();
+		}
 
 	} else {
 
@@ -615,7 +622,8 @@ Editor::sequence_regions ()
 
 	if (!rs.empty()) {
 
-		begin_reversible_command (_("sequence regions"));
+		bool in_command = false;
+
 		for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 			boost::shared_ptr<Region> r ((*i)->region());
 
@@ -635,13 +643,20 @@ Editor::sequence_regions ()
 				r->set_position(r_end_prev);
 			}
 
+			if (!in_command) {
+				begin_reversible_command (_("sequence regions"));
+				in_command = true;
+			}
 			_session->add_command (new StatefulDiffCommand (r));
 
 			r_end=r->position() + r->length();
 
 			iCount++;
 		}
-		commit_reversible_command ();
+
+		if (in_command) {
+			commit_reversible_command ();
+		}
 	} 
 } 
 
@@ -2172,10 +2187,7 @@ void
 Editor::remove_location_at_playhead_cursor ()
 {
 	if (_session) {
-
 		//set up for undo
-		begin_reversible_command (_("remove marker"));
-		
 		XMLNode &before = _session->locations()->get_state();
 		bool removed = false;
 
@@ -2191,9 +2203,9 @@ Editor::remove_location_at_playhead_cursor ()
 		
 		//store undo
 		if (removed) {
+			begin_reversible_command (_("remove marker"));
 			XMLNode &after = _session->locations()->get_state();
 			_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-			
 			commit_reversible_command ();
 		}
 	}
@@ -2208,8 +2220,7 @@ Editor::add_locations_from_region ()
 	if (rs.empty()) {
 		return;
 	}
-
-	begin_reversible_command (selection->regions.size () > 1 ? _("add markers") : _("add marker"));
+	bool commit = false;
 	
 	XMLNode &before = _session->locations()->get_state();
 
@@ -2220,12 +2231,15 @@ Editor::add_locations_from_region ()
 		Location *location = new Location (*_session, region->position(), region->last_frame(), region->name(), Location::IsRangeMarker);
 
 		_session->locations()->add (location, true);
+		commit = true;
 	}
 
-	XMLNode &after = _session->locations()->get_state();
-	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	
-	commit_reversible_command ();
+	if (commit) {
+		begin_reversible_command (selection->regions.size () > 1 ? _("add markers") : _("add marker"));
+		XMLNode &after = _session->locations()->get_state();
+		_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
+		commit_reversible_command ();
+	}
 }
 
 /** Add a single range marker around all selected regions */
@@ -2238,8 +2252,6 @@ Editor::add_location_from_region ()
 		return;
 	}
 
-	begin_reversible_command (_("add marker"));
-	
 	XMLNode &before = _session->locations()->get_state();
 
 	string markername;
@@ -2260,9 +2272,9 @@ Editor::add_location_from_region ()
 	Location *location = new Location (*_session, selection->regions.start(), selection->regions.end_frame(), markername, Location::IsRangeMarker);
 	_session->locations()->add (location, true);
 
+	begin_reversible_command (_("add marker"));
 	XMLNode &after = _session->locations()->get_state();
 	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	
 	commit_reversible_command ();
 }
 
@@ -3264,8 +3276,7 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 	framepos_t the_start;
 	framepos_t the_end;
 	framepos_t cnt;
-
-	begin_reversible_command (_("trim to selection"));
+	bool in_command = false;
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
@@ -3290,12 +3301,18 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 		the_end = min (end, the_end);
 		cnt = the_end - the_start + 1;
 
+		if(!in_command) {
+			begin_reversible_command (_("trim to selection"));
+			in_command = true;
+		}
 		region->clear_changes ();
 		region->trim_to (the_start, cnt);
 		_session->add_command (new StatefulDiffCommand (region));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -3308,8 +3325,8 @@ Editor::region_fill_track ()
 	}
 
 	framepos_t const end = _session->current_end_frame ();
-
-	begin_reversible_command (Operations::region_fill);
+	RegionSelection foo;
+	bool in_command = false;
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 
@@ -3318,21 +3335,39 @@ Editor::region_fill_track ()
 		boost::shared_ptr<Playlist> pl = region->playlist();
 
 		if (end <= region->last_frame()) {
-			return;
+			continue;
 		}
 
 		double times = (double) (end - region->last_frame()) / (double) region->length();
 
 		if (times == 0) {
-			return;
+			continue;
 		}
+
+		if (!in_command) {
+			begin_reversible_command (Operations::region_fill);
+			in_command = true;
+		}
+		TimeAxisView& tv = (*i)->get_time_axis_view();
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+		latest_regionviews.clear ();
+		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
 		pl->clear_changes ();
 		pl->add_region (RegionFactory::create (region, true), region->last_frame(), times);
 		_session->add_command (new StatefulDiffCommand (pl));
+
+		c.disconnect ();
+
+		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		if (!foo.empty()) {
+			selection->set (foo);
+		}
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -3362,10 +3397,10 @@ Editor::region_fill_selection ()
 
 	framepos_t selection_length = end - start;
 	float times = (float)selection_length / region->length();
-
-	begin_reversible_command (Operations::fill_selection);
+	bool in_command = false;
 
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	RegionSelection foo;
 
 	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 
@@ -3373,12 +3408,27 @@ Editor::region_fill_selection ()
 			continue;
 		}
 
+		if (!in_command) {
+			begin_reversible_command (Operations::fill_selection);
+			in_command = true;
+		}
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		latest_regionviews.clear ();
+		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
+
 		playlist->clear_changes ();
 		playlist->add_region (RegionFactory::create (region, true), start, times);
 		_session->add_command (new StatefulDiffCommand (playlist));
+		c.disconnect ();
+		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		if (!foo.empty()) {
+			selection->set (foo);
+		}
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -3676,8 +3726,7 @@ void
 Editor::trim_region_to_location (const Location& loc, const char* str)
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	begin_reversible_command (str);
+	bool in_command = false;
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		RegionView* rv = (*x);
@@ -3708,10 +3757,17 @@ Editor::trim_region_to_location (const Location& loc, const char* str)
 
 		rv->region()->clear_changes ();
 		rv->region()->trim_to (start, (end - start));
+
+		if (!in_command) {
+			begin_reversible_command (str);
+			in_command = true;
+		}
 		_session->add_command(new StatefulDiffCommand (rv->region()));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -3730,8 +3786,7 @@ void
 Editor::trim_to_region(bool forward)
 {
 	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	begin_reversible_command (_("trim to region"));
+	bool in_command = false;
 
 	boost::shared_ptr<Region> next_region;
 
@@ -3746,7 +3801,7 @@ Editor::trim_to_region(bool forward)
 		AudioTimeAxisView* atav = dynamic_cast<AudioTimeAxisView*> (&arv->get_time_axis_view());
 
 		if (!atav) {
-			return;
+			continue;
 		}
 
 		float speed = 1.0;
@@ -3785,10 +3840,16 @@ Editor::trim_to_region(bool forward)
 		    arv->region_changed (ARDOUR::bounds_change);
 		}
 
+		if (!in_command) {
+			begin_reversible_command (_("trim to region"));
+			in_command = true;
+		}
 		_session->add_command(new StatefulDiffCommand (region));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -3913,8 +3974,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 	framepos_t start = selection->time[clicked_selection].start;
 	framepos_t end = selection->time[clicked_selection].end;
 	framepos_t cnt = end - start + 1;
-
-	begin_reversible_command (_("bounce range"));
+	bool in_command = false;
 
 	for (TrackViewList::iterator i = views.begin(); i != views.end(); ++i) {
 
@@ -3927,7 +3987,7 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		boost::shared_ptr<Playlist> playlist;
 
 		if ((playlist = rtv->playlist()) == 0) {
-			return;
+			continue;
 		}
 
 		InterThreadInfo itt;
@@ -3954,6 +4014,10 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 			playlist->add_region (r, start);
 		}
 
+		if (!in_command) {
+			begin_reversible_command (_("bounce range"));
+			in_command = true;
+		}
 		vector<Command*> cmds;
 		playlist->rdiff (cmds);
 		_session->add_commands (cmds);
@@ -3961,7 +4025,9 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 		_session->add_command (new StatefulDiffCommand (playlist));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 /** Delete selected regions, automation points or a time range */
@@ -4315,8 +4381,6 @@ Editor::remove_selected_regions ()
 		return;
 	}
 
-	begin_reversible_command (_("remove region"));
-
 	list<boost::shared_ptr<Region> > regions_to_remove;
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
@@ -4360,6 +4424,7 @@ Editor::remove_selected_regions ()
 	}
 
 	vector<boost::shared_ptr<Playlist> >::iterator pl;
+	bool in_command = false;
 
 	for (pl = playlists.begin(); pl != playlists.end(); ++pl) {
 		(*pl)->thaw ();
@@ -4367,6 +4432,11 @@ Editor::remove_selected_regions ()
 		/* We might have removed regions, which alters other regions' layering_index,
 		   so we need to do a recursive diff here.
 		*/
+
+		if (!in_command) {
+			begin_reversible_command (_("remove region"));
+			in_command = true;
+		}
 		vector<Command*> cmds;
 		(*pl)->rdiff (cmds);
 		_session->add_commands (cmds);
@@ -4374,7 +4444,9 @@ Editor::remove_selected_regions ()
 		_session->add_command(new StatefulDiffCommand (*pl));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 /** Cut, copy or clear selected regions.
@@ -4710,6 +4782,10 @@ Editor::paste_internal (framepos_t position, float times)
 void
 Editor::duplicate_some_regions (RegionSelection& regions, float times)
 {
+	if (regions.empty ()) {
+		return;
+	}
+
 	boost::shared_ptr<Playlist> playlist;
 	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
 	RegionSelection foo;
@@ -4764,11 +4840,10 @@ Editor::duplicate_selection (float times)
 		return;
 	}
 
-	begin_reversible_command (_("duplicate selection"));
-
 	ri = new_regions.begin();
 
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	bool in_command = false;
 
 	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 		if ((playlist = (*i)->playlist()) == 0) {
@@ -4782,6 +4857,11 @@ Editor::duplicate_selection (float times)
 			end = selection->time.end_frame();
 		}
 		playlist->duplicate (*ri, end, times);
+
+		if (!in_command) {
+			begin_reversible_command (_("duplicate selection"));
+			in_command = true;
+		}
 		_session->add_command (new StatefulDiffCommand (playlist));
 
 		++ri;
@@ -4790,7 +4870,9 @@ Editor::duplicate_selection (float times)
 		}
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 /** Reset all selected points to the relevant default value */
@@ -4848,9 +4930,8 @@ Editor::nudge_track (bool use_edit, bool forwards)
 		return;
 	}
 
-	begin_reversible_command (_("nudge track"));
-
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
+	bool in_command = false;
 
 	for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 
@@ -4863,6 +4944,10 @@ Editor::nudge_track (bool use_edit, bool forwards)
 
 		playlist->nudge_after (start, distance, forwards);
 
+		if (!in_command) {
+			begin_reversible_command (_("nudge track"));
+			in_command = true;
+		}
 		vector<Command*> cmds;
 
 		playlist->rdiff (cmds);
@@ -4871,7 +4956,9 @@ Editor::nudge_track (bool use_edit, bool forwards)
 		_session->add_command (new StatefulDiffCommand (playlist));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -4951,9 +5038,8 @@ Editor::normalize_region ()
 		}
 	}
 
-	begin_reversible_command (_("normalize"));
-
 	list<double>::const_iterator a = max_amps.begin ();
+	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*r);
@@ -4966,12 +5052,19 @@ Editor::normalize_region ()
 		double const amp = dialog.normalize_individually() ? *a : max_amp;
 
 		arv->audio_region()->normalize (amp, dialog.target ());
+
+		if (!in_command) {
+			begin_reversible_command (_("normalize"));
+			in_command = true;
+		}
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 
 		++a;
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 
@@ -4988,7 +5081,7 @@ Editor::reset_region_scale_amplitude ()
 		return;
 	}
 
-	begin_reversible_command ("reset gain");
+	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
@@ -4996,10 +5089,17 @@ Editor::reset_region_scale_amplitude ()
 			continue;
 		arv->region()->clear_changes ();
 		arv->audio_region()->set_scale_amplitude (1.0f);
+
+		if(!in_command) {
+				begin_reversible_command ("reset gain");
+				in_command = true;
+		}
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5011,7 +5111,7 @@ Editor::adjust_region_gain (bool up)
 		return;
 	}
 
-	begin_reversible_command ("adjust region gain");
+	bool in_command = false;
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*r);
@@ -5030,10 +5130,17 @@ Editor::adjust_region_gain (bool up)
 		}
 
 		arv->audio_region()->set_scale_amplitude (dB_to_coefficient (dB));
+
+		if (!in_command) {
+				begin_reversible_command ("adjust region gain");
+				in_command = true;
+		}
 		_session->add_command (new StatefulDiffCommand (arv->region()));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 
@@ -5105,7 +5212,7 @@ Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 		return;
 	}
 
-	begin_reversible_command (op.name ());
+	bool in_command = false;
 
 	for (RegionSelection::const_iterator r = rs.begin(); r != rs.end(); ) {
 		RegionSelection::const_iterator tmp = r;
@@ -5116,6 +5223,10 @@ Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 		if (mrv) {
 			Command* cmd = apply_midi_note_edit_op_to_region (op, *mrv);
 			if (cmd) {
+				if (!in_command) {
+					begin_reversible_command (op.name ());
+					in_command = true;
+				}
 				(*cmd)();
 				_session->add_command (cmd);
 			}
@@ -5124,7 +5235,9 @@ Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 		r = tmp;
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5136,9 +5249,9 @@ Editor::fork_region ()
 		return;
 	}
 
-	begin_reversible_command (_("Fork Region(s)"));
-
 	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
+	bool in_command = false;
+
 	gdk_flush ();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ) {
@@ -5152,7 +5265,11 @@ Editor::fork_region ()
 				boost::shared_ptr<Playlist> playlist = mrv->region()->playlist();
 				boost::shared_ptr<MidiSource> new_source = _session->create_midi_source_by_stealing_name (mrv->midi_view()->track());
 				boost::shared_ptr<MidiRegion> newregion = mrv->midi_region()->clone (new_source);
-				
+
+				if (!in_command) {
+					begin_reversible_command (_("Fork Region(s)"));
+					in_command = true;
+				}
 				playlist->clear_changes ();
 				playlist->replace_region (mrv->region(), newregion, mrv->region()->position());
 				_session->add_command(new StatefulDiffCommand (playlist));
@@ -5164,7 +5281,9 @@ Editor::fork_region ()
 		r = tmp;
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5292,9 +5411,9 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 		return;
 	}
 
-	begin_reversible_command (command);
-
 	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
+	bool in_command = false;
+
 	gdk_flush ();
 
 	int n = 0;
@@ -5337,17 +5456,22 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 					}
 
 				}
-
 				/* We might have removed regions, which alters other regions' layering_index,
 				   so we need to do a recursive diff here.
 				*/
+
+				if (!in_command) {
+					begin_reversible_command (command);
+					in_command = true;
+				}
 				vector<Command*> cmds;
 				playlist->rdiff (cmds);
 				_session->add_commands (cmds);
 				
 				_session->add_command(new StatefulDiffCommand (playlist));
+
 			} else {
-				return;
+				continue;
 			}
 
 			if (progress) {
@@ -5359,7 +5483,9 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 		++n;
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5377,7 +5503,7 @@ Editor::reset_region_gain_envelopes ()
 		return;
 	}
 
-	begin_reversible_command (_("reset region gain"));
+	bool in_command = false;
 	
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
@@ -5386,11 +5512,18 @@ Editor::reset_region_gain_envelopes ()
 			XMLNode& before (alist->get_state());
 
 			arv->audio_region()->set_default_envelope ();
+
+			if (!in_command) {
+				begin_reversible_command (_("reset region gain"));
+				in_command = true;
+			}
 			_session->add_command (new MementoCommand<AutomationList>(*arv->audio_region()->envelope().get(), &before, &alist->get_state()));
 		}
 	}
-	
-	commit_reversible_command ();
+
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5430,18 +5563,25 @@ Editor::toggle_gain_envelope_active ()
 		return;
 	}
 
-	begin_reversible_command (_("region gain envelope active"));
-	
+	bool in_command = false;
+
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
 			arv->region()->clear_changes ();
 			arv->audio_region()->set_envelope_active (!arv->audio_region()->envelope_active());
+
+			if (!in_command) {
+				begin_reversible_command (_("region gain envelope active"));
+				in_command = true;
+			}
 			_session->add_command (new StatefulDiffCommand (arv->region()));
 		}
 	}
-	
-	commit_reversible_command ();
+
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5671,13 +5811,13 @@ Editor::set_fade_length (bool in)
 		cmd = _("set fade out length");
 	}
 
-	begin_reversible_command (cmd);
+	bool in_command = false;
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AutomationList> alist;
@@ -5697,11 +5837,17 @@ Editor::set_fade_length (bool in)
 			tmp->audio_region()->set_fade_out_active (true);
 		}
 
+		if (!in_command) {
+			begin_reversible_command (cmd);
+			in_command = true;
+		}
 		XMLNode &after = alist->get_state();
 		_session->add_command(new MementoCommand<AutomationList>(*alist, &before, &after));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5712,14 +5858,13 @@ Editor::set_fade_in_shape (FadeShape shape)
 	if (rs.empty()) {
 		return;
 	}
-
-	begin_reversible_command (_("set fade in shape"));
+	bool in_command = false;
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
@@ -5727,12 +5872,17 @@ Editor::set_fade_in_shape (FadeShape shape)
 
 		tmp->audio_region()->set_fade_in_shape (shape);
 
+		if (!in_command) {
+			begin_reversible_command (_("set fade in shape"));
+			in_command = true;
+		}
 		XMLNode &after = alist->get_state();
 		_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
-	commit_reversible_command ();
-
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5743,14 +5893,13 @@ Editor::set_fade_out_shape (FadeShape shape)
 	if (rs.empty()) {
 		return;
 	}
-
-	begin_reversible_command (_("set fade out shape"));
+	bool in_command = false;
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_out();
@@ -5758,11 +5907,17 @@ Editor::set_fade_out_shape (FadeShape shape)
 
 		tmp->audio_region()->set_fade_out_shape (shape);
 
+		if(!in_command) {
+			begin_reversible_command (_("set fade out shape"));
+			in_command = true;
+		}
 		XMLNode &after = alist->get_state();
 		_session->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5773,14 +5928,13 @@ Editor::set_fade_in_active (bool yn)
 	if (rs.empty()) {
 		return;
 	}
-
-	begin_reversible_command (_("set fade in active"));
+	bool in_command = false;
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 
@@ -5788,10 +5942,17 @@ Editor::set_fade_in_active (bool yn)
 
 		ar->clear_changes ();
 		ar->set_fade_in_active (yn);
+
+		if (!in_command) {
+			begin_reversible_command (_("set fade in active"));
+			in_command = true;
+		}
 		_session->add_command (new StatefulDiffCommand (ar));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5802,24 +5963,30 @@ Editor::set_fade_out_active (bool yn)
 	if (rs.empty()) {
 		return;
 	}
-
-	begin_reversible_command (_("set fade out active"));
+	bool in_command = false;
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ++x) {
 		AudioRegionView* tmp = dynamic_cast<AudioRegionView*> (*x);
 
 		if (!tmp) {
-			return;
+			continue;
 		}
 
 		boost::shared_ptr<AudioRegion> ar (tmp->audio_region());
 
 		ar->clear_changes ();
 		ar->set_fade_out_active (yn);
+
+		if (!in_command) {
+			begin_reversible_command (_("set fade out active"));
+			in_command = true;
+		}
 		_session->add_command(new StatefulDiffCommand (ar));
 	}
 
-	commit_reversible_command ();
+	if (in_command) {
+		commit_reversible_command ();
+	}
 }
 
 void
@@ -5855,11 +6022,14 @@ Editor::toggle_region_fades (int dir)
 	}
 
 	/* XXX should this undo-able? */
+	bool in_command = false;
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		if ((ar = boost::dynamic_pointer_cast<AudioRegion>((*i)->region())) == 0) {
 			continue;
 		}
+		ar->clear_changes ();
+
 		if (dir == 1 || dir == 0) {
 			ar->set_fade_in_active (!yn);
 		}
@@ -5867,6 +6037,15 @@ Editor::toggle_region_fades (int dir)
 		if (dir == -1 || dir == 0) {
 			ar->set_fade_out_active (!yn);
 		}
+		if (!in_command) {
+			begin_reversible_command (_("toggle fade active"));
+			in_command = true;
+		}
+		_session->add_command(new StatefulDiffCommand (ar));
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
 	}
 }
 
@@ -6964,13 +7143,11 @@ Editor::insert_time (
 	bool all_playlists, bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too
 	)
 {
-	bool commit = false;
 
 	if (Config->get_edit_mode() == Lock) {
 		return;
 	}
-
-	begin_reversible_command (_("insert time"));
+	bool in_command = false;
 
 	TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
 
@@ -7010,19 +7187,25 @@ Editor::insert_time (
 
 			(*i)->shift (pos, frames, (opt == MoveIntersected), ignore_music_glue);
 
+			if (!in_command) {
+				begin_reversible_command (_("insert time"));
+				in_command = true;
+			}
 			vector<Command*> cmds;
 			(*i)->rdiff (cmds);
 			_session->add_commands (cmds);
 
 			_session->add_command (new StatefulDiffCommand (*i));
-			commit = true;
 		}
 
 		/* automation */
 		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
 		if (rtav) {
+			if (!in_command) {
+				begin_reversible_command (_("insert time"));
+				in_command = true;
+			}
 			rtav->route ()->shift (pos, frames);
-			commit = true;
 		}
 	}
 
@@ -7058,16 +7241,27 @@ Editor::insert_time (
 		}
 
 		if (moved) {
+			if (!in_command) {
+				begin_reversible_command (_("insert time"));
+				in_command = true;
+			}
 			XMLNode& after (_session->locations()->get_state());
 			_session->add_command (new MementoCommand<Locations>(*_session->locations(), &before, &after));
 		}
 	}
 
 	if (tempo_too) {
+		if (!in_command) {
+			begin_reversible_command (_("insert time"));
+			in_command = true;
+		}
+		XMLNode& before (_session->tempo_map().get_state());
 		_session->tempo_map().insert_time (pos, frames);
+		XMLNode& after (_session->tempo_map().get_state());
+		_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 	}
 
-	if (commit) {
+	if (in_command) {
 		commit_reversible_command ();
 	}
 }
@@ -7110,14 +7304,11 @@ void
 Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt, 
 		     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
 {
-	bool commit = false;
-	
 	if (Config->get_edit_mode() == Lock) {
 		error << (_("Cannot insert or delete time when in Lock edit.")) << endmsg;
 		return;
 	}
-
-	begin_reversible_command (_("cut time"));
+	bool in_command = false;
 
 	for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
 		/* regions */
@@ -7133,17 +7324,23 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 			pl->cut (rl);
 			pl->shift (pos, -frames, true, ignore_music_glue);
 			
+			if (!in_command) {
+				begin_reversible_command (_("cut time"));
+				in_command = true;
+			}
 			XMLNode &after = pl->get_state();
 			
 			_session->add_command (new MementoCommand<Playlist> (*pl, &before, &after));
-			commit = true;
 		}
 			
 		/* automation */
 		RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
 		if (rtav) {
+			if (!in_command) {
+				begin_reversible_command (_("cut time"));
+				in_command = true;
+			}
 			rtav->route ()->shift (pos, -frames);
-			commit = true;
 		}
 	}
 
@@ -7212,23 +7409,29 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 		}
 	
 		if (moved) {
+			if (!in_command) {
+				begin_reversible_command (_("cut time"));
+				in_command = true;
+			}
 			XMLNode& after (_session->locations()->get_state());
 			_session->add_command (new MementoCommand<Locations>(*_session->locations(), &before, &after));
-			commit = true;
 		}
 	}
 	
 	if (tempo_too) {
 		XMLNode& before (_session->tempo_map().get_state());
 
-		if (_session->tempo_map().remove_time (pos, frames) ) {
+		if (_session->tempo_map().cut_time (pos, frames) ) {
+			if (!in_command) {
+				begin_reversible_command (_("cut time"));
+				in_command = true;
+			}
 			XMLNode& after (_session->tempo_map().get_state());
 			_session->add_command (new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
-			commit = true;
 		}
 	}
 	
-	if (commit) {
+	if (in_command) {
 		commit_reversible_command ();
 	}
 }

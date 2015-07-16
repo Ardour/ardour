@@ -276,7 +276,11 @@ AutomationList::state (bool full)
                 if (_state != Write) {
                         root->add_property ("state", auto_state_to_string (_state));
                 } else {
-                        root->add_property ("state", auto_state_to_string (Off));
+			if (_events.empty ()) {
+				root->add_property ("state", auto_state_to_string (Off));
+			} else {
+				root->add_property ("state", auto_state_to_string (Touch));
+			}
                 }
 	} else {
 		/* never save anything but Off for automation state to a template */

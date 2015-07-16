@@ -270,33 +270,41 @@ RegionEditor::connect_editor_events ()
 void
 RegionEditor::position_clock_changed ()
 {
-	PublicEditor::instance().begin_reversible_command (_("change region start position"));
-
+	bool in_command = false;
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
+		PublicEditor::instance().begin_reversible_command (_("change region start position"));
+		in_command = true;
+
 		_region->clear_changes ();
 		_region->set_position (position_clock.current_time());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
-	PublicEditor::instance().commit_reversible_command ();
+	if (in_command) {
+		PublicEditor::instance().commit_reversible_command ();
+	}
 }
 
 void
 RegionEditor::end_clock_changed ()
 {
-	PublicEditor::instance().begin_reversible_command (_("change region end position"));
-
+	bool in_command = false;
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
+		PublicEditor::instance().begin_reversible_command (_("change region end position"));
+		in_command = true;
+
                 _region->clear_changes ();
 		_region->trim_end (end_clock.current_time());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
-	PublicEditor::instance().commit_reversible_command ();
+	if (in_command) {
+		PublicEditor::instance().commit_reversible_command ();
+	}
 
 	end_clock.set (_region->position() + _region->length() - 1, true);
 }
@@ -305,18 +313,21 @@ void
 RegionEditor::length_clock_changed ()
 {
 	framecnt_t frames = length_clock.current_time();
-
-	PublicEditor::instance().begin_reversible_command (_("change region length"));
-
+	bool in_command = false;
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
-                _region->clear_changes ();
+		PublicEditor::instance().begin_reversible_command (_("change region length"));
+		in_command = true;
+
+		_region->clear_changes ();
 		_region->trim_end (_region->position() + frames - 1);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
-	PublicEditor::instance().commit_reversible_command ();
+	if (in_command) {
+		PublicEditor::instance().commit_reversible_command ();
+	}
 
 	length_clock.set (_region->length());
 }

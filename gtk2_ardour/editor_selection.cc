@@ -326,19 +326,23 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 	if (!clicked_control_point) {
 		return false;
 	}
+	bool ret = false;
 
 	switch (op) {
 	case Selection::Set:
 		if (press) {
 			selection->set (clicked_control_point);
+			ret = true;
 		}
 		break;
 	case Selection::Add:
 		if (press) {
 			selection->add (clicked_control_point);
+			ret = true;
 		}
 		break;
 	case Selection::Toggle:
+
 		/* This is a bit of a hack; if we Primary-Click-Drag a control
 		   point (for push drag) we want the point we clicked on to be
 		   selected, otherwise we end up confusingly dragging an
@@ -353,9 +357,11 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 			*/
 			selection->toggle (clicked_control_point);
 			_control_point_toggled_on_press = true;
+			ret = true;
 		} else if (!press && !_control_point_toggled_on_press) {
 			/* This is the release, and the point wasn't toggled on the press, so do it now */
 			selection->toggle (clicked_control_point);
+			ret = true;
 		} else {
 			/* Reset our flag */
 			_control_point_toggled_on_press = false;
@@ -366,7 +372,7 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 		break;
 	}
 
-	return true;
+	return ret;
 }
 
 void

@@ -71,7 +71,7 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 
 	_adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
 	_adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
-
+	signal_grab_broken_event ().connect (mem_fun (*this, &PixFader::on_grab_broken_event));
 	if (_orien == VERT) {
 		CairoWidget::set_size_request(_girth, _span);
 	} else {
@@ -363,6 +363,18 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 	}
 
 	update_unity_position ();
+}
+
+bool
+PixFader::on_grab_broken_event (GdkEventGrabBroken* ev)
+{
+	if (_dragging) {
+		remove_modal_grab();
+		_dragging = false;
+		gdk_pointer_ungrab (GDK_CURRENT_TIME);
+		StopGesture ();
+	}
+	return (_tweaks & NoButtonForward) ? true : false;
 }
 
 bool

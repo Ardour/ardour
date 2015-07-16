@@ -59,6 +59,7 @@
 
 #include "ardour_ui.h"
 #include "ardour_button.h"
+#include "audio_streamview.h"
 #include "debug.h"
 #include "global_signals.h"
 #include "route_time_axis.h"
@@ -1341,6 +1342,10 @@ RouteTimeAxisView::set_selected_points (PointSelection& points)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->set_selected_points (points);
+	}
+	AudioStreamView* asv = dynamic_cast<AudioStreamView*>(_view);
+	if (asv) {
+		asv->set_selected_points (points);
 	}
 }
 

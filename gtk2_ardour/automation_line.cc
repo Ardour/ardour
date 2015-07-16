@@ -466,7 +466,6 @@ AutomationLine::string_to_fraction (string const & s) const
 void
 AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
-	trackview.editor().begin_reversible_command (_("automation event move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), &get_state(), 0));
 
@@ -492,7 +491,6 @@ AutomationLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 void
 AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
-	trackview.editor().begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder (), &get_state(), 0));
 
@@ -512,7 +510,6 @@ AutomationLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 void
 AutomationLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
 {
-	trackview.editor().begin_reversible_command (_("automation range move"));
 	trackview.editor().session()->add_command (
 		new MementoCommand<AutomationList> (memento_command_binder(), state, 0));
 
@@ -678,6 +675,7 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
 			(*ccp)->compute_x_bounds (trackview.editor());
 		}
+		_drag_had_movement = true;
 	}	
 
 	/* OK, now on to the stuff related to *this* motion event. First, for
@@ -738,7 +736,6 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	_drag_distance += dx;
 	_drag_x += dx;
 	_last_drag_fraction = fraction;
-	_drag_had_movement = true;
 	did_push = with_push;
 
 	return pair<double, float> (_drag_x + dx, _last_drag_fraction + dy);
@@ -951,7 +948,8 @@ AutomationLine::set_selected_points (PointSelection const & points)
 	set_colors ();
 }
 
-void AutomationLine::set_colors ()
+void
+AutomationLine::set_colors ()
 {
 	set_line_color (ARDOUR_UI::config()->color ("automation line"));
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {

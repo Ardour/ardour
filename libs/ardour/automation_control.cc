@@ -19,11 +19,14 @@
 */
 
 #include <iostream>
-
 #include "ardour/automation_control.h"
 #include "ardour/automation_watch.h"
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
+
+#include "pbd/memento_command.h"
+
+#include "i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -85,6 +88,8 @@ AutomationControl::set_automation_state (AutoState as)
 		}
 
 		if (as == Write) {
+			/* get state for undo */
+			_before = &alist ()->get_state ();
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		} else if (as == Touch) {
 			if (!touching()) {
@@ -113,9 +118,16 @@ AutomationControl::set_automation_style (AutoStyle as)
 void
 AutomationControl::start_touch(double when)
 {
-	if (!_list) return;
+	if (!_list) {
+		return;
+	}
+
 	if (!touching()) {
+
 		if (alist()->automation_state() == Touch) {
+			/* subtle. aligns the user value with the playback */
+			set_value (get_value ());
+			_before = &alist ()->get_state ();
 			alist()->start_touch (when);
 			if (!_desc.toggled) {
 				AutomationWatch::instance().add_automation_watch (shared_from_this());
@@ -131,11 +143,22 @@ AutomationControl::stop_touch(bool mark, double when)
 	if (!_list) return;
 	if (touching()) {
 		set_touching (false);
+
+		if (alist()->automation_state() == Write) {
+			_session.begin_reversible_command (string_compose (_("write %1 automation"), name ()));
+			_session.add_command (new MementoCommand<AutomationList> (*alist ().get (), _before, &alist ()->get_state ()));
+			_session.commit_reversible_command ();
+		}
+
 		if (alist()->automation_state() == Touch) {
 			alist()->stop_touch (mark, when);
 			if (!_desc.toggled) {
 				AutomationWatch::instance().remove_automation_watch (shared_from_this());
 			}
+
+			_session.begin_reversible_command (string_compose (_("touch %1 automation"), name ()));
+			_session.add_command (new MementoCommand<AutomationList> (*alist ().get (), _before, &alist ()->get_state ()));
+			_session.commit_reversible_command ();
 		}
 	}
 }

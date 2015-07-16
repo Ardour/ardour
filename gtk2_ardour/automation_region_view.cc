@@ -190,7 +190,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	view->editor().begin_reversible_command (_("add automation event"));
 	XMLNode& before = _line->the_list()->get_state();
 
-	_line->the_list()->add (when_d, y, with_guard_points, false);
+	_line->the_list()->editor_add (when_d, y, with_guard_points);
 
 	XMLNode& after = _line->the_list()->get_state();
 

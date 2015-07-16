@@ -617,6 +617,11 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		assert(_last_pointer_time_axis_view >= 0);
 		_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
 	}
+
+	if (_brushing) {
+		/* cross track dragging seems broken here. disabled for now. */
+		_y_constrained = true;
+	}
 }
 
 double
@@ -1221,13 +1226,13 @@ void
 RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (_copy && first_move) {
-
-		if (_x_constrained) {
+		if (_x_constrained && !_brushing) {
 			_editor->begin_reversible_command (Operations::fixed_time_region_copy);
-		} else {
+		} else if (!_brushing) {
 			_editor->begin_reversible_command (Operations::region_copy);
+		} else if (_brushing) {
+			_editor->begin_reversible_command (Operations::drag_region_brush);
 		}
-
 		/* duplicate the regionview(s) and region(s) */
 
 		list<DraggingView> new_regionviews;
@@ -1285,14 +1290,14 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 		}
 
 	} else if (!_copy && first_move) {
-
-		if (_x_constrained) {
+		if (_x_constrained && !_brushing) {
 			_editor->begin_reversible_command (_("fixed time region drag"));
-		} else {
+		} else if (!_brushing) {
 			_editor->begin_reversible_command (Operations::region_drag);
+		} else if (_brushing) {
+			_editor->begin_reversible_command (Operations::drag_region_brush);
 		}
 	}
-
 	RegionMotionDrag::motion (event, first_move);
 }
 
@@ -1500,12 +1505,6 @@ RegionMoveDrag::finished_no_copy (
 	set<RouteTimeAxisView*> views_to_update;
 	RouteTimeAxisView* new_time_axis_view = 0;
 
-	if (_brushing) {
-		/* all changes were made during motion event handlers */
-		_editor->commit_reversible_command ();
-		return;
-	}
-
 	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
@@ -1619,7 +1618,6 @@ RegionMoveDrag::finished_no_copy (
 			}
 
 			rv->region()->set_position (where);
-
 			_editor->session()->add_command (new StatefulDiffCommand (rv->region()));
 		}
 
@@ -1668,7 +1666,7 @@ RegionMoveDrag::finished_no_copy (
 
 	/* write commands for the accumulated diffs for all our modified playlists */
 	add_stateful_diff_commands_for_playlists (modified_playlists);
-
+	/* applies to _brushing */
 	_editor->commit_reversible_command ();
 
 	/* We have futzed with the layering of canvas items on our streamviews.
@@ -2334,6 +2332,8 @@ RegionCreateDrag::aborted (bool)
 NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, region (0)
+	, relative (false)
+	, at_front (true)
 	, _snap_delta (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New NoteResizeDrag\n");
@@ -2370,37 +2370,36 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	} else {
 		relative = true;
 	}
-
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
-
 	if (ms.size() > 1) {
 		/* has to be relative, may make no sense otherwise */
 		relative = true;
 	}
-
 	/* select this note; if it is already selected, preserve the existing selection,
 	   otherwise make this note the only one selected.
 	*/
 	region->note_selected (cnote, cnote->selected ());
-
-	_editor->begin_reversible_command (_("resize notes"));
-
-	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
-		MidiRegionSelection::iterator next;
-		next = r;
-		++next;
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
-		if (mrv) {
-			mrv->begin_resizing (at_front);
-		}
-		r = next;
-	}
 }
 
 void
-NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
+NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 {
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
+	if (first_move) {
+		_editor->begin_reversible_command (_("resize notes"));
+
+		for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ) {
+			MidiRegionSelection::iterator next;
+			next = r;
+			++next;
+			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*r);
+			if (mrv) {
+				mrv->begin_resizing (at_front);
+			}
+			r = next;
+		}
+	}
+
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
@@ -2434,8 +2433,12 @@ NoteResizeDrag::motion (GdkEvent* event, bool /*first_move*/)
 }
 
 void
-NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
+NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 {
+	if (!movement_occurred) {
+		return;
+	}
+
 	MidiRegionSelection& ms (_editor->get_selection().midi_regions);
 	for (MidiRegionSelection::iterator r = ms.begin(); r != ms.end(); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
@@ -2458,9 +2461,11 @@ NoteResizeDrag::finished (GdkEvent* event, bool /*movement_occurred*/)
 					}
 				}
 			}
+
 			if (apply_snap_delta) {
 				sd = _snap_delta;
 			}
+
 			mrv->commit_resizing (nb, at_front, _drags->current_pointer_x() - grab_x(), relative, sd, snap);
 		}
 	}
@@ -3479,7 +3484,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 		fade_length = pos - region->position();
 	}
 
-	_editor->begin_reversible_command (_("change fade in length"));
+	bool in_command = false;
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
@@ -3495,11 +3500,17 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region()->set_fade_in_length (fade_length);
 		tmp->audio_region()->set_fade_in_active (true);
 
+		if (!in_command) {
+			_editor->begin_reversible_command (_("change fade in length"));
+			in_command = true;
+		}
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
-	_editor->commit_reversible_command ();
+	if (in_command) {
+		_editor->commit_reversible_command ();
+	}
 }
 
 void
@@ -3598,7 +3609,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 		fade_length = region->last_frame() - pos;
 	}
 
-	_editor->begin_reversible_command (_("change fade out length"));
+	bool in_command = false;
 
 	for (list<DraggingView>::iterator i = _views.begin(); i != _views.end(); ++i) {
 
@@ -3614,11 +3625,17 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region()->set_fade_out_length (fade_length);
 		tmp->audio_region()->set_fade_out_active (true);
 
+		if (!in_command) {
+			_editor->begin_reversible_command (_("change fade out length"));
+			in_command = false;
+		}
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
 	}
 
-	_editor->commit_reversible_command ();
+	if (in_command) {
+		_editor->commit_reversible_command ();
+	}
 }
 
 void
@@ -3952,8 +3969,8 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	_editor->_dragging_edit_point = false;
 
-	_editor->begin_reversible_command ( _("move marker") );
 	XMLNode &before = _editor->session()->locations()->get_state();
+	bool in_command = false;
 
 	MarkerSelection::iterator i;
 	CopiedLocationInfo::iterator x;
@@ -3968,9 +3985,12 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (location) {
 
 			if (location->locked()) {
-				return;
+				continue;
 			}
-
+			if (!in_command) {
+				_editor->begin_reversible_command ( _("move marker") );
+				in_command = true;
+			}
 			if (location->is_mark()) {
 				location->set_start (((*x).location)->start());
 			} else {
@@ -3979,9 +3999,11 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	XMLNode &after = _editor->session()->locations()->get_state();
-	_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
-	_editor->commit_reversible_command ();
+	if (in_command) {
+		XMLNode &after = _editor->session()->locations()->get_state();
+		_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
+		_editor->commit_reversible_command ();
+	}
 }
 
 void
@@ -4044,9 +4066,6 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	setup_snap_delta (pos);
 
 	float const fraction = 1 - (_point->get_y() / _point->line().height());
-
-	_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
-
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (fraction));
 
 	_pushing = Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::push_points_modifier ());
@@ -4057,7 +4076,7 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 }
 
 void
-ControlPointDrag::motion (GdkEvent* event, bool)
+ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 {
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	double dy = current_pointer_y() - last_pointer_y();
@@ -4076,11 +4095,6 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	// positive side of zero
 	double const zero_gain_y = (1.0 - _zero_gain_fraction) * _point->line().height() - .01;
 
-	// make sure we hit zero when passing through
-	if ((cy < zero_gain_y && (cy - dy) > zero_gain_y) || (cy > zero_gain_y && (cy - dy) < zero_gain_y)) {
-		cy = zero_gain_y;
-	}
-
 	if (_x_constrained) {
 		cx = _fixed_grab_x;
 	}
@@ -4090,6 +4104,11 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 
 	_cumulative_x_drag = cx - _fixed_grab_x;
 	_cumulative_y_drag = cy - _fixed_grab_y;
+
+	// make sure we hit zero when passing through
+	if ((cy < zero_gain_y && (cy - dy) > zero_gain_y) || (cy > zero_gain_y && (cy - dy) < zero_gain_y)) {
+		cy = zero_gain_y;
+	}
 
 	cx = max (0.0, cx);
 	cy = max (0.0, cy);
@@ -4105,6 +4124,11 @@ ControlPointDrag::motion (GdkEvent* event, bool)
 	cx_frames = min (cx_frames, _point->line().maximum_time());
 
 	float const fraction = 1.0 - (cy / _point->line().height());
+
+	if (first_motion) {
+		_editor->begin_reversible_command (_("automation event move"));
+		_point->line().start_drag_single (_point, _fixed_grab_x, fraction);
+	}
 
 	_point->line().drag_motion (_editor->sample_to_pixel_unrounded (cx_frames), fraction, false, _pushing, _final_index);
 
@@ -4123,10 +4147,9 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	} else {
 		motion (event, false);
+		_point->line().end_drag (_pushing, _final_index);
+		_editor->commit_reversible_command ();
 	}
-
-	_point->line().end_drag (_pushing, _final_index);
-	_editor->commit_reversible_command ();
 }
 
 void
@@ -4151,6 +4174,8 @@ LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i)
 	, _line (0)
 	, _cumulative_y_drag (0)
+	, _before (0)
+	, _after (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LineDrag\n");
 }
@@ -4174,10 +4199,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	framecnt_t const frame_within_region = (framecnt_t) floor (cx * _editor->samples_per_pixel);
 
-	uint32_t before;
-	uint32_t after;
-
-	if (!_line->control_points_adjacent (frame_within_region, before, after)) {
+	if (!_line->control_points_adjacent (frame_within_region, _before, _after)) {
 		/* no adjacent points */
 		return;
 	}
@@ -4191,13 +4213,11 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	double fraction = 1.0 - (cy / _line->height());
 
-	_line->start_drag_line (before, after, fraction);
-
 	show_verbose_cursor_text (_line->get_verbose_cursor_string (fraction));
 }
 
 void
-LineDrag::motion (GdkEvent* event, bool)
+LineDrag::motion (GdkEvent* event, bool first_move)
 {
 	double dy = current_pointer_y() - last_pointer_y();
 
@@ -4215,6 +4235,11 @@ LineDrag::motion (GdkEvent* event, bool)
 	double const fraction = 1.0 - (cy / _line->height());
 	uint32_t ignored;
 
+	if (first_move) {
+		_editor->begin_reversible_command (_("automation range move"));
+		_line->start_drag_line (_before, _after, fraction);
+	}
+
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	_line->drag_motion (0, fraction, true, false, ignored);
 
@@ -4227,20 +4252,17 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 	if (movement_occured) {
 		motion (event, false);
 		_line->end_drag (false, 0);
+		_editor->commit_reversible_command ();
 	} else {
 		/* add a new control point on the line */
 
 		AutomationTimeAxisView* atv;
-
-		_line->end_drag (false, 0);
 
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
 			framepos_t where = _editor->window_event_sample (event, 0, 0);
 			atv->add_automation_event (event, where, event->button.y, false);
 		}
 	}
-
-	_editor->commit_reversible_command ();
 }
 
 void
@@ -5525,8 +5547,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, value (the_list, p));
-				the_list->editor_add (q, value (the_list, q));
+				the_list->editor_add (p, value (the_list, p), false);
+				the_list->editor_add (q, value (the_list, q), false);
 			}
 
 			/* same thing for the end */
@@ -5551,8 +5573,8 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 				double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
 				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
 
-				the_list->editor_add (p, value (the_list, p));
-				the_list->editor_add (q, value (the_list, q));
+				the_list->editor_add (p, value (the_list, p), false);
+				the_list->editor_add (q, value (the_list, q), false);
 			}
 		}
 
@@ -5589,17 +5611,20 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	if (_nothing_to_drag) {
 		return;
 	}
-
-	for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-		i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
-	}
 }
 
 void
-AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
+AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 {
 	if (_nothing_to_drag) {
 		return;
+	}
+
+	if (first_move) {
+		_editor->begin_reversible_command (_("automation range move"));
+		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+			i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
+		}
 	}
 
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
@@ -5612,9 +5637,9 @@ AutomationRangeDrag::motion (GdkEvent*, bool /*first_move*/)
 }
 
 void
-AutomationRangeDrag::finished (GdkEvent* event, bool)
+AutomationRangeDrag::finished (GdkEvent* event, bool motion_occurred)
 {
-	if (_nothing_to_drag) {
+	if (_nothing_to_drag || !motion_occurred) {
 		return;
 	}
 

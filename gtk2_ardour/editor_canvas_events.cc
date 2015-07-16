@@ -695,6 +695,11 @@ Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, Automation
 		type = AutomationLineItem;
 	}
 
+	clicked_control_point = 0;
+	clicked_axisview = &al->trackview;
+	clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
+	clicked_regionview = 0;
+
 	return typed_event (item, event, type);
 }
 

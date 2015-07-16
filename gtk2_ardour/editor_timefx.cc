@@ -133,6 +133,8 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
 
 	if (ret == 0) {
 		commit_reversible_command ();
+	} else {
+		abort_reversible_command ();
 	}
 
 	return ret;

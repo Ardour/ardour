@@ -446,7 +446,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 	if (((mouse_mode != MouseObject) &&
 	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
-	     (mouse_mode != MouseDraw)) ||
+	     (mouse_mode != MouseDraw) &&
+	     (mouse_mode != MouseContent || item_type == RegionItem)) ||
 	    ((event->type != GDK_BUTTON_PRESS && event->type != GDK_BUTTON_RELEASE) || event->button.button > 3)) {
 		return;
 	}
@@ -512,7 +513,8 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		break;
 
 	case ControlPointItem:
-		set_selected_track_as_side_effect (op);
+		/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
+
 		if (eff_mouse_mode != MouseRange) {
 			_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
 		}
@@ -761,8 +763,18 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			return true;
 
+		case GainLineItem:
+			_drags->set (new LineDrag (this, item), event);
+			return true;
+			break;
+
 		case ControlPointItem:
 			_drags->set (new ControlPointDrag (this, item), event);
+			return true;
+			break;
+
+		case AutomationLineItem:
+			_drags->set (new LineDrag (this, item), event);
 			return true;
 			break;
 
@@ -2200,7 +2212,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, framepos_t pos)
 
 	// playlist is frozen, so we have to update manually XXX this is disgusting
 
-	playlist->RegionAdded (new_region); /* EMIT SIGNAL */
+	//playlist->RegionAdded (new_region); /* EMIT SIGNAL */
 }
 
 gint
@@ -2262,8 +2274,6 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 	}
 
 	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), true, false));
-
-	begin_reversible_command (Operations::drag_region_brush);
 }
 
 /** Start a grab where a time range is selected, track(s) are selected, and the
@@ -2303,7 +2313,6 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	/* A selection grab currently creates two undo/redo operations, one for
 	   creating the new region and another for moving it.
 	*/
-
 	begin_reversible_command (Operations::selection_grab);
 
 	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
@@ -2316,6 +2325,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	if (latest_regionviews.empty()) {
 		/* something went wrong */
+		abort_reversible_command ();
 		return;
 	}
 

@@ -877,6 +877,8 @@ private:
 	double _fixed_grab_x;
 	double _fixed_grab_y;
 	double _cumulative_y_drag;
+	uint32_t _before;
+	uint32_t _after;
 };
 
 /** Transient feature line drags*/
