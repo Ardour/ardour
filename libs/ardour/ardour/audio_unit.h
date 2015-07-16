@@ -241,7 +241,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 
 	bool reconfigurable_io() const { return true; }
 
-	static PluginInfoList* discover ();
+	static PluginInfoList* discover (bool scan_only);
 	static bool au_get_crashlog (std::string &msg);
 	static void get_names (CAComponentDescription&, std::string& name, std::string& maker);
 	static std::string stringify_descriptor (const CAComponentDescription&);
@@ -252,6 +252,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 	boost::shared_ptr<CAComponentDescription> descriptor;
 	UInt32 version;
 	static FILE * _crashlog_fd;
+	static bool _scan_only;
 
 	static void au_start_crashlog (void);
 	static void au_remove_crashlog (void);
@@ -267,7 +268,7 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 	typedef std::map<std::string,AUPluginCachedInfo> CachedInfoMap;
 	static CachedInfoMap cached_info;
 
-	static bool cached_io_configuration (const std::string&, UInt32, CAComponent&, AUPluginCachedInfo&, const std::string& name);
+	static int cached_io_configuration (const std::string&, UInt32, CAComponent&, AUPluginCachedInfo&, const std::string& name);
 	static void add_cached_info (const std::string&, AUPluginCachedInfo&);
 	static void save_cached_info ();
 };

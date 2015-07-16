@@ -73,6 +73,7 @@ static string preset_search_path = "/Library/Audio/Presets:/Network/Library/Audi
 static string preset_suffix = ".aupreset";
 static bool preset_search_path_initialized = false;
 FILE * AUPluginInfo::_crashlog_fd = NULL;
+bool AUPluginInfo::_scan_only = true;
 
 
 static void au_blacklist (std::string id)
@@ -2277,9 +2278,18 @@ AUPluginInfo::au_cache_path ()
 }
 
 PluginInfoList*
-AUPluginInfo::discover ()
+AUPluginInfo::discover (bool scan_only)
 {
 	XMLTree tree;
+
+	/* AU require a CAComponentDescription pointer provided by the OS.
+	 * Ardour only caches port and i/o config. It can't just 'scan' without
+	 * 'discovering' (like we do for VST).
+	 * 
+	 * "Scan Only" means
+	 * "Iterate over all plugins. skip the ones where there's no io-cache".
+	 */
+	_scan_only = scan_only;
 
 	if (!Glib::file_test (au_cache_path(), Glib::FILE_TEST_EXISTS)) {
 		ARDOUR::BootMessage (_("Discovering AudioUnit plugins (could take some time ...)"));
@@ -2498,8 +2508,9 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			info->version = 0;
 		}
 
-		if (cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name)) {
+		const int rv = cached_io_configuration (info->unique_id, info->version, cacomp, info->cache, info->name);
 
+		if (rv == 0) {
 			/* here we have to map apple's wildcard system to a simple pair
 			   of values. in ::can_do() we use the whole system, but here
 			   we need a single pair of values. XXX probably means we should
@@ -2533,7 +2544,8 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 
 			plugs.push_back (info);
 
-		} else {
+		}
+		else if (rv == -1) {
 			error << string_compose (_("Cannot get I/O configuration info for AU %1"), info->name) << endmsg;
 		}
 
@@ -2545,7 +2557,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 	au_crashlog(string_compose("End AU discovery for Type: %1", (int)desc.componentType));
 }
 
-bool
+int
 AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 				       UInt32 version,
 				       CAComponent& comp,
@@ -2569,7 +2581,12 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 
 	if (cim != cached_info.end()) {
 		cinfo = cim->second;
-		return true;
+		return 0;
+	}
+
+	if (_scan_only) {
+		PBD::info << string_compose (_("Skipping AU %1 (not indexed. Discover new plugins to add)"), unique_id) << endmsg;
+		return 1;
 	}
 
 	CAAudioUnit unit;
@@ -2582,19 +2599,19 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	try {
 
 		if (CAAudioUnit::Open (comp, unit) != noErr) {
-			return false;
+			return -1;
 		}
 
 	} catch (...) {
 
 		warning << string_compose (_("Could not load AU plugin %1 - ignored"), name) << endmsg;
-		return false;
+		return -1;
 
 	}
 
 	DEBUG_TRACE (DEBUG::AudioUnits, "get AU channel info\n");
 	if ((ret = unit.GetChannelInfo (&channel_info, cnt)) < 0) {
-		return false;
+		return -1;
 	}
 
 	if (ret > 0) {
@@ -2620,7 +2637,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	add_cached_info (id, cinfo);
 	save_cached_info ();
 
-	return true;
+	return 0;
 }
 
 void

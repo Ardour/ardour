@@ -639,31 +639,17 @@ void
 PluginManager::au_refresh (bool cache_only)
 {
 	DEBUG_TRACE (DEBUG::PluginManager, "AU: refresh\n");
-	if (cache_only && !Config->get_discover_audio_units ()) {
-		return;
-	}
-	delete _au_plugin_info;
-	_au_plugin_info = AUPluginInfo::discover();
 
-	// disable automatic scan in case we crash
+	// disable automatic discovery in case we crash
+	bool discover_at_start = Config->get_discover_audio_units ();
 	Config->set_discover_audio_units (false);
 	Config->save_state();
 
-	/* note: AU require a CAComponentDescription pointer provided by the OS.
-	 * Ardour only caches port and i/o config. It can't just 'scan' without
-	 * 'discovering' (like we do for VST).
-	 *
-	 * So in case discovery fails, we assume the worst: the Description
-	 * is broken (malicious plugins) and even a simple 'scan' would always
-	 * crash ardour on startup. Hence we disable Auto-Scan on start.
-	 *
-	 * If the crash happens at any later time (description is available),
-	 * Ardour will blacklist the plugin in question -- unless
-	 * the crash happens during realtime-run.
-	 */
+	delete _au_plugin_info;
+	_au_plugin_info = AUPluginInfo::discover(cache_only && !discover_at_start);
 
-	// successful scan re-enabled automatic discovery
-	Config->set_discover_audio_units (true);
+	// successful scan re-enabled automatic discovery if it was set
+	Config->set_discover_audio_units (discover_at_start);
 	Config->save_state();
 }
 
