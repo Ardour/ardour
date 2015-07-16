@@ -144,6 +144,8 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	std::string get_ladspa_category (uint32_t id);
 	std::vector<uint32_t> ladspa_plugin_whitelist;
 
+	Glib::Threads::Mutex _lock;
+
 	static PluginManager* _instance; // singleton
 	PluginManager ();
 };

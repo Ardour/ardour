@@ -225,6 +225,12 @@ PluginManager::~PluginManager()
 void
 PluginManager::refresh (bool cache_only)
 {
+	Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked()) {
+		return;
+	}
+
 	DEBUG_TRACE (DEBUG::PluginManager, "PluginManager::refresh\n");
 	_cancel_scan = false;
 
