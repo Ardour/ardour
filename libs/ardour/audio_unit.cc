@@ -2585,7 +2585,7 @@ AUPluginInfo::cached_io_configuration (const std::string& unique_id,
 	}
 
 	if (_scan_only) {
-		PBD::info << string_compose (_("Skipping AU %1 (not indexed. Discover new plugins to add)"), unique_id) << endmsg;
+		PBD::info << string_compose (_("Skipping AU %1 (not indexed. Discover new plugins to add)"), name) << endmsg;
 		return 1;
 	}
 
