@@ -363,22 +363,32 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		return -1;
 	}
 
-	/* check actual size of the peakfile is at least large enough for all
-	 * the data in the audio file. if it is too short, assume that a crash
-	 * or other error truncated it, and rebuild it from scratch.
-	 */
+	if (!_captured_for.empty()) {
 	
-	const off_t expected_file_size = (_length / (double) samples_per_file_peak) * sizeof (PeakData);
-
-	if (statbuf.st_size < expected_file_size) {
-		warning << string_compose (_("peak file %1 is truncated from %2 to %3"), peakpath, expected_file_size, statbuf.st_size) << endmsg;
-		const_cast<AudioSource*>(this)->build_peaks_from_scratch ();
-		if (g_stat (peakpath.c_str(), &statbuf) != 0) {
-			error << string_compose (_("Cannot open peakfile @ %1 for size check (%2) after rebuild"), peakpath, strerror (errno)) << endmsg;
-		}
+		/* _captured_for is only set after a capture pass is
+		 * complete. so we know that capturing is finished for this
+		 * file, and now we can check actual size of the peakfile is at
+		 * least large enough for all the data in the audio file. if it
+		 * is too short, assume that a crash or other error truncated
+		 * it, and rebuild it from scratch.
+		 *
+		 * XXX this may not work for destructive recording, but we
+		 * might decided to get rid of that anyway.
+		 * 
+		 */
+		
+		const off_t expected_file_size = (_length / (double) samples_per_file_peak) * sizeof (PeakData);
+		
 		if (statbuf.st_size < expected_file_size) {
-			fatal << "peak file is still truncated after rebuild" << endmsg;
-			/*NOTREACHED*/
+			warning << string_compose (_("peak file %1 is truncated from %2 to %3"), peakpath, expected_file_size, statbuf.st_size) << endmsg;
+			const_cast<AudioSource*>(this)->build_peaks_from_scratch ();
+			if (g_stat (peakpath.c_str(), &statbuf) != 0) {
+				error << string_compose (_("Cannot open peakfile @ %1 for size check (%2) after rebuild"), peakpath, strerror (errno)) << endmsg;
+			}
+			if (statbuf.st_size < expected_file_size) {
+				fatal << "peak file is still truncated after rebuild" << endmsg;
+				/*NOTREACHED*/
+			}
 		}
 	}
 
