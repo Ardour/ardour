@@ -28,9 +28,7 @@
 
 #include <sys/stat.h>
 
-#ifdef PLATFORM_WINDOWS
 #include <glibmm/convert.h>
-#endif
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -924,8 +922,8 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
 
-	if ((sf = sf_open (const_cast<char*>(path.c_str()), SFM_READ, &sf_info)) == 0) {
-		char errbuf[256];
+	if ((sf = sf_open (const_cast<char*>(Glib::locale_from_utf8(path).c_str()), SFM_READ, &sf_info)) == 0) {
+		char errbuf[1024];
 		error_msg = sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		return false;
 	}

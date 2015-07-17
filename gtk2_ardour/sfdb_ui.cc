@@ -29,7 +29,6 @@
 
 #include <unistd.h>
 #include <limits.h>
-#include <sys/stat.h>
 
 #include <gtkmm/box.h>
 #include <gtkmm/stock.h>
@@ -1255,8 +1254,8 @@ SoundFileBrowser::get_paths ()
 		vector<string>::iterator i;
 
 		for (i = filenames.begin(); i != filenames.end(); ++i) {
-			struct stat buf;
-			if ((!stat((*i).c_str(), &buf)) && S_ISREG(buf.st_mode)) {
+			GStatBuf buf;
+			if ((!g_stat((*i).c_str(), &buf)) && S_ISREG(buf.st_mode)) {
 				results.push_back (*i);
 			}
 		}
@@ -1590,7 +1589,7 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 	std::string tmpdir(Glib::build_filename (s->session_directory().sound_path(), "linktest"));
 	bool ret = false;
 
-	if (mkdir (tmpdir.c_str(), 0744)) {
+	if (g_mkdir (tmpdir.c_str(), 0744)) {
 		if (errno != EEXIST) {
 			return false;
 		}
@@ -1614,7 +1613,7 @@ SoundFileOmega::check_link_status (const Session* s, const vector<string>& paths
 	ret = true;
 
   out:
-	rmdir (tmpdir.c_str());
+	g_rmdir (tmpdir.c_str());
 	return ret;
 #endif
 }
