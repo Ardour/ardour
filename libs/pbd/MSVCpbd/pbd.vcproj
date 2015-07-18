@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib libxml2D.lib libsndfile-1D.lib intlD.lib ws2_32.lib"
+				AdditionalDependencies="$(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib $(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib pthreadVCE2.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib libxml2D.lib libsndfile-1D.lib intlD.lib ws2_32.lib dbghelp.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				GenerateDebugInformation="true"

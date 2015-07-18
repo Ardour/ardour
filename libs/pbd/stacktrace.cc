@@ -20,6 +20,7 @@
 #include "libpbd-config.h"
 
 #include "pbd/stacktrace.h"
+#include "pbd/debug.h"
 #include "pbd/compose.h"
 #include "pbd/pthread_utils.h"
 
@@ -113,6 +114,19 @@ PBD::stacktrace (std::ostream& out, int levels)
 
 #elif defined (PLATFORM_WINDOWS)
 
+#if defined DEBUG && !defined CaptureStackBackTrace
+#define CaptureStackBackTrace RtlCaptureStackBackTrace
+
+extern "C" {
+    __declspec(dllimport) USHORT WINAPI CaptureStackBackTrace (
+                                 ULONG  FramesToSkip,
+                                 ULONG  FramesToCapture,
+                                 PVOID  *BackTrace,
+                                 PULONG BackTraceHash
+	                      );
+}
+#endif
+
 std::string 
 PBD::demangle (std::string const & l) /* JE - !!!! 'PBD' namespace might possibly get removed (except it's still used in 'libs/canvas/item.cc') */
 {
@@ -131,7 +145,7 @@ PBD::stacktrace( std::ostream& out, int)
 	HANDLE         process;
 
 	process = GetCurrentProcess();
-	out << "+++++Backtrace process: " <<  pthread_self() << std::endl;
+	out << "+++++Backtrace process: " <<  DEBUG_THREAD_SELF << std::endl;
 
 	SymInitialize( process, NULL, TRUE );
 

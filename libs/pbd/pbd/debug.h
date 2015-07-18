@@ -28,6 +28,10 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/timing.h"
 
+#if defined(COMPILER_MSVC) && !defined(PTW32_VERSION)
+#include <ardourext/pthread.h> // Gets us 'PTW32_VERSION'
+#endif
+
 namespace PBD {
 
 	typedef std::bitset<128> DebugBits;
