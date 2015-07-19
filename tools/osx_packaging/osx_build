@@ -411,7 +411,7 @@ while [ true ] ; do
 	    continue
 	fi
 	# libffi contains "S" (other section symbols) that should not be stripped.
-	if [[ $string == *"libffi"* ]] ; then
+	if [[ $file == *"libffi"* ]] ; then
 	    continue
 	fi
 
