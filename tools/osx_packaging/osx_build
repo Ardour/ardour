@@ -410,6 +410,10 @@ while [ true ] ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
+	# libffi contains "S" (other section symbols) that should not be stripped.
+	if [[ $string == *"libffi"* ]] ; then
+	    continue
+	fi
 
 	if test x$STRIP != x ; then
 		strip -u -r -arch all $file &>/dev/null
