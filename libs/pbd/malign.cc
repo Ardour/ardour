@@ -47,8 +47,6 @@ int cache_aligned_malloc (void** memptr, size_t size)
 		return 0;
 	}
 #else
-	std::string << string_compose (_("Memory allocation error: malloc (%1 * %2)"),
-					 CPU_CACHE_ALIGN, size) << endmsg;
 	if (((*memptr) = malloc (size)) == 0) {
 		fatal << string_compose (_("Memory allocation error: malloc (%1 * %2) failed (%3)"),
 					 CPU_CACHE_ALIGN, size, strerror (errno)) << endmsg;
