@@ -175,7 +175,7 @@ AutomationControl::internal_to_interface (double val) const
 
 	if (_desc.logarithmic) {
 		if (val > 0) {
-			val = pow (val, 1/1.5);
+			val = pow (val, 1./2.0);
 		} else {
 			val = 0;
 		}
@@ -191,7 +191,7 @@ AutomationControl::interface_to_internal (double val) const
 		if (val <= 0) {
 			val = 0;
 		} else {
-			val = pow (val, 1.5);
+			val = pow (val, 2.0);
 		}
 	}
 
