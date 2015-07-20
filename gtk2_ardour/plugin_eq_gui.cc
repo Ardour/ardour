@@ -344,6 +344,7 @@ PluginEqGui::run_impulse_analysis()
 	ARDOUR::ChanMapping in_map(_plugin->get_info()->n_inputs);
 	ARDOUR::ChanMapping out_map(_plugin->get_info()->n_outputs);
 
+	_plugin->set_block_size (_buffer_size);
 	_plugin->connect_and_run(_bufferset, in_map, out_map, _buffer_size, 0);
 	framecnt_t f = _plugin->signal_latency ();
 	// Adding user_latency() could be interesting
