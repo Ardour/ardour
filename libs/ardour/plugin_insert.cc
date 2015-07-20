@@ -1387,6 +1387,7 @@ PluginInsert::get_impulse_analysis_plugin()
 	boost::shared_ptr<Plugin> ret;
 	if (_impulseAnalysisPlugin.expired()) {
 		ret = plugin_factory(_plugins[0]);
+		ret->configure_io (input_streams (), output_streams ());
 		_impulseAnalysisPlugin = ret;
 	} else {
 		ret = _impulseAnalysisPlugin.lock();
