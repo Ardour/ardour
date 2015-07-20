@@ -1,0 +1,44 @@
+--- old/gtk+-2.24.23/gdk/quartz/GdkQuartzWindow.c	2013-10-16 11:29:55.000000000 -0400
++++ new/gtk+-2.24.23/gdk/quartz/GdkQuartzWindow.c	2015-07-20 15:05:40.000000000 -0400
+@@ -625,6 +625,41 @@
+   event.dnd.send_event = FALSE;
+   event.dnd.context = _gdk_quartz_drag_source_context;
+ 
++  /* Check to see if the coordinates are inside a known GdkWindow */
++
++  GdkScreen* screen = gdk_window_get_screen (event.dnd.window);
++
++  if (screen) 
++    {
++       GList* windows, *list;
++       gint gx, gy;
++       
++       event.dnd.context->dest_window = NULL;
++
++       windows = gdk_screen_get_toplevel_windows (screen);
++       _gdk_quartz_window_nspoint_to_gdk_xy (aPoint, &gx, &gy);
++       
++       for (list = windows; list; list = list->next) 
++         {
++            GdkWindow* win = (GdkWindow*) list->data;
++            gint wx, wy;
++            gint ww, wh;
++            
++            gdk_window_get_root_origin (win, &wx, &wy);
++            ww = gdk_window_get_width (win);
++            wh = gdk_window_get_height (win);
++            
++            if (gx > wx && 
++                gy > wy &&
++                gx <= wx + ww && 
++                gy <= wy + wh) 
++              {
++                 /* found a toplevel GdkWindow at the drop position */
++                 event.dnd.context->dest_window = win;
++              }
++         }
++    }
++
+   (*_gdk_event_func) (&event, _gdk_event_data);
+ 
+   g_object_unref (event.dnd.window);

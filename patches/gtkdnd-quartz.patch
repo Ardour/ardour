@@ -1,0 +1,55 @@
+--- old/gtk+-2.24.23/gtk/gtkdnd-quartz.c	2013-10-16 11:29:55.000000000 -0400
++++ new/gtk+-2.24.23/gtk/gtkdnd-quartz.c	2015-07-20 14:53:33.000000000 -0400
+@@ -1928,16 +1928,29 @@
+ static gboolean
+ drag_drop_finished_idle_cb (gpointer data)
+ {
+-  gtk_drag_source_info_destroy (data);
++  GtkDragSourceInfo* info = (GtkDragSourceInfo*) data;
++  if (info->success) 
++    {
++       gtk_drag_source_info_destroy (data);
++    }
+   return FALSE;
+ }
+ 
+ static void
+-gtk_drag_drop_finished (GtkDragSourceInfo *info)
++gtk_drag_drop_finished (GtkDragSourceInfo *info, GtkDragResult result)
+ {
+-  if (info->success && info->delete)
+-    g_signal_emit_by_name (info->source_widget, "drag-data-delete",
+-                           info->context);
++        gboolean success = (result == GTK_DRAG_RESULT_SUCCESS);
++
++        if (!success) {
++                g_signal_emit_by_name (info->source_widget, "drag-failed",
++                                       info->context, GTK_DRAG_RESULT_NO_TARGET, &success);
++        }
++                
++        if (success && info->delete) {
++                g_signal_emit_by_name (info->source_widget, "drag-data-delete",
++                                       info->context);
++        }
++
+ 
+   /* Workaround for the fact that the NS API blocks until the drag is
+    * over. This way the context is still valid when returning from
+@@ -1963,6 +1976,7 @@
+ {
+   GtkDragSourceInfo *info;
+   GdkDragContext *context;
++  GtkDragResult result;
+ 
+   g_return_if_fail (widget != NULL);
+   g_return_if_fail (event != NULL);
+@@ -1975,7 +1989,8 @@
+   switch (event->type)
+     {
+     case GDK_DROP_FINISHED:
+-      gtk_drag_drop_finished (info);
++      result = (gdk_drag_context_get_dest_window (context) != NULL) ? GTK_DRAG_RESULT_SUCCESS : GTK_DRAG_RESULT_NO_TARGET;
++      gtk_drag_drop_finished (info, result);
+       break;
+     default:
+       g_assert_not_reached ();
