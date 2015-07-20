@@ -24,6 +24,10 @@
 #include <glibmm.h>
 #include "portaudio_io.h"
 
+#ifdef WITH_ASIO
+#include "pa_asio.h"
+#endif
+
 #include "pbd/compose.h"
 
 #include "debug.h"
@@ -63,6 +67,43 @@ PortAudioIO::~PortAudioIO ()
 	free (_output_buffer); _output_buffer = NULL;
 }
 
+std::string
+PortAudioIO::control_app_name (int device_id) const
+{
+	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
+	std::string app_name;
+
+	if (info == NULL) {
+		DEBUG_AUDIO (string_compose ("Unable to determine Host API from index %1\n",
+		                             _host_api_index));
+		return app_name;
+	}
+
+	PaHostApiTypeId type_id = info->type;
+
+#ifdef WITH_ASIO
+	if (type_id == paASIO) {
+		// is this used for anything, or just acts as a boolean?
+		return "PortaudioASIO";
+	}
+#endif
+
+	return app_name;
+}
+
+void
+PortAudioIO::launch_control_app (int device_id)
+{
+#ifdef WITH_ASIO
+	PaError err = PaAsio_ShowControlPanel (device_id, NULL);
+
+	if (err != paNoError) {
+		// error << ?
+		DEBUG_AUDIO (string_compose (
+		    "Unable to show control panel for device with index %1\n", device_id));
+	}
+#endif
+}
 
 int
 PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRates)
@@ -209,8 +250,10 @@ PortAudioIO::get_host_api_index_from_name (const std::string& name)
 
 	for (int i = 0; i < count; ++i) {
 		const PaHostApiInfo* info = Pa_GetHostApiInfo (i);
-		if (info->name != NULL) { // possible?
-			if (name == info->name) return i;
+		if (info != NULL && info->name != NULL) { // possible?
+			if (name == info->name) {
+				return i;
+			}
 		}
 	}
 	DEBUG_AUDIO (string_compose ("Unable to get host API from name: %1\n", name));

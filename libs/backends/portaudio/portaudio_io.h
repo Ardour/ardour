@@ -54,6 +54,8 @@ public:
 	int      available_sample_rates (int device_id, std::vector<float>& sampleRates);
 	int      available_buffer_sizes (int device_id, std::vector<uint32_t>& sampleRates);
 
+	std::string control_app_name (int device_id) const;
+	void launch_control_app (int device_id);
 
 	void     pcm_stop (void);
 	int      pcm_start (void);

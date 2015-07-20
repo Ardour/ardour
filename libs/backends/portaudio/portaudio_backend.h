@@ -212,8 +212,8 @@ class PortAudioBackend : public AudioBackend {
 		bool can_set_systemic_midi_latencies () const { return false; }
 
 		/* External control app */
-		std::string control_app_name () const { return std::string (); }
-		void launch_control_app () {}
+		std::string control_app_name () const;
+		void launch_control_app ();
 
 		/* MIDI */
 		std::vector<std::string> enumerate_midi_options () const;

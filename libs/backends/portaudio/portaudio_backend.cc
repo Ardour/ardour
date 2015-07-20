@@ -376,6 +376,18 @@ PortAudioBackend::systemic_output_latency () const
 	return _systemic_audio_output_latency;
 }
 
+std::string
+PortAudioBackend::control_app_name () const
+{
+	return _pcmio->control_app_name (name_to_id (_input_audio_device));
+}
+
+void
+PortAudioBackend::launch_control_app ()
+{
+	return _pcmio->launch_control_app (name_to_id(_input_audio_device));
+}
+
 /* MIDI */
 
 std::vector<std::string>
