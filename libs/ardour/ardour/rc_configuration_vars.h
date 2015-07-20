@@ -260,7 +260,7 @@ CONFIG_VARIABLE (std::string, donate_url, "donate-url", "http://ardour.org/donat
 
 /* video timeline configuration */
 CONFIG_VARIABLE (bool, video_advanced_setup, "video-advanced-setup", false)
-CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://localhost:1554")
+CONFIG_VARIABLE (std::string, video_server_url, "video-server-url", "http://127.0.0.1:1554")
 #ifndef PLATFORM_WINDOWS
 CONFIG_VARIABLE (std::string, video_server_docroot, "video-server-docroot", "/")
 #else
