@@ -482,7 +482,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		offset = 0;
 	}
 
-	_diskstream->seek (offset);
+	_diskstream->seek (offset, true);
 	current_frame = offset;
 
 	g_atomic_int_set (&_auditioning, 1);
