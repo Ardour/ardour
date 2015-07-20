@@ -394,6 +394,7 @@ MIDIControllable::midi_receiver (Parser &, MIDI::byte *msg, size_t /*len*/)
 		return;
 	}
 
+	_surface->check_used_event(msg[0], msg[1]);
 	bind_midi ((channel_t) (msg[0] & 0xf), eventType (msg[0] & 0xF0), msg[1]);
 
 	if (controllable) {

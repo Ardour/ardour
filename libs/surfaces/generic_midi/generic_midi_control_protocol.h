@@ -71,6 +71,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	int load_bindings (const std::string&);
 	void drop_bindings ();
+
+	void check_used_event (int, int);
 	
 	std::string current_binding() const { return _current_binding; }
 
