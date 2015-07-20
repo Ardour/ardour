@@ -120,6 +120,7 @@
     <Option name="use-windows-vst" value="1"/>
     <Option name="use-lxvst" value="1"/>
     <Option name="discover-vst-on-start" value="0"/>
+    <Option name="verbose-plugin-scan" value="1"/>
     <Option name="vst-scan-timeout" value="600"/>
     <Option name="discover-audio-units" value="0"/>
     <Option name="plugin-path-vst" value="@default@"/>
@@ -127,10 +128,11 @@
     <Option name="denormal-protection" value="0"/>
     <Option name="denormal-model" value="3"/>
     <Option name="osx-pingback-url" value="http://community.ardour.org/pingback/osx/"/>
+    <Option name="windows-pingback-url" value="http://community.ardour.org/pingback/windows/"/>
     <Option name="tutorial-manual-url" value="http://ardour.org/tutorial"/>
     <Option name="reference-manual-url" value="http://manual.ardour.org/"/>
     <Option name="video-advanced-setup" value="0"/>
-    <Option name="video-server-url" value="http://localhost:1554"/>
+    <Option name="video-server-url" value="http://127.0.0.1:1554"/>
     <Option name="video-server-docroot" value="/"/>
     <Option name="show-video-export-info" value="1"/>
     <Option name="show-video-server-dialog" value="0"/>
