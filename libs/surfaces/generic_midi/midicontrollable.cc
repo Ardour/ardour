@@ -347,14 +347,16 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 			return;
 		}
 	}
+	if (msg == control_additional) {
 
-	if (!controllable->is_toggle()) {
-		controllable->set_value (midi_to_control (msg));
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) midi_to_control (msg), current_uri() ));
-	} else if (msg == control_additional) {
-		float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
-		controllable->set_value (new_value);
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
+		if (!controllable->is_toggle()) {
+			controllable->set_value (1.0);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value 1.0  %3\n", (int) msg, current_uri() ));
+		} else  {
+			float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
+			controllable->set_value (new_value);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
+		}
 	}
 
 	last_value = (MIDI::byte) (controllable->get_value() * 127.0); // to prevent feedback fights
