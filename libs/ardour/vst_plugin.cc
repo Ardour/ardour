@@ -614,6 +614,9 @@ VSTPlugin::unique_id () const
 const char *
 VSTPlugin::name () const
 {
+	if (!_info->name.empty ()) {
+		return _info->name.c_str();
+	}
 	return _handle->name;
 }
 
