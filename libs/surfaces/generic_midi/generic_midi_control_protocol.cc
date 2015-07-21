@@ -772,6 +772,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	MIDI::eventType ev;
 	int intval;
 	bool momentary;
+	bool encoder = false;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -781,6 +782,9 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 		ev = MIDI::program;
 	} else if ((prop = node.property (X_("pb"))) != 0) {
 		ev = MIDI::pitchbend;
+	} else if ((prop = node.property (X_("enc"))) != 0) {
+		encoder = true;
+		ev = MIDI::controller;
 	} else {
 		return 0;
 	}
@@ -820,6 +824,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 		return 0;
 	}
 
+	mc->set_encoder (encoder);
 	mc->bind_midi (channel, ev, detail);
 
 	return mc;

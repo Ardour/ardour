@@ -75,6 +75,9 @@ class MIDIControllable : public PBD::Stateful
 
 	bool learned() const { return _learned; }
 
+	bool is_encoder() const { return _encoder; }
+	void set_encoder(bool val) { _encoder = val; }
+
         MIDI::Parser& get_parser() { return _parser; }
 	PBD::Controllable* get_controllable() const { return controllable; }
 	void set_controllable (PBD::Controllable*);
@@ -109,6 +112,7 @@ class MIDIControllable : public PBD::Stateful
 	bool            _momentary;
 	bool            _is_gain_controller;
 	bool            _learned;
+	bool		_encoder;
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
