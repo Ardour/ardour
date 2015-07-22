@@ -46,6 +46,9 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 
 	void add_to_notebook (Gtk::Notebook& notebook, const std::string& tab_title);
 	void make_visible ();
+	void make_invisible ();
+	void attach ();
+	void detach ();
 	
 	Gtk::Widget& contents() const { return _contents; }
 	
@@ -56,6 +59,8 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	bool has_own_window () const;
 	bool is_tabbed () const;
 
+	void set_allow_hide (bool);
+	
 	virtual void show_window ();
 
 	bool window_visible ();
@@ -83,8 +88,11 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	CairoIcon       tab_close_image;
 	
 	void show_tab ();
+	void hide_tab ();
 	void tab_close_clicked ();
+	void show_own_window (bool and_pack_it);
 };
+
 
 }
 

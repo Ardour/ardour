@@ -58,16 +58,19 @@ Tabbable::~Tabbable ()
 }
 
 void
+Tabbable::set_allow_hide (bool yn)
+{
+	if (yn) {
+		tab_close_image.show ();
+	} else {
+		tab_close_image.hide ();
+	}
+}
+
+void
 Tabbable::tab_close_clicked ()
 {
-	/* for this to happen, the tab must be visible so we
-	   can assume that the contents are displayed in the
-	   parent notebook
-	*/
-	
-	if (_parent_notebook) {
-		_parent_notebook->remove_page (_contents);
-	}
+	hide_tab ();
 }
 
 void
@@ -147,26 +150,37 @@ Tabbable::get (bool create)
 	return _window;
 }
 
+void
+Tabbable::show_own_window (bool and_pack_it)
+{
+	Gtk::Widget* parent = _contents.get_parent();
+	Gtk::Allocation alloc;
+
+	if (parent) {
+		alloc = parent->get_allocation();
+	}
+	
+	(void) use_own_window (and_pack_it);
+	
+	if (parent) {
+		_window->set_default_size (alloc.get_width(), alloc.get_height());
+	}
+
+	_window->show_all ();
+	_window->present ();
+}
+
 Gtk::Notebook*
 Tabbable::tab_root_drop ()
 {
-	Gtk::Allocation alloc;
-
-	alloc = _contents.get_parent()->get_allocation();
-	
-	(void) use_own_window (false);
-	
 	/* This is called after a drop of a tab onto the root window. Its
-	 * responsibility is to return the notebook that this Tabbable's
+	 * responsibility xois to return the notebook that this Tabbable's
 	 * contents should be packed into before the drop handling is
 	 * completed. It is not responsible for actually taking care of this
 	 * packing.
 	 */
 
-	_window->set_default_size (alloc.get_width(), alloc.get_height());
-	_window->show_all ();
-	_window->present ();
-
+	show_own_window (false);
 	return &_own_notebook;
 }
 
@@ -182,40 +196,71 @@ Tabbable::show_window ()
 	}
 }
 
-bool
-Tabbable::delete_event_handler (GdkEventAny *ev)
+void
+Tabbable::make_visible ()
 {
-	Window* toplevel = dynamic_cast<Window*> (_contents.get_toplevel());
+	if (_window && (current_toplevel() == _window)) {
+		_window->present ();
+	} else {
+		show_tab ();
+	}
+}
 
-	if (_window == toplevel) {
+void
+Tabbable::make_invisible ()
+{
+	if (_window && (current_toplevel() == _window)) {
+		_window->hide ();
+	} else {
+		hide_tab ();
+	}
+}
+	
+void
+Tabbable::detach ()
+{
+	show_own_window (true);
+}
 
+void
+Tabbable::attach ()
+{
+	if (!_parent_notebook) {
+		return;
+	}
+	
+	if (_parent_notebook->page_num (_contents) >= 0) {
+		/* already tabbed */
+		return;
+	}
+
+
+	if (_window && current_toplevel() == _window) {
 		/* unpack Tabbable from parent, put it back in the main tabbed
 		 * notebook
 		 */
-
+		
 		save_pos_and_size ();
-
+		
 		_contents.get_parent()->remove (_contents);
-
+	
 		/* leave the window around */
-
+		
 		_window->hide ();
-		
-		if (_parent_notebook) {
+	}
+	
+	_parent_notebook->append_page (_contents, _tab_box);
+	_parent_notebook->set_tab_detachable (_contents);
+	_parent_notebook->set_tab_reorderable (_contents);
+	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+}
 
-			_parent_notebook->append_page (_contents, _tab_box);
-			_parent_notebook->set_tab_detachable (_contents);
-			_parent_notebook->set_tab_reorderable (_contents);
-			_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
-		}
+bool
+Tabbable::delete_event_handler (GdkEventAny *ev)
+{
+	_window->hide();
 
-		/* don't let anything else handle this */
-		
-		return true;
-	} 
-
-	/* nothing to do */
-	return false;
+	return true;
 }
 
 bool
@@ -232,6 +277,14 @@ Tabbable::is_tabbed () const
 	}
 	
 	return false;
+}
+
+void
+Tabbable::hide_tab ()
+{
+	if (_parent_notebook) {
+		_parent_notebook->remove_page (_contents);
+	}
 }
 
 void
@@ -281,12 +334,3 @@ Tabbable::set_state (const XMLNode& node, int version)
 	return ret;
 }
 
-void
-Tabbable::make_visible ()
-{
-	if (_window && (current_toplevel() == _window)) {
-		_window->present ();
-	} else {
-		show_tab ();
-	}
-}
