@@ -5117,6 +5117,10 @@ ARDOUR_UI::setup_toplevel_window (Gtk::Window& window, const string& name, void*
 	window.set_flags (CAN_FOCUS);
 	window.add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
+	/* This is a hack to ensure that GTK-accelerators continue to
+	 * work. Once we switch over to entirely native bindings, this will be
+	 * unnecessary and should be removed
+	 */
 	window.add_accel_group (ActionManager::ui_manager->get_accel_group());
 
 	window.signal_configure_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::configure_handler));
