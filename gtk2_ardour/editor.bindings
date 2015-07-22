@@ -70,7 +70,7 @@
   <Binding key="c" action="MouseMode/set-mouse-mode-cut"/>
   <Binding key="Primary-x" action="Editor/editor-cut"/>
   <Binding key="Primary-c" action="Editor/editor-copy"/>
-  <Binding key="crop" action="Editor/crop<@PRIMARY@><@TERTIARY@>c"/>
+  <Binding key="Primary-Tertiary-c" action="Editor/crop"/>
   <Binding key="v" action="Region/set-region-sync-position"/>
   <Binding key="Primary-v" action="Editor/editor-paste"/>
   <Binding key="Secondary-v" action="Editor/ToggleJadeo"/>
