@@ -24,6 +24,7 @@
 
 #include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "i18n.h"
@@ -35,12 +36,16 @@ using std::string;
 Tabbable::Tabbable (Widget& w, const string& name)
 	: WindowProxy (name)
 	, _contents (w)
-	, tab_close_image (Stock::CLOSE, ICON_SIZE_BUTTON)
+	, tab_close_image (ArdourIcon::CloseCross, 0xffffffff)
 {
+	/* make the image about the same size as an actual X */
+	set_size_request_to_display_given_text (tab_close_image, "X", 0, 0);
+	
+	_tab_box.set_spacing (2);
 	_tab_box.pack_start (_tab_label, true, true);
 	_tab_box.pack_start (_tab_close_button, false, false);
 	_tab_close_button.add (tab_close_image);
-
+	
 	_tab_close_button.signal_clicked().connect (sigc::mem_fun (*this, &Tabbable::tab_close_clicked));
 }
 
@@ -70,7 +75,7 @@ Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title)
 {
 	_tab_label.set_text (tab_title);
 	_tab_box.show_all ();
-	
+
 	notebook.append_page (_contents, _tab_box);
 
 	Gtkmm2ext::UI::instance()->set_tip (_tab_label,

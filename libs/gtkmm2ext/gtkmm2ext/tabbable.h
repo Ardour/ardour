@@ -26,6 +26,7 @@
 #include <gtkmm/image.h>
 #include <gtkmm/label.h>
 
+#include "gtkmm2ext/cairo_icon.h"
 #include "gtkmm2ext/window_proxy.h"
 #include "gtkmm2ext/visibility.h"
 
@@ -79,7 +80,7 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	Gtk::HBox      _tab_box;
 	Gtk::Label     _tab_label;
 	Gtk::Button    _tab_close_button;
-	Gtk::Image      tab_close_image;
+	CairoIcon       tab_close_image;
 	
 	void show_tab ();
 	void tab_close_clicked ();
