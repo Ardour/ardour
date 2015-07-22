@@ -37,6 +37,7 @@ Tabbable::Tabbable (Widget& w, const string& name)
 	: WindowProxy (name)
 	, _contents (w)
 	, tab_close_image (ArdourIcon::CloseCross, 0xffffffff)
+	, tab_requested_by_state (true)
 {
 	/* make the image about the same size as an actual X */
 	set_size_request_to_display_given_text (tab_close_image, "X", 0, 0);
@@ -58,16 +59,6 @@ Tabbable::~Tabbable ()
 }
 
 void
-Tabbable::set_allow_hide (bool yn)
-{
-	if (yn) {
-		tab_close_image.show ();
-	} else {
-		tab_close_image.hide ();
-	}
-}
-
-void
 Tabbable::tab_close_clicked ()
 {
 	hide_tab ();
@@ -76,20 +67,14 @@ Tabbable::tab_close_clicked ()
 void
 Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title)
 {
+	_parent_notebook = &notebook;
+	_tab_title = tab_title;
 	_tab_label.set_text (tab_title);
 	_tab_box.show_all ();
 
-	notebook.append_page (_contents, _tab_box);
-
-	Gtkmm2ext::UI::instance()->set_tip (_tab_label,
-	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-	                                                      "To put the window back, click on its \"close\" button"), tab_title));
-	
-	notebook.set_tab_detachable (_contents);
-	notebook.set_tab_reorderable (_contents);
-
-	_parent_notebook = &notebook;
-	_tab_title = tab_title;
+	if (tab_requested_by_state) {
+		attach ();
+	}
 }
 
 Window*
@@ -202,7 +187,12 @@ Tabbable::make_visible ()
 	if (_window && (current_toplevel() == _window)) {
 		_window->present ();
 	} else {
-		show_tab ();
+
+		if (!tab_requested_by_state) {
+			show_own_window (true);
+		} else {
+			show_tab ();
+		}
 	}
 }
 
@@ -229,7 +219,7 @@ Tabbable::attach ()
 		return;
 	}
 	
-	if (_parent_notebook->page_num (_contents) >= 0) {
+	if (tabbed()) {
 		/* already tabbed */
 		return;
 	}
@@ -253,6 +243,17 @@ Tabbable::attach ()
 	_parent_notebook->set_tab_detachable (_contents);
 	_parent_notebook->set_tab_reorderable (_contents);
 	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+
+	Gtkmm2ext::UI::instance()->set_tip (_tab_label,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, click on its \"close\" button"), _tab_title));
+
+
+	/* have to force this on, which is semantically correct, since
+	 * the user has effectively asked for it.
+	 */
+
+	tab_requested_by_state = true;
 }
 
 bool
@@ -282,7 +283,7 @@ Tabbable::is_tabbed () const
 void
 Tabbable::hide_tab ()
 {
-	if (_parent_notebook) {
+	if (tabbed()) {
 		_parent_notebook->remove_page (_contents);
 	}
 }
@@ -310,11 +311,19 @@ Tabbable::xml_node_name()
 	return WindowProxy::xml_node_name();
 }
 
+bool
+Tabbable::tabbed () const
+{
+	return _parent_notebook && (_parent_notebook->page_num (_contents) >= 0);
+}
+
 XMLNode&
 Tabbable::get_state()
 {
 	XMLNode& node (WindowProxy::get_state());
 
+	node.add_property (X_("tabbed"),  tabbed() ? X_("yes") : X_("no"));
+	
 	return node;
 }
 
@@ -331,6 +340,23 @@ Tabbable::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	XMLNodeList children = node.children ();
+	XMLNode* window_node = node.child ("Window");
+
+	if (window_node) {
+		const XMLProperty* prop = window_node->property (X_("tabbed"));
+		if (prop) {
+			tab_requested_by_state = PBD::string_is_affirmative (prop->value());
+		}
+	}
+
+	if (tab_requested_by_state) {
+		attach ();
+	} else {
+		/* this does nothing if not tabbed */
+		hide_tab ();
+	}
+	
 	return ret;
 }
 

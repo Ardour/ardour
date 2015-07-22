@@ -59,7 +59,7 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	bool has_own_window () const;
 	bool is_tabbed () const;
 
-	void set_allow_hide (bool);
+	void set_default_tabbed (bool yn);
 	
 	virtual void show_window ();
 
@@ -86,11 +86,13 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	Gtk::Label     _tab_label;
 	Gtk::Button    _tab_close_button;
 	CairoIcon       tab_close_image;
+	bool            tab_requested_by_state;
 	
 	void show_tab ();
 	void hide_tab ();
 	void tab_close_clicked ();
 	void show_own_window (bool and_pack_it);
+	bool tabbed() const;
 };
 
 
