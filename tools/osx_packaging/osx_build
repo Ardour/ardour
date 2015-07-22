@@ -572,20 +572,25 @@ else
 
 fi
 
+if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
+	OSX_ARCH=x86_64
+	OSX_BENSID=osx64
+elif file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q ppc; then
+	OSX_ARCH=ppc
+else
+	OSX_ARCH=i386
+	OSX_BENSID=osx32
+fi
+
 if test x$WITH_HARRISON_LV2 != x ; then
-	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
-		OSX_ARCH=osx64
-	else 
-		OSX_ARCH=osx32
-	fi
 	curl -s -S --fail -#  \
-		-z "${CACHEDIR}/harrison_lv2s.${OSX_ARCH}.zip" \
-		-o "${CACHEDIR}/harrison_lv2s.${OSX_ARCH}.zip" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_lv2s.zip
+		-z "${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip" \
+		-o "${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip" \
+		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_BENSID}/harrison_lv2s.zip
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
-		"${CACHEDIR}/harrison_lv2s.${OSX_ARCH}.zip"
+		"${CACHEDIR}/harrison_lv2s.${OSX_BENSID}.zip"
 fi
 
 if test x$WITH_HARVID != x ; then
@@ -611,6 +616,14 @@ if test x$WITH_HARVID != x ; then
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"
 	hdiutil detach "${JADEO}"
 
+	XJCONTENT=${PRODUCT_PKG_DIR}/Jadeo.app/Contents
+	HVLIBS=${PRODUCT_PKG_DIR}/$APPROOT/lib/harvid
+
+	for file in ${XJCONTENT}/MacOS/Jadeo-bin ${XJCONTENT}/Frameworks/*.dylib ${HVLIBS}/*.dylib ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/*harvid* ; do
+		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
+		mv ${file}.thin ${file}
+	done
+
 	DMGWINBOTTOM=580
 	YPOS=$[ $DMGWINBOTTOM - 300 ]
 	XJADEOPOS="set position of item \"Jadeo.app\" of container window to {310, ${YPOS}}"
@@ -622,12 +635,6 @@ fi
 ### Mixbus plugins, etc
 if test x$WITH_X42_LV2 != x ; then
 	echo "bundling x42 plugins"
-	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
-		OSX_ARCH=x86_64
-	else
-		OSX_ARCH=i386
-	fi
-
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
 	METERS_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/x42-meters.latest.txt)
@@ -658,22 +665,16 @@ if test x$WITH_X42_LV2 != x ; then
 fi
 
 if test -n "$MIXBUS"; then
-	if file ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/$MAIN_EXECUTABLE | grep -q x86_64; then
-		OSX_ARCH=osx64
-	else
-		OSX_ARCH=osx32
-	fi
-
-	echo "deploying harrison tools for $OSX_ARCH"
+	echo "deploying harrison tools for $OSX_BENSID"
 
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip"
 
 	curl -s -S --fail -#  \
-		-z "${CACHEDIR}/harrison_channelstrip.${OSX_ARCH}.so" \
-		-o "${CACHEDIR}/harrison_channelstrip.${OSX_ARCH}.so" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_ARCH}/harrison_channelstrip.so
+		-z "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
+		-o "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
+		http://www.harrisonconsoles.com/mixbus/mb3/${OSX_BENSID}/harrison_channelstrip.so
 
-	cp "${CACHEDIR}/harrison_channelstrip.${OSX_ARCH}.so" \
+	cp "${CACHEDIR}/harrison_channelstrip.${OSX_BENSID}.so" \
 		"${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa/strip/harrison_channelstrip.so"
 fi
 ################################################################################
