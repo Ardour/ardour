@@ -30,6 +30,7 @@ gtkmm2ext_sources = [
         'bindable_button.cc',
         'bindings.cc',
         'cairocell.cc',
+        'cairo_icon.cc',
         'cairo_packer.cc',
         'cairo_widget.cc',
         'cell_renderer_color_selector.cc',
