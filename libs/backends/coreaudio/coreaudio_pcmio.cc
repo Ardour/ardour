@@ -82,7 +82,7 @@ static OSStatus GetHardwarePropertyWrapper (AudioDevicePropertyID prop, UInt32* 
 	property_address.mElement = kAudioObjectPropertyElementMaster;
 	return AudioObjectGetPropertyData(kAudioObjectSystemObject, &property_address, 0, NULL, size, d);
 #else
-	return AudioHardwareGetProperty (kAudioHardwarePropertyDevices, size, d);
+	return AudioHardwareGetProperty (prop, size, d);
 #endif
 }
 
