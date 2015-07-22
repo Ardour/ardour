@@ -322,8 +322,9 @@ AddVideoDialog::file_name (bool &local_file)
 		std::string video_server_url = video_get_server_url(Config);
 
 		/* check if video server is running locally */
-		if (video_get_docroot(Config).size() > 0
-				&& !video_server_url.compare(0, 16, "http://localhost"))
+		if (video_get_docroot(Config).size() > 0 &&
+			(0 == video_server_url.compare (0, 16, "http://127.0.0.1") || 0 == video_server_url.compare (0, 16, "http://localhost"))
+		   )
 		{
 			/* check if the file can be accessed */
 			int plen;

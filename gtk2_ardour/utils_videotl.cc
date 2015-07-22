@@ -118,7 +118,7 @@ VideoUtils::video_get_server_url (ARDOUR::RCConfiguration* config)
 	if (config->get_video_advanced_setup()) {
 		return config->get_video_server_url();
 	}
-	return X_("http://localhost:1554");
+	return X_("http://127.0.0.1:1554");
 }
 
 
