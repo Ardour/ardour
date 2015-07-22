@@ -3762,12 +3762,14 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	, _selection_changed (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
+	Gtk::Window* toplevel = _editor->current_toplevel();
+	_marker = reinterpret_cast<Marker*> (_item->get_data ("marker"));
 
-	_marker = reinterpret_cast<ArdourMarker*> (_item->get_data ("marker"));
 	assert (_marker);
 
 	_points.push_back (ArdourCanvas::Duple (0, 0));
-	_points.push_back (ArdourCanvas::Duple (0, physical_screen_height (_editor->current_toplevel()->get_window())));
+
+	_points.push_back (ArdourCanvas::Duple (0, toplevel ? physical_screen_height (toplevel->get_window()) : 900));
 }
 
 MarkerDrag::~MarkerDrag ()

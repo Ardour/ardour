@@ -78,11 +78,16 @@ Editor::show_editor_mixer (bool yn)
 	show_editor_mixer_when_tracks_arrive = false;
 
 	if (yn) {
-		Glib::RefPtr<Gdk::Window> win = current_toplevel()->get_window ();
+		Gtk::Window* toplevel = current_toplevel();
+		Glib::RefPtr<Gdk::Window> win;
 		Glib::RefPtr<Gdk::Screen> screen;
 
+		if (toplevel) {
+			win = toplevel->get_window();
+		}
+
 		if (win) {
-			 screen = win->get_screen();
+			screen = win->get_screen();
 		} else {
 			screen = Gdk::Screen::get_default();
 		}

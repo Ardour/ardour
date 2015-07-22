@@ -332,6 +332,10 @@ _hide_splash (gpointer arg)
 void
 ARDOUR_UI::show_tabbable (Tabbable* t)
 {
+	if (!t) {
+		return;
+	}
+	
 	if (splash && splash->is_visible()) {
 		// in 2 seconds, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
@@ -343,12 +347,18 @@ ARDOUR_UI::show_tabbable (Tabbable* t)
 void
 ARDOUR_UI::hide_tabbable (Tabbable* t)
 {
+	if (!t) {
+		return;
+	}
 	t->make_invisible ();
 }
 
 void
 ARDOUR_UI::attach_tabbable (Tabbable* t)
 {
+	if (!t) {
+		return;
+	}
 	if (splash && splash->is_visible()) {
 		// in 2 seconds, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
@@ -360,6 +370,9 @@ ARDOUR_UI::attach_tabbable (Tabbable* t)
 void
 ARDOUR_UI::detach_tabbable (Tabbable* t)
 {
+	if (!t) {
+		return;
+	}
 	t->detach ();
 }
 
