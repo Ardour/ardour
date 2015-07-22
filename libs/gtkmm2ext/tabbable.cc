@@ -20,6 +20,7 @@
 #include <gtkmm/action.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/window.h>
+#include <gtkmm/stock.h>
 
 #include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -34,7 +35,13 @@ using std::string;
 Tabbable::Tabbable (Widget& w, const string& name)
 	: WindowProxy (name)
 	, _contents (w)
+	, tab_close_image (Stock::CLOSE, ICON_SIZE_BUTTON)
 {
+	_tab_box.pack_start (_tab_label, true, true);
+	_tab_box.pack_start (_tab_close_button, false, false);
+	_tab_close_button.add (tab_close_image);
+
+	_tab_close_button.signal_clicked().connect (sigc::mem_fun (*this, &Tabbable::tab_close_clicked));
 }
 
 Tabbable::~Tabbable ()
@@ -46,16 +53,29 @@ Tabbable::~Tabbable ()
 }
 
 void
+Tabbable::tab_close_clicked ()
+{
+	/* for this to happen, the tab must be visible so we
+	   can assume that the contents are displayed in the
+	   parent notebook
+	*/
+	
+	if (_parent_notebook) {
+		_parent_notebook->remove_page (_contents);
+	}
+}
+
+void
 Tabbable::add_to_notebook (Notebook& notebook, const string& tab_title)
 {
-	notebook.append_page (_contents, tab_title, false);
-	Gtk::Widget* tab_label = notebook.get_tab_label (_contents);
+	_tab_label.set_text (tab_title);
+	_tab_box.show_all ();
+	
+	notebook.append_page (_contents, _tab_box);
 
-	if (tab_label) {
-		Gtkmm2ext::UI::instance()->set_tip (*tab_label,
-		                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
-		                                                      "To put the window back, click on its \"close\" button"), tab_title));
-	}
+	Gtkmm2ext::UI::instance()->set_tip (_tab_label,
+	                                    string_compose (_("Drag this tab to the desktop to show %1 in its own window\n\n"
+	                                                      "To put the window back, click on its \"close\" button"), tab_title));
 	
 	notebook.set_tab_detachable (_contents);
 	notebook.set_tab_reorderable (_contents);
@@ -74,7 +94,7 @@ Tabbable::use_own_window (bool and_pack_it)
 		if (parent) {
 			parent->remove (_contents);
 		}
-		_own_notebook.append_page (_contents, _tab_title);
+		_own_notebook.append_page (_contents, _tab_box);
 	}
 
 	return win;
@@ -148,22 +168,11 @@ Tabbable::tab_root_drop ()
 void
 Tabbable::show_window ()
 {
-	Window* toplevel = dynamic_cast<Window*> (_contents.get_toplevel());
+	make_visible ();
 
-	if (toplevel == _window) {
-		_window->present ();
-	}
-
-	if (!_visible) { /* was hidden, update status */
-		set_pos_and_size ();
-	}
-
-	if (toplevel != _window) {
-		/* not in its own window, just switch parent notebook to show
-		   this Tabbable.
-		*/
-		if (_parent_notebook) {
-			_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+	if (_window && (current_toplevel() == _window)) {
+		if (!_visible) { /* was hidden, update status */
+			set_pos_and_size ();
 		}
 	}
 }
@@ -189,7 +198,7 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 		
 		if (_parent_notebook) {
 
-			_parent_notebook->append_page (_contents, _tab_title);
+			_parent_notebook->append_page (_contents, _tab_box);
 			_parent_notebook->set_tab_detachable (_contents);
 			_parent_notebook->set_tab_reorderable (_contents);
 			_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
@@ -213,7 +222,7 @@ Tabbable::is_tabbed () const
 		return false;
 	}
 
-	if (_parent_notebook) {
+	if (_parent_notebook && _contents.get_parent()) {
 		return true;
 	}
 	
@@ -224,6 +233,9 @@ void
 Tabbable::show_tab ()
 {
 	if (!window_visible() && _parent_notebook) {
+		if (_contents.get_parent() == 0) {
+			add_to_notebook (*_parent_notebook, _tab_title);
+		}
 		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
 	}
 }
@@ -267,7 +279,7 @@ Tabbable::set_state (const XMLNode& node, int version)
 void
 Tabbable::make_visible ()
 {
-	if (current_toplevel() == _window) {
+	if (_window && (current_toplevel() == _window)) {
 		_window->present ();
 	} else {
 		show_tab ();

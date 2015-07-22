@@ -21,6 +21,10 @@
 #define __gtkmm2ext_tabbable_h__
 
 #include <gtkmm/bin.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/image.h>
+#include <gtkmm/label.h>
 
 #include "gtkmm2ext/window_proxy.h"
 #include "gtkmm2ext/visibility.h"
@@ -72,8 +76,13 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
 	std::string    _tab_title;
-
+	Gtk::HBox      _tab_box;
+	Gtk::Label     _tab_label;
+	Gtk::Button    _tab_close_button;
+	Gtk::Image      tab_close_image;
+	
 	void show_tab ();
+	void tab_close_clicked ();
 };
 
 }
