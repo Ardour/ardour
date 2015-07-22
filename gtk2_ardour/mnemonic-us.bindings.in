@@ -225,7 +225,7 @@ This mode provides many different operations on both regions and control points,
 @edit|Editor/editor-cut|<@PRIMARY@>x|cut
 @edit|Editor/editor-copy|<@PRIMARY@>c|copy
 @wvis|Window/toggle-big-clock|<@SECONDARY@>c|toggle big clock
-@-edit|Editor/crop<@PRIMARY@><@TERTIARY@>c|crop
+@-edit|Editor/crop|<@PRIMARY@><@TERTIARY@>c|crop
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @edit|Editor/ToggleJadeo|<@SECONDARY@>v|video window
