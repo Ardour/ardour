@@ -330,38 +330,38 @@ _hide_splash (gpointer arg)
 }
 
 void
-ARDOUR_UI::show_application_preferences ()
+ARDOUR_UI::show_tabbable (Tabbable* t)
 {
 	if (splash && splash->is_visible()) {
 		// in 2 seconds, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 
-	rc_option_editor->make_visible ();
+	t->make_visible ();
 }
 
 void
-ARDOUR_UI::show_editor ()
+ARDOUR_UI::hide_tabbable (Tabbable* t)
 {
-	if (splash && splash->is_visible()) {
-		// in 2 seconds, hide the splash screen
-		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
-	}
-
-	editor->make_visible ();
+	t->make_invisible ();
 }
 
 void
-ARDOUR_UI::show_mixer ()
+ARDOUR_UI::attach_tabbable (Tabbable* t)
 {
 	if (splash && splash->is_visible()) {
 		// in 2 seconds, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 2000);
 	}
 
-	mixer->make_visible ();
+	t->attach ();
 }
 
+void
+ARDOUR_UI::detach_tabbable (Tabbable* t)
+{
+	t->detach ();
+}
 
 void
 ARDOUR_UI::toggle_meterbridge ()

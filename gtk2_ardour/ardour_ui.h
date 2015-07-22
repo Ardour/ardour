@@ -374,9 +374,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtkmm2ext::Bindings _global_bindings;
 	
-	void show_editor ();
-	void show_mixer ();
-	void show_application_preferences ();
+	void show_tabbable (Gtkmm2ext::Tabbable*);
+	void hide_tabbable (Gtkmm2ext::Tabbable*);
+	void detach_tabbable (Gtkmm2ext::Tabbable*);
+	void attach_tabbable (Gtkmm2ext::Tabbable*);
+
 	void toggle_meterbridge ();
 
 	int  setup_windows ();

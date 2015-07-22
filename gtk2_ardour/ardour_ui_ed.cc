@@ -106,6 +106,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (main_menu_actions, X_("Sync"), _("Sync"));
 	ActionManager::register_action (main_menu_actions, X_("TransportOptions"), _("Options"));
 	ActionManager::register_action (main_menu_actions, X_("WindowMenu"), _("Window"));
+	ActionManager::register_action (main_menu_actions, X_("MixerMenu"), _("Mixer"));
+	ActionManager::register_action (main_menu_actions, X_("EditorMenu"), _("Editor"));
+	ActionManager::register_action (main_menu_actions, X_("PrefsMenu"), _("Preferences"));
+	ActionManager::register_action (main_menu_actions, X_("DetachMenu"), _("Detach"));
 	ActionManager::register_action (main_menu_actions, X_("Help"), _("Help"));
  	ActionManager::register_action (main_menu_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
 	ActionManager::register_action (main_menu_actions, X_("AudioFileFormat"), _("Audio File Format"));
@@ -215,9 +219,22 @@ ARDOUR_UI::install_actions ()
 	common_actions = ActionGroup::create (X_("Common"));
 	ActionManager::register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 	ActionManager::register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
-	ActionManager::register_action (common_actions, X_("show-editor"), _("Show Editor"), sigc::mem_fun (*this, &ARDOUR_UI::show_editor));
-	ActionManager::register_action (common_actions, X_("show-mixer"), _("Show Mixer"), sigc::mem_fun (*this, &ARDOUR_UI::show_mixer));
-	ActionManager::register_action (common_actions, X_("show-application-preferences"), _("Preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_application_preferences));
+
+	ActionManager::register_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
+	ActionManager::register_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
+	ActionManager::register_action (common_actions, X_("show-application-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
+
+	ActionManager::register_action (common_actions, X_("hide-editor"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), editor));
+	ActionManager::register_action (common_actions, X_("hide-mixer"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), mixer));
+	ActionManager::register_action (common_actions, X_("hide-application-preferences"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), rc_option_editor));
+	
+	ActionManager::register_action (common_actions, X_("attach-editor"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), editor));
+	ActionManager::register_action (common_actions, X_("attach-mixer"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), mixer));
+	ActionManager::register_action (common_actions, X_("attach-application-preferences"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), rc_option_editor));
+	
+	ActionManager::register_action (common_actions, X_("detach-editor"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), editor));
+	ActionManager::register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
+	ActionManager::register_action (common_actions, X_("detach-application-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
 
 	/* windows visibility actions */
 

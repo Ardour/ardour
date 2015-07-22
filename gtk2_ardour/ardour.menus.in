@@ -511,8 +511,24 @@
     <menu action = 'WindowMenu'>
       <menuitem action='toggle-audio-midi-setup'/>
       <separator/>
-      <menuitem action='show-editor'/>
-      <menuitem action='show-mixer'/>
+      <menu action='EditorMenu'>
+          <menuitem action='show-editor'/>
+          <menuitem action='hide-editor'/>
+          <menuitem action='attach-editor'/>
+          <menuitem action='detach-editor'/>
+      </menu>
+      <menu action='MixerMenu'>
+          <menuitem action='show-mixer'/>
+          <menuitem action='hide-mixer'/>
+          <menuitem action='attach-mixer'/>
+          <menuitem action='detach-mixer'/>
+      </menu>
+      <menu action='PrefsMenu'>
+          <menuitem action='show-application-preferences'/>
+          <menuitem action='hide-application-preferences'/>
+          <menuitem action='attach-application-preferences'/>
+          <menuitem action='detach-application-preferences'/>
+      </menu>
       <menuitem action='toggle-meterbridge'/>
       <separator/>
       <menuitem action='toggle-inspector'/>

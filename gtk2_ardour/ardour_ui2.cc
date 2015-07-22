@@ -97,6 +97,10 @@ ARDOUR_UI::setup_windows ()
 		return -1;
 	}
 
+	rc_option_editor = new RCOptionEditor;
+	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
+	rc_option_editor->contents().show_all ();
+	
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();
@@ -180,10 +184,6 @@ ARDOUR_UI::setup_windows ()
 	
 	_main_window.show_all ();
 	setup_toplevel_window (_main_window, "", this);
-	
-	rc_option_editor = new RCOptionEditor;
-	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
-	rc_option_editor->contents().show_all ();
 	
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 	_tabs.signal_page_removed().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_removed));
