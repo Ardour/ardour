@@ -64,6 +64,7 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	virtual void show_window ();
 
 	bool window_visible ();
+	bool tabbed() const;
 
 	Gtk::Window* current_toplevel () const;
 
@@ -73,6 +74,8 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	XMLNode& get_state ();
 	
 	static std::string xml_node_name();
+
+	sigc::signal1<void,Tabbable&> StateChange;
 	
   protected:
 	bool delete_event_handler (GdkEventAny *ev);
@@ -92,7 +95,6 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	void hide_tab ();
 	void tab_close_clicked ();
 	void show_own_window (bool and_pack_it);
-	bool tabbed() const;
 };
 
 

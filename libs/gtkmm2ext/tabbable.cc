@@ -101,7 +101,7 @@ Tabbable::window_visible ()
 		return false;
 	}
 
-	return visible();
+	return _window->is_visible();
 }
 
 Window*
@@ -153,6 +153,7 @@ Tabbable::show_own_window (bool and_pack_it)
 
 	_window->show_all ();
 	_window->present ();
+	StateChange (*this);
 }
 
 Gtk::Notebook*
@@ -201,6 +202,7 @@ Tabbable::make_invisible ()
 {
 	if (_window && (current_toplevel() == _window)) {
 		_window->hide ();
+		StateChange (*this);
 	} else {
 		hide_tab ();
 	}
@@ -254,6 +256,7 @@ Tabbable::attach ()
 	 */
 
 	tab_requested_by_state = true;
+	StateChange (*this);
 }
 
 bool
@@ -285,6 +288,7 @@ Tabbable::hide_tab ()
 {
 	if (tabbed()) {
 		_parent_notebook->remove_page (_contents);
+		StateChange (*this);
 	}
 }
 
@@ -296,6 +300,7 @@ Tabbable::show_tab ()
 			add_to_notebook (*_parent_notebook, _tab_title);
 		}
 		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+		StateChange (*this);
 	}
 }
 
@@ -314,7 +319,7 @@ Tabbable::xml_node_name()
 bool
 Tabbable::tabbed () const
 {
-	return _parent_notebook && (_parent_notebook->page_num (_contents) >= 0);
+	return _parent_notebook && (_parent_notebook->page_num (_contents) > 0);
 }
 
 XMLNode&
