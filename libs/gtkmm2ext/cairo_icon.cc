@@ -16,9 +16,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#include <iostream>
 
 #include "gtkmm2ext/cairo_icon.h"
+#include "gtkmm2ext/gtk_ui.h"
 
 using namespace Gtkmm2ext;
 
@@ -44,8 +44,10 @@ CairoIcon::set_fg (uint32_t color)
 void
 CairoIcon::render (cairo_t* cr , cairo_rectangle_t* area)
 {
-	int width = get_width();
-	int height = get_height ();
+	const double scale = UI::instance()->ui_scale;
+	int width = get_width() * scale;
+	int height = get_height () * scale;
 
 	ArdourIcon::render (cr, icon_type, width, height, Off, fg);
 }
+
