@@ -372,12 +372,8 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 	Glib::RefPtr<Action> action;	
 	std::string downcased_name = downcase (t.name());
 
-	std::cerr << t.name() << " changed state\n";
-	
 	if (t.tabbed()) {
 
-		std::cerr << "tabbed\n";
-		
 		insensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
 		insensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
@@ -386,8 +382,6 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 
 	} else if (t.window_visible()) {
 
-		std::cerr << "windowed\n";
-
 		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
 		insensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
@@ -395,8 +389,6 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 
 	} else {
 
-		std::cerr << "invisible\n";
-		
 		/* not currently visible. allow user to retab it or just make
 		 * it visible.
 		 */
