@@ -2,6 +2,7 @@
   <Name value="Steinberg CMC series"/>
   <Strips value="1"/>
   <Extenders value="0"/>
+  <MasterPosition value="0"/>
   <MasterFader value="yes"/>
   <TimecodeDisplay value="no"/>
   <TwoCharacterDisplay value="no"/>
