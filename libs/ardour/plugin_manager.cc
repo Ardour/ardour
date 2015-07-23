@@ -296,7 +296,7 @@ PluginManager::clear_vst_cache ()
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$", true);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\" VST_EXT_INFOFILE "$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -306,7 +306,7 @@ PluginManager::clear_vst_cache ()
 #ifdef LXVST_SUPPORT
 	{
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$", true);
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\" VST_EXT_INFOFILE "$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -317,7 +317,7 @@ PluginManager::clear_vst_cache ()
 	{
 		string personal = get_personal_vst_info_cache_dir();
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\.fsi$", /* user cache is flat, no recursion */ false);
+		find_files_matching_regex (fsi_files, personal, "\\" VST_EXT_INFOFILE "$", /* user cache is flat, no recursion */ false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
