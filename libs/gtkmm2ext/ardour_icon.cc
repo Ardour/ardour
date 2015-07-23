@@ -849,7 +849,7 @@ static void icon_close_cross (cairo_t *cr, const int width, const int height, co
 	const double y = height * .5;
 	const double o = .5 + std::min (x, y) * .4;
 	ardour_icon_set_source_rgba (cr, fg_color);
-	cairo_set_line_width (cr, 2.0);
+	cairo_set_line_width (cr, 1.0);
 	cairo_move_to (cr, x-o, y-o);
 	cairo_line_to (cr, x+o, y+o);
 	cairo_move_to (cr, x+o, y-o);
