@@ -203,13 +203,19 @@ static void
 libxml_structured_error_func (void* /* parsing_context*/,
                               xmlErrorPtr err)
 {
-	string msg = err->message;
+	string msg;
+
+	if (err->message)
+		msg = err->message;
 
 	replace_all (msg, "\n", "");
 
-	error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
-	if (err->int2) {
-		error << ':' << err->int2;
+	if (err->file && err->line) {
+		error << X_("XML error: ") << msg << " in " << err->file << " at line " << err->line;
+
+		if (err->int2) {
+			error << ':' << err->int2;
+		}
 	}
 	error << endmsg;
 }
