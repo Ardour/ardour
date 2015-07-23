@@ -95,6 +95,8 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	void hide_tab ();
 	void tab_close_clicked ();
 	void show_own_window (bool and_pack_it);
+	void window_mapped ();
+	void window_unmapped ();
 };
 
 

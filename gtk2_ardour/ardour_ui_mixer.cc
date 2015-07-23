@@ -42,6 +42,7 @@ ARDOUR_UI::create_mixer ()
 	try {
 		mixer = Mixer_UI::instance ();
 		mixer->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		mixer->add_to_notebook (_tabs, _("Mixer"));
 	}
 
 	catch (failed_constructor& err) {

@@ -275,7 +275,7 @@
         <menuitem action='set-tempo-from-edit-range'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
-      <menuitem action='show-application-preferences'/>
+      <menuitem action='show-preferences'/>
     </menu>         
 
     <menu name='RegionMenu' action='RegionMenu'>
@@ -524,10 +524,10 @@
           <menuitem action='detach-mixer'/>
       </menu>
       <menu action='PrefsMenu'>
-          <menuitem action='show-application-preferences'/>
-          <menuitem action='hide-application-preferences'/>
-          <menuitem action='attach-application-preferences'/>
-          <menuitem action='detach-application-preferences'/>
+          <menuitem action='show-preferences'/>
+          <menuitem action='hide-preferences'/>
+          <menuitem action='attach-preferences'/>
+          <menuitem action='detach-preferences'/>
       </menu>
       <menuitem action='toggle-meterbridge'/>
       <separator/>

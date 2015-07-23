@@ -40,7 +40,8 @@ Tabbable::Tabbable (Widget& w, const string& name)
 	, tab_requested_by_state (true)
 {
 	/* make the image about the same size as an actual X */
-	set_size_request_to_display_given_text (tab_close_image, "X", 0, 0);
+	tab_close_image.set_size_request (15,15);
+	// set_size_request_to_display_given_text (tab_close_image, "X", 0, 0);
 	
 	_tab_box.set_spacing (2);
 	_tab_box.pack_start (_tab_label, true, true);
@@ -126,6 +127,9 @@ Tabbable::get (bool create)
 	_own_notebook.show ();
 	_own_notebook.set_show_tabs (false);
 
+	_window->signal_map().connect (sigc::mem_fun (*this, &Tabbable::window_mapped));
+	_window->signal_unmap().connect (sigc::mem_fun (*this, &Tabbable::window_unmapped));
+	
 	/* do other window-related setup */
 
 	setup ();
@@ -153,7 +157,6 @@ Tabbable::show_own_window (bool and_pack_it)
 
 	_window->show_all ();
 	_window->present ();
-	StateChange (*this);
 }
 
 Gtk::Notebook*
@@ -202,7 +205,6 @@ Tabbable::make_invisible ()
 {
 	if (_window && (current_toplevel() == _window)) {
 		_window->hide ();
-		StateChange (*this);
 	} else {
 		hide_tab ();
 	}
@@ -297,10 +299,10 @@ Tabbable::show_tab ()
 {
 	if (!window_visible() && _parent_notebook) {
 		if (_contents.get_parent() == 0) {
+			tab_requested_by_state = true;
 			add_to_notebook (*_parent_notebook, _tab_title);
 		}
 		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
-		StateChange (*this);
 	}
 }
 
@@ -319,7 +321,7 @@ Tabbable::xml_node_name()
 bool
 Tabbable::tabbed () const
 {
-	return _parent_notebook && (_parent_notebook->page_num (_contents) > 0);
+	return _parent_notebook && (_parent_notebook->page_num (_contents) >= 0);
 }
 
 XMLNode&
@@ -356,6 +358,12 @@ Tabbable::set_state (const XMLNode& node, int version)
 	}
 
 	if (tab_requested_by_state) {
+
+		std::cerr << name() << " pn " << _parent_notebook << std::endl;
+		if (_parent_notebook) {
+			std::cerr << "\t page " << _parent_notebook->page_num (_contents) << std::endl;
+		}
+
 		attach ();
 	} else {
 		/* this does nothing if not tabbed */
@@ -363,5 +371,17 @@ Tabbable::set_state (const XMLNode& node, int version)
 	}
 	
 	return ret;
+}
+
+void
+Tabbable::window_mapped ()
+{
+	StateChange (*this);
+}
+
+void
+Tabbable::window_unmapped ()
+{
+	StateChange (*this);
 }
 

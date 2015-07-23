@@ -40,6 +40,8 @@
 #include "splash.h"
 #include "route_params_ui.h"
 #include "opts.h"
+#include "utils.h"
+
 #include "i18n.h"
 
 using namespace Gtk;
@@ -61,8 +63,15 @@ ARDOUR_UI::we_have_dependents ()
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
-	editor->add_to_notebook (_tabs, _("Editor"));
-	mixer->add_to_notebook (_tabs, _("Mixer"));
+	/* catch up on tabbable state */
+
+	std::cerr << "Tab catch up\n";
+	
+	tabbable_state_change (*editor);
+	tabbable_state_change (*mixer);
+	tabbable_state_change (*rc_option_editor);
+	
+	std::cerr << "Tab catch done\n";
 	
 	/* all actions are defined */
 
@@ -71,6 +80,13 @@ ARDOUR_UI::we_have_dependents ()
 
 	editor->track_mixer_selection ();
 	mixer->track_editor_selection ();
+
+	/* catch up on parameters */
+	
+	boost::function<void (std::string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
+	Config->map_parameters (pc);
+
+	ARDOUR_UI_UTILS::reset_dpi ();
 }
 
 void
