@@ -61,7 +61,7 @@ class RouteTimeAxisView;
 class RegionSelection;
 class MidiRegionView;
 class MeterMarker;
-class Marker;
+class ArdourMarker;
 class TempoMarker;
 class ControlPoint;
 class AudioRegionView;
@@ -821,13 +821,13 @@ public:
 private:
 	void update_item (ARDOUR::Location *);
 
-	Marker* _marker; ///< marker being dragged
+	ArdourMarker* _marker; ///< marker being dragged
 
         struct CopiedLocationMarkerInfo {
 	    ARDOUR::Location* location;
-	    std::vector<Marker*> markers;
+	    std::vector<ArdourMarker*> markers;
 	    bool    move_both;
-	    CopiedLocationMarkerInfo (ARDOUR::Location* l, Marker* m);
+	    CopiedLocationMarkerInfo (ARDOUR::Location* l, ArdourMarker* m);
 	};
 
         typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;

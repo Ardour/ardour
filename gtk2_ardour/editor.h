@@ -111,7 +111,7 @@ class EditorSnapshots;
 class EditorSummary;
 class GroupedButtons;
 class GUIObjectState;
-class Marker;
+class ArdourMarker;
 class MidiRegionView;
 class MixerStrip;
 class MouseCursors;
@@ -642,8 +642,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	uint32_t location_cd_marker_color;
 
 	struct LocationMarkers {
-		Marker* start;
-		Marker* end;
+		ArdourMarker* start;
+		ArdourMarker* end;
 		bool    valid;
 
 		LocationMarkers () : start(0), end(0), valid (true) {}
@@ -664,9 +664,9 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	};
 
 	LocationMarkers  *find_location_markers (ARDOUR::Location *) const;
-	ARDOUR::Location* find_location_from_marker (Marker *, bool& is_start) const;
-	Marker* find_marker_from_location_id (PBD::ID const &, bool) const;
-	Marker* entered_marker;
+	ARDOUR::Location* find_location_from_marker (ArdourMarker *, bool& is_start) const;
+	ArdourMarker* find_marker_from_location_id (PBD::ID const &, bool) const;
+	ArdourMarker* entered_marker;
 	bool _show_marker_lines;
 
 	typedef std::map<ARDOUR::Location*,LocationMarkers *> LocationMarkerMap;
@@ -674,7 +674,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	void update_marker_labels ();
 	void update_marker_labels (ArdourCanvas::Container *);
-	void check_marker_label (Marker *);
+	void check_marker_label (ArdourMarker *);
 
 	/** A set of lists of Markers that are in each of the canvas groups
 	 *  for the marker sections at the top of the editor.  These lists
@@ -682,8 +682,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	 *  a marker has moved we can decide whether we need to update the labels
 	 *  for all markers or for just a few.
 	 */
-	std::map<ArdourCanvas::Container *, std::list<Marker *> > _sorted_marker_lists;
-	void remove_sorted_marker (Marker *);
+	std::map<ArdourCanvas::Container *, std::list<ArdourMarker *> > _sorted_marker_lists;
+	void remove_sorted_marker (ArdourMarker *);
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
@@ -1554,7 +1554,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*);
 	bool canvas_stream_view_event (GdkEvent* event,ArdourCanvas::Item*, RouteTimeAxisView*);
-	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, Marker*);
+	bool canvas_marker_event (GdkEvent* event,ArdourCanvas::Item*, ArdourMarker*);
 	bool canvas_tempo_marker_event (GdkEvent* event,ArdourCanvas::Item*, TempoMarker*);
 	bool canvas_meter_marker_event (GdkEvent* event,ArdourCanvas::Item*, MeterMarker*);
 	bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*);
@@ -1642,7 +1642,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_menu_edit ();
 	void marker_menu_remove ();
 	void marker_menu_rename ();
-	void rename_marker (Marker *marker);
+	void rename_marker (ArdourMarker *marker);
 	void toggle_marker_menu_lock ();
 	void toggle_marker_menu_glue ();
 	void marker_menu_hide ();
@@ -1679,7 +1679,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Menu* cd_marker_menu;
 	ArdourCanvas::Item* marker_menu_item;
 
-	typedef std::list<Marker*> Marks;
+	typedef std::list<ArdourMarker*> Marks;
 	Marks metric_marks;
 
 	void remove_metric_marks ();

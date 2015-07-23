@@ -38,7 +38,7 @@ namespace ARDOUR {
 
 class PublicEditor;
 
-class Marker : public sigc::trackable
+class ArdourMarker : public sigc::trackable
 {
   public:
 	enum Type {
@@ -56,12 +56,12 @@ class Marker : public sigc::trackable
 	};
 
 
-	Marker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
+	ArdourMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
 		framepos_t frame = 0, bool handle_events = true);
 
-	virtual ~Marker ();
+	virtual ~ArdourMarker ();
 
-	static PBD::Signal1<void,Marker*> CatchDeletion;
+	static PBD::Signal1<void,ArdourMarker*> CatchDeletion;
 
 	static void setup_sizes (const double timebar_height);
 
@@ -129,11 +129,11 @@ class Marker : public sigc::trackable
 
 private:
 	/* disallow copy construction */
-	Marker (Marker const &);
-	Marker & operator= (Marker const &);
+	ArdourMarker (ArdourMarker const &);
+	ArdourMarker & operator= (ArdourMarker const &);
 };
 
-class TempoMarker : public Marker
+class TempoMarker : public ArdourMarker
 {
   public:
         TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
@@ -145,7 +145,7 @@ class TempoMarker : public Marker
 	ARDOUR::TempoSection& _tempo;
 };
 
-class MeterMarker : public Marker
+class MeterMarker : public ArdourMarker
 {
   public:
         MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);

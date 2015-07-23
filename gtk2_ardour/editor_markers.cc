@@ -106,10 +106,10 @@ Editor::add_new_location_internal (Location* location)
 	if (location->is_mark()) {
 
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new ArdourMarker (*this, *cd_marker_group, color, location->name(), ArdourMarker::Mark, location->start());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (*this, *marker_group, color, location->name(), Marker::Mark, location->start());
+			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), ArdourMarker::Mark, location->start());
 			group = marker_group;
 		}
 
@@ -118,41 +118,41 @@ Editor::add_new_location_internal (Location* location)
 	} else if (location->is_auto_loop()) {
 
 		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, color,
-					 location->name(), Marker::LoopStart, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, color,
-					 location->name(), Marker::LoopEnd, location->end());
+		lam->start = new ArdourMarker (*this, *transport_marker_group, color,
+					 location->name(), ArdourMarker::LoopStart, location->start());
+		lam->end   = new ArdourMarker (*this, *transport_marker_group, color,
+					 location->name(), ArdourMarker::LoopEnd, location->end());
 		group = transport_marker_group;
 
 	} else if (location->is_auto_punch()) {
 
 		// transport marker
-		lam->start = new Marker (*this, *transport_marker_group, color,
-					 location->name(), Marker::PunchIn, location->start());
-		lam->end   = new Marker (*this, *transport_marker_group, color,
-					 location->name(), Marker::PunchOut, location->end());
+		lam->start = new ArdourMarker (*this, *transport_marker_group, color,
+					 location->name(), ArdourMarker::PunchIn, location->start());
+		lam->end   = new ArdourMarker (*this, *transport_marker_group, color,
+					 location->name(), ArdourMarker::PunchOut, location->end());
 		group = transport_marker_group;
 
 	} else if (location->is_session_range()) {
 
 		// session range
-		lam->start = new Marker (*this, *marker_group, color, _("start"), Marker::SessionStart, location->start());
-		lam->end = new Marker (*this, *marker_group, color, _("end"), Marker::SessionEnd, location->end());
+		lam->start = new ArdourMarker (*this, *marker_group, color, _("start"), ArdourMarker::SessionStart, location->start());
+		lam->end = new ArdourMarker (*this, *marker_group, color, _("end"), ArdourMarker::SessionEnd, location->end());
 		group = marker_group;
 
 	} else {
 		// range marker
 		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
-			lam->start = new Marker (*this, *cd_marker_group, color,
-						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (*this, *cd_marker_group, color,
-						 location->name(), Marker::RangeEnd, location->end());
+			lam->start = new ArdourMarker (*this, *cd_marker_group, color,
+						 location->name(), ArdourMarker::RangeStart, location->start());
+			lam->end   = new ArdourMarker (*this, *cd_marker_group, color,
+						 location->name(), ArdourMarker::RangeEnd, location->end());
 			group = cd_marker_group;
 		} else {
-			lam->start = new Marker (*this, *range_marker_group, color,
-						 location->name(), Marker::RangeStart, location->start());
-			lam->end   = new Marker (*this, *range_marker_group, color,
-						 location->name(), Marker::RangeEnd, location->end());
+			lam->start = new ArdourMarker (*this, *range_marker_group, color,
+						 location->name(), ArdourMarker::RangeStart, location->start());
+			lam->end   = new ArdourMarker (*this, *range_marker_group, color,
+						 location->name(), ArdourMarker::RangeEnd, location->end());
 			group = range_marker_group;
 		}
 	}
@@ -224,15 +224,15 @@ Editor::location_changed (Location *location)
  *  lengthened)
  */
 void
-Editor::check_marker_label (Marker* m)
+Editor::check_marker_label (ArdourMarker* m)
 {
 	/* Get a time-ordered list of markers from the last time anything changed */
-	std::list<Marker*>& sorted = _sorted_marker_lists[m->get_parent()];
+	std::list<ArdourMarker*>& sorted = _sorted_marker_lists[m->get_parent()];
 
-	list<Marker*>::iterator i = find (sorted.begin(), sorted.end(), m);
+	list<ArdourMarker*>::iterator i = find (sorted.begin(), sorted.end(), m);
 
-	list<Marker*>::iterator prev = sorted.end ();
-	list<Marker*>::iterator next = i;
+	list<ArdourMarker*>::iterator prev = sorted.end ();
+	list<ArdourMarker*>::iterator next = i;
 	++next;
 
 	/* Look to see if the previous marker is still behind `m' in time */
@@ -299,7 +299,7 @@ Editor::check_marker_label (Marker* m)
 }
 
 struct MarkerComparator {
-	bool operator() (Marker const * a, Marker const * b) {
+	bool operator() (ArdourMarker const * a, ArdourMarker const * b) {
 		return a->position() < b->position();
 	}
 };
@@ -308,7 +308,7 @@ struct MarkerComparator {
 void
 Editor::update_marker_labels ()
 {
-	for (std::map<ArdourCanvas::Container *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Container *, std::list<ArdourMarker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		update_marker_labels (i->first);
 	}
 }
@@ -317,7 +317,7 @@ Editor::update_marker_labels ()
 void
 Editor::update_marker_labels (ArdourCanvas::Container* group)
 {
-	list<Marker*>& sorted = _sorted_marker_lists[group];
+	list<ArdourMarker*>& sorted = _sorted_marker_lists[group];
 
 	if (sorted.empty()) {
 		return;
@@ -327,10 +327,10 @@ Editor::update_marker_labels (ArdourCanvas::Container* group)
 
 	sorted.sort (MarkerComparator ());
 
-	list<Marker*>::iterator i = sorted.begin ();
+	list<ArdourMarker*>::iterator i = sorted.begin ();
 
-	list<Marker*>::iterator prev = sorted.end ();
-	list<Marker*>::iterator next = i;
+	list<ArdourMarker*>::iterator prev = sorted.end ();
+	list<ArdourMarker*>::iterator next = i;
 
 	if (next != sorted.end()) {
 		++next;
@@ -467,7 +467,7 @@ Editor::find_location_markers (Location *location) const
 }
 
 Location *
-Editor::find_location_from_marker (Marker *marker, bool& is_start) const
+Editor::find_location_from_marker (ArdourMarker *marker, bool& is_start) const
 {
 	LocationMarkerMap::const_iterator i;
 
@@ -580,11 +580,11 @@ Editor::LocationMarkers::set_name (const string& str)
 {
 	/* XXX: hack: don't change names of session start/end markers */
 
-	if (start->type() != Marker::SessionStart) {
+	if (start->type() != ArdourMarker::SessionStart) {
 		start->set_name (str);
 	}
 
-	if (end && end->type() != Marker::SessionEnd) {
+	if (end && end->type() != ArdourMarker::SessionEnd) {
 		end->set_name (str);
 	}
 }
@@ -726,10 +726,10 @@ Editor::mouse_add_new_range (framepos_t where)
 void
 Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 {
-	Marker* marker;
+	ArdourMarker* marker;
 	bool is_start;
 
-	if ((marker = static_cast<Marker*> (item.get_data ("marker"))) == 0) {
+	if ((marker = static_cast<ArdourMarker*> (item.get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -815,8 +815,8 @@ Editor::tempo_or_meter_marker_context_menu (GdkEventButton* ev, ArdourCanvas::It
 void
 Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 {
-	Marker * marker;
-	if ((marker = reinterpret_cast<Marker *> (item->get_data("marker"))) == 0) {
+	ArdourMarker * marker;
+	if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -999,9 +999,9 @@ Editor::build_new_transport_marker_menu ()
 void
 Editor::marker_menu_hide ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1017,9 +1017,9 @@ Editor::marker_menu_hide ()
 void
 Editor::marker_menu_select_using_range ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1035,9 +1035,9 @@ Editor::marker_menu_select_using_range ()
 void
 Editor::marker_menu_select_all_selectables_using_range ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1054,9 +1054,9 @@ Editor::marker_menu_select_all_selectables_using_range ()
 void
 Editor::marker_menu_separate_regions_using_location ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1073,9 +1073,9 @@ Editor::marker_menu_separate_regions_using_location ()
 void
 Editor::marker_menu_play_from ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1103,9 +1103,9 @@ Editor::marker_menu_play_from ()
 void
 Editor::marker_menu_set_playhead ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1131,12 +1131,12 @@ Editor::marker_menu_set_playhead ()
 void
 Editor::marker_menu_range_to_next ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 	if (!_session) {
 		return;
 	}
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1164,9 +1164,9 @@ Editor::marker_menu_range_to_next ()
 void
 Editor::marker_menu_set_from_playhead ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1192,9 +1192,9 @@ Editor::marker_menu_set_from_playhead ()
 void
 Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1223,9 +1223,9 @@ Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 void
 Editor::marker_menu_play_range ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1248,9 +1248,9 @@ Editor::marker_menu_play_range ()
 void
 Editor::marker_menu_loop_range ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1274,7 +1274,7 @@ Editor::marker_menu_loop_range ()
 void
 Editor::marker_menu_zoom_to_range ()
 {
-	Marker* marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"));
+	ArdourMarker* marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"));
 	assert (marker);
 
 	bool is_start;
@@ -1300,7 +1300,7 @@ Editor::marker_menu_zoom_to_range ()
 void
 Editor::dynamic_cast_marker_object (void* p, MeterMarker** m, TempoMarker** t) const
 {
-	Marker* marker = reinterpret_cast<Marker*> (p);
+	ArdourMarker* marker = reinterpret_cast<ArdourMarker*> (p);
 	if (!marker) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
@@ -1343,9 +1343,9 @@ Editor::marker_menu_remove ()
 void
 Editor::toggle_marker_menu_lock ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1369,9 +1369,9 @@ Editor::toggle_marker_menu_lock ()
 void
 Editor::marker_menu_rename ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1381,7 +1381,7 @@ Editor::marker_menu_rename ()
 }
 
 void
-Editor::rename_marker(Marker *marker)
+Editor::rename_marker(ArdourMarker *marker)
 {
 	Location* loc;
 	bool is_start;
@@ -1563,9 +1563,9 @@ Editor::goto_nth_marker (int n)
 void
 Editor::toggle_marker_menu_glue ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -1598,14 +1598,14 @@ Editor::toggle_marker_lines ()
 }
 
 void
-Editor::remove_sorted_marker (Marker* m)
+Editor::remove_sorted_marker (ArdourMarker* m)
 {
-	for (std::map<ArdourCanvas::Container *, std::list<Marker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
+	for (std::map<ArdourCanvas::Container *, std::list<ArdourMarker *> >::iterator i = _sorted_marker_lists.begin(); i != _sorted_marker_lists.end(); ++i) {
 		i->second.remove (m);
 	}
 }
 
-Marker *
+ArdourMarker *
 Editor::find_marker_from_location_id (PBD::ID const & id, bool is_start) const
 {
 	for (LocationMarkerMap::const_iterator i = location_markers.begin(); i != location_markers.end(); ++i) {

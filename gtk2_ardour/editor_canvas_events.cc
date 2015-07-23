@@ -981,7 +981,7 @@ Editor::canvas_feature_line_event (GdkEvent *event, ArdourCanvas::Item* item, Re
 }
 
 bool
-Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, Marker* /*marker*/)
+Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, ArdourMarker* /*marker*/)
 {
 	return typed_event (item, event, MarkerItem);
 }

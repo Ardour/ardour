@@ -415,7 +415,7 @@ Editor::Editor ()
 
 	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::ui_scale));
 	TimeAxisView::setup_sizes ();
-	Marker::setup_sizes (timebar_height);
+	ArdourMarker::setup_sizes (timebar_height);
 
 	_scroll_callbacks = 0;
 

@@ -24,7 +24,7 @@
 
 #include "marker.h"
 
-struct MarkerSelection : public std::list<Marker*>
+struct MarkerSelection : public std::list<ArdourMarker*>
 {
         void range (ARDOUR::framepos_t& start, ARDOUR::framepos_t& end);
 };

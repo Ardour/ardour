@@ -71,7 +71,7 @@ class AutomationTimeAxisView;
 class ControlPoint;
 class DragManager;
 class Editor;
-class Marker;
+class ArdourMarker;
 class MeterMarker;
 class MouseCursors;
 class PlaylistSelector;
@@ -346,7 +346,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	virtual bool canvas_region_view_name_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_stream_view_event (GdkEvent* event, ArdourCanvas::Item*, RouteTimeAxisView*) = 0;
-	virtual bool canvas_marker_event (GdkEvent* event, ArdourCanvas::Item*, Marker*) = 0;
+	virtual bool canvas_marker_event (GdkEvent* event, ArdourCanvas::Item*, ArdourMarker*) = 0;
 	virtual bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 	virtual bool canvas_tempo_marker_event (GdkEvent* event, ArdourCanvas::Item*, TempoMarker*) = 0;
 	virtual bool canvas_meter_marker_event (GdkEvent* event, ArdourCanvas::Item*, MeterMarker*) = 0;
@@ -412,8 +412,8 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 
 	virtual void get_pointer_position (double &, double &) const = 0;
 
-	virtual ARDOUR::Location* find_location_from_marker (Marker *, bool &) const = 0;
-	virtual Marker* find_marker_from_location_id (PBD::ID const &, bool) const = 0;
+	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker *, bool &) const = 0;
+	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const &, bool) const = 0;
 
 	virtual void snap_to_with_modifier (framepos_t &      first,
 	                                    GdkEvent const *  ev,

@@ -50,16 +50,16 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtkmm2ext;
 
-PBD::Signal1<void,Marker*> Marker::CatchDeletion;
+PBD::Signal1<void,ArdourMarker*> ArdourMarker::CatchDeletion;
 
 static double marker_height = 13.0;
 
-void Marker::setup_sizes(const double timebar_height)
+void ArdourMarker::setup_sizes(const double timebar_height)
 {
 	marker_height = floor (timebar_height) - 2;
 }
 
-Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
+ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba, const string& annotation,
 		Type type, framepos_t frame, bool handle_events)
 
 	: editor (ed)
@@ -284,14 +284,14 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	Gtkmm2ext::get_ink_pixel_size (layout, width, name_height);
 	
 	_name_item = new ArdourCanvas::Text (group);
-	CANVAS_DEBUG_NAME (_name_item, string_compose ("Marker::_name_item for %1", annotation));
+	CANVAS_DEBUG_NAME (_name_item, string_compose ("ArdourMarker::_name_item for %1", annotation));
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 	_name_item->set_position (ArdourCanvas::Duple (_label_offset, (marker_height - name_height - 1) * .5 ));
 
 	set_name (annotation.c_str());
 
-	editor.ZoomChanged.connect (sigc::mem_fun (*this, &Marker::reposition));
+	editor.ZoomChanged.connect (sigc::mem_fun (*this, &ArdourMarker::reposition));
 
 	/* events will be handled by both the group and the mark itself, so
 	 * make sure they can both be used to lookup this object.
@@ -305,7 +305,7 @@ Marker::Marker (PublicEditor& ed, ArdourCanvas::Container& parent, guint32 rgba,
 	}
 }
 
-Marker::~Marker ()
+ArdourMarker::~ArdourMarker ()
 {
 	CatchDeletion (this); /* EMIT SIGNAL */
 
@@ -314,28 +314,28 @@ Marker::~Marker ()
 	delete _track_canvas_line;
 }
 
-void Marker::reparent(ArdourCanvas::Container & parent)
+void ArdourMarker::reparent(ArdourCanvas::Container & parent)
 {
 	group->reparent (&parent);
 	_parent = &parent;
 }
 
 void
-Marker::set_selected (bool s)
+ArdourMarker::set_selected (bool s)
 {
 	_selected = s;
 	setup_line ();
 }
 
 void
-Marker::set_show_line (bool s)
+ArdourMarker::set_show_line (bool s)
 {
 	_line_shown = s;
 	setup_line ();
 }
 
 void
-Marker::setup_line ()
+ArdourMarker::setup_line ()
 {
 	if (_shown && (_selected || _line_shown)) {
 
@@ -365,20 +365,20 @@ Marker::setup_line ()
 }
 
 void
-Marker::canvas_height_set (double h)
+ArdourMarker::canvas_height_set (double h)
 {
 	_canvas_height = h;
 	setup_line ();
 }
 
 ArdourCanvas::Item&
-Marker::the_item() const
+ArdourMarker::the_item() const
 {
 	return *group;
 }
 
 void
-Marker::set_name (const string& new_name)
+ArdourMarker::set_name (const string& new_name)
 {
 	_name = new_name;
 
@@ -387,13 +387,13 @@ Marker::set_name (const string& new_name)
 
 /** @return true if our label is on the left of the mark, otherwise false */
 bool
-Marker::label_on_left () const
+ArdourMarker::label_on_left () const
 {
 	return (_type == SessionEnd || _type == RangeEnd || _type == LoopEnd || _type == PunchOut);
 }
 
 void
-Marker::setup_name_display ()
+ArdourMarker::setup_name_display ()
 {
 	double limit = DBL_MAX;
 
@@ -438,7 +438,7 @@ Marker::setup_name_display ()
 }
 
 void
-Marker::set_position (framepos_t frame)
+ArdourMarker::set_position (framepos_t frame)
 {
 	unit_position = editor.sample_to_pixel (frame) - _shift;
 	group->set_x_position (unit_position);
@@ -447,13 +447,13 @@ Marker::set_position (framepos_t frame)
 }
 
 void
-Marker::reposition ()
+ArdourMarker::reposition ()
 {
 	set_position (frame_position);
 }
 
 void
-Marker::show ()
+ArdourMarker::show ()
 {
 	_shown = true;
 
@@ -462,7 +462,7 @@ Marker::show ()
 }
 
 void
-Marker::hide ()
+ArdourMarker::hide ()
 {
 	_shown = false;
 
@@ -471,7 +471,7 @@ Marker::hide ()
 }
 
 void
-Marker::set_color_rgba (uint32_t c)
+ArdourMarker::set_color_rgba (uint32_t c)
 {
 	_color = c;
 	mark->set_fill_color (_color);
@@ -488,7 +488,7 @@ Marker::set_color_rgba (uint32_t c)
 
 /** Set the number of pixels that are available for a label to the left of the centre of this marker */
 void
-Marker::set_left_label_limit (double p)
+ArdourMarker::set_left_label_limit (double p)
 {
 	/* Account for the size of the marker */
 	_left_label_limit = p - marker_height;
@@ -503,7 +503,7 @@ Marker::set_left_label_limit (double p)
 
 /** Set the number of pixels that are available for a label to the right of the centre of this marker */
 void
-Marker::set_right_label_limit (double p)
+ArdourMarker::set_right_label_limit (double p)
 {
 	/* Account for the size of the marker */
 	_right_label_limit = p - marker_height;
@@ -520,7 +520,7 @@ Marker::set_right_label_limit (double p)
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::TempoSection& temp)
-	: Marker (editor, parent, rgba, text, Tempo, 0, false),
+	: ArdourMarker (editor, parent, rgba, text, Tempo, 0, false),
 	  _tempo (temp)
 {
 	set_position (_tempo.frame());
@@ -535,7 +535,7 @@ TempoMarker::~TempoMarker ()
 
 MeterMarker::MeterMarker (PublicEditor& editor, ArdourCanvas::Container& parent, guint32 rgba, const string& text,
 			  ARDOUR::MeterSection& m)
-	: Marker (editor, parent, rgba, text, Meter, 0, false),
+	: ArdourMarker (editor, parent, rgba, text, Meter, 0, false),
 	  _meter (m)
 {
 	set_position (_meter.frame());

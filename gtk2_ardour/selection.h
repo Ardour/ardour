@@ -113,7 +113,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	bool selected (TimeAxisView*);
 	bool selected (RegionView*);
-	bool selected (Marker*);
+	bool selected (ArdourMarker*);
 	bool selected (ControlPoint*);
 
 	void set (std::list<Selectable*> const &);
@@ -132,7 +132,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void set (ControlPoint *);
-	void set (Marker*);
+	void set (ArdourMarker*);
 	void set (const RegionSelection&);
 
 	void toggle (TimeAxisView*);
@@ -148,7 +148,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void toggle (ControlPoint *);
 	void toggle (std::vector<ControlPoint*> const &);
-	void toggle (Marker*);
+	void toggle (ArdourMarker*);
 
 	void add (TimeAxisView*);
 	void add (const TrackViewList&);
@@ -163,8 +163,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void add (ControlPoint *);
 	void add (std::vector<ControlPoint*> const &);
-	void add (Marker*);
-	void add (const std::list<Marker*>&);
+	void add (ArdourMarker*);
+	void add (const std::list<ArdourMarker*>&);
 	void add (const RegionSelection&);
 	void add (const PointSelection&);
 	void remove (TimeAxisView*);
@@ -179,7 +179,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
 	void remove (const std::list<Selectable*>&);
-	void remove (Marker*);
+	void remove (ArdourMarker*);
 	void remove (ControlPoint *);
 
 	void remove_regions (TimeAxisView *);

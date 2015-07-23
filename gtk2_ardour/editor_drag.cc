@@ -3657,7 +3657,7 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
 
-	_marker = reinterpret_cast<Marker*> (_item->get_data ("marker"));
+	_marker = reinterpret_cast<ArdourMarker*> (_item->get_data ("marker"));
 	assert (_marker);
 
 	_points.push_back (ArdourCanvas::Duple (0, 0));
@@ -3671,7 +3671,7 @@ MarkerDrag::~MarkerDrag ()
 	}
 }
 
-MarkerDrag::CopiedLocationMarkerInfo::CopiedLocationMarkerInfo (Location* l, Marker* m)
+MarkerDrag::CopiedLocationMarkerInfo::CopiedLocationMarkerInfo (Location* l, ArdourMarker* m)
 {
 	location = new Location (*l);
 	markers.push_back (m);
@@ -3713,7 +3713,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	case Selection::Extend:
 	{
 		Locations::LocationList ll;
-		list<Marker*> to_add;
+		list<ArdourMarker*> to_add;
 		framepos_t s, e;
 		_editor->selection->markers.range (s, e);
 		s = min (_marker->position(), s);
@@ -3828,17 +3828,17 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 
 				switch (_marker->type()) {
-				case Marker::SessionStart:
-				case Marker::RangeStart:
-				case Marker::LoopStart:
-				case Marker::PunchIn:
+				case ArdourMarker::SessionStart:
+				case ArdourMarker::RangeStart:
+				case ArdourMarker::LoopStart:
+				case ArdourMarker::PunchIn:
 					f_delta = newframe - copy_location->start();
 					break;
 
-				case Marker::SessionEnd:
-				case Marker::RangeEnd:
-				case Marker::LoopEnd:
-				case Marker::PunchOut:
+				case ArdourMarker::SessionEnd:
+				case ArdourMarker::RangeEnd:
+				case ArdourMarker::LoopEnd:
+				case ArdourMarker::PunchOut:
 					f_delta = newframe - copy_location->end();
 					break;
 				default:
@@ -4018,7 +4018,7 @@ MarkerDrag::aborted (bool movement_occured)
 		/* move all markers to their original location */
 
 
-		for (vector<Marker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
+		for (vector<ArdourMarker*>::iterator m = x->markers.begin(); m != x->markers.end(); ++m) {
 
 			bool is_start;
 			Location * location = _editor->find_location_from_marker (*m, is_start);

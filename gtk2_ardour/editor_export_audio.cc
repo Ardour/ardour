@@ -86,9 +86,9 @@ Editor::export_selection ()
 void
 Editor::export_range ()
 {
-	Marker* marker;
+	ArdourMarker* marker;
 
-	if ((marker = reinterpret_cast<Marker *> (marker_menu_item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}

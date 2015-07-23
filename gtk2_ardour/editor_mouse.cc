@@ -1228,10 +1228,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case TempoMarkerItem: {
-			Marker* marker;
+			ArdourMarker* marker;
 			TempoMarker* tempo_marker;
 			
-			if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+			if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 				abort(); /*NOTREACHED*/
 			}
@@ -1246,10 +1246,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 
 		case MeterMarkerItem: {
-			Marker* marker;
+			ArdourMarker* marker;
 			MeterMarker* meter_marker;
 			
-			if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+			if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 				fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 				abort(); /*NOTREACHED*/
 			}
@@ -1576,7 +1576,7 @@ bool
 Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
 	ControlPoint* cp;
-	Marker * marker;
+	ArdourMarker * marker;
 	double fraction;
         bool ret = true;
 
@@ -1629,7 +1629,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		break;
 
 	case MarkerItem:
-		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
+		if ((marker = static_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
 		entered_marker = marker;
@@ -1710,7 +1710,7 @@ bool
 Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 {
 	AutomationLine* al;
-	Marker *marker;
+	ArdourMarker *marker;
 	Location *loc;
 	bool is_start;
 	bool ret = true;
@@ -1736,7 +1736,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		break;
 
 	case MarkerItem:
-		if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
+		if ((marker = static_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
 		entered_marker = 0;
@@ -2133,10 +2133,10 @@ Editor::point_trim (GdkEvent* event, framepos_t new_bound)
 void
 Editor::hide_marker (ArdourCanvas::Item* item, GdkEvent* /*event*/)
 {
-	Marker* marker;
+	ArdourMarker* marker;
 	bool is_start;
 
-	if ((marker = static_cast<Marker *> (item->get_data ("marker"))) == 0) {
+	if ((marker = static_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}

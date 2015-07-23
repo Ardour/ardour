@@ -61,8 +61,8 @@ Selection::Selection (const PublicEditor* e)
 	void (Selection::*track_remove)(TimeAxisView*) = &Selection::remove;
 	TimeAxisView::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (track_remove, this, _1), gui_context());
 
-	void (Selection::*marker_remove)(Marker*) = &Selection::remove;
-	Marker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (marker_remove, this, _1), gui_context());
+	void (Selection::*marker_remove)(ArdourMarker*) = &Selection::remove;
+	ArdourMarker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (marker_remove, this, _1), gui_context());
 
 	void (Selection::*point_remove)(ControlPoint*) = &Selection::remove;
 	ControlPoint::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (point_remove, this, _1), gui_context());
@@ -911,7 +911,7 @@ Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
 }
 
 bool
-Selection::selected (Marker* m)
+Selection::selected (ArdourMarker* m)
 {
 	return find (markers.begin(), markers.end(), m) != markers.end();
 }
@@ -1126,7 +1126,7 @@ Selection::set (ControlPoint* cp)
 }
 
 void
-Selection::set (Marker* m)
+Selection::set (ArdourMarker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
@@ -1136,7 +1136,7 @@ Selection::set (Marker* m)
 }
 
 void
-Selection::toggle (Marker* m)
+Selection::toggle (ArdourMarker* m)
 {
 	MarkerSelection::iterator i;
 
@@ -1148,7 +1148,7 @@ Selection::toggle (Marker* m)
 }
 
 void
-Selection::remove (Marker* m)
+Selection::remove (ArdourMarker* m)
 {
 	MarkerSelection::iterator i;
 
@@ -1159,7 +1159,7 @@ Selection::remove (Marker* m)
 }
 
 void
-Selection::add (Marker* m)
+Selection::add (ArdourMarker* m)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
@@ -1171,7 +1171,7 @@ Selection::add (Marker* m)
 }
 
 void
-Selection::add (const list<Marker*>& m)
+Selection::add (const list<ArdourMarker*>& m)
 {
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
@@ -1486,7 +1486,7 @@ Selection::set_state (XMLNode const & node, int)
 			assert (prop_start);
 
 			PBD::ID id (prop_id->value ());
-			Marker* m = editor->find_marker_from_location_id (id, string_is_affirmative (prop_start->value ()));
+			ArdourMarker* m = editor->find_marker_from_location_id (id, string_is_affirmative (prop_start->value ()));
 			if (m) {
 				add (m);
 			}

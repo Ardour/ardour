@@ -263,10 +263,10 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 void
 Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 {
-	Marker* marker;
+	ArdourMarker* marker;
 	TempoMarker* tempo_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: tempo marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -363,10 +363,10 @@ Editor::real_remove_tempo_marker (TempoSection *section)
 void
 Editor::remove_meter_marker (ArdourCanvas::Item* item)
 {
-	Marker* marker;
+	ArdourMarker* marker;
 	MeterMarker* meter_marker;
 
-	if ((marker = reinterpret_cast<Marker *> (item->get_data ("marker"))) == 0) {
+	if ((marker = reinterpret_cast<ArdourMarker *> (item->get_data ("marker"))) == 0) {
 		fatal << _("programming error: meter marker canvas item has no marker object pointer!") << endmsg;
 		abort(); /*NOTREACHED*/
 	}
