@@ -58,12 +58,6 @@ TimeInfoBox::TimeInfoBox ()
 	punch_start = new AudioClock ("punch-start", false, "punch", false, false, false, false);
 	punch_end = new AudioClock ("punch-end", false, "punch", false, false, false, false);
 
-	selection_start->set_draw_background (false);
-	selection_end->set_draw_background (false);
-	selection_length->set_draw_background (false);
-	punch_start->set_draw_background (false);
-	punch_end->set_draw_background (false);
-
 	selection_title.set_text (_("Selection"));
 	punch_title.set_text (_("Punch"));
 
