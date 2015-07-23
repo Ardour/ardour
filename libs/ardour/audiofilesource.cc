@@ -46,6 +46,7 @@
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>
+#include <glibmm/convert.h>
 
 #include "ardour/audiofilesource.h"
 #include "ardour/debug.h"
@@ -173,7 +174,7 @@ AudioFileSource::peak_path (string audio_path)
 	if (suffix != string::npos) {
 		base = audio_path.substr (0, suffix);
 	} else {
-		warning << string_compose (_("Odd audio file path: %1"), audio_path) << endmsg;
+		warning << string_compose (_("Odd audio file path: %1"), Glib::locale_from_utf8(audio_path)) << endmsg;
 		base = audio_path;
 	}
 
