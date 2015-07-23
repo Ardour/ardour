@@ -42,6 +42,7 @@
 #include <errno.h>
 #include <regex.h>
 
+#include <glibmm/convert.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
@@ -299,7 +300,7 @@ ARDOUR::cmp_nocase_utf8 (const string& s1, const string& s2)
 int
 ARDOUR::touch_file (string path)
 {
-	int fd = open (path.c_str(), O_RDWR|O_CREAT, 0660);
+	int fd = open (Glib::locale_from_utf8 (path).c_str(), O_RDWR|O_CREAT, 0660);
 	if (fd >= 0) {
 		close (fd);
 		return 0;
