@@ -455,7 +455,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 
 {
 	init ();
-	for (int i = 0; i < descriptors.size(); ++i) {
+	for (size_t i = 0; i < descriptors.size(); ++i) {
 		set_parameter (i, other.get_parameter (i));
 	}
 }
