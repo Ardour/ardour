@@ -30,7 +30,7 @@ def build(bld):
     obj.target   = 'coreaudio_backend'
     obj.use      = 'libardour libpbd'
     obj.framework = [ 'CoreAudio', 'AudioToolbox', 'CoreServices' ]
-    if bld.env['build_target'] not in [ 'lion' ]:
+    if bld.env['build_target'] not in [ 'lion' ] and (not bld.env['build_arch'] == "ppc"):
         obj.framework += [ 'CoreMidi' ]
     else:
         obj.framework += [ 'CoreMIDI' ]

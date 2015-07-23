@@ -822,12 +822,21 @@ CoreAudioPCM::pcm_start (
 	AudioDeviceID device_id;
 	AudioStreamBasicDescription srcFormat, dstFormat;
 
+#ifndef COREAUDIO_108
+	ComponentDescription cd = {kAudioUnitType_Output, kAudioUnitSubType_HALOutput, kAudioUnitManufacturer_Apple, 0, 0};
+	Component HALOutput = FindNextComponent(NULL, &cd);
+	if (!HALOutput) { errorMsg="FindNextComponent"; goto error; }
+
+	err = OpenAComponent(HALOutput, &_auhal);
+	if (err != noErr) { errorMsg="OpenAComponent"; goto error; }
+#else
 	AudioComponentDescription cd = {kAudioUnitType_Output, kAudioUnitSubType_HALOutput, kAudioUnitManufacturer_Apple, 0, 0};
 	AudioComponent HALOutput = AudioComponentFindNext(NULL, &cd);
 	if (!HALOutput) { errorMsg="AudioComponentFindNext"; goto error; }
 
 	err = AudioComponentInstanceNew(HALOutput, &_auhal);
 	if (err != noErr) { errorMsg="AudioComponentInstanceNew"; goto error; }
+#endif
 
 	err = AudioUnitInitialize(_auhal);
 	if (err != noErr) { errorMsg="AudioUnitInitialize"; goto error; }
