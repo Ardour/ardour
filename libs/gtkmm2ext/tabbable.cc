@@ -39,14 +39,14 @@ Tabbable::Tabbable (Widget& w, const string& name)
 	, tab_close_image (ArdourIcon::CloseCross, 0xffffffff)
 	, tab_requested_by_state (true)
 {
+	/* sizes will be scaled during rendering */
 	tab_close_image.set_size_request (15,15);
 	
 	_tab_box.set_spacing (2);
 	_tab_box.pack_start (_tab_label, true, true);
-	_tab_box.pack_start (_tab_close_button, false, false);
-	_tab_close_button.add (tab_close_image);
+	_tab_box.pack_start (tab_close_image, false, false);
 	
-	_tab_close_button.signal_clicked().connect (sigc::mem_fun (*this, &Tabbable::tab_close_clicked));
+	tab_close_image.signal_button_release_event().connect (sigc::mem_fun (*this, &Tabbable::tab_close_clicked));
 }
 
 Tabbable::~Tabbable ()
@@ -57,10 +57,11 @@ Tabbable::~Tabbable ()
 	}
 }
 
-void
-Tabbable::tab_close_clicked ()
+bool
+Tabbable::tab_close_clicked (GdkEventButton*)
 {
 	hide_tab ();
+	return true;
 }
 
 void
@@ -337,17 +338,17 @@ Tabbable::set_state (const XMLNode& node, int version)
 {
 	int ret;
 
-	if ((ret = WindowProxy::set_state (node, version)) == 0) {
-		if (_visible) {
-			if (use_own_window (true) == 0) {
-				ret = -1;
-			}
-		}
+	if ((ret = WindowProxy::set_state (node, version)) != 0) {
+		return ret;
 	}
+
+	if (_visible) {
+		show_own_window (true);
+	} 
 
 	XMLNodeList children = node.children ();
 	XMLNode* window_node = node.child ("Window");
-
+	
 	if (window_node) {
 		const XMLProperty* prop = window_node->property (X_("tabbed"));
 		if (prop) {
@@ -355,17 +356,13 @@ Tabbable::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if (tab_requested_by_state) {
-
-		std::cerr << name() << " pn " << _parent_notebook << std::endl;
-		if (_parent_notebook) {
-			std::cerr << "\t page " << _parent_notebook->page_num (_contents) << std::endl;
+	if (!_visible) {
+		if (tab_requested_by_state) {
+			attach ();
+		} else {
+			/* this does nothing if not tabbed */
+			hide_tab ();
 		}
-
-		attach ();
-	} else {
-		/* this does nothing if not tabbed */
-		hide_tab ();
 	}
 	
 	return ret;

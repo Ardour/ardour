@@ -87,13 +87,12 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	std::string    _tab_title;
 	Gtk::HBox      _tab_box;
 	Gtk::Label     _tab_label;
-	Gtk::Button    _tab_close_button;
 	CairoIcon       tab_close_image;
 	bool            tab_requested_by_state;
 	
 	void show_tab ();
 	void hide_tab ();
-	void tab_close_clicked ();
+	bool tab_close_clicked (GdkEventButton*);
 	void show_own_window (bool and_pack_it);
 	void window_mapped ();
 	void window_unmapped ();
