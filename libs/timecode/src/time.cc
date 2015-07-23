@@ -770,7 +770,7 @@ sample_to_timecode (
 
 	if (!use_offset) {
 		timecode.negative = (sample < 0);
-		offset_sample = llabs(sample);
+		offset_sample = ::llabs(sample);
 	} else {
 		if (offset_is_negative) {
 			offset_sample = sample + offset_samples;

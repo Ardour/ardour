@@ -610,7 +610,7 @@ LTC_Slave::approximate_current_delta() const
 	} else {
 		snprintf(delta, sizeof(delta), "\u0394<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span>sm",
 				sync_lock_broken ? "red" : "green",
-				LEADINGZERO(llabs(current_delta)), PLUSMINUS(-current_delta), llabs(current_delta));
+				LEADINGZERO(::llabs(current_delta)), PLUSMINUS(-current_delta), ::llabs(current_delta));
 	}
 	return std::string(delta);
 }
