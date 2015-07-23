@@ -53,7 +53,8 @@ using namespace Glib;
 using namespace PBD;
 using std::map;
 
-UI       *UI::theGtkUI = 0;
+UI*   UI::theGtkUI = 0;
+float UI::ui_scale = 1.0;
 
 BaseUI::RequestType Gtkmm2ext::NullMessage = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::ErrorMessage = BaseUI::new_request_type();

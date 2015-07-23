@@ -167,6 +167,7 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 	sigc::signal<void> theme_changed;
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
+	static float ui_scale;
 
   protected:
 	virtual void handle_fatal (const char *);
