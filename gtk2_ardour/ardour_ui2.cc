@@ -100,6 +100,7 @@ ARDOUR_UI::setup_windows ()
 	rc_option_editor = new RCOptionEditor;
 	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
 	rc_option_editor->contents().show_all ();
+	rc_option_editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
 	
 	/* all other dialogs are created conditionally */
 

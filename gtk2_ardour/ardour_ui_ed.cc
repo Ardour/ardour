@@ -79,6 +79,7 @@ ARDOUR_UI::create_editor ()
 {
 	try {
 		editor = new Editor ();
+		editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
 	}
 
 	catch (failed_constructor& err) {

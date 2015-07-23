@@ -379,6 +379,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void detach_tabbable (Gtkmm2ext::Tabbable*);
 	void attach_tabbable (Gtkmm2ext::Tabbable*);
 
+	void tabbable_state_change (Gtkmm2ext::Tabbable&);
+	
 	void toggle_meterbridge ();
 
 	int  setup_windows ();

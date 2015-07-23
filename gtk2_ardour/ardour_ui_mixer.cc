@@ -41,6 +41,7 @@ ARDOUR_UI::create_mixer ()
 {
 	try {
 		mixer = Mixer_UI::instance ();
+		mixer->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
 	}
 
 	catch (failed_constructor& err) {

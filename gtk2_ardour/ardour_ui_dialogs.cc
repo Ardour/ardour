@@ -23,6 +23,10 @@
    This is to cut down on the compile times.  It also helps with my sanity.
 */
 
+#include <vector>
+
+#include "pbd/convert.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/automation_watch.h"
 #include "ardour/control_protocol_manager.h"
@@ -374,6 +378,65 @@ ARDOUR_UI::detach_tabbable (Tabbable* t)
 		return;
 	}
 	t->detach ();
+}
+
+void
+ARDOUR_UI::tabbable_state_change (Tabbable& t)
+{
+	std::vector<std::string> insensitive_action_names;
+	std::vector<std::string> sensitive_action_names;
+	Glib::RefPtr<Action> action;	
+	std::string downcased_name = downcase (t.name());
+
+	std::cerr << t.name() << " changed state\n";
+	
+	if (t.tabbed()) {
+
+		std::cerr << "tabbed\n";
+		
+		insensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+
+
+	} else if (t.window_visible()) {
+
+		std::cerr << "windowed\n";
+
+		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+
+	} else {
+
+		std::cerr << "invisible\n";
+		
+		/* not currently visible. allow user to retab it or just make
+		 * it visible.
+		 */
+		
+		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
+	}
+
+
+	for (std::vector<std::string>::iterator s = insensitive_action_names.begin(); s != insensitive_action_names.end(); ++s) {
+		action = ActionManager::get_action (X_("Common"), (*s).c_str());
+		if (action) {
+			action->set_sensitive (false);
+		}
+	}
+
+	for (std::vector<std::string>::iterator s = sensitive_action_names.begin(); s != sensitive_action_names.end(); ++s) {
+		action = ActionManager::get_action (X_("Common"), (*s).c_str());
+		if (action) {
+			action->set_sensitive (true);
+		}
+	}
 }
 
 void
