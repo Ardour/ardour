@@ -859,6 +859,13 @@ ARDOUR_UI::check_announcements ()
 #endif
 }
 
+static bool
+_hide_splash (gpointer arg)
+{
+	((ARDOUR_UI*)arg)->hide_splash();
+	return false;
+}
+
 int
 ARDOUR_UI::starting ()
 {
@@ -1039,6 +1046,12 @@ ARDOUR_UI::starting ()
 	_status_bar_visibility.update ();
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
+
+	if (splash && splash->is_visible()) {
+		// in 1 second, hide the splash screen
+		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
+	}
+
 	return 0;
 }
 
