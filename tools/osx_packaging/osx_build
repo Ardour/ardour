@@ -769,6 +769,7 @@ hdiutil eject "${DiskDevice}" || true
 # Create a read-only version, use zlib compression
 hdiutil convert -format UDZO "${TMPDMG}" -imagekey zlib-level=9 -o "${UC_DMG}"
 
+if test $(sw_vers -productVersion | cut -d '.' -f 2) -gt 5; then
 echo "setting file icon ..."
 
 cp ${PRODUCT_PKG_DIR}/$Resources/appIcon.icns ${ICNSTMP}.icns
@@ -778,6 +779,8 @@ Rez -append ${ICNSTMP}.rsrc -o "$UC_DMG"
 SetFile -a C "$UC_DMG"
 
 rm ${ICNSTMP}.icns ${ICNSTMP}.rsrc
+fi
+
 rm -rf ${PRODUCT_PKG_DIR}
 
 echo
