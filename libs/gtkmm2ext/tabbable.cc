@@ -39,9 +39,7 @@ Tabbable::Tabbable (Widget& w, const string& name)
 	, tab_close_image (ArdourIcon::CloseCross, 0xffffffff)
 	, tab_requested_by_state (true)
 {
-	/* make the image about the same size as an actual X */
 	tab_close_image.set_size_request (15,15);
-	// set_size_request_to_display_given_text (tab_close_image, "X", 0, 0);
 	
 	_tab_box.set_spacing (2);
 	_tab_box.pack_start (_tab_label, true, true);
