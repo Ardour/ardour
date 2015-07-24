@@ -620,7 +620,7 @@ if test x$WITH_HARVID != x ; then
 	HVLIBS=${PRODUCT_PKG_DIR}/$APPROOT/lib/harvid
 
 	for file in ${XJCONTENT}/MacOS/Jadeo-bin ${XJCONTENT}/Frameworks/*.dylib ${HVLIBS}/*.dylib ${PRODUCT_PKG_DIR}/$APPROOT/MacOS/*harvid* ; do
-		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
+		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin && \
 		mv ${file}.thin ${file}
 	done
 
@@ -709,9 +709,8 @@ TMPDMG="${TMPDMG}.dmg"
 
 trap "rm -rf $MNTPATH $TMPDMG ${TMPDMG}.dmg $ICNSTMP" EXIT
 
-hdiutil create -megabytes $DMGMEGABYTES "$TMPDMG"
+hdiutil create -megabytes $DMGMEGABYTES -fs HFS+ -volname "${VOLNAME}" "$TMPDMG"
 DiskDevice=$(hdid -nomount "$TMPDMG" | grep Apple_HFS | cut -f 1 -d ' ')
-newfs_hfs -v "${VOLNAME}" "${DiskDevice}"
 mount -t hfs -o nobrowse "${DiskDevice}" "${MNTPATH}"
 
 cp -r ${PRODUCT_PKG_DIR}/* "${MNTPATH}" || exit
