@@ -390,7 +390,7 @@ static FILE *
 vstfx_blacklist_file (const char *dllpath)
 {
 	FILE *f;
-	if ((f = fopen (vstfx_blacklist_path (dllpath, 0).c_str(), "wb"))) {
+	if ((f = g_fopen (vstfx_blacklist_path (dllpath, 0).c_str(), "wb"))) {
 #ifndef NDEBUG
 	PBD::info << "Blacklisted VST: '" << vstfx_blacklist_path (dllpath, 0) << "'" << endmsg;
 #endif
@@ -399,7 +399,7 @@ vstfx_blacklist_file (const char *dllpath)
 #ifndef NDEBUG
 	PBD::info << "Blacklisted VST: '" << vstfx_blacklist_path (dllpath, 1) << "'" << endmsg;
 #endif
-	return fopen (vstfx_blacklist_path (dllpath, 1).c_str(), "wb");
+	return g_fopen (vstfx_blacklist_path (dllpath, 1).c_str(), "wb");
 }
 
 /** mark plugin as blacklisted */
@@ -512,7 +512,7 @@ vstfx_infofile_create (const char* dllpath, int personal)
 #ifndef NDEBUG
 	PBD::info << "Creating VST cache file " << path << endmsg;
 #endif
-	return fopen (path.c_str(), "wb");
+	return g_fopen (path.c_str(), "wb");
 }
 
 /** newly created cache file for given plugin
@@ -885,8 +885,8 @@ static void parse_scanner_output (std::string msg, size_t /*len*/)
 	}
 
 	if (!_errorlog_fd) {
-		if (!(_errorlog_fd = fopen(vstfx_errorfile_path(_errorlog_dll, 0).c_str(), "w"))) {
-			if (!(_errorlog_fd = fopen(vstfx_errorfile_path(_errorlog_dll, 1).c_str(), "w"))) {
+		if (!(_errorlog_fd = g_fopen(vstfx_errorfile_path(_errorlog_dll, 0).c_str(), "w"))) {
+			if (!(_errorlog_fd = g_fopen(vstfx_errorfile_path(_errorlog_dll, 1).c_str(), "w"))) {
 				PBD::error << "Cannot create plugin error-log for plugin " << _errorlog_dll;
 				free(_errorlog_dll);
 				_errorlog_dll = NULL;
