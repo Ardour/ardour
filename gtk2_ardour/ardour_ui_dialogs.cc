@@ -379,7 +379,13 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
 		sensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
 
+	} else if (t.tabbed_by_default ()) {
 
+		insensitive_action_names.push_back (string_compose ("attach-%1", downcased_name));
+		insensitive_action_names.push_back (string_compose ("hide-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("show-%1", downcased_name));
+		sensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
+		
 	} else if (t.window_visible()) {
 
 		insensitive_action_names.push_back (string_compose ("detach-%1", downcased_name));
