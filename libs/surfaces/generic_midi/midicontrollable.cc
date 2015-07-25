@@ -361,7 +361,6 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 						break;
 					default:
 						break;
-					
 				}
 				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) last_value, current_uri() ));
 
