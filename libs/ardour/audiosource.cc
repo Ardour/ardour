@@ -270,8 +270,8 @@ AudioSource::initialize_peakfile (string audio_path)
 			_peaks_built = false;
 		} else {
 			// Check if the audio file has changed since the peakfile was built.
-			struct stat stat_file;
-			int err = stat (audio_path.c_str(), &stat_file);
+			GStatBuf stat_file;
+			int err = g_stat (audio_path.c_str(), &stat_file);
 
 			if (err) {
 
