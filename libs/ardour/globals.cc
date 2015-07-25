@@ -61,7 +61,6 @@
 #undef check /* stupid Apple and their un-namespaced, generic Carbon macros */
 #endif 
 
-#include <glibmm/convert.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
@@ -648,13 +647,13 @@ static const bool translate_by_default = true;
 string
 ARDOUR::translation_enable_path ()
 {
-	return Glib::build_filename (user_config_directory(), ".translate");
+        return Glib::build_filename (user_config_directory(), ".translate");
 }
 
 bool
 ARDOUR::translations_are_enabled ()
 {
-	int fd = ::open (Glib::locale_from_utf8 (ARDOUR::translation_enable_path()).c_str(), O_RDONLY);
+	int fd = ::open (ARDOUR::translation_enable_path().c_str(), O_RDONLY);
 
 	if (fd < 0) {
 		return translate_by_default;
@@ -676,7 +675,7 @@ bool
 ARDOUR::set_translations_enabled (bool yn)
 {
 	string i18n_enabler = ARDOUR::translation_enable_path();
-	int fd = ::open (Glib::locale_from_utf8 (i18n_enabler).c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0644);
+	int fd = ::open (i18n_enabler.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0644);
 
 	if (fd < 0) {
 		return false;
