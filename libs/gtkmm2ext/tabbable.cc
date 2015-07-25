@@ -41,11 +41,12 @@ Tabbable::Tabbable (Widget& w, const string& name)
 {
 	/* sizes will be scaled during rendering */
 	tab_close_image.set_size_request (15,15);
-	
+
+	_tab_box.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	_tab_box.set_spacing (2);
 	_tab_box.pack_start (_tab_label, true, true);
 	_tab_box.pack_start (tab_close_image, false, false);
-	
+
 	tab_close_image.signal_button_release_event().connect (sigc::mem_fun (*this, &Tabbable::tab_close_clicked));
 }
 
@@ -243,6 +244,7 @@ Tabbable::attach ()
 	}
 	
 	_parent_notebook->append_page (_contents, _tab_box);
+	_contents.set_data ("close-button", &tab_close_image);
 	_parent_notebook->set_tab_detachable (_contents);
 	_parent_notebook->set_tab_reorderable (_contents);
 	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
