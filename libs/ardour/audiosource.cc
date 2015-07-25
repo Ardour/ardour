@@ -392,7 +392,7 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		}
 	}
 
-	ScopedFileDescriptor sfd (::open (peakpath.c_str(), O_RDONLY));
+	ScopedFileDescriptor sfd (g_open (peakpath.c_str(), O_RDONLY, 0444));
 
 	if (sfd < 0) {
 		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), peakpath, strerror (errno)) << endmsg;
@@ -775,7 +775,7 @@ AudioSource::build_peaks_from_scratch ()
 int
 AudioSource::prepare_for_peakfile_writes ()
 {
-	if ((_peakfile_fd = open (peakpath.c_str(), O_CREAT|O_RDWR, 0664)) < 0) {
+	if ((_peakfile_fd = g_open (peakpath.c_str(), O_CREAT|O_RDWR, 0664)) < 0) {
 		error << string_compose(_("AudioSource: cannot open peakpath (c) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
