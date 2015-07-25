@@ -6,8 +6,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+#include <fcntl.h>
+
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
+#include <glibmm/convert.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
@@ -116,6 +119,105 @@ FilesystemTest::testCopyFileUTF8Filename ()
 
 		CPPUNIT_ASSERT (PBD::copy_file (input_path, output_path));
 	}
+}
+
+void
+FilesystemTest::testOpenFileUTF8Filename ()
+{
+	vector<string> i18n_files;
+
+	Searchpath i18n_path (test_search_path ());
+	i18n_path.add_subdirectory_to_paths ("i18n_test");
+
+	PBD::find_files_matching_pattern (i18n_files, i18n_path, "*.tst");
+
+	CPPUNIT_ASSERT (i18n_files.size () == 8);
+
+	cerr << endl;
+	cerr << "Opening " << i18n_files.size ()
+	     << " test files from: " << i18n_path.to_string () << endl;
+
+	// check that g_open will successfully open all the test files
+	for (vector<string>::iterator i = i18n_files.begin (); i != i18n_files.end ();
+	     ++i) {
+		string input_path = *i;
+
+		cerr << "Opening file: " << input_path << " with g_open" << endl;
+
+		int fdgo = g_open (input_path.c_str(), O_RDONLY, 0444);
+
+		CPPUNIT_ASSERT (fdgo != -1);
+
+		if (fdgo >= 0) {
+			::close (fdgo);
+		}
+	}
+
+#ifdef PLATFORM_WINDOWS
+	// This test is here to prove and remind us that using Glib::locale_from_utf8
+	// to convert a utf-8 encoded file path for use with ::open will not work
+	// for all file paths.
+	//
+	// It may be possible to convert a string that is utf-8 encoded that will not
+	// work with ::open(on windows) to a string that will work with ::open using
+	// Glib::locale_from_utf8 string if all the characters that are contained
+	// in the utf-8 string can be found/mapped in the system code page.
+	//
+	// European locales that only have a small amount of extra characters with
+	// accents/umlauts I'm guessing will be more likely succeed but CJK locales
+	// will almost certainly fail
+
+	bool conversion_failed = false;
+
+	for (vector<string>::iterator i = i18n_files.begin (); i != i18n_files.end ();
+	     ++i) {
+		string input_path = *i;
+		cerr << "Opening file: " << input_path << " with locale_from_utf8 and ::open "
+		     << endl;
+		string converted_input_path;
+		int fdo;
+
+		try {
+			// this will fail for utf8 that contains characters that aren't
+			// representable in the system code page
+			converted_input_path = Glib::locale_from_utf8 (input_path);
+			// conversion succeeded so we expect ::open to be successful if the
+			// current C library locale is the same as the system locale, which
+			// it should be as we haven't changed it.
+			fdo = ::open (converted_input_path.c_str (), O_RDONLY, 0444);
+			CPPUNIT_ASSERT (fdo != -1);
+
+			if (converted_input_path != input_path) {
+				cerr << "Character set conversion succeeded and strings differ for input "
+				        "string: " << input_path << endl;
+				// file path must have contained non-ASCII characters that were mapped
+				// from the system code page so we would expect the original
+				// utf-8 file path to fail with ::open
+				int fd2 = ::open (input_path.c_str (), O_RDONLY, 0444);
+				CPPUNIT_ASSERT (fd2 == -1);
+			}
+
+		} catch (const Glib::ConvertError& err) {
+			cerr << "Character set conversion failed: " << err.what () << endl;
+			// I am confident that on Windows with the test data that no locale will
+			// have a system code page containing all the characters required
+			// and conversion will fail for at least one of the filenames
+			conversion_failed = true;
+			// CPPUNIT_ASSERT (err.code() == ?);
+
+			// conversion failed so we expect the original utf-8 string to fail
+			// with ::open on Windows as the file path will not exist
+			fdo = ::open (input_path.c_str (), O_RDONLY, 0444);
+			CPPUNIT_ASSERT (fdo == -1);
+		}
+
+		if (fdo >= 0) {
+			::close (fdo);
+		}
+	}
+	// we expect at least one conversion failure with the filename test data
+	CPPUNIT_ASSERT (conversion_failed);
+#endif
 }
 
 void

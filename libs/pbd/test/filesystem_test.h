@@ -7,6 +7,7 @@ class FilesystemTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (testPathIsWithin);
 	CPPUNIT_TEST (testCopyFileASCIIFilename);
 	CPPUNIT_TEST (testCopyFileUTF8Filename);
+	CPPUNIT_TEST (testOpenFileUTF8Filename);
 	CPPUNIT_TEST (testFindFilesMatchingPattern);
 	CPPUNIT_TEST (testClearDirectory);
 	CPPUNIT_TEST (testRemoveDirectory);
@@ -17,6 +18,7 @@ public:
 	void testPathIsWithin ();
 	void testCopyFileASCIIFilename ();
 	void testCopyFileUTF8Filename ();
+	void testOpenFileUTF8Filename ();
 	void testFindFilesMatchingPattern ();
 	void testClearDirectory ();
 	void testRemoveDirectory ();
