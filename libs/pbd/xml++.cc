@@ -11,8 +11,6 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 
-#include <glibmm/convert.h>
-
 xmlChar* xml_version = xmlCharStrdup("1.0");
 
 using namespace std;
@@ -156,7 +154,7 @@ XMLTree::write() const
 	doc = xmlNewDoc(xml_version);
 	xmlSetDocCompressMode(doc, _compression);
 	writenode(doc, _root, doc->children, 1);
-	result = xmlSaveFormatFileEnc(Glib::locale_from_utf8 (_filename).c_str(), doc, "UTF-8", 1);
+	result = xmlSaveFormatFileEnc(_filename.c_str(), doc, "UTF-8", 1);
 #ifndef NDEBUG
 	if (result == -1) {
 		xmlErrorPtr xerr = xmlGetLastError ();
