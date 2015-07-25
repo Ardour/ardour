@@ -20,6 +20,11 @@
 #include <sndfile.h>
 #include <iostream>
 #include <cstring>
+#include <fcntl.h>
+
+#include <glib.h>
+#include <glib/gstdio.h>
+
 
 #include "pbd/error.h"
 #include "ardour/sndfileimportable.h"
@@ -69,8 +74,12 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 
 SndFileImportableSource::SndFileImportableSource (const string& path)
 {
+	int fd = g_open (path.c_str (), SFM_READ, 0444);
+	if (fd == -1) {
+		throw failed_constructor ();
+	}
 	memset(&sf_info, 0 , sizeof(sf_info));
-	in.reset( sf_open(Glib::locale_from_utf8(path).c_str(), SFM_READ, &sf_info), sf_close);
+	in.reset (sf_open_fd (fd, SFM_READ, &sf_info, true), sf_close);
 	if (!in) throw failed_constructor();
 
 	SF_BROADCAST_INFO binfo;
