@@ -37,6 +37,9 @@
 #include <errno.h>
 #include <time.h>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #ifdef PLATFORM_WINDOWS
 #include <windows.h> // for LARGE_INTEGER
 #endif
@@ -653,7 +656,7 @@ ARDOUR::translation_enable_path ()
 bool
 ARDOUR::translations_are_enabled ()
 {
-	int fd = ::open (ARDOUR::translation_enable_path().c_str(), O_RDONLY);
+	int fd = g_open (ARDOUR::translation_enable_path().c_str(), O_RDONLY, 0444);
 
 	if (fd < 0) {
 		return translate_by_default;
@@ -675,7 +678,7 @@ bool
 ARDOUR::set_translations_enabled (bool yn)
 {
 	string i18n_enabler = ARDOUR::translation_enable_path();
-	int fd = ::open (i18n_enabler.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0644);
+	int fd = g_open (i18n_enabler.c_str(), O_WRONLY|O_CREAT|O_TRUNC, 0644);
 
 	if (fd < 0) {
 		return false;
