@@ -79,9 +79,55 @@ tab_window_root_drop (GtkNotebook* src,
 	return ARDOUR_UI::instance()->tab_window_root_drop (src, w, x, y, user_data);
 }
 
+bool
+ARDOUR_UI::tabs_button_event (GdkEventButton* ev)
+{
+	std::vector<Widget*> children = _tabs.get_children();
+
+	for (std::vector<Widget*>::iterator w = children.begin(); w != children.end(); ++w) {
+
+		Gtk::Widget* close_button = reinterpret_cast<Gtk::Widget*> ((*w)->get_data ("close-button"));
+
+		if (close_button) {
+
+			Gtk::Allocation alloc (close_button->get_allocation());
+			int dx, dy;
+
+			/* Allocation origin uses toplevel window coordinates;
+			 * event origin uses _tabs-centric coordinate space, so
+			 * translate before computing if event is inside the
+			 * close button.
+			 */
+			
+			close_button->get_toplevel()->translate_coordinates (_tabs, alloc.get_x(), alloc.get_y(), dx, dy);
+			
+			if (ev->x >= dx &&
+			    ev->y >= dy &&
+			    ev->x < dx + alloc.get_width() &&
+			    ev->y < dy + alloc.get_height()) {
+				if (close_button->event ((GdkEvent*) ev)) {
+					return true;
+				}
+			}
+		}
+	}
+	
+	return false;
+}
+
 int
 ARDOUR_UI::setup_windows ()
 {
+	/* we don't use a widget with its own window for the tab close button,
+	   which makes it impossible to rely on GTK+ to generate signals for
+	   events occuring "in" this widget. Instead, we pre-connect a
+	   handler to the relevant events on the notebook and then check
+	   to see if the event coordinates tell us that it occured "in"
+	   the close button.
+	*/
+	_tabs.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
+	_tabs.signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
+	
 	if (create_editor ()) {
 		error << _("UI: cannot setup editor") << endmsg;
 		return -1;

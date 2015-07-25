@@ -374,6 +374,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtkmm2ext::Bindings _global_bindings;
 	
+	bool tabs_button_event (GdkEventButton* ev);
+	
 	void show_tabbable (Gtkmm2ext::Tabbable*);
 	void hide_tabbable (Gtkmm2ext::Tabbable*);
 	void detach_tabbable (Gtkmm2ext::Tabbable*);
