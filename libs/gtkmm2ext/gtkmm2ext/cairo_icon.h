@@ -20,8 +20,9 @@
 #ifndef __gtk2_ardour_cairo_icon_h__
 #define __gtk2_ardour_cairo_icon_h__
 
+#include <gtkmm/bin.h>
+
 #include "gtkmm2ext/visibility.h"
-#include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/ardour_icon.h"
 
 /** A parent class for icons that are rendered using Cairo but need to be
@@ -30,7 +31,7 @@
 
 namespace Gtkmm2ext {
 
-class LIBGTKMM2EXT_API CairoIcon : public CairoWidget
+class LIBGTKMM2EXT_API CairoIcon : public Gtk::Bin
 {
 public:
 	CairoIcon (Gtkmm2ext::ArdourIcon::Icon, uint32_t fg = 0x000000ff);
@@ -38,8 +39,11 @@ public:
 
 	void render (cairo_t *, cairo_rectangle_t*);
 	void set_fg (uint32_t fg);
+
+	bool on_expose_event (GdkEventExpose*);
 	
   private:
+	Cairo::RefPtr<Cairo::Surface> image_surface;
 	ArdourIcon::Icon icon_type;
 	uint32_t fg;
 };
