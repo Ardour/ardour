@@ -96,9 +96,9 @@ Tabbable::use_own_window (bool and_pack_it)
 }
 
 bool
-Tabbable::window_visible ()
+Tabbable::window_visible () const
 {
-	if (!own_window()) {
+	if (!_window) {
 		return false;
 	}
 
@@ -154,6 +154,8 @@ Tabbable::show_own_window (bool and_pack_it)
 	if (parent) {
 		_window->set_default_size (alloc.get_width(), alloc.get_height());
 	}
+
+	tab_requested_by_state = false;
 
 	_window->show_all ();
 	_window->present ();
@@ -271,15 +273,13 @@ Tabbable::delete_event_handler (GdkEventAny *ev)
 }
 
 bool
-Tabbable::is_tabbed () const
+Tabbable::tabbed () const
 {
-	Window* toplevel = (Window*) _contents.get_toplevel();
-
-	if (_window && (toplevel == _window)) {
+	if (_window && (current_toplevel() == _window)) {
 		return false;
 	}
 
-	if (_parent_notebook && _contents.get_parent()) {
+	if (_parent_notebook && (_parent_notebook->page_num (_contents) >= 0)) {
 		return true;
 	}
 	
@@ -320,9 +320,9 @@ Tabbable::xml_node_name()
 }
 
 bool
-Tabbable::tabbed () const
+Tabbable::tabbed_by_default() const
 {
-	return _parent_notebook && (_parent_notebook->page_num (_contents) >= 0);
+	return tab_requested_by_state;
 }
 
 XMLNode&

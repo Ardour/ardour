@@ -57,15 +57,15 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	virtual Gtk::Window* use_own_window (bool and_pack_it);
 
 	bool has_own_window () const;
-	bool is_tabbed () const;
 
 	void set_default_tabbed (bool yn);
 	
 	virtual void show_window ();
 
-	bool window_visible ();
+	bool window_visible () const;
 	bool tabbed() const;
-
+	bool tabbed_by_default () const;
+	
 	Gtk::Window* current_toplevel () const;
 
 	Gtk::Notebook* tab_root_drop ();
