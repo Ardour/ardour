@@ -54,7 +54,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	, _momentary (m)
 {
 	_learned = false; /* from URI */
-	_encoder = false;
+	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
 	last_controllable_value = 0.0f;
@@ -73,7 +73,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	set_controllable (&c);
 	
 	_learned = true; /* from controllable */
-	_encoder = false;
+	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
 	last_controllable_value = 0.0f;
@@ -304,7 +304,7 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 	if (control_additional == msg->controller_number) {
 
 		if (!controllable->is_toggle()) {
-			if (!is_encoder()) {
+			if (get_encoder() == No_enc) {
 				float new_value = msg->value;
 				float max_value = max(last_controllable_value, new_value);
 				float min_value = min(last_controllable_value, new_value);
@@ -329,12 +329,39 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 
 				last_controllable_value = new_value;
 			} else {
-				// add or subtract ticks from last value
 				int offset = (msg->value & 0x3f);
-				if (msg->value > 0x40) {
-					controllable->set_value (midi_to_control (last_value - offset + 1));
-				} else {
-					controllable->set_value (midi_to_control (last_value + offset + 1));
+				switch (get_encoder()) {
+					case Enc_L:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value - offset + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						}
+						break;
+					case Enc_R:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value - offset + 1));
+						}
+						break;
+					case Enc_2:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value - (0x7f - msg->value) + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						}
+						break;
+					case Enc_B:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value - (0x40 - offset)));
+						}
+						break;
+					default:
+						break;
+					
 				}
 				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) last_value, current_uri() ));
 
