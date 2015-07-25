@@ -108,11 +108,12 @@ FilesystemTest::testCopyFileUTF8Filename ()
 	cerr << "Copying " << i18n_files.size() << " test files from: "
 	     << i18n_path.to_string () << endl;
 
+	string output_dir = test_output_directory ("CopyFile");
+
 	for (vector<string>::iterator i = i18n_files.begin(); i != i18n_files.end(); ++i) {
 		string input_path = *i;
 		string output_file = Glib::path_get_basename(*i);
-		string output_path = test_output_directory ("CopyFile");
-		output_path = Glib::build_filename (output_path, output_file);
+		string output_path = Glib::build_filename (output_dir, output_file);
 
 		cerr << "Copying test file: " << input_path
 		     << " To " << output_path << endl;
