@@ -25,8 +25,12 @@
 #include <cerrno>
 #include <climits>
 #include <cstdarg>
+#include <fcntl.h>
 
 #include <sys/stat.h>
+
+#include <glib.h>
+#include <glib/gstdio.h>
 
 #include <glibmm/convert.h>
 #include <glibmm/fileutils.h>
@@ -240,19 +244,30 @@ SndFileSource::close ()
 int
 SndFileSource::open ()
 {
-	string path_to_open;
-
 	if (_sndfile) {
 		return 0;
 	}
-	
+
+// We really only want to use g_open for all platforms but because of this
+// method(SndfileSource::open), the compiler(or at least GCC) is confused
+// because g_open will expand to "open" on non-POSIX systems and needs the
+// global namespace qualifer. The problem is since since C99 ::g_open will
+// apparently expand to ":: open"
 #ifdef PLATFORM_WINDOWS
-	path_to_open = Glib::locale_from_utf8(_path);
+	int fd = g_open (_path.c_str(), writable() ? O_RDWR : O_RDONLY, writable() ? 0644 : 0444);
 #else
-	path_to_open = _path;
+	int fd = ::open (_path.c_str(), writable() ? O_RDWR : O_RDONLY, writable() ? 0644 : 0444);
 #endif
 
-	_sndfile = sf_open (path_to_open.c_str(), writable() ? SFM_RDWR : SFM_READ, &_info);
+	if (fd == -1) {
+		error << string_compose (
+		             _ ("SndFileSource: cannot open file \"%1\" for %2"),
+		             _path,
+		             (writable () ? "read+write" : "reading")) << endmsg;
+		return false;
+	}
+
+	_sndfile = sf_open_fd (fd, writable() ? SFM_RDWR : SFM_READ, &_info, true);
 
 	if (_sndfile == 0) {
 		char errbuf[1024];
@@ -262,10 +277,10 @@ SndFileSource::open ()
 		   so we don't want to see this message.
 		*/
 
-                cerr << "failed to open " << path_to_open << " with name " << _name << endl;
+                cerr << "failed to open " << _path << " with name " << _name << endl;
 
 		error << string_compose(_("SndFileSource: cannot open file \"%1\" for %2 (%3)"),
-					path_to_open, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
+					_path, (writable() ? "read+write" : "reading"), errbuf) << endmsg;
 #endif
 		return -1;
 	}
@@ -327,7 +342,7 @@ SndFileSource::open ()
 
                         if (!_broadcast_info->write_to_file (_sndfile)) {
                                 error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
-                                                         path_to_open, _broadcast_info->get_error())
+                                                         _path, _broadcast_info->get_error())
                                       << endmsg;
                                 _flags = Flag (_flags & ~Broadcast);
                                 delete _broadcast_info;
@@ -922,7 +937,18 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
 
-	if ((sf = sf_open (const_cast<char*>(Glib::locale_from_utf8(path).c_str()), SFM_READ, &sf_info)) == 0) {
+#ifdef PLATFORM_WINDOWS
+	int fd = g_open (path.c_str(), O_RDONLY, 0444);
+#else
+	int fd = ::open (path.c_str(), O_RDONLY, 0444);
+#endif
+
+	if (fd == -1) {
+		error << string_compose ( _("SndFileSource: cannot open file \"%1\" for reading"), path)
+		      << endmsg;
+		return false;
+	}
+	if ((sf = sf_open_fd (fd, SFM_READ, &sf_info, true)) == 0) {
 		char errbuf[1024];
 		error_msg = sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 		return false;
