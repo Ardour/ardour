@@ -343,6 +343,17 @@ copy_recurse(const std::string & from_path, const std::string & to_dir)
 	}
 }
 
+bool
+touch_file (const std::string& path)
+{
+	int fd = g_open (path.c_str(), O_RDWR|O_CREAT, 0660);
+	if (fd >= 0) {
+		close (fd);
+		return true;
+	}
+	return false;
+}
+
 std::string
 get_absolute_path (const std::string & p)
 {

@@ -42,9 +42,6 @@
 #include <errno.h>
 #include <regex.h>
 
-#include <glib.h>
-#include <glib/gstdio.h>
-
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
@@ -297,17 +294,6 @@ ARDOUR::cmp_nocase_utf8 (const string& s1, const string& s2)
 	}
 
 	return retval;
-}
-
-int
-ARDOUR::touch_file (string path)
-{
-	int fd = g_open (path.c_str(), O_RDWR|O_CREAT, 0660);
-	if (fd >= 0) {
-		close (fd);
-		return 0;
-	}
-	return 1;
 }
 
 string

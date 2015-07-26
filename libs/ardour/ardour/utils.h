@@ -63,8 +63,6 @@ LIBARDOUR_API std::string bump_name_number(const std::string& s);
 LIBARDOUR_API int cmp_nocase (const std::string& s, const std::string& s2);
 LIBARDOUR_API int cmp_nocase_utf8 (const std::string& s1, const std::string& s2);
 
-LIBARDOUR_API int touch_file(std::string path);
-
 LIBARDOUR_API std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
 LIBARDOUR_API bool path_is_paired (std::string path, std::string& pair_base);
 

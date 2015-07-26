@@ -34,9 +34,10 @@
 #include <glibmm/convert.h>
 
 #include "pbd/compose.h"
+#include "pbd/error.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/audio_library.h"
-#include "ardour/utils.h"
 #include "ardour/filesystem_paths.h"
 
 #include "i18n.h"

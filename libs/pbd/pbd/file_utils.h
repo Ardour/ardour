@@ -182,6 +182,14 @@ LIBPBD_API void copy_files(const std::string & from_path, const std::string & to
 LIBPBD_API void copy_recurse(const std::string & from_path, const std::string & to_dir);
 
 /**
+ * Update the access and modification times of file at @path, creating file if it
+ * doesn't already exist.
+ * @path file path to touch
+ * @return true if file exists or was created and access time updated.
+ */
+LIBPBD_API bool touch_file (const std::string& path);
+
+/**
  * Take a (possibly) relative path and make it absolute
  * @return An absolute path
  */
