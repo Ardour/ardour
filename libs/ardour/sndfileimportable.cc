@@ -74,7 +74,7 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 
 SndFileImportableSource::SndFileImportableSource (const string& path)
 {
-	int fd = g_open (path.c_str (), SFM_READ, 0444);
+	int fd = g_open (path.c_str (), O_RDONLY, 0444);
 	if (fd == -1) {
 		throw failed_constructor ();
 	}

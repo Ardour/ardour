@@ -254,9 +254,9 @@ SndFileSource::open ()
 // global namespace qualifer. The problem is since since C99 ::g_open will
 // apparently expand to ":: open"
 #ifdef PLATFORM_WINDOWS
-	int fd = g_open (_path.c_str(), writable() ? O_RDWR : O_RDONLY, writable() ? 0644 : 0444);
+	int fd = g_open (_path.c_str(), writable() ? O_CREAT | O_RDWR : O_RDONLY, writable() ? 0644 : 0444);
 #else
-	int fd = ::open (_path.c_str(), writable() ? O_RDWR : O_RDONLY, writable() ? 0644 : 0444);
+	int fd = ::open (_path.c_str(), writable() ? O_CREAT | O_RDWR : O_RDONLY, writable() ? 0644 : 0444);
 #endif
 
 	if (fd == -1) {
