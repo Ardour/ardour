@@ -65,13 +65,9 @@ ARDOUR_UI::we_have_dependents ()
 
 	/* catch up on tabbable state */
 
-	std::cerr << "Tab catch up\n";
-	
 	tabbable_state_change (*editor);
 	tabbable_state_change (*mixer);
 	tabbable_state_change (*rc_option_editor);
-	
-	std::cerr << "Tab catch done\n";
 	
 	/* all actions are defined */
 
