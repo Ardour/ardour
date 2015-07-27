@@ -1922,7 +1922,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	TempoMetric             tmetric  = tmap.metric_at(_session.transport_frame(), &metric_i);
 
 	if (_freewheel_control_port) {
-		*_freewheel_control_port = _session.engine().freewheeling();
+		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
 	}
 
 	if (_bpm_control_port) {
