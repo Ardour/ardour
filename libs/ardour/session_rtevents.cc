@@ -62,11 +62,16 @@ Session::set_solo (boost::shared_ptr<RouteList> rl, bool yn, SessionEvent::RTeve
 void
 Session::rt_set_solo (boost::shared_ptr<RouteList> rl, bool yn, bool /* group_override */)
 {
+	solo_update_disabled = true;
+	
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if (!(*i)->is_auditioner()) {
 			(*i)->set_solo (yn, this);
 		}
 	}
+
+	solo_update_disabled = false;
+	routes_solo_changed (rl);
 
 	set_dirty();
 }
