@@ -46,14 +46,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 void
-ARDOUR_UI::toggle_keep_tearoffs ()
-{
-	ActionManager::toggle_config_state ("Common", "KeepTearoffs", &UIConfiguration::set_keep_tearoffs, &UIConfiguration::get_keep_tearoffs);
-
-	ARDOUR_UI::update_tearoff_visibility();
-}
-
-void
 ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
@@ -346,8 +338,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 		ActionManager::map_some_state ("options", "SendMMC", &RCConfiguration::get_send_mmc);
 
-	} else if (p == "keep-tearoffs") {
-		ActionManager::map_some_state ("Common", "KeepTearoffs", &UIConfiguration::get_keep_tearoffs);
 	} else if (p == "mmc-control") {
 		ActionManager::map_some_state ("options", "UseMMC", &RCConfiguration::get_mmc_control);
 	} else if (p == "midi-feedback") {
@@ -411,13 +401,13 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 		if (editor_meter) {
 			if (meter_box.get_parent()) {
-				transport_tearoff_hbox.remove (meter_box);
-				transport_tearoff_hbox.remove (editor_meter_peak_display);
+				transport_hbox.remove (meter_box);
+				transport_hbox.remove (editor_meter_peak_display);
 			}
 
 			if (show) {
-				transport_tearoff_hbox.pack_start (meter_box, false, false);
-				transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
+				transport_hbox.pack_start (meter_box, false, false);
+				transport_hbox.pack_start (editor_meter_peak_display, false, false);
 				meter_box.show();
 				editor_meter_peak_display.show();
 			}

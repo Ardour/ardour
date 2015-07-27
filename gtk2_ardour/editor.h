@@ -62,7 +62,6 @@
 #include "selection_memento.h"
 
 namespace Gtkmm2ext {
-	class TearOff;
 	class Bindings;
 }
 
@@ -383,9 +382,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void maximise_editing_space();
 	void restore_editing_space();
 
-	void update_tearoff_visibility();
-	void reattach_all_tearoffs ();
-
 	double get_y_origin () const;
 	void reset_x_origin (framepos_t);
 	void reset_x_origin_to_follow_playhead ();
@@ -440,9 +436,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void center_screen (framepos_t);
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
-
-	Gtkmm2ext::TearOff* mouse_mode_tearoff () const { return _mouse_mode_tearoff; }
-	Gtkmm2ext::TearOff* tools_tearoff () const { return _tools_tearoff; }
 
 	void snap_to (framepos_t&       first,
 	              ARDOUR::RoundMode direction = ARDOUR::RoundNearest,
@@ -1740,7 +1733,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
-	Gtkmm2ext::TearOff*      _mouse_mode_tearoff;
 	ArdourButton mouse_select_button;
 	ArdourButton mouse_draw_button;
 	ArdourButton mouse_move_button;
@@ -1799,22 +1791,16 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
 	Gtk::HBox           _zoom_box;
-	Gtkmm2ext::TearOff* _zoom_tearoff;
 	void                zoom_adjustment_changed();
 
 	void setup_toolbar ();
 
 	void setup_tooltips ();
 
-	Gtkmm2ext::TearOff*     _tools_tearoff;
 	Gtk::HBox                toolbar_hbox;
 	Gtk::EventBox            toolbar_base;
 	Gtk::Frame               toolbar_frame;
 	Gtk::Viewport           _toolbar_viewport;
-
-	/* midi toolbar */
-
-	Gtk::HBox                panic_box;
 
 	void setup_midi_toolbar ();
 
@@ -2034,8 +2020,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void cms_new (boost::shared_ptr<ARDOUR::Route>);
 	void current_mixer_strip_hidden ();
 
-	void detach_tearoff (Gtk::Box* b, Gtk::Window* w);
-	void reattach_tearoff (Gtk::Box* b, Gtk::Window* w, int32_t n);
 #ifdef GTKOSX
 	void ensure_all_elements_drawn ();
 #endif

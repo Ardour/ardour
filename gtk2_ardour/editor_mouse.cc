@@ -34,7 +34,6 @@
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/tearoff.h"
 
 #include "canvas/canvas.h"
 

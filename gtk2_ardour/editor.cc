@@ -59,7 +59,6 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/grouped_buttons.h"
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 #include "gtkmm2ext/choice.h"
@@ -397,10 +396,7 @@ Editor::Editor ()
 	, bbt_beat_subdivision (4)
 	, _visible_track_count (-1)
 	,  toolbar_selection_clock_table (2,3)
-	, _mouse_mode_tearoff (0)
 	,  automation_mode_button (_("mode"))
-	, _zoom_tearoff (0)
-	, _tools_tearoff (0)
 	,  _toolbar_viewport (*manage (new Gtk::Adjustment (0, 0, 1e10)), *manage (new Gtk::Adjustment (0, 0, 1e10)))
 	, selection (new Selection (this))
 	, cut_buffer (new Selection (this))
@@ -2893,25 +2889,9 @@ Editor::setup_toolbar ()
 	if (!ARDOUR::Profile->get_trx()) {
 		mode_box->pack_start (edit_mode_selector, false, false);
 	}
+	
 	mode_box->pack_start (*mouse_mode_box, false, false);
-
-	_mouse_mode_tearoff = manage (new TearOff (*mode_box));
-	_mouse_mode_tearoff->set_name ("MouseModeBase");
-	_mouse_mode_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_mouse_mode_tearoff->tearoff_window()), false);
-
-	if (Profile->get_sae() || Profile->get_mixbus() ) {
-		_mouse_mode_tearoff->set_can_be_torn_off (false);
-	}
-
-	_mouse_mode_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                                 &_mouse_mode_tearoff->tearoff_window()));
-	_mouse_mode_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                                 &_mouse_mode_tearoff->tearoff_window(), 1));
-	_mouse_mode_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                                 &_mouse_mode_tearoff->tearoff_window()));
-	_mouse_mode_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                                  &_mouse_mode_tearoff->tearoff_window(), 1));
-
+	
 	/* Zoom */
 
 	_zoom_box.set_spacing (2);
@@ -2982,23 +2962,6 @@ Editor::setup_toolbar ()
 		_zoom_box.pack_start (tav_expand_button);
 	}
 
-	if (!ARDOUR::Profile->get_trx()) {
-		_zoom_tearoff = manage (new TearOff (_zoom_box));
-
-		_zoom_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-							   &_zoom_tearoff->tearoff_window()));
-		_zoom_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-							   &_zoom_tearoff->tearoff_window(), 0));
-		_zoom_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-							   &_zoom_tearoff->tearoff_window()));
-		_zoom_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-							    &_zoom_tearoff->tearoff_window(), 0));
-	}
-
-	if (Profile->get_sae() || Profile->get_mixbus() ) {
-		_zoom_tearoff->set_can_be_torn_off (false);
-	}
-
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
 
@@ -3031,37 +2994,19 @@ Editor::setup_toolbar ()
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing(2);
 
-	_tools_tearoff = manage (new TearOff (*hbox));
-	_tools_tearoff->set_name ("MouseModeBase");
-	_tools_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &_tools_tearoff->tearoff_window()), false);
-
-	if (Profile->get_sae() || Profile->get_mixbus()) {
-		_tools_tearoff->set_can_be_torn_off (false);
-	}
-
-	_tools_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                            &_tools_tearoff->tearoff_window()));
-	_tools_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                            &_tools_tearoff->tearoff_window(), 0));
-	_tools_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &Editor::detach_tearoff), static_cast<Box*>(&toolbar_hbox),
-	                                            &_tools_tearoff->tearoff_window()));
-	_tools_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &Editor::reattach_tearoff), static_cast<Box*> (&toolbar_hbox),
-	                                             &_tools_tearoff->tearoff_window(), 0));
-
 	toolbar_hbox.set_spacing (2);
 	toolbar_hbox.set_border_width (1);
 
-	toolbar_hbox.pack_start (*_mouse_mode_tearoff, false, false);
+	toolbar_hbox.pack_start (*mode_box, false, false);
 	if (!ARDOUR::Profile->get_trx()) {
-		toolbar_hbox.pack_start (*_zoom_tearoff, false, false);
-		toolbar_hbox.pack_start (*_tools_tearoff, false, false);
+		toolbar_hbox.pack_start (_zoom_box, false, false);
+		toolbar_hbox.pack_start (*hbox, false, false);
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
 		hbox->pack_start (snap_box, false, false);
 		hbox->pack_start (*nudge_box, false, false);
 	}
-	hbox->pack_start (panic_box, false, false);
 
 	hbox->show_all ();
 
@@ -3886,24 +3831,6 @@ Editor::pane_allocation_handler (Allocation &alloc, Paned* which)
 }
 
 void
-Editor::detach_tearoff (Box* /*b*/, Window* /*w*/)
-{
-	if ((_tools_tearoff->torn_off() || !_tools_tearoff->visible()) &&
-	    (_mouse_mode_tearoff->torn_off() || !_mouse_mode_tearoff->visible()) &&
-	    (_zoom_tearoff && (_zoom_tearoff->torn_off() || !_zoom_tearoff->visible()))) {
-		top_hbox.remove (toolbar_frame);
-	}
-}
-
-void
-Editor::reattach_tearoff (Box* /*b*/, Window* /*w*/, int32_t /*n*/)
-{
-	if (toolbar_frame.get_parent() == 0) {
-		top_hbox.pack_end (toolbar_frame);
-	}
-}
-
-void
 Editor::set_show_measures (bool yn)
 {
 	if (_show_measures != yn) {
@@ -4180,25 +4107,6 @@ Editor::session_state_saved (string)
 {
 	update_title ();
 	_snapshots->redisplay ();
-}
-
-void
-Editor::update_tearoff_visibility()
-{
-	bool visible = UIConfiguration::instance().get_keep_tearoffs();
-	_mouse_mode_tearoff->set_visible (visible);
-	_tools_tearoff->set_visible (visible);
-	if (_zoom_tearoff) {
-		_zoom_tearoff->set_visible (visible);
-	}
-}
-
-void
-Editor::reattach_all_tearoffs ()
-{
-	if (_mouse_mode_tearoff) _mouse_mode_tearoff->put_it_back ();
-	if (_tools_tearoff) _tools_tearoff->put_it_back ();
-	if (_zoom_tearoff) _zoom_tearoff->put_it_back ();
 }
 
 void

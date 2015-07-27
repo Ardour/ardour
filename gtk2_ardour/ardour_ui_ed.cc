@@ -32,10 +32,10 @@
 #include <glibmm/miscutils.h>
 #include <gtk/gtk.h>
 
+#include "gtkmm2ext/cairo_packer.h"
+#include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
-#include "gtkmm2ext/tearoff.h"
-#include "gtkmm2ext/cairo_packer.h"
 
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
@@ -240,7 +240,6 @@ ARDOUR_UI::install_actions ()
 
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
 	ActionManager::register_toggle_action (common_actions, X_("ToggleMaximalMixer"), _("Maximise Mixer Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_space));
-	act = ActionManager::register_toggle_action (common_actions, X_("KeepTearoffs"), _("Show Toolbars"), mem_fun (*this, &ARDOUR_UI::toggle_keep_tearoffs));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleMixerList"), _("Toggle Mixer List"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_list));
@@ -253,8 +252,6 @@ if (Profile->get_mixbus())
 	ActionManager::register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 
 	ActionManager::register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
-
-	ActionManager::register_action (common_actions, X_("reattach-all-tearoffs"), _("Reattach All Tearoffs"), sigc::mem_fun (*this, &ARDOUR_UI::reattach_all_tearoffs));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -683,25 +680,11 @@ ARDOUR_UI::save_ardour_state ()
 
 	WM::Manager::instance().add_state (*window_node);
 
-	/* tearoffs */
-
 	XMLNode* tearoff_node = new XMLNode (X_("Tearoffs"));
-
-	if (transport_tearoff) {
-		XMLNode* t = new XMLNode (X_("transport"));
-		transport_tearoff->add_state (*t);
-		tearoff_node->add_child_nocopy (*t);
-	}
 
 	if (mixer->monitor_section()) {
 		XMLNode* t = new XMLNode (X_("monitor-section"));
 		mixer->monitor_section()->tearoff().add_state (*t);
-		tearoff_node->add_child_nocopy (*t);
-	}
-
-	if (editor->mouse_mode_tearoff()) {
-		XMLNode* t = new XMLNode (X_("mouse-mode"));
-		editor->mouse_mode_tearoff ()->add_state (*t);
 		tearoff_node->add_child_nocopy (*t);
 	}
 

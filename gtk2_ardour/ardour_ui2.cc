@@ -36,7 +36,6 @@
 #include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/click_box.h"
-#include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/window_title.h"
 
 #include "ardour/profile.h"
@@ -231,18 +230,8 @@ ARDOUR_UI::setup_transport ()
 {
 	RefPtr<Action> act;
 
-	transport_tearoff_hbox.set_border_width (PX_SCALE(3));
-	transport_tearoff_hbox.set_spacing (PX_SCALE(3));
-
-	transport_tearoff = manage (new TearOff (transport_tearoff_hbox));
-	transport_tearoff->set_name ("TransportBase");
-	transport_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), &transport_tearoff->tearoff_window()), false);
-
-	if (Profile->get_sae() || Profile->get_mixbus()) {
-		transport_tearoff->set_can_be_torn_off (false);
-	}
-
-	transport_hbox.pack_start (*transport_tearoff, true, false);
+	transport_hbox.set_border_width (PX_SCALE(3));
+	transport_hbox.set_spacing (PX_SCALE(3));
 
 	transport_base.set_name ("TransportBase");
 	transport_base.add (transport_hbox);
@@ -250,15 +239,6 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.set_shadow_type (SHADOW_OUT);
 	transport_frame.set_name ("BaseFrame");
 	transport_frame.add (transport_base);
-
-	transport_tearoff->Detach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Attach.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						 static_cast<Widget*> (&transport_frame), 1));
-	transport_tearoff->Hidden.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::detach_tearoff), static_cast<Box*>(&top_packer),
-						 static_cast<Widget*>(&transport_frame)));
-	transport_tearoff->Visible.connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::reattach_tearoff), static_cast<Box*> (&top_packer),
-						  static_cast<Widget*> (&transport_frame), 1));
 
 	auto_return_button.set_text(_("Auto Return"));
 
@@ -433,11 +413,7 @@ ARDOUR_UI::setup_transport ()
 
 	time_info_box = manage (new TimeInfoBox);
 
-	if (ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
-	}
-
-	transport_tearoff_hbox.pack_start (*transport_vbox, false, false);
+	transport_hbox.pack_start (*transport_vbox, false, true);
 
 	/* transport related toggle controls */
 
@@ -451,59 +427,34 @@ ARDOUR_UI::setup_transport ()
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*auto_box, false, false);
+		transport_hbox.pack_start (*auto_box, false, false);
 	}
-	transport_tearoff_hbox.pack_start (*clock_box, true, true);
+	transport_hbox.pack_start (*clock_box, true, true);
 
 	if (ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*auto_box, false, false);
+		transport_hbox.pack_start (*auto_box, false, false);
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (*time_info_box, false, false);
+		transport_hbox.pack_start (*time_info_box, false, false);
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
-		transport_tearoff_hbox.pack_start (alert_box, false, false);
-		transport_tearoff_hbox.pack_start (meter_box, false, false);
-		transport_tearoff_hbox.pack_start (editor_meter_peak_display, false, false);
+		transport_hbox.pack_start (alert_box, false, false);
+		transport_hbox.pack_start (meter_box, false, false);
+		transport_hbox.pack_start (editor_meter_peak_display, false, false);
 	}
 
 	if (Profile->get_sae()) {
 		Image* img = manage (new Image ((::get_icon (X_("sae")))));
-		transport_tearoff_hbox.pack_end (*img, false, false);
+		transport_hbox.pack_end (*img, false, false);
 	}
 
 	/* desensitize */
 
 	set_transport_sensitivity (false);
-
-	XMLNode* tnode = tearoff_settings ("transport");
-	if (tnode) {
-		transport_tearoff->set_state (*tnode);
-	}
 }
 #undef PX_SCALE
-
-void
-ARDOUR_UI::detach_tearoff (Box* b, Widget* w)
-{
-	b->remove (*w);
-}
-
-void
-ARDOUR_UI::reattach_tearoff (Box* b, Widget* w, int32_t n)
-{
-	b->pack_start (*w);
-	b->reorder_child (*w, n);
-}
-
-void
-ARDOUR_UI::reattach_all_tearoffs ()
-{
-	if (transport_tearoff) transport_tearoff->put_it_back();
-	if (editor) editor->reattach_all_tearoffs ();
-}
 
 void
 ARDOUR_UI::soloing_changed (bool onoff)
@@ -674,14 +625,6 @@ ARDOUR_UI::editor_realized ()
 	Config->map_parameters (pc);
 
 	UIConfiguration::instance().reset_dpi ();
-}
-
-void
-ARDOUR_UI::update_tearoff_visibility ()
-{
-	if (editor) {
-		editor->update_tearoff_visibility ();
-	}
 }
 
 void

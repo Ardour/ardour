@@ -63,10 +63,6 @@ namespace Gtk {
 	class Menu;
 }
 
-namespace Gtkmm2ext {
-        class TearOff;
-}
-
 class AudioRegionView;
 class AutomationLine;
 class AutomationTimeAxisView;
@@ -284,8 +280,6 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual void update_tearoff_visibility () = 0;
-	virtual void reattach_all_tearoffs () = 0;
 	virtual framepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (framepos_t, RegionSelection&) = 0;
@@ -378,9 +372,6 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
 	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
 	virtual TrackViewList const & get_track_views () = 0;
-
-	virtual Gtkmm2ext::TearOff* mouse_mode_tearoff () const = 0;
-	virtual Gtkmm2ext::TearOff* tools_tearoff () const = 0;
 
 	virtual DragManager* drags () const = 0;
         virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
