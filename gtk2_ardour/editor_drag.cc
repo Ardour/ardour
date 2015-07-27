@@ -3763,7 +3763,7 @@ MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
 	Gtk::Window* toplevel = _editor->current_toplevel();
-	_marker = reinterpret_cast<Marker*> (_item->get_data ("marker"));
+	_marker = reinterpret_cast<ArdourMarker*> (_item->get_data ("marker"));
 
 	assert (_marker);
 
