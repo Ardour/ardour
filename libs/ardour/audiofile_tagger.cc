@@ -43,6 +43,16 @@ bool
 AudiofileTagger::tag_file (std::string const & filename, SessionMetadata const & metadata)
 {
 	TagLib::FileRef file (filename.c_str());
+	if (file.isNull()) {
+		std::cerr << "TagLib::FileRef is null for file" << filename  << std::endl;
+		return true; // continue anyway?!
+	}
+
+	if (!file.tag()) {
+		std::cerr << "TagLib::Tag is null for file" << filename  << std::endl;
+		return true; // continue anyway?!
+	}
+
 	TagLib::Tag & tag (*file.tag());
 
 	tag_generic (tag, metadata);
