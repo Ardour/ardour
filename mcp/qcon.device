@@ -2,6 +2,7 @@
   <Name value="Qcon"/>
   <Strips value="8"/>
   <Extenders value="0"/>
+  <MasterPosition value="0"/>
   <MasterFader value="yes"/>
   <TimecodeDisplay value="yes"/>
   <TwoCharacterDisplay value="no"/>

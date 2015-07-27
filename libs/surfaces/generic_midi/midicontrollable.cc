@@ -54,6 +54,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	, _momentary (m)
 {
 	_learned = false; /* from URI */
+	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
 	last_controllable_value = 0.0f;
@@ -72,6 +73,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	set_controllable (&c);
 	
 	_learned = true; /* from controllable */
+	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
 	last_controllable_value = 0.0f;
@@ -188,8 +190,9 @@ MIDIControllable::control_to_midi (float val)
 			val = actl->internal_to_interface(val);
 		}
 	}
-
-	return (val - control_min) / control_range * max_value_for_type ();
+	// fiddle value of max so value doesn't jump from 125 to 127 for 1.0
+	// otherwise decrement won't work.
+	return (val - control_min) / control_range * (max_value_for_type () - 1);
 }
 
 float
@@ -197,7 +200,7 @@ MIDIControllable::midi_to_control (int val)
 {
         /* fiddle with MIDI value so that we get an odd number of integer steps
            and can thus represent "middle" precisely as 0.5. this maps to
-           the range 0..+1.0
+           the range 0..+1.0 (0 to 126)
         */
 
         float fv = (val == 0 ? 0 : float (val - 1) / (max_value_for_type() - 1));
@@ -301,30 +304,67 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 	if (control_additional == msg->controller_number) {
 
 		if (!controllable->is_toggle()) {
+			if (get_encoder() == No_enc) {
+				float new_value = msg->value;
+				float max_value = max(last_controllable_value, new_value);
+				float min_value = min(last_controllable_value, new_value);
+				float range = max_value - min_value;
+				float threshold = (float) _surface->threshold ();
 
-			float new_value = msg->value;
-			float max_value = max(last_controllable_value, new_value);
-			float min_value = min(last_controllable_value, new_value);
-			float range = max_value - min_value;
-			float threshold = (float) _surface->threshold ();
+				bool const in_sync = (
+					range < threshold &&
+					controllable->get_value() <= midi_to_control(max_value) &&
+					controllable->get_value() >= midi_to_control(min_value)
+					);
 
-			bool const in_sync = (
-				range < threshold &&
-				controllable->get_value() <= midi_to_control(max_value) &&
-				controllable->get_value() >= midi_to_control(min_value)
-				);
+				/* If the surface is not motorised, we try to prevent jumps when
+				   the MIDI controller and controllable are out of sync.
+				   There might be a better way of doing this.
+				*/
 
-			/* If the surface is not motorised, we try to prevent jumps when
-			   the MIDI controller and controllable are out of sync.
-			   There might be a better way of doing this.
-			*/
+				if (in_sync || _surface->motorised ()) {
+					controllable->set_value (midi_to_control (new_value));
+				}
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
 
-			if (in_sync || _surface->motorised ()) {
-				controllable->set_value (midi_to_control (new_value));
+				last_controllable_value = new_value;
+			} else {
+				int offset = (msg->value & 0x3f);
+				switch (get_encoder()) {
+					case Enc_L:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value - offset + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						}
+						break;
+					case Enc_R:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value - offset + 1));
+						}
+						break;
+					case Enc_2:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value - (0x7f - msg->value) + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						}
+						break;
+					case Enc_B:
+						if (msg->value > 0x40) {
+							controllable->set_value (midi_to_control (last_value + offset + 1));
+						} else {
+							controllable->set_value (midi_to_control (last_value - (0x40 - offset)));
+						}
+						break;
+					default:
+						break;
+				}
+				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (int) last_value, current_uri() ));
+
 			}
-			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI CC %1 value %2  %3\n", (int) msg->controller_number, (float) midi_to_control(new_value), current_uri() ));
-
-			last_controllable_value = new_value;
 		} else {
 			if (msg->value > 64.0f) {
 				controllable->set_value (1);
@@ -347,14 +387,16 @@ MIDIControllable::midi_sense_program_change (Parser &, MIDI::byte msg)
 			return;
 		}
 	}
+	if (msg == control_additional) {
 
-	if (!controllable->is_toggle()) {
-		controllable->set_value (midi_to_control (msg));
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) midi_to_control (msg), current_uri() ));
-	} else if (msg == control_additional) {
-		float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
-		controllable->set_value (new_value);
-		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
+		if (!controllable->is_toggle()) {
+			controllable->set_value (1.0);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value 1.0  %3\n", (int) msg, current_uri() ));
+		} else  {
+			float new_value = controllable->get_value() > 0.5f ? 0.0f : 1.0f;
+			controllable->set_value (new_value);
+			DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("MIDI program %1 value %2  %3\n", (int) msg, (float) new_value, current_uri()));
+		}
 	}
 
 	last_value = (MIDI::byte) (controllable->get_value() * 127.0); // to prevent feedback fights
@@ -394,6 +436,7 @@ MIDIControllable::midi_receiver (Parser &, MIDI::byte *msg, size_t /*len*/)
 		return;
 	}
 
+	_surface->check_used_event(msg[0], msg[1]);
 	bind_midi ((channel_t) (msg[0] & 0xf), eventType (msg[0] & 0xF0), msg[1]);
 
 	if (controllable) {

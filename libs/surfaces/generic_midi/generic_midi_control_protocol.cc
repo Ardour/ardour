@@ -299,6 +299,7 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 	}
 
 	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Learn binding: Controlable number: %1\n", c));
 
 	MIDIControllables::iterator tmp;
 	for (MIDIControllables::iterator i = controllables.begin(); i != controllables.end(); ) {
@@ -350,7 +351,6 @@ GenericMidiControlProtocol::start_learning (Controllable* c)
 
 		pending_controllables.push_back (element);
 	}
-
 	mc->learn_about_external_control ();
 	return true;
 }
@@ -425,6 +425,7 @@ GenericMidiControlProtocol::delete_binding (PBD::Controllable* control)
 	}
 }
 
+// This next function seems unused
 void
 GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos, int control_number)
 {
@@ -460,6 +461,65 @@ GenericMidiControlProtocol::create_binding (PBD::Controllable* control, int pos,
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Create binding: Channel: %1 Controller: %2 Value: %3 \n", channel, MIDI::controller, value));
 		controllables.push_back (mc);
 	}
+}
+
+void
+GenericMidiControlProtocol::check_used_event (int pos, int control_number)
+{
+	Glib::Threads::Mutex::Lock lm2 (controllables_lock);
+
+	MIDI::channel_t channel = (pos & 0xf);
+	MIDI::byte value = control_number;
+
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("checking for used event: Channel: %1 Controller: %2 value: %3\n", (int) channel, (pos & 0xf0), (int) value));
+
+	// Remove any old binding for this midi channel/type/value pair
+	// Note:  can't use delete_binding() here because we don't know the specific controllable we want to remove, only the midi information
+	for (MIDIControllables::iterator iter = controllables.begin(); iter != controllables.end();) {
+		MIDIControllable* existingBinding = (*iter);
+		if ( (existingBinding->get_control_type() & 0xf0 ) == (pos & 0xf0) && (existingBinding->get_control_channel() & 0xf ) == channel ) {
+			if ( ((int) existingBinding->get_control_additional() == (int) value) || ((pos & 0xf0) == MIDI::pitchbend)) {
+				DEBUG_TRACE (DEBUG::GenericMidi, "checking: found match, delete old binding.\n");
+				delete existingBinding;
+				iter = controllables.erase (iter);
+			} else {
+				++iter;
+			}
+		} else {
+			++iter;
+		}
+	}
+
+	for (MIDIFunctions::iterator iter = functions.begin(); iter != functions.end();) {
+		MIDIFunction* existingBinding = (*iter);
+		if ( (existingBinding->get_control_type() & 0xf0 ) == (pos & 0xf0) && (existingBinding->get_control_channel() & 0xf ) == channel ) {
+			if ( ((int) existingBinding->get_control_additional() == (int) value) || ((pos & 0xf0) == MIDI::pitchbend)) {
+				DEBUG_TRACE (DEBUG::GenericMidi, "checking: found match, delete old binding.\n");
+				delete existingBinding;
+				iter = functions.erase (iter);
+			} else {
+				++iter;
+			}
+		} else {
+			++iter;
+		}
+	}
+
+	for (MIDIActions::iterator iter = actions.begin(); iter != actions.end();) {
+		MIDIAction* existingBinding = (*iter);
+		if ( (existingBinding->get_control_type() & 0xf0 ) == (pos & 0xf0) && (existingBinding->get_control_channel() & 0xf ) == channel ) {
+			if ( ((int) existingBinding->get_control_additional() == (int) value) || ((pos & 0xf0) == MIDI::pitchbend)) {
+				DEBUG_TRACE (DEBUG::GenericMidi, "checking: found match, delete old binding.\n");
+				delete existingBinding;
+				iter = actions.erase (iter);
+			} else {
+				++iter;
+			}
+		} else {
+			++iter;
+		}
+	}
+
 }
 
 XMLNode&
@@ -550,7 +610,6 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 
 	{
 		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
-		controllables.clear ();
 		nlist = node.children(); // "Controls"
 
 		if (!nlist.empty()) {
@@ -713,6 +772,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	MIDI::eventType ev;
 	int intval;
 	bool momentary;
+	MIDIControllable::Encoder encoder = MIDIControllable::No_enc;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
 		ev = MIDI::controller;
@@ -722,6 +782,18 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 		ev = MIDI::program;
 	} else if ((prop = node.property (X_("pb"))) != 0) {
 		ev = MIDI::pitchbend;
+	} else if ((prop = node.property (X_("enc-l"))) != 0) {
+		encoder = MIDIControllable::Enc_L;
+		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("enc-r"))) != 0) {
+		encoder = MIDIControllable::Enc_R;
+		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("enc-2"))) != 0) {
+		encoder = MIDIControllable::Enc_2;
+		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("enc-b"))) != 0) {
+		encoder = MIDIControllable::Enc_B;
+		ev = MIDI::controller;
 	} else {
 		return 0;
 	}
@@ -761,6 +833,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 		return 0;
 	}
 
+	mc->set_encoder (encoder);
 	mc->bind_midi (channel, ev, detail);
 
 	return mc;

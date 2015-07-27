@@ -59,6 +59,14 @@ class MIDIControllable : public PBD::Stateful
 	uint32_t rid() const { return _rid; }
 	std::string what() const { return _what; }
 
+	enum Encoder {
+		No_enc,
+		Enc_R,
+		Enc_L,
+		Enc_2,
+		Enc_B,
+	};
+
 	MIDI::byte* write_feedback (MIDI::byte* buf, int32_t& bufsize, bool force = false);
 	
 	void midi_rebind (MIDI::channel_t channel=-1);
@@ -75,7 +83,10 @@ class MIDIControllable : public PBD::Stateful
 
 	bool learned() const { return _learned; }
 
-        MIDI::Parser& get_parser() { return _parser; }
+	Encoder get_encoder() const { return _encoder; }
+	void set_encoder (Encoder val) { _encoder = val; }
+
+	MIDI::Parser& get_parser() { return _parser; }
 	PBD::Controllable* get_controllable() const { return controllable; }
 	void set_controllable (PBD::Controllable*);
 	const std::string& current_uri() const { return _current_uri; }
@@ -109,6 +120,7 @@ class MIDIControllable : public PBD::Stateful
 	bool            _momentary;
 	bool            _is_gain_controller;
 	bool            _learned;
+	Encoder			_encoder;
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
