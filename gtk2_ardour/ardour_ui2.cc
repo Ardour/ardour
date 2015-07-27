@@ -69,16 +69,6 @@ using namespace Glib;
 using namespace ARDOUR_UI_UTILS;
 
 
-static GtkNotebook*
-tab_window_root_drop (GtkNotebook* src,
-		      GtkWidget* w,
-		      gint x,
-		      gint y,
-		      gpointer user_data)
-{
-	return ARDOUR_UI::instance()->tab_window_root_drop (src, w, x, y, user_data);
-}
-
 bool
 ARDOUR_UI::tabs_button_event (GdkEventButton* ev)
 {
@@ -115,136 +105,6 @@ ARDOUR_UI::tabs_button_event (GdkEventButton* ev)
 	return false;
 }
 
-int
-ARDOUR_UI::setup_windows ()
-{
-	/* we don't use a widget with its own window for the tab close button,
-	   which makes it impossible to rely on GTK+ to generate signals for
-	   events occuring "in" this widget. Instead, we pre-connect a
-	   handler to the relevant events on the notebook and then check
-	   to see if the event coordinates tell us that it occured "in"
-	   the close button.
-	*/
-	_tabs.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
-	_tabs.signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_button_event), false);
-	
-	if (create_editor ()) {
-		error << _("UI: cannot setup editor") << endmsg;
-		return -1;
-	}
-
-	if (create_mixer ()) {
-		error << _("UI: cannot setup mixer") << endmsg;
-		return -1;
-	}
-
-	if (create_meterbridge ()) {
-		error << _("UI: cannot setup meterbridge") << endmsg;
-		return -1;
-	}
-
-	rc_option_editor = new RCOptionEditor;
-	rc_option_editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
-	rc_option_editor->add_to_notebook (_tabs, _("Preferences"));
-	
-	/* all other dialogs are created conditionally */
-
-	we_have_dependents ();
-
-#ifdef TOP_MENUBAR
-	EventBox* status_bar_event_box = manage (new EventBox);
-
-	status_bar_event_box->add (status_bar_label);
-	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	status_bar_label.set_size_request (300, -1);
-
-	status_bar_label.show ();
-	status_bar_event_box->show ();
-
-	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
-
-	status_bar_hpacker.pack_start (*status_bar_event_box, true, true, 6);
-	status_bar_hpacker.pack_start (menu_bar_base, false, false, 2);
-#else
-	top_packer.pack_start (menu_bar_base, false, false);
-#endif
-
-	main_vpacker.pack_start (top_packer, false, false);
-
-	/* now add the transport frame to the top of main window */
-	
-	main_vpacker.pack_start (transport_frame, false, false);
-	main_vpacker.pack_start (_tabs, true, true);
-
-#ifdef TOP_MENUBAR
-	main_vpacker.pack_start (status_bar_hpacker, false, false);
-#endif
-
-	setup_transport();
-	build_menu_bar ();
-	setup_tooltips ();
-
-	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::main_window_delete_event));
-	
-	/* pack the main vpacker into the main window and show everything
-	 */
-
-	_main_window.add (main_vpacker);
-	transport_frame.show_all ();
-
-	const XMLNode* mnode = main_window_settings ();
-
-	if (mnode) {
-		const XMLProperty* prop;
-		gint x = -1;
-		gint y = -1;
-		gint w = -1;
-		gint h = -1;
-
-		if ((prop = mnode->property (X_("x"))) != 0) {
-			x = atoi (prop->value());
-		}
-
-		if ((prop = mnode->property (X_("y"))) != 0) {
-			y = atoi (prop->value());
-		} 
-
-		if ((prop = mnode->property (X_("w"))) != 0) {
-			w = atoi (prop->value());
-		} 
-		
-		if ((prop = mnode->property (X_("h"))) != 0) {
-			h = atoi (prop->value());
-		}
-
-		if (x >= 0 && y >= 0 && w >= 0 && h >= 0) {
-			_main_window.set_position (Gtk::WIN_POS_NONE);
-		}
-		
-		if (x >= 0 && y >= 0) {
-			_main_window.move (x, y);
-		}
-		
-		if (w > 0 && h > 0) {
-			_main_window.set_default_size (w, h);
-		}
-	}
-	
-	_main_window.show_all ();
-	setup_toplevel_window (_main_window, "", this);
-	
-	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
-	_tabs.signal_page_removed().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_removed));
-	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));
-
-	/* It would be nice if Gtkmm had wrapped this rather than just
-	 * deprecating the old set_window_creation_hook() method, but oh well...
-	 */
-	g_signal_connect (_tabs.gobj(), "create-window", (GCallback) ::tab_window_root_drop, this);
-
-	return 0;
-}
-
 void
 ARDOUR_UI::tabs_page_removed (Gtk::Widget*, guint)
 {
@@ -268,13 +128,6 @@ ARDOUR_UI::tabs_page_added (Gtk::Widget*, guint)
 void
 ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page_number)
 {
-	if (page_number == 2) {
-		if (!rc_option_editor) {
-			rc_option_editor = new RCOptionEditor;
-			rc_option_editor_placeholder.pack_start (*rc_option_editor, true, true);
-			rc_option_editor_placeholder.show_all ();
-		}
-	}
 }
 
 void
@@ -850,10 +703,11 @@ ARDOUR_UI::restore_editing_space ()
 void
 ARDOUR_UI::show_ui_prefs ()
 {
-	tabs().set_current_page (2);
-	rc_option_editor->set_current_page (_("GUI"));
+	if (rc_option_editor) {
+		show_tabbable (rc_option_editor);
+		rc_option_editor->set_current_page (_("GUI"));
+	}
 }
-
 
 bool
 ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
@@ -863,7 +717,7 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 		return false;
 	}
 
-	tabs().set_current_page (2);
+	show_tabbable (rc_option_editor);
 	rc_option_editor->set_current_page (_("Misc"));
 	return true;
 }

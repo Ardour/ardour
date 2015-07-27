@@ -80,7 +80,6 @@ ARDOUR_UI::create_editor ()
 	try {
 		editor = new Editor ();
 		editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
-		editor->add_to_notebook (_tabs, _("Editor"));
 	}
 
 	catch (failed_constructor& err) {
@@ -668,6 +667,18 @@ ARDOUR_UI::save_ardour_state ()
 	main_window_node.add_property (X_("w"), PBD::to_string (mw, std::dec));
 	main_window_node.add_property (X_("h"), PBD::to_string (mh, std::dec));
 
+	string current_tab;
+	int current_page_number = _tabs.get_current_page ();
+	if (editor && (current_page_number == _tabs.page_num (editor->contents()))) {
+		current_tab = "editor";
+	} else if (mixer && (current_page_number == _tabs.page_num (mixer->contents()))) {
+		current_tab = "mixer";
+	} else if (rc_option_editor && (current_page_number == _tabs.page_num (rc_option_editor->contents()))) {
+		current_tab == "preferences";
+	}
+
+	main_window_node.add_property (X_("current-tab"), current_tab);
+	
 	/* Windows */
 
 	WM::Manager::instance().add_state (*window_node);

@@ -747,6 +747,11 @@ Editor::Editor ()
 	global_vpacker.pack_start (*hbox, true, true);
 	global_hpacker.pack_start (global_vpacker, true, true);
 
+	/* need to show the "contents" widget so that notebook will show if tab is switched to
+	 */
+
+	global_hpacker.show (); 
+
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
 	register_actions ();
