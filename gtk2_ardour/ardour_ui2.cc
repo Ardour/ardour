@@ -184,9 +184,11 @@ ARDOUR_UI::setup_windows ()
 	build_menu_bar ();
 	setup_tooltips ();
 
+	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::main_window_delete_event));
+	
 	/* pack the main vpacker into the main window and show everything
 	 */
-	
+
 	_main_window.add (main_vpacker);
 	transport_frame.show_all ();
 
@@ -905,3 +907,4 @@ ARDOUR_UI::update_title ()
 	}
 
 }
+

@@ -839,6 +839,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);
 	
+	bool main_window_delete_event (GdkEventAny*);
+	bool idle_ask_about_quit ();
 };
 
 #endif /* __ardour_gui_h__ */

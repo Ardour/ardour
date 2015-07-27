@@ -155,3 +155,41 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 	
 	return 0; /* what was that? */
 }
+
+bool
+ARDOUR_UI::idle_ask_about_quit ()
+{
+	if (_session && _session->dirty()) {
+		finish ();
+	} else {
+		/* no session or session not dirty, but still ask anyway */
+
+		Gtk::MessageDialog msg (string_compose ("Quit %1?", PROGRAM_NAME),
+		                        false, /* no markup */
+		                        Gtk::MESSAGE_INFO,
+		                        Gtk::BUTTONS_YES_NO,
+		                        true); /* modal */
+		msg.set_default_response (Gtk::RESPONSE_YES);
+
+		if (msg.run() == Gtk::RESPONSE_YES) {
+			finish ();
+		}
+	}
+
+	/* not reached but keep the compiler happy */
+
+	return false;
+}
+
+bool
+ARDOUR_UI::main_window_delete_event (GdkEventAny* ev)
+{
+	/* quit the application as soon as we go idle. If we call this here,
+	 * the window manager/desktop can think we're taking too longer to
+	 * handle the "delete" event
+	 */
+	
+	Glib::signal_idle().connect (sigc::mem_fun (*this, &ARDOUR_UI::idle_ask_about_quit));	
+	
+	return true;
+}
