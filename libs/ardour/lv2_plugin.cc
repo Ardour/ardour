@@ -1624,24 +1624,10 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			plugin_dir(),
 			Glib::build_filename(prop->value(), "state.ttl"));
 
-		if (!Glib::file_test (state_file, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
-			/* this should be done in lilv_state_new_from_file()
-			 * some systems don't like realpath() calls with an non-existent file.
-			 * (hopefully this fixes crashes on OSX 10.5/PPC, see #6456,
-			 * segfault in __asm realpath$DARWIN_EXTSN
-			 * if so, backport upstream to liblilv)
-			 */
-			error << string_compose(
-				"LV2: expected state file \"%1\" does not exist.",
-				state_file) << endmsg;
-		} else {
+		LilvState* state = lilv_state_new_from_file(
+			_world.world, _uri_map.urid_map(), NULL, state_file.c_str());
 
-			LilvState* state = lilv_state_new_from_file(
-					_world.world, _uri_map.urid_map(), NULL, state_file.c_str());
-
-			// lilv_state_restore allows/ignores possible NULL state
-			lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
-		}
+		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
 
 	latency_compute_run();
