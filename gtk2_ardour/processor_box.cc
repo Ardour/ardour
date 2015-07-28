@@ -568,18 +568,14 @@ ProcessorEntry::Control::set_tooltip ()
 	if (!c) {
 		return;
 	}
-	
-	stringstream s;
-	s << _name << ": ";
+	char tmp[256];
 	if (c->toggled ()) {
-		s << (c->get_value() > 0.5 ? _("on") : _("off"));
+		snprintf (tmp, sizeof(tmp), "%sX %s", _name.c_str(), c->get_value() > 0.5 ? _("on") : _("off"));
 	} else {
-		s << setprecision(2) << fixed;
-		s << c->internal_to_user (c->get_value ());
+		snprintf (tmp, sizeof(tmp), "%sX %.2f", _name.c_str(), c->internal_to_user (c->get_value ()));
 	}
 
-	string sm = Glib::Markup::escape_text (s.str());
-	
+	string sm = Glib::Markup::escape_text (tmp);
 	_slider_persistant_tooltip.set_tip (sm);
 	ARDOUR_UI::instance()->set_tip (_button, sm);
 }
