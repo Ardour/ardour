@@ -152,6 +152,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void device_changed ();
     void input_device_changed ();
     void output_device_changed ();
+    bool set_driver_popdown_strings ();
     bool set_device_popdown_strings ();
     bool set_input_device_popdown_strings ();
     bool set_output_device_popdown_strings ();

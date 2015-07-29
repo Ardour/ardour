@@ -119,7 +119,6 @@ EngineControl::EngineControl ()
 	}
 
 	set_popdown_strings (backend_combo, backend_names);
-	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
 
 	/* setup basic packing characteristics for the table used on the main
 	 * tab of the notebook
@@ -303,6 +302,7 @@ EngineControl::EngineControl ()
 
 	/* Connect to signals */
 
+	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
 	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
@@ -848,6 +848,23 @@ EngineControl::print_channel_count (Gtk::SpinButton* sb)
 		snprintf (buf, sizeof (buf), "%d", cnt);
 		sb->set_text (buf);
 	}
+	return true;
+}
+
+bool
+EngineControl::set_driver_popdown_strings ()
+{
+	string backend_name = backend_combo.get_active_text();
+	boost::shared_ptr<ARDOUR::AudioBackend> backend;
+
+	if (!(backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, "ardour", ""))) {
+		/* eh? setting the backend failed... how ? */
+		/* A: stale config contains a backend that does not exist in current build */
+		return false;
+	}
+
+	vector<string> drivers = backend->enumerate_drivers();
+	set_popdown_strings (driver_combo, drivers);
 	return true;
 }
 
@@ -1750,11 +1767,19 @@ EngineControl::set_state (const XMLNode& root)
 		if ((*i)->active) {
 			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			backend_combo.set_active_text ((*i)->backend);
+
+			/* The driver popdown strings need to be populated now so that
+			 * set_active_text will actually set a valid entry. Then
+			 * backend_changed() will populate all the other combo's so they
+			 * can also be set to valid entries and the state will be restored
+			 * correctly.
+			 */
+			set_driver_popdown_strings ();
 			driver_combo.set_active_text ((*i)->driver);
+			backend_changed ();
+
 			device_combo.set_active_text ((*i)->device);
-			fprintf (stderr, "setting input device to: %s ", (*i)->input_device.c_str());
 			input_device_combo.set_active_text ((*i)->input_device);
-			fprintf (stderr, "setting output device to: %s ", (*i)->output_device.c_str());
 			output_device_combo.set_active_text ((*i)->output_device);
 			sample_rate_combo.set_active_text (rate_as_string ((*i)->sample_rate));
 			set_active_text_if_present (buffer_size_combo, bufsize_as_string ((*i)->buffer_size));
