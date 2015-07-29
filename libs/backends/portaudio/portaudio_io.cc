@@ -44,6 +44,7 @@ PortAudioIO::PortAudioIO ()
 	, _cur_sample_rate (0)
 	, _cur_input_latency (0)
 	, _cur_output_latency (0)
+	, _host_api_index(-1)
 {
 }
 
@@ -180,14 +181,18 @@ PortAudioIO::host_api_list (std::vector<std::string>& api_list)
 	}
 }
 
-void
+bool
 PortAudioIO::set_host_api (const std::string& host_api_name)
 {
-	_host_api_index = get_host_api_index_from_name (host_api_name);
+	PaHostApiIndex new_index = get_host_api_index_from_name (host_api_name);
 
-	if (_host_api_index < 0) {
-		DEBUG_AUDIO ("Error setting host API\n");
+	if (new_index < 0) {
+		DEBUG_AUDIO ("Portaudio: Error setting host API\n");
+		return false;
 	}
+	_host_api_index = new_index;
+	_host_api_name = host_api_name;
+	return true;
 }
 
 PaHostApiIndex

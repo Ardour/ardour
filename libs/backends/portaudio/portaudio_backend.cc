@@ -128,8 +128,20 @@ PortAudioBackend::enumerate_drivers () const
 int
 PortAudioBackend::set_driver (const std::string& name)
 {
-	_pcmio->set_host_api (name);
+	DEBUG_AUDIO (string_compose ("Portaudio: set_driver %1 \n", name));
+	if (!_pcmio->set_host_api (name)) {
+		DEBUG_AUDIO (string_compose ("Portaudio: Unable to set_driver %1 \n", name));
+		return -1;
+	}
 	return 0;
+}
+
+std::string
+PortAudioBackend::driver_name () const
+{
+	std::string driver_name = _pcmio->get_host_api ();
+	DEBUG_AUDIO (string_compose ("Portaudio: driver_name %1 \n", driver_name));
+	return driver_name;
 }
 
 bool

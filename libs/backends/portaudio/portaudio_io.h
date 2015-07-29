@@ -39,8 +39,9 @@ public:
 
 	bool     initialize_pa ();
 
-	void     host_api_list (std::vector<std::string>&);
-	void     set_host_api (const std::string& host_api_name);
+	void host_api_list (std::vector<std::string>&);
+	bool set_host_api (const std::string& host_api_name);
+	std::string get_host_api () const { return _host_api_name; }
 	PaHostApiIndex get_host_api_index_from_name (const std::string& name);
 
 	PaDeviceIndex get_default_input_device ();
@@ -114,6 +115,7 @@ private: // Data
 	std::map<int, paDevice *> _output_devices;
 
 	PaHostApiIndex _host_api_index;
+	std::string _host_api_name;
 
 };
 

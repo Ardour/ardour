@@ -163,6 +163,7 @@ class PortAudioBackend : public AudioBackend {
 		bool is_realtime () const;
 
 		bool requires_driver_selection() const;
+		std::string driver_name () const;
 		std::vector<std::string> enumerate_drivers () const;
 		int set_driver (const std::string&);
 
