@@ -570,9 +570,9 @@ ProcessorEntry::Control::set_tooltip ()
 	}
 	char tmp[256];
 	if (c->toggled ()) {
-		snprintf (tmp, sizeof(tmp), "%sX %s", _name.c_str(), c->get_value() > 0.5 ? _("on") : _("off"));
+		snprintf (tmp, sizeof(tmp), "%s: %s", _name.c_str(), c->get_value() > 0.5 ? _("on") : _("off"));
 	} else {
-		snprintf (tmp, sizeof(tmp), "%sX %.2f", _name.c_str(), c->internal_to_user (c->get_value ()));
+		snprintf (tmp, sizeof(tmp), "%s: %.2f", _name.c_str(), c->internal_to_user (c->get_value ()));
 	}
 
 	string sm = Glib::Markup::escape_text (tmp);
