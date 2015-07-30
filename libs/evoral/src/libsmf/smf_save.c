@@ -519,7 +519,7 @@ smf_validate(smf_t *smf)
 			assert(event);
 
 			if (!smf_event_is_valid(event)) {
-				g_critical("Event #%zu on track #%d is invalid.", eventno, trackno);
+				g_critical("Event #%" G_GSIZE_FORMAT " on track #%d is invalid.", eventno, trackno);
 				return (-5);
 			}
 

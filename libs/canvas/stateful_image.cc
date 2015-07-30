@@ -101,7 +101,7 @@ StatefulImage::load_states (const XMLNode& node)
 			error << _("no ID for state") << endmsg;
 			continue;
 		}
-		sscanf (prop->value().c_str(), "%zd", &id);
+		sscanf (prop->value().c_str(), "%" G_GSIZE_FORMAT, &id);
 
 		if ((prop = (*i)->property ("image")) == 0) {
 			error << _("no image for state") << endmsg;

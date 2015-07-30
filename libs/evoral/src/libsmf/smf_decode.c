@@ -277,7 +277,7 @@ smf_event_decode_metadata(const smf_event_t *event)
 			break;
 
 		case 0x7F:
-			off += snprintf(buf + off, BUFFER_SIZE - off, "Proprietary (aka Sequencer) Event, length %zu",
+			off += snprintf(buf + off, BUFFER_SIZE - off, "Proprietary (aka Sequencer) Event, length %" G_GSIZE_FORMAT,
 				event->midi_buffer_length);
 			break;
 
