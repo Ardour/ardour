@@ -660,7 +660,7 @@ if test x$WITH_X42_LV2 != x ; then
 		"$CACHEDIR/x42-midifilter-lv2-osx-${MIDIFILTER_VERSION}.zip"
 
 	for file in ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/*/*.dylib ; do
-		lipo -thin ${OSX_ARCH} ${file} -output ${file}.thin
+		lipo -extract_family ${OSX_ARCH} ${file} -output ${file}.thin
 		mv ${file}.thin ${file}
 	done
 fi
