@@ -119,6 +119,7 @@ PortAudioBackend::requires_driver_selection() const
 std::vector<std::string>
 PortAudioBackend::enumerate_drivers () const
 {
+	DEBUG_AUDIO ("Portaudio: enumerate_drivers\n");
 	std::vector<std::string> currently_available;
 	_pcmio->host_api_list (currently_available);
 	return currently_available;
@@ -140,6 +141,7 @@ PortAudioBackend::use_separate_input_and_output_devices () const
 std::vector<AudioBackend::DeviceStatus>
 PortAudioBackend::enumerate_devices () const
 {
+	DEBUG_AUDIO ("Portaudio: ERROR enumerate devices should not be called \n");
 	return std::vector<AudioBackend::DeviceStatus>();
 }
 
@@ -176,6 +178,7 @@ PortAudioBackend::enumerate_output_devices () const
 std::vector<float>
 PortAudioBackend::available_sample_rates (const std::string&) const
 {
+	DEBUG_AUDIO ("Portaudio: available_sample_rates\n");
 	std::vector<float> sr;
 	_pcmio->available_sample_rates(name_to_id(_input_audio_device), sr);
 	return sr;
@@ -184,6 +187,7 @@ PortAudioBackend::available_sample_rates (const std::string&) const
 std::vector<uint32_t>
 PortAudioBackend::available_buffer_sizes (const std::string&) const
 {
+	DEBUG_AUDIO ("Portaudio: available_buffer_sizes\n");
 	std::vector<uint32_t> bs;
 	_pcmio->available_buffer_sizes(name_to_id(_input_audio_device), bs);
 	return bs;
@@ -216,12 +220,14 @@ PortAudioBackend::can_change_buffer_size_when_running () const
 int
 PortAudioBackend::set_device_name (const std::string& d)
 {
+	DEBUG_AUDIO ("Portaudio: set_device_name should not be called\n");
 	return 0;
 }
 
 int
 PortAudioBackend::set_input_device_name (const std::string& d)
 {
+	DEBUG_AUDIO (string_compose ("Portaudio: set_input_device_name %1\n", d));
 	_input_audio_device = d;
 	return 0;
 }
@@ -229,6 +235,7 @@ PortAudioBackend::set_input_device_name (const std::string& d)
 int
 PortAudioBackend::set_output_device_name (const std::string& d)
 {
+	DEBUG_AUDIO (string_compose ("Portaudio: set_output_device_name %1\n", d));
 	_output_audio_device = d;
 	return 0;
 }

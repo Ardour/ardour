@@ -347,6 +347,8 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 {
 	m_thread_running = true;
 
+	DEBUG_MIDI ("WinMMEMidiOut: MIDI output thread started\n");
+
 	while (!m_thread_quit) {
 		if (!wait (m_queue_semaphore)) {
 			break;
