@@ -26,6 +26,8 @@
 #include "win_utils.h"
 #include "midi_util.h"
 
+#include "mmcss.h"
+
 #include "debug.h"
 
 static const uint32_t MIDI_BUFFER_SIZE = 32768;
@@ -174,6 +176,30 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
                                             DWORD timestamp)
 {
 	WinMMEMidiInputDevice* midi_input = (WinMMEMidiInputDevice*)instance;
+
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+
+	static HANDLE input_thread = GetCurrentThread ();
+	static bool priority_boosted = false;
+
+	if (input_thread != GetCurrentThread ()) {
+		DWORD otid = GetThreadId (input_thread);
+		DWORD ntid = GetThreadId (GetCurrentThread ());
+		// There was a reference on the internet somewhere that it is possible
+		// for the callback to come from different threads(thread pool) this
+		// could be problematic but I haven't seen this behaviour yet
+		DEBUG_THREADS (string_compose (
+		    "WinMME input Thread ID Changed: was %1, now %2\n", otid, ntid));
+	}
+
+	HANDLE task_handle;
+
+	if (!priority_boosted) {
+		mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
+		mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_HIGH);
+		priority_boosted = true;
+	}
+#endif
 
 	switch (msg) {
 	case MIM_OPEN:

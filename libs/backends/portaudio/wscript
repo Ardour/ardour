@@ -36,5 +36,6 @@ def build(bld):
     obj.uselib   = ['PORTAUDIO']
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
-                   'ARDOURBACKEND_DLL_EXPORTS'
+                   'ARDOURBACKEND_DLL_EXPORTS',
+                   'USE_MMCSS_THREAD_PRIORITIES'
                   ]

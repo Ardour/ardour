@@ -37,6 +37,8 @@
 #include "i18n.h"
 
 #include "win_utils.h"
+#include "mmcss.h"
+
 #include "debug.h"
 
 using namespace ARDOUR;
@@ -79,6 +81,8 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
 
+	mmcss::initialize ();
+
 	_pcmio = new PortAudioIO ();
 	_midiio = new WinMMEMidiIO ();
 }
@@ -87,6 +91,9 @@ PortAudioBackend::~PortAudioBackend ()
 {
 	delete _pcmio; _pcmio = 0;
 	delete _midiio; _midiio = 0;
+
+	mmcss::deinitialize ();
+
 	pthread_mutex_destroy (&_port_callback_mutex);
 }
 
@@ -636,7 +643,23 @@ PortAudioBackend::portaudio_process_thread (void *arg)
 	ThreadData* td = reinterpret_cast<ThreadData*> (arg);
 	boost::function<void ()> f = td->f;
 	delete td;
+
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	HANDLE task_handle;
+
+	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
+	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_NORMAL);
+#endif
+
+	DWORD tid = GetThreadId (GetCurrentThread ());
+	DEBUG_THREADS (string_compose ("Process Thread Child ID: %1\n", tid));
+
 	f ();
+
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	mmcss::revert_thread_characteristics (task_handle);
+#endif
+
 	return 0;
 }
 
@@ -1308,6 +1331,16 @@ PortAudioBackend::main_process_thread ()
 		engine.halted_callback("PortAudio I/O error.");
 	}
 
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	HANDLE task_handle;
+
+	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
+	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_NORMAL);
+#endif
+
+	DWORD tid = GetThreadId (GetCurrentThread ());
+	DEBUG_THREADS (string_compose ("Process Thread Master ID: %1\n", tid));
+
 	while (_run) {
 
 		if (_freewheeling != _freewheel) {
@@ -1511,6 +1544,11 @@ PortAudioBackend::main_process_thread ()
 	if (_run) {
 		engine.halted_callback("PortAudio I/O error.");
 	}
+
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	mmcss::revert_thread_characteristics (task_handle);
+#endif
+
 	return 0;
 }
 

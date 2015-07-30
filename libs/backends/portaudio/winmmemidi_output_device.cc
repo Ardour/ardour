@@ -27,6 +27,7 @@
 #include "win_utils.h"
 #include "midi_util.h"
 
+#include "mmcss.h"
 #include "debug.h"
 
 // remove dup with input_device
@@ -349,6 +350,13 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 
 	DEBUG_MIDI ("WinMMEMidiOut: MIDI output thread started\n");
 
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	HANDLE task_handle;
+
+	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
+	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_HIGH);
+#endif
+
 	while (!m_thread_quit) {
 		if (!wait (m_queue_semaphore)) {
 			break;
@@ -470,6 +478,10 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 		}
 #endif
 	}
+
+#ifdef USE_MMCSS_THREAD_PRIORITIES
+	mmcss::revert_thread_characteristics (task_handle);
+#endif
 
 	m_thread_running = false;
 }
