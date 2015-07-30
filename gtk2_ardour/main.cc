@@ -99,6 +99,28 @@ gui_jack_error ()
 	win.run ();
 }
 
+#ifndef NDEBUG
+static void ardour_g_log (const gchar *log_domain, GLogLevelFlags log_level, const gchar *message, gpointer user_data) {
+	switch (log_level) {
+		case G_LOG_FLAG_FATAL:
+		case G_LOG_LEVEL_CRITICAL:
+			fatal << "g_log: " << message << endmsg;
+			break;
+		case G_LOG_LEVEL_ERROR:
+			error << "g_log: " << message << endmsg;
+			break;
+		case G_LOG_LEVEL_WARNING:
+			warning << "g_log: " << message << endmsg;
+			break;
+		case G_LOG_LEVEL_MESSAGE:
+		case G_LOG_LEVEL_INFO:
+		default:
+			info << "g_log: " << message << endmsg;
+			break;
+	}
+}
+#endif
+
 static gboolean
 tell_about_backend_death (void* /* ignored */)
 {
@@ -358,6 +380,12 @@ int main (int argc, char *argv[])
 		error << string_compose (_("could not create %1 GUI"), PROGRAM_NAME) << endmsg;
 		exit (1);
 	}
+
+#ifndef NDEBUG
+	g_log_set_handler (NULL,
+			GLogLevelFlags (G_LOG_LEVEL_WARNING | G_LOG_FLAG_FATAL |  G_LOG_LEVEL_CRITICAL | G_LOG_FLAG_RECURSION),
+			&ardour_g_log, NULL);
+#endif
 
 	ui->run (text_receiver);
 	Gtkmm2ext::Application::instance()->cleanup();
