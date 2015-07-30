@@ -310,6 +310,13 @@ ExportHandler::finish_timespan ()
 		}
 
 		if (fmt->tag()) {
+			/* close file first, otherwise TagLib enounters an ERROR_SHARING_VIOLATION
+			 * The process cannot access the file because it is being used.
+			 *
+			 * TODO: check Umlauts and encoding in filename.
+			 * TagLib eventually calls CreateFileA(),
+			 */
+			graph_builder->reset ();
 			AudiofileTagger::tag_file(filename, *SessionMetadata::Metadata());
 		}
 
