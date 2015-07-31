@@ -19,6 +19,7 @@
 #include "win_utils.h"
 
 #include <windows.h>
+#include <mmsystem.h>
 
 #include "pbd/compose.h"
 
