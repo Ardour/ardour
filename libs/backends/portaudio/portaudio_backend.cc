@@ -1421,9 +1421,9 @@ PortAudioBackend::main_process_thread ()
 
 			uint64_t cycle_diff_us = (m_cycle_timer.get_start () - m_last_cycle_start);
 			int64_t deviation_us = (cycle_diff_us - m_cycle_timer.get_length_us());
-			m_total_deviation_us += std::abs(deviation_us);
+			m_total_deviation_us += ::llabs(deviation_us);
 			m_max_deviation_us =
-			    std::max (m_max_deviation_us, (uint64_t)std::abs (deviation_us));
+				std::max (m_max_deviation_us, (uint64_t)::llabs (deviation_us));
 
 			if ((m_cycle_count % 1000) == 0) {
 				uint64_t mean_deviation_us = m_total_deviation_us / m_cycle_count;
@@ -1433,7 +1433,7 @@ PortAudioBackend::main_process_thread ()
 				                    m_max_deviation_us * 1e-3));
 			}
 
-			if (std::abs(deviation_us) > m_cycle_timer.get_length_us()) {
+			if (::llabs(deviation_us) > m_cycle_timer.get_length_us()) {
 				DEBUG_TIMING (string_compose (
 				    "time between process(ms): %1, Est(ms): %2, Dev(ms): %3\n",
 				    cycle_diff_us * 1e-3,
