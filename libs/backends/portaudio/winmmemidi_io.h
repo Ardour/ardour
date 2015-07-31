@@ -23,6 +23,7 @@
 #include <vector>
 #include <string>
 #include <stdint.h>
+#include <pthread.h>
 
 #include <boost/shared_ptr.hpp>
 #include "pbd/ringbuffer.h"

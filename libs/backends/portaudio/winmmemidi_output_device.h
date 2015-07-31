@@ -23,6 +23,7 @@
 #include <mmsystem.h>
 
 #include <stdint.h>
+#include <pthread.h>
 
 #include <string>
 
