@@ -269,11 +269,35 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\portaudio\midi_util.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\mmcss.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\portaudio\portaudio_backend.cc"
 				>
 			</File>
 			<File
 				RelativePath="..\portaudio\portaudio_io.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\win_utils.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\winmmemidi_input_device.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\winmmemidi_io.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\winmmemidi_output_device.cc"
 				>
 			</File>
 		</Filter>
@@ -282,6 +306,22 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\portaudio\cycle_timer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\debug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\midi_util.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\mmcss.h"
+				>
+			</File>
 			<File
 				RelativePath="..\portaudio\portaudio_backend.h"
 				>
@@ -292,6 +332,22 @@
 			</File>
 			<File
 				RelativePath="..\portaudio\rt_thread.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\win_utils.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\winmmemidi_input_device.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\winmmemidi_io.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\winmmemidi_output_device.h"
 				>
 			</File>
 		</Filter>
