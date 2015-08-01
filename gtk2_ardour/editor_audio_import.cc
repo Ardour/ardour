@@ -303,6 +303,7 @@ Editor::do_import (vector<string>        paths,
 		} else {
 			ipw.show ();
 			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument) == 0);
+			import_status.sources.clear();
 		}
 
 	} else {
@@ -348,6 +349,7 @@ Editor::do_import (vector<string>        paths,
 				}
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument) == 0);
+				import_status.sources.clear();
 				break;
 
 			case Editing::ImportDistinctChannels:
@@ -356,6 +358,7 @@ Editor::do_import (vector<string>        paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument) == 0);
+				import_status.sources.clear();
 				break;
 
 			case Editing::ImportSerializeFiles:
@@ -364,6 +367,7 @@ Editor::do_import (vector<string>        paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument) == 0);
+				import_status.sources.clear();
 				break;
 
 			case Editing::ImportMergeFiles:
@@ -524,7 +528,6 @@ Editor::import_sndfiles (vector<string>            paths,
 		pos = import_status.pos;
 	}
 
-	import_status.sources.clear();
 	return result;
 }
 
@@ -734,7 +737,7 @@ Editor::add_sources (vector<string>            paths,
 				/* generate a per-channel region name so that things work as
 				 * intended
 				 */
-				
+
 				string path;
 
 				if (fs) {
@@ -742,7 +745,7 @@ Editor::add_sources (vector<string>            paths,
 				} else {
 					region_name = (*x)->name();
 				}
-				
+
 				if (sources.size() == 2) {
 					if (n == 0) {
 						region_name += "-L";
@@ -752,9 +755,9 @@ Editor::add_sources (vector<string>            paths,
 				} else if (sources.size() > 2) {
 					region_name += string_compose ("-%1", n+1);
 				}
-				
+
 				track_names.push_back (region_name);
-				
+
 			} else {
 				if (fs) {
 					region_name = region_name_from_path (fs->path(), false, false, sources.size(), n);
@@ -825,7 +828,7 @@ Editor::add_sources (vector<string>            paths,
 	 * the API simpler.
 	 */
 	assert (regions.size() == track_names.size());
-	
+
 	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
 
@@ -857,7 +860,7 @@ Editor::add_sources (vector<string>            paths,
                                 pos = get_preferred_edit_position ();
                         }
                 }
-		
+
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], instrument);
 
 		rlen = (*r)->length();
@@ -873,7 +876,7 @@ Editor::add_sources (vector<string>            paths,
 	}
 
 	commit_reversible_command ();
-	
+
 	/* setup peak file building in another thread */
 
 	for (SourceList::iterator x = sources.begin(); x != sources.end(); ++x) {

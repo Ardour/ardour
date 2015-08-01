@@ -61,6 +61,7 @@ gtk2_ardour_sources = [
         'editor.cc',
         'editor_actions.cc',
         'editor_audio_import.cc',
+        'editor_pt_import.cc',
         'editor_audiotrack.cc',
         'editor_canvas.cc',
         'editor_canvas_events.cc',
@@ -397,6 +398,7 @@ def build(bld):
                              'libgtk2_ardour',
                              'libgtkmm2ext',
                              'libcanvas',
+                             'libptformat',
                              ]
         obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
         obj.includes  = [ '../libs/fst', '.' ]
@@ -412,6 +414,7 @@ def build(bld):
         obj.includes  = [ '../libs/fst', '.' ]
         obj.name      = 'libgtk2_ardour'
         obj.target    = 'gtk2_ardour'
+
     else:
         # just the normal executable version of the GTK GUI
         if bld.env['build_target'] == 'mingw':
@@ -437,6 +440,7 @@ def build(bld):
                      'libmidipp',
                      'libgtkmm2ext',
                      'libcanvas',
+                     'libptformat',
                      ]
 
     obj.defines = [
@@ -462,6 +466,8 @@ def build(bld):
         obj.source += [ 'bundle_env_linux.cc' ]
 
     obj.includes += ['../libs']
+
+    obj.use += 'libptformat'
 
     if bld.env['build_target'] == 'mingw':
         obj.linkflags = ['-mwindows']
@@ -633,6 +639,9 @@ def build(bld):
     else:
         menus_argv = [ '-E', '-P' ]
 
+    if bld.is_defined('PTFORMAT'):
+        menus_argv += [ '-DPTFORMAT' ]
+
     # always build all versions of the menu definitions
     # so that we can try them out with different program builds.
     for program in [ 'ardour', 'trx' ]:
@@ -641,7 +650,7 @@ def build(bld):
         obj.command_is_external = True
         obj.no_inputs = True
         obj.argv = menus_argv
-        obj.dep_vars = ['GTKOSX', 'WINDOWS']
+        obj.dep_vars = ['PTFORMAT', 'GTKOSX', 'WINDOWS']
         obj.stdin = program + '.menus.in'
         obj.stdout = program + '.menus'
         bld.install_files (bld.env['CONFDIR'], program + '.menus')

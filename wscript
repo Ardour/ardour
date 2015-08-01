@@ -195,6 +195,7 @@ children = [
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/libltc',
+        'libs/ptformat',
         # core ardour libraries
         'libs/pbd',
         'libs/midi++2',
@@ -706,6 +707,9 @@ def options(opt):
                     help='Turn on c++11 compiler flags (-std=c++11)')
     opt.add_option('--address-sanitizer', action='store_true', default=False, dest='asan',
                     help='Turn on AddressSanitizer (requires GCC >= 4.8 or clang >= 3.1)')
+    opt.add_option('--ptformat', action='store_true', default=False, dest='ptformat',
+                    help='Turn on PT session import option')
+
     for i in children:
         opt.recurse(i)
 
@@ -998,6 +1002,9 @@ def configure(conf):
         conf.env['DEBUG_DENORMAL_EXCEPTION'] = True
     if opts.build_tests:
         autowaf.check_pkg(conf, 'cppunit', uselib_store='CPPUNIT', atleast_version='1.12.0', mandatory=True)
+    if opts.ptformat:
+        conf.define('PTFORMAT', 1)
+        conf.env['PTFORMAT'] = True
 
     backends = opts.with_backends.split(',')
 
@@ -1096,6 +1103,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
     write_config_text('Program name',          opts.program_name)
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
+    write_config_text('PT format',            conf.is_defined('PTFORMAT'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
