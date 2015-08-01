@@ -2,7 +2,9 @@
 
 # import module
 use Getopt::Long; 
-
+use File::Basename;
+use File::Spec;
+    
 $semicolon = ";"; # help out stupid emacs
 $title = "Ardour Shortcuts";
 $in_group_def = 0;
@@ -12,8 +14,8 @@ $group_key;
 $group_number = 0;
 %group_names;
 %group_text;
-%group_files;
-%group_handles;
+%owner_bindings;
+%group_owners;
 %group_bindings;
 %modifier_map;
 %group_numbering;
@@ -23,7 +25,6 @@ $platform = linux;
 $winkey = 'Win';
 $make_cheatsheet = 1;
 $make_accelmap = 0;
-$ardour_bindings = 0;
 $merge_from = "";
 $html = 0;
 
@@ -31,7 +32,6 @@ GetOptions ("platform=s" => \$platform,
 	    "winkey=s" => \$winkey,
 	    "cheatsheet" => \$make_cheatsheet,
 	    "accelmap" => \$make_accelmap,
-	    "ardourbindings" => \$ardour_bindings,
 	    "merge=s" => \$merge_from,
             "html" => \$html);
 
@@ -176,11 +176,16 @@ if ($merge_from) {
     close (BINDINGS);
 }
 
-if ($make_accelmap && !$merge_from && !$ardour_bindings) {
-    print ";; this accelmap was produced by tools/fmt-bindings\n";
+if ($make_accelmap && !$merge_from) {
+    print "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 }
 
-while (<>) {
+$bindings_name = basename ($ARGV[0]);
+$bindings_name =~ s/.bindings\.in$//;
+
+open SOURCE, "<", $ARGV[0] or die $!;
+
+while (<SOURCE>) {
     next if /^$semicolon/;
 
     if (/^\$/) {
@@ -205,14 +210,12 @@ while (<>) {
 
 	s/^%//;
 	chop;
-	($group_key,$group_file,$group_name) = split (/\s+/, $_, 3);
-	if ($make_accelmap && $ardour_bindings) {
-	    if (!exists ($group_handles{$group_file})) {
-		
-		open $group_handles{$group_file}, ">", "gtk2_ardour/" . $group_file . ".bindings" or die "Cannot open bindings file " . $group_file . ".bindings: $!";
-		print { $group_handles{$group_file} } "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n <Bindings name=\"ardour-", $group_file , "\">\n <Press>\n";
+	($group_key,$owner,$group_name) = split (/\s+/, $_, 3);
+	if ($make_accelmap) {
+	    if (!exists ($owner_bindings{$owner})) {
+		$owner_bindings{$owner} = [ [] ];
 	    }
-	    $group_files{$group_key} = $group_handles{$group_file}
+	    $group_owners{$group_key} = $owner;
 	}
 	$group_number++;
 	$group_text = "";
@@ -241,7 +244,8 @@ while (<>) {
 
 	$gkey = $key;
 	$gkey =~ s/^-//;
-	    
+	$owner = $group_owners{$gkey};
+
 	# substitute bindings
 
 	$gtk_binding = $binding;
@@ -266,26 +270,19 @@ while (<>) {
 	    # remove + and don't print it in the accelmap
 	    $key =~ s/^\+//;
 	} else {
-	    # include this in the accelmap
-	    if (!$merge_from && $make_accelmap) {
-		if (!$ardour_bindings) {
-		    foreach $k (keys %gtk_modifier_map) {
-			$gtk_binding =~ s/\@$k\@/$gtk_modifier_map{$k}/;
-		    }
-		    print "(gtk_accel_path \"<Actions>/$action\" \"$gtk_binding\")\n";
-		} else {
-		    $b = $binding;
-		    $b =~ s/<@//g;
-		    $b =~ s/@>//g;
-		    $b =~ s/PRIMARY/Primary-/;
-		    $b =~ s/SECONDARY/Secondary-/;
-		    $b =~ s/TERTIARY/Tertiary-/;
-		    $b =~ s/LEVEL4/Level4-/;
-		    
-		    if (exists ($group_files{$gkey})) {
-			print { $group_files{$gkey}  } "  <Binding key=\"" . $b . "\" action=\"" . $action . "\"/>\n";
-		    }
-		}
+	    # include this in the accelmap if it is part of a group that has an "owner"
+	    if (!$merge_from && $make_accelmap && exists ($owner_bindings{$owner})) {
+
+		$b = $binding;
+		$b =~ s/<@//g;
+		$b =~ s/@>//g;
+		$b =~ s/PRIMARY/Primary-/;
+		$b =~ s/SECONDARY/Secondary-/;
+		$b =~ s/TERTIARY/Tertiary-/;
+		$b =~ s/LEVEL4/Level4-/;
+		
+		$bref = $owner_bindings{$owner};
+		push (@$bref, [ $action, $b ]);
 	    }
 	}
 
@@ -303,9 +300,32 @@ while (<>) {
     next;
 }
 
-foreach my $key (keys %group_handles) {
-    print { $group_handles{$key} } " </Press>\n <Release>\n </Release>\n</Bindings>\n";
-    close $group_handles{$key} or die "Group file $group_files{$key} not closed!"
+if ($make_accelmap) {
+    print "<BindingSet name=\"" . $bindings_name . "\">\n";
+    
+    foreach $owner (keys %owner_bindings) {
+	print " <Bindings name=\"$owner\">\n  <Press\n";
+	$bindings = $owner_bindings{$owner};
+	shift (@$bindings); # remove initial empty element
+	for my $binding (@$bindings) {
+	    print '   <Binding key="' . @$binding[1] . '" action="' . @$binding[0] . "\"/>\n";
+	}
+        print "  </Press>\n </Bindings>\n";
+    }
+
+    # merge in the "fixed" bindings that are not defined by the argument given to this program
+    # namely, the step editor and the mixer windows
+
+    foreach $hardcoded_bindings ("mixer.bindings", "step_editing.bindings") {
+	$path = File::Spec->catfile (dirname ($ARGV[0]), $hardcoded_bindings);
+	open HARDCODED, "<", $path or die $!;
+	while (<HARDCODED>) {
+	    print $_;
+	}
+	close HARDCODED;
+    }
+    
+    print "</BindingSet/>\n";
 }
 
 if ($make_accelmap || !$make_cheatsheet) {
