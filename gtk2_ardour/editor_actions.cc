@@ -688,6 +688,9 @@ Editor::register_actions ()
 
 	ActionManager::register_action (rl_actions, X_("removeUnusedRegions"), _("Remove Unused"), sigc::mem_fun (*_regions, &EditorRegions::remove_unused_regions));
 
+	act = reg_sens (editor_actions, X_("addExistingPT8Files"), _("Import PT8 session"), sigc::mem_fun (*this, &Editor::external_ptf_dialog));
+	ActionManager::write_sensitive_actions.push_back (act);
+
 	/* the next two are duplicate items with different names for use in two different contexts */
 
 	act = reg_sens (editor_actions, X_("addExistingAudioFiles"), _("Import"), sigc::mem_fun (*this, &Editor::external_audio_dialog));
