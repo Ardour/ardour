@@ -1,6 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Bindings name="ardour-mixer">
-  <Press>
+ <bindings name="mixer">
+  <press>
      <Binding key="s" action="Mixer/solo"/>
      <Binding key="m" action="Mixer/mute"/>
      <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active"/>
@@ -20,4 +19,4 @@
      <Binding key="Slash" action="Mixer/ab-plugins"/>
      <Binding key="Escape" action="Mixer/select-none"/>
   </Press>
-</Bindings>
+ </Bindings>

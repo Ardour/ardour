@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Bindings name="logic">
+<Bindings name="step-editing">
   <Press>
      <Binding key="grave" action="StepEditing/octave-0"/>
      <Binding key="1" action="StepEditing/octave-1"/>
