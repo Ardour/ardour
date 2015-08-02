@@ -325,7 +325,7 @@ if ($make_accelmap) {
 	close HARDCODED;
     }
     
-    print "</BindingSet/>\n";
+    print "</BindingSet>\n";
 }
 
 if ($make_accelmap || !$make_cheatsheet) {
