@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm/action.h>
-#include <gtkmm/action.h>
 #include <gtkmm/radioaction.h>
 #include <gtkmm/toggleaction.h>
 
@@ -72,13 +71,27 @@ class LIBGTKMM2EXT_API ActionMap {
         ActionMap() {}
         ~ActionMap() {}
 
-	Glib::RefPtr<Gtk::Action> register_action (const char* path,
+        Glib::RefPtr<Gtk::ActionGroup> create_action_group (const std::string& group_name);
+        void install_action_group (Glib::RefPtr<Gtk::ActionGroup>);
+        
+        Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, const char* name, const char* label);
+        Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char* name, const char* label, sigc::slot<void> sl);
+<<<<<<< HEAD
 	Glib::RefPtr<Gtk::Action> register_radio_action (const char* path, Gtk::RadioAction::Group&,
 							 const char* name, const char* label,
+=======
+        Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
+							 Gtk::RadioAction::Group&,
+							 const char* name, const char* label, 
+>>>>>>> changes to Bindings and Keyboard API to support (mostly) GTK-free keyboard bindings
                                                          sigc::slot<void,GtkAction*> sl,
                                                          int value);
-	Glib::RefPtr<Gtk::Action> register_toggle_action (const char*path,
+        Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
+							 Gtk::RadioAction::Group&,
+							 const char* name, const char* label, 
+                                                         sigc::slot<void> sl);
+	Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
 							  const char* name, const char* label, sigc::slot<void> sl);
 
         Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
@@ -127,7 +140,7 @@ class LIBGTKMM2EXT_API Bindings {
 
         KeybindingMap press_bindings;
         KeybindingMap release_bindings;
-
+        
         typedef std::map<MouseButton,Glib::RefPtr<Gtk::Action> > MouseButtonBindingMap;
         MouseButtonBindingMap button_press_bindings;
         MouseButtonBindingMap button_release_bindings;
@@ -138,6 +151,6 @@ class LIBGTKMM2EXT_API Bindings {
 
 } // namespace
 
-std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey& k);
+std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k);
 
 #endif /* __libgtkmm2ext_bindings_h__ */

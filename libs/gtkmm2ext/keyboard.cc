@@ -110,8 +110,8 @@ bool Keyboard::can_save_keybindings = false;
 bool Keyboard::bindings_changed_after_save_became_legal = false;
 map<string,string> Keyboard::binding_files;
 string Keyboard::_current_binding_name;
-map<AccelKey,pair<string,string>,Keyboard::AccelKeyLess> Keyboard::release_keys;
 Gtk::Window* Keyboard::pre_dialog_active_window = 0;
+XMLNode* Keyboard::_bindings_node = 0;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 GdkModifierType Keyboard::RelevantModifierKeyMask;
@@ -368,6 +368,10 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 			   prevent auto-repeat events.
 			*/
 
+#if 0
+			/* August 2015: we don't have any release bindings
+			 */
+			
 			for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
 
 				const AccelKey& ak (k->first);
@@ -378,32 +382,7 @@ Keyboard::snooper (GtkWidget *widget, GdkEventKey *event)
 					break;
 				}
 			}
-		}
-
-	} else if (event->type == GDK_KEY_RELEASE) {
-
-		State::iterator i;
-
-		if ((i = find (state.begin(), state.end(), keyval)) != state.end()) {
-			state.erase (i);
-			sort (state.begin(), state.end());
-		}
-
-		for (map<AccelKey,two_strings,AccelKeyLess>::iterator k = release_keys.begin(); k != release_keys.end(); ++k) {
-
-			const AccelKey& ak (k->first);
-			two_strings ts (k->second);
-
-			if (keyval == ak.get_key() && (Gdk::ModifierType)((event->state & Keyboard::RelevantModifierKeyMask) | Gdk::RELEASE_MASK) == ak.get_mod()) {
-				Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (ts.first.c_str(), ts.second.c_str());
-				if (act) {
-					DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Activate %1 %2\n", ts.first, ts.second));
-					act->activate();
-					DEBUG_TRACE (DEBUG::Keyboard, string_compose ("Use repeat, suppress other\n", ts.first, ts.second));
-					ret = true;
-				}
-				break;
-			}
+#endif
 		}
 	}
 
@@ -675,18 +654,20 @@ void
 Keyboard::save_keybindings ()
 {
 	if (can_save_keybindings && bindings_changed_after_save_became_legal) {
-		Gtk::AccelMap::save (user_keybindings_path);
+		/* Call to specific implementation to save bindings to path */
+		store_keybindings (user_keybindings_path);
 	}
 }
 
 bool
-Keyboard::load_keybindings (string path)
+Keyboard::load_keybindings (string const & path)
 {
 	try {
 		info << "Loading bindings from " << path << endl;
 
-		Gtk::AccelMap::load (path);
-
+		/* Call to specific implementation to load bindings from path */
+		read_keybindings (path);
+		
 		_current_binding_name = _("Unknown");
 
 		for (map<string,string>::iterator x = binding_files.begin(); x != binding_files.end(); ++x) {
@@ -703,41 +684,27 @@ Keyboard::load_keybindings (string path)
 		return false;
 	}
 
-	/* now find all release-driven bindings */
-
-	vector<string> groups;
-	vector<string> names;
-	vector<string> tooltips;
-	vector<AccelKey> bindings;
-
-	ActionManager::get_all_actions (groups, names, tooltips, bindings);
-
-	vector<string>::iterator g;
-	vector<AccelKey>::iterator b;
-	vector<string>::iterator n;
-
-	release_keys.clear ();
-
-	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
-		stringstream s;
-		s << "Action: " << *n << " Group: " << *g << " Binding: ";
-
-		if ((*b).get_key() != GDK_VoidSymbol) {
-			s << b->get_key() << " w/mod " << hex << b->get_mod() << dec << " = " << b->get_abbrev () << "\n";
-		} else {
-			s << "unbound\n";
-		}
-
-		DEBUG_TRACE (DEBUG::Bindings, s.str ());
-	}
-
-	for (n = names.begin(), b = bindings.begin(), g = groups.begin(); n != names.end(); ++n, ++b, ++g) {
-		if ((*b).get_mod() & Gdk::RELEASE_MASK) {
-			release_keys.insert (pair<AccelKey,two_strings> (*b, two_strings (*g, *n)));
-		}
-	}
-
 	return true;
+}
+
+int
+Keyboard::read_keybindings (string const & path)
+{
+	XMLTree tree;
+
+	if (!tree.read (path.c_str())) {
+		return -1;
+	}
+
+	_bindings_node = new XMLNode (*tree.root ()); /* copy operation. Sorry */
+	
+	return 0;
+}
+
+int
+Keyboard::store_keybindings (string const & path)
+{
+	return 0;
 }
 
 int

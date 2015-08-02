@@ -20,13 +20,19 @@
 #include <iostream>
 
 #include "pbd/gstdio_compat.h"
+#include <gtkmm/accelmap.h>
+#include <gtkmm/uimanager.h>
 
-#include "pbd/xml++.h"
 #include "pbd/convert.h"
+#include "pbd/debug.h"
+#include "pbd/error.h"
+#include "pbd/xml++.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/debug.h"
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
 
 #include "i18n.h"
 
@@ -34,6 +40,7 @@ using namespace std;
 using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace PBD;
 
 uint32_t Bindings::_ignored_state = 0;
 
@@ -130,12 +137,6 @@ KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
 {
         uint32_t ignore = Bindings::ignored_state();
 
-        if (gdk_keyval_is_upper (keycode) && gdk_keyval_is_lower (keycode)) {
-                /* key is not subject to case, so ignore SHIFT
-                 */
-                ignore |= GDK_SHIFT_MASK;
-        }
-
         _val = (state & ~ignore);
         _val <<= 32;
         _val |= keycode;
@@ -203,7 +204,7 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 
         string::size_type lastmod = str.find_last_of ('-');
         guint keyval;
-
+        
         if (lastmod == string::npos) {
                 keyval = gdk_keyval_from_name (str.c_str());
         } else {
@@ -211,10 +212,11 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
         }
 
         if (keyval == GDK_VoidSymbol) {
-                return false;
+	        return false;
         }
 
         k = KeyboardKey (s, keyval);
+
         return true;
 }
 
@@ -266,15 +268,18 @@ Bindings::activate (KeyboardKey kb, Operation op)
                 kbm = &release_bindings;
                 break;
         }
-
+        
         KeybindingMap::iterator k = kbm->find (kb);
 
         if (k == kbm->end()) {
                 /* no entry for this key in the state map */
+	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1\n", kb));
 	        return false;
         }
 
         /* lets do it ... */
+
+        DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", kb, k->second->get_name()));
 
         k->second->activate ();
         return true;
@@ -287,7 +292,7 @@ Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what)
 
         switch (op) {
         case Press:
-                kbm = &press_bindings;
+	        kbm = &press_bindings;
                 break;
         case Release:
                 kbm = &release_bindings;
@@ -297,10 +302,35 @@ Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what)
         KeybindingMap::iterator k = kbm->find (kb);
 
         if (k == kbm->end()) {
-                pair<KeyboardKey,RefPtr<Action> > newpair (kb, what);
+	        pair<KeyboardKey,RefPtr<Action> > newpair (kb, what);
                 kbm->insert (newpair);
         } else {
                 k->second = what;
+        }
+
+        Gtk::AccelKey gtk_key;
+
+        /* tweak the binding so that GTK will accept it and display something
+         * acceptable 
+         */
+
+        uint32_t gtk_legal_keyval = kb.key();
+        possibly_translate_keyval_to_make_legal_accelerator (gtk_legal_keyval);
+        KeyboardKey gtk_binding (kb.state(), gtk_legal_keyval);
+        
+
+        bool entry_exists = Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key);
+
+        if (!entry_exists || gtk_key.get_key() == 0) {
+	        Gtk::AccelMap::add_entry (what->get_accel_path(),
+	                                  gtk_binding.key(),
+	                                  (Gdk::ModifierType) gtk_binding.state());
+        } else {
+	        warning << string_compose (_("There is more than one key binding defined for %1. Both will work, but only the first will be visible in menus"), what->get_accel_path()) << endmsg;
+        }
+
+        if (!Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key) || gtk_key.get_key() == 0) {
+	        cerr << "GTK binding using " << gtk_binding << " failed for " << what->get_accel_path() << " existing = " << gtk_key.get_key() << " + " << gtk_key.get_mod() << endl;
         }
 }
 
@@ -463,7 +493,7 @@ Bindings::save (XMLNode& root)
 }
 
 bool
-Bindings::load (const string& path)
+Bindings::load (string const & name)
 {
         XMLTree tree;
 
@@ -471,18 +501,46 @@ Bindings::load (const string& path)
                 return false;
         }
 
-        if (!tree.read (path)) {
-                return false;
+        XMLNode const * node = Keyboard::bindings_node();
+
+        if (!node) {
+	        error << string_compose (_("No keyboard binding information when loading bindings for \"%1\""), name) << endmsg;
+	        return false;
+        }
+        
+        const XMLNodeList& children (node->children());
+        bool found = false;
+        
+        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+
+	        if ((*i)->name() == X_("Bindings")) {
+		        XMLProperty const * prop = (*i)->property (X_("name"));
+
+		        if (!prop) {
+			        continue;
+		        }
+
+		        if (prop->value() == name) {
+			        found = true;
+			        node = *i;
+			        break;
+		        }
+	        }
+        }
+        
+        if (!found) {
+	        error << string_compose (_("Bindings for \"%1\" not found in keyboard binding node\n"), name) << endmsg;
+	        return false;
         }
 
         press_bindings.clear ();
         release_bindings.clear ();
 
-        XMLNode& root (*tree.root());
-        const XMLNodeList& children (root.children());
+        const XMLNodeList& bindings (node->children());
 
-        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-                load (**i);
+        for (XMLNodeList::const_iterator i = bindings.begin(); i != bindings.end(); ++i) {
+	        /* each node could be Press or Release */
+	        load (**i);
         }
 
         return true;
@@ -520,8 +578,8 @@ Bindings::load (const XMLNode& node)
                         RefPtr<Action> act;
 
                         if (action_map) {
-                                act = action_map->find_action (ap->value());
-                        }
+	                        act = action_map->find_action (ap->value());
+                        } 
 
                         if (!act) {
                                 string::size_type slash = ap->value().find ('/');
@@ -565,8 +623,38 @@ ActionMap::find_action (const string& name)
         return RefPtr<Action>();
 }
 
-RefPtr<Action>
-ActionMap::register_action (const char* path,
+RefPtr<ActionGroup>
+ActionMap::create_action_group (const string& name)
+{
+	RefPtr<ActionGroup> g = ActionGroup::create (name);
+	return g;
+}
+
+void
+ActionMap::install_action_group (RefPtr<ActionGroup> group)
+{
+	ActionManager::ui_manager->insert_action_group (group);
+}
+
+RefPtr<Action> 
+ActionMap::register_action (RefPtr<ActionGroup> group, const char* name, const char* label)
+{
+        string fullpath;
+
+        RefPtr<Action> act = Action::create (name, label);
+
+        fullpath = group->get_name();
+        fullpath += '/';
+        fullpath += name;
+        
+        actions.insert (_ActionMap::value_type (fullpath, act));
+        group->add (act);
+        
+        return act;
+}
+
+RefPtr<Action> 
+ActionMap::register_action (RefPtr<ActionGroup> group,
                             const char* name, const char* label, sigc::slot<void> sl)
 {
         string fullpath;
@@ -575,17 +663,42 @@ ActionMap::register_action (const char* path,
 
         act->signal_activate().connect (sl);
 
-        fullpath = path;
+        fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
 
         actions.insert (_ActionMap::value_type (fullpath, act));
+        group->add (act, sl);
+
         return act;
 }
 
-RefPtr<Action>
-ActionMap::register_radio_action (const char* path, Gtk::RadioAction::Group& rgroup,
-                                  const char* name, const char* label,
+RefPtr<Action> 
+ActionMap::register_radio_action (RefPtr<ActionGroup> group,
+                                  Gtk::RadioAction::Group& rgroup,
+                                  const char* name, const char* label, 
+                                  sigc::slot<void> sl)
+{
+        string fullpath;
+
+        RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+        RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
+        
+        act->signal_activate().connect (sl);
+
+        fullpath = group->get_name();
+        fullpath += '/';
+        fullpath += name;
+
+        actions.insert (_ActionMap::value_type (fullpath, act));
+        group->add (act, sl);
+        return act;
+}
+
+RefPtr<Action> 
+ActionMap::register_radio_action (RefPtr<ActionGroup> group,
+                                  Gtk::RadioAction::Group& rgroup,
+                                  const char* name, const char* label, 
                                   sigc::slot<void,GtkAction*> sl,
                                   int value)
 {
@@ -597,16 +710,17 @@ ActionMap::register_radio_action (const char* path, Gtk::RadioAction::Group& rgr
 
         act->signal_activate().connect (sigc::bind (sl, act->gobj()));
 
-        fullpath = path;
+        fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
 
         actions.insert (_ActionMap::value_type (fullpath, act));
+        group->add (act, sigc::bind (sl, act->gobj()));
         return act;
 }
 
-RefPtr<Action>
-ActionMap::register_toggle_action (const char* path,
+RefPtr<Action> 
+ActionMap::register_toggle_action (RefPtr<ActionGroup> group,
                                    const char* name, const char* label, sigc::slot<void> sl)
 {
         string fullpath;
@@ -615,15 +729,16 @@ ActionMap::register_toggle_action (const char* path,
 
         act->signal_activate().connect (sl);
 
-        fullpath = path;
+        fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
 
         actions.insert (_ActionMap::value_type (fullpath, act));
+        group->add (act, sl);
         return act;
 }
 
-std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey& k) {
-	return out << "Key " << k.key() << " state " << k.state();
+std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
+	return out << "Key " << k.key() << " (" << (k.key() > 0 ? gdk_keyval_name (k.key()) : "no-key") << ") state " << k.state();
 }
 
