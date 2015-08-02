@@ -23,10 +23,12 @@
  */
 
 #include <iostream>
+#include <fstream>
 #include <cassert>
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -52,15 +54,10 @@
 #include "ardour/plugin_types.h"
 #include "ardour/vst_info_file.h"
 
+#include "sha1.c"
+
 #define MAX_STRING_LEN 256
 #define PLUGIN_SCAN_TIMEOUT (Config->get_vst_scan_timeout()) // in deciseconds
-
-#ifdef PLATFORM_WINDOWS
-#define PFX_DOTFILE   ""
-#else
-#define PFX_DOTFILE   "."
-#endif
-
 
 using namespace std;
 #ifndef VST_SCANNER_APP
@@ -81,54 +78,106 @@ static bool vstfx_instantiate_and_get_info_lx (const char* dllpath, vector<VSTIn
 /* ID for shell plugins */
 static int vstfx_current_loading_id = 0;
 
-
-
 /* *** CACHE FILE PATHS *** */
 
 static string
-vstfx_cache_file (const char* dllpath, int personal, const char *ext)
+get_vst_info_cache_dir () {
+	string dir = Glib::build_filename (ARDOUR::user_cache_directory (), "vst");
+	/* if the directory doesn't exist, try to create it */
+	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+		if (g_mkdir (dir.c_str (), 0700)) {
+			PBD::fatal << "Cannot create VST info folder '" << dir << "'" << endmsg;
+		}
+	}
+	return dir;
+}
+
+static string
+vstfx_infofile_path (const char* dllpath)
 {
-	string dir;
-	if (personal) {
-		dir = get_personal_vst_info_cache_dir();
-		// TODO prefix path relative to scan-root to avoid duplicates
-	} else {
-		dir = Glib::path_get_dirname (std::string(dllpath));
+	char hash[41];
+	Sha1Digest s;
+	sha1_init (&s);
+	sha1_write (&s, (const uint8_t *) dllpath, strlen (dllpath));
+	sha1_result_hash (&s, hash);
+	return Glib::build_filename (get_vst_info_cache_dir (), std::string (hash) + std::string (VST_EXT_INFOFILE));
+}
+
+
+/* *** VST Blacklist *** */
+
+/** mark plugin as blacklisted */
+static void vstfx_blacklist (const char *id)
+{
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST_BLACKLIST);
+	FILE * blacklist_fd = NULL;
+	if (! (blacklist_fd = g_fopen (fn.c_str (), "a"))) {
+		PBD::error << "Cannot append to VST blacklist for '"<< id <<"'\n";
+		return;
+	}
+	assert (NULL == strchr (id, '\n'));
+	fprintf (blacklist_fd, "%s\n", id);
+	::fclose (blacklist_fd);
+}
+
+/** mark plugin as not blacklisted */
+static void vstfx_un_blacklist (const char *idcs)
+{
+	string id (idcs);
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST_BLACKLIST);
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		PBD::warning << "Expected VST Blacklist file does not exist.\n";
+		return;
 	}
 
-	stringstream s;
-	s << PFX_DOTFILE << Glib::path_get_basename (dllpath) << ext;
-	return Glib::build_filename (dir, s.str ());
-}
+	std::string bl;
+	std::ifstream ifs (fn.c_str ());
+	bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
+	::g_unlink (fn.c_str ());
 
-static string
-vstfx_blacklist_path (const char* dllpath, int personal)
-{
-	string dir;
-	if (personal) {
-		dir = get_personal_vst_blacklist_dir();
-	} else {
-		dir = Glib::path_get_dirname (std::string(dllpath));
+	assert (id.find ("\n") == string::npos);
+
+	id += "\n"; // add separator
+	const size_t rpl = bl.find (id);
+	if (rpl != string::npos) {
+		bl.replace (rpl, id.size (), "");
+	}
+	if (bl.empty ()) {
+		return;
 	}
 
-	stringstream s;
-	s << PFX_DOTFILE << Glib::path_get_basename (dllpath) << VST_EXT_BLACKLIST;
-	return Glib::build_filename (dir, s.str ());
+	FILE * blacklist_fd = NULL;
+	if (! (blacklist_fd = g_fopen (fn.c_str (), "w"))) {
+		PBD::error << "Cannot open VST blacklist.\n";
+		return;
+	}
+	fprintf (blacklist_fd, "%s", bl.c_str ());
+	::fclose (blacklist_fd);
 }
 
-static string
-vstfx_infofile_path (const char* dllpath, int personal)
+/* return true if plugin is blacklisted */
+static bool vst_is_blacklisted (const char *idcs)
 {
-	return vstfx_cache_file(dllpath, personal, VST_EXT_INFOFILE);
+	// TODO ideally we'd also check if the VST has been updated since blacklisting
+	string id (idcs);
+	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST_BLACKLIST);
+	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+	std::string bl;
+	std::ifstream ifs (fn.c_str ());
+	bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
+
+	assert (id.find ("\n") == string::npos);
+
+	id += "\n"; // add separator
+	const size_t rpl = bl.find (id);
+	if (rpl != string::npos) {
+		return true;
+	}
+	return false;
 }
 
-#ifndef VST_SCANNER_APP
-static string
-vstfx_errorfile_path (const char* dllpath, int personal)
-{
-	return vstfx_cache_file(dllpath, personal, VST_EXT_ERRORFILE);
-}
-#endif
 
 
 /* *** MEMORY MANAGEMENT *** */
@@ -154,12 +203,11 @@ vstfx_free_info (VSTInfo *info)
 static void
 vstfx_clear_info_list (vector<VSTInfo *> *infos)
 {
-	for (vector<VSTInfo *>::iterator i = infos->begin(); i != infos->end(); ++i) {
-		vstfx_free_info(*i);
+	for (vector<VSTInfo *>::iterator i = infos->begin (); i != infos->end (); ++i) {
+		vstfx_free_info (*i);
 	}
-	infos->clear();
+	infos->clear ();
 }
-
 
 
 /* *** CACHE FILE I/O *** */
@@ -176,9 +224,9 @@ read_string (FILE *fp)
 		return 0;
 	}
 
-	if (strlen(buf) < MAX_STRING_LEN) {
+	if (strlen (buf) < MAX_STRING_LEN) {
 		if (strlen (buf)) {
-			buf[strlen(buf)-1] = 0;
+			buf[strlen (buf)-1] = 0;
 		}
 		return strdup (buf);
 	} else {
@@ -204,12 +252,12 @@ read_int (FILE* fp, int* n)
 
 /** parse a plugin-block from the cache info file */
 static bool
-vstfx_load_info_block(FILE* fp, VSTInfo *info)
+vstfx_load_info_block (FILE* fp, VSTInfo *info)
 {
-	if ((info->name = read_string(fp)) == 0) return false;
-	if ((info->creator = read_string(fp)) == 0) return false;
+	if ((info->name = read_string (fp)) == 0) return false;
+	if ((info->creator = read_string (fp)) == 0) return false;
 	if (read_int (fp, &info->UniqueID)) return false;
-	if ((info->Category = read_string(fp)) == 0) return false;
+	if ((info->Category = read_string (fp)) == 0) return false;
 	if (read_int (fp, &info->numInputs)) return false;
 	if (read_int (fp, &info->numOutputs)) return false;
 	if (read_int (fp, &info->numParams)) return false;
@@ -228,20 +276,20 @@ vstfx_load_info_block(FILE* fp, VSTInfo *info)
 		return true;
 	}
 
-	if ((info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
+	if ((info->ParamNames = (char **) malloc (sizeof (char*) * info->numParams)) == 0) {
 		return false;
 	}
 
 	for (int i = 0; i < info->numParams; ++i) {
-		if ((info->ParamNames[i] = read_string(fp)) == 0) return false;
+		if ((info->ParamNames[i] = read_string (fp)) == 0) return false;
 	}
 
-	if ((info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams)) == 0) {
+	if ((info->ParamLabels = (char **) malloc (sizeof (char*) * info->numParams)) == 0) {
 		return false;
 	}
 
 	for (int i = 0; i < info->numParams; ++i) {
-		if ((info->ParamLabels[i] = read_string(fp)) == 0) {
+		if ((info->ParamLabels[i] = read_string (fp)) == 0) {
 			return false;
 		}
 	}
@@ -256,23 +304,23 @@ vstfx_load_info_file (FILE* fp, vector<VSTInfo*> *infos)
 	if ((info = (VSTInfo*) calloc (1, sizeof (VSTInfo))) == 0) {
 		return false;
 	}
-	if (vstfx_load_info_block(fp, info)) {
+	if (vstfx_load_info_block (fp, info)) {
 		if (strncmp (info->Category, "Shell", 5)) {
-			infos->push_back(info);
+			infos->push_back (info);
 		} else {
 			int plugin_cnt = 0;
-			vstfx_free_info(info);
+			vstfx_free_info (info);
 			if (!read_int (fp, &plugin_cnt)) {
 				for (int i = 0; i < plugin_cnt; i++) {
 					if ((info = (VSTInfo*) calloc (1, sizeof (VSTInfo))) == 0) {
-						vstfx_clear_info_list(infos);
+						vstfx_clear_info_list (infos);
 						return false;
 					}
-					if (vstfx_load_info_block(fp, info)) {
-						infos->push_back(info);
+					if (vstfx_load_info_block (fp, info)) {
+						infos->push_back (info);
 					} else {
-						vstfx_free_info(info);
-						vstfx_clear_info_list(infos);
+						vstfx_free_info (info);
+						vstfx_clear_info_list (infos);
 						return false;
 					}
 				}
@@ -282,8 +330,8 @@ vstfx_load_info_file (FILE* fp, vector<VSTInfo*> *infos)
 		}
 		return true;
 	}
-	vstfx_free_info(info);
-	vstfx_clear_info_list(infos);
+	vstfx_free_info (info);
+	vstfx_clear_info_list (infos);
 	return false;
 }
 
@@ -316,124 +364,42 @@ vstfx_write_info_block (FILE* fp, VSTInfo *info)
 static void
 vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
 {
-	assert(infos);
-	assert(fp);
+	assert (infos);
+	assert (fp);
 
-	if (infos->size() > 1) {
-		vector<VSTInfo *>::iterator x = infos->begin();
+	if (infos->size () > 1) {
+		vector<VSTInfo *>::iterator x = infos->begin ();
 		/* write out the shell info first along with count of the number of
 		 * plugins contained in this shell
 		 */
-		vstfx_write_info_block(fp, *x);
-		fprintf( fp, "%d\n", (int)infos->size() - 1 );
+		vstfx_write_info_block (fp, *x);
+		fprintf (fp, "%d\n", (int)infos->size () - 1 );
 		++x;
 		/* Now write out the info for each plugin */
-		for (; x != infos->end(); ++x) {
-			vstfx_write_info_block(fp, *x);
+		for (; x != infos->end (); ++x) {
+			vstfx_write_info_block (fp, *x);
 		}
-	} else if (infos->size() == 1) {
-		vstfx_write_info_block(fp, infos->front());
+	} else if (infos->size () == 1) {
+		vstfx_write_info_block (fp, infos->front ());
 	} else {
 		PBD::error << "Zero plugins in VST." << endmsg; // XXX here? rather make this impossible before if it ain't already.
 	}
 }
 
 
-/* *** CACHE AND BLACKLIST MANAGEMENT *** */
-
-/* return true if plugin is blacklisted or has an invalid file extension */
-static bool
-vstfx_blacklist_stat (const char *dllpath, int personal)
-{
-	const size_t slen = strlen (dllpath);
-	if (
-			(slen <= 3 || g_ascii_strcasecmp (&dllpath[slen-3], ".so"))
-			&&
-			(slen <= 4 || g_ascii_strcasecmp (&dllpath[slen-4], ".dll"))
-	   ) {
-		return true;
-	}
-
-	string const path = vstfx_blacklist_path (dllpath, personal);
-
-	if (Glib::file_test (path, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
-		struct stat dllstat;
-		struct stat fsbstat;
-
-		if (stat (dllpath, &dllstat) == 0 && stat (path.c_str(), &fsbstat) == 0) {
-			if (dllstat.st_mtime > fsbstat.st_mtime) {
-				/* plugin is newer than blacklist file */
-				return true;
-			}
-		}
-		/* stat failed or plugin is older than blacklist file */
-		return true;
-	}
-	/* blacklist file does not exist */
-	return false;
-}
-
-/* return true if plugin is blacklisted, checks both personal
- * and global folder */
-static bool
-vstfx_check_blacklist (const char *dllpath)
-{
-	if (vstfx_blacklist_stat(dllpath, 0)) return true;
-	if (vstfx_blacklist_stat(dllpath, 1)) return true;
-	return false;
-}
-
-/* create blacklist file, preferably in same folder as the
- * plugin, fall back to personal folder in $HOME
- */
-static FILE *
-vstfx_blacklist_file (const char *dllpath)
-{
-	FILE *f;
-	if ((f = g_fopen (vstfx_blacklist_path (dllpath, 0).c_str(), "wb"))) {
-#ifndef NDEBUG
-	PBD::info << "Blacklisted VST: '" << vstfx_blacklist_path (dllpath, 0) << "'" << endmsg;
-#endif
-		return f;
-	}
-#ifndef NDEBUG
-	PBD::info << "Blacklisted VST: '" << vstfx_blacklist_path (dllpath, 1) << "'" << endmsg;
-#endif
-	return g_fopen (vstfx_blacklist_path (dllpath, 1).c_str(), "wb");
-}
-
-/** mark plugin as blacklisted */
-static bool
-vstfx_blacklist (const char *dllpath)
-{
-	FILE *f = vstfx_blacklist_file(dllpath);
-	if (f) {
-		fclose(f);
-		return true;
-	}
-	return false;
-}
-
-/** mark plugin as not blacklisted */
-static void
-vstfx_un_blacklist (const char *dllpath)
-{
-	::g_unlink(vstfx_blacklist_path (dllpath, 0).c_str());
-	::g_unlink(vstfx_blacklist_path (dllpath, 1).c_str());
-}
+/* *** CACHE MANAGEMENT *** */
 
 /** remove info file from cache */
 static void
 vstfx_remove_infofile (const char *dllpath)
 {
-	::g_unlink(vstfx_infofile_path (dllpath, 0).c_str());
-	::g_unlink(vstfx_infofile_path (dllpath, 1).c_str());
+	::g_unlink (vstfx_infofile_path (dllpath).c_str ());
 }
 
-/** helper function, check if cache is newer than plugin
- * @return path to cache file */
-static char *
-vstfx_infofile_stat (const char *dllpath, struct stat* statbuf, int personal)
+/** cache file for given plugin
+ * @return FILE of the .fsi cache if found and up-to-date*/
+static FILE *
+vstfx_infofile_for_read (const char* dllpath)
 {
 	const size_t slen = strlen (dllpath);
 	if (
@@ -444,60 +410,31 @@ vstfx_infofile_stat (const char *dllpath, struct stat* statbuf, int personal)
 		return 0;
 	}
 
-	string const path = vstfx_infofile_path (dllpath, personal);
+	string const path = vstfx_infofile_path (dllpath);
 
 	if (Glib::file_test (path, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR))) {
-
 		struct stat dllstat;
+		struct stat fsistat;
 
 		if (stat (dllpath, &dllstat) == 0) {
-			if (stat (path.c_str(), statbuf) == 0) {
-				if (dllstat.st_mtime <= statbuf->st_mtime) {
+			if (stat (path.c_str (), &fsistat) == 0) {
+				if (dllstat.st_mtime <= fsistat.st_mtime) {
 					/* plugin is older than info file */
-					return strdup (path.c_str ());
+					return g_fopen (path.c_str (), "rb");
 				}
 			}
 		}
+		PBD::warning << "Ignored VST plugin which is newer than cache: " << dllpath << " (cache: " << path << " )" << endmsg;
+		PBD::into << "Re-Scan Plugins (Preferences > Plugis) to update the cache, also make sure your system-time is set correctly." << endmsg;
 	}
-
-	return 0;
+	return NULL;
 }
 
-/** cache file for given plugin
- * @return FILE of the .fsi cache if found and up-to-date*/
-static FILE *
-vstfx_infofile_for_read (const char* dllpath)
-{
-	struct stat own_statbuf;
-	struct stat sys_statbuf;
-	FILE *rv = NULL;
-
-	char* own_info = vstfx_infofile_stat (dllpath, &own_statbuf, 1);
-	char* sys_info = vstfx_infofile_stat (dllpath, &sys_statbuf, 0);
-
-	if (own_info) {
-		if (sys_info) {
-			if (own_statbuf.st_mtime <= sys_statbuf.st_mtime) {
-				/* system info file is newer, use it */
-				rv = g_fopen (sys_info, "rb");
-			}
-		} else {
-			rv = g_fopen (own_info, "rb");
-		}
-	} else if (sys_info) {
-		rv = g_fopen (sys_info, "rb");
-	}
-	free(own_info);
-	free(sys_info);
-
-	return rv;
-}
-
-/** helper function for \ref vstfx_infofile_for_write
- * abstract global and personal cache folders
+/** newly created cache file for given plugin
+ * @return FILE for the .fsi cache or NULL on error
  */
 static FILE *
-vstfx_infofile_create (const char* dllpath, int personal)
+vstfx_infofile_for_write (const char* dllpath)
 {
 	const size_t slen = strlen (dllpath);
 	if (
@@ -508,26 +445,11 @@ vstfx_infofile_create (const char* dllpath, int personal)
 		return NULL;
 	}
 
-	string const path = vstfx_infofile_path (dllpath, personal);
+	string const path = vstfx_infofile_path (dllpath);
 #ifndef NDEBUG
 	PBD::info << "Creating VST cache file " << path << endmsg;
 #endif
-	return g_fopen (path.c_str(), "wb");
-}
-
-/** newly created cache file for given plugin
- * @return FILE for the .fsi cache, NULL if neither personal,
- * nor global cache folder is writable */
-static FILE *
-vstfx_infofile_for_write (const char* dllpath)
-{
-	FILE* f;
-
-	if ((f = vstfx_infofile_create (dllpath, 0)) == 0) {
-		f = vstfx_infofile_create (dllpath, 1);
-	}
-
-	return f;
+	return g_fopen (path.c_str (), "wb");
 }
 
 /** check if cache-file exists, is up-to-date and parse cache file
@@ -535,12 +457,12 @@ vstfx_infofile_for_write (const char* dllpath)
  * @return true if .fsi cache was read successfully, false otherwise
  */
 static bool
-vstfx_get_info_from_file(const char* dllpath, vector<VSTInfo*> *infos)
+vstfx_get_info_from_file (const char* dllpath, vector<VSTInfo*> *infos)
 {
 	FILE* infofile;
 	bool rv = false;
 	if ((infofile = vstfx_infofile_for_read (dllpath)) != 0) {
-		rv = vstfx_load_info_file(infofile, infos);
+		rv = vstfx_load_info_file (infofile, infos);
 		fclose (infofile);
 		if (!rv) {
 			PBD::warning << "Cannot get VST information form " << dllpath << ": info file load failed." << endmsg;
@@ -582,8 +504,8 @@ bool vstfx_midi_output (VSTState* vstfx)
 		/* should we send it VST events (i.e. MIDI) */
 
 		if (   (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstEvents"), 0.0f) > 0)
-		       || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstMidiEvent"), 0.0f) > 0)
-			 ) {
+		    || (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("sendVstMidiEvent"), 0.0f) > 0)
+		   ) {
 			return true;
 		}
 	}
@@ -615,7 +537,7 @@ simple_master_callback (AEffect *, int32_t opcode, int32_t, intptr_t, void *ptr,
 	}
 	else if (opcode == audioMasterCanDo) {
 		for (int i = 0; i < vstfx_can_do_string_count; i++) {
-			if (! strcmp(vstfx_can_do_strings[i], (const char*)ptr)) {
+			if (! strcmp (vstfx_can_do_strings[i], (const char*)ptr)) {
 				return 1;
 			}
 		}
@@ -641,9 +563,9 @@ vstfx_parse_vst_state (VSTState* vstfx)
 		return 0;
 	}
 
-	/*We need to init the creator because some plugins
-	  fail to implement getVendorString, and so won't stuff the
-	  string with any name*/
+	/* We need to init the creator because some plugins
+	 * fail to implement getVendorString, and so won't stuff the
+	 * string with any name */
 
 	char creator[65] = "Unknown";
 	char name[65] = "";
@@ -653,25 +575,25 @@ vstfx_parse_vst_state (VSTState* vstfx)
 
 	plugin->dispatcher (plugin, effGetEffectName, 0, 0, name, 0);
 
-	if (strlen(name) == 0) {
+	if (strlen (name) == 0) {
 		plugin->dispatcher (plugin, effGetProductString, 0, 0, name, 0);
 	}
 
-	if (strlen(name) == 0) {
+	if (strlen (name) == 0) {
 		info->name = strdup (vstfx->handle->name);
 	} else {
 		info->name = strdup (name);
 	}
 
 	/*If the plugin doesn't bother to implement GetVendorString we will
-	  have pre-stuffed the string with 'Unknown' */
+	 * have pre-stuffed the string with 'Unknown' */
 
 	plugin->dispatcher (plugin, effGetVendorString, 0, 0, creator, 0);
 
-	/*Some plugins DO implement GetVendorString, but DON'T put a name in it
-	  so if its just a zero length string we replace it with 'Unknown' */
+	/* Some plugins DO implement GetVendorString, but DON'T put a name in it
+	 * so if its just a zero length string we replace it with 'Unknown' */
 
-	if (strlen(creator) == 0) {
+	if (strlen (creator) == 0) {
 		info->creator = strdup ("Unknown");
 	} else {
 		info->creator = strdup (creator);
@@ -699,11 +621,11 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	info->numInputs = plugin->numInputs;
 	info->numOutputs = plugin->numOutputs;
 	info->numParams = plugin->numParams;
-	info->wantMidi = (vstfx_midi_input(vstfx) ? 1 : 0) | (vstfx_midi_output(vstfx) ? 2 : 0);
+	info->wantMidi = (vstfx_midi_input (vstfx) ? 1 : 0) | (vstfx_midi_output (vstfx) ? 2 : 0);
 	info->hasEditor = plugin->flags & effFlagsHasEditor ? true : false;
 	info->canProcessReplacing = plugin->flags & effFlagsCanReplacing ? true : false;
-	info->ParamNames = (char **) malloc(sizeof(char*)*info->numParams);
-	info->ParamLabels = (char **) malloc(sizeof(char*)*info->numParams);
+	info->ParamNames = (char **) malloc (sizeof (char*)*info->numParams);
+	info->ParamLabels = (char **) malloc (sizeof (char*)*info->numParams);
 
 	for (int i = 0; i < info->numParams; ++i) {
 		char name[64];
@@ -715,11 +637,11 @@ vstfx_parse_vst_state (VSTState* vstfx)
 		strcpy (label, "No Label");
 
 		plugin->dispatcher (plugin, effGetParamName, i, 0, name, 0);
-		info->ParamNames[i] = strdup(name);
+		info->ParamNames[i] = strdup (name);
 
 		//NOTE: 'effGetParamLabel' is no longer defined in vestige headers
 		//plugin->dispatcher (plugin, effGetParamLabel, i, 0, label, 0);
-		info->ParamLabels[i] = strdup(label);
+		info->ParamLabels[i] = strdup (label);
 	}
 	return info;
 }
@@ -730,14 +652,14 @@ vstfx_parse_vst_state (VSTState* vstfx)
 static void
 vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> *infos, enum ARDOUR::PluginType type)
 {
-	assert(vstfx);
+	assert (vstfx);
 	VSTInfo *info;
 
-	if (!(info = vstfx_parse_vst_state(vstfx))) {
+	if (!(info = vstfx_parse_vst_state (vstfx))) {
 		return;
 	}
 
-	infos->push_back(info);
+	infos->push_back (info);
 #if 1 // shell-plugin support
 	/* If this plugin is a Shell and we are not already inside a shell plugin
 	 * read the info for all of the plugins contained in this shell.
@@ -751,20 +673,26 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 		do {
 			char name[65] = "Unknown";
 			id = plugin->dispatcher (plugin, effShellGetNextPlugin, 0, 0, name, 0);
-			ids.push_back(std::make_pair(id, name));
+			ids.push_back (std::make_pair (id, name));
 		} while ( id != 0 );
 
-		switch(type) {
+		switch (type) {
 #ifdef WINDOWS_VST_SUPPORT
-			case ARDOUR::Windows_VST: fst_close(vstfx); break;
+			case ARDOUR::Windows_VST:
+				fst_close (vstfx);
+				break;
 #endif
 #ifdef LXVST_SUPPORT
-			case ARDOUR::LXVST: vstfx_close (vstfx); break;
+			case ARDOUR::LXVST:
+				vstfx_close (vstfx);
+				break;
 #endif
-			default: assert(0); break;
+			default:
+				assert (0);
+				break;
 		}
 
-		for (vector< pair<int, string> >::iterator x = ids.begin(); x != ids.end(); ++x) {
+		for (vector< pair<int, string> >::iterator x = ids.begin (); x != ids.end (); ++x) {
 			id = (*x).first;
 			if (id == 0) continue;
 			/* recurse vstfx_get_info() */
@@ -772,37 +700,49 @@ vstfx_info_from_plugin (const char *dllpath, VSTState* vstfx, vector<VSTInfo *> 
 			bool ok;
 			switch (type) {
 #ifdef WINDOWS_VST_SUPPORT
-				case ARDOUR::Windows_VST:  ok = vstfx_instantiate_and_get_info_fst(dllpath, infos, id); break;
+				case ARDOUR::Windows_VST:
+					ok = vstfx_instantiate_and_get_info_fst (dllpath, infos, id);
+					break;
 #endif
 #ifdef LXVST_SUPPORT
-				case ARDOUR::LXVST:  ok = vstfx_instantiate_and_get_info_lx(dllpath, infos, id); break;
+				case ARDOUR::LXVST:
+					ok = vstfx_instantiate_and_get_info_lx (dllpath, infos, id);
+					break;
 #endif
-				default: ok = false;
+				default:
+					ok = false;
+					break;
 			}
 			if (ok) {
 				// One shell (some?, all?) does not report the actual plugin name
 				// even after the shelled plugin has been instantiated.
 				// Replace the name of the shell with the real name.
-				info = infos->back();
+				info = infos->back ();
 				free (info->name);
 
-				if ((*x).second.length() == 0) {
-					info->name = strdup("Unknown");
+				if ((*x).second.length () == 0) {
+					info->name = strdup ("Unknown");
 				}
 				else {
-					info->name = strdup ((*x).second.c_str());
+					info->name = strdup ((*x).second.c_str ());
 				}
 			}
 		}
 	} else {
-		switch(type) {
+		switch (type) {
 #ifdef WINDOWS_VST_SUPPORT
-			case ARDOUR::Windows_VST: fst_close(vstfx); break;
+			case ARDOUR::Windows_VST:
+				fst_close (vstfx);
+				break;
 #endif
 #ifdef LXVST_SUPPORT
-			case ARDOUR::LXVST: vstfx_close (vstfx); break;
+			case ARDOUR::LXVST:
+				vstfx_close (vstfx);
+				break;
 #endif
-			default: assert(0); break;
+			default:
+				assert (0);
+				break;
 		}
 	}
 #endif
@@ -819,22 +759,22 @@ vstfx_instantiate_and_get_info_lx (
 {
 	VSTHandle* h;
 	VSTState* vstfx;
-	if (!(h = vstfx_load(dllpath))) {
+	if (!(h = vstfx_load (dllpath))) {
 		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
 		return false;
 	}
 
 	vstfx_current_loading_id = uniqueID;
 
-	if (!(vstfx = vstfx_instantiate(h, simple_master_callback, 0))) {
-		vstfx_unload(h);
+	if (!(vstfx = vstfx_instantiate (h, simple_master_callback, 0))) {
+		vstfx_unload (h);
 		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
 		return false;
 	}
 
 	vstfx_current_loading_id = 0;
 
-	vstfx_info_from_plugin(dllpath, vstfx, infos, ARDOUR::LXVST);
+	vstfx_info_from_plugin (dllpath, vstfx, infos, ARDOUR::LXVST);
 
 	vstfx_unload (h);
 	return true;
@@ -848,22 +788,22 @@ vstfx_instantiate_and_get_info_fst (
 {
 	VSTHandle* h;
 	VSTState* vstfx;
-	if(!(h = fst_load(dllpath))) {
+	if (!(h = fst_load (dllpath))) {
 		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": load failed." << endmsg;
 		return false;
 	}
 
 	vstfx_current_loading_id = uniqueID;
 
-	if(!(vstfx = fst_instantiate(h, simple_master_callback, 0))) {
-		fst_unload(&h);
+	if (!(vstfx = fst_instantiate (h, simple_master_callback, 0))) {
+		fst_unload (&h);
 		vstfx_current_loading_id = 0;
 		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": instantiation failed." << endmsg;
 		return false;
 	}
 	vstfx_current_loading_id = 0;
 
-	vstfx_info_from_plugin(dllpath, vstfx, infos, ARDOUR::Windows_VST);
+	vstfx_info_from_plugin (dllpath, vstfx, infos, ARDOUR::Windows_VST);
 
 	return true;
 }
@@ -884,18 +824,20 @@ static void parse_scanner_output (std::string msg, size_t /*len*/)
 		return;
 	}
 
+#if 0 // TODO
 	if (!_errorlog_fd) {
-		if (!(_errorlog_fd = g_fopen(vstfx_errorfile_path(_errorlog_dll, 0).c_str(), "w"))) {
-			if (!(_errorlog_fd = g_fopen(vstfx_errorfile_path(_errorlog_dll, 1).c_str(), "w"))) {
-				PBD::error << "Cannot create plugin error-log for plugin " << _errorlog_dll;
-				free(_errorlog_dll);
-				_errorlog_dll = NULL;
-			}
+		if (!(_errorlog_fd = g_fopen (vstfx_errorfile_path (_errorlog_dll).c_str (), "w"))) {
+			PBD::error << "Cannot create plugin error-log for plugin " << _errorlog_dll;
+			free (_errorlog_dll);
+			_errorlog_dll = NULL;
 		}
 	}
+#endif
 
 	if (_errorlog_fd) {
-		fprintf (_errorlog_fd, "%s\n", msg.c_str());
+		fprintf (_errorlog_fd, "%s\n", msg.c_str ());
+	} else if (_errorlog_dll) {
+		PBD::error << "VST '" << _errorlog_dll << "': " << msg;
 	} else {
 		PBD::error << "VST scanner: " << msg;
 	}
@@ -903,25 +845,25 @@ static void parse_scanner_output (std::string msg, size_t /*len*/)
 
 static void
 set_error_log (const char* dllpath) {
-	assert(!_errorlog_fd);
-	assert(!_errorlog_dll);
-	_errorlog_dll = strdup(dllpath);
+	assert (!_errorlog_fd);
+	assert (!_errorlog_dll);
+	_errorlog_dll = strdup (dllpath);
 }
 
 static void
 close_error_log () {
 	if (_errorlog_fd) {
-		fclose(_errorlog_fd);
+		fclose (_errorlog_fd);
 		_errorlog_fd = 0;
 	}
-	free(_errorlog_dll);
+	free (_errorlog_dll);
 	_errorlog_dll = 0;
 }
 
 #endif
 
 
-/* *** THE MAIN FUNCTION THAT USES ALL OF THE ABOVE :) *** */
+/* *** the main function that uses all of the above *** */
 
 static vector<VSTInfo *> *
 vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanMode mode)
@@ -929,11 +871,11 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 	FILE* infofile;
 	vector<VSTInfo*> *infos = new vector<VSTInfo*>;
 
-	if (vstfx_check_blacklist(dllpath)) {
+	if (vst_is_blacklisted (dllpath)) {
 		return infos;
 	}
 
-	if (vstfx_get_info_from_file(dllpath, infos)) {
+	if (vstfx_get_info_from_file (dllpath, infos)) {
 		return infos;
 	}
 
@@ -947,50 +889,50 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 	else if (mode == VST_SCAN_USE_APP && scanner_bin_path != "") {
 		/* use external scanner app */
 
-		char **argp= (char**) calloc(3,sizeof(char*));
-		argp[0] = strdup(scanner_bin_path.c_str());
-		argp[1] = strdup(dllpath);
+		char **argp= (char**) calloc (3,sizeof (char*));
+		argp[0] = strdup (scanner_bin_path.c_str ());
+		argp[1] = strdup (dllpath);
 		argp[2] = 0;
 
-		set_error_log(dllpath);
+		set_error_log (dllpath);
 		ARDOUR::SystemExec scanner (scanner_bin_path, argp);
 		PBD::ScopedConnectionList cons;
 		scanner.ReadStdout.connect_same_thread (cons, boost::bind (&parse_scanner_output, _1 ,_2));
 		if (scanner.start (2 /* send stderr&stdout via signal */)) {
-			PBD::error << "Cannot launch VST scanner app '" << scanner_bin_path << "': "<< strerror(errno) << endmsg;
-			close_error_log();
+			PBD::error << "Cannot launch VST scanner app '" << scanner_bin_path << "': "<< strerror (errno) << endmsg;
+			close_error_log ();
 			return infos;
 		} else {
 			int timeout = PLUGIN_SCAN_TIMEOUT;
 			bool no_timeout = (timeout <= 0);
-			ARDOUR::PluginScanTimeout(timeout);
-			while (scanner.is_running() && (no_timeout || timeout > 0)) {
-				if (!no_timeout && !ARDOUR::PluginManager::instance().no_timeout()) {
+			ARDOUR::PluginScanTimeout (timeout);
+			while (scanner.is_running () && (no_timeout || timeout > 0)) {
+				if (!no_timeout && !ARDOUR::PluginManager::instance ().no_timeout ()) {
 					if (timeout%5 == 0) {
-						ARDOUR::PluginScanTimeout(timeout);
+						ARDOUR::PluginScanTimeout (timeout);
 					}
 					--timeout;
 				}
-				ARDOUR::GUIIdle();
+				ARDOUR::GUIIdle ();
 				Glib::usleep (100000);
 
-				if (ARDOUR::PluginManager::instance().cancelled()) {
+				if (ARDOUR::PluginManager::instance ().cancelled ()) {
 					// remove info file (might be incomplete)
-					vstfx_remove_infofile(dllpath);
+					vstfx_remove_infofile (dllpath);
 					// remove temporary blacklist file (scan incomplete)
-					vstfx_un_blacklist(dllpath);
-					scanner.terminate();
-					close_error_log();
+					vstfx_un_blacklist (dllpath);
+					scanner.terminate ();
+					close_error_log ();
 					return infos;
 				}
 			}
-			scanner.terminate();
+			scanner.terminate ();
 		}
-		close_error_log();
+		close_error_log ();
 		/* re-read index (generated by external scanner) */
-		vstfx_clear_info_list(infos);
-		if (!vstfx_check_blacklist(dllpath)) {
-			vstfx_get_info_from_file(dllpath, infos);
+		vstfx_clear_info_list (infos);
+		if (!vst_is_blacklisted (dllpath)) {
+			vstfx_get_info_from_file (dllpath, infos);
 		}
 		return infos;
 	}
@@ -1001,16 +943,22 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 
 	bool ok;
 	/* blacklist in case instantiation fails */
-	vstfx_blacklist(dllpath);
+	vstfx_blacklist (dllpath);
 
 	switch (type) {
 #ifdef WINDOWS_VST_SUPPORT
-		case ARDOUR::Windows_VST:  ok = vstfx_instantiate_and_get_info_fst(dllpath, infos, 0); break;
+		case ARDOUR::Windows_VST:
+			ok = vstfx_instantiate_and_get_info_fst (dllpath, infos, 0);
+			break;
 #endif
 #ifdef LXVST_SUPPORT
-		case ARDOUR::LXVST:  ok = vstfx_instantiate_and_get_info_lx(dllpath, infos, 0); break;
+		case ARDOUR::LXVST:
+			ok = vstfx_instantiate_and_get_info_lx (dllpath, infos, 0);
+			break;
 #endif
-		default: ok = false;
+		default:
+			ok = false;
+			break;
 	}
 
 	if (!ok) {
@@ -1018,7 +966,7 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 	}
 
 	/* remove from blacklist */
-	vstfx_un_blacklist(dllpath);
+	vstfx_un_blacklist (dllpath);
 
 	/* crate cache/whitelist */
 	infofile = vstfx_infofile_for_write (dllpath);
@@ -1033,49 +981,22 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 }
 
 
-
 /* *** public API *** */
 
 void
 vstfx_free_info_list (vector<VSTInfo *> *infos)
 {
-	for (vector<VSTInfo *>::iterator i = infos->begin(); i != infos->end(); ++i) {
-		vstfx_free_info(*i);
+	for (vector<VSTInfo *>::iterator i = infos->begin (); i != infos->end (); ++i) {
+		vstfx_free_info (*i);
 	}
 	delete infos;
-}
-
-string
-get_personal_vst_blacklist_dir() {
-	string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_blacklist");
-	/* if the directory doesn't exist, try to create it */
-	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
-		if (g_mkdir (dir.c_str (), 0700)) {
-			PBD::error << "Cannot create VST blacklist folder '" << dir << "'" << endmsg;
-			//exit(1);
-		}
-	}
-	return dir;
-}
-
-string
-get_personal_vst_info_cache_dir() {
-	string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_info");
-	/* if the directory doesn't exist, try to create it */
-	if (!Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
-		if (g_mkdir (dir.c_str (), 0700)) {
-			PBD::error << "Cannot create VST info folder '" << dir << "'" << endmsg;
-			//exit(1);
-		}
-	}
-	return dir;
 }
 
 #ifdef LXVST_SUPPORT
 vector<VSTInfo *> *
 vstfx_get_info_lx (char* dllpath, enum VSTScanMode mode)
 {
-	return vstfx_get_info(dllpath, ARDOUR::LXVST, mode);
+	return vstfx_get_info (dllpath, ARDOUR::LXVST, mode);
 }
 #endif
 
@@ -1083,7 +1004,7 @@ vstfx_get_info_lx (char* dllpath, enum VSTScanMode mode)
 vector<VSTInfo *> *
 vstfx_get_info_fst (char* dllpath, enum VSTScanMode mode)
 {
-	return vstfx_get_info(dllpath, ARDOUR::Windows_VST, mode);
+	return vstfx_get_info (dllpath, ARDOUR::Windows_VST, mode);
 }
 #endif
 

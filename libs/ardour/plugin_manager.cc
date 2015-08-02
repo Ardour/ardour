@@ -292,11 +292,25 @@ PluginManager::cancel_plugin_timeout ()
 void
 PluginManager::clear_vst_cache ()
 {
-	// see also libs/ardour/vst_info_file.cc - vstfx_infofile_path()
+#if 1 // clean old cache and error files. (remove this code after 4.3 or 5.0)
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
 		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\" VST_EXT_INFOFILE "$", true);
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
+		}
+	}
+	{
+		vector<string> fsi_files;
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.fsi$", true);
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
+		}
+	}
+	{
+		vector<string> fsi_files;
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_vst(), "\\.err$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -311,13 +325,28 @@ PluginManager::clear_vst_cache ()
 			::g_unlink(i->c_str());
 		}
 	}
+	{
+		vector<string> fsi_files;
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.fsi$", true);
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
+		}
+	}
+	{
+		vector<string> fsi_files;
+		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\.err$", true);
+		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
+			::g_unlink(i->c_str());
+		}
+	}
 #endif
+#endif // old cache cleanup
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	{
-		string personal = get_personal_vst_info_cache_dir();
+		string dn = Glib::build_filename (ARDOUR::user_cache_directory(), "vst");
 		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\" VST_EXT_INFOFILE "$", /* user cache is flat, no recursion */ false);
+		find_files_matching_regex (fsi_files, dn, "\\" VST_EXT_INFOFILE "$", /* user cache is flat, no recursion */ false);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
 		}
@@ -328,6 +357,8 @@ PluginManager::clear_vst_cache ()
 void
 PluginManager::clear_vst_blacklist ()
 {
+#if 1 // remove old blacklist files. (remove this code after 4.3 or 5.0)
+
 #ifdef WINDOWS_VST_SUPPORT
 	{
 		vector<string> fsi_files;
@@ -348,17 +379,17 @@ PluginManager::clear_vst_blacklist ()
 	}
 #endif
 
+#endif // old blacklist cleanup
+
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
 	{
-		string personal = get_personal_vst_blacklist_dir();
-
-		vector<string> fsi_files;
-		find_files_matching_regex (fsi_files, personal, "\\" VST_EXT_BLACKLIST "$", /* flat user cache */ false);
-		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
-			::g_unlink(i->c_str());
+		string fn = Glib::build_filename (ARDOUR::user_cache_directory(), VST_BLACKLIST);
+		if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+			::g_unlink (fn.c_str());
 		}
 	}
 #endif
+
 }
 
 void
@@ -797,7 +828,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 			_windows_vst_plugin_info->push_back (info);
 			discovered++;
 			if (Config->get_verbose_plugin_scan()) {
-				PBD::info << string_compose (_(" -> OK. (VST Plugin \"%1\" added)."), info->name) << endmsg; 
+				PBD::info << string_compose (_(" -> OK. (VST Plugin \"%1\" added)."), info->name) << endmsg;
 			}
 		}
 	}

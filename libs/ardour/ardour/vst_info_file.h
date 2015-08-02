@@ -32,11 +32,12 @@
 #  define VST_EXT_BLACKLIST ".fsb"
 #endif
 
-#define VST_EXT_ERRORFILE ".err"
 # if ( defined(__x86_64__) || defined(_M_X64) )
 #define VST_EXT_INFOFILE  ".fsi64"
+#define VST_BLACKLIST  "vst64_blacklist.txt"
 #else
 #define VST_EXT_INFOFILE  ".fsi"
+#define VST_BLACKLIST  "vst32_blacklist.txt"
 #endif
 
 #ifndef VST_SCANNER_APP
@@ -49,8 +50,6 @@ enum VSTScanMode {
 	VST_SCAN_INTERNAL
 };
 
-LIBARDOUR_API extern std::string get_personal_vst_info_cache_dir ();
-LIBARDOUR_API extern std::string get_personal_vst_blacklist_dir ();
 LIBARDOUR_API extern void vstfx_free_info_list (std::vector<VSTInfo *> *infos);
 
 #ifdef LXVST_SUPPORT
