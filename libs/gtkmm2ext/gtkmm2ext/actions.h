@@ -52,30 +52,6 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
 	LIBGTKMM2EXT_API extern void enable_accelerators ();
 
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
-						   const char * name, const char * label);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
-						   const char * name, const char * label, sigc::slot<void> sl,
-						   guint key, Gdk::ModifierType mods);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
-						   const char * name, const char * label, sigc::slot<void> sl);
-
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
-								const char * name, const char * label, sigc::slot<void> sl,
-								guint key, Gdk::ModifierType mods);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
-								const char * name, const char * label, sigc::slot<void> sl);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group, Gtk::RadioAction::Group&,
-								std::string const &, std::string const &, std::string const &, sigc::slot<void> sl);
-
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
-							  const char * name, const char * label, sigc::slot<void> sl,
-							  guint key, Gdk::ModifierType mods);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
-								 std::string const &, std::string const &, std::string const &, sigc::slot<void> sl);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> register_toggle_action (Glib::RefPtr<Gtk::ActionGroup> group,
-								 const char * name, const char * label, sigc::slot<void> sl);
-
 	LIBGTKMM2EXT_API extern bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
 
 	LIBGTKMM2EXT_API extern void get_all_actions (std::vector<std::string>& names,
