@@ -52,45 +52,37 @@ MixerActor::~MixerActor ()
 void
 MixerActor::register_actions ()
 {
-	myactions.register_action ("Mixer", "solo", _("Toggle Solo on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::solo_action));
-	myactions.register_action ("Mixer", "mute", _("Toggle Mute on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::mute_action));
-	myactions.register_action ("Mixer", "recenable", _("Toggle Rec-enable on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::rec_enable_action));
-	myactions.register_action ("Mixer", "increment-gain", _("Decrease Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::step_gain_up_action));
-	myactions.register_action ("Mixer", "decrement-gain", _("Increase Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::step_gain_down_action));
-	myactions.register_action ("Mixer", "unity-gain", _("Set Gain to 0dB on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::unity_gain_action));
+	Glib::RefPtr<ActionGroup> group = myactions.create_action_group (X_("Mixer"));
+
+	myactions.register_action (group, "solo", _("Toggle Solo on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::solo_action));
+	myactions.register_action (group, "mute", _("Toggle Mute on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::mute_action));
+	myactions.register_action (group, "recenable", _("Toggle Rec-enable on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::rec_enable_action));
+	myactions.register_action (group, "increment-gain", _("Decrease Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::step_gain_up_action));
+	myactions.register_action (group, "decrement-gain", _("Increase Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::step_gain_down_action));
+ 	myactions.register_action (group, "unity-gain", _("Set Gain to 0dB on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &MixerActor::unity_gain_action));
 
 
-	myactions.register_action ("Mixer", "copy-processors", _("Copy Selected Processors"), sigc::mem_fun (*this, &MixerActor::copy_processors));
-	myactions.register_action ("Mixer", "cut-processors", _("Cut Selected Processors"), sigc::mem_fun (*this, &MixerActor::cut_processors));
-	myactions.register_action ("Mixer", "paste-processors", _("Paste Selected Processors"), sigc::mem_fun (*this, &MixerActor::paste_processors));
-	myactions.register_action ("Mixer", "delete-processors", _("Delete Selected Processors"), sigc::mem_fun (*this, &MixerActor::delete_processors));
-	myactions.register_action ("Mixer", "select-all-processors", _("Select All (visible) Processors"), sigc::mem_fun (*this, &MixerActor::select_all_processors));
-	myactions.register_action ("Mixer", "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &MixerActor::toggle_processors));
-	myactions.register_action ("Mixer", "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &MixerActor::ab_plugins));
-	myactions.register_action ("Mixer", "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &MixerActor::select_none));
+	myactions.register_action (group, "copy-processors", _("Copy Selected Processors"), sigc::mem_fun (*this, &MixerActor::copy_processors));
+	myactions.register_action (group, "cut-processors", _("Cut Selected Processors"), sigc::mem_fun (*this, &MixerActor::cut_processors));
+	myactions.register_action (group, "paste-processors", _("Paste Selected Processors"), sigc::mem_fun (*this, &MixerActor::paste_processors));
+	myactions.register_action (group, "delete-processors", _("Delete Selected Processors"), sigc::mem_fun (*this, &MixerActor::delete_processors));
+	myactions.register_action (group, "select-all-processors", _("Select All (visible) Processors"), sigc::mem_fun (*this, &MixerActor::select_all_processors));
+	myactions.register_action (group, "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &MixerActor::toggle_processors));
+	myactions.register_action (group, "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &MixerActor::ab_plugins));
+ 	myactions.register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &MixerActor::select_none));
 
-	myactions.register_action ("Mixer", "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_left));
-	myactions.register_action ("Mixer", "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_right));
+	myactions.register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_left));
+ 	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &MixerActor::scroll_right));
 
-	myactions.register_action ("Mixer", "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"),
-				   sigc::bind (sigc::mem_fun (*this, &MixerActor::toggle_midi_input_active), false));
+	myactions.register_action (group, "toggle-midi-input-active", _("Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"), 
+	                           sigc::bind (sigc::mem_fun (*this, &MixerActor::toggle_midi_input_active), false));
 }
 
 void
 MixerActor::load_bindings ()
 {
-        /* XXX move this to a better place */
-
         bindings.set_action_map (myactions);
-
-	std::string binding_file;
-
-	if (find_file (ardour_config_search_path(), "mixer.bindings", binding_file)) {
-                bindings.load (binding_file);
-		info << string_compose (_("Loaded mixer bindings from %1"), binding_file) << endmsg;
-        } else {
-		error << string_compose (_("Could not find mixer.bindings in search path %1"), ardour_config_search_path().to_string()) << endmsg;
-	}
+        bindings.load ("mixer");
 }
 
 void

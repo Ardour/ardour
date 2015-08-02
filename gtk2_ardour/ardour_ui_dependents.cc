@@ -58,8 +58,10 @@ void
 ARDOUR_UI::we_have_dependents ()
 {
 	install_actions ();
+	load_bindings ();
+	
 	ProcessorBox::register_actions ();
-	keyboard->setup_keybindings ();
+
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 
@@ -215,6 +217,8 @@ ARDOUR_UI::setup_windows ()
 
 	rc_option_editor = new RCOptionEditor;
 	rc_option_editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+
+	keyboard->setup_keybindings ();
 
 	if (create_editor ()) {
 		error << _("UI: cannot setup editor") << endmsg;

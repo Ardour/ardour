@@ -7,12 +7,12 @@
 ; FORMAT:
 ; $text -> defines cheatsheet title as "text", which may contain LaTeX markup
 ;
-; %group file text -> defines a binding group called "group" which will have the title "text" on the cheatsheet. 
+; %group owner text -> defines a binding group called "group" which will have the title "text" on the cheatsheet. 
 ;                may be followed by zero or more lines of descriptive text,
 ;                which may contain LaTeX markup. When generating native ardour
 ;                bindings, the definition for a binding in group "group" will
-;                be placed in "<file>.bindings". The "file" field is otherwise
-;                ignored.
+;                be placed in the "owner" block of the bindings file. The
+;                "owner" field is otherwise ignored.
 ;
 ;                If the group name starts with "-", the binding will not appear
 ;                on the cheetsheet.
@@ -112,7 +112,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
 
-@trans|Editor/add-location-from-playhead|nabla|add marker
+@trans|Editor/add-location-from-playhead|Tab|add marker
 @trans|Editor/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
 @movp|Transport/alternate-GotoStart|Return|to start marker
 
@@ -179,7 +179,6 @@ This mode provides many different operations on both regions and control points,
 @trans|Editor/set-playhead|p|set playhead position
 @select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
 @wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>p|toggle global audio patchbay
-@wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>p|toggle global midi patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
 @select|Editor/select-all-after-playhead|<@PRIMARY@><@TERTIARY@>p|all after playhead
 
@@ -233,40 +232,39 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/toggle-meterbridge|<@SECONDARY@>b|show meter bridge
 @trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
-@wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>n|toggle global audio patchbay
 @sess|Main/New|<@PRIMARY@>n|open a new session
 @wvis|Common/toggle-editor-mixer|<@SECONDARY@>m|rotate editor \& mixer window
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 
 ;; arrow keys, navigation etc.
 
-@vis|Editor/step-tracks-up|uparrow|scroll up (step)
-@trans|Transport/TransitionToRoll|<@TERTIARY@>uparrow|transition to roll
-@select|Editor/select-prev-route|<@SECONDARY@>uparrow|select previous track/bus
-@vis|Editor/move-selected-tracks-up|<@PRIMARY@>uparrow|move selected tracks up
+@vis|Editor/step-tracks-up|Up|scroll up (step)
+@trans|Transport/TransitionToRoll|<@TERTIARY@>Up|transition to roll
+@select|Editor/select-prev-route|<@SECONDARY@>Up|select previous track/bus
+@vis|Editor/move-selected-tracks-up|<@PRIMARY@>Up|move selected tracks up
 
-@vis|Editor/step-tracks-down|downarrow|scroll down (step)
-@trans|Transport/TransitionToReverse|<@TERTIARY@>downarrow|transition to reverse
-@select|Editor/select-next-route|<@SECONDARY@>downarrow|select next track/bus
-@vis|Editor/move-selected-tracks-down|<@PRIMARY@>downarrow|move selected tracks down
+@vis|Editor/step-tracks-down|Down|scroll down (step)
+@trans|Transport/TransitionToReverse|<@TERTIARY@>Down|transition to reverse
+@select|Editor/select-next-route|<@SECONDARY@>Down|select next track/bus
+@vis|Editor/move-selected-tracks-down|<@PRIMARY@>Down|move selected tracks down
 
-@movp|Editor/playhead-to-previous-region-boundary|leftarrow|to previous region edge
-;@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>leftarrow|to previous edge \linebreak[4] (ignoring selection)
-@movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>leftarrow|to previous region sync
-@movp|Editor/tab-to-transient-backwards|<@PRIMARY@>leftarrow|to previous transient
-@movp|Editor/nudge-playhead-backward|<@SECONDARY@>leftarrow|nudge backward
-@movp|Editor/playhead-backward-to-grid|<@SECONDARY@><@TERTIARY@>leftarrow|to previous grid point
-@trans|Transport/Rewind|<@TERTIARY@>leftarrow|rewind
-@markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>leftarrow|move to prev region edge
+@movp|Editor/playhead-to-previous-region-boundary|Left|to previous region edge
+;@movp|Editor/playhead-to-previous-region-boundary-noselection|<@LEVEL4@>Left|to previous edge \linebreak[4] (ignoring selection)
+@movp|Editor/playhead-to-previous-region-sync|<@PRIMARY@><@SECONDARY@>Left|to previous region sync
+@movp|Editor/tab-to-transient-backwards|<@PRIMARY@>Left|to previous transient
+@movp|Editor/nudge-playhead-backward|<@SECONDARY@>Left|nudge backward
+@movp|Editor/playhead-backward-to-grid|<@SECONDARY@><@TERTIARY@>Left|to previous grid point
+@trans|Transport/Rewind|<@TERTIARY@>Left|rewind
+@markers|Editor/selected-marker-to-previous-region-boundary|<@PRIMARY@><@TERTIARY@>Left|move to prev region edge
 
-@movp|Editor/playhead-to-next-region-boundary|rightarrow|to next region edge
-;@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>rightarrow|to next region edge \linebreak[4] (ignoring selection)
-@movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>rightarrow|to next region sync
-@movp|Editor/tab-to-transient-forwards|<@PRIMARY@>rightarrow|to next transient
-@movp|Editor/nudge-playhead-forward|<@SECONDARY@>rightarrow|nudge forwards
-@movp|Editor/playhead-forward-to-grid|<@SECONDARY@><@TERTIARY@>rightarrow|to next grid point
-@trans|Transport/Forward|<@TERTIARY@>rightarrow|fast forward
-@markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>rightarrow|move to next region edge
+@movp|Editor/playhead-to-next-region-boundary|Right|to next region edge
+;@movp|Editor/playhead-to-next-region-boundary-noselection|<@LEVEL4@>Right|to next region edge \linebreak[4] (ignoring selection)
+@movp|Editor/playhead-to-next-region-sync|<@PRIMARY@><@SECONDARY@>Right|to next region sync
+@movp|Editor/tab-to-transient-forwards|<@PRIMARY@>Right|to next transient
+@movp|Editor/nudge-playhead-forward|<@SECONDARY@>Right|nudge forwards
+@movp|Editor/playhead-forward-to-grid|<@SECONDARY@><@TERTIARY@>Right|to next grid point
+@trans|Transport/Forward|<@TERTIARY@>Right|fast forward
+@markers|Editor/selected-marker-to-next-region-boundary|<@PRIMARY@><@TERTIARY@>Right|move to next region edge
 
 @vis|Editor/scroll-tracks-down|Page_Down|scroll down (page)
 @vis|Editor/scroll-tracks-up|Page_Up|scroll up (page)

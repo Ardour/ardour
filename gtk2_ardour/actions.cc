@@ -45,23 +45,23 @@ using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
 
-vector<RefPtr<Gtk::Action> > ActionManager::session_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::write_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::region_list_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::track_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::point_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::time_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::line_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::playlist_selection_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::mouse_edit_point_requires_canvas_actions;
+typedef std::vector<RefPtr<Gtk::Action> > RelatedActions;
 
-vector<RefPtr<Gtk::Action> > ActionManager::range_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::engine_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::engine_opposite_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::transport_sensitive_actions;
-vector<RefPtr<Gtk::Action> > ActionManager::edit_point_in_region_sensitive_actions;
-
-static Glib::RefPtr<UIManager> ui_manager;
+RelatedActions ActionManager::session_sensitive_actions;
+RelatedActions ActionManager::write_sensitive_actions;
+RelatedActions ActionManager::region_list_selection_sensitive_actions;
+RelatedActions ActionManager::plugin_selection_sensitive_actions;
+RelatedActions ActionManager::track_selection_sensitive_actions;
+RelatedActions ActionManager::point_selection_sensitive_actions;
+RelatedActions ActionManager::time_selection_sensitive_actions;
+RelatedActions ActionManager::line_selection_sensitive_actions;
+RelatedActions ActionManager::playlist_selection_sensitive_actions;
+RelatedActions ActionManager::mouse_edit_point_requires_canvas_actions;
+RelatedActions ActionManager::range_sensitive_actions;
+RelatedActions ActionManager::engine_sensitive_actions;
+RelatedActions ActionManager::engine_opposite_sensitive_actions;
+RelatedActions ActionManager::transport_sensitive_actions;
+RelatedActions ActionManager::edit_point_in_region_sensitive_actions;
 
 void
 ActionManager::init ()

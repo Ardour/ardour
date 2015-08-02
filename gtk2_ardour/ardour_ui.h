@@ -366,8 +366,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         bool          _initial_verbose_plugin_scan;
 	bool           first_time_engine_run;
 
-	Gtkmm2ext::Bindings _global_bindings;
-	
 	bool tabs_button_event (GdkEventButton* ev);
 	
 	void show_tabbable (Gtkmm2ext::Tabbable*);
@@ -829,6 +827,11 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	
 	bool main_window_delete_event (GdkEventAny*);
 	bool idle_ask_about_quit ();
+
+	Gtkmm2ext::ActionMap global_actions;
+	Gtkmm2ext::Bindings  global_bindings;
+	void load_bindings ();
+	
 };
 
 #endif /* __ardour_gui_h__ */

@@ -29,9 +29,11 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
-#include "gtkmm2ext/dndtreeview.h"
+
 #include "gtkmm2ext/auto_spin.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/dndvbox.h"
 #include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/persistent_tooltip.h"
@@ -321,7 +323,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 #endif
 
   private:
-
+	static Gtkmm2ext::ActionMap processor_box_actions;
+	
 	/* prevent copy construction */
 	ProcessorBox (ProcessorBox const &);
 

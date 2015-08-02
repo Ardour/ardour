@@ -179,11 +179,11 @@ ArdourKeyboard::setup_keybindings ()
 	}
 
 	load_keybindings (keybindings_path);
+	
+	/* catch changes made via some GTK mechanism */
 
-	/* catch changes */
-
-	GtkAccelMap* accelmap = gtk_accel_map_get();
-	g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, this);
+	// GtkAccelMap* accelmap = gtk_accel_map_get();
+	// g_signal_connect (accelmap, "changed", (GCallback) accel_map_changed, this);
 }
 
 XMLNode&

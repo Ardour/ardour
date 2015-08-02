@@ -5171,9 +5171,11 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 		if (w) {
 			bindings = reinterpret_cast<Gtkmm2ext::Bindings*>(w->get_data ("ardour-bindings"));
 		} else {
-			bindings = &_global_bindings;
+			bindings = &global_bindings;
 		}
 
+		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("main window key event, bindings = %1, global = %2\n", bindings, &global_bindings));
+		
 	} else if (event_window != 0) {
 
 		window = event_window;
@@ -5271,11 +5273,11 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 								  ev->send_event, ev->time, ev->length, ev->string, ev->hardware_keycode, ev->group, gdk_keyval_name (ev->keyval)));
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tsending to window\n");
+		KeyboardKey k (ev->state, ev->keyval);
 
 		if (bindings) {
 
 			DEBUG_TRACE (DEBUG::Accelerators, "\tusing Ardour bindings for this window\n");
-			KeyboardKey k (ev->state, ev->keyval);
 			
 			if (bindings->activate (k, Bindings::Press)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
@@ -5283,12 +5285,13 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 			}
 		}
 
-		if (try_gtk_accel_binding (win, ev, !special_handling_of_unmodified_accelerators, modifier)) {
+		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
+		
+		if (global_bindings.activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 			return true;
 		}
 
-		
                 DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
                 
                 if (gtk_window_propagate_key_event (win, ev)) {
@@ -5308,11 +5311,12 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagation didn't handle, so activate\n");
-		
+		KeyboardKey k (ev->state, ev->keyval);		
+
 		if (bindings) {
 			
 			DEBUG_TRACE (DEBUG::Accelerators, "\tusing Ardour bindings for this window\n");
-			KeyboardKey k (ev->state, ev->keyval);
+
 			
 			if (bindings->activate (k, Bindings::Press)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
@@ -5321,49 +5325,22 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 			
 		} 
 		
-		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try GTK bindings\n");
+		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
 		
-		if (try_gtk_accel_binding (win, ev, !special_handling_of_unmodified_accelerators, modifier)) {
+		if (global_bindings.activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 			return true;
 		}
-	}
-
-	DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
-	
-	KeyboardKey k (ev->state, ev->keyval);
-	
-	if (_global_bindings.activate (k, Bindings::Press)) {
-		DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
-		return true;
 	}
 
 	DEBUG_TRACE (DEBUG::Accelerators, "\tnot handled\n");
 	return true;
 }
 
-bool
-ARDOUR_UI::try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier)
+void
+ARDOUR_UI::load_bindings ()
 {
-	uint32_t fakekey = ev->keyval;
-
-	if (translate) {
-		
-		/* pretend that certain key events that GTK does not allow
-		   to be used as accelerators are actually something that
-		   it does allow. but only where there are no modifiers.
-		*/
-
-		if (Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (fakekey)) {
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tactivate (was %1 now %2) without special hanlding of unmodified accels, modifier was %3\n",
-			                                                  ev->keyval, fakekey, show_gdk_event_state (modifier)));
-		}
-	}
-			
-	if (gtk_accel_groups_activate (G_OBJECT(win), fakekey, modifier)) {
-		DEBUG_TRACE (DEBUG::Accelerators, "\tGTK accel group activated\n");
-		return true;
-	}
-
-	return false;
+	global_bindings.set_action_map (global_actions);
+	global_bindings.load ("global");
 }
+

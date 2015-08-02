@@ -21,6 +21,7 @@
 #include <gtkmm/table.h>
 
 #include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/bindings.h"
 
 #include "ardour_button.h"
 #include "ardour_knob.h"
@@ -40,7 +41,7 @@ namespace Gtkmm2ext {
 
 class MonitorSection : public RouteUI
 {
-	public:
+  public:
 	MonitorSection (ARDOUR::Session*);
 	~MonitorSection ();
 
@@ -175,4 +176,7 @@ class MonitorSection : public RouteUI
 	void processors_changed (ARDOUR::RouteProcessorChange);
 	Glib::RefPtr<Gtk::ToggleAction> proctoggle;
 	bool _ui_initialized;
+
+  private:
+	Gtkmm2ext::ActionMap myactions;
 };

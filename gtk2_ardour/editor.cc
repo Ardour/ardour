@@ -751,9 +751,6 @@ Editor::Editor ()
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
 	register_actions ();
-	/* when we start using our own keybinding system for the editor, this
-	 * will be uncommented
-	 */
 	load_bindings ();
 
 	setup_toolbar ();
