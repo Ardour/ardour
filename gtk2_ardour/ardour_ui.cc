@@ -4225,6 +4225,7 @@ quickly enough to keep up with recording.\n"), PROGRAM_NAME));
 static MessageDialog *scan_dlg = NULL;
 static ProgressBar   *scan_pbar = NULL;
 static HBox          *scan_tbox = NULL;
+static Gtk::Button   *scan_timeout_button;
 
 void
 ARDOUR_UI::cancel_plugin_scan ()
@@ -4236,7 +4237,7 @@ void
 ARDOUR_UI::cancel_plugin_timeout ()
 {
 	PluginManager::instance().cancel_plugin_timeout();
-	scan_tbox->hide();
+	scan_timeout_button->set_sensitive (false);
 }
 
 void
@@ -4246,10 +4247,13 @@ ARDOUR_UI::plugin_scan_timeout (int timeout)
 		return;
 	}
 	if (timeout > 0) {
+		scan_pbar->set_sensitive (false);
+		scan_timeout_button->set_sensitive (true);
 		scan_pbar->set_fraction ((float) timeout / (float) Config->get_vst_scan_timeout());
 		scan_tbox->show();
 	} else {
-		scan_tbox->hide();
+		scan_pbar->set_sensitive (false);
+		scan_timeout_button->set_sensitive (false);
 	}
 	gui_idle_handler();
 }
@@ -4274,7 +4278,6 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 	}
 
 	static Gtk::Button *cancel_button;
-	static Gtk::Button *timeout_button;
 	if (!scan_dlg) {
 		scan_dlg = new MessageDialog("", false, MESSAGE_INFO, BUTTONS_NONE); // TODO manage
 		VBox* vbox = scan_dlg->get_vbox();
@@ -4290,10 +4293,10 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 
 		scan_tbox = manage( new HBox() );
 
-		timeout_button = manage(new Gtk::Button(_("Stop Timeout")));
-		timeout_button->set_name ("EditorGTKButton");
-		timeout_button->signal_clicked().connect ( mem_fun (*this, &ARDOUR_UI::cancel_plugin_timeout) );
-		timeout_button->show();
+		scan_timeout_button = manage(new Gtk::Button(_("Stop Timeout")));
+		scan_timeout_button->set_name ("EditorGTKButton");
+		scan_timeout_button->signal_clicked().connect ( mem_fun (*this, &ARDOUR_UI::cancel_plugin_timeout) );
+		scan_timeout_button->show();
 
 		scan_pbar = manage(new ProgressBar());
 		scan_pbar->set_orientation(Gtk::PROGRESS_RIGHT_TO_LEFT);
@@ -4301,7 +4304,7 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 		scan_pbar->show();
 
 		scan_tbox->pack_start (*scan_pbar, PACK_EXPAND_WIDGET, 4);
-		scan_tbox->pack_start (*timeout_button, PACK_SHRINK, 4);
+		scan_tbox->pack_start (*scan_timeout_button, PACK_SHRINK, 4);
 
 		scan_dlg->get_vbox()->pack_start (*scan_tbox, PACK_SHRINK, 4);
 	}
@@ -4309,13 +4312,14 @@ ARDOUR_UI::plugin_scan_dialog (std::string type, std::string plugin, bool can_ca
 	assert(scan_dlg && scan_tbox && cancel_button);
 
 	if (type == X_("closeme")) {
+		scan_tbox->hide();
 		scan_dlg->hide();
 	} else {
 		scan_dlg->set_message(type + ": " + Glib::path_get_basename(plugin));
 		scan_dlg->show();
 	}
 	if (!can_cancel || !cancelled) {
-		scan_tbox->hide();
+		scan_timeout_button->set_sensitive(false);
 	}
 	cancel_button->set_sensitive(can_cancel && !cancelled);
 
