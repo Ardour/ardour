@@ -19,8 +19,6 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-// gcc -Wall -DSELFTEST_SHA1 -o /tmp/sha1test libs/ardour/sha1.c && /tmp/sha1test
-
 #ifndef EXPORT_SHA
 #define EXPORT_SHA static
 #endif
@@ -29,7 +27,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
-
 
 #ifdef __BIG_ENDIAN__
 # define SHA_BIG_ENDIAN
@@ -46,17 +43,11 @@
 # endif
 #endif
 
-
-#define HASH_LENGTH 20
-#define BLOCK_LENGTH 64
-
 typedef struct {
-	uint32_t buffer[BLOCK_LENGTH/4];
-	uint32_t state[HASH_LENGTH/4];
+	uint32_t buffer[16];
+	uint32_t state[5];
 	uint32_t byteCount;
 	uint8_t bufferOffset;
-	uint8_t keyBuffer[BLOCK_LENGTH];
-	uint8_t innerHash[HASH_LENGTH];
 } Sha1Digest;
 
 
@@ -111,7 +102,7 @@ static void sha1_addUncounted (Sha1Digest *s, const uint8_t data) {
 	b[s->bufferOffset ^ 3] = data;
 #endif
 	s->bufferOffset++;
-	if (s->bufferOffset == BLOCK_LENGTH) {
+	if (s->bufferOffset == 64) {
 		sha1_hashBlock (s);
 		s->bufferOffset = 0;
 	}
@@ -182,52 +173,3 @@ EXPORT_SHA void sha1_result_hash (Sha1Digest *s, char *rv) {
 		sprintf (&rv[2*i], "%02x", hash[i]);
 	}
 }
-
-
-/*** self-test ***/
-#ifdef SELFTEST_SHA1
-void printHash (Sha1Digest *s) {
-	char hash[41];
-	sha1_result_hash (s, hash);
-	printf ("%s\n", hash);
-}
-
-int main (int argc, char **argv) {
-	uint32_t a;
-	Sha1Digest s;
-
-	// SHA tests
-	printf ("Test: FIPS 180-2 C.1 and RFC3174 7.3 TEST1\n");
-	printf ("Expect:a9993e364706816aba3e25717850c26c9cd0d89d\n");
-	printf ("Result:");
-	sha1_init (&s);
-	sha1_write (&s, "abc", 3);
-	printHash (&s);
-	printf ("\n\n");
-
-	printf ("Test: FIPS 180-2 C.2 and RFC3174 7.3 TEST2\n");
-	printf ("Expect:84983e441c3bd26ebaae4aa1f95129e5e54670f1\n");
-	printf ("Result:");
-	sha1_init (&s);
-	sha1_write (&s, "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq", 56);
-	printHash (&s);
-	printf ("\n\n");
-
-	printf ("Test: RFC3174 7.3 TEST4\n");
-	printf ("Expect:dea356a2cddd90c7a7ecedc5ebb563934f460452\n");
-	printf ("Result:");
-	sha1_init (&s);
-	for (a = 0; a < 80; ++a) sha1_write (&s, "01234567", 8);
-	printHash (&s);
-	printf ("\n\n");
-
-	printf ("Test: FIPS 180-2 C.3 and RFC3174 7.3 TEST3\n");
-	printf ("Expect:34aa973cd4c4daa4f61eeb2bdbad27316534016f\n");
-	printf ("Result:");
-	sha1_init (&s);
-	for (a = 0; a < 1000000; ++a) sha1_writebyte (&s, 'a');
-	printHash (&s);
-
-	return 0;
-}
-#endif /* self-test */
