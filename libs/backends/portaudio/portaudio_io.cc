@@ -525,7 +525,7 @@ PortAudioIO::pcm_setup (
 			_playback_channels > 0 ? &outputParam: NULL,
 			sample_rate,
 			samples_per_period,
-			paClipOff | paDitherOff,
+			paDitherOff,
 			NULL, NULL);
 
 	if (err != paNoError) {
