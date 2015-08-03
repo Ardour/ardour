@@ -73,6 +73,7 @@ libpbd_sources = [
     'stacktrace.cc',
     'stateful_diff_command.cc',
     'stateful.cc',
+    'string_convert.cc',
     'strreplace.cc',
     'strsplit.cc',
     'system_exec.cc',
@@ -191,6 +192,7 @@ def build(bld):
                 test/mutex_test.cc
                 test/scalar_properties.cc
                 test/signals_test.cc
+                test/string_convert_test.cc
                 test/convert_test.cc
                 test/filesystem_test.cc
                 test/natsort_test.cc
