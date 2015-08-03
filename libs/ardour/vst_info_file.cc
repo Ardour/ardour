@@ -133,10 +133,14 @@ static void vstfx_un_blacklist (const char *idcs)
 	}
 
 	std::string bl;
-	std::ifstream ifs (fn.c_str ());
-	bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
+	{
+		std::ifstream ifs (fn.c_str ());
+		bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
+	}
+
 	::g_unlink (fn.c_str ());
 
+	assert (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS));
 	assert (id.find ("\n") == string::npos);
 
 	id += "\n"; // add separator
