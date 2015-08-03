@@ -36,7 +36,7 @@
 #define VST_EXT_INFOFILE  ".fsi64"
 #define VST_BLACKLIST  "vst64_blacklist.txt"
 #else
-#define VST_EXT_INFOFILE  ".fsi"
+#define VST_EXT_INFOFILE  ".fsi32"
 #define VST_BLACKLIST  "vst32_blacklist.txt"
 #endif
 

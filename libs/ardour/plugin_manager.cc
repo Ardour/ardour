@@ -352,6 +352,14 @@ PluginManager::clear_vst_cache ()
 		}
 	}
 #endif
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+	{
+		string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_info");
+		if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+			PBD::remove_directory (dir);
+		}
+	}
+#endif
 #endif // old cache cleanup
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
@@ -387,6 +395,14 @@ PluginManager::clear_vst_blacklist ()
 		find_files_matching_regex (fsi_files, Config->get_plugin_path_lxvst(), "\\" VST_EXT_BLACKLIST "$", true);
 		for (vector<string>::iterator i = fsi_files.begin(); i != fsi_files.end (); ++i) {
 			::g_unlink(i->c_str());
+		}
+	}
+#endif
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+	{
+		string dir = Glib::build_filename (ARDOUR::user_cache_directory(), "fst_blacklist");
+		if (Glib::file_test (dir, Glib::FILE_TEST_IS_DIR)) {
+			PBD::remove_directory (dir);
 		}
 	}
 #endif
