@@ -38,7 +38,7 @@
 # endif
 #elif !defined __LITTLE_ENDIAN__
 # include <endian.h> // machine/endian.h
-# if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
+# if (defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__ && __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__)
 #  define SHA_BIG_ENDIAN
 # endif
 #endif
