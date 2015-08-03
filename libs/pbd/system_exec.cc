@@ -363,13 +363,10 @@ SystemExec::make_wargs(char **a) {
 	char **tmp = ++a;
 	while (tmp && *tmp) {
 		wa.append(" \"");
-		std::string arg(*tmp);
-		size_t start_pos = 0;
-		while((start_pos = arg.find("\\", start_pos)) != std::string::npos) {
-			arg.replace(start_pos, 1, "\\\\");
-			start_pos += 2;
+		wa.append(*tmp);
+		if (strlen(*tmp) > 0 && (*tmp)[strlen(*tmp) - 1] == '\\') {
+			wa.append("\\")
 		}
-		wa.append(arg);
 		wa.append("\"");
 		tmp++;
 	}
