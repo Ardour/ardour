@@ -37,6 +37,7 @@ namespace ARDOUR {
 
 WinMMEMidiInputDevice::WinMMEMidiInputDevice (int index)
 	: m_handle(0)
+	, m_started(false)
 	, m_midi_buffer(new RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
 	, m_sysex_buffer(new uint8_t[SYSEX_BUFFER_SIZE])
 {
