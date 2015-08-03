@@ -182,6 +182,7 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 	static HANDLE input_thread = GetCurrentThread ();
 	static bool priority_boosted = false;
 
+#if 0 // GetThreadId() is Vista or later only.
 	if (input_thread != GetCurrentThread ()) {
 		DWORD otid = GetThreadId (input_thread);
 		DWORD ntid = GetThreadId (GetCurrentThread ());
@@ -191,6 +192,7 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 		DEBUG_THREADS (string_compose (
 		    "WinMME input Thread ID Changed: was %1, now %2\n", otid, ntid));
 	}
+#endif
 
 	HANDLE task_handle;
 

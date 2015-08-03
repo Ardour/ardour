@@ -663,7 +663,7 @@ PortAudioBackend::portaudio_process_thread (void *arg)
 	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_NORMAL);
 #endif
 
-	DWORD tid = GetThreadId (GetCurrentThread ());
+	DWORD tid = GetCurrentThreadId ();
 	DEBUG_THREADS (string_compose ("Process Thread Child ID: %1\n", tid));
 
 	f ();
@@ -1350,7 +1350,7 @@ PortAudioBackend::main_process_thread ()
 	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_NORMAL);
 #endif
 
-	DWORD tid = GetThreadId (GetCurrentThread ());
+	DWORD tid = GetCurrentThreadId ();
 	DEBUG_THREADS (string_compose ("Process Thread Master ID: %1\n", tid));
 
 	while (_run) {
