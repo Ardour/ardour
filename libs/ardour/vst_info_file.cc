@@ -42,6 +42,7 @@
 #include <glibmm.h>
 
 #include "pbd/error.h"
+#include "pbd/compose.h"
 
 #ifndef VST_SCANNER_APP
 #include "ardour/plugin_manager.h" // scanner_bin_path
@@ -54,6 +55,7 @@
 #include "ardour/plugin_types.h"
 #include "ardour/vst_info_file.h"
 
+#include "i18n.h"
 #include "sha1.c"
 
 #define MAX_STRING_LEN 256
@@ -112,7 +114,7 @@ static void vstfx_blacklist (const char *id)
 	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST_BLACKLIST);
 	FILE * blacklist_fd = NULL;
 	if (! (blacklist_fd = g_fopen (fn.c_str (), "a"))) {
-		PBD::error << "Cannot append to VST blacklist for '"<< id <<"'\n";
+		PBD::error << string_compose (_("Cannot append to VST blacklist for '%1'"), id) << endmsg;
 		return;
 	}
 	assert (NULL == strchr (id, '\n'));
@@ -126,7 +128,7 @@ static void vstfx_un_blacklist (const char *idcs)
 	string id (idcs);
 	string fn = Glib::build_filename (ARDOUR::user_cache_directory (), VST_BLACKLIST);
 	if (!Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
-		PBD::warning << "Expected VST Blacklist file does not exist.\n";
+		PBD::warning << _("Expected VST Blacklist file does not exist.") << endmsg;
 		return;
 	}
 
@@ -148,7 +150,7 @@ static void vstfx_un_blacklist (const char *idcs)
 
 	FILE * blacklist_fd = NULL;
 	if (! (blacklist_fd = g_fopen (fn.c_str (), "w"))) {
-		PBD::error << "Cannot open VST blacklist.\n";
+		PBD::error << _("Cannot open VST blacklist.") << endmsg;;
 		return;
 	}
 	fprintf (blacklist_fd, "%s", bl.c_str ());
@@ -382,7 +384,7 @@ vstfx_write_info_file (FILE* fp, vector<VSTInfo *> *infos)
 	} else if (infos->size () == 1) {
 		vstfx_write_info_block (fp, infos->front ());
 	} else {
-		PBD::error << "Zero plugins in VST." << endmsg; // XXX here? rather make this impossible before if it ain't already.
+		PBD::warning << _("VST object file contains no plugins.") << endmsg;
 	}
 }
 
@@ -424,8 +426,8 @@ vstfx_infofile_for_read (const char* dllpath)
 				}
 			}
 		}
-		PBD::warning << "Ignored VST plugin which is newer than cache: " << dllpath << " (cache: " << path << " )" << endmsg;
-		PBD::info << "Re-Scan Plugins (Preferences > Plugis) to update the cache, also make sure your system-time is set correctly." << endmsg;
+		PBD::warning << string_compose (_("Ignored VST plugin which is newer than cache: '%1' (cache: '%2')"), dllpath, path) << endmsg;
+		PBD::info << _("Re-Scan Plugins (Preferences > Plugins) to update the cache, also make sure your system-time is set correctly.") << endmsg;
 	}
 	return NULL;
 }
@@ -446,9 +448,6 @@ vstfx_infofile_for_write (const char* dllpath)
 	}
 
 	string const path = vstfx_infofile_path (dllpath);
-#ifndef NDEBUG
-	PBD::info << "Creating VST cache file " << path << endmsg;
-#endif
 	return g_fopen (path.c_str (), "wb");
 }
 
@@ -465,7 +464,7 @@ vstfx_get_info_from_file (const char* dllpath, vector<VSTInfo*> *infos)
 		rv = vstfx_load_info_file (infofile, infos);
 		fclose (infofile);
 		if (!rv) {
-			PBD::warning << "Cannot get VST information form " << dllpath << ": info file load failed." << endmsg;
+			PBD::warning << string_compose (_("Cannot get VST information for '%1': failed to load cache file."), dllpath) << endmsg;
 		}
 	}
 	return rv;
@@ -760,7 +759,7 @@ vstfx_instantiate_and_get_info_lx (
 	VSTHandle* h;
 	VSTState* vstfx;
 	if (!(h = vstfx_load (dllpath))) {
-		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": load failed." << endmsg;
+		PBD::warning << string_compose (_("Cannot get LinuxVST information from '%1': load failed."), dllpath) << endmsg;
 		return false;
 	}
 
@@ -768,7 +767,7 @@ vstfx_instantiate_and_get_info_lx (
 
 	if (!(vstfx = vstfx_instantiate (h, simple_master_callback, 0))) {
 		vstfx_unload (h);
-		PBD::warning << "Cannot get LinuxVST information from " << dllpath << ": instantiation failed." << endmsg;
+		PBD::warning << string_compose (_("Cannot get LinuxVST information from '%1': instantiation failed."), dllpath) << endmsg;
 		return false;
 	}
 
@@ -789,7 +788,7 @@ vstfx_instantiate_and_get_info_fst (
 	VSTHandle* h;
 	VSTState* vstfx;
 	if (!(h = fst_load (dllpath))) {
-		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": load failed." << endmsg;
+		PBD::warning << string_compose (_("Cannot get Windows VST information from '%1': load failed."), dllpath) << endmsg;
 		return false;
 	}
 
@@ -798,7 +797,7 @@ vstfx_instantiate_and_get_info_fst (
 	if (!(vstfx = fst_instantiate (h, simple_master_callback, 0))) {
 		fst_unload (&h);
 		vstfx_current_loading_id = 0;
-		PBD::warning << "Cannot get Windows VST information from " << dllpath << ": instantiation failed." << endmsg;
+		PBD::warning << string_compose (_("Cannot get Windows VST information from '%1': instantiation failed."), dllpath) << endmsg;
 		return false;
 	}
 	vstfx_current_loading_id = 0;
@@ -899,7 +898,7 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 		PBD::ScopedConnectionList cons;
 		scanner.ReadStdout.connect_same_thread (cons, boost::bind (&parse_scanner_output, _1 ,_2));
 		if (scanner.start (2 /* send stderr&stdout via signal */)) {
-			PBD::error << "Cannot launch VST scanner app '" << scanner_bin_path << "': "<< strerror (errno) << endmsg;
+			PBD::error << string_compose (_("Cannot launch VST scanner app '%1': %2"), scanner_bin_path, strerror (errno)) << endmsg;
 			close_error_log ();
 			return infos;
 		} else {
@@ -971,7 +970,7 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 	/* crate cache/whitelist */
 	infofile = vstfx_infofile_for_write (dllpath);
 	if (!infofile) {
-		PBD::warning << "Cannot cache VST information for " << dllpath << ": cannot create new FST info file." << endmsg;
+		PBD::warning << string_compose (_("Cannot cache VST information for '%1': cannot create cache file."), dllpath) << endmsg;
 		return infos;
 	} else {
 		vstfx_write_info_file (infofile, infos);
