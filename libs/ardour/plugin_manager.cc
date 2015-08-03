@@ -262,6 +262,18 @@ PluginManager::refresh (bool cache_only)
 	}
 #endif //Native linuxVST SUPPORT
 
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT)
+		if (!cache_only) {
+			string fn = Glib::build_filename (ARDOUR::user_cache_directory(), VST_BLACKLIST);
+			if (Glib::file_test (fn, Glib::FILE_TEST_EXISTS)) {
+				std::string bl;
+				std::ifstream ifs (fn.c_str ());
+				bl.assign ((std::istreambuf_iterator<char> (ifs)), (std::istreambuf_iterator<char> ()));
+				PBD::info << _("VST Blacklist:") << "\n" << bl << "-----" << endmsg;
+			}
+		}
+#endif
+
 #ifdef AUDIOUNIT_SUPPORT
 	if (cache_only) {
 		BootMessage (_("Scanning AU Plugins"));
