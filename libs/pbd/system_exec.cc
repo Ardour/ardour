@@ -365,7 +365,7 @@ SystemExec::make_wargs(char **a) {
 		wa.append(" \"");
 		wa.append(*tmp);
 		if (strlen(*tmp) > 0 && (*tmp)[strlen(*tmp) - 1] == '\\') {
-			wa.append("\\")
+			wa.append("\\");
 		}
 		wa.append("\"");
 		tmp++;
