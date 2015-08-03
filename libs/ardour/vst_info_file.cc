@@ -425,7 +425,7 @@ vstfx_infofile_for_read (const char* dllpath)
 			}
 		}
 		PBD::warning << "Ignored VST plugin which is newer than cache: " << dllpath << " (cache: " << path << " )" << endmsg;
-		PBD::into << "Re-Scan Plugins (Preferences > Plugis) to update the cache, also make sure your system-time is set correctly." << endmsg;
+		PBD::info << "Re-Scan Plugins (Preferences > Plugis) to update the cache, also make sure your system-time is set correctly." << endmsg;
 	}
 	return NULL;
 }
