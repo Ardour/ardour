@@ -40,3 +40,6 @@ def build(bld):
                    'ARDOURBACKEND_DLL_EXPORTS',
                    'USE_MMCSS_THREAD_PRIORITIES'
                   ]
+    if bld.env['build_target'] == 'mingw':
+        # MIDI input doesn't work with -O3 or -O2 so override
+        obj.cxxflags = [ '-O0' ]
