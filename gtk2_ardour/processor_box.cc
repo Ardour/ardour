@@ -3087,7 +3087,7 @@ ProcessorBox::edit_processor (boost::shared_ptr<Processor> processor)
 
 	if (proxy) {
 		proxy->set_custom_ui_mode (true);
-		proxy->toggle ();
+		proxy->show_the_right_window ();
 	}
 }
 
@@ -3105,7 +3105,7 @@ ProcessorBox::generic_edit_processor (boost::shared_ptr<Processor> processor)
 
 	if (proxy) {
 		proxy->set_custom_ui_mode (false);
-		proxy->toggle ();
+		proxy->show_the_right_window ();
 	}
 }
 
@@ -3371,13 +3371,16 @@ ProcessorWindowProxy::get (bool create)
 }
 
 void
-ProcessorWindowProxy::toggle ()
+ProcessorWindowProxy::show_the_right_window ()
 {
 	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		drop_window ();
+		get (true);
+		setup ();
+		assert (_window);
+		is_custom = want_custom;
 	}
-	is_custom = want_custom;
 
-	WM::ProxyBase::toggle ();
+	toggle ();
 }

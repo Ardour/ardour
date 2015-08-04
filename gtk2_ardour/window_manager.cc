@@ -89,8 +89,20 @@ Manager::remove (const ProxyBase* info)
 void
 Manager::toggle_window (ProxyBase* proxy)
 {
-	if (proxy) {
-		proxy->toggle ();
+
+	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	if (!act) {
+		return;
+	}
+	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
+	if (!tact) {
+		return;
+	}
+
+	if (tact->get_active()) {
+		proxy->present ();
+	} else {
+		proxy->hide ();
 	}
 }
 

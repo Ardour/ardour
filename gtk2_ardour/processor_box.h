@@ -90,7 +90,7 @@ class ProcessorWindowProxy : public WM::ProxyBase
 	}
 	
 	ARDOUR::SessionHandlePtr* session_handle();
-	void toggle();
+	void show_the_right_window ();
 	void set_custom_ui_mode(bool use_custom) { want_custom = use_custom; }
 	
 	int set_state (const XMLNode&, int);

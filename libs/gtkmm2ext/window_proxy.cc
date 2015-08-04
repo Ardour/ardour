@@ -22,6 +22,7 @@
 
 #include "pbd/convert.h"
 #include "pbd/xml++.h"
+#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/window_proxy.h"
 #include "gtkmm2ext/visibility_tracker.h"
@@ -139,6 +140,7 @@ WindowProxy::toggle()
 {
 	if (!_window) {
 		(void) get (true);
+		setup ();
 		assert (_window);
 		/* XXX this is a hack - the window object should really
 		   ensure its components are all visible. sigh.
@@ -146,12 +148,13 @@ WindowProxy::toggle()
 		_window->show_all();
 		/* we'd like to just call this and nothing else */
 		_window->present ();
-
 	} else {
 		if (_window->is_mapped()) {
 			save_pos_and_size();
 		}
+
 		vistracker->cycle_visibility ();
+
 		if (_window->is_mapped()) {
 			if (_width != -1 && _height != -1) {
 				_window->set_default_size (_width, _height);
@@ -279,7 +282,12 @@ WindowProxy::hide ()
 bool
 WindowProxy::delete_event_handler (GdkEventAny* /*ev*/)
 {
-	hide();
+	if (_action) {
+		_action->activate ();
+	} else {
+		hide();
+	}
+
 	return true;
 }
 

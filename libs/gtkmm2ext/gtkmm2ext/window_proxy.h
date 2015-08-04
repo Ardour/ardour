@@ -66,8 +66,6 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
     
 	virtual Gtk::Window* get (bool create = false) = 0;
     
-	virtual void toggle ();
-    
 	virtual int set_state (const XMLNode&, int version);
 	virtual XMLNode& get_state ();
     
@@ -93,6 +91,7 @@ class LIBGTKMM2EXT_API WindowProxy : public PBD::StatefulDestructible, public vi
 	virtual bool delete_event_handler (GdkEventAny *ev);
     
 	virtual void setup ();
+	void toggle ();
 };
 
 }
