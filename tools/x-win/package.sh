@@ -132,6 +132,8 @@ cp build/libs/clearlooks-newer/clearlooks.dll $DESTDIR/lib/gtk-2.0/engines/libcl
 
 cp $PREFIX/bin/*dll $DESTDIR/bin/
 cp $PREFIX/lib/*dll $DESTDIR/bin/
+# special case libportaudio (wasapi), old stack has no wasapi and hence no .xp
+cp $PREFIX/bin/libportaudio-2.xp $DESTDIR/bin/ || cp $PREFIX/bin/libportaudio-2.dll $DESTDIR/bin/libportaudio-2.xp
 rm -rf $DESTDIR/bin/libjack*.dll
 
 cp `find build/libs/surfaces/ -iname "*.dll"` $ALIBDIR/surfaces/
@@ -310,6 +312,7 @@ cat >> $NSISFILE << EOF
 !addincludedir "${this_script_dir}\\nsis"
 !include MUI2.nsh
 !include FileAssociation.nsh
+!include WinVer.nsh
 
 Name "${PROGRAM_NAME}${PROGRAM_VERSION}"
 OutFile "${OUTFILE}"
@@ -409,6 +412,12 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
+  \${If} \${AtMostWinXP}
+    Delete "\$INSTDIR\\bin\\libportaudio-2.dll"
+    Rename "\$INSTDIR\\bin\\libportaudio-2.xp" "\$INSTDIR\\bin\\libportaudio-2.dll"
+  \${Else}
+    Delete "\$INSTDIR\\bin\\libportaudio-2.xp"
+  \${EndIf}
   \${registerExtension} "\$INSTDIR\\bin\\${STATEFILE_SUFFIX}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
 SectionEnd
 EOF
