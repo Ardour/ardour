@@ -23,6 +23,8 @@ class LIBGTKMM2EXT_API KeyboardKey
 
         KeyboardKey (uint32_t state, uint32_t keycode);
 
+        static KeyboardKey null_key() { return KeyboardKey (0, 0); }
+
         uint32_t state() const { return _val >> 32; }
         uint32_t key() const { return _val & 0xffff; }
 
@@ -96,6 +98,9 @@ class LIBGTKMM2EXT_API ActionMap {
 
         Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
 
+        typedef std::vector<Glib::RefPtr<Gtk::Action> > Actions;
+	void get_actions (Actions&);
+	
   private:
         typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
         _ActionMap actions;
@@ -129,11 +134,22 @@ class LIBGTKMM2EXT_API Bindings {
         void save (XMLNode& root);
 
         void set_action_map (ActionMap&);
-
+        
         static void set_ignored_state (int mask) {
                 _ignored_state = mask;
         }
         static uint32_t ignored_state() { return _ignored_state; }
+
+        void get_all_actions (std::vector<std::string>& names,
+                              std::vector<std::string>& paths,
+                              std::vector<std::string>& tooltips,
+                              std::vector<std::string>& keys,
+                              std::vector<KeyboardKey>& bindings);
+        
+	void get_all_actions (std::vector<std::string>& groups,
+	                      std::vector<std::string>& paths,
+	                      std::vector<std::string>& tooltips,
+	                      std::vector<KeyboardKey>& bindings);
 
   private:
         typedef std::map<KeyboardKey,Glib::RefPtr<Gtk::Action> > KeybindingMap;

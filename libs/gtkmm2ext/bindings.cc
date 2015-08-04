@@ -611,6 +611,89 @@ Bindings::load (const XMLNode& node)
         }
 }
 
+void
+Bindings::get_all_actions (std::vector<std::string>& names,
+                           std::vector<std::string>& paths,
+                           std::vector<std::string>& tooltips,
+                           std::vector<std::string>& keys,
+                           std::vector<KeyboardKey>& bindings)
+{
+	if (!action_map) {
+		return;
+	}
+	
+	/* build a reverse map from actions to bindings */
+
+	typedef map<Glib::RefPtr<Gtk::Action>,KeyboardKey> ReverseMap;
+	ReverseMap rmap;
+
+	for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+		rmap.insert (make_pair (k->second, k->first));
+	}
+
+	/* get a list of all actions */
+
+	ActionMap::Actions actions;
+	action_map->get_actions (actions);
+	
+	for (ActionMap::Actions::const_iterator act = actions.begin(); act != actions.end(); ++act) {
+		names.push_back ((*act)->get_name());
+		paths.push_back ((*act)->get_accel_path());
+		tooltips.push_back ((*act)->get_tooltip());
+
+		ReverseMap::iterator r = rmap.find (*act);
+		if (r != rmap.end()) {
+			keys.push_back (gtk_accelerator_get_label (r->second.key(), (GdkModifierType) r->second.state()));
+			bindings.push_back (r->second);
+		} else {
+			keys.push_back (string());
+			bindings.push_back (KeyboardKey::null_key());
+		}
+	}
+}
+        
+void
+Bindings::get_all_actions (std::vector<std::string>& groups,
+                           std::vector<std::string>& paths,
+                           std::vector<std::string>& tooltips,
+                           std::vector<KeyboardKey>& bindings)
+{
+	/* build a reverse map from actions to bindings */
+
+	typedef map<Glib::RefPtr<Gtk::Action>,KeyboardKey> ReverseMap;
+	ReverseMap rmap;
+
+	for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+		rmap.insert (make_pair (k->second, k->first));
+	}
+
+	/* get a list of all actions */
+
+	ActionMap::Actions actions;
+	action_map->get_actions (actions);
+	
+	for (ActionMap::Actions::const_iterator act = actions.begin(); act != actions.end(); ++act) {
+		groups.push_back ((*act)->get_name());
+		paths.push_back ((*act)->get_accel_path());
+		tooltips.push_back ((*act)->get_tooltip());
+
+		ReverseMap::iterator r = rmap.find (*act);
+		if (r != rmap.end()) {
+			bindings.push_back (r->second);
+		} else {
+			bindings.push_back (KeyboardKey::null_key());
+		}
+	}
+}
+
+void
+ActionMap::get_actions (ActionMap::Actions& acts)
+{
+	for (_ActionMap::iterator a = actions.begin(); a != actions.end(); ++a) {
+		acts.push_back (a->second);
+	}
+}
+
 RefPtr<Action>
 ActionMap::find_action (const string& name)
 {
@@ -647,10 +730,13 @@ ActionMap::register_action (RefPtr<ActionGroup> group, const char* name, const c
         fullpath += '/';
         fullpath += name;
         
-        actions.insert (_ActionMap::value_type (fullpath, act));
-        group->add (act);
-        
-        return act;
+        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+	        group->add (act);
+	        return act;
+        }
+
+        /* already registered */
+        return RefPtr<Action> ();
 }
 
 RefPtr<Action> 
@@ -661,16 +747,17 @@ ActionMap::register_action (RefPtr<ActionGroup> group,
 
         RefPtr<Action> act = Action::create (name, label);
 
-        act->signal_activate().connect (sl);
-
         fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
 
-        actions.insert (_ActionMap::value_type (fullpath, act));
-        group->add (act, sl);
+        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+	        group->add (act, sl);
+	        return act;
+        }
 
-        return act;
+        /* already registered */
+        return RefPtr<Action>();
 }
 
 RefPtr<Action> 
@@ -684,15 +771,17 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
         RefPtr<Action> act = RadioAction::create (rgroup, name, label);
         RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
         
-        act->signal_activate().connect (sl);
-
         fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
 
-        actions.insert (_ActionMap::value_type (fullpath, act));
-        group->add (act, sl);
-        return act;
+        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+	        group->add (act, sl);
+	        return act;
+        }
+
+        /* already registered */
+        return RefPtr<Action>();
 }
 
 RefPtr<Action> 
@@ -708,15 +797,18 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
         RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
         ract->property_value() = value;
 
-        act->signal_activate().connect (sigc::bind (sl, act->gobj()));
-
         fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
 
-        actions.insert (_ActionMap::value_type (fullpath, act));
-        group->add (act, sigc::bind (sl, act->gobj()));
-        return act;
+        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+	        group->add (act, sigc::bind (sl, act->gobj()));
+	        return act;
+        }
+
+        /* already registered */
+
+        return RefPtr<Action>();
 }
 
 RefPtr<Action> 
@@ -725,17 +817,19 @@ ActionMap::register_toggle_action (RefPtr<ActionGroup> group,
 {
         string fullpath;
 
-        RefPtr<Action> act = ToggleAction::create (name, label);
-
-        act->signal_activate().connect (sl);
-
         fullpath = group->get_name();
         fullpath += '/';
         fullpath += name;
 
-        actions.insert (_ActionMap::value_type (fullpath, act));
-        group->add (act, sl);
-        return act;
+        RefPtr<Action> act = ToggleAction::create (name, label);
+
+        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+	        group->add (act, sl);
+	        return act;
+        }
+
+        /* already registered */
+        return RefPtr<Action>();
 }
 
 std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
