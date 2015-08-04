@@ -240,7 +240,6 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature    _def_state_feature;
 
 	// Options passed to plugin
-	int32_t _block_length;
 	int32_t _seq_size;
 
 	mutable unsigned _state_version;

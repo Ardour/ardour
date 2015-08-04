@@ -309,7 +309,6 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_latency_control_port   = 0;
 	_next_cycle_start       = std::numeric_limits<framepos_t>::max();
 	_next_cycle_speed       = 1.0;
-	_block_length           = _engine.samples_per_cycle();
 	_seq_size               = _engine.raw_buffer_size(DataType::MIDI);
 	_state_version          = 0;
 	_was_activated          = false;
@@ -355,11 +354,17 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 #ifdef HAVE_LV2_1_2_0
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
+	static const int32_t _min_block_length = 1;   // may happen during split-cycles
+	static const int32_t _max_block_length = 8192; // max possible (with all engines and during export)
+	/* @drobilla: Does it make sense to re-instantiate all plugins
+	 * whenever the buffersize changes?
+	 * Is there a way to find plugins that require the min/max blocksize option?
+	 */
 	LV2_Options_Option options[] = {
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__minBlockLength),
-		  sizeof(int32_t), atom_Int, &_block_length },
+		  sizeof(int32_t), atom_Int, &_min_block_length },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__maxBlockLength),
-		  sizeof(int32_t), atom_Int, &_block_length },
+		  sizeof(int32_t), atom_Int, &_max_block_length },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__sequenceSize),
 		  sizeof(int32_t), atom_Int, &_seq_size },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
