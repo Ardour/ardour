@@ -93,7 +93,7 @@ DummyAudioBackend::~DummyAudioBackend ()
 std::string
 DummyAudioBackend::name () const
 {
-	return X_("Dummy");
+	return X_("Dummy"); // internal name
 }
 
 bool
@@ -1312,7 +1312,7 @@ static bool already_configured ();
 static bool available ();
 
 static ARDOUR::AudioBackendInfo _descriptor = {
-	"Dummy",
+	_("None (Dummy)"),
 	instantiate,
 	deinstantiate,
 	backend_factory,
