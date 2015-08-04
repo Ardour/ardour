@@ -23,56 +23,85 @@
 #include <string>
 
 #include <gtkmm/buttonbox.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
-#include <gtkmm/scrolledwindow.h>
 
 #include "ardour_window.h"
+
+namespace Gtkmm2ext {
+	class Bindings;
+}
 
 class KeyEditor : public ArdourWindow
 {
   public:
 	KeyEditor ();
 
+	void add_tab (std::string const &name, Gtkmm2ext::Bindings&);
+	
   protected:
-	void on_show ();
-	void on_unmap ();
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
   private:
-	struct KeyEditorColumns : public Gtk::TreeModel::ColumnRecord {
-	    KeyEditorColumns () {
-		    add (action);
-		    add (binding);
-		    add (path);
-		    add (bindable);
-	    }
-	    Gtk::TreeModelColumn<std::string> action;
-	    Gtk::TreeModelColumn<std::string> binding;
-	    Gtk::TreeModelColumn<std::string> path;
-	    Gtk::TreeModelColumn<bool> bindable;
+	class Tab : public Gtk::VBox
+	{
+ 	   public:
+		Tab (KeyEditor&, std::string const &name, Gtkmm2ext::Bindings*);
+		
+		void populate ();
+		void unbind ();
+		void bind (GdkEventKey* release_event, guint pressed_key);
+		void action_selected ();
+		
+		struct KeyEditorColumns : public Gtk::TreeModel::ColumnRecord {
+			KeyEditorColumns () {
+				add (action);
+				add (binding);
+				add (path);
+				add (bindable);
+			}
+			Gtk::TreeModelColumn<std::string> action;
+			Gtk::TreeModelColumn<std::string> binding;
+			Gtk::TreeModelColumn<std::string> path;
+			Gtk::TreeModelColumn<bool> bindable;
+		};
+		
+		Gtk::VBox vpacker;
+		/* give KeyEditor full access to these. This is just a helper
+		   class with no special semantics
+		*/
+		
+		KeyEditor& owner;
+		std::string name;
+		Gtkmm2ext::Bindings* bindings;
+		Gtk::ScrolledWindow scroller;
+		Gtk::TreeView view;
+		Glib::RefPtr<Gtk::TreeStore> model;
+		KeyEditorColumns columns;
 	};
 
-        Gtk::VBox vpacker;
-	Gtk::ScrolledWindow scroller;
-	Gtk::TreeView view;
-	Glib::RefPtr<Gtk::TreeStore> model;
-	KeyEditorColumns columns;
+	friend class Tab;
+	
+	Gtk::VBox vpacker;
+	Gtk::Notebook notebook;
 	Gtk::Button unbind_button;
 	Gtk::HButtonBox unbind_box;
 	Gtk::HBox reset_box;
 	Gtk::Button reset_button;
 	Gtk::Label reset_label;
-
-	void unbind ();
-
 	guint last_keyval;
 
-	void action_selected ();
-	void populate ();
+	typedef std::vector<Tab*> Tabs;
 
+	Tabs tabs;
+	Tab* current_tab();
+
+	void unbind ();
 	void reset ();
+	void page_change (GtkNotebookPage*, guint);
 };
 
 #endif /* __ardour_gtk_key_editor_h__ */
