@@ -15,7 +15,7 @@ Sha1Test::basicTest ()
 	sha1_init (&s);
 	sha1_write (&s, (const uint8_t *) "abc", 3);
 	sha1_result_hash (&s, hash);
-	printf ("\nSha1: FIPS 180-2 C.1 and RFC3174 7.3 TEST1");
+	printf ("\nSha1: FIPS 180-2 C.1 and RFC3174 7.3 TEST1\n");
 	printf ("Expect: a9993e364706816aba3e25717850c26c9cd0d89d\n");
 	printf ("Result: %s\n", hash);
 	CPPUNIT_ASSERT_MESSAGE ("Sha1: FIPS 180-2 C.1 and RFC3174 7.3 TEST1",
