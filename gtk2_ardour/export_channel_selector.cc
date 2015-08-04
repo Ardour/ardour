@@ -40,6 +40,12 @@ using namespace Glib;
 using namespace ARDOUR;
 using namespace PBD;
 
+struct EditorOrderRouteSorter {
+    bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+	    return a->order_key () < b->order_key ();
+    }
+};
+
 PortExportChannelSelector::PortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager) :
   ExportChannelSelector (session, manager),
   channels_label (_("Channels:"), Gtk::ALIGN_LEFT),
@@ -114,6 +120,8 @@ PortExportChannelSelector::fill_route_list ()
 		ARDOUR::IO* master = _session->master_out()->output().get();
 		channel_view.add_route (master);
 	}
+
+	routes.sort (EditorOrderRouteSorter ());
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if ((*it)->is_master () || (*it)->is_monitor ()) {
