@@ -263,15 +263,15 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	Gtk::ScrolledWindow          track_scroller;
 
 	Gtk::HBox                    options_box;
-	Gtk::RadioButton::Group      source_group;
-	Gtk::RadioButton             region_contents_button;
-	Gtk::RadioButton             track_output_button;
+	Gtk::CheckButton             track_output_button;
 	Gtk::Button                  select_tracks_button;
 	Gtk::Button                  select_busses_button;
 	Gtk::Button                  select_none_button;
 	void select_tracks ();
 	void select_busses ();
 	void select_none ();
+
+	void track_outputs_selected ();
 };
 
 #endif /* __export_channel_selector_h__ */

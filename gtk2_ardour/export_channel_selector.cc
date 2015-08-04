@@ -539,8 +539,7 @@ RegionExportChannelSelector::handle_selection ()
 
 TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
   : ExportChannelSelector(session, manager)
-  , region_contents_button(source_group, _("Export region contents"))
-  , track_output_button(source_group, _("Export track output"))
+  , track_output_button(_("Apply track/bus processing"))
   , select_tracks_button (_("Select all tracks"))
   , select_busses_button (_("Select all busses"))
   , select_none_button (_("Deselect all"))
@@ -548,7 +547,6 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	pack_start(main_layout);
 
 	// Options
-	options_box.pack_start(region_contents_button);
 	options_box.pack_start(track_output_button);
 	options_box.pack_start (select_tracks_button);
 	options_box.pack_start (select_busses_button);
@@ -587,6 +585,8 @@ TrackExportChannelSelector::TrackExportChannelSelector (ARDOUR::Session * sessio
 	select_tracks_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_tracks));
 	select_busses_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_busses));
 	select_none_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::select_none));
+
+	track_output_button.signal_clicked().connect (sigc::mem_fun (*this, &TrackExportChannelSelector::track_outputs_selected));
 
 	fill_list();
 
@@ -635,6 +635,12 @@ TrackExportChannelSelector::select_none ()
 		Gtk::TreeModel::Row row = *it;
 		row[track_cols.selected] = false;
 	}
+	update_config();
+}
+
+void
+TrackExportChannelSelector::track_outputs_selected ()
+{
 	update_config();
 }
 
@@ -716,6 +722,7 @@ TrackExportChannelSelector::update_config()
 		}
 
 		state->config->set_name (route->name());
+
 	}
 
 	CriticalSelectionChanged ();
