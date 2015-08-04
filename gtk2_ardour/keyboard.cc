@@ -35,7 +35,7 @@ using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
 using Gtkmm2ext::Keyboard;
-
+ 
 static void
 accel_map_changed (GtkAccelMap* /*map*/,
 		   gchar* /*path*/,

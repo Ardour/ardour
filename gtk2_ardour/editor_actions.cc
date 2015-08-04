@@ -754,8 +754,8 @@ Editor::register_actions ()
 void
 Editor::load_bindings ()
 {
-        key_bindings.set_action_map (myactions);
-        key_bindings.load ("editor");
+        bindings.set_action_map (myactions);
+        bindings.load ("editor");
 }
 
 void

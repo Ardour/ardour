@@ -43,6 +43,7 @@
 #include "canvas/fwd.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
@@ -421,6 +422,8 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;
 
+	Gtkmm2ext::Bindings  bindings;
+	
   protected:
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;

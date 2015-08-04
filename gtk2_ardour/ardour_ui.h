@@ -333,6 +333,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool tabbed_window_state_event_handler (GdkEventWindowState*, void* object);
 	bool key_event_handler (GdkEventKey*, Gtk::Window* window);
 
+	Gtkmm2ext::ActionMap global_actions;
+	Gtkmm2ext::Bindings  global_bindings;
+	
   protected:
 	friend class PublicEditor;
 
@@ -648,7 +651,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::HBox rc_option_editor_placeholder;
 	
         WM::Proxy<SpeakerDialog> speaker_config_window;
-        WM::Proxy<KeyEditor> key_editor;
         WM::Proxy<AddRouteDialog> add_route_dialog;
         WM::Proxy<About> about;
         WM::Proxy<LocationUIWindow> location_ui;
@@ -664,6 +666,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
         WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
         WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
+        WM::ProxyWithConstructor<KeyEditor> key_editor;
 
         /* creator methods */
 
@@ -672,7 +675,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
         AddVideoDialog*         create_add_video_dialog ();
         BigClockWindow*         create_big_clock_window();
         GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
-
+	KeyEditor*              create_key_editor ();
+	
 	ARDOUR::SystemExec *video_server_process;
 
 	void handle_locations_change (ARDOUR::Location*);
@@ -828,8 +832,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool main_window_delete_event (GdkEventAny*);
 	bool idle_ask_about_quit ();
 
-	Gtkmm2ext::ActionMap global_actions;
-	Gtkmm2ext::Bindings  global_bindings;
 	void load_bindings ();
 	
 };
