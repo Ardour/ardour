@@ -843,10 +843,12 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	const uint32_t sources = _sources.n_total();
 	const uint32_t sinks = _sinks.n_total();
 
-	/* MIDI */
 	const uint32_t midi_sources = _sources.n_midi();
 	const uint32_t midi_sinks = _sinks.n_midi();
+	const uint32_t audio_sources = _sources.n_audio();
+	const uint32_t audio_sinks = _sinks.n_audio();
 
+	/* MIDI */
 	cairo_set_source_rgb (cr,
 			UINT_RGBA_R_FLT(midi_port_color),
 			UINT_RGBA_G_FLT(midi_port_color),
@@ -871,11 +873,24 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 		cairo_move_to (cr, si_x, height);
 		cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
 		cairo_stroke (cr);
+	} else if (midi_sources == 0 && midi_sinks == 1) {
+		const double dx = 1 + rint(max(2., 2. * ARDOUR_UI::ui_scale));
+		// draw "T"
+		//  TODO connect back to track-input of last midi-out if any, otherwise draw "X"
+		const float si_x  = rintf(width * .2f) + .5f;
+		cairo_move_to (cr, si_x, height);
+		cairo_line_to (cr, si_x, height * .66);
+		cairo_move_to (cr, si_x - dx, height * .66);
+		cairo_line_to (cr, si_x + dx, height * .66);
+		cairo_stroke (cr);
+#ifndef NDEBUG
+	} else if (midi_sources != 0 && midi_sinks != 0) {
+		PBD::warning << string_compose("Programming error: midi routing display: A %1 -> %2 | M %3 -> %4 | T %5 -> %6", 
+				audio_sources, audio_sinks, midi_sources, midi_sinks, sources, sinks) << endmsg;
+#endif
 	}
 
 	/* AUDIO */
-	const uint32_t audio_sources = _sources.n_audio();
-	const uint32_t audio_sinks = _sinks.n_audio();
 	cairo_set_source_rgb (cr,
 			UINT_RGBA_R_FLT(audio_port_color),
 			UINT_RGBA_G_FLT(audio_port_color),
@@ -892,7 +907,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 			cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
 			cairo_stroke (cr);
 		}
-	} else if (audio_sources > 1) {
+	} else if (audio_sources > 1 && sinks > 1) {
 		for (uint32_t i = 0 ; i < audio_sources; ++i) {
 			const float si_x = rintf(width * (.2f + .6f * (i + midi_sinks) / (sinks - 1.f))) + .5f;
 			const float si_x0 = rintf(width * (.2f + .6f * (i + midi_sources) / (sources - 1.f))) + .5f;
@@ -900,11 +915,26 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 			cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
 			cairo_stroke (cr);
 		}
-	} else if (audio_sources == 1 && audio_sinks == 1) {
-		const float si_x = rintf(width * .5f) + .5f;
+	} else if (audio_sources == 1 && audio_sinks > 0) {
+		float si_x, si_x0;
+		if (sinks == 1) {
+			si_x = rintf(width * .5f) + .5f;
+		} else {
+			si_x = rintf(width * (.2f + .6f * midi_sinks / (sinks - 1.f))) + .5f;
+		}
+		if (sources == 1) {
+			si_x0 = rintf(width * .5f) + .5f;
+		} else {
+			si_x0 = rintf(width * (.2f + .6f * midi_sources / (sources - 1.f))) + .5f;
+		}
 		cairo_move_to (cr, si_x, height);
-		cairo_line_to (cr, si_x, 0);
+		cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
 		cairo_stroke (cr);
+#ifndef NDEBUG
+	} else if (audio_sources != 0 && audio_sinks != 0) {
+		PBD::warning << string_compose("Programming error: audio routing display: A %1 -> %2 | M %3 -> %4 | T %5 -> %6", 
+				audio_sources, audio_sinks, midi_sources, midi_sinks, sources, sinks) << endmsg;
+#endif
 	}
 	cairo_destroy(cr);
 	return true;
