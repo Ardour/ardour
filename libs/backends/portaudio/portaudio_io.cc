@@ -206,7 +206,10 @@ PortAudioIO::get_asio_buffer_properties (int device_id,
 bool
 PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes)
 {
-	long min_size_frames, max_size_frames, preferred_size_frames, granularity;
+	long min_size_frames = 0;
+	long max_size_frames = 0;
+	long preferred_size_frames = 0;
+	long granularity = 0;
 
 	if (!get_asio_buffer_properties (device_id,
 	                                 min_size_frames,
@@ -218,7 +221,36 @@ PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer
 		return false;
 	}
 
-	buffer_sizes.push_back(preferred_size_frames);
+	DEBUG_AUDIO (string_compose ("ASIO buffer properties for device %1, "
+	                             "min_size_frames: %2, max_size_frames: %3, "
+	                             "preferred_size_frames: %4, granularity: %5\n",
+	                             device_id,
+	                             min_size_frames,
+	                             max_size_frames,
+	                             preferred_size_frames,
+	                             granularity));
+
+#ifdef USE_ASIO_MIN_MAX_BUFFER_SIZES
+	if (min_size_frames >= max_size_frames) {
+		buffer_sizes.push_back (preferred_size_frames);
+		return true;
+	}
+
+	long buffer_size = min_size_frames;
+	while (buffer_size <= max_size_frames) {
+		buffer_sizes.push_back (buffer_size);
+
+		if (granularity <= 0) {
+			// buffer sizes are power of 2
+			buffer_size = buffer_size * 2;
+		} else {
+			buffer_size += granularity;
+		}
+	}
+#else
+	buffer_sizes.push_back (preferred_size_frames);
+#endif
+	return true;
 }
 #endif
 
