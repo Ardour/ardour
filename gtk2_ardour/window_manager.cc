@@ -26,6 +26,7 @@
 
 #include "actions.h"
 #include "ardour_dialog.h"
+#include "ardour_ui.h"
 #include "ardour_window.h"
 #include "window_manager.h"
 #include "processor_box.h"
@@ -64,12 +65,13 @@ Manager::register_window (ProxyBase* info)
 	if (!info->menu_name().empty()) {
 
 		if (!window_actions) {
-			window_actions = Gtk::ActionGroup::create (X_("Window"));
-			ActionManager::add_action_group (window_actions);
+			window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
+			ARDOUR_UI::instance()->global_actions.install_action_group (window_actions);
 		}
 
-		// info->set_action (ActionManager::register_action (window_actions, info->action_name().c_str(), info->menu_name().c_str(), 
-		// sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
+		info->set_action (ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
+			 info->action_name().c_str(), info->menu_name().c_str(),
+			 sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
 	}
 }
 
