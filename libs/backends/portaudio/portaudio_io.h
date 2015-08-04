@@ -56,6 +56,12 @@ public:
 
 	bool get_default_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes);
 #ifdef WITH_ASIO
+	bool get_asio_buffer_properties (int device_id,
+	                                 long& min_size_frames,
+	                                 long& max_size_frames,
+	                                 long& preferred_size_frames,
+	                                 long& granularity);
+
 	bool get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_size);
 #endif
 

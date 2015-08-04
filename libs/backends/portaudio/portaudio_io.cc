@@ -160,7 +160,11 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 
 #ifdef WITH_ASIO
 bool
-PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes)
+PortAudioIO::get_asio_buffer_properties (int device_id,
+                                         long& min_size_frames,
+                                         long& max_size_frames,
+                                         long& preferred_size_frames,
+                                         long& granularity)
 {
 	// we shouldn't really need all these checks but it shouldn't hurt
 	const PaDeviceInfo* device_info = Pa_GetDeviceInfo(device_id);
@@ -185,19 +189,36 @@ PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer
 		return false;
 	}
 
-	long min_size, max_size, preferred_size, granularity;
-
-	PaError err = PaAsio_GetAvailableBufferSizes (
-	    device_id, &min_size, &max_size, &preferred_size, &granularity);
+	PaError err = PaAsio_GetAvailableBufferSizes (device_id,
+	                                              &min_size_frames,
+	                                              &max_size_frames,
+	                                              &preferred_size_frames,
+	                                              &granularity);
 
 	if (err != paNoError) {
 		DEBUG_AUDIO (string_compose (
 		    "Unable to determine available buffer sizes for device %1\n", device_id));
 		return false;
 	}
-
-	buffer_sizes.push_back(preferred_size);
 	return true;
+}
+
+bool
+PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes)
+{
+	long min_size_frames, max_size_frames, preferred_size_frames, granularity;
+
+	if (!get_asio_buffer_properties (device_id,
+	                                 min_size_frames,
+	                                 max_size_frames,
+	                                 preferred_size_frames,
+	                                 granularity)) {
+		DEBUG_AUDIO (string_compose (
+		    "Unable to get device buffer properties from device index %1\n", device_id));
+		return false;
+	}
+
+	buffer_sizes.push_back(preferred_size_frames);
 }
 #endif
 
