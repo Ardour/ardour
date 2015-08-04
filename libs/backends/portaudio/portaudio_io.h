@@ -51,8 +51,13 @@ public:
 	void     input_device_list (std::map<int, std::string> &devices) const;
 	void     output_device_list (std::map<int, std::string> &devices) const;
 
-	int      available_sample_rates (int device_id, std::vector<float>& sampleRates);
-	int      available_buffer_sizes (int device_id, std::vector<uint32_t>& sampleRates);
+	int available_sample_rates (int device_id, std::vector<float>& sample_rates);
+	int available_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes);
+
+	bool get_default_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes);
+#ifdef WITH_ASIO
+	bool get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_size);
+#endif
 
 	std::string control_app_name (int device_id) const;
 	void launch_control_app (int device_id);

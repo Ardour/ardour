@@ -158,14 +158,82 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 	return 0;
 }
 
-int
-PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& bufferSizes)
+#ifdef WITH_ASIO
+bool
+PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes)
 {
-	// TODO
+	// we shouldn't really need all these checks but it shouldn't hurt
+	const PaDeviceInfo* device_info = Pa_GetDeviceInfo(device_id);
+
+	if (!device_info) {
+		DEBUG_AUDIO (string_compose (
+		    "Unable to get device info from device index %1\n", device_id));
+		return false;
+	}
+
+	const PaHostApiInfo* info = Pa_GetHostApiInfo (device_info->hostApi);
+
+	if (info == NULL) {
+		DEBUG_AUDIO (string_compose (
+		    "Unable to determine Host API from device index %1\n", device_id));
+		return false;
+	}
+
+	if (info->type != paASIO) {
+		DEBUG_AUDIO (string_compose (
+		    "ERROR device_id %1 is not an ASIO device\n", device_id));
+		return false;
+	}
+
+	long min_size, max_size, preferred_size, granularity;
+
+	PaError err = PaAsio_GetAvailableBufferSizes (
+	    device_id, &min_size, &max_size, &preferred_size, &granularity);
+
+	if (err != paNoError) {
+		DEBUG_AUDIO (string_compose (
+		    "Unable to determine available buffer sizes for device %1\n", device_id));
+		return false;
+	}
+
+	buffer_sizes.push_back(preferred_size);
+	return true;
+}
+#endif
+
+bool
+PortAudioIO::get_default_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes)
+{
 	static const uint32_t ardourSizes[] = { 64, 128, 256, 512, 1024, 2048, 4096 };
 	for(uint32_t i = 0; i < sizeof(ardourSizes)/sizeof(uint32_t); ++i) {
-		bufferSizes.push_back (ardourSizes[i]);
+		buffer_sizes.push_back (ardourSizes[i]);
 	}
+	return true;
+}
+
+int
+PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& buffer_sizes)
+{
+#ifdef WITH_ASIO
+	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
+
+	if (info == NULL) {
+		DEBUG_AUDIO (string_compose ("Unable to determine Host API from index %1\n",
+		                             _host_api_index));
+		return -1;
+	}
+
+	PaHostApiTypeId type_id = info->type;
+
+	if (type_id == paASIO) {
+		if (get_asio_buffer_sizes (device_id, buffer_sizes)) {
+			return 0;
+		}
+	}
+#endif
+
+	get_default_buffer_sizes (device_id, buffer_sizes);
+
 	return 0;
 }
 
