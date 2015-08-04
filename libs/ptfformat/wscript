@@ -1,0 +1,43 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Version of this package (even if built as a child)
+LIBPTFFORMAT_VERSION = '0.0.0'
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+LIBPTFFORMAT_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libptfformat'
+VERSION = LIBPTFFORMAT_VERSION
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('compiler_cxx')
+    autowaf.configure(conf)
+
+def build(bld):
+    # Library
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = 'ptfformat.cc'
+    obj.export_includes = ['.']
+    obj.includes     = ['.']
+    obj.name         = 'libptfformat'
+    obj.target       = 'ptfformat'
+    obj.use          = 'libardour'
+    autowaf.ensure_visible_symbols (obj, True)
+    obj.vnum         = LIBPTFFORMAT_LIB_VERSION
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ptfformat')
+
+def shutdown():
+    autowaf.shutdown()

@@ -410,6 +410,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 
 	int get_regionview_count_from_region_list (boost::shared_ptr<ARDOUR::Region>);
 
+	void do_pt8import(std::string path, ARDOUR::SrcQuality quality);
+
 	void do_import (std::vector<std::string>              paths,
 	                Editing::ImportDisposition            disposition,
 	                Editing::ImportMode                   mode,
@@ -1316,6 +1318,19 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
 
 	void insert_region_list_selection (float times);
+
+	/* PT8 import */
+	void external_ptf_dialog ();
+	Gtk::FileChooserDialog* ptfbrowser;
+	typedef struct ptflookup {
+		uint16_t index1;
+		uint16_t index2;
+		PBD::ID  id;
+
+		bool operator ==(const struct ptflookup& other) {
+			return (this->index1 == other.index1);
+		}
+	} ptflookup_t;
 
 	/* import & embed */
 

@@ -43,7 +43,11 @@
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/utils.h"
+#include "ardour/playlist.h"
+#include "ardour/session.h"
 #include "pbd/memento_command.h"
+
+#include "ptfformat/ptfformat.h"
 
 #include "ardour_ui.h"
 #include "cursor_context.h"
@@ -86,6 +90,46 @@ Editor::add_external_audio_action (ImportMode mode_hint)
 	}
 
 	external_audio_dialog ();
+}
+
+void
+Editor::external_ptf_dialog ()
+{
+	std::string ptfpath;
+
+	if (_session == 0) {
+		MessageDialog msg (_("You can't import a PT8 session until you have a session loaded."));
+		msg.run ();
+		return;
+	}
+
+	Gtk::FileChooserDialog dialog(_("Import PT8 Session"), FILE_CHOOSER_ACTION_OPEN);
+	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+	while (true) {
+		int result = dialog.run();
+
+		if (result == Gtk::RESPONSE_OK) {
+			ptfpath = dialog.get_filename ();
+
+			if (!Glib::file_test (ptfpath, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+				Gtk::MessageDialog msg (string_compose (_("%1: this is only the directory/folder name, not the filename.\n"), ptfpath));
+				msg.run ();
+				continue;
+			}
+		}
+
+		if (ptfpath.length()) {
+			printf("XXXDZ %s\n", ptfpath.c_str());
+			do_pt8import(ptfpath, SrcBest);
+			break;
+		}
+
+		if (result == Gtk::RESPONSE_CANCEL) {
+			break;
+		}
+	}
 }
 
 void
@@ -262,6 +306,150 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
+Editor::do_pt8import (std::string ptfpath,
+                      SrcQuality  quality)
+{
+	vector<boost::shared_ptr<Region> > regions;
+	boost::shared_ptr<ARDOUR::Track> track;
+	ARDOUR::PluginInfoPtr instrument;
+	vector<string> to_import;
+	string fullpath;
+	bool ok = false;
+	PTFFormat ptf;
+	framepos_t pos = -1;
+
+	vector<ptflookup_t> ptfwavpair;
+	vector<ptflookup_t> ptfregpair;
+
+	if (ptf.load(ptfpath) == -1) {
+		MessageDialog msg (_("Doesn't seem to be a valid PT8 session file"));
+		msg.run ();
+		return;
+	}
+
+	current_interthread_info = &import_status;
+	import_status.current = 1;
+	import_status.total = ptf.audiofiles.size ();
+	import_status.all_done = false;
+
+	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
+
+	SourceList just_one;
+	SourceList imported;
+
+	for (vector<PTFFormat::wav_t>::iterator a = ptf.audiofiles.begin(); a != ptf.audiofiles.end(); ++a) {
+		ptflookup_t p;
+
+		fullpath = Glib::build_filename (Glib::path_get_dirname(ptfpath), "Audio Files");
+		fullpath = Glib::build_filename (fullpath, a->filename);
+		to_import.clear ();
+		to_import.push_back (fullpath);
+		ipw.show ();
+		ok = import_sndfiles (to_import, Editing::ImportDistinctFiles, Editing::ImportAsRegion, quality, pos, 1, -1, track, false, instrument);
+		if (!import_status.sources.empty()) {
+			p.index1 = a->index;
+			p.id = import_status.sources.back()->id();
+
+			ptfwavpair.push_back(p);
+			imported.push_back(import_status.sources.back());
+			printf("wavindex=%d\n", p.index1);
+		}
+	}
+
+	for (vector<PTFFormat::region_t>::iterator a = ptf.regions.begin();
+			a != ptf.regions.end(); ++a) {
+		for (vector<ptflookup_t>::iterator p = ptfwavpair.begin();
+				p != ptfwavpair.end(); ++p) {
+			printf("pindex=%d waveindex=%d\n", p->index1, a->wave.index);
+			if (p->index1 == a->wave.index) {
+				printf("match index=%d\n", p->index1);
+				for (SourceList::iterator x = imported.begin();
+						x != imported.end(); ++x) {
+					if ((*x)->id() == p->id) {
+						// Matched an uncreated ptf region to ardour region
+						ptflookup_t rp;
+						PropertyList plist;
+
+						plist.add (ARDOUR::Properties::start, a->sampleoffset);
+						plist.add (ARDOUR::Properties::position, 0);
+						plist.add (ARDOUR::Properties::length, a->length);
+						plist.add (ARDOUR::Properties::name, a->name);
+						plist.add (ARDOUR::Properties::layer, 0);
+						plist.add (ARDOUR::Properties::whole_file, false);
+						plist.add (ARDOUR::Properties::external, true);
+
+						just_one.clear();
+						just_one.push_back(*x);
+
+						boost::shared_ptr<Region> r = RegionFactory::create (just_one, plist);
+						regions.push_back(r);
+
+						rp.id = regions.back()->id();
+						rp.index1 = a->index;
+						ptfregpair.push_back(rp);
+					}
+				}
+			}
+		}
+	}
+
+	boost::shared_ptr<AudioTrack> existing_track;
+	uint16_t nth = 0;
+	vector<ptflookup_t> usedtracks;
+	ptflookup_t utr;
+
+	for (vector<PTFFormat::track_t>::iterator a = ptf.tracks.begin();
+			a != ptf.tracks.end(); ++a) {
+		for (vector<ptflookup_t>::iterator p = ptfregpair.begin();
+				p != ptfregpair.end(); ++p) {
+
+			if ((p->index1 == a->reg.index))  {
+				// Matched a ptf active region to an ardour region
+				utr.index1 = a->index;
+				utr.index2 = nth;
+				utr.id = p->id;
+				boost::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
+				vector<ptflookup_t>::iterator lookuptr = usedtracks.begin();
+				vector<ptflookup_t>::iterator found;
+				if ((found = std::find(lookuptr, usedtracks.end(), utr)) != usedtracks.end()) {
+					printf("w(%s) r(%d) ptf_tr(%d) ard_tr(%d)\n", a->reg.wave.filename.c_str(), a->reg.index, found->index1, found->index2);
+					existing_track =  get_nth_selected_audio_track(found->index2);
+					// Put on existing track
+					boost::shared_ptr<Playlist> playlist = existing_track->playlist();
+					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
+					playlist->clear_changes ();
+					playlist->add_region (copy, a->reg.startpos);
+					//_session->add_command (new StatefulDiffCommand (playlist));
+				} else {
+					// Put on a new track
+					printf("w(%s) r(%d) new_t(%d)\n", a->reg.wave.filename.c_str(), a->reg.index, nth);
+					list<boost::shared_ptr<AudioTrack> > at (_session->new_audio_track (1, 2, Normal, 0, 1));
+					if (at.empty()) {
+						return;
+					}
+					existing_track = at.back();
+					existing_track->set_name (a->name);
+					boost::shared_ptr<Playlist> playlist = existing_track->playlist();
+					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
+					playlist->clear_changes ();
+					playlist->add_region (copy, a->reg.startpos);
+					//_session->add_command (new StatefulDiffCommand (playlist));
+					nth++;
+				}
+				usedtracks.push_back(utr);
+			}
+		}
+	}
+
+	import_status.sources.clear();
+
+	if (ok) {
+		_session->save_state ("");
+	}
+	import_status.all_done = true;
+}
+
+void
 Editor::do_import (vector<string>        paths,
                    ImportDisposition     disposition,
                    ImportMode            mode,
@@ -303,6 +491,7 @@ Editor::do_import (vector<string>        paths,
 		} else {
 			ipw.show ();
 			ok = (import_sndfiles (paths, disposition, mode, quality, pos, 1, 1, track, false, instrument) == 0);
+			import_status.sources.clear();
 		}
 
 	} else {
@@ -348,6 +537,7 @@ Editor::do_import (vector<string>        paths,
 				}
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, -1, track, replace, instrument) == 0);
+				import_status.sources.clear();
 				break;
 
 			case Editing::ImportDistinctChannels:
@@ -356,6 +546,7 @@ Editor::do_import (vector<string>        paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, -1, -1, track, replace, instrument) == 0);
+				import_status.sources.clear();
 				break;
 
 			case Editing::ImportSerializeFiles:
@@ -364,6 +555,7 @@ Editor::do_import (vector<string>        paths,
 				to_import.push_back (*a);
 
 				ok = (import_sndfiles (to_import, disposition, mode, quality, pos, 1, 1, track, replace, instrument) == 0);
+				import_status.sources.clear();
 				break;
 
 			case Editing::ImportMergeFiles:
@@ -524,7 +716,6 @@ Editor::import_sndfiles (vector<string>            paths,
 		pos = import_status.pos;
 	}
 
-	import_status.sources.clear();
 	return result;
 }
 
@@ -734,7 +925,7 @@ Editor::add_sources (vector<string>            paths,
 				/* generate a per-channel region name so that things work as
 				 * intended
 				 */
-				
+
 				string path;
 
 				if (fs) {
@@ -742,7 +933,7 @@ Editor::add_sources (vector<string>            paths,
 				} else {
 					region_name = (*x)->name();
 				}
-				
+
 				if (sources.size() == 2) {
 					if (n == 0) {
 						region_name += "-L";
@@ -752,9 +943,9 @@ Editor::add_sources (vector<string>            paths,
 				} else if (sources.size() > 2) {
 					region_name += string_compose ("-%1", n+1);
 				}
-				
+
 				track_names.push_back (region_name);
-				
+
 			} else {
 				if (fs) {
 					region_name = region_name_from_path (fs->path(), false, false, sources.size(), n);
@@ -825,7 +1016,7 @@ Editor::add_sources (vector<string>            paths,
 	 * the API simpler.
 	 */
 	assert (regions.size() == track_names.size());
-	
+
 	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
 
@@ -857,7 +1048,7 @@ Editor::add_sources (vector<string>            paths,
                                 pos = get_preferred_edit_position ();
                         }
                 }
-		
+
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], instrument);
 
 		rlen = (*r)->length();
@@ -873,7 +1064,7 @@ Editor::add_sources (vector<string>            paths,
 	}
 
 	commit_reversible_command ();
-	
+
 	/* setup peak file building in another thread */
 
 	for (SourceList::iterator x = sources.begin(); x != sources.end(); ++x) {

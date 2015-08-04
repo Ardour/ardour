@@ -22,6 +22,9 @@
       <menuitem action='AddTrackBus'/>	
       <separator/>
       <menuitem action='addExistingAudioFiles'/>
+#ifdef PTFFORMAT
+      <menuitem action='addExistingPT8Files'/>
+#endif
       <!--menuitem action='importFromSession'/-->
 
       <menuitem action='OpenVideo'/>
