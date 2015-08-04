@@ -81,6 +81,9 @@ public:
 	uint32_t n_playback_channels (void) const { return _playback_channels; }
 	uint32_t n_capture_channels (void) const { return _capture_channels; }
 
+	std::string get_input_channel_name (int device_id, uint32_t channel) const;
+	std::string get_output_channel_name (int device_id, uint32_t channel) const;
+
 	double   sample_rate (void) const { return _cur_sample_rate; }
 	uint32_t capture_latency (void) const { return _cur_input_latency; }
 	uint32_t playback_latency (void) const { return _cur_output_latency; }

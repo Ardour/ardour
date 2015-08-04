@@ -792,6 +792,28 @@ PortAudioBackend::get_port_name (PortEngine::PortHandle port) const
 	return static_cast<PamPort*>(port)->name ();
 }
 
+int
+PortAudioBackend::get_port_property (PortHandle port,
+                                     const std::string& key,
+                                     std::string& value,
+                                     std::string& type) const
+{
+	if (!valid_port (port)) {
+		PBD::error << _ ("PortAudioBackend::get_port_name: Invalid Port(s)")
+		           << endmsg;
+		return -1;
+	}
+
+	if (key == "http://jackaudio.org/metadata/pretty-name") {
+		type = "";
+		value = static_cast<PamPort*>(port)->pretty_name ();
+		if (!value.empty()) {
+			return 0;
+		}
+	}
+	return -1;
+}
+
 PortEngine::PortHandle
 PortAudioBackend::get_port_by_name (const std::string& name) const
 {
@@ -915,7 +937,10 @@ PortAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		_system_inputs.push_back(static_cast<PortAudioPort*>(p));
+		PortAudioPort* audio_port = static_cast<PortAudioPort*>(p);
+		audio_port->set_pretty_name (
+		    _pcmio->get_input_channel_name (name_to_id (_input_audio_device), i));
+		_system_inputs.push_back (audio_port);
 	}
 
 	lr.min = lr.max = portaudio_reported_output_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
@@ -925,7 +950,10 @@ PortAudioBackend::register_system_audio_ports()
 		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, true, lr);
-		_system_outputs.push_back(static_cast<PamPort*>(p));
+		PortAudioPort* audio_port = static_cast<PortAudioPort*>(p);
+		audio_port->set_pretty_name (
+		    _pcmio->get_output_channel_name (name_to_id (_output_audio_device), i));
+		_system_outputs.push_back(audio_port);
 	}
 	return 0;
 }

@@ -737,6 +737,47 @@ PortAudioIO::next_cycle (uint32_t n_samples)
 	return xrun ? 1 : 0;
 }
 
+std::string
+PortAudioIO::get_input_channel_name (int device_id, uint32_t channel) const
+{
+#ifdef WITH_ASIO
+	const char* channel_name;
+
+	// This will return an error for non-ASIO devices so no need to check if
+	// the device_id corresponds to an ASIO device.
+	PaError err = PaAsio_GetInputChannelName (device_id, channel, &channel_name);
+
+	if (err == paNoError) {
+		DEBUG_AUDIO (
+		    string_compose ("Input channel name for device %1, channel %2 is %3\n",
+		                    device_id,
+		                    channel,
+		                    channel_name));
+		return channel_name;
+	}
+#endif
+	return std::string();
+}
+
+std::string
+PortAudioIO::get_output_channel_name (int device_id, uint32_t channel) const
+{
+#ifdef WITH_ASIO
+	const char* channel_name;
+
+	PaError err = PaAsio_GetOutputChannelName (device_id, channel, &channel_name);
+
+	if (err == paNoError) {
+		DEBUG_AUDIO (
+		    string_compose ("Output channel name for device %1, channel %2 is %3\n",
+		                    device_id,
+		                    channel,
+		                    channel_name));
+		return channel_name;
+	}
+#endif
+	return std::string();
+}
 
 #ifdef INTERLEAVED_INPUT
 
