@@ -88,6 +88,7 @@ void
 ClickBox::set_label ()
 {
 	char buf[32];
+	int width, height;
 
 	bool const h = _printer (buf, get_adjustment());
 	if (!h) {
@@ -96,7 +97,17 @@ ClickBox::set_label ()
 	}
 
 	layout->set_text (buf);
-	layout->get_pixel_size (twidth, theight);
+	layout->get_pixel_size (width, height);
+
+	if (twidth < width && (width > 50))  {
+		/* override GenericPluginUI::build_control_ui()
+		 * Gtkmm2ext::set_size_request_to_display_given_text ("g9999999")
+		 * see http://tracker.ardour.org/view.php?id=6499
+		 */
+		set_size_request (std::min (300, width + 6), height + 4);
+	}
+
+	twidth = width; theight = height;
 
 	queue_draw ();
 }
