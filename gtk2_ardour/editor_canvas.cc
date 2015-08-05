@@ -425,8 +425,8 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 		/* drop onto canvas background: create new tracks */
 
 		frame = 0;
-
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame);
+		InstrumentSelector is; // instantiation builds instrument-list and sets default.
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, frame, is.selected_instrument());
 		
 		if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack, SrcBest, frame);
