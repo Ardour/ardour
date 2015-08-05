@@ -568,9 +568,19 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		uint32_t  index;
 		bool      valid = false;
 		index = out_map.get(DataType::AUDIO, out_index++, &valid);
+#ifdef VST_IN_PLACE
 		outs[i] = (valid)
 					? bufs.get_audio(index).data(offset)
 					: scratch_bufs.get_audio(0).data(offset);
+#else
+		if (!valid) {
+			outs[i] = scratch_bufs.get_audio(0).data(offset);
+		} else {
+			// TODO if this fixes various VST issues,
+			// maintain a dedicated buffer, the stack may not be large enough
+			outs[i] = (float*)alloca (nframes * sizeof(float));
+		}
+#endif
 	}
 
 	if (bufs.count().n_midi() > 0) {
@@ -597,6 +607,18 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	_plugin->processReplacing (_plugin, &ins[0], &outs[0], nframes);
 	_midi_out_buf = 0;
 
+#ifndef VST_IN_PLACE
+	out_index = 0;
+	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
+		uint32_t  index;
+		bool      valid = false;
+		index = out_map.get(DataType::AUDIO, out_index++, &valid);
+		if (!valid) {
+			continue;
+		}
+		copy_vector (bufs.get_audio(index).data(offset), outs[i], nframes * sizeof(float));
+	}
+#endif
 	return 0;
 }
 
