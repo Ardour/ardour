@@ -270,6 +270,12 @@ def enoify (major, minor):
             return "\\n\\\"Taking Tiger Mountain\\\""
         elif minor == 3:
             return "\\n\\\"Lady June's Linguistic Leprosy\\\""
+        elif minor == 4:
+            return "\\n\\\"Discreet Music\\\""
+        elif minor == 5:
+            return "\\n\\\"Another Green World\\\""
+        elif minor == 6:
+            return "\\n\\\"Evening Star\\\""
     return "\\\"\\\""
 
 def options(opt):
