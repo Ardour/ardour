@@ -491,7 +491,6 @@ PortAudioIO::discover()
 	if (!initialize_pa()) return;
 
 	clear_device_lists ();
-	add_default_devices ();
 	add_devices ();
 }
 
