@@ -43,6 +43,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 
 uint32_t Bindings::_ignored_state = 0;
+map<string,Bindings*> Bindings::bindings_for_state;
 
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
@@ -227,6 +228,9 @@ Bindings::Bindings ()
 
 Bindings::~Bindings()
 {
+	if (!_name.empty()) {
+		remove_bindings_for_state (_name, *this);
+	}
 }
 
 bool
@@ -507,6 +511,10 @@ Bindings::load (string const & name)
 	        error << string_compose (_("No keyboard binding information when loading bindings for \"%1\""), name) << endmsg;
 	        return false;
         }
+
+        if (!_name.empty()) {
+	        remove_bindings_for_state (_name, *this);
+        }
         
         const XMLNodeList& children (node->children());
         bool found = false;
@@ -543,6 +551,9 @@ Bindings::load (string const & name)
 	        load (**i);
         }
 
+        add_bindings_for_state (_name, *this);
+        _name = name;
+        
         return true;
 }
 
@@ -830,6 +841,18 @@ ActionMap::register_toggle_action (RefPtr<ActionGroup> group,
 
         /* already registered */
         return RefPtr<Action>();
+}
+
+void
+Bindings::add_bindings_for_state (std::string const& name, Bindings& bindings)
+{
+	bindings_for_state.insert (make_pair (name, &bindings));
+}
+
+void
+Bindings::remove_bindings_for_state (std::string const& name, Bindings& bindings)
+{
+	bindings_for_state.erase (name);
 }
 
 std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {

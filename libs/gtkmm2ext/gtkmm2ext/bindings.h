@@ -151,9 +151,15 @@ class LIBGTKMM2EXT_API Bindings {
 	                      std::vector<std::string>& tooltips,
 	                      std::vector<KeyboardKey>& bindings);
 
+	static std::map<std::string,Bindings*> bindings_for_state;
+
+	static void add_bindings_for_state (std::string const &, Bindings&);
+	static void remove_bindings_for_state (std::string const &, Bindings&);
+	
   private:
         typedef std::map<KeyboardKey,Glib::RefPtr<Gtk::Action> > KeybindingMap;
 
+        std::string  _name;
         KeybindingMap press_bindings;
         KeybindingMap release_bindings;
         

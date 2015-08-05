@@ -38,8 +38,9 @@
 #include "pbd/debug.h"
 #include "pbd/unwind.h"
 
-#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/debug.h"
 
 #include "i18n.h"
@@ -704,7 +705,28 @@ Keyboard::read_keybindings (string const & path)
 int
 Keyboard::store_keybindings (string const & path)
 {
-	return 0;
+	XMLNode* node = new XMLNode (X_("BindingSet"));
+	XMLNode* bnode;
+	int ret = 0;
+
+	for (map<string,Bindings*>::const_iterator c = Bindings::bindings_for_state.begin(); c != Bindings::bindings_for_state.end(); ++c) {
+		bnode = new XMLNode (X_("Bindings"));
+		bnode->add_property (X_("name"), c->first);
+		c->second->save (*bnode);
+		node->add_child_nocopy (*bnode);
+	}
+
+	XMLTree tree;
+	tree.set_root (node);
+
+	if (!tree.write (path)) {
+		error << string_compose (_("Cannot save key bindings to %1"), path) << endmsg;
+		ret = -1;
+	}
+
+	delete node;
+	
+	return ret;
 }
 
 int
