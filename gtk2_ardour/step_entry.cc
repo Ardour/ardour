@@ -21,9 +21,8 @@
 
 #include "pbd/file_utils.h"
 
-#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/actions.h"
-#include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/keyboard.h"
 
 #include "ardour/filesystem_paths.h"
 
@@ -703,7 +702,8 @@ void
 StepEntry::load_bindings ()
 {
         bindings.set_action_map (myactions);
-        bindings.load ("step-editing");
+        bindings.load (X_("step-editing"));
+        set_data ("ardour-bindings", &bindings);
 }
 
 void
