@@ -36,18 +36,6 @@ using namespace PBD;
 using namespace ARDOUR;
 using Gtkmm2ext::Keyboard;
  
-static void
-accel_map_changed (GtkAccelMap* /*map*/,
-		   gchar* /*path*/,
-		   guint /*key*/,
-		   GdkModifierType /*mod*/,
-		   gpointer keyboard)
-{
-	ArdourKeyboard* me = (ArdourKeyboard*)keyboard;
-	Keyboard::keybindings_changed ();
-	me->ui.setup_tooltips ();
-}
-
 #ifdef GTKOSX
 guint ArdourKeyboard::constraint_mod = Keyboard::PrimaryModifier;
 #else

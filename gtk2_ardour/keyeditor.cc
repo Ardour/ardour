@@ -121,7 +121,13 @@ KeyEditor::on_key_press_event (GdkEventKey* ev)
 	if (!ev->is_modifier) {
 		last_keyval = ev->keyval;
 	}
-	return ArdourWindow::on_key_press_event (ev);
+
+	/* Don't let anything else handle the key press, because navigation
+	 * keys will be used by GTK to change the selection/treeview cursor
+	 * position
+	 */
+	
+	return true;
 }
 
 bool
@@ -145,7 +151,7 @@ KeyEditor::Tab::Tab (KeyEditor& ke, string const & str, Bindings* b)
 	model = TreeStore::create(columns);
 
 	view.set_model (model);
-	view.append_column (_("Action"), columns.action);
+	view.append_column (_("Action"), columns.name);
 	view.append_column (_("Shortcut"), columns.binding);
 	view.set_headers_visible (true);
 	view.get_selection()->set_mode (SELECTION_SINGLE);
@@ -200,19 +206,14 @@ KeyEditor::Tab::unbind ()
 	owner.unbind_button.set_sensitive (false);
 
 	if (i != model->children().end()) {
-		string path = (*i)[columns.path];
+		Glib::RefPtr<Action> action = (*i)[columns.action];
 
 		if (!(*i)[columns.bindable]) {
 			return;
 		}
-
-		bool result = AccelMap::change_entry (path,
-						      0,
-						      (ModifierType) 0,
-						      true);
-		if (result) {
-			(*i)[columns.binding] = string ();
-		}
+		
+		bindings->remove (action, Gtkmm2ext::Bindings::Press, true);
+		(*i)[columns.binding] = string ();
 	}
 }
 
@@ -222,25 +223,20 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 	TreeModel::iterator i = view.get_selection()->get_selected();
 
 	if (i != model->children().end()) {
-		string path = (*i)[columns.path];
+
+		string action_name = (*i)[columns.path];
 
 		if (!(*i)[columns.bindable]) {
 			return;
 		}
 
 		GdkModifierType mod = (GdkModifierType)(Keyboard::RelevantModifierKeyMask & release_event->state);
+		Gtkmm2ext::KeyboardKey new_binding (mod, pressed_key);
 
-		Gtkmm2ext::possibly_translate_keyval_to_make_legal_accelerator (release_event->keyval);
-		Gtkmm2ext::possibly_translate_mod_to_make_legal_accelerator (mod);
-
-		bool result = AccelMap::change_entry (path,
-						      pressed_key,
-						      Gdk::ModifierType(mod),
-						      true);
+		bool result = bindings->replace (new_binding, Gtkmm2ext::Bindings::Press, action_name);
 
 		if (result) {
-			AccelKey key;
-			(*i)[columns.binding] = ActionManager::get_key_representation (path, key);
+			(*i)[columns.binding] = gtk_accelerator_get_label (new_binding.key(), (GdkModifierType) new_binding.state());
 			owner.unbind_button.set_sensitive (true);
 		}
 	}
@@ -248,80 +244,93 @@ KeyEditor::Tab::bind (GdkEventKey* release_event, guint pressed_key)
 
 void
 KeyEditor::Tab::populate ()
-{
+{	
 	vector<string> paths;
 	vector<string> labels;
 	vector<string> tooltips;
 	vector<string> keys;
-	vector<Gtkmm2ext::KeyboardKey> binds;
+	vector<Glib::RefPtr<Action> > actions;
 	typedef std::map<string,TreeIter> NodeMap;
 	NodeMap nodes;
 	NodeMap::iterator r;
 
-	bindings->get_all_actions (labels, paths, tooltips, keys, binds);
+	bindings->get_all_actions (paths, labels, tooltips, keys, actions);
 
 	vector<string>::iterator k;
 	vector<string>::iterator p;
 	vector<string>::iterator t;
 	vector<string>::iterator l;
-
+	vector<Glib::RefPtr<Action> >::iterator a;
+	
 	model->clear ();
 
-	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
+	for (a = actions.begin(), l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l, ++a) {
 
 		TreeModel::Row row;
 		vector<string> parts;
 
-		parts.clear ();
-
 		split (*p, parts, '/');
 
-		if (parts.empty()) {
+		string category = parts[1];
+		string action_name = parts[2];
+		
+		if (action_name.empty()) {
 			continue;
 		}
 
 		//kinda kludgy way to avoid displaying menu items as mappable
-		if ((parts[1].find ("Menu") == parts[1].length() - 4) ||
-		    (parts[1].find ("menu") == parts[1].length() - 4) ||
-		    (parts[1] == _("RegionList"))) {
+		if ((action_name.find ("Menu") == action_name.length() - 4) ||
+		    (action_name.find ("menu") == action_name.length() - 4) ||
+		    (action_name == _("RegionList"))) {
 			continue;
 		}
 
-		if ((r = nodes.find (parts[1])) == nodes.end()) {
+		if ((r = nodes.find (category)) == nodes.end()) {
 
-			/* top level is missing */
+			/* category/group is missing, so add it first */
 
 			TreeIter rowp;
 			TreeModel::Row parent;
 			rowp = model->append();
-			nodes[parts[1]] = rowp;
+			nodes[category] = rowp;
 			parent = *(rowp);
-			parent[columns.action] = parts[1];
+			parent[columns.name] = category;
 			parent[columns.bindable] = false;
+			parent[columns.action] = *a;
 
+			/* now set up the child row that we're about to fill
+			 * out with information
+			 */
+			
 			row = *(model->append (parent.children()));
 
 		} else {
 
+			/* category/group is present, so just add the child row */
+			
 			row = *(model->append ((*r->second)->children()));
 
 		}
 
 		/* add this action */
 
+		/* use the "visible label" as the action name */
+		
 		if (l->empty ()) {
-			row[columns.action] = *t;
+			/* no label, try using the tooltip instead */
+			row[columns.name] = *t;
 		} else {
-			row[columns.action] = *l;
+			row[columns.name] = *l;
 		}
-		row[columns.path] = (*p);
+		row[columns.path] = string_compose ("%1/%2", category, action_name);
 		row[columns.bindable] = true;
 
 		if (*k == ActionManager::unbound_string) {
 			row[columns.binding] = string();
 		} else {
-			row[columns.binding] = (*k);
+			row[columns.binding] = *k;
 		}
+		row[columns.action] = *a;
 	}
 }
 

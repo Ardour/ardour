@@ -58,15 +58,17 @@ class KeyEditor : public ArdourWindow
 		
 		struct KeyEditorColumns : public Gtk::TreeModel::ColumnRecord {
 			KeyEditorColumns () {
-				add (action);
+				add (name);
 				add (binding);
 				add (path);
 				add (bindable);
+				add (action);
 			}
-			Gtk::TreeModelColumn<std::string> action;
+			Gtk::TreeModelColumn<std::string> name;
 			Gtk::TreeModelColumn<std::string> binding;
 			Gtk::TreeModelColumn<std::string> path;
 			Gtk::TreeModelColumn<bool> bindable;
+			Gtk::TreeModelColumn<Glib::RefPtr<Gtk::Action> > action;
 		};
 		
 		Gtk::VBox vpacker;

@@ -587,19 +587,21 @@ ARDOUR_UI::post_engine ()
 	/* this is the first point at which all the keybindings are available */
 
 	if (ARDOUR_COMMAND_LINE::show_key_actions) {
-		vector<string> names;
-		vector<string> paths;
-		vector<string> tooltips;
-		vector<string> keys;
-		vector<AccelKey> bindings;
 
-		ActionManager::get_all_actions (names, paths, tooltips, keys, bindings);
+		for (map<string,Bindings*>::const_iterator mb = Bindings::bindings_for_state.begin(); mb != Bindings::bindings_for_state.end(); ++mb) {
 
-		vector<string>::iterator n;
-		vector<string>::iterator k;
-		vector<string>::iterator p;
-		for (n = names.begin(), k = keys.begin(), p = paths.begin(); n != names.end(); ++n, ++k, ++p) {
-			cout << "Action: '" << (*n) << "' bound to '" << (*k) << "' Path: '" << (*p) << "'" << endl;
+			vector<string> names;
+			vector<string> paths;
+			vector<string> keys;
+			
+			mb->second->get_all_actions (names, paths, keys);
+			
+			vector<string>::iterator n;
+			vector<string>::iterator k;
+			vector<string>::iterator p;
+			for (n = names.begin(), k = keys.begin(), p = paths.begin(); n != names.end(); ++n, ++k, ++p) {
+				cout << "Action: '" << (*n) << "' bound to '" << (*k) << "' Path: '" << (*p) << "'" << endl;
+			}
 		}
 
 		halt_connection.disconnect ();
