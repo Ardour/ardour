@@ -103,7 +103,7 @@ create_and_start_dummy_backend ()
 
 	CPPUNIT_ASSERT (AudioEngine::instance ());
 	CPPUNIT_ASSERT (engine);
-	CPPUNIT_ASSERT (engine->set_backend ("Dummy", "", ""));
+	CPPUNIT_ASSERT (engine->set_backend ("None (Dummy)", "", ""));
 
 	init_post_engine ();
 
