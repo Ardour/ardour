@@ -82,7 +82,7 @@ void
 MixerActor::load_bindings ()
 {
         bindings.set_action_map (myactions);
-        bindings.load ("mixer");
+        bindings.load (X_("mixer"));
 }
 
 void

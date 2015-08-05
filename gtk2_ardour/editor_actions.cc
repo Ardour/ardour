@@ -22,6 +22,7 @@
 
 #include "pbd/file_utils.h"
 
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/filesystem_paths.h"
@@ -755,7 +756,7 @@ void
 Editor::load_bindings ()
 {
         bindings.set_action_map (myactions);
-        bindings.load ("editor");
+        bindings.load (X_("editor"));
 }
 
 void
