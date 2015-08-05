@@ -120,8 +120,11 @@ class LIBGTKMM2EXT_API Bindings {
         bool empty_keys () const;
         bool empty_mouse () const;
         
-        void add (KeyboardKey, Operation, Glib::RefPtr<Gtk::Action>);
-        void remove (KeyboardKey, Operation);
+        void add (KeyboardKey, Operation, Glib::RefPtr<Gtk::Action>, bool can_save = false);
+        bool replace (KeyboardKey, Operation, std::string const& action_name, bool can_save = true);
+        void remove (KeyboardKey, Operation, bool can_save = false);
+        void remove (Glib::RefPtr<Gtk::Action>, Operation, bool can_save = false);
+
         bool activate (KeyboardKey, Operation);
 
         void add (MouseButton, Operation, Glib::RefPtr<Gtk::Action>);
@@ -140,16 +143,17 @@ class LIBGTKMM2EXT_API Bindings {
         }
         static uint32_t ignored_state() { return _ignored_state; }
 
+        /* used to list all actions */
         void get_all_actions (std::vector<std::string>& names,
                               std::vector<std::string>& paths,
-                              std::vector<std::string>& tooltips,
-                              std::vector<std::string>& keys,
-                              std::vector<KeyboardKey>& bindings);
-        
-	void get_all_actions (std::vector<std::string>& groups,
-	                      std::vector<std::string>& paths,
+                              std::vector<std::string>& keys);
+
+        /* used for editing bindings */
+	void get_all_actions (std::vector<std::string>& paths,
+	                      std::vector<std::string>& labels,
 	                      std::vector<std::string>& tooltips,
-	                      std::vector<KeyboardKey>& bindings);
+	                      std::vector<std::string>& keys,
+	                      std::vector<Glib::RefPtr<Gtk::Action> >& actions);
 
 	static std::map<std::string,Bindings*> bindings_for_state;
 

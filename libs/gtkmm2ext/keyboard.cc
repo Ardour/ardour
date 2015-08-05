@@ -709,6 +709,8 @@ Keyboard::store_keybindings (string const & path)
 	XMLNode* bnode;
 	int ret = 0;
 
+	std::cerr << "Save bindings to " << path << endl;
+	
 	for (map<string,Bindings*>::const_iterator c = Bindings::bindings_for_state.begin(); c != Bindings::bindings_for_state.end(); ++c) {
 		bnode = new XMLNode (X_("Bindings"));
 		bnode->add_property (X_("name"), c->first);
