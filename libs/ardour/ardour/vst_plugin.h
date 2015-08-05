@@ -97,6 +97,10 @@ protected:
 	AEffect*   _plugin;
 
 	MidiBuffer* _midi_out_buf;
+#ifndef VST_IN_PLACE
+	float ** _audio_out_buf;
+	uint32_t _audio_out_buf_cnt;
+#endif
 };
 
 }

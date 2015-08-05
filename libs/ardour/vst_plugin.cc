@@ -35,6 +35,10 @@
 
 #include "i18n.h"
 
+#ifndef VST_IN_PLACE
+#define MAX_VST_BUFFERSIZE 8192
+#endif
+
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
@@ -44,13 +48,22 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _handle (handle)
 	, _state (0)
 	, _plugin (0)
+#ifndef VST_IN_PLACE
+	, _audio_out_buf (0)
+	, _audio_out_buf_cnt (0)
+#endif
 {
 
 }
 
 VSTPlugin::~VSTPlugin ()
 {
-
+#ifndef VST_IN_PLACE
+	for (uint32_t i = 0; i < _audio_out_buf_cnt; ++i) {
+		free (_audio_out_buf[i]);
+	}
+	free (_audio_out_buf);
+#endif
 }
 
 void
@@ -63,6 +76,23 @@ VSTPlugin::set_plugin (AEffect* e)
 
 	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.frame_rate());
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, _session.get_block_size(), NULL, 0.0f);
+#ifndef VST_IN_PLACE
+	if (_audio_out_buf_cnt != _plugin->numOutputs) {
+		for (uint32_t i = 0; i < _audio_out_buf_cnt; ++i) {
+			free (_audio_out_buf[i]);
+		}
+		free (_audio_out_buf);
+		_audio_out_buf_cnt = _plugin->numOutputs;
+		_audio_out_buf = (float**) malloc (_audio_out_buf_cnt * sizeof(float*));
+		/* think.  Should this be part of the BufferSet ?
+		 * in which case it would be dynamically sized, but then again
+		 * every BufferSet would have N[?] extra VST audio buffers.
+		 */
+		for (uint32_t i = 0; i < _audio_out_buf_cnt; ++i) {
+			_audio_out_buf[i] = (float*) malloc (MAX_VST_BUFFERSIZE * sizeof(float));
+		}
+	}
+#endif
 }
 
 void
@@ -563,6 +593,11 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 					: silent_bufs.get_audio(0).data(offset);
 	}
 
+#ifndef VST_IN_PLACE
+	assert (nframes <= MAX_VST_BUFFERSIZE);
+	assert (_plugin->numOutputs <= _audio_out_buf_cnt);
+#endif
+
 	uint32_t out_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
 		uint32_t  index;
@@ -576,9 +611,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		if (!valid) {
 			outs[i] = scratch_bufs.get_audio(0).data(offset);
 		} else {
-			// TODO if this fixes various VST issues,
-			// maintain a dedicated buffer, the stack may not be large enough
-			outs[i] = (float*)alloca (nframes * sizeof(float));
+			outs[i] = _audio_out_buf[i];
 		}
 #endif
 	}
