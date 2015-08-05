@@ -37,7 +37,7 @@ def build(bld):
     obj.use          = 'libardour'
     autowaf.ensure_visible_symbols (obj, True)
     obj.vnum         = LIBPTFORMAT_LIB_VERSION
-    obj.install_path = os.path.join(bld.env['LIBDIR'], 'ptformat')
+    obj.install_path = bld.env['LIBDIR']
 
 def shutdown():
     autowaf.shutdown()
