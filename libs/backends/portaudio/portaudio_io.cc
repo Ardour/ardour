@@ -321,6 +321,8 @@ PortAudioIO::initialize_pa ()
 			return false;
 		}
 		_initialized = true;
+		_host_api_index = Pa_GetDefaultHostApi ();
+		_host_api_name = get_host_api_name_from_index (_host_api_index);
 	}
 
 	return true;
@@ -341,6 +343,14 @@ PortAudioIO::host_api_list (std::vector<std::string>& api_list)
 			api_list.push_back (info->name);
 		}
 	}
+}
+
+std::string
+PortAudioIO::get_host_api_name_from_index (PaHostApiIndex index)
+{
+	std::vector<std::string> api_list;
+	host_api_list(api_list);
+	return api_list[index];
 }
 
 bool

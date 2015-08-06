@@ -98,6 +98,7 @@ private: // Methods
 	void clear_device_lists ();
 	void add_default_devices ();
 	void add_devices ();
+	std::string get_host_api_name_from_index (PaHostApiIndex index);
 
 private: // Data
 	int  _state;
