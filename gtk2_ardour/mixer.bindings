@@ -1,22 +1,22 @@
- <bindings name="mixer">
-  <press>
-     <Binding key="s" action="Mixer/solo"/>
-     <Binding key="m" action="Mixer/mute"/>
-     <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active"/>
-     <Binding key="r" action="Mixer/recenable"/>
-     <Binding key="0" action="Mixer/unity-gain"/>
-     <Binding key="Up" action="Mixer/increment-gain"/>
-     <Binding key="Down" action="Mixer/decrement-gain"/>
-     <Binding key="Left" action="Mixer/scroll-left"/>
-     <Binding key="Right" action="Mixer/scroll-right"/>
-     <Binding key="Primary-x" action="Mixer/cut-processors"/>
-     <Binding key="Primary-c" action="Mixer/copy-processors"/>
-     <Binding key="Primary-v" action="Mixer/paste-processors"/>
-     <Binding key="Delete" action="Mixer/delete-processors"/>
-     <Binding key="BackSpace" action="Mixer/delete-processors"/>
-     <Binding key="Return" action="Mixer/toggle-processors"/>
-     <Binding key="Primary-a" action="Mixer/select-all-processors"/>
-     <Binding key="Slash" action="Mixer/ab-plugins"/>
-     <Binding key="Escape" action="Mixer/select-none"/>
+ <Bindings name="mixer">
+  <Press>
+   <Binding key="s" action="Mixer/solo"/>
+   <Binding key="m" action="Mixer/mute"/>
+   <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active"/>
+   <Binding key="r" action="Mixer/recenable"/>
+   <Binding key="0" action="Mixer/unity-gain"/>
+   <Binding key="Up" action="Mixer/increment-gain"/>
+   <Binding key="Down" action="Mixer/decrement-gain"/>
+   <Binding key="Left" action="Mixer/scroll-left"/>
+   <Binding key="Right" action="Mixer/scroll-right"/>
+   <Binding key="Primary-x" action="Mixer/cut-processors"/>
+   <Binding key="Primary-c" action="Mixer/copy-processors"/>
+   <Binding key="Primary-v" action="Mixer/paste-processors"/>
+   <Binding key="Delete" action="Mixer/delete-processors"/>
+   <Binding key="BackSpace" action="Mixer/delete-processors"/>
+   <Binding key="Return" action="Mixer/toggle-processors"/>
+   <Binding key="Primary-a" action="Mixer/select-all-processors"/>
+   <Binding key="slash" action="Mixer/ab-plugins"/>
+   <Binding key="Escape" action="Mixer/select-none"/>
   </Press>
  </Bindings>
