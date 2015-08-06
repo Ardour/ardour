@@ -177,8 +177,15 @@ KeyboardKey::name () const
                 str += '-';
         }
 
-        str += gdk_keyval_name (key());
+        char const *gdk_name = gdk_keyval_name (key());
 
+        if (gdk_name) {
+	        str += gdk_name;
+        } else {
+	        /* fail! */
+	        return string();
+        }
+	        
         return str;
 }
 
@@ -212,7 +219,7 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
                 keyval = gdk_keyval_from_name (str.substr (lastmod+1).c_str());
         }
 
-        if (keyval == GDK_VoidSymbol) {
+        if (keyval == GDK_VoidSymbol || keyval == 0) {
 	        return false;
         }
 
@@ -336,7 +343,7 @@ Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, boo
 		        break;
 	        }
         }
-        
+
         add (kb, op, action, can_save);
 
         /* for now, this never fails */
@@ -415,7 +422,7 @@ Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what, bool can_save)
         }
 
         if (can_save) {
-	        Keyboard::save_keybindings ();
+	        Keyboard::keybindings_changed ();
         }
 }
 
@@ -440,7 +447,7 @@ Bindings::remove (KeyboardKey kb, Operation op, bool can_save)
         }
 
         if (can_save) {
-	        Keyboard::save_keybindings ();
+	        Keyboard::keybindings_changed ();
         }
 }
 
@@ -466,7 +473,7 @@ Bindings::remove (RefPtr<Action> action, Operation op, bool can_save)
         }
 
         if (can_save) {
-	        Keyboard::save_keybindings ();
+	        Keyboard::keybindings_changed ();
         }
 }
 
@@ -564,10 +571,14 @@ void
 Bindings::save (XMLNode& root)
 {
         XMLNode* presses = new XMLNode (X_("Press"));
-        root.add_child_nocopy (*presses);
 
         for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
                 XMLNode* child;
+
+                if (k->first.name().empty()) {
+	                continue;
+                }
+
                 child = new XMLNode (X_("Binding"));
                 child->add_property (X_("key"), k->first.name());
                 string ap = k->second->get_accel_path();
@@ -585,10 +596,14 @@ Bindings::save (XMLNode& root)
         }
 
         XMLNode* releases = new XMLNode (X_("Release"));
-        root.add_child_nocopy (*releases);
 
         for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
                 XMLNode* child;
+
+                if (k->first.name().empty()) {
+	                continue;
+                }
+
                 child = new XMLNode (X_("Binding"));
                 child->add_property (X_("key"), k->first.name());
                 string ap = k->second->get_accel_path();
@@ -605,6 +620,8 @@ Bindings::save (XMLNode& root)
                 releases->add_child_nocopy (*child);
         }
 
+        root.add_child_nocopy (*presses);
+        root.add_child_nocopy (*releases);
 }
 
 bool
@@ -662,8 +679,8 @@ Bindings::load (string const & name)
 	        load (**i);
         }
 
-        add_bindings_for_state (_name, *this);
         _name = name;
+        add_bindings_for_state (_name, *this);
         
         return true;
 }
