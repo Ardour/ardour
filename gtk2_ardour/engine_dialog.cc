@@ -1161,6 +1161,7 @@ EngineControl::set_buffersize_popdown_strings (const std::string& device_name)
 	if (!s.empty()) {
 		buffer_size_combo.set_sensitive (true);
 		set_popdown_strings (buffer_size_combo, s);
+		buffer_size_combo.set_active_text (s.front());
 
 		uint32_t period = backend->buffer_size();
 		if (0 == period) {
