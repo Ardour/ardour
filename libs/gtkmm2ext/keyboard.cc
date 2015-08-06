@@ -709,8 +709,6 @@ Keyboard::store_keybindings (string const & path)
 	XMLNode* bnode;
 	int ret = 0;
 
-	std::cerr << "Save bindings to " << path << endl;
-	
 	for (map<string,Bindings*>::const_iterator c = Bindings::bindings_for_state.begin(); c != Bindings::bindings_for_state.end(); ++c) {
 		bnode = new XMLNode (X_("Bindings"));
 		bnode->add_property (X_("name"), c->first);
@@ -719,14 +717,12 @@ Keyboard::store_keybindings (string const & path)
 	}
 
 	XMLTree tree;
-	tree.set_root (node);
+	tree.set_root (node); /* tree now owns root and will delete it */
 
 	if (!tree.write (path)) {
 		error << string_compose (_("Cannot save key bindings to %1"), path) << endmsg;
 		ret = -1;
 	}
-
-	delete node;
 	
 	return ret;
 }
