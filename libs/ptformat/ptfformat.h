@@ -28,7 +28,7 @@ public:
 	/* Return values:	0            success
 				-1           could not open file as ptf
 	*/
-	int load(std::string path);
+	int load(std::string path, int64_t targetsr);
 
 	typedef struct wav {
 		std::string filename;
@@ -110,7 +110,8 @@ public:
 		return false;
 	}
 
-	uint32_t sessionrate;
+	int64_t sessionrate;
+	int64_t targetrate;
 	uint8_t version;
 
 	unsigned char c0;
@@ -121,10 +122,12 @@ public:
 private:
 	bool foundin(std::string haystack, std::string needle);
 	void parse(void);
+	void setrates(void);
 	void parse8header(void);
 	void parse9header(void);
 	void parserest(void);
 	std::vector<wav_t> actualwavs;
+	float ratefactor;
 };
 
 

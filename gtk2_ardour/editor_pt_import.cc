@@ -127,7 +127,7 @@ Editor::do_ptimport (std::string ptpath,
 	vector<ptflookup_t> ptfwavpair;
 	vector<ptflookup_t> ptfregpair;
 
-	if (ptf.load(ptpath) == -1) {
+	if (ptf.load(ptpath, _session->frame_rate()) == -1) {
 		MessageDialog msg (_("Doesn't seem to be a valid PT session file (.ptf only currently supported)"));
 		msg.run ();
 		return;

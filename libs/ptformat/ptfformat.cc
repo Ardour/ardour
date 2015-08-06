@@ -102,7 +102,7 @@ PTFFormat::foundin(std::string haystack, std::string needle) {
 			-1           could not open file as ptf
 */
 int
-PTFFormat::load(std::string path) {
+PTFFormat::load(std::string path, int64_t targetsr) {
 	FILE *fp;
 	unsigned char xxor[256];
 	unsigned char ct;
@@ -254,6 +254,7 @@ PTFFormat::load(std::string path) {
 		break;
 	}
 	fclose(fp);
+	this->targetrate = targetsr;
 	parse();
 	return 0;
 }
@@ -264,13 +265,23 @@ PTFFormat::parse(void) {
 
 	if (this->version == 8) {
 		parse8header();
+		setrates();
 		parserest();
 	} else if (this->version == 9) {
 		parse9header();
+		setrates();
 		parserest();
 	} else {
 		// Should not occur
 	}	
+}
+
+void
+PTFFormat::setrates(void) {
+	this->ratefactor = 1.f;
+	if (sessionrate != 0) {
+		this->ratefactor = (float)this->targetrate / this->sessionrate;
+	}
 }
 
 void
@@ -502,8 +513,8 @@ PTFFormat::parserest(void) {
 			wav_t f = { 
 				filename,
 				0,
-				(int64_t)start,
-				(int64_t)length,
+				(int64_t)(start*this->ratefactor),
+				(int64_t)(length*this->ratefactor),
 			};
 
 			f.index = findex;
@@ -519,9 +530,9 @@ PTFFormat::parserest(void) {
 				region_t r = {
 					name,
 					rindex,
-					start,
-					sampleoffset,
-					length,
+					(int64_t)(start*this->ratefactor),
+					(int64_t)(sampleoffset*this->ratefactor),
+					(int64_t)(length*this->ratefactor),
 					f
 				};
 				this->regions.push_back(r);
@@ -533,9 +544,9 @@ PTFFormat::parserest(void) {
 				region_t r = {
 					name,
 					rindex,
-					start,
-					sampleoffset,
-					length,
+					(int64_t)(start*this->ratefactor),
+					(int64_t)(sampleoffset*this->ratefactor),
+					(int64_t)(length*this->ratefactor),
 					f
 				};
 				this->regions.push_back(r);
@@ -612,23 +623,13 @@ PTFFormat::parserest(void) {
 					if ((found = std::find(begin, finish, tr.reg)) != finish) {
 						tr.reg = (*found);
 					}
-					startbytes = (ptfunxored[l+3] & 0xf0) >> 4;
-
 					i = l+16;
 					offset = 0;
-					switch (startbytes) {
-					case 4:
-						offset |= (uint32_t)(ptfunxored[i+3] << 24);
-					case 3:
-						offset |= (uint32_t)(ptfunxored[i+2] << 16);
-					case 2:
-						offset |= (uint32_t)(ptfunxored[i+1] << 8);
-					case 1:
-						offset |= (uint32_t)(ptfunxored[i]);
-					default:
-						break;
-					}
-					tr.reg.startpos = (int64_t)offset;
+					offset |= (uint32_t)(ptfunxored[i+3] << 24);
+					offset |= (uint32_t)(ptfunxored[i+2] << 16);
+					offset |= (uint32_t)(ptfunxored[i+1] << 8);
+					offset |= (uint32_t)(ptfunxored[i]);
+					tr.reg.startpos = (int64_t)(offset*this->ratefactor);
 					if (tr.reg.length > 0) {
 						this->tracks.push_back(tr);
 					}
