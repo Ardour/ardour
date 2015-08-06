@@ -97,7 +97,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	/* lets use master_position instead */
 	uint32_t mp = _mcp.device_info().master_position();
 	if (_number == mp) {
-		DEBUG_TRACE (DEBUG::MackieControl, "Surface is first. Might have global controls.\n");
+		DEBUG_TRACE (DEBUG::MackieControl, "Surface matches MasterPosition. Might have global controls.\n");
 		if (_mcp.device_info().has_global_controls()) {
 			init_controls ();
 			DEBUG_TRACE (DEBUG::MackieControl, "init_controls done\n");
@@ -508,6 +508,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 			_jog_wheel->jog_event (delta);
 			return;
 		}
+		// add external (pedal?) control here
 
 		return;
 	}
