@@ -403,6 +403,12 @@ if test -f $BUILD_ROOT/libs/vfork/ardour-exec-wrapper ; then
     cp $BUILD_ROOT/libs/vfork/ardour-exec-wrapper $Frameworks/
 fi
 
+# TODO check if this is still needed, even when building on 10.5
+if file $BUILD_ROOT/gtk2_ardour/ardour-$release_version | grep -q ppc; then
+STDCPP='|libstdc\+\+'
+else
+STDCPP=
+fi
 
 while [ true ] ; do 
     missing=false
@@ -419,7 +425,7 @@ while [ true ] ; do
 		strip -u -r -arch all $file &>/dev/null
 	fi
 
-	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/|libstdc\+\+)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
+	deps=`otool -L $file | awk '{print $1}' | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | grep -v 'libjack\.' | grep -v "$(basename $file)"`
 	# echo -n "."
 	for dep in $deps ; do
 	    base=`basename $dep`
@@ -488,7 +494,7 @@ fi
 for exe in $executables; do
     EXE=$APPROOT/MacOS/$exe
     changes=""
-    for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/|libstdc\+\+)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+    for lib in `otool -L $EXE | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
       base=`basename $lib`
       changes="$changes -change $lib @executable_path/../lib/$base"
     done
@@ -514,7 +520,7 @@ for libdir in $Frameworks $Frameworks/modules $Surfaces $Panners $Backends ; do
         # change all the dependencies
 	
 	changes=""
-	for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/|libstdc\+\+)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
+	for lib in `otool -L $dylib | egrep "($GTKSTACK_ROOT|$ARDOURSTACK_ROOT|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}' | grep -v 'libjack\.'` ; do
 	    base=`basename $lib`
 	    if echo $lib | grep -s libbase; then
 		changes="$changes -change $lib @executable_path/../$libbase/$base"
