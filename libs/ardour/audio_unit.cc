@@ -1334,14 +1334,13 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	}
 
 	if (found) {
+		out.set (DataType::MIDI, 0);
+		out.set (DataType::AUDIO, audio_out);
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 	} else {
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tFAIL: no io configs match %1\n", in));
 		return false;
 	}
-
-	out.set (DataType::MIDI, 0);
-	out.set (DataType::AUDIO, audio_out);
 
 	return true;
 }
