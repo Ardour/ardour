@@ -4840,7 +4840,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 	case SelectionStartTrim:
 
-		start = _editor->selection->time[_editor->clicked_selection].start;
 		end = _editor->selection->time[_editor->clicked_selection].end;
 
 		if (pending_position > end) {
@@ -4853,7 +4852,6 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	case SelectionEndTrim:
 
 		start = _editor->selection->time[_editor->clicked_selection].start;
-		end = _editor->selection->time[_editor->clicked_selection].end;
 
 		if (pending_position < start) {
 			end = start;

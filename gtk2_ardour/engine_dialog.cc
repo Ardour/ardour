@@ -176,8 +176,6 @@ EngineControl::EngineControl ()
 	lm_table.attach (*misc_align, 1, 3, row, row+1, FILL, (AttachOptions) 0);
 	++row;
 
-	xopt = AttachOptions(0);
-
 	lm_measure_label.set_padding (10, 10);
 	lm_measure_button.add (lm_measure_label);
 	lm_measure_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::latency_button_clicked));

@@ -1158,7 +1158,6 @@ IO::parse_io_string (const string& str, vector<string>& ports)
 		return 0;
 	}
 
-	pos = 0;
 	opos = 0;
 
 	ports.clear ();
