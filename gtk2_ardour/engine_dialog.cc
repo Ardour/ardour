@@ -1775,7 +1775,9 @@ EngineControl::set_state (const XMLNode& root)
 			 * can also be set to valid entries and the state will be restored
 			 * correctly.
 			 */
-			set_driver_popdown_strings ();
+			if (!(*i)->driver.empty()) {
+				set_driver_popdown_strings ();
+			}
 			driver_combo.set_active_text ((*i)->driver);
 			backend_changed ();
 
