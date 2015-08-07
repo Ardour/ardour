@@ -649,7 +649,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		if (!valid) {
 			continue;
 		}
-		copy_vector (bufs.get_audio(index).data(offset), outs[i], nframes * sizeof(float));
+		memcpy (bufs.get_audio(index).data(offset), outs[i], nframes * sizeof(float));
 	}
 #endif
 	return 0;
