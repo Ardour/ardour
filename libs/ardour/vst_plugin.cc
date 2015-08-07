@@ -600,7 +600,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		if (!valid) {
 			continue;
 		}
-		memcpy (bufs.get_audio(index).data(offset), outs[i], nframes * sizeof(float));
+		copy_vector (bufs.get_audio(index).data(offset), outs[i], nframes);
 	}
 	return 0;
 }
