@@ -41,13 +41,12 @@ PBD::spherical_to_cartesian (double azi, double ele, double len, double& x, doub
 void 
 PBD::cartesian_to_spherical (double x, double y, double z, double& azimuth, double& elevation, double& length)
 {
-#if 1
 	/* converts cartesian coordinates to cylindrical in degrees*/
 
         double rho, theta, phi;
 
         rho = sqrt (x*x + y*y + z*z);
-        phi = acos (1.0/rho);
+        //phi = acos (1.0 / rho);
         theta = atan2 (y, x);
 
         /* XXX for now, clamp phi to zero */
@@ -67,46 +66,5 @@ PBD::cartesian_to_spherical (double x, double y, double z, double& azimuth, doub
         }
         
         length = rho;
-#else
-	/* converts cartesian coordinates to cylindrical in degrees*/
-
-	const double atorad = 2.0 * M_PI / 360.0;
-	double atan_y_per_x, atan_x_pl_y_per_z;
-	double distance;
-
-	if (x == 0.0) {
-		atan_y_per_x = M_PI / 2;
-	} else {
-		atan_y_per_x = atan2 (y,x);
-	}
-
-	if (y < 0.0) {
-		/* below x-axis: atan2 returns 0 .. -PI (negative) so convert to degrees and ADD to 180 */
-		azimuth = 180.0 + (atan_y_per_x / (M_PI/180.0) + 180.0);
-	} else {
-		/* above x-axis: atan2 returns 0 .. +PI so convert to degrees */
-		azimuth = atan_y_per_x / atorad;
-	}
-
-	distance = sqrt (x*x + y*y);
-
-	if (z == 0.0) {
-		atan_x_pl_y_per_z = 0.0;
-	} else {
-		atan_x_pl_y_per_z = atan2 (z,distance);
-	}
-
-	if (distance == 0.0) {
-		if (z < 0.0) {
-			atan_x_pl_y_per_z = -M_PI/2.0;
-		} else if (z > 0.0) {
-			atan_x_pl_y_per_z = M_PI/2.0;
-		}
-	}
-
-	elevation = atan_x_pl_y_per_z / atorad;
-
-	// distance = sqrtf (x*x + y*y + z*z);
-#endif
 }
 
