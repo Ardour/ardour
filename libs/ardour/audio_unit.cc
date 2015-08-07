@@ -1278,21 +1278,12 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 				audio_out = 2;
 				found = true;
 			} else if (possible_out < -2) {
-				/* explicitly variable number of outputs. 
-
-                                   Since Ardour can handle any configuration,
-                                   we have to somehow pick a number. 
-
-                                   We'll use the number of inputs
-                                   to the master bus, or 2 if there
-                                   is no master bus.
-                                */
-                                boost::shared_ptr<Route> master = _session.master_out();
-                                if (master) {
-                                        audio_out = master->input()->n_ports().n_audio();
-                                } else {
-                                        audio_out = 2;
-                                }
+				/* explicitly variable number of outputs.
+				 *
+				 * We really need to ask the user in this case.
+				 * stereo will be correct in 99.9% of all cases.
+				 */
+				audio_out = 2;
 				found = true;
 			} else {
 				/* exact number of outputs */
