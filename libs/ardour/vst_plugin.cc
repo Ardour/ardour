@@ -35,10 +35,6 @@
 
 #include "i18n.h"
 
-#ifndef VST_IN_PLACE
-#define MAX_VST_BUFFERSIZE 8192
-#endif
-
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
@@ -48,22 +44,13 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _handle (handle)
 	, _state (0)
 	, _plugin (0)
-#ifndef VST_IN_PLACE
-	, _audio_out_buf (0)
-	, _audio_out_buf_cnt (0)
-#endif
 {
 
 }
 
 VSTPlugin::~VSTPlugin ()
 {
-#ifndef VST_IN_PLACE
-	for (uint32_t i = 0; i < _audio_out_buf_cnt; ++i) {
-		free (_audio_out_buf[i]);
-	}
-	free (_audio_out_buf);
-#endif
+
 }
 
 void
@@ -76,23 +63,6 @@ VSTPlugin::set_plugin (AEffect* e)
 
 	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.frame_rate());
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, _session.get_block_size(), NULL, 0.0f);
-#ifndef VST_IN_PLACE
-	if (_audio_out_buf_cnt != _plugin->numOutputs) {
-		for (uint32_t i = 0; i < _audio_out_buf_cnt; ++i) {
-			free (_audio_out_buf[i]);
-		}
-		free (_audio_out_buf);
-		_audio_out_buf_cnt = _plugin->numOutputs;
-		_audio_out_buf = (float**) malloc (_audio_out_buf_cnt * sizeof(float*));
-		/* think.  Should this be part of the BufferSet ?
-		 * in which case it would be dynamically sized, but then again
-		 * every BufferSet would have N[?] extra VST audio buffers.
-		 */
-		for (uint32_t i = 0; i < _audio_out_buf_cnt; ++i) {
-			_audio_out_buf[i] = (float*) malloc (MAX_VST_BUFFERSIZE * sizeof(float));
-		}
-	}
-#endif
 }
 
 void
@@ -593,27 +563,9 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 					: silent_bufs.get_audio(0).data(offset);
 	}
 
-#ifndef VST_IN_PLACE
-	assert (nframes <= MAX_VST_BUFFERSIZE);
-	assert (_plugin->numOutputs <= _audio_out_buf_cnt);
-#endif
-
 	uint32_t out_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
-		uint32_t  index;
-		bool      valid = false;
-		index = out_map.get(DataType::AUDIO, out_index++, &valid);
-#ifdef VST_IN_PLACE
-		outs[i] = (valid)
-					? bufs.get_audio(index).data(offset)
-					: scratch_bufs.get_audio(0).data(offset);
-#else
-		if (!valid) {
-			outs[i] = scratch_bufs.get_audio(0).data(offset);
-		} else {
-			outs[i] = _audio_out_buf[i];
-		}
-#endif
+		outs[i] = scratch_bufs.get_audio(i).data(offset);
 	}
 
 	if (bufs.count().n_midi() > 0) {
@@ -640,7 +592,6 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 	_plugin->processReplacing (_plugin, &ins[0], &outs[0], nframes);
 	_midi_out_buf = 0;
 
-#ifndef VST_IN_PLACE
 	out_index = 0;
 	for (i = 0; i < (int32_t) _plugin->numOutputs; ++i) {
 		uint32_t  index;
@@ -651,7 +602,6 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		}
 		memcpy (bufs.get_audio(index).data(offset), outs[i], nframes * sizeof(float));
 	}
-#endif
 	return 0;
 }
 
