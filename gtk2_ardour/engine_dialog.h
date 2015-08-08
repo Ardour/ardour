@@ -250,7 +250,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
     void post_push ();
-    void update_sensitivity ();
 
     /* latency measurement */
     void latency_button_clicked ();

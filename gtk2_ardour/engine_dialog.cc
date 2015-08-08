@@ -748,11 +748,6 @@ EngineControl::refresh_midi_display (std::string focus)
 }
 
 void
-EngineControl::update_sensitivity ()
-{
-}
-
-void
 EngineControl::backend_changed ()
 {
 	string backend_name = backend_combo.get_active_text();
@@ -888,7 +883,6 @@ EngineControl::set_device_popdown_strings ()
 
 
 	if (!available_devices.empty()) {
-		update_sensitivity ();
 
 		{
 			string current_device, found_device;
@@ -934,7 +928,6 @@ EngineControl::set_input_device_popdown_strings ()
 	}
 
 	if (!available_devices.empty()) {
-		update_sensitivity ();
 
 		{
 			string current_device, found_device;
@@ -981,7 +974,6 @@ EngineControl::set_output_device_popdown_strings ()
 	}
 
 	if (!available_devices.empty()) {
-		update_sensitivity ();
 
 		{
 			string current_device, found_device;
