@@ -36,21 +36,13 @@ PROGRAM_VERSION=${major_version}
 LOWERCASE_DIRNAME=ardour${major_version}
 STATEFILE_SUFFIX=ardour # see filename_extensions.cc
 
-BIT_SUFFIX=""
-
 if test -n "$MIXBUS"; then
-	if test "$XARCH" = "x86_64"; then
-		PROGRAM_NAME=Mixbus
-		PRODUCT_NAME=mixbus
-	else
-		PROGRAM_NAME=Mixbus
-		PRODUCT_NAME=mixbus
-		BIT_SUFFIX="(x86)"
-	fi
+	PROGRAM_NAME=Mixbus
+	PRODUCT_NAME=mixbus
 fi
 
 # derived variables
-PRODUCT_ID=${PROGRAM_NAME}${PROGRAM_VERSION}${BIT_SUFFIX}
+PRODUCT_ID=${PROGRAM_NAME}${PROGRAM_VERSION}
 PRODUCT_EXE=${PRODUCT_NAME}.exe
 PRODUCT_ICON=${PRODUCT_NAME}.ico
 
