@@ -5406,7 +5406,7 @@ Editor::sync_track_view_list_and_routes ()
 {
 	track_views = TrackViewList (_routes->views ());
 
-	_summary->set_dirty ();
+	_summary->set_background_dirty();
 	_group_tabs->set_dirty ();
 
 	return false; // do not call again (until needed)
