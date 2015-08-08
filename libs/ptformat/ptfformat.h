@@ -38,7 +38,8 @@ public:
 		int64_t     length;
 
 		bool operator ==(const struct wav& other) {
-			return (this->index == other.index);
+			return (this->filename != std::string("") &&
+				this->index == other.index);
 		}
 
 	} wav_t;
@@ -63,7 +64,7 @@ public:
 		region_t    reg;
 
 		bool operator ==(const struct track& other) {
-			return (this->index == other.index);
+			return (this->name == other.name);
 		}
 	} track_t;
 
@@ -71,25 +72,13 @@ public:
 	std::vector<region_t> regions;
 	std::vector<track_t> tracks;
 
-	static bool trackexistsin(std::vector<track_t> tr, uint16_t index) {
-		std::vector<track_t>::iterator begin = tr.begin();
-		std::vector<track_t>::iterator finish = tr.end();
-		std::vector<track_t>::iterator found;
-
-		track_t f = { std::string(""), index };
-
-		if ((found = std::find(begin, finish, f)) != finish) {
-			return true;
-		}
-		return false;
-	}
-
 	static bool regionexistsin(std::vector<region_t> reg, uint16_t index) {
 		std::vector<region_t>::iterator begin = reg.begin();
 		std::vector<region_t>::iterator finish = reg.end();
 		std::vector<region_t>::iterator found;
 
-		region_t r = { std::string(""), index };
+		wav_t w = { std::string(""), 0, 0, 0 };
+		region_t r = { std::string(""), index, 0, 0, 0, w };
 
 		if ((found = std::find(begin, finish, r)) != finish) {
 			return true;
@@ -102,7 +91,7 @@ public:
 		std::vector<wav_t>::iterator finish = wv.end();
 		std::vector<wav_t>::iterator found;
 
-		wav_t w = { std::string(""), index };
+		wav_t w = { std::string(""), index, 0, 0 };
 
 		if ((found = std::find(begin, finish, w)) != finish) {
 			return true;
@@ -122,12 +111,23 @@ public:
 private:
 	bool foundin(std::string haystack, std::string needle);
 	void parse(void);
+	void unxor10(void);
 	void setrates(void);
+	void parse5header(void);
+	void parse7header(void);
 	void parse8header(void);
 	void parse9header(void);
-	void parserest(void);
+	void parse10header(void);
+	void parserest5(void);
+	void parserest89(void);
+	void parserest10(void);
+	void parseaudio5(void);
+	void parseaudio(void);
 	std::vector<wav_t> actualwavs;
 	float ratefactor;
+	std::string extension;
+	unsigned char key10a;
+	unsigned char key10b;
 };
 
 
