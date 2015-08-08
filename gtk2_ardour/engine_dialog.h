@@ -235,6 +235,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void store_state (State);
     bool equivalent_states (const State&, const State&);
 
+	void set_current_state (const State& state);
+
     bool  _have_control;
 
     static bool print_channel_count (Gtk::SpinButton*);

@@ -1704,32 +1704,38 @@ EngineControl::set_state (const XMLNode& root)
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
 		if ((*i)->active) {
-			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-			backend_combo.set_active_text ((*i)->backend);
-
-			/* The driver popdown strings need to be populated now so that
-			 * set_active_text will actually set a valid entry. Then
-			 * backend_changed() will populate all the other combo's so they
-			 * can also be set to valid entries and the state will be restored
-			 * correctly.
-			 */
-			if (!(*i)->driver.empty()) {
-				set_driver_popdown_strings ();
-			}
-			driver_combo.set_active_text ((*i)->driver);
-			backend_changed ();
-
-			device_combo.set_active_text ((*i)->device);
-			input_device_combo.set_active_text ((*i)->input_device);
-			output_device_combo.set_active_text ((*i)->output_device);
-			sample_rate_combo.set_active_text (rate_as_string ((*i)->sample_rate));
-			set_active_text_if_present (buffer_size_combo, bufsize_as_string ((*i)->buffer_size));
-			input_latency.set_value ((*i)->input_latency);
-			output_latency.set_value ((*i)->output_latency);
-			midi_option_combo.set_active_text ((*i)->midi_option);
+			set_current_state (*i);
 			break;
 		}
 	}
+}
+
+void
+EngineControl::set_current_state (const State& state)
+{
+	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+	backend_combo.set_active_text (state->backend);
+
+	/* The driver popdown strings need to be populated now so that
+	 * set_active_text will actually set a valid entry. Then
+	 * backend_changed() will populate all the other combo's so they
+	 * can also be set to valid entries and the state will be restored
+	 * correctly.
+	 */
+	if (!state->driver.empty()) {
+		set_driver_popdown_strings ();
+	}
+	driver_combo.set_active_text (state->driver);
+	backend_changed ();
+
+	device_combo.set_active_text (state->device);
+	input_device_combo.set_active_text (state->input_device);
+	output_device_combo.set_active_text (state->output_device);
+	sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
+	set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
+	input_latency.set_value (state->input_latency);
+	output_latency.set_value (state->output_latency);
+	midi_option_combo.set_active_text (state->midi_option);
 }
 
 int
