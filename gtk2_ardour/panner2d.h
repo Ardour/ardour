@@ -100,6 +100,26 @@ class Panner2d : public Gtk::DrawingArea
 		bool _selected;
 	};
 
+	struct ColorScheme {
+		uint32_t background;
+		uint32_t crosshairs;
+		uint32_t signalcircle_border;
+		uint32_t signalcircle;
+		uint32_t diffusion;
+		uint32_t diffusion_inv;
+		uint32_t pos_outline;
+		uint32_t pos_fill;
+		uint32_t signal_outline;
+		uint32_t signal_fill;
+		uint32_t speaker_fill;
+		uint32_t text;
+	};
+
+	static ColorScheme colors;
+	static void set_colors ();
+	static bool have_colors;
+	void color_handler ();
+
 	boost::shared_ptr<ARDOUR::PannerShell> panner_shell;
 	Glib::RefPtr<Pango::Layout> layout;
 

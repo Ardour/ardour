@@ -36,9 +36,11 @@
 #include "canvas/colors.h"
 
 #include "ardour_ui.h"
+#include "global_signals.h"
 #include "panner2d.h"
 #include "keyboard.h"
 #include "gui_thread.h"
+#include "rgb_macros.h"
 #include "utils.h"
 #include "public_editor.h"
 
@@ -50,6 +52,9 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using Gtkmm2ext::Keyboard;
+
+Panner2d::ColorScheme Panner2d::colors;
+bool Panner2d::have_colors = false;
 
 static const int large_size_threshold = 100;
 static const int large_border_width = 25;
@@ -81,6 +86,13 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 	, have_elevation (false)
 	, _send_mode (false)
 {
+	if (!have_colors) {
+		set_colors ();
+		have_colors = true;
+	}
+
+	ColorsChanged.connect (sigc::mem_fun (*this, &Panner2d::color_handler));
+
 	panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
 	panner_shell->panner()->SignalPositionChanged.connect (panner_connections, invalidator(*this), boost::bind (&Panner2d::handle_position_change, this), gui_context());
@@ -97,6 +109,31 @@ Panner2d::~Panner2d()
 	for (Targets::iterator i = speakers.begin(); i != speakers.end(); ++i) {
 		delete *i;
 	}
+}
+
+void
+Panner2d::set_colors ()
+{
+	// TODO get all colors from theme, resolve dups
+	colors.background = ARDOUR_UI::config()->color ("mono panner bg");
+	colors.crosshairs =          0x4884a9ff; // 0.282, 0.517, 0.662, 1.0
+	colors.signalcircle_border = 0x84c5e1ff; // 0.517, 0.772, 0.882, 1.0
+	colors.signalcircle =        0x4884a9ff; // 0.282, 0.517, 0.662, 1.0  // also used with a = 0.9
+	colors.diffusion =           0x4884a973; // 0.282, 0.517, 0.662, 0.45
+	colors.diffusion_inv =       0xff6b6b73; // 1.0,   0.419, 0.419, 0.45
+	colors.pos_outline =         0xffe7e7d9; // 1.0,   0.905, 0.905, 0.85
+	colors.pos_fill =            0xff6b6bd9; // 1.0,   0.419, 0.419, 0.85
+	colors.signal_outline =      0x84c5e1cc; // 0.517, 0.772, 0.882, 0.8
+	colors.signal_fill =         0x4884a9bf; // 0.282, 0.517, 0.662, 0.75
+	colors.speaker_fill =        0x4884a9ff; // 0.282, 0.517, 0.662, 1.0
+	colors.text =                0x84c5e1e6; // 0.517, 0.772, 0.882, 0.9
+}
+
+void
+Panner2d::color_handler ()
+{
+	set_colors ();
+	queue_draw ();
 }
 
 void
@@ -413,6 +450,11 @@ Panner2d::on_motion_notify_event (GdkEventMotion *ev)
 	return handle_motion (x, y, state);
 }
 
+#define CSSRGBA(CL) \
+	cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(CL), UINT_RGBA_G_FLT(CL), UINT_RGBA_B_FLT(CL), UINT_RGBA_A_FLT(CL));
+
+#define CSSRGB(CL, A) \
+	cairo_set_source_rgba (cr, UINT_RGBA_R_FLT(CL), UINT_RGBA_G_FLT(CL), UINT_RGBA_B_FLT(CL), A);
 bool
 Panner2d::on_expose_event (GdkEventExpose *event)
 {
@@ -427,14 +469,15 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	cairo_rectangle (cr, event->area.x, event->area.y, event->area.width, event->area.height);
 
-	double r, g, b, a;
+	uint32_t bg = colors.background;
 	if (_send_mode) {
-		ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("send bg"), r, g, b, a);
+		bg = ARDOUR_UI::config()->color ("send bg");
 	}
+
 	if (!panner_shell->bypassed()) {
-		cairo_set_source_rgba (cr, r, g, b, 1.0);
+		CSSRGBA(bg);
 	} else {
-		cairo_set_source_rgba (cr, r, g, b , 0.2);
+		CSSRGB(bg, 0.2);
 	}
 	cairo_fill_preserve (cr);
 	cairo_clip (cr);
@@ -447,7 +490,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	/* horizontal line of "crosshairs" */
 
-	cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
+	CSSRGBA(colors.crosshairs);
 	cairo_move_to (cr, 0.0, radius);
 	cairo_line_to (cr, diameter, radius);
 	cairo_stroke (cr);
@@ -461,16 +504,16 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	/* the circle on which signals live */
 
 	cairo_set_line_width (cr, 1.5);
-	cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 1.0);
+	CSSRGBA(colors.signalcircle_border);
 	cairo_arc (cr, radius, radius, radius, 0.0, 2.0 * M_PI);
 	cairo_stroke (cr);
 
 	for (uint32_t rad = 15; rad < 90; rad += 15) {
 		cairo_set_line_width (cr, .5 + (float)rad / 150.0);
 		if (rad == 45) {
-			cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
+			CSSRGBA(colors.signalcircle);
 		} else {
-			cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.8);
+			CSSRGB(colors.signalcircle, 0.9);
 		}
 		cairo_new_path (cr);
 		cairo_arc (cr, radius, radius, radius * sin(M_PI * (float) rad / 180.0), 0, 2.0 * M_PI);
@@ -495,10 +538,10 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 			cairo_close_path (cr);
 			if (panner_shell->pannable()->pan_width_control->get_value() >= 0.0) {
 				/* normal width */
-				cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.45);
+				CSSRGBA(colors.diffusion);
 			} else {
 				/* inverse width */
-				cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.45);
+				CSSRGBA(colors.diffusion_inv);
 			}
 			cairo_fill (cr);
 			cairo_restore (cr);
@@ -525,9 +568,9 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		cairo_new_path (cr);
 		cairo_arc (cr, c.x, c.y, arc_radius + 1.0, 0, 2.0 * M_PI);
-		cairo_set_source_rgba (cr, 1.0, 0.419, 0.419, 0.85);
+		CSSRGBA(colors.pos_fill);
 		cairo_fill_preserve (cr);
-		cairo_set_source_rgba (cr, 1.0, 0.905, 0.905, 0.85);
+		CSSRGBA(colors.pos_outline);
 		cairo_stroke (cr);
 
 		/* signals */
@@ -549,13 +592,13 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 					cairo_new_path (cr);
 					cairo_arc (cr, c.x, c.y, arc_radius, 0, 2.0 * M_PI);
-					cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 0.75);
+					CSSRGBA(colors.signal_fill);
 					cairo_fill_preserve (cr);
-					cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, 0.8);
+					CSSRGBA(colors.signal_outline);
 					cairo_stroke (cr);
 
 					if (!xsmall && !signal->text.empty()) {
-						cairo_set_source_rgba (cr, 0.517, 0.772, 0.882, .9);
+						CSSRGBA(colors.text);
 						/* the +/- adjustments are a hack to try to center the text in the circle
 						 * TODO use pango get_pixel_size() -- see mono_panner.cc
 						 */
@@ -608,7 +651,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 				cairo_rel_line_to (cr, -5, +5);
 				cairo_rel_line_to (cr, 0, -7);
 				cairo_close_path (cr);
-				cairo_set_source_rgba (cr, 0.282, 0.517, 0.662, 1.0);
+				CSSRGBA(colors.speaker_fill);
 				cairo_fill (cr);
 				cairo_restore (cr);
 
