@@ -128,11 +128,18 @@ Editor::do_ptimport (std::string ptpath,
 	vector<ptflookup_t> ptfregpair;
 
 	if (ptf.load(ptpath, _session->frame_rate()) == -1) {
-		MessageDialog msg (_("Doesn't seem to be a valid PT session file (.ptf only currently supported)"));
+		MessageDialog msg (_("Doesn't seem to be a valid PT session file"));
 		msg.run ();
 		return;
-	}
+	} else {
+		MessageDialog msg (string_compose (_("PT v%1 Session @ %2Hz\n\n%3 audio files\n%4 regions\n%5 active regions\n\nContinue..."), (int)ptf.version, ptf.sessionrate, ptf.audiofiles.size(), ptf.regions.size(), ptf.tracks.size()));
+		msg.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
+		int result = msg.run ();
+		if (result != Gtk::RESPONSE_OK) {
+			return;
+		}
+	}
 	current_interthread_info = &import_status;
 	import_status.current = 1;
 	import_status.total = ptf.audiofiles.size ();
@@ -206,7 +213,7 @@ Editor::do_ptimport (std::string ptpath,
 		for (vector<ptflookup_t>::iterator p = ptfregpair.begin();
 				p != ptfregpair.end(); ++p) {
 
-			if ((p->index1 == a->reg.index))  {
+			if (p->index1 == a->reg.index)  {
 				// Matched a ptf active region to an ardour region
 				utr.index1 = a->index;
 				utr.index2 = nth;
