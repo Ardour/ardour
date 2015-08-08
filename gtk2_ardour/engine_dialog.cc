@@ -331,8 +331,6 @@ EngineControl::on_show ()
 		backend_changed ();
 	}
 	device_changed ();
-	input_device_changed ();
-	output_device_changed ();
 	ok_button->grab_focus();
 }
 
@@ -962,7 +960,7 @@ EngineControl::set_input_device_popdown_strings ()
 			input_device_combo.set_active_text (current_device);
 		}
 
-		input_device_changed ();
+		device_changed ();
 		return true;
 	}
 
@@ -1009,7 +1007,7 @@ EngineControl::set_output_device_popdown_strings ()
 			output_device_combo.set_active_text (current_device);
 		}
 
-		output_device_changed ();
+		device_changed ();
 		return true;
 	}
 
@@ -1238,63 +1236,13 @@ EngineControl::device_changed ()
 void
 EngineControl::input_device_changed ()
 {
-	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-	assert (backend);
-	string input_device_name = input_device_combo.get_active_text ();
-
-	if (!ignore_changes && input_device_name != backend->input_device_name()) {
-		queue_device_changed = true;
-	}
-
-	backend->set_input_device_name(input_device_name);
-
-	{
-		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-
-		set_samplerate_popdown_strings (input_device_name);
-		set_buffersize_popdown_strings (input_device_name);
-		/* XXX theoretically need to set min + max channel counts here
-		*/
-
-		manage_control_app_sensitivity ();
-	}
-
-	/* pick up any saved state for this device */
-
-	if (!ignore_changes) {
-		maybe_display_saved_state ();
-	}
+	device_changed ();
 }
 
 void
 EngineControl::output_device_changed ()
 {
-	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-	assert (backend);
-	string output_device_name = output_device_combo.get_active_text ();
-
-	if (!ignore_changes && output_device_name != backend->output_device_name()) {
-		queue_device_changed = true;
-	}
-
-	backend->set_output_device_name(output_device_name);
-
-	{
-		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-
-		set_samplerate_popdown_strings (output_device_name);
-		set_buffersize_popdown_strings (output_device_name);
-		/* XXX theoretically need to set min + max channel counts here
-		*/
-
-		manage_control_app_sensitivity ();
-	}
-
-	/* pick up any saved state for this device */
-
-	if (!ignore_changes) {
-		maybe_display_saved_state ();
-	}
+	device_changed ();
 }
 
 string
@@ -2244,8 +2192,6 @@ EngineControl::set_desired_sample_rate (uint32_t sr)
 {
 	_desired_sample_rate = sr;
 	device_changed ();
-	input_device_changed ();
-	output_device_changed ();
 }
 
 void
