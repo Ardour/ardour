@@ -365,10 +365,11 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	}
 
 	if (action) {
+#warning Paul fix this before you think tabbed is done
 		Gtk::AccelKey key;
 		ustring ap = action->get_accel_path();
 		if (!ap.empty()) {
-			string shortcut = ActionManager::get_key_representation (ap, key);
+			string shortcut = string(); // ActionManager::get_key_representation (ap, key);
 			if (!shortcut.empty()) {
 				replace_all (shortcut, "<", "");
 				replace_all (shortcut, ">", "-");

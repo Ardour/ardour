@@ -2,7 +2,11 @@
 #define __libgtkmm2ext_bindings_h__
 
 #include <map>
+#include <vector>
+#include <list>
+
 #include <stdint.h>
+
 #include <gdk/gdkkeysyms.h>
 #include <gtkmm/action.h>
 #include <gtkmm/radioaction.h>
@@ -74,19 +78,13 @@ class LIBGTKMM2EXT_API ActionMap {
         ~ActionMap() {}
 
         Glib::RefPtr<Gtk::ActionGroup> create_action_group (const std::string& group_name);
-        void install_action_group (Glib::RefPtr<Gtk::ActionGroup>);
-        
+
         Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, const char* name, const char* label);
         Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group,
 						   const char* name, const char* label, sigc::slot<void> sl);
-<<<<<<< HEAD
-	Glib::RefPtr<Gtk::Action> register_radio_action (const char* path, Gtk::RadioAction::Group&,
-							 const char* name, const char* label,
-=======
         Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
 							 Gtk::RadioAction::Group&,
 							 const char* name, const char* label, 
->>>>>>> changes to Bindings and Keyboard API to support (mostly) GTK-free keyboard bindings
                                                          sigc::slot<void,GtkAction*> sl,
                                                          int value);
         Glib::RefPtr<Gtk::Action> register_radio_action (Glib::RefPtr<Gtk::ActionGroup> group,
@@ -100,11 +98,28 @@ class LIBGTKMM2EXT_API ActionMap {
 
         typedef std::vector<Glib::RefPtr<Gtk::Action> > Actions;
 	void get_actions (Actions&);
-	
+
   private:
+<<<<<<< HEAD
         typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
         _ActionMap actions;
 };
+=======
+	/* hash for faster lookup of actions by name */
+
+	typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
+        _ActionMap _actions;
+};        
+>>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
+
+/* single global action map for entire application. 
+ * 
+ * Actions are name-spaced by group, and it makes things
+ * much easier if there is a single place to look up
+ * any action.
+ */
+
+LIBGTKMM2EXT_API extern ActionMap Actions;
 
 class LIBGTKMM2EXT_API Bindings {
   public:
@@ -113,36 +128,56 @@ class LIBGTKMM2EXT_API Bindings {
                 Release
         };
 
+<<<<<<< HEAD
         Bindings();
+=======
+        struct ActionInfo {
+	        ActionInfo (std::string const& name) : action_name (name) {}
+
+	        std::string action_name;
+	        Glib::RefPtr<Gtk::Action> action;
+        };
+        
+        Bindings (std::string const& name);
+>>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
         ~Bindings ();
 
+        std::string const& name() const { return _name; }
+
+        void associate ();
+        void dissociate ();
+        
         bool empty() const;
         bool empty_keys () const;
         bool empty_mouse () const;
         
-        void add (KeyboardKey, Operation, Glib::RefPtr<Gtk::Action>, bool can_save = false);
+        void add (KeyboardKey, Operation, std::string const&, bool can_save = false);
         bool replace (KeyboardKey, Operation, std::string const& action_name, bool can_save = true);
         void remove (KeyboardKey, Operation, bool can_save = false);
         void remove (Glib::RefPtr<Gtk::Action>, Operation, bool can_save = false);
 
         bool activate (KeyboardKey, Operation);
 
-        void add (MouseButton, Operation, Glib::RefPtr<Gtk::Action>);
+        void add (MouseButton, Operation, std::string const&);
         void remove (MouseButton, Operation);
         bool activate (MouseButton, Operation);
 
-        bool load (const std::string& path);
-        void load (const XMLNode& node);
-        bool save (const std::string& path);
+        bool load (XMLNode const& node);
+        void load_operation (XMLNode const& node);
         void save (XMLNode& root);
+<<<<<<< HEAD
 
         void set_action_map (ActionMap&);
+=======
+>>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
         
         static void set_ignored_state (int mask) {
                 _ignored_state = mask;
         }
         static uint32_t ignored_state() { return _ignored_state; }
 
+        void set_action_map (ActionMap&);
+        
         /* used to list all actions */
         void get_all_actions (std::vector<std::string>& names,
                               std::vector<std::string>& paths,
@@ -155,24 +190,26 @@ class LIBGTKMM2EXT_API Bindings {
 	                      std::vector<std::string>& keys,
 	                      std::vector<Glib::RefPtr<Gtk::Action> >& actions);
 
-	static std::map<std::string,Bindings*> bindings_for_state;
-
-	static void add_bindings_for_state (std::string const &, Bindings&);
-	static void remove_bindings_for_state (std::string const &, Bindings&);
+	/* all bindings currently in existence, as grouped into Bindings */
+	static std::list<Bindings*> bindings;
+	static Bindings* get_bindings (std::string const& name);
+	static void associate_all ();
 	
   private:
-        typedef std::map<KeyboardKey,Glib::RefPtr<Gtk::Action> > KeybindingMap;
+        typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
 
         std::string  _name;
+        ActionMap&   _action_map;
         KeybindingMap press_bindings;
         KeybindingMap release_bindings;
         
-        typedef std::map<MouseButton,Glib::RefPtr<Gtk::Action> > MouseButtonBindingMap;
+        typedef std::map<MouseButton,ActionInfo> MouseButtonBindingMap;
         MouseButtonBindingMap button_press_bindings;
         MouseButtonBindingMap button_release_bindings;
 
-        ActionMap* action_map;
         static uint32_t _ignored_state;
+
+        void push_to_gtk (KeyboardKey, Glib::RefPtr<Gtk::Action>);
 };
 
 } // namespace

@@ -45,25 +45,9 @@ namespace ActionManager {
 	LIBGTKMM2EXT_API extern Gtk::Widget* get_widget (const char * name);
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> get_action (const char* group, const char* name);
 	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> get_action (const char* path);
-	LIBGTKMM2EXT_API extern Glib::RefPtr<Gtk::Action> get_action_from_name (const char* name);
+
 	LIBGTKMM2EXT_API extern void do_action (const char* group, const char* name);
 	LIBGTKMM2EXT_API extern void set_toggle_action (const char* group, const char* name, bool);
-
-	LIBGTKMM2EXT_API extern void add_action_group (Glib::RefPtr<Gtk::ActionGroup>);
-	LIBGTKMM2EXT_API extern void enable_accelerators ();
-
-	LIBGTKMM2EXT_API extern bool lookup_entry (const Glib::ustring accel_path, Gtk::AccelKey& key);
-
-	LIBGTKMM2EXT_API extern void get_all_actions (std::vector<std::string>& names,
-				     std::vector<std::string>& paths,
-				     std::vector<std::string>& tooltips,
-				     std::vector<std::string>& keys,
-				     std::vector<Gtk::AccelKey>& bindings);
-
-	LIBGTKMM2EXT_API extern void get_all_actions (std::vector<std::string>& groups,
-				     std::vector<std::string>& paths,
-				     std::vector<std::string>& tooltips,
-				     std::vector<Gtk::AccelKey>& bindings);
 
 	LIBGTKMM2EXT_API extern void check_toggleaction (std::string);
 	LIBGTKMM2EXT_API extern void uncheck_toggleaction (std::string);

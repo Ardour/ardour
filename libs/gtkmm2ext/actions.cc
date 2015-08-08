@@ -53,164 +53,6 @@ using namespace Gtkmm2ext;
 RefPtr<UIManager> ActionManager::ui_manager;
 string ActionManager::unbound_string = "--";
 
-bool
-ActionManager::lookup_entry (const ustring accel_path, Gtk::AccelKey& key)
-{
-	GtkAccelKey gkey;
-	bool known = gtk_accel_map_lookup_entry (accel_path.c_str(), &gkey);
-
-	if (known) {
-		key = AccelKey (gkey.accel_key, Gdk::ModifierType (gkey.accel_mods));
-	} else {
-		key = AccelKey (GDK_VoidSymbol, Gdk::ModifierType (0));
-	}
-
-	return known;
-}
-
-struct SortActionsByLabel {
-	bool operator() (Glib::RefPtr<Gtk::Action> a, Glib::RefPtr<Gtk::Action> b) {
-		ustring astr = a->get_accel_path();
-		ustring bstr = b->get_accel_path();
-		return astr < bstr;
-	}
-};
-
-void
-ActionManager::get_all_actions (vector<string>& groups, vector<string>& names, vector<string>& tooltips, vector<AccelKey>& bindings)
-{
-	/* the C++ API for functions used here appears to be broken in
-	   gtkmm2.6, so we fall back to the C level.
-	*/
-
-	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
-	GList* node;
-	GList* acts;
-
-	for (node = list; node; node = g_list_next (node)) {
-
-		GtkActionGroup* group = (GtkActionGroup*) node->data;
-
-		/* first pass: collect them all */
-
-		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
-		action_list the_acts;
-
-		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
-			GtkAction* action = (GtkAction*) acts->data;
-			the_acts.push_back (Glib::wrap (action, true));
-		}
-
-		/* now sort by label */
-
-		SortActionsByLabel cmp;
-		the_acts.sort (cmp);
-
-		for (action_list::iterator a = the_acts.begin(); a != the_acts.end(); ++a) {
-
-			string accel_path = (*a)->get_accel_path ();
-
-			groups.push_back (gtk_action_group_get_name(group));
-			names.push_back (accel_path.substr (accel_path.find_last_of ('/') + 1));
-			tooltips.push_back ((*a)->get_tooltip ());
-
-			AccelKey key;
-			lookup_entry (accel_path, key);
-			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
-		}
-	}
-}
-
-void
-ActionManager::get_all_actions (vector<string>& names, vector<string>& paths, vector<string>& tooltips, vector<string>& keys, vector<AccelKey>& bindings)
-{
-	/* the C++ API for functions used here appears to be broken in
-	   gtkmm2.6, so we fall back to the C level.
-	*/
-
-	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
-	GList* node;
-	GList* acts;
-
-	for (node = list; node; node = g_list_next (node)) {
-
-		GtkActionGroup* group = (GtkActionGroup*) node->data;
-
-		/* first pass: collect them all */
-
-		typedef std::list<Glib::RefPtr<Gtk::Action> > action_list;
-		action_list the_acts;
-
-		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
-			GtkAction* action = (GtkAction*) acts->data;
-			the_acts.push_back (Glib::wrap (action, true));
-		}
-
-		/* now sort by label */
-
-		SortActionsByLabel cmp;
-		the_acts.sort (cmp);
-
-		for (action_list::iterator a = the_acts.begin(); a != the_acts.end(); ++a) {
-
-			ustring const label = (*a)->property_label ();
-			string const accel_path = (*a)->get_accel_path ();
-
-			names.push_back (label);
-			paths.push_back (accel_path);
-			tooltips.push_back ((*a)->get_tooltip ());
-
-			AccelKey key;
-			keys.push_back (get_key_representation (accel_path, key));
-			bindings.push_back (AccelKey (key.get_key(), Gdk::ModifierType (key.get_mod())));
-		}
-	}
-}
-
-void
-ActionManager::enable_accelerators ()
-{
-	/* the C++ API for functions used here appears to be broken in
-	   gtkmm2.6, so we fall back to the C level.
-	*/
-
-	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
-	GList* node;
-	GList* acts;
-	string ui_string = "<ui>";
-
-	/* get all actions, build a string describing them all as <accelerator
-	 * action="name"/>
-	 */
-
-	for (node = list; node; node = g_list_next (node)) {
-
-		GtkActionGroup* group = (GtkActionGroup*) node->data;
-
-		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
-			ui_string += "<accelerator action=\"";
-
-			/* OK, this is pretty stupid ... there is the full
-			 * accel path returned by gtk_action_get_accel_path ()
-			 * but of course the UIManager doesn't use that, but
-			 * just a name, which is the last component of the
-			 * path. What a totally ridiculous design.
-			 */
-
-			string fullpath = gtk_action_get_accel_path ((GtkAction*) acts->data);
-
-			ui_string += Glib::path_get_basename (fullpath);
-			ui_string += "\"/>";
-		}
-	}
-
-	ui_string += "</ui>";
-
-	/* and load it */
-
-	ui_manager->add_ui_from_string (ui_string);
-}
-
 struct ActionState {
 	GtkAction* action;
 	bool       sensitive;
@@ -276,12 +118,6 @@ ActionManager::disable_active_actions ()
 		}
 	}
 	actions_disabled = true;
-}
-
-void
-ActionManager::add_action_group (RefPtr<ActionGroup> grp)
-{
-	ui_manager->insert_action_group (grp);
 }
 
 Widget*
@@ -357,32 +193,6 @@ ActionManager::get_action (const char* group_name, const char* action_name)
 	return act;
 }
 
-RefPtr<Action>
-ActionManager::get_action_from_name (const char* name)
-{
-	/* the C++ API for functions used here appears to be broken in
-	   gtkmm2.6, so we fall back to the C level.
-	*/
-
-	GList* list = gtk_ui_manager_get_action_groups (ui_manager->gobj());
-	GList* node;
-	GList* acts;
-
-	for (node = list; node; node = g_list_next (node)) {
-
-		GtkActionGroup* group = (GtkActionGroup*) node->data;
-
-		for (acts = gtk_action_group_list_actions (group); acts; acts = g_list_next (acts)) {
-			GtkAction* action = (GtkAction*) acts->data;
-			if (!strcmp (gtk_action_get_name (action), name)) {
-				return Glib::wrap (action, true);
-			}
-		}
-	}
-
-	return RefPtr<Action>();
-}
-
 void
 ActionManager::set_sensitive (vector<RefPtr<Action> >& actions, bool state)
 {
@@ -450,20 +260,6 @@ ActionManager::set_toggleaction_state (string n, bool s)
 	}
 
 	delete [] group_name;
-}
-
-string
-ActionManager::get_key_representation (const string& accel_path, AccelKey& key)
-{
-	bool known = lookup_entry (accel_path, key);
-
-	if (known) {
-		uint32_t k = possibly_translate_legal_accelerator_to_real_key (key.get_key());
-		key = AccelKey (k, Gdk::ModifierType (key.get_mod()));
-		return ui_manager->get_accel_group()->get_label (key.get_key(), Gdk::ModifierType (key.get_mod()));
-	}
-
-	return unbound_string;
 }
 
 void

@@ -29,6 +29,7 @@
 #include <gtkmm/accelkey.h>
 
 #include "pbd/stateful.h"
+#include "pbd/signals.h"
 
 #include "gtkmm2ext/visibility.h"
 
@@ -37,6 +38,8 @@ namespace Gtk {
 }
 
 namespace Gtkmm2ext {
+
+class Bindings;
 
 class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 {
@@ -170,11 +173,13 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static bool load_keybindings (std::string const& path);
 	static void save_keybindings (std::string const& path);
 
-	static XMLNode const * bindings_node() { return _bindings_node; }
-
 	int reset_bindings ();
 
 	sigc::signal0<void> ZoomVerticalModifierReleased;
+
+	static std::vector<Bindings*> bindings;
+	static Bindings* get_bindings (std::string const& name);
+	static PBD::Signal0<void> BindingsChanged;
 
   protected:
 	static Keyboard* _the_keyboard;
@@ -196,7 +201,6 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	static bool can_save_keybindings;
 	static bool bindings_changed_after_save_became_legal;
 	static std::string _current_binding_name;
-	static XMLNode* _bindings_node;
 
 	typedef std::pair<std::string,std::string> two_strings;
 

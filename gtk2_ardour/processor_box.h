@@ -323,8 +323,6 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 #endif
 
   private:
-	static Gtkmm2ext::ActionMap processor_box_actions;
-	
 	/* prevent copy construction */
 	ProcessorBox (ProcessorBox const &);
 

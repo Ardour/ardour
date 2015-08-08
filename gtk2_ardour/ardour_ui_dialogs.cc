@@ -478,9 +478,9 @@ ARDOUR_UI::create_key_editor ()
 {
 	KeyEditor* kedit = new KeyEditor;
 
-	kedit->add_tab (_("Global"), global_bindings);
-	kedit->add_tab (_("Editing"), editor->bindings);
-	kedit->add_tab (_("Mixing"), mixer->bindings);
+	kedit->add_tab (_("Global"), *global_bindings);
+	kedit->add_tab (_("Editing"), *editor->bindings);
+	kedit->add_tab (_("Mixing"), *mixer->bindings);
 
 	return kedit;
 }

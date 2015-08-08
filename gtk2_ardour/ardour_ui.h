@@ -333,8 +333,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	bool tabbed_window_state_event_handler (GdkEventWindowState*, void* object);
 	bool key_event_handler (GdkEventKey*, Gtk::Window* window);
 
-	Gtkmm2ext::ActionMap global_actions;
-	Gtkmm2ext::Bindings  global_bindings;
+	Gtkmm2ext::Bindings* global_bindings;
 	
   protected:
 	friend class PublicEditor;

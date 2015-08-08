@@ -95,153 +95,153 @@ ARDOUR_UI::create_editor ()
 void
 ARDOUR_UI::install_actions ()
 {
-	Glib::RefPtr<ActionGroup> main_actions = global_actions.create_action_group (X_("Main"));
-	Glib::RefPtr<ActionGroup> main_menu_actions = global_actions.create_action_group (X_("Main_menu"));
+	Glib::RefPtr<ActionGroup> main_actions = Actions.create_action_group (X_("Main"));
+	Glib::RefPtr<ActionGroup> main_menu_actions = Actions.create_action_group (X_("Main_menu"));
 	Glib::RefPtr<Action> act;
 
 	/* menus + submenus that need action items */
 
-	global_actions.register_action (main_menu_actions, X_("Session"), _("Session"));
-	act = global_actions.register_action (main_menu_actions, X_("Cleanup"), _("Clean-up"));
+	Actions.register_action (main_menu_actions, X_("Session"), _("Session"));
+	act = Actions.register_action (main_menu_actions, X_("Cleanup"), _("Clean-up"));
 	ActionManager::write_sensitive_actions.push_back (act);
-	global_actions.register_action (main_menu_actions, X_("Sync"), _("Sync"));
-	global_actions.register_action (main_menu_actions, X_("TransportOptions"), _("Options"));
-	global_actions.register_action (main_menu_actions, X_("WindowMenu"), _("Window"));
-	global_actions.register_action (main_menu_actions, X_("MixerMenu"), _("Mixer"));
-	global_actions.register_action (main_menu_actions, X_("EditorMenu"), _("Editor"));
-	global_actions.register_action (main_menu_actions, X_("PrefsMenu"), _("Preferences"));
-	global_actions.register_action (main_menu_actions, X_("DetachMenu"), _("Detach"));
-	global_actions.register_action (main_menu_actions, X_("Help"), _("Help"));
- 	global_actions.register_action (main_menu_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
-	global_actions.register_action (main_menu_actions, X_("AudioFileFormat"), _("Audio File Format"));
-	global_actions.register_action (main_menu_actions, X_("AudioFileFormatHeader"), _("File Type"));
-	global_actions.register_action (main_menu_actions, X_("AudioFileFormatData"), _("Sample Format"));
-	global_actions.register_action (main_menu_actions, X_("ControlSurfaces"), _("Control Surfaces"));
-	global_actions.register_action (main_menu_actions, X_("Plugins"), _("Plugins"));
-	global_actions.register_action (main_menu_actions, X_("Metering"), _("Metering"));
-	global_actions.register_action (main_menu_actions, X_("MeteringFallOffRate"), _("Fall Off Rate"));
-	global_actions.register_action (main_menu_actions, X_("MeteringHoldTime"), _("Hold Time"));
-	global_actions.register_action (main_menu_actions, X_("Denormals"), _("Denormal Handling"));
+	Actions.register_action (main_menu_actions, X_("Sync"), _("Sync"));
+	Actions.register_action (main_menu_actions, X_("TransportOptions"), _("Options"));
+	Actions.register_action (main_menu_actions, X_("WindowMenu"), _("Window"));
+	Actions.register_action (main_menu_actions, X_("MixerMenu"), _("Mixer"));
+	Actions.register_action (main_menu_actions, X_("EditorMenu"), _("Editor"));
+	Actions.register_action (main_menu_actions, X_("PrefsMenu"), _("Preferences"));
+	Actions.register_action (main_menu_actions, X_("DetachMenu"), _("Detach"));
+	Actions.register_action (main_menu_actions, X_("Help"), _("Help"));
+ 	Actions.register_action (main_menu_actions, X_("KeyMouseActions"), _("Misc. Shortcuts"));
+	Actions.register_action (main_menu_actions, X_("AudioFileFormat"), _("Audio File Format"));
+	Actions.register_action (main_menu_actions, X_("AudioFileFormatHeader"), _("File Type"));
+	Actions.register_action (main_menu_actions, X_("AudioFileFormatData"), _("Sample Format"));
+	Actions.register_action (main_menu_actions, X_("ControlSurfaces"), _("Control Surfaces"));
+	Actions.register_action (main_menu_actions, X_("Plugins"), _("Plugins"));
+	Actions.register_action (main_menu_actions, X_("Metering"), _("Metering"));
+	Actions.register_action (main_menu_actions, X_("MeteringFallOffRate"), _("Fall Off Rate"));
+	Actions.register_action (main_menu_actions, X_("MeteringHoldTime"), _("Hold Time"));
+	Actions.register_action (main_menu_actions, X_("Denormals"), _("Denormal Handling"));
 
 	/* the real actions */
 
-	act = global_actions.register_action (main_actions, X_("New"), _("New..."),  hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::get_session_parameters), false, true, "")));
+	act = Actions.register_action (main_actions, X_("New"), _("New..."),  hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::get_session_parameters), false, true, "")));
 
-	global_actions.register_action (main_actions, X_("Open"), _("Open..."),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
-	global_actions.register_action (main_actions, X_("Recent"), _("Recent..."),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
-	act = global_actions.register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
+	Actions.register_action (main_actions, X_("Open"), _("Open..."),  sigc::mem_fun(*this, &ARDOUR_UI::open_session));
+	Actions.register_action (main_actions, X_("Recent"), _("Recent..."),  sigc::mem_fun(*this, &ARDOUR_UI::open_recent_session));
+	act = Actions.register_action (main_actions, X_("Close"), _("Close"),  sigc::mem_fun(*this, &ARDOUR_UI::close_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("AddTrackBus"), _("Add Track or Bus..."),
+	act = Actions.register_action (main_actions, X_("AddTrackBus"), _("Add Track or Bus..."),
 					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_route), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("duplicate-routes"), _("Duplicate Tracks/Busses..."),
+	act = Actions.register_action (main_actions, X_("duplicate-routes"), _("Duplicate Tracks/Busses..."),
 	                                      sigc::mem_fun(*this, &ARDOUR_UI::start_duplicate_routes));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("cancel-solo"), _("Cancel Solo"), sigc::mem_fun(*this, &ARDOUR_UI::cancel_solo));
+	act = Actions.register_action (main_actions, X_("cancel-solo"), _("Cancel Solo"), sigc::mem_fun(*this, &ARDOUR_UI::cancel_solo));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("OpenVideo"), _("Open Video"),
-					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
+	act = Actions.register_action (main_actions, X_("OpenVideo"), _("Open Video"),
+	                               sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
+	act = Actions.register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
 					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
 	act->set_sensitive (false);
 
-	act = global_actions.register_action (main_actions, X_("ExportVideo"), _("Export to Video File"),
+	act = Actions.register_action (main_actions, X_("ExportVideo"), _("Export to Video File"),
 	                                      hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::export_video), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("SnapshotStay"), _("Snapshot (& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
+	act = Actions.register_action (main_actions, X_("SnapshotStay"), _("Snapshot (& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("SnapshotSwitch"), _("Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
+	act = Actions.register_action (main_actions, X_("SnapshotSwitch"), _("Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::snapshot_session), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("QuickSnapshotStay"), _("Quick Snapshot (& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), false));
+	act = Actions::register_action (main_actions, X_("QuickSnapshotStay"), _("Quick Snapshot(& keep working on current version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = global_actions::register_action (main_actions, X_("QuickSnapshotSwitch"), _("Quick Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), true));
+	act = Actions::register_action (main_actions, X_("QuickSnapshotSwitch"), _("Quick Snapshot (& switch to new version) ..."), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::quick_snapshot_session), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
+	act = Actions.register_action (main_actions, X_("SaveAs"), _("Save As..."), sigc::mem_fun(*this, &ARDOUR_UI::save_session_as));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
+	act = Actions.register_action (main_actions, X_("Rename"), _("Rename..."), sigc::mem_fun(*this, &ARDOUR_UI::rename_session));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
+	act = Actions.register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("Metadata"), _("Metadata"));
+	act = Actions.register_action (main_actions, X_("Metadata"), _("Metadata"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("EditMetadata"), _("Edit Metadata..."),  sigc::mem_fun(*this, &ARDOUR_UI::edit_metadata));
+	act = Actions.register_action (main_actions, X_("EditMetadata"), _("Edit Metadata..."),  sigc::mem_fun(*this, &ARDOUR_UI::edit_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("ImportMetadata"), _("Import Metadata..."),  sigc::mem_fun(*this, &ARDOUR_UI::import_metadata));
+	act = Actions.register_action (main_actions, X_("ImportMetadata"), _("Import Metadata..."),  sigc::mem_fun(*this, &ARDOUR_UI::import_metadata));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("ExportAudio"), _("Export to Audio File(s)..."),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
+	act = Actions.register_action (main_actions, X_("ExportAudio"), _("Export to Audio File(s)..."),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("StemExport"), _("Stem export..."),  sigc::mem_fun (*editor, &PublicEditor::stem_export));
+	act = Actions.register_action (main_actions, X_("StemExport"), _("Stem export..."),  sigc::mem_fun (*editor, &PublicEditor::stem_export));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("Export"), _("Export"));
+	act = Actions.register_action (main_actions, X_("Export"), _("Export"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("CleanupUnused"), _("Clean-up Unused Sources..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
-
-	act = global_actions.register_action (main_actions, X_("CleanupPeakFiles"), _("Reset Peak Files"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup_peakfiles));
+	act = Actions.register_action (main_actions, X_("CleanupUnused"), _("Clean-up Unused Sources..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
+	act = Actions.register_action (main_actions, X_("CleanupPeakFiles"), _("Reset Peak Files"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup_peakfiles));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
+	act = Actions.register_action (main_actions, X_("FlushWastebasket"), _("Flush Wastebasket"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::flush_trash));
 
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* these actions are intended to be shared across all windows */
 
-	common_actions = global_actions.create_action_group (X_("Common"));
-	global_actions.register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
-	global_actions.register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
+	common_actions = Actions.create_action_group (X_("Common"));
+	Actions.register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
+	Actions.register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
-	global_actions.register_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
-	global_actions.register_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
-	global_actions.register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
+	Actions.register_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
+	Actions.register_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
+	Actions.register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 
-	global_actions.register_action (common_actions, X_("hide-editor"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), editor));
-	global_actions.register_action (common_actions, X_("hide-mixer"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), mixer));
-	global_actions.register_action (common_actions, X_("hide-preferences"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), rc_option_editor));
+	Actions.register_action (common_actions, X_("hide-editor"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), editor));
+	Actions.register_action (common_actions, X_("hide-mixer"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), mixer));
+	Actions.register_action (common_actions, X_("hide-preferences"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), rc_option_editor));
 	
-	global_actions.register_action (common_actions, X_("attach-editor"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), editor));
-	global_actions.register_action (common_actions, X_("attach-mixer"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), mixer));
-	global_actions.register_action (common_actions, X_("attach-preferences"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), rc_option_editor));
+	Actions.register_action (common_actions, X_("attach-editor"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), editor));
+	Actions.register_action (common_actions, X_("attach-mixer"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), mixer));
+	Actions.register_action (common_actions, X_("attach-preferences"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), rc_option_editor));
 	
-	global_actions.register_action (common_actions, X_("detach-editor"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), editor));
-	global_actions.register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
-	global_actions.register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
+	Actions.register_action (common_actions, X_("detach-editor"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), editor));
+	Actions.register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
+	Actions.register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
 
 	/* windows visibility actions */
 
-	global_actions.register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
-	global_actions.register_toggle_action (common_actions, X_("ToggleMaximalMixer"), _("Maximise Mixer Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_space));
+	Actions.register_toggle_action (common_actions, X_("ToggleMaximalEditor"), _("Maximise Editor Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_editing_space));
+	Actions.register_toggle_action (common_actions, X_("ToggleMaximalMixer"), _("Maximise Mixer Space"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_space));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (common_actions, X_("ToggleMixerList"), _("Toggle Mixer List"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_list));
@@ -251,11 +251,11 @@ ARDOUR_UI::install_actions ()
 	act->set_sensitive (false);
 
 if (Profile->get_mixbus())
-	global_actions.register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
+	Actions.register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 
-	global_actions.register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
+	Actions.register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
-	act = global_actions.register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
+	act = Actions.register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	global_actions.register_action (common_actions, X_("chat"), _("Chat"),  sigc::mem_fun(*this, &ARDOUR_UI::launch_chat));
@@ -269,37 +269,37 @@ if (Profile->get_mixbus())
 	global_actions.register_action (common_actions, X_("forums"), _("User Forums"), mem_fun(*this, &ARDOUR_UI::launch_forums));
 	global_actions.register_action (common_actions, X_("howto-report"), _("How to Report a Bug"), mem_fun(*this, &ARDOUR_UI::launch_howto_report));
 
-	act = global_actions.register_action (common_actions, X_("Save"), _("Save"),  sigc::hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false)));
+	act = Actions.register_action (common_actions, X_("Save"), _("Save"),  sigc::hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false)));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	Glib::RefPtr<ActionGroup> transport_actions = global_actions.create_action_group (X_("Transport"));
+	Glib::RefPtr<ActionGroup> transport_actions = Actions.create_action_group (X_("Transport"));
 
 	/* do-nothing action for the "transport" menu bar item */
 
-	global_actions.register_action (transport_actions, X_("Transport"), _("Transport"));
+	Actions.register_action (transport_actions, X_("Transport"), _("Transport"));
 
 	/* these two are not used by key bindings, instead use ToggleRoll for that. these two do show up in
 	   menus and via button proxies.
 	*/
 
-	act = global_actions.register_action (transport_actions, X_("Stop"), _("Stop"), sigc::mem_fun(*this, &ARDOUR_UI::transport_stop));
+	act = Actions.register_action (transport_actions, X_("Stop"), _("Stop"), sigc::mem_fun(*this, &ARDOUR_UI::transport_stop));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("Roll"), _("Roll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_roll));
+	act = Actions.register_action (transport_actions, X_("Roll"), _("Roll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_roll));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
+	act = Actions.register_action (transport_actions, X_("ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("alternate-ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
+	act = Actions.register_action (transport_actions, X_("alternate-ToggleRoll"), _("Start/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("ToggleRollMaybe"), _("Start/Continue/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, true));
+	act = Actions.register_action (transport_actions, X_("ToggleRollMaybe"), _("Start/Continue/Stop"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_roll), false, true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop and Forget Capture"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
+	act = Actions.register_action (transport_actions, X_("ToggleRollForgetCapture"), _("Stop and Forget Capture"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::toggle_roll), true, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
@@ -309,202 +309,194 @@ if (Profile->get_mixbus())
 	   - otherwise do nothing
 	*/
 
-	act = global_actions.register_action (transport_actions, X_("TransitionToRoll"), _("Transition to Roll"), sigc::bind (sigc::mem_fun (*editor, &PublicEditor::transition_to_rolling), true));
+	act = Actions.register_action (transport_actions, X_("TransitionToRoll"), _("Transition to Roll"), sigc::bind (sigc::mem_fun (*editor, &PublicEditor::transition_to_rolling), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("TransitionToReverse"), _("Transition to Reverse"), sigc::bind (sigc::mem_fun (*editor, &PublicEditor::transition_to_rolling), false));
+	act = Actions.register_action (transport_actions, X_("TransitionToReverse"), _("Transition to Reverse"), sigc::bind (sigc::mem_fun (*editor, &PublicEditor::transition_to_rolling), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("Loop"), _("Play Loop Range"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
+	act = Actions.register_action (transport_actions, X_("Loop"), _("Play Loop Range"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_auto_loop));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("PlaySelection"), _("Play Selection"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_selection));
+	act = Actions.register_action (transport_actions, X_("PlaySelection"), _("Play Selection"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_selection));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("PlayPreroll"), _("Play Selection w/Preroll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_preroll));
+	act = Actions.register_action (transport_actions, X_("PlayPreroll"), _("Play Selection w/Preroll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_preroll));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("Record"), _("Enable Record"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), false));
+	act = Actions.register_action (transport_actions, X_("Record"), _("Enable Record"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("record-roll"), _("Start Recording"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), true));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::write_sensitive_actions.push_back (act);
-	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("alternate-record-roll"), _("Start Recording"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), true));
+	act = Actions.register_action (transport_actions, X_("record-roll"), _("Start Recording"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), true));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("Rewind"), _("Rewind"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
+	act = Actions.register_action (transport_actions, X_("alternate-record-roll"), _("Start Recording"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_record), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+	act = Actions.register_action (transport_actions, X_("Rewind"), _("Rewind"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_rewind), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("RewindSlow"), _("Rewind (Slow)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_rewind), -1));
+	act = Actions.register_action (transport_actions, X_("RewindSlow"), _("Rewind (Slow)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_rewind), -1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("RewindFast"), _("Rewind (Fast)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_rewind), 1));
+	act = Actions.register_action (transport_actions, X_("RewindFast"), _("Rewind (Fast)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_rewind), 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("Forward"), _("Forward"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_forward), 0));
+	act = Actions.register_action (transport_actions, X_("Forward"), _("Forward"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_forward), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("ForwardSlow"), _("Forward (Slow)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_forward), -1));
+	act = Actions.register_action (transport_actions, X_("ForwardSlow"), _("Forward (Slow)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_forward), -1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("ForwardFast"), _("Forward (Fast)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_forward), 1));
+	act = Actions.register_action (transport_actions, X_("ForwardFast"), _("Forward (Fast)"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::transport_forward), 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("GotoZero"), _("Go to Zero"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_zero));
+	act = Actions.register_action (transport_actions, X_("GotoZero"), _("Go to Zero"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_zero));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("GotoStart"), _("Go to Start"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_start));
+	act = Actions.register_action (transport_actions, X_("GotoStart"), _("Go to Start"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_start));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("alternate-GotoStart"), _("Go to Start"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_start));
+	act = Actions.register_action (transport_actions, X_("alternate-GotoStart"), _("Go to Start"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_start));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("GotoEnd"), _("Go to End"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_end));
+	act = Actions.register_action (transport_actions, X_("GotoEnd"), _("Go to End"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_end));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("GotoWallClock"), _("Go to Wall Clock"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_wallclock));
+	act = Actions.register_action (transport_actions, X_("GotoWallClock"), _("Go to Wall Clock"), sigc::mem_fun(*this, &ARDOUR_UI::transport_goto_wallclock));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
 	//these actions handle the numpad events, ProTools style
-	act = global_actions.register_action (transport_actions, X_("numpad-decimal"), _("Numpad Decimal"), mem_fun(*this, &ARDOUR_UI::transport_numpad_decimal));
+	act = Actions.register_action (transport_actions, X_("numpad-decimal"), _("Numpad Decimal"), mem_fun(*this, &ARDOUR_UI::transport_numpad_decimal));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("alternate-numpad-decimal"), _("Numpad Decimal"), mem_fun(*this, &ARDOUR_UI::transport_numpad_decimal));
+	act = Actions.register_action (transport_actions, X_("alternate-numpad-decimal"), _("Numpad Decimal"), mem_fun(*this, &ARDOUR_UI::transport_numpad_decimal));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-0"), _("Numpad 0"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 0));
+	act = Actions.register_action (transport_actions, X_("numpad-0"), _("Numpad 0"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-1"), _("Numpad 1"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 1));
+	act = Actions.register_action (transport_actions, X_("numpad-1"), _("Numpad 1"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 1));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-2"), _("Numpad 2"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 2));
+	act = Actions.register_action (transport_actions, X_("numpad-2"), _("Numpad 2"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 2));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-3"), _("Numpad 3"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 3));
+	act = Actions.register_action (transport_actions, X_("numpad-3"), _("Numpad 3"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 3));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-4"), _("Numpad 4"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 4));
+	act = Actions.register_action (transport_actions, X_("numpad-4"), _("Numpad 4"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 4));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-5"), _("Numpad 5"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 5));
+	act = Actions.register_action (transport_actions, X_("numpad-5"), _("Numpad 5"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 5));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-6"), _("Numpad 6"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 6));
+	act = Actions.register_action (transport_actions, X_("numpad-6"), _("Numpad 6"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 6));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-7"), _("Numpad 7"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 7));
+	act = Actions.register_action (transport_actions, X_("numpad-7"), _("Numpad 7"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 7));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-8"), _("Numpad 8"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 8));
+	act = Actions.register_action (transport_actions, X_("numpad-8"), _("Numpad 8"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 8));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("numpad-9"), _("Numpad 9"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 9));
-	ActionManager::session_sensitive_actions.push_back (act);
-	ActionManager::transport_sensitive_actions.push_back (act);
-
-	act = global_actions.register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), sigc::mem_fun(*this, &ARDOUR_UI::focus_on_clock));
+	act = Actions.register_action (transport_actions, X_("numpad-9"), _("Numpad 9"), bind (mem_fun(*this, &ARDOUR_UI::transport_numpad_event), 9));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("primary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Timecode));
+	act = Actions.register_action (transport_actions, X_("focus-on-clock"), _("Focus On Clock"), sigc::mem_fun(*this, &ARDOUR_UI::focus_on_clock));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("primary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::BBT));
+	ActionManager::transport_sensitive_actions.push_back (act);
+
+	act = Actions.register_action (transport_actions, X_("primary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Timecode));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	act = Actions.register_action (transport_actions, X_("primary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::BBT));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Frames));
+	act = Actions.register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = Actions.register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Frames));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Timecode));
+	act = Actions.register_action (transport_actions, X_("secondary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Timecode));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::BBT));
+	act = Actions.register_action (transport_actions, X_("secondary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::BBT));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::MinSec));
+	act = Actions.register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::MinSec));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Frames));
+	act = Actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Frames));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch In"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
+	act = Actions.register_toggle_action (transport_actions, X_("TogglePunchIn"), _("Punch In"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch_in));
 	act->set_short_label (_("In"));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("TogglePunchOut"), _("Punch Out"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
+	act = Actions.register_toggle_action (transport_actions, X_("TogglePunchOut"), _("Punch Out"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch_out));
 	act->set_short_label (_("Out"));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("TogglePunch"), _("Punch In/Out"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch));
+	act = Actions.register_toggle_action (transport_actions, X_("TogglePunch"), _("Punch In/Out"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_punch));
 	act->set_short_label (_("In/Out"));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleClick"), _("Click"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_click));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleClick"), _("Click"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_click));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleAutoInput"), _("Auto Input"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_auto_input));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleAutoInput"), _("Auto Input"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_auto_input));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleAutoPlay"), _("Auto Play"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_auto_play));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleAutoPlay"), _("Auto Play"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_auto_play));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleAutoReturn"), _("Auto Return"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_auto_return));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleAutoReturn"), _("Auto Return"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_auto_return));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleFollowEdits"), _("Follow Edits"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_follow_edits));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleFollowEdits"), _("Follow Edits"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_follow_edits));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
 
 
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync Startup to Video"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleVideoSync"), _("Sync Startup to Video"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_video_sync));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time Master"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_time_master));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleTimeMaster"), _("Time Master"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_time_master));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (transport_actions, X_("ToggleExternalSync"), _("Use External Positional Sync Source"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_external_sync));
+	act = Actions.register_toggle_action (transport_actions, X_("ToggleExternalSync"), _("Use External Positional Sync Source"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_external_sync));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	for (int i = 1; i <= 32; ++i) {
 		string const a = string_compose (X_("ToggleRecordEnableTrack%1"), i);
 		string const n = string_compose (_("Toggle Record Enable Track %1"), i);
-		act = global_actions.register_action (common_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_record_enable), i - 1));
+		act = Actions.register_action (common_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::toggle_record_enable), i - 1));
 		ActionManager::session_sensitive_actions.push_back (act);
 	}
 
-	Glib::RefPtr<ActionGroup> shuttle_actions = global_actions.create_action_group ("ShuttleActions");
+	Glib::RefPtr<ActionGroup> shuttle_actions = Actions.create_action_group ("ShuttleActions");
 
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsPercentage"), _("Percentage")), hide_return (sigc::bind (sigc::mem_fun (*Config, &RCConfiguration::set_shuttle_units), Percentage)));
 	shuttle_actions->add (Action::create (X_("SetShuttleUnitsSemitones"), _("Semitones")), hide_return (sigc::bind (sigc::mem_fun (*Config, &RCConfiguration::set_shuttle_units), Semitones)));
 
-	Glib::RefPtr<ActionGroup> option_actions = global_actions.create_action_group ("options");
+	Glib::RefPtr<ActionGroup> option_actions = Actions.create_action_group ("options");
 
-	act = global_actions.register_toggle_action (option_actions, X_("SendMTC"), _("Send MTC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
+	act = Actions.register_toggle_action (option_actions, X_("SendMTC"), _("Send MTC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_mtc));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (option_actions, X_("SendMMC"), _("Send MMC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_mmc));
+	act = Actions.register_toggle_action (option_actions, X_("SendMMC"), _("Send MMC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_mmc));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (option_actions, X_("UseMMC"), _("Use MMC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_use_mmc));
+	act = Actions.register_toggle_action (option_actions, X_("UseMMC"), _("Use MMC"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_use_mmc));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (option_actions, X_("SendMidiClock"), _("Send MIDI Clock"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_midi_clock));
+	act = Actions.register_toggle_action (option_actions, X_("SendMidiClock"), _("Send MIDI Clock"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_midi_clock));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI Feedback"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
+	act = Actions.register_toggle_action (option_actions, X_("SendMIDIfeedback"), _("Send MIDI Feedback"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_send_midi_feedback));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	/* MIDI */
 
-	Glib::RefPtr<ActionGroup> midi_actions = global_actions.create_action_group (X_("MIDI"));
-	global_actions.register_action (midi_actions, X_("panic"), _("Panic"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
-
-	global_actions.install_action_group (shuttle_actions);
-	global_actions.install_action_group (option_actions);
-	global_actions.install_action_group (transport_actions);
-	global_actions.install_action_group (main_actions);
-	global_actions.install_action_group (main_menu_actions);
-	global_actions.install_action_group (common_actions);
-	global_actions.install_action_group (midi_actions);
+	Glib::RefPtr<ActionGroup> midi_actions = Actions.create_action_group (X_("MIDI"));
+	Actions.register_action (midi_actions, X_("panic"), _("Panic"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
 }
 
 void

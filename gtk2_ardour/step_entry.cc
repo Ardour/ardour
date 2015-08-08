@@ -498,7 +498,7 @@ StepEntry::on_key_press_event (GdkEventKey* ev)
 	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 KeyboardKey k (ev->state, ev->keyval);
 
-                if (bindings.activate (k, Bindings::Press)) {
+                if (bindings->activate (k, Bindings::Press)) {
                         return true;
                 }
 	}
@@ -512,7 +512,7 @@ StepEntry::on_key_release_event (GdkEventKey* ev)
 	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
                 KeyboardKey k (ev->state, ev->keyval);
 
-                if (bindings.activate (k, Bindings::Release)) {
+                if (bindings->activate (k, Bindings::Release)) {
                         return true;
                 }
 	}
@@ -701,9 +701,9 @@ StepEntry::register_actions ()
 void
 StepEntry::load_bindings ()
 {
-        bindings.set_action_map (myactions);
-        bindings.load (X_("step-editing"));
-        set_data ("ardour-bindings", &bindings);
+        bindings = Bindings::get_bindings (X_("step-editing"));
+        bindings->set_action_map (myactions);
+        set_data ("ardour-bindings", bindings);
 }
 
 void

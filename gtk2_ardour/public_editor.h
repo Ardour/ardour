@@ -422,7 +422,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	PBD::Signal0<void> SnapChanged;
 	PBD::Signal0<void> MouseModeChanged;
 
-	Gtkmm2ext::Bindings  bindings;
+	Gtkmm2ext::Bindings* bindings;
 	
   protected:
 	friend class DisplaySuspender;

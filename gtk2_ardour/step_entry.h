@@ -140,7 +140,6 @@ class StepEntry : public ArdourWindow
         /* actions */
 
         void register_actions ();
-        Gtkmm2ext::ActionMap myactions;
 
         void insert_note (uint8_t);
         void insert_rest ();
@@ -166,7 +165,8 @@ class StepEntry : public ArdourWindow
         bool radio_button_release (GdkEventButton*, Gtk::RadioButton*, int);
 
         void load_bindings ();
-        Gtkmm2ext::Bindings  bindings;
+	Gtkmm2ext::ActionMap myactions;
+	Gtkmm2ext::Bindings*  bindings;
 
         void inc_note_velocity ();
         void dec_note_velocity ();

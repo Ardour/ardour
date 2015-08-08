@@ -238,6 +238,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 	, video_timeline(0)
+	, global_bindings (0)
 	, ignore_dual_punch (false)
 	, editor (0)
 	, mixer (0)
@@ -584,17 +585,21 @@ ARDOUR_UI::post_engine ()
 
 	check_memory_locking();
 
-	/* this is the first point at which all the keybindings are available */
+	/* this is the first point at which all the possible actions are
+	 * available, because some of the available actions are dependent on
+	 * aspects of the engine/backend.
+	 */
 
 	if (ARDOUR_COMMAND_LINE::show_key_actions) {
 
-		for (map<string,Bindings*>::const_iterator mb = Bindings::bindings_for_state.begin(); mb != Bindings::bindings_for_state.end(); ++mb) {
+		for (list<Bindings*>::const_iterator mb = Bindings::bindings.begin(); mb != Bindings::bindings.end(); ++mb) {
 
 			vector<string> names;
 			vector<string> paths;
 			vector<string> keys;
-			
-			mb->second->get_all_actions (names, paths, keys);
+
+#warning Paul fix this before tabbed is merged
+			// mb->second->get_all_actions (names, paths, keys);
 			
 			vector<string>::iterator n;
 			vector<string>::iterator k;
@@ -608,7 +613,9 @@ ARDOUR_UI::post_engine ()
 		AudioEngine::instance()->stop ();
 		exit (0);
 	}
-
+	
+	Bindings::associate_all ();
+	
 	/* this being a GUI and all, we want peakfiles */
 
 	AudioFileSource::set_build_peakfiles (true);
@@ -5173,7 +5180,7 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 		if (w) {
 			bindings = reinterpret_cast<Gtkmm2ext::Bindings*>(w->get_data ("ardour-bindings"));
 		} else {
-			bindings = &global_bindings;
+			bindings = global_bindings;
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("main window key event, bindings = %1, global = %2\n", bindings, &global_bindings));
@@ -5289,7 +5296,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
 		
-		if (global_bindings.activate (k, Bindings::Press)) {
+		if (global_bindings->activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 			return true;
 		}
@@ -5329,7 +5336,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		
 		DEBUG_TRACE (DEBUG::Accelerators, "\tnot yet handled, try global bindings\n");
 		
-		if (global_bindings.activate (k, Bindings::Press)) {
+		if (global_bindings->activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
 			return true;
 		}
@@ -5342,7 +5349,8 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 void
 ARDOUR_UI::load_bindings ()
 {
-	global_bindings.set_action_map (global_actions);
-	global_bindings.load (X_("global"));
+	if ((global_bindings = Bindings::get_bindings ("global")) == 0) {
+		error << _("Global keybindings are missing") << endmsg;
+	}
 }
 

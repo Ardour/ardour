@@ -102,7 +102,6 @@ RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::delete_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
-Gtkmm2ext::ActionMap ProcessorBox::processor_box_actions;
 
 static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
 static const uint32_t midi_port_color = 0x960909FF; //Red
@@ -2801,38 +2800,39 @@ ProcessorBox::get_generic_editor_window (boost::shared_ptr<Processor> processor)
 void
 ProcessorBox::register_actions ()
 {
-	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = processor_box_actions.create_action_group (X_("ProcessorMenu"));
+	Glib::RefPtr<Gtk::ActionGroup> popup_act_grp = Actions.create_action_group (X_("ProcessorMenu"));
 	Glib::RefPtr<Action> act;
 
 	/* new stuff */
-	processor_box_actions.register_action (popup_act_grp, X_("newplugin"), _("New Plugin"),
+	Actions.register_action (popup_act_grp, X_("newplugin"), _("New Plugin"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_plugin));
 
-	act = processor_box_actions.register_action (popup_act_grp, X_("newinsert"), _("New Insert"),
+	act = Actions.register_action (popup_act_grp, X_("newinsert"), _("New Insert"),
 			sigc::ptr_fun (ProcessorBox::rb_choose_insert));
 	ActionManager::engine_sensitive_actions.push_back (act);
-	act = processor_box_actions.register_action (popup_act_grp, X_("newsend"), _("New External Send ..."),
+	act = Actions.register_action (popup_act_grp, X_("newsend"), _("New External Send ..."),
 			sigc::ptr_fun (ProcessorBox::rb_choose_send));
 	ActionManager::engine_sensitive_actions.push_back (act);
 
-	processor_box_actions.register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
+	Actions.register_action (popup_act_grp, X_("newaux"), _("New Aux Send ..."));
 
-	processor_box_actions.register_action (popup_act_grp, X_("controls"), _("Controls"));
-	processor_box_actions.register_action (popup_act_grp, X_("send_options"), _("Send Options"));
+	Actions.register_action (popup_act_grp, X_("controls"), _("Controls"));
+	Actions.register_action (popup_act_grp, X_("send_options"), _("Send Options"));
 
-	processor_box_actions.register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
+	Actions.register_action (popup_act_grp, X_("clear"), _("Clear (all)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear));
-	processor_box_actions.register_action (popup_act_grp, X_("clear_pre"), _("Clear (pre-fader)"),
+	Actions.register_action (popup_act_grp, X_("clear_pre"), _("Clear (pre-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_pre));
-	processor_box_actions.register_action (popup_act_grp, X_("clear_post"), _("Clear (post-fader)"),
+	Actions.register_action (popup_act_grp, X_("clear_post"), _("Clear (post-fader)"),
 			sigc::ptr_fun (ProcessorBox::rb_clear_post));
 
 	/* standard editing stuff */
-	cut_action = processor_box_actions.register_action (popup_act_grp, X_("cut"), _("Cut"),
+
+	cut_action = Actions.register_action (popup_act_grp, X_("cut"), _("Cut"),
 	                                                    sigc::ptr_fun (ProcessorBox::rb_cut));
-	copy_action = processor_box_actions.register_action (popup_act_grp, X_("copy"), _("Copy"),
+	copy_action = Actions.register_action (popup_act_grp, X_("copy"), _("Copy"),
 	                                                     sigc::ptr_fun (ProcessorBox::rb_copy));
-	delete_action = processor_box_actions.register_action (popup_act_grp, X_("delete"), _("Delete"),
+	delete_action = Actions.register_action (popup_act_grp, X_("delete"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
 	
 	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);
@@ -2841,32 +2841,30 @@ ProcessorBox::register_actions ()
 	
 	paste_action = processor_box_actions.register_action (popup_act_grp, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));
-	rename_action = processor_box_actions.register_action (popup_act_grp, X_("rename"), _("Rename"),
+	rename_action = Actions.register_action (popup_act_grp, X_("rename"), _("Rename"),
 			sigc::ptr_fun (ProcessorBox::rb_rename));
-	processor_box_actions.register_action (popup_act_grp, X_("selectall"), _("Select All"),
+	Actions.register_action (popup_act_grp, X_("selectall"), _("Select All"),
 			sigc::ptr_fun (ProcessorBox::rb_select_all));
-	processor_box_actions.register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),
+	Actions.register_action (popup_act_grp, X_("deselectall"), _("Deselect All"),
 			sigc::ptr_fun (ProcessorBox::rb_deselect_all));
 
 	/* activation etc. */
 
-	processor_box_actions.register_action (popup_act_grp, X_("activate_all"), _("Activate All"),
+	Actions.register_action (popup_act_grp, X_("activate_all"), _("Activate All"),
 			sigc::ptr_fun (ProcessorBox::rb_activate_all));
-	processor_box_actions.register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate All"),
+	Actions.register_action (popup_act_grp, X_("deactivate_all"), _("Deactivate All"),
 			sigc::ptr_fun (ProcessorBox::rb_deactivate_all));
-	processor_box_actions.register_action (popup_act_grp, X_("ab_plugins"), _("A/B Plugins"),
+	Actions.register_action (popup_act_grp, X_("ab_plugins"), _("A/B Plugins"),
 			sigc::ptr_fun (ProcessorBox::rb_ab_plugins));
 
 	/* show editors */
-	edit_action = processor_box_actions.register_action (
+	edit_action = Actions.register_action (
 		popup_act_grp, X_("edit"), _("Edit..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit));
 
-	edit_generic_action = processor_box_actions.register_action (
+	edit_generic_action = Actions.register_action (
 		popup_act_grp, X_("edit-generic"), _("Edit with generic controls..."),
 		sigc::ptr_fun (ProcessorBox::rb_edit_generic));
-
-	processor_box_actions.install_action_group (popup_act_grp);
 }
 
 void

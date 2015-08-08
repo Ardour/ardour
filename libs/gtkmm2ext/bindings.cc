@@ -42,8 +42,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
+ActionMap Gtkmm2ext::Actions; /* global. Gulp */
+list<Bindings*> Bindings::bindings; /* global. Gulp */
 uint32_t Bindings::_ignored_state = 0;
-map<string,Bindings*> Bindings::bindings_for_state;
 
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
@@ -228,16 +229,24 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
         return true;
 }
 
-Bindings::Bindings ()
-        : action_map (0)
+Bindings::Bindings (std::string const& name)
+	: _name (name)
+	, _action_map (Actions)
 {
+	bindings.push_back (this);
 }
 
 Bindings::~Bindings()
 {
-	if (!_name.empty()) {
-		remove_bindings_for_state (_name, *this);
-	}
+	bindings.remove (this);
+}
+
+void
+Bindings::set_action_map (ActionMap& actions)
+{
+	_action_map = actions;
+	dissociate ();
+	associate ();
 }
 
 bool
@@ -256,14 +265,6 @@ bool
 Bindings::empty() const
 {
 	return empty_keys() && empty_mouse ();
-}
-
-void
-Bindings::set_action_map (ActionMap& am)
-{
-        action_map = &am;
-        press_bindings.clear ();
-        release_bindings.clear ();
 }
 
 bool
@@ -288,92 +289,67 @@ Bindings::activate (KeyboardKey kb, Operation op)
 	        return false;
         }
 
-        /* lets do it ... */
-
-        DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", kb, k->second->get_name()));
-
-        k->second->activate ();
-        return true;
-}
-
-bool
-Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, bool can_save)
-{
-	if (!action_map) {
-		return false;
-	}
-
-	/* We have to search the existing binding map by both action and
-	 * keybinding, because the following are possible:
-	 *
-	 *   - key is already used for a different action
-	 *   - action has a different binding
-	 *   - key is not used
-	 *   - action is not bound
-	 */
-	
-	RefPtr<Action> action = action_map->find_action (action_name);
-
-        if (!action) {
-	        return false;
-        }
-
-        KeybindingMap* kbm = 0;
-
-        switch (op) {
-        case Press:
-                kbm = &press_bindings;
-                break;
-        case Release:
-                kbm = &release_bindings;
-                break;
-        }
-
-        KeybindingMap::iterator k = kbm->find (kb);
-
-        if (k != kbm->end()) {
-	        kbm->erase (k);
-        }
-
-        /* now linear search by action */
-
-        for (k = kbm->begin(); k != kbm->end(); ++k) {
-	        if (k->second == action) {
-		        kbm->erase (k);
-		        break;
-	        }
-        }
-
-        add (kb, op, action, can_save);
-
-        /* for now, this never fails */
+        RefPtr<Action> action;
         
+        if (!k->second.action) {
+	        action = _action_map.find_action (k->second.action_name);
+        }
+
+        if (action) {
+	        /* lets do it ... */
+	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", kb, k->second.action_name));
+	        action->activate ();
+        }
+
+        /* return true even if the action could not be found */
+
         return true;
 }
 
 void
-Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what, bool can_save)
+Bindings::associate ()
 {
-        KeybindingMap* kbm = 0;
+	KeybindingMap::iterator k;
 
-        switch (op) {
-        case Press:
-	        kbm = &press_bindings;
-                break;
-        case Release:
-                kbm = &release_bindings;
-                break;
-        }
+	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+		k->second.action = _action_map.find_action (k->second.action_name);
+		if (k->second.action) {
+			push_to_gtk (k->first, k->second.action);
+		}
+	}
 
-        KeybindingMap::iterator k = kbm->find (kb);
+	for (k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+		k->second.action = _action_map.find_action (k->second.action_name);
+		/* no working support in GTK for release bindings */
+	}
 
-        if (k == kbm->end()) {
-	        pair<KeyboardKey,RefPtr<Action> > newpair (kb, what);
-                kbm->insert (newpair);
-        } else {
-                k->second = what;
-        }
+	MouseButtonBindingMap::iterator b;
+	
+	for (b = button_press_bindings.begin(); b != button_press_bindings.end(); ++b) {
+		b->second.action = _action_map.find_action (b->second.action_name);
+	}
 
+	for (b = button_release_bindings.begin(); b != button_release_bindings.end(); ++b) {
+		b->second.action = _action_map.find_action (b->second.action_name);
+	}
+}
+
+void
+Bindings::dissociate ()
+{
+	KeybindingMap::iterator k;
+
+	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+		k->second.action.clear ();
+	}
+	for (k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+		k->second.action.clear ();
+	}
+}
+
+void
+Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
+{
         /* GTK has the useful feature of showing key bindings for actions in
          * menus. As of August 2015, we have no interest in trying to
          * reimplement this functionality, so we will use it even though we no
@@ -420,6 +396,81 @@ Bindings::add (KeyboardKey kb, Operation op, RefPtr<Action> what, bool can_save)
         if (!Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key) || gtk_key.get_key() == 0) {
 	        cerr << "GTK binding using " << gtk_binding << " failed for " << what->get_accel_path() << " existing = " << gtk_key.get_key() << " + " << gtk_key.get_mod() << endl;
         }
+}
+
+bool
+Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, bool can_save)
+{
+	/* We have to search the existing binding map by both action and
+	 * keybinding, because the following are possible:
+	 *
+	 *   - key is already used for a different action
+	 *   - action has a different binding
+	 *   - key is not used
+	 *   - action is not bound
+	 */
+	
+	RefPtr<Action> action = Actions.find_action (action_name);
+
+        if (!action) {
+	        return false;
+        }
+
+        KeybindingMap* kbm = 0;
+
+        switch (op) {
+        case Press:
+                kbm = &press_bindings;
+                break;
+        case Release:
+                kbm = &release_bindings;
+                break;
+        }
+
+        KeybindingMap::iterator k = kbm->find (kb);
+
+        if (k != kbm->end()) {
+	        kbm->erase (k);
+        }
+
+        /* now linear search by action */
+
+        for (k = kbm->begin(); k != kbm->end(); ++k) {
+	        if (k->second.action_name == action_name) {
+		        kbm->erase (k);
+		        break;
+	        }
+        }
+
+        add (kb, op, action_name, can_save);
+
+        /* for now, this never fails */
+        
+        return true;
+}
+
+void
+Bindings::add (KeyboardKey kb, Operation op, string const& action_name, bool can_save)
+{
+        KeybindingMap* kbm = 0;
+
+        switch (op) {
+        case Press:
+	        kbm = &press_bindings;
+                break;
+        case Release:
+                kbm = &release_bindings;
+                break;
+        }
+
+        KeybindingMap::iterator k = kbm->find (kb);
+
+        if (k != kbm->end()) {
+	        kbm->erase (k);
+        } 
+        KeybindingMap::value_type new_pair (kb, ActionInfo (action_name));
+        
+        kbm->insert (new_pair).first;
 
         if (can_save) {
 	        Keyboard::keybindings_changed ();
@@ -466,7 +517,7 @@ Bindings::remove (RefPtr<Action> action, Operation op, bool can_save)
         }
 
         for (KeybindingMap::iterator k = kbm->begin(); k != kbm->end(); ++k) {
-	        if (k->second == action) {
+	        if (k->second.action == action) {
 		        kbm->erase (k);
 		        break;
 	        }
@@ -498,14 +549,24 @@ Bindings::activate (MouseButton bb, Operation op)
                 return false;
         }
 
-        /* lets do it ... */
+        RefPtr<Action> action;
+        
+        if (!b->second.action) {
+	        action = _action_map.find_action (b->second.action_name);
+        }
 
-        b->second->activate ();
+        if (action) {
+	        /* lets do it ... */
+	        action->activate ();
+        }
+
+        /* return true even if the action could not be found */
+        
         return true;
 }
 
 void
-Bindings::add (MouseButton bb, Operation op, RefPtr<Action> what)
+Bindings::add (MouseButton bb, Operation op, string const& action_name)
 {
         MouseButtonBindingMap* bbm = 0;
 
@@ -518,15 +579,8 @@ Bindings::add (MouseButton bb, Operation op, RefPtr<Action> what)
                 break;
         }
 
-        MouseButtonBindingMap::iterator b = bbm->find (bb);
-
-        if (b == bbm->end()) {
-                pair<MouseButton,RefPtr<Action> > newpair (bb, what);
-                bbm->insert (newpair);
-                // cerr << "Bindings added mouse button " << bb.button() << " w/ " << bb.state() << " => " << what->get_name() << endl;
-        } else {
-                b->second = what;
-        }
+        MouseButtonBindingMap::value_type newpair (bb, ActionInfo (action_name));
+        bbm->insert (newpair);
 }
 
 void
@@ -550,23 +604,6 @@ Bindings::remove (MouseButton bb, Operation op)
         }
 }
 
-bool
-Bindings::save (const string& path)
-{
-        XMLTree tree;
-        XMLNode* root = new XMLNode (X_("Bindings"));
-        tree.set_root (root);
-
-        save (*root);
-
-        if (!tree.write (path)) {
-                ::g_unlink (path.c_str());
-                return false;
-        }
-
-        return true;
-}
-
 void
 Bindings::save (XMLNode& root)
 {
@@ -581,8 +618,7 @@ Bindings::save (XMLNode& root)
 
                 child = new XMLNode (X_("Binding"));
                 child->add_property (X_("key"), k->first.name());
-                string ap = k->second->get_accel_path();
-                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                child->add_property (X_("action"), k->second.action_name);
                 presses->add_child_nocopy (*child);
         }
 
@@ -590,8 +626,7 @@ Bindings::save (XMLNode& root)
                 XMLNode* child;
                 child = new XMLNode (X_("Binding"));
                 child->add_property (X_("button"), k->first.name());
-                string ap = k->second->get_accel_path();
-                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                child->add_property (X_("action"), k->second.action_name);
                 presses->add_child_nocopy (*child);
         }
 
@@ -606,8 +641,7 @@ Bindings::save (XMLNode& root)
 
                 child = new XMLNode (X_("Binding"));
                 child->add_property (X_("key"), k->first.name());
-                string ap = k->second->get_accel_path();
-                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                child->add_property (X_("action"), k->second.action_name);
                 releases->add_child_nocopy (*child);
         }
 
@@ -615,8 +649,7 @@ Bindings::save (XMLNode& root)
                 XMLNode* child;
                 child = new XMLNode (X_("Binding"));
                 child->add_property (X_("button"), k->first.name());
-                string ap = k->second->get_accel_path();
-                child->add_property (X_("action"), ap.substr (ap.find ('/') + 1));
+                child->add_property (X_("action"), k->second.action_name);
                 releases->add_child_nocopy (*child);
         }
 
@@ -625,68 +658,23 @@ Bindings::save (XMLNode& root)
 }
 
 bool
-Bindings::load (string const & name)
+Bindings::load (XMLNode const& node)
 {
-        XMLTree tree;
-
-        if (!action_map) {
-                return false;
-        }
-
-        XMLNode const * node = Keyboard::bindings_node();
-
-        if (!node) {
-	        error << string_compose (_("No keyboard binding information when loading bindings for \"%1\""), name) << endmsg;
-	        return false;
-        }
-
-        if (!_name.empty()) {
-	        remove_bindings_for_state (_name, *this);
-        }
+        const XMLNodeList& children (node.children());
         
-        const XMLNodeList& children (node->children());
-        bool found = false;
-        
-        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-
-	        if ((*i)->name() == X_("Bindings")) {
-		        XMLProperty const * prop = (*i)->property (X_("name"));
-
-		        if (!prop) {
-			        continue;
-		        }
-
-		        if (prop->value() == name) {
-			        found = true;
-			        node = *i;
-			        break;
-		        }
-	        }
-        }
-        
-        if (!found) {
-	        error << string_compose (_("Bindings for \"%1\" not found in keyboard binding node\n"), name) << endmsg;
-	        return false;
-        }
-
         press_bindings.clear ();
         release_bindings.clear ();
 
-        const XMLNodeList& bindings (node->children());
-
-        for (XMLNodeList::const_iterator i = bindings.begin(); i != bindings.end(); ++i) {
+        for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 	        /* each node could be Press or Release */
-	        load (**i);
+	        load_operation (**i);
         }
 
-        _name = name;
-        add_bindings_for_state (_name, *this);
-        
         return true;
 }
 
 void
-Bindings::load (const XMLNode& node)
+Bindings::load_operation (XMLNode const& node)
 {
         if (node.name() == X_("Press") || node.name() == X_("Release")) {
 
@@ -714,37 +702,18 @@ Bindings::load (const XMLNode& node)
                                 continue;
                         }
 
-                        RefPtr<Action> act;
-
-                        if (action_map) {
-	                        act = action_map->find_action (ap->value());
-                        } 
-
-                        if (!act) {
-                                string::size_type slash = ap->value().find ('/');
-                                if (slash != string::npos) {
-                                        string group = ap->value().substr (0, slash);
-                                        string action = ap->value().substr (slash+1);
-                                        act = ActionManager::get_action (group.c_str(), action.c_str());
-                                }
-                        }
-
-                        if (!act) {
-                                continue;
-                        }
-
                         if (kp) {
                                 KeyboardKey k;
                                 if (!KeyboardKey::make_key (kp->value(), k)) {
                                         continue;
                                 }
-                                add (k, op, act);
+                                add (k, op, ap->value());
                         } else {
                                 MouseButton b;
                                 if (!MouseButton::make_button (bp->value(), b)) {
                                         continue;
                                 }
-                                add (b, op, act);
+                                add (b, op, ap->value());
                         }
                 }
         }
@@ -757,23 +726,19 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
                            std::vector<std::string>& keys,
                            std::vector<RefPtr<Action> >& actions)
 {
-	if (!action_map) {
-		return;
-	}
-	
 	/* build a reverse map from actions to bindings */
 
 	typedef map<Glib::RefPtr<Gtk::Action>,KeyboardKey> ReverseMap;
 	ReverseMap rmap;
 
 	for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-		rmap.insert (make_pair (k->second, k->first));
+		rmap.insert (make_pair (k->second.action, k->first));
 	}
 
 	/* get a list of all actions */
 
 	ActionMap::Actions all_actions;
-	action_map->get_actions (all_actions);
+	_action_map.get_actions (all_actions);
 	
 	for (ActionMap::Actions::const_iterator act = all_actions.begin(); act != all_actions.end(); ++act) {
 
@@ -804,15 +769,16 @@ Bindings::get_all_actions (std::vector<std::string>& names,
 	ReverseMap rmap;
 
 	for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-		rmap.insert (make_pair (k->second, k->first));
+		rmap.insert (make_pair (k->second.action, k->first));
 	}
 
 	/* get a list of all actions */
 
-	ActionMap::Actions actions;
-	action_map->get_actions (actions);
+	ActionMap::Actions all_actions;
+	_action_map.get_actions (all_actions);
 	
-	for (ActionMap::Actions::const_iterator act = actions.begin(); act != actions.end(); ++act) {
+	for (ActionMap::Actions::const_iterator act = all_actions.begin(); act != all_actions.end(); ++act) {
+		
 		names.push_back ((*act)->get_name());
 		paths.push_back ((*act)->get_accel_path());
 
@@ -825,10 +791,32 @@ Bindings::get_all_actions (std::vector<std::string>& names,
 	}
 }
 
+Bindings*
+Bindings::get_bindings (string const& name)
+{
+	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
+		if ((*b)->name() == name) {
+			return *b;
+		}
+	}
+
+	return 0;
+}
+
+void
+Bindings::associate_all ()
+{
+	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
+		(*b)->associate ();
+	}
+}
+
+/*==========================================ACTION MAP =========================================*/
+
 void
 ActionMap::get_actions (ActionMap::Actions& acts)
 {
-	for (_ActionMap::iterator a = actions.begin(); a != actions.end(); ++a) {
+	for (_ActionMap::iterator a = _actions.begin(); a != _actions.end(); ++a) {
 		acts.push_back (a->second);
 	}
 }
@@ -836,9 +824,9 @@ ActionMap::get_actions (ActionMap::Actions& acts)
 RefPtr<Action>
 ActionMap::find_action (const string& name)
 {
-        _ActionMap::iterator a = actions.find (name);
+        _ActionMap::iterator a = _actions.find (name);
 
-        if (a != actions.end()) {
+        if (a != _actions.end()) {
                 return a->second;
         }
 
@@ -849,13 +837,19 @@ RefPtr<ActionGroup>
 ActionMap::create_action_group (const string& name)
 {
 	RefPtr<ActionGroup> g = ActionGroup::create (name);
-	return g;
-}
 
-void
-ActionMap::install_action_group (RefPtr<ActionGroup> group)
-{
-	ActionManager::ui_manager->insert_action_group (group);
+	/* this is one of the places where our own Action management code
+	   has to touch the GTK one, because we want the GtkUIManager to
+	   be able to create widgets (particularly Menus) from our actions.
+	   
+	   This is a a necessary step for that to happen.
+	*/
+	
+	if (g) {
+		ActionManager::ui_manager->insert_action_group (g);
+	}
+
+	return g;
 }
 
 RefPtr<Action> 
@@ -869,7 +863,7 @@ ActionMap::register_action (RefPtr<ActionGroup> group, const char* name, const c
         fullpath += '/';
         fullpath += name;
         
-        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
 	        group->add (act);
 	        return act;
         }
@@ -890,7 +884,7 @@ ActionMap::register_action (RefPtr<ActionGroup> group,
         fullpath += '/';
         fullpath += name;
 
-        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
 	        group->add (act, sl);
 	        return act;
         }
@@ -914,7 +908,7 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
         fullpath += '/';
         fullpath += name;
 
-        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
 	        group->add (act, sl);
 	        return act;
         }
@@ -940,7 +934,7 @@ ActionMap::register_radio_action (RefPtr<ActionGroup> group,
         fullpath += '/';
         fullpath += name;
 
-        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
 	        group->add (act, sigc::bind (sl, act->gobj()));
 	        return act;
         }
@@ -962,25 +956,13 @@ ActionMap::register_toggle_action (RefPtr<ActionGroup> group,
 
         RefPtr<Action> act = ToggleAction::create (name, label);
 
-        if (actions.insert (_ActionMap::value_type (fullpath, act)).second) {
+        if (_actions.insert (_ActionMap::value_type (fullpath, act)).second) {
 	        group->add (act, sl);
 	        return act;
         }
 
         /* already registered */
         return RefPtr<Action>();
-}
-
-void
-Bindings::add_bindings_for_state (std::string const& name, Bindings& bindings)
-{
-	bindings_for_state.insert (make_pair (name, &bindings));
-}
-
-void
-Bindings::remove_bindings_for_state (std::string const& name, Bindings& bindings)
-{
-	bindings_for_state.erase (name);
 }
 
 std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {

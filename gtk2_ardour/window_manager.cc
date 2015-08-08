@@ -22,6 +22,7 @@
 
 #include "ardour/session_handle.h"
 
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
 #include "actions.h"
@@ -65,13 +66,12 @@ Manager::register_window (ProxyBase* info)
 	if (!info->menu_name().empty()) {
 
 		if (!window_actions) {
-			window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
-			ARDOUR_UI::instance()->global_actions.install_action_group (window_actions);
+			window_actions = Gtkmm2ext::Actions.create_action_group (X_("Window"));
 		}
 
-		info->set_action (ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
-			 info->action_name().c_str(), info->menu_name().c_str(),
-			 sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
+		info->set_action (Gtkmm2ext::Actions.register_toggle_action (window_actions,
+		                                                             info->action_name().c_str(), info->menu_name().c_str(),
+		                                                             sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
 	}
 }
 
@@ -90,7 +90,7 @@ void
 Manager::toggle_window (ProxyBase* proxy)
 {
 
-	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	Glib::RefPtr<Gtk::Action> act = Gtkmm2ext::Actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
 	if (!act) {
 		return;
 	}

@@ -73,7 +73,6 @@ ARDOUR_UI::we_have_dependents ()
 	
 	/* all actions are defined */
 
-	ActionManager::enable_accelerators ();
 	ActionManager::load_menus (ARDOUR_COMMAND_LINE::menus_file);
 
 	editor->track_mixer_selection ();
@@ -205,6 +204,13 @@ tab_window_root_drop (GtkNotebook* src,
 int
 ARDOUR_UI::setup_windows ()
 {
+	/* actions do not need to be defined when we load keybindings. They
+	 * will be lazily discovered. But bindings do need to exist when we
+	 * create windows/tabs with their own binding sets.
+	 */
+
+	keyboard->setup_keybindings ();
+
 	/* we don't use a widget with its own window for the tab close button,
 	   which makes it impossible to rely on GTK+ to generate signals for
 	   events occuring "in" this widget. Instead, we pre-connect a
@@ -217,8 +223,6 @@ ARDOUR_UI::setup_windows ()
 
 	rc_option_editor = new RCOptionEditor;
 	rc_option_editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
-
-	keyboard->setup_keybindings ();
 
 	if (create_editor ()) {
 		error << _("UI: cannot setup editor") << endmsg;

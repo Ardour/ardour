@@ -550,7 +550,6 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void color_handler ();
 
 	bool                 constructed;
-	Gtkmm2ext::ActionMap myactions;
 
 	// to keep track of the playhead position for control_scroll
 	boost::optional<framepos_t> _control_scroll_target;

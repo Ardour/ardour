@@ -816,12 +816,12 @@ Editor::Editor ()
 
         /* Button bindings */
 
-        button_bindings = new Bindings;
+	button_bindings = new Bindings ("editor-mouse");
 
 	XMLNode* node = button_settings();
         if (node) {
                 for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
-                        button_bindings->load (**i);
+                        button_bindings->load_operation (**i);
                 }
         }
 

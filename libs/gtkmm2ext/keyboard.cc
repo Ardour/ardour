@@ -112,7 +112,7 @@ bool Keyboard::bindings_changed_after_save_became_legal = false;
 map<string,string> Keyboard::binding_files;
 string Keyboard::_current_binding_name;
 Gtk::Window* Keyboard::pre_dialog_active_window = 0;
-XMLNode* Keyboard::_bindings_node = 0;
+PBD::Signal0<void> Keyboard::BindingsChanged;
 
 /* set this to initially contain the modifiers we care about, then track changes in ::set_edit_modifier() etc. */
 GdkModifierType Keyboard::RelevantModifierKeyMask;
@@ -643,6 +643,7 @@ Keyboard::keybindings_changed ()
 	}
 
 	Keyboard::save_keybindings ();
+	BindingsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -697,7 +698,22 @@ Keyboard::read_keybindings (string const & path)
 		return -1;
 	}
 
-	_bindings_node = new XMLNode (*tree.root ()); /* copy operation. Sorry */
+	/* toplevel node is "BindingSet; children are "Bindings" */
+	
+	XMLNodeList const& children = tree.root()->children();
+
+	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
+		if ((*i)->name() == X_("Bindings")) {
+		        XMLProperty const* name = (*i)->property (X_("name"));
+		        if (!name) {
+			        warning << _("Keyboard binding found without a name") << endmsg;
+			        continue;
+		        }
+		        
+		        Bindings* b = new Bindings (name->value());
+		        b->load (**i);
+	        }
+        }
 	
 	return 0;
 }
@@ -709,10 +725,10 @@ Keyboard::store_keybindings (string const & path)
 	XMLNode* bnode;
 	int ret = 0;
 
-	for (map<string,Bindings*>::const_iterator c = Bindings::bindings_for_state.begin(); c != Bindings::bindings_for_state.end(); ++c) {
+	for (list<Bindings*>::const_iterator b = Bindings::bindings.begin(); b != Bindings::bindings.end(); ++b) {
 		bnode = new XMLNode (X_("Bindings"));
-		bnode->add_property (X_("name"), c->first);
-		c->second->save (*bnode);
+		bnode->add_property (X_("name"), (*b)->name());
+		(*b)->save (*bnode);
 		node->add_child_nocopy (*bnode);
 	}
 
@@ -744,6 +760,7 @@ Keyboard::reset_bindings ()
 	{
 		PBD::Unwinder<bool> uw (can_save_keybindings, false);
 		setup_keybindings ();
+		Bindings::associate_all ();
 	}
 
 	return 0;

@@ -456,7 +456,8 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	NodeMap nodes;
 	NodeMap::iterator r;
 
-	ActionManager::get_all_actions (labels, paths, tooltips, keys, bindings);
+#warning Paul fix this before you think tabbed is done
+	// get_all_actions (labels, paths, tooltips, keys, bindings);
 
 	vector<string>::iterator k;
 	vector<string>::iterator p;
