@@ -796,6 +796,7 @@ PTFFormat::parserest89(void) {
 	uint8_t somethingbytes = 0;
 	uint8_t skipbytes = 0;
 
+	k = 0;
 	while (k < len) {
 		if (		(ptfunxored[k  ] == 'S') &&
 				(ptfunxored[k+1] == 'n') &&
@@ -1044,6 +1045,7 @@ PTFFormat::parserest10(void) {
 	uint8_t somethingbytes = 0;
 	uint8_t skipbytes = 0;
 
+	k = 0;
 	while (k < len) {
 		if (		(ptfunxored[k  ] == 'S') &&
 				(ptfunxored[k+1] == 'n') &&
