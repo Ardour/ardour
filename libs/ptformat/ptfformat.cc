@@ -439,7 +439,7 @@ void
 PTFFormat::parserest5(void) {
 	int i, j, k;
 	int regionspertrack, lengthofname;
-	int startbytes, lengthbytes, offsetbytes, somethingbytes;
+	int startbytes, lengthbytes, offsetbytes;
 	uint16_t tracknumber = 0;
 	uint16_t findex;
 	uint16_t rindex;
@@ -510,13 +510,9 @@ PTFFormat::parserest5(void) {
 			startbytes = (ptfunxored[j+3] & 0xf0) >> 4;
 			lengthbytes = (ptfunxored[j+2] & 0xf0) >> 4;
 			offsetbytes = (ptfunxored[j+1] & 0xf0) >> 4;
-			somethingbytes = (ptfunxored[j+1] & 0xf);
-			findex = ptfunxored[j+4
-					+startbytes
-					+lengthbytes
-					+offsetbytes
-					+somethingbytes
-					];
+			//somethingbytes = (ptfunxored[j+1] & 0xf);
+			findex = ptfunxored[k+14];
+			printf("findex=%x\n", findex);
 			j--;
 			uint32_t start = 0;
 			switch (startbytes) {
@@ -602,7 +598,6 @@ PTFFormat::parserest5(void) {
 				};
 				tracks.push_back(t);
 			} else {
-				audiofiles.push_back(f);
 				region_t r = {
 					name,
 					rindex,
@@ -638,76 +633,80 @@ PTFFormat::parserest5(void) {
 
 void
 PTFFormat::parseaudio5(void) {
-	int i,j,k,l;
+	int i,k,l;
+	int lengthofname, wavnumber;
 
 	// Find end of wav file list
 	k = 0;
 	while (k < len) {
-		if (		(ptfunxored[k  ] == 0x5a) &&
-				(ptfunxored[k+1] == 0x00) &&
-				(ptfunxored[k+2] == 0x05)) {
+		if (		(ptfunxored[k  ] == 0x5f) &&
+				(ptfunxored[k+1] == 0x50) &&
+				(ptfunxored[k+2] == 0x35)) {
+			break;
+		}
+		k++;
+	}
+	k++;
+	while (k < len) {
+		if (		(ptfunxored[k  ] == 0x5f) &&
+				(ptfunxored[k+1] == 0x50) &&
+				(ptfunxored[k+2] == 0x35)) {
 			break;
 		}
 		k++;
 	}
 
 	// Find actual wav names
-	bool first = true;
-	uint16_t numberofwavs;
+	uint16_t numberofwavs = ptfunxored[k-23];
 	char wavname[256];
-	for (i = k; i > 4; i--) {
-		if (		((ptfunxored[i  ] == 'W') || (ptfunxored[i  ] == 'F')) &&
-				((ptfunxored[i-1] == 'A') || (ptfunxored[i-1] == 'F')) &&
-				((ptfunxored[i-2] == 'V') || (ptfunxored[i-2] == 'I')) &&
-				((ptfunxored[i-3] == 'E') || (ptfunxored[i-3] == 'A'))) {
-			j = i-4;
-			l = 0;
-			while (ptfunxored[j] != '\0') {
-				wavname[l] = ptfunxored[j];
-				l++;
-				j--;
-			}
-			wavname[l] = 0;
-			if (ptfunxored[i] == 'W') {
-				extension = string(".wav");
-			} else {
-				extension = string(".aif");
-			}
-			//uint8_t playlist = ptfunxored[j-8];
-
-			if (first) {
-				first = false;
-				for (j = k; j > 4; j--) {
-					if (	(ptfunxored[j  ] == 0x01) &&
-						(ptfunxored[j-1] == 0x00) &&
-						(ptfunxored[j-2] == 0x5a)) {
-
-						numberofwavs = 0;
-						numberofwavs |= (uint32_t)(ptfunxored[j-6] << 24);
-						numberofwavs |= (uint32_t)(ptfunxored[j-5] << 16);
-						numberofwavs |= (uint32_t)(ptfunxored[j-4] << 8);
-						numberofwavs |= (uint32_t)(ptfunxored[j-3]);
-						//printf("%d wavs\n", numberofwavs);
-						break;
-					}
-				k--;
-				}
-			}
-
-			std::string wave = string(wavname);
-			std::reverse(wave.begin(), wave.end());
-			wav_t f = { wave, (uint16_t)(numberofwavs - 1), 0, 0 };
-
-			if (foundin(wave, string(".grp"))) {
-				continue;
-			}
-
-			actualwavs.push_back(f);
-			//printf("done\n");
-			numberofwavs--;
-			if (numberofwavs <= 0)
-				break;
+	for (i = k; i < len; i++) {
+		if (		(ptfunxored[i  ] == 'F') &&
+				(ptfunxored[i+1] == 'i') &&
+				(ptfunxored[i+2] == 'l') &&
+				(ptfunxored[i+3] == 'e') &&
+				(ptfunxored[i+4] == 's')) {
+			break;
 		}
+	}
+	
+	wavnumber = 0;
+	i+=16;
+	while (i < len && numberofwavs > 0) {
+		i++;
+		if (		(ptfunxored[i  ] == 0x5a) &&
+				(ptfunxored[i+1] == 0x00) &&
+				(ptfunxored[i+2] == 0x05)) {
+			break;
+		}
+		lengthofname = ptfunxored[i];
+		i++;
+		l = 0;
+		while (l < lengthofname) {
+			wavname[l] = ptfunxored[i+l];
+			l++;
+		}
+		i+=lengthofname + 4;
+		wavname[l] = 0;
+		if (foundin(wavname, ".wav")) {
+			extension = string(".wav");
+		} else if (foundin(wavname, ".aif")) {
+			extension = string(".aif");
+		} else {
+			extension = string("");
+		}
+
+		std::string wave = string(wavname);
+		wav_t f = { wave, (uint16_t)(wavnumber++), 0, 0 };
+
+		if (foundin(wave, string(".grp"))) {
+			continue;
+		}
+
+		actualwavs.push_back(f);
+		audiofiles.push_back(f);
+		//printf("done\n");
+		numberofwavs--;
+		i += 7;
 	}
 }
 

@@ -38,7 +38,7 @@ public:
 		int64_t     length;
 
 		bool operator ==(const struct wav& other) {
-			return (this->filename != std::string("") &&
+			return (this->filename == other.filename ||
 				this->index == other.index);
 		}
 
