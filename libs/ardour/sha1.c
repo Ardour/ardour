@@ -28,6 +28,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if defined(PLATFORM_WINDOWS) && !defined(__LITTLE_ENDIAN__)
+#define __LITTLE_ENDIAN__
+#endif
+
 #ifdef __BIG_ENDIAN__
 # define SHA_BIG_ENDIAN
 #elif defined _BIG_ENDIAN
