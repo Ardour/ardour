@@ -326,10 +326,13 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 		argp[a++] = strdup(it->first.c_str());
 		argp[a++] = strdup(it->second.c_str());
 	}
+#ifndef PLATFORM_WINDOWS
+	// quote-escape does not work here. this needs further work (system_exec.cc)
 	for(TranscodeFfmpeg::FFSettings::const_iterator it = meta.begin(); it != meta.end(); ++it) {
 		argp[a++] = strdup("-metadata");
 		argp[a++] = format_metadata(it->first.c_str(), it->second.c_str());
 	}
+#endif
 
 	if (m_fps > 0) {
 		m_lead_in  = rint (m_lead_in * m_fps) / m_fps;
