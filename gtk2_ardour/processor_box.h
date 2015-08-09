@@ -231,8 +231,9 @@ private:
 		void set_splitting(const bool splitting) { _splitting = splitting; }
 	private:
 		bool on_expose_event (GdkEventExpose *);
-		ARDOUR::ChanCount _sources; // signals available to feed into the processor(s)
-		ARDOUR::ChanCount _sinks;   // combined number of outputs of the processor
+		/* the wire icon sits on top of every processor if needed */
+		ARDOUR::ChanCount _sources; // signals available (valid outputs from prev. processor)
+		ARDOUR::ChanCount _sinks;   // actual inputs of this processor
 		bool _splitting;
 	};
 

@@ -703,14 +703,13 @@ PluginInsertProcessorEntry::PluginInsertProcessorEntry (ProcessorBox* b, boost::
 void
 PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 {
-	_output_icon.set_ports(_plugin_insert->output_streams());
-	_routing_icon.set_splitting(_plugin_insert->splitting ());
+	ChanCount in, out; // actual configured i/o
+	_plugin_insert->configured_io (in, out);
 
-	ChanCount sources = _plugin_insert->input_streams();
+	/* get number of input ports */
 	ChanCount sinks = _plugin_insert->natural_input_streams();
-
-	/* replicated instances */
 	if (!_plugin_insert->splitting () && _plugin_insert->get_count() > 1) {
+		/* replicated instances */
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			sinks.set(*t, sinks.get(*t) * _plugin_insert->get_count());
 		}
@@ -718,17 +717,50 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 	/* MIDI bypass */
 	if (_plugin_insert->natural_output_streams().n_midi() == 0 &&
 			_plugin_insert->output_streams().n_midi() == 1) {
+		in.set(DataType::MIDI, 1);
+		out.set(DataType::MIDI, 1);
 		sinks.set(DataType::MIDI, 1);
-		sources.set(DataType::MIDI, 1);
 	}
 
+	/* the Input streams available (*valid* outputs from prev. plugin)
+	 * this will be <= sinks. Some input-ports of this processor
+	 * may be unconnected.
+	 */
+	_routing_icon.set_sources(in);
+
+	/* the actual input ports of this processor */
 	_input_icon.set_ports(sinks);
 	_routing_icon.set_sinks(sinks);
-	_routing_icon.set_sources(sources);
 
-	if (_plugin_insert->splitting () ||
-			_plugin_insert->input_streams().n_audio() < _plugin_insert->natural_input_streams().n_audio()
-		 )
+	/* set/override plugin-output ports to actual outputs-streams.
+	 *
+	 * This plugin may have unconnected output-ports (currently only in Mixbus,
+	 * e.g channelstrip-EQ at the top of a MIDI-channel before the synth).
+	 *
+	 * The *next* processor below this one will only see the 
+	 * actual available streams (it cannot know the real outputs
+	 * of this plugin).
+	 *
+	 * There is currently no API to query the ports of the previous (or next)
+	 * processor.
+	 *
+	 * (normally - iff configuration succeeds - this is set during
+	 * ProcessorEntry::processor_configuration_changed() and should
+	 * equal _plugin_insert->output_streams())
+	 */
+	_output_icon.set_ports(out);
+#ifndef NDEBUG
+	if (out != _plugin_insert->output_streams()) {
+		std::cerr << "Processor Wiring: " <<  processor()->name()
+			<< " out-ports: " << _plugin_insert->output_streams() // NB. does not include midi-bypass
+			<< " out-connections: " << out
+			<< endmsg;
+	}
+#endif
+
+	_routing_icon.set_splitting(_plugin_insert->splitting ());
+
+	if (_plugin_insert->splitting () ||  in != sinks)
 	{
 		_routing_icon.set_size_request (-1, std::max (7.f, rintf(7.f * ARDOUR_UI::ui_scale)));
 		_routing_icon.set_visible(true);
