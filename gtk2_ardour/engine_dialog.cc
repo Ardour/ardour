@@ -300,9 +300,18 @@ EngineControl::EngineControl ()
 		backend_changed ();
 	}
 
+	connect_changed_signals ();
 
-	/* Connect to signals */
+	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
 
+	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
+	connect_disconnect_button.set_no_show_all();
+
+}
+
+void
+EngineDialog::connect_changed_signals ()
+{
 	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
 	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
 	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
@@ -317,12 +326,6 @@ EngineControl::EngineControl ()
 	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
 	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
-
-	notebook.signal_switch_page().connect (sigc::mem_fun (*this, &EngineControl::on_switch_page));
-
-	connect_disconnect_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::connect_disconnect_click));
-	connect_disconnect_button.set_no_show_all();
-
 }
 
 void
