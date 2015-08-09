@@ -246,6 +246,35 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void build_no_control_notebook ();
 
 	void connect_changed_signals ();
+	void block_changed_signals ();
+	void unblock_changed_signals ();
+
+	class SignalBlocker
+	{
+	public:
+		SignalBlocker (EngineControl& engine_control, const std::string& reason);
+
+		~SignalBlocker ();
+
+	private:
+		EngineControl& ec;
+		std::string m_reason;
+	};
+
+	uint32_t block_signals;
+
+	sigc::connection backend_combo_connection;
+	sigc::connection driver_combo_connection;
+	sigc::connection sample_rate_combo_connection;
+	sigc::connection buffer_size_combo_connection;
+	sigc::connection device_combo_connection;
+	sigc::connection input_device_combo_connection;
+	sigc::connection output_device_combo_connection;
+	sigc::connection midi_option_combo_connection;
+	sigc::connection input_latency_connection;
+	sigc::connection output_latency_connection;
+	sigc::connection input_channels_connection;
+	sigc::connection output_channels_connection;
 
     void on_show ();
     void on_response (int);

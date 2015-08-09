@@ -98,6 +98,7 @@ EngineControl::EngineControl ()
 	, _desired_sample_rate (0)
 	, started_at_least_once (false)
 	, queue_device_changed (false)
+	, block_signals(0)
 {
 	using namespace Notebook_Helpers;
 	vector<string> backend_names;
@@ -310,22 +311,87 @@ EngineControl::EngineControl ()
 }
 
 void
-EngineDialog::connect_changed_signals ()
+EngineControl::connect_changed_signals ()
 {
-	backend_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::backend_changed));
-	driver_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::driver_changed));
-	sample_rate_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
-	buffer_size_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
-	device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::device_changed));
-	midi_option_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::midi_option_changed));
+	backend_combo_connection = backend_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::backend_changed));
+	driver_combo_connection = driver_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::driver_changed));
+	sample_rate_combo_connection = sample_rate_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::sample_rate_changed));
+	buffer_size_combo_connection = buffer_size_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::buffer_size_changed));
+	device_combo_connection = device_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::device_changed));
+	midi_option_combo_connection = midi_option_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::midi_option_changed));
 
-	input_device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::input_device_changed));
-	output_device_combo.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::output_device_changed));
+	input_device_combo_connection = input_device_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::input_device_changed));
+	output_device_combo_connection = output_device_combo.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::output_device_changed));
 
-	input_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
-	output_latency.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
-	input_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
-	output_channels.signal_changed().connect (sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	input_latency_connection = input_latency.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	output_latency_connection = output_latency.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	input_channels_connection = input_channels.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+	output_channels_connection = output_channels.signal_changed ().connect (
+	    sigc::mem_fun (*this, &EngineControl::parameter_changed));
+}
+
+void
+EngineControl::block_changed_signals ()
+{
+	if (block_signals++ == 0) {
+		backend_combo_connection.block ();
+		driver_combo_connection.block ();
+		sample_rate_combo_connection.block ();
+		buffer_size_combo_connection.block ();
+		device_combo_connection.block ();
+		input_device_combo_connection.block ();
+		output_device_combo_connection.block ();
+		midi_option_combo_connection.block ();
+		input_latency_connection.block ();
+		output_latency_connection.block ();
+		input_channels_connection.block ();
+		output_channels_connection.block ();
+	}
+}
+
+void
+EngineControl::unblock_changed_signals ()
+{
+	if (--block_signals == 0) {
+		backend_combo_connection.unblock ();
+		driver_combo_connection.unblock ();
+		sample_rate_combo_connection.unblock ();
+		buffer_size_combo_connection.unblock ();
+		device_combo_connection.unblock ();
+		input_device_combo_connection.unblock ();
+		output_device_combo_connection.unblock ();
+		midi_option_combo_connection.unblock ();
+		input_latency_connection.unblock ();
+		output_latency_connection.unblock ();
+		input_channels_connection.unblock ();
+		output_channels_connection.unblock ();
+	}
+}
+
+EngineControl::SignalBlocker::SignalBlocker (EngineControl& engine_control,
+                                             const std::string& reason)
+    : ec (engine_control)
+    , m_reason (reason)
+{
+	DEBUG_ECONTROL (string_compose ("SignalBlocker: %1", m_reason));
+	ec.block_changed_signals ();
+}
+
+EngineControl::SignalBlocker::~SignalBlocker ()
+{
+	DEBUG_ECONTROL (string_compose ("~SignalBlocker: %1", m_reason));
+	ec.unblock_changed_signals ();
 }
 
 void
