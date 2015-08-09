@@ -333,7 +333,7 @@ AddVideoDialog::file_name (bool &local_file)
 			char *ue = curl_easy_unescape(curl, uri.c_str(), uri.length(), &plen);
 #ifdef PLATFORM_WINDOWS
 			char *tmp;
-			while (tmp = strchr(ue, '/')) *tmp = '\\';
+			while ((tmp = strchr(ue, '/'))) *tmp = '\\';
 #endif
 			std::string path = video_get_docroot(Config) + ue;
 			if (!::access(path.c_str(), R_OK)) {
