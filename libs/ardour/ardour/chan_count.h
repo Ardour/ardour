@@ -154,7 +154,7 @@ private:
 
 } // namespace ARDOUR
 
-std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanCount& c);
+LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::ChanCount& c);
 
 #endif // __ardour_chan_count_h__
 
