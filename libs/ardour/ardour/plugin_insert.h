@@ -142,6 +142,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 		return _match.method == Split;
 	}
 
+	void configured_io (ChanCount &in, ChanCount &out) { in = _configured_in; out = _configured_out; }
+
 	PBD::Signal2<void,BufferSet*, BufferSet*> AnalysisDataGathered;
 	PBD::Signal0<void> PluginIoReConfigure;
 
@@ -181,6 +183,9 @@ class LIBARDOUR_API PluginInsert : public Processor
 	BufferSet _signal_analysis_outputs;
 
 	ChanCount midi_bypass;
+
+	ChanCount _configured_in;
+	ChanCount _configured_out;
 
 	/** Description of how we can match our plugin's IO to our own insert IO */
 	struct Match {

@@ -715,10 +715,32 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	ChanCount old_in = input_streams ();
 	ChanCount old_out = output_streams ();
 
+	_configured_in = in;
+	_configured_out = out;
+
 	/* set the matching method and number of plugins that we will use to meet this configuration */
 	_match = private_can_support_io_configuration (in, out);
 	if (set_count (_match.plugins) == false) {
+		PluginIoReConfigure (); /* EMIT SIGNAL */
 		return false;
+	}
+
+	/* configure plugins */
+	switch (_match.method) {
+	case Split:
+	case Hide:
+		if (_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out)) {
+			PluginIoReConfigure (); /* EMIT SIGNAL */
+			return false;
+		}
+		break;
+
+	default:
+		if (_plugins.front()->configure_io (in, out) == false) {
+			PluginIoReConfigure (); /* EMIT SIGNAL */
+			return false;
+		}
+		break;
 	}
 
 	if (  (old_match.method != _match.method && (old_match.method == Split || _match.method == Split))
@@ -727,22 +749,6 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 			)
 	{
 		PluginIoReConfigure (); /* EMIT SIGNAL */
-	}
-
-	/* configure plugins */
-	switch (_match.method) {
-	case Split:
-	case Hide:
-		if (_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out)) {
-			return false;
-		}
-		break;
-
-	default:
-		if (_plugins.front()->configure_io (in, out) == false) {
-			return false;
-		}
-		break;
 	}
 
 	// we don't know the analysis window size, so we must work with the
