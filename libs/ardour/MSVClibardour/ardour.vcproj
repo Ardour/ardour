@@ -1164,6 +1164,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\sha1.c"
+				>
+			</File>
+			<File
 				RelativePath="..\slave.cc"
 				>
 			</File>
