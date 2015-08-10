@@ -960,35 +960,28 @@ EngineControl::set_device_popdown_strings ()
 		available_devices.push_back (i->name);
 	}
 
-
-	if (!available_devices.empty()) {
-
-		{
-			string current_device, found_device;
-			current_device = device_combo.get_active_text ();
-			if (current_device == "") {
-				current_device = backend->device_name ();
-			}
-
-			// Make sure that the active text is still relevant for this
-			// device (it might only be relevant to the previous device!!)
-			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
-				if (*i == current_device)
-					found_device = current_device;
-			}
-			if (found_device == "")
-				// device has never been set (or was not relevant
-				// for this backend) Let's make sure it's not blank
-				current_device = available_devices.front ();
-
-			set_popdown_strings (device_combo, available_devices);
-			DEBUG_ECONTROL (string_compose ("set device_combo active text: %1", current_device));
-
-			device_combo.set_active_text (current_device);
-		}
-		return true;
+	if (available_devices.empty ()) {
+		return false;
 	}
-	return false;
+
+	string current_device = backend->device_name ();
+
+	// Make sure that backend->device_name () is a valid
+	// device, the backend may not return a valid device if it hasn't
+	// been set yet.
+	if (std::find (available_devices.begin (),
+	               available_devices.end (),
+	               current_device) == available_devices.end ()) {
+
+		current_device = available_devices.front ();
+	}
+
+	set_popdown_strings (device_combo, available_devices);
+	DEBUG_ECONTROL (
+	    string_compose ("set device_combo active text: %1", current_device));
+
+	device_combo.set_active_text (current_device);
+	return true;
 }
 
 // @return true if there are input devices available
@@ -1005,35 +998,28 @@ EngineControl::set_input_device_popdown_strings ()
 		available_devices.push_back (i->name);
 	}
 
-	if (!available_devices.empty()) {
-
-		{
-			string current_device, found_device;
-			current_device = input_device_combo.get_active_text ();
-			if (current_device == "") {
-				current_device = backend->input_device_name ();
-			}
-
-			// Make sure that the active text is still relevant for this
-			// device (it might only be relevant to the previous device!!)
-			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
-				if (*i == current_device)
-					found_device = current_device;
-			}
-			if (found_device == "")
-				// device has never been set (or was not relevant
-				// for this backend) Let's make sure it's not blank
-				current_device = available_devices.front ();
-
-			set_popdown_strings (input_device_combo, available_devices);
-
-			DEBUG_ECONTROL (string_compose ("set input_device_combo active text: %1", current_device));
-			input_device_combo.set_active_text (current_device);
-		}
-		return true;
+	if (available_devices.empty()) {
+		return false;
 	}
 
-	return false;
+	string current_device = backend->input_device_name ();
+
+	// Make sure that backend->input_device_name () is a valid
+	// device, the backend may not return a valid device if it hasn't
+	// been set yet.
+	if (std::find (available_devices.begin (),
+	               available_devices.end (),
+	               current_device) == available_devices.end ()) {
+
+		current_device = available_devices.front ();
+	}
+
+	set_popdown_strings (input_device_combo, available_devices);
+
+	DEBUG_ECONTROL (
+	    string_compose ("set input_device_combo active text: %1", current_device));
+	input_device_combo.set_active_text (current_device);
+	return true;
 }
 
 // @return true if there are output devices available
@@ -1050,35 +1036,28 @@ EngineControl::set_output_device_popdown_strings ()
 		available_devices.push_back (i->name);
 	}
 
-	if (!available_devices.empty()) {
-
-		{
-			string current_device, found_device;
-			current_device = output_device_combo.get_active_text ();
-			if (current_device == "") {
-				current_device = backend->output_device_name ();
-			}
-
-			// Make sure that the active text is still relevant for this
-			// device (it might only be relevant to the previous device!!)
-			for (vector<string>::const_iterator i = available_devices.begin(); i != available_devices.end(); ++i) {
-				if (*i == current_device)
-					found_device = current_device;
-			}
-			if (found_device == "")
-				// device has never been set (or was not relevant
-				// for this backend) Let's make sure it's not blank
-				current_device = available_devices.front ();
-
-			set_popdown_strings (output_device_combo, available_devices);
-
-			DEBUG_ECONTROL (string_compose ("set input_device_combo active text: %1", current_device));
-			output_device_combo.set_active_text (current_device);
-		}
-		return true;
+	if (available_devices.empty()) {
+		return false;
 	}
 
-	return false;
+	string current_device = backend->output_device_name ();
+
+	// Make sure that backend->output_device_name () is a valid
+	// device, the backend may not return a valid device if it hasn't
+	// been set yet.
+	if (std::find (available_devices.begin (),
+	               available_devices.end (),
+	               current_device) == available_devices.end ()) {
+
+		current_device = available_devices.front ();
+	}
+
+	set_popdown_strings (output_device_combo, available_devices);
+
+	DEBUG_ECONTROL (
+	    string_compose ("set output_device_combo active text: %1", current_device));
+	output_device_combo.set_active_text (current_device);
+	return true;
 }
 
 void
