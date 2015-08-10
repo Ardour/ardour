@@ -473,6 +473,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	XMLNode* entry_gui_object_state (ProcessorEntry *);
 	PBD::ScopedConnection amp_config_connection;
+
+	static Gtkmm2ext::ActionMap processor_box_actions;
 };
 
 #endif /* __ardour_gtk_processor_box__ */

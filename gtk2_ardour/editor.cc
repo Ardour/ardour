@@ -471,8 +471,6 @@ Editor::Editor ()
 	last_event_time.tv_sec = 0;
 	last_event_time.tv_usec = 0;
 
-	global_hpacker.set_data ("ardour-bindings", &bindings);
-
 	selection_op_history.clear();
 	before.clear();
 
@@ -5862,7 +5860,7 @@ Editor::use_own_window (bool and_fill_it)
 
 		// win->signal_realize().connect (*this, &Editor::on_realize);
 		win->signal_event().connect (sigc::mem_fun (*this, &Editor::generic_event_handler));
-		win->set_data ("ardour-bindings", &bindings);
+		win->set_data ("ardour-bindings", bindings);
 		
 		update_title ();
 	}

@@ -24,7 +24,6 @@
 #include <vector>
 #include <string>
 
-#include <sigc++/signal.h>
 #include <gtk/gtk.h>
 #include <gtkmm/accelkey.h>
 
@@ -40,6 +39,7 @@ namespace Gtk {
 namespace Gtkmm2ext {
 
 class Bindings;
+class ActionMap;
 
 class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 {
@@ -176,10 +176,6 @@ class LIBGTKMM2EXT_API Keyboard : public sigc::trackable, PBD::Stateful
 	int reset_bindings ();
 
 	sigc::signal0<void> ZoomVerticalModifierReleased;
-
-	static std::vector<Bindings*> bindings;
-	static Bindings* get_bindings (std::string const& name);
-	static PBD::Signal0<void> BindingsChanged;
 
   protected:
 	static Keyboard* _the_keyboard;

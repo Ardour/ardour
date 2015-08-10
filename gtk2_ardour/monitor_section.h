@@ -179,4 +179,7 @@ class MonitorSection : public RouteUI
 
   private:
 	Gtkmm2ext::ActionMap myactions;
+	Gtkmm2ext::Bindings* bindings;
+
+	void load_bindings ();
 };

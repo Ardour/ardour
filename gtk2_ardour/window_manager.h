@@ -27,6 +27,7 @@
 #include <glibmm/refptr.h>
 #include <sigc++/trackable.h>
 
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/window_proxy.h"
 
 class XMLNode;
@@ -37,12 +38,12 @@ class Action;
 }
 
 namespace Gtkmm2ext {
-class VisibilityTracker;
+	class VisibilityTracker;
 }
 
 namespace ARDOUR {
-class Session;
-class SessionHandlePtr;
+	class Session;
+	class SessionHandlePtr;
 }
 
 namespace WM {
@@ -70,7 +71,8 @@ class Manager : public ARDOUR::SessionHandlePtr
 	Windows _windows;
 	Glib::RefPtr<Gtk::ActionGroup> window_actions;
 	Gtk::Window* current_transient_parent;
-
+	Gtkmm2ext::ActionMap window_action_map;
+	
 	Manager();
 	~Manager();
 

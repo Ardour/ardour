@@ -238,7 +238,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
 	, big_clock (new AudioClock (X_("bigclock"), false, "big", true, true, false, false))
 	, video_timeline(0)
-	, global_bindings (0)
 	, ignore_dual_punch (false)
 	, editor (0)
 	, mixer (0)
@@ -613,8 +612,6 @@ ARDOUR_UI::post_engine ()
 		AudioEngine::instance()->stop ();
 		exit (0);
 	}
-	
-	Bindings::associate_all ();
 	
 	/* this being a GUI and all, we want peakfiles */
 
@@ -5179,8 +5176,6 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 
 		if (w) {
 			bindings = reinterpret_cast<Gtkmm2ext::Bindings*>(w->get_data ("ardour-bindings"));
-		} else {
-			bindings = global_bindings;
 		}
 
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("main window key event, bindings = %1, global = %2\n", bindings, &global_bindings));
@@ -5192,7 +5187,6 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 		/* see if window uses ardour binding system */
 
 		bindings = reinterpret_cast<Gtkmm2ext::Bindings*>(window->get_data ("ardour-bindings"));
-		
 	} 
 
 	/* An empty binding set is treated as if it doesn't exist */
@@ -5286,7 +5280,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		if (bindings) {
 
-			DEBUG_TRACE (DEBUG::Accelerators, "\tusing Ardour bindings for this window\n");
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing Ardour bindings %1 for this event\n", bindings));
 			
 			if (bindings->activate (k, Bindings::Press)) {
 				DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
@@ -5349,7 +5343,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 void
 ARDOUR_UI::load_bindings ()
 {
-	if ((global_bindings = Bindings::get_bindings ("global")) == 0) {
+	if ((global_bindings = Bindings::get_bindings ("global", global_actions)) == 0) {
 		error << _("Global keybindings are missing") << endmsg;
 	}
 }

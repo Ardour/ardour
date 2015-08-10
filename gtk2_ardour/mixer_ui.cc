@@ -105,7 +105,9 @@ Mixer_UI::Mixer_UI ()
 {
 	Route::SyncOrderKeys.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::sync_treeview_from_order_keys, this), gui_context());
 
-	_content.set_data ("ardour-bindings", &bindings);
+	/* bindings was already set in MixerActor constructor */
+
+	_content.set_data ("ardour-bindings", bindings);
 	
 	scroller.set_can_default (true);
 	// set_default (scroller);

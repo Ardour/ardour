@@ -35,6 +35,7 @@
 #include "pbd/replace_all.h"
 
 #include "gtkmm2ext/application.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/textviewer.h"
 #include "gtkmm2ext/popup.h"
@@ -71,8 +72,8 @@ template class AbstractUI<Gtkmm2ext::UIRequest>;
 UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 	: AbstractUI<UIRequest> (thread_name)
 	, _receiver (*this)
+	, global_bindings (0)
 	, errors (0)
-
 {
 	theMain = new Main (argc, argv);
 
@@ -365,11 +366,22 @@ UI::set_tip (Widget *w, const gchar *tip, const gchar *hlp)
 	}
 
 	if (action) {
-#warning Paul fix this before you think tabbed is done
-		Gtk::AccelKey key;
-		ustring ap = action->get_accel_path();
-		if (!ap.empty()) {
-			string shortcut = string(); // ActionManager::get_key_representation (ap, key);
+		Bindings* bindings = (Bindings*) w->get_data ("ardour-bindings");
+		if (!bindings) {
+			Gtk::Window* win = (Gtk::Window*) w->get_toplevel();
+			if (win) {
+				bindings = (Bindings*) win->get_data ("ardour-bindings");
+			}
+		}
+
+		if (!bindings) {
+			bindings = global_bindings;
+		}
+		
+		if (bindings) {
+			Bindings::Operation op;
+			KeyboardKey kb = bindings->get_binding_for_action (action, op);
+			string shortcut = kb.display_label ();
 			if (!shortcut.empty()) {
 				replace_all (shortcut, "<", "");
 				replace_all (shortcut, ">", "-");

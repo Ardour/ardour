@@ -42,9 +42,10 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-ActionMap Gtkmm2ext::Actions; /* global. Gulp */
 list<Bindings*> Bindings::bindings; /* global. Gulp */
 uint32_t Bindings::_ignored_state = 0;
+list<ActionMap*> ActionMap::action_maps; /* global. Gulp */
+PBD::Signal1<void,Bindings*> Bindings::BindingsChanged;
 
 MouseButton::MouseButton (uint32_t state, uint32_t keycode)
 {
@@ -142,8 +143,21 @@ KeyboardKey::KeyboardKey (uint32_t state, uint32_t keycode)
         _val = (state & ~ignore);
         _val <<= 32;
         _val |= keycode;
-};
+}
 
+string
+KeyboardKey::display_label () const
+{
+	if (key() == 0) {
+		return string();
+	}
+
+	/* This magically returns a string that will display the right thing
+	 *  on all platforms, notably the command key on OS X.
+	 */
+	
+	return gtk_accelerator_get_label (key(), (GdkModifierType) state());
+}
 
 string
 KeyboardKey::name () const
@@ -231,7 +245,7 @@ KeyboardKey::make_key (const string& str, KeyboardKey& k)
 
 Bindings::Bindings (std::string const& name)
 	: _name (name)
-	, _action_map (Actions)
+	, _action_map (0)
 {
 	bindings.push_back (this);
 }
@@ -241,10 +255,67 @@ Bindings::~Bindings()
 	bindings.remove (this);
 }
 
+string
+Bindings::ardour_action_name (RefPtr<Action> action)
+{
+	/* Skip "<Actions>/" */
+	return action->get_accel_path ().substr (10);
+}
+
+KeyboardKey
+Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
+{
+	const string action_name = ardour_action_name (action);
+	
+        for (KeybindingMap::iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
+
+	        /* option one: action has already been associated with the
+	         * binding
+	         */
+
+	        if (k->second.action == action) {
+		        return k->first;
+	        }
+
+	        /* option two: action name matches, so lookup the action,
+	         * setup the association while we're here, and return the binding.
+	         */
+
+	        if (_action_map && k->second.action_name == action_name) {
+		        k->second.action = _action_map->find_action (action_name);
+		        return k->first;
+	        }
+	         
+        }
+
+        for (KeybindingMap::iterator k = release_bindings.begin(); k != release_bindings.end(); ++k) {
+	        
+	        /* option one: action has already been associated with the
+	         * binding
+	         */
+
+	        if (k->second.action == action) {
+		        return k->first;
+	        }
+
+	        /* option two: action name matches, so lookup the action,
+	         * setup the association while we're here, and return the binding.
+	         */
+
+	        if (_action_map && k->second.action_name == action_name) {
+		         k->second.action = _action_map->find_action (action_name);
+		         return k->first;
+	         }
+	         
+        }
+        
+        return KeyboardKey::null_key();
+}
+
 void
 Bindings::set_action_map (ActionMap& actions)
 {
-	_action_map = actions;
+	_action_map = &actions;
 	dissociate ();
 	associate ();
 }
@@ -291,8 +362,12 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
         RefPtr<Action> action;
         
-        if (!k->second.action) {
-	        action = _action_map.find_action (k->second.action_name);
+        if (k->second.action) {
+	        action = k->second.action;
+        } else {
+	        if (_action_map) {
+		        action = _action_map->find_action (k->second.action_name);
+	        }
         }
 
         if (action) {
@@ -311,26 +386,33 @@ Bindings::associate ()
 {
 	KeybindingMap::iterator k;
 
+	if (!_action_map) {
+		return;
+	}
+	
 	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-		k->second.action = _action_map.find_action (k->second.action_name);
+		k->second.action = _action_map->find_action (k->second.action_name);
 		if (k->second.action) {
+			cerr << "push to GTK " << k->first << ' ' << k->second.action_name << endl;
 			push_to_gtk (k->first, k->second.action);
+		} else {
+			cerr << "didn't find " << k->second.action_name << endl;
 		}
 	}
 
 	for (k = release_bindings.begin(); k != release_bindings.end(); ++k) {
-		k->second.action = _action_map.find_action (k->second.action_name);
+		k->second.action = _action_map->find_action (k->second.action_name);
 		/* no working support in GTK for release bindings */
 	}
 
 	MouseButtonBindingMap::iterator b;
 	
 	for (b = button_press_bindings.begin(); b != button_press_bindings.end(); ++b) {
-		b->second.action = _action_map.find_action (b->second.action_name);
+		b->second.action = _action_map->find_action (b->second.action_name);
 	}
 
 	for (b = button_release_bindings.begin(); b != button_release_bindings.end(); ++b) {
-		b->second.action = _action_map.find_action (b->second.action_name);
+		b->second.action = _action_map->find_action (b->second.action_name);
 	}
 }
 
@@ -358,22 +440,14 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
          * up with all bindings/actions. 
          */
 
-        Gtk::AccelKey gtk_key;
+	uint32_t gtk_legal_keyval = kb.key();
+	possibly_translate_keyval_to_make_legal_accelerator (gtk_legal_keyval);
+	KeyboardKey gtk_binding (kb.state(), gtk_legal_keyval);
+	Gtk::AccelKey gtk_key;
+	
+	bool entry_exists = Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key);
 
-        /* tweak the modifier used in the binding so that GTK will accept it
-         * and display something acceptable. The actual keyval should display
-         * correctly even if it involves a key that GTK would not allow
-         * as an accelerator.
-         */
-
-        uint32_t gtk_legal_keyval = kb.key();
-        possibly_translate_keyval_to_make_legal_accelerator (gtk_legal_keyval);
-        KeyboardKey gtk_binding (kb.state(), gtk_legal_keyval);
-        
-
-        bool entry_exists = Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key);
-
-        if (!entry_exists || gtk_key.get_key() == 0) {
+        if (!entry_exists) {
 
 	        /* there is a trick happening here. It turns out that
 	         * gtk_accel_map_add_entry() performs no validation checks on
@@ -386,21 +460,17 @@ Bindings::push_to_gtk (KeyboardKey kb, RefPtr<Action> what)
 	         * happens.
 	         */
 
-	        Gtk::AccelMap::add_entry (what->get_accel_path(),
-	                                  gtk_binding.key(),
-	                                  (Gdk::ModifierType) gtk_binding.state());
-        } else {
-	        warning << string_compose (_("There is more than one key binding defined for %1. Both will work, but only the first will be visible in menus"), what->get_accel_path()) << endmsg;
-        }
-
-        if (!Gtk::AccelMap::lookup_entry (what->get_accel_path(), gtk_key) || gtk_key.get_key() == 0) {
-	        cerr << "GTK binding using " << gtk_binding << " failed for " << what->get_accel_path() << " existing = " << gtk_key.get_key() << " + " << gtk_key.get_mod() << endl;
+	        Gtk::AccelMap::add_entry (what->get_accel_path(), gtk_binding.key(), (Gdk::ModifierType) gtk_binding.state());
         }
 }
 
 bool
 Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, bool can_save)
 {
+	if (!_action_map) {
+		return false;
+	}
+
 	/* We have to search the existing binding map by both action and
 	 * keybinding, because the following are possible:
 	 *
@@ -410,7 +480,7 @@ Bindings::replace (KeyboardKey kb, Operation op, string const & action_name, boo
 	 *   - action is not bound
 	 */
 	
-	RefPtr<Action> action = Actions.find_action (action_name);
+	RefPtr<Action> action = _action_map->find_action (action_name);
 
         if (!action) {
 	        return false;
@@ -475,6 +545,8 @@ Bindings::add (KeyboardKey kb, Operation op, string const& action_name, bool can
         if (can_save) {
 	        Keyboard::keybindings_changed ();
         }
+
+        BindingsChanged (this); /* EMIT SIGNAL */
 }
 
 void
@@ -500,6 +572,8 @@ Bindings::remove (KeyboardKey kb, Operation op, bool can_save)
         if (can_save) {
 	        Keyboard::keybindings_changed ();
         }
+
+        BindingsChanged (this); /* EMIT SIGNAL */
 }
 
 void
@@ -526,6 +600,8 @@ Bindings::remove (RefPtr<Action> action, Operation op, bool can_save)
         if (can_save) {
 	        Keyboard::keybindings_changed ();
         }
+
+        BindingsChanged (this); /* EMIT SIGNAL */
 }
 
 bool
@@ -551,17 +627,22 @@ Bindings::activate (MouseButton bb, Operation op)
 
         RefPtr<Action> action;
         
-        if (!b->second.action) {
-	        action = _action_map.find_action (b->second.action_name);
+        if (b->second.action) {
+	        action = b->second.action;
+        } else {
+	        if (_action_map) {
+		        action = _action_map->find_action (b->second.action_name);
+	        }
         }
 
         if (action) {
 	        /* lets do it ... */
+	        DEBUG_TRACE (DEBUG::Bindings, string_compose ("activating action %1\n", ardour_action_name (action)));
 	        action->activate ();
         }
 
         /* return true even if the action could not be found */
-        
+
         return true;
 }
 
@@ -726,6 +807,10 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
                            std::vector<std::string>& keys,
                            std::vector<RefPtr<Action> >& actions)
 {
+	if (!_action_map) {
+		return;
+	}
+
 	/* build a reverse map from actions to bindings */
 
 	typedef map<Glib::RefPtr<Gtk::Action>,KeyboardKey> ReverseMap;
@@ -738,7 +823,7 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 	/* get a list of all actions */
 
 	ActionMap::Actions all_actions;
-	_action_map.get_actions (all_actions);
+	_action_map->get_actions (all_actions);
 	
 	for (ActionMap::Actions::const_iterator act = all_actions.begin(); act != all_actions.end(); ++act) {
 
@@ -749,7 +834,7 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 		ReverseMap::iterator r = rmap.find (*act);
 
 		if (r != rmap.end()) {
-			keys.push_back (gtk_accelerator_get_label (r->second.key(), (GdkModifierType) r->second.state()));
+			keys.push_back (r->second.display_label());
 		} else {
 			keys.push_back (string());
 		}
@@ -763,6 +848,10 @@ Bindings::get_all_actions (std::vector<std::string>& names,
                            std::vector<std::string>& paths,
                            std::vector<std::string>& keys)
 {
+	if (!_action_map) {
+		return;
+	}
+
 	/* build a reverse map from actions to bindings */
 
 	typedef map<Glib::RefPtr<Gtk::Action>,KeyboardKey> ReverseMap;
@@ -775,7 +864,7 @@ Bindings::get_all_actions (std::vector<std::string>& names,
 	/* get a list of all actions */
 
 	ActionMap::Actions all_actions;
-	_action_map.get_actions (all_actions);
+	_action_map->get_actions (all_actions);
 	
 	for (ActionMap::Actions::const_iterator act = all_actions.begin(); act != all_actions.end(); ++act) {
 		
@@ -784,7 +873,7 @@ Bindings::get_all_actions (std::vector<std::string>& names,
 
 		ReverseMap::iterator r = rmap.find (*act);
 		if (r != rmap.end()) {
-			keys.push_back (gtk_accelerator_get_label (r->second.key(), (GdkModifierType) r->second.state()));
+			keys.push_back (r->second.display_label());
 		} else {
 			keys.push_back (string());
 		}
@@ -792,10 +881,11 @@ Bindings::get_all_actions (std::vector<std::string>& names,
 }
 
 Bindings*
-Bindings::get_bindings (string const& name)
+Bindings::get_bindings (string const& name, ActionMap& map)
 {
 	for (list<Bindings*>::iterator b = bindings.begin(); b != bindings.end(); b++) {
 		if ((*b)->name() == name) {
+			(*b)->set_action_map (map);
 			return *b;
 		}
 	}

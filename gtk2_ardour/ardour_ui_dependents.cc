@@ -31,6 +31,8 @@
 
 #include "ardour/session.h"
 
+#include "gtkmm2ext/bindings.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -62,6 +64,25 @@ ARDOUR_UI::we_have_dependents ()
 	
 	ProcessorBox::register_actions ();
 
+	/* Global, editor, mixer, processor box actions are defined now. Link
+	   them with any bindings, so that GTK does not get a chance to define
+	   the GTK accel map entries first when we ask the GtkUIManager to
+	   create menus/widgets. 
+
+	   If GTK adds the actions to its accel map before we do, we lose our
+	   freedom to use any keys. More precisely, we can use any keys, but
+	   ones that GTK considers illegal as accelerators will not show up in
+	   menus.
+
+	   There are other dynamic actions that can be created by a monitor
+	   section, by step entry dialogs. These need to be handled
+	   separately. They don't tend to use GTK-illegal bindings and more
+	   importantly they don't have menus showing the bindings, so it is
+	   less of an issue.
+	*/
+	
+	Gtkmm2ext::Bindings::associate_all ();
+	
 	editor->setup_tooltips ();
 	editor->UpdateAllTransportClocks.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_transport_clocks));
 

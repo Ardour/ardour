@@ -12,6 +12,8 @@
 #include <gtkmm/radioaction.h>
 #include <gtkmm/toggleaction.h>
 
+#include "pbd/signals.h"
+
 #include "gtkmm2ext/visibility.h"
 
 class XMLNode;
@@ -43,6 +45,8 @@ class LIBGTKMM2EXT_API KeyboardKey
         std::string name() const;
         static bool make_key (const std::string&, KeyboardKey&);
 
+        std::string display_label() const;
+        
   private:
         uint64_t _val;
 };
@@ -99,6 +103,8 @@ class LIBGTKMM2EXT_API ActionMap {
         typedef std::vector<Glib::RefPtr<Gtk::Action> > Actions;
 	void get_actions (Actions&);
 
+	static std::list<ActionMap*> action_maps;
+	
   private:
 <<<<<<< HEAD
         typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
@@ -111,15 +117,6 @@ class LIBGTKMM2EXT_API ActionMap {
         _ActionMap _actions;
 };        
 >>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
-
-/* single global action map for entire application. 
- * 
- * Actions are name-spaced by group, and it makes things
- * much easier if there is a single place to look up
- * any action.
- */
-
-LIBGTKMM2EXT_API extern ActionMap Actions;
 
 class LIBGTKMM2EXT_API Bindings {
   public:
@@ -162,6 +159,8 @@ class LIBGTKMM2EXT_API Bindings {
         void remove (MouseButton, Operation);
         bool activate (MouseButton, Operation);
 
+        KeyboardKey get_binding_for_action (Glib::RefPtr<Gtk::Action>, Operation& op);
+        
         bool load (XMLNode const& node);
         void load_operation (XMLNode const& node);
         void save (XMLNode& root);
@@ -171,11 +170,31 @@ class LIBGTKMM2EXT_API Bindings {
 =======
 >>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
         
+        /* There are modifiers that we just don't care about
+           when it comes to defining bindings. This sets the modifiers
+           that will be ignored when comparing a key event with
+           existing bindings.
+        */
         static void set_ignored_state (int mask) {
                 _ignored_state = mask;
         }
         static uint32_t ignored_state() { return _ignored_state; }
 
+        /* GTK has the following position a Gtk::Action:
+         * 
+         *  accel_path: <Actions>/GroupName/ActionName
+         *  name: ActionName
+         *
+         * We want proper namespacing and we're not interested in
+         * the silly <Actions> "extra" namespace. So in Ardour:
+         *
+         * accel_path: <Actions>/GroupName/ActionName
+         * name: GroupName/ActionName
+         *
+         * This (static) method returns the "ardour" name for the action.
+         */
+        static std::string ardour_action_name (Glib::RefPtr<Gtk::Action>);
+        
         void set_action_map (ActionMap&);
         
         /* used to list all actions */
@@ -192,14 +211,16 @@ class LIBGTKMM2EXT_API Bindings {
 
 	/* all bindings currently in existence, as grouped into Bindings */
 	static std::list<Bindings*> bindings;
-	static Bindings* get_bindings (std::string const& name);
+	static Bindings* get_bindings (std::string const& name, ActionMap&);
 	static void associate_all ();
+
+	static PBD::Signal1<void,Bindings*> BindingsChanged;
 	
   private:
         typedef std::map<KeyboardKey,ActionInfo> KeybindingMap;
 
         std::string  _name;
-        ActionMap&   _action_map;
+        ActionMap*   _action_map;
         KeybindingMap press_bindings;
         KeybindingMap release_bindings;
         

@@ -701,8 +701,7 @@ StepEntry::register_actions ()
 void
 StepEntry::load_bindings ()
 {
-        bindings = Bindings::get_bindings (X_("step-editing"));
-        bindings->set_action_map (myactions);
+	bindings = Bindings::get_bindings (X_("step-editing"), myactions);
         set_data ("ardour-bindings", bindings);
 }
 

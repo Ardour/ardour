@@ -42,9 +42,10 @@ class MixerActor : virtual public sigc::trackable
         Gtkmm2ext::Bindings*  bindings;
 
   protected:
+	Gtkmm2ext::ActionMap myactions;
 	RouteProcessorSelection _selection;
 	RouteUISelection _route_targets;
-
+	
 	virtual void set_route_targets_for_operation () = 0;
 
 	void solo_action ();

@@ -58,6 +58,7 @@ class Touchable;
 namespace Gtkmm2ext {
 
 class TextViewer;
+class Bindings;
 
 extern BaseUI::RequestType NullMessage;
 extern BaseUI::RequestType ErrorMessage;
@@ -168,6 +169,8 @@ class LIBGTKMM2EXT_API UI : public AbstractUI<UIRequest>
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
 	static float ui_scale;
+
+	Gtkmm2ext::Bindings* global_bindings;
 
   protected:
 	virtual void handle_fatal (const char *);
