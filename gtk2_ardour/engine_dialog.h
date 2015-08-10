@@ -46,7 +46,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     static bool need_setup ();
 
     XMLNode& get_state ();
-    void set_state (const XMLNode&);
+    bool set_state (const XMLNode&);
 
     void set_desired_sample_rate (uint32_t);
 
@@ -237,7 +237,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void store_state (State);
     bool equivalent_states (const State&, const State&);
 
-	void set_current_state (const State& state);
+	bool set_current_state (const State& state);
+	void set_default_state ();
 
     bool  _have_control;
 

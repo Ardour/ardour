@@ -283,22 +283,11 @@ EngineControl::EngineControl ()
 	ARDOUR::AudioEngine::instance()->DeviceListChanged.connect (devicelist_connection, MISSING_INVALIDATOR, boost::bind (&EngineControl::device_list_changed, this), gui_context());
 
 	if (audio_setup) {
-		set_state (*audio_setup);
-	}
-
-	if (backend_combo.get_active_text().empty()) {
-		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-		backend_combo.set_active_text (backend_names.front());
-	}
-
-	backend_changed ();
-
-	/* in case the setting the backend failed, e.g. stale config, from set_state(), try again */
-	if (0 == ARDOUR::AudioEngine::instance()->current_backend()) {
-		backend_combo.set_active_text (backend_names.back());
-		/* ignore: don't save state */
-		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-		backend_changed ();
+		if (!set_state (*audio_setup)) {
+			set_default_state ();
+		}
+	} else {
+		set_default_state ();
 	}
 
 	connect_changed_signals ();
@@ -1606,6 +1595,22 @@ EngineControl::get_state ()
 }
 
 void
+EngineControl::set_default_state ()
+{
+	vector<string> backend_names;
+	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
+
+	for (vector<const ARDOUR::AudioBackendInfo*>::const_iterator b = backends.begin(); b != backends.end(); ++b) {
+		backend_names.push_back ((*b)->name);
+	}
+	backend_combo.set_active_text (backend_names.front());
+
+	// We could set default backends per platform etc here
+
+	backend_changed ();
+}
+
+bool
 EngineControl::set_state (const XMLNode& root)
 {
 	XMLNodeList          clist, cclist;
@@ -1617,7 +1622,7 @@ EngineControl::set_state (const XMLNode& root)
 	fprintf (stderr, "EngineControl::set_state\n");
 
 	if (root.name() != "AudioMIDISetup") {
-		return;
+		return false;
 	}
 
 	clist = root.children();
@@ -1770,20 +1775,89 @@ EngineControl::set_state (const XMLNode& root)
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
 		if ((*i)->active) {
-			set_current_state (*i);
-			break;
+			return set_current_state (*i);
 		}
 	}
+	return false;
 }
 
-void
+bool
 EngineControl::set_current_state (const State& state)
 {
 	DEBUG_ECONTROL ("set_current_state");
-	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
+
+	boost::shared_ptr<ARDOUR::AudioBackend> backend;
+
+	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (
+	          state->backend, "ardour", ""))) {
+		DEBUG_ECONTROL (string_compose ("Unable to set backend to %1", state->backend));
+		// this shouldn't happen as the invalid backend names should have been
+		// removed from the list of states.
+		return false;
+	}
+
+	// now reflect the change in the backend in the GUI so backend_changed will
+	// do the right thing
 	backend_combo.set_active_text (state->backend);
-	driver_combo.set_active_text (state->driver);
+
+	if (!state->driver.empty ()) {
+		if (!backend->requires_driver_selection ()) {
+			DEBUG_ECONTROL ("Backend should require driver selection");
+			// A backend has changed from having driver selection to not having
+			// it or someone has been manually editing a config file and messed
+			// it up
+			return false;
+		}
+
+		if (backend->set_driver (state->driver) != 0) {
+			DEBUG_ECONTROL (string_compose ("Unable to set driver %1", state->driver));
+			// Driver names for a backend have changed and the name in the
+			// config file is now invalid or support for driver is no longer
+			// included in the backend
+			return false;
+		}
+		// no need to set the driver_combo as backend_changed will use
+		// backend->driver_name to set the active driver
+	}
+
+	if (!state->device.empty ()) {
+		if (backend->set_device_name (state->device) != 0) {
+			DEBUG_ECONTROL (
+			    string_compose ("Unable to set device name %1", state->device));
+			// device is no longer available on the system
+			return false;
+		}
+		// no need to set active device as it will be picked up in
+		// via backend_changed ()/set_device_popdown_strings
+
+	} else {
+		// backend supports separate input/output devices
+		if (backend->set_input_device_name (state->input_device) != 0) {
+			DEBUG_ECONTROL (string_compose ("Unable to set input device name %1",
+			                                state->input_device));
+			// input device is no longer available on the system
+			return false;
+		}
+
+		if (backend->set_output_device_name (state->output_device) != 0) {
+			DEBUG_ECONTROL (string_compose ("Unable to set output device name %1",
+			                                state->input_device));
+			// output device is no longer available on the system
+			return false;
+		}
+		// no need to set active devices as it will be picked up in via
+		// backend_changed ()/set_*_device_popdown_strings
+	}
+
 	backend_changed ();
+
+	// Now restore the state of the rest of the controls
+
+	// We don't use a SignalBlocker as set_current_state is currently only
+	// called from set_state before any signals are connected. If at some point
+	// a more general named state mechanism is implemented and
+	// set_current_state is called while signals are connected then a
+	// SignalBlocker will need to be instantiated before setting these.
 
 	device_combo.set_active_text (state->device);
 	input_device_combo.set_active_text (state->input_device);
@@ -1793,6 +1867,7 @@ EngineControl::set_current_state (const State& state)
 	input_latency.set_value (state->input_latency);
 	output_latency.set_value (state->output_latency);
 	midi_option_combo.set_active_text (state->midi_option);
+	return true;
 }
 
 int
