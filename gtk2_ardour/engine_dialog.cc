@@ -843,31 +843,8 @@ EngineControl::backend_changed ()
 	_midi_devices.clear();
 
 	if (backend->requires_driver_selection()) {
-		vector<string> drivers = backend->enumerate_drivers();
-		driver_combo.set_sensitive (true);
-
-		if (!drivers.empty()) {
-			{
-				string current_driver;
-				current_driver = backend->driver_name ();
-
-				DEBUG_ECONTROL (string_compose ("backend->driver_name: %1", current_driver));
-
-				// driver might not have been set yet
-				if (current_driver == "") {
-					current_driver = driver_combo.get_active_text ();
-					if (current_driver == "")
-						// driver has never been set, make sure it's not blank
-						current_driver = drivers.front ();
-				}
-
-				PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
-				set_popdown_strings (driver_combo, drivers);
-				DEBUG_ECONTROL (
-				    string_compose ("driver_combo.set_active_text: %1", current_driver));
-				driver_combo.set_active_text (current_driver);
-			}
-
+		if (set_driver_popdown_strings ()) {
+			driver_combo.set_sensitive (true);
 			driver_changed ();
 		}
 
@@ -930,21 +907,37 @@ EngineControl::print_channel_count (Gtk::SpinButton* sb)
 	return true;
 }
 
+// @return true if there are drivers available
 bool
 EngineControl::set_driver_popdown_strings ()
 {
 	DEBUG_ECONTROL ("set_driver_popdown_strings");
-	string backend_name = backend_combo.get_active_text();
-	boost::shared_ptr<ARDOUR::AudioBackend> backend;
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	vector<string> drivers = backend->enumerate_drivers();
 
-	if (!(backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, "ardour", ""))) {
-		/* eh? setting the backend failed... how ? */
-		/* A: stale config contains a backend that does not exist in current build */
+	if (drivers.empty()) {
+		// This is an error...?
 		return false;
 	}
 
-	vector<string> drivers = backend->enumerate_drivers();
+	string current_driver;
+	current_driver = backend->driver_name ();
+
+	DEBUG_ECONTROL (string_compose ("backend->driver_name: %1", current_driver));
+
+	// driver might not have been set yet
+	if (current_driver == "") {
+		current_driver = driver_combo.get_active_text ();
+		if (current_driver == "")
+			// driver has never been set, make sure it's not blank
+			current_driver = drivers.front ();
+	}
+
+	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 	set_popdown_strings (driver_combo, drivers);
+	DEBUG_ECONTROL (
+			string_compose ("driver_combo.set_active_text: %1", current_driver));
+	driver_combo.set_active_text (current_driver);
 	return true;
 }
 
