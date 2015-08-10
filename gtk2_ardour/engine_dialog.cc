@@ -992,8 +992,6 @@ EngineControl::set_device_popdown_strings ()
 
 			device_combo.set_active_text (current_device);
 		}
-
-		device_changed ();
 		return true;
 	}
 	return false;
@@ -1039,8 +1037,6 @@ EngineControl::set_input_device_popdown_strings ()
 			DEBUG_ECONTROL (string_compose ("set input_device_combo active text: %1", current_device));
 			input_device_combo.set_active_text (current_device);
 		}
-
-		device_changed ();
 		return true;
 	}
 
@@ -1087,8 +1083,6 @@ EngineControl::set_output_device_popdown_strings ()
 			DEBUG_ECONTROL (string_compose ("set input_device_combo active text: %1", current_device));
 			output_device_combo.set_active_text (current_device);
 		}
-
-		device_changed ();
 		return true;
 	}
 
@@ -1115,6 +1109,8 @@ EngineControl::list_devices ()
 	}
 
 	if (devices_available) {
+		device_changed ();
+
 		input_latency.set_sensitive (true);
 		output_latency.set_sensitive (true);
 		input_channels.set_sensitive (true);
