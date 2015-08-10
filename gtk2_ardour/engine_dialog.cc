@@ -981,7 +981,6 @@ EngineControl::set_device_popdown_strings ()
 				// for this backend) Let's make sure it's not blank
 				current_device = available_devices.front ();
 
-			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			set_popdown_strings (device_combo, available_devices);
 			DEBUG_ECONTROL (string_compose ("set device_combo active text: %1", current_device));
 
@@ -1026,7 +1025,6 @@ EngineControl::set_input_device_popdown_strings ()
 				// for this backend) Let's make sure it's not blank
 				current_device = available_devices.front ();
 
-			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			set_popdown_strings (input_device_combo, available_devices);
 
 			DEBUG_ECONTROL (string_compose ("set input_device_combo active text: %1", current_device));
@@ -1072,7 +1070,6 @@ EngineControl::set_output_device_popdown_strings ()
 				// for this backend) Let's make sure it's not blank
 				current_device = available_devices.front ();
 
-			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			set_popdown_strings (output_device_combo, available_devices);
 
 			DEBUG_ECONTROL (string_compose ("set input_device_combo active text: %1", current_device));
