@@ -880,6 +880,23 @@ EngineControl::backend_changed ()
 		list_devices ();
 	}
 
+	update_midi_options ();
+
+	connect_disconnect_button.hide();
+
+	midi_option_changed();
+
+	started_at_least_once = false;
+
+	if (!ignore_changes) {
+		maybe_display_saved_state ();
+	}
+}
+
+void
+EngineControl::update_midi_options ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	vector<string> midi_options = backend->enumerate_midi_options();
 
 	if (midi_options.size() == 1) {
@@ -893,16 +910,6 @@ EngineControl::backend_changed ()
 		} else {
 			midi_option_combo.set_sensitive (false);
 		}
-	}
-
-	connect_disconnect_button.hide();
-
-	midi_option_changed();
-
-	started_at_least_once = false;
-
-	if (!ignore_changes) {
-		maybe_display_saved_state ();
 	}
 }
 
