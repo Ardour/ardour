@@ -30,6 +30,7 @@ namespace PBD {
                 extern DebugBits CutNPaste;
                 extern DebugBits Accelerators;
                 extern DebugBits GUITiming;
+                extern DebugBits EngineControl;
 	}
 }
 
