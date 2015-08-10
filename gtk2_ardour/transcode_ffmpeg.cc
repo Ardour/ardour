@@ -298,7 +298,15 @@ TranscodeFfmpeg::format_metadata (std::string key, std::string value)
 
 	size_t len = key.length() + v1.length() + 4;
 	char *mds = (char*) calloc(len, sizeof(char));
+#ifdef PLATFORM_WINDOWS
+	/* SystemExec::make_wargs() adds quotes around the complete argument
+	 * windows uses CreateProcess() with a parameter string
+	 * (and not an array list of separate arguments)
+	 */
+	snprintf(mds, len, "%s=%s", key.c_str(), v1.c_str());
+#else
 	snprintf(mds, len, "%s=\"%s\"", key.c_str(), v1.c_str());
+#endif
 	return mds;
 }
 
