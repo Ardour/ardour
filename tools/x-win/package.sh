@@ -177,8 +177,6 @@ echo " === bundle completed, cleaning up"
 echo " === complete"
 du -sh $DESTDIR
 
-( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt
-
 ################################################################################
 ### get video tools
 if test -z "$NOVIDEOTOOLS"; then
@@ -276,6 +274,8 @@ if test -n "$MIXBUS"; then
 	cp "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
 		"$ALIBDIR/ladspa/strip/rrison_channelstrip.dll"
 fi
+
+( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt
 
 ################################################################################
 echo " === Preparing Windows Installer"
