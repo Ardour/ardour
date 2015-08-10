@@ -933,7 +933,6 @@ EngineControl::set_driver_popdown_strings ()
 			current_driver = drivers.front ();
 	}
 
-	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 	set_popdown_strings (driver_combo, drivers);
 	DEBUG_ECONTROL (
 			string_compose ("driver_combo.set_active_text: %1", current_driver));
