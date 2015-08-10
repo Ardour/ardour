@@ -38,6 +38,7 @@ def build(bld):
     autowaf.ensure_visible_symbols (obj, True)
     obj.vnum         = LIBPTFORMAT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
+    obj.defines      = [ 'LIBPTFORMAT_DLL_EXPORTS' ]
 
 def shutdown():
     autowaf.shutdown()
