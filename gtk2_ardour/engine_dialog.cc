@@ -1817,16 +1817,6 @@ EngineControl::set_current_state (const State& state)
 	DEBUG_ECONTROL ("set_current_state");
 	PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 	backend_combo.set_active_text (state->backend);
-
-	/* The driver popdown strings need to be populated now so that
-	 * set_active_text will actually set a valid entry. Then
-	 * backend_changed() will populate all the other combo's so they
-	 * can also be set to valid entries and the state will be restored
-	 * correctly.
-	 */
-	if (!state->driver.empty()) {
-		set_driver_popdown_strings ();
-	}
 	driver_combo.set_active_text (state->driver);
 	backend_changed ();
 
