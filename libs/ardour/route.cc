@@ -96,7 +96,7 @@ Route::Route (Session& sess, string name, Flag flg, DataType default_type)
 	, _self_solo (false)
 	, _soloed_by_others_upstream (0)
 	, _soloed_by_others_downstream (0)
-	, _solo_isolated (0)
+	, _solo_isolated (false)
 	, _solo_isolated_by_upstream (0)
 	, _denormal_protection (false)
 	, _recordable (true)
@@ -989,18 +989,16 @@ Route::set_solo_isolated (bool yn, void *src)
 	bool changed = false;
 
 	if (yn) {
-		if (_solo_isolated == 0) {
+		if (_solo_isolated == false) {
 			_mute_master->set_solo_ignore (true);
 			changed = true;
 		}
-		_solo_isolated++;
+		_solo_isolated = true;
 	} else {
-		if (_solo_isolated > 0) {
-			_solo_isolated--;
-			if (_solo_isolated == 0) {
-				_mute_master->set_solo_ignore (false);
-				changed = true;
-			}
+		if (_solo_isolated == true) {
+			_solo_isolated = false;
+            _mute_master->set_solo_ignore (false);
+			changed = true;
 		}
 	}
 
@@ -1034,7 +1032,7 @@ Route::set_solo_isolated (bool yn, void *src)
 bool
 Route::solo_isolated () const
 {
-	return (_solo_isolated > 0) || (_solo_isolated_by_upstream > 0);
+	return (_solo_isolated == true) || (_solo_isolated_by_upstream > 0);
 }
 
 void

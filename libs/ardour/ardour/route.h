@@ -546,7 +546,7 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	bool           _self_solo;
 	uint32_t       _soloed_by_others_upstream;
 	uint32_t       _soloed_by_others_downstream;
-	uint32_t       _solo_isolated;
+	bool           _solo_isolated;
 	uint32_t       _solo_isolated_by_upstream;
 
 	void mod_solo_isolated_by_upstream (bool, void*);
