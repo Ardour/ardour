@@ -512,7 +512,6 @@ PTFFormat::parserest5(void) {
 			offsetbytes = (ptfunxored[j+1] & 0xf0) >> 4;
 			//somethingbytes = (ptfunxored[j+1] & 0xf);
 			findex = ptfunxored[k+14];
-			printf("findex=%x\n", findex);
 			j--;
 			uint32_t start = 0;
 			switch (startbytes) {
