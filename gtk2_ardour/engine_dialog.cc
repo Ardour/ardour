@@ -915,27 +915,24 @@ EngineControl::set_driver_popdown_strings ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	vector<string> drivers = backend->enumerate_drivers();
 
-	if (drivers.empty()) {
+	if (drivers.empty ()) {
 		// This is an error...?
 		return false;
 	}
 
-	string current_driver;
-	current_driver = backend->driver_name ();
+	string current_driver = backend->driver_name ();
 
 	DEBUG_ECONTROL (string_compose ("backend->driver_name: %1", current_driver));
 
-	// driver might not have been set yet
-	if (current_driver == "") {
-		current_driver = driver_combo.get_active_text ();
-		if (current_driver == "")
-			// driver has never been set, make sure it's not blank
-			current_driver = drivers.front ();
+	if (std::find (drivers.begin (), drivers.end (), current_driver) ==
+	    drivers.end ()) {
+
+		current_driver = drivers.front ();
 	}
 
 	set_popdown_strings (driver_combo, drivers);
 	DEBUG_ECONTROL (
-			string_compose ("driver_combo.set_active_text: %1", current_driver));
+	    string_compose ("driver_combo.set_active_text: %1", current_driver));
 	driver_combo.set_active_text (current_driver);
 	return true;
 }
