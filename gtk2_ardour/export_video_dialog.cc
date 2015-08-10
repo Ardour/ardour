@@ -195,9 +195,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	t->attach (aspect_combo, 3, 4, ty, ty+1); ty++;
 	t->attach (bframes_checkbox, 0, 2, ty, ty+1);
 	t->attach (deinterlace_checkbox, 2, 4, ty, ty+1); ty++;
-#ifndef PLATFORM_WINDOWS
 	t->attach (meta_checkbox, 2, 4, ty, ty+1); ty++;
-#endif
 	t->attach (optimizations_checkbox, 0, 1, ty, ty+1);
 	t->attach (optimizations_label, 1, 4, ty, ty+1); ty++;
 #if 1 /* tentative debug mode */
