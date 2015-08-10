@@ -235,7 +235,7 @@ if test -n "$MIXBUS"; then # TODO use separate variable
 	rsync -a -q --partial \
 		rsync://x42-plugins.com/x42/win/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip \
 		"${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
-	unzip -q -d "$ALIBDIR/LV3/" "${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
+	unzip -q -d "$ALIBDIR/LV2/" "${SRCDIR}/x42-meters-lv2-${WARCH}-${METERS_VERSION}.zip"
 
 	SETBFREE_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/setBfree.latest.txt)
 	rsync -a -q --partial \
