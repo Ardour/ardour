@@ -824,8 +824,7 @@ EngineControl::refresh_midi_display (std::string focus)
 void
 EngineControl::backend_changed ()
 {
-	DEBUG_ECONTROL ("backend_changed");
-
+	SignalBlocker blocker (*this, "backend_changed");
 	string backend_name = backend_combo.get_active_text();
 	boost::shared_ptr<ARDOUR::AudioBackend> backend;
 
@@ -1156,7 +1155,7 @@ EngineControl::list_devices ()
 void
 EngineControl::driver_changed ()
 {
-	DEBUG_ECONTROL ("driver_changed");
+	SignalBlocker blocker (*this, "driver_changed");
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
@@ -1261,7 +1260,7 @@ EngineControl::set_buffersize_popdown_strings (const std::string& device_name)
 void
 EngineControl::device_changed ()
 {
-	DEBUG_ECONTROL ("device_changed");
+	SignalBlocker blocker (*this, "device_changed");
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
