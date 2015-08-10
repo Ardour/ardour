@@ -20,7 +20,9 @@
 #include <vector>
 #include <stdint.h>
 
-class PTFFormat {
+#include "ptformat/visibility.h"
+
+class LIBPTFORMAT_API PTFFormat {
 public:
 	PTFFormat();
 	~PTFFormat();
