@@ -272,7 +272,7 @@ if test -n "$MIXBUS"; then
 		http://www.harrisonconsoles.com/mixbus/mb3/${WARCH}/harrison_channelstrip.dll
 
 	cp "${SRCDIR}/harrison_channelstrip.${WARCH}.dll" \
-		"$ALIBDIR/ladspa/strip/rrison_channelstrip.dll"
+		"$ALIBDIR/ladspa/strip/harrison_channelstrip.dll"
 fi
 
 ( cd $DESTDIR ; find . ) > ${TMPDIR}/file_list.txt
