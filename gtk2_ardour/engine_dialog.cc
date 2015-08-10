@@ -1156,8 +1156,14 @@ EngineControl::set_samplerate_popdown_strings (const std::string& device_name)
 		sample_rate_combo.set_sensitive (true);
 		set_popdown_strings (sample_rate_combo, s);
 
-		if (desired.empty()) {
-			sample_rate_combo.set_active_text (rate_as_string (backend->default_sample_rate()));
+		if (desired.empty ()) {
+			float new_active_sr = backend->default_sample_rate ();
+
+			if (std::find (sr.begin (), sr.end (), new_active_sr) == sr.end ()) {
+				new_active_sr = sr.front ();
+			}
+
+			sample_rate_combo.set_active_text (rate_as_string (new_active_sr));
 		} else {
 			sample_rate_combo.set_active_text (desired);
 		}
