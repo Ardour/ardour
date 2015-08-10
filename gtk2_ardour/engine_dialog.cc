@@ -345,6 +345,7 @@ void
 EngineControl::block_changed_signals ()
 {
 	if (block_signals++ == 0) {
+		DEBUG_ECONTROL ("Blocking changed signals");
 		backend_combo_connection.block ();
 		driver_combo_connection.block ();
 		sample_rate_combo_connection.block ();
@@ -364,6 +365,7 @@ void
 EngineControl::unblock_changed_signals ()
 {
 	if (--block_signals == 0) {
+		DEBUG_ECONTROL ("Unblocking changed signals");
 		backend_combo_connection.unblock ();
 		driver_combo_connection.unblock ();
 		sample_rate_combo_connection.unblock ();
