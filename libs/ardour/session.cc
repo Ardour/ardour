@@ -3554,7 +3554,7 @@ Session::routes_solo_changed (boost::shared_ptr<RouteList> solo_change_routes)
 	solo_update_disabled = true;
 	RouteList uninvolved;
 
-	for (RouteList::iterator route = solo_change_routes->begin(); route != solo_change_routes->begin(); ++route) {
+	for (RouteList::iterator route = solo_change_routes->begin(); route != solo_change_routes->end(); ++route) {
 
 		if ((*route)->self_soloed() ) {
 			delta = 1;
