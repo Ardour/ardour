@@ -1190,7 +1190,7 @@ EngineControl::set_buffersize_popdown_strings (const std::string& device_name)
 		bs.push_back (4096);
 		bs.push_back (8192);
 	}
-	s.clear ();
+
 	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
 		s.push_back (bufsize_as_string (*x));
 	}
