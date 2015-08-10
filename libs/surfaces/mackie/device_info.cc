@@ -246,6 +246,8 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		if ((prop = child->property ("value")) != 0) {
 			if ((_master_position = atoi (prop->value().c_str())) == 0) {
 				_master_position = 0;
+			} else if (_master_position > 0) {
+				_master_position --;
 			}
 		}
 	}
