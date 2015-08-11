@@ -164,8 +164,10 @@ setup_hardware_optimization (bool try_optimization)
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 
+#if 0 /* AVX code doesn't compile on Linux yet, don't use generic code instead */
+		
 		if (fpu.has_avx()) {
-
+			
 			info << "Using AVX optimized routines" << endmsg;
 
 			// AVX SET
@@ -178,7 +180,9 @@ setup_hardware_optimization (bool try_optimization)
 
 			generic_mix_functions = false;
 
-		} else if (fpu.has_sse()) {
+		} else
+#endif
+			if (fpu.has_sse()) {
 
 			info << "Using SSE optimized routines" << endmsg;
 
