@@ -797,9 +797,15 @@ EngineControl::update_sensitivity ()
 	}
 
 	if (ARDOUR::AudioEngine::instance()->running() && _have_control) {
+		input_device_combo.set_sensitive (false);
+		output_device_combo.set_sensitive (false);
+		device_combo.set_sensitive (false);
 		stop_engine_button.set_sensitive (true);
 		stop_engine_button.show ();
 	} else {
+		input_device_combo.set_sensitive (true);
+		output_device_combo.set_sensitive (true);
+		device_combo.set_sensitive (true);
 		stop_engine_button.set_sensitive (false);
 		stop_engine_button.hide ();
 	}
