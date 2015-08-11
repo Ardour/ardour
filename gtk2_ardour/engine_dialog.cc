@@ -800,12 +800,18 @@ EngineControl::update_sensitivity ()
 		input_device_combo.set_sensitive (false);
 		output_device_combo.set_sensitive (false);
 		device_combo.set_sensitive (false);
+		driver_combo.set_sensitive (false);
 		stop_engine_button.set_sensitive (true);
 		stop_engine_button.show ();
 	} else {
 		input_device_combo.set_sensitive (true);
 		output_device_combo.set_sensitive (true);
 		device_combo.set_sensitive (true);
+		if (backend->requires_driver_selection() && get_popdown_string_count(driver_combo) > 0) {
+			driver_combo.set_sensitive (true);
+		} else {
+			driver_combo.set_sensitive (false);
+		}
 		stop_engine_button.set_sensitive (false);
 		stop_engine_button.hide ();
 	}
@@ -936,12 +942,9 @@ EngineControl::backend_changed ()
 
 	if (backend->requires_driver_selection()) {
 		if (set_driver_popdown_strings ()) {
-			driver_combo.set_sensitive (true);
 			driver_changed ();
 		}
-
 	} else {
-		driver_combo.set_sensitive (false);
 		/* this will change the device text which will cause a call to
 		 * device changed which will set up parameters
 		 */
