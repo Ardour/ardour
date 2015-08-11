@@ -1213,7 +1213,7 @@ EngineControl::get_sample_rates_for_all_devices ()
 	vector<float> all_rates;
 
 	if (backend->use_separate_input_and_output_devices ()) {
-		all_rates = backend->available_sample_rates (get_input_device_name (), get_output_device_name ());
+		all_rates = backend->available_sample_rates2 (get_input_device_name (), get_output_device_name ());
 	} else {
 		all_rates = backend->available_sample_rates (get_device_name ());
 	}
@@ -1285,7 +1285,7 @@ EngineControl::get_buffer_sizes_for_all_devices ()
 	vector<uint32_t> all_sizes;
 
 	if (backend->use_separate_input_and_output_devices ()) {
-		all_sizes = backend->available_buffer_sizes (get_input_device_name (), get_output_device_name ());
+		all_sizes = backend->available_buffer_sizes2 (get_input_device_name (), get_output_device_name ());
 	} else {
 		all_sizes = backend->available_buffer_sizes (get_device_name ());
 	}
