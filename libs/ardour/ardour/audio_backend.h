@@ -191,6 +191,20 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual std::vector<float> available_sample_rates (const std::string& device) const = 0;
 
+    /* backends that support separate input and output devices should
+     * implement this function and return an intersection (not union) of available
+     * sample rates valid for the given input + output device combination.
+     */
+    virtual std::vector<float> available_sample_rates (const std::string& input_device, const std::string& output_device) const {
+	    std::vector<float> input_sizes  = available_sample_rates (input_device);
+	    std::vector<float> output_sizes = available_sample_rates (output_device);
+	    std::vector<float> rv;
+	    std::set_union (input_sizes.begin (), input_sizes.end (),
+			    output_sizes.begin (), output_sizes.end (),
+			    std::back_inserter (rv));
+	    return rv;
+    }
+
     /* Returns the default sample rate that will be shown to the user when
      * configuration options are first presented. If the derived class
      * needs or wants to override this, it can. It also MUST override this
@@ -210,6 +224,19 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      */
     virtual std::vector<uint32_t> available_buffer_sizes (const std::string& device) const = 0;
 
+    /* backends that support separate input and output devices should
+     * implement this function and return an intersection (not union) of available
+     * buffer sizes valid for the given input + output device combination.
+     */
+    virtual std::vector<uint32_t> available_buffer_sizes (const std::string& input_device, const std::string& output_device) const {
+	    std::vector<uint32_t> input_rates  = available_buffer_sizes (input_device);
+	    std::vector<uint32_t> output_rates = available_buffer_sizes (output_device);
+	    std::vector<uint32_t> rv;
+	    std::set_union (input_rates.begin (), input_rates.end (),
+			    output_rates.begin (), output_rates.end (),
+			    std::back_inserter (rv));
+	    return rv;
+    }
     /* Returns the default buffer size that will be shown to the user when
      * configuration options are first presented. If the derived class
      * needs or wants to override this, it can. It also MUST override this
