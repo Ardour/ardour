@@ -44,6 +44,9 @@ std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_output_audio_device_s
 std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_duplex_audio_device_status;
 std::vector<AudioBackend::DeviceStatus> AlsaAudioBackend::_midi_device_status;
 
+ALSADeviceInfo AlsaAudioBackend::_input_audio_device_info;
+ALSADeviceInfo AlsaAudioBackend::_output_audio_device_info;
+
 AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	: AudioBackend (e, info)
 	, _pcmi (0)
@@ -70,6 +73,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
+	_input_audio_device_info.valid = false;
+	_output_audio_device_info.valid = false;
 }
 
 AlsaAudioBackend::~AlsaAudioBackend ()
@@ -211,47 +216,118 @@ AlsaAudioBackend::acquire_device(const char* device_name)
 }
 
 std::vector<float>
-AlsaAudioBackend::available_sample_rates (const std::string&) const
+AlsaAudioBackend::available_sample_rates (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<float> sr;
-	sr.push_back (8000.0);
-	sr.push_back (22050.0);
-	sr.push_back (24000.0);
-	sr.push_back (44100.0);
-	sr.push_back (48000.0);
-	sr.push_back (88200.0);
-	sr.push_back (96000.0);
-	sr.push_back (176400.0);
-	sr.push_back (192000.0);
+	if (input_device == _("None") && output_device == _("None")) {
+		return sr;
+	}
+	else if (input_device == _("None")) {
+		sr = available_sample_rates (output_device);
+	}
+	else if (output_device == _("None")) {
+		sr = available_sample_rates (input_device);
+	} else {
+		std::vector<float> sr_in =  available_sample_rates (input_device);
+		std::vector<float> sr_out = available_sample_rates (output_device);
+		std::set_intersection (sr_in.begin(), sr_in.end(), sr_out.begin(), sr_out.end(), std::back_inserter(sr));
+	}
+	return sr;
+}
+
+std::vector<float>
+AlsaAudioBackend::available_sample_rates (const std::string& device) const
+{
+	ALSADeviceInfo *nfo = NULL;
+	std::vector<float> sr;
+	if (device == _("None")) {
+		return sr;
+	}
+	if (device == _input_audio_device && _input_audio_device_info.valid) {
+		nfo = &_input_audio_device_info;
+	}
+	else if (device == _output_audio_device && _output_audio_device_info.valid) {
+		nfo = &_output_audio_device_info;
+	}
+
+	static const float avail_rates [] = { 8000, 22050.0, 24000.0, 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0 };
+
+	for (size_t i = 0 ; i < sizeof(avail_rates) / sizeof(float); ++i) {
+		if (!nfo || (avail_rates[i] >= nfo->min_rate && avail_rates[i] <= nfo->max_rate)) {
+			sr.push_back (avail_rates[i]);
+		}
+	}
+
 	return sr;
 }
 
 std::vector<uint32_t>
-AlsaAudioBackend::available_buffer_sizes (const std::string&) const
+AlsaAudioBackend::available_buffer_sizes (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<uint32_t> bs;
-	bs.push_back (32);
-	bs.push_back (64);
-	bs.push_back (128);
-	bs.push_back (256);
-	bs.push_back (512);
-	bs.push_back (1024);
-	bs.push_back (2048);
-	bs.push_back (4096);
-	bs.push_back (8192);
+	if (input_device == _("None") && output_device == _("None")) {
+		return bs;
+	}
+	else if (input_device == _("None")) {
+		bs = available_buffer_sizes (output_device);
+	}
+	else if (output_device == _("None")) {
+		bs = available_buffer_sizes (input_device);
+	} else {
+		std::vector<uint32_t> bs_in =  available_buffer_sizes (input_device);
+		std::vector<uint32_t> bs_out = available_buffer_sizes (output_device);
+		std::set_intersection (bs_in.begin(), bs_in.end(), bs_out.begin(), bs_out.end(), std::back_inserter(bs));
+	}
+	return bs;
+}
+
+std::vector<uint32_t>
+AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
+{
+	ALSADeviceInfo *nfo = NULL;
+	std::vector<uint32_t> bs;
+	if (device == _("None")) {
+		return bs;
+	}
+	if (device == _input_audio_device && _input_audio_device_info.valid) {
+		nfo = &_input_audio_device_info;
+	}
+	else if (device == _output_audio_device && _output_audio_device_info.valid) {
+		nfo = &_output_audio_device_info;
+	}
+
+	static const unsigned long avail_sizes [] = { 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 };
+
+	for (size_t i = 0 ; i < sizeof(avail_sizes) / sizeof(unsigned long); ++i) {
+		if (!nfo || (avail_sizes[i] >= nfo->min_size && avail_sizes[i] <= nfo->max_size)) {
+			bs.push_back (avail_sizes[i]);
+		}
+	}
 	return bs;
 }
 
 uint32_t
-AlsaAudioBackend::available_input_channel_count (const std::string&) const
+AlsaAudioBackend::available_input_channel_count (const std::string& device) const
 {
-	return 128; // TODO query current device
+	if (device == _("None")) {
+		return 0;
+	}
+	if (device == _input_audio_device && _input_audio_device_info.valid) {
+		return _input_audio_device_info.max_channels;
+	}
+	return 128;
 }
 
 uint32_t
-AlsaAudioBackend::available_output_channel_count (const std::string&) const
+AlsaAudioBackend::available_output_channel_count (const std::string& device) const
 {
-	return 128; // TODO query current device
+	if (device == _("None")) {
+		return 0;
+	}
+	if (device == _output_audio_device && _output_audio_device_info.valid) {
+		return _output_audio_device_info.max_channels;
+	}
+	return 128;
 }
 
 bool
@@ -269,14 +345,62 @@ AlsaAudioBackend::can_change_buffer_size_when_running () const
 int
 AlsaAudioBackend::set_input_device_name (const std::string& d)
 {
+	if (_input_audio_device == d) {
+		return 0;
+	}
 	_input_audio_device = d;
+
+	if (d == _("None")) {
+		_input_audio_device_info.valid = false;
+		return 0;
+	}
+	std::string alsa_device;
+	std::map<std::string, std::string> devices;
+
+	get_alsa_audio_device_names(devices, HalfDuplexIn);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (i->first == d) {
+			alsa_device = i->second;
+			break;
+		}
+	}
+	if (alsa_device == "") {
+		_input_audio_device_info.valid = false;
+		return 1;
+	}
+	/* device will be busy once used, hence cache the parameters */
+	/* return */ get_alsa_device_parameters (alsa_device.c_str(), true, &_input_audio_device_info);
 	return 0;
 }
 
 int
 AlsaAudioBackend::set_output_device_name (const std::string& d)
 {
+	if (_output_audio_device == d) {
+		return 0;
+	}
+
 	_output_audio_device = d;
+
+	if (d == _("None")) {
+		_output_audio_device_info.valid = false;
+		return 0;
+	}
+	std::string alsa_device;
+	std::map<std::string, std::string> devices;
+
+	get_alsa_audio_device_names(devices, HalfDuplexOut);
+	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
+		if (i->first == d) {
+			alsa_device = i->second;
+			break;
+		}
+	}
+	if (alsa_device == "") {
+		_output_audio_device_info.valid = false;
+		return 1;
+	}
+	/* return */ get_alsa_device_parameters (alsa_device.c_str(), true, &_output_audio_device_info);
 	return 0;
 }
 

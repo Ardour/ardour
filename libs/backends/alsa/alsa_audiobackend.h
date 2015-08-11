@@ -34,6 +34,8 @@
 #include "ardour/system_exec.h"
 #include "ardour/types.h"
 
+#include "ardouralsautil/deviceinfo.h"
+
 #include "zita-alsa-pcmi.h"
 #include "alsa_rawmidi.h"
 #include "alsa_sequencer.h"
@@ -169,7 +171,9 @@ class AlsaAudioBackend : public AudioBackend {
 		std::vector<DeviceStatus> enumerate_input_devices () const;
 		std::vector<DeviceStatus> enumerate_output_devices () const;
 		std::vector<float> available_sample_rates (const std::string& device) const;
+		std::vector<float> available_sample_rates (const std::string&, const std::string&) const;
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
+		std::vector<uint32_t> available_buffer_sizes (const std::string&, const std::string&) const;
 		uint32_t available_input_channel_count (const std::string& device) const;
 		uint32_t available_output_channel_count (const std::string& device) const;
 
@@ -319,6 +323,8 @@ class AlsaAudioBackend : public AudioBackend {
 		static std::vector<AudioBackend::DeviceStatus> _output_audio_device_status;
 		static std::vector<AudioBackend::DeviceStatus> _duplex_audio_device_status;
 		static std::vector<AudioBackend::DeviceStatus> _midi_device_status;
+		static ARDOUR::ALSADeviceInfo _input_audio_device_info;
+		static ARDOUR::ALSADeviceInfo _output_audio_device_info;
 
 		mutable std::string _input_audio_device;
 		mutable std::string _output_audio_device;
