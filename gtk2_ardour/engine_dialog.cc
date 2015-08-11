@@ -1145,6 +1145,22 @@ EngineControl::get_sample_rates_for_all_devices ()
 	return all_rates;
 }
 
+vector<float>
+EngineControl::get_default_sample_rates ()
+{
+	vector<float> rates;
+	rates.push_back (8000.0f);
+	rates.push_back (16000.0f);
+	rates.push_back (32000.0f);
+	rates.push_back (44100.0f);
+	rates.push_back (48000.0f);
+	rates.push_back (88200.0f);
+	rates.push_back (96000.0f);
+	rates.push_back (192000.0f);
+	rates.push_back (384000.0f);
+	return rates;
+}
+
 void
 EngineControl::set_samplerate_popdown_strings ()
 {
@@ -1155,20 +1171,9 @@ EngineControl::set_samplerate_popdown_strings ()
 	vector<string> s;
 
 	if (_have_control) {
-
 		sr = get_sample_rates_for_all_devices ();
-
 	} else {
-
-		sr.push_back (8000.0f);
-		sr.push_back (16000.0f);
-		sr.push_back (32000.0f);
-		sr.push_back (44100.0f);
-		sr.push_back (48000.0f);
-		sr.push_back (88200.0f);
-		sr.push_back (96000.0f);
-		sr.push_back (192000.0f);
-		sr.push_back (384000.0f);
+		sr = get_default_sample_rates ();
 	}
 
 	for (vector<float>::const_iterator x = sr.begin(); x != sr.end(); ++x) {
@@ -1223,6 +1228,24 @@ EngineControl::get_buffer_sizes_for_all_devices ()
 	return all_sizes;
 }
 
+vector<uint32_t>
+EngineControl::get_default_buffer_sizes ()
+{
+	vector<uint32_t> sizes;
+	sizes.push_back (8);
+	sizes.push_back (16);
+	sizes.push_back (32);
+	sizes.push_back (64);
+	sizes.push_back (128);
+	sizes.push_back (256);
+	sizes.push_back (512);
+	sizes.push_back (1024);
+	sizes.push_back (2048);
+	sizes.push_back (4096);
+	sizes.push_back (8192);
+	return sizes;
+}
+
 void
 EngineControl::set_buffersize_popdown_strings ()
 {
@@ -1235,17 +1258,7 @@ EngineControl::set_buffersize_popdown_strings ()
 	if (_have_control) {
 		bs = get_buffer_sizes_for_all_devices ();
 	} else if (backend->can_change_buffer_size_when_running()) {
-		bs.push_back (8);
-		bs.push_back (16);
-		bs.push_back (32);
-		bs.push_back (64);
-		bs.push_back (128);
-		bs.push_back (256);
-		bs.push_back (512);
-		bs.push_back (1024);
-		bs.push_back (2048);
-		bs.push_back (4096);
-		bs.push_back (8192);
+		bs = get_default_buffer_sizes ();
 	}
 
 	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {

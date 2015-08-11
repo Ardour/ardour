@@ -138,6 +138,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     std::string bufsize_as_string (uint32_t);
 
+	std::vector<float> get_default_sample_rates ();
+	std::vector<uint32_t> get_default_buffer_sizes ();
+
 	std::vector<float> get_sample_rates_for_all_devices ();
 	std::vector<uint32_t> get_buffer_sizes_for_all_devices ();
 
