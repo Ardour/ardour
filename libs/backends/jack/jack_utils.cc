@@ -698,8 +698,10 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 #ifdef PLATFORM_WINDOWS
 	// must use sync mode on windows
 	args.push_back ("-S");
+#endif
 
-	// this needs to be added now on windows
+#if (defined PLATFORM_WINDOWS || defined __APPLE__)
+	// midi systems needs to be added before the audio driver for jack2
 	if (!options.midi_driver.empty () && options.midi_driver != get_none_string ()) {
 		args.push_back ("-X");
 		args.push_back (options.midi_driver);
@@ -879,7 +881,7 @@ ARDOUR::get_jack_command_line_string (JackCommandLineOptions& options, string& c
 		}
 	}
 
-	if (options.driver == alsa_driver_name || options.driver == coreaudio_driver_name) {
+	if (options.driver == alsa_driver_name) {
 
 		if (options.midi_driver != alsa_seq_midi_driver_name) {
 			if (!options.midi_driver.empty() && options.midi_driver != get_none_string ()) {
