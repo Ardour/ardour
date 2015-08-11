@@ -1172,6 +1172,11 @@ EngineControl::set_samplerate_popdown_strings ()
 
 	if (_have_control) {
 		sr = get_sample_rates_for_all_devices ();
+		// currently possible if both devices are set to "None" and the backend
+		// returns no supported rates for both devices
+		if (sr.empty()) {
+			sr = get_default_sample_rates ();
+		}
 	} else {
 		sr = get_default_sample_rates ();
 	}
@@ -1257,6 +1262,11 @@ EngineControl::set_buffersize_popdown_strings ()
 
 	if (_have_control) {
 		bs = get_buffer_sizes_for_all_devices ();
+		// currently possible if both devices are set to "None" and the backend
+		// returns no supported sizes for both devices
+		if (bs.empty()) {
+			bs = get_default_buffer_sizes ();
+		}
 	} else if (backend->can_change_buffer_size_when_running()) {
 		bs = get_default_buffer_sizes ();
 	}
