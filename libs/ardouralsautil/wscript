@@ -26,7 +26,8 @@ def build(bld):
         if bld.is_defined('HAVE_ALSA'):
             obj = bld(features = 'cxx cxxshlib')
             obj.source = [
-                'devicelist.cc'
+                'devicelist.cc',
+                'deviceparams.cc'
             ]
             obj.export_includes = ['.']
             obj.includes = ['.']
