@@ -863,10 +863,20 @@ AudioEngine::stop (bool for_latency)
 		return 0;
 	}
 
+	Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+
+	if (running()) {
+		pl.acquire ();
+	}
+
 	if (_backend->stop ()) {
 		return -1;
 	}
-	
+
+	if (pl.locked ()) {
+		pl.release ();
+	}
+
 	if (_session && _running &&
 	    (_session->state_of_the_state() & Session::Loading) == 0 &&
 	    (_session->state_of_the_state() & Session::Deletion) == 0) {
