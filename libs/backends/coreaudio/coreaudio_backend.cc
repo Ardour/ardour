@@ -211,51 +211,68 @@ CoreAudioBackend::enumerate_output_devices () const
 }
 
 std::vector<float>
-CoreAudioBackend::available_sample_rates (const std::string&) const
+CoreAudioBackend::available_sample_rates (const std::string& device) const
+{
+	std::vector<float> sr;
+	_pcmio->available_sample_rates (name_to_id (device), sr);
+	return sr;
+}
+
+std::vector<float>
+CoreAudioBackend::available_sample_rates (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<float> sr;
 	std::vector<float> sr_in;
 	std::vector<float> sr_out;
 
-	const uint32_t inp = name_to_id(_input_audio_device);
-	const uint32_t out = name_to_id(_output_audio_device);
+	const uint32_t inp = name_to_id (input_device);
+	const uint32_t out = name_to_id (output_device);
+
 	if (inp == UINT32_MAX && out == UINT32_MAX) {
 		return sr;
 	} else if (inp == UINT32_MAX) {
-		_pcmio->available_sample_rates(out, sr_out);
+		_pcmio->available_sample_rates (out, sr_out);
 		return sr_out;
 	} else if (out == UINT32_MAX) {
-		_pcmio->available_sample_rates(inp, sr_in);
+		_pcmio->available_sample_rates (inp, sr_in);
 		return sr_in;
 	} else {
-		_pcmio->available_sample_rates(inp, sr_in);
-		_pcmio->available_sample_rates(out, sr_out);
+		_pcmio->available_sample_rates (inp, sr_in);
+		_pcmio->available_sample_rates (out, sr_out);
 		// TODO allow to use different SR per device, tweak aggregate
-		std::set_intersection(sr_in.begin(), sr_in.end(), sr_out.begin(), sr_out.end(), std::back_inserter(sr));
+		std::set_intersection (sr_in.begin(), sr_in.end(), sr_out.begin(), sr_out.end(), std::back_inserter(sr));
 		return sr;
 	}
 }
 
 std::vector<uint32_t>
-CoreAudioBackend::available_buffer_sizes (const std::string&) const
+CoreAudioBackend::available_buffer_sizes (const std::string& device) const
+{
+	std::vector<uint32_t> bs;
+	_pcmio->available_buffer_sizes (name_to_id (device), bs);
+	return bs;
+}
+
+std::vector<uint32_t>
+CoreAudioBackend::available_buffer_sizes (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<uint32_t> bs;
 	std::vector<uint32_t> bs_in;
 	std::vector<uint32_t> bs_out;
-	const uint32_t inp = name_to_id(_input_audio_device);
-	const uint32_t out = name_to_id(_output_audio_device);
+	const uint32_t inp = name_to_id (input_device);
+	const uint32_t out = name_to_id (output_device);
 	if (inp == UINT32_MAX && out == UINT32_MAX) {
 		return bs;
 	} else if (inp == UINT32_MAX) {
-		_pcmio->available_buffer_sizes(out, bs_out);
+		_pcmio->available_buffer_sizes (out, bs_out);
 		return bs_out;
 	} else if (out == UINT32_MAX) {
-		_pcmio->available_buffer_sizes(out, bs_in);
+		_pcmio->available_buffer_sizes (inp, bs_in);
 		return bs_in;
 	} else {
-		_pcmio->available_buffer_sizes(inp, bs_in);
-		_pcmio->available_buffer_sizes(out, bs_out);
-		std::set_intersection(bs_in.begin(), bs_in.end(), bs_out.begin(), bs_out.end(), std::back_inserter(bs));
+		_pcmio->available_buffer_sizes (inp, bs_in);
+		_pcmio->available_buffer_sizes (out, bs_out);
+		std::set_intersection (bs_in.begin(), bs_in.end(), bs_out.begin(), bs_out.end(), std::back_inserter(bs));
 		return bs;
 	}
 }
@@ -315,7 +332,7 @@ CoreAudioBackend::set_output_device_name (const std::string& d)
 int
 CoreAudioBackend::set_sample_rate (float sr)
 {
-	std::vector<float> srs = available_sample_rates (/* really ignored */_input_audio_device);
+	std::vector<float> srs = available_sample_rates (_input_audio_device, _output_audio_device);
 	if (std::find(srs.begin(), srs.end(), sr) == srs.end()) {
 		return -1;
 	}
@@ -463,7 +480,12 @@ CoreAudioBackend::midi_option () const
 void
 CoreAudioBackend::launch_control_app ()
 {
-    _pcmio->launch_control_app(name_to_id(_input_audio_device));
+	if (name_to_id (_input_audio_device) != UINT32_MAX) {
+		_pcmio->launch_control_app(name_to_id(_input_audio_device));
+	}
+	if (name_to_id (_output_audio_device) != UINT32_MAX) {
+		_pcmio->launch_control_app(name_to_id(_output_audio_device));
+	}
 }
 
 /* State Control */
