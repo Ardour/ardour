@@ -2756,7 +2756,11 @@ EngineControl::engine_running ()
 	connect_disconnect_button.show();
 
 	started_at_least_once = true;
-	engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Running")));
+	if (_have_control) {
+		engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Running")));
+	} else {
+		engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Connected")));
+	}
 	update_sensitivity();
 }
 
