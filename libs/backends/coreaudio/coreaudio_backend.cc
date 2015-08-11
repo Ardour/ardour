@@ -219,7 +219,7 @@ CoreAudioBackend::available_sample_rates (const std::string& device) const
 }
 
 std::vector<float>
-CoreAudioBackend::available_sample_rates (const std::string& input_device, const std::string& output_device) const
+CoreAudioBackend::available_sample_rates2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<float> sr;
 	std::vector<float> sr_in;
@@ -254,7 +254,7 @@ CoreAudioBackend::available_buffer_sizes (const std::string& device) const
 }
 
 std::vector<uint32_t>
-CoreAudioBackend::available_buffer_sizes (const std::string& input_device, const std::string& output_device) const
+CoreAudioBackend::available_buffer_sizes2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<uint32_t> bs;
 	std::vector<uint32_t> bs_in;
@@ -332,7 +332,7 @@ CoreAudioBackend::set_output_device_name (const std::string& d)
 int
 CoreAudioBackend::set_sample_rate (float sr)
 {
-	std::vector<float> srs = available_sample_rates (_input_audio_device, _output_audio_device);
+	std::vector<float> srs = available_sample_rates2 (_input_audio_device, _output_audio_device);
 	if (std::find(srs.begin(), srs.end(), sr) == srs.end()) {
 		return -1;
 	}

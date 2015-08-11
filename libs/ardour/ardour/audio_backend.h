@@ -195,7 +195,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * implement this function and return an intersection (not union) of available
      * sample rates valid for the given input + output device combination.
      */
-    virtual std::vector<float> available_sample_rates (const std::string& input_device, const std::string& output_device) const {
+    virtual std::vector<float> available_sample_rates2 (const std::string& input_device, const std::string& output_device) const {
 	    std::vector<float> input_sizes  = available_sample_rates (input_device);
 	    std::vector<float> output_sizes = available_sample_rates (output_device);
 	    std::vector<float> rv;
@@ -228,7 +228,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * implement this function and return an intersection (not union) of available
      * buffer sizes valid for the given input + output device combination.
      */
-    virtual std::vector<uint32_t> available_buffer_sizes (const std::string& input_device, const std::string& output_device) const {
+    virtual std::vector<uint32_t> available_buffer_sizes2 (const std::string& input_device, const std::string& output_device) const {
 	    std::vector<uint32_t> input_rates  = available_buffer_sizes (input_device);
 	    std::vector<uint32_t> output_rates = available_buffer_sizes (output_device);
 	    std::vector<uint32_t> rv;

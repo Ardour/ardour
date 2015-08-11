@@ -216,7 +216,7 @@ AlsaAudioBackend::acquire_device(const char* device_name)
 }
 
 std::vector<float>
-AlsaAudioBackend::available_sample_rates (const std::string& input_device, const std::string& output_device) const
+AlsaAudioBackend::available_sample_rates2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<float> sr;
 	if (input_device == _("None") && output_device == _("None")) {
@@ -262,7 +262,7 @@ AlsaAudioBackend::available_sample_rates (const std::string& device) const
 }
 
 std::vector<uint32_t>
-AlsaAudioBackend::available_buffer_sizes (const std::string& input_device, const std::string& output_device) const
+AlsaAudioBackend::available_buffer_sizes2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<uint32_t> bs;
 	if (input_device == _("None") && output_device == _("None")) {
