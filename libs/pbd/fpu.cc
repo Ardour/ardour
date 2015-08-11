@@ -37,6 +37,22 @@
 using namespace PBD;
 using namespace std;
 
+/* This function is provided by MSVC are part of the compiler instrinsics. We
+ * don't care about this on OS X (though perhaps we should), but we need to
+ * test AVX support on Linux also. It doesn't hurt that this works on OS X 
+ * also. 
+ */
+
+#if __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 4
+static inline unsigned long long _xgetbv(unsigned int index){
+  unsigned int eax, edx;
+  __asm__ __volatile__("xgetbv" : "=a"(eax), "=d"(edx) : "c"(index));
+  return ((unsigned long long)edx << 32) | eax;
+}
+#else
+#define _xgetbv() 0
+#endif
+
 FPU::FPU ()
 {
 	unsigned long cpuflags = 0;
@@ -96,8 +112,25 @@ FPU::FPU ()
 #endif /* _LP64 */
 #endif /* PLATFORM_WINDOWS */
 
-	if (cpuflags & ((1<<27)|(1<<28))) {
-		_flags = Flags (_flags | HasAVX);
+	if (cpuflags & ((1<<27) /* AVX */ |(1<<28) /* XGETBV */)) {
+
+		std::cerr << "Looks like AVX\n";
+		
+		/* now check if YMM resters state is saved: which means OS does
+		 * know about new YMM registers and saves them during context
+		 * switches it's true for most cases, but we must be sure
+		 *
+		 * giving 0 as the argument to _xgetbv() fetches the 
+		 * XCR_XFEATURE_ENABLED_MASK, which we need to check for 
+		 * the 2nd and 3rd bits, indicating correct register save/restore.
+		 */
+
+		uint64_t xcrFeatureMask = _xgetbv (0);
+
+		if (xcrFeatureMask & 0x6) {
+			std::cerr << "Definitely AVX\n";
+			_flags = Flags (_flags | (HasAVX) );
+		}
 	}
 
 	if (cpuflags & (1<<25)) {
