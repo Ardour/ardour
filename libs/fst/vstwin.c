@@ -377,7 +377,7 @@ fst_run_editor (VSTState* fst, void* window_parent)
 	if (fst->windows_window == NULL) {
 		HMODULE hInst;
 		HWND window;
-		struct ERect* er;
+		struct ERect* er = NULL;
 
 		if (!(fst->plugin->flags & effFlagsHasEditor)) {
 			fst_error ("Plugin \"%s\" has no editor", fst->handle->name);
@@ -424,9 +424,10 @@ fst_run_editor (VSTState* fst, void* window_parent)
 		fst->plugin->dispatcher (fst->plugin, effEditOpen, 0, 0, fst->windows_window, 0 );
 		fst->plugin->dispatcher (fst->plugin, effEditGetRect, 0, 0, &er, 0 );
 
-		fst->width =  er->right-er->left;
-		fst->height =  er->bottom-er->top;
-
+		if (er != NULL) {
+			fst->width = er->right - er->left;
+			fst->height = er->bottom - er->top;
+		}
 
 		fst->been_activated = TRUE;
 
