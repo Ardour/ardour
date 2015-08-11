@@ -322,6 +322,16 @@ Gtkmm2ext::get_popdown_strings (Gtk::ComboBoxText& cr, std::vector<std::string>&
 	}
 }
 
+size_t
+Gtkmm2ext::get_popdown_string_count (Gtk::ComboBoxText& cr)
+{
+	Glib::RefPtr<const Gtk::TreeModel> m = cr.get_model();
+	if (!m) {
+		return 0;
+	}
+	return m->children().size();
+}
+
 bool
 Gtkmm2ext::contains_value (Gtk::ComboBoxText& cr, const std::string text)
 {

@@ -101,6 +101,8 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void get_popdown_strings (Gtk::ComboBoxText&,
 	                          std::vector<std::string>&);
 
+	LIBGTKMM2EXT_API size_t get_popdown_string_count (Gtk::ComboBoxText&);
+
 	LIBGTKMM2EXT_API bool contains_value (Gtk::ComboBoxText&,
 	                          const std::string);
 
