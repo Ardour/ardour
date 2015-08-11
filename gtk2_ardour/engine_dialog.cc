@@ -1126,19 +1126,10 @@ EngineControl::get_sample_rates_for_all_devices ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend =
 	    ARDOUR::AudioEngine::instance ()->current_backend ();
-	vector<float> input_rates;
-	vector<float> output_rates;
 	vector<float> all_rates;
 
 	if (backend->use_separate_input_and_output_devices ()) {
-		input_rates = backend->available_sample_rates (get_input_device_name ());
-		output_rates = backend->available_sample_rates (get_output_device_name ());
-
-		std::set_union (input_rates.begin (),
-		                input_rates.end (),
-		                output_rates.begin (),
-		                output_rates.end (),
-		                std::back_inserter (all_rates));
+		all_rates = backend->available_sample_rates (get_input_device_name (), get_output_device_name ());
 	} else {
 		all_rates = backend->available_sample_rates (get_device_name ());
 	}
@@ -1214,19 +1205,10 @@ EngineControl::get_buffer_sizes_for_all_devices ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend =
 	    ARDOUR::AudioEngine::instance ()->current_backend ();
-	vector<uint32_t> input_sizes;
-	vector<uint32_t> output_sizes;
 	vector<uint32_t> all_sizes;
 
 	if (backend->use_separate_input_and_output_devices ()) {
-		input_sizes = backend->available_buffer_sizes (get_input_device_name ());
-		output_sizes = backend->available_buffer_sizes (get_output_device_name ());
-
-		std::set_union (input_sizes.begin (),
-		                input_sizes.end (),
-		                output_sizes.begin (),
-		                output_sizes.end (),
-		                std::back_inserter (all_sizes));
+		all_sizes = backend->available_buffer_sizes (get_input_device_name (), get_output_device_name ());
 	} else {
 		all_sizes = backend->available_buffer_sizes (get_device_name ());
 	}
@@ -1343,9 +1325,6 @@ EngineControl::device_changed ()
 		 */
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 
-		/* backends that support separate devices, need to ignore
-		 * the device-name - and use the devies set above
-		 */
 		set_samplerate_popdown_strings ();
 		set_buffersize_popdown_strings ();
 		/* XXX theoretically need to set min + max channel counts here
