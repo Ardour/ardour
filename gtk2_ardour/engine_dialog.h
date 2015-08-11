@@ -138,6 +138,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     std::string bufsize_as_string (uint32_t);
 
+	std::vector<float> get_sample_rates_for_all_devices ();
+	std::vector<uint32_t> get_buffer_sizes_for_all_devices ();
+
     float get_rate() const;
     uint32_t get_buffer_size() const;
     uint32_t get_input_channels() const;
@@ -158,8 +161,8 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     bool set_device_popdown_strings ();
     bool set_input_device_popdown_strings ();
     bool set_output_device_popdown_strings ();
-    void set_samplerate_popdown_strings (const std::string& dev_name);
-    void set_buffersize_popdown_strings (const std::string& dev_name);
+    void set_samplerate_popdown_strings ();
+    void set_buffersize_popdown_strings ();
     void list_devices ();
     void show_buffer_duration ();
 

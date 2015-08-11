@@ -1121,8 +1121,32 @@ EngineControl::driver_changed ()
 	}
 }
 
+vector<float>
+EngineControl::get_sample_rates_for_all_devices ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend =
+	    ARDOUR::AudioEngine::instance ()->current_backend ();
+	vector<float> input_rates;
+	vector<float> output_rates;
+	vector<float> all_rates;
+
+	if (backend->use_separate_input_and_output_devices ()) {
+		input_rates = backend->available_sample_rates (get_input_device_name ());
+		output_rates = backend->available_sample_rates (get_output_device_name ());
+
+		std::set_union (input_rates.begin (),
+		                input_rates.end (),
+		                output_rates.begin (),
+		                output_rates.end (),
+		                std::back_inserter (all_rates));
+	} else {
+		all_rates = backend->available_sample_rates (get_device_name ());
+	}
+	return all_rates;
+}
+
 void
-EngineControl::set_samplerate_popdown_strings (const std::string& device_name)
+EngineControl::set_samplerate_popdown_strings ()
 {
 	DEBUG_ECONTROL ("set_samplerate_popdown_strings");
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
@@ -1131,7 +1155,9 @@ EngineControl::set_samplerate_popdown_strings (const std::string& device_name)
 	vector<string> s;
 
 	if (_have_control) {
-		sr = backend->available_sample_rates (device_name);
+
+		sr = get_sample_rates_for_all_devices ();
+
 	} else {
 
 		sr.push_back (8000.0f);
@@ -1173,16 +1199,41 @@ EngineControl::set_samplerate_popdown_strings (const std::string& device_name)
 	}
 }
 
+vector<uint32_t>
+EngineControl::get_buffer_sizes_for_all_devices ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend =
+	    ARDOUR::AudioEngine::instance ()->current_backend ();
+	vector<uint32_t> input_sizes;
+	vector<uint32_t> output_sizes;
+	vector<uint32_t> all_sizes;
+
+	if (backend->use_separate_input_and_output_devices ()) {
+		input_sizes = backend->available_buffer_sizes (get_input_device_name ());
+		output_sizes = backend->available_buffer_sizes (get_output_device_name ());
+
+		std::set_union (input_sizes.begin (),
+		                input_sizes.end (),
+		                output_sizes.begin (),
+		                output_sizes.end (),
+		                std::back_inserter (all_sizes));
+	} else {
+		all_sizes = backend->available_buffer_sizes (get_device_name ());
+	}
+	return all_sizes;
+}
+
 void
-EngineControl::set_buffersize_popdown_strings (const std::string& device_name)
+EngineControl::set_buffersize_popdown_strings ()
 {
 	DEBUG_ECONTROL ("set_buffersize_popdown_strings");
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	vector<uint32_t> bs;
 	vector<string> s;
+	string device_name;
 
 	if (_have_control) {
-		bs = backend->available_buffer_sizes (device_name);
+		bs = get_buffer_sizes_for_all_devices ();
 	} else if (backend->can_change_buffer_size_when_running()) {
 		bs.push_back (8);
 		bs.push_back (16);
@@ -1199,6 +1250,12 @@ EngineControl::set_buffersize_popdown_strings (const std::string& device_name)
 
 	for (vector<uint32_t>::const_iterator x = bs.begin(); x != bs.end(); ++x) {
 		s.push_back (bufsize_as_string (*x));
+	}
+
+	if (backend->use_separate_input_and_output_devices ()) {
+		device_name = get_input_device_name ();
+	} else {
+		device_name = get_device_name ();
 	}
 
 	if (!s.empty()) {
@@ -1266,8 +1323,8 @@ EngineControl::device_changed ()
 		/* backends that support separate devices, need to ignore
 		 * the device-name - and use the devies set above
 		 */
-		set_samplerate_popdown_strings (device_name_in);
-		set_buffersize_popdown_strings (device_name_in);
+		set_samplerate_popdown_strings ();
+		set_buffersize_popdown_strings ();
 		/* XXX theoretically need to set min + max channel counts here
 		*/
 
