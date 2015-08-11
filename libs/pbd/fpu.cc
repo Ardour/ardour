@@ -96,6 +96,10 @@ FPU::FPU ()
 #endif /* _LP64 */
 #endif /* PLATFORM_WINDOWS */
 
+	if (cpuflags & ((1<<27)|(1<<28))) {
+		_flags = Flags (_flags | HasAVX);
+	}
+
 	if (cpuflags & (1<<25)) {
 		_flags = Flags (_flags | (HasSSE|HasFlushToZero));
 	}
