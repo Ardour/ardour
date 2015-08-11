@@ -237,11 +237,27 @@ CoreAudioBackend::available_sample_rates (const std::string&) const
 }
 
 std::vector<uint32_t>
-CoreAudioBackend::available_buffer_sizes (const std::string& device) const
+CoreAudioBackend::available_buffer_sizes (const std::string&) const
 {
 	std::vector<uint32_t> bs;
-	_pcmio->available_buffer_sizes(name_to_id(device), bs);
-	return bs;
+	std::vector<uint32_t> bs_in;
+	std::vector<uint32_t> bs_out;
+	const uint32_t inp = name_to_id(_input_audio_device);
+	const uint32_t out = name_to_id(_output_audio_device);
+	if (inp == UINT32_MAX && out == UINT32_MAX) {
+		return bs;
+	} else if (inp == UINT32_MAX) {
+		_pcmio->available_buffer_sizes(out, bs_out);
+		return bs_out;
+	} else if (out == UINT32_MAX) {
+		_pcmio->available_buffer_sizes(out, bs_in);
+		return bs_in;
+	} else {
+		_pcmio->available_buffer_sizes(inp, bs_in);
+		_pcmio->available_buffer_sizes(out, bs_out);
+		std::set_intersection(bs_in.begin(), bs_in.end(), bs_out.begin(), bs_out.end(), std::back_inserter(bs));
+		return bs;
+	}
 }
 
 uint32_t
