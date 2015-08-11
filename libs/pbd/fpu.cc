@@ -39,8 +39,8 @@ using namespace std;
 
 /* This function is provided by MSVC are part of the compiler instrinsics. We
  * don't care about this on OS X (though perhaps we should), but we need to
- * test AVX support on Linux also. It doesn't hurt that this works on OS X 
- * also. 
+ * test AVX support on Linux also. This doesn't work on OS X because 
+ * the compiler is different there. 
  */
 
 #if __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 4
@@ -112,6 +112,7 @@ FPU::FPU ()
 #endif /* _LP64 */
 #endif /* PLATFORM_WINDOWS */
 
+#ifndef __APPLE__
 	if (cpuflags & ((1<<27) /* AVX */ |(1<<28) /* XGETBV */)) {
 
 		std::cerr << "Looks like AVX\n";
@@ -132,6 +133,7 @@ FPU::FPU ()
 			_flags = Flags (_flags | (HasAVX) );
 		}
 	}
+#endif /* !__APPLE__ */ 
 
 	if (cpuflags & (1<<25)) {
 		_flags = Flags (_flags | (HasSSE|HasFlushToZero));
