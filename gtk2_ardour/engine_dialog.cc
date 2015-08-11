@@ -86,6 +86,7 @@ EngineControl::EngineControl ()
 	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Device Control Panel"))
 	, midi_devices_button (_("Midi Device Setup"))
+	, stop_engine_button (_("Stop (Reconfigure)"))
 	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
@@ -251,9 +252,6 @@ EngineControl::EngineControl ()
 	get_vbox()->set_border_width (12);
 	get_vbox()->pack_start (notebook);
 
-	get_action_area()->pack_start (engine_status);
-	engine_status.show();
-
 	/* need a special function to print "all available channels" when the
 	 * channel counts hit zero.
 	 */
@@ -266,8 +264,15 @@ EngineControl::EngineControl ()
 	midi_devices_button.set_name ("generic button");
 	midi_devices_button.set_can_focus(true);
 
-	control_app_button.signal_clicked().connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
+	control_app_button.signal_clicked.connect (mem_fun (*this, &EngineControl::control_app_button_clicked));
+	control_app_button.set_name ("generic button");
+	control_app_button.set_can_focus(true);
 	manage_control_app_sensitivity ();
+
+	stop_engine_button.signal_clicked.connect (mem_fun (*this, &EngineControl::stop_engine_button_clicked));
+	stop_engine_button.set_sensitive (false);
+	stop_engine_button.set_name ("generic button");
+	stop_engine_button.set_can_focus(true);
 
 	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
 	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
@@ -460,6 +465,11 @@ EngineControl::build_notebook ()
 	label = manage (left_aligned_label (_("Audio System:")));
 	basic_packer.attach (*label, 0, 1, 0, 1, xopt, (AttachOptions) 0);
 	basic_packer.attach (backend_combo, 1, 2, 0, 1, xopt, (AttachOptions) 0);
+
+	basic_packer.attach (engine_status, 2, 3, 0, 1, xopt, (AttachOptions) 0);
+	engine_status.show();
+
+	basic_packer.attach (stop_engine_button, 3, 4, 0, 1, xopt, xopt);
 
 	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
 	lm_button_audio.set_name ("generic button");
@@ -723,6 +733,7 @@ EngineControl::update_sensitivity ()
 	if (!backend) {
 		ok_button->set_sensitive (false);
 		apply_button->set_sensitive (false);
+		stop_engine_button.set_sensitive (false);
 		return;
 	}
 
@@ -760,6 +771,9 @@ EngineControl::update_sensitivity ()
 			 * Currently there is no way to manually stop the
 			 * engine in order to re-configure it.
 			 * This needs to remain sensitive for now.
+			 *
+			 * (it's also handy to implicily
+			 * re-start the engine)
 			 */
 			buffer_size_combo.set_sensitive (true);
 #else
@@ -780,6 +794,14 @@ EngineControl::update_sensitivity ()
 	} else {
 		sample_rate_combo.set_sensitive (false);
 		valid = false;
+	}
+
+	if (ARDOUR::AudioEngine::instance()->running() && _have_control) {
+		stop_engine_button.set_sensitive (true);
+		stop_engine_button.show ();
+	} else {
+		stop_engine_button.set_sensitive (false);
+		stop_engine_button.hide ();
 	}
 
 	if (valid || !_have_control) {
@@ -2406,6 +2428,12 @@ EngineControl::control_app_button_clicked ()
 }
 
 void
+EngineControl::stop_engine_button_clicked ()
+{
+	ARDOUR::AudioEngine::instance()->stop ();
+}
+
+void
 EngineControl::manage_control_app_sensitivity ()
 {
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
@@ -2722,7 +2750,7 @@ EngineControl::engine_running ()
 	connect_disconnect_button.show();
 
 	started_at_least_once = true;
-	engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Active")));
+	engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Running")));
 	update_sensitivity();
 }
 
@@ -2735,12 +2763,7 @@ EngineControl::engine_stopped ()
 	connect_disconnect_button.set_label (string_compose (_("Connect to %1"), backend->name()));
 	connect_disconnect_button.show();
 
-	if (ARDOUR::Profile->get_mixbus()) {
-		engine_status.set_markup("");
-	} else {
-		engine_status.set_markup(string_compose ("<span foreground=\"red\">%1</span>", _("Inactive")));
-	}
-
+	engine_status.set_markup(X_(""));
 	update_sensitivity();
 }
 
