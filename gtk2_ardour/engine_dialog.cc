@@ -717,6 +717,81 @@ EngineControl::setup_midi_tab_for_backend ()
 }
 
 void
+EngineControl::update_sensitivity ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+	if (!backend) {
+		ok_button->set_sensitive (false);
+		apply_button->set_sensitive (false);
+		return;
+	}
+
+	bool valid = true;
+	size_t devices_available = 0;
+
+	if (backend->use_separate_input_and_output_devices ()) {
+		devices_available += get_popdown_string_count (input_device_combo);
+		devices_available += get_popdown_string_count (output_device_combo);
+	} else {
+		devices_available += get_popdown_string_count (device_combo);
+	}
+
+	if (devices_available == 0) {
+		valid = false;
+		input_latency.set_sensitive (false);
+		output_latency.set_sensitive (false);
+		input_channels.set_sensitive (false);
+		output_channels.set_sensitive (false);
+	} else {
+		input_latency.set_sensitive (true);
+		output_latency.set_sensitive (true);
+		input_channels.set_sensitive (true);
+		output_channels.set_sensitive (true);
+	}
+
+	if (get_popdown_string_count (buffer_size_combo) > 0) {
+		if (!ARDOUR::AudioEngine::instance()->running()) {
+			buffer_size_combo.set_sensitive (valid);
+		} else if (backend->can_change_sample_rate_when_running()) {
+			buffer_size_combo.set_sensitive (valid || !_have_control);
+		} else {
+#if 1
+			/* TODO
+			 * Currently there is no way to manually stop the
+			 * engine in order to re-configure it.
+			 * This needs to remain sensitive for now.
+			 */
+			buffer_size_combo.set_sensitive (true);
+#else
+			buffer_size_combo.set_sensitive (false);
+#endif
+		}
+	} else {
+		buffer_size_combo.set_sensitive (false);
+		valid = false;
+	}
+
+	if (get_popdown_string_count (sample_rate_combo) > 0) {
+		if (!ARDOUR::AudioEngine::instance()->running()) {
+			sample_rate_combo.set_sensitive (true);
+		} else {
+			sample_rate_combo.set_sensitive (false);
+		}
+	} else {
+		sample_rate_combo.set_sensitive (false);
+		valid = false;
+	}
+
+	if (valid || !_have_control) {
+		ok_button->set_sensitive (true);
+		apply_button->set_sensitive (true);
+	} else {
+		ok_button->set_sensitive (false);
+		apply_button->set_sensitive (false);
+	}
+}
+
+void
 EngineControl::setup_midi_tab_for_jack ()
 {
 }
@@ -852,6 +927,12 @@ EngineControl::backend_changed ()
 	midi_option_changed();
 
 	started_at_least_once = false;
+
+	/* changing the backend implies stopping the engine
+	 * ARDOUR::AudioEngine() may or may not emit this signal
+	 * depending on previous engine state
+	 */
+	engine_stopped (); // set "active/inactive"
 
 	if (!ignore_changes) {
 		maybe_display_saved_state ();
@@ -1070,40 +1151,12 @@ EngineControl::list_devices ()
 
 	if (devices_available) {
 		device_changed ();
-
-		input_latency.set_sensitive (true);
-		output_latency.set_sensitive (true);
-		input_channels.set_sensitive (true);
-		output_channels.set_sensitive (true);
-
-		ok_button->set_sensitive (true);
-		apply_button->set_sensitive (true);
-
 	} else {
 		device_combo.clear();
 		input_device_combo.clear();
 		output_device_combo.clear();
-		sample_rate_combo.set_sensitive (false);
-		buffer_size_combo.set_sensitive (false);
-		input_latency.set_sensitive (false);
-		output_latency.set_sensitive (false);
-		input_channels.set_sensitive (false);
-		output_channels.set_sensitive (false);
-		if (_have_control) {
-			ok_button->set_sensitive (false);
-			apply_button->set_sensitive (false);
-		} else {
-			ok_button->set_sensitive (true);
-			apply_button->set_sensitive (true);
-			if (backend->can_change_sample_rate_when_running() && sample_rate_combo.get_children().size() > 0) {
-				sample_rate_combo.set_sensitive (true);
-			}
-			if (backend->can_change_buffer_size_when_running() && buffer_size_combo.get_children().size() > 0) {
-				buffer_size_combo.set_sensitive (true);
-			}
-
-		}
 	}
+	update_sensitivity ();
 }
 
 void
@@ -1163,11 +1216,6 @@ EngineControl::set_samplerate_popdown_strings ()
 
 	if (_have_control) {
 		sr = get_sample_rates_for_all_devices ();
-		// currently possible if both devices are set to "None" and the backend
-		// returns no supported rates for both devices
-		if (sr.empty()) {
-			sr = get_default_sample_rates ();
-		}
 	} else {
 		sr = get_default_sample_rates ();
 	}
@@ -1179,10 +1227,9 @@ EngineControl::set_samplerate_popdown_strings ()
 		}
 	}
 
-	if (!s.empty()) {
-		sample_rate_combo.set_sensitive (true);
-		set_popdown_strings (sample_rate_combo, s);
+	set_popdown_strings (sample_rate_combo, s);
 
+	if (!s.empty()) {
 		if (desired.empty ()) {
 			float new_active_sr = backend->default_sample_rate ();
 
@@ -1195,9 +1242,8 @@ EngineControl::set_samplerate_popdown_strings ()
 			sample_rate_combo.set_active_text (desired);
 		}
 
-	} else {
-		sample_rate_combo.set_sensitive (false);
 	}
+	update_sensitivity ();
 }
 
 vector<uint32_t>
@@ -1240,15 +1286,9 @@ EngineControl::set_buffersize_popdown_strings ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	vector<uint32_t> bs;
 	vector<string> s;
-	string device_name;
 
 	if (_have_control) {
 		bs = get_buffer_sizes_for_all_devices ();
-		// currently possible if both devices are set to "None" and the backend
-		// returns no supported sizes for both devices
-		if (bs.empty()) {
-			bs = get_default_buffer_sizes ();
-		}
 	} else if (backend->can_change_buffer_size_when_running()) {
 		bs = get_default_buffer_sizes ();
 	}
@@ -1257,26 +1297,26 @@ EngineControl::set_buffersize_popdown_strings ()
 		s.push_back (bufsize_as_string (*x));
 	}
 
-	if (backend->use_separate_input_and_output_devices ()) {
-		device_name = get_input_device_name ();
-	} else {
-		device_name = get_device_name ();
-	}
+	set_popdown_strings (buffer_size_combo, s);
 
 	if (!s.empty()) {
-		buffer_size_combo.set_sensitive (true);
-		set_popdown_strings (buffer_size_combo, s);
 		buffer_size_combo.set_active_text (s.front());
 
 		uint32_t period = backend->buffer_size();
-		if (0 == period) {
-			period = backend->default_buffer_size(device_name);
+		if (0 == period && backend->use_separate_input_and_output_devices ()) {
+			period = backend->default_buffer_size (get_input_device_name ());
 		}
+		if (0 == period && backend->use_separate_input_and_output_devices ()) {
+			period = backend->default_buffer_size (get_output_device_name ());
+		}
+		if (0 == period && !backend->use_separate_input_and_output_devices ()) {
+			period = backend->default_buffer_size (get_device_name ());
+		}
+
 		set_active_text_if_present (buffer_size_combo, bufsize_as_string (period));
 		show_buffer_duration ();
-	} else {
-		buffer_size_combo.set_sensitive (false);
 	}
+	update_sensitivity ();
 }
 
 void
@@ -1327,8 +1367,8 @@ EngineControl::device_changed ()
 
 		set_samplerate_popdown_strings ();
 		set_buffersize_popdown_strings ();
-		/* XXX theoretically need to set min + max channel counts here
-		*/
+
+		/* TODO set min + max channel counts here */
 
 		manage_control_app_sensitivity ();
 	}
@@ -2395,9 +2435,8 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 {
 	if (page_num == 0) {
 		cancel_button->set_sensitive (true);
-		ok_button->set_sensitive (true);
-		apply_button->set_sensitive (true);
 		_measure_midi.reset();
+		update_sensitivity ();
 	} else {
 		cancel_button->set_sensitive (false);
 		ok_button->set_sensitive (false);
@@ -2679,14 +2718,12 @@ EngineControl::engine_running ()
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size()));
 	sample_rate_combo.set_active_text (rate_as_string (backend->sample_rate()));
 
-	buffer_size_combo.set_sensitive (true);
-	sample_rate_combo.set_sensitive (true);
-
 	connect_disconnect_button.set_label (string_compose (_("Disconnect from %1"), backend->name()));
 	connect_disconnect_button.show();
 
 	started_at_least_once = true;
 	engine_status.set_markup(string_compose ("<span foreground=\"green\">%1</span>", _("Active")));
+	update_sensitivity();
 }
 
 void
@@ -2695,13 +2732,16 @@ EngineControl::engine_stopped ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	assert (backend);
 
-	buffer_size_combo.set_sensitive (false);
 	connect_disconnect_button.set_label (string_compose (_("Connect to %1"), backend->name()));
 	connect_disconnect_button.show();
 
-	sample_rate_combo.set_sensitive (true);
-	buffer_size_combo.set_sensitive (true);
-	engine_status.set_markup(string_compose ("<span foreground=\"red\">%1</span>", _("Inactive")));
+	if (ARDOUR::Profile->get_mixbus()) {
+		engine_status.set_markup("");
+	} else {
+		engine_status.set_markup(string_compose ("<span foreground=\"red\">%1</span>", _("Inactive")));
+	}
+
+	update_sensitivity();
 }
 
 void
