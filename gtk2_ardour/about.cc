@@ -183,6 +183,7 @@ static const char* authors[] = {
 	N_("Mike Täht"),
 	N_("Roy Vegard"),
 	N_("Thorsten Wilms"),
+	N_("Damien Zammit"),
 	N_("Grygorii Zharun"),
 	0
 };
