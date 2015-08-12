@@ -856,7 +856,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 			_windows_vst_plugin_info->push_back (info);
 			discovered++;
 			if (Config->get_verbose_plugin_scan()) {
-				PBD::info << string_compose (_(" -> OK. (VST Plugin \"%1\" added)."), info->name) << endmsg;
+				PBD::info << string_compose (_(" -> OK (VST Plugin \"%1\" was added)."), info->name) << endmsg;
 			}
 		}
 	}
