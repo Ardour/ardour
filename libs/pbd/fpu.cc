@@ -42,7 +42,7 @@ FPU* FPU::_instance (0);
 
 #ifndef PLATFORM_WINDOWS
 
-/* use __cpuid() as the name to match the MSVC intrinsic */
+/* use __cpuid() as the name to match the MSVC/mingw intrinsic */
 
 static void
 __cpuid(int regs[4], int cpuid_leaf)
