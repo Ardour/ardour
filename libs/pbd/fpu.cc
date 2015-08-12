@@ -78,9 +78,16 @@ __cpuid(int regs[4], int cpuid_leaf)
 static uint64_t
 _xgetbv (uint32_t xcr)
 {
+#ifdef __APPLE__
+        /* it would be nice to make this work on OS X but as long we use veclib,
+           we don't really need to know about SSE/AVX on that platform.
+        */
+        return 0;
+#else
 	uint32_t eax, edx;
 	__asm__ volatile ("xgetbv" : "=a" (eax), "=d" (edx) : "c" (xcr));
 	return (static_cast<uint64_t>(edx) << 32) | eax;
+#endif
 }
 
 #define _XCR_XFEATURE_ENABLED_MASK 0
