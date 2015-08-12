@@ -164,12 +164,17 @@ setup_hardware_optimization (bool try_optimization)
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 
-#if 0 /* AVX code doesn't compile on Linux yet, don't use generic code instead */
+#ifdef PLATFORM_WINDOWS
+		/* We have AVX-optimized code for Windows */
 		
 		if (fpu->has_avx()) {
-			
+#else			
+		/* AVX code doesn't compile on Linux yet */
+		
+		if (false) {
+#endif			
 			info << "Using AVX optimized routines" << endmsg;
-
+			
 			// AVX SET
 			compute_peak          = x86_sse_avx_compute_peak;
 			find_peaks            = x86_sse_avx_find_peaks;
@@ -180,9 +185,7 @@ setup_hardware_optimization (bool try_optimization)
 
 			generic_mix_functions = false;
 
-		} else
-#endif
-			if (fpu->has_sse()) {
+		} else if (fpu->has_sse()) {
 
 			info << "Using SSE optimized routines" << endmsg;
 
