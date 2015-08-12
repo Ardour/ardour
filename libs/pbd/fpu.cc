@@ -40,6 +40,7 @@ using namespace std;
 
 FPU* FPU::_instance (0);
 
+#if ( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // ARCH_X86
 #ifndef PLATFORM_WINDOWS
 
 /* use __cpuid() as the name to match the MSVC/mingw intrinsic */
@@ -95,6 +96,7 @@ _xgetbv (uint32_t xcr)
 }
 
 #endif /* !COMPILER_MSVC */
+#endif /* ARCH_X86 */
 
 #ifndef _XCR_XFEATURE_ENABLED_MASK
 #define _XCR_XFEATURE_ENABLED_MASK 0
@@ -239,7 +241,6 @@ FPU::FPU ()
 			free (fxbuf);
 #endif
 		}
-#endif
 
 		/* finally get the CPU brand */
 
@@ -261,6 +262,7 @@ FPU::FPU ()
 			info << string_compose (_("CPU brand: %1"), cpu_brand) << endmsg;
 		} 
 	}
+#endif /* !ARCH_X86 */
 }			
 
 FPU::~FPU ()
