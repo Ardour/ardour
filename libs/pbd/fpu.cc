@@ -40,7 +40,7 @@ using namespace std;
 
 FPU* FPU::_instance (0);
 
-#ifndef COMPILER_MSVC
+#ifndef PLATFORM_WINDOWS
 
 /* use __cpuid() as the name to match the MSVC intrinsic */
 
@@ -75,6 +75,10 @@ __cpuid(int regs[4], int cpuid_leaf)
         regs[3] = edx;
 }
 
+#endif /* !PLATFORM_WINDOWS */
+
+#ifndef COMPILER_MSVC
+
 static uint64_t
 _xgetbv (uint32_t xcr)
 {
@@ -90,9 +94,11 @@ _xgetbv (uint32_t xcr)
 #endif
 }
 
-#define _XCR_XFEATURE_ENABLED_MASK 0
-
 #endif /* !COMPILER_MSVC */
+
+#ifndef _XCR_XFEATURE_ENABLED_MASK
+#define _XCR_XFEATURE_ENABLED_MASK 0
+#endif
 
 FPU*
 FPU::instance()
