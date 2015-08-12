@@ -734,8 +734,6 @@ Surface::zero_controls ()
 	}
 
 	// turn off global buttons and leds
-	// global buttons are only ever on mcu_port, so we don't have
-	// to figure out which port.
 
 	for (Controls::iterator it = controls.begin(); it != controls.end(); ++it) {
 		Control & control = **it;
