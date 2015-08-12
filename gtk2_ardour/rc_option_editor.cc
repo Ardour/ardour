@@ -2407,23 +2407,23 @@ RCOptionEditor::RCOptionEditor ()
 	int dmsize = 1;
 	dm->add (DenormalNone, _("no processor handling"));
 
-	FPU fpu;
+	FPU* fpu = FPU::instance();
 
-	if (fpu.has_flush_to_zero()) {
+	if (fpu->has_flush_to_zero()) {
 		++dmsize;
 		dm->add (DenormalFTZ, _("use FlushToZero"));
 	} else if (_rc_config->get_denormal_model() == DenormalFTZ) {
 		_rc_config->set_denormal_model(DenormalNone);
 	}
 
-	if (fpu.has_denormals_are_zero()) {
+	if (fpu->has_denormals_are_zero()) {
 		++dmsize;
 		dm->add (DenormalDAZ, _("use DenormalsAreZero"));
 	} else if (_rc_config->get_denormal_model() == DenormalDAZ) {
 		_rc_config->set_denormal_model(DenormalNone);
 	}
 
-	if (fpu.has_flush_to_zero() && fpu.has_denormals_are_zero()) {
+	if (fpu->has_flush_to_zero() && fpu->has_denormals_are_zero()) {
 		++dmsize;
 		dm->add (DenormalFTZDAZ, _("use FlushToZero and DenormalsAreZero"));
 	} else if (_rc_config->get_denormal_model() == DenormalFTZDAZ) {
