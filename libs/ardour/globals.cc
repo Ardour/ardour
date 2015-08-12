@@ -160,13 +160,13 @@ setup_hardware_optimization (bool try_optimization)
 
 	if (try_optimization) {
 
-		FPU fpu;
+		FPU* fpu = FPU::instance();
 
 #if defined (ARCH_X86) && defined (BUILD_SSE_OPTIMIZATIONS)
 
 #if 0 /* AVX code doesn't compile on Linux yet, don't use generic code instead */
 		
-		if (fpu.has_avx()) {
+		if (fpu->has_avx()) {
 			
 			info << "Using AVX optimized routines" << endmsg;
 
@@ -182,7 +182,7 @@ setup_hardware_optimization (bool try_optimization)
 
 		} else
 #endif
-			if (fpu.has_sse()) {
+			if (fpu->has_sse()) {
 
 			info << "Using SSE optimized routines" << endmsg;
 
@@ -585,7 +585,8 @@ ARDOUR::no_auto_connect()
 void
 ARDOUR::setup_fpu ()
 {
-
+	FPU* fpu = FPU::instance ();
+	
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
 		// valgrind doesn't understand this assembler stuff
 		// September 10th, 2007
@@ -595,13 +596,8 @@ ARDOUR::setup_fpu ()
 #if defined(ARCH_X86) && defined(USE_XMMINTRIN)
 
 	int MXCSR;
-	FPU fpu;
 
-	/* XXX use real code to determine if the processor supports
-	   DenormalsAreZero and FlushToZero
-	*/
-
-	if (!fpu.has_flush_to_zero() && !fpu.has_denormals_are_zero()) {
+	if (!fpu->has_flush_to_zero() && !fpu->has_denormals_are_zero()) {
 		return;
 	}
 
@@ -618,21 +614,21 @@ ARDOUR::setup_fpu ()
 		break;
 
 	case DenormalFTZ:
-		if (fpu.has_flush_to_zero()) {
+		if (fpu->has_flush_to_zero()) {
 			MXCSR |= _MM_FLUSH_ZERO_ON;
 		}
 		break;
 
 	case DenormalDAZ:
 		MXCSR &= ~_MM_FLUSH_ZERO_ON;
-		if (fpu.has_denormals_are_zero()) {
+		if (fpu->has_denormals_are_zero()) {
 			MXCSR |= 0x40;
 		}
 		break;
 
 	case DenormalFTZDAZ:
-		if (fpu.has_flush_to_zero()) {
-			if (fpu.has_denormals_are_zero()) {
+		if (fpu->has_flush_to_zero()) {
+			if (fpu->has_denormals_are_zero()) {
 				MXCSR |= _MM_FLUSH_ZERO_ON | 0x40;
 			} else {
 				MXCSR |= _MM_FLUSH_ZERO_ON;
