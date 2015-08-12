@@ -2405,7 +2405,7 @@ EngineControl::get_backend () const
 string
 EngineControl::get_driver () const
 {
-	if (driver_combo.get_sensitive() && driver_combo.get_parent()) {
+	if (driver_combo.get_parent()) {
 		return driver_combo.get_active_text ();
 	} else {
 		return "";
