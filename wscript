@@ -455,7 +455,7 @@ int main() { return 0; }''',
                 # usability of the 64 bit windows assembler depends on the compiler target,
                 # not the build host, which in turn can only be inferred from the name
                 # of the compiler. 
-                if re.search ('^x86_64', str(conf.env['CC'])) != None:
+                if re.search ('x86_64-w64', str(conf.env['CC'])) != None:
                         compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
             print("\nWarning: you are building Ardour with SSE support even though your system does not support these instructions. (This may not be an error, especially if you are a package maintainer)")
