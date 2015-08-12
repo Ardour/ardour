@@ -97,7 +97,10 @@ FPU::FPU ()
 #endif /* PLATFORM_WINDOWS */
 
 #ifndef __APPLE__
-	if (cpuflags & ((1<<27) /* AVX */ |(1<<28) /* XGETBV */)) {
+	/* must check for both AVX and OSXSAVE support in cpuflags before
+	 * attempting to use AVX related instructions.
+	 */
+	if ((cpuflags & (1<<27)) /* AVX */ && (cpuflags & (1<<28) /* (OS)XSAVE */)) {
 
 		std::cerr << "Looks like AVX\n";
 		
