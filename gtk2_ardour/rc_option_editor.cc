@@ -1154,13 +1154,34 @@ public:
                 , _playback_slider (_playback_adjustment)
 		, _capture_slider (_capture_adjustment)
 	{
+		vector<string> presets;
+
+		/* these must match the order of the enums for BufferingPreset */
+		
+		presets.push_back (_("Small sessions (4-16 tracks)"));
+		presets.push_back (_("Medium sessions (16-64 tracks)"));
+		presets.push_back (_("Large sessions (64+ tracks)"));
+		presets.push_back (_("Custom (set by sliders below)"));
+
+		set_popdown_strings (_buffering_presets_combo, presets);
+
+		Label* l = manage (new Label (_("Preset:")));
+		l->set_name ("OptionsLabel");
+		HBox* h = manage (new HBox);
+		h->set_spacing (12);
+		h->pack_start (*l, false, false);
+		h->pack_start (_buffering_presets_combo, true, true);
+		_box->pack_start (*h, false, false);
+
+		_buffering_presets_combo.signal_changed().connect (sigc::mem_fun (*this, &BufferingOptions::preset_changed));
+		
 		_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
 
-		Label* l = manage (new Label (_("Playback (seconds of buffering):")));
+		l = manage (new Label (_("Playback (seconds of buffering):")));
 		l->set_name ("OptionsLabel");
 
 		_playback_slider.set_update_policy (UPDATE_DISCONTINUOUS);
-		HBox* h = manage (new HBox);
+		h = manage (new HBox);
 		h->set_spacing (4);
 		h->pack_start (*l, false, false);
 		h->pack_start (_playback_slider, true, true);
@@ -1186,6 +1207,31 @@ public:
 
 	void parameter_changed (string const & p)
 	{
+		if (p == "buffering-preset") {
+			switch (_rc_config->get_buffering_preset()) {
+			case Small:
+				_playback_slider.set_sensitive (false);
+				_capture_slider.set_sensitive (false);
+				_buffering_presets_combo.set_active (0);
+				break;
+			case Medium:
+				_playback_slider.set_sensitive (false);
+				_capture_slider.set_sensitive (false);
+				_buffering_presets_combo.set_active (1);
+				break;
+			case Large:
+				_playback_slider.set_sensitive (false);
+				_capture_slider.set_sensitive (false);
+				_buffering_presets_combo.set_active (2);
+				break;
+			case Custom:
+				_playback_slider.set_sensitive (true);
+				_capture_slider.set_sensitive (true);
+				_buffering_presets_combo.set_active (3);
+				break;
+			}
+		}
+
 		if (p == "playback-buffer-seconds") {
 			_playback_adjustment.set_value (_rc_config->get_audio_playback_buffer_seconds());
 		} else if (p == "capture-buffer-seconds") {
@@ -1195,12 +1241,38 @@ public:
 
 	void set_state_from_config ()
 	{
+		parameter_changed ("buffering-preset");
 		parameter_changed ("playback-buffer-seconds");
 		parameter_changed ("capture-buffer-seconds");
 	}
 
 private:
 
+	void preset_changed ()
+	{
+		int index = _buffering_presets_combo.get_active_row_number ();
+		if (index < 0) {
+			return;
+		}
+		switch (index) {
+		case 0:
+			_rc_config->set_buffering_preset (Small);
+			break;
+		case 1:
+			_rc_config->set_buffering_preset (Medium);
+			break;
+		case 2:
+			_rc_config->set_buffering_preset (Large);
+			break;
+		case 3:
+			_rc_config->set_buffering_preset (Custom);
+			break;
+		default:
+			error << string_compose (_("programming error: unknown buffering preset string, index = %1"), index) << endmsg;
+			break;
+		}
+	}
+	
 	void playback_changed ()
 	{
 		_rc_config->set_audio_playback_buffer_seconds ((long) _playback_adjustment.get_value());
@@ -1216,6 +1288,7 @@ private:
 	Adjustment _capture_adjustment;
 	HScale _playback_slider;
 	HScale _capture_slider;
+	ComboBoxText _buffering_presets_combo;
 };
 
 class ControlSurfacesOptions : public OptionEditorBox
