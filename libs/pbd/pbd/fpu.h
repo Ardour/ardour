@@ -35,9 +35,10 @@ class LIBPBD_API FPU {
 	};
 
   public:
-	FPU ();
 	~FPU ();
 
+	static FPU* instance();
+	
 	bool has_flush_to_zero () const { return _flags & HasFlushToZero; }
 	bool has_denormals_are_zero () const { return _flags & HasDenormalsAreZero; }
 	bool has_sse () const { return _flags & HasSSE; }
@@ -46,6 +47,10 @@ class LIBPBD_API FPU {
 	
   private:
 	Flags _flags;
+
+	static FPU* _instance;
+
+	FPU ();
 };
 
 }

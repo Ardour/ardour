@@ -29,6 +29,7 @@
 #include <intrin.h>
 #endif
 
+#include "pbd/compose.h"
 #include "pbd/fpu.h"
 #include "pbd/error.h"
 
@@ -37,178 +38,216 @@
 using namespace PBD;
 using namespace std;
 
-FPU::FPU ()
-{
-	unsigned long cpuflags = 0;
+FPU* FPU::_instance (0);
 
-	_flags = Flags (0);
+#ifndef COMPILER_MSVC
+
+/* use __cpuid() as the name to match the MSVC intrinsic */
+
+static void
+__cpuid(int regs[4], int cpuid_leaf)
+{
+        int eax, ebx, ecx, edx;
+        asm volatile (
+#if defined(__i386__)
+	        "pushl %%ebx;\n\t"
+#endif
+	        "movl %4, %%eax;\n\t"
+	        "cpuid;\n\t"
+	        "movl %%eax, %0;\n\t"
+	        "movl %%ebx, %1;\n\t"
+	        "movl %%ecx, %2;\n\t"
+	        "movl %%edx, %3;\n\t"
+#if defined(__i386__)
+	        "popl %%ebx;\n\t"
+#endif
+	        :"=m" (eax), "=m" (ebx), "=m" (ecx), "=m" (edx)
+	        :"r" (cpuid_leaf)
+	        :"%eax",
+#if !defined(__i386__)
+	         "%ebx",
+#endif
+	         "%ecx", "%edx");
+        
+        regs[0] = eax;
+        regs[1] = ebx;
+        regs[2] = ecx;
+        regs[3] = edx;
+}
+
+static uint64_t
+_xgetbv (uint32_t xcr)
+{
+	uint32_t eax, edx;
+	__asm__ volatile ("xgetbv" : "=a" (eax), "=d" (edx) : "c" (xcr));
+	return (static_cast<uint64_t>(edx) << 32) | eax;
+}
+
+#define _XCR_XFEATURE_ENABLED_MASK 0
+
+#endif /* !COMPILER_MSVC */
+
+FPU*
+FPU::instance()
+{
+	if (!_instance) {
+		_instance = new FPU;
+	}
+
+	return _instance;
+}
+
+FPU::FPU ()
+	: _flags ((Flags) 0)
+{
+	if (_instance) {
+		error << _("FPU object instantiated more than once") << endmsg;
+	}
 
 #if !( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // !ARCH_X86
+	/* Non-Intel architecture, nothing to do here */
 	return;
 #else
 
-#ifdef PLATFORM_WINDOWS
+	/* Get the CPU vendor just for kicks */
 
-	// Get CPU flags using Microsoft function
-	// It works for both 64 and 32 bit systems
-	// no need to use assembler for getting info from register, this function does this for us
-	int cpuInfo[4];
-	__cpuid (cpuInfo, 1);
-	cpuflags = cpuInfo[3];
+	// __cpuid with an InfoType argument of 0 returns the number of
+ 	// valid Ids in CPUInfo[0] and the CPU identification string in
+ 	// the other three array elements. The CPU identification string is
+ 	// not in linear order. The code below arranges the information
+ 	// in a human readable form. The human readable order is CPUInfo[1] |
+ 	// CPUInfo[3] | CPUInfo[2]. CPUInfo[2] and CPUInfo[3] are swapped
+ 	// before using memcpy to copy these three array elements to cpu_string.
 
-#else	
+	int cpu_info[4];
+	char cpu_string[48];
+	string cpu_vendor;
 
-#ifndef _LP64 /* *nix; 32 bit version. This odd macro constant is required because we need something that identifies this as a 32 bit
-                 build on Linux and on OS X. Anything that serves this purpose will do, but this is the best thing we've identified
-                 so far.
-              */
+	__cpuid (cpu_info, 0);
+
+	int num_ids = cpu_info[0];
+ 	std::swap(cpu_info[2], cpu_info[3]);
+	memcpy(cpu_string, &cpu_info[1], 3 * sizeof(cpu_info[1]));
+ 	cpu_vendor.assign(cpu_string, 3 * sizeof(cpu_info[1]));
+
+	info << string_compose (_("CPU vendor: %1"), cpu_vendor) << endmsg;
+
+	if (num_ids > 0) {
 	
-	asm volatile (
-		"mov $1, %%eax\n"
-		"pushl %%ebx\n"
-		"cpuid\n"
-		"movl %%edx, %0\n"
-		"popl %%ebx\n"
-		: "=r" (cpuflags)
-		: 
-		: "%eax", "%ecx", "%edx"
-		);
+		/* Now get CPU/FPU flags */
 	
-#else /* *nix; 64 bit version */
-	
-	/* asm notes: although we explicitly save&restore rbx, we must tell
-	   gcc that ebx,rbx is clobbered so that it doesn't try to use it as an intermediate
-	   register when storing rbx. gcc 4.3 didn't make this "mistake", but gcc 4.4
-	   does, at least on x86_64.
-	*/
+		__cpuid (cpu_info, 1);
 
-	asm volatile (
-		"pushq %%rbx\n"
-		"movq $1, %%rax\n"
-		"cpuid\n"
-		"movq %%rdx, %0\n"
-		"popq %%rbx\n"
-		: "=r" (cpuflags)
-		: 
-		: "%rax", "%rbx", "%rcx", "%rdx"
-		);
-
-#endif /* _LP64 */
-#endif /* PLATFORM_WINDOWS */
-
-#ifndef __APPLE__
-	/* must check for both AVX and OSXSAVE support in cpuflags before
-	 * attempting to use AVX related instructions.
-	 */
-	if ((cpuflags & (1<<27)) /* AVX */ && (cpuflags & (1<<28) /* (OS)XSAVE */)) {
-
-		std::cerr << "Looks like AVX\n";
-		
-		/* now check if YMM resters state is saved: which means OS does
-		 * know about new YMM registers and saves them during context
-		 * switches it's true for most cases, but we must be sure
-		 *
-		 * giving 0 as the argument to _xgetbv() fetches the 
-		 * XCR_XFEATURE_ENABLED_MASK, which we need to check for 
-		 * the 2nd and 3rd bits, indicating correct register save/restore.
-		 */
-
-		uint64_t xcrFeatureMask = 0;
-
-#if __GNUC__ > 4 || __GNUC__ == 4 && __GNUC_MINOR__ >= 4
-		unsigned int eax, edx, index = 0;
-		asm volatile("xgetbv" : "=a"(eax), "=d"(edx) : "c"(index));
-		xcrFeatureMask = ((unsigned long long)edx << 32) | eax;
-#elif defined (COMPILER_MSVC)
-		xcrFeatureMask = _xgetbv(_XCR_XFEATURE_ENABLED_MASK);
-#endif
-		if (xcrFeatureMask & 0x6) {
-			std::cerr << "Definitely AVX\n";
+		if ((cpu_info[2] & (1<<27)) /* AVX */ &&
+		    (cpu_info[2] & (1<<28) /* (OS)XSAVE */) &&
+		    (_xgetbv (_XCR_XFEATURE_ENABLED_MASK) & 0x6)) { /* OS really supports XSAVE */
+			info << _("AVX-capable processor") << endmsg;
 			_flags = Flags (_flags | (HasAVX) );
 		}
-	}
-#endif /* !__APPLE__ */ 
 
-	if (cpuflags & (1<<25)) {
-		_flags = Flags (_flags | (HasSSE|HasFlushToZero));
-	}
+		if (cpu_info[3] & (1<<25)) {
+			_flags = Flags (_flags | (HasSSE|HasFlushToZero));
+		}
 
-	if (cpuflags & (1<<26)) {
-		_flags = Flags (_flags | HasSSE2);
-	}
+		if (cpu_info[3] & (1<<26)) {
+			_flags = Flags (_flags | HasSSE2);
+		}
 
-	if (cpuflags & (1 << 24)) {
+		/* Figure out CPU/FPU denormal handling capabilities */
+	
+		if (cpu_info[3] & (1 << 24)) {
 		
-		char** fxbuf = 0;
+			char** fxbuf = 0;
 		
-		/* DAZ wasn't available in the first version of SSE. Since
-		   setting a reserved bit in MXCSR causes a general protection
-		   fault, we need to be able to check the availability of this
-		   feature without causing problems. To do this, one needs to
-		   set up a 512-byte area of memory to save the SSE state to,
-		   using fxsave, and then one needs to inspect bytes 28 through
-		   31 for the MXCSR_MASK value. If bit 6 is set, DAZ is
-		   supported, otherwise, it isn't.
-		*/
+			/* DAZ wasn't available in the first version of SSE. Since
+			   setting a reserved bit in MXCSR causes a general protection
+			   fault, we need to be able to check the availability of this
+			   feature without causing problems. To do this, one needs to
+			   set up a 512-byte area of memory to save the SSE state to,
+			   using fxsave, and then one needs to inspect bytes 28 through
+			   31 for the MXCSR_MASK value. If bit 6 is set, DAZ is
+			   supported, otherwise, it isn't.
+			*/
 
 #ifndef HAVE_POSIX_MEMALIGN
 #  ifdef PLATFORM_WINDOWS
-		fxbuf = (char **) _aligned_malloc (sizeof (char *), 16);
-		assert (fxbuf);
-		*fxbuf = (char *) _aligned_malloc (512, 16);
-		assert (*fxbuf);
+			fxbuf = (char **) _aligned_malloc (sizeof (char *), 16);
+			assert (fxbuf);
+			*fxbuf = (char *) _aligned_malloc (512, 16);
+			assert (*fxbuf);
 #  else
 #  warning using default malloc for aligned memory
-		fxbuf = (char **) malloc (sizeof (char *));
-		assert (fxbuf);
-		*fxbuf = (char *) malloc (512);
-		assert (*fxbuf);
+			fxbuf = (char **) malloc (sizeof (char *));
+			assert (fxbuf);
+			*fxbuf = (char *) malloc (512);
+			assert (*fxbuf);
 #  endif
 #else
-		(void) posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
-		assert (fxbuf);
-		(void) posix_memalign ((void **) fxbuf, 16, 512);
-		assert (*fxbuf);
+			(void) posix_memalign ((void **) &fxbuf, 16, sizeof (char *));
+			assert (fxbuf);
+			(void) posix_memalign ((void **) fxbuf, 16, 512);
+			assert (*fxbuf);
 #endif			
 		
-		memset (*fxbuf, 0, 512);
+			memset (*fxbuf, 0, 512);
 		
 #ifdef COMPILER_MSVC
-		char *buf = *fxbuf;
-		__asm {
-			mov eax, buf
-			fxsave   [eax]
-		};
+			char *buf = *fxbuf;
+			__asm {
+				mov eax, buf
+					fxsave   [eax]
+					};
 #else
-		asm volatile (
-			"fxsave (%0)"
-			:
-			: "r" (*fxbuf)
-			: "memory"
-			);
+			asm volatile (
+				"fxsave (%0)"
+				:
+				: "r" (*fxbuf)
+				: "memory"
+				);
 #endif
 		
-		uint32_t mxcsr_mask = *((uint32_t*) &((*fxbuf)[28]));
+			uint32_t mxcsr_mask = *((uint32_t*) &((*fxbuf)[28]));
 		
-		/* if the mask is zero, set its default value (from intel specs) */
+			/* if the mask is zero, set its default value (from intel specs) */
 		
-		if (mxcsr_mask == 0) {
-			mxcsr_mask = 0xffbf;
-		}
+			if (mxcsr_mask == 0) {
+				mxcsr_mask = 0xffbf;
+			}
 		
-		if (mxcsr_mask & (1<<6)) {
-			_flags = Flags (_flags | HasDenormalsAreZero);
-		} 
+			if (mxcsr_mask & (1<<6)) {
+				_flags = Flags (_flags | HasDenormalsAreZero);
+			} 
 		
 #if !defined HAVE_POSIX_MEMALIGN && defined PLATFORM_WINDOWS
-		_aligned_free (*fxbuf);
-		_aligned_free (fxbuf);
+			_aligned_free (*fxbuf);
+			_aligned_free (fxbuf);
 #else
-		free (*fxbuf);
-		free (fxbuf);
+			free (*fxbuf);
+			free (fxbuf);
 #endif
+		}
+#endif
+
+		/* finally get the CPU brand */
+
+		__cpuid (cpu_info, 0x80000000);
+
+		const int parameter_end = 0x80000004;
+		string cpu_brand;
+	
+		if (cpu_info[0] >= parameter_end) {
+			char* cpu_string_ptr = cpu_string;
+		
+			for (int parameter = 0x80000002; parameter <= parameter_end &&
+				     cpu_string_ptr < &cpu_string[sizeof(cpu_string)]; parameter++) {
+				__cpuid(cpu_info, parameter);
+				memcpy(cpu_string_ptr, cpu_info, sizeof(cpu_info));
+				cpu_string_ptr += sizeof(cpu_info);
+			}
+			cpu_brand.assign(cpu_string, cpu_string_ptr - cpu_string);
+			info << string_compose (_("CPU brand: %1"), cpu_brand) << endmsg;
+		} 
 	}
-#endif
 }			
 
 FPU::~FPU ()
