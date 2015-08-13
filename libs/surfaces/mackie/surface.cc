@@ -775,7 +775,7 @@ Surface::map_routes (const vector<boost::shared_ptr<Route> >& routes)
 	vector<boost::shared_ptr<Route> >::const_iterator r;
 	Strips::iterator s = strips.begin();
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mapping %1 routes", routes.size()));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mapping %1 routes\n", routes.size()));
 
 	for (r = routes.begin(); r != routes.end() && s != strips.end(); ++s) {
 

@@ -119,7 +119,7 @@ SurfacePort::set_state (const XMLNode& node, int version)
 	if (dynamic_cast<MIDI::IPMIDIPort*>(_input_port)) {
 		return 0;
 	}
-
+	// the rest should not be run if the device-name changes outside of a session load.
 	XMLNode* child;
 
 	if ((child = node.child (X_("Input"))) != 0) {
