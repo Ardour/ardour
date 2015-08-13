@@ -40,6 +40,7 @@ public:
 	bool copy_external () const;
 
 	void clear_name ();
+	void set_name (std::string);
 	
 private:
 	Gtk::CheckButton switch_to_button;

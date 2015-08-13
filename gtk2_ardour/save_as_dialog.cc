@@ -157,6 +157,13 @@ SaveAsDialog::clear_name ()
 	set_response_sensitive (RESPONSE_OK, false);
 }
 
+void
+SaveAsDialog::set_name (std::string name)
+{
+	new_name_entry.set_text (name);
+	name_entry_changed ();
+}
+
 bool
 SaveAsDialog::include_media () const
 {

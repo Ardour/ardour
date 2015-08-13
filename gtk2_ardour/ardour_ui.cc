@@ -2464,9 +2464,9 @@ ARDOUR_UI::save_session_as ()
 
 	if (!save_as_dialog) {
 		save_as_dialog = new SaveAsDialog;
-	} else {
-		save_as_dialog->clear_name ();
 	}
+
+	save_as_dialog->set_name (_session->name());
 
 	int response = save_as_dialog->run ();
 
