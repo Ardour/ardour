@@ -352,44 +352,6 @@ cat >> $NSISFILE << EOF
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "English"
 
-
-Function .onInit
-
-  ReadRegStr \$R0 HKLM \
-    "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" \
-    "UninstallString"
-  StrCmp \$R0 "" done
-
-  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
-    "${PROGRAM_NAME} is already installed. Click 'OK' to remove the previous version or 'Cancel' to cancel this upgrade." \
-    IDOK uninst
-    Abort
-
-  uninst:
-    ClearErrors
-    ExecWait '\$R0 _?=\$INSTDIR'
-    IfErrors uninstall_error
-
-    ReadRegStr \$R1 HKLM \
-      "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" \
-      "UninstallString"
-    StrCmp \$R1 "" 0 done
-
-    Delete "\$INSTDIR\\uninstall.exe"
-    RMDir "\$INSTDIR"
-    goto done
-
-  uninstall_error:
-
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-      "Uninstaller did not complete successfully. Continue at your own risk..." \
-      IDOK done
-
-  done:
-
-FunctionEnd
-
-
 Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   SectionIn RO
   SetOutPath \$INSTDIR
@@ -405,13 +367,10 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   WriteRegDWORD HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "NoRepair" 1
   WriteUninstaller "\$INSTDIR\uninstall.exe"
   CreateShortCut "\$INSTDIR\\${PROGRAM_NAME}${PROGRAM_VERSION}.lnk" "\$INSTDIR\\bin\\${PRODUCT_EXE}" "" "\$INSTDIR\\bin\\${PRODUCT_EXE}" 0
-  \${If} \${AtMostWinXP}
-    Delete "\$INSTDIR\\bin\\libportaudio-2.dll"
-    Rename "\$INSTDIR\\bin\\libportaudio-2.xp" "\$INSTDIR\\bin\\libportaudio-2.dll"
-  \${Else}
-    Delete "\$INSTDIR\\bin\\libportaudio-2.xp"
-  \${EndIf}
   \${registerExtension} "\$INSTDIR\\bin\\${STATEFILE_SUFFIX}" ".${PRODUCT_NAME}" "${PROGRAM_NAME} Session"
+SectionEnd
+
+Section "WASAPI sound driver" SecWASAPI
 SectionEnd
 EOF
 
@@ -451,6 +410,7 @@ cat >> $NSISFILE << EOF
   CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\Uninstall.lnk" "\$INSTDIR\\uninstall.exe" "" "\$INSTDIR\\uninstall.exe" 0
 SectionEnd
 LangString DESC_SecMainProg \${LANG_ENGLISH} "${PROGRAM_NAME} ${ARDOURVERSION}\$\\r\$\\n${VERSIONINFO}\$\\r\$\\n${ARDOURDATE}"
+LangString DESC_SecWASAPI \${LANG_ENGLISH} "WASAPI Audio Driver\$\\r\$\\nOnly works on Vista or later. Windows 10 Users may currently also experience issues if this is installed."
 EOF
 
 if test -z "$NOVIDEOTOOLS"; then
@@ -463,6 +423,7 @@ cat >> $NSISFILE << EOF
 LangString DESC_SecMenu \${LANG_ENGLISH} "Create Start-Menu Shortcuts (recommended)."
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
 !insertmacro MUI_DESCRIPTION_TEXT \${SecMainProg} \$(DESC_SecMainProg)
+!insertmacro MUI_DESCRIPTION_TEXT \${SecWASAPI} \$(DESC_SecWASAPI)
 EOF
 
 if test -z "$NOVIDEOTOOLS"; then
@@ -492,6 +453,75 @@ Section "Uninstall"
   RMDir "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}"
   \${unregisterExtension} ".${STATEFILE_SUFFIX}" "${PROGRAM_NAME} Session"
 SectionEnd
+
+
+Function .onInit
+
+  ReadRegStr \$R0 HKLM \
+    "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" \
+    "UninstallString"
+  StrCmp \$R0 "" done
+
+  MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
+    "${PROGRAM_NAME} is already installed. Click 'OK' to remove the previous version or 'Cancel' to cancel this upgrade." \
+    IDOK uninst
+    Abort
+
+  uninst:
+    ClearErrors
+    ExecWait '\$R0 _?=\$INSTDIR'
+    IfErrors uninstall_error
+
+    ReadRegStr \$R1 HKLM \
+      "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" \
+      "UninstallString"
+    StrCmp \$R1 "" 0 done
+
+    Delete "\$INSTDIR\\uninstall.exe"
+    RMDir "\$INSTDIR"
+    goto done
+
+  uninstall_error:
+
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+      "Uninstaller did not complete successfully. Continue at your own risk..." \
+      IDOK done
+
+  done:
+
+  \${If} \${AtMostWinXP}
+    SectionSetFlags \${SecWASAPI} \${SF_RO}
+  \${Else}
+    SectionSetFlags \${SecWASAPI} \${SF_SELECTED}
+  \${EndIf}
+
+FunctionEnd
+
+Function .onInstSuccess
+
+  \${If} \${AtMostWinXP}
+    goto pa_no_wasapi
+  \${EndIf}
+
+  SectionGetFlags \${SecWASAPI} \$R0
+
+  IntOp \$R0 \$R0 & \${SF_SELECTED}
+  IntCmp \$R0 \${SF_SELECTED} pa_with_wasapi pa_no_wasapi
+
+  pa_with_wasapi:
+; VISTA .. 9, libportaudio with WASAPI is good.
+  Delete "\$INSTDIR\\bin\\libportaudio-2.xp"
+  goto endportaudio
+
+; Windows XP lacks support for WASAPI, Windows10 on some system has issues
+; http://tracker.ardour.org/view.php?id=6507
+  pa_no_wasapi:
+  Delete "\$INSTDIR\\bin\\libportaudio-2.dll"
+  Rename "\$INSTDIR\\bin\\libportaudio-2.xp" "\$INSTDIR\\bin\\libportaudio-2.dll"
+
+  endportaudio:
+
+FunctionEnd
 EOF
 
 rm -f ${OUTFILE}
