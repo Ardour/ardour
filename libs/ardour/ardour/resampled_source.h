@@ -36,7 +36,7 @@ class LIBARDOUR_API ResampledImportableSource : public ImportableSource
 	~ResampledImportableSource ();
 
 	framecnt_t read (Sample* buffer, framecnt_t nframes);
-	float      ratio() const { return src_data.src_ratio; }
+	float      ratio() const { return _src_data.src_ratio; }
 	uint32_t   channels() const { return source->channels(); }
 	framecnt_t length() const { return source->length(); }
 	framecnt_t samplerate() const { return source->samplerate(); }
@@ -52,10 +52,11 @@ class LIBARDOUR_API ResampledImportableSource : public ImportableSource
 
    private:
 	boost::shared_ptr<ImportableSource> source;
-	float* input;
-	int _src_type;
-	SRC_STATE*	src_state;
-	SRC_DATA	src_data;
+	float*          _input;
+	int             _src_type;
+	SRC_STATE*      _src_state;
+	SRC_DATA        _src_data;
+	bool            _end_of_input;
 };
 
 }

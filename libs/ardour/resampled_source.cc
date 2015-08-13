@@ -34,7 +34,7 @@ const uint32_t ResampledImportableSource::blocksize = 16384U;
 
 ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, framecnt_t rate, SrcQuality srcq)
 	: source (src)
-	, src_state (0)
+	, _src_state (0)
 {
 	_src_type = SRC_SINC_BEST_QUALITY;
 
@@ -56,17 +56,17 @@ ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<Importab
 		break;
 	}
 
-	input = new float[blocksize];
+	_input = new float[blocksize];
 
 	seek (0);
 
-	src_data.src_ratio = ((float) rate) / source->samplerate();
+	_src_data.src_ratio = ((float) rate) / source->samplerate();
 }
 
 ResampledImportableSource::~ResampledImportableSource ()
 {
-	src_state = src_delete (src_state) ;
-	delete [] input;
+	_src_state = src_delete (_src_state) ;
+	delete [] _input;
 }
 
 framecnt_t
@@ -75,44 +75,47 @@ ResampledImportableSource::read (Sample* output, framecnt_t nframes)
 	int err;
 
 	/* If the input buffer is empty, refill it. */
+	if (_src_data.input_frames == 0) {
 
-	if (src_data.input_frames == 0) {
-
-		src_data.input_frames = source->read (input, blocksize);
+		_src_data.input_frames = source->read (_input, blocksize);
 
 		/* The last read will not be a full buffer, so set end_of_input. */
-
-		if ((framecnt_t) src_data.input_frames < blocksize) {
-			src_data.end_of_input = true;
+		if ((framecnt_t) _src_data.input_frames < blocksize) {
+			_end_of_input = true;
 		}
 
-		src_data.input_frames /= source->channels();
-		src_data.data_in = input;
+		_src_data.input_frames /= source->channels();
+		_src_data.data_in = _input;
 	}
 
-	src_data.data_out = output;
+	_src_data.data_out = output;
+	_src_data.output_frames = nframes / source->channels();
 
-	if (!src_data.end_of_input) {
-		src_data.output_frames = nframes / source->channels();
-	} else {
-		src_data.output_frames = std::min ((framecnt_t) src_data.input_frames, nframes / source->channels());
+	if (_end_of_input && _src_data.input_frames * _src_data.src_ratio <= _src_data.output_frames) {
+		/* only set src_data.end_of_input for the last cycle.
+		 *
+		 * The flag only affects writing out remaining data in the
+		 * internal buffer of src_state.
+		 * SRC is not aware of data bufered here in _src_data.input
+		 * which needs to be processed first.
+		 */
+		_src_data.end_of_input = true;
 	}
 
-	if ((err = src_process (src_state, &src_data))) {
+	if ((err = src_process (_src_state, &_src_data))) {
 		error << string_compose(_("Import: %1"), src_strerror (err)) << endmsg ;
 		return 0 ;
 	}
 
 	/* Terminate if at end */
-
-	if (src_data.end_of_input && src_data.output_frames_gen == 0) {
+	if (_src_data.end_of_input && _src_data.output_frames_gen == 0) {
 		return 0;
 	}
 
-	src_data.data_in += src_data.input_frames_used * source->channels();
-	src_data.input_frames -= src_data.input_frames_used ;
+	_src_data.data_in += _src_data.input_frames_used * source->channels();
+	_src_data.input_frames -= _src_data.input_frames_used ;
 
-	return src_data.output_frames_gen * source->channels();
+	return _src_data.output_frames_gen * source->channels();
 }
 
 void
@@ -122,20 +125,21 @@ ResampledImportableSource::seek (framepos_t pos)
 
 	/* and reset things so that we start from scratch with the conversion */
 
-	if (src_state) {
-		src_delete (src_state);
+	if (_src_state) {
+		src_delete (_src_state);
 	}
 
 	int err;
 
-	if ((src_state = src_new (_src_type, source->channels(), &err)) == 0) {
+	if ((_src_state = src_new (_src_type, source->channels(), &err)) == 0) {
 		error << string_compose(_("Import: src_new() failed : %1"), src_strerror (err)) << endmsg ;
 		throw failed_constructor ();
 	}
 
-	src_data.input_frames = 0;
-	src_data.data_in = input;
-	src_data.end_of_input = 0;
+	_src_data.input_frames = 0;
+	_src_data.data_in = _input;
+	_src_data.end_of_input = 0;
+	_end_of_input = false;
 }
 
 framepos_t
