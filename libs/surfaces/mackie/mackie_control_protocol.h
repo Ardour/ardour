@@ -300,6 +300,7 @@ class MackieControlProtocol
 	ARDOUR::RouteNotificationList _last_selected_routes;
         XMLNode*                 _surfaces_state;
         int                      _surfaces_version;
+	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 
         struct ipMIDIHandler {
                 MackieControlProtocol* mcp;
