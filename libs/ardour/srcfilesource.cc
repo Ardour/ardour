@@ -120,24 +120,23 @@ SrcFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 	_src_data.input_frames = _source->read (_src_buffer, _source_position, scnt);
 
-	if ((framecnt_t) _src_data.input_frames < scnt
-			|| _source_position + scnt >= _source->length(0)) {
+	if ((framecnt_t) _src_data.input_frames * _ratio <= cnt
+			&& _source_position + scnt >= _source->length(0)) {
 		_src_data.end_of_input = true;
-		_target_position += _src_data.input_frames * _ratio;
 		DEBUG_TRACE (DEBUG::AudioPlayback, "SRC: END OF INPUT\n");
 	} else {
 		_src_data.end_of_input = false;
+	}
+
+	if ((framecnt_t) _src_data.input_frames < scnt) {
+		_target_position += _src_data.input_frames * _ratio;
+	} else {
 		_target_position += cnt;
 	}
 
 	_src_data.output_frames = cnt;
 	_src_data.data_in = _src_buffer;
 	_src_data.data_out = dst;
-
-	if (_src_data.end_of_input) {
-		_src_data.output_frames = std::min ((long)floor(_src_data.input_frames * _ratio), _src_data.output_frames);
-	}
-
 
 	if ((err = src_process (_src_state, &_src_data))) {
 		error << string_compose(_("SrcFileSource: %1"), src_strerror (err)) << endmsg ;
