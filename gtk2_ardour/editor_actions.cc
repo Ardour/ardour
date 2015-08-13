@@ -196,7 +196,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(*this, &Editor::deselect_all));
 	reg_sens (editor_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection));
 
-	reg_sens (editor_actions, "select-loop-range", _("Set Range in Loop Range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop));
+	reg_sens (editor_actions, "select-loop-range", _("Set Range to Loop Range"), sigc::mem_fun(*this, &Editor::set_selection_from_loop));
 	reg_sens (editor_actions, "select-punch-range", _("Set Range to Punch Range"), sigc::mem_fun(*this, &Editor::set_selection_from_punch));
 	reg_sens (editor_actions, "select-from-regions", _("Set Range to Selected Regions"), sigc::mem_fun(*this, &Editor::set_selection_from_region));
 

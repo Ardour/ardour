@@ -632,7 +632,7 @@ public:
 			}
 		}
 
-		l = manage (left_aligned_label (_("Resize overlaped regions using:")));
+		l = manage (left_aligned_label (_("Resize overlapped regions using:")));
 		l->set_name ("OptionsLabel");
 
 		t->attach (*l, col, col + 1, row, row + 1, FILL | EXPAND, FILL);
