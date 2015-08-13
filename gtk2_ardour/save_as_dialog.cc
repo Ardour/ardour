@@ -105,9 +105,19 @@ SaveAsDialog::no_include_toggled ()
 void
 SaveAsDialog::name_entry_changed ()
 {
-	if (!new_name_entry.get_text().empty()) {
-		set_response_sensitive (RESPONSE_OK);
+	if (new_name_entry.get_text().empty()) {
+		set_response_sensitive (RESPONSE_OK, false);
+		return;
 	}
+
+	std::string dir = Glib::build_filename (new_parent_folder(), new_name_entry.get_text());
+
+	if (Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
+		set_response_sensitive (RESPONSE_OK, false);
+		return;
+	}
+
+	set_response_sensitive (RESPONSE_OK);
 }
 
 string
