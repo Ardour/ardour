@@ -271,7 +271,10 @@ MackieControlProtocol::get_sorted_routes()
 		if (route_is_locked_to_strip(route)) {
 			continue;
 		}
-
+		/* This next section which is not used yet, looks wrong to me
+			The first four belong here but the bottom five are not a selection
+			of routes and belong elsewhere as they are v-pot modes.
+		*/
 		switch (_view_mode) {
 		case Mixer:
 			break;
@@ -490,8 +493,8 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
-
-	boost::shared_ptr<Surface> surface = surfaces.front();
+	// surface needs to be master surface
+	boost::shared_ptr<Surface> surface = _master_surface;
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
 	if (x != surface->controls_by_device_independent_id.end()) {
@@ -510,8 +513,7 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
-
-	boost::shared_ptr<Surface> surface = surfaces.front();
+	boost::shared_ptr<Surface> surface = _master_surface;
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
 
@@ -668,7 +670,7 @@ int
 MackieControlProtocol::create_surfaces ()
 {
 	string device_name;
-	surface_type_t stype = mcu;
+	surface_type_t stype = mcu; // type not yet determined
 	char buf[128];
 
 	if (_device_info.extenders() == 0) {
@@ -683,10 +685,19 @@ MackieControlProtocol::create_surfaces ()
 
 		boost::shared_ptr<Surface> surface;
 
+		if (n == _device_info.master_position()) {
+			stype = mcu;
+		} else {
+			stype = ext;
+		}
 		try {
 			surface.reset (new Surface (*this, device_name, n, stype));
 		} catch (...) {
 			return -1;
+		}
+
+		if (n == _device_info.master_position()) {
+			_master_surface = surface;
 		}
 
 		if (_surfaces_state) {
@@ -697,8 +708,6 @@ MackieControlProtocol::create_surfaces ()
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
 			surfaces.push_back (surface);
 		}
-
-		/* next device will be an extender */
 		
 		if (_device_info.extenders() < 2) {
 			device_name = X_("mackie control #2");
@@ -706,7 +715,6 @@ MackieControlProtocol::create_surfaces ()
 			snprintf (buf, sizeof (buf), X_("mackie control #%d"), n+2);
 			device_name = buf;
 		}
-		stype = ext;
 
 		if (!_device_info.uses_ipmidi()) {
 
@@ -921,7 +929,7 @@ MackieControlProtocol::update_timecode_display()
 		return;
 	}
 
-	boost::shared_ptr<Surface> surface = surfaces.front();
+	boost::shared_ptr<Surface> surface = _master_surface;
 
 	if (surface->type() != mcu || !_device_info.has_timecode_display() || !surface->active ()) {
 		return;
@@ -995,7 +1003,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		surface = surfaces.front ();
+		surface = _master_surface;
 	}
 	
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (Led::RudeSolo);
@@ -1073,7 +1081,7 @@ MackieControlProtocol::notify_record_state_changed ()
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		surface = surfaces.front();
+		surface = _master_surface;
 	}
 		
 	/* rec is a tristate */
