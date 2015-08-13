@@ -63,7 +63,7 @@ protected:
 	}
 
 private:
-	static const uint32_t blocksize;
+	static const uint32_t max_blocksize;
 	boost::shared_ptr<AudioFileSource> _source;
 
 	mutable SRC_STATE* _src_state;
