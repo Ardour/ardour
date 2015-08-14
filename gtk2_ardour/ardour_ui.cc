@@ -1971,7 +1971,7 @@ ARDOUR_UI::transport_goto_wallclock ()
 		time (&now);
 		localtime_r (&now, &tmnow);
 		
-		int frame_rate = _session->frame_rate();
+		framecnt_t frame_rate = _session->frame_rate();
 		
 		if (frame_rate == 0) {
 			/* no frame rate available */
