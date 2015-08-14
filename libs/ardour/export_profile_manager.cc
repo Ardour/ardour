@@ -483,12 +483,15 @@ ExportProfileManager::update_ranges () {
 		return;
 	}
 
-	/* Session */
 
-	Location * session_range = (session.get_play_loop () ? session.locations()->auto_loop_location () : 
-														   session.locations()->session_range_location());
-	if (session_range) {
-		ranges->push_back (session_range);
+	/* Loop */
+	if (session.locations()->auto_loop_location ()) {
+		ranges->push_back (session.locations()->auto_loop_location ());
+	}
+
+	/* Session */
+	if (session.locations()->session_range_location()) {
+		ranges->push_back (session.locations()->session_range_location());
 	}
 
 	/* Selection */
