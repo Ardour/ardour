@@ -155,8 +155,10 @@ public:
 	LilvNode* units_midiNote;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
+#ifdef HAVE_LV2_1_2_0
 	LilvNode* bufz_powerOf2BlockLength;
 	LilvNode* bufz_fixedBlockLength;
+#endif
 
 private:
 	bool _bundle_checked;
@@ -431,6 +433,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		throw failed_constructor();
 	}
 
+#ifdef HAVE_LV2_1_2_0
 	LilvNodes *required_features = lilv_plugin_get_required_features (plugin);
 	if (lilv_nodes_contains (required_features, _world.bufz_powerOf2BlockLength) ||
 			lilv_nodes_contains (required_features, _world.bufz_fixedBlockLength)
@@ -444,6 +447,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		throw failed_constructor();
 	}
 	lilv_nodes_free(required_features);
+#endif
 
 #ifdef HAVE_LILV_0_16_0
 	// Load default state
@@ -2385,15 +2389,19 @@ LV2World::LV2World()
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
+#ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
+#endif
 
 }
 
 LV2World::~LV2World()
 {
+#ifdef HAVE_LV2_1_2_0
 	lilv_node_free(bufz_fixedBlockLength);
 	lilv_node_free(bufz_powerOf2BlockLength);
+#endif
 	lilv_node_free(patch_Message);
 	lilv_node_free(patch_writable);
 	lilv_node_free(units_hz);
@@ -2524,6 +2532,7 @@ LV2PluginInfo::discover()
 			continue;
 		}
 
+#ifdef HAVE_LV2_1_2_0
 		LilvNodes *required_features = lilv_plugin_get_required_features (p);
 		if (lilv_nodes_contains (required_features, world.bufz_powerOf2BlockLength) ||
 				lilv_nodes_contains (required_features, world.bufz_fixedBlockLength)
@@ -2536,6 +2545,7 @@ LV2PluginInfo::discover()
 			continue;
 		}
 		lilv_nodes_free(required_features);
+#endif
 
 		info->type = LV2;
 
