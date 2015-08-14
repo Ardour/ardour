@@ -133,7 +133,7 @@ setup_enum_writer ()
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
 	Evoral::OverlapType _OverlapType;
-        BufferingPreset _BufferingPreset;
+    BufferingPreset _BufferingPreset;
 	AutoReturnTarget _AutoReturnTarget;
 	PresentationInfo::Flag _PresentationInfo_Flag;
 	MusicalMode::Type mode;
