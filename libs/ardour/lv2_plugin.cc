@@ -155,6 +155,8 @@ public:
 	LilvNode* units_midiNote;
 	LilvNode* patch_writable;
 	LilvNode* patch_Message;
+	LilvNode* bufz_powerOf2BlockLength;
+	LilvNode* bufz_fixedBlockLength;
 
 private:
 	bool _bundle_checked;
@@ -423,6 +425,16 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
 		    _("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
+		    lilv_node_as_string(_impl->name)) << endmsg;
+		lilv_node_free(_impl->name);
+		lilv_node_free(_impl->author);
+		throw failed_constructor();
+	}
+	if (lilv_plugin_has_feature(plugin, _world.bufz_powerOf2BlockLength) ||
+			lilv_plugin_has_feature(plugin, _world.bufz_fixedBlockLength)
+	   ) {
+		error << string_compose(
+		    _("LV2: \"%1\" buffer-size requirements cannot be satisfied."),
 		    lilv_node_as_string(_impl->name)) << endmsg;
 		lilv_node_free(_impl->name);
 		lilv_node_free(_impl->author);
@@ -2369,10 +2381,16 @@ LV2World::LV2World()
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
+
+	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
+	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
+
 }
 
 LV2World::~LV2World()
 {
+	lilv_node_free(bufz_fixedBlockLength);
+	lilv_node_free(bufz_powerOf2BlockLength);
 	lilv_node_free(patch_Message);
 	lilv_node_free(patch_writable);
 	lilv_node_free(units_hz);
