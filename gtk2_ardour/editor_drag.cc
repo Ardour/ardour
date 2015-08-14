@@ -3291,6 +3291,10 @@ CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
 void
 CursorDrag::fake_locate (framepos_t t)
 {
+	if (_editor->session () == 0) {
+		return;
+	}
+
 	_editor->playhead_cursor->set_position (t);
 
 	Session* s = _editor->session ();
