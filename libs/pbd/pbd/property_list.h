@@ -38,18 +38,18 @@ public:
 
 	virtual ~PropertyList();
 
-        void get_changes_as_xml (XMLNode *);
+	void get_changes_as_xml (XMLNode*);
 	void invert ();
 
-        /** Add a property (of some kind) to the list. Used when
-            constructing PropertyLists that describe a change/operation.
-        */
-        bool add (PropertyBase* prop);
+	/* Add a property (of some kind) to the list. Used when
+	 * constructing PropertyLists that describe a change/operation.
+	 */
+	bool add (PropertyBase* prop);
 
 	/* Code that is constructing a property list for use
 	 * in setting the state of an object uses this.
-         *
-         * Defined below, once we have Property<T>
+	 *
+	 * Defined below, once we have Property<T>
 	 */
 	template<typename T, typename V> bool add (PropertyDescriptor<T> pid, const V& v);
 
@@ -57,10 +57,10 @@ protected:
 	bool _property_owner;
 };
 
-/** A variant of PropertyList that does not delete its
- *  property list in its destructor. Objects with their
- *  own Properties store them in an OwnedPropertyList
- *  to avoid having them deleted at the wrong time.
+/* A variant of PropertyList that does not delete its
+ * property list in its destructor. Objects with their
+ * own Properties store them in an OwnedPropertyList
+ * to avoid having them deleted at the wrong time.
  */
 class LIBPBD_API OwnedPropertyList : public PropertyList
 {
@@ -69,8 +69,8 @@ public:
 
 	/* Classes that own property lists use this to add their
 	 * property members to their plists. Note that it takes
-         * a reference argument rather than a pointer like
-         * one of the add() methods in PropertyList.
+	 * a reference argument rather than a pointer like
+	 * one of the add() methods in PropertyList.
 	 */
 	bool add (PropertyBase& p);
 };
