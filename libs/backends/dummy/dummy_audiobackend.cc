@@ -1354,9 +1354,6 @@ deinstantiate ()
 static bool
 already_configured ()
 {
-	if (_instance) {
-		return _instance->is_running();
-	}
 	return false;
 }
 
