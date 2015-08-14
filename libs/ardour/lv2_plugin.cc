@@ -430,16 +430,20 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		lilv_node_free(_impl->author);
 		throw failed_constructor();
 	}
-	if (lilv_plugin_has_feature(plugin, _world.bufz_powerOf2BlockLength) ||
-			lilv_plugin_has_feature(plugin, _world.bufz_fixedBlockLength)
+
+	LilvNodes *required_features = lilv_plugin_get_required_features (plugin);
+	if (lilv_nodes_contains (required_features, _world.bufz_powerOf2BlockLength) ||
+			lilv_nodes_contains (required_features, _world.bufz_fixedBlockLength)
 	   ) {
 		error << string_compose(
 		    _("LV2: \"%1\" buffer-size requirements cannot be satisfied."),
 		    lilv_node_as_string(_impl->name)) << endmsg;
 		lilv_node_free(_impl->name);
 		lilv_node_free(_impl->author);
+		lilv_nodes_free(required_features);
 		throw failed_constructor();
 	}
+	lilv_nodes_free(required_features);
 
 #ifdef HAVE_LILV_0_16_0
 	// Load default state
@@ -2520,15 +2524,18 @@ LV2PluginInfo::discover()
 			continue;
 		}
 
-		if (lilv_plugin_has_feature(p, _world.bufz_powerOf2BlockLength) ||
-				lilv_plugin_has_feature(p, world.bufz_fixedBlockLength)
+		LilvNodes *required_features = lilv_plugin_get_required_features (p);
+		if (lilv_nodes_contains (required_features, world.bufz_powerOf2BlockLength) ||
+				lilv_nodes_contains (required_features, world.bufz_fixedBlockLength)
 		   ) {
 			warning << string_compose(
 			    _("Ignoring LV2 plugin \"%1\" because its buffer-size requirements cannot be satisfied."),
 			    lilv_node_as_string(name)) << endmsg;
+			lilv_nodes_free(required_features);
 			lilv_node_free(name);
 			continue;
 		}
+		lilv_nodes_free(required_features);
 
 		info->type = LV2;
 
