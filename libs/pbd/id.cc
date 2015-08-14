@@ -26,6 +26,8 @@
 #include <inttypes.h>
 
 #include "pbd/id.h"
+#include "pbd/string_convert.h"
+
 #include <string>
 
 using namespace std;
@@ -63,10 +65,10 @@ ID::reset ()
 	_id = _counter++;
 }
 
-int
+bool
 ID::string_assign (string str)
 {
-	return sscanf (str.c_str(), "%" PRIu64, &_id) != 0;
+	return string_to_uint64 (str, _id);
 }
 
 void
@@ -75,17 +77,16 @@ ID::print (char* buf, uint32_t bufsize) const
 	snprintf (buf, bufsize, "%" PRIu64, _id);
 }
 
-string ID::to_s() const
+std::string
+ID::to_s () const
 {
-    char buf[32]; // see print()
-    print(buf, sizeof (buf));
-    return string(buf);
+	return to_string (_id);
 }
 
 bool
 ID::operator== (const string& str) const
 {
-	return to_s() == str;
+	return to_string (_id) == str;
 }
 
 ID&
@@ -105,11 +106,9 @@ ID::operator= (const ID& other)
 }
 
 ostream&
-operator<< (ostream& ostr, const ID& _id)
+operator<< (ostream& ostr, const ID& id)
 {
-	char buf[32];
-	_id.print (buf, sizeof (buf));
-	ostr << buf;
+	ostr << id.to_s();
 	return ostr;
 }
 
