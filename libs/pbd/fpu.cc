@@ -153,9 +153,9 @@ FPU::FPU ()
 	
 		__cpuid (cpu_info, 1);
 
-		if ((cpu_info[2] & (1<<27)) /* AVX */ &&
-		    (cpu_info[2] & (1<<28) /* (OS)XSAVE */) &&
-		    (_xgetbv (_XCR_XFEATURE_ENABLED_MASK) & 0x6)) { /* OS really supports XSAVE */
+		if ((cpu_info[2] & (1<<27)) /* OSXSAVE */ &&
+		    (cpu_info[2] & (1<<28) /* AVX */) &&
+		    ((_xgetbv (_XCR_XFEATURE_ENABLED_MASK) & 0x6) == 0x6)) { /* OS really supports XSAVE */
 			info << _("AVX-capable processor") << endmsg;
 			_flags = Flags (_flags | (HasAVX) );
 		}
