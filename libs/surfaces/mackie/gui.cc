@@ -532,6 +532,7 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 void
 MackieControlProtocolGUI::surface_combo_changed ()
 {
+	_cp.not_session_load();
 	_cp.set_device (_surface_combo.get_active_text());
 
 	/* update ipMIDI field */

@@ -110,6 +110,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _initialized (false)
 	, _surfaces_state (0)
 	, _surfaces_version (0)
+	, _session_load (true)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 

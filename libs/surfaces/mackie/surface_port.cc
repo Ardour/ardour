@@ -120,19 +120,22 @@ SurfacePort::set_state (const XMLNode& node, int version)
 		return 0;
 	}
 	// the rest should not be run if the device-name changes outside of a session load.
-	XMLNode* child;
+	if ( _surface->mcp().session_load()) {
 
-	if ((child = node.child (X_("Input"))) != 0) {
-		XMLNode* portnode = child->child (Port::state_node_name.c_str());
-		if (portnode) {
-			_async_in->set_state (*portnode, version);
+		XMLNode* child;
+
+		if ((child = node.child (X_("Input"))) != 0) {
+			XMLNode* portnode = child->child (Port::state_node_name.c_str());
+			if (portnode) {
+				_async_in->set_state (*portnode, version);
+			}
 		}
-	}
 
-	if ((child = node.child (X_("Output"))) != 0) {
-		XMLNode* portnode = child->child (Port::state_node_name.c_str());
-		if (portnode) {
-			_async_out->set_state (*portnode, version);
+		if ((child = node.child (X_("Output"))) != 0) {
+			XMLNode* portnode = child->child (Port::state_node_name.c_str());
+			if (portnode) {
+				_async_out->set_state (*portnode, version);
+			}
 		}
 	}
 

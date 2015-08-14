@@ -209,6 +209,9 @@ class MackieControlProtocol
 	int16_t ipmidi_base() const { return _ipmidi_base; }
 	void    set_ipmidi_base (int16_t);
 
+	bool session_load () { return _session_load; }
+	void not_session_load () { _session_load = false; }
+
 	void midi_connectivity_established ();
 	
   protected:
@@ -298,8 +301,9 @@ class MackieControlProtocol
 	bool                     _metering_active;
 	bool                     _initialized;
 	ARDOUR::RouteNotificationList _last_selected_routes;
-        XMLNode*                 _surfaces_state;
-        int                      _surfaces_version;
+	XMLNode*				_surfaces_state;
+	int						_surfaces_version;
+	bool					_session_load;
 	boost::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
 
         struct ipMIDIHandler {
