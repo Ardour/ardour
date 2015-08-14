@@ -424,7 +424,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
-		    _("LV2: \"%1\" cannot be used, since it cannot do inplace processing"),
+		    _("LV2: \"%1\" cannot be used, since it cannot do inplace processing."),
 		    lilv_node_as_string(_impl->name)) << endmsg;
 		lilv_node_free(_impl->name);
 		lilv_node_free(_impl->author);
@@ -2381,7 +2381,6 @@ LV2World::LV2World()
 	units_db           = lilv_new_uri(world, LV2_UNITS__db);
 	patch_writable     = lilv_new_uri(world, LV2_PATCH__writable);
 	patch_Message      = lilv_new_uri(world, LV2_PATCH__Message);
-
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
 
@@ -2510,6 +2509,24 @@ LV2PluginInfo::discover()
 			warning << "Ignoring invalid LV2 plugin "
 			        << lilv_node_as_string(lilv_plugin_get_uri(p))
 			        << endmsg;
+			continue;
+		}
+
+		if (lilv_plugin_has_feature(p, world.lv2_inPlaceBroken)) {
+			warning << string_compose(
+			    _("Ignoring LV2 plugin \"%1\" since it cannot do inplace processing."),
+			    lilv_node_as_string(name)) << endmsg;
+			lilv_node_free(name);
+			continue;
+		}
+
+		if (lilv_plugin_has_feature(p, _world.bufz_powerOf2BlockLength) ||
+				lilv_plugin_has_feature(p, world.bufz_fixedBlockLength)
+		   ) {
+			warning << string_compose(
+			    _("Ignoring LV2 plugin \"%1\" because its buffer-size requirements cannot be satisfied."),
+			    lilv_node_as_string(name)) << endmsg;
+			lilv_node_free(name);
 			continue;
 		}
 
