@@ -351,6 +351,8 @@
     <ColorAlias name="processor prefader: fill" alias="color 40"/>
     <ColorAlias name="processor prefader: fill active" alias="color 80"/>
     <ColorAlias name="processor prefader: led active" alias="color 37"/>
+    <ColorAlias name="processor stub: fill" alias="color 46"/>
+    <ColorAlias name="processor stub: fill active" alias="color 46"/>
     <ColorAlias name="punch button: fill" alias="color 20"/>
     <ColorAlias name="punch button: fill active" alias="color 9"/>
     <ColorAlias name="punch button: led active" alias="color 4"/>

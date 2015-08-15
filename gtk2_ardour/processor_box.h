@@ -126,6 +126,7 @@ public:
 	};
 
 	void set_position (Position, uint32_t);
+	bool unknown_processor () const { return _unknown_processor; } ;
 	boost::shared_ptr<ARDOUR::Processor> processor () const;
 	void set_enum_width (Width);
 
@@ -150,6 +151,7 @@ protected:
 
 private:
 	bool _selectable;
+	bool _unknown_processor;
 	void led_clicked();
 	void processor_active_changed ();
 	void processor_property_changed (const PBD::PropertyChange&);
@@ -394,10 +396,13 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void get_selected_processors (ProcSelection&) const;
 
 	bool can_cut() const;
+	bool stub_processor_selected() const;
 
 	static Glib::RefPtr<Gtk::Action> cut_action;
+	static Glib::RefPtr<Gtk::Action> copy_action;
 	static Glib::RefPtr<Gtk::Action> paste_action;
 	static Glib::RefPtr<Gtk::Action> rename_action;
+	static Glib::RefPtr<Gtk::Action> delete_action;
 	static Glib::RefPtr<Gtk::Action> edit_action;
 	static Glib::RefPtr<Gtk::Action> edit_generic_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);

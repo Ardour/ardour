@@ -91,7 +91,9 @@ using namespace Gtkmm2ext;
 ProcessorBox* ProcessorBox::_current_processor_box = 0;
 RefPtr<Action> ProcessorBox::paste_action;
 RefPtr<Action> ProcessorBox::cut_action;
+RefPtr<Action> ProcessorBox::copy_action;
 RefPtr<Action> ProcessorBox::rename_action;
+RefPtr<Action> ProcessorBox::delete_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
 
@@ -103,6 +105,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	, _position (PreFader)
 	, _position_num(0)
 	, _selectable(true)
+	, _unknown_processor(false)
 	, _parent (parent)
 	, _processor (p)
 	, _width (w)
@@ -122,6 +125,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	}
 	if (boost::dynamic_pointer_cast<UnknownProcessor> (_processor)) {
 		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
+		_unknown_processor = true;
 	}
 	if (_processor) {
 
@@ -231,6 +235,11 @@ ProcessorEntry::set_visual_state (Gtkmm2ext::VisualState s, bool yn)
 void
 ProcessorEntry::setup_visuals ()
 {
+	if (_unknown_processor) {
+		_button.set_name ("processor stub");
+		return;
+	}
+
 	switch (_position) {
 	case PreFader:
 		_button.set_name ("processor prefader");
@@ -319,6 +328,11 @@ ProcessorEntry::setup_tooltip ()
 				ARDOUR_UI::instance()->set_tip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
 			}
+			return;
+		}
+		if(boost::dynamic_pointer_cast<UnknownProcessor> (_processor)) {
+			ARDOUR_UI::instance()->set_tip (_button,
+					string_compose (_("<b>%1</b>\nThe Plugin is not available on this system\nand has been replaced by a stub."), name (Wide)));
 			return;
 		}
 	}
@@ -1096,6 +1110,9 @@ ProcessorBox::object_drop(DnDVBox<ProcessorEntry>* source, ProcessorEntry* posit
 	list<boost::shared_ptr<Processor> > procs;
 	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->processor ()) {
+			if (boost::dynamic_pointer_cast<UnknownProcessor> ((*i)->processor())) {
+				continue;
+			}
 			procs.push_back ((*i)->processor ());
 		}
 	}
@@ -1234,11 +1251,14 @@ ProcessorBox::show_processor_menu (int arg)
 
 	/* Sensitise actions as approprioate */
 
-        cut_action->set_sensitive (can_cut());
-	paste_action->set_sensitive (!_rr_selection.processors.empty());
 
-	const bool sensitive = !processor_display.selection().empty();
-	ActionManager::set_sensitive (ActionManager::plugin_selection_sensitive_actions, sensitive);
+	const bool sensitive = !processor_display.selection().empty() && ! stub_processor_selected ();
+
+	paste_action->set_sensitive (!_rr_selection.processors.empty());
+	cut_action->set_sensitive (sensitive && can_cut ());
+	copy_action->set_sensitive (sensitive);
+	delete_action->set_sensitive (sensitive || stub_processor_selected ());
+
 	edit_action->set_sensitive (one_processor_can_be_edited ());
 	edit_generic_action->set_sensitive (one_processor_can_be_edited ());
 
@@ -1251,7 +1271,10 @@ ProcessorBox::show_processor_menu (int arg)
 	edit_action->set_sensitive (pi && pi->plugin()->has_editor ());
 
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
-	rename_action->set_sensitive (single_selection && !pi && !boost::dynamic_pointer_cast<Amp> (single_selection->processor ()));
+	rename_action->set_sensitive (single_selection
+			&& !pi
+			&& !boost::dynamic_pointer_cast<Amp> (single_selection->processor ())
+			&& !boost::dynamic_pointer_cast<UnknownProcessor> (single_selection->processor ()));
 
 	processor_menu->popup (1, arg);
 
@@ -1781,9 +1804,10 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 	boost::shared_ptr<PortInsert> ext = boost::dynamic_pointer_cast<PortInsert> (processor);
+	boost::shared_ptr<UnknownProcessor> stub = boost::dynamic_pointer_cast<UnknownProcessor> (processor);
 	
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
-	if (!send && !plugin_insert && !ext)
+	if (!send && !plugin_insert && !ext && !stub)
 		e->set_selectable(false);
 
 	bool mark_send_visible = false;
@@ -1908,22 +1932,38 @@ ProcessorBox::rename_processors ()
 bool
 ProcessorBox::can_cut () const
 {
-        vector<boost::shared_ptr<Processor> > sel;
+	vector<boost::shared_ptr<Processor> > sel;
 
-        get_selected_processors (sel);
+	get_selected_processors (sel);
 
-        /* cut_processors () does not cut inserts */
+	/* cut_processors () does not cut inserts */
 
-        for (vector<boost::shared_ptr<Processor> >::const_iterator i = sel.begin (); i != sel.end (); ++i) {
+	for (vector<boost::shared_ptr<Processor> >::const_iterator i = sel.begin (); i != sel.end (); ++i) {
 
 		if (boost::dynamic_pointer_cast<PluginInsert>((*i)) != 0 ||
 		    (boost::dynamic_pointer_cast<Send>((*i)) != 0) ||
 		    (boost::dynamic_pointer_cast<Return>((*i)) != 0)) {
-                        return true;
-                }
-        }
+			return true;
+		}
+	}
 
-        return false;
+	return false;
+}
+
+bool
+ProcessorBox::stub_processor_selected () const
+{
+	vector<boost::shared_ptr<Processor> > sel;
+
+	get_selected_processors (sel);
+
+	for (vector<boost::shared_ptr<Processor> >::const_iterator i = sel.begin (); i != sel.end (); ++i) {
+		if (boost::dynamic_pointer_cast<UnknownProcessor>((*i)) != 0) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void
@@ -2520,14 +2560,10 @@ ProcessorBox::register_actions ()
 	/* standard editing stuff */
 	cut_action = ActionManager::register_action (popup_act_grp, X_("cut"), _("Cut"),
                                                      sigc::ptr_fun (ProcessorBox::rb_cut));
-	ActionManager::plugin_selection_sensitive_actions.push_back(cut_action);
-	act = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),
+	copy_action = ActionManager::register_action (popup_act_grp, X_("copy"), _("Copy"),
 			sigc::ptr_fun (ProcessorBox::rb_copy));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act);
-
-	act = ActionManager::register_action (popup_act_grp, X_("delete"), _("Delete"),
+	delete_action = ActionManager::register_action (popup_act_grp, X_("delete"), _("Delete"),
 			sigc::ptr_fun (ProcessorBox::rb_delete));
-	ActionManager::plugin_selection_sensitive_actions.push_back(act); // ??
 
 	paste_action = ActionManager::register_action (popup_act_grp, X_("paste"), _("Paste"),
 			sigc::ptr_fun (ProcessorBox::rb_paste));
