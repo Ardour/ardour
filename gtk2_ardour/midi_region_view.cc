@@ -470,7 +470,7 @@ MidiRegionView::enter_internal()
 void
 MidiRegionView::leave_internal()
 {
-	trackview.editor().verbose_cursor()->hide ();
+	hide_verbose_cursor ();
 	remove_ghost_note ();
 
 	if (_grabbed_keyboard) {
@@ -484,11 +484,6 @@ MidiRegionView::leave_internal()
 	}
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
-	}
-
-	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
-	if (mtv) {
-		mtv->set_note_highlight (NO_MIDI_NOTE);
 	}
 }
 
@@ -634,7 +629,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 	} else if (_ghost_note && editor.current_mouse_mode() == MouseContent) {
 
 		remove_ghost_note ();
-		editor.verbose_cursor()->hide ();
+		hide_verbose_cursor ();
 
 	} else if (_ghost_note && editor.current_mouse_mode() == MouseDraw) {
 
@@ -658,7 +653,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				editor.drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (&editor), group, this), (GdkEvent *) ev);
 				_mouse_state = AddDragging;
 				remove_ghost_note ();
-				editor.verbose_cursor()->hide ();
+				hide_verbose_cursor ();
 				return true;
 			} else if (m == MouseContent) {
 				editor.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
@@ -712,7 +707,7 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 		return false;
 	}
 
-	trackview.editor().verbose_cursor()->hide ();
+	hide_verbose_cursor ();
 
 	bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
 	bool together = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
@@ -1387,7 +1382,7 @@ MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
 
-	trackview.editor().verbose_cursor()->hide ();
+	hide_verbose_cursor ();
 
 	note_delete_connection.disconnect ();
 
@@ -2130,6 +2125,7 @@ MidiRegionView::delete_selection()
 	_selection.clear();
 
 	apply_diff ();
+	hide_verbose_cursor ();
 }
 
 void
@@ -2139,7 +2135,7 @@ MidiRegionView::delete_note (boost::shared_ptr<NoteType> n)
 	_note_diff_command->remove (n);
 	apply_diff ();
 
-	trackview.editor().verbose_cursor()->hide ();
+	hide_verbose_cursor ();
 }
 
 void
@@ -3336,13 +3332,11 @@ MidiRegionView::note_entered(NoteBase* ev)
 void
 MidiRegionView::note_left (NoteBase*)
 {
-	Editor* editor = dynamic_cast<Editor*>(&trackview.editor());
-
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		(*i)->hide_velocity ();
 	}
 
-	editor->verbose_cursor()->hide ();
+	hide_verbose_cursor ();
 }
 
 void
@@ -3360,7 +3354,7 @@ MidiRegionView::patch_entered (PatchChange* p)
 void
 MidiRegionView::patch_left (PatchChange *)
 {
-	trackview.editor().verbose_cursor()->hide ();
+	hide_verbose_cursor ();
 	/* focus will transfer back via the enter-notify event sent to this
 	 * midi region view.
 	 */
@@ -3380,7 +3374,7 @@ MidiRegionView::sysex_entered (SysEx* p)
 void
 MidiRegionView::sysex_left (SysEx *)
 {
-	trackview.editor().verbose_cursor()->hide ();
+	hide_verbose_cursor ();
 	/* focus will transfer back via the enter-notify event sent to this
 	 * midi region view.
 	 */
@@ -3763,6 +3757,16 @@ MidiRegionView::remove_ghost_note ()
 {
 	delete _ghost_note;
 	_ghost_note = 0;
+}
+
+void
+MidiRegionView::hide_verbose_cursor ()
+{
+	trackview.editor().verbose_cursor()->hide ();
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	if (mtv) {
+		mtv->set_note_highlight (NO_MIDI_NOTE);
+	}
 }
 
 void

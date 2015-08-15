@@ -32,12 +32,12 @@ using namespace std;
 using namespace Gtkmm2ext;
 
 PianoRollHeader::Color PianoRollHeader::white = PianoRollHeader::Color(0.77f, 0.78f, 0.76f);
-PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(1.00f, 0.50f, 0.50f);
+PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(1.00f, 0.40f, 0.40f);
 PianoRollHeader::Color PianoRollHeader::white_shade_light = PianoRollHeader::Color(0.95f, 0.95f, 0.95f);
 PianoRollHeader::Color PianoRollHeader::white_shade_dark = PianoRollHeader::Color(0.56f, 0.56f, 0.56f);
 
 PianoRollHeader::Color PianoRollHeader::black = PianoRollHeader::Color(0.24f, 0.24f, 0.24f);
-PianoRollHeader::Color PianoRollHeader::black_highlight = PianoRollHeader::Color(0.50f, 0.10f, 0.10f);
+PianoRollHeader::Color PianoRollHeader::black_highlight = PianoRollHeader::Color(0.60f, 0.10f, 0.10f);
 PianoRollHeader::Color PianoRollHeader::black_shade_light = PianoRollHeader::Color(0.46f, 0.46f, 0.46f);
 PianoRollHeader::Color PianoRollHeader::black_shade_dark = PianoRollHeader::Color(0.1f, 0.1f, 0.1f);
 
@@ -558,6 +558,10 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 
 void
 PianoRollHeader::set_note_highlight (uint8_t note) {
+	if (_highlighted_note == note) {
+		return;
+	}
+
 	if (_highlighted_note != NO_MIDI_NOTE) {
 		if (note > _highlighted_note) {
 			invalidate_note_range (_highlighted_note, note);

@@ -502,6 +502,7 @@ private:
 	void mouse_mode_changed ();
 	void enter_internal ();
 	void leave_internal ();
+	void hide_verbose_cursor ();
 
 	framecnt_t _last_display_zoom;
 
