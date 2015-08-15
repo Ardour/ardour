@@ -48,6 +48,7 @@ public:
 	void on_size_allocate(Gtk::Allocation& a);
 
 	void note_range_changed();
+	void set_note_highlight (uint8_t note);
 
 	struct Color {
 		Color();

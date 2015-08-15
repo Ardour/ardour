@@ -485,6 +485,11 @@ MidiRegionView::leave_internal()
 	if (frame_handle_end) {
 		frame_handle_end->raise_to_top();
 	}
+
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	if (mtv) {
+		mtv->set_note_highlight (NO_MIDI_NOTE);
+	}
 }
 
 bool
@@ -4006,7 +4011,7 @@ MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
 
 	std::string name;
 
-	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	if (mtv) {
 		boost::shared_ptr<MasterDeviceNames> device_names(mtv->get_device_names());
 		if (device_names) {
@@ -4018,6 +4023,7 @@ MidiRegionView::show_verbose_cursor (boost::shared_ptr<NoteType> n) const
 			                               patch_key.program(),
 			                               n->note());
 		}
+		mtv->set_note_highlight (n->note());
 	}
 
 	char buf[128];

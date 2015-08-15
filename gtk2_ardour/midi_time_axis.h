@@ -68,6 +68,8 @@ class StepEntry;
 class StepEditor;
 class MidiChannelSelectorWindow;
 
+#define NO_MIDI_NOTE 0xff
+
 class MidiTimeAxisView : public RouteTimeAxisView
 {
 public:
@@ -102,6 +104,7 @@ public:
 	void check_step_edit ();
 
 	void first_idle ();
+	void set_note_highlight (uint8_t note);
 
 	uint8_t get_channel_for_add () const;
 

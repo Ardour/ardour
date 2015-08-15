@@ -124,6 +124,11 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 }
 
 void
+MidiTimeAxisView::set_note_highlight (uint8_t note) {
+	_piano_roll_header->set_note_highlight (note);
+}
+
+void
 MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	_route = rt;

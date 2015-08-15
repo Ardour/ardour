@@ -28,18 +28,16 @@
 #include "midi_streamview.h"
 #include "public_editor.h"
 
-const int no_note = 0xff;
-
 using namespace std;
 using namespace Gtkmm2ext;
 
 PianoRollHeader::Color PianoRollHeader::white = PianoRollHeader::Color(0.77f, 0.78f, 0.76f);
-PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(0.87f, 0.88f, 0.86f);
+PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(1.00f, 0.50f, 0.50f);
 PianoRollHeader::Color PianoRollHeader::white_shade_light = PianoRollHeader::Color(0.95f, 0.95f, 0.95f);
 PianoRollHeader::Color PianoRollHeader::white_shade_dark = PianoRollHeader::Color(0.56f, 0.56f, 0.56f);
 
 PianoRollHeader::Color PianoRollHeader::black = PianoRollHeader::Color(0.24f, 0.24f, 0.24f);
-PianoRollHeader::Color PianoRollHeader::black_highlight = PianoRollHeader::Color(0.30f, 0.30f, 0.30f);
+PianoRollHeader::Color PianoRollHeader::black_highlight = PianoRollHeader::Color(0.50f, 0.10f, 0.10f);
 PianoRollHeader::Color PianoRollHeader::black_shade_light = PianoRollHeader::Color(0.46f, 0.46f, 0.46f);
 PianoRollHeader::Color PianoRollHeader::black_shade_dark = PianoRollHeader::Color(0.1f, 0.1f, 0.1f);
 
@@ -67,8 +65,8 @@ PianoRollHeader::Color::set(const PianoRollHeader::Color& c)
 
 PianoRollHeader::PianoRollHeader(MidiStreamView& v)
 	: _view(v)
-	, _highlighted_note(no_note)
-	, _clicked_note(no_note)
+	, _highlighted_note(NO_MIDI_NOTE)
+	, _clicked_note(NO_MIDI_NOTE)
 	, _dragging(false)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK |
@@ -463,9 +461,10 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 bool
 PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 {
-	if (_dragging) {
+	int note = _view.y_to_note(ev->y);
+	set_note_highlight (note);
 
-		int note = _view.y_to_note(ev->y);
+	if (_dragging) {
 
 		if ( false /*editor().current_mouse_mode() == Editing::MouseRange*/ ) {   //ToDo:  fix this.  this mode is buggy, and of questionable utility anyway
 			
@@ -476,21 +475,9 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 			}
 
 		} else {
-			
 			/* play notes */
-
-			if (_highlighted_note != no_note) {
-				if (note > _highlighted_note) {
-					invalidate_note_range(_highlighted_note, note);
-				} else {
-					invalidate_note_range(note, _highlighted_note);
-				}
-				
-				_highlighted_note = note;
-			}
-			
-			/* redraw already taken care of above */
-			if (_clicked_note != no_note && _clicked_note != note) {
+			/* redraw already taken care of above in set_note_highlight */
+			if (_clicked_note != NO_MIDI_NOTE && _clicked_note != note) {
 				_active_notes[_clicked_note] = false;
 				send_note_off(_clicked_note);
 				
@@ -569,12 +556,27 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 	return true;
 }
 
+void
+PianoRollHeader::set_note_highlight (uint8_t note) {
+	if (_highlighted_note != NO_MIDI_NOTE) {
+		if (note > _highlighted_note) {
+			invalidate_note_range (_highlighted_note, note);
+		} else {
+			invalidate_note_range (note, _highlighted_note);
+		}
+	}
+
+	_highlighted_note = note;
+
+	if (_highlighted_note != NO_MIDI_NOTE) {
+		invalidate_note_range (_highlighted_note, _highlighted_note);
+	}
+}
+
 bool
 PianoRollHeader::on_enter_notify_event (GdkEventCrossing* ev)
 {
-	_highlighted_note = _view.y_to_note(ev->y);
-
-	invalidate_note_range(_highlighted_note, _highlighted_note);
+	set_note_highlight (_view.y_to_note(ev->y));
 	return true;
 }
 
@@ -583,11 +585,11 @@ PianoRollHeader::on_leave_notify_event (GdkEventCrossing*)
 {
 	invalidate_note_range(_highlighted_note, _highlighted_note);
 
-	if (_clicked_note != no_note) {
+	if (_clicked_note != NO_MIDI_NOTE) {
 		reset_clicked_note(_clicked_note, _clicked_note != _highlighted_note);
 	}
 
-	_highlighted_note = no_note;
+	_highlighted_note = NO_MIDI_NOTE;
 	return true;
 }
 
@@ -702,7 +704,7 @@ void
 PianoRollHeader::reset_clicked_note (uint8_t note, bool invalidate)
 {
 	_active_notes[note] = false;
-	_clicked_note = no_note;
+	_clicked_note = NO_MIDI_NOTE;
 	send_note_off (note);
 	if (invalidate) {
 		invalidate_note_range (note, note);
