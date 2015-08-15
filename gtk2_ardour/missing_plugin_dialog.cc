@@ -42,7 +42,7 @@ MissingPluginDialog::MissingPluginDialog (Session * s, list<string> const & plug
 		t << *i << "\n";
 	}
 
-	t << "\nThose plugins and any following them on a track or buss have been disabled, and will be hidden.\n";
+	t << "\nThose plugins will be replaced with inactive stubs.\n";
 	t << "It is recommended that you install the missing plugins and re-load the session.\n";
 
         m->set_markup (t.str ());

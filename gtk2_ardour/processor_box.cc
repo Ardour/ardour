@@ -120,6 +120,9 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 	if (boost::dynamic_pointer_cast<PeakMeter> (_processor)) {
 		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
 	}
+	if (boost::dynamic_pointer_cast<UnknownProcessor> (_processor)) {
+		_button.set_elements(ArdourButton::Element(_button.elements() & ~ArdourButton::Indicator));
+	}
 	if (_processor) {
 
 		_vbox.pack_start (_routing_icon);
