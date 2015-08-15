@@ -18,6 +18,7 @@
 
 */
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 
 #include "ardour/gain_control.h"
