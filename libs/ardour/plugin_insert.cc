@@ -729,7 +729,7 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	switch (_match.method) {
 	case Split:
 	case Hide:
-		if (_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out)) {
+		if (_plugins.front()->configure_io (_plugins.front()->get_info()->n_inputs, out) == false) {
 			PluginIoReConfigure (); /* EMIT SIGNAL */
 			return false;
 		}
