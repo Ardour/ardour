@@ -945,6 +945,12 @@ PluginInsert::state (bool full)
 	node.add_property("type", _plugins[0]->state_node_name());
 	node.add_property("unique-id", _plugins[0]->unique_id());
 	node.add_property("count", string_compose("%1", _plugins.size()));
+
+	/* remember actual i/o configuration (for later placeholder
+	 * in case the plugin goes missing) */
+	node.add_child_nocopy (* _configured_in.state (X_("ConfiguredInput")));
+	node.add_child_nocopy (* _configured_out.state (X_("ConfiguredOutput")));
+
 	node.add_child_nocopy (_plugins[0]->get_state());
 
 	for (Controls::iterator c = controls().begin(); c != controls().end(); ++c) {
