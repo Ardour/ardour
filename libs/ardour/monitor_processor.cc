@@ -227,46 +227,46 @@ XMLNode&
 MonitorProcessor::state (bool full)
 {
 	LocaleGuard lg;
-        XMLNode& node (Processor::state (full));
-        char buf[64];
+	XMLNode& node(Processor::state(full));
+	char buf[64];
 
 	/* this replaces any existing "type" property */
 
 	node.add_property (X_("type"), X_("monitor"));
 
-        snprintf (buf, sizeof(buf), "%.12g", _dim_level.val());
-        node.add_property (X_("dim-level"), buf);
+    snprintf (buf, sizeof(buf), "%.12g", _dim_level.val());
+    node.add_property (X_("dim-level"), buf);
 
-        snprintf (buf, sizeof(buf), "%.12g", _solo_boost_level.val());
-        node.add_property (X_("solo-boost-level"), buf);
+    snprintf (buf, sizeof(buf), "%.12g", _solo_boost_level.val());
+    node.add_property (X_("solo-boost-level"), buf);
 
-        node.add_property (X_("cut-all"), (_cut_all ? "yes" : "no"));
-        node.add_property (X_("dim-all"), (_dim_all ? "yes" : "no"));
-        node.add_property (X_("mono"), (_mono ? "yes" : "no"));
+    node.add_property (X_("cut-all"), (_cut_all ? "yes" : "no"));
+    node.add_property (X_("dim-all"), (_dim_all ? "yes" : "no"));
+    node.add_property (X_("mono"), (_mono ? "yes" : "no"));
 
-        uint32_t limit = _channels.size();
+    uint32_t limit = _channels.size();
 
-        snprintf (buf, sizeof (buf), "%u", limit);
-        node.add_property (X_("channels"), buf);
+    snprintf (buf, sizeof (buf), "%u", limit);
+    node.add_property (X_("channels"), buf);
 
-        XMLNode* chn_node;
-        uint32_t chn = 0;
+    XMLNode* chn_node;
+    uint32_t chn = 0;
 
-        for (vector<ChannelRecord*>::const_iterator x = _channels.begin(); x != _channels.end(); ++x, ++chn) {
-                chn_node = new XMLNode (X_("Channel"));
+    for (vector<ChannelRecord*>::const_iterator x = _channels.begin(); x != _channels.end(); ++x, ++chn) {
+        chn_node = new XMLNode (X_("Channel"));
 
-                snprintf (buf, sizeof (buf), "%u", chn);
-                chn_node->add_property ("id", buf);
+        snprintf (buf, sizeof (buf), "%u", chn);
+        chn_node->add_property ("id", buf);
 
-                chn_node->add_property (X_("cut"), (*x)->cut == GAIN_COEFF_UNITY ? "no" : "yes");
-                chn_node->add_property (X_("invert"), (*x)->polarity == GAIN_COEFF_UNITY ? "no" : "yes");
-                chn_node->add_property (X_("dim"), (*x)->dim ? "yes" : "no");
-                chn_node->add_property (X_("solo"), (*x)->soloed ? "yes" : "no");
+        chn_node->add_property (X_("cut"), (*x)->cut == GAIN_COEFF_UNITY ? "no" : "yes");
+        chn_node->add_property (X_("invert"), (*x)->polarity == GAIN_COEFF_UNITY ? "no" : "yes");
+        chn_node->add_property (X_("dim"), (*x)->dim ? "yes" : "no");
+        chn_node->add_property (X_("solo"), (*x)->soloed ? "yes" : "no");
 
-                node.add_child_nocopy (*chn_node);
-        }
+        node.add_child_nocopy (*chn_node);
+    }
 
-        return node;
+    return node;
 }
 
 void
