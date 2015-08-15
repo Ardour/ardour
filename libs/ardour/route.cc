@@ -1878,12 +1878,6 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
 
-		if (boost::dynamic_pointer_cast<UnknownProcessor> (*p)) {
-			DEBUG_TRACE (DEBUG::Processors, "--- CONFIGURE ABORTED due to unknown processor.\n");
-			DEBUG_TRACE (DEBUG::Processors, "}\n");
-			return list<pair<ChanCount, ChanCount> > ();
-		}
-
 		if ((*p)->can_support_io_configuration(in, out)) {
 			DEBUG_TRACE (DEBUG::Processors, string_compose ("\t%1 ID=%2 in=%3 out=%4\n",(*p)->name(), (*p)->id(), in, out));
 			configuration.push_back(make_pair(in, out));
@@ -1939,10 +1933,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
-
-		if (boost::dynamic_pointer_cast<UnknownProcessor> (*p)) {
-			break;
-		}
 
 		(*p)->configure_io(c->first, c->second);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);

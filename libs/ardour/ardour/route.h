@@ -207,9 +207,6 @@ class LIBARDOUR_API Route : public SessionObject, public Automatable, public Rou
 	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) {
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if (boost::dynamic_pointer_cast<UnknownProcessor> (*i)) {
-				break;
-			}
 			method (boost::weak_ptr<Processor> (*i));
 		}
 	}
