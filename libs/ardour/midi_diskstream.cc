@@ -40,6 +40,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/butler.h"
 #include "ardour/debug.h"
+#include "ardour/evoral_types_convert.h"
 #include "ardour/io.h"
 #include "ardour/midi_diskstream.h"
 #include "ardour/midi_model.h"

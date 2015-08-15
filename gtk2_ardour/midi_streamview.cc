@@ -33,6 +33,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
+#include "ardour/evoral_types_convert.h"
 
 #include "gui_thread.h"
 #include "midi_region_view.h"

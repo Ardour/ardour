@@ -26,6 +26,8 @@
 #include "evoral/Beats.hpp"
 #include "evoral/Range.hpp"
 
+#include "pbd/string_convert.h"
+
 #include "ardour/ardour.h"
 #include "ardour/midi_cursor.h"
 #include "ardour/region.h"

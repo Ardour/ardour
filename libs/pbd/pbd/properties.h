@@ -21,10 +21,8 @@
 #define __pbd_properties_h__
 
 #include <string>
-#include <sstream>
 #include <list>
 #include <set>
-#include <iostream>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/xml++.h"
@@ -32,6 +30,7 @@
 #include "pbd/property_list.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stateful.h"
+#include "pbd/string_convert.h"
 
 namespace PBD {
 
@@ -265,17 +264,11 @@ private:
 	 * other than C or POSIX locales.
 	 */
 	virtual std::string to_string (T const& v) const {
-		std::stringstream s;
-		s.precision (12); // in case its floating point
-		s << v;
-		return s.str ();
+		return PBD::to_string (v);
 	}
 
 	virtual T from_string (std::string const& s) const {
-		std::stringstream t (s);
-		T                 v;
-		t >> v;
-		return v;
+		return PBD::string_to<T>(s);
 	}
 
 };

@@ -44,6 +44,7 @@
 #include "ardour/source_factory.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
+#include "ardour/evoral_types_convert.h"
 
 #include "pbd/i18n.h"
 #include <locale.h>

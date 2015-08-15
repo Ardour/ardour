@@ -37,6 +37,7 @@
 #include "ardour/source.h"
 #include "ardour/tempo.h"
 #include "ardour/transient_detector.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
