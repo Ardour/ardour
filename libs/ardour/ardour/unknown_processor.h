@@ -43,20 +43,18 @@ class LIBARDOUR_API UnknownProcessor : public Processor
 {
 public:
 	UnknownProcessor (Session &, XMLNode const &);
+	virtual ~UnknownProcessor ();
 
-	/* These processors are hidden from view */
-	bool display_to_user () const {
-		return false;
-	}
-
-	bool can_support_io_configuration (const ChanCount &, ChanCount &) {
-		return false;
-	}
+	bool can_support_io_configuration (const ChanCount &, ChanCount &);
+	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, pframes_t /*nframes*/, bool /*result_required*/);
 
 	XMLNode & state (bool);
 
 private:
 	XMLNode _state;
+	bool      have_ioconfig;
+	ChanCount *saved_input;
+	ChanCount *saved_output;
 };
 
 }
