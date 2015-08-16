@@ -95,6 +95,23 @@ _xgetbv (uint32_t xcr)
 #endif
 }
 
+#elif _MSC_VER < 1600
+
+// '_xgetbv()' was only available from VC10 onwards
+__declspec(noinline) static uint64_t
+_xgetbv (uint32_t xcr)
+{
+	return 0;
+
+	// N.B.  The following would probably work for a pre-VC10 build,
+	// although it might suffer from optimization issues.  We'd need
+	// to place this function into its own (unoptimized) source file.
+	__asm {   
+			 mov ecx, [xcr]
+			 __asm _emit 0x0f __asm _emit 0x01 __asm _emit 0xd0   /*xgetbv*/
+		  }
+}
+
 #endif /* !COMPILER_MSVC */
 #endif /* ARCH_X86 */
 
