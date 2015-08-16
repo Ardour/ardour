@@ -168,23 +168,19 @@ Surfaces=$APPLIB/surfaces
 Panners=$APPLIB/panners
 Backends=$APPLIB/backends
 
-Modules=$Libraries/modules
-Loaders=$Libraries/loaders
-
 Templates=$Shared/templates
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
 MackieControl=$Shared/mcp
-VFork=$Libraries/vfork
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
 # print system dependencies
 #
 
-	for file in $APPBIN/* $Libraries/* $Modules/* $Plugins/*.so ; do 
+	for file in $APPBIN/* $Libraries/* $Plugins/*.so ; do
 		if ! file $file | grep -qs Mach-O ; then
 			continue
 		fi
@@ -204,9 +200,6 @@ mkdir -p $APPDIR
 mkdir -p $APPBIN
 mkdir -p $APPLIB
 mkdir -p $Etc
-mkdir -p $Plugins
-mkdir -p $Modules
-mkdir -p $Loaders
 mkdir -p $Shared
 mkdir -p $Locale
 mkdir -p $Surfaces
@@ -218,7 +211,6 @@ mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $Templates
 mkdir -p $Shared/doc
-mkdir -p $VFork
 
 # maybe set variables
 ENVIRONMENT=environment
@@ -342,6 +334,7 @@ if test x$WITH_LADSPA != x ; then
 	fi
 	echo "Copying `ls $plugdir | wc -l` plugins ..."
 	if [ -d $plugdir ] ; then
+		mkdir -p $Plugins
 		cp -r $plugdir/* $Plugins
 	fi
 fi
