@@ -360,9 +360,12 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
 	static const int32_t _min_block_length = 1;   // may happen during split-cycles
 	static const int32_t _max_block_length = 8192; // max possible (with all engines and during export)
-	/* @drobilla: Does it make sense to re-instantiate all plugins
-	 * whenever the buffersize changes?
-	 * Is there a way to find plugins that require the min/max blocksize option?
+	/* Consider updating max-block-size whenever the buffersize changes.
+	 * It requires re-instantiating the plugin (which is a non-realtime operation),
+	 * so it should be done lightly and only for plugins that require it.
+	 *
+	 * given that the block-size can change at any time (split-cycles) ardour currently
+	 * does not support plugins that require bufz_fixedBlockLength.
 	 */
 	LV2_Options_Option options[] = {
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__minBlockLength),
