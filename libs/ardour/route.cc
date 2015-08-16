@@ -1934,7 +1934,9 @@ Route::configure_processors_unlocked (ProcessorStreams* err)
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
 
-		(*p)->configure_io(c->first, c->second);
+		if (!(*p)->configure_io(c->first, c->second)) {
+			DEBUG_TRACE (DEBUG::Processors, string_compose ("%1: configuration failed\n", _name));
+		}
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 
