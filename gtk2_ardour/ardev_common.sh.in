@@ -5,9 +5,9 @@
 libs=$TOP/@LIBS@
 
 #
-# when running ardev, the various parts of Ardour have not been consolidated into the locations that they 
+# when running ardev, the various parts of Ardour have not been consolidated into the locations that they
 # would normally end up after an install. We therefore need to set up environment variables so that we
-# can find all the components. 
+# can find all the components.
 #
 
 export ARDOUR_PATH=$TOP/gtk2_ardour/icons:$TOP/gtk2_ardour/pixmaps:$TOP/build/gtk2_ardour:$TOP/gtk2_ardour:.
@@ -24,7 +24,7 @@ export EVORAL_TEST_PATH=$TOP/libs/evoral/test/testdata
 export MIDIPP_TEST_PATH=$TOP/patchfiles
 
 #
-# even though we set the above variables, ardour requires that these 
+# even though we set the above variables, ardour requires that these
 # two also be set. the above settings will override them.
 #
 
@@ -35,6 +35,8 @@ export GTK_PATH=~/.ardour3:$libs/clearlooks-newer
 export VAMP_PATH=$libs/vamp-plugins${VAMP_PATH:+:$VAMP_PATH}
 
 export LD_LIBRARY_PATH=$libs/ptformat:$libs/qm-dsp:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/gnomecanvas:$libs/libsndfile:$libs/appleutility:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$libs/audiographer:$libs/timecode:$libs/libltc:$libs/canvas:$libs/ardouralsautil${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export OLD_PATH=$PATH
+export PATH=$LD_LIBRARY_PATH:$PATH
 
 # DYLD_LIBRARY_PATH is for darwin.
 export DYLD_FALLBACK_LIBRARY_PATH=$LD_LIBRARY_PATH
