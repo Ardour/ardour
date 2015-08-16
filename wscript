@@ -72,9 +72,9 @@ compiler_flags_dictionaries= {
         'c-strict' : ['-std=c99', '-pedantic', '-Wshadow'],
         # Flags used for "strict" compilation, C++ only (i.e. compiler will warn about language issues)
         'cxx-strict' : [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-fstrict-overflow' ],
-        # Flags required for whatever consider the strictest possible compilation 
+        # Flags required for whatever consider the strictest possible compilation
         'ultra-strict' : ['-Wredundant-decls', '-Wstrict-prototypes', '-Wmissing-prototypes'],
-        # Flag to turn on C99 compliance by itself 
+        # Flag to turn on C99 compliance by itself
         'c99': '-std=c99',
         # Flag to enable AT&T assembler syntax
         'attasm': '-masm=att',
@@ -186,12 +186,18 @@ V = MAJOR + '.' + MINOR + '.' + MICRO
 VERSION = str (V.encode ('ascii', 'ignore'))
 PROGRAM_VERSION = str (MAJOR.encode ('ascii', 'ignore'))
 
+# It seems, that on msys2, with python3, it puts quotes around
+# the version number, which breaks the build.
+VERSION = VERSION.replace('\'', '')
+PROGRAM_VERSION = PROGRAM_VERSION.replace('\'', '')
+
+
 if len (sys.argv) > 1 and sys.argv[1] == 'dist':
         if not 'APPNAME' in os.environ:
                 print "You must define APPNAME in the environment when running ./waf dist"
                 sys.exit (1)
         APPNAME = os.environ['APPNAME'];
-                
+
 
 # Mandatory variables
 top = '.'
@@ -318,14 +324,14 @@ int main() { return 0; }''',
         else:
             compiler_name = 'gcc'
 
-    flags_dict = compiler_flags_dictionaries[compiler_name] 
+    flags_dict = compiler_flags_dictionaries[compiler_name]
     # Save the compiler flags because we need them at build time
     # when we need to add compiler specific flags in certain
     # libraries
     conf.env['compiler_flags_dict'] = flags_dict;
-    
+
     autowaf.set_basic_compiler_flags (conf,flags_dict)
-    
+
     if conf.options.asan:
         conf.check_cxx(cxxflags=["-fsanitize=address", "-fno-omit-frame-pointer"], linkflags=["-fsanitize=address"])
         cxx_flags.append('-fsanitize=address')
@@ -381,7 +387,7 @@ int main() { return 0; }''',
         #
         # stupid OS X 10.6 has a bug in math.h that prevents llrint and friends
         # from being visible.
-        # 
+        #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
     if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite' ]:
@@ -407,10 +413,10 @@ int main() { return 0; }''',
 
         #
         # ARCH_X86 means anything in the x86 family from i386 to x86_64
-        # the compile-time presence of the macro _LP64 is used to 
+        # the compile-time presence of the macro _LP64 is used to
         # distingush 32 and 64 bit assembler
         #
- 
+
         compiler_flags.append ("-DARCH_X86")
 
         if platform == 'linux' :
@@ -438,7 +444,7 @@ int main() { return 0; }''',
 
         if not is_clang and ((conf.env['build_target'] == 'i686') or (conf.env['build_target'] == 'x86_64')) and build_host_supports_sse:
             compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'] ])
-            
+
         if (conf.env['build_target'] == 'mingw'):
             if (re.search ("(x86_64|AMD64)", cpu) != None):
                 # on Windows sse is supported by 64 bit platforms only
@@ -446,7 +452,7 @@ int main() { return 0; }''',
 
                 # mingw GCC compiler to uses at&t (Unix specific) assembler dialect by default
                 # compiler_flags.append (["--mmnemonic=att", "msyntax=att")
-                
+
                 compiler_flags.extend ([ flags_dict['sse'], flags_dict['fpmath-sse'], flags_dict['xmmintrinsics'], flags_dict['attasm'] ])
 
     # end of processor-specific section
@@ -461,7 +467,7 @@ int main() { return 0; }''',
         elif conf.env['build_target'] == 'mingw':
                 # usability of the 64 bit windows assembler depends on the compiler target,
                 # not the build host, which in turn can only be inferred from the name
-                # of the compiler. 
+                # of the compiler.
                 if re.search ('x86_64-w64', str(conf.env['CC'])) != None:
                         compiler_flags.append ("-DBUILD_SSE_OPTIMIZATIONS")
         if not build_host_supports_sse:
@@ -580,9 +586,9 @@ int main() { return 0; }''',
         ('-DBOOST_SYSTEM_NO_DEPRECATED', '-D_ISOC9X_SOURCE',
          '-D_LARGEFILE64_SOURCE', '-D_FILE_OFFSET_BITS=64'))
     cxx_flags.extend(
-        ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS', 
+        ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
          '-DCANVAS_COMPATIBILITY', '-DCANVAS_DEBUG'))
-    
+
     if opt.nls:
         compiler_flags.append('-DENABLE_NLS')
 
@@ -590,7 +596,7 @@ int main() { return 0; }''',
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
     conf.env['PROGRAM_NAME'] = Options.options.program_name
-    
+
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
         conf.env.append_value('CXXFLAGS', debug_flags)
@@ -610,7 +616,7 @@ int main() { return 0; }''',
 
 def is_tracks_build (conf):
         return conf.env['PROGRAM_NAME'] == 'Tracks Live'
-    
+
 #----------------------------------------------------------------
 
 # Waf stages
@@ -779,7 +785,7 @@ def configure(conf):
     else:
         # libintl is part of the system, so use it
         autowaf.display_msg(conf, 'Will rely on libintl built into libc', 'yes')
-            
+
     user_ardour_root = os.path.expanduser (Options.options.depstack_root + '/a3/inst')
     if pkg_config_path is not None and pkg_config_path.find (user_ardour_root) >= 0:
         # told to search user_ardour_root
@@ -791,7 +797,7 @@ def configure(conf):
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack in ' + user_ardour_root, 'yes')
     else:
         autowaf.display_msg(conf, 'Will build against private Ardour dependency stack', 'no')
-        
+
     if Options.options.freebie:
         conf.env.append_value ('CFLAGS', '-DSILENCE_AFTER')
         conf.env.append_value ('CXXFLAGS', '-DSILENCE_AFTER')
@@ -862,7 +868,7 @@ def configure(conf):
             print ('No Carbon support available for this build\n')
 
 
-    if Options.options.internal_shared_libs: 
+    if Options.options.internal_shared_libs:
         conf.define('INTERNAL_SHARED_LIBS', 1)
 
     if Options.options.use_external_libs:
@@ -926,7 +932,7 @@ def configure(conf):
         conf.env.append_value('LIB', 'regex')
         # TODO this should only be necessary for a debug build
         conf.env.append_value('LIB', 'dbghelp')
-        
+
         # work around GdkDrawable BitBlt performance issue on windows
         # see http://gareus.org/wiki/ardour_windows_gdk_and_cairo
         conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
@@ -944,7 +950,7 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
         # MORE STUFF PROBABLY NEEDED HERE
         conf.define ('WINDOWS', 1)
-        
+
     # Tell everyone that this is a waf build
 
     conf.env.append_value('CFLAGS', '-DWAF_BUILD')
@@ -1020,7 +1026,7 @@ def configure(conf):
         sys.exit(1)
 
     if conf.is_tracks_build():
-        # For Tracks, override backends on OS X or Windows    
+        # For Tracks, override backends on OS X or Windows
         if sys.platform == 'darwin' or sys.platform == 'mingw' or sys.platform == 'msvc':
             backends = [ 'wavesaudio' ]
 
@@ -1151,7 +1157,7 @@ def build(bld):
         bld.env.append_value ('CXXFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
         bld.env.append_value ('CFLAGS', '-DUSE_TRACKS_CODE_FEATURES')
         lwrcase_dirname = 'trx'
-        
+
     # configuration files go here
     bld.env['CONFDIR'] = os.path.join(bld.env['SYSCONFDIR'], lwrcase_dirname)
     # data files loaded at run time go here

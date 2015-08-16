@@ -5,9 +5,9 @@
 libs=$TOP/@LIBS@
 
 #
-# when running ardev, the various parts of Ardour have not been consolidated into the locations that they 
+# when running ardev, the various parts of Ardour have not been consolidated into the locations that they
 # would normally end up after an install. We therefore need to set up environment variables so that we
-# can find all the components. 
+# can find all the components.
 #
 
 export ARDOUR_PATH=$TOP/gtk2_ardour/icons:$TOP/gtk2_ardour/pixmaps:$TOP/build/gtk2_ardour:$TOP/gtk2_ardour:.
@@ -24,7 +24,7 @@ export EVORAL_TEST_PATH=$TOP/libs/evoral/test/testdata
 export MIDIPP_TEST_PATH=$TOP/patchfiles
 
 #
-# even though we set the above variables, ardour requires that these 
+# even though we set the above variables, ardour requires that these
 # two also be set. the above settings will override them.
 #
 

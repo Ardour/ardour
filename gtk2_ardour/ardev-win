@@ -1,0 +1,6 @@
+#!/bin/sh
+TOP=`dirname "$0"`/..
+. $TOP/build/gtk2_ardour/ardev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+export PATH=$libs/ptformat:$libs/qm-dsp:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/gnomecanvas:$libs/libsndfile:$libs/appleutility:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$libs/audiographer:$libs/timecode:$libs/libltc:$libs/canvas:$libs/ardouralsautil${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}:$PATH
+exec $TOP/$EXECUTABLE "$@"
