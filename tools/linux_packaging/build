@@ -566,9 +566,11 @@ cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
 
 # lv2 core, classifications etc - TODO check if we need the complete LV2 ontology
 if test -d $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
-	cp -R $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2 $APPLIB/LV2/
+	mkdir -p $APPLIB/LV2/lv2core.lv2
+	cp -R $ARDOURSTACK_ROOT/lib/lv2/lv2core.lv2/*.ttl $APPLIB/LV2/lv2core.lv2/
 elif test -d $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 ; then
-	cp -R $GTKSTACK_ROOT/lib/lv2/lv2core.lv2 $APPLIB/LV2/
+	mkdir -p $APPLIB/LV2/lv2core.lv2
+	cp -R $GTKSTACK_ROOT/lib/lv2/lv2core.lv2/*.ttl $APPLIB/LV2/lv2core.lv2/
 fi
 
 # go through and recursively remove any .svn dirs in the bundle
