@@ -36,11 +36,11 @@ BUILDTYPE=""
 
 
 if [ $# -eq 0 ] ; then
-	echo ""	 
+	echo ""
 	echo "ERROR - Please specify build type"
 	echo "	  --public"
 	echo "	  --mixbus"
-	echo ""	 
+	echo ""
 	exit 1
 fi
 
@@ -53,26 +53,26 @@ while [ $# -gt 0 ] ; do
 	#
 
 	--mixbus)
-		MIXBUS=1; 
+		MIXBUS=1;
 		WITH_HARRISON_LV2=1 ;
 		WITH_X42_LV2=1 ;
-		WITH_NLS=1 ; 
-		WITH_LADSPA=; 
+		WITH_NLS=1 ;
+		WITH_LADSPA=;
 		STRIP=all
 		APPNAME=Mixbus ;
 		VENDOR=Harrison ;
 		EXENAME=mixbus ;
 		shift ;;
 	--public)
-		WITH_NLS=1 ; 
-		WITH_LADSPA=; 
-		STRIP=all ; 
+		WITH_NLS=1 ;
+		WITH_LADSPA=;
+		STRIP=all ;
 		APPNAME=Ardour ;
 		shift ;;
 	--allinone)
-		WITH_NLS= ; 
-		WITH_LADSPA=1; 
-		STRIP=all; 
+		WITH_NLS= ;
+		WITH_LADSPA=1;
+		STRIP=all;
 		shift ;;
 	--test) WITH_LADSPA=; STRIP= ; shift ;;
 
@@ -184,7 +184,7 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 		if ! file $file | grep -qs Mach-O ; then
 			continue
 		fi
-		otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)" 
+		otool -L $file | awk '{print $1}' | egrep -v "(^@executable_path|^Ardour[0-9][.0-9]*.app)"
 	done | sort | uniq
 	exit 0
 fi
@@ -252,7 +252,7 @@ if test x$WITH_NLS != x ; then
 	echo "I hope you remembered to run scons msgupdate!"
 	LINGUAS=
 
-        for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do 
+        for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do
 	    files=`find ../../$pkg -name "*.mo"`
 
             #
@@ -269,8 +269,8 @@ if test x$WITH_NLS != x ; then
 		echo "!!!! WARNING !!!! - Did not find any .mo files in ../../$pkg"
 		echo ""
 	    fi
- 
-	    for file in $files 
+
+	    for file in $files
 	    do
 		echo $file
 		lang=`basename $file | sed 's/\.mo//'`
@@ -279,7 +279,7 @@ if test x$WITH_NLS != x ; then
 		echo copy $file to $Locale/$lang/LC_MESSAGES/`basename $pkg`$vsuffix.mo
                 if echo $LINGUAS | grep $lang >/dev/null 2>&1 ; then
                     :
-                else 
+                else
 		    LINGUAS="$LINGUAS $lang"
                 fi
 	    done
@@ -290,7 +290,7 @@ if test x$WITH_NLS != x ; then
 
 	for l in $LINGUAS ; do
 		echo "Copying GTK i18n files for $l..."
-		for MO in $GTK_MESSAGES ; do 
+		for MO in $GTK_MESSAGES ; do
 			if [ -f $LOCALEROOT/$l/LC_MESSAGES/$MO ] ; then
 				cp $LOCALEROOT/$l/LC_MESSAGES/$MO $Locale/$l/LC_MESSAGES
 			else
@@ -308,7 +308,7 @@ fi
 
 #
 # Copy stuff that may be dynamically loaded
-# 
+#
 
 cp -R $GTKSTACK_ROOT/etc/* $Etc
 
@@ -362,9 +362,9 @@ for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
 done
 
 # Templates
-#for f in $BUILD_ROOT/../templates/* ; do 
+#for f in $BUILD_ROOT/../templates/* ; do
 #    if [ -d "$f" ] ; then
-#	echo Template: $f ; cp -r "$f" $Templates ; 
+#	echo Template: $f ; cp -r "$f" $Templates ;
 #    fi
 #done
 
@@ -421,12 +421,12 @@ echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 checkedIdx=0
 deplibs=
 
-while [ true ] ; do 
+while [ true ] ; do
 	missing=false
 	filelist=`find $APPLIB/ -type f`
 	filelist="$APPBIN/${EXENAME}-${release_version} $filelist"
 
-	for file in $filelist  ; do 
+	for file in $filelist  ; do
 		if ! file $file | grep -qs ELF ; then
 			continue
 		fi
@@ -442,13 +442,13 @@ while [ true ] ; do
 
 		# ignore suil/qt wrappers - the plugin will pull in QT4.
 		if echo $file | grep -qs 'libsuil_.*qt4' ; then continue; fi
-		
+
 		# do not include libjack
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | awk '{print $3}'`
 
 		echo -n "."
 		for dep in $deps ; do
-			if test "not" = ${dep}; then 
+			if test "not" = ${dep}; then
 				echo ""
 				echo "!!! ERROR !!! - Missing dependant library for $file."
 				echo "Searched: " $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
@@ -468,10 +468,10 @@ while [ true ] ; do
 			# don't include ALSA
 			if echo $dep | grep -qs libasound ; then continue; fi
 			# don't include any X Window libraries
-			if echo $dep | grep -qs libX\. ; then continue; fi  
-			if echo $dep | grep -qs libxcb ; then continue; fi  
-			if echo $dep | grep -qs libICE\. ; then continue; fi  
-			if echo $dep | grep -qs libSM\. ; then continue; fi  
+			if echo $dep | grep -qs libX\. ; then continue; fi
+			if echo $dep | grep -qs libxcb ; then continue; fi
+			if echo $dep | grep -qs libICE\. ; then continue; fi
+			if echo $dep | grep -qs libSM\. ; then continue; fi
 			# don't include libc
 			if echo $dep | grep -qs 'libc\.' ; then continue; fi
 			# don't include libstdc++
@@ -581,7 +581,7 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
 		-o "${CACHEDIR}/harrison_lv2s.${HARCH}.zip" \
-		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_lv2s.zip 
+		http://www.harrisonconsoles.com/mixbus/mb3/${HARCH}/harrison_lv2s.zip
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_lv2s.${HARCH}.zip"
 fi
 
