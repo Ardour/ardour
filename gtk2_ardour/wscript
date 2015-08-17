@@ -690,6 +690,12 @@ def build(bld):
     bld.install_files(bld.env['DATADIR'], 'small-splash.png')
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')
 
+    if bld.env['build_target'] == 'mingw':
+        # These icons need to overwrite the files already installed in the icons
+        # directory above. Do this in the external packaging scripts for now.
+        #bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/cursor_square/*.png'))
+        bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), 'icons/cursor_square/hotspots')
+
     # Default UI configuration
     bld.install_files(bld.env['CONFDIR'], 'default_ui_config')
     # Color Themes
