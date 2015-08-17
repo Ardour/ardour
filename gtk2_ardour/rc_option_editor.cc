@@ -73,28 +73,44 @@ class ClickOptions : public OptionEditorBox
 public:
 	ClickOptions (RCConfiguration* c, Gtk::Window* p)
 		: _rc_config (c)
+		, _click_browse_button (_("Browse..."))
+		, _click_emphasis_browse_button (_("Browse..."))
 	{
-		Table* t = manage (new Table (2, 3));
+		Table* t = manage (new Table (3, 3));
 		t->set_spacings (4);
 
-		Label* l = manage (left_aligned_label (_("Click audio file:")));
+		Label* l = manage (left_aligned_label (_("Use default Click:")));
 		t->attach (*l, 0, 1, 0, 1, FILL);
-		t->attach (_click_path_entry, 1, 2, 0, 1, FILL);
-		Button* b = manage (new Button (_("Browse...")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
-		t->attach (*b, 2, 3, 0, 1, FILL);
+		t->attach (_use_default_click_check_button, 1, 2, 0, 1, FILL);
+		_use_default_click_check_button.signal_toggled().connect (
+		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
+
+		l = manage (left_aligned_label (_("Click audio file:")));
+		t->attach (*l, 0, 1, 1, 2, FILL);
+		t->attach (_click_path_entry, 1, 2, 1, 2, FILL);
+		_click_browse_button.signal_clicked ().connect (
+		    sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
+		t->attach (_click_browse_button, 2, 3, 1, 2, FILL);
 
 		l = manage (left_aligned_label (_("Click emphasis audio file:")));
-		t->attach (*l, 0, 1, 1, 2, FILL);
-		t->attach (_click_emphasis_path_entry, 1, 2, 1, 2, FILL);
-		b = manage (new Button (_("Browse...")));
-		b->signal_clicked().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
-		t->attach (*b, 2, 3, 1, 2, FILL);
+		t->attach (*l, 0, 1, 2, 3, FILL);
+		t->attach (_click_emphasis_path_entry, 1, 2, 2, 3, FILL);
+		_click_emphasis_browse_button.signal_clicked ().connect (
+		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
+		t->attach (_click_emphasis_browse_button, 2, 3, 2, 3, FILL);
 		
 		_box->pack_start (*t, false, false);
 
 		_click_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_changed));	
 		_click_emphasis_path_entry.signal_activate().connect (sigc::mem_fun (*this, &ClickOptions::click_emphasis_changed));
+
+		if (_rc_config->get_click_sound ().empty() &&
+		    _rc_config->get_click_emphasis_sound().empty()) {
+			_use_default_click_check_button.set_active (true);
+
+		} else {
+			_use_default_click_check_button.set_active (false);
+		}
 	}
 
 	void parameter_changed (string const & p)
@@ -160,9 +176,29 @@ private:
 		click_emphasis_chosen (_click_emphasis_path_entry.get_text ());
 	}
 
+	void use_default_click_toggled ()
+	{
+		if (_use_default_click_check_button.get_active ()) {
+			_rc_config->set_click_sound ("");
+			_rc_config->set_click_emphasis_sound ("");
+			_click_path_entry.set_sensitive (false);
+			_click_emphasis_path_entry.set_sensitive (false);
+			_click_browse_button.set_sensitive (false);
+			_click_emphasis_browse_button.set_sensitive (false);
+		} else {
+			_click_path_entry.set_sensitive (true);
+			_click_emphasis_path_entry.set_sensitive (true);
+			_click_browse_button.set_sensitive (true);
+			_click_emphasis_browse_button.set_sensitive (true);
+		}
+	}
+
 	RCConfiguration* _rc_config;
+	CheckButton _use_default_click_check_button;
 	Entry _click_path_entry;
 	Entry _click_emphasis_path_entry;
+	Button _click_browse_button;
+	Button _click_emphasis_browse_button;
 };
 
 class UndoOptions : public OptionEditorBox
