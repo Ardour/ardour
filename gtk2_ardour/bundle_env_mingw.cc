@@ -29,7 +29,6 @@
 
 #include <windows.h>
 #include <wingdi.h>
-#include <shlobj.h> // CSIDL_*
 
 #include "ardour/ardour.h"
 #include "ardour/search_paths.h"
@@ -37,52 +36,10 @@
 
 #include "pbd/file_utils.h"
 #include "pbd/epa.h"
-#include "pbd/windows_special_dirs.h"
 
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
-
-
-/* query top-level Ardour installation path.
- * Typically, this will be somehwere like
- * "C:\Program Files (x86)\Ardour"
- */
-const std::string
-get_install_path ()
-{
-	const gchar* pExeRoot = g_win32_get_package_installation_directory_of_module (0);
-
-	if (0 == pExeRoot) {
-		HKEY key;
-		DWORD size = PATH_MAX;
-		char tmp[PATH_MAX+1];
-		if (
-#ifdef __MINGW64__
-				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\w64", 0, KEY_READ, &key))
-#else
-				(ERROR_SUCCESS == RegOpenKeyExA (HKEY_LOCAL_MACHINE, "Software\\" PROGRAM_NAME "\\v" PROGRAM_VERSION "\\w32", 0, KEY_READ, &key))
-#endif
-				&&(ERROR_SUCCESS == RegQueryValueExA (key, "Install_Dir", 0, NULL, reinterpret_cast<LPBYTE>(tmp), &size))
-			 )
-		{
-			pExeRoot = Glib::locale_to_utf8(tmp).c_str();
-		}
-	}
-
-	if (0 == pExeRoot) {
-		const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
-		if (program_files) {
-			pExeRoot = g_build_filename(program_files, PROGRAM_NAME, NULL);
-		}
-	}
-
-	if (pExeRoot && Glib::file_test(pExeRoot, Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_DIR)) {
-		return std::string (pExeRoot);
-	}
-	return "";
-}
-
 
 void
 fixup_bundle_environment (int, char* [], string & localedir)
