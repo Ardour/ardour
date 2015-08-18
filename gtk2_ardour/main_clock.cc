@@ -92,6 +92,7 @@ MainClock::display_delta_to_edit_cursor ()
 void
 MainClock::edit_current_tempo ()
 {
+	if (!PublicEditor::instance().session()) return;
 	ARDOUR::TempoSection ts = PublicEditor::instance().session()->tempo_map().tempo_section_at (absolute_time());
 	PublicEditor::instance().edit_tempo_section (&ts);
 }
@@ -99,6 +100,7 @@ MainClock::edit_current_tempo ()
 void
 MainClock::edit_current_meter ()
 {
+	if (!PublicEditor::instance().session()) return;
 	ARDOUR::MeterSection ms = PublicEditor::instance().session()->tempo_map().meter_section_at (absolute_time());
 	PublicEditor::instance().edit_meter_section (&ms);
 }
