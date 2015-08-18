@@ -23,38 +23,27 @@
 
 #include "pbd/windows_special_dirs.h"
 
-//***************************************************************
-//
-//	get_win_special_folder()
-//
-//  Gets the full path name that corresponds of one of the Windows
-//  special folders, such as "My Documents" and the like. The input
-//  parameter must be one of the corresponding CSIDL values, such
-//  as CSIDL_SYSTEM etc.
-//  
-//	Returns:
-//
-//    On Success: A pointer to a newly allocated string containing
-//                the name of the special folder (must later be freed).
-//    On Failure: NULL
-//
-
-char *
-PBD::get_win_special_folder (int csidl)
+std::string
+PBD::get_win_special_folder_path (int csidl)
 {
 	wchar_t path[PATH_MAX+1];
 	HRESULT hr;
 	LPITEMIDLIST pidl = 0;
-	char *retval = 0;
+	char *utf8_folder_path = 0;
 	
 	if (S_OK == (hr = SHGetSpecialFolderLocation (0, csidl, &pidl))) {
 
 		if (SHGetPathFromIDListW (pidl, path)) {
-			retval = g_utf16_to_utf8 ((const gunichar2*)path, -1, 0, 0, 0);
+			utf8_folder_path = g_utf16_to_utf8 ((const gunichar2*)path, -1, 0, 0, 0);
 		}
 		CoTaskMemFree (pidl);
 	}
 
-	return retval;
+	if (utf8_folder_path != NULL) {
+		std::string folder_path(utf8_folder_path);
+		g_free (utf8_folder_path);
+		return folder_path;
+	}
+	return std::string();
 }
 

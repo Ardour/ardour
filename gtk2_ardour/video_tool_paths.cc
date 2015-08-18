@@ -66,7 +66,7 @@ ArdourVideoToolPaths::harvid_exe (std::string &harvid_exe)
 
 #ifdef PLATFORM_WINDOWS
 	std::string reg;
-	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
+	std::string program_files = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 #endif
 
 	harvid_exe = "";
@@ -84,9 +84,9 @@ ArdourVideoToolPaths::harvid_exe (std::string &harvid_exe)
 	{
 		harvid_exe = g_build_filename(reg.c_str(), "harvid.exe", NULL);
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "harvid.exe", NULL), Glib::FILE_TEST_EXISTS))
+	else if (!program_files.empty() && Glib::file_test(g_build_filename(program_files.c_str(), "harvid", "harvid.exe", NULL), Glib::FILE_TEST_EXISTS))
 	{
-		harvid_exe = g_build_filename(program_files, "harvid", "harvid.exe", NULL);
+		harvid_exe = g_build_filename(program_files.c_str(), "harvid", "harvid.exe", NULL);
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\harvid\\harvid.exe"), Glib::FILE_TEST_EXISTS)) {
 		harvid_exe = X_("C:\\Program Files\\harvid\\harvid.exe");
@@ -105,7 +105,7 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 	std::string xjadeo_file_path;
 #ifdef PLATFORM_WINDOWS
 	std::string reg;
-	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
+	std::string program_files = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 #endif
 	if (getenv("XJREMOTE")) {
 		xjadeo_exe = getenv("XJREMOTE");
@@ -131,9 +131,9 @@ ArdourVideoToolPaths::xjadeo_exe (std::string &xjadeo_exe)
 	{
 		xjadeo_exe = std::string(g_build_filename(reg.c_str(), "xjadeo.exe", NULL));
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "xjadeo", "xjadeo.exe", NULL), Glib::FILE_TEST_EXISTS))
+	else if (!program_files.empty() && Glib::file_test(g_build_filename(program_files.c_str(), "xjadeo", "xjadeo.exe", NULL), Glib::FILE_TEST_EXISTS))
 	{
-		xjadeo_exe = std::string(g_build_filename(program_files, "xjadeo", "xjadeo.exe", NULL));
+		xjadeo_exe = std::string(g_build_filename(program_files.c_str(), "xjadeo", "xjadeo.exe", NULL));
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\xjadeo\\xjadeo.exe"), Glib::FILE_TEST_EXISTS)) {
 		xjadeo_exe = X_("C:\\Program Files\\xjadeo\\xjadeo.exe");
@@ -151,7 +151,7 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 {
 #ifdef PLATFORM_WINDOWS
 	std::string reg;
-	const char *program_files = PBD::get_win_special_folder (CSIDL_PROGRAM_FILES);
+	std::string program_files = PBD::get_win_special_folder_path (CSIDL_PROGRAM_FILES);
 #endif
 
 	ffmpeg_exe = X_("");
@@ -176,8 +176,8 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 	if (Glib::file_test(ffmpeg_exe, Glib::FILE_TEST_EXISTS)) {
 		;
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL), Glib::FILE_TEST_EXISTS)) {
-		ffmpeg_exe = g_build_filename(program_files, "harvid", "ffmpeg.exe", NULL);
+	else if (!program_files.empty() && Glib::file_test(g_build_filename(program_files.c_str(), "harvid", "ffmpeg.exe", NULL), Glib::FILE_TEST_EXISTS)) {
+		ffmpeg_exe = g_build_filename(program_files.c_str(), "harvid", "ffmpeg.exe", NULL);
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffmpeg_exe = X_("C:\\Program Files\\ffmpeg\\ffmpeg.exe");
@@ -193,8 +193,8 @@ ArdourVideoToolPaths::transcoder_exe (std::string &ffmpeg_exe, std::string &ffpr
 	if (Glib::file_test(ffprobe_exe, Glib::FILE_TEST_EXISTS)) {
 		;
 	}
-	else if (program_files && Glib::file_test(g_build_filename(program_files, "harvid", "ffprobe.exe", NULL), Glib::FILE_TEST_EXISTS)) {
-		ffprobe_exe = g_build_filename(program_files, "harvid", "ffprobe.exe", NULL);
+	else if (!program_files.empty() && Glib::file_test(g_build_filename(program_files.c_str(), "harvid", "ffprobe.exe", NULL), Glib::FILE_TEST_EXISTS)) {
+		ffprobe_exe = g_build_filename(program_files.c_str(), "harvid", "ffprobe.exe", NULL);
 	}
 	else if (Glib::file_test(X_("C:\\Program Files\\ffmpeg\\ffprobe.exe"), Glib::FILE_TEST_EXISTS)) {
 		ffprobe_exe = X_("C:\\Program Files\\ffmpeg\\ffprobe.exe");

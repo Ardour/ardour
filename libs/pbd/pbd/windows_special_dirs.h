@@ -20,10 +20,22 @@
 #ifndef __libpbd_windows_special_dirs_h__
 #define __libpbd_windows_special_dirs_h__
 
+#include <string>
+
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD {
-	LIBPBD_API char * get_win_special_folder (int csidl);
+
+/**
+* Gets the full path that corresponds of one of the Windows special folders,
+* such as "My Documents" and the like.
+*
+* @param csidl corresponds to CSIDL values, such as CSIDL_SYSTEM etc.
+* @return A string containing the name of the special folder or an empty
+* string on failure.
+*/
+LIBPBD_API std::string get_win_special_folder_path (int csidl);
+
 }
 
 #endif /* __libpbd_windows_special_dirs_h__ */
