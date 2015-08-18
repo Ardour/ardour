@@ -200,7 +200,7 @@ std::string
 ardour_dll_directory ()
 {
 #ifdef PLATFORM_WINDOWS
-	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
+	std::string dll_dir_path(windows_package_directory_path());
 	dll_dir_path = Glib::build_filename (dll_dir_path, "lib");
 	return Glib::build_filename (dll_dir_path, LIBARDOUR);
 #else
@@ -217,9 +217,26 @@ ardour_dll_directory ()
 Searchpath
 windows_search_path ()
 {
-	std::string dll_dir_path(g_win32_get_package_installation_directory_of_module(NULL));
+	std::string dll_dir_path(windows_package_directory_path());
 	dll_dir_path = Glib::build_filename (dll_dir_path, "share");
 	return Glib::build_filename (dll_dir_path, LIBARDOUR);
+}
+
+std::string
+windows_package_directory_path ()
+{
+	char* package_dir =
+	    g_win32_get_package_installation_directory_of_module (NULL);
+
+	if (package_dir == NULL) {
+		fatal << string_compose (_("Cannot determine %1 package directory"),
+		                           PROGRAM_NAME) << endmsg;
+		// not reached
+	}
+
+	std::string package_dir_path(package_dir);
+	g_free(package_dir);
+	return package_dir_path;
 }
 #endif
 

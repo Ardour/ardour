@@ -78,6 +78,13 @@ namespace ARDOUR {
 	 * @return our 'Windows' search path ( corresponds to <install_dir>/share/ardour3 )
 	 */
 	LIBARDOUR_API PBD::Searchpath windows_search_path ();
+
+	/**
+	 * @return Convenience function that calls
+	 * g_win32_get_package_installation_directory_of_module but returns a
+	 * std::string
+	 */
+	LIBARDOUR_API std::string windows_package_directory_path ();
 #endif
 } // namespace ARDOUR
 

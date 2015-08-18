@@ -27,6 +27,7 @@
 
 #include "ardour/session.h"
 #include "ardour/audioengine.h"
+#include "ardour/filesystem_paths.h"
 
 #include "test_util.h"
 
@@ -133,7 +134,7 @@ PBD::Searchpath
 test_search_path ()
 {
 #ifdef PLATFORM_WINDOWS
-	std::string wsp(g_win32_get_package_installation_directory_of_module(NULL));
+	std::string wsp(windows_package_directory_path());
 	return Glib::build_filename (wsp, "ardour_testdata");
 #else
 	return Glib::getenv("ARDOUR_TEST_PATH");

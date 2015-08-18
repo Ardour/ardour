@@ -123,7 +123,7 @@ PluginManager::PluginManager ()
 
 #ifdef PLATFORM_WINDOWS
 	// on windows the .exe needs to be in the same folder with libardour.dll
-	vstsp += Glib::build_filename(g_win32_get_package_installation_directory_of_module (0), "bin");
+	vstsp += Glib::build_filename(windows_package_directory_path(), "bin");
 #else
 	// on Unices additional internal-use binaries are deployed to $libdir
 	vstsp += ARDOUR::ardour_dll_directory();
