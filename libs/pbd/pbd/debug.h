@@ -55,6 +55,7 @@ namespace PBD {
 		LIBPBD_API extern DebugBits AbstractUI;
 		LIBPBD_API extern DebugBits Configuration;
 		LIBPBD_API extern DebugBits FileUtils;
+		LIBPBD_API extern DebugBits UndoHistory;
 
 		LIBPBD_API extern DebugBits BackendMIDI;
 		LIBPBD_API extern DebugBits BackendAudio;
