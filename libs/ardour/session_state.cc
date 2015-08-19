@@ -66,6 +66,7 @@
 #include "pbd/boost_debug.h"
 #include "pbd/basename.h"
 #include "pbd/controllable_descriptor.h"
+#include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
@@ -128,6 +129,8 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
+
+#define DEBUG_UNDO_HISTORY(msg) DEBUG_TRACE (PBD::DEBUG::UndoHistory, string_compose ("%1: %2\n", __LINE__, msg));
 
 void
 Session::pre_engine_init (string fullpath)
@@ -2527,6 +2530,16 @@ Session::add_commands (vector<Command*> const & cmds)
 }
 
 void
+Session::add_command (Command* const cmd)
+{
+	assert (_current_trans);
+	DEBUG_UNDO_HISTORY (
+	    string_compose ("Current Undo Transaction %1, adding command: %2",
+	                    _current_trans->name (),
+	                    cmd->name ()));
+	_current_trans->add_command (cmd);
+}
+void
 Session::begin_reversible_command (const string& name)
 {
 	begin_reversible_command (g_quark_from_string (name.c_str ()));
@@ -2545,10 +2558,17 @@ Session::begin_reversible_command (GQuark q)
 	*/
 
 	if (_current_trans == 0) {
+		DEBUG_UNDO_HISTORY (string_compose (
+		    "Begin Reversible Command, new transaction: %1", g_quark_to_string (q)));
+
 		/* start a new transaction */
 		assert (_current_trans_quarks.empty ());
 		_current_trans = new UndoTransaction();
 		_current_trans->set_name (g_quark_to_string (q));
+	} else {
+		DEBUG_UNDO_HISTORY (
+		    string_compose ("Begin Reversible Command, current transaction: %1",
+		                    _current_trans->name ()));
 	}
 
 	_current_trans_quarks.push_front (q);
@@ -2558,6 +2578,8 @@ void
 Session::abort_reversible_command ()
 {
 	if (_current_trans != 0) {
+		DEBUG_UNDO_HISTORY (
+		    string_compose ("Abort Reversible Command: %1", _current_trans->name ()));
 		_current_trans->clear();
 		delete _current_trans;
 		_current_trans = 0;
@@ -2574,18 +2596,34 @@ Session::commit_reversible_command (Command *cmd)
 	struct timeval now;
 
 	if (cmd) {
+		DEBUG_UNDO_HISTORY (
+		    string_compose ("Current Undo Transaction %1, adding command: %2",
+		                    _current_trans->name (),
+		                    cmd->name ()));
 		_current_trans->add_command (cmd);
 	}
+
+	DEBUG_UNDO_HISTORY (
+	    string_compose ("Commit Reversible Command, current transaction: %1",
+	                    _current_trans->name ()));
 
 	_current_trans_quarks.pop_front ();
 
 	if (!_current_trans_quarks.empty ()) {
+		DEBUG_UNDO_HISTORY (
+		    string_compose ("Commit Reversible Command, transaction is not "
+		                    "top-level, current transaction: %1",
+		                    _current_trans->name ()));
 		/* the transaction we're committing is not the top-level one */
 		return;
 	}
 
 	if (_current_trans->empty()) {
 		/* no commands were added to the transaction, so just get rid of it */
+		DEBUG_UNDO_HISTORY (
+		    string_compose ("Commit Reversible Command, No commands were "
+		                    "added to current transaction: %1",
+		                    _current_trans->name ()));
 		delete _current_trans;
 		_current_trans = 0;
 		return;

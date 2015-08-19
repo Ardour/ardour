@@ -813,10 +813,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void abort_reversible_command ();
 	void commit_reversible_command (Command* cmd = 0);
 
-	void add_command (Command *const cmd) {
-		assert (_current_trans);
-		_current_trans->add_command (cmd);
-	}
+	void add_command (Command *const cmd);
 
 	/** @return The list of operations that are currently in progress */
 	std::list<GQuark> const & current_operations () {
