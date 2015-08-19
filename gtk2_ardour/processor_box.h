@@ -169,6 +169,7 @@ private:
 	class Control : public sigc::trackable {
 	public:
 		Control (boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
+		~Control ();
 
 		void set_visible (bool);
 		void add_state (XMLNode *) const;
@@ -203,6 +204,7 @@ private:
 		PBD::ScopedConnection _connection;
 		bool _visible;
 		std::string _name;
+		sigc::connection timer_connection;
 	};
 
 	std::list<Control*> _controls;

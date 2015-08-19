@@ -529,7 +529,8 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 
 		_button.signal_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
 		_button.signal_led_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
-		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+		// dup. currently timers are used :(
+		//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 
 	} else {
 		
@@ -565,16 +566,24 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		_slider.set_default_value (normal);
 		
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
-		c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+		// dup. currently timers are used :(
+		//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
 	}
 
-	Timers::rapid_connect (sigc::mem_fun (*this, &Control::control_changed));
+	// yuck, do we really need to do this?
+	// according to c404374 this is only needed for send automation
+	timer_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Control::control_changed));
 	
 	control_changed ();
 	set_tooltip ();
 
 	/* We're providing our own PersistentTooltip */
 	set_no_tooltip_whatsoever (_slider);
+}
+
+ProcessorEntry::Control::~Control ()
+{
+	timer_connection.disconnect ();
 }
 
 void
@@ -645,9 +654,13 @@ ProcessorEntry::Control::control_changed ()
 		_button.set_active (c->get_value() > 0.5);
 		
 	} else {
-
-		_adjustment.set_value (c->internal_to_interface(c->get_value ()));
-		set_tooltip ();
+		// as long as rapid timers are used, only update the tooltip
+		// if the value has changed.
+		const double nval = c->internal_to_interface (c->get_value ());
+		if (_adjustment.get_value() != nval) {
+			_adjustment.set_value (nval);
+			set_tooltip ();
+		}
 	}
 	
 	_ignore_ui_adjustment = false;
