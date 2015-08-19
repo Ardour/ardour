@@ -41,8 +41,7 @@ static char *vfork_exec_wrapper_path() {
 					),
 				"ardour-exec-wrapper", vfork_exec_wrapper)) {
 		PBD::fatal << "vfork exec wrapper 'ardour-exec-wrapper' was not found in $PATH." << endmsg;
-		/* not reached */
-		return NULL;
+		abort(); /*NOTREACHED*/
 	}
 	return strdup(vfork_exec_wrapper.c_str());
 #endif

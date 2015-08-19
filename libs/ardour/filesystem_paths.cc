@@ -124,7 +124,7 @@ user_config_directory (int version)
 			} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 			error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
 			                         p) << endmsg;
-			exit (1);
+			abort(); /*NOTREACHED*/
 		}
 	}
 
@@ -190,7 +190,7 @@ user_cache_directory ()
 	} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
 		fatal << string_compose (_("Cache directory %1 already exists and is not a directory/folder - cannot run"),
 					   p) << endmsg;
-		exit (1);
+		abort(); /*NOTREACHED*/
 	}
 
 	return p;
@@ -231,7 +231,7 @@ windows_package_directory_path ()
 	if (package_dir == NULL) {
 		fatal << string_compose (_("Cannot determine %1 package directory"),
 		                           PROGRAM_NAME) << endmsg;
-		// not reached
+		abort(); /*NOTREACHED*/
 	}
 
 	std::string package_dir_path(package_dir);
