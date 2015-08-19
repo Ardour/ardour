@@ -122,7 +122,7 @@ user_config_directory (int version)
 				exit (1);
 			}
 			} else if (!Glib::file_test (p, Glib::FILE_TEST_IS_DIR)) {
-			error << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
+			fatal << string_compose (_("Configuration directory %1 already exists and is not a directory/folder - cannot run"),
 			                         p) << endmsg;
 			abort(); /*NOTREACHED*/
 		}
