@@ -6290,6 +6290,128 @@ Editor::set_session_extents_from_selection ()
 }
 
 void
+Editor::set_punch_start_from_edit_point ()
+{
+	if (_session) {
+
+		framepos_t start;
+		framepos_t end;
+		
+		//use the existing loop end, if any
+		Location* tpl = transport_punch_location();
+		if (tpl)
+			end = tpl->end();
+
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+			start = _session->audible_frame();
+		} else {
+			start = get_preferred_edit_position();
+		}
+		
+		//snap the selection start/end
+		snap_to(start);
+		
+		//if there's not already a sensible selection endpoint, go "forever"
+		if ( start > end ) {
+			end = max_framepos;
+		}
+				
+		set_punch_range (start, end, _("set punch start from EP"));
+	}
+
+}
+
+void
+Editor::set_punch_end_from_edit_point ()
+{
+printf("set punch end\n");
+	if (_session) {
+
+		framepos_t start;
+		framepos_t end;
+		
+		//use the existing loop end, if any
+		Location* tpl = transport_punch_location();
+		if (tpl)
+			start = tpl->start();
+		
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+			end = _session->audible_frame();
+		} else {
+			end = get_preferred_edit_position();
+		}
+
+		//snap the selection start/end
+		snap_to(end);
+		
+printf("set punch %d, %d\n", start, end);
+		set_punch_range (start, end, _("set punch end from EP"));
+
+	}
+}
+
+void
+Editor::set_loop_start_from_edit_point ()
+{
+printf("set loop start\n");
+	if (_session) {
+
+		framepos_t start;
+		framepos_t end;
+		
+		//use the existing loop end, if any
+		Location* tpl = transport_loop_location();
+		if (tpl)
+			end = tpl->end();
+
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+			start = _session->audible_frame();
+		} else {
+			start = get_preferred_edit_position();
+		}
+		
+		//snap the selection start/end
+		snap_to(start);
+		
+		//if there's not already a sensible selection endpoint, go "forever"
+		if ( start > end ) {
+			end = max_framepos;
+		}
+				
+printf("set loop %d, %d\n", start, end);
+		set_loop_range (start, end, _("set loop start from EP"));
+	}
+
+}
+
+void
+Editor::set_loop_end_from_edit_point ()
+{
+	if (_session) {
+
+		framepos_t start;
+		framepos_t end;
+		
+		//use the existing loop end, if any
+		Location* tpl = transport_loop_location();
+		if (tpl)
+			start = tpl->start();
+		
+		if ((_edit_point == EditAtPlayhead) && _session->transport_rolling()) {
+			end = _session->audible_frame();
+		} else {
+			end = get_preferred_edit_position();
+		}
+
+		//snap the selection start/end
+		snap_to(end);
+		
+		set_loop_range (start, end, _("set loop end from EP"));
+
+	}
+}
+
+void
 Editor::set_punch_from_region ()
 {
 	framepos_t start, end;

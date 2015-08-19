@@ -1480,6 +1480,11 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	int scrub_reverse_distance;
 	void scrub (framepos_t, double);
 
+	void set_punch_start_from_edit_point ();
+	void set_punch_end_from_edit_point ();
+	void set_loop_start_from_edit_point ();
+	void set_loop_end_from_edit_point ();
+
 	void keyboard_selection_begin ();
 	void keyboard_selection_finish (bool add);
 	bool have_pending_keyboard_selection;

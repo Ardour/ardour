@@ -365,6 +365,12 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "start-range", _("Start Range"), sigc::mem_fun(*this, &Editor::keyboard_selection_begin));
 	reg_sens (editor_actions, "finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false));
 
+	reg_sens (editor_actions, "start-punch-range", _("Start Punch Range"), sigc::mem_fun(*this, &Editor::set_punch_start_from_edit_point));
+	reg_sens (editor_actions, "finish-punch-range", _("Finish Punch Range"), sigc::mem_fun(*this, &Editor::set_punch_end_from_edit_point));
+
+	reg_sens (editor_actions, "start-loop-range", _("Start Loop Range"), sigc::mem_fun(*this, &Editor::set_loop_start_from_edit_point));
+	reg_sens (editor_actions, "finish-loop-range", _("Finish Loop Range"), sigc::mem_fun(*this, &Editor::set_loop_end_from_edit_point));
+
 	reg_sens (editor_actions, "alt-start-range", _("Start Range"), sigc::mem_fun(*this, &Editor::keyboard_selection_begin));
 	reg_sens (editor_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(*this, &Editor::keyboard_selection_finish), false));
 

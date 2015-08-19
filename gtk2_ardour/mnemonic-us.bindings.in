@@ -282,8 +282,12 @@ This mode provides many different operations on both regions and control points,
 
 @-group|Editor/start-range|comma|some text
 @-group|Editor/finish-range|period|some text
-@-group|Editor/alt-start-range|<@PRIMARY@>KP_Down|some text
-@-group|Editor/alt-finish-range|<@PRIMARY@>KP_Up|some text
+@-group|Editor/alt-start-range|<@PRIMARY@>KP_Down|set the start of the range selection
+@-group|Editor/alt-finish-range|<@PRIMARY@>KP_Up|set the end of the range selection
+@-group|Editor/start-punch-range|<@PRIMARY@>comma|set the start of the Punch range
+@-group|Editor/finish-punch-range|<@PRIMARY@>period|set the end of the Punch range
+@-group|Editor/start-loop-range|<@SECONDARY@>comma|set the start of the Loop range
+@-group|Editor/finish-loop-range|<@SECONDARY@>period|set the end of the Loop range
 
 @markers|Editor/alternate-add-location-from-playhead|KP_Enter|add mark at playhead
 @markers|Editor/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
