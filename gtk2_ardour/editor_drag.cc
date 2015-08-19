@@ -3631,7 +3631,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if (!in_command) {
 			_editor->begin_reversible_command (_("change fade out length"));
-			in_command = false;
+			in_command = true;
 		}
 		XMLNode &after = alist->get_state();
 		_editor->session()->add_command(new MementoCommand<AutomationList>(*alist.get(), &before, &after));
