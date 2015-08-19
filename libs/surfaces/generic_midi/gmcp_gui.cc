@@ -154,6 +154,7 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	++n;
 
 	motorised_button.show ();
+	motorised_button.set_active (p.motorised ());
 
 	threshold_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &GMCPGUI::threshold_changed));
 

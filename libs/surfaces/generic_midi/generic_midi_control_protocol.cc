@@ -533,6 +533,8 @@ GenericMidiControlProtocol::get_state ()
 	snprintf (buf, sizeof (buf), "%d", _threshold);
 	node.add_property (X_("threshold"), buf);
 
+	node.add_property (X_("motorized"), _motorised ? "yes" : "no");
+
 	if (!_current_binding.empty()) {
 		node.add_property ("binding", _current_binding);
 	}
@@ -582,6 +584,12 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		}
 	} else {
 		_threshold = 10;
+	}
+
+	if ((prop = node.property ("motorized")) != 0) {
+		_motorised = string_is_affirmative (prop->value ());
+	} else {
+		_motorised = false;
 	}
 
 	boost::shared_ptr<Controllable> c;
@@ -709,7 +717,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				_current_bank = 0;
 			}
 
-			if ((prop = (*citer)->property ("motorised")) != 0 || ((prop = (*citer)->property ("motorized")) != 0)) {
+			if ((prop = (*citer)->property ("motorized")) != 0) {
 				_motorised = string_is_affirmative (prop->value ());
 			} else {
 				_motorised = false;
