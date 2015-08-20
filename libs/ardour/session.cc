@@ -3420,6 +3420,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 #ifdef USE_TRACKS_CODE_FEATURES
 		reconnect_existing_routes(true, false);
 #else
+		routes.flush (); // maybe unsafe, see below.
 		resort_routes ();
 #endif
     
