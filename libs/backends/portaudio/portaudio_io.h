@@ -37,6 +37,11 @@ public:
 
 	int      state (void) const { return _state; }
 
+	enum StandardDevices {
+		DeviceNone = -2,
+		DeviceDefault = -1
+	};
+
 	bool     initialize_pa ();
 
 	void host_api_list (std::vector<std::string>&);
