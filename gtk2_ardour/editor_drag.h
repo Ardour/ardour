@@ -645,6 +645,7 @@ protected:
 private:
 	ARDOUR::frameoffset_t _startdrag_video_offset;
 	ARDOUR::frameoffset_t _max_backwards_drag;
+	bool _stuck;
 };
 
 /** Drag to trim region(s) */

@@ -2502,10 +2502,14 @@ VideoTimeLineDrag::VideoTimeLineDrag (Editor* e, ArdourCanvas::Item* i)
 	_editor->get_regions_after(rs, (framepos_t) 0, empty);
 	std::list<RegionView*> views = rs.by_layer();
 
+	_stuck = false;
 	for (list<RegionView*>::iterator i = views.begin(); i != views.end(); ++i) {
 		RegionView* rv = (*i);
 		if (!rv->region()->video_locked()) {
 			continue;
+		}
+		if (!rv->region()->position_locked()) {
+			_stuck = true;
 		}
 		_views.push_back (AVDraggingView (rv));
 	}
@@ -2516,6 +2520,10 @@ VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
 	Drag::start_grab (event);
 	if (_editor->session() == 0) {
+		return;
+	}
+	if (_stuck) {
+		show_verbose_cursor_text (_("One or more Audio Regions\nare both Locked and\nLocked to Video.\nThe video cannot me moved."));
 		return;
 	}
 
@@ -2547,6 +2555,10 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 	if (ARDOUR_UI::instance()->video_timeline->is_offset_locked()) {
+		return;
+	}
+	if (_stuck) {
+		show_verbose_cursor_text (_("One or more Audio Regions\nare both Locked and\nLocked to Video.\nThe video cannot me moved."));
 		return;
 	}
 
@@ -2593,6 +2605,9 @@ void
 VideoTimeLineDrag::finished (GdkEvent * /*event*/, bool movement_occurred)
 {
 	if (ARDOUR_UI::instance()->video_timeline->is_offset_locked()) {
+		return;
+	}
+	if (_stuck) {
 		return;
 	}
 
