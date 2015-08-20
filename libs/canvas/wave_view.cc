@@ -141,6 +141,9 @@ WaveView::WaveView (Item* parent, boost::shared_ptr<ARDOUR::AudioRegion> region)
 WaveView::~WaveView ()
 {
 	invalidate_image_cache ();
+	if (images ) {
+		images->clear_cache ();
+	}
 }
 
 string
