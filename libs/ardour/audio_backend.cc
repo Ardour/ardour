@@ -1,0 +1,96 @@
+/*
+    Copyright (C) 2015 Tim Mayberry
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
+#include "ardour/audio_backend.h"
+
+#include "i18n.h"
+
+namespace ARDOUR {
+
+std::string
+AudioBackend::get_error_string (ErrorCode error_code)
+{
+	switch (error_code) {
+	case NoError: // to stop compiler warning
+		return _("No Error occurred");
+	case BackendInitializationError:
+		return _("Failed to initialize audio backend");
+	case BackendDeinitializationError:
+		return _("Failed to deinitialize audio backend");
+	case AudioDeviceOpenError:
+		return _("Failed to open audio device");
+	case AudioDeviceCloseError:
+		return _("Failed to close audio device");
+	case AudioDeviceNotAvailableError:
+		return _("Audio device unavailable");
+	case AudioDeviceNotConnectedError:
+		return _("Audio device not connected");
+	case AudioDeviceReservationError:
+		return _("Failed to request and reserve audio device");
+	case AudioDeviceIOError:
+		return _("Audio device Input/Output error");
+	case MidiDeviceOpenError:
+		return _("Failed to open MIDI device");
+	case MidiDeviceCloseError:
+		return _("Failed to close MIDI device");
+	case MidiDeviceNotAvailableError:
+		return _("MIDI device unavailable");
+	case MidiDeviceNotConnectedError:
+		return _("MIDI device not connected");
+	case MidiDeviceIOError:
+		return _("MIDI device Input/Output error");
+	case SampleRateNotSupportedError:
+		return _("Sample rate is not supported");
+	case RequestedInputLatencyNotSupportedError:
+		return _("Requested input latency is not supported");
+	case RequestedOutputLatencyNotSupportedError:
+		return _("Requested output latency is not supported");
+	case PeriodSizeNotSupportedError:
+		return _("Period size is not supported");
+	case PeriodCountNotSupportedError:
+		return _("Period count is not supported");
+	case DeviceConfigurationNotSupportedError:
+		return _("Device configuration not supported");
+	case InputChannelCountNotSupportedError:
+		return _("Input channel count configuration not supported");
+	case OutputChannelCountNotSupportedError:
+		return _("Output channel count configuration not supported");
+	case AquireRealtimePermissionError:
+		return _("Unable to aquire realtime permissions");
+	case SettingAudioThreadPriorityError:
+		return _("Setting audio device thread priorities failed");
+	case SettingMIDIThreadPriorityError:
+		return _("Setting MIDI device thread priorities failed");
+	}
+	return std::string();
+}
+
+std::string
+AudioBackend::get_standard_device_name (StandardDeviceName device_name)
+{
+	switch (device_name) {
+	case DeviceNone:
+		return _("None");
+	case DeviceDefault:
+		return _("Default");
+	}
+	return std::string();
+}
+
+} // namespace ARDOUR

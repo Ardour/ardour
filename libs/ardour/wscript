@@ -22,6 +22,7 @@ libardour_sources = [
         'amp.cc',
         'analyser.cc',
         'async_midi_port.cc',
+        'audio_backend.cc',
         'audio_buffer.cc',
         'audio_diskstream.cc',
         'audio_library.cc',

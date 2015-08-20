@@ -86,6 +86,43 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     AudioBackend (AudioEngine& e, AudioBackendInfo& i) : PortEngine (e), _info (i), engine (e) {}
     virtual ~AudioBackend () {}
     
+	enum ErrorCode {
+		NoError = 0,
+		BackendInitializationError = -64,
+		BackendDeinitializationError,
+		AudioDeviceOpenError,
+		AudioDeviceCloseError,
+		AudioDeviceNotAvailableError,
+		AudioDeviceNotConnectedError,
+		AudioDeviceReservationError,
+		AudioDeviceIOError,
+		MidiDeviceOpenError,
+		MidiDeviceCloseError,
+		MidiDeviceNotAvailableError,
+		MidiDeviceNotConnectedError,
+		MidiDeviceIOError,
+		SampleRateNotSupportedError,
+		RequestedInputLatencyNotSupportedError,
+		RequestedOutputLatencyNotSupportedError,
+		PeriodSizeNotSupportedError,
+		PeriodCountNotSupportedError,
+		DeviceConfigurationNotSupportedError,
+		InputChannelCountNotSupportedError,
+		OutputChannelCountNotSupportedError,
+		AquireRealtimePermissionError,
+		SettingAudioThreadPriorityError,
+		SettingMIDIThreadPriorityError
+	};
+
+	static std::string get_error_string (ErrorCode);
+
+	enum StandardDeviceName {
+		DeviceNone,
+		DeviceDefault
+	};
+
+	static std::string get_standard_device_name (StandardDeviceName);
+
     /** Return the AudioBackendInfo object from which this backend
 	was constructed.
     */
