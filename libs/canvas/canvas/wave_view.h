@@ -126,6 +126,7 @@ class LIBCANVAS_API WaveViewCache
 
 	uint64_t image_cache_threshold () const { return _image_cache_threshold; }
 	void set_image_cache_threshold (uint64_t);
+	void clear_cache ();
 	
 	void add (boost::shared_ptr<ARDOUR::AudioSource>, boost::shared_ptr<Entry>);
 	void use (boost::shared_ptr<ARDOUR::AudioSource>, boost::shared_ptr<Entry>);

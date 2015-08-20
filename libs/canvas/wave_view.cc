@@ -1351,6 +1351,9 @@ WaveView::set_global_shape (Shape s)
 {
 	if (_global_shape != s) {
 		_global_shape = s;
+		if (images) {
+			images->clear_cache ();
+		}
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -1360,6 +1363,9 @@ WaveView::set_global_logscaled (bool yn)
 {
 	if (_global_logscaled != yn) {
 		_global_logscaled = yn;
+		if (images) {
+			images->clear_cache ();
+		}
 		VisualPropertiesChanged (); /* EMIT SIGNAL */
 	}
 }
@@ -1828,9 +1834,19 @@ WaveViewCache::cache_flush ()
 }
 
 void
+WaveViewCache::clear_cache ()
+{
+	DEBUG_TRACE (DEBUG::WaveView, "clear cache\n");
+	const uint64_t image_cache_threshold = _image_cache_threshold;
+	_image_cache_threshold = 0;
+	cache_flush ();
+	_image_cache_threshold = image_cache_threshold;
+}
+
+void
 WaveViewCache::set_image_cache_threshold (uint64_t sz)
 {
-	DEBUG_TRACE (DEBUG::WaveView, string_compose ("new image cache size \n", sz));
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("new image cache size %1\n", sz));
 	_image_cache_threshold = sz;
 	cache_flush ();
 }
