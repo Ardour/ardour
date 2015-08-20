@@ -2508,7 +2508,7 @@ VideoTimeLineDrag::VideoTimeLineDrag (Editor* e, ArdourCanvas::Item* i)
 		if (!rv->region()->video_locked()) {
 			continue;
 		}
-		if (!rv->region()->position_locked()) {
+		if (rv->region()->locked()) {
 			_stuck = true;
 		}
 		_views.push_back (AVDraggingView (rv));
