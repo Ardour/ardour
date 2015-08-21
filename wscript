@@ -193,7 +193,7 @@ PROGRAM_VERSION = PROGRAM_VERSION.replace('\'', '')
 
 if len (sys.argv) > 1 and sys.argv[1] == 'dist':
         if not 'APPNAME' in os.environ:
-                print "You must define APPNAME in the environment when running ./waf dist"
+                print ("You must define APPNAME in the environment when running ./waf dist")
                 sys.exit (1)
         APPNAME = os.environ['APPNAME'];
 
