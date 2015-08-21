@@ -113,7 +113,7 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 	if (!initialize_pa()) return -1;
 
 	// TODO use  separate int device_input, int device_output ?!
-	if (device_id == -1) {
+	if (device_id == DeviceDefault) {
 		device_id = get_default_input_device ();
 	}
 
@@ -431,12 +431,12 @@ PortAudioIO::add_default_devices ()
 	const PaDeviceInfo* nfo_i = Pa_GetDeviceInfo(get_default_input_device());
 	const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(get_default_output_device());
 	if (nfo_i && nfo_o) {
-		_input_devices.insert (std::pair<int, paDevice*> (-1,
+		_input_devices.insert (std::pair<int, paDevice*> (DeviceDefault,
 					new paDevice("Default",
 						nfo_i->maxInputChannels,
 						nfo_o->maxOutputChannels
 						)));
-		_output_devices.insert (std::pair<int, paDevice*> (-1,
+		_output_devices.insert (std::pair<int, paDevice*> (DeviceDefault,
 					new paDevice("Default",
 						nfo_i->maxInputChannels,
 						nfo_o->maxOutputChannels
@@ -565,10 +565,10 @@ PortAudioIO::pcm_setup (
 		goto error;
 	}
 
-	if (device_input == -1) {
+	if (device_input == DeviceDefault) {
 		device_input = get_default_input_device ();
 	}
-	if (device_output == -1) {
+	if (device_output == DeviceDefault) {
 		device_output = get_default_output_device ();
 	}
 
