@@ -981,7 +981,9 @@ PortAudioBackend::register_system_midi_ports()
 		              static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		_system_midi_in.push_back (static_cast<PortMidiPort*>(p));
+		PortMidiPort* midi_port = static_cast<PortMidiPort*>(p);
+		midi_port->set_pretty_name ((*i)->name());
+		_system_midi_in.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI input port: %1\n", port_name));
 	}
 
@@ -997,8 +999,10 @@ PortAudioBackend::register_system_midi_ports()
 		              static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
 		if (!p) return -1;
 		set_latency_range (p, false, lr);
-		static_cast<PortMidiPort*>(p)->set_n_periods(2);
-		_system_midi_out.push_back (static_cast<PortMidiPort*>(p));
+		PortMidiPort* midi_port = static_cast<PortMidiPort*>(p);
+		midi_port->set_n_periods(2);
+		midi_port->set_pretty_name ((*i)->name());
+		_system_midi_out.push_back (midi_port);
 		DEBUG_MIDI (string_compose ("Registered MIDI output port: %1\n", port_name));
 	}
 	return 0;
