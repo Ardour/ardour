@@ -215,6 +215,7 @@ Butler::thread_work ()
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner());
 			DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
 			tr->seek(audition_seek);
+			tr->do_refill ();
 			_session.the_auditioner()->seek_response(audition_seek);
 		}
 
