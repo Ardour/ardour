@@ -183,13 +183,8 @@ V = MAJOR + '.' + MINOR + '.' + MICRO
 # can cause odd problems elsewhere. Note that
 # in python3, encode and decode do not return
 # strings, so we have to force the type.
-VERSION = str (V.encode ('ascii', 'ignore'))
-PROGRAM_VERSION = str (MAJOR.encode ('ascii', 'ignore'))
-
-# It seems, that on msys2, with python3, it puts quotes around
-# the version number, which breaks the build.
-VERSION = VERSION.replace('\'', '')
-PROGRAM_VERSION = PROGRAM_VERSION.replace('\'', '')
+VERSION = V.encode ('ascii', 'ignore').decode ("utf-8")
+PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore').decode ("utf-8")
 
 if len (sys.argv) > 1 and sys.argv[1] == 'dist':
         if not 'APPNAME' in os.environ:
