@@ -505,8 +505,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	DEBUG_MIDI ("Registering MIDI ports\n");
 
 	if (register_system_midi_ports () != 0) {
-		PBD::error << _ ("PortAudioBackend: failed to register system midi ports.")
-		           << endmsg;
+		DEBUG_PORTS("Failed to register system midi ports.\n")
 		_run = false;
 		return -1;
 	}
@@ -514,7 +513,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	DEBUG_AUDIO ("Registering Audio ports\n");
 
 	if (register_system_audio_ports()) {
-		PBD::error << _("PortAudioBackend: failed to register system audio ports.") << endmsg;
+		DEBUG_PORTS("Failed to register system audio ports.\n");
 		_run = false;
 		return -1;
 	}
@@ -523,7 +522,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	engine.buffer_size_change (_samples_per_period);
 
 	if (engine.reestablish_ports ()) {
-		PBD::error << _("PortAudioBackend: Could not re-establish ports.") << endmsg;
+		DEBUG_PORTS("Could not re-establish ports.\n");
 		_run = false;
 		return -1;
 	}
@@ -780,7 +779,7 @@ int
 PortAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string& name)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PortAudioBackend::set_port_name: Invalid Port(s)") << endmsg;
+		DEBUG_PORTS("set_port_name: Invalid Port(s)\n");
 		return -1;
 	}
 	return static_cast<PamPort*>(port)->set_name (_instance_name + ":" + name);
@@ -790,7 +789,7 @@ std::string
 PortAudioBackend::get_port_name (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PortAudioBackend::get_port_name: Invalid Port(s)") << endmsg;
+		DEBUG_PORTS("get_port_name: Invalid Port(s)\n");
 		return std::string ();
 	}
 	return static_cast<PamPort*>(port)->name ();
@@ -803,8 +802,7 @@ PortAudioBackend::get_port_property (PortHandle port,
                                      std::string& type) const
 {
 	if (!valid_port (port)) {
-		PBD::error << _ ("PortAudioBackend::get_port_name: Invalid Port(s)")
-		           << endmsg;
+		DEBUG_PORTS("get_port_name: Invalid Port(s)\n");
 		return -1;
 	}
 
@@ -882,8 +880,8 @@ PortAudioBackend::add_port (
 {
 	assert(name.size ());
 	if (find_port (name)) {
-		PBD::error << _("PortAudioBackend::register_port: Port already exists:")
-				<< " (" << name << ")" << endmsg;
+		DEBUG_PORTS(
+		    string_compose("register_port: Port already exists: (%1)\n", name));
 		return 0;
 	}
 	PamPort* port = NULL;
@@ -895,7 +893,7 @@ PortAudioBackend::add_port (
 			port = new PortMidiPort (*this, name, flags);
 			break;
 		default:
-			PBD::error << _("PortAudioBackend::register_port: Invalid Data Type.") << endmsg;
+			DEBUG_PORTS("register_port: Invalid Data Type.\n");
 			return 0;
 	}
 
@@ -913,7 +911,7 @@ PortAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 	PamPort* port = static_cast<PamPort*>(port_handle);
 	std::vector<PamPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<PamPort*>(port_handle));
 	if (i == _ports.end ()) {
-		PBD::error << _("PortAudioBackend::unregister_port: Failed to find port") << endmsg;
+		DEBUG_PORTS("unregister_port: Failed to find port\n");
 		return;
 	}
 	disconnect_all(port_handle);
@@ -1039,13 +1037,11 @@ PortAudioBackend::connect (const std::string& src, const std::string& dst)
 	PamPort* dst_port = find_port (dst);
 
 	if (!src_port) {
-		PBD::error << _("PortAudioBackend::connect: Invalid Source port:")
-				<< " (" << src <<")" << endmsg;
+		DEBUG_PORTS(string_compose("connect: Invalid Source port: (%1)\n", src));
 		return -1;
 	}
 	if (!dst_port) {
-		PBD::error << _("PortAudioBackend::connect: Invalid Destination port:")
-			<< " (" << dst <<")" << endmsg;
+		DEBUG_PORTS(string_compose("connect: Invalid Destination port: (%1)\n", dst));
 		return -1;
 	}
 	return src_port->connect (dst_port);
@@ -1058,7 +1054,7 @@ PortAudioBackend::disconnect (const std::string& src, const std::string& dst)
 	PamPort* dst_port = find_port (dst);
 
 	if (!src_port || !dst_port) {
-		PBD::error << _("PortAudioBackend::disconnect: Invalid Port(s)") << endmsg;
+		DEBUG_PORTS("disconnect: Invalid Port(s)\n");
 		return -1;
 	}
 	return src_port->disconnect (dst_port);
@@ -1069,12 +1065,11 @@ PortAudioBackend::connect (PortEngine::PortHandle src, const std::string& dst)
 {
 	PamPort* dst_port = find_port (dst);
 	if (!valid_port (src)) {
-		PBD::error << _("PortAudioBackend::connect: Invalid Source Port Handle") << endmsg;
+		DEBUG_PORTS("connect: Invalid Source Port Handle\n");
 		return -1;
 	}
 	if (!dst_port) {
-		PBD::error << _("PortAudioBackend::connect: Invalid Destination Port")
-			<< " (" << dst << ")" << endmsg;
+		DEBUG_PORTS(string_compose("connect: Invalid Destination Port (%1)\n", dst));
 		return -1;
 	}
 	return static_cast<PamPort*>(src)->connect (dst_port);
@@ -1085,7 +1080,7 @@ PortAudioBackend::disconnect (PortEngine::PortHandle src, const std::string& dst
 {
 	PamPort* dst_port = find_port (dst);
 	if (!valid_port (src) || !dst_port) {
-		PBD::error << _("PortAudioBackend::disconnect: Invalid Port(s)") << endmsg;
+		DEBUG_PORTS("disconnect: Invalid Port(s)\n");
 		return -1;
 	}
 	return static_cast<PamPort*>(src)->disconnect (dst_port);
@@ -1095,7 +1090,7 @@ int
 PortAudioBackend::disconnect_all (PortEngine::PortHandle port)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PortAudioBackend::disconnect_all: Invalid Port") << endmsg;
+		DEBUG_PORTS("disconnect_all: Invalid Port\n");
 		return -1;
 	}
 	static_cast<PamPort*>(port)->disconnect_all ();
@@ -1106,7 +1101,7 @@ bool
 PortAudioBackend::connected (PortEngine::PortHandle port, bool /* process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PortAudioBackend::disconnect_all: Invalid Port") << endmsg;
+		DEBUG_PORTS("disconnect_all: Invalid Port\n");
 		return false;
 	}
 	return static_cast<PamPort*>(port)->is_connected ();
@@ -1117,7 +1112,7 @@ PortAudioBackend::connected_to (PortEngine::PortHandle src, const std::string& d
 {
 	PamPort* dst_port = find_port (dst);
 	if (!valid_port (src) || !dst_port) {
-		PBD::error << _("PortAudioBackend::connected_to: Invalid Port") << endmsg;
+		DEBUG_PORTS("connected_to: Invalid Port\n");
 		return false;
 	}
 	return static_cast<PamPort*>(src)->is_connected (dst_port);
@@ -1127,7 +1122,7 @@ bool
 PortAudioBackend::physically_connected (PortEngine::PortHandle port, bool /*process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PortAudioBackend::physically_connected: Invalid Port") << endmsg;
+		DEBUG_PORTS("physically_connected: Invalid Port\n");
 		return false;
 	}
 	return static_cast<PamPort*>(port)->is_physically_connected ();
@@ -1137,7 +1132,7 @@ int
 PortAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std::string>& names, bool /*process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PortAudioBackend::get_connections: Invalid Port") << endmsg;
+		DEBUG_PORTS("get_connections: Invalid Port\n");
 		return -1;
 	}
 
@@ -1238,7 +1233,7 @@ void
 PortAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playback, LatencyRange latency_range)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PamPort::set_latency_range (): invalid port.") << endmsg;
+		DEBUG_PORTS("PamPort::set_latency_range (): invalid port.\n");
 	}
 	static_cast<PamPort*>(port)->set_latency_range (latency_range, for_playback);
 }
@@ -1248,7 +1243,7 @@ PortAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playb
 {
 	LatencyRange r;
 	if (!valid_port (port)) {
-		PBD::error << _("PamPort::get_latency_range (): invalid port.") << endmsg;
+		DEBUG_PORTS("PamPort::get_latency_range (): invalid port.\n");
 		r.min = 0;
 		r.max = 0;
 		return r;
@@ -1277,7 +1272,7 @@ bool
 PortAudioBackend::port_is_physical (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
-		PBD::error << _("PamPort::port_is_physical (): invalid port.") << endmsg;
+		DEBUG_PORTS("PamPort::port_is_physical (): invalid port.\n");
 		return false;
 	}
 	return static_cast<PamPort*>(port)->is_physical ();
@@ -1684,27 +1679,27 @@ PamPort::~PamPort () {
 int PamPort::connect (PamPort *port)
 {
 	if (!port) {
-		PBD::error << _("PamPort::connect (): invalid (null) port") << endmsg;
+		DEBUG_PORTS("PamPort::connect (): invalid (null) port\n");
 		return -1;
 	}
 
 	if (type () != port->type ()) {
-		PBD::error << _("PamPort::connect (): wrong port-type") << endmsg;
+		DEBUG_PORTS("PamPort::connect (): wrong port-type\n");
 		return -1;
 	}
 
 	if (is_output () && port->is_output ()) {
-		PBD::error << _("PamPort::connect (): cannot inter-connect output ports.") << endmsg;
+		DEBUG_PORTS("PamPort::connect (): cannot inter-connect output ports.\n");
 		return -1;
 	}
 
 	if (is_input () && port->is_input ()) {
-		PBD::error << _("PamPort::connect (): cannot inter-connect input ports.") << endmsg;
+		DEBUG_PORTS("PamPort::connect (): cannot inter-connect input ports.\n");
 		return -1;
 	}
 
 	if (this == port) {
-		PBD::error << _("PamPort::connect (): cannot self-connect ports.") << endmsg;
+		DEBUG_PORTS("PamPort::connect (): cannot self-connect ports.\n");
 		return -1;
 	}
 
@@ -1734,14 +1729,15 @@ void PamPort::_connect (PamPort *port, bool callback)
 int PamPort::disconnect (PamPort *port)
 {
 	if (!port) {
-		PBD::error << _("PamPort::disconnect (): invalid (null) port") << endmsg;
+		DEBUG_PORTS("PamPort::disconnect (): invalid (null) port\n");
 		return -1;
 	}
 
 	if (!is_connected (port)) {
-		PBD::error << _("PamPort::disconnect (): ports are not connected:")
-			<< " (" << name () << ") -> (" << port->name () << ")"
-			<< endmsg;
+		DEBUG_PORTS(string_compose(
+		    "PamPort::disconnect (): ports are not connected: (%1) -> (%2)\n",
+		    name(),
+		    port->name()));
 		return -1;
 	}
 	_disconnect (port, true);
