@@ -109,7 +109,7 @@ void
 Session::request_transport_speed (double speed, bool as_default)
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	ev->third_yes_or_no = true;
+	ev->third_yes_or_no = true; // as_default
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
 	queue_event (ev);
 }
@@ -1369,7 +1369,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 
 		PostTransportWork todo = PostTransportWork (0);
 
-		if ((_transport_speed && speed * _transport_speed < 0.0) || (_last_transport_speed * speed < 0.0) || (_last_transport_speed == 0.0f && speed < 0.0f)) {
+		if ((_transport_speed && speed * _transport_speed < 0.0) || (_last_transport_speed * speed < 0.0) || (_last_transport_speed == 0.0 && speed < 0.0)) {
 			todo = PostTransportWork (todo | PostTransportReverse);
 			_last_roll_or_reversal_location = _transport_frame;
 		}
@@ -1408,10 +1408,10 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 		 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
 		 * for TransportStateChange() here is the ShuttleControl display.
 		 */
-		if (fabsf(_signalled_varispeed - speed) > .002f
+		if (fabs (_signalled_varispeed - speed) > .002
 		    // still, signal hard changes to 1.0 and 0.0:
-		    || ( speed == 1.f && _signalled_varispeed != 1.f)
-		    || ( speed == 0.f && _signalled_varispeed != 0.f)
+		    || ( speed == 1.0 && _signalled_varispeed != 1.0)
+		    || ( speed == 0.0 && _signalled_varispeed != 0.0)
 		   )
 		{
 			TransportStateChange (); /* EMIT SIGNAL */
