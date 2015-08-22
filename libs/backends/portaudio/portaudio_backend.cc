@@ -32,6 +32,7 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
 #include "i18n.h"
@@ -67,7 +68,7 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, m_max_deviation_us(0)
 	, _input_audio_device("")
 	, _output_audio_device("")
-	, _midi_driver_option(_("None"))
+	, _midi_driver_option(get_standard_device_name(DeviceNone))
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _n_inputs (0)
@@ -395,7 +396,7 @@ PortAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
 		_midi_options.push_back (winmme_driver_name);
-		_midi_options.push_back (_("None"));
+		_midi_options.push_back (get_standard_device_name(DeviceNone));
 	}
 	return _midi_options;
 }
@@ -403,7 +404,7 @@ PortAudioBackend::enumerate_midi_options () const
 int
 PortAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != _("None") && opt != winmme_driver_name) {
+	if (opt != get_standard_device_name(DeviceNone) && opt != winmme_driver_name) {
 		return -1;
 	}
 	DEBUG_MIDI (string_compose ("Setting midi option to %1\n", opt));
@@ -961,8 +962,8 @@ PortAudioBackend::register_system_audio_ports()
 int
 PortAudioBackend::register_system_midi_ports()
 {
-	if (_midi_driver_option == _("None")) {
-		DEBUG_MIDI ("No MIDI backend selected, not system midi ports available\n");
+	if (_midi_driver_option == get_standard_device_name(DeviceNone)) {
+		DEBUG_MIDI("No MIDI backend selected, not system midi ports available\n");
 		return 0;
 	}
 
