@@ -22,6 +22,7 @@
 #include <string.h>
 #include <assert.h>
 #include <glibmm.h>
+
 #include "portaudio_io.h"
 
 #ifdef WITH_ASIO
@@ -425,6 +426,15 @@ PortAudioIO::clear_device_lists ()
 }
 
 void
+PortAudioIO::add_none_devices ()
+{
+	_input_devices.insert(std::pair<int, paDevice*>(
+	    DeviceNone, new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceNone), 0, 0)));
+	_output_devices.insert(std::pair<int, paDevice*>(
+	    DeviceNone, new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceNone), 0, 0)));
+}
+
+void
 PortAudioIO::add_default_devices ()
 {
 	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
@@ -503,6 +513,7 @@ PortAudioIO::discover()
 	if (!initialize_pa()) return;
 
 	clear_device_lists ();
+	add_none_devices ();
 	add_devices ();
 }
 
@@ -558,9 +569,9 @@ PortAudioIO::pcm_setup (
 	_state = -2;
 
 	PaError err = paNoError;
-	const PaDeviceInfo *nfo_in;
-	const PaDeviceInfo *nfo_out;
-	const PaStreamInfo *nfo_s;
+	const PaDeviceInfo *nfo_in = NULL;
+	const PaDeviceInfo *nfo_out = NULL;
+	const PaStreamInfo *nfo_s = NULL;
 		
 	if (!initialize_pa()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
@@ -583,8 +594,20 @@ PortAudioIO::pcm_setup (
 	DEBUG_AUDIO (string_compose (
 	    "PortAudio Device IDs: i:%1 o:%2\n", device_input, device_output));
 
-	nfo_in = Pa_GetDeviceInfo(device_input);
-	nfo_out = Pa_GetDeviceInfo(device_output);
+	if (device_input == DeviceNone && device_output == DeviceNone) {
+		// just send the error msg for now rather than return it
+		error << AudioBackend::get_error_string(AudioBackend::DeviceConfigurationNotSupportedError)
+		      << endmsg;
+		return -1;
+	}
+
+	if (device_input != DeviceNone) {
+		nfo_in = Pa_GetDeviceInfo(device_input);
+	}
+
+	if (device_output != DeviceNone) {
+		nfo_out = Pa_GetDeviceInfo(device_output);
+	}
 
 	if (!nfo_in && ! nfo_out) {
 		DEBUG_AUDIO ("PortAudio Cannot Query Device Info\n");
