@@ -73,25 +73,14 @@ PortAudioIO::~PortAudioIO ()
 std::string
 PortAudioIO::control_app_name (int device_id) const
 {
-	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
-	std::string app_name;
-
-	if (info == NULL) {
-		DEBUG_AUDIO (string_compose ("Unable to determine Host API from index %1\n",
-		                             _host_api_index));
-		return app_name;
-	}
-
-	PaHostApiTypeId type_id = info->type;
-
 #ifdef WITH_ASIO
-	if (type_id == paASIO) {
+	if (get_current_host_api_type() == paASIO) {
 		// is this used for anything, or just acts as a boolean?
 		return "PortaudioASIO";
 	}
 #endif
 
-	return app_name;
+	return std::string();
 }
 
 void
@@ -178,15 +167,7 @@ PortAudioIO::get_asio_buffer_properties (int device_id,
 		return false;
 	}
 
-	const PaHostApiInfo* info = Pa_GetHostApiInfo (device_info->hostApi);
-
-	if (info == NULL) {
-		DEBUG_AUDIO (string_compose (
-		    "Unable to determine Host API from device index %1\n", device_id));
-		return false;
-	}
-
-	if (info->type != paASIO) {
+	if (get_current_host_api_type() != paASIO) {
 		DEBUG_AUDIO (string_compose (
 		    "ERROR device_id %1 is not an ASIO device\n", device_id));
 		return false;
@@ -271,17 +252,7 @@ int
 PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& buffer_sizes)
 {
 #ifdef WITH_ASIO
-	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
-
-	if (info == NULL) {
-		DEBUG_AUDIO (string_compose ("Unable to determine Host API from index %1\n",
-		                             _host_api_index));
-		return -1;
-	}
-
-	PaHostApiTypeId type_id = info->type;
-
-	if (type_id == paASIO) {
+	if (get_current_host_api_type() == paASIO) {
 		if (get_asio_buffer_sizes (device_id, buffer_sizes)) {
 			return 0;
 		}
