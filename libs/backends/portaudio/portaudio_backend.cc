@@ -661,7 +661,10 @@ PortAudioBackend::portaudio_process_thread (void *arg)
 	HANDLE task_handle;
 
 	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
-	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_NORMAL);
+	if (!mmcss::set_thread_priority(task_handle, mmcss::AVRT_PRIORITY_NORMAL)) {
+		PBD::warning << get_error_string(SettingAudioThreadPriorityError)
+		             << endmsg;
+	}
 #endif
 
 	DWORD tid = GetCurrentThreadId ();
@@ -1380,7 +1383,10 @@ PortAudioBackend::main_process_thread ()
 	HANDLE task_handle;
 
 	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
-	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_NORMAL);
+	if (!mmcss::set_thread_priority(task_handle, mmcss::AVRT_PRIORITY_NORMAL)) {
+		PBD::warning << get_error_string(SettingAudioThreadPriorityError)
+		             << endmsg;
+	}
 #endif
 
 	DWORD tid = GetCurrentThreadId ();
