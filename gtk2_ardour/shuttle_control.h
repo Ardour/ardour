@@ -78,6 +78,7 @@ class ShuttleControl : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void shuttle_style_changed();
 	void shuttle_unit_clicked ();
 	void set_shuttle_max_speed (float);
+	void reset_speed ();
 
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);

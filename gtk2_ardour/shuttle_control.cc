@@ -234,6 +234,8 @@ ShuttleControl::build_shuttle_context_menu ()
 
 	items.push_back (MenuElem (_("Maximum speed"), *speed_menu));
 
+	items.push_back (SeparatorElem ());
+	items.push_back (MenuElem (_("Reset to 100%"), sigc::mem_fun (*this, &ShuttleControl::reset_speed)));
 }
 
 void
@@ -244,6 +246,16 @@ ShuttleControl::show_shuttle_context_menu ()
 	}
 
 	shuttle_context_menu->popup (1, gtk_get_current_event_time());
+}
+
+void
+ShuttleControl::reset_speed ()
+{
+	if (_session->transport_rolling()) {
+		_session->request_transport_speed (1.0, true);
+	} else {
+		_session->request_transport_speed (0.0, true);
+	}
 }
 
 void
