@@ -30,6 +30,8 @@
 
 #include "pbd/compose.h"
 
+#include "ardour/audio_backend.h"
+
 #include "debug.h"
 
 #define INTERLEAVED_INPUT
@@ -432,12 +434,12 @@ PortAudioIO::add_default_devices ()
 	const PaDeviceInfo* nfo_o = Pa_GetDeviceInfo(get_default_output_device());
 	if (nfo_i && nfo_o) {
 		_input_devices.insert (std::pair<int, paDevice*> (DeviceDefault,
-					new paDevice("Default",
+					new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceDefault),
 						nfo_i->maxInputChannels,
 						nfo_o->maxOutputChannels
 						)));
 		_output_devices.insert (std::pair<int, paDevice*> (DeviceDefault,
-					new paDevice("Default",
+					new paDevice(AudioBackend::get_standard_device_name(AudioBackend::DeviceDefault),
 						nfo_i->maxInputChannels,
 						nfo_o->maxOutputChannels
 						)));
