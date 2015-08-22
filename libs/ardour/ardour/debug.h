@@ -74,6 +74,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits BackendAudio;
 		LIBARDOUR_API extern DebugBits BackendTiming;
 		LIBARDOUR_API extern DebugBits BackendThreads;
+		LIBARDOUR_API extern DebugBits BackendPorts;
 
 	}
 }

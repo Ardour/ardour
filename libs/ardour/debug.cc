@@ -71,3 +71,4 @@ PBD::DebugBits PBD::DEBUG::BackendMIDI = PBD::new_debug_bit ("backendmidi");
 PBD::DebugBits PBD::DEBUG::BackendAudio = PBD::new_debug_bit ("backendaudio");
 PBD::DebugBits PBD::DEBUG::BackendTiming = PBD::new_debug_bit ("backendtiming");
 PBD::DebugBits PBD::DEBUG::BackendThreads = PBD::new_debug_bit ("backendthreads");
+PBD::DebugBits PBD::DEBUG::BackendPorts = PBD::new_debug_bit ("backendports");
