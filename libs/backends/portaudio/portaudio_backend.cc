@@ -1376,7 +1376,7 @@ PortAudioBackend::main_process_thread ()
 	if (_pcmio->pcm_start()) {
 		_pcmio->pcm_stop ();
 		_active = false;
-		engine.halted_callback("PortAudio I/O error.");
+		engine.halted_callback(get_error_string(AudioDeviceIOError).c_str());
 	}
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
@@ -1409,7 +1409,7 @@ PortAudioBackend::main_process_thread ()
 					engine.Xrun ();
 					break;
 				default:
-					PBD::error << _("PortAudioBackend: I/O error. Audio Process Terminated.") << endmsg;
+					PBD::error << get_error_string(AudioDeviceIOError) << endmsg;
 					break;
 			}
 
@@ -1593,7 +1593,7 @@ PortAudioBackend::main_process_thread ()
 	_pcmio->pcm_stop ();
 	_active = false;
 	if (_run) {
-		engine.halted_callback("PortAudio I/O error.");
+		engine.halted_callback(get_error_string(AudioDeviceIOError).c_str());
 	}
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
