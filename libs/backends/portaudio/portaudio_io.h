@@ -47,6 +47,7 @@ public:
 	void host_api_list (std::vector<std::string>&);
 	bool set_host_api (const std::string& host_api_name);
 	std::string get_host_api () const { return _host_api_name; }
+	PaHostApiTypeId get_current_host_api_type () const;
 	PaHostApiIndex get_host_api_index_from_name (const std::string& name);
 
 	PaDeviceIndex get_default_input_device ();

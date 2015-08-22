@@ -348,6 +348,21 @@ PortAudioIO::host_api_list (std::vector<std::string>& api_list)
 	}
 }
 
+
+PaHostApiTypeId
+PortAudioIO::get_current_host_api_type () const
+{
+	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
+
+	if (info == NULL) {
+		DEBUG_AUDIO(string_compose(
+		    "Unable to determine Host API type from index %1\n", _host_api_index));
+		return (PaHostApiTypeId)0;
+	}
+
+	return info->type;
+}
+
 std::string
 PortAudioIO::get_host_api_name_from_index (PaHostApiIndex index)
 {
