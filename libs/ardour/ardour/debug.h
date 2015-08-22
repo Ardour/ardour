@@ -70,6 +70,11 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits Soundcloud;
 		LIBARDOUR_API extern DebugBits Butler;
 		LIBARDOUR_API extern DebugBits GenericMidi;
+		LIBARDOUR_API extern DebugBits BackendMIDI;
+		LIBARDOUR_API extern DebugBits BackendAudio;
+		LIBARDOUR_API extern DebugBits BackendTiming;
+		LIBARDOUR_API extern DebugBits BackendThreads;
+
 	}
 }
 

@@ -38,6 +38,7 @@
 #define INTERLEAVED_INPUT
 #define INTERLEAVED_OUTPUT
 
+using namespace PBD;
 using namespace ARDOUR;
 
 PortAudioIO::PortAudioIO ()

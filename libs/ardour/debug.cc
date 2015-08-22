@@ -67,4 +67,7 @@ PBD::DebugBits PBD::DEBUG::Soundcloud = PBD::new_debug_bit ("Soundcloud");
 PBD::DebugBits PBD::DEBUG::Butler = PBD::new_debug_bit ("Butler");
 PBD::DebugBits PBD::DEBUG::GenericMidi = PBD::new_debug_bit ("genericmidi");
 
-
+PBD::DebugBits PBD::DEBUG::BackendMIDI = PBD::new_debug_bit ("backendmidi");
+PBD::DebugBits PBD::DEBUG::BackendAudio = PBD::new_debug_bit ("backendaudio");
+PBD::DebugBits PBD::DEBUG::BackendTiming = PBD::new_debug_bit ("backendtiming");
+PBD::DebugBits PBD::DEBUG::BackendThreads = PBD::new_debug_bit ("backendthreads");
