@@ -37,6 +37,20 @@ public:
 
 	int      state (void) const { return _state; }
 
+	enum ErrorCode {
+		NoError = 0,
+		InitializationError,
+		DeInitializationError,
+		DeviceConfigNotSupportedError,
+		StreamOpenError,
+		StreamStartError,
+		StreamStopError,
+		StreamCloseError,
+		IOError,
+		BufferUnderrunError,
+		BufferOverrunError
+	};
+
 	enum StandardDevices {
 		DeviceNone = -2,
 		DeviceDefault = -1
