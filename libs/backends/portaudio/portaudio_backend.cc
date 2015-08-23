@@ -459,10 +459,16 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_pcmio->pcm_setup (name_to_id(_input_audio_device), name_to_id(_output_audio_device), _samplerate, _samples_per_period);
 
 	switch (_pcmio->state ()) {
-		case 0: /* OK */ break;
-		case -1: PBD::error << get_error_string(AudioDeviceOpenError) << endmsg; break;
-		default: PBD::error << get_error_string(AudioDeviceOpenError) << endmsg; break;
+	case 0: /* OK */
+		break;
+	case -1:
+		PBD::error << get_error_string(AudioDeviceOpenError) << endmsg;
+		break;
+	default:
+		PBD::error << get_error_string(AudioDeviceOpenError) << endmsg;
+		break;
 	}
+
 	if (_pcmio->state ()) {
 		return -1;
 	}
@@ -600,10 +606,10 @@ size_t
 PortAudioBackend::raw_buffer_size (DataType t)
 {
 	switch (t) {
-		case DataType::AUDIO:
-			return _samples_per_period * sizeof(Sample);
-		case DataType::MIDI:
-			return _max_buffer_size; // XXX not really limited
+	case DataType::AUDIO:
+		return _samples_per_period * sizeof(Sample);
+	case DataType::MIDI:
+		return _max_buffer_size; // XXX not really limited
 	}
 	return 0;
 }
@@ -887,15 +893,15 @@ PortAudioBackend::add_port (
 	}
 	PamPort* port = NULL;
 	switch (type) {
-		case DataType::AUDIO:
-			port = new PortAudioPort (*this, name, flags);
-			break;
-		case DataType::MIDI:
-			port = new PortMidiPort (*this, name, flags);
-			break;
-		default:
-			DEBUG_PORTS("register_port: Invalid Data Type.\n");
-			return 0;
+	case DataType::AUDIO:
+		port = new PortAudioPort(*this, name, flags);
+		break;
+	case DataType::MIDI:
+		port = new PortMidiPort(*this, name, flags);
+		break;
+	default:
+		DEBUG_PORTS("register_port: Invalid Data Type.\n");
+		return 0;
 	}
 
 	_ports.push_back (port);
@@ -1310,9 +1316,14 @@ PortAudioBackend::n_physical_outputs () const
 		PamPort* port = _ports[i];
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
-				case DataType::AUDIO: ++n_audio; break;
-				case DataType::MIDI: ++n_midi; break;
-				default: break;
+			case DataType::AUDIO:
+				++n_audio;
+				break;
+			case DataType::MIDI:
+				++n_midi;
+				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -1331,9 +1342,14 @@ PortAudioBackend::n_physical_inputs () const
 		PamPort* port = _ports[i];
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
-				case DataType::AUDIO: ++n_audio; break;
-				case DataType::MIDI: ++n_midi; break;
-				default: break;
+			case DataType::AUDIO:
+				++n_audio;
+				break;
+			case DataType::MIDI:
+				++n_midi;
+				break;
+			default:
+				break;
 			}
 		}
 	}
@@ -1398,15 +1414,15 @@ PortAudioBackend::main_process_thread ()
 		if (!_freewheel) {
 
 			switch (_pcmio->next_cycle (_samples_per_period)) {
-				case 0: // OK
-					break;
-				case 1:
-					DEBUG_AUDIO ("PortAudio: Xrun\n");
-					engine.Xrun ();
-					break;
-				default:
-					PBD::error << get_error_string(AudioDeviceIOError) << endmsg;
-					break;
+			case 0: // OK
+				break;
+			case 1:
+				DEBUG_AUDIO("PortAudio: Xrun\n");
+				engine.Xrun();
+				break;
+			default:
+				PBD::error << get_error_string(AudioDeviceIOError) << endmsg;
+				break;
 			}
 
 			uint32_t i = 0;
