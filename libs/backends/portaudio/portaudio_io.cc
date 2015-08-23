@@ -117,6 +117,13 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 {
 	if (!initialize_pa()) return -1;
 
+#ifdef WITH_ASIO
+	if (get_current_host_api_type() == paASIO) {
+		get_default_sample_rates(sampleRates);
+		return 0;
+	}
+#endif
+
 	// TODO use  separate int device_input, int device_output ?!
 	if (device_id == DeviceDefault) {
 		device_id = get_default_input_device ();
