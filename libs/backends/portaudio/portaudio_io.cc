@@ -559,19 +559,6 @@ PortAudioIO::pcm_start()
 	return 0;
 }
 
-#ifdef __APPLE__
-static uint32_t lower_power_of_two (uint32_t v) {
-	v--;
-	v |= v >> 1;
-	v |= v >> 2;
-	v |= v >> 4;
-	v |= v >> 8;
-	v |= v >> 16;
-	v++;
-	return v >> 1;
-}
-#endif
-
 int
 PortAudioIO::pcm_setup (
 		int device_input, int device_output,
@@ -636,22 +623,6 @@ PortAudioIO::pcm_setup (
 		DEBUG_AUDIO ("PortAudio no input or output channels.\n");
 		goto error;
 	}
-
-#ifdef __APPLE__
-	// pa_mac_core_blocking.c pa_stable_v19_20140130
-	// BUG: ringbuffer alloc requires power-of-two chn count.
-	if ((_capture_channels & (_capture_channels - 1)) != 0) {
-		DEBUG_AUDIO (
-		    "Adjusted capture channels to power of two (portaudio rb bug)\n");
-		_capture_channels = lower_power_of_two (_capture_channels);
-	}
-
-	if ((_playback_channels & (_playback_channels - 1)) != 0) {
-		DEBUG_AUDIO (
-		    "Adjusted capture channels to power of two (portaudio rb bug)\n");
-		_playback_channels = lower_power_of_two (_playback_channels);
-	}
-#endif
 
 	DEBUG_AUDIO (string_compose ("PortAudio Channels: in:%1 out:%2\n",
 	                             _capture_channels,
