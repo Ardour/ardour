@@ -560,6 +560,31 @@ PortAudioIO::pcm_start()
 }
 
 bool
+PortAudioIO::set_sample_rate_and_latency_from_stream ()
+{
+	const PaStreamInfo* nfo_s = Pa_GetStreamInfo(_stream);
+
+	if (nfo_s == NULL) {
+		return false;
+	}
+
+	_cur_sample_rate = nfo_s->sampleRate;
+	_cur_input_latency = nfo_s->inputLatency * _cur_sample_rate;
+	_cur_output_latency = nfo_s->outputLatency * _cur_sample_rate;
+
+	DEBUG_AUDIO (string_compose ("PA Sample Rate %1 SPS\n", _cur_sample_rate));
+
+	DEBUG_AUDIO (string_compose ("PA Input Latency %1ms, %2 spl\n",
+	                             1e3 * nfo_s->inputLatency,
+	                             _cur_input_latency));
+
+	DEBUG_AUDIO (string_compose ("PA Output Latency %1ms, %2 spl\n",
+	                             1e3 * nfo_s->outputLatency,
+	                             _cur_output_latency));
+	return true;
+}
+
+bool
 PortAudioIO::allocate_buffers_for_blocking_api (uint32_t samples_per_period)
 {
 	if (_capture_channels > 0) {
@@ -592,7 +617,6 @@ PortAudioIO::pcm_setup (
 	PaError err = paNoError;
 	const PaDeviceInfo *nfo_in = NULL;
 	const PaDeviceInfo *nfo_out = NULL;
-	const PaStreamInfo *nfo_s = NULL;
 		
 	if (!initialize_pa()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
@@ -693,26 +717,11 @@ PortAudioIO::pcm_setup (
 		return -1;
 	}
 
-	nfo_s = Pa_GetStreamInfo (_stream);
-	if (!nfo_s) {
+	if (!set_sample_rate_and_latency_from_stream()) {
 		DEBUG_AUDIO ("PortAudio failed to query stream information.\n");
 		pcm_stop();
 		return -1;
 	}
-
-	_cur_sample_rate = nfo_s->sampleRate;
-	_cur_input_latency = nfo_s->inputLatency * _cur_sample_rate;
-	_cur_output_latency = nfo_s->outputLatency * _cur_sample_rate;
-
-	DEBUG_AUDIO (string_compose ("PA Sample Rate %1 SPS\n", _cur_sample_rate));
-
-	DEBUG_AUDIO (string_compose ("PA Input Latency %1ms, %2 spl\n",
-	                             1e3 * nfo_s->inputLatency,
-	                             _cur_input_latency));
-
-	DEBUG_AUDIO (string_compose ("PA Output Latency %1ms, %2 spl\n",
-	                             1e3 * nfo_s->outputLatency,
-	                             _cur_output_latency));
 
 	_state = 0;
 
