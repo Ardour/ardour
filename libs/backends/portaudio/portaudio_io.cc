@@ -607,6 +607,74 @@ PortAudioIO::allocate_buffers_for_blocking_api (uint32_t samples_per_period)
 	return true;
 }
 
+bool
+PortAudioIO::get_input_stream_params(int device_input,
+                                     PaStreamParameters& inputParam) const
+{
+	const PaDeviceInfo *nfo_in = NULL;
+
+	if (device_input == DeviceDefault) {
+		device_input = get_default_input_device ();
+	}
+
+	if (device_input == DeviceNone) {
+		return false;
+	}
+
+	nfo_in = Pa_GetDeviceInfo(device_input);
+
+	if (nfo_in == NULL) {
+		DEBUG_AUDIO ("PortAudio Cannot Query Input Device Info\n");
+		return false;
+	}
+
+	inputParam.device = device_input;
+	inputParam.channelCount = nfo_in->maxInputChannels;
+#ifdef INTERLEAVED_INPUT
+	inputParam.sampleFormat = paFloat32;
+#else
+	inputParam.sampleFormat = paFloat32 | paNonInterleaved;
+#endif
+	inputParam.suggestedLatency = nfo_in->defaultLowInputLatency;
+	inputParam.hostApiSpecificStreamInfo = NULL;
+
+	return true;
+}
+
+bool
+PortAudioIO::get_output_stream_params(int device_output,
+                                      PaStreamParameters& outputParam) const
+{
+	const PaDeviceInfo *nfo_out = NULL;
+
+	if (device_output == DeviceDefault) {
+		device_output = get_default_output_device ();
+	}
+
+	if (device_output == DeviceNone) {
+		return false;
+	}
+
+	nfo_out = Pa_GetDeviceInfo(device_output);
+
+	if (nfo_out == NULL) {
+		DEBUG_AUDIO ("PortAudio Cannot Query Output Device Info\n");
+		return false;
+	}
+
+	outputParam.device = device_output;
+	outputParam.channelCount = nfo_out->maxOutputChannels;
+#ifdef INTERLEAVED_OUTPUT
+	outputParam.sampleFormat = paFloat32;
+#else
+	outputParam.sampleFormat = paFloat32 | paNonInterleaved;
+#endif
+	outputParam.suggestedLatency = nfo_out->defaultLowOutputLatency;
+	outputParam.hostApiSpecificStreamInfo = NULL;
+
+	return true;
+}
+
 int
 PortAudioIO::pcm_setup (
 		int device_input, int device_output,
@@ -615,19 +683,10 @@ PortAudioIO::pcm_setup (
 	_state = -2;
 
 	PaError err = paNoError;
-	const PaDeviceInfo *nfo_in = NULL;
-	const PaDeviceInfo *nfo_out = NULL;
 		
 	if (!initialize_pa()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
 		return -1;
-	}
-
-	if (device_input == DeviceDefault) {
-		device_input = get_default_input_device ();
-	}
-	if (device_output == DeviceDefault) {
-		device_output = get_default_output_device ();
 	}
 
 	_capture_channels = 0;
@@ -646,28 +705,19 @@ PortAudioIO::pcm_setup (
 		return -1;
 	}
 
-	if (device_input != DeviceNone) {
-		nfo_in = Pa_GetDeviceInfo(device_input);
+	PaStreamParameters inputParam;
+	PaStreamParameters outputParam;
+
+	if (get_input_stream_params(device_input, inputParam)) {
+		_capture_channels = inputParam.channelCount;
 	}
 
-	if (device_output != DeviceNone) {
-		nfo_out = Pa_GetDeviceInfo(device_output);
+	if (get_output_stream_params(device_output, outputParam)) {
+		_playback_channels = outputParam.channelCount;
 	}
 
-	if (!nfo_in && !nfo_out) {
-		DEBUG_AUDIO ("PortAudio Cannot Query Device Info\n");
-		return -1;
-	}
-
-	if (nfo_in) {
-		_capture_channels = nfo_in->maxInputChannels;
-	}
-	if (nfo_out) {
-		_playback_channels = nfo_out->maxOutputChannels;
-	}
-
-	if(_capture_channels == 0 && _playback_channels == 0) {
-		DEBUG_AUDIO ("PortAudio no input or output channels.\n");
+	if (_capture_channels == 0 && _playback_channels == 0) {
+		DEBUG_AUDIO("PortAudio no input or output channels.\n");
 		return -1;
 	}
 
@@ -675,32 +725,6 @@ PortAudioIO::pcm_setup (
 	                             _capture_channels,
 	                             _playback_channels));
 
-	PaStreamParameters inputParam;
-	PaStreamParameters outputParam;
-
-	if (nfo_in) {
-		inputParam.device = device_input;
-		inputParam.channelCount = _capture_channels;
-#ifdef INTERLEAVED_INPUT
-		inputParam.sampleFormat = paFloat32;
-#else
-		inputParam.sampleFormat = paFloat32 | paNonInterleaved;
-#endif
-		inputParam.suggestedLatency = nfo_in->defaultLowInputLatency;
-		inputParam.hostApiSpecificStreamInfo = NULL;
-	}
-
-	if (nfo_out) {
-		outputParam.device = device_output;
-		outputParam.channelCount = _playback_channels;
-#ifdef INTERLEAVED_OUTPUT
-		outputParam.sampleFormat = paFloat32;
-#else
-		outputParam.sampleFormat = paFloat32 | paNonInterleaved;
-#endif
-		outputParam.suggestedLatency = nfo_out->defaultLowOutputLatency;
-		outputParam.hostApiSpecificStreamInfo = NULL;
-	}
 
 	// XXX re-consider using callback API, testing needed.
 	err = Pa_OpenStream (

@@ -106,7 +106,12 @@ private: // Methods
 	void add_devices ();
 	std::string get_host_api_name_from_index (PaHostApiIndex index);
 
-	bool set_sample_rate_and_latency_from_stream ();
+	bool get_output_stream_params(int device_output,
+	                              PaStreamParameters& outputParam) const;
+	bool get_input_stream_params(int device_input,
+	                             PaStreamParameters& inputParam) const;
+
+	bool set_sample_rate_and_latency_from_stream();
 	bool allocate_buffers_for_blocking_api (uint32_t samples_per_period);
 
 	static void get_default_sample_rates(std::vector<float>&);
