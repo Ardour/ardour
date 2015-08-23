@@ -559,6 +559,29 @@ PortAudioIO::pcm_start()
 	return 0;
 }
 
+bool
+PortAudioIO::allocate_buffers_for_blocking_api (uint32_t samples_per_period)
+{
+	if (_capture_channels > 0) {
+		_input_buffer =
+		    (float*)malloc(samples_per_period * _capture_channels * sizeof(float));
+		if (!_input_buffer) {
+			DEBUG_AUDIO("PortAudio failed to allocate input buffer.\n");
+			return false;
+		}
+	}
+
+	if (_playback_channels > 0) {
+		_output_buffer =
+		    (float*)calloc(samples_per_period * _playback_channels, sizeof(float));
+		if (!_output_buffer) {
+			DEBUG_AUDIO("PortAudio failed to allocate output buffer.\n");
+			return false;
+		}
+	}
+	return true;
+}
+
 int
 PortAudioIO::pcm_setup (
 		int device_input, int device_output,
@@ -573,7 +596,7 @@ PortAudioIO::pcm_setup (
 		
 	if (!initialize_pa()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
-		goto error;
+		return -1;
 	}
 
 	if (device_input == DeviceDefault) {
@@ -607,9 +630,9 @@ PortAudioIO::pcm_setup (
 		nfo_out = Pa_GetDeviceInfo(device_output);
 	}
 
-	if (!nfo_in && ! nfo_out) {
+	if (!nfo_in && !nfo_out) {
 		DEBUG_AUDIO ("PortAudio Cannot Query Device Info\n");
-		goto error;
+		return -1;
 	}
 
 	if (nfo_in) {
@@ -621,7 +644,7 @@ PortAudioIO::pcm_setup (
 
 	if(_capture_channels == 0 && _playback_channels == 0) {
 		DEBUG_AUDIO ("PortAudio no input or output channels.\n");
-		goto error;
+		return -1;
 	}
 
 	DEBUG_AUDIO (string_compose ("PortAudio Channels: in:%1 out:%2\n",
@@ -667,14 +690,14 @@ PortAudioIO::pcm_setup (
 
 	if (err != paNoError) {
 		DEBUG_AUDIO ("PortAudio failed to start stream.\n");
-		goto error;
+		return -1;
 	}
 
 	nfo_s = Pa_GetStreamInfo (_stream);
 	if (!nfo_s) {
 		DEBUG_AUDIO ("PortAudio failed to query stream information.\n");
 		pcm_stop();
-		goto error;
+		return -1;
 	}
 
 	_cur_sample_rate = nfo_s->sampleRate;
@@ -693,32 +716,11 @@ PortAudioIO::pcm_setup (
 
 	_state = 0;
 
-	if (_capture_channels > 0) {
-		_input_buffer = (float*) malloc (samples_per_period * _capture_channels * sizeof(float));
-		if (!_input_buffer) {
-			DEBUG_AUDIO ("PortAudio failed to allocate input buffer.\n");
-			pcm_stop();
-			goto error;
-		}
+	if (!allocate_buffers_for_blocking_api(samples_per_period)) {
+		pcm_stop();
+		return -1;
 	}
-
-	if (_playback_channels > 0) {
-		_output_buffer = (float*) calloc (samples_per_period * _playback_channels, sizeof(float));
-		if (!_output_buffer) {
-			DEBUG_AUDIO ("PortAudio failed to allocate output buffer.\n");
-			pcm_stop();
-			goto error;
-		}
-	}
-
 	return 0;
-
-error:
-	_capture_channels = 0;
-	_playback_channels = 0;
-	free (_input_buffer); _input_buffer = NULL;
-	free (_output_buffer); _output_buffer = NULL;
-	return -1;
 }
 
 int
