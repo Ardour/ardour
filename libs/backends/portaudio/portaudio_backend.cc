@@ -437,12 +437,13 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	if (_active || _run) {
-		PBD::error << _("PortAudioBackend: already active.") << endmsg;
+		DEBUG_AUDIO("Already active.\n");
 		return -1;
 	}
 
 	if (_ports.size()) {
-		PBD::warning << _("PortAudioBackend: recovering from unclean shutdown, port registry is not empty.") << endmsg;
+		DEBUG_AUDIO(
+		    "Recovering from unclean shutdown, port registry is not empty.\n");
 		_system_inputs.clear();
 		_system_outputs.clear();
 		_system_midi_in.clear();
@@ -536,7 +537,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	{
 		if (pthread_create (&_main_thread, NULL, pthread_process, this))
 		{
-			PBD::error << _("PortAudioBackend: failed to create process thread.") << endmsg;
+			DEBUG_AUDIO("Failed to create main audio thread\n");
 			_run = false;
 			return -1;
 		} else {
@@ -548,7 +549,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	while (!_active && --timeout > 0) { Glib::usleep (1000); }
 
 	if (timeout == 0 || !_active) {
-		PBD::error << _("PortAudioBackend: failed to start.") << endmsg;
+		DEBUG_AUDIO("Failed to start main audio thread\n");
 		_pcmio->pcm_stop();
 		_run = false;
 		unregister_ports();
@@ -569,7 +570,7 @@ PortAudioBackend::stop ()
 
 	_run = false;
 	if (pthread_join (_main_thread, &status)) {
-		PBD::error << _("PortAudioBackend: failed to terminate.") << endmsg;
+		DEBUG_AUDIO("Failed to stop main audio thread\n");
 		return -1;
 	}
 
@@ -692,7 +693,7 @@ PortAudioBackend::create_process_thread (boost::function<void()> func)
 		pthread_attr_init (&attr);
 		pthread_attr_setstacksize (&attr, stacksize);
 		if (pthread_create (&thread_id, &attr, portaudio_process_thread, td)) {
-			PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
+			DEBUG_AUDIO("Cannot create process thread.");
 			pthread_attr_destroy (&attr);
 			return -1;
 		}
@@ -712,7 +713,7 @@ PortAudioBackend::join_process_threads ()
 	{
 		void *status;
 		if (pthread_join (*i, &status)) {
-			PBD::error << _("AudioEngine: cannot terminate process thread.") << endmsg;
+			DEBUG_AUDIO("Cannot terminate process thread.");
 			rv -= 1;
 		}
 	}
