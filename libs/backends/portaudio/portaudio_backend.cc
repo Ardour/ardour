@@ -460,8 +460,8 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	switch (_pcmio->state ()) {
 		case 0: /* OK */ break;
-		case -1: PBD::error << _("PortAudioBackend: failed to open device.") << endmsg; break;
-		default: PBD::error << _("PortAudioBackend: initialization failed.") << endmsg; break;
+		case -1: PBD::error << get_error_string(AudioDeviceOpenError) << endmsg; break;
+		default: PBD::error << get_error_string(AudioDeviceOpenError) << endmsg; break;
 	}
 	if (_pcmio->state ()) {
 		return -1;
