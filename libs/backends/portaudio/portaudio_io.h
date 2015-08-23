@@ -60,7 +60,6 @@ public:
 	int available_sample_rates (int device_id, std::vector<float>& sample_rates);
 	int available_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes);
 
-	bool get_default_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes);
 #ifdef WITH_ASIO
 	bool get_asio_buffer_properties (int device_id,
 	                                 long& min_size_frames,
@@ -106,6 +105,9 @@ private: // Methods
 	void add_default_devices ();
 	void add_devices ();
 	std::string get_host_api_name_from_index (PaHostApiIndex index);
+
+	static void get_default_sample_rates(std::vector<float>&);
+	static void get_default_buffer_sizes(std::vector<uint32_t>&);
 
 private: // Data
 	int  _state;

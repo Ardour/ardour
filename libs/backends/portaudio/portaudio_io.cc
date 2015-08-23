@@ -98,11 +98,23 @@ PortAudioIO::launch_control_app (int device_id)
 #endif
 }
 
+void
+PortAudioIO::get_default_sample_rates (std::vector<float>& rates)
+{
+	rates.push_back(8000.0);
+	rates.push_back(22050.0);
+	rates.push_back(24000.0);
+	rates.push_back(44100.0);
+	rates.push_back(48000.0);
+	rates.push_back(88200.0);
+	rates.push_back(96000.0);
+	rates.push_back(176400.0);
+	rates.push_back(192000.0);
+}
+
 int
 PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRates)
 {
-	static const float ardourRates[] = { 8000.0, 22050.0, 24000.0, 44100.0, 48000.0, 88200.0, 96000.0, 176400.0, 192000.0};
-
 	if (!initialize_pa()) return -1;
 
 	// TODO use  separate int device_input, int device_output ?!
@@ -132,20 +144,23 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 		outputParam.suggestedLatency = 0;
 		outputParam.hostApiSpecificStreamInfo = 0;
 
-		for (uint32_t i = 0; i < sizeof(ardourRates)/sizeof(float); ++i) {
-			if (paFormatIsSupported == Pa_IsFormatSupported(
-						nfo->maxInputChannels > 0 ? &inputParam : NULL,
-						nfo->maxOutputChannels > 0 ? &outputParam : NULL,
-						ardourRates[i])) {
-				sampleRates.push_back (ardourRates[i]);
+		std::vector<float> rates;
+		get_default_sample_rates(rates);
+
+		for (std::vector<float>::const_iterator i = rates.begin(); i != rates.end();
+		     ++i) {
+			if (paFormatIsSupported ==
+			    Pa_IsFormatSupported(nfo->maxInputChannels > 0 ? &inputParam : NULL,
+			                         nfo->maxOutputChannels > 0 ? &outputParam : NULL,
+			                         *i)) {
+				sampleRates.push_back(*i);
 			}
 		}
 	}
 
 	if (sampleRates.empty()) {
 		// fill in something..
-		sampleRates.push_back (44100.0);
-		sampleRates.push_back (48000.0);
+		get_default_sample_rates(sampleRates);
 	}
 
 	return 0;
@@ -239,14 +254,16 @@ PortAudioIO::get_asio_buffer_sizes (int device_id, std::vector<uint32_t>& buffer
 }
 #endif
 
-bool
-PortAudioIO::get_default_buffer_sizes (int device_id, std::vector<uint32_t>& buffer_sizes)
+void
+PortAudioIO::get_default_buffer_sizes(std::vector<uint32_t>& buffer_sizes)
 {
-	static const uint32_t ardourSizes[] = { 64, 128, 256, 512, 1024, 2048, 4096 };
-	for(uint32_t i = 0; i < sizeof(ardourSizes)/sizeof(uint32_t); ++i) {
-		buffer_sizes.push_back (ardourSizes[i]);
-	}
-	return true;
+	buffer_sizes.push_back(64);
+	buffer_sizes.push_back(128);
+	buffer_sizes.push_back(256);
+	buffer_sizes.push_back(512);
+	buffer_sizes.push_back(1024);
+	buffer_sizes.push_back(2048);
+	buffer_sizes.push_back(4096);
 }
 
 int
@@ -260,7 +277,7 @@ PortAudioIO::available_buffer_sizes(int device_id, std::vector<uint32_t>& buffer
 	}
 #endif
 
-	get_default_buffer_sizes (device_id, buffer_sizes);
+	get_default_buffer_sizes (buffer_sizes);
 
 	return 0;
 }
