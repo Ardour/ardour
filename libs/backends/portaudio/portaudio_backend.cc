@@ -540,7 +540,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 			_run = false;
 			return -1;
 		} else {
-			PBD::warning << _("PortAudioBackend: cannot acquire realtime permissions.") << endmsg;
+			PBD::warning << get_error_string(AquireRealtimePermissionError) << endmsg;
 		}
 	}
 
