@@ -666,7 +666,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->file_button = manage(new Gtk::FileChooserButton(Gtk::FILE_CHOOSER_ACTION_OPEN));
 			control_ui->file_button->set_title(desc.label);
 
-			control_ui->pack_start (control_ui->label, true, true);
+			control_ui->pack_start (control_ui->label, false, true);
 			control_ui->pack_start (*control_ui->file_button, true, true);
 
 			// Connect signals (TODO: do this via the Control)
