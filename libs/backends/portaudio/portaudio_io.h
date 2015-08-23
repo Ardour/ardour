@@ -50,8 +50,8 @@ public:
 	PaHostApiTypeId get_current_host_api_type () const;
 	PaHostApiIndex get_host_api_index_from_name (const std::string& name);
 
-	PaDeviceIndex get_default_input_device ();
-	PaDeviceIndex get_default_output_device ();
+	PaDeviceIndex get_default_input_device () const;
+	PaDeviceIndex get_default_output_device () const;
 
 	void     discover();
 	void     input_device_list (std::map<int, std::string> &devices) const;

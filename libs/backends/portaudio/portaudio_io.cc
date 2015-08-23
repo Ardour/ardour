@@ -407,7 +407,7 @@ PortAudioIO::get_host_api_index_from_name (const std::string& name)
 }
 
 PaDeviceIndex
-PortAudioIO::get_default_input_device ()
+PortAudioIO::get_default_input_device () const
 {
 	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
 	if (info == NULL) return -1;
@@ -415,7 +415,7 @@ PortAudioIO::get_default_input_device ()
 }
 
 PaDeviceIndex
-PortAudioIO::get_default_output_device ()
+PortAudioIO::get_default_output_device () const
 {
 	const PaHostApiInfo* info = Pa_GetHostApiInfo (_host_api_index);
 	if (info == NULL) return -1;
