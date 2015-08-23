@@ -529,6 +529,16 @@ PortAudioIO::discover()
 }
 
 void
+PortAudioIO::reset_stream_dependents ()
+{
+	_capture_channels = 0;
+	_playback_channels = 0;
+	_cur_sample_rate = 0;
+	_cur_input_latency = 0;
+	_cur_output_latency = 0;
+}
+
+void
 PortAudioIO::pcm_stop ()
 {
 	if (_stream) {
@@ -536,11 +546,7 @@ PortAudioIO::pcm_stop ()
 	}
 	_stream = NULL;
 
-	_capture_channels = 0;
-	_playback_channels = 0;
-	_cur_sample_rate = 0;
-	_cur_input_latency = 0;
-	_cur_output_latency = 0;
+	reset_stream_dependents();
 
 	free (_input_buffer); _input_buffer = NULL;
 	free (_output_buffer); _output_buffer = NULL;
@@ -689,11 +695,7 @@ PortAudioIO::pcm_setup (
 		return -1;
 	}
 
-	_capture_channels = 0;
-	_playback_channels = 0;
-	_cur_sample_rate = 0;
-	_cur_input_latency = 0;
-	_cur_output_latency = 0;
+	reset_stream_dependents ();
 
 	DEBUG_AUDIO (string_compose (
 	    "PortAudio Device IDs: i:%1 o:%2\n", device_input, device_output));
