@@ -469,12 +469,12 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (_n_outputs != _pcmio->n_playback_channels ()) {
 		_n_outputs = _pcmio->n_playback_channels ();
-		PBD::info << _("PortAudioBackend: adjusted output channel count to match device.") << endmsg;
+		PBD::info << get_error_string(OutputChannelCountNotSupportedError) << endmsg;
 	}
 
 	if (_n_inputs != _pcmio->n_capture_channels ()) {
 		_n_inputs = _pcmio->n_capture_channels ();
-		PBD::info << _("PortAudioBackend: adjusted input channel count to match device.") << endmsg;
+		PBD::info << get_error_string(InputChannelCountNotSupportedError) << endmsg;
 	}
 #if 0
 	if (_pcmio->samples_per_period() != _samples_per_period) {
@@ -486,7 +486,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	if (_pcmio->sample_rate() != _samplerate) {
 		_samplerate = _pcmio->sample_rate();
 		engine.sample_rate_change (_samplerate);
-		PBD::warning << _("PortAudioBackend: sample rate does not match.") << endmsg;
+		PBD::warning << get_error_string(SampleRateNotSupportedError) << endmsg;
 	}
 
 	_measure_latency = for_latency_measurement;
