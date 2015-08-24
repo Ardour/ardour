@@ -690,9 +690,10 @@ PortAudioIO::get_output_stream_params(int device_output,
 }
 
 PortAudioIO::ErrorCode
-PortAudioIO::pcm_setup (
-		int device_input, int device_output,
-		double sample_rate, uint32_t samples_per_period)
+PortAudioIO::pre_stream_open(int device_input,
+                             PaStreamParameters& inputParam,
+                             int device_output,
+                             PaStreamParameters& outputParam)
 {
 	if (!pa_initialize()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
@@ -707,9 +708,6 @@ PortAudioIO::pcm_setup (
 	if (device_input == DeviceNone && device_output == DeviceNone) {
 		return DeviceConfigNotSupportedError;
 	}
-
-	PaStreamParameters inputParam;
-	PaStreamParameters outputParam;
 
 	if (get_input_stream_params(device_input, inputParam)) {
 		_capture_channels = inputParam.channelCount;
@@ -728,9 +726,25 @@ PortAudioIO::pcm_setup (
 	                             _capture_channels,
 	                             _playback_channels));
 
+	return NoError;
+}
+
+PortAudioIO::ErrorCode
+PortAudioIO::pcm_setup(int device_input,
+                       int device_output,
+                       double sample_rate,
+                       uint32_t samples_per_period)
+{
+	PaStreamParameters inputParam;
+	PaStreamParameters outputParam;
+
+	ErrorCode error_code =
+	    pre_stream_open(device_input, inputParam, device_output, outputParam);
+
+	if (error_code != NoError) return error_code;
+
 	PaError err = paNoError;
 
-	// XXX re-consider using callback API, testing needed.
 	err = Pa_OpenStream (
 			&_stream,
 			_capture_channels > 0 ? &inputParam: NULL,

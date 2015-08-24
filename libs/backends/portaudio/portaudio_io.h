@@ -126,6 +126,11 @@ private: // Methods
 	bool set_sample_rate_and_latency_from_stream();
 	bool allocate_buffers_for_blocking_api (uint32_t samples_per_period);
 
+	ErrorCode pre_stream_open(int device_input,
+	                          PaStreamParameters& inputParam,
+	                          int device_output,
+	                          PaStreamParameters& outputParam);
+
 	void reset_stream_dependents ();
 
 	static void get_default_sample_rates(std::vector<float>&);
