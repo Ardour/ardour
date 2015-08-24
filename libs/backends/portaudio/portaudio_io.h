@@ -90,12 +90,10 @@ public:
 	void     pcm_stop (void);
 	int      pcm_start (void);
 
-	int      pcm_setup (
-			int device_input,
-			int device_output,
-			double   sample_rate,
-			uint32_t samples_per_period
-			);
+	ErrorCode pcm_setup(int device_input,
+	                    int device_output,
+	                    double sample_rate,
+	                    uint32_t samples_per_period);
 
 	uint32_t n_playback_channels (void) const { return _playback_channels; }
 	uint32_t n_capture_channels (void) const { return _capture_channels; }

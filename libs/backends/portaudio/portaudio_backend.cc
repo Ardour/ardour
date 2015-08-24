@@ -456,20 +456,22 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_freewheeling = false;
 	_freewheel = false;
 
-	_pcmio->pcm_setup (name_to_id(_input_audio_device), name_to_id(_output_audio_device), _samplerate, _samples_per_period);
+	PortAudioIO::ErrorCode err;
 
-	switch (_pcmio->state ()) {
-	case 0: /* OK */
+	err = _pcmio->pcm_setup(name_to_id(_input_audio_device),
+	                        name_to_id(_output_audio_device),
+	                        _samplerate,
+	                        _samples_per_period);
+
+	switch (err) {
+	case PortAudioIO::NoError:
 		break;
-	case -1:
-		PBD::error << get_error_string(AudioDeviceOpenError) << endmsg;
-		break;
+	case PortAudioIO::DeviceConfigNotSupportedError:
+		PBD::error << get_error_string(DeviceConfigurationNotSupportedError)
+		           << endmsg;
+		return -1;
 	default:
 		PBD::error << get_error_string(AudioDeviceOpenError) << endmsg;
-		break;
-	}
-
-	if (_pcmio->state ()) {
 		return -1;
 	}
 

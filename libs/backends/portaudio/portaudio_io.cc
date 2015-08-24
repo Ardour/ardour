@@ -681,18 +681,16 @@ PortAudioIO::get_output_stream_params(int device_output,
 	return true;
 }
 
-int
+PortAudioIO::ErrorCode
 PortAudioIO::pcm_setup (
 		int device_input, int device_output,
 		double sample_rate, uint32_t samples_per_period)
 {
 	_state = -2;
 
-	PaError err = paNoError;
-		
 	if (!initialize_pa()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
-		return -1;
+		return InitializationError;
 	}
 
 	reset_stream_dependents ();
@@ -701,10 +699,7 @@ PortAudioIO::pcm_setup (
 	    "PortAudio Device IDs: i:%1 o:%2\n", device_input, device_output));
 
 	if (device_input == DeviceNone && device_output == DeviceNone) {
-		// just send the error msg for now rather than return it
-		error << AudioBackend::get_error_string(AudioBackend::DeviceConfigurationNotSupportedError)
-		      << endmsg;
-		return -1;
+		return DeviceConfigNotSupportedError;
 	}
 
 	PaStreamParameters inputParam;
@@ -720,13 +715,14 @@ PortAudioIO::pcm_setup (
 
 	if (_capture_channels == 0 && _playback_channels == 0) {
 		DEBUG_AUDIO("PortAudio no input or output channels.\n");
-		return -1;
+		return DeviceConfigNotSupportedError;
 	}
 
 	DEBUG_AUDIO (string_compose ("PortAudio Channels: in:%1 out:%2\n",
 	                             _capture_channels,
 	                             _playback_channels));
 
+	PaError err = paNoError;
 
 	// XXX re-consider using callback API, testing needed.
 	err = Pa_OpenStream (
@@ -740,22 +736,22 @@ PortAudioIO::pcm_setup (
 
 	if (err != paNoError) {
 		DEBUG_AUDIO ("PortAudio failed to start stream.\n");
-		return -1;
+		return StreamOpenError;
 	}
 
 	if (!set_sample_rate_and_latency_from_stream()) {
 		DEBUG_AUDIO ("PortAudio failed to query stream information.\n");
 		pcm_stop();
-		return -1;
+		return StreamOpenError;
 	}
 
 	_state = 0;
 
 	if (!allocate_buffers_for_blocking_api(samples_per_period)) {
 		pcm_stop();
-		return -1;
+		return StreamOpenError;
 	}
-	return 0;
+	return NoError;
 }
 
 int
