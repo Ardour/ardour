@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "evoral/EventList.hpp"
+#include "evoral/Control.hpp"
 
 #include "ardour/beats_frames_converter.h"
 #include "ardour/debug.h"
@@ -377,7 +378,9 @@ MidiPlaylist::contained_automation()
 
 		for (Automatable::Controls::iterator c = mr->model()->controls().begin();
 				c != mr->model()->controls().end(); ++c) {
-			ret.insert(c->first);
+			if (c->second->list()->size() > 0) {
+				ret.insert(c->first);
+			}
 		}
 	}
 
