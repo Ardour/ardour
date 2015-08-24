@@ -35,8 +35,6 @@ public:
 	PortAudioIO (void);
 	~PortAudioIO (void);
 
-	int      state (void) const { return _state; }
-
 	enum ErrorCode {
 		NoError = 0,
 		InitializationError,
@@ -132,7 +130,6 @@ private: // Methods
 	static void get_default_buffer_sizes(std::vector<uint32_t>&);
 
 private: // Data
-	int  _state;
 	bool _initialized;
 
 	uint32_t _capture_channels;

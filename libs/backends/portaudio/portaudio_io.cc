@@ -42,8 +42,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 PortAudioIO::PortAudioIO ()
-	: _state (-1)
-	, _initialized (false)
+	: _initialized (false)
 	, _capture_channels (0)
 	, _playback_channels (0)
 	, _stream (0)
@@ -58,9 +57,8 @@ PortAudioIO::PortAudioIO ()
 
 PortAudioIO::~PortAudioIO ()
 {
-	if (_state == 0) {
-		pcm_stop();
-	}
+	pcm_stop();
+
 	if (_initialized) {
 		Pa_Terminate();
 	}
@@ -550,7 +548,6 @@ PortAudioIO::pcm_stop ()
 
 	free (_input_buffer); _input_buffer = NULL;
 	free (_output_buffer); _output_buffer = NULL;
-	_state = -1;
 }
 
 int
@@ -559,7 +556,6 @@ PortAudioIO::pcm_start()
 	PaError err = Pa_StartStream (_stream);
 
 	if (err != paNoError) {
-		_state = -1;
 		return -1;
 	}
 	return 0;
@@ -686,8 +682,6 @@ PortAudioIO::pcm_setup (
 		int device_input, int device_output,
 		double sample_rate, uint32_t samples_per_period)
 {
-	_state = -2;
-
 	if (!initialize_pa()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
 		return InitializationError;
@@ -744,8 +738,6 @@ PortAudioIO::pcm_setup (
 		pcm_stop();
 		return StreamOpenError;
 	}
-
-	_state = 0;
 
 	if (!allocate_buffers_for_blocking_api(samples_per_period)) {
 		pcm_stop();
