@@ -1352,23 +1352,34 @@ EngineControl::set_buffersize_popdown_strings ()
 		s.push_back (bufsize_as_string (*x));
 	}
 
+	uint32_t previous_size = 0;
+	if (!buffer_size_combo.get_active_text().empty()) {
+		previous_size = get_buffer_size ();
+	}
+
 	set_popdown_strings (buffer_size_combo, s);
 
 	if (!s.empty()) {
-		buffer_size_combo.set_active_text (s.front());
 
-		uint32_t period = backend->buffer_size();
-		if (0 == period && backend->use_separate_input_and_output_devices ()) {
-			period = backend->default_buffer_size (get_input_device_name ());
-		}
-		if (0 == period && backend->use_separate_input_and_output_devices ()) {
-			period = backend->default_buffer_size (get_output_device_name ());
-		}
-		if (0 == period && !backend->use_separate_input_and_output_devices ()) {
-			period = backend->default_buffer_size (get_device_name ());
-		}
+		if (std::find(bs.begin(), bs.end(), previous_size) != bs.end()) {
+			buffer_size_combo.set_active_text(bufsize_as_string(previous_size));
+		} else {
 
-		set_active_text_if_present (buffer_size_combo, bufsize_as_string (period));
+			buffer_size_combo.set_active_text(s.front());
+
+			uint32_t period = backend->buffer_size();
+			if (0 == period && backend->use_separate_input_and_output_devices()) {
+				period = backend->default_buffer_size(get_input_device_name());
+			}
+			if (0 == period && backend->use_separate_input_and_output_devices()) {
+				period = backend->default_buffer_size(get_output_device_name());
+			}
+			if (0 == period && !backend->use_separate_input_and_output_devices()) {
+				period = backend->default_buffer_size(get_device_name());
+			}
+
+			set_active_text_if_present(buffer_size_combo, bufsize_as_string(period));
+		}
 		show_buffer_duration ();
 	}
 	update_sensitivity ();
