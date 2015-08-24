@@ -54,8 +54,6 @@ public:
 		DeviceDefault = -1
 	};
 
-	bool     initialize_pa ();
-
 	void host_api_list (std::vector<std::string>&);
 	bool set_host_api (const std::string& host_api_name);
 	std::string get_host_api () const { return _host_api_name; }
@@ -110,6 +108,10 @@ public:
 
 private: // Methods
 
+	static bool pa_initialize();
+	static bool pa_deinitialize();
+	static bool& pa_initialized();
+
 	void clear_device_lists ();
 	void add_none_devices ();
 	void add_default_devices ();
@@ -130,8 +132,6 @@ private: // Methods
 	static void get_default_buffer_sizes(std::vector<uint32_t>&);
 
 private: // Data
-	bool _initialized;
-
 	uint32_t _capture_channels;
 	uint32_t _playback_channels;
 

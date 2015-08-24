@@ -42,8 +42,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 PortAudioIO::PortAudioIO ()
-	: _initialized (false)
-	, _capture_channels (0)
+	: _capture_channels (0)
 	, _playback_channels (0)
 	, _stream (0)
 	, _input_buffer (0)
@@ -59,10 +58,7 @@ PortAudioIO::~PortAudioIO ()
 {
 	pcm_stop();
 
-	if (_initialized) {
-		Pa_Terminate();
-	}
-
+	pa_deinitialize ();
 	clear_device_lists ();
 
 	free (_input_buffer); _input_buffer = NULL;
@@ -113,7 +109,7 @@ PortAudioIO::get_default_sample_rates (std::vector<float>& rates)
 int
 PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRates)
 {
-	if (!initialize_pa()) return -1;
+	if (!pa_initialize()) return -1;
 
 #ifdef WITH_ASIO
 	if (get_current_host_api_type() == paASIO) {
@@ -307,28 +303,44 @@ PortAudioIO::output_device_list(std::map<int, std::string> &devices) const
 	}
 }
 
-bool
-PortAudioIO::initialize_pa ()
+bool&
+PortAudioIO::pa_initialized()
 {
-	PaError err = paNoError;
+	static bool s_initialized = false;
+	return s_initialized;
+}
 
-	if (!_initialized) {
-		err = Pa_Initialize();
-		if (err != paNoError) {
-			return false;
-		}
-		_initialized = true;
-		_host_api_index = Pa_GetDefaultHostApi ();
-		_host_api_name = get_host_api_name_from_index (_host_api_index);
+bool
+PortAudioIO::pa_initialize()
+{
+	if (pa_initialized()) return true;
+
+	PaError err = Pa_Initialize();
+	if (err != paNoError) {
+		return false;
 	}
+	pa_initialized() = true;
 
+	return true;
+}
+
+bool
+PortAudioIO::pa_deinitialize()
+{
+	if (!pa_initialized()) return true;
+
+	PaError err = Pa_Terminate();
+	if (err != paNoError) {
+		return false;
+	}
+	pa_initialized() = false;
 	return true;
 }
 
 void
 PortAudioIO::host_api_list (std::vector<std::string>& api_list)
 {
-	if (!initialize_pa()) return;
+	if (!pa_initialize()) return;
 
 	PaHostApiIndex count = Pa_GetHostApiCount();
 
@@ -382,7 +394,7 @@ PortAudioIO::set_host_api (const std::string& host_api_name)
 PaHostApiIndex
 PortAudioIO::get_host_api_index_from_name (const std::string& name)
 {
-	if (!initialize_pa()) return -1;
+	if (!pa_initialize()) return -1;
 
 	PaHostApiIndex count = Pa_GetHostApiCount();
 
@@ -519,7 +531,7 @@ void
 PortAudioIO::discover()
 {
 	DEBUG_AUDIO ("PortAudio: discover\n");
-	if (!initialize_pa()) return;
+	if (!pa_initialize()) return;
 
 	clear_device_lists ();
 	add_none_devices ();
@@ -682,7 +694,7 @@ PortAudioIO::pcm_setup (
 		int device_input, int device_output,
 		double sample_rate, uint32_t samples_per_period)
 {
-	if (!initialize_pa()) {
+	if (!pa_initialize()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
 		return InitializationError;
 	}
