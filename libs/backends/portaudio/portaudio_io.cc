@@ -528,9 +528,11 @@ PortAudioIO::add_devices ()
 }
 
 void
-PortAudioIO::discover()
+PortAudioIO::update_devices()
 {
-	DEBUG_AUDIO ("PortAudio: discover\n");
+	DEBUG_AUDIO ("Update devices\n");
+	if (_stream != NULL) return;
+	pa_deinitialize();
 	if (!pa_initialize()) return;
 
 	clear_device_lists ();

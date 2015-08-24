@@ -63,7 +63,7 @@ public:
 	PaDeviceIndex get_default_input_device () const;
 	PaDeviceIndex get_default_output_device () const;
 
-	void     discover();
+	void     update_devices();
 	void     input_device_list (std::map<int, std::string> &devices) const;
 	void     output_device_list (std::map<int, std::string> &devices) const;
 

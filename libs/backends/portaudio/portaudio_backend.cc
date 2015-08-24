@@ -141,6 +141,7 @@ PortAudioBackend::set_driver (const std::string& name)
 		DEBUG_AUDIO (string_compose ("Portaudio: Unable to set_driver %1 \n", name));
 		return -1;
 	}
+	_pcmio->update_devices();
 	return 0;
 }
 
@@ -168,7 +169,6 @@ PortAudioBackend::enumerate_devices () const
 std::vector<AudioBackend::DeviceStatus>
 PortAudioBackend::enumerate_input_devices () const
 {
-	_pcmio->discover();
 	_input_audio_device_status.clear();
 	std::map<int, std::string> input_devices;
 	_pcmio->input_device_list(input_devices);
@@ -183,7 +183,6 @@ PortAudioBackend::enumerate_input_devices () const
 std::vector<AudioBackend::DeviceStatus>
 PortAudioBackend::enumerate_output_devices () const
 {
-	_pcmio->discover();
 	_output_audio_device_status.clear();
 	std::map<int, std::string> output_devices;
 	_pcmio->output_device_list(output_devices);
