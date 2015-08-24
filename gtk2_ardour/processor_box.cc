@@ -1357,6 +1357,14 @@ ProcessorBox::processor_operation (ProcessorOperation op)
 		break;
 
 	case ProcessorsPaste:
+		// some processors are not selectable (e.g fader, meter), target is empty.
+		if (targets.empty() && _placement >= 0) {
+			assert (_route);
+			boost::shared_ptr<Processor> proc = _route->before_processor_for_index (_placement);
+			if (proc) {
+				targets.push_back (proc);
+			}
+		}
 		if (targets.empty()) {
 			paste_processors ();
 		} else {
