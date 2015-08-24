@@ -56,7 +56,7 @@ PortAudioIO::PortAudioIO ()
 
 PortAudioIO::~PortAudioIO ()
 {
-	pcm_stop();
+	close_stream();
 
 	pa_deinitialize ();
 	clear_device_lists ();
@@ -548,11 +548,15 @@ PortAudioIO::reset_stream_dependents ()
 	_cur_output_latency = 0;
 }
 
-void
-PortAudioIO::pcm_stop ()
+PortAudioIO::ErrorCode
+PortAudioIO::close_stream()
 {
-	if (_stream) {
-		Pa_CloseStream (_stream);
+	if (!_stream) return NoError;
+
+	PaError err = Pa_CloseStream (_stream);
+
+	if (err != paNoError) {
+		return StreamCloseError;
 	}
 	_stream = NULL;
 
@@ -560,17 +564,18 @@ PortAudioIO::pcm_stop ()
 
 	free (_input_buffer); _input_buffer = NULL;
 	free (_output_buffer); _output_buffer = NULL;
+	return NoError;
 }
 
-int
-PortAudioIO::pcm_start()
+PortAudioIO::ErrorCode
+PortAudioIO::start_stream()
 {
 	PaError err = Pa_StartStream (_stream);
 
 	if (err != paNoError) {
-		return -1;
+		return StreamStartError;
 	}
-	return 0;
+	return NoError;
 }
 
 bool
@@ -730,10 +735,10 @@ PortAudioIO::pre_stream_open(int device_input,
 }
 
 PortAudioIO::ErrorCode
-PortAudioIO::pcm_setup(int device_input,
-                       int device_output,
-                       double sample_rate,
-                       uint32_t samples_per_period)
+PortAudioIO::open_blocking_stream(int device_input,
+                                  int device_output,
+                                  double sample_rate,
+                                  uint32_t samples_per_period)
 {
 	PaStreamParameters inputParam;
 	PaStreamParameters outputParam;
@@ -761,12 +766,12 @@ PortAudioIO::pcm_setup(int device_input,
 
 	if (!set_sample_rate_and_latency_from_stream()) {
 		DEBUG_AUDIO ("PortAudio failed to query stream information.\n");
-		pcm_stop();
+		close_stream();
 		return StreamOpenError;
 	}
 
 	if (!allocate_buffers_for_blocking_api(samples_per_period)) {
-		pcm_stop();
+		close_stream();
 		return StreamOpenError;
 	}
 	return NoError;

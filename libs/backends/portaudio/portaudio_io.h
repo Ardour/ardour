@@ -83,13 +83,13 @@ public:
 	std::string control_app_name (int device_id) const;
 	void launch_control_app (int device_id);
 
-	void     pcm_stop (void);
-	int      pcm_start (void);
+	ErrorCode open_blocking_stream(int device_input,
+	                               int device_output,
+	                               double sample_rate,
+	                               uint32_t samples_per_period);
+	ErrorCode start_stream(void);
 
-	ErrorCode pcm_setup(int device_input,
-	                    int device_output,
-	                    double sample_rate,
-	                    uint32_t samples_per_period);
+	ErrorCode close_stream(void);
 
 	uint32_t n_playback_channels (void) const { return _playback_channels; }
 	uint32_t n_capture_channels (void) const { return _capture_channels; }

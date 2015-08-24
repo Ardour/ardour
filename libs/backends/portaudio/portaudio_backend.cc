@@ -458,10 +458,10 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	PortAudioIO::ErrorCode err;
 
-	err = _pcmio->pcm_setup(name_to_id(_input_audio_device),
-	                        name_to_id(_output_audio_device),
-	                        _samplerate,
-	                        _samples_per_period);
+	err = _pcmio->open_blocking_stream(name_to_id(_input_audio_device),
+	                                   name_to_id(_output_audio_device),
+	                                   _samplerate,
+	                                   _samples_per_period);
 
 	switch (err) {
 	case PortAudioIO::NoError:
@@ -558,7 +558,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (timeout == 0 || !_active) {
 		DEBUG_AUDIO("Failed to start main audio thread\n");
-		_pcmio->pcm_stop();
+		_pcmio->close_stream();
 		_run = false;
 		unregister_ports();
 		_active = false;
@@ -1387,8 +1387,8 @@ PortAudioBackend::main_process_thread ()
 	manager.registration_callback();
 	manager.graph_order_callback();
 
-	if (_pcmio->pcm_start()) {
-		_pcmio->pcm_stop ();
+	if (_pcmio->start_stream() != PortAudioIO::NoError) {
+		_pcmio->close_stream ();
 		_active = false;
 		engine.halted_callback(get_error_string(AudioDeviceIOError).c_str());
 	}
@@ -1496,7 +1496,7 @@ PortAudioBackend::main_process_thread ()
 
 			/* call engine process callback */
 			if (engine.process_callback (_samples_per_period)) {
-				_pcmio->pcm_stop ();
+				_pcmio->close_stream ();
 				_active = false;
 				return 0;
 			}
@@ -1559,7 +1559,7 @@ PortAudioBackend::main_process_thread ()
 			// TODO clear midi or stop midi recv when entering fwheelin'
 
 			if (engine.process_callback (_samples_per_period)) {
-				_pcmio->pcm_stop ();
+				_pcmio->close_stream();
 				_active = false;
 				return 0;
 			}
@@ -1604,7 +1604,7 @@ PortAudioBackend::main_process_thread ()
 		}
 
 	}
-	_pcmio->pcm_stop ();
+	_pcmio->close_stream();
 	_active = false;
 	if (_run) {
 		engine.halted_callback(get_error_string(AudioDeviceIOError).c_str());
