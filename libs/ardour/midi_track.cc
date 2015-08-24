@@ -527,7 +527,9 @@ MidiTrack::non_realtime_locate (framepos_t pos)
 		if ((tcontrol = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) &&
 		    (rcontrol = region->control(tcontrol->parameter()))) {
 			const Evoral::Beats pos_beats = bfc.from(pos - origin);
-			tcontrol->set_value(rcontrol->list()->eval(pos_beats.to_double()));
+			if (rcontrol->list()->size() > 0) {
+				tcontrol->set_value(rcontrol->list()->eval(pos_beats.to_double()));
+			}
 		}
 	}
 }
