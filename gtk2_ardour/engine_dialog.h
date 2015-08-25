@@ -107,7 +107,6 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     Gtk::Button* cancel_button;
     Gtk::Button* ok_button;
-    Gtk::Button* apply_button;
 
     /* MIDI Tab */
 

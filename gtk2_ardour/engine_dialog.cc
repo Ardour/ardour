@@ -275,7 +275,6 @@ EngineControl::EngineControl ()
 	start_stop_button.set_can_focus(true);
 
 	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
-	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
 	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	/* Pick up any existing audio setup configuration, if appropriate */
@@ -408,9 +407,6 @@ EngineControl::on_response (int response_id)
 	ArdourDialog::on_response (response_id);
 
 	switch (response_id) {
-		case RESPONSE_APPLY:
-			push_state_to_backend (true);
-			break;
 		case RESPONSE_OK:
 #ifdef PLATFORM_WINDOWS
 			// For some reason we don't understand, 'hide()'
@@ -738,7 +734,6 @@ EngineControl::update_sensitivity ()
 	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	if (!backend) {
 		ok_button->set_sensitive (false);
-		apply_button->set_sensitive (false);
 		start_stop_button.set_sensitive (false);
 		return;
 	}
@@ -833,10 +828,8 @@ EngineControl::update_sensitivity ()
 
 	if (valid || !_have_control) {
 		ok_button->set_sensitive (true);
-		apply_button->set_sensitive (true);
 	} else {
 		ok_button->set_sensitive (false);
-		apply_button->set_sensitive (false);
 	}
 }
 
@@ -2502,7 +2495,6 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 	} else {
 		cancel_button->set_sensitive (false);
 		ok_button->set_sensitive (false);
-		apply_button->set_sensitive (false);
 	}
 
 	if (page_num == midi_tab) {
