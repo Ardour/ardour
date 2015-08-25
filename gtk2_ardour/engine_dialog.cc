@@ -1669,6 +1669,7 @@ EngineControl::maybe_display_saved_state ()
 	State state = get_saved_state_for_currently_displayed_backend_and_device ();
 
 	if (state) {
+		DEBUG_ECONTROL ("Restoring saved state");
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 
 		if (!_desired_sample_rate) {
@@ -1686,6 +1687,8 @@ EngineControl::maybe_display_saved_state ()
 			midi_option_combo.set_active_text (state->midi_option);
 			_midi_devices = state->midi_devices;
 		}
+	} else {
+		DEBUG_ECONTROL ("Unable to find saved state for backend and devices");
 	}
 }
 
