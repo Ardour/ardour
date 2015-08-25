@@ -86,7 +86,7 @@ EngineControl::EngineControl ()
 	, ports_spinner (ports_adjustment)
 	, control_app_button (_("Device Control Panel"))
 	, midi_devices_button (_("Midi Device Setup"))
-	, stop_engine_button (_("Stop (Reconfigure)"))
+	, start_stop_button (_("Stop"))
 	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
@@ -269,10 +269,10 @@ EngineControl::EngineControl ()
 	control_app_button.set_can_focus(true);
 	manage_control_app_sensitivity ();
 
-	stop_engine_button.signal_clicked.connect (mem_fun (*this, &EngineControl::stop_engine_button_clicked));
-	stop_engine_button.set_sensitive (false);
-	stop_engine_button.set_name ("generic button");
-	stop_engine_button.set_can_focus(true);
+	start_stop_button.signal_clicked.connect (mem_fun (*this, &EngineControl::start_stop_button_clicked));
+	start_stop_button.set_sensitive (false);
+	start_stop_button.set_name ("generic button");
+	start_stop_button.set_can_focus(true);
 
 	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
 	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_APPLY);
@@ -469,7 +469,7 @@ EngineControl::build_notebook ()
 	basic_packer.attach (engine_status, 2, 3, 0, 1, xopt, (AttachOptions) 0);
 	engine_status.show();
 
-	basic_packer.attach (stop_engine_button, 3, 4, 0, 1, xopt, xopt);
+	basic_packer.attach (start_stop_button, 3, 4, 0, 1, xopt, xopt);
 
 	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
 	lm_button_audio.set_name ("generic button");
@@ -739,7 +739,7 @@ EngineControl::update_sensitivity ()
 	if (!backend) {
 		ok_button->set_sensitive (false);
 		apply_button->set_sensitive (false);
-		stop_engine_button.set_sensitive (false);
+		start_stop_button.set_sensitive (false);
 		return;
 	}
 
@@ -802,13 +802,24 @@ EngineControl::update_sensitivity ()
 		valid = false;
 	}
 
+	if (_have_control) {
+		start_stop_button.set_sensitive(true);
+		start_stop_button.show();
+		if (ARDOUR::AudioEngine::instance()->running()) {
+			start_stop_button.set_text("Stop");
+		} else {
+			start_stop_button.set_text("Start");
+		}
+	} else {
+		start_stop_button.set_sensitive(false);
+		start_stop_button.hide();
+	}
+
 	if (ARDOUR::AudioEngine::instance()->running() && _have_control) {
 		input_device_combo.set_sensitive (false);
 		output_device_combo.set_sensitive (false);
 		device_combo.set_sensitive (false);
 		driver_combo.set_sensitive (false);
-		stop_engine_button.set_sensitive (true);
-		stop_engine_button.show ();
 	} else {
 		input_device_combo.set_sensitive (true);
 		output_device_combo.set_sensitive (true);
@@ -818,8 +829,6 @@ EngineControl::update_sensitivity ()
 		} else {
 			driver_combo.set_sensitive (false);
 		}
-		stop_engine_button.set_sensitive (false);
-		stop_engine_button.hide ();
 	}
 
 	if (valid || !_have_control) {
@@ -2443,9 +2452,19 @@ EngineControl::control_app_button_clicked ()
 }
 
 void
-EngineControl::stop_engine_button_clicked ()
+EngineControl::start_stop_button_clicked ()
 {
-	ARDOUR::AudioEngine::instance()->stop ();
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+
+	if (!backend) {
+		return;
+	}
+
+	if (ARDOUR::AudioEngine::instance()->running()) {
+		ARDOUR::AudioEngine::instance()->stop ();
+	} else {
+		push_state_to_backend (true);
+	}
 }
 
 void
@@ -2782,7 +2801,12 @@ EngineControl::engine_stopped ()
 	connect_disconnect_button.set_label (string_compose (_("Connect to %1"), backend->name()));
 	connect_disconnect_button.show();
 
-	engine_status.set_markup(X_(""));
+	if (_have_control) {
+		engine_status.set_markup(string_compose ("<span foreground=\"red\">%1</span>", _("Stopped")));
+	} else {
+		engine_status.set_markup(X_(""));
+	}
+
 	update_sensitivity();
 }
 

@@ -84,7 +84,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     Gtk::Label      have_control_text;
     ArdourButton    control_app_button;
     ArdourButton    midi_devices_button;
-    ArdourButton    stop_engine_button;
+    ArdourButton    start_stop_button;
 
     Gtk::Button     connect_disconnect_button;
 
@@ -289,7 +289,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     void on_show ();
     void on_response (int);
     void control_app_button_clicked ();
-    void stop_engine_button_clicked ();
+    void start_stop_button_clicked ();
     void use_latency_button_clicked ();
     void manage_control_app_sensitivity ();
     int push_state_to_backend (bool start);
