@@ -145,6 +145,12 @@ PortAudioBackend::set_driver (const std::string& name)
 	return 0;
 }
 
+bool
+PortAudioBackend::update_devices ()
+{
+	return _pcmio->update_devices();
+}
+
 std::string
 PortAudioBackend::driver_name () const
 {

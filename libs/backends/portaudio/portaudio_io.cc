@@ -527,17 +527,18 @@ PortAudioIO::add_devices ()
 	}
 }
 
-void
+bool
 PortAudioIO::update_devices()
 {
 	DEBUG_AUDIO ("Update devices\n");
-	if (_stream != NULL) return;
+	if (_stream != NULL) return false;
 	pa_deinitialize();
-	if (!pa_initialize()) return;
+	if (!pa_initialize()) return false;
 
 	clear_device_lists ();
 	add_none_devices ();
 	add_devices ();
+	return true;
 }
 
 void

@@ -170,6 +170,9 @@ class PortAudioBackend : public AudioBackend {
 		std::vector<std::string> enumerate_drivers () const;
 		int set_driver (const std::string&);
 
+		bool can_request_update_devices () { return true; }
+		bool update_devices ();
+
 		bool use_separate_input_and_output_devices () const;
 		std::vector<DeviceStatus> enumerate_devices () const;
 		std::vector<DeviceStatus> enumerate_input_devices () const;
