@@ -205,6 +205,7 @@ MidiSource::midi_read (const Lock&                        lm,
 		Evoral::Sequence<Evoral::Beats>::const_iterator& i = _model_iter;
 		const bool linear_read = _last_read_end != 0 && start == _last_read_end;
 		if (!linear_read || !_model_iter_valid) {
+#if 0
 			// Cached iterator is invalid, search for the first event past start
 			i = _model->begin(converter.from(start), false, filtered,
 			                  linear_read ? &_model->active_notes() : NULL);
@@ -212,6 +213,43 @@ MidiSource::midi_read (const Lock&                        lm,
 			if (!linear_read) {
 				_model->active_notes().clear();
 			}
+#else
+			/* hot-fix http://tracker.ardour.org/view.php?id=6541
+			 * "parallel playback of linked midi regions -> no note-offs"
+			 *
+			 * A midi source can be used by multiple tracks simultaneously,
+			 * in which case midi_read() can called from different tracks for
+			 * overlapping time-ranges.
+			 *
+			 * However there is only a single iterator for a given midi-source.
+			 * this results in every midi_read() performing a seek.
+			 *
+			 * if seeking is performed with
+			 *    _model->begin(converter.from(start),...)
+			 * the model is used for seeking. That method seeks to the first
+			 * *note-on* event after 'start'.
+			 *
+			 * _model->begin(conveter.from(  ) ,..) eventually calls
+			 * Sequence<Time>::const_iterator() in libs/evoral/src/Sequence.cpp
+			 * which looks up the note-event via seq.note_lower_bound(t);
+			 * but the sequence 'seq' only contains note-on events(!).
+			 * note-off events are implicit in Sequence<Time>::operator++()
+			 * via _active_notes.pop(); and not part of seq.
+			 *
+			 * see also http://tracker.ardour.org/view.php?id=6287#c16671
+			 * and call 1-900-ardour-midi ($4.99/min)
+			 *
+			 * The linear search below assures that reading starts at the first
+			 * event for the given time, regardless of its event-type.
+			 */
+			for (i = _model->begin(); i != _model->end(); ++i) {
+				const framecnt_t time_frames = converter.to(i->time());
+				if (time_frames >= start) {
+					break;
+				}
+			}
+			_model_iter_valid = true;
+#endif
 		}
 
 		_last_read_end = start + cnt;
