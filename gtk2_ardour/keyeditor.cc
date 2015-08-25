@@ -58,6 +58,7 @@ KeyEditor::KeyEditor ()
 	last_keyval = 0;
 
 	model = TreeStore::create(columns);
+	model->set_sort_column(0, SORT_ASCENDING);
 
 	view.set_model (model);
 	view.append_column (_("Action"), columns.action);
@@ -93,10 +94,10 @@ KeyEditor::KeyEditor ()
 		unbind_button.show ();
 
 	}
-	
+
 	reset_button.add (reset_label);
 	reset_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Reset Bindings to Defaults")));
-				
+
 	reset_box.pack_start (reset_button, true, false);
 	reset_box.show ();
 	reset_button.show ();
@@ -222,6 +223,8 @@ KeyEditor::on_key_release_event (GdkEventKey* ev)
 
   out:
     last_keyval = 0;
+    view.get_column(0)->clicked();
+
 	return true;
 }
 
@@ -307,6 +310,7 @@ KeyEditor::populate ()
 			row[columns.binding] = (*k);
 		}
 	}
+	view.get_column(0)->clicked();
 }
 
 void
