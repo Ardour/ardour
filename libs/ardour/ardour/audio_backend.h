@@ -219,6 +219,20 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual std::vector<DeviceStatus> enumerate_output_devices () const
     { return std::vector<DeviceStatus>(); }
 
+	/**
+	 * @return true if backend supports requesting an update to the device list
+	 * and any cached properties associated with the devices.
+	 */
+	virtual bool can_request_update_devices () { return false; }
+
+	/**
+	 * Request an update to the list of devices returned in the enumerations.
+	 * The Backend must return true from can_request_update_devices to support
+	 * this interface.
+	 * @return true if the devices were updated
+	 */
+	virtual bool update_devices () { return false; }
+
     /** Returns a collection of float identifying sample rates that are
      * potentially usable with the hardware identified by @param device.
      * Any of these values may be supplied in other calls to this backend
