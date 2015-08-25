@@ -1062,6 +1062,46 @@ EngineControl::set_driver_popdown_strings ()
 	return true;
 }
 
+std::string
+EngineControl::get_default_device(const string& current_device_name,
+                                  const vector<string>& available_devices)
+{
+	// If the current device is available, use it as default
+	if (std::find (available_devices.begin (),
+	               available_devices.end (),
+	               current_device_name) != available_devices.end ()) {
+
+		return current_device_name;
+	}
+
+	using namespace ARDOUR;
+
+	string default_device_name =
+	    AudioBackend::get_standard_device_name(AudioBackend::DeviceDefault);
+
+	vector<string>::const_iterator i;
+
+	// If there is a "Default" device available, use it
+	for (i = available_devices.begin(); i != available_devices.end(); ++i) {
+		if (*i == default_device_name) {
+			return *i;
+		}
+	}
+
+	string none_device_name =
+	    AudioBackend::get_standard_device_name(AudioBackend::DeviceNone);
+
+	// Use the first device that isn't "None"
+	for (i = available_devices.begin(); i != available_devices.end(); ++i) {
+		if (*i != none_device_name) {
+			return *i;
+		}
+	}
+
+	// Use "None" if there are no other available
+	return available_devices.front();
+}
+
 // @return true if there are devices available
 bool
 EngineControl::set_device_popdown_strings ()
@@ -1089,23 +1129,15 @@ EngineControl::set_device_popdown_strings ()
 		return false;
 	}
 
-	string current_device = backend->device_name ();
-
-	// Make sure that backend->device_name () is a valid
-	// device, the backend may not return a valid device if it hasn't
-	// been set yet.
-	if (std::find (available_devices.begin (),
-	               available_devices.end (),
-	               current_device) == available_devices.end ()) {
-
-		current_device = available_devices.front ();
-	}
-
 	set_popdown_strings (device_combo, available_devices);
-	DEBUG_ECONTROL (
-	    string_compose ("set device_combo active text: %1", current_device));
 
-	device_combo.set_active_text (current_device);
+	std::string default_device =
+	    get_default_device(backend->device_name(), available_devices);
+
+	DEBUG_ECONTROL (
+	    string_compose ("set device_combo active text: %1", default_device));
+
+	device_combo.set_active_text(default_device);
 	return true;
 }
 
@@ -1127,23 +1159,14 @@ EngineControl::set_input_device_popdown_strings ()
 		return false;
 	}
 
-	string current_device = backend->input_device_name ();
-
-	// Make sure that backend->input_device_name () is a valid
-	// device, the backend may not return a valid device if it hasn't
-	// been set yet.
-	if (std::find (available_devices.begin (),
-	               available_devices.end (),
-	               current_device) == available_devices.end ()) {
-
-		current_device = available_devices.front ();
-	}
-
 	set_popdown_strings (input_device_combo, available_devices);
 
+	std::string default_device =
+	    get_default_device(backend->input_device_name(), available_devices);
+
 	DEBUG_ECONTROL (
-	    string_compose ("set input_device_combo active text: %1", current_device));
-	input_device_combo.set_active_text (current_device);
+	    string_compose ("set input_device_combo active text: %1", default_device));
+	input_device_combo.set_active_text(default_device);
 	return true;
 }
 
@@ -1165,23 +1188,14 @@ EngineControl::set_output_device_popdown_strings ()
 		return false;
 	}
 
-	string current_device = backend->output_device_name ();
-
-	// Make sure that backend->output_device_name () is a valid
-	// device, the backend may not return a valid device if it hasn't
-	// been set yet.
-	if (std::find (available_devices.begin (),
-	               available_devices.end (),
-	               current_device) == available_devices.end ()) {
-
-		current_device = available_devices.front ();
-	}
-
 	set_popdown_strings (output_device_combo, available_devices);
 
+	std::string default_device =
+	    get_default_device(backend->output_device_name(), available_devices);
+
 	DEBUG_ECONTROL (
-	    string_compose ("set output_device_combo active text: %1", current_device));
-	output_device_combo.set_active_text (current_device);
+	    string_compose ("set output_device_combo active text: %1", default_device));
+	output_device_combo.set_active_text(default_device);
 	return true;
 }
 

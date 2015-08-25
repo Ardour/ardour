@@ -158,6 +158,9 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
     std::string get_backend() const;
     std::string get_midi_option () const;
 
+	std::string get_default_device (const std::string&,
+	                                const std::vector<std::string>&);
+
     void device_changed ();
     void input_device_changed ();
     void output_device_changed ();
