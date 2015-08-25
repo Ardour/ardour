@@ -87,6 +87,7 @@ EngineControl::EngineControl ()
 	, control_app_button (_("Device Control Panel"))
 	, midi_devices_button (_("Midi Device Setup"))
 	, start_stop_button (_("Stop"))
+	, update_devices_button (_("Refresh Devices"))
 	, lm_measure_label (_("Measure"))
 	, lm_use_button (_("Use results"))
 	, lm_back_button (_("Back to settings ... (ignore results)"))
@@ -273,6 +274,11 @@ EngineControl::EngineControl ()
 	start_stop_button.set_sensitive (false);
 	start_stop_button.set_name ("generic button");
 	start_stop_button.set_can_focus(true);
+
+	update_devices_button.signal_clicked.connect (mem_fun (*this, &EngineControl::update_devices_button_clicked));
+	update_devices_button.set_sensitive (false);
+	update_devices_button.set_name ("generic button");
+	update_devices_button.set_can_focus(true);
 
 	cancel_button = add_button (Gtk::Stock::CLOSE, Gtk::RESPONSE_CANCEL);
 	ok_button = add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
@@ -466,6 +472,7 @@ EngineControl::build_notebook ()
 	engine_status.show();
 
 	basic_packer.attach (start_stop_button, 3, 4, 0, 1, xopt, xopt);
+	basic_packer.attach (update_devices_button, 3, 4, 1, 2, xopt, xopt);
 
 	lm_button_audio.signal_clicked.connect (sigc::mem_fun (*this, &EngineControl::calibrate_audio_latency));
 	lm_button_audio.set_name ("generic button");
@@ -802,10 +809,19 @@ EngineControl::update_sensitivity ()
 		start_stop_button.show();
 		if (ARDOUR::AudioEngine::instance()->running()) {
 			start_stop_button.set_text("Stop");
+			update_devices_button.set_sensitive(false);
 		} else {
+			if (backend->can_request_update_devices()) {
+				update_devices_button.show();
+			} else {
+				update_devices_button.hide();
+			}
 			start_stop_button.set_text("Start");
+			update_devices_button.set_sensitive(true);
 		}
 	} else {
+		update_devices_button.set_sensitive(false);
+		update_devices_button.hide();
 		start_stop_button.set_sensitive(false);
 		start_stop_button.hide();
 	}
@@ -2460,6 +2476,20 @@ EngineControl::start_stop_button_clicked ()
 		ARDOUR::AudioEngine::instance()->stop ();
 	} else {
 		push_state_to_backend (true);
+	}
+}
+
+void
+EngineControl::update_devices_button_clicked ()
+{
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+
+	if (!backend) {
+		return;
+	}
+
+	if (backend->update_devices()) {
+		device_list_changed ();
 	}
 }
 
