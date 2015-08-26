@@ -319,6 +319,10 @@ class PortAudioBackend : public AudioBackend {
 
 		void* main_process_thread ();
 
+	private: // Methods
+		bool start_blocking_process_thread ();
+		bool stop_blocking_process_thread ();
+
 	private:
 		std::string _instance_name;
 		PortAudioIO *_pcmio;

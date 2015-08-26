@@ -545,6 +545,16 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag = false;
 
+	if (!start_blocking_process_thread()) {
+		return -1;
+	}
+
+	return 0;
+}
+
+bool
+PortAudioBackend::start_blocking_process_thread ()
+{
 	if (_realtime_pthread_create (SCHED_FIFO, -20, 100000,
 				&_main_thread, pthread_process, this))
 	{
@@ -552,7 +562,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		{
 			DEBUG_AUDIO("Failed to create main audio thread\n");
 			_run = false;
-			return -1;
+			return false;
 		} else {
 			PBD::warning << get_error_string(AquireRealtimePermissionError) << endmsg;
 		}
@@ -567,26 +577,36 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		_run = false;
 		unregister_ports();
 		_active = false;
-		return -1;
+		return false;
+	}
+	return true;
+}
+
+bool
+PortAudioBackend::stop_blocking_process_thread ()
+{
+	void *status;
+
+	if (pthread_join (_main_thread, &status)) {
+		DEBUG_AUDIO("Failed to stop main audio thread\n");
+		return false;
 	}
 
-	return 0;
+	return true;
 }
 
 int
 PortAudioBackend::stop ()
 {
-	void *status;
 	if (!_run) {
 		return 0;
 	}
 
 	_run = false;
-	if (pthread_join (_main_thread, &status)) {
-		DEBUG_AUDIO("Failed to stop main audio thread\n");
+
+	if (!stop_blocking_process_thread ()) {
 		return -1;
 	}
-
 
 	unregister_ports();
 
