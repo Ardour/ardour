@@ -1601,35 +1601,7 @@ PortAudioBackend::main_blocking_process_thread ()
 			Glib::usleep (100); // don't hog cpu
 		}
 
-		bool connections_changed = false;
-		bool ports_changed = false;
-		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-			if (_port_change_flag) {
-				ports_changed = true;
-				_port_change_flag = false;
-			}
-			if (!_port_connection_queue.empty ()) {
-				connections_changed = true;
-			}
-			while (!_port_connection_queue.empty ()) {
-				PortConnectData *c = _port_connection_queue.back ();
-				manager.connect_callback (c->a, c->b, c->c);
-				_port_connection_queue.pop_back ();
-				delete c;
-			}
-			pthread_mutex_unlock (&_port_callback_mutex);
-		}
-		if (ports_changed) {
-			manager.registration_callback();
-		}
-		if (connections_changed) {
-			manager.graph_order_callback();
-		}
-		if (connections_changed || ports_changed) {
-			engine.latency_callback(false);
-			engine.latency_callback(true);
-		}
-
+		process_port_connection_changes();
 	}
 	_pcmio->close_stream();
 	_active = false;
@@ -1644,6 +1616,38 @@ PortAudioBackend::main_blocking_process_thread ()
 	return 0;
 }
 
+void
+PortAudioBackend::process_port_connection_changes ()
+{
+	bool connections_changed = false;
+	bool ports_changed = false;
+	if (!pthread_mutex_trylock (&_port_callback_mutex)) {
+		if (_port_change_flag) {
+			ports_changed = true;
+			_port_change_flag = false;
+		}
+		if (!_port_connection_queue.empty ()) {
+			connections_changed = true;
+		}
+		while (!_port_connection_queue.empty ()) {
+			PortConnectData *c = _port_connection_queue.back ();
+			manager.connect_callback (c->a, c->b, c->c);
+			_port_connection_queue.pop_back ();
+			delete c;
+		}
+		pthread_mutex_unlock (&_port_callback_mutex);
+	}
+	if (ports_changed) {
+		manager.registration_callback();
+	}
+	if (connections_changed) {
+		manager.graph_order_callback();
+	}
+	if (connections_changed || ports_changed) {
+		engine.latency_callback(false);
+		engine.latency_callback(true);
+	}
+}
 
 /******************************************************************************/
 
