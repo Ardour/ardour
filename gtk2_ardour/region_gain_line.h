@@ -41,7 +41,7 @@ class AudioRegionGainLine : public AutomationLine
         void end_drag (bool with_push, uint32_t final_index);
 
 	void remove_point (ControlPoint&);
-
+	AudioRegionView& region_view () { return rv; }
 
 private:
 	PBD::ScopedConnection _region_changed_connection;

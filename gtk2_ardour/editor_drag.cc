@@ -4057,8 +4057,9 @@ MarkerDrag::update_item (Location*)
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i),
-	  _cumulative_x_drag (0),
-	  _cumulative_y_drag (0)
+	  _cumulative_x_drag (0)
+	, _cumulative_y_drag (0)
+	, _pushing (false)
 {
 	if (_zero_gain_fraction < 0.0) {
 		_zero_gain_fraction = gain_to_slider_position_with_max (dB_to_coefficient (0.0), Config->get_max_gain());
@@ -4278,8 +4279,15 @@ LineDrag::finished (GdkEvent* event, bool movement_occured)
 		AutomationTimeAxisView* atv;
 
 		if ((atv = dynamic_cast<AutomationTimeAxisView*>(_editor->clicked_axisview)) != 0) {
-			framepos_t where = _editor->window_event_sample (event, 0, 0);
+			framepos_t where = _editor->canvas_event_sample (event, 0, 0);
+
 			atv->add_automation_event (event, where, event->button.y, false);
+		} else if (dynamic_cast<AudioTimeAxisView*>(_editor->clicked_axisview) != 0) {
+			AudioRegionView* arv;
+
+			if ((arv = dynamic_cast<AudioRegionView*>(_editor->clicked_regionview)) != 0) {
+				arv->add_gain_point_event (arv->get_canvas_group (), event, false);
+			}
 		}
 	}
 }

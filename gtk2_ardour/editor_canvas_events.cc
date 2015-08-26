@@ -688,17 +688,18 @@ bool
 Editor::canvas_line_event (GdkEvent *event, ArdourCanvas::Item* item, AutomationLine* al)
 {
 	ItemType type;
-
-	if (dynamic_cast<AudioRegionGainLine*> (al) != 0) {
+	AudioRegionGainLine* gl;
+	if ((gl = dynamic_cast<AudioRegionGainLine*> (al)) != 0) {
 		type = GainLineItem;
+		clicked_regionview = &gl->region_view ();
 	} else {
 		type = AutomationLineItem;
+		clicked_regionview = 0;
 	}
 
 	clicked_control_point = 0;
 	clicked_axisview = &al->trackview;
 	clicked_routeview = dynamic_cast<RouteTimeAxisView*>(clicked_axisview);
-	clicked_regionview = 0;
 
 	return typed_event (item, event, type);
 }
