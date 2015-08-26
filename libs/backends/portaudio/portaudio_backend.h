@@ -317,7 +317,7 @@ class PortAudioBackend : public AudioBackend {
 
 		void* get_buffer (PortHandle, pframes_t);
 
-		void* main_process_thread ();
+		void* main_blocking_process_thread ();
 
 	private: // Methods
 		bool start_blocking_process_thread ();
@@ -367,7 +367,9 @@ class PortAudioBackend : public AudioBackend {
 		/* processing */
 		float  _dsp_load;
 		framecnt_t _processed_samples;
-		pthread_t _main_thread;
+
+		/* blocking thread */
+		pthread_t _main_blocking_thread;
 
 		/* process threads */
 		static void* portaudio_process_thread (void *);

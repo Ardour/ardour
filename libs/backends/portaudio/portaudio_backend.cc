@@ -428,7 +428,7 @@ PortAudioBackend::midi_option () const
 static void * pthread_process (void *arg)
 {
 	PortAudioBackend *d = static_cast<PortAudioBackend *>(arg);
-	d->main_process_thread ();
+	d->main_blocking_process_thread ();
 	pthread_exit (0);
 	return 0;
 }
@@ -556,9 +556,9 @@ bool
 PortAudioBackend::start_blocking_process_thread ()
 {
 	if (_realtime_pthread_create (SCHED_FIFO, -20, 100000,
-				&_main_thread, pthread_process, this))
+				&_main_blocking_thread, pthread_process, this))
 	{
-		if (pthread_create (&_main_thread, NULL, pthread_process, this))
+		if (pthread_create (&_main_blocking_thread, NULL, pthread_process, this))
 		{
 			DEBUG_AUDIO("Failed to create main audio thread\n");
 			_run = false;
@@ -587,7 +587,7 @@ PortAudioBackend::stop_blocking_process_thread ()
 {
 	void *status;
 
-	if (pthread_join (_main_thread, &status)) {
+	if (pthread_join (_main_blocking_thread, &status)) {
 		DEBUG_AUDIO("Failed to stop main audio thread\n");
 		return false;
 	}
@@ -759,7 +759,7 @@ PortAudioBackend::join_process_threads ()
 bool
 PortAudioBackend::in_process_thread ()
 {
-	if (pthread_equal (_main_thread, pthread_self()) != 0) {
+	if (pthread_equal (_main_blocking_thread, pthread_self()) != 0) {
 		return true;
 	}
 
@@ -1399,7 +1399,7 @@ PortAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 
 
 void *
-PortAudioBackend::main_process_thread ()
+PortAudioBackend::main_blocking_process_thread ()
 {
 	AudioEngine::thread_init_callback (this);
 	_active = true;
