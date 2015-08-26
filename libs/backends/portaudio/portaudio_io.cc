@@ -536,7 +536,12 @@ PortAudioIO::update_devices()
 	if (!pa_initialize()) return false;
 
 	clear_device_lists ();
-	add_none_devices ();
+
+	// ASIO doesn't support separate input/output devices so adding None
+	// doesn't make sense
+	if (get_current_host_api_type() != paASIO) {
+		add_none_devices ();
+	}
 	add_devices ();
 	return true;
 }
