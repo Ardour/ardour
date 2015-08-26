@@ -145,6 +145,10 @@ WinMMEMidiIO::start ()
 void
 WinMMEMidiIO::stop ()
 {
+	if (!m_run) {
+		DEBUG_MIDI ("MIDI driver already stopped\n");
+		return;
+	}
 	DEBUG_MIDI ("Stopping MIDI driver\n");
 	m_run = false;
 	stop_devices ();

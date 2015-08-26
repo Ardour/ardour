@@ -602,6 +602,8 @@ PortAudioBackend::stop ()
 		return 0;
 	}
 
+	_midiio->stop();
+
 	_run = false;
 
 	if (!stop_blocking_process_thread ()) {
