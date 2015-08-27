@@ -433,16 +433,27 @@ static void * pthread_process (void *arg)
 	return 0;
 }
 
+bool
+PortAudioBackend::engine_halted ()
+{
+	return !_active && _run;
+}
+
+bool
+PortAudioBackend::running ()
+{
+	return _active || _run;
+}
+
 int
 PortAudioBackend::_start (bool for_latency_measurement)
 {
-	if (!_active && _run) {
-		// recover from 'halted', reap threads
+	if (engine_halted()) {
 		stop();
 	}
 
-	if (_active || _run) {
-		DEBUG_AUDIO("Already active.\n");
+	if (running()) {
+		DEBUG_AUDIO("Already started.\n");
 		return -1;
 	}
 

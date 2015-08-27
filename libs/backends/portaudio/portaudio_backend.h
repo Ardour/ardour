@@ -330,6 +330,9 @@ class PortAudioBackend : public AudioBackend {
 		void process_incoming_midi ();
 		void process_outgoing_midi ();
 
+		bool engine_halted ();
+		bool running ();
+
 	private:
 		std::string _instance_name;
 		PortAudioIO *_pcmio;
