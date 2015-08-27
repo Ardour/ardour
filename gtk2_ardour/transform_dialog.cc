@@ -114,6 +114,7 @@ TransformDialog::TransformDialog()
 
 	show_all();
 	_seed_chooser->value_spinner.hide();
+	_seed_chooser->source_changed();
 }
 
 TransformDialog::ValueChooser::ValueChooser(const Model& model)
@@ -308,6 +309,7 @@ TransformDialog::OperationChooser::OperationChooser(const Model& model)
 	show_all();
 	value_chooser.property_combo.hide();
 	value_chooser.value_spinner.set_value(1);
+	value_chooser.source_changed();
 }
 
 void
