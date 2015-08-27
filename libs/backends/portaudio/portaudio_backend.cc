@@ -1574,29 +1574,10 @@ PortAudioBackend::main_blocking_process_thread ()
 			}
 
 		} else {
-			// Freewheelin'
 
-			// zero audio input buffers
-			for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
-				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
-			}
-
-			// TODO clear midi or stop midi recv when entering fwheelin'
-
-			if (engine.process_callback (_samples_per_period)) {
-				_pcmio->close_stream();
-				_active = false;
+			if (!blocking_process_freewheel()) {
 				return 0;
 			}
-
-			// drop all outgoing MIDI messages
-			for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-					void *bptr = (*it)->get_buffer(0);
-					midi_clear(bptr);
-			}
-
-			_dsp_load = 1.0;
-			Glib::usleep (100); // don't hog cpu
 		}
 
 		process_port_connection_changes();
@@ -1612,6 +1593,39 @@ PortAudioBackend::main_blocking_process_thread ()
 #endif
 
 	return 0;
+}
+
+bool
+PortAudioBackend::blocking_process_freewheel ()
+{
+	// zero audio input buffers
+	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin();
+	     it != _system_inputs.end();
+	     ++it) {
+		memset((*it)->get_buffer(_samples_per_period),
+		       0,
+		       _samples_per_period * sizeof(Sample));
+	}
+
+	// TODO clear midi or stop midi recv when entering fwheelin'
+
+	if (engine.process_callback(_samples_per_period)) {
+		_pcmio->close_stream();
+		_active = false;
+		return false;
+	}
+
+	// drop all outgoing MIDI messages
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin();
+	     it != _system_midi_out.end();
+	     ++it) {
+		void* bptr = (*it)->get_buffer(0);
+		midi_clear(bptr);
+	}
+
+	_dsp_load = 1.0;
+	Glib::usleep(100); // don't hog cpu
+	return true;
 }
 
 void

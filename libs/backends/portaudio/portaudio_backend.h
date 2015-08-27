@@ -322,8 +322,10 @@ class PortAudioBackend : public AudioBackend {
 	private: // Methods
 		bool start_blocking_process_thread ();
 		bool stop_blocking_process_thread ();
+		bool blocking_process_freewheel ();
 
 		void process_port_connection_changes ();
+
 
 	private:
 		std::string _instance_name;
