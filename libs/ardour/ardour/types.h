@@ -713,13 +713,30 @@ LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineU
 static inline ARDOUR::framepos_t
 session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
 {
-	return (ARDOUR::framepos_t) ((long double) session_frame * (long double) speed);
+	long double result = (long double) session_frame * (long double) speed;
+
+	if (result >= (long double) ARDOUR::max_framepos) {
+		return ARDOUR::max_framepos;
+	} else if (result <= (long double) (ARDOUR::max_framepos) * (ARDOUR::framepos_t)(-1)) {
+		return (ARDOUR::max_framepos * (ARDOUR::framepos_t)(-1));
+	} else {
+		return result;
+	}
 }
 
 static inline ARDOUR::framepos_t
 track_frame_to_session_frame (ARDOUR::framepos_t track_frame, double speed)
 {
-	return (ARDOUR::framepos_t) ((long double) track_frame / (long double) speed);
+	/* NB - do we need a check for speed == 0 ??? */ 
+	long double result = (long double) track_frame / (long double) speed;
+
+	if (result >= (long double) ARDOUR::max_framepos) {
+		return ARDOUR::max_framepos;
+	} else if (result <= (long double) (ARDOUR::max_framepos) * (ARDOUR::framepos_t)(-1)) {
+		return (ARDOUR::max_framepos * (ARDOUR::framepos_t)(-1));
+	} else {
+		return result;
+	}
 }
 
 /* for now, break the rules and use "using" to make this "global" */
