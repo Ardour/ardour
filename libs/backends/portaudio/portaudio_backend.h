@@ -327,6 +327,8 @@ class PortAudioBackend : public AudioBackend {
 		bool blocking_process_main ();
 
 		void process_port_connection_changes ();
+		void process_incoming_midi ();
+		void process_outgoing_midi ();
 
 	private:
 		std::string _instance_name;

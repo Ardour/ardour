@@ -1493,34 +1493,7 @@ PortAudioBackend::blocking_process_main ()
 		    i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
 	}
 
-	/* de-queue incoming midi*/
-	i = 0;
-	for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin();
-	     it != _system_midi_in.end();
-	     ++it, ++i) {
-		PortMidiBuffer* mbuf = static_cast<PortMidiBuffer*>((*it)->get_buffer(0));
-		mbuf->clear();
-		uint64_t timestamp;
-		pframes_t sample_offset;
-		uint8_t data[256];
-		size_t size = sizeof(data);
-		while (_midiio->dequeue_input_event(i,
-		                                    m_cycle_timer.get_start(),
-		                                    m_cycle_timer.get_next_start(),
-		                                    timestamp,
-		                                    data,
-		                                    size)) {
-			sample_offset = m_cycle_timer.samples_since_cycle_start(timestamp);
-			midi_event_put(mbuf, sample_offset, data, size);
-			DEBUG_MIDI(string_compose("Dequeuing incoming MIDI data for device: %1 "
-			                          "sample_offset: %2 timestamp: %3, size: %4\n",
-			                          _midiio->get_inputs()[i]->name(),
-			                          sample_offset,
-			                          timestamp,
-			                          size));
-			size = sizeof(data);
-		}
-	}
+	process_incoming_midi ();
 
 	/* clear output buffers */
 	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin();
@@ -1562,33 +1535,8 @@ PortAudioBackend::blocking_process_main ()
 		_active = false;
 		return false;
 	}
-	/* mixdown midi */
-	for (std::vector<PamPort*>::iterator it = _system_midi_out.begin();
-	     it != _system_midi_out.end();
-	     ++it) {
-		static_cast<PortMidiPort*>(*it)->next_period();
-	}
-	/* queue outgoing midi */
-	i = 0;
-	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin();
-	     it != _system_midi_out.end();
-	     ++it, ++i) {
-		const PortMidiBuffer* src =
-		    static_cast<const PortMidiPort*>(*it)->const_buffer();
 
-		for (PortMidiBuffer::const_iterator mit = src->begin(); mit != src->end();
-		     ++mit) {
-			uint64_t timestamp =
-			    m_cycle_timer.timestamp_from_sample_offset((*mit)->timestamp());
-			DEBUG_MIDI(string_compose("Queuing outgoing MIDI data for device: "
-			                          "%1 sample_offset: %2 timestamp: %3, size: %4\n",
-			                          _midiio->get_outputs()[i]->name(),
-			                          (*mit)->timestamp(),
-			                          timestamp,
-			                          (*mit)->size()));
-			_midiio->enqueue_output_event(i, timestamp, (*mit)->data(), (*mit)->size());
-		}
-	}
+	process_outgoing_midi ();
 
 	/* write back audio */
 	i = 0;
@@ -1651,6 +1599,70 @@ PortAudioBackend::blocking_process_freewheel()
 	_dsp_load = 1.0;
 	Glib::usleep(100); // don't hog cpu
 	return true;
+}
+
+void
+PortAudioBackend::process_incoming_midi ()
+{
+	uint32_t i = 0;
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin();
+	     it != _system_midi_in.end();
+	     ++it, ++i) {
+		PortMidiBuffer* mbuf = static_cast<PortMidiBuffer*>((*it)->get_buffer(0));
+		mbuf->clear();
+		uint64_t timestamp;
+		pframes_t sample_offset;
+		uint8_t data[256];
+		size_t size = sizeof(data);
+		while (_midiio->dequeue_input_event(i,
+		                                    m_cycle_timer.get_start(),
+		                                    m_cycle_timer.get_next_start(),
+		                                    timestamp,
+		                                    data,
+		                                    size)) {
+			sample_offset = m_cycle_timer.samples_since_cycle_start(timestamp);
+			midi_event_put(mbuf, sample_offset, data, size);
+			DEBUG_MIDI(string_compose("Dequeuing incoming MIDI data for device: %1 "
+			                          "sample_offset: %2 timestamp: %3, size: %4\n",
+			                          _midiio->get_inputs()[i]->name(),
+			                          sample_offset,
+			                          timestamp,
+			                          size));
+			size = sizeof(data);
+		}
+	}
+}
+
+void
+PortAudioBackend::process_outgoing_midi ()
+{
+	/* mixdown midi */
+	for (std::vector<PamPort*>::iterator it = _system_midi_out.begin();
+	     it != _system_midi_out.end();
+	     ++it) {
+		static_cast<PortMidiPort*>(*it)->next_period();
+	}
+	/* queue outgoing midi */
+	uint32_t i = 0;
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin();
+	     it != _system_midi_out.end();
+	     ++it, ++i) {
+		const PortMidiBuffer* src =
+		    static_cast<const PortMidiPort*>(*it)->const_buffer();
+
+		for (PortMidiBuffer::const_iterator mit = src->begin(); mit != src->end();
+		     ++mit) {
+			uint64_t timestamp =
+			    m_cycle_timer.timestamp_from_sample_offset((*mit)->timestamp());
+			DEBUG_MIDI(string_compose("Queuing outgoing MIDI data for device: "
+			                          "%1 sample_offset: %2 timestamp: %3, size: %4\n",
+			                          _midiio->get_outputs()[i]->name(),
+			                          (*mit)->timestamp(),
+			                          timestamp,
+			                          (*mit)->size()));
+			_midiio->enqueue_output_event(i, timestamp, (*mit)->data(), (*mit)->size());
+		}
+	}
 }
 
 void
