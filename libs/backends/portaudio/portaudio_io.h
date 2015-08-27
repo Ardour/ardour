@@ -70,9 +70,17 @@ public:
 	void launch_control_app (int device_id);
 
 	PaErrorCode open_blocking_stream(int device_input,
-	                               int device_output,
-	                               double sample_rate,
-	                               uint32_t samples_per_period);
+	                                 int device_output,
+	                                 double sample_rate,
+	                                 uint32_t samples_per_period);
+
+	PaErrorCode open_callback_stream(int device_input,
+	                                 int device_output,
+	                                 double sample_rate,
+	                                 uint32_t samples_per_period,
+	                                 PaStreamCallback* callback,
+	                                 void* data);
+
 	PaErrorCode start_stream(void);
 
 	PaErrorCode close_stream(void);

@@ -24,6 +24,10 @@
 #include <sys/time.h>
 #endif
 
+#ifdef COMPILER_MINGW
+#include <sys/time.h>
+#endif
+
 #include <glibmm.h>
 
 #include "portaudio_backend.h"
@@ -63,6 +67,9 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _run (false)
 	, _active (false)
 	, _freewheel (false)
+	, _freewheeling (false)
+	, _freewheel_ack (false)
+	, _reinit_thread_callback (false)
 	, _measure_latency (false)
 	, m_cycle_count(0)
 	, m_total_deviation_us(0)
@@ -82,6 +89,8 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
+	pthread_mutex_init (&m_freewheel_mutex, 0);
+	pthread_cond_init (&m_freewheel_signal, 0);
 
 	_pcmio = new PortAudioIO ();
 	_midiio = new WinMMEMidiIO ();
@@ -93,6 +102,8 @@ PortAudioBackend::~PortAudioBackend ()
 	delete _midiio; _midiio = 0;
 
 	pthread_mutex_destroy (&_port_callback_mutex);
+	pthread_mutex_destroy (&m_freewheel_mutex);
+	pthread_cond_destroy (&m_freewheel_signal);
 }
 
 /* AUDIOBACKEND API */
@@ -471,10 +482,21 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	PaErrorCode err = paNoError;
 
+#ifdef USE_BLOCKING_API
 	err = _pcmio->open_blocking_stream(name_to_id(_input_audio_device),
 	                                   name_to_id(_output_audio_device),
 	                                   _samplerate,
 	                                   _samples_per_period);
+
+#else
+	err = _pcmio->open_callback_stream(name_to_id(_input_audio_device),
+	                                   name_to_id(_output_audio_device),
+	                                   _samplerate,
+	                                   _samples_per_period,
+	                                   portaudio_callback,
+	                                   this);
+
+#endif
 
 	// reintepret Portaudio error messages
 	switch (err) {
@@ -557,11 +579,90 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag = false;
 
+#ifdef USE_BLOCKING_API
 	if (!start_blocking_process_thread()) {
 		return ProcessThreadStartError;
 	}
+#else
+	if (_pcmio->start_stream() != paNoError) {
+		DEBUG_AUDIO("Unable to start stream\n");
+		return AudioDeviceOpenError;
+	}
+
+	if (!start_freewheel_process_thread()) {
+		DEBUG_AUDIO("Unable to start freewheel thread\n");
+		stop();
+		return ProcessThreadStartError;
+	}
+#endif
 
 	return NoError;
+}
+
+int
+PortAudioBackend::portaudio_callback(const void* input,
+                                     void* output,
+                                     unsigned long frame_count,
+                                     const PaStreamCallbackTimeInfo* time_info,
+                                     PaStreamCallbackFlags status_flags,
+                                     void* user_data)
+{
+	PortAudioBackend* pa_backend = static_cast<PortAudioBackend*>(user_data);
+
+	if (!pa_backend->process_callback((const float*)input,
+	                                  (float*)output,
+	                                  frame_count,
+	                                  time_info,
+	                                  status_flags)) {
+		return paAbort;
+	}
+	return paContinue;
+}
+
+bool
+PortAudioBackend::process_callback(const float* input,
+                                   float* output,
+                                   uint32_t frame_count,
+                                   const PaStreamCallbackTimeInfo* timeInfo,
+                                   PaStreamCallbackFlags statusFlags)
+{
+	_active = true;
+
+	m_dsp_calc.set_start_timestamp_us (PBD::get_microseconds());
+
+	if (_run && _freewheel && !_freewheel_ack) {
+		// acknowledge freewheeling; hand-over thread ID
+		pthread_mutex_lock (&m_freewheel_mutex);
+		if (_freewheel) {
+			DEBUG_AUDIO("Setting _freewheel_ack = true;\n");
+			_freewheel_ack = true;
+		}
+		DEBUG_AUDIO("Signalling freewheel thread\n");
+		pthread_cond_signal (&m_freewheel_signal);
+		pthread_mutex_unlock (&m_freewheel_mutex);
+	}
+
+	if (statusFlags & paInputUnderflow ||
+		statusFlags & paInputOverflow ||
+		statusFlags & paOutputUnderflow ||
+		statusFlags & paOutputOverflow ) {
+		DEBUG_AUDIO("PortAudio: Xrun\n");
+		engine.Xrun();
+		return true;
+	}
+
+	if (!_run || _freewheel) {
+		memset(output, 0, frame_count * sizeof(float) * _system_outputs.size());
+		return true;
+	}
+
+	if (_reinit_thread_callback || m_main_thread != pthread_self()) {
+		_reinit_thread_callback = false;
+		m_main_thread = pthread_self();
+		AudioEngine::thread_init_callback (this);
+	}
+
+	return blocking_process_main (input, output);
 }
 
 bool
@@ -618,13 +719,134 @@ PortAudioBackend::stop ()
 
 	_run = false;
 
+#ifdef USE_BLOCKING_API
 	if (!stop_blocking_process_thread ()) {
 		return -1;
 	}
+#else
+	_pcmio->close_stream ();
+	_active = false;
+
+	if (!stop_freewheel_process_thread ()) {
+		return -1;
+	}
+
+#endif
 
 	unregister_ports();
 
 	return (_active == false) ? 0 : -1;
+}
+
+static void* freewheel_thread(void* arg)
+{
+	PortAudioBackend* d = static_cast<PortAudioBackend*>(arg);
+	d->freewheel_process_thread ();
+	pthread_exit (0);
+	return 0;
+}
+
+bool
+PortAudioBackend::start_freewheel_process_thread ()
+{
+	if (pthread_create(&m_pthread_freewheel, NULL, freewheel_thread, this)) {
+		DEBUG_AUDIO("Failed to create main audio thread\n");
+		return false;
+	}
+
+	int timeout = 5000;
+	while (!m_freewheel_thread_active && --timeout > 0) { Glib::usleep (1000); }
+
+	if (timeout == 0 || !m_freewheel_thread_active) {
+		DEBUG_AUDIO("Failed to start freewheel thread\n");
+		return false;
+	}
+	return true;
+}
+
+bool
+PortAudioBackend::stop_freewheel_process_thread ()
+{
+	void *status;
+
+	if (!m_freewheel_thread_active) {
+		return true;
+	}
+
+	DEBUG_AUDIO("Signaling freewheel thread to stop\n");
+
+	pthread_mutex_lock (&m_freewheel_mutex);
+	pthread_cond_signal (&m_freewheel_signal);
+	pthread_mutex_unlock (&m_freewheel_mutex);
+
+	if (pthread_join (m_pthread_freewheel, &status) != 0) {
+		DEBUG_AUDIO("Failed to stop freewheel thread\n");
+		return false;
+	}
+
+	return true;
+}
+
+void*
+PortAudioBackend::freewheel_process_thread()
+{
+	m_freewheel_thread_active = true;
+
+	bool first_run = false;
+
+	pthread_mutex_lock (&m_freewheel_mutex);
+
+	while(_run) {
+		// check if we should run,
+		if (_freewheeling != _freewheel) {
+			if (!_freewheeling) {
+				DEBUG_AUDIO("Leaving freewheel\n");
+				_freewheel = false; // first mark as disabled
+				_reinit_thread_callback = true; // hand over _main_thread
+				_freewheel_ack = false; // prepare next handshake
+				_midiio->set_enabled(true);
+			} else {
+				first_run = true;
+				_freewheel = true;
+			}
+		}
+
+		if (!_freewheel || !_freewheel_ack) {
+			// wait for a change, we use a timed wait to
+			// terminate early in case some error sets _run = 0
+			struct timeval tv;
+			struct timespec ts;
+			gettimeofday (&tv, NULL);
+			ts.tv_sec = tv.tv_sec + 3;
+			ts.tv_nsec = 0;
+			DEBUG_AUDIO("Waiting for freewheel change\n");
+			pthread_cond_timedwait (&m_freewheel_signal, &m_freewheel_mutex, &ts);
+			continue;
+		}
+
+		if (first_run) {
+			// tell the engine we're ready to GO.
+			engine.freewheel_callback (_freewheeling);
+			first_run = false;
+			m_main_thread = pthread_self();
+			AudioEngine::thread_init_callback (this);
+			_midiio->set_enabled(false);
+		}
+
+		if (!blocking_process_freewheel()) {
+			break;
+		}
+	}
+
+	pthread_mutex_unlock (&m_freewheel_mutex);
+
+	m_freewheel_thread_active = false;
+
+	if (_run) {
+		// engine.process_callback() returner error
+		engine.halted_callback("CoreAudio Freehweeling aborted.");
+	}
+	return 0;
 }
 
 int
@@ -634,6 +856,11 @@ PortAudioBackend::freewheel (bool onoff)
 		return 0;
 	}
 	_freewheeling = onoff;
+
+	if (0 == pthread_mutex_trylock (&m_freewheel_mutex)) {
+		pthread_cond_signal (&m_freewheel_signal);
+		pthread_mutex_unlock (&m_freewheel_mutex);
+	}
 	return 0;
 }
 
@@ -803,9 +1030,15 @@ PortAudioBackend::join_process_threads ()
 bool
 PortAudioBackend::in_process_thread ()
 {
+#ifdef USE_BLOCKING_API
 	if (pthread_equal (_main_blocking_thread, pthread_self()) != 0) {
 		return true;
 	}
+#else
+	if (pthread_equal (m_main_thread, pthread_self()) != 0) {
+		return true;
+	}
+#endif
 
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i)
 	{
