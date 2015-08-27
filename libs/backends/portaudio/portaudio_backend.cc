@@ -1405,12 +1405,6 @@ PortAudioBackend::main_blocking_process_thread ()
 	_active = true;
 	_processed_samples = 0;
 
-	uint64_t clock1, clock2;
-	int64_t min_elapsed_us = 1000000;
-	int64_t max_elapsed_us = 0;
-	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
-	// const int64_t nomial_time = m_cycle_timer.get_length_us();
-
 	manager.registration_callback();
 	manager.graph_order_callback();
 
@@ -1454,125 +1448,9 @@ PortAudioBackend::main_blocking_process_thread ()
 				break;
 			}
 
-			uint32_t i = 0;
-			clock1 = utils::get_microseconds ();
-
-			/* get audio */
-			i = 0;
-			for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++i) {
-				_pcmio->get_capture_channel (i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
-			}
-
-			/* de-queue incoming midi*/
-			i=0;
-			for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it, ++i) {
-				PortMidiBuffer* mbuf = static_cast<PortMidiBuffer*>((*it)->get_buffer(0));
-				mbuf->clear();
-				uint64_t timestamp;
-				pframes_t sample_offset;
-				uint8_t data[256];
-				size_t size = sizeof(data);
-				while (_midiio->dequeue_input_event (i,
-				                                     m_cycle_timer.get_start (),
-				                                     m_cycle_timer.get_next_start (),
-				                                     timestamp,
-				                                     data,
-				                                     size)) {
-					sample_offset = m_cycle_timer.samples_since_cycle_start (timestamp);
-					midi_event_put (mbuf, sample_offset, data, size);
-					DEBUG_MIDI (string_compose ("Dequeuing incoming MIDI data for device: %1 "
-					                            "sample_offset: %2 timestamp: %3, size: %4\n",
-					                            _midiio->get_inputs ()[i]->name (),
-					                            sample_offset,
-					                            timestamp,
-					                            size));
-					size = sizeof(data);
-				}
-			}
-
-			/* clear output buffers */
-			for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
-				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
-			}
-
-			m_last_cycle_start = m_cycle_timer.get_start ();
-			m_cycle_timer.reset_start(utils::get_microseconds());
-			m_cycle_count++;
-
-			uint64_t cycle_diff_us = (m_cycle_timer.get_start () - m_last_cycle_start);
-			int64_t deviation_us = (cycle_diff_us - m_cycle_timer.get_length_us());
-			m_total_deviation_us += ::llabs(deviation_us);
-			m_max_deviation_us =
-				std::max (m_max_deviation_us, (uint64_t)::llabs (deviation_us));
-
-			if ((m_cycle_count % 1000) == 0) {
-				uint64_t mean_deviation_us = m_total_deviation_us / m_cycle_count;
-				DEBUG_TIMING (
-				    string_compose ("Mean avg cycle deviation: %1(ms), max %2(ms)\n",
-				                    mean_deviation_us * 1e-3,
-				                    m_max_deviation_us * 1e-3));
-			}
-
-			if (::llabs(deviation_us) > m_cycle_timer.get_length_us()) {
-				DEBUG_TIMING (string_compose (
-				    "time between process(ms): %1, Est(ms): %2, Dev(ms): %3\n",
-				    cycle_diff_us * 1e-3,
-				    m_cycle_timer.get_length_us () * 1e-3,
-				    deviation_us * 1e-3));
-			}
-
-			/* call engine process callback */
-			if (engine.process_callback (_samples_per_period)) {
-				_pcmio->close_stream ();
-				_active = false;
+			if (!blocking_process_main()) {
 				return 0;
 			}
-			/* mixdown midi */
-			for (std::vector<PamPort*>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
-				static_cast<PortMidiPort*>(*it)->next_period();
-			}
-			/* queue outgoing midi */
-			i = 0;
-			for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
-				const PortMidiBuffer* src = static_cast<const PortMidiPort*>(*it)->const_buffer();
-
-				for (PortMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-					uint64_t timestamp =
-					    m_cycle_timer.timestamp_from_sample_offset ((*mit)->timestamp ());
-					DEBUG_MIDI (
-					    string_compose ("Queuing outgoing MIDI data for device: "
-					                    "%1 sample_offset: %2 timestamp: %3, size: %4\n",
-					                    _midiio->get_outputs ()[i]->name (),
-					                    (*mit)->timestamp (),
-					                    timestamp,
-					                    (*mit)->size ()));
-					_midiio->enqueue_output_event (
-					    i, timestamp, (*mit)->data (), (*mit)->size ());
-				}
-			}
-
-			/* write back audio */
-			i = 0;
-			for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it, ++i) {
-				_pcmio->set_playback_channel (i, (float const*)(*it)->get_buffer (_samples_per_period), _samples_per_period);
-			}
-
-			_processed_samples += _samples_per_period;
-
-			/* calculate DSP load */
-			clock2 = utils::get_microseconds ();
-			const int64_t elapsed_time = clock2 - clock1;
-			_dsp_load = elapsed_time / (float) nomial_time;
-
-			max_elapsed_us = std::max (elapsed_time, max_elapsed_us);
-			min_elapsed_us = std::min (elapsed_time, min_elapsed_us);
-			if ((m_cycle_count % 1000) == 0) {
-				DEBUG_TIMING (
-				    string_compose ("Elapsed process time(usecs) max: %1, min: %2\n",
-				                    max_elapsed_us,
-				                    min_elapsed_us));
-			}
-
 		} else {
 
 			if (!blocking_process_freewheel()) {
@@ -1596,7 +1474,154 @@ PortAudioBackend::main_blocking_process_thread ()
 }
 
 bool
-PortAudioBackend::blocking_process_freewheel ()
+PortAudioBackend::blocking_process_main ()
+{
+	uint32_t i = 0;
+	uint64_t clock1, clock2;
+	int64_t min_elapsed_us = 1000000;
+	int64_t max_elapsed_us = 0;
+	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
+	// const int64_t nomial_time = m_cycle_timer.get_length_us();
+
+	clock1 = utils::get_microseconds();
+
+	/* get audio */
+	i = 0;
+	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin();
+	     it != _system_inputs.end();
+	     ++it, ++i) {
+		_pcmio->get_capture_channel(
+		    i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
+	}
+
+	/* de-queue incoming midi*/
+	i = 0;
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin();
+	     it != _system_midi_in.end();
+	     ++it, ++i) {
+		PortMidiBuffer* mbuf = static_cast<PortMidiBuffer*>((*it)->get_buffer(0));
+		mbuf->clear();
+		uint64_t timestamp;
+		pframes_t sample_offset;
+		uint8_t data[256];
+		size_t size = sizeof(data);
+		while (_midiio->dequeue_input_event(i,
+		                                    m_cycle_timer.get_start(),
+		                                    m_cycle_timer.get_next_start(),
+		                                    timestamp,
+		                                    data,
+		                                    size)) {
+			sample_offset = m_cycle_timer.samples_since_cycle_start(timestamp);
+			midi_event_put(mbuf, sample_offset, data, size);
+			DEBUG_MIDI(string_compose("Dequeuing incoming MIDI data for device: %1 "
+			                          "sample_offset: %2 timestamp: %3, size: %4\n",
+			                          _midiio->get_inputs()[i]->name(),
+			                          sample_offset,
+			                          timestamp,
+			                          size));
+			size = sizeof(data);
+		}
+	}
+
+	/* clear output buffers */
+	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin();
+	     it != _system_outputs.end();
+	     ++it) {
+		memset((*it)->get_buffer(_samples_per_period),
+		       0,
+		       _samples_per_period * sizeof(Sample));
+	}
+
+	m_last_cycle_start = m_cycle_timer.get_start();
+	m_cycle_timer.reset_start(utils::get_microseconds());
+	m_cycle_count++;
+
+	uint64_t cycle_diff_us = (m_cycle_timer.get_start() - m_last_cycle_start);
+	int64_t deviation_us = (cycle_diff_us - m_cycle_timer.get_length_us());
+	m_total_deviation_us += ::llabs(deviation_us);
+	m_max_deviation_us =
+	    std::max(m_max_deviation_us, (uint64_t)::llabs(deviation_us));
+
+	if ((m_cycle_count % 1000) == 0) {
+		uint64_t mean_deviation_us = m_total_deviation_us / m_cycle_count;
+		DEBUG_TIMING(string_compose("Mean avg cycle deviation: %1(ms), max %2(ms)\n",
+		                            mean_deviation_us * 1e-3,
+		                            m_max_deviation_us * 1e-3));
+	}
+
+	if (::llabs(deviation_us) > m_cycle_timer.get_length_us()) {
+		DEBUG_TIMING(
+		    string_compose("time between process(ms): %1, Est(ms): %2, Dev(ms): %3\n",
+		                   cycle_diff_us * 1e-3,
+		                   m_cycle_timer.get_length_us() * 1e-3,
+		                   deviation_us * 1e-3));
+	}
+
+	/* call engine process callback */
+	if (engine.process_callback(_samples_per_period)) {
+		_pcmio->close_stream();
+		_active = false;
+		return false;
+	}
+	/* mixdown midi */
+	for (std::vector<PamPort*>::iterator it = _system_midi_out.begin();
+	     it != _system_midi_out.end();
+	     ++it) {
+		static_cast<PortMidiPort*>(*it)->next_period();
+	}
+	/* queue outgoing midi */
+	i = 0;
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin();
+	     it != _system_midi_out.end();
+	     ++it, ++i) {
+		const PortMidiBuffer* src =
+		    static_cast<const PortMidiPort*>(*it)->const_buffer();
+
+		for (PortMidiBuffer::const_iterator mit = src->begin(); mit != src->end();
+		     ++mit) {
+			uint64_t timestamp =
+			    m_cycle_timer.timestamp_from_sample_offset((*mit)->timestamp());
+			DEBUG_MIDI(string_compose("Queuing outgoing MIDI data for device: "
+			                          "%1 sample_offset: %2 timestamp: %3, size: %4\n",
+			                          _midiio->get_outputs()[i]->name(),
+			                          (*mit)->timestamp(),
+			                          timestamp,
+			                          (*mit)->size()));
+			_midiio->enqueue_output_event(i, timestamp, (*mit)->data(), (*mit)->size());
+		}
+	}
+
+	/* write back audio */
+	i = 0;
+	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin();
+	     it != _system_outputs.end();
+	     ++it, ++i) {
+		_pcmio->set_playback_channel(
+		    i,
+		    (float const*)(*it)->get_buffer(_samples_per_period),
+		    _samples_per_period);
+	}
+
+	_processed_samples += _samples_per_period;
+
+	/* calculate DSP load */
+	clock2 = utils::get_microseconds();
+	const int64_t elapsed_time = clock2 - clock1;
+	_dsp_load = elapsed_time / (float)nomial_time;
+
+	max_elapsed_us = std::max(elapsed_time, max_elapsed_us);
+	min_elapsed_us = std::min(elapsed_time, min_elapsed_us);
+	if ((m_cycle_count % 1000) == 0) {
+		DEBUG_TIMING(string_compose("Elapsed process time(usecs) max: %1, min: %2\n",
+		                            max_elapsed_us,
+		                            min_elapsed_us));
+	}
+
+	return true;
+}
+
+bool
+PortAudioBackend::blocking_process_freewheel()
 {
 	// zero audio input buffers
 	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin();
