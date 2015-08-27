@@ -1581,8 +1581,6 @@ PortAudioBackend::main_blocking_process_thread ()
 				memset ((*it)->get_buffer (_samples_per_period), 0, _samples_per_period * sizeof (Sample));
 			}
 
-			clock1 = utils::get_microseconds ();
-
 			// TODO clear midi or stop midi recv when entering fwheelin'
 
 			if (engine.process_callback (_samples_per_period)) {
