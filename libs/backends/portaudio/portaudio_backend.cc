@@ -516,6 +516,8 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	m_cycle_timer.set_samplerate(_samplerate);
 	m_cycle_timer.set_samples_per_cycle(_samples_per_period);
 
+	m_dsp_calc.set_max_time_us (m_cycle_timer.get_length_us());
+
 	DEBUG_MIDI ("Registering MIDI ports\n");
 
 	if (register_system_midi_ports () != 0) {
@@ -1477,13 +1479,10 @@ bool
 PortAudioBackend::blocking_process_main ()
 {
 	uint32_t i = 0;
-	uint64_t clock1, clock2;
-	int64_t min_elapsed_us = 1000000;
-	int64_t max_elapsed_us = 0;
-	const int64_t nomial_time = 1e6 * _samples_per_period / _samplerate;
-	// const int64_t nomial_time = m_cycle_timer.get_length_us();
+	uint64_t min_elapsed_us = 1000000;
+	uint64_t max_elapsed_us = 0;
 
-	clock1 = utils::get_microseconds();
+	m_dsp_calc.set_start_timestamp_us (utils::get_microseconds());
 
 	/* get audio */
 	i = 0;
@@ -1605,12 +1604,13 @@ PortAudioBackend::blocking_process_main ()
 	_processed_samples += _samples_per_period;
 
 	/* calculate DSP load */
-	clock2 = utils::get_microseconds();
-	const int64_t elapsed_time = clock2 - clock1;
-	_dsp_load = elapsed_time / (float)nomial_time;
+	m_dsp_calc.set_stop_timestamp_us (utils::get_microseconds());
+	_dsp_load = m_dsp_calc.get_dsp_load();
 
-	max_elapsed_us = std::max(elapsed_time, max_elapsed_us);
-	min_elapsed_us = std::min(elapsed_time, min_elapsed_us);
+	DEBUG_TIMING(string_compose("DSP Load: %1\n", _dsp_load));
+
+	max_elapsed_us = std::max(m_dsp_calc.elapsed_time_us(), max_elapsed_us);
+	min_elapsed_us = std::min(m_dsp_calc.elapsed_time_us(), min_elapsed_us);
 	if ((m_cycle_count % 1000) == 0) {
 		DEBUG_TIMING(string_compose("Elapsed process time(usecs) max: %1, min: %2\n",
 		                            max_elapsed_us,
