@@ -932,7 +932,7 @@ EngineControl::backend_changed ()
 	string backend_name = backend_combo.get_active_text();
 	boost::shared_ptr<ARDOUR::AudioBackend> backend;
 
-	if (!(backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, "ardour", ""))) {
+	if (!(backend = ARDOUR::AudioEngine::instance()->set_backend (backend_name, downcase (PROGRAM_NAME), ""))) {
 		/* eh? setting the backend failed... how ? */
 		/* A: stale config contains a backend that does not exist in current build */
 		return;
@@ -1931,7 +1931,7 @@ EngineControl::set_current_state (const State& state)
 	boost::shared_ptr<ARDOUR::AudioBackend> backend;
 
 	if (!(backend = ARDOUR::AudioEngine::instance ()->set_backend (
-	          state->backend, "ardour", ""))) {
+	          state->backend, downcase (PROGRAM_NAME), ""))) {
 		DEBUG_ECONTROL (string_compose ("Unable to set backend to %1", state->backend));
 		// this shouldn't happen as the invalid backend names should have been
 		// removed from the list of states.
