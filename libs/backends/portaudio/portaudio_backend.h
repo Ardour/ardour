@@ -320,6 +320,8 @@ class PortAudioBackend : public AudioBackend {
 
 		void* main_blocking_process_thread ();
 
+		void* freewheel_process_thread ();
+
 	private: // Methods
 		bool start_blocking_process_thread ();
 		bool stop_blocking_process_thread ();
@@ -334,6 +336,22 @@ class PortAudioBackend : public AudioBackend {
 		bool engine_halted ();
 		bool running ();
 
+		static int portaudio_callback(const void* input,
+	                                  void* output,
+	                                  unsigned long frameCount,
+	                                  const PaStreamCallbackTimeInfo* timeInfo,
+	                                  PaStreamCallbackFlags statusFlags,
+	                                  void* userData);
+
+		bool process_callback(const float* input,
+	                          float* output,
+	                          uint32_t frame_count,
+	                          const PaStreamCallbackTimeInfo* timeInfo,
+	                          PaStreamCallbackFlags statusFlags);
+
+		bool start_freewheel_process_thread ();
+		bool stop_freewheel_process_thread ();
+
 		static bool set_mmcss_pro_audio (HANDLE* task_handle);
 		static bool reset_mmcss (HANDLE task_handle);
 
@@ -346,9 +364,16 @@ class PortAudioBackend : public AudioBackend {
 		bool  _active; /* is running, process thread */
 		bool  _freewheel;
 		bool  _freewheeling;
+		bool  _freewheel_ack;
+		bool  _reinit_thread_callback;
 		bool  _measure_latency;
 
 		ARDOUR::DSPLoadCalculator m_dsp_calc;
+
+		bool m_freewheel_thread_active;
+
+		pthread_mutex_t m_freewheel_mutex;
+		pthread_cond_t m_freewheel_signal;
 
 		uint64_t m_cycle_count;
 		uint64_t m_total_deviation_us;
@@ -386,6 +411,12 @@ class PortAudioBackend : public AudioBackend {
 
 		/* blocking thread */
 		pthread_t _main_blocking_thread;
+
+		/* main thread in callback mode(or fw thread when running) */
+		pthread_t m_main_thread;
+
+		/* freewheel thread in callback mode */
+		pthread_t m_pthread_freewheel;
 
 		/* process threads */
 		static void* portaudio_process_thread (void *);

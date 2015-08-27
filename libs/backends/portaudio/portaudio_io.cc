@@ -745,6 +745,49 @@ PortAudioIO::pre_stream_open(int device_input,
 }
 
 PaErrorCode
+PortAudioIO::open_callback_stream(int device_input,
+                                  int device_output,
+                                  double sample_rate,
+                                  uint32_t samples_per_period,
+                                  PaStreamCallback* callback,
+                                  void* data)
+{
+	PaStreamParameters inputParam;
+	PaStreamParameters outputParam;
+
+	PaErrorCode error_code =
+	    pre_stream_open(device_input, inputParam, device_output, outputParam);
+
+	if (error_code != paNoError) return error_code;
+
+	PaError err = paNoError;
+
+	DEBUG_AUDIO ("Open Callback Stream\n");
+
+	err = Pa_OpenStream(&_stream,
+	                    _capture_channels > 0 ? &inputParam : NULL,
+	                    _playback_channels > 0 ? &outputParam : NULL,
+	                    sample_rate,
+	                    samples_per_period,
+	                    paDitherOff,
+	                    callback,
+	                    data);
+
+	if (err != paNoError) {
+		DEBUG_AUDIO ("PortAudio failed to start stream.\n");
+		return paInternalError;
+	}
+
+	if (!set_sample_rate_and_latency_from_stream()) {
+		DEBUG_AUDIO ("PortAudio failed to query stream information.\n");
+		close_stream();
+		return paInternalError;
+	}
+
+	return paNoError;
+}
+
+PaErrorCode
 PortAudioIO::open_blocking_stream(int device_input,
                                   int device_output,
                                   double sample_rate,
