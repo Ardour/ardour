@@ -669,10 +669,6 @@ int vstfx_create_editor (VSTState* vstfx)
 	
 	XSendEvent(LXVST_XDisplay, parent_window, FALSE, NoEventMask, (XEvent*)&event);
 
-	/*Unlock - and we are done for the first part of staring the Editor...*/
-	
-	pthread_mutex_unlock (&vstfx->lock);
-	
 	return 0;
 }
 
