@@ -218,18 +218,18 @@ MidiSource::midi_read (const Lock&                        lm,
 			 * "parallel playback of linked midi regions -> no note-offs"
 			 *
 			 * A midi source can be used by multiple tracks simultaneously,
-			 * in which case midi_read() can called from different tracks for
+			 * in which case midi_read() may be called from different tracks for
 			 * overlapping time-ranges.
 			 *
 			 * However there is only a single iterator for a given midi-source.
-			 * this results in every midi_read() performing a seek.
+			 * This results in every midi_read() performing a seek.
 			 *
-			 * if seeking is performed with
+			 * If seeking is performed with
 			 *    _model->begin(converter.from(start),...)
 			 * the model is used for seeking. That method seeks to the first
 			 * *note-on* event after 'start'.
 			 *
-			 * _model->begin(conveter.from(  ) ,..) eventually calls
+			 * _model->begin(converter.from(  ) ,..) eventually calls
 			 * Sequence<Time>::const_iterator() in libs/evoral/src/Sequence.cpp
 			 * which looks up the note-event via seq.note_lower_bound(t);
 			 * but the sequence 'seq' only contains note-on events(!).
@@ -237,10 +237,14 @@ MidiSource::midi_read (const Lock&                        lm,
 			 * via _active_notes.pop(); and not part of seq.
 			 *
 			 * see also http://tracker.ardour.org/view.php?id=6287#c16671
-			 * and call 1-900-ardour-midi ($4.99/min)
 			 *
 			 * The linear search below assures that reading starts at the first
 			 * event for the given time, regardless of its event-type.
+			 *
+			 * The performance of this approach is O(N), while the previous
+			 * implementation is O(log(N)). This needs to be optimized:
+			 * The model-iterator or event-sequence needs to be re-designed in
+			 * some way (maybe keep an iterator per playlist).
 			 */
 			for (i = _model->begin(); i != _model->end(); ++i) {
 				const framecnt_t time_frames = converter.to(i->time());
