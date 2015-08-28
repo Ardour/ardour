@@ -305,6 +305,8 @@ Session::Session (AudioEngine &eng,
 	
 	if (_is_new) {
 
+		Stateful::loading_state_version = CURRENT_SESSION_FILE_VERSION;
+
 #ifdef USE_TRACKS_CODE_FEATURES		
 		sr = EngineStateController::instance()->get_current_sample_rate();
 #endif
