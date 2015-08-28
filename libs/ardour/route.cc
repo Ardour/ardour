@@ -3101,14 +3101,21 @@ Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 			
 			if (d && d->target_route() == route) {
 				rl.release ();
-				remove_processor (*x, &err, false);
+				if (remove_processor (*x, &err, false) > 0) {
+					rl.acquire ();
+					continue;
+				}
 				rl.acquire ();
 
 				/* list could have been demolished while we dropped the lock
 				   so start over.
 				*/
-				
-				goto again;
+				if (_session.engine().connected()) {
+					/* i/o processors cannot be removed if the engine is not running
+					 * so don't live-loop in case the engine is N/A or dies
+					 */
+					goto again;
+				}
 			}
 		}
 	}
