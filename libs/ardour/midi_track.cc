@@ -513,6 +513,11 @@ MidiTrack::non_realtime_locate (framepos_t pos)
 		return;
 	}
 
+	/* the source may be missing, but the control still referenced in the GUI */
+	if (!region->midi_source() || !region->model()) {
+		return;
+	}
+
 	Glib::Threads::Mutex::Lock lm (_control_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
 		return;
