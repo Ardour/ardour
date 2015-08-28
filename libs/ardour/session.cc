@@ -811,10 +811,10 @@ Session::setup_bundles ()
 	/* mono output bundles */
 
 	for (uint32_t np = 0; np < outputs[DataType::AUDIO].size(); ++np) {
-		char buf[32];
+		char buf[64];
 		std::string pn = _engine.get_pretty_name_by_name (outputs[DataType::AUDIO][np]);
 		if (!pn.empty()) {
-			snprintf (buf, sizeof (buf), _("out %s"), pn.substr(0,12).c_str());
+			snprintf (buf, sizeof (buf), _("out %s"), pn.c_str());
 		} else {
 			snprintf (buf, sizeof (buf), _("out %" PRIu32), np+1);
 		}
@@ -845,10 +845,10 @@ Session::setup_bundles ()
 	/* mono input bundles */
 
 	for (uint32_t np = 0; np < inputs[DataType::AUDIO].size(); ++np) {
-		char buf[32];
+		char buf[64];
 		std::string pn = _engine.get_pretty_name_by_name (inputs[DataType::AUDIO][np]);
 		if (!pn.empty()) {
-			snprintf (buf, sizeof (buf), _("in %s"), pn.substr(0,12).c_str());
+			snprintf (buf, sizeof (buf), _("in %s"), pn.c_str());
 		} else {
 			snprintf (buf, sizeof (buf), _("in %" PRIu32), np+1);
 		}
