@@ -870,7 +870,7 @@ int
 CoreAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string& name)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreAudioBackend::set_port_name: Invalid Port(s)") << endmsg;
+		PBD::warning << _("CoreAudioBackend::set_port_name: Invalid Port(s)") << endmsg;
 		return -1;
 	}
 	return static_cast<CoreBackendPort*>(port)->set_name (_instance_name + ":" + name);
@@ -880,7 +880,7 @@ std::string
 CoreAudioBackend::get_port_name (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreAudioBackend::get_port_name: Invalid Port(s)") << endmsg;
+		PBD::warning << _("CoreAudioBackend::get_port_name: Invalid Port(s)") << endmsg;
 		return std::string ();
 	}
 	return static_cast<CoreBackendPort*>(port)->name ();
@@ -890,7 +890,7 @@ int
 CoreAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreAudioBackend::get_port_name: Invalid Port(s)") << endmsg;
+		PBD::warning << _("CoreAudioBackend::get_port_name: Invalid Port(s)") << endmsg;
 		return -1;
 	}
 	if (key == "http://jackaudio.org/metadata/pretty-name") {
@@ -967,7 +967,7 @@ CoreAudioBackend::add_port (
 {
 	assert(name.size ());
 	if (find_port (name)) {
-		PBD::error << _("CoreAudioBackend::register_port: Port already exists:")
+		PBD::warning << _("CoreAudioBackend::register_port: Port already exists:")
 				<< " (" << name << ")" << endmsg;
 		return 0;
 	}
@@ -998,7 +998,7 @@ CoreAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 	CoreBackendPort* port = static_cast<CoreBackendPort*>(port_handle);
 	std::vector<CoreBackendPort*>::iterator i = std::find (_ports.begin (), _ports.end (), static_cast<CoreBackendPort*>(port_handle));
 	if (i == _ports.end ()) {
-		PBD::error << _("CoreAudioBackend::unregister_port: Failed to find port") << endmsg;
+		PBD::warning << _("CoreAudioBackend::unregister_port: Failed to find port") << endmsg;
 		return;
 	}
 	disconnect_all(port_handle);
@@ -1178,12 +1178,12 @@ CoreAudioBackend::connect (const std::string& src, const std::string& dst)
 	CoreBackendPort* dst_port = find_port (dst);
 
 	if (!src_port) {
-		PBD::error << _("CoreAudioBackend::connect: Invalid Source port:")
+		PBD::warning << _("CoreAudioBackend::connect: Invalid Source port:")
 				<< " (" << src <<")" << endmsg;
 		return -1;
 	}
 	if (!dst_port) {
-		PBD::error << _("CoreAudioBackend::connect: Invalid Destination port:")
+		PBD::warning << _("CoreAudioBackend::connect: Invalid Destination port:")
 			<< " (" << dst <<")" << endmsg;
 		return -1;
 	}
@@ -1197,7 +1197,7 @@ CoreAudioBackend::disconnect (const std::string& src, const std::string& dst)
 	CoreBackendPort* dst_port = find_port (dst);
 
 	if (!src_port || !dst_port) {
-		PBD::error << _("CoreAudioBackend::disconnect: Invalid Port(s)") << endmsg;
+		PBD::warning << _("CoreAudioBackend::disconnect: Invalid Port(s)") << endmsg;
 		return -1;
 	}
 	return src_port->disconnect (dst_port);
@@ -1208,11 +1208,11 @@ CoreAudioBackend::connect (PortEngine::PortHandle src, const std::string& dst)
 {
 	CoreBackendPort* dst_port = find_port (dst);
 	if (!valid_port (src)) {
-		PBD::error << _("CoreAudioBackend::connect: Invalid Source Port Handle") << endmsg;
+		PBD::warning << _("CoreAudioBackend::connect: Invalid Source Port Handle") << endmsg;
 		return -1;
 	}
 	if (!dst_port) {
-		PBD::error << _("CoreAudioBackend::connect: Invalid Destination Port")
+		PBD::warning << _("CoreAudioBackend::connect: Invalid Destination Port")
 			<< " (" << dst << ")" << endmsg;
 		return -1;
 	}
@@ -1224,7 +1224,7 @@ CoreAudioBackend::disconnect (PortEngine::PortHandle src, const std::string& dst
 {
 	CoreBackendPort* dst_port = find_port (dst);
 	if (!valid_port (src) || !dst_port) {
-		PBD::error << _("CoreAudioBackend::disconnect: Invalid Port(s)") << endmsg;
+		PBD::warning << _("CoreAudioBackend::disconnect: Invalid Port(s)") << endmsg;
 		return -1;
 	}
 	return static_cast<CoreBackendPort*>(src)->disconnect (dst_port);
@@ -1234,7 +1234,7 @@ int
 CoreAudioBackend::disconnect_all (PortEngine::PortHandle port)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreAudioBackend::disconnect_all: Invalid Port") << endmsg;
+		PBD::warning << _("CoreAudioBackend::disconnect_all: Invalid Port") << endmsg;
 		return -1;
 	}
 	static_cast<CoreBackendPort*>(port)->disconnect_all ();
@@ -1245,7 +1245,7 @@ bool
 CoreAudioBackend::connected (PortEngine::PortHandle port, bool /* process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreAudioBackend::disconnect_all: Invalid Port") << endmsg;
+		PBD::warning << _("CoreAudioBackend::disconnect_all: Invalid Port") << endmsg;
 		return false;
 	}
 	return static_cast<CoreBackendPort*>(port)->is_connected ();
@@ -1256,7 +1256,7 @@ CoreAudioBackend::connected_to (PortEngine::PortHandle src, const std::string& d
 {
 	CoreBackendPort* dst_port = find_port (dst);
 	if (!valid_port (src) || !dst_port) {
-		PBD::error << _("CoreAudioBackend::connected_to: Invalid Port") << endmsg;
+		PBD::warning << _("CoreAudioBackend::connected_to: Invalid Port") << endmsg;
 		return false;
 	}
 	return static_cast<CoreBackendPort*>(src)->is_connected (dst_port);
@@ -1266,7 +1266,7 @@ bool
 CoreAudioBackend::physically_connected (PortEngine::PortHandle port, bool /*process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreAudioBackend::physically_connected: Invalid Port") << endmsg;
+		PBD::warning << _("CoreAudioBackend::physically_connected: Invalid Port") << endmsg;
 		return false;
 	}
 	return static_cast<CoreBackendPort*>(port)->is_physically_connected ();
@@ -1276,7 +1276,7 @@ int
 CoreAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std::string>& names, bool /*process_callback_safe*/)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreAudioBackend::get_connections: Invalid Port") << endmsg;
+		PBD::warning << _("CoreAudioBackend::get_connections: Invalid Port") << endmsg;
 		return -1;
 	}
 
@@ -1378,7 +1378,8 @@ void
 CoreAudioBackend::set_latency_range (PortEngine::PortHandle port, bool for_playback, LatencyRange latency_range)
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreBackendPort::set_latency_range (): invalid port.") << endmsg;
+		PBD::warning << _("CoreBackendPort::set_latency_range (): invalid port.") << endmsg;
+		return;
 	}
 	static_cast<CoreBackendPort*>(port)->set_latency_range (latency_range, for_playback);
 }
@@ -1388,7 +1389,7 @@ CoreAudioBackend::get_latency_range (PortEngine::PortHandle port, bool for_playb
 {
 	LatencyRange r;
 	if (!valid_port (port)) {
-		PBD::error << _("CoreBackendPort::get_latency_range (): invalid port.") << endmsg;
+		PBD::warning << _("CoreBackendPort::get_latency_range (): invalid port.") << endmsg;
 		r.min = 0;
 		r.max = 0;
 		return r;
@@ -1416,7 +1417,7 @@ bool
 CoreAudioBackend::port_is_physical (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
-		PBD::error << _("CoreBackendPort::port_is_physical (): invalid port.") << endmsg;
+		PBD::warning << _("CoreBackendPort::port_is_physical (): invalid port.") << endmsg;
 		return false;
 	}
 	return static_cast<CoreBackendPort*>(port)->is_physical ();
@@ -1992,33 +1993,33 @@ CoreBackendPort::~CoreBackendPort () {
 int CoreBackendPort::connect (CoreBackendPort *port)
 {
 	if (!port) {
-		PBD::error << _("CoreBackendPort::connect (): invalid (null) port") << endmsg;
+		PBD::warning << _("CoreBackendPort::connect (): invalid (null) port") << endmsg;
 		return -1;
 	}
 
 	if (type () != port->type ()) {
-		PBD::error << _("CoreBackendPort::connect (): wrong port-type") << endmsg;
+		PBD::warning << _("CoreBackendPort::connect (): wrong port-type") << endmsg;
 		return -1;
 	}
 
 	if (is_output () && port->is_output ()) {
-		PBD::error << _("CoreBackendPort::connect (): cannot inter-connect output ports.") << endmsg;
+		PBD::warning << _("CoreBackendPort::connect (): cannot inter-connect output ports.") << endmsg;
 		return -1;
 	}
 
 	if (is_input () && port->is_input ()) {
-		PBD::error << _("CoreBackendPort::connect (): cannot inter-connect input ports.") << endmsg;
+		PBD::warning << _("CoreBackendPort::connect (): cannot inter-connect input ports.") << endmsg;
 		return -1;
 	}
 
 	if (this == port) {
-		PBD::error << _("CoreBackendPort::connect (): cannot self-connect ports.") << endmsg;
+		PBD::warning << _("CoreBackendPort::connect (): cannot self-connect ports.") << endmsg;
 		return -1;
 	}
 
 	if (is_connected (port)) {
 #if 0 // don't bother to warn about this for now. just ignore it
-		PBD::error << _("CoreBackendPort::connect (): ports are already connected:")
+		PBD::info << _("CoreBackendPort::connect (): ports are already connected:")
 			<< " (" << name () << ") -> (" << port->name () << ")"
 			<< endmsg;
 #endif
@@ -2042,12 +2043,12 @@ void CoreBackendPort::_connect (CoreBackendPort *port, bool callback)
 int CoreBackendPort::disconnect (CoreBackendPort *port)
 {
 	if (!port) {
-		PBD::error << _("CoreBackendPort::disconnect (): invalid (null) port") << endmsg;
+		PBD::warning << _("CoreBackendPort::disconnect (): invalid (null) port") << endmsg;
 		return -1;
 	}
 
 	if (!is_connected (port)) {
-		PBD::error << _("CoreBackendPort::disconnect (): ports are not connected:")
+		PBD::warning << _("CoreBackendPort::disconnect (): ports are not connected:")
 			<< " (" << name () << ") -> (" << port->name () << ")"
 			<< endmsg;
 		return -1;
