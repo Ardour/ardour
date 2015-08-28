@@ -257,6 +257,7 @@ WinMMEMidiOutputDevice::stop_midi_output_thread ()
 {
 	int timeout = 5000;
 	m_thread_quit = true;
+	signal (m_queue_semaphore);
 
 	while (m_thread_running && --timeout > 0) { Glib::usleep (1000); }
 	if (timeout == 0 || m_thread_running) {
