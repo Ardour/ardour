@@ -5394,7 +5394,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 	if (!moved) {
 		/* no motion - select note */
 
-		if (_editor->current_mouse_mode() == Editing::MouseObject ||
+		if (_editor->current_mouse_mode() == Editing::MouseContent ||
 		    _editor->current_mouse_mode() == Editing::MouseDraw) {
 
 			bool changed = false;
