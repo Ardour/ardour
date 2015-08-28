@@ -216,7 +216,7 @@ WinMMEMidiOutputDevice::stop ()
 	}
 
 	if (!stop_midi_output_thread ()) {
-		DEBUG_MIDI ("WinMMEMidiOutput: Failed to start MIDI output thread\n");
+		DEBUG_MIDI ("WinMMEMidiOutput: Failed to stop MIDI output thread\n");
 		return false;
 	}
 
