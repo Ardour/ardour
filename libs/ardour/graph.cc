@@ -117,6 +117,8 @@ Graph::reset_thread_list ()
                 drop_threads ();
         }
 
+        _threads_active = true;
+
 	if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::main_thread, this)) != 0) {
 		throw failed_constructor ();
 	}
@@ -126,7 +128,6 @@ Graph::reset_thread_list ()
 			throw failed_constructor ();
 		}
         }
-        _threads_active = true;
 }
 
 void
@@ -145,15 +146,20 @@ Graph::session_going_away()
 void
 Graph::drop_threads ()
 {
+        Glib::Threads::Mutex::Lock ls (_swap_mutex);
         _threads_active = false;
 
         uint32_t thread_count = AudioEngine::instance()->process_thread_count ();
 
         for (unsigned int i=0; i < thread_count; i++) {
+		pthread_mutex_lock (&_trigger_mutex);
 		_execution_sem.signal ();
+		pthread_mutex_unlock (&_trigger_mutex);
         }
 
+	pthread_mutex_lock (&_trigger_mutex);
         _callback_start_sem.signal ();
+	pthread_mutex_unlock (&_trigger_mutex);
 
 	AudioEngine::instance()->join_process_threads ();
 
@@ -260,7 +266,7 @@ Graph::restart_cycle()
 
 	prep ();
 
-        if (_graph_empty) {
+        if (_graph_empty && _threads_active) {
                 goto again;
         }
 
@@ -396,7 +402,7 @@ Graph::run_one()
 
         DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 has finished run_one()\n", pthread_name()));
 
-        return false;
+        return !_threads_active;
 }
 
 void

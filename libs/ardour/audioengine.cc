@@ -776,6 +776,8 @@ AudioEngine::drop_backend ()
 {
 	if (_backend) {
 		_backend->stop ();
+		// Stopped is needed for Graph to explicitly terminate threads
+		Stopped (); /* EMIT SIGNAL */
 		_backend->drop_device ();
 		_backend.reset ();
 		_running = false;
