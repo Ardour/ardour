@@ -3052,7 +3052,7 @@ Session::cleanup_sources (CleanupReport& rep)
                                  or for the first channel of embedded files. it will miss
                                  some peakfiles for other channels
                               */
-		string peakpath = peak_path (base);
+		string peakpath = construct_peak_filepath (base);
 
 		if (Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
 			if (::g_unlink (peakpath.c_str()) != 0) {

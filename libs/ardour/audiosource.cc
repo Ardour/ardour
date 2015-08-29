@@ -239,7 +239,7 @@ AudioSource::initialize_peakfile (const string& audio_path)
 {
 	GStatBuf statbuf;
 
-	_peakpath = generate_peak_path (audio_path);
+	_peakpath = construct_peak_filepath (audio_path);
 
 	DEBUG_TRACE(DEBUG::Peaks, string_compose ("Initialize Peakfile %1 for Audio file %2\n", _peakpath, audio_path));
 

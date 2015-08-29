@@ -164,26 +164,9 @@ AudioFileSource::init (const string& pathstr, bool must_exist)
 }
 
 string
-AudioFileSource::generate_peak_path (const string& audio_path)
+AudioFileSource::construct_peak_filepath (const string& audio_path) const
 {
-	string base;
-
-	string::size_type suffix = audio_path.find_last_of ('.');
-
-	if (suffix != string::npos) {
-		base = audio_path.substr (0, suffix);
-	} else {
-		warning << string_compose (_("Odd audio file path: %1"), audio_path) << endmsg;
-		base = audio_path;
-	}
-
-	base += '%';
-	base += (char) ('A' + _channel);
-
-	/* pass in the name/path of the source, with no audio file type suffix
-	 */
-	
-	return _session.peak_path (base);
+	return _session.construct_peak_filepath (audio_path);
 }
 
 string
@@ -230,7 +213,7 @@ AudioFileSource::find_broken_peakfile (const string& peak_path, const string& au
 string
 AudioFileSource::broken_peak_path (const string& audio_path)
 {
-	return _session.peak_path (basename_nosuffix (audio_path));
+	return _session.construct_peak_filepath (basename_nosuffix (audio_path));
 }
 
 string

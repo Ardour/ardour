@@ -58,7 +58,7 @@ FileSource::FileSource (Session& session, DataType type, const string& path, con
 	, _path (path)
 	, _file_is_new (!origin.empty()) // if origin is left unspecified (empty string) then file must exist
 	, _channel (0)
-        , _origin (origin)
+	, _origin (origin)
 {
 	set_within_session_from_path (path);
 }
@@ -148,9 +148,9 @@ FileSource::set_state (const XMLNode& node, int /*version*/)
 		_channel = 0;
 	}
 
-        if ((prop = node.property (X_("origin"))) != 0) {
-                _origin = prop->value();
-        }
+	if ((prop = node.property (X_("origin"))) != 0) {
+		_origin = prop->value();
+	}
 
 	return 0;
 }

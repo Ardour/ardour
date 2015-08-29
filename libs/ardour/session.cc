@@ -107,6 +107,8 @@
 
 #include "i18n.h"
 
+#include <glibmm/checksum.h>
+
 namespace ARDOUR {
 class MidiSource;
 class Processor;
@@ -4362,19 +4364,20 @@ Session::count_sources_by_origin (const string& path)
 }
 
 string
-Session::peak_path (const string& base) const
+Session::construct_peak_filepath (const string& filepath) const
 {
-	if (Glib::path_is_absolute (base)) {
+	string interchange_dir_string = string (interchange_dir_name) + G_DIR_SEPARATOR;
+
+	if (Glib::path_is_absolute (filepath)) {
 
 		/* rip the session dir from the audiofile source */
 
 		string session_path;
-		string interchange_dir_string = string (interchange_dir_name) + G_DIR_SEPARATOR;
 		bool in_another_session = true;
 		
-		if (base.find (interchange_dir_string) != string::npos) {
+		if (filepath.find (interchange_dir_string) != string::npos) {
 		
-			session_path = Glib::path_get_dirname (base); /* now ends in audiofiles */
+			session_path = Glib::path_get_dirname (filepath); /* now ends in audiofiles */
 			session_path = Glib::path_get_dirname (session_path); /* now ends in session name */
 			session_path = Glib::path_get_dirname (session_path); /* now ends in interchange */
 			session_path = Glib::path_get_dirname (session_path); /* now has session path */
@@ -4394,12 +4397,32 @@ Session::peak_path (const string& base) const
 
 		if (in_another_session) {
 			SessionDirectory sd (session_path);
-			return Glib::build_filename (sd.peak_path(), Glib::path_get_basename (base) + peakfile_suffix);
+			return Glib::build_filename (sd.peak_path(), Glib::path_get_basename (filepath) + peakfile_suffix);
 		}
 	}
 
-	std::string basename = Glib::path_get_basename (base);
-	return Glib::build_filename (_session_dir->peak_path(), basename + peakfile_suffix);
+	std::string filename = Glib::path_get_basename (filepath);
+	std::string path;
+	/* file is within our session: just use the filename for checksumming and leave path empty */
+
+	if (filepath.find (interchange_dir_string) == string::npos) {
+		/* the file is outside our session: add the filepath for checksummming */
+		path = Glib::path_get_dirname (filepath);
+	}
+	
+	string::size_type suffix = filename.find_last_of ('.');
+
+	std::string filename_unsuffixed;
+	if (suffix != string::npos) {
+		filename_unsuffixed = filename.substr (0, suffix);
+	} else {
+		warning << string_compose (_("Odd audio file path: %1"), filepath) << endmsg;
+		filename_unsuffixed = filename;
+	}
+
+	std::string checksum = "_" + Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, path + G_DIR_SEPARATOR + filename);
+
+	return Glib::build_filename (_session_dir->peak_path(), filename_unsuffixed + checksum + peakfile_suffix);
 }
 
 string
