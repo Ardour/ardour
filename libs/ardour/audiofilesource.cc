@@ -143,7 +143,7 @@ AudioFileSource::AudioFileSource (Session& s, const XMLNode& node, bool must_exi
 		throw failed_constructor ();
 	}
 
-	if (init (_path, must_exist)) {
+	if (init (_origin, must_exist)) {
 		throw failed_constructor ();
 	}
 }
