@@ -39,13 +39,13 @@ class LIBARDOUR_API AudioFileSource : public AudioSource, public FileSource {
 public:
 	virtual ~AudioFileSource ();
 
-	std::string peak_path (std::string audio_path);
-	std::string find_broken_peakfile (std::string missing_peak_path,
-	                                  std::string audio_path);
+	std::string generate_peak_path (const std::string& audio_path);
+	std::string find_broken_peakfile (const std::string& missing_peak_path,
+	                                  const std::string& audio_path);
 
-	static void set_peak_dir (std::string dir) { peak_dir = dir; }
+	static void set_peak_dir (const std::string& dir) { peak_dir = dir; }
 
-	static bool get_soundfile_info (std::string path, SoundFileInfo& _info, std::string& error);
+	static bool get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error);
 
 	bool safe_file_extension (const std::string& path) const {
 		return safe_audio_file_extension(path);
@@ -119,8 +119,8 @@ protected:
 	static framecnt_t header_position_offset;
 
   private:
-	std::string old_peak_path (std::string audio_path);
-	std::string broken_peak_path (std::string audio_path);
+	std::string old_peak_path (const std::string& audio_path);
+	std::string broken_peak_path (const std::string& audio_path);
 };
 
 } // namespace ARDOUR

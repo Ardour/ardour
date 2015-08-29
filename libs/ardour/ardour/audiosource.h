@@ -43,7 +43,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 		public boost::enable_shared_from_this<ARDOUR::AudioSource>
 {
   public:
-	AudioSource (Session&, std::string name);
+	AudioSource (Session&, const std::string& name);
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
@@ -115,18 +115,18 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	   thread, or a lock around calls that use them.
 	*/
 
-        static std::vector<boost::shared_array<Sample> > _mixdown_buffers;
+	static std::vector<boost::shared_array<Sample> > _mixdown_buffers;
 	static std::vector<boost::shared_array<gain_t> > _gain_buffers;
-        static Glib::Threads::Mutex    _level_buffer_lock;
+	static Glib::Threads::Mutex    _level_buffer_lock;
 
 	static void ensure_buffers_for_level (uint32_t, framecnt_t);
 	static void ensure_buffers_for_level_locked (uint32_t, framecnt_t);
 
 	framecnt_t           _length;
-	std::string         peakpath;
+	std::string         _peakpath;
 	std::string        _captured_for;
 
-	int initialize_peakfile (std::string path);
+	int initialize_peakfile (const std::string& path);
 	int build_peaks_from_scratch ();
 	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);
@@ -136,9 +136,9 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 
 	virtual framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const = 0;
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
-	virtual std::string peak_path(std::string audio_path) = 0;
+	virtual std::string generate_peak_path(const std::string& audio_path) = 0;
 	virtual std::string find_broken_peakfile (std::string /* missing_peak_path */,
-	                                          std::string audio_path) { return peak_path (audio_path); }
+	                                          std::string audio_path) { return generate_peak_path (audio_path); }
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,

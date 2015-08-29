@@ -75,7 +75,7 @@ bool AudioSource::_build_peakfiles = false;
 
 #define _FPP 256
 
-AudioSource::AudioSource (Session& s, string name)
+AudioSource::AudioSource (Session& s, const string& name)
 	: Source (s, DataType::AUDIO, name)
 	, _length (0)
 	, _peak_byte_max (0)
@@ -203,7 +203,7 @@ AudioSource::touch_peakfile ()
 {
 	GStatBuf statbuf;
 
-	if (g_stat (peakpath.c_str(), &statbuf) != 0 || statbuf.st_size == 0) {
+	if (g_stat (_peakpath.c_str(), &statbuf) != 0 || statbuf.st_size == 0) {
 		return;
 	}
 
@@ -212,7 +212,7 @@ AudioSource::touch_peakfile ()
 	tbuf.actime = statbuf.st_atime;
 	tbuf.modtime = time ((time_t*) 0);
 
-	g_utime (peakpath.c_str(), &tbuf);
+	g_utime (_peakpath.c_str(), &tbuf);
 }
 
 int
@@ -220,7 +220,7 @@ AudioSource::rename_peakfile (string newpath)
 {
 	/* caller must hold _lock */
 
-	string oldpath = peakpath;
+	string oldpath = _peakpath;
 
 	if (Glib::file_test (oldpath, Glib::FILE_TEST_EXISTS)) {
 		if (g_rename (oldpath.c_str(), newpath.c_str()) != 0) {
@@ -229,35 +229,35 @@ AudioSource::rename_peakfile (string newpath)
 		}
 	}
 
-	peakpath = newpath;
+	_peakpath = newpath;
 
 	return 0;
 }
 
 int
-AudioSource::initialize_peakfile (string audio_path)
+AudioSource::initialize_peakfile (const string& audio_path)
 {
 	GStatBuf statbuf;
 
-	peakpath = peak_path (audio_path);
+	_peakpath = generate_peak_path (audio_path);
 
-	DEBUG_TRACE(DEBUG::Peaks, string_compose ("Initialize Peakfile %1 for Audio file %2\n", peakpath, audio_path));
+	DEBUG_TRACE(DEBUG::Peaks, string_compose ("Initialize Peakfile %1 for Audio file %2\n", _peakpath, audio_path));
 
 	/* if the peak file should be there, but isn't .... */
 
-	if (!empty() && !Glib::file_test (peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-		peakpath = find_broken_peakfile (peakpath, audio_path);
+	if (!empty() && !Glib::file_test (_peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
+		_peakpath = find_broken_peakfile (_peakpath, audio_path);
 	}
 
-	if (g_stat (peakpath.c_str(), &statbuf)) {
+	if (g_stat (_peakpath.c_str(), &statbuf)) {
 		if (errno != ENOENT) {
 			/* it exists in the peaks dir, but there is some kind of error */
 
-			error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), peakpath) << endmsg;
+			error << string_compose(_("AudioSource: cannot stat peakfile \"%1\""), _peakpath) << endmsg;
 			return -1;
 		}
 
-		DEBUG_TRACE(DEBUG::Peaks, string_compose("Peakfile %1 does not exist\n", peakpath));
+		DEBUG_TRACE(DEBUG::Peaks, string_compose("Peakfile %1 does not exist\n", _peakpath));
 
 		_peaks_built = false;
 
@@ -266,7 +266,7 @@ AudioSource::initialize_peakfile (string audio_path)
 		/* we found it in the peaks dir, so check it out */
 
 		if (statbuf.st_size == 0 || (statbuf.st_size < (off_t) ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
-			DEBUG_TRACE(DEBUG::Peaks, string_compose("Peakfile %1 is empty\n", peakpath));
+			DEBUG_TRACE(DEBUG::Peaks, string_compose("Peakfile %1 is empty\n", _peakpath));
 			_peaks_built = false;
 		} else {
 			// Check if the audio file has changed since the peakfile was built.
@@ -278,7 +278,7 @@ AudioSource::initialize_peakfile (string audio_path)
 				/* no audio path - nested source or we can't
 				   read it or ... whatever, use the peakfile as-is.
 				*/
-				DEBUG_TRACE(DEBUG::Peaks, string_compose("Error when calling stat on Peakfile %1\n", peakpath));
+				DEBUG_TRACE(DEBUG::Peaks, string_compose("Error when calling stat on Peakfile %1\n", _peakpath));
 
 				_peaks_built = true;
 				_peak_byte_max = statbuf.st_size;
@@ -358,8 +358,8 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 	GStatBuf statbuf;
 
 	expected_peaks = (cnt / (double) samples_per_file_peak);
-	if (g_stat (peakpath.c_str(), &statbuf) != 0) {
-		error << string_compose (_("Cannot open peakfile @ %1 for size check (%2)"), peakpath, strerror (errno)) << endmsg;
+	if (g_stat (_peakpath.c_str(), &statbuf) != 0) {
+		error << string_compose (_("Cannot open peakfile @ %1 for size check (%2)"), _peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -380,10 +380,10 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		const off_t expected_file_size = (_length / (double) samples_per_file_peak) * sizeof (PeakData);
 		
 		if (statbuf.st_size < expected_file_size) {
-			warning << string_compose (_("peak file %1 is truncated from %2 to %3"), peakpath, expected_file_size, statbuf.st_size) << endmsg;
+			warning << string_compose (_("peak file %1 is truncated from %2 to %3"), _peakpath, expected_file_size, statbuf.st_size) << endmsg;
 			const_cast<AudioSource*>(this)->build_peaks_from_scratch ();
-			if (g_stat (peakpath.c_str(), &statbuf) != 0) {
-				error << string_compose (_("Cannot open peakfile @ %1 for size check (%2) after rebuild"), peakpath, strerror (errno)) << endmsg;
+			if (g_stat (_peakpath.c_str(), &statbuf) != 0) {
+				error << string_compose (_("Cannot open peakfile @ %1 for size check (%2) after rebuild"), _peakpath, strerror (errno)) << endmsg;
 			}
 			if (statbuf.st_size < expected_file_size) {
 				fatal << "peak file is still truncated after rebuild" << endmsg;
@@ -392,10 +392,10 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 		}
 	}
 
-	ScopedFileDescriptor sfd (g_open (peakpath.c_str(), O_RDONLY, 0444));
+	ScopedFileDescriptor sfd (g_open (_peakpath.c_str(), O_RDONLY, 0444));
 
 	if (sfd < 0) {
-		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), peakpath, strerror (errno)) << endmsg;
+		error << string_compose (_("Cannot open peakfile @ %1 for reading (%2)"), _peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 				  
@@ -464,13 +464,13 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 			map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
 			if (map_handle == NULL) {
-				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 
 			view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
 			if (view_handle == NULL) {
-				error << string_compose (_("map failed - could not map peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("map failed - could not map peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 
@@ -481,13 +481,13 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			err_flag = UnmapViewOfFile (view_handle);
 			err_flag = CloseHandle(map_handle);
 			if(!err_flag) {
-				error << string_compose (_("unmap failed - could not unmap peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("unmap failed - could not unmap peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 #else
 			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
 			if (addr ==  MAP_FAILED) {
-				error << string_compose (_("map failed - could not mmap peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("map failed - could not mmap peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 
@@ -559,13 +559,13 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 
 			map_handle = CreateFileMapping(file_handle, NULL, PAGE_READONLY, 0, 0, NULL);
 			if (map_handle == NULL) {
-				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("map failed - could not create file mapping for peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 
 			view_handle = MapViewOfFile(map_handle, FILE_MAP_READ, 0, read_map_off, map_length);
 			if (view_handle == NULL) {
-				error << string_compose (_("map failed - could not map peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("map failed - could not map peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 
@@ -576,13 +576,13 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t
 			err_flag = UnmapViewOfFile (view_handle);
 			err_flag = CloseHandle(map_handle);
 			if(!err_flag) {
-				error << string_compose (_("unmap failed - could not unmap peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("unmap failed - could not unmap peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 #else
 			addr = (char*) mmap (0, map_length, PROT_READ, MAP_PRIVATE, sfd, read_map_off);
 			if (addr ==  MAP_FAILED) {
-				error << string_compose (_("map failed - could not mmap peakfile %1."), peakpath) << endmsg;
+				error << string_compose (_("map failed - could not mmap peakfile %1."), _peakpath) << endmsg;
 				return -1;
 			}
 
@@ -765,8 +765,8 @@ AudioSource::build_peaks_from_scratch ()
 
   out:
 	if (ret) {
-		DEBUG_TRACE (DEBUG::Peaks, string_compose("Could not write peak data, attempting to remove peakfile %1\n", peakpath));
-		::g_unlink (peakpath.c_str());
+		DEBUG_TRACE (DEBUG::Peaks, string_compose("Could not write peak data, attempting to remove peakfile %1\n", _peakpath));
+		::g_unlink (_peakpath.c_str());
 	}
 
 	return ret;
@@ -775,8 +775,8 @@ AudioSource::build_peaks_from_scratch ()
 int
 AudioSource::prepare_for_peakfile_writes ()
 {
-	if ((_peakfile_fd = g_open (peakpath.c_str(), O_CREAT|O_RDWR, 0664)) < 0) {
-		error << string_compose(_("AudioSource: cannot open peakpath (c) \"%1\" (%2)"), peakpath, strerror (errno)) << endmsg;
+	if ((_peakfile_fd = g_open (_peakpath.c_str(), O_CREAT|O_RDWR, 0664)) < 0) {
+		error << string_compose(_("AudioSource: cannot open _peakpath (c) \"%1\" (%2)"), _peakpath, strerror (errno)) << endmsg;
 		return -1;
 	}
 	return 0;
@@ -958,7 +958,7 @@ AudioSource::compute_and_write_peaks (Sample* buf, framecnt_t first_frame, frame
 		off_t target_length = blocksize * ((first_peak_byte + blocksize + 1) / blocksize);
 
 		if (endpos < target_length) {
-			DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile %1\n", peakpath));
+			DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile %1\n", _peakpath));
 			if (ftruncate (_peakfile_fd, target_length)) {
 				/* error doesn't actually matter so continue on without testing */
 			}
@@ -1009,10 +1009,10 @@ AudioSource::truncate_peakfile ()
 	off_t end = lseek (_peakfile_fd, 0, SEEK_END);
 
 	if (end > _peak_byte_max) {
-		DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile  %1\n", peakpath));
+		DEBUG_TRACE(DEBUG::Peaks, string_compose ("Truncating Peakfile  %1\n", _peakpath));
 		if (ftruncate (_peakfile_fd, _peak_byte_max)) {
 			error << string_compose (_("could not truncate peakfile %1 to %2 (error: %3)"),
-						 peakpath, _peak_byte_max, errno) << endmsg;
+						 _peakpath, _peak_byte_max, errno) << endmsg;
 		}
 	}
 }

@@ -153,7 +153,7 @@ AudioFileSource::~AudioFileSource ()
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("AudioFileSource destructor %1, removable? %2\n", _path, removable()));
 	if (removable()) {
 		::g_unlink (_path.c_str());
-		::g_unlink (peakpath.c_str());
+		::g_unlink (_peakpath.c_str());
 	}
 }
 
@@ -164,7 +164,7 @@ AudioFileSource::init (const string& pathstr, bool must_exist)
 }
 
 string
-AudioFileSource::peak_path (string audio_path)
+AudioFileSource::generate_peak_path (const string& audio_path)
 {
 	string base;
 
@@ -187,7 +187,7 @@ AudioFileSource::peak_path (string audio_path)
 }
 
 string
-AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
+AudioFileSource::find_broken_peakfile (const string& peak_path, const string& audio_path)
 {
 	string str;
 
@@ -203,7 +203,7 @@ AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 			   the bug means that we can't reliably use it.
 			*/
 
-			peak_path = str;
+			return str;
 
 		} else {
 			/* all native files are mono, so we can just rename
@@ -219,7 +219,7 @@ AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 #ifndef PLATFORM_WINDOWS // there's no old_peak_path() for windows
 		str = old_peak_path (audio_path);
 		if (Glib::file_test (str, Glib::FILE_TEST_EXISTS)) {
-			peak_path = str;
+			return str;
 		}
 #endif
 	}
@@ -228,13 +228,13 @@ AudioFileSource::find_broken_peakfile (string peak_path, string audio_path)
 }
 
 string
-AudioFileSource::broken_peak_path (string audio_path)
+AudioFileSource::broken_peak_path (const string& audio_path)
 {
 	return _session.peak_path (basename_nosuffix (audio_path));
 }
 
 string
-AudioFileSource::old_peak_path (string audio_path)
+AudioFileSource::old_peak_path (const string& audio_path)
 {
 	/* XXX hardly bombproof! fix me */
 
@@ -264,7 +264,7 @@ AudioFileSource::old_peak_path (string audio_path)
 }
 
 bool
-AudioFileSource::get_soundfile_info (string path, SoundFileInfo& _info, string& error_msg)
+AudioFileSource::get_soundfile_info (const string& path, SoundFileInfo& _info, string& error_msg)
 {
         /* try sndfile first because it gets timecode info from .wav (BWF) if it exists,
            which at present, ExtAudioFile from Apple seems unable to do.
@@ -325,7 +325,7 @@ AudioFileSource::mark_streaming_write_completed (const Lock& lock)
 int
 AudioFileSource::move_dependents_to_trash()
 {
-	return ::g_unlink (peakpath.c_str());
+	return ::g_unlink (_peakpath.c_str());
 }
 
 void

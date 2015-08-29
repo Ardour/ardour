@@ -4362,7 +4362,7 @@ Session::count_sources_by_origin (const string& path)
 }
 
 string
-Session::peak_path (string base) const
+Session::peak_path (const string& base) const
 {
 	if (Glib::path_is_absolute (base)) {
 
@@ -4398,8 +4398,8 @@ Session::peak_path (string base) const
 		}
 	}
 
-	base = Glib::path_get_basename (base);
-	return Glib::build_filename (_session_dir->peak_path(), base + peakfile_suffix);
+	std::string basename = Glib::path_get_basename (base);
+	return Glib::build_filename (_session_dir->peak_path(), basename + peakfile_suffix);
 }
 
 string
