@@ -334,6 +334,9 @@ class PortAudioBackend : public AudioBackend {
 		bool engine_halted ();
 		bool running ();
 
+		static bool set_mmcss_pro_audio (HANDLE* task_handle);
+		static bool reset_mmcss (HANDLE task_handle);
+
 	private:
 		std::string _instance_name;
 		PortAudioIO *_pcmio;

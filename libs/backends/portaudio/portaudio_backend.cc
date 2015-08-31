@@ -699,6 +699,41 @@ PortAudioBackend::name_to_id(std::string device_name) const {
 	return device_id;
 }
 
+bool
+PortAudioBackend::set_mmcss_pro_audio (HANDLE* task_handle)
+{
+	bool mmcss_success = mmcss::set_thread_characteristics ("Pro Audio", task_handle);
+
+	if (!mmcss_success) {
+		PBD::warning << get_error_string(SettingAudioThreadPriorityError) << endmsg;
+		return false;
+	} else {
+		DEBUG_THREADS("Thread characteristics set to Pro Audio\n");
+	}
+
+	bool mmcss_priority =
+		mmcss::set_thread_priority(*task_handle, mmcss::AVRT_PRIORITY_NORMAL);
+
+	if (!mmcss_priority) {
+		PBD::warning << get_error_string(SettingAudioThreadPriorityError) << endmsg;
+		return false;
+	} else {
+		DEBUG_THREADS("Thread priority set to AVRT_PRIORITY_NORMAL\n");
+	}
+
+	return true;
+}
+
+bool
+PortAudioBackend::reset_mmcss (HANDLE task_handle)
+{
+	if (!mmcss::revert_thread_characteristics(task_handle)) {
+		DEBUG_THREADS("Unable to reset process thread characteristics\n");
+		return false;
+	}
+	return true;
+}
+
 void *
 PortAudioBackend::portaudio_process_thread (void *arg)
 {
