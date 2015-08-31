@@ -324,7 +324,8 @@ class PortAudioBackend : public AudioBackend {
 		bool start_blocking_process_thread ();
 		bool stop_blocking_process_thread ();
 		bool blocking_process_freewheel ();
-		bool blocking_process_main ();
+		bool blocking_process_main (const float* interleaved_input_data,
+		                            float* interleaved_output_data);
 
 		void process_port_connection_changes ();
 		void process_incoming_midi ();

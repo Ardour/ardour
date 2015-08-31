@@ -39,6 +39,7 @@
 
 #include "win_utils.h"
 #include "mmcss.h"
+#include "audio_utils.h"
 
 #include "debug.h"
 
@@ -1461,7 +1462,8 @@ PortAudioBackend::main_blocking_process_thread ()
 				break;
 			}
 
-			if (!blocking_process_main()) {
+			if (!blocking_process_main(_pcmio->get_capture_buffer(),
+			                           _pcmio->get_playback_buffer())) {
 				return 0;
 			}
 		} else {
@@ -1487,7 +1489,8 @@ PortAudioBackend::main_blocking_process_thread ()
 }
 
 bool
-PortAudioBackend::blocking_process_main ()
+PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
+                                        float* interleaved_output_data)
 {
 	uint32_t i = 0;
 	uint64_t min_elapsed_us = 1000000;
@@ -1495,13 +1498,16 @@ PortAudioBackend::blocking_process_main ()
 
 	m_dsp_calc.set_start_timestamp_us (utils::get_microseconds());
 
-	/* get audio */
 	i = 0;
+	/* Copy input audio data into input port buffers */
 	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin();
 	     it != _system_inputs.end();
 	     ++it, ++i) {
-		_pcmio->get_capture_channel(
-		    i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
+		assert(_system_inputs.size() == _pcmio->n_capture_channels());
+		uint32_t channels = _system_inputs.size();
+		float* input_port_buffer = (float*)(*it)->get_buffer(_samples_per_period);
+		deinterleave_audio_data(
+		    interleaved_input_data, input_port_buffer, _samples_per_period, i, channels);
 	}
 
 	process_incoming_midi ();
@@ -1554,10 +1560,11 @@ PortAudioBackend::blocking_process_main ()
 	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin();
 	     it != _system_outputs.end();
 	     ++it, ++i) {
-		_pcmio->set_playback_channel(
-		    i,
-		    (float const*)(*it)->get_buffer(_samples_per_period),
-		    _samples_per_period);
+		assert(_system_outputs.size() == _pcmio->n_playback_channels());
+		const uint32_t channels = _system_outputs.size();
+		float* output_port_buffer = (float*)(*it)->get_buffer(_samples_per_period);
+		interleave_audio_data(
+		    output_port_buffer, interleaved_output_data, _samples_per_period, i, channels);
 	}
 
 	_processed_samples += _samples_per_period;

@@ -106,6 +106,9 @@ public:
 	int      get_capture_channel (uint32_t chn, float *input, uint32_t n_samples);
 	int      set_playback_channel (uint32_t chn, const float *input, uint32_t n_samples);
 
+	float* get_capture_buffer () { return _input_buffer; }
+	float* get_playback_buffer () { return _output_buffer; }
+
 private: // Methods
 
 	static bool pa_initialize();
