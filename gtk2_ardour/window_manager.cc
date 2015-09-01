@@ -97,6 +97,12 @@ Manager::show_visible() const
 {
 	for (Windows::const_iterator i = _windows.begin(); i != _windows.end(); ++i) {
 		if ((*i)->visible()) {
+			if (! (*i)->get (true)) {
+				/* the window may be a plugin GUI for a plugin which
+				 * is disabled or longer present.
+				 */
+				continue;
+			}
 			(*i)->show_all ();
 			(*i)->present ();
 		}
