@@ -743,12 +743,7 @@ PortAudioBackend::portaudio_process_thread (void *arg)
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
 	HANDLE task_handle;
-
-	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
-	if (!mmcss::set_thread_priority(task_handle, mmcss::AVRT_PRIORITY_NORMAL)) {
-		PBD::warning << get_error_string(SettingAudioThreadPriorityError)
-		             << endmsg;
-	}
+	bool mmcss_success = set_mmcss_pro_audio (&task_handle);
 #endif
 
 	DWORD tid = GetCurrentThreadId ();
@@ -757,7 +752,9 @@ PortAudioBackend::portaudio_process_thread (void *arg)
 	f ();
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
-	mmcss::revert_thread_characteristics (task_handle);
+	if (mmcss_success) {
+		reset_mmcss (task_handle);
+	}
 #endif
 
 	return 0;
@@ -1465,12 +1462,7 @@ PortAudioBackend::main_blocking_process_thread ()
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
 	HANDLE task_handle;
-
-	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
-	if (!mmcss::set_thread_priority(task_handle, mmcss::AVRT_PRIORITY_NORMAL)) {
-		PBD::warning << get_error_string(SettingAudioThreadPriorityError)
-		             << endmsg;
-	}
+	bool mmcss_success = set_mmcss_pro_audio (&task_handle);
 #endif
 
 	DWORD tid = GetCurrentThreadId ();
@@ -1517,7 +1509,9 @@ PortAudioBackend::main_blocking_process_thread ()
 	}
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
-	mmcss::revert_thread_characteristics (task_handle);
+	if (mmcss_success) {
+		reset_mmcss(task_handle);
+	}
 #endif
 
 	return 0;
