@@ -423,6 +423,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, input_offset (0)
 	, input_buffers (0)
 	, frames_processed (0)
+	, _match_ioports (false)
 	, _parameter_listener (0)
 	, _parameter_listener_arg (0)
 	, last_transport_rolling (false)
@@ -1012,8 +1013,11 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 {
 	AudioStreamBasicDescription streamFormat;
 	bool was_initialized = initialized;
-	int32_t audio_in = in.n_audio();
 	int32_t audio_out = out.n_audio();
+	if (_match_ioports) {
+		in.set (DataType::AUDIO, audio_out);
+	}
+	int32_t audio_in = in.n_audio();
 
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("configure %1 for %2 in %3 out\n", name(), in, out));
 
@@ -1310,13 +1314,17 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 
 		if (found) {
+			if (possible_in < -2 && possible_in == possible_out) {
+				// input-port count needs to match output-port
+				_match_ioports = true;
+			}
 			break;
 		}
 
 	}
 
 	if (found) {
-		out.set (DataType::MIDI, 0);
+		out.set (DataType::MIDI, 0); /// XXX
 		out.set (DataType::AUDIO, audio_out);
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 	} else {
@@ -2222,6 +2230,7 @@ AUPlugin::has_editor () const
 
 AUPluginInfo::AUPluginInfo (boost::shared_ptr<CAComponentDescription> d)
 	: descriptor (d)
+	, version (0)
 {
 	type = ARDOUR::AudioUnit;
 }
