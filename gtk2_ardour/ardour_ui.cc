@@ -592,33 +592,24 @@ ARDOUR_UI::post_engine ()
 
 	if (ARDOUR_COMMAND_LINE::show_key_actions) {
 
-		cerr << "Dump actions from " << ActionMap::action_maps.size() << " action maps\n";
 		
-		for (list<ActionMap*>::const_iterator map = ActionMap::action_maps.begin(); map != ActionMap::action_maps.end(); ++map) {
+		vector<string> paths;
+		vector<string> labels;
+		vector<string> tooltips;
+		vector<string> keys;
+		vector<Glib::RefPtr<Gtk::Action> > actions;
+		
+		Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
 
-			Bindings* bindings = (*map)->bindings();
-			
-			ActionMap::Actions actions;
+		vector<string>::iterator k;
+		vector<string>::iterator p;
 
-			(*map)->get_actions (actions);
+		for (p = paths.begin(), k = keys.begin(); p != paths.end(); ++k, ++p) {
 
-			for (ActionMap::Actions::const_iterator act = actions.begin(); act != actions.end(); ++act) {
-
-				if (bindings) {
-
-					KeyboardKey key;
-					Bindings::Operation op;
-					
-					key = bindings->get_binding_for_action (*act, op);
-					
-					if (key == KeyboardKey::null_key()) {
-						cout << Bindings::ardour_action_name (*act) << endl;
-					} else {
-						cout << Bindings::ardour_action_name (*act) << " => " << key.display_label() << endl;
-					}
-				} else {
-					cout << Bindings::ardour_action_name (*act) << endl;
-				}
+			if ((*k).empty()) {
+				cout << *p << endl;
+			} else {
+				cout << *p << " => " << *k << endl;
 			}
 		}
 
