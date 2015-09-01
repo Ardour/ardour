@@ -91,7 +91,7 @@ This mode provides many different operations on both regions and control points,
 %mopsolo editor Mouse Ops on Solo Buttons only
 %mopsfader editor Mouse Ops on Faders \& Plugin Controls
 
-%midi editor MIDI specific commands
+%midi global MIDI specific commands
 
 ;; END GROUP DEFINITIONS
 
@@ -106,24 +106,24 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>grave|next EP w/marker
 
 @trans|Transport/ToggleRoll|space|toggle roll
-@epp|Editor/PlaySelection|<@SECONDARY@>space|play edit range
+@trans|Transport/PlaySelection|<@SECONDARY@>space|play edit range
 @epp|Editor/play-from-edit-point-and-return|<@PRIMARY@><@TERTIARY@>space|play from EP \& return
 @trans|Transport/ToggleRollMaybe|<@PRIMARY@><@SECONDARY@>space|stop (keep loop/range play)
 @trans|Transport/ToggleRollForgetCapture|<@PRIMARY@>space|stop and destroy
 @trans|Transport/record-roll|<@TERTIARY@>space|start recording
 
-@trans|Editor/add-location-from-playhead|Tab|add marker
-@trans|Editor/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
-@movp|Transport/alternate-GotoStart|Return|to start marker
+@edit|Editor/add-location-from-playhead|Tab|add marker
+@edit|Editor/remove-location-from-playhead|<@PRIMARY@>nabla|add marker
+@trans|Transport/alternate-GotoStart|Return|to start marker
 
-@trans|Editor/editor-fade-range|slash|fade range selection
+@edit|Editor/editor-fade-range|slash|fade range selection
 @rop|Region/set-fade-in-length|<@PRIMARY@>slash|set fade in length
 ;;@rop|Region/toggle-region-fade-out|<@PRIMARY@>slash|toggle fade in active
 @rop|Region/set-fade-out-length|<@PRIMARY@>backslash|set fade out length
 ;;@rop|Region/toggle-region-fade-out|<@PRIMARY@>backslash|toggle fade out active
 
-@eep|Editor/trim-to-previous-region|<@PRIMARY@>j|trim region to end of prev region
-@eep|Editor/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
+@eep|Region/trim-to-previous-region|<@PRIMARY@>j|trim region to end of prev region
+@eep|Region/trim-to-next-region|<@PRIMARY@>k|trim region to start of next region
 
 @ranges|Editor/set-loop-from-edit-range|bracketright|set loop range from edit range
 
@@ -157,7 +157,6 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/ExportAudio|<@SECONDARY@>e|export session
 @select|Editor/select-all-after-edit-cursor|<@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|<@TERTIARY@>e|toggle editor window mixer
-@wvis|Common/goto-editor|<@SECONDARY@>e|show editor tab/window
 @mmode|MouseMode/set-mouse-mode-range|r|range mode
 @edit|Editor/redo|<@PRIMARY@>r|redo
 @trans|Transport/Record|<@TERTIARY@>r|engage record
@@ -169,18 +168,16 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-within-cursors|u|all present in edit range
 @eep|Region/insert-region-from-region-list|i|insert from region list
 @select|Editor/invert-selection|<@TERTIARY@>i|invert selection
-@sess|Editor/addExistingAudioFiles|<@PRIMARY@>i|import audio files
-@sess|Editor/toggle-midi-input-active|<@SECONDARY@>i|toggle sel. track MIDI input
+@edit|Editor/addExistingAudioFiles|<@PRIMARY@>i|import audio files
+@edit|Editor/toggle-midi-input-active|<@SECONDARY@>i|toggle sel. track MIDI input
 @mmode|MouseMode/set-mouse-mode-object|g|object mode
 @mmode|MouseMode/set-mouse-mode-content|e|content mode
 @sess|Main/Open|<@PRIMARY@>o|open an existing session
 @sess|Main/Recent|<@PRIMARY@><@TERTIARY@>o|open a recent session
 @wvis|Window/toggle-session-options-editor|<@SECONDARY@>o|toggle preferences dialog
-@trans|Editor/set-playhead|p|set playhead position
-@select|Editor/select-all-before-playhead|<@PRIMARY@>p|all before playhead
+@edit|Editor/set-playhead|p|set playhead position
 @wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>p|toggle global audio patchbay
 @midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
-@select|Editor/select-all-after-playhead|<@PRIMARY@><@TERTIARY@>p|all after playhead
 
 ;; MIDDLE ROW
 
@@ -193,18 +190,17 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/split-region|s|split
 @sess|Common/Save|<@PRIMARY@>s|save session
 @sess|Main/SnapshotStay|<@PRIMARY@><@TERTIARY@>s|snapshot session
-@trans|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
+@edit|Editor/track-solo-toggle|<@SECONDARY@>s|toggle track solo status
 @mmode|MouseMode/set-mouse-mode-draw|d|note-draw mode
 @rop|Region/duplicate-region|<@SECONDARY@>d|duplicate region (once)
 @rop|Region/multi-duplicate-region|<@TERTIARY@>d|duplicate region (multi)
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
 @vis|Editor/fit-selection|f|fit selection vertically
-@trans|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
-@wvis|Region/show-rhythm-ferret|<@SECONDARY@>f|show rhythm ferret window 
+@edit|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
+@edit|Region/show-rhythm-ferret|<@SECONDARY@>f|show rhythm ferret window 
 @trans|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|<@PRIMARY@><@TERTIARY@>f|maximise mixer space
-@mmode|MouseMode/set-mouse-mode-gain|g|region gain mode
 @epp|Region/play-selected-regions|h|play selected region(s)
 @eep|Region/trim-front|j|trim front
 @eep|Region/trim-back|k|trim back
@@ -216,7 +212,6 @@ This mode provides many different operations on both regions and control points,
 ;; BOTTOM ROW
 
 @mmode|Editor/zoom-to-selection|z|zoom to selection
-@vis|Editor/zoom-to-selection-both-axes|<@PRIMARY@><@SECONDARY@>z|zoom to selection, x and y
 @edit|Editor/undo|<@PRIMARY@>z|undo
 @edit|Editor/alternate-alternate-redo|<@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|<@TERTIARY@>z|toggle last 2 zoom states
@@ -228,12 +223,10 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/set-region-sync-position|v|set region sync point
 @edit|Editor/editor-paste|<@PRIMARY@>v|paste
 @edit|Editor/ToggleJadeo|<@SECONDARY@>v|video window
-@-edit|Editor/brush-at-mouse|<@PRIMARY@>b|some text
 @wvis|Common/toggle-meterbridge|<@SECONDARY@>b|show meter bridge
-@trans|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
+@edit|Editor/track-record-enable-toggle|<@TERTIARY@>b|toggle track rec-enable 
 @sess|Main/AddTrackBus|<@PRIMARY@><@TERTIARY@>n|add track(s) or bus(ses)
 @sess|Main/New|<@PRIMARY@>n|open a new session
-@wvis|Common/toggle-editor-mixer|<@SECONDARY@>m|rotate editor \& mixer window
 @wvis|Window/toggle-midi-connection-manager|<@SECONDARY@><@TERTIARY@>m|toggle global midi patchbay
 
 ;; arrow keys, navigation etc.
@@ -268,8 +261,8 @@ This mode provides many different operations on both regions and control points,
 
 @vis|Editor/scroll-tracks-down|Page_Down|scroll down (page)
 @vis|Editor/scroll-tracks-up|Page_Up|scroll up (page)
-@movp|Transport/GotoStart|Home|to start marker
-@movp|Transport/GotoEnd|End|to end marker
+@trans|Transport/GotoStart|Home|to start marker
+@trans|Transport/GotoEnd|End|to end marker
 @edit|Editor/editor-delete|Delete|delete
 @edit|Editor/alternate-editor-delete|BackSpace|backspace (delete)
 
@@ -299,10 +292,10 @@ This mode provides many different operations on both regions and control points,
 @markers|Editor/alternate-remove-location-from-playhead|<@PRIMARY@>KP_Enter|add mark at playhead
 @wvis|Transport/focus-on-clock|KP_Divide|focus on main clock
 
-@movp|Transport/numpad-decimal|KP_Decimal|numpad decimal should initiate and finalize a locate-to-marker
-@movp|Transport/alternate-numpad-decimal|KP_Separator|(some keybd layouts have separator instead of decimal)
+@trans|Transport/numpad-decimal|KP_Decimal|numpad decimal should initiate and finalize a locate-to-marker
+@trans|Transport/alternate-numpad-decimal|KP_Separator|(some keybd layouts have separator instead of decimal)
 
-@movp|Transport/numpad-0|KP_0|some text
+@global|Transport/numpad-0|KP_0|some text
 @-global|Transport/numpad-1|KP_1|some text
 @-global|Transport/numpad-2|KP_2|some text
 @-global|Transport/numpad-3|KP_3|some text
