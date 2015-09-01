@@ -118,6 +118,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 bool Session::_disable_all_loaded_plugins = false;
+bool Session::_bypass_all_loaded_plugins = false;
 
 PBD::Signal1<int,uint32_t> Session::AudioEngineSetupRequired;
 PBD::Signal1<void,std::string> Session::Dialog;

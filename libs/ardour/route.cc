@@ -1239,7 +1239,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 
 		}
 
-		if (activation_allowed && (!_session.get_disable_all_loaded_plugins () || !processor->display_to_user ())) {
+		if (activation_allowed && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user ())) {
 			processor->activate ();
 		}
 
@@ -1292,7 +1292,11 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 						prop->value() == "lxvst" ||
 						prop->value() == "audiounit") {
 
-					processor.reset (new PluginInsert (_session));
+					if (_session.get_disable_all_loaded_plugins ()) {
+						processor.reset (new UnknownProcessor (_session, node));
+					} else {
+						processor.reset (new PluginInsert (_session));
+					}
 
 				} else {
 
@@ -1319,7 +1323,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 		//A2 uses the "active" flag in the toplevel redirect node, not in the child plugin/IO
 		if (i != children.end()) {
 			if ((prop = (*i)->property (X_("active"))) != 0) {
-				if ( string_is_affirmative (prop->value()) && (!_session.get_disable_all_loaded_plugins () || !processor->display_to_user () ) )
+				if ( string_is_affirmative (prop->value()) && (!_session.get_bypass_all_loaded_plugins () || !processor->display_to_user () ) )
 					processor->activate();
 				else
 					processor->deactivate();
@@ -2866,8 +2870,11 @@ Route::set_processor_state (const XMLNode& node)
 					   prop->value() == "lxvst" ||
 				           prop->value() == "audiounit") {
 
-					processor.reset (new PluginInsert(_session));
-
+					if (_session.get_disable_all_loaded_plugins ()) {
+						processor.reset (new UnknownProcessor (_session, **niter));
+					} else {
+						processor.reset (new PluginInsert (_session));
+					}
 				} else if (prop->value() == "port") {
 
 					processor.reset (new PortInsert (_session, _pannable, _mute_master));
@@ -4237,6 +4244,11 @@ list<string>
 Route::unknown_processors () const
 {
 	list<string> p;
+
+	if (_session.get_disable_all_loaded_plugins ()) {
+		// Do not list "missing plugins" if they are explicitly disabled
+		return p;
+	}
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {

@@ -760,6 +760,12 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static bool get_disable_all_loaded_plugins() {
 		return _disable_all_loaded_plugins;
 	}
+	static void set_bypass_all_loaded_plugins (bool yn) {
+		_bypass_all_loaded_plugins = yn;
+	}
+	static bool get_bypass_all_loaded_plugins() {
+		return _bypass_all_loaded_plugins;
+	}
 
 	uint32_t next_send_id();
 	uint32_t next_aux_send_id();
@@ -1733,6 +1739,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_history_depth (uint32_t depth);
 
 	static bool _disable_all_loaded_plugins;
+	static bool _bypass_all_loaded_plugins;
 
 	mutable bool have_looped; ///< Used in ::audible_frame(*)
 
