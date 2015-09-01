@@ -592,20 +592,33 @@ ARDOUR_UI::post_engine ()
 
 	if (ARDOUR_COMMAND_LINE::show_key_actions) {
 
-		for (list<Bindings*>::const_iterator mb = Bindings::bindings.begin(); mb != Bindings::bindings.end(); ++mb) {
+		cerr << "Dump actions from " << ActionMap::action_maps.size() << " action maps\n";
+		
+		for (list<ActionMap*>::const_iterator map = ActionMap::action_maps.begin(); map != ActionMap::action_maps.end(); ++map) {
 
-			vector<string> names;
-			vector<string> paths;
-			vector<string> keys;
-
-#warning Paul fix this before tabbed is merged
-			// mb->second->get_all_actions (names, paths, keys);
+			Bindings* bindings = (*map)->bindings();
 			
-			vector<string>::iterator n;
-			vector<string>::iterator k;
-			vector<string>::iterator p;
-			for (n = names.begin(), k = keys.begin(), p = paths.begin(); n != names.end(); ++n, ++k, ++p) {
-				cout << "Action: '" << (*n) << "' bound to '" << (*k) << "' Path: '" << (*p) << "'" << endl;
+			ActionMap::Actions actions;
+
+			(*map)->get_actions (actions);
+
+			for (ActionMap::Actions::const_iterator act = actions.begin(); act != actions.end(); ++act) {
+
+				if (bindings) {
+
+					KeyboardKey key;
+					Bindings::Operation op;
+					
+					key = bindings->get_binding_for_action (*act, op);
+					
+					if (key == KeyboardKey::null_key()) {
+						cout << Bindings::ardour_action_name (*act) << endl;
+					} else {
+						cout << Bindings::ardour_action_name (*act) << " => " << key.display_label() << endl;
+					}
+				} else {
+					cout << Bindings::ardour_action_name (*act) << endl;
+				}
 			}
 		}
 
