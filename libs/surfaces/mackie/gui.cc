@@ -34,6 +34,7 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
@@ -451,13 +452,13 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	vector<string> labels;
 	vector<string> tooltips;
 	vector<string> keys;
-	vector<AccelKey> bindings;
+	vector<Glib::RefPtr<Gtk::Action> > actions;
+
 	typedef std::map<string,TreeIter> NodeMap;
 	NodeMap nodes;
 	NodeMap::iterator r;
 
-#warning Paul fix this before you think tabbed is done
-	// get_all_actions (labels, paths, tooltips, keys, bindings);
+	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
 
 	vector<string>::iterator k;
 	vector<string>::iterator p;
@@ -467,8 +468,9 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	available_action_model->clear ();
 
 	/* Because there are button bindings built in that are not
-	in the key binding map, there needs to be a way to undo
-	a profile edit. */
+	   in the key binding map, there needs to be a way to undo
+	   a profile edit. 
+	*/
 	TreeIter rowp;
 	TreeModel::Row parent;
 	rowp = available_action_model->append();
