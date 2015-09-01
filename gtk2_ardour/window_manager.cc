@@ -66,12 +66,12 @@ Manager::register_window (ProxyBase* info)
 	if (!info->menu_name().empty()) {
 
 		if (!window_actions) {
-			window_actions = window_action_map.create_action_group (X_("Window"));
+			window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
 		}
 
-		info->set_action (window_action_map.register_toggle_action (window_actions,
-		                                                            info->action_name().c_str(), info->menu_name().c_str(),
-		                                                            sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
+		info->set_action (ARDOUR_UI::instance()->global_actions.register_toggle_action (window_actions,
+			 info->action_name().c_str(), info->menu_name().c_str(),
+			 sigc::bind (sigc::mem_fun (*this, &Manager::toggle_window), info)));
 	}
 }
 
@@ -90,7 +90,7 @@ void
 Manager::toggle_window (ProxyBase* proxy)
 {
 
-	Glib::RefPtr<Gtk::Action> act = window_action_map.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
+	Glib::RefPtr<Gtk::Action> act = ARDOUR_UI::instance()->global_actions.find_action (string_compose ("%1/%2", window_actions->get_name(), proxy->action_name()));
 	if (!act) {
 		return;
 	}

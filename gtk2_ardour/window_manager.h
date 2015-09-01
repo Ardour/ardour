@@ -71,7 +71,6 @@ class Manager : public ARDOUR::SessionHandlePtr
 	Windows _windows;
 	Glib::RefPtr<Gtk::ActionGroup> window_actions;
 	Gtk::Window* current_transient_parent;
-	Gtkmm2ext::ActionMap window_action_map;
 	
 	Manager();
 	~Manager();
