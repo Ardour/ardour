@@ -44,6 +44,7 @@ using namespace PBD;
 using Gtkmm2ext::Bindings;
 
 MixerActor::MixerActor ()
+	: myactions (X_("mixer"))
 {
 	register_actions ();
 	load_bindings ();

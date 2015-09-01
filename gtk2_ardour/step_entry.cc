@@ -85,6 +85,7 @@ StepEntry::StepEntry (StepEditor& seditor)
 	, _piano (0)
 	, piano (0)
 	, se (&seditor)
+	, myactions (X_("step entry"))
 {
         register_actions ();
         load_bindings ();

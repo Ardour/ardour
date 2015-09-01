@@ -102,7 +102,7 @@ RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::delete_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
-ActionMap      ProcessorBox::processor_box_actions;
+ActionMap      ProcessorBox::processor_box_actions (X_("processor box"));
 
 static const uint32_t audio_port_color = 0x4A8A0EFF; // Green
 static const uint32_t midi_port_color = 0x960909FF; //Red

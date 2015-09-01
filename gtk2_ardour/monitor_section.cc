@@ -83,6 +83,7 @@ MonitorSection::MonitorSection (Session* s)
 	, toggle_processorbox_button (ArdourButton::default_elements)
 	, _inhibit_solo_model_update (false)
 	, _ui_initialized (false)
+	, myactions (X_("monitor section"))
 	, bindings (0)
 {
 

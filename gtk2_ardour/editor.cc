@@ -461,6 +461,7 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
+	, myactions (X_("editor"))
 {
 	/* we are a singleton */
 
