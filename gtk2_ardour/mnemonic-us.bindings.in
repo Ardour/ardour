@@ -47,7 +47,7 @@ just align the first region and moves other selected regions to maintain relativ
 
 %epp editor Edit Point Playback
 
-%movp global Moving the Playhead
+%movp editor Moving the Playhead
 A left click in the rulers positions the playhead unless Ardour is recording. You can use {\tt KP$\_$n} to move the 
 playhead to the n-th marker.
 
