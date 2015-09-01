@@ -86,11 +86,12 @@ print_help ()
 
 int main (int argc, char* argv[])
 {
-	const char *optstring = "vhdD:c:VOU:P";
+	const char *optstring = "vhBdD:c:VOU:P";
 
 	const struct option longopts[] = {
 		{ "version", 0, 0, 'v' },
 		{ "help", 0, 0, 'h' },
+		{ "bypass-plugins", 1, 0, 'B' },
 		{ "disable-plugins", 1, 0, 'd' },
 		{ "debug", 1, 0, 'D' },
 		{ "name", 1, 0, 'c' },
@@ -126,6 +127,10 @@ int main (int argc, char* argv[])
 
 		case 'c':
 			backend_client_name = optarg;
+			break;
+
+		case 'B':
+			ARDOUR::Session::set_bypass_all_loaded_plugins (true);
 			break;
 
 		case 'd':

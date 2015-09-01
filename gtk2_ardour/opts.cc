@@ -60,6 +60,7 @@ print_help (const char *execname)
 	     << _("  -h, --help                  Print this message\n")
 	     << _("  -a, --no-announcements      Do not contact website for announcements\n")
 	     << _("  -b, --bindings              Print all possible keyboard binding names\n")
+	     << _("  -B, --bypass-plugins        Bypass all plugins in an existing session\n")
 	     << _("  -c, --name <name>           Use a specific backend client name, default is ardour\n")
 	     << _("  -d, --disable-plugins       Disable all plugins in an existing session\n")
 	     << _("  -D, --debug <options>       Set debug flags. Use \"-D list\" to see available options\n")
@@ -83,7 +84,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "abc:C:dD:hk:E:m:N:nOp:PST:U:vV";
+	const char *optstring = "abBc:C:dD:hk:E:m:N:nOp:PST:U:vV";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (getenv ("ARDOUR_SAE")) {
@@ -102,6 +103,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "help", 0, 0, 'h' },
 		{ "no-announcements", 0, 0, 'a' },
 		{ "bindings", 0, 0, 'b' },
+		{ "bypass-plugins", 0, 0, 'B' },
 		{ "disable-plugins", 0, 0, 'd' },
 		{ "debug", 1, 0, 'D' },
 		{ "no-splash", 0, 0, 'n' },
@@ -147,6 +149,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 
 		case 'b':
 			show_key_actions = true;
+			break;
+
+		case 'B':
+			ARDOUR::Session::set_bypass_all_loaded_plugins (true);
 			break;
 
 		case 'd':
