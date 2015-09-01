@@ -320,9 +320,9 @@ SessionDialog::setup_initial_choice_box ()
 	recent_session_model = TreeStore::create (recent_session_columns);
 	
 	recent_session_display.set_model (recent_session_model);
-	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
+	recent_session_display.append_column (_("Session Name"), recent_session_columns.visible_name);
 	recent_session_display.append_column (_("Sample Rate"), recent_session_columns.sample_rate);
-	recent_session_display.append_column (_("Disk Format"), recent_session_columns.disk_format);
+	recent_session_display.append_column (_("File Resolution"), recent_session_columns.disk_format);
 	recent_session_display.set_headers_visible (true);
 	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
 	
