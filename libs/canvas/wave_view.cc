@@ -1526,6 +1526,11 @@ WaveView::drawing_thread ()
 			request_cond.wait (request_queue_lock);
 		}
 
+		if (request_queue.empty()) {
+			assert (g_atomic_int_get (&drawing_thread_should_quit));
+			continue; // or break;
+		}
+
 		/* remove the request from the queue (remember: the "request"
 		 * is just a pointer to a WaveView object)
 		 */
