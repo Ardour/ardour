@@ -64,7 +64,6 @@
 #include "evoral/SMF.hpp"
 
 #include "pbd/boost_debug.h"
-#include "pbd/basename.h"
 #include "pbd/controllable_descriptor.h"
 #include "pbd/debug.h"
 #include "pbd/enumwriter.h"
@@ -2427,30 +2426,13 @@ state_file_filter (const string &str, void* /*arg*/)
 		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
 }
 
-static string
-remove_end(string state)
-{
-	string statename(state);
-
-	string::size_type start,end;
-	if ((start = statename.find_last_of (G_DIR_SEPARATOR)) != string::npos) {
-		statename = statename.substr (start+1);
-	}
-
-	if ((end = statename.rfind(statefile_suffix)) == string::npos) {
-		end = statename.length();
-	}
-
-	return string(statename.substr (0, end));
-}
-
 vector<string>
 Session::possible_states (string path)
 {
 	vector<string> states;
 	find_files_matching_filter (states, path, state_file_filter, 0, false, false);
 
-	transform(states.begin(), states.end(), states.begin(), remove_end);
+	transform(states.begin(), states.end(), states.begin(), filename_no_extension);
 
 	sort (states.begin(), states.end());
 
@@ -2657,9 +2639,9 @@ accept_all_midi_files (const string& path, void* /*arg*/)
                 return false;
         }
 
-	return ((path.length() > 4 && path.find (".mid") != (path.length() - 4)) ||
-                (path.length() > 4 && path.find (".smf") != (path.length() - 4)) ||
-                (path.length() > 5 && path.find (".midi") != (path.length() - 5)));
+	return ((get_extension (path) == mid_suffix) ||
+                (get_extension (path) == smf_suffix) ||
+                (get_extension (path) == midi_suffix));
 }
 
 static bool
@@ -2669,12 +2651,10 @@ accept_all_state_files (const string& path, void* /*arg*/)
 		return false;
 	}
 
-	std::string const statefile_ext (statefile_suffix);
-	if (path.length() >= statefile_ext.length()) {
-		return (0 == path.compare (path.length() - statefile_ext.length(), statefile_ext.length(), statefile_ext));
-	} else {
-		return false;
+	if (PBD::get_extension(path) == statefile_suffix) {
+		return true;
 	}
+	return false;
 }
 
 int
@@ -3047,7 +3027,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		/* see if there an easy to find peakfile for this file, and remove it.
 		 */
 
-                string base = basename_nosuffix (*x);
+                string base = filename_no_extension (*x);
                 base += "%A"; /* this is what we add for the channel suffix of all native files,
                                  or for the first channel of embedded files. it will miss
                                  some peakfiles for other channels

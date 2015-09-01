@@ -31,6 +31,10 @@ namespace ARDOUR {
 	LIBARDOUR_API extern const char* const peakfile_suffix;
 	LIBARDOUR_API extern const char* const backup_suffix;
 	LIBARDOUR_API extern const char* const temp_suffix;
+	LIBARDOUR_API extern const char* const smf_suffix;
+	LIBARDOUR_API extern const char* const mid_suffix;
+	LIBARDOUR_API extern const char* const midi_suffix;
+	LIBARDOUR_API extern const char* const midnam_suffix;
 	LIBARDOUR_API extern const char* const history_suffix;
 	LIBARDOUR_API extern const char* const export_preset_suffix;
 	LIBARDOUR_API extern const char* const export_format_suffix;

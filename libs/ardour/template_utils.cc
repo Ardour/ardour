@@ -22,7 +22,6 @@
 
 #include <glibmm.h>
 
-#include "pbd/basename.h"
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
@@ -103,7 +102,7 @@ find_session_templates (vector<TemplateInfo>& template_names)
 
 		TemplateInfo rti;
 
-		rti.name = basename_nosuffix (*i);
+		rti.name = filename_no_extension (*i);
 		rti.path = *i;
 
 		template_names.push_back (rti);

@@ -18,8 +18,6 @@
 */
 #include <cmath>
 
-#include "pbd/basename.h"
-
 #include "ardour/quantize.h"
 #include "ardour/midi_model.h"
 

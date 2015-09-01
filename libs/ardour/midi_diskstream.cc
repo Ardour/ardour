@@ -30,7 +30,6 @@
 
 #include "pbd/error.h"
 #include "pbd/ffs.h"
-#include "pbd/basename.h"
 #include <glibmm/threads.h>
 #include "pbd/xml++.h"
 #include "pbd/memento_command.h"

@@ -29,7 +29,6 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
-#include "pbd/basename.h"
 #include "pbd/stateful_diff_command.h"
 
 #include "gtkmm2ext/bindings.h"

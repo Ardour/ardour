@@ -36,7 +36,6 @@
 
 #include <boost/algorithm/string/erase.hpp>
 
-#include "pbd/basename.h"
 #include "pbd/boost_debug.h"
 #include "pbd/convert.h"
 #include "pbd/convert.h"
@@ -4441,10 +4440,9 @@ Session::new_audio_source_path_for_embedded (const std::string& path)
 		md5.writeToString ();
 		base = md5.digestChars;
 		
-		string ext = get_suffix (path);
+		string ext = get_extension (path);
 
 		if (!ext.empty()) {
-			base += '.';
 			base += ext;
 		}
 		

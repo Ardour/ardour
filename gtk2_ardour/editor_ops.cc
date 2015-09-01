@@ -29,7 +29,6 @@
 #include <set>
 
 #include "pbd/error.h"
-#include "pbd/basename.h"
 #include "pbd/pthread_utils.h"
 #include "pbd/memento_command.h"
 #include "pbd/unwind.h"

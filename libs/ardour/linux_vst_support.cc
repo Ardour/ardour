@@ -34,8 +34,8 @@
 #include <glibmm/fileutils.h>
 
 #include "ardour/linux_vst_support.h"
-#include "pbd/basename.h"
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 
 #include "i18n.h"
 
@@ -224,7 +224,7 @@ vstfx_load (const char *path)
 	   which we don't want to do at this point
 	*/
 	
-	fhandle->name = strdup (PBD::basename_nosuffix (path).c_str());
+	fhandle->name = strdup (PBD::filename_no_extension (path).c_str());
 
 	/*call load_vstfx_library to actually load the .so into memory*/
 

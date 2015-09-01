@@ -362,13 +362,26 @@ get_absolute_path (const std::string & p)
 }
 
 std::string
-get_suffix (const std::string & p)
+get_extension (const std::string& p)
 {
-	string::size_type period = p.find_last_of ('.');
-	if (period == string::npos || period == p.length() - 1) {
-		return string();
-	}
-	return p.substr (period+1);
+	if (p == "." || p == "..") return string();
+	string::size_type pos (p.rfind ('.'));
+	return pos == string::npos ? string() : string(p.c_str() + pos);
+}
+
+std::string
+remove_extension (const std::string& p)
+{
+	if (p == "." || p == "..") return p;
+	string::size_type pos (p.rfind ('.'));
+	return pos == string::npos ? p : string(p.c_str(), p.c_str() + pos);
+}
+
+std::string
+filename_no_extension (const std::string& p)
+{
+	std::string base = Glib::path_get_basename (p);
+	return remove_extension (base);
 }
 
 bool

@@ -30,7 +30,6 @@
 
 #include <sigc++/bind.h>
 #include "pbd/error.h"
-#include "pbd/basename.h"
 #include "pbd/fastlog.h"
 #include <gtkmm2ext/cairocell.h>
 #include <gtkmm2ext/utils.h>

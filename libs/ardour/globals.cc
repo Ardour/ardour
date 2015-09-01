@@ -79,7 +79,6 @@
 #include "pbd/fpu.h"
 #include "pbd/file_utils.h"
 #include "pbd/enumwriter.h"
-#include "pbd/basename.h"
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
@@ -574,7 +573,7 @@ ARDOUR::find_bindings_files (map<string,string>& files)
 		std::string path(*x);
 		pair<string,string> namepath;
 		namepath.second = path;
-		namepath.first = PBD::basename_nosuffix (path);
+		namepath.first = PBD::filename_no_extension (path);
 		files.insert (namepath);
 	}
 }
