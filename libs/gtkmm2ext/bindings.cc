@@ -315,7 +315,13 @@ Bindings::get_binding_for_action (RefPtr<Action> action, Operation& op)
 void
 Bindings::set_action_map (ActionMap& actions)
 {
+	if (_action_map) {
+		_action_map->set_bindings (0);
+	}
+	
 	_action_map = &actions;
+	_action_map->set_bindings (this);
+	
 	dissociate ();
 	associate ();
 }
@@ -389,14 +395,13 @@ Bindings::associate ()
 	if (!_action_map) {
 		return;
 	}
-	
+
 	for (k = press_bindings.begin(); k != press_bindings.end(); ++k) {
 		k->second.action = _action_map->find_action (k->second.action_name);
 		if (k->second.action) {
-			cerr << "push to GTK " << k->first << ' ' << k->second.action_name << endl;
 			push_to_gtk (k->first, k->second.action);
 		} else {
-			cerr << "didn't find " << k->second.action_name << endl;
+			cerr << _name << " didn't find " << k->second.action_name << " in " << _action_map->name() << endl;
 		}
 	}
 
@@ -902,6 +907,24 @@ Bindings::associate_all ()
 }
 
 /*==========================================ACTION MAP =========================================*/
+
+ActionMap::ActionMap (string const & name)
+	: _name (name)
+	, _bindings (0)
+{
+	action_maps.push_back (this);
+}
+
+ActionMap::~ActionMap ()
+{
+	action_maps.remove (this);
+}
+
+void
+ActionMap::set_bindings (Bindings* b)
+{
+	_bindings = b;
+}
 
 void
 ActionMap::get_actions (ActionMap::Actions& acts)

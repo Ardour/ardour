@@ -76,11 +76,15 @@ class LIBGTKMM2EXT_API MouseButton {
         uint64_t _val;
 };
 
+class LIBGTKMM2EXT_API Bindings;
+
 class LIBGTKMM2EXT_API ActionMap {
   public:
-        ActionMap() {}
-        ~ActionMap() {}
+	ActionMap (std::string const& name);
+	~ActionMap();
 
+	std::string name() const { return _name; }
+	
         Glib::RefPtr<Gtk::ActionGroup> create_action_group (const std::string& group_name);
 
         Glib::RefPtr<Gtk::Action> register_action (Glib::RefPtr<Gtk::ActionGroup> group, const char* name, const char* label);
@@ -105,18 +109,24 @@ class LIBGTKMM2EXT_API ActionMap {
 
 	static std::list<ActionMap*> action_maps;
 	
+	void set_bindings (Bindings*);
+	Bindings* bindings() const { return _bindings; }
+
   private:
-<<<<<<< HEAD
-        typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
-        _ActionMap actions;
-};
-=======
+	std::string _name;
+
 	/* hash for faster lookup of actions by name */
 
 	typedef std::map<std::string, Glib::RefPtr<Gtk::Action> > _ActionMap;
         _ActionMap _actions;
+
+        /* initialized to null; set after a Bindings object has ::associated()
+         * itself with this action map.
+         */
+         
+        Bindings* _bindings;
+        
 };        
->>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
 
 class LIBGTKMM2EXT_API Bindings {
   public:
@@ -125,9 +135,6 @@ class LIBGTKMM2EXT_API Bindings {
                 Release
         };
 
-<<<<<<< HEAD
-        Bindings();
-=======
         struct ActionInfo {
 	        ActionInfo (std::string const& name) : action_name (name) {}
 
@@ -136,7 +143,6 @@ class LIBGTKMM2EXT_API Bindings {
         };
         
         Bindings (std::string const& name);
->>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
         ~Bindings ();
 
         std::string const& name() const { return _name; }
@@ -164,11 +170,6 @@ class LIBGTKMM2EXT_API Bindings {
         bool load (XMLNode const& node);
         void load_operation (XMLNode const& node);
         void save (XMLNode& root);
-<<<<<<< HEAD
-
-        void set_action_map (ActionMap&);
-=======
->>>>>>> radically change Keyboard/Binding API design to disconnect Gtk::Action lookup from binding definition
         
         /* There are modifiers that we just don't care about
            when it comes to defining bindings. This sets the modifiers
