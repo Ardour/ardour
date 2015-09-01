@@ -118,6 +118,22 @@ set_thread_characteristics (const std::string& task_name, HANDLE* task_handle)
 	if (*task_handle == 0) {
 		DEBUG_THREADS (string_compose ("Failed to set Thread Characteristics to %1\n",
 		                               task_name));
+		DWORD error = GetLastError();
+
+		switch (error) {
+		case ERROR_INVALID_TASK_INDEX:
+			DEBUG_THREADS("MMCSS: Invalid Task Index\n");
+			break;
+		case ERROR_INVALID_TASK_NAME:
+			DEBUG_THREADS("MMCSS: Invalid Task Name\n");
+			break;
+		case ERROR_PRIVILEGE_NOT_HELD:
+			DEBUG_THREADS("MMCSS: Privilege not held\n");
+			break;
+		default:
+			DEBUG_THREADS("MMCSS: Unknown error setting thread characteristics\n");
+			break;
+		}
 		return false;
 	}
 

@@ -33,6 +33,11 @@ enum AVRT_PRIORITY {
 	AVRT_PRIORITY_CRITICAL
 };
 
+enum error_codes {
+	ERROR_INVALID_TASK_NAME = 1550,
+	ERROR_INVALID_TASK_INDEX = 1551
+};
+
 bool initialize ();
 
 bool deinitialize ();
