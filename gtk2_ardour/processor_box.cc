@@ -2829,11 +2829,11 @@ ProcessorBox::register_actions ()
 
 	/* standard editing stuff */
 
-	cut_action = Actions.register_action (popup_act_grp, X_("cut"), _("Cut"),
+	cut_action = processor_box_actions.register_action (popup_act_grp, X_("cut"), _("Cut"),
 	                                                    sigc::ptr_fun (ProcessorBox::rb_cut));
-	copy_action = Actions.register_action (popup_act_grp, X_("copy"), _("Copy"),
+	copy_action = processor_box_actions.register_action (popup_act_grp, X_("copy"), _("Copy"),
 	                                                     sigc::ptr_fun (ProcessorBox::rb_copy));
-	delete_action = Actions.register_action (popup_act_grp, X_("delete"), _("Delete"),
+	delete_action = processor_box_actions.register_action (popup_act_grp, X_("delete"), _("Delete"),
 	                                                       sigc::ptr_fun (ProcessorBox::rb_delete));
 	
 	ActionManager::plugin_selection_sensitive_actions.push_back (cut_action);

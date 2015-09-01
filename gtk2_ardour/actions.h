@@ -37,6 +37,7 @@ namespace ActionManager {
 	extern std::vector<Glib::RefPtr<Gtk::Action> > session_sensitive_actions;
 	extern std::vector<Glib::RefPtr<Gtk::Action> > write_sensitive_actions;
 	extern std::vector<Glib::RefPtr<Gtk::Action> > region_list_selection_sensitive_actions;
+	extern std::vector<Glib::RefPtr<Gtk::Action> > plugin_selection_sensitive_actions;
 
 	extern std::vector<Glib::RefPtr<Gtk::Action> > track_selection_sensitive_actions;
 	extern std::vector<Glib::RefPtr<Gtk::Action> > point_selection_sensitive_actions;
