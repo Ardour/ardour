@@ -104,14 +104,21 @@ class LIBGTKMM2EXT_API ActionMap {
 
         Glib::RefPtr<Gtk::Action> find_action (const std::string& name);
 
-        typedef std::vector<Glib::RefPtr<Gtk::Action> > Actions;
-	void get_actions (Actions&);
-
-	static std::list<ActionMap*> action_maps;
-	
 	void set_bindings (Bindings*);
 	Bindings* bindings() const { return _bindings; }
 
+	typedef std::vector<Glib::RefPtr<Gtk::Action> > Actions;
+	void get_actions (Actions&);
+
+	static std::list<ActionMap*> action_maps;
+
+        /* used by control surface protocols and other UIs */
+	static void get_all_actions (std::vector<std::string>& paths,
+	                             std::vector<std::string>& labels,
+	                             std::vector<std::string>& tooltips,
+	                             std::vector<std::string>& keys,
+	                             std::vector<Glib::RefPtr<Gtk::Action> >& actions);
+	
   private:
 	std::string _name;
 
@@ -198,17 +205,12 @@ class LIBGTKMM2EXT_API Bindings {
         
         void set_action_map (ActionMap&);
         
-        /* used to list all actions */
-        void get_all_actions (std::vector<std::string>& names,
-                              std::vector<std::string>& paths,
-                              std::vector<std::string>& keys);
-
         /* used for editing bindings */
-	void get_all_actions (std::vector<std::string>& paths,
-	                      std::vector<std::string>& labels,
-	                      std::vector<std::string>& tooltips,
-	                      std::vector<std::string>& keys,
-	                      std::vector<Glib::RefPtr<Gtk::Action> >& actions);
+        void get_all_actions (std::vector<std::string>& paths,
+                              std::vector<std::string>& labels,
+                              std::vector<std::string>& tooltips,
+                              std::vector<std::string>& keys,
+                              std::vector<Glib::RefPtr<Gtk::Action> >& actions);
 
 	/* all bindings currently in existence, as grouped into Bindings */
 	static std::list<Bindings*> bindings;

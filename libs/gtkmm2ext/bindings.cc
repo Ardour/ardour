@@ -848,43 +848,6 @@ Bindings::get_all_actions (std::vector<std::string>& paths,
 	}
 }
 
-void
-Bindings::get_all_actions (std::vector<std::string>& names,
-                           std::vector<std::string>& paths,
-                           std::vector<std::string>& keys)
-{
-	if (!_action_map) {
-		return;
-	}
-
-	/* build a reverse map from actions to bindings */
-
-	typedef map<Glib::RefPtr<Gtk::Action>,KeyboardKey> ReverseMap;
-	ReverseMap rmap;
-
-	for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-		rmap.insert (make_pair (k->second.action, k->first));
-	}
-
-	/* get a list of all actions */
-
-	ActionMap::Actions all_actions;
-	_action_map->get_actions (all_actions);
-	
-	for (ActionMap::Actions::const_iterator act = all_actions.begin(); act != all_actions.end(); ++act) {
-		
-		names.push_back ((*act)->get_name());
-		paths.push_back ((*act)->get_accel_path());
-
-		ReverseMap::iterator r = rmap.find (*act);
-		if (r != rmap.end()) {
-			keys.push_back (r->second.display_label());
-		} else {
-			keys.push_back (string());
-		}
-	}
-}
-
 Bindings*
 Bindings::get_bindings (string const& name, ActionMap& map)
 {
@@ -1076,6 +1039,48 @@ ActionMap::register_toggle_action (RefPtr<ActionGroup> group,
 
         /* already registered */
         return RefPtr<Action>();
+}
+
+void
+ActionMap::get_all_actions (std::vector<std::string>& paths,
+                           std::vector<std::string>& labels,
+                           std::vector<std::string>& tooltips,
+                           std::vector<std::string>& keys,
+                           std::vector<RefPtr<Action> >& actions)
+{
+	for (list<ActionMap*>::const_iterator map = action_maps.begin(); map != action_maps.end(); ++map) {
+		
+		ActionMap::Actions these_actions;
+		(*map)->get_actions (these_actions);
+
+		for (ActionMap::Actions::const_iterator act = these_actions.begin(); act != these_actions.end(); ++act) {
+
+			paths.push_back ((*act)->get_accel_path());
+			labels.push_back ((*act)->get_label());
+			tooltips.push_back ((*act)->get_tooltip());
+			actions.push_back (*act);
+			
+			Bindings* bindings = (*map)->bindings();
+
+			if (bindings) {
+				
+				KeyboardKey key;
+				Bindings::Operation op;
+				
+				key = bindings->get_binding_for_action (*act, op);
+				
+				if (key == KeyboardKey::null_key()) {
+					keys.push_back (string());
+				} else {
+					keys.push_back (key.display_label());
+				}
+			} else {
+				keys.push_back (string());
+			}
+		}
+
+		these_actions.clear ();
+	}
 }
 
 std::ostream& operator<<(std::ostream& out, Gtkmm2ext::KeyboardKey const & k) {
