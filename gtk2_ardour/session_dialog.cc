@@ -323,7 +323,7 @@ SessionDialog::setup_initial_choice_box ()
 	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
 	recent_session_display.append_column (_("Sample Rate"), recent_session_columns.sample_rate);
 	recent_session_display.append_column (_("Disk Format"), recent_session_columns.disk_format);
-	recent_session_display.set_headers_visible (false);
+	recent_session_display.set_headers_visible (true);
 	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
 	
 	recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::recent_session_row_selected));
