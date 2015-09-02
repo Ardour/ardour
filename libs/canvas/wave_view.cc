@@ -1006,12 +1006,16 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		} else {
 			draw_absent_image (req->image, peaks.get(), n_peaks);
 		}
+	} else {
+		cerr << "Request stopped before image generation\n";
 	}
 	
 	if (in_render_thread && !req->should_stop()) {
                 DEBUG_TRACE (DEBUG::WaveView, string_compose ("done with request for %1 at %2 CR %3 req %4 range %5 .. %6\n", this, g_get_monotonic_time(), current_request, req, req->start, req->end));
 		const_cast<WaveView*>(this)->ImageReady (); /* emit signal */
 	}
+
+	cerr << "Generate image done, image = " << req->image << endl;
 	
 	return;
 }
