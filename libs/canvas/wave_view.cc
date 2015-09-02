@@ -742,7 +742,11 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* _peak
 boost::shared_ptr<WaveViewCache::Entry>
 WaveView::cache_request_result (boost::shared_ptr<WaveViewThreadRequest> req) const
 {
-	
+	if (!req->image) {
+		cerr << "asked to cache null image!!!\n";
+		return boost::shared_ptr<WaveViewCache::Entry> ();
+	}
+
 	boost::shared_ptr<WaveViewCache::Entry> ret (new WaveViewCache::Entry (req->channel,
 	                                                                       req->height,
 	                                                                       req->amplitude,
@@ -1008,15 +1012,13 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		}
 	} else {
 		cerr << "Request stopped before image generation\n";
-	}
+	}	
 	
 	if (in_render_thread && !req->should_stop()) {
                 DEBUG_TRACE (DEBUG::WaveView, string_compose ("done with request for %1 at %2 CR %3 req %4 range %5 .. %6\n", this, g_get_monotonic_time(), current_request, req, req->start, req->end));
 		const_cast<WaveView*>(this)->ImageReady (); /* emit signal */
 	}
 
-	cerr << "Generate image done, image = " << req->image << endl;
-	
 	return;
 }
 
