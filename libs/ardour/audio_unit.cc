@@ -423,7 +423,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAC
 	, input_offset (0)
 	, input_buffers (0)
 	, frames_processed (0)
-	, _match_ioports (false)
+	, audio_input_cnt (0)
 	, _parameter_listener (0)
 	, _parameter_listener_arg (0)
 	, last_transport_rolling (false)
@@ -1014,8 +1014,8 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 	AudioStreamBasicDescription streamFormat;
 	bool was_initialized = initialized;
 	int32_t audio_out = out.n_audio();
-	if (_match_ioports) {
-		in.set (DataType::AUDIO, audio_out);
+	if (audio_input_cnt > 0) {
+		in.set (DataType::AUDIO, audio_input_cnt);
 	}
 	int32_t audio_in = in.n_audio();
 
@@ -1142,6 +1142,32 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	} else {
 		audio_out = audio_in;
 	}
+
+	/* kAudioUnitProperty_SupportedNumChannels
+	 * https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html#//apple_ref/doc/uid/TP40003278-CH12-SW20
+	 *
+	 * - both fields are -1
+	 *   e.g. inChannels = -1 outChannels = -1
+	 *    This is the default case. Any number of input and output channels, as long as the numbers match
+	 *
+	 * - one field is -1, the other field is positive
+	 *   e.g. inChannels = -1 outChannels = 2
+	 *    Any number of input channels, exactly two output channels
+	 *
+	 * - one field is -1, the other field is -2
+	 *   e.g. inChannels = -1 outChannels = -2
+	 *    Any number of input channels, any number of output channels
+	 *
+	 * - both fields have non-negative values
+	 *   e.g. inChannels = 2 outChannels = 6
+	 *    Exactly two input channels, exactly six output channels
+	 *   e.g. inChannels = 0 outChannels = 2
+	 *    No input channels, exactly two output channels (such as for an instrument unit with stereo output)
+	 *
+	 * - both fields have negative values, neither of which is –1 or –2
+	 *   e.g. inChannels = -4 outChannels = -8
+	 *    Up to four input channels and up to eight output channels
+	 */
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
@@ -1314,9 +1340,10 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 		}
 
 		if (found) {
-			if (possible_in < -2 && possible_in == possible_out) {
-				// input-port count needs to match output-port
-				_match_ioports = true;
+			if (possible_in < -2 && audio_in == 0) {
+				// input-port count cannot be zero, use as many ports
+				// as outputs, but at most abs(possible_in)
+				audio_input_cnt = max (1, min (audio_out, -possible_in));
 			}
 			break;
 		}

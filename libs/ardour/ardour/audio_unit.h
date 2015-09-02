@@ -203,7 +203,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	framecnt_t cb_offset;
 	BufferSet* input_buffers;
 	framecnt_t frames_processed;
-	bool _match_ioports;
+	uint32_t   audio_input_cnt;
 
 	std::vector<AUParameterDescriptor> descriptors;
 	AUEventListenerRef _parameter_listener;
