@@ -65,6 +65,7 @@ double WaveView::_clip_level = 0.98853;
 WaveViewCache* WaveView::images = 0;
 gint WaveView::drawing_thread_should_quit = 0;
 Glib::Threads::Mutex WaveView::request_queue_lock;
+Glib::Threads::Mutex WaveView::current_image_lock;
 Glib::Threads::Cond WaveView::request_cond;
 Glib::Threads::Thread* WaveView::_drawing_thread = 0;
 WaveView::DrawingRequestQueue WaveView::request_queue;
@@ -263,6 +264,7 @@ WaveView::invalidate_image_cache ()
 {
         DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1 invalidates image cache and cancels current request\n", this));
 	cancel_my_render_request ();
+	Glib::Threads::Mutex::Lock lci (current_image_lock);
 	_current_image.reset ();
 }
 
@@ -1119,6 +1121,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	double image_origin_in_self_coordinates;
 	boost::shared_ptr<WaveViewCache::Entry> image_to_draw;
 	
+	Glib::Threads::Mutex::Lock lci (current_image_lock);
 	if (_current_image) {
 
 		/* check it covers the right sample range */
@@ -1181,6 +1184,7 @@ WaveView::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	double draw_width;
 	
 	if (image_to_draw != _current_image) {
+		lci.release ();
 
 		/* the image is guaranteed to start at or before
 		 * draw_start. But if it starts before draw_start, that reduces

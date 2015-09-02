@@ -401,6 +401,7 @@ public:
 
         static gint drawing_thread_should_quit;
         static Glib::Threads::Mutex request_queue_lock;
+        static Glib::Threads::Mutex current_image_lock;
         static Glib::Threads::Cond request_cond;
         static Glib::Threads::Thread* _drawing_thread;
         typedef std::set<WaveView const *> DrawingRequestQueue;
