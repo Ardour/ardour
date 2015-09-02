@@ -109,7 +109,7 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _last_process_start (0)
 	, _input_audio_device("")
 	, _output_audio_device("")
-	, _midi_driver_option(_("None"))
+	, _midi_driver_option(get_standard_device_name(DeviceNone))
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _n_inputs (0)
@@ -186,7 +186,7 @@ CoreAudioBackend::enumerate_input_devices () const
 	std::map<size_t, std::string> devices;
 	_pcmio->input_device_list(devices);
 
-	_input_audio_device_status.push_back (DeviceStatus (_("None"), true));
+	_input_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
 	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (_input_audio_device == "") _input_audio_device = i->second;
 		_input_audio_device_status.push_back (DeviceStatus (i->second, true));
@@ -202,7 +202,7 @@ CoreAudioBackend::enumerate_output_devices () const
 	std::map<size_t, std::string> devices;
 	_pcmio->output_device_list(devices);
 
-	_output_audio_device_status.push_back (DeviceStatus (_("None"), true));
+	_output_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
 	for (std::map<size_t, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (_output_audio_device == "") _output_audio_device = i->second;
 		_output_audio_device_status.push_back (DeviceStatus (i->second, true));
@@ -456,7 +456,7 @@ CoreAudioBackend::enumerate_midi_options () const
 {
 	if (_midi_options.empty()) {
 		_midi_options.push_back (_("CoreMidi"));
-		_midi_options.push_back (_("None"));
+		_midi_options.push_back (get_standard_device_name(DeviceNone));
 	}
 	return _midi_options;
 }
@@ -464,7 +464,7 @@ CoreAudioBackend::enumerate_midi_options () const
 int
 CoreAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != _("None") && opt != _("CoreMidi")) {
+	if (opt != get_standard_device_name(DeviceNone) && opt != _("CoreMidi")) {
 		return -1;
 	}
 	_midi_driver_option = opt;

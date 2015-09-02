@@ -58,7 +58,7 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _last_process_start (0)
 	, _input_audio_device("")
 	, _output_audio_device("")
-	, _midi_driver_option(_("None"))
+	, _midi_driver_option(get_standard_device_name(DeviceNone))
 	, _device_reservation(0)
 	, _samplerate (48000)
 	, _samples_per_period (1024)
@@ -116,7 +116,7 @@ AlsaAudioBackend::enumerate_input_devices () const
 	_input_audio_device_status.clear();
 	std::map<std::string, std::string> devices;
 	get_alsa_audio_device_names(devices, HalfDuplexIn);
-	_input_audio_device_status.push_back (DeviceStatus (_("None"), true));
+	_input_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (_input_audio_device == "") _input_audio_device = i->first;
 		_input_audio_device_status.push_back (DeviceStatus (i->first, true));
@@ -130,7 +130,7 @@ AlsaAudioBackend::enumerate_output_devices () const
 	_output_audio_device_status.clear();
 	std::map<std::string, std::string> devices;
 	get_alsa_audio_device_names(devices, HalfDuplexOut);
-	_output_audio_device_status.push_back (DeviceStatus (_("None"), true));
+	_output_audio_device_status.push_back (DeviceStatus (get_standard_device_name(DeviceNone), true));
 	for (std::map<std::string, std::string>::const_iterator i = devices.begin (); i != devices.end(); ++i) {
 		if (_output_audio_device == "") _output_audio_device = i->first;
 		_output_audio_device_status.push_back (DeviceStatus (i->first, true));
@@ -219,13 +219,13 @@ std::vector<float>
 AlsaAudioBackend::available_sample_rates2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<float> sr;
-	if (input_device == _("None") && output_device == _("None")) {
+	if (input_device == get_standard_device_name(DeviceNone) && output_device == get_standard_device_name(DeviceNone)) {
 		return sr;
 	}
-	else if (input_device == _("None")) {
+	else if (input_device == get_standard_device_name(DeviceNone)) {
 		sr = available_sample_rates (output_device);
 	}
-	else if (output_device == _("None")) {
+	else if (output_device == get_standard_device_name(DeviceNone)) {
 		sr = available_sample_rates (input_device);
 	} else {
 		std::vector<float> sr_in =  available_sample_rates (input_device);
@@ -240,7 +240,7 @@ AlsaAudioBackend::available_sample_rates (const std::string& device) const
 {
 	ALSADeviceInfo *nfo = NULL;
 	std::vector<float> sr;
-	if (device == _("None")) {
+	if (device == get_standard_device_name(DeviceNone)) {
 		return sr;
 	}
 	if (device == _input_audio_device && _input_audio_device_info.valid) {
@@ -265,13 +265,13 @@ std::vector<uint32_t>
 AlsaAudioBackend::available_buffer_sizes2 (const std::string& input_device, const std::string& output_device) const
 {
 	std::vector<uint32_t> bs;
-	if (input_device == _("None") && output_device == _("None")) {
+	if (input_device == get_standard_device_name(DeviceNone) && output_device == get_standard_device_name(DeviceNone)) {
 		return bs;
 	}
-	else if (input_device == _("None")) {
+	else if (input_device == get_standard_device_name(DeviceNone)) {
 		bs = available_buffer_sizes (output_device);
 	}
-	else if (output_device == _("None")) {
+	else if (output_device == get_standard_device_name(DeviceNone)) {
 		bs = available_buffer_sizes (input_device);
 	} else {
 		std::vector<uint32_t> bs_in =  available_buffer_sizes (input_device);
@@ -286,7 +286,7 @@ AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 {
 	ALSADeviceInfo *nfo = NULL;
 	std::vector<uint32_t> bs;
-	if (device == _("None")) {
+	if (device == get_standard_device_name(DeviceNone)) {
 		return bs;
 	}
 	if (device == _input_audio_device && _input_audio_device_info.valid) {
@@ -309,7 +309,7 @@ AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 uint32_t
 AlsaAudioBackend::available_input_channel_count (const std::string& device) const
 {
-	if (device == _("None")) {
+	if (device == get_standard_device_name(DeviceNone)) {
 		return 0;
 	}
 	if (device == _input_audio_device && _input_audio_device_info.valid) {
@@ -321,7 +321,7 @@ AlsaAudioBackend::available_input_channel_count (const std::string& device) cons
 uint32_t
 AlsaAudioBackend::available_output_channel_count (const std::string& device) const
 {
-	if (device == _("None")) {
+	if (device == get_standard_device_name(DeviceNone)) {
 		return 0;
 	}
 	if (device == _output_audio_device && _output_audio_device_info.valid) {
@@ -350,7 +350,7 @@ AlsaAudioBackend::set_input_device_name (const std::string& d)
 	}
 	_input_audio_device = d;
 
-	if (d == _("None")) {
+	if (d == get_standard_device_name(DeviceNone)) {
 		_input_audio_device_info.valid = false;
 		return 0;
 	}
@@ -382,7 +382,7 @@ AlsaAudioBackend::set_output_device_name (const std::string& d)
 
 	_output_audio_device = d;
 
-	if (d == _("None")) {
+	if (d == get_standard_device_name(DeviceNone)) {
 		_output_audio_device_info.valid = false;
 		return 0;
 	}
@@ -493,10 +493,10 @@ AlsaAudioBackend::set_systemic_midi_output_latency (std::string const device, ui
 std::string
 AlsaAudioBackend::device_name () const
 {
-	if (_input_audio_device != _("None")) {
+	if (_input_audio_device != get_standard_device_name(DeviceNone)) {
 		return _input_audio_device;
 	}
-	if (_output_audio_device != _("None")) {
+	if (_output_audio_device != get_standard_device_name(DeviceNone)) {
 		return _output_audio_device;
 	}
 	return "";
@@ -581,7 +581,7 @@ AlsaAudioBackend::midi_device_info(std::string const name) const {
 		}
 	}
 
-	assert(_midi_driver_option != _("None"));
+	assert(_midi_driver_option != get_standard_device_name(DeviceNone));
 
 	std::map<std::string, std::string> devices;
 	if (_midi_driver_option == _("ALSA raw devices")) {
@@ -605,7 +605,7 @@ AlsaAudioBackend::enumerate_midi_options () const
 	if (_midi_options.empty()) {
 		_midi_options.push_back (_("ALSA raw devices"));
 		_midi_options.push_back (_("ALSA sequencer"));
-		_midi_options.push_back (_("None"));
+		_midi_options.push_back (get_standard_device_name(DeviceNone));
 	}
 	return _midi_options;
 }
@@ -632,7 +632,7 @@ AlsaAudioBackend::enumerate_midi_devices () const
 int
 AlsaAudioBackend::set_midi_option (const std::string& opt)
 {
-	if (opt != _("None") && opt != _("ALSA raw devices") && opt != _("ALSA sequencer")) {
+	if (opt != get_standard_device_name(DeviceNone) && opt != _("ALSA raw devices") && opt != _("ALSA sequencer")) {
 		return -1;
 	}
 	_midi_driver_option = opt;
@@ -711,17 +711,17 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	std::string alsa_device;
 	std::map<std::string, std::string> devices;
 
-	if (_input_audio_device == _("None") && _output_audio_device == _("None")) {
+	if (_input_audio_device == get_standard_device_name(DeviceNone) && _output_audio_device == get_standard_device_name(DeviceNone)) {
 		PBD::error << _("AlsaAudioBackend: At least one of input or output device needs to be set.");
 		return -1;
 	}
 
 	if (_input_audio_device != _output_audio_device) {
-		if (_input_audio_device != _("None") && _output_audio_device != _("None")) {
+		if (_input_audio_device != get_standard_device_name(DeviceNone) && _output_audio_device != get_standard_device_name(DeviceNone)) {
 			PBD::error << _("AlsaAudioBackend: Cannot use two different devices.");
 			return -1;
 		}
-		if (_input_audio_device != _("None")) {
+		if (_input_audio_device != get_standard_device_name(DeviceNone)) {
 			get_alsa_audio_device_names(devices, HalfDuplexIn);
 			audio_device = _input_audio_device;
 			duplex = 1;
@@ -1210,7 +1210,7 @@ AlsaAudioBackend::register_system_midi_ports()
 	int midi_ins = 0;
 	int midi_outs = 0;
 
-	if (_midi_driver_option == _("None")) {
+	if (_midi_driver_option == get_standard_device_name(DeviceNone)) {
 		return 0;
 	} else if (_midi_driver_option == _("ALSA raw devices")) {
 		get_alsa_rawmidi_device_names(devices);
