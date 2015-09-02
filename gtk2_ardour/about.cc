@@ -596,7 +596,7 @@ About::About ()
 	const std::string cpu_arch = _("PowerPC 64bit");
 #elif defined __ppc__
 	const std::string cpu_arch = _("PowerPC 32bit");
-#elif && defined  __LP64__
+#elif defined  __LP64__
 	const std::string cpu_arch = _("64bit");
 #else
 	const std::string cpu_arch = _("32bit"); // ARM, ALPHA,..
