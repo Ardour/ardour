@@ -588,15 +588,28 @@ About::About ()
 		t += ' ';
 	}
 
+#if defined __x86_64__ || defined _M_X64
+	const std::string cpu_arch = _("Intel 64 bit");
+#elif defined __i386__  || defined _M_IX86
+	const std::string cpu_arch = _("Intel 32 bit");
+#elif defined __ppc__ && defined  __LP64__
+	const std::string cpu_arch = _("PowerPC 64bit");
+#elif defined __ppc__
+	const std::string cpu_arch = _("PowerPC 32bit");
+#elif && defined  __LP64__
+	const std::string cpu_arch = _("64bit");
+#else
+	const std::string cpu_arch = _("32bit"); // ARM, ALPHA,..
+#endif
 	set_translator_credits (t);
 	set_copyright (_("Copyright (C) 1999-2015 Paul Davis\n"));
 	set_license (gpl);
 	set_name (X_("Ardour"));
 	set_website (X_("http://ardour.org/"));
 	set_website_label (_("http://ardour.org/"));
-	set_version ((string_compose(_("%1%2\n(built from revision %3)"),
+	set_version ((string_compose(_("%1%2\n(built from revision %3)\n%4"),
 				     VERSIONSTRING, CODENAME,
-				     revision)));
+				     revision, cpu_arch)));
 
 	Gtk::Button* config_button = manage (new Button (_("Config")));
 
