@@ -52,7 +52,7 @@ void
 ArdourKeyboard::setup_keybindings ()
 {
 	using namespace ARDOUR_COMMAND_LINE;
-	string default_bindings = "mnemonic-us.bindings";
+	string default_bindings = "us.bindings";
 	vector<string> strs;
 
 	binding_files.clear ();

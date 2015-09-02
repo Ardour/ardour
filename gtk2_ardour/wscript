@@ -715,15 +715,11 @@ def build(bld):
 
     # Keybindings
 
-    # 'SAE-de-keypad', 'SAE-de-nokeypad', 'SAE-us-keypad',
-    # 'SAE-us-nokeypad', 'ergonomic-us'
-
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
     # 
     a_rule = 'perl ../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
-
-    for b in [ 'mnemonic-us' ] :
+    for b in [ 'us' ] :
         obj = bld(
             target = b + '.bindings',
             source = b + '.bindings.in',
@@ -733,8 +729,6 @@ def build(bld):
         
     # not modified at present
     bld.install_files(bld.env['CONFDIR'], 'dark.colors')
-    bld.install_files(bld.env['CONFDIR'], 'step_editing.bindings')
-    bld.install_files(bld.env['CONFDIR'], 'mixer.bindings')
 
     # Icons/Images
     bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
