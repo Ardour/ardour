@@ -388,7 +388,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 		// Speed quietning
 		gain_t gain_coeff = GAIN_COEFF_UNITY;
 
-		if (fabsf(_session.transport_speed()) > 1.5f && Config->get_quieten_at_speed ()) {
+		if (fabs(_session.transport_speed()) > 1.5 && Config->get_quieten_at_speed ()) {
 			gain_coeff = speed_quietning;
 		}
 
