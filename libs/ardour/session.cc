@@ -4412,17 +4412,9 @@ Session::construct_peak_filepath (const string& filepath) const
 	
 	string::size_type suffix = filename.find_last_of ('.');
 
-	std::string filename_unsuffixed;
-	if (suffix != string::npos) {
-		filename_unsuffixed = filename.substr (0, suffix);
-	} else {
-		warning << string_compose (_("Odd audio file path: %1"), filepath) << endmsg;
-		filename_unsuffixed = filename;
-	}
+	std::string checksum = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_SHA1, path + G_DIR_SEPARATOR + filename);
 
-	std::string checksum = "_" + Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_MD5, path + G_DIR_SEPARATOR + filename);
-
-	return Glib::build_filename (_session_dir->peak_path(), filename_unsuffixed + checksum + peakfile_suffix);
+	return Glib::build_filename (_session_dir->peak_path(), checksum + peakfile_suffix);
 }
 
 string
