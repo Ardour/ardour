@@ -554,9 +554,8 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	, matches (0)
 	, _status (0)
 	, _done (false)
-	, ok_button (Stock::OK)
+	, import_button (_("Import"))
 	, close_button (Stock::CLOSE)
-	, apply_button (Stock::APPLY)
 	, gm (0)
 {
 
@@ -726,16 +725,11 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	button_box->set_layout (BUTTONBOX_END);
 	button_box->pack_start (close_button, false, false);
 	close_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_CLOSE));
-	if (persistent) {
-		button_box->pack_start (apply_button, false, false);
-		apply_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_APPLY));
-	}
 
-	button_box->pack_start (ok_button, false, false);
-	ok_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_OK));
+	button_box->pack_start (import_button, false, false);
+	import_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_OK));
 
-	Gtkmm2ext::UI::instance()->set_tip (ok_button, _("Press to import selected files and close this window"));
-	Gtkmm2ext::UI::instance()->set_tip (apply_button, _("Press to import selected files and leave this window open"));
+	Gtkmm2ext::UI::instance()->set_tip (import_button, _("Press to import selected files"));
 	Gtkmm2ext::UI::instance()->set_tip (close_button, _("Press to close this window without importing any files"));
 
 	vpacker.pack_end (*button_box, false, false);
@@ -767,8 +761,7 @@ SoundFileBrowser::run ()
 void
 SoundFileBrowser::set_action_sensitive (bool yn)
 {
-	ok_button.set_sensitive (yn);
-	apply_button.set_sensitive (yn);
+	import_button.set_sensitive (yn);
 }
 
 void
@@ -1990,10 +1983,6 @@ SoundFileOmega::do_something (int action)
 		PublicEditor::instance().do_import (paths, chns, mode, quality, where, instrument);
 	} else {
 		PublicEditor::instance().do_embed (paths, chns, mode, where, instrument);
-	}
-	
-	if (action == RESPONSE_OK) {
-		hide ();
 	}
 }
 	
