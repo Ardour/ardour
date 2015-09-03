@@ -173,9 +173,9 @@ class SoundFileBrowser : public ArdourWindow
 	SoundFileBrowser (std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
 
-        int run ();
-        int status () const { return _status; }
-        
+	int run ();
+	int status () const { return _status; }
+
 	virtual void set_session (ARDOUR::Session*);
 	std::vector<std::string> get_paths ();
 
@@ -202,8 +202,8 @@ class SoundFileBrowser : public ArdourWindow
   protected:
 	bool resetting_ourselves;
 	int matches;
-        int _status;
-        bool _done;
+	int _status;
+	bool _done;
 
 	Gtk::FileFilter audio_and_midi_filter;
 	Gtk::FileFilter audio_filter;
@@ -211,14 +211,13 @@ class SoundFileBrowser : public ArdourWindow
 	Gtk::FileFilter custom_filter;
 	Gtk::FileFilter matchall_filter;
 	Gtk::HBox hpacker;
-        Gtk::VBox vpacker;
+	Gtk::VBox vpacker;
 
-        Gtk::Button ok_button;
-        Gtk::Button cancel_button;
-        Gtk::Button apply_button;
+	Gtk::Button ok_button;
+	Gtk::Button cancel_button;
+	Gtk::Button apply_button;
 
 	static std::string persistent_folder;
-
 
 	GainMeter* gm;
 	Gtk::VBox meter_packer;
@@ -249,13 +248,13 @@ class SoundFileBrowser : public ArdourWindow
 	bool on_midi_filter (const Gtk::FileFilter::Info& filter_info);
 	bool on_audio_and_midi_filter (const Gtk::FileFilter::Info& filter_info);
 
-        void set_action_sensitive (bool);
+	void set_action_sensitive (bool);
 
-	virtual bool reset_options() { return true; }
+	virtual bool reset_options () { return true; }
 
   protected:
 	void on_show();
-        virtual void do_something (int action);
+	virtual void do_something(int action);
 };
 
 class SoundFileChooser : public SoundFileBrowser
@@ -322,7 +321,7 @@ class SoundFileOmega : public SoundFileBrowser
 	void src_combo_changed ();
 	void where_combo_changed ();
 
-        void do_something (int action);
+	void do_something (int action);
 };
 
 #endif // __ardour_sfdb_ui_h__
