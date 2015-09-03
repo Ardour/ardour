@@ -555,7 +555,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	, _status (0)
 	, _done (false)
 	, ok_button (Stock::OK)
-	, cancel_button (Stock::CANCEL)
+	, close_button (Stock::CLOSE)
 	, apply_button (Stock::APPLY)
 	, gm (0)
 {
@@ -724,8 +724,8 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	Gtk::HButtonBox* button_box = manage (new HButtonBox);
 
 	button_box->set_layout (BUTTONBOX_END);
-	button_box->pack_start (cancel_button, false, false);
-	cancel_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_CANCEL));
+	button_box->pack_start (close_button, false, false);
+	close_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_CLOSE));
 	if (persistent) {
 		button_box->pack_start (apply_button, false, false);
 		apply_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_APPLY));
@@ -736,7 +736,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	Gtkmm2ext::UI::instance()->set_tip (ok_button, _("Press to import selected files and close this window"));
 	Gtkmm2ext::UI::instance()->set_tip (apply_button, _("Press to import selected files and leave this window open"));
-	Gtkmm2ext::UI::instance()->set_tip (cancel_button, _("Press to close this window without importing any files"));
+	Gtkmm2ext::UI::instance()->set_tip (close_button, _("Press to close this window without importing any files"));
 
 	vpacker.pack_end (*button_box, false, false);
 
@@ -1955,7 +1955,7 @@ SoundFileOmega::do_something (int action)
 {
 	SoundFileBrowser::do_something (action);
 
-	if (action == RESPONSE_CANCEL) {
+	if (action == RESPONSE_CLOSE) {
 		hide ();
 		return;
 	}

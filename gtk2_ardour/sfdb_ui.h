@@ -214,7 +214,7 @@ class SoundFileBrowser : public ArdourWindow
 	Gtk::VBox vpacker;
 
 	Gtk::Button ok_button;
-	Gtk::Button cancel_button;
+	Gtk::Button close_button;
 	Gtk::Button apply_button;
 
 	static std::string persistent_folder;
