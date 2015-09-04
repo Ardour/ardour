@@ -1354,6 +1354,10 @@ deinstantiate ()
 static bool
 already_configured ()
 {
+	// special-case: unit-tests require backend to be pre-configured.
+	if (s_instance_name == "Unit-Test") {
+		return true;
+	}
 	return false;
 }
 
