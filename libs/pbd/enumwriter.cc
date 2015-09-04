@@ -189,7 +189,7 @@ EnumWriter::write_distinct (EnumRegistration& er, int value)
 }
 
 int
-EnumWriter::validate (EnumRegistration& er, int val)
+EnumWriter::validate (EnumRegistration& er, int val) const
 {
         if (er.values.empty()) {
                 return val;
@@ -204,7 +204,7 @@ EnumWriter::validate (EnumRegistration& er, int val)
         vector<int>::iterator i;
         string enum_name = _("unknown enumeration");
         
-        for (Registry::iterator x = registry.begin(); x != registry.end(); ++x) {
+        for (Registry::const_iterator x = registry.begin(); x != registry.end(); ++x) {
                 if (&er == &(*x).second) {
                         enum_name = (*x).first;
                 }
@@ -224,6 +224,21 @@ EnumWriter::validate (EnumRegistration& er, int val)
 }
 
 int
+EnumWriter::validate_bitwise (EnumRegistration& er, int val) const
+{
+	int result = 0;
+	for (int p = 1; p <= val; p = p << 1) {
+		if (std::find (er.values.begin(), er.values.end(), p) == er.values.end()) {
+			continue;
+		}
+		if (p & val) {
+			result |= p;
+		}
+	}
+	return result;
+}
+
+int
 EnumWriter::read_bits (EnumRegistration& er, string str)
 {
 	vector<int>::iterator i;
@@ -236,14 +251,14 @@ EnumWriter::read_bits (EnumRegistration& er, string str)
 
 	if (str.length() > 2 && str[0] == '0' && str[1] == 'x') {
 		int val = strtol (str.c_str(), (char **) 0, 16);
-                return validate (er, val);
+                return validate_bitwise (er, val);
 	}
 
 	/* catch old style dec numerics */
 
 	if (strspn (str.c_str(), "0123456789") == str.length()) {
 		int val = strtol (str.c_str(), (char **) 0, 10);
-                return validate (er, val);
+                return validate_bitwise (er, val);
         }
 
 	do {

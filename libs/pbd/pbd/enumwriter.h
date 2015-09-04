@@ -88,8 +88,8 @@ class LIBPBD_API EnumWriter {
 	static EnumWriter* _instance;
 	static std::map<std::string,std::string> hack_table;
 
-
-        int validate (EnumRegistration& er, int value);
+        int validate (EnumRegistration& er, int value) const;
+        int validate_bitwise (EnumRegistration& er, int value) const;
 };
 
 }
