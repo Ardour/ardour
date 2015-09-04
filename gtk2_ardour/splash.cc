@@ -45,6 +45,7 @@ using namespace ARDOUR;
 Splash* Splash::the_splash = 0;
 
 Splash::Splash ()
+	: Gtk::Window (Gtk::WINDOW_POPUP)
 {
 	assert (the_splash == 0);
 
@@ -111,9 +112,9 @@ Splash::pop_back_for (Gtk::Window& win)
 
            So for OS X, we just hide ourselves.
 
-					 Oct 2014: The Windows situation is similar, although it should be possible
-					 to play tricks with gdk's set_type_hint() or directly hack things using
-					 SetWindowLong() and UpdateLayeredWindow()
+           Oct 2014: The Windows situation is similar, although it should be possible
+           to play tricks with gdk's set_type_hint() or directly hack things using
+           SetWindowLong() and UpdateLayeredWindow()
         */
         (void) win;
         hide();
