@@ -311,9 +311,11 @@ ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
 	if (!gdk_keymap_get_entries_for_keyval(keymap, keyval, &keymapkey, &n_keys)) return false;
 	if (n_keys !=1) { g_free(keymapkey); return false;}
 
+	Gtk::Window& main_window (ARDOUR_UI::instance()->main_window());
+	
 	GdkEventKey ev;
 	ev.type = GDK_KEY_PRESS;
-	ev.window = ARDOUR_UI::instance()->main_window().get_window()->gobj();
+	ev.window = main_window.get_window()->gobj();
 	ev.send_event = FALSE;
 	ev.time = 0;
 	ev.state = 0;
@@ -324,9 +326,9 @@ ARDOUR_UI_UTILS::emulate_key_event (unsigned int keyval)
 	ev.group = keymapkey[0].group;
 	g_free(keymapkey);
 
-	relay_key_press(&ev);
+	relay_key_press (&ev, &main_window);
 	ev.type = GDK_KEY_RELEASE;
-	return relay_key_press(&ev);
+	return relay_key_press(&ev, &main_window);
 }
 
 string

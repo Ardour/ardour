@@ -5185,7 +5185,7 @@ ARDOUR_UI::key_event_handler (GdkEventKey* ev, Gtk::Window* event_window)
 
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("main window key event, bindings = %1, global = %2\n", bindings, &global_bindings));
 		
-	} else if (event_window != 0) {
+	} else {
 
 		window = event_window;
 		

@@ -467,7 +467,7 @@ MonitorSection::MonitorSection (Session* s)
 		_tearoff->tearoff_window().set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
 	}
 	_tearoff->tearoff_window().set_title (X_("Monitor"));
-	_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), (Gtk::Window*) 0), false);
+	_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), (Gtk::Window*) &_tearoff->tearoff_window()), false);
 
 	update_output_display ();
 	update_processor_box ();

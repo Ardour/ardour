@@ -222,7 +222,7 @@ RegionLayeringOrderEditor::on_key_press_event (GdkEventKey* ev)
 	}
 
 	if (!handled) {
-		handled = relay_key_press (ev, 0);
+		handled = relay_key_press (ev, this);
 	}
 
 	if (!handled) {

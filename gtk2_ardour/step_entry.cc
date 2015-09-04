@@ -496,26 +496,18 @@ StepEntry::on_key_press_event (GdkEventKey* ev)
            forward to main window
         */
 
-	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
-                KeyboardKey k (ev->state, ev->keyval);
-
-                if (bindings->activate (k, Bindings::Press)) {
-                        return true;
-                }
+	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
+		return true;
 	}
 
-        return relay_key_press (ev);
+	return relay_key_press (ev, this);
 }
 
 bool
 StepEntry::on_key_release_event (GdkEventKey* ev)
 {
-	if (!gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
-                KeyboardKey k (ev->state, ev->keyval);
-
-                if (bindings->activate (k, Bindings::Release)) {
-                        return true;
-                }
+	if (gtk_window_propagate_key_event (GTK_WINDOW(gobj()), ev)) {
+		return true;
 	}
 
         /* don't forward releases */
