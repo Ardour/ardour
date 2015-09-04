@@ -937,6 +937,10 @@ SndFileSource::get_soundfile_info (const string& path, SoundFileInfo& info, stri
 
 	sf_info.format = 0; // libsndfile says to clear this before sf_open().
 
+	if (path.empty() || Glib::file_test(path, Glib::FILE_TEST_IS_DIR)) {
+		return false;
+	}
+
 #ifdef PLATFORM_WINDOWS
 	int fd = g_open (path.c_str(), O_RDONLY, 0444);
 #else
