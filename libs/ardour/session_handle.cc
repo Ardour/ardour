@@ -83,9 +83,11 @@ SessionHandleRef::session_going_away ()
 void
 SessionHandleRef::insanity_check ()
 {
+#ifndef NDEBUG
 	cerr << string_compose (
 	        _("programming error: %1"),
 	        string_compose("SessionHandleRef exists across session deletion! Dynamic type: %1 @ %2",
 	                       PBD::demangled_name (*this), this))
 	     << endl;
+#endif
 }
