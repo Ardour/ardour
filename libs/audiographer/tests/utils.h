@@ -86,6 +86,7 @@ template<typename T>
 class AppendingVectorSink : public VectorSink<T>
 {
   public:
+	AppendingVectorSink() { reset (); }
 	void process (AudioGrapher::ProcessContext<T> const & c)
 	{
 		std::vector<T> & data (VectorSink<T>::data);
