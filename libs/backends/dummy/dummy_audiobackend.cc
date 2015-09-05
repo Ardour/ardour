@@ -41,6 +41,8 @@ size_t DummyAudioBackend::_max_buffer_size = 8192;
 std::vector<std::string> DummyAudioBackend::_midi_options;
 std::vector<AudioBackend::DeviceStatus> DummyAudioBackend::_device_status;
 
+std::vector<DummyAudioBackend::DriverSpeed> DummyAudioBackend::_driver_speed;
+
 #ifdef PLATFORM_WINDOWS
 static double _win_pc_rate = 0; // usec per tick
 #endif
@@ -64,6 +66,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _running (false)
 	, _freewheel (false)
 	, _freewheeling (false)
+	, _speedup (1.0)
 	, _device ("")
 	, _samplerate (48000)
 	, _samples_per_period (1024)
@@ -180,6 +183,49 @@ bool
 DummyAudioBackend::can_change_buffer_size_when_running () const
 {
 	return true;
+}
+
+std::vector<std::string>
+DummyAudioBackend::enumerate_drivers () const
+{
+	if (_driver_speed.empty()) {
+		_driver_speed.push_back (DriverSpeed (_("Half Speed"),   2.0f));
+		_driver_speed.push_back (DriverSpeed (_("Normal Speed"), 1.0f));
+		_driver_speed.push_back (DriverSpeed (_("Double Speed"), 0.5f));
+		_driver_speed.push_back (DriverSpeed (_("5x Speed"),     0.2f));
+		_driver_speed.push_back (DriverSpeed (_("10x Speed"),    0.1f));
+		_driver_speed.push_back (DriverSpeed (_("20x Speed"),    0.05f));
+	}
+
+	std::vector<std::string> speed_drivers;
+	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
+		speed_drivers.push_back (it->name);
+	}
+	return speed_drivers;
+}
+
+std::string
+DummyAudioBackend::driver_name () const
+{
+	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
+		if (_speedup == it->speedup) {
+			return it->name;
+		}
+	}
+	assert (0);
+	return _("Normal Speed");
+}
+
+int
+DummyAudioBackend::set_driver (const std::string& d)
+{
+	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
+		if (d == it->name) {
+			_speedup = it->speedup;
+			return 0;
+		}
+	}
+	return -1;
 }
 
 int
@@ -1254,7 +1300,8 @@ DummyAudioBackend::main_process_thread ()
 			}
 
 			if (elapsed_time < nominal_time) {
-				Glib::usleep (nominal_time - elapsed_time);
+				const int64_t sleepy = _speedup * (nominal_time - elapsed_time);
+				Glib::usleep (std::max ((int64_t) 100, sleepy));
 			} else {
 				Glib::usleep (100); // don't hog cpu
 			}

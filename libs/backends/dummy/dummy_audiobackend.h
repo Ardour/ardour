@@ -45,6 +45,7 @@ namespace DummyMidiData {
 	} MIDISequence;
 };
 
+
 class DummyMidiEvent {
 	public:
 		DummyMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
@@ -226,6 +227,11 @@ class DummyAudioBackend : public AudioBackend {
 		std::string name () const;
 		bool is_realtime () const;
 
+		bool requires_driver_selection() const { return true; }
+		std::string driver_name () const;
+		std::vector<std::string> enumerate_drivers () const;
+		int set_driver (const std::string&);
+
 		std::vector<DeviceStatus> enumerate_devices () const;
 		std::vector<float> available_sample_rates (const std::string& device) const;
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
@@ -374,13 +380,21 @@ class DummyAudioBackend : public AudioBackend {
 			MidiToAudio,
 		};
 
+		struct DriverSpeed {
+			std::string name;
+			float speedup;
+			DriverSpeed (const std::string& n, float s) : name (n), speedup (s) {}
+		};
+
 		std::string _instance_name;
 		static std::vector<std::string> _midi_options;
 		static std::vector<AudioBackend::DeviceStatus> _device_status;
+		static std::vector<DummyAudioBackend::DriverSpeed> _driver_speed;
 
 		bool  _running;
 		bool  _freewheel;
 		bool  _freewheeling;
+		float _speedup;
 
 		std::string _device;
 
