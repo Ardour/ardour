@@ -22,6 +22,7 @@
 
 #include "libardour-config.h"
 
+#include <exception>
 #include <list>
 #include <map>
 #include <set>
@@ -138,6 +139,17 @@ class Track;
 class WindowsVSTPlugin;
 
 extern void setup_enum_writer ();
+
+class LIBARDOUR_API SessionException: public std::exception {
+public:
+	explicit SessionException(const std::string msg) : _message(msg) {}
+	virtual ~SessionException() throw() {}
+
+	virtual const char* what() const throw() { return _message.c_str(); }
+
+private:
+	std::string _message;
+};
 
 class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {

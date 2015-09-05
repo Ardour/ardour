@@ -315,12 +315,12 @@ Session::Session (AudioEngine &eng,
 #endif
 		if (ensure_engine (sr)) {
 			destroy ();
-			throw failed_constructor ();
+			throw SessionException (_("Cannot connect to audio/midi engine"));
 		}
 
 		if (create (mix_template, bus_profile)) {
 			destroy ();
-			throw failed_constructor ();
+			throw SessionException (_("Session initialization failed"));
 		}
 
 		/* if a mix template was provided, then ::create() will
@@ -336,7 +336,7 @@ Session::Session (AudioEngine &eng,
 
 		if (!mix_template.empty()) { 
 			if (load_state (_current_snapshot_name)) {
-				throw failed_constructor ();
+				throw SessionException (_("Failed to load template/snapshot state"));
 			}
 			store_recent_templates (mix_template);
 		}
@@ -347,7 +347,7 @@ Session::Session (AudioEngine &eng,
 	} else {
 
 		if (load_state (_current_snapshot_name)) {
-			throw failed_constructor ();
+			throw SessionException (_("Failed to load state"));
 		}
 	
 		/* try to get sample rate from XML state so that we
@@ -364,13 +364,13 @@ Session::Session (AudioEngine &eng,
 
 		if (ensure_engine (sr)) {
 			destroy ();
-			throw failed_constructor ();
+			throw SessionException (_("Cannot connect to audio/midi engine"));
 		}
 	}
 
 	if (post_engine_init ()) {
 		destroy ();
-		throw failed_constructor ();
+		throw SessionException (_("Cannot configure audio/midi engine with session parameters"));
 	}
 
 	store_recent_sessions (_name, _path);
