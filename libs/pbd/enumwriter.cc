@@ -19,6 +19,7 @@
 */
 
 #include <cctype>
+#include <algorithm>
 
 #include <cstring>
 #include <cstdlib>
