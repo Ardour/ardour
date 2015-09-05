@@ -120,8 +120,7 @@ AutomationLine::AutomationLine (const string&                              name,
 
 	if (alist->parameter().type() == GainAutomation ||
 	    alist->parameter().type() == TrimAutomation ||
-	    alist->parameter().type() == EnvelopeAutomation ||
-	    desc.unit == ParameterDescriptor::DB) {
+	    alist->parameter().type() == EnvelopeAutomation) {
 		set_uses_gain_mapping (true);
 	}
 
