@@ -194,7 +194,9 @@ DummyAudioBackend::enumerate_drivers () const
 		_driver_speed.push_back (DriverSpeed (_("Double Speed"), 0.5f));
 		_driver_speed.push_back (DriverSpeed (_("5x Speed"),     0.2f));
 		_driver_speed.push_back (DriverSpeed (_("10x Speed"),    0.1f));
+		_driver_speed.push_back (DriverSpeed (_("15x Speed"),    0.06666f));
 		_driver_speed.push_back (DriverSpeed (_("20x Speed"),    0.05f));
+		_driver_speed.push_back (DriverSpeed (_("50x Speed"),    0.02f));
 	}
 
 	std::vector<std::string> speed_drivers;
@@ -208,7 +210,7 @@ std::string
 DummyAudioBackend::driver_name () const
 {
 	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
-		if (_speedup == it->speedup) {
+		if (rintf (1e6f * _speedup) == rintf (1e6f * it->speedup)) {
 			return it->name;
 		}
 	}
