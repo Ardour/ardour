@@ -3206,7 +3206,26 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		}
 		goto out;
 	}
+	catch (SessionException e) {
+		MessageDialog msg (string_compose(
+			                   _("Session \"%1 (snapshot %2)\" did not load successfully: %3"),
+			                   path, snap_name, e.what()),
+		                   true,
+		                   Gtk::MESSAGE_INFO,
+		                   BUTTONS_OK);
 
+		msg.set_title (_("Loading Error"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash (msg);
+		msg.present ();
+
+		dump_errors (cerr);
+
+		(void) msg.run ();
+		msg.hide ();
+
+		goto out;
+	}
 	catch (...) {
 
 		MessageDialog msg (string_compose(
@@ -3307,9 +3326,20 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		new_session = new Session (*AudioEngine::instance(), path, snap_name, &bus_profile);
 	}
 
+	catch (SessionException e) {
+		dump_errors (cerr);
+		MessageDialog msg (string_compose(_("Could not create session in \"%1\": %2"), path, e.what()));
+		msg.set_title (_("Loading Error"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+		pop_back_splash (msg);
+		msg.run ();
+		return -1;
+	}
 	catch (...) {
-
+		dump_errors (cerr);
 		MessageDialog msg (string_compose(_("Could not create session in \"%1\""), path));
+		msg.set_title (_("Loading Error"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
 		pop_back_splash (msg);
 		msg.run ();
 		return -1;
