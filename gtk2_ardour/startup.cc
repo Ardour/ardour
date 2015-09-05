@@ -24,11 +24,15 @@
 
 #include <fstream>
 #include <algorithm>
+#include <fcntl.h>
+
+#include <glib/gstdio.h>
 
 #include <gtkmm/main.h>
 #include <gtkmm/filechooser.h>
 
 #include "pbd/failed_constructor.h"
+#include "pbd/scoped_file_descriptor.h"
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
 #include "pbd/whitespace.h"
@@ -126,7 +130,7 @@ ArdourStartup::required ()
 		if (Glib::file_test (ARDOUR::been_here_before_path (v), Glib::FILE_TEST_EXISTS)) {
 			if (v != current_version) {
 				/* older version exists, create the current one */
-				ofstream fout (been_here_before_path (current_version).c_str());
+				PBD::ScopedFileDescriptor fout (g_open (been_here_before_path (current_version).c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 			}
 			return false;
 		}
@@ -418,7 +422,7 @@ ArdourStartup::on_apply ()
 		/* "touch" the been-here-before path now we've successfully
 		   made it through the first time setup (at least)
 		*/
-		ofstream fout (been_here_before_path().c_str());
+		PBD::ScopedFileDescriptor fout (g_open (been_here_before_path ().c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
 
 	}
 		
