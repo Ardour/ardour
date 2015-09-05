@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #endif
 
+#include <assert.h>
 #include <sys/types.h>
 
 /* Lipshitz's minimally audible FIR, only really works for 46kHz-ish signals */
@@ -197,6 +198,7 @@ inline static void gdither_innner_loop(const GDitherType dt,
 	    break;
 	case GDitherShaped:
 	    /* Save raw value for error calculations */
+	    assert (ss);
 	    ideal = tmp;
 
 	    /* Run FIR and add white noise */
