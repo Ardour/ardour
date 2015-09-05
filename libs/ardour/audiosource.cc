@@ -744,12 +744,16 @@ AudioSource::build_peaks_from_scratch ()
 				goto out;
 			}
 
+			lp.release(); // allow butler to refill buffers
+
 			if (compute_and_write_peaks (buf.get(), current_frame, frames_read, true, false, _FPP)) {
 				break;
 			}
 
 			current_frame += frames_read;
 			cnt -= frames_read;
+
+			lp.acquire();
 		}
 
 		if (cnt == 0) {

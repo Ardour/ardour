@@ -4694,7 +4694,7 @@ Session::create_audio_source_for_session (size_t n_chans, string const & base, u
 
 	if (!path.empty()) {
 		return boost::dynamic_pointer_cast<AudioFileSource> (
-			SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate()));
+			SourceFactory::createWritable (DataType::AUDIO, *this, path, destructive, frame_rate(), true, true));
 	} else {
 		throw failed_constructor ();
 	}
