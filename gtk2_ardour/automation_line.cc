@@ -1194,12 +1194,12 @@ AutomationLine::view_to_model_coord_y (double& y) const
 	 */
 	if (   alist->parameter().type() == GainAutomation
 	    || alist->parameter().type() == EnvelopeAutomation
-	    || (_desc.unit == ParameterDescriptor::DB && _desc.lower == 0.)) {
+	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
 		y = slider_position_to_gain_with_max (y, _desc.upper);
 		y = max ((double)_desc.lower, y);
 		y = min ((double)_desc.upper, y);
 	} else if (alist->parameter().type() == TrimAutomation
-	           || (_desc.unit == ParameterDescriptor::DB && _desc.lower > 0 && _desc.upper > _desc.lower)) {
+	           || (_desc.logarithmic && _desc.lower * _desc.upper > 0 && _desc.upper > _desc.lower)) {
 		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
 		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 		y = max (0.0, y);
@@ -1226,10 +1226,10 @@ AutomationLine::model_to_view_coord_y (double& y) const
 	/* TODO: This should be more generic (use ParameterDescriptor) */
 	if (   alist->parameter().type() == GainAutomation
 	    || alist->parameter().type() == EnvelopeAutomation
-	    || (_desc.unit == ParameterDescriptor::DB && _desc.lower == 0.)) {
+	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
 		y = gain_to_slider_position_with_max (y, Config->get_max_gain());
 	} else if (alist->parameter().type() == TrimAutomation
-	           || (_desc.unit == ParameterDescriptor::DB && _desc.lower > 0 && _desc.upper > _desc.lower)) {
+	           || (_desc.logarithmic && _desc.lower * _desc.upper > 0 && _desc.upper > _desc.lower)) {
 		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
 		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 		y = (accurate_coefficient_to_dB (y) - lower_db) / range_db;
