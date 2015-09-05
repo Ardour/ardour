@@ -288,6 +288,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\audio_backend.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\audio_buffer.cc"
 				>
 			</File>
