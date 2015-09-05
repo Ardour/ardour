@@ -307,11 +307,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\portaudio\audio_utils.h"
+				>
+			</File>
+			<File
 				RelativePath="..\portaudio\cycle_timer.h"
 				>
 			</File>
 			<File
 				RelativePath="..\portaudio\debug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\portaudio\dsp_load_calculator.h"
 				>
 			</File>
 			<File
