@@ -240,7 +240,10 @@ FastMeter::generate_meter_pattern (
 			cairo_set_line_width(tc, 1.0);
 			cairo_set_source_rgba(tc, .0, .0, .0, 0.4);
 			//cairo_set_operator (tc, CAIRO_OPERATOR_SOURCE);
-			for (float y=0.5; y < height; y+= 2.0) {
+			for (int i = 0; float y = 0.5 + i * 2.0; ++i) {
+				if (y >= height) {
+					break;
+				}
 				cairo_move_to(tc, 0, y);
 				cairo_line_to(tc, width, y);
 				cairo_stroke (tc);
