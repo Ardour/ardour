@@ -54,8 +54,8 @@ Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 {
 	Pango::Rectangle ink_rect = layout->get_ink_extents ();
 	
-	width = (ink_rect.get_width() + PANGO_SCALE / 2) / PANGO_SCALE;
-	height = (ink_rect.get_height() + PANGO_SCALE / 2) / PANGO_SCALE;
+	width = PANGO_PIXELS(ink_rect.get_width());
+	height = PANGO_PIXELS(ink_rect.get_height());
 }
 
 void
@@ -704,14 +704,28 @@ Gtkmm2ext::window_to_draw_on (Gtk::Widget& w, Gtk::Widget** parent)
 int
 Gtkmm2ext::pixel_width (const string& str, Pango::FontDescription& font)
 {
-	Gtk::Label foo;
-	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout ("");
+	Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get());
+	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
 	layout->set_font_description (font);
 	layout->set_text (str);
 
 	int width, height;
 	Gtkmm2ext::get_ink_pixel_size (layout, width, height);
+
+#ifdef __APPLE__
+	// Pango returns incorrect text width on some OS X
+	// So we have to make a correction
+	// To determine the correct indent take the largest symbol for which the width is correct
+	// and make the calculation
+	//
+	// see also libs/canvas/text.cc
+	int cor_width;
+	layout->set_text ("H");
+	layout->get_pixel_size (cor_width, height);
+	width += cor_width * 1.5;
+#endif
+
 	return width;
 }
 

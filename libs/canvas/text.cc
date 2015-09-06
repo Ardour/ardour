@@ -81,31 +81,12 @@ Text::set (string const & text)
 }
 
 void
-Text::_redraw (Cairo::RefPtr<Cairo::Context> context) const
+Text::_redraw () const
 {
-	if (_text.empty()) {
-		return;
-	}
-
+	assert (!_text.empty());
+	Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get());
 	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
 
-	__redraw (layout);
-}
-
-void
-Text::_redraw (Glib::RefPtr<Pango::Context> context) const
-{
-	if (_text.empty()) {
-		return;
-	}
-
-	Glib::RefPtr<Pango::Layout> layout = Pango::Layout::create (context);
-	__redraw (layout);
-}
-
-void
-Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
-{
 #ifdef __APPLE__
 	if (_width_correction < 0.0) {
 		// Pango returns incorrect text width on some OS X
@@ -115,6 +96,7 @@ Text::__redraw (Glib::RefPtr<Pango::Layout> layout) const
 		Gtk::Window win;
 		Gtk::Label foo;
 		win.add (foo);
+		win.ensure_style ();
 
 		int width = 0;
 		int height = 0;
@@ -197,7 +179,7 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	}
 
 	if (_need_redraw) {
-		_redraw (context);
+		_redraw ();
 	}
 	
 	Rect intersection (i.get());
@@ -220,10 +202,13 @@ Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 void
 Text::clamp_width (double w)
 {
-        begin_change ();
+	if (_clamped_width == w) {
+		return;
+	}
+	begin_change ();
 	_clamped_width = w;
-        _bounding_box_dirty = true;
-        end_change ();
+	_bounding_box_dirty = true;
+	end_change ();
 }
 
 void
@@ -236,11 +221,15 @@ Text::compute_bounding_box () const
 	}
 
 	if (_bounding_box_dirty) {
+#ifdef __APPLE__
+		const float retina_factor = 0.5;
+#else
+		const float retina_factor = 1.0;
+#endif
 		if (_need_redraw || !_image) {
-			Glib::RefPtr<Pango::Context> context = Glib::wrap (gdk_pango_context_get()); // context now owns C object and will free it
-			_redraw (context);
+			_redraw ();
 		}
-		_bounding_box = Rect (0, 0, min (_clamped_width, (double) _image->get_width()), _image->get_height());
+		_bounding_box = Rect (0, 0, min (_clamped_width, (double) _image->get_width() * retina_factor), _image->get_height() * retina_factor);
 		_bounding_box_dirty = false;
 	}
 }
