@@ -194,6 +194,7 @@ class AudioRegionView : public RegionView
 	void reset_width_dependent_items (double pixel_width);
 	void set_frame_color ();
 
+	uint32_t get_fill_color() const;
 	void color_handler ();
 
 	void transients_changed();

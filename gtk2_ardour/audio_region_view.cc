@@ -984,6 +984,17 @@ AudioRegionView::set_amplitude_above_axis (gdouble a)
 	}
 }
 
+uint32_t
+AudioRegionView::get_fill_color() const
+{
+	ArdourCanvas::Color c = TimeAxisViewItem::get_fill_color();
+	if (!tmp_waves.empty()) {
+		// peak-data is not ready.
+		c &= 0xffffff1f; // TODO: themable color or pattern?
+	}
+	return c;
+}
+
 void
 AudioRegionView::set_colors ()
 {
@@ -1111,6 +1122,9 @@ AudioRegionView::create_waves ()
 				// cerr << "\tdata is not ready\n";
 				// we'll get a PeaksReady signal from the source in the future
 				// and will call create_one_wave(n) then.
+
+				// hightlight track, missing peaks
+				set_colors ();
 			}
 
 		} else {
@@ -1211,6 +1225,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		waves = tmp_waves;
 		tmp_waves.clear ();
 
+		/* set color to indicate peak-completed */
+		set_colors ();
 	}
 
 	/* channel wave created, don't hook into peaks ready anymore */
