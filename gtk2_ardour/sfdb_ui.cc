@@ -560,10 +560,16 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 {
 
 #ifdef GTKOSX
-        chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
-        chooser.add_shortcut_folder_uri("file:///Library/Audio/Apple Loops");
-        chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
-        chooser.add_shortcut_folder_uri("file:///Volumes");
+	try {
+		/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+		chooser.add_shortcut_folder_uri("file:///Library/GarageBand/Apple Loops");
+		chooser.add_shortcut_folder_uri("file:///Library/Audio/Apple Loops");
+		chooser.add_shortcut_folder_uri("file:///Library/Application Support/GarageBand/Instrument Library/Sampler/Sampler Files");
+		chooser.add_shortcut_folder_uri("file:///Volumes");
+	}
+	catch (Glib::Error & e) {
+		std::cerr << "sfdb.add_shortcut_folder() threw Glib::Error " << e.what() << std::endl;
+	}
 #endif
 
 	//add the file chooser
