@@ -104,6 +104,7 @@ Location::Location (const Location& other)
 
 Location::Location (Session& s, const XMLNode& node)
 	: SessionHandleRef (s)
+	, _flags (Flags (0))
 	, _position_lock_style (AudioTime)
 {
 	/* Note: _position_lock_style is initialised above in case set_state doesn't set it
