@@ -251,6 +251,7 @@ AudioRegionView::~AudioRegionView ()
 	for (vector<ScopedConnection*>::iterator i = _data_ready_connections.begin(); i != _data_ready_connections.end(); ++i) {
 		delete *i;
 	}
+	_data_ready_connections.clear ();
 
 	for (list<std::pair<framepos_t, ArdourCanvas::Line*> >::iterator i = feature_lines.begin(); i != feature_lines.end(); ++i) {
 		delete ((*i).second);
@@ -1210,10 +1211,11 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		waves = tmp_waves;
 		tmp_waves.clear ();
 
-		/* all waves created, don't hook into peaks ready anymore */
-		delete _data_ready_connections[which];
-		_data_ready_connections[which] = 0;
 	}
+
+	/* channel wave created, don't hook into peaks ready anymore */
+	delete _data_ready_connections[which];
+	_data_ready_connections[which] = 0;
 }
 
 void
