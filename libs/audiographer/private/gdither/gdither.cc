@@ -273,6 +273,7 @@ inline static void gdither_innner_loop_fp(const GDitherType dt,
 	    ts[channel] = r;
 	    break;
 	case GDitherShaped:
+	    assert (ss);
 	    /* Save raw value for error calculations */
 	    ideal = tmp;
 
