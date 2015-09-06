@@ -46,6 +46,7 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 	_meter_type = MeterPeak;
 	_reset_dpm = true;
 	_reset_max = true;
+	_bufcnt = 0;
 }
 
 PeakMeter::~PeakMeter ()
