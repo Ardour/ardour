@@ -316,6 +316,11 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	free(ui_binary_path);
 	free(features);
 
+	if (!_inst) {
+		error << _("failed to instantiate LV2 GUI") << endmsg;
+		return;
+	}
+
 #define GET_WIDGET(inst) suil_instance_get_widget((SuilInstance*)inst);
 
 	const uint32_t num_ports = _lv2->num_ports();
@@ -328,25 +333,23 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 	}
 
 	_external_ui_ptr = NULL;
-	if (_inst) {
-		if (!is_external_ui) {
-			GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
-			if (!c_widget) {
-				error << _("failed to get LV2 UI widget") << endmsg;
-				suil_instance_free((SuilInstance*)_inst);
-				_inst = NULL;
-				return;
-			}
-			if (!container->get_child()) {
-				// Suil didn't add the UI to the container for us, so do it now
-				container->add(*Gtk::manage(Glib::wrap(c_widget)));
-			}
-			container->show_all();
-			gtk_widget_set_can_focus(c_widget, true);
-			gtk_widget_grab_focus(c_widget);
-		} else {
-			_external_ui_ptr = (struct lv2_external_ui*)GET_WIDGET(_inst);
+	if (!is_external_ui) {
+		GtkWidget* c_widget = (GtkWidget*)GET_WIDGET(_inst);
+		if (!c_widget) {
+			error << _("failed to get LV2 UI widget") << endmsg;
+			suil_instance_free((SuilInstance*)_inst);
+			_inst = NULL;
+			return;
 		}
+		if (!container->get_child()) {
+			// Suil didn't add the UI to the container for us, so do it now
+			container->add(*Gtk::manage(Glib::wrap(c_widget)));
+		}
+		container->show_all();
+		gtk_widget_set_can_focus(c_widget, true);
+		gtk_widget_grab_focus(c_widget);
+	} else {
+		_external_ui_ptr = (struct lv2_external_ui*)GET_WIDGET(_inst);
 	}
 
 	_values = new float[num_ports];
@@ -502,7 +505,7 @@ LV2PluginUI::on_window_show(const std::string& title)
 		lv2ui_instantiate("gtk2gui");
 	}
 
-	return true;
+	return _inst ? true : false;
 }
 
 void
