@@ -84,6 +84,18 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	_instance_name = s_instance_name;
 	_device = _("Silence");
 	pthread_mutex_init (&_port_callback_mutex, 0);
+
+	if (_driver_speed.empty()) {
+		_driver_speed.push_back (DriverSpeed (_("Half Speed"),   2.0f));
+		_driver_speed.push_back (DriverSpeed (_("Normal Speed"), 1.0f));
+		_driver_speed.push_back (DriverSpeed (_("Double Speed"), 0.5f));
+		_driver_speed.push_back (DriverSpeed (_("5x Speed"),     0.2f));
+		_driver_speed.push_back (DriverSpeed (_("10x Speed"),    0.1f));
+		_driver_speed.push_back (DriverSpeed (_("15x Speed"),    0.06666f));
+		_driver_speed.push_back (DriverSpeed (_("20x Speed"),    0.05f));
+		_driver_speed.push_back (DriverSpeed (_("50x Speed"),    0.02f));
+	}
+
 }
 
 DummyAudioBackend::~DummyAudioBackend ()
@@ -188,17 +200,6 @@ DummyAudioBackend::can_change_buffer_size_when_running () const
 std::vector<std::string>
 DummyAudioBackend::enumerate_drivers () const
 {
-	if (_driver_speed.empty()) {
-		_driver_speed.push_back (DriverSpeed (_("Half Speed"),   2.0f));
-		_driver_speed.push_back (DriverSpeed (_("Normal Speed"), 1.0f));
-		_driver_speed.push_back (DriverSpeed (_("Double Speed"), 0.5f));
-		_driver_speed.push_back (DriverSpeed (_("5x Speed"),     0.2f));
-		_driver_speed.push_back (DriverSpeed (_("10x Speed"),    0.1f));
-		_driver_speed.push_back (DriverSpeed (_("15x Speed"),    0.06666f));
-		_driver_speed.push_back (DriverSpeed (_("20x Speed"),    0.05f));
-		_driver_speed.push_back (DriverSpeed (_("50x Speed"),    0.02f));
-	}
-
 	std::vector<std::string> speed_drivers;
 	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
 		speed_drivers.push_back (it->name);
@@ -227,6 +228,7 @@ DummyAudioBackend::set_driver (const std::string& d)
 			return 0;
 		}
 	}
+	assert (0);
 	return -1;
 }
 
