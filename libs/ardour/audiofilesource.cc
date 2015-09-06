@@ -335,6 +335,9 @@ AudioFileSource::is_empty (Session& /*s*/, string path)
 int
 AudioFileSource::setup_peakfile ()
 {
+	if (_session.deletion_in_progress()) {
+		return 0;
+	}
 	if (!(_flags & NoPeakFile)) {
 		return initialize_peakfile (_path);
 	} else {

@@ -56,6 +56,7 @@
 #include "ardour/audiosource.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/runtime_functions.h"
+#include "ardour/session.h"
 
 #include "i18n.h"
 
@@ -745,6 +746,12 @@ AudioSource::build_peaks_from_scratch ()
 			}
 
 			lp.release(); // allow butler to refill buffers
+
+			if (_session.deletion_in_progress()) {
+				cerr << "peak file creation interrupted: " << _name << endmsg;
+				done_with_peakfile_writes (false);
+				goto out;
+			}
 
 			if (compute_and_write_peaks (buf.get(), current_frame, frames_read, true, false, _FPP)) {
 				break;
