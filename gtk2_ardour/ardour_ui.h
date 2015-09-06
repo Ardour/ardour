@@ -518,7 +518,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Glib::RefPtr<Gtk::TreeStore> recent_session_model;
 
 	ArdourDialog*     session_selector_window;
-	Gtk::FileChooserDialog* open_session_selector;
 
 	void build_session_selector();
 	void redisplay_recent_sessions();

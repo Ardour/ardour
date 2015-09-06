@@ -256,7 +256,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	, editor_meter(0)
 	, editor_meter_peak_display()
 	, session_selector_window (0)
-	, open_session_selector (0)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)
 	, last_key_press_time (0)
@@ -1775,55 +1774,43 @@ ARDOUR_UI::open_session ()
 
 	}
 
-	/* popup selector window */
+	/* ardour sessions are folders */
+	Gtk::FileChooserDialog open_session_selector(_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
+	open_session_selector.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	open_session_selector.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
+	open_session_selector.set_default_response(Gtk::RESPONSE_ACCEPT);
 
-	if (open_session_selector == 0) {
 
-		/* ardour sessions are folders */
 
-		open_session_selector = new Gtk::FileChooserDialog (_("Open Session"), FILE_CHOOSER_ACTION_OPEN);
-		open_session_selector->add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-		open_session_selector->add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
-		open_session_selector->set_default_response(Gtk::RESPONSE_ACCEPT);
-		
-		if (_session) {
-			string session_parent_dir = Glib::path_get_dirname(_session->path());
-			string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
-			session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
-			open_session_selector->set_current_folder(session_parent_dir);
-		} else {
-			open_session_selector->set_current_folder(Config->get_default_session_parent_dir());
-		}
-
-		string default_session_folder = Config->get_default_session_parent_dir();
-		try {
-			/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
-			open_session_selector->add_shortcut_folder (default_session_folder);
-		}
-		catch (Glib::Error & e) {
-			std::cerr << "open_session_selector->add_shortcut_folder (" << default_session_folder << ") threw Glib::Error " << e.what() << std::endl;
-		}
-
-		FileFilter session_filter;
-		session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
-		session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
-		open_session_selector->add_filter (session_filter);
-		open_session_selector->set_filter (session_filter);
-  	}
-
-	int response = open_session_selector->run();
-	open_session_selector->hide ();
-
-	switch (response) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		open_session_selector->hide();
-		return;
+	if (_session) {
+		string session_parent_dir = Glib::path_get_dirname(_session->path());
+		open_session_selector.set_current_folder(session_parent_dir);
+	} else {
+		open_session_selector.set_current_folder(Config->get_default_session_parent_dir());
 	}
 
-	open_session_selector->hide();
-	string session_path = open_session_selector->get_filename();
+	try {
+		/* add_shortcut_folder throws an exception if the folder being added already has a shortcut */
+#ifdef GTKOSX
+		open_session_selector.add_shortcut_folder_uri("file:///Volumes");
+#endif
+		string default_session_folder = Config->get_default_session_parent_dir();
+		open_session_selector.add_shortcut_folder (default_session_folder);
+	}
+	catch (Glib::Error & e) {
+		std::cerr << "open_session_selector.add_shortcut_folder() threw Glib::Error " << e.what() << std::endl;
+	}
+
+	FileFilter session_filter;
+	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
+	session_filter.set_name (string_compose (_("%1 sessions"), PROGRAM_NAME));
+	open_session_selector.add_filter (session_filter);
+	open_session_selector.set_filter (session_filter);
+
+	int response = open_session_selector.run();
+	open_session_selector.hide ();
+
+	string session_path = open_session_selector.get_filename();
 	string path, name;
 	bool isnew;
 
