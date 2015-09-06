@@ -380,6 +380,7 @@ Editor::Editor ()
 	region_edit_menu_split_item = 0;
 	temp_location = 0;
 	leftmost_frame = 0;
+	mouse_mode = MouseObject;
 	current_stepping_trackview = 0;
 	entered_track = 0;
 	entered_regionview = 0;

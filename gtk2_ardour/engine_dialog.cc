@@ -100,6 +100,7 @@ EngineControl::EngineControl ()
 	, _desired_sample_rate (0)
 	, started_at_least_once (false)
 	, queue_device_changed (false)
+	, _have_control (true)
 	, block_signals(0)
 {
 	using namespace Notebook_Helpers;
