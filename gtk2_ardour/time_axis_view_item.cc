@@ -538,6 +538,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 
 	name_text_width = pixel_width (new_name, NAME_FONT) + 2;
 	name_text->set (new_name);
+	manage_name_text ();
 
 }
 
