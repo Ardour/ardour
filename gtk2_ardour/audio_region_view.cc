@@ -1125,6 +1125,14 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 {
 	//cerr << "AudioRegionView::create_one_wave() called which: " << which << " this: " << this << endl;//DEBUG
 	RouteTimeAxisView& atv (*(dynamic_cast<RouteTimeAxisView*>(&trackview))); // ick
+	if (!trackview.session() || trackview.session()->deletion_in_progress () || !atv.track()) {
+		/* peaks_ready_handler() may be called from peak_thread_work() while
+		 * session deletion is in progress.
+		 * Since session-unload happens in the GUI thread, we need to test
+		 * in this context.
+		 */
+		return;
+	}
 	uint32_t nchans = atv.track()->n_channels().n_audio();
 	uint32_t n;
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
