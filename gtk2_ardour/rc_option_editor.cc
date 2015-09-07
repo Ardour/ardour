@@ -21,6 +21,10 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#if !defined USE_CAIRO_IMAGE_SURFACE && !defined NDEBUG
+#define OPTIONAL_CAIRO_IMAGE_SURFACE
+#endif
+
 #include <cairo/cairo.h>
 
 #include <boost/algorithm/string.hpp>    
@@ -2776,18 +2780,31 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* INTERFACE */
 
+#ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
+	BoolOption* bgo = new BoolOption (
+		"cairo-image-surface",
+		_("Disable Graphics Hardware Acceleration (requires restart)"),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::get_cairo_image_surface),
+		sigc::mem_fun (*_ui_config, &UIConfiguration::set_cairo_image_surface)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (
+				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+	add_option (S_("Preferences|GUI"), bgo);
+#endif
+
 #ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
 	BoolOption* bgo = new BoolOption (
 		"buggy-gradients",
-		_("Possibly improve slow graphical performance"),
+		_("Possibly improve slow graphical performance (requires restart)"),
 		sigc::mem_fun (*_ui_config, &UIConfiguration::get_buggy_gradients),
 		sigc::mem_fun (*_ui_config, &UIConfiguration::set_buggy_gradients)
 		);
 
-	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("This requires restarting %1 before having an effect"), PROGRAM_NAME));
+	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (_("Disables hardware gradient rendering on buggy video drivers (\"buggy gradients patch\").\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
 	add_option (S_("Preferences|GUI"), bgo);
 #endif
-	
+
 	add_option (S_("Preferences|GUI"),
 	     new BoolOption (
 		     "widget-prelight",
