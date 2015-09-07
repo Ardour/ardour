@@ -2522,6 +2522,12 @@ VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	if (_editor->session() == 0) {
 		return;
 	}
+
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
+		_stuck = false;
+		_views.clear();
+	}
+
 	if (_stuck) {
 		show_verbose_cursor_text (_("One or more Audio Regions\nare both Locked and\nLocked to Video.\nThe video cannot me moved."));
 		return;
