@@ -135,20 +135,10 @@ FastMeter::~FastMeter ()
 
 void
 FastMeter::flush_pattern_cache () {
-	Pattern10Map::iterator i1;
-	PatternBgMap::iterator ib;
-	for (ib = hb_pattern_cache.begin(); ib !=  hb_pattern_cache.end(); ++ib) {
-		hb_pattern_cache.erase(ib);
-	}
-	for (i1 = hm_pattern_cache.begin(); i1 !=  hm_pattern_cache.end(); ++i1) {
-		hm_pattern_cache.erase(i1);
-	}
-	for (ib = vb_pattern_cache.begin(); ib !=  vb_pattern_cache.end(); ++ib) {
-		vb_pattern_cache.erase(ib);
-	}
-	for (i1 = vm_pattern_cache.begin(); i1 !=  vm_pattern_cache.end(); ++i1) {
-		vm_pattern_cache.erase(i1);
-	}
+	hb_pattern_cache.clear();
+	hm_pattern_cache.clear();
+	vb_pattern_cache.clear();
+	vm_pattern_cache.clear();
 }
 
 Cairo::RefPtr<Cairo::Pattern>
