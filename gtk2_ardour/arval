@@ -13,4 +13,5 @@ exec valgrind --tool=memcheck \
 	$VALGRIND_OPTIONS \
         --track-origins=yes \
 	--suppressions=`dirname "$0"`/../tools/valgrind.supp \
+	--suppressions=`dirname "$0"`/../tools/objc.supp \
 	$TOP/$EXECUTABLE --novst "$@"
