@@ -49,6 +49,7 @@ class LIBARDOUR_API Source : public SessionObject
 		NoPeakFile = 0x40,
 		Destructive = 0x80,
 		Empty = 0x100, /* used for MIDI only */
+		RF64_RIFF = 0x200,
 	};
 
 	typedef Glib::Threads::Mutex::Lock Lock;

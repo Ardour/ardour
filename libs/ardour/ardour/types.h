@@ -484,7 +484,9 @@ namespace ARDOUR {
 		CAF,
 		AIFF,
 		iXML,
-		RF64
+		RF64,
+		RF64_WAV,
+		MBWF,
 	};
 
 	struct PeakData {
