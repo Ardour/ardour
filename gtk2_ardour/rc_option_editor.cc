@@ -2781,16 +2781,16 @@ RCOptionEditor::RCOptionEditor ()
 	/* INTERFACE */
 
 #ifdef OPTIONAL_CAIRO_IMAGE_SURFACE
-	BoolOption* bgo = new BoolOption (
+	BoolOption* bgc = new BoolOption (
 		"cairo-image-surface",
 		_("Disable Graphics Hardware Acceleration (requires restart)"),
 		sigc::mem_fun (*_ui_config, &UIConfiguration::get_cairo_image_surface),
 		sigc::mem_fun (*_ui_config, &UIConfiguration::set_cairo_image_surface)
 		);
 
-	Gtkmm2ext::UI::instance()->set_tip (bgo->tip_widget(), string_compose (
+	Gtkmm2ext::UI::instance()->set_tip (bgc->tip_widget(), string_compose (
 				_("Render large parts of the application user-interface in software, instead of using 2D-graphics acceleration.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
-	add_option (S_("Preferences|GUI"), bgo);
+	add_option (S_("Preferences|GUI"), bgc);
 #endif
 
 #ifdef CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE
