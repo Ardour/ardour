@@ -226,14 +226,7 @@ _pingback (void *arg)
 			FILE* fout = g_fopen (cm->announce_path.c_str(), "wb");
 
 			if (fout) {
-				{
-					std::ofstream annc_file (fout);
-
-					if (annc_file) {
-						annc_file << return_str;
-					}
-				}
-
+				fwrite (return_str.c_str(), sizeof(char), return_str.length (), fout);
 				fclose (fout);
 			}
 		}

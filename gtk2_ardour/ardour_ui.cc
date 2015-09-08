@@ -807,20 +807,18 @@ ARDOUR_UI::check_announcements ()
 #endif
 	_annc_filename.append (VERSIONSTRING);
 
+	_announce_string = "";
+
 	std::string path = Glib::build_filename (user_config_directory(), _annc_filename);
 	FILE* fin = g_fopen (path.c_str(), "rb");
-
 	if (fin) {
-		std::ifstream announce_file (fin);
-
-		if ( announce_file.fail() )
-			_announce_string = "";
-		else {
-			std::stringstream oss;
-			oss << announce_file.rdbuf();
-			_announce_string = oss.str();
+		while (!feof (fin)) {
+			char tmp[1024];
+			if (fread (tmp, sizeof(char), 1024, fin) <= 0) {
+				break;
+			}
+			_announce_string += fin
 		}
-
 		fclose (fin);
 	}
 
