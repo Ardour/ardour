@@ -21,6 +21,7 @@
 #include <cerrno>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 
 #include <glib/gstdio.h>
@@ -60,7 +61,26 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 		}
 	}
 
-	ifstream recent (fin);
+
+
+	// Read the file into a std::string;
+	std::stringstream recent;
+	char temporaryBuffer[1024];
+	while (!feof(fin))
+	{
+		size_t charsRead = fread(&temporaryBuffer[0], sizeof(char), 1024, fin);
+		if (charsRead != 1024 && ferror(fin))
+		{
+			error << string_compose (_("Error reading recent session file %1 (%2)"), path, strerror (errno)) << endmsg;
+			fclose(fin);
+			return -1;
+		}
+		recent << &temporaryBuffer[0];
+	}
+
+
+
+	//ifstream recent (fin);
 
 	while (true) {
 
@@ -131,17 +151,32 @@ ARDOUR::write_recent_sessions (RecentSessions& rs)
 	}
 
 	{
-		ofstream recent (fout);
+		stringstream recent;
+		//ofstream recent (fout);
 
-		if (!recent) {
-			fclose (fout);
-			return -1;
-		}
+		// if (!recent) {
+		// 	fclose (fout);
+		// 	return -1;
+		// }
 
 		for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
 			recent << (*i).first << '\n' << (*i).second << endl;
 		}
+
+		string recentString = recent.str();
+		size_t writeSize = recentString.length();
+
+		fwrite(recentString.c_str(), sizeof(char), writeSize, fout);
+
+		if (ferror(fout))
+		{
+			error << string_compose (_("Error writing recent sessions file %1 (%2)"), recent_file_name, strerror (errno)) << endmsg;
+			fclose(fout);
+			return -1;
+		}
 	}
+
+
 
 	fclose (fout);
 
@@ -239,4 +274,3 @@ ARDOUR::remove_recent_sessions (const string& path)
 		return 1;
 	}
 }
-
