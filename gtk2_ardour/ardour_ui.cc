@@ -1381,6 +1381,12 @@ ARDOUR_UI::update_format ()
 	case RF64:
 		s << _("RF64");
 		break;
+	case RF64_WAV:
+		s << _("RF64/WAV");
+		break;
+	case MBWF:
+		s << _("MBWF");
+		break;
 	}
 
 	s << " ";

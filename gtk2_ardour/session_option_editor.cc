@@ -179,10 +179,17 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_native_file_header_format)
 		);
 
-	hf->add (BWF, _("Broadcast WAVE"));
-	hf->add (WAVE, _("WAVE"));
+	hf->add (BWF, _("Broadcast WAVE (4GB size limit)"));
+#ifdef HAVE_RF64_RIFF
+	hf->add (MBWF, _("Broadcast RF64"));
+#endif	
+	hf->add (WAVE, _("WAVE (4GB size limit)"));
 	hf->add (WAVE64, _("WAVE-64"));
 	hf->add (CAF, _("CAF"));
+	hf->add (RF64, _("RF64"));
+#ifdef HAVE_RF64_RIFF
+	hf->add (RF64_WAV, _("RF64 (WAV compatible)"));
+#endif
 
 	add_option (_("Media"), hf);
 
