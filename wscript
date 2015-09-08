@@ -906,6 +906,22 @@ def configure(conf):
     autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', atleast_version='2.1', mandatory=True)
     autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
 
+    have_rf64_riff_support = conf.check_cc(fragment = '''
+#include <sndfile.h>
+int main () { int x = SFC_AUTO_DOWNGRADE_RF64; return 0; }
+''',
+                                           features  = 'c',
+                                           mandatory = False,
+                                           execute   = False,
+                                           use = 'SNDFILE',
+                                           msg       = 'Checking for  sndfile RF64=>RIFF support',
+                                           okmsg = 'Found',
+                                           errmsg = 'Not found, no RF64-to-WAV support')
+
+    if have_rf64_riff_support:
+            conf.env.append_value('CXXFLAGS', "-DHAVE_RF64_RIFF")
+            conf.env.append_value('CFLAGS', "-DHAVE_RF64_RIFF")
+    
     if Options.options.dist_target == 'mingw':
         Options.options.fpu_optimization = True
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
