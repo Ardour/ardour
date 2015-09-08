@@ -251,7 +251,7 @@ DummyAudioBackend::set_sample_rate (float sr)
 int
 DummyAudioBackend::set_buffer_size (uint32_t bs)
 {
-	if (bs <= 0 || bs >= _max_buffer_size) {
+	if (bs <= 0 || bs > _max_buffer_size) {
 		return -1;
 	}
 	_samples_per_period = bs;
