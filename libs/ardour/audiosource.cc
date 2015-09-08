@@ -244,12 +244,6 @@ AudioSource::initialize_peakfile (const string& audio_path)
 
 	DEBUG_TRACE(DEBUG::Peaks, string_compose ("Initialize Peakfile %1 for Audio file %2\n", _peakpath, audio_path));
 
-	/* if the peak file should be there, but isn't .... */
-
-	if (!empty() && !Glib::file_test (_peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-		_peakpath = find_broken_peakfile (_peakpath, audio_path);
-	}
-
 	if (g_stat (_peakpath.c_str(), &statbuf)) {
 		if (errno != ENOENT) {
 			/* it exists in the peaks dir, but there is some kind of error */

@@ -40,8 +40,6 @@ public:
 	virtual ~AudioFileSource ();
 
 	std::string construct_peak_filepath (const std::string& audio_filepath) const;
-	std::string find_broken_peakfile (const std::string& missing_peak_path,
-	                                  const std::string& audio_path);
 
 	static void set_peak_dir (const std::string& dir) { peak_dir = dir; }
 
@@ -117,10 +115,6 @@ protected:
 
 	/** Kept up to date with the position of the session location start */
 	static framecnt_t header_position_offset;
-
-  private:
-	std::string old_peak_path (const std::string& audio_path);
-	std::string broken_peak_path (const std::string& audio_path);
 };
 
 } // namespace ARDOUR
