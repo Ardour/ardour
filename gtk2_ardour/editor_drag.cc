@@ -593,6 +593,7 @@ RegionDrag::find_time_axis_view (TimeAxisView* t) const
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, bool b)
 	: RegionDrag (e, i, p, v)
 	, _brushing (b)
+	, _ignore_video_lock (false)
 	, _total_x_delta (0)
 	, _last_pointer_time_axis_view (0)
 	, _last_pointer_layer (0)
@@ -616,6 +617,10 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		_last_pointer_time_axis_view = find_time_axis_view (tv.first);
 		assert(_last_pointer_time_axis_view >= 0);
 		_last_pointer_layer = tv.first->layer_display() == Overlaid ? 0 : tv.second;
+	}
+
+	if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
+		_ignore_video_lock = true;
 	}
 
 	if (_brushing) {
@@ -1008,7 +1013,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 		y_delta = 0;
 
-		if (rv->region()->locked() || rv->region()->video_locked()) {
+		if (rv->region()->locked() || (rv->region()->video_locked() && !_ignore_video_lock)) {
 			continue;
 		}
 
@@ -1430,7 +1435,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const /*changed
 
 		RouteTimeAxisView* dest_rtv = 0;
 
-		if (i->view->region()->locked() || i->view->region()->video_locked()) {
+		if (i->view->region()->locked() || (i->view->region()->video_locked() && !_ignore_video_lock)) {
 			continue;
 		}
 
@@ -1513,7 +1518,7 @@ RegionMoveDrag::finished_no_copy (
 		RegionView* rv = i->view;
 		RouteTimeAxisView* dest_rtv = 0;
 
-		if (rv->region()->locked() || rv->region()->video_locked()) {
+		if (rv->region()->locked() || (rv->region()->video_locked() && !_ignore_video_lock)) {
 			++i;
 			continue;
 		}

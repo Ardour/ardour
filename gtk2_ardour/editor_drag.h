@@ -362,6 +362,7 @@ protected:
 	virtual bool y_movement_allowed (int, double, int skip_invisible = 0) const;
 
 	bool _brushing;
+	bool _ignore_video_lock;
 	ARDOUR::framepos_t _last_frame_position; ///< last position of the thing being dragged
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
