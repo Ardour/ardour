@@ -817,7 +817,7 @@ ARDOUR_UI::check_announcements ()
 			if (fread (tmp, sizeof(char), 1024, fin) <= 0) {
 				break;
 			}
-			_announce_string += fin
+			_announce_string += tmp;
 		}
 		fclose (fin);
 	}
