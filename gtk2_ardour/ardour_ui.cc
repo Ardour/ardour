@@ -1821,6 +1821,10 @@ ARDOUR_UI::open_session ()
 	int response = open_session_selector.run();
 	open_session_selector.hide ();
 
+	if (response == Gtk::RESPONSE_CANCEL) {
+		return;
+	}
+
 	string session_path = open_session_selector.get_filename();
 	string path, name;
 	bool isnew;
