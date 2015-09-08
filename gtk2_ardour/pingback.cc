@@ -32,6 +32,7 @@
 
 #include <curl/curl.h>
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/compose.h"
@@ -221,11 +222,19 @@ _pingback (void *arg)
 			
 			//write announcements to local file, even if the
 			//announcement is empty
-				
-			std::ofstream annc_file (cm->announce_path.c_str());
-			
-			if (annc_file) {
-				annc_file << return_str;
+
+			FILE* fout = g_fopen (cm->announce_path.c_str(), "wb");
+
+			if (fout) {
+				{
+					std::ofstream annc_file (fout);
+
+					if (annc_file) {
+						annc_file << return_str;
+					}
+				}
+
+				fclose (fout);
 			}
 		}
 	} else {

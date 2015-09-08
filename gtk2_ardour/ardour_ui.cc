@@ -808,13 +808,20 @@ ARDOUR_UI::check_announcements ()
 	_annc_filename.append (VERSIONSTRING);
 
 	std::string path = Glib::build_filename (user_config_directory(), _annc_filename);
-	std::ifstream announce_file (path.c_str());
-	if ( announce_file.fail() )
-		_announce_string = "";
-	else {
-		std::stringstream oss;
-		oss << announce_file.rdbuf();
-		_announce_string = oss.str();
+	FILE* fin = g_fopen (path.c_str(), "rb");
+
+	if (fin) {
+		std::ifstream announce_file (fin);
+
+		if ( announce_file.fail() )
+			_announce_string = "";
+		else {
+			std::stringstream oss;
+			oss << announce_file.rdbuf();
+			_announce_string = oss.str();
+		}
+
+		fclose (fin);
 	}
 
 	pingback (VERSIONSTRING, path);
