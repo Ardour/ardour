@@ -152,6 +152,23 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 		_flags = Flag (_flags & ~Broadcast);
 		break;
 
+	case RF64_WAV:
+		fmt = SF_FORMAT_RF64;
+		_flags = Flag (_flags & ~Broadcast);
+		_flags = Flag (_flags | RF64_RIFF);
+		break;
+
+	case MBWF:
+		fmt = SF_FORMAT_RF64;
+		_flags = Flag (_flags | Broadcast);
+		_flags = Flag (_flags | RF64_RIFF);
+		break;
+
+	case RF64:
+		fmt = SF_FORMAT_RF64;
+		_flags = Flag (_flags & ~Broadcast);
+		break;
+		               
 	default:
 		fatal << string_compose (_("programming error: %1"), X_("unsupported audio header format requested")) << endmsg;
 		abort(); /*NOTREACHED*/
@@ -296,6 +313,19 @@ SndFileSource::open ()
 
 	_length = _info.frames;
 
+#ifdef HAVE_RF64_RIFF
+	if (_file_is_new && _length == 0 && writable()) {
+		if (_flags & RF64_RIFF) {
+			if (sf_command (_sndfile, SFC_AUTO_DOWNGRADE_RF64, 0, 0) != SF_TRUE) {
+				char errbuf[256];
+				sf_error_str (_sndfile, errbuf, sizeof (errbuf) - 1);
+				error << string_compose (_("Cannot mark RF64 audio file for automatic downgrade to WAV: %1"), errbuf)
+				      << endmsg;
+			}
+		}
+	}
+#endif
+	
 	if (!_broadcast_info) {
 		_broadcast_info = new BroadcastInfo;
 	}

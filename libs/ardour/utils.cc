@@ -649,6 +649,8 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
         case iXML:
                 return ".ixml";
         case RF64:
+        case RF64_WAV:
+        case MBWF:
                 return ".rf64";
         }
 
