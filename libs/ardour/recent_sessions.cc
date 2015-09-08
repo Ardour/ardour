@@ -20,8 +20,10 @@
 #include <cstring>
 #include <cerrno>
 #include <fstream>
+#include <iostream>
 #include <algorithm>
 
+#include <glib/gstdio.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
@@ -47,10 +49,9 @@ int
 ARDOUR::read_recent_sessions (RecentSessions& rs)
 {
 	std::string path = Glib::build_filename (user_config_directory(), recent_file_name);
+	FILE* fin = g_fopen (path.c_str(), "rb");
 
-	ifstream recent (path.c_str());
-
-	if (!recent) {
+	if (!fin) {
 		if (errno != ENOENT) {
 			error << string_compose (_("cannot open recent session file %1 (%2)"), path, strerror (errno)) << endmsg;
 			return -1;
@@ -58,6 +59,8 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 			return 1;
 		}
 	}
+
+	ifstream recent (fin);
 
 	while (true) {
 
@@ -82,6 +85,7 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 	 * natural order will be broken
 	 */
 
+	fclose (fin);
 	return 0;
 }
 
@@ -120,17 +124,26 @@ ARDOUR::read_recent_templates (std::deque<std::string>& rt)
 int
 ARDOUR::write_recent_sessions (RecentSessions& rs)
 {
-	std::string path = Glib::build_filename (user_config_directory(), recent_file_name);
+	FILE* fout = g_fopen (Glib::build_filename (user_config_directory(), recent_file_name).c_str(), "wb");
 
-	ofstream recent (path.c_str());
-
-	if (!recent) {
+	if (!fout) {
 		return -1;
 	}
 
-	for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-		recent << (*i).first << '\n' << (*i).second << endl;
+	{
+		ofstream recent (fout);
+
+		if (!recent) {
+			fclose (fout);
+			return -1;
+		}
+
+		for (RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
+			recent << (*i).first << '\n' << (*i).second << endl;
+		}
 	}
+
+	fclose (fout);
 
 	return 0;
 }
