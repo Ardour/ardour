@@ -216,7 +216,7 @@ void ltc_time_to_frame(LTCFrame* frame, SMPTETimecode* stime, enum LTC_TV_STANDA
 void ltc_frame_reset(LTCFrame* frame) {
 	memset(frame, 0, sizeof(LTCFrame));
 	// syncword = 0x3FFD
-#ifdef __BIG_ENDIAN__
+#ifdef LTC_BIG_ENDIAN
 	// mirrored BE bit order: FCBF
 	frame->sync_word = 0xFCBF;
 #else

@@ -65,24 +65,31 @@ void ltc_decoder_write(LTCDecoder *d, ltcsnd_sample_t *buf, size_t size, ltc_off
 	decode_ltc(d, buf, size, posinfo);
 }
 
+#define LTC_CONVERSION_BUF_SIZE 1024
+
 #define LTCWRITE_TEMPLATE(FN, FORMAT, CONV) \
 void ltc_decoder_write_ ## FN (LTCDecoder *d, FORMAT *buf, size_t size, ltc_off_t posinfo) { \
-	ltcsnd_sample_t tmp[1024]; \
-	size_t remain = size; \
-	while (remain > 0) { \
-		int c = (remain > 1024) ? 1024 : remain; \
+	ltcsnd_sample_t tmp[LTC_CONVERSION_BUF_SIZE]; \
+	size_t copyStart = 0; \
+	while (copyStart < size) { \
 		int i; \
-		for (i=0; i<c; i++) { \
+		int c = size - copyStart; \
+		c = (c > LTC_CONVERSION_BUF_SIZE) ? LTC_CONVERSION_BUF_SIZE : c; \
+		for (i=0; i < c; i++) { \
 			tmp[i] = CONV; \
 		} \
-		decode_ltc(d, tmp, c, posinfo + (ltc_off_t)c); \
-		remain -= c; \
+		decode_ltc(d, tmp, c, posinfo + (ltc_off_t)copyStart); \
+		copyStart += c; \
 	} \
 }
 
-LTCWRITE_TEMPLATE(float, float, 128 + (buf[i] * 127.0))
-LTCWRITE_TEMPLATE(s16, short, 128 + (buf[i] >> 8))
-LTCWRITE_TEMPLATE(u16, short, (buf[i] >> 8))
+LTCWRITE_TEMPLATE(float, float, 128 + (buf[copyStart+i] * 127.0))
+/* this relies on the compiler to use an arithemtic right-shift for signed values */
+LTCWRITE_TEMPLATE(s16, short, 128 + (buf[copyStart+i] >> 8))
+/* this relies on the compiler to use a logical right-shift for unsigned values */
+LTCWRITE_TEMPLATE(u16, unsigned short, (buf[copyStart+i] >> 8))
+
+#undef LTC_CONVERSION_BUF_SIZE
 
 int ltc_decoder_read(LTCDecoder* d, LTCFrameExt* frame) {
 	if (!frame) return -1;

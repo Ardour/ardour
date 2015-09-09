@@ -13,7 +13,7 @@
    @author Robin Gareus <robin@gareus.org>
    @copyright
 
-   Copyright (C) 2006-2012 Robin Gareus <robin@gareus.org>
+   Copyright (C) 2006-2014 Robin Gareus <robin@gareus.org>
 
    Copyright (C) 2008-2009 Jan Weiß <jan@geheimwerk.de>
 
@@ -40,20 +40,39 @@
 extern "C" {
 #endif
 
+#if defined _WIN32 && !defined(__LITTLE_ENDIAN__)
+#define __LITTLE_ENDIAN__
+#endif
+
+#ifdef __BIG_ENDIAN__
+# define LTC_BIG_ENDIAN
+#elif defined _BIG_ENDIAN
+# define LTC_BIG_ENDIAN
+#elif defined __BYTE_ORDER__
+# if __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__
+#  define LTC_BIG_ENDIAN
+# endif
+#elif !defined __LITTLE_ENDIAN__
+# include <endian.h> // machine/endian.h
+# if (defined __BYTE_ORDER__ && defined __ORDER_BIG_ENDIAN__ && __BYTE_ORDER__ ==  __ORDER_BIG_ENDIAN__)
+#  define LTC_BIG_ENDIAN
+# endif
+#endif
+
 #include <stddef.h> /* size_t */
 
 #ifndef DOXYGEN_IGNORE
 /* libltc version */
-#define LIBLTC_VERSION "1.1.1"
+#define LIBLTC_VERSION "1.1.4"
 #define LIBLTC_VERSION_MAJOR  1
 #define LIBLTC_VERSION_MINOR  1
-#define LIBLTC_VERSION_MICRO  1
+#define LIBLTC_VERSION_MICRO  4
 
 /* interface revision number
  * http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
  */
 #define LIBLTC_CUR 11
-#define LIBLTC_REV  1
+#define LIBLTC_REV  3
 #define LIBLTC_AGE  0
 #endif /* end DOXYGEN_IGNORE */
 
@@ -159,7 +178,7 @@ typedef long long int ltc_off_t;
  * further information: http://www.philrees.co.uk/articles/timecode.htm
  * and http://www.barney-wol.net/time/timecode.html
  */
-#if (defined __BIG_ENDIAN__ && !defined DOXYGEN_IGNORE)
+#if (defined LTC_BIG_ENDIAN && !defined DOXYGEN_IGNORE)
 // Big Endian version, bytes are "upside down"
 struct LTCFrame {
 	unsigned int user1:4;
@@ -449,7 +468,7 @@ void ltc_decoder_write_s16(LTCDecoder *d, short *buf, size_t size, ltc_off_t pos
  * @param size number of samples to parse
  * @param posinfo (optional, recommended) sample-offset in the audio-stream.
  */
-void ltc_decoder_write_u16(LTCDecoder *d, short *buf, size_t size, ltc_off_t posinfo);
+void ltc_decoder_write_u16(LTCDecoder *d, unsigned short *buf, size_t size, ltc_off_t posinfo);
 
 /**
  * Decoded LTC frames are placed in a queue. This function retrieves
