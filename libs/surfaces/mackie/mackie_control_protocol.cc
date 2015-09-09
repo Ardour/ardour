@@ -565,13 +565,13 @@ MackieControlProtocol::initialize()
 			return;
 		}
 		
-		if (!surfaces.front()->active ()) {
+		if (!_master_surface->active ()) {
 			return;
 		}
 		
 		// sometimes the jog wheel is a pot
 		if (_device_info.has_jog_wheel()) {
-			surfaces.front()->blank_jog_ring ();
+			_master_surface->blank_jog_ring ();
 		}
 	}
 
