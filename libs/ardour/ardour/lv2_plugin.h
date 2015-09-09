@@ -96,7 +96,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void deactivate ();
 	void cleanup ();
 
-	int set_block_size (pframes_t /*nframes*/) { return 0; }
+	int set_block_size (pframes_t);
 
 	int connect_and_run (BufferSet& bufs,
 	                     ChanMapping in, ChanMapping out,

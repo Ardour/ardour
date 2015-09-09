@@ -158,6 +158,7 @@ public:
 #ifdef HAVE_LV2_1_2_0
 	LilvNode* bufz_powerOf2BlockLength;
 	LilvNode* bufz_fixedBlockLength;
+	LilvNode* bufz_nominalBlockLength;
 #endif
 
 private:
@@ -238,7 +239,9 @@ log_printf(LV2_Log_Handle handle,
 struct LV2Plugin::Impl {
 	Impl() : plugin(0), ui(0), ui_type(0), name(0), author(0), instance(0)
 	       , work_iface(0)
+	       , opts_iface(0)
 	       , state(0)
+	       , block_length(0)
 	{}
 
 	/** Find the LV2 input port with the given designation.
@@ -246,16 +249,18 @@ struct LV2Plugin::Impl {
 	 */
 	const LilvPort* designated_input (const char* uri, void** bufptrs[], void** bufptr);
 
-	const LilvPlugin*           plugin;
-	const LilvUI*               ui;
-	const LilvNode*             ui_type;
-	LilvNode*                   name;
-	LilvNode*                   author;
-	LilvInstance*               instance;
-	const LV2_Worker_Interface* work_iface;
-	LilvState*                  state;
-	LV2_Atom_Forge              forge;
-	LV2_Atom_Forge              ui_forge;
+	const LilvPlugin*            plugin;
+	const LilvUI*                ui;
+	const LilvNode*              ui_type;
+	LilvNode*                    name;
+	LilvNode*                    author;
+	LilvInstance*                instance;
+	const LV2_Worker_Interface*  work_iface;
+	const LV2_Options_Interface* opts_iface;
+	LilvState*                   state;
+	LV2_Atom_Forge               forge;
+	LV2_Atom_Forge               ui_forge;
+	int32_t                      block_length;
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -317,6 +322,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_state_version          = 0;
 	_was_activated          = false;
 	_has_state_interface    = false;
+	_impl->block_length     = _session.get_block_size();
 
 	_instance_access_feature.URI = "http://lv2plug.in/ns/ext/instance-access";
 	_data_access_feature.URI     = "http://lv2plug.in/ns/ext/data-access";
@@ -374,6 +380,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		  sizeof(int32_t), atom_Int, &_max_block_length },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id(LV2_BUF_SIZE__sequenceSize),
 		  sizeof(int32_t), atom_Int, &_seq_size },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/ext/buf-size#nominalBlockLength"),
+		  sizeof(int32_t), atom_Int, &_impl->block_length },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
@@ -426,6 +434,14 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 			LV2_WORKER__interface);
 	}
 	lilv_node_free(worker_iface_uri);
+
+
+	LilvNode* options_iface_uri = lilv_new_uri(_world.world, LV2_OPTIONS__interface);
+	if (lilv_plugin_has_extension_data(plugin, options_iface_uri)) {
+		_impl->opts_iface = (const LV2_Options_Interface*)extension_data(
+			LV2_OPTIONS__interface);
+	}
+	lilv_node_free(options_iface_uri);
 
 	if (lilv_plugin_has_feature(plugin, _world.lv2_inPlaceBroken)) {
 		error << string_compose(
@@ -634,6 +650,23 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	load_supported_properties(_property_descriptors);
 	allocate_atom_event_buffers();
 	latency_compute_run();
+}
+
+int
+LV2Plugin::set_block_size (pframes_t nframes)
+{
+#ifdef HAVE_LV2_1_2_0
+	if (_impl->opts_iface) {
+		LV2_URID atom_Int = _uri_map.uri_to_id(LV2_ATOM__Int);
+		_impl->block_length = nframes;
+		LV2_Options_Option block_size_option = {
+			LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id ("http://lv2plug.in/ns/ext/buf-size#nominalBlockLength"),
+			sizeof(int32_t), atom_Int, (void*)&_impl->block_length
+		};
+		_impl->opts_iface->set (_impl->instance->lv2_handle, &block_size_option);
+	}
+#endif
+	return 0;
 }
 
 LV2Plugin::~LV2Plugin ()
@@ -2395,6 +2428,7 @@ LV2World::LV2World()
 #ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
 	bufz_fixedBlockLength    = lilv_new_uri(world, LV2_BUF_SIZE__fixedBlockLength);
+	bufz_nominalBlockLength  = lilv_new_uri(world, "http://lv2plug.in/ns/ext/buf-size#nominalBlockLength");
 #endif
 
 }
@@ -2402,6 +2436,7 @@ LV2World::LV2World()
 LV2World::~LV2World()
 {
 #ifdef HAVE_LV2_1_2_0
+	lilv_node_free(bufz_nominalBlockLength);
 	lilv_node_free(bufz_fixedBlockLength);
 	lilv_node_free(bufz_powerOf2BlockLength);
 #endif
