@@ -210,7 +210,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string plugins_dir () const;     ///< Plugin state
 	std::string externals_dir () const;   ///< Links to external files
 
-	std::string construct_peak_filepath (const std::string&) const;
+	std::string construct_peak_filepath (const std::string&, bool oldformat = false) const;
 
 	bool audio_source_name_is_unique (const std::string& name);
 	std::string format_audio_source_name (const std::string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists);

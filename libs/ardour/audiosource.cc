@@ -50,6 +50,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/file_utils.h"
 #include "pbd/scoped_file_descriptor.h"
 #include "pbd/xml++.h"
 
@@ -241,6 +242,16 @@ AudioSource::initialize_peakfile (const string& audio_path)
 	GStatBuf statbuf;
 
 	_peakpath = construct_peak_filepath (audio_path);
+
+	if (!empty() && !Glib::file_test (_peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
+		string oldpeak = construct_peak_filepath (audio_path, true);
+		DEBUG_TRACE(DEBUG::Peaks, string_compose ("Looking for old peak file %1 for Audio file %2\n", oldpeak, audio_path));
+		if (Glib::file_test (oldpeak.c_str(), Glib::FILE_TEST_EXISTS)) {
+			// TODO use hard-link if possible
+			DEBUG_TRACE(DEBUG::Peaks, string_compose ("Copy old peakfile %1 to %2\n", oldpeak, _peakpath));
+			PBD::copy_file (oldpeak, _peakpath);
+		}
+	}
 
 	DEBUG_TRACE(DEBUG::Peaks, string_compose ("Initialize Peakfile %1 for Audio file %2\n", _peakpath, audio_path));
 

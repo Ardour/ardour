@@ -136,7 +136,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 
 	virtual framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const = 0;
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
-	virtual std::string construct_peak_filepath(const std::string& audio_filepath) const = 0;
+	virtual std::string construct_peak_filepath(const std::string& audio_filepath, bool oldformat = false) const = 0;
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,

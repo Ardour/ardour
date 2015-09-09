@@ -3047,7 +3047,7 @@ Session::cleanup_sources (CleanupReport& rep)
 		/* see if there an easy to find peakfile for this file, and remove it.
 		 */
 
-                string base = basename_nosuffix (*x);
+                string base = Glib::path_get_basename (*x);
                 base += "%A"; /* this is what we add for the channel suffix of all native files,
                                  or for the first channel of embedded files. it will miss
                                  some peakfiles for other channels

@@ -164,9 +164,17 @@ AudioFileSource::init (const string& pathstr, bool must_exist)
 }
 
 string
-AudioFileSource::construct_peak_filepath (const string& audio_path) const
+AudioFileSource::construct_peak_filepath (const string& audio_path, bool oldformat) const
 {
-	return _session.construct_peak_filepath (audio_path);
+	string base;
+	if (oldformat) {
+		base = audio_path.substr (0, audio_path.find_last_of ('.'));
+	} else {
+		base = audio_path;
+	}
+	base += '%';
+	base += (char) ('A' + _channel);
+	return _session.construct_peak_filepath (base, oldformat);
 }
 
 bool

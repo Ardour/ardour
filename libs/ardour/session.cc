@@ -4363,8 +4363,18 @@ Session::count_sources_by_origin (const string& path)
 	return cnt;
 }
 
+static string
+peak_file_helper (const string& peak_path, const string& file_path, const string& file_base, bool hash) {
+	if (hash) {
+		std::string checksum = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_SHA1, file_path + G_DIR_SEPARATOR + file_base);
+		return Glib::build_filename (peak_path, checksum + peakfile_suffix);
+	} else {
+		return Glib::build_filename (peak_path, file_base + peakfile_suffix);
+	}
+}
+
 string
-Session::construct_peak_filepath (const string& filepath) const
+Session::construct_peak_filepath (const string& filepath, bool oldformat) const
 {
 	string interchange_dir_string = string (interchange_dir_name) + G_DIR_SEPARATOR;
 
@@ -4397,24 +4407,25 @@ Session::construct_peak_filepath (const string& filepath) const
 
 		if (in_another_session) {
 			SessionDirectory sd (session_path);
-			return Glib::build_filename (sd.peak_path(), Glib::path_get_basename (filepath) + peakfile_suffix);
+			return peak_file_helper (sd.peak_path(), "", Glib::path_get_basename (filepath), !oldformat);
 		}
 	}
 
+	/* 1) if file belongs to this session
+	 * it may be a relative path (interchange/...)
+	 * or just basename (session_state, remove source)
+	 * -> just use the basename
+	 */
 	std::string filename = Glib::path_get_basename (filepath);
 	std::string path;
-	/* file is within our session: just use the filename for checksumming and leave path empty */
 
+	/* 2) if the file is outside our session dir:
+	 * (imported but not copied) add the path for check-summming */
 	if (filepath.find (interchange_dir_string) == string::npos) {
-		/* the file is outside our session: add the filepath for checksummming */
 		path = Glib::path_get_dirname (filepath);
 	}
 	
-	string::size_type suffix = filename.find_last_of ('.');
-
-	std::string checksum = Glib::Checksum::compute_checksum(Glib::Checksum::CHECKSUM_SHA1, path + G_DIR_SEPARATOR + filename);
-
-	return Glib::build_filename (_session_dir->peak_path(), checksum + peakfile_suffix);
+	return peak_file_helper (_session_dir->peak_path(), path, Glib::path_get_basename (filepath), !oldformat);
 }
 
 string
