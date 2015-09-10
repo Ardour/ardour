@@ -30,12 +30,12 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/audio_backend.h"
+#include "ardour/dsp_load_calculator.h"
 #include "ardour/types.h"
 
 #include "portaudio_io.h"
 #include "winmmemidi_io.h"
 #include "cycle_timer.h"
-#include "dsp_load_calculator.h"
 
 namespace ARDOUR {
 
@@ -348,7 +348,7 @@ class PortAudioBackend : public AudioBackend {
 		bool  _freewheeling;
 		bool  _measure_latency;
 
-		DSPLoadCalculator m_dsp_calc;
+		ARDOUR::DSPLoadCalculator m_dsp_calc;
 
 		uint64_t m_cycle_count;
 		uint64_t m_total_deviation_us;
