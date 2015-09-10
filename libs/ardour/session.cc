@@ -2198,14 +2198,37 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 bool
 Session::find_route_name (string const & base, uint32_t& id, string& name, bool definitely_add_number)
 {
-	if (!definitely_add_number && route_by_name (base) == 0) {
+	string el_base = base;
+	
+	/* the base may conflict with ports that do not belong to existing
+	   routes, but hidden objects like the click track. So check port names
+	   before anything else.
+	*/
+
+	
+	if (!_engine.port_name_prefix_is_unique (base)) {
+		uint32_t unique_port_suffix = 1;
+
+		do {
+			string possible = string_compose (X_("%1-%2"), base, unique_port_suffix);
+			if (_engine.port_name_prefix_is_unique (possible)) {
+				el_base = possible;
+				break;
+			}
+
+			unique_port_suffix++;
+
+		} while (unique_port_suffix < UINT_MAX);
+	}
+
+	if (!definitely_add_number && route_by_name (el_base) == 0) {
 		/* juse use the base */
-		name = base;
+		name = el_base;
 		return true;
 	}
 
 	do {
-		name = string_compose ("%1 %2", base, id);
+		name = string_compose ("%1 %2", el_base, id);
 
 		if (route_by_name (name) == 0) {
 			return true;
