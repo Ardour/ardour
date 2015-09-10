@@ -237,14 +237,14 @@ AudioSource::rename_peakfile (string newpath)
 }
 
 int
-AudioSource::initialize_peakfile (const string& audio_path)
+AudioSource::initialize_peakfile (const string& audio_path, const bool in_session)
 {
 	GStatBuf statbuf;
 
-	_peakpath = construct_peak_filepath (audio_path);
+	_peakpath = construct_peak_filepath (audio_path, in_session);
 
 	if (!empty() && !Glib::file_test (_peakpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-		string oldpeak = construct_peak_filepath (audio_path, true);
+		string oldpeak = construct_peak_filepath (audio_path, in_session, true);
 		DEBUG_TRACE(DEBUG::Peaks, string_compose ("Looking for old peak file %1 for Audio file %2\n", oldpeak, audio_path));
 		if (Glib::file_test (oldpeak.c_str(), Glib::FILE_TEST_EXISTS)) {
 			// TODO use hard-link if possible

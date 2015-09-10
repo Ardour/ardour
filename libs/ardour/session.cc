@@ -4374,7 +4374,7 @@ peak_file_helper (const string& peak_path, const string& file_path, const string
 }
 
 string
-Session::construct_peak_filepath (const string& filepath, bool oldformat) const
+Session::construct_peak_filepath (const string& filepath, const bool in_session, const bool old_peak_name) const
 {
 	string interchange_dir_string = string (interchange_dir_name) + G_DIR_SEPARATOR;
 
@@ -4407,7 +4407,7 @@ Session::construct_peak_filepath (const string& filepath, bool oldformat) const
 
 		if (in_another_session) {
 			SessionDirectory sd (session_path);
-			return peak_file_helper (sd.peak_path(), "", Glib::path_get_basename (filepath), !oldformat);
+			return peak_file_helper (sd.peak_path(), "", Glib::path_get_basename (filepath), !old_peak_name);
 		}
 	}
 
@@ -4421,11 +4421,11 @@ Session::construct_peak_filepath (const string& filepath, bool oldformat) const
 
 	/* 2) if the file is outside our session dir:
 	 * (imported but not copied) add the path for check-summming */
-	if (filepath.find (interchange_dir_string) == string::npos) {
+	if (!in_session) {
 		path = Glib::path_get_dirname (filepath);
 	}
 	
-	return peak_file_helper (_session_dir->peak_path(), path, Glib::path_get_basename (filepath), !oldformat);
+	return peak_file_helper (_session_dir->peak_path(), path, Glib::path_get_basename (filepath), !old_peak_name);
 }
 
 string

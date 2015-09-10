@@ -164,17 +164,17 @@ AudioFileSource::init (const string& pathstr, bool must_exist)
 }
 
 string
-AudioFileSource::construct_peak_filepath (const string& audio_path, bool oldformat) const
+AudioFileSource::construct_peak_filepath (const string& audio_path, const bool in_session, const bool old_peak_name) const
 {
 	string base;
-	if (oldformat) {
+	if (old_peak_name) {
 		base = audio_path.substr (0, audio_path.find_last_of ('.'));
 	} else {
 		base = audio_path;
 	}
 	base += '%';
 	base += (char) ('A' + _channel);
-	return _session.construct_peak_filepath (base, oldformat);
+	return _session.construct_peak_filepath (base, in_session, old_peak_name);
 }
 
 bool
@@ -270,7 +270,7 @@ AudioFileSource::setup_peakfile ()
 		return 0;
 	}
 	if (!(_flags & NoPeakFile)) {
-		return initialize_peakfile (_path);
+		return initialize_peakfile (_path, within_session());
 	} else {
 		return 0;
 	}

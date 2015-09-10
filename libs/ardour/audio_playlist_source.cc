@@ -217,7 +217,7 @@ AudioPlaylistSource::setup_peakfile ()
 }
 
 string
-AudioPlaylistSource::construct_peak_filepath (const string& /*audio_path_IGNORED*/, bool /* oldformat IGNORED*/) const
+AudioPlaylistSource::construct_peak_filepath (const string& /*audio_path_*/, const bool /* in_session */, const bool /* old_peak_name */) const
 {
 	return _peak_path;
 }

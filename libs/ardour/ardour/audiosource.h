@@ -126,7 +126,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	std::string         _peakpath;
 	std::string        _captured_for;
 
-	int initialize_peakfile (const std::string& path);
+	int initialize_peakfile (const std::string& path, const bool in_session = false);
 	int build_peaks_from_scratch ();
 	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);
@@ -136,7 +136,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 
 	virtual framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const = 0;
 	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
-	virtual std::string construct_peak_filepath(const std::string& audio_filepath, bool oldformat = false) const = 0;
+	virtual std::string construct_peak_filepath (const std::string& audio_path, const bool in_session = false, const bool old_peak_name = false) const = 0;
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
 					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,

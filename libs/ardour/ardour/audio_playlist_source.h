@@ -37,7 +37,7 @@ public:
 	virtual ~AudioPlaylistSource ();
 
 	bool empty() const;
-	std::string construct_peak_filepath (const std::string& audio_path, bool oldformat = false) const;
+	std::string construct_peak_filepath (const std::string& audio_path, const bool in_session = false, const bool old_peak_name = false) const;
 	uint32_t   n_channels() const;
 	bool clamped_at_unity () const { return false; }
 
