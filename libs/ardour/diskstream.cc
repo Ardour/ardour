@@ -386,6 +386,7 @@ Diskstream::use_playlist (boost::shared_ptr<Playlist> playlist)
 		}
 
 		_playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_modified, this));
+		_playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_modified, this));
 		_playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_deleted, this, boost::weak_ptr<Playlist>(_playlist)));
 		_playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&Diskstream::playlist_ranges_moved, this, _1, _2));
 	}
