@@ -253,6 +253,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 		_ardour_buttons_box.show_all();
 
 		_gui_widget = Gtk::manage((container = new Gtk::Alignment()));
+		container->set (.5, .5, 0, 0);
 		pack_start(*_gui_widget, true, true);
 		_gui_widget->show();
 
