@@ -81,7 +81,8 @@ class LIBARDOUR_API PortManager
     std::string             make_port_name_non_relative (const std::string& name) const;
     std::string             get_pretty_name_by_name (const std::string& portname) const;
     bool                    port_is_mine (const std::string& fullname) const;
-
+    bool                    port_name_prefix_is_unique (const std::string& first_part_of_port_name) const;
+    
     /* other Port management */
     
     bool      port_is_physical (const std::string&) const;

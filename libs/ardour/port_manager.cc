@@ -17,6 +17,7 @@
 
 */
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 
 #include "ardour/async_midi_port.h"
@@ -195,6 +196,28 @@ PortManager::n_physical_inputs () const
 		return ChanCount::ZERO;
 	}
 	return _backend->n_physical_inputs ();
+}
+
+bool
+PortManager::port_name_prefix_is_unique (const string& first_part_of_port_name) const
+{
+	if (!_backend) {
+		return boost::shared_ptr<Port>();
+	}
+
+	boost::shared_ptr<const Ports> pr = ports.reader();
+	const string::size_type len = first_part_of_port_name.length();
+	
+	for (Ports::const_iterator x = pr->begin(); x != pr->end(); ++x) {
+
+		string prefix = x->first.substr (0, len); 
+
+		if (strings_equal_ignore_case (prefix, first_part_of_port_name)) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /** @param name Full or short name of port
