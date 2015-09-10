@@ -3346,6 +3346,8 @@ Session::add_internal_send (boost::shared_ptr<Route> dest, boost::shared_ptr<Pro
 void
 Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 {
+	PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
+
 	{ // RCU Writer scope
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> rs = writer.get_copy ();
@@ -3441,7 +3443,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	/* try to cause everyone to drop their references
 	 * and unregister ports from the backend
 	 */
-	PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
 
 	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
 		(*iter)->drop_references ();
@@ -4878,7 +4879,7 @@ Session::graph_reordered ()
 	   from a set_state() call or creating new tracks. Ditto for deletion.
 	*/
 
-	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _reconnecting_routes_in_progress) {
+	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _reconnecting_routes_in_progress || _route_deletion_in_progress) {
 		return;
 	}
 
