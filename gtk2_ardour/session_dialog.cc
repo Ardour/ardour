@@ -477,8 +477,6 @@ SessionDialog::setup_new_session_page ()
 	} else if (ARDOUR_UI::instance()->session_loaded) {
 		// point the new session file chooser at the parent directory of the current session
 		string session_parent_dir = Glib::path_get_dirname(ARDOUR_UI::instance()->the_session()->path());
-		string::size_type last_dir_sep = session_parent_dir.rfind(G_DIR_SEPARATOR);
-		session_parent_dir = session_parent_dir.substr(0, last_dir_sep);
 		new_folder_chooser.set_current_folder (session_parent_dir);
 		string default_session_folder = poor_mans_glob (Config->get_default_session_parent_dir());
 
