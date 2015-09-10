@@ -639,6 +639,10 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete primary_clock;
 		delete secondary_clock;
 		delete _process_thread;
+		delete meterbridge;
+		delete editor;
+		delete mixer;
+		delete nsm;
 		delete gui_object_state;
 		FastMeter::flush_pattern_cache ();
 	}
