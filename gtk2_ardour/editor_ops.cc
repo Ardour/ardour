@@ -7285,7 +7285,7 @@ Editor::insert_time (
 
 		if (all_playlists) {
 			RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (*x);
-			if (rtav) {
+			if (rtav && rtav->track ()) {
 				vector<boost::shared_ptr<Playlist> > all = _session->playlists->playlists_for_track (rtav->track ());
 				for (vector<boost::shared_ptr<Playlist> >::iterator p = all.begin(); p != all.end(); ++p) {
 					pl.insert (*p);
