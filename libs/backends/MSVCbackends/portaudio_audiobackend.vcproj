@@ -319,10 +319,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\portaudio\dsp_load_calculator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\portaudio\midi_util.h"
 				>
 			</File>
