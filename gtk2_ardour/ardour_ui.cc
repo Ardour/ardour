@@ -818,10 +818,11 @@ ARDOUR_UI::check_announcements ()
 	if (fin) {
 		while (!feof (fin)) {
 			char tmp[1024];
-			if (fread (tmp, sizeof(char), 1024, fin) <= 0) {
+			size_t len;
+			if ((len = fread (tmp, sizeof(char), 1024, fin)) == 0 || ferror (fin)) {
 				break;
 			}
-			_announce_string += tmp;
+			_announce_string.append (tmp, len);
 		}
 		fclose (fin);
 	}
