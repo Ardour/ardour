@@ -61,26 +61,21 @@ ARDOUR::read_recent_sessions (RecentSessions& rs)
 		}
 	}
 
-
-
-	// Read the file into a std::string;
+	// Read the file into a std::string
 	std::stringstream recent;
-	char temporaryBuffer[1024];
-	while (!feof(fin))
-	{
-		size_t charsRead = fread(&temporaryBuffer[0], sizeof(char), 1024, fin);
-		if (charsRead != 1024 && ferror(fin))
-		{
+	while (!feof (fin)) {
+		char buf[1024];
+		size_t charsRead = fread (buf, sizeof(char), 1024, fin);
+		if (ferror (fin)) {
 			error << string_compose (_("Error reading recent session file %1 (%2)"), path, strerror (errno)) << endmsg;
 			fclose(fin);
 			return -1;
 		}
-		recent << &temporaryBuffer[0];
+		if (charsRead == 0) {
+			break;
+		}
+		recent.write (buf, charsRead);
 	}
-
-
-
-	//ifstream recent (fin);
 
 	while (true) {
 
