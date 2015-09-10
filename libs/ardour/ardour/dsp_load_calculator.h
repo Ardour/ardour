@@ -25,9 +25,11 @@
 
 #include <pbd/ringbuffer.h>
 
+#include "ardour/libardour_visibility.h"
+
 namespace ARDOUR {
 
-class DSPLoadCalculator {
+class LIBARDOUR_API DSPLoadCalculator {
 public:
 	DSPLoadCalculator()
 	    : m_max_time_us(0)
