@@ -3376,8 +3376,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 				_monitor_out.reset ();
 			}
 
-			update_route_solo_state ();
-            
 			// We need to disconnect the route's inputs and outputs
             
 			(*iter)->input()->disconnect (0);
@@ -3408,14 +3406,14 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 					_step_editors--;
 				}
 			}
-
-			RouteAddedOrRemoved (false); /* EMIT SIGNAL */
 		}
     
 		/* writer goes out of scope, forces route list update */
 
 	} // end of RCU Writer scope
     
+	update_route_solo_state ();
+	RouteAddedOrRemoved (false); /* EMIT SIGNAL */
 	update_latency_compensation ();
 	set_dirty();
     
