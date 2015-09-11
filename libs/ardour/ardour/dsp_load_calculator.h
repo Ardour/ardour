@@ -56,16 +56,16 @@ public:
 	}
 
 
-	uint64_t get_max_time_us() const { return m_max_time_us; }
+	int64_t get_max_time_us() const { return m_max_time_us; }
 
-	void set_start_timestamp_us(uint64_t start_timestamp_us)
+	void set_start_timestamp_us(int64_t start_timestamp_us)
 	{
 		m_start_timestamp_us = start_timestamp_us;
 	}
 
-	void set_stop_timestamp_us(uint64_t stop_timestamp_us);
+	void set_stop_timestamp_us(int64_t stop_timestamp_us);
 
-	uint64_t elapsed_time_us()
+	int64_t elapsed_time_us()
 	{
 		return m_stop_timestamp_us - m_start_timestamp_us;
 	}
@@ -89,9 +89,9 @@ private: // methods
 	static uint32_t max_value_history () { return 16; }
 
 private: // data
-	uint64_t m_max_time_us;
-	uint64_t m_start_timestamp_us;
-	uint64_t m_stop_timestamp_us;
+	int64_t m_max_time_us;
+	int64_t m_start_timestamp_us;
+	int64_t m_stop_timestamp_us;
 	float m_dsp_load;
 	RingBuffer<float> m_value_history;
 	uint32_t m_num_values;

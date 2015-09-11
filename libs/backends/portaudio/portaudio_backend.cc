@@ -1522,8 +1522,8 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
                                         float* interleaved_output_data)
 {
 	uint32_t i = 0;
-	uint64_t min_elapsed_us = 1000000;
-	uint64_t max_elapsed_us = 0;
+	int64_t min_elapsed_us = 1000000;
+	int64_t max_elapsed_us = 0;
 
 	m_dsp_calc.set_start_timestamp_us (utils::get_microseconds());
 

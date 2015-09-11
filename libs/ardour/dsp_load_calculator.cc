@@ -21,7 +21,7 @@
 namespace ARDOUR {
 
 void
-DSPLoadCalculator::set_stop_timestamp_us(uint64_t stop_timestamp_us)
+DSPLoadCalculator::set_stop_timestamp_us(int64_t stop_timestamp_us)
 {
 	// We could only bother with calculations if a certain amount of time
 	// has passed, or the Raw DSP value is > X% different than last calc
