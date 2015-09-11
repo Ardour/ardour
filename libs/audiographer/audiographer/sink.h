@@ -27,7 +27,7 @@ class /*LIBAUDIOGRAPHER_API*/ Sink  {
 	/** Process given data
 	  * Data may be modified, so in place processing is allowed.
 	  * The default implementation calls the non-modifying version,
-	  * so this function does not need to be overriden.
+	  * so this function does not need to be overridden.
 	  * However, if the sink can do in-place processing,
 	  * overriding this is highly recommended.
 	  *

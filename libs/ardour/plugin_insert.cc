@@ -523,7 +523,7 @@ PluginInsert::set_parameter (Evoral::Parameter param, float val)
 	if (ac) {
 		ac->set_value(val);
 	} else {
-		warning << "set_parameter called for nonexistant parameter "
+		warning << "set_parameter called for nonexistent parameter "
 			<< EventTypeMap::instance().to_symbol(param) << endmsg;
 	}
 

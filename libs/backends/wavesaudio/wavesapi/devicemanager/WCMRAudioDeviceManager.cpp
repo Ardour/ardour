@@ -213,7 +213,7 @@ int WCMRAudioDevice::CurrentBufferSize ()
 //
 //! Device's block size we use for holding the audio samples.
 //! Usually this is equal to the buffer size, but in some cases the buffer size holds additional
-//!   data other then the audio buffers, like frames info in SG, so it can be overriden
+//!   data other then the audio buffers, like frames info in SG, so it can be overridden
 //!
 //! \param none
 //! 

@@ -534,7 +534,7 @@ class DefaultCookiePolicy(CookiePolicy):
     Both RFC 2965 and Netscape cookies are covered.
 
     The easiest way to provide your own policy is to override this class and
-    call its methods in your overriden implementations before adding your own
+    call its methods in your overridden implementations before adding your own
     additional checks.
 
     import ClientCookie

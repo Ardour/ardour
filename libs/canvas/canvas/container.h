@@ -45,7 +45,7 @@ public:
 
 	/** The compute_bounding_box() method is likely to be identical
 	 * in all containers (the union of the children's bounding boxes).
-	 * It can be overriden as necessary.
+	 * It can be overridden as necessary.
 	 */
 	void compute_bounding_box () const;
 

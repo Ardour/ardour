@@ -54,13 +54,13 @@ class LIBARDOUR_API ExportFormat : public ExportFormatBase, public ExportFormatB
 	bool has_sample_format ();
 	bool sample_format_is_compatible (SampleFormat format) const;
 
-	/* If the format has a specific sample format, this function should be overriden
+	/* If the format has a specific sample format, this function should be overridden
 	 * if the format has a selectable sample format, do not override this!
 	 */
 
 	virtual SampleFormat get_explicit_sample_format () const { return SF_None; }
 
-	/* If the above is not overriden, this one should be */
+	/* If the above is not overridden, this one should be */
 
 	virtual ExportFormat::SampleFormat default_sample_format () const { return SF_None; }
 

@@ -86,7 +86,7 @@ release the device.\n\
 \n\
 " ARD_PROG_NAME " by default announces itself as \"" ARD_APPL_NAME "\"\n\
 and uses the maximum possible priority for requesting the device.\n\
-These settings can be overriden using the -n and -p options respectively.\n\
+These settings can be overridden using the -n and -p options respectively.\n\
 \n\
 If a PID is given the tool will watch the process and if that is not running\n\
 release the device and exit.  Otherwise " ARD_PROG_NAME " runs until\n\
