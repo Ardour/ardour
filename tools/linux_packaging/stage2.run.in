@@ -229,6 +229,41 @@ case `uname -m` in
 		;;
 esac
 
+#############################
+# Determine C11 stdlibc++ ABI
+#############################
+
+if %REPLACE_GCC5%; then
+	# Ardour was compiled with gcc5, warn on gcc4 systems
+	if ! ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/gcc-glibmm-abi-check --gcc5 > /dev/null"; then
+		echo ""
+		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
+		echo ""
+		echo "Ardour was compiled with gcc5, your system uses an older version of the"
+		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
+		echo "may cause crashes."
+		echo ""
+		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
+		if test "n" = $ANSWER; then
+			exit 1
+		fi
+else
+	# Ardour was compiled with gcc4, warn on gcc5 systems
+	if ! ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/gcc-glibmm-abi-check --gcc4 > /dev/null"; then
+		echo ""
+		echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
+		echo ""
+		echo "Ardour was compiled with gcc4, your system uses a newer version of the"
+		echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
+		echo "may cause crashes."
+		echo ""
+		ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
+		if test "n" = $ANSWER; then
+			exit 1
+		fi
+	fi
+fi
+
 ####################
 # Check disk space
 ####################
