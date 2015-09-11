@@ -28,6 +28,19 @@ DSPLoadCalculator::set_stop_timestamp_us(int64_t stop_timestamp_us)
 	// which would mean consistent overhead for small values of m_max_time_us
 
 	m_stop_timestamp_us = stop_timestamp_us;
+
+	/* querying the performance counter can fail occasionally (-1).
+	 * Also on some multi-core systems, timers are CPU specific and not
+	 * synchronized. We assume they differ more than a few milliseconds
+	 * (4 * nominal cycle time) and simply ignore cases where the
+	 * execution switches cores.
+	 */
+	if (m_start_timestamp_us < 0 || m_stop_timestamp_us < 0 ||
+	    m_start_timestamp_us > m_stop_timestamp_us ||
+	    elapsed_time_us() > max_timer_error()) {
+		   return;
+	}
+
 	float load = 0;
 
 	if (elapsed_time_us() > m_max_time_us) {

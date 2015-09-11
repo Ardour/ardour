@@ -88,6 +88,8 @@ public:
 private: // methods
 	static uint32_t max_value_history () { return 16; }
 
+	int64_t max_timer_error () { return 4 * m_max_time_us; }
+
 private: // data
 	int64_t m_max_time_us;
 	int64_t m_start_timestamp_us;
