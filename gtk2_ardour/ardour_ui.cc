@@ -646,6 +646,15 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete gui_object_state;
 		FastMeter::flush_pattern_cache ();
 	}
+
+#ifndef NDEBUG
+	/* Small trick to flush main-thread event pool.
+	 * Other thread-pools are destroyed at pthread_exit(),
+	 * but tmain thread termination is too late to trigger Pool::~Pool()
+	 */
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Clear, SessionEvent::Immediate, 0, 0); // get the pool reference, values don't matter since the event is never queued.
+	delete ev->event_pool();
+#endif
 }
 
 void
