@@ -1028,10 +1028,13 @@ Session::add_monitor_section ()
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
 	// boost_debug_shared_ptr_mark_interesting (r.get(), "Route");
 #endif
-	{
+	try {
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		r->input()->ensure_io (_master_out->output()->n_ports(), false, this);
 		r->output()->ensure_io (_master_out->output()->n_ports(), false, this);
+	} catch (...) {
+		error << _("Cannot create monitor section. 'Monitor' Port name is not unique.") << endmsg;
+		return;
 	}
 
 	rl.push_back (r);
