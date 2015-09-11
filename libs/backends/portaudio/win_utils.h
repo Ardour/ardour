@@ -27,7 +27,15 @@ bool set_min_timer_resolution ();
 
 bool reset_timer_resolution ();
 
-uint64_t get_microseconds ();
+/** The highest resolution timer source provided by the system. On Vista and
+ * above this is the value returned by QueryPerformanceCounter(QPC). On XP,
+ * this will QPC if supported or otherwise g_get_monotonic_time will be used.
+ *
+ * @return A timer value in microseconds or -1 in the event that the reading
+ * the timer source fails, but the MS docs say that this won't occur for
+ * systems >= XP
+ */
+int64_t get_microseconds ();
 
 }
 

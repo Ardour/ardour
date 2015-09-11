@@ -27,14 +27,26 @@
 
 namespace {
 
-LARGE_INTEGER
-get_frequency ()
+bool&
+qpc_frequency_success ()
 {
-	LARGE_INTEGER freq;
-	QueryPerformanceFrequency(&freq);
-	return freq;
+	static bool success = false;
+	return success;
 }
 
+LARGE_INTEGER
+qpc_frequency ()
+{
+	LARGE_INTEGER freq;
+	if (QueryPerformanceFrequency(&freq) == 0) {
+		DEBUG_TIMING ("Failed to determine frequency of QPC\n");
+		qpc_frequency_success() = false;
+	} else {
+		qpc_frequency_success() = true;
+	}
+
+	return freq;
+}
 
 UINT&
 old_timer_resolution ()
@@ -86,15 +98,26 @@ reset_timer_resolution ()
 	return true;
 }
 
-uint64_t get_microseconds ()
+int64_t
+get_microseconds ()
 {
-	static LARGE_INTEGER frequency = get_frequency ();
+	static LARGE_INTEGER frequency = qpc_frequency ();
 	LARGE_INTEGER current_val;
 
-	QueryPerformanceCounter (&current_val);
+	if (qpc_frequency_success()) {
 
-	return (uint64_t)(((double)current_val.QuadPart) /
-	                  ((double)frequency.QuadPart) * 1000000.0);
+		// MS docs say this will always succeed for systems >= XP but it may
+		// not return a monotonic value with non-invariant TSC's etc
+		if (QueryPerformanceCounter(&current_val) != 0) {
+			return (int64_t)(((double)current_val.QuadPart) /
+			                 ((double)frequency.QuadPart) * 1000000.0);
+		} else {
+			DEBUG_TIMING ("Could not get QPC timer\n");
+		}
+		return -1;
+	}
+	// For XP systems that don't support a high-res performance counter
+	return g_get_monotonic_time ();
 }
 
 } // namespace utils
