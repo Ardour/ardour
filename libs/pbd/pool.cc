@@ -35,6 +35,9 @@ using namespace PBD;
 Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 	: free_list (nitems)
 	, _name (n)
+#ifndef NDEBUG
+	, max_usage (0)
+#endif
 {
 	_name = n;
 
@@ -57,6 +60,10 @@ Pool::Pool (string n, unsigned long item_size, unsigned long nitems)
 
 Pool::~Pool ()
 {
+#ifndef NDEBUG
+	// TODO: after collecting some stats, use DEBUG::PoolStats here
+	cerr << "Pool: '" << _name << "' max: " << max_usage << " / " << total() << endmsg;
+#endif
 	free (block);
 }
 
@@ -67,6 +74,12 @@ void *
 Pool::alloc ()
 {
 	void *ptr;
+
+#ifndef NDEBUG
+	if (used () > max_usage) {
+		max_usage = used () + 1;
+	}
+#endif
 
 	if (free_list.read (&ptr, 1) < 1) {
 		fatal << "CRITICAL: " << _name << " POOL OUT OF MEMORY - RECOMPILE WITH LARGER SIZE!!" << endmsg;

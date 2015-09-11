@@ -51,6 +51,9 @@ class LIBPBD_API Pool
 
   private:
 	void *block; ///< data storage area
+#ifndef NDEBUG
+	unsigned long max_usage;
+#endif
 };
 
 class LIBPBD_API SingleAllocMultiReleasePool : public Pool
