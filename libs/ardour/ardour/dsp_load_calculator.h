@@ -23,8 +23,6 @@
 #include <cassert>
 #include <algorithm>
 
-#include <pbd/ringbuffer.h>
-
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
@@ -36,8 +34,6 @@ public:
 	    , m_start_timestamp_us(0)
 	    , m_stop_timestamp_us(0)
 	    , m_dsp_load(0)
-	    , m_value_history (max_value_history())
-	    , m_num_values(0)
 	{
 
 	}
@@ -45,16 +41,7 @@ public:
 	void set_max_time_us(uint64_t max_time_us) {
 		assert(max_time_us != 0);
 		m_max_time_us = max_time_us;
-
-		// Use average of last 1/4 second of values so responsiveness
-		// remains consistent independent of max time
-		uint32_t max_dsp_samples_per_qtr_second = (250000 / m_max_time_us);
-		m_num_values =
-		    std::min(max_value_history() - 1, max_dsp_samples_per_qtr_second);
-
-		m_value_history.reset();
 	}
-
 
 	int64_t get_max_time_us() const { return m_max_time_us; }
 
@@ -85,9 +72,8 @@ public:
 		}
 		return m_dsp_load;
 	}
-private: // methods
-	static uint32_t max_value_history () { return 16; }
 
+private: // methods
 	int64_t max_timer_error () { return 4 * m_max_time_us; }
 
 private: // data
@@ -95,8 +81,6 @@ private: // data
 	int64_t m_start_timestamp_us;
 	int64_t m_stop_timestamp_us;
 	float m_dsp_load;
-	RingBuffer<float> m_value_history;
-	uint32_t m_num_values;
 };
 
 } // namespace ARDOUR
