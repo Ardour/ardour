@@ -140,7 +140,9 @@ BoolOption::set_state_from_config ()
 void
 BoolOption::toggled ()
 {
-	_set (_button->get_active ());
+	if (!_set (_button->get_active ())) {
+		_button->set_active (_get ());
+	}
 }
 
 RouteDisplayBoolOption::RouteDisplayBoolOption (string const & i, string const & n, sigc::slot<bool> g, sigc::slot<bool, bool> s)

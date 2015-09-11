@@ -414,7 +414,7 @@ SessionOptionEditor::set_use_monitor_section (bool yn)
 	
 	Config->set_use_monitor_bus (yn);
 
-	return had_monitor_section != yn;
+	return had_monitor_section != (_session->monitor_out() != 0);
 }
 
 bool
