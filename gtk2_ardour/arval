@@ -7,11 +7,13 @@ VALGRIND_OPTIONS="$VALGRIND_OPTIONS --error-limit=no"
 
 TOP=`dirname "$0"`/..
 . $TOP/build/gtk2_ardour/ardev_common_waf.sh
-LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
+if uname | grep -q arwin; then
+	OBJSUPP="--suppressions=${TOP}/tools/objc.supp"
+fi
 export ARDOUR_RUNNING_UNDER_VALGRIND=TRUE
 exec valgrind --tool=memcheck \
 	$VALGRIND_OPTIONS \
-        --track-origins=yes \
-	--suppressions=`dirname "$0"`/../tools/valgrind.supp \
-	--suppressions=`dirname "$0"`/../tools/objc.supp \
+	--track-origins=yes \
+	--suppressions=${TOP}/tools/valgrind.supp \
+	$OBJSUPP \
 	$TOP/$EXECUTABLE --novst "$@"
