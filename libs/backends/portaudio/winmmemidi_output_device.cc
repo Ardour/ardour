@@ -390,7 +390,7 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 			DEBUG_MIDI ("WinMMEMidiOut: MIDI buffer underrun, shouldn't occur\n");
 			continue;
 		}
-		uint64_t current_time = utils::get_microseconds ();
+		uint64_t current_time = PBD::get_microseconds ();
 
 		DEBUG_TIMING (string_compose (
 		    "WinMMEMidiOut: h.time = %1, current_time = %2\n", h.time, current_time));
@@ -408,7 +408,7 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 				break;
 			}
 
-			uint64_t wakeup_time = utils::get_microseconds ();
+			uint64_t wakeup_time = PBD::get_microseconds ();
 			DEBUG_TIMING (string_compose ("WinMMEMidiOut: woke up at %1(ms)\n",
 			                              ((double)wakeup_time) / 1000.0));
 			if (wakeup_time > h.time) {

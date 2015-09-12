@@ -31,7 +31,6 @@
 #include "i18n.h"
 
 using namespace ARDOUR;
-using namespace utils;
 
 WinMMEMidiIO::WinMMEMidiIO()
 	: m_active (false)
@@ -136,7 +135,7 @@ WinMMEMidiIO::start ()
 	m_run = true;
 	DEBUG_MIDI ("Starting MIDI driver\n");
 
-	set_min_timer_resolution();
+	PBD::MMTIMERS::set_min_resolution();
 	discover();
 	start_devices ();
 }
@@ -156,7 +155,7 @@ WinMMEMidiIO::stop ()
 	cleanup ();
 	pthread_mutex_unlock (&m_device_lock);
 
-	reset_timer_resolution();
+	PBD::MMTIMERS::reset_resolution();
 }
 
 void

@@ -680,7 +680,7 @@ PortAudioBackend::samples_since_cycle_start ()
 		return 0;
 	}
 
-	return m_cycle_timer.samples_since_cycle_start (utils::get_microseconds());
+	return m_cycle_timer.samples_since_cycle_start (PBD::get_microseconds());
 }
 
 int
@@ -1525,7 +1525,7 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 	int64_t min_elapsed_us = 1000000;
 	int64_t max_elapsed_us = 0;
 
-	m_dsp_calc.set_start_timestamp_us (utils::get_microseconds());
+	m_dsp_calc.set_start_timestamp_us (PBD::get_microseconds());
 
 	i = 0;
 	/* Copy input audio data into input port buffers */
@@ -1551,7 +1551,7 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 	}
 
 	m_last_cycle_start = m_cycle_timer.get_start();
-	m_cycle_timer.reset_start(utils::get_microseconds());
+	m_cycle_timer.reset_start(PBD::get_microseconds());
 	m_cycle_count++;
 
 	uint64_t cycle_diff_us = (m_cycle_timer.get_start() - m_last_cycle_start);
@@ -1599,7 +1599,7 @@ PortAudioBackend::blocking_process_main(const float* interleaved_input_data,
 	_processed_samples += _samples_per_period;
 
 	/* calculate DSP load */
-	m_dsp_calc.set_stop_timestamp_us (utils::get_microseconds());
+	m_dsp_calc.set_stop_timestamp_us (PBD::get_microseconds());
 	_dsp_load = m_dsp_calc.get_dsp_load();
 
 	DEBUG_TIMING(string_compose("DSP Load: %1\n", _dsp_load));

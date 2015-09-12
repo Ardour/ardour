@@ -21,22 +21,66 @@
 
 #include <stdint.h>
 
-namespace utils {
+namespace PBD {
 
-bool set_min_timer_resolution ();
+namespace MMTIMERS {
 
-bool reset_timer_resolution ();
+/**
+ * Set the minimum Multimedia Timer resolution as supported by the system
+ * @return true if min timer resolution was successfully set
+ *
+ * Call reset_resolution to restore old timer resolution
+ */
+bool set_min_resolution ();
 
-/** The highest resolution timer source provided by the system. On Vista and
+/**
+ * Get current Multimedia Timer resolution
+ * @return true if getting the timer value was successful
+ */
+bool get_resolution(uint32_t& timer_resolution_us);
+
+/**
+ * Set current Multimedia Timer resolution
+ * @return true if setting the timer value was successful
+ */
+bool set_resolution(uint32_t timer_resolution_us);
+
+/**
+ * Reset the Multimedia Timer back to what it was originally before
+ * setting the timer resolution.
+ */
+bool reset_resolution ();
+
+} // namespace MMTIMERS
+
+namespace QPC {
+
+/**
+ * @return true if QueryPerformanceCounter is usable as a timer source
+ */
+bool get_timer_valid ();
+
+/**
+ * @return the value of the performance counter converted to microseconds
+ *
+ * If get_counter_valid returns true then get_microseconds will always
+ * return a positive value. If QPC is not supported(OS < XP) then -1 is
+ * returned but the MS docs say that this won't occur for systems >= XP.
+ */
+int64_t get_microseconds ();
+
+} // namespace QPC
+
+/**
+ * The highest resolution timer source provided by the system. On Vista and
  * above this is the value returned by QueryPerformanceCounter(QPC). On XP,
  * this will QPC if supported or otherwise g_get_monotonic_time will be used.
  *
  * @return A timer value in microseconds or -1 in the event that the reading
- * the timer source fails, but the MS docs say that this won't occur for
- * systems >= XP
+ * the timer source fails.
  */
 int64_t get_microseconds ();
 
-}
+} // namespace PBD
 
 #endif // WIN_UTILS_H

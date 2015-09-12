@@ -27,6 +27,90 @@
 
 namespace {
 
+UINT&
+old_timer_resolution ()
+{
+	static UINT timer_res_ms = 0;
+	return timer_res_ms;
+}
+
+} // anon namespace
+
+namespace PBD {
+
+namespace MMTIMERS {
+
+bool
+set_min_resolution ()
+{
+	TIMECAPS caps;
+
+	if (timeGetDevCaps (&caps, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
+		DEBUG_TIMING ("Could not get timer device capabilities.\n");
+		return false;
+	}
+	return set_resolution(caps.wPeriodMin);
+}
+
+bool
+set_resolution (uint32_t timer_resolution_ms)
+{
+	TIMECAPS caps;
+
+	if (timeGetDevCaps (&caps, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
+		DEBUG_TIMING ("Could not get timer device capabilities.\n");
+		return false;
+	}
+
+	UINT old_timer_res = caps.wPeriodMin;
+
+	if (timeBeginPeriod(timer_resolution_ms) != TIMERR_NOERROR) {
+		DEBUG_TIMING(
+		    string_compose("Could not set minimum timer resolution to %1(ms)\n",
+		                   timer_resolution_ms));
+		return false;
+	}
+
+	old_timer_resolution () = old_timer_res;
+
+	DEBUG_TIMING (string_compose ("Multimedia timer resolution set to %1(ms)\n",
+	                              caps.wPeriodMin));
+	return true;
+}
+
+bool
+get_resolution (uint32_t& timer_resolution_ms)
+{
+	TIMECAPS caps;
+
+	if (timeGetDevCaps(&caps, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
+		DEBUG_TIMING ("Could not get timer device capabilities.\n");
+		return false;
+	}
+	timer_resolution_ms = caps.wPeriodMin;
+	return true;
+}
+
+bool
+reset_resolution ()
+{
+	if (old_timer_resolution ()) {
+		if (timeEndPeriod (old_timer_resolution ()) != TIMERR_NOERROR) {
+			DEBUG_TIMING ("Could not reset timer resolution.\n");
+			return false;
+		}
+	}
+
+	DEBUG_TIMING (string_compose ("Multimedia timer resolution set to %1(ms)\n",
+	                              old_timer_resolution ()));
+
+	return true;
+}
+
+} // namespace MMTIMERS
+
+namespace {
+
 bool&
 qpc_frequency_success ()
 {
@@ -48,76 +132,52 @@ qpc_frequency ()
 	return freq;
 }
 
-UINT&
-old_timer_resolution ()
+LARGE_INTEGER
+qpc_frequency_cached ()
 {
-	static UINT timer_res_ms = 0;
-	return timer_res_ms;
+	static LARGE_INTEGER frequency = qpc_frequency ();
+	return frequency;
 }
 
 } // anon namespace
 
-namespace utils {
+namespace QPC {
 
 bool
-set_min_timer_resolution ()
+get_timer_valid ()
 {
-	TIMECAPS caps;
-
-	if (timeGetDevCaps (&caps, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
-		DEBUG_TIMING ("Could not get timer device capabilities.\n");
-		return false;
-	} else {
-		old_timer_resolution () = caps.wPeriodMin;
-		if (timeBeginPeriod (caps.wPeriodMin) != TIMERR_NOERROR) {
-			DEBUG_TIMING (string_compose (
-			    "Could not set minimum timer resolution to %1(ms)\n", caps.wPeriodMin));
-			return false;
-		}
-	}
-
-	DEBUG_TIMING (string_compose ("Multimedia timer resolution set to %1(ms)\n",
-	                              caps.wPeriodMin));
-
-	return true;
-}
-
-bool
-reset_timer_resolution ()
-{
-	if (old_timer_resolution ()) {
-		if (timeEndPeriod (old_timer_resolution ()) != TIMERR_NOERROR) {
-			DEBUG_TIMING ("Could not reset timer resolution.\n");
-			return false;
-		}
-	}
-
-	DEBUG_TIMING (string_compose ("Multimedia timer resolution set to %1(ms)\n",
-	                              old_timer_resolution ()));
-
-	return true;
+	// setup caching the timer frequency
+	qpc_frequency_cached ();
+	return qpc_frequency_success ();
 }
 
 int64_t
 get_microseconds ()
 {
-	static LARGE_INTEGER frequency = qpc_frequency ();
 	LARGE_INTEGER current_val;
 
 	if (qpc_frequency_success()) {
-
 		// MS docs say this will always succeed for systems >= XP but it may
 		// not return a monotonic value with non-invariant TSC's etc
 		if (QueryPerformanceCounter(&current_val) != 0) {
 			return (int64_t)(((double)current_val.QuadPart) /
-			                 ((double)frequency.QuadPart) * 1000000.0);
-		} else {
-			DEBUG_TIMING ("Could not get QPC timer\n");
+			                 ((double)qpc_frequency_cached().QuadPart) * 1000000.0);
 		}
-		return -1;
+	}
+	DEBUG_TIMING ("Could not get QPC timer\n");
+	return -1;
+}
+
+} // namespace QPC
+
+int64_t
+get_microseconds ()
+{
+	if (qpc_frequency_success()) {
+		return QPC::get_microseconds ();
 	}
 	// For XP systems that don't support a high-res performance counter
 	return g_get_monotonic_time ();
 }
 
-} // namespace utils
+} // namespace PBD

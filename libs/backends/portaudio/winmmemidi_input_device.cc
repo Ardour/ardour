@@ -346,7 +346,7 @@ WinMMEMidiInputDevice::enqueue_midi_msg (const uint8_t* midi_data,
 	}
 
 	// don't use winmme timestamps for now
-	uint64_t ts = utils::get_microseconds ();
+	uint64_t ts = PBD::get_microseconds ();
 
 	DEBUG_TIMING (string_compose (
 	    "Enqueing MIDI data device: %1 with timestamp: %2 and size %3\n",
