@@ -16,8 +16,8 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef WIN_UTILS_H
-#define WIN_UTILS_H
+#ifndef PBD_WINDOWS_TIMER_UTILS_H
+#define PBD_WINDOWS_TIMER_UTILS_H
 
 #include <stdint.h>
 
@@ -83,4 +83,4 @@ int64_t get_microseconds ();
 
 } // namespace PBD
 
-#endif // WIN_UTILS_H
+#endif // PBD_WINDOWS_TIMER_UTILS_H

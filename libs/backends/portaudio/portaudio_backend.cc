@@ -32,12 +32,12 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/windows_timer_utils.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
 #include "i18n.h"
 
-#include "win_utils.h"
 #include "mmcss.h"
 #include "audio_utils.h"
 

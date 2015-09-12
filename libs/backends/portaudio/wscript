@@ -26,7 +26,6 @@ def build(bld):
                    'winmmemidi_io.cc',
                    'winmmemidi_input_device.cc',
                    'winmmemidi_output_device.cc',
-                   'win_utils.cc',
                    'midi_util.cc',
                    'mmcss.cc'
                  ]

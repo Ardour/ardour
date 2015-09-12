@@ -148,6 +148,7 @@ def build(bld):
     if bld.env['build_target'] == 'mingw':
         obj.defines += [ 'NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
+        obj.source += [ 'windows_timer_utils.cc' ]
         obj.uselib += ' OLE'
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):

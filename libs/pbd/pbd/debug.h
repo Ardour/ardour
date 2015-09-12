@@ -56,6 +56,7 @@ namespace PBD {
 		LIBPBD_API extern DebugBits Configuration;
 		LIBPBD_API extern DebugBits FileUtils;
 		LIBPBD_API extern DebugBits UndoHistory;
+		LIBPBD_API extern DebugBits Timing;
 
 		/* See notes in ../debug.cc on why these are defined here */
 

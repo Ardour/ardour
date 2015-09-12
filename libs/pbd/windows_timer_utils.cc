@@ -16,14 +16,15 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "win_utils.h"
+#include "pbd/windows_timer_utils.h"
 
 #include <windows.h>
 #include <mmsystem.h>
 
 #include "pbd/compose.h"
+#include "pbd/debug.h"
 
-#include "debug.h"
+#define DEBUG_TIMING(msg) DEBUG_TRACE (PBD::DEBUG::Timing, msg);
 
 namespace {
 

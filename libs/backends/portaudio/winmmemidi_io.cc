@@ -23,9 +23,9 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
+#include "pbd/windows_timer_utils.h"
 
 #include "winmmemidi_io.h"
-#include "win_utils.h"
 #include "debug.h"
 
 #include "i18n.h"

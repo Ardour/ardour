@@ -22,8 +22,8 @@
 #include <cmath>
 
 #include "pbd/compose.h"
+#include "pbd/windows_timer_utils.h"
 
-#include "win_utils.h"
 #include "midi_util.h"
 
 #include "mmcss.h"
