@@ -43,7 +43,7 @@ public:
 	}
 
 	void set_max_time_us(uint64_t max_time_us) {
-		assert(m_max_time_us != 0);
+		assert(max_time_us != 0);
 		m_max_time_us = max_time_us;
 
 		// Use average of last 1/4 second of values so responsiveness
