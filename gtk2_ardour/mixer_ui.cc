@@ -92,6 +92,7 @@ Mixer_UI::Mixer_UI ()
 	, in_group_row_change (false)
 	, track_menu (0)
 	, _monitor_section (0)
+	, _plugin_selector (0)
 	, _strip_width (ARDOUR_UI::config()->get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
         , _in_group_rebuild_or_clear (false)
@@ -257,6 +258,7 @@ Mixer_UI::~Mixer_UI ()
 	if (_monitor_section) {
 		delete _monitor_section;
 	}
+	delete _plugin_selector;
 }
 
 void

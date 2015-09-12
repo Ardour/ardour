@@ -69,7 +69,7 @@ ArdourKeyboard::setup_keybindings ()
 
 	/* set up the per-user bindings path */
 
-	string lowercase_program_name = downcase (PROGRAM_NAME);
+	string lowercase_program_name = downcase (string(PROGRAM_NAME));
 
 	user_keybindings_path = Glib::build_filename (user_config_directory(), lowercase_program_name + ".bindings");
 

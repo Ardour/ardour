@@ -645,6 +645,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete nsm;
 		delete gui_object_state;
 		FastMeter::flush_pattern_cache ();
+		PixFader::flush_pattern_cache ();
 	}
 
 #ifndef NDEBUG

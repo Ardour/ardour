@@ -814,6 +814,12 @@ Editor::~Editor()
 	delete _drags;
 	delete nudge_clock;
 	delete quantize_dialog;
+	delete _summary;
+	delete _group_tabs;
+	delete _regions;
+	delete _snapshots;
+	delete _locations;
+	delete _playlist_selector;
 }
 
 XMLNode*
