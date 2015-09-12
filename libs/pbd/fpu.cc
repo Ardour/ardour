@@ -129,6 +129,13 @@ FPU::instance()
 	return _instance;
 }
 
+void
+FPU::destroy ()
+{
+	delete _instance;
+	_instance = 0;
+}
+
 FPU::FPU ()
 	: _flags ((Flags) 0)
 {

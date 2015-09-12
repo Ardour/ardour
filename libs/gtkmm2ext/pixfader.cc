@@ -85,6 +85,15 @@ PixFader::~PixFader ()
 	if (_layout) _layout.clear (); // drop reference to existing layout
 }
 
+void
+PixFader::flush_pattern_cache () {
+	for (list<FaderImage*>::iterator f = _patterns.begin(); f != _patterns.end(); ++f) {
+		cairo_pattern_destroy ((*f)->pattern);
+	}
+	_patterns.clear();
+}
+
+
 cairo_pattern_t*
 PixFader::find_pattern (double afr, double afg, double afb,
 			double abr, double abg, double abb,

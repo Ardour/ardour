@@ -81,6 +81,8 @@ Port::~Port ()
 	for (int i = 0; i < 16; i++) {
 		delete _channel[i];
 	}
+
+	delete _parser;
 }
 
 /** Send a clock tick message.

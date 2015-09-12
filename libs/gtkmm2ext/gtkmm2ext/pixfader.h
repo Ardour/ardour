@@ -36,6 +36,7 @@ class LIBGTKMM2EXT_API PixFader : public CairoWidget
 	public:
 	PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
 	virtual ~PixFader ();
+	static void flush_pattern_cache();
 
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;

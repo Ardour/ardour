@@ -699,6 +699,7 @@ LV2Plugin::~LV2Plugin ()
 
 	delete [] _control_data;
 	delete [] _shadow_data;
+	delete [] _defaults;
 	delete [] _ev_buffers;
 }
 

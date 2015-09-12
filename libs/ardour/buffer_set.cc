@@ -87,6 +87,13 @@ BufferSet::clear()
 	_vst_buffers.clear ();
 #endif
 
+#ifdef LV2_SUPPORT
+	for (LV2Buffers::iterator i = _lv2_buffers.begin(); i != _lv2_buffers.end(); ++i) {
+		delete (*i).second;
+	}
+	_lv2_buffers.clear ();
+#endif
+
 }
 
 /** Set up this BufferSet so that its data structures mirror a PortSet's buffers.

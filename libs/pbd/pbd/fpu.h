@@ -38,6 +38,7 @@ class LIBPBD_API FPU {
 	~FPU ();
 
 	static FPU* instance();
+	static void destroy();
 	
 	bool has_flush_to_zero () const { return _flags & HasFlushToZero; }
 	bool has_denormals_are_zero () const { return _flags & HasDenormalsAreZero; }

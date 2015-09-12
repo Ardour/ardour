@@ -459,6 +459,7 @@ Graph::main_thread()
         }
 
         pt->drop_buffers();
+        delete (pt);
 }
 
 void

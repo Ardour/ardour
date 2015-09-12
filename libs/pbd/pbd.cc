@@ -34,6 +34,7 @@
 #include "pbd/error.h"
 #include "pbd/id.h"
 #include "pbd/enumwriter.h"
+#include "pbd/fpu.h"
 
 #ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
@@ -111,4 +112,5 @@ PBD::cleanup ()
 #endif	
 
 	EnumWriter::destroy ();
+	FPU::destroy ();
 }
