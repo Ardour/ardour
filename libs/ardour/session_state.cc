@@ -202,8 +202,6 @@ Session::pre_engine_init (string fullpath)
 
 	Delivery::disable_panners ();
 	IO::disable_connecting ();
-
-	AudioFileSource::set_peak_dir (_session_dir->peak_path());
 }
 
 int

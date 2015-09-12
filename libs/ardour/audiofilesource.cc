@@ -68,8 +68,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 
-string AudioFileSource::peak_dir = "";
-
 PBD::Signal0<void> AudioFileSource::HeaderPositionOffsetChanged;
 framecnt_t         AudioFileSource::header_position_offset = 0;
 

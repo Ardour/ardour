@@ -41,8 +41,6 @@ public:
 
 	std::string construct_peak_filepath (const std::string& audio_path, const bool in_session = false, const bool old_peak_name = false) const;
 
-	static void set_peak_dir (const std::string& dir) { peak_dir = dir; }
-
 	static bool get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error);
 
 	bool safe_file_extension (const std::string& path) const {
@@ -106,8 +104,6 @@ protected:
 	int move_dependents_to_trash();
 
 	static Sample* get_interleave_buffer (framecnt_t size);
-
-	static std::string peak_dir;
 
 	static char bwf_country_code[3];
 	static char bwf_organization_code[4];
