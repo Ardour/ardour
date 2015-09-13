@@ -160,7 +160,6 @@ def build(bld):
                 test/mutex_test.cc
                 test/scalar_properties.cc
                 test/signals_test.cc
-                test/timer_test.cc
                 test/convert_test.cc
                 test/filesystem_test.cc
                 test/xml_test.cc
