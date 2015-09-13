@@ -368,10 +368,10 @@ CurveTest::constrainedCubic ()
 	// printf("a1=%Lf, b1=%Lf, c1=%Lf, d1=%Lf\n", a1, b1, c1, d1);
 
 	// values from worked example: deltas rather arbitrary, I'm afraid
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, a1, 0);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(14.09, b1, 0.001);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, c1, 0);
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.0409, d1, 0.00001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(30.0, a1, 0.1);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(14.09, b1, 0.01);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, c1, 0.1);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.0409, d1, 0.0001);
 
 	for (x = 0; x <= 10; x++) {
 		double v = a1 + b1*x + c1*x*x  + d1*x*x*x;
@@ -395,7 +395,7 @@ CurveTest::constrainedCubic ()
 	// printf("a2=%Lf, b2=%Lf, c2=%Lf, d2=%Lf\n", a2, b2, c2, d2);
 
 	// values from worked example: deltas rather arbitrary, I'm afraid
-	CPPUNIT_ASSERT_DOUBLES_EQUAL(109.09, a2, 0.001);
+	CPPUNIT_ASSERT_DOUBLES_EQUAL(109.09, a2, 0.01);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(2.31818, b2, 0.00001);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.01818, c2, 0.00001);
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.0004545, d2, 0.0000001);
