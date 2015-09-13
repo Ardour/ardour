@@ -134,11 +134,12 @@ PBD::Searchpath
 test_search_path ()
 {
 #ifdef PLATFORM_WINDOWS
-	std::string wsp(windows_package_directory_path());
-	return Glib::build_filename (wsp, "ardour_testdata");
-#else
-	return Glib::getenv("ARDOUR_TEST_PATH");
+	if (!getenv("ARDOUR_TEST_PATH")) {
+		std::string wsp(windows_package_directory_path());
+		return Glib::build_filename (wsp, "ardour_testdata");
+	}
 #endif
+	return Glib::getenv("ARDOUR_TEST_PATH");
 }
 
 std::string

@@ -25,11 +25,12 @@ PBD::Searchpath
 test_search_path ()
 {
 #ifdef PLATFORM_WINDOWS
-	string wsp(g_win32_get_package_installation_directory_of_module(NULL));
-	return Glib::build_filename (wsp,  "evoral_testdata");
-#else
-	return Glib::getenv("EVORAL_TEST_PATH");
+	if (!getenv("EVORAL_TEST_PATH")) {
+		string wsp(g_win32_get_package_installation_directory_of_module(NULL));
+		return Glib::build_filename (wsp,  "evoral_testdata");
+	}
 #endif
+	return Glib::getenv("EVORAL_TEST_PATH");
 }
 
 void

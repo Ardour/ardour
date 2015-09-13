@@ -36,11 +36,12 @@ PBD::Searchpath
 test_search_path ()
 {
 #ifdef PLATFORM_WINDOWS
-	std::string wsp(g_win32_get_package_installation_directory_of_module(NULL));
-	return Glib::build_filename (wsp,  "pbd_testdata");
-#else
-	return Glib::getenv("PBD_TEST_PATH");
+	if (!getenv("PBD_TEST_PATH")) {
+		std::string wsp(g_win32_get_package_installation_directory_of_module(NULL));
+		return Glib::build_filename (wsp,  "pbd_testdata");
+	}
 #endif
+	return Glib::getenv("PBD_TEST_PATH");
 }
 
 std::string

@@ -18,15 +18,16 @@ PBD::Searchpath
 test_search_path ()
 {
 #ifdef PLATFORM_WINDOWS
-	std::vector<std::string> path_tok;
-	path_tok.push_back (g_win32_get_package_installation_directory_of_module(NULL));
-	path_tok.push_back ("share");
-	path_tok.push_back ("ardour3");
-	path_tok.push_back ("patchfiles");
-	return Glib::build_filename (path_tok);
-#else
-	return Glib::getenv("MIDIPP_TEST_PATH");
+	if (!getenv("MIDIPP_TEST_PATH")) {
+		std::vector<std::string> path_tok;
+		path_tok.push_back (g_win32_get_package_installation_directory_of_module(NULL));
+		path_tok.push_back ("share");
+		path_tok.push_back ("ardour3");
+		path_tok.push_back ("patchfiles");
+		return Glib::build_filename (path_tok);
+	}
 #endif
+	return Glib::getenv("MIDIPP_TEST_PATH");
 }
 
 void
