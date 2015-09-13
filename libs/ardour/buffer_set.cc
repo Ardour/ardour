@@ -89,7 +89,7 @@ BufferSet::clear()
 
 #ifdef LV2_SUPPORT
 	for (LV2Buffers::iterator i = _lv2_buffers.begin(); i != _lv2_buffers.end(); ++i) {
-		delete (*i).second;
+		free ((*i).second);
 	}
 	_lv2_buffers.clear ();
 #endif
