@@ -1113,7 +1113,7 @@ Selection::set (ControlPoint* cp)
 	clear_time ();  //enforce region/object exclusivity
 	clear_tracks();  //enforce object/track exclusivity
 
-	if (cp->get_selected()) {
+	if (cp->get_selected () && points.size () == 1) {
 		return;
 	}
 

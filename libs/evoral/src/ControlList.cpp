@@ -451,11 +451,18 @@ ControlList::in_write_pass () const
 	return _in_write_pass;
 }
 
-void
+bool
 ControlList::editor_add (double when, double value, bool with_guard)
 {
 	/* this is for making changes from a graphical line editor
 	*/
+
+	ControlEvent cp (when, 0.0f);
+	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+
+	if (i != _events.end () && (*i)->when == when) {
+		return false;
+	}
 
 	if (_events.empty()) {
 
@@ -477,15 +484,18 @@ ControlList::editor_add (double when, double value, bool with_guard)
 		maybe_add_insert_guard (when);
 	}
 
-	ControlEvent cp (when, 0.0f);
-	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+	iterator result;
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
-	_events.insert (i, new ControlEvent (when, value));
+	result = _events.insert (i, new ControlEvent (when, value));
+
+	if (i == result) {
+		return false;
+	}
 
 	mark_dirty ();
-
 	maybe_signal_changed ();
 
+	return true;
 }
 
 void

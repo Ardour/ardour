@@ -399,8 +399,9 @@ Editor::step_mouse_mode (bool next)
 }
 
 void
-Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemType item_type)
+Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+
  	/* in object/audition/timefx/gain-automation mode,
 	   any button press sets the selection if the object
 	   can be selected. this is a bit of hack, because
@@ -472,6 +473,9 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 
 	switch (item_type) {
 	case RegionItem:
+		if (eff_mouse_mode == MouseDraw) {
+			break;
+		}
 		if (press) {
 			if (eff_mouse_mode != MouseRange) {
 				_mouse_changed_selection = set_selected_regionview_from_click (press, op);
@@ -519,6 +523,51 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		}
 		break;
 
+	case GainLineItem:
+	case AutomationLineItem:
+		if (eff_mouse_mode != MouseRange) {
+			AutomationLine* al;
+			std::list<Selectable*> selectables;
+			uint32_t before, after;
+			framecnt_t const  where = (framecnt_t) floor (event->button.x * samples_per_pixel);
+
+			if ((al = reinterpret_cast<AutomationLine*> (item->get_data ("line")))) {
+
+				if (!al->control_points_adjacent (where, before, after)) {
+					break;
+				}
+			}
+
+			selectables.push_back (al->nth (before));
+			selectables.push_back (al->nth (after));
+
+			switch (op) {
+			case Selection::Set:
+				if (press) {
+					selection->set (selectables);
+					_mouse_changed_selection = true;
+				}
+				break;
+			case Selection::Add:
+				if (press) {
+					selection->add (selectables);
+					_mouse_changed_selection = true;
+				}
+				break;
+			case Selection::Toggle:
+				if (press) {
+					selection->toggle (selectables);
+					_mouse_changed_selection = true;
+				}
+				break;
+
+			case Selection::Extend:
+				/* XXX */
+				break;
+			}
+		}
+		break;
+
 	case StreamItem:
 		/* for context click, select track */
 		if (event->button.button == 3) {
@@ -532,7 +581,9 @@ Editor::button_selection (ArdourCanvas::Item* /*item*/, GdkEvent* event, ItemTyp
 		break;
 
 	case AutomationTrackItem:
-		set_selected_track_as_side_effect (op);
+		if (eff_mouse_mode != MouseDraw) {
+			set_selected_track_as_side_effect (op);
+		}
 		break;
 
 	default:

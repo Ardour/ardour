@@ -1334,25 +1334,40 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 	gain_line->view_to_model_coord (x, y);
 
+	trackview.editor ().snap_to_with_modifier (fx, ev);
+
 	/* XXX STATEFUL: can't convert to stateful diff until we
 	   can represent automation data with it.
 	*/
 
-	trackview.editor().begin_reversible_command (_("add gain control point"));
 	XMLNode &before = audio_region()->envelope()->get_state();
+	MementoCommand<AudioRegion>* region_memento = 0;
 
 	if (!audio_region()->envelope_active()) {
 		XMLNode &region_before = audio_region()->get_state();
 		audio_region()->set_envelope_active(true);
 		XMLNode &region_after = audio_region()->get_state();
-		trackview.session()->add_command (new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after));
+		region_memento = new MementoCommand<AudioRegion>(*(audio_region().get()), &region_before, &region_after);
 	}
 
-	audio_region()->envelope()->editor_add (fx, y, with_guard_points);
+	if (audio_region()->envelope()->editor_add (fx, y, with_guard_points)) {
+		XMLNode &after = audio_region()->envelope()->get_state();
+		std::list<Selectable*> results;
 
-	XMLNode &after = audio_region()->envelope()->get_state();
-	trackview.session()->add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
-	trackview.editor().commit_reversible_command ();
+		trackview.editor().begin_reversible_command (_("add gain control point"));
+
+		if (region_memento) {
+			trackview.session()->add_command (region_memento);
+		}
+
+		trackview.session()->add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
+
+		gain_line->get_selectables (fx, fx, 0.0, 1.0, results);
+		trackview.editor ().get_selection ().set (results);
+
+		trackview.editor ().commit_reversible_command ();
+		trackview.session ()->set_dirty ();
+	}
 }
 
 void
