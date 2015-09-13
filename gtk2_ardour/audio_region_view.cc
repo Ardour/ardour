@@ -1321,6 +1321,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 	item->canvas_to_item (x, y);
 
 	framepos_t fx = trackview.editor().pixel_to_sample (x);
+	trackview.editor ().snap_to_with_modifier (fx, ev);
 
 	if (fx > _region->length()) {
 		return;
@@ -1333,8 +1334,6 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 	/* map using gain line */
 
 	gain_line->view_to_model_coord (x, y);
-
-	trackview.editor ().snap_to_with_modifier (fx, ev);
 
 	/* XXX STATEFUL: can't convert to stateful diff until we
 	   can represent automation data with it.
