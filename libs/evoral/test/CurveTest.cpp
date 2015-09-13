@@ -5,6 +5,23 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION (CurveTest);
 
+#if defined(PLATFORM_WINDOWS) && defined(COMPILER_MINGW)
+/* cppunit-1.13.2  uses assertion_traits<double>
+ *    sprintf( , "%.*g", precision, x)
+ * to format a double. The actual comparison is performed on a string.
+ * This is problematic with mingw/windows|wine, "%.*g" formatting fails.
+ *
+ * This quick hack compares float, however float compatisons are at most Y.MMMM+eXX,
+ * the max precision needs to be limited. to the last mantissa digit.
+ *
+ * Anyway, actual maths is verified with Linux and OSX unit-tests,
+ * and this needs to go to https://sourceforge.net/p/cppunit/bugs/
+ */
+#define MAXPREC(P) ((P) < .0005 ? .0005 : (P))
+#define CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(M,A,B,P) CPPUNIT_ASSERT_EQUAL_MESSAGE(M, (float)rint ((A) / MAXPREC(P)),(float)rint ((B) / MAXPREC(P)))
+#define CPPUNIT_ASSERT_DOUBLES_EQUAL(A,B,P) CPPUNIT_ASSERT_EQUAL((float)rint ((A) / MAXPREC(P)),(float)rint ((B) / MAXPREC(P)))
+#endif
+
 using namespace Evoral;
 
 // linear y = Y0 + YS * x ;  with x = i * (X1 - X0) + X0; and i = [0..1023]
