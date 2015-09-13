@@ -327,15 +327,27 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 	if (!clicked_control_point) {
 		return false;
 	}
+
 	bool ret = false;
 
 	switch (op) {
 	case Selection::Set:
-		if (press) {
+		if (!selection->selected (clicked_control_point)) {
 			selection->set (clicked_control_point);
 			ret = true;
+		} else {
+			/* clicked on an already selected point */
+			if (press) {
+				break;
+			} else {
+				if (selection->points.size() > 1) {
+					selection->set (clicked_control_point);
+					ret = true;
+				}
+			}
 		}
 		break;
+
 	case Selection::Add:
 		if (press) {
 			selection->add (clicked_control_point);

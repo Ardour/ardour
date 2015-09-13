@@ -5557,92 +5557,6 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 			}
 		}
 
-	} else {
-
-		for (list<AudioRange>::const_iterator i = _ranges.begin(); i != _ranges.end(); ++i) {
-
-			framecnt_t const half = (i->start + i->end) / 2;
-
-			/* find the line that this audio range starts in */
-			list<Line>::iterator j = _lines.begin();
-			while (j != _lines.end() && (j->range.first > i->start || j->range.second < i->start)) {
-				++j;
-			}
-
-			if (j != _lines.end()) {
-				boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
-
-				/* j is the line that this audio range starts in; fade into it;
-				   64 samples length plucked out of thin air.
-				*/
-
-				framepos_t a = i->start + 64;
-				if (a > half) {
-					a = half;
-				}
-
-				double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
-				double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
-
-				the_list->editor_add (p, value (the_list, p), false);
-				the_list->editor_add (q, value (the_list, q), false);
-			}
-
-			/* same thing for the end */
-
-			j = _lines.begin();
-			while (j != _lines.end() && (j->range.first > i->end || j->range.second < i->end)) {
-				++j;
-			}
-
-			if (j != _lines.end()) {
-				boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
-
-				/* j is the line that this audio range starts in; fade out of it;
-				   64 samples length plucked out of thin air.
-				*/
-
-				framepos_t b = i->end - 64;
-				if (b < half) {
-					b = half;
-				}
-
-				double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
-				double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
-
-				the_list->editor_add (p, value (the_list, p), false);
-				the_list->editor_add (q, value (the_list, q), false);
-			}
-		}
-
-		_nothing_to_drag = true;
-
-		/* Find all the points that should be dragged and put them in the relevant
-		   points lists in the Line structs.
-		*/
-
-		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
-
-			uint32_t const N = i->line->npoints ();
-			for (uint32_t j = 0; j < N; ++j) {
-
-				/* here's a control point on this line */
-				ControlPoint* p = i->line->nth (j);
-				double const w = i->line->time_converter().to ((*p->model())->when) + i->line->time_converter().origin_b ();
-
-				/* see if it's inside a range */
-				list<AudioRange>::const_iterator k = _ranges.begin ();
-				while (k != _ranges.end() && (k->start >= w || k->end <= w)) {
-					++k;
-				}
-
-				if (k != _ranges.end()) {
-					/* dragging this point */
-					_nothing_to_drag = false;
-					i->points.push_back (p);
-				}
-			}
-		}
 	}
 
 	if (_nothing_to_drag) {
@@ -5653,12 +5567,113 @@ AutomationRangeDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 {
-	if (_nothing_to_drag) {
+	if (_nothing_to_drag && !first_move) {
 		return;
 	}
 
 	if (first_move) {
 		_editor->begin_reversible_command (_("automation range move"));
+
+		if (!_ranges.empty()) {
+
+			for (list<AudioRange>::const_iterator i = _ranges.begin(); i != _ranges.end(); ++i) {
+
+				framecnt_t const half = (i->start + i->end) / 2;
+
+				/* find the line that this audio range starts in */
+				list<Line>::iterator j = _lines.begin();
+				while (j != _lines.end() && (j->range.first > i->start || j->range.second < i->start)) {
+					++j;
+				}
+
+				if (j != _lines.end()) {
+					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
+
+				/* j is the line that this audio range starts in; fade into it;
+				   64 samples length plucked out of thin air.
+				*/
+
+					framepos_t a = i->start + 64;
+					if (a > half) {
+						a = half;
+					}
+
+					double const p = j->line->time_converter().from (i->start - j->line->time_converter().origin_b ());
+					double const q = j->line->time_converter().from (a - j->line->time_converter().origin_b ());
+
+					XMLNode &before = the_list->get_state();
+					bool const add_p = the_list->editor_add (p, value (the_list, p), false);
+					bool const add_q = the_list->editor_add (q, value (the_list, q), false);
+
+					if (add_p || add_q) {
+						_editor->session()->add_command (
+							new MementoCommand<AutomationList>(*the_list.get (), &before, &the_list->get_state()));
+					}
+				}
+
+				/* same thing for the end */
+
+				j = _lines.begin();
+				while (j != _lines.end() && (j->range.first > i->end || j->range.second < i->end)) {
+					++j;
+				}
+
+				if (j != _lines.end()) {
+					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
+
+					/* j is the line that this audio range starts in; fade out of it;
+					   64 samples length plucked out of thin air.
+					*/
+
+					framepos_t b = i->end - 64;
+					if (b < half) {
+						b = half;
+					}
+
+					double const p = j->line->time_converter().from (b - j->line->time_converter().origin_b ());
+					double const q = j->line->time_converter().from (i->end - j->line->time_converter().origin_b ());
+
+					XMLNode &before = the_list->get_state();
+					bool const add_p = the_list->editor_add (p, value (the_list, p), false);
+					bool const add_q = the_list->editor_add (q, value (the_list, q), false);
+
+					if (add_p || add_q) {
+						_editor->session()->add_command (
+							new MementoCommand<AutomationList>(*the_list.get (), &before, &the_list->get_state()));
+					}
+				}
+			}
+
+			_nothing_to_drag = true;
+
+			/* Find all the points that should be dragged and put them in the relevant
+			   points lists in the Line structs.
+			*/
+
+			for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
+
+				uint32_t const N = i->line->npoints ();
+				for (uint32_t j = 0; j < N; ++j) {
+
+					/* here's a control point on this line */
+					ControlPoint* p = i->line->nth (j);
+					double const w = i->line->time_converter().to ((*p->model())->when) + i->line->time_converter().origin_b ();
+
+					/* see if it's inside a range */
+					list<AudioRange>::const_iterator k = _ranges.begin ();
+					while (k != _ranges.end() && (k->start >= w || k->end <= w)) {
+						++k;
+					}
+
+					if (k != _ranges.end()) {
+						/* dragging this point */
+						_nothing_to_drag = false;
+						i->points.push_back (p);
+					}
+				}
+			}
+		}
+
 		for (list<Line>::iterator i = _lines.begin(); i != _lines.end(); ++i) {
 			i->line->start_drag_multiple (i->points, y_fraction (i->line, current_pointer_y()), i->state);
 		}

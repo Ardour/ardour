@@ -638,18 +638,21 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t when, 
 
 	_line->view_to_model_coord (x, y);
 
-
 	_editor.snap_to_with_modifier (when, event);
 
-	_editor.begin_reversible_command (_("add automation event"));
 	XMLNode& before = list->get_state();
+	std::list<Selectable*> results;
+	if (list->editor_add (when, y, with_guard_points)) {
+		XMLNode& after = list->get_state();
+		_editor.begin_reversible_command (_("add automation event"));
+		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
 
-	list->editor_add (when, y, with_guard_points);
+		_line->get_selectables (when, when, 0.0, 1.0, results);
+		_editor.get_selection ().set (results);
 
-	XMLNode& after = list->get_state();
-	_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
-	_editor.commit_reversible_command ();
-	_session->set_dirty ();
+		_editor.commit_reversible_command ();
+		_session->set_dirty ();
+	}
 }
 
 bool
