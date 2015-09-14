@@ -74,6 +74,8 @@ using namespace ArdourCanvas;
 
 static double const handle_size = 10; /* height of fade handles */
 
+Cairo::RefPtr<Cairo::Pattern> AudioRegionView::pending_peak_pattern;
+
 AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
@@ -82,6 +84,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 	, fade_out_handle(0)
 	, fade_in_trim_handle(0)
 	, fade_out_trim_handle(0)
+	, pending_peak_data(0)
 	, start_xfade_curve (0)
 	, start_xfade_rect (0)
 	, _start_xfade_visible (false)
@@ -103,6 +106,7 @@ AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxis
 	, fade_out_handle(0)
 	, fade_in_trim_handle(0)
 	, fade_out_trim_handle(0)
+	, pending_peak_data(0)
 	, start_xfade_curve (0)
 	, start_xfade_rect (0)
 	, _start_xfade_visible (false)
@@ -122,6 +126,7 @@ AudioRegionView::AudioRegionView (const AudioRegionView& other, boost::shared_pt
 	, fade_out_handle(0)
 	, fade_in_trim_handle(0)
 	, fade_out_trim_handle(0)
+	, pending_peak_data(0)
 	, start_xfade_curve (0)
 	, start_xfade_rect (0)
 	, _start_xfade_visible (false)
@@ -142,6 +147,23 @@ AudioRegionView::init (bool wfd)
 {
 	// FIXME: Some redundancy here with RegionView::init.  Need to figure out
 	// where order is important and where it isn't...
+
+	if (!pending_peak_pattern) {
+		cairo_pattern_t* pat = cairo_pattern_create_radial (4.0, 4.0, 1.0, 4.0, 4.0, 4.0);	
+		cairo_pattern_add_color_stop_rgba (pat, 0.0, 0, 0, 0, 1.0);
+		cairo_pattern_add_color_stop_rgba (pat, 0.6, 0, 0, 0, 0.0);
+		cairo_pattern_set_extend (pat, CAIRO_EXTEND_REPEAT);
+		Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
+		pending_peak_pattern = p;
+	}
+
+	// needs to be created first, RegionView::init() calls set_height()
+	pending_peak_data = new ArdourCanvas::Rectangle (group);
+	CANVAS_DEBUG_NAME (pending_peak_data, string_compose ("pending peak rectangle for %1", region()->name()));
+	pending_peak_data->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 0.0));
+	pending_peak_data->set_pattern (pending_peak_pattern);
+	pending_peak_data->set_data ("regionview", this);
+	pending_peak_data->hide ();
 
 	RegionView::init (wfd);
 
@@ -231,6 +253,8 @@ AudioRegionView::init (bool wfd)
 	set_colors ();
 
 	setup_waveform_visibility ();
+
+	pending_peak_data->raise_to_top ();
 
 	if (frame_handle_start) {
 		frame_handle_start->raise_to_top ();
@@ -407,6 +431,8 @@ AudioRegionView::reset_width_dependent_items (double pixel_width)
 	RegionView::reset_width_dependent_items(pixel_width);
 	assert(_pixel_width == pixel_width);
 
+	pending_peak_data->set_x1(pixel_width);
+
 	if (pixel_width <= 20.0 || _height < 5.0 || !trackview.session()->config.get_show_region_fades()) {
 		if (fade_in_handle)       { fade_in_handle->hide(); }
 		if (fade_out_handle)      { fade_out_handle->hide(); }
@@ -475,6 +501,7 @@ void
 AudioRegionView::set_height (gdouble height)
 {
 	RegionView::set_height (height);
+	pending_peak_data->set_y1 (height);
 
 	uint32_t wcnt = waves.size();
 
@@ -984,17 +1011,6 @@ AudioRegionView::set_amplitude_above_axis (gdouble a)
 	}
 }
 
-uint32_t
-AudioRegionView::get_fill_color() const
-{
-	ArdourCanvas::Color c = TimeAxisViewItem::get_fill_color();
-	if (!tmp_waves.empty()) {
-		// peak-data is not ready.
-		c &= 0xffffff1f; // TODO: themable color or pattern?
-	}
-	return c;
-}
-
 void
 AudioRegionView::set_colors ()
 {
@@ -1122,9 +1138,7 @@ AudioRegionView::create_waves ()
 				// cerr << "\tdata is not ready\n";
 				// we'll get a PeaksReady signal from the source in the future
 				// and will call create_one_wave(n) then.
-
-				// hightlight track, missing peaks
-				set_colors ();
+				pending_peak_data->show ();
 			}
 
 		} else {
@@ -1225,8 +1239,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		waves = tmp_waves;
 		tmp_waves.clear ();
 
-		/* set color to indicate peak-completed */
-		set_colors ();
+		/* indicate peak-completed */
+		pending_peak_data->hide ();
 	}
 
 	/* channel wave created, don't hook into peaks ready anymore */
