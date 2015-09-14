@@ -13,7 +13,8 @@ CPPUNIT_TEST_SUITE_REGISTRATION (WindowsTimerUtilsTest);
 void
 WindowsTimerUtilsTest::testQPC ()
 {
-	CPPUNIT_ASSERT (PBD::QPC::get_timer_valid());
+	// performs basically the same test
+	CPPUNIT_ASSERT (PBD::QPC::check_timer_valid());
 
 	int64_t last_timer_val = PBD::QPC::get_microseconds ();
 	CPPUNIT_ASSERT (last_timer_val >= 0);

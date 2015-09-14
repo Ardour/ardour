@@ -136,16 +136,35 @@ qpc_frequency_cached ()
 	return frequency;
 }
 
+bool
+test_qpc_validity ()
+{
+	int64_t last_timer_val = PBD::QPC::get_microseconds ();
+	if (last_timer_val < 0) return false;
+
+	for (int i = 0; i < 100000; ++i) {
+		int64_t timer_val = PBD::QPC::get_microseconds ();
+		if (timer_val < 0) return false;
+		// try and test for non-syncronized TSC(AMD K8/etc)
+		if (timer_val < last_timer_val) return false;
+		last_timer_val = timer_val;
+	}
+	return true;
+}
+
 } // anon namespace
 
 namespace QPC {
 
 bool
-get_timer_valid ()
+check_timer_valid ()
 {
 	// setup caching the timer frequency
 	qpc_frequency_cached ();
-	return qpc_frequency_success ();
+	if (!qpc_frequency_success ()) {
+		return false;
+	}
+	return test_qpc_validity ();
 }
 
 int64_t

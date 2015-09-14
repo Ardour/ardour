@@ -61,8 +61,11 @@ namespace QPC {
 
 /**
  * @return true if QueryPerformanceCounter is usable as a timer source
+ * This should always return true for systems > XP as those versions of windows
+ * have there own tests to check timer validity and will select an appropriate
+ * timer source.
  */
-bool get_timer_valid ();
+bool check_timer_valid ();
 
 /**
  * @return the value of the performance counter converted to microseconds
