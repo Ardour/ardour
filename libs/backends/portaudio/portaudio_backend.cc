@@ -83,8 +83,6 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
 
-	PBD::MMCSS::initialize ();
-
 	_pcmio = new PortAudioIO ();
 	_midiio = new WinMMEMidiIO ();
 }
@@ -93,8 +91,6 @@ PortAudioBackend::~PortAudioBackend ()
 {
 	delete _pcmio; _pcmio = 0;
 	delete _midiio; _midiio = 0;
-
-	PBD::MMCSS::deinitialize ();
 
 	pthread_mutex_destroy (&_port_callback_mutex);
 }

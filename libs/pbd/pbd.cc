@@ -35,12 +35,11 @@
 #include "pbd/id.h"
 #include "pbd/enumwriter.h"
 #include "pbd/fpu.h"
-#ifdef PLATFORM_WINDOWS
-#include "pbd/windows_timer_utils.h"
-#endif
 
 #ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
+#include "pbd/windows_timer_utils.h"
+#include "pbd/windows_mmcss.h"
 #endif
 
 #include "i18n.h"
@@ -109,6 +108,12 @@ PBD::init ()
 	}
 
 	test_timers_from_env ();
+
+	if (!PBD::MMCSS::initialize()) {
+		PBD::info << "Unable to initialize MMCSS" << endmsg;
+	} else {
+		PBD::info << "MMCSS Initialized" << endmsg;
+	}
 #endif
 
 	if (!Glib::thread_supported()) {
@@ -131,6 +136,7 @@ void
 PBD::cleanup ()
 {
 #ifdef PLATFORM_WINDOWS
+	PBD::MMCSS::deinitialize ();
 	WSACleanup();
 #endif	
 
