@@ -25,6 +25,7 @@
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
+#include <pbd/windows_timer_utils.h>
 #endif
 
 #include "dummy_audiobackend.h"
@@ -43,20 +44,9 @@ std::vector<AudioBackend::DeviceStatus> DummyAudioBackend::_device_status;
 
 std::vector<DummyAudioBackend::DriverSpeed> DummyAudioBackend::_driver_speed;
 
-#ifdef PLATFORM_WINDOWS
-static double _win_pc_rate = 0; // usec per tick
-#endif
-
 static int64_t _x_get_monotonic_usec() {
 #ifdef PLATFORM_WINDOWS
-	if (_win_pc_rate > 0) {
-		LARGE_INTEGER Count;
-		// not very reliable, but the only realistic way for sub milli-seconds
-		if (QueryPerformanceCounter (&Count)) {
-			return (int64_t) (Count.QuadPart * _win_pc_rate);
-		}
-		return -1;
-	}
+	return PBD::get_microseconds();
 #endif
 	return g_get_monotonic_time();
 }
@@ -1384,14 +1374,6 @@ static int
 instantiate (const std::string& arg1, const std::string& /* arg2 */)
 {
 	s_instance_name = arg1;
-#ifdef PLATFORM_WINDOWS
-	LARGE_INTEGER Frequency;
-	if (!QueryPerformanceFrequency(&Frequency) || Frequency.QuadPart < 1) {
-		_win_pc_rate = 0;
-	} else {
-		_win_pc_rate = 1000000.0 / Frequency.QuadPart;
-	}
-#endif
 	return 0;
 }
 
