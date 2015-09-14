@@ -32,6 +32,7 @@
 
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
+#include "ardour/dsp_load_calculator.h"
 
 namespace ARDOUR {
 
@@ -401,6 +402,7 @@ class DummyAudioBackend : public AudioBackend {
 		float  _samplerate;
 		size_t _samples_per_period;
 		float  _dsp_load;
+		DSPLoadCalculator _dsp_load_calc;
 		static size_t _max_buffer_size;
 
 		uint32_t _n_inputs;

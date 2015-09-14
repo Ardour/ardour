@@ -447,6 +447,8 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	engine.sample_rate_change (_samplerate);
 	engine.buffer_size_change (_samples_per_period);
 
+	_dsp_load_calc.set_max_time (_samplerate, _samples_per_period);
+
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
 		stop ();
@@ -1213,7 +1215,7 @@ DummyAudioBackend::main_process_thread ()
 	manager.registration_callback();
 	manager.graph_order_callback();
 
-	int64_t clock1, clock2;
+	int64_t clock1;
 	clock1 = -1;
 	while (_running) {
 
@@ -1264,35 +1266,12 @@ DummyAudioBackend::main_process_thread ()
 		}
 
 		if (!_freewheel) {
-			const int64_t nominal_time = 1e6 * _samples_per_period / _samplerate;
-			clock2 = _x_get_monotonic_usec();
-			bool timers_ok = true;
+			_dsp_load_calc.set_start_timestamp_us (clock1);
+			_dsp_load_calc.set_stop_timestamp_us (_x_get_monotonic_usec());
+			_dsp_load = _dsp_load_calc.get_dsp_load ();
 
-			/* querying the performance counter can fail occasionally (-1).
-			 * Also on some multi-core systems, timers are CPU specific and not
-			 * synchronized. We assume they differ more than a few milliseconds
-			 * (4 * nominal cycle time) and simply ignore cases where the
-			 * execution switches cores.
-			 */
-			if (clock1 < 0 || clock2 < 0 || (clock1 > clock2) || (clock2 - clock1) > 4 * nominal_time) {
-				clock1 = 0;
-				clock2 = nominal_time;
-				timers_ok = false;
-			}
-
-			const int64_t elapsed_time = clock2 - clock1;
-
-			if (timers_ok)
-			{ // low pass filter
-				const float load = elapsed_time / (float) nominal_time;
-				if (load > _dsp_load) {
-					_dsp_load = load;
-				} else {
-					const float a = .2 * _samples_per_period / _samplerate;
-					_dsp_load = _dsp_load + a * (load - _dsp_load) + 1e-12;
-				}
-			}
-
+			const int64_t elapsed_time = _dsp_load_calc.elapsed_time_us ();
+			const int64_t nominal_time = _dsp_load_calc.get_max_time_us ();
 			if (elapsed_time < nominal_time) {
 				const int64_t sleepy = _speedup * (nominal_time - elapsed_time);
 				Glib::usleep (std::max ((int64_t) 100, sleepy));
