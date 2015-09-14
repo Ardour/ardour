@@ -28,7 +28,7 @@ typedef HANDLE (WINAPI* AvSetMmThreadCharacteristicsA_t)(LPCSTR TaskName,
 typedef BOOL (WINAPI* AvRevertMmThreadCharacteristics_t)(HANDLE AvrtHandle);
 
 typedef BOOL (WINAPI* AvSetMmThreadPriority_t)(
-    HANDLE AvrtHandle, mmcss::AVRT_PRIORITY Priority);
+    HANDLE AvrtHandle, PBD::MMCSS::AVRT_PRIORITY Priority);
 
 static HMODULE avrt_dll = NULL;
 
@@ -36,8 +36,9 @@ static AvSetMmThreadCharacteristicsA_t AvSetMmThreadCharacteristicsA = NULL;
 static AvRevertMmThreadCharacteristics_t AvRevertMmThreadCharacteristics = NULL;
 static AvSetMmThreadPriority_t AvSetMmThreadPriority = NULL;
 
+namespace PBD {
 
-namespace mmcss {
+namespace MMCSS {
 
 bool
 initialize ()
@@ -174,4 +175,6 @@ set_thread_priority (HANDLE task_handle, AVRT_PRIORITY priority)
 	return true;
 }
 
-} // namespace mmcss
+} // namespace MMCSS
+
+} // namespace PBD

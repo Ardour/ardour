@@ -83,7 +83,7 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
 
-	mmcss::initialize ();
+	PBD::MMCSS::initialize ();
 
 	_pcmio = new PortAudioIO ();
 	_midiio = new WinMMEMidiIO ();
@@ -94,7 +94,7 @@ PortAudioBackend::~PortAudioBackend ()
 	delete _pcmio; _pcmio = 0;
 	delete _midiio; _midiio = 0;
 
-	mmcss::deinitialize ();
+	PBD::MMCSS::deinitialize ();
 
 	pthread_mutex_destroy (&_port_callback_mutex);
 }
@@ -702,7 +702,7 @@ PortAudioBackend::name_to_id(std::string device_name) const {
 bool
 PortAudioBackend::set_mmcss_pro_audio (HANDLE* task_handle)
 {
-	bool mmcss_success = mmcss::set_thread_characteristics ("Pro Audio", task_handle);
+	bool mmcss_success = PBD::MMCSS::set_thread_characteristics ("Pro Audio", task_handle);
 
 	if (!mmcss_success) {
 		PBD::warning << get_error_string(SettingAudioThreadPriorityError) << endmsg;
@@ -712,7 +712,7 @@ PortAudioBackend::set_mmcss_pro_audio (HANDLE* task_handle)
 	}
 
 	bool mmcss_priority =
-		mmcss::set_thread_priority(*task_handle, mmcss::AVRT_PRIORITY_NORMAL);
+		PBD::MMCSS::set_thread_priority(*task_handle, PBD::MMCSS::AVRT_PRIORITY_NORMAL);
 
 	if (!mmcss_priority) {
 		PBD::warning << get_error_string(SettingAudioThreadPriorityError) << endmsg;
@@ -727,7 +727,7 @@ PortAudioBackend::set_mmcss_pro_audio (HANDLE* task_handle)
 bool
 PortAudioBackend::reset_mmcss (HANDLE task_handle)
 {
-	if (!mmcss::revert_thread_characteristics(task_handle)) {
+	if (!PBD::MMCSS::revert_thread_characteristics(task_handle)) {
 		DEBUG_THREADS("Unable to reset process thread characteristics\n");
 		return false;
 	}

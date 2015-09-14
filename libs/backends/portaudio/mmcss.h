@@ -16,14 +16,16 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef MMCSS_H
-#define MMCSS_H
+#ifndef PBD_WINDOWS_MMCSS_H
+#define PBD_WINDOWS_MMCSS_H
 
 #include <windows.h>
 
 #include <string>
 
-namespace mmcss {
+namespace PBD {
+
+namespace MMCSS {
 
 enum AVRT_PRIORITY {
 	AVRT_PRIORITY_VERYLOW = -2,
@@ -48,7 +50,8 @@ bool revert_thread_characteristics (HANDLE task_handle);
 
 bool set_thread_priority (HANDLE, AVRT_PRIORITY);
 
+} // namespace MMCSS
 
-} // namespace mmcss
+} // namespace PBD
 
-#endif // MMCSS_H
+#endif // PBD_WINDOWS_MMCSS_H

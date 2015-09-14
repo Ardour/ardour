@@ -354,8 +354,8 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 #ifdef USE_MMCSS_THREAD_PRIORITIES
 	HANDLE task_handle;
 
-	mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
-	mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_HIGH);
+	PBD::MMCSS::set_thread_characteristics ("Pro Audio", &task_handle);
+	PBD::MMCSS::set_thread_priority (task_handle, PBD::MMCSS::AVRT_PRIORITY_HIGH);
 #endif
 
 	while (!m_thread_quit) {
@@ -481,7 +481,7 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 	}
 
 #ifdef USE_MMCSS_THREAD_PRIORITIES
-	mmcss::revert_thread_characteristics (task_handle);
+	PBD::MMCSS::revert_thread_characteristics (task_handle);
 #endif
 
 	m_thread_running = false;

@@ -198,8 +198,8 @@ WinMMEMidiInputDevice::winmm_input_callback(HMIDIIN handle,
 	HANDLE task_handle;
 
 	if (!priority_boosted) {
-		mmcss::set_thread_characteristics ("Pro Audio", &task_handle);
-		mmcss::set_thread_priority (task_handle, mmcss::AVRT_PRIORITY_HIGH);
+		PBD::MMCSS::set_thread_characteristics ("Pro Audio", &task_handle);
+		PBD::MMCSS::set_thread_priority (task_handle, PBD::MMCSS::AVRT_PRIORITY_HIGH);
 		priority_boosted = true;
 	}
 #endif
