@@ -134,6 +134,7 @@ public:
 		}
 	};
 
+#if 0 // NOT USED
 	struct LaterNoteComparator {
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
@@ -141,12 +142,13 @@ public:
 			return a->time() > b->time();
 		}
 	};
+#endif
 
 	struct LaterNoteEndComparator {
 		typedef const Note<Time>* value_type;
 		inline bool operator()(const boost::shared_ptr< const Note<Time> > a,
 		                       const boost::shared_ptr< const Note<Time> > b) const {
-			return a->end_time() > b->end_time();
+			return a->end_time().to_double() > b->end_time().to_double();
 		}
 	};
 
