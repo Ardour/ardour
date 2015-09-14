@@ -60,7 +60,7 @@ set_debug_options_from_env ()
 
 	options = Glib::getenv ("PBD_DEBUG", set);
 	if (set) {
-		std::cerr << "PBD_DEBUG=" << options << std::endl;
+		std::cerr << X_("PBD_DEBUG=") << options << std::endl;
 		PBD::parse_debug_options (options.c_str());
 	}
 }
@@ -75,9 +75,9 @@ test_timers_from_env ()
 	options = Glib::getenv ("PBD_TEST_TIMERS", set);
 	if (set) {
 		if (!PBD::QPC::check_timer_valid ()) {
-			PBD::error << "Windows QPC Timer source not usable." << endmsg;
+			PBD::error << X_("Windows QPC Timer source not usable") << endmsg;
 		} else {
-			PBD::info << "Windows QPC Timer source usable." << endmsg;
+			PBD::info << X_("Windows QPC Timer source usable") << endmsg;
 		}
 	}
 }
@@ -101,7 +101,7 @@ PBD::init ()
 	 */
 	
 	if (WSAStartup(MAKEWORD(1,1),&wsaData) != 0) {
-		fatal << "Windows socket initialization failed with error: " << WSAGetLastError() << endmsg;
+		fatal << X_("Windows socket initialization failed with error: ") << WSAGetLastError() << endmsg;
 		abort();
 		/*NOTREACHED*/
 		return false;
@@ -110,9 +110,9 @@ PBD::init ()
 	test_timers_from_env ();
 
 	if (!PBD::MMCSS::initialize()) {
-		PBD::info << "Unable to initialize MMCSS" << endmsg;
+		PBD::info << X_("Unable to initialize MMCSS") << endmsg;
 	} else {
-		PBD::info << "MMCSS Initialized" << endmsg;
+		PBD::info << X_("MMCSS Initialized") << endmsg;
 	}
 #endif
 
