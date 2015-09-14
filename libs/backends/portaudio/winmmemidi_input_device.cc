@@ -23,10 +23,9 @@
 
 #include "pbd/compose.h"
 #include "pbd/windows_timer_utils.h"
+#include "pbd/windows_mmcss.h"
 
 #include "midi_util.h"
-
-#include "mmcss.h"
 
 #include "debug.h"
 

@@ -16,11 +16,12 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "mmcss.h"
+#include "pbd/windows_mmcss.h"
 
 #include "pbd/compose.h"
+#include "pbd/debug.h"
 
-#include "debug.h"
+#define DEBUG_THREADS(msg) DEBUG_TRACE (PBD::DEBUG::Threads, msg);
 
 typedef HANDLE (WINAPI* AvSetMmThreadCharacteristicsA_t)(LPCSTR TaskName,
                                                          LPDWORD TaskIndex);

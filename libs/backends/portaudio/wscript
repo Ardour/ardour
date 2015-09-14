@@ -27,7 +27,6 @@ def build(bld):
                    'winmmemidi_input_device.cc',
                    'winmmemidi_output_device.cc',
                    'midi_util.cc',
-                   'mmcss.cc'
                  ]
     obj.includes = ['.']
     obj.name     = 'portaudio_backend'

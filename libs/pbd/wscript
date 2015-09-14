@@ -149,6 +149,7 @@ def build(bld):
         obj.defines += [ 'NO_POSIX_MEMALIGN' ]
         obj.source += [ 'windows_special_dirs.cc' ]
         obj.source += [ 'windows_timer_utils.cc' ]
+        obj.source += [ 'windows_mmcss.cc' ]
         obj.uselib += ' OLE'
 
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
