@@ -186,7 +186,7 @@ XFadeCurve::get_path(Rect const & area, Cairo::RefPtr<Cairo::Context> context, C
 			if (window_space.x >= area.x0) break;
 		}
 		for (Points::size_type idx = c.n_samples; right > left;) {
-			--idx;
+			if (--idx <= left) break;
 			window_space = item_to_window (Duple (c.samples[idx].x, 0.0), false);
 			if (window_space.x <= area.x1) break;
 			right = idx;
