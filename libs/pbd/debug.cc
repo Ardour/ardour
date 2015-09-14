@@ -55,6 +55,7 @@ DebugBits PBD::DEBUG::FileUtils = PBD::new_debug_bit ("fileutils");
 DebugBits PBD::DEBUG::Configuration = PBD::new_debug_bit ("configuration");
 DebugBits PBD::DEBUG::UndoHistory = PBD::new_debug_bit ("undohistory");
 DebugBits PBD::DEBUG::Timing = PBD::new_debug_bit ("timing");
+DebugBits PBD::DEBUG::Threads = PBD::new_debug_bit ("threads");
 
 /* These are debug bits that are used by backends. Since these are loaded dynamically,
    after command-line parsing, defining them in code that is part of the backend
