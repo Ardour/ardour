@@ -165,6 +165,8 @@ def build(bld):
                 test/xml_test.cc
                 test/test_common.cc
         '''.split()
+        if bld.env['build_target'] == 'mingw':
+            testobj.source += [ 'test/windows_timer_utils_test.cc' ]
         testobj.target       = 'run-tests'
         testobj.includes     = obj.includes + ['test', '../pbd']
         testobj.uselib       = 'CPPUNIT XML SNDFILE'
