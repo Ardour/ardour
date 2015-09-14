@@ -26,30 +26,34 @@ namespace PBD {
 namespace MMTIMERS {
 
 /**
+ * Get the minimum Multimedia Timer resolution as supported by the system
+ * @return true if getting min timer resolution was not successful
+ */
+bool get_min_resolution (uint32_t& timer_resolution_ms);
+
+/**
  * Set the minimum Multimedia Timer resolution as supported by the system
- * @return true if min timer resolution was successfully set
- *
- * Call reset_resolution to restore old timer resolution
+ * @return true if setting min timer resolution was successful
  */
 bool set_min_resolution ();
 
 /**
- * Get current Multimedia Timer resolution
- * @return true if getting the timer value was successful
+ * Set current Multimedia Timer resolution. If the timer resolution has already
+ * been set then reset_resolution() must be called before set_resolution will
+ * succeed.
+ * @return true if setting the timer value was successful, false if setting the
+ * timer resolution failed or the resolution has already been set.
  */
-bool get_resolution(uint32_t& timer_resolution_us);
+bool set_resolution(uint32_t timer_resolution_ms);
 
 /**
- * Set current Multimedia Timer resolution
+ * Reset Multimedia Timer resolution. In my testing, if the timer resolution is
+ * set below the default, then resetting the resolution will not reset the
+ * timer resolution back to 15ms. At least it does not reset immediately
+ * even after calling Sleep.
  * @return true if setting the timer value was successful
  */
-bool set_resolution(uint32_t timer_resolution_us);
-
-/**
- * Reset the Multimedia Timer back to what it was originally before
- * setting the timer resolution.
- */
-bool reset_resolution ();
+bool reset_resolution();
 
 } // namespace MMTIMERS
 

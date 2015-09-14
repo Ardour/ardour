@@ -29,20 +29,20 @@
 namespace {
 
 UINT&
-old_timer_resolution ()
+timer_resolution ()
 {
 	static UINT timer_res_ms = 0;
 	return timer_res_ms;
 }
 
-} // anon namespace
+}
 
 namespace PBD {
 
 namespace MMTIMERS {
 
 bool
-set_min_resolution ()
+get_min_resolution (uint32_t& min_resolution_ms)
 {
 	TIMECAPS caps;
 
@@ -50,61 +50,57 @@ set_min_resolution ()
 		DEBUG_TIMING ("Could not get timer device capabilities.\n");
 		return false;
 	}
-	return set_resolution(caps.wPeriodMin);
+
+	min_resolution_ms = caps.wPeriodMin;
+	return true;
+}
+
+bool
+set_min_resolution ()
+{
+	uint32_t min_resolution = 0;
+
+	if (!get_min_resolution (min_resolution)) {
+		return false;
+	}
+
+	if (!set_resolution (min_resolution)) {
+		return false;
+	}
+	return true;
 }
 
 bool
 set_resolution (uint32_t timer_resolution_ms)
 {
-	TIMECAPS caps;
-
-	if (timeGetDevCaps (&caps, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
-		DEBUG_TIMING ("Could not get timer device capabilities.\n");
-		return false;
+	if (timer_resolution() != 0) {
+		DEBUG_TIMING(
+		    "Timer resolution must be reset before setting new resolution.\n");
 	}
-
-	UINT old_timer_res = caps.wPeriodMin;
 
 	if (timeBeginPeriod(timer_resolution_ms) != TIMERR_NOERROR) {
 		DEBUG_TIMING(
-		    string_compose("Could not set minimum timer resolution to %1(ms)\n",
+		    string_compose("Could not set timer resolution to %1(ms)\n",
 		                   timer_resolution_ms));
 		return false;
 	}
 
-	old_timer_resolution () = old_timer_res;
+	timer_resolution() = timer_resolution_ms;
 
 	DEBUG_TIMING (string_compose ("Multimedia timer resolution set to %1(ms)\n",
-	                              caps.wPeriodMin));
-	return true;
-}
-
-bool
-get_resolution (uint32_t& timer_resolution_ms)
-{
-	TIMECAPS caps;
-
-	if (timeGetDevCaps(&caps, sizeof(TIMECAPS)) != TIMERR_NOERROR) {
-		DEBUG_TIMING ("Could not get timer device capabilities.\n");
-		return false;
-	}
-	timer_resolution_ms = caps.wPeriodMin;
+	                              timer_resolution_ms));
 	return true;
 }
 
 bool
 reset_resolution ()
 {
-	if (old_timer_resolution ()) {
-		if (timeEndPeriod (old_timer_resolution ()) != TIMERR_NOERROR) {
-			DEBUG_TIMING ("Could not reset timer resolution.\n");
-			return false;
-		}
+	// You must match calls to timeBegin/EndPeriod with the same resolution
+	if (timeEndPeriod(timer_resolution()) != TIMERR_NOERROR) {
+		DEBUG_TIMING("Could not reset the Timer resolution.\n");
+		return false;
 	}
-
-	DEBUG_TIMING (string_compose ("Multimedia timer resolution set to %1(ms)\n",
-	                              old_timer_resolution ()));
-
+	timer_resolution() = 0;
 	return true;
 }
 
