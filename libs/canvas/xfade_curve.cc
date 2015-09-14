@@ -178,13 +178,14 @@ XFadeCurve::get_path(Rect const & area, Cairo::RefPtr<Cairo::Context> context, C
 		Points::size_type left = 0;
 		Points::size_type right = c.n_samples - 1;
 
+		assert (left < right);
 		// we should really really do a binary search rather than iterate
 		for (Points::size_type idx = 0; idx < c.n_samples - 1; ++idx) {
 			left = idx;
 			window_space = item_to_window (Duple (c.samples[idx].x, 0.0), false);
 			if (window_space.x >= area.x0) break;
 		}
-		for (Points::size_type idx = c.n_samples; idx >= left;) {
+		for (Points::size_type idx = c.n_samples; right > left;) {
 			--idx;
 			window_space = item_to_window (Duple (c.samples[idx].x, 0.0), false);
 			if (window_space.x <= area.x1) break;
