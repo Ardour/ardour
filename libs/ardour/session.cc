@@ -2201,37 +2201,46 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 bool
 Session::find_route_name (string const & base, uint32_t& id, string& name, bool definitely_add_number)
 {
-	string el_base = base;
+	/* it is unfortunate that we need to include reserved names here that
+	   refer to control surfaces. But there's no way to ensure a complete
+	   lack of collisions without doing this, since the control surface
+	   support may not even be active. Without adding an API to control 
+	   surface support that would list their port names, we do have to
+	   list them here.
+	*/
+
+	char const * const reserved[] = {
+		_("Monitor"),
+		_("Master"),
+		_("Control"),
+		_("Click"),
+		_("Mackie"),
+		0
+	};
 	
 	/* the base may conflict with ports that do not belong to existing
 	   routes, but hidden objects like the click track. So check port names
 	   before anything else.
 	*/
-
 	
-	if (!_engine.port_name_prefix_is_unique (base)) {
-		uint32_t unique_port_suffix = 1;
-
-		do {
-			string possible = string_compose (X_("%1-%2"), base, unique_port_suffix);
-			if (_engine.port_name_prefix_is_unique (possible)) {
-				el_base = possible;
-				break;
+	for (int n = 0; reserved[n]; ++n) {
+		if (base == reserved[n]) {
+			definitely_add_number = true;
+			if (id < 1) {
+				id = 1;
 			}
-
-			unique_port_suffix++;
-
-		} while (unique_port_suffix < UINT_MAX);
+			break;
+		}
 	}
-
-	if (!definitely_add_number && route_by_name (el_base) == 0) {
+	
+	if (!definitely_add_number && route_by_name (base) == 0) {
 		/* juse use the base */
-		name = el_base;
+		name = base;
 		return true;
 	}
 
 	do {
-		name = string_compose ("%1 %2", el_base, id);
+		name = string_compose ("%1 %2", base, id);
 
 		if (route_by_name (name) == 0) {
 			return true;
