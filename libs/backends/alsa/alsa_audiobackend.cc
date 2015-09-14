@@ -815,8 +815,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	engine.sample_rate_change (_samplerate);
 	engine.buffer_size_change (_samples_per_period);
 
-	_dsp_load_calc.set_max_time(_samplerate, _samples_per_period);
-
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("AlsaAudioBackend: Could not re-establish ports.") << endmsg;
 		delete _pcmi; _pcmi = 0;
@@ -1761,6 +1759,7 @@ AlsaAudioBackend::main_process_thread ()
 				nr -= _samples_per_period;
 				_processed_samples += _samples_per_period;
 
+				_dsp_load_calc.set_max_time(_samplerate, _samples_per_period);
 				_dsp_load_calc.set_start_timestamp_us (clock1);
 				_dsp_load_calc.set_stop_timestamp_us (g_get_monotonic_time());
 				_dsp_load = _dsp_load_calc.get_dsp_load ();
