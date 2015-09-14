@@ -50,8 +50,7 @@ namespace {
 
 static bool libpbd_initialized = false;
 
-}
-
+static
 void
 set_debug_options_from_env ()
 {
@@ -66,6 +65,7 @@ set_debug_options_from_env ()
 }
 
 #ifdef PLATFORM_WINDOWS
+static
 void
 test_timers_from_env ()
 {
@@ -82,6 +82,8 @@ test_timers_from_env ()
 	}
 }
 #endif
+
+} // namespace
 
 bool
 PBD::init ()
