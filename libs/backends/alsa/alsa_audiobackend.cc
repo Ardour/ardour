@@ -815,6 +815,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	engine.sample_rate_change (_samplerate);
 	engine.buffer_size_change (_samples_per_period);
 
+	_dsp_load_calc.set_max_time(_samplerate, _samples_per_period);
+
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("AlsaAudioBackend: Could not re-establish ports.") << endmsg;
 		delete _pcmi; _pcmi = 0;
@@ -1653,11 +1655,10 @@ AlsaAudioBackend::main_process_thread ()
 	_active = true;
 	_processed_samples = 0;
 
-	uint64_t clock1, clock2;
+	uint64_t clock1;
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
 	const int bailout = 2 * _samplerate / _samples_per_period;
-	const int64_t nominal_time = 1e6 * _samples_per_period / _samplerate;
 
 	manager.registration_callback();
 	manager.graph_order_callback();
@@ -1760,17 +1761,9 @@ AlsaAudioBackend::main_process_thread ()
 				nr -= _samples_per_period;
 				_processed_samples += _samples_per_period;
 
-				/* calculate DSP load */
-				clock2 = g_get_monotonic_time();
-				const int64_t elapsed_time = clock2 - clock1;
-				// low pass filter
-				const float load = elapsed_time / (float) nominal_time;
-				if (load > _dsp_load) {
-					_dsp_load = load;
-				} else {
-					const float a = .2 * _samples_per_period / _samplerate;
-					_dsp_load = _dsp_load + a * (load - _dsp_load) + 1e-12;
-				}
+				_dsp_load_calc.set_start_timestamp_us (clock1);
+				_dsp_load_calc.set_stop_timestamp_us (g_get_monotonic_time());
+				_dsp_load = _dsp_load_calc.get_dsp_load ();
 			}
 
 			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {
