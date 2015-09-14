@@ -35,6 +35,9 @@
 #include "pbd/id.h"
 #include "pbd/enumwriter.h"
 #include "pbd/fpu.h"
+#ifdef PLATFORM_WINDOWS
+#include "pbd/windows_timer_utils.h"
+#endif
 
 #ifdef PLATFORM_WINDOWS
 #include <winsock2.h>
@@ -63,6 +66,24 @@ set_debug_options_from_env ()
 	}
 }
 
+#ifdef PLATFORM_WINDOWS
+void
+test_timers_from_env ()
+{
+	bool set;
+	std::string options;
+
+	options = Glib::getenv ("PBD_TEST_TIMERS", set);
+	if (set) {
+		if (!PBD::QPC::check_timer_valid ()) {
+			PBD::error << "Windows QPC Timer source not usable." << endmsg;
+		} else {
+			PBD::info << "Windows QPC Timer source usable." << endmsg;
+		}
+	}
+}
+#endif
+
 bool
 PBD::init ()
 {
@@ -86,6 +107,8 @@ PBD::init ()
 		/*NOTREACHED*/
 		return false;
 	}
+
+	test_timers_from_env ();
 #endif
 
 	if (!Glib::thread_supported()) {
