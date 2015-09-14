@@ -36,6 +36,10 @@ public:
 
 	}
 
+	void set_max_time(double samplerate, uint32_t period_size) {
+		m_max_time_us = (1e6 / samplerate) * period_size;
+	}
+
 	void set_max_time_us(uint64_t max_time_us) {
 		assert(max_time_us != 0);
 		m_max_time_us = max_time_us;
@@ -60,7 +64,7 @@ public:
 		 */
 		if (m_start_timestamp_us < 0 || m_stop_timestamp_us < 0 ||
 		    m_start_timestamp_us > m_stop_timestamp_us ||
-		    elapsed_time_us() > max_timer_error()) {
+		    elapsed_time_us() > max_timer_error_us()) {
 			return;
 		}
 
@@ -98,8 +102,11 @@ public:
 		return m_dsp_load;
 	}
 
-private: // methods
-	int64_t max_timer_error () { return 4 * m_max_time_us; }
+	/**
+	 * The maximum error in timestamp values that will be tolerated before the
+	 * current dsp load sample will be ignored
+	 */
+	int64_t max_timer_error_us() { return 4 * m_max_time_us; }
 
 private: // data
 	int64_t m_max_time_us;
