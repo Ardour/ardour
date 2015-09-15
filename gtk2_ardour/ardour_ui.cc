@@ -86,6 +86,7 @@
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
+#include "ardour/source_factory.h"
 #include "ardour/slave.h"
 #include "ardour/system_exec.h"
 
@@ -489,6 +490,7 @@ ARDOUR_UI::engine_running ()
 	update_xrun_count ();
 	update_sample_rate (AudioEngine::instance()->sample_rate());
 	update_timecode_format ();
+	update_peak_thread_work ();
 }
 
 void
@@ -1261,6 +1263,7 @@ ARDOUR_UI::every_second ()
 	update_buffer_load ();
 	update_disk_space ();
 	update_timecode_format ();
+	update_peak_thread_work ();
 
 	if (nsm && nsm->is_active ()) {
 		nsm->check ();
@@ -1459,6 +1462,19 @@ ARDOUR_UI::update_cpu_load ()
 	double const c = AudioEngine::instance()->get_dsp_load ();
 	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
 	cpu_load_label.set_markup (buf);
+}
+
+void
+ARDOUR_UI::update_peak_thread_work ()
+{
+	char buf[64];
+	const int c = SourceFactory::peak_work_queue_length ();
+	if (c > 0) {
+		snprintf (buf, sizeof (buf), _("PkBld: <span foreground=\"%s\">%d</span>"), c >= 2 ? X_("red") : X_("green"), c);
+		peak_thread_work_label.set_markup (buf);
+	} else {
+		peak_thread_work_label.set_markup (X_(""));
+	}
 }
 
 void

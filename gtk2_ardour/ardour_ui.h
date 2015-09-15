@@ -553,6 +553,9 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	Gtk::Label   xrun_label;
 	void update_xrun_count ();
 
+	Gtk::Label   peak_thread_work_label;
+	void update_peak_thread_work ();
+
 	Gtk::Label   buffer_load_label;
 	void update_buffer_load ();
 

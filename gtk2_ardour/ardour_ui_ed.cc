@@ -182,7 +182,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_action (main_actions, X_("CleanupPeakFiles"), _("Clean-up Peak Files..."),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup_peakfiles));
+	act = ActionManager::register_action (main_actions, X_("CleanupPeakFiles"), _("Reset Peak Files"),  sigc::mem_fun (*(ARDOUR_UI::instance()), &ARDOUR_UI::cleanup_peakfiles));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
@@ -502,6 +502,8 @@ ARDOUR_UI::build_menu_bar ()
 	cpu_load_label.set_use_markup ();
 	xrun_label.set_name ("XrunLabel");
 	xrun_label.set_use_markup ();
+	peak_thread_work_label.set_name ("PeakThreadWork");
+	peak_thread_work_label.set_use_markup ();
 	buffer_load_label.set_name ("BufferLoad");
 	buffer_load_label.set_use_markup ();
 	sample_rate_label.set_name ("SampleRate");
@@ -531,6 +533,7 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (wall_clock_label, false, false, 2);
 	hbox->pack_end (disk_space_label, false, false, 4);
 	hbox->pack_end (xrun_label, false, false, 4);
+	hbox->pack_end (peak_thread_work_label, false, false, 4);
 	hbox->pack_end (cpu_load_label, false, false, 4);
 	hbox->pack_end (buffer_load_label, false, false, 4);
 	hbox->pack_end (sample_rate_label, false, false, 4);
@@ -548,6 +551,7 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), disk_space);
 	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&xrun_label,            X_("XRun"),      _("X-run"), false);
+	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
 	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
