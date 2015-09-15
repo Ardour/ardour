@@ -24,6 +24,9 @@
 #include <fstream>
 #include <algorithm>
 
+#include <glib.h>
+#include <glib/gstdio.h>
+
 #include <gtkmm/filechooser.h>
 
 #include "pbd/failed_constructor.h"
@@ -582,11 +585,12 @@ int
 SessionDialog::redisplay_recent_sessions ()
 {
 	std::vector<std::string> session_directories;
-	RecentSessionsSorter cmp;
+	RecentSessionsTimeSorter cmp;
 
 	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
 	recent_session_model->clear ();
 
+	// code below is a near from ARDOUR_UI::redisplay_recent_sessions()
 	ARDOUR::RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 
@@ -594,11 +598,26 @@ SessionDialog::redisplay_recent_sessions ()
 		recent_session_display.set_model (recent_session_model);
 		return 0;
 	}
-	//
-	// sort them alphabetically
-	sort (rs.begin(), rs.end(), cmp);
 
+	// sort by session modificaion time.
+	// TODO it would be nicer to sort using the model (and make the TV sortable)
+	std::vector< std::pair<int64_t,std::string> > rss;
 	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
+		std::vector<std::string> state_file_paths;
+		get_state_files_in_directory ((*i).second, state_file_paths);
+		if (state_file_paths.empty()) {
+			continue;
+		}
+		GStatBuf gsb;
+		if (g_stat (state_file_paths.front().c_str(), &gsb)) {
+			continue;
+		}
+		rss.push_back (std::make_pair((int64_t)gsb.st_mtime, (*i).second));
+	}
+
+	sort (rss.begin(), rss.end(), cmp);
+
+	for (std::vector< std::pair<int64_t,std::string> >::iterator i = rss.begin(); i != rss.end(); ++i) {
 		session_directories.push_back ((*i).second);
 	}
 	
