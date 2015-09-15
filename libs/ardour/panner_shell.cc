@@ -385,14 +385,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 
 	if (!(as & Play || ((as & Touch) && !_panner->touching()))) {
 
-		// Speed quietning
-		gain_t gain_coeff = GAIN_COEFF_UNITY;
-
-		if (fabs(_session.transport_speed()) > 1.5 && Config->get_quieten_at_speed ()) {
-			gain_coeff = speed_quietning;
-		}
-
-		distribute_no_automation (inbufs, outbufs, nframes, gain_coeff);
+		distribute_no_automation (inbufs, outbufs, nframes, 1.0);
 
 	} else {
 

@@ -318,6 +318,14 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 		goto out;
 	}
 
+        // Speed quietning
+
+	if (fabs (_session.transport_speed()) > 1.5 && Config->get_quieten_at_speed ()) {
+		Amp::apply_simple_gain (bufs, nframes, speed_quietning, false);
+	}
+
+	// Panning
+
 	if (_panshell && !_panshell->bypassed() && _panshell->panner()) {
 
 		// Use the panner to distribute audio to output port buffers
