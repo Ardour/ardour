@@ -142,6 +142,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    ));
 
 	add_option (_("Fades"), new BoolOption (
+			    "use-transport-fades",
+			    _("Declick when transport starts and stops"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_use_transport_fades),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_use_transport_fades)
+			    ));
+
+	add_option (_("Fades"), new BoolOption (
 			    "use-region-fades",
 			    _("Region fades active"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_use_region_fades),
