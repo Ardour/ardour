@@ -703,10 +703,11 @@ SessionDialog::redisplay_recent_sessions ()
 			// add the children
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin(); i2 != state_file_names.end(); ++i2) {
 
+				s = Glib::build_filename (dirname, *i2 + statefile_suffix);
 				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
 				
 				child_row[recent_session_columns.visible_name] = *i2;
-				child_row[recent_session_columns.fullpath] = Glib::build_filename (dirname, *i2 + statefile_suffix);
+				child_row[recent_session_columns.fullpath] = s;
 				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname);
 				
 				if (Session::get_info_from_path (s, sr, sf) == 0) {
