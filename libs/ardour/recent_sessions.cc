@@ -108,16 +108,31 @@ int
 ARDOUR::read_recent_templates (std::deque<std::string>& rt)
 {
 	std::string path = Glib::build_filename (user_config_directory(), recent_templates_file_name);
+	FILE* fin = g_fopen (path.c_str(), "rb");
 
-	ifstream recent (path.c_str());
-
-	if (!recent) {
+	if (!fin) {
 		if (errno != ENOENT) {
-			error << string_compose (_("cannot open recent template file %1 (%2)"), path, strerror (errno)) << endmsg;
+			error << string_compose (_("Cannot open recent template file %1 (%2)"), path, strerror (errno)) << endmsg;
 			return -1;
 		} else {
 			return 1;
 		}
+	}
+
+	// Copy the file contents into a std::stringstream
+	std::stringstream recent;
+	while (!feof (fin)) {
+		char buf[1024];
+		size_t charsRead = fread (buf, sizeof(char), 1024, fin);
+		if (ferror (fin)) {
+			error << string_compose (_("Error reading recent session file %1 (%2)"), path, strerror (errno)) << endmsg;
+			fclose(fin);
+			return -1;
+		}
+		if (charsRead == 0) {
+			break;
+		}
+		recent.write (buf, charsRead);
 	}
 
 	while (true) {
@@ -133,6 +148,7 @@ ARDOUR::read_recent_templates (std::deque<std::string>& rt)
 		rt.push_back (session_template_full_name);
 	}
 
+	fclose (fin);
 	return 0;
 }
 
@@ -181,17 +197,31 @@ ARDOUR::write_recent_sessions (RecentSessions& rs)
 int
 ARDOUR::write_recent_templates (std::deque<std::string>& rt)
 {
-	std::string path = Glib::build_filename (user_config_directory(), recent_templates_file_name);
+	FILE* fout = g_fopen (Glib::build_filename (user_config_directory(), recent_templates_file_name).c_str(), "wb");
 
-	std::ofstream recent (path.c_str());
-
-	if (!recent) {
+	if (!fout) {
 		return -1;
 	}
+
+	stringstream recent;
 
 	for (std::deque<std::string>::const_iterator i = rt.begin(); i != rt.end(); ++i) {
 		recent << (*i) << std::endl;
 	}
+
+	string recentString = recent.str();
+	size_t writeSize = recentString.length();
+
+	fwrite(recentString.c_str(), sizeof(char), writeSize, fout);
+
+	if (ferror(fout))
+	{
+		error << string_compose (_("Error writing saved template file %1 (%2)"), recent_templates_file_name, strerror (errno)) << endmsg;
+		fclose(fout);
+		return -1;
+	}
+
+	fclose (fout);
 
 	return 0;
 }
