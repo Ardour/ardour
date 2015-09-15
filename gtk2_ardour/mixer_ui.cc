@@ -139,6 +139,7 @@ Mixer_UI::Mixer_UI ()
 	group_display.set_reorderable (true);
 	group_display.set_headers_visible (true);
 	group_display.set_rules_hint (true);
+	group_display.set_can_focus(false);
 
 	/* name is directly editable */
 
@@ -1883,6 +1884,7 @@ Mixer_UI::setup_track_display ()
 	track_display.get_selection()->set_mode (Gtk::SELECTION_NONE);
 	track_display.set_reorderable (true);
 	track_display.set_headers_visible (true);
+	track_display.set_can_focus(false);
 
 	track_model->signal_row_deleted().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_delete));
 	track_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &Mixer_UI::track_list_reorder));
