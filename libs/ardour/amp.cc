@@ -133,9 +133,19 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 
 				_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, dg, _midi_amp);
 
+			} else if (_current_gain == GAIN_COEFF_ZERO) {
+
+				/* gain has not changed, and is zero. small
+				 * optimization here.
+				 */
+
+				bufs.silence (nframes, 0);
+
 			} else if (_current_gain != GAIN_COEFF_UNITY) {
 
-				/* gain has not changed, but its non-unity */
+				/* gain has not changed, but its non-unity and
+				 * isn't zero, so we have to do something
+				 */
 
 				if (_midi_amp) {
 					/* don't Trim midi velocity -- only relevant for Midi on Audio tracks */

@@ -52,7 +52,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name)
 	, _role (r)
 	, _output_buffers (new BufferSet())
-	, _current_gain (GAIN_COEFF_UNITY)
+	, _amp (new Amp (s))
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, _no_panner_reset (false)
@@ -68,6 +68,8 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	if (_output) {
 		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
+
+	_amp->activate ();
 }
 
 /* deliver to a new IO object */
@@ -76,7 +78,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name, "", DataType::AUDIO, (r == Send))
 	, _role (r)
 	, _output_buffers (new BufferSet())
-	, _current_gain (GAIN_COEFF_UNITY)
+	, _amp (new Amp (s))
 	, _no_outs_cuz_we_no_monitor (false)
 	, _mute_master (mm)
 	, _no_panner_reset (false)
@@ -92,16 +94,17 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	if (_output) {
 		_output->changed.connect_same_thread (*this, boost::bind (&Delivery::output_changed, this, _1, _2));
 	}
-}
 
+	_amp->activate ();
+}
 
 Delivery::~Delivery()
 {
-	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));	
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delivery %1 destructor\n", _name));
 
 	/* this object should vanish from any signal callback lists
 	   that it is on before we get any further. The full qualification
-	   of the method name is not necessary, but is here to make it 
+	   of the method name is not necessary, but is here to make it
 	   clear that this call is about signals, not data flow connections.
 	*/
 
@@ -235,6 +238,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 
 	PortSet& ports (_output->ports());
 	gain_t tgain;
+	bool need_amp = true;
 
 	if (_output->n_ports ().get (_output->default_type()) == 0) {
 		goto out;
@@ -259,28 +263,59 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pf
 
 	tgain = target_gain ();
 
-	if (tgain != _current_gain) {
-		/* target gain has changed */
+	if (tgain < GAIN_COEFF_SMALL && _amp->gain() < GAIN_COEFF_SMALL) {
 
-		_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
-
-	} else if (tgain < GAIN_COEFF_SMALL) {
-
-		/* we were quiet last time, and we're still supposed to be quiet.
-		   Silence the outputs, and make sure the buffers are quiet too,
-		*/
+		/* special case (but very common) fast path:
+		 *
+		 * if we are supposed to be silent, and we were already silent,
+		 * then short-circuit the computation in Amp and just put silence into
+		 * our output(s)
+		 */
 
 		_output->silence (nframes);
-		if (result_required) {
-			bufs.set_count (output_buffers().count ());
-			Amp::apply_simple_gain (bufs, nframes, GAIN_COEFF_ZERO);
+
+		if (!result_required) {
+			/* if !result_required, then the buffers won't actually
+			 * be used. This means we don't actually need to silence
+			 * them, because we've already filled the output ports
+			 * with silence.
+			 *
+			 * but we just noted that result_required is true,
+			 * and so we do need to run the amp to ensure
+			 * that the buffers are silenced.
+			 */
+			need_amp = false;
 		}
+	}
+
+	if (need_amp) {
+
+		bufs.set_count (output_buffers().count ());
+
+		if (_role != Main) {
+
+			/* inserts, external and internal sends have
+			 * automatable gain and the Amp::run() method has
+			 * already been executed by the time we get here.
+			 *
+			 * XXX we do not expose the automatable gain for
+			 * Inserts as of September 2015.
+			 */
+
+		} else {
+
+			/* main outs have no automatable gain, the amp is just
+			 * used for ramping gain changes caused by monitoring
+			 * state changes.
+			 */
+
+			_amp->set_gain (tgain, this);
+			_amp->run (bufs, 0, 0, nframes, false);
+
+		}
+
+	} else {
 		goto out;
-
-	} else if (tgain != GAIN_COEFF_UNITY) {
-
-		/* target gain has not changed, but is not unity */
-		Amp::apply_simple_gain (bufs, nframes, tgain);
 	}
 
 	if (_panshell && !_panshell->bypassed() && _panshell->panner()) {
@@ -386,7 +421,7 @@ Delivery::pan_outs () const
 {
 	if (_output) {
 		return _output->n_ports().n_audio();
-	} 
+	}
 
 	return _configured_output.n_audio();
 }
@@ -454,7 +489,7 @@ Delivery::flush_buffers (framecnt_t nframes)
 	if (!_output) {
 		return;
 	}
-	
+
 	PortSet& ports (_output->ports());
 
 	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
@@ -505,7 +540,7 @@ Delivery::target_gain ()
 	   we're not monitoring, then be quiet.
 	*/
 
-	if (_no_outs_cuz_we_no_monitor) {
+	if (_role == Main && _session.config.get_use_monitor_fades() && _no_outs_cuz_we_no_monitor) {
 		return GAIN_COEFF_ZERO;
 	}
 

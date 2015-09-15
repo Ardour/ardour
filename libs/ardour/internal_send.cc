@@ -148,10 +148,10 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	} else {
 		if (role() == Listen) {
 			/* We're going to the monitor bus, so discard MIDI data */
-			
+
 			uint32_t const bufs_audio = bufs.count().get (DataType::AUDIO);
 			uint32_t const mixbufs_audio = mixbufs.count().get (DataType::AUDIO);
-			
+
 			/* monitor-section has same number of channels as master-bus (on creation).
 			 *
 			 * There is no clear answer what should happen when trying to PFL or AFL
@@ -190,26 +190,21 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 	gain_t tgain = target_gain ();
 
-	if (tgain != _current_gain) {
+	_amp->set_gain (tgain, this);
 
-		/* target gain has changed */
-
-		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
-
-	} else if (tgain == GAIN_COEFF_ZERO) {
-
+	if (tgain == GAIN_COEFF_ZERO && _amp->gain() == GAIN_COEFF_ZERO) {
 		/* we were quiet last time, and we're still supposed to be quiet.
-		*/
+		 */
 
 		_meter->reset ();
 		Amp::apply_simple_gain (mixbufs, nframes, GAIN_COEFF_ZERO);
 		goto out;
 
-	} else if (tgain != GAIN_COEFF_UNITY) {
-
-		/* target gain has not changed, but is not zero or unity */
-		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
+
+	/* These two calls will either set up gain automation or mark
+	   the amp as ready to use a simple scalar gain.
+	*/
 
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);
@@ -400,4 +395,4 @@ InternalSend::cycle_start (pframes_t /*nframes*/)
 	for (BufferSet::audio_iterator b = mixbufs.audio_begin(); b != mixbufs.audio_end(); ++b) {
 		b->prepare ();
 	}
-}	
+}
