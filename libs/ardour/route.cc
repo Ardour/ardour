@@ -501,14 +501,11 @@ Route::process_output_buffers (BufferSet& bufs,
 	   on a transition between monitoring states we get a de-clicking gain
 	   change in the _main_outs delivery, if config.get_use_monitor_fades()
 	   is true.
+	   
+	   We override this in the case where we have an internal generator.
 	*/
-	bool silence = monitoring_state () == MonitoringSilence;
-
-	//but we override this in the case where we have an internal generator
-	if (_have_internal_generator) {
-		silence = false;
-	}
-
+	bool silence = _have_internal_generator ? false : (monitoring_state () == MonitoringSilence);
+	
 	_main_outs->no_outs_cuz_we_no_monitor (silence);
 
 	/* -------------------------------------------------------------------------------------------
