@@ -131,7 +131,6 @@ UIConfiguration::reset_gtk_theme ()
 	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
 		
 		if (g->first.find ("gtk_") == 0) {
-			ColorAliases::const_iterator a = color_aliases.find (g->first);
 			const string gtk_name = g->first.substr (4);
 			ss << gtk_name << ":#" << std::setw (6) << setfill ('0') << (color (g->second) >> 8) << ';';
 		}
