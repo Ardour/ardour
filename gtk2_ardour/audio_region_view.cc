@@ -76,6 +76,34 @@ static double const handle_size = 10; /* height of fade handles */
 
 Cairo::RefPtr<Cairo::Pattern> AudioRegionView::pending_peak_pattern;
 
+static Cairo::RefPtr<Cairo::Pattern> create_pending_peak_pattern() {
+	cairo_surface_t * is = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 8, 8);
+
+	// create checker pattern
+	unsigned char *img = cairo_image_surface_get_data (is);
+	cairo_surface_flush (is);
+	const int stride = cairo_image_surface_get_stride (is);
+
+	for (int y = 0; y < 8; ++y) {
+		for (int x = 0; x < 8; ++x) {
+			const int off = (y * stride + x * 4);
+			uint32_t *pixel = (uint32_t*) &img[off];
+			if ((x < 4) ^ (y < 4)) {
+				*pixel = 0xa0000000;
+			} else {
+				*pixel = 0x40000000;
+			}
+		}
+	}
+	cairo_surface_mark_dirty (is);
+
+	cairo_pattern_t* pat = cairo_pattern_create_for_surface (is);
+	cairo_pattern_set_extend (pat, CAIRO_EXTEND_REPEAT);
+	Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
+	cairo_surface_destroy (is);
+	return p;
+}
+
 AudioRegionView::AudioRegionView (ArdourCanvas::Container *parent, RouteTimeAxisView &tv, boost::shared_ptr<AudioRegion> r, double spu,
 				  uint32_t basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
@@ -149,12 +177,7 @@ AudioRegionView::init (bool wfd)
 	// where order is important and where it isn't...
 
 	if (!pending_peak_pattern) {
-		cairo_pattern_t* pat = cairo_pattern_create_radial (4.0, 4.0, 1.0, 4.0, 4.0, 4.0);	
-		cairo_pattern_add_color_stop_rgba (pat, 0.0, 0, 0, 0, 1.0);
-		cairo_pattern_add_color_stop_rgba (pat, 0.6, 0, 0, 0, 0.0);
-		cairo_pattern_set_extend (pat, CAIRO_EXTEND_REPEAT);
-		Cairo::RefPtr<Cairo::Pattern> p (new Cairo::Pattern (pat, false));
-		pending_peak_pattern = p;
+		pending_peak_pattern = create_pending_peak_pattern();
 	}
 
 	// needs to be created first, RegionView::init() calls set_height()
