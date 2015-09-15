@@ -133,7 +133,7 @@ Session::no_roll (pframes_t nframes)
 	
 	framepos_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
-	int declick = get_transport_declick_required();
+	int declick = (config.get_use_transport_fades() ? get_transport_declick_required() : false);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {
@@ -174,7 +174,7 @@ Session::no_roll (pframes_t nframes)
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
-	int  declick = get_transport_declick_required();
+	int declick = (config.get_use_transport_fades() ? get_transport_declick_required() : false);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	const framepos_t start_frame = _transport_frame;
