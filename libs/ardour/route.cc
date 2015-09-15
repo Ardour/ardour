@@ -504,8 +504,9 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool silence = monitoring_state () == MonitoringSilence;
 
 	//but we override this in the case where we have an internal generator
-	if ( _have_internal_generator )
+	if (_have_internal_generator) {
 		silence = false;
+	}
 
 	_main_outs->no_outs_cuz_we_no_monitor (silence);
 
