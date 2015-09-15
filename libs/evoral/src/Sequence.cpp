@@ -244,7 +244,7 @@ Sequence<Time>::const_iterator::choose_next(Time earliest_t)
 
 	// Use the next note off iff it's earlier or the same time as the note on
 	if ((!_active_notes.empty())) {
-		if (_type == NIL || _active_notes.top()->end_time() <= earliest_t) {
+		if (_type == NIL || _active_notes.top()->end_time().to_double() <= earliest_t.to_double()) {
 			_type      = NOTE_OFF;
 			earliest_t = _active_notes.top()->end_time();
 		}
