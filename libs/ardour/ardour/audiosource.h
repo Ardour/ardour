@@ -96,6 +96,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	}
 
 	virtual int setup_peakfile () { return 0; }
+	int close_peakfile ();
 
 	int prepare_for_peakfile_writes ();
 	void done_with_peakfile_writes (bool done = true);

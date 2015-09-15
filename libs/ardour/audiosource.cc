@@ -752,8 +752,9 @@ AudioSource::build_peaks_from_scratch ()
 
 			lp.release(); // allow butler to refill buffers
 
-			if (_session.deletion_in_progress()) {
+			if (_session.deletion_in_progress() || _session.peaks_cleanup_in_progres()) {
 				cerr << "peak file creation interrupted: " << _name << endmsg;
+				lp.acquire();
 				done_with_peakfile_writes (false);
 				goto out;
 			}
@@ -789,8 +790,27 @@ AudioSource::build_peaks_from_scratch ()
 }
 
 int
+AudioSource::close_peakfile ()
+{
+	Glib::Threads::Mutex::Lock lp (_lock);
+	if (_peakfile_fd >= 0) {
+		close (_peakfile_fd);
+		_peakfile_fd = -1;
+	}
+	if (!_peakpath.empty()) {
+		::g_unlink (_peakpath.c_str());
+	}
+	_peaks_built = false;
+	return 0;
+}
+
+int
 AudioSource::prepare_for_peakfile_writes ()
 {
+	if (_session.deletion_in_progress() || _session.peaks_cleanup_in_progres()) {
+		return -1;
+	}
+
 	if ((_peakfile_fd = g_open (_peakpath.c_str(), O_CREAT|O_RDWR, 0664)) < 0) {
 		error << string_compose(_("AudioSource: cannot open _peakpath (c) \"%1\" (%2)"), _peakpath, strerror (errno)) << endmsg;
 		return -1;
@@ -801,6 +821,14 @@ AudioSource::prepare_for_peakfile_writes ()
 void
 AudioSource::done_with_peakfile_writes (bool done)
 {
+	if (_session.deletion_in_progress() || _session.peaks_cleanup_in_progres()) {
+		if (_peakfile_fd) {
+			close (_peakfile_fd);
+			_peakfile_fd = -1;
+		}
+		return;
+	}
+
 	if (peak_leftover_cnt) {
 		compute_and_write_peaks (0, 0, 0, true, false, _FPP);
 	}

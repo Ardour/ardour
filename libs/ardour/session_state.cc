@@ -2846,6 +2846,66 @@ Session::cleanup_regions ()
 	save_state ("");
 }
 
+bool
+Session::can_cleanup_peakfiles () const
+{
+	if (deletion_in_progress()) {
+		return false;
+	}
+	if (!_writable || (_state_of_the_state & CannotSave)) {
+		warning << _("Cannot cleanup peak-files for read-only session.") << endmsg;
+		return false;
+	}
+        if (record_status() == Recording) {
+		error << _("Cannot cleanup peak-files while recording") << endmsg;
+		return false;
+	}
+	return true;
+}
+
+int
+Session::cleanup_peakfiles ()
+{
+	Glib::Threads::Mutex::Lock lm (peak_cleanup_lock, Glib::Threads::TRY_LOCK);
+	if (!lm.locked()) {
+		return -1;
+	}
+
+	assert (can_cleanup_peakfiles ());
+	assert (!peaks_cleanup_in_progres());
+
+	_state_of_the_state = StateOfTheState (_state_of_the_state | PeakCleanup);
+
+	int timeout = 5000; // 5 seconds
+	while (!SourceFactory::files_with_peaks.empty()) {
+		Glib::usleep (1000);
+		if (--timeout < 0) {
+			warning << _("Timeout waiting for peak-file creation to terminate before cleanup, please try again later.") << endmsg;
+			_state_of_the_state = StateOfTheState (_state_of_the_state & (~PeakCleanup));
+			return -1;
+		}
+	}
+
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+		boost::shared_ptr<AudioSource> as;
+		if ((as = boost::dynamic_pointer_cast<AudioSource> (i->second)) != 0) {
+			as->close_peakfile();
+		}
+	}
+
+	PBD::clear_directory (session_directory().peak_path());
+
+	_state_of_the_state = StateOfTheState (_state_of_the_state & (~PeakCleanup));
+
+	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+		boost::shared_ptr<AudioSource> as;
+		if ((as = boost::dynamic_pointer_cast<AudioSource> (i->second)) != 0) {
+			SourceFactory::setup_peakfile(as, true);
+		}
+	}
+	return 0;
+}
+
 int
 Session::cleanup_sources (CleanupReport& rep)
 {

@@ -191,6 +191,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool reconnection_in_progress() const { return _reconnecting_routes_in_progress; }
 	bool deletion_in_progress() const { return _state_of_the_state & Deletion; }
 	bool routes_deletion_in_progress() const { return _route_deletion_in_progress; }
+	bool peaks_cleanup_in_progres() const { return _state_of_the_state & PeakCleanup; }
 
 	PBD::Signal0<void> DirtyChanged;
 
@@ -505,7 +506,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		Deletion = 0x4,
 		InitialConnecting = 0x8,
 		Loading = 0x10,
-		InCleanup = 0x20
+		InCleanup = 0x20,
+		PeakCleanup = 0x40
 	};
 
 	StateOfTheState state_of_the_state() const { return _state_of_the_state; }
@@ -661,7 +663,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void add_source (boost::shared_ptr<Source>);
 	void remove_source (boost::weak_ptr<Source>);
 
-	void  cleanup_regions();
+	void cleanup_regions();
+	bool can_cleanup_peakfiles () const;
+	int  cleanup_peakfiles ();
 	int  cleanup_sources (CleanupReport&);
 	int  cleanup_trash_sources (CleanupReport&);
 
@@ -1243,6 +1247,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	gint            _suspend_save; /* atomic */
 	volatile bool   _save_queued;
 	Glib::Threads::Mutex save_state_lock;
+	Glib::Threads::Mutex peak_cleanup_lock;
 
 	int      load_options (const XMLNode&);
 	int      load_state (std::string snapshot_name);
