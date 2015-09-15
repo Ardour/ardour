@@ -688,6 +688,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* list_title, const bool msg_delete);
 	void cleanup ();
+	void cleanup_peakfiles ();
 	void flush_trash ();
 
 	bool have_configure_timeout;

@@ -421,6 +421,7 @@ class PublicEditor : public Gtk::Window, public PBD::StatefulDestructible, publi
 	                                    bool              for_mark  = false) = 0;
 
 	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
+	virtual void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
 	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const = 0;

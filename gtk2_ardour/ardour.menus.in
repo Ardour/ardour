@@ -36,7 +36,8 @@
         <menuitem action='ExportVideo'/>
       </menu>
       <menu name='Cleanup' action='Cleanup'>
-		<menuitem action='bring-into-session'/>
+        <menuitem action='bring-into-session'/>
+        <menuitem action='CleanupPeakFiles'/>
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>

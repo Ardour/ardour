@@ -107,6 +107,7 @@ typedef uint64_t microseconds_t;
 #include "ambiguous_file_dialog.h"
 #include "ardour_ui.h"
 #include "audio_clock.h"
+#include "audio_region_view.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
 #include "engine_dialog.h"
@@ -3710,6 +3711,47 @@ ARDOUR_UI::flush_trash ()
 	}
 
 	display_cleanup_results (rep, _("deleted file"), true);
+}
+
+void
+ARDOUR_UI::cleanup_peakfiles ()
+{
+	if (_session == 0) {
+		/* shouldn't happen: menu item is insensitive */
+		return;
+	}
+
+	if (! _session->can_cleanup_peakfiles ()) {
+		return;
+	}
+
+	// get all region-views in this session
+	RegionSelection rs;
+	TrackViewList empty;
+	empty.clear();
+	editor->get_regions_after(rs, (framepos_t) 0, empty);
+	std::list<RegionView*> views = rs.by_layer();
+
+	// remove displayed audio-region-views waveforms
+	for (list<RegionView*>::iterator i = views.begin(); i != views.end(); ++i) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+		if (!arv) { continue ; }
+		arv->delete_waves();
+	}
+
+	// cleanup peak files:
+	// - stop pending peakfile threads
+	// - close peakfiles if any
+	// - remove peak dir in session
+	// - setup peakfiles (background thread)
+	_session->cleanup_peakfiles ();
+
+	// re-add waves to ARV
+	for (list<RegionView*>::iterator i = views.begin(); i != views.end(); ++i) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+		if (!arv) { continue ; }
+		arv->create_waves();
+	}
 }
 
 void

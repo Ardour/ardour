@@ -1116,6 +1116,22 @@ AudioRegionView::update_envelope_visibility ()
 }
 
 void
+AudioRegionView::delete_waves ()
+{
+	for (vector<ScopedConnection*>::iterator i = _data_ready_connections.begin(); i != _data_ready_connections.end(); ++i) {
+		delete *i;
+	}
+	_data_ready_connections.clear ();
+
+	for (vector<WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+		group->remove(*w);
+	}
+	waves.clear();
+	tmp_waves.clear();
+	pending_peak_data->show ();
+}
+
+void
 AudioRegionView::create_waves ()
 {
 	// cerr << "AudioRegionView::create_waves() called on " << this << endl;//DEBUG

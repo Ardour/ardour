@@ -74,6 +74,7 @@ class AudioRegionView : public RegionView
 	boost::shared_ptr<ARDOUR::AudioRegion> audio_region() const;
 
 	void create_waves ();
+	void delete_waves ();
 
 	void set_height (double);
 	void set_samples_per_pixel (double);
