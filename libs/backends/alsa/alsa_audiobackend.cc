@@ -826,7 +826,8 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 	_port_change_flag = false;
 
-	if (_realtime_pthread_create (SCHED_FIFO, -20, 100000,
+	// Use the same priority as the jack default(10)
+	if (_realtime_pthread_create (SCHED_FIFO, 9, 100000,
 				&_main_thread, pthread_process, this))
 	{
 		if (pthread_create (&_main_thread, NULL, pthread_process, this))
