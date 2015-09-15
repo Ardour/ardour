@@ -149,6 +149,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    ));
 
 	add_option (_("Fades"), new BoolOption (
+			    "use-monitor-fades",
+			    _("Declick when monitor state changes"),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_use_monitor_fades),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_use_monitor_fades)
+			    ));
+
+	add_option (_("Fades"), new BoolOption (
 			    "use-region-fades",
 			    _("Region fades active"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_use_region_fades),
@@ -418,7 +425,7 @@ SessionOptionEditor::set_use_monitor_section (bool yn)
 	}
 
 	/* store this choice for any new sessions */
-	
+
 	Config->set_use_monitor_bus (yn);
 
 	return had_monitor_section != (_session->monitor_out() != 0);
