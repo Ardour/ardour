@@ -499,7 +499,8 @@ Route::process_output_buffers (BufferSet& bufs,
 
 	/* Tell main outs what to do about monitoring.  We do this so that
 	   on a transition between monitoring states we get a de-clicking gain
-	   change in the _main_outs delivery.
+	   change in the _main_outs delivery, if config.get_use_monitor_fades()
+	   is true.
 	*/
 	bool silence = monitoring_state () == MonitoringSilence;
 
