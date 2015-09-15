@@ -32,6 +32,7 @@
 #include "ardour/audio_playlist_source.h"
 #include "ardour/midi_playlist.h"
 #include "ardour/midi_playlist_source.h"
+#include "ardour/source.h"
 #include "ardour/source_factory.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/silentfilesource.h"
@@ -54,6 +55,8 @@ Glib::Threads::Cond SourceFactory::PeaksToBuild;
 Glib::Threads::Mutex SourceFactory::peak_building_lock;
 std::list<boost::weak_ptr<AudioSource> > SourceFactory::files_with_peaks;
 
+static int active_threads = 0;
+
 static void
 peak_thread_work ()
 {
@@ -74,6 +77,7 @@ peak_thread_work ()
 
 		boost::shared_ptr<AudioSource> as (SourceFactory::files_with_peaks.front().lock());
 		SourceFactory::files_with_peaks.pop_front ();
+		++active_threads;
 		SourceFactory::peak_building_lock.unlock ();
 
 		if (!as) {
@@ -81,7 +85,18 @@ peak_thread_work ()
 		}
 
 		as->setup_peakfile ();
+		SourceFactory::peak_building_lock.lock ();
+		--active_threads;
+		SourceFactory::peak_building_lock.unlock ();
 	}
+}
+
+int
+SourceFactory::peak_work_queue_length ()
+{
+	// ideally we'd loop over the queue and check for duplicates
+	// and existing valid peak-files..
+	return SourceFactory::files_with_peaks.size () + active_threads;
 }
 
 void
@@ -99,7 +114,8 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 
 	if (as) {
 
-		if (async) {
+		// immediately set 'peakfile-path' for empty and NoPeakFile sources
+		if (async && !as->empty() && !(as->flags() & Source::NoPeakFile)) {
 
 			Glib::Threads::Mutex::Lock lm (peak_building_lock);
 			files_with_peaks.push_back (boost::weak_ptr<AudioSource> (as));

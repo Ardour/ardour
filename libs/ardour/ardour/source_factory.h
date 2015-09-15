@@ -68,6 +68,7 @@ class LIBARDOUR_API SourceFactory {
         static Glib::Threads::Mutex                      peak_building_lock;
 	static std::list< boost::weak_ptr<AudioSource> > files_with_peaks;
 
+	static int peak_work_queue_length ();
 	static int setup_peakfile (boost::shared_ptr<Source>, bool async);
 };
 
