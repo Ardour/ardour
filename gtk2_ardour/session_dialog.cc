@@ -706,7 +706,7 @@ SessionDialog::redisplay_recent_sessions ()
 				child_row[recent_session_columns.time_modified] = gsb.st_mtime;
 
 				Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
-				child_row[recent_session_columns.time_formatted] = gdt.format ("%F");
+				child_row[recent_session_columns.time_formatted] = gdt.format ("%F %H:%M");
 
 				if (gsb.st_mtime > most_recent) {
 					most_recent = gsb.st_mtime;
@@ -742,7 +742,7 @@ SessionDialog::redisplay_recent_sessions ()
 		}
 
 		Glib::DateTime gdt(Glib::DateTime::create_now_local (row[recent_session_columns.time_modified]));
-		row[recent_session_columns.time_formatted] = gdt.format ("%F");
+		row[recent_session_columns.time_formatted] = gdt.format ("%F %H:%M");
 	}
 
 	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip 
