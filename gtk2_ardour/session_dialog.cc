@@ -599,7 +599,7 @@ SessionDialog::redisplay_recent_sessions ()
 		recent_session_display.set_model (recent_session_model);
 		return 0;
 	}
-	//
+
 	// sort them alphabetically
 	sort (rs.begin(), rs.end(), cmp);
 
@@ -750,6 +750,7 @@ SessionDialog::redisplay_recent_sessions ()
 	Gtk::TreeView::Column* pColumn;
 	if ((pColumn = recent_session_display.get_column (0))) { // name
 		pColumn->set_sort_column (recent_session_columns.visible_name);
+		pColumn->set_sort_indicator (true);
 	}
 	if ((pColumn = recent_session_display.get_column (3))) { // date
 		pColumn->set_sort_column (recent_session_columns.time_modified); // unixtime
