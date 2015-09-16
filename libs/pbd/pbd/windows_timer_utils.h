@@ -60,19 +60,28 @@ bool reset_resolution();
 namespace QPC {
 
 /**
+ * Initialize the QPC timer, must be called before QPC::get_microseconds will
+ * return a valid value.
+ * @return true if QPC timer is usable, use check_timer_valid to try to check
+ * if it is monotonic.
+ */
+bool initialize ();
+
+/**
  * @return true if QueryPerformanceCounter is usable as a timer source
  * This should always return true for systems > XP as those versions of windows
  * have there own tests to check timer validity and will select an appropriate
- * timer source.
+ * timer source. This check is not conclusive and there are probably conditions
+ * under which this check will return true but the timer is not monotonic.
  */
 bool check_timer_valid ();
 
 /**
  * @return the value of the performance counter converted to microseconds
  *
- * If get_counter_valid returns true then get_microseconds will always
- * return a positive value. If QPC is not supported(OS < XP) then -1 is
- * returned but the MS docs say that this won't occur for systems >= XP.
+ * If initialize returns true then get_microseconds will always return a
+ * positive value. If QPC is not supported(OS < XP) then -1 is returned but the
+ * MS docs say that this won't occur for systems >= XP.
  */
 int64_t get_microseconds ();
 

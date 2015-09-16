@@ -109,6 +109,7 @@ PBD::init ()
 		return false;
 	}
 
+	QPC::initialize();
 	test_timers_from_env ();
 
 	if (!PBD::MMCSS::initialize()) {

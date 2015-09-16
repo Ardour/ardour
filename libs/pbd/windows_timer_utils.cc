@@ -23,11 +23,15 @@
 
 #include "pbd/compose.h"
 #include "pbd/debug.h"
+#include "pbd/error.h"
+
+#include "i18n.h"
 
 #define DEBUG_TIMING(msg) DEBUG_TRACE (PBD::DEBUG::Timing, msg);
 
 namespace {
 
+static
 UINT&
 timer_resolution ()
 {
@@ -35,7 +39,7 @@ timer_resolution ()
 	return timer_res_ms;
 }
 
-}
+} // namespace
 
 namespace PBD {
 
@@ -100,6 +104,7 @@ reset_resolution ()
 		DEBUG_TIMING("Could not reset the Timer resolution.\n");
 		return false;
 	}
+	DEBUG_TIMING("Reset the Timer resolution.\n");
 	timer_resolution() = 0;
 	return true;
 }
@@ -108,34 +113,9 @@ reset_resolution ()
 
 namespace {
 
-bool&
-qpc_frequency_success ()
-{
-	static bool success = false;
-	return success;
-}
+static double timer_rate_us = 0.0;
 
-LARGE_INTEGER
-qpc_frequency ()
-{
-	LARGE_INTEGER freq;
-	if (QueryPerformanceFrequency(&freq) == 0) {
-		DEBUG_TIMING ("Failed to determine frequency of QPC\n");
-		qpc_frequency_success() = false;
-	} else {
-		qpc_frequency_success() = true;
-	}
-
-	return freq;
-}
-
-LARGE_INTEGER
-qpc_frequency_cached ()
-{
-	static LARGE_INTEGER frequency = qpc_frequency ();
-	return frequency;
-}
-
+static
 bool
 test_qpc_validity ()
 {
@@ -159,12 +139,25 @@ namespace QPC {
 bool
 check_timer_valid ()
 {
-	// setup caching the timer frequency
-	qpc_frequency_cached ();
-	if (!qpc_frequency_success ()) {
+	if (!timer_rate_us) {
 		return false;
 	}
 	return test_qpc_validity ();
+}
+
+bool
+initialize ()
+{
+	LARGE_INTEGER freq;
+	if (!QueryPerformanceFrequency(&freq) || freq.QuadPart < 1) {
+		info << X_("Failed to determine frequency of QPC\n") << endmsg;
+		timer_rate_us = 0;
+	} else {
+		timer_rate_us = 1000000.0 / freq.QuadPart;
+	}
+	info << string_compose(X_("QPC timer microseconds per tick: %1\n"),
+	                       timer_rate_us) << endmsg;
+	return !timer_rate_us;
 }
 
 int64_t
@@ -172,12 +165,11 @@ get_microseconds ()
 {
 	LARGE_INTEGER current_val;
 
-	if (qpc_frequency_success()) {
+	if (timer_rate_us) {
 		// MS docs say this will always succeed for systems >= XP but it may
 		// not return a monotonic value with non-invariant TSC's etc
 		if (QueryPerformanceCounter(&current_val) != 0) {
-			return (int64_t)(((double)current_val.QuadPart) /
-			                 ((double)qpc_frequency_cached().QuadPart) * 1000000.0);
+			return (int64_t)(current_val.QuadPart * timer_rate_us);
 		}
 	}
 	DEBUG_TIMING ("Could not get QPC timer\n");
@@ -189,8 +181,7 @@ get_microseconds ()
 int64_t
 get_microseconds ()
 {
-	qpc_frequency_cached();
-	if (qpc_frequency_success()) {
+	if (timer_rate_us) {
 		return QPC::get_microseconds ();
 	}
 	// For XP systems that don't support a high-res performance counter
