@@ -27,6 +27,7 @@
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 
+#include "ardour/profile.h"
 #include "ardour/revision.h"
 #include "ardour/filesystem_paths.h"
 
@@ -601,6 +602,11 @@ About::About ()
 #else
 	const std::string cpu_arch = _("32bit"); // ARM, ALPHA,..
 #endif
+	std::string codename = CODENAME;
+	if (ARDOUR::Profile->get_mixbus() || ARDOUR::Profile->get_trx()) {
+		codename = "";
+	}
+
 	set_translator_credits (t);
 	set_copyright (_("Copyright (C) 1999-2015 Paul Davis\n"));
 	set_license (gpl);
@@ -608,7 +614,8 @@ About::About ()
 	set_website (X_("http://ardour.org/"));
 	set_website_label (_("http://ardour.org/"));
 	set_version ((string_compose(_("%1%2\n(built from revision %3)\n%4"),
-				     VERSIONSTRING, CODENAME,
+				     VERSIONSTRING,
+				     codename,
 				     revision, cpu_arch)));
 
 	Gtk::Button* config_button = manage (new Button (_("Config")));
