@@ -745,6 +745,16 @@ SessionDialog::redisplay_recent_sessions ()
 
 	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip 
 	recent_session_display.set_model (recent_session_model);
+
+	// custom sort
+	Gtk::TreeView::Column* pColumn;
+	if ((pColumn = recent_session_display.get_column (0))) { // name
+		pColumn->set_sort_column (recent_session_columns.visible_name);
+	}
+	if ((pColumn = recent_session_display.get_column (3))) { // date
+		pColumn->set_sort_column (recent_session_columns.time_modified); // unixtime
+	}
+
 	return session_snapshot_count;
 }
 
