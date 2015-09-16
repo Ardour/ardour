@@ -102,9 +102,9 @@ class SessionDialog : public ArdourDialog {
 
 	void setup_existing_session_page ();
 
-	struct RecentSessionsTimeSorter {
-	    bool operator() (std::pair<int64_t,std::string> a, std::pair<int64_t,std::string> b) const {
-		    return a.first > b.first;
+	struct RecentSessionsSorter {
+	    bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
+		    return ARDOUR::cmp_nocase(a.first, b.first) == -1;
 	    }
 	};
 
