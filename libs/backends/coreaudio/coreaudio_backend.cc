@@ -701,7 +701,7 @@ CoreAudioBackend::freewheel (bool onoff)
 float
 CoreAudioBackend::dsp_load () const
 {
-	return std::min(100.f, 100.f * _dsp_load);
+	return 100.f * _dsp_load;
 }
 
 size_t
@@ -1718,7 +1718,7 @@ int
 CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t host_time)
 {
 	uint32_t i = 0;
-	uint64_t clock1, clock2;
+	uint64_t clock1;
 
 	_active_ca = true;
 
@@ -1846,16 +1846,10 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	_processed_samples += n_samples;
 
 	/* calc DSP load. */
-	clock2 = g_get_monotonic_time();
-	const int64_t elapsed_time = clock2 - clock1;
-	// low pass filter
-	const float load = elapsed_time / (float) nominal_time;
-	if (load > _dsp_load) {
-		_dsp_load = load;
-	} else {
-		const float a = .2 * _samples_per_period / _samplerate;
-		_dsp_load = _dsp_load + a * (load - _dsp_load) + 1e-12;
-	}
+	_dsp_load_calc.set_max_time (_samplerate, _samples_per_period);
+	_dsp_load_calc.set_start_timestamp_us (clock1);
+	_dsp_load_calc.set_stop_timestamp_us (g_get_monotonic_time());
+	_dsp_load = _dsp_load_calc.get_dsp_load ();
 
 	pthread_mutex_unlock (&_process_callback_mutex);
 	return 0;

@@ -31,6 +31,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "ardour/audio_backend.h"
+#include "ardour/dsp_load_calculator.h"
 #include "ardour/types.h"
 
 #include "coreaudio_pcmio.h"
@@ -371,6 +372,7 @@ class CoreAudioBackend : public AudioBackend {
 
 		/* processing */
 		float  _dsp_load;
+		ARDOUR::DSPLoadCalculator  _dsp_load_calc;
 		uint64_t _processed_samples;
 
 		pthread_t _main_thread;
