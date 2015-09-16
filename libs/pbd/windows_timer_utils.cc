@@ -189,6 +189,7 @@ get_microseconds ()
 int64_t
 get_microseconds ()
 {
+	qpc_frequency_cached();
 	if (qpc_frequency_success()) {
 		return QPC::get_microseconds ();
 	}
