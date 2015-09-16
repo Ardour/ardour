@@ -27,6 +27,8 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 
+#include "ardour/types.h" // required for opeators used in pbd/configuration_variable.h
+
 #include "pbd/stateful.h"
 #include "pbd/xml++.h"
 #include "pbd/configuration_variable.h"
