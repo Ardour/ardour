@@ -49,6 +49,7 @@ class SessionDialog : public ArdourDialog {
   public:
         SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, 
 		       const std::string& template_name, bool cancel_not_quit);
+        SessionDialog ();
 	~SessionDialog ();
 
         void clear_given ();
@@ -94,6 +95,7 @@ class SessionDialog : public ArdourDialog {
 	/* initial choice page */
 
 	void setup_initial_choice_box ();
+	void setup_recent_sessions ();
 	Gtk::VBox ic_vbox;
 	Gtk::Button ic_new_session_button;
         void new_session_button_clicked ();

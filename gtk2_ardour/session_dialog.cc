@@ -26,6 +26,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <glibmm.h>
 
 #include <gtkmm/filechooser.h>
 
@@ -150,6 +151,37 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	}
 }
 
+SessionDialog::SessionDialog ()
+	: ArdourDialog (_("Recent Sessions"), true, true)
+	, new_only (false)
+	, _provided_session_name ("")
+	, _provided_session_path ("")
+	// the following are unused , but have no default ctor
+	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
+	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
+	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
+	, _existing_session_chooser_used (false) // caller must check should_be_new
+{
+	get_vbox()->set_spacing (6);
+
+	cancel_button = add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	open_button = add_button (Stock::OPEN, RESPONSE_ACCEPT);
+	open_button->set_sensitive (false);
+
+	setup_recent_sessions ();
+
+	get_vbox()->pack_start (recent_scroller, true, true);
+	get_vbox()->show_all ();
+	recent_scroller.show();
+
+	int cnt = redisplay_recent_sessions ();
+	if (cnt > 4) {
+		recent_scroller.set_size_request (-1, 300);
+	}
+}
+
+
+
 SessionDialog::~SessionDialog()
 {
 }
@@ -253,6 +285,30 @@ SessionDialog::session_folder ()
 }
 
 void
+SessionDialog::setup_recent_sessions ()
+{
+	recent_session_model = TreeStore::create (recent_session_columns);
+	recent_session_model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &SessionDialog::recent_session_sort_changed));
+
+	recent_session_display.set_model (recent_session_model);
+	recent_session_display.append_column (_("Session Name"), recent_session_columns.visible_name);
+	recent_session_display.append_column (_("Sample Rate"), recent_session_columns.sample_rate);
+	recent_session_display.append_column (_("File Resolution"), recent_session_columns.disk_format);
+	recent_session_display.append_column (_("Last Modified"), recent_session_columns.time_formatted);
+	recent_session_display.set_headers_visible (true);
+	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
+
+	recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::recent_session_row_selected));
+
+	recent_scroller.add (recent_session_display);
+	recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
+
+	recent_session_display.show();
+	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &SessionDialog::recent_row_activated));
+}
+
+void
 SessionDialog::setup_initial_choice_box ()
 {
 	ic_vbox.set_spacing (6);
@@ -314,32 +370,12 @@ SessionDialog::setup_initial_choice_box ()
 	}
 
 	/* recent session scroller */
+	setup_recent_sessions ();
 
 	recent_label.set_no_show_all (true);
 	recent_scroller.set_no_show_all (true);
-	
-	recent_label.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Recent Sessions")));
-	
-	recent_session_model = TreeStore::create (recent_session_columns);
-	recent_session_model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &SessionDialog::recent_session_sort_changed));
 
-	
-	recent_session_display.set_model (recent_session_model);
-	recent_session_display.append_column (_("Session Name"), recent_session_columns.visible_name);
-	recent_session_display.append_column (_("Sample Rate"), recent_session_columns.sample_rate);
-	recent_session_display.append_column (_("File Resolution"), recent_session_columns.disk_format);
-	recent_session_display.append_column (_("Last Modified"), recent_session_columns.time_formatted);
-	recent_session_display.set_headers_visible (true);
-	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
-	
-	recent_session_display.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::recent_session_row_selected));
-	
-	recent_scroller.add (recent_session_display);
-	recent_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-	recent_scroller.set_shadow_type	(Gtk::SHADOW_IN);
-	
-	recent_session_display.show();
-	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &SessionDialog::recent_row_activated));
+	recent_label.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Recent Sessions")));
 	
 	centering_vbox->pack_start (recent_label, false, false, 12);
 	centering_vbox->pack_start (recent_scroller, true, true);
@@ -593,7 +629,6 @@ SessionDialog::redisplay_recent_sessions ()
 	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
 	recent_session_model->clear ();
 
-	// code below is a near from ARDOUR_UI::redisplay_recent_sessions()
 	ARDOUR::RecentSessions rs;
 	ARDOUR::read_recent_sessions (rs);
 

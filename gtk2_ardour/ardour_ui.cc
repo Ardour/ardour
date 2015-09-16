@@ -257,7 +257,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfi
 	, error_alert_button ( ArdourButton::just_led_default_elements )
 	, editor_meter(0)
 	, editor_meter_peak_display()
-	, session_selector_window (0)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)
 	, last_key_press_time (0)
@@ -1620,169 +1619,38 @@ ARDOUR_UI::update_wall_clock ()
 }
 
 void
-ARDOUR_UI::redisplay_recent_sessions ()
-{
-	std::vector<std::string> session_directories;
-	RecentSessionsSorter cmp;
-
-	recent_session_display.set_model (Glib::RefPtr<TreeModel>(0));
-	recent_session_model->clear ();
-
-	ARDOUR::RecentSessions rs;
-	ARDOUR::read_recent_sessions (rs);
-
-	if (rs.empty()) {
-		recent_session_display.set_model (recent_session_model);
-		return;
-	}
-
-	// sort them alphabetically
-	sort (rs.begin(), rs.end(), cmp);
-
-	for (ARDOUR::RecentSessions::iterator i = rs.begin(); i != rs.end(); ++i) {
-		session_directories.push_back ((*i).second);
-	}
-
-	for (vector<std::string>::const_iterator i = session_directories.begin();
-			i != session_directories.end(); ++i)
-	{
-		std::vector<std::string> state_file_paths;
-
-		// now get available states for this session
-
-		get_state_files_in_directory (*i, state_file_paths);
-
-		vector<string> states;
-		vector<const gchar*> item;
-		string fullpath = *i;
-
-		/* remove any trailing / */
-
-		if (fullpath[fullpath.length() - 1] == '/') {
-			fullpath = fullpath.substr (0, fullpath.length() - 1);
-		}
-
-		/* check whether session still exists */
-		if (!Glib::file_test(fullpath.c_str(), Glib::FILE_TEST_EXISTS)) {
-			/* session doesn't exist */
-			continue;
-		}
-
-		/* now get available states for this session */
-		states = Session::possible_states (fullpath);
-
-		if (states.empty()) {
-			/* no state file? */
-			continue;
-		}
-
-		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
-
-		Gtk::TreeModel::Row row = *(recent_session_model->append());
-
-		row[recent_session_columns.fullpath] = fullpath;
-		row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
-
-		if (state_file_names.size() > 1) {
-			// multiple session files in the session directory - show the directory name.
-			row[recent_session_columns.visible_name] = Glib::path_get_basename (fullpath);
-
-			// add the children
-			for (std::vector<std::string>::iterator i2 = state_file_names.begin();
-					i2 != state_file_names.end(); ++i2)
-			{
-
-				Gtk::TreeModel::Row child_row = *(recent_session_model->append (row.children()));
-
-				child_row[recent_session_columns.visible_name] = *i2;
-				child_row[recent_session_columns.fullpath] = fullpath;
-				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (fullpath);
-			}
-		} else {
-			// only a single session file in the directory - show its actual name.
-			row[recent_session_columns.visible_name] = state_file_names.front ();
-		}
-	}
-
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
-	recent_session_display.set_model (recent_session_model);
-}
-
-void
-ARDOUR_UI::build_session_selector ()
-{
-	session_selector_window = new ArdourDialog (_("Recent Sessions"));
-
-	Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow);
-
-	session_selector_window->add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	session_selector_window->add_button (Stock::OPEN, RESPONSE_ACCEPT);
-	session_selector_window->set_default_response (RESPONSE_ACCEPT);
-	recent_session_model = TreeStore::create (recent_session_columns);
-	recent_session_display.set_model (recent_session_model);
-	recent_session_display.append_column (_("Recent Sessions"), recent_session_columns.visible_name);
-	recent_session_display.set_headers_visible (false);
-	recent_session_display.get_selection()->set_mode (SELECTION_BROWSE);
-	recent_session_display.signal_row_activated().connect (sigc::mem_fun (*this, &ARDOUR_UI::recent_session_row_activated));
-
-	scroller->add (recent_session_display);
-	scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-
-	session_selector_window->set_name ("SessionSelectorWindow");
-	session_selector_window->set_size_request (200, 400);
-	session_selector_window->get_vbox()->pack_start (*scroller);
-
-	recent_session_display.show();
-	scroller->show();
-}
-
-void
-ARDOUR_UI::recent_session_row_activated (const TreePath& /*path*/, TreeViewColumn* /*col*/)
-{
-	session_selector_window->response (RESPONSE_ACCEPT);
-}
-
-void
 ARDOUR_UI::open_recent_session ()
 {
 	bool can_return = (_session != 0);
 
-	if (session_selector_window == 0) {
-		build_session_selector ();
-	}
-
-	redisplay_recent_sessions ();
+	SessionDialog recent_session_dialog;
 
 	while (true) {
 
-		ResponseType r = (ResponseType) session_selector_window->run ();
+		ResponseType r = (ResponseType) recent_session_dialog.run ();
 
 		switch (r) {
 		case RESPONSE_ACCEPT:
 			break;
 		default:
 			if (can_return) {
-				session_selector_window->hide();
+				recent_session_dialog.hide();
 				return;
 			} else {
 				exit (1);
 			}
 		}
 
-		if (recent_session_display.get_selection()->count_selected_rows() == 0) {
+		recent_session_dialog.hide();
+
+		bool should_be_new;
+
+		std::string path = recent_session_dialog.session_folder();
+		std::string state = recent_session_dialog.session_name (should_be_new);
+
+		if (should_be_new == true) {
 			continue;
 		}
-
-		session_selector_window->hide();
-
-		Gtk::TreeModel::iterator i = recent_session_display.get_selection()->get_selected();
-
-		if (i == recent_session_model->children().end()) {
-			return;
-		}
-
-		std::string path = (*i)[recent_session_columns.fullpath];
-		std::string state = (*i)[recent_session_columns.visible_name];
 
 		_session_is_new = false;
 

@@ -502,33 +502,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	Gtk::Menu*        session_popup_menu;
 
-	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    RecentSessionModelColumns() {
-		    add (visible_name);
-		    add (tip);
-		    add (fullpath);
-	    }
-	    Gtk::TreeModelColumn<std::string> visible_name;
-	    Gtk::TreeModelColumn<std::string> tip;
-	    Gtk::TreeModelColumn<std::string> fullpath;
-	};
-
-	RecentSessionModelColumns    recent_session_columns;
-	Gtk::TreeView                recent_session_display;
-	Glib::RefPtr<Gtk::TreeStore> recent_session_model;
-
-	ArdourDialog*     session_selector_window;
-
-	void build_session_selector();
-	void redisplay_recent_sessions();
-	void recent_session_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
-
-	struct RecentSessionsSorter {
-		bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
-		    return ARDOUR::cmp_nocase(a.first, b.first) == -1;
-	    }
-	};
-
 	/* menu bar and associated stuff */
 
 	Gtk::MenuBar* menu_bar;
