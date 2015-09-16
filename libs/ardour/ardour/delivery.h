@@ -34,7 +34,6 @@ class MuteMaster;
 class PannerShell;
 class Panner;
 class Pannable;
-class Amp;
 
 class LIBARDOUR_API Delivery : public IOProcessor
 {
@@ -67,8 +66,6 @@ public:
 
 	bool set_name (const std::string& name);
 	std::string display_name() const;
-
-	boost::shared_ptr<Amp> amp() const { return _amp; }
 
 	Role role() const { return _role; }
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
@@ -109,8 +106,8 @@ public:
   protected:
 	Role        _role;
 	BufferSet*  _output_buffers;
+	gain_t      _current_gain;
 	boost::shared_ptr<PannerShell> _panshell;
-	boost::shared_ptr<Amp> _amp;
 
 	gain_t target_gain ();
 

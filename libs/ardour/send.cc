@@ -86,6 +86,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
+	_amp.reset (new Amp (_session));
 	_meter.reset (new PeakMeter (_session, name()));
 
 	_delayline.reset (new DelayLine (_session, name()));
@@ -173,7 +174,7 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframe
 	sendbufs.read_from (bufs, nframes);
 	assert(sendbufs.count() == bufs.count());
 
-	/* automatable gain control */
+	/* gain control */
 
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_frame, end_frame, nframes);

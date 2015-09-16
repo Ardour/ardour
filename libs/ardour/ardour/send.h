@@ -43,6 +43,7 @@ class LIBARDOUR_API Send : public Delivery
 
 	bool display_to_user() const;
 
+	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
 
 	bool metering() const { return _metering; }
@@ -77,6 +78,7 @@ class LIBARDOUR_API Send : public Delivery
 
   protected:
 	bool _metering;
+	boost::shared_ptr<Amp> _amp;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _delayline;
 
