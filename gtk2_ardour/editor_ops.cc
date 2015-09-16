@@ -6123,6 +6123,10 @@ Editor::set_playhead_cursor ()
 void
 Editor::split_region ()
 {
+	if (_drags->active ()) {
+		return;
+	}
+
 	//if a range is selected, separate it
 	if ( !selection->time.empty()) {
 		separate_regions_between (selection->time);
