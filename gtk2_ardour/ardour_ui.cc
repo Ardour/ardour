@@ -125,6 +125,7 @@ typedef uint64_t microseconds_t;
 #include "missing_file_dialog.h"
 #include "missing_plugin_dialog.h"
 #include "mixer_ui.h"
+#include "meterbridge.h"
 #include "mouse_cursors.h"
 #include "nsm.h"
 #include "opts.h"
