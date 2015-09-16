@@ -326,6 +326,7 @@ SessionDialog::setup_initial_choice_box ()
 	recent_session_display.append_column (_("Session Name"), recent_session_columns.visible_name);
 	recent_session_display.append_column (_("Sample Rate"), recent_session_columns.sample_rate);
 	recent_session_display.append_column (_("File Resolution"), recent_session_columns.disk_format);
+	recent_session_display.append_column (_("Last Modified"), recent_session_columns.time_formatted);
 	recent_session_display.set_headers_visible (true);
 	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
 	
@@ -688,6 +689,7 @@ SessionDialog::redisplay_recent_sessions ()
 			// opening the parent item will fail, but expanding it will show the session
 			// files that actually exist, and the right one can then be opened.
 			row[recent_session_columns.visible_name] = Glib::path_get_basename (dirname);
+			int64_t most_recent = 0;
 
 			// add the children
 			for (std::vector<std::string>::iterator i2 = state_file_names.begin(); i2 != state_file_names.end(); ++i2) {
@@ -699,7 +701,14 @@ SessionDialog::redisplay_recent_sessions ()
 				child_row[recent_session_columns.fullpath] = s;
 				child_row[recent_session_columns.tip] = Glib::Markup::escape_text (dirname);
 				g_stat (s.c_str(), &gsb);
-				row[recent_session_columns.time_modified] = gsb.st_mtime;
+				child_row[recent_session_columns.time_modified] = gsb.st_mtime;
+
+				Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
+				child_row[recent_session_columns.time_formatted] = gdt.format ("%F");
+
+				if (gsb.st_mtime > most_recent) {
+					most_recent = gsb.st_mtime;
+				}
 				
 				if (Session::get_info_from_path (s, sr, sf) == 0) {
 					child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
@@ -718,14 +727,20 @@ SessionDialog::redisplay_recent_sessions ()
 					child_row[recent_session_columns.sample_rate] = "??";
 					child_row[recent_session_columns.disk_format] = "--";
 				}
-				
 
 				++session_snapshot_count;
 			}
+
+			assert (most_recent >= row[recent_session_columns.time_modified]);
+			row[recent_session_columns.time_modified] = most_recent;
+
 		} else {
 			// only a single session file in the directory - show its actual name.
 			row[recent_session_columns.visible_name] = state_file_basename;
 		}
+
+		Glib::DateTime gdt(Glib::DateTime::create_now_local (row[recent_session_columns.time_modified]));
+		row[recent_session_columns.time_formatted] = gdt.format ("%F");
 	}
 
 	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip 
