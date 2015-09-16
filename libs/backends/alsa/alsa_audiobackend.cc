@@ -899,7 +899,7 @@ AlsaAudioBackend::freewheel (bool onoff)
 float
 AlsaAudioBackend::dsp_load () const
 {
-	return std::min(100.f, 100.f * _dsp_load);
+	return 100.f * _dsp_load;
 }
 
 size_t

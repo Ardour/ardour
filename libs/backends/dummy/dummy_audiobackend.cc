@@ -1268,7 +1268,7 @@ DummyAudioBackend::main_process_thread ()
 		if (!_freewheel) {
 			_dsp_load_calc.set_start_timestamp_us (clock1);
 			_dsp_load_calc.set_stop_timestamp_us (_x_get_monotonic_usec());
-			_dsp_load = _dsp_load_calc.get_dsp_load ();
+			_dsp_load = _dsp_load_calc.get_dsp_load_unbound ();
 
 			const int64_t elapsed_time = _dsp_load_calc.elapsed_time_us ();
 			const int64_t nominal_time = _dsp_load_calc.get_max_time_us ();
