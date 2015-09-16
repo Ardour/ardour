@@ -297,13 +297,13 @@ ARDOUR_UI_UTILS::gdk_color_to_rgba (Gdk::Color const& c)
 bool
 ARDOUR_UI_UTILS::relay_key_press (GdkEventKey* ev, Gtk::Window* win)
 {
-	PublicEditor& ed (PublicEditor::instance());
 
 	if (!key_press_focus_accelerator_handler (*win, ev)) {
-		if (&ed == 0) {
+		if (!PublicEditor::_instance) {
 			/* early key press in pre-main-window-dialogs, no editor yet */
 			return false;
 		}
+		PublicEditor& ed (PublicEditor::instance());
 		return ed.on_key_press_event(ev);
 	} else {
 		return true;
