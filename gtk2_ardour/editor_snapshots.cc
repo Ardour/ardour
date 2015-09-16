@@ -17,11 +17,20 @@
 
 */
 
+
+#include <glib.h>
+#include <glib/gstdio.h>
+#include <glibmm.h>
+
 #include <gtkmm/liststore.h>
+
 #include "gtkmm2ext/choice.h"
+
+#include "ardour/filename_extensions.h"
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
+
 #include "editor_snapshots.h"
 #include "ardour_ui.h"
 #include "i18n.h"
@@ -40,6 +49,7 @@ EditorSnapshots::EditorSnapshots (Editor* e)
 	_model = ListStore::create (_columns);
 	_display.set_model (_model);
 	_display.append_column (X_("snapshot"), _columns.visible_name);
+	_display.append_column (X_("lastmod"), _columns.time_formatted);
 	_display.set_size_request (75, -1);
 	_display.set_headers_visible (false);
 	_display.set_reorderable (false);
@@ -203,8 +213,15 @@ EditorSnapshots::redisplay ()
 			_display.get_selection()->select(row);
 		}
 
+		std::string s = Glib::build_filename (_session->path(), statename + ARDOUR::statefile_suffix);
+
+		GStatBuf gsb;
+		g_stat (s.c_str(), &gsb);
+		Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
+
 		row[_columns.visible_name] = display_name;
 		row[_columns.real_name] = statename;
+		row[_columns.time_formatted] = gdt.format ("%F %H:%M");
 	}
 }
 

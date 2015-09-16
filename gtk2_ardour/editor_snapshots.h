@@ -44,9 +44,11 @@ private:
 		Columns () {
 			add (visible_name);
 			add (real_name);
+			add (time_formatted);
 		}
 		Gtk::TreeModelColumn<std::string> visible_name;
 		Gtk::TreeModelColumn<std::string> real_name;
+		Gtk::TreeModelColumn<std::string> time_formatted;
 	};
 
 	Columns _columns;
