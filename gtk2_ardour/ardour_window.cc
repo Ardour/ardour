@@ -24,6 +24,7 @@
 
 #include "ardour_window.h"
 #include "ardour_ui.h"
+#include "ui_config.h"
 #include "keyboard.h"
 #include "utils.h"
 
@@ -114,7 +115,7 @@ ArdourWindow::init ()
                vice versa.
         */
 
-	if (ARDOUR_UI::config()->get_all_floating_windows_are_dialogs()) {
+	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 	} else {
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);

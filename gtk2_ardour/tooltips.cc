@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2012 Paul Davis 
+    Copyright (C) 2014 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,14 +17,25 @@
 
 */
 
-#ifndef __gtk_ardour_global_signals_h__
-#define __gtk_ardour_global_signals_h__
+#include "tooltips.h"
 
-#include <sigc++/signal.h>
+#include "gtkmm2ext/gtk_ui.h"
 
 namespace ARDOUR_UI_UTILS {
-extern sigc::signal<void>  ColorsChanged;
-extern sigc::signal<void>  DPIReset;
-} // namespace
 
-#endif /* __gtk_ardour_global_signals_h__ */
+void
+set_tooltip (Gtk::Widget& w, const std::string& text) {
+	Gtkmm2ext::UI::instance()->set_tip(w, text);
+}
+
+void
+set_tooltip (Gtk::Widget* w, const std::string& text) {
+	Gtkmm2ext::UI::instance()->set_tip(*w, text);
+}
+
+void
+set_tooltip (Gtk::Widget* w, const std::string& text, const std::string& help_text) {
+	Gtkmm2ext::UI::instance()->set_tip(w, text.c_str(), help_text.c_str());
+}
+
+} // ARDOUR_UI_UTILS

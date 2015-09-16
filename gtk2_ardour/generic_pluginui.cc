@@ -43,12 +43,13 @@
 #include "ardour/session.h"
 #include "ardour/value_as_string.h"
 
-#include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
 #include "timers.h"
+#include "tooltips.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -57,6 +58,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrollable)
 	: PlugUIBase (pi)
@@ -297,7 +299,7 @@ GenericPluginUI::build ()
 
 			const std::string param_docs = plugin->get_parameter_docs(i);
 			if (!param_docs.empty()) {
-				ARDOUR_UI::instance()->set_tip(cui, param_docs.c_str());
+				set_tooltip(cui, param_docs.c_str());
 			}
 
 			control_uis.push_back(cui);
@@ -488,7 +490,7 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	, file_button(NULL)
 {
 	automate_button.set_name ("PluginAutomateButton");
-	ARDOUR_UI::instance()->set_tip (automate_button, _("Automation control"));
+	set_tooltip (automate_button, _("Automation control"));
 
 	/* XXX translators: use a string here that will be at least as long
 	   as the longest automation label (see ::automation_state_changed()
@@ -763,8 +765,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				0xcccc00ff, 0xcccc00ff,
 				0xffaa00ff, 0xffaa00ff,
 				0xff0000ff,
-				ARDOUR_UI::config()->color ("meter background bottom"),
-				ARDOUR_UI::config()->color ("meter background top")
+				UIConfiguration::instance().color ("meter background bottom"),
+				UIConfiguration::instance().color ("meter background top")
 				);
 
 		info->min_unbound = desc.min_unbound;

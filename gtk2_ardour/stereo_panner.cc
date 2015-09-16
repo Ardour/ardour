@@ -39,12 +39,11 @@
 
 #include "canvas/colors.h"
 
-#include "ardour_ui.h"
-#include "global_signals.h"
 #include "stereo_panner.h"
 #include "stereo_panner_editor.h"
 #include "rgb_macros.h"
 #include "utils.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -84,7 +83,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<PannerShell> p)
 	if (!have_font) {
 		Pango::FontDescription font;
 		Pango::AttrFontDesc* font_attr;
-		font = Pango::FontDescription (ARDOUR_UI::config()->get_SmallBoldMonospaceFont());
+		font = Pango::FontDescription (UIConfiguration::instance().get_SmallBoldMonospaceFont());
 		font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 		panner_font_attributes.change(*font_attr);
 		delete font_attr;
@@ -97,7 +96,7 @@ StereoPanner::StereoPanner (boost::shared_ptr<PannerShell> p)
 	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::bypass_handler, this), gui_context());
 	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&StereoPanner::pannable_handler, this), gui_context());
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &StereoPanner::color_handler));
 
 	set_tooltip ();
 }
@@ -152,7 +151,7 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	height = get_height ();
 
 	const int step_down = rint(height / 3.5);
-	const double corner_radius = 5.0 * ARDOUR_UI::ui_scale;
+	const double corner_radius = 5.0 * UIConfiguration::instance().get_ui_scale();
 	const int lr_box_size = height - 2 * step_down;
 	const int pos_box_size = (int)(rint(step_down * .8)) | 1;
 	const int top_step = step_down - pos_box_size;
@@ -180,7 +179,7 @@ StereoPanner::on_expose_event (GdkEventExpose*)
 	}
 
 	if (_send_mode) {
-		b = ARDOUR_UI::config()->color ("send bg");
+		b = UIConfiguration::instance().color ("send bg");
 		// b = rgba_from_style("SendStripBase",
 		// UINT_RGBA_R(b), UINT_RGBA_G(b), UINT_RGBA_B(b), 255,
 		// "fg");
@@ -672,24 +671,24 @@ StereoPanner::on_key_press_event (GdkEventKey* ev)
 void
 StereoPanner::set_colors ()
 {
-	colors[Normal].fill = ARDOUR_UI::config()->color_mod ("stereo panner fill", "panner fill");
-	// colors[Normal].outline = ARDOUR_UI::config()->color ("stereo panner outline");
+	colors[Normal].fill = UIConfiguration::instance().color_mod ("stereo panner fill", "panner fill");
+	// colors[Normal].outline = UIConfiguration::instance().color ("stereo panner outline");
 	colors[Normal].outline = ArdourCanvas::HSV (colors[Normal].fill).outline().color ();
-	colors[Normal].text = ARDOUR_UI::config()->color ("stereo panner text");
-	colors[Normal].background = ARDOUR_UI::config()->color ("stereo panner bg");
-	colors[Normal].rule = ARDOUR_UI::config()->color ("stereo panner rule");
+	colors[Normal].text = UIConfiguration::instance().color ("stereo panner text");
+	colors[Normal].background = UIConfiguration::instance().color ("stereo panner bg");
+	colors[Normal].rule = UIConfiguration::instance().color ("stereo panner rule");
 
-	colors[Mono].fill = ARDOUR_UI::config()->color ("stereo panner mono fill");
-	colors[Mono].outline = ARDOUR_UI::config()->color ("stereo panner mono outline");
-	colors[Mono].text = ARDOUR_UI::config()->color ("stereo panner mono text");
-	colors[Mono].background = ARDOUR_UI::config()->color ("stereo panner mono bg");
-	colors[Mono].rule = ARDOUR_UI::config()->color ("stereo panner rule");
+	colors[Mono].fill = UIConfiguration::instance().color ("stereo panner mono fill");
+	colors[Mono].outline = UIConfiguration::instance().color ("stereo panner mono outline");
+	colors[Mono].text = UIConfiguration::instance().color ("stereo panner mono text");
+	colors[Mono].background = UIConfiguration::instance().color ("stereo panner mono bg");
+	colors[Mono].rule = UIConfiguration::instance().color ("stereo panner rule");
 
-	colors[Inverted].fill = ARDOUR_UI::config()->color_mod ("stereo panner inverted fill", "stereo panner inverted");
-	colors[Inverted].outline = ARDOUR_UI::config()->color ("stereo panner inverted outline");
-	colors[Inverted].text = ARDOUR_UI::config()->color ("stereo panner inverted text");
-	colors[Inverted].background = ARDOUR_UI::config()->color_mod ("stereo panner inverted bg", "stereo panner inverted bg");
-	colors[Inverted].rule = ARDOUR_UI::config()->color ("stereo panner rule");
+	colors[Inverted].fill = UIConfiguration::instance().color_mod ("stereo panner inverted fill", "stereo panner inverted");
+	colors[Inverted].outline = UIConfiguration::instance().color ("stereo panner inverted outline");
+	colors[Inverted].text = UIConfiguration::instance().color ("stereo panner inverted text");
+	colors[Inverted].background = UIConfiguration::instance().color_mod ("stereo panner inverted bg", "stereo panner inverted bg");
+	colors[Inverted].rule = UIConfiguration::instance().color ("stereo panner rule");
 }
 
 void

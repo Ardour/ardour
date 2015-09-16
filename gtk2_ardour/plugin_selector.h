@@ -29,6 +29,8 @@
 #include "ardour/session_handle.h"
 #include "plugin_interest.h"
 
+#include "ardour_dialog.h"
+
 namespace ARDOUR {
 	class Session;
 	class PluginManager;

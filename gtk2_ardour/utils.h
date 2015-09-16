@@ -49,8 +49,6 @@ namespace ArdourCanvas {
 
 namespace ARDOUR_UI_UTILS {
 
-extern sigc::signal<void>  DPIReset;
-
 gint   just_hide_it (GdkEventAny*, Gtk::Window*);
 void add_item_with_sensitivity (Gtk::Menu_Helpers::MenuList &, Gtk::Menu_Helpers::MenuElem, bool);
 
@@ -82,8 +80,6 @@ static std::map<std::string, Glib::RefPtr<Gdk::Pixbuf> > xpm_map;
 const char* const *get_xpm_data (std::string path);
 std::string longest (std::vector<std::string>&);
 bool key_is_legal_for_numeric_entry (guint keyval);
-void reset_dpi ();
-void set_pango_fontsize ();
 
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 

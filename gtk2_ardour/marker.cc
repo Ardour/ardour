@@ -29,11 +29,15 @@
 #include "canvas/scroll_group.h"
 #include "canvas/debug.h"
 
-#include "ardour_ui.h"
+#include "ui_config.h"
 /*
  * ardour_ui.h include was moved to the top of the list
  * due to a conflicting definition of 'Rect' between
  * Apple's MacTypes.h and GTK.
+ *
+ * Now that we are including ui_config.h and not ardour_ui.h
+ * the above comment may no longer apply and this comment
+ * can be removed and ui_config.h inclusion moved.
  */
 
 #include "marker.h"
@@ -77,8 +81,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Container& parent, g
 {
 
 	const double MH = marker_height - 1;
-	const double M3 = std::max(1.f, rintf(3.f * ARDOUR_UI::ui_scale));
-	const double M6 = std::max(2.f, rintf(6.f * ARDOUR_UI::ui_scale));
+	const double M3 = std::max(1.f, rintf(3.f * UIConfiguration::instance().get_ui_scale()));
+	const double M6 = std::max(2.f, rintf(6.f * UIConfiguration::instance().get_ui_scale()));
 
 	/* Shapes we use:
 	 *
@@ -342,7 +346,7 @@ ArdourMarker::setup_line ()
 		if (_track_canvas_line == 0) {
 
 			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
-			_track_canvas_line->set_outline_color (ARDOUR_UI::config()->color ("edit point"));
+			_track_canvas_line->set_outline_color (UIConfiguration::instance().color ("edit point"));
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
@@ -353,7 +357,7 @@ ArdourMarker::setup_line ()
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
 		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
-		_track_canvas_line->set_outline_color (_selected ? ARDOUR_UI::config()->color ("edit point") : _color);
+		_track_canvas_line->set_outline_color (_selected ? UIConfiguration::instance().color ("edit point") : _color);
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
 
@@ -403,7 +407,7 @@ ArdourMarker::setup_name_display ()
 		limit = _right_label_limit;
 	}
 
-	const float padding =  std::max(2.f, rintf(2.f * ARDOUR_UI::ui_scale));
+	const float padding =  std::max(2.f, rintf(2.f * UIConfiguration::instance().get_ui_scale()));
 
 	/* Work out how wide the name can be */
 	int name_width = min ((double) pixel_width (_name, name_font) + padding, limit);

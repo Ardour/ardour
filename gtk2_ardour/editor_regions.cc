@@ -48,6 +48,8 @@
 #include "editor_regions.h"
 #include "editor_drag.h"
 #include "main_clock.h"
+#include "tooltips.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -126,7 +128,7 @@ EditorRegions::EditorRegions (Editor* e)
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);
 		l = manage (new Label (ci[i].label));
-		ARDOUR_UI::instance()->set_tip (*l, ci[i].tooltip);
+		set_tooltip (*l, ci[i].tooltip);
 		col->set_widget (*l);
 		l->show ();
 
@@ -342,14 +344,14 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 		if (missing_source) {
 			// c.set_rgb(65535,0,0);     // FIXME: error color from style
-			set_color_from_rgba (c, ARDOUR_UI::config()->color ("region list missing source"));
+			set_color_from_rgba (c, UIConfiguration::instance().color ("region list missing source"));
 
 		} else if (region->automatic()){
 			// c.set_rgb(0,65535,0);     // FIXME: error color from style
-			set_color_from_rgba (c, ARDOUR_UI::config()->color ("region list automatic"));
+			set_color_from_rgba (c, UIConfiguration::instance().color ("region list automatic"));
 
 		} else {
-			set_color_from_rgba (c, ARDOUR_UI::config()->color ("region list whole file"));
+			set_color_from_rgba (c, UIConfiguration::instance().color ("region list whole file"));
 		}
 
 		row[_columns.color_] = c;
@@ -1245,7 +1247,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 		framepos_t pos = 0;
 		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
-		if (Profile->get_sae() || ARDOUR_UI::config()->get_only_copy_imported_files() || copy) {
+		if (Profile->get_sae() || UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			_editor->do_import (paths, Editing::ImportDistinctFiles, Editing::ImportAsRegion, SrcBest, pos);
 		} else {
 			_editor->do_embed (paths, Editing::ImportDistinctFiles, ImportAsRegion, pos);

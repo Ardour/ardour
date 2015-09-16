@@ -34,11 +34,11 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/rgb_macros.h>
 
-#include "ardour_ui.h"
-#include "global_signals.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "ardour_window.h"
+#include "tooltips.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "meterbridge.h"
@@ -59,7 +59,7 @@ PBD::Signal1<void,MeterStrip*> MeterStrip::CatchDeletion;
 PBD::Signal0<void> MeterStrip::MetricChanged;
 PBD::Signal0<void> MeterStrip::ConfigurationChanged;
 
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * UIConfiguration::instance().get_ui_scale()))
 
 MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	: AxisView(0)
@@ -112,8 +112,8 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	nfo_vbox.show();
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
-	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 }
 
 MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
@@ -158,7 +158,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	// peak display
 	peak_display.set_name ("meterbridge peakindicator");
 	peak_display.set_elements((ArdourButton::Element) (ArdourButton::Edge|ArdourButton::Body));
-	ARDOUR_UI::instance()->set_tip (peak_display, _("Reset Peak"));
+	set_tooltip (peak_display, _("Reset Peak"));
 	max_peak = minus_infinity();
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_size_request(PX_SCALE(12, 12), PX_SCALE(8, 8));
@@ -183,8 +183,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_layout_ellipsize_width(48 * PANGO_SCALE);
 	name_label.set_size_request(PX_SCALE(18, 18), PX_SCALE(50, 50));
 	name_label.set_alignment(-1.0, .5);
-	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
-	ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
+	set_tooltip (name_label, _route->name());
+	set_tooltip (*level_meter, _route->name());
 
 	number_label.set_corner_radius(2);
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
@@ -300,8 +300,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.signal_button_release_event().connect (sigc::mem_fun(*this, &MeterStrip::name_label_button_release), false);
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &MeterStrip::on_theme_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
-	DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
+	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 	Config->ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 	sess->config.ParameterChanged.connect (*this, invalidator (*this), ui_bind (&MeterStrip::parameter_changed, this, _1), gui_context());
 
@@ -396,9 +396,9 @@ MeterStrip::strip_property_changed (const PropertyChange& what_changed)
 	}
 	ENSURE_GUI_THREAD (*this, &MeterStrip::strip_name_changed, what_changed);
 	name_changed();
-	ARDOUR_UI::instance()->set_tip (name_label, _route->name());
+	set_tooltip (name_label, _route->name());
 	if (level_meter) {
-		ARDOUR_UI::instance()->set_tip (*level_meter, _route->name());
+		set_tooltip (*level_meter, _route->name());
 	}
 }
 
@@ -415,7 +415,7 @@ MeterStrip::fast_update ()
 	float mpeak = level_meter->update_meters();
 	if (mpeak > max_peak) {
 		max_peak = mpeak;
-		if (mpeak >= ARDOUR_UI::config()->get_meter_peak()) {
+		if (mpeak >= UIConfiguration::instance().get_meter_peak()) {
 			peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
 		}
 	}
@@ -545,8 +545,8 @@ MeterStrip::on_size_allocate (Gtk::Allocation& a)
 		tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_with_of_digit_0_to_9()
 	}
 
-	nh *= ARDOUR_UI::ui_scale;
-	tnh *= ARDOUR_UI::ui_scale;
+	nh *= UIConfiguration::instance().get_ui_scale();
+	tnh *= UIConfiguration::instance().get_ui_scale();
 
 	int prev_height, ignored;
 	bool need_relayout = false;
@@ -811,7 +811,7 @@ MeterStrip::name_changed () {
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
 		// NB numbers are rotated 90deg. on the meterbridge -> use height
-		number_label.set_size_request(PX_SCALE(18, 18), tnh * ARDOUR_UI::ui_scale);
+		number_label.set_size_request(PX_SCALE(18, 18), tnh * UIConfiguration::instance().get_ui_scale());
 	} else {
 		number_label.hide();
 	}

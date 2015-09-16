@@ -34,6 +34,7 @@
 #include "actions.h"
 #include "ardour_ui.h"
 #include "public_editor.h"
+#include "meterbridge.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
 #include "splash.h"

@@ -26,13 +26,13 @@
 #include "canvas/scroll_group.h"
 #include "canvas/tracking_text.h"
 
-#include "ardour_ui.h"
 #include "audio_clock.h"
 #include "editor.h"
 #include "editor_drag.h"
-#include "global_signals.h"
 #include "main_clock.h"
 #include "verbose_cursor.h"
+#include "ardour_ui.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -44,16 +44,16 @@ VerboseCursor::VerboseCursor (Editor* editor)
 {
 	_canvas_item = new ArdourCanvas::TrackingText (_editor->get_noscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
-	_canvas_item->set_font_description (Pango::FontDescription (ARDOUR_UI::config()->get_LargerBoldFont()));
+	_canvas_item->set_font_description (Pango::FontDescription (UIConfiguration::instance().get_LargerBoldFont()));
 	color_handler ();
 
-	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &VerboseCursor::color_handler));
 }
 
 void
 VerboseCursor::color_handler ()
 {
-	_canvas_item->set_color (ARDOUR_UI::config()->color_mod ("verbose canvas cursor", "verbose canvas cursor"));
+	_canvas_item->set_color (UIConfiguration::instance().color_mod ("verbose canvas cursor", "verbose canvas cursor"));
 }
 
 ArdourCanvas::Item *

@@ -21,13 +21,13 @@
 
 #include "canvas/canvas.h"
 
-#include "ardour_ui.h"
 #include "editor.h"
 #include "editing.h"
 #include "audio_time_axis.h"
 #include "route_time_axis.h"
 #include "audio_region_view.h"
 #include "selection.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -70,7 +70,7 @@ void
 Editor::toggle_meter_updating()
 {
 	DisplaySuspender ds;
-	if (ARDOUR_UI::config()->get_show_track_meters()) {
+	if (UIConfiguration::instance().get_show_track_meters()) {
 		start_updating_meters ();
 	} else {
 		stop_updating_meters ();

@@ -24,14 +24,13 @@
 #include <gtkmm2ext/utils.h>
 #include "pbd/fastlog.h"
 
-#include "ardour_ui.h"
-#include "global_signals.h"
 #include "level_meter.h"
 #include "utils.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "public_editor.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -58,8 +57,8 @@ LevelMeterBase::LevelMeterBase (Session* s, PBD::EventLoop::InvalidationRecord* 
 	set_session (s);
 
 	Config->ParameterChanged.connect (_parameter_connection, parent_invalidator, boost::bind (&LevelMeterBase::parameter_changed, this, _1), gui_context());
-	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun(*this, &LevelMeterBase::parameter_changed));
-	ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun(*this, &LevelMeterBase::parameter_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &LevelMeterBase::color_handler));
 }
 
 LevelMeterBase::~LevelMeterBase ()
@@ -105,12 +104,12 @@ static float meter_lineup_cfg(MeterLineUp lul, float offset) {
 }
 
 static float meter_lineup(float offset) {
-	return meter_lineup_cfg (ARDOUR_UI::config()->get_meter_line_up_level(), offset);
+	return meter_lineup_cfg (UIConfiguration::instance().get_meter_line_up_level(), offset);
 }
 
 static float vu_standard() {
 	// note - default meter config is +2dB (france)
-	switch (ARDOUR_UI::config()->get_meter_vu_standard()) {
+	switch (UIConfiguration::instance().get_meter_vu_standard()) {
 		default:
 		case MeteringVUfrench:   // 0VU = -2dBu
 			return 0;
@@ -140,7 +139,7 @@ LevelMeterBase::update_meters ()
 			const float mpeak = _meter->meter_level(n, MeterMaxPeak);
 			if (mpeak > (*i).max_peak) {
 				(*i).max_peak = mpeak;
-				(*i).meter->set_highlight(mpeak >= ARDOUR_UI::config()->get_meter_peak());
+				(*i).meter->set_highlight(mpeak >= UIConfiguration::instance().get_meter_peak());
 			}
 			if (mpeak > max_peak) {
 				max_peak = mpeak;
@@ -157,7 +156,7 @@ LevelMeterBase::update_meters ()
 				} else if (meter_type == MeterIEC1NOR) {
 					(*i).meter->set (meter_deflect_nordic (peak + meter_lineup(0)));
 				} else if (meter_type == MeterIEC1DIN) {
-					(*i).meter->set (meter_deflect_din (peak + meter_lineup_cfg(ARDOUR_UI::config()->get_meter_line_up_din(), 3.0)));
+					(*i).meter->set (meter_deflect_din (peak + meter_lineup_cfg(UIConfiguration::instance().get_meter_line_up_din(), 3.0)));
 				} else if (meter_type == MeterIEC2BBC || meter_type == MeterIEC2EBU) {
 					(*i).meter->set (meter_deflect_ppm (peak + meter_lineup(0)));
 				} else if (meter_type == MeterVU) {
@@ -187,7 +186,7 @@ LevelMeterBase::parameter_changed (string p)
 		uint32_t n;
 
 		for (n = 0, i = meters.begin(); i != meters.end(); ++i, ++n) {
-			(*i).meter->set_hold_count ((uint32_t) floor(ARDOUR_UI::config()->get_meter_hold()));
+			(*i).meter->set_hold_count ((uint32_t) floor(UIConfiguration::instance().get_meter_hold()));
 		}
 	}
 	else if (p == "meter-line-up-level") {
@@ -261,7 +260,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		width = thin_meter_width;
 	}
 
-	width = rint (width * ARDOUR_UI::ui_scale);
+	width = rint (width * UIConfiguration::instance().get_ui_scale());
 
 	if (   meters.size() > 0
 	    && nmeters == visible_meter_count
@@ -294,37 +293,37 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 		uint32_t c[10];
 		uint32_t b[4];
 		float stp[4];
-		int styleflags = ARDOUR_UI::config()->get_meter_style_led() ? 3 : 1;
-		b[0] = ARDOUR_UI::config()->color ("meter background bottom");
-		b[1] = ARDOUR_UI::config()->color ("meter background top");
+		int styleflags = UIConfiguration::instance().get_meter_style_led() ? 3 : 1;
+		b[0] = UIConfiguration::instance().color ("meter background bottom");
+		b[1] = UIConfiguration::instance().color ("meter background top");
 		b[2] = 0x991122ff; // red highlight gradient Bot
 		b[3] = 0x551111ff; // red highlight gradient Top
 		if (n < nmidi) {
-			c[0] = ARDOUR_UI::config()->color ("midi meter color0");
-			c[1] = ARDOUR_UI::config()->color ("midi meter color1");
-			c[2] = ARDOUR_UI::config()->color ("midi meter color2");
-			c[3] = ARDOUR_UI::config()->color ("midi meter color3");
-			c[4] = ARDOUR_UI::config()->color ("midi meter color4");
-			c[5] = ARDOUR_UI::config()->color ("midi meter color5");
-			c[6] = ARDOUR_UI::config()->color ("midi meter color6");
-			c[7] = ARDOUR_UI::config()->color ("midi meter color7");
-			c[8] = ARDOUR_UI::config()->color ("midi meter color8");
-			c[9] = ARDOUR_UI::config()->color ("midi meter color9");
+			c[0] = UIConfiguration::instance().color ("midi meter color0");
+			c[1] = UIConfiguration::instance().color ("midi meter color1");
+			c[2] = UIConfiguration::instance().color ("midi meter color2");
+			c[3] = UIConfiguration::instance().color ("midi meter color3");
+			c[4] = UIConfiguration::instance().color ("midi meter color4");
+			c[5] = UIConfiguration::instance().color ("midi meter color5");
+			c[6] = UIConfiguration::instance().color ("midi meter color6");
+			c[7] = UIConfiguration::instance().color ("midi meter color7");
+			c[8] = UIConfiguration::instance().color ("midi meter color8");
+			c[9] = UIConfiguration::instance().color ("midi meter color9");
 			stp[0] = 115.0 *  32.0 / 128.0;
 			stp[1] = 115.0 *  64.0 / 128.0;
 			stp[2] = 115.0 * 100.0 / 128.0;
 			stp[3] = 115.0 * 112.0 / 128.0;
 		} else {
-			c[0] = ARDOUR_UI::config()->color ("meter color0");
-			c[1] = ARDOUR_UI::config()->color ("meter color1");
-			c[2] = ARDOUR_UI::config()->color ("meter color2");
-			c[3] = ARDOUR_UI::config()->color ("meter color3");
-			c[4] = ARDOUR_UI::config()->color ("meter color4");
-			c[5] = ARDOUR_UI::config()->color ("meter color5");
-			c[6] = ARDOUR_UI::config()->color ("meter color6");
-			c[7] = ARDOUR_UI::config()->color ("meter color7");
-			c[8] = ARDOUR_UI::config()->color ("meter color8");
-			c[9] = ARDOUR_UI::config()->color ("meter color9");
+			c[0] = UIConfiguration::instance().color ("meter color0");
+			c[1] = UIConfiguration::instance().color ("meter color1");
+			c[2] = UIConfiguration::instance().color ("meter color2");
+			c[3] = UIConfiguration::instance().color ("meter color3");
+			c[4] = UIConfiguration::instance().color ("meter color4");
+			c[5] = UIConfiguration::instance().color ("meter color5");
+			c[6] = UIConfiguration::instance().color ("meter color6");
+			c[7] = UIConfiguration::instance().color ("meter color7");
+			c[8] = UIConfiguration::instance().color ("meter color8");
+			c[9] = UIConfiguration::instance().color ("meter color9");
 
 			switch (meter_type) {
 				case MeterK20:
@@ -362,7 +361,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					break;
 				case MeterIEC2BBC:
 					c[0] = c[1] = c[2] = c[3] = c[4] = c[5] = c[6] = c[7] = c[8] = c[9] =
-						ARDOUR_UI::config()->color ("meter color BBC");
+						UIConfiguration::instance().color ("meter color BBC");
 					stp[0] = stp[1] = stp[2] = stp[3] = 115.0;
 					break;
 				case MeterIEC2EBU:
@@ -402,7 +401,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					 stp[1] =  89.125; // 115.0 * log_meter0dB(-9);
 					 stp[2] = 106.375; // 115.0 * log_meter0dB(-3);
 					 stp[3] = 115.0;   // 115.0 * log_meter0dB(0);
-					switch (ARDOUR_UI::config()->get_meter_line_up_level()) {
+					switch (UIConfiguration::instance().get_meter_line_up_level()) {
 					case MeteringLineUp24:
 						stp[0] = 115.0 * log_meter0dB(-24);
 						break;
@@ -421,7 +420,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 					stp[1] = 77.5;  // 115 * log_meter(-9)
 					stp[2] = 92.5;  // 115 * log_meter(-3)
 					stp[3] = 100.0; // 115 * log_meter(0)
-					switch (ARDOUR_UI::config()->get_meter_line_up_level()) {
+					switch (UIConfiguration::instance().get_meter_line_up_level()) {
 					case MeteringLineUp24:
 						stp[0] = 42.0;
 						break;
@@ -442,7 +441,7 @@ LevelMeterBase::setup_meters (int len, int initial_width, int thin_width)
 			bool hl = meters[n].meter ? meters[n].meter->get_highlight() : false;
 			meters[n].packed = false;
 			delete meters[n].meter;
-			meters[n].meter = new FastMeter ((uint32_t) floor (ARDOUR_UI::config()->get_meter_hold()), width, _meter_orientation, len,
+			meters[n].meter = new FastMeter ((uint32_t) floor (UIConfiguration::instance().get_meter_hold()), width, _meter_orientation, len,
 					c[0], c[1], c[2], c[3], c[4],
 					c[5], c[6], c[7], c[8], c[9],
 					b[0], b[1], b[2], b[3],

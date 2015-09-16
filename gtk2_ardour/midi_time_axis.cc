@@ -60,7 +60,6 @@
 #include "ardour/track.h"
 #include "ardour/types.h"
 
-#include "ardour_ui.h"
 #include "ardour_button.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
@@ -84,6 +83,7 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "step_editor.h"
+#include "tooltips.h"
 #include "utils.h"
 #include "note_base.h"
 
@@ -311,8 +311,8 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	ARDOUR_UI::instance()->set_tip (_midnam_model_selector, _("External MIDI Device"));
-	ARDOUR_UI::instance()->set_tip (_midnam_custom_device_mode_selector, _("External Device Mode"));
+	set_tooltip (_midnam_model_selector, _("External MIDI Device"));
+	set_tooltip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (2);
@@ -322,7 +322,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	
 	ArdourButton *channel_selector_button = manage (new ArdourButton(_("Chns")));
 	channel_selector_button->set_name ("route button");
-	ARDOUR_UI::instance()->set_tip (channel_selector_button, _("Click to edit channel settings"));
+	set_tooltip (channel_selector_button, _("Click to edit channel settings"));
 	
 	// Insert expanding space labels to get full width justification
 	_channel_status_box.pack_start (_playback_channel_status, false, false, 2);

@@ -19,8 +19,8 @@
 
 #include "control_point.h"
 #include "automation_line.h"
-#include "ardour_ui.h"
 #include "public_editor.h"
+#include "ui_config.h"
 
 #include "canvas/rectangle.h"
 
@@ -45,8 +45,8 @@ ControlPoint::ControlPoint (AutomationLine& al)
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
 	_item->set_fill (true);
-	_item->set_fill_color (ARDOUR_UI::config()->color ("control point fill"));
-	_item->set_outline_color (ARDOUR_UI::config()->color ("control point outline"));
+	_item->set_fill_color (UIConfiguration::instance().color ("control point fill"));
+	_item->set_outline_color (UIConfiguration::instance().color ("control point outline"));
 	_item->set_data ("control_point", this);
 	_item->Event.connect (sigc::mem_fun (this, &ControlPoint::event_handler));
 
@@ -70,7 +70,7 @@ ControlPoint::ControlPoint (const ControlPoint& other, bool /*dummy_arg_to_force
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
 	_item->set_fill (true);
-	_item->set_outline_color (ARDOUR_UI::config()->color ("control point outline"));
+	_item->set_outline_color (UIConfiguration::instance().color ("control point outline"));
 
 	/* NOTE: no event handling in copied ControlPoints */
 
@@ -120,11 +120,11 @@ void
 ControlPoint::set_color ()
 {
 	if (_selected) {
-		_item->set_outline_color(ARDOUR_UI::config()->color ("control point selected outline"));;
-		_item->set_fill_color(ARDOUR_UI::config()->color ("control point selected fill"));
+		_item->set_outline_color(UIConfiguration::instance().color ("control point selected outline"));;
+		_item->set_fill_color(UIConfiguration::instance().color ("control point selected fill"));
 	} else {
-		_item->set_outline_color(ARDOUR_UI::config()->color ("control point outline"));
-		_item->set_fill_color(ARDOUR_UI::config()->color ("control point fill"));
+		_item->set_outline_color(UIConfiguration::instance().color ("control point outline"));
+		_item->set_fill_color(UIConfiguration::instance().color ("control point fill"));
 	}
 }
 

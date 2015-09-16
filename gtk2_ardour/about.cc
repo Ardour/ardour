@@ -24,6 +24,7 @@
 #include <ctime>
 #include <cstdlib>
 
+#include "pbd/error.h"
 #include "pbd/file_utils.h"
 
 #include "ardour/revision.h"
@@ -32,7 +33,6 @@
 #include "about.h"
 #include "configinfo.h"
 #include "rgb_macros.h"
-#include "ardour_ui.h"
 
 #include "i18n.h"
 

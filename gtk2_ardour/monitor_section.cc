@@ -35,13 +35,15 @@
 #include "ardour/monitor_processor.h"
 #include "ardour/port.h"
 #include "ardour/route.h"
+#include "ardour/user_bundle.h"
 
-#include "ardour_ui.h"
 #include "gui_thread.h"
 #include "monitor_section.h"
 #include "public_editor.h"
 #include "timers.h"
+#include "tooltips.h"
 #include "volume_controller.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -55,7 +57,7 @@ using namespace std;
 
 Glib::RefPtr<ActionGroup> MonitorSection::monitor_actions;
 
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
 MonitorSection::MonitorSection (Session* s)
 	: AxisView (s)
@@ -137,19 +139,19 @@ MonitorSection::MonitorSection (Session* s)
 	solo_model_box.show ();
 
 	act = ActionManager::get_action (X_("Solo"), X_("solo-use-in-place"));
-	ARDOUR_UI::instance()->tooltips().set_tip (solo_in_place_button, _("Solo controls affect solo-in-place"));
+	set_tooltip (solo_in_place_button, _("Solo controls affect solo-in-place"));
 	if (act) {
 		solo_in_place_button.set_related_action (act);
 	}
 
 	act = ActionManager::get_action (X_("Solo"), X_("solo-use-afl"));
-	ARDOUR_UI::instance()->tooltips().set_tip (afl_button, _("Solo controls toggle after-fader-listen"));
+	set_tooltip (afl_button, _("Solo controls toggle after-fader-listen"));
 	if (act) {
 		afl_button.set_related_action (act);
 	}
 
 	act = ActionManager::get_action (X_("Solo"), X_("solo-use-pfl"));
-	ARDOUR_UI::instance()->tooltips().set_tip (pfl_button, _("Solo controls toggle pre-fader-listen"));
+	set_tooltip (pfl_button, _("Solo controls toggle pre-fader-listen"));
 	if (act) {
 		pfl_button.set_related_action (act);
 	}
@@ -159,7 +161,7 @@ MonitorSection::MonitorSection (Session* s)
 	solo_boost_control = new ArdourKnob ();
 	solo_boost_control->set_name("monitor knob");
 	solo_boost_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
-	ARDOUR_UI::instance()->tooltips().set_tip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
+	set_tooltip (*solo_boost_control, _("Gain increase for soloed signals (0dB is normal)"));
 
 	solo_boost_display = new ArdourDisplay ();
 	solo_boost_display->set_name("monitor section cut");
@@ -188,7 +190,7 @@ MonitorSection::MonitorSection (Session* s)
 	solo_cut_control = new ArdourKnob ();
 	solo_cut_control->set_name ("monitor knob");
 	solo_cut_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
-	ARDOUR_UI::instance()->tooltips().set_tip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
+	set_tooltip (*solo_cut_control, _("Gain reduction non-soloed signals\nA value above -inf dB causes \"solo-in-front\""));
 
 	solo_cut_display = new ArdourDisplay ();
 	solo_cut_display->set_name("monitor section cut");
@@ -214,7 +216,7 @@ MonitorSection::MonitorSection (Session* s)
 	dim_control = new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Detent);
 	dim_control->set_name ("monitor knob");
 	dim_control->set_size_request (PX_SCALE(40), PX_SCALE(40));
-	ARDOUR_UI::instance()->tooltips().set_tip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
+	set_tooltip (*dim_control, _("Gain reduction to use when dimming monitor outputs"));
 
 	dim_display = new ArdourDisplay ();
 	dim_display->set_name("monitor section cut");
@@ -240,7 +242,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	exclusive_solo_button.set_text (_("Excl. Solo"));
 	exclusive_solo_button.set_name (X_("monitor solo exclusive"));
-	ARDOUR_UI::instance()->set_tip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
+	set_tooltip (&exclusive_solo_button, _("Exclusive solo means that only 1 solo is active at a time"));
 
 	act = ActionManager::get_action (X_("Monitor"), X_("toggle-exclusive-solo"));
 	if (act) {
@@ -249,7 +251,7 @@ MonitorSection::MonitorSection (Session* s)
 
 	solo_mute_override_button.set_text (_("Solo » Mute"));
 	solo_mute_override_button.set_name (X_("monitor solo override"));
-	ARDOUR_UI::instance()->set_tip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
+	set_tooltip (&solo_mute_override_button, _("If enabled, solo will override mute\n(a soloed & muted track or bus will be audible)"));
 
 	act = ActionManager::get_action (X_("Monitor"), X_("toggle-mute-overrides-solo"));
 	if (act) {
@@ -1456,7 +1458,7 @@ MonitorSection::update_output_display ()
 	tooltip_cstr = new char[tooltip.str().size() + 1];
 	strcpy(tooltip_cstr, tooltip.str().c_str());
 
-	ARDOUR_UI::instance()->set_tip (output_button, tooltip_cstr, "");
+	set_tooltip (output_button, tooltip_cstr, "");
 
 	if (each_io_has_one_connection) {
 		if (total_connection_count == ardour_connection_count) {

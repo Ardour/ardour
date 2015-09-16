@@ -74,6 +74,7 @@
 #include "route_processor_selection.h"
 #include "send_ui.h"
 #include "timers.h"
+#include "tooltips.h"
 
 #include "i18n.h"
 
@@ -322,10 +323,10 @@ ProcessorEntry::setup_tooltip ()
 				postfix = string_compose(_("\nThis mono plugin has been replicated %1 times."), replicated);
 			}
 			if (pi->plugin()->has_editor()) {
-				ARDOUR_UI::instance()->set_tip (_button,
+				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\nAlt+double-click to show generic GUI.%2"), name (Wide), postfix));
 			} else {
-				ARDOUR_UI::instance()->set_tip (_button,
+				ARDOUR_UI_UTILS::set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
 			}
 			return;
@@ -336,7 +337,7 @@ ProcessorEntry::setup_tooltip ()
 			return;
 		}
 	}
-	ARDOUR_UI::instance()->set_tip (_button, string_compose ("<b>%1</b>", name (Wide)));
+	ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
 
 string
@@ -510,7 +511,7 @@ ProcessorEntry::toggle_panner_link ()
 ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string const & n)
 	: _control (c)
 	, _adjustment (gain_to_slider_position_with_max (1.0, Config->get_max_gain()), 0, 1, 0.01, 0.1)
-	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable>(), 0, max(13.f, rintf(13.f * ARDOUR_UI::ui_scale)))
+	, _slider (&_adjustment, boost::shared_ptr<PBD::Controllable>(), 0, max(13.f, rintf(13.f * UIConfiguration::instance().get_ui_scale())))
 	, _slider_persistant_tooltip (&_slider)
 	, _button (ArdourButton::led_default_elements)
 	, _ignore_ui_adjustment (false)
@@ -603,7 +604,7 @@ ProcessorEntry::Control::set_tooltip ()
 
 	string sm = Glib::Markup::escape_text (tmp);
 	_slider_persistant_tooltip.set_tip (sm);
-	ARDOUR_UI::instance()->set_tip (_button, sm);
+	ARDOUR_UI_UTILS::set_tooltip (_button, sm);
 }
 
 void
@@ -792,7 +793,7 @@ PluginInsertProcessorEntry::plugin_insert_splitting_changed ()
 
 	if (_plugin_insert->splitting () ||  in != sinks)
 	{
-		_routing_icon.set_size_request (-1, std::max (7.f, rintf(7.f * ARDOUR_UI::ui_scale)));
+		_routing_icon.set_size_request (-1, std::max (7.f, rintf(7.f * UIConfiguration::instance().get_ui_scale())));
 		_routing_icon.set_visible(true);
 		_input_icon.show();
 	} else {
@@ -817,7 +818,7 @@ PluginInsertProcessorEntry::hide_things ()
 ProcessorEntry::PortIcon::PortIcon(bool input) {
 	_input = input;
 	_ports = ARDOUR::ChanCount(ARDOUR::DataType::AUDIO, 1);
-	set_size_request (-1, std::max (2.f, rintf(2.f * ARDOUR_UI::ui_scale)));
+	set_size_request (-1, std::max (2.f, rintf(2.f * UIConfiguration::instance().get_ui_scale())));
 }
 
 bool
@@ -838,7 +839,7 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
-	const double dx = rint(max(2., 2. * ARDOUR_UI::ui_scale));
+	const double dx = rint(max(2., 2. * UIConfiguration::instance().get_ui_scale()));
 	if (_ports.n_total() > 1) {
 		for (uint32_t i = 0; i < _ports.n_total(); ++i) {
 			if (i < _ports.n_midi()) {
@@ -886,7 +887,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
 
-	cairo_set_line_width (cr, max (1.f, ARDOUR_UI::ui_scale));
+	cairo_set_line_width (cr, max (1.f, UIConfiguration::instance().get_ui_scale()));
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 
 	Gtk::Allocation a = get_allocation();
@@ -936,7 +937,7 @@ ProcessorEntry::RoutingIcon::on_expose_event (GdkEventExpose* ev)
 		cairo_curve_to (cr, si_x, 0, si_x0, height, si_x0, 0);
 		cairo_stroke (cr);
 	} else if (midi_sources == 0 && midi_sinks == 1) {
-		const double dx = 1 + rint(max(2., 2. * ARDOUR_UI::ui_scale));
+		const double dx = 1 + rint(max(2., 2. * UIConfiguration::instance().get_ui_scale()));
 		// draw "T"
 		//  TODO connect back to track-input of last midi-out if any, otherwise draw "X"
 		const float si_x  = rintf(width * .2f) + .5f;
@@ -1048,7 +1049,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 			);
 	}
 
-	ARDOUR_UI::instance()->set_tip (processor_display, _("Right-click to add/remove/edit\nplugins,inserts,sends and more"));
+	ARDOUR_UI_UTILS::set_tooltip (processor_display, _("Right-click to add/remove/edit\nplugins,inserts,sends and more"));
 }
 
 ProcessorBox::~ProcessorBox ()

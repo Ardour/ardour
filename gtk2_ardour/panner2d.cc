@@ -35,14 +35,13 @@
 
 #include "canvas/colors.h"
 
-#include "ardour_ui.h"
-#include "global_signals.h"
 #include "panner2d.h"
 #include "keyboard.h"
 #include "gui_thread.h"
 #include "rgb_macros.h"
 #include "utils.h"
 #include "public_editor.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -91,7 +90,7 @@ Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
 		have_colors = true;
 	}
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &Panner2d::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &Panner2d::color_handler));
 
 	panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&Panner2d::handle_state_change, this), gui_context());
 
@@ -115,7 +114,7 @@ void
 Panner2d::set_colors ()
 {
 	// TODO get all colors from theme, resolve dups
-	colors.background = ARDOUR_UI::config()->color ("mono panner bg");
+	colors.background = UIConfiguration::instance().color ("mono panner bg");
 	colors.crosshairs =          0x4884a9ff; // 0.282, 0.517, 0.662, 1.0
 	colors.signalcircle_border = 0x84c5e1ff; // 0.517, 0.772, 0.882, 1.0
 	colors.signalcircle =        0x4884a9ff; // 0.282, 0.517, 0.662, 1.0  // also used with a = 0.9
@@ -471,7 +470,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 	uint32_t bg = colors.background;
 	if (_send_mode) {
-		bg = ARDOUR_UI::config()->color ("send bg");
+		bg = UIConfiguration::instance().color ("send bg");
 	}
 
 	if (!panner_shell->bypassed()) {

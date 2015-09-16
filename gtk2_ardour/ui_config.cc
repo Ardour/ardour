@@ -29,13 +29,19 @@
 
 #include <cairo/cairo.h>
 
+#include <pango/pangoft2.h> // for fontmap resolution control for GnomeCanvas
+#include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
+
 #include <glibmm/miscutils.h>
 #include <glib/gstdio.h>
+
+#include <gtkmm/settings.h>
 
 #include "pbd/convert.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/xml++.h"
 #include "pbd/file_utils.h"
+#include "pbd/locale_guard.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
@@ -43,9 +49,8 @@
 #include "gtkmm2ext/gtk_ui.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/utils.h"
 
-#include "ardour_ui.h"
-#include "global_signals.h"
 #include "ui_config.h"
 
 #include "i18n.h"
@@ -57,9 +62,15 @@ using namespace ArdourCanvas;
 
 static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
-UIConfiguration* UIConfiguration::_instance = 0;
 
 static const double hue_width = 18.0;
+
+UIConfiguration&
+UIConfiguration::instance ()
+{
+	static UIConfiguration s_instance;
+	return s_instance;
+}
 
 UIConfiguration::UIConfiguration ()
 	:
@@ -77,11 +88,9 @@ UIConfiguration::UIConfiguration ()
 	modifiers_modified (false),
 	block_save (0)
 {
-	_instance = this;
-
 	load_state();
 
-	ARDOUR_UI_UTILS::ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
+	ColorsChanged.connect (boost::bind (&UIConfiguration::colors_changed, this));
 
 	ParameterChanged.connect (sigc::mem_fun (*this, &UIConfiguration::parameter_changed));
 }
@@ -142,7 +151,41 @@ UIConfiguration::reset_gtk_theme ()
 
 	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
 }
-	
+
+void
+UIConfiguration::reset_dpi ()
+{
+	long val = get_font_scale();
+	set_pango_fontsize ();
+	/* Xft rendering */
+
+	gtk_settings_set_long_property (gtk_settings_get_default(),
+					"gtk-xft-dpi", val, "ardour");
+	DPIReset(); //Emit Signal
+}
+
+void
+UIConfiguration::set_pango_fontsize ()
+{
+	long val = get_font_scale();
+
+	/* FT2 rendering - used by GnomeCanvas, sigh */
+
+#ifndef PLATFORM_WINDOWS
+	pango_ft2_font_map_set_resolution ((PangoFT2FontMap*) pango_ft2_font_map_new(), val/1024, val/1024);
+#endif
+
+	/* Cairo rendering, in case there is any */
+
+	pango_cairo_font_map_set_resolution ((PangoCairoFontMap*) pango_cairo_font_map_get_default(), val/1024);
+}
+
+float
+UIConfiguration::get_ui_scale ()
+{
+	return get_font_scale () / 102400.;
+}
+
 void
 UIConfiguration::map_parameters (boost::function<void (std::string)>& functor)
 {
@@ -205,7 +248,7 @@ UIConfiguration::load_defaults ()
 	if (ret == 0) {
 		/* reload color theme */
 		load_color_theme (false);
-		ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+		ColorsChanged (); /* EMIT SIGNAL */
 	}
 
 	return ret;
@@ -253,7 +296,7 @@ UIConfiguration::load_color_theme (bool allow_own)
 			return -1;
 		}
 
-		ARDOUR_UI_UTILS::ColorsChanged ();
+		ColorsChanged ();
 	} else {
 		warning << string_compose (_("Color file %1 not found"), basename) << endmsg;
 	}
@@ -645,7 +688,7 @@ UIConfiguration::set_color (string const& name, ArdourCanvas::Color color)
 	i->second = color;
 	colors_modified = true;
 
-	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+	ColorsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -659,7 +702,7 @@ UIConfiguration::set_alias (string const & name, string const & alias)
 	i->second = alias;
 	aliases_modified = true;
 
-	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+	ColorsChanged (); /* EMIT SIGNAL */
 }
 
 void
@@ -674,7 +717,7 @@ UIConfiguration::set_modifier (string const & name, SVAModifier svam)
 	m->second = svam;
 	modifiers_modified = true;
 
-	ARDOUR_UI_UTILS::ColorsChanged (); /* EMIT SIGNAL */
+	ColorsChanged (); /* EMIT SIGNAL */
 }
 
 void

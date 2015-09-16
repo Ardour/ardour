@@ -216,7 +216,7 @@ ARDOUR_UI::tearoff_settings (const char* name) const
 	return 0;
 }
 
-#define PX_SCALE(px) std::max((float)px, rintf((float)px * ARDOUR_UI::ui_scale))
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
 
 void
 ARDOUR_UI::setup_transport ()
@@ -678,7 +678,7 @@ ARDOUR_UI::editor_realized ()
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	Config->map_parameters (pc);
 
-	reset_dpi ();
+	UIConfiguration::instance().reset_dpi ();
 }
 
 void
@@ -743,7 +743,7 @@ ARDOUR_UI::toggle_follow_edits ()
 	RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	ui_config->set_follow_edits (tact->get_active ());
+	UIConfiguration::instance().set_follow_edits (tact->get_active ());
 }
 
 	

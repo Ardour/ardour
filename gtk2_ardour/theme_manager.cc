@@ -47,8 +47,7 @@
 #include "ardour_dialog.h"
 #include "theme_manager.h"
 #include "rgb_macros.h"
-#include "ardour_ui.h"
-#include "global_signals.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -58,10 +57,6 @@ using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
-
-namespace ARDOUR_UI_UTILS {
-	sigc::signal<void> ColorsChanged;
-}
 
 ThemeManager::ThemeManager()
         : dark_button (_("Dark Theme"))
@@ -133,7 +128,7 @@ ThemeManager::ThemeManager()
 
 	if (icon_sets.size() > 1) {
 		Gtkmm2ext::set_popdown_strings (icon_set_dropdown, icon_sets);
-		icon_set_dropdown.set_active_text (ARDOUR_UI::config()->get_icon_set());
+		icon_set_dropdown.set_active_text (UIConfiguration::instance().get_icon_set());
 
 		hbox = Gtk::manage (new Gtk::HBox());
 		hbox->set_spacing (6);
@@ -206,7 +201,7 @@ ThemeManager::ThemeManager()
 	setup_aliases ();
 	setup_modifiers ();
 	
-	ARDOUR_UI_UTILS::ColorsChanged.connect (sigc::mem_fun (*this, &ThemeManager::colors_changed));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ThemeManager::colors_changed));
 }
 
 ThemeManager::~ThemeManager()
@@ -216,7 +211,7 @@ ThemeManager::~ThemeManager()
 void
 ThemeManager::setup_modifiers ()
 {
-	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration* uic (&UIConfiguration::instance());
 	UIConfiguration::Modifiers& modifiers (uic->modifiers);
 	Gtk::HBox* mod_hbox;
 	Gtk::Label* mod_label;
@@ -254,7 +249,7 @@ ThemeManager::modifier_edited (Gtk::Range* range, string name)
 	
 	double alpha = range->get_value();
 	SVAModifier svam (SVAModifier::Assign, -1.0, -1.0, alpha);
-	ARDOUR_UI::config()->set_modifier (name, svam);
+	UIConfiguration::instance().set_modifier (name, svam);
 }
 
 void
@@ -274,7 +269,7 @@ ThemeManager::save (string /*path*/)
 void
 ThemeManager::on_flat_buttons_toggled ()
 {
-	ARDOUR_UI::config()->set_flat_buttons (flat_buttons.get_active());
+	UIConfiguration::instance().set_flat_buttons (flat_buttons.get_active());
 	ArdourButton::set_flat_buttons (flat_buttons.get_active());
 	/* force a redraw */
 	gtk_rc_reset_styles (gtk_settings_get_default());
@@ -283,34 +278,34 @@ ThemeManager::on_flat_buttons_toggled ()
 void
 ThemeManager::on_blink_rec_arm_toggled ()
 {
-	ARDOUR_UI::config()->set_blink_rec_arm (blink_rec_button.get_active());
-	ARDOUR::Config->ParameterChanged("blink-rec-arm");
+	UIConfiguration::instance().set_blink_rec_arm (blink_rec_button.get_active());
+	UIConfiguration::instance().ParameterChanged("blink-rec-arm");
 }
 
 void
 ThemeManager::on_region_color_toggled ()
 {
-	ARDOUR_UI::config()->set_color_regions_using_track_color (region_color_button.get_active());
+	UIConfiguration::instance().set_color_regions_using_track_color (region_color_button.get_active());
 }
 
 void
 ThemeManager::on_show_clip_toggled ()
 {
-	ARDOUR_UI::config()->set_show_waveform_clipping (show_clipping_button.get_active());
+	UIConfiguration::instance().set_show_waveform_clipping (show_clipping_button.get_active());
 	// "show-waveform-clipping" was a session config key
-	ArdourCanvas::WaveView::set_global_show_waveform_clipping (ARDOUR_UI::config()->get_show_waveform_clipping());
+	ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
 }
 
 void
 ThemeManager::on_all_dialogs_toggled ()
 {
-	ARDOUR_UI::config()->set_all_floating_windows_are_dialogs (all_dialogs.get_active());
+	UIConfiguration::instance().set_all_floating_windows_are_dialogs (all_dialogs.get_active());
 }
 
 void
 ThemeManager::on_transients_follow_front_toggled ()
 {
-	ARDOUR_UI::config()->set_transients_follow_front (transients_follow_front.get_active());
+	UIConfiguration::instance().set_transients_follow_front (transients_follow_front.get_active());
 }
 
 void
@@ -318,7 +313,7 @@ ThemeManager::on_waveform_gradient_depth_change ()
 {
 	double v = waveform_gradient_depth.get_value();
 
-	ARDOUR_UI::config()->set_waveform_gradient_depth (v);
+	UIConfiguration::instance().set_waveform_gradient_depth (v);
 	ArdourCanvas::WaveView::set_global_gradient_depth (v);
 }
 
@@ -327,14 +322,14 @@ ThemeManager::on_timeline_item_gradient_depth_change ()
 {
 	double v = timeline_item_gradient_depth.get_value();
 
-	ARDOUR_UI::config()->set_timeline_item_gradient_depth (v);
+	UIConfiguration::instance().set_timeline_item_gradient_depth (v);
 }
 
 void
 ThemeManager::on_icon_set_changed ()
 {
 	string new_set = icon_set_dropdown.get_active_text();
-	ARDOUR_UI::config()->set_icon_set (new_set);
+	UIConfiguration::instance().set_icon_set (new_set);
 }
 
 void
@@ -342,7 +337,7 @@ ThemeManager::on_dark_theme_button_toggled()
 {
 	if (!dark_button.get_active()) return;
 
-	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration* uic (&UIConfiguration::instance());
 	
         uic->set_color_file("dark");
 }
@@ -352,7 +347,7 @@ ThemeManager::on_light_theme_button_toggled()
 {
 	if (!light_button.get_active()) return;
 
-	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration* uic (&UIConfiguration::instance());
 	
         uic->set_color_file("light");
 }
@@ -365,7 +360,7 @@ ThemeManager::set_ui_to_state()
 	 * hence a common combined update function suffices
 	 */
 
-	if (ARDOUR_UI::config()->get_color_file() == "light") {
+	if (UIConfiguration::instance().get_color_file() == "light") {
 		light_button.set_active(true);
 	} else {
 		dark_button.set_active(true);
@@ -374,14 +369,14 @@ ThemeManager::set_ui_to_state()
 	/* there is no need to block signal handlers, here,
 	 * all elements check if the value has changed and ignore NOOPs 
 	 */
-	all_dialogs.set_active (ARDOUR_UI::config()->get_all_floating_windows_are_dialogs());
-	transients_follow_front.set_active (ARDOUR_UI::config()->get_transients_follow_front());
-	flat_buttons.set_active (ARDOUR_UI::config()->get_flat_buttons());
-	blink_rec_button.set_active (ARDOUR_UI::config()->get_blink_rec_arm());
-	region_color_button.set_active (ARDOUR_UI::config()->get_color_regions_using_track_color());
-	show_clipping_button.set_active (ARDOUR_UI::config()->get_show_waveform_clipping());
-	waveform_gradient_depth.set_value(ARDOUR_UI::config()->get_waveform_gradient_depth());
-	timeline_item_gradient_depth.set_value(ARDOUR_UI::config()->get_timeline_item_gradient_depth());
+	all_dialogs.set_active (UIConfiguration::instance().get_all_floating_windows_are_dialogs());
+	transients_follow_front.set_active (UIConfiguration::instance().get_transients_follow_front());
+	flat_buttons.set_active (UIConfiguration::instance().get_flat_buttons());
+	blink_rec_button.set_active (UIConfiguration::instance().get_blink_rec_arm());
+	region_color_button.set_active (UIConfiguration::instance().get_color_regions_using_track_color());
+	show_clipping_button.set_active (UIConfiguration::instance().get_show_waveform_clipping());
+	waveform_gradient_depth.set_value(UIConfiguration::instance().get_waveform_gradient_depth());
+	timeline_item_gradient_depth.set_value(UIConfiguration::instance().get_timeline_item_gradient_depth());
 }
 
 void
@@ -391,7 +386,7 @@ ThemeManager::reset_canvas_colors()
 	string basename;
 
 	basename = "my-";
-	basename += ARDOUR_UI::config()->get_color_file();
+	basename += UIConfiguration::instance().get_color_file();
 	basename += ".colors";
 
 	if (find_file (ardour_config_search_path(), basename, cfile)) {
@@ -400,8 +395,8 @@ ThemeManager::reset_canvas_colors()
 		/* don't really care if it fails */
 	}
 
-	ARDOUR_UI::config()->load_defaults();
-	ARDOUR_UI::config()->save_state ();
+	UIConfiguration::instance().load_defaults();
+	UIConfiguration::instance().save_state ();
 	set_ui_to_state();
 }
 
@@ -457,7 +452,7 @@ ThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCanvas::
 
 	/* we want the colors sorted by hue, with their name */
 
-	UIConfiguration::Colors& colors (ARDOUR_UI::config()->colors);
+	UIConfiguration::Colors& colors (UIConfiguration::instance().colors);
 	vector<NamedColor> nc;
 	for (UIConfiguration::Colors::const_iterator x = colors.begin(); x != colors.end(); ++x) {
 		nc.push_back (NamedColor (x->first, HSV (x->second)));
@@ -498,7 +493,7 @@ ThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCanvas::
 void
 ThemeManager::palette_size_request (Gtk::Requisition* req)
 {
-	uint32_t ncolors = ARDOUR_UI::config()->colors.size();
+	uint32_t ncolors = UIConfiguration::instance().colors.size();
 	const int box_size = 20;
 
 	double c = sqrt ((double)ncolors);
@@ -536,7 +531,7 @@ ThemeManager::edit_palette_color (std::string name)
 {
 	using namespace ArdourCanvas;
 	double r,g, b, a;
-	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration* uic (&UIConfiguration::instance());
 	ArdourCanvas::Color c = uic->color (name);
 	Gdk::Color gdkcolor;
 
@@ -560,7 +555,7 @@ ThemeManager::palette_color_response (int result, std::string name)
 
 	color_dialog_connection.disconnect ();
 	
-	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration* uic (&UIConfiguration::instance());
 	Gdk::Color gdkcolor;
 	double r,g, b, a;
 
@@ -588,7 +583,7 @@ ThemeManager::alias_palette_event (GdkEvent* ev, string new_alias, string target
 {
 	switch (ev->type) {
 	case GDK_BUTTON_RELEASE:
-		ARDOUR_UI::config()->set_alias (target_name, new_alias);
+		UIConfiguration::instance().set_alias (target_name, new_alias);
 		return true;
 		break;
 	default:
@@ -609,7 +604,7 @@ ThemeManager::alias_palette_response (int response, std::string target_name, std
 
 	case GTK_RESPONSE_REJECT:
 		/* revert choice */
-		ARDOUR_UI::config()->set_alias (target_name, old_alias);
+		UIConfiguration::instance().set_alias (target_name, old_alias);
 		break;
 
 	default:
@@ -623,7 +618,7 @@ ThemeManager::alias_palette_response (int response, std::string target_name, std
 void
 ThemeManager::choose_color_from_palette (string const & name)
 {
-	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration* uic (&UIConfiguration::instance());
 	UIConfiguration::ColorAliases::iterator i = uic->color_aliases.find (name);
 
 	if (i == uic->color_aliases.end()) {
@@ -657,7 +652,7 @@ ThemeManager::setup_aliases ()
 {
 	using namespace ArdourCanvas;
 	
-	UIConfiguration* uic (ARDOUR_UI::config());
+	UIConfiguration* uic (&UIConfiguration::instance());
 	UIConfiguration::ColorAliases& aliases (uic->color_aliases);
 
 	alias_list->clear ();

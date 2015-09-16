@@ -53,12 +53,12 @@
 #include "control_point.h"
 #include "gui_thread.h"
 #include "rgb_macros.h"
-#include "ardour_ui.h"
 #include "public_editor.h"
 #include "selection.h"
 #include "time_axis_view.h"
 #include "point_selection.h"
 #include "automation_time_axis.h"
+#include "ui_config.h"
 
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
@@ -950,7 +950,7 @@ AutomationLine::set_selected_points (PointSelection const & points)
 void
 AutomationLine::set_colors ()
 {
-	set_line_color (ARDOUR_UI::config()->color ("automation line"));
+	set_line_color (UIConfiguration::instance().color ("automation line"));
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->set_color ();
 	}

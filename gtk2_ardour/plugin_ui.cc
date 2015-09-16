@@ -58,7 +58,6 @@
 #endif
 
 #include "ardour_window.h"
-#include "ardour_ui.h"
 #include "prompter.h"
 #include "plugin_ui.h"
 #include "utils.h"
@@ -68,6 +67,7 @@
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
 #include "new_plugin_preset_dialog.h"
+#include "tooltips.h"
 
 #include "i18n.h"
 
@@ -428,12 +428,12 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 {
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
-	ARDOUR_UI::instance()->set_tip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
-	ARDOUR_UI::instance()->set_tip (add_button, _("Save a new preset"));
-	ARDOUR_UI::instance()->set_tip (save_button, _("Save the current preset"));
-	ARDOUR_UI::instance()->set_tip (delete_button, _("Delete the current preset"));
-	ARDOUR_UI::instance()->set_tip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
-	ARDOUR_UI::instance()->set_tip (bypass_button, _("Disable signal processing by the plugin"));
+	set_tooltip (_preset_combo, _("Presets (if any) for this plugin\n(Both factory and user-created)"));
+	set_tooltip (add_button, _("Save a new preset"));
+	set_tooltip (save_button, _("Save the current preset"));
+	set_tooltip (delete_button, _("Delete the current preset"));
+	set_tooltip (reset_button, _("Reset parameters to default (if no parameters are in automation play mode)"));
+	set_tooltip (bypass_button, _("Disable signal processing by the plugin"));
 	_no_load_preset = 0;
 
 	update_preset_list ();
@@ -470,8 +470,8 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	focus_button.add (*focus_out_image);
 
-	ARDOUR_UI::instance()->set_tip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
-	ARDOUR_UI::instance()->set_tip (bypass_button, _("Click to enable/disable this plugin"));
+	set_tooltip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
+	set_tooltip (bypass_button, _("Click to enable/disable this plugin"));
 
 	description_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_description));
 	description_expander.set_expanded(false);
@@ -682,14 +682,14 @@ PlugUIBase::focus_toggled (GdkEventButton*)
 		focus_button.remove ();
 		focus_button.add (*focus_out_image);
 		focus_out_image->show ();
-		ARDOUR_UI::instance()->set_tip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
+		set_tooltip (focus_button, string_compose (_("Click to allow the plugin to receive keyboard events that %1 would normally use as a shortcut"), PROGRAM_NAME));
 		KeyboardFocused (false);
 	} else {
 		Keyboard::the_keyboard().magic_widget_grab_focus();
 		focus_button.remove ();
 		focus_button.add (*focus_in_image);
 		focus_in_image->show ();
-		ARDOUR_UI::instance()->set_tip (focus_button, string_compose (_("Click to allow normal use of %1 keyboard shortcuts"), PROGRAM_NAME));
+		set_tooltip (focus_button, string_compose (_("Click to allow normal use of %1 keyboard shortcuts"), PROGRAM_NAME));
 		KeyboardFocused (true);
 	}
 

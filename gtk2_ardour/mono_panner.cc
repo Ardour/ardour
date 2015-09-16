@@ -38,11 +38,10 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 
-#include "ardour_ui.h"
-#include "global_signals.h"
 #include "mono_panner.h"
 #include "mono_panner_editor.h"
 #include "rgb_macros.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -76,7 +75,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 	if (!have_font) {
 		Pango::FontDescription font;
 		Pango::AttrFontDesc* font_attr;
-		font = Pango::FontDescription (ARDOUR_UI::config()->get_SmallBoldMonospaceFont());
+		font = Pango::FontDescription (UIConfiguration::instance().get_SmallBoldMonospaceFont());
 		font_attr = new Pango::AttrFontDesc (Pango::Attribute::create_attr_font_desc (font));
 		panner_font_attributes.change(*font_attr);
 		delete font_attr;
@@ -87,7 +86,7 @@ MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
 
 	_panner_shell->Changed.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::bypass_handler, this), gui_context());
 	_panner_shell->PannableChanged.connect (panshell_connections, invalidator (*this), boost::bind (&MonoPanner::pannable_handler, this), gui_context());
-	ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &MonoPanner::color_handler));
 
 	set_tooltip ();
 }
@@ -139,7 +138,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	const int lr_box_size = height - 2 * step_down;
 	const int pos_box_size = (int)(rint(step_down * .8)) | 1;
 	const int top_step = step_down - pos_box_size;
-	const double corner_radius = 5 * ARDOUR_UI::ui_scale;
+	const double corner_radius = 5 * UIConfiguration::instance().get_ui_scale();
 
 	o = colors.outline;
 	f = colors.fill;
@@ -158,7 +157,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	}
 
 	if (_send_mode) {
-		b = ARDOUR_UI::config()->color ("send bg");
+		b = UIConfiguration::instance().color ("send bg");
 	}
 	/* background */
 	context->set_source_rgba (UINT_RGBA_R_FLT(b), UINT_RGBA_G_FLT(b), UINT_RGBA_B_FLT(b), UINT_RGBA_A_FLT(b));
@@ -254,8 +253,8 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 	context->set_line_width (2.0);
 	context->move_to (spos + (pos_box_size/2.0), top_step); /* top right */
 	context->rel_line_to (0.0, pos_box_size); /* lower right */
-	context->rel_line_to (-pos_box_size/2.0, 4.0 * ARDOUR_UI::ui_scale); /* bottom point */
-	context->rel_line_to (-pos_box_size/2.0, -4.0 * ARDOUR_UI::ui_scale); /* lower left */
+	context->rel_line_to (-pos_box_size/2.0, 4.0 * UIConfiguration::instance().get_ui_scale()); /* bottom point */
+	context->rel_line_to (-pos_box_size/2.0, -4.0 * UIConfiguration::instance().get_ui_scale()); /* lower left */
 	context->rel_line_to (0.0, -pos_box_size); /* upper left */
 	context->close_path ();
 
@@ -267,7 +266,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 
 	/* marker line */
 	context->set_line_width (1.0);
-	context->move_to (spos, 1 + top_step + pos_box_size + 4.0 * ARDOUR_UI::ui_scale);
+	context->move_to (spos, 1 + top_step + pos_box_size + 4.0 * UIConfiguration::instance().get_ui_scale());
 	context->line_to (spos, half_lr_box + step_down + lr_box_size - 1);
 	context->set_source_rgba (UINT_RGBA_R_FLT(po), UINT_RGBA_G_FLT(po), UINT_RGBA_B_FLT(po), UINT_RGBA_A_FLT(po));
 	context->stroke ();
@@ -486,12 +485,12 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-        colors.fill = ARDOUR_UI::config()->color_mod ("mono panner fill", "panner fill");
-        colors.outline = ARDOUR_UI::config()->color ("mono panner outline");
-        colors.text = ARDOUR_UI::config()->color ("mono panner text");
-        colors.background = ARDOUR_UI::config()->color ("mono panner bg");
-        colors.pos_outline = ARDOUR_UI::config()->color ("mono panner position outline");
-        colors.pos_fill = ARDOUR_UI::config()->color_mod ("mono panner position fill", "mono panner position fill");
+        colors.fill = UIConfiguration::instance().color_mod ("mono panner fill", "panner fill");
+        colors.outline = UIConfiguration::instance().color ("mono panner outline");
+        colors.text = UIConfiguration::instance().color ("mono panner text");
+        colors.background = UIConfiguration::instance().color ("mono panner bg");
+        colors.pos_outline = UIConfiguration::instance().color ("mono panner position outline");
+        colors.pos_fill = UIConfiguration::instance().color_mod ("mono panner position fill", "mono panner position fill");
 }
 
 void

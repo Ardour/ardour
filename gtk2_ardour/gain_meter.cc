@@ -34,9 +34,7 @@
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
 
-#include "ardour_ui.h"
 #include "gain_meter.h"
-#include "global_signals.h"
 #include "logmeter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -44,6 +42,8 @@
 #include "utils.h"
 #include "meter_patterns.h"
 #include "timers.h"
+#include "tooltips.h"
+#include "ui_config.h"
 
 #include "ardour/session.h"
 #include "ardour/route.h"
@@ -101,8 +101,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	next_release_selects = false;
 	_width = Wide;
 
-	fader_length = rint (fader_length * ARDOUR_UI::ui_scale);
-	fader_girth = rint (fader_girth * ARDOUR_UI::ui_scale);
+	fader_length = rint (fader_length * UIConfiguration::instance().get_ui_scale());
+	fader_girth = rint (fader_girth * UIConfiguration::instance().get_ui_scale());
 
 	if (horizontal) {
 		gain_slider = manage (new HSliderController (&gain_adjustment, boost::shared_ptr<PBD::Controllable>(), fader_length, fader_girth));
@@ -146,8 +146,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
-	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
+	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
+	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
@@ -171,8 +171,8 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	RedrawMetrics.connect (sigc::mem_fun(*this, &GainMeterBase::redraw_metrics));
 
 	UI::instance()->theme_changed.connect (sigc::mem_fun(*this, &GainMeterBase::on_theme_changed));
-	ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
-	DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), false));
+	UIConfiguration::instance().DPIReset.connect (sigc::bind(sigc::mem_fun (*this, &GainMeterBase::color_handler), true));
 }
 
 GainMeterBase::~GainMeterBase ()
@@ -901,7 +901,7 @@ GainMeterBase::update_meters()
 			peak_display.set_text (buf);
 		}
 	}
-	if (mpeak >= ARDOUR_UI::config()->get_meter_peak()) {
+	if (mpeak >= UIConfiguration::instance().get_meter_peak()) {
 		peak_display.set_name ("MixerStripPeakDisplayPeak");
 	}
 }
@@ -936,7 +936,7 @@ GainMeterBase::redraw_metrics()
 	meter_ticks2_area.queue_draw ();
 }
 
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * UIConfiguration::instance().get_ui_scale()))
 
 GainMeter::GainMeter (Session* s, int fader_length)
 	: GainMeterBase (s, false, fader_length, 24)
@@ -959,8 +959,8 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
-	ARDOUR_UI::instance()->set_tip (gain_automation_state_button, _("Fader automation mode"));
-	ARDOUR_UI::instance()->set_tip (gain_automation_style_button, _("Fader automation type"));
+	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
+	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
 	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);

@@ -51,6 +51,7 @@
 #include "time_axis_view.h"
 #include "editor_drag.h"
 #include "editor_cursors.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -123,7 +124,7 @@ Editor::initialize_rulers ()
 {
 	ruler_grabbed_widget = 0;
 
-	Pango::FontDescription font (ARDOUR_UI::config()->get_SmallerFont());
+	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
 
 	_timecode_metric = new TimecodeMetric (this);
 	_bbt_metric = new BBTMetric (this);

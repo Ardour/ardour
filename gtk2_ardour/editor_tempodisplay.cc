@@ -48,8 +48,8 @@
 #include "rgb_macros.h"
 #include "gui_thread.h"
 #include "time_axis_view.h"
-#include "ardour_ui.h"
 #include "tempo_lines.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -85,15 +85,15 @@ Editor::draw_metric_marks (const Metrics& metrics)
 
 		if ((ms = dynamic_cast<const MeterSection*>(*i)) != 0) {
 			snprintf (buf, sizeof(buf), "%g/%g", ms->divisions_per_bar(), ms->note_divisor ());
-			metric_marks.push_back (new MeterMarker (*this, *meter_group, ARDOUR_UI::config()->color ("meter marker"), buf,
+			metric_marks.push_back (new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf,
 								 *(const_cast<MeterSection*>(ms))));
 		} else if ((ts = dynamic_cast<const TempoSection*>(*i)) != 0) {
-			if (ARDOUR_UI::config()->get_allow_non_quarter_pulse()) {
+			if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
 				snprintf (buf, sizeof (buf), "%.2f/%.0f", ts->beats_per_minute(), ts->note_type());
 			} else {
 				snprintf (buf, sizeof (buf), "%.2f", ts->beats_per_minute());
 			}
-			metric_marks.push_back (new TempoMarker (*this, *tempo_group, ARDOUR_UI::config()->color ("tempo marker"), buf,
+			metric_marks.push_back (new TempoMarker (*this, *tempo_group, UIConfiguration::instance().color ("tempo marker"), buf,
 								 *(const_cast<TempoSection*>(ts))));
 		}
 

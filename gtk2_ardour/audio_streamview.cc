@@ -44,9 +44,9 @@
 #include "region_gain_line.h"
 #include "selection.h"
 #include "public_editor.h"
-#include "ardour_ui.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -187,7 +187,7 @@ AudioStreamView::setup_rec_box ()
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.track()->record_enabled()) {
-			if (_trackview.audio_track()->mode() == Normal && ARDOUR_UI::config()->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
+			if (_trackview.audio_track()->mode() == Normal && UIConfiguration::instance().get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
 
@@ -315,7 +315,7 @@ AudioStreamView::rec_peak_range_ready (framepos_t start, framecnt_t cnt, boost::
 void
 AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 {
-	if (!ARDOUR_UI::config()->get_show_waveforms_while_recording ()) {
+	if (!UIConfiguration::instance().get_show_waveforms_while_recording ()) {
 		return;
 	}
 
@@ -460,15 +460,15 @@ AudioStreamView::color_handler ()
 {
 	//case cAudioTrackBase:
 	if (_trackview.is_track()) {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("audio track base", "audio track base"));
+		canvas_rect->set_fill_color (UIConfiguration::instance().color_mod ("audio track base", "audio track base"));
 	}
 
 	//case cAudioBusBase:
 	if (!_trackview.is_track()) {
 		if (Profile->get_sae() && _trackview.route()->is_master()) {
-			canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("audio master bus base"));
+			canvas_rect->set_fill_color (UIConfiguration::instance().color ("audio master bus base"));
 		} else {
-			canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("audio bus base", "audio bus base"));
+			canvas_rect->set_fill_color (UIConfiguration::instance().color_mod ("audio bus base", "audio bus base"));
 		}
 	}
 }

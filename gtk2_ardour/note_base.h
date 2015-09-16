@@ -26,7 +26,6 @@
 #include "evoral/types.hpp"
 
 #include "rgb_macros.h"
-#include "ardour_ui.h"
 #include "ui_config.h"
 
 class Editor;
@@ -105,16 +104,16 @@ class NoteBase : public sigc::trackable
 
 	inline static uint32_t meter_style_fill_color(uint8_t vel, bool selected) {
 		if (selected) {
-			return ARDOUR_UI::config()->color_mod ("midi note selected", "midi note");
+			return UIConfiguration::instance().color_mod ("midi note selected", "midi note");
 		} else if (vel < 64) {
 			return UINT_INTERPOLATE(
-				ARDOUR_UI::config()->color_mod ("midi note min", "midi note"),
-				ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
+				UIConfiguration::instance().color_mod ("midi note min", "midi note"),
+				UIConfiguration::instance().color_mod ("midi note mid", "midi note"),
 				(vel / (double)63.0));
 		} else {
 			return UINT_INTERPOLATE(
-				ARDOUR_UI::config()->color_mod ("midi note mid", "midi note"),
-				ARDOUR_UI::config()->color_mod ("midi note max", "midi note"),
+				UIConfiguration::instance().color_mod ("midi note mid", "midi note"),
+				UIConfiguration::instance().color_mod ("midi note max", "midi note"),
 				((vel-64) / (double)63.0));
 		}
 	}
@@ -122,7 +121,7 @@ class NoteBase : public sigc::trackable
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color, bool selected=false) {
 		if (selected) {
-			return ARDOUR_UI::config()->color ("midi note selected outline");
+			return UIConfiguration::instance().color ("midi note selected outline");
 		} else {
 			return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
 		}

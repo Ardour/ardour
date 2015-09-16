@@ -34,8 +34,6 @@
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
 
-#include "ardour_ui.h"
-#include "global_signals.h"
 #include "gui_thread.h"
 #include "midi_region_view.h"
 #include "midi_streamview.h"
@@ -46,6 +44,7 @@
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -86,7 +85,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 	color_handler ();
 
-	ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
 
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
@@ -324,7 +323,7 @@ MidiStreamView::draw_note_lines()
 		 */
 
 		if (i <= highest_note()) {
-			_note_lines->add (y, 1.0, ARDOUR_UI::config()->color ("piano roll black outline"));
+			_note_lines->add (y, 1.0, UIConfiguration::instance().color ("piano roll black outline"));
 		}
 
 		/* now add a thicker line/bar which covers the entire vertical
@@ -337,10 +336,10 @@ MidiStreamView::draw_note_lines()
 		case 6:
 		case 8:
 		case 10:
-			color = ARDOUR_UI::config()->color_mod ("piano roll black", "piano roll black");
+			color = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
 			break;
 		default:
-			color = ARDOUR_UI::config()->color_mod ("piano roll white", "piano roll white");
+			color = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
 			break;
 		}
 
@@ -443,7 +442,7 @@ MidiStreamView::setup_rec_box ()
 		    _trackview.session()->record_status() == Session::Recording &&
 		    _trackview.track()->record_enabled()) {
 
-			if (ARDOUR_UI::config()->get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
+			if (UIConfiguration::instance().get_show_waveforms_while_recording() && rec_regions.size() == rec_rects.size()) {
 
 				/* add a new region, but don't bother if they set show-waveforms-while-recording mid-record */
 
@@ -566,9 +565,9 @@ MidiStreamView::color_handler ()
 	draw_note_lines ();
 
 	if (_trackview.is_midi_track()) {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->color_mod ("midi track base", "midi track base"));
+		canvas_rect->set_fill_color (UIConfiguration::instance().color_mod ("midi track base", "midi track base"));
 	} else {
-		canvas_rect->set_fill_color (ARDOUR_UI::config()->color ("midi bus base"));
+		canvas_rect->set_fill_color (UIConfiguration::instance().color ("midi bus base"));
 	}
 }
 

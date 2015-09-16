@@ -22,7 +22,6 @@
 #include "gtkmm2ext/persistent_tooltip.h"
 #include "panner_interface.h"
 #include "panner_editor.h"
-#include "global_signals.h"
 
 #include "i18n.h"
 

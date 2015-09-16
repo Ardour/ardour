@@ -124,6 +124,8 @@
 #include "tempo_lines.h"
 #include "time_axis_view.h"
 #include "timers.h"
+#include "tooltips.h"
+#include "ui_config.h"
 #include "utils.h"
 #include "verbose_cursor.h"
 
@@ -402,11 +404,11 @@ Editor::Editor ()
 
 	sfbrowser = 0;
 
-	location_marker_color = ARDOUR_UI::config()->color ("location marker");
-	location_range_color = ARDOUR_UI::config()->color ("location range");
-	location_cd_marker_color = ARDOUR_UI::config()->color ("location cd marker");
-	location_loop_color = ARDOUR_UI::config()->color ("location loop");
-	location_punch_color = ARDOUR_UI::config()->color ("location punch");
+	location_marker_color = UIConfiguration::instance().color ("location marker");
+	location_range_color = UIConfiguration::instance().color ("location range");
+	location_cd_marker_color = UIConfiguration::instance().color ("location cd marker");
+	location_loop_color = UIConfiguration::instance().color ("location loop");
+	location_punch_color = UIConfiguration::instance().color ("location punch");
 
 	zoom_focus = ZoomFocusPlayhead;
 	_edit_point = EditAtMouse;
@@ -414,7 +416,7 @@ Editor::Editor ()
 
 	samples_per_pixel = 2048; /* too early to use reset_zoom () */
 
-	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::ui_scale));
+	timebar_height = std::max(12., ceil (15. * UIConfiguration::instance().get_ui_scale()));
 	TimeAxisView::setup_sizes ();
 	ArdourMarker::setup_sizes (timebar_height);
 
@@ -530,8 +532,8 @@ Editor::Editor ()
 	controls_layout.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::control_layout_scroll), false);
 
 	_cursors = new MouseCursors;
-	_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
-	cerr << "Set cursor set to " << ARDOUR_UI::config()->get_icon_set() << endl;
+	_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
+	cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << endl;
 
 	/* Push default cursor to ever-present bottom of cursor stack. */
 	push_canvas_cursor(_cursors->grabber);
@@ -771,7 +773,7 @@ Editor::Editor ()
 	Session::AskAboutPlaylistDeletion.connect_same_thread (*this, boost::bind (&Editor::playlist_deletion_dialog, this, _1));
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&Editor::parameter_changed, this, _1), gui_context());
-	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &Editor::ui_parameter_changed));
 
 	TimeAxisView::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Editor::timeaxisview_deleted, this, _1), gui_context());
 
@@ -798,7 +800,7 @@ Editor::Editor ()
 
 	/* grab current parameter state */
 	boost::function<void (string)> pc (boost::bind (&Editor::ui_parameter_changed, this, _1));
-	ARDOUR_UI::config()->map_parameters (pc);
+	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
 
@@ -1156,7 +1158,7 @@ Editor::on_realize ()
 	Window::on_realize ();
 	Realized ();
 
-	if (ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+	if (UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		start_lock_event_timing ();
 	}
 
@@ -1216,7 +1218,7 @@ Editor::lock_timeout_callback ()
 
 	timersub (&now, &last_event_time, &delta);
 
-	if (delta.tv_sec > (time_t) ARDOUR_UI::config()->get_lock_gui_after_seconds()) {
+	if (delta.tv_sec > (time_t) UIConfiguration::instance().get_lock_gui_after_seconds()) {
 		lock ();
 		/* don't call again. Returning false will effectively
 		   disconnect us from the timer callback.
@@ -3231,30 +3233,30 @@ Editor::build_snap_type_menu ()
 void
 Editor::setup_tooltips ()
 {
-	ARDOUR_UI::instance()->set_tip (smart_mode_button, _("Smart Mode (add Range functions to Grab mode)"));
-	ARDOUR_UI::instance()->set_tip (mouse_move_button, _("Grab Mode (select/move objects)"));
-	ARDOUR_UI::instance()->set_tip (mouse_cut_button, _("Cut Mode (split regions)"));
-	ARDOUR_UI::instance()->set_tip (mouse_select_button, _("Range Mode (select time ranges)"));
-	ARDOUR_UI::instance()->set_tip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
-	ARDOUR_UI::instance()->set_tip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
-	ARDOUR_UI::instance()->set_tip (mouse_audition_button, _("Audition Mode (listen to regions)"));
-	ARDOUR_UI::instance()->set_tip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
-	ARDOUR_UI::instance()->set_tip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
-	ARDOUR_UI::instance()->set_tip (nudge_forward_button, _("Nudge Region/Selection Later"));
-	ARDOUR_UI::instance()->set_tip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
-	ARDOUR_UI::instance()->set_tip (zoom_in_button, _("Zoom In"));
-	ARDOUR_UI::instance()->set_tip (zoom_out_button, _("Zoom Out"));
-	ARDOUR_UI::instance()->set_tip (zoom_preset_selector, _("Zoom to Time Scale"));
-	ARDOUR_UI::instance()->set_tip (zoom_out_full_button, _("Zoom to Session"));
-	ARDOUR_UI::instance()->set_tip (zoom_focus_selector, _("Zoom focus"));
-	ARDOUR_UI::instance()->set_tip (tav_expand_button, _("Expand Tracks"));
-	ARDOUR_UI::instance()->set_tip (tav_shrink_button, _("Shrink Tracks"));
-	ARDOUR_UI::instance()->set_tip (visible_tracks_selector, _("Number of visible tracks"));
-	ARDOUR_UI::instance()->set_tip (snap_type_selector, _("Snap/Grid Units"));
-	ARDOUR_UI::instance()->set_tip (snap_mode_selector, _("Snap/Grid Mode"));
-	ARDOUR_UI::instance()->set_tip (edit_point_selector, _("Edit point"));
-	ARDOUR_UI::instance()->set_tip (edit_mode_selector, _("Edit Mode"));
-	ARDOUR_UI::instance()->set_tip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));
+	set_tooltip (smart_mode_button, _("Smart Mode (add Range functions to Grab mode)"));
+	set_tooltip (mouse_move_button, _("Grab Mode (select/move objects)"));
+	set_tooltip (mouse_cut_button, _("Cut Mode (split regions)"));
+	set_tooltip (mouse_select_button, _("Range Mode (select time ranges)"));
+	set_tooltip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
+	set_tooltip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
+	set_tooltip (mouse_audition_button, _("Audition Mode (listen to regions)"));
+	set_tooltip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
+	set_tooltip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
+	set_tooltip (nudge_forward_button, _("Nudge Region/Selection Later"));
+	set_tooltip (nudge_backward_button, _("Nudge Region/Selection Earlier"));
+	set_tooltip (zoom_in_button, _("Zoom In"));
+	set_tooltip (zoom_out_button, _("Zoom Out"));
+	set_tooltip (zoom_preset_selector, _("Zoom to Time Scale"));
+	set_tooltip (zoom_out_full_button, _("Zoom to Session"));
+	set_tooltip (zoom_focus_selector, _("Zoom focus"));
+	set_tooltip (tav_expand_button, _("Expand Tracks"));
+	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
+	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
+	set_tooltip (snap_type_selector, _("Snap/Grid Units"));
+	set_tooltip (snap_mode_selector, _("Snap/Grid Mode"));
+	set_tooltip (edit_point_selector, _("Edit point"));
+	set_tooltip (edit_mode_selector, _("Edit Mode"));
+	set_tooltip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));
 }
 
 int
@@ -4247,7 +4249,7 @@ Editor::session_state_saved (string)
 void
 Editor::update_tearoff_visibility()
 {
-	bool visible = ARDOUR_UI::config()->get_keep_tearoffs();
+	bool visible = UIConfiguration::instance().get_keep_tearoffs();
 	_mouse_mode_tearoff->set_visible (visible);
 	_tools_tearoff->set_visible (visible);
 	if (_zoom_tearoff) {
@@ -5982,11 +5984,11 @@ Editor::ui_parameter_changed (string parameter)
 		while (!_cursor_stack.empty()) {
 			_cursor_stack.pop_back();
 		}
-		_cursors->set_cursor_set (ARDOUR_UI::config()->get_icon_set());
+		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
 		_cursor_stack.push_back(_cursors->grabber);
 	} else if (parameter == "draggable-playhead") {
 		if (_verbose_cursor) {
-			playhead_cursor->set_sensitive (ARDOUR_UI::config()->get_draggable_playhead());
+			playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
 		}
 	}
 }

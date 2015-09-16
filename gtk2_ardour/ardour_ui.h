@@ -67,23 +67,22 @@
 
 #include "video_timeline.h"
 
-#include "about.h"
+#include "add_route_dialog.h"
 #include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"
 #include "editing.h"
-#include "engine_dialog.h"
-#include "export_video_dialog.h"
-#include "meterbridge.h"
-#include "ui_config.h"
 #include "enums.h"
 #include "visibility_group.h"
 #include "window_manager.h"
 
-#include "add_route_dialog.h"
+#ifdef COMPILER_MSVC
+#include "about.h"
 #include "add_video_dialog.h"
 #include "big_clock_window.h"
 #include "bundle_manager.h"
+#include "engine_dialog.h"
+#include "export_video_dialog.h"
 #include "global_port_matrix.h"
 #include "keyeditor.h"
 #include "location_ui.h"
@@ -91,6 +90,22 @@
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
+#else
+class About;
+class AddRouteDialog;
+class AddVideoDialog;
+class BigClockWindow;
+class BundleManager;
+class EngineControl;
+class ExportVideoDialog;
+class KeyEditor;
+class LocationUIWindow;
+class RCOptionEditor;
+class RouteParams_UI;
+class SessionOptionEditor;
+class SpeakerDialog;
+class GlobalPortMatrixWindow;
+#endif
 
 class VideoTimeLine;
 class ArdourKeyboard;
@@ -100,14 +115,13 @@ class ConnectionEditor;
 class MainClock;
 class Mixer_UI;
 class PublicEditor;
-class RCOptionEditor;
-class RouteParams_UI;
 class SaveAsDialog;
 class SessionDialog;
 class SessionOptionEditor;
 class ShuttleControl;
 class Splash;
 class TimeInfoBox;
+class Meterbridge;
 class MidiTracer;
 class NSM_Client;
 class LevelMeterHBox;
@@ -133,14 +147,8 @@ namespace Gtk {
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 {
-    private:
-	/* This must be the first data element because constructor ordering
-	   relies on it.
-	*/
-	UIConfiguration*     ui_config;
-
     public:
-	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir, UIConfiguration*);
+	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
 	~ARDOUR_UI();
 
 	bool run_startup (bool should_be_new, std::string load_template);
@@ -185,8 +193,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
 	static ARDOUR_UI *instance () { return theArdourUI; }
-	static UIConfiguration *config () { return theArdourUI->ui_config; }
-	static float ui_scale;
 	
 	PublicEditor&	  the_editor() { return *editor;}
 	Mixer_UI* the_mixer() { return mixer; }
@@ -195,8 +201,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void toggle_editing_space();
 	void toggle_mixer_space();
 	void toggle_keep_tearoffs();
-
-	Gtk::Tooltips& tooltips() { return _tooltips; }
 
 	static PublicEditor* _instance;
 
@@ -332,7 +336,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
   private:
 	PublicEditor*        editor;
 	Mixer_UI*            mixer;
-	Gtk::Tooltips       _tooltips;
 	NSM_Client*          nsm;
 	bool                _was_dirty;
         bool                _mixer_on_top;

@@ -34,6 +34,8 @@
 #include "prompter.h"
 #include "utils.h"
 #include "public_editor.h"
+#include "tooltips.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -314,20 +316,20 @@ LocationEditRow::set_location (Location *loc)
 			show_cd_track_details ();
 		}
 
-		ARDOUR_UI::instance()->set_tip (remove_button, _("Remove this range"));
-		ARDOUR_UI::instance()->set_tip (start_clock, _("Start time - middle click to locate here"));
-		ARDOUR_UI::instance()->set_tip (end_clock, _("End time - middle click to locate here"));
-		ARDOUR_UI::instance()->set_tip (length_clock, _("Length"));
+		set_tooltip (remove_button, _("Remove this range"));
+		set_tooltip (start_clock, _("Start time - middle click to locate here"));
+		set_tooltip (end_clock, _("End time - middle click to locate here"));
+		set_tooltip (length_clock, _("Length"));
 
-		ARDOUR_UI::instance()->tooltips().set_tip (start_to_playhead_button, _("Set range start from playhead location"));
-		ARDOUR_UI::instance()->tooltips().set_tip (end_to_playhead_button, _("Set range end from playhead location"));
+		set_tooltip (start_to_playhead_button, _("Set range start from playhead location"));
+		set_tooltip (end_to_playhead_button, _("Set range end from playhead location"));
 		
 	} else {
 
-		ARDOUR_UI::instance()->set_tip (remove_button, _("Remove this marker"));
-		ARDOUR_UI::instance()->set_tip (start_clock, _("Position - middle click to locate here"));
+		set_tooltip (remove_button, _("Remove this marker"));
+		set_tooltip (start_clock, _("Position - middle click to locate here"));
 
-		ARDOUR_UI::instance()->tooltips().set_tip (start_to_playhead_button, _("Set marker time from playhead location"));
+		set_tooltip (start_to_playhead_button, _("Set marker time from playhead location"));
 
 		end_clock.hide();
 		length_clock.hide();
@@ -1017,7 +1019,7 @@ LocationUI::add_new_location()
 		framepos_t where = _session->audible_frame();
 		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
-		if (ARDOUR_UI::config()->get_name_new_markers()) {
+		if (UIConfiguration::instance().get_name_new_markers()) {
 			newest_location = location;
 		}
 		PublicEditor::instance().begin_reversible_command (_("add marker"));

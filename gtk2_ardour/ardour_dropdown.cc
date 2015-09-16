@@ -34,8 +34,6 @@
 #include "ardour/rc_configuration.h" // for widget prelight preference
 
 #include "ardour_dropdown.h"
-#include "ardour_ui.h"
-#include "global_signals.h"
 
 #include "i18n.h"
 

@@ -17,16 +17,18 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <gtkmm/drawingarea.h>
+
 #include <gtkmm2ext/cairo_widget.h>
 #include <gtkmm2ext/gtk_ui.h>
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/rgb_macros.h>
 
 #include <ardour/rc_configuration.h>
-#include "ardour_ui.h"
 #include "utils.h"
 #include "logmeter.h"
 #include "meter_patterns.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -245,18 +247,18 @@ static void set_bg_color (Gtk::Widget& w, cairo_t* cr, MeterType type) {
 	double r,g,b,a;
 	switch(type) {
 		case MeterVU:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip vu bg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("meterstrip vu bg"), r, g, b, a);
 			break;
 		case MeterIEC1DIN:
 		case MeterIEC1NOR:
 		case MeterIEC2BBC:
 		case MeterIEC2EBU:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip ppm bg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("meterstrip ppm bg"), r, g, b, a);
 			break;
 		case MeterK12:
 		case MeterK14:
 		case MeterK20:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip dpm bg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("meterstrip dpm bg"), r, g, b, a);
 			break;
 		default:
 			{
@@ -274,16 +276,16 @@ static void set_fg_color(Gtk::Widget&, MeterType type, Gdk::Color * c) {
 	double r,g,b,a;
 	switch(type) {
 		case MeterVU:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip vu fg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("meterstrip vu fg"), r, g, b, a);
 			break;
 		case MeterIEC1DIN:
 		case MeterIEC1NOR:
 		case MeterIEC2BBC:
 		case MeterIEC2EBU:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip ppm fg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("meterstrip ppm fg"), r, g, b, a);
 			break;
 		default:
-			ArdourCanvas::color_to_rgba (ARDOUR_UI::config()->color ("meterstrip dpm fg"), r, g, b, a);
+			ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("meterstrip dpm fg"), r, g, b, a);
 			break;
 	}
 	c->set_rgb_p (r, g, b);
@@ -304,7 +306,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 
 	float box_l=0;
 	float box_w=0;
-#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * ARDOUR_UI::ui_scale))
+#define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * UIConfiguration::instance().get_ui_scale()))
 	if (tickleft) {
 		if (w.get_name().substr(0, 3) == "Bar") {
 			box_w = PX_SCALE(2, 2);
@@ -343,7 +345,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 	cairo_fill (cr);
 
 	height = min(max_pattern_metric_size, height);
-	uint32_t peakcolor = ARDOUR_UI::config()->color ("meterbridge peaklabel");
+	uint32_t peakcolor = UIConfiguration::instance().color ("meterbridge peaklabel");
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
 
@@ -518,7 +520,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(-50, 1.0));
 					points.insert (std::pair<float,float>(-40, 1.0));
 					points.insert (std::pair<float,float>(-30, 1.0));
-					if (ARDOUR_UI::config()->get_meter_line_up_level() == MeteringLineUp24) {
+					if (UIConfiguration::instance().get_meter_line_up_level() == MeteringLineUp24) {
 						points.insert (std::pair<float,float>(-24, 1.0));
 					} else {
 						points.insert (std::pair<float,float>(-25, 1.0));
@@ -636,12 +638,12 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	Pango::AttrFontDesc* font_attr;
 	Pango::FontDescription font;
 
-	font = Pango::FontDescription (ARDOUR_UI::config()->get_SmallMonospaceFont());
+	font = Pango::FontDescription (UIConfiguration::instance().get_SmallMonospaceFont());
 #ifdef __APPLE__
 	const double fixfontsize = 1.0;
 #else
 	// counter-act global font-scaling.
-	const double fixfontsize = std::min(1.0, 0.9 / sqrtf(ARDOUR_UI::ui_scale));
+	const double fixfontsize = std::min(1.0, 0.9 / sqrtf(UIConfiguration::instance().get_ui_scale()));
 #endif
 
 	font.set_weight (Pango::WEIGHT_NORMAL);
@@ -677,7 +679,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 	cairo_set_line_width (cr, 1.0);
 
 	height = min(max_pattern_metric_size, height);
-	uint32_t peakcolor = ARDOUR_UI::config()->color ("meterbridge peaklabel");
+	uint32_t peakcolor = UIConfiguration::instance().color ("meterbridge peaklabel");
 	Gdk::Color c; // default text color
 
 	for (vector<DataType>::const_iterator i = types.begin(); i != types.end(); ++i) {
@@ -758,7 +760,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(-30.0f, "-30"));
 					points.insert (std::pair<float,string>(-20.0f, "-20"));
 					if (types.size() == 1) {
-						if (ARDOUR_UI::config()->get_meter_line_up_level() == MeteringLineUp24) {
+						if (UIConfiguration::instance().get_meter_line_up_level() == MeteringLineUp24) {
 							points.insert (std::pair<float,string>(-24.0f, "-24"));
 						} else {
 							points.insert (std::pair<float,string>(-25.0f, "-25"));

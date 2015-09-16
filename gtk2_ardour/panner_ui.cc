@@ -27,13 +27,14 @@
 #include "ardour/panner_shell.h"
 #include "ardour/session.h"
 
-#include "ardour_ui.h"
 #include "panner_ui.h"
 #include "panner2d.h"
 #include "gui_thread.h"
 #include "stereo_panner.h"
 #include "timers.h"
+#include "tooltips.h"
 #include "mono_panner.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -42,6 +43,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
+using namespace ARDOUR_UI_UTILS;
 
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
@@ -67,8 +69,8 @@ PannerUI::PannerUI (Session* s)
 	pan_automation_style_button.set_name ("MixerAutomationModeButton");
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 
-	ARDOUR_UI::instance()->set_tip (pan_automation_state_button, _("Pan automation mode"));
-	ARDOUR_UI::instance()->set_tip (pan_automation_style_button, _("Pan automation type"));
+	set_tooltip (pan_automation_state_button, _("Pan automation mode"));
+	set_tooltip (pan_automation_style_button, _("Pan automation type"));
 
 	//set_size_request_to_display_given_text (pan_automation_state_button, X_("O"), 2, 2);
 	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
@@ -240,7 +242,7 @@ PannerUI::setup_pan ()
 		return;
 	}
 
-	const float scale = std::max (1.f, ARDOUR_UI::ui_scale);
+	const float scale = std::max (1.f, UIConfiguration::instance().get_ui_scale());
 
 	if (_current_uri == "http://ardour.org/plugin/panner_2in2out#ui")
 	{

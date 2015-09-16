@@ -41,9 +41,7 @@
 
 #include "ardour/profile.h"
 
-#include "ardour_ui.h"
 #include "ardour_dialog.h"
-#include "global_signals.h"
 #include "gui_thread.h"
 #include "public_editor.h"
 #include "time_axis_view.h"
@@ -56,6 +54,8 @@
 #include "streamview.h"
 #include "editor_drag.h"
 #include "editor.h"
+#include "tooltips.h"
+#include "ui_config.h"
 
 #include "i18n.h"
 
@@ -83,7 +83,7 @@ Glib::RefPtr<Gtk::SizeGroup> TimeAxisView::midi_scroomer_size_group = Glib::RefP
 void
 TimeAxisView::setup_sizes()
 {
-	name_width_px = ceilf (100.f * ARDOUR_UI::ui_scale);
+	name_width_px = ceilf (100.f * UIConfiguration::instance().get_ui_scale());
 }
 
 TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisView* rent, Canvas& /*canvas*/)
@@ -147,7 +147,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	name_label.set_name ("TrackLabel");
 	name_label.set_alignment (0.0, 0.5);
 	name_label.set_width_chars (12);
-	ARDOUR_UI::instance()->set_tip (name_label, _("Track/Bus name (double click to edit)"));
+	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
 	Gtk::Entry* an_entry = new Gtkmm2ext::FocusEntry;
 	an_entry->set_name ("EditorTrackNameDisplay");
@@ -220,7 +220,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	time_axis_hbox.show();
 	top_hbox.pack_start (scroomer_placeholder, false, false); // OR pack_end to move after meters ?
 
-	ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
+	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &TimeAxisView::color_handler));
 
 	GhostRegion::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&TimeAxisView::erase_ghost, this, _1), gui_context());
 }
@@ -1056,7 +1056,7 @@ TimeAxisView::get_selection_rect (uint32_t id)
 		rect->rect = new ArdourCanvas::Rectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->rect, "selection rect");
 		rect->rect->set_outline (false);
-		rect->rect->set_fill_color (ARDOUR_UI::config()->color_mod ("selection rect", "selection rect"));
+		rect->rect->set_fill_color (UIConfiguration::instance().color_mod ("selection rect", "selection rect"));
 
 		rect->start_trim = new ArdourCanvas::Rectangle (selection_group);
 		CANVAS_DEBUG_NAME (rect->start_trim, "selection rect start trim");
@@ -1221,26 +1221,26 @@ TimeAxisView::color_handler ()
 
 	for (list<SelectionRect*>::iterator i = used_selection_rects.begin(); i != used_selection_rects.end(); ++i) {
 
-		(*i)->rect->set_fill_color (ARDOUR_UI::config()->color_mod ("selection rect", "selection rect"));
-		(*i)->rect->set_outline_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->rect->set_fill_color (UIConfiguration::instance().color_mod ("selection rect", "selection rect"));
+		(*i)->rect->set_outline_color (UIConfiguration::instance().color ("selection"));
 
-		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
-		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->start_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
+		(*i)->start_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
 		
-		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
-		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->end_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
+		(*i)->end_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
 	}
 	
 	for (list<SelectionRect*>::iterator i = free_selection_rects.begin(); i != free_selection_rects.end(); ++i) {
 		
-		(*i)->rect->set_fill_color (ARDOUR_UI::config()->color_mod ("selection rect", "selection rect"));
-		(*i)->rect->set_outline_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->rect->set_fill_color (UIConfiguration::instance().color_mod ("selection rect", "selection rect"));
+		(*i)->rect->set_outline_color (UIConfiguration::instance().color ("selection"));
 		
-		(*i)->start_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
-		(*i)->start_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->start_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
+		(*i)->start_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
 		
-		(*i)->end_trim->set_fill_color (ARDOUR_UI::config()->color ("selection"));
-		(*i)->end_trim->set_outline_color (ARDOUR_UI::config()->color ("selection"));
+		(*i)->end_trim->set_fill_color (UIConfiguration::instance().color ("selection"));
+		(*i)->end_trim->set_outline_color (UIConfiguration::instance().color ("selection"));
 	}
 }
 

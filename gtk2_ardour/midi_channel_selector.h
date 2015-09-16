@@ -25,6 +25,7 @@
 #include "sigc++/trackable.h"
 
 #include "gtkmm/table.h"
+#include "gtkmm/box.h"
 #include "gtkmm/button.h"
 #include "gtkmm/radiobutton.h"
 #include "gtkmm/label.h"

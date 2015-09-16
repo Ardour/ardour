@@ -21,7 +21,6 @@
 
 #include "canvas/debug.h"
 
-#include "ardour_ui.h"
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -34,6 +33,7 @@
 #include "editor_cursors.h"
 #include "mouse_cursors.h"
 #include "route_time_axis.h"
+#include "ui_config.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -62,7 +62,7 @@ EditorSummary::EditorSummary (Editor* e)
 	add_events (Gdk::POINTER_MOTION_MASK|Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	set_flags (get_flags() | Gtk::CAN_FOCUS);
 
-	ARDOUR_UI::config()->ParameterChanged.connect (sigc::mem_fun (*this, &EditorSummary::parameter_changed));
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &EditorSummary::parameter_changed));
 }
 
 EditorSummary::~EditorSummary ()
@@ -474,7 +474,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 bool
 EditorSummary::suspending_editor_updates () const
 {
-	return (!ARDOUR_UI::config()->get_update_editor_during_summary_drag () && (_zoom_dragging || _move_dragging));
+	return (!UIConfiguration::instance().get_update_editor_during_summary_drag () && (_zoom_dragging || _move_dragging));
 }
 
 /** Fill in x and y with the editor's current viewable area in summary coordinates */

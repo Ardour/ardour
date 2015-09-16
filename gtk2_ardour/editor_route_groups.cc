@@ -45,6 +45,7 @@
 #include "route_group_dialog.h"
 #include "route_time_axis.h"
 #include "time_axis_view.h"
+#include "tooltips.h"
 #include "utils.h"
 
 #include "i18n.h"
@@ -112,7 +113,7 @@ EditorRouteGroups::EditorRouteGroups (Editor* e)
 	for (int i = 0; ci[i].index >= 0; ++i) {
 		col = _display.get_column (ci[i].index);
 		l = manage (new Label (ci[i].label));
-		ARDOUR_UI::instance()->set_tip (*l, ci[i].tooltip);
+		set_tooltip (*l, ci[i].tooltip);
 		col->set_widget (*l);
 		l->show ();
 
