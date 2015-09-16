@@ -321,6 +321,8 @@ SessionDialog::setup_initial_choice_box ()
 	recent_label.set_markup (string_compose ("<span weight=\"bold\" size=\"large\">%1</span>", _("Recent Sessions")));
 	
 	recent_session_model = TreeStore::create (recent_session_columns);
+	recent_session_model->signal_sort_column_changed().connect (sigc::mem_fun (*this, &SessionDialog::recent_session_sort_changed));
+
 	
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Session Name"), recent_session_columns.visible_name);
@@ -750,13 +752,28 @@ SessionDialog::redisplay_recent_sessions ()
 	Gtk::TreeView::Column* pColumn;
 	if ((pColumn = recent_session_display.get_column (0))) { // name
 		pColumn->set_sort_column (recent_session_columns.visible_name);
-		pColumn->set_sort_indicator (true);
 	}
 	if ((pColumn = recent_session_display.get_column (3))) { // date
 		pColumn->set_sort_column (recent_session_columns.time_modified); // unixtime
 	}
 
+	const int32_t sort = ARDOUR_UI::config()->get_recent_session_sort();
+	recent_session_model->set_sort_column (abs (sort), sort < 0 ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING);
+
 	return session_snapshot_count;
+}
+
+void
+SessionDialog::recent_session_sort_changed ()
+{
+	int column;
+	SortType order;
+	if (recent_session_model->get_sort_column_id (column, order)) {
+		int32_t sort = column * (order == Gtk::SORT_DESCENDING ? -1 : 1);
+		if (sort != ARDOUR_UI::config()->get_recent_session_sort()) {
+			ARDOUR_UI::config()->set_recent_session_sort(sort);
+		}
+	}
 }
 
 void

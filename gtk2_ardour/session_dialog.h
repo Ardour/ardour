@@ -135,6 +135,7 @@ class SessionDialog : public ArdourDialog {
 	Gtk::FileChooserButton       existing_session_chooser;
 	int redisplay_recent_sessions ();
 	void recent_session_row_selected ();
+	void recent_session_sort_changed ();
 	void recent_row_activated (const Gtk::TreePath& path, Gtk::TreeViewColumn* col);
 
 	void existing_session_selected ();
