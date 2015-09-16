@@ -93,12 +93,18 @@ public:
 	 */
 	float get_dsp_load() const
 	{
-		if (m_dsp_load > m_max_time_us) {
-			return 1.0f;
-		}
-		if (m_dsp_load < 0.0f) {
-			return 0.0f;
-		}
+		assert (m_dsp_load >= 0.f); // since stop > start is assured this cannot happen.
+		return std::min (1.f, m_dsp_load);
+	}
+
+	/**
+	 * @return an unbound value representing the percentage of time spent between
+	 * start and stop in proportion to the max expected time in microseconds(us).
+	 * This is useful for cases to estimate overload (e.g. Dummy backend)
+	 */
+	float get_dsp_load_unbound() const
+	{
+		assert (m_dsp_load >= 0.f);
 		return m_dsp_load;
 	}
 
