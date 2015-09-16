@@ -757,8 +757,12 @@ SessionDialog::redisplay_recent_sessions ()
 		pColumn->set_sort_column (recent_session_columns.time_modified); // unixtime
 	}
 
-	const int32_t sort = ARDOUR_UI::config()->get_recent_session_sort();
-	recent_session_model->set_sort_column (abs (sort), sort < 0 ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING);
+	int32_t sort = ARDOUR_UI::config()->get_recent_session_sort();
+	if (abs(sort) != 1 + recent_session_columns.visible_name.index () &&
+	    abs(sort) != 1 + recent_session_columns.time_modified.index ()) {
+		sort = 1 + recent_session_columns.visible_name.index();
+	}
+	recent_session_model->set_sort_column (abs (sort) -1, sort < 0 ? Gtk::SORT_DESCENDING : Gtk::SORT_ASCENDING);
 
 	return session_snapshot_count;
 }
@@ -769,7 +773,7 @@ SessionDialog::recent_session_sort_changed ()
 	int column;
 	SortType order;
 	if (recent_session_model->get_sort_column_id (column, order)) {
-		int32_t sort = column * (order == Gtk::SORT_DESCENDING ? -1 : 1);
+		int32_t sort = (column + 1) * (order == Gtk::SORT_DESCENDING ? -1 : 1);
 		if (sort != ARDOUR_UI::config()->get_recent_session_sort()) {
 			ARDOUR_UI::config()->set_recent_session_sort(sort);
 		}
