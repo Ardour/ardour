@@ -52,6 +52,7 @@
 #include "engine_dialog.h"
 #include "i18n.h"
 #include "tooltips.h"
+#include "ui_config.h"
 #include "utils.h"
 
 using namespace std;
@@ -793,7 +794,7 @@ SessionDialog::redisplay_recent_sessions ()
 		pColumn->set_sort_column (recent_session_columns.time_modified); // unixtime
 	}
 
-	int32_t sort = ARDOUR_UI::config()->get_recent_session_sort();
+	int32_t sort = UIConfiguration::instance().get_recent_session_sort();
 	if (abs(sort) != 1 + recent_session_columns.visible_name.index () &&
 	    abs(sort) != 1 + recent_session_columns.time_modified.index ()) {
 		sort = 1 + recent_session_columns.visible_name.index();
@@ -810,8 +811,8 @@ SessionDialog::recent_session_sort_changed ()
 	SortType order;
 	if (recent_session_model->get_sort_column_id (column, order)) {
 		int32_t sort = (column + 1) * (order == Gtk::SORT_DESCENDING ? -1 : 1);
-		if (sort != ARDOUR_UI::config()->get_recent_session_sort()) {
-			ARDOUR_UI::config()->set_recent_session_sort(sort);
+		if (sort != UIConfiguration::instance().get_recent_session_sort()) {
+			UIConfiguration::instance().set_recent_session_sort(sort);
 		}
 	}
 }
