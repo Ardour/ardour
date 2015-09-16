@@ -1242,6 +1242,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void remove_clicked_region ();
 	void show_region_properties ();
 	void show_midi_list_editor ();
+	void show_midi_tracker_editor ();
 	void rename_region ();
 	void duplicate_some_regions (RegionSelection&, float times);
 	void duplicate_selection (float times);
