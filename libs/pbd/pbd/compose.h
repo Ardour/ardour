@@ -54,6 +54,10 @@ namespace StringPrivate
     template <typename T>
     Composition &arg(const T &obj);
 
+    // specialization to catch strings (C++ and C)
+    Composition &arg(const std::string &str);
+    Composition &arg(char const * const cstr);
+
     // compose and return string
     std::string str() const;
 
@@ -136,6 +140,42 @@ namespace StringPrivate
     }
   
     return *this;
+  }
+
+  inline Composition &Composition::arg(const std::string &str)
+  {
+	  /* specialization to ensure that empty strings show up
+	   * in the output
+	   */
+	  for (specification_map::const_iterator i = specs.lower_bound(arg_no),
+		       end = specs.upper_bound(arg_no); i != end; ++i) {
+		  output_list::iterator pos = i->second;
+		  ++pos;
+
+		  output.insert(pos, str);
+	  }
+
+	  ++arg_no;
+
+	  return *this;
+  }
+
+  inline Composition &Composition::arg(char const * const cstr)
+  {
+	  /* specialization to ensure that empty C strings show up
+	   * in the output
+	   */
+	  for (specification_map::const_iterator i = specs.lower_bound(arg_no),
+		       end = specs.upper_bound(arg_no); i != end; ++i) {
+		  output_list::iterator pos = i->second;
+		  ++pos;
+
+		  output.insert(pos, std::string (cstr));
+	  }
+
+	  ++arg_no;
+	  
+	  return *this;
   }
 
   inline Composition::Composition(std::string fmt)
