@@ -605,7 +605,7 @@ About::About ()
 #endif
 	std::string codename = CODENAME;
 	if (ARDOUR::Profile->get_mixbus() || ARDOUR::Profile->get_trx()) {
-		codename = "";
+		codename = " ";
 	}
 
 	set_translator_credits (t);
