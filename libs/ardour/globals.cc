@@ -38,7 +38,7 @@
 #include <time.h>
 
 #include <glib.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #ifdef PLATFORM_WINDOWS
 #include <windows.h> // for LARGE_INTEGER

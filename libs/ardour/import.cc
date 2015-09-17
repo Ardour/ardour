@@ -34,7 +34,7 @@
 #include <sndfile.h>
 #include <samplerate.h>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 #include <glibmm.h>
 
 #include <boost/scoped_array.hpp>

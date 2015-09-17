@@ -35,7 +35,7 @@
 #include <glibmm/threads.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"

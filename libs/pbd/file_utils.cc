@@ -22,7 +22,7 @@
 #include <vector>
 
 #include <glib.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #ifdef COMPILER_MINGW
 #include <io.h> // For W_OK

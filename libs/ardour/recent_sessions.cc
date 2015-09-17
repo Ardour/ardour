@@ -24,7 +24,7 @@
 #include <sstream>
 #include <algorithm>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"

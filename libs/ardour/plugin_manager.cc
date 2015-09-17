@@ -46,7 +46,7 @@
 #include <cstring>
 #endif //LXVST_SUPPORT
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/pattern.h>
 #include <glibmm/fileutils.h>

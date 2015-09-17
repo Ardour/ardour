@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include "pbd/xml++.h"
 #include "pbd/convert.h"

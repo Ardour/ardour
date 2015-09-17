@@ -21,7 +21,7 @@
 #include <cstdio> /* for snprintf, grrr */
 
 #include <glib.h>
-#include <glib/gstdio.h> /* for g_stat() */
+#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/xml++.h"

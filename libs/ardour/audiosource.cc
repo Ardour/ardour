@@ -43,7 +43,7 @@
 #endif
 
 #include <glib.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include <boost/scoped_ptr.hpp>
 

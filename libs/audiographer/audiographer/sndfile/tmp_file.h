@@ -5,7 +5,7 @@
 #include <string>
 
 #include <glib.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include "sndfile_writer.h"
 #include "sndfile_reader.h"

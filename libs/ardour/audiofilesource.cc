@@ -42,7 +42,7 @@
 
 #include <sndfile.h>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>

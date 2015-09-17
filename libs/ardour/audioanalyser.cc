@@ -23,7 +23,7 @@
 
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
-#include <glib/gstdio.h> // for g_remove()
+#include <pbd/gstdio_compat.h>
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"

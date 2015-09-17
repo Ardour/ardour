@@ -25,7 +25,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 #include <glib/gprintf.h>
 #include <glibmm.h>
 

@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <iostream>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include "i18n.h"
 
