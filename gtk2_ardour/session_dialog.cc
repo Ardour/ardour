@@ -25,7 +25,7 @@
 #include <algorithm>
 
 #include <glib.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include <glibmm.h>
 #include <glibmm/datetime.h>

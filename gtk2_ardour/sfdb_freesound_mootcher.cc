@@ -48,7 +48,7 @@
 #include <iostream>
 
 #include <glib.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include "i18n.h"
 

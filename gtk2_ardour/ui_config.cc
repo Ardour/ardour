@@ -33,7 +33,7 @@
 #include <pango/pangocairo.h> // for fontmap resolution control for GnomeCanvas
 
 #include <glibmm/miscutils.h>
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include <gtkmm/settings.h>
 

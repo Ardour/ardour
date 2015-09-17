@@ -25,7 +25,7 @@
 
 #include <gtkmm/messagedialog.h>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include "gtkmm2ext/choice.h"
 

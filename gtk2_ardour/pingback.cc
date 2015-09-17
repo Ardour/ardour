@@ -32,7 +32,7 @@
 
 #include <curl/curl.h>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 #include <glibmm/miscutils.h>
 
 #include "pbd/compose.h"

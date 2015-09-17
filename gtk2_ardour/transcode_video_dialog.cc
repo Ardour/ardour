@@ -29,7 +29,7 @@
 
 #include <sigc++/bind.h>
 
-#include <glib/gstdio.h>
+#include <pbd/gstdio_compat.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
