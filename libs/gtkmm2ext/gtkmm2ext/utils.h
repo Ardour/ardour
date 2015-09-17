@@ -153,6 +153,7 @@ namespace Gtkmm2ext {
 	LIBGTKMM2EXT_API void rounded_left_half_rectangle (cairo_t* cr, double x, double y, double w, double h, double r=10);
 
 	LIBGTKMM2EXT_API Gtk::Label* left_aligned_label (std::string const &);
+	LIBGTKMM2EXT_API Gtk::Label* right_aligned_label (std::string const &);
 
 	LIBGTKMM2EXT_API void set_no_tooltip_whatsoever (Gtk::Widget &);
 	LIBGTKMM2EXT_API void enable_tooltips ();

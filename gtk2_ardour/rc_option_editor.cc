@@ -1569,14 +1569,14 @@ public:
 					    _("<b>When enabled</b> new VST plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
 
 #ifdef LXVST_SUPPORT
-		t->attach (*manage (left_aligned_label (_("Linux VST Path:"))), 0, 1, n, n+1);
+		t->attach (*manage (right_aligned_label (_("Linux VST Path:"))), 0, 1, n, n+1);
 		b = manage (new Button (_("Edit")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_lxvst_path_clicked));
 		t->attach (*b, 1, 2, n, n+1, FILL); ++n;
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
-		t->attach (*manage (left_aligned_label (_("Windows VST Path:"))), 0, 1, n, n+1);
+		t->attach (*manage (right_aligned_label (_("Windows VST Path:"))), 0, 1, n, n+1);
 		b = manage (new Button (_("Edit")));
 		b->signal_clicked().connect (sigc::mem_fun (*this, &PluginOptions::edit_vst_path_clicked));
 		t->attach (*b, 1, 2, n, n+1, FILL); ++n;

@@ -818,6 +818,14 @@ Gtkmm2ext::left_aligned_label (string const & t)
 	return l;
 }
 
+Gtk::Label *
+Gtkmm2ext::right_aligned_label (string const & t)
+{
+	Gtk::Label* l = new Gtk::Label (t);
+	l->set_alignment (1, 0.5);
+	return l;
+}
+
 static bool
 make_null_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>& t)
 {
