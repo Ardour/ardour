@@ -22,6 +22,7 @@ pbd_g_stat(const gchar *filename, GStatBufW32 *buf)
 }
 #  define GStatBuf GStatBufW32
 #  define g_stat pbd_g_stat
+#  define g_lstat pbd_g_stat
 #endif
 
 #endif /* __pbd_gstdio_compat_h__ */
