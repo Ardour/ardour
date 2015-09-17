@@ -12,6 +12,8 @@ class FilesystemTest : public CppUnit::TestFixture
 	CPPUNIT_TEST (testClearDirectory);
 	CPPUNIT_TEST (testRemoveDirectory);
 	CPPUNIT_TEST (testCanonicalPath);
+	CPPUNIT_TEST (testTouchFile);
+	CPPUNIT_TEST (testStatFile);
 	CPPUNIT_TEST_SUITE_END ();
 
 public:
@@ -23,5 +25,7 @@ public:
 	void testClearDirectory ();
 	void testRemoveDirectory ();
 	void testCanonicalPath ();
+	void testTouchFile ();
+	void testStatFile ();
 };
 

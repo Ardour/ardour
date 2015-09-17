@@ -8,9 +8,16 @@
 
 #include <fcntl.h>
 
+#ifdef COMPILER_MSVC
+#include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
+
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 #include <glibmm/convert.h>
+#include <glibmm/timer.h>
 
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
@@ -362,4 +369,73 @@ FilesystemTest::testCanonicalPath ()
 	CPPUNIT_ASSERT (canonical_path == expected_path);
 	CPPUNIT_ASSERT (expanded_path == expected_path);
 #endif
+}
+
+void
+FilesystemTest::testTouchFile ()
+{
+	const string filename = "touch.me";
+
+	const string test_dir = test_output_directory ("testTouchFile");
+	const string touch_file_path = Glib::build_filename (test_dir, filename);
+
+	CPPUNIT_ASSERT (touch_file(touch_file_path));
+
+	CPPUNIT_ASSERT (Glib::file_test (touch_file_path, Glib::FILE_TEST_EXISTS));
+}
+
+void
+FilesystemTest::testStatFile ()
+{
+	const string filename1 = "touch.me";
+	const string filename2 = "touch.me.2";
+
+	const string test_dir = test_output_directory ("testStatFile");
+
+	const string path1 = Glib::build_filename (test_dir, filename1);
+	const string path2 = Glib::build_filename (test_dir, filename2);
+
+	CPPUNIT_ASSERT (touch_file(path1));
+
+	Glib::usleep (2000000);
+
+	CPPUNIT_ASSERT (touch_file(path2));
+
+	GStatBuf gsb1;
+	GStatBuf gsb2;
+
+	CPPUNIT_ASSERT (g_stat (path1.c_str(), &gsb1) == 0);
+	CPPUNIT_ASSERT (g_stat (path2.c_str(), &gsb2) == 0);
+
+	cerr << endl;
+	cerr << "StatFile: " << path1 << " access time: " << gsb1.st_atime << endl;
+	cerr << "StatFile: " << path1 << " modification time: " << gsb1.st_mtime << endl;
+	cerr << "StatFile: " << path2 << " access time: " << gsb2.st_atime << endl;
+	cerr << "StatFile: " << path2 << " modification time: " << gsb2.st_mtime << endl;
+
+	CPPUNIT_ASSERT (gsb1.st_atime == gsb1.st_mtime);
+	CPPUNIT_ASSERT (gsb2.st_atime == gsb2.st_mtime);
+
+	// at least access time works on windows(or at least on ntfs)
+	CPPUNIT_ASSERT (gsb1.st_atime < gsb2.st_atime);
+	CPPUNIT_ASSERT (gsb1.st_mtime < gsb2.st_mtime);
+
+	struct utimbuf tbuf;
+
+	tbuf.actime = gsb1.st_atime;
+	tbuf.modtime = gsb1.st_mtime;
+
+	// update the file access/modification times to be the same
+	CPPUNIT_ASSERT (g_utime (path2.c_str(), &tbuf) == 0);
+
+	CPPUNIT_ASSERT (g_stat (path2.c_str(), &gsb2) == 0);
+
+	cerr << endl;
+	cerr << "StatFile: " << path1 << " access time: " << gsb1.st_atime << endl;
+	cerr << "StatFile: " << path1 << " modification time: " << gsb1.st_mtime << endl;
+	cerr << "StatFile: " << path2 << " access time: " << gsb2.st_atime << endl;
+	cerr << "StatFile: " << path2 << " modification time: " << gsb2.st_mtime << endl;
+
+	CPPUNIT_ASSERT (gsb1.st_atime == gsb2.st_atime);
+	CPPUNIT_ASSERT (gsb1.st_mtime == gsb2.st_mtime);
 }
