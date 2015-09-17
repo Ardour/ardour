@@ -26,6 +26,7 @@
 
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/openuri.h"
 
 #include "ardour/profile.h"
 #include "ardour/revision.h"
@@ -628,6 +629,7 @@ About::About ()
 	if (btn) {
 		btn->signal_clicked().connect(sigc::mem_fun(static_cast<Gtk::Window*>(this), &Gtk::Window::hide));
 	}
+	set_url_hook (sigc::ptr_fun(&About::launch_homepage));
 }
 
 About::~About ()
@@ -646,3 +648,8 @@ About::show_config_info ()
 	config_info->hide ();
 }
 
+void
+About::launch_homepage (AboutDialog& /* about */, const Glib::ustring& website_url)
+{
+	PBD::open_uri (website_url);
+}

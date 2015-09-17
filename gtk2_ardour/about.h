@@ -35,6 +35,8 @@ class About : public Gtk::AboutDialog, public ARDOUR::SessionHandlePtr
   private:
 	ConfigInfoDialog* config_info;
 	void show_config_info ();
+
+	static void launch_homepage (AboutDialog& about, const Glib::ustring& website_url);
 };
 
 #endif /* __ardour_gtk_about_h__ */
