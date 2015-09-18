@@ -397,9 +397,11 @@ SMFSource::append_event_beats (const Glib::Threads::Mutex::Lock&   lock,
 		return;
 	}
 
-	/*printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
+#if 0
+	printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
                name().c_str(), ev.id(), ev.time(), ev.size());
-	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");*/
+	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
+#endif
 
 	Evoral::Beats time = ev.time();
 	if (time < _last_ev_time_beats) {
@@ -678,8 +680,8 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 					ss += b;
 				}
 
-				DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %6 load model delta %1, time %2, size %3 buf %4, type %5\n",
-							delta_t, time, size, ss , event_type, name()));
+				DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF %7 load model delta %1, time %2, size %3 buf %4, type %5 id %6\n",
+							delta_t, time, size, ss , event_type, event_id, name()));
 #endif
 
 				eventlist.push_back(make_pair (
@@ -707,6 +709,10 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 		_model->append (*it->first, it->second);
 		delete it->first;
 	}
+
+        // cerr << "----SMF-SRC-----\n";
+        // _playback_buf->dump (cerr);
+        // cerr << "----------------\n";
 
 	_model->end_write (Evoral::Sequence<Evoral::Beats>::ResolveStuckNotes, _length_beats);
 	_model->set_edited (false);
