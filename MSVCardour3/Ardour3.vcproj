@@ -1168,6 +1168,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\tooltips.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\track_selection.cc"
 				>
 			</File>
@@ -1587,10 +1591,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\global_port_matrix.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\global_signals.h"
 				>
 			</File>
 			<File
@@ -2187,6 +2187,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\timers.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\tooltips.h"
 				>
 			</File>
 			<File
