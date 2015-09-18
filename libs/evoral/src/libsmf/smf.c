@@ -133,15 +133,20 @@ smf_track_delete(smf_track_t *track)
 	assert(track);
 	assert(track->events_array);
 
-	/* Remove all the events, from last to first. */
-	while (track->events_array->len > 0)
-		smf_event_delete((smf_event_t*)g_ptr_array_index(track->events_array, track->events_array->len - 1));
+	/* Remove all the events */
+	for (unsigned int i=0; i < track->events_array->len; ++i) {
+		smf_event_t* ev = g_ptr_array_index(track->events_array, i);
+		free (ev->midi_buffer);
+		free (ev);
+	}
+
+	g_ptr_array_remove_range(track->events_array, 0, track->events_array->len);
+	track->number_of_events = 0;
 
 	if (track->smf)
 		smf_track_remove_from_smf(track);
 
 	assert(track->events_array->len == 0);
-	assert(track->number_of_events == 0);
 	g_ptr_array_free(track->events_array, TRUE);
 
 	memset(track, 0, sizeof(smf_track_t));
