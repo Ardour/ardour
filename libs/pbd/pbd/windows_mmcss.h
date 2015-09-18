@@ -23,6 +23,8 @@
 
 #include <string>
 
+#include "pbd/libpbd_visibility.h"
+
 namespace PBD {
 
 namespace MMCSS {
@@ -40,15 +42,15 @@ enum error_codes {
 	ERROR_INVALID_TASK_INDEX = 1551
 };
 
-bool initialize ();
+bool LIBPBD_API initialize ();
 
-bool deinitialize ();
+bool LIBPBD_API deinitialize ();
 
-bool set_thread_characteristics (const std::string& task_name, HANDLE *task_handle);
+bool LIBPBD_API set_thread_characteristics (const std::string& task_name, HANDLE *task_handle);
 
-bool revert_thread_characteristics (HANDLE task_handle);
+bool LIBPBD_API revert_thread_characteristics (HANDLE task_handle);
 
-bool set_thread_priority (HANDLE, AVRT_PRIORITY);
+bool LIBPBD_API set_thread_priority (HANDLE, AVRT_PRIORITY);
 
 } // namespace MMCSS
 
