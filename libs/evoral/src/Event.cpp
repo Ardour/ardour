@@ -107,30 +107,29 @@ Event<Timestamp>::~Event() {
 }
 
 template<typename Timestamp>
-const Event<Timestamp>&
-Event<Timestamp>::operator=(const Event& copy)
+void
+Event<Timestamp>::assign(const Event& other)
 {
-	_id = next_event_id ();
-	_type = copy._type;
-	_original_time = copy._original_time;
-	_nominal_time = copy._nominal_time;
-	_owns_buf = copy._owns_buf;
+	_id = other._id;
+	_type = other._type;
+	_original_time = other._original_time;
+	_nominal_time = other._nominal_time;
+	_owns_buf = other._owns_buf;
 	if (_owns_buf) {
-		if (copy._buf) {
-			if (copy._size > _size) {
-				_buf = (uint8_t*)::realloc(_buf, copy._size);
+		if (other._buf) {
+			if (other._size > _size) {
+				_buf = (uint8_t*)::realloc(_buf, other._size);
 			}
-			memcpy(_buf, copy._buf, copy._size);
+			memcpy(_buf, other._buf, other._size);
 		} else {
 			free(_buf);
 			_buf = NULL;
 		}
 	} else {
-		_buf = copy._buf;
+		_buf = other._buf;
 	}
 
-	_size = copy._size;
-	return *this;
+	_size = other._size;
 }
 
 template<typename Timestamp>

@@ -284,18 +284,18 @@ Sequence<Time>::const_iterator::set_event()
 	switch (_type) {
 	case NOTE_ON:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = note on\n");
-		*_event = (*_note_iter)->on_event();
+		_event->assign ((*_note_iter)->on_event());
 		_active_notes.push(*_note_iter);
 		break;
 	case NOTE_OFF:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = note off\n");
 		assert(!_active_notes.empty());
-		*_event = _active_notes.top()->off_event();
+		_event->assign (_active_notes.top()->off_event());
 		// We don't pop the active note until we increment past it
 		break;
 	case SYSEX:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = sysex\n");
-		*_event = *(*_sysex_iter);
+		_event->assign (*(*_sysex_iter));
 		break;
 	case CONTROL:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = control\n");
@@ -303,7 +303,7 @@ Sequence<Time>::const_iterator::set_event()
 		break;
 	case PATCH_CHANGE:
 		DEBUG_TRACE(DEBUG::Sequence, "iterator = program change\n");
-		*_event = (*_patch_change_iter)->message (_active_patch_change_message);
+		_event->assign ((*_patch_change_iter)->message (_active_patch_change_message));
 		break;
 	default:
 		_is_end = true;

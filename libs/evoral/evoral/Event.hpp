@@ -61,7 +61,7 @@ public:
 
         ~Event();
 
-	const Event& operator=(const Event& copy);
+	void assign (const Event& other);
 
 	void set(const uint8_t* buf, uint32_t size, Time t);
 
