@@ -460,10 +460,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\dsp_load_calculator.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\element_import_handler.cc"
 				>
 			</File>

@@ -273,19 +273,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\portaudio\mmcss.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\portaudio\portaudio_backend.cc"
 				>
 			</File>
 			<File
 				RelativePath="..\portaudio\portaudio_io.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\portaudio\win_utils.cc"
 				>
 			</File>
 			<File
@@ -323,10 +315,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\portaudio\mmcss.h"
-				>
-			</File>
-			<File
 				RelativePath="..\portaudio\portaudio_backend.h"
 				>
 			</File>
@@ -336,10 +324,6 @@
 			</File>
 			<File
 				RelativePath="..\portaudio\rt_thread.h"
-				>
-			</File>
-			<File
-				RelativePath="..\portaudio\win_utils.h"
 				>
 			</File>
 			<File
