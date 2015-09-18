@@ -3558,6 +3558,7 @@ MidiRegionView::paste_internal (framepos_t pos, unsigned paste_count, float time
 
 			boost::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
 			copied_note->set_time (pos_beats + copied_note->time() - first_time);
+			copied_note->set_id (Evoral::next_event_id());
 
 			/* make all newly added notes selected */
 
