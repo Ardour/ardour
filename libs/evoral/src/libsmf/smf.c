@@ -134,7 +134,8 @@ smf_track_delete(smf_track_t *track)
 	assert(track->events_array);
 
 	/* Remove all the events */
-	for (unsigned int i=0; i < track->events_array->len; ++i) {
+	unsigned int i;
+	for (i = 0; i < track->events_array->len; ++i) {
 		smf_event_t* ev = g_ptr_array_index(track->events_array, i);
 		free (ev->midi_buffer);
 		free (ev);
