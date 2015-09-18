@@ -534,6 +534,7 @@ Sequence<Time>::control_to_midi_event(
 
 	uint8_t midi_type = _type_map.parameter_midi_type(iter.list->parameter());
 	ev->set_event_type(_type_map.midi_event_type(midi_type));
+	ev->set_id(-1);
 	switch (midi_type) {
 	case MIDI_CMD_CONTROL:
 		assert(iter.list.get());
