@@ -100,7 +100,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	frameoffset_t const end_of_region = r->start() + r->length();
 
-	if (last_silence->second != end_of_region - 1) {
+	if (last_silence->second < end_of_region - 1) {
 		audible.push_back (std::make_pair (last_silence->second, end_of_region - 1));
 	}
 
