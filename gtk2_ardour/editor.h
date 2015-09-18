@@ -1457,7 +1457,10 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void set_loop_from_selection (bool play);
 	void set_punch_from_selection ();
 	void set_punch_from_region ();
+	void set_punch_from_loop ();
 
+	void setup_loop_record ();
+	
 	void set_session_start_from_playhead ();
 	void set_session_end_from_playhead ();
 	void set_session_extents_from_selection ();
@@ -1684,7 +1687,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void tempo_or_meter_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
 	void new_transport_marker_context_menu (GdkEventButton*, ArdourCanvas::Item*);
-	void build_range_marker_menu (bool, bool);
+	void build_range_marker_menu (bool, bool, bool);
 	void build_marker_menu (ARDOUR::Location *);
 	void build_tempo_or_meter_marker_menu (bool);
 	void build_new_transport_marker_menu ();

@@ -827,7 +827,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range ()) {
 
 		if (transport_marker_menu == 0) {
-			build_range_marker_menu (loc == transport_loop_location() || loc == transport_punch_location(), loc->is_session_range());
+			build_range_marker_menu (loc == transport_loop_location(), loc == transport_punch_location(), loc->is_session_range());
 		}
 
 		marker_menu_item = item;
@@ -857,7 +857,7 @@ Editor::marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* item)
 
 	} else if (loc->is_range_marker()) {
 		if (range_marker_menu == 0) {
-			build_range_marker_menu (false, false);
+			build_range_marker_menu (false, false, false);
 		}
 		marker_menu_item = item;
 		range_marker_menu->popup (1, ev->time);
@@ -915,11 +915,11 @@ Editor::build_marker_menu (Location* loc)
 }
 
 void
-Editor::build_range_marker_menu (bool loop_or_punch, bool session)
+Editor::build_range_marker_menu (bool loop, bool punch, bool session)
 {
 	using namespace Menu_Helpers;
 
-	bool const loop_or_punch_or_session = loop_or_punch | session;
+	bool const loop_or_punch_or_session = loop | punch | session;
 
 	Menu *markerMenu = new Menu;
 	if (loop_or_punch_or_session) {
@@ -933,7 +933,12 @@ Editor::build_range_marker_menu (bool loop_or_punch, bool session)
 	items.push_back (MenuElem (_("Play Range"), sigc::mem_fun(*this, &Editor::marker_menu_play_range)));
 	items.push_back (MenuElem (_("Locate to Marker"), sigc::mem_fun(*this, &Editor::marker_menu_set_playhead)));
 	items.push_back (MenuElem (_("Play from Marker"), sigc::mem_fun(*this, &Editor::marker_menu_play_from)));
-	items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
+
+	if (!loop) {
+		items.push_back (MenuElem (_("Loop Range"), sigc::mem_fun(*this, &Editor::marker_menu_loop_range)));
+	} else {
+		items.push_back (MenuElem (_("Setup Loop Record"), sigc::mem_fun(*this, &Editor::setup_loop_record)));
+	}
 
 	items.push_back (MenuElem (_("Set Marker from Playhead"), sigc::mem_fun(*this, &Editor::marker_menu_set_from_playhead)));
 	if (!Profile->get_sae()) {
