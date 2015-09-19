@@ -45,7 +45,6 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	, ProgressReporter ()
         , _minimum_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
         , _fade_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
-	, _peaks_ready_connection (0)
 	, _destroying (false)
 {
         set_session (s);
@@ -118,7 +117,6 @@ StripSilenceDialog::~StripSilenceDialog ()
 	_destroying = true;
 
 	/* Terminate our thread */
-
 	_lock.lock ();
 	_interthread_info.cancel = true;
 	_thread_should_finish = true;
@@ -129,8 +127,6 @@ StripSilenceDialog::~StripSilenceDialog ()
 
 	delete _minimum_length;
 	delete _fade_length;
-
-	delete _peaks_ready_connection;
 }
 
 void

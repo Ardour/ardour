@@ -51,7 +51,6 @@ public:
 
 private:
 	void create_waves ();
-	void peaks_ready ();
 	void canvas_allocation (Gtk::Allocation &);
 	void update_silence_rects ();
         void resize_silence_rects ();
@@ -75,8 +74,6 @@ private:
         };
 
         std::list<ViewInterval> views;
-
-	PBD::ScopedConnection* _peaks_ready_connection;
 
 	bool _destroying;
 
