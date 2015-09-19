@@ -102,7 +102,7 @@
     <Color name="color 95" value="0xe4f4d3ff"/>
     <Color name="color 96" value="0x85e524ff"/>
     <Color name="color 97" value="0xccccccff"/>
-    <Color name="color 98" value="0x9effffff"/>
+    <Color name="color 98" value="0x9e00ffff"/>
     <Color name="color 99" value="0x5da3c1ff"/>
     <Color name="meter color0" value="0x008800ff"/>
     <Color name="meter color1" value="0x00aa00ff"/>
@@ -411,7 +411,7 @@
     <ColorAlias name="send bg" alias="color 38"/>
     <ColorAlias name="shuttle" alias="color 12"/>
     <ColorAlias name="silence" alias="color 98"/>
-    <ColorAlias name="silence text" alias="color 99"/>
+    <ColorAlias name="silence text" alias="color 10"/>
     <ColorAlias name="solo button: fill active" alias="color 12"/>
     <ColorAlias name="solo button: led active" alias="color 4"/>
     <ColorAlias name="solo isolate: fill" alias="color 25"/>
