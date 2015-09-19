@@ -79,11 +79,13 @@ void get_sleep_granularity(uint32_t& min_elapsed,
 		uint32_t current_time_ms = timeGetTime();
 		uint32_t elapsed = current_time_ms - last_time_ms;
 		cout << "Sleep elapsed = " << elapsed << endl;
-		min_elapsed = std::min (min_elapsed, current_time_ms - last_time_ms);
-		max_elapsed = std::max (max_elapsed, current_time_ms - last_time_ms);
+		min_elapsed = std::min (min_elapsed, elapsed);
+		max_elapsed = std::max (max_elapsed, elapsed);
 		total_elapsed += elapsed;
 		last_time_ms = current_time_ms;
 	}
+	// the rounding here doesn't matter, we aren't interested in
+	// accurate measurements
 	avg_elapsed = total_elapsed / count;
 }
 
@@ -119,11 +121,6 @@ test_sleep_granularity (const std::string& test_name, uint32_t& sleep_avg_elapse
 
 } // namespace
 
-/**
- * This test will not succeed if the current system wide timer resolution is
- * already at the minimum but in most cases it won't be and it will test
- * whether setting the minimum timer resolution is successful.
- */
 void
 WindowsTimerUtilsTest::testMMTimers ()
 {
@@ -146,15 +143,19 @@ WindowsTimerUtilsTest::testMMTimers ()
 
 	test_tgt_granularity ("Minimum Timer Resolution", avg_min_res_tgt_elapsed);
 
-	// test that it is less than original granularity
-	CPPUNIT_ASSERT (avg_min_res_tgt_elapsed < avg_orig_res_tgt_elapsed);
+	// test that it the avg granularity is the same as miniumum resolution
+	CPPUNIT_ASSERT (avg_min_res_tgt_elapsed == 1);
 
 	uint32_t avg_min_res_sleep_elapsed = 0;
 
 	test_sleep_granularity ("Minimum Timer Resolution", avg_min_res_sleep_elapsed);
 
-	// test that it is less than original granularity
-	CPPUNIT_ASSERT (avg_min_res_sleep_elapsed < avg_orig_res_sleep_elapsed);
+	// In a heavily loaded system and without running this test with raised
+	// scheduling priority we can't assume that the sleep granularity is the
+	// same as the minimum timer resolution so give it 1ms of slack, if it is
+	// greater than that then there likely is a problem that needs
+	// investigating.
+	CPPUNIT_ASSERT (avg_min_res_sleep_elapsed <= 2);
 
 	CPPUNIT_ASSERT (PBD::MMTIMERS::reset_resolution());
 
