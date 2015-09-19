@@ -101,6 +101,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	_threshold.get_adjustment()->signal_value_changed().connect (sigc::mem_fun (*this, &StripSilenceDialog::threshold_changed));
 	_minimum_length->ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::restart_thread));
+	_fade_length->ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::restart_thread));
 
 	update_silence_rects ();
 	update_threshold_line ();
@@ -214,7 +215,7 @@ StripSilenceDialog::detection_thread_work ()
 			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
 
 			if (ar) {
-				i->intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
+				i->intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), fade_length(), _interthread_info);
 			}
 
 			if (_interthread_info.cancel) {
