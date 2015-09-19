@@ -123,9 +123,15 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 
 		framecnt_t const f = std::min (_fade_length, (i->second - i->first));
 
-		copy->set_fade_in_active (true);
-		copy->set_fade_in (FadeLinear, f);
-		copy->set_fade_out (FadeLinear, f);
+		if (f > 0) {
+			copy->set_fade_in_active (true);
+			copy->set_fade_out_active (true);
+			copy->set_fade_in (FadeLinear, f);
+			copy->set_fade_out (FadeLinear, f);
+		} else {
+			copy->set_fade_in_active (false);
+			copy->set_fade_out_active (false);
+		}
 		results.push_back (copy);
 
 		if (progress && (n <= N)) {

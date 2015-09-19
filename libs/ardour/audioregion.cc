@@ -1799,7 +1799,7 @@ in this and future transient-detection operations.\n\
  */
 
 AudioIntervalResult
-AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadInfo& itt) const
+AudioRegion::find_silence (Sample threshold, framecnt_t min_length, framecnt_t fade_length, InterThreadInfo& itt) const
 {
 	framecnt_t const block_size = 64 * 1024;
 	boost::scoped_array<Sample> loudest (new Sample[block_size]);
@@ -1812,7 +1812,10 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 
 	bool in_silence = false;
 	frameoffset_t silence_start = 0;
+	frameoffset_t silence_end = 0;
 
+	framecnt_t continuous_signal = fade_length;
+	framecnt_t hold_off = 0;
 	while (pos < end && !itt.cancel) {
 
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
@@ -1831,13 +1834,44 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 			if (silence && !in_silence) {
 				/* non-silence to silence */
 				in_silence = true;
-				silence_start = pos + i;
+				/* process last queued silent part if any */
+				if (hold_off > 0) {
+					assert (hold_off < fade_length);
+					silence_end -= hold_off;
+					if (silence_end - silence_start >= min_length) {
+						silent_periods.push_back (std::make_pair (silence_start, silence_end));
+					}
+				}
+				hold_off = 0;
+
+				if (continuous_signal < fade_length) {
+					silence_start = pos + i + fade_length - continuous_signal;
+				} else {
+					silence_start = pos + i;
+				}
 			} else if (!silence && in_silence) {
 				/* silence to non-silence */
 				in_silence = false;
+				hold_off = 0;
 				if (pos + i - 1 - silence_start >= min_length) {
-					silent_periods.push_back (std::make_pair (silence_start, pos + i - 1));
+					/* queue silence */
+					silence_end = pos + i - 1;
+					hold_off = 1;
 				}
+			}
+
+			if (hold_off > 0) {
+				assert (!in_silence);
+				if (++hold_off >= fade_length) {
+					silent_periods.push_back (std::make_pair (silence_start, silence_end));
+					hold_off = 0;
+				}
+			}
+
+			if (!silence) {
+				++continuous_signal;
+			} else {
+				continuous_signal = 0;
 			}
 		}
 
@@ -1845,9 +1879,15 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, InterThreadI
 		itt.progress = (end-pos)/(double)_length;
 	}
 
-	if (in_silence && end - 1 - silence_start >= min_length) {
+	if (in_silence) {
 		/* last block was silent, so finish off the last period */
-		silent_periods.push_back (std::make_pair (silence_start, end));
+		assert (hold_off == 0);
+		if (continuous_signal < fade_length) {
+			silence_start += fade_length - continuous_signal;
+		}
+		if (end - 1 - silence_start >= min_length) {
+			silent_periods.push_back (std::make_pair (silence_start, end));
+		}
 	}
 
 	itt.done = true;

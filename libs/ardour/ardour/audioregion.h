@@ -172,7 +172,7 @@ class LIBARDOUR_API AudioRegion : public Region
 	int update_transient (framepos_t old_position, framepos_t new_position);
 	int adjust_transients (frameoffset_t delta);
 
-	AudioIntervalResult find_silence (Sample, framecnt_t, InterThreadInfo&) const;
+	AudioIntervalResult find_silence (Sample, framecnt_t, framecnt_t, InterThreadInfo&) const;
 
   private:
 	friend class RegionFactory;
