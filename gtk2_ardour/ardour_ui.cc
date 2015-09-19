@@ -2575,6 +2575,10 @@ ARDOUR_UI::rename_session ()
 void
 ARDOUR_UI::save_state (const string & name, bool switch_to_it)
 {
+	if (!_session || _session->deletion_in_progress()) {
+		return;
+	}
+
 	XMLNode* node = new XMLNode (X_("UI"));
 
 	WM::Manager::instance().add_state (*node);
