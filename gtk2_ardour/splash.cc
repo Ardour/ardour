@@ -223,7 +223,7 @@ void
 Splash::message (const string& msg)
 {
 	string str ("<b>");
-	str += Glib::Markup::escape_text (msg);
+	str += Glib::Markup::escape_text (msg).c_str();
 	str += "</b>";
 
         show ();
