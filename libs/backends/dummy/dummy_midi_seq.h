@@ -733,7 +733,28 @@ static const MIDISequence s4[] = { // channel1, sustain pedal test
 	{ 4.00, 3, {0xff,  255, 0xff} }, // sentinel
 };
 
-static const MIDISequence s5[] = { // channel1, nonsense
+static const MIDISequence s5[] = { // channel1, CCs only
+	{ 0.00, 3, {0xB0, 0x01, 0x00} },
+	{ 0.25, 3, {0xB0, 0x01, 0x10} },
+	{ 0.50, 3, {0xB0, 0x01, 0x40} },
+	{ 0.75, 3, {0xB0, 0x01, 0x7f} },
+	{ 1.00, 3, {0xB0, 0x01, 0x60} },
+	{ 1.25, 3, {0xB0, 0x01, 0x55} },
+	{ 1.50, 3, {0xB0, 0x01, 0x20} },
+	{ 1.75, 3, {0xB0, 0x01, 0x1f} },
+	{ 2.00, 3, {0xB0, 0x01, 0x1e} },
+	{ 2.25, 3, {0xB0, 0x01, 0x1d} },
+	{ 2.50, 3, {0xB0, 0x01, 0x1c} },
+	{ 2.75, 3, {0xB0, 0x01, 0x1b} },
+	{ 3.50, 3, {0xB0, 0x01, 0x00} },
+	{ 4.00, 3, {0xB0, 0x01, 0x00} },
+	{ 4.25, 3, {0xB0, 0x01, 0x7f} },
+	{ 4.50, 3, {0xB0, 0x01, 0x40} },
+	{ 4.75, 3, {0xB0, 0x01, 0x40} },
+	{ 5.00, 3, {0xff,  255, 0xff} }, // sentinel
+};
+
+static const MIDISequence s6[] = { // channel1, nonsense
 	{ 0.00, 3, {0x90,   64, 0x7f} }, // note-on
 	{ 0.50, 3, {0x90,   64, 0x7f} }, // duplicate note-on
 	{ 1.00, 3, {0x80,   64, 0x00} }, // note-off
@@ -746,7 +767,7 @@ static const MIDISequence s5[] = { // channel1, nonsense
 };
 
 static const MIDISequence *sequences[] = {
-	s0, s1, s2, s3, s4, s5
+	s0, s1, s2, s3, s4, s5, s6
 };
 
 }} // namespace
