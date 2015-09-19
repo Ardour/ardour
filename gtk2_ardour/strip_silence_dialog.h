@@ -25,7 +25,7 @@
 #include "progress_reporter.h"
 
 namespace ARDOUR {
-        class Session;
+	class Session;
 }
 
 class AudioClock;
@@ -35,25 +35,25 @@ class RegionView;
 class StripSilenceDialog : public ArdourDialog, public ProgressReporter
 {
 public:
-        StripSilenceDialog (ARDOUR::Session*, std::list<RegionView*> const &);
+	StripSilenceDialog (ARDOUR::Session*, std::list<RegionView*> const &);
 	~StripSilenceDialog ();
 
 	double threshold () const {
 		return _threshold.get_value ();
 	}
 
-        void drop_rects ();
+	void drop_rects ();
 
-        void silences (ARDOUR::AudioIntervalMap&);
+	void silences (ARDOUR::AudioIntervalMap&);
 
 	ARDOUR::framecnt_t minimum_length () const;
-        ARDOUR::framecnt_t fade_length () const;
+	ARDOUR::framecnt_t fade_length () const;
 
 private:
 	void create_waves ();
 	void canvas_allocation (Gtk::Allocation &);
 	void update_silence_rects ();
-        void resize_silence_rects ();
+	void resize_silence_rects ();
 	void update ();
 	void update_threshold_line ();
 	void update_stats (ARDOUR::AudioIntervalResult const &);
@@ -63,20 +63,20 @@ private:
 
 	Gtk::SpinButton _threshold;
 	AudioClock*      _minimum_length;
-        AudioClock*      _fade_length;
+	AudioClock*      _fade_length;
 	Gtk::ProgressBar _progress_bar;
 
 	Gtk::Button* cancel_button;
 	Gtk::Button* apply_button;
 
-        struct ViewInterval {
-            RegionView* view;
-            ARDOUR::AudioIntervalResult intervals;
+	struct ViewInterval {
+		RegionView* view;
+		ARDOUR::AudioIntervalResult intervals;
 
-            ViewInterval (RegionView* rv) : view (rv) {}
-        };
+		ViewInterval (RegionView* rv) : view (rv) {}
+	};
 
-        std::list<ViewInterval> views;
+	std::list<ViewInterval> views;
 
 	bool _destroying;
 

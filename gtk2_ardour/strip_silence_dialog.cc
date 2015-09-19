@@ -43,15 +43,15 @@ using namespace ArdourCanvas;
 StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	: ArdourDialog (_("Strip Silence"))
 	, ProgressReporter ()
-        , _minimum_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
-        , _fade_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
+	, _minimum_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
+	, _fade_length (new AudioClock (X_("silence duration"), true, "", true, false, true, false))
 	, _destroying (false)
 {
-        set_session (s);
+	set_session (s);
 
-        for (list<RegionView*>::const_iterator r = v.begin(); r != v.end(); ++r) {
-                views.push_back (ViewInterval (*r));
-        }
+	for (list<RegionView*>::const_iterator r = v.begin(); r != v.end(); ++r) {
+		views.push_back (ViewInterval (*r));
+	}
 
 	Gtk::HBox* hbox = Gtk::manage (new Gtk::HBox);
 
@@ -75,17 +75,17 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	table->attach (*_minimum_length, 1, 2, n, n + 1, Gtk::FILL);
 	++n;
 
-        _minimum_length->set_session (s);
-        _minimum_length->set_mode (AudioClock::Frames);
-        _minimum_length->set (1000, true);
+	_minimum_length->set_session (s);
+	_minimum_length->set_mode (AudioClock::Frames);
+	_minimum_length->set (1000, true);
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Fade length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
-        table->attach (*_fade_length, 1, 2, n, n + 1, Gtk::FILL);
+	table->attach (*_fade_length, 1, 2, n, n + 1, Gtk::FILL);
 	++n;
 
-        _fade_length->set_session (s);
-        _fade_length->set_mode (AudioClock::Frames);
-        _fade_length->set (64, true);
+	_fade_length->set_session (s);
+	_fade_length->set_mode (AudioClock::Frames);
+	_fade_length->set (64, true);
 
 	hbox->pack_start (*table);
 
@@ -99,8 +99,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	show_all ();
 
-        _threshold.get_adjustment()->signal_value_changed().connect (sigc::mem_fun (*this, &StripSilenceDialog::threshold_changed));
-        _minimum_length->ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::restart_thread));
+	_threshold.get_adjustment()->signal_value_changed().connect (sigc::mem_fun (*this, &StripSilenceDialog::threshold_changed));
+	_minimum_length->ValueChanged.connect (sigc::mem_fun (*this, &StripSilenceDialog::restart_thread));
 
 	update_silence_rects ();
 	update_threshold_line ();
@@ -132,10 +132,10 @@ StripSilenceDialog::~StripSilenceDialog ()
 void
 StripSilenceDialog::silences (AudioIntervalMap& m)
 {
-        for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-                pair<boost::shared_ptr<Region>,AudioIntervalResult> newpair (v->view->region(), v->intervals);
-                m.insert (newpair);
-        }
+	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
+		pair<boost::shared_ptr<Region>,AudioIntervalResult> newpair (v->view->region(), v->intervals);
+		m.insert (newpair);
+	}
 }
 
 void
@@ -144,9 +144,9 @@ StripSilenceDialog::drop_rects ()
 	// called by parent when starting to progess (dialog::run returned),
 	// but before the dialog is destoyed.
 
-        for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-                v->view->drop_silent_frames ();
-        }
+	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
+		v->view->drop_silent_frames ();
+	}
 
 	cancel_button->set_sensitive (false);
 	apply_button->set_sensitive (false);
@@ -186,10 +186,10 @@ StripSilenceDialog::update_silence_rects ()
 {
 	/* Lock so that we don't contend with the detection thread for access to the silence regions */
 	Glib::Threads::Mutex::Lock lm (_lock);
-        double const y = _threshold.get_value();
+	double const y = _threshold.get_value();
 
-        for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-                v->view->set_silent_frames (v->intervals, y);
+	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
+		v->view->set_silent_frames (v->intervals, y);
 	}
 }
 
@@ -204,18 +204,18 @@ StripSilenceDialog::_detection_thread_work (void* arg)
 void *
 StripSilenceDialog::detection_thread_work ()
 {
-        ARDOUR_UI::instance()->register_thread ("gui", pthread_self(), "silence", 32);
+	ARDOUR_UI::instance()->register_thread ("gui", pthread_self(), "silence", 32);
 
 	/* Hold this lock when we are doing work */
 	_lock.lock ();
 
 	while (1) {
 		for (list<ViewInterval>::iterator i = views.begin(); i != views.end(); ++i) {
-                        boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
+			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
 
-                        if (ar) {
-                                i->intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
-                        }
+			if (ar) {
+				i->intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), _interthread_info);
+			}
 
 			if (_interthread_info.cancel) {
 				break;
@@ -248,7 +248,7 @@ StripSilenceDialog::restart_thread ()
 		   method to be called after our destructor has finished executing.
 		   If this happens, bad things follow; _lock cannot be locked and
 		   Ardour hangs.  So if we are destroying, just bail early.
-		*/
+		   */
 		return;
 	}
 
@@ -275,13 +275,13 @@ StripSilenceDialog::threshold_changed ()
 framecnt_t
 StripSilenceDialog::minimum_length () const
 {
-        return _minimum_length->current_duration (views.front().view->region()->position());
+	return _minimum_length->current_duration (views.front().view->region()->position());
 }
 
 framecnt_t
 StripSilenceDialog::fade_length () const
 {
-        return _fade_length->current_duration (views.front().view->region()->position());
+	return _fade_length->current_duration (views.front().view->region()->position());
 }
 
 void
