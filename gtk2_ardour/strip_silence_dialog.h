@@ -66,6 +66,9 @@ private:
         AudioClock*      _fade_length;
 	Gtk::ProgressBar _progress_bar;
 
+	Gtk::Button* cancel_button;
+	Gtk::Button* apply_button;
+
         struct ViewInterval {
             RegionView* view;
             ARDOUR::AudioIntervalResult intervals;

@@ -91,8 +91,8 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 
 	get_vbox()->pack_start (*hbox, false, false);
 
-	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
-	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
+	cancel_button = add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	apply_button = add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_OK);
 	set_default_response (Gtk::RESPONSE_OK);
 
 	get_vbox()->pack_start (_progress_bar, true, true, 12);
@@ -141,9 +141,15 @@ StripSilenceDialog::silences (AudioIntervalMap& m)
 void
 StripSilenceDialog::drop_rects ()
 {
+	// called by parent when starting to progess (dialog::run returned),
+	// but before the dialog is destoyed.
+
         for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
                 v->view->drop_silent_frames ();
         }
+
+	cancel_button->set_sensitive (false);
+	apply_button->set_sensitive (false);
 }
 
 void
