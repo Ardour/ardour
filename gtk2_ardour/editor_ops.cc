@@ -5177,6 +5177,8 @@ Editor::strip_region_silence ()
 		}
 	}
 
+	assert (!audio_only.empty());
+
 	StripSilenceDialog d (_session, audio_only);
 	int const r = d.run ();
 
@@ -5469,9 +5471,6 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 				_session->add_commands (cmds);
 				
 				_session->add_command(new StatefulDiffCommand (playlist));
-
-			} else {
-				continue;
 			}
 
 			if (progress) {
