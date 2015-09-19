@@ -275,13 +275,13 @@ StripSilenceDialog::threshold_changed ()
 framecnt_t
 StripSilenceDialog::minimum_length () const
 {
-	return _minimum_length->current_duration (views.front().view->region()->position());
+	return std::max((framecnt_t)1, _minimum_length->current_duration (views.front().view->region()->position()));
 }
 
 framecnt_t
 StripSilenceDialog::fade_length () const
 {
-	return _fade_length->current_duration (views.front().view->region()->position());
+	return std::max((framecnt_t)0, _fade_length->current_duration (views.front().view->region()->position()));
 }
 
 void
