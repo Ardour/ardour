@@ -204,6 +204,7 @@ sed -e "s?@ENV@?$env?g" \
     -e "s?@VERSION@?$release_version?g" \
     -e "s?@INFOSTRING@?$info_string?g" \
     -e "s?@IDSUFFIX@?$EXECUTABLE?g" \
+    -e "s?@BUNDLENAME@?${APPNAME}${major_version}?g" \
     -e "s?@EXECUTABLE@?$EXECUTABLE?g" < Info.plist.in > Info.plist
 # and plist strings
 sed -e "s?@APPNAME@?$appname?" \
