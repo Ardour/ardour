@@ -18,7 +18,7 @@
 */
 
 #include <iostream>
-#include <glibmm/main.h>
+#include "ardour/ardour.h"
 #include "progress_reporter.h"
 
 ProgressReporter::ProgressReporter ()
@@ -35,10 +35,6 @@ void
 ProgressReporter::set_overall_progress (float p)
 {
 	update_progress_gui (p);
-
-	/* Make sure the progress widget gets updated */
-	while (Glib::MainContext::get_default()->iteration (false)) {
-		/* do nothing */
-	}
+	ARDOUR::GUIIdle ();
 }
 
