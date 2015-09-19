@@ -107,7 +107,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 	int n = 0;
 	int const N = audible.size ();
 
-	for (AudioIntervalResult::const_iterator i = audible.begin(); i != audible.end(); ++i) {
+	for (AudioIntervalResult::const_iterator i = audible.begin(); i != audible.end(); ++i, ++n) {
 
 		PBD::PropertyList plist;
 		boost::shared_ptr<AudioRegion> copy;
