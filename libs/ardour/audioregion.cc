@@ -1805,88 +1805,61 @@ AudioRegion::find_silence (Sample threshold, framecnt_t min_length, framecnt_t f
 	boost::scoped_array<Sample> loudest (new Sample[block_size]);
 	boost::scoped_array<Sample> buf (new Sample[block_size]);
 
+	assert (fade_length >= 0);
+	assert (min_length > 0);
+
 	framepos_t pos = _start;
-	framepos_t const end = _start + _length - 1;
+	framepos_t const end = _start + _length;
 
 	AudioIntervalResult silent_periods;
 
-	bool in_silence = false;
-	frameoffset_t silence_start = 0;
-	frameoffset_t silence_end = 0;
+	bool in_silence = true;
+	frameoffset_t silence_start = _start;
 
-	framecnt_t continuous_signal = fade_length;
-	framecnt_t hold_off = 0;
 	while (pos < end && !itt.cancel) {
 
+		framecnt_t cur_samples = 0;
 		/* fill `loudest' with the loudest absolute sample at each instant, across all channels */
 		memset (loudest.get(), 0, sizeof (Sample) * block_size);
 		for (uint32_t n = 0; n < n_channels(); ++n) {
 
-			read_raw_internal (buf.get(), pos, block_size, n);
-			for (framecnt_t i = 0; i < block_size; ++i) {
+			cur_samples = read_raw_internal (buf.get(), pos, block_size, n);
+			for (framecnt_t i = 0; i < cur_samples; ++i) {
 				loudest[i] = max (loudest[i], abs (buf[i]));
 			}
 		}
 
 		/* now look for silence */
-		for (framecnt_t i = 0; i < block_size; ++i) {
+		for (framecnt_t i = 0; i < cur_samples; ++i) {
 			bool const silence = abs (loudest[i]) < threshold;
 			if (silence && !in_silence) {
 				/* non-silence to silence */
 				in_silence = true;
-				/* process last queued silent part if any */
-				if (hold_off > 0) {
-					assert (hold_off < fade_length);
-					silence_end -= hold_off;
-					if (silence_end - silence_start >= min_length) {
-						silent_periods.push_back (std::make_pair (silence_start, silence_end));
-					}
-				}
-				hold_off = 0;
-
-				if (continuous_signal < fade_length) {
-					silence_start = pos + i + fade_length - continuous_signal;
-				} else {
-					silence_start = pos + i;
-				}
+				silence_start = pos + i + fade_length;
 			} else if (!silence && in_silence) {
 				/* silence to non-silence */
 				in_silence = false;
-				hold_off = 0;
-				if (pos + i - 1 - silence_start >= min_length) {
-					/* queue silence */
-					silence_end = pos + i - 1;
-					hold_off = 1;
-				}
-			}
+				frameoffset_t silence_end = pos + i - 1 - fade_length;
 
-			if (hold_off > 0) {
-				assert (!in_silence);
-				if (++hold_off >= fade_length) {
+				if (silence_end - silence_start >= min_length) {
 					silent_periods.push_back (std::make_pair (silence_start, silence_end));
-					hold_off = 0;
 				}
-			}
-
-			if (!silence) {
-				++continuous_signal;
-			} else {
-				continuous_signal = 0;
 			}
 		}
 
-		pos += block_size;
-		itt.progress = (end-pos)/(double)_length;
+		pos += cur_samples;
+		itt.progress = (end - pos) / (double)_length;
+
+		if (cur_samples == 0) {
+			assert (pos >= end);
+			break;
+		}
 	}
 
-	if (in_silence) {
+	if (in_silence && !itt.cancel) {
 		/* last block was silent, so finish off the last period */
-		assert (hold_off == 0);
-		if (continuous_signal < fade_length) {
-			silence_start += fade_length - continuous_signal;
-		}
-		if (end - 1 - silence_start >= min_length) {
-			silent_periods.push_back (std::make_pair (silence_start, end));
+		if (end - 1 - silence_start >= min_length + fade_length) {
+			silent_periods.push_back (std::make_pair (silence_start, end - 1));
 		}
 	}
 
