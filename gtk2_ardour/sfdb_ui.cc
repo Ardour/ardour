@@ -1698,16 +1698,6 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	hbox->pack_start (*vbox, false, false);
 	options.pack_start (*hbox, false, false);
 
-	/* dummy entry for action combo so that it doesn't look odd if we
-	   come up with no tracks selected.
-	*/
-
-	str.clear ();
-	str.push_back (importmode2string (mode_hint));
-	set_popdown_strings (action_combo, str);
-	action_combo.set_active_text (str.front());
-	action_combo.set_sensitive (false);
-
 	l = manage (new Label);
 	l->set_markup (_("<b>Insert at</b>"));
 
@@ -1775,8 +1765,6 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	src_combo.set_sensitive (false);
 	src_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::src_combo_changed));
 
-	reset_options ();
-
 	action_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &SoundFileOmega::reset_options_noret));
 
@@ -1814,19 +1802,22 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	   selects a file to import, which in turn prevents the size of the dialog from jumping
 	   around. */
 
-	vector<string> t;
-	t.push_back (_("one track per file"));
-	t.push_back (_("one track per channel"));
-	t.push_back (_("sequence files"));
-	t.push_back (_("all files in one region"));
-	set_popdown_strings (channel_combo, t);
+	str.clear ();
+	str.push_back (_("one track per file"));
+	str.push_back (_("one track per channel"));
+	str.push_back (_("sequence files"));
+	str.push_back (_("all files in one region"));
+	set_popdown_strings (channel_combo, str);
 
-	t.clear ();
-	t.push_back (importmode2string (ImportAsTrack));
-	t.push_back (importmode2string (ImportToTrack));
-	t.push_back (importmode2string (ImportAsRegion));
-	t.push_back (importmode2string (ImportAsTapeTrack));
-	set_popdown_strings (action_combo, t);
+	str.clear ();
+	str.push_back (importmode2string (ImportAsTrack));
+	str.push_back (importmode2string (ImportToTrack));
+	str.push_back (importmode2string (ImportAsRegion));
+	str.push_back (importmode2string (ImportAsTapeTrack));
+	set_popdown_strings (action_combo, str);
+	action_combo.set_active_text (importmode2string(mode_hint));
+
+	reset (selected_audio_tracks, selected_midi_tracks);
 }
 
 void
