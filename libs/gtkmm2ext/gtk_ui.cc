@@ -764,12 +764,22 @@ UI::get_color (const string& prompt, bool& picked, const Gdk::Color* initial)
 	ColorSelectionDialog color_dialog (prompt);
 
 	color_dialog.set_modal (true);
-	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (*this, &UI::color_selection_done), false));
-	color_dialog.get_ok_button()->signal_clicked().connect (bind (mem_fun (*this, &UI::color_selection_done), true));
-	color_dialog.signal_delete_event().connect (mem_fun (*this, &UI::color_selection_deleted));
+
+	Gtk::Button* ok_button = dynamic_cast<Gtk::Button*>(
+	    color_dialog.get_widget_for_response(RESPONSE_OK));
+	ok_button->signal_clicked().connect(
+	    bind(mem_fun(*this, &UI::color_selection_done), true));
+
+	Gtk::Button* cancel_button = dynamic_cast<Gtk::Button*>(
+	    color_dialog.get_widget_for_response(RESPONSE_CANCEL));
+	cancel_button->signal_clicked().connect(
+	    bind(mem_fun(*this, &UI::color_selection_done), false));
+
+	color_dialog.signal_delete_event().connect(
+	    mem_fun(*this, &UI::color_selection_deleted));
 
 	if (initial) {
-		color_dialog.get_colorsel()->set_current_color (*initial);
+		color_dialog.get_color_selection()->set_current_color (*initial);
 	}
 
 	color_dialog.show_all ();
@@ -778,10 +788,10 @@ UI::get_color (const string& prompt, bool& picked, const Gdk::Color* initial)
 
 	Main::run();
 
-	color_dialog.hide_all ();
+	color_dialog.hide ();
 
 	if (color_picked) {
-		Gdk::Color f_rgba = color_dialog.get_colorsel()->get_current_color ();
+		Gdk::Color f_rgba = color_dialog.get_color_selection()->get_current_color ();
 		color.set_red(f_rgba.get_red());
 		color.set_green(f_rgba.get_green());
 		color.set_blue(f_rgba.get_blue());
