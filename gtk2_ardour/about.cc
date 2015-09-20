@@ -645,7 +645,9 @@ About::About ()
 	if (btn) {
 		btn->signal_clicked().connect(sigc::mem_fun(static_cast<Gtk::Window*>(this), &Gtk::Window::hide));
 	}
+#ifndef GTKMM_DISABLE_DEPRECATED
 	set_url_hook (sigc::ptr_fun(&About::launch_homepage));
+#endif
 }
 
 About::~About ()
