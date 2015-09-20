@@ -19,8 +19,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#include <glibmm.h>
 #include <assert.h>
+#include <string.h>
+#include <glibmm.h>
 
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
