@@ -63,6 +63,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	, aspect_checkbox (_("Height = "))
 	, height_adjustment (128, 0, 1920, 1, 16, 0)
 	, height_spinner (height_adjustment)
+	, ltc_detect (_("Extract LTC from audio and align video"))
 	, bitrate_checkbox (_("Manual Override"))
 	, bitrate_adjustment (2000, 500, 10000, 10, 100, 0)
 	, bitrate_spinner (bitrate_adjustment)
@@ -219,7 +220,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 
 	options_box->pack_start (video_combo, false, false, 4);
 
-	Table* t = manage (new Table (4, 3));
+	Table* t = manage (new Table (4, 4));
 	t->set_spacings (4);
 	options_box->pack_start (*t, true, true, 4);
 
@@ -254,6 +255,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	t->attach (*l, 0, 1, 2, 3);
 	audio_combo.set_name ("PaddedButton");
 	t->attach (audio_combo, 1, 4, 2, 3);
+	t->attach (ltc_detect, 1, 4, 3, 4);
 	if (as.size() == 0) {
 		audio_combo.append_text(_("No Audio Track Present"));
 		audio_combo.set_sensitive(false);
@@ -264,6 +266,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 		}
 	}
 	audio_combo.set_active(0);
+	ltc_detect.set_sensitive (false);
 
 #if 1 /* tentative debug mode */
 	options_box->pack_start (debug_checkbox, false, true, 4);
@@ -461,6 +464,9 @@ TranscodeVideoDialog::video_combo_changed ()
 	}
 	if (i == 2 && audio_combo.get_active_row_number() == 0) {
 		audio_combo.set_active(1);
+	} else {
+		//update LTC option sensitivity
+		audio_combo_changed ();
 	}
 }
 
@@ -471,6 +477,17 @@ TranscodeVideoDialog::audio_combo_changed ()
 			&& audio_combo.get_active_row_number() == 0)
 	{
 		audio_combo.set_active(1);
+		ltc_detect.set_sensitive (false);
+		ltc_detect.set_active (false);
+	}
+
+	if (video_combo.get_active_row_number() != 2
+			&& audio_combo.get_active_row_number() > 0)
+	{
+		ltc_detect.set_sensitive (true);
+	} else {
+		ltc_detect.set_sensitive (false);
+		ltc_detect.set_active (false);
 	}
 }
 

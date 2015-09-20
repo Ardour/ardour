@@ -77,6 +77,7 @@
 #include "ardour/diskstream.h"
 #include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/ltc_file_reader.h"
 #include "ardour/port.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/process_thread.h"
@@ -3958,6 +3959,9 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		return;
 	}
 
+	std::string audio_from_video;
+	bool detect_ltc = false;
+
 	switch (add_video_dialog->import_option()) {
 		case VTL_IMPORT_TRANSCODE:
 			{
@@ -3969,9 +3973,15 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 					delete transcode_video_dialog;
 					return;
 				}
-				if (!transcode_video_dialog->get_audiofile().empty()) {
+
+				audio_from_video = transcode_video_dialog->get_audiofile();
+
+				if (!audio_from_video.empty() && transcode_video_dialog->detect_ltc()) {
+					detect_ltc = true;
+				}
+				else if (!audio_from_video.empty()) {
 					editor->embed_audio_from_video(
-							transcode_video_dialog->get_audiofile(),
+							audio_from_video,
 							video_timeline->get_offset(),
 							(transcode_video_dialog->import_option() != VTL_IMPORT_NO_VIDEO)
 							);
@@ -4004,6 +4014,7 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 	}
 
 	video_timeline->set_update_session_fps(auto_set_session_fps);
+
 	if (video_timeline->video_file_info(path, local_file)) {
 		XMLNode* node = new XMLNode(X_("Videotimeline"));
 		node->add_property (X_("Filename"), path);
@@ -4016,6 +4027,40 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 		}
 		_session->add_extra_xml (*node);
 		_session->set_dirty ();
+
+		if (!audio_from_video.empty() && detect_ltc) {
+			std::vector<LTCFileReader::LTCMap> ltc_seq;
+
+			try {
+				/* TODO ask user about TV standard (LTC alignment if any) */
+				LTCFileReader ltcr (audio_from_video, video_timeline->get_video_file_fps());
+				/* TODO ASK user which channel:  0 .. ltcr->channels() - 1 */
+
+				ltc_seq = ltcr.read_ltc (/*channel*/ 0, /*max LTC frames to decode*/ 15);
+
+				/* TODO seek near end of file, and read LTC until end.
+				 * if it fails to find any LTC frames, scan complete file
+				 *
+				 * calculate drift of LTC compared to video-duration,
+				 * ask user for reference (timecode from start/mid/end)
+				 */
+			} catch (...) {
+				// LTCFileReader will have written error messages
+			}
+
+			::g_unlink(audio_from_video.c_str());
+
+			if (ltc_seq.size() == 0) {
+				PBD::error << _("No LTC detected, video will not be aligned.") << endmsg;
+			} else {
+				/* the very first TC in the file is somteimes not aligned properly */
+				int i = ltc_seq.size() -1;
+				ARDOUR::frameoffset_t video_start_offset =
+					_session->nominal_frame_rate() * (ltc_seq[i].timecode_sec - ltc_seq[i].framepos_sec);
+				PBD::info << string_compose (_("Align video-start to %1 [samples]"), video_start_offset) << endmsg;
+				video_timeline->set_offset(video_start_offset);
+			}
+		}
 
 		_session->maybe_update_session_range(
 			std::max(video_timeline->get_offset(), (ARDOUR::frameoffset_t) 0),

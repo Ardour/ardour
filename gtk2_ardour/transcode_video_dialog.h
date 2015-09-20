@@ -48,6 +48,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	std::string get_filename () { return path_entry.get_text(); }
 	std::string get_audiofile () { return audiofile; }
 	VtlTranscodeOption import_option ();
+	bool detect_ltc () { return ltc_detect.get_active (); }
 
   private:
 	void on_show ();
@@ -94,6 +95,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	Gtk::Adjustment   height_adjustment;
 	Gtk::SpinButton   height_spinner;
 	Gtk::ComboBoxText audio_combo;
+	Gtk::CheckButton  ltc_detect;
 	Gtk::CheckButton  bitrate_checkbox;
 	Gtk::Adjustment   bitrate_adjustment;
 	Gtk::SpinButton   bitrate_spinner;
