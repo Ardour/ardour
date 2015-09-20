@@ -140,6 +140,7 @@ public:
 	void shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue);
 	void partition (framepos_t start, framepos_t end, bool cut = false);
 	void duplicate (boost::shared_ptr<Region>, framepos_t position, float times);
+	void duplicate (boost::shared_ptr<Region>, framepos_t position, framecnt_t gap, float times);
 	void nudge_after (framepos_t start, framecnt_t distance, bool forwards);
 	boost::shared_ptr<Region> combine (const RegionList&);
 	void uncombine (boost::shared_ptr<Region>);

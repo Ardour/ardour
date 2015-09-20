@@ -4792,6 +4792,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 	framepos_t const start_frame = regions.start ();
 	framepos_t const end_frame = regions.end_frame ();
+	framecnt_t const gap = end_frame - start_frame;
 
 	begin_reversible_command (Operations::duplicate_region);
 
@@ -4806,9 +4807,10 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		latest_regionviews.clear ();
 		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
 
+		framepos_t const position = end_frame + (r->first_frame() - start_frame);
  		playlist = (*i)->region()->playlist();
 		playlist->clear_changes ();
-		playlist->duplicate (r, end_frame + (r->first_frame() - start_frame), times);
+		playlist->duplicate (r, position, gap, times);
 		_session->add_command(new StatefulDiffCommand (playlist));
 
 		c.disconnect ();

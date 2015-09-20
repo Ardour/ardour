@@ -1245,6 +1245,13 @@ Playlist::flush_notifications (bool from_undo)
  void
  Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, float times)
  {
+	 duplicate(region, position, region->length(), times);
+ }
+
+/** @param gap from the beginning of the region to the next beginning */
+ void
+ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, framecnt_t gap, float times)
+ {
 	 times = fabs (times);
 
 	 RegionWriteLock rl (this);
@@ -1255,7 +1262,7 @@ Playlist::flush_notifications (bool from_undo)
 		 boost::shared_ptr<Region> copy = RegionFactory::create (region, true);
 		 add_region_internal (copy, pos);
 		 set_layer (copy, DBL_MAX);
-		 pos += region->length();
+		 pos += gap;
 	 }
 
 	 if (floor (times) != times) {
