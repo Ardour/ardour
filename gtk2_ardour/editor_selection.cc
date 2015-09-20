@@ -41,6 +41,7 @@
 #include "editor_regions.h"
 #include "editor_cursors.h"
 #include "midi_region_view.h"
+#include "sfdb_ui.h"
 
 #include "i18n.h"
 
@@ -1006,6 +1007,32 @@ Editor::track_selection_changed ()
 	/* notify control protocols */
 	
 	ControlProtocol::TrackSelectionChanged (routes);
+
+	if (sfbrowser) {
+		uint32_t audio_track_cnt = 0;
+		uint32_t midi_track_cnt = 0;
+
+		for (TrackSelection::iterator x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+			AudioTimeAxisView* atv = dynamic_cast<AudioTimeAxisView*>(*x);
+
+			if (atv) {
+				if (atv->is_audio_track()) {
+					audio_track_cnt++;
+				}
+
+			} else {
+				MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(*x);
+
+				if (mtv) {
+					if (mtv->is_midi_track()) {
+						midi_track_cnt++;
+					}
+				}
+			}
+		}
+
+		sfbrowser->reset (audio_track_cnt, midi_track_cnt);
+	}
 }
 
 void
