@@ -281,7 +281,7 @@ SndFileSource::open ()
 		             _ ("SndFileSource: cannot open file \"%1\" for %2"),
 		             _path,
 		             (writable () ? "read+write" : "reading")) << endmsg;
-		return false;
+		return -1;
 	}
 
 	_sndfile = sf_open_fd (fd, writable() ? SFM_RDWR : SFM_READ, &_info, true);
