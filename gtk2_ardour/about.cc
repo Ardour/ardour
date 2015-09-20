@@ -169,6 +169,7 @@ static const char* authors[] = {
 	N_("Tim Mayberry"),
 	N_("Doug Mclain"),
 	N_("Todd Naugle"),
+	N_("André Nusser"),
 	N_("Jack O'Quin"),
 	N_("Nimal Ratnayake"),
 	N_("David Robillard"),
