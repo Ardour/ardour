@@ -130,12 +130,12 @@ intptr_t Session::vst_callback (
 		}
 		switch (value) {
 			case 0:
-				if (index < plug->numInputs) {
+				if (index < plug->input_streams().n_audio()) {
 					return 0;
 				}
 				break;
 			case 1:
-				if (index < plug->numOutputs) {
+				if (index < plug->output_streams().n_audio()) {
 					return 0;
 				}
 				break;
