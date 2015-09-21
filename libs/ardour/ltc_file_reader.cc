@@ -19,6 +19,9 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include <glib.h>
+#include <pbd/gstdio_compat.h>
+
 #include <assert.h>
 #include <string.h>
 #include <glibmm.h>
