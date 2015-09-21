@@ -126,16 +126,18 @@ intptr_t Session::vst_callback (
 		// return value is 0 for <true> such that older versions
 		// will always return true.
 		if (!plug) {
-			return 1;
+			// we don't know.
+			// but ardour always connects all buffers, so we're good
+			return 0;
 		}
 		switch (value) {
 			case 0:
-				if (index < plug->input_streams().n_audio()) {
+				if (index < plug->plugin()->numInputs) {
 					return 0;
 				}
 				break;
 			case 1:
-				if (index < plug->output_streams().n_audio()) {
+				if (index < plug->plugin()->numOutputs) {
 					return 0;
 				}
 				break;
