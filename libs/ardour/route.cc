@@ -3900,7 +3900,16 @@ Route::MuteControllable::set_superficial_value(bool muted)
 	/* Note we can not use AutomationControl::set_value here since it will emit
 	   Changed(), but the value will not be correct to the observer. */
 
-	bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
+	/* this is a tweak of ControlList::automation_write ()
+	   as currently MuteControllable can't be touching.
+	   bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
+	*/
+	const AutoState as = ((AutomationList*)_list.get())->automation_state ();
+	bool to_list = _list && _session.transport_rolling () && (as == Touch || as == Write);
+
+	if (to_list) {
+		_list->set_in_write_pass(true, false, _session.audible_frame ());
+	}
 
 	Control::set_double (muted, _session.transport_frame(), to_list);
 }
@@ -3916,6 +3925,8 @@ Route::MuteControllable::set_value (double val)
 	}
 
 	if (_list && ((AutomationList*)_list.get())->automation_playback()) {
+		// Set superficial/automation value to drive controller (and possibly record)
+		set_superficial_value (bval);
 		// Playing back automation, set route mute directly
 		r->set_mute (bval, this);
 	} else {
@@ -3924,9 +3935,6 @@ Route::MuteControllable::set_value (double val)
 		rl->push_back (r);
 		_session.set_mute (rl, bval, Session::rt_cleanup);
 	}
-
-	// Set superficial/automation value to drive controller (and possibly record)
-	set_superficial_value(bval);
 }
 
 double

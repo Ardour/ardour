@@ -86,7 +86,6 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 		but->set_controllable(ac);
 		but->signal_clicked.connect(
 			sigc::mem_fun(*this, &AutomationController::toggled));
-
 		_widget = but;
 	} else {
 		AutomationBarController* bar = manage(new AutomationBarController(_printer, ac, adj));
@@ -198,14 +197,6 @@ AutomationController::toggled ()
 {
 	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
 	if (but) {
-		if (_controllable->session().transport_rolling()) {
-			if (_controllable->automation_state() == Touch) {
-				_controllable->set_automation_state(Write);
-			}
-			if (_controllable->list()) {
-				_controllable->list()->set_in_write_pass(true, true, _controllable->session().audible_frame());
-			}
-		}
 		const bool was_active = _controllable->get_value() >= 0.5;
 		if (was_active && but->get_active()) {
 			_adjustment->set_value(0.0);
