@@ -53,7 +53,7 @@ LedState
 MackieControlProtocol::shift_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_SHIFT;
-	return on;
+	return off;
 }
 LedState
 MackieControlProtocol::option_press (Button &)
@@ -65,7 +65,7 @@ LedState
 MackieControlProtocol::option_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_OPTION;
-	return on;
+	return off;
 }
 LedState
 MackieControlProtocol::control_press (Button &)
@@ -79,7 +79,7 @@ MackieControlProtocol::control_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_CONTROL;
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("CONTROL Release: modifier state now set to %1\n", _modifier_state));
-	return on;
+	return off;
 }
 LedState
 MackieControlProtocol::cmd_alt_press (Button &)
@@ -91,7 +91,7 @@ LedState
 MackieControlProtocol::cmd_alt_release (Button &)
 {
 	_modifier_state &= ~MODIFIER_CMDALT;
-	return on;
+	return off;
 }
 
 LedState 
