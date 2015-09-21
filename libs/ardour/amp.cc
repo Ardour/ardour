@@ -59,7 +59,7 @@ Amp::Amp (Session& s, std::string type)
 std::string
 Amp::display_name() const
 {
-	return _("Fader");
+	return _type == "trim" ? _("Trim") : _("Fader");
 }
 
 bool

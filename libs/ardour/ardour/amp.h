@@ -39,6 +39,7 @@ public:
 	Amp(Session& s, std::string type = "amp");
 
 	std::string display_name() const;
+	std::string type() const { return _type;}
 
 	bool visible () const;
 

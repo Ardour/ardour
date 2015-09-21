@@ -165,7 +165,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 			_controls.push_back (c);
 
 			if (boost::dynamic_pointer_cast<Amp> (_processor) == 0) {
-				/* Add non-Amp controls to the processor box */
+				/* Add non-Amp (Fader & Trim) controls to the processor box */
 				_vbox.pack_start (c->box);
 			}
 		}
@@ -1796,7 +1796,7 @@ ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor>
 
 	if (processor && processor->display_to_user()) {
 
-		if (boost::dynamic_pointer_cast<Amp>(processor)) {
+		if (boost::dynamic_pointer_cast<Amp>(processor) && boost::dynamic_pointer_cast<Amp>(processor)->type() == X_("amp")) {
 			*amp_seen = true;
 		} else {
 			if (!*amp_seen) {
@@ -1872,7 +1872,7 @@ ProcessorBox::setup_entry_positions ()
 
 	uint32_t num = 0;
 	for (list<ProcessorEntry*>::iterator i = children.begin(); i != children.end(); ++i) {
-		if (boost::dynamic_pointer_cast<Amp>((*i)->processor())) {
+		if (boost::dynamic_pointer_cast<Amp>((*i)->processor()) && boost::dynamic_pointer_cast<Amp>((*i)->processor())->type() == X_("amp")) {
 			pre_fader = false;
 			(*i)->set_position (ProcessorEntry::Fader, num++);
 		} else {
@@ -2444,7 +2444,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		}
 	}
 
-	if (boost::dynamic_pointer_cast<Amp> (processor)) {
+	if (boost::dynamic_pointer_cast<Amp> (processor) && boost::dynamic_pointer_cast<Amp> (processor)->type() == X_("amp")) {
 
 		if (_parent_strip) {
 			_parent_strip->revert_to_default_display ();
