@@ -46,7 +46,7 @@ public:
 	/** @param g Route group, or 0.
          *  @return Menu to be popped up on right-click over the given route group.
 	 */
-	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g);
+	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g, bool tabArea = false);
 
 	void run_new_group_dialog (ARDOUR::RouteList const &);
 

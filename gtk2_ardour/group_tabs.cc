@@ -144,7 +144,7 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 			RouteGroupDialog d (g, false);
 			d.do_run ();
 		} else {
-			Menu* m = get_menu (g);
+			Menu* m = get_menu (g, true);
 			if (m) {
 				m->popup (ev->button, ev->time);
 			}
@@ -301,7 +301,7 @@ GroupTabs::click_to_tab (double c, list<Tab>::iterator* prev, list<Tab>::iterato
 }
 
 Gtk::Menu*
-GroupTabs::get_menu (RouteGroup* g)
+GroupTabs::get_menu (RouteGroup* g, bool TabArea)
 {
 	using namespace Menu_Helpers;
 
@@ -317,7 +317,10 @@ GroupTabs::get_menu (RouteGroup* g)
 	_menu->set_name ("ArdourContextMenu");
 	MenuList& items = _menu->items();
 
-	items.push_back (MenuElem (_("Create New Group ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
+	if (!TabArea) {
+		items.push_back (MenuElem (_("Create New Group ..."), hide_return (sigc::mem_fun(*this, &GroupTabs::create_and_add_group))));
+	}
+
 	items.push_back (MenuElem (_("Create New Group From"), *new_from));
 
 	if (g) {
