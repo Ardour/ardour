@@ -125,6 +125,23 @@ intptr_t Session::vst_callback (
 		// value is 0 for input and != 0 otherwise. note: the
 		// return value is 0 for <true> such that older versions
 		// will always return true.
+		if (!plug) {
+			return 1;
+		}
+		switch (value) {
+			case 0:
+				if (index < plug->numInputs) {
+					return 0;
+				}
+				break;
+			case 1:
+				if (index < plug->numOutputs) {
+					return 0;
+				}
+				break;
+			default:
+				break;
+		}
 		return 1;
 
 	case audioMasterWantMidi:
