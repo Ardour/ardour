@@ -85,8 +85,10 @@ SaveAsDialog::SaveAsDialog ()
 	no_include_media_button.signal_toggled ().connect (sigc::mem_fun (*this, &SaveAsDialog::no_include_toggled));
 	
 	new_parent_folder_selector.set_action (FILE_CHOOSER_ACTION_SELECT_FOLDER);
-	new_parent_folder_selector.set_current_folder (Glib::get_home_dir());
+	new_parent_folder_selector.set_current_folder (Glib::get_home_dir()); // Why $HOME and not poor_mans_glob (Config->get_default_session_parent_dir ()) ??
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));
+	new_parent_folder_selector.signal_current_folder_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));
+	new_parent_folder_selector.signal_selection_changed().connect (sigc::mem_fun (*this, &SaveAsDialog::name_entry_changed));
 	set_response_sensitive (RESPONSE_OK, false);
 }
 
