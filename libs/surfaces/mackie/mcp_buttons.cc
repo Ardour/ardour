@@ -645,7 +645,7 @@ MackieControlProtocol::pan_press (Button &)
 LedState
 MackieControlProtocol::pan_release (Button &) 
 { 
-	return off; 
+	return none; 
 }
 LedState
 MackieControlProtocol::plugin_press (Button &) 
@@ -655,13 +655,14 @@ MackieControlProtocol::plugin_press (Button &)
 LedState
 MackieControlProtocol::plugin_release (Button &) 
 { 
-	return off; 
+	return none; 
 }
 LedState
 MackieControlProtocol::eq_press (Button &) 
 { 
-	set_view_mode (EQ);
-	return on;
+	//set_view_mode (EQ);
+	// not implemented yet, turn off (see comments for send button)
+	return off;
 }
 LedState
 MackieControlProtocol::eq_release (Button &) 
@@ -671,8 +672,9 @@ MackieControlProtocol::eq_release (Button &)
 LedState
 MackieControlProtocol::dyn_press (Button &) 
 { 
-	set_view_mode (Dynamics);
-	return on;
+	//set_view_mode (Dynamics);
+	// same as send
+	return off;
 }
 LedState
 MackieControlProtocol::dyn_release (Button &) 
@@ -810,7 +812,7 @@ Mackie::LedState
 MackieControlProtocol::track_press (Mackie::Button&) 
 {
 
-	return none;
+	return off;
 }
 Mackie::LedState 
 MackieControlProtocol::track_release (Mackie::Button&) 
@@ -821,9 +823,12 @@ Mackie::LedState
 MackieControlProtocol::send_press (Mackie::Button&) 
 {
 // code moved here from "sends_press"
-	set_view_mode (Sends);
-	return on;
-//	return none;
+	//set_view_mode (Sends);
+	// Led state for vpot assignment should be radio button-ish
+	// Pressing any one should turn the rest off.
+	// but this is not implemented yet so leave off
+	//return on;
+	return off;
 }
 Mackie::LedState 
 MackieControlProtocol::send_release (Mackie::Button&) 
