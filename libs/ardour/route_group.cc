@@ -80,16 +80,16 @@ RouteGroup::make_property_quarks ()
 }
 
 #define ROUTE_GROUP_DEFAULT_PROPERTIES  _relative (Properties::relative, true) \
-	, _active (Properties::active, false) \
+	, _active (Properties::active, true) \
 	, _hidden (Properties::hidden, false) \
-	, _gain (Properties::gain, false) \
-	, _mute (Properties::mute, false) \
-	, _solo (Properties::solo, false) \
-	, _recenable (Properties::recenable, false) \
-	, _select (Properties::select, false) \
-	, _route_active (Properties::route_active, false) \
-	, _color (Properties::color, false) \
-	, _monitoring (Properties::monitoring, false)
+	, _gain (Properties::gain, true) \
+	, _mute (Properties::mute, true) \
+	, _solo (Properties::solo, true) \
+	, _recenable (Properties::recenable, true) \
+	, _select (Properties::select, true) \
+	, _route_active (Properties::route_active, true) \
+	, _color (Properties::color, true) \
+	, _monitoring (Properties::monitoring, true)
 
 RouteGroup::RouteGroup (Session& s, const string &n)
 	: SessionObject (s, n)
