@@ -158,8 +158,6 @@ RouteGroupMenu::new_group ()
 	}
 
 	RouteGroup* g = new RouteGroup (*_session, "");
-	g->apply_changes (*_default_properties);
-
 	RouteGroupDialog d (g, true);
 
 	if (d.do_run ()) {

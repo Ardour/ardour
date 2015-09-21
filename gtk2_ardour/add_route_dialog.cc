@@ -531,11 +531,6 @@ AddRouteDialog::group_changed ()
 {
 	if (_session && route_group_combo.get_active_text () == _("New Group...")) {
 		RouteGroup* g = new RouteGroup (*_session, "");
-
-		PropertyList plist;
-		plist.add (Properties::active, true);
-		g->apply_changes (plist);
-
 		RouteGroupDialog d (g, true);
 
 		if (d.do_run ()) {
