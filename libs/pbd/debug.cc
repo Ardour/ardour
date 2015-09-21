@@ -83,7 +83,7 @@ PBD::new_debug_bit (const char* name)
 void
 PBD::debug_print (const char* prefix, string str)
 {
-	cerr << prefix << ": " << str;
+	cout << prefix << ": " << str;
 }
 
 int
@@ -111,7 +111,7 @@ PBD::parse_debug_options (const char* str)
 
                         if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
 	                        bits |= i->second;
-	                        cerr << i->first << " set ... debug bits now set to " << bits << " using " << i->second << endl;
+	                        cout << i->first << " set ... debug bits now set to " << bits << " using " << i->second << endl;
                         }
                 }
 	}
