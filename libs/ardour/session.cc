@@ -1817,7 +1817,7 @@ Session::disable_record (bool rt_context, bool force)
 
 	if ((rs = (RecordState) g_atomic_int_get (&_record_status)) != Disabled) {
 
-		if ((!Config->get_latched_record_enable () && !play_loop) || force) {
+		if (!Config->get_latched_record_enable () || force) {
 			g_atomic_int_set (&_record_status, Disabled);
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
