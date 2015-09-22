@@ -1419,7 +1419,10 @@ AudioClock::on_key_press_event (GdkEventKey* ev)
 		goto use_input_string;
 
 	default:
-		return false;
+		/* do not allow other keys to passthru to the rest of the GUI
+		   when editing.
+		*/
+		return true;
 	}
 
 	if (!insert_map.empty() && (input_string.length() >= insert_map.size())) {
