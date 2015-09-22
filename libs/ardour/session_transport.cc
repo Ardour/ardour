@@ -283,6 +283,10 @@ Session::realtime_stop (bool abort, bool clear_state)
 	/* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
 	disable_record (true, (!Config->get_latched_record_enable() && clear_state));
 
+	if (clear_state && !Config->get_loop_is_mode()) {
+		unset_play_loop ();
+	}
+	
 	reset_slave_state ();
 
 	_transport_speed = 0;
@@ -1297,10 +1301,6 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 			}
 
 			stop_transport (abort);
-		}
-
-		if (!Config->get_loop_is_mode()) {
-			unset_play_loop ();
 		}
 
 	} else if (transport_stopped() && speed == 1.0) {
