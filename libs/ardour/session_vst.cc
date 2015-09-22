@@ -23,6 +23,7 @@
 #include <cstdio>
 
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/windows_vst_plugin.h"
@@ -32,20 +33,11 @@
 #include <fst.h>
 #endif
 
-#include "pbd/debug.h"
-
 #include "i18n.h"
 
-#define DEBUG_CALLBACKS
-static int debug_callbacks = -1;
-
-#ifdef DEBUG_CALLBACKS
-#define SHOW_CALLBACK if (debug_callbacks) printf
-#else
-#define SHOW_CALLBACK(...)
-#endif
-
 using namespace ARDOUR;
+
+#define SHOW_CALLBACK(MSG) DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose (MSG " val = %1 idx = %2", index, value))
 
 int Session::vst_current_loading_id = 0;
 const char* Session::vst_can_do_strings[] = {
@@ -74,24 +66,24 @@ intptr_t Session::vst_callback (
 	VSTPlugin* plug;
 	Session* session;
 
-	if (debug_callbacks < 0) {
-		debug_callbacks = (getenv ("ARDOUR_DEBUG_VST_CALLBACKS") != 0);
-	}
-
 	if (effect && effect->user) {
 		plug = (VSTPlugin *) (effect->user);
 		session = &plug->session();
-		SHOW_CALLBACK ("am callback 0x%p, opcode = %d, plugin = \"%s\" ", (void*) DEBUG_THREAD_SELF, opcode, plug->name());
+		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("am callback 0x%1%2, opcode = %3%4, plugin = \"%5\" ",
+					std::hex, (void*) DEBUG_THREAD_SELF,
+					std::dec, opcode, plug->name()));
 	} else {
 		plug = 0;
 		session = 0;
-		SHOW_CALLBACK ("am callback 0x%p, opcode = %d", (void*) DEBUG_THREAD_SELF, opcode);
+		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("am callback 0x%1%2, opcode = %3%4",
+					std::hex, (void*) DEBUG_THREAD_SELF,
+					std::dec, opcode));
 	}
 
 	switch(opcode){
 
 	case audioMasterAutomate:
-		SHOW_CALLBACK ("amc: audioMasterAutomate\n");
+		SHOW_CALLBACK ("audioMasterAutomate");
 		// index, value, returns 0
 		if (plug) {
 			plug->set_parameter (index, opt);
@@ -99,17 +91,17 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterVersion:
-		SHOW_CALLBACK ("amc: audioMasterVersion\n");
+		SHOW_CALLBACK ("audioMasterVersion");
 		// vst version, currently 2 (0 for older)
 		return 2400;
 
 	case audioMasterCurrentId:
-		SHOW_CALLBACK ("amc: audioMasterCurrentId\n");
+		SHOW_CALLBACK ("audioMasterCurrentId");
 		// returns the unique id of a plug that's currently loading
 		return vst_current_loading_id;
 
 	case audioMasterIdle:
-		SHOW_CALLBACK ("amc: audioMasterIdle\n");
+		SHOW_CALLBACK ("audioMasterIdle");
 #ifdef WINDOWS_VST_SUPPORT
 		fst_audio_master_idle();
 #endif
@@ -119,7 +111,7 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterPinConnected:
-		SHOW_CALLBACK ("amc: audioMasterPinConnected\n");
+		SHOW_CALLBACK ("audioMasterPinConnected");
 		// inquire if an input or output is beeing connected;
 		// index enumerates input or output counting from zero:
 		// value is 0 for input and != 0 otherwise. note: the
@@ -147,7 +139,7 @@ intptr_t Session::vst_callback (
 		return 1;
 
 	case audioMasterWantMidi:
-		SHOW_CALLBACK ("amc: audioMasterWantMidi\n");
+		SHOW_CALLBACK ("audioMasterWantMidi");
 		// <value> is a filter which is currently ignored
 		if (plug && plug->get_info() != NULL) {
 			plug->get_info()->n_inputs.set_midi (1);
@@ -155,7 +147,7 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterGetTime:
-		SHOW_CALLBACK ("amc: audioMasterGetTime\n");
+		SHOW_CALLBACK ("audioMasterGetTime");
 		// returns const VstTimeInfo* (or 0 if not supported)
 		// <value> should contain a mask indicating which fields are required
 		// (see valid masks above), as some items may require extensive
@@ -272,7 +264,7 @@ intptr_t Session::vst_callback (
 		return (intptr_t) &_timeInfo;
 
 	case audioMasterProcessEvents:
-		SHOW_CALLBACK ("amc: audioMasterProcessEvents\n");
+		SHOW_CALLBACK ("audioMasterProcessEvents");
 		// VstEvents* in <ptr>
 		if (plug && plug->midi_buffer()) {
 			VstEvents* v = (VstEvents*)ptr;
@@ -286,11 +278,11 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterSetTime:
-		SHOW_CALLBACK ("amc: audioMasterSetTime\n");
+		SHOW_CALLBACK ("audioMasterSetTime");
 		// VstTimenfo* in <ptr>, filter in <value>, not supported
 
 	case audioMasterTempoAt:
-		SHOW_CALLBACK ("amc: audioMasterTempoAt\n");
+		SHOW_CALLBACK ("audioMasterTempoAt");
 		// returns tempo (in bpm * 10000) at sample frame location passed in <value>
 		if (session) {
 			const Tempo& t (session->tempo_map().tempo_at (value));
@@ -301,23 +293,23 @@ intptr_t Session::vst_callback (
 		break;
 
 	case audioMasterGetNumAutomatableParameters:
-		SHOW_CALLBACK ("amc: audioMasterGetNumAutomatableParameters\n");
+		SHOW_CALLBACK ("audioMasterGetNumAutomatableParameters");
 		return 0;
 
 	case audioMasterGetParameterQuantization:
-		SHOW_CALLBACK ("amc: audioMasterGetParameterQuantization\n");
+		SHOW_CALLBACK ("audioMasterGetParameterQuantization");
 		// returns the integer value for +1.0 representation,
 		// or 1 if full single float precision is maintained
 		// in automation. parameter index in <value> (-1: all, any)
 		return 0;
 
 	case audioMasterIOChanged:
-		SHOW_CALLBACK ("amc: audioMasterIOChanged\n");
+		SHOW_CALLBACK ("audioMasterIOChanged");
 		// numInputs and/or numOutputs has changed
 		return 0;
 
 	case audioMasterNeedIdle:
-		SHOW_CALLBACK ("amc: audioMasterNeedIdle\n");
+		SHOW_CALLBACK ("audioMasterNeedIdle");
 		// plug needs idle calls (outside its editor window)
 		if (plug) {
 			plug->state()->wantIdle = 1;
@@ -325,48 +317,48 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterSizeWindow:
-		SHOW_CALLBACK ("amc: audioMasterSizeWindow\n");
+		SHOW_CALLBACK ("audioMasterSizeWindow");
 		// index: width, value: height
 		return 0;
 
 	case audioMasterGetSampleRate:
-		SHOW_CALLBACK ("amc: audioMasterGetSampleRate\n");
+		SHOW_CALLBACK ("audioMasterGetSampleRate");
 		if (session) {
 			return session->frame_rate();
 		}
 		return 0;
 
 	case audioMasterGetBlockSize:
-		SHOW_CALLBACK ("amc: audioMasterGetBlockSize\n");
+		SHOW_CALLBACK ("audioMasterGetBlockSize");
 		if (session) {
 			return session->get_block_size();
 		}
 		return 0;
 
 	case audioMasterGetInputLatency:
-		SHOW_CALLBACK ("amc: audioMasterGetInputLatency\n");
+		SHOW_CALLBACK ("audioMasterGetInputLatency");
 		return 0;
 
 	case audioMasterGetOutputLatency:
-		SHOW_CALLBACK ("amc: audioMasterGetOutputLatency\n");
+		SHOW_CALLBACK ("audioMasterGetOutputLatency");
 		return 0;
 
 	case audioMasterGetPreviousPlug:
-		SHOW_CALLBACK ("amc: audioMasterGetPreviousPlug\n");
+		SHOW_CALLBACK ("audioMasterGetPreviousPlug");
 		// input pin in <value> (-1: first to come), returns cEffect*
 		return 0;
 
 	case audioMasterGetNextPlug:
-		SHOW_CALLBACK ("amc: audioMasterGetNextPlug\n");
+		SHOW_CALLBACK ("audioMasterGetNextPlug");
 		// output pin in <value> (-1: first to come), returns cEffect*
 
 	case audioMasterWillReplaceOrAccumulate:
-		SHOW_CALLBACK ("amc: audioMasterWillReplaceOrAccumulate\n");
+		SHOW_CALLBACK ("audioMasterWillReplaceOrAccumulate");
 		// returns: 0: not supported, 1: replace, 2: accumulate
 		return 0;
 
 	case audioMasterGetCurrentProcessLevel:
-		SHOW_CALLBACK ("amc: audioMasterGetCurrentProcessLevel\n");
+		SHOW_CALLBACK ("audioMasterGetCurrentProcessLevel");
 		// returns: 0: not supported,
 		// 1: currently in user thread (gui)
 		// 2: currently in audio thread (where process is called)
@@ -376,72 +368,72 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterGetAutomationState:
-		SHOW_CALLBACK ("amc: audioMasterGetAutomationState\n");
+		SHOW_CALLBACK ("audioMasterGetAutomationState");
 		// returns 0: not supported, 1: off, 2:read, 3:write, 4:read/write
 		// offline
 		return 0;
 
 	case audioMasterOfflineStart:
-		SHOW_CALLBACK ("amc: audioMasterOfflineStart\n");
+		SHOW_CALLBACK ("audioMasterOfflineStart");
 		return 0;
 
 	case audioMasterOfflineRead:
-		SHOW_CALLBACK ("amc: audioMasterOfflineRead\n");
+		SHOW_CALLBACK ("audioMasterOfflineRead");
 		// ptr points to offline structure, see below. return 0: error, 1 ok
 		return 0;
 
 	case audioMasterOfflineWrite:
-		SHOW_CALLBACK ("amc: audioMasterOfflineWrite\n");
+		SHOW_CALLBACK ("audioMasterOfflineWrite");
 		// same as read
 		return 0;
 
 	case audioMasterOfflineGetCurrentPass:
-		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentPass\n");
+		SHOW_CALLBACK ("audioMasterOfflineGetCurrentPass");
 		return 0;
 
 	case audioMasterOfflineGetCurrentMetaPass:
-		SHOW_CALLBACK ("amc: audioMasterOfflineGetCurrentMetaPass\n");
+		SHOW_CALLBACK ("audioMasterOfflineGetCurrentMetaPass");
 		return 0;
 
 	case audioMasterSetOutputSampleRate:
-		SHOW_CALLBACK ("amc: audioMasterSetOutputSampleRate\n");
+		SHOW_CALLBACK ("audioMasterSetOutputSampleRate");
 		// for variable i/o, sample rate in <opt>
 		return 0;
 
 	case audioMasterGetSpeakerArrangement:
-		SHOW_CALLBACK ("amc: audioMasterGetSpeakerArrangement\n");
+		SHOW_CALLBACK ("audioMasterGetSpeakerArrangement");
 		// (long)input in <value>, output in <ptr>
 		return 0;
 
 	case audioMasterGetVendorString:
-		SHOW_CALLBACK ("amc: audioMasterGetVendorString\n");
+		SHOW_CALLBACK ("audioMasterGetVendorString");
 		// fills <ptr> with a string identifying the vendor (max 64 char)
 		strcpy ((char*) ptr, "Linux Audio Systems");
 		return 0;
 
 	case audioMasterGetProductString:
-		SHOW_CALLBACK ("amc: audioMasterGetProductString\n");
+		SHOW_CALLBACK ("audioMasterGetProductString");
 		// fills <ptr> with a string with product name (max 64 char)
 		strcpy ((char*) ptr, PROGRAM_NAME);
 		return 0;
 
 	case audioMasterGetVendorVersion:
-		SHOW_CALLBACK ("amc: audioMasterGetVendorVersion\n");
+		SHOW_CALLBACK ("audioMasterGetVendorVersion");
 		// returns vendor-specific version
 		return 900;
 
 	case audioMasterVendorSpecific:
-		SHOW_CALLBACK ("amc: audioMasterVendorSpecific\n");
+		SHOW_CALLBACK ("audioMasterVendorSpecific");
 		// no definition, vendor specific handling
 		return 0;
 
 	case audioMasterSetIcon:
-		SHOW_CALLBACK ("amc: audioMasterSetIcon\n");
+		SHOW_CALLBACK ("audioMasterSetIcon");
 		// void* in <ptr>, format not defined yet
 		return 0;
 
 	case audioMasterCanDo:
-		SHOW_CALLBACK ("amc: audioMasterCanDo\n");
+		SHOW_CALLBACK ("audioMasterCanDo");
 		// string in ptr,  (const char*)ptr
 		for (int i = 0; i < vst_can_do_string_count; i++) {
 			if (! strcmp(vst_can_do_strings[i], (const char*)ptr)) {
@@ -451,27 +443,27 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterGetLanguage:
-		SHOW_CALLBACK ("amc: audioMasterGetLanguage\n");
+		SHOW_CALLBACK ("audioMasterGetLanguage");
 		// see enum
 		return 0;
 
 	case audioMasterOpenWindow:
-		SHOW_CALLBACK ("amc: audioMasterOpenWindow\n");
+		SHOW_CALLBACK ("audioMasterOpenWindow");
 		// returns platform specific ptr
 		return 0;
 
 	case audioMasterCloseWindow:
-		SHOW_CALLBACK ("amc: audioMasterCloseWindow\n");
+		SHOW_CALLBACK ("audioMasterCloseWindow");
 		// close window, platform specific handle in <ptr>
 		return 0;
 
 	case audioMasterGetDirectory:
-		SHOW_CALLBACK ("amc: audioMasterGetDirectory\n");
+		SHOW_CALLBACK ("audioMasterGetDirectory");
 		// get plug directory, FSSpec on MAC, else char*
 		return 0;
 
 	case audioMasterUpdateDisplay:
-		SHOW_CALLBACK ("amc: audioMasterUpdateDisplay\n");
+		SHOW_CALLBACK ("audioMasterUpdateDisplay");
 		// something has changed, update 'multi-fx' display
 		if (effect) {
 			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
@@ -479,22 +471,22 @@ intptr_t Session::vst_callback (
 		return 0;
 
 	case audioMasterBeginEdit:
-		SHOW_CALLBACK ("amc: audioMasterBeginEdit\n");
+		SHOW_CALLBACK ("audioMasterBeginEdit");
 		// begin of automation session (when mouse down), parameter index in <index>
 		return 0;
 
 	case audioMasterEndEdit:
-		SHOW_CALLBACK ("amc: audioMasterEndEdit\n");
+		SHOW_CALLBACK ("audioMasterEndEdit");
 		// end of automation session (when mouse up),     parameter index in <index>
 		return 0;
 
 	case audioMasterOpenFileSelector:
-		SHOW_CALLBACK ("amc: audioMasterOpenFileSelector\n");
+		SHOW_CALLBACK ("audioMasterOpenFileSelector");
 		// open a fileselector window with VstFileSelect* in <ptr>
 		return 0;
 
 	default:
-		SHOW_CALLBACK ("VST master dispatcher: undefed: %d\n", opcode);
+		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("VST master dispatcher: undefed: %1\n", opcode));
 		break;
 	}
 
