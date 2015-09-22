@@ -197,6 +197,7 @@ AudioClock::set_font (Pango::FontDescription font)
 
 	tmp->set_text ("8");
 	tmp->get_pixel_size (em_width, ignore_height);
+	
 
 	/* force redraw of markup with new font-size */
 	set (last_when, true);
@@ -312,13 +313,17 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 	double lw = layout_width * xscale;
 	double lh = layout_height * yscale;
 
-	cairo_move_to (cr, (get_width() - lw) / 2.0, (upper_height - lh) / 2.0);
+	if (lw >= get_width()) {
+		cairo_move_to (cr, 0.0, (upper_height - lh) / 2.0);
+	} else {
+		cairo_move_to (cr, (get_width() - lw) / 2.0, (upper_height - lh) / 2.0);
+	}
 
 	if (xscale != 1.0 || yscale != 1.0) {
 		cairo_save (cr);
 		cairo_scale (cr, xscale, yscale);
 	}
-	
+
 	pango_cairo_show_layout (cr, _layout->gobj());
 
 	if (xscale != 1.0 || yscale != 1.0) {
@@ -401,42 +406,44 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 	}
 
 	if (editing) {
+		Pango::Rectangle cursor;
+
 		if (!insert_map.empty()) {
 
-			int xcenter = (get_width() - layout_width) /2;
-
 			if (input_string.length() < insert_map.size()) {
-				Pango::Rectangle cursor;
 
-				if (input_string.empty()) {
-					/* nothing entered yet, put cursor at the end
-					   of string
-					*/
-					cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
-				} else {
-					cursor = _layout->get_cursor_strong_pos (insert_map[input_string.length()]);
-				}
+				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
 
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+
 				cairo_rectangle (cr,
-						 min (get_width() - 2.0,
-						      (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
-						 (upper_height - layout_height)/2.0,
-						 2.0, cursor.get_height()/PANGO_SCALE);
-				cairo_fill (cr);
+				                 cursor.get_x()/PANGO_SCALE,
+				                 (upper_height - layout_height)/2.0,
+				                 em_width,
+				                 cursor.get_height()/PANGO_SCALE);
+				cairo_stroke (cr);
+
 			} else {
 				/* we've entered all possible digits, no cursor */
 			}
 
 		} else {
-			if (input_string.empty()) {
-				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+			cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+
+			if (edit_string.empty()) {
 				cairo_rectangle (cr,
-						 (get_width()/2.0),
-						 (upper_height - layout_height)/2.0,
-						 2.0, upper_height);
-				cairo_fill (cr);
+				                 get_width() - em_width,
+				                 (upper_height - layout_height)/2.0,
+				                 em_width, upper_height);
+			} else {
+				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
+				cairo_rectangle (cr,
+				                 cursor.get_x()/PANGO_SCALE,
+				                 (upper_height - layout_height)/2.0,
+				                 em_width, upper_height);
 			}
+				
+			cairo_stroke (cr);
 		}
 	}
 }
@@ -477,8 +484,19 @@ AudioClock::set_clock_dimensions (Gtk::Requisition& req)
 		tmp->set_text (" 88:88:88,88 ");
 	tmp->get_pixel_size (req.width, req.height);
 
+
 	layout_height = req.height;
 	layout_width = req.width;
+
+	/* get the figure width for the font. This doesn't have to super
+	 * accurate since we only use it to measure the (roughly 1 character)
+	 * offset from the position Pango tells us for the "cursor"
+	 */
+
+	int ignore_height;
+
+	tmp->set_text ("8");
+	tmp->get_pixel_size (em_width, ignore_height);
 }
 
 void
