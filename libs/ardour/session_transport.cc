@@ -1429,6 +1429,8 @@ Session::stop_transport (bool abort, bool clear_state)
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("stop_transport, declick required? %1\n", get_transport_declick_required()));
+	
 	if (!get_transport_declick_required()) {
 
 		/* stop has not yet been scheduled */
@@ -1481,8 +1483,8 @@ Session::stop_transport (bool abort, bool clear_state)
 			/* Not recording, schedule a declick in the next process() cycle and then stop at its end */
 			
 			new_bits = PendingDeclickOut;
+			DEBUG_TRACE (DEBUG::Transport, string_compose ("stop scheduled for next process cycle @ %1\n", _transport_frame));
 		}
-
 		
 		/* we'll be called again after the declick */
 		transport_sub_state = SubState (transport_sub_state|new_bits);
@@ -1491,6 +1493,8 @@ Session::stop_transport (bool abort, bool clear_state)
 		return;
 
 	} else {
+
+		DEBUG_TRACE (DEBUG::Transport, "time to actually stop\n");
 		
 		/* declick was scheduled, but we've been called again, which means it is really time to stop
 		   
