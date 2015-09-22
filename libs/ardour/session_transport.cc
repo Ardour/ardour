@@ -1167,7 +1167,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		Location* al = _locations->auto_loop_location();
 
 		if (al) {
-			if (_transport_frame < al->start() || _transport_frame > al->end()) {
+			if (_transport_frame < al->start() || _transport_frame >= al->end()) {
 
 				// located outside the loop: cancel looping directly, this is called from event handling context
 
