@@ -1868,11 +1868,6 @@ Session::maybe_enable_record ()
 
 	save_state ("", true);
 
-        if (Config->get_loop_is_mode()) {
-                /* makes no sense to use loop play as mode when recording */
-                request_play_loop (false);
-        }
-        
 	if (_transport_speed) {
 		if (!config.get_punch_in()) {
 			enable_record ();
