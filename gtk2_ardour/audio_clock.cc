@@ -313,18 +313,74 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 	double lw = layout_width * xscale;
 	double lh = layout_height * yscale;
 
+	double layout_x_offset;
+	double layout_y_offset = (upper_height - lh) / 2.0;
+
 	if (lw >= get_width()) {
-		cairo_move_to (cr, 0.0, (upper_height - lh) / 2.0);
+		layout_x_offset = 0.0;
 	} else {
-		cairo_move_to (cr, (get_width() - lw) / 2.0, (upper_height - lh) / 2.0);
+		layout_x_offset = get_width() - lw;
 	}
 
+	/* convert these back to unscaled units since we're going to use cairo
+	   scaling for a bit.
+	*/
+	
+	layout_x_offset /= xscale;
+	layout_y_offset /= xscale;
+	
 	if (xscale != 1.0 || yscale != 1.0) {
 		cairo_save (cr);
 		cairo_scale (cr, xscale, yscale);
 	}
 
+	cairo_move_to (cr, layout_x_offset, layout_y_offset);
+
 	pango_cairo_show_layout (cr, _layout->gobj());
+
+	if (editing) {
+		Pango::Rectangle cursor;
+
+		if (!insert_map.empty()) {
+
+			if (input_string.length() < insert_map.size()) {
+
+				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
+
+				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+
+				cairo_rectangle (cr,
+				                 layout_x_offset + (cursor.get_x()/PANGO_SCALE),
+				                 layout_y_offset,
+				                 em_width,
+				                 layout_height);
+				cairo_stroke (cr);
+
+			} else {
+				/* we've entered all possible digits, no cursor */
+			}
+
+		} else {
+			cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+
+			if (edit_string.empty()) {
+				cairo_rectangle (cr,
+				                 layout_x_offset + get_width() - em_width,
+				                 layout_y_offset,
+				                 em_width,
+				                 upper_height - layout_y_offset);
+			} else {
+				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
+				cairo_rectangle (cr,
+				                 layout_x_offset + (cursor.get_x()/PANGO_SCALE),
+				                 layout_y_offset,
+				                 em_width,
+				                 upper_height - layout_y_offset);
+			}
+			
+			cairo_stroke (cr);
+		}
+	}
 
 	if (xscale != 1.0 || yscale != 1.0) {
 		cairo_restore (cr);
@@ -405,47 +461,6 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 		}
 	}
 
-	if (editing) {
-		Pango::Rectangle cursor;
-
-		if (!insert_map.empty()) {
-
-			if (input_string.length() < insert_map.size()) {
-
-				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
-
-				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
-
-				cairo_rectangle (cr,
-				                 cursor.get_x()/PANGO_SCALE,
-				                 (upper_height - layout_height)/2.0,
-				                 em_width,
-				                 cursor.get_height()/PANGO_SCALE);
-				cairo_stroke (cr);
-
-			} else {
-				/* we've entered all possible digits, no cursor */
-			}
-
-		} else {
-			cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
-
-			if (edit_string.empty()) {
-				cairo_rectangle (cr,
-				                 get_width() - em_width,
-				                 (upper_height - layout_height)/2.0,
-				                 em_width, upper_height);
-			} else {
-				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
-				cairo_rectangle (cr,
-				                 cursor.get_x()/PANGO_SCALE,
-				                 (upper_height - layout_height)/2.0,
-				                 em_width, upper_height);
-			}
-				
-			cairo_stroke (cr);
-		}
-	}
 }
 
 void
