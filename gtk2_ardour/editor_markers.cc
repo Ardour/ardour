@@ -783,6 +783,13 @@ Editor::location_gone (Location *location)
 			LocationMarkers* m = i->second;
 			location_markers.erase (i);
 			delete m;
+
+			/* Markers that visually overlap with this (removed) marker
+			 * need to be re-displayed.
+			 * But finding such cases is similarly expensive as simply
+			 * re-displaying all..  so:
+			 */
+			refresh_location_display ();
 			break;
 		}
 	}
