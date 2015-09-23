@@ -2817,25 +2817,34 @@ Session::cleanup_regions ()
 	bool removed = false;
 	const RegionFactory::RegionMap& regions (RegionFactory::regions());
 
-	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end();) {
 
 		uint32_t used = playlists->region_use_count (i->second);
 
 		if (used == 0 && !i->second->automatic ()) {
+			boost::weak_ptr<Region> w = i->second;
+			++i;
 			removed = true;
-			RegionFactory::map_remove (i->second);
+			RegionFactory::map_remove (w);
+		} else {
+			++i;
 		}
 	}
 
 	if (removed) {
 		// re-check to remove parent references of compound regions
-		for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
+		for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end();) {
 			if (!(i->second->whole_file() && i->second->max_source_level() > 0)) {
+				++i;
 				continue;
 			}
 			assert(boost::dynamic_pointer_cast<PlaylistSource>(i->second->source (0)) != 0);
 			if (0 == playlists->region_use_count (i->second)) {
-				RegionFactory::map_remove (i->second);
+				boost::weak_ptr<Region> w = i->second;
+				++i;
+				RegionFactory::map_remove (w);
+			} else {
+				++i;
 			}
 		}
 	}
