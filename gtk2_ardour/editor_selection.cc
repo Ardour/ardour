@@ -1008,7 +1008,7 @@ Editor::track_selection_changed ()
 	
 	ControlProtocol::TrackSelectionChanged (routes);
 
-	if (sfbrowser) {
+	if (sfbrowser && _session && !_session->deletion_in_progress()) {
 		uint32_t audio_track_cnt = 0;
 		uint32_t midi_track_cnt = 0;
 
