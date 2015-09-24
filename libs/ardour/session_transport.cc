@@ -958,11 +958,11 @@ Session::set_play_loop (bool yn, double speed)
 				   rolling, do not locate to loop start.
 				*/
 				if (!transport_rolling() && (speed != 0.0)) {
-					start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+					start_locate (loc->start(), true, true, false, true);
 				}
 			} else {
 				if (speed != 0.0) {
-					start_locate (loc->start(), true, true, false, Config->get_seamless_loop());
+					start_locate (loc->start(), true, true, false, true);
 				}
 			}
 		}
@@ -986,7 +986,7 @@ Session::flush_all_inserts ()
 }
 
 void
-Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush, bool with_loop, bool force)
+Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush, bool for_loop_enabled, bool force)
 {
 	if (target_frame < 0) {
 		error << _("Locate called for negative sample position - ignored") << endmsg;
@@ -1007,7 +1007,7 @@ Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush,
 				   will use the incorrect _transport_frame and report an old
 				   and incorrect time to Jack transport
 				*/
-				locate (target_frame, with_roll, with_flush, with_loop, force);
+				locate (target_frame, with_roll, with_flush, for_loop_enabled, force);
 			}
 
 			/* tell JACK to change transport position, and we will
@@ -1023,7 +1023,7 @@ Session::start_locate (framepos_t target_frame, bool with_roll, bool with_flush,
 		}
 
 	} else {
-		locate (target_frame, with_roll, with_flush, with_loop, force);
+		locate (target_frame, with_roll, with_flush, for_loop_enabled, force);
 	}
 }
 
@@ -1051,7 +1051,7 @@ Session::micro_locate (framecnt_t distance)
 
 /** @param with_mmc true to send a MMC locate command when the locate is done */
 void
-Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool for_seamless_loop, bool force, bool with_mmc)
+Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool for_loop_enabled, bool force, bool with_mmc)
 {
 	bool need_butler = false;
 	
@@ -1063,14 +1063,10 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	 * changes in the value of _transport_frame. 
 	 */
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 seamless %4 force %5 mmc %6\n",
-	                                               target_frame, with_roll, with_flush, for_seamless_loop, force, with_mmc));
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("rt-locate to %1, roll %2 flush %3 loop-enabled %4 force %5 mmc %6\n",
+	                                               target_frame, with_roll, with_flush, for_loop_enabled, force, with_mmc));
 	
-	if (actively_recording() && !for_seamless_loop) {
-		return;
-	}
-
-	if (!force && _transport_frame == target_frame && !loop_changing && !for_seamless_loop) {
+	if (!force && _transport_frame == target_frame && !loop_changing && !for_loop_enabled) {
 		if (with_roll) {
 			set_transport_speed (1.0, 0, false);
 		}
@@ -1079,7 +1075,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		return;
 	}
 
-	if (_transport_speed && !for_seamless_loop) {
+	if (_transport_speed && !(for_loop_enabled && Config->get_seamless_loop())) {
 		/* Schedule a declick.  We'll be called again when its done.
 		   We only do it this way for ordinary locates, not those
 		   due to **seamless** loops.
@@ -1122,7 +1118,7 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 		realtime_locate ();
 	}
 
-	if (force || !for_seamless_loop || loop_changing) {
+	if (force || !for_loop_enabled || loop_changing) {
 
 		PostTransportWork todo = PostTransportLocate;
 
@@ -1184,37 +1180,32 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 						set_track_loop (false);
 					}
 				}
-				
+
 			} else if (_transport_frame == al->start()) {
 
 				// located to start of loop - this is looping, basically
 
-				if (for_seamless_loop) {
-
-					if (!have_looped) {
-						/* first time */
-						if (_last_roll_location != al->start()) {
-							/* didn't start at loop start - playback must have
-							 * started before loop since we've now hit the loop
-							 * end.
-							 */
-							add_post_transport_work (PostTransportLocate);
-							need_butler = true;
-						}
-						    
+				if (!have_looped) {
+					/* first time */
+					if (_last_roll_location != al->start()) {
+						/* didn't start at loop start - playback must have
+						 * started before loop since we've now hit the loop
+						 * end.
+						 */
+						add_post_transport_work (PostTransportLocate);
+						need_butler = true;
 					}
+
+				}
+
+				boost::shared_ptr<RouteList> rl = routes.reader();
 				
-					// this is only necessary for seamless looping
+				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 					
-					boost::shared_ptr<RouteList> rl = routes.reader();
-
-					for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-						boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-
-						if (tr && tr->record_enabled ()) {
-							// tell it we've looped, so it can deal with the record state
-							tr->transport_looped (_transport_frame);
-						}
+					if (tr && tr->record_enabled ()) {
+						// tell it we've looped, so it can deal with the record state
+						tr->transport_looped (_transport_frame);
 					}
 				}
 

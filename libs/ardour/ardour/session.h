@@ -1466,7 +1466,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void flush_all_inserts ();
 	int  micro_locate (framecnt_t distance);
 	void locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false, bool with_mmc=true);
-	void start_locate (framepos_t, bool with_roll, bool with_flush, bool with_loop=false, bool force=false);
+	void start_locate (framepos_t, bool with_roll, bool with_flush, bool for_loop_enabled=false, bool force=false);
 	void force_locate (framepos_t frame, bool with_roll = false);
 	void set_track_speed (Track *, double speed);
 	void set_transport_speed (double speed, framepos_t destination_frame, bool abort = false, bool clear_state = false, bool as_default = false);
