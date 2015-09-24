@@ -648,7 +648,7 @@ style "small_entry" = "small_text"
 
 	text[NORMAL] = @texts
 	text[ACTIVE] = @texts
-	text[SELECTED] = @fg_selected
+	text[SELECTED] = mix(0.3, @texts, @bases) 
 
 	bg[NORMAL] = @bases
 	bg[ACTIVE] = @bases
