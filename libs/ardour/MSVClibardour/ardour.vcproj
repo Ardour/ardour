@@ -624,6 +624,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ltc_file_reader.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\ltc_slave.cc"
 				>
 			</File>
@@ -1715,6 +1719,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\logcurve.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\ltc_file_reader.h"
 				>
 			</File>
 			<File
