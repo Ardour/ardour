@@ -334,12 +334,15 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 		cairo_scale (cr, xscale, yscale);
 	}
 
-	cairo_move_to (cr, layout_x_offset, layout_y_offset);
+	/* show the actual clock layout */
 
+	cairo_move_to (cr, layout_x_offset, layout_y_offset);
 	pango_cairo_show_layout (cr, _layout->gobj());
 
 	if (editing) {
 		Pango::Rectangle cursor;
+		const double scaled_x_half_pixel = 0.5/xscale;
+		const double scaled_y_half_pixel = 0.5/yscale;
 
 		if (!insert_map.empty()) {
 
@@ -348,12 +351,13 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
 
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
+				cairo_set_line_width (cr, (1.0/xscale));
 
 				cairo_rectangle (cr,
-				                 layout_x_offset + (cursor.get_x()/PANGO_SCALE),
-				                 layout_y_offset,
+				                 layout_x_offset + (cursor.get_x()/PANGO_SCALE) + scaled_x_half_pixel,
+				                 layout_y_offset + scaled_y_half_pixel,
 				                 em_width,
-				                 layout_height);
+				                 layout_height - (1.0/yscale));
 				cairo_stroke (cr);
 
 			} else {
@@ -365,22 +369,23 @@ AudioClock::render (cairo_t* cr, cairo_rectangle_t*)
 
 			if (edit_string.empty()) {
 				cairo_rectangle (cr,
-				                 layout_x_offset + get_width() - em_width,
-				                 layout_y_offset,
+				                 layout_x_offset + get_width() - em_width + scaled_x_half_pixel,
+				                 layout_y_offset + scaled_y_half_pixel,
 				                 em_width,
-				                 upper_height - layout_y_offset);
+				                 upper_height - layout_y_offset - (1.0/yscale));
 			} else {
 				cursor = _layout->get_cursor_strong_pos (edit_string.length() - 1);
 				cairo_rectangle (cr,
-				                 layout_x_offset + (cursor.get_x()/PANGO_SCALE),
-				                 layout_y_offset,
+				                 layout_x_offset + (cursor.get_x()/PANGO_SCALE) + scaled_x_half_pixel,
+				                 layout_y_offset + scaled_y_half_pixel,
 				                 em_width,
-				                 upper_height - layout_y_offset);
+				                 upper_height - layout_y_offset - (1.0/yscale));
 			}
 			
 			cairo_stroke (cr);
 		}
 	}
+
 
 	if (xscale != 1.0 || yscale != 1.0) {
 		cairo_restore (cr);
