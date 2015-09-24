@@ -493,12 +493,8 @@ AudioClock::set_clock_dimensions (Gtk::Requisition& req)
 	tmp->set_font_description (font);
 
 	/* this string is the longest thing we will ever display */
-	if (_mode == MinSec)
-		tmp->set_text (" 88:88:88,888 ");
-	else
-		tmp->set_text (" 88:88:88,88 ");
+	tmp->set_text (" 88:88:88,888 ");
 	tmp->get_pixel_size (req.width, req.height);
-
 
 	layout_height = req.height;
 	layout_width = req.width;
