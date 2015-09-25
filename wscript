@@ -394,6 +394,8 @@ int main() { return 0; }''',
             linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
             conf.define("_DARWIN_C_SOURCE", 1)
+        else:
+            cxx_flags.append('-DBOOST_NO_AUTO_PTR')
 
     if (is_clang and platform == "darwin") or conf.env['build_host'] in ['mavericks', 'yosemite']:
         # Silence warnings about the non-existing osx clang compiler flags
