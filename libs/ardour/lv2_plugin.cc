@@ -242,6 +242,7 @@ struct LV2Plugin::Impl {
 	       , opts_iface(0)
 	       , state(0)
 	       , block_length(0)
+	       , options(0)
 	{}
 
 	/** Find the LV2 input port with the given designation.
@@ -261,6 +262,7 @@ struct LV2Plugin::Impl {
 	LV2_Atom_Forge               forge;
 	LV2_Atom_Forge               ui_forge;
 	int32_t                      block_length;
+	LV2_Options_Option*          options;
 };
 
 LV2Plugin::LV2Plugin (AudioEngine& engine,
@@ -385,8 +387,11 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
+	_impl->options = (LV2_Options_Option*) malloc (sizeof (options));
+	memcpy ((void*) _impl->options, (void*) options, sizeof (options));
+
 	_options_feature.URI    = LV2_OPTIONS__options;
-	_options_feature.data   = options;
+	_options_feature.data   = _impl->options;
 	_features[n_features++] = &_options_feature;
 #endif
 
@@ -679,6 +684,7 @@ LV2Plugin::~LV2Plugin ()
 	lilv_instance_free(_impl->instance);
 	lilv_node_free(_impl->name);
 	lilv_node_free(_impl->author);
+	free(_impl->options);
 
 	free(_features);
 	free(_make_path_feature.data);
