@@ -99,6 +99,8 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	pframes_t      samples_since_cycle_start ();
 	bool           get_sync_offset (pframes_t& offset) const;
 
+	std::string    get_last_backend_error () const { return _last_backend_error_string; }
+
 	int            create_process_thread (boost::function<void()> func);
 	int            join_process_threads ();
 	bool           in_process_thread ();
@@ -279,6 +281,8 @@ class LIBARDOUR_API AudioEngine : public SessionHandlePtr, public PortManager
 	bool                      _stopped_for_latency;
 	bool                      _started_for_latency;
 	bool                      _in_destructor;
+
+	std::string               _last_backend_error_string;
 
 	Glib::Threads::Thread*     _hw_reset_event_thread;
 	gint                       _hw_reset_request_count;
