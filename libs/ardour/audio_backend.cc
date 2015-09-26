@@ -55,6 +55,8 @@ AudioBackend::get_error_string (ErrorCode error_code)
 		return _("MIDI device not connected");
 	case MidiDeviceIOError:
 		return _("MIDI device Input/Output error");
+	case SampleFormatNotSupportedError:
+		return _("Sample format is not supported");
 	case SampleRateNotSupportedError:
 		return _("Sample rate is not supported");
 	case RequestedInputLatencyNotSupportedError:
@@ -67,6 +69,8 @@ AudioBackend::get_error_string (ErrorCode error_code)
 		return _("Period count is not supported");
 	case DeviceConfigurationNotSupportedError:
 		return _("Device configuration not supported");
+	case ChannelCountNotSupportedError:
+		return _("Channel count configuration not supported");
 	case InputChannelCountNotSupportedError:
 		return _("Input channel count configuration not supported");
 	case OutputChannelCountNotSupportedError:
@@ -78,7 +82,7 @@ AudioBackend::get_error_string (ErrorCode error_code)
 	case SettingMIDIThreadPriorityError:
 		return _("Setting MIDI device thread priorities failed");
 	}
-	return std::string();
+	return _("Could not reconnect to Audio/MIDI engine");
 }
 
 std::string
