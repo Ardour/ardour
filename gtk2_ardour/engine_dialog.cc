@@ -442,6 +442,11 @@ EngineControl::on_response (int response_id)
 				on_delete_event ((GdkEventAny*) &ev);
 				break;
 			}
+		case RESPONSE_CANCEL:
+			if (ARDOUR_UI::instance() && ARDOUR_UI::instance()->session_loaded) {
+				ARDOUR_UI::instance()->check_audioengine ();
+			}
+			// fall through
 		default:
 			hide ();
 	}

@@ -294,6 +294,8 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void show_ui_prefs ();
 
+	bool check_audioengine();
+
 	void update_tearoff_visibility ();
 
 	void setup_profile ();
@@ -719,7 +721,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void check_memory_locking ();
 
-	bool check_audioengine();
 	void audioengine_setup ();
 
 	void display_message (const char *prefix, gint prefix_len,
