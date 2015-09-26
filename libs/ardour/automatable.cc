@@ -365,7 +365,7 @@ Automatable::transport_located (framepos_t now)
                         boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-			if (l) {
+			if (l && l->automation_state () == Write) {
 				l->start_write_pass (now);
 			}
 		}
@@ -394,7 +394,12 @@ Automatable::transport_stopped (framepos_t now)
 		   when the transport is re-started, a touch will magically
 		   be happening without it ever have being started in the usual way.
 		*/
+		const bool list_did_write = !l->in_new_write_pass ();
+
 		l->stop_touch (true, now);
+		if (list_did_write) {
+			c->commit_transaction ();
+		}
 		l->write_pass_finished (now, Config->get_automation_thinning_factor());
 
 		if (l->automation_playback()) {

@@ -267,6 +267,7 @@ public:
         void write_pass_finished (double when, double thinning_factor=0.0);
         void set_in_write_pass (bool, bool add_point = false, double when = 0.0);
         bool in_write_pass () const;
+	bool in_new_write_pass () { return new_write_pass; }
 
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;

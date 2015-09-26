@@ -196,7 +196,22 @@ void
 AutomationController::toggled ()
 {
 	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
+	const AutoState as = _controllable->automation_state ();
+
+	const bool to_list = _controllable->list () && _controllable->session().transport_rolling () && (as == Touch || as == Write);
+
 	if (but) {
+		if (_controllable->session().transport_rolling()) {
+			if (_controllable->automation_state() == Touch && _controllable->list()->in_new_write_pass ()) {
+				_controllable->alist()->start_write_pass ( _controllable->session().audible_frame());
+			}
+			if (_controllable->list()) {
+				_controllable->list()->set_in_write_pass(true, false, _controllable->session().audible_frame());
+			}
+		}
+
+		_controllable->set_double (!but->get_active (), _controllable->session ().transport_frame (), to_list);
+
 		const bool was_active = _controllable->get_value() >= 0.5;
 		if (was_active && but->get_active()) {
 			_adjustment->set_value(0.0);

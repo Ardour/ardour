@@ -50,6 +50,7 @@ static void dumpit (const AutomationList& al, string prefix = "")
 #endif
 AutomationList::AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc)
 	: ControlList(id, desc)
+	, _before (0)
 {
 	_state = Off;
 	_style = Absolute;
@@ -63,6 +64,7 @@ AutomationList::AutomationList (const Evoral::Parameter& id, const Evoral::Param
 
 AutomationList::AutomationList (const Evoral::Parameter& id)
 	: ControlList(id, ARDOUR::ParameterDescriptor(id))
+	, _before (0)
 {
 	_state = Off;
 	_style = Absolute;
@@ -77,6 +79,7 @@ AutomationList::AutomationList (const Evoral::Parameter& id)
 AutomationList::AutomationList (const AutomationList& other)
 	: StatefulDestructible()
 	, ControlList(other)
+	, _before (0)
 {
 	_style = other._style;
 	_state = other._state;
@@ -90,6 +93,7 @@ AutomationList::AutomationList (const AutomationList& other)
 
 AutomationList::AutomationList (const AutomationList& other, double start, double end)
 	: ControlList(other, start, end)
+	, _before (0)
 {
 	_style = other._style;
 	_state = other._state;
@@ -106,6 +110,7 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
  */
 AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 	: ControlList(id, ARDOUR::ParameterDescriptor(id))
+	, _before (0)
 {
 	g_atomic_int_set (&_touching, 0);
 	_state = Off;
@@ -186,6 +191,9 @@ AutomationList::set_automation_state (AutoState s)
 {
 	if (s != _state) {
 		_state = s;
+		if (s == Write) {
+			_before = &get_state ();
+		}
 		automation_state_changed (s); /* EMIT SIGNAL */
 	}
 }
@@ -197,6 +205,22 @@ AutomationList::set_automation_style (AutoStyle s)
 		_style = s;
 		automation_style_changed (); /* EMIT SIGNAL */
 	}
+}
+
+void
+AutomationList::start_write_pass (double when)
+{
+	if (in_new_write_pass ()) {
+		_before = &get_state ();
+	}
+	ControlList::start_write_pass (when);
+}
+
+void
+AutomationList::write_pass_finished (double when, double thinning_factor)
+{
+	ControlList::write_pass_finished (when, thinning_factor);
+	_before = 0;
 }
 
 void

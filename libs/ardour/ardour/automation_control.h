@@ -95,13 +95,13 @@ public:
 	const ParameterDescriptor& desc() const { return _desc; }
 
 	const ARDOUR::Session& session() const { return _session; }
+	void commit_transaction ();
 
 protected:
 
 	ARDOUR::Session& _session;
 
 	const ParameterDescriptor _desc;
-	XMLNode* _before; //used for undo of touch start/stop pairs.
 };
 
 
