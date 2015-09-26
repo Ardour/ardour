@@ -1070,6 +1070,7 @@ int main () { int x = SFC_AUTO_DOWNGRADE_RF64; return 0; }
         sub_config_and_use(conf, 'libs/appleutility')
     elif Options.options.dist_target != 'mingw':
         sub_config_and_use(conf, 'tools/sanity_check')
+        sub_config_and_use(conf, 'tools/gccabicheck')
 
     sub_config_and_use(conf, 'libs/clearlooks-newer')
 
@@ -1185,6 +1186,7 @@ def build(bld):
         bld.recurse('libs/appleutility')
     elif bld.env['build_target'] != 'mingw':
         bld.recurse('tools/sanity_check')
+        bld.recurse('tools/gccabicheck')
 
     bld.recurse('libs/clearlooks-newer')
 

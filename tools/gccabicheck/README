@@ -1,0 +1,34 @@
+g++5 ABI test tool
+==================
+
+This is a simple tool to test a system for g++5's glibmm at runtime.
+
+GCC5.1 introduced a new ABI for the C++ standard library.
+The old 3.4 .. 5.0 ABI is not compatible. By default gcc provides a
+dual ABI, so testing libstc++ itself is not sufficient.
+
+
+Some GNU/Linux distributions systems switched to the new ABI already
+and compile *plugins* with the new gcc.
+
+If a plugin uses a c++ library that is also shipped with ardour-bundles,
+the ABI of that library must match. Currently known cases: gtkmm, glibmm.
+
+e.g. Ingen or eq10q provided by a distro compiled with gcc5 will not
+load in Ardour from ardour.org compiled with gcc4 because ardour
+ships an incompatible gtkmm, glibmm, cairomm, ...
+
+Likewise Ardour gcc5-compiled binaries will fail to load plugins that
+are compiled with gcc4.
+
+This simiple tool `gcc-glibmm-abi-check` checks for gcc4/gcc5 specific
+symbols in libglibmm (a common denominator C++ lib), it is intended
+to be run when deploying ardour binaries.
+
+
+References
+----------
+
+https://gcc.gnu.org/onlinedocs/libstdc++/manual/using_dual_abi.html
+https://wiki.debian.org/GCC5
+https://mail.gnome.org/archives/gtkmm-list/2015-June/thread.html
