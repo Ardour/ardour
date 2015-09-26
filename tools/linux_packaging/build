@@ -662,7 +662,7 @@ chmod a+x stage2.run
 
 
 # gcc4/5 ABI test tool
-if [ -e $BUILD_ROOT/tools/gccabicheck/gcc-glibmm-abi-check]; then
+if [ -e $BUILD_ROOT/tools/gccabicheck/gcc-glibmm-abi-check ]; then
 	cp $BUILD_ROOT/tools/gccabicheck/gcc-glibmm-abi-check $APPBIN
 else
 	echo "!!!ERROR !!! gcc-glibmm-abi-check program is missing. packager will exit without being complete"
