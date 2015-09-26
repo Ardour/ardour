@@ -480,8 +480,14 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	switch (err) {
 	case paNoError:
 		break;
+	case paBadIODeviceCombination:
+		return DeviceConfigurationNotSupportedError;
+	case paInvalidChannelCount:
+		return ChannelCountNotSupportedError;
+	case paInvalidSampleRate:
+		return SampleRateNotSupportedError;
 	default:
-		return -1;
+		return AudioDeviceOpenError;
 	}
 
 	if (_n_outputs != _pcmio->n_playback_channels ()) {
