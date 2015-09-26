@@ -556,15 +556,15 @@ PortAudioIO::reset_stream_dependents ()
 	_cur_output_latency = 0;
 }
 
-PortAudioIO::ErrorCode
+PaErrorCode
 PortAudioIO::close_stream()
 {
-	if (!_stream) return NoError;
+	if (!_stream) return paNoError;
 
 	PaError err = Pa_CloseStream (_stream);
 
 	if (err != paNoError) {
-		return StreamCloseError;
+		return (PaErrorCode)err;
 	}
 	_stream = NULL;
 
@@ -572,18 +572,20 @@ PortAudioIO::close_stream()
 
 	free (_input_buffer); _input_buffer = NULL;
 	free (_output_buffer); _output_buffer = NULL;
-	return NoError;
+	return paNoError;
 }
 
-PortAudioIO::ErrorCode
+PaErrorCode
 PortAudioIO::start_stream()
 {
 	PaError err = Pa_StartStream (_stream);
 
 	if (err != paNoError) {
-		return StreamStartError;
+		DEBUG_AUDIO(string_compose("PortAudio failed to start stream %1\n",
+		                           Pa_GetErrorText(err)));
+		return (PaErrorCode)err;
 	}
-	return NoError;
+	return paNoError;
 }
 
 bool
@@ -702,7 +704,7 @@ PortAudioIO::get_output_stream_params(int device_output,
 	return true;
 }
 
-PortAudioIO::ErrorCode
+PaErrorCode
 PortAudioIO::pre_stream_open(int device_input,
                              PaStreamParameters& inputParam,
                              int device_output,
@@ -710,7 +712,7 @@ PortAudioIO::pre_stream_open(int device_input,
 {
 	if (!pa_initialize()) {
 		DEBUG_AUDIO ("PortAudio Initialization Failed\n");
-		return InitializationError;
+		return paNotInitialized;
 	}
 
 	reset_stream_dependents ();
@@ -719,7 +721,7 @@ PortAudioIO::pre_stream_open(int device_input,
 	    "PortAudio Device IDs: i:%1 o:%2\n", device_input, device_output));
 
 	if (device_input == DeviceNone && device_output == DeviceNone) {
-		return DeviceConfigNotSupportedError;
+		return paBadIODeviceCombination;
 	}
 
 	if (get_input_stream_params(device_input, inputParam)) {
@@ -732,17 +734,17 @@ PortAudioIO::pre_stream_open(int device_input,
 
 	if (_capture_channels == 0 && _playback_channels == 0) {
 		DEBUG_AUDIO("PortAudio no input or output channels.\n");
-		return DeviceConfigNotSupportedError;
+		return paBadIODeviceCombination;
 	}
 
 	DEBUG_AUDIO (string_compose ("PortAudio Channels: in:%1 out:%2\n",
 	                             _capture_channels,
 	                             _playback_channels));
 
-	return NoError;
+	return paNoError;
 }
 
-PortAudioIO::ErrorCode
+PaErrorCode
 PortAudioIO::open_blocking_stream(int device_input,
                                   int device_output,
                                   double sample_rate,
@@ -751,10 +753,10 @@ PortAudioIO::open_blocking_stream(int device_input,
 	PaStreamParameters inputParam;
 	PaStreamParameters outputParam;
 
-	ErrorCode error_code =
+	PaErrorCode error_code =
 	    pre_stream_open(device_input, inputParam, device_output, outputParam);
 
-	if (error_code != NoError) return error_code;
+	if (error_code != paNoError) return error_code;
 
 	PaError err = paNoError;
 
@@ -768,21 +770,22 @@ PortAudioIO::open_blocking_stream(int device_input,
 			NULL, NULL);
 
 	if (err != paNoError) {
-		DEBUG_AUDIO ("PortAudio failed to start stream.\n");
-		return StreamOpenError;
+		DEBUG_AUDIO(string_compose("PortAudio failed to open stream %1\n",
+		                           Pa_GetErrorText(err)));
+		return (PaErrorCode)err;
 	}
 
 	if (!set_sample_rate_and_latency_from_stream()) {
 		DEBUG_AUDIO ("PortAudio failed to query stream information.\n");
 		close_stream();
-		return StreamOpenError;
+		return paInternalError;
 	}
 
 	if (!allocate_buffers_for_blocking_api(samples_per_period)) {
 		close_stream();
-		return StreamOpenError;
+		return paInternalError;
 	}
-	return NoError;
+	return paNoError;
 }
 
 int

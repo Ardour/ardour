@@ -469,22 +469,18 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_freewheeling = false;
 	_freewheel = false;
 
-	PortAudioIO::ErrorCode err;
+	PaErrorCode err = paNoError;
 
 	err = _pcmio->open_blocking_stream(name_to_id(_input_audio_device),
 	                                   name_to_id(_output_audio_device),
 	                                   _samplerate,
 	                                   _samples_per_period);
 
+	// reintepret Portaudio error messages
 	switch (err) {
-	case PortAudioIO::NoError:
+	case paNoError:
 		break;
-	case PortAudioIO::DeviceConfigNotSupportedError:
-		PBD::error << get_error_string(DeviceConfigurationNotSupportedError)
-		           << endmsg;
-		return -1;
 	default:
-		PBD::error << get_error_string(AudioDeviceOpenError) << endmsg;
 		return -1;
 	}
 
@@ -1450,7 +1446,7 @@ PortAudioBackend::main_blocking_process_thread ()
 	manager.registration_callback();
 	manager.graph_order_callback();
 
-	if (_pcmio->start_stream() != PortAudioIO::NoError) {
+	if (_pcmio->start_stream() != paNoError) {
 		_pcmio->close_stream ();
 		_active = false;
 		engine.halted_callback(get_error_string(AudioDeviceIOError).c_str());
