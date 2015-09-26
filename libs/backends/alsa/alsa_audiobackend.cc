@@ -752,20 +752,48 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 			(duplex & 2) ? alsa_device.c_str() : NULL,
 			(duplex & 1) ? alsa_device.c_str() : NULL,
 			0, _samplerate, _samples_per_period, _periods_per_cycle, 0);
-	switch (_pcmi->state ()) {
-		case 0: /* OK */ break;
-		case -1: PBD::error << _("AlsaAudioBackend: failed to open device.") << endmsg; break;
-		case -2: PBD::error << _("AlsaAudioBackend: failed to allocate parameters.") << endmsg; break;
-		case -3: PBD::error << _("AlsaAudioBackend: cannot set requested sample rate.") << endmsg; break;
-		case -4: PBD::error << _("AlsaAudioBackend: cannot set requested period size.") << endmsg; break;
-		case -5: PBD::error << _("AlsaAudioBackend: cannot set requested number of periods.") << endmsg; break;
-		case -6: PBD::error << _("AlsaAudioBackend: unsupported sample format.") << endmsg; break;
-		default: PBD::error << _("AlsaAudioBackend: initialization failed.") << endmsg; break;
+
+	AudioBackend::ErrorCode error_code = NoError;
+	switch (_pcmi->state()) {
+	case 0: /* OK */
+		break;
+	case -1:
+		PBD::error << _("AlsaAudioBackend: failed to open device.") << endmsg;
+		error_code = AudioDeviceOpenError;
+		break;
+	case -2:
+		PBD::error << _("AlsaAudioBackend: failed to allocate parameters.") << endmsg;
+		error_code = AudioDeviceOpenError;
+		break;
+	case -3:
+		PBD::error << _("AlsaAudioBackend: cannot set requested sample rate.")
+		           << endmsg;
+		error_code = SampleRateNotSupportedError;
+		break;
+	case -4:
+		PBD::error << _("AlsaAudioBackend: cannot set requested period size.")
+		           << endmsg;
+		error_code = PeriodSizeNotSupportedError;
+		break;
+	case -5:
+		PBD::error << _("AlsaAudioBackend: cannot set requested number of periods.")
+		           << endmsg;
+		error_code = PeriodCountNotSupportedError;
+		break;
+	case -6:
+		PBD::error << _("AlsaAudioBackend: unsupported sample format.") << endmsg;
+		error_code = SampleFormatNotSupportedError;
+		break;
+	default:
+		PBD::error << _("AlsaAudioBackend: initialization failed.") << endmsg;
+		error_code = AudioDeviceOpenError;
+		break;
 	}
+
 	if (_pcmi->state ()) {
 		delete _pcmi; _pcmi = 0;
 		release_device();
-		return -1;
+		return error_code;
 	}
 
 #ifndef NDEBUG
