@@ -83,7 +83,9 @@ MixerGroupTabs::compute_tabs () const
 			}
 		}
 
-		x += s->get_width ();
+		int ww = 0, wh = 0;
+		s->get_size_request (ww, wh); // widget may not be realized, get_width() is invalid.
+		x += ww;
 	}
 
 	if (tab.group) {
