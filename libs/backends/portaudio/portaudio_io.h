@@ -35,20 +35,6 @@ public:
 	PortAudioIO (void);
 	~PortAudioIO (void);
 
-	enum ErrorCode {
-		NoError = 0,
-		InitializationError,
-		DeInitializationError,
-		DeviceConfigNotSupportedError,
-		StreamOpenError,
-		StreamStartError,
-		StreamStopError,
-		StreamCloseError,
-		IOError,
-		BufferUnderrunError,
-		BufferOverrunError
-	};
-
 	enum StandardDevices {
 		DeviceNone = -2,
 		DeviceDefault = -1
@@ -83,13 +69,13 @@ public:
 	std::string control_app_name (int device_id) const;
 	void launch_control_app (int device_id);
 
-	ErrorCode open_blocking_stream(int device_input,
+	PaErrorCode open_blocking_stream(int device_input,
 	                               int device_output,
 	                               double sample_rate,
 	                               uint32_t samples_per_period);
-	ErrorCode start_stream(void);
+	PaErrorCode start_stream(void);
 
-	ErrorCode close_stream(void);
+	PaErrorCode close_stream(void);
 
 	uint32_t n_playback_channels (void) const { return _playback_channels; }
 	uint32_t n_capture_channels (void) const { return _capture_channels; }
@@ -129,7 +115,7 @@ private: // Methods
 	bool set_sample_rate_and_latency_from_stream();
 	bool allocate_buffers_for_blocking_api (uint32_t samples_per_period);
 
-	ErrorCode pre_stream_open(int device_input,
+	PaErrorCode pre_stream_open(int device_input,
 	                          PaStreamParameters& inputParam,
 	                          int device_output,
 	                          PaStreamParameters& outputParam);
