@@ -45,6 +45,8 @@ while [ $# -gt 0 ] ; do
 
 	--singlearch) SINGLE_ARCH="T" ; shift ;;
 
+	--gcc5abi) shift ;;
+
 	*)
 		#catch all for unknown arguments
 		echo ""
