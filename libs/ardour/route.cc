@@ -3904,11 +3904,15 @@ Route::MuteControllable::set_superficial_value(bool muted)
 	   as currently MuteControllable can't be touching.
 	   bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
 	*/
-	const AutoState as = ((AutomationList*)_list.get())->automation_state ();
-	bool to_list = _list && _session.transport_rolling () && (as == Touch || as == Write);
+	AutomationList* alist = (AutomationList*)_list.get();
+	const AutoState as = alist->automation_state ();
+	const bool to_list = _list && _session.transport_rolling () && (as == Touch || as == Write);
 
 	if (to_list) {
-		_list->set_in_write_pass(true, false, _session.audible_frame ());
+		if (as == Touch && _list->in_new_write_pass ()) {
+			alist->start_write_pass (_session.audible_frame ());
+		}
+		_list->set_in_write_pass (true, false, _session.audible_frame ());
 	}
 
 	Control::set_double (muted, _session.transport_frame(), to_list);

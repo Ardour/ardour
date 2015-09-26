@@ -97,6 +97,9 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 
 	static PBD::Signal1<void,AutomationList*> AutomationListCreated;
 
+	void start_write_pass (double when);
+	void write_pass_finished (double when, double thinning_factor=0.0);
+
 	void start_touch (double when);
 	void stop_touch (bool mark, double when);
         bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
@@ -110,6 +113,7 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 
 	bool operator!= (const AutomationList &) const;
 
+	XMLNode* before () { return _before; }
   private:
 	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);
@@ -121,6 +125,8 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 	gint         _touching;
 
 	bool operator== (const AutomationList&) const { /* not called */ abort(); return false; }
+	XMLNode* _before; //used for undo of touch start/stop pairs.
+
 };
 
 } // namespace
