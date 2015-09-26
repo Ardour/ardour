@@ -415,10 +415,12 @@ EngineControl::on_response (int response_id)
 
 	switch (response_id) {
 		case RESPONSE_OK:
+			if (push_state_to_backend (true) != 0) {
+				return;
+			} else {
+				hide ();
+			}
 #ifdef PLATFORM_WINDOWS
-			// For some reason we don't understand, 'hide()'
-			// needs to get called first in Windows
-			hide ();
 
 			// But if there's no session open, this can produce
 			// a long gap when nothing appears to be happening.
@@ -430,13 +432,8 @@ EngineControl::on_response (int response_id)
 					}
 				}
 			}
-			push_state_to_backend (true);
-			break;
-#else
-			push_state_to_backend (true);
-			hide ();
-			break;
 #endif
+			break;
 		case RESPONSE_DELETE_EVENT:
 			{
 				GdkEventButton ev;

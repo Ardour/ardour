@@ -4828,13 +4828,21 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 	audio_midi_setup->set_desired_sample_rate (desired_sample_rate);
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 
-	switch (audio_midi_setup->run()) {
-	case Gtk::RESPONSE_OK:
-		return 0;
-	case Gtk::RESPONSE_APPLY:
-		return 0;
-	default:
-		return -1;
+	int response;
+
+	while (true) {
+		response = audio_midi_setup->run();
+		switch (response) {
+		case Gtk::RESPONSE_OK:
+			if (!AudioEngine::instance()->running()) {
+				continue;
+			} else {
+				return 0;
+			}
+			return 0;
+		default:
+			return -1;
+		}
 	}
 }
 
