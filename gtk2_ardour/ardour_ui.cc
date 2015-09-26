@@ -4501,13 +4501,8 @@ ARDOUR_UI::reconnect_to_engine ()
 {
 	if (AudioEngine::instance()->start ()) {
 		// TODO somehow make this the topmost window (above any dialogs currently visible)
-		if (editor) {
-			MessageDialog msg (*editor,  AudioEngine::instance()->get_last_backend_error ());
-			msg.run ();
-		} else {
-			MessageDialog msg (AudioEngine::instance()->get_last_backend_error ());
-			msg.run ();
-		}
+		MessageDialog msg(*audio_midi_setup.get(), AudioEngine::instance()->get_last_backend_error());
+		msg.run();
 		return -1;
 	}
 
