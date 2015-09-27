@@ -1586,8 +1586,6 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (MenuElem (_("Remote Control ID..."), sigc::mem_fun (*this, &RouteUI::open_remote_control_id_dialog)));
 	}
 
-	items.push_back (SeparatorElem());
-
 	if (_route) {
 		/* note that this relies on selection being shared across editor and
 		   mixer (or global to the backend, in the future), which is the only
@@ -1601,6 +1599,7 @@ MixerStrip::build_route_ops_menu ()
 				selection.set (rtav);
 			}
 			
+			items.push_front (SeparatorElem());
 			items.push_front (MenuElem (_("Remove"), sigc::mem_fun(PublicEditor::instance(), &PublicEditor::remove_tracks)));
 		}
 	}
