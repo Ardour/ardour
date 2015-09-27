@@ -294,7 +294,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
 	void show_ui_prefs ();
 
-	bool check_audioengine();
+	bool check_audioengine(Gtk::Window&);
 
 	void update_tearoff_visibility ();
 
