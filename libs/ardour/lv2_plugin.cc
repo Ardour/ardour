@@ -480,6 +480,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	if (state && _has_state_interface) {
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
 	}
+	lilv_state_free(state);
 #endif
 
 	_sample_rate = rate;
@@ -682,6 +683,7 @@ LV2Plugin::~LV2Plugin ()
 	cleanup();
 
 	lilv_instance_free(_impl->instance);
+	lilv_state_free(_impl->state);
 	lilv_node_free(_impl->name);
 	lilv_node_free(_impl->author);
 	free(_impl->options);
@@ -1696,6 +1698,8 @@ LV2Plugin::set_state(const XMLNode& node, int version)
 			_world.world, _uri_map.urid_map(), NULL, state_file.c_str());
 
 		lilv_state_restore(state, _impl->instance, NULL, NULL, 0, NULL);
+		lilv_state_free(_impl->state);
+		_impl->state = state;
 	}
 
 	latency_compute_run();
