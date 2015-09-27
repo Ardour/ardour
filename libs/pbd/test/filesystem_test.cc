@@ -335,14 +335,7 @@ FilesystemTest::testRemoveDirectory ()
 
 	PBD::remove_directory (output_dir_path);
 
-	// doesn't actually remove directory though...just contents
-	CPPUNIT_ASSERT (Glib::file_test (output_dir_path, Glib::FILE_TEST_IS_DIR));
-
-	files_in_output_dir.clear ();
-
-	PBD::get_paths (files_in_output_dir, output_dir_path, false, true);
-
-	CPPUNIT_ASSERT (files_in_output_dir.size () == 0);
+	CPPUNIT_ASSERT (!Glib::file_test (output_dir_path, Glib::FILE_TEST_EXISTS));
 }
 
 void

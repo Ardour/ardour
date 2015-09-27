@@ -476,6 +476,7 @@ void
 remove_directory (const std::string& dir)
 {
 	remove_directory_internal (dir, 0, 0, false);
+	g_rmdir (dir.c_str());
 }
 
 string

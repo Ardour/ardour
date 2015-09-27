@@ -235,9 +235,9 @@ LIBPBD_API int clear_directory (const std::string& dir, size_t* size = 0,
 
 /**
  * Remove all the contents of a directory recursively.
- * @note dir will not be removed
+ * including the dir itself (`rm -rf $dir`)
  *
- * @param dir The directory to remove files from.
+ * @param dir The directory to remove recursively
  */
 LIBPBD_API void remove_directory (const std::string& dir);
 
