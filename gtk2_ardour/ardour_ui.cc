@@ -1662,10 +1662,10 @@ ARDOUR_UI::open_recent_session ()
 }
 
 bool
-ARDOUR_UI::check_audioengine ()
+ARDOUR_UI::check_audioengine (Gtk::Window& parent)
 {
 	if (!AudioEngine::instance()->connected()) {
-		MessageDialog msg (string_compose (
+		MessageDialog msg (parent, string_compose (
 					   _("%1 is not connected to any audio backend.\n"
 					     "You cannot open or close sessions in this condition"),
 					   PROGRAM_NAME));
@@ -1679,9 +1679,8 @@ ARDOUR_UI::check_audioengine ()
 void
 ARDOUR_UI::open_session ()
 {
-	if (!check_audioengine()) {
+	if (!check_audioengine(*editor)) {
 		return;
-
 	}
 
 	/* ardour sessions are folders */
@@ -1689,8 +1688,6 @@ ARDOUR_UI::open_session ()
 	open_session_selector.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	open_session_selector.add_button (Gtk::Stock::OPEN, Gtk::RESPONSE_ACCEPT);
 	open_session_selector.set_default_response(Gtk::RESPONSE_ACCEPT);
-
-
 
 	if (_session) {
 		string session_parent_dir = Glib::path_get_dirname(_session->path());
@@ -2671,7 +2668,7 @@ ARDOUR_UI::save_template ()
 	ArdourPrompter prompter (true);
 	string name;
 
-	if (!check_audioengine()) {
+	if (!check_audioengine(*editor)) {
 		return;
 	}
 
@@ -3038,7 +3035,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 void
 ARDOUR_UI::close_session()
 {
-	if (!check_audioengine()) {
+	if (!check_audioengine(*editor)) {
 		return;
 	}
 
