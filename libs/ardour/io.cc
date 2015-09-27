@@ -526,7 +526,6 @@ IO::state (bool /*full_state*/)
 	XMLNode* node = new XMLNode (state_node_name);
 	char buf[64];
 	string str;
-	vector<string>::iterator ci;
 	int n;
 	LocaleGuard lg (X_("C"));
 	Glib::Threads::Mutex::Lock lm (io_lock);
@@ -552,6 +551,8 @@ IO::state (bool /*full_state*/)
 		pnode->add_property (X_("name"), i->name());
 
 		if (i->get_connections (connections)) {
+			vector<string>::const_iterator ci;
+			std::sort (connections.begin(), connections.end());
 
 			for (n = 0, ci = connections.begin(); ci != connections.end(); ++ci, ++n) {
 
