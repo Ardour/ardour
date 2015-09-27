@@ -2120,6 +2120,10 @@ MidiRegionView::delete_selection()
 		return;
 	}
 
+	if (trackview.editor().drags()->active()) {
+		return;
+	}
+
 	start_note_diff_command (_("delete selection"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
