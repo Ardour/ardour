@@ -344,6 +344,7 @@ The filename will be chosen from the information just above the folder selector.
 				break;
 			}
 		}
+		break;
 	}
 
 	CriticalSelectionChanged();
