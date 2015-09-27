@@ -167,7 +167,6 @@ Port::get_connections (std::vector<std::string> & c) const
 
 	if (_port_handle) {
 		return port_engine.get_connections (_port_handle, c);
-		return c.size();
 	}
 
 	return 0;
