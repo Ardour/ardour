@@ -1452,9 +1452,38 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 bool
 RouteUI::solo_safe_button_release (GdkEventButton* ev)
 {
-	if (ev->button == 1) {
-		_route->set_solo_safe (!solo_safe_led->active_state(), this);
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+		return true;
 	}
+
+	bool view = solo_safe_led->active_state();
+	bool model = _route->solo_safe();
+
+	if (ev->button == 1) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+			boost::shared_ptr<RouteList> rl (_session->get_routes());
+			if (model) {
+				/* disable solo safe for all routes */
+				DisplaySuspender ds;
+				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+					(*i)->set_solo_safe (false, this);
+				}
+			} else {
+				/* enable solo safe for all routes */
+				DisplaySuspender ds;
+				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+					(*i)->set_solo_safe (true, this);
+				}
+			}
+		}
+		else {
+			if (model == view) {
+				/* flip just this route */
+				_route->set_solo_safe (!view, this);
+			}
+		}
+	}
+
 	return false;
 }
 
