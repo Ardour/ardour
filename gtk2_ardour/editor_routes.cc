@@ -490,7 +490,7 @@ EditorRoutes::build_menu ()
 	items.push_back (MenuElem (_("Hide All Audio Busses"), sigc::mem_fun (*this, &EditorRoutes::hide_all_audiobus)));
 	items.push_back (MenuElem (_("Show All Midi Tracks"), sigc::mem_fun (*this, &EditorRoutes::show_all_miditracks)));
 	items.push_back (MenuElem (_("Hide All Midi Tracks"), sigc::mem_fun (*this, &EditorRoutes::hide_all_miditracks)));
-	items.push_back (MenuElem (_("Show Tracks With Regions Under Playhead"), sigc::mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
+	items.push_back (MenuElem (_("Only show Tracks With Regions Under Playhead"), sigc::mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
 }
 
 void
@@ -1118,17 +1118,20 @@ EditorRoutes::set_all_audio_midi_visibility (int tracks, bool yn)
 		if ((atv = dynamic_cast<AudioTimeAxisView*>(tv)) != 0) {
 			switch (tracks) {
 			case 0:
+				atv->set_marked_for_display (yn);
 				(*i)[_columns.visible] = yn;
 				break;
 
 			case 1:
 				if (atv->is_audio_track()) {
+					atv->set_marked_for_display (yn);
 					(*i)[_columns.visible] = yn;
 				}
 				break;
 
 			case 2:
 				if (!atv->is_audio_track()) {
+					atv->set_marked_for_display (yn);
 					(*i)[_columns.visible] = yn;
 				}
 				break;
@@ -1137,11 +1140,13 @@ EditorRoutes::set_all_audio_midi_visibility (int tracks, bool yn)
 		else if ((mtv = dynamic_cast<MidiTimeAxisView*>(tv)) != 0) {
 			switch (tracks) {
 			case 0:
+				mtv->set_marked_for_display (yn);
 				(*i)[_columns.visible] = yn;
 				break;
 
 			case 3:
 				if (mtv->is_midi_track()) {
+					mtv->set_marked_for_display (yn);
 					(*i)[_columns.visible] = yn;
 				}
 				break;
@@ -1725,6 +1730,14 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 	TreeModel::Children rows = _model->children ();
 	for (TreeModel::Children::iterator i = rows.begin(); i != rows.end(); ++i) {
 		TimeAxisView* tv = (*i)[_columns.tv];
-		(*i)[_columns.visible] = (show.find (tv) != show.end());
+		bool to_show = (show.find (tv) != show.end());
+
+		tv->set_marked_for_display (to_show);
+		(*i)[_columns.visible] = to_show;
 	}
+
+	/* force route order keys catch up with visibility changes
+	 */
+
+	sync_order_keys_from_treeview ();
 }
