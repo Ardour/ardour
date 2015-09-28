@@ -490,7 +490,7 @@ EditorRoutes::build_menu ()
 	items.push_back (MenuElem (_("Hide All Audio Busses"), sigc::mem_fun (*this, &EditorRoutes::hide_all_audiobus)));
 	items.push_back (MenuElem (_("Show All Midi Tracks"), sigc::mem_fun (*this, &EditorRoutes::show_all_miditracks)));
 	items.push_back (MenuElem (_("Hide All Midi Tracks"), sigc::mem_fun (*this, &EditorRoutes::hide_all_miditracks)));
-	items.push_back (MenuElem (_("Only show Tracks With Regions Under Playhead"), sigc::mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
+	items.push_back (MenuElem (_("Only Show Tracks With Regions Under Playhead"), sigc::mem_fun (*this, &EditorRoutes::show_tracks_with_regions_at_playhead)));
 }
 
 void
