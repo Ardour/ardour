@@ -268,44 +268,7 @@ Butler::thread_work ()
 			goto restart;
 		}
 
-		for (i = rl->begin(); !transport_work_requested() && should_run && i != rl->end(); ++i) {
-			// cerr << "write behind for " << (*i)->name () << endl;
-
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-
-			if (!tr) {
-				continue;
-			}
-
-			/* note that we still try to flush diskstreams attached to inactive routes
-			 */
-
-                        gint64 before, after;
-                        int ret;
-
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("butler flushes track %1 capture load %2\n", tr->name(), tr->capture_buffer_load()));
-                        before = g_get_monotonic_time ();
-                        ret = tr->do_flush (ButlerContext);
-                        after = g_get_monotonic_time ();
-			switch (ret) {
-			case 0:
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush complete for %1, %2 usecs\n", tr->name(), after - before));
-				break;
-				
-			case 1:
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush not finished for %1, %2 usecs\n", tr->name(), after - before));
-				disk_work_outstanding = true;
-				break;
-
-			default:
-				err++;
-				error << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << endmsg;
-                                std::cerr << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << std::endl;
-				/* don't break - try to flush all streams in case they
-				   are split across disks.
-				*/
-			}
-		}
+		disk_work_outstanding = flush_tracks_to_disk (rl, err, false);
 
 		if (err && _session.actively_recording()) {
 			/* stop the transport and try to catch as much possible
@@ -313,12 +276,6 @@ Butler::thread_work ()
 			*/
 			DEBUG_TRACE (DEBUG::Butler, "error occurred during recording - stop transport\n");
 			_session.request_stop ();
-		}
-
-		if (i != rl->begin() && i != rl->end()) {
-			/* we didn't get to all the streams */
-			DEBUG_TRACE (DEBUG::Butler, "not all tracks processed, will need to go back for more\n");
-			disk_work_outstanding = true;
 		}
 
 		if (!err && transport_work_requested()) {
@@ -329,7 +286,6 @@ Butler::thread_work ()
 		if (!disk_work_outstanding) {
 			_session.refresh_disk_space ();
 		}
-
 
 		{
 			Glib::Threads::Mutex::Lock lm (request_lock);
@@ -350,6 +306,54 @@ Butler::thread_work ()
 
 	return (0);
 }
+
+bool
+Butler::flush_tracks_to_disk (boost::shared_ptr<RouteList> rl, uint32_t& errors, bool force)
+{
+	bool disk_work_outstanding = false;
+
+	for (RouteList::iterator i = rl->begin(); (force || !transport_work_requested()) && should_run && i != rl->end(); ++i) {
+
+		// cerr << "write behind for " << (*i)->name () << endl;
+
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+
+		if (!tr) {
+			continue;
+		}
+
+		/* note that we still try to flush diskstreams attached to inactive routes
+		 */
+
+		gint64 before, after;
+		int ret;
+
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler flushes track %1 capture load %2\n", tr->name(), tr->capture_buffer_load()));
+		before = g_get_monotonic_time ();
+		ret = tr->do_flush (ButlerContext, force);
+		after = g_get_monotonic_time ();
+		switch (ret) {
+		case 0:
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush complete for %1, %2 usecs\n", tr->name(), after - before));
+			break;
+
+		case 1:
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush not finished for %1, %2 usecs\n", tr->name(), after - before));
+			disk_work_outstanding = true;
+			break;
+
+		default:
+			errors++;
+			error << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << endmsg;
+			std::cerr << string_compose(_("Butler write-behind failure on dstream %1"), (*i)->name()) << std::endl;
+			/* don't break - try to flush all streams in case they
+			   are split across disks.
+			*/
+		}
+	}
+
+	return disk_work_outstanding;
+}	
 
 void
 Butler::schedule_transport_work ()

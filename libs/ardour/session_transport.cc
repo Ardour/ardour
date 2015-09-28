@@ -326,6 +326,37 @@ Session::butler_transport_work ()
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler transport work, todo = %1 at %2\n", enum_2_string (ptw), (before = g_get_monotonic_time())));
 
+
+	if (ptw & PostTransportLocate) {
+
+		if (get_play_loop() && !Config->get_seamless_loop() && actively_recording()) {
+
+			/* this locate is happening while we are doing loop
+			 * recording but with seam-ed (non-seamless) looping.
+			 * We must flush any data to disk before resetting
+			 * buffers as part of the pending locate (which happens
+			 * a little later in this method).
+			 */
+
+			bool more_disk_io_to_do = false;
+			uint32_t errors = 0;
+
+			do {
+				more_disk_io_to_do = _butler->flush_tracks_to_disk (r, errors, true);
+
+				if (errors) {
+					break;
+				}
+
+				if (more_disk_io_to_do) {
+					continue;
+				}
+
+			} while (false);
+
+		}
+	}
+
 	if (ptw & PostTransportAdjustPlaybackBuffering) {
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
@@ -1067,6 +1098,13 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	                                               target_frame, with_roll, with_flush, for_loop_enabled, force, with_mmc));
 	
 	if (!force && _transport_frame == target_frame && !loop_changing && !for_loop_enabled) {
+
+		/* already at the desired position. Not forced to locate,
+		   the loop isn't changing, so unless we're told to
+		   start rolling also, there's nothing to do but
+		   tell the world where we are (again).
+		*/
+
 		if (with_roll) {
 			set_transport_speed (1.0, 0, false);
 		}
