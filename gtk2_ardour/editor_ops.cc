@@ -6266,60 +6266,6 @@ Editor::set_punch_from_selection ()
 }
 
 void
-Editor::set_punch_from_loop ()
-{
-	if (_session == 0) {
-		return;
-	}
-
-	Location* tll;
-
-	if ((tll = transport_loop_location()) == 0) {
-		return;
-	}
-
-	set_punch_range (tll->start(), tll->end(),  _("set punch range from loop"));
-}
-
-void
-Editor::setup_loop_record ()
-{
-	if (_session == 0) {
-		return;
-	}
-
-	Location * looploc = _session->locations()->auto_loop_location();
-
-	if (!looploc) {
-		return;
-	}
-
-	set_punch_range (looploc->start(), looploc->end(), _("setup loop recording"));
-
-	Glib::RefPtr<Action> action = ActionManager::get_action ("Transport", "TogglePunch");
-
-	if (action) {
-
-		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(action);
-
-		if (!tact) {
-			return;
-		}
-
-		/* drive the other two actions from this one */
-
-		Glib::RefPtr<Action> in_action = ActionManager::get_action ("Transport", "TogglePunchIn");
-		Glib::RefPtr<Action> out_action = ActionManager::get_action ("Transport", "TogglePunchOut");
-
-		if (in_action && out_action) {
-			Glib::RefPtr<ToggleAction> tiact = Glib::RefPtr<ToggleAction>::cast_dynamic(in_action);
-			Glib::RefPtr<ToggleAction> toact = Glib::RefPtr<ToggleAction>::cast_dynamic(out_action);
-			tiact->set_active (true);
-			toact->set_active (true);
-		}
-	}
-}
-void
 Editor::set_session_extents_from_selection ()
 {
 	if (_session == 0) {
