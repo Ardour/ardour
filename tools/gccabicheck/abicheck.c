@@ -47,10 +47,12 @@ int main (int argc, char **argv) {
 	char *glibmm = "libglibmm-2.4.so";
 
 	const struct option long_options[] = {
+		{ "fail",       no_argument,       0, 'f' },
 		{ "help",       no_argument,       0, 'h' },
 		{ "gcc4",       no_argument,       0, '4' },
 		{ "gcc5",       no_argument,       0, '5' },
 		{ "glibmm",     required_argument, 0, 'g' },
+		{ "verbose",    no_argument,       0, 'v' },
 		{ "version",    no_argument,       0, 'V' },
 	};
 
