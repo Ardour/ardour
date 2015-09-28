@@ -750,12 +750,6 @@ def configure(conf):
     autowaf.configure(conf)
     autowaf.display_header('Ardour Configuration')
 
-    gcc_versions = fetch_gcc_version(str(conf.env['CC']))
-    if not Options.options.debug and gcc_versions[0] == '4' and gcc_versions[1] > '4':
-        print('Version 4.5 of gcc is not ready for use when compiling Ardour with optimization.')
-        print('Please use a different version or re-configure with --debug')
-        exit (1)
-
     # systems with glibc have libintl builtin. systems without require explicit
     # linkage against libintl.
     #
