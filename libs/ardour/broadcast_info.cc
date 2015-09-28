@@ -90,12 +90,19 @@ BroadcastInfo::set_originator_ref_from_session (Session const & /*session*/)
 	/* Serial number is 12 chars */
 
 	std::ostringstream serial_number;
-	serial_number << "ARDOUR" << "r" <<  std::setfill('0') << std::right << std::setw(5) << revision;
+	serial_number << PROGRAM_NAME << revision;
 
+	/* https://tech.ebu.ch/docs/r/r099.pdf
+	 * CC Country code: (2 characters) based on the ISO 3166-1 standard
+	 * OOO Organisation code: (3 characters) based on the EBU facility codes, Tech 3279 
+	 * NNNNNNNNNNNN Serial number: (12 characters extracted from the recorder model and serial number) This should identify the machine’s type and serial number.
+	 * HHMMSS OriginationTime (6 characters,) from the <OriginationTime> field of the BWF.
+	 * RRRRRRRRR Random Number (9 characters 0-9) Generated locally by the recorder using some reasonably random algorithm. 
+	 */
 	snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
-		  SessionMetadata::Metadata()->country().c_str(),
-		  SessionMetadata::Metadata()->organization().c_str(),
-		  serial_number.str().c_str(),
+		  SessionMetadata::Metadata()->country().substr (0, 2).c_str(),
+		  SessionMetadata::Metadata()->organization().substr (0, 3).c_str(),
+		  serial_number.str().substr (0, 12).c_str(),
 		  _time.tm_hour,
 		  _time.tm_min,
 		  _time.tm_sec,
