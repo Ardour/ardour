@@ -142,6 +142,8 @@ PBD::Signal1<void,int> ARDOUR::PluginScanTimeout;
 PBD::Signal0<void> ARDOUR::GUIIdle;
 PBD::Signal3<bool,std::string,std::string,int> ARDOUR::CopyConfigurationFiles;
 
+std::vector<std::string> ARDOUR::reserved_io_names;
+
 static bool have_old_configuration_files = false;
 
 namespace ARDOUR {
@@ -506,6 +508,25 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	ARDOUR::AudioEngine::create ();
 
+	/* it is unfortunate that we need to include reserved names here that
+	   refer to control surfaces. But there's no way to ensure a complete
+	   lack of collisions without doing this, since the control surface
+	   support may not even be active. Without adding an API to control 
+	   surface support that would list their port names, we do have to
+	   list them here.
+	*/
+
+	char const * reserved[] = {
+		_("Monitor"),
+		_("Master"),
+		_("Control"),
+		_("Click"),
+		_("Mackie"),
+		0
+	};
+
+	reserved_io_names = I18N (reserved);
+	
 	libardour_initialized = true;
 
 	return true;

@@ -52,6 +52,7 @@ namespace ARDOUR {
 	extern LIBARDOUR_API PBD::Signal1<void,int> PluginScanTimeout;
 	extern LIBARDOUR_API PBD::Signal0<void> GUIIdle;
 	extern LIBARDOUR_API PBD::Signal3<bool,std::string,std::string,int> CopyConfigurationFiles;
+	extern LIBARDOUR_API std::vector<std::string> reserved_io_names;
 
 	/**
 	 * @param with_vst true to enable VST Support

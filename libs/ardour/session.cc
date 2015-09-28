@@ -2196,30 +2196,13 @@ Session::resort_routes_using (boost::shared_ptr<RouteList> r)
 bool
 Session::find_route_name (string const & base, uint32_t& id, string& name, bool definitely_add_number)
 {
-	/* it is unfortunate that we need to include reserved names here that
-	   refer to control surfaces. But there's no way to ensure a complete
-	   lack of collisions without doing this, since the control surface
-	   support may not even be active. Without adding an API to control 
-	   surface support that would list their port names, we do have to
-	   list them here.
-	*/
-
-	char const * const reserved[] = {
-		_("Monitor"),
-		_("Master"),
-		_("Control"),
-		_("Click"),
-		_("Mackie"),
-		0
-	};
-	
 	/* the base may conflict with ports that do not belong to existing
 	   routes, but hidden objects like the click track. So check port names
 	   before anything else.
 	*/
 	
-	for (int n = 0; reserved[n]; ++n) {
-		if (base == reserved[n]) {
+	for (vector<string>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
+		if (base == *reserved) {
 			definitely_add_number = true;
 			if (id < 1) {
 				id = 1;
@@ -3875,6 +3858,12 @@ Session::io_name_is_legal (const std::string& name)
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
+	for (vector<string>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
+		if (name == *reserved) {
+			return false;
+		}
+	}
+	
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if ((*i)->name() == name) {
 			return false;
