@@ -515,8 +515,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	   surface support that would list their port names, we do have to
 	   list them here.
 	*/
-
-	char const * reserved[] = {
+	
+	char const * const reserved[] = {
 		_("Monitor"),
 		_("Master"),
 		_("Control"),
@@ -525,7 +525,9 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 		0
 	};
 
-	reserved_io_names = I18N (reserved);
+	for (int n = 0; reserved[n]; ++n) {
+		reserved_io_names.push_back (reserved[n]);
+	}
 	
 	libardour_initialized = true;
 
