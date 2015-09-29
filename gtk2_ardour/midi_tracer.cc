@@ -280,9 +280,9 @@ MidiTracer::tracer (Parser&, byte* msg, size_t len)
 
 	case MIDI::pitchbend:
 		if (show_hex) {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "Pitch Bend", (msg[0]&0xf)+1, (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x %02x\n", "Pitch Bend", (msg[0]&0xf)+1, (int) msg[1], (int) msg[2]);
 		} else {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "Pitch Bend", (msg[0]&0xf)+1, (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d %-3d\n", "Pitch Bend", (msg[0]&0xf)+1, (int) msg[1], (int) msg[2]);
 		}
 		break;
 
