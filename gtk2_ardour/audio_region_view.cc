@@ -1285,7 +1285,8 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 		/* Restore stacked coverage */
 		std::string str = trackview.gui_property ("layer-display");
 		if (!str.empty()) {
-			update_coverage_frames (LayerDisplay (string_2_enum (str, LayerDisplay::Stacked)));
+			LayerDisplay layer_display;
+			update_coverage_frames (LayerDisplay (string_2_enum (str, layer_display)));
 		}
 	}
 
