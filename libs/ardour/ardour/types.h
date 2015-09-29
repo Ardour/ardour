@@ -192,7 +192,8 @@ namespace ARDOUR {
 		MeterIEC2EBU   = 0x0200,
 		MeterVU        = 0x0400,
 		MeterK12       = 0x0800,
-		MeterPeak0dB   = 0x1000
+		MeterPeak0dB   = 0x1000,
+		MeterMCP       = 0x2000
 	};
 
 	enum TrackMode {

@@ -47,6 +47,7 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 	_reset_dpm = true;
 	_reset_max = true;
 	_bufcnt = 0;
+	_combined_peak = 0;
 }
 
 PeakMeter::~PeakMeter ()
@@ -102,13 +103,18 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
 		float val = 0.0f;
 		const MidiBuffer& buf (bufs.get_midi(i));
-		
+
 		for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
 			const Evoral::MIDIEvent<framepos_t> ev(*e, false);
 			if (ev.is_note_on()) {
 				const float this_vel = ev.buffer()[2] / 127.0;
 				if (this_vel > val) {
 					val = this_vel;
+				}
+				if (val > 0.01) {
+					if (_combined_peak < 0.01) {
+						_combined_peak = 0.01;
+					}
 				}
 			} else {
 				val += 1.0 / bufs.get_midi(n).capacity();
@@ -134,6 +140,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 		} else {
 			_peak_buffer[n] = compute_peak (bufs.get_audio(i).data(), nframes, _peak_buffer[n]);
 			_max_peak_signal[n] = std::max(_peak_buffer[n], _max_peak_signal[n]); // todo sync reset
+			_combined_peak =std::max(_peak_buffer[n], _combined_peak);
 		}
 
 		if (do_reset_max) {
@@ -310,6 +317,7 @@ PeakMeter::set_max_channels (const ChanCount& chn)
 
 float
 PeakMeter::meter_level(uint32_t n, MeterType type) {
+	float mcptmp;
 	switch (type) {
 		case MeterKrms:
 		case MeterK20:
@@ -354,6 +362,10 @@ PeakMeter::meter_level(uint32_t n, MeterType type) {
 				return _peak_power[n];
 			}
 			break;
+		case MeterMCP:
+			mcptmp = _combined_peak;
+			_combined_peak = 0;
+			return accurate_coefficient_to_dB(mcptmp);
 		case MeterMaxSignal:
 			assert(0);
 			break;
