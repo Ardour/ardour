@@ -239,7 +239,7 @@ AudioRegionView::init (bool wfd)
 	update_envelope_visibility ();
 	gain_line->reset ();
 
-	set_height (trackview.current_height());
+	set_height (trackview.current_height()); // XXX not correct for Layered mode, but set_height() will fix later.
 
 	region_muted ();
 	region_sync_changed ();
@@ -1206,12 +1206,13 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 	uint32_t nwaves = std::min (nchans, audio_region()->n_channels());
 	gdouble ht;
 
-	/* reduce waveview height by 2.0 to account for our frame */
-	
-	if (trackview.current_height() < NAME_HIGHLIGHT_THRESH) {
-		ht = ((trackview.current_height() - 2.0) / (double) nchans);
+	/* compare to set_height(), use _height as set by streamview (child_height),
+	 * not trackview.current_height() to take stacked layering into acconnt
+	 */
+	if (!UIConfiguration::instance().get_show_name_highlight() || (_height < NAME_HIGHLIGHT_THRESH)) {
+		ht = _height / (double) nchans;
 	} else {
-		ht = ((trackview.current_height() - NAME_HIGHLIGHT_SIZE - 2.0) / (double) nchans);
+		ht = (_height - NAME_HIGHLIGHT_SIZE) / (double) nchans;
 	}
 
 	/* first waveview starts at 1.0, not 0.0 since that will overlap the
@@ -1280,6 +1281,12 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 		/* indicate peak-completed */
 		pending_peak_data->hide ();
+
+		/* Restore stacked coverage */
+		std::string str = trackview.gui_property ("layer-display");
+		if (!str.empty()) {
+			update_coverage_frames (LayerDisplay (string_2_enum (str, LayerDisplay::Stacked)));
+		}
 	}
 
 	/* channel wave created, don't hook into peaks ready anymore */
