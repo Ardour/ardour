@@ -470,7 +470,6 @@
     <ColorAlias name="trim knob: arc end" alias="color 81"/>
     <ColorAlias name="trim knob: arc start" alias="color 82"/>
     <ColorAlias name="verbose canvas cursor" alias="color 32"/>
-    <ColorAlias name="vestigial frame" alias="color 4"/>
     <ColorAlias name="video timeline bar" alias="color 46"/>
     <ColorAlias name="waveform fill" alias="color 13"/>
     <ColorAlias name="waveform outline" alias="color 4"/>

@@ -210,9 +210,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	/** true if the name should respond to events */
 	bool name_connected;
 
-	/** true if a small vestigial rect should be shown when the item gets very narrow */
-	bool show_vestigial;
-
 	uint32_t fill_color;
 
 	uint32_t last_item_width;
@@ -221,7 +218,6 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	bool high_enough_for_name;
 
 	ArdourCanvas::Container*      group;
-	ArdourCanvas::Rectangle* vestigial_frame;
 	ArdourCanvas::Rectangle* frame;
 	ArdourCanvas::Rectangle* selection_frame;
 	ArdourCanvas::Text*      name_text;
