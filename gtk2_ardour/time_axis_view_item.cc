@@ -171,14 +171,12 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	position_locked = false;
 	max_item_duration = ARDOUR::max_framepos;
 	min_item_duration = 0;
-	show_vestigial = false;
 	visibility = vis;
 	_sensitive = true;
 	name_text_width = 0;
 	last_item_width = 0;
 	wide_enough_for_name = wide;
 	high_enough_for_name = high;
-	vestigial_frame = 0;
 
 	if (duration == 0) {
 		warning << "Time Axis Item Duration == 0" << endl;
@@ -572,11 +570,6 @@ TimeAxisViewItem::set_height (double height)
 		}
 	}
 
-	if (vestigial_frame) {
-		vestigial_frame->set_y0 (0.0);
-		vestigial_frame->set_y1 (height);
-	}
-
 	set_colors ();
 }
 
@@ -824,19 +817,6 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 
 	if (pixel_width < 2.0) {
 
-		if (show_vestigial) {
-
-			if (!vestigial_frame) {
-				vestigial_frame = new ArdourCanvas::Rectangle (group, ArdourCanvas::Rect (0.0, 0.0, 2.0, trackview.current_height()));
-				CANVAS_DEBUG_NAME (vestigial_frame, string_compose ("vestigial frame for %1", get_item_name()));
-				vestigial_frame->set_outline_color (UIConfiguration::instance().color ("vestigial frame"));
-				vestigial_frame->set_fill_color (UIConfiguration::instance().color ("vestigial frame"));
-				vestigial_frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
-			}
-
-			vestigial_frame->show();
-		}
-
 		if (frame) {
 			frame->set_outline (false);
 			frame->set_x1 (std::max(1.0, pixel_width));
@@ -848,10 +828,6 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		}
 
 	} else {
-		if (vestigial_frame) {
-			vestigial_frame->hide();
-		}
-
 		if (frame) {
 			frame->set_outline (true);
 			/* Note: x0 is always zero - the position is defined by
