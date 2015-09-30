@@ -2793,7 +2793,7 @@ Editor::show_midi_list_editor ()
 void
 Editor::show_midi_tracker_editor ()
 {
-	// TODO
+	selection->foreach_midi_regionview (&MidiRegionView::show_tracker_editor);
 }
 
 void
