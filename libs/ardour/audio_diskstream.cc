@@ -1693,18 +1693,6 @@ AudioDiskstream::transport_looped (framepos_t transport_frame)
 		// all we need to do is finish this capture, with modified capture length
 		boost::shared_ptr<ChannelList> c = channels.reader();
 
-		// adjust the capture length knowing that the data will be recorded to disk
-		// only necessary after the first loop where we're recording
-		if (capture_info.size() == 0) {
-			capture_captured += _capture_offset;
-
-			if (_alignment_style == ExistingMaterial) {
-				capture_captured += _session.worst_output_latency();
-			} else {
-				capture_captured += _roll_delay;
-			}
-		}
-
 		finish_capture (c);
 
 		// the next region will start recording via the normal mechanism
