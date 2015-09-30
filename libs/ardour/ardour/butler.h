@@ -67,7 +67,7 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 	framecnt_t audio_diskstream_playback_buffer_size() const { return audio_dstream_playback_buffer_size; }
 	uint32_t midi_diskstream_buffer_size()  const { return midi_dstream_buffer_size; }
 
-	bool flush_tracks_to_disk (boost::shared_ptr<RouteList>, uint32_t& errors, bool force_flush);
+	bool flush_tracks_to_disk_after_locate (boost::shared_ptr<RouteList>, uint32_t& errors);
 
 	static void* _thread_work(void *arg);
 	void*         thread_work();
@@ -94,6 +94,8 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 private:
 	void empty_pool_trash ();
 	void config_changed (std::string);
+
+	bool flush_tracks_to_disk_normal (boost::shared_ptr<RouteList>, uint32_t& errors);
 
 	/**
 	 * Add request to butler thread request queue
