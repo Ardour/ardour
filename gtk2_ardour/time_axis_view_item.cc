@@ -171,7 +171,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	position_locked = false;
 	max_item_duration = ARDOUR::max_framepos;
 	min_item_duration = 0;
-	show_vestigial = true;
+	show_vestigial = false;
 	visibility = vis;
 	_sensitive = true;
 	name_text_width = 0;
@@ -191,6 +191,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 									 trackview.current_height()));
 		
 		frame->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
+		frame->show ();
 
 		CANVAS_DEBUG_NAME (frame, string_compose ("frame for %1", get_item_name()));
 
@@ -837,7 +838,8 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		}
 
 		if (frame) {
-			frame->hide();
+			frame->set_outline (false);
+			frame->set_x1 (std::max(1.0, pixel_width));
 		}
 
 		if (frame_handle_start) {
@@ -851,7 +853,7 @@ TimeAxisViewItem::reset_width_dependent_items (double pixel_width)
 		}
 
 		if (frame) {
-			frame->show();
+			frame->set_outline (true);
 			/* Note: x0 is always zero - the position is defined by
 			 * the position of the group, not the frame.
 			 */
