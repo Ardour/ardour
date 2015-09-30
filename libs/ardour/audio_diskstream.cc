@@ -787,6 +787,7 @@ AudioDiskstream::commit (framecnt_t playback_distance)
 
 	if (adjust_capture_position != 0) {
 		capture_captured += adjust_capture_position;
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 now captured %2 (by %3)\n", name(), capture_captured, adjust_capture_position));
 		adjust_capture_position = 0;
 	}
 
@@ -1579,6 +1580,8 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 			if (Config->get_auto_analyse_audio()) {
 				Analyser::queue_source_for_analysis (s, true);
 			}
+
+			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("newly captured source %1 length %2\n", s->path(), s->length (0)));
 		}
 	}
 
@@ -1637,8 +1640,8 @@ AudioDiskstream::transport_stopped_wallclock (struct tm& when, time_t twhen, boo
 
 			RegionFactory::region_name (region_name, whole_file_region_name, false);
 
-			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
-			                                                      _name, (*ci)->start, (*ci)->frames, region_name));
+			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture bufpos %5 start @ %2 length %3 add new region %4\n",
+			                                                      _name, (*ci)->start, (*ci)->frames, region_name, buffer_position));
 
 			try {
 
