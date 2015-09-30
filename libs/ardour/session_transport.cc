@@ -314,6 +314,8 @@ Session::realtime_locate ()
 void
 Session::butler_transport_work ()
 {
+	/* Note: this function executes in the butler thread context */
+
   restart:
 	bool finished;
 	PostTransportWork ptw;
@@ -329,20 +331,27 @@ Session::butler_transport_work ()
 
 	if (ptw & PostTransportLocate) {
 
-		if (get_play_loop() && !Config->get_seamless_loop() && actively_recording()) {
+		if (get_play_loop() && !Config->get_seamless_loop()) {
 
-			/* this locate is happening while we are doing loop
-			 * recording but with seam-ed (non-seamless) looping.
-			 * We must flush any data to disk before resetting
-			 * buffers as part of the pending locate (which happens
-			 * a little later in this method).
+			DEBUG_TRACE (DEBUG::Butler, "flush loop recording fragment to disk\n");
+			
+			/* this locate might be happening while we are
+			 * loop recording. 
+			 *
+			 * Non-seamless looping will require a locate (below) that
+			 * will reset capture buffers and throw away data.
+			 *
+			 * Rather than first find all tracks and see if they 
+			 * have outstanding data, just do a flush anyway. It
+			 * may be cheaper this way anyway, and is certainly
+			 * more accurate.
 			 */
 
 			bool more_disk_io_to_do = false;
 			uint32_t errors = 0;
 
 			do {
-				more_disk_io_to_do = _butler->flush_tracks_to_disk (r, errors, true);
+				more_disk_io_to_do = _butler->flush_tracks_to_disk_after_locate (r, errors);
 
 				if (errors) {
 					break;
