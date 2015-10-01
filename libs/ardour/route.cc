@@ -4699,6 +4699,7 @@ Route::non_realtime_locate (framepos_t pos)
 			(*i)->transport_located (pos);
 		}
 	}
+	_roll_delay = _initial_delay;
 }
 
 void
