@@ -728,7 +728,7 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s sample rate to %u.\n",
 				sname, _fsamp);
-		return -1;
+		return -3;
 	}
 	snd_pcm_hw_params_get_channels_max (hwpar, nchan);
 	if (*nchan > 1024)
@@ -758,19 +758,19 @@ int Alsa_pcmi::set_hwpar (snd_pcm_t *handle,  snd_pcm_hw_params_t *hwpar, const 
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s period size to %lu.\n",
 				sname, _fsize);
-		return -1;
+		return -4;
 	}
 	if (snd_pcm_hw_params_set_periods (handle, hwpar, _nfrag, 0) < 0)
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s periods to %u.\n",
 				sname, _nfrag);
-		return -1;
+		return -5;
 	}
 	if (snd_pcm_hw_params_set_buffer_size (handle, hwpar, _fsize * _nfrag) < 0)
 	{
 		if (_debug & DEBUG_INIT) fprintf (stderr, "Alsa_pcmi: can't set %s buffer length to %lu.\n",
 				sname, _fsize * _nfrag);
-		return -1;
+		return -4;
 	}
 	if (snd_pcm_hw_params (handle, hwpar) < 0)
 	{
