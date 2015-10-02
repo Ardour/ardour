@@ -144,7 +144,7 @@ MackieControlProtocol::right_press (Button &)
 LedState 
 MackieControlProtocol::right_release (Button &)
 {
-	if (_zoom_mode) {
+	if (zoom_mode()) {
 
 	}
 
@@ -154,20 +154,20 @@ MackieControlProtocol::right_release (Button &)
 LedState
 MackieControlProtocol::cursor_left_press (Button& )
 {
-	if (_zoom_mode) {
+	if (zoom_mode()) {
 
-		if (_modifier_state & MODIFIER_OPTION) {
+		if (main_modifier_state() & MODIFIER_OPTION) {
 			/* reset selected tracks to default vertical zoom */
 		} else {
 			ZoomOut (); /* EMIT SIGNAL */
 		}
 	} else {
 		float page_fraction;
-		if (_modifier_state == MODIFIER_CONTROL) {
+		if (main_modifier_state() == MODIFIER_CONTROL) {
 			page_fraction = 1.0;
-		} else if (_modifier_state == MODIFIER_OPTION) {
+		} else if (main_modifier_state() == MODIFIER_OPTION) {
 			page_fraction = 0.1;
-		} else if (_modifier_state == MODIFIER_SHIFT) {
+		} else if (main_modifier_state() == MODIFIER_SHIFT) {
 			page_fraction = 2.0;
 		} else {
 			page_fraction = 0.25;
@@ -188,20 +188,20 @@ MackieControlProtocol::cursor_left_release (Button&)
 LedState
 MackieControlProtocol::cursor_right_press (Button& )
 {
-	if (_zoom_mode) {
+	if (zoom_mode()) {
 		
-		if (_modifier_state & MODIFIER_OPTION) {
+		if (main_modifier_state() & MODIFIER_OPTION) {
 			/* reset selected tracks to default vertical zoom */
 		} else {
 			ZoomIn (); /* EMIT SIGNAL */
 		}
 	} else {
 		float page_fraction;
-		if (_modifier_state == MODIFIER_CONTROL) {
+		if (main_modifier_state() == MODIFIER_CONTROL) {
 			page_fraction = 1.0;
-		} else if (_modifier_state == MODIFIER_OPTION) {
+		} else if (main_modifier_state() == MODIFIER_OPTION) {
 			page_fraction = 0.1;
-		} else if (_modifier_state == MODIFIER_SHIFT) {
+		} else if (main_modifier_state() == MODIFIER_SHIFT) {
 			page_fraction = 2.0;
 		} else {
 			page_fraction = 0.25;
@@ -222,9 +222,9 @@ MackieControlProtocol::cursor_right_release (Button&)
 LedState
 MackieControlProtocol::cursor_up_press (Button&)
 {
-	if (_zoom_mode) {
+	if (zoom_mode()) {
 		
-		if (_modifier_state & MODIFIER_CONTROL) {
+		if (main_modifier_state() & MODIFIER_CONTROL) {
 			VerticalZoomInSelected (); /* EMIT SIGNAL */
 		} else {
 			VerticalZoomInAll (); /* EMIT SIGNAL */
@@ -244,8 +244,8 @@ MackieControlProtocol::cursor_up_release (Button&)
 LedState
 MackieControlProtocol::cursor_down_press (Button&)
 {
-	if (_zoom_mode) {
-		if (_modifier_state & MODIFIER_OPTION) {
+	if (zoom_mode()) {
+		if (main_modifier_state() & MODIFIER_OPTION) {
 			VerticalZoomOutSelected (); /* EMIT SIGNAL */
 		} else {
 			VerticalZoomOutAll (); /* EMIT SIGNAL */
@@ -301,14 +301,19 @@ MackieControlProtocol::channel_right_release (Button &)
 Mackie::LedState 
 MackieControlProtocol::zoom_press (Mackie::Button &)
 {
-	_zoom_mode = !_zoom_mode;
-	return (_zoom_mode ? on : off);
+	return none;
 }
 
 Mackie::LedState 
 MackieControlProtocol::zoom_release (Mackie::Button &)
 {
-	return (_zoom_mode ? on : off);
+	if (_modifier_state & MODIFIER_ZOOM) {
+		_modifier_state &= ~MODIFIER_ZOOM;
+	} else {
+		_modifier_state |= MODIFIER_ZOOM;
+	}
+
+	return (zoom_mode() ? on : off);
 }
 
 Mackie::LedState 
@@ -330,7 +335,7 @@ MackieControlProtocol::scrub_release (Mackie::Button &)
 LedState
 MackieControlProtocol::undo_press (Button&)
 {
-	if (_modifier_state & MODIFIER_SHIFT) {
+	if (main_modifier_state() & MODIFIER_SHIFT) {
 		Redo(); /* EMIT SIGNAL */
 	} else {
 		Undo(); /* EMIT SIGNAL */
@@ -465,7 +470,7 @@ MackieControlProtocol::record_release (Button &)
 LedState 
 MackieControlProtocol::rewind_press (Button &)
 {
-	if (_modifier_state == MODIFIER_CONTROL) {
+	if (main_modifier_state() == MODIFIER_CONTROL) {
 		goto_start ();
 	} else {
 		rewind ();
@@ -482,7 +487,7 @@ MackieControlProtocol::rewind_release (Button &)
 LedState 
 MackieControlProtocol::ffwd_press (Button &)
 {
-	if (_modifier_state == MODIFIER_CONTROL) {
+	if (main_modifier_state() == MODIFIER_CONTROL) {
 		goto_end();
 	} else {
 		ffwd ();
@@ -499,7 +504,7 @@ MackieControlProtocol::ffwd_release (Button &)
 LedState 
 MackieControlProtocol::loop_press (Button &)
 {
-	if (_modifier_state & MODIFIER_CONTROL) {
+	if (main_modifier_state() & MODIFIER_CONTROL) {
 		set_view_mode (Loop);
 		return on;
 	} else {

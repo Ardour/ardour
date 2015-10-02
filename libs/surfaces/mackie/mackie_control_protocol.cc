@@ -84,6 +84,12 @@ const int MackieControlProtocol::MODIFIER_OPTION = 0x1;
 const int MackieControlProtocol::MODIFIER_CONTROL = 0x2;
 const int MackieControlProtocol::MODIFIER_SHIFT = 0x4;
 const int MackieControlProtocol::MODIFIER_CMDALT = 0x8;
+const int MackieControlProtocol::MODIFIER_ZOOM = 0x10;
+const int MackieControlProtocol::MODIFIER_SCRUB = 0x20;
+const int MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieControlProtocol::MODIFIER_OPTION|
+                                                       MackieControlProtocol::MODIFIER_CONTROL|
+                                                       MackieControlProtocol::MODIFIER_SHIFT|
+                                                       MackieControlProtocol::MODIFIER_CMDALT);
 
 MackieControlProtocol* MackieControlProtocol::_instance = 0;
 
@@ -98,7 +104,6 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	, _current_initial_bank (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
 	, _gui (0)
-	, _zoom_mode (false)
 	, _scrub_mode (false)
 	, _flip_mode (Normal)
 	, _view_mode (Mixer)
@@ -1465,7 +1470,7 @@ MackieControlProtocol::select_range ()
 	if (!routes.empty()) {
 		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
 
-			if (_modifier_state == MODIFIER_CONTROL) {
+			if (main_modifier_state() == MODIFIER_CONTROL) {
 				ToggleRouteSelection ((*r)->remote_control_id ());
 			} else {
 				if (r == routes.begin()) {

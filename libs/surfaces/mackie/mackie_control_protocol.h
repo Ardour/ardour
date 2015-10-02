@@ -96,6 +96,9 @@ class MackieControlProtocol
 	static const int MODIFIER_CONTROL;
 	static const int MODIFIER_SHIFT;
 	static const int MODIFIER_CMDALT;
+	static const int MODIFIER_ZOOM;
+	static const int MODIFIER_SCRUB;
+	static const int MAIN_MODIFIER_MASK;
 
 	enum ViewMode {
 		Mixer,
@@ -132,7 +135,7 @@ class MackieControlProtocol
 
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
-	bool zoom_mode () const { return _zoom_mode; }
+	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
 
 	void set_view_mode (ViewMode);
@@ -195,6 +198,7 @@ class MackieControlProtocol
 	framepos_t transport_frame() const;
 
 	int modifier_state() const { return _modifier_state; }
+	int main_modifier_state() const { return _modifier_state & MAIN_MODIFIER_MASK; }
 
 	typedef std::list<boost::shared_ptr<ARDOUR::AutomationControl> > ControlList;
 
@@ -289,7 +293,6 @@ class MackieControlProtocol
 	// Bundle to represent our output ports
 	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
 	void*                    _gui;
-	bool                     _zoom_mode;
 	bool                     _scrub_mode;
 	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
