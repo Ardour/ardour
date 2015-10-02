@@ -1239,6 +1239,8 @@ MackieControlProtocol::build_button_map ()
 void 
 MackieControlProtocol::handle_button_event (Surface& surface, Button& button, ButtonState bs)
 {
+	Button::ID button_id = button.bid();
+	
 	if  (bs != press && bs != release) {
 		update_led (surface, button, none);
 		return;
@@ -1250,26 +1252,48 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	/* check profile first */
 	
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
-	
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Looked up action for button %1 with modifier %2, got [%3]\n",
-							   button.bid(), _modifier_state, action));
 
 	if (!action.empty()) {
-		/* if there is a bound action for this button, and this is a press event,
-		   carry out the action. If its a release event, do nothing since we 
-		   don't bind to them at all but don't want any other handling to 
-		   occur either.
-		*/
-		if (bs == press) {
-			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("executing action %1\n", action));
-			access_action (action);
+	
+		if (action.find ('/') != string::npos) { /* good chance that this is really an action */
+			
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Looked up action for button %1 with modifier %2, got [%3]\n",
+			                                                   button.bid(), _modifier_state, action));
+			
+			/* if there is a bound action for this button, and this is a press event,
+			   carry out the action. If its a release event, do nothing since we 
+			   don't bind to them at all but don't want any other handling to 
+			   occur either.
+			*/
+			if (bs == press) {
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("executing action %1\n", action));
+				access_action (action);
+			}
+			return;
+		} else {
+			
+			/* "action" is more likely to be a button name. We use this to
+			 * allow remapping buttons to different (builtin) functionality
+			 * associated with an existing button. This is similar to the
+			 * way that (for example) Nuendo moves the "Shift" function to
+			 * the "Enter" key of the MCU Pro.
+			 */
+			
+			int bid = Button::name_to_id (action);
+			
+			if (bid < 0) {
+				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("apparent button name %1 not found\n", action));
+				return;
+			}
+			
+			button_id = (Button::ID) bid;
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handling button %1 as if it was %2 (%3)\n", Button::id_to_name (button.bid()), button_id, Button::id_to_name (button_id)));
 		}
-		return;
 	}
 
 	/* lookup using the device-INDEPENDENT button ID */
 
-	ButtonMap::iterator b = button_map.find (button.bid());
+	ButtonMap::iterator b = button_map.find (button_id);
 
 	if (b != button_map.end()) {
 
