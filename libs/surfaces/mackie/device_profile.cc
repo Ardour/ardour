@@ -157,7 +157,7 @@ DeviceProfile::set_state (const XMLNode& node, int /* version */)
 
 				int id = Button::name_to_id (prop->value());
 				if (id < 0) {
-					error << string_compose ("Unknow button ID \"%1\"", prop->value()) << endmsg;
+					error << string_compose ("Unknown button ID \"%1\"", prop->value()) << endmsg;
 					continue;
 				}
 
