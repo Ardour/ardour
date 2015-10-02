@@ -451,7 +451,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (running()) {
 		DEBUG_AUDIO("Already started.\n");
-		return -1;
+		return BackendReinitializationError;
 	}
 
 	if (_ports.size()) {
@@ -533,7 +533,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	if (register_system_midi_ports () != 0) {
 		DEBUG_PORTS("Failed to register system midi ports.\n")
 		_run = false;
-		return -1;
+		return PortRegistrationError;
 	}
 
 	DEBUG_AUDIO ("Registering Audio ports\n");
@@ -541,7 +541,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	if (register_system_audio_ports()) {
 		DEBUG_PORTS("Failed to register system audio ports.\n");
 		_run = false;
-		return -1;
+		return PortRegistrationError;
 	}
 
 	engine.sample_rate_change (_samplerate);
@@ -550,7 +550,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	if (engine.reestablish_ports ()) {
 		DEBUG_PORTS("Could not re-establish ports.\n");
 		_run = false;
-		return -1;
+		return PortReconnectError;
 	}
 
 	engine.reconnect_ports ();
@@ -558,10 +558,10 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_port_change_flag = false;
 
 	if (!start_blocking_process_thread()) {
-		return -1;
+		return ProcessThreadStartError;
 	}
 
-	return 0;
+	return NoError;
 }
 
 bool

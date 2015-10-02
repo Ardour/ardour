@@ -682,7 +682,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	if (_active || _run) {
 		PBD::error << _("AlsaAudioBackend: already active.") << endmsg;
-		return -1;
+		return BackendReinitializationError;
 	}
 
 	if (_ports.size()) {
@@ -713,13 +713,13 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	if (_input_audio_device == get_standard_device_name(DeviceNone) && _output_audio_device == get_standard_device_name(DeviceNone)) {
 		PBD::error << _("AlsaAudioBackend: At least one of input or output device needs to be set.");
-		return -1;
+		return AudioDeviceInvalidError;
 	}
 
 	if (_input_audio_device != _output_audio_device) {
 		if (_input_audio_device != get_standard_device_name(DeviceNone) && _output_audio_device != get_standard_device_name(DeviceNone)) {
 			PBD::error << _("AlsaAudioBackend: Cannot use two different devices.");
-			return -1;
+			return AudioDeviceInvalidError;
 		}
 		if (_input_audio_device != get_standard_device_name(DeviceNone)) {
 			get_alsa_audio_device_names(devices, HalfDuplexIn);
@@ -744,7 +744,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 	if (alsa_device == "") {
 		PBD::error << _("AlsaAudioBackend: Cannot find configured device. Is it still connected?");
-		return -1;
+		return AudioDeviceNotAvailableError;
 	}
 
 	acquire_device(alsa_device.c_str());
@@ -837,7 +837,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		PBD::error << _("AlsaAudioBackend: failed to register system ports.") << endmsg;
 		delete _pcmi; _pcmi = 0;
 		release_device();
-		return -1;
+		return PortRegistrationError;
 	}
 
 	engine.sample_rate_change (_samplerate);
@@ -847,7 +847,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		PBD::error << _("AlsaAudioBackend: Could not re-establish ports.") << endmsg;
 		delete _pcmi; _pcmi = 0;
 		release_device();
-		return -1;
+		return PortReconnectError;
 	}
 
 	engine.reconnect_ports ();
@@ -863,7 +863,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 			delete _pcmi; _pcmi = 0;
 			release_device();
 			_run = false;
-			return -1;
+			return ProcessThreadStartError;
 		} else {
 			PBD::warning << _("AlsaAudioBackend: cannot acquire realtime permissions.") << endmsg;
 		}
@@ -877,10 +877,10 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		delete _pcmi; _pcmi = 0;
 		release_device();
 		_run = false;
-		return -1;
+		return ProcessThreadStartError;
 	}
 
-	return 0;
+	return NoError;
 }
 
 int

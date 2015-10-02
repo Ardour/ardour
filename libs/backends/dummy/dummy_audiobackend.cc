@@ -424,7 +424,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 {
 	if (_running) {
 		PBD::error << _("DummyAudioBackend: already active.") << endmsg;
-		return -1;
+		return BackendReinitializationError;
 	}
 
 	if (_ports.size()) {
@@ -441,7 +441,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 
 	if (register_system_ports()) {
 		PBD::error << _("DummyAudioBackend: failed to register system ports.") << endmsg;
-		return -1;
+		return PortRegistrationError;
 	}
 
 	engine.sample_rate_change (_samplerate);
@@ -452,7 +452,7 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
 		stop ();
-		return -1;
+		return PortReconnectError;
 	}
 
 	engine.reconnect_ports ();
@@ -467,10 +467,10 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 
 	if (timeout == 0 || !_running) {
 		PBD::error << _("DummyAudioBackend: failed to start process thread.") << endmsg;
-		return -1;
+		return ProcessThreadStartError;
 	}
 
-	return 0;
+	return NoError;
 }
 
 int

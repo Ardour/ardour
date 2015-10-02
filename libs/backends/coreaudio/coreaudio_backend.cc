@@ -516,7 +516,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 
 	if (_active_ca || _active_fw || _run) {
 		PBD::error << _("CoreAudioBackend: already active.") << endmsg;
-		return -1;
+		return BackendReinitializationError;
 	}
 
 	if (_ports.size()) {
@@ -551,11 +551,11 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 			break;
 		case -1:
 			PBD::error << _("CoreAudioBackend: Invalid Device ID.") << endmsg;
-			error_code = BackendInitializationError; // XXX
+			error_code = AudioDeviceInvalidError;
 			break;
 		case -2:
 			PBD::error << _("CoreAudioBackend: Failed to resolve Device-Component by ID.") << endmsg;
-			error_code = BackendInitializationError; // XXX
+			error_code = AudioDeviceNotAvailableError;
 			break;
 		case -3:
 			PBD::error << _("CoreAudioBackend: failed to open device.") << endmsg;
@@ -579,7 +579,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 			break;
 		case -8:
 			PBD::error << _("CoreAudioBackend: Cannot allocate buffers, out-of-memory.") << endmsg;
-			error_code = BackendInitializationError; // XXX
+			error_code = OutOfMemoryError;
 			break;
 		case -9:
 			PBD::error << _("CoreAudioBackend: Failed to set device-property listeners.") << endmsg;
@@ -587,7 +587,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 			break;
 		case -10:
 			PBD::error << _("CoreAudioBackend: Setting Process Callback failed.") << endmsg;
-			error_code = BackendInitializationError; // XXX
+			error_code = AudioDeviceIOError;
 			break;
 		case -11:
 			PBD::error << _("CoreAudioBackend: cannot use requested period size.") << endmsg;
@@ -650,7 +650,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	if (register_system_audio_ports()) {
 		PBD::error << _("CoreAudioBackend: failed to register system ports.") << endmsg;
 		_run = false;
-		return -1;
+		return PortRegistrationError;
 	}
 
 	engine.sample_rate_change (_samplerate);
@@ -659,7 +659,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("CoreAudioBackend: Could not re-establish ports.") << endmsg;
 		_run = false;
-		return -1;
+		return PortReconnectError;
 	}
 
 	if (pthread_create (&_freeewheel_thread, NULL, pthread_freewheel, this))
@@ -667,7 +667,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		PBD::error << _("CoreAudioBackend: failed to create process thread.") << endmsg;
 		delete _pcmio; _pcmio = 0;
 		_run = false;
-		return -1;
+		return ProcessThreadStartError;
 	}
 
 	int timeout = 5000;
@@ -684,14 +684,14 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		unregister_ports();
 		_active_ca = false;
 		_active_fw = false;
-		return -1;
+		return FreewheelThreadStartError;
 	}
 
 	if (!_active_ca) {
 		PBD::error << _("CoreAudioBackend: failed to start coreaudio.") << endmsg;
 		stop();
 		_run = false;
-		return -1;
+		return ProcessThreadStartError;
 	}
 
 	engine.reconnect_ports ();
@@ -704,7 +704,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	_pcmio->set_xrun_callback (xrun_callback_ptr, this);
 	_preinit = false;
 
-	return 0;
+	return NoError;
 }
 
 int
