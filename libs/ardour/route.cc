@@ -3900,22 +3900,22 @@ Route::MuteControllable::set_superficial_value(bool muted)
 	/* Note we can not use AutomationControl::set_value here since it will emit
 	   Changed(), but the value will not be correct to the observer. */
 
-	/* this is a tweak of ControlList::automation_write ()
-	   as currently MuteControllable can't be touching.
-	   bool to_list = _list && ((AutomationList*)_list.get())->automation_write();
-	*/
-	AutomationList* alist = (AutomationList*)_list.get();
-	const AutoState as = alist->automation_state ();
-	const bool to_list = _list && _session.transport_rolling () && (as == Touch || as == Write);
-
+	const bool to_list = _list && ((AutomationList*)_list.get ())->automation_write ();
+	const double where = _session.audible_frame ();
 	if (to_list) {
-		if (as == Touch && _list->in_new_write_pass ()) {
-			alist->start_write_pass (_session.audible_frame ());
-		}
-		_list->set_in_write_pass (true, false, _session.audible_frame ());
+		/* Note that we really need this:
+		 *  if (as == Touch && _list->in_new_write_pass ()) {
+		 *       alist->start_write_pass (_session.audible_frame ());
+		 *  }
+		 * here in the case of the user calling from a GUI or whatever.
+		 * Without the ability to distinguish between user and
+		 * automation-initiated changes, we lose the "touch mute"
+		 * behaviour we have in AutomationController::toggled ().
+		 */
+		_list->set_in_write_pass (true, false, where);
 	}
 
-	Control::set_double (muted, _session.transport_frame(), to_list);
+	Control::set_double (muted, where, to_list);
 }
 
 void

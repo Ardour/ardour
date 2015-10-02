@@ -397,17 +397,19 @@ Automatable::transport_stopped (framepos_t now)
 		const bool list_did_write = !l->in_new_write_pass ();
 
 		l->stop_touch (true, now);
+
 		if (list_did_write) {
 			c->commit_transaction ();
 		}
-		l->write_pass_finished (now, Config->get_automation_thinning_factor());
 
-		if (l->automation_state() == Write) {
+		l->write_pass_finished (now, Config->get_automation_thinning_factor ());
+
+		if (l->automation_state () == Write) {
 			l->set_automation_state (Touch);
 		}
 
-		if (l->automation_playback()) {
-			c->set_value(c->list()->eval(now));
+		if (l->automation_playback ()) {
+			c->set_value (c->list ()->eval (now));
 		}
 	}
 }
