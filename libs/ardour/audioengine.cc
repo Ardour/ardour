@@ -282,8 +282,6 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	if (session_remove_pending) {
 
-		cerr << "SRP, countdown = " << session_removal_countdown << endl;
-		
 		/* perform the actual session removal */
 
 		if (session_removal_countdown < 0) {
