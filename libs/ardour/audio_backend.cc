@@ -33,10 +33,14 @@ AudioBackend::get_error_string (ErrorCode error_code)
 		return _("Failed to initialize audio backend");
 	case BackendDeinitializationError:
 		return _("Failed to deinitialize audio backend");
+	case BackendReinitializationError:
+		return _("Failed to reinitialize audio backend");
 	case AudioDeviceOpenError:
 		return _("Failed to open audio device");
 	case AudioDeviceCloseError:
 		return _("Failed to close audio device");
+	case AudioDeviceInvalidError:
+		return _("Audio device not valid");
 	case AudioDeviceNotAvailableError:
 		return _("Audio device unavailable");
 	case AudioDeviceNotConnectedError:
@@ -81,6 +85,16 @@ AudioBackend::get_error_string (ErrorCode error_code)
 		return _("Setting audio device thread priorities failed");
 	case SettingMIDIThreadPriorityError:
 		return _("Setting MIDI device thread priorities failed");
+	case ProcessThreadStartError:
+		return _("Failed to start process thread");
+	case FreewheelThreadStartError:
+		return _("Failed to start freewheel thread");
+	case PortRegistrationError:
+		return _("Failed to register audio/midi ports");
+	case PortReconnectError:
+		return _("Failed to re-connect audio/midi ports");
+	case OutOfMemoryError:
+		return _("Out Of Memory Error");
 	}
 	return _("Could not reconnect to Audio/MIDI engine");
 }

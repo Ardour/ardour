@@ -90,8 +90,10 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
 		NoError = 0,
 		BackendInitializationError = -64,
 		BackendDeinitializationError,
+		BackendReinitializationError,
 		AudioDeviceOpenError,
 		AudioDeviceCloseError,
+		AudioDeviceInvalidError,
 		AudioDeviceNotAvailableError,
 		AudioDeviceNotConnectedError,
 		AudioDeviceReservationError,
@@ -113,7 +115,12 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
 		OutputChannelCountNotSupportedError,
 		AquireRealtimePermissionError,
 		SettingAudioThreadPriorityError,
-		SettingMIDIThreadPriorityError
+		SettingMIDIThreadPriorityError,
+		ProcessThreadStartError,
+		FreewheelThreadStartError,
+		PortRegistrationError,
+		PortReconnectError,
+		OutOfMemoryError,
 	};
 
 	static std::string get_error_string (ErrorCode);
