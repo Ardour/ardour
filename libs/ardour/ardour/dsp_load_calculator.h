@@ -68,16 +68,12 @@ public:
 			return;
 		}
 
-		if (elapsed_time_us() > m_max_time_us) {
-			m_dsp_load = 1.0f;
+		const float load = elapsed_time_us() / (float)m_max_time_us;
+		if (load > m_dsp_load || load > 1.0) {
+			m_dsp_load = load;
 		} else {
-			const float load = elapsed_time_us() / (float)m_max_time_us;
-			if (load > m_dsp_load) {
-				m_dsp_load = load;
-			} else {
-				const float alpha = 0.2f * (m_max_time_us * 1e-6f);
-				m_dsp_load = m_dsp_load + alpha * (load - m_dsp_load) + 1e-12;
-			}
+			const float alpha = 0.2f * (m_max_time_us * 1e-6f);
+			m_dsp_load = m_dsp_load + alpha * (load - m_dsp_load) + 1e-12;
 		}
 	}
 
