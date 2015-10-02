@@ -87,7 +87,8 @@ bool
 ImportProgressWindow::update ()
 {
 	_cancel_button.set_sensitive (!_import_status->freeze);
-	_label.set_markup ("<i>" + _import_status->doing_what + "</i>");
+	std::string op = Glib::Markup::escape_text(_import_status->doing_what);
+	_label.set_markup ("<i>" + op + "</i>");
 
 	/* use overall progress for the bar, rather than that for individual files */
 	_bar.set_fraction ((_import_status->current - 1 + _import_status->progress) / _import_status->total);
