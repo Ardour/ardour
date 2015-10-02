@@ -247,6 +247,7 @@ if %REPLACE_GCC5%; then
 		if test "n" = $ANSWER; then
 			exit 1
 		fi
+	fi
 else
 	# Ardour was compiled with gcc4, warn on gcc5 systems
 	if ! ${NORM_USER} "${INSTALL_DEST_BASE}/${PGM_FULL_NAME}/bin/gcc-glibmm-abi-check --gcc4 > /dev/null"; then
