@@ -977,7 +977,7 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 	        // no such button right now
 		// update_global_button (Button::PunchOut, session->config.get_punch_out());
 	} else if (p == "clicking") {
-		// update_global_button (Button::RelayClick, Config->get_clicking());
+		update_global_button (Button::Click, Config->get_clicking());
 	} else {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("parameter changed: %1\n", p));
 	}
