@@ -390,14 +390,14 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		row[_columns.property_toggles_visible] = false;
 
 		if (missing_source) {
-			row[_columns.path] = _("(MISSING) ") + region->source()->name();
+			row[_columns.path] = _("(MISSING) ") + Glib::Markup::escape_text (region->source()->name());
 
 		} else {
 			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(region->source());
 			if (fs) {
-				row[_columns.path] = fs->path();
+				row[_columns.path] = Glib::Markup::escape_text (fs->path());
 			} else {
-				row[_columns.path] = region->source()->name();
+				row[_columns.path] = Glib::Markup::escape_text (region->source()->name());
 			}
 		}
 
@@ -949,9 +949,9 @@ void
 EditorRegions::populate_row_name (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
 	if (region->n_channels() > 1) {
-		row[_columns.name] = string_compose("%1  [%2]", region->name(), region->n_channels());
+		row[_columns.name] = string_compose("%1  [%2]", Glib::Markup::escape_text (region->name()), region->n_channels());
 	} else {
-		row[_columns.name] = region->name();
+		row[_columns.name] = Glib::Markup::escape_text (region->name());
 	}
 }
 
@@ -959,9 +959,9 @@ void
 EditorRegions::populate_row_source (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
         if (boost::dynamic_pointer_cast<SilentFileSource>(region->source())) {
-		row[_columns.path] = _("MISSING ") + region->source()->name();
+		row[_columns.path] = _("MISSING ") + Glib::Markup::escape_text (region->source()->name());
 	} else {
-		row[_columns.path] = region->source()->name();
+		row[_columns.path] = Glib::Markup::escape_text (region->source()->name());
 	}
 }
 
