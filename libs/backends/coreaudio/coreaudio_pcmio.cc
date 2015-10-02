@@ -794,7 +794,7 @@ CoreAudioPCM::pcm_start (
 
 	assert(_device_ids);
 	std::string errorMsg;
-	_state = -2;
+	_state = -99;
 
 	// "None" = UINT32_MAX
 	if (device_id_out >= _n_devices && device_id_in >= _n_devices) {
@@ -825,36 +825,36 @@ CoreAudioPCM::pcm_start (
 #ifndef COREAUDIO_108
 	ComponentDescription cd = {kAudioUnitType_Output, kAudioUnitSubType_HALOutput, kAudioUnitManufacturer_Apple, 0, 0};
 	Component HALOutput = FindNextComponent(NULL, &cd);
-	if (!HALOutput) { errorMsg="FindNextComponent"; goto error; }
+	if (!HALOutput) { errorMsg="FindNextComponent"; _state = -2; goto error; }
 
 	err = OpenAComponent(HALOutput, &_auhal);
-	if (err != noErr) { errorMsg="OpenAComponent"; goto error; }
+	if (err != noErr) { errorMsg="OpenAComponent"; _state = -2; goto error; }
 #else
 	AudioComponentDescription cd = {kAudioUnitType_Output, kAudioUnitSubType_HALOutput, kAudioUnitManufacturer_Apple, 0, 0};
 	AudioComponent HALOutput = AudioComponentFindNext(NULL, &cd);
-	if (!HALOutput) { errorMsg="AudioComponentFindNext"; goto error; }
+	if (!HALOutput) { errorMsg="AudioComponentFindNext"; _state = -2; goto error; }
 
 	err = AudioComponentInstanceNew(HALOutput, &_auhal);
-	if (err != noErr) { errorMsg="AudioComponentInstanceNew"; goto error; }
+	if (err != noErr) { errorMsg="AudioComponentInstanceNew"; _state = -2; goto error; }
 #endif
 
 	err = AudioUnitInitialize(_auhal);
-	if (err != noErr) { errorMsg="AudioUnitInitialize"; goto error; }
+	if (err != noErr) { errorMsg="AudioUnitInitialize"; _state = -3; goto error; }
 
 	// explicitly change samplerate of the devices, TODO allow separate rates with aggregates
 	if (set_device_sample_rate(device_id_in, sample_rate, true)) {
-		errorMsg="Failed to set SampleRate, Capture Device"; goto error;
+		errorMsg="Failed to set SampleRate, Capture Device"; _state = -4; goto error;
 	}
 	if (set_device_sample_rate(device_id_out, sample_rate, false)) {
-		errorMsg="Failed to set SampleRate, Playback Device"; goto error;
+		errorMsg="Failed to set SampleRate, Playback Device"; _state = -4; goto error;
 	}
 
 	// explicitly request device buffer size
 	if (device_id_in < _n_devices && set_device_buffer_size_id(_device_ids[device_id_in], samples_per_period)) {
-		errorMsg="kAudioDevicePropertyBufferFrameSize, Input"; goto error;
+		errorMsg="kAudioDevicePropertyBufferFrameSize, Input"; _state = -5; goto error;
 	}
 	if (device_id_out < _n_devices && set_device_buffer_size_id(_device_ids[device_id_out], samples_per_period)) {
-		errorMsg="kAudioDevicePropertyBufferFrameSize, Output"; goto error;
+		errorMsg="kAudioDevicePropertyBufferFrameSize, Output"; _state = -5; goto error;
 	}
 
 	// create aggregate device..
@@ -864,7 +864,7 @@ CoreAudioPCM::pcm_start (
 		} else {
 			_aggregate_device_id = 0;
 			_aggregate_plugin_id = 0;
-			errorMsg="Cannot create Aggregate Device"; goto error;
+			errorMsg="Cannot create Aggregate Device"; _state = -12; goto error;
 		}
 	} else if (device_id_out < _n_devices) {
 		device_id = _device_ids[device_id_out];
@@ -880,14 +880,14 @@ CoreAudioPCM::pcm_start (
 	// enableIO to progress further
 	uint32val = (chn_in > 0) ? 1 : 0;
 	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, AUHAL_INPUT_ELEMENT, &uint32val, sizeof(UInt32));
-	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_EnableIO, Input"; goto error; }
+	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_EnableIO, Input"; _state = -7; goto error; }
 
 	uint32val = (chn_out > 0) ? 1 : 0;
 	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, AUHAL_OUTPUT_ELEMENT, &uint32val, sizeof(UInt32));
-	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_EnableIO, Output"; goto error; }
+	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_EnableIO, Output"; _state = -7; goto error; }
 
 	err = AudioUnitSetProperty(_auhal, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, 0, &device_id, sizeof(AudioDeviceID));
-	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_CurrentDevice, Input"; goto error; }
+	if (err != noErr) { errorMsg="kAudioOutputUnitProperty_CurrentDevice, Input"; _state = -7; goto error; }
 
 	if (chn_in > 0) {
 		// set sample format
@@ -901,10 +901,10 @@ CoreAudioPCM::pcm_start (
 		srcFormat.mBitsPerChannel = 32;
 
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, sizeof(AudioStreamBasicDescription));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat, Output"; goto error; }
+		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat, Output"; _state = -6; goto error; }
 
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Input"; goto error; }
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Input"; _state = -6; goto error; }
 	}
 
 	if (chn_out > 0) {
@@ -918,17 +918,17 @@ CoreAudioPCM::pcm_start (
 		dstFormat.mBitsPerChannel = 32;
 
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, sizeof(AudioStreamBasicDescription));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat Input"; goto error; }
+		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat Input"; _state = -5; goto error; }
 
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Output"; goto error; }
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Output"; _state = -5; goto error; }
 	}
 
 	/* read back stream descriptions */
 	if (chn_in > 0) {
 		size = sizeof(AudioStreamBasicDescription);
 		err = AudioUnitGetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, &size);
-		if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Output"; goto error; }
+		if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Output"; _state = -5; goto error; }
 		_capture_channels = srcFormat.mChannelsPerFrame;
 #ifndef NDEBUG
 		PrintStreamDesc(&srcFormat);
@@ -938,7 +938,7 @@ CoreAudioPCM::pcm_start (
 	if (chn_out > 0) {
 		size = sizeof(AudioStreamBasicDescription);
 		err = AudioUnitGetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, &size);
-		if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Input"; goto error; }
+		if (err != noErr) { errorMsg="Get kAudioUnitProperty_StreamFormat, Input"; _state = -5; goto error; }
 		_playback_channels = dstFormat.mChannelsPerFrame;
 
 #ifndef NDEBUG
@@ -950,20 +950,20 @@ CoreAudioPCM::pcm_start (
 	if (_capture_channels > 0) {
 		_input_audio_buffer_list = (AudioBufferList*)malloc(sizeof(AudioBufferList) + (_capture_channels - 1) * sizeof(AudioBuffer));
 		assert(_input_audio_buffer_list);
-		if (!_input_audio_buffer_list) { errorMsg="Out of Memory."; goto error; }
+		if (!_input_audio_buffer_list) { errorMsg="Out of Memory."; _state = -8; goto error; }
 	}
 
 	_active_device_id = device_id;
 
 	// add Listeners
 	err = add_listener (_active_device_id, kAudioDeviceProcessorOverload, this);
-	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Listen"; goto error; }
+	if (err != noErr) { errorMsg="kAudioDeviceProcessorOverload, Listen"; _state = -9; goto error; }
 
 	err = add_listener (_active_device_id, kAudioDevicePropertyBufferFrameSize, this);
-	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Listen"; goto error; }
+	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Listen"; _state = -9; goto error; }
 
 	err = add_listener (_active_device_id, kAudioDevicePropertyNominalSampleRate, this);
-	if (err != noErr) { errorMsg="kAudioDevicePropertyBufferFrameSize, Listen"; goto error; }
+	if (err != noErr) { errorMsg="kAudioDevicePropertyNominalSampleRate, Listen"; _state = -9; goto error; }
 
 	_samples_per_period = current_buffer_size_id(_active_device_id);
 
@@ -984,7 +984,7 @@ CoreAudioPCM::pcm_start (
 				&renderCallback, sizeof (renderCallback));
 	}
 
-	if (err != noErr) { errorMsg="kAudioUnitProperty_SetRenderCallback"; goto error; }
+	if (err != noErr) { errorMsg="kAudioUnitProperty_SetRenderCallback"; _state = -10; goto error; }
 
 	/* setup complete, now get going.. */
 	if (AudioOutputUnitStart(_auhal) == noErr) {
@@ -997,17 +997,17 @@ CoreAudioPCM::pcm_start (
 
 		// kick device
 		if (set_device_buffer_size_id(_active_device_id, samples_per_period)) {
-			errorMsg="kAudioDevicePropertyBufferFrameSize"; goto error;
+			errorMsg="kAudioDevicePropertyBufferFrameSize"; _state = -11; goto error;
 		}
 
 		return 0;
 	}
 
 error:
+	assert (_state != 0);
 	char *rv = (char*)&err;
 	fprintf(stderr, "CoreaudioPCM Error: %c%c%c%c %s\n", rv[0], rv[1], rv[2], rv[3], errorMsg.c_str());
 	pcm_stop();
-	_state = -3;
 	_active_device_id = 0;
 	pthread_mutex_unlock (&_discovery_lock);
 	return -1;

@@ -507,6 +507,8 @@ static int process_callback_ptr (void *arg, const uint32_t n_samples, const uint
 int
 CoreAudioBackend::_start (bool for_latency_measurement)
 {
+	AudioBackend::ErrorCode error_code = NoError;
+
 	if ((!_active_ca || !_active_fw)  && _run) {
 		// recover from 'halted', reap threads
 		stop();
@@ -541,15 +543,67 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	_pcmio->set_sample_rate_callback (sample_rate_callback_ptr, this);
 
 	_pcmio->pcm_start (device1, device2, _samplerate, _samples_per_period, process_callback_ptr, this);
+#ifndef NDEBUG
 	printf("STATE: %d\n", _pcmio->state ());
-
+#endif
 	switch (_pcmio->state ()) {
-		case 0: /* OK */ break;
-		case -1: PBD::error << _("CoreAudioBackend: failed to open device.") << endmsg; break;
-		default: PBD::error << _("CoreAudioBackend: initialization failed.") << endmsg; break;
+		case 0: /* OK */
+			break;
+		case -1:
+			PBD::error << _("CoreAudioBackend: Invalid Device ID.") << endmsg;
+			error_code = BackendInitializationError; // XXX
+			break;
+		case -2:
+			PBD::error << _("CoreAudioBackend: Failed to resolve Device-Component by ID.") << endmsg;
+			error_code = BackendInitializationError; // XXX
+			break;
+		case -3:
+			PBD::error << _("CoreAudioBackend: failed to open device.") << endmsg;
+			error_code = AudioDeviceOpenError;
+			break;
+		case -4:
+			PBD::error << _("CoreAudioBackend: cannot set requested sample rate.") << endmsg;
+			error_code = SampleRateNotSupportedError;
+			break;
+		case -5:
+			PBD::error << _("CoreAudioBackend: cannot configure requested buffer size.") << endmsg;
+			error_code = PeriodSizeNotSupportedError;
+			break;
+		case -6:
+			PBD::error << _("CoreAudioBackend: unsupported sample format.") << endmsg;
+			error_code = SampleFormatNotSupportedError;
+			break;
+		case -7:
+			PBD::error << _("CoreAudioBackend: Failed to enable Device.") << endmsg;
+			error_code = BackendInitializationError; // XXX
+			break;
+		case -8:
+			PBD::error << _("CoreAudioBackend: Cannot allocate buffers, out-of-memory.") << endmsg;
+			error_code = BackendInitializationError; // XXX
+			break;
+		case -9:
+			PBD::error << _("CoreAudioBackend: Failed to set device-property listeners.") << endmsg;
+			error_code = BackendInitializationError; // XXX
+			break;
+		case -10:
+			PBD::error << _("CoreAudioBackend: Setting Process Callback failed.") << endmsg;
+			error_code = BackendInitializationError; // XXX
+			break;
+		case -11:
+			PBD::error << _("CoreAudioBackend: cannot use requested period size.") << endmsg;
+			error_code = PeriodSizeNotSupportedError;
+			break;
+		case -12:
+			PBD::error << _("CoreAudioBackend: cannot create aggregate device.") << endmsg;
+			error_code = DeviceConfigurationNotSupportedError;
+			break;
+		default:
+			PBD::error << _("CoreAudioBackend: initialization failure.") << endmsg;
+			error_code = BackendInitializationError;
+			break;
 	}
 	if (_pcmio->state ()) {
-		return -1;
+		return error_code;
 	}
 
 	if (_n_outputs != _pcmio->n_playback_channels ()) {
