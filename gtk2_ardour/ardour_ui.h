@@ -480,6 +480,7 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 	void blink_handler (bool);
 	sigc::connection blink_connection;
 
+	void cancel_solo ();
 	void solo_blink (bool);
 	void sync_blink (bool);
 	void audition_blink (bool);

@@ -4957,3 +4957,15 @@ ARDOUR_UI::hide_application ()
 {
     Application::instance ()-> hide ();
 }
+
+void
+ARDOUR_UI::cancel_solo ()
+{
+	if (_session) {
+		if (_session->soloing()) {
+			_session->set_solo (_session->get_routes(), false);
+		} else if (_session->listening()) {
+			_session->set_listen (_session->get_routes(), false);
+		}
+	}
+}

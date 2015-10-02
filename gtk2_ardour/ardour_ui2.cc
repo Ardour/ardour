@@ -324,7 +324,8 @@ ARDOUR_UI::setup_transport ()
 	/* CANNOT sigc::bind these to clicked or toggled, must use pressed or released */
 
 	solo_alert_button.set_name ("rude solo");
-	solo_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::solo_alert_press), false);
+	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
+	solo_alert_button.set_related_action (act);
 	auditioning_alert_button.set_name ("rude audition");
 	auditioning_alert_button.signal_button_press_event().connect (sigc::mem_fun(*this,&ARDOUR_UI::audition_alert_press), false);
 	feedback_alert_button.set_name ("feedback alert");
@@ -523,19 +524,6 @@ ARDOUR_UI::audition_alert_press (GdkEventButton*)
 {
 	if (_session) {
 		_session->cancel_audition();
-	}
-	return true;
-}
-
-bool
-ARDOUR_UI::solo_alert_press (GdkEventButton*)
-{
-	if (_session) {
-		if (_session->soloing()) {
-			_session->set_solo (_session->get_routes(), false);
-		} else if (_session->listening()) {
-			_session->set_listen (_session->get_routes(), false);
-		}
 	}
 	return true;
 }

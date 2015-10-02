@@ -115,7 +115,8 @@ MonitorSection::MonitorSection (Session* s)
 
         Timers::blink_connect (sigc::mem_fun (*this, &MonitorSection::do_blink));
 
-	rude_solo_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_solo), false);
+	act = ActionManager::get_action (X_("Main"), X_("cancel-solo"));
+	rude_solo_button.set_related_action (act);
 	UI::instance()->set_tip (rude_solo_button, _("When active, something is soloed.\nClick to de-solo everything"));
 
 	rude_iso_button.signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::cancel_isolate), false);
@@ -1077,20 +1078,6 @@ MonitorSection::solo_blink (bool onoff)
 		rude_solo_button.set_active (false);
 		rude_iso_button.set_active (false);
 	}
-}
-
-bool
-MonitorSection::cancel_solo (GdkEventButton*)
-{
-	if (_session) {
-		if (_session->soloing()) {
-			_session->set_solo (_session->get_routes(), false);
-		} else if (_session->listening()) {
-			_session->set_listen (_session->get_routes(), false);
-		}
-	}
-
-	return true;
 }
 
 bool
