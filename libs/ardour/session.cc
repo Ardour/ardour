@@ -551,6 +551,12 @@ Session::destroy ()
 
 	drop_connections ();
 
+	/* shutdown control surface protocols while we still have ports
+	   and the engine to move data to any devices.
+	*/
+	
+	ControlProtocolManager::instance().drop_protocols ();
+	
 	_engine.remove_session ();
 
 #ifdef USE_TRACKS_CODE_FEATURES

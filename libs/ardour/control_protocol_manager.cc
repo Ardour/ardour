@@ -126,26 +126,35 @@ void
 ControlProtocolManager::session_going_away()
 {
 	SessionHandlePtr::session_going_away ();
+	/* Session::destroy() will explicitly call drop_protocols() so we don't
+	 * have to worry about that here.
+	 */
+}
 
-	{
-		Glib::Threads::Mutex::Lock lm (protocols_lock);
-
-		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
-			delete *p;
-		}
-
-		control_protocols.clear ();
-
-		for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
-			// mark existing protocols as requested
-			// otherwise the ControlProtocol instances are not recreated in set_session
-			if ((*p)->protocol) {
-				(*p)->requested = true;
-				(*p)->protocol = 0;
-			}
+void
+ControlProtocolManager::drop_protocols ()
+{
+	/* called explicitly by Session::destroy() so that we can clean up
+	 * before the process cycle stops and ports vanish.
+	 */
+	
+	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	
+	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
+		delete *p;
+	}
+	
+	control_protocols.clear ();
+	
+	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
+		// mark existing protocols as requested
+		// otherwise the ControlProtocol instances are not recreated in set_session
+		if ((*p)->protocol) {
+			(*p)->requested = true;
+			(*p)->protocol = 0;
 		}
 	}
-}
+}	
 
 ControlProtocol*
 ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
