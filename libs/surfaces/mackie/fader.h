@@ -14,6 +14,7 @@ class Fader : public Control
 	Fader (int id, std::string name, Group & group)
 		: Control (id, name, group)
 		, position (0.0)
+		, last_update_position (-1)
 	{
 	}
 
@@ -26,6 +27,7 @@ class Fader : public Control
 	
   private:
 	float position;
+	int   last_update_position;
 };
 
 }

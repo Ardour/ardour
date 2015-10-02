@@ -60,6 +60,13 @@ Fader::update_message ()
 	}
 
 	int posi = lrintf (16384.0 * position);
+
+	if (posi == last_update_position) {
+		return MidiByteArray();
+	}
+
+	last_update_position = posi;
+	
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("generate fader message for position %1 (%2)\n", position, posi));
 	return MidiByteArray  (3, 0xe0 + id(), posi & 0x7f, posi >> 7);
 }
