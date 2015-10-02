@@ -62,6 +62,16 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+#ifdef ENABLE_PANNING_DELAY
+static PanPluginDescriptor _descriptor = {
+	"Stereo Balance with Delay",
+	"http://ardour.org/plugin/panner_balance_delay",
+	"http://ardour.org/plugin/panner_balance#ui",
+	2, 2,
+	200,
+	Pannerbalance::factory
+};
+#else /* !defined(ENABLE_PANNING_DELAY) */
 static PanPluginDescriptor _descriptor = {
 	"Stereo Balance",
 	"http://ardour.org/plugin/panner_balance",
@@ -70,12 +80,18 @@ static PanPluginDescriptor _descriptor = {
 	2000,
 	Pannerbalance::factory
 };
+#endif /* !defined(ENABLE_PANNING_DELAY) */
 
 extern "C" ARDOURPANNER_API PanPluginDescriptor* panner_descriptor () { return &_descriptor; } 
 
 Pannerbalance::Pannerbalance (boost::shared_ptr<Pannable> p)
 	: Panner (p)
+	, dist_buf_0 (p->session())
+	, dist_buf_1 (p->session())
 {
+	dist_buf[0] = &dist_buf_0;
+	dist_buf[1] = &dist_buf_1;
+
 	if (!_pannable->has_state()) {
 		_pannable->pan_azimuth_control->set_value (0.5);
 	}
@@ -83,9 +99,9 @@ Pannerbalance::Pannerbalance (boost::shared_ptr<Pannable> p)
 	update ();
 
 	/* LEFT SIGNAL */
-	pos_interp[0] = pos[0] = desired_pos[0];
+	gain[0] = desired_gain[0];
 	/* RIGHT SIGNAL */
-	pos_interp[1] = pos[1] = desired_pos[1];
+	gain[1] = desired_gain[1];
 
 	_pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Pannerbalance::update, this));
 }
@@ -100,7 +116,7 @@ Pannerbalance::position () const
 	return _pannable->pan_azimuth_control->get_value();
 }
 
-	void
+void
 Pannerbalance::set_position (double p)
 {
 	if (clamp_position (p)) {
@@ -108,7 +124,7 @@ Pannerbalance::set_position (double p)
 	}
 }
 
-	void
+void
 Pannerbalance::thaw ()
 {
 	Panner::thaw ();
@@ -124,17 +140,17 @@ Pannerbalance::update ()
 		return;
 	}
 
-	float const pos = _pannable->pan_azimuth_control->get_value();
+	double const pos = position();
 
 	if (pos == .5) {
-		desired_pos[0] = 1.0;
-		desired_pos[1] = 1.0;
+		desired_gain[0] = 1.0;
+		desired_gain[1] = 1.0;
 	} else if (pos > .5) {
-		desired_pos[0] = 2 - 2. * pos;
-		desired_pos[1] = 1.0;
+		desired_gain[0] = 2 - 2. * pos;
+		desired_gain[1] = 1.0;
 	} else {
-		desired_pos[0] = 1.0;
-		desired_pos[1] = 2. * pos;
+		desired_gain[0] = 1.0;
+		desired_gain[1] = 2. * pos;
 	}
 }
 
@@ -156,61 +172,25 @@ Pannerbalance::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 {
 	assert (obufs.count().n_audio() == 2);
 
-	pan_t delta;
 	Sample* dst;
-	pan_t pan;
+
+	double pos = position();
+	if (which == 0) {
+		pos = 1.0 - pos;
+	}
 
 	Sample* const src = srcbuf.data();
 
 	dst = obufs.get_audio(which).data();
 
-	if (fabsf ((delta = (pos[which] - desired_pos[which]))) > 0.002) { // about 1 degree of arc
+	dist_buf[which]->update_session_config();
+	dist_buf[which]->set_pan_position(pos);
 
-		/* we've moving the pan by an appreciable amount, so we must
-			 interpolate over 64 frames or nframes, whichever is smaller */
+	dist_buf[which]->mix_buffers(dst, src, nframes, gain[which] * gain_coeff, desired_gain[which] * gain_coeff);
 
-		pframes_t const limit = min ((pframes_t) 64, nframes);
-		pframes_t n;
+	gain[which] = desired_gain[which];
 
-		delta = -(delta / (float) (limit));
-
-		for (n = 0; n < limit; n++) {
-			pos_interp[which] = pos_interp[which] + delta;
-			pos[which] = pos_interp[which] + 0.9 * (pos[which] - pos_interp[which]);
-			dst[n] += src[n] * pos[which] * gain_coeff;
-		}
-
-		/* then pan the rest of the buffer; no need for interpolation for this bit */
-
-		pan = pos[which] * gain_coeff;
-
-		mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
-
-	} else {
-
-		pos[which] = desired_pos[which];
-		pos_interp[which] = pos[which];
-
-		if ((pan = (pos[which] * gain_coeff)) != 1.0f) {
-
-			if (pan != 0.0f) {
-
-				/* pan is 1 but also not 0, so we must do it "properly" */
-
-				//obufs.get_audio(1).read_from (srcbuf, nframes);
-				mix_buffers_with_gain(dst,src,nframes,pan);
-
-				/* mark that we wrote into the buffer */
-
-				// obufs[0] = 0;
-
-			}
-
-		} else {
-			/* pan is 1 so we can just copy the input samples straight in */
-			mix_buffers_no_gain(dst,src,nframes);
-		}
-	}
+	/* XXX it would be nice to mark the buffer as written to, depending on gain (see pan_distribution_buffer.cc) */
 }
 
 void
@@ -221,7 +201,6 @@ Pannerbalance::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 	assert (obufs.count().n_audio() == 2);
 
 	Sample* dst;
-	pan_t* pbuf;
 	Sample* const src = srcbuf.data();
 	pan_t* const position = buffers[0];
 
@@ -233,30 +212,25 @@ Pannerbalance::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 		return;
 	}
 
-	for (pframes_t n = 0; n < nframes; ++n) {
-
-		float const pos = position[n];
-
-		if (which == 0) { // Left
-			if (pos > .5) {
-				buffers[which][n] = 2 - 2. * pos;
-			} else {
-				buffers[which][n] = 1.0;
-			}
-		} else { // Right
-			if (pos < .5) {
-				buffers[which][n] = 2. * pos;
-			} else {
-				buffers[which][n] = 1.0;
-			}
-		}
-	}
-
 	dst = obufs.get_audio(which).data();
-	pbuf = buffers[which];
+
+	dist_buf[which]->update_session_config();
 
 	for (pframes_t n = 0; n < nframes; ++n) {
-		dst[n] += src[n] * pbuf[n];
+		float pos = position[n];
+		if (which == 0) {
+			pos = 1.0f - pos;
+		}
+
+		float gain;
+		if (pos < .5f) {
+			gain = 2.0f * pos;
+		} else {
+			gain = 1.0f;
+		}
+
+		dist_buf[which]->set_pan_position(pos);
+		dst[n] += dist_buf[which]->process(src[n] * gain);
 	}
 
 	/* XXX it would be nice to mark the buffer as written to */
@@ -268,7 +242,7 @@ Pannerbalance::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speaker
 	return new Pannerbalance (p);
 }
 
-	XMLNode&
+XMLNode&
 Pannerbalance::get_state ()
 {
 	XMLNode& root (Panner::get_state ());

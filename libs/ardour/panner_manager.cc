@@ -136,7 +136,7 @@ PannerManager::get_descriptor (string path)
 	PanPluginDescriptor* (*dfunc)(void);
 	void* func = 0;
 
-	if (!module) {
+	if (!(*module)) {
 		error << string_compose(_("PannerManager: cannot load module \"%1\" (%2)"), path,
 				Glib::Module::get_last_error()) << endmsg;
 		delete module;

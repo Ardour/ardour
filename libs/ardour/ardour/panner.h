@@ -183,6 +183,8 @@ protected:
 	                                       pan_t** buffers, uint32_t which) = 0;
 
         int32_t _frozen;
+
+        static const float _pan_law_scale = 2.0f - 4.0f * M_SQRT1_2; /* -3 dB */
 };
 
 } // namespace

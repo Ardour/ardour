@@ -274,7 +274,9 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    sigc::mem_fun (*this, &SessionOptionEditor::get_use_monitor_section),
 			    sigc::mem_fun (*this, &SessionOptionEditor::set_use_monitor_section)
 			    ));
+
 	/* Meterbridge */
+
 	add_option (_("Meterbridge"), new OptionEditorHeading (_("Route Display")));
 
 	add_option (_("Meterbridge"), new BoolOption (
@@ -335,6 +337,19 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 			    _("Track Name"),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_name_on_meterbridge),
 			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_name_on_meterbridge)
+			    ));
+
+	/* Panning */
+
+	add_option (_("Panning"), new OptionEditorHeading (_("Delay-based Panners")));
+
+	Gtk::Adjustment *panning_delay_adjustment = manage (new Gtk::Adjustment (0, 0, 10, .1, 1));
+	add_option (_("Panning"), new HSliderOption (
+			    "panning-delay",
+			    _("Applied delay in relation to loudness difference [ms/100%]"),
+			    panning_delay_adjustment,
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::get_panning_delay),
+			    sigc::mem_fun (*_session_config, &SessionConfiguration::set_panning_delay)
 			    ));
 
 	/* Misc */

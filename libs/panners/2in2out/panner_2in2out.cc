@@ -46,7 +46,6 @@
 #include "ardour/buffer_set.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/pannable.h"
-#include "ardour/runtime_functions.h"
 #include "ardour/session.h"
 #include "ardour/utils.h"
 #include "ardour/mix.h"
@@ -61,6 +60,16 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+#ifdef ENABLE_PANNING_DELAY
+static PanPluginDescriptor _descriptor = {
+        "Equal Power Stereo with Delay",
+        "http://ardour.org/plugin/panner_2in2out_delay",
+        "http://ardour.org/plugin/panner_2in2out#ui",
+        2, 2, 
+        1000,
+        Panner2in2out::factory
+};
+#else /* !defined(ENABLE_PANNING_DELAY) */
 static PanPluginDescriptor _descriptor = {
         "Equal Power Stereo",
         "http://ardour.org/plugin/panner_2in2out",
@@ -69,12 +78,22 @@ static PanPluginDescriptor _descriptor = {
         10000,
         Panner2in2out::factory
 };
+#endif /* !defined(ENABLE_PANNING_DELAY) */
 
 extern "C" ARDOURPANNER_API PanPluginDescriptor* panner_descriptor () { return &_descriptor; }
 
 Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
 	: Panner (p)
+	, left_dist_buf_0 (p->session())
+	, left_dist_buf_1 (p->session())
+	, right_dist_buf_0 (p->session())
+	, right_dist_buf_1 (p->session())
 {
+	left_dist_buf[0] = &left_dist_buf_0;
+	left_dist_buf[1] = &left_dist_buf_1;
+	right_dist_buf[0] = &right_dist_buf_0;
+	right_dist_buf[1] = &right_dist_buf_1;
+
         if (!_pannable->has_state()) {
                 _pannable->pan_azimuth_control->set_value (0.5);
                 _pannable->pan_width_control->set_value (1.0);
@@ -90,12 +109,12 @@ Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
         update ();
         
         /* LEFT SIGNAL */
-        left_interp[0] = left[0] = desired_left[0];
-        right_interp[0] = right[0] = desired_right[0]; 
+        left[0] = desired_left[0];
+        right[0] = desired_right[0]; 
         
         /* RIGHT SIGNAL */
-        left_interp[1] = left[1] = desired_left[1];
-        right_interp[1] = right[1] = desired_right[1];
+        left[1] = desired_left[1];
+        right[1] = desired_right[1];
         
         _pannable->pan_azimuth_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
         _pannable->pan_width_control->Changed.connect_same_thread (*this, boost::bind (&Panner2in2out::update, this));
@@ -170,35 +189,27 @@ Panner2in2out::update ()
                 width = (width  > 0 ? wrange : -wrange);
         }
 
-        if (width < 0.0) {
-                width = -width;
-                pos[0] = direction_as_lr_fract + (width/2.0); // left signal lr_fract
-                pos[1] = direction_as_lr_fract - (width/2.0); // right signal lr_fract
-        } else {
-                pos[1] = direction_as_lr_fract + (width/2.0); // right signal lr_fract
-                pos[0] = direction_as_lr_fract - (width/2.0); // left signal lr_fract
-        }
+        pos[0] = direction_as_lr_fract - (width*0.5); // left signal lr_fract
+        pos[1] = direction_as_lr_fract + (width*0.5); // right signal lr_fract
         
         /* compute target gain coefficients for both input signals */
         
-        float const pan_law_attenuation = -3.0f;
-        float const scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
         float panR;
         float panL;
         
         /* left signal */
         
         panR = pos[0];
-        panL = 1 - panR;
-        desired_left[0] = panL * (scale * panL + 1.0f - scale);
-        desired_right[0] = panR * (scale * panR + 1.0f - scale);
+        panL = 1.0f - panR;
+        desired_left[0] = panL * (_pan_law_scale * panL + 1.0f - _pan_law_scale);
+        desired_right[0] = panR * (_pan_law_scale * panR + 1.0f - _pan_law_scale);
         
         /* right signal */
         
         panR = pos[1];
-        panL = 1 - panR;
-        desired_left[1] = panL * (scale * panL + 1.0f - scale);
-        desired_right[1] = panR * (scale * panR + 1.0f - scale);
+        panL = 1.0f - panR;
+        desired_left[1] = panL * (_pan_law_scale * panL + 1.0f - _pan_law_scale);
+        desired_right[1] = panR * (_pan_law_scale * panR + 1.0f - _pan_law_scale);
 }
 
 bool
@@ -237,8 +248,8 @@ Panner2in2out::clamp_stereo_pan (double& direction_as_lr_fract, double& width)
         width = max (min (width, 1.0), -1.0);
         direction_as_lr_fract = max (min (direction_as_lr_fract, 1.0), 0.0);
 
-        r_pos = direction_as_lr_fract + (width/2.0);
-        l_pos = direction_as_lr_fract - (width/2.0);
+        r_pos = direction_as_lr_fract + (width*0.5);
+        l_pos = direction_as_lr_fract - (width*0.5);
 
         if (width < 0.0) {
                 swap (r_pos, l_pos);
@@ -269,9 +280,7 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 {
 	assert (obufs.count().n_audio() == 2);
 
-	pan_t delta;
 	Sample* dst;
-	pan_t pan;
 
 	Sample* const src = srcbuf.data();
         
@@ -279,112 +288,27 @@ Panner2in2out::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 
 	dst = obufs.get_audio(0).data();
 
-	if (fabsf ((delta = (left[which] - desired_left[which]))) > 0.002) { // about 1 degree of arc
+	left_dist_buf[which]->update_session_config();
+	left_dist_buf[which]->set_pan_position(1.0 - position());
 
-		/* we've moving the pan by an appreciable amount, so we must
-		   interpolate over 64 frames or nframes, whichever is smaller */
+	left_dist_buf[which]->mix_buffers(dst, src, nframes, left[which] * gain_coeff, desired_left[which] * gain_coeff);
 
-		pframes_t const limit = min ((pframes_t) 64, nframes);
-		pframes_t n;
+	left[which] = desired_left[which];
 
-		delta = -(delta / (float) (limit));
-
-		for (n = 0; n < limit; n++) {
-			left_interp[which] = left_interp[which] + delta;
-			left[which] = left_interp[which] + 0.9 * (left[which] - left_interp[which]);
-			dst[n] += src[n] * left[which] * gain_coeff;
-		}
-
-		/* then pan the rest of the buffer; no need for interpolation for this bit */
-
-		pan = left[which] * gain_coeff;
-
-		mix_buffers_with_gain (dst+n,src+n,nframes-n,pan);
-
-	} else {
-
-		left[which] = desired_left[which];
-		left_interp[which] = left[which];
-
-		if ((pan = (left[which] * gain_coeff)) != 1.0f) {
-
-			if (pan != 0.0f) {
-
-				/* pan is 1 but also not 0, so we must do it "properly" */
-				
-				//obufs.get_audio(1).read_from (srcbuf, nframes);
-				mix_buffers_with_gain(dst,src,nframes,pan);
-
-				/* mark that we wrote into the buffer */
-
-				// obufs[0] = 0;
-
-			}
-
-		} else {
-
-			/* pan is 1 so we can just copy the input samples straight in */
-
-			mix_buffers_no_gain(dst,src,nframes);
-                        
-			/* XXX it would be nice to mark that we wrote into the buffer */
-		}
-	}
+	/* XXX it would be nice to mark the buffer as written to, depending on gain (see pan_distribution_buffer.cc) */
 
 	/* RIGHT OUTPUT */
 
 	dst = obufs.get_audio(1).data();
 
-	if (fabsf ((delta = (right[which] - desired_right[which]))) > 0.002) { // about 1 degree of arc
+	right_dist_buf[which]->update_session_config();
+	right_dist_buf[which]->set_pan_position(position());
 
-		/* we're moving the pan by an appreciable amount, so we must
-		   interpolate over 64 frames or nframes, whichever is smaller */
+	right_dist_buf[which]->mix_buffers(dst, src, nframes, right[which] * gain_coeff, desired_right[which] * gain_coeff);
 
-		pframes_t const limit = min ((pframes_t) 64, nframes);
-		pframes_t n;
+	right[which] = desired_right[which];
 
-		delta = -(delta / (float) (limit));
-
-		for (n = 0; n < limit; n++) {
-			right_interp[which] = right_interp[which] + delta;
-			right[which] = right_interp[which] + 0.9 * (right[which] - right_interp[which]);
-			dst[n] += src[n] * right[which] * gain_coeff;
-		}
-
-		/* then pan the rest of the buffer, no need for interpolation for this bit */
-
-		pan = right[which] * gain_coeff;
-
-		mix_buffers_with_gain(dst+n,src+n,nframes-n,pan);
-
-		/* XXX it would be nice to mark the buffer as written to */
-
-	} else {
-
-		right[which] = desired_right[which];
-		right_interp[which] = right[which];
-
-		if ((pan = (right[which] * gain_coeff)) != 1.0f) {
-
-			if (pan != 0.0f) {
-
-				/* pan is not 1 but also not 0, so we must do it "properly" */
-				
-				mix_buffers_with_gain(dst,src,nframes,pan);
-				// obufs.get_audio(1).read_from (srcbuf, nframes);
-				
-				/* XXX it would be nice to mark the buffer as written to */
-			}
-
-		} else {
-
-			/* pan is 1 so we can just copy the input samples straight in */
-			
-			mix_buffers_no_gain(dst,src,nframes);
-
-			/* XXX it would be nice to mark the buffer as written to */
-		}
-	}
+	/* XXX it would be nice to mark the buffer as written to, depending on gain (see pan_distribution_buffer.cc) */
 }
 
 void
@@ -395,7 +319,6 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 	assert (obufs.count().n_audio() == 2);
 
 	Sample* dst;
-	pan_t* pbuf;
 	Sample* const src = srcbuf.data();
         pan_t* const position = buffers[0];
         pan_t* const width = buffers[1];
@@ -414,47 +337,29 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 		return;
 	}
 
-	/* apply pan law to convert positional data into pan coefficients for
-	   each buffer (output)
-	*/
+	/* LEFT OUTPUT */
 
-	const float pan_law_attenuation = -3.0f;
-	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
+	dst = obufs.get_audio(0).data();
+
+	left_dist_buf[which]->update_session_config();
 
 	for (pframes_t n = 0; n < nframes; ++n) {
-
                 float panR;
 
                 if (which == 0) { 
                         // panning left signal
-                        panR = position[n] - (width[n]/2.0f); // center - width/2
+                        panR = position[n] - (width[n]*0.5f); // center - width/2
                 } else {
                         // panning right signal
-                        panR = position[n] + (width[n]/2.0f); // center - width/2
+                        panR = position[n] + (width[n]*0.5f); // center + width/2
                 }
 
                 panR = max(0.f, min(1.f, panR));
 
                 const float panL = 1 - panR;
 
-                /* note that are overwriting buffers, but its OK
-                   because we're finished with their old contents
-                   (position/width automation data) and are
-                   replacing it with panning/gain coefficients 
-                   that we need to actually process the data.
-                */
-                
-                buffers[0][n] = panL * (scale * panL + 1.0f - scale);
-                buffers[1][n] = panR * (scale * panR + 1.0f - scale);
-        }
-
-	/* LEFT OUTPUT */
-
-	dst = obufs.get_audio(0).data();
-	pbuf = buffers[0];
-
-	for (pframes_t n = 0; n < nframes; ++n) {
-		dst[n] += src[n] * pbuf[n];
+		left_dist_buf[which]->set_pan_position(1.0f - position[n]);
+		dst[n] += left_dist_buf[which]->process(src[n] * panL * (_pan_law_scale * panL + 1.0f - _pan_law_scale));
 	}
 
 	/* XXX it would be nice to mark the buffer as written to */
@@ -462,10 +367,24 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 	/* RIGHT OUTPUT */
 
 	dst = obufs.get_audio(1).data();
-	pbuf = buffers[1];
+
+	right_dist_buf[which]->update_session_config();
 
 	for (pframes_t n = 0; n < nframes; ++n) {
-		dst[n] += src[n] * pbuf[n];
+                float panR;
+
+                if (which == 0) { 
+                        // panning left signal
+                        panR = position[n] - (width[n]*0.5f); // center - width/2
+                } else {
+                        // panning right signal
+                        panR = position[n] + (width[n]*0.5f); // center + width/2
+                }
+
+		panR = max(0.f, min(1.f, panR));
+
+		right_dist_buf[which]->set_pan_position(position[n]);
+		dst[n] += right_dist_buf[which]->process(src[n] * panR * (_pan_law_scale * panR + 1.0f - _pan_law_scale));
 	}
 
 	/* XXX it would be nice to mark the buffer as written to */
