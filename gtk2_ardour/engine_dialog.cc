@@ -413,41 +413,40 @@ EngineControl::on_response (int response_id)
 	ArdourDialog::on_response (response_id);
 
 	switch (response_id) {
-		case RESPONSE_OK:
-			if (push_state_to_backend (true) != 0) {
-				return;
-			} else {
-				hide ();
-			}
+	case RESPONSE_OK:
+		if (push_state_to_backend(true) != 0) {
+			return;
+		} else {
+			hide();
+		}
 #ifdef PLATFORM_WINDOWS
 
-			// But if there's no session open, this can produce
-			// a long gap when nothing appears to be happening.
-			// Let's show the splash image while we're waiting.
-			if ( !ARDOUR_COMMAND_LINE::no_splash ) {
-				if ( ARDOUR_UI::instance() ) {
-					if ( !ARDOUR_UI::instance()->session_loaded ) {
-						ARDOUR_UI::instance()->show_splash();
-					}
+		// But if there's no session open, this can produce
+		// a long gap when nothing appears to be happening.
+		// Let's show the splash image while we're waiting.
+		if (!ARDOUR_COMMAND_LINE::no_splash) {
+			if (ARDOUR_UI::instance()) {
+				if (!ARDOUR_UI::instance()->session_loaded) {
+					ARDOUR_UI::instance()->show_splash();
 				}
 			}
+		}
 #endif
-			break;
-		case RESPONSE_DELETE_EVENT:
-			{
-				GdkEventButton ev;
-				ev.type = GDK_BUTTON_PRESS;
-				ev.button = 1;
-				on_delete_event ((GdkEventAny*) &ev);
-				break;
-			}
-		case RESPONSE_CANCEL:
-			if (ARDOUR_UI::instance() && ARDOUR_UI::instance()->session_loaded) {
-				ARDOUR_UI::instance()->check_audioengine (*this);
-			}
-			// fall through
-		default:
-			hide ();
+		break;
+	case RESPONSE_DELETE_EVENT: {
+		GdkEventButton ev;
+		ev.type = GDK_BUTTON_PRESS;
+		ev.button = 1;
+		on_delete_event((GdkEventAny*)&ev);
+		break;
+	}
+	case RESPONSE_CANCEL:
+		if (ARDOUR_UI::instance() && ARDOUR_UI::instance()->session_loaded) {
+			ARDOUR_UI::instance()->check_audioengine(*this);
+		}
+	// fall through
+	default:
+		hide();
 	}
 }
 
