@@ -1,5 +1,15 @@
+/* Copyright (C) 2015 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software. It comes without any warranty, to
+ * the extent permitted by applicable law. You can redistribute it
+ * and/or modify it under the terms of the Do What The Fuck You Want
+ * To Public License, Version 2, as published by Sam Hocevar. See
+ * http://www.wtfpl.net/ for more details.
+ */
+
 // gcc -Wall -o gcc-glibmm-abi-check abicheck.c -ldl
 // help2man -N -n 'glib gcc4/5 C++11 ABI compatibility test' -o gcc-glibmm-abi-check.1 ./gcc-glibmm-abi-check
+
 #include <stdio.h>
 #include <dlfcn.h>
 #include <getopt.h>
@@ -33,7 +43,7 @@ static void print_usage (void) {
 static void print_version (void) {
 	printf ("gcc-glibmm-abi-check version %s\n\n", VERSION);
 	printf (
-			"Copyright (C) GPL 2015 Robin Gareus <robin@gareus.org>\n"
+			"Copyright (C) 2015 Robin Gareus <robin@gareus.org>\n"
 			"This is free software; see the source for copying conditions.  There is NO\n"
 			"warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
 }
