@@ -197,28 +197,26 @@ AutomationController::toggled ()
 {
 	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
 	const AutoState as = _controllable->automation_state ();
-
+	const double where = _controllable->session ().audible_frame ();
 	const bool to_list = _controllable->list () && _controllable->session().transport_rolling () && (as == Touch || as == Write);
 
 	if (but) {
-		if (_controllable->session().transport_rolling()) {
-			if (_controllable->automation_state() == Touch && _controllable->list()->in_new_write_pass ()) {
-				_controllable->alist()->start_write_pass ( _controllable->session().audible_frame());
+		if (to_list) {
+			if (as == Touch && _controllable->list ()->in_new_write_pass ()) {
+				_controllable->alist ()->start_write_pass (where);
 			}
-			if (_controllable->list()) {
-				_controllable->list()->set_in_write_pass(true, false, _controllable->session().audible_frame());
-			}
+			_controllable->list ()->set_in_write_pass (true, false, where);
 		}
 
-		_controllable->set_double (!but->get_active (), _controllable->session ().transport_frame (), to_list);
+		_controllable->set_double (!but->get_active (), where, to_list);
 
-		const bool was_active = _controllable->get_value() >= 0.5;
-		if (was_active && but->get_active()) {
-			_adjustment->set_value(0.0);
-			but->set_active(false);
-		} else if (!was_active && !but->get_active()) {
-			_adjustment->set_value(1.0);
-			but->set_active(true);
+		const bool active = _controllable->get_double (to_list, where) >= 0.5;
+		if (active && !but->get_active ()) {
+			_adjustment->set_value (1.0);
+			but->set_active (true);
+		} else if (!active && but->get_active ()) {
+			_adjustment->set_value (0.0);
+			but->set_active (false);
 		}
 	}
 }
