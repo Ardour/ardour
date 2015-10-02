@@ -19,6 +19,10 @@
 
 #include <cmath>
 
+#include "pbd/compose.h"
+
+#include "ardour/debug.h"
+
 #include "fader.h"
 #include "surface.h"
 #include "control_group.h"
@@ -26,6 +30,7 @@
 
 using namespace ArdourSurface;
 using namespace Mackie;
+using namespace PBD;
 
 Control*
 Fader::factory (Surface& surface, int id, const char* name, Group& group)
@@ -54,6 +59,7 @@ Fader::update_message ()
 		return MidiByteArray();
 	}
 
-	int posi = lrintf (0x3fff * position);
+	int posi = lrintf (16384.0 * position);
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("generate fader message for position %1 (%2)\n", position, posi));
 	return MidiByteArray  (3, 0xe0 + id(), posi & 0x7f, posi >> 7);
 }

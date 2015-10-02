@@ -396,8 +396,8 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 	 * when we connected to the per-channel pitchbend events.
 	 */
 
-	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_pitchbend_message on port %3, fader = %1 value = %2\n",
-							   fader_id, pb, _number));
+	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Surface::handle_midi_pitchbend_message on port %3, fader = %1 value = %2 (%4)\n",
+	                                                   fader_id, pb, _number, pb/16384.0));
 	
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
@@ -407,7 +407,7 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 
 	if (fader) {
 		Strip* strip = dynamic_cast<Strip*> (&fader->group());
-		float pos = (pb >> 4)/1023.0; // only the top 10 bytes are used
+		float pos = pb / 16384.0;
 		if (strip) {
 			strip->handle_fader (*fader, pos);
 		} else {
