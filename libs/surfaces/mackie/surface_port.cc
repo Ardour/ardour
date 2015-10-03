@@ -74,15 +74,17 @@ SurfacePort::~SurfacePort()
 {
 	if (dynamic_cast<MIDI::IPMIDIPort*>(_input_port)) {
 		delete _input_port;
+		_input_port = 0;
 	} else {
-
 		if (_async_in) {
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("unregistering input port %1\n", _async_in->name()));
 			AudioEngine::instance()->unregister_port (_async_in);
 			_async_in.reset ((ARDOUR::Port*) 0);
 		}
 		
 		if (_async_out) {
 			_output_port->drain (10000);
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("unregistering output port %1\n", _async_out->name()));
 			AudioEngine::instance()->unregister_port (_async_out);
 			_async_out.reset ((ARDOUR::Port*) 0);
 		}
