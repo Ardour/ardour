@@ -312,8 +312,6 @@ class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
 
         const std::string& announce_string() const { return _announce_string; }
 
-        int disconnect_from_engine ();
-        int reconnect_to_engine ();
 	void hide_application ();
 
   protected:

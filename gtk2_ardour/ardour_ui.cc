@@ -4473,41 +4473,6 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
         return 1;
 }
 
-int
-ARDOUR_UI::disconnect_from_engine ()
-{
-	/* drop connection to AudioEngine::Halted so that we don't act
-	 *  as if the engine unexpectedly shut down
-	 */
-
-	halt_connection.disconnect ();
-
-	if (AudioEngine::instance()->stop ()) {
-		MessageDialog msg (*editor, _("Could not disconnect from Audio/MIDI engine"));
-		msg.run ();
-		return -1;
-	} else {
-		AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
-	}
-
-	update_sample_rate (0);
-	return 0;
-}
-
-int
-ARDOUR_UI::reconnect_to_engine ()
-{
-	if (AudioEngine::instance()->start ()) {
-		// TODO somehow make this the topmost window (above any dialogs currently visible)
-		MessageDialog msg(*audio_midi_setup.get(), AudioEngine::instance()->get_last_backend_error());
-		msg.run();
-		return -1;
-	}
-
-	update_sample_rate (0);
-	return 0;
-}
-
 void
 ARDOUR_UI::use_config ()
 {
