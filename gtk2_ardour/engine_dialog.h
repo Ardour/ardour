@@ -304,6 +304,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 
     /* latency measurement */
     void latency_button_clicked ();
+    void latency_back_button_clicked ();
     bool check_audio_latency_measurement ();
     bool check_midi_latency_measurement ();
     sigc::connection latency_timeout;

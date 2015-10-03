@@ -186,7 +186,8 @@ EngineControl::EngineControl ()
 	lm_measure_button.add (lm_measure_label);
 	lm_measure_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::latency_button_clicked));
 	lm_use_button.signal_clicked().connect (sigc::mem_fun (*this, &EngineControl::use_latency_button_clicked));
-	lm_back_button_signal = lm_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
+	lm_back_button_signal = lm_back_button.signal_clicked().connect(
+	    sigc::mem_fun(*this, &EngineControl::latency_back_button_clicked));
 
 	lm_use_button.set_sensitive (false);
 
@@ -726,7 +727,8 @@ EngineControl::enable_latency_tab ()
 		lm_back_button_signal = lm_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), midi_tab));
 		lm_preamble.hide ();
 	} else {
-		lm_back_button_signal = lm_back_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (notebook, &Gtk::Notebook::set_current_page), 0));
+		lm_back_button_signal = lm_back_button.signal_clicked().connect(
+		    sigc::mem_fun(*this, &EngineControl::latency_back_button_clicked));
 		lm_preamble.show ();
 	}
 
@@ -2803,6 +2805,13 @@ EngineControl::latency_button_clicked ()
 }
 
 void
+EngineControl::latency_back_button_clicked ()
+{
+	ARDOUR::AudioEngine::instance()->stop(true);
+	notebook.set_current_page(0);
+}
+
+void
 EngineControl::use_latency_button_clicked ()
 {
 	if (_measure_midi) {
@@ -2831,9 +2840,8 @@ EngineControl::use_latency_button_clicked ()
 
 		/* back to settings page */
 		notebook.set_current_page (0);
-}
 	}
-
+}
 
 bool
 EngineControl::on_delete_event (GdkEventAny* ev)
