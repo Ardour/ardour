@@ -136,7 +136,7 @@ MackieControlProtocol::~MackieControlProtocol()
 	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 		(*si)->reset ();
 	}
-	
+
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::~MackieControlProtocol drop_connections ()\n");
 	drop_connections ();
 
@@ -199,7 +199,7 @@ MackieControlProtocol::midi_connectivity_established ()
 
 // go to the previous track.
 // Assume that get_sorted_routes().size() > route_table.size()
-void 
+void
 MackieControlProtocol::prev_track()
 {
 	if (_current_initial_bank >= 1) {
@@ -209,7 +209,7 @@ MackieControlProtocol::prev_track()
 
 // go to the next track.
 // Assume that get_sorted_routes().size() > route_table.size()
-void 
+void
 MackieControlProtocol::next_track()
 {
 	Sorted sorted = get_sorted_routes();
@@ -248,7 +248,7 @@ struct RouteByRemoteId
 	}
 };
 
-MackieControlProtocol::Sorted 
+MackieControlProtocol::Sorted
 MackieControlProtocol::get_sorted_routes()
 {
 	Sorted sorted;
@@ -314,7 +314,7 @@ MackieControlProtocol::get_sorted_routes()
 	return sorted;
 }
 
-void 
+void
 MackieControlProtocol::refresh_current_bank()
 {
 	switch_banks (_current_initial_bank, true);
@@ -332,7 +332,7 @@ MackieControlProtocol::n_strips (bool with_locked_strips) const
 	return strip_count;
 }
 
-void 
+void
 MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch banking to start at %1 force ? %2 current = %3\n", initial, force, _current_initial_bank));
@@ -359,14 +359,14 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 
 	if (_current_initial_bank <= sorted.size()) {
 
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available routes %3 on %4 surfaces\n", 
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to %1, %2, available routes %3 on %4 surfaces\n",
 								   _current_initial_bank, strip_cnt, sorted.size(),
 								   surfaces.size()));
 
 		// link routes to strips
 
 		Sorted::iterator r = sorted.begin() + _current_initial_bank;
-		
+
 		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 			vector<boost::shared_ptr<Route> > routes;
 			uint32_t added = 0;
@@ -387,14 +387,14 @@ MackieControlProtocol::switch_banks (uint32_t initial, bool force)
 	set_view_mode (_view_mode);
 
 	/* make sure selection is correct */
-	
+
 	_gui_track_selection_changed (&_last_selected_routes, false);
-	
+
 	/* current bank has not been saved */
 	session->set_dirty();
 }
 
-int 
+int
 MackieControlProtocol::set_active (bool yn)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose("MackieControlProtocol::set_active init with yn: '%1'\n", yn));
@@ -404,26 +404,26 @@ MackieControlProtocol::set_active (bool yn)
 	}
 
 	if (yn) {
-		
+
 		/* start event loop */
-		
+
 		BaseUI::run ();
-		
+
 		if (create_surfaces ()) {
 			return -1;
 		}
 		connect_session_signals ();
 		update_surfaces ();
-		
+
 		/* set up periodic task for metering and automation
 		 */
-		
+
 		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
 
 		/* a faster periodic task used to display parameter updates */
-		
+
 		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (10); // milliseconds
 		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
 		redisplay_timeout->attach (main_loop()->get_context());
@@ -433,8 +433,8 @@ MackieControlProtocol::set_active (bool yn)
 			hui_connection = hui_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::hui_heartbeat));
 			hui_timeout->attach (main_loop()->get_context());
 		}
-		
-		
+
+
 	} else {
 
 		BaseUI::quit ();
@@ -460,7 +460,7 @@ MackieControlProtocol::hui_heartbeat ()
 
 	return true;
 }
-	
+
 bool
 MackieControlProtocol::periodic ()
 {
@@ -472,7 +472,7 @@ MackieControlProtocol::periodic ()
 		ipmidi_restart ();
 		return true;
 	}
-	
+
 	if (!_initialized) {
 		initialize();
 	}
@@ -492,7 +492,7 @@ MackieControlProtocol::periodic ()
 	}
 
 	update_timecode_display ();
-	
+
 	return true;
 }
 
@@ -523,7 +523,7 @@ MackieControlProtocol::redisplay ()
 	return true;
 }
 
-void 
+void
 MackieControlProtocol::update_timecode_beats_led()
 {
 	if (!_device_info.has_timecode_display()) {
@@ -547,7 +547,7 @@ MackieControlProtocol::update_timecode_beats_led()
 	}
 }
 
-void 
+void
 MackieControlProtocol::update_global_button (int id, LedState ls)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -567,7 +567,7 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 	}
 }
 
-void 
+void
 MackieControlProtocol::update_global_led (int id, LedState ls)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -595,13 +595,13 @@ MackieControlProtocol::device_ready ()
 	 * handshaking, it can be called once the device has verified the
 	 * connection.
 	 */
-	 
+
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("device ready init (active=%1)\n", active()));
 	update_surfaces ();
 }
 
 // send messages to surface to set controls to correct values
-void 
+void
 MackieControlProtocol::update_surfaces()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::update_surfaces() init (active=%1)\n", active()));
@@ -612,7 +612,7 @@ MackieControlProtocol::update_surfaces()
 	// do the initial bank switch to connect signals
 	// _current_initial_bank is initialised by set_state
 	switch_banks (_current_initial_bank, true);
-	
+
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::update_surfaces() finished\n");
 }
 
@@ -621,15 +621,15 @@ MackieControlProtocol::initialize()
 {
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		
+
 		if (surfaces.empty()) {
 			return;
 		}
-		
+
 		if (!_master_surface->active ()) {
 			return;
 		}
-		
+
 		// sometimes the jog wheel is a pot
 		if (_device_info.has_jog_wheel()) {
 			_master_surface->blank_jog_ring ();
@@ -641,11 +641,11 @@ MackieControlProtocol::initialize()
 	notify_record_state_changed();
 	notify_transport_state_changed();
 	update_timecode_beats_led();
-	
+
 	_initialized = true;
 }
 
-void 
+void
 MackieControlProtocol::connect_session_signals()
 {
 	// receive routes added
@@ -683,9 +683,9 @@ MackieControlProtocol::set_profile (const string& profile_name)
 	if (d == DeviceProfile::device_profiles.end()) {
 		return;
 	}
-	
+
 	_device_profile = d->second;
-}	
+}
 
 int
 MackieControlProtocol::set_device_info (const string& device_name)
@@ -697,7 +697,7 @@ MackieControlProtocol::set_device_info (const string& device_name)
 	if (d == DeviceInfo::device_info.end()) {
 		return -1;
 	}
-	
+
 	_device_info = d->second;
 
 	return 0;
@@ -721,7 +721,7 @@ MackieControlProtocol::set_device (const string& device_name)
 	return 0;
 }
 
-gboolean 
+gboolean
 ArdourSurface::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
 {
 	ArdourSurface::MackieControlProtocol::ipMIDIHandler* ipm = static_cast<ArdourSurface::MackieControlProtocol::ipMIDIHandler*>(data);
@@ -770,7 +770,7 @@ MackieControlProtocol::create_surfaces ()
 			Glib::Threads::Mutex::Lock lm (surfaces_lock);
 			surfaces.push_back (surface);
 		}
-		
+
 		if (_device_info.extenders() < 2) {
 			device_name = X_("mackie control #2");
 		} else {
@@ -788,7 +788,7 @@ MackieControlProtocol::create_surfaces ()
 				ARDOUR::DataType::MIDI,
 				session->engine().make_port_name_non_relative (surface->port().input_port().name())
 				);
-			
+
 			_output_bundle->add_channel (
 				surface->port().output_port().name(),
 				ARDOUR::DataType::MIDI,
@@ -824,12 +824,12 @@ MackieControlProtocol::create_surfaces ()
 
                                 GIOChannel* ioc = g_io_channel_unix_new (fd);
                                 GSource* gsrc = g_io_create_watch (ioc, GIOCondition (G_IO_IN|G_IO_HUP|G_IO_ERR));
-                                
+
                                 /* hack up an object so that in the callback from the event loop
                                    we have both the MackieControlProtocol and the input port.
-                                   
+
                                    If we were using C++ for this stuff we wouldn't need this
-                                   but a nasty, not-fixable bug in the binding between C 
+                                   but a nasty, not-fixable bug in the binding between C
                                    and C++ makes it necessary to avoid C++ for the IO
                                    callback setup.
                                 */
@@ -847,7 +847,7 @@ MackieControlProtocol::create_surfaces ()
 	return 0;
 }
 
-void 
+void
 MackieControlProtocol::close()
 {
 	session_connections.drop_connections ();
@@ -857,7 +857,7 @@ MackieControlProtocol::close()
 	clear_surfaces();
 }
 
-XMLNode& 
+XMLNode&
 MackieControlProtocol::get_state()
 {
 	XMLNode& node (ControlProtocol::get_state());
@@ -888,7 +888,7 @@ MackieControlProtocol::get_state()
 	return node;
 }
 
-int 
+int
 MackieControlProtocol::set_state (const XMLNode & node, int version)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::set_state: active %1\n", active()));
@@ -900,7 +900,7 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 	if (ControlProtocol::set_state (node, version)) {
 		return -1;
 	}
-	
+
 	if ((prop = node.property (X_("ipmidi-base"))) != 0) {
 		set_ipmidi_base (atoi (prop->value()));
 	}
@@ -909,7 +909,7 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 	if ((prop = node.property (X_("bank"))) != 0) {
 		bank = atoi (prop->value());
 	}
-	
+
 	if ((prop = node.property (X_("device-name"))) != 0) {
 		set_device_info (prop->value());
 	}
@@ -917,9 +917,9 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 	if ((prop = node.property (X_("device-profile"))) != 0) {
 		set_profile (prop->value());
 	}
-	
+
 	XMLNode* snode = node.child (X_("Surfaces"));
-	
+
 	delete _surfaces_state;
 	_surfaces_state = 0;
 
@@ -929,13 +929,13 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 	}
 
 	switch_banks (bank, true);
-	
+
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::set_state done\n");
 
 	return retval;
 }
 
-string 
+string
 MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 {
 	Timecode::BBT_Time bbt_time;
@@ -962,7 +962,7 @@ MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 	return os.str();
 }
 
-string 
+string
 MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 {
 	Timecode::Time timecode;
@@ -982,7 +982,7 @@ MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
 	return os.str();
 }
 
-void 
+void
 MackieControlProtocol::update_timecode_display()
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1011,7 +1011,7 @@ MackieControlProtocol::update_timecode_display()
 	default:
 		return;
 	}
-	
+
 	// only write the timecode string to the MCU if it's changed
 	// since last time. This is to reduce midi bandwidth used.
 	if (timecode != _timecode_last) {
@@ -1040,7 +1040,7 @@ void MackieControlProtocol::notify_parameter_changed (std::string const & p)
 }
 
 // RouteList is the set of routes that have just been added
-void 
+void
 MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 {
 	// currently assigned banks are less than the full set of
@@ -1058,7 +1058,7 @@ MackieControlProtocol::notify_route_added (ARDOUR::RouteList & rl)
 	}
 }
 
-void 
+void
 MackieControlProtocol::notify_solo_active_changed (bool active)
 {
 	boost::shared_ptr<Surface> surface;
@@ -1067,7 +1067,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 		surface = _master_surface;
 	}
-	
+
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (Led::RudeSolo);
 	if (x != surface->controls_by_device_independent_id.end()) {
 		Led* rude_solo = dynamic_cast<Led*> (x->second);
@@ -1077,7 +1077,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 	}
 }
 
-void 
+void
 MackieControlProtocol::notify_remote_id_changed()
 {
 	Sorted sorted = get_sorted_routes();
@@ -1099,13 +1099,13 @@ MackieControlProtocol::notify_remote_id_changed()
 // Transport signals
 ///////////////////////////////////////////
 
-void 
+void
 MackieControlProtocol::notify_loop_state_changed()
 {
 	update_global_button (Button::Loop, session->get_play_loop());
 }
 
-void 
+void
 MackieControlProtocol::notify_transport_state_changed()
 {
 	if (!_device_info.has_global_controls()) {
@@ -1122,14 +1122,14 @@ MackieControlProtocol::notify_transport_state_changed()
 	notify_metering_state_changed ();
 }
 
-void 
+void
 MackieControlProtocol::notify_metering_state_changed()
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->notify_metering_state_changed ();
-	}	
+	}
 }
 
 void
@@ -1145,7 +1145,7 @@ MackieControlProtocol::notify_record_state_changed ()
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
 		surface = _master_surface;
 	}
-		
+
 	/* rec is a tristate */
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (Button::Record);
@@ -1153,7 +1153,7 @@ MackieControlProtocol::notify_record_state_changed ()
 		Button * rec = dynamic_cast<Button*> (x->second);
 		if (rec) {
 			LedState ls;
-			
+
 			switch (session->record_status()) {
 			case Session::Disabled:
 				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to disabled, LED off\n");
@@ -1208,7 +1208,7 @@ MackieControlProtocol::stop ()
 	return 0;
 }
 
-void 
+void
 MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::LedState ls)
 {
 	if (ls != none) {
@@ -1292,7 +1292,7 @@ MackieControlProtocol::build_button_map ()
 
 }
 
-void 
+void
 MackieControlProtocol::handle_button_event (Surface& surface, Button& button, ButtonState bs)
 {
 	Button::ID button_id = button.bid();
@@ -1301,12 +1301,12 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		update_led (surface, button, none);
 		return;
 	}
-	
+
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Handling %1 for button %2 (%3)\n", (bs == press ? "press" : "release"), button.id(),
 							   Button::id_to_name (button.bid())));
 
 	/* check profile first */
-	
+
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
 
 	if (!action.empty()) {
@@ -1315,10 +1315,10 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Looked up action for button %1 with modifier %2, got [%3]\n",
 			                                                   button.bid(), _modifier_state, action));
-			
+
 			/* if there is a bound action for this button, and this is a press event,
-			   carry out the action. If its a release event, do nothing since we 
-			   don't bind to them at all but don't want any other handling to 
+			   carry out the action. If its a release event, do nothing since we
+			   don't bind to them at all but don't want any other handling to
 			   occur either.
 			*/
 			if (bs == press) {
@@ -1329,21 +1329,21 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 			return;
 
 		} else {
-			
+
 			/* "action" is more likely to be a button name. We use this to
 			 * allow remapping buttons to different (builtin) functionality
 			 * associated with an existing button. This is similar to the
 			 * way that (for example) Nuendo moves the "Shift" function to
 			 * the "Enter" key of the MCU Pro.
 			 */
-			
+
 			int bid = Button::name_to_id (action);
-			
+
 			if (bid < 0) {
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("apparent button name %1 not found\n", action));
 				return;
 			}
-			
+
 			button_id = (Button::ID) bid;
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("handling button %1 as if it was %2 (%3)\n", Button::id_to_name (button.bid()), button_id, Button::id_to_name (button_id)));
 		}
@@ -1358,19 +1358,19 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 		ButtonHandlers& bh (b->second);
 
 		switch  (bs) {
-		case press: 
+		case press:
 			surface.write (button.set_state ((this->*(bh.press)) (button)));
 			break;
-		case release: 
+		case release:
 			surface.write (button.set_state ((this->*(bh.release)) (button)));
 			break;
 		default:
 			break;
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button handlers for button ID %1 (device ID %2)\n", 
+		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("no button handlers for button ID %1 (device ID %2)\n",
 								   button.bid(), button.id()));
-		error << string_compose ("no button handlers for button ID %1 (device ID %2)\n", 
+		error << string_compose ("no button handlers for button ID %1 (device ID %2)\n",
 					 button.bid(), button.id()) << endmsg;
 	}
 }
@@ -1428,7 +1428,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->update_view_mode_display ();
 	}
-	
+
 }
 
 void
@@ -1437,12 +1437,12 @@ MackieControlProtocol::set_flip_mode (FlipMode fm)
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 	_flip_mode = fm;
-	
+
 	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 		(*s)->update_flip_mode_display ();
 	}
 }
-	
+
 void
 MackieControlProtocol::set_master_on_surface_strip (uint32_t surface, uint32_t strip_number)
 {
@@ -1504,12 +1504,12 @@ MackieControlProtocol::_gui_track_selection_changed (ARDOUR::RouteNotificationLi
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		
+
 		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
 			(*s)->gui_selection_changed (srl);
 		}
 	}
-	
+
 	if (save_list) {
 		_last_selected_routes = *rl;
 	}
@@ -1610,12 +1610,12 @@ MackieControlProtocol::down_controls (AutomationType p)
 	if (m == _down_buttons.end()) {
 		return controls;
 	}
-	
+
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("looking for down buttons for %1, got %2\n",
 							   p, m->second.size()));
 
 	pull_route_range (m->second, routes);
-	
+
 	switch (p) {
 	case GainAutomation:
 		for (RouteList::iterator r = routes.begin(); r != routes.end(); ++r) {
@@ -1647,7 +1647,7 @@ MackieControlProtocol::down_controls (AutomationType p)
 	return controls;
 
 }
-	
+
 struct ButtonRangeSorter {
     bool operator() (const uint32_t& a, const uint32_t& b) {
 	    return (a>>8) < (b>>8) // a.surface < b.surface
@@ -1671,7 +1671,7 @@ MackieControlProtocol::pull_route_range (DownButtonList& down, RouteList& select
 
 	uint32_t first = ldown.front();
 	uint32_t last = ldown.back ();
-	
+
 	uint32_t first_surface = first>>8;
 	uint32_t first_strip = first&0xf;
 
@@ -1680,11 +1680,11 @@ MackieControlProtocol::pull_route_range (DownButtonList& down, RouteList& select
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("PRR %5 in list %1.%2 - %3.%4\n", first_surface, first_strip, last_surface, last_strip,
 							   down.size()));
-	
+
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
 	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		
+
 		if ((*s)->number() >= first_surface && (*s)->number() <= last_surface) {
 
 			uint32_t fs;
@@ -1752,7 +1752,7 @@ MackieControlProtocol::clear_surfaces ()
 	clear_ports ();
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	_master_surface.reset ();
-	surfaces.clear ();	
+	surfaces.clear ();
 }
 
 void
