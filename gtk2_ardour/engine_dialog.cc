@@ -407,6 +407,18 @@ EngineControl::on_show ()
 	ok_button->grab_focus();
 }
 
+bool
+EngineControl::start_engine ()
+{
+	if (push_state_to_backend(true) != 0) {
+		MessageDialog msg(*this,
+		                  ARDOUR::AudioEngine::instance()->get_last_backend_error());
+		msg.run();
+		return false;
+	}
+	return true;
+}
+
 void
 EngineControl::on_response (int response_id)
 {
@@ -414,7 +426,7 @@ EngineControl::on_response (int response_id)
 
 	switch (response_id) {
 	case RESPONSE_OK:
-		if (push_state_to_backend(true) != 0) {
+		if (!start_engine()) {
 			return;
 		} else {
 			hide();
@@ -2327,7 +2339,7 @@ EngineControl::push_state_to_backend (bool start)
 	}
 
 	if (start || (was_running && restart_required)) {
-		if (ARDOUR_UI::instance()->reconnect_to_engine()) {
+		if (ARDOUR::AudioEngine::instance()->start()) {
 			return -1;
 		}
 	}
@@ -2501,7 +2513,7 @@ EngineControl::start_stop_button_clicked ()
 	if (ARDOUR::AudioEngine::instance()->running()) {
 		ARDOUR::AudioEngine::instance()->stop ();
 	} else {
-		push_state_to_backend (true);
+		start_engine ();
 	}
 }
 
