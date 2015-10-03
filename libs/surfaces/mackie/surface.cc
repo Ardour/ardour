@@ -51,6 +51,10 @@
 
 #include "i18n.h"
 
+#ifdef PLATFORM_WINDOWS
+#define random() rand()
+#endif
+
 using namespace std;
 using namespace PBD;
 using ARDOUR::Route;
