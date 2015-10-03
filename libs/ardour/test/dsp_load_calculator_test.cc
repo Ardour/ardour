@@ -61,15 +61,15 @@ DSPLoadCalculatorTest::basicTest ()
 	CPPUNIT_ASSERT(dsp_calc.elapsed_time_us() > dsp_calc.max_timer_error_us());
 	CPPUNIT_ASSERT(dsp_calc.get_dsp_load() == dsp_load);
 
-	std::cout << std::endl;
-
 	// test the rate of rolloff of the LPF from 100% with load at constant 50%
 	// over the equivalent of 1 second
 	for (int i = 0; i < 1e6 / dsp_100_pc_48k_us; ++i) {
 		dsp_calc.set_start_timestamp_us(0);
 		dsp_calc.set_stop_timestamp_us(dsp_100_pc_48k_us / 2);
 		CPPUNIT_ASSERT(dsp_calc.elapsed_time_us() == 5333);
+#if 0
 		std::cout << "DSP 50% load value = " << dsp_calc.get_dsp_load() << std::endl;
+#endif
 	}
 
 	// test that the LPF is still working after one second of values
@@ -99,11 +99,12 @@ DSPLoadCalculatorTest::basicTest ()
 		if (i % 2 == 0) {
 			dsp_calc.set_start_timestamp_us(0);
 			dsp_calc.set_stop_timestamp_us(dsp_100_pc_48k_us / 2);
-
+#if 0
 			std::cout << "DSP 50% load value 48k = " << dsp_calc.get_dsp_load()
 			          << std::endl;
 			std::cout << "DSP 50% load value 96k = " << dsp_calc_96k.get_dsp_load()
 			          << std::endl;
+#endif
 			CPPUNIT_ASSERT_DOUBLES_EQUAL(dsp_calc.get_dsp_load(),
 			                             dsp_calc_96k.get_dsp_load(), 0.001);
 		}
