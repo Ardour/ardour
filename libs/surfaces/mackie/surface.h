@@ -52,7 +52,6 @@ public:
 	void say_hello ();
 
 	bool active() const { return _active; }
-	void drop_routes ();
 
 	typedef std::vector<Control*> Controls;
 	Controls controls;
