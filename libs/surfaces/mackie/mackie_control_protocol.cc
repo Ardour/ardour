@@ -1751,6 +1751,7 @@ MackieControlProtocol::clear_surfaces ()
 {
 	clear_ports ();
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	_master_surface.reset ();
 	surfaces.clear ();	
 }
 
