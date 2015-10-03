@@ -90,7 +90,6 @@ devprofile_filter (const string &str, void* /*arg*/)
 void
 DeviceProfile::reload_device_profiles ()
 {
-	DeviceProfile dp;
 	vector<string> s;
 	vector<string> devprofiles;
 	Searchpath spath (devprofile_search_path());
@@ -105,6 +104,7 @@ DeviceProfile::reload_device_profiles ()
 
 	for (vector<string>::iterator i = devprofiles.begin(); i != devprofiles.end(); ++i) {
 		string fullpath = *i;
+		DeviceProfile dp; // has to be initial every loop or info from last added.
 
 		XMLTree tree;
 
