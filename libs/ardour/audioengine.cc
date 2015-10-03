@@ -923,7 +923,7 @@ AudioEngine::freewheel (bool start_stop)
 float
 AudioEngine::get_dsp_load() const
 {
-	if (!_backend) {
+	if (!_backend || !_running) {
 		return 0.0;
 	}
 	return _backend->dsp_load ();
