@@ -584,8 +584,15 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 			/* empty: add an "anchor" point if the point we're adding past time 0 */
 
 			if (when >= 1) {
-				_events.insert (_events.end(), new ControlEvent (0, value));
-				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
+				if (_desc.toggled) {
+					const bool bval = ((value >= 0.5) ? true : false);
+					_events.insert (_events.end(), new ControlEvent (0, !bval));
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added bool value %2 at zero\n", this, !bval));
+
+				} else {
+					_events.insert (_events.end(), new ControlEvent (0, value));
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
+				}
 			}
 		}
 
