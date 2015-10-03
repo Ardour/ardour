@@ -111,6 +111,12 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	RadioButtonGroup rb_group = absolute_touch_mode_button.get_group();
 	touch_move_mode_button.set_group (rb_group);
 
+	recalibrate_fader_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::recalibrate_faders));
+	backlight_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::toggle_backlight));
+
+	touch_sensitivity_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::touch_sensitive_change));
+	touch_sensitivity_scale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
+	
 	l = manage (new Gtk::Label (_("Button click")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, 1, 2, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -154,7 +160,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 
 	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
 	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
-
 	
 	table->attach (discover_button, 1, 2, 8, 9, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	discover_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::discover_clicked));
@@ -561,4 +566,23 @@ MackieControlProtocolGUI::discover_clicked ()
 {
 	/* this should help to get things started */
 	_cp.midi_connectivity_established ();
+}
+
+void
+MackieControlProtocolGUI::recalibrate_faders ()
+{
+	_cp.recalibrate_faders ();
+}
+
+void
+MackieControlProtocolGUI::toggle_backlight ()
+{
+	_cp.toggle_backlight ();
+}
+
+void
+MackieControlProtocolGUI::touch_sensitive_change ()
+{
+	int sensitivity = (int) touch_sensitivity_adjustment.get_value ();
+	_cp.set_touch_sensitivity (sensitivity);
 }

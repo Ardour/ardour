@@ -109,6 +109,9 @@ class MackieControlProtocolGUI : public Gtk::Notebook
     Gtk::Button      discover_button;
 
     void discover_clicked ();
+	void recalibrate_faders ();
+	void toggle_backlight ();
+	void touch_sensitive_change ();
 };
 
 }

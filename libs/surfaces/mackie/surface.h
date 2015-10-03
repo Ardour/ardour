@@ -115,6 +115,13 @@ public:
 
 	void display_timecode (const std::string & /*timecode*/, const std::string & /*timecode_last*/);
 
+	/// sends MCP "reset" message to surface
+	void reset ();
+
+	void recalibrate_faders ();
+	void toggle_backlight ();
+	void set_touch_sensitivity (int);
+	
 	/**
 		This is used to calculate the clicks per second that define
 		a transport speed of 1.0 for the jog wheel. 100.0 is 10 clicks

@@ -1695,3 +1695,36 @@ MackieControlProtocol::clear_surfaces ()
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	surfaces.clear ();	
 }
+
+void
+MackieControlProtocol::set_touch_sensitivity (int sensitivity)
+{
+	sensitivity = min (9, sensitivity);
+	sensitivity = max (0, sensitivity);
+
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->set_touch_sensitivity (sensitivity);
+	}
+}
+
+void
+MackieControlProtocol::recalibrate_faders ()
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->recalibrate_faders ();
+	}
+}
+
+void
+MackieControlProtocol::toggle_backlight ()
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->toggle_backlight ();
+	}
+}

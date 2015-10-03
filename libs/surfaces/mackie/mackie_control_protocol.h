@@ -171,6 +171,10 @@ class MackieControlProtocol
 	void notify_route_added (ARDOUR::RouteList &);
 	void notify_remote_id_changed();
 
+	void recalibrate_faders ();
+	void toggle_backlight ();
+	void set_touch_sensitivity (int);
+	
 	/// rebuild the current bank. Called on route added/removed and
 	/// remote id changed.
 	void refresh_current_bank();

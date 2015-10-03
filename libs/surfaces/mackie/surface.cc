@@ -995,3 +995,75 @@ Surface::notify_metering_state_changed()
 		(*s)->notify_metering_state_changed ();
 	}
 }
+
+void
+Surface::reset ()
+{
+	if (_port) {
+		/* reset msg for Mackie Control */
+		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x08, 0x00, MIDI::eox);
+		_port->write (msg); 
+		msg[4] = 0x15; /* reset Mackie XT */
+		_port->write (msg);
+		msg[4] = 0x10; /* reset Logic Control */
+		_port->write (msg);
+		msg[4] = 0x11; /* reset Logic Control XT */
+		_port->write (msg);
+	}
+}
+
+void
+Surface::toggle_backlight ()
+{
+	if (_port) {
+		int onoff = random() %2;
+		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x0a, onoff, MIDI::eox);
+		_port->write (msg); 
+		msg[4] = 0x15; /* reset Mackie XT */
+		_port->write (msg);
+		msg[4] = 0x10; /* reset Logic Control */
+		_port->write (msg);
+		msg[4] = 0x11; /* reset Logic Control XT */
+		_port->write (msg);
+	}
+}
+
+void
+Surface::recalibrate_faders ()
+{
+	if (_port) {
+		MidiByteArray msg (8, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x09, 0x00, MIDI::eox);
+		_port->write (msg); 
+		msg[4] = 0x15; /* reset Mackie XT */
+		_port->write (msg);
+		msg[4] = 0x10; /* reset Logic Control */
+		_port->write (msg);
+		msg[4] = 0x11; /* reset Logic Control XT */
+		_port->write (msg);
+	}
+}	
+
+void
+Surface::set_touch_sensitivity (int sensitivity)
+{
+	/* NOTE: assumed called from GUI code, hence sleep() */
+	
+	/* sensitivity already clamped by caller */
+
+	if (_port) {
+		MidiByteArray msg (9, MIDI::sysex, 0x00, 0x00, 0x66, 0x14, 0x0e, 0xff, sensitivity, MIDI::eox);
+
+		for (int fader = 0; fader < 9; ++fader) {
+			msg[6] = fader;
+
+			_port->write (msg); 
+			msg[4] = 0x15; /* reset Mackie XT */
+			_port->write (msg);
+			msg[4] = 0x10; /* reset Logic Control */
+			_port->write (msg);
+			msg[4] = 0x11; /* reset Logic Control XT */
+
+			g_usleep (1000); /* milliseconds */
+		}
+	}
+}
