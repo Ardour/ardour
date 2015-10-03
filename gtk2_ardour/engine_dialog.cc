@@ -419,6 +419,18 @@ EngineControl::start_engine ()
 	return true;
 }
 
+bool
+EngineControl::stop_engine ()
+{
+	if (ARDOUR::AudioEngine::instance()->stop()) {
+		MessageDialog msg(*this,
+		                  ARDOUR::AudioEngine::instance()->get_last_backend_error());
+		msg.run();
+		return false;
+	}
+	return true;
+}
+
 void
 EngineControl::on_response (int response_id)
 {
@@ -2260,12 +2272,11 @@ EngineControl::push_state_to_backend (bool start)
 
 	if (was_running) {
 		if (restart_required) {
-			if (ARDOUR_UI::instance()->disconnect_from_engine ()) {
+			if (ARDOUR::AudioEngine::instance()->stop()) {
 				return -1;
 			}
 		}
 	}
-
 
 	if (change_driver && backend->set_driver (get_driver())) {
 		error << string_compose (_("Cannot set driver to %1"), get_driver()) << endmsg;
@@ -2578,7 +2589,7 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 
 		if (ARDOUR::AudioEngine::instance()->running()) {
 			// TODO - mark as 'stopped for latency
-			ARDOUR_UI::instance()->disconnect_from_engine ();
+			stop_engine ();
 		}
 
 		{
@@ -2885,9 +2896,9 @@ void
 EngineControl::connect_disconnect_click()
 {
 	if (ARDOUR::AudioEngine::instance()->running()) {
-		ARDOUR_UI::instance()->disconnect_from_engine ();
+		stop_engine ();
 	} else {
-		ARDOUR_UI::instance()->reconnect_to_engine ();
+		start_engine ();
 	}
 }
 
