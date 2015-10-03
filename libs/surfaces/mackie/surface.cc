@@ -961,7 +961,7 @@ Surface::say_hello ()
 	_port->write (wakeup);
 	wakeup[4] = 0x15; /* wakup Mackie XT */
 	_port->write (wakeup);
-	wakeup[4] = 0x10; /* wakupe Logic Control */
+	wakeup[4] = 0x10; /* wakeup Logic Control */
 	_port->write (wakeup);
 	wakeup[4] = 0x11; /* wakeup Logic Control XT */
 	_port->write (wakeup);
