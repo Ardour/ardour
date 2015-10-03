@@ -1424,7 +1424,6 @@ Selection::set_state (XMLNode const & node, int)
 				XMLProperty* prop_parameter = (*i)->property (X_("parameter"));
 				XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
 
-				assert (prop_type);
 				assert (prop_route_id);
 				assert (prop_alist_id);
 				assert (prop_parameter);
@@ -1455,6 +1454,10 @@ Selection::set_state (XMLNode const & node, int)
 			} else if (prop_type->value () == "region") {
 				XMLProperty* prop_region_id = (*i)->property (X_("region-id"));
 				XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
+
+				if (!prop_region_id || !prop_view_index) {
+					continue;
+				}
 
 				PBD::ID region_id (prop_region_id->value ());
 				RegionSelection rs;
