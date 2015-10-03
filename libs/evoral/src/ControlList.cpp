@@ -585,9 +585,9 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 
 			if (when >= 1) {
 				if (_desc.toggled) {
-					const bool bval = ((value >= 0.5) ? true : false);
-					_events.insert (_events.end(), new ControlEvent (0, !bval));
-					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added bool value %2 at zero\n", this, !bval));
+					const double opp_val = ((value < 0.5) ? 1.0 : 0.0);
+					_events.insert (_events.end(), new ControlEvent (0, opp_val));
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added bool value %2 at zero\n", this, opp_val));
 
 				} else {
 					_events.insert (_events.end(), new ControlEvent (0, value));
