@@ -57,6 +57,7 @@ DeviceInfo::DeviceInfo()
 	, _uses_ipmidi (false)
 	, _no_handshake (false)
 	, _has_meters (true)
+	, _device_type (MCU)
 	, _name (X_("Mackie Control Universal Pro"))
 {
 	mackie_control_buttons ();

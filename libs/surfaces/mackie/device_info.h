@@ -55,11 +55,20 @@ struct StripButtonInfo {
 class DeviceInfo 
 {
   public:
+	enum DeviceType {
+		MCU = 0x14,
+		MCXT = 0x15,
+		LC = 0x10,
+		LCXT = 0x11,
+		HUI = 0x5
+	};
+	
 	DeviceInfo();
 	~DeviceInfo();
 
 	int set_state (const XMLNode&, int version);
 
+	DeviceType device_type() const { return _device_type; }
 	uint32_t strip_cnt () const;
 	uint32_t extenders() const;
 	uint32_t master_position() const;
@@ -100,6 +109,7 @@ class DeviceInfo
     bool     _uses_ipmidi;
     bool     _no_handshake;
     bool     _has_meters;
+	DeviceType _device_type;
     std::string _name;
 		std::string _global_button_name;
 
