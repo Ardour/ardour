@@ -37,7 +37,7 @@ public:
 	}
 
 	void set_max_time(double samplerate, uint32_t period_size) {
-		m_max_time_us = (1e6 / samplerate) * period_size;
+		m_max_time_us = period_size * 1e6 / samplerate;
 	}
 
 	void set_max_time_us(uint64_t max_time_us) {
