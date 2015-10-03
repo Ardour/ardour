@@ -1679,7 +1679,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 
 	switch (item_type) {
 	case ControlPointItem:
-		if (mouse_mode == MouseDraw || mouse_mode == MouseObject) {
+		if (mouse_mode == MouseDraw || mouse_mode == MouseObject || mouse_mode == MouseContent) {
 			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
 			cp->show ();
 
