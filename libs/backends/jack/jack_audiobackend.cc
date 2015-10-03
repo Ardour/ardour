@@ -464,8 +464,13 @@ JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 	options.num_periods = 2;
 	options.input_device = _target_device;
 	options.output_device = _target_device;
-	options.input_latency = _target_systemic_input_latency;
-	options.output_latency = _target_systemic_output_latency;
+	if (for_latency_measurement) {
+		options.input_latency = 0;
+		options.output_latency = 0;
+	} else {
+		options.input_latency = _target_systemic_input_latency;
+		options.output_latency = _target_systemic_output_latency;
+	}
 	options.input_channels = _target_input_channels;
 	options.output_channels = _target_output_channels;
 	if (_target_sample_format == FormatInt16) {
@@ -483,7 +488,7 @@ JACKAudioBackend::setup_jack_startup_command (bool for_latency_measurement)
 
 	string cmdline;
 
-	if (!get_jack_command_line_string (options, cmdline, for_latency_measurement)) {
+	if (!get_jack_command_line_string (options, cmdline)) {
 		/* error, somehow - we will still try to start JACK
 		 * automatically but it will be without our preferred options
 		 */
