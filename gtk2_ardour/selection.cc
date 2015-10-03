@@ -26,8 +26,10 @@
 #include "ardour/playlist.h"
 #include "ardour/rc_configuration.h"
 
+#include "audio_region_view.h"
 #include "gui_thread.h"
 #include "midi_cut_buffer.h"
+#include "region_gain_line.h"
 #include "region_view.h"
 #include "selection.h"
 #include "selection_templates.h"
@@ -1278,8 +1280,18 @@ Selection::get_state () const
 
 			snprintf(buf, sizeof(buf), "%d", (*i)->view_index());
 			r->add_property (X_("view-index"), string(buf));
-
+			continue;
 		}
+
+		AudioRegionGainLine* argl = dynamic_cast<AudioRegionGainLine*> (&(*i)->line());
+		if (argl) {
+			XMLNode* r = node->add_child (X_("ControlPoint"));
+			r->add_property (X_("type"), "region");
+			r->add_property (X_("region-id"), atoi (argl->region_view ().region ()->id ().to_s ().c_str()));
+			snprintf(buf, sizeof(buf), "%d", (*i)->view_index());
+			r->add_property (X_("view-index"), string(buf));
+		}
+
 	}
 
 	for (TimeSelection::const_iterator i = time.begin(); i != time.end(); ++i) {
@@ -1439,6 +1451,31 @@ Selection::set_state (XMLNode const & node, int)
 				}
 				if (!cps.empty()) {
 					add (cps);
+				}
+			} else if (prop_type->value () == "region") {
+				XMLProperty* prop_region_id = (*i)->property (X_("region-id"));
+				XMLProperty* prop_view_index = (*i)->property (X_("view-index"));
+
+				PBD::ID region_id (prop_region_id->value ());
+				RegionSelection rs;
+				editor->get_regionviews_by_id (region_id, rs);
+
+				if (!rs.empty ()) {
+					vector <ControlPoint *> cps;
+					for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
+						AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*rsi);
+						if (arv) {
+							boost::shared_ptr<AudioRegionGainLine> gl = arv->get_gain_line ();
+							ControlPoint* cp = gl->nth(atol(prop_view_index->value().c_str()));
+							if (cp) {
+								cps.push_back (cp);
+								cp->show();
+							}
+						}
+					}
+					if (!cps.empty()) {
+						add (cps);
+					}
 				}
 			}
 
