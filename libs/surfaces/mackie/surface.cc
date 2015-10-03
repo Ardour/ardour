@@ -758,6 +758,14 @@ Surface::periodic (uint64_t now_usecs)
 }
 
 void
+Surface::redisplay ()
+{
+	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+		(*s)->redisplay ();
+	}
+}
+
+void
 Surface::write (const MidiByteArray& data) 
 {
 	if (_active) {

@@ -96,6 +96,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 	, _last_gain_position_written (-1.0)
 	, _last_pan_azi_position_written (-1.0)
 	, _last_pan_width_position_written (-1.0)
+	, redisplay_requests (256)
 {
 	_fader = dynamic_cast<Fader*> (Fader::factory (*_surface, index, "fader", *this));
 	_vpot = dynamic_cast<Pot*> (Pot::factory (*_surface, Pot::ID + index, "vpot", *this));
@@ -318,18 +319,19 @@ Strip::notify_gain_changed (bool force_update)
 		float gain_coefficient = ac->get_value();
 		float normalized_position = ac->internal_to_interface (gain_coefficient);
 
+
 		if (force_update || normalized_position != _last_gain_position_written) {
 			
 			if (_surface->mcp().flip_mode() != MackieControlProtocol::Normal) {
 				if (!control->in_use()) {
 					_surface->write (_vpot->set (normalized_position, true, Pot::wrap));
 				}
-				do_parameter_display (GainAutomation, gain_coefficient);
+				queue_parameter_display (GainAutomation, gain_coefficient);
 			} else {
 				if (!control->in_use()) {
 					_surface->write (_fader->set_position (normalized_position));
 				}
-				do_parameter_display (GainAutomation, gain_coefficient);
+				queue_parameter_display (GainAutomation, gain_coefficient);
 			}
 
 			queue_display_reset (2000);
@@ -391,7 +393,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 				_surface->write (_vpot->set (pos, true, Pot::dot));
 			}
 			
-			do_parameter_display (PanAzimuthAutomation, pos);
+			queue_parameter_display (PanAzimuthAutomation, pos);
 			queue_display_reset (2000);
 			_last_pan_azi_position_written = pos;
 		}
@@ -435,7 +437,7 @@ Strip::notify_panner_width_changed (bool force_update)
 				_surface->write (_vpot->set (pos, true, Pot::spread));
 			}
 			
-			do_parameter_display (PanWidthAutomation, pos);
+			queue_parameter_display (PanWidthAutomation, pos);
 			queue_display_reset (2000);
 			_last_pan_azi_position_written = pos;
 		}
@@ -512,17 +514,17 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 
 		boost::shared_ptr<AutomationControl> ac = _fader->control ();
 
-		if (_surface->mcp().modifier_state() == MackieControlProtocol::MODIFIER_SHIFT) {
+		if (_surface->mcp().main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
 			if (ac) {
 				ac->set_value (ac->normal());
 			}
 		} else {
-		
+
 			_fader->set_in_use (true);
 			_fader->start_touch (_surface->mcp().transport_frame());
 			
 			if (ac) {
-				do_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
+				queue_parameter_display ((AutomationType) ac->parameter().type(), ac->internal_to_interface (ac->get_value()));
 				queue_display_reset (2000);
 			}
 		}
@@ -605,6 +607,17 @@ Strip::handle_button (Button& button, ButtonState bs)
 }
 
 void
+Strip::queue_parameter_display (AutomationType type, float val)
+{
+	RedisplayRequest req;
+
+	req.type = type;
+	req.val = val;
+
+	redisplay_requests.write (&req, 1);
+}
+
+void
 Strip::do_parameter_display (AutomationType type, float val)
 {
 	switch (type) {
@@ -658,11 +671,16 @@ Strip::handle_fader (Fader& fader, float position)
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
 
 	fader.set_value (position);
-	queue_display_reset (2000);
 
-	// must echo bytes back to slider now, because
-	// the notifier only works if the fader is not being
-	// touched. Which it is if we're getting input.
+	/* From the Mackie Control MIDI implementation docs:
+
+	   In order to ensure absolute synchronization with the host software,
+	   Mackie Control uses a closed-loop servo system for the faders,
+	   meaning the faders will always move to their last received position.
+	   When a host receives a Fader Position Message, it must then
+	   re-transmit that message to the Mackie Control or else the faders
+	   will return to their last position.
+	*/
 
 	_surface->write (fader.set_position (position));
 }
@@ -694,6 +712,22 @@ Strip::periodic (uint64_t usecs)
 
 	if (_reset_display_at && _reset_display_at < usecs) {
 		reset_display ();
+	}
+}
+
+void
+Strip::redisplay ()
+{
+	RedisplayRequest req;
+	bool have_request = false;
+
+	while (redisplay_requests.read (&req, 1) == 1) {
+		/* read them all */
+		have_request = true;
+	}
+
+	if (have_request) {
+		do_parameter_display (req.type, req.val);
 	}
 }
 

@@ -87,6 +87,7 @@ public:
 	const MidiByteArray& sysex_hdr() const;
 
 	void periodic (uint64_t now_usecs);
+	void redisplay ();
 
 	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t, uint32_t channel_id);
 	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);

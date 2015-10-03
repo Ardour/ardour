@@ -421,7 +421,13 @@ MackieControlProtocol::set_active (bool yn)
 		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
+
+		/* a faster periodic task used to display parameter updates */
 		
+		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (10); // milliseconds
+		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
+		redisplay_timeout->attach (main_loop()->get_context());
+
 	} else {
 
 		BaseUI::quit ();
@@ -468,6 +474,33 @@ MackieControlProtocol::periodic ()
 
 	update_timecode_display ();
 	
+	return true;
+}
+
+bool
+MackieControlProtocol::redisplay ()
+{
+	if (!active()) {
+		return false;
+	}
+
+	if (needs_ipmidi_restart) {
+		ipmidi_restart ();
+		return true;
+	}
+
+	if (!_initialized) {
+		initialize();
+	}
+
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+		for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+			(*s)->redisplay ();
+		}
+	}
+
 	return true;
 }
 
@@ -1244,7 +1277,7 @@ void
 MackieControlProtocol::handle_button_event (Surface& surface, Button& button, ButtonState bs)
 {
 	Button::ID button_id = button.bid();
-	
+
 	if  (bs != press && bs != release) {
 		update_led (surface, button, none);
 		return;
@@ -1258,9 +1291,9 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 	string action = _device_profile.get_button_action (button.bid(), _modifier_state);
 
 	if (!action.empty()) {
-	
+
 		if (action.find ('/') != string::npos) { /* good chance that this is really an action */
-			
+
 			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Looked up action for button %1 with modifier %2, got [%3]\n",
 			                                                   button.bid(), _modifier_state, action));
 			
@@ -1273,7 +1306,9 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("executing action %1\n", action));
 				access_action (action);
 			}
+
 			return;
+
 		} else {
 			
 			/* "action" is more likely to be a button name. We use this to
