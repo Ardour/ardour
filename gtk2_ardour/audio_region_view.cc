@@ -1361,7 +1361,7 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 		trackview.session()->add_command (new MementoCommand<AutomationList>(*audio_region()->envelope().get(), &before, &after));
 
-		gain_line->get_selectables (fx, fx, 0.0, 1.0, results);
+		gain_line->get_selectables (fx + region ()->position (), fx + region ()->position (), 0.0, 1.0, results);
 		trackview.editor ().get_selection ().set (results);
 
 		trackview.editor ().commit_reversible_command ();
