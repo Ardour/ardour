@@ -256,6 +256,22 @@ MackieControlProtocolGUI::build_available_action_menu ()
 	parent = *(rowp);
 	parent[available_action_columns.name] = _("Remove Binding");
 
+	/* Key aliasing */
+
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[available_action_columns.name] = _("Shift");
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[available_action_columns.name] = _("Control");
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[available_action_columns.name] = _("Option");
+	rowp = available_action_model->append();
+	parent = *(rowp);
+	parent[available_action_columns.name] = _("CmdAlt");
+
+	
 	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
 
 		TreeModel::Row row;
@@ -390,11 +406,17 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.plain] = defstring;
 		} else {
-			act = ActionManager::get_action (action.c_str());
-			if (act) {
-				row[function_key_columns.plain] = act->get_label();
+			if (action.find ('/') == string::npos) {
+				/* Probably a key alias */
+				row[function_key_columns.plain] = action;
 			} else {
-				row[function_key_columns.plain] = defstring;
+				
+				act = ActionManager::get_action (action.c_str());
+				if (act) {
+					row[function_key_columns.plain] = act->get_label();
+				} else {
+					row[function_key_columns.plain] = defstring;
+				}
 			}
 		}
 
@@ -402,11 +424,16 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.control] = defstring;
 		} else {
-			act = ActionManager::get_action (action.c_str());
-			if (act) {
-				row[function_key_columns.control] = act->get_label();
+			if (action.find ('/') == string::npos) {
+				/* Probably a key alias */
+				row[function_key_columns.control] = action;
 			} else {
-				row[function_key_columns.control] = defstring;
+				act = ActionManager::get_action (action.c_str());
+				if (act) {
+					row[function_key_columns.control] = act->get_label();
+				} else {
+					row[function_key_columns.control] = defstring;
+				}
 			}
 		}
 
@@ -414,11 +441,16 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.shift] = defstring;
 		} else {
-			act = ActionManager::get_action (action.c_str());
-			if (act) {
-				row[function_key_columns.shift] = act->get_label();
+			if (action.find ('/') == string::npos) {
+				/* Probably a key alias */
+				row[function_key_columns.shift] = action;
 			} else {
-				row[function_key_columns.shift] = defstring;
+				act = ActionManager::get_action (action.c_str());
+				if (act) {
+					row[function_key_columns.shift] = act->get_label();
+				} else {
+					row[function_key_columns.shift] = defstring;
+				}
 			}
 		}
 
@@ -426,11 +458,16 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.option] = defstring;
 		} else {
-			act = ActionManager::get_action (action.c_str());
-			if (act) {
-				row[function_key_columns.option] = act->get_label();
+			if (action.find ('/') == string::npos) {
+				/* Probably a key alias */
+				row[function_key_columns.option] = action;
 			} else {
-				row[function_key_columns.option] = defstring;
+				act = ActionManager::get_action (action.c_str());
+				if (act) {
+					row[function_key_columns.option] = act->get_label();
+				} else {
+					row[function_key_columns.option] = defstring;
+				}
 			}
 		}
 
@@ -438,11 +475,16 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		if (action.empty()) {
 			row[function_key_columns.cmdalt] = defstring;
 		} else {
-			act = ActionManager::get_action (action.c_str());
-			if (act) {
-				row[function_key_columns.cmdalt] = act->get_label();
+			if (action.find ('/') == string::npos) {
+				/* Probably a key alias */
+				row[function_key_columns.cmdalt] = action;
 			} else {
-				row[function_key_columns.cmdalt] = defstring;
+				act = ActionManager::get_action (action.c_str());
+				if (act) {
+					row[function_key_columns.cmdalt] = act->get_label();
+				} else {
+					row[function_key_columns.cmdalt] = defstring;
+				}
 			}
 		}
 
