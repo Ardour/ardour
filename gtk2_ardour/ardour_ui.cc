@@ -471,6 +471,8 @@ ARDOUR_UI::engine_stopped ()
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_stopped)
 	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
+	update_sample_rate (0);
+	update_cpu_load ();
 }
 
 void
