@@ -68,12 +68,13 @@ public:
 			return;
 		}
 
-		const float load = elapsed_time_us() / (float)m_max_time_us;
+		const float load = (float) elapsed_time_us() / (float)m_max_time_us;
 		if (load > m_dsp_load || load > 1.0) {
 			m_dsp_load = load;
 		} else {
 			const float alpha = 0.2f * (m_max_time_us * 1e-6f);
-			m_dsp_load = m_dsp_load + alpha * (load - m_dsp_load) + 1e-12;
+			m_dsp_load = std::min (1.f, m_dsp_load);
+			m_dsp_load += alpha * (load - m_dsp_load) + 1e-12;
 		}
 	}
 
