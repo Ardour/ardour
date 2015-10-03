@@ -451,7 +451,7 @@ Strip::select_event (Button&, ButtonState bs)
 	
 	if (bs == press) {
 		
-		int ms = _surface->mcp().modifier_state();
+		int ms = _surface->mcp().main_modifier_state();
 
 		if (ms & MackieControlProtocol::MODIFIER_CMDALT) {
 			_controls_locked = !_controls_locked;
@@ -484,7 +484,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 {
 	if (bs == press) {
 
-		int ms = _surface->mcp().modifier_state();
+		int ms = _surface->mcp().main_modifier_state();
 				
 		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 
@@ -571,7 +571,7 @@ Strip::handle_button (Button& button, ButtonState bs)
 				_surface->mcp().add_down_button ((AutomationType) control->parameter().type(), _surface->number(), _index);
 				
 				float new_value;
-				int ms = _surface->mcp().modifier_state();
+				int ms = _surface->mcp().main_modifier_state();
 				
 				if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 					/* reset to default/normal value */
