@@ -26,7 +26,7 @@
 #include <gtkmm/scrolledwindow.h>
 
 namespace Gtk {
-	class CellRendererCombo;
+class CellRendererCombo;
 }
 
 #include "button.h"
@@ -39,76 +39,76 @@ class MackieControlProtocol;
 
 class MackieControlProtocolGUI : public Gtk::Notebook
 {
-  public:
+   public:
 	MackieControlProtocolGUI (MackieControlProtocol &);
 	
-  private:
-    MackieControlProtocol& _cp;
-    Gtk::ComboBoxText _surface_combo;
-    Gtk::ComboBoxText _profile_combo;
-
-    struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
-	    AvailableActionColumns() {
-		    add (name);
-		    add (path);
-	    }
-	    Gtk::TreeModelColumn<std::string> name;
-	    Gtk::TreeModelColumn<std::string> path;
-    };
-    
-    struct FunctionKeyColumns : public Gtk::TreeModel::ColumnRecord {
-	FunctionKeyColumns() {
-		add (name);
-		add (id);
-		add (plain);
-		add (shift);
-		add (control);
-		add (option);
-		add (cmdalt);
-		add (shiftcontrol);
+   private:
+	MackieControlProtocol& _cp;
+	Gtk::ComboBoxText _surface_combo;
+	Gtk::ComboBoxText _profile_combo;
+	
+	struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
+		AvailableActionColumns() {
+			add (name);
+			add (path);
+		}
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
 	};
-	Gtk::TreeModelColumn<std::string> name;
-	Gtk::TreeModelColumn<Mackie::Button::ID>  id;
-	Gtk::TreeModelColumn<std::string> plain;
-	Gtk::TreeModelColumn<std::string> shift;
-	Gtk::TreeModelColumn<std::string> control;
-	Gtk::TreeModelColumn<std::string> option;
-	Gtk::TreeModelColumn<std::string> cmdalt;
-	Gtk::TreeModelColumn<std::string> shiftcontrol;
-    };
+    
+	struct FunctionKeyColumns : public Gtk::TreeModel::ColumnRecord {
+		FunctionKeyColumns() {
+			add (name);
+			add (id);
+			add (plain);
+			add (shift);
+			add (control);
+			add (option);
+			add (cmdalt);
+			add (shiftcontrol);
+		};
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<Mackie::Button::ID>  id;
+		Gtk::TreeModelColumn<std::string> plain;
+		Gtk::TreeModelColumn<std::string> shift;
+		Gtk::TreeModelColumn<std::string> control;
+		Gtk::TreeModelColumn<std::string> option;
+		Gtk::TreeModelColumn<std::string> cmdalt;
+		Gtk::TreeModelColumn<std::string> shiftcontrol;
+	};
 
-    AvailableActionColumns available_action_columns;
-    FunctionKeyColumns function_key_columns;
+	AvailableActionColumns available_action_columns;
+	FunctionKeyColumns function_key_columns;
 
-    Gtk::ScrolledWindow function_key_scroller;
-    Gtk::TreeView function_key_editor;
-    Glib::RefPtr<Gtk::ListStore> function_key_model;
-    Glib::RefPtr<Gtk::TreeStore> available_action_model;
+	Gtk::ScrolledWindow function_key_scroller;
+	Gtk::TreeView function_key_editor;
+	Glib::RefPtr<Gtk::ListStore> function_key_model;
+	Glib::RefPtr<Gtk::TreeStore> available_action_model;
 
-    void build_available_action_menu ();
-    void refresh_function_key_editor ();
-    void build_function_key_editor ();
-    void action_changed (const Glib::ustring &sPath, const Glib::ustring &text, Gtk::TreeModelColumnBase);
-    Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::TreeStore> model, Gtk::TreeModelColumnBase);
+	void build_available_action_menu ();
+	void refresh_function_key_editor ();
+	void build_function_key_editor ();
+	void action_changed (const Glib::ustring &sPath, const Glib::ustring &text, Gtk::TreeModelColumnBase);
+	Gtk::CellRendererCombo* make_action_renderer (Glib::RefPtr<Gtk::TreeStore> model, Gtk::TreeModelColumnBase);
 
-    void surface_combo_changed ();
-    void profile_combo_changed ();
-    void ipmidi_spinner_changed ();
+	void surface_combo_changed ();
+	void profile_combo_changed ();
+	void ipmidi_spinner_changed ();
 
-    std::map<std::string,std::string> action_map; // map from action names to paths
+	std::map<std::string,std::string> action_map; // map from action names to paths
 
-    Gtk::CheckButton relay_click_button;
-    Gtk::CheckButton backlight_button;
-    Gtk::RadioButton absolute_touch_mode_button;
-    Gtk::RadioButton touch_move_mode_button;
-    Gtk::Adjustment  touch_sensitivity_adjustment;
-    Gtk::HScale      touch_sensitivity_scale;
-    Gtk::Button      recalibrate_fader_button;
-    Gtk::Adjustment  ipmidi_base_port_adjustment;
-    Gtk::SpinButton  ipmidi_base_port_spinner;
-    Gtk::Button      discover_button;
+	Gtk::CheckButton relay_click_button;
+	Gtk::CheckButton backlight_button;
+	Gtk::RadioButton absolute_touch_mode_button;
+	Gtk::RadioButton touch_move_mode_button;
+	Gtk::Adjustment  touch_sensitivity_adjustment;
+	Gtk::HScale      touch_sensitivity_scale;
+	Gtk::Button      recalibrate_fader_button;
+	Gtk::Adjustment  ipmidi_base_port_adjustment;
+	Gtk::SpinButton  ipmidi_base_port_spinner;
+	Gtk::Button      discover_button;
 
-    void discover_clicked ();
+	void discover_clicked ();
 	void recalibrate_faders ();
 	void toggle_backlight ();
 	void touch_sensitive_change ();
