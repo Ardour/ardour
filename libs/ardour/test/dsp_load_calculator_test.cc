@@ -67,6 +67,8 @@ DSPLoadCalculatorTest::basicTest ()
 		dsp_calc.set_start_timestamp_us(0);
 		dsp_calc.set_stop_timestamp_us(dsp_100_pc_48k_us / 2);
 		CPPUNIT_ASSERT(dsp_calc.elapsed_time_us() == 5333);
+		CPPUNIT_ASSERT(dsp_calc.get_dsp_load() <= 1.0);
+		CPPUNIT_ASSERT(dsp_calc.get_dsp_load() >= 0.5);
 #if 0
 		std::cout << "DSP 50% load value = " << dsp_calc.get_dsp_load() << std::endl;
 #endif
