@@ -215,6 +215,28 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		return -1;
 	}
 
+	/* Device type ought to be mandatory but early versions missed it */
+	if ((child = node.child ("DeviceType")) != 0) {
+		if ((prop = child->property ("value")) != 0) {
+			if (prop->value() == X_("MCU")) {
+				_device_type = MCU;
+			} else if (prop->value() == X_("MCXT")) {
+				_device_type = MCXT;
+			} else if (prop->value() == X_("LC")) {
+				_device_type = LC;
+			} else if (prop->value() == X_("LCXT")) {
+				_device_type = LCXT;
+			} else if (prop->value() == X_("HUI")) {
+				_device_type = HUI;
+			} else {
+				error << string_compose (_("Unknown Mackie device type \"%1\" used in device info file, using MCU instead"), prop->value()) << endmsg;
+				_device_type = MCU;
+			}
+		} else {
+			_device_type = MCU;
+		}
+	}
+
 	/* name is mandatory */
 	if ((child = node.child ("Name")) != 0) {
 		if ((prop = child->property ("value")) != 0) {
