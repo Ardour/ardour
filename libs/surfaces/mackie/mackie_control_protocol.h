@@ -282,6 +282,7 @@ class MackieControlProtocol
 	Mackie::DeviceProfile    _device_profile;
 	sigc::connection          periodic_connection;
 	sigc::connection          redisplay_connection;
+	sigc::connection          hui_connection;
 	uint32_t                 _current_initial_bank;
 	PBD::ScopedConnectionList audio_engine_connections;
 	PBD::ScopedConnectionList session_connections;
@@ -324,6 +325,7 @@ class MackieControlProtocol
 	int create_surfaces ();
 	bool periodic();
 	bool redisplay();
+	bool hui_heartbeat ();
 	void build_gui ();
 	bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 	void clear_ports ();

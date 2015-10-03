@@ -428,6 +428,13 @@ MackieControlProtocol::set_active (bool yn)
 		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
 		redisplay_timeout->attach (main_loop()->get_context());
 
+		if (_device_info.device_type() == DeviceInfo::HUI) {
+			Glib::RefPtr<Glib::TimeoutSource> hui_timeout = Glib::TimeoutSource::create (1000); // milliseconds
+			hui_connection = hui_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::hui_heartbeat));
+			hui_timeout->attach (main_loop()->get_context());
+		}
+		
+		
 	} else {
 
 		BaseUI::quit ();
@@ -442,6 +449,18 @@ MackieControlProtocol::set_active (bool yn)
 	return 0;
 }
 
+bool
+MackieControlProtocol::hui_heartbeat ()
+{
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+
+	for (Surfaces::iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
+		(*s)->hui_heartbeat ();
+	}
+
+	return true;
+}
+	
 bool
 MackieControlProtocol::periodic ()
 {

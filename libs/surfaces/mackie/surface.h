@@ -87,7 +87,8 @@ public:
 
 	void periodic (uint64_t now_usecs);
 	void redisplay ();
-
+	void hui_heartbeat ();
+	
 	void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t, uint32_t channel_id);
 	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);

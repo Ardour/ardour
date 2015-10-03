@@ -440,8 +440,12 @@ Surface::handle_midi_note_on_message (MIDI::Parser &, MIDI::EventTwoBytes* ev)
 	
 	if (_mcp.device_info().no_handshake()) {
 		turn_it_on ();
-	}
+	} 
 
+	if (_mcp.device_info().device_type() == DeviceInfo::HUI && ev->note_number == 0 && ev->velocity == 127) {
+		turn_it_on ();
+	}
+	
 	/* fader touch sense is given by "buttons" 0xe..0xe7 and 0xe8 for the
 	 * master. 
 	 */
@@ -1086,4 +1090,15 @@ Surface::set_touch_sensitivity (int sensitivity)
 			g_usleep (1000); /* milliseconds */
 		}
 	}
+}
+
+void
+Surface::hui_heartbeat ()
+{
+	if (!_port) {
+		return;
+	}
+
+	MidiByteArray msg (3, MIDI::on, 0x0, 0x0);
+	_port->write (msg);
 }
