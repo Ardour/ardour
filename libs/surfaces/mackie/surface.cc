@@ -403,6 +403,14 @@ Surface::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb, uin
 		turn_it_on ();
 	}
 
+	if (_mcp.main_modifier_state() & MackieControlProtocol::MODIFIER_SHIFT) {
+		/* user is doing a reset to unity gain but device sends a PB
+		 * message in the middle of the touch on/off messages. Ignore
+		 * it.
+		 */
+		return;
+	}
+
 	Fader* fader = faders[fader_id];
 
 	if (fader) {
