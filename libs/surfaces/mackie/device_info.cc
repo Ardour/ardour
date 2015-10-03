@@ -81,7 +81,7 @@ std::string&
 DeviceInfo::get_global_button_name(Button::ID id)
 {
 	GlobalButtonsInfo::iterator it;
-	
+
 	it = _global_buttons.find (id);
 	if (it == _global_buttons.end ()) {
 		_global_button_name = "";
@@ -96,14 +96,14 @@ DeviceInfo::mackie_control_buttons ()
 {
 	_global_buttons.clear ();
 	shared_buttons ();
-	
+
 	_global_buttons[Button::UserA] = GlobalButtonInfo ("Rear Panel User Switch 1", "user", 0x66);
 	_global_buttons[Button::UserB] = GlobalButtonInfo ("Rear Panel User Switch 2", "user", 0x67);
-	
+
 	//TODO Implement "rear panel external control": a connection for a resistive 
 	//TODO element expression pedal . Message: 0xb0 0x2e 0xVV where 0xVV = external 
 	//TODO controller position value (0x00 to 0x7f)
-	
+
 	_strip_buttons[Button::RecEnable] = StripButtonInfo (0x0, "Rec");
 }
 
@@ -112,7 +112,7 @@ DeviceInfo::logic_control_buttons ()
 {
 	_global_buttons.clear ();
 	shared_buttons ();
-	
+
 	_global_buttons[Button::UserA] = GlobalButtonInfo ("User Switch A", "user", 0x66);
 	_global_buttons[Button::UserB] = GlobalButtonInfo ("User Switch B", "user", 0x67);
 
@@ -128,7 +128,7 @@ DeviceInfo::shared_buttons ()
 	_global_buttons[Button::Plugin] = GlobalButtonInfo ("Plugin", "assignment", 0x2b);
 	_global_buttons[Button::Eq] = GlobalButtonInfo ("Eq", "assignment", 0x2c);
 	_global_buttons[Button::Dyn] = GlobalButtonInfo ("Instrument", "assignment", 0x2d);
-	
+
 	_global_buttons[Button::Left] = GlobalButtonInfo ("Bank Left", "bank", 0x2e);
 	_global_buttons[Button::Right] = GlobalButtonInfo ("Bank Right", "bank", 0x2f);
 	_global_buttons[Button::ChannelLeft] = GlobalButtonInfo ("Channel Left", "bank", 0x30);
@@ -138,7 +138,7 @@ DeviceInfo::shared_buttons ()
 
 	_global_buttons[Button::NameValue] = GlobalButtonInfo ("Name/Value", "display", 0x34);
 	_global_buttons[Button::TimecodeBeats] = GlobalButtonInfo ("Timecode/Beats", "display", 0x35);
-	
+
 	_global_buttons[Button::F1] = GlobalButtonInfo ("F1", "function select", 0x36);
 	_global_buttons[Button::F2] = GlobalButtonInfo ("F2", "function select", 0x37);
 	_global_buttons[Button::F3] = GlobalButtonInfo ("F3", "function select", 0x38);
@@ -147,7 +147,7 @@ DeviceInfo::shared_buttons ()
 	_global_buttons[Button::F6] = GlobalButtonInfo ("F6", "function select", 0x3b);
 	_global_buttons[Button::F7] = GlobalButtonInfo ("F7", "function select", 0x3c);
 	_global_buttons[Button::F8] = GlobalButtonInfo ("F8", "function select", 0x3d);
-	
+
 	_global_buttons[Button::MidiTracks] = GlobalButtonInfo ("MIDI Tracks", "global view", 0x3e);
 	_global_buttons[Button::Inputs] = GlobalButtonInfo ("Inputs", "global view", 0x3f);
 	_global_buttons[Button::AudioTracks] = GlobalButtonInfo ("Audio Tracks", "global view", 0x40);
@@ -156,19 +156,19 @@ DeviceInfo::shared_buttons ()
 	_global_buttons[Button::Busses] = GlobalButtonInfo ("Busses", "global view", 0x43);
 	_global_buttons[Button::Outputs] = GlobalButtonInfo ("Outputs", "global view", 0x44);
 	_global_buttons[Button::User] = GlobalButtonInfo ("User", "global view", 0x45);
-	
+
 	_global_buttons[Button::Shift] = GlobalButtonInfo ("Shift", "modifiers", 0x46);
 	_global_buttons[Button::Option] = GlobalButtonInfo ("Option", "modifiers", 0x47);
 	_global_buttons[Button::Ctrl] = GlobalButtonInfo ("Ctrl", "modifiers", 0x48);
 	_global_buttons[Button::CmdAlt] = GlobalButtonInfo ("Cmd/Alt", "modifiers", 0x49);
-	
+
 	_global_buttons[Button::Read] = GlobalButtonInfo ("Read/Off", "automation", 0x4a);
 	_global_buttons[Button::Write] = GlobalButtonInfo ("Write", "automation", 0x4b);
 	_global_buttons[Button::Trim] = GlobalButtonInfo ("Trim", "automation", 0x4c);
 	_global_buttons[Button::Touch] = GlobalButtonInfo ("Touch", "automation", 0x4d);
 	_global_buttons[Button::Latch] = GlobalButtonInfo ("Latch", "automation", 0x4e);
 	_global_buttons[Button::Grp] = GlobalButtonInfo ("Group", "automation", 0x4f);
-	
+
 	_global_buttons[Button::Save] = GlobalButtonInfo ("Save", "utilities", 0x50);
 	_global_buttons[Button::Undo] = GlobalButtonInfo ("Undo", "utilities", 0x51);
 	_global_buttons[Button::Cancel] = GlobalButtonInfo ("Cancel", "utilities", 0x52);
@@ -181,13 +181,13 @@ DeviceInfo::shared_buttons ()
 	_global_buttons[Button::Replace] = GlobalButtonInfo ("Replace", "transport", 0x58);
 	_global_buttons[Button::Click] = GlobalButtonInfo ("Click", "transport", 0x59);
 	_global_buttons[Button::ClearSolo] = GlobalButtonInfo ("Solo", "transport", 0x5a);
-	
+
 	_global_buttons[Button::Rewind] = GlobalButtonInfo ("Rewind", "transport", 0x5b);
 	_global_buttons[Button::Ffwd] = GlobalButtonInfo ("Fast Fwd", "transport", 0x5c);
 	_global_buttons[Button::Stop] = GlobalButtonInfo ("Stop", "transport", 0x5d);
 	_global_buttons[Button::Play] = GlobalButtonInfo ("Play", "transport", 0x5e);
 	_global_buttons[Button::Record] = GlobalButtonInfo ("Record", "transport", 0x5f);
-	
+
 	_global_buttons[Button::CursorUp] = GlobalButtonInfo ("Cursor Up", "cursor", 0x60);
 	_global_buttons[Button::CursorDown] = GlobalButtonInfo ("Cursor Down", "cursor", 0x61);
 	_global_buttons[Button::CursorLeft] = GlobalButtonInfo ("Cursor Left", "cursor", 0x62);
@@ -370,7 +370,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 							std::map<Button::ID,GlobalButtonInfo>::iterator b = _global_buttons.find (bid);
 							if (b != _global_buttons.end()) {
 								b->second.id = val;
-								
+
 								if ((prop = (*i)->property ("label")) != 0) {
 									b->second.label = prop->value();
 								}
@@ -379,7 +379,7 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 					}
 					
 				}
-				
+
 			} else if ((*i)->name() == "StripButton") {
 				if ((prop = (*i)->property ("name")) != 0) {
 					int id = Button::name_to_id (prop->value());
@@ -511,7 +511,6 @@ devinfo_filter (const string &str, void* /*arg*/)
 void
 DeviceInfo::reload_device_info ()
 {
-	DeviceInfo di;
 	vector<string> s;
 	vector<string> devinfos;
 	Searchpath spath (devinfo_search_path());
@@ -527,6 +526,7 @@ DeviceInfo::reload_device_info ()
 
 	for (vector<string>::iterator i = devinfos.begin(); i != devinfos.end(); ++i) {
 		string fullpath = *i;
+		DeviceInfo di; // has to be initial every loop or info from last added.
 
 		XMLTree tree;
 
