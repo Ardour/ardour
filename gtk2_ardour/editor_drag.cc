@@ -4113,7 +4113,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	double dx = _drags->current_pointer_x() - last_pointer_x();
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & ArdourKeyboard::fine_adjust_modifier ()) {
+	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::fine_adjust_modifier ())) {
 		dx *= 0.1;
 		dy *= 0.1;
 	}
@@ -4253,7 +4253,7 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 {
 	double dy = current_pointer_y() - last_pointer_y();
 
-	if (event->button.state & ArdourKeyboard::fine_adjust_modifier ()) {
+	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::fine_adjust_modifier ())) {
 		dy *= 0.1;
 	}
 
