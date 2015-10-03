@@ -125,7 +125,7 @@ Surface::~Surface ()
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::~Surface init\n");
 
-	zero_all ();
+	// zero_all ();
 
 	// delete groups
 	for (Groups::iterator it = groups.begin(); it != groups.end(); ++it) {
