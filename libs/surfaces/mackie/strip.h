@@ -7,6 +7,7 @@
 #include "evoral/Parameter.hpp"
 
 #include "pbd/property_basics.h"
+#include "pbd/ringbuffer.h"
 #include "pbd/signals.h"
 
 #include "ardour/types.h"
@@ -67,6 +68,7 @@ public:
 	void handle_pot (Pot&, float delta);
 
 	void periodic (uint64_t now_usecs);
+	void redisplay ();
 
 	MidiByteArray display (uint32_t line_number, const std::string&);
 	MidiByteArray blank_display (uint32_t line_number);
@@ -124,7 +126,16 @@ private:
 	void queue_display_reset (uint32_t msecs);
 	void clear_display_reset ();
 	void reset_display ();
+
+	struct RedisplayRequest {
+		ARDOUR::AutomationType type;
+		float val;
+	};
+
+	RingBuffer<RedisplayRequest> redisplay_requests;
+
 	void do_parameter_display (ARDOUR::AutomationType, float val);
+	void queue_parameter_display (ARDOUR::AutomationType, float val);
 	
 	typedef std::map<std::string,boost::shared_ptr<ARDOUR::Bundle> > BundleMap;
 	BundleMap input_bundles;
