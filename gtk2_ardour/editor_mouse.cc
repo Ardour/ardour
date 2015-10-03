@@ -524,18 +524,56 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		break;
 
 	case GainLineItem:
+		if (eff_mouse_mode != MouseRange) {
+			AutomationLine* argl = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
+
+			std::list<Selectable*> selectables;
+			uint32_t before, after;
+			framecnt_t const  where = (framecnt_t) floor (event->button.x * samples_per_pixel) - clicked_regionview->region ()->position ();
+
+			if (!argl || !argl->control_points_adjacent (where, before, after)) {
+				break;
+			}
+
+			selectables.push_back (argl->nth (before));
+			selectables.push_back (argl->nth (after));
+
+			switch (op) {
+			case Selection::Set:
+				if (press) {
+					selection->set (selectables);
+					_mouse_changed_selection = true;
+				}
+				break;
+			case Selection::Add:
+				if (press) {
+					selection->add (selectables);
+					_mouse_changed_selection = true;
+				}
+				break;
+			case Selection::Toggle:
+				if (press) {
+					selection->toggle (selectables);
+					_mouse_changed_selection = true;
+				}
+				break;
+
+			case Selection::Extend:
+				/* XXX */
+				break;
+			}
+		}
+		break;
+
 	case AutomationLineItem:
 		if (eff_mouse_mode != MouseRange) {
-			AutomationLine* al;
+			AutomationLine* al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 			std::list<Selectable*> selectables;
 			uint32_t before, after;
 			framecnt_t const  where = (framecnt_t) floor (event->button.x * samples_per_pixel);
 
-			if ((al = reinterpret_cast<AutomationLine*> (item->get_data ("line")))) {
-
-				if (!al->control_points_adjacent (where, before, after)) {
-					break;
-				}
+			if (!al || !al->control_points_adjacent (where, before, after)) {
+				break;
 			}
 
 			selectables.push_back (al->nth (before));
