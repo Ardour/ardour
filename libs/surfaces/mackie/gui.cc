@@ -33,6 +33,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/actions.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/rc_configuration.h"
 
 #include "mackie_control_protocol.h"
@@ -91,14 +92,15 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	
 	set_border_width (12);
 
-	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 9));
+	Gtk::Table* table = Gtk::manage (new Gtk::Table (2, 12));
 	table->set_row_spacings (4);
 	table->set_col_spacings (6);
 	table->set_border_width (12);
+
 	l = manage (new Gtk::Label (_("Device Type:")));
 	l->set_alignment (1.0, 0.5);
 	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	table->attach (_surface_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 20);
+	table->attach (_surface_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 		
 	vector<string> surfaces;
@@ -109,6 +111,50 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	Gtkmm2ext::set_popdown_strings (_surface_combo, surfaces);
 	_surface_combo.set_active_text (p.device_info().name());
 	_surface_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::surface_combo_changed));
+
+	vector<string> midi_ports;
+
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsOutput|ARDOUR::IsPhysical), midi_ports);
+	Gtkmm2ext::set_popdown_strings (_input_port_combo, midi_ports);
+
+	string send_string;
+	string receive_string;
+
+	if (_cp.device_info().extenders() > 0) {
+		send_string = _("Main surface sends via:");
+		receive_string = _("Main surface receives via:");
+	} else {
+		send_string = _("Surface sends via:");
+		receive_string = _("Surface receives via:");
+	}
+	
+	l = manage (new Gtk::Label (send_string));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (_input_port_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	row++;
+
+ 	midi_ports.clear ();
+	ARDOUR::AudioEngine::instance()->get_ports ("", ARDOUR::DataType::MIDI, ARDOUR::PortFlags (ARDOUR::IsInput|ARDOUR::IsPhysical), midi_ports);
+	Gtkmm2ext::set_popdown_strings (_output_port_combo, midi_ports);
+
+	l = manage (new Gtk::Label (receive_string));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (_output_port_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	row++;
+
+	l = manage (new Gtk::Label (_("ipMIDI Port (lowest)")));
+	l->set_alignment (1.0, 0.5);
+	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	table->attach (ipmidi_base_port_spinner, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	row++;
+	
+	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
+	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
+	
+	/* leave an extra blank row */
+	row++;
 
 	RadioButtonGroup rb_group = absolute_touch_mode_button.get_group();
 	touch_move_mode_button.set_group (rb_group);
@@ -165,15 +211,6 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	row++;
 	
 
-	l = manage (new Gtk::Label (_("ipMIDI Port (lowest)")));
-	l->set_alignment (1.0, 0.5);
-	table->attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	table->attach (ipmidi_base_port_spinner, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
-	row++;
-	
-	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
-	ipmidi_base_port_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::ipmidi_spinner_changed));
-	
 	table->attach (discover_button, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 	discover_button.signal_clicked().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::discover_clicked));
 	row++;
@@ -596,9 +633,15 @@ MackieControlProtocolGUI::surface_combo_changed ()
 	_cp.not_session_load();
 	_cp.set_device (_surface_combo.get_active_text());
 
-	/* update ipMIDI field */
-
-	ipmidi_base_port_spinner.set_sensitive (_cp.device_info().uses_ipmidi());
+	if (_cp.device_info().uses_ipmidi()) {
+		ipmidi_base_port_spinner.set_sensitive (true);
+		_input_port_combo.set_sensitive (false);
+		_output_port_combo.set_sensitive (false);
+	} else {
+		ipmidi_base_port_spinner.set_sensitive (false);
+		_input_port_combo.set_sensitive (true);
+		_output_port_combo.set_sensitive (true);
+	}
 }
 
 void

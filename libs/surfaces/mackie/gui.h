@@ -46,6 +46,8 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	MackieControlProtocol& _cp;
 	Gtk::ComboBoxText _surface_combo;
 	Gtk::ComboBoxText _profile_combo;
+	Gtk::ComboBoxText _input_port_combo;
+	Gtk::ComboBoxText _output_port_combo;
 	
 	struct AvailableActionColumns : public Gtk::TreeModel::ColumnRecord {
 		AvailableActionColumns() {
