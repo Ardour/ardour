@@ -192,17 +192,10 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		group = clicked_routeview->route()->route_group();
 	}
 
-	bool had_tracks = !selection->tracks.empty();
-	RouteGroup& arg (_session->all_route_group());
-
 	switch (op) {
 	case Selection::Toggle:
 		if (selection->selected (clicked_axisview)) {
-			if (arg.is_select() && arg.is_active()) {
-				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					selection->remove(*i);
-				}
-			} else if (group && group->is_active()) {
+			if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
 					if ((*i)->route_group() == group) {
 						selection->remove(*i);
@@ -212,11 +205,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 				selection->remove (clicked_axisview);
 			}
 		} else {
-			if (arg.is_select() && arg.is_active()) {
-				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					selection->add(*i);
-				}
-			} else if (group && group->is_active()) {
+			if (group && group->is_active()) {
 				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
 					if ((*i)->route_group() == group) {
 						selection->add(*i);
@@ -229,14 +218,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		break;
 
 	case Selection::Add:
-		if (!had_tracks && arg.is_select() && arg.is_active()) {
-			/* nothing was selected already, and all group is active etc. so use
-			   all tracks.
-			*/
-			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-				selection->add(*i);
-			}
-		} else if (group && group->is_active()) {
+		if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
 				if ((*i)->route_group() == group) {
 					selection->add(*i);
@@ -249,14 +231,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 
 	case Selection::Set:
 		selection->clear();
-		if (!had_tracks && arg.is_select() && arg.is_active()) {
-			/* nothing was selected already, and all group is active etc. so use
-			   all tracks.
-			*/
-			for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-				selection->add(*i);
-			}
-		} else if (group && group->is_active()) {
+		if (group && group->is_active()) {
 			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
 				if ((*i)->route_group() == group) {
 					selection->add(*i);
